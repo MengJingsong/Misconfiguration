@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-if ! compgen -G "$HOME/.ssh/*.pub" > /dev/null; then
+if ! compgen -G "$HOME/.ssh/id_rsa.pub" > /dev/null; then
         echo "no ssh key, generate one"
         ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
         cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys

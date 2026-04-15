@@ -6,11 +6,23 @@ sudo apt-get update
 sudo apt-get install -y openjdk-8-jdk
 sudo apt-get install maven
 
+if [ -d "/proj/misconfiguration-PG0" ]; then
+        PROJ="/proj/misconfiguration-PG0"
+else
+        PROJ="/proj/Misconfiguration"
+fi
+
+cd $PROJ/tarfiles
+
+if [[ ! -d "hadoop-3.4.2.tar.gz" ]]; then
+        wget https://dlcdn.apache.org/hadoop/common/hadoop-3.4.2/hadoop-3.4.2.tar.gz
+fi
+
 cd /mydata
 sudo chmod 777 .
 
 if [[ ! -d "hadoop-3.4.2" ]]; then
-        tar xvf /proj/misconfiguration-PG0/tarfiles/hadoop-3.4.2.tar.gz -C /mydata
+        tar xvf $PROJ/tarfiles/hadoop-3.4.2.tar.gz -C /mydata
 fi
 
 append_to_bashrc_if_absent() {
