@@ -8,8 +8,11 @@ if ! compgen -G "$HOME/.ssh/id_rsa.pub" > /dev/null; then
         chmod 0600 ~/.ssh/authorized_keys
 fi
 
+SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+
 PUBKEY_CONTENT="$(cat ~/.ssh/id_rsa.pub)"
-PUBKEYS_PATH="/proj/misconfiguration-PG0/scripts/public_keys"
+PUBKEYS_PATH="$SCRIPT_DIR/public_keys"
 AUTH_FILE="$HOME/.ssh/authorized_keys"
 
 mkdir -p "$(dirname -- "$PUBKEYS_PATH")"
