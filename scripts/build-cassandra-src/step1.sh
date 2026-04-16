@@ -4,7 +4,7 @@ set -euo pipefail
 
 sudo apt-get update
 sudo apt-get install -y openjdk-17-jdk
-sudo apt-get install ant
+sudo apt-get install -y ant
 
 if [ -d "/proj/misconfiguration-PG0" ]; then
         PROJ="/proj/misconfiguration-PG0"
