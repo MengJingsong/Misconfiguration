@@ -41,7 +41,8 @@ append_to_bashrc_if_absent() {
 }
 
 append_to_bashrc_if_absent 'export JAVA_HOME_17=/usr/lib/jvm/java-17-openjdk-amd64'
-append_to_bashrc_if_absent 'export PATH=$JAVA_HOME_17/bin:$PATH'
+append_to_bashrc_if_absent 'export CASSANDRA_HOME=/mydata/apache-cassandra-5.0.7'
+append_to_bashrc_if_absent 'export PATH=$CASSANDRA_HOME/bin:$CASSANDRA_HOME/tools/bin:$JAVA_HOME_17/bin:$PATH'
 append_to_bashrc_if_absent 'export CASSANDRA_USE_JDK17=true'
 
 source $HOME/.bashrc
