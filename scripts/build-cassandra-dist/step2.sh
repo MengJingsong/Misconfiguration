@@ -9,7 +9,7 @@ fi
 
 SEEDS="$1"
 NODE_IP="$2"
-YAML_FILE="conf/cassandra.yaml"
+YAML_FILE="/mydata/apache-cassandra-5.0.7/conf/cassandra.yaml"
 
 if [[ ! -f "$YAML_FILE" ]]; then
     echo "Error: $YAML_FILE not found"
