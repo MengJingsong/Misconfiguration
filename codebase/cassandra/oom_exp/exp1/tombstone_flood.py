@@ -13,7 +13,7 @@ NODE_IP        = "128.110.216.213"
 SERVER_USER    = "jason92"
 CASSANDRA_HOME = "/mydata/apache-cassandra-5.0.7"
 
-ROW_COUNT   = 800_000   # 800k × 200 bytes = 160MiB > 136MiB available → OOM
+ROW_COUNT   = 700_000   
 BLOB_SIZE   = 512
 BATCH_PRINT = 10_000
 TIMEOUT_MS  = 3_600_000
