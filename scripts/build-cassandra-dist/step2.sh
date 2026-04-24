@@ -21,8 +21,10 @@ cp "$YAML_FILE" "${YAML_FILE}.bak"
 sed -i \
     -e "s|^\([[:space:]]*-[[:space:]]*seeds:[[:space:]]*\)\"[^\"]*\"|\1\"$SEEDS\"|" \
     -e "s|^listen_address:.*|listen_address: $NODE_IP|" \
+    -e "s|^broadcast_address:.*|broadcast_address: $NODE_IP|" \
     -e "s|^# broadcast_address:.*|broadcast_address: $NODE_IP|" \
     -e "s|^rpc_address:.*|rpc_address: 0.0.0.0|" \
+    -e "s|^broadcast_rpc_address:.*|broadcast_rpc_address: $NODE_IP|" \
     -e "s|^# broadcast_rpc_address:.*|broadcast_rpc_address: $NODE_IP|" \
     "$YAML_FILE"
 
