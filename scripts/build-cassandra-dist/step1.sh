@@ -14,8 +14,8 @@ fi
 
 cd $PROJ/tarfiles
 
-if [[ ! -d "apache-cassandra-5.0.7-bin.tar.gz" ]]; then
-	wget https://dlcdn.apache.org/cassandra/5.0.7/apache-cassandra-5.0.7-bin.tar.gz
+if [[ ! -f "apache-cassandra-5.0.7-bin.tar.gz" ]]; then
+	wget https://archive.apache.org/dist/cassandra/5.0.7/apache-cassandra-5.0.7-bin.tar.gz
 fi
 
 cd /mydata

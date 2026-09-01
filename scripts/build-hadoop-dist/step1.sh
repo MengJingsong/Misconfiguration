@@ -14,7 +14,7 @@ fi
 
 cd $PROJ/tarfiles
 
-if [[ ! -d "hadoop-3.4.2.tar.gz" ]]; then
+if [[ ! -f "hadoop-3.4.2.tar.gz" ]]; then
         wget https://dlcdn.apache.org/hadoop/common/hadoop-3.4.2/hadoop-3.4.2.tar.gz
 fi
 
@@ -49,9 +49,9 @@ append_to_bashrc_if_absent 'export YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop'
 append_to_bashrc_if_absent 'export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64'
 append_to_bashrc_if_absent 'export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$JAVA_HOME/bin'
 
-source /users/jason92/.bashrc
+source $HOME/.bashrc
 
-mv -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/core-site.xml /mydata/hadoop-3.4.2/etc/hadoop
-mv -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/hdfs-site.xml /mydata/hadoop-3.4.2/etc/hadoop
-mv -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/yarn-site.xml /mydata/hadoop-3.4.2/etc/hadoop
-mv -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/hadoop-env.sh /mydata/hadoop-3.4.2/etc/hadoop
+cp -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/core-site.xml /mydata/hadoop-3.4.2/etc/hadoop
+cp -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/hdfs-site.xml /mydata/hadoop-3.4.2/etc/hadoop
+cp -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/yarn-site.xml /mydata/hadoop-3.4.2/etc/hadoop
+cp -b /proj/misconfiguration-PG0/scripts/build-hadoop-dist/hadoop-env.sh /mydata/hadoop-3.4.2/etc/hadoop

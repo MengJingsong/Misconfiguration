@@ -14,7 +14,7 @@ fi
 
 cd $PROJ/tarfiles
 
-if [[ ! -d "hadoop-3.4.2-src.tar.gz" ]]; then
+if [[ ! -f "hadoop-3.4.2-src.tar.gz" ]]; then
         wget https://dlcdn.apache.org/hadoop/common/hadoop-3.4.2/hadoop-3.4.2-src.tar.gz
 fi
 
