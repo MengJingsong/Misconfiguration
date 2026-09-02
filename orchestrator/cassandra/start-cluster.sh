@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Starts Cassandra on every node via build-cassandra-dist/step3.sh.
+# Starts Cassandra on every node via build-cassandra-dist/step3.sh, one
+# node at a time (seeds first, in SEED_INDEXES order, then the rest),
+# each waited on until it reports itself Up/Normal in `nodetool status`
+# before the next one starts.
 #
-# Seed nodes are started one at a time, each waited on until it reports
-# itself Up/Normal in `nodetool status` before the next one starts --
-# starting seeds concurrently on a brand new cluster risks a gossip/schema
-# race during initial bootstrap. Once all seeds are up, the remaining
-# (non-seed) nodes are started in parallel. Safe to re-run: step3.sh
-# skips nodes where Cassandra is already running.
+# This has to be fully sequential, not just "seeds before non-seeds": on
+# a brand new cluster, ANY two nodes bootstrapping at the same time can
+# race on token allocation over gossip and pick the same token, which
+# crashes the loser with "Bootstrap Token collision" (seen in practice
+# when node2 and node3 were started together here). Safe to re-run --
+# step3.sh skips nodes where Cassandra is already running.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=config.sh
@@ -48,26 +51,18 @@ fail_hint() {
   echo "node${idx} (${SSH_HOST[$idx]}) failed to come up in time -- check ${REMOTE_CASSANDRA_HOME}/logs/system.log there" >&2
 }
 
-echo "== Starting seed nodes (one at a time) =="
-for idx in "${SEED_INDEXES[@]}"; do
-  echo "-- node${idx} (${SSH_HOST[$idx]}) --"
-  start_node "$idx"
-  wait_for_ready "$idx" || { fail_hint "$idx"; exit 1; }
-done
-
-echo "== Starting remaining nodes (parallel) =="
-pids=()
-non_seed_idxs=()
+# Seeds first (in SEED_INDEXES order), then the remaining nodes -- all
+# strictly one at a time.
+ordered_idxs=("${SEED_INDEXES[@]}")
 for idx in "${NODE_INDEXES[@]}"; do
   is_seed "$idx" && continue
-  echo "-- node${idx} (${SSH_HOST[$idx]}) --"
-  start_node "$idx" &
-  pids+=("$!")
-  non_seed_idxs+=("$idx")
+  ordered_idxs+=("$idx")
 done
-for pid in "${pids[@]}"; do wait "$pid"; done
 
-for idx in "${non_seed_idxs[@]}"; do
+echo "== Starting nodes one at a time (seeds first: ${SEED_INDEXES[*]}) =="
+for idx in "${ordered_idxs[@]}"; do
+  echo "-- node${idx} (${SSH_HOST[$idx]}) --"
+  start_node "$idx"
   wait_for_ready "$idx" || { fail_hint "$idx"; exit 1; }
 done
 
