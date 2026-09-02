@@ -1,0 +1,95 @@
+# oom-exp/exp1 — Tombstone Flood
+
+Reproduces a documented real-world Cassandra failure (tombstone-scan OOM,
+similar to [CASSANDRA-8559](https://issues.apache.org/jira/browse/CASSANDRA-8559))
+against our own self-controlled cluster: flood a single partition with
+tombstones, then force the coordinator to materialize all of them into
+heap at once with an unbounded scan.
+
+## Files
+
+- **`setup.py`** — one-time schema setup. Connects to `<NODE_IP>` and
+  creates keyspace `oomtest` (RF=1) with two tables: `wide` (used by
+  `tombstone_flood.py`) and `bigpart` (reserved for a separate
+  huge-partition test). Idempotent (`CREATE ... IF NOT EXISTS`).
+  ```bash
+  python setup.py <NODE_IP>
+  ```
+
+- **`tombstone_flood.py`** — the experiment itself:
+  ```bash
+  python tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
+      [--concurrency N] [--auto-adjust] [--skip-phase-5]
+  ```
+
+## How it works
+
+Target table: `oomtest.wide (pk int, ck int, val blob, PRIMARY KEY (pk, ck))`.
+Everything lands in a single wide partition (`pk = 1`), which is the
+point — Cassandra has to hold the whole partition's tombstones in the
+coordinator's heap at once when it's scanned unpaged.
+
+**Pre-flight:** reads current heap usage via `nodetool info`, then
+estimates two things: how much heap the write phase itself needs
+(`rows × (blob_size + ~200B row overhead)`) and how much the tombstone
+scan needs (`rows × ~200B` per tombstone — a live cell's on-disk value
+size doesn't matter, tombstones cost roughly the same in heap regardless).
+If the write phase alone would eat >80% of available heap, it warns (and
+with `--auto-adjust`, halves the row count and retries) — the intent is a
+heap that survives phases 1-4 comfortably but reliably OOMs on phase 5.
+
+**Phase 1 — Write:** insert `--rows` (default 800,000) rows with a small
+`--blob-size` (default 8B) blob each, asynchronously at `--concurrency`
+(default 256), in 50K-row batches. A background thread polls
+`nodetool info`/`gcstats` every 2s during this phase so a write-phase OOM
+(a different, unintended failure) can be told apart from the intended
+scan-phase OOM. `--skip-phase-5` stops here, to validate the write path
+in isolation.
+
+**Phase 2 — Flush:** `nodetool flush oomtest wide`, pushing the live rows
+out of the memtable and onto SSTables.
+
+**Phase 3 — Delete:** delete every row just written (same
+batched/concurrent approach as Phase 1) — each becomes a tombstone.
+
+**Phase 4 — Flush:** flush again, so the tombstones are on disk, not
+sitting in the memtable.
+
+**Phase 5 — Scan (the attack):** `SELECT * FROM wide WHERE pk = 1` with
+paging disabled (`fetch_size=None`) at `CL=ONE`. This forces the
+coordinator to load every tombstone for the partition into heap in one
+shot. Heap is monitored throughout; the result is classified as OOM
+(success), timeout (possible OOM — server may be GC-thrashing), or an
+unexpected clean scan (heap was bigger than assumed, tombstones got
+compacted away, or row count was too low).
+
+## Guardrails this experiment relies on being relaxed
+
+Cassandra's own safety nets would normally stop this before it reaches
+OOM. `../updated-conf` (vs. Cassandra's defaults in `../../original-conf`)
+relaxes the ones that matter here:
+
+| Setting | Default | Relaxed to | Why |
+|---|---|---|---|
+| `tombstone_warn_threshold` / `tombstone_failure_threshold` | 1000 / 100000 | `2147483647` (effectively off) | so the query isn't aborted before it OOMs |
+| `MAX_HEAP_SIZE` (cassandra-env.sh) | half of system RAM | `512M` | makes OOM reachable without absurd row counts |
+| `read_request_timeout` / `range_request_timeout` / `request_timeout` | 5s / 10s / 10s | 60s / 120s / 120s | client shouldn't give up before the server actually OOMs |
+| `autocompaction_on_startup_enabled` | (on) | `false` | tombstones shouldn't get compacted away mid-experiment (the script also calls `nodetool disableautocompaction` itself) |
+| `dump_heap_on_uncaught_exception`, `-Dcassandra.printHeapHistogramOnOutOfMemoryError=true` | off | on | capture evidence when it happens |
+
+The plan (see the "Progress Report" doc) is to get a reliable OOM under
+this relaxed config, then progressively tighten each guardrail back
+toward its default and re-run, to find the point where the guardrail
+actually stops the attack.
+
+## Known issues (as of 2026-09-02)
+
+1. **The relaxed-guardrail config above isn't deployed anywhere yet.**
+   `../updated-conf/{cassandra.yaml,cassandra-env.sh}` exists in the repo,
+   but nothing in `../../build-cassandra-dist/` or `../../orchestrator/`
+   copies it onto the nodes — `build-cassandra-dist/step2.sh` only patches
+   network addressing (`listen_address`, `seeds`, etc.), not heap size or
+   tombstone thresholds. The current live 4-node cluster is running with
+   Cassandra's default heap sizing (observed ~31GB, not the intended
+   512MB), so Phase 5 as designed won't OOM against it as currently
+   deployed.
