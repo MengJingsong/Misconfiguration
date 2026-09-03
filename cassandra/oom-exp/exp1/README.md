@@ -8,25 +8,34 @@ heap at once with an unbounded scan.
 
 ## Files
 
-- **`setup.py`** — one-time schema setup. Connects to `<NODE_IP>` and
-  creates keyspace `oomtest` (RF=1) with two tables: `wide` (used by
-  `tombstone_flood.py`) and `bigpart` (reserved for a separate
+- **`remotes/`** — runs on a node (invoked over SSH); **`orchestrator/`** —
+  runs on the control machine (SSHes/connects out to the nodes), same split
+  as [`../../build-cassandra-dist`](../../build-cassandra-dist). Everything
+  in this experiment is a control-machine script, so it all lives under
+  `orchestrator/` except `remotes/step2b.sh` (see "Deploying the relaxed
+  guardrails" below).
+
+- **`orchestrator/setup.py`** — one-time schema setup. Connects to
+  `<NODE_IP>` (a node's public hostname, e.g. `pc66.cloudlab.umass.edu` —
+  reachable from the control machine; the internal `10.10.1.x` addresses
+  are not) and creates keyspace `oomtest` (RF=1) with two tables: `wide`
+  (used by `tombstone_flood.py`) and `bigpart` (reserved for a separate
   huge-partition test). Idempotent (`CREATE ... IF NOT EXISTS`).
   ```bash
-  python setup.py <NODE_IP>
+  python orchestrator/setup.py <NODE_IP>
   ```
 
-- **`tombstone_flood.py`** — the experiment itself:
+- **`orchestrator/tombstone_flood.py`** — the experiment itself. Talks CQL
+  directly to `<NODE_IP>:9042` for the read/write workload, and separately
+  shells out to `ssh jason92@<NODE_IP> nodetool ...` for heap monitoring —
+  both from the control machine, using the same passwordless SSH set up
+  for `../../build-cassandra-dist/orchestrator/*.sh`. Requires the Python
+  `cassandra-driver` package, not yet installed anywhere as of 2026-09-03
+  (see "Known issues").
   ```bash
-  python tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
+  python orchestrator/tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
       [--concurrency N] [--auto-adjust] [--skip-phase-5]
   ```
-
-- **`remotes/`** / **`orchestrator/`** — exp1-specific relaxed-guardrail
-  deployment, split the same way as
-  [`../../build-cassandra-dist`](../../build-cassandra-dist) (per-node
-  scripts vs. the control-machine driver that SSHes out to them). See
-  "Deploying the relaxed guardrails" below.
 
 ## How it works
 
@@ -112,7 +121,13 @@ values above are confirmed patched into every node's `conf/cassandra.yaml`
 
 ## Known issues (as of 2026-09-03)
 
-1. Phase 5 of `tombstone_flood.py` has not yet actually been run against
+1. `cassandra-driver` (the Python CQL driver `orchestrator/{setup,tombstone_flood}.py`
+   import) isn't installed anywhere yet — not on the control machine, and
+   node0 doesn't even have `pip3` available to install it there. Needs
+   `pip install cassandra-driver` on the control machine before either
+   script can run (that's where they're meant to run from — see their
+   entries in "Files" above).
+2. Phase 5 of `tombstone_flood.py` has not yet actually been run against
    the relaxed-guardrail cluster to confirm it OOMs as designed — the
    config deployment above is done, but the experiment itself is still
    unverified end-to-end.
