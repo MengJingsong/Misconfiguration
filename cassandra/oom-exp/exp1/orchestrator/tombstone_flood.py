@@ -10,11 +10,12 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 from cassandra.query import SimpleStatement, ConsistencyLevel
 from cassandra.policies import RoundRobinPolicy
 from cassandra.concurrent import execute_concurrent_with_args
-from cassandra import OperationTimedOut, NoHostAvailable, ConnectionShutdown
+from cassandra.connection import ConnectionShutdown
+from cassandra import OperationTimedOut
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
 

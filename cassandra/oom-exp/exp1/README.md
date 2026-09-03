@@ -22,20 +22,20 @@ heap at once with an unbounded scan.
   (used by `tombstone_flood.py`) and `bigpart` (reserved for a separate
   huge-partition test). Idempotent (`CREATE ... IF NOT EXISTS`).
   ```bash
-  python orchestrator/setup.py <NODE_IP>
+  python3.9 orchestrator/setup.py <NODE_IP>
   ```
 
 - **`orchestrator/tombstone_flood.py`** — the experiment itself. Talks CQL
   directly to `<NODE_IP>:9042` for the read/write workload, and separately
   shells out to `ssh jason92@<NODE_IP> nodetool ...` for heap monitoring —
   both from the control machine, using the same passwordless SSH set up
-  for `../../build-cassandra-dist/orchestrator/*.sh`. Requires the Python
-  `cassandra-driver` package, not yet installed anywhere as of 2026-09-03
-  (see "Known issues").
+  for `../../build-cassandra-dist/orchestrator/*.sh`.
   ```bash
-  python orchestrator/tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
+  python3.9 orchestrator/tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
       [--concurrency N] [--auto-adjust] [--skip-phase-5]
   ```
+  Requires `python3.9` specifically on the control machine, not the
+  default `python3` (3.10) — see "Known issues".
 
 ## How it works
 
@@ -121,13 +121,23 @@ values above are confirmed patched into every node's `conf/cassandra.yaml`
 
 ## Known issues (as of 2026-09-03)
 
-1. `cassandra-driver` (the Python CQL driver `orchestrator/{setup,tombstone_flood}.py`
-   import) isn't installed anywhere yet — not on the control machine, and
-   node0 doesn't even have `pip3` available to install it there. Needs
-   `pip install cassandra-driver` on the control machine before either
-   script can run (that's where they're meant to run from — see their
-   entries in "Files" above).
-2. Phase 5 of `tombstone_flood.py` has not yet actually been run against
+1. On the control machine, `pip3`/`cassandra-driver` are only available
+   for `python3.9`, not the default `python3` (3.10) — `python3.10` has no
+   `pip` module and no passwordless `sudo` to install `python3-pip` for
+   it. Use `python3.9` explicitly to run either script (see "Files"
+   above) until/unless that's fixed properly.
+2. `oomtest` keyspace doesn't exist yet on the cluster — run
+   `orchestrator/setup.py <NODE_IP>` before `tombstone_flood.py`.
+3. Phase 5 of `tombstone_flood.py` has not yet actually been run against
    the relaxed-guardrail cluster to confirm it OOMs as designed — the
    config deployment above is done, but the experiment itself is still
    unverified end-to-end.
+
+Fixed in the same pass as the above (2026-09-03): `tombstone_flood.py`'s
+`from cassandra import OperationTimedOut, NoHostAvailable, ConnectionShutdown`
+was wrong for cassandra-driver 3.29.3 — only `OperationTimedOut` actually
+lives in the top-level `cassandra` package; `NoHostAvailable` is in
+`cassandra.cluster` and `ConnectionShutdown` is in `cassandra.connection`.
+The script would have failed on import on any real driver install; never
+caught because the driver had never actually been installed anywhere
+before now.
