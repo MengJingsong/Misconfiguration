@@ -82,14 +82,30 @@ this relaxed config, then progressively tighten each guardrail back
 toward its default and re-run, to find the point where the guardrail
 actually stops the attack.
 
-## Known issues (as of 2026-09-02)
+## Deploying the relaxed guardrails
 
-1. **The relaxed-guardrail config above isn't deployed anywhere yet.**
-   `../updated-conf/{cassandra.yaml,cassandra-env.sh}` exists in the repo,
-   but nothing in `../../build-cassandra-dist/` or `../../orchestrator/`
-   copies it onto the nodes — `build-cassandra-dist/step2.sh` only patches
-   network addressing (`listen_address`, `seeds`, etc.), not heap size or
-   tombstone thresholds. The current live 4-node cluster is running with
-   Cassandra's default heap sizing (observed ~31GB, not the intended
-   512MB), so Phase 5 as designed won't OOM against it as currently
-   deployed.
+`../updated-conf/{cassandra.yaml,cassandra-env.sh}` also carries a
+hardcoded single-node address (left over from an earlier single-node
+experiment) and unrelated tuning not documented above, so it isn't copied
+onto nodes wholesale. Instead, `../../build-cassandra-dist/step2b.sh`
+sed-patches just the 5 guardrails in the table above onto each node
+(after `step2.sh` has already set that node's addressing), and
+`../../orchestrator/apply-relaxed-conf.sh` runs it across all 4 nodes and
+restarts the cluster:
+
+```bash
+cd ../../orchestrator
+./apply-relaxed-conf.sh
+```
+
+Verified deployed on the 4-node cluster as of 2026-09-03 (`nodetool info`
+on node0 reports `Heap Memory (MB): .../512.00`, and all 5 guardrail
+values above are confirmed patched into every node's `conf/cassandra.yaml`
+/ `cassandra-env.sh`).
+
+## Known issues (as of 2026-09-03)
+
+1. Phase 5 of `tombstone_flood.py` has not yet actually been run against
+   the relaxed-guardrail cluster to confirm it OOMs as designed — the
+   config deployment above is done, but the experiment itself is still
+   unverified end-to-end.
