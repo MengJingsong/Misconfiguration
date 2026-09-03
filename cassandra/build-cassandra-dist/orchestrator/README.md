@@ -1,11 +1,11 @@
-# cassandra/orchestrator
+# cassandra/build-cassandra-dist/orchestrator
 
 Driver scripts for bringing up a 4-node Cassandra cluster from a **control
 machine** (e.g. WSL) that has SSH access to the experiment nodes but does
 **not** have `/proj` mounted. These scripts never touch Cassandra directly —
 they SSH out to each node and invoke the per-node scripts in
-[`build-cassandra-dist`](../build-cassandra-dist), which live on shared NFS
-storage (`/proj/misconfiguration-PG0`) and run there.
+[`../remotes`](../remotes), which live on shared NFS storage
+(`/proj/misconfiguration-PG0`) and run there.
 
 ## Files
 
@@ -29,15 +29,15 @@ storage (`/proj/misconfiguration-PG0`) and run there.
   changes the LAN addresses.
 
 - **`build-cluster.sh`** — installs and configures Cassandra on all 4 nodes:
-  1. Runs `build-cassandra-dist/step1.sh` on node0 first, to prime the
-     shared tarball download on NFS.
+  1. Runs `remotes/step1.sh` on node0 first, to prime the shared tarball
+     download on NFS.
   2. Runs `step1.sh` on the remaining nodes in parallel.
-  3. Runs `build-cassandra-dist/step2.sh` on every node sequentially, to
-     write each node's `cassandra.yaml` with the right seeds/addresses.
+  3. Runs `remotes/step2.sh` on every node sequentially, to write each
+     node's `cassandra.yaml` with the right seeds/addresses.
   4. Both steps are idempotent — safe to re-run after a partial failure.
 
 - **`start-cluster.sh`** — starts the Cassandra daemon on every node via
-  `build-cassandra-dist/step3.sh`:
+  `remotes/step3.sh`:
   1. Starts the seed nodes (`SEED_INDEXES` in `config.sh`) one at a time,
      waiting for each to report itself `UN` (Up/Normal) in `nodetool
      status` before starting the next -- starting seeds concurrently on a
@@ -48,13 +48,17 @@ storage (`/proj/misconfiguration-PG0`) and run there.
   4. Idempotent -- re-running skips any node where Cassandra is already
      running (`step3.sh` checks its pidfile).
 
+- **`stop-cluster.sh`** — stops the Cassandra daemon on every node via
+  `remotes/step4.sh`, in parallel (no bootstrap/gossip race to avoid on
+  shutdown, unlike starting). Idempotent -- no-ops on nodes already down.
+
 ## Usage
 
 Run from the control machine, with SSH access to all 4 nodes already
 working (passwordless SSH keys distributed to each node in advance):
 
 ```bash
-cd cassandra/orchestrator
+cd cassandra/build-cassandra-dist/orchestrator
 
 # Only needed once, or after node IPs change (e.g. experiment swap):
 ./check-ips.sh
@@ -64,7 +68,15 @@ cd cassandra/orchestrator
 
 # Start the Cassandra daemon on all 4 nodes (seeds first, then the rest):
 ./start-cluster.sh
+
+# Stop it on all 4 nodes:
+./stop-cluster.sh
 ```
+
+For experiment-specific config on top of a running cluster (e.g. the
+tombstone-flood relaxed guardrails), see the experiment's own
+`orchestrator/` dir, e.g.
+[`../../oom-exp/exp1/orchestrator`](../../oom-exp/exp1/orchestrator).
 
 ## Prerequisites
 

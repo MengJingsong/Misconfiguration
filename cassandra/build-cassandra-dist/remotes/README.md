@@ -1,4 +1,4 @@
-# cassandra/build-cassandra-dist
+# cassandra/build-cassandra-dist/remotes
 
 Per-node scripts that install and configure a binary distribution of
 Apache Cassandra 5.0.7. These run **on each experiment node**, not on the
@@ -49,19 +49,25 @@ so the download only needs to happen once, from whichever node runs
     Cassandra's own logs (including `system.log`) under
     `$CASSANDRA_HOME/logs/`.
 
+- **`step4.sh`** — stop the Cassandra daemon on this node:
+  - No-ops if it isn't running (checks the pidfile).
+  - SIGTERM, waits up to 60s for the process to exit, SIGKILL as a
+    fallback.
+
 ## Usage
 
-Normally you don't call these directly — run
-[`orchestrator/build-cluster.sh`](../orchestrator) from the control machine
-instead, which SSHes in and runs both steps with the right arguments on
-every node in the right order.
+Normally you don't call these directly — run the scripts in
+[`../orchestrator`](../orchestrator) from the control machine instead,
+which SSH in and run these with the right arguments on every node in the
+right order.
 
 To run manually on a single node (e.g. for debugging):
 
 ```bash
-bash cassandra/build-cassandra-dist/step1.sh
-bash cassandra/build-cassandra-dist/step2.sh "<seeds>" "<this-node-ip>"
-bash cassandra/build-cassandra-dist/step3.sh
+bash cassandra/build-cassandra-dist/remotes/step1.sh
+bash cassandra/build-cassandra-dist/remotes/step2.sh "<seeds>" "<this-node-ip>"
+bash cassandra/build-cassandra-dist/remotes/step3.sh
+bash cassandra/build-cassandra-dist/remotes/step4.sh
 ```
 
 ## Prerequisites

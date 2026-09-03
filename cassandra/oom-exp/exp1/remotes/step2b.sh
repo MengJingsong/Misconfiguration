@@ -1,14 +1,15 @@
 #!/bin/bash
-# Applies the relaxed-guardrail config from ../oom-exp/updated-conf/ needed
-# by oom-exp/exp1 (tombstone flood), scoped to exactly the guardrails
-# documented in oom-exp/exp1/README.md's "Guardrails this experiment relies
-# on being relaxed" table -- NOT a wholesale copy of updated-conf, which
-# also carries a hardcoded single-node address and unrelated tuning left
-# over from an earlier experiment.
+# Applies the relaxed-guardrail config from ../../updated-conf/ needed by
+# this experiment (tombstone flood), scoped to exactly the guardrails
+# documented in ../README.md's "Guardrails this experiment relies on being
+# relaxed" table -- NOT a wholesale copy of updated-conf, which also
+# carries a hardcoded single-node address and unrelated tuning left over
+# from an earlier experiment.
 #
-# Run on each node after step2.sh (node addressing must already be in
-# place). Idempotent -- re-running is safe, sed patches match on the
-# default/original value so a second run is a no-op diff.
+# Run on each node after build-cassandra-dist/remotes/step2.sh (node
+# addressing must already be in place). Idempotent -- re-running is safe,
+# sed patches match on the default/original value so a second run is a
+# no-op diff.
 set -euo pipefail
 
 CASSANDRA_HOME="/mydata/apache-cassandra-5.0.7"

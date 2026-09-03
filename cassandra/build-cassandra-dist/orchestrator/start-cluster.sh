@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starts Cassandra on every node via build-cassandra-dist/step3.sh, one
+# Starts Cassandra on every node via build-cassandra-dist/remotes/step3.sh, one
 # node at a time (seeds first, in SEED_INDEXES order, then the rest),
 # each waited on until it reports itself Up/Normal in `nodetool status`
 # before the next one starts.
@@ -20,7 +20,7 @@ POLL_INTERVAL=5
 
 start_node() {
   local idx="$1"
-  ssh_node "$idx" "bash ${REMOTE_SCRIPTS_DIR}/build-cassandra-dist/step3.sh"
+  ssh_node "$idx" "bash ${REMOTE_SCRIPTS_DIR}/build-cassandra-dist/remotes/step3.sh"
 }
 
 # Waits until `nodetool status` (run on the node itself, via SSH) reports

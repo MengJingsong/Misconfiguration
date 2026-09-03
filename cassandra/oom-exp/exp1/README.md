@@ -22,6 +22,12 @@ heap at once with an unbounded scan.
       [--concurrency N] [--auto-adjust] [--skip-phase-5]
   ```
 
+- **`remotes/`** / **`orchestrator/`** — exp1-specific relaxed-guardrail
+  deployment, split the same way as
+  [`../../build-cassandra-dist`](../../build-cassandra-dist) (per-node
+  scripts vs. the control-machine driver that SSHes out to them). See
+  "Deploying the relaxed guardrails" below.
+
 ## How it works
 
 Target table: `oomtest.wide (pk int, ck int, val blob, PRIMARY KEY (pk, ck))`.
@@ -87,14 +93,15 @@ actually stops the attack.
 `../updated-conf/{cassandra.yaml,cassandra-env.sh}` also carries a
 hardcoded single-node address (left over from an earlier single-node
 experiment) and unrelated tuning not documented above, so it isn't copied
-onto nodes wholesale. Instead, `../../build-cassandra-dist/step2b.sh`
+onto nodes wholesale. Instead, [`remotes/step2b.sh`](remotes/step2b.sh)
 sed-patches just the 5 guardrails in the table above onto each node
-(after `step2.sh` has already set that node's addressing), and
-`../../orchestrator/apply-relaxed-conf.sh` runs it across all 4 nodes and
-restarts the cluster:
+(after `../../build-cassandra-dist/remotes/step2.sh` has already set that
+node's addressing), and
+[`orchestrator/apply-relaxed-conf.sh`](orchestrator/apply-relaxed-conf.sh)
+runs it across all 4 nodes and restarts the cluster:
 
 ```bash
-cd ../../orchestrator
+cd orchestrator
 ./apply-relaxed-conf.sh
 ```
 
