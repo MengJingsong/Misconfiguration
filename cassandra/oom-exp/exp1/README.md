@@ -22,7 +22,7 @@ heap at once with an unbounded scan.
   (used by `tombstone_flood.py`) and `bigpart` (reserved for a separate
   huge-partition test). Idempotent (`CREATE ... IF NOT EXISTS`).
   ```bash
-  python3.9 orchestrator/setup.py <NODE_IP>
+  python3 orchestrator/setup.py <NODE_IP>
   ```
 
 - **`orchestrator/tombstone_flood.py`** — the experiment itself. Talks CQL
@@ -31,11 +31,9 @@ heap at once with an unbounded scan.
   both from the control machine, using the same passwordless SSH set up
   for `../../build-cassandra-dist/orchestrator/*.sh`.
   ```bash
-  python3.9 orchestrator/tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
+  python3 orchestrator/tombstone_flood.py <NODE_IP> [--rows N] [--blob-size N] \
       [--concurrency N] [--auto-adjust] [--skip-phase-5]
   ```
-  Requires `python3.9` specifically on the control machine, not the
-  default `python3` (3.10) — see "Known issues".
 
 ## How it works
 
@@ -121,17 +119,26 @@ values above are confirmed patched into every node's `conf/cassandra.yaml`
 
 ## Known issues (as of 2026-09-03)
 
-1. On the control machine, `pip3`/`cassandra-driver` are only available
-   for `python3.9`, not the default `python3` (3.10) — `python3.10` has no
-   `pip` module and no passwordless `sudo` to install `python3-pip` for
-   it. Use `python3.9` explicitly to run either script (see "Files"
-   above) until/unless that's fixed properly.
-2. `oomtest` keyspace doesn't exist yet on the cluster — run
+1. `oomtest` keyspace doesn't exist yet on the cluster — run
    `orchestrator/setup.py <NODE_IP>` before `tombstone_flood.py`.
-3. Phase 5 of `tombstone_flood.py` has not yet actually been run against
+2. Phase 5 of `tombstone_flood.py` has not yet actually been run against
    the relaxed-guardrail cluster to confirm it OOMs as designed — the
    config deployment above is done, but the experiment itself is still
-   unverified end-to-end.
+   unverified end-to-end. The default `--rows 800000` was likely tuned
+   against a much larger heap than the 512M this cluster now runs at:
+   `preflight_checks()` estimates ~456MB available (512M heap minus a
+   56MB metaspace allowance) against only ~153MB of tombstones at
+   800,000 rows (`rows × 200B`), and will print
+   `Phase 5 may NOT OOM ... Consider shrinking heap to ~203MB` at
+   startup. It only *suggests* shrinking the heap, though — it doesn't
+   suggest raising `--rows` to compensate, and doesn't do so
+   automatically the way `--auto-adjust` does for the opposite (Phase 1
+   too heavy) case. Since live rows and tombstones cost about the same
+   per-row heap in this script's model, raising `--rows` enough to
+   guarantee Phase 5 OOMs risks pushing Phase 1's write pressure over its
+   own 80%-of-available warning threshold too — worth deciding
+   deliberately (higher `--rows`, or a smaller pinned heap) before the
+   real run rather than trusting the default.
 
 Fixed in the same pass as the above (2026-09-03): `tombstone_flood.py`'s
 `from cassandra import OperationTimedOut, NoHostAvailable, ConnectionShutdown`
