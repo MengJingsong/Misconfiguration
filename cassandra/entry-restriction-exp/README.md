@@ -69,12 +69,24 @@ cassandra/entry-restriction-exp/
 
 ## Workflow
 
-1. Identify an entry point (Target 1).
-2. For each restriction location it reaches, create a pair `NN`.
-3. Fill `-summary.md` from `_TEMPLATE-summary.md` and `-codepath.md` from
-   `_TEMPLATE-codepath.md`.
-4. Add a row to `_INDEX.md` and update the coverage counts.
-5. Verify the code path (Target 2) against the pinned source tag, then update the pair's `Status`.
+**Orient (before starting):**
+
+0. Read the Google Docs (*Meeting Summary*, *Progress Report*) for the current plan, scope, and next step.
+1. Open `_INDEX.md` to see which entry points/pairs already exist and what's pending — continue from there, don't duplicate.
+
+**Target 1 — discover entry points:**
+
+2. Find candidate constraints in the current scope. Where to look:
+   - `conf/cassandra.yaml` (config names), `Config.java` (field declarations), `DatabaseDescriptor.java` (defaults, validation, getters); plus hardcoded constants and typed bounds.
+   - Approaches: **AI** (read + reason), **CodeQL** (taint tracking), or **Hybrid** (AI proposes, CodeQL verifies).
+   - Current focus scope: the storage-engine memtable path (`org.apache.cassandra.db` + config layer). Use the `memtable_heap_space` pair as the worked reference.
+
+**Target 2 — trace & verify (inseparable from Target 1):**
+
+3. From the entry point, trace the continuous path: **declaration → default/validation → getter → consumer(s) → each place the value gates/limits a resource (enforcement) → action on breach.** Each distinct restriction location = one pair `NN`. An entry point isn't "done" until its restriction path is traced.
+4. Fill `-summary.md` and `-codepath.md` from the templates; repeat shared path prefixes so each codepath file is self-contained.
+5. Run the failure-mode analysis (proxy / enforcement-point / default) using the legend; record bypass hypotheses in `Bypass Potential` (Target 3 seed).
+6. Add/refresh the `_INDEX.md` row and coverage counts; set `Status` (`pending` → `in-progress` → `verified` once checked against the pinned tag).
 
 **Drafting convention:** draft new/changed result files in the Claude session
 first for review, then push to `main` after approval.
