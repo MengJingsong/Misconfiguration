@@ -5,7 +5,7 @@
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
 **Entry point:** memtable_heap_space
-**Restriction location (this pair):** `MemtablePool.SubPool.tryAllocate():151-161` (hard allocation cap)
+**Restriction location (this pair):** [`MemtablePool.SubPool.tryAllocate():151-161`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L151-L161) (hard allocation cap)
 
 ## Full Continuous Code Path
 
@@ -37,18 +37,18 @@ Each `Location` cell links to the pinned source at tag `cassandra-5.0.9`.
 
 ## Path Continuity Notes
 
-- The `while(true)` loop in `allocate()` (`:173-196`) cycles steps 11–15 until
+- The `while(true)` loop in `allocate()` ([`:173-196`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L173-L196)) cycles steps 11–15 until
   the allocation succeeds or the bypass fires.
 - Step 12b is the key divergence for Target 3: it books memory through
-  `allocated()` → `adjustAllocated()` (`MemtablePool:167-175`), which the source
+  `allocated()` → `adjustAllocated()` ([`MemtablePool:167-175`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L167-L175)), which the source
   comments as “bypassing any limits or constraints.”
 - Step 16 signals **all** waiters; the freeing side is driven by flush completion
   (see pair 01, step 16), coupling the two pairs at runtime.
 - **Bypass trigger source (step 12b):** `isBlocking` is set by
-  `writeBarrier.markBlocking()` during flush (`ColumnFamilyStore.java:1236-1238`,
-  `OpOrder.java:333-335`), not by the write itself — the force branch exists to
+  `writeBarrier.markBlocking()` during flush ([`ColumnFamilyStore.java:1236-1238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1236-L1238),
+  [`OpOrder.java:333-335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/concurrent/OpOrder.java#L333-L335)), not by the write itself — the force branch exists to
   let pre-barrier writes drain so the flush can reclaim their memory.
 - **Second overshoot path (not a row in the main table):** row/partition overhead
   is charged *after* the insert via `allocator.onHeap().allocate(overhead, opGroup)`
-  (`SkipListMemtable.java:122-125`), which "can overshoot our declared limit"
+  ([`SkipListMemtable.java:122-125`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/SkipListMemtable.java#L122-L125)), which "can overshoot our declared limit"
   independently of step 12b.

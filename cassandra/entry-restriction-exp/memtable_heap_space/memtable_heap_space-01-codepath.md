@@ -5,7 +5,7 @@
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
 **Entry point:** memtable_heap_space
-**Restriction location (this pair):** `MemtablePool.SubPool.needsCleaning():128` → `maybeClean():131-135` (soft cleanup trigger)
+**Restriction location (this pair):** [`MemtablePool.SubPool.needsCleaning():128`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L128) → [`maybeClean():131-135`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L131-L135) (soft cleanup trigger)
 
 ## Full Continuous Code Path
 
@@ -35,7 +35,7 @@ Each `Location` cell links to the pinned source at tag `cassandra-5.0.9`.
 
 ## Path Continuity Notes
 
-- Steps 12–13 also reachable via `SubPool.acquired():187-190` (which calls `maybeClean()` directly) and via `reclaimed():206-214` (which re-checks `updateNextClean()` and may re-trigger).
-- Step 10 uses `adjustAllocated()` (`:167-175`), which the source comments as “bypassing any limits” — relevant to pair 02, not enforced here.
+- Steps 12–13 also reachable via [`SubPool.acquired():187-190`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L187-L190) (which calls `maybeClean()` directly) and via [`reclaimed():206-214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L206-L214) (which re-checks `updateNextClean()` and may re-trigger).
+- Step 10 uses `adjustAllocated()` ([`:167-175`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L167-L175)), which the source comments as “bypassing any limits” — relevant to pair 02, not enforced here.
 - Flush completion (step 16) is asynchronous via the returned `Future`; the path from `signalFlushRequired` into `ColumnFamilyStore` flush is out of scope for this pair.
-- **Step 10 detail:** `allocated` accrues not just cloned data but metadata charged via `onAllocatedOnHeap → onHeap().adjust()` (`BTreePartitionUpdater.java:132-182`) and post-insert row overhead (`SkipListMemtable.java:124-125`); the trigger check (steps 11-13) runs against this *estimated* total, not measured heap.
+- **Step 10 detail:** `allocated` accrues not just cloned data but metadata charged via `onAllocatedOnHeap → onHeap().adjust()` ([`BTreePartitionUpdater.java:132-182`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/partitions/BTreePartitionUpdater.java#L132-L182)) and post-insert row overhead ([`SkipListMemtable.java:124-125`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/SkipListMemtable.java#L124-L125)); the trigger check (steps 11-13) runs against this *estimated* total, not measured heap.

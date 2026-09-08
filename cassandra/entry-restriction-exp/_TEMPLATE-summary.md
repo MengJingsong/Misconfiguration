@@ -2,6 +2,12 @@
 
 > **Codepath:** [[entry_name]-[NN]-codepath.md]([entry_name]-[NN]-codepath.md) · **Index:** [../_INDEX.md](../_INDEX.md)
 
+Link every code reference (a `` `File.java:NN` `` or `` `Class.method():NN` ``) to the
+pinned source on GitHub, keeping the backticks **inside** the link so it renders as
+clickable code: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) ``
+(ranges use `#LNN-LMM`; a cell naming two methods gets two links). A link placed
+*outside* backticks (`` `[...]` ``) will not render — wrap the code span, don't nest it.
+
 ## Identity
 
 | Field | Content |
