@@ -3,19 +3,21 @@
 Navigation hub and progress tracker for all entry-restriction pairs.
 See [README.md](README.md) for the format.
 
+**Source:** apache/cassandra @ tag `cassandra-5.0.9`
 **Status legend:** `pending` · `in-progress` · `verified`
 
-| Entry Point | Pair | Type | Restriction Location | Failure Mode(s) | Status | Summary | Codepath |
-|-------------|------|------|----------------------|-----------------|--------|---------|----------|
-| _example: memtable_heap_space_ | 01 | Config | `MemtableAllocator.allocate():LINE` | proxy? / enforcement? | pending | [link](memtable_heap_space/memtable_heap_space-01-summary.md) | [link](memtable_heap_space/memtable_heap_space-01-codepath.md) |
+| Entry Point | Pair | Type | Restriction Location | Failure Mode(s) flagged | Status | Summary | Codepath |
+|-------------|------|------|----------------------|-------------------------|--------|---------|----------|
+| memtable_heap_space | 01 | Config | `SubPool.needsCleaning():128` → `maybeClean()` (soft flush trigger) | enforcement-point ⚠ (post-hoc + async flush); proxy ⚠ | verified | [link](memtable_heap_space/memtable_heap_space-01-summary.md) | [link](memtable_heap_space/memtable_heap_space-01-codepath.md) |
+| memtable_heap_space | 02 | Config | `SubPool.tryAllocate():156` (hard allocation cap) | enforcement-point ✗ (blocking-op bypass); proxy ⚠ | verified | [link](memtable_heap_space/memtable_heap_space-02-summary.md) | [link](memtable_heap_space/memtable_heap_space-02-codepath.md) |
 
-<!-- Add one row per pair. Keep example row until the first real pair is added. -->
+<!-- Add one row per pair. -->
 
 ## Coverage summary
 
 | Metric | Count |
 |--------|-------|
-| Entry points identified | 0 |
-| Total pairs | 0 |
-| Verified | 0 |
+| Entry points identified | 1 |
+| Total pairs | 2 |
+| Verified | 2 |
 | Pending | 0 |
