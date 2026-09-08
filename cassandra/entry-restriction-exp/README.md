@@ -51,6 +51,7 @@ Each pair is recorded in **two** markdown files:
 - The two files cross-link to each other and to `_INDEX.md`.
 - When two pairs share a code-path prefix, **repeat** the shared steps in each
   codepath file so every file is self-contained.
+- In codepath files, each `Location` cell **links** to the pinned source on GitHub — short display text (`File.java:NN`), full path in the href (`…/blob/cassandra-5.0.9/<path>#Lnn`).
 
 ## Directory layout
 
@@ -113,4 +114,4 @@ In the summary's Failure Mode Analysis table, the symbol always encodes
 ## Related context (for a new session)
 
 - **Google Docs** — *Meeting Summary* and *Progress Report* hold the current plan and next steps; read them first (the Claude project is configured to surface them).
-- **Sibling work** — `cassandra/oom-exp/` and `cassandra/constraint-analysis/` in this repo hold related chaos-testing and constraint analysis.
+- **Sibling work** — `cassandra/oom-exp/` in this repo holds related chaos-testing experiments.

@@ -9,7 +9,12 @@
 
 Unbroken trace from declaration/init → load/parse → storage → read →
 transform → validation → enforcement check → action on breach. Every node
-listed; no gaps.
+listed; no gaps. When a sibling pair shares a prefix, repeat the shared
+steps here so this file stands alone.
+
+Link each `Location` cell to the pinned source on GitHub — display the short
+`File.java:NN`, put the full path in the href:
+`[`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN)` (ranges use `#LNN-LMM`; cells naming two methods get two links).
 
 | Step | Stage | Location (`Class.method:line`) | What happens | Value / State |
 |------|-------|--------------------------------|--------------|---------------|
