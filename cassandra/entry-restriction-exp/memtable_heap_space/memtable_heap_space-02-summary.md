@@ -66,7 +66,6 @@ until memory is released, unless a bypass applies.
 | Field | Content |
 |-------|---------|
 | **Status** | verified (static trace) |
-| **CodeQL Pattern** | candidate: if-check on `tryAllocate` return controlling allocation |
 | **Verified By / Date** | Claude + Jingsong, 2026-09-08 |
 
 ## Notes

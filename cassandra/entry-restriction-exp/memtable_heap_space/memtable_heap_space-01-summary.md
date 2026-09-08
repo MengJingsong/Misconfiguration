@@ -66,7 +66,6 @@ to free heap. It does **not** block writes (that is pair 02).
 | Field | Content |
 |-------|---------|
 | **Status** | verified (static trace) |
-| **CodeQL Pattern** | n/a (manual trace; candidate for if-check pattern on `needsCleaning`) |
 | **Verified By / Date** | Claude + Jingsong, 2026-09-08 |
 
 ## Notes

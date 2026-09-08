@@ -52,7 +52,6 @@ _Distilled critical nodes (full trace lives in the codepath file)._
 | Field | Content |
 |-------|---------|
 | **Status** | pending / in-progress / verified |
-| **CodeQL Pattern** | which of the 3 if-check patterns (if applicable) |
 | **Verified By / Date** | |
 
 ## Notes
