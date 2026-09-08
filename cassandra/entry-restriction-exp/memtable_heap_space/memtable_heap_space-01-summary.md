@@ -41,7 +41,7 @@ to free heap. It does **not** block writes (that is pair 02).
 
 | Mode | Status | Notes |
 |------|--------|-------|
-| **Proxy Match** | ⚠ | Tracks bytes handed out by the memtable allocator (slab/heap), not actual JVM heap. Excludes non-memtable heap, slab fragmentation, and objects retained after switch. Correlated but not exact. |
+| **Proxy Match** | ⚠ | `allocated` is the memtable's **estimated on-heap footprint** — cloned data **+ metadata** charged via `unsharedHeapSize()` / `ROW_OVERHEAD_HEAP_SIZE` (`BTreePartitionUpdater.onAllocatedOnHeap():175-182`, `SkipListMemtable.java:124-125`) — not measured JVM heap. Excludes non-memtable heap and slab fragmentation. If those size models under-count real object footprint, actual heap can exceed `allocated` while the counter still reads "within limit." Direct on the *estimated* footprint; proxy for node heap. |
 | **Enforcement Point** | ⚠ | Check runs **after** `adjustAllocated(size)` records the bytes (`allocated():183-184`) — memory is already used before the trigger fires. Flush is **asynchronous**; heap keeps growing until the flush completes. |
 | **Default State** | ✓ | Enabled by default. `limit` defaults to ¼ heap; `memtable_cleanup_threshold` defaults to `1/(1 + memtable_flush_writers)` (`DatabaseDescriptor.java:763`). |
 
@@ -60,6 +60,11 @@ to free heap. It does **not** block writes (that is pair 02).
   cap peak heap.
 - **Post-hoc accounting:** because `maybeClean()` runs after the allocation is
   booked, a burst can overshoot before any flush is scheduled.
+- **Estimate-fidelity divergence:** because `allocated` counts an *estimated*
+  footprint (see Proxy Match), data whose true retained size exceeds its
+  `unsharedHeapSize` estimate lets real heap exceed `allocated` while staying
+  "under limit" — the proxy-mismatch failure mode. Magnitude is an empirical
+  (chaos) question, not a static one.
 
 ## Verification
 
@@ -72,3 +77,4 @@ to free heap. It does **not** block writes (that is pair 02).
 
 - Default `memtable_allocation_type = heap_buffers` → `SlabPool(heapLimit, 0, …)`, so `memtable_heap_space` maps to `MEMORY_POOL.onHeap.limit`.
 - `used()` returns `allocated` only (does not subtract `reclaiming`), so in-flight flushes still count toward the trigger.
+- **What `allocated` measures:** estimated footprint = cloned data bytes (slab/native cloner) **+** structural overhead charged explicitly — partition/row overhead (`SkipListMemtable.java:124-125`) and per-row/column/stats/deletion `unsharedHeapSize*()` estimates via `onAllocatedOnHeap → onHeap().adjust()` (`BTreePartitionUpdater.java:132-182`). The limit governs `Σ estimated_size`, not raw bytes or measured heap.

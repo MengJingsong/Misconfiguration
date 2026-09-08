@@ -36,3 +36,4 @@ Declaration → default/validate → read → convert to bytes → pool build �
 - Steps 12–13 also reachable via `SubPool.acquired():187-190` (which calls `maybeClean()` directly) and via `reclaimed():206-214` (which re-checks `updateNextClean()` and may re-trigger).
 - Step 10 uses `adjustAllocated()` (`:167-175`), which the source comments as “bypassing any limits” — relevant to pair 02, not enforced here.
 - Flush completion (step 16) is asynchronous via the returned `Future`; the path from `signalFlushRequired` into `ColumnFamilyStore` flush is out of scope for this pair.
+- **Step 10 detail:** `allocated` accrues not just cloned data but metadata charged via `onAllocatedOnHeap → onHeap().adjust()` (`BTreePartitionUpdater.java:132-182`) and post-insert row overhead (`SkipListMemtable.java:124-125`); the trigger check (steps 11-13) runs against this *estimated* total, not measured heap.

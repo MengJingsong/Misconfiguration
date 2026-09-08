@@ -42,3 +42,11 @@ allocation request.
   comments as “bypassing any limits or constraints.”
 - Step 16 signals **all** waiters; the freeing side is driven by flush completion
   (see pair 01, step 16), coupling the two pairs at runtime.
+- **Bypass trigger source (step 12b):** `isBlocking` is set by
+  `writeBarrier.markBlocking()` during flush (`ColumnFamilyStore.java:1236-1238`,
+  `OpOrder.java:333-335`), not by the write itself — the force branch exists to
+  let pre-barrier writes drain so the flush can reclaim their memory.
+- **Second overshoot path (not a row in the main table):** row/partition overhead
+  is charged *after* the insert via `allocator.onHeap().allocate(overhead, opGroup)`
+  (`SkipListMemtable.java:122-125`), which "can overshoot our declared limit"
+  independently of step 12b.
