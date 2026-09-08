@@ -110,16 +110,6 @@ In the summary's Failure Mode Analysis table, the symbol always encodes
 | **⚠** | partial / at risk | proxy loosely correlated | checked late, or after-the-fact with mitigation (e.g. async reclaim) | enabled but weak/soft default |
 | **✗** | weakness present (finding) | proxy weakly correlated / mismatch | after the resource is already used, or bypassable | disabled by default (default-off) |
 
-## CodeQL pattern field
-
-The summary's `CodeQL Pattern` field refers to the **3 if-check patterns** used
-by the project's CodeQL taint-tracking queries to locate conditionals that
-control metadata/resource creation. Those patterns are defined in the repo's
-CodeQL scripts (Hadoop work), **not yet transcribed here**.
-
-> **TODO:** document the three if-check patterns in this README so pairs can cite
-> them by number. Until then, use `n/a` for manually-traced pairs.
-
 ## Related context (for a new session)
 
 - **Google Docs** — *Meeting Summary* and *Progress Report* hold the current plan and next steps; read them first (the Claude project is configured to surface them).
