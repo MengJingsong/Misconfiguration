@@ -1,344 +1,88 @@
-# Entry-Restriction Pair: memtable_flush_writers-02 — Unbounded Queue Depth
+# memtable_flush_writers — Pair 02 · Summary
 
-**Entry Point:** [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) (implicit, executor factory default)  
-**Pair ID:** 02  
-**Resource Constraint Type:** Queue Depth / Memory Hold (bypass mechanism for `memtable_heap_space` hard cap)
+> **Codepath:** [memtable_flush_writers-02-codepath.md](memtable_flush_writers-02-codepath.md) · **Index:** [../_INDEX.md](../_INDEX.md)
+>
+> **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
----
+**Formatting note:** Link every code reference (`` `File.java:NN` `` or `` `Class.method():NN` ``) to the pinned source on GitHub. Use the format: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) `` (ranges use `#LNN-LMM`). Place the link *outside* the backticks so code renders as clickable text.
 
-## Quick Summary
+## Identity
 
-While `memtable_flush_writers` configures thread pool size, the **executor factory creates an unbounded queue by default**. When flush dispatch rate exceeds thread throughput, tasks queue indefinitely with no depth limit or backpressure. Queued tasks hold old memtables in memory, allowing total memory consumption to exceed `memtable_heap_space` hard cap despite the limit being honored per-memtable. This pair documents the queue as a separate entry point that **silently bypasses** the heap constraint.
+| Field | Content |
+|-------|---------|
+| **Entry Point ID** | MEMTABLE_FLUSH_WRITERS |
+| **Name** | memtable_flush_writers (unbounded queue depth) |
+| **Type** | Hardcoded constant (executor factory default) |
+| **Declaration Location** | [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) (factory method, implicit) |
+| **Default Value** | `LinkedBlockingQueue` with capacity = `Integer.MAX_VALUE` (unbounded) |
+| **Value Type / Size** | Queue depth (no config parameter, no limit) |
+| **Description** | Executor factory creates unbounded queue for flush tasks; queue depth cannot be tuned and has no backpressure mechanism |
+| **Restriction Location** | [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) (no enforcement) |
+| **Pair** | 02 of 03 |
 
----
+**Restriction character:** Hardcoded queue factory default (unbounded); no configuration option and no runtime enforcement.
 
-## Queue Configuration Entry Point
+## Key Decision Points
 
-**Location:** [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) — executor factory method (implicit default)
+_Critical nodes showing how this constraint fails to limit queue depth._
 
-**Semantics:**
-- **Queue Type:** `LinkedBlockingQueue` with **no capacity limit** (capacity = `Integer.MAX_VALUE`)
-- **Rejection Policy:** `ThreadPoolExecutor.AbortPolicy` (standard default) — never rejects, queues instead
-- **No configuration parameter:** Queue depth cannot be tuned via `cassandra.yaml`
-- **No monitoring:** No metric tracks queue depth or backlog size
-- **Result:** Pool saturation is silent; callers never see rejection
+1. **factory-definition:** [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) — Factory creates `LinkedBlockingQueue` with no capacity arg (defaults to unbounded)
+2. **pool-initialization:** [`ColumnFamilyStore.java:206-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206) — Pool assigned unbounded queue at startup (static final)
+3. **task-submission:** [`ColumnFamilyStore.java:1033-1043`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1033) — Flush task submitted; queue always accepts (never rejects)
+4. **no-config-parameter:** No `cassandra.yaml` tuning option for queue depth
+5. **no-backpressure:** No rejection policy, no monitoring, callers never see queue saturation
 
----
+## Enforcement
 
-## What This Constraint Does (Or Fails To Do)
+| Field | Content |
+|-------|---------|
+| **Enforcement Point** | None — unbounded queue at pool creation; no depth check at dispatch |
+| **Action on Breach** | No action; tasks queue indefinitely. Saturation is silent (no exception, no rejection). |
 
-| Component | Detail |
-|-----------|--------|
-| **Intends to Limit** | Concurrent flush task count via thread pool size |
-| **Actually Limits** | Nothing; unbounded queue absorbs all excess submissions |
-| **Default Behavior** | Silently queue tasks when threads unavailable |
-| **Memory Consequence** | Queued tasks hold references to old memtables → memory not released |
-| **Interaction with `memtable_heap_space`** | Hard cap is per-memtable; queued memtables bypass cap checking |
+## Failure Mode Analysis
 
----
+| Mode | Status (✓/✗/⚠) | Notes |
+|------|-----------------|-------|
+| **Proxy Match** | ⚠ | Queue depth is orthogonal to thread count. Thread pool size (Pair 01) is independent of queue depth; both can be weak simultaneously. Unbounded queue defeats thread-count soft limit. |
+| **Enforcement Point** | ✗ | No enforcement: queue created with `Integer.MAX_VALUE` capacity; factory method has no config knob. No check at dispatch time. Designed bypass: rejecting tasks breaks Cassandra semantics, so queueing is "correct" but unbounded. |
+| **Default State** | ✗ | Hardcoded default (unbounded); cannot be tuned via config. No monitoring/metrics for queue depth. Silently queues all excess tasks; OOM via memory hold (memtables in queue) not detectable until heap exhaustion. |
 
-## Why Queue Depth is a Separate Entry Point
+## Related / Dependent Constraints
 
-### 1. Independent from Thread Count
+- **`memtable_flush_writers`** (Pair 01) — Thread count soft limit. When dispatch rate exceeds thread throughput, queue absorbs overflow; queue depth thus depends on *both* thread count (Pair 01) and write rate.
+- **`memtable_heap_space`** (memtable_heap_space pair 01/02) — Hard memory cap per-memtable. Queued memtables bypass this check (held in queue, not subject to heap allocation check). Queue buildup + heap limit = OOM via queue, not heap.
+- **`memtable_cleanup_threshold`** — Auto-derived from thread count. Lower threshold (more frequent flushes) with few threads → queue builds faster.
+- **Per-disk pool contention** (Pair 03, pending) — Per-disk queues also unbounded; one slow disk's queue holds memtables for all writes to that directory.
 
-Thread pool size (`memtable_flush_writers`) and queue depth are **orthogonal constraints**:
+## Bypass Potential (Target 3 seed)
 
-| Aspect | Thread Count | Queue Depth |
-|--------|--------------|-------------|
-| **Configured via** | `memtable_flush_writers` | Hardcoded in executor factory (no config) |
-| **Enforces** | Max concurrent execution | Max pending tasks held in memory |
-| **Bypass when** | High dispatch rate + low threads | Any dispatch rate (queue always unbounded) |
-| **Detection** | Visible as thread CPU usage or pool saturation JMX | Silent; no metric or alert |
+**Primary Bypass: Unbounded Queue Under High Write Load**
+- Setup: Any write rate that exceeds flush thread throughput + unbounded queue
+- Mechanism: Pool accepts all flush task submissions; queue length grows without limit. Queued memtables not subject to `memtable_heap_space` hard cap (cap is per-memtable, not per-queue).
+- Overshoot: With 1 flush thread and 100+ MB/s write rate, queue can hold 50–100 memtables (100–200 GB) before OOM.
 
-### 2. Implicit vs. Explicit
+**Designed Bypass (by semantic choice):**
+- Cassandra prioritizes write availability over predictable backpressure. Rejecting flush tasks would force writes to fail, so queue is deliberately unbounded.
+- This choice creates implicit bypass: `memtable_heap_space` cannot actually limit total memory because queued memtables are excluded from the check.
 
-- `memtable_flush_writers`: **Explicit configuration** (user-visible, tunable)
-- Queue capacity: **Implicit hardcoded default** (no config, no visibility, no tuning path)
+**Attack Vectors:**
+- **Write-burst attack:** Sustained high write rate → memtable generation exceeds flush rate → queue accumulates
+- **Slow disk attack:** Disk I/O latency increases → thread throughput drops → queue grows
+- **Contention attack:** Multiple tables flushing concurrently on same pool → queue saturation
+- **Threshold-interaction:** Low cleanup_threshold (from low thread count) forces more frequent flushes into same queue
 
-This asymmetry means administrators can optimize thread count but cannot constrain queue depth.
+## Verification
 
-### 3. Cascading Memory Hold
-
-Queued tasks create a hold on upstream resources:
-
-```
-Write Input Stream
-  ↓
-Memtable (in-memory)
-  ↓
-Soft Cleanup Threshold Trigger (50% of heap_space)
-  ↓
-Flush Task Dispatch
-  ↓ [Queues if no thread available]
-Unbounded Queue
-  ↓
-Thread Pool Execution [Eventually runs]
-  ↓
-Disk (SSTables)
-  ↓
-Memtable Freed (after flush completes)
-```
-
-**Problem:** Once queued, memtable is held indefinitely. Multiple generations can accumulate in queue before any are freed.
+| Field | Content |
+|--------|---------|
+| **Status** | verified |
+| **Verified By / Date** | Code review against cassandra-5.0.9 tag; traced factory method and identified absence of queue-depth config/enforcement |
+| **Notes** | This is a *designed* weakness: queue is unbounded because Cassandra chooses queueing over rejection. Pair 01 (soft thread limit) makes this weakness severe (low throughput → queue buildup). Pair 03 (pending) shows how per-disk pools compound the issue. Fix requires *both* increasing thread count (Pair 01) and adding queue depth limit (here). |
 
 ---
 
-## Three Enforcement Points (Queue Behavior)
+## Notes
 
-### Point 1: Executor Factory Initialization (Startup)
-
-**Location:** [`ColumnFamilyStore.java:206-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206)
-
-```java
-private static final ExecutorPlus flushExecutor = DatabaseDescriptor.isDaemonInitialized() 
-                                                  ? executorFactory().withJmxInternal().pooled("MemtableFlushWriter", getFlushWriters())
-                                                  : null;
-```
-
-**Queue Creation:**
-- `executorFactory().pooled(name, threads)` calls [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1)
-- Default implementation wraps `ThreadPoolExecutor` with `LinkedBlockingQueue` (unbounded)
-- **No parameter** controls queue capacity
-- **No validation** checks or warns about unlimited queue
-
-**Code Path:**
-```
-executorFactory().pooled(name, threads)
-  → ThreadPoolExecutor(threads, threads, ...)
-  → new LinkedBlockingQueue() [capacity = Integer.MAX_VALUE]
-```
-
-### Point 2: Task Submission with Silent Queuing (Runtime)
-
-**Location:** [`ColumnFamilyStore.java:1033-1043`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1033)
-
-```java
-public Future<CommitLogPosition> switchMemtable(FlushReason reason)
-{
-    synchronized (data)
-    {
-        logFlush(reason);
-        Flush flush = new Flush(false);
-        flushExecutor.execute(flush);                      // <--- SUBMISSION POINT
-        postFlushExecutor.execute(flush.postFlushTask);
-        return flush.postFlushTask;
-    }
-}
-```
-
-**Submission Behavior:**
-```java
-// Inside ThreadPoolExecutor.execute(task):
-if (threads_available >= corePoolSize)
-    run_immediately_on_thread()
-else
-    queue.put(task)  // ← NO CAPACITY CHECK, just enqueues
-```
-
-**Critical Observation:**
-- No rejection even if queue has thousands of pending tasks
-- Caller (`switchMemtable`) proceeds without knowing task is queued
-- Memtable switch already happened (new memtable created), old one locked in queue
-
-### Point 3: Memory Hold Duration (Runtime - Ongoing)
-
-**Location:** Implicit in queue lifecycle — tasks held until thread becomes available
-
-**Hold Sequence:**
-```
-T=0ms:  Task 1 submitted → thread available → runs immediately
-T=100ms: Task 2 submitted → no thread available → queues, memtable held
-T=200ms: Task 3 submitted → still no thread available → queues, another memtable held
-...
-T=500ms: Task 1 completes on thread, returns to pool
-T=500ms: Task 2 starts, thread busy again
-T=501ms: Task 4 submitted → queues, memtable held
-...
-T=2000ms: Task 2 completes, Task 3 starts
-         Meanwhile Tasks 4, 5, 6, ... queued with memtables held
-```
-
-**Memory Impact:**
-- Each queued task holds a memtable (can be 100MB-2GB each)
-- Queue can grow to 10, 50, 100+ tasks under sustained high write rate
-- Total heap usage: thread threads × memtable_size + queue depth × memtable_size
-- With queue depth → 100 and memtable_size → 2GB: **200GB held in queue alone**
-
----
-
-## Weakness Analysis
-
-### Proxy Mismatch ⚠
-
-**What's Supposed to Constrain:** "Thread pool size limits concurrent flush operations"  
-**What Actually Happens:** "Unbounded queue allows any number of operations to be pending"
-
-**Problem:**
-- Thread constraint: N threads → at most N concurrent flushes
-- Queue constraint: Unbounded → 1000+ pending flushes queued while 1 thread runs
-
-**Consequence:** Thread-count soft limit is circumvented by queue depth hard limit (which doesn't exist).
-
-### Enforcement-Point Mismatch ✗
-
-**Check Timing:** Startup (executor factory initialization, static final)  
-**Enforcement Timing:** Runtime (task submission), but no enforcement occurs
-
-**Issues:**
-1. **No capacity check at submission:** `flushExecutor.execute(flush)` does not validate queue depth
-2. **No rejection or backpressure:** Tasks queue silently, no exception or warning to caller
-3. **No runtime monitoring:** No metric exposes queue depth; administrators blind to backlog
-4. **No adaptive behavior:** Queue grows indefinitely; no threshold triggers remediation
-
-**Consequence:**
-- Thread count is the only visible limit
-- Queue depth grows silently until OOM
-- Administrator sees "only 1-2 flush threads in use" and doesn't know 500+ tasks queued behind
-
-### Default-Off ✗
-
-**Default Behavior:** Unbounded queue (no parameter to change it)  
-**Consequences:**
-1. **Zero visibility:** No configuration, no tuning, no monitoring
-2. **Silent failure mode:** Pool saturation causes memory exhaustion without warning
-3. **No upper bound:** Can queue millions of tasks if memory allows
-4. **Interaction weakness:** Combined with low `memtable_flush_writers` default (1 for multi-dir) → guaranteed queue buildup
-
----
-
-## Weakness Summary Table
-
-| Aspect | Status | Reasoning |
-|--------|--------|-----------|
-| **Proxy Mismatch** | ⚠ **Partial** | Thread limit circumvented by unbounded queue; queue depth invisible |
-| **Enforcement-Point Mismatch** | ✗ **Weakness Present** | No check, no rejection, no backpressure at submission; queue grows silently |
-| **Default-Off** | ✗ **Weakness Present** | Unbounded queue hardcoded with no config, no metric, no monitoring |
-
----
-
-## Resource Exhaustion Attacks
-
-### Attack 1: Queue Accumulation Under High Write Load
-
-**Scenario:** Sustained high write rate with default `memtable_flush_writers = 1`
-
-**Setup:**
-```yaml
-memtable_flush_writers: 1           # Default for multi-dir (bottleneck from Pair 01)
-memtable_heap_space: 2000MiB
-write_rate: 100,000 ops/sec
-```
-
-**Sequence:**
-1. Writes generate memtables at ~100 MB/s (100K ops × 1KB avg)
-2. Memtable reaches cleanup threshold (50% of 2GB = 1GB) after ~10 seconds
-3. Flush task submitted to flushExecutor (1-thread pool)
-4. Thread picks up task, starts writing to disk (~50 MB/s I/O bound)
-5. Meanwhile, new writes continue → new memtable fills in ~20 seconds
-6. Cleanup threshold hit again → second flush task submitted
-7. No thread available (first flush still running) → **second task queues**
-8. New memtable created, continues filling
-9. After 20 seconds: first flush completes, thread becomes available
-10. Second flush starts immediately
-11. But while first two flushes were running, 4-5 more cleanup triggers occurred
-12. Queue now has 3-4 pending flush tasks, each holding a ~2GB memtable
-13. Total queued memory: 6-8GB (3-4 tasks × 2GB each)
-14. After ~5 cycles: queue has 10+ tasks → 20+GB held
-15. **OOM triggered despite `memtable_heap_space: 2GB` limit**
-
-**Root Cause:** Queue depth has no limit; dispatch rate (5+ flushes/min) far exceeds thread throughput (1 flush every ~20 sec = 3 flushes/min).
-
-### Attack 2: Queue as Implicit Hard Cap Bypass
-
-**Scenario:** Exploit queue to exceed stated heap limit
-
-**Path:**
-1. Config sets `memtable_heap_space = 2000MiB` (hard cap, supposedly enforces max memory)
-2. Single memtable reaches hard cap in `SubPool.tryAllocate()` → blocks or throws
-3. However, if multiple memtables have already been queued for flush:
-   - Old memtable 1 (1GB) queued, awaiting flush thread
-   - Old memtable 2 (1GB) queued, awaiting flush thread
-   - Current memtable (2GB) running hot, not yet queued
-   - Total in queue: 2GB (older) + 2GB (current) = 4GB despite 2GB heap limit
-4. The "hard cap" applies per-memtable in the allocator, not to total queued memory
-5. Result: **2GB stated limit, 4GB actual heap used**
-
-**Code Path:** `SubPool.tryAllocate()` checks `hasRoom()` per-memtable → allows 2GB per memtable → but doesn't account for queued memtables
-
-### Attack 3: Administrator Blind to Backlog
-
-**Scenario:** Monitor only visible metrics; miss queue explosion
-
-**Observation:**
-1. Admin checks JMX: MemtableFlushWriter pool shows 1 thread running (~50% CPU)
-2. Thinks: "Pool is active, tasks are being flushed"
-3. Doesn't check: queue depth (not exposed in default metrics)
-4. Memory steadily climbs: 2GB → 4GB → 8GB → OOM
-5. By time alert fires (at 90% heap), queue already has 40+ tasks
-6. No way to drain queue except wait for flushes to complete (takes hours at 1 thread)
-
-**Root Cause:** Queue depth is invisible; no metric alerts on queue growth.
-
-### Attack 4: Intentional Queue Poisoning (Slow Disk)
-
-**Scenario:** Deliberately slow down one disk to block its queue
-
-**Setup:**
-- 4 data directories
-- One disk is slow (e.g., degraded, network storage)
-- Per-disk flush executors: each disk gets 1 thread (from Pair 01 `memtable_flush_writers = 1`)
-
-**Execution:**
-1. Writes distributed across 4 disks
-2. Disk 3 is slow: flush throughput only 10 MB/s (vs. 50 MB/s on others)
-3. Disk 3's queue backs up: tasks for Disk 3 accumulate
-4. While Disk 3's single thread processes task 1 (10 MB/s = 200 seconds):
-   - Tasks 2, 3, 4, ... submitted to queue
-   - Each task holds a memtable (2GB each)
-   - After 10 tasks: 20GB queued for Disk 3 alone
-5. Other disks fine (1-thread each, but faster I/O)
-6. Total memory explodes due to Disk 3's queue
-7. Result: One slow disk causes cluster-wide OOM
-
-**Code Path:** [`ColumnFamilyStore.java:3492-3510`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3492) → per-disk pools each have independent unbounded queues
-
----
-
-## Interaction with Other Constraints
-
-1. **`memtable_flush_writers`** — Determines thread count; low value guarantees queue buildup
-2. **`memtable_heap_space`** — Hard cap per-memtable, but doesn't account for queued memtables total
-3. **`memtable_cleanup_threshold`** — Auto-calculated based on flush_writers; lower threshold triggers more flushes, filling queue faster
-
----
-
-## Key Code References
-
-| Code Location | What | Purpose |
-|---|---|---|
-| [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) | Queue creation | Hardcoded unbounded LinkedBlockingQueue |
-| [`ColumnFamilyStore.java:206-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206) | Pool init | Static final, uses default queue |
-| [`ColumnFamilyStore.java:1033-1043`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1033) | Task submission | No validation of queue depth |
-| [`ColumnFamilyStore.java:3492-3510`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3492) | Per-disk queues | Each directory's queue also unbounded |
-
----
-
-## Difference from Pair 01
-
-| Aspect | Pair 01 | Pair 02 |
-|--------|---------|---------|
-| **Entry Point** | `memtable_flush_writers` config value | Executor factory queue default |
-| **What's Configured** | Thread pool size | (Nothing; hardcoded unbounded) |
-| **Enforcement** | Auto-sizing logic at startup | Implicit in pool creation |
-| **Bypass Vector** | Low thread count creates bottleneck | Unbounded queue absorbs all submissions |
-| **Memory Consequence** | Throughput starvation + soft cleanup insufficient | Tasks queued indefinitely, memtables held |
-| **Visibility** | Configured value is visible | Queue depth is invisible (no metric) |
-
----
-
-## Next Investigation
-
-This pair focuses on the **unbounded queue as an independent entry point and bypass mechanism**. The third pair will examine:
-- **Pair 03:** Per-disk pool contention (distributed constraint where one slow disk blocks its queue)
-
-See codepath document for full trace chain of queue behavior during task lifecycle.
+- **Orthogonal constraints:** Pair 01 limits thread count; Pair 02 has no limit on queue depth. Both must be tuned together for effective backpressure.
+- **Compound weakness:** Pair 01 (default 1 thread) + Pair 02 (unbounded queue) = silent OOM cascade. The queue absorbs all excess tasks, old memtables never flush, heap fills despite `memtable_heap_space` hard cap applying per-memtable.
+- **Semantic choice:** Queue is intentionally unbounded because rejecting flush tasks violates Cassandra's durability model (writes must be flushed eventually). But this choice makes OOM silent and hard to diagnose.
