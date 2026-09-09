@@ -42,16 +42,25 @@ Each pair is recorded in **two** markdown files:
 
 | File | Content |
 |------|---------|
-| `[entry_name]-[NN]-summary.md` | Everything **except** the full code path (metadata, key decision points, enforcement, failure-mode analysis, bypass seed, verification). |
-| `[entry_name]-[NN]-codepath.md` | **Only** the full continuous code path for that pair. |
+| `[entry_name]-[NN]-summary.md` | Everything **except** the full code path (metadata, key decision points, enforcement, failure-mode analysis, bypass seed, verification). Use `_TEMPLATE-summary.md` as reference. |
+| `[entry_name]-[NN]-codepath.md` | **Only** the full continuous code path for that pair. Use `_TEMPLATE-codepath.md` as reference. |
 
+### Naming
 - `[entry_name]` — the entry point name, keeping underscores (e.g. `memtable_heap_space`).
 - `[NN]` — zero-padded pair index **within that entry point** (`01`, `02`, ...).
 - **Entry Point ID** — the entry name upper-cased (e.g. `memtable_heap_space` → `MEMTABLE_HEAP_SPACE`); shared across all pairs of that entry point.
+
+### Cross-linking and self-containment
 - The two files cross-link to each other and to `_INDEX.md`.
-- When two pairs share a code-path prefix, **repeat** the shared steps in each
-  codepath file so every file is self-contained.
-- In codepath files, each `Location` cell **links** to the pinned source on GitHub — short display text (`File.java:NN`), full path in the href (`…/blob/cassandra-5.0.9/<path>#Lnn`).
+- When two pairs share a code-path prefix, **repeat** the shared steps in each codepath file so every file is self-contained.
+
+### Code path stages (case-specific, not generic)
+- Codepath files trace constraint from declaration/init through enforcement to action.
+- **Stages are extracted from the actual code flow** — configuration parameters, hardcoded constants, factory methods, queues, and distributed constraints have different patterns.
+  - **Configuration parameter example** (memtable_heap_space): declaration → load → validate → store → read → check → action
+  - **Hardcoded/factory example** (memtable_flush_writers queue): factory definition → pool init → submission → queue state → execution → (missing backpressure)
+- Each codepath file defines its own stages based on the specific constraint type; do not force a generic pattern.
+- Each `Location` cell **links** to the pinned source on GitHub — short display text (`File.java:NN`), full path in the href (`…/blob/cassandra-5.0.9/<path>#Lnn`).
 
 ## Directory layout
 
@@ -59,8 +68,8 @@ Each pair is recorded in **two** markdown files:
 cassandra/entry-restriction-exp/
 ├── README.md                     # this file
 ├── _INDEX.md                     # master index of every pair (navigation + progress)
-├── _TEMPLATE-summary.md          # copy for each new summary file
-├── _TEMPLATE-codepath.md         # copy for each new codepath file
+├── _TEMPLATE-summary.md          # template for each new summary file
+├── _TEMPLATE-codepath.md         # template for each new codepath file (table + flexible notes)
 └── <entry_name>/                 # one folder per entry point
     ├── <entry_name>-01-summary.md
     ├── <entry_name>-01-codepath.md
@@ -84,9 +93,17 @@ cassandra/entry-restriction-exp/
 
 **Target 2 — trace & verify (inseparable from Target 1):**
 
-3. From the entry point, trace the continuous path: **declaration → default/validation → getter → consumer(s) → each place the value gates/limits a resource (enforcement) → action on breach.** Each distinct restriction location = one pair `NN`. An entry point isn't "done" until its restriction path is traced.
-4. Fill `-summary.md` and `-codepath.md` from the templates; repeat shared path prefixes so each codepath file is self-contained.
+3. From the entry point, trace the continuous path from declaration/initialization through to enforcement and action on breach. **The specific stages depend on the constraint type:**
+   - **Configuration parameters** (like `memtable_heap_space`): declaration → load/parse → validate → store limit → read/getter → transform → check → action
+   - **Hardcoded constants or factory defaults** (like `ExecutorPlus.pooled()`): factory definition → pool/object initialization → usage/submission → state evolution → (enforcement or missing enforcement)
+   - **Distributed or implicit constraints** (like per-disk pools): initialization → routing → per-pool behavior → cascade effects
+   
+   Each distinct restriction location = one pair `NN`. An entry point isn't "done" until all its restriction paths are traced.
+
+4. Fill `-summary.md` and `-codepath.md` from the templates; repeat shared path prefixes so each codepath file is self-contained. **Key Decision Points in summary should reflect your constraint's specific enforcement chain (may be 3 points, 5 points, 7 points, or different sequence).**
+
 5. Run the failure-mode analysis (proxy / enforcement-point / default) using the legend; record bypass hypotheses in `Bypass Potential` (Target 3 seed).
+
 6. Add/refresh the `_INDEX.md` row and coverage counts; set `Status` (`pending` → `in-progress` → `verified` once checked against the pinned tag).
 
 **Drafting convention:** draft new/changed result files in the Claude session
