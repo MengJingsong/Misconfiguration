@@ -1,11 +1,18 @@
-# Entry-Restriction Pair: memtable_flush_writers-01 — Full Code Path
+# memtable_flush_writers — Pair 01 · Full Code Path
+
+> **Summary:** [memtable_flush_writers-01-summary.md](memtable_flush_writers-01-summary.md) · **Index:** [../_INDEX.md](../_INDEX.md)
+>
+> **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
 **Pair:** memtable_flush_writers-01 (Auto-Sizing Default Throughput Bottleneck)  
-**Source Pin:** apache/cassandra @ tag cassandra-5.0.9
+**Entry Point Location:** [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184)  
+**Restriction Enforcement:** [`DatabaseDescriptor.java:753-765`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L753) (auto-sizing at startup)
 
 ---
 
 ## Complete Continuous Code Trace
+
+Unbroken trace from constraint definition → initialization → read/load → storage → submission/validation → enforcement check → action on breach. Every node listed; no gaps. When a sibling pair shares a prefix, repeat the shared steps here so this file stands alone.
 
 ### Stage 1: Configuration Declaration
 
@@ -407,25 +414,59 @@ else
 
 ---
 
-## Weakness Summary: Full Picture
+## Path Continuity Notes
 
-| Stage | What | Limit | Actual | Gap |
-|-------|------|-------|--------|-----|
-| Config | Thread count | `flushWriters` (1-2) | Configured | ✓ |
-| Pool Creation | Threads created | Matches config | N threads | ✓ |
-| Dispatch | Queue depth | Unbounded | No limit | ✗ |
-| Memory | Memtables held | Should be flushed | Queued tasks hold them | ✗ |
+**Alternative Entry Point:** Per-disk pool variant (Stage 5) bypasses single global pool when multiple data directories are configured. Each directory gets its own pool, but the same bottleneck applies: each pool has only `flushWriters` threads (default 1 per directory when auto-sized for multi-directory setup).
+
+**Bypass Mechanism:** The unbounded queue (Stage 11) is the actual bypass. Thread-count limit (Stage 4) is enforced only on *concurrent execution*, not on *task submission*. High submission rate + few threads = queue grows unbounded.
+
+**Timing Sensitivity:** Stage 9 (dispatch) is asynchronous. Caller does not wait for queue depth to be checked; it immediately returns a future. By the time future is awaited, queue may already hold dozens of tasks.
 
 ---
 
-## References
+## Key Code References
 
-All code references are clickable links to cassandra-5.0.9 tag:
+| Stage | File | Lines | What | Purpose |
+|-------|------|-------|------|---------|
+| 1 | [`Config.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java) | 184 | Field declaration | Entry point |
+| 2 | [`DatabaseDescriptor.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java) | 753-765 | Auto-sizing logic | Soft limit trigger (bottleneck: min value too low) |
+| 3 | [`DatabaseDescriptor.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java) | 2457-2460 | Getter | Value read by pool creation |
+| 4 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java) | 206-210 | Pool creation | Global flush executor |
+| 5-7 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java) | 219-223, 3492-3510 | Per-disk pools | Directory-isolated pools (Pair 03 focus) |
+| 9 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java) | 1033-1043 | Dispatch | Critical bottleneck point |
+| 10 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java) | 1175+ | Flush runnable | Actual flush work |
 
-- [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184) — Config field
-- [`DatabaseDescriptor.java:753`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L753) — Auto-sizing logic
-- [`DatabaseDescriptor.java:2457`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L2457) — Getter
-- [`ColumnFamilyStore.java:206`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206) — Global pool
-- [`ColumnFamilyStore.java:219`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L219) — Per-disk pools
-- [`ColumnFamilyStore.java:1033`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1033) — Dispatch point
-- [`ColumnFamilyStore.java:1175`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1175) — Flush runnable
+---
+
+## Memory / Resource Impact Summary
+
+**Allocation & Release:**
+- Memtable allocated when table switches (Stage 9, Step 2)
+- Memtable released after flush completes and post-flush cleanup finishes (Stage 10, after `run()`)
+- If queued: memtable held in queue reference until thread picks up task
+
+**Synchrony:**
+- Dispatch is asynchronous (Stage 9 returns immediately)
+- Flush execution is synchronous (thread blocks until `run()` completes)
+- Release is asynchronous (postFlush task scheduled after flush completes)
+
+**Timing & Overshoot:**
+- With 1 thread and 100 MB/s write rate: new memtable generated every ~1 sec (at 100 MB threshold)
+- But 1 thread flushes at ~50 MB/s (I/O bound), taking ~2 secs per memtable
+- Result: queue grows by ~1 memtable per second until OOM
+
+**Cascade to memtable_heap_space:**
+- `memtable_heap_space` limits *per-table* heap usage (checked during allocation)
+- Queued memtables are no longer subject to this check (already allocated)
+- Total heap = queued memtables + new memtables + active heap
+- Can exceed stated `memtable_heap_space` limit by 10-20x
+
+---
+
+## Notes
+
+- **Stage 2 bottleneck:** Auto-sizing sets flushWriters to 1 for multi-directory. For N directories, this should be ≥N to parallelize across disks, not 1.
+- **Stage 4 design:** Pool created as `static final`, cannot be reconfigured at runtime. Changes to `memtable_flush_writers` config are ignored after daemon init.
+- **Stage 9 dispatch:** No queue-depth checking before submission. Caller has no way to detect queue saturation (future is returned immediately).
+- **Stage 11 ubiquity:** Every ExecutorPlus pool created with `pooled()` factory has unbounded queue by default. This is not Pair 01 specific; it's Pair 02 (queue depth is separate entry point).
+
