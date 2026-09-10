@@ -35,7 +35,7 @@ to free heap. It does **not** block writes (that is pair 02).
 | Field | Content |
 |-------|---------|
 | **Enforcement Point** | [`SubPool.maybeClean():131-135`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L131-L135), invoked from [`SubPool.allocated():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L184) and [`SubPool.acquired():189`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L189) |
-| **Action on Breach** | [`MemtableCleanerThread.trigger():131`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableCleanerThread.java#L131) → [`run():73-88`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableCleanerThread.java#L73-L88) → [`AbstractAllocatorMemtable.flushLargestMemtable():249`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L249) → [`signalFlushRequired(…, MEMTABLE_LIMIT):297`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L297) (flush largest memtable, moving its bytes to `reclaiming`) |
+| **Action on Breach** | [`MemtableCleanerThread.trigger():131`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableCleanerThread.java#L131) → [`run():71-89`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableCleanerThread.java#L71-L89) → [`AbstractAllocatorMemtable.flushLargestMemtable():249`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L249) → [`signalFlushRequired(…, MEMTABLE_LIMIT):297`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L297) (flush largest memtable, moving its bytes to `reclaiming`) |
 
 ## Failure Mode Analysis
 
@@ -78,3 +78,9 @@ to free heap. It does **not** block writes (that is pair 02).
 - Default `memtable_allocation_type = heap_buffers` → `SlabPool(heapLimit, 0, …)`, so `memtable_heap_space` maps to `MEMORY_POOL.onHeap.limit`.
 - `used()` returns `allocated` only (does not subtract `reclaiming`), so in-flight flushes still count toward the trigger.
 - **What `allocated` measures:** estimated footprint = cloned data bytes (slab/native cloner) **+** structural overhead charged explicitly — partition/row overhead ([`SkipListMemtable.java:124-125`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/SkipListMemtable.java#L124-L125)) and per-row/column/stats/deletion `unsharedHeapSize*()` estimates via `onAllocatedOnHeap → onHeap().adjust()` ([`BTreePartitionUpdater.java:132-182`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/partitions/BTreePartitionUpdater.java#L132-L182)). The limit governs `Σ estimated_size`, not raw bytes or measured heap.
+
+---
+
+## Correction Log
+
+- 2026-09-10: Verified against local `cassandra-cassandra-5.0.9` clone. One fix: `MemtableCleanerThread.run()` cited as `71-100` in the codepath file but `73-88` here (inconsistent) — `run()` actually starts at line **71**; corrected this file's citation to **71-89** to match the method body and the (already-correct) codepath file. All other citations in this file checked out exactly against the local source.
