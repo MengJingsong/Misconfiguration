@@ -13,7 +13,7 @@
 | **Entry Point ID** | MEMTABLE_FLUSH_WRITERS |
 | **Name** | memtable_flush_writers |
 | **Type** | Configuration (cassandra.yaml) |
-| **Declaration Location** | [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184) |
+| **Declaration Location** | [`Config.java:185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L185) |
 | **Default Value** | 0 (auto-sized: 2 for single-directory, 1 for multi-directory) |
 | **Value Type / Size** | `int` threads |
 | **Description** | Controls maximum concurrent memtable flush operations to disk; defines thread pool size for `flushExecutor` |
@@ -26,17 +26,17 @@
 
 _Critical nodes in the enforcement chain for this configuration parameter._
 
-1. **read/declare:** [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184) — Field declared with default 0
+1. **read/declare:** [`Config.java:185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L185) — Field declared with default 0
 2. **auto-calculate:** [`DatabaseDescriptor.java:753-755`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L753) — Auto-sizing logic: `1 if multi-dir else 2`
-3. **validate:** [`DatabaseDescriptor.java:755-757`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L755) — Min bound check (≥1), no upper bound
-4. **allocate:** [`ColumnFamilyStore.java:206-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206) — Pool created once (static final) with unbounded LinkedBlockingQueue
+3. **validate:** [`DatabaseDescriptor.java:758-759`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L758-L759) — Min bound check (≥1), no upper bound
+4. **allocate:** [`ColumnFamilyStore.java:206-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206) — Pool created once (static final) with unbounded queue
 5. **dispatch:** [`ColumnFamilyStore.java:1033-1043`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1033) — Tasks queued; no queue depth limit or backpressure
 
 ## Enforcement
 
 | Field | Content |
 |-------|---------|
-| **Enforcement Point** | [`DatabaseDescriptor.java:755-757`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L755) (startup validation only) |
+| **Enforcement Point** | [`DatabaseDescriptor.java:758-759`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L758-L759) (startup validation only) |
 | **Action on Breach** | `ConfigurationException` if value < 1; no action for queue overflow at runtime |
 
 ## Failure Mode Analysis
@@ -80,3 +80,9 @@ _Critical nodes in the enforcement chain for this configuration parameter._
 
 - **Soft vs. Hard:** This pair (01) is the *soft* thread-pool limit; Pair 02 is the *hard* queue bypass. Together they show how a soft limit with unbounded queue creates a compound weakness.
 - **Cascade insight:** Low default (1) + config-time-only check + unbounded queue + multi-directory contention = memory exhaustion is silent and unavoidable under typical production load. No single fix sufficient; needs both thread count increase *and* queue depth limit.
+
+---
+
+## Correction Log
+
+- 2026-09-10: Verified against local `cassandra-cassandra-5.0.9` clone. Two fixes: (1) `Config.java` declaration line 184 → **185** (line 184 is blank); (2) the "validate" step and Enforcement Point cited `DatabaseDescriptor.java:755-757`, which is actually the closing brace of the auto-sizing block — the real min-bound check and throw are at **758-759**.
