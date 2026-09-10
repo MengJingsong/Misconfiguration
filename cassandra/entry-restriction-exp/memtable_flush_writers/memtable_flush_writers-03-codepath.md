@@ -5,7 +5,7 @@
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
 **Pair:** memtable_flush_writers-03 (per-disk pool contention — distributed constraint, one flush pool per data directory)
-**Entry Point Location:** [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184) (`memtable_flush_writers`)
+**Entry Point Location:** [`Config.java:185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L185) (`memtable_flush_writers`)
 **Restriction Enforcement:** [`ColumnFamilyStore.PerDiskFlushExecutors`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3474) → per-disk executor array (`createPerDiskFlushWriters`, per-disk dispatch, blocking join)
 
 ---
@@ -16,22 +16,22 @@ Unbroken trace from the config value → auto-sizing → per-disk pool **array**
 
 | Step | Stage | Location (`Class.method:line`) | What happens | Value / State |
 |------|-------|--------------------------------|--------------|---------------|
-| 1 | config-declaration | [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184) | `memtable_flush_writers` field declared | default `0` (sentinel for auto-size) |
+| 1 | config-declaration | [`Config.java:185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L185) | `memtable_flush_writers` field declared | default `0` (sentinel for auto-size) |
 | 2 | auto-sizing | [`DatabaseDescriptor.java:753-755`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L753-L755) | If `0`, set to `data_file_directories.length == 1 ? 2 : 1` | **multi-directory → 1 thread per pool** |
 | 3 | validation | [`DatabaseDescriptor.java:758-759`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L758-L759) | Reject `< 1`; **no upper bound**, and no bound relative to disk count | `flushWriters ≥ 1` |
 | 4 | derived-threshold | [`DatabaseDescriptor.java:763`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L763) | `memtable_cleanup_threshold = 1/(1+flushWriters)` | with `flushWriters=1` → `0.5` (flush at 50%) |
 | 5 | pool-array-field | [`ColumnFamilyStore.java:219-222`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L219-L222) | Static `perDiskflushExecutors` built at daemon init from `getFlushWriters()` + non-local-system data-file locations | one `PerDiskFlushExecutors` for JVM lifetime |
 | 6 | constructor | [`ColumnFamilyStore.java:3492-3501`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3492-L3501) | Builds `nonLocalSystemflushExecutors` array; system pool is separate only if `useSpecificLocationForLocalSystemData()`, else shares `flushExecutors[0]` | `N` non-system pools (+ maybe 1 system pool) |
 | 7 | per-disk-pool-creation | [`ColumnFamilyStore.java:3503-3511`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3503-L3511) | Loop over directory count: `flushExecutors[i] = newThreadPool("PerDiskMemtableFlushWriter_"+i, flushWriters)` | array length = number of data directories |
-| 8 | unbounded-queue-factory | [`ColumnFamilyStore.java:3513-3516`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3513-L3516) | `newThreadPool` → `executorFactory().withJmxInternal().pooled(poolName, size)` — same factory as Pair 02 | each pool: `flushWriters` threads + unbounded `LinkedBlockingQueue` |
+| 8 | unbounded-queue-factory | [`ColumnFamilyStore.java:3513-3516`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3513-L3516) → [`ThreadPoolExecutorBuilder.newQueue():159-167`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ThreadPoolExecutorBuilder.java#L159-L167) | `newThreadPool` → `executorFactory().withJmxInternal().pooled(poolName, size)` — same factory chain as Pair 02 | each pool: `flushWriters` threads + queue sized `Integer.MAX_VALUE` (unbounded) |
 | 9 | flush-orchestrator-start | [`ColumnFamilyStore.java:1039`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1039) | `flushExecutor.execute(flush)` submits the `Flush` orchestrator (global pool, also sized `flushWriters`) | orchestrator queued/run on `MemtableFlushWriter` pool |
 | 10 | memtable-switch-hold | [`ColumnFamilyStore.java:1229-1246`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1229-L1246) | `Flush.run()` awaits write barrier, then `markFlushing` moves old memtable to the "pending flush" set (still in heap) | memtable bytes still allocated, awaiting flush |
-| 11 | memtable-split | [`Flushing.java:70-91`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L70-L91) | `flushRunnables()` uses `DiskBoundaries` to cut the memtable into one `FlushRunnable` per directory (`locations.get(i)`) | `runnables.size()` == directory count |
+| 11 | memtable-split | [`Flushing.java:57-91`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L57-L91) | `flushRunnables()` uses `DiskBoundaries` to cut the memtable into one `FlushRunnable` per directory (`locations.get(i)`) | `runnables.size()` == directory count |
 | 12 | per-disk-executor-lookup | [`ColumnFamilyStore.java:1302`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1302) | `executors = perDiskflushExecutors.getExecutorsFor(ks, table)` | non-system → the `N`-pool array |
 | 13 | per-disk-dispatch | [`ColumnFamilyStore.java:1304-1305`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1304-L1305) | `for i: futures.add(executors[i].submit(flushRunnables.get(i)))` — runnable `i` → pool `i` | each disk's slice enqueued on its own pool (unbounded) |
 | 14 | routing-rule | [`ColumnFamilyStore.java:3525-3529`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3525-L3529) | `getExecutorsFor` sends local system keyspaces to the system pool (if configured), all others to the shared array | shared array serves every user table |
 | 15 | block-on-all-disks | [`ColumnFamilyStore.java:1316`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1316) | `FBUtilities.waitOnFutures(futures)` — orchestrator blocks until **every** per-disk runnable completes | completion time = **max** over disks (slowest gates) |
-| 16 | deferred-reclaim | [`Flushing.java:150-152`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L150-L152) | Comment + logic: map is **not** cleared as-we-go (memtable still serving pending-flush reads); whole memtable retained | no partial release; all disks' slices held until step 17 |
+| 16 | deferred-reclaim | [`Flushing.java:155-157`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L155-L157) | Comment + logic: map is **not** cleared as-we-go (memtable still serving pending-flush reads); whole memtable retained | no partial release; all disks' slices held until step 17 |
 | 17 | reclaim | [`ColumnFamilyStore.java:1391`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1391) | After successful flush of all slices, `reclaim(memtable)` frees the memtable's `SubPool` bytes | `SubPool.used` decremented only now (after slowest disk) |
 | 18 | no-aggregate-cap | [`ColumnFamilyStore.PerDiskFlushExecutors`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3474) | No code sums queued/in-flight bytes across the `N` pools or compares to `memtable_heap_space` | cross-disk memory grows unmonitored/unbounded |
 
@@ -55,10 +55,10 @@ private static ExecutorPlus[] createPerDiskFlushWriters(int numberOfExecutors, i
     return flushExecutors;
 }
 
-// newThreadPool():3513-3516 — same unbounded-queue factory as Pair 02
+// newThreadPool():3513-3516 — same factory chain as Pair 02 (ExecutorFactory.pooled() -> ThreadPoolExecutorBuilder)
 private static ExecutorPlus newThreadPool(String poolName, int size)
 {
-    return executorFactory().withJmxInternal().pooled(poolName, size); // LinkedBlockingQueue = Integer.MAX_VALUE
+    return executorFactory().withJmxInternal().pooled(poolName, size); // queue sized Integer.MAX_VALUE in ThreadPoolExecutorBuilder.newQueue()
 }
 ```
 
@@ -81,7 +81,7 @@ flushResults = Lists.newArrayList(FBUtilities.waitOnFutures(futures));    // blo
 Because `waitOnFutures` waits for the maximum, one slow disk stretches the whole flush. And per `Flushing.writeSortedContents()`:
 
 ```java
-// Flushing.java:150-152
+// Flushing.java:155-157
 // (we can't clear out the map as-we-go to free up memory,
 //  since the memtable is being used for queries in the "pending flush" category)
 ```
@@ -113,7 +113,7 @@ delaying reclamation of already-flushed fast-disk work even further.
 ### Relationship to Pairs 01 and 02
 
 - **Pair 01** (thread-count soft limit / auto-sizing): supplies the per-pool thread count. Its multi-directory default of `1` is the input that makes each per-disk pool single-threaded — worst case for this pair.
-- **Pair 02** (unbounded queue): each per-disk pool is created by the same `pooled()` factory, so Pair 02's unbounded `LinkedBlockingQueue` exists `N` times over. Pair 03 adds the cross-disk dimension Pair 02 does not cover: the **array** of pools, the split/blocking-join coupling, and the absence of any aggregate cap.
+- **Pair 02** (unbounded queue): each per-disk pool is created by the same `ExecutorFactory.pooled()` → `ThreadPoolExecutorBuilder` chain, so Pair 02's unbounded queue sizing exists `N` times over. Pair 03 adds the cross-disk dimension Pair 02 does not cover: the **array** of pools, the split/blocking-join coupling, and the absence of any aggregate cap.
 
 ### What would close the gap (not present in 5.0.9)
 
@@ -127,11 +127,11 @@ delaying reclamation of already-flushed fast-disk work even further.
 |-------|------|-------|------|---------|
 | 2-4 | [`DatabaseDescriptor.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L753-L763) | 753-763 | Auto-size (1 per pool for multi-dir), validate (no upper bound), derive cleanup threshold | Sets per-pool thread count and flush cadence |
 | 5-6 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L219-L222) | 219-222, 3492-3501 | `perDiskflushExecutors` field + constructor | Builds the per-disk pool array at daemon init |
-| 7-8 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3503-L3516) | 3503-3516 | `createPerDiskFlushWriters` + `newThreadPool` | One unbounded-queue pool per directory, each sized `flushWriters` |
-| 11 | [`Flushing.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L70-L91) | 70-91 | `flushRunnables` splits memtable by `DiskBoundaries` | One runnable per directory |
+| 7-8 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3503-L3516) / [`ThreadPoolExecutorBuilder.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ThreadPoolExecutorBuilder.java#L159-L167) | CFS 3503-3516; builder 159-167 | `createPerDiskFlushWriters` + `newThreadPool`, backed by `ThreadPoolExecutorBuilder.newQueue()` | One unbounded-queue pool per directory, each sized `flushWriters` |
+| 11 | [`Flushing.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L57-L91) | 57-91 | `flushRunnables` splits memtable by `DiskBoundaries` | One runnable per directory |
 | 12-15 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1302-L1316) | 1302-1316 | Lookup, per-disk dispatch, blocking `waitOnFutures` | Runnable i → pool i; orchestrator blocks on slowest disk |
 | 14 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3525-L3529) | 3525-3529 | `getExecutorsFor` routing | System vs non-system pool selection |
-| 16-17 | [`Flushing.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L150-L152), [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1391) | 150-152, 1391 | Deferred (non-incremental) release; `reclaim()` | Whole memtable held until slowest slice, then freed |
+| 16-17 | [`Flushing.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/Flushing.java#L155-L157), [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1391) | 155-157, 1391 | Deferred (non-incremental) release; `reclaim()` | Whole memtable held until slowest slice, then freed |
 
 ---
 
@@ -158,3 +158,12 @@ delaying reclamation of already-flushed fast-disk work even further.
 - **Commit log coupling:** queued/in-flight flush slices hold `CommitLogPosition` bounds; a slow disk delaying flush completion may pin commit log segments from being recycled, potentially cascading into commit-log-directory pressure before heap OOM. (Untraced.)
 - **System-keyspace pool sharing:** when `useSpecificLocationForLocalSystemData()` is false, local system keyspaces share `flushExecutors[0]`; quantify how much extra load this places on disk-0's pool under mixed workloads.
 - **`waitOnFutures` failure handling:** on one slice failing, `abortRunnables` aborts the rest — confirm no partial-write memory is leaked vs. reclaimed on the abort path (step at [`ColumnFamilyStore.java:1319-1330`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1319-L1330)).
+
+---
+
+## Correction Log
+
+- 2026-09-10: Verified against the local `cassandra-cassandra-5.0.9` clone and corrected three citation errors:
+  1. `Config.java` entry-point line: 184 → **185** (line 184 is blank).
+  2. Step 8 / "unbounded-queue-factory": previously implied the queue was constructed inside `ColumnFamilyStore.java` alone; added the actual downstream location, `ThreadPoolExecutorBuilder.newQueue():159-167`, which is where the `Integer.MAX_VALUE` sizing decision is made (same fix as Pair 02).
+  3. `Flushing.java` step 11 range: 70-91 → **57-91** (method actually starts at line 57); step 16 comment location: 150-152 → **155-157** (actual line of the "can't clear out the map as-we-go" comment).
