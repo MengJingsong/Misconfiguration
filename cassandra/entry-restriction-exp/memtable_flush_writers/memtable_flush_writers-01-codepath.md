@@ -5,7 +5,7 @@
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
 **Pair:** memtable_flush_writers-01 (Auto-Sizing Default Throughput Bottleneck)  
-**Entry Point Location:** [`Config.java:184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L184)  
+**Entry Point Location:** [`Config.java:185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L185)  
 **Restriction Enforcement:** [`DatabaseDescriptor.java:753-765`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L753) (auto-sizing at startup)
 
 ---
@@ -17,7 +17,7 @@ Unbroken trace from constraint definition → initialization → read/load → s
 ### Stage 1: Configuration Declaration
 
 **File:** `src/java/org/apache/cassandra/config/Config.java`  
-**Lines:** 184-187
+**Lines:** 185-188
 
 ```java
 public int memtable_flush_writers = 0;
@@ -428,7 +428,7 @@ else
 
 | Stage | File | Lines | What | Purpose |
 |-------|------|-------|------|---------|
-| 1 | [`Config.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java) | 184 | Field declaration | Entry point |
+| 1 | [`Config.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java) | 185 | Field declaration | Entry point |
 | 2 | [`DatabaseDescriptor.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java) | 753-765 | Auto-sizing logic | Soft limit trigger (bottleneck: min value too low) |
 | 3 | [`DatabaseDescriptor.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java) | 2457-2460 | Getter | Value read by pool creation |
 | 4 | [`ColumnFamilyStore.java`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java) | 206-210 | Pool creation | Global flush executor |
@@ -470,3 +470,8 @@ else
 - **Stage 9 dispatch:** No queue-depth checking before submission. Caller has no way to detect queue saturation (future is returned immediately).
 - **Stage 11 ubiquity:** Every ExecutorPlus pool created with `pooled()` factory has unbounded queue by default. This is not Pair 01 specific; it's Pair 02 (queue depth is separate entry point).
 
+---
+
+## Correction Log
+
+- 2026-09-10: `Config.java` entry-point line corrected from 184 → **185** (verified against local `cassandra-cassandra-5.0.9` clone; line 184 is blank, the field declaration is on 185).
