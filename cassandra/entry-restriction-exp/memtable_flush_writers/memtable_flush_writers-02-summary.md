@@ -13,11 +13,11 @@
 | **Entry Point ID** | MEMTABLE_FLUSH_WRITERS |
 | **Name** | memtable_flush_writers (unbounded queue depth) |
 | **Type** | Hardcoded constant (executor factory default) |
-| **Declaration Location** | [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) (factory method, implicit) |
-| **Default Value** | `LinkedBlockingQueue` with capacity = `Integer.MAX_VALUE` (unbounded) |
+| **Declaration Location** | [`ExecutorFactory.pooled():281`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorFactory.java#L281) → [`ThreadPoolExecutorBuilder.newQueue():159-167`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ThreadPoolExecutorBuilder.java#L159-L167) (factory method chain) |
+| **Default Value** | Queue sized `Integer.MAX_VALUE` (unbounded) when `queueLimit` is unset and thread count is finite |
 | **Value Type / Size** | Queue depth (no config parameter, no limit) |
 | **Description** | Executor factory creates unbounded queue for flush tasks; queue depth cannot be tuned and has no backpressure mechanism |
-| **Restriction Location** | [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) (no enforcement) |
+| **Restriction Location** | [`ThreadPoolExecutorBuilder.newQueue():159-167`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ThreadPoolExecutorBuilder.java#L159-L167) (no enforcement) |
 | **Pair** | 02 of 03 |
 
 **Restriction character:** Hardcoded queue factory default (unbounded); no configuration option and no runtime enforcement.
@@ -26,7 +26,7 @@
 
 _Critical nodes showing how this constraint fails to limit queue depth._
 
-1. **factory-definition:** [`ExecutorPlus.pooled()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorPlus.java#L1) — Factory creates `LinkedBlockingQueue` with no capacity arg (defaults to unbounded)
+1. **factory-definition:** [`ExecutorFactory.pooled():281`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ExecutorFactory.java#L281) → [`ThreadPoolExecutorBuilder.newQueue():159-167`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/ThreadPoolExecutorBuilder.java#L159-L167) — Factory chain sizes the queue at `Integer.MAX_VALUE` when no capacity is given
 2. **pool-initialization:** [`ColumnFamilyStore.java:206-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L206) — Pool assigned unbounded queue at startup (static final)
 3. **task-submission:** [`ColumnFamilyStore.java:1033-1043`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1033) — Flush task submitted; queue always accepts (never rejects)
 4. **no-config-parameter:** No `cassandra.yaml` tuning option for queue depth
@@ -86,3 +86,9 @@ _Critical nodes showing how this constraint fails to limit queue depth._
 - **Orthogonal constraints:** Pair 01 limits thread count; Pair 02 has no limit on queue depth. Both must be tuned together for effective backpressure.
 - **Compound weakness:** Pair 01 (default 1 thread) + Pair 02 (unbounded queue) = silent OOM cascade. The queue absorbs all excess tasks, old memtables never flush, heap fills despite `memtable_heap_space` hard cap applying per-memtable.
 - **Semantic choice:** Queue is intentionally unbounded because rejecting flush tasks violates Cassandra's durability model (writes must be flushed eventually). But this choice makes OOM silent and hard to diagnose.
+
+---
+
+## Correction Log
+
+- 2026-09-10: `Declaration Location`, `Restriction Location`, and Key Decision Point 1 previously cited `ExecutorPlus.java` (`#L1`, an arbitrary anchor) for the queue factory. Verified against the local `cassandra-cassandra-5.0.9` clone: `ExecutorPlus.java` is a plain interface with no `pooled()` implementation and no queue-construction code. Corrected to the actual chain: `ExecutorFactory.pooled()` at `ExecutorFactory.java:281`, delegating to `ThreadPoolExecutorBuilder.pooled()`/`newQueue()` at `ThreadPoolExecutorBuilder.java:57,159-167` (the latter is where the `Integer.MAX_VALUE` sizing decision is actually made). The technical claim — unbounded queue, no backpressure — is unchanged.
