@@ -73,3 +73,4 @@ _Other constraints may have 3 points, 7 points, or a different sequence. Adapt t
 ## Notes
 
 - _Add any additional context or edge cases relevant to this pair._
+- denote which cassandra module this entry belong to.
