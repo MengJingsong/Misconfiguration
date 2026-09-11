@@ -36,5 +36,5 @@ them._
 ### memtable
 Storage-engine module covering memtable memory allocation and pooling
 (`utils/memory`, `db/memtable`). One case so far:
-- **`memtable_heap_space-bytebuffer`:** hard allocation cap in `SubPool.tryAllocate()`, gating `ByteBuffer.allocate()` for memtable writes.
+- **`memtable_heap_space-bytebuffer`:** hard allocation cap in `SubPool.tryAllocate()`, gating `ByteBuffer.allocate()` for memtable writes. Verification trigger designed (unit test `HeapPoolTest`, not yet run).
 - **`memtable_offheap_space-region`:** sibling case, same `SubPool.tryAllocate()` if-check on the `offHeap` `SubPool`, reached via `NativeAllocator` — gates off-heap `Region`/native memory allocation instead of `ByteBuffer`. Note: accounting call is decoupled from the physical allocation call (see case notes).
