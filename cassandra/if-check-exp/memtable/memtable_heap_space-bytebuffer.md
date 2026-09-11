@@ -173,8 +173,26 @@ test below is a new file, structured the same way as
 
 ### Trigger: unit test (primary — run this)
 
-**Create** `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java`
-in the local Cassandra clone with the following content:
+**This runs on a cluster node reached over SSH from the control machine
+(e.g. WSL), not on the local `heisenberg-laptop` clone.** `if-check-exp`'s
+live/cluster verification is its own, independent setup — do not assume any
+existing Cassandra installation, source checkout, JDK, `ant`, or config on
+the target node; check for and install each prerequisite explicitly rather
+than assuming another experiment already provisioned it:
+
+1. Pick one node from the cluster (this test needs no cluster membership at
+   all — it's a plain JUnit test against `MemtablePool`/`HeapPool`, no
+   running Cassandra daemon required — so any single reachable node works).
+2. On that node, confirm/install: a JDK (`build.xml`'s `java.default` is
+   `11` — `java -version` first, install a JDK 11 if none is present) and
+   `ant` (`ant -version`; install via the OS package manager if missing).
+3. Get the **Cassandra 5.0.9 source tree** onto that node — not a binary
+   distribution; `ant testsome` compiles and runs the test against the
+   source. Clone it fresh on the node
+   (`git clone --depth 1 --branch cassandra-5.0.9 https://github.com/apache/cassandra.git`)
+   rather than assuming a copy already exists there.
+4. **Create** `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java`
+   in that source tree with the following content:
 
 ```java
 /*
@@ -338,11 +356,11 @@ public class HeapPoolTest
 }
 ```
 
-**Run it** from the root of the local Cassandra clone
-(`Downloads\cassandra-cassandra-5.0.9` on `heisenberg-laptop`):
+**Run it** from the root of that source tree on the cluster node, e.g. via
+SSH from the control machine:
 
 ```
-ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest
+ssh <ssh_user>@<node> "cd <path-to-source-tree> && ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest"
 ```
 
 (`build.xml`'s `testsome` target is the same one the codebase's own docs use
@@ -370,28 +388,52 @@ to run a single test class, e.g. its usage example at `build.xml:1379`.)
 ### Trigger: live-cluster (secondary — optional, for end-to-end confirmation)
 
 Only do this after the unit test above passes; it confirms the same
-mechanism is reachable through a real node, per the README's "do this in
-addition to, not instead of" guidance.
+mechanism is reachable through a real running Cassandra daemon, per the
+README's "do this in addition to, not instead of" guidance.
 
-1. `memtable_allocation_type` defaults to `heap_buffers`
-   (`Config.java:524`), so no explicit setting is needed to reach
-   `HeapPool`.
-2. Set `memtable_heap_space: 1MiB` (or similar, small) in `cassandra.yaml`
-   on a **dedicated single-node instance** — `MEMORY_POOL` is a global
-   static singleton (`AbstractAllocatorMemtable.java:59`) shared by every
-   table, so don't run this against a shared/loaded cluster.
-3. Start the node, then issue writes (e.g. via `cqlsh`) whose cumulative
-   size approaches the 1MiB cap faster than the periodic/threshold-driven
-   flush can reclaim it. Unlike the unit test, there is no clean
-   deterministic single-shot trigger here (a single CQL write is much
-   smaller than 1MiB), so this will need sustained write pressure — expect
-   some raciness against `memtable_cleanup_threshold`-driven flushing.
-4. Evidence to capture (do not rely on a hang/slowdown alone — confirm it's
-   *this* check): the JMX timer
+**`if-check-exp` is a new, independent experiment with its own setup.**
+Do not assume any existing Cassandra installation, build, config, or
+guardrail state on whatever node(s) are used — including state left by any
+other experiment in this repo. Provision and configure this experiment's
+node(s) from scratch and keep whatever scripts/config that takes inside
+`if-check-exp`'s own directory, not shared with or dependent on another
+experiment's setup.
+
+1. **This is a per-node test, not a distributed one** — `MEMORY_POOL` is a
+   global static singleton (`AbstractAllocatorMemtable.java:59`) scoped to
+   a single JVM/node. A single node is sufficient; if multiple nodes are
+   available, target one explicitly (RF=1, CL=ONE, single keyspace/table)
+   rather than treating this as a distributed test.
+2. Install/build Cassandra 5.0.9 on that node (from source or a binary
+   distribution — either works for running the daemon; the unit test above
+   is the only part of this case that needs the source tree) and confirm it
+   starts cleanly with **default config** before changing anything.
+3. `memtable_allocation_type` defaults to `heap_buffers` (`Config.java:524`),
+   so no explicit setting is needed to reach `HeapPool`. Set
+   `memtable_heap_space: 1MiB` (or similar, small) in that node's
+   `cassandra.yaml` — this is the only config change this case's trigger
+   needs; don't carry over tuning from elsewhere.
+4. Start the node, then issue writes (e.g. via `cqlsh`, or a small script)
+   whose cumulative size approaches the 1MiB cap faster than the
+   periodic/threshold-driven flush can reclaim it. Unlike the unit test,
+   there is no clean deterministic single-shot trigger here (a single CQL
+   write is much smaller than 1MiB), so this will need sustained write
+   pressure — expect some raciness against `memtable_cleanup_threshold`-
+   driven flushing.
+5. **Evidence to capture** (do not rely on a hang/slowdown alone — confirm
+   it's *this* check, not something else hanging). Primary method, since it
+   needs no extra tooling: from the control machine, `ssh <node> jstack
+   $(cat <path-to-cassandra-pidfile>)` while a write is stuck, and look for
+   a thread parked in `WaitQueue$Signal.awaitThrowUncheckedOnInterrupt()`
+   called from `MemtableAllocator$LifeCycle.allocate()`
+   (`MemtableAllocator.java:195`, inside the `allocate()` shown in the §5
+   note above). The JMX timer
    `org.apache.cassandra.metrics:type=MemtablePool,name=BlockedOnAllocation`
-   (`MemtablePool.java:63`) going non-zero, and/or a thread dump of a write
-   thread parked in `WaitQueue$Signal.awaitThrowUncheckedOnInterrupt()`
-   called from `MemtableAllocator$LifeCycle.allocate()`.
+   (`MemtablePool.java:63`) is corroborating evidence if JMX tooling
+   (jmxterm, an SSH-tunneled jconsole) is set up, but isn't required —
+   `nodetool` has no built-in subcommand to read an arbitrary MBean/Timer,
+   so don't block on standing that up if the thread dump alone is
+   conclusive.
 
 | Field | Content |
 |--------|---------|
