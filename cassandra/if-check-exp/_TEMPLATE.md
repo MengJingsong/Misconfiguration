@@ -75,11 +75,18 @@ Continuous trace from the allow branch to the actual allocation call.
 
 ## Verification
 
+See [README.md § Verifying a case](README.md#verifying-a-case-triggering-the-disallow-branch)
+before setting `Status: verified` — line-number checking alone is not enough;
+a designed experiment must have actually driven execution into the disallow
+branch with recorded evidence.
+
 | Field | Content |
 |--------|---------|
 | **Status** | pending / in-progress / verified |
 | **Verified By / Date** | Who verified and when |
-| **Notes** | Any caveats or outstanding questions |
+| **Trigger method** | Unit test / program, or live-cluster config+steps, used to drive execution into the disallow branch |
+| **Evidence** | What was observed that confirms the disallow branch specifically fired (assertion/breakpoint, metric, log line, thread dump) — not just an end symptom like a hang or error |
+| **Notes** | Any caveats, escape hatches/bypasses noticed along the way (flag for Target 3), or outstanding questions |
 
 ---
 

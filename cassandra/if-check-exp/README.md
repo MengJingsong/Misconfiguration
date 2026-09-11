@@ -164,10 +164,67 @@ cassandra/if-check-exp/
    config-derived, trace its short declare → configure → store → read
    sub-path; if hardcoded, just cite the constant's declaration.
 5. Add/refresh the `_INDEX.md` row; set `Status` (`pending` →
-   `in-progress` → `verified` once checked against the pinned tag).
+   `in-progress` → `verified` once checked against the pinned tag **and**
+   verified per [Verifying a case](#verifying-a-case-triggering-the-disallow-branch) below).
 
 **Drafting convention:** draft new/changed case files in the Claude session
 first for review, then push to `main` after approval.
+
+## Verifying a case (triggering the disallow branch)
+
+Line-number verification (above) confirms the citations are accurate — it
+does **not** confirm the if-check actually behaves as described. A case only
+earns `Status: verified` in `_INDEX.md` / the case file's Verification table
+after a designed experiment has actually driven execution into the
+**disallow branch** and produced observed evidence of it. Follow this before
+flipping a case to `verified`:
+
+1. **Don't assume the disallow branch "rejects" anything.** Trace what the
+   disallow branch's caller actually does with a `false`/blocked result
+   before designing a trigger — some checks throw or reject cleanly, but
+   others only cause a retry, a block/wait, or (via an escape-hatch flag
+   elsewhere in the call chain) get silently overridden and let the
+   allocation through anyway. Design the experiment — and what you look for
+   as "success" — around the check's real effect, not an assumed one.
+2. **Prefer a deterministic single-shot trigger over a sustained-load race.**
+   Where possible, size the limit smaller than what a single request/operation
+   needs, so the very first attempt deterministically hits the disallow
+   branch — rather than relying on write/allocation throughput outracing
+   whatever reclaims capacity (flush, cleanup thread, GC), which is racy and
+   harder to reproduce.
+3. **Check whether the limit/pool is global or scoped.** Some limits are
+   per-connection or per-table; others are a single process-wide static
+   instance shared across all callers. For a shared/global limit, an
+   experiment against one table/connection isn't isolated from unrelated
+   background activity — run it on a dedicated single-node instance (or
+   otherwise control for other traffic) rather than a shared/loaded cluster.
+4. **Choose the right level for the trigger:**
+   - **Unit/programmatic level** (preferred first pass when feasible) —
+     construct the relevant class(es) directly in a small program or test
+     (check `test/unit/...` for existing coverage of the class first; reuse
+     or extend it rather than writing a new harness from scratch) and drive
+     it straight to the boundary condition. Fast, deterministic, no cluster
+     needed, and lets you assert/breakpoint at the exact check.
+   - **Live-cluster / end-to-end level** — exercise the check through a real
+     Cassandra node (e.g. via `cqlsh`, `nodetool`, or a client program) with
+     config pushed to the boundary. Needed to confirm the check is actually
+     reachable and behaves the same way in the full system, not just in
+     isolation — do this in addition to, not instead of, a unit-level check
+     where one is practical.
+5. **Capture direct evidence the specific if-check fired**, not just a
+   symptom that could have other causes (a hang or an error alone isn't
+   proof — several things can hang or error). Depending on what's available
+   for the check in question:
+   - An assertion or breakpoint in a unit test at the exact line.
+   - A JMX metric, counter, or log line that only fires from this check's
+     disallow branch (confirm this by reading the source around the check —
+     don't assume one exists).
+   - A thread/stack dump showing execution parked or returned from the exact
+     method/line of the disallow branch.
+6. **Record the experiment in the case file** (config used, the test/program
+   used to trigger it, and the evidence observed) before setting
+   `Status: verified` — the goal is that a later session can re-run the same
+   trigger and get the same result, not just trust the checkmark.
 
 ## Related context (for a new session)
 
