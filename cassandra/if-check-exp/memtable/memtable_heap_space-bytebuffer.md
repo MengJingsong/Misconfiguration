@@ -437,10 +437,10 @@ experiment's setup.
 
 | Field | Content |
 |--------|---------|
-| **Status** | in-progress — line numbers verified; unit-level trigger designed and documented above, pending an actual run by Jingsong |
-| **Verified By / Date** | Jingsong — line numbers verified against local pinned-tag clone; behavioral trigger pending execution of `HeapPoolTest` |
-| **Trigger method** | Unit test `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full source above) — run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`. Live-cluster trigger documented above as a secondary/optional confirmation. |
-| **Evidence** | Pending — will be: (1) `TimeoutException` on the over-limit `Future.get()` in `testBlocksThenUnblocksOnRelease`, plus post-release usage matching the expected value; (2) post-escape-hatch usage exceeding `LIMIT` in `testForcesThroughWhenOpGroupIsBlocking`. Update this field with the actual test output once run. |
+| **Status** | verified — unit-level trigger executed, both disallow-branch outcomes confirmed with recorded evidence |
+| **Verified By / Date** | Jingsong — line numbers verified against local pinned-tag clone; behavioral trigger executed 2026-09-16 on CloudLab node pc80 (JDK 11.0.32, Ant 1.10.12, git SHA `b5f2a54210d541339c2e7c17a794195cac0e67c2` of the shared `cassandra-src` clone) |
+| **Trigger method** | Unit test `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full source above) — run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`. Live-cluster trigger not run (optional secondary confirmation, not needed once the unit test passed). |
+| **Evidence** | `BUILD SUCCESSFUL` — `Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.065 sec`. (1) `testBlocksThenUnblocksOnRelease` passed: the over-limit `allocate(1)` call did not complete within 300 ms (`TimeoutException` caught and asserted) while usage stayed at `LIMIT`; after `released(50)`, the parked call completed and returned a 1-byte buffer with usage at `LIMIT - 50 + 1`. (2) `testForcesThroughWhenOpGroupIsBlocking` passed: with the op group's barrier marked blocking, `allocate(1)` returned immediately (no park) and usage reached `LIMIT + 1`, confirming the escape hatch overshoots the limit rather than gating it. |
 | **Notes** | Sibling to [`memtable_offheap_space-region`](memtable_offheap_space-region.md) — same `SubPool.tryAllocate()` if-check, on-heap `SubPool`/`HeapPool.Allocator` instead of off-heap. Same decoupled-accounting / escape-hatch behavior applies (see §5 note); flagged for later Target-3 bypass analysis, not pursued further here. |
 
 ---
