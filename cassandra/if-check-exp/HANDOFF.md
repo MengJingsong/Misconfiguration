@@ -66,41 +66,36 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — two cases written, both `in-progress`
+## Current state — one case `verified`, one `in-progress`
 
 - **`memtable/memtable_heap_space-bytebuffer.md`** — on-heap path. If-check:
   [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156),
   gating `ByteBuffer.allocate(size)` via `HeapPool.Allocator.allocate()`.
   Limit traced from `Config.java`'s `memtable_heap_space` through to
-  `SubPool.limit`. **Verification is fully designed and documented in the
-  case file, not yet executed:**
-  - **Primary trigger (do this first — cheap, deterministic):** a complete
-    new unit test, `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java`
-    (full source is written out in the case file's Verification section,
-    ready to save and run) — two `@Test` methods proving (1) the disallow
-    branch parks the calling thread on `SubPool.hasRoom` until released,
-    and (2) a `markBlocking()`-marked op instead silently overshoots the
-    limit (escape-hatch behavior — flagged for Target 3, not pursued here).
-    Jingsong will run this **on a cluster node reached over SSH from a
-    control machine (WSL)**, not locally on `heisenberg-laptop`. A
-    `cassandra-5.0.9` source clone already exists, shared across every
-    cluster node, at `/proj/misconfiguration-PG0/git-repos/cassandra-src`
-    (see the top-level repo `README.md`) — no need to re-clone it per node.
-    JDK 11 and `ant` are **not** yet installed on the nodes (checked
-    2026-09-15 on node0: neither present) — that provisioning still needs
-    to happen from scratch per the case file's instructions. Run via
-    `ssh <user>@<node> "cd /proj/misconfiguration-PG0/git-repos/cassandra-src && ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest"`.
-  - **Secondary trigger (optional, after the unit test passes):**
-    live-cluster, documented in the case file as this experiment's own
-    independent setup — a single node, provisioned and configured from
-    scratch (no assumption of existing Cassandra install, config, or
-    guardrail state, from this or any other experiment), with a
-    `jstack`-over-SSH thread dump as the primary evidence (JMX metric as
-    optional corroboration only, since `nodetool` has no built-in MBean
-    reader).
-  - `Status` stays `in-progress` until a trigger is actually run and its
-    result (pass/fail, actual evidence) is recorded in the case file's
-    `Trigger method`/`Evidence` fields.
+  `SubPool.limit`. **Status: `verified` — the primary trigger has been run
+  and recorded.**
+  - **Primary trigger (executed 2026-09-16):** the new unit test
+    `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full
+    source in the case file's Verification section) was saved into the
+    shared `cassandra-src` clone at
+    `/proj/misconfiguration-PG0/git-repos/cassandra-src` and run on
+    CloudLab node pc80 via
+    `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`.
+    JDK 11 (11.0.32) and `ant` (1.10.12) were installed on pc80 for this
+    (previously absent, checked 2026-09-15) — **still not installed on the
+    other cluster nodes**, install per-node if verification work moves
+    there. Result: `BUILD SUCCESSFUL`, `Tests run: 2, Failures: 0, Errors: 0`.
+    Both `@Test` methods passed, proving (1) the disallow branch parks the
+    calling thread on `SubPool.hasRoom` until released, and (2) a
+    `markBlocking()`-marked op instead silently overshoots the limit
+    (escape-hatch behavior — flagged for Target 3, not pursued here). Full
+    evidence recorded in the case file's Verification table and pushed to
+    `origin/main` (commit `e878607`).
+  - **Secondary trigger (optional, not run):** live-cluster confirmation,
+    documented in the case file as this experiment's own independent
+    setup — skipped since the unit test already provides direct evidence
+    for both branches; would only be a reasonable next step if end-to-end
+    (real daemon) confirmation becomes valuable later.
 - **`memtable/memtable_offheap_space-region.md`** — off-heap sibling case.
   Same if-check, `offHeap` `SubPool` instance instead of `onHeap`, reached
   via `NativePool`/`NativeAllocator` instead of `HeapPool`; limit is
@@ -124,12 +119,11 @@ this folder's own scope.
 
 ## Open items / natural next steps
 
-- **Run `HeapPoolTest`** on a cluster node (see above) and record the
-  result in `memtable_heap_space-bytebuffer.md`'s Verification section.
-- **Neither case is `verified` yet** — both need an actual trigger run with
-  recorded evidence, per the README methodology, before flipping `Status`.
-- **`memtable_offheap_space-region.md` has no ready-to-run test written
-  out** (unlike the heap case) — only a pointer to `NativeAllocatorTest`.
+- **`memtable_offheap_space-region.md` is still `in-progress`** — no
+  ready-to-run test written out yet (unlike the now-verified heap case) —
+  only a pointer to reuse/extend `NativeAllocatorTest.testBookKeeping()`.
+  Writing that test out and running it (JDK 11 + `ant` already provisioned
+  on pc80) is the natural next step if this case is prioritized.
 - **Next module/if-check to inventory is undecided** — no scope commitment
   beyond memtable allocation yet. Natural candidates per the README's
   Target-1 discovery step: native transport / request queues, compaction,
