@@ -3,6 +3,22 @@
 Research repo for Cassandra/Hadoop memory-throttling misconfiguration
 experiments (CloudLab-based).
 
+## Setup
+
+Before running any script in this repo on a machine/allocation for the
+first time:
+
+```bash
+cp config/environment.sh.example config/environment.sh
+```
+
+Then edit `config/environment.sh` and fill in real values for this
+environment (shared-mount path, node hostnames/IPs, Cassandra version,
+etc. — see the file's comments). This file is gitignored, so it's never
+committed and never overwrites anyone else's values; `check-ips.sh` can
+also rewrite its `CLUSTER_IP` block automatically after a CloudLab
+allocation swap.
+
 ## Workspace layout (on CloudLab)
 
 This repo is checked out under a persistent, project-shared CloudLab
@@ -33,14 +49,14 @@ change independently:
 
 - **`config/repo_layout.sh`** (committed) — **local refs**: paths
   *relative to this repo's own root* (e.g. where `build-cassandra-dist`,
-  `oom-exp`, `build-hadoop-src` live within `cassandra/`/`hadoop/`). Edit
-  this only when folders are renamed/moved *inside* this repo.
+  `build-hadoop-src` live within `cassandra/`/`hadoop/`). Edit this only
+  when folders are renamed/moved *inside* this repo.
 
 - **`config/environment.sh`** (gitignored — copy from
-  `config/environment.sh.example`) — **external refs**: facts about
-  *where this checkout is deployed* (the shared-mount path, the separate
-  `cassandra-src` clone's location, `/mydata` install paths, node
-  hostnames/IPs, Cassandra version). Edit this whenever the repo is
+  `config/environment.sh.example`, see Setup above) — **external refs**:
+  facts about *where this checkout is deployed* (the shared-mount path,
+  the separate `cassandra-src` clone's location, `/mydata` install paths,
+  node hostnames/IPs, Cassandra version). Edit this whenever the repo is
   loaded into a new environment or CloudLab allocation swaps node
   hostnames/IPs (`orchestrator/check-ips.sh` rewrites the `CLUSTER_IP`
   block in this file automatically).
@@ -55,8 +71,6 @@ never scattered across individual scripts.
 - **`cassandra/build-cassandra-dist/`** — orchestrator (control-machine)
   and remote (per-node) scripts to install/configure/start/stop a 4-node
   Cassandra **5.0.9** binary distribution cluster.
-- **`cassandra/oom-exp/`** — tombstone-flood OOM experiment against a
-  running cluster.
 - **`cassandra/entry-restriction-exp/`**, **`cassandra/if-check-exp/`** —
   static code-path inventories of Cassandra's resource-limit checks (see
   each folder's own `README.md`/`HANDOFF.md`); `if-check-exp` verifies
