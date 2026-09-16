@@ -26,9 +26,9 @@ are noted in case files for later Target-3 use, not chased down here.
 
 **`if-check-exp` is its own independent experiment.** It does not share
 infrastructure, cluster state, or config with any other experiment in this
-repo (e.g. `oom-exp`) — when setting up verification infrastructure for
-this folder, assume nothing is already provisioned and build/configure it
-from scratch under this folder's own scope.
+repo — when setting up verification infrastructure for this folder, assume
+nothing is already provisioned and build/configure it from scratch under
+this folder's own scope.
 
 ## Where things live
 
@@ -82,11 +82,14 @@ from scratch under this folder's own scope.
     and (2) a `markBlocking()`-marked op instead silently overshoots the
     limit (escape-hatch behavior — flagged for Target 3, not pursued here).
     Jingsong will run this **on a cluster node reached over SSH from a
-    control machine (WSL)**, not locally on `heisenberg-laptop` — the case
-    file's instructions cover provisioning that node from scratch (JDK,
-    `ant`, a fresh `cassandra-5.0.9` source clone — assume none of these
-    are already present) and running via
-    `ssh <user>@<node> "cd <source-tree> && ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest"`.
+    control machine (WSL)**, not locally on `heisenberg-laptop`. A
+    `cassandra-5.0.9` source clone already exists, shared across every
+    cluster node, at `/proj/misconfiguration-PG0/git-repos/cassandra-src`
+    (see the top-level repo `README.md`) — no need to re-clone it per node.
+    JDK 11 and `ant` are **not** yet installed on the nodes (checked
+    2026-09-15 on node0: neither present) — that provisioning still needs
+    to happen from scratch per the case file's instructions. Run via
+    `ssh <user>@<node> "cd /proj/misconfiguration-PG0/git-repos/cassandra-src && ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest"`.
   - **Secondary trigger (optional, after the unit test passes):**
     live-cluster, documented in the case file as this experiment's own
     independent setup — a single node, provisioned and configured from
