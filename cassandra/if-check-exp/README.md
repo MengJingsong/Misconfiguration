@@ -29,9 +29,10 @@ file restates its source ref in the header for this reason.
 
 ### Verifying and linking against the local clone
 
-Jingsong has a local copy of the pinned source on device `heisenberg-laptop`
-(a `cassandra-5.0.9` tag download, not a live `git` checkout — its `.git`
-directory is empty, so version is confirmed by content, not `git verify-tag`).
+Jingsong keeps a local copy of the pinned source on whichever machine he's
+currently working from (a `cassandra-5.0.9` tag download, not a live `git`
+checkout — its `.git` directory is empty, so version is confirmed by
+content, not `git verify-tag`).
 Use it instead of fetching whole files through GitHub — grep/window it, which
 saves tokens versus pulling entire files into context.
 

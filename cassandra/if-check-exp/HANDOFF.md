@@ -33,7 +33,8 @@ this folder's own scope.
 ## Where things live
 
 - **Repo:** `MengJingsong/Misconfiguration` on GitHub.
-- **Local clone:** `Downloads\Misconfiguration` on device `heisenberg-laptop`
+- **Local clone:** kept wherever the current working session's local
+  machine keeps it — path and device vary by environment, not fixed
   (Jingsong pushes commits himself — a session only writes local files and
   commits locally when asked; pushing is Jingsong's call).
 - **Folder:** `cassandra/if-check-exp/`
@@ -58,8 +59,8 @@ this folder's own scope.
 
 ## Cassandra source for verification
 
-- Local clone (separate from the Misconfiguration repo) at
-  `Downloads\cassandra-cassandra-5.0.9` on `heisenberg-laptop`.
+- Local clone (separate from the Misconfiguration repo) — path and device
+  vary by environment, not fixed.
 - Confirmed as tag `cassandra-5.0.9` by content (`build.xml`'s
   `base.version` and `CHANGES.txt`'s top entry both read `5.0.9`).
 - **Always grep/read the local clone to verify a line number**, then build

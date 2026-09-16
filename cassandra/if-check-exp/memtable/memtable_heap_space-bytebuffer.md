@@ -173,8 +173,8 @@ test below is a new file, structured the same way as
 
 ### Trigger: unit test (primary — run this)
 
-**This runs on a cluster node reached over SSH from the control machine
-(e.g. WSL), not on the local `heisenberg-laptop` clone.** `if-check-exp`'s
+**This runs on a cluster node reached over SSH from the control machine,
+not on whatever local source clone the current session has.** `if-check-exp`'s
 live/cluster verification is its own, independent setup — do not assume any
 existing Cassandra installation, source checkout, JDK, `ant`, or config on
 the target node; check for and install each prerequisite explicitly rather
