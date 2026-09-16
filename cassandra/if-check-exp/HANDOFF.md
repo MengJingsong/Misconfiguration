@@ -152,7 +152,21 @@ this folder's own scope.
   caveat above. Writing a purpose-built `NativeAllocatorTest`-style test
   mirroring `HeapPoolTest`'s two isolated `@Test`s would close this gap;
   explicitly not prioritized for now.
-- **Next module/if-check to inventory is undecided** — no scope commitment
-  beyond memtable allocation yet. Natural candidates per the README's
-  Target-1 discovery step: native transport / request queues, compaction,
-  concurrent executors.
+- **New `compaction` module started:** first case drafted,
+  `compaction/concurrent_compactors-compaction_task.md` — `concurrent_compactors`
+  gating `CompactionManager.submitBackground():245`'s scheduling of a
+  `BackgroundCompactionCandidate` task on the compaction thread pool.
+  `Status: pending` — not yet verified. **Before designing a trigger, confirm
+  the suspected soft-no-op behavior:** unlike the memtable cases (park or
+  silently force through), this disallow branch looks like an unconditional
+  `return Collections.emptyList()` with no blocking and no escape hatch —
+  the caller is expected to just retry on the next `submitBackground()` call.
+  Verify that read of the caller behavior before picking a trigger method.
+- **Further compaction candidates surveyed but not written up:** grepped
+  `db/compaction/**` for limit/threshold/capacity/max/size/count comparisons;
+  most hits were config-validation (`if (x < 0) throw`) or non-diverging
+  comparisons, not object-creation gates — not yet logged in `_INDEX.md`'s
+  "lines considered and rejected" table (do that before re-scanning the
+  module again).
+- **Other modules still undecided:** native transport / request queues,
+  concurrent executors remain open per the README's Target-1 discovery step.
