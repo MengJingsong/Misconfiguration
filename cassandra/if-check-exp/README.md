@@ -67,6 +67,41 @@ null-guards unrelated to capacity) are out of scope — note them as "considered
 rejected" in `_INDEX.md` rather than writing a case file, so later passes don't
 re-discover and re-reject the same line.
 
+### Memory-magnitude filter
+
+This folder narrows Target 1's "memory/CPU usage" scope (see Project context
+above) to **memory usage** specifically — a deliberate scoping choice for
+`if-check-exp`, not a correction to the project's broader scope; CPU-limiting
+constraints are still valid Target 1 material, just not inventoried here.
+
+A candidate if-check only qualifies if its **limit-side operand bounds the
+total quantity of memory (bytes) that can be allocated/held at once** — not
+the *rate*, *concurrency*, or *throughput* at which existing allocations
+happen.
+
+**Test:** if the limit-side operand's configured value changes, does the
+maximum bytes resident in memory (heap or off-heap) change as a direct
+consequence?
+
+- **Valid** — the limit is compared against a byte count, buffer size, or a
+  count of objects whose per-object footprint is fixed/derivable (so total
+  bytes = count × size). Example: `memtable_heap_space` bounds the bytes a
+  `HeapPool` can hold; raising it lets more `ByteBuffer`s be allocated.
+- **Reject** — the limit is a thread-pool size, worker/task concurrency cap,
+  or a throughput/rate limiter. Example: `concurrent_compactors` bounds how
+  many compactions run in parallel; raising it changes *speed*, not the
+  total bytes any single compaction task allocates.
+- **Edge case — queue/buffer depth:** don't reject on "it's a queue" alone.
+  If each queued slot holds a memory-significant object (e.g. buffered
+  write bytes), queue depth is a memory limit in disguise and total bytes
+  held does scale with it → valid. If each slot just holds a lightweight
+  task reference (a lone `Runnable`/pointer), the memory difference across
+  depths is negligible → reject, same reasoning as thread-pool size.
+
+Candidates rejected under this filter go in `_INDEX.md`'s "lines considered
+and rejected" table like any other rejection, noting which side of the test
+they failed.
+
 ## Scope: what this folder does NOT cover
 
 - **No bypass analysis, no failure-mode scoring.** Target 3 (bypass potential)
