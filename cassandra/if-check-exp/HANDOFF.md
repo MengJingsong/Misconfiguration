@@ -117,9 +117,19 @@ this folder's own scope.
     `MemtablePool.java:156` on the `offHeap` `SubPool`: accounting capped at
     the 100-byte limit, then forced through to 110 once `markBlocking()`
     fires — the same escape-hatch behavior as the heap case. Full evidence
-    recorded in the case file's Verification table; not yet pushed to
-    `origin/main` (local commit only, pending Jingsong's push per this
-    project's convention).
+    recorded in the case file's Verification table and pushed to
+    `origin/main` (commit `0198e25`).
+    **Caveat vs. the heap case's evidence:** `testBookKeeping()` is a
+    pre-existing test reused as-is, not purpose-built like `HeapPoolTest`.
+    It proves the escape-hatch outcome cleanly (110 > limit 100 is only
+    reachable via the disallow branch), but — unlike `HeapPoolTest`'s
+    explicit timed `Future.get()` — it never isolates a proof that the
+    "normal case" call actually *parked* before being released; it only
+    confirms the correct numeric end-state. Equal outcome, not equal
+    verification rigor. A `HeapPoolTest`-style purpose-built test (two
+    isolated `@Test`s, explicit timeout-based blocking proof) would close
+    this gap if stronger evidence is wanted later — not done, per Jingsong's
+    call to skip it for now.
   - **Secondary trigger (optional, not run):** live-cluster confirmation,
     same rationale as the heap case — skipped since the unit test already
     gives direct evidence for both branches.
@@ -135,10 +145,13 @@ this folder's own scope.
 
 ## Open items / natural next steps
 
-- **Both memtable cases are now `verified`.** Push the local
-  `memtable_offheap_space-region.md`/`_INDEX.md`/`HANDOFF.md` updates to
-  `origin/main` when Jingsong is ready (this session only commits/edits
-  locally, per this project's convention — pushing is his call).
+- **Both memtable cases are now `verified` and pushed** (commit `0198e25`).
+- **Optional rigor gap:** the offheap case's evidence (reused
+  `testBookKeeping()`) doesn't isolate a timeout-based proof of the
+  "blocks" outcome the way `HeapPoolTest` does for the heap case — see
+  caveat above. Writing a purpose-built `NativeAllocatorTest`-style test
+  mirroring `HeapPoolTest`'s two isolated `@Test`s would close this gap;
+  explicitly not prioritized for now.
 - **Next module/if-check to inventory is undecided** — no scope commitment
   beyond memtable allocation yet. Natural candidates per the README's
   Target-1 discovery step: native transport / request queues, compaction,
