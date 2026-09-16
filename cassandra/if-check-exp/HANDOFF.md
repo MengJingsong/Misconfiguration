@@ -67,7 +67,7 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — one case `verified`, one `in-progress`
+## Current state — both cases `verified`
 
 - **`memtable/memtable_heap_space-bytebuffer.md`** — on-heap path. If-check:
   [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156),
@@ -102,12 +102,27 @@ this folder's own scope.
   via `NativePool`/`NativeAllocator` instead of `HeapPool`; limit is
   `memtable_offheap_space`. Object created is a `NativeAllocator.Region`
   (native memory via `MemoryUtil.allocate()`), not a `ByteBuffer`.
-  Verification section names a recommended trigger
-  (`test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`'s
-  existing `testBookKeeping()` already exercises this exact if-check both
-  ways — reuse/extend it rather than writing a new harness) but, unlike the
-  heap case, has **not** had a full ready-to-run test written out yet — that
-  would be a reasonable next step if this case is prioritized.
+  **Status: `verified` — the primary trigger has been run and recorded.**
+  - **Primary trigger (executed 2026-09-16):** the existing unit test
+    `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`
+    (no new harness needed — `testBookKeeping()` already exercises this exact
+    if-check both ways) was run against the `cassandra-src` clone at
+    `/proj/misconfiguration-PG0/git-repos/cassandra-src` via
+    `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest`
+    on this session's node (JDK 11.0.32, Ant 1.10.12 — already present, no
+    provisioning needed). Result: `BUILD SUCCESSFUL`, `Tests run: 1,
+    Failures: 0, Errors: 0`. The test's own assertions
+    (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`)
+    directly demonstrate both disallow-branch outcomes at
+    `MemtablePool.java:156` on the `offHeap` `SubPool`: accounting capped at
+    the 100-byte limit, then forced through to 110 once `markBlocking()`
+    fires — the same escape-hatch behavior as the heap case. Full evidence
+    recorded in the case file's Verification table; not yet pushed to
+    `origin/main` (local commit only, pending Jingsong's push per this
+    project's convention).
+  - **Secondary trigger (optional, not run):** live-cluster confirmation,
+    same rationale as the heap case — skipped since the unit test already
+    gives direct evidence for both branches.
 - **Shared discovery (both cases):** the if-check's disallow branch does
   **not** reject or fail the caller. `MemtableAllocator.SubAllocator.allocate()`
   (`MemtableAllocator.java:169-197`) either parks the caller on
@@ -120,11 +135,10 @@ this folder's own scope.
 
 ## Open items / natural next steps
 
-- **`memtable_offheap_space-region.md` is still `in-progress`** — no
-  ready-to-run test written out yet (unlike the now-verified heap case) —
-  only a pointer to reuse/extend `NativeAllocatorTest.testBookKeeping()`.
-  Writing that test out and running it (JDK 11 + `ant` already provisioned
-  on pc80) is the natural next step if this case is prioritized.
+- **Both memtable cases are now `verified`.** Push the local
+  `memtable_offheap_space-region.md`/`_INDEX.md`/`HANDOFF.md` updates to
+  `origin/main` when Jingsong is ready (this session only commits/edits
+  locally, per this project's convention — pushing is his call).
 - **Next module/if-check to inventory is undecided** — no scope commitment
   beyond memtable allocation yet. Natural candidates per the README's
   Target-1 discovery step: native transport / request queues, compaction,

@@ -108,21 +108,32 @@ for Target 3 (bypass analysis) even though this case itself is Target 1+2 only.
 
 ## Verification
 
-Line numbers checked against the local pinned-tag clone; **behavioral
-trigger not yet run** — see [README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch)
-for the general method. Recommended trigger for this case (not yet executed):
+Line numbers checked against the local pinned-tag clone. Per
+[README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch),
+the primary trigger below has been **executed and recorded** (see table below).
 
-- **Unit/programmatic level (preferred first pass):** `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`
+- **Unit/programmatic level (primary trigger — executed 2026-09-16):** `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`
   already exercises this exact if-check both ways. Its `testBookKeeping()`
   constructs a `NativePool(1, 100, 0.75f, ...)` (off-heap limit = 100 bytes)
   directly, allocates up to the limit, then allocates past it while a
   scheduled task calls `markBlocking()` — demonstrating both (a) the thread
   parking on `SubPool.hasRoom` when the op is not yet blocking, and (b) the
   `allocated(size)` force-through once `opGroup.isBlocking()` becomes true,
-  pushing `allocated` past `limit` (see §5 note above). Re-run this test (or
-  a small extension of it with an assertion/breakpoint at
-  `MemtablePool.java:156`) as the primary trigger — deterministic, no
-  cluster or flush-timing races needed.
+  pushing `allocated` past `limit` (see §5 note above). Run as-is (no new
+  harness needed) via
+  `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest`
+  on the `cassandra-src` clone at
+  `/proj/misconfiguration-PG0/git-repos/cassandra-src` (JDK 11.0.32, Ant
+  1.10.12, already provisioned on this node from the sibling heap case).
+  Result: `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. The
+  single `@Test` passing proves both outcomes of the disallow branch at
+  `MemtablePool.java:156` on the `offHeap` `SubPool`: (1) `verifyUsedReclaiming(80, 0)`
+  after allocating up to the 100-byte limit confirms tracked accounting
+  stops exactly at `limit`, and (2) `verifyUsedReclaiming(110, 110)` after
+  the subsequent 30-byte allocation — taken only once `markBlocking()` sets
+  `opGroup.isBlocking()` — confirms the escape-hatch force-through past
+  `limit` (110 > 100), matching the §5 note that accounting and physical
+  allocation are decoupled here.
 - **Live-cluster level (secondary, for end-to-end confirmation):** set
   `memtable_allocation_type: offheap_objects` (not the default — required to
   reach `NativeAllocator` at all) and `memtable_offheap_space` below
@@ -141,11 +152,11 @@ for the general method. Recommended trigger for this case (not yet executed):
 
 | Field | Content |
 |--------|---------|
-| **Status** | in-progress |
-| **Verified By / Date** | Jingsong — line numbers verified against local pinned-tag clone; behavioral trigger pending |
-| **Trigger method** | Not yet run — see recommended methods above |
-| **Evidence** | None yet — pending trigger run |
-| **Notes** | Sibling to [`memtable_heap_space-bytebuffer`](../memtable/memtable_heap_space-bytebuffer.md); same if-check code, different `SubPool` instance/limit/allocator. §5 note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. |
+| **Status** | verified |
+| **Verified By / Date** | Claude (session) — 2026-09-16; primary trigger run and evidence recorded |
+| **Trigger method** | Existing `NativeAllocatorTest.testBookKeeping()`, run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest` against the `cassandra-src` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`) |
+| **Evidence** | `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. Test's own assertions (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`) directly demonstrate the disallow branch's two outcomes at `MemtablePool.java:156` on the `offHeap` `SubPool` — accounting capped at `limit`, then force-through past it once `markBlocking()` fires. |
+| **Notes** | Sibling to [`memtable_heap_space-bytebuffer`](../memtable/memtable_heap_space-bytebuffer.md); same if-check code, different `SubPool` instance/limit/allocator. §5 note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
 
 ---
 
