@@ -5,7 +5,7 @@ machine** (e.g. WSL) that has SSH access to the experiment nodes but does
 **not** have `/proj` mounted. These scripts never touch Cassandra directly —
 they SSH out to each node and invoke the per-node scripts in
 [`../remotes`](../remotes), which live on shared NFS storage
-(`/proj/misconfiguration-PG0`) and run there.
+(`$PROJ` (see `config/environment.sh`)) and run there.
 
 ## Files
 
@@ -82,6 +82,6 @@ tombstone-flood relaxed guardrails), see the experiment's own
 
 - Passwordless SSH from the control machine to every node
   (`ssh jason92@<prefix>.cloudlab.umass.edu`).
-- `/proj/misconfiguration-PG0` present and up to date on every node (it's
+- `$PROJ` (see `config/environment.sh`) present and up to date on every node (it's
   the same NFS mount shared across the cluster, so a single `git pull`
   there updates all nodes at once).

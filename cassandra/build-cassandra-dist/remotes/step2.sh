@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT_GUESS="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+# shellcheck source=/dev/null
+source "$REPO_ROOT_GUESS/config/environment.sh"
+
 if [[ $# -ne 2 ]]; then
     echo "Usage: $0 <seeds> <node_ip>"
     echo "Example: $0 \"192.168.1.10:7000,192.168.1.11:7000\" \"192.168.1.12\""
@@ -9,7 +14,7 @@ fi
 
 SEEDS="$1"
 NODE_IP="$2"
-YAML_FILE="/mydata/apache-cassandra-5.0.7/conf/cassandra.yaml"
+YAML_FILE="$MYDATA_CASSANDRA_HOME/conf/cassandra.yaml"
 
 if [[ ! -f "$YAML_FILE" ]]; then
     echo "Error: $YAML_FILE not found"

@@ -1,7 +1,7 @@
 # cassandra/build-cassandra-dist/remotes
 
 Per-node scripts that install and configure a binary distribution of
-Apache Cassandra 5.0.7. These run **on each experiment node**, not on the
+Apache Cassandra 5.0.9. These run **on each experiment node**, not on the
 control machine — they're normally invoked over SSH by
 [`orchestrator/build-cluster.sh`](../orchestrator), but can also be run
 directly on a node if you're logged in there.
@@ -15,10 +15,10 @@ so the download only needs to happen once, from whichever node runs
 
 - **`step1.sh`** — install Cassandra:
   - Installs `openjdk-17-jdk` and `ant` via apt.
-  - Downloads `apache-cassandra-5.0.7-bin.tar.gz` into
+  - Downloads `apache-cassandra-5.0.9-bin.tar.gz` into
     `/proj/misconfiguration-PG0/tarfiles` (or `/proj/Misconfiguration` as a
     fallback) if it isn't already there.
-  - Extracts it to `/mydata/apache-cassandra-5.0.7` if not already
+  - Extracts it to `/mydata/apache-cassandra-5.0.9` if not already
     extracted.
   - Appends `JAVA_HOME_17`, `CASSANDRA_HOME`, `PATH`, and
     `CASSANDRA_USE_JDK17` exports to `~/.bashrc` (idempotent — won't
@@ -32,7 +32,7 @@ so the download only needs to happen once, from whichever node runs
   step2.sh <seeds> <node_ip>
   # e.g. step2.sh "10.10.1.1:7000,10.10.1.2:7000" "10.10.1.3"
   ```
-  Backs up `/mydata/apache-cassandra-5.0.7/conf/cassandra.yaml` to
+  Backs up `/mydata/apache-cassandra-5.0.9/conf/cassandra.yaml` to
   `cassandra.yaml.bak`, then `sed`s in:
   - `seeds` (cluster-wide, same value on every node)
   - `listen_address`, `broadcast_address`, `broadcast_rpc_address` (this
@@ -73,6 +73,6 @@ bash cassandra/build-cassandra-dist/remotes/step4.sh
 ## Prerequisites
 
 - `sudo` (passwordless, for `apt-get`/`ufw`).
-- `/proj/misconfiguration-PG0` (or `/proj/Misconfiguration`) mounted and
+- `$PROJ` (see `config/environment.sh`) (or `/proj/Misconfiguration`) mounted and
   containing this repo.
 - `/mydata` present and writable (local per-node disk, not shared).

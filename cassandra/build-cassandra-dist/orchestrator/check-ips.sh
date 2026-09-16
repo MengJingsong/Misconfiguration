@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Discovers each node's experiment-LAN IP by SSHing in and inspecting its
-# interfaces, then writes the result directly into config.sh's CLUSTER_IP
-# array. Safe to re-run (e.g. after a CloudLab experiment swap changes the
-# LAN addresses) -- it replaces the whole CLUSTER_IP block each time and
-# keeps a config.sh.bak of the previous version.
+# interfaces, then writes the result directly into config/environment.sh's
+# CLUSTER_IP array. Safe to re-run (e.g. after a CloudLab experiment swap
+# changes the LAN addresses) -- it replaces the whole CLUSTER_IP block each
+# time and keeps a config/environment.sh.bak of the previous version.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/config.sh"
 # shellcheck source=config.sh
-source "$CONFIG_FILE"
+source "$SCRIPT_DIR/config.sh"
+
+CONFIG_FILE="$REPO_ROOT/config/environment.sh"
 
 # All addresses on this experiment's nodes have been observed to be
 # 10.10.1.x; fall back to any RFC1918 private address (excluding
@@ -41,7 +42,6 @@ for idx in "${NODE_INDEXES[@]}"; do
   fi
 done
 
-# Build the replacement block.
 block="# Experiment-LAN IP per node, last discovered by check-ips.sh on $(date -u +%Y-%m-%dT%H:%MZ)."
 block+=$'\n'"declare -A CLUSTER_IP=("
 for idx in "${NODE_INDEXES[@]}"; do
@@ -51,8 +51,6 @@ block+=$'\n'")"
 
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Replace the CLUSTER_IP declare block (and any comment lines directly
-# above it, whatever they currently say) with the freshly discovered one.
 awk -v block="$block" '
   BEGIN { skip = 0; bufn = 0 }
   {
@@ -76,7 +74,7 @@ awk -v block="$block" '
 mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
 
 echo
-echo "config.sh updated (previous version saved to config.sh.bak)."
+echo "config/environment.sh updated (previous version saved to config/environment.sh.bak)."
 if [[ "$missing" -eq 1 ]]; then
-  echo "One or more nodes' IPs could not be discovered -- check config.sh and fill in manually." >&2
+  echo "One or more nodes' IPs could not be discovered -- check config/environment.sh and fill in manually." >&2
 fi

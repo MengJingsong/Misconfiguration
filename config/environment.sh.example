@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# External refs: facts about *where this checkout is deployed*, not about
+# this repo's own structure. Copy this file to config/environment.sh
+# (gitignored -- never committed) and fill in real values for the current
+# CloudLab allocation / machine. Re-check PREFIX/CLUSTER_IP every new
+# allocation -- CloudLab hostnames and LAN IPs churn.
+
+PROJ="/proj/misconfiguration-PG0"
+REPO_ROOT="$PROJ/git-repos/misconfiguration"
+CASSANDRA_SRC="$PROJ/git-repos/cassandra-src"
+
+CASSANDRA_VERSION="5.0.9"
+MYDATA_CASSANDRA_HOME="/mydata/apache-cassandra-${CASSANDRA_VERSION}"
+MYDATA_HADOOP_HOME="/mydata/hadoop-3.4.2"
+
+SSH_USER="jason92"
+POSTFIX="cloudlab.umass.edu"
+PREFIX=('pc80' 'pc100' 'pc70' 'pc83')
+
+NODE_INDEXES=(0 1 2 3)
+declare -A CLUSTER_IP=(
+  [0]=""
+  [1]=""
+  [2]=""
+  [3]=""
+)
+SEED_INDEXES=(0 1)

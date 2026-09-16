@@ -1,10 +1,12 @@
 #!/bin/bash
-# Starts the Cassandra daemon on this node (config already written by
-# step2.sh). Idempotent: does nothing if Cassandra is already running
-# under the pidfile below.
 set -euo pipefail
 
-CASSANDRA_HOME="/mydata/apache-cassandra-5.0.7"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT_GUESS="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+# shellcheck source=/dev/null
+source "$REPO_ROOT_GUESS/config/environment.sh"
+
+CASSANDRA_HOME="$MYDATA_CASSANDRA_HOME"
 PIDFILE="$CASSANDRA_HOME/cassandra.pid"
 LOGDIR="$CASSANDRA_HOME/logs"
 STDOUT_LOG="$LOGDIR/cassandra-stdout.log"
@@ -17,10 +19,6 @@ rm -f "$PIDFILE"
 
 mkdir -p "$LOGDIR"
 
-# nohup + redirected/closed stdio so the daemon survives the SSH session
-# that launched it closing (bin/cassandra also detaches on its own, but
-# this is belt-and-suspenders against SIGHUP during the brief window
-# before it does).
 nohup "$CASSANDRA_HOME/bin/cassandra" -p "$PIDFILE" \
     > "$STDOUT_LOG" 2>&1 < /dev/null &
 disown
