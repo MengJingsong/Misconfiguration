@@ -135,6 +135,7 @@ the grouping unit instead):
 ```
 cassandra/if-check-exp/
 ├── README.md                     # this file
+├── HANDOFF.md                     # start-here brief for a new session: what this experiment is, current state, next steps
 ├── _INDEX.md                      # master index of every case (navigation + progress)
 ├── _TEMPLATE.md                    # template for each new case file
 └── <module>/                       # one folder per Cassandra module
@@ -146,7 +147,10 @@ cassandra/if-check-exp/
 
 **Orient (before starting):**
 
-0. Read the Google Docs (*Meeting Summary*, *Progress Report*) for the current plan, scope, and next step.
+0. Read `HANDOFF.md` first — it's the start-here brief for a new session
+   (what this experiment is, current state, open items) — then the Google
+   Docs (*Meeting Summary*, *Progress Report*) for the current plan, scope,
+   and next step.
 1. Open `_INDEX.md` to see which modules/cases already exist (and which
    lines were considered and rejected) — continue from there, don't duplicate.
 
