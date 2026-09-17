@@ -31,11 +31,29 @@ if [[ ! -d "$db" ]]; then
 fi
 
 mkdir -p "$QUERIES_ROOT/results/$target"
-out_file="$QUERIES_ROOT/results/$target/${out_name}.sarif"
 
-echo "Running $query_path against $db"
-"$CODEQL_BIN" database analyze "$db" "$QUERIES_ROOT/$query_path" \
-  --format=sarif-latest \
-  --output="$out_file"
+# table/graph-kind queries are plain data dumps, not alerts: `database analyze`
+# (which expects problem/path-problem kind) can't interpret them, so run them
+# via `query run` + `bqrs decode` instead.
+kind="$(grep -m1 '^\s*\*\s*@kind\s' "$QUERIES_ROOT/$query_path" | awk '{print $NF}')"
+
+if [[ "$kind" == "table" || "$kind" == "graph" ]]; then
+  out_file="$QUERIES_ROOT/results/$target/${out_name}.csv"
+  bqrs_file="$QUERIES_ROOT/results/$target/${out_name}.bqrs"
+
+  echo "Running $query_path against $db (table query -> CSV)"
+  "$CODEQL_BIN" query run "$QUERIES_ROOT/$query_path" \
+    --database="$db" \
+    --output="$bqrs_file"
+  "$CODEQL_BIN" bqrs decode --format=csv --output="$out_file" "$bqrs_file"
+  rm -f "$bqrs_file"
+else
+  out_file="$QUERIES_ROOT/results/$target/${out_name}.sarif"
+
+  echo "Running $query_path against $db"
+  "$CODEQL_BIN" database analyze "$db" "$QUERIES_ROOT/$query_path" \
+    --format=sarif-latest \
+    --output="$out_file"
+fi
 
 echo "Results written to $out_file"
