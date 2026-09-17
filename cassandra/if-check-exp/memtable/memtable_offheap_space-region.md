@@ -32,14 +32,27 @@ of `SubPool`: `MemtablePool.offHeap` rather than `MemtablePool.onHeap`
 constructed with a separately-configured `limit` and reached via a different
 allocator (`NativeAllocator` instead of `HeapPool.Allocator`).
 
-## 2. Module
+## 2. Context
+
+Cassandra buffers newly-written data in memory (a "memtable") before it is
+flushed to disk as an immutable SSTable file. When a table is configured to
+keep those memtable cells off the JVM heap (to reduce garbage-collector
+pressure from a large working set), the buffered bytes instead live in
+native/off-heap memory, obtained directly from the OS rather than the JVM
+allocator. Off-heap memory isn't garbage-collected, so without a cap a
+burst of writes could grow this native allocation without bound just as
+easily as its on-heap counterpart. This if-check is the same admission gate
+as the on-heap case — "is there room for `size` more bytes under the
+configured ceiling?" — applied to a separate off-heap accounting pool.
+
+## 3. Module
 
 | Field | Content |
 |-------|---------|
 | **Module** | Storage engine — memtable memory allocation (`utils/memory`, `db/memtable`) |
 | **One-line role** | Tracks and bounds the off-heap (native) bytes used by in-memory memtables when Cassandra is configured to allocate memtable cells as off-heap objects rather than on-heap `ByteBuffer`s. |
 
-## 3. Capacity-overflow check
+## 4. Capacity-overflow check
 
 | Field | Content |
 |-------|---------|
@@ -58,12 +71,12 @@ allocator (`NativeAllocator` instead of `HeapPool.Allocator`).
 6. [`NativePool.java:23-25`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativePool.java#L23-L25) — `NativePool` constructor forwards `maxOffHeapMemory` to `super(...)` (`MemtablePool`).
 7. [`MemtablePool.java:55-60`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L55-L60) — stored: `MemtablePool` constructor calls `this.offHeap = getSubPool(maxOffHeapMemory, cleanThreshold)`, which sets `SubPool.limit` on the `offHeap` field ([line 48](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L48)) — this is what `tryAllocate()` reads at the check when called via `offHeap()`.
 
-## 4. Branch semantics
+## 5. Branch semantics
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
 | **Allow** | `allocated + size <= limit` (the `if` is false, so the CAS is attempted) | CAS updates `allocated` on the `offHeap` `SubPool`; on success returns `true` — caller proceeds to slice off-heap memory. |
-| **Disallow** | `allocated + size > limit` | Returns `false` immediately, no state change — caller does not allocate through this path (in `NativeAllocator`'s case, this return value is not even checked — see §5 note). |
+| **Disallow** | `allocated + size > limit` | Returns `false` immediately, no state change — caller does not allocate through this path (in `NativeAllocator`'s case, this return value is not even checked — see 6b). |
 
 ```java
 // allow branch (falls through the if, line 158-159)
@@ -77,27 +90,31 @@ if ((cur = allocated) + size > limit)
     return false;
 ```
 
-## 5. Code path: allow-branch → object creation
+## 6. Code path
+
+### 6a. Allow branch → object creation
 
 1. [`MemtablePool.java:156-160`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156-L160) — allow branch taken on the `offHeap` `SubPool`, `allocated` bumped via CAS, returns `true`.
 2. [`MemtableAllocator.java:175-177`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L175-L177) — `SubAllocator.allocate()`: `if (parent.tryAllocate(size)) { acquired(size); return; }` — same shared logic as the heap case, called on the `offHeap` `SubAllocator`.
-3. [`NativeAllocator.java:138-141`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L138-L141) — `NativeAllocator.allocate(int size, OpOrder.Group opGroup)` calls `offHeap().allocate(size, opGroup)` (steps 1-2 above) **for accounting only** — the boolean/blocking result of the tracked allocation is not used to gate what follows; `NativeAllocator` always proceeds to physically allocate.
+3. [`NativeAllocator.java:138-141`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L138-L141) — `NativeAllocator.allocate(int size, OpOrder.Group opGroup)` calls `offHeap().allocate(size, opGroup)` (steps 1-2 above) **for accounting only** — the boolean/blocking result of the tracked allocation is not used to gate what follows; `NativeAllocator` always proceeds to physically allocate (see 6b).
 4. [`NativeAllocator.java:144-156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L144-L156) — size routing: allocations `> MAX_CLONED_SIZE` (128 KiB) go to `allocateOversize(size)`; smaller ones are sliced from `currentRegion`, swapping in a new `Region` via `trySwapRegion()` if the current one is full or absent.
 5. [`NativeAllocator.java:176`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L176) (new region, via `trySwapRegion()`) or [`NativeAllocator.java:190`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L190) (oversize path) — **object creation**: `new Region(MemoryUtil.allocate(size), size)` — `MemoryUtil.allocate(size)` is the actual native/off-heap memory allocation (`Unsafe.allocateMemory` under the hood); `Region` wraps the returned peer address for slab-style sub-allocation.
 
-**Note — accounting/allocation are decoupled here:** unlike the heap path
+### 6b. Disallow branch effect
+
+**Accounting/allocation are decoupled here:** unlike the heap path
 (where `ByteBuffer.allocate()` only runs after `tryAllocate()` returns
 `true`, and `HeapPool.Allocator.allocate()` returns nothing if it doesn't),
 `NativeAllocator.allocate()` calls `offHeap().allocate()` purely to update
-the tracked/blocking accounting (§4's `SubAllocator.allocate()` will block
+the tracked/blocking accounting (`SubAllocator.allocate()` will block
 the caller on `opGroup` if `tryAllocate()` keeps failing and the op isn't
 already blocking — see [`MemtableAllocator.java:170-193`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L170-L193)) but does not
 use its return value to conditionally skip the physical `MemoryUtil.allocate()`
-call below it. The if-check still gates *whether the caller blocks/waits*,
+call in 6a's step 5. The if-check still gates *whether the caller blocks/waits*,
 but not *whether the native memory is eventually allocated* — worth flagging
 for Target 3 (bypass analysis) even though this case itself is Target 1+2 only.
 
-## 6. Object & resource
+## 7. Object & resource
 
 | Field | Content |
 |-------|---------|
@@ -106,15 +123,22 @@ for Target 3 (bypass analysis) even though this case itself is Target 1+2 only.
 | **Rough sizing** | Slab-allocated: region size scales exponentially (8 KiB → 1 MiB) independent of the individual cell's `size`; oversize allocations (`size > MAX_CLONED_SIZE`) get a dedicated `Region` sized exactly to `size`. |
 | **Lifetime / release** | Freed via `MemoryUtil.free(region.peer)` in `NativeAllocator.setDiscarded()` ([`NativeAllocator.java:200-206`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L200-L206)) when the owning allocator is discarded (memtable flushed/discarded); tracked-accounting side released via `SubPool.released(size)` ([`MemtablePool.java:192-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L192-L197)), same as the heap case. |
 
-## 7. Maximum memory bound
+## 8. Maximum memory bound
 
-| Field | Content |
-|-------|---------|
-| **Multiplicity** | **True global cap**, same as the heap sibling case: `MEMORY_POOL` ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59)) is a single JVM-wide static singleton; its `offHeap` `SubPool` is one instance shared by every table's `NativeAllocator`, not per-table or per-keyspace. |
-| **Shared/tiered limits** | Single-tier, same structure as the heap case — no reserve/borrow layer. The escape hatch (§5) is a bypass of the *tracked-accounting* tier, not a second legitimate tier. |
-| **Worst-case bound** | `limit` bytes (`memtable_offheap_space`) for the **tracked-accounting** total — but see the §5 note: because `NativeAllocator.allocate()` doesn't gate the physical `MemoryUtil.allocate()` call on `tryAllocate()`'s return value at all (not even via the escape hatch's `isBlocking()` check — it simply never checks the boolean), the *physical* off-heap bytes allocated can diverge from the *accounted* bytes independent of any blocking state. |
-
-**Worst case vs. typical case:** doubly non-hard compared to the heap case. Not only does the `markBlocking()` escape hatch overshoot `limit` (§5, same as the heap sibling), but the accounting/allocation decoupling means the if-check's disallow branch returning `false` **never itself prevents the physical native allocation** — it only prevents `SubPool.allocated`'s bookkeeping from updating past `limit` while the caller (if not already blocking) parks. A reader taking `memtable_offheap_space` as a hard native-memory ceiling would be wrong on two independent grounds; both are flagged for Target 3, not resolved here.
+Raising `memtable_offheap_space` raises the total off-heap bytes the
+**tracked-accounting** side of the single JVM-wide `MEMORY_POOL`'s `offHeap`
+`SubPool` will count before making writers wait; lowering it makes them
+wait sooner. But this is doubly non-hard as a true memory ceiling. First,
+same as the heap sibling: a write already marked "blocking" bypasses the
+check via `markBlocking()` and pushes `allocated` past `limit` with no
+ceiling of its own (6b). Second, and unique to this case: per 6b,
+`NativeAllocator.allocate()` never conditions the physical
+`MemoryUtil.allocate()` call on `tryAllocate()`'s return value at all — not
+even via the escape hatch's `isBlocking()` check, it simply never reads the
+boolean — so the *physical* off-heap bytes allocated can diverge from the
+*accounted* bytes independent of any blocking state. A reader taking
+`memtable_offheap_space` as a hard native-memory ceiling would be wrong on
+two independent grounds; both flagged for Target 3, not resolved here.
 
 ## Verification
 
@@ -129,7 +153,7 @@ the primary trigger below has been **executed and recorded** (see table below).
   scheduled task calls `markBlocking()` — demonstrating both (a) the thread
   parking on `SubPool.hasRoom` when the op is not yet blocking, and (b) the
   `allocated(size)` force-through once `opGroup.isBlocking()` becomes true,
-  pushing `allocated` past `limit` (see §5 note above). Run as-is (no new
+  pushing `allocated` past `limit` (see 6b above). Run as-is (no new
   harness needed) via
   `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest`
   on the `cassandra-src` clone at
@@ -142,7 +166,7 @@ the primary trigger below has been **executed and recorded** (see table below).
   stops exactly at `limit`, and (2) `verifyUsedReclaiming(110, 110)` after
   the subsequent 30-byte allocation — taken only once `markBlocking()` sets
   `opGroup.isBlocking()` — confirms the escape-hatch force-through past
-  `limit` (110 > 100), matching the §5 note that accounting and physical
+  `limit` (110 > 100), matching 6b that accounting and physical
   allocation are decoupled here.
 - **Live-cluster level (secondary, for end-to-end confirmation):** set
   `memtable_allocation_type: offheap_objects` (not the default — required to
@@ -166,7 +190,7 @@ the primary trigger below has been **executed and recorded** (see table below).
 | **Verified By / Date** | Claude (session) — 2026-09-16; primary trigger run and evidence recorded |
 | **Trigger method** | Existing `NativeAllocatorTest.testBookKeeping()`, run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest` against the `cassandra-src` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`) |
 | **Evidence** | `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. Test's own assertions (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`) directly demonstrate the disallow branch's two outcomes at `MemtablePool.java:156` on the `offHeap` `SubPool` — accounting capped at `limit`, then force-through past it once `markBlocking()` fires. |
-| **Notes** | Sibling to [`memtable_heap_space-bytebuffer`](../memtable/memtable_heap_space-bytebuffer.md); same if-check code, different `SubPool` instance/limit/allocator. §5 note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
+| **Notes** | Sibling to [`memtable_heap_space-bytebuffer`](../memtable/memtable_heap_space-bytebuffer.md); same if-check code, different `SubPool` instance/limit/allocator. 6b note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
 
 ---
 

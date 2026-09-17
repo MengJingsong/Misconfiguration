@@ -114,42 +114,42 @@ they failed.
 
 ## Required content per if-check case
 
-Every case file answers exactly these seven questions (see `_TEMPLATE.md`):
+Every case file answers exactly these eight questions (see `_TEMPLATE.md`):
 
 1. **Location** — the if-statement's file:line, pinned to `cassandra-5.0.9`.
-2. **Module** — which Cassandra module/subsystem this if-check belongs to
+2. **Context** — a short, high-level description of what this if-check does
+   and why it exists, written so that any computer-science researcher
+   unfamiliar with Cassandra internals can understand the case at a glance —
+   no line numbers or code, just the functional gist (e.g. "this check
+   throttles how much unflushed write data a node can buffer in memory
+   before forcing writers to wait, so a slow disk can't let memory grow
+   without bound").
+3. **Module** — which Cassandra module/subsystem this if-check belongs to
    (e.g. storage engine / memtable, native transport, compaction).
-3. **Capacity-overflow check?** — is this comparing a counter/usage value
+4. **Capacity-overflow check?** — is this comparing a counter/usage value
    against a limit (general capacity overflow), and if so, where is that
    limit initialized (its own short codepath: declared → configured/derived →
    stored → read at the check)?
-4. **Branch semantics** — which branch allows object creation, which
+5. **Branch semantics** — which branch allows object creation, which
    disallows it (quote the branch bodies).
-5. **Code path to object creation** — the continuous trace from the
-   allow-branch to the actual `new`/allocation call.
-6. **Object & resource** — what is being created (type), and what resource
+6. **Code path** — two subsections:
+   - **(a) Allow branch → object creation** — the continuous trace from the
+     allow-branch to the actual `new`/allocation call.
+   - **(b) Disallow branch effect** — what actually happens when the
+     disallow branch fires (reject / throw / block-and-wait / defer / a
+     silent bypass elsewhere in the call chain) — trace the real effect
+     before assuming it cleanly rejects anything, per the
+     [verification methodology](#verifying-a-case-triggering-the-disallow-branch)'s
+     first rule.
+7. **Object & resource** — what is being created (type), and what resource
    it consumes (heap bytes, off-heap/native bytes, a thread, a queue slot,
    a file handle, etc.), including rough sizing if derivable from the code.
-7. **Maximum memory bound** — a plain statement of how this if-check bounds
-   total memory usage in practice, not just the per-object sizing from
-   question 6. State it as a formula or explicit worst-case bound wherever
-   derivable, and be explicit about anything that makes the effective cap
-   different from "the config value" taken alone:
-   - **Multiplicity** — is this limit instantiated once per JVM (a true
-     global cap), or once per some other unit (per connection, per peer,
-     per table, per connection-type) that multiplies with cluster/schema
-     size? If it multiplies, say what it multiplies by and whether that
-     factor is itself bounded.
-   - **Shared/tiered limits** — if this if-check's limit is only the
-     innermost tier of a larger system (e.g. an exclusive per-connection
-     allowance backed by a shared per-endpoint reserve backed by a global
-     reserve), name every tier and which config backs each one — don't
-     describe only the tier this specific if-check enforces as if it were
-     the whole picture.
-   - **Worst case vs. typical case** — if the true worst-case bound differs
-     meaningfully from what a reader would assume from the config name
-     alone (e.g. "4MiB" sounds like a hard per-node cap but is actually
-     per-connection-type-per-peer), say so explicitly.
+8. **Maximum memory bound** — a plain statement of how the value of the
+   limit-side operand (question 4) affects maximum memory usage: if this
+   value is raised or lowered, what happens to the maximum bytes the system
+   can hold via this if-check, and through what mechanism? This goes beyond
+   the per-object sizing in question 7 — it's about the limit's effect on
+   the ceiling, not just what one allowed object costs.
 
 ## Files per case
 

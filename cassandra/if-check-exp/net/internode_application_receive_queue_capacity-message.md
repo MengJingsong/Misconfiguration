@@ -50,19 +50,34 @@ per-endpoint/global `Limit.tryAllocate()` reserve checks at lines 428/431
 `internode_application_receive_queue_reserve_endpoint_capacity` /
 `internode_application_receive_queue_reserve_global_capacity`). This case
 covers only (1), the exclusive per-connection queue; the reserve-capacity
-checks are noted in §5 but not traced as their own case here — they share
+checks are noted in 6b but not traced as their own case here — they share
 the same object-creation path and could be filed as a sibling case if the
 per-connection vs. reserve distinction is later judged worth separating
 (same pattern as the memtable heap/offheap sibling pair).
 
-## 2. Module
+## 2. Context
+
+Cassandra nodes constantly exchange messages with peers over persistent
+internode connections — replicated writes, read requests, gossip, repair
+traffic, and more. Each inbound connection decodes messages off the wire
+and deserializes them into in-memory objects before handing them to a
+worker thread for processing; if a peer sends messages faster than this
+node can drain its processing queue, that steady stream of deserialized
+objects would otherwise accumulate in memory without bound. This if-check
+is the flow-control gate on that inbound path: before deserializing an
+arriving message, the connection checks whether adding its byte size to
+what it's already holding would exceed a per-connection allowance — if so,
+the connection stops decoding and applies backpressure to the sender
+instead of buffering unboundedly.
+
+## 3. Module
 
 | Field | Content |
 |-------|---------|
 | **Module** | Internode messaging (`net/`) — inbound connection handling |
 | **One-line role** | Netty pipeline handler that decodes and deserializes messages arriving from a peer node, applying flow control so a fast/misbehaving sender can't unboundedly grow in-memory buffered message state on the receiver. |
 
-## 3. Capacity-overflow check
+## 4. Capacity-overflow check
 
 | Field | Content |
 |-------|---------|
@@ -79,7 +94,7 @@ per-connection vs. reserve distinction is later judged worth separating
 4. [`InboundMessageHandlers.java:97,118,147`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandlers.java#L97) — stored: constructor param `queueCapacity` is kept on `InboundMessageHandlers` and threaded into each per-connection `InboundMessageHandler::new` at line 147.
 5. [`InboundMessageHandler.java:92,105`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L92) → [`AbstractMessageHandler.java:172,185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L172-L185) — stored: `InboundMessageHandler`'s constructor forwards `queueCapacity` to `super(...)`, which assigns `this.queueCapacity = queueCapacity` (`AbstractMessageHandler.java:185`) — a `final` field on the per-connection handler, this is what the check at line 419 reads.
 
-## 4. Branch semantics
+## 5. Branch semantics
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -108,14 +123,18 @@ if (!endpointReserve.tryAllocate(allocatedExcess))
 }
 ```
 
-## 5. Code path: allow-branch → object creation
+## 6. Code path
+
+### 6a. Allow branch → object creation
 
 1. [`AbstractMessageHandler.java:419-423`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419-L423) — allow branch taken, `queueSize` bumped, returns `Outcome.SUCCESS`.
 2. [`AbstractMessageHandler.java:398`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L398) — outer `acquireCapacity(endpointReserve, globalReserve, bytes, currentTimeNanos, expiresAtNanos)` sees `outcome == SUCCESS`, returns `true` to its caller.
 3. [`InboundMessageHandler.java:139-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L139-L151) — `processOneContainedMessage()`: `if (!acquireCapacity(...)) return false;` is skipped (capacity was granted), so execution proceeds to `processSmallMessage(bytes, size, header)` (or `processLargeMessage` for messages over `largeThreshold`).
 4. [`InboundMessageHandler.java:163`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L163) — **object creation**: `Message<?> m = serializer.deserialize(in, header, version);` — the inbound bytes are deserialized into a live `Message` object (header + payload, e.g. a mutation, read command, or response).
 
-**Disallow-branch effect (not a rejection):** per
+### 6b. Disallow branch effect
+
+**Not a rejection.** Per
 [`InboundMessageHandler.java:139-140`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L139-L140),
 a `false` return from `acquireCapacity()` makes `processOneContainedMessage()`
 return `false` without deserializing. This propagates up through
@@ -133,7 +152,7 @@ outright. No escape hatch analogous to the memtable cases' `markBlocking()`
 was found in this class; flagged as an open question for Target 3, not
 pursued further here.
 
-## 6. Object & resource
+## 7. Object & resource
 
 | Field | Content |
 |-------|---------|
@@ -142,15 +161,36 @@ pursued further here.
 | **Rough sizing** | Bounded per-connection to `queueCapacity` (default 4MiB via `internode_application_receive_queue_capacity`), plus whatever the connection can additionally borrow from the shared endpoint/global reserves (§1 note) before backpressure applies. |
 | **Lifetime / release** | Released via `releaseCapacity(size)` (referenced at `InboundMessageHandler.java:184`, called when deserialization fails, and — per class-level docs at `InboundMessageHandler.java:66`, "Permits are released after the verb handler has been invoked" — once the dispatched verb handler finishes processing the message), which frees `queueSize` and signals waiting handlers via the wait queues. |
 
-## 7. Maximum memory bound
+## 8. Maximum memory bound
 
-| Field | Content |
-|-------|---------|
-| **Multiplicity** | **Not a global cap.** `queueCapacity` is a `final long` copied onto *every* `AbstractMessageHandler` instance. `InboundMessageHandlers.createHandler()` ([InboundMessageHandlers.java:130-149](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandlers.java#L130-L149)) creates one handler per `ConnectionType` (urgent/small/large/legacy) per peer, and `InboundMessageHandlers` itself is one instance per peer (`MessagingService.getInbound()`, [MessagingService.java:669-682](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/MessagingService.java#L669-L682)). So the exclusive allowance this if-check enforces multiplies by up to 4 connection types × however many peers this node communicates with — it is **not bounded by this if-check** and grows with cluster size. |
-| **Shared/tiered limits** | This if-check (line 419) is only the innermost of three tiers, all read at the same `acquireCapacity()` call: (1) **per-connection exclusive** — `queueCapacity`, this case, `internode_application_receive_queue_capacity` (default 4MiB), one allowance per `AbstractMessageHandler`; (2) **per-endpoint shared reserve** — `endpointReserveCapacity`, backed by `internode_application_receive_queue_reserve_endpoint_capacity` (default 128MiB), one `ResourceLimits.Concurrent` instance shared by *all* connection-type handlers for a single peer (constructed once in `InboundMessageHandlers`'s constructor, [InboundMessageHandlers.java:118](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandlers.java#L118)), borrowed from at lines 428-436 of the if-check's method; (3) **global shared reserve** — `globalReserveCapacity`, backed by `internode_application_receive_queue_reserve_global_capacity` (default 512MiB), a *single* `ResourceLimits.Concurrent` for the entire node, constructed once in `MessagingService` ([MessagingService.java:309-310](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/MessagingService.java#L309-L310)) and shared across every peer. Only tier (3) doesn't grow with peer count. |
-| **Worst-case bound** | `max bytes ≈ (peers × connection_types_per_peer × queueCapacity) + endpointReserveCapacity_per_active_peer + globalReserveCapacity`, where the middle term itself can be up to `peers × endpointReserveCapacity` in the worst case (each peer has its own endpoint reserve instance), bounded overall by however much of `globalReserveCapacity` the union of all peers' borrowing can draw from at once (borrowed reserve capacity is a single shared pool, so peers contend for it rather than each getting a full independent 512MiB). |
-
-**Worst case vs. typical case:** the config name `internode_application_receive_queue_capacity` (4MiB default) reads like a flat per-node receive-buffer cap. It is not — it is a **per-connection-type-per-peer** allowance. A node talking to 50 peers has up to `50 × 4 × 4MiB = 800MiB` of *exclusive* allowance alone before any peer even touches the shared reserves, on top of which each peer can additionally borrow from the 128MiB endpoint reserve and the node-wide 512MiB global reserve. The true worst-case total scales with cluster topology (peer count), not with this one config value in isolation.
+Raising `internode_application_receive_queue_capacity` raises how many bytes
+of not-yet-processed inbound messages **one connection** may hold — and
+deserialize into live `Message` objects — before it must fall back to
+borrowing from shared reserves or applying backpressure; lowering it makes
+that connection throttle sooner. But `queueCapacity` is a `final long`
+copied onto *every* `AbstractMessageHandler` instance, and
+`InboundMessageHandlers.createHandler()`
+([InboundMessageHandlers.java:130-149](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandlers.java#L130-L149))
+creates one handler per `ConnectionType` (urgent/small/large/legacy) per
+peer, with `InboundMessageHandlers` itself one instance per peer
+(`MessagingService.getInbound()`,
+[MessagingService.java:669-682](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/MessagingService.java#L669-L682)).
+So this if-check's enforcement multiplies by up to 4 connection types ×
+however many peers this node talks to — raising the config value scales the
+node's true worst-case receive-side memory by that same factor, not by a
+flat per-node amount. On top of this per-connection tier, 6b's disallow
+path lets a connection borrow from a per-endpoint reserve
+(`internode_application_receive_queue_reserve_endpoint_capacity`, default
+128MiB, shared by all connection-type handlers to one peer) and then a
+single node-wide global reserve
+(`internode_application_receive_queue_reserve_global_capacity`, default
+512MiB, shared across every peer) — so the node's actual worst-case receive
+memory is `(peers × connection_types × queueCapacity) + endpointReserve_per_active_peer + globalReserve`,
+not simply "`internode_application_receive_queue_capacity` MiB." A node
+talking to 50 peers already has `50 × 4 × 4MiB = 800MiB` of exclusive
+per-connection allowance alone, before any peer touches the shared
+reserves — the config name reads like a flat per-node cap but is actually a
+per-connection-type-per-peer one.
 
 ## Verification
 

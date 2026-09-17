@@ -17,14 +17,23 @@
 // paste the exact if-statement (and enough surrounding context to read both branches)
 ```
 
-## 2. Module
+## 2. Context
+
+_High-level, non-code description of what this if-check does and why it
+exists — written so any computer-science researcher unfamiliar with
+Cassandra internals can understand the case at a glance. One short
+paragraph: what mechanism this is part of, what problem it solves, what
+would go wrong without it. No line numbers, no code snippets here — those
+come later._
+
+## 3. Module
 
 | Field | Content |
 |-------|---------|
 | **Module** | e.g., storage engine — memtable allocation (`utils/memory`, `db/memtable`) |
 | **One-line role** | what this module does in Cassandra, one sentence |
 
-## 3. Capacity-overflow check
+## 4. Capacity-overflow check
 
 | Field | Content |
 |-------|---------|
@@ -40,7 +49,7 @@
 3. [`Class.method():NN`](link) — stored where the check reads it from
 4. [`Class.method():NN`](link) — read at the point of comparison
 
-## 4. Branch semantics
+## 5. Branch semantics
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -55,7 +64,9 @@
 // disallow-branch body
 ```
 
-## 5. Code path: allow-branch → object creation
+## 6. Code path
+
+### 6a. Allow branch → object creation
 
 Continuous trace from the allow branch to the actual allocation call.
 
@@ -64,7 +75,18 @@ Continuous trace from the allow branch to the actual allocation call.
 3. [`Class.method():NN`](link) — caller proceeds to allocate
 4. [`Class.method():NN`](link) — **object creation** (`new ...` / `ByteBuffer.allocate(...)` / etc.)
 
-## 6. Object & resource
+### 6b. Disallow branch effect
+
+What actually happens when the disallow branch fires — trace the real
+effect before assuming it cleanly rejects anything (per the
+[verification methodology](README.md#verifying-a-case-triggering-the-disallow-branch)'s
+first rule). Is it a clean reject/throw? A block-and-wait? A silent
+bypass/escape hatch elsewhere in the call chain?
+
+1. [`Class.method():NN`](link) — disallow branch taken, what state (if any) changes
+2. [`Class.method():NN`](link) — what the caller does with the rejected/blocked result
+
+## 7. Object & resource
 
 | Field | Content |
 |-------|---------|
@@ -73,22 +95,13 @@ Continuous trace from the allow branch to the actual allocation call.
 | **Rough sizing** | how the size is derived, if determinable from the code (e.g. `size` param, fixed struct size) |
 | **Lifetime / release** | what releases this resource back to the pool/limit (brief) |
 
-## 7. Maximum memory bound
+## 8. Maximum memory bound
 
-State plainly how this if-check bounds total memory usage in practice — not
-just the per-object sizing from §6. Prefer an explicit formula/worst-case
-bound over prose alone.
-
-| Field | Content |
-|-------|---------|
-| **Multiplicity** | Is this limit instantiated once per JVM (true global cap), or once per connection/peer/table/other unit that multiplies with cluster or schema size? If it multiplies, state the factor and whether that factor is itself bounded. |
-| **Shared/tiered limits** | If this if-check enforces only the innermost tier of a larger system (e.g. exclusive per-connection allowance → shared per-endpoint reserve → global reserve), name every tier and the config backing each — don't describe only this if-check's own tier as if it were the whole picture. |
-| **Worst-case bound** | The actual worst-case total, as a formula if derivable (e.g. `peers × connection_types × queueCapacity + endpointReserve + globalReserve`). |
-
-**Worst case vs. typical case:** call out explicitly if the true worst-case
-bound differs from what the config name alone would suggest (e.g. a value
-that sounds like a flat per-node cap but is actually per-connection or
-per-peer).
+State plainly how the value of the limit-side operand (§4) affects maximum
+memory usage: if it's raised or lowered, what happens to the maximum bytes
+the system can hold via this if-check, and through what mechanism? Goes
+beyond §7's per-object sizing — this is about the limit's effect on the
+ceiling, not what one allowed object costs.
 
 ## Verification
 

@@ -25,14 +25,28 @@ boolean tryAllocate(long size)
 }
 ```
 
-## 2. Module
+## 2. Context
+
+Cassandra buffers newly-written data in memory (a "memtable") before it is
+flushed to disk as an immutable SSTable file — this avoids a disk write on
+every single client write, at the cost of holding recent writes in JVM heap.
+Without a cap, a burst of writes arriving faster than flushes can drain them
+would grow this in-memory buffer without bound, risking an out-of-memory
+condition. This if-check is the admission gate for that buffer: every write
+that wants to add bytes to a memtable first asks a shared pool "is there
+room for `size` more bytes under the configured ceiling?" — if yes, the
+write's bytes are counted against the ceiling and the write proceeds; if
+no, the write is (usually) made to wait until other memtables are flushed
+and release their share back to the pool.
+
+## 3. Module
 
 | Field | Content |
 |-------|---------|
 | **Module** | Storage engine — memtable memory allocation (`utils/memory`, `db/memtable`) |
 | **One-line role** | Tracks and bounds the JVM heap / off-heap bytes used by in-memory memtables (the write-path buffer before data is flushed to disk as SSTables). |
 
-## 3. Capacity-overflow check
+## 4. Capacity-overflow check
 
 | Field | Content |
 |-------|---------|
@@ -49,7 +63,7 @@ boolean tryAllocate(long size)
 4. [`AbstractAllocatorMemtable.java:81`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L81) — read and converted to bytes: `heapLimit = getMemtableHeapSpaceInMiB() << 20`.
 5. [`MemtablePool.java:55-60`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L55-L60) & [`MemtablePool.java:117-121`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L117-L121) — stored: `MemtablePool` constructor passes `maxOnHeapMemory` into `getSubPool(limit, cleanThreshold)`, which sets `SubPool.limit` — this is what `tryAllocate()` reads at the check.
 
-## 4. Branch semantics
+## 5. Branch semantics
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -68,7 +82,9 @@ if ((cur = allocated) + size > limit)
     return false;
 ```
 
-## 5. Code path: allow-branch → object creation
+## 6. Code path
+
+### 6a. Allow branch → object creation
 
 1. [`MemtablePool.java:156-160`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156-L160) — allow branch taken, `allocated` bumped via CAS, returns `true`.
 2. [`MemtableAllocator.java:175-177`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L175-L177) — `SubAllocator.allocate()`: `if (parent.tryAllocate(size)) { acquired(size); return; }` — caller sees success, marks the memory acquired, returns normally.
@@ -77,10 +93,14 @@ if ((cur = allocated) + size > limit)
 **Note — accounting and object creation are decoupled (same as the off-heap
 sibling case):** step 3's `ByteBuffer.allocate(size)` runs unconditionally
 after `onHeap().allocate(size, opGroup)` *returns*, regardless of how it
-returned. The full disallow-branch behavior lives in
+returned — see 6b for what the disallow branch actually does.
+
+### 6b. Disallow branch effect
+
+The full disallow-branch behavior lives in
 [`MemtableAllocator.java:169-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L169-L197)
-(`SubAllocator.allocate()`), which this case's step 2 only shows the
-allow-branch half of:
+(`SubAllocator.allocate()`), which 6a's step 2 only shows the allow-branch
+half of:
 
 ```java
 public void allocate(long size, OpOrder.Group opGroup)
@@ -137,7 +157,7 @@ things happens, and neither is a rejected/failed write:
   allocating — worth flagging for Target 3 (bypass analysis), not pursued
   further in this Target 1+2 case.
 
-## 6. Object & resource
+## 7. Object & resource
 
 | Field | Content |
 |-------|---------|
@@ -146,15 +166,22 @@ things happens, and neither is a rejected/failed write:
 | **Rough sizing** | Equal to the `size` parameter threaded in from the write path (cell/row serialized size) — no fixed struct size; scales with write payload. |
 | **Lifetime / release** | Released via `SubPool.released(size)` (`MemtablePool.java:192-197`) when the owning `SubAllocator` is discarded (memtable flushed/discarded) — signals `hasRoom` to unblock any waiters. |
 
-## 7. Maximum memory bound
+## 8. Maximum memory bound
 
-| Field | Content |
-|-------|---------|
-| **Multiplicity** | **True global cap.** [`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59) — `MEMORY_POOL` is a single `static final MemtablePool` instance for the entire JVM. Every table's memtable allocator (`MEMORY_POOL.newAllocator(...)`, line 118) draws from the *same* `SubPool.onHeap` instance and its one `limit` field — this does not multiply per-table or per-keyspace. |
-| **Shared/tiered limits** | Single-tier — no reserve/borrow system layered on top (contrast with the `net` module's `internode_application_receive_queue_capacity` case, which has per-connection + per-endpoint + global tiers). The only complication is the escape hatch documented in §5: a `markBlocking()`-marked op bypasses `limit` entirely rather than borrowing from a separate reserve. |
-| **Worst-case bound** | `limit` bytes under normal operation (`memtable_heap_space`, auto-sized to `Runtime.getRuntime().maxMemory() / 4` if unset) — but **unbounded above `limit`** when the escape hatch fires, since `allocated(size)` (`MemtableAllocator.java:184`) adds `size` unconditionally with no upper check of its own. The overshoot magnitude is bounded only by however much in-flight blocking-marked write volume exists at once during a flush barrier wait, not by any second limit. |
-
-**Worst case vs. typical case:** `memtable_heap_space` reads like (and normally behaves as) a hard per-node cap on on-heap memtable bytes. It is **not hard** — see the escape hatch in §5: writes belonging to an `OpOrder.Group` already marked "blocking" (done for in-flight writes a flush barrier must wait out, `ColumnFamilyStore.java:1238`) skip the check's enforcement and push `allocated` past `limit` with no ceiling of their own. Flagged for Target 3 (bypass analysis); the true worst-case is not simply "`memtable_heap_space` MiB."
+Raising `memtable_heap_space` raises the total on-heap bytes the single
+JVM-wide `MEMORY_POOL` ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59),
+one instance for the whole node, shared by every table's memtable — not
+per-table or per-keyspace) will admit through this if-check before making
+writers wait; lowering it makes writers wait sooner, at a smaller total.
+Under normal operation the ceiling is exactly `limit` bytes (the configured
+value, auto-sized to `Runtime.getRuntime().maxMemory() / 4` if unset). **This
+is not a hard ceiling**, though: per 6b, a write already marked "blocking"
+(an in-flight write a flush barrier must wait out,
+`ColumnFamilyStore.java:1238`) bypasses the check's enforcement entirely and
+pushes `allocated` past `limit` with no ceiling of its own — so the true
+worst case is `limit` plus however much blocking-marked write volume is
+in flight at once during a flush barrier wait, not simply "`memtable_heap_space`
+MiB." Flagged for Target 3 (bypass analysis).
 
 ## Verification
 
@@ -167,7 +194,7 @@ as-is to run the verification.
 
 ### What "hitting the disallow branch" looks like here
 
-Per the §5 note above, there is **no rejected write to look for**. The two
+Per the 6b note above, there is **no rejected write to look for**. The two
 observable outcomes are: (a) the calling thread **blocks** on
 `SubPool.hasRoom` until something releases memory, or (b) if the op is
 already part of a flush barrier's "blocking" set, the allocation **silently
@@ -383,11 +410,11 @@ to run a single test class, e.g. its usage example at `build.xml:1379`.)
   was actually reached — the over-limit call provably did not return within
   300ms (`TimeoutException` caught, asserted) while a non-blocking op was
   pending — ruling out "it just happened to be slow"; (2) it is the *same*
-  if-check and *same* release mechanism described in §§3-5 — the call only
+  if-check and *same* release mechanism described in §§4-6 — the call only
   completes after `SubAllocator.released()` is invoked, and completes with
   exactly the expected post-release usage number.
 - `testForcesThroughWhenOpGroupIsBlocking` passing proves the escape-hatch
-  behavior described in the §5 note: usage ends up strictly greater than
+  behavior described in the 6b note: usage ends up strictly greater than
   `LIMIT`, with no parking at all — direct evidence that this if-check does
   not gate a `markBlocking()`-marked caller.
 - If either assertion fails, that means real behavior has drifted from this
@@ -436,7 +463,7 @@ experiment's setup.
    $(cat <path-to-cassandra-pidfile>)` while a write is stuck, and look for
    a thread parked in `WaitQueue$Signal.awaitThrowUncheckedOnInterrupt()`
    called from `MemtableAllocator$LifeCycle.allocate()`
-   (`MemtableAllocator.java:195`, inside the `allocate()` shown in the §5
+   (`MemtableAllocator.java:195`, inside the `allocate()` shown in the 6b
    note above). The JMX timer
    `org.apache.cassandra.metrics:type=MemtablePool,name=BlockedOnAllocation`
    (`MemtablePool.java:63`) is corroborating evidence if JMX tooling
@@ -451,7 +478,7 @@ experiment's setup.
 | **Verified By / Date** | Jingsong — line numbers verified against local pinned-tag clone; behavioral trigger executed 2026-09-16 on CloudLab node pc80 (JDK 11.0.32, Ant 1.10.12, git SHA `b5f2a54210d541339c2e7c17a794195cac0e67c2` of the shared `cassandra-src` clone) |
 | **Trigger method** | Unit test `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full source above) — run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`. Live-cluster trigger not run (optional secondary confirmation, not needed once the unit test passed). |
 | **Evidence** | `BUILD SUCCESSFUL` — `Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.065 sec`. (1) `testBlocksThenUnblocksOnRelease` passed: the over-limit `allocate(1)` call did not complete within 300 ms (`TimeoutException` caught and asserted) while usage stayed at `LIMIT`; after `released(50)`, the parked call completed and returned a 1-byte buffer with usage at `LIMIT - 50 + 1`. (2) `testForcesThroughWhenOpGroupIsBlocking` passed: with the op group's barrier marked blocking, `allocate(1)` returned immediately (no park) and usage reached `LIMIT + 1`, confirming the escape hatch overshoots the limit rather than gating it. |
-| **Notes** | Sibling to [`memtable_offheap_space-region`](memtable_offheap_space-region.md) — same `SubPool.tryAllocate()` if-check, on-heap `SubPool`/`HeapPool.Allocator` instead of off-heap. Same decoupled-accounting / escape-hatch behavior applies (see §5 note); flagged for later Target-3 bypass analysis, not pursued further here. |
+| **Notes** | Sibling to [`memtable_offheap_space-region`](memtable_offheap_space-region.md) — same `SubPool.tryAllocate()` if-check, on-heap `SubPool`/`HeapPool.Allocator` instead of off-heap. Same decoupled-accounting / escape-hatch behavior applies (see 6b note); flagged for later Target-3 bypass analysis, not pursued further here. |
 
 ---
 
