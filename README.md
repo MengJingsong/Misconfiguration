@@ -29,8 +29,12 @@ mount, alongside other resources that are **not** part of this repo:
 ├── git-repos/
 │   ├── misconfiguration/            <- THIS repo (what you're reading)
 │   └── cassandra-src/               <- git clone of apache/cassandra (tag cassandra-5.0.9),
-│                                        used by cassandra/if-check-exp for unit-test verification;
+│                                        used by cassandra/if-check-exp for unit-test verification
+│                                        and by codeql-queries/ for database builds;
 │                                        NOT tracked by this repo
+├── tools/codeql/                    <- CodeQL CLI bundle, used by codeql-queries/; NOT tracked by this repo
+├── codeql-dbs/                      <- compiled CodeQL databases (e.g. cassandra-db), built from
+│                                        cassandra-src by codeql-queries/; NOT tracked by this repo
 ├── tarfiles/                        <- downloaded release tarballs (gitignored equivalent; lives outside this repo)
 ├── exp/, deltas/, groups/, images/, logs/, rpms/, templates/, tiplogs/
                                       <- CloudLab platform-managed scaffold dirs, not ours
@@ -73,7 +77,12 @@ never scattered across individual scripts.
   Cassandra **5.0.9** binary distribution cluster.
 - **`cassandra/entry-restriction-exp/`**, **`cassandra/if-check-exp/`** —
   static code-path inventories of Cassandra's resource-limit checks (see
-  each folder's own `README.md`/`HANDOFF.md`); `if-check-exp` verifies
-  cases against the `cassandra-src` clone described above.
+  each folder's own `README.md`, and this repo's root [`HANDOFF.md`](HANDOFF.md)
+  for `if-check-exp`'s start-here brief); `if-check-exp` verifies cases
+  against the `cassandra-src` clone described above.
+- **`codeql-queries/`** — CodeQL query packs (one per target: `cassandra/`,
+  `hadoop/`) used to mechanically discover candidate if-checks for
+  `cassandra/if-check-exp` (see its own [`README.md`](codeql-queries/README.md)).
+  Runs against the compiled databases under `codeql-dbs/` described above.
 - **`hadoop/build-hadoop-src/`** — Hadoop source build scripts (JDK8 +
   Maven + protobuf 2.5.0).

@@ -1,11 +1,18 @@
 # If-Check Exp — Handoff
 
 For a new session (Claude Code, Cowork, or otherwise) picking up
-`if-check-exp` work. Read this first, then `README.md` for the full format
-spec. This file is kept in sync with the Cowork "Throttling" project's
-handoff doc (`claude/if-check-exp-handoff.md`) so a local Claude Code
-session — which can't read that project's knowledge base directly — has
-the same context available on disk.
+`if-check-exp` work. Read this first, then
+[`cassandra/if-check-exp/README.md`](cassandra/if-check-exp/README.md) for
+the full format spec. This file is kept in sync with the Cowork
+"Throttling" project's handoff doc (`claude/if-check-exp-handoff.md`) so a
+local Claude Code session — which can't read that project's knowledge base
+directly — has the same context available on disk.
+
+This handoff currently covers `if-check-exp` specifically, since that's
+the repo's active experiment; it lives at the repo root (rather than under
+`cassandra/if-check-exp/`) so a new session finds it immediately. If other
+experiment folders grow their own handoff needs later, split this back out
+per-folder rather than overloading one file.
 
 ## What this experiment is
 
@@ -69,7 +76,7 @@ this folder's own scope.
 
 ## Current state — both cases `verified`
 
-- **`memtable/memtable_heap_space-bytebuffer.md`** — on-heap path. If-check:
+- **`cassandra/if-check-exp/memtable/memtable_heap_space-bytebuffer.md`** — on-heap path. If-check:
   [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156),
   gating `ByteBuffer.allocate(size)` via `HeapPool.Allocator.allocate()`.
   Limit traced from `Config.java`'s `memtable_heap_space` through to
@@ -97,7 +104,7 @@ this folder's own scope.
     setup — skipped since the unit test already provides direct evidence
     for both branches; would only be a reasonable next step if end-to-end
     (real daemon) confirmation becomes valuable later.
-- **`memtable/memtable_offheap_space-region.md`** — off-heap sibling case.
+- **`cassandra/if-check-exp/memtable/memtable_offheap_space-region.md`** — off-heap sibling case.
   Same if-check, `offHeap` `SubPool` instance instead of `onHeap`, reached
   via `NativePool`/`NativeAllocator` instead of `HeapPool`; limit is
   `memtable_offheap_space`. Object created is a `NativeAllocator.Region`
@@ -145,8 +152,28 @@ this folder's own scope.
 
 ## Open items / natural next steps
 
+- **CodeQL-assisted discovery pipeline in progress (started 2026-09-17):**
+  a new `codeql-queries/` folder at the repo root (own
+  [README](codeql-queries/README.md)) builds a CodeQL database from the
+  `cassandra-src` clone (kept at
+  `/proj/misconfiguration-PG0/codeql-dbs/cassandra-db`, CLI at
+  `/proj/misconfiguration-PG0/tools/codeql/`) and runs queries under
+  `codeql-queries/cassandra/queries/if-check-exp/` (own
+  [README](codeql-queries/cassandra/queries/if-check-exp/README.md)) to
+  mechanically narrow Cassandra's ~17k `if` statements toward Target-1
+  candidates — this supersedes Workflow step 2's manual keyword-grep
+  approach below. Pipeline so far: `AllIfStatements.ql` (full inventory) →
+  `ComparisonIfStatements.ql` (narrows to `if` conditions built from a
+  direct `<`/`<=`/`>`/`>=`/`==`/`!=` comparison, ~10,147 rows, ~5,932 after
+  dropping null-comparisons). **Deliberately no fixed keyword list** — per
+  Jingsong's call, the memory-relatedness judgment (Rule 1/Rule 2) is made
+  by reading each row, not by grepping for a canned vocabulary, since real
+  cases (`memtable_heap_space`, `HintsBufferPool_MAX_ALLOCATED_BUFFERS`)
+  don't share predictable vocabulary. Next: more structural (non-keyword)
+  narrowing, then a read-and-judge triage pass writing survivors to
+  `cassandra/if-check-exp/candidates/`.
 - **New case drafted, not yet verified:**
-  `net/internode_application_receive_queue_capacity-message.md` — per-connection
+  `cassandra/if-check-exp/net/internode_application_receive_queue_capacity-message.md` — per-connection
   byte cap (`internode_application_receive_queue_capacity`, default 4MiB) in
   [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419),
   gating deserialization of inbound internode `Message` objects. Disallow
@@ -160,7 +187,7 @@ this folder's own scope.
   Verification section, checking `test/unit/org/apache/cassandra/net/` for
   reusable scaffolding first.
 - **New case drafted, not yet verified:**
-  `hints/HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer.md` — cap
+  `cassandra/if-check-exp/hints/HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer.md` — cap
   (`MAX_ALLOCATED_BUFFERS`, a JVM system property `cassandra.MAX_HINT_BUFFERS`,
   default 3) on off-heap `HintsBuffer` allocations in
   [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113).
@@ -179,7 +206,7 @@ this folder's own scope.
   segment/buffer on "full" rather than diverging into block/reject — same
   non-diverging pattern as prior compaction rejects), and
   `BatchStatement.java:349` (`verifyBatchSize()`, rejects an already-built
-  batch post hoc, doesn't gate object creation). Logged in `_INDEX.md`.
+  batch post hoc, doesn't gate object creation). Logged in `cassandra/if-check-exp/_INDEX.md`.
 - **Both memtable cases are `verified` and pushed** (commit `0198e25`).
 - **Optional rigor gap:** the offheap case's evidence (reused
   `testBookKeeping()`) doesn't isolate a timeout-based proof of the
@@ -207,8 +234,8 @@ this folder's own scope.
   compaction thread pool), was drafted then removed after adopting the
   memory-magnitude test now codified as Rule 2: `concurrent_compactors`
   bounds thread-pool *concurrency*, not the bytes a compaction task
-  allocates once running. Logged in `_INDEX.md`'s "lines considered and
-  rejected" table along with the other compaction lines surveyed (mostly
+  allocates once running. Logged in `cassandra/if-check-exp/_INDEX.md`'s
+  "lines considered and rejected" table along with the other compaction lines surveyed (mostly
   config-validation, non-diverging selection logic) so this module isn't
   re-scanned from scratch.
 - **Other modules still undecided:** native transport / request queues,

@@ -214,11 +214,12 @@ the grouping unit instead):
 ### Directory layout
 
 ```
+(repo root)/HANDOFF.md              # start-here brief for a new session: what this experiment is, current state, next steps
 cassandra/if-check-exp/
 ├── README.md                     # this file
-├── HANDOFF.md                     # start-here brief for a new session: what this experiment is, current state, next steps
 ├── _INDEX.md                      # master index of every case (navigation + progress)
 ├── _TEMPLATE.md                    # template for each new case file
+├── candidates/                      # working list of CodeQL-surfaced candidates pending triage
 └── <module>/                       # one folder per Cassandra module
     ├── <limit>-<object>.md
     └── <limit>-<object>.md
@@ -228,19 +229,25 @@ cassandra/if-check-exp/
 
 **Orient (before starting):**
 
-0. Read `HANDOFF.md` first — it's the start-here brief for a new session
-   (what this experiment is, current state, open items) — then the Google
-   Docs (*Meeting Summary*, *Progress Report*) for the current plan, scope,
-   and next step.
+0. Read [`../../HANDOFF.md`](../../HANDOFF.md) first — it's the start-here
+   brief for a new session (what this experiment is, current state, open
+   items) — then the Google Docs (*Meeting Summary*, *Progress Report*) for
+   the current plan, scope, and next step.
 1. Open `_INDEX.md` to see which modules/cases already exist (and which
    lines were considered and rejected) — continue from there, don't duplicate.
 
 **Target 1 — discover candidate if-checks:**
 
-2. Grep for comparisons (`<`, `>`, `<=`, `>=`, `==`) near identifiers
-   containing `limit`, `threshold`, `capacity`, `max`, `size`, `count`,
-   inside or near allocation-adjacent code. Prefer the local repo clone over
-   fetching whole files through GitHub (grep/window it — saves tokens).
+2. Use the CodeQL pipeline under
+   [`codeql-queries/cassandra/queries/if-check-exp/`](../../codeql-queries/cassandra/queries/if-check-exp/README.md)
+   to mechanically narrow the full `if`-statement inventory down to
+   comparison-based candidates, then read the results and judge each one
+   by hand for capacity/memory-relatedness — deliberately no fixed keyword
+   list (real cases like `memtable_heap_space` don't share predictable
+   vocabulary), so this is a read-and-judge pass over CodeQL's structural
+   narrowing, not a grep. Prefer the local repo clone over fetching whole
+   files through GitHub when reading a candidate's surrounding code
+   (grep/window it — saves tokens).
 3. For each candidate, confirm the two branches actually diverge on object
    creation before writing a case file (see scope note above).
 

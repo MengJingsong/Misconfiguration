@@ -161,4 +161,4 @@ branch with recorded evidence.
 ## Notes
 
 - `MAX_ALLOCATED_BUFFERS` is set via a JVM system property (`-D` flag), not `cassandra.yaml` — different configuration mechanism from the memtable/net cases' YAML-backed limits, but still "Configuration" per the Limit type taxonomy since it's externally settable without a code change.
-- This case was flagged as a runner-up candidate in `HANDOFF.md` before this draft; see `_INDEX.md` for cross-reference.
+- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../HANDOFF.md) before this draft; see `_INDEX.md` for cross-reference.
