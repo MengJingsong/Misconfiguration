@@ -159,17 +159,27 @@ this folder's own scope.
   `Limit`s, feed one oversized message frame) per the case file's
   Verification section, checking `test/unit/org/apache/cassandra/net/` for
   reusable scaffolding first.
+- **New case drafted, not yet verified:**
+  `hints/HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer.md` — cap
+  (`MAX_ALLOCATED_BUFFERS`, a JVM system property `cassandra.MAX_HINT_BUFFERS`,
+  default 3) on off-heap `HintsBuffer` allocations in
+  [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113).
+  Disallow branch blocks the caller on `reserveBuffers.take()` until a
+  flushed buffer is recycled via `offer()`, rather than allocating a new
+  one — no escape hatch found yet. `Status: pending`. Next step: run the
+  existing `test/unit/org/apache/cassandra/hints/HintsBufferPoolTest.java`'s
+  `testBackpressure()` test as-is (`ant testsome
+  -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest`) — it already
+  uses a byteman rule at the exact `reserveBuffers.take()` call inside this
+  if-check's disallow branch, so no new harness is needed, just execution +
+  recording the result in the case file's Verification table. Confirm
+  Byteman is resolved as a test dependency by `ant testsome` before running.
 - Broader survey (2026-09-17) also considered and rejected:
   `CommitLogSegment.java:242` and `HintsBuffer.java:190` (both allocate a new
   segment/buffer on "full" rather than diverging into block/reject — same
   non-diverging pattern as prior compaction rejects), and
   `BatchStatement.java:349` (`verifyBatchSize()`, rejects an already-built
   batch post hoc, doesn't gate object creation). Logged in `_INDEX.md`.
-  Runner-up candidate not yet filed: `HintsBufferPool.switchCurrentBuffer()`
-  (`HintsBufferPool.java:113`) caps off-heap direct-buffer allocation for
-  hints at `MAX_ALLOCATED_BUFFERS × bufferSize`, blocking on
-  `reserveBuffers.take()` when full — worth a case file if the messaging one
-  stalls or a second parallel case is wanted.
 - **Both memtable cases are `verified` and pushed** (commit `0198e25`).
 - **Optional rigor gap:** the offheap case's evidence (reused
   `testBookKeeping()`) doesn't isolate a timeout-based proof of the

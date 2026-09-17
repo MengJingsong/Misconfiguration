@@ -11,6 +11,7 @@ See [README.md](README.md) for the format.
 | `memtable` | `memtable_heap_space` | `bytebuffer` | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_heap_space-bytebuffer.md) |
 | `memtable` | `memtable_offheap_space` | `region` | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_offheap_space-region.md) |
 | `net` | `internode_application_receive_queue_capacity` | `message` | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) | pending | [link](net/internode_application_receive_queue_capacity-message.md) |
+| `hints` | `HintsBufferPool_MAX_ALLOCATED_BUFFERS` | `hintsbuffer` | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) | pending | [link](hints/HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer.md) |
 
 <!-- Add one row per case. -->
 
@@ -18,10 +19,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 2 |
-| Total cases | 3 |
+| Modules covered | 3 |
+| Total cases | 4 |
 | Verified | 2 |
-| Pending / in-progress | 1 |
+| Pending / in-progress | 2 |
 
 ## Lines considered and rejected
 
@@ -59,3 +60,7 @@ Storage-engine module covering memtable memory allocation and pooling
 ### net
 Internode messaging module covering inbound connection handling (`net/`). One case so far:
 - **`internode_application_receive_queue_capacity-message`:** per-connection byte cap in `AbstractMessageHandler.acquireCapacity()`, gating `Message` deserialization for inbound internode traffic. Disallow branch backpressures (registers on a wait queue) rather than dropping the message. Status: pending — trigger not yet designed/run. Sibling candidate noted but not filed: the CQL/native-transport side of the same check (`native_transport_receive_queue_capacity`).
+
+### hints
+Hint buffering and dispatch module, covering writes stashed for temporarily-unreachable replicas (`hints/`). One case so far:
+- **`HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer`:** cap (JVM system property, default 3) on how many off-heap `HintsBuffer`s the pool will ever allocate, in `HintsBufferPool.switchCurrentBuffer()`. Disallow branch blocks on `reserveBuffers.take()` until a buffer is recycled, rather than allocating a new one. Status: pending — an existing test (`HintsBufferPoolTest.testBackpressure()`, using a byteman rule at the exact `take()` call) already targets this line and just needs to be run.
