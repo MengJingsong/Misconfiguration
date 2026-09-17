@@ -73,6 +73,23 @@ Continuous trace from the allow branch to the actual allocation call.
 | **Rough sizing** | how the size is derived, if determinable from the code (e.g. `size` param, fixed struct size) |
 | **Lifetime / release** | what releases this resource back to the pool/limit (brief) |
 
+## 7. Maximum memory bound
+
+State plainly how this if-check bounds total memory usage in practice — not
+just the per-object sizing from §6. Prefer an explicit formula/worst-case
+bound over prose alone.
+
+| Field | Content |
+|-------|---------|
+| **Multiplicity** | Is this limit instantiated once per JVM (true global cap), or once per connection/peer/table/other unit that multiplies with cluster or schema size? If it multiplies, state the factor and whether that factor is itself bounded. |
+| **Shared/tiered limits** | If this if-check enforces only the innermost tier of a larger system (e.g. exclusive per-connection allowance → shared per-endpoint reserve → global reserve), name every tier and the config backing each — don't describe only this if-check's own tier as if it were the whole picture. |
+| **Worst-case bound** | The actual worst-case total, as a formula if derivable (e.g. `peers × connection_types × queueCapacity + endpointReserve + globalReserve`). |
+
+**Worst case vs. typical case:** call out explicitly if the true worst-case
+bound differs from what the config name alone would suggest (e.g. a value
+that sounds like a flat per-node cap but is actually per-connection or
+per-peer).
+
 ## Verification
 
 See [README.md § Verifying a case](README.md#verifying-a-case-triggering-the-disallow-branch)

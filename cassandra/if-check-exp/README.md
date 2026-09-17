@@ -114,7 +114,7 @@ they failed.
 
 ## Required content per if-check case
 
-Every case file answers exactly these six questions (see `_TEMPLATE.md`):
+Every case file answers exactly these seven questions (see `_TEMPLATE.md`):
 
 1. **Location** — the if-statement's file:line, pinned to `cassandra-5.0.9`.
 2. **Module** — which Cassandra module/subsystem this if-check belongs to
@@ -130,6 +130,26 @@ Every case file answers exactly these six questions (see `_TEMPLATE.md`):
 6. **Object & resource** — what is being created (type), and what resource
    it consumes (heap bytes, off-heap/native bytes, a thread, a queue slot,
    a file handle, etc.), including rough sizing if derivable from the code.
+7. **Maximum memory bound** — a plain statement of how this if-check bounds
+   total memory usage in practice, not just the per-object sizing from
+   question 6. State it as a formula or explicit worst-case bound wherever
+   derivable, and be explicit about anything that makes the effective cap
+   different from "the config value" taken alone:
+   - **Multiplicity** — is this limit instantiated once per JVM (a true
+     global cap), or once per some other unit (per connection, per peer,
+     per table, per connection-type) that multiplies with cluster/schema
+     size? If it multiplies, say what it multiplies by and whether that
+     factor is itself bounded.
+   - **Shared/tiered limits** — if this if-check's limit is only the
+     innermost tier of a larger system (e.g. an exclusive per-connection
+     allowance backed by a shared per-endpoint reserve backed by a global
+     reserve), name every tier and which config backs each one — don't
+     describe only the tier this specific if-check enforces as if it were
+     the whole picture.
+   - **Worst case vs. typical case** — if the true worst-case bound differs
+     meaningfully from what a reader would assume from the config name
+     alone (e.g. "4MiB" sounds like a hard per-node cap but is actually
+     per-connection-type-per-peer), say so explicitly.
 
 ## Files per case
 

@@ -146,6 +146,16 @@ things happens, and neither is a rejected/failed write:
 | **Rough sizing** | Equal to the `size` parameter threaded in from the write path (cell/row serialized size) — no fixed struct size; scales with write payload. |
 | **Lifetime / release** | Released via `SubPool.released(size)` (`MemtablePool.java:192-197`) when the owning `SubAllocator` is discarded (memtable flushed/discarded) — signals `hasRoom` to unblock any waiters. |
 
+## 7. Maximum memory bound
+
+| Field | Content |
+|-------|---------|
+| **Multiplicity** | **True global cap.** [`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59) — `MEMORY_POOL` is a single `static final MemtablePool` instance for the entire JVM. Every table's memtable allocator (`MEMORY_POOL.newAllocator(...)`, line 118) draws from the *same* `SubPool.onHeap` instance and its one `limit` field — this does not multiply per-table or per-keyspace. |
+| **Shared/tiered limits** | Single-tier — no reserve/borrow system layered on top (contrast with the `net` module's `internode_application_receive_queue_capacity` case, which has per-connection + per-endpoint + global tiers). The only complication is the escape hatch documented in §5: a `markBlocking()`-marked op bypasses `limit` entirely rather than borrowing from a separate reserve. |
+| **Worst-case bound** | `limit` bytes under normal operation (`memtable_heap_space`, auto-sized to `Runtime.getRuntime().maxMemory() / 4` if unset) — but **unbounded above `limit`** when the escape hatch fires, since `allocated(size)` (`MemtableAllocator.java:184`) adds `size` unconditionally with no upper check of its own. The overshoot magnitude is bounded only by however much in-flight blocking-marked write volume exists at once during a flush barrier wait, not by any second limit. |
+
+**Worst case vs. typical case:** `memtable_heap_space` reads like (and normally behaves as) a hard per-node cap on on-heap memtable bytes. It is **not hard** — see the escape hatch in §5: writes belonging to an `OpOrder.Group` already marked "blocking" (done for in-flight writes a flush barrier must wait out, `ColumnFamilyStore.java:1238`) skip the check's enforcement and push `allocated` past `limit` with no ceiling of their own. Flagged for Target 3 (bypass analysis); the true worst-case is not simply "`memtable_heap_space` MiB."
+
 ## Verification
 
 Line numbers checked against the local pinned-tag clone. Per

@@ -145,7 +145,32 @@ this folder's own scope.
 
 ## Open items / natural next steps
 
-- **Both memtable cases are now `verified` and pushed** (commit `0198e25`).
+- **New case drafted, not yet verified:**
+  `net/internode_application_receive_queue_capacity-message.md` — per-connection
+  byte cap (`internode_application_receive_queue_capacity`, default 4MiB) in
+  [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419),
+  gating deserialization of inbound internode `Message` objects. Disallow
+  branch backpressures (registers on `endpointWaitQueue`/`globalWaitQueue`)
+  rather than dropping the message — no escape hatch found yet, unlike the
+  memtable cases' `markBlocking()`. `Status: pending` — line numbers verified
+  against the local pinned-tag clone (2026-09-17), but no trigger designed or
+  run. Next step: design a unit-level trigger (construct an
+  `InboundMessageHandler` with a tiny `queueCapacity` and exhausted reserve
+  `Limit`s, feed one oversized message frame) per the case file's
+  Verification section, checking `test/unit/org/apache/cassandra/net/` for
+  reusable scaffolding first.
+- Broader survey (2026-09-17) also considered and rejected:
+  `CommitLogSegment.java:242` and `HintsBuffer.java:190` (both allocate a new
+  segment/buffer on "full" rather than diverging into block/reject — same
+  non-diverging pattern as prior compaction rejects), and
+  `BatchStatement.java:349` (`verifyBatchSize()`, rejects an already-built
+  batch post hoc, doesn't gate object creation). Logged in `_INDEX.md`.
+  Runner-up candidate not yet filed: `HintsBufferPool.switchCurrentBuffer()`
+  (`HintsBufferPool.java:113`) caps off-heap direct-buffer allocation for
+  hints at `MAX_ALLOCATED_BUFFERS × bufferSize`, blocking on
+  `reserveBuffers.take()` when full — worth a case file if the messaging one
+  stalls or a second parallel case is wanted.
+- **Both memtable cases are `verified` and pushed** (commit `0198e25`).
 - **Optional rigor gap:** the offheap case's evidence (reused
   `testBookKeeping()`) doesn't isolate a timeout-based proof of the
   "blocks" outcome the way `HeapPoolTest` does for the heap case — see

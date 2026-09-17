@@ -106,6 +106,16 @@ for Target 3 (bypass analysis) even though this case itself is Target 1+2 only.
 | **Rough sizing** | Slab-allocated: region size scales exponentially (8 KiB → 1 MiB) independent of the individual cell's `size`; oversize allocations (`size > MAX_CLONED_SIZE`) get a dedicated `Region` sized exactly to `size`. |
 | **Lifetime / release** | Freed via `MemoryUtil.free(region.peer)` in `NativeAllocator.setDiscarded()` ([`NativeAllocator.java:200-206`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L200-L206)) when the owning allocator is discarded (memtable flushed/discarded); tracked-accounting side released via `SubPool.released(size)` ([`MemtablePool.java:192-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L192-L197)), same as the heap case. |
 
+## 7. Maximum memory bound
+
+| Field | Content |
+|-------|---------|
+| **Multiplicity** | **True global cap**, same as the heap sibling case: `MEMORY_POOL` ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59)) is a single JVM-wide static singleton; its `offHeap` `SubPool` is one instance shared by every table's `NativeAllocator`, not per-table or per-keyspace. |
+| **Shared/tiered limits** | Single-tier, same structure as the heap case — no reserve/borrow layer. The escape hatch (§5) is a bypass of the *tracked-accounting* tier, not a second legitimate tier. |
+| **Worst-case bound** | `limit` bytes (`memtable_offheap_space`) for the **tracked-accounting** total — but see the §5 note: because `NativeAllocator.allocate()` doesn't gate the physical `MemoryUtil.allocate()` call on `tryAllocate()`'s return value at all (not even via the escape hatch's `isBlocking()` check — it simply never checks the boolean), the *physical* off-heap bytes allocated can diverge from the *accounted* bytes independent of any blocking state. |
+
+**Worst case vs. typical case:** doubly non-hard compared to the heap case. Not only does the `markBlocking()` escape hatch overshoot `limit` (§5, same as the heap sibling), but the accounting/allocation decoupling means the if-check's disallow branch returning `false` **never itself prevents the physical native allocation** — it only prevents `SubPool.allocated`'s bookkeeping from updating past `limit` while the caller (if not already blocking) parks. A reader taking `memtable_offheap_space` as a hard native-memory ceiling would be wrong on two independent grounds; both are flagged for Target 3, not resolved here.
+
 ## Verification
 
 Line numbers checked against the local pinned-tag clone. Per
