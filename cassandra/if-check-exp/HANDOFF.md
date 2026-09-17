@@ -177,24 +177,32 @@ this folder's own scope.
   caveat above. Writing a purpose-built `NativeAllocatorTest`-style test
   mirroring `HeapPoolTest`'s two isolated `@Test`s would close this gap;
   explicitly not prioritized for now.
-- **New scope filter adopted — memory-magnitude only:** README now has a
-  "Memory-magnitude filter" rule (see below). A candidate's limit-side
-  operand must bound the *total bytes* that can be allocated/held, not just
-  the rate/concurrency/throughput of processing. This is a narrowing of
+- **Filter rules refined into three explicit rules (see README § Core
+  concept):** Rule 1 (identify the limit-side operand as a
+  capacity/constraint), Rule 2 (the allow branch creates memory-significant
+  objects, and the operand bounds *total bytes*, not rate/concurrency/
+  throughput), Rule 3 (the disallow branch must produce some observably
+  different outcome from the allow branch — not necessarily a clean reject,
+  per the verification methodology's "trace the real effect" rule). This
+  supersedes the earlier informal "memory-magnitude filter" note — same
+  substance, now split out and tied explicitly to the folder's stated
+  purpose (find resource constraints that limit memory usage, where the
+  constraint takes effect via the if-check itself). This is a narrowing of
   `if-check-exp` specifically — the project's broader Target 1 scope still
   covers CPU-limiting constraints too, just not in this folder's inventory.
 - **`compaction` module explored, no case retained:** surveyed
   `db/compaction/**` for candidates. The one real candidate found,
   `CompactionManager.submitBackground():245`'s `concurrent_compactors` check
   (gating scheduling of a `BackgroundCompactionCandidate` task on the
-  compaction thread pool), was drafted then removed after the memory-
-  magnitude filter was adopted: `concurrent_compactors` bounds thread-pool
-  *concurrency*, not the bytes a compaction task allocates once running.
-  Logged in `_INDEX.md`'s "lines considered and rejected" table along with
-  the other compaction lines surveyed (mostly config-validation, non-
-  diverging selection logic) so this module isn't re-scanned from scratch.
+  compaction thread pool), was drafted then removed after adopting the
+  memory-magnitude test now codified as Rule 2: `concurrent_compactors`
+  bounds thread-pool *concurrency*, not the bytes a compaction task
+  allocates once running. Logged in `_INDEX.md`'s "lines considered and
+  rejected" table along with the other compaction lines surveyed (mostly
+  config-validation, non-diverging selection logic) so this module isn't
+  re-scanned from scratch.
 - **Other modules still undecided:** native transport / request queues,
   concurrent executors remain open per the README's Target-1 discovery
-  step — apply the memory-magnitude filter when evaluating candidates there
-  too (e.g. a queue *depth* limit only counts if each queued slot holds a
-  memory-significant object, not a lightweight task reference).
+  step — apply all three filter rules when evaluating candidates there too
+  (e.g. a queue *depth* limit only counts under Rule 2 if each queued slot
+  holds a memory-significant object, not a lightweight task reference).

@@ -52,32 +52,27 @@ saves tokens versus pulling entire files into context.
 
 ## Core concept: the if-check case
 
-An **if-check case** is a single `if` statement (or tight cluster of branches
-implementing one decision) where:
+The purpose of this folder is to find **resource constraints that limit
+memory usage**, where the constraint **takes effect via an if-check
+statement** — i.e., the if-statement itself is the enforcement mechanism,
+not just code that happens to sit near one. A candidate if-check qualifies
+only if it passes all three rules below.
 
-- the compared operands are related to **object creation** (memory/resource
-  allocation) on one side, and to a **capacity/constraint** (a limit, threshold,
-  or counter cap — hardcoded or configured) on the other, and
-- the two branches **genuinely diverge**: one branch proceeds to allow the
-  object creation / resource acquisition, the other blocks, rejects, defers,
-  or throws instead of creating it.
+### Rule 1 — Identify the limit-side operand
 
-Checks that don't diverge this way (pure validation, logging-only branches,
-null-guards unrelated to capacity) are out of scope — note them as "considered,
-rejected" in `_INDEX.md` rather than writing a case file, so later passes don't
-re-discover and re-reject the same line.
+The if-statement compares a usage-side operand (current consumption)
+against a limit-side operand. The limit-side operand must represent a
+**capacity/constraint** — a limit, threshold, or counter cap, whether
+hardcoded or configured. This names the candidate constraint; it is not by
+itself a pass/fail test — Rules 2 and 3 are.
 
-### Memory-magnitude filter
+### Rule 2 — Allow branch creates memory-significant objects, gated by that operand
 
-This folder narrows Target 1's "memory/CPU usage" scope (see Project context
-above) to **memory usage** specifically — a deliberate scoping choice for
-`if-check-exp`, not a correction to the project's broader scope; CPU-limiting
-constraints are still valid Target 1 material, just not inventoried here.
-
-A candidate if-check only qualifies if its **limit-side operand bounds the
-total quantity of memory (bytes) that can be allocated/held at once** — not
-the *rate*, *concurrency*, or *throughput* at which existing allocations
-happen.
+The allow branch leads to creating an object (or acquiring a resource)
+whose memory footprint is non-negligible, and the limit-side operand's
+value directly bounds the **maximum total memory** such object creation
+can consume — not just the *rate*, *concurrency*, or *throughput* at which
+existing allocations happen.
 
 **Test:** if the limit-side operand's configured value changes, does the
 maximum bytes resident in memory (heap or off-heap) change as a direct
@@ -98,9 +93,40 @@ consequence?
   task reference (a lone `Runnable`/pointer), the memory difference across
   depths is negligible → reject, same reasoning as thread-pool size.
 
-Candidates rejected under this filter go in `_INDEX.md`'s "lines considered
-and rejected" table like any other rejection, noting which side of the test
-they failed.
+This rule also carries this folder's deliberate scoping choice: it narrows
+Target 1's "memory/CPU usage" (see Project context above) to **memory
+usage** specifically. CPU-limiting constraints are still valid Target 1
+material, just not inventoried here.
+
+### Rule 3 — Disallow branch must withhold that object creation, verifiably
+
+The disallow branch must produce an observably different outcome from the
+allow branch with respect to object creation — a clean reject/throw, a
+deferred/blocked creation, or (at minimum) a change in accounting/caller
+state — as opposed to the object being created identically regardless of
+which branch fires. This is what makes the operand's limiting effect real
+and checkable, rather than decorative: it confirms the if-statement itself
+is the enforcement mechanism, not just a check that happens to run near one.
+
+**What fails this rule:** a disallow branch with *zero* observable effect —
+object creation happens unconditionally on both branches, with no
+difference in state, timing, or accounting. That if-check isn't actually
+gating anything, even if it looks like it should.
+
+**Note the exact effect can vary** — don't assume "disallow" means "clean
+reject." A disallow branch can permanently reject, defer/block the caller
+until capacity frees up, or only change accounting/caller state while an
+escape hatch elsewhere still lets the allocation through. Tracing which of
+these applies is exactly the first rule of
+[Verifying a case](#verifying-a-case-triggering-the-disallow-branch) below
+— applying that same "trace the real effect, don't assume" discipline here,
+at candidate-discovery time, is what Rule 3 is asking for.
+
+Checks that don't pass all three rules (pure validation, logging-only
+branches, null-guards unrelated to capacity, non-diverging branches, rate/
+concurrency limits, etc.) are out of scope — note them as "considered,
+rejected" in `_INDEX.md` rather than writing a case file, noting which rule
+they failed, so later passes don't re-discover and re-reject the same line.
 
 ## Scope: what this folder does NOT cover
 
