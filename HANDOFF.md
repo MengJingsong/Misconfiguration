@@ -172,6 +172,28 @@ this folder's own scope.
   don't share predictable vocabulary. Next: more structural (non-keyword)
   narrowing, then a read-and-judge triage pass writing survivors to
   `cassandra/if-check-exp/candidates/`.
+- **New case drafted, not yet verified (2026-09-17):**
+  `cassandra/if-check-exp/commitlog/cdc_total_space-allocation.md` — byte cap on total un-consumed
+  CDC-hard-linked commit log segment data
+  (`cdc_total_space`, auto-derived default 1/8 of the `cdc_raw_directory`
+  filesystem, capped at 4096MiB), enforced in
+  [`CommitLogSegmentManagerCDC.throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214)
+  (fed by the byte-count comparison in the sibling `permitSegmentMaybe()`).
+  Gates whether a CDC-tracked mutation may be written into the current
+  commit log segment. Disallow branch throws `CDCWriteException` (a
+  `RequestExecutionException`) — a **clean reject**, the first case in this
+  folder that isn't a block-and-wait or backpressure-register. Escape hatch
+  found: `cdc_block_writes = false` (live-mutable via JMX) bypasses the
+  check entirely, same shape as the memtable cases' `markBlocking()`.
+  `Status: pending` — line numbers verified against the local pinned-tag
+  clone (2026-09-17), no trigger run yet. Next step: run the existing
+  `test/unit/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDCTest.java`
+  (uses `testWithCDCSpaceInMb()` + `bulkWrite()` helpers that already drive
+  writes to exhaustion and assert `CDCWriteException`) via `ant testsome
+  -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDCTest`
+  — identify which specific `@Test` method most directly isolates the
+  `cdc_total_space` boundary (vs. the `cdc_block_writes`-toggle tests)
+  before citing it as primary evidence.
 - **New case drafted, not yet verified:**
   `cassandra/if-check-exp/net/internode_application_receive_queue_capacity-message.md` — per-connection
   byte cap (`internode_application_receive_queue_capacity`, default 4MiB) in

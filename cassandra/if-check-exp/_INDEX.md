@@ -12,6 +12,7 @@ See [README.md](README.md) for the format.
 | `memtable` | `memtable_offheap_space` | `region` | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_offheap_space-region.md) |
 | `net` | `internode_application_receive_queue_capacity` | `message` | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) | pending | [link](net/internode_application_receive_queue_capacity-message.md) |
 | `hints` | `HintsBufferPool_MAX_ALLOCATED_BUFFERS` | `hintsbuffer` | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) | pending | [link](hints/HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer.md) |
+| `commitlog` | `cdc_total_space` | `allocation` | [`CommitLogSegmentManagerCDC.throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214) | pending | [link](commitlog/cdc_total_space-allocation.md) |
 
 <!-- Add one row per case. -->
 
@@ -19,10 +20,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 3 |
-| Total cases | 4 |
+| Modules covered | 4 |
+| Total cases | 5 |
 | Verified | 2 |
-| Pending / in-progress | 2 |
+| Pending / in-progress | 3 |
 
 ## Lines considered and rejected
 
@@ -64,3 +65,7 @@ Internode messaging module covering inbound connection handling (`net/`). One ca
 ### hints
 Hint buffering and dispatch module, covering writes stashed for temporarily-unreachable replicas (`hints/`). One case so far:
 - **`HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer`:** cap (JVM system property, default 3) on how many off-heap `HintsBuffer`s the pool will ever allocate, in `HintsBufferPool.switchCurrentBuffer()`. Disallow branch blocks on `reserveBuffers.take()` until a buffer is recycled, rather than allocating a new one. Status: pending — an existing test (`HintsBufferPoolTest.testBackpressure()`, using a byteman rule at the exact `take()` call) already targets this line and just needs to be run.
+
+### commitlog
+Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). One case so far:
+- **`cdc_total_space-allocation`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, enforced in `CommitLogSegmentManagerCDC.throwIfForbidden()` (fed by the byte-count comparison in the sibling `permitSegmentMaybe()`). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. Escape hatch found: `cdc_block_writes = false` bypasses the check entirely. Status: pending — an existing test (`CommitLogSegmentManagerCDCTest`'s `testWithCDCSpaceInMb()`-driven tests) already targets this exact boundary and just needs to be run.
