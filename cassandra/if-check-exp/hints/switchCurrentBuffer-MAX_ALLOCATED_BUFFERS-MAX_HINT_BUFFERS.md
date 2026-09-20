@@ -8,8 +8,11 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | HINTSBUFFERPOOL_MAX_ALLOCATED_BUFFERS-HINTSBUFFER |
-| **If-statement** | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) |
+| **Case ID** | SWITCHCURRENTBUFFER-MAX_ALLOCATED_BUFFERS-MAX_HINT_BUFFERS |
+| **Enforcement pattern** | (a) — the capacity check is the decision |
+| **Capacity check** | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) |
+| **Decision point** | the same statement, [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) — the disallow branch blocks on `reserveBuffers.take()` (line 118) |
+| **Allocation site** | [`HintsBufferPool.createBuffer():130-134`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L130-L134) → `HintsBuffer.create()` (`ByteBuffer.allocateDirect(slabSize)`) |
 
 ```java
 private synchronized boolean switchCurrentBuffer(HintsBuffer previous)
@@ -143,7 +146,7 @@ writer threads block waiting for a buffer to be flushed and recycled.
 
 ## Verification
 
-See [README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch)
+See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
 a designed experiment must have actually driven execution into the disallow
 branch with recorded evidence.

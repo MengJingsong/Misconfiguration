@@ -1,4 +1,4 @@
-# [limit] — [object]
+# [constraint] — [object]  <!-- file name: [function]-[operand]-[constraint].md -->
 
 > **Index:** [../_INDEX.md](../_INDEX.md)
 >
@@ -10,11 +10,14 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | e.g., MEMTABLE_HEAP_SPACE-BYTEBUFFER |
-| **If-statement** | [`Class.method():NN`](GitHub link) |
+| **Case ID** | e.g., TRYALLOCATE-LIMIT-MEMTABLE_HEAP_SPACE |
+| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](README.md#3-core-concept-the-if-check-case) |
+| **Capacity check** | [`Class.method():NN`](GitHub link) — the usage-vs-limit comparison (names the file: `[function]-[operand]-[constraint].md`). List any additional check sites feeding the same decision point. |
+| **Decision point** | [`Class.method():NN`](GitHub link) — where allow and disallow diverge (same as the capacity check for pattern (a)) |
+| **Allocation site** | [`Class.method():NN`](GitHub link) — where the memory/disk-significant object is created |
 
 ```java
-// paste the exact if-statement (and enough surrounding context to read both branches)
+// paste the capacity check and, if different, the decision point (enough surrounding context to read both outcomes)
 ```
 
 ## 2. Context
@@ -51,35 +54,37 @@ come later._
 
 ## 5. Branch semantics
 
-| Branch | Condition | Effect |
-|--------|-----------|--------|
+For pattern (b), first state the verdict (flag/enum values or return outcomes), where it is set, and where it is read; for (c), the guard and what it throws or returns.
+
+| Outcome | Condition | Effect |
+|---------|-----------|--------|
 | **Allow** | e.g. `used + size <= limit` | proceeds to allocate / create the object |
 | **Disallow** | e.g. `used + size > limit` | blocks / rejects / defers / throws instead |
 
 ```java
-// allow-branch body
+// allow-outcome body
 ```
 
 ```java
-// disallow-branch body
+// disallow-outcome body
 ```
 
 ## 6. Code path
 
-### 6a. Allow branch → object creation
+### 6a. Allow path → object creation
 
-Continuous trace from the allow branch to the actual allocation call.
+Continuous trace from the allow outcome to the actual allocation call. For patterns (b) and (c), include how the verdict travels from the capacity check to the decision point.
 
 1. [`Class.method():NN`](link) — allow branch taken, state updated (e.g. counter incremented / CAS)
 2. [`Class.method():NN`](link) — returns to caller
 3. [`Class.method():NN`](link) — caller proceeds to allocate
 4. [`Class.method():NN`](link) — **object creation** (`new ...` / `ByteBuffer.allocate(...)` / etc.)
 
-### 6b. Disallow branch effect
+### 6b. Disallow path effect
 
-What actually happens when the disallow branch fires — trace the real
+What actually happens when the disallow verdict fires — trace the real
 effect before assuming it cleanly rejects anything (per the
-[verification methodology](README.md#verifying-a-case-triggering-the-disallow-branch)'s
+[verification methodology](README.md#8-verifying-a-case-triggering-the-disallow-branch)'s
 first rule). Is it a clean reject/throw? A block-and-wait? A silent
 bypass/escape hatch elsewhere in the call chain?
 
@@ -91,21 +96,22 @@ bypass/escape hatch elsewhere in the call chain?
 | Field | Content |
 |-------|---------|
 | **Object created** | type/class |
-| **Resource consumed** | heap bytes / off-heap bytes / thread / queue slot / file handle / etc. |
+| **Resource consumed** | heap bytes / off-heap bytes / on-disk bytes / thread / queue slot / file handle / etc. |
 | **Rough sizing** | how the size is derived, if determinable from the code (e.g. `size` param, fixed struct size) |
 | **Lifetime / release** | what releases this resource back to the pool/limit (brief) |
 
-## 8. Maximum memory bound
+## 8. Maximum memory/disk bound
 
 State plainly how the value of the limit-side operand (§4) affects maximum
-memory usage: if it's raised or lowered, what happens to the maximum bytes
-the system can hold via this if-check, and through what mechanism? Goes
-beyond §7's per-object sizing — this is about the limit's effect on the
-ceiling, not what one allowed object costs.
+memory or disk usage (whichever §7 identifies as the resource): if it's
+raised or lowered, what happens to the maximum bytes the system can hold
+or write via this check, and through what mechanism? Goes beyond §7's
+per-object sizing — this is about the limit's effect on the ceiling, not
+what one allowed object costs.
 
 ## Verification
 
-See [README.md § Verifying a case](README.md#verifying-a-case-triggering-the-disallow-branch)
+See [README.md § Verifying a case](README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
 a designed experiment must have actually driven execution into the disallow
 branch with recorded evidence.

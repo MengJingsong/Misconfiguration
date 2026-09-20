@@ -8,8 +8,22 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | CDC_TOTAL_SPACE-ALLOCATION |
-| **If-statement** | [`CommitLogSegmentManagerCDC.throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214) |
+| **Case ID** | PROCESSNEWSEGMENT-ALLOWANCE-CDC_TOTAL_SPACE |
+| **Enforcement pattern** | (b) — the capacity check sets a verdict (the segment's `CDCState`: `FORBIDDEN` / `PERMITTED`), and a separate decision point reads it |
+| **Capacity check** | [`CDCSizeTracker.processNewSegment():335-337`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L335-L337) — a ternary, not an `if`: `segment.setCDCState(blocking && segmentSize + sizeInProgress.get() > allowance ? FORBIDDEN : PERMITTED)`, where `allowance = DatabaseDescriptor.getCDCTotalSpace()` (line 329). **Second check site, same verdict:** [`permitSegmentMaybe():200-201`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200-L201) — `!getCDCBlockWrites() \|\| sizeInProgress + segmentSize < getCDCTotalSpace()` — re-evaluates a `FORBIDDEN` segment and can flip it back to `PERMITTED`. |
+| **Decision point** | [`throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214) — `if (mutation.trackedByCDC() && segment.getCDCState() == CDCState.FORBIDDEN)` → throws `CDCWriteException` at [line 226](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L226) |
+| **Allocation site** | [`CommitLogSegment.allocate():201-217`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegment.java#L201-L217) — the `Allocation` for the mutation, reached only if `throwIfForbidden()` returns normally |
+
+**Verdict propagation (pattern (b)).** The verdict is the segment's `cdcState`
+field, written by `processNewSegment()` when a segment is created (line 335)
+and by `permitSegmentMaybe()` on every write attempt (line 203), and read by
+`throwIfForbidden()`. `CommitLogSegment.setCDCState()`
+([`CommitLogSegment.java:681-694`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegment.java#L681-L694))
+only allows `FORBIDDEN` → `PERMITTED`, never the reverse, so a segment that
+was marked `FORBIDDEN` at creation stays so until `permitSegmentMaybe()` finds
+room.
+
+The decision point, `throwIfForbidden()`:
 
 ```java
 private void throwIfForbidden(Mutation mutation, CommitLogSegment segment) throws CDCWriteException
@@ -27,10 +41,25 @@ private void throwIfForbidden(Mutation mutation, CommitLogSegment segment) throw
 }
 ```
 
-The `CDCState.FORBIDDEN`/`PERMITTED` flag itself is set by a sibling check,
-[`permitSegmentMaybe():192-209`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L192-L209),
-which is where the actual byte-count comparison against `cdc_total_space`
-happens:
+The capacity check that sets the verdict, `processNewSegment()` (called when a
+segment is created, see
+[`CommitLogSegmentManagerCDC.java:241`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L241)):
+
+```java
+long allowance = DatabaseDescriptor.getCDCTotalSpace();
+boolean blocking = DatabaseDescriptor.getCDCBlockWrites();
+synchronized (segment.cdcStateLock)
+{
+    segment.setCDCState(blocking && segmentSize + sizeInProgress.get() > allowance
+                        ? CDCState.FORBIDDEN
+                        : CDCState.PERMITTED);
+    if (segment.getCDCState() == CDCState.PERMITTED)
+        addSize(segmentSize);
+}
+```
+
+and its re-evaluation twin, `permitSegmentMaybe()`
+([`:195-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L195-L210)):
 
 ```java
 private void permitSegmentMaybe(CommitLogSegment segment)
@@ -51,15 +80,12 @@ private void permitSegmentMaybe(CommitLogSegment segment)
 }
 ```
 
-Both are called together, in order, from
-[`allocate():169-188`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L169-L188),
-on every mutation write attempt — `permitSegmentMaybe()` re-evaluates and
-possibly flips the segment's state (in case CDC consumers freed up space
-since it was last marked forbidden), then `throwIfForbidden()` reads that
-state and decides whether *this* mutation may proceed. This case treats the
-pair as one logical capacity check: §4 traces the byte-count comparison
-(inside `permitSegmentMaybe`), while §1/§5/§6 focus on `throwIfForbidden`,
-which is the actual branch point that diverges on object creation.
+On every mutation write attempt, `allocate()`
+([`:169-188`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L169-L188)) calls `permitSegmentMaybe()` (possibly flipping the
+state) and then `throwIfForbidden()` (acting on it). One case covers both check
+sites because they compute the same verdict for the same decision point; the
+case is named after the primary one, `processNewSegment()`, where a segment's
+verdict is first set.
 
 ## 2. Context
 
@@ -88,9 +114,9 @@ being accepted and further inflating that backlog.
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | Yes — `permitSegmentMaybe()` compares a running total of un-consumed CDC segment bytes plus one more segment's worth against a configured ceiling, and `throwIfForbidden()` acts on the resulting state to reject or admit the individual mutation. |
+| **Is this a capacity/overflow check?** | Yes — `processNewSegment()` (and, on re-evaluation, `permitSegmentMaybe()`) compares a running total of un-consumed CDC segment bytes plus one more segment's worth against a configured ceiling and records the result as the segment's `CDCState`; `throwIfForbidden()` then acts on that state to reject or admit each mutation. |
 | **Usage-side operand** | `cdcSizeTracker.sizeInProgress` — a `volatile`-read `AtomicLong` on `CommitLogSegmentManagerCDC.CDCSizeTracker`, tracking total bytes of CDC-hard-linked segment files currently retained on disk (incremented in `permitSegmentMaybe()`/`processNewSegment()`, decremented as consumed segments are deleted). |
-| **Limit-side operand** | `cdc_total_space` (read via `DatabaseDescriptor.getCDCTotalSpace()`) — a `Config` field, mebibytes converted to bytes. |
+| **Limit-side operand** | `allowance` in `processNewSegment()` (a local variable holding `DatabaseDescriptor.getCDCTotalSpace()`, i.e. the `cdc_total_space` `Config` field converted to bytes); `permitSegmentMaybe()` reads `getCDCTotalSpace()` directly. |
 | **Limit type** | Configuration (`cdc_total_space`, defaults to 0 which triggers an auto-derived value — see below). |
 
 **Limit initialization path** (declare → configure/derive → store → read at the check):
@@ -98,12 +124,14 @@ being accepted and further inflating that backlog.
 1. [`Config.java:418-419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L418-L419) — declared: `cdc_total_space` (`DataStorageSpec.IntMebibytesBound`, default `"0MiB"`).
 2. [`DatabaseDescriptor.java:684-694`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L684-L694) — derived if left at 0 and `cdc_enabled` is true: `calculateDefaultSpaceInMiB(..., 1, 8)` sizes it to 1/8th of the `cdc_raw_directory` filesystem's total space (capped at a 4096 MiB preferred default).
 3. [`DatabaseDescriptor.java:4370-4372`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L4370-L4372) — read/converted: `getCDCTotalSpace()` returns `conf.cdc_total_space.toBytesInLong()`.
-4. [`CommitLogSegmentManagerCDC.java:200-201`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200-L201) — read at the point of comparison, inside `permitSegmentMaybe()`.
+4. [`CommitLogSegmentManagerCDC.java:329`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L329) — read into the local `allowance` at the primary comparison in `processNewSegment()` (line 335); also read directly at [`:200-201`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200-L201) inside `permitSegmentMaybe()`.
 
 ## 5. Branch semantics
 
-| Branch | Condition | Effect |
-|--------|-----------|--------|
+The verdict is the segment's `CDCState`. The table gives the decision point's two outcomes (`throwIfForbidden()` at line 214).
+
+| Outcome | Condition | Effect |
+|---------|-----------|--------|
 | **Allow** | `mutation.trackedByCDC()` is false, **or** the segment's `CDCState` is not `FORBIDDEN` (i.e. `permitSegmentMaybe()` found `sizeInProgress + segmentSize < cdc_total_space`, or `cdc_block_writes` is disabled) | `throwIfForbidden()` returns normally; `allocate()` proceeds to reserve space in the segment and serialize the mutation into it. |
 | **Disallow** | `mutation.trackedByCDC()` is true **and** the segment's `CDCState` is `FORBIDDEN` (i.e. `sizeInProgress + segmentSize >= cdc_total_space` and `cdc_block_writes` is enabled) | Throws `CDCWriteException` — the mutation is never appended to the commit log. |
 
@@ -128,7 +156,9 @@ throw new CDCWriteException(logMsg);
 
 ## 6. Code path
 
-### 6a. Allow branch → object creation
+### 6a. Allow path → object creation
+
+0. **Verdict.** [`processNewSegment():335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L335) marks the segment `PERMITTED` (or [`permitSegmentMaybe():203`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L203) flips it there); the state is stored on the `CommitLogSegment` and read at the decision point below.
 
 1. [`CassandraKeyspaceWriteHandler.addToCommitLog():99`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/CassandraKeyspaceWriteHandler.java#L99) — every durable write calls `CommitLog.instance.add(mutation)`.
 2. [`CommitLog.add():311`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L311) — calls `segmentManager.allocate(mutation, totalSize)`.
@@ -137,7 +167,7 @@ throw new CDCWriteException(logMsg);
 5. [`CommitLogSegment.allocate():201-217`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegment.java#L201-L217) — reserves `size` bytes within the segment's already-mapped buffer (`allocate(size)` at line 206, a lock-free position bump), then **object creation**: `return new Allocation(this, opGroup, position, (ByteBuffer) buffer.duplicate()...)` (line 216) — an `Allocation` wrapping a live view into the segment's buffer at the reserved offset.
 6. The mutation's serialized bytes are then written into that buffer view (in `CommitLog.add()`, around [`CommitLog.java:311-329`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L311-L329)), occupying real bytes of the segment's memory-mapped (or, for compressed/encrypted/direct-IO segments, off-heap-buffered) region — see §7 for the nuance that the segment's buffer itself is allocated once at segment creation, independent of this check.
 
-### 6b. Disallow branch effect
+### 6b. Disallow path effect
 
 **A clean reject, not a block or defer** — unlike this folder's other net/hints
 cases, no backpressure or wait queue is involved here.
@@ -175,7 +205,7 @@ check only gates `mutation.trackedByCDC()` writes.
 
 ## Verification
 
-See [README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch)
+See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
 a designed experiment must have actually driven execution into the disallow
 branch with recorded evidence.
@@ -196,14 +226,13 @@ branch with recorded evidence.
   `permitSegmentMaybe()` always permit CDC writes regardless of
   `sizeInProgress`, bypassing this check entirely — same shape as the
   memtable cases' `markBlocking()`. Flagged for Target 3.
-- **Two-tier check:** unlike the memtable/net/hints cases where a single
-  comparison gates a single divergence, this case is a pair —
-  `permitSegmentMaybe()` computes and caches the segment's admit/forbid
-  state (the byte-count comparison against `cdc_total_space`), and
-  `throwIfForbidden()` (this case's primary citation) is the actual
-  per-mutation branch point that acts on that cached state. Both were kept
-  in one case file rather than split, since they're inseparable parts of
-  one mechanism reached together on every write attempt (see §1 note).
+- **Pattern (b), two check sites:** the capacity check
+  (`processNewSegment():335`, re-evaluated by `permitSegmentMaybe():200`)
+  and the decision point (`throwIfForbidden():214`) are separate methods
+  connected through the segment's `CDCState` field. Re-anchored on the
+  capacity check on 2026-09-20 (the case was first drafted on the decision
+  point). Both check sites are kept in one case file because they compute
+  the same verdict for the same decision point (see §1).
 - **Object creation nuance:** the segment's underlying buffer
   (`MemoryMappedSegment`/`CompressedSegment`/etc.) is allocated once at
   segment creation regardless of CDC — this check doesn't gate *that*

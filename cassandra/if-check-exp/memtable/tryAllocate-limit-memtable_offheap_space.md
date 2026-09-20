@@ -8,8 +8,11 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | MEMTABLE_OFFHEAP_SPACE-REGION |
-| **If-statement** | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) |
+| **Case ID** | TRYALLOCATE-LIMIT-MEMTABLE_OFFHEAP_SPACE |
+| **Enforcement pattern** | (b) — the capacity check returns a boolean verdict to its caller |
+| **Capacity check** | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) (on the `offHeap` `SubPool`) |
+| **Decision point** | [`MemtableAllocator.SubAllocator.allocate():169-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L169-L197) — same park-or-force-through decision as the heap case |
+| **Allocation site** | [`NativeAllocator.allocate():138-190`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L138-L190) → a new `NativeAllocator.Region` via `MemoryUtil.allocate()` |
 
 ```java
 boolean tryAllocate(long size)
@@ -25,7 +28,7 @@ boolean tryAllocate(long size)
 }
 ```
 
-Same method body as [`memtable_heap_space-bytebuffer`](../memtable/memtable_heap_space-bytebuffer.md) —
+Same method body as [`tryAllocate-limit-memtable_heap_space`](../memtable/tryAllocate-limit-memtable_heap_space.md) —
 `SubPool.tryAllocate()` is shared code. This case is a **different instance**
 of `SubPool`: `MemtablePool.offHeap` rather than `MemtablePool.onHeap`
 (see [`MemtablePool.java:48`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L48)),
@@ -143,7 +146,7 @@ two independent grounds; both flagged for Target 3, not resolved here.
 ## Verification
 
 Line numbers checked against the local pinned-tag clone. Per
-[README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch),
+[README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch),
 the primary trigger below has been **executed and recorded** (see table below).
 
 - **Unit/programmatic level (primary trigger — executed 2026-09-16):** `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`
@@ -190,7 +193,7 @@ the primary trigger below has been **executed and recorded** (see table below).
 | **Verified By / Date** | Claude (session) — 2026-09-16; primary trigger run and evidence recorded |
 | **Trigger method** | Existing `NativeAllocatorTest.testBookKeeping()`, run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest` against the `cassandra-src` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`) |
 | **Evidence** | `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. Test's own assertions (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`) directly demonstrate the disallow branch's two outcomes at `MemtablePool.java:156` on the `offHeap` `SubPool` — accounting capped at `limit`, then force-through past it once `markBlocking()` fires. |
-| **Notes** | Sibling to [`memtable_heap_space-bytebuffer`](../memtable/memtable_heap_space-bytebuffer.md); same if-check code, different `SubPool` instance/limit/allocator. 6b note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
+| **Notes** | Sibling to [`tryAllocate-limit-memtable_heap_space`](../memtable/tryAllocate-limit-memtable_heap_space.md); same if-check code, different `SubPool` instance/limit/allocator. 6b note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
 
 ---
 

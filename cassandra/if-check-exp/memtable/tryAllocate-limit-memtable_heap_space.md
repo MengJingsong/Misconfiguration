@@ -8,8 +8,11 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | MEMTABLE_HEAP_SPACE-BYTEBUFFER |
-| **If-statement** | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) |
+| **Case ID** | TRYALLOCATE-LIMIT-MEMTABLE_HEAP_SPACE |
+| **Enforcement pattern** | (b) — the capacity check returns a boolean verdict to its caller |
+| **Capacity check** | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) |
+| **Decision point** | [`MemtableAllocator.SubAllocator.allocate():169-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L169-L197) — on a `false` verdict, parks the caller on `SubPool.hasRoom`, or forces the allocation through if the caller's `OpOrder.Group` is already marked blocking |
+| **Allocation site** | [`HeapPool.Allocator.allocate():52-55`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/HeapPool.java#L52-L55) → `ByteBuffer.allocate(size)` |
 
 ```java
 boolean tryAllocate(long size)
@@ -186,7 +189,7 @@ MiB." Flagged for Target 3 (bypass analysis).
 ## Verification
 
 Line numbers checked against the local pinned-tag clone. Per
-[README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch),
+[README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch),
 line-checking alone does not earn `Status: verified` — a designed experiment
 must actually drive execution into the disallow branch with recorded
 evidence. This section is written to be directly executable: follow it
@@ -270,7 +273,7 @@ import org.apache.cassandra.utils.concurrent.OpOrder;
 
 /**
  * Verification experiment for the if-check-exp case
- * memtable/memtable_heap_space-bytebuffer.md: drives execution into the
+ * memtable/tryAllocate-limit-memtable_heap_space.md: drives execution into the
  * disallow branch of MemtablePool.SubPool.tryAllocate() (MemtablePool.java:156)
  * via the on-heap path (HeapPool.Allocator -> MemtableAllocator.SubAllocator),
  * and captures direct evidence of both disallow-branch outcomes:
@@ -478,7 +481,7 @@ experiment's setup.
 | **Verified By / Date** | Jingsong — line numbers verified against local pinned-tag clone; behavioral trigger executed 2026-09-16 on CloudLab node pc80 (JDK 11.0.32, Ant 1.10.12, git SHA `b5f2a54210d541339c2e7c17a794195cac0e67c2` of the shared `cassandra-src` clone) |
 | **Trigger method** | Unit test `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full source above) — run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`. Live-cluster trigger not run (optional secondary confirmation, not needed once the unit test passed). |
 | **Evidence** | `BUILD SUCCESSFUL` — `Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.065 sec`. (1) `testBlocksThenUnblocksOnRelease` passed: the over-limit `allocate(1)` call did not complete within 300 ms (`TimeoutException` caught and asserted) while usage stayed at `LIMIT`; after `released(50)`, the parked call completed and returned a 1-byte buffer with usage at `LIMIT - 50 + 1`. (2) `testForcesThroughWhenOpGroupIsBlocking` passed: with the op group's barrier marked blocking, `allocate(1)` returned immediately (no park) and usage reached `LIMIT + 1`, confirming the escape hatch overshoots the limit rather than gating it. |
-| **Notes** | Sibling to [`memtable_offheap_space-region`](memtable_offheap_space-region.md) — same `SubPool.tryAllocate()` if-check, on-heap `SubPool`/`HeapPool.Allocator` instead of off-heap. Same decoupled-accounting / escape-hatch behavior applies (see 6b note); flagged for later Target-3 bypass analysis, not pursued further here. |
+| **Notes** | Sibling to [`tryAllocate-limit-memtable_offheap_space`](tryAllocate-limit-memtable_offheap_space.md) — same `SubPool.tryAllocate()` if-check, on-heap `SubPool`/`HeapPool.Allocator` instead of off-heap. Same decoupled-accounting / escape-hatch behavior applies (see 6b note); flagged for later Target-3 bypass analysis, not pursued further here. |
 
 ---
 
@@ -486,7 +489,7 @@ experiment's setup.
 
 - The escape hatch (`opGroup.isBlocking()` forcing `allocated(size)` through
   regardless of `limit`) is shared code between this case and
-  `memtable_offheap_space-region` — it lives in `MemtableAllocator.java`,
+  `tryAllocate-limit-memtable_offheap_space` — it lives in `MemtableAllocator.java`,
   not in either allocator subclass. Any future case touching
   `SubPool.tryAllocate()` (there may be others besides the two memtable
   pools) should check whether it goes through this same

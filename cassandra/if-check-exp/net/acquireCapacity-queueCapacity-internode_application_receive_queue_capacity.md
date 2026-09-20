@@ -8,8 +8,11 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | INTERNODE_APPLICATION_RECEIVE_QUEUE_CAPACITY-MESSAGE |
-| **If-statement** | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) |
+| **Case ID** | ACQUIRECAPACITY-QUEUECAPACITY-INTERNODE_APPLICATION_RECEIVE_QUEUE_CAPACITY |
+| **Enforcement pattern** | (b) — the capacity check returns a `ResourceLimits.Outcome` verdict to its caller |
+| **Capacity check** | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) |
+| **Decision point** | [`InboundMessageHandler.processOneContainedMessage():139-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L139-L151) (returns without deserializing on a non-`SUCCESS` outcome) plus the wait-queue registration at [`AbstractMessageHandler.java:401-403`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L401-L403) |
+| **Allocation site** | [`InboundMessageHandler.java:163`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L163) — `serializer.deserialize(...)` creates the `Message` |
 
 ```java
 protected ResourceLimits.Outcome acquireCapacity(Limit endpointReserve, Limit globalReserve, int bytes)
@@ -194,7 +197,7 @@ per-connection-type-per-peer one.
 
 ## Verification
 
-See [README.md § Verifying a case](../README.md#verifying-a-case-triggering-the-disallow-branch)
+See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
 a designed experiment must have actually driven execution into the disallow
 branch with recorded evidence.
@@ -218,7 +221,7 @@ branch with recorded evidence.
   (config `native_transport_receive_queue_capacity`, default 1MiB) — same
   if-check, same class, different config and different peer path (CQL client
   connections vs. internode). Could be filed as a sibling case
-  (`native_transport_receive_queue_capacity-message.md`) following the same
+  (`acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md`) following the same
   memtable heap/offheap precedent, if useful to distinguish later.
 - **Reserve-capacity checks (lines 428/431) not separately cased:** see the
   §1 scoping note — `endpointReserve.tryAllocate()` /

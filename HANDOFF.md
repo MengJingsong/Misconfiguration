@@ -20,10 +20,12 @@ Part of the **Throttling** research project (Target 1: identify resource
 constraints that limit memory/CPU usage; Target 2: show how each constraint
 restricts usage via its exact code path; Target 3: bypass analysis — out of
 scope for this folder), scoped to **Apache Cassandra 5.0.9**. `if-check-exp`
-inventories individual **if-checks**: single `if` statements where one
-operand relates to object/resource creation and the other to a capacity
-limit, and the two branches genuinely diverge (one allows the allocation,
-the other blocks/rejects it).
+inventories **capacity checks** and the **decision points** they feed: a
+comparison of usage against a capacity limit, and the code where the outcome
+diverges (one outcome lets a memory- or disk-significant allocation happen,
+the other blocks, defers, or rejects it). Each case always covers Target 1
+and Target 2 together: it names the constraint (found by tracing the limit
+back to where it is first declared) and shows how the code enforces it.
 
 It is a **standalone inventory** — deliberately not cross-referenced against
 the sibling `entry-restriction-exp` folder, even when a line happens to
@@ -74,9 +76,9 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — both cases `verified`
+## Current state — 2 cases `verified`, 3 `pending`
 
-- **`cassandra/if-check-exp/memtable/memtable_heap_space-bytebuffer.md`** — on-heap path. If-check:
+- **`cassandra/if-check-exp/memtable/tryAllocate-limit-memtable_heap_space.md`** — on-heap path. If-check:
   [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156),
   gating `ByteBuffer.allocate(size)` via `HeapPool.Allocator.allocate()`.
   Limit traced from `Config.java`'s `memtable_heap_space` through to
@@ -104,7 +106,7 @@ this folder's own scope.
     setup — skipped since the unit test already provides direct evidence
     for both branches; would only be a reasonable next step if end-to-end
     (real daemon) confirmation becomes valuable later.
-- **`cassandra/if-check-exp/memtable/memtable_offheap_space-region.md`** — off-heap sibling case.
+- **`cassandra/if-check-exp/memtable/tryAllocate-limit-memtable_offheap_space.md`** — off-heap sibling case.
   Same if-check, `offHeap` `SubPool` instance instead of `onHeap`, reached
   via `NativePool`/`NativeAllocator` instead of `HeapPool`; limit is
   `memtable_offheap_space`. Object created is a `NativeAllocator.Region`
@@ -150,6 +152,61 @@ this folder's own scope.
   both case files' §5 and flagged as a Target-3 bypass candidate, not
   pursued further under Target 1+2.
 
+## Enforcement patterns (added 2026-09-20)
+
+The first cases assumed the capacity check was an `if` whose own branches
+allow or disallow the allocation. The `cdc_total_space` case showed that is
+only one of three shapes; every case now records which one it follows (see
+`cassandra/if-check-exp/README.md` §3.2):
+
+- **(a)** the capacity check is itself the decision (`hints` case);
+- **(b)** the check produces a verdict — a flag, enum, or return value —
+  and a separate decision point reads it (memtable ×2, internode, native
+  transport, and CDC cases; CDC uses a per-segment `CDCState` set in
+  `processNewSegment():335` and read in `throwIfForbidden():214`);
+- **(c)** guard clauses that `throw`/`return` before an allocation that is
+  not inside a branch (the disk candidate `getWriteDirectory():282`).
+
+Case files now record three locations — capacity check, decision point,
+allocation site — and are named after the capacity check
+(`[function]-[operand]-[constraint].md`). The CDC case was re-anchored and
+renamed on that basis. `NarrowedIfStatements.ql` only keeps comparisons
+inside `if` conditions, so it cannot see pattern-(b) checks written as
+ternaries or assignments (the CDC comparison was missed); three extra
+structural queries are planned (see the CodeQL README) and the triage done so
+far needs a re-read for rows rejected only for "non-diverging branches"
+(see `cassandra/if-check-exp/candidates/candidates.md`). Both READMEs now
+have numbered sections and subsections for easy reference.
+
+## Case file naming policy (changed 2026-09-20)
+
+Case files are now named `[function]-[operand]-[constraint].md` (enclosing
+method of the if-statement, limit-side operand as written at the check, and
+the resource constraint's first-declared variable on the limit
+initialization path — config entry, JVM property variable, constant, or
+accessor). Name collisions get a `-n` postfix. The old `[limit]-[object]`
+scheme is retired; the object created now lives only in `_INDEX.md`'s
+Object column and each case's §7. All 5 existing case files, Case IDs and
+cross-links were renamed accordingly. See `cassandra/if-check-exp/README.md`
+§ Naming for the full rules.
+
+## Scope change: disk added alongside memory (2026-09-18)
+
+`if-check-exp` was originally memory-only (Rule 2 in
+`cassandra/if-check-exp/README.md`). **Disk (on-disk bytes) is now also
+in scope**, per Jingsong's call — Rule 2's wording, the required-fields
+spec (§7/§8), and `_TEMPLATE.md` were all updated to say "memory or disk"
+throughout. A line found during the `db/compaction/` triage batch and
+rejected purely for being disk-scoped —
+[`CompactionAwareWriter.getWriteDirectory():282`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L282)
+(`availableSpace < estimatedWriteSize`, a disk-space check gating whether a
+compaction writer starts writing an SSTable) — was reclassified as a live
+candidate in `cassandra/if-check-exp/candidates/candidates.md` as a direct
+result; not yet written up as a full case file or verified. No other
+previously-rejected lines in `_INDEX.md` were disk-related as of this date
+(reviewed the existing table when making this change), so this is currently
+the only reclassification.
+
 ## Open items / natural next steps
 
 - **CodeQL-assisted discovery pipeline in progress (started 2026-09-17):**
@@ -164,19 +221,63 @@ this folder's own scope.
   candidates — this supersedes Workflow step 2's manual keyword-grep
   approach below. Pipeline so far: `AllIfStatements.ql` (full inventory) →
   `ComparisonIfStatements.ql` (narrows to `if` conditions built from a
-  direct `<`/`<=`/`>`/`>=`/`==`/`!=` comparison, ~10,147 rows, ~5,932 after
-  dropping null-comparisons). **Deliberately no fixed keyword list** — per
-  Jingsong's call, the memory-relatedness judgment (Rule 1/Rule 2) is made
-  by reading each row, not by grepping for a canned vocabulary, since real
-  cases (`memtable_heap_space`, `HintsBufferPool_MAX_ALLOCATED_BUFFERS`)
-  don't share predictable vocabulary. Next: more structural (non-keyword)
-  narrowing, then a read-and-judge triage pass writing survivors to
-  `cassandra/if-check-exp/candidates/`.
+  direct `<`/`<=`/`>`/`>=`/`==`/`!=` comparison, ~10,147 rows) →
+  `NarrowedIfStatements.ql` (2026-09-18: drops null comparisons,
+  literal-vs-literal comparisons, and non-numeric-typed comparisons —
+  keeps only magnitude comparisons; ~4,490 rows). **Deliberately no fixed
+  keyword list** — per Jingsong's call, the memory-relatedness judgment
+  (Rule 1/Rule 2) is made by reading each row, not by grepping for a
+  canned vocabulary, since real cases (`memtable_heap_space`,
+  `HintsBufferPool_MAX_ALLOCATED_BUFFERS`) don't share predictable
+  vocabulary. Remaining rows still include structural noise mechanical
+  filtering can't remove without keyword judgment (e.g. `index == 0`,
+  comparator results like `compareIPs() < 0`) — left for the triage pass.
+  **Semantic triage started 2026-09-18** (batched by subpackage directory,
+  not linearly — see `cassandra/if-check-exp/candidates/candidates.md`'s
+  "Batches triaged so far" table for exact coverage and row counts):
+  `concurrent/` (17 rows, 0 survivors), `cache/` (15 rows, 0 survivors),
+  `transport/` (89 rows, 1 survivor), `db/compaction/` (208 rows, 0
+  survivors — extends the earlier informal compaction survey to the whole
+  subpackage: writer-switch-on-full, candidate-selection logic, and config
+  validation account for nearly all rows) triaged so far — 329 of 4,490
+  rows total; rejects logged in `_INDEX.md`. One live candidate found and
+  written up:
+  `acquireCapacity-queueCapacity-native_transport_receive_queue_capacity` — the CQL/native-transport
+  sibling of the already-filed `internode_application_receive_queue_capacity`
+  case (same `AbstractMessageHandler.acquireCapacity():419` if-check, reached
+  via `CQLMessageHandler` instead of `InboundMessageHandler`, gated by
+  `native_transport_receive_queue_capacity` config instead) — this sibling
+  was already flagged as unfiled in the internode case's own notes; this pass
+  confirmed it independently by reading `CQLMessageHandler`'s source and
+  config wiring. **Promoted to a full case file 2026-09-18**:
+  [`cassandra/if-check-exp/net/acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md`](cassandra/if-check-exp/net/acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md),
+  `Status: pending` (trigger not yet designed/run). Writing it up surfaced
+  a significant divergence from its internode sibling: under the
+  **default** `native_transport_throw_on_overload=false` config, the
+  disallow branch does not withhold message deserialization at all —
+  decoding proceeds regardless, only a client-visible overload flag is
+  set; the check only behaves like a real gate under the non-default
+  `throwOnOverload=true`. Flagged as Target-3-relevant (a default-mode
+  escape hatch, stronger than the memtable cases' `markBlocking()` pattern
+  since no special caller state is required — it's the out-of-the-box
+  behavior). `_INDEX.md` coverage summary now: 5 total cases, 2 verified,
+  3 pending. Remaining subpackages still to triage (row counts as of
+  2026-09-18; see `cassandra/if-check-exp/candidates/candidates.md` for the
+  `db/` breakdown by sub-directory): `db` (774 remaining after
+  `compaction/`), `utils` (717), `index` (487), `io` (466), `cql3`
+  (368), `service` (267), `tools` (167), `config` (154), `net` (140, partial),
+  `locator` (98), `serializers` (91), `dht` (78), `gms` (74), `repair` (62),
+  `schema` (48), `metrics` (44), `hints` (34, partial), `auth` (30),
+  `streaming` (23), `batchlog` (10), `security` (10), `tracing` (6), `audit`
+  (4), `diag` (3), `exceptions` (3), `triggers` (2). Next: continue triage
+  batch-by-batch (biggest remaining: `db/marshal`, `db/tries`, `utils/`),
+  then promote the `acquireCapacity-queueCapacity-native_transport_receive_queue_capacity`
+  candidate to a full case file.
 - **New case drafted, not yet verified (2026-09-17):**
-  `cassandra/if-check-exp/commitlog/cdc_total_space-allocation.md` — byte cap on total un-consumed
+  `cassandra/if-check-exp/commitlog/processNewSegment-allowance-cdc_total_space.md` — byte cap on total un-consumed
   CDC-hard-linked commit log segment data
   (`cdc_total_space`, auto-derived default 1/8 of the `cdc_raw_directory`
-  filesystem, capped at 4096MiB), enforced in
+  filesystem, capped at 4096MiB), compared in `CDCSizeTracker.processNewSegment():335` (re-evaluated by `permitSegmentMaybe()`) and enforced in
   [`CommitLogSegmentManagerCDC.throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214)
   (fed by the byte-count comparison in the sibling `permitSegmentMaybe()`).
   Gates whether a CDC-tracked mutation may be written into the current
@@ -195,7 +296,7 @@ this folder's own scope.
   `cdc_total_space` boundary (vs. the `cdc_block_writes`-toggle tests)
   before citing it as primary evidence.
 - **New case drafted, not yet verified:**
-  `cassandra/if-check-exp/net/internode_application_receive_queue_capacity-message.md` — per-connection
+  `cassandra/if-check-exp/net/acquireCapacity-queueCapacity-internode_application_receive_queue_capacity.md` — per-connection
   byte cap (`internode_application_receive_queue_capacity`, default 4MiB) in
   [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419),
   gating deserialization of inbound internode `Message` objects. Disallow
@@ -209,7 +310,7 @@ this folder's own scope.
   Verification section, checking `test/unit/org/apache/cassandra/net/` for
   reusable scaffolding first.
 - **New case drafted, not yet verified:**
-  `cassandra/if-check-exp/hints/HintsBufferPool_MAX_ALLOCATED_BUFFERS-hintsbuffer.md` — cap
+  `cassandra/if-check-exp/hints/switchCurrentBuffer-MAX_ALLOCATED_BUFFERS-MAX_HINT_BUFFERS.md` — cap
   (`MAX_ALLOCATED_BUFFERS`, a JVM system property `cassandra.MAX_HINT_BUFFERS`,
   default 3) on off-heap `HintsBuffer` allocations in
   [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113).
