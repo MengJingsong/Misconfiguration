@@ -39,13 +39,30 @@ repo — when setting up verification infrastructure for this folder, assume
 nothing is already provisioned and build/configure it from scratch under
 this folder's own scope.
 
+## Working preferences (for a new session)
+
+- **Plan before editing.** For changes to rules, naming, scope, or folder
+  structure, first give an opinion or an update plan (which files, what
+  changes) and wait for Jingsong's go-ahead. Show old-vs-new names or a
+  file-by-file list when asked. Small factual fixes to a file you are
+  already working on don't need this.
+- **Commit and push only on request.** "Commit" and "push" are asked for
+  separately; never do either unprompted.
+- **Sync before restructuring.** Jingsong also uploads files to GitHub
+  directly, so `git fetch` and compare with `origin/main` before renaming or
+  reorganizing files. If local edits exist, stash, fast-forward, then re-apply.
+- **Keep settled decisions.** For example, the "no cross-referencing other
+  experiments" rule in `cassandra/if-check-exp/README.md` §4 stays because
+  Jingsong may not return to `entry-restriction-exp`; don't propose
+  cross-check steps against it.
+
 ## Where things live
 
 - **Repo:** `MengJingsong/Misconfiguration` on GitHub.
 - **Local clone:** kept wherever the current working session's local
   machine keeps it — path and device vary by environment, not fixed
-  (Jingsong pushes commits himself — a session only writes local files and
-  commits locally when asked; pushing is Jingsong's call).
+  (a session only writes local files, and commits or pushes only when
+  Jingsong asks — see "Working preferences" below).
 - **Folder:** `cassandra/if-check-exp/`
   - `README.md` — full format spec: scope, required fields, naming rules,
     workflow, how to verify/link against the local Cassandra source, **and
