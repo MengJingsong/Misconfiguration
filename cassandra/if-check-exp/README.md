@@ -324,7 +324,7 @@ grouping unit instead):
   `memtable_heap_space-tryAllocate-limit-2.md` (new). The object created is not
   part of the file name; it's the `Object` column in `_INDEX.md` and §5
   question 7.
-- **Case ID** — the filename stem (without `.md`) upper-cased, used in `_INDEX.md`.
+- **Case ID** — the filename stem (without `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `_INDEX.md` has no Case column; its `File` link identifies the case.
 
 ### 6.2 Directory layout
 
@@ -375,7 +375,8 @@ cassandra/if-check-exp/
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
-6. Add/refresh the `_INDEX.md` row; set `Status` (`pending` →
+6. Add/refresh the `_INDEX.md` Master Index row (columns: Constraint name, Capacity check,
+   Decision point, Module, Object, Pattern, Status, File); set `Status` (`pending` →
    `in-progress` → `verified` once checked against the pinned tag **and**
    verified per [§8](#8-verifying-a-case-triggering-the-disallow-branch)).
 
