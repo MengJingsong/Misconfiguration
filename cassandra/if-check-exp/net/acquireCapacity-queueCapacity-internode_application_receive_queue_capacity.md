@@ -208,7 +208,7 @@ branch with recorded evidence.
 | **Verified By / Date** | — |
 | **Trigger method** | Not yet designed. Candidate approach: unit/programmatic level — construct an `InboundMessageHandler` directly (check `test/unit/org/apache/cassandra/net/` for existing inbound-handler test scaffolding, e.g. `InboundMessageHandlerTests` / `PipelineIntegrationTest`-style harnesses, before writing a new one) with a small `queueCapacity` and both reserve `Limit`s set to 0 (or already exhausted), then feed it a message frame sized to deterministically exceed `queueCapacity` in a single shot — per the README's "prefer a deterministic single-shot trigger" guidance. Evidence to capture: the handler's `throttledCount` incrementing (`AbstractMessageHandler.java:406`) and/or a `Ticket` appearing on `endpointWaitQueue`/`globalWaitQueue`, rather than just an absence of dispatch. |
 | **Evidence** | — |
-| **Notes** | Line numbers checked against the local pinned-tag clone (`/cassandra-cassandra-5.0.9/cassandra-cassandra-5.0.9`, confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-17. Behavioral trigger not yet run. |
+| **Notes** | Line numbers checked against a local copy of the pinned tag `cassandra-5.0.9` (confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-17. Behavioral trigger not yet run. |
 
 ---
 

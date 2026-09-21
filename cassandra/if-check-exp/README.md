@@ -35,24 +35,23 @@ file restates its source ref in the header for this reason.
 
 ### 2.1 Verifying and linking against the local clone
 
-Jingsong keeps a local copy of the pinned source on whichever machine he's
-currently working from (a `cassandra-5.0.9` tag download, not a live `git`
-checkout — its `.git` directory is empty, so version is confirmed by
-content, not `git verify-tag`).
-Use it instead of fetching whole files through GitHub — grep/window it, which
-saves tokens versus pulling entire files into context.
+The pinned source is kept as a real git clone at
+`/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`;
+see the root `README.md` §2). On another machine, create your own with the
+`git clone` command above. Use the clone instead of fetching whole files
+through GitHub — grep/window it, which saves tokens versus pulling entire
+files into context.
 
-- **Root mapping:** the download unpacks with a doubled folder name
-  (`cassandra-cassandra-5.0.9/cassandra-cassandra-5.0.9/`) — the **inner**
-  folder is the actual repo root (it directly contains `build.xml`,
-  `CHANGES.txt`, `src/`, etc.). Everything below that inner folder maps
-  1:1 onto the GitHub repo's paths.
-- **Version confirmation:** `build.xml`'s `base.version` property and
-  `CHANGES.txt`'s top entry both read `5.0.9`, confirming the content
-  matches the pinned tag.
-- **Building a link:** take the file's path **relative to that inner root**
-  (e.g. `src/java/org/apache/cassandra/utils/memory/MemtablePool.java`) and
-  splice it into `https://github.com/apache/cassandra/blob/cassandra-5.0.9/<that path>#L<NN>`
+- **Root mapping:** the clone's root is the repo root (it directly contains
+  `build.xml`, `CHANGES.txt`, `src/`, etc.), so every path in it maps 1:1
+  onto the GitHub repo's paths.
+- **Version confirmation:** `git describe --tags` prints `cassandra-5.0.9`.
+  Independently, `build.xml`'s `base.version` property and `CHANGES.txt`'s
+  top entry both read `5.0.9`. If a copy has no usable `.git` (for example a
+  tag tarball), confirm by those two files.
+- **Building a link:** take the file's path **relative to that root** (e.g.
+  `src/java/org/apache/cassandra/utils/memory/MemtablePool.java`) and splice
+  it into `https://github.com/apache/cassandra/blob/cassandra-5.0.9/<that path>#L<NN>`
   (ranges: `#L<NN>-L<MM>`). Verify the line number by reading the local file
   itself, not by trusting a remembered offset.
 

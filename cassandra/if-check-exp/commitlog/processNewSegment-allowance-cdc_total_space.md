@@ -216,7 +216,7 @@ branch with recorded evidence.
 | **Verified By / Date** | — |
 | **Trigger method** | Not yet run. An existing test, `test/unit/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDCTest.java`, already targets this exact check: its `testWithCDCSpaceInMb(size, ...)` helper (around line 428) sets `cdc_total_space` to a small value via `DatabaseDescriptor.setCDCTotalSpaceInMiB(size)`, then `bulkWrite()` (around line 452) writes CDC-tracked mutations in a loop and asserts a `CDCWriteException` is thrown once `cdc_block_writes` is enabled and the space is exhausted (`Assert.fail("Expected CDCWriteException from full CDC but did not receive it.")` if it's *not* thrown). Several `@Test` methods (e.g. around lines 80, 109, 115, 121, 142) already exercise this via `testWithCDCSpaceInMb`. Reuse as-is via `ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDCTest` — check which specific `@Test` method most directly isolates the `cdc_total_space` boundary (vs. the `cdc_block_writes`-toggle tests) before citing one as primary evidence. |
 | **Evidence** | Not yet captured — expected: `BUILD SUCCESSFUL`, the relevant `@Test` passes, confirming a `CDCWriteException` was thrown and caught exactly where `bulkWrite()` expects it once CDC space is exhausted. |
-| **Notes** | Line numbers checked against the local pinned-tag clone (`/cassandra-cassandra-5.0.9/cassandra-cassandra-5.0.9`, confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-17. Behavioral trigger not yet run. |
+| **Notes** | Line numbers checked against a local copy of the pinned tag `cassandra-5.0.9` (confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-17. Behavioral trigger not yet run. |
 
 ---
 
