@@ -8,11 +8,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | SWITCHCURRENTBUFFER-MAX_ALLOCATED_BUFFERS-MAX_HINT_BUFFERS |
+| **Case ID** | MAX_HINT_BUFFERS-SWITCHCURRENTBUFFER-MAX_ALLOCATED_BUFFERS |
+| **Constraint** | `MAX_HINT_BUFFERS` — JVM system property (`CassandraRelevantProperties`) |
 | **Enforcement pattern** | (a) — the capacity check is the decision |
 | **Capacity check** | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) |
 | **Decision point** | the same statement, [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) — the disallow branch blocks on `reserveBuffers.take()` (line 118) |
 | **Allocation site** | [`HintsBufferPool.createBuffer():130-134`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L130-L134) → `HintsBuffer.create()` (`ByteBuffer.allocateDirect(slabSize)`) |
+| **Related cases** | none |
 
 ```java
 private synchronized boolean switchCurrentBuffer(HintsBuffer previous)
@@ -61,14 +63,14 @@ pool, rather than getting a new allocation.
 | **Module** | hints — hint buffering and dispatch (`hints/`) |
 | **One-line role** | Buffers and later delivers writes destined for replicas that are temporarily unreachable. |
 
-## 4. Capacity-overflow check
+## 4. Capacity check & limit
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | Yes — compares the count of buffers already allocated (`allocatedBuffers`) against a fixed cap (`MAX_ALLOCATED_BUFFERS`) before permitting another buffer to be created. |
+| **Is this a capacity check?** | Yes — compares the count of buffers already allocated (`allocatedBuffers`) against a fixed cap (`MAX_ALLOCATED_BUFFERS`) before permitting another buffer to be created. |
 | **Usage-side operand** | `allocatedBuffers` — an `int` field incremented each time `createBuffer()` actually allocates a new `HintsBuffer` (never decremented — it counts cumulative buffers ever created, not buffers currently live). |
 | **Limit-side operand** | `MAX_ALLOCATED_BUFFERS` — a `static final int` field on `HintsBufferPool`. |
-| **Limit type** | Configuration — backed by a JVM system property (`cassandra.MAX_HINT_BUFFERS`), not a `cassandra.yaml` setting, defaulting to `3`. |
+| **Limit type** | JVM system property (`cassandra.MAX_HINT_BUFFERS`), not a `cassandra.yaml` setting, defaulting to `3`. |
 
 **Limit initialization path** (declare → configure/derive → store → read at the check):
 
@@ -76,7 +78,12 @@ pool, rather than getting a new allocation.
 2. [`HintsBufferPool.MAX_ALLOCATED_BUFFERS`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L41) — read once via `MAX_HINT_BUFFERS.getInt()` and stored as a `static final int` at class-init time (so it's effectively fixed for the JVM's lifetime, though externally configurable via `-Dcassandra.MAX_HINT_BUFFERS=<n>` at startup).
 3. [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) — read directly at the comparison point (no intermediate config object; the static field is referenced in place).
 
-## 5. Branch semantics
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | see §1 |
+| **Verdict** | n/a — pattern (a): the check is the decision. |
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -144,7 +151,7 @@ maximum off-heap memory this pool can hold is bounded by
 ceiling linearly; lowering it tightens the ceiling but increases how often
 writer threads block waiting for a buffer to be flushed and recycled.
 
-## Verification
+## 9. Verification
 
 See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
@@ -157,11 +164,13 @@ branch with recorded evidence.
 | **Verified By / Date** | — |
 | **Trigger method** | Not yet run. An existing test, `test/unit/org/apache/cassandra/hints/HintsBufferPoolTest.java`'s `testBackpressure()`, already targets this exact line: it sets `bufferSize` small, drives 512 hint writes from a background thread, and uses a byteman rule (`@BMRule`, `targetMethod="switchCurrentBuffer"`, `targetLocation="AT INVOKE java.util.concurrent.BlockingQueue.take"`) to flip `blockedOnBackpressure = true` the instant the thread reaches the `reserveBuffers.take()` call inside the disallow branch — i.e. it already proves the disallow branch fires. Reuse as-is via `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest` (note: needs Byteman on the classpath, which `ant testsome` should already resolve as a test dependency — confirm before running). |
 | **Evidence** | Not yet captured — expected: `BUILD SUCCESSFUL`, `blockedOnBackpressure` assertion passes, confirming the calling thread actually reached the `take()` call inside the `if` block at line 113. |
+| **Line numbers checked** | not recorded |
+| **Escape hatch / Target-3 note** | none found yet (see Notes). |
 | **Notes** | No escape hatch identified yet in this code path (unlike the memtable cases' `markBlocking()`) — flagged as an open question for Target 3, not chased further here. `allocatedBuffers` counts cumulative allocations, not live buffers, which is a minor discrepancy from a naive reading of "current buffer count" worth noting for anyone extending this case. |
 
 ---
 
-## Notes
+## 10. Notes
 
 - `MAX_ALLOCATED_BUFFERS` is set via a JVM system property (`-D` flag), not `cassandra.yaml` — different configuration mechanism from the memtable/net cases' YAML-backed limits, but still "Configuration" per the Limit type taxonomy since it's externally settable without a code change.
 - This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../HANDOFF.md) before this draft; see `_INDEX.md` for cross-reference.

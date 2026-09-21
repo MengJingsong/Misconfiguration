@@ -10,11 +10,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | e.g., TRYALLOCATE-LIMIT-MEMTABLE_HEAP_SPACE |
+| **Case ID** | filename stem upper-cased, e.g., MEMTABLE_HEAP_SPACE-TRYALLOCATE-LIMIT |
+| **Constraint** | the resource constraint name (first part of the file name) and its source: configuration entry / JVM system property / constant / runtime-queried accessor (README §6.1) |
 | **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](README.md#3-core-concept-the-if-check-case) |
 | **Capacity check** | [`Class.method():NN`](GitHub link) — the usage-vs-limit comparison (names the file: `[function]-[operand]-[constraint].md`). List any additional check sites feeding the same decision point. |
 | **Decision point** | [`Class.method():NN`](GitHub link) — where allow and disallow diverge (same as the capacity check for pattern (a)) |
 | **Allocation site** | [`Class.method():NN`](GitHub link) — where the memory/disk-significant object is created |
+| **Related cases** | links to sibling cases sharing the same check code or constraint (e.g. heap/off-heap variants), or "none" |
 
 ```java
 // paste the capacity check and, if different, the decision point (enough surrounding context to read both outcomes)
@@ -36,14 +38,14 @@ come later._
 | **Module** | e.g., storage engine — memtable allocation (`utils/memory`, `db/memtable`) |
 | **One-line role** | what this module does in Cassandra, one sentence |
 
-## 4. Capacity-overflow check
+## 4. Capacity check & limit
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | yes / no / partial — one sentence why |
+| **Is this a capacity check?** | yes / no / partial — one sentence why |
 | **Usage-side operand** | the variable tracking current consumption (e.g. a counter, `allocated` bytes) |
 | **Limit-side operand** | the variable/constant being compared against |
-| **Limit type** | Configuration / Hardcoded constant / Derived (computed from other config) |
+| **Limit type** | Configuration entry / JVM system property / Hardcoded constant / Runtime-queried (accessor method) / Derived (computed from other config) |
 
 **Limit initialization path** (short — declare → configure/derive → store → read at the check; cite line numbers; if hardcoded, just the declaration):
 
@@ -52,7 +54,12 @@ come later._
 3. [`Class.method():NN`](link) — stored where the check reads it from
 4. [`Class.method():NN`](link) — read at the point of comparison
 
-## 5. Branch semantics
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | [`Class.method():NN`](GitHub link) — same as §1 |
+| **Verdict** | patterns (b)/(c): the flag/enum/return value or guard — name, where it is set, where it is read; pattern (a): "n/a — the check is the decision" |
 
 For pattern (b), first state the verdict (flag/enum values or return outcomes), where it is set, and where it is read; for (c), the guard and what it throws or returns.
 
@@ -109,7 +116,7 @@ or write via this check, and through what mechanism? Goes beyond §7's
 per-object sizing — this is about the limit's effect on the ceiling, not
 what one allowed object costs.
 
-## Verification
+## 9. Verification
 
 See [README.md § Verifying a case](README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
@@ -120,12 +127,14 @@ branch with recorded evidence.
 |--------|---------|
 | **Status** | pending / in-progress / verified |
 | **Verified By / Date** | Who verified and when |
+| **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) |
 | **Trigger method** | Unit test / program, or live-cluster config+steps, used to drive execution into the disallow branch |
 | **Evidence** | What was observed that confirms the disallow branch specifically fired (assertion/breakpoint, metric, log line, thread dump) — not just an end symptom like a hang or error |
-| **Notes** | Any caveats, escape hatches/bypasses noticed along the way (flag for Target 3), or outstanding questions |
+| **Escape hatch / Target-3 note** | any bypass of the disallow branch noticed (flag for Target 3, do not chase here), or "none found yet" |
+| **Notes** | Any other caveats or outstanding questions |
 
 ---
 
-## Notes
+## 10. Notes
 
 - _Add any additional context, edge cases, or version-specific behavior._

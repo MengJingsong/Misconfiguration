@@ -8,11 +8,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | TRYALLOCATE-LIMIT-MEMTABLE_HEAP_SPACE |
+| **Case ID** | MEMTABLE_HEAP_SPACE-TRYALLOCATE-LIMIT |
+| **Constraint** | `memtable_heap_space` — configuration entry (`Config.java`) |
 | **Enforcement pattern** | (b) — the capacity check returns a boolean verdict to its caller |
 | **Capacity check** | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) |
 | **Decision point** | [`MemtableAllocator.SubAllocator.allocate():169-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L169-L197) — on a `false` verdict, parks the caller on `SubPool.hasRoom`, or forces the allocation through if the caller's `OpOrder.Group` is already marked blocking |
 | **Allocation site** | [`HeapPool.Allocator.allocate():52-55`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/HeapPool.java#L52-L55) → `ByteBuffer.allocate(size)` |
+| **Related cases** | [`memtable_offheap_space-tryAllocate-limit`](memtable_offheap_space-tryAllocate-limit.md) (off-heap sibling; same check code) |
 
 ```java
 boolean tryAllocate(long size)
@@ -49,11 +51,11 @@ and release their share back to the pool.
 | **Module** | Storage engine — memtable memory allocation (`utils/memory`, `db/memtable`) |
 | **One-line role** | Tracks and bounds the JVM heap / off-heap bytes used by in-memory memtables (the write-path buffer before data is flushed to disk as SSTables). |
 
-## 4. Capacity-overflow check
+## 4. Capacity check & limit
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | Yes — a running-total counter (`allocated`) plus a requested increment (`size`) compared against a fixed ceiling (`limit`). |
+| **Is this a capacity check?** | Yes — a running-total counter (`allocated`) plus a requested increment (`size`) compared against a fixed ceiling (`limit`). |
 | **Usage-side operand** | `allocated` — `volatile long` on `SubPool`, the running total of bytes currently allocated from this pool. |
 | **Limit-side operand** | `limit` — `final long` on `SubPool`, set once at construction. |
 | **Limit type** | Configuration (`memtable_heap_space`), with an auto-sized default. |
@@ -66,7 +68,12 @@ and release their share back to the pool.
 4. [`AbstractAllocatorMemtable.java:81`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L81) — read and converted to bytes: `heapLimit = getMemtableHeapSpaceInMiB() << 20`.
 5. [`MemtablePool.java:55-60`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L55-L60) & [`MemtablePool.java:117-121`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L117-L121) — stored: `MemtablePool` constructor passes `maxOnHeapMemory` into `getSubPool(limit, cleanThreshold)`, which sets `SubPool.limit` — this is what `tryAllocate()` reads at the check.
 
-## 5. Branch semantics
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | see §1 |
+| **Verdict** | boolean return of `SubPool.tryAllocate()` (set at the check, `MemtablePool.java:156`), read by `SubAllocator.allocate()` (§1 decision point). |
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -186,7 +193,7 @@ worst case is `limit` plus however much blocking-marked write volume is
 in flight at once during a flush barrier wait, not simply "`memtable_heap_space`
 MiB." Flagged for Target 3 (bypass analysis).
 
-## Verification
+## 9. Verification
 
 Line numbers checked against the local pinned-tag clone. Per
 [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch),
@@ -481,11 +488,13 @@ experiment's setup.
 | **Verified By / Date** | Jingsong — line numbers verified against local pinned-tag clone; behavioral trigger executed 2026-09-16 on CloudLab node pc80 (JDK 11.0.32, Ant 1.10.12, git SHA `b5f2a54210d541339c2e7c17a794195cac0e67c2` of the shared `cassandra-src` clone) |
 | **Trigger method** | Unit test `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full source above) — run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`. Live-cluster trigger not run (optional secondary confirmation, not needed once the unit test passed). |
 | **Evidence** | `BUILD SUCCESSFUL` — `Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.065 sec`. (1) `testBlocksThenUnblocksOnRelease` passed: the over-limit `allocate(1)` call did not complete within 300 ms (`TimeoutException` caught and asserted) while usage stayed at `LIMIT`; after `released(50)`, the parked call completed and returned a 1-byte buffer with usage at `LIMIT - 50 + 1`. (2) `testForcesThroughWhenOpGroupIsBlocking` passed: with the op group's barrier marked blocking, `allocate(1)` returned immediately (no park) and usage reached `LIMIT + 1`, confirming the escape hatch overshoots the limit rather than gating it. |
+| **Line numbers checked** | not recorded (verified against the local pinned-tag clone, before the behavioral trigger run on 2026-09-16) |
+| **Escape hatch / Target-3 note** | `markBlocking()`-marked `OpOrder.Group` silently forces the allocation past `limit` instead of parking (`MemtableAllocator.SubAllocator.allocate():169-197`); see §6b. |
 | **Notes** | Sibling to [`memtable_offheap_space-tryAllocate-limit`](memtable_offheap_space-tryAllocate-limit.md) — same `SubPool.tryAllocate()` if-check, on-heap `SubPool`/`HeapPool.Allocator` instead of off-heap. Same decoupled-accounting / escape-hatch behavior applies (see 6b note); flagged for later Target-3 bypass analysis, not pursued further here. |
 
 ---
 
-## Notes
+## 10. Notes
 
 - The escape hatch (`opGroup.isBlocking()` forcing `allocated(size)` through
   regardless of `limit`) is shared code between this case and

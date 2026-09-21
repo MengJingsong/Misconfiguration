@@ -7,18 +7,20 @@ See [README.md](README.md) for the format.
 **Status legend:** `pending` · `in-progress` · `verified`
 **Pattern legend** (README §3.2): **(a)** the capacity check is the decision · **(b)** the check sets a verdict (flag, enum, return value) that a separate decision point reads · **(c)** guard clause(s) before an allocation outside any branch
 
-| Module | Limit | Object | Pattern | Capacity check | Status | File |
-|--------|-------|--------|---------|----------------|--------|------|
-| `memtable` | `memtable_heap_space` | `bytebuffer` | (b) | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_heap_space-tryAllocate-limit.md) |
-| `memtable` | `memtable_offheap_space` | `region` | (b) | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_offheap_space-tryAllocate-limit.md) |
-| `net` | `internode_application_receive_queue_capacity` | `message` | (b) | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) | pending | [link](net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
-| `net` | `native_transport_receive_queue_capacity` | `message` | (b) | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) | pending | [link](net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
-| `hints` | `HintsBufferPool_MAX_ALLOCATED_BUFFERS` | `hintsbuffer` | (a) | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) | pending | [link](hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md) |
-| `commitlog` | `cdc_total_space` | `allocation` | (b) | [`CDCSizeTracker.processNewSegment():335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L335) | pending | [link](commitlog/cdc_total_space-processNewSegment-allowance.md) |
+## 1. Master Index
+
+| Case | Module | Limit | Object | Pattern | Capacity check | Status | File |
+|------|--------|-------|--------|---------|----------------|--------|------|
+| `memtable_heap_space-tryAllocate-limit` | `memtable` | `memtable_heap_space` | `bytebuffer` | (b) | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_heap_space-tryAllocate-limit.md) |
+| `memtable_offheap_space-tryAllocate-limit` | `memtable` | `memtable_offheap_space` | `region` | (b) | [`SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | verified | [link](memtable/memtable_offheap_space-tryAllocate-limit.md) |
+| `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` | `net` | `internode_application_receive_queue_capacity` | `message` | (b) | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) | pending | [link](net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
+| `native_transport_receive_queue_capacity-acquireCapacity-queueCapacity` | `net` | `native_transport_receive_queue_capacity` | `message` | (b) | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) | pending | [link](net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
+| `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS` | `hints` | `HintsBufferPool_MAX_ALLOCATED_BUFFERS` | `hintsbuffer` | (a) | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) | pending | [link](hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md) |
+| `cdc_total_space-processNewSegment-allowance` | `commitlog` | `cdc_total_space` | `allocation` | (b) | [`CDCSizeTracker.processNewSegment():335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L335) | pending | [link](commitlog/cdc_total_space-processNewSegment-allowance.md) |
 
 <!-- Add one row per case. -->
 
-## Coverage summary
+## 2. Coverage summary
 
 | Metric | Count |
 |--------|-------|
@@ -27,7 +29,7 @@ See [README.md](README.md) for the format.
 | Verified | 2 |
 | Pending / in-progress | 4 |
 
-## Lines considered and rejected
+## 3. Lines considered and rejected
 
 _Track if-checks that were examined but don't qualify (no branch divergence
 on object creation, pure validation, etc.), so later passes don't re-examine
@@ -59,23 +61,23 @@ them._
 | `cache/` subpackage (`AutoSavingCache`, `CaffeineCache`, `ChunkCache`, `NopCacheProvider`, `RefCountedMemory`, `SerializingCache`) | Surveyed in full (15 rows) — ref-counting (`refCount == 0`), `int`-overflow guards (`size > MAX_VALUE`), and cache-save bookkeeping; no capacity-vs-limit divergence gating new object creation found. |
 | `db/compaction/` subpackage, remaining files not already logged above (208 rows total, full subpackage now surveyed) | Extends the earlier informal compaction survey's conclusion to every file in the subpackage. Three recurring non-qualifying patterns account for nearly all rows: (1) **SSTable-candidate selection/threshold logic** (`LeveledManifest`, `UnifiedCompactionStrategy`, `SizeTieredCompactionStrategy`, `TimeWindowCompactionStrategy`, `ShardManager*`) — comparisons that choose *which* SSTables to compact or how to bucket/level them, not a create-vs-block divergence. (2) **Writer-switch-on-full** (`CompactionAwareWriter.maybeSwitchLocation`, `MajorLeveledCompactionWriter`, `SplittingSizeTieredCompactionWriter`, `Sharded*Writer`, e.g. `totalWrittenInCurrentWriter > maxSSTableSize`) — same non-diverging "start a new writer instead of blocking" pattern already rejected for `CommitLogSegment.java:242`/`HintsBuffer.java:190` (writing proceeds regardless of branch) — rejected under Rule 2's writer-rollover edge case even with disk now in scope, since total bytes written aren't bounded, only their chunking. (3) **Config validation / arithmetic derivation** (`validateOptions()` methods across every strategy, `Controller.java`'s remaining rows) — startup-time checks or plain derived-value math, not runtime allocation gates. No candidate survived from these three patterns. **`CompactionAwareWriter.getWriteDirectory():282`** (`availableSpace < estimatedWriteSize`) was rejected here as disk-scoped/out-of-scope — **reclassified as a live candidate 2026-09-18** once disk was brought into this folder's scope (README § Core concept); see `candidates/candidates.md`. |
 
-## Notes on Modules
+## 4. Notes on Modules
 
-### memtable
+### 4.1 memtable
 Storage-engine module covering memtable memory allocation and pooling
 (`utils/memory`, `db/memtable`). One case so far:
 - **`memtable_heap_space-tryAllocate-limit`:** hard allocation cap in `SubPool.tryAllocate()`, gating `ByteBuffer.allocate()` for memtable writes. Verified via new `HeapPoolTest` unit test (2026-09-16).
 - **`memtable_offheap_space-tryAllocate-limit`:** sibling case, same `SubPool.tryAllocate()` if-check on the `offHeap` `SubPool`, reached via `NativeAllocator` — gates off-heap `Region`/native memory allocation instead of `ByteBuffer`. Note: accounting call is decoupled from the physical allocation call (see case notes). Verified via existing `NativeAllocatorTest.testBookKeeping()` (2026-09-16).
 
-### net
+### 4.2 net
 Internode messaging and native (CQL client) transport module covering inbound connection handling (`net/`, `transport/`). Two cases so far:
 - **`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`:** per-connection byte cap in `AbstractMessageHandler.acquireCapacity()`, gating `Message` deserialization for inbound internode traffic. Disallow branch backpressures (registers on a wait queue) rather than dropping the message. Status: pending — trigger not yet designed/run.
 - **`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`:** same `AbstractMessageHandler.acquireCapacity()` if-check, reached via `CQLMessageHandler` for CQL client connections instead of internode peers. **Notable divergence from its sibling:** under the default `native_transport_throw_on_overload=false` config, the disallow branch does *not* withhold message deserialization at all — decoding proceeds regardless, only a client-visible overload flag is set. Only under the non-default `throwOnOverload=true` does it behave like the internode case (clean reject via `OverloadedException`). Flagged as Target-3-relevant (default-mode escape hatch). Status: pending — trigger not yet designed/run. Promoted from `candidates/candidates.md` 2026-09-18.
 
-### hints
+### 4.3 hints
 Hint buffering and dispatch module, covering writes stashed for temporarily-unreachable replicas (`hints/`). One case so far:
 - **`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`:** cap (JVM system property, default 3) on how many off-heap `HintsBuffer`s the pool will ever allocate, in `HintsBufferPool.switchCurrentBuffer()`. Disallow branch blocks on `reserveBuffers.take()` until a buffer is recycled, rather than allocating a new one. Status: pending — an existing test (`HintsBufferPoolTest.testBackpressure()`, using a byteman rule at the exact `take()` call) already targets this line and just needs to be run.
 
-### commitlog
+### 4.4 commitlog
 Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). One case so far:
 - **`cdc_total_space-processNewSegment-allowance`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, compared in `CDCSizeTracker.processNewSegment()` (re-evaluated by `permitSegmentMaybe()`), which sets a per-segment `FORBIDDEN`/`PERMITTED` state read by the decision point `CommitLogSegmentManagerCDC.throwIfForbidden()` (pattern (b)). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. Escape hatch found: `cdc_block_writes = false` bypasses the check entirely. Status: pending — an existing test (`CommitLogSegmentManagerCDCTest`'s `testWithCDCSpaceInMb()`-driven tests) already targets this exact boundary and just needs to be run.

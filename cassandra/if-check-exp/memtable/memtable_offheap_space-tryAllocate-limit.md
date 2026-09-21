@@ -8,11 +8,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | TRYALLOCATE-LIMIT-MEMTABLE_OFFHEAP_SPACE |
+| **Case ID** | MEMTABLE_OFFHEAP_SPACE-TRYALLOCATE-LIMIT |
+| **Constraint** | `memtable_offheap_space` — configuration entry (`Config.java`) |
 | **Enforcement pattern** | (b) — the capacity check returns a boolean verdict to its caller |
 | **Capacity check** | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) (on the `offHeap` `SubPool`) |
 | **Decision point** | [`MemtableAllocator.SubAllocator.allocate():169-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L169-L197) — same park-or-force-through decision as the heap case |
 | **Allocation site** | [`NativeAllocator.allocate():138-190`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L138-L190) → a new `NativeAllocator.Region` via `MemoryUtil.allocate()` |
+| **Related cases** | [`memtable_heap_space-tryAllocate-limit`](memtable_heap_space-tryAllocate-limit.md) (on-heap sibling; same check code) |
 
 ```java
 boolean tryAllocate(long size)
@@ -55,11 +57,11 @@ configured ceiling?" — applied to a separate off-heap accounting pool.
 | **Module** | Storage engine — memtable memory allocation (`utils/memory`, `db/memtable`) |
 | **One-line role** | Tracks and bounds the off-heap (native) bytes used by in-memory memtables when Cassandra is configured to allocate memtable cells as off-heap objects rather than on-heap `ByteBuffer`s. |
 
-## 4. Capacity-overflow check
+## 4. Capacity check & limit
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | Yes — a running-total counter (`allocated`) plus a requested increment (`size`) compared against a fixed ceiling (`limit`), on the `offHeap` `SubPool` instance. |
+| **Is this a capacity check?** | Yes — a running-total counter (`allocated`) plus a requested increment (`size`) compared against a fixed ceiling (`limit`), on the `offHeap` `SubPool` instance. |
 | **Usage-side operand** | `allocated` — `volatile long` on `SubPool`, running total of off-heap bytes currently allocated from `MemtablePool.offHeap`. |
 | **Limit-side operand** | `limit` — `final long` on the `offHeap` `SubPool`, set once at construction from `maxOffHeapMemory`. |
 | **Limit type** | Configuration (`memtable_offheap_space`), with an auto-sized default. |
@@ -74,7 +76,12 @@ configured ceiling?" — applied to a separate off-heap accounting pool.
 6. [`NativePool.java:23-25`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativePool.java#L23-L25) — `NativePool` constructor forwards `maxOffHeapMemory` to `super(...)` (`MemtablePool`).
 7. [`MemtablePool.java:55-60`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L55-L60) — stored: `MemtablePool` constructor calls `this.offHeap = getSubPool(maxOffHeapMemory, cleanThreshold)`, which sets `SubPool.limit` on the `offHeap` field ([line 48](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L48)) — this is what `tryAllocate()` reads at the check when called via `offHeap()`.
 
-## 5. Branch semantics
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | see §1 |
+| **Verdict** | boolean return of `SubPool.tryAllocate()` (set at the check, `MemtablePool.java:156`), read by `SubAllocator.allocate()` (§1 decision point). |
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -143,7 +150,7 @@ boolean — so the *physical* off-heap bytes allocated can diverge from the
 `memtable_offheap_space` as a hard native-memory ceiling would be wrong on
 two independent grounds; both flagged for Target 3, not resolved here.
 
-## Verification
+## 9. Verification
 
 Line numbers checked against the local pinned-tag clone. Per
 [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch),
@@ -193,10 +200,12 @@ the primary trigger below has been **executed and recorded** (see table below).
 | **Verified By / Date** | Claude (session) — 2026-09-16; primary trigger run and evidence recorded |
 | **Trigger method** | Existing `NativeAllocatorTest.testBookKeeping()`, run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest` against the `cassandra-src` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`) |
 | **Evidence** | `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. Test's own assertions (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`) directly demonstrate the disallow branch's two outcomes at `MemtablePool.java:156` on the `offHeap` `SubPool` — accounting capped at `limit`, then force-through past it once `markBlocking()` fires. |
+| **Line numbers checked** | not recorded (behavioral trigger run 2026-09-16) |
+| **Escape hatch / Target-3 note** | `markBlocking()`/`isBlocking()` forces the allocation through past `limit` instead of parking; see §6b. |
 | **Notes** | Sibling to [`memtable_heap_space-tryAllocate-limit`](../memtable/memtable_heap_space-tryAllocate-limit.md); same if-check code, different `SubPool` instance/limit/allocator. 6b note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
 
 ---
 
-## Notes
+## 10. Notes
 
 - `NativePool`/`NativeAllocator` is only reachable when `memtable_allocation_type` is `offheap_objects`; the sibling `offheap_buffers` type uses `SlabPool` (off-heap `ByteBuffer` slabs) instead — a third, not-yet-written variant if the off-heap-buffers path is wanted later.

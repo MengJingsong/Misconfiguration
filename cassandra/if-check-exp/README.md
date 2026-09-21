@@ -235,12 +235,12 @@ Every case file answers exactly these eight questions (see `_TEMPLATE.md`):
    without bound").
 3. **Module** — which Cassandra module/subsystem this if-check belongs to
    (e.g. storage engine / memtable, native transport, compaction).
-4. **Capacity-overflow check?** — is this comparing a counter/usage value
+4. **Capacity check & limit** — is this comparing a counter/usage value
    against a limit (general capacity overflow), and if so, where is that
    limit initialized (its own short codepath: declared → configured/derived →
    stored → read at the check)? This is the Target 1 half of the case: the
    first declaration on this path names the resource constraint.
-5. **Branch semantics** — for pattern (a), which branch allows object
+5. **Decision point & branch semantics** — the decision point (`file:line`, same as question 1), then: for pattern (a), which branch allows object
    creation and which disallows it (quote the branch bodies). For (b), what
    the verdict is (flag/enum values or return outcomes), where it is set, and
    the decision point's two outcomes. For (c), the guard and what it throws

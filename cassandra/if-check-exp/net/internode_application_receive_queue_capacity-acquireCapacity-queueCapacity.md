@@ -8,11 +8,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | ACQUIRECAPACITY-QUEUECAPACITY-INTERNODE_APPLICATION_RECEIVE_QUEUE_CAPACITY |
+| **Case ID** | INTERNODE_APPLICATION_RECEIVE_QUEUE_CAPACITY-ACQUIRECAPACITY-QUEUECAPACITY |
+| **Constraint** | `internode_application_receive_queue_capacity` — configuration entry (`Config.java`) |
 | **Enforcement pattern** | (b) — the capacity check returns a `ResourceLimits.Outcome` verdict to its caller |
 | **Capacity check** | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) |
 | **Decision point** | [`InboundMessageHandler.processOneContainedMessage():139-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L139-L151) (returns without deserializing on a non-`SUCCESS` outcome) plus the wait-queue registration at [`AbstractMessageHandler.java:401-403`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L401-L403) |
 | **Allocation site** | [`InboundMessageHandler.java:163`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L163) — `serializer.deserialize(...)` creates the `Message` |
+| **Related cases** | [`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`](native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) (same `acquireCapacity()` check, CQL side) |
 
 ```java
 protected ResourceLimits.Outcome acquireCapacity(Limit endpointReserve, Limit globalReserve, int bytes)
@@ -80,11 +82,11 @@ instead of buffering unboundedly.
 | **Module** | Internode messaging (`net/`) — inbound connection handling |
 | **One-line role** | Netty pipeline handler that decodes and deserializes messages arriving from a peer node, applying flow control so a fast/misbehaving sender can't unboundedly grow in-memory buffered message state on the receiver. |
 
-## 4. Capacity-overflow check
+## 4. Capacity check & limit
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | Yes — a running-total counter (`queueSize`) plus a requested increment (`bytes`, the incoming message's size) compared against a fixed per-connection ceiling (`queueCapacity`). |
+| **Is this a capacity check?** | Yes — a running-total counter (`queueSize`) plus a requested increment (`bytes`, the incoming message's size) compared against a fixed per-connection ceiling (`queueCapacity`). |
 | **Usage-side operand** | `queueSize` — `volatile long` on `AbstractMessageHandler`, bytes of not-yet-fully-processed inbound messages currently attributed to this connection. |
 | **Limit-side operand** | `queueCapacity` — `protected final long` on `AbstractMessageHandler`, set once at construction. |
 | **Limit type** | Configuration (`internode_application_receive_queue_capacity`), fixed default. |
@@ -97,7 +99,12 @@ instead of buffering unboundedly.
 4. [`InboundMessageHandlers.java:97,118,147`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandlers.java#L97) — stored: constructor param `queueCapacity` is kept on `InboundMessageHandlers` and threaded into each per-connection `InboundMessageHandler::new` at line 147.
 5. [`InboundMessageHandler.java:92,105`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L92) → [`AbstractMessageHandler.java:172,185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L172-L185) — stored: `InboundMessageHandler`'s constructor forwards `queueCapacity` to `super(...)`, which assigns `this.queueCapacity = queueCapacity` (`AbstractMessageHandler.java:185`) — a `final` field on the per-connection handler, this is what the check at line 419 reads.
 
-## 5. Branch semantics
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | see §1 |
+| **Verdict** | `ResourceLimits.Outcome` returned by `AbstractMessageHandler.acquireCapacity()` (`:419`), read at the §1 decision point. |
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
@@ -195,7 +202,7 @@ per-connection allowance alone, before any peer touches the shared
 reserves — the config name reads like a flat per-node cap but is actually a
 per-connection-type-per-peer one.
 
-## Verification
+## 9. Verification
 
 See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
@@ -208,11 +215,13 @@ branch with recorded evidence.
 | **Verified By / Date** | — |
 | **Trigger method** | Not yet designed. Candidate approach: unit/programmatic level — construct an `InboundMessageHandler` directly (check `test/unit/org/apache/cassandra/net/` for existing inbound-handler test scaffolding, e.g. `InboundMessageHandlerTests` / `PipelineIntegrationTest`-style harnesses, before writing a new one) with a small `queueCapacity` and both reserve `Limit`s set to 0 (or already exhausted), then feed it a message frame sized to deterministically exceed `queueCapacity` in a single shot — per the README's "prefer a deterministic single-shot trigger" guidance. Evidence to capture: the handler's `throttledCount` incrementing (`AbstractMessageHandler.java:406`) and/or a `Ticket` appearing on `endpointWaitQueue`/`globalWaitQueue`, rather than just an absence of dispatch. |
 | **Evidence** | — |
-| **Notes** | Line numbers checked against a local copy of the pinned tag `cassandra-5.0.9` (confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-17. Behavioral trigger not yet run. |
+| **Line numbers checked** | 2026-09-17 |
+| **Escape hatch / Target-3 note** | none found yet. |
+| **Notes** | Behavioral trigger not yet run. |
 
 ---
 
-## Notes
+## 10. Notes
 
 - **Sibling candidate not filed separately:** the CQL/native-transport side of
   this same `AbstractMessageHandler.acquireCapacity()` check is reached via

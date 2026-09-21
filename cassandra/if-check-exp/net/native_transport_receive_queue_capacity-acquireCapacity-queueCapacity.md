@@ -8,11 +8,13 @@
 
 | Field | Content |
 |-------|---------|
-| **Case ID** | ACQUIRECAPACITY-QUEUECAPACITY-NATIVE_TRANSPORT_RECEIVE_QUEUE_CAPACITY |
+| **Case ID** | NATIVE_TRANSPORT_RECEIVE_QUEUE_CAPACITY-ACQUIRECAPACITY-QUEUECAPACITY |
+| **Constraint** | `native_transport_receive_queue_capacity` — configuration entry (`Config.java`) |
 | **Enforcement pattern** | (b) — the capacity check returns a verdict to its caller, and the decision point itself depends on `native_transport_throw_on_overload` |
 | **Capacity check** | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) (reached via `CQLMessageHandler`) |
 | **Decision point** | [`CQLMessageHandler.processOneContainedMessage():196-256`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L196-L256) |
 | **Allocation site** | [`CQLMessageHandler.processRequest():385-391`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L385-L391) — `messageDecoder.decode(...)` creates the `Message.Request` |
+| **Related cases** | [`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`](internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md) (same `acquireCapacity()` check, internode side) |
 
 ```java
 protected ResourceLimits.Outcome acquireCapacity(Limit endpointReserve, Limit globalReserve, int bytes)
@@ -57,11 +59,11 @@ signaling instead.
 | **Module** | Native transport / CQL client connections (`transport/`) |
 | **One-line role** | Netty pipeline handler (`CQLMessageHandler`) that decodes and deserializes CQL requests arriving from a client connection, tracking per-connection in-flight byte usage and applying overload signaling when a client sends faster than the node can absorb. |
 
-## 4. Capacity-overflow check
+## 4. Capacity check & limit
 
 | Field | Content |
 |-------|---------|
-| **Is this a capacity/overflow check?** | Yes — same running-total (`queueSize`) vs. fixed per-connection ceiling (`queueCapacity`) comparison as the internode case, on the CQL side. |
+| **Is this a capacity check?** | Yes — same running-total (`queueSize`) vs. fixed per-connection ceiling (`queueCapacity`) comparison as the internode case, on the CQL side. |
 | **Usage-side operand** | `queueSize` — inherited `volatile long` on `AbstractMessageHandler`, bytes of not-yet-fully-processed inbound CQL requests attributed to this client connection. |
 | **Limit-side operand** | `queueCapacity` — `protected final long`, set once at construction from the CQL-side config value. |
 | **Limit type** | Configuration (`native_transport_receive_queue_capacity`), fixed default. |
@@ -74,7 +76,12 @@ signaling instead.
 4. [`PipelineConfigurator.java:317-332`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/PipelineConfigurator.java#L317-L332) — passed into `new CQLMessageHandler<>(..., queueCapacity, ...)`.
 5. [`CQLMessageHandler.java:124,134`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L124) → [`AbstractMessageHandler.java:172,185`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L172-L185) — stored: `CQLMessageHandler`'s constructor forwards `queueCapacity` to `super(...)`, assigned to the inherited `final` field the check at line 419 reads — identical storage mechanism to the internode case, just a different config value threaded in.
 
-## 5. Branch semantics
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | see §1 |
+| **Verdict** | verdict returned by `AbstractMessageHandler.acquireCapacity()` (`:419`), read at the §1 decision point, whose outcome also depends on `native_transport_throw_on_overload`. |
 
 The if-check's own two branches are identical to the internode case (see
 that case's §5). What's specific to this case is *how the caller reacts*
@@ -142,7 +149,7 @@ name alone would be misled. **Flagged as noteworthy for Target 3
 Target 1+2 scope, since the "bypass" here is simply the out-of-the-box
 default rather than requiring any special caller state.
 
-## Verification
+## 9. Verification
 
 See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
@@ -155,11 +162,13 @@ branch with recorded evidence.
 | **Verified By / Date** | — |
 | **Trigger method** | Not yet designed. Two triggers needed given §5/§6b's config-dependent split: (1) `throwOnOverload=true` — construct a `CQLMessageHandler` (check `test/unit/org/apache/cassandra/transport/` for existing handler-level test scaffolding, e.g. anything exercising `CQLMessageHandler` or `Dispatcher` directly, before writing new harness code) with a small `queueCapacity`, feed an oversized request frame, and assert `discardAndThrow()`'s `OverloadedException` fires without a `messageDecoder.decode()` call. (2) `throwOnOverload=false` (default) — same setup, but assert the *opposite*: that `messageDecoder.decode()` **does** fire despite `queueSize + bytes > queueCapacity`, to directly confirm the no-effect finding in §6b rather than just inferring it from source reading. |
 | **Evidence** | — |
-| **Notes** | Line numbers checked against a local copy of the pinned tag `cassandra-5.0.9` (confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-18. Behavioral trigger not yet run. Promoted from `candidates/candidates.md` (2026-09-18) after confirming the sibling relationship to `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` by reading `CQLMessageHandler`'s source directly. |
+| **Line numbers checked** | 2026-09-18 |
+| **Escape hatch / Target-3 note** | under the default `native_transport_throw_on_overload=false` the message is still decoded despite the over-limit verdict; see §6b. |
+| **Notes** | Behavioral trigger not yet run. Promoted from `candidates/candidates.md` (2026-09-18) after confirming the sibling relationship to `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` by reading `CQLMessageHandler`'s source directly. |
 
 ---
 
-## Notes
+## 10. Notes
 
 - **Biggest finding of this case, distinct from its internode sibling:**
   under the *default* configuration, this if-check's disallow branch does
