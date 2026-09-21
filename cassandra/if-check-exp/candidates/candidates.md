@@ -1,7 +1,7 @@
 # Candidates working list
 
 Survivors of semantic triage (step 4 of the CodeQL pipeline, see
-[../../codeql-queries/cassandra/queries/if-check-exp/README.md](../../codeql-queries/cassandra/queries/if-check-exp/README.md))
+[../../codeql-queries/cassandra/queries/if-check-exp/README.md](../../../codeql-queries/cassandra/queries/if-check-exp/README.md))
 against `results/cassandra/NarrowedIfStatements.csv`, pending promotion to a
 full case file under a `<module>/` folder. Rejected rows are logged directly
 in [`../_INDEX.md`](../_INDEX.md)'s "Lines considered and rejected" table
@@ -99,7 +99,7 @@ live candidate as a direct result.
   rate/concurrency). Rule 3 (yes — disallow branch `throw new
   RuntimeException(...)` is a clean, unambiguous reject; no escape hatch
   visible in this method).
-- **Enforcement pattern:** (c) — the check is a guard that throws before the write proceeds; the disallow path is a clean reject, and the allocation must be shown to be dominated by it when the case is written up. Its file name under the current policy would be `getWriteDirectory-availableSpace-DataDirectory_getAvailableSpace.md`.
+- **Enforcement pattern:** (c) — the check is a guard that throws before the write proceeds; the disallow path is a clean reject, and the allocation must be shown to be dominated by it when the case is written up. Its file name under the current policy would be `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`.
 - **Also note:** the same method has a second disk-capacity check later —
   `getDirectories().getWriteableLocation(estimatedWriteSize)` returning
   `null` (also throws) — a fallback path when no single directory's
@@ -115,7 +115,7 @@ live candidate as a direct result.
 ### ~~`native_transport_receive_queue_capacity` — `message`~~ — promoted 2026-09-18
 
 Written up as a full case file:
-[`net/acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md`](../net/acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md).
+[`net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md`](../net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md).
 Notable finding surfaced while writing it up: under the *default*
 `native_transport_throw_on_overload=false` config, this if-check's
 disallow branch does not withhold object creation at all — a stronger,
@@ -126,7 +126,7 @@ case file's §6b/§8/Notes.
 <summary>Original triage notes (kept for reference)</summary>
 
 - **If-statement:** same enforcement point as the already-filed
-  [`acquireCapacity-queueCapacity-internode_application_receive_queue_capacity`](../net/acquireCapacity-queueCapacity-internode_application_receive_queue_capacity.md)
+  [`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`](../net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md)
   case — [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) —
   but reached via `CQLMessageHandler` (extends `AbstractMessageHandler`,
   confirmed `codeql-queries/cassandra/queries/if-check-exp/README.md` line
@@ -140,15 +140,15 @@ case file's §6b/§8/Notes.
   `PipelineConfigurator.java:306` and threaded to `CQLMessageHandler`'s
   constructor (`CQLMessageHandler.java:124,134`).
 - **Why it's a distinct candidate, not a duplicate:** this is exactly the
-  precedent set by `tryAllocate-limit-memtable_heap_space` /
-  `tryAllocate-limit-memtable_offheap_space` — same if-check, different `SubPool`
+  precedent set by `memtable_heap_space-tryAllocate-limit` /
+  `memtable_offheap_space-tryAllocate-limit` — same if-check, different `SubPool`
   instance and config source. Here it's the same `acquireCapacity()`
   if-check, different config (`native_transport_receive_queue_capacity` vs.
   `internode_application_receive_queue_capacity`) and different object
   created (a CQL `Message` decoded from a client, e.g. a query/execute
   request, rather than an internode peer `Message`). The existing case file
   already flagged this exact sibling in its own "Notes" section
-  (`net/acquireCapacity-queueCapacity-internode_application_receive_queue_capacity.md`) as "could
+  (`net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md`) as "could
   be filed... following the same memtable heap/offheap precedent" — this
   triage pass confirms it independently by reading `CQLMessageHandler`'s
   source and config wiring, rather than just accepting the earlier note at
@@ -159,7 +159,7 @@ case file's §6b/§8/Notes.
   branch backpressures via the same `endpointWaitQueue`/`globalWaitQueue`
   registration as the internode case, per `AbstractMessageHandler.java:401-403`).
 - **Status:** candidate, not yet written up as a full case file or verified.
-  Next step: write `net/acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md`
+  Next step: write `net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md`
   from `_TEMPLATE.md` (mirroring the internode case's structure — §1 note
   about the reserve-capacity sub-checks likely applies here too, since
   `CQLMessageHandler` shares `acquireCapacity()`'s full body), then design a

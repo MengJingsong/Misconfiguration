@@ -155,7 +155,7 @@ branch with recorded evidence.
 | **Verified By / Date** | — |
 | **Trigger method** | Not yet designed. Two triggers needed given §5/§6b's config-dependent split: (1) `throwOnOverload=true` — construct a `CQLMessageHandler` (check `test/unit/org/apache/cassandra/transport/` for existing handler-level test scaffolding, e.g. anything exercising `CQLMessageHandler` or `Dispatcher` directly, before writing new harness code) with a small `queueCapacity`, feed an oversized request frame, and assert `discardAndThrow()`'s `OverloadedException` fires without a `messageDecoder.decode()` call. (2) `throwOnOverload=false` (default) — same setup, but assert the *opposite*: that `messageDecoder.decode()` **does** fire despite `queueSize + bytes > queueCapacity`, to directly confirm the no-effect finding in §6b rather than just inferring it from source reading. |
 | **Evidence** | — |
-| **Notes** | Line numbers checked against a local copy of the pinned tag `cassandra-5.0.9` (confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-18. Behavioral trigger not yet run. Promoted from `candidates/candidates.md` (2026-09-18) after confirming the sibling relationship to `acquireCapacity-queueCapacity-internode_application_receive_queue_capacity` by reading `CQLMessageHandler`'s source directly. |
+| **Notes** | Line numbers checked against a local copy of the pinned tag `cassandra-5.0.9` (confirmed `5.0.9` via `build.xml`/`CHANGES.txt`) on 2026-09-18. Behavioral trigger not yet run. Promoted from `candidates/candidates.md` (2026-09-18) after confirming the sibling relationship to `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` by reading `CQLMessageHandler`'s source directly. |
 
 ---
 

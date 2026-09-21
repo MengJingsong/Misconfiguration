@@ -221,7 +221,7 @@ branch with recorded evidence.
   (config `native_transport_receive_queue_capacity`, default 1MiB) — same
   if-check, same class, different config and different peer path (CQL client
   connections vs. internode). Could be filed as a sibling case
-  (`acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md`) following the same
+  (`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md`) following the same
   memtable heap/offheap precedent, if useful to distinguish later.
 - **Reserve-capacity checks (lines 428/431) not separately cased:** see the
   §1 scoping note — `endpointReserve.tryAllocate()` /

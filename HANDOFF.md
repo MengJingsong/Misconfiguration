@@ -111,17 +111,17 @@ this folder's own scope.
 
 | Case (file under `cassandra/if-check-exp/`) | Pattern | Status | Key finding | Next step |
 |---|---|---|---|---|
-| `memtable/tryAllocate-limit-memtable_heap_space.md` | (b) | verified | Disallow parks the caller; a `markBlocking()` op overshoots the limit (escape hatch). | none |
-| `memtable/tryAllocate-limit-memtable_offheap_space.md` | (b) | verified | Same check on the `offHeap` `SubPool`; same escape hatch. | optional: purpose-built timeout test (see Open items) |
-| `net/acquireCapacity-queueCapacity-internode_application_receive_queue_capacity.md` | (b) | pending | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found yet. | design a unit trigger: `InboundMessageHandler` with tiny `queueCapacity` and exhausted reserves, feed one oversized frame; check `test/unit/.../net/` for scaffolding first |
-| `net/acquireCapacity-queueCapacity-native_transport_receive_queue_capacity.md` | (b) | pending | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. | two triggers: `throwOnOverload=true` (expect `OverloadedException`, no decode) and `false` (expect decode despite over-limit) |
-| `hints/switchCurrentBuffer-MAX_ALLOCATED_BUFFERS-MAX_HINT_BUFFERS.md` | (a) | pending | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. | run existing `HintsBufferPoolTest.testBackpressure()` via `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest`; confirm Byteman resolves as a test dependency |
-| `commitlog/processNewSegment-allowance-cdc_total_space.md` | (b) | pending | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. | run `CommitLogSegmentManagerCDCTest` via `ant testsome`; find which `@Test` isolates the `cdc_total_space` boundary vs. the `cdc_block_writes` tests |
+| `memtable/memtable_heap_space-tryAllocate-limit.md` | (b) | verified | Disallow parks the caller; a `markBlocking()` op overshoots the limit (escape hatch). | none |
+| `memtable/memtable_offheap_space-tryAllocate-limit.md` | (b) | verified | Same check on the `offHeap` `SubPool`; same escape hatch. | optional: purpose-built timeout test (see Open items) |
+| `net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | pending | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found yet. | design a unit trigger: `InboundMessageHandler` with tiny `queueCapacity` and exhausted reserves, feed one oversized frame; check `test/unit/.../net/` for scaffolding first |
+| `net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | pending | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. | two triggers: `throwOnOverload=true` (expect `OverloadedException`, no decode) and `false` (expect decode despite over-limit) |
+| `hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | pending | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. | run existing `HintsBufferPoolTest.testBackpressure()` via `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest`; confirm Byteman resolves as a test dependency |
+| `commitlog/cdc_total_space-processNewSegment-allowance.md` | (b) | pending | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. | run `CommitLogSegmentManagerCDCTest` via `ant testsome`; find which `@Test` isolates the `cdc_total_space` boundary vs. the `cdc_block_writes` tests |
 
 Details for the two verified cases follow. The pending cases' details live in
 their case files.
 
-- **`cassandra/if-check-exp/memtable/tryAllocate-limit-memtable_heap_space.md`** — on-heap path. If-check:
+- **`cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`** — on-heap path. If-check:
   [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156),
   gating `ByteBuffer.allocate(size)` via `HeapPool.Allocator.allocate()`.
   Limit traced from `Config.java`'s `memtable_heap_space` through to
@@ -149,7 +149,7 @@ their case files.
     setup — skipped since the unit test already provides direct evidence
     for both branches; would only be a reasonable next step if end-to-end
     (real daemon) confirmation becomes valuable later.
-- **`cassandra/if-check-exp/memtable/tryAllocate-limit-memtable_offheap_space.md`** — off-heap sibling case.
+- **`cassandra/if-check-exp/memtable/memtable_offheap_space-tryAllocate-limit.md`** — off-heap sibling case.
   Same if-check, `offHeap` `SubPool` instance instead of `onHeap`, reached
   via `NativePool`/`NativeAllocator` instead of `HeapPool`; limit is
   `memtable_offheap_space`. Object created is a `NativeAllocator.Region`
@@ -215,8 +215,10 @@ their case files.
 - **Scope** (§1, §3.3, §4): memory and disk (disk added 2026-09-18); every
   case covers Target 1 and Target 2 together; no cross-referencing other
   experiments; no bypass analysis.
-- **Naming** (§6.1, changed 2026-09-20): `[function]-[operand]-[constraint].md`
-  anchored on the capacity check, `-n` postfix on collisions; the object
+- **Naming** (§6.1, changed 2026-09-21): `[constraint]-[function]-[operand].md`
+  (follows the data flow: limit source → checking function → operand), anchored
+  on the capacity check. On a name collision the existing file is **not**
+  renamed; only the newcomer gets a `-2` (then `-3`, ...) postfix. The object
   created lives only in `_INDEX.md`'s Object column and each case's §7.
 - **Discovery** (§7.2): CodeQL only shrinks the search space; qualification
   is decided by reading each row, with no fixed keyword list.
@@ -228,7 +230,7 @@ their case files.
    ([`CompactionAwareWriter.getWriteDirectory():282`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L282),
    `availableSpace < estimatedWriteSize`; previously rejected only for being
    disk-scoped; pattern (c); under the naming policy:
-   `compaction/getWriteDirectory-availableSpace-DataDirectory_getAvailableSpace.md`,
+   `compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`,
    module name to be chosen). Show that the guard dominates the write, and fold
    in the second check in the same method (`getWriteableLocation()` returning
    `null`).

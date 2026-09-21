@@ -275,7 +275,7 @@ grouping unit instead):
 
 | File | Content |
 |------|---------|
-| `[function]-[operand]-[constraint].md` | All eight required fields for one case. Use `_TEMPLATE.md`. |
+| `[constraint]-[function]-[operand].md` | All eight required fields for one case. Use `_TEMPLATE.md`. |
 
 ### 6.1 Naming
 
@@ -288,14 +288,6 @@ grouping unit instead):
   plausibly hold future cases too (e.g. `memtable` rather than
   `memtable_onheap_allocation`; `native_transport` rather than
   `native_transport_request_queue`).
-- `[function]` — the name of the method that directly encloses the
-  **capacity check** (§3.1; for pattern (a) that is the if-statement),
-  no class prefix, verbatim, e.g. `tryAllocate`, `acquireCapacity`,
-  `processNewSegment`. The exact `Class.method():line` of all three
-  locations is recorded in the case file's §1 and in `_INDEX.md`.
-- `[operand]` — the limit-side operand's name exactly as written at the
-  capacity check (§5, question 4), e.g. `limit`, `queueCapacity`,
-  `allowance`, `MAX_ALLOCATED_BUFFERS`.
 - `[constraint]` — the **resource constraint name**: the variable that is
   *first declared/initialized* along the limit initialization path (§5,
   question 4), verbatim:
@@ -309,17 +301,27 @@ grouping unit instead):
     method that supplies it, e.g. `DataDirectory_getAvailableSpace`.
   - **Derived from several sources** → the primary one (the one a user
     would tune); mention the others in §5 question 4.
-- Names are joined with hyphens as `[function]-[operand]-[constraint].md`
+- `[function]` — the name of the method that directly encloses the
+  **capacity check** (§3.1; for pattern (a) that is the if-statement),
+  no class prefix, verbatim, e.g. `tryAllocate`, `acquireCapacity`,
+  `processNewSegment`. The exact `Class.method():line` of all three
+  locations is recorded in the case file's §1 and in `_INDEX.md`.
+- `[operand]` — the limit-side operand's name exactly as written at the
+  capacity check (§5, question 4), e.g. `limit`, `queueCapacity`,
+  `allowance`, `MAX_ALLOCATED_BUFFERS`.
+- Names are joined with hyphens as `[constraint]-[function]-[operand].md`
   (hyphens never occur inside Java identifiers or config names). Keep each
   part's original casing.
 - **One case, several check sites** — if one constraint is compared at more
   than one place feeding the same decision point (for example a state set at
   creation and re-evaluated later), file one case named after the primary
   check site and list the others in the case's Location section.
-- **Collisions** — if two cases would produce the same file name, append a
-  numeric postfix `-n` (`-1`, `-2`, ...) to distinguish them, e.g.
-  `tryAllocate-limit-memtable_heap_space-1.md` /
-  `tryAllocate-limit-memtable_heap_space-2.md`. The object created is not
+- **Collisions** — if a new case would produce the same file name as an
+  existing one, the **first (existing) file keeps its name unchanged** — it is
+  never renamed, so no existing reference changes — and only the
+  **newcomer** gets a numeric postfix `-2` (a third gets `-3`, and so on), e.g.
+  `memtable_heap_space-tryAllocate-limit.md` (existing, untouched) /
+  `memtable_heap_space-tryAllocate-limit-2.md` (new). The object created is not
   part of the file name; it's the `Object` column in `_INDEX.md` and §5
   question 7.
 - **Case ID** — the filename stem (without `.md`) upper-cased, used in `_INDEX.md`.
@@ -369,7 +371,7 @@ cassandra/if-check-exp/
 
 ### 7.3 Trace & verify (Target 2)
 
-5. Fill `<module>/[function]-[operand]-[constraint].md` from `_TEMPLATE.md`. If the limit side is
+5. Fill `<module>/[constraint]-[function]-[operand].md` from `_TEMPLATE.md`. If the limit side is
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
