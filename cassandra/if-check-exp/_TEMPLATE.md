@@ -58,7 +58,7 @@ come later._
 
 | Field | Content |
 |-------|---------|
-| **Decision point** | [`Class.method():NN`](GitHub link) — same as §1 |
+| **Decision point** | [`Class.method():NN`](GitHub link) — where allow and disallow diverge (repeat the §1 entry in full; same as the capacity check for pattern (a)) |
 | **Verdict** | patterns (b)/(c): the flag/enum/return value or guard — name, where it is set, where it is read; pattern (a): "n/a — the check is the decision" |
 
 For pattern (b), first state the verdict (flag/enum values or return outcomes), where it is set, and where it is read; for (c), the guard and what it throws or returns.

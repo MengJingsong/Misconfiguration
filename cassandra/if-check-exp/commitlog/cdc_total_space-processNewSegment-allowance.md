@@ -132,7 +132,7 @@ being accepted and further inflating that backlog.
 
 | Field | Content |
 |-------|---------|
-| **Decision point** | see §1 |
+| **Decision point** | [`throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214) — `if (mutation.trackedByCDC() && segment.getCDCState() == CDCState.FORBIDDEN)` → throws `CDCWriteException` at [line 226](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L226) |
 | **Verdict** | the segment's `CDCState` (`FORBIDDEN` / `PERMITTED`), set in `processNewSegment():335` (re-evaluated by `permitSegmentMaybe()`), read in `throwIfForbidden():214`. |
 
 The verdict is the segment's `CDCState`. The table gives the decision point's two outcomes (`throwIfForbidden()` at line 214).

@@ -80,8 +80,8 @@ signaling instead.
 
 | Field | Content |
 |-------|---------|
-| **Decision point** | see §1 |
-| **Verdict** | verdict returned by `AbstractMessageHandler.acquireCapacity()` (`:419`), read at the §1 decision point, whose outcome also depends on `native_transport_throw_on_overload`. |
+| **Decision point** | [`CQLMessageHandler.processOneContainedMessage():196-256`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L196-L256) |
+| **Verdict** | verdict returned by `AbstractMessageHandler.acquireCapacity()` (`:419`), read at the decision point above, whose outcome also depends on `native_transport_throw_on_overload`. |
 
 The if-check's own two branches are identical to the internode case (see
 that case's §5). What's specific to this case is *how the caller reacts*

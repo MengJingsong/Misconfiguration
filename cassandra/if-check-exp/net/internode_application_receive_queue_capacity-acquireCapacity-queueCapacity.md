@@ -103,8 +103,8 @@ instead of buffering unboundedly.
 
 | Field | Content |
 |-------|---------|
-| **Decision point** | see §1 |
-| **Verdict** | `ResourceLimits.Outcome` returned by `AbstractMessageHandler.acquireCapacity()` (`:419`), read at the §1 decision point. |
+| **Decision point** | [`InboundMessageHandler.processOneContainedMessage():139-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L139-L151) (returns without deserializing on a non-`SUCCESS` outcome) plus the wait-queue registration at [`AbstractMessageHandler.java:401-403`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L401-L403) |
+| **Verdict** | `ResourceLimits.Outcome` returned by `AbstractMessageHandler.acquireCapacity()` (`:419`), read at the decision point above. |
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|

@@ -82,7 +82,7 @@ pool, rather than getting a new allocation.
 
 | Field | Content |
 |-------|---------|
-| **Decision point** | see §1 |
+| **Decision point** | the same statement, [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) — the disallow branch blocks on `reserveBuffers.take()` (line 118) |
 | **Verdict** | n/a — pattern (a): the check is the decision. |
 
 | Branch | Condition | Effect |

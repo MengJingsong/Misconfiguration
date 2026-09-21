@@ -80,8 +80,8 @@ configured ceiling?" — applied to a separate off-heap accounting pool.
 
 | Field | Content |
 |-------|---------|
-| **Decision point** | see §1 |
-| **Verdict** | boolean return of `SubPool.tryAllocate()` (set at the check, `MemtablePool.java:156`), read by `SubAllocator.allocate()` (§1 decision point). |
+| **Decision point** | [`MemtableAllocator.SubAllocator.allocate():169-197`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L169-L197) — same park-or-force-through decision as the heap case |
+| **Verdict** | boolean return of `SubPool.tryAllocate()` (set at the check, `MemtablePool.java:156`), read by `SubAllocator.allocate()` (the decision point above). |
 
 | Branch | Condition | Effect |
 |--------|-----------|--------|
