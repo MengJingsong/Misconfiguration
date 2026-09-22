@@ -24,11 +24,17 @@ pinned.
 | [`positives.md`](positives.md) | Rows that passed all three rules — live candidates pending promotion to a full case file under a `<module>/` folder. |
 | [`negatives.md`](negatives.md) | Rows read and refused, each citing the rule it failed. |
 | [`deferred.md`](deferred.md) | Rows left **unjudged** — they would qualify only under enforcement pattern (b) or (c), which are parked by the §7.5 scope decision. Not refused; awaiting the (b)/(c) resumption. |
+| [`stage2-playbook.md`](stage2-playbook.md) | **Start here when running a batch.** Stage 1's results, the prioritization ladder, verified fast-reject rules, and the tricks/pitfalls learned from the cases filed so far. Not a verdict store — the three files above are. |
 
 The three are mutually exclusive: every row read in stage 2 lands in exactly
 one of them.
 
 ## How a row is judged
+
+> Practical guidance — what to read first, what to reject on sight, how to
+> avoid re-reading files — is in
+> [`stage2-playbook.md`](stage2-playbook.md). The rules below are the
+> definition; the playbook is the technique.
 
 Read the row's actual source in the local `cassandra-src` clone (grep/window
 it — don't fetch whole files through GitHub), then apply the three rules in

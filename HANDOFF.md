@@ -95,6 +95,10 @@ this folder's own scope.
     - `candidates/deferred.md` — rows left unjudged: those that would qualify
       only under pattern (b) or (c), parked by the scope decision below.
       Kept apart from `negatives.md` because they are undecided, not refused.
+    - `candidates/stage2-playbook.md` — **start here to run a batch.** Stage
+      1's results, the prioritization ladder (5,145 rows → 2,941 magnitude →
+      ~1,895 after verified fast-reject → ~470 positive-signal rows first),
+      and the tricks and pitfalls from the cases filed so far.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `candidates/`; the if-check queries and their
   [pipeline README](codeql-queries/cassandra/queries/if-check-exp/README.md)
