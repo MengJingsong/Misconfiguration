@@ -96,7 +96,20 @@ it to reproduce a batch.
 | `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up (see `positives.md`). Rejects logged in `_INDEX.md`. |
 | helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `deferred.md` as pattern (b). Rejects in `negatives.md`. |
 
-**Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows.**
+| **P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done.** Deep read against the three rules. 4 candidates (`positives.md`), 22 rejected (`negatives.md`), 3 deferred as pattern (b)/(c) (`deferred.md`), 5 already covered by existing records. Spans ~15 packages and completes none of them — see the note below. |
+
+**Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows. P1 tier: 34 rows
+(deep-read, overlapping the package counts).**
+
+> **The P1 row is a tier, not a package.** Its 34 rows are scattered across
+> ~15 packages, so no package may be marked done on its account. When a
+> package batch runs later, its P1 rows are already judged — check
+> `positives.md` / `negatives.md` / `deferred.md` before re-reading a row.
+>
+> **P1 validated the ranking.** It recovered both known filed cases as
+> calibration and produced 4 new candidates plus 1 strong pattern-(b) find
+> from 34 rows — roughly a 1-in-3 hit rate on rows not already accounted
+> for. That justifies continuing tier-first with **P2 (371 rows)**.
 
 > The four subtrees above were first triaged before
 > `HelperGuardedIfStatements.ql` existed, so their helper rows were swept

@@ -311,37 +311,42 @@ remaining items below.
    little reading. Verified tiers and reject rules are in
    `candidates/stage2-playbook.md`.
 
-### Next step (decided 2026-09-22): run P1 tier-first
+### P1 tier — run 2026-09-22, done
 
-**The immediate next task is the P1 tier — 34 rows, corpus-wide.** Stage 2's
-ranking (see `candidates/stage2-playbook.md`) puts a row in P1 when a
-capacity word appears on either side of the comparison *and* the usage side
-is a compound expression — the `current + requested vs limit` shape.
+All 34 P1 rows deep-read against the three rules. Outcome: **4 new
+candidates, 22 rejected, 3 deferred as pattern (b)/(c), 5 already covered.**
+Details in `candidates/positives.md`, `negatives.md`, `deferred.md`.
 
-Tier-first rather than batch-first, deliberately:
+**The ranking validated.** P1 recovered both known filed cases as calibration
+and yielded 4 new candidates plus 1 strong pattern-(b) find — about a
+1-in-3 hit rate on rows not already accounted for. **Next: P2, 371 rows**,
+continuing tier-first.
 
-- **Fastest route to new cases.** P1 already contains two known cases
-  (`MemtablePool.tryAllocate():156`, `AbstractMessageHandler.acquireCapacity():419`)
-  as free calibration, one known rejection to cite rather than re-judge
-  (`HintsBuffer.allocateBytes():190`), and several strong unknowns —
-  `BufferPool$GlobalPool.allocateMoreChunks():443` (`> memoryUsageThreshold`),
-  `ResourceLimits$Basic.tryAllocate():213`, `NativeAllocator$Region.allocate():273`
-  and `SlabAllocator$Region.allocate():201` (both `> capacity`),
-  `MmappedRegions.updateState():208` (`> MAX_SEGMENT_SIZE`).
-- **It tests the ranking cheaply.** The tiers are currently validated against
-  only four labelled positives. Running P1 checks them on a real sample
-  *before* ~5,000 remaining rows get ordered by them. If P1 yields two or
-  three real cases the tiering is justified and P2 (371 rows) follows; if it
-  yields nothing new, better to learn that now and fall back to completing
-  packages batch by batch.
+**The 4 candidates** (none written up yet — this is the immediate next work):
 
-**Caveat to record when it runs:** P1's rows are scattered across ~15
-packages, so it completes no package. Log it as its own coverage entry rather
-than marking any package done.
+| Candidate | Check |
+|---|---|
+| `BufferPool_memoryUsageThreshold` | `BufferPool$GlobalPool.allocateMoreChunks():443` — disallow returns `null`, allow does `new Chunk(allocateDirectAligned(MACRO_CHUNK_SIZE))`. Strongest of the four; an explicit off-heap ceiling immediately before the allocation. |
+| `MAX_MATERIALIZED_KEYS` | `QueryController.materializeKeysAndCloseSource():449` — disallow discards the accumulated `List<PrimaryKey>` and returns `null`. |
+| `Integer_MAX_VALUE` (index summary) | `IndexSummaryBuilder.maybeAddEntry():204` — disallow skips the entry and logs "index summary exceeded (2GiB)". Constraint is a **type bound**, which Target 1 admits but §6.1 naming does not cleanly cover. |
+| `TeeDataInputPlus_limit` | `TeeDataInputPlus.maybeWrite():58` — weakest; confirm `limit`'s origin before writing it up. |
 
-Note P1 is a *deep-read* task — it applies the three rules with the source
-open. Stage 2's own remaining work (ranking the rest of the corpus) is
-separate and can proceed independently.
+**Two open actions on existing cases**, both surfaced by P1:
+
+1. `CommitLogSegmentManagerCDC.permitSegmentMaybe():200` is a **second check
+   site of the filed `cdc_total_space` case** (the re-permit path, same
+   `CDCState` verdict, same decision point). README §6.1's "one case, several
+   check sites" applies; that case file does not list it.
+2. `ResourceLimits$Basic.tryAllocate():213` is the generic limiter behind the
+   two net cases' reserve sub-checks. Worth linking from those case files
+   rather than filing separately.
+
+**Notable rejection worth remembering:** `NativeAllocator$Region.allocate():273`
+and `SlabAllocator$Region.allocate():201` look like memtable capacity checks
+but are writer-rollover — a full region just causes `trySwapRegion()` to
+allocate a new one. The real ceiling is the already-filed
+`MemtablePool.tryAllocate()`. Same archetype as the 5 `BTree MAX_KEYS` rows
+and `MmappedRegions`.
 
 ### Scope decisions (2026-09-22): pattern (a) only; verification deferred
 

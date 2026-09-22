@@ -94,6 +94,39 @@ several sources" rule first. `min_free_space_per_drive` and
 and the latter is the one a user would tune for *this* check specifically, so
 it may be the better constraint name.
 
+## 1c. Found by the P1 pass, parked by pattern — 2026-09-22
+
+### `column_index_cache_size` — pattern (b) — **strong**
+
+- **Capacity check:** [`BigFormatPartitionWriter.indexSamples():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L113)
+  — `indexSamplesSerializedSize + columnIndexCount * TypeSizes.sizeof(0) <= cacheSizeThreshold`,
+  returning the sample list or `null`. Second check site at
+  [`:171`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L171),
+  which switches to byte-buffer mode at the same threshold.
+- **Verdict path:** the `null`/list return is read at
+  [`RowIndexEntry.create():227`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L227).
+- **Decision point & divergence:** with samples, it builds an `IndexedEntry`
+  holding `indexSamples.toArray(new IndexInfo[...])` — the full `IndexInfo`
+  array retained in memory. With `null`, it builds a `ShallowIndexedEntry`
+  carrying only a file position. **Real object-creation divergence**, so
+  Rule 3 is satisfied.
+- **Why deferred:** the comparison sets a verdict that a *separate* decision
+  point in another class reads — textbook **pattern (b)**, parked by the
+  pattern-(a)-only scope. It is a qualifying candidate, not a rejection.
+- **When (b) resumes:** trace `cacheSizeThreshold` to `column_index_cache_size`
+  (`Config`), and record that raising it retains more `IndexInfo` arrays in
+  heap via row index entries.
+
+### `TrackedDataInputPlus_limit` — pattern (c) — weak
+
+- **Guard:** [`TrackedDataInputPlus.checkCanRead():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L184)
+  — `limit >= 0 && bytesRead + size > limit`, which skips to the limit and
+  throws `EOFException`.
+- **Why deferred:** a guard clause before an allocation that is not inside a
+  branch — **pattern (c)**. Also needs `limit`'s origin traced before it is
+  clear whether it bounds a deserialized object's size or is merely a stream
+  boundary; judge that when (c) resumes.
+
 ## 2. Re-audit of earlier rejections under (b)/(c)
 
 **Raised 2026-09-20; parked 2026-09-22.**
