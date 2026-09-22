@@ -60,10 +60,13 @@ What stage 2 does instead:
 3. **Park** anything that would only qualify under pattern (b) or (c) in
    [`deferred.md`](deferred.md).
 
-> **Open (2026-09-22):** whether stage 2's ranking should move from the
-> fixed capacity-word list to AI lexical judgement of the row. Evidence
-> gathered and the failure modes of the keyword list documented in
-> [`stage2-playbook.md`](stage2-playbook.md); not yet decided or applied.
+> **Next pass (planned 2026-09-22):** stage 2's ranking moves from the fixed
+> capacity-word list to **AI lexical judgement** of the row — reading the
+> operand names, class, method and package for what they actually mean
+> instead of matching a word list. This is what §7.2's "deliberately no fixed
+> keyword list" rule always implied. Rationale, the keyword list's
+> demonstrated failure modes, and how to run it are in
+> [`stage2-playbook.md`](stage2-playbook.md).
 
 **Rank rather than reject when unsure.** Stage 2 is cheap and blind; the
 deep read is expensive and sighted. A row wrongly rejected here is never seen

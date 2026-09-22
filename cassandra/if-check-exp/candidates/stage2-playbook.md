@@ -149,7 +149,13 @@ and why the folder's rules refuse a fixed keyword list — `memtable_heap_space`
 and `MAX_HINT_BUFFERS` share no vocabulary, and a future case may share none
 with the list above. **P3 is not optional; it is the insurance.**
 
-### Open: replace the keyword list with lexical judgement (proposed 2026-09-22, not applied)
+### Lexical judgement — the next stage-2 pass (planned 2026-09-22)
+
+**This replaces the fixed capacity-word list the tiers above are built on.**
+Jingsong's plan, to run before P2: *use AI to scan the operand names and any
+other text in a stage-1 row — enclosing class, method, package — and sort
+candidates by what those names actually mean, rather than by matching a word
+list.*
 
 The tiers above key off a fixed capacity-word list, which **fails in both
 directions** — this is exactly what
@@ -166,15 +172,31 @@ before the operand does.
 *Capacity vocabulary the list never anticipated:* `remaining()`,
 `keysWritten >= keysEstimate`, `unused`, `pendingTasks`.
 
-**Proposed replacement** (decision pending — see HANDOFF "One open design
-question"): have the AI judge each row as a sentence — `declaringType` +
-`method` + `lhs op rhs` — layered *after* the mechanical fast-reject, which
-stays because it is free and deterministic. Emit a one-line reason per row so
-the pass is auditable and does not drift; reject only lexical certainties and
-downrank anything ambiguous (`remaining() < 4` looks capacity-shaped and is a
-deserialization bounds check — stage 2 cannot know that). Record model and
-date per batch, since these judgements are model-dependent in a way CodeQL
-output is not, and regression-check each batch against the known rows.
+**How to run it.**
+
+- **Judge the row as a sentence**, not the operand alone: `declaringType` +
+  `method` + `lhs op rhs`. Context usually decides before the operand does —
+  everything in `applySimpleConfig`/`validate*` is startup validation
+  whatever it compares, and everything in a `*Pool.allocate` deserves a look
+  whatever it is called.
+- **Layer it after the mechanical fast-reject** (bare literal, `compareTo`),
+  which stays because it is free, deterministic and reproducible. That strips
+  ~1,337 rows before any judgement is spent.
+- **Emit a one-line reason per row**, not just a label, so the pass is
+  auditable and does not drift across sessions. *"`phi_convict_threshold` —
+  failure-detector tuning, not a byte bound"* is a complete justification.
+- **Reject only lexical certainties; downrank anything ambiguous.**
+  `remaining() < 4` looks capacity-shaped and is really a deserialization
+  bounds check — stage 2 cannot know that, so it ranks low rather than
+  refusing. The standing asymmetry applies: a wrong rejection is permanent
+  and invisible, a wrong promotion costs a little reading.
+- **Record model and date per batch.** These judgements are model-dependent
+  in a way CodeQL output is not. Regression-check each batch against the
+  known rows, and re-judge ~10 rows from the previous batch to confirm the
+  same row still gets the same verdict.
+- **Re-rank before P2.** P2's membership comes from the keyword list this
+  pass supersedes, so re-ranking first means it is read in a trustworthy
+  order instead of being re-read later.
 
 Either way, lexical meaning **cannot** settle the three rules; it improves
 ranking and removes the obvious, and qualification stays with the deep read.

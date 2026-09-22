@@ -257,31 +257,47 @@ is deferred by decision, not backlog).
 
 **The immediate next work, in order:**
 
-1. **Write up the 4 P1 candidates as case files.** They are found, judged
+1. **The lexical stage-2 pass — Jingsong's plan, to be done next.** In his
+   words:
+
+   > *"In stage 2, can we use AI to scan the operand's name or any text from
+   > stage 1 results and extract valid/invalid candidates by their lexical
+   > meanings?"*
+
+   Yes — and it replaces the fixed capacity-word list the current tiers are
+   built on. Full rationale, evidence and the working design are in
+   `candidates/stage2-playbook.md` ("Lexical judgement") and summarised
+   below. **Do this before P2**, because P2's membership is defined by the
+   keyword list this pass supersedes; re-ranking first means P2 is read in a
+   trustworthy order rather than re-read later.
+2. **Write up the 4 P1 candidates as case files.** They are found, judged
    against the three rules, and recorded in `candidates/positives.md`, but
-   none exists as a case file yet. Start with `BufferPool_memoryUsageThreshold`
-   (strongest); its main open task is tracing `memoryUsageThreshold` to its
-   config source for the §6.1 constraint name. `TeeDataInputPlus_limit` is
-   the weakest — confirm `limit`'s origin before committing to it.
-   `Integer_MAX_VALUE` needs a §6.1 naming judgement call, since the
-   constraint is a *type bound*.
-2. **Two corrections to existing case files**, both found by the P1 pass and
+   none exists as a case file yet. Independent of step 1, so it can be done
+   in either order. Start with `BufferPool_memoryUsageThreshold` (strongest);
+   its main open task is tracing `memoryUsageThreshold` to its config source
+   for the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest —
+   confirm `limit`'s origin before committing to it. `Integer_MAX_VALUE`
+   needs a §6.1 naming judgement call, since the constraint is a *type
+   bound*.
+3. **Two corrections to existing case files**, both found by the P1 pass and
    detailed in the "P1 tier" section below: `cdc_total_space` is missing a
    second check site (`permitSegmentMaybe():200`), and the two net cases
    should link `ResourceLimits$Basic.tryAllocate():213` as the mechanism
    behind their reserve sub-checks.
-3. **Then run the P2 tier (371 rows)**, continuing tier-first rather than
-   package-first. P1 gave roughly a 1-in-3 hit rate on rows not already
-   accounted for, which is why tier order is worth keeping.
+4. **Then run the P2 tier (371 rows, or its re-ranked equivalent after step
+   1)**, continuing tier-first rather than package-first. P1 gave roughly a
+   1-in-3 hit rate on rows not already accounted for, which is why tier order
+   is worth keeping.
 
 **Do not** start patterns (b)/(c), and do not run behavioral verification —
 both are deferred by decision (see "Scope decisions" below). `deferred.md`
 is their worklist.
 
-### ⏵ One open design question (raised 2026-09-22, not decided)
+### ⏵ Step 1 in detail — the lexical stage-2 pass (planned 2026-09-22)
 
-**Should stage 2's ranking move from keyword matching to AI lexical
-judgement?** Evidence gathered, design not applied.
+**Stage 2's ranking moves from keyword matching to AI lexical judgement of
+the row.** Decided by Jingsong 2026-09-22 as the next step; the design below
+is settled in shape, and only the mechanics are open.
 
 The current tiers key off a fixed capacity-word list, and that list fails in
 both directions. False positives: `phi_convict_threshold > 16`,
@@ -292,8 +308,8 @@ validation. False negatives: capacity-shaped vocabulary the list never
 anticipated (`remaining()`, `keysWritten >= keysEstimate`, `unused`).
 
 This is what README §7.2's "deliberately no fixed keyword list" rule is
-guarding against, so lexical judgement is the more faithful method. Proposed
-shape, **not yet written into the playbook**:
+guarding against, so lexical judgement is the more faithful method — it is
+what the rule always implied stage 2 should be doing. How it works:
 
 - Judge the row as a sentence — `declaringType` + `method` + `lhs op rhs`.
   Context usually decides before the operand does; anything in
