@@ -1,4 +1,4 @@
-# [constraint] — [object]  <!-- file name: [function]-[operand]-[constraint].md -->
+# [constraint] — [object]  <!-- file name: [constraint]-[function]-[operand].md -->
 
 > **Index:** [../_INDEX.md](../_INDEX.md)
 >
@@ -6,14 +6,18 @@
 
 **Formatting note:** Link every code reference (`` `File.java:NN` `` or `` `Class.method():NN` ``) to the pinned source on GitHub. Use the format: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) `` (ranges use `#LNN-LMM`). Place the link *outside* the backticks so code renders as clickable text.
 
+**Relative links in this template** (`../README.md`, `../_INDEX.md`) are written for where a
+*copy* of it lives — inside a `<module>/` folder — not for the template's own location at the
+experiment root. They will look broken here and resolve correctly in a real case file.
+
 ## 1. Location
 
 | Field | Content |
 |-------|---------|
 | **Case ID** | filename stem upper-cased, e.g., MEMTABLE_HEAP_SPACE-TRYALLOCATE-LIMIT |
 | **Constraint** | the resource constraint name (first part of the file name) and its source: configuration entry / JVM system property / constant / runtime-queried accessor (README §6.1) |
-| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](README.md#3-core-concept-the-if-check-case) |
-| **Capacity check** | [`Class.method():NN`](GitHub link) — the usage-vs-limit comparison (names the file: `[function]-[operand]-[constraint].md`). List any additional check sites feeding the same decision point. |
+| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](../README.md#3-core-concept-the-if-check-case) |
+| **Capacity check** | [`Class.method():NN`](GitHub link) — the usage-vs-limit comparison (names the file: `[constraint]-[function]-[operand].md`). List any additional check sites feeding the same decision point. |
 | **Decision point** | [`Class.method():NN`](GitHub link) — where allow and disallow diverge (same as the capacity check for pattern (a)) |
 | **Allocation site** | [`Class.method():NN`](GitHub link) — where the memory/disk-significant object is created |
 | **Related cases** | links to sibling cases sharing the same check code or constraint (e.g. heap/off-heap variants), or "none" |
@@ -91,7 +95,7 @@ Continuous trace from the allow outcome to the actual allocation call. For patte
 
 What actually happens when the disallow verdict fires — trace the real
 effect before assuming it cleanly rejects anything (per the
-[verification methodology](README.md#8-verifying-a-case-triggering-the-disallow-branch)'s
+[verification methodology](../README.md#8-verifying-a-case-triggering-the-disallow-branch)'s
 first rule). Is it a clean reject/throw? A block-and-wait? A silent
 bypass/escape hatch elsewhere in the call chain?
 
@@ -118,14 +122,14 @@ what one allowed object costs.
 
 ## 9. Verification
 
-See [README.md § Verifying a case](README.md#8-verifying-a-case-triggering-the-disallow-branch)
+See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
 before setting `Status: verified` — line-number checking alone is not enough;
 a designed experiment must have actually driven execution into the disallow
 branch with recorded evidence.
 
 | Field | Content |
 |--------|---------|
-| **Status** | pending / in-progress / verified |
+| **Status** | pending / in-progress / verified — note behavioral verification is **deferred by decision** (README §7.5); new cases stay `pending` with the trigger designed but not run |
 | **Verified By / Date** | Who verified and when |
 | **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) |
 | **Trigger method** | Unit test / program, or live-cluster config+steps, used to drive execution into the disallow branch |

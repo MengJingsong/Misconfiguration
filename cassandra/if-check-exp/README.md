@@ -340,8 +340,8 @@ cassandra/if-check-exp/
 │   ├── negatives.md                 #   read and refused, each citing the rule it failed
 │   └── deferred.md                  #   not yet judged: parked by the pattern-(a)-only scope (§7.5)
 └── <module>/                       # one folder per Cassandra module
-    ├── <function>-<operand>-<constraint>.md
-    └── <function>-<operand>-<constraint>.md
+    ├── <constraint>-<function>-<operand>.md
+    └── <constraint>-<function>-<operand>.md
 ```
 
 ## 7. Workflow

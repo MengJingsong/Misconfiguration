@@ -1,4 +1,4 @@
-# HintsBufferPool_MAX_ALLOCATED_BUFFERS — hintsbuffer
+# MAX_HINT_BUFFERS — hintsbuffer
 
 > **Index:** [../_INDEX.md](../_INDEX.md)
 >

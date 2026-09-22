@@ -1,4 +1,4 @@
-# DataDirectory_getAvailableSpace — compaction output SSTable  <!-- file name: DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md -->
+# DataDirectory_getAvailableSpace — compaction output SSTable
 
 > **Index:** [../_INDEX.md](../_INDEX.md)
 >

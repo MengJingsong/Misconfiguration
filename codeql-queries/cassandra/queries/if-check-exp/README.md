@@ -1,7 +1,8 @@
 # if-check-exp queries
 
 CodeQL queries that narrow Cassandra's ~17k `if` statements down to a shortlist of candidate
-memory-capacity checks, for manual triage against the three rules in
+capacity checks (**memory or disk** — disk entered scope 2026-09-18), for manual triage
+against the three rules in
 [../../../../cassandra/if-check-exp/README.md](../../../../cassandra/if-check-exp/README.md).
 Survivors of triage get written up as full case files there; this folder only produces the
 CSV working lists that feed that process. Results are gitignored and stay
@@ -9,10 +10,16 @@ under `codeql-queries/results/cassandra/`; the AI-filtering verdicts made
 from them live in that folder's `candidates/`.
 
 CodeQL narrows the search space mechanically (structure of the code); it cannot judge whether
-a check is actually a *memory*-capacity check — that's a semantic call made by reading each
-row, not a fixed keyword filter, since real cases (`memtable_heap_space`,
-`HintsBufferPool_MAX_ALLOCATED_BUFFERS`, ...) don't share vocabulary predictably enough for
-one to be reliable.
+a check is actually a capacity check — that's a semantic call made by reading each row, not a
+fixed keyword filter, since real cases (`memtable_heap_space`, `MAX_HINT_BUFFERS`,
+`cdc_total_space`, ...) don't share vocabulary predictably enough for one to be reliable.
+
+**Current scope: enforcement pattern (a) only** (see
+[`../../../../cassandra/if-check-exp/README.md` §7.5](../../../../cassandra/if-check-exp/README.md)).
+`NarrowedIfStatements.ql` selects numeric comparisons whose enclosing statement is an `if` —
+structurally exactly pattern (a) — so the pipeline below already fits that scope with **no
+changes needed**. The three planned extensions further down exist only to surface patterns
+(b) and (c), which are parked until (a) is finished.
 
 ## Pipeline
 
@@ -30,7 +37,7 @@ one to be reliable.
    e.g. `index == 0`, comparator results (`compareIPs() < 0`) — is left for step 4.
 4. *(in progress)* **Semantic triage** of the remaining rows — for each, judge by reading it
    whether the limit-side operand is capacity/threshold-shaped *and* the subject (operand
-   name, enclosing class, or field's declaring type) is memory-related. This is a
+   name, enclosing class, or field's declaring type) bounds memory or disk bytes. This is a
    read-and-judge pass, not something expressible as a CodeQL predicate, since there's no
    reliable fixed vocabulary to grep for. Verdicts go to `../../../../cassandra/if-check-exp/candidates/`
    (`positives.md` / `negatives.md` / `deferred.md`).

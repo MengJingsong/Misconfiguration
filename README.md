@@ -89,8 +89,11 @@ never scattered across individual scripts.
 - **`cassandra/entry-restriction-exp/`**, **`cassandra/if-check-exp/`** —
   static code-path inventories of Cassandra's resource-limit checks (see
   each folder's own `README.md`, and this repo's root [`HANDOFF.md`](HANDOFF.md)
-  for `if-check-exp`'s start-here brief); `if-check-exp` verifies cases
-  against the `cassandra-src` clone described above.
+  for `if-check-exp`'s start-here brief). `if-check-exp` checks its cited
+  line numbers against the `cassandra-src` clone described above; its
+  *behavioral* verification step (running a trigger into the disallow
+  branch) is currently deferred by decision — see that folder's `README.md`
+  §7.5.
 
 ### 4.3 `codeql-queries/`
 
