@@ -378,11 +378,16 @@ Remaining items, in the order they were previously prioritized:
      the gitignored `codeql-queries/results/cassandra/`. There is
      deliberately no fixed keyword list; whether a row qualifies is decided
      by reading it in stage 2.
-   - *Progress:* 329 of 4,490 rows triaged (`concurrent/`, `cache/`,
-     `transport/`, `db/compaction/`). Exact coverage and the un-triaged
-     subpackage row counts are in `candidates/README.md`. Largest
-     remaining: `db/marshal`, `db/tries`, `utils` (717), `index` (487), `io`
-     (466), `cql3` (368).
+   - *Progress:* 329 of 4,489 `NarrowedIfStatements` rows triaged
+     (`concurrent`, `cache`, `transport`, `db/compaction` — each a subtree).
+     Refreshed counts, including the second input file, are in
+     `candidates/README.md`. **Remaining: 5,145 rows (4,160 narrowed + 985
+     helper), of which 2,941 are magnitude-class** — the realistic first
+     pass, equality being a lower-priority sweep. Largest: `db` (529
+     magnitude), `utils` (476), `index` (343), `io` (329), `service` (309).
+     **Note:** the four done batches predate `HelperGuardedIfStatements.ql`,
+     which finds 114 rows inside those same subtrees that have never been
+     read.
    - *Known gap (deferred, not blocking):* the pipeline only sees comparisons
      inside `if` conditions, so it cannot find pattern-(b)/(c) checks written
      as ternaries or assignments (the CDC comparison was missed). Under the

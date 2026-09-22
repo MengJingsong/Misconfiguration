@@ -56,44 +56,94 @@ refused). If stage 2 reaches a line that method 1 already judged, **cite the
 
 ## Batch coverage
 
-Triage proceeds by directory batch (grouping the stage-1 rows by their
-`src/java/org/apache/cassandra/<dir>/` path) rather than top-to-bottom, since
-4,490 rows is too many to read linearly in one pass. Batches recorded here so
+Triage proceeds by directory batch rather than top-to-bottom, since the corpus
+is far too large to read linearly in one pass. Batches are recorded here so
 later sessions don't re-scan them.
 
-| Batch (subpackage) | Rows | Date | Result |
+Counts below come from the `pkg` column, refreshed 2026-09-22 after stage 1
+gained named columns and the `HelperGuardedIfStatements.ql` query. **A batch
+name is a subtree**: `transport` covers `transport` and `transport/messages`,
+`db/compaction` covers it plus `db/compaction/unified` and
+`db/compaction/writers`. The `pkg` column is a leaf, so group on a prefix of
+it to reproduce a batch.
+
+### Done
+
+| Batch (subtree) | Narrowed rows | Date | Result |
 |---|---|---|---|
-| `concurrent/` | 17 | 2026-09-18 | 0 survivors — all thread-pool/permit concurrency checks (Rule 2 fail, same reasoning as `concurrent_compactors`). |
-| `cache/` | 15 | 2026-09-18 | 0 survivors — ref-counting, overflow guards, and trivial validation; no capacity-vs-limit divergence found. |
-| `transport/` | 89 | 2026-09-18 | 1 survivor (since promoted, see `positives.md`) + rejects logged in `_INDEX.md`. |
-| `db/compaction/` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate (now in `deferred.md`). Rejects logged in `_INDEX.md`. |
+| `concurrent` | 17 | 2026-09-18 | 0 survivors — all thread-pool/permit concurrency checks (Rule 2 fail, same reasoning as `concurrent_compactors`). |
+| `cache` | 15 | 2026-09-18 | 0 survivors — ref-counting, overflow guards, and trivial validation; no capacity-vs-limit divergence found. |
+| `transport` | 89 | 2026-09-18 | 1 survivor (since promoted, see `positives.md`) + rejects logged in `_INDEX.md`. |
+| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up (see `positives.md`). Rejects logged in `_INDEX.md`. |
 
-**Triaged: 329 of 4,490 rows.**
+**Narrowed: 329 of 4,489 rows triaged.**
 
-### Remaining un-triaged subpackages
+> **These four are complete only against `NarrowedIfStatements.csv`.** They
+> were triaged before `HelperGuardedIfStatements.ql` existed, and that query
+> finds **114 further rows inside the same four subtrees** (`transport` 63,
+> `db/compaction` 43, `concurrent` 6, `cache` 2) that **have never been read**.
+> They are not a re-audit — they are rows the pipeline could not produce at
+> the time. Worth sweeping before or alongside the next new batch, since these
+> subtrees are already familiar.
 
-Row counts from the same grouping. `db/compaction/` is done, so `db`'s
-remaining rows are 982 − 208 = 774, spread across `marshal` (143), `tries`
-(80), `commitlog` (78 — `CommitLogSegment.java:242` already rejected, see
-`_INDEX.md`, but not the rest of the subpackage), `rows` (67),
-`RangeTombstoneList.java` (48), `context` (39), `filter` (33),
-`ColumnFamilyStore.java` (27), `Slices.java` (23), `partitions` (18),
-`streaming` (16, db-local), `lifecycle` (15), `view` (14), `Columns.java`
-(13), `memtable` (13, partially covered by existing memtable cases),
-`ClusteringPrefix.java` (12), `monitoring` (11), `ReadCommand.java` (10),
-`virtual` (10), and many smaller single-digit files.
+### Remaining
 
-Then: `utils` (717), `index` (487), `io` (466), `cql3` (368), `service`
-(267), `tools` (167), `config` (154), `net` (140, partially covered by the
-existing `internode_application_receive_queue_capacity` case), `locator`
-(98), `serializers` (91), `dht` (78), `gms` (74), `repair` (62), `schema`
-(48), `metrics` (44), `hints` (34, partially covered by the existing
-`MAX_HINT_BUFFERS` case), `auth` (30), `streaming` (23, top-level),
-`batchlog` (10), `security` (10), `tracing` (6), `audit` (4), `diag` (3),
-`exceptions` (3), `triggers` (2).
+Two files feed pattern-(a) triage: `NarrowedIfStatements.csv` (comparison in
+the `if` condition) and `HelperGuardedIfStatements.csv` (comparison one call
+frame down, behind a boolean helper). Grouped by top-level package, with
+magnitude-class counts in parentheses — those are the rows to read first,
+since a capacity check is inherently a magnitude comparison.
+
+| Top-level package | Narrowed (magnitude) | Helper (magnitude) | Combined magnitude |
+|---|---|---|---|
+| `db` | 774 (409) | 303 (120) | **529** |
+| `utils` | 717 (428) | 92 (48) | **476** |
+| `index` | 487 (286) | 94 (57) | **343** |
+| `io` | 466 (288) | 72 (41) | **329** |
+| `service` | 267 (195) | 169 (114) | **309** |
+| `cql3` | 368 (165) | 52 (34) | **199** |
+| `config` | 154 (115) | 8 (0) | **115** |
+| `net` | 140 (93) | 16 (5) | **98** |
+| `tools` | 167 (82) | 21 (5) | **87** |
+| `locator` | 98 (58) | 22 (17) | **75** |
+| `serializers` | 91 (61) | 18 (2) | **63** |
+| `dht` | 78 (52) | 11 (10) | **62** |
+| `gms` | 74 (50) | 6 (2) | **52** |
+| `repair` | 62 (33) | 43 (16) | **49** |
+| `metrics` | 44 (32) | 7 (3) | **35** |
+| `schema` | 48 (31) | 11 (1) | **32** |
+| `hints` | 34 (23) | 17 (4) | **27** |
+| `streaming` | 23 (15) | 9 (5) | **20** |
+| `auth` | 30 (13) | 11 (2) | **15** |
+| `batchlog` | 10 (8) | 1 (0) | **8** |
+| `tracing` | 6 (5) | 1 (1) | **6** |
+| `security` | 10 (5) | 0 (0) | **5** |
+| `exceptions` | 3 (3) | 0 (0) | **3** |
+| `diag` | 3 (2) | 0 (0) | **2** |
+| `audit` | 4 (1) | 0 (0) | **1** |
+| `triggers` | 2 (1) | 1 (0) | **1** |
+| **Total** | **4160 (2454)** | **985 (487)** | **2941** |
+
+**Reading the numbers.** 5,145 rows remain in total, but the realistic first
+pass is the **2,941 magnitude rows**; the 2,204 equality rows are a
+lower-priority sweep afterwards. The helper rows shrink further in practice:
+across the whole corpus they come from only ~300 distinct helpers, so triage
+judges each *helper* once and applies the verdict to all its call sites —
+sorting a batch's helper rows by frequency disposes of the repeated
+non-candidates (`ProtocolVersion.isGreaterOrEqualTo()`, `DeletionTime.supersedes()`)
+in one judgment each.
+
+**Suggested order.** `config` and `net` are small, dense in magnitude rows,
+and adjacent to constraints already understood (`net` partly covered by the
+two `*_receive_queue_capacity` cases), so they are cheap batches to
+recalibrate on. `db`, `utils`, `index` and `io` together hold over half the
+remaining work and are better attempted once the judging pace is established.
 
 ## History
 
+- **2026-09-22** — coverage table refreshed against the new `pkg` column and
+  the new `HelperGuardedIfStatements.csv`; batch names clarified as subtrees,
+  and the 114 unread helper rows inside the four done batches recorded.
 - **2026-09-22** — folder restructured into `positives.md` / `negatives.md` /
   `deferred.md`; the former single `candidates.md` was folded into this
   README (coverage table) and those three files.
