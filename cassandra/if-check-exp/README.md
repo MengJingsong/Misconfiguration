@@ -381,14 +381,29 @@ relieve method 1's burden by shrinking what has to be read:
   candidate set. Results are written to the **gitignored**
   `codeql-queries/results/cassandra/` and regenerated per machine; nothing
   about a result set is committed or pinned.
-- **Stage 2 — AI filtering.** An AI session reads stage 1's rows against the
-  three rules and sorts each into positive, negative or deferred, recording
-  the verdicts under `candidates/` (see §6.2). Survivors are then promoted to
-  full case files.
+- **Stage 2 — AI filtering.** An AI session works **only from the stage-1
+  rows themselves** — operand names, enclosing class and method, package,
+  operator class — *without reading the Cassandra source*. It rules out rows
+  that are visibly not capacity checks and ranks the rest by how promising
+  they look, recording the outcome under `candidates/` (see §6.2).
 
-The point of method 2 is that stage 1 + stage 2 *filter out* the invalid
-candidates cheaply, so the expensive per-case work of method 1 is spent only
-on the positives.
+**Stage 2 is preprocessing, not qualification.** It does **not** apply the
+three rules in §3.4–§3.6. Those decide whether a candidate is a real case,
+and Rule 3 in particular ("does the verdict reach a decision point that
+diverges on object creation?") cannot be answered from a row — it needs the
+branches read. Applying them is the job of the deep-read pass (method 1),
+which stage 2 exists to point at the right rows.
+
+So the division is: stage 1 narrows structurally, stage 2 narrows and
+**orders** by what the row makes visible, and method 1 then does the
+expensive source reading — against the three rules — only on what survives,
+highest priority first.
+
+**Because stage 2 cannot see the source, it should rank far more than it
+rejects.** A wrong rejection here is permanent and invisible: nothing
+re-reads `negatives.md`. A wrong promotion costs only a little reading later.
+Reject only on grounds the row *fully* determines (see `candidates/README.md`);
+when in doubt, downrank instead of refusing.
 
 **Where rejections live (one line, one place).** Method 1's rejections go in
 `_INDEX.md`; method 2's go in `candidates/negatives.md`. They are kept apart

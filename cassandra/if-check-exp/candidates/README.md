@@ -29,28 +29,41 @@ pinned.
 The three are mutually exclusive: every row read in stage 2 lands in exactly
 one of them.
 
-## How a row is judged
+## How a row is triaged
 
-> Practical guidance — what to read first, what to reject on sight, how to
-> avoid re-reading files — is in
-> [`stage2-playbook.md`](stage2-playbook.md). The rules below are the
-> definition; the playbook is the technique.
+> Practical technique — the priority tiers, the verified reject rules, what
+> signals exist in a row — is in
+> [`stage2-playbook.md`](stage2-playbook.md). This section is the definition
+> of what stage 2 is and is not.
 
-Read the row's actual source in the local `cassandra-src` clone (grep/window
-it — don't fetch whole files through GitHub), then apply the three rules in
-[`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case):
-Rule 1 (is the limit-side operand a real capacity?), Rule 2 (does it bound
-total memory/disk **bytes**, not rate or concurrency?), Rule 3 (does the
-verdict reach a decision point that diverges on object creation?).
+Stage 2 works **only from the row**: `lhs`, `op`, `rhs`, `pkg`,
+`declaringType`, `method`, `opClass`, and for helper rows `helper` /
+`helperLine`. It does **not** open the Cassandra source.
 
-There is deliberately **no fixed keyword list** — real cases like
-`memtable_heap_space` share no predictable vocabulary, so this is a
-read-and-judge pass over CodeQL's structural narrowing, not a grep. CodeQL
-only shrinks the search space; it decides nothing about qualification.
+**It does not apply the three rules**
+([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)).
+Those decide whether a candidate is a real case and require reading the
+code — Rule 3 asks whether the branches diverge on object creation, which no
+row can answer. They belong to the deep-read pass that follows.
 
-**Current scope: pattern (a) only.** A row whose capacity check is itself the
-deciding `if` is judged normally. A row that would only qualify under pattern
-(b) or (c) goes to `deferred.md` — do not refuse it.
+What stage 2 does instead:
+
+1. **Rule out** rows the row itself shows are not capacity checks — a
+   comparison against a bare literal, an ordering test (`compareTo()`), a
+   loop index, a method whose name marks it as config validation or
+   serialization arithmetic. These go to [`negatives.md`](negatives.md) citing
+   the *row-level* ground, not a rule number.
+2. **Rank** everything else into priority tiers on the evidence in the row:
+   capacity-shaped operand names, a compound usage side (`... + ...`),
+   allocation-adjacent class and method names. These go to
+   [`positives.md`](positives.md) **with their tier**.
+3. **Park** anything that would only qualify under pattern (b) or (c) in
+   [`deferred.md`](deferred.md).
+
+**Rank rather than reject when unsure.** Stage 2 is cheap and blind; the
+deep read is expensive and sighted. A row wrongly rejected here is never seen
+again, while a row wrongly promoted only costs some reading. Downranking is
+always available and always safer than refusing.
 
 ## One line, one place
 

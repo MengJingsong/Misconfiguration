@@ -1,17 +1,21 @@
-# Positives — survivors of stage-2 AI filtering
+# Positives — rows stage 2 passes forward, with priority
 
-Rows that passed all three rules
-([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)),
-pending promotion to a full case file under a `<module>/` folder. See
-[`README.md`](README.md) for how rows are judged and for batch coverage.
+Rows that stage 2 did **not** rule out, ranked by how promising the row looks.
+This is a **work queue for the deep-read pass**, not a list of qualified
+cases: stage 2 works only from the row and never applies the three rules (see
+[`README.md`](README.md)). A row here means "worth reading the source for,
+in roughly this order" — nothing more.
 
-An entry stays here until its case file exists, then moves to the
-**Promoted** section below with a link, so the promotion history is visible
-without diffing.
+Tiers (defined in [`stage2-playbook.md`](stage2-playbook.md)):
 
-**Current scope is pattern (a) only** ([`../README.md` §7.5](../README.md)).
-A row that would qualify only under pattern (b) or (c) belongs in
-[`deferred.md`](deferred.md), not here.
+| Tier | Meaning |
+|---|---|
+| **P1** | Capacity-shaped name on one side **and** a compound usage side (`... + ...`) — the `current + requested vs limit` shape. Rare; read first. |
+| **P2** | Capacity-shaped name on one side. |
+| **P3** | Named operands on both sides, no capacity vocabulary — the long tail that the folder's rules deliberately refuse to exclude by keyword. |
+| **P4** | Survived fast-reject but looks mechanical; parked at the bottom rather than refused. |
+
+An entry moves to **Promoted** once a case file exists for it.
 
 ## Live candidates
 

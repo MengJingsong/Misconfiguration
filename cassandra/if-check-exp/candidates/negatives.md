@@ -1,10 +1,17 @@
 # Negatives — rows read and refused
 
-Stage-2 AI filtering verdicts for rows that **fail** one of the three rules
-([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)).
-Each entry cites the rule it failed, so a later pass doesn't re-derive the
-judgment. See [`README.md`](README.md) for how rows are judged and for batch
-coverage.
+Rows that stage 2 ruled out **on grounds the row itself fully determines** —
+no source reading, and **not** the three rules in
+[`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case),
+which belong to the deep-read pass. Each entry cites the row-level ground so
+a later pass doesn't re-derive it. See [`README.md`](README.md) for what
+stage 2 is, and [`stage2-playbook.md`](stage2-playbook.md) for the verified
+reject rules.
+
+**Rejection here is permanent in practice** — nothing re-reads this file — so
+it is reserved for rows that are unambiguously not capacity checks. Anything
+merely unpromising belongs in [`positives.md`](positives.md) at a low tier
+instead.
 
 **Refused, not merely unjudged.** A row dropped only because patterns (b)/(c)
 are currently out of scope is *not* a negative — it goes to
@@ -68,8 +75,26 @@ Outcome: **21 helpers rejected (108 rows)**, 1 cited to an existing entry
 see `_INDEX.md`'s rejected table (`Dispatcher.java:345`, time-based queue-age
 check, fails Rule 2). One line, one place.
 
-Recurring rejection reasons already established (cite these rather than
-re-arguing them):
+### Row-level grounds available to stage 2
+
+These are decidable from the row alone — cite the ground rather than
+re-arguing it:
+
+- **Bare literal operand** — `x > 0`, `size() < 2`. An emptiness or sign
+  test; a real limit has a name. 602 magnitude rows compare against `0`.
+- **Ordering test** — `compareTo()` / `compare()` on either side.
+- **Loop / index arithmetic** — both operands index-shaped (`i`, `idx`,
+  `pos`, `length`, `size()`).
+- **Method name marks it mechanical** — `validate*`, `apply*Config`,
+  `serializedSize`, `hashCode`, `equals`, `compareTo`, `toString`.
+- **Declaring type marks it mechanical** — `*Spec`, `*Options`, `Config*`
+  for startup validation; serializer and comparator types.
+
+### Grounds that need the source (deep-read pass, NOT stage 2)
+
+Listed so they are not mistaken for stage-2 grounds. These are the recurring
+archetypes, each a failure of one of the three rules, and they can only be
+established by reading the code:
 
 - **Thread-pool / concurrency / permit caps** — Rule 2: bounds parallelism,
   not total bytes. Precedent: `concurrent_compactors`.
@@ -82,3 +107,4 @@ re-arguing them):
 - **Selection / bucketing logic** — comparisons that choose *which* objects to
   act on, not whether to create one. Precedent: the compaction strategies.
 - **Ref-counting and overflow guards** — not a usage-vs-capacity comparison.
+- **Non-diverging branches** — Rule 3. Never visible in a row.

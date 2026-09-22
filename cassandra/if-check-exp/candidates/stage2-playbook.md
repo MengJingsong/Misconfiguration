@@ -69,126 +69,135 @@ never decides it.
 
 ## Part 2 — Stage 2 playbook
 
-### Prioritization ladder
+### What stage 2 is
 
-The remaining corpus is 5,145 rows, but it is nothing like 5,145 units of
-work. Peel it in this order:
+Stage 2 reads **only the rows**, never the Cassandra source. Its job is to
+rule out what a row visibly cannot be, and to **order** the rest so the
+expensive deep-read pass starts with the most promising rows.
 
-| Step | Rows | Rationale |
+It does **not** apply the three rules — those qualify a real case and need
+the code (Rule 3 asks whether the branches diverge on object creation, which
+no row can show). See [`README.md`](README.md).
+
+**Therefore: rank far more than you reject.** A wrong rejection is permanent
+and invisible — nothing re-reads `negatives.md`. A wrong promotion costs a
+few minutes of reading. When unsure, assign a low tier rather than refusing.
+
+### Signals actually available in a row
+
+`lhs`, `op`, `rhs`, `pkg`, `declaringType`, `method`, `opClass`, and for
+helper rows `helper` / `helperLine`. Everything below is derived from those.
+
+**The limit side is *not* determined by the operator.** Both of these are
+real capacity checks:
+
+```
+availableSpace       <  estimatedWriteSize     <- limit on the LEFT
+allocatedBuffers     >= MAX_ALLOCATED_BUFFERS  <- limit on the RIGHT
+```
+
+Which operand is the limit is semantic, not syntactic. **Every heuristic must
+look at both sides.** (An earlier draft of this file assumed limit = rhs of
+`<`/`<=` and lhs of `>`/`>=`; that is wrong and gets the hints case exactly
+backwards.)
+
+### Fast-reject: verified, side-agnostic
+
+Reject a magnitude row if **either** operand is a bare numeric literal, or if
+either mentions `compareTo()` / `compare()`.
+
+- Drops **1,463 of 2,681** magnitude rows → **1,218** remain.
+- **Loses none of the four known real cases.**
+
+One judgment call to be aware of: dropping literal-operand rows would also
+drop a capacity check written against a hardcoded number (`if (size > 65536)`).
+That is accepted because a bare literal has no declaring variable, so it
+could not name a constraint under §6.1 — but it is a real, if small, risk.
+Keep the dropped rows **listed** in `negatives.md` by ground rather than
+deleted, so the decision stays auditable.
+
+### Priority tiers
+
+| Tier | Definition | Rows (magnitude corpus) |
 |---|---|---|
-| All remaining | 5,145 | — |
-| **Magnitude only** (`opClass`) | **2,941** | A capacity check is inherently a magnitude comparison. Equality (`==`, `!=`) is 2,204 rows of mostly `index == 0` sentinel tests — sweep later, don't delete. |
-| **minus fast-reject** (below) | **~1,895** in the narrowed file | Mechanical, and verified not to drop any known case. |
-| **Positive-signal rows first** | ~470 | See "signals" below — read these before the rest of the batch. |
+| **P1** | Capacity word on either side **and** compound usage side (`... + ...`) | 11 |
+| **P2** | Capacity word on either side | 527 (incl. P1) |
+| **P3** | Both operands named, no capacity vocabulary | remainder of the 1,218 |
+| **P4** | Fast-rejected — parked at the bottom, not deleted | 1,463 |
 
-### Fast-reject: two rules that cut ~29% of magnitude rows
+Capacity vocabulary: `limit`, `capacity`, `max`, `threshold`, `space`,
+`bytes`, `free`, `avail`, `quota`, `reserve`, `allowance`, `budget`.
 
-Both verified against all four known cases — **neither drops any of them**:
+**Validation:** the capacity-word test on either side catches **4 of 4**
+known real cases while selecting only 527 of 2,681 magnitude rows. The
+compound-usage signal (`current + requested vs limit`) appears in just 11
+rows corpus-wide and covers 2 of the 4.
 
-1. **Limit side is a bare literal.** 602 magnitude rows compare against `0`,
-   711 against some small literal. `x > 0` is an emptiness or sign test;
-   a real limit has a *name*. (Careful: `getCapacity() > 0` is an
-   enabled-check, not a capacity check — correctly rejected here.)
-2. **Either operand is `compareTo()` / `compare()`.** 67+ rows. These are
-   ordering tests, never capacity.
+**Caveat worth keeping in view:** four labelled positives is a very small
+validation set. 4/4 is encouraging, not proof. This is exactly why P3 exists
+and why the folder's rules refuse a fixed keyword list — `memtable_heap_space`
+and `MAX_HINT_BUFFERS` share no vocabulary, and a future case may share none
+with the list above. **P3 is not optional; it is the insurance.**
 
-"Limit side" means the right operand of `<`/`<=` and the left of `>`/`>=` —
-i.e. the side the usage is being tested *against*.
+### Other row-level signals
 
-### Positive signals: what a real one looks like
+- **Method name** — `validate*`, `apply*Config`, `serializedSize`,
+  `hashCode`, `equals`, `toString` mark mechanical code. The whole `config`
+  package is dominated by `applySimpleConfig` and `validate*`.
+- **Declaring type** — `*Spec`, `*Options`, `Config*` mean startup
+  validation; `*Pool`, `*Allocator`, `*Buffer`, `*Writer`, `*Manager` are
+  allocation-adjacent and deserve an uprank.
+- **Repetition** — many rows in one method, or one helper across many call
+  sites, is usually one judgment, not many.
 
-- **The usage side is an arithmetic expression** — `... + ...`, rendered by
-  CodeQL when the operand is compound. This is the classic
-  `current + requested vs limit` shape. Only **36 rows** corpus-wide, and it
-  is the shape of *two* of the four known cases. Read every one of them.
-- **The limit side's name contains a capacity word** — `limit`, `capacity`,
-  `max`, `threshold`, `space`, `bytes`, `free`, `avail`, `quota`, `reserve`,
-  `allowance`. **461 rows.** This is a *prioritization* heuristic, never a
-  filter: the folder's rules deliberately reject a fixed keyword list,
-  because `memtable_heap_space` and `MAX_HINT_BUFFERS` share no vocabulary.
-  Use it to order reading, then read the rest anyway.
-- **Both signals at once: 11 rows corpus-wide.** One is the known
-  `AbstractMessageHandler.java:419`. The others are the single
-  highest-yield thing to read first — e.g.
-  `BigFormatPartitionWriter.java:113` (`cacheSizeThreshold`),
-  `IncrementalTrieWriterPageAware.java:167` (`maxBytesPerPage`),
-  `TeeDataInputPlus.java:58` (`limit`).
+### Tried and rejected: the config-name join
+
+Joining the limit operand against the 414 `Config.java` field names and 328
+`CassandraRelevantProperties` entries **does not work**: only 18 rows match
+corpus-wide, and **none of the four known cases**. Operand names at the check
+site (`limit`, `queueCapacity`, `MAX_ALLOCATED_BUFFERS`) are not config
+names — the config name is reached by *tracing* the limit back to its
+declaration, which is deep-read work (README §5, question 4). Recorded so it
+is not attempted again.
 
 ### Tricks that save real time
 
-**Judge the helper, not the row.** In `HelperGuardedIfStatements.csv`, 1,099
-rows come from only ~300 distinct helpers; the 577 magnitude rows come from
-197. Sort a batch by `helper`, judge each helper **once**, apply the verdict
-to all its call sites. The most repeated ones are obviously not capacity
-checks (`ProtocolVersion.isGreaterOrEqualTo()` 40 rows,
-`DeletionTime.supersedes()` 28), so a handful of judgments clears a large
-share.
+**Judge the helper, not the row.** 1,099 helper rows come from ~300 distinct
+helpers (577 magnitude rows from 197). Sort by `helper`, judge once, apply to
+every call site. The most repeated are obviously not capacity checks
+(`ProtocolVersion.isGreaterOrEqualTo()` 40 rows, `DeletionTime.supersedes()`
+28).
 
-**Read by file, not by row.** Rows are sorted by `pkg, path, line`. Group a
-batch's rows by file, then open that file **once** in the local clone and
-window around all its lines together. Reading the same file once per row is
-the single biggest waste available here.
+**Work a whole method or file at once.** Rows are sorted by `pkg, path,
+line`, and rows cluster heavily by method — 51 of the `config` batch's 69
+surviving rows are in `DatabaseDescriptor.java`, most in `applySimpleConfig`.
+One judgment about that method disposes of dozens of rows.
 
-**Trace the limit operand to its declaration — that is the answer to Target 1.**
-`grep` the operand name in `config/Config.java` and
-`config/CassandraRelevantProperties.java` first. A hit there is a strong
-positive signal *and* hands you the constraint name for the file name
-(README §6.1). No hit means it is a constant, a derived value, or a runtime
-accessor — all still valid, just name them by the §6.1 rules.
+**Stage 2 needs no clone access at all.** It is pure CSV work, so it is cheap
+and parallelisable across batches; keep it that way rather than drifting into
+source reading, which is the next pass's job.
 
-**Look for siblings deliberately.** Three of the seven filed cases are
-siblings of another: same check, different pool or config
-(`memtable_heap_space`/`memtable_offheap_space`;
-`internode_`/`native_transport_receive_queue_capacity`). When a row
-qualifies, immediately ask what *other* instance reaches the same code with a
-different limit. That is the cheapest new case available.
+### Output of a batch
 
-**Assume there is an escape hatch.** Every case filed so far has one:
-`markBlocking()` overshoots the memtable limit; `throw_on_overload=false`
-decodes the message anyway; `cdc_block_writes=false`; and the compaction
-guard is skipped entirely on the default path. If a check looks like a clean
-reject, you have probably not read far enough. Record it for Target 3 in §9
-and move on — do not chase it.
+1. Row-level rejects → [`negatives.md`](negatives.md), citing the ground.
+2. Everything else → [`positives.md`](positives.md) **with a tier**.
+3. Pattern-(b)/(c)-only rows → [`deferred.md`](deferred.md).
+4. Batch line added to [`README.md`](README.md)'s coverage table.
 
-### Pitfalls, learned from the cases already filed
-
-**The row is not the case — Rule 3 needs the branches.** The CSV tells you a
-comparison exists. It says nothing about whether the outcomes diverge on
-object creation, which is what actually qualifies a candidate. Always read
-the `if`'s two branches.
-
-**For anything guard-shaped, read the callers, not just the method.** The
-compaction disk case looked airtight in isolation and turned out not to
-dominate its allocation at all — its only caller skips it entirely on the
-default path. That was invisible in the CSV row *and* in the method itself.
-
-**Write verdicts down in the same pass.** Every row you read goes to
-[`positives.md`](positives.md), [`negatives.md`](negatives.md) or
-[`deferred.md`](deferred.md) before you move on. A row judged and not
-recorded gets re-read by the next session at full cost — which is exactly
-what the batch-coverage table exists to prevent.
-
-**Cite the established reject archetypes rather than re-arguing them.**
-[`negatives.md`](negatives.md) lists the recurring ones (thread-pool and
-concurrency caps, rate limiters, writer-rollover, config validation,
-selection/bucketing logic, ref-counting). Most rejections are one of these;
-naming the archetype is a complete justification.
-
-**Check `_INDEX.md` before recording a rejection.** It holds every rejection
-made up to 2026-09-22, including method-1 findings. One line is recorded in
-exactly one place.
+The deep-read pass then takes `positives.md` in tier order, applies the three
+rules with the source open, and promotes what qualifies into case files.
 
 ### Suggested batch order
 
 1. **The 114 unread helper rows inside the four "done" batches**
-   (`transport` 63, `db/compaction` 43, `concurrent` 6, `cache` 2). These
-   subtrees are already familiar, and they are currently marked done while
-   containing rows the pipeline could not produce at the time.
-2. **`config` (115 magnitude) and `net` (98)** — small, dense, adjacent to
-   constraints already understood. Good for calibrating judging pace.
-3. **`db`, `utils`, `index`, `io`** — over half the remaining work; attempt
-   once the pace and the reject archetypes are second nature.
+   (`transport` 63, `db/compaction` 43, `concurrent` 6, `cache` 2) — those
+   subtrees are marked done but predate the helper query.
+2. **`config` (115 magnitude) and `net` (98)** — `config` is worth doing
+   first because it is *fast*, not because it is promising: it is almost
+   entirely `applySimpleConfig`/`validate*` config validation, so expect
+   close to zero survivors. It is a good calibration batch for exactly that
+   reason.
+3. **`db`, `utils`, `index`, `io`** — over half the remaining work.
 
-A session of roughly 100–200 magnitude rows appears to be the right size:
-large enough to finish a real subpackage, small enough to record verdicts
-properly before context runs short.
+Because stage 2 does not read source, a session can cover much more than the
+deep-read pass: a whole top-level package at a time is reasonable.

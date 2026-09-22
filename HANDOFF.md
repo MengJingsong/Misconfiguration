@@ -96,8 +96,8 @@ this folder's own scope.
       only under pattern (b) or (c), parked by the scope decision below.
       Kept apart from `negatives.md` because they are undecided, not refused.
     - `candidates/stage2-playbook.md` — **start here to run a batch.** Stage
-      1's results, the prioritization ladder (5,145 rows → 2,941 magnitude →
-      ~1,895 after verified fast-reject → ~470 positive-signal rows first),
+      1's results, the priority tiers (P1 11 rows / P2 527 / P3 the rest /
+      P4 the 1,463 fast-rejected), the verified side-agnostic reject rules,
       and the tricks and pitfalls from the cases filed so far.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `candidates/`; the if-check queries and their
@@ -288,12 +288,25 @@ remaining items below.
    machine from the pinned queries and the `cassandra-5.0.9` DB anyway).
    CodeQL only shrinks the search space — it decides nothing about
    qualification.
-2. **Stage 2 — AI filtering.** Read stage 1's rows against the three rules
-   (README §3.4–§3.6) and record every verdict under
-   `cassandra/if-check-exp/candidates/` — that folder *is* the
-   AI-filtering-results store. Survivors go to `positives.md` and are then
-   promoted to full case files under a `<module>/` folder as before;
-   non-survivors go to `negatives.md`.
+2. **Stage 2 — AI filtering (preprocessing only).** Work from the stage-1
+   rows alone — operand names, enclosing class/method, package, operator
+   class — **without reading the Cassandra source**. Rule out rows the row
+   itself shows are not capacity checks, rank the rest into priority tiers,
+   and record everything under `cassandra/if-check-exp/candidates/` — that
+   folder *is* the AI-filtering-results store. Ranked survivors go to
+   `positives.md` (with a tier), row-level rejects to `negatives.md`,
+   pattern-(b)/(c)-only rows to `deferred.md`.
+
+   **Stage 2 does *not* apply the three rules** (README §3.4–§3.6). Those
+   qualify a real case and need the code — Rule 3 asks whether the branches
+   diverge on object creation, which no row can answer. They belong to the
+   deep-read pass (method 1), which takes `positives.md` in tier order and
+   promotes what qualifies into case files.
+
+   **Because stage 2 is blind, it should rank far more than it rejects.** A
+   wrong rejection is permanent and invisible; a wrong promotion costs a
+   little reading. Verified tiers and reject rules are in
+   `candidates/stage2-playbook.md`.
 
 ### Scope decisions (2026-09-22): pattern (a) only; verification deferred
 
