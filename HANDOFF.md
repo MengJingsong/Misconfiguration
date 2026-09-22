@@ -389,9 +389,14 @@ Remaining items, in the order they were previously prioritized:
      helper), of which 2,941 are magnitude-class** — the realistic first
      pass, equality being a lower-priority sweep. Largest: `db` (529
      magnitude), `utils` (476), `index` (343), `io` (329), `service` (309).
-     **Note:** the four done batches predate `HelperGuardedIfStatements.ql`,
-     which finds 114 rows inside those same subtrees that have never been
-     read.
+     **First stage-2 batch run 2026-09-22:** the 114 helper rows inside the
+     four already-done subtrees, which predated
+     `HelperGuardedIfStatements.ql`. 23 distinct helpers judged (the
+     judge-the-helper-once trick held: 114 rows, 23 decisions); 21 rejected,
+     1 cited to an existing entry, **1 candidate found** —
+     `Directories.hasDiskSpaceForCompactionsAndStreams():551`, a per-filestore
+     disk check gating whether a compaction starts at all. It is pattern (b),
+     so it is parked in `candidates/deferred.md` rather than written up.
    - *Known gap (deferred, not blocking):* the pipeline only sees comparisons
      inside `if` conditions, so it cannot find pattern-(b)/(c) checks written
      as ternaries or assignments (the CDC comparison was missed). Under the

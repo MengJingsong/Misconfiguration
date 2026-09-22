@@ -81,16 +81,15 @@ it to reproduce a batch.
 | `cache` | 15 | 2026-09-18 | 0 survivors — ref-counting, overflow guards, and trivial validation; no capacity-vs-limit divergence found. |
 | `transport` | 89 | 2026-09-18 | 1 survivor (since promoted, see `positives.md`) + rejects logged in `_INDEX.md`. |
 | `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up (see `positives.md`). Rejects logged in `_INDEX.md`. |
+| helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `deferred.md` as pattern (b). Rejects in `negatives.md`. |
 
-**Narrowed: 329 of 4,489 rows triaged.**
+**Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows.**
 
-> **These four are complete only against `NarrowedIfStatements.csv`.** They
-> were triaged before `HelperGuardedIfStatements.ql` existed, and that query
-> finds **114 further rows inside the same four subtrees** (`transport` 63,
-> `db/compaction` 43, `concurrent` 6, `cache` 2) that **have never been read**.
-> They are not a re-audit — they are rows the pipeline could not produce at
-> the time. Worth sweeping before or alongside the next new batch, since these
-> subtrees are already familiar.
+> The four subtrees above were first triaged before
+> `HelperGuardedIfStatements.ql` existed, so their helper rows were swept
+> separately on 2026-09-22 (row above) rather than as a re-audit — those rows
+> were ones the pipeline could not produce at the time. All four subtrees are
+> now complete against **both** stage-1 inputs.
 
 ### Remaining
 
@@ -130,7 +129,8 @@ since a capacity check is inherently a magnitude comparison.
 | `triggers` | 2 (1) | 1 (0) | **1** |
 | **Total** | **4160 (2454)** | **985 (487)** | **2941** |
 
-**Reading the numbers.** 5,145 rows remain in total, but the realistic first
+**Reading the numbers.** 5,031 rows remain (the 114 helper rows above are
+now done), but the realistic first
 pass is the **2,941 magnitude rows**; the 2,204 equality rows are a
 lower-priority sweep afterwards. The helper rows shrink further in practice:
 across the whole corpus they come from only ~300 distinct helpers, so triage

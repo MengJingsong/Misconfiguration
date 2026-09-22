@@ -41,6 +41,59 @@ rejection under Rule 3; (2) it is invisible in a stage-1 CSV row, which shows
 only the comparison — establishing it requires reading the callers, so
 budget for that in the (c) pass.
 
+## 1b. Candidate found by stage 2, parked by pattern — `hasDiskSpaceForCompactionsAndStreams`
+
+Found 2026-09-22 in the first stage-2 batch (the helper rows inside the four
+previously-triaged subtrees). **Passes all three rules; parked because it is
+pattern (b).**
+
+- **Capacity check:** [`Directories.hasDiskSpaceForCompactionsAndStreams():551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L551)
+  — `availableForCompaction < toWrite.getValue()`, evaluated per `FileStore`.
+- **Limit side:** `availableForCompaction` =
+  [`getAvailableSpaceForCompactions():563-568`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L563-L568)
+  — the file store's usable bytes, minus `min_free_space_per_drive`, then
+  **multiplied by `max_space_usable_for_compactions_in_percentage`**
+  ([`Config.java:344`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L344),
+  default `.95`, read via `getMaxSpaceForCompactionsPerDrive()`). Two tunable
+  config entries on the limit path, not one.
+- **Usage side:** the total bytes to write = this compaction's estimated
+  output **plus** the remaining write of all compactions already running
+  (`CompactionManager.instance.active.estimatedRemainingWriteToDiskBytes()`),
+  summed per file store.
+- **Verdict path (why (b)):** the comparison does not branch to an
+  allocation. It sets a local `hasSpace = false`, continues the loop over
+  file stores, and returns the boolean. The decision points are in
+  [`CompactionTask.buildCompactionCandidatesForAvailableDiskSpace()`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L411):
+  `if (...hasDiskSpaceForCompactionsAndStreams(...)) break;` at `:411`, then
+  either dropping an SSTable from the compaction via
+  `reduceScopeForLimitedSpace()` or, when nothing more can be dropped,
+  `throw new RuntimeException("Not enough space for compaction ...")` at
+  `:441`.
+- **Why it matters — it is not a duplicate of the filed compaction case.**
+  `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace` checks
+  *one chosen directory* against *this* compaction's output, at writer-setup
+  time, and is skipped entirely on the default disk-boundaries path. This one
+  checks *every file store* against *all in-flight compaction output*, before
+  the task starts, and it reserves a configurable fraction of the drive
+  (`max_space_usable_for_compactions_in_percentage`, default 95%) rather than
+  only a flat floor. It also
+  has a graceful degradation path — shrink the compaction — that the filed
+  case lacks. Different limit, different scope, different disallow effect.
+- **How it was found:** the helper query surfaced it via
+  `buildCompactionCandidatesForAvailableDiskSpace()`, whose *reported*
+  comparisons (`size() > 0`, `sstablesRemoved > 0`) are both noise. The
+  method name pointed the read in the right direction and the real check was
+  two calls further in. Worth remembering: a helper row's value can be the
+  method it names, not the comparison it reports.
+
+**When (b) resumes:** likely name
+`DataDirectory_getAvailableSpaceForCompactions-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`
+under a `compaction` or `disk` module — but check §6.1's "derived from
+several sources" rule first. `min_free_space_per_drive` and
+`max_space_usable_for_compactions_in_percentage` both sit on the limit path,
+and the latter is the one a user would tune for *this* check specifically, so
+it may be the better constraint name.
+
 ## 2. Re-audit of earlier rejections under (b)/(c)
 
 **Raised 2026-09-20; parked 2026-09-22.**
