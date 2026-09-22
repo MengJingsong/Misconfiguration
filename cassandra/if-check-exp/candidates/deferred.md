@@ -99,12 +99,14 @@ whether a row qualifies is still decided by reading it.
 
 ## 4. Known limits of stage 1 even for pattern (a)
 
-Recorded so they aren't rediscovered as surprises. Neither blocks the current
+Recorded so they aren't rediscovered as surprises. Does not block the current
 pass:
 
-- The query captures the **form** only. Rule 3 — do the branches actually
+- The queries capture the **form** only. Rule 3 — do the branches actually
   diverge on object creation? — remains entirely a stage-2 judgment.
-- A pattern-(a) check whose comparison hides behind a boolean helper (e.g.
-  `if (!pool.hasRoom())`) keeps its comparison in the callee, so the `if`
-  itself carries no comparison and the row will not appear. Stage 1 is a
-  near-complete superset for pattern (a), not a provably complete one.
+
+**Closed 2026-09-22:** the boolean-helper gap (a pattern-(a) check whose
+comparison hides behind a helper such as `if (!pool.hasRoom())`, leaving the
+`if` itself with no comparison) is now covered by
+`HelperGuardedIfStatements.ql`. Stage 1's pattern-(a) input is therefore
+`NarrowedIfStatements.csv` **plus** `HelperGuardedIfStatements.csv`.

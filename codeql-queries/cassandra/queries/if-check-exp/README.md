@@ -21,6 +21,34 @@ structurally exactly pattern (a) — so the pipeline below already fits that sco
 changes needed**. The three planned extensions further down exist only to surface patterns
 (b) and (c), which are parked until (a) is finished.
 
+## Shared predicates
+
+`isNumeric`, `operandName`, `pkgDir`, `opClass` and `isCandidateComparison` live in
+[`cassandra/ifcheck/IfCheck.qll`](../../ifcheck/IfCheck.qll), imported as
+`import ifcheck.IfCheck`. They were previously copy-pasted into each query, which risked the
+queries drifting apart on what counts as "numeric" or "a candidate comparison". The library is
+Cassandra-local rather than in `common/` because it encodes this experiment's notion of a
+candidate check; it sits in `ifcheck/` rather than beside the queries because QL module names
+cannot contain hyphens, so `queries/if-check-exp/` is not an importable path.
+
+## Output columns
+
+All queries emit named columns (`path`, `line`, `pkg`, `declaringType`, `method`, ...) and are
+`order by`-ed, so runs are reproducible and diffable across machines — which matters because
+results are gitignored and regenerated per machine, not committed. Two columns exist
+specifically to serve triage:
+
+- **`pkg`** — the package directory under `org/apache/cassandra` (`db/compaction`, `utils`,
+  `net`). Triage proceeds by directory batch, so this is emitted rather than re-derived from
+  the path by hand. Group on a prefix of it for coarser batches.
+- **`opClass`** — `magnitude` (`<`, `<=`, `>`, `>=`) or `equality` (`==`, `!=`). A capacity
+  check is inherently a magnitude comparison, so equality rows are mostly noise (`index == 0`,
+  sentinel tests) — in `NarrowedIfStatements.csv` they are 1,808 of 4,489 rows. They are
+  **kept, not dropped**: an exact-value counter cap (`count == MAX`) is conceivable, and
+  discarding 40% of the corpus silently would be an invisible decision. Rows are sorted
+  `opClass` first so magnitude rows are read first and equality swept afterward at lower
+  priority.
+
 ## Pipeline
 
 1. **`AllIfStatements.ql`** — every `if` statement in `src/java/...`. Pure inventory, no
@@ -42,6 +70,29 @@ changes needed**. The three planned extensions further down exist only to surfac
    reliable fixed vocabulary to grep for. Verdicts go to `../../../../cassandra/if-check-exp/candidates/`
    (`positives.md` / `negatives.md` / `deferred.md`).
 
+## Pattern-(a) completeness: `HelperGuardedIfStatements.ql`
+
+Steps 1-3 find the capacity check only when the comparison is written **directly in the `if`
+condition**. When it hides behind a boolean helper — `if (!pool.hasRoom())`,
+`if (isOverLimit())` — the `if` carries no comparison and the row never appears, even though
+the `if`'s own branches are what decide allow vs. disallow. That is still pattern (a); the
+check just sits one call frame down.
+
+`HelperGuardedIfStatements.ql` closes that gap: `if` statements whose condition calls a
+boolean method declared in Cassandra's own source, where that method's body holds a candidate
+numeric comparison. It reports both the `if` site and the comparison inside the callee
+(`helper`, `helperLine`). **1,099 rows — 577 magnitude, 522 equality.**
+
+Note the real unit of work is much smaller than the row count: the 577 magnitude rows come
+from only **197 distinct helpers**, so triage judges each *helper* once and then applies the
+verdict to all its call sites. The most-repeated helpers are plainly not capacity checks
+(`ProtocolVersion.isGreaterOrEqualTo()`, 40 rows; `DeletionTime.supersedes()`, 28), so sorting
+by helper frequency disposes of a large share quickly.
+
+As with the others, this is mechanical narrowing only. It does not check that the helper's
+comparison is a usage-vs-limit test, nor that the `if`'s branches diverge on object creation —
+both stay read-and-judge calls.
+
 ## Known gap and planned extensions (2026-09-20)
 
 `if-check-exp` now recognizes three enforcement patterns (see
@@ -49,8 +100,10 @@ changes needed**. The three planned extensions further down exist only to surfac
 (a) the capacity check is itself the deciding `if`; (b) the check produces a
 verdict — a flag, enum, or return value — that a separate decision point
 reads; (c) guard clauses before an allocation that sits outside any branch.
-Steps 1–3 above only keep comparisons that sit inside an `if` condition, so
-they can miss patterns (b) and (c). Known miss: the `cdc_total_space`
+Steps 1-3 above only keep comparisons that sit inside an `if` condition, and
+`HelperGuardedIfStatements.ql` extends that to comparisons one call frame down — but all of
+them are anchored on an `if` whose branches decide, i.e. pattern (a). None of them can reach
+patterns (b) and (c). Known miss: the `cdc_total_space`
 comparison in `CDCSizeTracker.processNewSegment()` (line 335) is a ternary
 inside a method argument, so it is not in `NarrowedIfStatements.csv`; only
 an unrelated `if` in the same method was.

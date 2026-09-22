@@ -323,12 +323,14 @@ What follows from this:
   numeric operands only, nulls and literal-only pairs dropped — structurally
   exactly pattern (a). No query changes are needed and the three planned
   structural queries are *not* prerequisites, so stage 2 is unblocked now.
-  Two residual gaps, recorded rather than left implicit: (1) the query
-  captures the *form* only — Rule 3 (do the branches actually diverge on
-  allocation?) stays entirely a stage-2 judgment; (2) a pattern-(a) check
-  whose comparison hides behind a boolean helper (`if (!pool.hasRoom())`)
-  keeps its comparison in the callee and will not appear, so stage 1 is a
-  near-complete superset for (a), not a provably complete one.
+  The boolean-helper gap — a pattern-(a) check hidden behind a helper such as
+  `if (!pool.hasRoom())`, leaving the `if` with no comparison — was **closed
+  2026-09-22** by the new `HelperGuardedIfStatements.ql` (1,099 rows from 300
+  distinct helpers), so stage 1's pattern-(a) input is now
+  `NarrowedIfStatements.csv` **plus** `HelperGuardedIfStatements.csv`. One
+  residual limit stands: the queries capture the *form* only, so Rule 3 (do
+  the branches actually diverge on allocation?) is entirely a stage-2
+  judgment.
 **Verification is deferred too (2026-09-22).** The README §8 "trigger the
 disallow branch" step is not being run for now — the focus is discovery.
 Cases are filed with their citations checked against the pinned tag and left

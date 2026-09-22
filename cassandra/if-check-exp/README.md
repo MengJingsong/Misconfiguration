@@ -446,12 +446,14 @@ finished**. Their rules in §3.2 stand unchanged in the meantime.
   enclosing statement is an `if` — structurally exactly pattern (a). The
   three planned structural queries (comparisons anywhere, guard clauses,
   verdict links) exist only to surface (b)/(c) and are not prerequisites for
-  the pattern-(a) pass. Two residual gaps to note: the query captures the
-  *form* only, so Rule 3 (do the branches actually diverge?) remains entirely
-  a stage-2 judgment; and a pattern-(a) check whose comparison hides behind a
-  boolean helper (`if (!pool.hasRoom())`) keeps its comparison in the callee
-  and so will not appear — stage 1 is a near-complete superset for (a), not a
-  provably complete one.
+  the pattern-(a) pass. The boolean-helper gap — a pattern-(a) check whose
+  comparison hides behind a helper (`if (!pool.hasRoom())`), leaving the `if`
+  itself with no comparison — was **closed 2026-09-22** by
+  `HelperGuardedIfStatements.ql` (1,099 rows, from 300 distinct helpers), so
+  stage 1's pattern-(a) input is now `NarrowedIfStatements.csv` **plus**
+  `HelperGuardedIfStatements.csv`. One residual limit remains: the queries
+  capture the *form* only, so Rule 3 — do the branches actually diverge on
+  object creation? — is entirely a stage-2 judgment.
 - **Rows that would qualify only under (b) or (c) go to
   `candidates/deferred.md`, never to `negatives.md`.** They are unjudged, not
   refused; keeping them in a separate file means resuming (b)/(c) is a matter

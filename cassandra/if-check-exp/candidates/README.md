@@ -6,7 +6,12 @@ preprocessing* discovery method. See
 for how the two discovery methods relate, and §7.5 for the scope currently in
 force.
 
-Stage 1's mechanical output is **not** kept here: the CodeQL queries under
+Stage 1's pattern-(a) output is two files — `NarrowedIfStatements.csv`
+(comparisons in an `if` condition) and `HelperGuardedIfStatements.csv`
+(comparisons one call frame down, behind a boolean helper). Both carry `pkg`
+and `opClass` columns; read `magnitude` rows before `equality` ones.
+
+That output is **not** kept here: the CodeQL queries under
 [`codeql-queries/cassandra/queries/if-check-exp/`](../../../codeql-queries/cassandra/queries/if-check-exp/README.md)
 write to the gitignored `codeql-queries/results/cassandra/` and are
 regenerated per machine, so nothing about a result set is committed or
