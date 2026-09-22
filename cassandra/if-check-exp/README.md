@@ -335,7 +335,7 @@ cassandra/if-check-exp/
 ├── _INDEX.md                      # master index of every case (navigation + progress)
 ├── _TEMPLATE.md                    # template for each new case file
 ├── candidates/                      # method 2, stage-2 (AI filtering) verdicts — see §7.2
-│   ├── README.md                    #   what stage 2 is, and which batches have been read
+│   ├── README.md                    #   what stage 2 is, how a row is triaged, which batches are done
 │   ├── positives.md                 #   survivors, pending promotion to a case file
 │   ├── negatives.md                 #   read and refused, each citing the rule it failed
 │   └── deferred.md                  #   not yet judged: parked by the pattern-(a)-only scope (§7.5)
@@ -468,7 +468,8 @@ finished**. Their rules in §3.2 stand unchanged in the meantime.
   stage 1's pattern-(a) input is now `NarrowedIfStatements.csv` **plus**
   `HelperGuardedIfStatements.csv`. One residual limit remains: the queries
   capture the *form* only, so Rule 3 — do the branches actually diverge on
-  object creation? — is entirely a stage-2 judgment.
+  object creation? — can be answered **only by the deep-read pass**: neither
+  stage 1 nor stage 2 sees the branches.
 - **Rows that would qualify only under (b) or (c) go to
   `candidates/deferred.md`, never to `negatives.md`.** They are unjudged, not
   refused; keeping them in a separate file means resuming (b)/(c) is a matter

@@ -63,12 +63,15 @@ specifically to serve triage:
    magnitude comparisons, drops boolean/enum/reference equality checks). ~4,490 rows (down
    from ~10,147). Remaining noise mechanical filtering can't remove without keyword judgment —
    e.g. `index == 0`, comparator results (`compareIPs() < 0`) — is left for step 4.
-4. *(in progress)* **Semantic triage** of the remaining rows — for each, judge by reading it
-   whether the limit-side operand is capacity/threshold-shaped *and* the subject (operand
-   name, enclosing class, or field's declaring type) bounds memory or disk bytes. This is a
-   read-and-judge pass, not something expressible as a CodeQL predicate, since there's no
-   reliable fixed vocabulary to grep for. Verdicts go to `../../../../cassandra/if-check-exp/candidates/`
-   (`positives.md` / `negatives.md` / `deferred.md`).
+4. *(in progress)* **Stage-2 triage** of the remaining rows — a preprocessing pass that
+   works from the rows alone, **without opening the source**: rule out what a row visibly
+   cannot be (bare-literal operand, ordering test, loop index, mechanical method name) and
+   rank the rest into priority tiers by operand and context names. Not expressible as a
+   CodeQL predicate, since there's no reliable fixed vocabulary to grep for — and equally
+   not a qualification: stage 2 does **not** apply the three rules, which need the code.
+   Verdicts go to `../../../../cassandra/if-check-exp/candidates/`
+   (`positives.md` with a tier / `negatives.md` / `deferred.md`), and the deep-read pass
+   then applies the rules in tier order.
 
 ## Pattern-(a) completeness: `HelperGuardedIfStatements.ql`
 

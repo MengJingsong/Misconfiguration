@@ -86,7 +86,7 @@ this folder's own scope.
     CodeQL + AI preprocessing pipeline; see Open items Priority 1). Stage 1's
     mechanical output is *not* kept here — it stays gitignored under
     `codeql-queries/results/cassandra/`. Planned layout:
-    - `candidates/README.md` — what stage 2 is, how a row is judged, and the
+    - `candidates/README.md` — what stage 2 is, how a row is triaged, and the
       batch-coverage table (which subpackages have been read).
     - `candidates/positives.md` — surviving candidates, pending promotion to
       a full case file under a `<module>/` folder.
@@ -261,10 +261,13 @@ in `cassandra/if-check-exp/README.md` §7.2.
    it puts a heavy burden on the reading session. That burden is the reason
    for method 2.
 2. **CodeQL + AI preprocessing.** Stage 1 (CodeQL) narrows ~17k `if`
-   statements structurally; stage 2 (AI) reads those rows against the three
-   rules and sorts them into positive / negative / deferred. The point is to
-   *filter out* invalid candidates cheaply, so method 1's expensive per-case
-   reading is spent only on the positives.
+   statements structurally; stage 2 (AI) then works **from the rows alone**,
+   without opening the source — ruling out what a row visibly cannot be and
+   **ranking** the rest into priority tiers. Neither stage applies the three
+   rules: those qualify a real case and need the code, so they belong to
+   method 1's deep read, which takes `positives.md` in tier order. The point
+   of method 2 is to cheaply *narrow and order* the corpus, so method 1's
+   expensive per-case reading is spent on the most promising rows first.
 
 **Rejections stay separated by method, in `_INDEX.md` and
 `candidates/negatives.md` respectively** (decided 2026-09-22). They differ in
@@ -308,6 +311,38 @@ remaining items below.
    little reading. Verified tiers and reject rules are in
    `candidates/stage2-playbook.md`.
 
+### Next step (decided 2026-09-22): run P1 tier-first
+
+**The immediate next task is the P1 tier — 34 rows, corpus-wide.** Stage 2's
+ranking (see `candidates/stage2-playbook.md`) puts a row in P1 when a
+capacity word appears on either side of the comparison *and* the usage side
+is a compound expression — the `current + requested vs limit` shape.
+
+Tier-first rather than batch-first, deliberately:
+
+- **Fastest route to new cases.** P1 already contains two known cases
+  (`MemtablePool.tryAllocate():156`, `AbstractMessageHandler.acquireCapacity():419`)
+  as free calibration, one known rejection to cite rather than re-judge
+  (`HintsBuffer.allocateBytes():190`), and several strong unknowns —
+  `BufferPool$GlobalPool.allocateMoreChunks():443` (`> memoryUsageThreshold`),
+  `ResourceLimits$Basic.tryAllocate():213`, `NativeAllocator$Region.allocate():273`
+  and `SlabAllocator$Region.allocate():201` (both `> capacity`),
+  `MmappedRegions.updateState():208` (`> MAX_SEGMENT_SIZE`).
+- **It tests the ranking cheaply.** The tiers are currently validated against
+  only four labelled positives. Running P1 checks them on a real sample
+  *before* ~5,000 remaining rows get ordered by them. If P1 yields two or
+  three real cases the tiering is justified and P2 (371 rows) follows; if it
+  yields nothing new, better to learn that now and fall back to completing
+  packages batch by batch.
+
+**Caveat to record when it runs:** P1's rows are scattered across ~15
+packages, so it completes no package. Log it as its own coverage entry rather
+than marking any package done.
+
+Note P1 is a *deep-read* task — it applies the three rules with the source
+open. Stage 2's own remaining work (ranking the rest of the corpus) is
+separate and can proceed independently.
+
 ### Scope decisions (2026-09-22): pattern (a) only; verification deferred
 
 **Triage is restricted to enforcement pattern (a)** — the capacity check is
@@ -346,8 +381,9 @@ What follows from this:
   distinct helpers), so stage 1's pattern-(a) input is now
   `NarrowedIfStatements.csv` **plus** `HelperGuardedIfStatements.csv`. One
   residual limit stands: the queries capture the *form* only, so Rule 3 (do
-  the branches actually diverge on allocation?) is entirely a stage-2
-  judgment.
+  the branches actually diverge on allocation?) can be answered **only by the
+  deep-read pass** — not by stage 1, and not by stage 2 either, since neither
+  sees the branches.
 **Verification is deferred too (2026-09-22).** The README §8 "trigger the
 disallow branch" step is not being run for now — the focus is discovery.
 Cases are filed with their citations checked against the pinned tag and left
@@ -393,8 +429,9 @@ Remaining items, in the order they were previously prioritized:
      (null, literal-only and non-numeric comparisons dropped; ~4,490 rows).
      This is stage 1; its output belongs in
      the gitignored `codeql-queries/results/cassandra/`. There is
-     deliberately no fixed keyword list; whether a row qualifies is decided
-     by reading it in stage 2.
+     deliberately no fixed keyword list. Stage 2 ranks these rows from the
+     rows themselves; whether one *qualifies* is decided later, by reading
+     the source in the deep-read pass.
    - *Progress:* 329 of 4,489 `NarrowedIfStatements` rows triaged
      (`concurrent`, `cache`, `transport`, `db/compaction` — each a subtree).
      Refreshed counts, including the second input file, are in

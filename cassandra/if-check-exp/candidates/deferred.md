@@ -156,7 +156,8 @@ Recorded so they aren't rediscovered as surprises. Does not block the current
 pass:
 
 - The queries capture the **form** only. Rule 3 — do the branches actually
-  diverge on object creation? — remains entirely a stage-2 judgment.
+  diverge on object creation? — can be answered **only by the deep-read
+  pass**: neither stage 1 nor stage 2 sees the branches.
 
 **Closed 2026-09-22:** the boolean-helper gap (a pattern-(a) check whose
 comparison hides behind a helper such as `if (!pool.hasRoom())`, leaving the

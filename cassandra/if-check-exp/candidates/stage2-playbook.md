@@ -118,20 +118,30 @@ deleted, so the decision stays auditable.
 
 ### Priority tiers
 
-| Tier | Definition | Rows (magnitude corpus) |
+Counts are over the **remaining** magnitude rows — the 2,454 left after
+excluding the four finished subtrees — since that is the work ahead:
+
+| Tier | Definition | Rows |
 |---|---|---|
-| **P1** | Capacity word on either side **and** compound usage side (`... + ...`) | 11 |
-| **P2** | Capacity word on either side | 527 (incl. P1) |
-| **P3** | Both operands named, no capacity vocabulary | remainder of the 1,218 |
-| **P4** | Fast-rejected — parked at the bottom, not deleted | 1,463 |
+| **P1** | Capacity word on either side **and** compound usage side (`... + ...`) | **34** |
+| **P2** | Capacity word on either side | **371** (incl. P1) |
+| **P3** | Both operands named, no capacity vocabulary | **746** (rest of the 1,117 fast-reject survivors) |
+| **P4** | Fast-rejected — parked at the bottom, not deleted | **1,337** |
 
 Capacity vocabulary: `limit`, `capacity`, `max`, `threshold`, `space`,
 `bytes`, `free`, `avail`, `quota`, `reserve`, `allowance`, `budget`.
 
-**Validation:** the capacity-word test on either side catches **4 of 4**
-known real cases while selecting only 527 of 2,681 magnitude rows. The
-compound-usage signal (`current + requested vs limit`) appears in just 11
-rows corpus-wide and covers 2 of the 4.
+**Validation:** measured over the whole magnitude corpus (2,681 rows,
+finished subtrees included, so the known cases are in scope), the
+capacity-word test on either side catches **4 of 4** known real cases while
+selecting only 527 rows. The compound-usage signal
+(`current + requested vs limit`) covers 2 of the 4.
+
+**P1 is the next thing to run** (decided 2026-09-22): 34 rows, one sitting,
+and it already contains two known cases as free calibration plus one known
+rejection to cite rather than re-judge. Running it first also tests the
+ranking on a bigger sample than four labels before the remaining ~5,000 rows
+are ordered by it.
 
 **Caveat worth keeping in view:** four labelled positives is a very small
 validation set. 4/4 is encouraging, not proof. This is exactly why P3 exists
@@ -187,11 +197,21 @@ source reading, which is the next pass's job.
 The deep-read pass then takes `positives.md` in tier order, applies the three
 rules with the source open, and promotes what qualifies into case files.
 
-### Suggested batch order
+### Suggested order
 
-1. **The 114 unread helper rows inside the four "done" batches**
-   (`transport` 63, `db/compaction` 43, `concurrent` 6, `cache` 2) — those
-   subtrees are marked done but predate the helper query.
+**Next: P1, corpus-wide (34 rows).** Tier-first rather than batch-first —
+this is the fastest route to new cases and the cheapest test of whether the
+ranking predicts them. Its rows are scattered across ~15 packages, so record
+it as its own coverage entry rather than treating any package as finished.
+
+Then, depending on what P1 yields: **P2** (371) if the tiering holds up, or
+fall back to completing packages batch by batch if it does not.
+
+Batch order for the package-by-package work:
+
+1. ~~The 114 unread helper rows inside the four "done" batches~~
+   (`transport` 63, `db/compaction` 43, `concurrent` 6, `cache` 2) — **done
+   2026-09-22**; 23 distinct helpers judged, 1 candidate found.
 2. **`config` (115 magnitude) and `net` (98)** — `config` is worth doing
    first because it is *fast*, not because it is promising: it is almost
    entirely `applySimpleConfig`/`validate*` config validation, so expect
