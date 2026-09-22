@@ -5,7 +5,7 @@
 #   ./run-query.sh <cassandra|hadoop> <query-or-dir-path> [output-name]
 #
 # Examples:
-#   ./run-query.sh cassandra cassandra/queries/if-check-exp/Example.ql
+#   ./run-query.sh cassandra cassandra/queries/if-check-exp/NarrowedIfStatements.ql
 #   ./run-query.sh hadoop hadoop/queries
 set -euo pipefail
 
