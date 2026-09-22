@@ -18,16 +18,27 @@ See [README.md](README.md) for the format.
 | `MAX_HINT_BUFFERS` | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) | [`HintsBufferPool.switchCurrentBuffer():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L113) | `hints` | `hintsbuffer` | (a) | pending | [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`](hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md) |
 | `cdc_total_space` | [`CDCSizeTracker.processNewSegment():335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L335) | [`throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214) | `commitlog` | `allocation` | (b) | pending | [`cdc_total_space-processNewSegment-allowance`](commitlog/cdc_total_space-processNewSegment-allowance.md) |
 
+| `DataDirectory_getAvailableSpace` | [`CompactionAwareWriter.getWriteDirectory():282`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L282) | [`CompactionAwareWriter.getWriteDirectory():283-286`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L283-L286) | `compaction` | `sstablewriter` | (c) | pending | [`DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`](compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md) |
+
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 4 |
-| Total cases | 6 |
+| Modules covered | 5 |
+| Total cases | 7 |
 | Verified | 2 |
-| Pending / in-progress | 4 |
+| Pending / in-progress | 5 |
+
+> **`pending` here does not mean "backlog".** Behavioral verification
+> (driving execution into the disallow branch, README §8) was **deferred by
+> decision on 2026-09-22** so that effort goes to discovery first. Cases are
+> filed with their `file:line` citations checked against the pinned
+> `cassandra-5.0.9` tag and left at `pending` until verification resumes;
+> each one's designed trigger is recorded in its own §9 Verification table,
+> ready to run. The two `verified` cases were verified before that decision.
+> See [`README.md` §7.5](README.md) and the repo-root `HANDOFF.md`.
 
 ## 3. Lines considered and rejected
 
@@ -55,13 +66,33 @@ them._
 | `BatchStatement.java:349` (`verifyBatchSize()`, `size > failThreshold`) | Runs after the batch's mutations are already fully constructed — doesn't gate object creation, only rejects an already-built batch post hoc. |
 | `SEPExecutor.java:135,165,175,196,373,384` / `SEPWorker.java:165,282,330,342` / `SharedExecutorPool.java:137` (task/work permit checks) | Thread-pool worker/permit concurrency accounting, same as `concurrent_compactors` — bounds how many tasks run concurrently, not the bytes any task allocates. |
 | `Dispatcher.java:345` (`hasQueueCapacity()`, `oldestTaskQueueTime() < timeout*threshold`) | Time-based (item age in queue), not a byte/capacity comparison — fails Rule 2. |
-| `ConnectionLimitHandler.java:93,121` (`count > limit`, per-IP/global connection count caps) | Bounds concurrent *connection count*, not bytes; per-connection memory footprint isn't fixed/derivable at this check, and the actual byte-level enforcement for CQL traffic is the separate `native_transport_receive_queue_capacity`/`native_transport_max_request_data_in_flight` mechanism (see `candidates/candidates.md`'s live candidate). Deferred rather than firmly rejected — revisit if a fixed per-connection footprint can be derived. |
-| `CQLMessageHandler.java:551` (`messageSize > getNativeTransportMaxMessageSizeInBytes()`) | Rejects a single oversized frame outright (protocol/sanity bound on one message), not a running-total capacity check — distinct from the `queueCapacity`-based candidate filed in `candidates/candidates.md`. |
+| `ConnectionLimitHandler.java:93,121` (`count > limit`, per-IP/global connection count caps) | Bounds concurrent *connection count*, not bytes; per-connection memory footprint isn't fixed/derivable at this check, and the actual byte-level enforcement for CQL traffic is the separate `native_transport_receive_queue_capacity`/`native_transport_max_request_data_in_flight` mechanism (see `candidates/deferred.md`'s parked candidate). Deferred rather than firmly rejected — revisit if a fixed per-connection footprint can be derived. |
+| `CQLMessageHandler.java:551` (`messageSize > getNativeTransportMaxMessageSizeInBytes()`) | Rejects a single oversized frame outright (protocol/sanity bound on one message), not a running-total capacity check — distinct from the `queueCapacity`-based candidate, since promoted to a case file (see `candidates/positives.md`). |
 | `Flusher.java:152,183,282,303,332,345` (`MAX_FRAMED_PAYLOAD_SIZE`, flush-buffer bookkeeping) | Governs how outbound response bytes are chunked/framed for writing, not a cap on how much gets allocated — buffers are sized to the response regardless of branch taken. |
 | `cache/` subpackage (`AutoSavingCache`, `CaffeineCache`, `ChunkCache`, `NopCacheProvider`, `RefCountedMemory`, `SerializingCache`) | Surveyed in full (15 rows) — ref-counting (`refCount == 0`), `int`-overflow guards (`size > MAX_VALUE`), and cache-save bookkeeping; no capacity-vs-limit divergence gating new object creation found. |
-| `db/compaction/` subpackage, remaining files not already logged above (208 rows total, full subpackage now surveyed) | Extends the earlier informal compaction survey's conclusion to every file in the subpackage. Three recurring non-qualifying patterns account for nearly all rows: (1) **SSTable-candidate selection/threshold logic** (`LeveledManifest`, `UnifiedCompactionStrategy`, `SizeTieredCompactionStrategy`, `TimeWindowCompactionStrategy`, `ShardManager*`) — comparisons that choose *which* SSTables to compact or how to bucket/level them, not a create-vs-block divergence. (2) **Writer-switch-on-full** (`CompactionAwareWriter.maybeSwitchLocation`, `MajorLeveledCompactionWriter`, `SplittingSizeTieredCompactionWriter`, `Sharded*Writer`, e.g. `totalWrittenInCurrentWriter > maxSSTableSize`) — same non-diverging "start a new writer instead of blocking" pattern already rejected for `CommitLogSegment.java:242`/`HintsBuffer.java:190` (writing proceeds regardless of branch) — rejected under Rule 2's writer-rollover edge case even with disk now in scope, since total bytes written aren't bounded, only their chunking. (3) **Config validation / arithmetic derivation** (`validateOptions()` methods across every strategy, `Controller.java`'s remaining rows) — startup-time checks or plain derived-value math, not runtime allocation gates. No candidate survived from these three patterns. **`CompactionAwareWriter.getWriteDirectory():282`** (`availableSpace < estimatedWriteSize`) was rejected here as disk-scoped/out-of-scope — **reclassified as a live candidate 2026-09-18** once disk was brought into this folder's scope (README § Core concept); see `candidates/candidates.md`. |
+| `db/compaction/` subpackage, remaining files not already logged above (208 rows total, full subpackage now surveyed) | Extends the earlier informal compaction survey's conclusion to every file in the subpackage. Three recurring non-qualifying patterns account for nearly all rows: (1) **SSTable-candidate selection/threshold logic** (`LeveledManifest`, `UnifiedCompactionStrategy`, `SizeTieredCompactionStrategy`, `TimeWindowCompactionStrategy`, `ShardManager*`) — comparisons that choose *which* SSTables to compact or how to bucket/level them, not a create-vs-block divergence. (2) **Writer-switch-on-full** (`CompactionAwareWriter.maybeSwitchLocation`, `MajorLeveledCompactionWriter`, `SplittingSizeTieredCompactionWriter`, `Sharded*Writer`, e.g. `totalWrittenInCurrentWriter > maxSSTableSize`) — same non-diverging "start a new writer instead of blocking" pattern already rejected for `CommitLogSegment.java:242`/`HintsBuffer.java:190` (writing proceeds regardless of branch) — rejected under Rule 2's writer-rollover edge case even with disk now in scope, since total bytes written aren't bounded, only their chunking. (3) **Config validation / arithmetic derivation** (`validateOptions()` methods across every strategy, `Controller.java`'s remaining rows) — startup-time checks or plain derived-value math, not runtime allocation gates. No candidate survived from these three patterns. **`CompactionAwareWriter.getWriteDirectory():282`** (`availableSpace < estimatedWriteSize`) was rejected here as disk-scoped/out-of-scope — **reclassified as a live candidate 2026-09-18** once disk was brought into this folder's scope (README § Core concept); now parked in `candidates/deferred.md` as pattern (c), per the 2026-09-22 scope decision (README §7.5). |
 
 ## 4. Notes on Modules
+
+### 4.0 compaction
+
+- **`DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`:** the
+  folder's first **disk-scoped** case and first **pattern-(c)** case. A guard
+  in `CompactionAwareWriter.getWriteDirectory()` refuses to start a compaction
+  whose estimated output exceeds the target data directory's free space
+  (device usable bytes minus the configurable `min_free_space_per_drive`,
+  default 50MiB). Where reached, the disallow outcome is a clean
+  `RuntimeException` before any writer or file exists.
+  **Notable finding — the guard does not dominate the allocation.** Its only
+  caller, `maybeSwitchLocation()`, consults it solely when the table has no
+  disk boundaries; on the `diskBoundaries != null` path — the **default**,
+  with `Murmur3Partitioner` on a node owning ranges — it selects a directory
+  by key range and creates the `SSTableWriter` with **no disk-space check at
+  all**. Flagged as Target-3-relevant; a stronger default-mode gap than the
+  memtable or native-transport escape hatches, since the check is not
+  overridden but never executed. Found by discovery **method 1** (direct AI
+  reading), which is also what exposed the non-domination — the CodeQL row
+  alone shows only the comparison. Status: pending (verification deferred).
 
 ### 4.1 memtable
 Storage-engine module covering memtable memory allocation and pooling
@@ -72,7 +103,7 @@ Storage-engine module covering memtable memory allocation and pooling
 ### 4.2 net
 Internode messaging and native (CQL client) transport module covering inbound connection handling (`net/`, `transport/`). Two cases so far:
 - **`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`:** per-connection byte cap in `AbstractMessageHandler.acquireCapacity()`, gating `Message` deserialization for inbound internode traffic. Disallow branch backpressures (registers on a wait queue) rather than dropping the message. Status: pending — trigger not yet designed/run.
-- **`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`:** same `AbstractMessageHandler.acquireCapacity()` if-check, reached via `CQLMessageHandler` for CQL client connections instead of internode peers. **Notable divergence from its sibling:** under the default `native_transport_throw_on_overload=false` config, the disallow branch does *not* withhold message deserialization at all — decoding proceeds regardless, only a client-visible overload flag is set. Only under the non-default `throwOnOverload=true` does it behave like the internode case (clean reject via `OverloadedException`). Flagged as Target-3-relevant (default-mode escape hatch). Status: pending — trigger not yet designed/run. Promoted from `candidates/candidates.md` 2026-09-18.
+- **`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`:** same `AbstractMessageHandler.acquireCapacity()` if-check, reached via `CQLMessageHandler` for CQL client connections instead of internode peers. **Notable divergence from its sibling:** under the default `native_transport_throw_on_overload=false` config, the disallow branch does *not* withhold message deserialization at all — decoding proceeds regardless, only a client-visible overload flag is set. Only under the non-default `throwOnOverload=true` does it behave like the internode case (clean reject via `OverloadedException`). Flagged as Target-3-relevant (default-mode escape hatch). Status: pending — trigger not yet designed/run. Promoted from the candidates list 2026-09-18 (see `candidates/positives.md`).
 
 ### 4.3 hints
 Hint buffering and dispatch module, covering writes stashed for temporarily-unreachable replicas (`hints/`). One case so far:

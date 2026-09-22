@@ -4,7 +4,9 @@ CodeQL queries that narrow Cassandra's ~17k `if` statements down to a shortlist 
 memory-capacity checks, for manual triage against the three rules in
 [../../../../cassandra/if-check-exp/README.md](../../../../cassandra/if-check-exp/README.md).
 Survivors of triage get written up as full case files there; this folder only produces the
-CSV working lists that feed that process (see `candidates/` in that folder).
+CSV working lists that feed that process. Results are gitignored and stay
+under `codeql-queries/results/cassandra/`; the AI-filtering verdicts made
+from them live in that folder's `candidates/`.
 
 CodeQL narrows the search space mechanically (structure of the code); it cannot judge whether
 a check is actually a *memory*-capacity check — that's a semantic call made by reading each
@@ -30,7 +32,8 @@ one to be reliable.
    whether the limit-side operand is capacity/threshold-shaped *and* the subject (operand
    name, enclosing class, or field's declaring type) is memory-related. This is a
    read-and-judge pass, not something expressible as a CodeQL predicate, since there's no
-   reliable fixed vocabulary to grep for. Survivors go to `../../../../cassandra/if-check-exp/candidates/`.
+   reliable fixed vocabulary to grep for. Verdicts go to `../../../../cassandra/if-check-exp/candidates/`
+   (`positives.md` / `negatives.md` / `deferred.md`).
 
 ## Known gap and planned extensions (2026-09-20)
 

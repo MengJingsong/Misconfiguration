@@ -82,9 +82,19 @@ this folder's own scope.
     to the README methodology above.
   - `<module>/` — one folder per (loosely, broadly-named) Cassandra module;
     invent a new one freely when a case doesn't fit — no fixed taxonomy.
-  - `candidates/` — working list of CodeQL-surfaced candidates pending
-    triage: which subpackage batches are done, the live candidates, and the
-    re-audit note (`candidates/candidates.md`).
+  - `candidates/` — **the AI-filtering-results folder** (stage 2 of the
+    CodeQL + AI preprocessing pipeline; see Open items Priority 1). Stage 1's
+    mechanical output is *not* kept here — it stays gitignored under
+    `codeql-queries/results/cassandra/`. Planned layout:
+    - `candidates/README.md` — what stage 2 is, how a row is judged, and the
+      batch-coverage table (which subpackages have been read).
+    - `candidates/positives.md` — surviving candidates, pending promotion to
+      a full case file under a `<module>/` folder.
+    - `candidates/negatives.md` — rows read and refused, each citing the rule
+      it failed.
+    - `candidates/deferred.md` — rows left unjudged: those that would qualify
+      only under pattern (b) or (c), parked by the scope decision below.
+      Kept apart from `negatives.md` because they are undecided, not refused.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `candidates/`; the if-check queries and their
   [pipeline README](codeql-queries/cassandra/queries/if-check-exp/README.md)
@@ -107,7 +117,12 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 2 cases `verified`, 4 `pending`
+## Current state — 7 cases: 2 `verified`, 5 `pending`
+
+**Verification is deferred by decision (2026-09-22)**, so `pending` here means
+"filed, citations checked, behavioral trigger not run" — not dropped work.
+Each pending case's designed trigger is recorded in its own §9 and in the
+table below.
 
 | Case (file under `cassandra/if-check-exp/`) | Pattern | Status | Key finding | Next step |
 |---|---|---|---|---|
@@ -117,6 +132,7 @@ this folder's own scope.
 | `net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | pending | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. | two triggers: `throwOnOverload=true` (expect `OverloadedException`, no decode) and `false` (expect decode despite over-limit) |
 | `hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | pending | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. | run existing `HintsBufferPoolTest.testBackpressure()` via `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest`; confirm Byteman resolves as a test dependency |
 | `commitlog/cdc_total_space-processNewSegment-allowance.md` | (b) | pending | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. | run `CommitLogSegmentManagerCDCTest` via `ant testsome`; find which `@Test` isolates the `cdc_total_space` boundary vs. the `cdc_block_writes` tests |
+| `compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | pending | Disk guard: refuses a compaction whose estimated output exceeds the target directory's free space (device bytes − `min_free_space_per_drive`, default 50MiB). **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. | verification deferred; when resumed the trigger must force `diskBoundaries == null` (a partitioner with no splitter), else the guard never executes |
 
 Details for the two verified cases follow. The pending cases' details live in
 their case files.
@@ -225,46 +241,192 @@ their case files.
 
 ## Open items / next steps
 
-1. **Verify the 4 pending cases** — next steps are in the status table above.
-2. **Write up the disk candidate** `getWriteDirectory():282` as a case file
-   ([`CompactionAwareWriter.getWriteDirectory():282`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L282),
-   `availableSpace < estimatedWriteSize`; previously rejected only for being
-   disk-scoped; pattern (c); under the naming policy:
-   `compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`,
-   module name to be chosen). Show that the guard dominates the write, and fold
-   in the second check in the same method (`getWriteableLocation()` returning
-   `null`).
-3. **Continue the CodeQL-assisted triage.**
+### Two discovery methods (recorded 2026-09-22)
+
+Both feed the same case files and answer to the same three rules
+(README §3.4–§3.6); they are complementary, not alternatives. Full write-up
+in `cassandra/if-check-exp/README.md` §7.2.
+
+1. **Direct AI search.** An AI session reads the Cassandra source directly,
+   following subsystems and call chains, and identifies real if-check cases
+   end to end with no mechanical pre-filter. This is how last week's cases
+   were found. *Strength:* follows semantics a structural query cannot
+   express — it found the `cdc_total_space` ternary that the CodeQL pipeline
+   structurally cannot surface. *Weakness:* the source is far larger than one
+   session can read, so coverage is opportunistic rather than systematic, and
+   it puts a heavy burden on the reading session. That burden is the reason
+   for method 2.
+2. **CodeQL + AI preprocessing.** Stage 1 (CodeQL) narrows ~17k `if`
+   statements structurally; stage 2 (AI) reads those rows against the three
+   rules and sorts them into positive / negative / deferred. The point is to
+   *filter out* invalid candidates cheaply, so method 1's expensive per-case
+   reading is spent only on the positives.
+
+**Rejections stay separated by method, in `_INDEX.md` and
+`candidates/negatives.md` respectively** (decided 2026-09-22). They differ in
+kind: method 1's are few, narrative, and often deferred-rather-than-refused
+(e.g. `ConnectionLimitHandler`); method 2's are bulk, per-batch, one line
+each citing the rule failed. Keeping `_INDEX.md` for method 1 also stops it
+absorbing thousands of triage rows. **One line is recorded in exactly one of
+the two** — if stage 2 reaches a line method 1 already judged, cite the
+`_INDEX.md` entry instead of re-recording it (`db/compaction/` rows were
+triaged both ways and would otherwise duplicate).
+
+**Priority 1 — CodeQL + AI preprocessing (2026-09-22).** Candidate discovery
+is an explicit two-stage pipeline, and running it takes precedence over the
+remaining items below.
+
+1. **Stage 1 — mechanical filtering (CodeQL).** Run the queries to narrow the
+   search space. Results stay where they already land: the **gitignored**
+   `codeql-queries/results/cassandra/` (decided 2026-09-22 — no
+   `mechanical-filtering-results/` folder in the experiment tree, and nothing
+   about a result set is pinned or committed, since it is regenerated per
+   machine from the pinned queries and the `cassandra-5.0.9` DB anyway).
+   CodeQL only shrinks the search space — it decides nothing about
+   qualification.
+2. **Stage 2 — AI filtering.** Read stage 1's rows against the three rules
+   (README §3.4–§3.6) and record every verdict under
+   `cassandra/if-check-exp/candidates/` — that folder *is* the
+   AI-filtering-results store. Survivors go to `positives.md` and are then
+   promoted to full case files under a `<module>/` folder as before;
+   non-survivors go to `negatives.md`.
+
+### Scope decisions (2026-09-22): pattern (a) only; verification deferred
+
+**Triage is restricted to enforcement pattern (a)** — the capacity check is
+itself the `if` whose branches decide allow vs. disallow (README §3.2).
+Patterns (b) (check sets a verdict read by a separate decision point) and
+(c) (guard clause before an allocation outside any branch) are **not being
+triaged yet**: how to handle them systematically is still an open question,
+so they are deliberately parked rather than half-done. **They resume once
+pattern (a) is finished** — this is a sequencing decision, not a narrowing of
+the folder's scope; (b) and (c) remain in scope and their rules in README
+§3.2 stand unchanged.
+
+What follows from this:
+
+- **Already-filed cases are unaffected.** Four of the six existing cases are
+  pattern (b), two of them already `verified`. This decision governs *new
+  candidate triage* only — verifying the filed pending cases (item 1 below)
+  continues regardless of their pattern.
+- **(b)/(c)-only rows go to `deferred.md`, not `negatives.md`.** A row
+  dropped only because "the `if`'s own branches don't diverge" is not
+  rejected — it is simply unjudged under (b)/(c). A separate file (rather
+  than a status column, which invites skimming past it) means resuming
+  (b)/(c) later is a matter of reading one file instead of re-scanning the
+  corpus. Rejections on pattern-independent grounds (thread-pool or
+  concurrency caps, rate limiters, config validation, time checks, writer
+  rollover) are true rejections and stay settled in `negatives.md`.
+- **The existing CodeQL scripts already fit pattern (a) — confirmed by
+  reading `NarrowedIfStatements.ql` (2026-09-22), not just its README.** It
+  selects `BinaryExpr` comparisons whose `getEnclosingStmt()` is an `IfStmt`,
+  numeric operands only, nulls and literal-only pairs dropped — structurally
+  exactly pattern (a). No query changes are needed and the three planned
+  structural queries are *not* prerequisites, so stage 2 is unblocked now.
+  Two residual gaps, recorded rather than left implicit: (1) the query
+  captures the *form* only — Rule 3 (do the branches actually diverge on
+  allocation?) stays entirely a stage-2 judgment; (2) a pattern-(a) check
+  whose comparison hides behind a boolean helper (`if (!pool.hasRoom())`)
+  keeps its comparison in the callee and will not appear, so stage 1 is a
+  near-complete superset for (a), not a provably complete one.
+**Verification is deferred too (2026-09-22).** The README §8 "trigger the
+disallow branch" step is not being run for now — the focus is discovery.
+Cases are filed with their citations checked against the pinned tag and left
+at `Status: pending`; §8 stands unchanged as the methodology for when
+verification resumes. This supersedes item 1 below as the top call on time,
+though the four pending cases' designed triggers remain recorded and ready.
+
+- **Deferred with (b)/(c):** the disk candidate `getWriteDirectory():282`
+  (pattern (c) — previously item 2 below), the three planned structural
+  CodeQL queries (comparisons anywhere, guard clauses, verdict links — they
+  exist only to surface (b)/(c)), and the 2026-09-20 re-audit of earlier
+  rejections under (b)/(c). All three are listed under "Deferred until
+  pattern (a) is finished" below.
+
+### `candidates/` layout (applied 2026-09-22)
+
+`candidates.md` was folded into `candidates/README.md` (which keeps the
+batch-coverage table and the judging procedure) and the rest split into
+`positives.md`, `negatives.md` and `deferred.md`, so each file has one job.
+References in `_INDEX.md`, the codeql pipeline README and the
+`native_transport` case file were updated to match.
+
+`_INDEX.md` keeps its own rejection section for method-1 findings (see "Two
+discovery methods" above) — the two sets are not merged. **Stage-2
+rejections made before 2026-09-22 also remain in `_INDEX.md`**, since this
+file did not exist when they were recorded and migrating them would churn
+several cross-references for no analytical gain. So: `_INDEX.md` is
+authoritative for every rejection up to 2026-09-22, `negatives.md` for
+stage-2 rejections after it. Check `_INDEX.md` before adding a row.
+
+Remaining items, in the order they were previously prioritized:
+
+1. **Verify the 4 pending cases** — *deferred (2026-09-22, see above); not
+   currently being worked.* Each case's designed trigger stays recorded in
+   the status table above, ready to run when verification resumes.
+2. **Continue the CodeQL-assisted triage** — carried out as the two-stage
+   pipeline in Priority 1 above, restricted to pattern (a).
    - *Pipeline:* `codeql-queries/` (own [README](codeql-queries/README.md);
      queries under `codeql-queries/cassandra/queries/if-check-exp/`, own
      [README](codeql-queries/cassandra/queries/if-check-exp/README.md))
      narrows ~17k `if` statements: `AllIfStatements.ql` →
      `ComparisonIfStatements.ql` (~10,147 rows) → `NarrowedIfStatements.ql`
      (null, literal-only and non-numeric comparisons dropped; ~4,490 rows).
-     There is deliberately no fixed keyword list; whether a row qualifies is
-     decided by reading it.
+     This is stage 1; its output belongs in
+     the gitignored `codeql-queries/results/cassandra/`. There is
+     deliberately no fixed keyword list; whether a row qualifies is decided
+     by reading it in stage 2.
    - *Progress:* 329 of 4,490 rows triaged (`concurrent/`, `cache/`,
      `transport/`, `db/compaction/`). Exact coverage and the un-triaged
-     subpackage row counts are in `candidates/candidates.md`. Largest
+     subpackage row counts are in `candidates/README.md`. Largest
      remaining: `db/marshal`, `db/tries`, `utils` (717), `index` (487), `io`
      (466), `cql3` (368).
-   - *Known gap:* the pipeline only sees comparisons inside `if` conditions,
-     so it cannot find pattern-(b)/(c) checks written as ternaries or
-     assignments (the CDC comparison was missed). Three structural queries are
-     planned in the CodeQL README (comparisons anywhere, guard clauses,
-     verdict links); none is written yet.
-   - *Re-audit:* rows and earlier rejections judged only on "the `if`'s own
-     branches don't diverge" need one re-read under patterns (b) and (c); see
-     `candidates/candidates.md`.
-4. **Native-transport follow-up:** `PreV5Handlers.LegacyDispatchHandler.checkLimits()`
+   - *Known gap (deferred, not blocking):* the pipeline only sees comparisons
+     inside `if` conditions, so it cannot find pattern-(b)/(c) checks written
+     as ternaries or assignments (the CDC comparison was missed). Under the
+     pattern-(a)-only scope this is exactly the right input, so the three
+     planned structural queries (comparisons anywhere, guard clauses, verdict
+     links; none written yet) wait until (b)/(c) resume.
+3. **Native-transport follow-up:** `PreV5Handlers.LegacyDispatchHandler.checkLimits()`
    (`PreV5Handlers.java:197-209`, pre-protocol-V5 connections, uses
    `channelPayloadBytesInFlight`) may be a related but distinct capacity path;
    not yet investigated. `ConnectionLimitHandler` (connection-count caps) is
    deferred rather than rejected; see `_INDEX.md`.
-5. **Optional rigor gap (off-heap memtable case):** its evidence reuses
+4. **Optional rigor gap (off-heap memtable case):** its evidence reuses
    `NativeAllocatorTest.testBookKeeping()`, which proves the escape-hatch
    outcome but not, as `HeapPoolTest` does, that the normal call actually
    parked. A purpose-built test would close this; not prioritized.
+
+### Deferred until pattern (a) is finished
+
+Parked by the 2026-09-22 scope decision above; all still in scope, none
+abandoned. **The worklist itself lives in
+[`cassandra/if-check-exp/candidates/deferred.md`](cassandra/if-check-exp/candidates/deferred.md)**
+— full detail there; this is the summary.
+
+- ~~**The disk candidate** `getWriteDirectory():282`~~ — **done 2026-09-22**,
+  processed with method 1 as a deliberate single-candidate exception to the
+  pattern-(a) scope (method 1 needs neither the stage-1 CSV nor the unwritten
+  (b)/(c) queries). Filed as
+  [`cassandra/if-check-exp/compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
+  **Headline finding: the guard does *not* dominate the allocation.** Its only
+  caller consults it solely when the table has no disk boundaries; on the
+  default path (`Murmur3Partitioner`, node owning ranges) the `SSTableWriter`
+  is created with no disk-space check at all — a stronger default-mode gap
+  than the memtable `markBlocking()` or native-transport
+  `throw_on_overload=false` hatches, since the check is never executed rather
+  than overridden. Flagged for Target 3. Two lessons carried into
+  `candidates/deferred.md` for the eventual (c) pass: non-domination is a
+  finding to record rather than grounds for rejection, and it cannot be seen
+  in a CSV row — it requires reading the callers.
+- **The three planned structural CodeQL queries** — comparisons anywhere,
+  guard clauses, verdict links (specified in the CodeQL README). They exist
+  only to surface (b)/(c) candidates, so they are not needed for the
+  pattern-(a) pass.
+- **The 2026-09-20 re-audit** of rows and earlier rejections judged only on
+  "the `if`'s own branches don't diverge". These are `deferred-(b)/(c)`, not
+  rejected; recording them as such in `negatives.md` is what makes this
+  resumable as a filter rather than a re-scan.
 
 Already explored, no case retained: the whole `db/compaction/` subpackage
 (the `concurrent_compactors` check fails Rule 2; the rest is selection logic,

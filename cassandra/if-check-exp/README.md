@@ -334,7 +334,11 @@ cassandra/if-check-exp/
 ├── README.md                     # this file
 ├── _INDEX.md                      # master index of every case (navigation + progress)
 ├── _TEMPLATE.md                    # template for each new case file
-├── candidates/                      # working list of CodeQL-surfaced candidates pending triage
+├── candidates/                      # method 2, stage-2 (AI filtering) verdicts — see §7.2
+│   ├── README.md                    #   what stage 2 is, and which batches have been read
+│   ├── positives.md                 #   survivors, pending promotion to a case file
+│   ├── negatives.md                 #   read and refused, each citing the rule it failed
+│   └── deferred.md                  #   not yet judged: parked by the pattern-(a)-only scope (§7.5)
 └── <module>/                       # one folder per Cassandra module
     ├── <function>-<operand>-<constraint>.md
     └── <function>-<operand>-<constraint>.md
@@ -352,6 +356,49 @@ cassandra/if-check-exp/
    lines were considered and rejected) — continue from there, don't duplicate.
 
 ### 7.2 Discover candidate capacity checks (Target 1)
+
+Two discovery methods are in use. They are complementary, not alternatives —
+both feed the same case files, and both are subject to the same three rules
+(§3.4–§3.6).
+
+**Method 1 — direct AI search.** An AI session reads the Cassandra source
+directly, following subsystems and call chains, and identifies real if-check
+cases end to end without any mechanical pre-filter. This is how the folder's
+first cases were found. Its strength is that it follows semantics a
+structural query can't express (it found the `cdc_total_space` ternary that
+the CodeQL pipeline structurally cannot surface). Its weakness is cost and
+coverage: the full source is far more than one session can read, so coverage
+is opportunistic rather than systematic, and it places a heavy burden on the
+reading session. Rejections found this way are recorded in `_INDEX.md`'s
+"lines considered and rejected" section.
+
+**Method 2 — CodeQL + AI preprocessing.** A two-stage pipeline that exists to
+relieve method 1's burden by shrinking what has to be read:
+
+- **Stage 1 — mechanical filtering (CodeQL).** The queries under
+  [`codeql-queries/cassandra/queries/if-check-exp/`](../../codeql-queries/cassandra/queries/if-check-exp/README.md)
+  narrow ~17k `if` statements structurally (no keyword list) down to a
+  candidate set. Results are written to the **gitignored**
+  `codeql-queries/results/cassandra/` and regenerated per machine; nothing
+  about a result set is committed or pinned.
+- **Stage 2 — AI filtering.** An AI session reads stage 1's rows against the
+  three rules and sorts each into positive, negative or deferred, recording
+  the verdicts under `candidates/` (see §6.2). Survivors are then promoted to
+  full case files.
+
+The point of method 2 is that stage 1 + stage 2 *filter out* the invalid
+candidates cheaply, so the expensive per-case work of method 1 is spent only
+on the positives.
+
+**Where rejections live (one line, one place).** Method 1's rejections go in
+`_INDEX.md`; method 2's go in `candidates/negatives.md`. They are kept apart
+because they differ in kind — method 1's are few, narrative, and often
+deferred-rather-than-refused; method 2's are bulk, per-batch, one line each
+citing the rule failed. A line is recorded in exactly one of the two: if
+stage 2 reaches a line method 1 already judged, cite the `_INDEX.md` entry
+rather than re-recording it.
+
+Then, for either method:
 
 3. Use the CodeQL pipeline under
    [`codeql-queries/cassandra/queries/if-check-exp/`](../../codeql-queries/cassandra/queries/if-check-exp/README.md)
@@ -384,6 +431,40 @@ cassandra/if-check-exp/
 
 Draft new/changed case files in the Claude session first for review, then
 push to `main` after approval.
+
+### 7.5 Active scope decision (2026-09-22): pattern (a) only
+
+**Candidate triage is currently restricted to enforcement pattern (a)** — the
+capacity check is itself the `if` whose branches decide allow vs. disallow
+(§3.2). Patterns **(b)** and **(c)** are *parked, not descoped*: how to
+handle them systematically is still an open question, so they are left
+untouched rather than half-done, and **they resume once pattern (a) is
+finished**. Their rules in §3.2 stand unchanged in the meantime.
+
+- **Stage 1 already fits this scope with no changes.**
+  `NarrowedIfStatements.ql` selects numeric magnitude comparisons whose
+  enclosing statement is an `if` — structurally exactly pattern (a). The
+  three planned structural queries (comparisons anywhere, guard clauses,
+  verdict links) exist only to surface (b)/(c) and are not prerequisites for
+  the pattern-(a) pass. Two residual gaps to note: the query captures the
+  *form* only, so Rule 3 (do the branches actually diverge?) remains entirely
+  a stage-2 judgment; and a pattern-(a) check whose comparison hides behind a
+  boolean helper (`if (!pool.hasRoom())`) keeps its comparison in the callee
+  and so will not appear — stage 1 is a near-complete superset for (a), not a
+  provably complete one.
+- **Rows that would qualify only under (b) or (c) go to
+  `candidates/deferred.md`, never to `negatives.md`.** They are unjudged, not
+  refused; keeping them in a separate file means resuming (b)/(c) is a matter
+  of reading one file rather than re-scanning the corpus.
+- **Already-filed cases are unaffected.** This governs new candidate triage
+  only; existing case files keep their recorded pattern, including the four
+  pattern-(b) cases.
+
+**Verification is also deferred (2026-09-22).** The §8 "trigger the disallow
+branch" step is not being run for now; cases are filed with their citations
+checked against the pinned tag and left at `Status: pending` until
+verification resumes. §8 stands unchanged as the methodology for when it
+does.
 
 ## 8. Verifying a case (triggering the disallow branch)
 
