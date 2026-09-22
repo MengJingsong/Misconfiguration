@@ -245,6 +245,75 @@ their case files.
 
 ## Open items / next steps
 
+### ⏵ Resume here (state as of 2026-09-22, end of session)
+
+**Where the pipeline stands.** Method 2 is built and running. Stage 1 is
+complete for pattern (a) — four CodeQL queries, two CSVs
+(`NarrowedIfStatements.csv` 4,489 rows, `HelperGuardedIfStatements.csv`
+1,099). Stage 2 has ranked the magnitude corpus into tiers
+(P1 34 / P2 371 / P3 746 / P4 1,337 fast-rejected) and the **P1 tier has been
+deep-read**. Seven cases are filed (2 `verified`, 5 `pending` — verification
+is deferred by decision, not backlog).
+
+**The immediate next work, in order:**
+
+1. **Write up the 4 P1 candidates as case files.** They are found, judged
+   against the three rules, and recorded in `candidates/positives.md`, but
+   none exists as a case file yet. Start with `BufferPool_memoryUsageThreshold`
+   (strongest); its main open task is tracing `memoryUsageThreshold` to its
+   config source for the §6.1 constraint name. `TeeDataInputPlus_limit` is
+   the weakest — confirm `limit`'s origin before committing to it.
+   `Integer_MAX_VALUE` needs a §6.1 naming judgement call, since the
+   constraint is a *type bound*.
+2. **Two corrections to existing case files**, both found by the P1 pass and
+   detailed in the "P1 tier" section below: `cdc_total_space` is missing a
+   second check site (`permitSegmentMaybe():200`), and the two net cases
+   should link `ResourceLimits$Basic.tryAllocate():213` as the mechanism
+   behind their reserve sub-checks.
+3. **Then run the P2 tier (371 rows)**, continuing tier-first rather than
+   package-first. P1 gave roughly a 1-in-3 hit rate on rows not already
+   accounted for, which is why tier order is worth keeping.
+
+**Do not** start patterns (b)/(c), and do not run behavioral verification —
+both are deferred by decision (see "Scope decisions" below). `deferred.md`
+is their worklist.
+
+### ⏵ One open design question (raised 2026-09-22, not decided)
+
+**Should stage 2's ranking move from keyword matching to AI lexical
+judgement?** Evidence gathered, design not applied.
+
+The current tiers key off a fixed capacity-word list, and that list fails in
+both directions. False positives: `phi_convict_threshold > 16`,
+`repair_session_max_tree_depth > 20`, `memtable_cleanup_threshold > 0.99f`,
+`default_keyspace_rf < ..._fail_threshold` — all contain `threshold`/`max`,
+none bounds bytes, and all sit in `applySimpleConfig`, i.e. startup
+validation. False negatives: capacity-shaped vocabulary the list never
+anticipated (`remaining()`, `keysWritten >= keysEstimate`, `unused`).
+
+This is what README §7.2's "deliberately no fixed keyword list" rule is
+guarding against, so lexical judgement is the more faithful method. Proposed
+shape, **not yet written into the playbook**:
+
+- Judge the row as a sentence — `declaringType` + `method` + `lhs op rhs`.
+  Context usually decides before the operand does; anything in
+  `applySimpleConfig`/`validate*` is validation whatever it compares.
+- Layer it *after* the mechanical fast-reject (bare literal, `compareTo`),
+  which is free, deterministic and reproducible.
+- Emit a one-line reason per row, not just a label, so the pass is auditable
+  and does not drift across sessions.
+- Reject only lexical certainties; downrank anything ambiguous. `remaining()
+  < 4` looks capacity-shaped and is really a deserialization bounds check —
+  stage 2 cannot know that, so it ranks low rather than refusing.
+- Record model and date per batch; these judgements are model-dependent in a
+  way CodeQL output is not. Regression-check each batch against the known
+  rows, and re-judge ~10 rows from the previous batch for consistency.
+
+**The limit that remains either way:** lexical meaning cannot settle the
+three rules. Stage 2 improves ranking and removes the obvious; qualification
+stays with the deep read.
+
+
 ### Two discovery methods (recorded 2026-09-22)
 
 Both feed the same case files and answer to the same three rules

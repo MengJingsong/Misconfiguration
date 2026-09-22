@@ -149,6 +149,36 @@ and why the folder's rules refuse a fixed keyword list — `memtable_heap_space`
 and `MAX_HINT_BUFFERS` share no vocabulary, and a future case may share none
 with the list above. **P3 is not optional; it is the insurance.**
 
+### Open: replace the keyword list with lexical judgement (proposed 2026-09-22, not applied)
+
+The tiers above key off a fixed capacity-word list, which **fails in both
+directions** — this is exactly what
+[`../README.md` §7.2](../README.md#72-discover-candidate-capacity-checks-target-1)'s
+"deliberately no fixed keyword list" rule warns about.
+
+*Keyword hits that are not byte capacities:* `phi_convict_threshold > 16`
+(failure-detector float), `repair_session_max_tree_depth > 20` (a depth),
+`memtable_cleanup_threshold > 0.99f` (a ratio), `default_keyspace_rf <
+..._fail_threshold` (replica count). All match `threshold`/`max`; all sit in
+`applySimpleConfig`, i.e. startup validation — the *method* gives them away
+before the operand does.
+
+*Capacity vocabulary the list never anticipated:* `remaining()`,
+`keysWritten >= keysEstimate`, `unused`, `pendingTasks`.
+
+**Proposed replacement** (decision pending — see HANDOFF "One open design
+question"): have the AI judge each row as a sentence — `declaringType` +
+`method` + `lhs op rhs` — layered *after* the mechanical fast-reject, which
+stays because it is free and deterministic. Emit a one-line reason per row so
+the pass is auditable and does not drift; reject only lexical certainties and
+downrank anything ambiguous (`remaining() < 4` looks capacity-shaped and is a
+deserialization bounds check — stage 2 cannot know that). Record model and
+date per batch, since these judgements are model-dependent in a way CodeQL
+output is not, and regression-check each batch against the known rows.
+
+Either way, lexical meaning **cannot** settle the three rules; it improves
+ranking and removes the obvious, and qualification stays with the deep read.
+
 ### Other row-level signals
 
 - **Method name** — `validate*`, `apply*Config`, `serializedSize`,
