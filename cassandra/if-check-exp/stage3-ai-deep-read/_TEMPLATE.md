@@ -7,7 +7,7 @@
 **Formatting note:** Link every code reference (`` `File.java:NN` `` or `` `Class.method():NN` ``) to the pinned source on GitHub. Use the format: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) `` (ranges use `#LNN-LMM`). Place the link *outside* the backticks so code renders as clickable text.
 
 **Relative links in this template** (`../README.md`, `_INDEX.md`) are written for where a
-*copy* of it lives — inside a `<module>/` folder — not for the template's own location at the
+*copy* of it lives — inside `cases/` — not for the template's own location at the
 experiment root. They will look broken here and resolve correctly in a real case file.
 
 ## 1. Location

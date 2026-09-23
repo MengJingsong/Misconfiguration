@@ -1,6 +1,6 @@
 # memtable_offheap_space — region
 
-> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
+> **Index:** [../_INDEX.md](../_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -30,7 +30,7 @@ boolean tryAllocate(long size)
 }
 ```
 
-Same method body as [`memtable_heap_space-tryAllocate-limit`](../memtable/memtable_heap_space-tryAllocate-limit.md) —
+Same method body as [`memtable_heap_space-tryAllocate-limit`](memtable_heap_space-tryAllocate-limit.md) —
 `SubPool.tryAllocate()` is shared code. This case is a **different instance**
 of `SubPool`: `MemtablePool.offHeap` rather than `MemtablePool.onHeap`
 (see [`MemtablePool.java:48`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L48)),

@@ -5,28 +5,24 @@ the stage-1 rows alone, without opening the Cassandra source. See
 [`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks) for how the three stages relate, and §7.5 for
 the scope currently in force.
 
-Stage 1's pattern-(a) output is two files — `NarrowedIfStatements.csv`
-(comparisons in an `if` condition) and `HelperGuardedIfStatements.csv`
-(comparisons one call frame down, behind a boolean helper). Both carry `pkg`
-and `opClass` columns; read `magnitude` rows before `equality` ones.
-
-That output is **not** kept here: the CodeQL queries under
-[`codeql-queries/cassandra/queries/if-check-exp/`](../../../codeql-queries/cassandra/queries/if-check-exp/README.md)
-write to the gitignored `codeql-queries/results/cassandra/` and are
-regenerated per machine, so nothing about a result set is committed or
-pinned.
+**Input:** the two stage-1 CSVs, described in
+[`../stage1-codeql-preprocessing/README.md`](../stage1-codeql-preprocessing/README.md)
+— which is also where the row counts, the run commands and stage 1's
+structural blind spot live. They are gitignored and regenerated per machine,
+so nothing about a result set is committed or pinned. Read `magnitude` rows
+before `equality` ones.
 
 ## Files
 
 | File | Holds |
 |---|---|
-| [`positives.md`](positives.md) | Rows that passed all three rules — live candidates pending promotion to a full case file under a `<module>/` folder. |
-| [`negatives.md`](negatives.md) | Rows read and refused, each citing the rule it failed. |
-| [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) | Rows left **unjudged** — they would qualify only under enforcement pattern (b) or (c), which are parked by the §7.5 scope decision. Not refused; awaiting the (b)/(c) resumption. |
-| [`playbook.md`](playbook.md) | **Start here when running a batch.** Stage 1's results, the prioritization ladder, verified fast-reject rules, and the tricks/pitfalls learned from the cases filed so far. Not a verdict store — the three files above are. |
+| [`positives.md`](positives.md) | Rows that **survived** stage-2 triage, each with its tier. This is stage 3's 3a queue — a work list, **not** a list of qualified cases. |
+| [`negatives.md`](negatives.md) | Rows refused, each citing the **row-level** ground (bare literal, ordering test, loop index, validation method name) — never a rule number, since stage 2 does not apply the rules. |
+| [`playbook.md`](playbook.md) | **Start here when running a batch.** The prioritization ladder, the verified fast-reject rules, the scope table, and the tricks and pitfalls learned so far. Not a verdict store — the two files above are. |
 
-The three are mutually exclusive: every row read in stage 2 lands in exactly
-one of them.
+The two verdict files are mutually exclusive: every row stage 2 reads lands
+in exactly one of them. **Stage 2 has no third outcome** — see "Stage 2
+cannot defer" below.
 
 ## How a row is triaged
 
@@ -56,8 +52,13 @@ What stage 2 does instead:
    capacity-shaped operand names, a compound usage side (`... + ...`),
    allocation-adjacent class and method names. These go to
    [`positives.md`](positives.md) **with their tier**.
-3. **Park** anything that would only qualify under pattern (b) or (c) in
-   [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
+**Stage 2 cannot defer.** Deciding that a line "would qualify only under
+pattern (b) or (c)" means tracing where the verdict is read and whether the
+branches diverge — which no row shows. Deferral is a stage-3 judgment and
+lives in
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
+If a row *smells* like (b)/(c), **downrank it and let stage 3 decide**; do
+not park it and do not refuse it.
 
 > **Next pass (planned 2026-09-22):** stage 2's ranking moves from the fixed
 > capacity-word list to **AI lexical judgement** of the row — reading the
@@ -75,10 +76,15 @@ always available and always safer than refusing.
 ## One line, one place
 
 Rejections made by **stage 3** (source open, three rules applied) live in
-[`../stage3-ai-deep-read/_INDEX.md`](../stage3-ai-deep-read/_INDEX.md)'s "lines considered and rejected" section, not
-here — they differ in kind (few, narrative, often deferred rather than firmly
-refused). If stage 2 reaches a line that stage 3 already judged, **cite the
-`../stage3-ai-deep-read/_INDEX.md` entry rather than re-recording it here.**
+[`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md),
+not here — they differ in kind: few, narrative, often
+deferred-rather-than-refused, and citing a rule rather than a row-level
+ground. If stage 2 reaches a line that stage 3 already judged, **cite that
+entry rather than re-recording it here.**
+
+Verdicts are filed by **the stage that judged**, not the stage that surfaced
+the row: a row stage 2 ranked and stage 3 then refused is a *stage-3*
+rejection.
 
 ## Progress at a glance
 
@@ -135,6 +141,14 @@ candidates awaiting write-up + 1 pattern-(b) find parked in `../stage3-ai-deep-r
 Triage proceeds by directory batch rather than top-to-bottom, since the corpus
 is far too large to read linearly in one pass. Batches are recorded here so
 later sessions don't re-scan them.
+
+> **This table tracks which stage-1 rows have been *consumed*, whichever
+> stage consumed them.** Most entries are stage-2 triage batches, but the
+> "P1 tier" row records a **stage-3** deep read of rows this folder had
+> ranked. It is kept here because its purpose is the same — stopping a later
+> session re-reading rows already judged — and because the row counts it
+> retires are stage-1 row counts. The verdicts themselves live with the
+> stage that made them.
 
 Counts below come from the `pkg` column, refreshed 2026-09-22 after stage 1
 gained named columns and the `HelperGuardedIfStatements.ql` query. **A batch

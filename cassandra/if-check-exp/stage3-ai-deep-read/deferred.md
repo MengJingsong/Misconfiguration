@@ -23,7 +23,7 @@ needed.
 On Jingsong's call it was processed with stage-3 feed **3b** (direct AI
 source reading) rather than waiting for the (b)/(c) resumption, and is now a
 full case file:
-[`../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
+[`../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
 
 This is a **deliberate single-candidate exception** to the pattern-(a)-only
 scope, not a reversal of it: feed 3b does not depend on the stage-1 CSV or

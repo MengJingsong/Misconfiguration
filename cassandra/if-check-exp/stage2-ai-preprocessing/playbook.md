@@ -1,56 +1,24 @@
-# Stage 1 results & stage 2 playbook
+# Stage 2 playbook
 
-What the CodeQL stage produced, and how to work through it. Written
-2026-09-22, after stage 1 was finished for enforcement **pattern (a)**.
-See [`README.md`](README.md) for the folder's rules and batch coverage, and
-[`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks) for how the three stages relate.
+How to work through the stage-1 rows. Written 2026-09-22, after stage 1 was
+finished for enforcement **pattern (a)**; revised 2026-09-23 when stage 1
+gained its own folder.
+
+See [`README.md`](README.md) for this folder's rules and batch coverage,
+[`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks)
+for how the three stages relate, and
+[`../stage1-codeql-preprocessing/README.md`](../stage1-codeql-preprocessing/README.md)
+for the input: the two CSVs, their row counts, the commands that regenerate
+them, and stage 1's structural blind spot. **That file is the single source
+of truth for stage-1 output — this one does not restate it.**
+
+What you get per row: `path, line, pkg, declaringType, method, lhs, op, rhs,
+opClass`, plus `helper, helperLine` for helper rows. Rows are `order by`-ed,
+so runs are reproducible across machines.
 
 ---
 
-## Part 1 — Stage 1 results
-
-### What exists
-
-Two CSVs feed pattern-(a) triage. Both live in the **gitignored**
-`codeql-queries/results/cassandra/` and are regenerated per machine:
-
-```bash
-export PATH="/proj/misconfiguration-PG0/tools/codeql:$PATH"
-cd /proj/misconfiguration-PG0/git-repos/misconfiguration/codeql-queries
-./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/NarrowedIfStatements.ql
-./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/HelperGuardedIfStatements.ql
-```
-
-| File | Rows | magnitude | equality | What it contains |
-|---|---|---|---|---|
-| `NarrowedIfStatements.csv` | 4,489 | 2,681 | 1,808 | Numeric comparisons written **directly in an `if` condition**. Nulls, literal-only pairs and non-numeric operands already dropped. |
-| `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 | Comparisons **one call frame down**, inside a boolean helper the `if` calls (`if (!pool.hasRoom())`). Adds `helper` and `helperLine` columns. |
-| **Pattern-(a) corpus** | **5,588** | **3,258** | **2,330** | The two are siblings, not nested — neither is a subset of the other. |
-
-Read `magnitude` before `equality`: a capacity check is inherently a
-magnitude comparison, so the 2,330 equality rows are a lower-priority sweep.
-The 1,099 helper rows collapse to **300 distinct helpers** (197 of them
-magnitude-class) — that, not the row count, is the real unit of work.
-
-Columns: `path, line, pkg, declaringType, method, lhs, op, rhs, opClass`
-(+ `helper, helperLine`). Rows are `order by`-ed, so runs are reproducible
-across machines.
-
-Narrowing so far: **17,343** `if` statements → **10,147** comparisons →
-**4,489** numeric non-trivial, plus **1,099** helper-guarded.
-
-### Why these two files are the complete pattern-(a) input
-
-Pattern (a) is "the capacity check is itself the `if` whose branches decide".
-`NarrowedIfStatements.ql` keeps comparisons whose enclosing statement is an
-`if` — structurally exactly that. `HelperGuardedIfStatements.ql` covers the
-one way an (a) check can hide from it: the comparison living inside a boolean
-helper, leaving the `if` with no comparison of its own.
-
-Patterns (b) and (c) are **not** covered and are parked (see
-[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md)). Do not go looking for them in these files.
-
-### Sanity check: the known cases are all in there
+## Calibration: what a true positive looks like as a row
 
 Every already-filed case whose check sits in an `if` appears in
 `NarrowedIfStatements.csv`, all magnitude-class:
@@ -70,11 +38,7 @@ looks like in the CSV.** Note how little the row itself tells you — two of
 them render the usage side as `... + ...`. The row locates the check; it
 never decides it.
 
----
-
-## Part 2 — Stage 2 playbook
-
-### What stage 2 is
+## What stage 2 is
 
 Stage 2 reads **only the rows**, never the Cassandra source. Its job is to
 rule out what a row visibly cannot be, and to **order** the rest so the
@@ -88,7 +52,7 @@ no row can show). See [`README.md`](README.md).
 and invisible — nothing re-reads `negatives.md`. A wrong promotion costs a
 few minutes of reading. When unsure, assign a low tier rather than refusing.
 
-### Signals actually available in a row
+## Signals actually available in a row
 
 `lhs`, `op`, `rhs`, `pkg`, `declaringType`, `method`, `opClass`, and for
 helper rows `helper` / `helperLine`. Everything below is derived from those.
@@ -106,7 +70,7 @@ look at both sides.** (An earlier draft of this file assumed limit = rhs of
 `<`/`<=` and lhs of `>`/`>=`; that is wrong and gets the hints case exactly
 backwards.)
 
-### Fast-reject: verified, side-agnostic
+## Fast-reject: verified, side-agnostic
 
 Reject a magnitude row if **either** operand is a bare numeric literal, or if
 either mentions `compareTo()` / `compare()`.
@@ -125,7 +89,7 @@ could not name a constraint under §6.1 — but it is a real, if small, risk.
 Keep the dropped rows **listed** in `negatives.md` by ground rather than
 deleted, so the decision stays auditable.
 
-### Priority tiers
+## Priority tiers
 
 Counts are over the **remaining** magnitude rows — the 2,454 left after
 excluding the four finished subtrees — since that is the work ahead:
@@ -146,7 +110,7 @@ Capacity vocabulary: `limit`, `capacity`, `max`, `threshold`, `space`,
 **4 of 4** known real cases while selecting only **527** rows. The
 compound-usage signal (`current + requested vs limit`) covers 2 of the 4.
 
-### Scope table — read this before quoting a number
+## Scope table — read this before quoting a number
 
 The same filter yields three different counts depending on the row set it is
 measured over, and all three appear in these docs. **Always name the scope.**
@@ -173,7 +137,7 @@ and why the folder's rules refuse a fixed keyword list — `memtable_heap_space`
 and `MAX_HINT_BUFFERS` share no vocabulary, and a future case may share none
 with the list above. **P3 is not optional; it is the insurance.**
 
-### Lexical judgement — the next stage-2 pass (planned 2026-09-22)
+## Lexical judgement — the next stage-2 pass (planned 2026-09-22)
 
 **This replaces the fixed capacity-word list the tiers above are built on.**
 Jingsong's plan, to run before P2: *use AI to scan the operand names and any
@@ -225,7 +189,7 @@ before the operand does.
 Either way, lexical meaning **cannot** settle the three rules; it improves
 ranking and removes the obvious, and qualification stays with the deep read.
 
-### Other row-level signals
+## Other row-level signals
 
 - **Method name** — `validate*`, `apply*Config`, `serializedSize`,
   `hashCode`, `equals`, `toString` mark mechanical code. The whole `config`
@@ -236,7 +200,7 @@ ranking and removes the obvious, and qualification stays with the deep read.
 - **Repetition** — many rows in one method, or one helper across many call
   sites, is usually one judgment, not many.
 
-### Tried and rejected: the config-name join
+## Tried and rejected: the config-name join
 
 Joining the limit operand against the 414 `Config.java` field names and 328
 `CassandraRelevantProperties` entries **does not work**: only 18 rows match
@@ -246,7 +210,7 @@ names — the config name is reached by *tracing* the limit back to its
 declaration, which is stage-3 work (README §5, question 4). Recorded so it
 is not attempted again.
 
-### Tricks that save real time
+## Tricks that save real time
 
 **Judge the helper, not the row.** 1,099 helper rows come from ~300 distinct
 helpers (577 magnitude rows from 197). Sort by `helper`, judge once, apply to
@@ -263,17 +227,23 @@ One judgment about that method disposes of dozens of rows.
 and parallelisable across batches; keep it that way rather than drifting into
 source reading, which is the next pass's job.
 
-### Output of a batch
+## Output of a batch
 
 1. Row-level rejects → [`negatives.md`](negatives.md), citing the ground.
 2. Everything else → [`positives.md`](positives.md) **with a tier**.
-3. Pattern-(b)/(c)-only rows → [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
-4. Batch line added to [`README.md`](README.md)'s coverage table.
+3. Batch line added to [`README.md`](README.md)'s coverage table.
+
+There is no third bucket. **Stage 2 cannot defer** — judging a row as
+pattern-(b)/(c)-only needs the branches read, so that is a stage-3 call
+recorded in
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
+A row that smells like (b)/(c) gets a low tier, not a park and not a
+refusal.
 
 Stage 3 then takes `positives.md` in tier order, applies the three
 rules with the source open, and promotes what qualifies into case files.
 
-### Suggested order
+## Suggested order
 
 | # | Step | Size | Status |
 |---|---|---|---|

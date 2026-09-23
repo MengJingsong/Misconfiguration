@@ -1,6 +1,6 @@
 # cdc_total_space — allocation
 
-> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
+> **Index:** [../_INDEX.md](../_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 

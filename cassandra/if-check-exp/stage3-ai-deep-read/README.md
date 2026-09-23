@@ -16,7 +16,7 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 | [`playbook.md`](playbook.md) | **Start here to run a pass.** How a feed is worked, what to check in order, the pitfalls found so far. |
 | [`rejected.md`](rejected.md) | Lines read with the source open and refused, each citing the rule it failed. |
 | [`deferred.md`](deferred.md) | Lines left **unjudged** — they would qualify only under enforcement pattern (b) or (c), parked by the §7.5 scope decision. Not refused. |
-| `../<module>/*.md` | Cases that **qualified** — the deliverable. Stage 3's positive output is the case file itself, so there is no `positives.md` here. |
+| `cases/*.md` | Cases that **qualified** — the deliverable. Stage 3's positive output is the case file itself, so there is no `positives.md` here. |
 | [`_INDEX.md`](_INDEX.md) | Master index of those cases. |
 
 ## The two feeds

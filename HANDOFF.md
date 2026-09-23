@@ -79,8 +79,7 @@ this folder's own scope.
     **Cases only** — the "lines considered and rejected" table moved to
     `stage3-ai-deep-read/rejected.md` on 2026-09-23.
 
-  - `<module>/` — one folder per (loosely, broadly-named) Cassandra module;
-    invent a new one freely when a case doesn't fit — no fixed taxonomy.
+
   - **`stage1-codeql-preprocessing/`** — stage-1 entry point. Holds no
     queries and no results, only pointers: the queries live at the repo root
     under `codeql-queries/`, the CSVs are gitignored. Also records stage 1's
@@ -105,6 +104,8 @@ this folder's own scope.
       (`3a`/`3b`) and the date the cited lines were checked.
     - `rejected.md` — read with the source open, refused against the three
       rules. Moved here from `stage3-ai-deep-read/_INDEX.md` on 2026-09-23.
+    - `cases/` — **the results**: one flat file per case (flattened from
+      per-module folders 2026-09-23; module is a field, not a folder).
     - `deferred.md` — unjudged: would qualify only under pattern (b) or (c),
       parked by the scope decision below. Kept apart from `rejected.md`
       because they are undecided, not refused. Moved here from the stage-2
@@ -143,13 +144,13 @@ stage 1/2, `3b` = direct source reading).
 
 | Case (file under `cassandra/if-check-exp/`) | Pattern | Feed | Key finding |
 |---|---|---|---|
-| `memtable/memtable_heap_space-tryAllocate-limit.md` | (b) | 3b | Disallow parks the caller; a `markBlocking()` op overshoots the limit (escape hatch). |
-| `memtable/memtable_offheap_space-tryAllocate-limit.md` | (b) | 3b | Same check on the `offHeap` `SubPool`; same escape hatch. |
-| `net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found. |
-| `net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. |
-| `hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | 3b | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. |
-| `commitlog/cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. |
-| `compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
+| `memtable_heap_space-tryAllocate-limit.md` | (b) | 3b | Disallow parks the caller; a `markBlocking()` op overshoots the limit (escape hatch). |
+| `memtable_offheap_space-tryAllocate-limit.md` | (b) | 3b | Same check on the `offHeap` `SubPool`; same escape hatch. |
+| `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found. |
+| `native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. |
+| `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | 3b | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. |
+| `cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. |
+| `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
 
 Each case's full detail lives in its own file.
 
@@ -296,7 +297,7 @@ then read and refused is a *stage-3* rejection.
 |---|---|---|
 | Rejected | `stage2-ai-preprocessing/negatives.md` | `stage3-ai-deep-read/rejected.md` |
 | Deferred | *(cannot defer)* | `stage3-ai-deep-read/deferred.md` |
-| Qualified | *(cannot qualify)* | a case file under `<module>/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
+| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `_INDEX.md` |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral** — deciding that needs
 the branches read, which no row shows. All deferrals are stage-3 judgments,
@@ -505,7 +506,7 @@ abandoned. **The worklist itself lives in
   processed via stage-3 feed 3b as a deliberate single-candidate exception to the
   pattern-(a) scope (feed 3b needs neither the stage-1 CSV nor the unwritten
   (b)/(c) queries). Filed as
-  [`cassandra/if-check-exp/compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
+  [`cassandra/if-check-exp/stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
   **Headline finding: the guard does *not* dominate the allocation.** Its only
   caller consults it solely when the table has no disk boundaries; on the
   default path (`Murmur3Partitioner`, node owning ranges) the `SSTableWriter`

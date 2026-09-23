@@ -61,14 +61,14 @@ P1 also surfaced five rows that belong to existing records:
 
 | Candidate | Promoted | Case file |
 |---|---|---|
-| `native_transport_receive_queue_capacity` — `AbstractMessageHandler.acquireCapacity():419` reached via `CQLMessageHandler` | 2026-09-18 | [`../net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md`](../net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
-| `DataDirectory_getAvailableSpace` — `CompactionAwareWriter.getWriteDirectory():282` (pattern (c), disk) | 2026-09-22 | [`../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md) |
+| `native_transport_receive_queue_capacity` — `AbstractMessageHandler.acquireCapacity():419` reached via `CQLMessageHandler` | 2026-09-18 | [`../net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md`](../stage3-ai-deep-read/cases/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
+| `DataDirectory_getAvailableSpace` — `CompactionAwareWriter.getWriteDirectory():282` (pattern (c), disk) | 2026-09-22 | [`../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](../stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md) |
 
 ### Notes carried over from the promoted entry
 
 `native_transport_receive_queue_capacity` was surfaced by the `transport/`
 batch as a sibling of the already-filed
-[`internode_application_receive_queue_capacity`](../net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md)
+[`internode_application_receive_queue_capacity`](../stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md)
 case: the **same** `acquireCapacity()` if-check, but reached via
 `CQLMessageHandler` (CQL client connections) rather than
 `InboundMessageHandler` (internode peers), with a different config source

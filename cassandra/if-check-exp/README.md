@@ -292,23 +292,29 @@ Every case file answers exactly these eight questions (see `stage3-ai-deep-read/
 
 ## 6. Files per case
 
-Each case is **one file**, filed under the folder of the module it belongs
-to (there is no single "entry point" to group by, so the module is the
-grouping unit instead):
+Each case is **one file**, all of them together in
+`stage3-ai-deep-read/cases/` — stage 3's positive output, filed with the
+stage that produced it:
 
 | File | Content |
 |------|---------|
-| `[constraint]-[function]-[operand].md` | All eight required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE.md`. |
+| `stage3-ai-deep-read/cases/[constraint]-[function]-[operand].md` | All eight required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE.md`. |
+
+**The layout is flat; the module is a field, not a folder.** Cases were once
+filed under per-module directories; that was flattened 2026-09-23 because the
+file name is already fully qualified and the module is recorded as `Module`
+in the case file (§5, question 3) and as a column in `_INDEX.md`, which is
+where grouping belongs. Module naming guidance below still applies to that
+field.
 
 ### 6.1 Naming
 
-- `<module>/` — a Cassandra module/subsystem folder used to *categorize*
-  case files (e.g. `memtable`, `native_transport`, `compaction`), lowercase
-  with underscores. Modules are not a precise or predefined taxonomy: if a
-  new case doesn't fit an existing module folder, create a new module name
-  for it — don't force-fit it into an existing one. When inventing a new
-  module name, prefer a **broad** one over a narrow/specific one, so it can
-  plausibly hold future cases too (e.g. `memtable` rather than
+- **Module** (a *field*, not a folder — see §6) — the Cassandra
+  module/subsystem a case belongs to (e.g. `memtable`, `native_transport`,
+  `compaction`), lowercase with underscores. Modules are not a precise or
+  predefined taxonomy: if a new case doesn't fit an existing module name,
+  invent one — don't force-fit it. Prefer a **broad** name over a narrow one,
+  so it can plausibly hold future cases too (e.g. `memtable` rather than
   `memtable_onheap_allocation`; `native_transport` rather than
   `native_transport_request_queue`).
 - `[constraint]` — the **resource constraint name**: the variable that is
@@ -368,11 +374,15 @@ cassandra/if-check-exp/
 │   ├── _TEMPLATE.md         #   template for a new case file (stage 3's output)
 │   ├── _INDEX.md            #   master index of every case (cases only)
 │   ├── rejected.md          #   read with source open, refused against the rules
-│   └── deferred.md          #   unjudged: parked by the (a)-only scope (§7.5)
-└── <module>/                # one folder per Cassandra module
-    ├── <constraint>-<function>-<operand>.md    # stage 3's positive output
-    └── <constraint>-<function>-<operand>.md
+│   ├── deferred.md          #   unjudged: parked by the (a)-only scope (§7.5)
+│   └── cases/               #   THE RESULTS — flat, one file per case
+│       ├── <constraint>-<function>-<operand>.md
+│       └── <constraint>-<function>-<operand>.md
 ```
+
+Everything stage 3 produces — the cases, their index, the template, and its
+rejected/deferred verdicts — lives in `stage3-ai-deep-read/`, matching the
+rule that a verdict is filed with the stage that made it (§7.2).
 
 ## 7. Workflow
 
@@ -466,7 +476,7 @@ Not by the stage that surfaced the row. A row **stage 2 ranked** and
 | | Stage 2 verdict | Stage 3 verdict |
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
-| Qualified | *(cannot qualify)* | a case file under `<module>/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
+| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
 | Rejected | `stage2-ai-preprocessing/negatives.md` | `stage3-ai-deep-read/rejected.md` |
 | Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/deferred.md` |
 
@@ -480,7 +490,7 @@ already judged, cite the stage-3 entry rather than re-recording it.
 
 ### 7.3 Write up the case
 
-3. Fill `<module>/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/_TEMPLATE.md`. If the limit side is
+3. Fill `stage3-ai-deep-read/cases/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/_TEMPLATE.md`. If the limit side is
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.

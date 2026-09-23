@@ -1,6 +1,6 @@
 # MAX_HINT_BUFFERS — hintsbuffer
 
-> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
+> **Index:** [../_INDEX.md](../_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -164,4 +164,4 @@ writer threads block waiting for a buffer to be flushed and recycled.
 ## 10. Notes
 
 - `MAX_ALLOCATED_BUFFERS` is set via a JVM system property (`-D` flag), not `cassandra.yaml` — different configuration mechanism from the memtable/net cases' YAML-backed limits, but still "Configuration" per the Limit type taxonomy since it's externally settable without a code change.
-- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../HANDOFF.md) before this draft; see `../stage3-ai-deep-read/_INDEX.md` for cross-reference.
+- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../../HANDOFF.md) before this draft; see `../_INDEX.md` for cross-reference.
