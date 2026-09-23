@@ -15,11 +15,18 @@ them:
 | **Target 2** | Show *how* each constraint restricts usage, via the exact code path. |
 | **Target 3** | Investigate bypass methods that could lead to resource exhaustion. |
 
-Each experiment folder covers some subset. `cassandra/if-check-exp/`, the
-currently active one, covers **Target 1 + Target 2 together** — every case
-both names a constraint and shows the code that enforces it — and leaves
-Target 3 out of scope, noting bypass-relevant observations in passing for
-later use.
+Each experiment folder covers some subset. The two Cassandra folders both
+cover **Target 1 + Target 2 together** — each result names a constraint *and*
+shows the code that enforces it — and both leave Target 3 out of scope,
+noting bypass-relevant observations in passing for later use:
+
+| Folder | Status | Direction |
+|---|---|---|
+| [`cassandra/if-check-exp/`](cassandra/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
+| [`cassandra/entry-restriction-exp/`](cassandra/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
+
+They are deliberately **not cross-referenced** — a line may legitimately
+appear in both.
 
 **Targets are not stages.** An experiment folder may number its own *working
 stages* (`if-check-exp` has three: structural → lexical → semantic). Those
@@ -53,8 +60,9 @@ mount, alongside other resources that are **not** part of this repo:
 ├── git-repos/
 │   ├── misconfiguration/            <- THIS repo (what you're reading)
 │   └── cassandra-src/               <- git clone of apache/cassandra (tag cassandra-5.0.9),
-│                                        used by cassandra/if-check-exp for unit-test verification
-│                                        and by codeql-queries/ for database builds;
+│                                        read by both Cassandra experiment folders (every
+│                                        file:line is checked against it) and used by
+│                                        codeql-queries/ for database builds;
 │                                        NOT tracked by this repo
 ├── tools/codeql/                    <- CodeQL CLI bundle, used by codeql-queries/; NOT tracked by this repo
 ├── codeql-dbs/                      <- compiled CodeQL databases (e.g. cassandra-db), built from
@@ -110,21 +118,29 @@ never scattered across individual scripts.
 
 ### 4.2 `cassandra/entry-restriction-exp/`, `cassandra/if-check-exp/`
 
-- **`cassandra/entry-restriction-exp/`**, **`cassandra/if-check-exp/`** —
-  static code-path inventories of Cassandra's resource-limit checks (see
-  each folder's own `README.md`, and this repo's root [`HANDOFF.md`](HANDOFF.md)
-  for `if-check-exp`'s start-here brief). `if-check-exp` checks its cited
-  line numbers against the `cassandra-src` clone described above; its
-  *behavioral* verification step (running a trigger into the disallow
-  branch) is currently deferred by decision — see that folder's `README.md`
-  §7.5.
+- **`cassandra/if-check-exp/`** (active) and
+  **`cassandra/entry-restriction-exp/`** (paused) — static code-path
+  inventories of Cassandra's resource-limit checks, approached from opposite
+  directions (§0). Each has its own `README.md` (format spec) and its own
+  start-here brief: the root [`HANDOFF.md`](HANDOFF.md) for `if-check-exp`,
+  and [`cassandra/entry-restriction-exp/HANDOFF.md`](cassandra/entry-restriction-exp/HANDOFF.md)
+  for the paused one.
+
+  `if-check-exp` organises its work as **three stages by evidence standard** —
+  structural (CodeQL) → lexical (rows only) → semantic (source open) — with
+  one folder each. Every cited line is checked against the `cassandra-src`
+  clone described above. **Behavioral verification (running a trigger into
+  the disallow branch) is out of scope** as of 2026-09-23: a case's evidence
+  is its traced code path.
 
 ### 4.3 `codeql-queries/`
 
 - **`codeql-queries/`** — CodeQL query packs (one per target: `cassandra/`,
-  `hadoop/`) used to mechanically discover candidate if-checks for
-  `cassandra/if-check-exp` (see its own [`README.md`](codeql-queries/README.md)).
-  Runs against the compiled databases under `codeql-dbs/` described above.
+  `hadoop/`). The Cassandra pack is **stage 1** of `if-check-exp`: it
+  mechanically narrows candidate if-checks, with no keyword list (see its own
+  [`README.md`](codeql-queries/README.md)). Runs against the compiled
+  databases under `codeql-dbs/` described above; its CSV output is
+  gitignored and regenerated per machine. The Hadoop pack is scaffold only.
 
 ### 4.4 `hadoop/build-hadoop-src/`
 

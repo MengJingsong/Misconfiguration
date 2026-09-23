@@ -1,10 +1,9 @@
 # Stage 2 — AI lexical preprocessing
 
-This folder holds the **stage-2 (AI filtering) verdicts** of the *CodeQL + AI
-preprocessing* discovery method. See
-[`../README.md` §7.2](../README.md#72-discover-candidate-capacity-checks-target-1)
-for how the two discovery methods relate, and §7.5 for the scope currently in
-force.
+This folder holds the **stage-2 verdicts**: the lexical pass that works from
+the stage-1 rows alone, without opening the Cassandra source. See
+[`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks) for how the three stages relate, and §7.5 for
+the scope currently in force.
 
 Stage 1's pattern-(a) output is two files — `NarrowedIfStatements.csv`
 (comparisons in an `if` condition) and `HelperGuardedIfStatements.csv`
@@ -75,7 +74,7 @@ always available and always safer than refusing.
 
 ## One line, one place
 
-Rejections from the *other* discovery method (direct AI search) live in
+Rejections made by **stage 3** (source open, three rules applied) live in
 [`../stage3-ai-deep-read/_INDEX.md`](../stage3-ai-deep-read/_INDEX.md)'s "lines considered and rejected" section, not
 here — they differ in kind (few, narrative, often deferred rather than firmly
 refused). If stage 2 reaches a line that stage 3 already judged, **cite the

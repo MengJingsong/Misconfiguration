@@ -480,14 +480,14 @@ already judged, cite the stage-3 entry rather than re-recording it.
 
 ### 7.3 Write up the case
 
-5. Fill `<module>/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/_TEMPLATE.md`. If the limit side is
+3. Fill `<module>/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/_TEMPLATE.md`. If the limit side is
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
-6. **Verify every `file:line` against the local clone before filing** (§2.1).
+4. **Verify every `file:line` against the local clone before filing** (§2.1).
    This is a stage-3 exit condition, not a tracked state: a case is not filed
    until its citations are checked.
-7. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns: Constraint name,
+5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns: Constraint name,
    Capacity check, Decision point, Module, Object, Pattern, Feed, File), and
    record the stage-3 feed (`3a`/`3b`) in the case's Notes.
 

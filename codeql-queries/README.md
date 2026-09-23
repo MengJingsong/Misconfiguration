@@ -8,9 +8,12 @@ documented in this repo.
 - `common/` — shared `.qll` library files usable by both targets. Not a separate CodeQL pack
   (see note below) — just plain QL source.
 - `cassandra/` — query pack for the Cassandra database (`misconfiguration/cassandra`).
-  Its `queries/if-check-exp/` holds the pipeline that feeds
-  [`cassandra/if-check-exp`](../cassandra/if-check-exp/README.md); see that folder's own
-  [README](cassandra/queries/if-check-exp/README.md) for the stage-by-stage narrowing.
+  Its `queries/if-check-exp/` is **stage 1** of
+  [`cassandra/if-check-exp`](../cassandra/if-check-exp/README.md)'s three-stage ladder
+  (structural → lexical → semantic); see that folder's own
+  [README](cassandra/queries/if-check-exp/README.md) for the query chain that does the
+  structural narrowing. Results land in `results/` and are **gitignored** —
+  regenerate them per machine rather than expecting them in a checkout.
 - `hadoop/` — query pack for the Hadoop database (`misconfiguration/hadoop`). Scaffold only:
   `hadoop/queries/` is currently empty.
 - `scripts/` — driver scripts that work against either database (not part of any qlpack).

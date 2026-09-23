@@ -49,7 +49,13 @@ specifically to serve triage:
   `opClass` first so magnitude rows are read first and equality swept afterward at lower
   priority.
 
-## Pipeline
+## The stage-1 query chain
+
+> **These numbered steps are not the evidence stages.** Steps 1–3 below are
+> all *within* stage 1 — successive queries, each narrowing the previous
+> one's output. Step 4 is the hand-off to stage 2 and is not a query at all.
+> The three evidence stages (structural → lexical → semantic) are defined in
+> [`../../../../cassandra/if-check-exp/README.md` §7.2](../../../../cassandra/if-check-exp/README.md).
 
 1. **`AllIfStatements.ql`** — every `if` statement in `src/java/...`. Pure inventory, no
    filtering. ~17,343 rows.
@@ -62,8 +68,8 @@ specifically to serve triage:
    no variable/call involved, and comparisons whose operands aren't numeric-typed (keeps only
    magnitude comparisons, drops boolean/enum/reference equality checks). ~4,490 rows (down
    from ~10,147). Remaining noise mechanical filtering can't remove without keyword judgment —
-   e.g. `index == 0`, comparator results (`compareIPs() < 0`) — is left for step 4.
-4. *(in progress)* **Stage-2 triage** of the remaining rows — a preprocessing pass that
+   e.g. `index == 0`, comparator results (`compareIPs() < 0`) — is left for stage 2.
+4. **Hand-off to stage 2** — triage of the remaining rows: a preprocessing pass that
    works from the rows alone, **without opening the source**: rule out what a row visibly
    cannot be (bare-literal operand, ordering test, loop index, mechanical method name) and
    rank the rest into priority tiers by operand and context names. Not expressible as a

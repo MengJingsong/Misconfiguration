@@ -94,9 +94,8 @@ Continuous trace from the allow outcome to the actual allocation call. For patte
 ### 6b. Disallow path effect
 
 What actually happens when the disallow verdict fires — trace the real
-effect before assuming it cleanly rejects anything (per the
-[verification methodology](../README.md#8-verifying-a-case-triggering-the-disallow-branch)'s
-first rule). Is it a clean reject/throw? A block-and-wait? A silent
+effect before assuming it cleanly rejects anything (the first pitfall in
+[`playbook.md`](playbook.md)). Is it a clean reject/throw? A block-and-wait? A silent
 bypass/escape hatch elsewhere in the call chain?
 
 1. [`Class.method():NN`](link) — disallow branch taken, what state (if any) changes

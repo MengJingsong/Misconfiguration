@@ -139,7 +139,7 @@ cassandra/entry-restriction-exp/
 
 5. Run the failure-mode analysis (proxy / enforcement-point / default) using the legend; record bypass hypotheses in `Bypass Potential` (Target 3 seed).
 
-6. Add/refresh the `_INDEX.md` row and coverage counts; set `Status` (`pending` → `in-progress` → `verified` once checked against the pinned tag).
+6. Add/refresh the `_INDEX.md` row and coverage counts; set `Status` (`pending` → `in-progress` → `verified` once the cited lines are checked against the pinned tag — `verified` means *citations checked*, not *behavior tested*).
 
 **Drafting convention:** draft new/changed result files in the Claude session
 first for review, then push to `main` after approval.

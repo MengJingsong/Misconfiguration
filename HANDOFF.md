@@ -256,7 +256,7 @@ three rules. Stage 2 improves ranking and removes the obvious; qualification
 stays with the deep read.
 
 
-### Two discovery methods (recorded 2026-09-22)
+### The three stages and stage 3's two feeds (revised 2026-09-23)
 
 Both feed the same case files and answer to the same three rules
 (README §3.4–§3.6); they are complementary, not alternatives. Full write-up
@@ -439,11 +439,12 @@ batch-coverage table and the judging procedure) and the rest split into
 References in `stage3-ai-deep-read/_INDEX.md`, the codeql pipeline README and the
 `native_transport` case file were updated to match.
 
-`stage3-ai-deep-read/_INDEX.md` keeps its own rejection section for method-1 findings (see "Two
-discovery methods" above) — the two sets are not merged. **Stage-2
-rejections made before 2026-09-22 also remain in `stage3-ai-deep-read/_INDEX.md`**, since this
-file did not exist when they were recorded and migrating them would churn
-several cross-references for no analytical gain. So: `stage3-ai-deep-read/_INDEX.md` is
+Rejections are split by the stage that judged them (see "The three stages"
+above): `stage3-ai-deep-read/rejected.md` for stage-3 refusals,
+`stage2-ai-preprocessing/negatives.md` for stage-2 ones. **Stage-2
+rejections made before 2026-09-22 remain in `rejected.md`**, since
+`negatives.md` did not exist when they were recorded and migrating them would
+churn several cross-references for no analytical gain. So: `rejected.md` is
 authoritative for every rejection up to 2026-09-22, `negatives.md` for
 stage-2 rejections after it. Check `stage3-ai-deep-read/_INDEX.md` before adding a row.
 

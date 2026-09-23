@@ -3,8 +3,7 @@
 What the CodeQL stage produced, and how to work through it. Written
 2026-09-22, after stage 1 was finished for enforcement **pattern (a)**.
 See [`README.md`](README.md) for the folder's rules and batch coverage, and
-[`../README.md` §7.2](../README.md#72-discover-candidate-capacity-checks-target-1)
-for how the two discovery methods relate.
+[`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks) for how the three stages relate.
 
 ---
 
@@ -184,7 +183,7 @@ list.*
 
 The tiers above key off a fixed capacity-word list, which **fails in both
 directions** — this is exactly what
-[`../README.md` §7.2](../README.md#72-discover-candidate-capacity-checks-target-1)'s
+[`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks)'s
 "deliberately no fixed keyword list" rule warns about.
 
 *Keyword hits that are not byte capacities:* `phi_convict_threshold > 16`
