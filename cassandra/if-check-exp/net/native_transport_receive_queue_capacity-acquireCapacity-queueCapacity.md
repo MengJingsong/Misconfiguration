@@ -164,7 +164,7 @@ branch with recorded evidence.
 | **Evidence** | — |
 | **Line numbers checked** | 2026-09-18 |
 | **Escape hatch / Target-3 note** | under the default `native_transport_throw_on_overload=false` the message is still decoded despite the over-limit verdict; see §6b. |
-| **Notes** | Behavioral trigger not yet run. Promoted from the candidates list (2026-09-18; see `../candidates/positives.md`) after confirming the sibling relationship to `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` by reading `CQLMessageHandler`'s source directly. |
+| **Notes** | Behavioral trigger not yet run. Promoted from the candidates list (2026-09-18; see `../stage2-ai-filtering/positives.md`) after confirming the sibling relationship to `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` by reading `CQLMessageHandler`'s source directly. |
 
 ---
 

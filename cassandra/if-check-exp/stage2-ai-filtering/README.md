@@ -1,4 +1,4 @@
-# Candidates — AI filtering results (method 2, stage 2)
+# Stage 2 — AI filtering results (method 2)
 
 This folder holds the **stage-2 (AI filtering) verdicts** of the *CodeQL + AI
 preprocessing* discovery method. See

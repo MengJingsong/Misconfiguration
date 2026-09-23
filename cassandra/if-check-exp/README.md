@@ -331,14 +331,15 @@ grouping unit instead):
 ```
 (repo root)/HANDOFF.md              # start-here brief for a new session: what this experiment is, current state, next steps
 cassandra/if-check-exp/
-├── README.md                     # this file
-├── _INDEX.md                      # master index of every case (navigation + progress)
-├── _TEMPLATE.md                    # template for each new case file
-├── candidates/                      # method 2, stage-2 (AI filtering) verdicts — see §7.2
-│   ├── README.md                    #   what stage 2 is, how a row is triaged, which batches are done
-│   ├── positives.md                 #   survivors, pending promotion to a case file
-│   ├── negatives.md                 #   read and refused, each citing the rule it failed
-│   └── deferred.md                  #   not yet judged: parked by the pattern-(a)-only scope (§7.5)
+├── README.md                # this file
+├── _INDEX.md                # master index of every case (navigation + progress)
+├── _TEMPLATE.md             # template for each new case file
+├── stage2-ai-filtering/     # method 2, stage-2 (AI filtering) verdicts — see §7.2
+│   ├── README.md            #   what stage 2 is, how a row is triaged, progress
+│   ├── stage2-playbook.md   #   start here to run a batch: tiers, rules, scopes
+│   ├── positives.md         #   survivors, pending promotion to a case file
+│   ├── negatives.md         #   read and refused, each citing the rule it failed
+│   └── deferred.md          #   not yet judged: parked by the (a)-only scope (§7.5)
 └── <module>/                       # one folder per Cassandra module
     ├── <constraint>-<function>-<operand>.md
     └── <constraint>-<function>-<operand>.md
@@ -385,7 +386,7 @@ relieve method 1's burden by shrinking what has to be read:
   rows themselves** — operand names, enclosing class and method, package,
   operator class — *without reading the Cassandra source*. It rules out rows
   that are visibly not capacity checks and ranks the rest by how promising
-  they look, recording the outcome under `candidates/` (see §6.2).
+  they look, recording the outcome under `stage2-ai-filtering/` (see §6.2).
 
 **Stage 2 is preprocessing, not qualification.** It does **not** apply the
 three rules in §3.4–§3.6. Those decide whether a candidate is a real case,
@@ -402,11 +403,13 @@ highest priority first.
 **Because stage 2 cannot see the source, it should rank far more than it
 rejects.** A wrong rejection here is permanent and invisible: nothing
 re-reads `negatives.md`. A wrong promotion costs only a little reading later.
-Reject only on grounds the row *fully* determines (see `candidates/README.md`);
+Reject only on grounds the row *fully* determines (see
+`stage2-ai-filtering/README.md`);
 when in doubt, downrank instead of refusing.
 
 **Where rejections live (one line, one place).** Method 1's rejections go in
-`_INDEX.md`; method 2's go in `candidates/negatives.md`. They are kept apart
+`_INDEX.md`; method 2's go in `stage2-ai-filtering/negatives.md`. They are
+kept apart
 because they differ in kind — method 1's are few, narrative, and often
 deferred-rather-than-refused; method 2's are bulk, per-batch, one line each
 citing the rule failed. A line is recorded in exactly one of the two: if
@@ -471,7 +474,8 @@ finished**. Their rules in §3.2 stand unchanged in the meantime.
   object creation? — can be answered **only by the deep-read pass**: neither
   stage 1 nor stage 2 sees the branches.
 - **Rows that would qualify only under (b) or (c) go to
-  `candidates/deferred.md`, never to `negatives.md`.** They are unjudged, not
+  `stage2-ai-filtering/deferred.md`, never to `negatives.md`.** They are
+  unjudged, not
   refused; keeping them in a separate file means resuming (b)/(c) is a matter
   of reading one file rather than re-scanning the corpus.
 - **Already-filed cases are unaffected.** This governs new candidate triage

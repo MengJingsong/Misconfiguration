@@ -82,26 +82,29 @@ this folder's own scope.
     to the README methodology above.
   - `<module>/` — one folder per (loosely, broadly-named) Cassandra module;
     invent a new one freely when a case doesn't fit — no fixed taxonomy.
-  - `candidates/` — **the AI-filtering-results folder** (stage 2 of the
-    CodeQL + AI preprocessing pipeline; see Open items Priority 1). Stage 1's
-    mechanical output is *not* kept here — it stays gitignored under
-    `codeql-queries/results/cassandra/`. Planned layout:
-    - `candidates/README.md` — what stage 2 is, how a row is triaged, and the
-      batch-coverage table (which subpackages have been read).
-    - `candidates/positives.md` — surviving candidates, pending promotion to
-      a full case file under a `<module>/` folder.
-    - `candidates/negatives.md` — rows read and refused, each citing the rule
-      it failed.
-    - `candidates/deferred.md` — rows left unjudged: those that would qualify
-      only under pattern (b) or (c), parked by the scope decision below.
-      Kept apart from `negatives.md` because they are undecided, not refused.
-    - `candidates/stage2-playbook.md` — **start here to run a batch.** Stage
-      1's results, the priority tiers (**work-ahead scope**: P1 34 / P2 371
+  - `stage2-ai-filtering/` — **the AI-filtering-results folder** (stage 2 of
+    the CodeQL + AI preprocessing pipeline; see Open items Priority 1).
+    Stage 1's mechanical output is *not* kept here — it stays gitignored
+    under `codeql-queries/results/cassandra/`; that separation is why the
+    folder is named for stage 2 rather than for the whole method. Layout
+    (paths below are inside this folder):
+    - `README.md` — what stage 2 is, how a row is triaged, the
+      "Progress at a glance" dashboard, and the batch-coverage table.
+    - `positives.md` — surviving candidates, pending promotion to a full
+      case file under a `<module>/` folder.
+    - `negatives.md` — rows read and refused, each citing the rule it
+      failed.
+    - `deferred.md` — rows left unjudged: those that would qualify only
+      under pattern (b) or (c), parked by the scope decision below. Kept
+      apart from `negatives.md` because they are undecided, not refused.
+    - `stage2-playbook.md` — **start here to run a batch.** Stage 1's
+      results, the priority tiers (**work-ahead scope**: P1 34 / P2 371
       incl. P1 / P3 746 / P4 1,337 fast-rejected — see that file's scope
       table before quoting any of them), the verified side-agnostic reject
       rules, and the tricks and pitfalls from the cases filed so far.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
-  CodeQL query packs that feed `candidates/`; the if-check queries and their
+  CodeQL query packs that feed `stage2-ai-filtering/`; the if-check queries
+  and their
   [pipeline README](codeql-queries/cassandra/queries/if-check-exp/README.md)
   are under `codeql-queries/cassandra/queries/if-check-exp/`. Results land in
   the gitignored `codeql-queries/results/` and must be regenerated on a new
@@ -270,8 +273,8 @@ decision, not backlog).
 Tiers over the 2,454 remaining narrowed-magnitude rows (*work-ahead scope*):
 **P1 34 ✅ done / P2 371 incl. P1 / P3 746 / P4 1,337 fast-rejected.** The
 canonical, scope-labelled version of every number here lives in
-`candidates/README.md`'s "Progress at a glance" and
-`candidates/stage2-playbook.md`'s scope table — update those first.
+`stage2-ai-filtering/README.md`'s "Progress at a glance" and
+`stage2-ai-filtering/stage2-playbook.md`'s scope table — update those first.
 
 **The immediate next work, in order:**
 
@@ -284,14 +287,14 @@ canonical, scope-labelled version of every number here lives in
 
    Yes — and it replaces the fixed capacity-word list the current tiers are
    built on. Full rationale, evidence and the working design are in
-   `candidates/stage2-playbook.md` ("Lexical judgement") and summarised
-   below. **Do this before P2**, because P2's membership is defined by the
+   `stage2-ai-filtering/stage2-playbook.md` ("Lexical judgement") and
+   summarised below. **Do this before P2**, because P2's membership is defined by the
    keyword list this pass supersedes; re-ranking first means P2 is read in a
    trustworthy order rather than re-read later.
 2. **Write up the 4 P1 candidates as case files.** They are found, judged
-   against the three rules, and recorded in `candidates/positives.md`, but
-   none exists as a case file yet. Independent of step 1, so it can be done
-   in either order. Start with `BufferPool_memoryUsageThreshold` (strongest);
+   against the three rules, and recorded in
+   `stage2-ai-filtering/positives.md`, but none exists as a case file yet.
+   Independent of step 1, so it can be done in either order. Start with `BufferPool_memoryUsageThreshold` (strongest);
    its main open task is tracing `memoryUsageThreshold` to its config source
    for the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest —
    confirm `limit`'s origin before committing to it. `Integer_MAX_VALUE`
@@ -373,7 +376,8 @@ in `cassandra/if-check-exp/README.md` §7.2.
    expensive per-case reading is spent on the most promising rows first.
 
 **Rejections stay separated by method, in `_INDEX.md` and
-`candidates/negatives.md` respectively** (decided 2026-09-22). They differ in
+`stage2-ai-filtering/negatives.md` respectively** (decided 2026-09-22). They
+differ in
 kind: method 1's are few, narrative, and often deferred-rather-than-refused
 (e.g. `ConnectionLimitHandler`); method 2's are bulk, per-batch, one line
 each citing the rule failed. Keeping `_INDEX.md` for method 1 also stops it
@@ -398,7 +402,8 @@ remaining items below.
    rows alone — operand names, enclosing class/method, package, operator
    class — **without reading the Cassandra source**. Rule out rows the row
    itself shows are not capacity checks, rank the rest into priority tiers,
-   and record everything under `cassandra/if-check-exp/candidates/` — that
+   and record everything under `cassandra/if-check-exp/stage2-ai-filtering/`
+   — that
    folder *is* the AI-filtering-results store. Ranked survivors go to
    `positives.md` (with a tier), row-level rejects to `negatives.md`,
    pattern-(b)/(c)-only rows to `deferred.md`.
@@ -412,13 +417,13 @@ remaining items below.
    **Because stage 2 is blind, it should rank far more than it rejects.** A
    wrong rejection is permanent and invisible; a wrong promotion costs a
    little reading. Verified tiers and reject rules are in
-   `candidates/stage2-playbook.md`.
+   `stage2-ai-filtering/stage2-playbook.md`.
 
 ### P1 tier — run 2026-09-22, done
 
 All 34 P1 rows deep-read against the three rules. Outcome: **4 new
 candidates, 22 rejected, 3 deferred as pattern (b)/(c), 5 already covered.**
-Details in `candidates/positives.md`, `negatives.md`, `deferred.md`.
+Details in `stage2-ai-filtering/positives.md`, `negatives.md`, `deferred.md`.
 
 **The ranking validated.** P1 recovered both known filed cases as calibration
 and yielded 4 new candidates plus 1 strong pattern-(b) find — about a
@@ -506,9 +511,9 @@ though the four pending cases' designed triggers remain recorded and ready.
   rejections under (b)/(c). All three are listed under "Deferred until
   pattern (a) is finished" below.
 
-### `candidates/` layout (applied 2026-09-22)
+### `stage2-ai-filtering/` layout (applied 2026-09-22)
 
-`candidates.md` was folded into `candidates/README.md` (which keeps the
+`candidates.md` was folded into `stage2-ai-filtering/README.md` (which keeps the
 batch-coverage table and the judging procedure) and the rest split into
 `positives.md`, `negatives.md` and `deferred.md`, so each file has one job.
 References in `_INDEX.md`, the codeql pipeline README and the
@@ -543,7 +548,8 @@ Remaining items, in the order they were previously prioritized:
    - *Progress:* 329 of 4,489 `NarrowedIfStatements` rows triaged
      (`concurrent`, `cache`, `transport`, `db/compaction` — each a subtree).
      Refreshed counts, including the second input file, are in
-     `candidates/README.md`. **Remaining: 5,145 rows (4,160 narrowed + 985
+     `stage2-ai-filtering/README.md`. **Remaining: 5,145 rows (4,160
+     narrowed + 985
      helper), of which 2,941 are magnitude-class** — the realistic first
      pass, equality being a lower-priority sweep. Largest: `db` (529
      magnitude), `utils` (476), `index` (343), `io` (329), `service` (309).
@@ -554,7 +560,8 @@ Remaining items, in the order they were previously prioritized:
      1 cited to an existing entry, **1 candidate found** —
      `Directories.hasDiskSpaceForCompactionsAndStreams():551`, a per-filestore
      disk check gating whether a compaction starts at all. It is pattern (b),
-     so it is parked in `candidates/deferred.md` rather than written up.
+     so it is parked in `stage2-ai-filtering/deferred.md` rather than
+     written up.
    - *Known gap (deferred, not blocking):* the pipeline only sees comparisons
      inside `if` conditions, so it cannot find pattern-(b)/(c) checks written
      as ternaries or assignments (the CDC comparison was missed). Under the
@@ -575,7 +582,7 @@ Remaining items, in the order they were previously prioritized:
 
 Parked by the 2026-09-22 scope decision above; all still in scope, none
 abandoned. **The worklist itself lives in
-[`cassandra/if-check-exp/candidates/deferred.md`](cassandra/if-check-exp/candidates/deferred.md)**
+[`cassandra/if-check-exp/stage2-ai-filtering/deferred.md`](cassandra/if-check-exp/stage2-ai-filtering/deferred.md)**
 — full detail there; this is the summary.
 
 - ~~**The disk candidate** `getWriteDirectory():282`~~ — **done 2026-09-22**,
@@ -590,7 +597,8 @@ abandoned. **The worklist itself lives in
   than the memtable `markBlocking()` or native-transport
   `throw_on_overload=false` hatches, since the check is never executed rather
   than overridden. Flagged for Target 3. Two lessons carried into
-  `candidates/deferred.md` for the eventual (c) pass: non-domination is a
+  `stage2-ai-filtering/deferred.md` for the eventual (c) pass: non-domination
+  is a
   finding to record rather than grounds for rejection, and it cannot be seen
   in a CSV row — it requires reading the callers.
 - **The three planned structural CodeQL queries** — comparisons anywhere,
