@@ -1,6 +1,6 @@
 # DataDirectory_getAvailableSpace — compaction output SSTable
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -242,17 +242,13 @@ actually runs. On the default `diskBoundaries != null` path no space check is
 performed, so compaction output is written to the selected directory
 regardless of its free space, and this ceiling does not apply.
 
-## 9. Verification
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | `pending` |
-| **Verified By / Date** | — (behavioral verification deferred by decision, 2026-09-22; see README §7.5) |
-| **Line numbers checked** | 2026-09-22, against the local clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). All `file:line` references in this file were read directly from that clone. |
-| **Trigger method** | Not run. When verification resumes, the natural unit-level trigger is to construct a `CompactionAwareWriter` on a table whose partitioner has no splitter (so `diskBoundaries == null` and the guard is actually reached), point it at a data directory with little free space, and drive `maybeSwitchWriter()` with an `estimatedWriteSize` larger than `getAvailableSpace()`. Per README §8's methodology, prefer asserting on the thrown `RuntimeException` at `:283` over observing a failed compaction. **Note the trigger must control the partitioner** — under the default `Murmur3Partitioner` the guard is never reached, so a naive test would pass without ever executing the check. Check `test/unit/.../db/compaction/` for existing `CompactionAwareWriter` scaffolding before writing a new harness. Raising `min_free_space_per_drive` is the cleanest way to shrink `availableSpace` without physically filling a disk. |
-| **Evidence** | None yet. |
+| **Stage-3 feed** | `3b` — established by deep-reading the source. (Stage 1/2 had surfaced this line as a row, but the case was made from the source, not the row.) |
+| **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | **Yes — significant.** The guard is bypassed entirely on the `diskBoundaries != null` path (§5), which is the **default** configuration (`Murmur3Partitioner`, node owning ranges): compaction output is then written to a boundary-selected directory with no free-space check at all. This is a stronger default-mode gap than the memtable cases' `markBlocking()` escape hatch or the native-transport `throw_on_overload=false` gap, because the check is not overridden — it is never executed. Flagged for Target 3; not pursued here. A second, milder observation: `estimatedWriteSize` is an estimate, so even on the guarded path an under-estimate admits a compaction that can still exhaust the drive mid-write. |
-| **Notes** | Discovered via the CodeQL `db/compaction/` batch (2026-09-18) and initially rejected as out-of-scope when this folder was memory-only; reclassified as a live candidate the same day once disk entered scope; written up 2026-09-22 using discovery **method 1** (direct AI source reading), which is what surfaced the non-domination finding — the stage-1 CSV row alone shows only the comparison at `:282`. |
 
 ---
 

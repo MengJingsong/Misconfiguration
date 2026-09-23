@@ -1,4 +1,4 @@
-# Stage 2 — AI filtering results (method 2)
+# Stage 2 — AI lexical preprocessing
 
 This folder holds the **stage-2 (AI filtering) verdicts** of the *CodeQL + AI
 preprocessing* discovery method. See
@@ -23,8 +23,8 @@ pinned.
 |---|---|
 | [`positives.md`](positives.md) | Rows that passed all three rules — live candidates pending promotion to a full case file under a `<module>/` folder. |
 | [`negatives.md`](negatives.md) | Rows read and refused, each citing the rule it failed. |
-| [`deferred.md`](deferred.md) | Rows left **unjudged** — they would qualify only under enforcement pattern (b) or (c), which are parked by the §7.5 scope decision. Not refused; awaiting the (b)/(c) resumption. |
-| [`stage2-playbook.md`](stage2-playbook.md) | **Start here when running a batch.** Stage 1's results, the prioritization ladder, verified fast-reject rules, and the tricks/pitfalls learned from the cases filed so far. Not a verdict store — the three files above are. |
+| [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) | Rows left **unjudged** — they would qualify only under enforcement pattern (b) or (c), which are parked by the §7.5 scope decision. Not refused; awaiting the (b)/(c) resumption. |
+| [`playbook.md`](playbook.md) | **Start here when running a batch.** Stage 1's results, the prioritization ladder, verified fast-reject rules, and the tricks/pitfalls learned from the cases filed so far. Not a verdict store — the three files above are. |
 
 The three are mutually exclusive: every row read in stage 2 lands in exactly
 one of them.
@@ -33,7 +33,7 @@ one of them.
 
 > Practical technique — the priority tiers, the verified reject rules, what
 > signals exist in a row — is in
-> [`stage2-playbook.md`](stage2-playbook.md). This section is the definition
+> [`playbook.md`](playbook.md). This section is the definition
 > of what stage 2 is and is not.
 
 Stage 2 works **only from the row**: `lhs`, `op`, `rhs`, `pkg`,
@@ -44,7 +44,7 @@ Stage 2 works **only from the row**: `lhs`, `op`, `rhs`, `pkg`,
 ([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)).
 Those decide whether a candidate is a real case and require reading the
 code — Rule 3 asks whether the branches diverge on object creation, which no
-row can answer. They belong to the deep-read pass that follows.
+row can answer. They belong to stage 3, the pass that follows.
 
 What stage 2 does instead:
 
@@ -58,7 +58,7 @@ What stage 2 does instead:
    allocation-adjacent class and method names. These go to
    [`positives.md`](positives.md) **with their tier**.
 3. **Park** anything that would only qualify under pattern (b) or (c) in
-   [`deferred.md`](deferred.md).
+   [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
 
 > **Next pass (planned 2026-09-22):** stage 2's ranking moves from the fixed
 > capacity-word list to **AI lexical judgement** of the row — reading the
@@ -66,7 +66,7 @@ What stage 2 does instead:
 > instead of matching a word list. This is what §7.2's "deliberately no fixed
 > keyword list" rule always implied. Rationale, the keyword list's
 > demonstrated failure modes, and how to run it are in
-> [`stage2-playbook.md`](stage2-playbook.md).
+> [`playbook.md`](playbook.md).
 
 **Rank rather than reject when unsure.** Stage 2 is cheap and blind; the
 deep read is expensive and sighted. A row wrongly rejected here is never seen
@@ -76,17 +76,17 @@ always available and always safer than refusing.
 ## One line, one place
 
 Rejections from the *other* discovery method (direct AI search) live in
-[`../_INDEX.md`](../_INDEX.md)'s "lines considered and rejected" section, not
+[`../stage3-ai-deep-read/_INDEX.md`](../stage3-ai-deep-read/_INDEX.md)'s "lines considered and rejected" section, not
 here — they differ in kind (few, narrative, often deferred rather than firmly
-refused). If stage 2 reaches a line that method 1 already judged, **cite the
-`_INDEX.md` entry rather than re-recording it here.**
+refused). If stage 2 reaches a line that stage 3 already judged, **cite the
+`../stage3-ai-deep-read/_INDEX.md` entry rather than re-recording it here.**
 
 ## Progress at a glance
 
 > **Update this block first** when a batch finishes; the detail tables below
 > are the working record, this is the summary. All counts reproduce from the
 > CSVs in `codeql-queries/results/cassandra/` — see
-> [`stage2-playbook.md`](stage2-playbook.md)'s scope table before quoting any
+> [`playbook.md`](playbook.md)'s scope table before quoting any
 > single number elsewhere.
 
 **Stage 1 — the pattern-(a) corpus (fixed, regenerable):**
@@ -128,8 +128,8 @@ The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 2,941 rows.
 
-**Cases produced by method 2 so far:** 7 filed (2 verified, 5 pending) + 4 P1
-candidates awaiting write-up + 1 pattern-(b) find parked in `deferred.md`.
+**Cases produced with a feed-3a origin so far:** 2 of the 7 filed + 4 P1
+candidates awaiting write-up + 1 pattern-(b) find parked in `../stage3-ai-deep-read/deferred.md`.
 
 ## Batch coverage
 
@@ -150,11 +150,11 @@ it to reproduce a batch.
 |---|---|---|---|
 | `concurrent` | 17 | 2026-09-18 | 0 survivors — all thread-pool/permit concurrency checks (Rule 2 fail, same reasoning as `concurrent_compactors`). |
 | `cache` | 15 | 2026-09-18 | 0 survivors — ref-counting, overflow guards, and trivial validation; no capacity-vs-limit divergence found. |
-| `transport` | 89 | 2026-09-18 | 1 survivor (since promoted, see `positives.md`) + rejects logged in `_INDEX.md`. |
-| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up (see `positives.md`). Rejects logged in `_INDEX.md`. |
-| helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `deferred.md` as pattern (b). Rejects in `negatives.md`. |
+| `transport` | 89 | 2026-09-18 | 1 survivor (since promoted, see `positives.md`) + rejects logged in `../stage3-ai-deep-read/_INDEX.md`. |
+| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up (see `positives.md`). Rejects logged in `../stage3-ai-deep-read/_INDEX.md`. |
+| helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `../stage3-ai-deep-read/_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `../stage3-ai-deep-read/deferred.md` as pattern (b). Rejects in `negatives.md`. |
 
-| **P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done.** Deep read against the three rules. 4 candidates (`positives.md`), 22 rejected (`negatives.md`), 3 deferred as pattern (b)/(c) (`deferred.md`), 5 already covered by existing records. Spans ~15 packages and completes none of them — see the note below. |
+| **P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done.** Deep read against the three rules. 4 candidates (`positives.md`), 22 rejected (`negatives.md`), 3 deferred as pattern (b)/(c) (`../stage3-ai-deep-read/deferred.md`), 5 already covered by existing records. Spans ~15 packages and completes none of them — see the note below. |
 
 **Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows. P1 tier: 34 rows
 (deep-read, overlapping the package counts).**
@@ -162,7 +162,7 @@ it to reproduce a batch.
 > **The P1 row is a tier, not a package.** Its 34 rows are scattered across
 > ~15 packages, so no package may be marked done on its account. When a
 > package batch runs later, its P1 rows are already judged — check
-> `positives.md` / `negatives.md` / `deferred.md` before re-reading a row.
+> `positives.md` / `negatives.md` / `../stage3-ai-deep-read/deferred.md` before re-reading a row.
 >
 > **P1 validated the ranking.** It recovered both known filed cases as
 > calibration and produced 4 new candidates plus 1 strong pattern-(b) find
@@ -235,7 +235,7 @@ remaining work and are better attempted once the judging pace is established.
   the new `HelperGuardedIfStatements.csv`; batch names clarified as subtrees,
   and the 114 unread helper rows inside the four done batches recorded.
 - **2026-09-22** — folder restructured into `positives.md` / `negatives.md` /
-  `deferred.md`; the former single `candidates.md` was folded into this
+  `../stage3-ai-deep-read/deferred.md`; the former single `candidates.md` was folded into this
   README (coverage table) and those three files.
 - **2026-09-18** — disk (on-disk bytes) added alongside memory to this
   folder's scope, per Jingsong's call; see

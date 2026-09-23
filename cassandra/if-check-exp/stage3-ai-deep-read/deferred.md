@@ -13,20 +13,20 @@ rules in [`../README.md` §3.2](../README.md#32-enforcement-patterns) stand
 unchanged, and they resume once pattern (a) is finished. Nothing here has
 been judged against them.
 
-Keeping these apart from [`negatives.md`](negatives.md) is the point: when
+Keeping these apart from [`negatives.md`](../stage2-ai-preprocessing/negatives.md) is the point: when
 (b)/(c) resume, this file is the worklist — no re-scan of the corpus is
 needed.
 
 ## 1. Live candidate parked by pattern — *resolved 2026-09-22*
 
 **`DataDirectory_getAvailableSpace` (pattern (c), disk) — no longer parked.**
-On Jingsong's call it was processed with discovery **method 1** (direct AI
+On Jingsong's call it was processed with stage-3 feed **3b** (direct AI
 source reading) rather than waiting for the (b)/(c) resumption, and is now a
 full case file:
 [`../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
 
 This is a **deliberate single-candidate exception** to the pattern-(a)-only
-scope, not a reversal of it: method 1 does not depend on the stage-1 CSV or
+scope, not a reversal of it: feed 3b does not depend on the stage-1 CSV or
 on the unwritten (b)/(c) queries, so one already-identified pattern-(c)
 candidate could be written up without reopening (b)/(c) triage. Everything
 else in this file stays parked.
@@ -41,9 +41,9 @@ rejection under Rule 3; (2) it is invisible in a stage-1 CSV row, which shows
 only the comparison — establishing it requires reading the callers, so
 budget for that in the (c) pass.
 
-## 1b. Candidate found by stage 2, parked by pattern — `hasDiskSpaceForCompactionsAndStreams`
+## 1b. Row surfaced by stage 2, judged and parked by stage 3 — `hasDiskSpaceForCompactionsAndStreams`
 
-Found 2026-09-22 in the first stage-2 batch (the helper rows inside the four
+Row surfaced 2026-09-22 by the first stage-2 batch (the helper rows inside the four
 previously-triaged subtrees). **Passes all three rules; parked because it is
 pattern (b).**
 
@@ -132,7 +132,7 @@ it may be the better constraint name.
 **Raised 2026-09-20; parked 2026-09-22.**
 
 Every batch in [`README.md`](README.md)'s coverage table, and every rejection
-in [`../_INDEX.md`](../_INDEX.md), was judged under the older assumption that
+in [`_INDEX.md`](_INDEX.md), was judged under the older assumption that
 a capacity check is an `if` whose own branches decide allow vs. disallow —
 i.e. pattern (a) only. Patterns (b) and (c) were added to
 [`../README.md` §3.2](../README.md#32-enforcement-patterns) afterwards.

@@ -2,7 +2,7 @@
 
 Structured results for **Target 1** (identify resource constraints) and
 **Target 2** (show how each constraint restricts resource usage) of the
-Throttling project, scoped to **Cassandra-5.0.9**.
+misconfiguration project, scoped to **Cassandra-5.0.9**.
 
 ## 1. Project context (the three targets)
 
@@ -19,6 +19,30 @@ until both halves are recorded.
 
 This folder is a standalone inventory of capacity checks and the decision
 points they feed, at the granularity of individual code locations.
+
+### 1.1 Targets vs. stages — two unrelated numberings
+
+**The three targets above are project scope**, shared by every experiment
+folder in this repo (`if-check-exp`, `entry-restriction-exp`, ...). They say
+*what the project wants to know*.
+
+**The stages (§7.2) belong to `if-check-exp` alone.** They say *how strongly
+a line has been evidenced* — stage 1 structural, stage 2 lexical, stage 3
+semantic. They are a ladder of evidence, not a division of the targets.
+
+The two numberings do not correspond. In particular:
+
+- **Stages 1 and 2 produce no target output at all.** They emit no findings,
+  only a shrunken and ordered worklist. **Only stage 3 produces a case**, and
+  a case completes Target 1 and Target 2 *together* — it names the constraint
+  and shows the enforcing code path in one artifact.
+- **There is no stage matching Target 3.** Bypass analysis is out of scope
+  for this folder (§4). Bypass-relevant observations noticed during stage 3
+  are noted in the case file for later Target-3 use, but are not pursued
+  here, and no stage number implies otherwise.
+
+So: three targets, project-wide, answering *what*; three stages, this folder
+only, answering *how well evidenced*. A case is the point where they meet.
 
 ## 2. Source of truth (version pinning — read this first)
 
@@ -108,7 +132,7 @@ memory-only. A case whose limit-side operand bounds total on-disk bytes
 an on-disk object, qualifies the same way a memory case does — read
 "memory" as "memory or disk" throughout the rules. Lines rejected before
 that date specifically because they were disk-related are worth revisiting;
-they are flagged inline in `_INDEX.md`'s rejected table rather than
+they are flagged inline in `stage3-ai-deep-read/_INDEX.md`'s rejected table rather than
 silently re-triaged.
 
 ### 3.4 Rule 1 — Identify the capacity check and its limit-side operand
@@ -195,15 +219,14 @@ reject." The disallow outcome can permanently reject, defer/block the caller
 until capacity frees up, or only change accounting/caller state while an
 escape hatch elsewhere still lets the allocation through (in
 `native_transport_receive_queue_capacity`'s case, even by default). Tracing
-which of these applies is exactly the first step of
-[§8 Verifying a case](#8-verifying-a-case-triggering-the-disallow-branch) —
-applying that same "trace the real effect, don't assume" discipline at
-candidate-discovery time is what Rule 3 is asking for.
+which of these applies — "trace the real effect, don't assume it rejects" —
+is exactly what Rule 3 is asking for, and the first pitfall in
+[`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md).
 
 Checks that don't pass all three rules (pure validation, logging-only
 branches, null-guards unrelated to capacity, non-diverging outcomes, rate/
 concurrency limits, etc.) are out of scope — note them as "considered,
-rejected" in `_INDEX.md` rather than writing a case file, noting which rule
+rejected" in `stage3-ai-deep-read/_INDEX.md` rather than writing a case file, noting which rule
 they failed, so later passes don't re-discover and re-reject the same line.
 
 ## 4. Scope: what this folder does NOT cover
@@ -213,15 +236,15 @@ they failed, so later passes don't re-discover and re-reject the same line.
   here — this folder is a Target 1 + 2 inventory: what the constraint is,
   what enforces it, and the path to the object it gates. Bypass-relevant
   observations made along the way (escape hatches, default-mode gaps) are
-  noted in the case file's Verification notes for later Target-3 use, not
-  chased down here.
+  noted in the case file's Notes for later Target-3 use, not chased down
+  here.
 - **No cross-referencing other experiments.** This is a standalone inventory;
   it does not check for or note overlap with `entry-restriction-exp` or any
   other folder, even when a line number happens to coincide.
 
 ## 5. Required content per if-check case
 
-Every case file answers exactly these eight questions (see `_TEMPLATE.md`):
+Every case file answers exactly these eight questions (see `stage3-ai-deep-read/_TEMPLATE.md`):
 
 1. **Location** — the three locations from §3.1 (capacity check, decision
    point, allocation site), each as `file:line` pinned to `cassandra-5.0.9`,
@@ -251,9 +274,9 @@ Every case file answers exactly these eight questions (see `_TEMPLATE.md`):
    - **(b) Disallow path effect** — what actually happens when the verdict is
      "disallow" (reject / throw / block-and-wait / defer / a silent bypass
      elsewhere in the call chain) — trace the real effect before assuming it
-     cleanly rejects anything, per
-     [§8](#8-verifying-a-case-triggering-the-disallow-branch) step 1. For
-     patterns (b) and (c), include the verdict's propagation from the
+     cleanly rejects anything (see
+     [`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md)).
+     For patterns (b) and (c), include the verdict's propagation from the
      capacity check to the decision point.
 7. **Object & resource** — what is being created (type), and what resource
    it consumes (heap bytes, off-heap/native bytes, on-disk bytes, a thread,
@@ -275,7 +298,7 @@ grouping unit instead):
 
 | File | Content |
 |------|---------|
-| `[constraint]-[function]-[operand].md` | All eight required fields for one case. Use `_TEMPLATE.md`. |
+| `[constraint]-[function]-[operand].md` | All eight required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE.md`. |
 
 ### 6.1 Naming
 
@@ -305,7 +328,7 @@ grouping unit instead):
   **capacity check** (§3.1; for pattern (a) that is the if-statement),
   no class prefix, verbatim, e.g. `tryAllocate`, `acquireCapacity`,
   `processNewSegment`. The exact `Class.method():line` of all three
-  locations is recorded in the case file's §1 and in `_INDEX.md`.
+  locations is recorded in the case file's §1 and in `stage3-ai-deep-read/_INDEX.md`.
 - `[operand]` — the limit-side operand's name exactly as written at the
   capacity check (§5, question 4), e.g. `limit`, `queueCapacity`,
   `allowance`, `MAX_ALLOCATED_BUFFERS`.
@@ -322,26 +345,32 @@ grouping unit instead):
   **newcomer** gets a numeric postfix `-2` (a third gets `-3`, and so on), e.g.
   `memtable_heap_space-tryAllocate-limit.md` (existing, untouched) /
   `memtable_heap_space-tryAllocate-limit-2.md` (new). The object created is not
-  part of the file name; it's the `Object` column in `_INDEX.md` and §5
+  part of the file name; it's the `Object` column in `stage3-ai-deep-read/_INDEX.md` and §5
   question 7.
-- **Case ID** — the filename stem (without `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `_INDEX.md` has no Case column; its `File` link identifies the case.
+- **Case ID** — the filename stem (without `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `stage3-ai-deep-read/_INDEX.md` has no Case column; its `File` link identifies the case.
 
 ### 6.2 Directory layout
 
 ```
-(repo root)/HANDOFF.md              # start-here brief for a new session: what this experiment is, current state, next steps
+(repo root)/HANDOFF.md       # start-here brief for a new session
 cassandra/if-check-exp/
-├── README.md                # this file
-├── _INDEX.md                # master index of every case (navigation + progress)
-├── _TEMPLATE.md             # template for each new case file
-├── stage2-ai-filtering/     # method 2, stage-2 (AI filtering) verdicts — see §7.2
+├── README.md                # this file: rules, format, the three stages
+├── stage1-codeql-preprocessing/   # structural narrowing — see §7.2
+│   └── README.md            #   pointers to codeql-queries/, output, blind spot
+├── stage2-ai-preprocessing/       # lexical narrowing, rows only — see §7.2
 │   ├── README.md            #   what stage 2 is, how a row is triaged, progress
-│   ├── stage2-playbook.md   #   start here to run a batch: tiers, rules, scopes
-│   ├── positives.md         #   survivors, pending promotion to a case file
-│   ├── negatives.md         #   read and refused, each citing the rule it failed
-│   └── deferred.md          #   not yet judged: parked by the (a)-only scope (§7.5)
-└── <module>/                       # one folder per Cassandra module
-    ├── <constraint>-<function>-<operand>.md
+│   ├── playbook.md          #   start here to run a batch: tiers, rules, scopes
+│   ├── positives.md         #   ranked survivors = stage 3's 3a queue
+│   └── negatives.md         #   refused from the row alone, source unread
+├── stage3-ai-deep-read/           # semantic qualification — the deciding stage
+│   ├── README.md            #   what stage 3 is, its two feeds, where verdicts go
+│   ├── playbook.md          #   how to run a pass: order of checks, pitfalls
+│   ├── _TEMPLATE.md         #   template for a new case file (stage 3's output)
+│   ├── _INDEX.md            #   master index of every case (cases only)
+│   ├── rejected.md          #   read with source open, refused against the rules
+│   └── deferred.md          #   unjudged: parked by the (a)-only scope (§7.5)
+└── <module>/                # one folder per Cassandra module
+    ├── <constraint>-<function>-<operand>.md    # stage 3's positive output
     └── <constraint>-<function>-<operand>.md
 ```
 
@@ -351,99 +380,116 @@ cassandra/if-check-exp/
 
 1. Read [`../../HANDOFF.md`](../../HANDOFF.md) first — it's the start-here
    brief for a new session (what this experiment is, current state, open
-   items) — then the Google Docs (*Meeting Summary*, *Progress Report*) for
-   the current plan, scope, and next step.
-2. Open `_INDEX.md` to see which modules/cases already exist (and which
+   items) — then the Google Docs ([*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit),
+   [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit)) for the current plan, scope, and next step.
+2. Open `stage3-ai-deep-read/_INDEX.md` to see which modules/cases already exist (and which
    lines were considered and rejected) — continue from there, don't duplicate.
+### 7.2 Discover and qualify candidate capacity checks
 
-### 7.2 Discover candidate capacity checks (Target 1)
+Work proceeds in **three stages, numbered by evidence standard** — how
+strongly a line has been evidenced — **not by position in a pipeline**. A
+higher stage is a stronger kind of evidence, not a later step in a chain, and
+**a stage can be entered directly**. See §1.1 for why these numbers have
+nothing to do with the Target numbers.
 
-Two discovery methods are in use. They are complementary, not alternatives —
-both feed the same case files, and both are subject to the same three rules
-(§3.4–§3.6).
+| Stage | Evidence | Reads source? | Decides? | Folder |
+|---|---|---|---|---|
+| **1** | Structural — the shape of the code (CodeQL) | queries the DB | no | [`stage1-codeql-preprocessing/`](stage1-codeql-preprocessing/README.md) |
+| **2** | Lexical — operand, class, method and package *names* | **no** | no | [`stage2-ai-preprocessing/`](stage2-ai-preprocessing/README.md) |
+| **3** | Semantic — the code itself, against the three rules | yes | **yes** | [`stage3-ai-deep-read/`](stage3-ai-deep-read/README.md) |
 
-**Method 1 — direct AI search.** An AI session reads the Cassandra source
-directly, following subsystems and call chains, and identifies real if-check
-cases end to end without any mechanical pre-filter. This is how the folder's
-first cases were found. Its strength is that it follows semantics a
-structural query can't express (it found the `cdc_total_space` ternary that
-the CodeQL pipeline structurally cannot surface). Its weakness is cost and
-coverage: the full source is far more than one session can read, so coverage
-is opportunistic rather than systematic, and it places a heavy burden on the
-reading session. Rejections found this way are recorded in `_INDEX.md`'s
-"lines considered and rejected" section.
+**Stage 3 is the only stage that decides whether something is a real case.**
+Stages 1 and 2 only shrink and order what stage 3 must read; they produce no
+findings of their own.
 
-**Method 2 — CodeQL + AI preprocessing.** A two-stage pipeline that exists to
-relieve method 1's burden by shrinking what has to be read:
+#### Stage 1 — structural preprocessing (CodeQL)
 
-- **Stage 1 — mechanical filtering (CodeQL).** The queries under
-  [`codeql-queries/cassandra/queries/if-check-exp/`](../../codeql-queries/cassandra/queries/if-check-exp/README.md)
-  narrow ~17k `if` statements structurally (no keyword list) down to a
-  candidate set. Results are written to the **gitignored**
-  `codeql-queries/results/cassandra/` and regenerated per machine; nothing
-  about a result set is committed or pinned.
-- **Stage 2 — AI filtering.** An AI session works **only from the stage-1
-  rows themselves** — operand names, enclosing class and method, package,
-  operator class — *without reading the Cassandra source*. It rules out rows
-  that are visibly not capacity checks and ranks the rest by how promising
-  they look, recording the outcome under `stage2-ai-filtering/` (see §6.2).
+Narrows ~17k `if` statements structurally — **no keyword list** — to a
+worklist. Results are **gitignored** under `codeql-queries/results/cassandra/`
+and regenerated per machine; nothing about a result set is committed or
+pinned.
+
+Stage 1 sees structure only, and has a known blind spot: a check written as a
+ternary, assignment, `return` expression or method argument is invisible to
+it at any tier. Details and the query pointers are in
+[`stage1-codeql-preprocessing/README.md`](stage1-codeql-preprocessing/README.md).
+
+#### Stage 2 — lexical preprocessing (rows only)
+
+An AI session works **only from the stage-1 rows** — operand names, enclosing
+class and method, package, operator class — **without reading the Cassandra
+source**. It rules out rows that are visibly not capacity checks and ranks
+the rest by how promising they look.
 
 **Stage 2 is preprocessing, not qualification.** It does **not** apply the
-three rules in §3.4–§3.6. Those decide whether a candidate is a real case,
-and Rule 3 in particular ("does the verdict reach a decision point that
-diverges on object creation?") cannot be answered from a row — it needs the
-branches read. Applying them is the job of the deep-read pass (method 1),
-which stage 2 exists to point at the right rows.
-
-So the division is: stage 1 narrows structurally, stage 2 narrows and
-**orders** by what the row makes visible, and method 1 then does the
-expensive source reading — against the three rules — only on what survives,
-highest priority first.
+three rules in §3.4–§3.6. Rule 3 in particular ("does the verdict reach a
+decision point that diverges on object creation?") cannot be answered from a
+row — it needs the branches read.
 
 **Because stage 2 cannot see the source, it should rank far more than it
-rejects.** A wrong rejection here is permanent and invisible: nothing
-re-reads `negatives.md`. A wrong promotion costs only a little reading later.
-Reject only on grounds the row *fully* determines (see
-`stage2-ai-filtering/README.md`);
-when in doubt, downrank instead of refusing.
+rejects.** A wrong rejection is permanent and invisible: nothing re-reads
+`negatives.md`. A wrong promotion costs only a little reading later. Reject
+only on grounds the row *fully* determines; when in doubt, downrank instead
+of refusing. See
+[`stage2-ai-preprocessing/README.md`](stage2-ai-preprocessing/README.md).
 
-**Where rejections live (one line, one place).** Method 1's rejections go in
-`_INDEX.md`; method 2's go in `stage2-ai-filtering/negatives.md`. They are
-kept apart
-because they differ in kind — method 1's are few, narrative, and often
-deferred-rather-than-refused; method 2's are bulk, per-batch, one line each
-citing the rule failed. A line is recorded in exactly one of the two: if
-stage 2 reaches a line method 1 already judged, cite the `_INDEX.md` entry
-rather than re-recording it.
+#### Stage 3 — AI deep read (semantic qualification)
 
-Then, for either method:
+An AI session reads the source and applies the three rules (§3.4–§3.6): it
+identifies the enforcement pattern (§3.2), locates the decision point and the
+allocation site, and judges whether the verdict reaches a decision point that
+diverges on object creation (Rule 3) — not only whether the comparison's own
+branches diverge, since under patterns (b) and (c) they may not. Prefer the
+local clone over fetching whole files through GitHub (grep/window it — saves
+tokens).
 
-3. Use the CodeQL pipeline under
-   [`codeql-queries/cassandra/queries/if-check-exp/`](../../codeql-queries/cassandra/queries/if-check-exp/README.md)
-   to mechanically narrow the code down to candidate capacity checks, then
-   read the results and judge each one by hand for capacity/memory- or
-   disk-relatedness — deliberately no fixed keyword list (real cases like
-   `memtable_heap_space` don't share predictable vocabulary), so this is a
-   read-and-judge pass over CodeQL's structural narrowing, not a grep.
-   CodeQL only shrinks the search space; it does not decide what qualifies.
-   Prefer the local repo clone over fetching whole files through GitHub when
-   reading a candidate's surrounding code (grep/window it — saves tokens).
-4. For each candidate, identify which enforcement pattern (§3.2) applies and
-   locate the decision point and the allocation site. Judge the candidate by
-   whether the verdict reaches a decision point that diverges on object
-   creation (Rule 3) — not only by whether the comparison's own branches
-   diverge, since under patterns (b) and (c) they may not.
+**Stage 3 has two feeds, and both are required:**
 
-### 7.3 Trace & verify (Target 2)
+| Feed | Points stage 3 at a line via | Coverage | Progress measurable? |
+|---|---|---|---|
+| **3a** | `stage2-ai-preprocessing/positives.md`, highest tier first | bounded, enumerable | **yes** |
+| **3b** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — no denominator |
 
-5. Fill `<module>/[constraint]-[function]-[operand].md` from `_TEMPLATE.md`. If the limit side is
+**3b is not optional.** It is the standing insurance against stage 1's
+structural blind spot — it found the `cdc_total_space` ternary, which stage 1
+cannot surface at any tier. Record the feed (`3a`/`3b`) on every case and
+every verdict; without it, "stage 3 progress" has no coherent answer.
+
+Method, pitfalls and the order to work a row: 
+[`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md).
+
+#### Where verdicts live — filed by the stage that judged
+
+Not by the stage that surfaced the row. A row **stage 2 ranked** and
+**stage 3 then read and refused** is a *stage-3* rejection.
+
+| | Stage 2 verdict | Stage 3 verdict |
+|---|---|---|
+| Evidence | the row alone, source unread | the source, against the three rules |
+| Qualified | *(cannot qualify)* | a case file under `<module>/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
+| Rejected | `stage2-ai-preprocessing/negatives.md` | `stage3-ai-deep-read/rejected.md` |
+| Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/deferred.md` |
+
+**Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding a line "would
+qualify only under (b) or (c)" means tracing where the verdict is read and
+whether the branches diverge, which no row shows. All deferrals are stage-3
+judgments.
+
+A line is recorded in exactly one place. If stage 2 reaches a line stage 3
+already judged, cite the stage-3 entry rather than re-recording it.
+
+### 7.3 Write up the case
+
+5. Fill `<module>/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/_TEMPLATE.md`. If the limit side is
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
-6. Add/refresh the `_INDEX.md` Master Index row (columns: Constraint name, Capacity check,
-   Decision point, Module, Object, Pattern, Status, File); set `Status` (`pending` →
-   `in-progress` → `verified` once checked against the pinned tag **and**
-   verified per [§8](#8-verifying-a-case-triggering-the-disallow-branch)).
+6. **Verify every `file:line` against the local clone before filing** (§2.1).
+   This is a stage-3 exit condition, not a tracked state: a case is not filed
+   until its citations are checked.
+7. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns: Constraint name,
+   Capacity check, Decision point, Module, Object, Pattern, Feed, File), and
+   record the stage-3 feed (`3a`/`3b`) in the case's Notes.
 
 ### 7.4 Drafting convention
 
@@ -471,10 +517,10 @@ finished**. Their rules in §3.2 stand unchanged in the meantime.
   stage 1's pattern-(a) input is now `NarrowedIfStatements.csv` **plus**
   `HelperGuardedIfStatements.csv`. One residual limit remains: the queries
   capture the *form* only, so Rule 3 — do the branches actually diverge on
-  object creation? — can be answered **only by the deep-read pass**: neither
+  object creation? — can be answered **only by stage 3**: neither
   stage 1 nor stage 2 sees the branches.
 - **Rows that would qualify only under (b) or (c) go to
-  `stage2-ai-filtering/deferred.md`, never to `negatives.md`.** They are
+  `stage3-ai-deep-read/deferred.md`, never to `negatives.md`.** They are
   unjudged, not
   refused; keeping them in a separate file means resuming (b)/(c) is a matter
   of reading one file rather than re-scanning the corpus.
@@ -482,70 +528,12 @@ finished**. Their rules in §3.2 stand unchanged in the meantime.
   only; existing case files keep their recorded pattern, including the four
   pattern-(b) cases.
 
-**Verification is also deferred (2026-09-22).** The §8 "trigger the disallow
-branch" step is not being run for now; cases are filed with their citations
-checked against the pinned tag and left at `Status: pending` until
-verification resumes. §8 stands unchanged as the methodology for when it
-does.
+**Behavioral verification is out of scope (2026-09-23).** Running a trigger
+to drive execution into the disallow path is no longer part of this folder's
+workflow, and there is no `Status` field. A case's evidence is its traced
+code path, checked against the pinned tag — that is what Target 2 asks for;
+an executed trigger was always supplementary, never the deliverable.
 
-## 8. Verifying a case (triggering the disallow branch)
+## 8. Related context (for a new session)
 
-Line-number verification (§2.1) confirms the citations are accurate — it
-does **not** confirm the check actually behaves as described. A case only
-earns `Status: verified` in `_INDEX.md` / the case file's Verification table
-after a designed experiment has actually driven execution into the
-**disallow path** and produced observed evidence of it. For patterns (b) and
-(c) the evidence must show the capacity check produced the disallow verdict
-*and* the decision point reacted to it. Follow this before flipping a case to
-`verified`:
-
-1. **Don't assume the disallow path "rejects" anything.** Trace what the
-   decision point's caller actually does with a `false`/blocked result
-   before designing a trigger — some checks throw or reject cleanly, but
-   others only cause a retry, a block/wait, or (via an escape-hatch flag
-   elsewhere in the call chain) get silently overridden and let the
-   allocation through anyway. Design the experiment — and what you look for
-   as "success" — around the check's real effect, not an assumed one.
-2. **Prefer a deterministic single-shot trigger over a sustained-load race.**
-   Where possible, size the limit smaller than what a single request/operation
-   needs, so the very first attempt deterministically hits the disallow
-   path — rather than relying on write/allocation throughput outracing
-   whatever reclaims capacity (flush, cleanup thread, GC), which is racy and
-   harder to reproduce.
-3. **Check whether the limit/pool is global or scoped.** Some limits are
-   per-connection or per-table; others are a single process-wide static
-   instance shared across all callers. For a shared/global limit, an
-   experiment against one table/connection isn't isolated from unrelated
-   background activity — run it on a dedicated single-node instance (or
-   otherwise control for other traffic) rather than a shared/loaded cluster.
-4. **Choose the right level for the trigger:**
-   - **Unit/programmatic level** (preferred first pass when feasible) —
-     construct the relevant class(es) directly in a small program or test
-     (check `test/unit/...` for existing coverage of the class first; reuse
-     or extend it rather than writing a new harness from scratch) and drive
-     it straight to the boundary condition. Fast, deterministic, no cluster
-     needed, and lets you assert/breakpoint at the exact check.
-   - **Live-cluster / end-to-end level** — exercise the check through a real
-     Cassandra node (e.g. via `cqlsh`, `nodetool`, or a client program) with
-     config pushed to the boundary. Needed to confirm the check is actually
-     reachable and behaves the same way in the full system, not just in
-     isolation — do this in addition to, not instead of, a unit-level check
-     where one is practical.
-5. **Capture direct evidence the specific check fired**, not just a
-   symptom that could have other causes (a hang or an error alone isn't
-   proof — several things can hang or error). Depending on what's available
-   for the check in question:
-   - An assertion or breakpoint in a unit test at the exact line.
-   - A JMX metric, counter, or log line that only fires from this check's
-     disallow path (confirm this by reading the source around the check —
-     don't assume one exists).
-   - A thread/stack dump showing execution parked or returned from the exact
-     method/line of the decision point.
-6. **Record the experiment in the case file** (config used, the test/program
-   used to trigger it, and the evidence observed) before setting
-   `Status: verified` — the goal is that a later session can re-run the same
-   trigger and get the same result, not just trust the checkmark.
-
-## 9. Related context (for a new session)
-
-- **Google Docs** — *Meeting Summary* and *Progress Report* hold the current plan and next steps; read them first (the Claude project is configured to surface them).
+- **Google Docs** — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit) (per-meeting decisions and next steps) and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit) (running log of entry points, cases and findings). Both live in Jingsong's Google Drive; a session with the Google Drive connector enabled can read them directly.

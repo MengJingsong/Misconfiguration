@@ -1,12 +1,12 @@
 # [constraint] — [object]  <!-- file name: [constraint]-[function]-[operand].md -->
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [_INDEX.md](_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
 **Formatting note:** Link every code reference (`` `File.java:NN` `` or `` `Class.method():NN` ``) to the pinned source on GitHub. Use the format: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) `` (ranges use `#LNN-LMM`). Place the link *outside* the backticks so code renders as clickable text.
 
-**Relative links in this template** (`../README.md`, `../_INDEX.md`) are written for where a
+**Relative links in this template** (`../README.md`, `_INDEX.md`) are written for where a
 *copy* of it lives — inside a `<module>/` folder — not for the template's own location at the
 experiment root. They will look broken here and resolve correctly in a real case file.
 
@@ -120,20 +120,13 @@ or write via this check, and through what mechanism? Goes beyond §7's
 per-object sizing — this is about the limit's effect on the ceiling, not
 what one allowed object costs.
 
-## 9. Verification
-
-See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
-before setting `Status: verified` — line-number checking alone is not enough;
-a designed experiment must have actually driven execution into the disallow
-branch with recorded evidence.
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | pending / in-progress / verified — note behavioral verification is **deferred by decision** (README §7.5); new cases stay `pending` with the trigger designed but not run |
-| **Verified By / Date** | Who verified and when |
-| **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) |
-| **Trigger method** | Unit test / program, or live-cluster config+steps, used to drive execution into the disallow branch |
-| **Evidence** | What was observed that confirms the disallow branch specifically fired (assertion/breakpoint, metric, log line, thread dump) — not just an end symptom like a hang or error |
+| **Stage-3 feed** | `3a` (from stage 1/2 — cite the `positives.md` row and its tier) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
+| **Filed by / Date** | Who wrote this case up and when |
+| **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) — a case is not filed until this is done |
 | **Escape hatch / Target-3 note** | any bypass of the disallow branch noticed (flag for Target 3, do not chase here), or "none found yet" |
 | **Notes** | Any other caveats or outstanding questions |
 

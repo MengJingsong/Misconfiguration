@@ -1,6 +1,6 @@
 # native_transport_receive_queue_capacity — message
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -149,22 +149,13 @@ name alone would be misled. **Flagged as noteworthy for Target 3
 Target 1+2 scope, since the "bypass" here is simply the out-of-the-box
 default rather than requiring any special caller state.
 
-## 9. Verification
-
-See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
-before setting `Status: verified` — line-number checking alone is not enough;
-a designed experiment must have actually driven execution into the disallow
-branch with recorded evidence.
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | pending |
-| **Verified By / Date** | — |
-| **Trigger method** | Not yet designed. Two triggers needed given §5/§6b's config-dependent split: (1) `throwOnOverload=true` — construct a `CQLMessageHandler` (check `test/unit/org/apache/cassandra/transport/` for existing handler-level test scaffolding, e.g. anything exercising `CQLMessageHandler` or `Dispatcher` directly, before writing new harness code) with a small `queueCapacity`, feed an oversized request frame, and assert `discardAndThrow()`'s `OverloadedException` fires without a `messageDecoder.decode()` call. (2) `throwOnOverload=false` (default) — same setup, but assert the *opposite*: that `messageDecoder.decode()` **does** fire despite `queueSize + bytes > queueCapacity`, to directly confirm the no-effect finding in §6b rather than just inferring it from source reading. |
-| **Evidence** | — |
-| **Line numbers checked** | 2026-09-18 |
+| **Stage-3 feed** | `3b` — established by deep-reading the source. (Stage 1/2 had surfaced this line as a row, but the case was made from the source, not the row.) |
+| **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | under the default `native_transport_throw_on_overload=false` the message is still decoded despite the over-limit verdict; see §6b. |
-| **Notes** | Behavioral trigger not yet run. Promoted from the candidates list (2026-09-18; see `../stage2-ai-filtering/positives.md`) after confirming the sibling relationship to `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity` by reading `CQLMessageHandler`'s source directly. |
 
 ---
 

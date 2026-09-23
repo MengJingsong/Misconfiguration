@@ -1,12 +1,12 @@
 # Positives — rows stage 2 passes forward, with priority
 
 Rows that stage 2 did **not** rule out, ranked by how promising the row looks.
-This is a **work queue for the deep-read pass**, not a list of qualified
+This is a **work queue for stage 3**, not a list of qualified
 cases: stage 2 works only from the row and never applies the three rules (see
 [`README.md`](README.md)). A row here means "worth reading the source for,
 in roughly this order" — nothing more.
 
-Tiers (defined in [`stage2-playbook.md`](stage2-playbook.md)):
+Tiers (defined in [`playbook.md`](playbook.md)):
 
 | Tier | Meaning |
 |---|---|
@@ -53,7 +53,7 @@ P1 also surfaced five rows that belong to existing records:
 |---|---|
 | `MemtablePool.tryAllocate():156` | The two filed memtable cases (verified). Served as calibration — P1 found them. |
 | `AbstractMessageHandler.acquireCapacity():419` | The two filed `*_receive_queue_capacity` cases. Also calibration. |
-| `HintsBuffer.allocateBytes():190` | Already rejected in `_INDEX.md` (writer-rollover). Cited, not re-judged. |
+| `HintsBuffer.allocateBytes():190` | Already rejected in `../stage3-ai-deep-read/_INDEX.md` (writer-rollover). Cited, not re-judged. |
 | [`CommitLogSegmentManagerCDC.permitSegmentMaybe():200`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200) | **A second check site of the filed `cdc_total_space` case** — `sizeInProgress + getCommitLogSegmentSize() < getCDCTotalSpace()`, the re-permit path, setting the same `CDCState` verdict that `throwIfForbidden()` reads. Per README §6.1 "one case, several check sites", it belongs in that case file's Location section, which does not currently list it. **Open action.** |
 | [`ResourceLimits$Basic.tryAllocate():213`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L213) | `using + amount > limit` — the generic limiter class behind the two net cases' endpoint/global *reserve* sub-checks, which both case files already mention. Not a separate constraint; it is the mechanism. Worth linking from those cases rather than filing anew. |
 

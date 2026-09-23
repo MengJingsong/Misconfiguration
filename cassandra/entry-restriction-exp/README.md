@@ -2,7 +2,7 @@
 
 Structured results for **Target 1** (identify resource constraints) and
 **Target 2** (show how each constraint restricts resource usage) of the
-Throttling project, scoped to **Cassandra-5.0.9**.
+misconfiguration project, scoped to **Cassandra-5.0.9**.
 
 ## Project context (the three targets)
 
@@ -13,6 +13,35 @@ Throttling project, scoped to **Cassandra-5.0.9**.
 This folder captures **Target 1 + Target 2**. Every pair also seeds Target 3
 through its `Bypass Potential` field. The overarching aim of the research is to
 replace *indirect proxy* limits with *direct* resource limits, memory first.
+
+### How this folder finds pairs — and how it differs from `if-check-exp`
+
+**Method: AI deep read, constraint-first.** An AI session reads the Cassandra
+source and works *forward* from a resource constraint: starting at the place
+the constraint is declared or initialised, it traces where that value flows
+and finds the locations where it actually restricts something. Each such
+location becomes a pair. **Every real pair is manually checked** before being
+recorded — the AI trace locates candidates, a human confirms them.
+
+This is the mirror image of the sibling folder. Both serve Target 1 + 2 and
+both read source, but they enter from opposite ends:
+
+| | `entry-restriction-exp` (this folder) | `if-check-exp` |
+|---|---|---|
+| Starts from | the **constraint's declaration** | the **code that enforces a limit** |
+| Traces | forward: declaration → restriction sites | backward: check → the limit's declaration |
+| Unit of record | an `(entry point, restriction location)` pair | an if-check case |
+| Confirmation | manual check of each pair | the three rules (its README §3.4–§3.6) |
+
+Neither is a subset of the other, and **they are deliberately not
+cross-referenced** — a line may legitimately appear in both.
+
+> **`if-check-exp`'s stage numbers do not apply here.** That folder numbers
+> its own working stages (structural → lexical → semantic) to say how
+> strongly a line has been evidenced. This folder has no such ladder; it is
+> deep reading plus manual confirmation throughout. The **targets**, by
+> contrast, are project-wide and shared — see the repo-root
+> [`README.md`](../../README.md) §0.
 
 ## Source of truth (version pinning — read this first)
 
@@ -54,12 +83,18 @@ Each pair is recorded in **two** markdown files:
 - The two files cross-link to each other and to `_INDEX.md`.
 - When two pairs share a code-path prefix, **repeat** the shared steps in each codepath file so every file is self-contained.
 
-### Code path stages (case-specific, not generic)
+### Code-trace steps (case-specific, not generic)
+
+> **"Code-trace steps" here are not `if-check-exp`'s numbered stages.** These are the
+> hops along one constraint's code flow, named per case. They were called
+> "stages" before that word was given a different meaning in the sibling
+> folder (2026-09-23); renamed to keep the two apart.
+
 - Codepath files trace constraint from declaration/init through enforcement to action.
-- **Stages are extracted from the actual code flow** — configuration parameters, hardcoded constants, factory methods, queues, and distributed constraints have different patterns.
+- **Code-trace steps are extracted from the actual code flow** — configuration parameters, hardcoded constants, factory methods, queues, and distributed constraints have different patterns.
   - **Configuration parameter example** (memtable_heap_space): declaration → load → validate → store → read → check → action
   - **Hardcoded/factory example** (memtable_flush_writers queue): factory definition → pool init → submission → queue state → execution → (missing backpressure)
-- Each codepath file defines its own stages based on the specific constraint type; do not force a generic pattern.
+- Each codepath file defines its own code-trace steps based on the specific constraint type; do not force a generic pattern.
 - Each `Location` cell **links** to the pinned source on GitHub — short display text (`File.java:NN`), full path in the href (`…/blob/cassandra-5.0.9/<path>#Lnn`).
 
 ## Directory layout
@@ -81,7 +116,7 @@ cassandra/entry-restriction-exp/
 
 **Orient (before starting):**
 
-0. Read the Google Docs (*Meeting Summary*, *Progress Report*) for the current plan, scope, and next step.
+0. Read the Google Docs ([*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit), [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit)) for the current plan, scope, and next step.
 1. Open `_INDEX.md` to see which entry points/pairs already exist and what's pending — continue from there, don't duplicate.
 
 **Target 1 — discover entry points:**
@@ -93,7 +128,7 @@ cassandra/entry-restriction-exp/
 
 **Target 2 — trace & verify (inseparable from Target 1):**
 
-3. From the entry point, trace the continuous path from declaration/initialization through to enforcement and action on breach. **The specific stages depend on the constraint type:**
+3. From the entry point, trace the continuous path from declaration/initialization through to enforcement and action on breach. **The specific code-trace steps depend on the constraint type:**
    - **Configuration parameters** (like `memtable_heap_space`): declaration → load/parse → validate → store limit → read/getter → transform → check → action
    - **Hardcoded constants or factory defaults** (like `ExecutorPlus.pooled()`): factory definition → pool/object initialization → usage/submission → state evolution → (enforcement or missing enforcement)
    - **Distributed or implicit constraints** (like per-disk pools): initialization → routing → per-pool behavior → cascade effects
@@ -130,5 +165,5 @@ In the summary's Failure Mode Analysis table, the symbol always encodes
 
 ## Related context (for a new session)
 
-- **Google Docs** — *Meeting Summary* and *Progress Report* hold the current plan and next steps; read them first (the Claude project is configured to surface them).
+- **Google Docs** — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit) (per-meeting decisions and next steps) and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit) (running log of entry points, cases and findings). Both live in Jingsong's Google Drive; a session with the Google Drive connector enabled can read them directly.
 - **Sibling work** — `cassandra/oom-exp/` in this repo holds related chaos-testing experiments.

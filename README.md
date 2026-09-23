@@ -1,7 +1,31 @@
 # misconfiguration
 
-Research repo for Cassandra/Hadoop memory-throttling misconfiguration
-experiments (CloudLab-based).
+Research repo for the **misconfiguration** project: Cassandra/Hadoop
+memory-throttling misconfiguration experiments (CloudLab-based).
+
+## 0. Project overview — the three targets
+
+The whole project works toward three targets. They are **project scope,
+shared by every experiment folder** in this repo — not owned by any one of
+them:
+
+| Target | Question |
+|---|---|
+| **Target 1** | Identify all resource constraints (config, hardcoded constants, variable types, ...) that limit memory/CPU usage. |
+| **Target 2** | Show *how* each constraint restricts usage, via the exact code path. |
+| **Target 3** | Investigate bypass methods that could lead to resource exhaustion. |
+
+Each experiment folder covers some subset. `cassandra/if-check-exp/`, the
+currently active one, covers **Target 1 + Target 2 together** — every case
+both names a constraint and shows the code that enforces it — and leaves
+Target 3 out of scope, noting bypass-relevant observations in passing for
+later use.
+
+**Targets are not stages.** An experiment folder may number its own *working
+stages* (`if-check-exp` has three: structural → lexical → semantic). Those
+numbers describe how strongly a finding has been evidenced inside that
+folder; they do not map onto the target numbers above. See
+[`cassandra/if-check-exp/README.md`](cassandra/if-check-exp/README.md) §1.1.
 
 ## 1. Setup
 

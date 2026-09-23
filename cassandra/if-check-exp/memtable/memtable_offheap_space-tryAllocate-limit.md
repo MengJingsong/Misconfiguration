@@ -1,6 +1,6 @@
 # memtable_offheap_space — region
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -150,59 +150,13 @@ boolean — so the *physical* off-heap bytes allocated can diverge from the
 `memtable_offheap_space` as a hard native-memory ceiling would be wrong on
 two independent grounds; both flagged for Target 3, not resolved here.
 
-## 9. Verification
-
-Line numbers checked against the local pinned-tag clone. Per
-[README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch),
-the primary trigger below has been **executed and recorded** (see table below).
-
-- **Unit/programmatic level (primary trigger — executed 2026-09-16):** `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`
-  already exercises this exact if-check both ways. Its `testBookKeeping()`
-  constructs a `NativePool(1, 100, 0.75f, ...)` (off-heap limit = 100 bytes)
-  directly, allocates up to the limit, then allocates past it while a
-  scheduled task calls `markBlocking()` — demonstrating both (a) the thread
-  parking on `SubPool.hasRoom` when the op is not yet blocking, and (b) the
-  `allocated(size)` force-through once `opGroup.isBlocking()` becomes true,
-  pushing `allocated` past `limit` (see 6b above). Run as-is (no new
-  harness needed) via
-  `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest`
-  on the `cassandra-src` clone at
-  `/proj/misconfiguration-PG0/git-repos/cassandra-src` (JDK 11.0.32, Ant
-  1.10.12, already provisioned on this node from the sibling heap case).
-  Result: `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. The
-  single `@Test` passing proves both outcomes of the disallow branch at
-  `MemtablePool.java:156` on the `offHeap` `SubPool`: (1) `verifyUsedReclaiming(80, 0)`
-  after allocating up to the 100-byte limit confirms tracked accounting
-  stops exactly at `limit`, and (2) `verifyUsedReclaiming(110, 110)` after
-  the subsequent 30-byte allocation — taken only once `markBlocking()` sets
-  `opGroup.isBlocking()` — confirms the escape-hatch force-through past
-  `limit` (110 > 100), matching 6b that accounting and physical
-  allocation are decoupled here.
-- **Live-cluster level (secondary, for end-to-end confirmation):** set
-  `memtable_allocation_type: offheap_objects` (not the default — required to
-  reach `NativeAllocator` at all) and `memtable_offheap_space` below
-  `NativeAllocator.MIN_REGION_SIZE` (8 KiB) so the first off-heap allocation
-  deterministically fails `tryAllocate()`; raise `memtable_heap_space` so the
-  heap limit doesn't trip first. Expect the write to **hang**, not fail —
-  `MEMORY_POOL` is a single global static singleton
-  (`AbstractAllocatorMemtable.java:59`) shared by all tables, so isolate on a
-  dedicated single-node instance rather than a shared/loaded cluster.
-  Evidence to capture: the JMX timer
-  `org.apache.cassandra.metrics:type=MemtablePool,name=BlockedOnAllocation`
-  (`MemtablePool.java:63`) going non-zero, and/or a thread dump of the write
-  thread parked in `WaitQueue$Signal.awaitThrowUncheckedOnInterrupt()` called
-  from `MemtableAllocator$LifeCycle.allocate()` — not just the hang itself,
-  which could have other causes.
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | verified |
-| **Verified By / Date** | Claude (session) — 2026-09-16; primary trigger run and evidence recorded |
-| **Trigger method** | Existing `NativeAllocatorTest.testBookKeeping()`, run via `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest` against the `cassandra-src` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`) |
-| **Evidence** | `BUILD SUCCESSFUL`, `Tests run: 1, Failures: 0, Errors: 0`. Test's own assertions (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`) directly demonstrate the disallow branch's two outcomes at `MemtablePool.java:156` on the `offHeap` `SubPool` — accounting capped at `limit`, then force-through past it once `markBlocking()` fires. |
-| **Line numbers checked** | not recorded (behavioral trigger run 2026-09-16) |
+| **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
+| **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | `markBlocking()`/`isBlocking()` forces the allocation through past `limit` instead of parking; see §6b. |
-| **Notes** | Sibling to [`memtable_heap_space-tryAllocate-limit`](../memtable/memtable_heap_space-tryAllocate-limit.md); same if-check code, different `SubPool` instance/limit/allocator. 6b note on decoupled accounting vs. physical allocation (the `isBlocking()` force-through past `limit`) is a candidate for later Target-3 bypass analysis, not addressed here. Secondary live-cluster trigger not run — same rationale as the heap case: the unit test already gives direct evidence for both branches. |
 
 ---
 

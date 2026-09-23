@@ -7,7 +7,7 @@ against the three rules in
 Survivors of triage get written up as full case files there; this folder only produces the
 CSV working lists that feed that process. Results are gitignored and stay
 under `codeql-queries/results/cassandra/`; the AI-filtering verdicts made
-from them live in that folder's `stage2-ai-filtering/`.
+from them live in that folder's `stage2-ai-preprocessing/`.
 
 CodeQL narrows the search space mechanically (structure of the code); it cannot judge whether
 a check is actually a capacity check — that's a semantic call made by reading each row, not a
@@ -69,9 +69,10 @@ specifically to serve triage:
    rank the rest into priority tiers by operand and context names. Not expressible as a
    CodeQL predicate, since there's no reliable fixed vocabulary to grep for — and equally
    not a qualification: stage 2 does **not** apply the three rules, which need the code.
-   Verdicts go to `../../../../cassandra/if-check-exp/stage2-ai-filtering/`
-   (`positives.md` with a tier / `negatives.md` / `deferred.md`), and the deep-read pass
-   then applies the rules in tier order.
+   Verdicts go to `../../../../cassandra/if-check-exp/stage2-ai-preprocessing/`
+   (`positives.md` with a tier / `negatives.md`), and **stage 3** then applies the rules
+   in tier order, filing its own verdicts under
+   `../../../../cassandra/if-check-exp/stage3-ai-deep-read/`.
 
 ## Pattern-(a) completeness: `HelperGuardedIfStatements.ql`
 

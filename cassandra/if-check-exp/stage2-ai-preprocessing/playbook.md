@@ -49,7 +49,7 @@ one way an (a) check can hide from it: the comparison living inside a boolean
 helper, leaving the `if` with no comparison of its own.
 
 Patterns (b) and (c) are **not** covered and are parked (see
-[`deferred.md`](deferred.md)). Do not go looking for them in these files.
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md)). Do not go looking for them in these files.
 
 ### Sanity check: the known cases are all in there
 
@@ -64,7 +64,7 @@ Every already-filed case whose check sits in an `if` appears in
 | the compaction disk case | `CompactionAwareWriter.java:282` — `availableSpace < estimatedWriteSize` |
 
 (`cdc_total_space` is absent by design — it is a ternary, hence pattern (b),
-and was found by method 1.)
+and was found by stage-3 feed 3b.)
 
 This matters for calibration: **these four rows are what a true positive
 looks like in the CSV.** Note how little the row itself tells you — two of
@@ -79,7 +79,7 @@ never decides it.
 
 Stage 2 reads **only the rows**, never the Cassandra source. Its job is to
 rule out what a row visibly cannot be, and to **order** the rest so the
-expensive deep-read pass starts with the most promising rows.
+expensive stage 3 starts with the most promising rows.
 
 It does **not** apply the three rules — those qualify a real case and need
 the code (Rule 3 asks whether the branches diverge on object creation, which
@@ -162,7 +162,7 @@ Validation scope is the one that justifies the filter (4/4 known cases);
 work-ahead scope is the one that sizes the remaining job. The tier table
 above is work-ahead scope. All counts reproduce from the CSVs.
 
-**P1 is done** (run 2026-09-22): 34 rows deep-read — 4 candidates, 22
+**P1 is done** (run 2026-09-22): 34 rows read in stage 3 — 4 candidates, 22
 rejected, 3 deferred, 5 already covered. It contained two known cases as free
 calibration, and validated the ranking at roughly a 1-in-3 hit rate on rows
 not already accounted for. **Next is P2** (371 rows incl. the 34 done), after
@@ -244,7 +244,7 @@ Joining the limit operand against the 414 `Config.java` field names and 328
 corpus-wide, and **none of the four known cases**. Operand names at the check
 site (`limit`, `queueCapacity`, `MAX_ALLOCATED_BUFFERS`) are not config
 names — the config name is reached by *tracing* the limit back to its
-declaration, which is deep-read work (README §5, question 4). Recorded so it
+declaration, which is stage-3 work (README §5, question 4). Recorded so it
 is not attempted again.
 
 ### Tricks that save real time
@@ -268,10 +268,10 @@ source reading, which is the next pass's job.
 
 1. Row-level rejects → [`negatives.md`](negatives.md), citing the ground.
 2. Everything else → [`positives.md`](positives.md) **with a tier**.
-3. Pattern-(b)/(c)-only rows → [`deferred.md`](deferred.md).
+3. Pattern-(b)/(c)-only rows → [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
 4. Batch line added to [`README.md`](README.md)'s coverage table.
 
-The deep-read pass then takes `positives.md` in tier order, applies the three
+Stage 3 then takes `positives.md` in tier order, applies the three
 rules with the source open, and promotes what qualifies into case files.
 
 ### Suggested order
@@ -301,4 +301,4 @@ Batch order for the package-by-package work:
 3. **`db`, `utils`, `index`, `io`** — over half the remaining work.
 
 Because stage 2 does not read source, a session can cover much more than the
-deep-read pass: a whole top-level package at a time is reasonable.
+stage-3 pass: a whole top-level package at a time is reasonable.

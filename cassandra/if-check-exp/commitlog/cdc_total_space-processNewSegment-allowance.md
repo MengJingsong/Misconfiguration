@@ -1,6 +1,6 @@
 # cdc_total_space — allocation
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -210,22 +210,13 @@ practical ceiling is always within one segment size of the configured value,
 never below it. Non-CDC-tracked mutations are entirely unaffected — the
 check only gates `mutation.trackedByCDC()` writes.
 
-## 9. Verification
-
-See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
-before setting `Status: verified` — line-number checking alone is not enough;
-a designed experiment must have actually driven execution into the disallow
-branch with recorded evidence.
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | pending |
-| **Verified By / Date** | — |
-| **Trigger method** | Not yet run. An existing test, `test/unit/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDCTest.java`, already targets this exact check: its `testWithCDCSpaceInMb(size, ...)` helper (around line 428) sets `cdc_total_space` to a small value via `DatabaseDescriptor.setCDCTotalSpaceInMiB(size)`, then `bulkWrite()` (around line 452) writes CDC-tracked mutations in a loop and asserts a `CDCWriteException` is thrown once `cdc_block_writes` is enabled and the space is exhausted (`Assert.fail("Expected CDCWriteException from full CDC but did not receive it.")` if it's *not* thrown). Several `@Test` methods (e.g. around lines 80, 109, 115, 121, 142) already exercise this via `testWithCDCSpaceInMb`. Reuse as-is via `ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDCTest` — check which specific `@Test` method most directly isolates the `cdc_total_space` boundary (vs. the `cdc_block_writes`-toggle tests) before citing one as primary evidence. |
-| **Evidence** | Not yet captured — expected: `BUILD SUCCESSFUL`, the relevant `@Test` passes, confirming a `CDCWriteException` was thrown and caught exactly where `bulkWrite()` expects it once CDC space is exhausted. |
-| **Line numbers checked** | 2026-09-17 |
+| **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
+| **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | `cdc_block_writes = false` makes `permitSegmentMaybe()` always permit CDC writes, bypassing the check (see Notes). |
-| **Notes** | Behavioral trigger not yet run. |
 
 ---
 

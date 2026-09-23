@@ -3,9 +3,9 @@
 Rows that stage 2 ruled out **on grounds the row itself fully determines** —
 no source reading, and **not** the three rules in
 [`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case),
-which belong to the deep-read pass. Each entry cites the row-level ground so
+which belong to stage 3. Each entry cites the row-level ground so
 a later pass doesn't re-derive it. See [`README.md`](README.md) for what
-stage 2 is, and [`stage2-playbook.md`](stage2-playbook.md) for the verified
+stage 2 is, and [`playbook.md`](playbook.md) for the verified
 reject rules.
 
 **Rejection here is permanent in practice** — nothing re-reads this file — so
@@ -15,27 +15,27 @@ instead.
 
 **Refused, not merely unjudged.** A row dropped only because patterns (b)/(c)
 are currently out of scope is *not* a negative — it goes to
-[`deferred.md`](deferred.md).
+[`deferred.md`](../stage3-ai-deep-read/deferred.md).
 
 ## Where existing rejections live
 
 Two things to know before adding here:
 
-1. **Method-1 rejections stay in [`../_INDEX.md`](../_INDEX.md)'s "lines
+1. **Method-1 rejections stay in [`../stage3-ai-deep-read/_INDEX.md`](../stage3-ai-deep-read/_INDEX.md)'s "lines
    considered and rejected" section.** Those come from the direct-AI-search
    method and differ in kind — few, narrative, sometimes deferred rather than
    firmly refused (e.g. `ConnectionLimitHandler`). They are not moved here.
-2. **Stage-2 rejections made before 2026-09-22 are also in `_INDEX.md`**, because
+2. **Stage-2 rejections made before 2026-09-22 are also in `../stage3-ai-deep-read/_INDEX.md`**, because
    this file did not exist yet. They were not migrated: the entries are
    detailed and already cross-referenced from several places, and moving them
    would churn those references for no analytical gain. They cover the
    `concurrent/`, `cache/`, `transport/` and `db/compaction/` batches (see
    `README.md`'s coverage table).
 
-**So: `_INDEX.md` is authoritative for every rejection recorded up to
+**So: `../stage3-ai-deep-read/_INDEX.md` is authoritative for every rejection recorded up to
 2026-09-22; this file is authoritative for stage-2 rejections from that date
 on.** Either way the rule holds — one line is recorded in exactly one place.
-Before adding a row here, check `_INDEX.md` first; if it is already there,
+Before adding a row here, check `../stage3-ai-deep-read/_INDEX.md` first; if it is already there,
 leave it there.
 
 ## Rejected rows (from 2026-09-22)
@@ -73,11 +73,11 @@ with the code open, unlike a stage-2 row-level pass.
 `HelperGuardedIfStatements.csv` restricted to `transport`, `db/compaction`,
 `concurrent`, `cache`: **114 rows from 23 distinct helpers.** Judged per
 helper and applied to all its call sites (see
-[`stage2-playbook.md`](stage2-playbook.md)).
+[`playbook.md`](playbook.md)).
 
 Outcome: **21 helpers rejected (108 rows)**, 1 cited to an existing entry
 (4 rows), 1 promoted to a candidate (2 rows, now in
-[`deferred.md`](deferred.md)).
+[`deferred.md`](../stage3-ai-deep-read/deferred.md)).
 
 | Helper (rows) | Comparison reported | Rule failed | Why |
 |---|---|---|---|
@@ -93,14 +93,14 @@ Outcome: **21 helpers rejected (108 rows)**, 1 cited to an existing entry
 | `SSTableReader.mayHaveTombstones()` (1) | `getMinLocalDeletionTime() != NO_DELETION_TIME` | 1 | Sentinel comparison, as above. |
 | `StorageService.shouldTraceProbablistically()` (2) | `nextDouble() < traceProbability`, `traceProbability != 0` | 1, 2 | Probabilistic trace sampling. The operand is a probability, and nothing about tracing bounds bytes. |
 | `RefCountedMemory.reference()` (2) | `n <= 0` | 1 | Reference counting, not capacity — the established ref-count archetype. |
-| `ClientResourceLimits$Allocator.acquire()` (1) | `0 < updateAndGet()` | 1 | Reference counting on the per-endpoint allocator's cache entry (`refCount.updateAndGet(i -> i < 0 ? i : i + 1)`), **not** the byte limit. The byte-level enforcement in this class is the separate `tryAllocate()` / `ResourceLimits.EndpointAndGlobal` path for `native_transport_max_request_data_in_flight`, which this row does not reach — see the note in `_INDEX.md` against `ConnectionLimitHandler` and the native-transport follow-up in `HANDOFF.md`. |
+| `ClientResourceLimits$Allocator.acquire()` (1) | `0 < updateAndGet()` | 1 | Reference counting on the per-endpoint allocator's cache entry (`refCount.updateAndGet(i -> i < 0 ? i : i + 1)`), **not** the byte limit. The byte-level enforcement in this class is the separate `tryAllocate()` / `ResourceLimits.EndpointAndGlobal` path for `native_transport_max_request_data_in_flight`, which this row does not reach — see the note in `../stage3-ai-deep-read/_INDEX.md` against `ConnectionLimitHandler` and the native-transport follow-up in `HANDOFF.md`. |
 | `AbstractBounds.strictlyWrapsAround()` (1) | `compareTo() <= 0` | 1 | Token-range ordering. |
 | `AbstractStrategyHolder$GroupedSSTableContainer.isEmpty()` (1) | `i < length` | 1 | Loop bound inside an emptiness test. |
 | `CompactionTask.reduceScopeForLimitedSpace()` (1) | `size() > 1` | 1 | "Is there another SSTable left to drop from the compaction?" — scope-reduction bookkeeping. The genuine space comparison this serves is the candidate recorded in `deferred.md`, not this row. |
 
 **Cited, not re-recorded:** `Dispatcher.hasQueueCapacity()` (4 rows,
 `oldestTaskQueueTime() < ... * ...`, `threshold <= 0`) was already rejected —
-see `_INDEX.md`'s rejected table (`Dispatcher.java:345`, time-based queue-age
+see `../stage3-ai-deep-read/_INDEX.md`'s rejected table (`Dispatcher.java:345`, time-based queue-age
 check, fails Rule 2). One line, one place.
 
 ### Row-level grounds available to stage 2
@@ -118,7 +118,7 @@ re-arguing it:
 - **Declaring type marks it mechanical** — `*Spec`, `*Options`, `Config*`
   for startup validation; serializer and comparator types.
 
-### Grounds that need the source (deep-read pass, NOT stage 2)
+### Grounds that need the source (stage 3, NOT stage 2)
 
 Listed so they are not mistaken for stage-2 grounds. These are the recurring
 archetypes, each a failure of one of the three rules, and they can only be

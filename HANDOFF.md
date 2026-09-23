@@ -1,22 +1,29 @@
 # If-Check Exp — Handoff
 
-For a new session (Claude Code, Cowork, or otherwise) picking up
-`if-check-exp` work. Read this first, then
+For a new session picking up `if-check-exp` work. Read this first, then
 [`cassandra/if-check-exp/README.md`](cassandra/if-check-exp/README.md) for
-the full format spec. This file is kept in sync with the Cowork
-"Throttling" project's handoff doc (`claude/if-check-exp-handoff.md`) so a
-local Claude Code session — which can't read that project's knowledge base
-directly — has the same context available on disk.
+the full format spec. This file is self-contained: everything a session
+needs is here or in the repo, with no external document required.
 
-This handoff currently covers `if-check-exp` specifically, since that's
-the repo's active experiment; it lives at the repo root (rather than under
-`cassandra/if-check-exp/`) so a new session finds it immediately. If other
-experiment folders grow their own handoff needs later, split this back out
-per-folder rather than overloading one file.
+This handoff covers `if-check-exp` specifically, since that's the repo's
+active experiment; it lives at the repo root (rather than under
+`cassandra/if-check-exp/`) so a new session finds it immediately. The paused
+sibling experiment has its own brief at
+[`cassandra/entry-restriction-exp/HANDOFF.md`](cassandra/entry-restriction-exp/HANDOFF.md)
+(split out 2026-09-23) — one handoff per experiment folder, rather than
+overloading this one.
+
+**Project context:** the three project-wide targets are in the repo-root
+[`README.md`](README.md) §0. The running plan and findings live in two
+Google Docs — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit)
+(per-meeting decisions and next steps) and
+[*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit)
+(running log of entry points, cases and findings); a session with the Google
+Drive connector enabled can read them directly.
 
 ## What this experiment is
 
-Part of the **Throttling** research project (Target 1: identify resource
+Part of the **misconfiguration** research project (Target 1: identify resource
 constraints that limit memory/CPU usage; Target 2: show how each constraint
 restricts usage via its exact code path; Target 3: bypass analysis — out of
 scope for this folder), scoped to **Apache Cassandra 5.0.9**. `if-check-exp`
@@ -35,7 +42,7 @@ are noted in case files for later Target-3 use, not chased down here.
 
 **`if-check-exp` is its own independent experiment.** It does not share
 infrastructure, cluster state, or config with any other experiment in this
-repo — when setting up verification infrastructure for this folder, assume
+repo — when setting up infrastructure for this folder, assume
 nothing is already provisioned and build/configure it from scratch under
 this folder's own scope.
 
@@ -64,46 +71,46 @@ this folder's own scope.
   (a session only writes local files, and commits or pushes only when
   Jingsong asks — see "Working preferences" below).
 - **Folder:** `cassandra/if-check-exp/`
-  - `README.md` — full format spec: scope, required fields, naming rules,
-    workflow, how to verify/link against the local Cassandra source, **and
-    a "Verifying a case (triggering the disallow branch)" methodology**
-    covering: don't assume the disallow branch cleanly rejects anything
-    (trace its real effect first); prefer a deterministic single-shot
-    trigger over a throughput race; check whether the limit is global or
-    scoped before designing the experiment; prefer a unit/programmatic-
-    level trigger over live-cluster where one is feasible; capture direct
-    evidence (assertion, metric, thread dump), not an ambiguous symptom
-    like a hang.
-  - `_INDEX.md` — master table of all cases, coverage summary, and a
-    "lines considered and rejected" table (check before re-examining a
-    line).
-  - `_TEMPLATE.md` — template for a new case file; its Verification section
-    has `Trigger method` / `Evidence` fields alongside `Status`, and links
-    to the README methodology above.
+  - `README.md` — full format spec: scope, the three rules, required
+    fields, naming rules, workflow, how to verify/link line numbers against
+    the local Cassandra source, and **§1.1 targets vs. stages** (the two
+    numberings are unrelated) and **§7.2 the three stages**.
+  - `stage3-ai-deep-read/_INDEX.md` — master table of all cases and the coverage summary.
+    **Cases only** — the "lines considered and rejected" table moved to
+    `stage3-ai-deep-read/rejected.md` on 2026-09-23.
+
   - `<module>/` — one folder per (loosely, broadly-named) Cassandra module;
     invent a new one freely when a case doesn't fit — no fixed taxonomy.
-  - `stage2-ai-filtering/` — **the AI-filtering-results folder** (stage 2 of
-    the CodeQL + AI preprocessing pipeline; see Open items Priority 1).
-    Stage 1's mechanical output is *not* kept here — it stays gitignored
-    under `codeql-queries/results/cassandra/`; that separation is why the
-    folder is named for stage 2 rather than for the whole method. Layout
-    (paths below are inside this folder):
+  - **`stage1-codeql-preprocessing/`** — stage-1 entry point. Holds no
+    queries and no results, only pointers: the queries live at the repo root
+    under `codeql-queries/`, the CSVs are gitignored. Also records stage 1's
+    output counts and its structural blind spot.
+  - **`stage2-ai-preprocessing/`** — stage-2 verdicts (lexical, rows only).
     - `README.md` — what stage 2 is, how a row is triaged, the
       "Progress at a glance" dashboard, and the batch-coverage table.
-    - `positives.md` — surviving candidates, pending promotion to a full
-      case file under a `<module>/` folder.
-    - `negatives.md` — rows read and refused, each citing the rule it
-      failed.
-    - `deferred.md` — rows left unjudged: those that would qualify only
-      under pattern (b) or (c), parked by the scope decision below. Kept
-      apart from `negatives.md` because they are undecided, not refused.
-    - `stage2-playbook.md` — **start here to run a batch.** Stage 1's
-      results, the priority tiers (**work-ahead scope**: P1 34 / P2 371
-      incl. P1 / P3 746 / P4 1,337 fast-rejected — see that file's scope
-      table before quoting any of them), the verified side-agnostic reject
-      rules, and the tricks and pitfalls from the cases filed so far.
+    - `playbook.md` — **start here to run a batch.** Stage 1's results, the
+      priority tiers (**work-ahead scope**: P1 34 / P2 371 incl. P1 / P3 746
+      / P4 1,337 fast-rejected — see that file's scope table before quoting
+      any of them), the verified side-agnostic reject rules, and the tricks
+      and pitfalls learned so far.
+    - `positives.md` — ranked survivors; this is stage 3's 3a queue.
+    - `negatives.md` — refused from the row alone, source unread.
+  - **`stage3-ai-deep-read/`** — stage-3 verdicts (semantic, source open).
+    This is the deciding stage.
+    - `README.md` — what stage 3 is, its two feeds, and where verdicts go.
+    - `playbook.md` — how to run a pass: the order to check things, and the
+      verified pitfalls.
+    - `_TEMPLATE.md` — template for a new case file (stage 3's output, so
+      the template lives with stage 3). Its §9 Provenance records the feed
+      (`3a`/`3b`) and the date the cited lines were checked.
+    - `rejected.md` — read with the source open, refused against the three
+      rules. Moved here from `stage3-ai-deep-read/_INDEX.md` on 2026-09-23.
+    - `deferred.md` — unjudged: would qualify only under pattern (b) or (c),
+      parked by the scope decision below. Kept apart from `rejected.md`
+      because they are undecided, not refused. Moved here from the stage-2
+      folder, since **stage 2 cannot produce a pattern deferral**.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
-  CodeQL query packs that feed `stage2-ai-filtering/`; the if-check queries
+  CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
   [pipeline README](codeql-queries/cassandra/queries/if-check-exp/README.md)
   are under `codeql-queries/cassandra/queries/if-check-exp/`. Results land in
@@ -112,7 +119,7 @@ this folder's own scope.
 - **Outside this repo (CloudLab shared mount, see root `README.md` §2):**
   `git-repos/cassandra-src`, `tools/codeql/`, `codeql-dbs/`.
 
-## Cassandra source for verification
+## Cassandra source (for stage-3 reading)
 
 - **Local clone:** `/proj/misconfiguration-PG0/git-repos/cassandra-src`, a git
   clone of `apache/cassandra` at tag `cassandra-5.0.9` (separate from this
@@ -125,137 +132,35 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 7 cases: 2 `verified`, 5 `pending`
+## Current state — 7 cases filed
 
-**Verification is deferred by decision (2026-09-22)**, so `pending` here means
-"filed, citations checked, behavioral trigger not run" — not dropped work.
-Each pending case's designed trigger is recorded in its own §9 and in the
-table below.
+All seven are stage-3 complete: judged against the three rules with the
+source open, citations checked against the pinned `cassandra-5.0.9` tag.
+**There is no `Status` field** — behavioral verification was removed from
+this folder's scope on 2026-09-23 (see "Scope decisions"), so a filed case is
+finished work. `Feed` records which stage-3 feed found it (`3a` = via
+stage 1/2, `3b` = direct source reading).
 
-| Case (file under `cassandra/if-check-exp/`) | Pattern | Status | Key finding | Next step |
-|---|---|---|---|---|
-| `memtable/memtable_heap_space-tryAllocate-limit.md` | (b) | verified | Disallow parks the caller; a `markBlocking()` op overshoots the limit (escape hatch). | none |
-| `memtable/memtable_offheap_space-tryAllocate-limit.md` | (b) | verified | Same check on the `offHeap` `SubPool`; same escape hatch. | optional: purpose-built timeout test (see Open items) |
-| `net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | pending | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found yet. | design a unit trigger: `InboundMessageHandler` with tiny `queueCapacity` and exhausted reserves, feed one oversized frame; check `test/unit/.../net/` for scaffolding first |
-| `net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | pending | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. | two triggers: `throwOnOverload=true` (expect `OverloadedException`, no decode) and `false` (expect decode despite over-limit) |
-| `hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | pending | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. | run existing `HintsBufferPoolTest.testBackpressure()` via `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest`; confirm Byteman resolves as a test dependency |
-| `commitlog/cdc_total_space-processNewSegment-allowance.md` | (b) | pending | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. | run `CommitLogSegmentManagerCDCTest` via `ant testsome`; find which `@Test` isolates the `cdc_total_space` boundary vs. the `cdc_block_writes` tests |
-| `compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | pending | Disk guard: refuses a compaction whose estimated output exceeds the target directory's free space (device bytes − `min_free_space_per_drive`, default 50MiB). **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. | verification deferred; when resumed the trigger must force `diskBoundaries == null` (a partitioner with no splitter), else the guard never executes |
+| Case (file under `cassandra/if-check-exp/`) | Pattern | Feed | Key finding |
+|---|---|---|---|
+| `memtable/memtable_heap_space-tryAllocate-limit.md` | (b) | 3b | Disallow parks the caller; a `markBlocking()` op overshoots the limit (escape hatch). |
+| `memtable/memtable_offheap_space-tryAllocate-limit.md` | (b) | 3b | Same check on the `offHeap` `SubPool`; same escape hatch. |
+| `net/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found. |
+| `net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. |
+| `hints/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | 3b | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. |
+| `commitlog/cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. |
+| `compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
 
-Details for the two verified cases follow. The pending cases' details live in
-their case files.
-
-- **`cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`** — on-heap path. If-check:
-  [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156),
-  gating `ByteBuffer.allocate(size)` via `HeapPool.Allocator.allocate()`.
-  Limit traced from `Config.java`'s `memtable_heap_space` through to
-  `SubPool.limit`. **Status: `verified` — the primary trigger has been run
-  and recorded.**
-  - **Primary trigger (executed 2026-09-16):** the new unit test
-    `test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java` (full
-    source in the case file's Verification section) was saved into the
-    shared `cassandra-src` clone at
-    `/proj/misconfiguration-PG0/git-repos/cassandra-src` and run on
-    CloudLab node pc80 via
-    `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest`.
-    JDK 11 (11.0.32) and `ant` (1.10.12) were installed on pc80 for this
-    (previously absent, checked 2026-09-15) — **still not installed on the
-    other cluster nodes**, install per-node if verification work moves
-    there. Result: `BUILD SUCCESSFUL`, `Tests run: 2, Failures: 0, Errors: 0`.
-    Both `@Test` methods passed, proving (1) the disallow branch parks the
-    calling thread on `SubPool.hasRoom` until released, and (2) a
-    `markBlocking()`-marked op instead silently overshoots the limit
-    (escape-hatch behavior — flagged for Target 3, not pursued here). Full
-    evidence recorded in the case file's Verification table and pushed to
-    `origin/main` (commit `e878607`).
-  - **Secondary trigger (optional, not run):** live-cluster confirmation,
-    documented in the case file as this experiment's own independent
-    setup — skipped since the unit test already provides direct evidence
-    for both branches; would only be a reasonable next step if end-to-end
-    (real daemon) confirmation becomes valuable later.
-- **`cassandra/if-check-exp/memtable/memtable_offheap_space-tryAllocate-limit.md`** — off-heap sibling case.
-  Same if-check, `offHeap` `SubPool` instance instead of `onHeap`, reached
-  via `NativePool`/`NativeAllocator` instead of `HeapPool`; limit is
-  `memtable_offheap_space`. Object created is a `NativeAllocator.Region`
-  (native memory via `MemoryUtil.allocate()`), not a `ByteBuffer`.
-  **Status: `verified` — the primary trigger has been run and recorded.**
-  - **Primary trigger (executed 2026-09-16):** the existing unit test
-    `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java`
-    (no new harness needed — `testBookKeeping()` already exercises this exact
-    if-check both ways) was run against the `cassandra-src` clone at
-    `/proj/misconfiguration-PG0/git-repos/cassandra-src` via
-    `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest`
-    on this session's node (JDK 11.0.32, Ant 1.10.12 — already present, no
-    provisioning needed). Result: `BUILD SUCCESSFUL`, `Tests run: 1,
-    Failures: 0, Errors: 0`. The test's own assertions
-    (`verifyUsedReclaiming(80, 0)` then `verifyUsedReclaiming(110, 110)`)
-    directly demonstrate both disallow-branch outcomes at
-    `MemtablePool.java:156` on the `offHeap` `SubPool`: accounting capped at
-    the 100-byte limit, then forced through to 110 once `markBlocking()`
-    fires — the same escape-hatch behavior as the heap case. Full evidence
-    recorded in the case file's Verification table and pushed to
-    `origin/main` (commit `0198e25`).
-    **Caveat vs. the heap case's evidence:** `testBookKeeping()` is a
-    pre-existing test reused as-is, not purpose-built like `HeapPoolTest`.
-    It proves the escape-hatch outcome cleanly (110 > limit 100 is only
-    reachable via the disallow branch), but — unlike `HeapPoolTest`'s
-    explicit timed `Future.get()` — it never isolates a proof that the
-    "normal case" call actually *parked* before being released; it only
-    confirms the correct numeric end-state. Equal outcome, not equal
-    verification rigor. A `HeapPoolTest`-style purpose-built test (two
-    isolated `@Test`s, explicit timeout-based blocking proof) would close
-    this gap if stronger evidence is wanted later — not done, per Jingsong's
-    call to skip it for now.
-  - **Secondary trigger (optional, not run):** live-cluster confirmation,
-    same rationale as the heap case — skipped since the unit test already
-    gives direct evidence for both branches.
-- **Shared discovery (both cases):** the if-check's disallow branch does
-  **not** reject or fail the caller. `MemtableAllocator.SubAllocator.allocate()`
-  (`MemtableAllocator.java:169-197`) either parks the caller on
-  `SubPool.hasRoom` until something releases memory, or — if the caller's
-  `OpOrder.Group` is already marked "blocking" (done for in-flight writes a
-  flush barrier must wait out, `ColumnFamilyStore.java:1238`) — silently
-  forces the allocation through past `limit` instead. This is documented in
-  both case files' §5 and flagged as a Target-3 bypass candidate, not
-  pursued further under Target 1+2.
-
-## Key rules (summary; full text in `cassandra/if-check-exp/README.md`)
-
-- **Three locations per case** (README §3.1): capacity check (usage-vs-limit
-  comparison), decision point (where allow and disallow diverge), allocation
-  site (where the memory- or disk-significant object is created).
-- **Enforcement patterns** (§3.2), recorded per case: **(a)** the check is
-  itself the decision (hints case); **(b)** the check sets a verdict — flag,
-  enum, or return value — read by a separate decision point (memtable ×2,
-  internode, native transport, CDC; CDC sets a per-segment `CDCState` in
-  `processNewSegment():335` and reads it in `throwIfForbidden():214`);
-  **(c)** guard clauses `throw`/`return` before an allocation outside any
-  branch (the disk candidate `getWriteDirectory():282`).
-- **Rules** (§3.4–§3.6): a capacity check against a limit-side operand; the
-  limit bounds total memory or disk bytes of the gated allocation (thread-pool
-  sizes, rate limiters, time checks and writer rollover don't qualify); the
-  verdict must reach a decision point whose outcome differs for object
-  creation.
-- **Scope** (§1, §3.3, §4): memory and disk (disk added 2026-09-18); every
-  case covers Target 1 and Target 2 together; no cross-referencing other
-  experiments; no bypass analysis.
-- **Naming** (§6.1, changed 2026-09-21): `[constraint]-[function]-[operand].md`
-  (follows the data flow: limit source → checking function → operand), anchored
-  on the capacity check. On a name collision the existing file is **not**
-  renamed; only the newcomer gets a `-2` (then `-3`, ...) postfix. The object
-  created lives only in `_INDEX.md`'s Object column and each case's §7.
-- **Discovery** (§7.2): CodeQL only shrinks the search space; qualification
-  is decided by reading each row, with no fixed keyword list.
+Each case's full detail lives in its own file.
 
 ## Open items / next steps
 
 ### ⏵ Resume here (state as of 2026-09-22, end of session)
 
-**Where the pipeline stands.** Method 2 is built and running. Stage 1 is
+**Where the pipeline stands.** Stages 1 and 2 are built and running. Stage 1 is
 complete for pattern (a) — four CodeQL queries, two CSVs. Stage 2 has ranked
 the magnitude corpus into tiers and the **P1 tier has been deep-read**. Seven
-cases are filed (2 `verified`, 5 `pending` — verification is deferred by
-decision, not backlog).
+Seven cases are filed, all stage-3 complete.
 
 | Stage-1 corpus | Rows | magnitude | equality |
 |---|---|---|---|
@@ -263,7 +168,7 @@ decision, not backlog).
 | `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 |
 | **Total** | **5,588** | **3,258** | **2,330** |
 
-| Stage-2 progress | Narrowed | Helper | Status |
+| Stage-2 progress | Narrowed | Helper | Total |
 |---|---|---|---|
 | Processed (4 subtrees + P1 tier, overlapping) | 329 | 114 | done |
 | Remaining — magnitude (the real queue) | 2,454 | 487 | **2,941** |
@@ -273,8 +178,8 @@ decision, not backlog).
 Tiers over the 2,454 remaining narrowed-magnitude rows (*work-ahead scope*):
 **P1 34 ✅ done / P2 371 incl. P1 / P3 746 / P4 1,337 fast-rejected.** The
 canonical, scope-labelled version of every number here lives in
-`stage2-ai-filtering/README.md`'s "Progress at a glance" and
-`stage2-ai-filtering/stage2-playbook.md`'s scope table — update those first.
+`stage2-ai-preprocessing/README.md`'s "Progress at a glance" and
+`stage2-ai-preprocessing/playbook.md`'s scope table — update those first.
 
 **The immediate next work, in order:**
 
@@ -287,13 +192,13 @@ canonical, scope-labelled version of every number here lives in
 
    Yes — and it replaces the fixed capacity-word list the current tiers are
    built on. Full rationale, evidence and the working design are in
-   `stage2-ai-filtering/stage2-playbook.md` ("Lexical judgement") and
+   `stage2-ai-preprocessing/playbook.md` ("Lexical judgement") and
    summarised below. **Do this before P2**, because P2's membership is defined by the
    keyword list this pass supersedes; re-ranking first means P2 is read in a
    trustworthy order rather than re-read later.
 2. **Write up the 4 P1 candidates as case files.** They are found, judged
    against the three rules, and recorded in
-   `stage2-ai-filtering/positives.md`, but none exists as a case file yet.
+   `stage2-ai-preprocessing/positives.md`, but none exists as a case file yet.
    Independent of step 1, so it can be done in either order. Start with `BufferPool_memoryUsageThreshold` (strongest);
    its main open task is tracing `memoryUsageThreshold` to its config source
    for the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest —
@@ -357,34 +262,49 @@ Both feed the same case files and answer to the same three rules
 (README §3.4–§3.6); they are complementary, not alternatives. Full write-up
 in `cassandra/if-check-exp/README.md` §7.2.
 
-1. **Direct AI search.** An AI session reads the Cassandra source directly,
-   following subsystems and call chains, and identifies real if-check cases
-   end to end with no mechanical pre-filter. This is how last week's cases
-   were found. *Strength:* follows semantics a structural query cannot
-   express — it found the `cdc_total_space` ternary that the CodeQL pipeline
-   structurally cannot surface. *Weakness:* the source is far larger than one
-   session can read, so coverage is opportunistic rather than systematic, and
-   it puts a heavy burden on the reading session. That burden is the reason
-   for method 2.
-2. **CodeQL + AI preprocessing.** Stage 1 (CodeQL) narrows ~17k `if`
-   statements structurally; stage 2 (AI) then works **from the rows alone**,
-   without opening the source — ruling out what a row visibly cannot be and
-   **ranking** the rest into priority tiers. Neither stage applies the three
-   rules: those qualify a real case and need the code, so they belong to
-   method 1's deep read, which takes `positives.md` in tier order. The point
-   of method 2 is to cheaply *narrow and order* the corpus, so method 1's
-   expensive per-case reading is spent on the most promising rows first.
+Work is organised as **three stages, numbered by evidence standard** — how
+strongly a line has been evidenced — not by position in a pipeline. A stage
+can be entered directly. (These numbers have nothing to do with the three
+Target numbers; see `cassandra/if-check-exp/README.md` §1.1.)
 
-**Rejections stay separated by method, in `_INDEX.md` and
-`stage2-ai-filtering/negatives.md` respectively** (decided 2026-09-22). They
-differ in
-kind: method 1's are few, narrative, and often deferred-rather-than-refused
-(e.g. `ConnectionLimitHandler`); method 2's are bulk, per-batch, one line
-each citing the rule failed. Keeping `_INDEX.md` for method 1 also stops it
-absorbing thousands of triage rows. **One line is recorded in exactly one of
-the two** — if stage 2 reaches a line method 1 already judged, cite the
-`_INDEX.md` entry instead of re-recording it (`db/compaction/` rows were
-triaged both ways and would otherwise duplicate).
+| Stage | Evidence | Reads source? | Decides? | Folder |
+|---|---|---|---|---|
+| **1** | structural — the shape of the code (CodeQL) | queries the DB | no | `stage1-codeql-preprocessing/` |
+| **2** | lexical — operand, class, method and package *names* | **no** | no | `stage2-ai-preprocessing/` |
+| **3** | semantic — the code itself, against the three rules | yes | **yes** | `stage3-ai-deep-read/` |
+
+**Stage 3 is the only stage that decides.** Stages 1 and 2 produce no
+findings — they shrink and order what stage 3 must read.
+
+**Stage 3 has two feeds, and both are required:**
+
+- **3a — from stage 1/2.** Takes `positives.md` in tier order. Bounded and
+  enumerable, so progress is measurable.
+- **3b — from raw source.** The session reads subsystems and call chains
+  directly. Unbounded, so there is no denominator and no percentage to
+  report. **Not optional:** it is the standing insurance against stage 1's
+  structural blind spot — it found the `cdc_total_space` ternary, which
+  stage 1 cannot surface at any tier because it is not an `if` condition.
+
+Record the feed (`3a`/`3b`) on every case and verdict.
+
+**Verdicts are filed by the stage that judged them, not the stage that
+surfaced the row** (revised 2026-09-23). A row stage 2 ranked and stage 3
+then read and refused is a *stage-3* rejection.
+
+| | Stage 2 verdict | Stage 3 verdict |
+|---|---|---|
+| Rejected | `stage2-ai-preprocessing/negatives.md` | `stage3-ai-deep-read/rejected.md` |
+| Deferred | *(cannot defer)* | `stage3-ai-deep-read/deferred.md` |
+| Qualified | *(cannot qualify)* | a case file under `<module>/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
+
+**Stage 2 cannot produce a pattern-(b)/(c) deferral** — deciding that needs
+the branches read, which no row shows. All deferrals are stage-3 judgments,
+which is why `deferred.md` lives in the stage-3 folder.
+
+One line is recorded in exactly one place — if stage 2 reaches a line stage 3
+already judged, cite the stage-3 entry instead of re-recording it
+(`db/compaction/` rows were triaged both ways and would otherwise duplicate).
 
 **Priority 1 — CodeQL + AI preprocessing (2026-09-22).** Candidate discovery
 is an explicit two-stage pipeline, and running it takes precedence over the
@@ -402,7 +322,7 @@ remaining items below.
    rows alone — operand names, enclosing class/method, package, operator
    class — **without reading the Cassandra source**. Rule out rows the row
    itself shows are not capacity checks, rank the rest into priority tiers,
-   and record everything under `cassandra/if-check-exp/stage2-ai-filtering/`
+   and record everything under `cassandra/if-check-exp/stage2-ai-preprocessing/`
    — that
    folder *is* the AI-filtering-results store. Ranked survivors go to
    `positives.md` (with a tier), row-level rejects to `negatives.md`,
@@ -411,19 +331,19 @@ remaining items below.
    **Stage 2 does *not* apply the three rules** (README §3.4–§3.6). Those
    qualify a real case and need the code — Rule 3 asks whether the branches
    diverge on object creation, which no row can answer. They belong to the
-   deep-read pass (method 1), which takes `positives.md` in tier order and
+   stage-3 pass, which takes `positives.md` in tier order and
    promotes what qualifies into case files.
 
    **Because stage 2 is blind, it should rank far more than it rejects.** A
    wrong rejection is permanent and invisible; a wrong promotion costs a
    little reading. Verified tiers and reject rules are in
-   `stage2-ai-filtering/stage2-playbook.md`.
+   `stage2-ai-preprocessing/playbook.md`.
 
 ### P1 tier — run 2026-09-22, done
 
 All 34 P1 rows deep-read against the three rules. Outcome: **4 new
 candidates, 22 rejected, 3 deferred as pattern (b)/(c), 5 already covered.**
-Details in `stage2-ai-filtering/positives.md`, `negatives.md`, `deferred.md`.
+Details in `stage2-ai-preprocessing/positives.md`, `negatives.md`, `deferred.md`.
 
 **The ranking validated.** P1 recovered both known filed cases as calibration
 and yielded 4 new candidates plus 1 strong pattern-(b) find — about a
@@ -470,10 +390,9 @@ the folder's scope; (b) and (c) remain in scope and their rules in README
 
 What follows from this:
 
-- **Already-filed cases are unaffected.** Four of the six existing cases are
-  pattern (b), two of them already `verified`. This decision governs *new
-  candidate triage* only — verifying the filed pending cases (item 1 below)
-  continues regardless of their pattern.
+- **Already-filed cases are unaffected.** Four of the seven existing cases
+  are pattern (b). This decision governs *new candidate triage* only;
+  existing case files keep their recorded pattern.
 - **(b)/(c)-only rows go to `deferred.md`, not `negatives.md`.** A row
   dropped only because "the `if`'s own branches don't diverge" is not
   rejected — it is simply unjudged under (b)/(c). A separate file (rather
@@ -495,14 +414,15 @@ What follows from this:
   `NarrowedIfStatements.csv` **plus** `HelperGuardedIfStatements.csv`. One
   residual limit stands: the queries capture the *form* only, so Rule 3 (do
   the branches actually diverge on allocation?) can be answered **only by the
-  deep-read pass** — not by stage 1, and not by stage 2 either, since neither
-  sees the branches.
-**Verification is deferred too (2026-09-22).** The README §8 "trigger the
-disallow branch" step is not being run for now — the focus is discovery.
-Cases are filed with their citations checked against the pinned tag and left
-at `Status: pending`; §8 stands unchanged as the methodology for when
-verification resumes. This supersedes item 1 below as the top call on time,
-though the four pending cases' designed triggers remain recorded and ready.
+  stage 3** — not by stage 1, and not by stage 2 either, since neither sees
+  the branches.
+**Behavioral verification is out of scope (2026-09-23).** Driving execution
+into the disallow branch is no longer part of this folder's workflow, the
+README's verification section is gone, and there is no `Status` field. A
+case's evidence is its traced code path, checked against the pinned tag —
+that is what Target 2 asks for; an executed trigger was always supplementary,
+never the deliverable. Earlier trigger designs and results are recoverable
+from git history (`git show e7f9963`).
 
 - **Deferred with (b)/(c):** the disk candidate `getWriteDirectory():282`
   (pattern (c) — previously item 2 below), the three planned structural
@@ -511,21 +431,21 @@ though the four pending cases' designed triggers remain recorded and ready.
   rejections under (b)/(c). All three are listed under "Deferred until
   pattern (a) is finished" below.
 
-### `stage2-ai-filtering/` layout (applied 2026-09-22)
+### `stage2-ai-preprocessing/` layout (applied 2026-09-22)
 
-`candidates.md` was folded into `stage2-ai-filtering/README.md` (which keeps the
+`candidates.md` was folded into `stage2-ai-preprocessing/README.md` (which keeps the
 batch-coverage table and the judging procedure) and the rest split into
 `positives.md`, `negatives.md` and `deferred.md`, so each file has one job.
-References in `_INDEX.md`, the codeql pipeline README and the
+References in `stage3-ai-deep-read/_INDEX.md`, the codeql pipeline README and the
 `native_transport` case file were updated to match.
 
-`_INDEX.md` keeps its own rejection section for method-1 findings (see "Two
+`stage3-ai-deep-read/_INDEX.md` keeps its own rejection section for method-1 findings (see "Two
 discovery methods" above) — the two sets are not merged. **Stage-2
-rejections made before 2026-09-22 also remain in `_INDEX.md`**, since this
+rejections made before 2026-09-22 also remain in `stage3-ai-deep-read/_INDEX.md`**, since this
 file did not exist when they were recorded and migrating them would churn
-several cross-references for no analytical gain. So: `_INDEX.md` is
+several cross-references for no analytical gain. So: `stage3-ai-deep-read/_INDEX.md` is
 authoritative for every rejection up to 2026-09-22, `negatives.md` for
-stage-2 rejections after it. Check `_INDEX.md` before adding a row.
+stage-2 rejections after it. Check `stage3-ai-deep-read/_INDEX.md` before adding a row.
 
 Remaining items, in the order they were previously prioritized:
 
@@ -544,11 +464,11 @@ Remaining items, in the order they were previously prioritized:
      the gitignored `codeql-queries/results/cassandra/`. There is
      deliberately no fixed keyword list. Stage 2 ranks these rows from the
      rows themselves; whether one *qualifies* is decided later, by reading
-     the source in the deep-read pass.
+     the source in stage 3.
    - *Progress:* 329 of 4,489 `NarrowedIfStatements` rows triaged
      (`concurrent`, `cache`, `transport`, `db/compaction` — each a subtree).
      Refreshed counts, including the second input file, are in
-     `stage2-ai-filtering/README.md`. **Remaining: 5,145 rows (4,160
+     `stage2-ai-preprocessing/README.md`. **Remaining: 5,145 rows (4,160
      narrowed + 985
      helper), of which 2,941 are magnitude-class** — the realistic first
      pass, equality being a lower-priority sweep. Largest: `db` (529
@@ -560,7 +480,7 @@ Remaining items, in the order they were previously prioritized:
      1 cited to an existing entry, **1 candidate found** —
      `Directories.hasDiskSpaceForCompactionsAndStreams():551`, a per-filestore
      disk check gating whether a compaction starts at all. It is pattern (b),
-     so it is parked in `stage2-ai-filtering/deferred.md` rather than
+     so it is parked in `stage3-ai-deep-read/deferred.md` rather than
      written up.
    - *Known gap (deferred, not blocking):* the pipeline only sees comparisons
      inside `if` conditions, so it cannot find pattern-(b)/(c) checks written
@@ -572,22 +492,17 @@ Remaining items, in the order they were previously prioritized:
    (`PreV5Handlers.java:197-209`, pre-protocol-V5 connections, uses
    `channelPayloadBytesInFlight`) may be a related but distinct capacity path;
    not yet investigated. `ConnectionLimitHandler` (connection-count caps) is
-   deferred rather than rejected; see `_INDEX.md`.
-4. **Optional rigor gap (off-heap memtable case):** its evidence reuses
-   `NativeAllocatorTest.testBookKeeping()`, which proves the escape-hatch
-   outcome but not, as `HeapPoolTest` does, that the normal call actually
-   parked. A purpose-built test would close this; not prioritized.
-
+   deferred rather than rejected; see `stage3-ai-deep-read/_INDEX.md`.
 ### Deferred until pattern (a) is finished
 
 Parked by the 2026-09-22 scope decision above; all still in scope, none
 abandoned. **The worklist itself lives in
-[`cassandra/if-check-exp/stage2-ai-filtering/deferred.md`](cassandra/if-check-exp/stage2-ai-filtering/deferred.md)**
+[`cassandra/if-check-exp/stage3-ai-deep-read/deferred.md`](cassandra/if-check-exp/stage3-ai-deep-read/deferred.md)**
 — full detail there; this is the summary.
 
 - ~~**The disk candidate** `getWriteDirectory():282`~~ — **done 2026-09-22**,
-  processed with method 1 as a deliberate single-candidate exception to the
-  pattern-(a) scope (method 1 needs neither the stage-1 CSV nor the unwritten
+  processed via stage-3 feed 3b as a deliberate single-candidate exception to the
+  pattern-(a) scope (feed 3b needs neither the stage-1 CSV nor the unwritten
   (b)/(c) queries). Filed as
   [`cassandra/if-check-exp/compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
   **Headline finding: the guard does *not* dominate the allocation.** Its only
@@ -597,7 +512,7 @@ abandoned. **The worklist itself lives in
   than the memtable `markBlocking()` or native-transport
   `throw_on_overload=false` hatches, since the check is never executed rather
   than overridden. Flagged for Target 3. Two lessons carried into
-  `stage2-ai-filtering/deferred.md` for the eventual (c) pass: non-domination
+  `stage3-ai-deep-read/deferred.md` for the eventual (c) pass: non-domination
   is a
   finding to record rather than grounds for rejection, and it cannot be seen
   in a CSV row — it requires reading the callers.
@@ -613,6 +528,6 @@ abandoned. **The worklist itself lives in
 Already explored, no case retained: the whole `db/compaction/` subpackage
 (the `concurrent_compactors` check fails Rule 2; the rest is selection logic,
 writer rollover, or config validation), `concurrent/` executors (thread-pool
-concurrency), and `cache/`. All are logged in `cassandra/if-check-exp/_INDEX.md`'s
+concurrency), and `cache/`. All are logged in `cassandra/if-check-exp/stage3-ai-deep-read/_INDEX.md`'s
 rejected table so they aren't re-scanned. The filter rules themselves are in
 `cassandra/if-check-exp/README.md` §3.4–§3.6.

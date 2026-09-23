@@ -1,6 +1,6 @@
 # MAX_HINT_BUFFERS — hintsbuffer
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -126,7 +126,7 @@ This is a **block-and-wait**, not a reject or drop — the write is never discar
 1. [`HintsBufferPool.switchCurrentBuffer():118`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L118) — the calling thread (the hint-writing thread, holding `HintsBufferPool`'s monitor via `synchronized`) parks on `reserveBuffers.take()`, blocking until another thread calls `offer()`.
 2. [`HintsBufferPool.offer():86-90`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L86-L90) — a *different* code path (the flush machinery, after a buffer has been written to disk and recycled) calls `offer(buffer)`, which pushes a reused `HintsBuffer` onto `reserveBuffers`, unblocking the waiting `take()`.
 3. Back in `switchCurrentBuffer():125` — since `buffer` is now non-null (the recycled one), `createBuffer()` is **not** called: no new allocation happens; the existing buffer is reused as `currentBuffer` instead.
-4. No escape hatch was found in this path — unlike the memtable cases' `markBlocking()`, there is no alternate route that lets a caller bypass this wait and force a new buffer allocation past the cap. (Not exhaustively verified via runtime tracing yet — see Verification below.)
+4. No escape hatch was found in this path — unlike the memtable cases' `markBlocking()`, there is no alternate route that lets a caller bypass this wait and force a new buffer allocation past the cap. (Established by reading the call paths, not by runtime tracing.)
 
 ## 7. Object & resource
 
@@ -151,26 +151,17 @@ maximum off-heap memory this pool can hold is bounded by
 ceiling linearly; lowering it tightens the ceiling but increases how often
 writer threads block waiting for a buffer to be flushed and recycled.
 
-## 9. Verification
-
-See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
-before setting `Status: verified` — line-number checking alone is not enough;
-a designed experiment must have actually driven execution into the disallow
-branch with recorded evidence.
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | pending |
-| **Verified By / Date** | — |
-| **Trigger method** | Not yet run. An existing test, `test/unit/org/apache/cassandra/hints/HintsBufferPoolTest.java`'s `testBackpressure()`, already targets this exact line: it sets `bufferSize` small, drives 512 hint writes from a background thread, and uses a byteman rule (`@BMRule`, `targetMethod="switchCurrentBuffer"`, `targetLocation="AT INVOKE java.util.concurrent.BlockingQueue.take"`) to flip `blockedOnBackpressure = true` the instant the thread reaches the `reserveBuffers.take()` call inside the disallow branch — i.e. it already proves the disallow branch fires. Reuse as-is via `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferPoolTest` (note: needs Byteman on the classpath, which `ant testsome` should already resolve as a test dependency — confirm before running). |
-| **Evidence** | Not yet captured — expected: `BUILD SUCCESSFUL`, `blockedOnBackpressure` assertion passes, confirming the calling thread actually reached the `take()` call inside the `if` block at line 113. |
-| **Line numbers checked** | not recorded |
+| **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
+| **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | none found yet (see Notes). |
-| **Notes** | No escape hatch identified yet in this code path (unlike the memtable cases' `markBlocking()`) — flagged as an open question for Target 3, not chased further here. `allocatedBuffers` counts cumulative allocations, not live buffers, which is a minor discrepancy from a naive reading of "current buffer count" worth noting for anyone extending this case. |
 
 ---
 
 ## 10. Notes
 
 - `MAX_ALLOCATED_BUFFERS` is set via a JVM system property (`-D` flag), not `cassandra.yaml` — different configuration mechanism from the memtable/net cases' YAML-backed limits, but still "Configuration" per the Limit type taxonomy since it's externally settable without a code change.
-- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../HANDOFF.md) before this draft; see `_INDEX.md` for cross-reference.
+- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../HANDOFF.md) before this draft; see `../stage3-ai-deep-read/_INDEX.md` for cross-reference.

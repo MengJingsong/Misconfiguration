@@ -1,6 +1,6 @@
 # internode_application_receive_queue_capacity — message
 
-> **Index:** [../_INDEX.md](../_INDEX.md)
+> **Index:** [../stage3-ai-deep-read/_INDEX.md](../stage3-ai-deep-read/_INDEX.md)
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
@@ -202,22 +202,13 @@ per-connection allowance alone, before any peer touches the shared
 reserves — the config name reads like a flat per-node cap but is actually a
 per-connection-type-per-peer one.
 
-## 9. Verification
-
-See [README.md § Verifying a case](../README.md#8-verifying-a-case-triggering-the-disallow-branch)
-before setting `Status: verified` — line-number checking alone is not enough;
-a designed experiment must have actually driven execution into the disallow
-branch with recorded evidence.
+## 9. Provenance
 
 | Field | Content |
 |--------|---------|
-| **Status** | pending |
-| **Verified By / Date** | — |
-| **Trigger method** | Not yet designed. Candidate approach: unit/programmatic level — construct an `InboundMessageHandler` directly (check `test/unit/org/apache/cassandra/net/` for existing inbound-handler test scaffolding, e.g. `InboundMessageHandlerTests` / `PipelineIntegrationTest`-style harnesses, before writing a new one) with a small `queueCapacity` and both reserve `Limit`s set to 0 (or already exhausted), then feed it a message frame sized to deterministically exceed `queueCapacity` in a single shot — per the README's "prefer a deterministic single-shot trigger" guidance. Evidence to capture: the handler's `throttledCount` incrementing (`AbstractMessageHandler.java:406`) and/or a `Ticket` appearing on `endpointWaitQueue`/`globalWaitQueue`, rather than just an absence of dispatch. |
-| **Evidence** | — |
-| **Line numbers checked** | 2026-09-17 |
+| **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
+| **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | none found yet. |
-| **Notes** | Behavioral trigger not yet run. |
 
 ---
 
