@@ -43,19 +43,15 @@ looks like in the CSV.** Note how little the row itself tells you — two of
 them render the usage side as `... + ...`. The row locates the check; it
 never decides it.
 
-## What stage 2 is
+## The one rule that governs every judgement below
 
-Stage 2 reads **only the rows**, never the Cassandra source. Its job is to
-rule out what a row visibly cannot be, and to **order** the rest so the
-expensive stage 3 starts with the most promising rows.
+**Rank far more than you reject.** A wrong rejection is permanent and
+invisible — nothing re-reads `negatives.md`. A wrong promotion costs a few
+minutes of reading. When unsure, assign a low tier rather than refusing.
 
-It does **not** apply the three rules — those qualify a real case and need
-the code (Rule 3 asks whether the branches diverge on object creation, which
-no row can show). See [`README.md`](README.md).
-
-**Therefore: rank far more than you reject.** A wrong rejection is permanent
-and invisible — nothing re-reads `negatives.md`. A wrong promotion costs a
-few minutes of reading. When unsure, assign a low tier rather than refusing.
+What stage 2 *is* — rows only, never the source, and never the three rules —
+is defined in [`README.md`](README.md)'s "How a row is triaged", which is
+authoritative. This file is technique only.
 
 ## Signals actually available in a row
 
