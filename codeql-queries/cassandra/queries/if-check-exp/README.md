@@ -115,8 +115,13 @@ Steps 1-3 above only keep comparisons that sit inside an `if` condition, and
 them are anchored on an `if` whose branches decide, i.e. pattern (a). None of them can reach
 patterns (b) and (c). Known miss: the `cdc_total_space`
 comparison in `CDCSizeTracker.processNewSegment()` (line 335) is a ternary
-inside a method argument, so it is not in `NarrowedIfStatements.csv`; only
-an unrelated `if` in the same method was.
+inside a method argument, so it is not in `NarrowedIfStatements.csv`. **The
+constraint itself is not missed, though** — line 345 in the same method
+(`!blocking && sizeInProgress.get() > allowance`, the eviction path) and
+`permitSegmentMaybe():200` both compare the same usage against the same limit
+in real `if`s and do appear. The miss is this *enforcement site*, not the
+constraint. (Earlier wording called line 345 "an unrelated `if`"; it is not —
+same usage, same limit, different response. Corrected 2026-09-23.)
 
 Planned structural (still non-keyword) extensions, not yet written:
 

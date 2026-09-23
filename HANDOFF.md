@@ -206,11 +206,26 @@ canonical, scope-labelled version of every number here lives in
    confirm `limit`'s origin before committing to it. `Integer_MAX_VALUE`
    needs a §6.1 naming judgement call, since the constraint is a *type
    bound*.
-3. **Two corrections to existing case files**, both found by the P1 pass and
-   detailed in the "P1 tier" section below: `cdc_total_space` is missing a
-   second check site (`permitSegmentMaybe():200`), and the two net cases
-   should link `ResourceLimits$Basic.tryAllocate():213` as the mechanism
-   behind their reserve sub-checks.
+3. **One correction to existing case files**, found by the P1 pass: the two
+   net cases should link `ResourceLimits$Basic.tryAllocate():213` as the
+   mechanism behind their reserve sub-checks. They currently name
+   `ResourceLimits.Outcome` (the enum) but never cite the comparison itself.
+   *(The other correction — `cdc_total_space` missing the
+   `permitSegmentMaybe():200` second check site — was **already applied**;
+   the case file cites it as "Second check site, same verdict". Verified
+   2026-09-23.)*
+
+   **Also unjudged, found 2026-09-23:**
+   [`CommitLogSegmentManagerCDC.java:345`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L345)
+   — `!blocking && sizeInProgress.get() > allowance`, a **third** site
+   comparing the same usage against the same `cdc_total_space` limit, in a
+   real `if`. It is in `NarrowedIfStatements.csv` and recorded nowhere: not
+   in the case file, `rejected.md` or `deferred.md`. Reading the source, it
+   is the eviction path (over allowance and not blocking → delete the oldest
+   linked CDC segment), so it likely fails Rule 3 — the segment was already
+   set `PERMITTED` at line 340, so nothing is withheld either way — but that
+   needs confirming and recording, either as a non-gating site in the case
+   file or as a rejection.
 4. **Then run the P2 tier (371 rows, or its re-ranked equivalent after step
    1)**, continuing tier-first rather than package-first. P1 gave roughly a
    1-in-3 hit rate on rows not already accounted for, which is why tier order

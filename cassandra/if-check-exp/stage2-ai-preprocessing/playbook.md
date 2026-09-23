@@ -30,8 +30,13 @@ Every already-filed case whose check sits in an `if` appears in
 | both `*_receive_queue_capacity` cases | `AbstractMessageHandler.java:419` — `... + ... <= queueCapacity` |
 | the compaction disk case | `CompactionAwareWriter.java:282` — `availableSpace < estimatedWriteSize` |
 
-(`cdc_total_space` is absent by design — it is a ternary, hence pattern (b),
-and was found by stage-3 feed 3b.)
+(`cdc_total_space`'s **cited** check is absent — `processNewSegment():335` is
+a ternary, so no `if`-anchored query can reach it; it was found by feed 3b.
+But note the constraint is **not** absent from the CSV: `:345`
+(`!blocking && sizeInProgress.get() > allowance`) and
+`permitSegmentMaybe():200` both compare the same usage against the same limit
+in real `if`s and are both present. Corrected 2026-09-23 — the earlier "absent
+by design" wording overstated the gap.)
 
 This matters for calibration: **these four rows are what a true positive
 looks like in the CSV.** Note how little the row itself tells you — two of
