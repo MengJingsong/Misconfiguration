@@ -16,8 +16,9 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 | [`playbook.md`](playbook.md) | **Start here to run a pass.** How a feed is worked, what to check in order, the pitfalls found so far. |
 | [`rejected.md`](rejected.md) | Lines read with the source open and refused, each citing the rule it failed. |
 | [`deferred.md`](deferred.md) | Lines left **unjudged** — they would qualify only under enforcement pattern (b) or (c), parked by the §7.5 scope decision. Not refused. |
-| `cases/*.md` | Cases that **qualified** — the deliverable. Stage 3's positive output is the case file itself, so there is no `positives.md` here. |
+| [`cases/`](cases/) | Cases that **qualified and are written up** — the deliverable. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](_INDEX.md) | Master index of those cases. |
+| [`pending.md`](pending.md) | Qualified against the three rules but **not yet written up**. Findings, not a queue — rows still awaiting a read live in `../stage2-ai-preprocessing/positives.md`. |
 
 ## The two feeds
 
@@ -51,6 +52,7 @@ refused** is a *stage-3* rejection.
 | | Stage 2 verdict | Stage 3 verdict |
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
+| Qualified | *(cannot qualify)* | [`cases/`](cases/), or [`pending.md`](pending.md) until written up |
 | Rejections | `../stage2-ai-preprocessing/negatives.md` | [`rejected.md`](rejected.md) |
 | Deferrals | *(none possible — see below)* | [`deferred.md`](deferred.md) |
 | Form | bulk, per-batch, one line citing row-level ground | few, narrative, often deferred-rather-than-refused |

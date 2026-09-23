@@ -19,68 +19,34 @@ An entry moves to **Promoted** once a case file exists for it.
 
 ## Live candidates
 
-### From the P1 pass, 2026-09-22 — 4 candidates, all pattern (a)
+## Current queue state
 
-Deep-read against the three rules with the source open. Each passes all
-three; none is written up as a case file yet.
+Tier membership is **computed from the stage-1 CSVs**, not enumerated here —
+the filter is in [`playbook.md`](playbook.md) and reproduces exactly. This
+section records only where the queue has got to.
 
-| Candidate | Check | Divergence on object creation |
+| Tier | Rows (work-ahead scope) | State |
 |---|---|---|
-| **`BufferPool_memoryUsageThreshold`** | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) — `cur + MACRO_CHUNK_SIZE > memoryUsageThreshold` | Disallow returns `null` and logs; allow CASes the counter then `new Chunk(null, allocateDirectAligned(MACRO_CHUNK_SIZE))`. Clean, textbook pattern (a). |
-| **`MAX_MATERIALIZED_KEYS`** | [`QueryController.materializeKeysAndCloseSource():449`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/QueryController.java#L449) — `MAX_MATERIALIZED_KEYS < ++count` | Disallow returns `null`, discarding the `List<PrimaryKey>` built so far and forcing the caller onto an ORDER-BY-then-post-filter path; allow keeps accumulating and returns the list. |
-| **`Integer_MAX_VALUE` (index summary)** | [`IndexSummaryBuilder.maybeAddEntry():204`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryBuilder.java#L204) — `entries.length() + getEntrySize(key) <= Integer.MAX_VALUE` | Allow writes the key and offset into the growable `entries` buffer; disallow skips the entry and logs "Memory capacity of index summary exceeded (2GiB)". |
-| **`TeeDataInputPlus_limit`** | [`TeeDataInputPlus.maybeWrite():58`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TeeDataInputPlus.java#L58) — `teeBuffer.position() + length < limit` | Allow performs the write into `teeBuffer` (which grows); disallow sets `limitReached` and writes nothing. |
+| **P1** | 34 | ✅ read by stage 3, 2026-09-22 |
+| **P2** (excl. P1) | 337 | next, after the lexical re-rank |
+| **P3** | 746 | pending — the insurance tier |
+| **P4** | 1,337 | parked, not refused |
 
-**Notes on these four.**
+See [`README.md`](README.md)'s "Progress at a glance" for the full corpus and
+remaining counts, and its coverage table for which batches are done.
 
-- `BufferPool` is the strongest: an explicit off-heap memory ceiling gating
-  direct-buffer chunk allocation, with the allocation immediately after the
-  guard. `memoryUsageThreshold` still needs tracing to its config source for
-  the constraint name (§6.1) — that is the main open work.
-- `Integer_MAX_VALUE` is unusual and worth keeping: the constraint is a
-  **type bound**, not config or a named constant. Target 1 explicitly admits
-  "variable types" as a constraint source, so it qualifies, but §6.1 naming
-  will need a judgement call.
-- `TeeDataInputPlus_limit` is the weakest of the four — it bounds bytes
-  mirrored into a buffer, and `limit`'s origin needs tracing before it is
-  clear how meaningful the ceiling is. Confirm before writing it up.
+## Where a row goes after stage 3 reads it
 
-### Already covered — cite, do not re-file
+Stage 2 hands a row forward; what happens next is recorded by **stage 3**,
+not here (verdicts file with the stage that judged them):
 
-P1 also surfaced five rows that belong to existing records:
-
-| Row | Disposition |
+| Outcome | Recorded in |
 |---|---|
-| `MemtablePool.tryAllocate():156` | The two filed memtable cases (verified). Served as calibration — P1 found them. |
-| `AbstractMessageHandler.acquireCapacity():419` | The two filed `*_receive_queue_capacity` cases. Also calibration. |
-| `HintsBuffer.allocateBytes():190` | Already rejected in `../stage3-ai-deep-read/_INDEX.md` (writer-rollover). Cited, not re-judged. |
-| [`CommitLogSegmentManagerCDC.permitSegmentMaybe():200`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200) | **A second check site of the filed `cdc_total_space` case** — `sizeInProgress + getCommitLogSegmentSize() < getCDCTotalSpace()`, the re-permit path, setting the same `CDCState` verdict that `throwIfForbidden()` reads. Per README §6.1 "one case, several check sites", it belongs in that case file's Location section, which does not currently list it. **Open action.** |
-| [`ResourceLimits$Basic.tryAllocate():213`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L213) | `using + amount > limit` — the generic limiter class behind the two net cases' endpoint/global *reserve* sub-checks, which both case files already mention. Not a separate constraint; it is the mechanism. Worth linking from those cases rather than filing anew. |
+| Qualified, written up | [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/) + [`_INDEX.md`](../stage3-ai-deep-read/_INDEX.md) |
+| Qualified, not yet written up | [`../stage3-ai-deep-read/pending.md`](../stage3-ai-deep-read/pending.md) |
+| Refused against the three rules | [`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md) |
+| Pattern (b)/(c), parked | [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) |
 
-## Promoted to case files
-
-| Candidate | Promoted | Case file |
-|---|---|---|
-| `native_transport_receive_queue_capacity` — `AbstractMessageHandler.acquireCapacity():419` reached via `CQLMessageHandler` | 2026-09-18 | [`../net/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md`](../stage3-ai-deep-read/cases/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) |
-| `DataDirectory_getAvailableSpace` — `CompactionAwareWriter.getWriteDirectory():282` (pattern (c), disk) | 2026-09-22 | [`../compaction/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](../stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md) |
-
-### Notes carried over from the promoted entry
-
-`native_transport_receive_queue_capacity` was surfaced by the `transport/`
-batch as a sibling of the already-filed
-[`internode_application_receive_queue_capacity`](../stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md)
-case: the **same** `acquireCapacity()` if-check, but reached via
-`CQLMessageHandler` (CQL client connections) rather than
-`InboundMessageHandler` (internode peers), with a different config source
-(default 1MiB vs. 4MiB) and a different object created. This mirrors the
-`memtable_heap_space` / `memtable_offheap_space` precedent — same check,
-different pool instance and config — which is why it was filed as a distinct
-case rather than a duplicate.
-
-Writing it up surfaced a finding worth keeping visible: under the **default**
-`native_transport_throw_on_overload=false`, this if-check's disallow branch
-does not withhold object creation at all — the message is still decoded, and
-only a client-visible overload flag is set. Only the non-default
-`throwOnOverload=true` produces a clean reject (`OverloadedException`). That
-is a stronger, default-mode version of the memtable cases' escape-hatch
-pattern, and is flagged in the case file as Target-3-relevant.
+**Nothing in this file is a finding.** The P1 pass's outcomes — 4 qualified
+candidates, 22 refusals, 3 deferrals — were recorded here until 2026-09-23
+and now live in the stage-3 files above.

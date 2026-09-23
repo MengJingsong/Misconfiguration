@@ -375,6 +375,7 @@ cassandra/if-check-exp/
 │   ├── _INDEX.md            #   master index of every case (cases only)
 │   ├── rejected.md          #   read with source open, refused against the rules
 │   ├── deferred.md          #   unjudged: parked by the (a)-only scope (§7.5)
+│   ├── pending.md           #   qualified, not yet written up as a case
 │   └── cases/               #   THE RESULTS — flat, one file per case
 │       ├── <constraint>-<function>-<operand>.md
 │       └── <constraint>-<function>-<operand>.md

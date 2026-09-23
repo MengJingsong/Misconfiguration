@@ -62,7 +62,9 @@ Only after all six does a case file get written, from `_TEMPLATE.md`.
 3. Add the `_INDEX.md` Master Index row and, if the module is new, a Notes
    entry.
 4. Refused lines → [`rejected.md`](rejected.md); pattern-(b)/(c) lines →
-   [`deferred.md`](deferred.md). Both cite the ground.
+   [`deferred.md`](deferred.md). Both cite the ground. A line that
+   **qualifies but you are not writing up now** → [`pending.md`](pending.md),
+   never left only in stage 2's files.
 5. If the feed was 3a, note the batch in
    `../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
    re-read.

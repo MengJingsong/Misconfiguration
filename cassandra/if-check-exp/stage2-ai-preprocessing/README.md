@@ -133,8 +133,10 @@ The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 2,941 rows.
 
-**Cases produced with a feed-3a origin so far:** 2 of the 7 filed + 4 P1
-candidates awaiting write-up + 1 pattern-(b) find parked in `../stage3-ai-deep-read/deferred.md`.
+**Stage-3 outcomes from rows this folder ranked:** 4 candidates awaiting
+write-up (`../stage3-ai-deep-read/pending.md`) + 1 pattern-(b) find parked in
+`../stage3-ai-deep-read/deferred.md`. No case has yet been *established* from
+this queue — all 7 filed cases came from feed 3b.
 
 ## Batch coverage
 
@@ -163,11 +165,11 @@ it to reproduce a batch.
 |---|---|---|---|
 | `concurrent` | 17 | 2026-09-18 | 0 survivors — all thread-pool/permit concurrency checks (Rule 2 fail, same reasoning as `concurrent_compactors`). |
 | `cache` | 15 | 2026-09-18 | 0 survivors — ref-counting, overflow guards, and trivial validation; no capacity-vs-limit divergence found. |
-| `transport` | 89 | 2026-09-18 | 1 survivor (since promoted, see `positives.md`) + rejects logged in `../stage3-ai-deep-read/_INDEX.md`. |
-| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up (see `positives.md`). Rejects logged in `../stage3-ai-deep-read/_INDEX.md`. |
+| `transport` | 89 | 2026-09-18 | 1 survivor, since promoted to a case file + rejects logged in `../stage3-ai-deep-read/rejected.md`. |
+| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up. Rejects logged in `../stage3-ai-deep-read/rejected.md`. |
 | helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `../stage3-ai-deep-read/_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `../stage3-ai-deep-read/deferred.md` as pattern (b). Rejects in `negatives.md`. |
 
-| **P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done.** Deep read against the three rules. 4 candidates (`positives.md`), 22 rejected (`negatives.md`), 3 deferred as pattern (b)/(c) (`../stage3-ai-deep-read/deferred.md`), 5 already covered by existing records. Spans ~15 packages and completes none of them — see the note below. |
+| **P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done** — but by **stage 3**, not stage 2. 4 candidates (`../stage3-ai-deep-read/pending.md`), 22 rejected (`../stage3-ai-deep-read/rejected.md`), 3 deferred (`../stage3-ai-deep-read/deferred.md`), 5 already covered. Spans ~15 packages and completes none of them — see the note below. |
 
 **Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows. P1 tier: 34 rows
 (deep-read, overlapping the package counts).**
@@ -175,7 +177,7 @@ it to reproduce a batch.
 > **The P1 row is a tier, not a package.** Its 34 rows are scattered across
 > ~15 packages, so no package may be marked done on its account. When a
 > package batch runs later, its P1 rows are already judged — check
-> `positives.md` / `negatives.md` / `../stage3-ai-deep-read/deferred.md` before re-reading a row.
+> `../stage3-ai-deep-read/pending.md`, `rejected.md` and `deferred.md` before re-reading a row.
 >
 > **P1 validated the ranking.** It recovered both known filed cases as
 > calibration and produced 4 new candidates plus 1 strong pattern-(b) find

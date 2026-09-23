@@ -17,56 +17,24 @@ instead.
 are currently out of scope is *not* a negative — it goes to
 [`deferred.md`](../stage3-ai-deep-read/deferred.md).
 
-## Where existing rejections live
+## Where other rejections live
 
-Two things to know before adding here:
+Verdicts file with **the stage that judged**, so before adding a row here,
+check that it is not already recorded elsewhere — one line, exactly one
+place:
 
-1. **Method-1 rejections stay in [`../stage3-ai-deep-read/_INDEX.md`](../stage3-ai-deep-read/_INDEX.md)'s "lines
-   considered and rejected" section.** Those come from the direct-AI-search
-   method and differ in kind — few, narrative, sometimes deferred rather than
-   firmly refused (e.g. `ConnectionLimitHandler`). They are not moved here.
-2. **Stage-2 rejections made before 2026-09-22 are also in `../stage3-ai-deep-read/_INDEX.md`**, because
-   this file did not exist yet. They were not migrated: the entries are
-   detailed and already cross-referenced from several places, and moving them
-   would churn those references for no analytical gain. They cover the
-   `concurrent/`, `cache/`, `transport/` and `db/compaction/` batches (see
-   `README.md`'s coverage table).
+| Kind | Lives in |
+|---|---|
+| Refused against the three rules, source read | [`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md) |
+| Stage-2 rejections made **before** 2026-09-22 | `../stage3-ai-deep-read/rejected.md` — this file did not exist yet, and they were not migrated: the entries are detailed, cross-referenced from several places, and moving them would churn those references for no analytical gain. They cover the `concurrent/`, `cache/`, `transport/` and `db/compaction/` batches. |
+| Pattern-(b)/(c), unjudged | [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) |
 
-**So: `../stage3-ai-deep-read/_INDEX.md` is authoritative for every rejection recorded up to
-2026-09-22; this file is authoritative for stage-2 rejections from that date
-on.** Either way the rule holds — one line is recorded in exactly one place.
-Before adding a row here, check `../stage3-ai-deep-read/_INDEX.md` first; if it is already there,
-leave it there.
+**This file is authoritative for stage-2 rejections from 2026-09-22 on.** The
+P1 batch that once sat here moved to `rejected.md` on 2026-09-23 — it was a
+source-level pass, and this file is explicitly for grounds the row alone
+determines.
 
 ## Rejected rows (from 2026-09-22)
-
-### Batch: P1 tier, corpus-wide — 2026-09-22
-
-Deep read of the 34 P1 rows (capacity word on either side **and** compound
-usage side). **22 rows rejected**, grounds below. The other 12: 4 candidates
-(`positives.md`), 3 rows deferred as pattern (b)/(c) (`deferred.md`), 5
-already covered by existing records.
-
-These are **source-level rejections** — the P1 pass applied the three rules
-with the code open, unlike a stage-2 row-level pass.
-
-| Row | Check | Ground |
-|---|---|---|
-| `NativeAllocator$Region.allocate():273` | `newOffset + size > capacity` | Rule 2, writer-rollover. On failure the caller `trySwapRegion()` allocates a **new** region (`new Region(MemoryUtil.allocate(size), size)`), so total bytes are not bounded — only chunked. The real memtable ceiling is the already-filed `MemtablePool.tryAllocate()`. |
-| `SlabAllocator$Region.allocate():201` | `newOffset + size > data.capacity()` | Rule 2, same archetype — returns `null`, caller creates a new region. |
-| `MmappedRegions.updateState():208` | `segmentSize + chunk.length + 4 > MAX_SEGMENT_SIZE` | Rule 2, chunking. Starts a new mmap segment at the boundary; the whole file is mapped either way, just in more segments. |
-| `BTree$LeafBuilder.copy():2575`, `:2608`, `.prepend():2700`, `$BranchBuilder.prepend():2956`, `.copyPreceding():3185` | `count + length >/<= MAX_KEYS` | Rule 2, node fanout. `MAX_KEYS = BRANCH_FACTOR - 1` is a structural tree parameter; over it the keys spill into an overflow/next node. All data is stored either way. 5 rows, one judgement. |
-| `IncrementalTrieWriterPageAware.complete():167` | `nodeSize + branchSize < maxBytesPerPage` | Rule 2, page packing. Decides node placement within pages; everything is written regardless. |
-| `DataLimits$CQLCounter.incrementRowCount():509`, `:511`, `$GroupByAwareCounter:986` | `++rowsCounted >= rowLimit`, `>= perPartitionLimit` | Rule 2. CQL query `LIMIT` semantics, not a resource constraint: per-row footprint is not fixed or derivable, and the limit is user-supplied per query rather than a system capacity. |
-| `ExpirationDateOverflowHandling.maybeApplyExpirationDateOverflowPolicy():82` | `ttl + nowInSecs > getVersionedMaxDeletiontionTime()` | Rule 2, time-based. A timestamp-overflow guard (CASSANDRA-14092); bounds no bytes. |
-| `MutationExceededMaxSizeException.makeTopKeysString():76` | `stringBuilder.length() + key.length() + 2 <= maxLength` | Rule 2, not memory-significant. Truncates the key list inside a diagnostic error message. |
-| `ChecksummedDataInput.checkLimit():161` | `getPosition() + length > limit` | Rule 3. A digest-boundary guard that throws; gates no object creation. |
-| `VIntCoding.getUnsignedVInt():162`, `:211` | `readerIndex + size > readerLimit` | Rule 3. Bounds reading a vint within a buffer, returning `-1`; nothing is allocated either way. |
-| `ContentionStrategy.computeWaitUntilForContention():401` | `minWaitMicros + minDeltaMicros > maxWaitMicros` | Rule 2, time-based. Microsecond back-off arithmetic. |
-| `DynamicList.isWellFormed():216` | `i + 1 < maxHeight` | Rule 3. Inside an invariant checker walking skip-list levels; not an allocation gate. |
-| `FBUtilities.copy():1291` | `limit < buffer.length + copied` | Rule 3. Clamps the next read size into a fixed 64-byte buffer; no divergence in object creation. |
-| `RepairTokenRangeSplitter.getRepairAssignmentsForKeyspace():312` | `currentAssignmentsBytes + tableAssignmentsBytes < maxBytesPerSchedule` | Rule 2/3, bucketing. Chooses whether to merge assignments or add them separately — they are added either way. |
-| `RepairTokenRangeSplitter.filterRepairAssignments():360` | `bytesSoFar + getEstimatedBytes() > maxBytesPerSchedule` | Rule 2. Bounds the volume of repair *work* scheduled, not bytes resident or written by an allocation. |
 
 ### Batch: helper rows in the four previously-triaged subtrees — 2026-09-22
 
