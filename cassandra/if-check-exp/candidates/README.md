@@ -81,6 +81,56 @@ here — they differ in kind (few, narrative, often deferred rather than firmly
 refused). If stage 2 reaches a line that method 1 already judged, **cite the
 `_INDEX.md` entry rather than re-recording it here.**
 
+## Progress at a glance
+
+> **Update this block first** when a batch finishes; the detail tables below
+> are the working record, this is the summary. All counts reproduce from the
+> CSVs in `codeql-queries/results/cassandra/` — see
+> [`stage2-playbook.md`](stage2-playbook.md)'s scope table before quoting any
+> single number elsewhere.
+
+**Stage 1 — the pattern-(a) corpus (fixed, regenerable):**
+
+| Input | Rows | magnitude | equality |
+|---|---|---|---|
+| `NarrowedIfStatements.csv` | 4,489 | 2,681 | 1,808 |
+| `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 |
+| **Total** | **5,588** | **3,258** | **2,330** |
+
+Funnel: 17,343 `if` statements → 10,147 direct comparisons → 4,489 numeric
+non-trivial, plus 1,099 helper-guarded (a sibling query, not a funnel step).
+
+**Stage 2 — processed so far:**
+
+| Unit | Narrowed | Helper | Date | Yield |
+|---|---|---|---|---|
+| 4 subtrees (`concurrent`, `cache`, `transport`, `db/compaction`) | 329 | 114 | 09-18 / 09-22 | 2 promoted, 1 deferred |
+| P1 tier (corpus-wide, ~15 pkgs — **overlaps** the above) | 34 | — | 09-22 | 4 candidates, 22 rejected, 3 deferred |
+
+**Stage 2 — remaining:**
+
+| | Narrowed | Helper | Total |
+|---|---|---|---|
+| magnitude (the real queue) | 2,454 | 487 | **2,941** |
+| equality (low-priority sweep) | 1,706 | 498 | **2,204** |
+| **all** | **4,160** | **985** | **5,145** |
+
+Tiering of the 2,454 remaining narrowed-magnitude rows:
+
+| Tier | Rows | Status |
+|---|---|---|
+| P1 | 34 | ✅ done 2026-09-22 |
+| P2 (excl. P1) | 337 | next, after the lexical re-rank |
+| P3 | 746 | pending — the insurance tier |
+| P4 (fast-rejected) | 1,337 | parked, not deleted |
+
+The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
+so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
+2,941 rows.
+
+**Cases produced by method 2 so far:** 7 filed (2 verified, 5 pending) + 4 P1
+candidates awaiting write-up + 1 pattern-(b) find parked in `deferred.md`.
+
 ## Batch coverage
 
 Triage proceeds by directory batch rather than top-to-bottom, since the corpus
@@ -163,10 +213,10 @@ since a capacity check is inherently a magnitude comparison.
 | `triggers` | 2 (1) | 1 (0) | **1** |
 | **Total** | **4160 (2454)** | **985 (487)** | **2941** |
 
-**Reading the numbers.** 5,031 rows remain (the 114 helper rows above are
-now done), but the realistic first
-pass is the **2,941 magnitude rows**; the 2,204 equality rows are a
-lower-priority sweep afterwards. The helper rows shrink further in practice:
+**Reading the numbers.** **5,145 rows remain** (4,160 narrowed + 985 helper;
+the 114 helper rows above are now done), but the realistic first pass is the
+**2,941 magnitude rows**; the 2,204 equality rows are a lower-priority sweep
+afterwards. The helper rows shrink further in practice:
 across the whole corpus they come from only ~300 distinct helpers, so triage
 judges each *helper* once and applies the verdict to all its call sites —
 sorting a batch's helper rows by frequency disposes of the repeated

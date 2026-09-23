@@ -96,9 +96,10 @@ this folder's own scope.
       only under pattern (b) or (c), parked by the scope decision below.
       Kept apart from `negatives.md` because they are undecided, not refused.
     - `candidates/stage2-playbook.md` — **start here to run a batch.** Stage
-      1's results, the priority tiers (P1 11 rows / P2 527 / P3 the rest /
-      P4 the 1,463 fast-rejected), the verified side-agnostic reject rules,
-      and the tricks and pitfalls from the cases filed so far.
+      1's results, the priority tiers (**work-ahead scope**: P1 34 / P2 371
+      incl. P1 / P3 746 / P4 1,337 fast-rejected — see that file's scope
+      table before quoting any of them), the verified side-agnostic reject
+      rules, and the tricks and pitfalls from the cases filed so far.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `candidates/`; the if-check queries and their
   [pipeline README](codeql-queries/cassandra/queries/if-check-exp/README.md)
@@ -248,12 +249,29 @@ their case files.
 ### ⏵ Resume here (state as of 2026-09-22, end of session)
 
 **Where the pipeline stands.** Method 2 is built and running. Stage 1 is
-complete for pattern (a) — four CodeQL queries, two CSVs
-(`NarrowedIfStatements.csv` 4,489 rows, `HelperGuardedIfStatements.csv`
-1,099). Stage 2 has ranked the magnitude corpus into tiers
-(P1 34 / P2 371 / P3 746 / P4 1,337 fast-rejected) and the **P1 tier has been
-deep-read**. Seven cases are filed (2 `verified`, 5 `pending` — verification
-is deferred by decision, not backlog).
+complete for pattern (a) — four CodeQL queries, two CSVs. Stage 2 has ranked
+the magnitude corpus into tiers and the **P1 tier has been deep-read**. Seven
+cases are filed (2 `verified`, 5 `pending` — verification is deferred by
+decision, not backlog).
+
+| Stage-1 corpus | Rows | magnitude | equality |
+|---|---|---|---|
+| `NarrowedIfStatements.csv` | 4,489 | 2,681 | 1,808 |
+| `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 |
+| **Total** | **5,588** | **3,258** | **2,330** |
+
+| Stage-2 progress | Narrowed | Helper | Status |
+|---|---|---|---|
+| Processed (4 subtrees + P1 tier, overlapping) | 329 | 114 | done |
+| Remaining — magnitude (the real queue) | 2,454 | 487 | **2,941** |
+| Remaining — equality (low-priority sweep) | 1,706 | 498 | 2,204 |
+| **Remaining total** | **4,160** | **985** | **5,145** |
+
+Tiers over the 2,454 remaining narrowed-magnitude rows (*work-ahead scope*):
+**P1 34 ✅ done / P2 371 incl. P1 / P3 746 / P4 1,337 fast-rejected.** The
+canonical, scope-labelled version of every number here lives in
+`candidates/README.md`'s "Progress at a glance" and
+`candidates/stage2-playbook.md`'s scope table — update those first.
 
 **The immediate next work, in order:**
 

@@ -22,10 +22,16 @@ cd /proj/misconfiguration-PG0/git-repos/misconfiguration/codeql-queries
 ./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/HelperGuardedIfStatements.ql
 ```
 
-| File | Rows | What it contains |
-|---|---|---|
-| `NarrowedIfStatements.csv` | 4,489 | Numeric comparisons written **directly in an `if` condition**. Nulls, literal-only pairs and non-numeric operands already dropped. |
-| `HelperGuardedIfStatements.csv` | 1,099 | Comparisons **one call frame down**, inside a boolean helper the `if` calls (`if (!pool.hasRoom())`). Adds `helper` and `helperLine` columns. |
+| File | Rows | magnitude | equality | What it contains |
+|---|---|---|---|---|
+| `NarrowedIfStatements.csv` | 4,489 | 2,681 | 1,808 | Numeric comparisons written **directly in an `if` condition**. Nulls, literal-only pairs and non-numeric operands already dropped. |
+| `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 | Comparisons **one call frame down**, inside a boolean helper the `if` calls (`if (!pool.hasRoom())`). Adds `helper` and `helperLine` columns. |
+| **Pattern-(a) corpus** | **5,588** | **3,258** | **2,330** | The two are siblings, not nested — neither is a subset of the other. |
+
+Read `magnitude` before `equality`: a capacity check is inherently a
+magnitude comparison, so the 2,330 equality rows are a lower-priority sweep.
+The 1,099 helper rows collapse to **300 distinct helpers** (197 of them
+magnitude-class) — that, not the row count, is the real unit of work.
 
 Columns: `path, line, pkg, declaringType, method, lhs, op, rhs, opClass`
 (+ `helper, helperLine`). Rows are `order by`-ed, so runs are reproducible
@@ -106,7 +112,11 @@ backwards.)
 Reject a magnitude row if **either** operand is a bare numeric literal, or if
 either mentions `compareTo()` / `compare()`.
 
-- Drops **1,463 of 2,681** magnitude rows → **1,218** remain.
+- Drops **1,463 of 2,681** magnitude rows → **1,218** remain
+  (*full-corpus scope* — finished subtrees included).
+- In *work-ahead scope* (finished subtrees excluded) it drops **1,337 of
+  2,454** → **1,117** remain. These are the P4 / survivor counts in the tier
+  table below.
 - **Loses none of the four known real cases.**
 
 One judgment call to be aware of: dropping literal-operand rows would also
@@ -131,17 +141,32 @@ excluding the four finished subtrees — since that is the work ahead:
 Capacity vocabulary: `limit`, `capacity`, `max`, `threshold`, `space`,
 `bytes`, `free`, `avail`, `quota`, `reserve`, `allowance`, `budget`.
 
-**Validation:** measured over the whole magnitude corpus (2,681 rows,
-finished subtrees included, so the known cases are in scope), the
-capacity-word test on either side catches **4 of 4** known real cases while
-selecting only 527 rows. The compound-usage signal
-(`current + requested vs limit`) covers 2 of the 4.
+**Validation:** measured in *validation scope* — the whole magnitude corpus
+(2,681 rows, finished subtrees included, so the known cases are in scope) and
+**before** the fast-reject — the capacity-word test on either side catches
+**4 of 4** known real cases while selecting only **527** rows. The
+compound-usage signal (`current + requested vs limit`) covers 2 of the 4.
 
-**P1 is the next thing to run** (decided 2026-09-22): 34 rows, one sitting,
-and it already contains two known cases as free calibration plus one known
-rejection to cite rather than re-judge. Running it first also tests the
-ranking on a bigger sample than four labels before the remaining ~5,000 rows
-are ordered by it.
+### Scope table — read this before quoting a number
+
+The same filter yields three different counts depending on the row set it is
+measured over, and all three appear in these docs. **Always name the scope.**
+
+| Scope | Row set | Fast-reject applied? | Magnitude rows | Capacity-word hits |
+|---|---|---|---|---|
+| **Validation** | whole magnitude corpus | no | 2,681 | **527** |
+| **Full-corpus** | whole magnitude corpus | yes | 1,218 survivors | 429 |
+| **Work-ahead** | finished subtrees excluded | yes | 1,117 survivors | **371** (= P2) |
+
+Validation scope is the one that justifies the filter (4/4 known cases);
+work-ahead scope is the one that sizes the remaining job. The tier table
+above is work-ahead scope. All counts reproduce from the CSVs.
+
+**P1 is done** (run 2026-09-22): 34 rows deep-read — 4 candidates, 22
+rejected, 3 deferred, 5 already covered. It contained two known cases as free
+calibration, and validated the ranking at roughly a 1-in-3 hit rate on rows
+not already accounted for. **Next is P2** (371 rows incl. the 34 done), after
+the lexical re-rank below.
 
 **Caveat worth keeping in view:** four labelled positives is a very small
 validation set. 4/4 is encouraging, not proof. This is exactly why P3 exists
@@ -251,13 +276,17 @@ rules with the source open, and promotes what qualifies into case files.
 
 ### Suggested order
 
-**Next: P1, corpus-wide (34 rows).** Tier-first rather than batch-first —
-this is the fastest route to new cases and the cheapest test of whether the
-ranking predicts them. Its rows are scattered across ~15 packages, so record
-it as its own coverage entry rather than treating any package as finished.
+| # | Step | Size | Status |
+|---|---|---|---|
+| 1 | ~~P1 tier, corpus-wide~~ | 34 rows | ✅ **done 2026-09-22** — 4 candidates, ranking validated |
+| 2 | Lexical re-rank (supersedes the keyword list) | 1,117 survivors | ⏵ **next** |
+| 3 | P2 tier, or its re-ranked equivalent | 371 (incl. the 34 done) | pending step 2 |
+| 4 | P3 tier — the insurance, not optional | 746 | pending |
+| 5 | Equality sweep | 2,204 | lowest priority |
 
-Then, depending on what P1 yields: **P2** (371) if the tiering holds up, or
-fall back to completing packages batch by batch if it does not.
+Tier-first beat batch-first on P1, so keep it. P1's rows were scattered
+across ~15 packages, so no package may be marked done on its account —
+record a tier as its own coverage entry.
 
 Batch order for the package-by-package work:
 
