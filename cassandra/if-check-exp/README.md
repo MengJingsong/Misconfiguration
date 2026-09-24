@@ -365,7 +365,7 @@ cassandra/if-check-exp/
 │   └── README.md            #   pointers to codeql-queries/, output, blind spot
 ├── stage2-ai-preprocessing/       # lexical narrowing, rows only — see §7.2
 │   ├── README.md            #   what stage 2 is, how a row is triaged, progress
-│   ├── playbook.md          #   start here to run a batch: tiers, rules, scopes
+│   ├── playbook.md          #   start here to run a batch: bands, procedure
 │   ├── positives.md         #   ranked survivors = stage 3's 3a queue
 │   └── negatives.md         #   refused from the row alone, source unread
 ├── stage3-ai-deep-read/           # semantic qualification — the deciding stage
@@ -408,10 +408,15 @@ nothing to do with the Target numbers.
 | **1** | Structural — the shape of the code (CodeQL) | queries the DB | no | [`stage1-codeql-preprocessing/`](stage1-codeql-preprocessing/README.md) |
 | **2** | Lexical — operand, class, method and package *names* | **no** | no | [`stage2-ai-preprocessing/`](stage2-ai-preprocessing/README.md) |
 | **3** | Semantic — the code itself, against the three rules | yes | **yes** | [`stage3-ai-deep-read/`](stage3-ai-deep-read/README.md) |
+| **4** | Behavioral — manual review and a running cluster | *(planned)* | *(planned)* | — not created |
 
 **Stage 3 is the only stage that decides whether something is a real case.**
-Stages 1 and 2 only shrink and order what stage 3 must read; they produce no
-findings of their own.
+Stage 2 only orders what stage 3 must read, and produces no findings of its
+own; stage 1 narrows structurally before it.
+
+**Stage 4 does not exist yet.** It is reserved (2026-09-23) for the manual
+review and runtime verification that a stage-3 case still needs — see §7.5.
+Nothing in this folder does that work, and no case here claims it.
 
 #### Stage 1 — structural preprocessing (CodeQL)
 
@@ -422,15 +427,37 @@ pinned.
 
 Stage 1 sees structure only, and has a known blind spot: a check written as a
 ternary, assignment, `return` expression or method argument is invisible to
-it at any tier. Details and the query pointers are in
+it at all. Details and the query pointers are in
 [`stage1-codeql-preprocessing/README.md`](stage1-codeql-preprocessing/README.md).
 
 #### Stage 2 — lexical preprocessing (rows only)
 
 An AI session works **only from the stage-1 rows** — operand names, enclosing
 class and method, package, operator class — **without reading the Cassandra
-source**. It rules out rows that are visibly not capacity checks and ranks
-the rest by how promising they look.
+source**. It does **one** thing:
+
+> **Rank every stage-1 row by how likely it is to become a valid case**, by AI
+> lexical and semantic judgement of the row's text.
+
+Each row gets one of four bands — **A** reads as a real capacity check, **B**
+plausibly a resource bound, **C** named operands with nothing resource-shaped
+(the insurance band), **D** clearly not one — plus a one-line reason. The
+banded rows are stage 2's result and stage 3's queue, in
+`stage2-ai-preprocessing/positives.md`.
+
+**No fixed keyword list and no mechanical pre-filter (2026-09-23).** The
+banding is the AI's reading of the row, start to finish. This is what this
+section's "deliberately no fixed keyword list" rule always implied.
+
+**Stage 2 rules nothing out (2026-09-23).** A row that looks impossible takes
+the bottom rank; it is never removed from the queue. A rule-out is permanent
+and invisible, while a bad rank costs a little reading and self-corrects as
+stage 3 works down the list. `stage2-ai-preprocessing/negatives.md` holds the
+rule-outs made before this decision and is closed.
+
+Which CSV a row came from, whether it compares by magnitude or equality, and
+whether its comparison hides behind a boolean helper are reading order and
+technique — not further stages.
 
 **Stage 2 is preprocessing, not qualification.** It does **not** apply the
 three rules in §3.4–§3.6. Rule 3 in particular ("does the verdict reach a
@@ -446,24 +473,33 @@ of refusing. See
 
 #### Stage 3 — AI deep read (semantic qualification)
 
-An AI session reads the source and applies the three rules (§3.4–§3.6): it
-identifies the enforcement pattern (§3.2), locates the decision point and the
-allocation site, and judges whether the verdict reaches a decision point that
-diverges on object creation (Rule 3) — not only whether the comparison's own
-branches diverge, since under patterns (b) and (c) they may not. Prefer the
-local clone over fetching whole files through GitHub (grep/window it — saves
-tokens).
+An AI session takes the ranked rows in order and, for each one, **deep-reads
+its context** — tracing backward to where the limit and the usage come from,
+forward to where the verdict is consumed, and out into whatever related
+Cassandra code the answer depends on. It applies the three rules (§3.4–§3.6)
+and the three enforcement patterns (§3.2): it identifies the pattern, locates
+the decision point and the allocation site, and judges whether the verdict
+reaches a decision point that diverges on object creation (Rule 3) — not only
+whether the comparison's own branches diverge, since under patterns (b) and
+(c) they may not. Prefer the local clone over fetching whole files through
+GitHub (grep/window it — saves tokens).
+
+**What stage 3 extracts are candidate cases, not settled findings.** A case
+file records a traced code path checked against the pinned tag. Confirming it
+still needs **manual review and runtime verification** — reserved for a future
+**stage 4** and out of this folder entirely (§7.5). A filed case is complete
+*as stage-3 evidence*, not as a verified result.
 
 **Stage 3 has two feeds, and both are required:**
 
 | Feed | Points stage 3 at a line via | Coverage | Progress measurable? |
 |---|---|---|---|
-| **3a** | `stage2-ai-preprocessing/positives.md`, highest tier first | bounded, enumerable | **yes** |
+| **3a** | `stage2-ai-preprocessing/positives.md`, band A first | bounded, enumerable | **yes** |
 | **3b** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — no denominator |
 
 **3b is not optional.** It is the standing insurance against stage 1's
 structural blind spot — it found the `cdc_total_space` ternary, which stage 1
-cannot surface at any tier. Record the feed (`3a`/`3b`) on every case and
+cannot surface at all. Record the feed (`3a`/`3b`) on every case and
 every verdict; without it, "stage 3 progress" has no coherent answer.
 
 Method, pitfalls and the order to work a row: 
@@ -478,7 +514,8 @@ Not by the stage that surfaced the row. A row **stage 2 ranked** and
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
 | Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
-| Rejected | `stage2-ai-preprocessing/negatives.md` | `stage3-ai-deep-read/rejected.md` |
+| Ranked | `stage2-ai-preprocessing/positives.md` — every row, banded A–D | *(n/a)* |
+| Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/rejected.md` |
 | Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/deferred.md` |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding a line "would
@@ -531,19 +568,35 @@ finished**. Their rules in §3.2 stand unchanged in the meantime.
   object creation? — can be answered **only by stage 3**: neither
   stage 1 nor stage 2 sees the branches.
 - **Rows that would qualify only under (b) or (c) go to
-  `stage3-ai-deep-read/deferred.md`, never to `negatives.md`.** They are
-  unjudged, not
-  refused; keeping them in a separate file means resuming (b)/(c) is a matter
-  of reading one file rather than re-scanning the corpus.
+  `stage3-ai-deep-read/deferred.md`.** They are unjudged, not refused; keeping
+  them in a separate file means resuming (b)/(c) is a matter of reading one
+  file rather than re-scanning the corpus.
 - **Already-filed cases are unaffected.** This governs new candidate triage
   only; existing case files keep their recorded pattern, including the four
   pattern-(b) cases.
 
-**Behavioral verification is out of scope (2026-09-23).** Running a trigger
-to drive execution into the disallow path is no longer part of this folder's
-workflow, and there is no `Status` field. A case's evidence is its traced
-code path, checked against the pinned tag — that is what Target 2 asks for;
-an executed trigger was always supplementary, never the deliverable.
+**Verification is out of this folder, and reserved for a future stage 4
+(2026-09-23).** Decided by Jingsong. Two things a stage-3 case still needs:
+
+| | |
+|---|---|
+| **Manual verification** | a person reads the traced path and agrees it holds |
+| **Runtime verification** | a trigger drives execution into the disallow branch on a running cluster |
+
+Neither happens here. This folder ends at stage 3, there is no `Status` field,
+and no case file claims to be verified. A case's evidence is its traced code
+path checked against the pinned tag — that is what Target 2 asks for, and it
+is complete *as stage-3 evidence*.
+
+**Why a separate stage rather than a column.** The stage numbers already mean
+*evidence standard*, not pipeline position (§7.2), so behavioral evidence is a
+higher standard and earns its own number. Keeping it outside also keeps this
+folder's rule intact: everything here is decidable from source alone, with no
+cluster, no build and no run. Earlier trigger designs and results are
+recoverable from git history (`git show e7f9963`).
+
+**Stage 4 is reserved, not scheduled.** Nothing is built, no folder exists,
+and no case is queued for it.
 
 ## 8. Related context (for a new session)
 

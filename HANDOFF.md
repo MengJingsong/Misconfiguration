@@ -87,13 +87,15 @@ this folder's own scope.
   - **`stage2-ai-preprocessing/`** — stage-2 verdicts (lexical, rows only).
     - `README.md` — what stage 2 is, how a row is triaged, the
       "Progress at a glance" dashboard, and the batch-coverage table.
-    - `playbook.md` — **start here to run a batch.** Stage 1's results, the
-      priority tiers (**work-ahead scope**: P1 34 / P2 371 incl. P1 / P3 746
-      / P4 1,337 fast-rejected — see that file's scope table before quoting
-      any of them), the verified side-agnostic reject rules, and the tricks
-      and pitfalls learned so far.
-    - `positives.md` — ranked survivors; this is stage 3's 3a queue.
-    - `negatives.md` — refused from the row alone, source unread.
+    - `playbook.md` — **start here to run a batch.** Stage 2's two
+      operations, the verified side-agnostic rule-out grounds, the
+      the four bands (A–D) and how to run a batch, the calibration rows, and
+      the tricks and pitfalls learned so far.
+    - `positives.md` — the banding result: bands explained, band A grouped by
+      what the limit is, run provenance. Stage 3's 3a queue.
+    - `bands.csv` — **the per-row verdicts**, committed because an AI band
+      cannot be regenerated the way the old keyword tiers could.
+    - `negatives.md` — **2.1's output**, ruled out from the row alone, source unread.
   - **`stage3-ai-deep-read/`** — stage-3 verdicts (semantic, source open).
     This is the deciding stage.
     - `README.md` — what stage 3 is, its two feeds, and where verdicts go.
@@ -137,9 +139,10 @@ this folder's own scope.
 
 All seven are stage-3 complete: judged against the three rules with the
 source open, citations checked against the pinned `cassandra-5.0.9` tag.
-**There is no `Status` field** — behavioral verification was removed from
-this folder's scope on 2026-09-23 (see "Scope decisions"), so a filed case is
-finished work. `Feed` records which stage-3 feed found it (`3a` = via
+**There is no `Status` field** — manual and runtime verification are out of
+this folder, reserved for a future **stage 4** (2026-09-23, see "Scope
+decisions"). A filed case is complete *as stage-3 evidence*, not a verified
+result. `Feed` records which stage-3 feed found it (`3a` = via
 stage 1/2, `3b` = direct source reading).
 
 | Case (file under `cassandra/if-check-exp/`) | Pattern | Feed | Key finding |
@@ -156,12 +159,29 @@ Each case's full detail lives in its own file.
 
 ## Open items / next steps
 
-### ⏵ Resume here (state as of 2026-09-22, end of session)
+### ⏵ Resume here (state as of 2026-09-24, end of session)
 
-**Where the pipeline stands.** Stages 1 and 2 are built and running. Stage 1 is
-complete for pattern (a) — four CodeQL queries, two CSVs. Stage 2 has ranked
-the magnitude corpus into tiers and the **P1 tier has been deep-read**. Seven
-Seven cases are filed, all stage-3 complete.
+**Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
+CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete.** All 4,438 units
+were banded on 2026-09-23/24 in 37 batches with `claude-opus-5`; verdicts are
+in `stage2-ai-preprocessing/bands.csv`, grouped in `positives.md`. Seven cases
+are filed, all stage-3 complete, and 34 further rows carry stage-3 verdicts
+from the old P1 tier.
+
+| Band | Meaning | Units |
+|---|---|---|
+| **A** | Reads as a real capacity check | **113** |
+| **B** | Plausibly a resource bound | 148 |
+| **C** | Named operands, nothing resource-shaped — the insurance band | 85 |
+| **D** | Clearly not one | 4,092 |
+
+Band A splits into **A1 configuration-derived (51)**, **A2 constants and
+structural bounds (25)**, **A3 grow-when-full reallocations (37)**. Only A1 is
+likely to survive §6.1. Anchors — the 8 labelled rows — passed on all 37
+batches; that is the only evidence separate batches share one yardstick, since
+run-to-run consistency is deliberately not measured.
+
+**Stage 3 is now the bottleneck.** Its 3a queue is full for the first time.
 
 | Stage-1 corpus | Rows | magnitude | equality |
 |---|---|---|---|
@@ -169,44 +189,55 @@ Seven cases are filed, all stage-3 complete.
 | `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 |
 | **Total** | **5,588** | **3,258** | **2,330** |
 
-| Stage-2 progress | Narrowed | Helper | Total |
+| Stage-2 coverage | Narrowed | Helper | Total |
 |---|---|---|---|
-| Processed (4 subtrees + P1 tier, overlapping) | 329 | 114 | done |
-| Remaining — magnitude (the real queue) | 2,454 | 487 | **2,941** |
-| Remaining — equality (low-priority sweep) | 1,706 | 498 | 2,204 |
-| **Remaining total** | **4,160** | **985** | **5,145** |
+| Consumed — 4 subtrees + the former P1 tier (overlapping) | 329 | 114 | — |
+| Not yet consumed | 4,160 | 985 | **5,145** |
 
-Tiers over the 2,454 remaining narrowed-magnitude rows (*work-ahead scope*):
-**P1 34 ✅ done / P2 371 incl. P1 / P3 746 / P4 1,337 fast-rejected.** The
-canonical, scope-labelled version of every number here lives in
-`stage2-ai-preprocessing/README.md`'s "Progress at a glance" and
-`stage2-ai-preprocessing/playbook.md`'s scope table — update those first.
+**All 5,588 rows need a band**, including the consumed ones if a band is ever
+wanted for them; coverage is tracked **per row**, by whether it carries a
+stage-3 verdict, not per band. The canonical version of every number here
+lives in `stage2-ai-preprocessing/README.md`'s "Progress at a glance" —
+update that first.
+
+**Stage 2 is one operation** — rank every stage-1 row by AI lexical and
+semantic judgement into four bands: **A** reads as a real capacity check, **B**
+plausibly a resource bound, **C** named operands with nothing resource-shaped
+(the insurance band), **D** clearly not one. Each row also carries a one-line
+reason. Output is `positives.md`.
+
+**It rules nothing out** (2026-09-23): a hopeless row takes band D rather than
+an exit from the queue, because a rule-out is permanent and invisible while a
+bad band self-corrects. `negatives.md` is closed. **The keyword tiers P1–P4
+were dropped the same day** — no fixed word list and no mechanical
+pre-filter; the banding is the AI's reading of the row, start to finish.
+Ranking the whole corpus costs about 107k input / 140k output tokens, so there
+is no saving worth buying with a heuristic that might drop a real case.
 
 **The immediate next work, in order:**
 
-1. **The lexical stage-2 pass — Jingsong's plan, to be done next.** In his
-   words:
-
-   > *"In stage 2, can we use AI to scan the operand's name or any text from
-   > stage 1 results and extract valid/invalid candidates by their lexical
-   > meanings?"*
-
-   Yes — and it replaces the fixed capacity-word list the current tiers are
-   built on. Full rationale, evidence and the working design are in
-   `stage2-ai-preprocessing/playbook.md` ("Lexical judgement") and
-   summarised below. **Do this before P2**, because P2's membership is defined by the
-   keyword list this pass supersedes; re-ranking first means P2 is read in a
-   trustworthy order rather than re-read later.
-2. **Write up the 4 P1 candidates as case files.** They are found, judged
-   against the three rules, and recorded in
-   `stage2-ai-preprocessing/positives.md`, but none exists as a case file yet.
-   Independent of step 1, so it can be done in either order. Start with `BufferPool_memoryUsageThreshold` (strongest);
-   its main open task is tracing `memoryUsageThreshold` to its config source
-   for the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest —
-   confirm `limit`'s origin before committing to it. `Integer_MAX_VALUE`
-   needs a §6.1 naming judgement call, since the constraint is a *type
-   bound*.
-3. **One correction to existing case files**, found by the P1 pass: the two
+1. **Stage 3 reads band A, in A1 → A2 → A3 order.** 113 rows, but far fewer
+   distinct arguments: A3's 37 rows share one shape (`size == capacity` before
+   growing an array), so judge them as a group rather than one at a time. Two
+   A-band rows are **already refused** — `NativeAllocator$Region.allocate():273`
+   and `SlabAllocator$Region.allocate():201`, in `rejected.md` — so check the
+   stage-3 files before reading any row.
+2. **Three open items the banding independently surfaced**, each already in
+   band A:
+   - `CommitLogSegmentManagerCDC.java:345` — the third `cdc_total_space` site,
+     which item 3 below says is recorded nowhere. Still needs judging.
+   - `ResourceLimits$Basic.tryAllocate():213` and `$Concurrent:138` — the
+     mechanism the two net cases fail to cite (item 3 below).
+   - `Directories.hasDiskSpaceForCompactionsAndStreams():551` — the pattern-(b)
+     find parked in `deferred.md`.
+3. **Write up the 4 candidates from the former P1 pass as case files.** Found,
+   judged and recorded in `stage3-ai-deep-read/pending.md`, but no case file
+   exists yet. Start with `BufferPool_memoryUsageThreshold` (strongest); its
+   main open task is tracing `memoryUsageThreshold` to its config source for
+   the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest — confirm
+   `limit`'s origin before committing to it. `Integer_MAX_VALUE` needs a §6.1
+   naming judgement, since the constraint is a *type bound*.
+4. **One correction to existing case files**, found by the P1 pass: the two
    net cases should link `ResourceLimits$Basic.tryAllocate():213` as the
    mechanism behind their reserve sub-checks. They currently name
    `ResourceLimits.Outcome` (the enum) but never cite the comparison itself.
@@ -214,62 +245,58 @@ canonical, scope-labelled version of every number here lives in
    `permitSegmentMaybe():200` second check site — was **already applied**;
    the case file cites it as "Second check site, same verdict". Verified
    2026-09-23.)*
+5. **Then band B (148)**, then C (85) — C is the insurance band and is not
+   optional. D is 4,092 rows and is read last, if at all.
 
-   **Also unjudged, found 2026-09-23:**
-   [`CommitLogSegmentManagerCDC.java:345`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L345)
-   — `!blocking && sizeInProgress.get() > allowance`, a **third** site
-   comparing the same usage against the same `cdc_total_space` limit, in a
-   real `if`. It is in `NarrowedIfStatements.csv` and recorded nowhere: not
-   in the case file, `rejected.md` or `deferred.md`. Reading the source, it
-   is the eviction path (over allowance and not blocking → delete the oldest
-   linked CDC segment), so it likely fails Rule 3 — the segment was already
-   set `PERMITTED` at line 340, so nothing is withheld either way — but that
-   needs confirming and recording, either as a non-gating site in the case
-   file or as a rejection.
-4. **Then run the P2 tier (371 rows, or its re-ranked equivalent after step
-   1)**, continuing tier-first rather than package-first. P1 gave roughly a
-   1-in-3 hit rate on rows not already accounted for, which is why tier order
-   is worth keeping.
+**What stage 2 will not tell you.** A band is a reading order, nothing more.
+The bands were assigned from the row alone, with the source unread, so a
+band-A row can still fail any of the three rules — and several will. The
+banding's only measured property is that the 8 labelled rows land in A.
 
 **Do not** start patterns (b)/(c), and do not run behavioral verification —
 both are deferred by decision (see "Scope decisions" below). `deferred.md`
 is their worklist.
 
-### ⏵ Step 1 in detail — the lexical stage-2 pass (planned 2026-09-22)
+### ⏵ Step 1 in detail — the AI banding (decided 2026-09-23)
 
-**Stage 2's ranking moves from keyword matching to AI lexical judgement of
-the row.** Decided by Jingsong 2026-09-22 as the next step; the design below
-is settled in shape, and only the mechanics are open.
+**Ranking is AI lexical/semantic judgement of the row, and nothing else.** The
+fixed capacity-word list that produced tiers P1–P4 is gone, and so is the
+bare-literal / `compareTo` fast-reject; both were dropped on 2026-09-23. The
+full procedure is in `stage2-ai-preprocessing/playbook.md` — this is the
+summary.
 
-The current tiers key off a fixed capacity-word list, and that list fails in
-both directions. False positives: `phi_convict_threshold > 16`,
-`repair_session_max_tree_depth > 20`, `memtable_cleanup_threshold > 0.99f`,
-`default_keyspace_rf < ..._fail_threshold` — all contain `threshold`/`max`,
-none bounds bytes, and all sit in `applySimpleConfig`, i.e. startup
-validation. False negatives: capacity-shaped vocabulary the list never
-anticipated (`remaining()`, `keysWritten >= keysEstimate`, `unused`).
+**Why the list went.** It failed in both directions. False positives:
+`phi_convict_threshold > 16`, `repair_session_max_tree_depth > 20`,
+`memtable_cleanup_threshold > 0.99f`, `default_keyspace_rf <
+..._fail_threshold` — all contain `threshold`/`max`, none bounds bytes, and
+all sit in `applySimpleConfig`, i.e. startup validation. False negatives:
+capacity-shaped vocabulary the list never anticipated (`remaining()`,
+`keysWritten >= keysEstimate`, `unused`). This is what README §7.2's
+"deliberately no fixed keyword list" rule always implied.
 
-This is what README §7.2's "deliberately no fixed keyword list" rule is
-guarding against, so lexical judgement is the more faithful method — it is
-what the rule always implied stage 2 should be doing. How it works:
+**What went with it.** The list's track record — 4/4 known cases selected in
+527 of 2,681 magnitude rows, ~1-in-3 hit rate on P1 — was evidence about *the
+list*, not about ranking in general. The banding starts its track record over.
+
+**How it works:**
 
 - Judge the row as a sentence — `declaringType` + `method` + `lhs op rhs`.
   Context usually decides before the operand does; anything in
-  `applySimpleConfig`/`validate*` is validation whatever it compares.
-- Layer it *after* the mechanical fast-reject (bare literal, `compareTo`),
-  which is free, deterministic and reproducible.
-- Emit a one-line reason per row, not just a label, so the pass is auditable
-  and does not drift across sessions.
-- Reject only lexical certainties; downrank anything ambiguous. `remaining()
-  < 4` looks capacity-shaped and is really a deserialization bounds check —
-  stage 2 cannot know that, so it ranks low rather than refusing.
-- Record model and date per batch; these judgements are model-dependent in a
-  way CodeQL output is not. Regression-check each batch against the known
-  rows, and re-judge ~10 rows from the previous batch for consistency.
+  `applySimpleConfig`/`validate*` is validation whatever it compares, and
+  anything in a `*Pool.allocate` deserves a look whatever it is called.
+- Assign one of four bands — A real capacity check / B plausible / C named
+  operands, nothing resource-shaped / D clearly not one — plus a **one-line
+  reason**, which is what makes a wrong band reviewable.
+- **C is not optional.** `memtable_heap_space` and `MAX_HINT_BUFFERS` share no
+  vocabulary at all, so a real case can read as unremarkable in every word.
+  Merging C into D rebuilds the keyword list's blind spot.
+- **D is read eventually** — the bottom of the order, not a bin.
+- Anchor every batch against the same ~8 labelled rows; record model and date.
+  Run-to-run consistency is **not** measured (2026-09-23).
+- Acceptance test: the known cases must land in band A.
 
-**The limit that remains either way:** lexical meaning cannot settle the
-three rules. Stage 2 improves ranking and removes the obvious; qualification
-stays with the deep read.
+**The limit that remains either way:** lexical meaning cannot settle the three
+rules. Stage 2 orders the queue; qualification stays with the deep read.
 
 
 ### The three stages and stage 3's two feeds (revised 2026-09-23)
@@ -286,7 +313,7 @@ Target numbers; see `cassandra/if-check-exp/README.md` §1.1.)
 | Stage | Evidence | Reads source? | Decides? | Folder |
 |---|---|---|---|---|
 | **1** | structural — the shape of the code (CodeQL) | queries the DB | no | `stage1-codeql-preprocessing/` |
-| **2** | lexical — operand, class, method and package *names* | **no** | no | `stage2-ai-preprocessing/` |
+| **2** | lexical — operand, class, method and package *names*, banded A–D by AI | **no** | no | `stage2-ai-preprocessing/` |
 | **3** | semantic — the code itself, against the three rules | yes | **yes** | `stage3-ai-deep-read/` |
 
 **Stage 3 is the only stage that decides.** Stages 1 and 2 produce no
@@ -294,13 +321,13 @@ findings — they shrink and order what stage 3 must read.
 
 **Stage 3 has two feeds, and both are required:**
 
-- **3a — from stage 1/2.** Takes `positives.md` in tier order. Bounded and
+- **3a — from stage 1/2.** Takes `positives.md` in band order. Bounded and
   enumerable, so progress is measurable.
 - **3b — from raw source.** The session reads subsystems and call chains
   directly. Unbounded, so there is no denominator and no percentage to
   report. **Not optional:** it is the standing insurance against stage 1's
   structural blind spot — it found the `cdc_total_space` ternary, which
-  stage 1 cannot surface at any tier because it is not an `if` condition.
+  stage 1 cannot surface at all because it is not an `if` condition.
 
 Record the feed (`3a`/`3b`) on every case and verdict.
 
@@ -336,18 +363,18 @@ remaining items below.
    qualification.
 2. **Stage 2 — AI filtering (preprocessing only).** Work from the stage-1
    rows alone — operand names, enclosing class/method, package, operator
-   class — **without reading the Cassandra source**. Rule out rows the row
-   itself shows are not capacity checks, rank the rest into priority tiers,
-   and record everything under `cassandra/if-check-exp/stage2-ai-preprocessing/`
-   — that
-   folder *is* the AI-filtering-results store. Ranked survivors go to
-   `positives.md` (with a tier), row-level rejects to `negatives.md`,
+   class — **without reading the Cassandra source**. One operation: **band
+   every row A–D** by AI lexical/semantic judgement of how likely it is to
+   become a valid case; nothing is ruled out. Record everything under
+   `cassandra/if-check-exp/stage2-ai-preprocessing/` — that
+   folder *is* the AI-filtering-results store. Every row goes to
+   `positives.md` with a band and a one-line reason; `negatives.md` is closed,
    pattern-(b)/(c)-only rows to `deferred.md`.
 
    **Stage 2 does *not* apply the three rules** (README §3.4–§3.6). Those
    qualify a real case and need the code — Rule 3 asks whether the branches
    diverge on object creation, which no row can answer. They belong to the
-   stage-3 pass, which takes `positives.md` in tier order and
+   stage-3 pass, which takes `positives.md` in band order and
    promotes what qualifies into case files.
 
    **Because stage 2 is blind, it should rank far more than it rejects.** A
@@ -392,7 +419,7 @@ allocate a new one. The real ceiling is the already-filed
 `MemtablePool.tryAllocate()`. Same archetype as the 5 `BTree MAX_KEYS` rows
 and `MmappedRegions`.
 
-### Scope decisions (2026-09-22): pattern (a) only; verification deferred
+### Scope decisions: pattern (a) only (2026-09-22); verification is stage 4 (2026-09-23); stage 2 never rules out (2026-09-23)
 
 **Triage is restricted to enforcement pattern (a)** — the capacity check is
 itself the `if` whose branches decide allow vs. disallow (README §3.2).
@@ -416,7 +443,8 @@ What follows from this:
   (b)/(c) later is a matter of reading one file instead of re-scanning the
   corpus. Rejections on pattern-independent grounds (thread-pool or
   concurrency caps, rate limiters, config validation, time checks, writer
-  rollover) are true rejections and stay settled in `negatives.md`.
+  rollover) were recorded in `negatives.md`, which closed on 2026-09-23 when
+  stage 2 stopped rejecting rows; they are now bottom-ranked, not settled.
 - **The existing CodeQL scripts already fit pattern (a) — confirmed by
   reading `NarrowedIfStatements.ql` (2026-09-22), not just its README.** It
   selects `BinaryExpr` comparisons whose `getEnclosingStmt()` is an `IfStmt`,
@@ -432,13 +460,22 @@ What follows from this:
   the branches actually diverge on allocation?) can be answered **only by the
   stage 3** — not by stage 1, and not by stage 2 either, since neither sees
   the branches.
-**Behavioral verification is out of scope (2026-09-23).** Driving execution
-into the disallow branch is no longer part of this folder's workflow, the
+**Verification is out of this folder, reserved for a future stage 4
+(2026-09-23).** Decided by Jingsong. A stage-3 case still needs **manual
+verification** (a person reads the traced path and agrees) and **runtime
+verification** (a trigger drives execution into the disallow branch on a
+running cluster). Neither happens here: this folder ends at stage 3, the
 README's verification section is gone, and there is no `Status` field. A
-case's evidence is its traced code path, checked against the pinned tag —
-that is what Target 2 asks for; an executed trigger was always supplementary,
-never the deliverable. Earlier trigger designs and results are recoverable
-from git history (`git show e7f9963`).
+case's evidence is its traced code path checked against the pinned tag — what
+Target 2 asks for, and complete as stage-3 evidence.
+
+Stage 4 is **reserved, not scheduled** — nothing built, no folder, no case
+queued. It gets its own number because the stage numbers mean *evidence
+standard*, not pipeline position (README §7.2), and behavioral evidence is a
+higher standard. Keeping it outside also preserves this folder's rule that
+everything here is decidable from source alone — no cluster, no build, no run.
+Earlier trigger designs and results are recoverable from git history
+(`git show e7f9963`).
 
 - **Deferred with (b)/(c):** the disk candidate `getWriteDirectory():282`
   (pattern (c) — previously item 2 below), the three planned structural

@@ -1,17 +1,28 @@
-# Negatives — rows read and refused
+# Negatives — closed 2026-09-23
 
-Rows that stage 2 ruled out **on grounds the row itself fully determines** —
+**This file takes no new entries.** Stage 2 no longer rules anything out: it
+ranks every stage-1 row, and a row that looks impossible gets the bottom rank
+instead of a refusal (see [`README.md`](README.md)). The rows below were
+refused under the earlier model and are now treated as **bottom-ranked, not
+settled** — a later pass may reach them.
+
+Kept as a record of what was judged and on what ground, so the reversal is
+auditable and nothing has to be re-derived.
+
+---
+
+Rows ruled out **on grounds the row itself fully
+determines** —
 no source reading, and **not** the three rules in
 [`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case),
 which belong to stage 3. Each entry cites the row-level ground so
 a later pass doesn't re-derive it. See [`README.md`](README.md) for what
 stage 2 is, and [`playbook.md`](playbook.md) for the verified
-reject rules.
+rule-out grounds.
 
-**Rejection here is permanent in practice** — nothing re-reads this file — so
-it is reserved for rows that are unambiguously not capacity checks. Anything
-merely unpromising belongs in [`positives.md`](positives.md) at a low tier
-instead.
+*(Historical note, written when the file was live: "Rejection here is
+permanent in practice — nothing re-reads this file." That property is exactly
+why the folder stopped rejecting rows.)*
 
 **Refused, not merely unjudged.** A row dropped only because patterns (b)/(c)
 are currently out of scope is *not* a negative — it goes to

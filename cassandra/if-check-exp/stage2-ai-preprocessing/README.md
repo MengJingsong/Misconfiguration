@@ -1,7 +1,13 @@
 # Stage 2 — AI lexical preprocessing
 
-This folder holds the **stage-2 verdicts**: the lexical pass that works from
-the stage-1 rows alone, without opening the Cassandra source. See
+This folder holds the **stage-2 verdicts**. Stage 2 takes the stage-1 rows —
+one row per `if` statement — and an AI session reads them without opening the
+Cassandra source. It does **one** thing: **rank every row** by how
+likely it is to become a valid case. The ranked rows are stage 2's result,
+and stage 3's queue.
+
+**Stage 2 rules nothing out** (decided 2026-09-23). A row that looks
+impossible gets the bottom rank, not an exit from the queue. See
 [`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks) for how the three stages relate, and §7.5 for
 the scope currently in force.
 
@@ -16,18 +22,18 @@ before `equality` ones.
 
 | File | Holds |
 |---|---|
-| [`positives.md`](positives.md) | Rows that **survived** stage-2 triage, each with its tier. This is stage 3's 3a queue — a work list, **not** a list of qualified cases. |
-| [`negatives.md`](negatives.md) | Rows refused, each citing the **row-level** ground (bare literal, ordering test, loop index, validation method name) — never a rule number, since stage 2 does not apply the rules. |
-| [`playbook.md`](playbook.md) | **Start here when running a batch.** The prioritization ladder, the verified fast-reject rules, the scope table, and the tricks and pitfalls learned so far. Not a verdict store — the two files above are. |
+| [`positives.md`](positives.md) | **Stage 2's result** — the bands explained, band A grouped by what the limit is, and the run's provenance. Stage 3's 3a queue, a work list, **not** a list of qualified cases. |
+| [`negatives.md`](negatives.md) | **Closed 2026-09-23.** Historical rule-outs from when stage 2 still refused rows, each citing its row-level ground. No new entries; those rows are now treated as bottom-ranked, not refused. |
+| [`bands.csv`](bands.csv) | **The per-row verdicts** — `uid, kind, band, reason, model, date, batch`. Committed, because an AI band cannot be regenerated the way the old keyword tiers could. |
+| [`playbook.md`](playbook.md) | **Start here when running a batch.** The four bands, the batch procedure, the calibration rows, and the tricks and pitfalls learned so far. Not a verdict store. |
 
-The two verdict files are mutually exclusive: every row stage 2 reads lands
-in exactly one of them. **Stage 2 has no third outcome** — see "Stage 2
-cannot defer" below.
+Every row stage 2 reads lands in `positives.md` with a rank. **Stage 2 has no
+other outcome** — it cannot refuse a row, and it cannot defer one (see below).
 
-## How a row is triaged
+## How a row is ranked
 
-> Practical technique — the priority tiers, the verified reject rules, what
-> signals exist in a row — is in
+> Practical technique — the four bands, how to run a batch, what signals exist
+> in a row — is in
 > [`playbook.md`](playbook.md). This section is the definition
 > of what stage 2 is and is not.
 
@@ -41,17 +47,23 @@ Those decide whether a candidate is a real case and require reading the
 code — Rule 3 asks whether the branches diverge on object creation, which no
 row can answer. They belong to stage 3, the pass that follows.
 
-What stage 2 does instead:
+What stage 2 does instead: an AI session reads each row as a sentence —
+`declaringType` + `method` + `lhs op rhs` — and assigns one of four bands by
+lexical and semantic judgement, with a one-line reason. Each row goes to
+[`positives.md`](positives.md) with its band.
 
-1. **Rule out** rows the row itself shows are not capacity checks — a
-   comparison against a bare literal, an ordering test (`compareTo()`), a
-   loop index, a method whose name marks it as config validation or
-   serialization arithmetic. These go to [`negatives.md`](negatives.md) citing
-   the *row-level* ground, not a rule number.
-2. **Rank** everything else into priority tiers on the evidence in the row:
-   capacity-shaped operand names, a compound usage side (`... + ...`),
-   allocation-adjacent class and method names. These go to
-   [`positives.md`](positives.md) **with their tier**.
+| Band | The row reads as |
+|---|---|
+| **A** | A real capacity check — usage compared against a memory or disk limit |
+| **B** | Plausibly a resource bound, but the row alone does not settle it |
+| **C** | Named operands, nothing resource-shaped — the insurance band |
+| **D** | Clearly not one: startup validation, ordering test, loop index, bare literal, serialization arithmetic |
+
+**No keyword list and no mechanical pre-filter** (2026-09-23). The banding is
+the AI's reading of the row, start to finish. Rows that look hopeless take
+band D and stay in the queue; before 2026-09-23 they were refused outright,
+and that is the decision this folder reversed.
+
 **Stage 2 cannot defer.** Deciding that a line "would qualify only under
 pattern (b) or (c)" means tracing where the verdict is read and whether the
 branches diverge — which no row shows. Deferral is a stage-3 judgment and
@@ -60,18 +72,16 @@ lives in
 If a row *smells* like (b)/(c), **downrank it and let stage 3 decide**; do
 not park it and do not refuse it.
 
-> **Next pass (planned 2026-09-22):** stage 2's ranking moves from the fixed
-> capacity-word list to **AI lexical judgement** of the row — reading the
-> operand names, class, method and package for what they actually mean
-> instead of matching a word list. This is what §7.2's "deliberately no fixed
-> keyword list" rule always implied. Rationale, the keyword list's
-> demonstrated failure modes, and how to run it are in
-> [`playbook.md`](playbook.md).
+> **Done 2026-09-24.** The banding ran as designed: 37 batches, anchors in
+> every batch, model and date recorded per batch, and the acceptance test held
+> throughout. Re-running it is only needed if the bands are re-derived with a
+> different model. See [`playbook.md`](playbook.md#how-to-run-a-batch).
 
-**Rank rather than reject when unsure.** Stage 2 is cheap and blind; the
-deep read is expensive and sighted. A row wrongly rejected here is never seen
-again, while a row wrongly promoted only costs some reading. Downranking is
-always available and always safer than refusing.
+**Rank, never rule out.** Stage 2 is cheap and blind; the deep read is
+expensive and sighted. A row wrongly refused here would never be seen again,
+while a row wrongly ranked high only costs some reading — and a row wrongly
+ranked low is still reachable. That asymmetry is the whole argument for having
+no reject step.
 
 ## One line, one place
 
@@ -91,8 +101,43 @@ rejection.
 > **Update this block first** when a batch finishes; the detail tables below
 > are the working record, this is the summary. All counts reproduce from the
 > CSVs in `codeql-queries/results/cassandra/` — see
-> [`playbook.md`](playbook.md)'s scope table before quoting any
+> [`playbook.md`](playbook.md#counts-and-scopes) before quoting any
 > single number elsewhere.
+
+**Stage 2 is one operation** — rank every stage-1 row by AI lexical and
+semantic judgement. See
+[`playbook.md`](playbook.md#what-stage-2-does--rank-every-row).
+
+**The banding is complete.** All 4,438 units banded over 37 batches on
+2026-09-23 / 2026-09-24 with `claude-opus-5`; per-row verdicts are in
+[`bands.csv`](bands.csv), grouped and explained in
+[`positives.md`](positives.md).
+
+| Band | Meaning | Units | Share |
+|---|---|---|---|
+| **A** | Reads as a real capacity check | **113** | 2.5% |
+| **B** | Plausibly a resource bound, row does not settle it | 148 | 3.3% |
+| **C** | Named operands, nothing resource-shaped — the insurance band | 85 | 1.9% |
+| **D** | Clearly not one | 4,092 | 92.2% |
+
+4,153 rows + 285 helper judgements standing for 985 call sites. **Anchors
+passed on all 37 batches** — the 8 labelled rows came back A every time, which
+is the only evidence that separate batches share one yardstick.
+
+Band A splits three ways, and only the first is likely to survive §6.1:
+**A1 configuration-derived limits (51)**, **A2 constants and structural bounds
+(25)**, **A3 grow-when-full array reallocations (37)**. The split is a reading
+aid, not a verdict — see [`positives.md`](positives.md).
+
+| | State |
+|---|---|
+| Ranking | ✅ complete |
+| Rule-outs | None, from 2026-09-23. [`negatives.md`](negatives.md) is closed. |
+| Next | Stage 3 reads band A in A1 → A2 → A3 order |
+
+Which CSV a row came from, whether it is magnitude or equality, and whether
+its comparison hides behind a helper are **signals and reading order**, not
+further stages. **Reading a band is stage 3's job**, not stage 2's.
 
 **Stage 1 — the pattern-(a) corpus (fixed, regenerable):**
 
@@ -120,14 +165,10 @@ non-trivial, plus 1,099 helper-guarded (a sibling query, not a funnel step).
 | equality (low-priority sweep) | 1,706 | 498 | **2,204** |
 | **all** | **4,160** | **985** | **5,145** |
 
-Tiering of the 2,454 remaining narrowed-magnitude rows:
-
-| Tier | Rows | Status |
-|---|---|---|
-| P1 | 34 | ✅ done 2026-09-22 |
-| P2 (excl. P1) | 337 | next, after the lexical re-rank |
-| P3 | 746 | pending — the insurance tier |
-| P4 (fast-rejected) | 1,337 | parked, not deleted |
+The former keyword tiers (P1 34 / P2 371 / P3 746 / P4 1,337) were **dropped
+on 2026-09-23** and are not being carried forward. Why, and what was given up
+with them, is in
+[`playbook.md`](playbook.md#why-the-keyword-list-was-dropped-2026-09-23).
 
 The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
@@ -161,6 +202,8 @@ it to reproduce a batch.
 
 ### Done
 
+| **Full-corpus AI banding** | **4,438 units** | 2026-09-23/24 | **Done.** 37 batches, `claude-opus-5`. A 113 / B 148 / C 85 / D 4,092. Anchors passed on every batch. Supersedes the package-by-package plan below for stage-2 purposes: every row now has a band, including the four subtrees already triaged. |
+
 | Batch (subtree) | Narrowed rows | Date | Result |
 |---|---|---|---|
 | `concurrent` | 17 | 2026-09-18 | 0 survivors — all thread-pool/permit concurrency checks (Rule 2 fail, same reasoning as `concurrent_compactors`). |
@@ -169,20 +212,24 @@ it to reproduce a batch.
 | `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up. Rejects logged in `../stage3-ai-deep-read/rejected.md`. |
 | helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `../stage3-ai-deep-read/_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `../stage3-ai-deep-read/deferred.md` as pattern (b). Rejects in `negatives.md`. |
 
-| **P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done** — but by **stage 3**, not stage 2. 4 candidates (`../stage3-ai-deep-read/pending.md`), 22 rejected (`../stage3-ai-deep-read/rejected.md`), 3 deferred (`../stage3-ai-deep-read/deferred.md`), 5 already covered. Spans ~15 packages and completes none of them — see the note below. |
+| **Former P1 tier, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done** — but by **stage 3**, not stage 2. 4 candidates (`../stage3-ai-deep-read/pending.md`), 22 rejected (`../stage3-ai-deep-read/rejected.md`), 3 deferred (`../stage3-ai-deep-read/deferred.md`), 5 already covered. Spans ~15 packages and completes none of them — see the note below. |
 
-**Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows. P1 tier: 34 rows
-(deep-read, overlapping the package counts).**
+**Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows. Former P1 tier: 34
+rows (deep-read, overlapping the package counts).**
 
-> **The P1 row is a tier, not a package.** Its 34 rows are scattered across
-> ~15 packages, so no package may be marked done on its account. When a
-> package batch runs later, its P1 rows are already judged — check
-> `../stage3-ai-deep-read/pending.md`, `rejected.md` and `deferred.md` before re-reading a row.
+> **Those 34 rows are not a package.** They are scattered across ~15
+> packages, so no package may be marked done on their account. When a package
+> batch runs later, some of its rows are already judged — check
+> `../stage3-ai-deep-read/pending.md`, `rejected.md` and `deferred.md` before
+> re-reading a row. This is why coverage is now tracked per row rather than
+> per band.
 >
-> **P1 validated the ranking.** It recovered both known filed cases as
-> calibration and produced 4 new candidates plus 1 strong pattern-(b) find
-> from 34 rows — roughly a 1-in-3 hit rate on rows not already accounted
-> for. That justifies continuing tier-first with **P2 (371 rows)**.
+> **They are also the calibration set.** The batch recovered both known filed
+> cases and produced 4 new candidates plus 1 pattern-(b) find — roughly a
+> 1-in-3 hit rate on rows not already accounted for. That result was about the
+> keyword list, which is gone, but the 34 stage-3 verdicts remain the material
+> the AI banding is checked against
+> ([`playbook.md`](playbook.md#calibration--the-labelled-rows)).
 
 > The four subtrees above were first triaged before
 > `HelperGuardedIfStatements.ql` existed, so their helper rows were swept
@@ -246,6 +293,27 @@ remaining work and are better attempted once the judging pace is established.
 
 ## History
 
+- **2026-09-24** — **the banding ran to completion**: all 4,438 units, 37
+  batches, `claude-opus-5`, anchors passing throughout. Verdicts in
+  `bands.csv`; band A grouped in `positives.md`. Three bugs in the batch
+  builder were caught before any banding — most importantly that `path:line`
+  is not a unique row id (340 lines carry more than one comparison, affecting
+  738 rows), so ids are now `path:line#n`.
+- **2026-09-23** — **the keyword tiers P1–P4 were dropped.** Ranking is now
+  AI lexical/semantic judgement of the row into four bands (A–D) with a
+  one-line reason each, over the whole 5,588-row corpus, with no keyword list
+  and no mechanical pre-filter. Decided by Jingsong. The list's track
+  record — 4/4 known cases in 527 rows, ~1-in-3 on P1 — was evidence about the
+  list, not about ranking, so the banding starts its track record over; the
+  labelled rows are the acceptance test.
+- **2026-09-23** — **stage 2 no longer rules anything out.** Decided by
+  Jingsong: rank every stage-1 row, and let "impossible" be the bottom rank
+  rather than an exit from the queue, since a rule-out is permanent and
+  invisible while a bad rank self-corrects. `negatives.md` is closed to new
+  entries and its rows are now treated as bottom-ranked. Two earlier drafts
+  that day — five passes (2.1–2.5), then two operations (rule out / rank) —
+  were both superseded as over-structured. No verdict changed and no count
+  moved.
 - **2026-09-22** — coverage table refreshed against the new `pkg` column and
   the new `HelperGuardedIfStatements.csv`; batch names clarified as subtrees,
   and the 114 unread helper rows inside the four done batches recorded.
