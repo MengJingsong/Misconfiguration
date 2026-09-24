@@ -26,7 +26,7 @@ The ranked rows are stage 2's result and stage 3's queue.
 
 **No keyword list, and no mechanical filter** (decided 2026-09-23). Ranking is
 the AI's reading of the row, start to finish. The fixed capacity-word list
-that produced the old P1–P4 tiers is gone; so is the bare-literal /
+that produced the old four-tier scale is gone; so is the bare-literal /
 `compareTo` fast-reject, which now survives only as one thing the AI notices
 while reading, not as a separate stage.
 
@@ -74,6 +74,49 @@ four buckets answer that. A score of 72 against 68 would imply a distinction
 the row cannot support; the average row is 67 characters. Bands also stay
 arguable: "B because the limit is unnamed" is a claim a later session can
 overturn, where "64" is not.
+
+## What band D looks like
+
+The recurring shapes that put a row in band D. Each is decidable **from the
+row alone** — cite the ground rather than re-arguing it. Moved here from
+the old `negatives.md` on 2026-09-24 (that file was deleted the same day),
+where they were written as rule-out grounds; they now argue for the bottom
+band, not an exit from the queue (see "The one rule").
+
+- **Bare literal operand** — `x > 0`, `size() < 2`. An emptiness or sign
+  test; a real limit has a name. **1,184 of the 2,681 magnitude rows in
+  `NarrowedIfStatements.csv` compare against a literal `0`** — 44% of them,
+  the single largest shape in the corpus. (Re-derived 2026-09-24: count rows
+  with `opClass=magnitude` and `rhs` exactly `0`. The figure given here
+  before was 602, which does not reproduce under any reading of the current
+  CSVs.)
+- **Ordering test** — `compareTo()` / `compare()` on either side.
+- **Loop / index arithmetic** — both operands index-shaped (`i`, `idx`,
+  `pos`, `length`, `size()`).
+- **Method name marks it mechanical** — `validate*`, `apply*Config`,
+  `serializedSize`, `hashCode`, `equals`, `compareTo`, `toString`.
+- **Declaring type marks it mechanical** — `*Spec`, `*Options`, `Config*`
+  for startup validation; serializer and comparator types.
+
+## Grounds you do not have — they need the source
+
+Listed so they are not mistaken for the shapes above. Each is a failure of one
+of the three rules, and **none can be established from a row** — they need the
+code open, which makes them stage 3's call, not stage 2's. If a row smells of
+one of these, that is an argument for a low band, never for a verdict:
+
+- **Thread-pool / concurrency / permit caps** — Rule 2: bounds parallelism,
+  not total bytes. Precedent: `concurrent_compactors`.
+- **Rate / throughput limiters** — Rule 2: bounds speed, not the ceiling.
+- **Writer-switch-on-full** — Rule 2's writer-rollover edge case: the write
+  proceeds either way, just chunked across more files. Precedent:
+  `CommitLogSegment.java:242`, `HintsBuffer.java:190`.
+- **Config validation / derived arithmetic** — startup-time checks or plain
+  math, not a runtime allocation gate.
+- **Selection / bucketing logic** — comparisons that choose *which* objects to
+  act on, not whether to create one. Precedent: the compaction strategies.
+- **Ref-counting and overflow guards** — not a usage-vs-capacity comparison.
+- **Non-diverging branches** — Rule 3. Never visible in a row.
 
 ## How to run a batch
 
@@ -134,7 +177,8 @@ Every already-filed case whose check sits in an `if` appears in
 | both `*_receive_queue_capacity` cases | `AbstractMessageHandler.java:419` — `... + ... <= queueCapacity` |
 | the compaction disk case | `CompactionAwareWriter.java:282` — `availableSpace < estimatedWriteSize` |
 
-The four qualified candidates from the P1 pass belong in band A too:
+The four qualified candidates from the capacity-word pass belong in band A
+too:
 
 | Candidate | Row |
 |---|---|
@@ -153,7 +197,8 @@ The constraint is **not** absent from the CSV, though: `:345` and
 `permitSegmentMaybe():200` both compare the same usage against the same limit
 in real `if`s.)
 
-**The 34 P1 rows all carry stage-3 verdicts** — 4 qualified, 22 refused, 3
+**The capacity-word pass's 34 rows all carry stage-3 verdicts** — 4
+qualified, 22 refused, 3
 deferred, 5 already covered — which makes them the largest labelled set
 available. **But the refusals are weak anchors.** Many were refused on Rule 3
 (the branches do not diverge on object creation), which stage 2 cannot see, so
@@ -204,8 +249,9 @@ earns a low band — but it is ranked like everything else, because a sentinel
 
 Recorded so it is not rebuilt. The old scale ranked rows by a fixed
 capacity-word list (`limit`, `capacity`, `max`, `threshold`, `space`, `bytes`,
-`free`, `avail`, `quota`, `reserve`, `allowance`, `budget`) into tiers P1–P4.
-It **failed in both directions**, which is what
+`free`, `avail`, `quota`, `reserve`, `allowance`, `budget`) into four tiers,
+strongest first — 34 / 371 / 746 / 1,337 rows. It **failed in both
+directions**, which is what
 [`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks)'s
 "deliberately no fixed keyword list" rule warns about:
 
@@ -219,8 +265,9 @@ It **failed in both directions**, which is what
 `keysWritten >= keysEstimate`, `unused`, `pendingTasks`.
 
 **What was given up with it.** The list's track record — 4/4 known cases
-selected in 527 of 2,681 magnitude rows, and a ~1-in-3 hit rate on P1's 34
-rows — was evidence about *the list*, not about ranking in general. Dropping
+selected in 527 of 2,681 magnitude rows, and a ~1-in-3 hit rate on the top
+tier's 34 rows — was evidence about *the list*, not about ranking in
+general. Dropping
 it starts the track record over, with the labelled rows above as the only
 check. That is why the acceptance test matters more now than it did before.
 
@@ -271,14 +318,15 @@ the CSVs are gitignored and regenerated per machine, so **no count here is
 pinned to a commit**. The corpus is 5,588 rows (4,489 narrowed + 1,099
 helper). When quoting a smaller number, say what it excludes — the four
 finished subtrees (`concurrent`, `cache`, `transport`, `db/compaction`)
-account for 329 narrowed and 114 helper rows, and the 34 P1 rows are already
+account for 329 narrowed and 114 helper rows, and the capacity-word pass's
+34 rows are already
 read.
 
 ## Output of a batch
 
-1. Every row → [`positives.md`](positives.md) **with a band and a one-line
+1. Every row → [`bands.md`](bands.md) **with a band and a one-line
    reason**. There is no second destination:
-   [`negatives.md`](negatives.md) is closed and takes no new entries.
+   stage 2 has no rejection file, and a hopeless row takes band D.
 2. Batch line added to [`README.md`](README.md)'s coverage table, recording
    the model and date.
 
@@ -287,7 +335,7 @@ branches read, so that is a stage-3 call recorded in
 [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md). A
 row that smells like (b)/(c) gets a low band — not a park, and not a refusal.
 
-Stage 3 then takes `positives.md` in band order, reads each row's context in
+Stage 3 then takes `bands.md` in band order, reads each row's context in
 the source — tracing backward and forward through related code — applies the
 three rules and the three patterns, and promotes what qualifies into case
 files.

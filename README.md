@@ -142,7 +142,22 @@ never scattered across individual scripts.
   databases under `codeql-dbs/` described above; its CSV output is
   gitignored and regenerated per machine. The Hadoop pack is scaffold only.
 
-### 4.4 `hadoop/build-hadoop-src/`
+### 4.4 `cassandra/original-conf/`
+
+- **`cassandra/original-conf/`** — reference copies of a stock Cassandra
+  config set: `cassandra.yaml`, `cassandra-env.sh`, `jvm17-server.options`.
+  Kept as the untouched baseline to diff an experiment's config against. No
+  script reads them, and nothing is generated from them.
+
+  **Caveat (checked 2026-09-24):** `cassandra-env.sh` and
+  `jvm17-server.options` are byte-identical to `conf/` at the pinned tag
+  `cassandra-5.0.9`, but **`cassandra.yaml` is not** — it is missing sections
+  that 5.0.9 ships (e.g. the `paxos_variant` block), so it predates the
+  pinned tag. It was committed in `56a7d0b`, before the repo pinned 5.0.9.
+  Re-copy it from `cassandra-src/conf/` before treating it as the 5.0.9
+  baseline.
+
+### 4.5 `hadoop/build-hadoop-src/`
 
 - **`hadoop/build-hadoop-src/`** — Hadoop source build scripts (JDK8 +
   Maven + protobuf 2.5.0).

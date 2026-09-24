@@ -32,8 +32,8 @@ See [README.md](README.md) for the format.
 
 > **Every case so far came from feed 3b — reading the source directly.**
 > Stage 1/2 have surfaced and ranked rows (some matching these same lines),
-> but no case has yet been *established* from that queue: the 4 P1
-> candidates awaiting write-up would be the first. This is the main evidence
+> but no case has yet been *established* from that queue: the 4 candidates
+> from the capacity-word pass awaiting write-up would be the first. This is the main evidence
 > that feed 3b is not optional.
 >
 > Feed counts are not a progress bar. Only 3a has a denominator — its

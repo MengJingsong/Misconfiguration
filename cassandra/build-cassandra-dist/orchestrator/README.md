@@ -73,10 +73,11 @@ cd cassandra/build-cassandra-dist/orchestrator
 ./stop-cluster.sh
 ```
 
-For experiment-specific config on top of a running cluster (e.g. the
-tombstone-flood relaxed guardrails), see the experiment's own
-`orchestrator/` dir, e.g.
-[`../../oom-exp/exp1/orchestrator`](../../oom-exp/exp1/orchestrator).
+For experiment-specific config on top of a running cluster (e.g. relaxed
+guardrails for a flood workload), an experiment keeps its own `orchestrator/`
+dir alongside its other files. The former example, `cassandra/oom-exp/`, was
+removed in `52a621a` — it was pinned to Cassandra 5.0.7 and superseded by
+this 5.0.9 build — so no such dir exists in the repo today.
 
 ## Prerequisites
 

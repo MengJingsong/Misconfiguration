@@ -53,7 +53,7 @@ Counts as of 2026-09-22.
 Stage 1 only sees comparisons that sit **in an `if` condition** (or one call
 frame down, behind a boolean helper). A capacity check written as a ternary,
 an assignment, a `return` expression or a method argument is invisible to it
-at any tier.
+entirely — no later ranking can recover a row stage 1 never emitted.
 
 This is not hypothetical: the `cdc_total_space` check in
 `CDCSizeTracker.processNewSegment()` is a ternary inside a method argument,

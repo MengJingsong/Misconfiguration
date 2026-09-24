@@ -13,7 +13,7 @@ rules in [`../README.md` §3.2](../README.md#32-enforcement-patterns) stand
 unchanged, and they resume once pattern (a) is finished. Nothing here has
 been judged against them.
 
-Keeping these apart from [`negatives.md`](../stage2-ai-preprocessing/negatives.md) is the point: when
+Keeping these apart from [`rejected.md`](rejected.md) is the point: when
 (b)/(c) resume, this file is the worklist — no re-scan of the corpus is
 needed.
 
@@ -94,7 +94,20 @@ several sources" rule first. `min_free_space_per_drive` and
 and the latter is the one a user would tune for *this* check specifically, so
 it may be the better constraint name.
 
-## 1c. Found by the P1 pass, parked by pattern — 2026-09-22
+## 1c. Found by the capacity-word pass, parked by pattern — 2026-09-22
+
+> **Two entries here, but the capacity-word pass is summarised everywhere as "3
+> deferred" (audit, 2026-09-24).** That summary is repeated in
+> `rejected.md`, `../../../HANDOFF.md` and
+> `../stage2-ai-preprocessing/README.md`, and its arithmetic is
+> 4 candidates + 22 rejected + 3 deferred + 5 already covered = 34 rows.
+> What is actually on file is 4 + 22 + **2** + 5 = **33**, so one row of the
+> 34 is unaccounted for. The third deferral was either never written up or
+> was folded into another entry without a note. Section 1b is *not* it — that
+> row came from the stage-2 helper batch, not this one. Not reconstructible
+> from the CSVs either, since the pass's keyword definition was dropped on
+> 2026-09-23. **Treat "3 deferred" as unverified**; if the (b)/(c) pass
+> resumes, one of its rows may need re-reading.
 
 ### `column_index_cache_size` — pattern (b) — **strong**
 

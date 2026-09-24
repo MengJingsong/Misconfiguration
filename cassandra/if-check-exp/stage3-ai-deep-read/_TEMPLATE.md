@@ -126,7 +126,7 @@ what one allowed object costs.
 
 | Field | Content |
 |--------|---------|
-| **Stage-3 feed** | `3a` (from stage 1/2 — cite the `positives.md` row and its tier) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
+| **Stage-3 feed** | `3a` (from stage 1/2 — cite the `bands.md` row and its band) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
 | **Filed by / Date** | Who wrote this case up and when |
 | **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) — a case is not filed until this is done |
 | **Escape hatch / Target-3 note** | any bypass of the disallow branch noticed (flag for Target 3, do not chase here), or "none found yet" |

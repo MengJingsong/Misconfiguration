@@ -14,7 +14,8 @@ are **not** restated here — one source of truth for the rules.
    `cd /proj/misconfiguration-PG0/git-repos/cassandra-src && git describe --tags`
    must print `cassandra-5.0.9`.
 3. Pick a feed (README's "two feeds"). For **3a**, take
-   `../stage2-ai-preprocessing/positives.md` in tier order, highest first.
+   `../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
+   then C; within A, read A1 → A2 → A3.
 
 ## Working a row
 

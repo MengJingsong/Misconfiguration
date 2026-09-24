@@ -1,4 +1,8 @@
-# Positives — every stage-1 row, ranked
+# Bands — every stage-1 row, ranked
+
+*Named `positives.md` until 2026-09-24. Renamed because the file covers all
+four bands, 4,387 of them band D: nothing here is a "positive", and stage 2
+has nothing to contrast one against since it stopped ruling rows out.*
 
 **Stage 2's output.** Every stage-1 row with the band an AI session gave it and
 a one-line reason. Stage 2 rules nothing out (2026-09-23), so a row that looks
@@ -40,7 +44,7 @@ helper judged once and applied to all its call sites.
 |---|---|
 | Model | `claude-opus-5` |
 | Dates | 2026-09-23 / 2026-09-24 |
-| Batches | 37 over the un-triaged corpus, then 3 more over the four subtrees triaged in September |
+| Batches | 37 over the un-triaged corpus, then 3 more over the four subtrees triaged in September. **The `batch` column does not identify a batch on its own** — see below. |
 | Anchor check | **passed on all 40 batches** — the 8 labelled rows came back A every time |
 | Accidental consistency check | 8 helpers fell into both scopes and were judged twice, in unrelated batches. **All 8 agreed.** This is the only cross-batch consistency evidence that exists, since re-judging for consistency was deliberately not done. |
 
@@ -50,6 +54,18 @@ repeated in every batch so separate batches share one yardstick;
 `record-stage2-bands.py` refuses a batch whose anchors do not all come back A.
 They also carry their own band-A rows in `bands.csv` (batch `anchors`), so the
 band-A list below is complete.
+
+**Batch labels collide across the two runs (found 2026-09-24).**
+`make-stage2-batches.py` names its output `batch-NN.txt` starting from 01 in
+whatever directory it is given, so the second run — the three `--consumed`
+batches over the four triaged subtrees — reused `batch-01`, `batch-02` and
+`batch-03`. `bands.csv` therefore holds 38 distinct `batch` values for 40
+batches, and for the 703 units under those three labels **only `batch` plus
+`date` identifies the run**: `2026-09-23` is the un-triaged corpus,
+`2026-09-24` the subtree pass. No verdict is affected — the collision is in
+the provenance label, not the judgement — but any query that groups by
+`batch` alone will merge two unrelated runs. Group by `(batch, date)`
+instead, or relabel the second run if the column is ever needed on its own.
 
 ## Band A, grouped by what the limit is
 
@@ -236,8 +252,8 @@ not here (verdicts file with the stage that judged them):
 
 **Nothing in this file is a finding.** Some band-A rows are already refused:
 `NativeAllocator$Region.allocate():273` and `SlabAllocator$Region.allocate():201`
-were read and rejected in the P1 pass and are in `rejected.md`. Stage 2 ranked
+were read and rejected in the capacity-word pass and are in `rejected.md`. Stage 2 ranked
 them high anyway, correctly — the ground for refusing them is Rule 2, which no
-row can show. The four subtrees banded last also carry older verdicts in
-`negatives.md` (closed) and `rejected.md`; a band never overrides a verdict
-already made with the source open.
+row can show. The four subtrees banded last also carry older
+verdicts in `../stage3-ai-deep-read/rejected.md`; a band never overrides a
+verdict already made with the source open.

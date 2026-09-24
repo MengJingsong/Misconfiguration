@@ -9,15 +9,15 @@ citations checked against the pinned tag).
 An entry leaves this file when its case file lands in `cases/` and its row is
 added to [`_INDEX.md`](_INDEX.md). Nothing else belongs here — rows still
 *awaiting* a read live in
-[`../stage2-ai-preprocessing/positives.md`](../stage2-ai-preprocessing/positives.md),
+[`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md),
 which is stage 3's 3a queue.
 
-> Moved here 2026-09-23 from `positives.md`. They had been recorded there
-> because the P1 pass predates the stage folders — but they are stage-3
+> Moved here 2026-09-23 from `bands.md`. They had been recorded there
+> because the capacity-word pass predates the stage folders — but they are stage-3
 > judgements (source read, three rules applied), and a stage-2 file states in
 > its own header that it never applies those rules.
 
-### From the P1 pass, 2026-09-22 — 4 candidates, all pattern (a)
+### From the capacity-word pass, 2026-09-22 — 4 candidates, all pattern (a)
 
 Deep-read against the three rules with the source open. Each passes all
 three; none is written up as a case file yet.
@@ -45,11 +45,11 @@ three; none is written up as a case file yet.
 
 ### Already covered — cite, do not re-file
 
-P1 also surfaced five rows that belong to existing records:
+The same pass surfaced five rows that belong to existing records:
 
 | Row | Disposition |
 |---|---|
-| `MemtablePool.tryAllocate():156` | The two filed memtable cases (verified). Served as calibration — P1 found them. |
+| `MemtablePool.tryAllocate():156` | The two filed memtable cases (verified). Served as calibration — the pass found them. |
 | `AbstractMessageHandler.acquireCapacity():419` | The two filed `*_receive_queue_capacity` cases. Also calibration. |
 | `HintsBuffer.allocateBytes():190` | Already rejected in `rejected.md` (writer-rollover). Cited, not re-judged. |
 | [`CommitLogSegmentManagerCDC.permitSegmentMaybe():200`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200) | **A second check site of the filed `cdc_total_space` case** — `sizeInProgress + getCommitLogSegmentSize() < getCDCTotalSpace()`, the re-permit path, setting the same `CDCState` verdict that `throwIfForbidden()` reads. Per README §6.1 "one case, several check sites", it belongs in that case file's Location section — **applied; verified present 2026-09-23.** |

@@ -18,7 +18,7 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 | [`deferred.md`](deferred.md) | Lines left **unjudged** — they would qualify only under enforcement pattern (b) or (c), parked by the §7.5 scope decision. Not refused. |
 | [`cases/`](cases/) | Cases that **qualified and are written up** — the deliverable. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](_INDEX.md) | Master index of those cases. |
-| [`pending.md`](pending.md) | Qualified against the three rules but **not yet written up**. Findings, not a queue — rows still awaiting a read live in `../stage2-ai-preprocessing/positives.md`. |
+| [`pending.md`](pending.md) | Qualified against the three rules but **not yet written up**. Findings, not a queue — rows still awaiting a read live in `../stage2-ai-preprocessing/bands.md`. |
 
 ## The two feeds
 
@@ -27,17 +27,18 @@ cover different blind spots.**
 
 | Feed | What points stage 3 at a line | Coverage | Progress measurable? |
 |---|---|---|---|
-| **3a — from stage 1/2** | [`../stage2-ai-preprocessing/positives.md`](../stage2-ai-preprocessing/positives.md), highest tier first | bounded, enumerable (row counts, tiers, batch table) | **yes** |
+| **3a — from stage 1/2** | [`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md), band A first | bounded, enumerable (row counts, bands, batch table) | **yes** |
 | **3b — from raw source** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — there is no denominator |
 
 - **3a** is the cheap, systematic feed. Stages 1 and 2 exist precisely to
   relieve stage 3's burden by shrinking and ordering what must be read.
 - **3b is not optional.** It is the standing insurance against stage 1's
   *structural* blind spot — it found the `cdc_total_space` ternary, which
-  stage 1 cannot surface at any tier because it is not an `if` condition. It
-  plays the same role against stage 1 that the P3 tier plays against
-  stage 2's vocabulary. Its weakness is cost: the full source is far more
-  than one session can read.
+  stage 1 cannot surface at all, because it is not an `if` condition. It
+  plays the same role against stage 1's *structural* blind spot that band C
+  plays against stage 2's *vocabulary* blind spot: insurance against a real
+  case that the mechanism is built not to see. Its weakness is cost: the full
+  source is far more than one session can read.
 
 **Record the feed (`3a` or `3b`) on every case and every entry here.** The
 two have different coverage properties and only 3a has a denominator; without
@@ -53,9 +54,9 @@ refused** is a *stage-3* rejection.
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
 | Qualified | *(cannot qualify)* | [`cases/`](cases/), or [`pending.md`](pending.md) until written up |
-| Rejections | `../stage2-ai-preprocessing/negatives.md` | [`rejected.md`](rejected.md) |
+| Rejections | *(none possible — bottom band instead)* | [`rejected.md`](rejected.md) |
 | Deferrals | *(none possible — see below)* | [`deferred.md`](deferred.md) |
-| Form | bulk, per-batch, one line citing row-level ground | few, narrative, often deferred-rather-than-refused |
+| Form | bulk, per-batch, a band and a one-line reason | few, narrative, often deferred-rather-than-refused |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding that a line
 "would qualify only under (b) or (c)" means tracing where the verdict is read

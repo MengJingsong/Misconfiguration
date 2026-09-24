@@ -87,15 +87,14 @@ this folder's own scope.
   - **`stage2-ai-preprocessing/`** — stage-2 verdicts (lexical, rows only).
     - `README.md` — what stage 2 is, how a row is triaged, the
       "Progress at a glance" dashboard, and the batch-coverage table.
-    - `playbook.md` — **start here to run a batch.** Stage 2's two
-      operations, the verified side-agnostic rule-out grounds, the
-      the four bands (A–D) and how to run a batch, the calibration rows, and
-      the tricks and pitfalls learned so far.
-    - `positives.md` — the banding result: bands explained, band A grouped by
+    - `playbook.md` — **start here to run a batch.** The one rule (rank,
+      never rule out), the four bands (A–D), what band D looks like and the
+      grounds that need the source instead, how to run a batch, the
+      calibration rows, and the tricks and pitfalls learned so far.
+    - `bands.md` — the banding result: bands explained, band A grouped by
       what the limit is, run provenance. Stage 3's 3a queue.
     - `bands.csv` — **the per-row verdicts**, committed because an AI band
       cannot be regenerated the way the old keyword tiers could.
-    - `negatives.md` — **2.1's output**, ruled out from the row alone, source unread.
   - **`stage3-ai-deep-read/`** — stage-3 verdicts (semantic, source open).
     This is the deciding stage.
     - `README.md` — what stage 3 is, its two feeds, and where verdicts go.
@@ -166,8 +165,8 @@ CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
 stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
 standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
 `claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `positives.md`. Seven cases are filed, all stage-3 complete, and 34 further
-rows carry stage-3 verdicts from the old P1 tier.
+in `bands.md`. Seven cases are filed, all stage-3 complete, and 34 further
+rows carry stage-3 verdicts from the capacity-word pass.
 
 | Band | Meaning | Units |
 |---|---|---|
@@ -194,7 +193,7 @@ were judged twice in unrelated batches, and all 8 agreed.
 
 | Stage-2 coverage | Narrowed | Helper | Total |
 |---|---|---|---|
-| Consumed — 4 subtrees + the former P1 tier (overlapping) | 329 | 114 | — |
+| Consumed — 4 subtrees + the capacity-word pass (overlapping) | 329 | 114 | — |
 | Not yet consumed | 4,160 | 985 | **5,145** |
 
 **All 5,588 rows need a band**, including the consumed ones if a band is ever
@@ -207,11 +206,12 @@ update that first.
 semantic judgement into four bands: **A** reads as a real capacity check, **B**
 plausibly a resource bound, **C** named operands with nothing resource-shaped
 (the insurance band), **D** clearly not one. Each row also carries a one-line
-reason. Output is `positives.md`.
+reason. Output is `bands.md`.
 
 **It rules nothing out** (2026-09-23): a hopeless row takes band D rather than
 an exit from the queue, because a rule-out is permanent and invisible while a
-bad band self-corrects. `negatives.md` is closed. **The keyword tiers P1–P4
+bad band self-corrects. **Stage 2 has no rejection file at all** — the
+former `negatives.md` was deleted on 2026-09-24. **The four keyword tiers
 were dropped the same day** — no fixed word list and no mechanical
 pre-filter; the banding is the AI's reading of the row, start to finish.
 Ranking the whole corpus costs about 107k input / 140k output tokens, so there
@@ -233,14 +233,14 @@ is no saving worth buying with a heuristic that might drop a real case.
      mechanism the two net cases fail to cite (item 3 below).
    - `Directories.hasDiskSpaceForCompactionsAndStreams():551` — the pattern-(b)
      find parked in `deferred.md`.
-3. **Write up the 4 candidates from the former P1 pass as case files.** Found,
+3. **Write up the 4 candidates from the capacity-word pass as case files.** Found,
    judged and recorded in `stage3-ai-deep-read/pending.md`, but no case file
    exists yet. Start with `BufferPool_memoryUsageThreshold` (strongest); its
    main open task is tracing `memoryUsageThreshold` to its config source for
    the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest — confirm
    `limit`'s origin before committing to it. `Integer_MAX_VALUE` needs a §6.1
    naming judgement, since the constraint is a *type bound*.
-4. **One correction to existing case files**, found by the P1 pass: the two
+4. **One correction to existing case files**, found by the capacity-word pass: the two
    net cases should link `ResourceLimits$Basic.tryAllocate():213` as the
    mechanism behind their reserve sub-checks. They currently name
    `ResourceLimits.Outcome` (the enum) but never cite the comparison itself.
@@ -263,7 +263,7 @@ is their worklist.
 ### ⏵ Step 1 in detail — the AI banding (decided 2026-09-23)
 
 **Ranking is AI lexical/semantic judgement of the row, and nothing else.** The
-fixed capacity-word list that produced tiers P1–P4 is gone, and so is the
+fixed capacity-word list that produced the four tiers is gone, and so is the
 bare-literal / `compareTo` fast-reject; both were dropped on 2026-09-23. The
 full procedure is in `stage2-ai-preprocessing/playbook.md` — this is the
 summary.
@@ -278,7 +278,7 @@ capacity-shaped vocabulary the list never anticipated (`remaining()`,
 "deliberately no fixed keyword list" rule always implied.
 
 **What went with it.** The list's track record — 4/4 known cases selected in
-527 of 2,681 magnitude rows, ~1-in-3 hit rate on P1 — was evidence about *the
+527 of 2,681 magnitude rows, ~1-in-3 hit rate on the top tier — was evidence about *the
 list*, not about ranking in general. The banding starts its track record over.
 
 **How it works:**
@@ -324,7 +324,7 @@ findings — they shrink and order what stage 3 must read.
 
 **Stage 3 has two feeds, and both are required:**
 
-- **3a — from stage 1/2.** Takes `positives.md` in band order. Bounded and
+- **3a — from stage 1/2.** Takes `bands.md` in band order. Bounded and
   enumerable, so progress is measurable.
 - **3b — from raw source.** The session reads subsystems and call chains
   directly. Unbounded, so there is no denominator and no percentage to
@@ -340,7 +340,7 @@ then read and refused is a *stage-3* rejection.
 
 | | Stage 2 verdict | Stage 3 verdict |
 |---|---|---|
-| Rejected | `stage2-ai-preprocessing/negatives.md` | `stage3-ai-deep-read/rejected.md` |
+| Rejected | *(cannot reject)* | `stage3-ai-deep-read/rejected.md` |
 | Deferred | *(cannot defer)* | `stage3-ai-deep-read/deferred.md` |
 | Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `_INDEX.md` |
 
@@ -371,30 +371,42 @@ remaining items below.
    become a valid case; nothing is ruled out. Record everything under
    `cassandra/if-check-exp/stage2-ai-preprocessing/` — that
    folder *is* the AI-filtering-results store. Every row goes to
-   `positives.md` with a band and a one-line reason; `negatives.md` is closed,
-   pattern-(b)/(c)-only rows to `deferred.md`.
+   `bands.md` with a band and a one-line reason — there is no second
+   destination; pattern-(b)/(c)-only rows to `deferred.md`.
 
    **Stage 2 does *not* apply the three rules** (README §3.4–§3.6). Those
    qualify a real case and need the code — Rule 3 asks whether the branches
    diverge on object creation, which no row can answer. They belong to the
-   stage-3 pass, which takes `positives.md` in band order and
+   stage-3 pass, which takes `bands.md` in band order and
    promotes what qualifies into case files.
 
-   **Because stage 2 is blind, it should rank far more than it rejects.** A
-   wrong rejection is permanent and invisible; a wrong promotion costs a
-   little reading. Verified tiers and reject rules are in
+   **Because stage 2 is blind, it ranks and never rejects.** A wrong
+   rejection is permanent and invisible; a wrong promotion costs a little
+   reading. The band definitions, what band D looks like, and the grounds
+   that need the source instead are in
    `stage2-ai-preprocessing/playbook.md`.
 
-### P1 tier — run 2026-09-22, done
+### The capacity-word pass — run 2026-09-22, done
 
-All 34 P1 rows deep-read against the three rules. Outcome: **4 new
+The 34 rows selected by a capacity word on either side **and** a compound
+usage side — the top tier of the keyword scale, before that scale was
+dropped on 2026-09-23. All 34 deep-read against the three rules. Outcome: **4 new
 candidates, 22 rejected, 3 deferred as pattern (b)/(c), 5 already covered.**
-Details in `stage2-ai-preprocessing/positives.md`, `negatives.md`, `deferred.md`.
+*(Audit 2026-09-24: only 2 deferrals are on file, so 33 of the 34 rows are
+accounted for — see `stage3-ai-deep-read/deferred.md` §1c.)*
+Details in `stage2-ai-preprocessing/bands.md` and
+`stage3-ai-deep-read/rejected.md` / `deferred.md`.
 
-**The ranking validated.** P1 recovered both known filed cases as calibration
+**The ranking validated.** The pass recovered both known filed cases as calibration
 and yielded 4 new candidates plus 1 strong pattern-(b) find — about a
-1-in-3 hit rate on rows not already accounted for. **Next: P2, 371 rows**,
-continuing tier-first.
+1-in-3 hit rate on rows not already accounted for.
+
+> **Superseded 2026-09-23.** This section closed by naming the next tier
+> down — 371 rows — as the next step. The keyword tiers were dropped the
+> next day and that pass never ran; the whole corpus was banded A–D instead. **Do not act on that
+> next step** — the current one is band A, in the "Resume here" section
+> above. What survives from this pass is its 34 stage-3 verdicts and the 4
+> candidates below.
 
 **The 4 candidates** (none written up yet — this is the immediate next work):
 
@@ -405,7 +417,7 @@ continuing tier-first.
 | `Integer_MAX_VALUE` (index summary) | `IndexSummaryBuilder.maybeAddEntry():204` — disallow skips the entry and logs "index summary exceeded (2GiB)". Constraint is a **type bound**, which Target 1 admits but §6.1 naming does not cleanly cover. |
 | `TeeDataInputPlus_limit` | `TeeDataInputPlus.maybeWrite():58` — weakest; confirm `limit`'s origin before writing it up. |
 
-**Two open actions on existing cases**, both surfaced by P1:
+**Two open actions on existing cases**, both surfaced by the capacity-word pass:
 
 1. `CommitLogSegmentManagerCDC.permitSegmentMaybe():200` is a **second check
    site of the filed `cdc_total_space` case** (the re-permit path, same
@@ -439,15 +451,17 @@ What follows from this:
 - **Already-filed cases are unaffected.** Four of the seven existing cases
   are pattern (b). This decision governs *new candidate triage* only;
   existing case files keep their recorded pattern.
-- **(b)/(c)-only rows go to `deferred.md`, not `negatives.md`.** A row
+- **(b)/(c)-only rows go to `deferred.md`, not a rejection file.** A row
   dropped only because "the `if`'s own branches don't diverge" is not
   rejected — it is simply unjudged under (b)/(c). A separate file (rather
   than a status column, which invites skimming past it) means resuming
   (b)/(c) later is a matter of reading one file instead of re-scanning the
   corpus. Rejections on pattern-independent grounds (thread-pool or
   concurrency caps, rate limiters, config validation, time checks, writer
-  rollover) were recorded in `negatives.md`, which closed on 2026-09-23 when
-  stage 2 stopped rejecting rows; they are now bottom-ranked, not settled.
+  rollover) were once recorded in the stage-2 `negatives.md`; it closed on
+  2026-09-23 when stage 2 stopped rejecting rows and was deleted on
+  2026-09-24, its rows now carrying band D in `bands.csv` — bottom-ranked,
+  not settled.
 - **The existing CodeQL scripts already fit pattern (a) — confirmed by
   reading `NarrowedIfStatements.ql` (2026-09-22), not just its README.** It
   selects `BinaryExpr` comparisons whose `getEnclosingStmt()` is an `IfStmt`,
@@ -491,18 +505,19 @@ Earlier trigger designs and results are recoverable from git history
 
 `candidates.md` was folded into `stage2-ai-preprocessing/README.md` (which keeps the
 batch-coverage table and the judging procedure) and the rest split into
-`positives.md`, `negatives.md` and `deferred.md`, so each file has one job.
+`bands.md`, `negatives.md` and `deferred.md`, so each file has one job.
+(`negatives.md` was deleted on 2026-09-24 — see below.)
 References in `stage3-ai-deep-read/_INDEX.md`, the codeql pipeline README and the
 `native_transport` case file were updated to match.
 
-Rejections are split by the stage that judged them (see "The three stages"
-above): `stage3-ai-deep-read/rejected.md` for stage-3 refusals,
-`stage2-ai-preprocessing/negatives.md` for stage-2 ones. **Stage-2
-rejections made before 2026-09-22 remain in `rejected.md`**, since
-`negatives.md` did not exist when they were recorded and migrating them would
-churn several cross-references for no analytical gain. So: `rejected.md` is
-authoritative for every rejection up to 2026-09-22, `negatives.md` for
-stage-2 rejections after it. Check `stage3-ai-deep-read/_INDEX.md` before adding a row.
+**There is one rejection file: `stage3-ai-deep-read/rejected.md`, and it is
+authoritative for every rejection in this folder.** The split by judging
+stage ended on 2026-09-24, when the stage-2 `negatives.md` was deleted —
+stage 2 had stopped rejecting rows on 2026-09-23, so the file could only ever
+shrink in relevance, and the 108 rows in it now carry band D in `bands.csv`.
+Its detail is in git history at `43a3c27` if a later pass wants the
+per-helper arguments. Check `stage3-ai-deep-read/_INDEX.md` before adding a
+row.
 
 Remaining items, in the order they were previously prioritized:
 
@@ -579,7 +594,7 @@ abandoned. **The worklist itself lives in
   pattern-(a) pass.
 - **The 2026-09-20 re-audit** of rows and earlier rejections judged only on
   "the `if`'s own branches don't diverge". These are `deferred-(b)/(c)`, not
-  rejected; recording them as such in `negatives.md` is what makes this
+  rejected; recording them as such in `deferred.md` is what makes this
   resumable as a filter rather than a re-scan.
 
 Already explored, no case retained: the whole `db/compaction/` subpackage

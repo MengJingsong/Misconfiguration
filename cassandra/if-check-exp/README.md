@@ -366,8 +366,8 @@ cassandra/if-check-exp/
 ├── stage2-ai-preprocessing/       # lexical narrowing, rows only — see §7.2
 │   ├── README.md            #   what stage 2 is, how a row is triaged, progress
 │   ├── playbook.md          #   start here to run a batch: bands, procedure
-│   ├── positives.md         #   ranked survivors = stage 3's 3a queue
-│   └── negatives.md         #   refused from the row alone, source unread
+│   ├── bands.md             #   every row banded A-D = stage 3's 3a queue
+│   └── bands.csv            #   the per-row verdicts
 ├── stage3-ai-deep-read/           # semantic qualification — the deciding stage
 │   ├── README.md            #   what stage 3 is, its two feeds, where verdicts go
 │   ├── playbook.md          #   how to run a pass: order of checks, pitfalls
@@ -443,7 +443,7 @@ Each row gets one of four bands — **A** reads as a real capacity check, **B**
 plausibly a resource bound, **C** named operands with nothing resource-shaped
 (the insurance band), **D** clearly not one — plus a one-line reason. The
 banded rows are stage 2's result and stage 3's queue, in
-`stage2-ai-preprocessing/positives.md`.
+`stage2-ai-preprocessing/bands.md`.
 
 **No fixed keyword list and no mechanical pre-filter (2026-09-23).** The
 banding is the AI's reading of the row, start to finish. This is what this
@@ -452,8 +452,9 @@ section's "deliberately no fixed keyword list" rule always implied.
 **Stage 2 rules nothing out (2026-09-23).** A row that looks impossible takes
 the bottom rank; it is never removed from the queue. A rule-out is permanent
 and invisible, while a bad rank costs a little reading and self-corrects as
-stage 3 works down the list. `stage2-ai-preprocessing/negatives.md` holds the
-rule-outs made before this decision and is closed.
+stage 3 works down the list. The rule-outs made before this decision were
+held in a `negatives.md` in that folder, closed the same day and deleted on
+2026-09-24; those rows carry band D in `bands.csv` instead.
 
 Which CSV a row came from, whether it compares by magnitude or equality, and
 whether its comparison hides behind a boolean helper are reading order and
@@ -464,11 +465,10 @@ three rules in §3.4–§3.6. Rule 3 in particular ("does the verdict reach a
 decision point that diverges on object creation?") cannot be answered from a
 row — it needs the branches read.
 
-**Because stage 2 cannot see the source, it should rank far more than it
-rejects.** A wrong rejection is permanent and invisible: nothing re-reads
-`negatives.md`. A wrong promotion costs only a little reading later. Reject
-only on grounds the row *fully* determines; when in doubt, downrank instead
-of refusing. See
+**Because stage 2 cannot see the source, it ranks and never rejects.** A
+wrong rejection is permanent and invisible — nothing re-reads a rejection —
+while a wrong promotion costs only a little reading later. When in doubt,
+downrank; band D is the bottom of the order, not a bin. See
 [`stage2-ai-preprocessing/README.md`](stage2-ai-preprocessing/README.md).
 
 #### Stage 3 — AI deep read (semantic qualification)
@@ -494,7 +494,7 @@ still needs **manual review and runtime verification** — reserved for a future
 
 | Feed | Points stage 3 at a line via | Coverage | Progress measurable? |
 |---|---|---|---|
-| **3a** | `stage2-ai-preprocessing/positives.md`, band A first | bounded, enumerable | **yes** |
+| **3a** | `stage2-ai-preprocessing/bands.md`, band A first | bounded, enumerable | **yes** |
 | **3b** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — no denominator |
 
 **3b is not optional.** It is the standing insurance against stage 1's
@@ -514,7 +514,7 @@ Not by the stage that surfaced the row. A row **stage 2 ranked** and
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
 | Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
-| Ranked | `stage2-ai-preprocessing/positives.md` — every row, banded A–D | *(n/a)* |
+| Ranked | `stage2-ai-preprocessing/bands.md` — every row, banded A–D | *(n/a)* |
 | Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/rejected.md` |
 | Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/deferred.md` |
 
