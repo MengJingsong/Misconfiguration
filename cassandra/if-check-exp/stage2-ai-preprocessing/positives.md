@@ -15,14 +15,24 @@ reason, model, date, batch`. A `uid` is `path:line#n` — the `#n` disambiguates
 the 340 lines that carry more than one comparison — or `helper:<fqn>` for a
 helper judged once and applied to all its call sites.
 
+## Coverage
+
+**Every stage-1 row has a band.**
+
+| Input | Units | Banded |
+|---|---|---|
+| `NarrowedIfStatements.csv` | 4,489 rows | **4,489 (100%)** |
+| `HelperGuardedIfStatements.csv` | 1,099 rows → 300 distinct helpers | **300 (100%)** |
+| **bands.csv** | | **4789** |
+
 ## Bands
 
-| Band | The row reads as | Rows | Stage-3 order |
+| Band | The row reads as | Units | Stage-3 order |
 |---|---|---|---|
-| **A** | A real capacity check — usage compared against a memory or disk limit | 113 | first |
-| **B** | Plausibly a resource bound, but the row alone does not settle it | 148 | second |
-| **C** | Named operands, nothing resource-shaped — the insurance band | 85 | third |
-| **D** | Clearly not one: validation, ordering, loop index, bare literal, serialization | 4092 | last |
+| **A** | A real capacity check — usage compared against a memory or disk limit | 134 | first |
+| **B** | Plausibly a resource bound, but the row alone does not settle it | 174 | second |
+| **C** | Named operands, nothing resource-shaped — the insurance band | 94 | third |
+| **D** | Clearly not one: validation, ordering, loop index, bare literal, serialization | 4387 | last |
 
 ## Run
 
@@ -30,14 +40,16 @@ helper judged once and applied to all its call sites.
 |---|---|
 | Model | `claude-opus-5` |
 | Dates | 2026-09-23 / 2026-09-24 |
-| Batches | 37, of ~120 units each |
-| Units banded | 4438 — 4,153 rows + 285 helper judgements standing for 985 call sites |
-| Anchor check | **passed on all 37 batches** — the 8 labelled rows came back A every time |
+| Batches | 37 over the un-triaged corpus, then 3 more over the four subtrees triaged in September |
+| Anchor check | **passed on all 40 batches** — the 8 labelled rows came back A every time |
+| Accidental consistency check | 8 helpers fell into both scopes and were judged twice, in unrelated batches. **All 8 agreed.** This is the only cross-batch consistency evidence that exists, since re-judging for consistency was deliberately not done. |
 
 Anchors are the 4 filed cases plus the 4 candidates in
 [`../stage3-ai-deep-read/pending.md`](../stage3-ai-deep-read/pending.md),
 repeated in every batch so separate batches share one yardstick;
 `record-stage2-bands.py` refuses a batch whose anchors do not all come back A.
+They also carry their own band-A rows in `bands.csv` (batch `anchors`), so the
+band-A list below is complete.
 
 ## Band A, grouped by what the limit is
 
@@ -48,7 +60,7 @@ limits are chosen by the code, so most will fail §6.1 even though the check
 itself is genuine. **Stage 2 cannot tell these apart from the row** — the split
 below is a reading aid, not a verdict.
 
-### A1 — limit traceable to configuration (51)
+### A1 — limit traceable to configuration (65)
 
 | Row | Reason |
 |---|---|
@@ -103,8 +115,22 @@ below is a reading aid, not a verdict.
 | helper `flushInternal()` | hints file position against the configured max hints file size, behind a helper |
 | helper `needsCleaning()` | memtable pool used bytes against the next cleaning threshold, behind a helper |
 | helper `tryAllocate()` | memtable pool allocated plus request against the pool limit, behind a helper |
+| `CompactionAwareWriter.java:282#1` | available disk space against the estimated compaction write size |
+| `HintsBufferPool.java:113#1` | allocated off-heap hint buffers against the max allocated buffers cap |
+| `QueryController.java:449#1` | materialized key count against the configured max-keys limit |
+| `TeeDataInputPlus.java:58#1` | tee buffer position plus length against the configured byte limit |
+| `AbstractMessageHandler.java:419#1` | queued bytes plus incoming against the per-connection queue capacity |
+| `BufferPool.java:443#1` | pool usage plus request against the memory usage threshold |
+| `MemtablePool.java:156#1` | memtable pool usage plus request against the pool limit |
+| `LeveledManifest.java:190#1` | level byte budget against the 2GiB type bound |
+| `LeveledManifest.java:557#1` | accumulated candidate bytes against the configured max sstable size |
+| `LeveledManifest.java:678#3` | accumulated bytes against the configured max sstable size when choosing the next level |
+| `MajorLeveledCompactionWriter.java:75#1` | bytes written against the configured max sstable size and the level byte budget, switching writer |
+| `MajorLeveledCompactionWriter.java:78#1` | bytes written against the configured max sstable size and the level byte budget, switching writer |
+| `SplittingSizeTieredCompactionWriter.java:84#2` | estimated on-disk bytes written against the bytes budgeted for the current writer |
+| `CQLMessageHandler.java:551#1` | message size against the configured native transport max message size |
 
-### A2 — limit is a constant or a structural bound (25)
+### A2 — limit is a constant or a structural bound (30)
 
 | Row | Reason |
 |---|---|
@@ -133,8 +159,13 @@ below is a reading aid, not a verdict.
 | `StreamingTombstoneHistogramBuilder.java:452#1` | spool size against its capacity, gating whether the point is accumulated |
 | helper `offer()` | blocking queue size against its capacity, behind a helper |
 | helper `tryAddOrAccumulate()` | spool size against its capacity, behind a helper |
+| `IndexSummaryBuilder.java:204#1` | index summary bytes plus entry size against the 2GiB type bound |
+| `CaffeineCache.java:65#1` | cache entry weight against the 2GiB type bound |
+| `SerializingCache.java:71#1` | cache entry serialized size against the 2GiB type bound |
+| `SerializingCache.java:94#1` | cache entry serialized size against the 2GiB type bound |
+| `Envelope.java:429#1` | total frame length against the maximum total length, rejecting the frame |
 
-### A3 — grow-when-full before reallocating a buffer or array (37)
+### A3 — grow-when-full before reallocating a buffer or array (39)
 
 These share one argument: `size == capacity` immediately before growing a
 growable structure. If stage 3 refuses one on Rule 3 or §6.1, the same
@@ -180,14 +211,16 @@ one at a time.**
 | `BTree.java:1600#1` | btree builder array length against the required size before growing |
 | `BTreeSet.java:133#1` | btree set array length against the required size before allocating |
 | `BTreeSet.java:477#1` | btree range array length against the required size before allocating |
+| `CBUtil.java:105#1` | decode buffer capacity against the required size before reallocating |
+| `Flusher.java:282#1` | flush buffer remaining against the max framed payload size before allocating |
 
-## Band B (148)
+## Band B (174)
 
 Not listed here row by row — query [`bands.csv`](bands.csv). Recurring themes:
 warn-rather-than-fail thresholds (batch size, query size, tombstone count),
 count-based guards that proxy for memory, buffer-remaining tests before a typed
 read or write, size-based routing decisions (large vs small message, sparse vs
-dense block), and repair byte budgets.
+dense block), connection and compaction count limits, and repair byte budgets.
 
 ## Where a row goes after stage 3 reads it
 
@@ -205,4 +238,6 @@ not here (verdicts file with the stage that judged them):
 `NativeAllocator$Region.allocate():273` and `SlabAllocator$Region.allocate():201`
 were read and rejected in the P1 pass and are in `rejected.md`. Stage 2 ranked
 them high anyway, correctly — the ground for refusing them is Rule 2, which no
-row can show.
+row can show. The four subtrees banded last also carry older verdicts in
+`negatives.md` (closed) and `rejected.md`; a band never overrides a verdict
+already made with the source open.

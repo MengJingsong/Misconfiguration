@@ -31,8 +31,8 @@ if bad:
     sys.exit("ANCHOR CHECK FAILED, batch not recorded:\n  " + "\n  ".join(bad))
 
 exists = os.path.exists(out)
-with open(out, 'a', newline='\n') as f:
-    w = csv.writer(f)
+with open(out, 'a', newline='') as f:
+    w = csv.writer(f, lineterminator='\n')
     if not exists:
         w.writerow(['uid', 'kind', 'band', 'reason', 'model', 'date', 'batch'])
     w.writerows(new)

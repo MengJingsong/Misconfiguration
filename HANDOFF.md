@@ -162,24 +162,27 @@ Each case's full detail lives in its own file.
 ### ⏵ Resume here (state as of 2026-09-24, end of session)
 
 **Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
-CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete.** All 4,438 units
-were banded on 2026-09-23/24 in 37 batches with `claude-opus-5`; verdicts are
-in `stage2-ai-preprocessing/bands.csv`, grouped in `positives.md`. Seven cases
-are filed, all stage-3 complete, and 34 further rows carry stage-3 verdicts
-from the old P1 tier.
+CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
+stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
+standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
+`claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
+in `positives.md`. Seven cases are filed, all stage-3 complete, and 34 further
+rows carry stage-3 verdicts from the old P1 tier.
 
 | Band | Meaning | Units |
 |---|---|---|
-| **A** | Reads as a real capacity check | **113** |
-| **B** | Plausibly a resource bound | 148 |
-| **C** | Named operands, nothing resource-shaped — the insurance band | 85 |
-| **D** | Clearly not one | 4,092 |
+| **A** | Reads as a real capacity check | **134** |
+| **B** | Plausibly a resource bound | 174 |
+| **C** | Named operands, nothing resource-shaped — the insurance band | 94 |
+| **D** | Clearly not one | 4,387 |
 
-Band A splits into **A1 configuration-derived (51)**, **A2 constants and
-structural bounds (25)**, **A3 grow-when-full reallocations (37)**. Only A1 is
-likely to survive §6.1. Anchors — the 8 labelled rows — passed on all 37
-batches; that is the only evidence separate batches share one yardstick, since
-run-to-run consistency is deliberately not measured.
+Band A splits into **A1 configuration-derived (65)**, **A2 constants and
+structural bounds (30)**, **A3 grow-when-full reallocations (39)**. Only A1 is
+likely to survive §6.1. Anchors — the 8 labelled rows — passed on all 40
+batches; that is the only designed evidence separate batches share one
+yardstick, since run-to-run consistency is deliberately not measured. One
+accidental check corroborates it: 8 helpers fell into both batch scopes and
+were judged twice in unrelated batches, and all 8 agreed.
 
 **Stage 3 is now the bottleneck.** Its 3a queue is full for the first time.
 
@@ -216,8 +219,8 @@ is no saving worth buying with a heuristic that might drop a real case.
 
 **The immediate next work, in order:**
 
-1. **Stage 3 reads band A, in A1 → A2 → A3 order.** 113 rows, but far fewer
-   distinct arguments: A3's 37 rows share one shape (`size == capacity` before
+1. **Stage 3 reads band A, in A1 → A2 → A3 order.** 134 rows, but far fewer
+   distinct arguments: A3's 39 rows share one shape (`size == capacity` before
    growing an array), so judge them as a group rather than one at a time. Two
    A-band rows are **already refused** — `NativeAllocator$Region.allocate():273`
    and `SlabAllocator$Region.allocate():201`, in `rejected.md` — so check the
@@ -245,8 +248,8 @@ is no saving worth buying with a heuristic that might drop a real case.
    `permitSegmentMaybe():200` second check site — was **already applied**;
    the case file cites it as "Second check site, same verdict". Verified
    2026-09-23.)*
-5. **Then band B (148)**, then C (85) — C is the insurance band and is not
-   optional. D is 4,092 rows and is read last, if at all.
+5. **Then band B (174)**, then C (94) — C is the insurance band and is not
+   optional. D is 4,387 rows and is read last, if at all.
 
 **What stage 2 will not tell you.** A band is a reading order, nothing more.
 The bands were assigned from the row alone, with the source unread, so a

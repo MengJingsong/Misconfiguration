@@ -108,30 +108,36 @@ rejection.
 semantic judgement. See
 [`playbook.md`](playbook.md#what-stage-2-does--rank-every-row).
 
-**The banding is complete.** All 4,438 units banded over 37 batches on
-2026-09-23 / 2026-09-24 with `claude-opus-5`; per-row verdicts are in
+**The banding is complete, and covers every stage-1 row.** 4,789 units over
+40 batches on 2026-09-23/24 with `claude-opus-5`; per-row verdicts are in
 [`bands.csv`](bands.csv), grouped and explained in
 [`positives.md`](positives.md).
 
+| Input | Units | Banded |
+|---|---|---|
+| `NarrowedIfStatements.csv` | 4,489 rows | **4,489 (100%)** |
+| `HelperGuardedIfStatements.csv` | 1,099 rows → 300 distinct helpers | **300 (100%)** |
+
 | Band | Meaning | Units | Share |
 |---|---|---|---|
-| **A** | Reads as a real capacity check | **113** | 2.5% |
-| **B** | Plausibly a resource bound, row does not settle it | 148 | 3.3% |
-| **C** | Named operands, nothing resource-shaped — the insurance band | 85 | 1.9% |
-| **D** | Clearly not one | 4,092 | 92.2% |
+| **A** | Reads as a real capacity check | **134** | 2.8% |
+| **B** | Plausibly a resource bound, row does not settle it | 174 | 3.6% |
+| **C** | Named operands, nothing resource-shaped — the insurance band | 94 | 2.0% |
+| **D** | Clearly not one | 4,387 | 91.6% |
 
-4,153 rows + 285 helper judgements standing for 985 call sites. **Anchors
-passed on all 37 batches** — the 8 labelled rows came back A every time, which
-is the only evidence that separate batches share one yardstick.
+**Anchors passed on all 40 batches** — the 8 labelled rows came back A every
+time, which is the only designed evidence that separate batches share one
+yardstick. One accidental check corroborates it: 8 helpers fell into both
+scopes and were judged twice in unrelated batches, and all 8 agreed.
 
 Band A splits three ways, and only the first is likely to survive §6.1:
-**A1 configuration-derived limits (51)**, **A2 constants and structural bounds
-(25)**, **A3 grow-when-full array reallocations (37)**. The split is a reading
-aid, not a verdict — see [`positives.md`](positives.md).
+**A1 configuration-derived (65)**, **A2 constants and structural bounds (30)**,
+**A3 grow-when-full array reallocations (39)**. The split is a reading aid, not
+a verdict — see [`positives.md`](positives.md).
 
 | | State |
 |---|---|
-| Ranking | ✅ complete |
+| Ranking | ✅ complete, full coverage |
 | Rule-outs | None, from 2026-09-23. [`negatives.md`](negatives.md) is closed. |
 | Next | Stage 3 reads band A in A1 → A2 → A3 order |
 
@@ -202,7 +208,7 @@ it to reproduce a batch.
 
 ### Done
 
-| **Full-corpus AI banding** | **4,438 units** | 2026-09-23/24 | **Done.** 37 batches, `claude-opus-5`. A 113 / B 148 / C 85 / D 4,092. Anchors passed on every batch. Supersedes the package-by-package plan below for stage-2 purposes: every row now has a band, including the four subtrees already triaged. |
+| **Full-corpus AI banding** | **4,789 units** | 2026-09-23/24 | **Done.** 40 batches, `claude-opus-5`: 37 over the un-triaged corpus, then 3 over the four subtrees below, which had verdicts but no band. A 134 / B 174 / C 94 / D 4,387. Anchors passed on every batch. Supersedes the package-by-package plan below for stage-2 purposes: **every stage-1 row now has a band.** The subtrees' older verdicts stand — a band never overrides one made with the source open. |
 
 | Batch (subtree) | Narrowed rows | Date | Result |
 |---|---|---|---|
@@ -293,7 +299,13 @@ remaining work and are better attempted once the judging pace is established.
 
 ## History
 
-- **2026-09-24** — **the banding ran to completion**: all 4,438 units, 37
+- **2026-09-24** — **coverage closed**: the 329 rows in the four
+  already-triaged subtrees, and the 8 anchor rows, had no band — 4,438 units
+  had been banded against 4,489 narrowed rows. Three more batches and a direct
+  write of the anchors bring it to 4,789 units and 100% coverage. Band A went
+  from 113 to 134; the anchors alone account for 8 of that, since band A had
+  been missing the filed cases it was validated against.
+- **2026-09-24** — **the banding ran to completion**: 4,438 units, 37
   batches, `claude-opus-5`, anchors passing throughout. Verdicts in
   `bands.csv`; band A grouped in `positives.md`. Three bugs in the batch
   builder were caught before any banding — most importantly that `path:line`

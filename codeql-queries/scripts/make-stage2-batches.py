@@ -9,7 +9,12 @@ that folder's bands.csv, which is committed because it cannot be regenerated.
 The stage-1 CSVs are gitignored and rebuilt per machine, so this script is
 committed and its output is not.
 
-Usage: make-stage2-batches.py <results-dir> <out-dir> [batch-size]
+By default it emits the rows that earlier package-by-package triage had not
+consumed. Pass --consumed to emit the other side instead: the four subtrees
+(concurrent, cache, transport, db/compaction) triaged in September 2026, which
+carry verdicts but no band. Between them the two scopes cover every stage-1 row.
+
+Usage: make-stage2-batches.py <results-dir> <out-dir> [batch-size] [--consumed]
 """
 import csv, os, sys
 
@@ -52,14 +57,15 @@ def row_ids(rows):
     return rows
 
 
-def load(results):
+def load(results, only_consumed=False):
     narrowed = row_ids(list(csv.DictReader(open(os.path.join(results, 'NarrowedIfStatements.csv')))))
     helper = list(csv.DictReader(open(os.path.join(results, 'HelperGuardedIfStatements.csv'))))
 
     units = []
     for r in narrowed:
-        # Anchors are kept whatever their subtree: they exist to calibrate.
-        if consumed(r) and r['uid'] not in ANCHORS:
+        # Anchors are kept in every scope: they exist to calibrate, and every
+        # batch must carry them so the recorder's gate has something to check.
+        if r['uid'] not in ANCHORS and consumed(r) != only_consumed:
             continue
         units.append({
             'id': r['uid'],
@@ -71,9 +77,14 @@ def load(results):
         })
 
     # One judgement per distinct helper, applied to all its call sites.
+    # Scope is decided by the CALL SITE's package, not the helper's declaring
+    # one, so a helper called from both a consumed and a non-consumed subtree
+    # appears in both scopes. Eight did; all eight were judged the same band
+    # both times. The recorder does not dedupe, so dedupe bands.csv on `uid`
+    # after running both scopes.
     by_helper = {}
     for r in helper:
-        if consumed(r):
+        if consumed(r) != only_consumed:
             continue
         by_helper.setdefault(r['helper'], []).append(r)
     for h, rows in sorted(by_helper.items()):
@@ -89,10 +100,12 @@ def load(results):
 
 
 def main():
-    results, out = sys.argv[1], sys.argv[2]
-    size = int(sys.argv[3]) if len(sys.argv) > 3 else 120
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    only_consumed = '--consumed' in sys.argv
+    results, out = args[0], args[1]
+    size = int(args[2]) if len(args) > 2 else 120
 
-    units = load(results)
+    units = load(results, only_consumed)
     anchors = [u for u in units if u['anchor']]
     body = [u for u in units if not u['anchor']]
 
