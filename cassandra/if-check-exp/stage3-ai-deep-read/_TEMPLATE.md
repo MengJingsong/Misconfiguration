@@ -124,75 +124,147 @@ what one allowed object costs.
 
 ## 9. Test design (guidance for stage 4)
 
-**Stage 3 writes this section; stage 3 never runs it.** This is executor-facing
-guidance: everything stage 4 needs to run the experiment without re-deriving
-the code path above. It carries **no measured numbers and no verdict** — those
-are stage 4's, and where they land is set out in
+**Stage 3 writes this section; stage 3 never runs it.** It carries **no
+measured numbers and no verdict** — those are stage 4's, and where they land is
+set out in
 [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
 Method and pitfalls: [README.md §8](../../README.md#8-designing-a-test-for-a-case).
 
+**Two audiences.** The intro and 9a are for **human review**: what the test
+does and what each result would mean, readable on their own. 9b–9e are the
+**runbook**: steps a person or an AI session can follow on a Linux machine.
+
+_In a case file, keep this intro to two or three lines: what the test does,
+and the state of any run already done. Then delete this note and the writing
+rules below — they guide the case writer and belong only in the template._
+
+**Writing rules:**
+
+- **State each fact once.** Settings live in 9b, conclusions in 9a; other
+  subsections point to them rather than restating them.
+- **Commands are copy-pasteable**, with `<placeholders>` in angle brackets and
+  paths relative to the Cassandra clone root.
+- **Source links only in 9b–9e**, and only where a setting is not obvious or a
+  trap needs justifying. The intro and 9a have none.
+- **Shared setup is linked, not copied** — JDK, `ant`, building the clone, and
+  the generic instruments in [README.md §8.3](../../README.md#83-measuring-the-resource).
+- **Delete what does not apply** (a tier, scenario C, a row) instead of writing
+  "n/a".
+
+### 9a. Procedure and conclusions
+
+**Testability:** config, live-settable / config, restart-only / JVM system
+property / **needs patched build** (say what to patch) / not settable. State
+this first: it decides whether the case is worth a cluster allocation at all.
+
+**Claim under test:** one sentence — which limit bounds which resource, and
+what the disallow outcome does (from §6b and §8).
+
+**Procedure:**
+
+1. **Unit tier** — drive the check to its limit. Assert the allow outcome at the
+   limit and the §6b disallow effect one step past it.
+2. **Cluster tier** — set up as in 9b and run every capacity value.
+3. **At each capacity value:** control run → **scenario A**, reach the limit →
+   **scenario B**, try to exceed it → **scenario C**, the bypass arm (only if
+   §6b or §10 records a bypass: an escape hatch, an unguarded path, or a
+   setting that turns the check off).
+4. **Compare** with the prediction below and read the result in the table.
+
+**Prediction:** how the ceiling should move with the knob if the traced path is
+the binding limit (for example proportional, or `limit × N` for a scoped
+limit), what the disallow effect looks like from outside, and — if a bypass is
+recorded — how far usage should go in scenario C.
+
+**Conclusions.** Adapt the wording to this case, delete rows that cannot
+occur, and keep the **Refuted** rows explicit: they are what stage 4's feedback
+settles.
+
+| Result | Conclusion |
+|---|---|
+| Usage stops at the limit, disallow evidence appears, and the ceiling moves with the knob | **Confirmed** — the check enforces as traced. |
+| Usage passes the limit, and the recorded bypass accounts for all of the excess | **Bypass as recorded** — expected, not a refutation. Record its size (Target-3 material). |
+| Usage passes the limit, and no recorded bypass explains it | **Refuted** — the check does not cap usage. |
+| The usage counter stays capped, but the real resource keeps growing | **Refuted** — the counter does not track the resource; §8's ceiling claim is wrong. |
+| The ceiling does not move with the knob | **Refuted** — not the binding limit. Re-read, do not re-run. |
+| The ceiling moves, but there is no disallow evidence | **Not confirmed** — something else derived from the same limit may be binding. Re-read. |
+| The limit is never reached | **Invalid run** — fix the setup (9b, 9c) and re-run. |
+
+Two rules behind this table:
+
+- **A confirmation needs both** the ceiling moving with the knob **and** direct
+  evidence that the disallow branch fired (README §8.2 rule 5). A curve alone
+  can come from another mechanism derived from the same limit.
+- **If a bypass is recorded, say how an overshoot will be attributed to it** —
+  a measurement of how much went through the bypass (9d), or an arm in which
+  the bypass cannot fire. Without one, "bypass" and "does not cap" look the
+  same.
+
+### 9b. Setup
+
 | Field | Content |
 |-------|---------|
-| **Testability** | Config-testable / JVM system property / **Needs patched build** (hardcoded constant or type bound — say what to patch) / Not settable. State this first: it decides whether the case is worth a cluster allocation at all. |
-| **Constraint knob** | The exact thing stage 4 changes, and how: `cassandra.yaml` entry, `-D` system property, or the `DatabaseDescriptor` setter a unit test would call. Name it as §4's limit path names it, not as the check-site operand. |
-| **Capacity values to test** | **At least three, including the default**, with units. Two points cannot show whether the response is linear. Say what capacity each value produces if the limit is derived rather than used raw (e.g. a percentage of free space). |
-| **Usage-side observable** | §4's usage-side operand — the counter the check actually compares. |
-| **Instrument** | How to read that operand, and **whether the real operand is exposed at all**. If it is not, name the proxy and state the gap plainly; a proxy that moves for other reasons is a confounder, not a measurement. |
-| **Scope of the limit** | Global/process-wide, per-table, per-connection, or per-file. For a per-object limit, give the multiplier: node-wide usage moves by `limit × N`, so say what N is and how to control it. |
-| **Suggested level** | Unit and/or cluster (both where practical — they answer different questions). Name any existing scaffolding under `test/unit/...` that already reaches this check, and the `ant testsome -Dtest.name=<FQCN>` line to run it. |
+| **Constraint knob** | The exact thing to change and how: `cassandra.yaml` entry, `-D` system property, JMX/`nodetool` setter, or the `DatabaseDescriptor` setter a unit test calls. Name it as §4's limit path names it. Say whether a change needs a restart. |
+| **Confirm it took effect** | How to read back the value actually in force (a startup log line, a `nodetool` or JMX read, a unit-test assertion). |
+| **Capacity values** | At least three, including the default, with units. If the limit is derived rather than used raw, give the capacity each value produces, and what else must be pinned for that to hold. |
+| **Scope** | Global, or per table / connection / host / file. For a scoped limit, give the multiplier N (node-wide usage moves by `limit × N`) and how to hold N steady. |
+| **Level** | Unit, cluster, or both. Name any existing test under `test/unit/...` that already reaches this check. |
 
-### 9a. Workload — driving the usage operand
+**Hold fixed** — every setting that must not change across the sweep, stated
+once here:
 
-What stage 4 must do to make the usage side climb toward the limit: the
-operation, the payload size, the concurrency, and what (if anything) releases
-capacity concurrently (flush, cleanup thread, consumer). Prefer a
-**deterministic single-shot approach** — size the capacity below what one
-operation needs, so the first attempt lands on the boundary — over a
-throughput race against whatever reclaims capacity.
+| Setting | Value | Why |
+|---|---|---|
+| `<setting>` | `<value>` | one line: what it would confound |
 
-### 9b. Scenario A — just reach capacity
+**Controls:** a baseline at the default configuration and an idle run are the
+minimum; add any case-specific control.
 
-How to bring usage up to the limit without crossing it, and what stage 4
-should observe at each capacity value. Expect usage ≈ capacity here in almost
-every case; this scenario establishes that the knob moves the ceiling at all.
+**Reset between runs:** how to return to a clean state (stop the node, clear
+the relevant data directories, restart).
 
-### 9c. Scenario B — try to exceed capacity
+### 9c. Workload
 
-How to cross the limit, and what to observe. **Derive the expectation from
-§6b**, not from an assumption that the check rejects cleanly: a clean reject,
-a block-and-wait, and an escape hatch all look different from outside.
+What pushes the usage side toward the limit: the operation, the payload size,
+the concurrency, and what releases capacity at the same time. Prefer a
+**deterministic single-shot trigger** — a capacity smaller than one operation
+needs — over a throughput race (README §8.2 rule 2).
 
-### 9d. Expected dose-response
+```bash
+# unit tier
+ant testsome -Dtest.name=<fully.qualified.TestClass>
+# cluster tier: load tool or small client, with its exact options
+<command>
+```
 
-State, before the run, what usage-vs-constraint should look like across the
-three-plus capacity values **if the traced path is the binding limit** — and
-what it should look like instead if the escape hatch or non-domination
-recorded in §6b/§10 dominates. A design that predicts only the enforcing
-outcome cannot tell a bypass from experimental noise.
+### 9d. Observables
 
-### 9e. Interpretation — what each outcome means
+One row per observable. Delete the bypass row if no bypass is recorded.
 
-So stage 4 can decide at the cluster without coming back to stage 3. Adjust
-the rows to this case; the third is the one that refutes it.
+| Observable | How to read it (command) | When to sample | Trap |
+|---|---|---|---|
+| **Usage counter** — §4's usage-side operand | … | … | … |
+| **Disallow evidence** — a signal only the disallow path produces | … | … | … |
+| **Bypass volume** — how much went through the recorded bypass | … | … | … |
+| **Real resource** — heap, off-heap or disk bytes (README §8.3) | … | … | … |
 
-| Observation at scenario B | Reading |
-|---|---|
-| Usage pinned at the ceiling; rejections/parks/exceptions rise as §6b predicts | The check enforces as traced. |
-| Usage climbs past the ceiling | §6b's escape hatch or non-domination dominates — Target-3 material, and the case's §8 ceiling claim needs amending. |
-| Usage flat across every capacity value | The traced path is **not** the binding limit. Stage 3 misread it; the case needs re-reading, not a re-run. |
+If the usage counter is not exposed, name the proxy and state the gap
+plainly: a proxy that moves for other reasons is a confounder, not a
+measurement. Before relying on a disallow signal, confirm from the source that
+no other path produces it.
 
-### 9f. What would refute this case
+### 9e. Running the scenarios
 
-The specific observation that would mean the traced path is wrong — stated
-plainly enough that stage 4's feedback can settle it. A case with nothing
-here is not falsifiable and the design is incomplete.
+For each run below, list the steps in order as commands, what to record, and
+when to stop. What a result means belongs in 9a, not here.
 
-### 9g. Confounders and controls
+1. **Control run** — …
+2. **Scenario A — reach the limit** — …
+3. **Scenario B — try to exceed the limit** — …
+4. **Scenario C — bypass arm** (only if a bypass is recorded) — …
 
-What could move the observable for reasons unrelated to this check, and the
-control run that separates them. Baseline at default config and an idle
-control are the minimum; add per-case items (background compaction, GC
-timing, a shared global pool picking up unrelated traffic, other tables).
+**Record for stage 4:** the configuration in force, the exact commands, and the
+raw readings from 9d for every run.
 
 ## 10. Provenance
 
