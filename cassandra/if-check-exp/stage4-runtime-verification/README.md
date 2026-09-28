@@ -89,8 +89,9 @@ observes nothing) and `DataDirectory_getAvailableSpace` (the guard does not run
 under the default partitioner, so the two arms need **separate clusters**).
 
 **Prior art to recover first.** A unit test for the `memtable_heap_space` case,
-`HeapPoolTest.java`, was written and run on pc80 in September 2026 and **is
-still present in the shared `cassandra-src` clone** — but it is untracked
-there and committed nowhere, so it exists in exactly one place. Preserve it
-before doing anything else. Earlier per-case trigger notes are in
-`git show e7f9963:HANDOFF.md`.
+`HeapPoolTest.java`, was written and run on pc80 in September 2026. It is not
+upstream, and the copy in the shared `cassandra-src` clone is untracked, but
+its **full source is in this repo's history**:
+`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`.
+Restore it from there to re-run it as the control (the case's §9). Earlier
+per-case trigger notes are in `git show e7f9963:HANDOFF.md`.

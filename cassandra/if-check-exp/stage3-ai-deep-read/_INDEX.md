@@ -95,7 +95,7 @@ See [README.md](README.md) for the format.
 ### 3.1 memtable
 Storage-engine module covering memtable memory allocation and pooling
 (`utils/memory`, `db/memtable`). One case so far:
-- **`memtable_heap_space-tryAllocate-limit`:** hard allocation cap in `SubPool.tryAllocate()`, gating `ByteBuffer.allocate()` for memtable writes. Verified via new `HeapPoolTest` unit test (2026-09-16).
+- **`memtable_heap_space-tryAllocate-limit`:** allocation cap in `SubPool.tryAllocate()`, gating `ByteBuffer.allocate()` for memtable writes via `HeapPool` (reached only under `memtable_allocation_type: unslabbed_heap_buffers`). Disallow parks the writer; a `markBlocking()` write overshoots the limit, so the cap is not hard. A unit test, `HeapPoolTest`, was run on 2026-09-16, before stage 4 existed — prior evidence, not a stage-4 result.
 - **`memtable_offheap_space-tryAllocate-limit`:** sibling case, same `SubPool.tryAllocate()` if-check on the `offHeap` `SubPool`, reached via `NativeAllocator` — gates off-heap `Region`/native memory allocation instead of `ByteBuffer`. Note: accounting call is decoupled from the physical allocation call (see case notes). Verified via existing `NativeAllocatorTest.testBookKeeping()` (2026-09-16).
 
 ### 3.2 net

@@ -169,8 +169,10 @@ and nothing else blocking it.
 
 **Two things stage 4 should know before picking one up.**
 `memtable_heap_space`'s unit tier was written and run on 2026-09-16 —
-`HeapPoolTest.java` is still in the `cassandra-src` clone but is **untracked
-there and committed nowhere**, so it exists in exactly one place. The
+`HeapPoolTest.java` is untracked in the `cassandra-src` clone and not
+upstream, but its **full source is recoverable from this repo's history**:
+`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`
+(corrected 2026-09-28; it was earlier described as committed nowhere). The
 best-scaffolded designs, in order, are `cdc_total_space` (an existing
 capacity-sweep helper plus five relevant tests), `MAX_HINT_BUFFERS` (an exact
 `n × bufferSize` prediction, and a Byteman test that already proves the
@@ -566,10 +568,12 @@ position (README §7.2), and a measured run is a higher standard.
 
 Stage 4 is **opened but not built** — the folder and its contract exist, no
 results file does. Prior art worth recovering first: the earlier per-case
-trigger designs, and the one test that was actually written and run
-(`HeapPoolTest.java`, still present in the `cassandra-src` clone), are in
-`git show e7f9963:HANDOFF.md` — note the `:HANDOFF.md` suffix, since that
-commit's own diff is an unrelated folder rename.
+trigger designs, and the run record of the one test that was actually written
+and run (`HeapPoolTest.java`), are in `git show e7f9963:HANDOFF.md` — note the
+`:HANDOFF.md` suffix, since that commit's own diff is an unrelated folder
+rename. The test's full source is in
+`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`;
+an untracked copy also sits in the `cassandra-src` clone.
 
 - **Deferred with (b)/(c):** the disk candidate `getWriteDirectory():282`
   (pattern (c) — previously item 2 below), the three planned structural
