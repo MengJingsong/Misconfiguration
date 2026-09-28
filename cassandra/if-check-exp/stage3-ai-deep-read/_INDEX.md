@@ -20,6 +20,8 @@ See [README.md](README.md) for the format.
 | `DataDirectory_getAvailableSpace` | [`CompactionAwareWriter.getWriteDirectory():282`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L282) | [`CompactionAwareWriter.getWriteDirectory():283-286`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L283-L286) | `compaction` | `sstablewriter` | (c) | 3b | [`DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`](cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md) |
 | `max_space_usable_for_compactions_in_percentage` | [`Directories.hasDiskSpaceForCompactionsAndStreams():551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L551) | [`CompactionTask.buildCompactionCandidatesForAvailableDiskSpace():412-413`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L412-L413) | `compaction` | `compactionwriter` | (b) | 3a | [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md) |
 | `column_index_cache_size` | [`BigFormatPartitionWriter.indexSamples():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L113) | [`RowIndexEntry.create():227-238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L227-L238) | `sstable_index` | `rowindexentry` | (b) | 3b | [`column_index_cache_size-indexSamples-cacheSizeThreshold`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold.md) |
+| `max_hints_size_per_host` | [`StorageProxy.shouldHint():2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492) | [`StorageProxy.sendToHintedReplicas():1552-1558`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L1552-L1558) | `hints` | `hint` | (b) | 3a | [`max_hints_size_per_host-shouldHint-maxHintsSize`](cases/max_hints_size_per_host-shouldHint-maxHintsSize.md) |
+| `file_cache_size` | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) | [`BufferPool$GlobalPool.allocateMoreChunks():443-453`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443-L453) | `buffer_pool` | `chunk` | (a) | 3b | [`file_cache_size-allocateMoreChunks-memoryUsageThreshold`](cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md) |
 
 <!-- Add one row per case. -->
 
@@ -27,10 +29,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 6 |
-| Total cases | 9 |
-| Found via feed 3b (raw source) | 8 |
-| Found via feed 3a (stage 1/2) | **1** |
+| Modules covered | 8 |
+| Total cases | 11 |
+| Found via feed 3b (raw source) | 9 |
+| Found via feed 3a (stage 1/2) | **2** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -106,6 +108,18 @@ Internode messaging and native (CQL client) transport module covering inbound co
 Hint buffering and dispatch module, covering writes stashed for temporarily-unreachable replicas (`hints/`). One case so far:
 - **`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`:** cap (JVM system property, default 3) on how many off-heap `HintsBuffer`s the pool will ever allocate, in `HintsBufferPool.switchCurrentBuffer()`. Disallow branch blocks on `reserveBuffers.take()` until a buffer is recycled, rather than allocating a new one.
 
+- **`max_hints_size_per_host-shouldHint-maxHintsSize`:** the other half of the
+  hints story — this one bounds the **hint files on disk**, per destination
+  host, where `MAX_HINT_BUFFERS` bounds the off-heap buffers. **Disabled by
+  default** (`0B`, and `if (maxHintsSize > 0)` skips the comparison), which is
+  a third kind of default-mode gap: not overridden like the memtable hatch, not
+  unreached like the compaction guard, simply not switched on. Its disallow is
+  the folder's first that **loses data** — the hint is silently skipped, the
+  write still succeeds, and the replica stays short of the mutation until a
+  repair. Also the first case whose pattern-(b) verdict is read at **seven**
+  decision points. No metric fires on the disallow path, unlike the adjacent
+  hint-window rejection four lines above.
+
 ### 3.4 commitlog
 Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). One case so far:
 - **`cdc_total_space-processNewSegment-allowance`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, compared in `CDCSizeTracker.processNewSegment()` (re-evaluated by `permitSegmentMaybe()`), which sets a per-segment `FORBIDDEN`/`PERMITTED` state read by the decision point `CommitLogSegmentManagerCDC.throwIfForbidden()` (pattern (b)). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. Escape hatch found: `cdc_block_writes = false` bypasses the check entirely.
@@ -132,3 +146,20 @@ On-disk index entries for wide partitions and the key cache that holds them
   **format-scoped** (BIG only; BTI does not reach it), and the read-path site
   reads config **live per deserialization**, so a JMX change alters the
   memory behaviour of already-written SSTables with no rewrite.
+
+### 3.6 buffer_pool
+Off-heap buffer pooling for file reads and networking (`utils/memory/BufferPool`,
+`utils/memory/BufferPools`). One case so far:
+- **`file_cache_size-allocateMoreChunks-memoryUsageThreshold`:** byte ceiling on
+  the `chunk-cache` pool's reserved off-heap memory, gating creation of its
+  8 MiB macro chunks. **The folder's clearest pool-versus-resource case:** the
+  disallow branch withholds the `Chunk`, but the caller then allocates the
+  buffer straight from the OS via `ByteBuffer.allocateDirect`, counted as
+  `overflowMemoryUsage` with **no ceiling of its own** — so `file_cache_size`
+  bounds the pool, not the node's off-heap footprint. Uniquely well
+  instrumented: `BufferPoolMetrics` publishes the limit (`Capacity`), the
+  operand (`Size`) and the escape hatch (`OverflowSize`) as gauges, so §8's
+  claim can be settled rather than merely predicted. Two config entries drive
+  one check — the `networking_cache_size` sibling is a separate case, not yet
+  filed (`pending.md`). Source bug noted: `MACRO_CHUNK_SIZE`'s comment says
+  1 MiB, the arithmetic gives 8 MiB.
