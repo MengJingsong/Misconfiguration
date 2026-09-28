@@ -6,6 +6,16 @@ applies the three rules
 to judge whether a line is a real if-check case. Stages 1 and 2 only shrink
 and order what stage 3 must read; neither produces a finding.
 
+For every case that qualifies, stage 3 also **designs the test** that would
+confirm or refute it — §9 of the case file, written for
+[stage 4](../stage4-runtime-verification/README.md) to execute. Stage 3 never
+runs it and records no measured numbers; see
+[`../README.md` §8](../README.md#8-designing-a-test-for-a-case) for the method.
+
+**All three enforcement patterns are in scope** as of 2026-09-25
+([`../README.md` §7.5](../README.md#75-active-scope-decisions-revised-2026-09-25)).
+A (b) or (c) row is read and judged like any other.
+
 See [`../README.md` §7.2](../README.md#72-discover-and-qualify-candidate-capacity-checks)
 for how the three stages relate, and §3.2 for the enforcement patterns.
 
@@ -15,7 +25,7 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 |---|---|
 | [`playbook.md`](playbook.md) | **Start here to run a pass.** How a feed is worked, what to check in order, the pitfalls found so far. |
 | [`rejected.md`](rejected.md) | Lines read with the source open and refused, each citing the rule it failed. |
-| [`deferred.md`](deferred.md) | Lines left **unjudged** — they would qualify only under enforcement pattern (b) or (c), parked by the §7.5 scope decision. Not refused. |
+| [`deferred.md`](deferred.md) | Lines left **unjudged**, identified but never read against the rules. Formerly the (b)/(c) parking lot; since those patterns were unparked (2026-09-25) it is a **worklist**, and the cheapest rows to pick up. Not refused. |
 | [`cases/`](cases/) | Cases that **qualified and are written up** — the deliverable. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](_INDEX.md) | Master index of those cases. |
 | [`pending.md`](pending.md) | Qualified against the three rules but **not yet written up**. Findings, not a queue — rows still awaiting a read live in `../stage2-ai-preprocessing/bands.md`. |
@@ -33,9 +43,9 @@ cover different blind spots.**
 - **3a** is the cheap, systematic feed. Stages 1 and 2 exist precisely to
   relieve stage 3's burden by shrinking and ordering what must be read.
 - **3b is not optional.** It is the standing insurance against stage 1's
-  *structural* blind spot — it found the `cdc_total_space` ternary, which
-  stage 1 cannot surface at all, because it is not an `if` condition. It
-  plays the same role against stage 1's *structural* blind spot that band C
+  *syntactic* blind spot — it found the `cdc_total_space` ternary, which
+  stage 1 cannot surface at all, because the comparison is not in an `if`
+  condition. It plays the same role against that blind spot that band C
   plays against stage 2's *vocabulary* blind spot: insurance against a real
   case that the mechanism is built not to see. Its weakness is cost: the full
   source is far more than one session can read.
@@ -55,7 +65,7 @@ refused** is a *stage-3* rejection.
 | Evidence | the row alone, source unread | the source, against the three rules |
 | Qualified | *(cannot qualify)* | [`cases/`](cases/), or [`pending.md`](pending.md) until written up |
 | Rejections | *(none possible — bottom band instead)* | [`rejected.md`](rejected.md) |
-| Deferrals | *(none possible — see below)* | [`deferred.md`](deferred.md) |
+| Deferrals | *(none possible — see below)* | [`deferred.md`](deferred.md) — historical; nothing new is deferred by pattern |
 | Form | bulk, per-batch, a band and a one-line reason | few, narrative, often deferred-rather-than-refused |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding that a line

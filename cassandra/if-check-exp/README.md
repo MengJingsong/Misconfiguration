@@ -244,7 +244,7 @@ they failed, so later passes don't re-discover and re-reject the same line.
 
 ## 5. Required content per if-check case
 
-Every case file answers exactly these eight questions (see `stage3-ai-deep-read/_TEMPLATE.md`):
+Every case file answers exactly these nine questions (see `stage3-ai-deep-read/_TEMPLATE.md`):
 
 1. **Location** — the three locations from §3.1 (capacity check, decision
    point, allocation site), each as `file:line` pinned to `cassandra-5.0.9`,
@@ -289,6 +289,13 @@ Every case file answers exactly these eight questions (see `stage3-ai-deep-read/
    check, and through what mechanism? This goes beyond
    the per-object sizing in question 7 — it's about the limit's effect on
    the ceiling, not just what one allowed object costs.
+9. **Test design** — how stage 4 should test this case: which knob changes the
+   constraint, at least three capacity values to try, the usage-side
+   observable and how to read it, the workload that drives it, how to *just
+   reach* and how to *try to exceed* capacity, the dose-response predicted
+   before the run, what each outcome would mean, and what would refute the
+   case. Written as guidance for someone else to execute — stage 3 designs
+   the test and never runs it (§8, §7.5).
 
 ## 6. Files per case
 
@@ -374,11 +381,13 @@ cassandra/if-check-exp/
 │   ├── _TEMPLATE.md         #   template for a new case file (stage 3's output)
 │   ├── _INDEX.md            #   master index of every case (cases only)
 │   ├── rejected.md          #   read with source open, refused against the rules
-│   ├── deferred.md          #   unjudged: parked by the (a)-only scope (§7.5)
+│   ├── deferred.md          #   the (b)/(c) worklist — unjudged, now live (§7.5)
 │   ├── pending.md           #   qualified, not yet written up as a case
 │   └── cases/               #   THE RESULTS — flat, one file per case
 │       ├── <constraint>-<function>-<operand>.md
 │       └── <constraint>-<function>-<operand>.md
+└── stage4-runtime-verification/   # runs the §9 designs — Jingsong, not an AI
+    └── README.md            #   the feedback contract: what it consumes/emits
 ```
 
 Everything stage 3 produces — the cases, their index, the template, and its
@@ -414,9 +423,12 @@ nothing to do with the Target numbers.
 Stage 2 only orders what stage 3 must read, and produces no findings of its
 own; stage 1 narrows structurally before it.
 
-**Stage 4 does not exist yet.** It is reserved (2026-09-23) for the manual
-review and runtime verification that a stage-3 case still needs — see §7.5.
-Nothing in this folder does that work, and no case here claims it.
+**Stage 4 runs the experiment; stage 3 designs it.** Reserved 2026-09-23 and
+opened 2026-09-25: each case file's §9 is a test design written for stage 4 to
+execute, and stage 4 reports back
+([`stage4-runtime-verification/README.md`](stage4-runtime-verification/README.md)).
+Nothing in this folder runs anything, and no case here carries a measured
+number — see §7.5.
 
 #### Stage 1 — structural preprocessing (CodeQL)
 
@@ -484,11 +496,15 @@ whether the comparison's own branches diverge, since under patterns (b) and
 (c) they may not. Prefer the local clone over fetching whole files through
 GitHub (grep/window it — saves tokens).
 
+It then **designs the test** that would confirm or refute the case — §9 of the
+case file, written as guidance for stage 4 to execute (§8).
+
 **What stage 3 extracts are candidate cases, not settled findings.** A case
-file records a traced code path checked against the pinned tag. Confirming it
-still needs **manual review and runtime verification** — reserved for a future
-**stage 4** and out of this folder entirely (§7.5). A filed case is complete
-*as stage-3 evidence*, not as a verified result.
+file records a traced code path checked against the pinned tag, plus a test
+design. Confirming it still needs **manual review and runtime verification**,
+which happen in [stage 4](stage4-runtime-verification/README.md), not here
+(§7.5). A filed case is complete *as stage-3 evidence*, not as a verified
+result — and it carries no measured numbers.
 
 **Stage 3 has two feeds, and both are required:**
 
@@ -498,12 +514,13 @@ still needs **manual review and runtime verification** — reserved for a future
 | **3b** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — no denominator |
 
 **3b is not optional.** It is the standing insurance against stage 1's
-structural blind spot — it found the `cdc_total_space` ternary, which stage 1
-cannot surface at all. Record the feed (`3a`/`3b`) on every case and
+*syntactic* blind spot — it found the `cdc_total_space` ternary, which stage 1
+cannot surface at all because the comparison is not in an `if` condition. Record the feed (`3a`/`3b`) on every case and
 every verdict; without it, "stage 3 progress" has no coherent answer.
 
-Method, pitfalls and the order to work a row: 
-[`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md).
+Method, pitfalls and the order to work a row:
+[`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md). How to
+write the test design: §8.
 
 #### Where verdicts live — filed by the stage that judged
 
@@ -544,60 +561,216 @@ already judged, cite the stage-3 entry rather than re-recording it.
 Draft new/changed case files in the Claude session first for review, then
 push to `main` after approval.
 
-### 7.5 Active scope decision (2026-09-22): pattern (a) only
+### 7.5 Active scope decisions (revised 2026-09-25)
 
-**Candidate triage is currently restricted to enforcement pattern (a)** — the
-capacity check is itself the `if` whose branches decide allow vs. disallow
-(§3.2). Patterns **(b)** and **(c)** are *parked, not descoped*: how to
-handle them systematically is still an open question, so they are left
-untouched rather than half-done, and **they resume once pattern (a) is
-finished**. Their rules in §3.2 stand unchanged in the meantime.
+Two decisions govern this folder's boundaries. Both were changed on
+2026-09-25 by Jingsong; what they replaced is recorded at the end of each.
 
-- **Stage 1 already fits this scope with no changes.**
-  `NarrowedIfStatements.ql` selects numeric magnitude comparisons whose
-  enclosing statement is an `if` — structurally exactly pattern (a). The
-  three planned structural queries (comparisons anywhere, guard clauses,
-  verdict links) exist only to surface (b)/(c) and are not prerequisites for
-  the pattern-(a) pass. The boolean-helper gap — a pattern-(a) check whose
-  comparison hides behind a helper (`if (!pool.hasRoom())`), leaving the `if`
-  itself with no comparison — was **closed 2026-09-22** by
-  `HelperGuardedIfStatements.ql` (1,099 rows, from 300 distinct helpers), so
-  stage 1's pattern-(a) input is now `NarrowedIfStatements.csv` **plus**
-  `HelperGuardedIfStatements.csv`. One residual limit remains: the queries
-  capture the *form* only, so Rule 3 — do the branches actually diverge on
-  object creation? — can be answered **only by stage 3**: neither
-  stage 1 nor stage 2 sees the branches.
-- **Rows that would qualify only under (b) or (c) go to
-  `stage3-ai-deep-read/deferred.md`.** They are unjudged, not refused; keeping
-  them in a separate file means resuming (b)/(c) is a matter of reading one
-  file rather than re-scanning the corpus.
-- **Already-filed cases are unaffected.** This governs new candidate triage
-  only; existing case files keep their recorded pattern, including the four
-  pattern-(b) cases.
+#### All three enforcement patterns are in scope
 
-**Verification is out of this folder, and reserved for a future stage 4
-(2026-09-23).** Decided by Jingsong. Two things a stage-3 case still needs:
+Candidate triage covers patterns **(a)**, **(b)** and **(c)** (§3.2). A row is
+read, the pattern identified, and the three rules applied — with no pattern
+filter and no parking.
 
-| | |
+- **Nothing new is needed to start.** The existing stage-1 corpus already
+  contains (b) and (c) candidates, and stage 2's banding was
+  pattern-agnostic — it ranked whether a row *reads as a capacity check*, not
+  where its decision sits. So band A is directly readable under all three
+  patterns.
+- **What stage 1's filter actually selects.** `NarrowedIfStatements.ql`
+  selects numeric magnitude comparisons whose enclosing statement is an `if`.
+  That is a **syntactic** filter — comparison inside an `if` — and it spans
+  all three patterns, which are defined by *where the decision sits relative
+  to the comparison*, not by syntax. Two parked candidates prove it: the
+  pattern-(b) check at
+  [`Directories.java:551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L551)
+  is an ordinary `if` whose branch sets `hasSpace = false` (stage 2 surfaced
+  it from the corpus), and pattern-(c) guard clauses such as
+  [`TrackedDataInputPlus.checkCanRead():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L184)
+  *are* `if` statements. **Corrected 2026-09-25:** this section and
+  `stage3-ai-deep-read/deferred.md` §3 previously called that filter
+  "structurally exactly pattern (a)" / "precisely pattern (a)". That was
+  wrong, and it understated the corpus.
+- **The real gap is narrower, and it is about syntax.** A comparison written
+  as a ternary, an assignment, a `return` expression or a method argument is
+  invisible to the current queries. Such a comparison cannot be pattern (a)
+  — (a) requires the comparison's own `if` — so every miss of this kind is a
+  (b) or (c) check. The known instance is the `cdc_total_space` ternary,
+  found by direct reading. The implication runs one way only: *not in an `if`
+  ⟹ (b) or (c)*, **never** *(b)/(c) ⟹ not in an `if`*.
+- **Consequently the three unwritten queries are not blockers.** Of the three
+  specified in the [CodeQL pipeline README](../../codeql-queries/cassandra/queries/if-check-exp/README.md):
+  "comparisons anywhere" closes the only genuine *coverage* gap; "guard
+  clauses" and "verdict links" are **precision aids**, since (c) guards and
+  flag-setting (b) checks are already in the corpus. None gates the band-A
+  pass.
+- **`deferred.md` is now a live worklist, not a parking lot.** Its entries —
+  `hasDiskSpaceForCompactionsAndStreams`, `column_index_cache_size`,
+  `TrackedDataInputPlus_limit` — are queued for reading, and its §2 re-audit
+  of rejections made under the old (a)-only assumption is scheduled rather
+  than parked.
+- **Expect (b)/(c) rows to cost more to judge.** Rule 3 under (b) needs the
+  verdict's path traced to its reader; under (c) it needs domination checked
+  across callers. The compaction case is the precedent: establishing that the
+  guard *does not* dominate meant reading the callers, and non-domination is a
+  finding to record, not grounds for rejection.
+
+*Replaces the decision of 2026-09-22, which restricted triage to pattern (a)
+and parked (b)/(c) as "not descoped, resuming once (a) is finished". (b)/(c)
+resume now instead. Already-filed cases are unaffected — they keep their
+recorded pattern.*
+
+#### Stage 3 designs the test; stage 4 runs it
+
+A case file's §9 is a **test design**: guidance for stage 4, covering which
+knob moves the constraint, the capacity values to try, the observable and its
+instrument, how to just-reach and how to exceed, the predicted dose-response,
+and what would refute the case. Method: §8.
+
+| | Stage 3 | Stage 4 |
+|---|---|---|
+| Evidence | the source, against the three rules | a measured run |
+| Test | designs it (§9) | executes it, and reports back |
+| Records measured numbers? | **never** | yes, in its own folder |
+| Needs a cluster or build? | no | yes |
+
+**This keeps the folder's rule intact.** A test design is derivable from the
+traced code path alone, so writing one needs no cluster, no build and no run —
+the property that made verification a separate stage in the first place.
+What stage 3 still must not do is *execute* anything, or record a measured
+number, or call a case verified. **There is no `Status` field**, and a filed
+case is complete as stage-3 evidence, not as a verified result.
+
+**Feedback returns, and can refute a case.** Stage 4 reports measurements into
+[`stage4-runtime-verification/`](stage4-runtime-verification/README.md); a
+refutation of the traced path amends the case file itself, dated and citing
+the run. Each case's §10 carries a **Stage-4 feedback** field, "none yet" until
+then. Two things a case still needs, unchanged from 2026-09-23: **manual
+verification** (a person reads the traced path and agrees) and **runtime
+verification** (execution actually driven into the disallow branch).
+
+*Replaces the decision of 2026-09-23, under which test design as well as
+execution sat outside this folder. Design moves in; execution stays out.
+Earlier trigger designs and the one executed test are recoverable from
+`git show e7f9963:HANDOFF.md` — note the `:HANDOFF.md` suffix, since that
+commit's own diff is an unrelated folder rename.*
+
+## 8. Designing a test for a case
+
+Stage 3 writes a design; [stage 4](stage4-runtime-verification/README.md) runs
+it. The design's purpose is to make the case **falsifiable**: it states, before
+any run, what should be observed if the traced path is the binding limit, and
+what would show it is not.
+
+### 8.1 The shape of the experiment
+
+**Vary the constraint, and at each capacity value drive usage to the boundary
+twice** — once to just reach it, once to try to exceed it. The constraint is
+the dose; peak resource usage is the response. A single-point test can only say
+"the disallow branch fired"; a sweep says whether the constraint actually
+governs the ceiling, which is what Target 2 is claiming.
+
+- **At least three capacity values, including the default.** Two points cannot
+  distinguish a linear response from a coincidence.
+- **"Just reach" establishes the knob moves the ceiling.** Usage ≈ capacity
+  here in nearly every case; the scenario is a control, not the finding.
+- **"Try to exceed" carries the information**, and what it shows depends
+  entirely on §6b's real disallow effect — which is why §6b must be traced
+  before the design is written.
+
+### 8.2 The six rules
+
+Recovered from this folder's earlier verification methodology (2026-09-16 to
+09-22) and still the method:
+
+1. **Don't assume the disallow path rejects anything.** Trace what the
+   decision point's caller actually does with a `false`/blocked result before
+   designing anything — some checks reject or throw cleanly, others only
+   retry, block and wait, or get silently overridden by an escape-hatch flag
+   further down the chain. Design the experiment, and what counts as
+   "expected", around the real effect.
+2. **Prefer a deterministic single-shot trigger over a sustained-load race.**
+   Size the capacity below what one operation needs, so the first attempt
+   deterministically lands on the boundary, rather than relying on
+   allocation throughput outracing whatever reclaims capacity (flush, cleanup
+   thread, GC) — which is racy and hard to reproduce.
+3. **Check whether the limit is global or scoped, before believing the case
+   is about total memory.** A per-connection, per-table or per-file cap bounds
+   one object's share, not the node's ceiling: node-wide usage moves by
+   `limit × N`, so the design must say what N is and how to hold it steady.
+   For a process-wide pool, an experiment on one table is not isolated from
+   background activity — use a dedicated single-node instance.
+4. **Choose the level, and prefer both.** They answer different questions.
+   - **Unit/programmatic** — construct the classes directly and drive them to
+     the boundary. Fast, deterministic, no cluster, and it can assert at the
+     exact line. Check `test/unit/...` for existing coverage of the class and
+     extend it rather than writing a harness from scratch. This tier measures
+     the *operand*, which proves the mechanism.
+   - **Live cluster** — push config to the boundary and drive the check
+     through a real node. This tier measures *actual memory or disk*, which is
+     what the dose-response claim is about. Needed to confirm the check is
+     reachable and behaves the same in the full system.
+5. **Capture direct evidence that this check fired**, not a symptom with other
+   possible causes — a hang or an error alone proves nothing. An assertion at
+   the exact line, a metric or log line reachable only from this disallow path
+   (confirm by reading the source; don't assume one exists), or a thread dump
+   parked at the decision point.
+6. **Write the design so it can be run without re-deriving the code path**,
+   and so a later session re-running it gets the same result: the knob, the
+   values, the workload, the commands, and what to record.
+
+### 8.3 Measuring the resource
+
+**Instrument the check's own usage-side operand — not process RSS.** §4 already
+names that operand. If it is exposed, read it; if it is not, name the proxy and
+state the gap, because a proxy that moves for other reasons is a confounder
+rather than a measurement.
+
+A verified example of that gap: the pool-wide `allocated` counter that
+`MemtablePool.SubPool.tryAllocate()` compares is **not exposed as a metric** —
+a grep of `src/java/org/apache/cassandra/metrics/` finds no `MemtablePool`
+gauge. `TableMetrics` offers `allMemtablesOnHeapDataSize` /
+`allMemtablesOffHeapDataSize`
+([`TableMetrics.java:93-95`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/TableMetrics.java#L93-L95)),
+which are per-table proxies for a node-wide counter. Checked 2026-09-25.
+
+Pick the external instrument from §7's "Resource consumed":
+
+| Resource | Instrument | Trap |
+|---|---|---|
+| On-heap bytes | Cassandra metrics over JMX / `nodetool`; heap after a forced full GC via `jcmd <pid> GC.heap_info` | Process RSS is useless — `-Xms` pre-commits the heap and GC timing masks the live set |
+| Off-heap / native bytes | JVM Native Memory Tracking: `-XX:NativeMemoryTracking=summary`, then `jcmd <pid> VM.native_memory summary`; RSS as a cross-check | NMT must be enabled at JVM start, so it belongs in the node's jvm options before the run |
+| On-disk bytes | `du -sb` on the data / commitlog / cdc / hints directory, **sampled over time** | The final size is not the peak — compaction or segment recycling erases the evidence |
+
+Load generation: `cassandra-stress` ships in the distribution's `tools/bin/`
+(confirmed present in the pinned clone) and can hold concurrency steady via
+`-rate threads=`, which rule 3 needs for a per-connection cap. A small CQL
+client is better where the payload size must be exact.
+
+**Limits that cannot be varied by config.** §4's "Limit type" already
+classifies these: a hardcoded constant or a type bound such as
+`Integer.MAX_VALUE` needs a patched build to move at all. Record that in §9's
+Testability field rather than leaving stage 4 to discover it on the cluster.
+
+### 8.4 Reading the result
+
+A design must predict **both** curves, or it cannot tell a bypass from noise:
+
+| Observation when trying to exceed | Reading |
 |---|---|
-| **Manual verification** | a person reads the traced path and agrees it holds |
-| **Runtime verification** | a trigger drives execution into the disallow branch on a running cluster |
+| Usage pinned at the ceiling; rejections, parks or exceptions rise as §6b predicts | The check enforces as traced. |
+| Usage climbs past the ceiling | The §6b escape hatch or non-domination dominates. Target-3 material, and §8 of the case needs amending. |
+| Usage flat across every capacity value | The traced path is **not** the binding limit — stage 3 misread it. The case needs re-reading, not a re-run. |
 
-Neither happens here. This folder ends at stage 3, there is no `Status` field,
-and no case file claims to be verified. A case's evidence is its traced code
-path checked against the pinned tag — that is what Target 2 asks for, and it
-is complete *as stage-3 evidence*.
+Two filed cases already predict the second row: `memtable_heap_space`
+overshoots via `markBlocking()`, and the compaction disk guard is skipped
+entirely on the default `diskBoundaries != null` path. On those, a constraint
+that fails to govern usage is the *expected* result.
 
-**Why a separate stage rather than a column.** The stage numbers already mean
-*evidence standard*, not pipeline position (§7.2), so behavioral evidence is a
-higher standard and earns its own number. Keeping it outside also keeps this
-folder's rule intact: everything here is decidable from source alone, with no
-cluster, no build and no run. Earlier trigger designs and results are
-recoverable from git history (`git show e7f9963`).
+**Controls are not optional.** A baseline at default config and an idle run are
+the minimum; background compaction, GC timing and unrelated traffic on a shared
+global pool can all move an observable on their own.
 
-**Stage 4 is reserved, not scheduled.** Nothing is built, no folder exists,
-and no case is queued for it.
-
-## 8. Related context (for a new session)
+## 9. Related context (for a new session)
 
 - **Google Docs** — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit) (per-meeting decisions and next steps) and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit) (running log of entry points, cases and findings). Both live in Jingsong's Google Drive; a session with the Google Drive connector enabled can read them directly.

@@ -11,12 +11,26 @@ actually a capacity check; real cases (`memtable_heap_space`, `MAX_HINT_BUFFERS`
 `cdc_total_space`, ...) share no vocabulary reliable enough for a keyword filter, which is why
 that judgement belongs to stage 2 and the qualification to stage 3.
 
-**Current scope: enforcement pattern (a) only** (see
-[`../../../../cassandra/if-check-exp/README.md` §7.5](../../../../cassandra/if-check-exp/README.md#75-active-scope-decision-2026-09-22-pattern-a-only)).
-All four queries anchor on an `if` whose branches decide, which is structurally exactly
-pattern (a), so the pipeline already fits that scope with **no changes needed**. The three
-planned extensions further down exist only to surface patterns (b) and (c), which are parked
-until (a) is finished.
+**Scope: all three enforcement patterns** (see
+[`../../../../cassandra/if-check-exp/README.md` §7.5](../../../../cassandra/if-check-exp/README.md#75-active-scope-decisions-revised-2026-09-25)),
+revised 2026-09-25.
+
+**What these four queries select is a *syntactic* shape, not a pattern.** They keep
+comparisons that sit inside an `if` condition (or one call frame down, via the helper query).
+The enforcement patterns are defined by *where the decision sits relative to the comparison*,
+so the filter spans all three: a pattern-(b) check can be an ordinary `if` that assigns a flag
+(`Directories.java:551`), and pattern-(c) guard clauses *are* `if` statements.
+
+> **Corrected 2026-09-25.** This README previously said the four queries are "structurally
+> exactly pattern (a)" and that the three planned extensions were prerequisites for triaging
+> (b)/(c). Both were wrong. The existing CSVs already contain (b) and (c) candidates, so no
+> query gates that work.
+
+The genuine gap is syntactic and narrower: a comparison written as a ternary, an assignment, a
+`return` expression or a method argument is invisible to all four. Such a comparison cannot be
+pattern (a) — (a) requires the comparison's own `if` — so every miss of this kind is a (b) or
+(c) check. The implication runs one way only: *not in an `if` ⟹ (b) or (c)*, never the
+reverse.
 
 ## The four queries
 
@@ -28,8 +42,8 @@ until (a) is finished.
 | `HelperGuardedIfStatements.ql` | `if`s whose condition calls a Cassandra boolean helper that itself holds a candidate comparison: **the other stage-2 input** | **1,099** |
 
 The first three form a chain, each narrowing the previous one's output. The fourth is a
-**sibling, not a funnel step** — it finds pattern-(a) checks the chain structurally cannot see,
-and its rows are additional, not a subset. Both CSVs feed stage 2 as equals.
+**sibling, not a funnel step** — it finds checks the chain structurally cannot see, and its
+rows are additional, not a subset. Both CSVs feed stage 2 as equals.
 
 ### The chain — `All` → `Comparison` → `Narrowed`
 
@@ -68,8 +82,8 @@ comparator results (`compareIPs() < 0`) — is left for stage 2.
 The chain finds the capacity check only when the comparison is written **directly in the `if`
 condition**. When it hides behind a boolean helper — `if (!pool.hasRoom())`,
 `if (isOverLimit())` — the `if` carries no comparison and the row never appears, even though
-the `if`'s own branches are what decide allow vs. disallow. That is still pattern (a); the
-check just sits one call frame down.
+the `if` itself is intact and its branches may well be what decide. The check just sits one
+call frame down; the enforcement pattern is whatever reading the code shows it to be.
 
 This query reports both the `if` site and the comparison inside the callee (`helper`,
 `helperLine`). **1,099 rows — 577 magnitude, 522 equality — from 300 distinct helpers.**
@@ -135,9 +149,10 @@ cannot contain hyphens, so `queries/if-check-exp/` is not an importable path.
 verdict — a flag, enum, or return value — that a separate decision point
 reads; (c) guard clauses before an allocation that sits outside any branch.
 The chain only keeps comparisons that sit inside an `if` condition, and
-`HelperGuardedIfStatements.ql` extends that to comparisons one call frame down — but all four
-queries are anchored on an `if` whose branches decide, i.e. pattern (a). None of them can reach
-patterns (b) and (c). Known miss: the `cdc_total_space`
+`HelperGuardedIfStatements.ql` extends that to comparisons one call frame down. That syntactic
+filter does **not** exclude (b) and (c) — both are frequently written as `if` statements, and
+the CSVs contain such rows already. What it does exclude is any comparison written outside an
+`if` condition, and those misses are necessarily (b) or (c). Known miss: the `cdc_total_space`
 comparison in `CDCSizeTracker.processNewSegment()` (line 335) is a ternary
 inside a method argument, so it is not in `NarrowedIfStatements.csv`. **The
 constraint itself is not missed, though** — line 345 in the same method
@@ -147,7 +162,14 @@ in real `if`s and do appear. The miss is this *enforcement site*, not the
 constraint. (Earlier wording called line 345 "an unrelated `if`"; it is not —
 same usage, same limit, different response. Corrected 2026-09-23.)
 
-Planned structural (still non-keyword) extensions, not yet written:
+Planned structural (still non-keyword) extensions, not yet written. **None
+gates the band-A pass** — priorities reassessed 2026-09-25:
+
+| # | Query | Role | Priority |
+|---|---|---|---|
+| 1 | Comparisons anywhere | Closes the **only genuine coverage gap** — comparisons outside an `if` condition, which no existing query can reach | keep |
+| 2 | Guard clauses | **Precision aid.** Pattern-(c) guards are `if` statements and are already in the CSVs; this narrows to the ones whose then-branch exits | low |
+| 3 | Verdict links | **Precision aid.** Flag-setting (b) checks are already in the CSVs; this traces comparison → flag → reader, which stage 3 currently does by hand | low |
 
 1. **Comparisons anywhere** — the same numeric-comparison narrowing as
    `NarrowedIfStatements.ql`, but over all comparison expressions, not only

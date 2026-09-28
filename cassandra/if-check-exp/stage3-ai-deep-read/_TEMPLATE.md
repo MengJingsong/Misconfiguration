@@ -122,7 +122,79 @@ or write via this check, and through what mechanism? Goes beyond §7's
 per-object sizing — this is about the limit's effect on the ceiling, not
 what one allowed object costs.
 
-## 9. Provenance
+## 9. Test design (guidance for stage 4)
+
+**Stage 3 writes this section; stage 3 never runs it.** This is executor-facing
+guidance: everything stage 4 needs to run the experiment without re-deriving
+the code path above. It carries **no measured numbers and no verdict** — those
+are stage 4's, and where they land is set out in
+[`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+Method and pitfalls: [README.md §8](../../README.md#8-designing-a-test-for-a-case).
+
+| Field | Content |
+|-------|---------|
+| **Testability** | Config-testable / JVM system property / **Needs patched build** (hardcoded constant or type bound — say what to patch) / Not settable. State this first: it decides whether the case is worth a cluster allocation at all. |
+| **Constraint knob** | The exact thing stage 4 changes, and how: `cassandra.yaml` entry, `-D` system property, or the `DatabaseDescriptor` setter a unit test would call. Name it as §4's limit path names it, not as the check-site operand. |
+| **Capacity values to test** | **At least three, including the default**, with units. Two points cannot show whether the response is linear. Say what capacity each value produces if the limit is derived rather than used raw (e.g. a percentage of free space). |
+| **Usage-side observable** | §4's usage-side operand — the counter the check actually compares. |
+| **Instrument** | How to read that operand, and **whether the real operand is exposed at all**. If it is not, name the proxy and state the gap plainly; a proxy that moves for other reasons is a confounder, not a measurement. |
+| **Scope of the limit** | Global/process-wide, per-table, per-connection, or per-file. For a per-object limit, give the multiplier: node-wide usage moves by `limit × N`, so say what N is and how to control it. |
+| **Suggested level** | Unit and/or cluster (both where practical — they answer different questions). Name any existing scaffolding under `test/unit/...` that already reaches this check, and the `ant testsome -Dtest.name=<FQCN>` line to run it. |
+
+### 9a. Workload — driving the usage operand
+
+What stage 4 must do to make the usage side climb toward the limit: the
+operation, the payload size, the concurrency, and what (if anything) releases
+capacity concurrently (flush, cleanup thread, consumer). Prefer a
+**deterministic single-shot approach** — size the capacity below what one
+operation needs, so the first attempt lands on the boundary — over a
+throughput race against whatever reclaims capacity.
+
+### 9b. Scenario A — just reach capacity
+
+How to bring usage up to the limit without crossing it, and what stage 4
+should observe at each capacity value. Expect usage ≈ capacity here in almost
+every case; this scenario establishes that the knob moves the ceiling at all.
+
+### 9c. Scenario B — try to exceed capacity
+
+How to cross the limit, and what to observe. **Derive the expectation from
+§6b**, not from an assumption that the check rejects cleanly: a clean reject,
+a block-and-wait, and an escape hatch all look different from outside.
+
+### 9d. Expected dose-response
+
+State, before the run, what usage-vs-constraint should look like across the
+three-plus capacity values **if the traced path is the binding limit** — and
+what it should look like instead if the escape hatch or non-domination
+recorded in §6b/§10 dominates. A design that predicts only the enforcing
+outcome cannot tell a bypass from experimental noise.
+
+### 9e. Interpretation — what each outcome means
+
+So stage 4 can decide at the cluster without coming back to stage 3. Adjust
+the rows to this case; the third is the one that refutes it.
+
+| Observation at scenario B | Reading |
+|---|---|
+| Usage pinned at the ceiling; rejections/parks/exceptions rise as §6b predicts | The check enforces as traced. |
+| Usage climbs past the ceiling | §6b's escape hatch or non-domination dominates — Target-3 material, and the case's §8 ceiling claim needs amending. |
+| Usage flat across every capacity value | The traced path is **not** the binding limit. Stage 3 misread it; the case needs re-reading, not a re-run. |
+
+### 9f. What would refute this case
+
+The specific observation that would mean the traced path is wrong — stated
+plainly enough that stage 4's feedback can settle it. A case with nothing
+here is not falsifiable and the design is incomplete.
+
+### 9g. Confounders and controls
+
+What could move the observable for reasons unrelated to this check, and the
+control run that separates them. Baseline at default config and an idle
+control are the minimum; add per-case items (background compaction, GC
+timing, a shared global pool picking up unrelated traffic, other tables).
+
+## 10. Provenance
 
 | Field | Content |
 |--------|---------|
@@ -130,10 +202,11 @@ what one allowed object costs.
 | **Filed by / Date** | Who wrote this case up and when |
 | **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) — a case is not filed until this is done |
 | **Escape hatch / Target-3 note** | any bypass of the disallow branch noticed (flag for Target 3, do not chase here), or "none found yet" |
+| **Stage-4 feedback** | "none yet" until stage 4 reports. Then: a link to its results entry, and — if the feedback corrected anything above — which section was amended and when. Measured numbers stay in stage 4's file; they are not copied here. |
 | **Notes** | Any other caveats or outstanding questions |
 
 ---
 
-## 10. Notes
+## 11. Notes
 
 - _Add any additional context, edge cases, or version-specific behavior._

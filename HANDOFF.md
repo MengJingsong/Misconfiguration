@@ -107,10 +107,15 @@ this folder's own scope.
       rules. Moved here from `stage3-ai-deep-read/_INDEX.md` on 2026-09-23.
     - `cases/` — **the results**: one flat file per case (flattened from
       per-module folders 2026-09-23; module is a field, not a folder).
-    - `deferred.md` — unjudged: would qualify only under pattern (b) or (c),
-      parked by the scope decision below. Kept apart from `rejected.md`
-      because they are undecided, not refused. Moved here from the stage-2
-      folder, since **stage 2 cannot produce a pattern deferral**.
+    - `deferred.md` — unjudged rows, identified but never read against the
+      rules. Formerly the (b)/(c) parking lot; **unparked 2026-09-25**, so it
+      is now a worklist. Kept apart from `rejected.md` because they are
+      undecided, not refused. Moved here from the stage-2 folder, since
+      **stage 2 cannot produce a pattern deferral**.
+  - **`stage4-runtime-verification/`** — opened 2026-09-25. Runs the §9 test
+    designs and reports back; executed by Jingsong, not by an AI session. Its
+    `README.md` is the feedback contract: what stage 4 consumes, what it emits,
+    and where each kind of feedback lands. No results file exists yet.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
@@ -155,6 +160,12 @@ stage 1/2, `3b` = direct source reading).
 | `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
 
 Each case's full detail lives in its own file.
+
+**All seven predate the §9 test-design section (added 2026-09-25) and need it
+backfilled.** The earlier per-case trigger designs are recoverable from
+`git show e7f9963:HANDOFF.md`, and for `memtable_heap_space` the test was
+actually written and run — `HeapPoolTest.java` is still in the `cassandra-src`
+clone.
 
 ## Open items / next steps
 
@@ -219,12 +230,19 @@ is no saving worth buying with a heuristic that might drop a real case.
 
 **The immediate next work, in order:**
 
-1. **Stage 3 reads band A, in A1 → A2 → A3 order.** 134 rows, but far fewer
-   distinct arguments: A3's 39 rows share one shape (`size == capacity` before
-   growing an array), so judge them as a group rather than one at a time. Two
-   A-band rows are **already refused** — `NativeAllocator$Region.allocate():273`
-   and `SlabAllocator$Region.allocate():201`, in `rejected.md` — so check the
-   stage-3 files before reading any row.
+0. **Clear the `deferred.md` queue first** — three already-identified (b)/(c)
+   rows, unparked 2026-09-25, whose reading is already done.
+   `hasDiskSpaceForCompactionsAndStreams` passes all three rules and needs only
+   writing up; `column_index_cache_size` is recorded as strong;
+   `TrackedDataInputPlus_limit` is weak and needs `limit`'s origin settled.
+1. **Stage 3 reads band A, in A1 → A2 → A3 order, under all three enforcement
+   patterns.** 134 rows, but far fewer distinct arguments: A3's 39 rows share
+   one shape (`size == capacity` before growing an array), so judge them as a
+   group rather than one at a time. Two A-band rows are **already refused** —
+   `NativeAllocator$Region.allocate():273` and
+   `SlabAllocator$Region.allocate():201`, in `rejected.md` — so check the
+   stage-3 files before reading any row. Every case that qualifies gets a §9
+   test design (README §8).
 2. **Three open items the banding independently surfaced**, each already in
    band A:
    - `CommitLogSegmentManagerCDC.java:345` — the third `cdc_total_space` site,
@@ -256,9 +274,15 @@ The bands were assigned from the row alone, with the source unread, so a
 band-A row can still fail any of the three rules — and several will. The
 banding's only measured property is that the 8 labelled rows land in A.
 
-**Do not** start patterns (b)/(c), and do not run behavioral verification —
-both are deferred by decision (see "Scope decisions" below). `deferred.md`
-is their worklist.
+**Patterns (b) and (c) are in scope as of 2026-09-25** — read every band-A row
+under all three, with no pattern filter. `deferred.md` is now a queue of
+already-identified (b)/(c) rows, and the cheapest work in the corpus.
+
+**Every case you file also needs a §9 test design** — how stage 4 should vary
+the constraint and drive usage to the boundary (README §8). Stage 3 designs it;
+**do not run anything**, and record no measured numbers. Execution is stage 4,
+run by Jingsong, which reports back into
+`cassandra/if-check-exp/stage4-runtime-verification/`.
 
 ### ⏵ Step 1 in detail — the AI banding (decided 2026-09-23)
 
@@ -434,40 +458,52 @@ allocate a new one. The real ceiling is the already-filed
 `MemtablePool.tryAllocate()`. Same archetype as the 5 `BTree MAX_KEYS` rows
 and `MmappedRegions`.
 
-### Scope decisions: pattern (a) only (2026-09-22); verification is stage 4 (2026-09-23); stage 2 never rules out (2026-09-23)
+### Scope decisions: all three patterns (revised 2026-09-25); stage 3 designs the test, stage 4 runs it (revised 2026-09-25); stage 2 never rules out (2026-09-23)
 
 **Triage is restricted to enforcement pattern (a)** — the capacity check is
 itself the `if` whose branches decide allow vs. disallow (README §3.2).
 Patterns (b) (check sets a verdict read by a separate decision point) and
-(c) (guard clause before an allocation outside any branch) are **not being
-triaged yet**: how to handle them systematically is still an open question,
-so they are deliberately parked rather than half-done. **They resume once
-pattern (a) is finished** — this is a sequencing decision, not a narrowing of
-the folder's scope; (b) and (c) remain in scope and their rules in README
-§3.2 stand unchanged.
+(c) (guard clause before an allocation outside any branch) **are triaged now**
+— unparked 2026-09-25, ahead of pattern (a) finishing. A row is read, its
+pattern identified, and the three rules applied, with no pattern filter.
+
+**Why it cost nothing to unpark.** The existing corpus already holds (b) and
+(c) candidates, and stage 2's banding was pattern-agnostic, so band A is
+readable under all three patterns with no new query. Expect (b)/(c) rows to
+take *longer per row*, though: Rule 3 under (b) needs the verdict traced to its
+reader, and under (c) needs domination checked across callers.
 
 What follows from this:
 
 - **Already-filed cases are unaffected.** Four of the seven existing cases
   are pattern (b). This decision governs *new candidate triage* only;
   existing case files keep their recorded pattern.
-- **(b)/(c)-only rows go to `deferred.md`, not a rejection file.** A row
-  dropped only because "the `if`'s own branches don't diverge" is not
-  rejected — it is simply unjudged under (b)/(c). A separate file (rather
-  than a status column, which invites skimming past it) means resuming
-  (b)/(c) later is a matter of reading one file instead of re-scanning the
-  corpus. Rejections on pattern-independent grounds (thread-pool or
+- **`deferred.md` is now a worklist, not a parking lot.** Nothing new is
+  deferred by pattern. Its existing entries — `hasDiskSpaceForCompactions`
+  `AndStreams` (passes all three rules, needs writing up),
+  `column_index_cache_size` (strong), `TrackedDataInputPlus_limit` (weak) —
+  are queued, and its re-audit of rejections made under the old (a)-only
+  assumption is scheduled. Rejections on pattern-independent grounds (thread-pool or
   concurrency caps, rate limiters, config validation, time checks, writer
   rollover) were once recorded in the stage-2 `negatives.md`; it closed on
   2026-09-23 when stage 2 stopped rejecting rows and was deleted on
   2026-09-24, its rows now carrying band D in `bands.csv` — bottom-ranked,
   not settled.
-- **The existing CodeQL scripts already fit pattern (a) — confirmed by
-  reading `NarrowedIfStatements.ql` (2026-09-22), not just its README.** It
-  selects `BinaryExpr` comparisons whose `getEnclosingStmt()` is an `IfStmt`,
-  numeric operands only, nulls and literal-only pairs dropped — structurally
-  exactly pattern (a). No query changes are needed and the three planned
-  structural queries are *not* prerequisites, so stage 2 is unblocked now.
+- **What the CodeQL filter actually selects — corrected 2026-09-25.**
+  `NarrowedIfStatements.ql` selects `BinaryExpr` comparisons whose
+  `getEnclosingStmt()` is an `IfStmt`, numeric operands only, nulls and
+  literal-only pairs dropped. This was previously described as "structurally
+  exactly pattern (a)"; that is **wrong**. It is a *syntactic* filter —
+  comparison inside an `if` — and it spans all three patterns, which are
+  defined by where the decision sits relative to the comparison. Proof: the
+  pattern-(b) check at `Directories.java:551` is an ordinary `if` assigning a
+  flag (and stage 2 surfaced it), and pattern-(c) guard clauses *are* `if`
+  statements. The genuine gap is syntactic and narrower: a comparison written
+  as a ternary, assignment, `return` or method argument is invisible, and
+  since such a comparison cannot be pattern (a), every miss of that kind is a
+  (b) or (c) check. One way only: *not in an `if` ⟹ (b) or (c)*, never the
+  reverse. No query changes are needed and the three planned structural
+  queries are *not* prerequisites.
   The boolean-helper gap — a pattern-(a) check hidden behind a helper such as
   `if (!pool.hasRoom())`, leaving the `if` with no comparison — was **closed
   2026-09-22** by the new `HelperGuardedIfStatements.ql` (1,099 rows from 300
@@ -477,22 +513,32 @@ What follows from this:
   the branches actually diverge on allocation?) can be answered **only by the
   stage 3** — not by stage 1, and not by stage 2 either, since neither sees
   the branches.
-**Verification is out of this folder, reserved for a future stage 4
-(2026-09-23).** Decided by Jingsong. A stage-3 case still needs **manual
-verification** (a person reads the traced path and agrees) and **runtime
-verification** (a trigger drives execution into the disallow branch on a
-running cluster). Neither happens here: this folder ends at stage 3, the
-README's verification section is gone, and there is no `Status` field. A
-case's evidence is its traced code path checked against the pinned tag — what
-Target 2 asks for, and complete as stage-3 evidence.
+**Stage 3 designs the test; stage 4 runs it (revised 2026-09-25).** Decided by
+Jingsong. Each case file's §9 is a test design — the knob that moves the
+constraint, at least three capacity values, the observable and its instrument,
+how to just-reach and how to exceed, the predicted dose-response, and what
+would refute the case (README §8). Writing one needs no cluster, no build and
+no run, which is why it can live here.
 
-Stage 4 is **reserved, not scheduled** — nothing built, no folder, no case
-queued. It gets its own number because the stage numbers mean *evidence
-standard*, not pipeline position (README §7.2), and behavioral evidence is a
-higher standard. Keeping it outside also preserves this folder's rule that
-everything here is decidable from source alone — no cluster, no build, no run.
-Earlier trigger designs and results are recoverable from git history
-(`git show e7f9963`).
+What stage 3 still must not do: **execute anything, record a measured number,
+or call a case verified.** There is no `Status` field. A case still needs
+**manual verification** (a person reads the traced path and agrees) and
+**runtime verification** (execution actually driven into the disallow branch);
+both are stage 4, run by Jingsong.
+
+**Feedback comes back, and can refute a case.** Measurements land in
+`cassandra/if-check-exp/stage4-runtime-verification/`; a refutation of the
+traced path amends the case file, dated and citing the run. Every case's §10
+carries a **Stage-4 feedback** field, "none yet" until then. Stage 4 keeps its
+own number because the stage numbers mean *evidence standard*, not pipeline
+position (README §7.2), and a measured run is a higher standard.
+
+Stage 4 is **opened but not built** — the folder and its contract exist, no
+results file does. Prior art worth recovering first: the earlier per-case
+trigger designs, and the one test that was actually written and run
+(`HeapPoolTest.java`, still present in the `cassandra-src` clone), are in
+`git show e7f9963:HANDOFF.md` — note the `:HANDOFF.md` suffix, since that
+commit's own diff is an unrelated folder rename.
 
 - **Deferred with (b)/(c):** the disk candidate `getWriteDirectory():282`
   (pattern (c) — previously item 2 below), the three planned structural
@@ -551,24 +597,28 @@ Remaining items, in the order they were previously prioritized:
      judge-the-helper-once trick held: 114 rows, 23 decisions); 21 rejected,
      1 cited to an existing entry, **1 candidate found** —
      `Directories.hasDiskSpaceForCompactionsAndStreams():551`, a per-filestore
-     disk check gating whether a compaction starts at all. It is pattern (b),
-     so it is parked in `stage3-ai-deep-read/deferred.md` rather than
-     written up.
-   - *Known gap (deferred, not blocking):* the pipeline only sees comparisons
-     inside `if` conditions, so it cannot find pattern-(b)/(c) checks written
-     as ternaries or assignments (the CDC comparison was missed). Under the
-     pattern-(a)-only scope this is exactly the right input, so the three
-     planned structural queries (comparisons anywhere, guard clauses, verdict
-     links; none written yet) wait until (b)/(c) resume.
+     disk check gating whether a compaction starts at all. Pattern (b), so it
+     was parked in `stage3-ai-deep-read/deferred.md` rather than written up;
+     **unparked 2026-09-25 and now first in that queue** — it passes all three
+     rules and needs only writing up.
+   - *Known gap (real, but not blocking):* the pipeline only sees comparisons
+     inside `if` conditions, so it cannot find a check written as a ternary or
+     assignment (the CDC comparison was missed). That is a **syntactic** gap,
+     not a pattern one — the CSVs do contain (b) and (c) rows, since both are
+     commonly written as `if`s. Of the three planned queries (none written),
+     only "comparisons anywhere" closes this gap; the other two are precision
+     aids. None blocks stage 3.
 3. **Native-transport follow-up:** `PreV5Handlers.LegacyDispatchHandler.checkLimits()`
    (`PreV5Handlers.java:197-209`, pre-protocol-V5 connections, uses
    `channelPayloadBytesInFlight`) may be a related but distinct capacity path;
    not yet investigated. `ConnectionLimitHandler` (connection-count caps) is
    deferred rather than rejected; see `stage3-ai-deep-read/_INDEX.md`.
-### Deferred until pattern (a) is finished
+### The (b)/(c) worklist — unparked 2026-09-25
 
-Parked by the 2026-09-22 scope decision above; all still in scope, none
-abandoned. **The worklist itself lives in
+Formerly "deferred until pattern (a) is finished". The 2026-09-22 scope
+decision that parked these was revised on 2026-09-25: all three patterns are
+triaged now, so this is a **queue**, and the cheapest work in the corpus — the
+reading behind each entry is already done. **The worklist itself lives in
 [`cassandra/if-check-exp/stage3-ai-deep-read/deferred.md`](cassandra/if-check-exp/stage3-ai-deep-read/deferred.md)**
 — full detail there; this is the summary.
 
@@ -584,7 +634,7 @@ abandoned. **The worklist itself lives in
   than the memtable `markBlocking()` or native-transport
   `throw_on_overload=false` hatches, since the check is never executed rather
   than overridden. Flagged for Target 3. Two lessons carried into
-  `stage3-ai-deep-read/deferred.md` for the eventual (c) pass: non-domination
+  `stage3-ai-deep-read/deferred.md` for the (c) reading: non-domination
   is a
   finding to record rather than grounds for rejection, and it cannot be seen
   in a CSV row — it requires reading the callers.

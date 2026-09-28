@@ -61,6 +61,10 @@ so it appears in no stage-1 CSV. It was found by stage 3 reading the source
 directly — which is why that feed is a standing obligation and not a
 convenience (see [`../stage3-ai-deep-read/README.md`](../stage3-ai-deep-read/README.md)).
 
-Three planned structural extensions (comparisons anywhere, guard clauses,
-verdict links) would close part of the gap; none is written, and all wait on
-the pattern-(b)/(c) resumption (`../README.md` §7.5).
+Three planned structural extensions are specified and none is written. Since
+patterns (b)/(c) were unparked (2026-09-25, `../README.md` §7.5), **none of
+them blocks stage 3** — the existing CSVs already contain (b) and (c)
+candidates, because the queries filter on a *syntactic* shape (comparison
+inside an `if`), not on an enforcement pattern. Only "comparisons anywhere"
+closes a real coverage gap; "guard clauses" and "verdict links" are precision
+aids for rows already in the corpus.
