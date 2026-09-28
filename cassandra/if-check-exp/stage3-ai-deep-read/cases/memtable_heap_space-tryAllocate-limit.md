@@ -296,10 +296,10 @@ bytes) lands on the boundary on the first attempt, with no race against the
 flush.
 
 ```bash
-# unit tier — restore HeapPoolTest (its source is the Java block in this file's
-# former "Verification" section), save it as
-# test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java, then:
-git -C <misconfiguration-repo> show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md
+# unit tier — copy the committed harness copy of HeapPoolTest (not upstream)
+# into the local clone, then run both tests:
+cp <misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/HeapPoolTest.java \
+   test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java
 ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest
 ant testsome -Dtest.name=org.apache.cassandra.db.memtable.MemtableSizeUnslabbedTest
 
@@ -358,7 +358,7 @@ the exact commands, and every reading above, per capacity value.
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). Citations added to §1, §9 and §11 on 2026-09-28 checked against a fresh clone of the same tag (`b5f2a54`). |
 | **Escape hatch / Target-3 note** | `markBlocking()`-marked `OpOrder.Group` silently forces the allocation past `limit` instead of parking (`MemtableAllocator.SubAllocator.allocate():169-197`); see §6b. |
 | **Stage-4 feedback** | none yet |
-| **Notes** | §9 revised 2026-09-28, before any stage-4 run: the knob corrected from `heap_buffers` (builds a `SlabPool`) to `unslabbed_heap_buffers`; `memtable_cleanup_threshold` capped at the accepted `0.99`; `AllMemtablesOnHeapDataSize` shown blind to switched-out memtables, and `BlockedOnAllocation`, the cleaner's `Used total` and the flush log added as instruments; the cleaner-trigger confound added to §9d–§9f; the nonexistent `MemtablePoolTest` replaced by `MemtableSizeUnslabbedTest`; `HeapPoolTest` shown recoverable from git history. Later the same day §9 was restructured to the new template layout (9a summary for review, 9b–9e runbook); the old §9d "time to first wait falls with the limit" prediction was dropped as redundant, and a `cassandra-stress` keyspace step was added because stress creates its keyspace with `durable_writes = true`. |
+| **Notes** | §9 revised 2026-09-28, before any stage-4 run: the knob corrected from `heap_buffers` (builds a `SlabPool`) to `unslabbed_heap_buffers`; `memtable_cleanup_threshold` capped at the accepted `0.99`; `AllMemtablesOnHeapDataSize` shown blind to switched-out memtables, and `BlockedOnAllocation`, the cleaner's `Used total` and the flush log added as instruments; the cleaner-trigger confound added to §9d–§9f; the nonexistent `MemtablePoolTest` replaced by `MemtableSizeUnslabbedTest`; `HeapPoolTest` shown recoverable from git history. Later the same day §9 was restructured to the new template layout (9a summary for review, 9b–9e runbook); the old §9d "time to first wait falls with the limit" prediction was dropped as redundant, and a `cassandra-stress` keyspace step was added because stress creates its keyspace with `durable_writes = true`. §9c amended 2026-09-28 (stage-4 runbook defect #1, approved by Jingsong): the unit tier copies `HeapPoolTest` from the committed stage-4 harness instead of restoring it from git history; the test code is the same. §9a unchanged. |
 
 ---
 
