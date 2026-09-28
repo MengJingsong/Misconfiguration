@@ -113,9 +113,19 @@ this folder's own scope.
       undecided, not refused. Moved here from the stage-2 folder, since
       **stage 2 cannot produce a pattern deferral**.
   - **`stage4-runtime-verification/`** — opened 2026-09-25. Runs the §9 test
-    designs and reports back; executed by Jingsong, not by an AI session. Its
-    `README.md` is the feedback contract: what stage 4 consumes, what it emits,
-    and where each kind of feedback lands. No results file exists yet.
+    designs and reports back. **Every procedure runs twice** (2026-09-28): an
+    AI session first (run 1, which concludes with its logic), then Jingsong
+    by hand, blind to run 1 (run 2, who checks that logic and owns the
+    verdict).
+    - `README.md` — the two-run protocol, safety rules for the shared
+      infrastructure, and where each kind of feedback lands.
+    - `environment.md` — **start here on a new node**: the exact install,
+      clone and build steps that worked (JDK 11.0.32.1, Ant 1.10.12).
+    - `_TEMPLATE.md` — template for a per-case results file.
+    - `harness/<case-file-stem>/` — committed test code both runs use
+      (e.g. the restored `HeapPoolTest.java`).
+    - `results/<case-file-stem>.md` — one per case, plus
+      `results/<case-file-stem>/run1|run2/` for small log excerpts.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
@@ -139,9 +149,9 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 9 cases filed
+## Current state — 11 cases filed
 
-All nine are stage-3 complete: judged against the three rules with the
+All eleven are stage-3 complete: judged against the three rules with the
 source open, citations checked against the pinned `cassandra-5.0.9` tag, and
 each carrying a §9 test design for stage 4.
 **There is no `Status` field** — manual and runtime verification happen in
@@ -159,40 +169,53 @@ stage 1/2, `3b` = direct source reading).
 | `cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. |
 | `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
 | `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md` | (b) | **3a** | Compaction admission gate, per file store, counting in-flight compactions. Disallow is a **shrink-and-retry ladder**, not a refusal; abort only at the end of it. Fail-open on estimation error. First case from feed 3a. |
+| `max_hints_size_per_host-shouldHint-maxHintsSize.md` | (b) | 3a | Per-host byte cap on hint files on disk. **Off by default** (`0B`). Disallow silently skips the hint while the write succeeds — the folder's first disallow that loses data; no metric fires on it. |
+| `file_cache_size-allocateMoreChunks-memoryUsageThreshold.md` | (a) | 3b | Byte ceiling on the chunk-cache pool's off-heap macro chunks. Disallow withholds the `Chunk`, but the caller then allocates straight from the OS with no ceiling — the limit bounds the pool, not the node's off-heap use. |
 | `column_index_cache_size-indexSamples-cacheSizeThreshold.md` | (b) | 3b | Threshold on a partition's block index: `IndexedEntry` (array on heap) vs. `ShallowIndexedEntry` (file position). **Both branches allocate** — the divergence is retained size. Key cache re-caps the total, so the ceiling claim is per entry. |
 
 Each case's full detail lives in its own file.
 
-**Every case now carries a §9 test design** (backfilled 2026-09-28; the two
-new cases were written with one). Stage 4 has nine executable designs waiting
-and nothing else blocking it.
-
-**Two things stage 4 should know before picking one up.**
-`memtable_heap_space`'s unit tier was written and run on 2026-09-16 —
-`HeapPoolTest.java` is untracked in the `cassandra-src` clone and not
-upstream, but its **full source is recoverable from this repo's history**:
-`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`
-(corrected 2026-09-28; it was earlier described as committed nowhere). The
-best-scaffolded designs, in order, are `cdc_total_space` (an existing
-capacity-sweep helper plus five relevant tests), `MAX_HINT_BUFFERS` (an exact
-`n × bufferSize` prediction, and a Byteman test that already proves the
-disallow branch), and `max_space_usable_for_compactions_in_percentage`.
+**Every case carries a §9 test design.** Only `memtable_heap_space` is in
+the **new §9 layout** (2026-09-28): the intro and §9a are a summary for human
+review (procedure and conclusions table), §9b–§9e are a Linux runbook. The
+other ten are in the old layout and must be converted before their first
+stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ## Open items / next steps
 
 ### ⏵ Resume here (state as of 2026-09-28, end of session)
+
+**Stage 4 has started, on `memtable_heap_space`.** Read
+`stage4-runtime-verification/README.md`, then the results file
+`results/memtable_heap_space-tryAllocate-limit.md`.
+
+| Step | State |
+|---|---|
+| Step 0 — freeze, harness, agreement criteria, environment | **Done.** §9a frozen at `98ad478`; harness `66ebf93`; criteria approved; node0 set up per `environment.md` (local clone `~/cassandra-run1`). |
+| Run 1 (AI), unit tier | **Done 2026-09-28.** Readings and conclusion are in the results file's **folded** §4 — do not summarise them to Jingsong before run 2 is recorded. Runbook defect #1 approved and fixed in §9c (`745c1ab`). |
+| Run 2 (Jingsong), unit tier | **Next.** Clone to `~/cassandra-run2`, follow `environment.md` and the case's §9c, fill §5.1–§5.3. Then compare (§6) and verdict (§7). |
+| Cluster tier | Not started. Needs the **Byteman rule** for scenario C (bypass volume), not written yet; scenarios A and B can run without it. |
+
+**Machine notes.** JDK and Ant exist only on node0 where they were installed
+(CloudLab nodes are rebuilt from scratch). Full run logs are on node0 in
+`~/stage4-logs/`, outside the repo. `HANDOFF.md` and the case files are the
+only record a new node inherits.
+
+**Open stage-4 follow-ups:** convert the other ten cases to the new §9 layout
+before their runs; update the stale §9d–§9g references in the root
+`README.md` §5/§7.5, `stage3-ai-deep-read/playbook.md` and `rejected.md`.
 
 **Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
 CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
 stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
 standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
 `claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `bands.md`. **Nine cases are filed**, all stage-3 complete and all carrying
+in `bands.md`. **Eleven cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 is now the folder's only unstarted stage, and it is unblocked** —
-nine executable designs, nothing owed to it from stage 3. Stage 3's own
+**Stage 4 has started** (see the table above) — eleven designs, one case in
+progress. Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
 | Band | Meaning | Units |
