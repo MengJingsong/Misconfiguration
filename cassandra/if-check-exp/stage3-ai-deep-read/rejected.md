@@ -79,3 +79,23 @@ with the code open, unlike a stage-2 row-level pass.
 | `FBUtilities.copy():1291` | `limit < buffer.length + copied` | Rule 3. Clamps the next read size into a fixed 64-byte buffer; no divergence in object creation. |
 | `RepairTokenRangeSplitter.getRepairAssignmentsForKeyspace():312` | `currentAssignmentsBytes + tableAssignmentsBytes < maxBytesPerSchedule` | Rule 2/3, bucketing. Chooses whether to merge assignments or add them separately — they are added either way. |
 | `RepairTokenRangeSplitter.filterRepairAssignments():360` | `bytesSoFar + getEstimatedBytes() > maxBytesPerSchedule` | Rule 2. Bounds the volume of repair *work* scheduled, not bytes resident or written by an allocation. |
+
+## Batch: clearing the deferred (b)/(c) queue — 2026-09-28
+
+The three entries parked in [`deferred.md`](deferred.md) §1b/§1c, read against
+the three rules now that all patterns are in scope (README §7.5). Two
+qualified and are filed as cases; **one is refused here.** The §2 re-audit
+remains scheduled, folded into the band-A pass.
+
+| Row | Check | Ground |
+|---|---|---|
+| `TrackedDataInputPlus.checkCanRead():184` | `limit >= 0 && bytesRead + size > limit` | **Rule 1, and Rule 2.** `limit`'s origin was the open question that kept this parked; it is settled. The only production site that passes a limit at all is [`UnfilteredSerializer.deserializeRowBody():587`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/rows/UnfilteredSerializer.java#L587), `new TrackedDataInputPlus(in, rowSize)`, where `rowSize` is `in.readUnsignedVInt()` read at [`:585`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/rows/UnfilteredSerializer.java#L585) — **the row's own serialized length, read out of the SSTable being deserialized.** It is therefore data, not a capacity: it is not configured, not constant, not a type bound, and not a runtime-queried resource figure, and it varies per row. Rule 1 asks the limit-side operand to represent a capacity; a per-record stream framing boundary does not. Rule 2 fails consequently — there is no value an operator or the build can change that would move the maximum bytes resident, because a larger row simply arrives with a larger `limit`. The guard's actual purpose is corruption safety: stop a malformed length field from reading past the end of one row's body. Same archetype as the already-rejected [`ChecksummedDataInput.checkLimit():161`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/ChecksummedDataInput.java#L161) and `VIntCoding.getUnsignedVInt()` above. **Second, independent ground:** the other four production construction sites — [`CassandraStreamReader.java:134`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/streaming/CassandraStreamReader.java#L134), [`CassandraCompressedStreamReader.java:76`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/streaming/CassandraCompressedStreamReader.java#L76), [`HintMessage.java:157`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintMessage.java#L157), [`RowIndexEntry.java:557`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L557) — all use the single-argument constructor, which sets `limit = -1` ([`:40-43`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L40-L43)) and so disables the guard entirely via the `limit >= 0` conjunct. The class is a **byte-counter** first and a bounded reader only incidentally. Checked 2026-09-28. |
+
+**Worth carrying forward.** This is the first entry refused on **Rule 1** —
+every previous rejection failed Rule 2 or Rule 3. The distinction is useful for
+the band-A pass: a comparison can be perfectly shaped like a capacity check,
+with a compound usage side and an operand literally named `limit`, and still
+have no constraint on the limit side at all. The question to ask is not "is
+this a limit?" but "**where does this number come from, and what could change
+it?**" If the answer is "the data being read", it fails at Rule 1 and the
+other two rules never need to be reached.

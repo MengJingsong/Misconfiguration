@@ -1,25 +1,31 @@
-# Deferred — the (b)/(c) worklist, now live
+# Deferred — the (b)/(c) worklist, now empty
 
 Rows and follow-ups that are **undecided**, not refused.
 
-**Unparked 2026-09-25.** All three enforcement patterns are now in scope
+**Unparked 2026-09-25, and cleared 2026-09-28.** All three enforcement
+patterns are in scope
 ([`../README.md` §7.5](../README.md#75-active-scope-decisions-revised-2026-09-25)),
 so nothing new arrives here: a (b) or (c) row is read and judged like any
-other. What is already here is a **queue** — these entries were identified but
-never judged against the three rules, and they are the cheapest rows in the
-corpus to pick up, because the reading behind them is already done.
+other. The three entries this file held were the cheapest rows in the corpus,
+because the reading behind them was already done — all three have now been
+judged.
 
-Work them in this order:
+**No row in this file is awaiting judgement.** One scheduled follow-up
+remains: the §2 re-audit, folded into the band-A pass.
 
-| # | Entry | Pattern | Why first |
+| # | Entry | Pattern | Outcome, 2026-09-28 |
 |---|---|---|---|
-| 1 | `hasDiskSpaceForCompactionsAndStreams` (§1b) | (b) | Already passes all three rules — needs writing up, not judging |
-| 2 | `column_index_cache_size` (§1c) | (b) | Recorded as **strong**, with the divergence already established |
-| 3 | `TrackedDataInputPlus_limit` (§1c) | (c) | Weak — settle `limit`'s origin before committing |
-| 4 | The §2 re-audit | both | Scheduled, not parked: rejections made under the old (a)-only assumption |
+| 1 | `hasDiskSpaceForCompactionsAndStreams` (§1b) | (b) | **Filed** — [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md) |
+| 2 | `column_index_cache_size` (§1c) | (b) | **Filed** — [`column_index_cache_size-indexSamples-cacheSizeThreshold.md`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold.md) |
+| 3 | `TrackedDataInputPlus_limit` (§1c) | (c) | **Refused, Rule 1** — `limit` is the row's own serialized length, read from the data being deserialized. See [`rejected.md`](rejected.md), batch 2026-09-28. |
+| 4 | The §2 re-audit | both | **Still scheduled** — rejections made under the old (a)-only assumption; run it inside the band-A pass, not separately. |
 
-Keeping these apart from [`rejected.md`](rejected.md) is still the point:
-nothing here was refused, and no re-scan of the corpus is needed to find them.
+The per-entry sections below are kept as the reading record: they are what
+made items 1–3 cheap to resolve, and §3–§4 document stage 1's limits
+independently of any one row. Keeping this file apart from
+[`rejected.md`](rejected.md) is still the point — nothing here was refused
+*as a class*, and item 3's refusal now lives in the rejection store where it
+belongs.
 
 ## 1. Live candidate parked by pattern — *resolved 2026-09-22*
 
@@ -47,6 +53,17 @@ only the comparison — establishing it requires reading the callers, so
 budget for that in the (c) pass.
 
 ## 1b. Row surfaced by stage 2, judged and parked by stage 3 — `hasDiskSpaceForCompactionsAndStreams`
+
+> **Resolved 2026-09-28 — filed as a case:**
+> [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md).
+> The naming question this section left open was settled by §6.1's
+> derived-limit rule in favour of the percentage entry, for the reason this
+> section itself gave. Two line numbers below are **off by one** and were
+> corrected in the case file: the decision point is `CompactionTask.java:412`
+> (not `:411`) and the throw is `:442` (not `:441`). Two things the write-up
+> added that are not below: the check can be **switched off** per table over
+> JMX (`compactionDiskSpaceCheck`), and an exception while computing the
+> check is **treated as allow**.
 
 Row surfaced 2026-09-22 by the first stage-2 batch (the helper rows inside the four
 previously-triaged subtrees). **Passes all three rules; parked because it is
@@ -116,6 +133,14 @@ it may be the better constraint name.
 
 ### `column_index_cache_size` — pattern (b) — **strong**
 
+> **Resolved 2026-09-28 — filed as a case:**
+> [`column_index_cache_size-indexSamples-cacheSizeThreshold.md`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold.md).
+> "Strong" held up. Every line number below was confirmed unchanged. The
+> write-up found a **third check site** this section does not list —
+> `RowIndexEntry.java:360` on the *read* path, which is pattern (a) and is the
+> site that governs steady-state heap — and established that the total is
+> re-capped by the key cache, so the ceiling claim is about per-entry cost.
+
 - **Capacity check:** [`BigFormatPartitionWriter.indexSamples():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L113)
   — `indexSamplesSerializedSize + columnIndexCount * TypeSizes.sizeof(0) <= cacheSizeThreshold`,
   returning the sample list or `null`. Second check site at
@@ -137,6 +162,16 @@ it may be the better constraint name.
   heap via row index entries.
 
 ### `TrackedDataInputPlus_limit` — pattern (c) — weak
+
+> **Resolved 2026-09-28 — refused, and moved to
+> [`rejected.md`](rejected.md)** (batch 2026-09-28). The suspicion recorded
+> below was right. `limit` comes from
+> `new TrackedDataInputPlus(in, rowSize)` at `UnfilteredSerializer.java:587`,
+> where `rowSize` is read out of the SSTable itself — so it is **data, not a
+> capacity**, and the row fails Rule 1 before Rules 2 and 3 are reached. The
+> other four production construction sites pass no limit at all
+> (`limit = -1`), which disables the guard. Kept here as the reading record;
+> the verdict lives in the rejection store.
 
 - **Guard:** [`TrackedDataInputPlus.checkCanRead():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L184)
   — `limit >= 0 && bytesRead + size > limit`, which skips to the limit and

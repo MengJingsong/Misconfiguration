@@ -18,6 +18,8 @@ See [README.md](README.md) for the format.
 | `cdc_total_space` | [`CDCSizeTracker.processNewSegment():335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L335) | [`throwIfForbidden():214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L214) | `commitlog` | `allocation` | (b) | 3b | [`cdc_total_space-processNewSegment-allowance`](cases/cdc_total_space-processNewSegment-allowance.md) |
 
 | `DataDirectory_getAvailableSpace` | [`CompactionAwareWriter.getWriteDirectory():282`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L282) | [`CompactionAwareWriter.getWriteDirectory():283-286`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L283-L286) | `compaction` | `sstablewriter` | (c) | 3b | [`DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`](cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md) |
+| `max_space_usable_for_compactions_in_percentage` | [`Directories.hasDiskSpaceForCompactionsAndStreams():551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L551) | [`CompactionTask.buildCompactionCandidatesForAvailableDiskSpace():412-413`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L412-L413) | `compaction` | `compactionwriter` | (b) | 3a | [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md) |
+| `column_index_cache_size` | [`BigFormatPartitionWriter.indexSamples():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L113) | [`RowIndexEntry.create():227-238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L227-L238) | `sstable_index` | `rowindexentry` | (b) | 3b | [`column_index_cache_size-indexSamples-cacheSizeThreshold`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold.md) |
 
 <!-- Add one row per case. -->
 
@@ -25,16 +27,22 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 5 |
-| Total cases | 7 |
-| Found via feed 3b (raw source) | 7 |
-| Found via feed 3a (stage 1/2) | 0 |
+| Modules covered | 6 |
+| Total cases | 9 |
+| Found via feed 3b (raw source) | 8 |
+| Found via feed 3a (stage 1/2) | **1** |
 
-> **Every case so far came from feed 3b — reading the source directly.**
-> Stage 1/2 have surfaced and ranked rows (some matching these same lines),
-> but no case has yet been *established* from that queue: the 4 candidates
-> from the capacity-word pass awaiting write-up would be the first. This is the main evidence
-> that feed 3b is not optional.
+> **Feed 3a has its first case, as of 2026-09-28.**
+> `max_space_usable_for_compactions_in_percentage` was surfaced by the first
+> stage-2 batch and is the first case established from that queue — and it is
+> worth recording *how*: the row's own reported comparisons were both noise
+> (`size() > 0`, `sstablesRemoved > 0`), and what made it a case was the
+> **method name** on the helper row, which pointed the read two calls deeper.
+> A 3a row's value is not always the comparison it reports.
+>
+> The other eight came from feed 3b — reading the source directly. That
+> remains the main evidence 3b is not optional: it found the `cdc_total_space`
+> ternary, which stage 1 cannot surface at all.
 >
 > Feed counts are not a progress bar. Only 3a has a denominator — its
 > remaining work is sized in
@@ -63,6 +71,26 @@ See [README.md](README.md) for the format.
   reading), which is also what exposed the non-domination — the CodeQL row
   alone shows only the comparison.
 
+- **`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`:**
+  the second compaction disk case, and **the folder's first case from feed
+  3a**. An admission gate that runs *before* a compaction task starts: it sums
+  this compaction's expected output with the remaining output of every
+  compaction already in flight, per file store, and compares that against
+  `(usable bytes − min_free_space_per_drive) × max_space_usable_for_compactions_in_percentage`
+  (default 95%). Distinctive in two ways. Its disallow outcome is **not a
+  refusal but a negotiation** — `reduceScopeForLimitedSpace()` drops the
+  largest input SSTable and re-checks, repeatedly, so a node under disk
+  pressure compacts in smaller units rather than stopping; the abort and its
+  `RuntimeException` come only at the bottom of that ladder. And its
+  dose-response **runs the opposite way to every other case here**: lowering
+  the limit means less compaction, hence *more* data on disk, so the case must
+  be judged on the shrink/abort metrics and admitted compaction size, not on
+  `du`. Two escape hatches recorded: the check is skipped per table over JMX
+  (`compactionDiskSpaceCheck`, `OperationType.COMPACTION` only), and an
+  exception while computing it is **treated as allow** (fail-open).
+  Complements rather than duplicates `DataDirectory_getAvailableSpace` — see
+  that case's §11 for the axis-by-axis comparison.
+
 ### 3.1 memtable
 Storage-engine module covering memtable memory allocation and pooling
 (`utils/memory`, `db/memtable`). One case so far:
@@ -81,3 +109,26 @@ Hint buffering and dispatch module, covering writes stashed for temporarily-unre
 ### 3.4 commitlog
 Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). One case so far:
 - **`cdc_total_space-processNewSegment-allowance`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, compared in `CDCSizeTracker.processNewSegment()` (re-evaluated by `permitSegmentMaybe()`), which sets a per-segment `FORBIDDEN`/`PERMITTED` state read by the decision point `CommitLogSegmentManagerCDC.throwIfForbidden()` (pattern (b)). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. Escape hatch found: `cdc_block_writes = false` bypasses the check entirely.
+
+
+### 3.5 sstable_index
+On-disk index entries for wide partitions and the key cache that holds them
+(`io/sstable/format/big`, `cache`, `service/CacheService`). One case so far:
+- **`column_index_cache_size-indexSamples-cacheSizeThreshold`:** byte
+  threshold on one partition's serialized block index, deciding whether the
+  index is retained on heap as an `IndexInfo[]` (`IndexedEntry`) or left on
+  disk behind a file position (`ShallowIndexedEntry`). **The first case where
+  both outcomes allocate** — the divergence is in retained size, not in
+  existence, and the classes' own `unsharedHeapSize()` implementations state
+  it directly. Three check sites on one constraint, and they are not all the
+  same pattern: the two write-path sites are (b), while
+  `RowIndexEntry$Serializer.deserialize():360` is **(a)** and is the site that
+  governs steady-state heap. **The ceiling claim is per entry, not node-wide** —
+  cached entries are charged their `unsharedHeapSize()` against
+  `key_cache_size`, so raising the threshold buys fewer, fatter cache entries
+  rather than more heap; the uncapped terms are the per-writer
+  `DataOutputBuffer` of `2 × threshold` and transient flush/compaction
+  entries. No flag-style escape hatch exists — but the check is
+  **format-scoped** (BIG only; BTI does not reach it), and the read-path site
+  reads config **live per deserialization**, so a JMX change alters the
+  memory behaviour of already-written SSTables with no rewrite.
