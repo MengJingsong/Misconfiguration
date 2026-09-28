@@ -144,7 +144,28 @@ a verdict — see [`bands.md`](bands.md).
 |---|---|
 | Ranking | ✅ complete, full coverage |
 | Rule-outs | None, from 2026-09-23. Stage 2 has no rejection file. |
-| Next | Stage 3 reads band A in A1 → A2 → A3 order |
+| Band A1 | ✅ **consumed by stage 3, 2026-09-28** — all 65 rows judged |
+| Next | Stage 3 reads **A2 (30)**, then A3 (39), then band B (174), then C (94) |
+
+**Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
+read all 65 rows with the source open. Outcome: **8 qualified** (in
+[`../stage3-ai-deep-read/pending.md`](../stage3-ai-deep-read/pending.md)),
+**33 refused** (in
+[`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md),
+batch "band A1"), **3 undecided** (in
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) §5),
+and **21 already recorded** by earlier passes and cited rather than re-judged.
+Do not re-read these rows — cite the entry.
+
+**What the pass says about the banding.** 8 of the 44 newly-judged rows
+qualified. A1 is genuinely dense with usage-vs-limit comparisons, exactly as
+the band claims, and most of them still fail Rule 2 or Rule 3 — which is the
+banding working as specified, since a band was never a verdict. Two
+corrections to this folder's output are worth carrying into A2: stage 2's
+one-line reason called a hardcoded `Short.MAX_VALUE` a "configured max term
+size" on three rows, and it cannot distinguish a comparison in an *acquiring*
+method from the same comparison in the matching `releaseCapacity()` — two A1
+rows were the release-path twin of a filed case.
 
 Which CSV a row came from, whether it is magnitude or equality, and whether
 its comparison hides behind a helper are **signals and reading order**, not

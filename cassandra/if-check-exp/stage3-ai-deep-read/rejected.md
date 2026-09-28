@@ -36,9 +36,9 @@ them._
 | `TimeWindowCompactionStrategyOptions.java:126` (`sstableWindowSize < 1`) | Config-value validation. |
 | `UnifiedCompactionStrategy.java:617,671,768,782` | Bucket-selection/candidate-picking logic (choosing which SSTables to compact), not a resource-creation vs. reject divergence. |
 | `CompactionManager.java:245` (`concurrent_compactors`, `submitBackground()`) | Fails Rule 2 (see README § Core concept): limit-side operand is `executor.getMaximumPoolSize()`, a thread-pool size. Changing `concurrent_compactors` changes how many compactions run *concurrently* (speed/throughput), not the total bytes memtable/compaction machinery can hold — the allocations a compaction task performs once running are unaffected by this cap. Case file drafted then removed once this rule was adopted. |
-| `CommitLogSegment.java:242` (`next >= endOfBuffer`) | Doesn't diverge on object creation — the "full" branch creates a *new* segment rather than blocking/rejecting; same non-diverging pattern as prior compaction rejects. |
+| `CommitLogSegment.java:246` (`next >= endOfBuffer`) — *line corrected 2026-09-28, recorded as `:242`* | Doesn't diverge on object creation — the "full" branch creates a *new* segment rather than blocking/rejecting; same non-diverging pattern as prior compaction rejects. |
 | `HintsBuffer.java:190` (`(prev+totalSize) > slab.capacity()`) | Same non-diverging pattern — the "full" branch triggers allocation of a new buffer rather than blocking/rejecting. |
-| `BatchStatement.java:349` (`verifyBatchSize()`, `size > failThreshold`) | Runs after the batch's mutations are already fully constructed — doesn't gate object creation, only rejects an already-built batch post hoc. |
+| `BatchStatement.java:352` (`verifyBatchSize()`, `size > failThreshold`) — *line corrected 2026-09-28, recorded as `:349`* | Runs after the batch's mutations are already fully constructed — doesn't gate object creation, only rejects an already-built batch post hoc. |
 | `SEPExecutor.java:135,165,175,196,373,384` / `SEPWorker.java:165,282,330,342` / `SharedExecutorPool.java:137` (task/work permit checks) | Thread-pool worker/permit concurrency accounting, same as `concurrent_compactors` — bounds how many tasks run concurrently, not the bytes any task allocates. |
 | `Dispatcher.java:345` (`hasQueueCapacity()`, `oldestTaskQueueTime() < timeout*threshold`) | Time-based (item age in queue), not a byte/capacity comparison — fails Rule 2. |
 | `ConnectionLimitHandler.java:93,121` (`count > limit`, per-IP/global connection count caps) | Bounds concurrent *connection count*, not bytes; per-connection memory footprint isn't fixed/derivable at this check, and the actual byte-level enforcement for CQL traffic is the separate `native_transport_receive_queue_capacity`/`native_transport_max_request_data_in_flight` mechanism (see `deferred.md`'s parked candidate). Deferred rather than firmly rejected — revisit if a fixed per-connection footprint can be derived. |
@@ -99,3 +99,65 @@ have no constraint on the limit side at all. The question to ask is not "is
 this a limit?" but "**where does this number come from, and what could change
 it?**" If the answer is "the data being read", it fails at Rule 1 and the
 other two rules never need to be reached.
+
+## Batch: band A1, the first stage-3 pass over stage 2's queue — 2026-09-28
+
+The 65 A1 rows from
+[`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md)
+(feed **3a**), read with the source open. **21 were already recorded** by
+earlier passes and were cited rather than re-judged; **8 qualify** and are in
+[`pending.md`](pending.md); **3 are undecided** and are in
+[`deferred.md`](deferred.md); the remaining **33 are refused below**, grouped
+by the argument that refuses them — several rows share one judgement.
+
+**A1's hit rate is 8/44 newly-judged rows.** Stage 2 promised only a reading
+order and that is what it delivered: band A1 is dense with real
+usage-vs-limit comparisons, and most of them still fail Rule 2 or Rule 3.
+
+| Row(s) | Check | Ground |
+|---|---|---|
+| `Message.java:817`, `OutboundConnection.java:331`, `:793`, `:979` (4 rows) | `messageSize > getInternodeMaxMessageSizeInBytes()` | **Rule 2, per-item sanity bound.** Rejects one oversized message; the *total* outbound memory is bounded by `internode_application_send_queue_capacity` and its reserves, not by this. Raising `internode_max_message_size` alone does not move any maximum — the queue cap still binds. Same archetype as `CQLMessageHandler.java:551` above. At `:979` the check sits **after** `new AsyncMessageOutputPlus(...)`, so it does not even gate that allocation. |
+| `HintsBuffer.java:152` | `totalSize > slab.capacity() / 2` | **Rule 2, same archetype.** Throws for a single oversized hint. The hints ceiling is `MAX_ALLOCATED_BUFFERS × bufferSize` — a filed case — and this comparison does not move it. |
+| `QueryProcessor.java:825` | `getSizeOfPreparedStatementForCache(...) > capacityToBytes(getPreparedStatementsCacheSizeMiB())` | **Rule 2.** Refuses to cache a statement larger than the *whole* cache. The cache's own capacity (a Caffeine weigher over the same config) is what bounds total heap; this is the degenerate single-item case of it, not an independent ceiling. |
+| `AbstractMessageHandler.java:464`, `OutboundConnection.java:449` (2 rows) | `queueSize > queueCapacity` / `pendingBytes(prev) > pendingCapacityInBytes` | **Rule 3, release-path accounting.** Both sit in `releaseCapacity()` and decide how much of a borrowed reserve to hand back. No allocation is gated in either branch — the bytes have already been released. The acquiring comparisons in the same classes are the real checks and are filed cases / `pending.md`. |
+| `HintsWriteExecutor.java:247` and helper `flushInternal()` | `session.position() >= maxHintsFileSize` | **Rule 2, writer rollover.** Returns `false` so the caller rolls to a new hints file. Every hint is still written, just split across more files — the edge case README §3.5 names explicitly. |
+| `HintsWriter.java:237` | `totalSize > buffer.remaining()` | **Rule 2, buffer rollover**, and inverted: the disallow side flushes and may `ByteBuffer.allocate(totalSize)` a **dedicated** buffer for the hint. The branch that "fails" allocates more, not less. |
+| `SSTableSimpleUnsortedWriter.java:110` | `currentSize > maxSStableSizeInBytes` | **Rule 2, writer rollover** — triggers `sync()` and a new SSTable. Bulk-loader class; all rows are written regardless. |
+| `PerSSTableIndexWriter.java:247` | `currentBuilder.estimatedMemoryUse() < maxMemorySize` | **Rule 2, rollover.** Crossing the threshold submits a segment flush and starts a new builder; every token was already added to the builder before the comparison. `maxMemorySize` is also half-hardcoded — `1GiB` for flush, the per-index `maxCompactionFlushMemoryInBytes` otherwise ([`:365-369`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sasi/disk/PerSSTableIndexWriter.java#L365-L369)). |
+| `OnDiskIndexBuilder.java:167`, `PerSSTableIndexWriter.java:218`, `TrieMemIndex.java:84` (3 rows) | `term.remaining() >= MAX_TERM_SIZE` | **Rule 2, per-item constant bound.** `MAX_TERM_SIZE` is a hardcoded `Short.MAX_VALUE`, not configuration — stage 2's reason ("configured max term size") is wrong on the row. Skipping one oversized term bounds no total: every other term is still indexed, and the index's memory is bounded by `maxMemorySize` above. Three rows, one judgement. (All three are SASI, deprecated in 5.0.) |
+| `SequentialWriter.java:227` | `bytesSinceTrickleFsync >= trickleFsyncByteInterval()` | **Rule 2, I/O scheduling.** Triggers an fsync at a byte interval. Governs *when* data is forced to disk, not how much is written or held. |
+| `RowIndexEntry.java:403` | `estimatedMemory > warnThreshold.toBytes()` | **Rule 3, logging-only branch.** The warn twin of the qualifying fail threshold at `:392`: it records a parameter for the client warning and continues. Nothing diverges on object creation. |
+| `PartitionDenylist.java:419`, `:445` (2 rows) | `results.size() > limit` | **Rule 3, post hoc**, plus Rule 2. The CQL result set is fully materialized before the comparison, which then logs a violation and truncates — the heap was already spent. The operand is also a *count* of variable-size partition keys, so total bytes are not `count × fixed size`. Same shape as `BatchStatement` below. |
+| `StorageProxy.java:1592` | `totalHintsInProgress > maxHintsInProgress` | **Rule 2, in-flight count cap.** Despite the comment ("avoid OOMing due to excess hints") the operand is a count of in-flight hints with no fixed per-hint footprint — the same reasoning as `concurrent_compactors` and the thread-pool rows above. The byte-level hint bounds are the filed `MAX_HINT_BUFFERS` case and the `max_hints_size_per_host` candidate in `pending.md`. |
+| `HeapUtils.java:115` | `freeSpaceBytes < 2 * maxMemoryBytes` | **Rule 2, one-off diagnostic precondition.** Refuses to start a heap dump unless the disk can hold twice the heap. It gates a single diagnostic file, bounds no steady-state usage, and its limit side is the device with no tunable term. Closest precedent: the `SSTableSplitter` CLI validation above. |
+| helper `needsCleaning()` (`MemtablePool.java:128`) | `used() > nextClean` | **Rule 3, reclaim trigger.** Crossing `nextClean` (= `limit × memtable_cleanup_threshold`) calls `cleaner.trigger()` to flush the largest memtable. Allocation proceeds in both branches; nothing is withheld. **Record the cross-reference, though:** this soft threshold is why the *hard* limit in the filed `memtable_heap_space` / `memtable_offheap_space` cases is rarely reached in practice, and both of those cases' §9 designs now say to raise `memtable_cleanup_threshold` or the experiment measures this instead. |
+
+### Two line numbers corrected while re-reading
+
+Both rows were already refused; only the citation was wrong. Checked against
+the pinned clone 2026-09-28.
+
+| Recorded as | Actually at | Note |
+|---|---|---|
+| `CommitLogSegment.java:242` (`next >= endOfBuffer`) | **`:246`** | `:242` is the enclosing `while (true)`. Same check, same rejection (writer rollover). Also covers A1's helper row `isStillAllocating()`. |
+| `BatchStatement.java:349` (`size > failThreshold`) | **`:352`** | Same check, same rejection (runs after the batch is fully constructed). |
+
+### What A1 taught, for the B and C passes
+
+- **Per-item sanity bounds are the dominant false positive in A1**, and they
+  read exactly like capacity checks: a byte count on each side, a config name
+  on the limit. The discriminator is Rule 2's own test — *does changing this
+  value move a maximum?* For `internode_max_message_size` it does not, because
+  a separate queue cap binds; for `max_mutation_size` it does, because the
+  commitlog entry, the serialization buffer and the hints buffer all scale
+  with it. Ask which value actually binds the total before judging.
+- **Rollover is the second.** Five A1 rows are "the current buffer/file/segment
+  is full, start another". README §3.5's edge case covers all of them, and
+  none needed more than the caller read to settle.
+- **Check the release path.** Two rows are the same comparison as a filed case,
+  in the `releaseCapacity()` method rather than the acquiring one. Stage 2
+  cannot tell them apart from the row; stage 3 settles it in one look.
+- **Stage 2's one-line reason can be wrong about the limit's kind.** Three
+  rows were described as "configured max term size" for a hardcoded
+  `Short.MAX_VALUE`. Trust the row for *where to look*, never for *what the
+  limit is*.

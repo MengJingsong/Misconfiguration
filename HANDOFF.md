@@ -250,9 +250,13 @@ is no saving worth buying with a heuristic that might drop a real case.
    `limit` is the row's own serialized length read from the SSTable). The file
    now holds no unjudged row; only its §2 re-audit remains, folded into item 1.
 1. **Stage 3 reads band A, in A1 → A2 → A3 order, under all three enforcement
-   patterns.** 134 rows, but far fewer distinct arguments: A3's 39 rows share
-   one shape (`size == capacity` before growing an array), so judge them as a
-   group rather than one at a time. Two A-band rows are **already refused** —
+   patterns.** **A1 is done — all 65 rows judged 2026-09-28**: 8 qualified
+   (`pending.md`), 33 refused (`rejected.md`, batch "band A1"), 3 undecided
+   (`deferred.md` §5), 21 already recorded and cited. **Next is A2 (30), then
+   A3 (39).** 134 rows in total, but far fewer distinct arguments: A3's 39 rows
+   share one shape (`size == capacity` before growing an array), so judge them
+   as a group rather than one at a time. Two A-band rows are **already
+   refused** —
    `NativeAllocator$Region.allocate():273` and
    `SlabAllocator$Region.allocate():201`, in `rejected.md` — so check the
    stage-3 files before reading any row. Every case that qualifies gets a §9
@@ -272,9 +276,15 @@ is no saving worth buying with a heuristic that might drop a real case.
    - ~~`Directories.hasDiskSpaceForCompactionsAndStreams():551`~~ — **done
      2026-09-28**, filed as
      `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`.
-3. **Write up the 4 candidates from the capacity-word pass as case files.** Found,
-   judged and recorded in `stage3-ai-deep-read/pending.md`, but no case file
-   exists yet. Start with `BufferPool_memoryUsageThreshold` (strongest); its
+3. **Write up `pending.md`'s candidates as case files — now 12, not 4.** The
+   A1 pass added 8 on 2026-09-28. Judged and recorded, but no case file exists
+   for any of them. The strongest of the new eight is
+   **`max_hints_size_per_host`** (`StorageProxy.java:2492`) — the only one
+   whose usage side is a running total against a configured ceiling with a
+   clean disallow. Two should be written up **as one case**:
+   `CACHEABLE_MUTATION_SIZE_LIMIT` (`Mutation.java:451`) and the older
+   `TeeDataInputPlus_limit`, which the A1 pass showed share that same constant —
+   settling the open question about that candidate's origin. Start with `BufferPool_memoryUsageThreshold` (strongest); its
    main open task is tracing `memoryUsageThreshold` to its config source for
    the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest — confirm
    `limit`'s origin before committing to it. `Integer_MAX_VALUE` needs a §6.1
