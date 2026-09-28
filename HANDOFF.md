@@ -139,13 +139,13 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 7 cases filed
+## Current state — 9 cases filed
 
-All seven are stage-3 complete: judged against the three rules with the
-source open, citations checked against the pinned `cassandra-5.0.9` tag.
-**There is no `Status` field** — manual and runtime verification are out of
-this folder, reserved for a future **stage 4** (2026-09-23, see "Scope
-decisions"). A filed case is complete *as stage-3 evidence*, not a verified
+All nine are stage-3 complete: judged against the three rules with the
+source open, citations checked against the pinned `cassandra-5.0.9` tag, and
+each carrying a §9 test design for stage 4.
+**There is no `Status` field** — manual and runtime verification happen in
+**stage 4** (opened 2026-09-25, see "Scope decisions"). A filed case is complete *as stage-3 evidence*, not a verified
 result. `Feed` records which stage-3 feed found it (`3a` = via
 stage 1/2, `3b` = direct source reading).
 
@@ -158,26 +158,40 @@ stage 1/2, `3b` = direct source reading).
 | `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | 3b | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. |
 | `cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. |
 | `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
+| `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md` | (b) | **3a** | Compaction admission gate, per file store, counting in-flight compactions. Disallow is a **shrink-and-retry ladder**, not a refusal; abort only at the end of it. Fail-open on estimation error. First case from feed 3a. |
+| `column_index_cache_size-indexSamples-cacheSizeThreshold.md` | (b) | 3b | Threshold on a partition's block index: `IndexedEntry` (array on heap) vs. `ShallowIndexedEntry` (file position). **Both branches allocate** — the divergence is retained size. Key cache re-caps the total, so the ceiling claim is per entry. |
 
 Each case's full detail lives in its own file.
 
-**All seven predate the §9 test-design section (added 2026-09-25) and need it
-backfilled.** The earlier per-case trigger designs are recoverable from
-`git show e7f9963:HANDOFF.md`, and for `memtable_heap_space` the test was
-actually written and run — `HeapPoolTest.java` is still in the `cassandra-src`
-clone.
+**Every case now carries a §9 test design** (backfilled 2026-09-28; the two
+new cases were written with one). Stage 4 has nine executable designs waiting
+and nothing else blocking it.
+
+**Two things stage 4 should know before picking one up.**
+`memtable_heap_space`'s unit tier was written and run on 2026-09-16 —
+`HeapPoolTest.java` is still in the `cassandra-src` clone but is **untracked
+there and committed nowhere**, so it exists in exactly one place. The
+best-scaffolded designs, in order, are `cdc_total_space` (an existing
+capacity-sweep helper plus five relevant tests), `MAX_HINT_BUFFERS` (an exact
+`n × bufferSize` prediction, and a Byteman test that already proves the
+disallow branch), and `max_space_usable_for_compactions_in_percentage`.
 
 ## Open items / next steps
 
-### ⏵ Resume here (state as of 2026-09-24, end of session)
+### ⏵ Resume here (state as of 2026-09-28, end of session)
 
 **Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
 CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
 stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
 standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
 `claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `bands.md`. Seven cases are filed, all stage-3 complete, and 34 further
-rows carry stage-3 verdicts from the capacity-word pass.
+in `bands.md`. **Nine cases are filed**, all stage-3 complete and all carrying
+a §9 test design, and 34 further rows carry stage-3 verdicts from the
+capacity-word pass.
+
+**Stage 4 is now the folder's only unstarted stage, and it is unblocked** —
+nine executable designs, nothing owed to it from stage 3. Stage 3's own
+bottleneck is unchanged: the 134-row band-A queue.
 
 | Band | Meaning | Units |
 |---|---|---|
@@ -230,11 +244,11 @@ is no saving worth buying with a heuristic that might drop a real case.
 
 **The immediate next work, in order:**
 
-0. **Clear the `deferred.md` queue first** — three already-identified (b)/(c)
-   rows, unparked 2026-09-25, whose reading is already done.
-   `hasDiskSpaceForCompactionsAndStreams` passes all three rules and needs only
-   writing up; `column_index_cache_size` is recorded as strong;
-   `TrackedDataInputPlus_limit` is weak and needs `limit`'s origin settled.
+0. ~~**Clear the `deferred.md` queue first.**~~ **Done 2026-09-28.**
+   `hasDiskSpaceForCompactionsAndStreams` and `column_index_cache_size` are
+   filed as cases; `TrackedDataInputPlus_limit` is refused (Rule 1 — its
+   `limit` is the row's own serialized length read from the SSTable). The file
+   now holds no unjudged row; only its §2 re-audit remains, folded into item 1.
 1. **Stage 3 reads band A, in A1 → A2 → A3 order, under all three enforcement
    patterns.** 134 rows, but far fewer distinct arguments: A3's 39 rows share
    one shape (`size == capacity` before growing an array), so judge them as a
@@ -246,11 +260,18 @@ is no saving worth buying with a heuristic that might drop a real case.
 2. **Three open items the banding independently surfaced**, each already in
    band A:
    - `CommitLogSegmentManagerCDC.java:345` — the third `cdc_total_space` site,
-     which item 3 below says is recorded nowhere. Still needs judging.
+     which item 3 below says is recorded nowhere. Still needs judging, but the
+     §9 backfill established what it does: in non-blocking mode
+     (`cdc_block_writes=false`) it **deletes the oldest CDC hard links** to get
+     back under the allowance. So the escape hatch does not remove the bound —
+     it changes enforcement from rejecting writes to discarding un-consumed CDC
+     data. The case file's §10 and `_INDEX.md` still say "bypasses the check
+     entirely", which undersells it; correct both when this site is judged.
    - `ResourceLimits$Basic.tryAllocate():213` and `$Concurrent:138` — the
      mechanism the two net cases fail to cite (item 3 below).
-   - `Directories.hasDiskSpaceForCompactionsAndStreams():551` — the pattern-(b)
-     find parked in `deferred.md`.
+   - ~~`Directories.hasDiskSpaceForCompactionsAndStreams():551`~~ — **done
+     2026-09-28**, filed as
+     `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`.
 3. **Write up the 4 candidates from the capacity-word pass as case files.** Found,
    judged and recorded in `stage3-ai-deep-read/pending.md`, but no case file
    exists yet. Start with `BufferPool_memoryUsageThreshold` (strongest); its

@@ -66,11 +66,31 @@ until a run reports. That field is the index of this relationship; keep it
 current, because a case whose §8 claim has been refuted at runtime but still
 reads as settled prose is the worst outcome this pipeline can produce.
 
-## Not yet built
+## Nine designs queued, nothing run
 
-No results file exists, no case is queued, and no harness is written. The prior
-art is worth recovering before building one: a unit test for the
-`memtable_heap_space` case, `HeapPoolTest.java`, was written and run on pc80 in
-September 2026 and **is still present in the shared `cassandra-src` clone**;
-its designed-trigger notes, and those for the other six filed cases, are in
+As of 2026-09-28 **every filed case carries a §9 test design**, so stage 4 is
+unblocked and waiting only on execution. No results file exists yet and no
+harness is written.
+
+**Where to start.** Three cases are far cheaper than the rest because upstream
+unit scaffolding already reaches the check:
+
+| Case | Why it is cheap |
+|---|---|
+| `cdc_total_space` | `CommitLogSegmentManagerCDCTest` already has a capacity-sweep helper (`testWithCDCSpaceInMb`) plus tests for the write failure, both modes' segment flagging, steady disk usage and mode switching. Very little to write. |
+| `MAX_HINT_BUFFERS` | Predicts an **exact** ceiling, `n × bufferSize` (96 MiB at defaults), not a trend — so it is the sharpest falsification in the set. `HintsBufferPoolTest.testBackpressure()` already proves the disallow branch via Byteman. Confirm Byteman resolves as a test dependency first. |
+| `max_space_usable_for_compactions_in_percentage` | `DirectoriesTest`, `PartialCompactionsTest` and `CompactionsBytemanTest` between them cover the arithmetic, the injection point and all three disallow outcomes. |
+
+**Two designs need a cluster before they say anything**, because their finding
+is a default-mode gap rather than a limit:
+`native_transport_receive_queue_capacity` (the whole experiment is a
+comparison of `throw_on_overload` true vs. false — a single-mode run correctly
+observes nothing) and `DataDirectory_getAvailableSpace` (the guard does not run
+under the default partitioner, so the two arms need **separate clusters**).
+
+**Prior art to recover first.** A unit test for the `memtable_heap_space` case,
+`HeapPoolTest.java`, was written and run on pc80 in September 2026 and **is
+still present in the shared `cassandra-src` clone** — but it is untracked
+there and committed nowhere, so it exists in exactly one place. Preserve it
+before doing anything else. Earlier per-case trigger notes are in
 `git show e7f9963:HANDOFF.md`.

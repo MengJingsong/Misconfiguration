@@ -2,7 +2,7 @@
 
 Lines stage 3 has **read against the three rules and accepted**, but which do
 not yet exist as case files in [`cases/`](cases/). They are findings, not a
-queue: the judgement is made: what remains is the write-up (all eight
+queue: the judgement is made: what remains is the write-up (all nine
 questions of [`../README.md` §5](../README.md#5-required-content-per-if-check-case),
 citations checked against the pinned tag).
 

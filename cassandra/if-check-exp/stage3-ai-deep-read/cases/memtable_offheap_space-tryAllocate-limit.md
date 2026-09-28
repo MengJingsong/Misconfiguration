@@ -150,16 +150,129 @@ boolean — so the *physical* off-heap bytes allocated can diverge from the
 `memtable_offheap_space` as a hard native-memory ceiling would be wrong on
 two independent grounds; both flagged for Target 3, not resolved here.
 
-## 9. Provenance
+
+## 9. Test design (guidance for stage 4)
+
+**Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
+[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+
+> **Unit tier already executed, 2026-09-16, before stage 4 existed.**
+> The pre-existing `NativeAllocatorTest.testBookKeeping()` was run and passed
+> (`Tests run: 1, Failures: 0, Errors: 0`), demonstrating the accounting
+> capped at the limit and then forced past it by `markBlocking()`. **Its
+> evidence is weaker than the heap sibling's** and the gap was recorded at the
+> time: being a reused test, it confirms the numeric end-state but never
+> isolates a proof that the normal-case call actually *parked*, as
+> `HeapPoolTest`'s timed `Future.get()` does. Closing that gap — a
+> purpose-built two-`@Test` harness on the off-heap path — is the first item
+> below.
+
+**This case needs a different experiment from its heap sibling**, and the
+reason is §6b/§8: `NativeAllocator.allocate()` never reads `tryAllocate()`'s
+return value, so the *accounted* bytes and the *physically allocated* native
+bytes can diverge. **Stage 4 must measure both and compare them.** A design
+that measures only one cannot see the case's most important finding.
+
+| Field | Content |
+|-------|---------|
+| **Testability** | **Config-testable, restart-only** — same as the heap sibling: `Config.memtable_offheap_space` is not `volatile`, has no setter, and `MEMORY_POOL` is `static final` and built once ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59)). Each capacity value costs a restart. Checked 2026-09-28. |
+| **Constraint knob** | `memtable_offheap_space` in `cassandra.yaml` (MiB), **and `memtable_allocation_type: offheap_objects`**, without which the `NativePool` is never built and this check is never reached. At the unit tier: `createMemtableAllocatorPoolInternal(offheap_objects, heapLimit, offHeapLimit, ...)` ([`:88-92`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L88-L92)) or `new NativePool(...)` directly. |
+| **Capacity values to test** | `memtable_offheap_space` ∈ {`128MiB`, `256MiB`, `512MiB`, **default**}. As with the heap case the default is auto-sized to `maxMemory() / 4` ([`DatabaseDescriptor.java:583-584`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L583-L584)), so **pin `-Xmx`** across the sweep and record the resolved value from the startup log. |
+| **Usage-side observable** | `allocated` on the **`offHeap`** `SubPool` — and, separately, the actual native bytes held by `NativeAllocator.Region`s. **These are two different quantities in this case**, which is the point. |
+| **Instrument** | Two instruments, deliberately: (1) **accounted** — `pool.offHeap.used()` / `allocator.offHeap().owns()` at the unit tier (the operand itself); `TableMetrics.allMemtablesOffHeapDataSize` ([`TableMetrics.java:94-95`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/TableMetrics.java#L94-L95)) as a per-table proxy on a cluster — no `MemtablePool` gauge exists (README §8.3). (2) **physical** — JVM Native Memory Tracking: start the node with `-XX:NativeMemoryTracking=summary` (**it must be set at JVM start**, so it belongs in `jvm.options` before the run), then `jcmd <pid> VM.native_memory summary`, with RSS as a cross-check. Report both curves on the same axes. |
+| **Scope of the limit** | **Global — one `MEMORY_POOL` for the node**, shared by every table's memtable. `N = 1`, no multiplier, but no isolation either: a dedicated single-node instance with one user table. |
+| **Suggested level** | **Both.** Unit: `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativeAllocatorTest` (re-run as the control), then write the `HeapPoolTest`-style harness noted above. Cluster: required here more than for the heap sibling, because the accounted-vs-physical divergence is invisible at the unit tier unless the harness is written to look for it. |
+
+### 9a. Workload — driving the usage operand
+
+- Single node, **`memtable_allocation_type: offheap_objects`**, one table, `-Xmx` pinned, NMT enabled at JVM start.
+- **Raise `memtable_cleanup_threshold` toward `1.0`** and disable periodic flush, for the same reason as the heap sibling: at the default the node flushes before the hard limit binds and nothing ever parks.
+- Write with a fixed payload. **Vary payload size deliberately across two arms**: one with cells well under `MAX_CLONED_SIZE` (128 KiB), which are slab-allocated into `Region`s sized 8 KiB → 1 MiB, and one with oversize cells above it, which get a dedicated `Region` sized exactly to the request. §7 says these size differently, so the accounted-to-physical ratio should differ between the arms — a useful internal check on the instrument.
+
+**Deterministic single-shot form:** at the unit tier, construct the pool with a
+small `offHeapLimit`, allocate exactly to it, then request one more byte —
+the `NativeAllocatorTest` pattern (`verifyUsedReclaiming(80, 0)` then
+`verifyUsedReclaiming(110, 110)`), extended with the timed-block assertion.
+
+### 9b. Scenario A — just reach capacity
+
+Bring the `offHeap` `SubPool`'s `allocated` to just under `limit`.
+
+Expect accounted usage ≈ `limit`, plateauing, and the plateau moving with the
+knob across the four values. **Also record physical NMT at this point** — the
+two should be close here, since slab regions are allocated in step with
+accounting while nothing is being forced through. A gap already visible in
+scenario A would mean the divergence is not confined to the disallow path, and
+is worth reporting on its own.
+
+### 9c. Scenario B — try to exceed capacity
+
+Request more once `allocated == limit`. **The disallow branch parks rather
+than rejecting** (§6b), and this case has a second, stronger bypass:
+
+| Expected | Evidence to capture |
+|---|---|
+| The allocating thread **blocks** on `SubPool.hasRoom` | Timed `Future.get()` timeout (unit), or a thread dump parked at [`MemtableAllocator.java:195`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L195) (cluster). The existing test does **not** prove this — capturing it is the main thing the new harness adds. |
+| Accounted usage unchanged while parked | `pool.offHeap.used()` still at `limit`; the disallow branch performs no CAS. |
+| `markBlocking()` **overshoots** the accounted limit | `NativeAllocatorTest` already shows 110 past a limit of 100. On a cluster this happens during a flush barrier ([`ColumnFamilyStore.java:1238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1238)). |
+| **Physical native bytes exceed accounted bytes** | The finding unique to this case. Compare `jcmd VM.native_memory summary` against `allMemtablesOffHeapDataSize` at the plateau. §6b says `NativeAllocator.allocate()` never consults the verdict, so physical allocation is not gated at all — the size of this gap has never been measured and is the most valuable number stage 4 can produce here. |
+
+### 9d. Expected dose-response
+
+If the traced path is the binding limit, across the four values:
+
+- **Accounted plateau is linear in `memtable_offheap_space`** and approximately equal to it — the same prediction as the heap sibling.
+- **Physical native bytes track the accounted curve only loosely.** Expect them to be higher, and to exceed `limit`, because (i) slab `Region`s are allocated in 8 KiB → 1 MiB units so the last region is partly unused, and (ii) §6b says the physical call is ungated. The *shape* should still follow the knob if the check governs anything at all; a physical curve completely flat across the sweep would mean the accounting is decorative.
+- **Time-to-first-block falls as the limit falls**, at constant write rate.
+- The gap between the two curves is the headline result. Report it as a ratio at each capacity value, not as a single number.
+
+### 9e. Interpretation — what each outcome means
+
+| Observation at scenario B | Reading |
+|---|---|
+| Accounted usage plateaus at `limit` and tracks the knob; threads park; physical NMT tracks it with a bounded offset | The check enforces the accounting as traced, and the physical divergence is slab granularity. Record the offset. |
+| Accounted plateau tracks the knob but physical NMT **does not**, or grows without bound | §6b's decoupling dominates. **Expected, and the most important outcome** — `memtable_offheap_space` then bounds a counter rather than memory. Target-3 material, and §8's claim needs amending with the measured gap. |
+| Accounted usage exceeds `limit` during flushes | The `markBlocking()` escape hatch, as predicted. Not a refutation; record the magnitude. |
+| Accounted plateau flat across all four values | The traced path is not the binding limit. Re-read, do not re-run. Check first that `memtable_allocation_type` is actually `offheap_objects`. |
+
+### 9f. What would refute this case
+
+The case claims the comparison on the `offHeap` `SubPool` gates memtable
+off-heap allocation, so accounted off-heap memtable bytes are bounded by
+`memtable_offheap_space`. It is refuted if the **accounted** plateau does not
+move when the knob is changed across the sweep, with `offheap_objects`
+confirmed active and flushing confirmed not to be binding.
+
+**A physical-versus-accounted divergence does not refute it** — §8 states that
+divergence as a finding of the case, on two independent grounds. Stage 4 should
+quantify it, not treat it as a contradiction. The one result that *would*
+sharpen §8 into something weaker is physical native memory showing **no**
+response to the knob at all: that would mean the constraint limits bookkeeping
+and nothing else, and §8's wording would need to say so outright rather than
+calling it "doubly non-hard".
+
+### 9g. Confounders and controls
+
+- **`memtable_allocation_type`** — must be `offheap_objects`. With `heap_buffers` or `unslabbed_heap_buffers` the `NativePool` is never constructed and the run measures nothing. Assert it from the startup log in every arm.
+- **`memtable_cleanup_threshold`** flushes before the hard limit binds. Hold it fixed and high; one control arm at default to show the difference.
+- **NMT is not free and must be enabled at JVM start** — enabling it changes the process's own footprint slightly, so enable it in *every* arm including the baseline, or the arms are not comparable.
+- **Other native consumers** — the chunk cache, compression buffers, Netty direct buffers and the JVM's own native memory all appear in NMT. Use NMT's per-category breakdown rather than the total, and take an idle-node NMT reading as the floor to subtract.
+- **The pool is node-wide**: one user table, no other traffic.
+- **`-Xmx`**, because the default limit derives from it. Pin and record.
+- **Baseline** at default config; **idle control** with the node up and no writes, for both the accounted and the physical floor.
+
+## 10. Provenance
 
 | Field | Content |
 |--------|---------|
 | **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | `markBlocking()`/`isBlocking()` forces the allocation through past `limit` instead of parking; see §6b. |
+| **Stage-4 feedback** | none yet |
 
 ---
 
-## 10. Notes
+## 11. Notes
 
 - `NativePool`/`NativeAllocator` is only reachable when `memtable_allocation_type` is `offheap_objects`; the sibling `offheap_buffers` type uses `SlabPool` (off-heap `ByteBuffer` slabs) instead — a third, not-yet-written variant if the off-heap-buffers path is wanted later.

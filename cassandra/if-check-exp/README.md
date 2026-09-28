@@ -305,7 +305,7 @@ stage that produced it:
 
 | File | Content |
 |------|---------|
-| `stage3-ai-deep-read/cases/[constraint]-[function]-[operand].md` | All eight required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE.md`. |
+| `stage3-ai-deep-read/cases/[constraint]-[function]-[operand].md` | All nine required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE.md`. |
 
 **The layout is flat; the module is a field, not a folder.** Cases were once
 filed under per-module directories; that was flattened 2026-09-23 because the

@@ -149,17 +149,124 @@ name alone would be misled. **Flagged as noteworthy for Target 3
 Target 1+2 scope, since the "bypass" here is simply the out-of-the-box
 default rather than requiring any special caller state.
 
-## 9. Provenance
+
+## 9. Test design (guidance for stage 4)
+
+**Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
+[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+
+**This case's experiment is a comparison of two modes, not a single sweep.**
+§8 says the config in this case's title **does not bound anything by itself
+under the default** `native_transport_throw_on_overload = false` — decoding
+proceeds regardless of the verdict. So the design must run the whole capacity
+sweep **twice**, once in each mode, and the finding is the difference between
+them. A single-mode run at the default would correctly observe "no effect" and
+would be worthless as evidence, because "no effect" is the predicted result.
+
+**One piece of luck makes this cheap:** unlike every other knob in this case's
+family, `native_transport_throw_on_overload` is **hot-settable over JMX**
+([`StorageServiceMBean.setNativeTransportThrowOnOverload(boolean)`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageServiceMBean.java#L1296)
+→ [`DatabaseDescriptor.java:2381`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L2381)),
+so the two modes can be compared on one node without a restart between them.
+
+| Field | Content |
+|-------|---------|
+| **Testability** | **Config-testable; mixed restart requirements.** `queueCapacity` is restart-only — a `final` field read per connection at [`PipelineConfigurator.java:306`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/PipelineConfigurator.java#L306) from a non-`volatile` `Config` field, so a new value needs a restart (a *reconnect* is not enough, because the config itself does not change). The mode flag and both reserves **are** hot-settable. Checked 2026-09-28. |
+| **Constraint knob** | `native_transport_receive_queue_capacity` in `cassandra.yaml` (default `1MiB`, [`Config.java:301-302`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L301-L302)). **Mode knob:** `native_transport_throw_on_overload` ([`Config.java:1393`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L1393), default `false`), over JMX. **Reserves, which must be pinned:** `native_transport_max_request_data_in_flight_per_ip` and `native_transport_max_request_data_in_flight` ([`Config.java:296-298`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L296-L298)) — both `volatile` with setters. **Their defaults are heap-derived**, `maxMemory()/10` global and `maxMemory()/40` per IP ([`DatabaseDescriptor.java:649-656`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L649-L656)), so pin `-Xmx` too or the reserves move between arms on their own. |
+| **Capacity values to test** | `native_transport_receive_queue_capacity` ∈ {`128KiB`, `512KiB`, **`1MiB`** (default), `4MiB`}, each run in **both** modes, with reserves pinned small enough that the per-connection tier is what binds. Note `native_transport_max_message_size` must not exceed either reserve or startup throws ([`DatabaseDescriptor.java:911-915`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L911-L915)) — so lower it alongside the reserves. |
+| **Usage-side observable** | `queueSize` on the per-connection `CQLMessageHandler` — bytes of CQL request frames accounted and not yet released. |
+| **Instrument** | The per-connection counter is not exposed, but **the two modes have distinct, direct-evidence metrics**, which is what the comparison rests on. Under `throwOnOverload = true`: **`Client.RequestDiscarded`** (a meter, [`ClientMetrics.java:147`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/ClientMetrics.java#L147)), marked inside `discardAndThrow()` at [`CQLMessageHandler.java:278`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L278) — plus the client-side `OverloadedException` itself. Under the default: **`Client.ConnectionPaused`** and the **`Client.PausedConnections`** gauge ([`ClientMetrics.java:144-146`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/ClientMetrics.java#L144-L146)), incremented at [`CQLMessageHandler.java:250`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L250) — note this fires only when the decoder is inactive, so it is weaker evidence than `RequestDiscarded`. Heap via `jcmd <pid> GC.heap_info` after a forced full GC. |
+| **Scope of the limit** | **Per client connection.** One `CQLMessageHandler` is built per connection during pipeline setup ([`PipelineConfigurator.java:317-332`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/PipelineConfigurator.java#L317-L332)), so `N` = concurrent client connections — and unlike the internode sibling's peer count, **`N` is controlled by the client and can be raised arbitrarily**. That makes the multiplier the sharper half of this case: fix connection count per arm, then vary it (say 1, 10, 100) as its own sweep. |
+| **Suggested level** | **Cluster-first, unusually.** The mode-dependent behaviour lives in `CQLMessageHandler`'s caller, and the client-visible outcome (`OverloadedException` versus a decoded response with a backpressure warning) is the clearest signal — both are easiest to observe with a real driver. Unit support: `test/unit/org/apache/cassandra/net/ResourceLimitsTest.java` covers the reserve mechanism; `test/unit/org/apache/cassandra/transport/` has handler scaffolding worth checking before writing a harness. The designed unit trigger is two tests, one per mode: a handler with tiny `queueCapacity` and exhausted reserves, fed one oversized frame, asserting (a) `throwOnOverload = true` → no `Message.Request` constructed and an `OverloadedException` raised, (b) `false` → the request **is** constructed despite the over-limit verdict. |
+
+### 9a. Workload — driving the usage operand
+
+- Single node, dedicated, with a CQL driver client on a separate host. Pin `-Xmx` (the reserves derive from it).
+- Pin both reserves and `native_transport_max_message_size` low, so the per-connection capacity is the binding tier rather than the reserves.
+- Drive requests whose frame bodies are a large fraction of `queueCapacity` — large `BatchMessage`s or wide `QueryMessage`s with big bound values. A few hundred KiB against a 128KiB capacity means one or two in flight fills it.
+- Hold **connection count** fixed within an arm and record it; the driver's pool size is the multiplier.
+- Make request processing lag intake so the queue fills: high concurrency per connection, and queries that are slow server-side.
+
+**Deterministic single-shot form:** set `queueCapacity` and both reserves below
+a single request's frame size, then send one request. Under
+`throwOnOverload = true` the client should get `OverloadedException` for the
+very first request; under the default it should get a **normal response**. That
+single pair of observations is the case's central finding, obtainable in
+seconds, and it should be the first thing stage 4 runs (README §8.2 rule 2).
+
+### 9b. Scenario A — just reach capacity
+
+Hold offered load so per-connection accounted bytes sit just below
+`queueCapacity`, in both modes.
+
+Expect, in **both** modes identically: requests succeed, `RequestDiscarded` and
+`ConnectionPaused` flat at zero, no `OverloadedException`. The modes should be
+indistinguishable here — that is what makes this the control.
+
+### 9c. Scenario B — try to exceed capacity
+
+Push past it, in each mode. **Derive the expectation from §6b** — the two modes
+diverge completely:
+
+| Mode | Expected | Evidence |
+|---|---|---|
+| **`throwOnOverload = true`** | The request is **discarded and never deserialized**; the client receives `OverloadedException`. | `Client.RequestDiscarded` rises; the driver surfaces `OverloadedException`. Heap attributable to in-flight requests plateaus near `queueCapacity × connections`. |
+| **`throwOnOverload = false`** (default) | The request is **deserialized and dispatched anyway**. A `backpressure` flag rides along in the response and, if the decoder is inactive, the connection is paused. **Nothing is withheld.** | `Client.RequestDiscarded` stays flat. `Client.ConnectionPaused` / `PausedConnections` may move, or may not. The client gets a normal result. **Accounted bytes and heap should exceed `queueCapacity`**, bounded only by the reserves. |
+
+The pair of rows above is the experiment. Report them side by side at every
+capacity value.
+
+### 9d. Expected dose-response
+
+If the traced path is the binding limit:
+
+- **Under `throwOnOverload = true`:** peak in-flight request bytes ≈ `queueCapacity × connections`, linear in the knob across 128KiB → 4MiB, and linear in connection count. `RequestDiscarded` rate rises as the knob falls at fixed offered load.
+- **Under the default:** peak in-flight bytes should be **flat in `queueCapacity`**, or nearly so, and instead track the reserves. This is the prediction that matters, and it is a *negative* one — §8 says the config named in this case's title bounds nothing by itself in the default mode.
+- **Across connection counts (1 → 10 → 100), in `true` mode:** total should scale with connection count until a reserve binds, then flatten. The knee is where the reserve takes over, and locating it is worth doing: it says how many clients it takes for the per-connection number to stop being the operative limit.
+- **Heap versus accounted bytes:** §7 notes accounting is the on-wire frame size while the resource is the deserialized object. Expect a consistent ratio > 1; report it.
+
+### 9e. Interpretation — what each outcome means
+
+| Observation at scenario B | Reading |
+|---|---|
+| `true` mode: in-flight plateaus at `queueCapacity × connections` and tracks the knob; `RequestDiscarded` rises. Default mode: flat in the knob, bounded by the reserves | **The case is confirmed, including §8's central claim** that the default mode does not enforce. Both halves matter. |
+| Both modes behave identically and both track the knob | §6b is wrong about the fall-through at [`CQLMessageHandler.java:236-256`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L236-L256) — the default mode *does* withhold. That would be a genuine correction to §5, §6b and §8, and should amend the case file. |
+| Both modes flat in the knob, with `RequestDiscarded` moving in `true` mode | The reserves are binding before the per-connection tier in both arms. Pin them lower and re-run; a setup error, not a finding. |
+| Nothing moves in either mode and no overload metric fires | The workload never saturated a connection, or `native_transport_max_message_size` is rejecting the frames earlier on a different path. Check before concluding. |
+
+### 9f. What would refute this case
+
+The case makes **two** claims and they are refuted differently.
+
+1. *Under `throwOnOverload = true`, the comparison at `acquireCapacity():419` gates deserialization of CQL requests, so per-connection in-flight request bytes are bounded by `native_transport_receive_queue_capacity`.* Refuted if, with reserves pinned below one frame, in-flight bytes do not plateau near `queueCapacity` and do not move with it, while `RequestDiscarded` confirms the check is evaluated.
+2. *Under the default `throwOnOverload = false`, the check withholds nothing.* Refuted — and this is the more interesting direction — if the default mode **does** show a dose-response to `queueCapacity` with the reserves held constant. That would mean §6b misread the fall-through, and §8's "the config name would mislead a reader" conclusion would have to be withdrawn.
+
+A stage-4 run that only tests the default mode cannot settle either claim: it
+would observe no effect, which claim 2 predicts and claim 1 says nothing about.
+
+### 9g. Confounders and controls
+
+- **The reserves are the dominant confounder**, and their defaults are derived from `-Xmx` ([`DatabaseDescriptor.java:649-656`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L649-L656)). Pin `-Xmx` and set both reserves explicitly in every arm, including the baseline.
+- **`native_transport_max_message_size`** rejects oversized frames on a *different* path, and is constrained to be no larger than either reserve. Keep frames below it, and confirm rejections are not coming from there — `Client.ProtocolException` and the rejection at [`CQLMessageHandler.java:551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L551) (already recorded as a separate rejected row) are the tell.
+- **Connection count is the multiplier and is client-controlled.** Fix the driver's pool size per arm and record it; a driver that silently opens more connections invalidates the arm.
+- **The native-transport rate limiter** (`native_transport_max_requests_per_second`) also produces `OverloadedException`, via a different `Overload` reason. Check the exception's message — `buildOverloadedException()` at [`:298-312`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L298-L312) distinguishes "breached limit on bytes in flight" from the requests/second and queue-time variants. Only the bytes-in-flight message belongs to this case.
+- **The sibling case shares this exact code.** `internode_application_receive_queue_capacity` runs the same `AbstractMessageHandler.acquireCapacity()` for internode traffic. Keep internode traffic quiet — a single-node instance with `RF = 1` is the cleanest way.
+- **Accounted bytes ≠ heap bytes** (§7); measure heap separately after a forced full GC.
+- **Baseline** at defaults in both modes under light load; **idle control** with the node up and clients connected but idle, for the metric floor.
+
+## 10. Provenance
 
 | Field | Content |
 |--------|---------|
 | **Stage-3 feed** | `3b` — established by deep-reading the source. (Stage 1/2 had surfaced this line as a row, but the case was made from the source, not the row.) |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | under the default `native_transport_throw_on_overload=false` the message is still decoded despite the over-limit verdict; see §6b. |
+| **Stage-4 feedback** | none yet |
 
 ---
 
-## 10. Notes
+## 11. Notes
 
 - **Biggest finding of this case, distinct from its internode sibling:**
   under the *default* configuration, this if-check's disallow branch does
