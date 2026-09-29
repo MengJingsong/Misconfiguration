@@ -15,9 +15,9 @@ This file was started under the 2026-09-28 two-run protocol and moved to the
 
 | Field | Content |
 |---|---|
-| **Case-file commit** | `98ad478` — §9a frozen here |
-| **Harness** | [`../harness/memtable_heap_space-tryAllocate-limit/`](../harness/memtable_heap_space-tryAllocate-limit/) — `HeapPoolTest.java`; commit `66ebf93`. Byteman rule for scenario C: not written. |
-| **Tiers and values** | **Unit tier now.** Cluster tier (128, 256, 512 MiB, default) later, once the Byteman rule exists. |
+| **Case-file commit** | Unit tier: `98ad478` — §9a frozen here. Cluster tier: `bf1f6bb` — §9a (Confirmed row amended 2026-09-29), §9c and §9e frozen here. |
+| **Harness** | [`../harness/memtable_heap_space-tryAllocate-limit/`](../harness/memtable_heap_space-tryAllocate-limit/) — `HeapPoolTest.java`, commit `66ebf93`; Byteman rule `escape-hatch.btm`, commit `bf1f6bb`. |
+| **Tiers and values** | Unit tier done. Cluster tier: 128, 256, 512 MiB and default, plus the cleanup-threshold control at 256 MiB. |
 | **Approved by Jingsong** | 2026-09-28 |
 
 **Agreement criteria** — approved 2026-09-28, under the two-run protocol. Kept
