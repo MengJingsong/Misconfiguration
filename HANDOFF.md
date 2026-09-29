@@ -185,7 +185,7 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ## Open items / next steps
 
-### ⏵ Resume here (state as of 2026-09-28, end of session)
+### ⏵ Resume here (state as of 2026-09-29, end of session)
 
 **Stage 4 has started, on `memtable_heap_space`.** Read
 `stage4-runtime-verification/README.md`, then the results file
@@ -197,7 +197,25 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 | Run 1 (AI), unit tier | **Done 2026-09-28.** Readings and conclusion are in the results file's §4 (no longer folded). Runbook defect #1 approved and fixed in §9c (`745c1ab`). |
 | Review of run 1 (Jingsong), unit tier | **Done 2026-09-29.** Agreed on all six parts; note on part 5: confirm the wait with a thread dump later. Unit-tier verdict filed in §8; case file §10 updated. |
 | Run 2 (Jingsong), unit tier | **Not chosen** (2026-09-29, when run 2 became optional). |
-| Cluster tier | Not started. Needs the **Byteman rule** for scenario C (bypass volume), not written yet; scenarios A and B can run without it. |
+| Cluster tier — preparation | **Done 2026-09-29.** Byteman rule `harness/…/escape-hatch.btm` written and checked (see the harness README); §9a Confirmed row, §9c and §9e amended and frozen at `bf1f6bb`; results §1 approved by Jingsong 2026-09-29. |
+| Run 1 (AI), cluster tier | **Next — start it in a fresh session** (a long session re-reads its whole context on every call and uses the Pro 5-hour limit fast). Plan below. |
+
+**Cluster-tier run 1 plan (approved by Jingsong 2026-09-29).** Follow the
+case's §9e exactly; one script, run unattended in the background, that
+**stops itself at the first failed check** (log it as a runbook defect and
+wait for Jingsong). Clone: reuse `~/cassandra-run1` (still run 1). Order:
+128 → 256 → 512 MiB → default → cleanup-threshold control at 256 MiB; read
+the first value's logs before letting the rest run. Choices §9e leaves open:
+
+| Choice | Decision |
+|---|---|
+| Length of B | Three more limit-driven flushes after A's first, one thread dump during each (also answers the unit-tier review's part-5 note). |
+| Trace windows | A = stress start → first `MEMTABLE_LIMIT` flush; B = → C's `nodetool flush`; C = → node stop. |
+| After C | Stop stress once C's flush completes; do not wait for all 2M rows. |
+| Results layout | Cluster readings in §4.1's cluster table; a cluster-tier conclusion in the six-part format beside the unit-tier one. |
+
+Not yet exercised on this node: `bin/cqlsh` (Python 3.10) and the
+`nodetool sjk` read-out — both are hit early; a failure is a defect.
 
 **Machine notes.** JDK and Ant exist only on node0 where they were installed
 (CloudLab nodes are rebuilt from scratch). Full run logs are on node0 in
