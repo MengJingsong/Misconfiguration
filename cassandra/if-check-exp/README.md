@@ -386,7 +386,7 @@ cassandra/if-check-exp/
 │   └── cases/               #   THE RESULTS — flat, one file per case
 │       ├── <constraint>-<function>-<operand>.md
 │       └── <constraint>-<function>-<operand>.md
-└── stage4-runtime-verification/   # runs the §9 designs — Jingsong, not an AI
+└── stage4-runtime-verification/   # runs the §9 designs — AI runs, Jingsong reviews
     └── README.md            #   the feedback contract: what it consumes/emits
 ```
 

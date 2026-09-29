@@ -2,26 +2,27 @@
 
 > **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/cases/[case-file stem].md)
 >
-> **Status:** planned / run 1 done / run 2 done / verdict filed
+> **Status:** planned / run 1 done / reviewed / run 2 done / verdict filed
 
 **Relative links in this template** are written for where a *copy* of it lives
 — inside `results/` — not for the template's own location one level up.
 
-**Fill the sections in order, with one exception:** §5.1 and §5.2 (run 2) are
-filled **before** §4's folded block is opened. That is what keeps run 2
-independent. The protocol behind each section is in
-[`../README.md`](../README.md#the-two-run-protocol).
+**Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
+run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.
+The protocol behind each section is in
+[`../README.md`](../README.md#the-run-protocol).
 
 ## 1. Before run 1
 
 | Field | Content |
 |---|---|
-| **Case-file commit** | the commit whose §9 both runs follow; §9a is frozen at this commit |
+| **Case-file commit** | the commit whose §9 every run follows; §9a is frozen at this commit |
 | **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
-| **Approved by Jingsong** | date — covers this table and the agreement criteria below |
+| **Approved by Jingsong** | date — covers this table |
 
-**Agreement criteria** — one row per observable in the case's §9d:
+**Agreement criteria** — only if run 2 is chosen; filled before run 2 starts.
+One row per observable in the case's §9d:
 
 | Observable | Must match | Tolerance |
 |---|---|---|
@@ -29,7 +30,7 @@ independent. The protocol behind each section is in
 
 ## 2. Environment
 
-| Field | Run 1 (AI) | Run 2 (Jingsong) |
+| Field | Run 1 (AI) | Run 2 (Jingsong, if done) |
 |---|---|---|
 | Date | | |
 | Node (CloudLab name and type) | | |
@@ -43,7 +44,7 @@ independent. The protocol behind each section is in
 
 ## 3. Runbook defects
 
-Every step either run could not execute as written. The run stops at the
+Every step a run could not execute as written. The run stops at the
 defect; the fix is approved, made in the case file (dated), and the affected
 tier restarts from its beginning. "None" if there were none.
 
@@ -54,9 +55,6 @@ tier restarts from its beginning. "None" if there were none.
 
 **Scope:** the tiers and capacity values actually run. **Command log:**
 `[case-file stem]/run1/<file>`.
-
-<details>
-<summary><b>Readings and conclusion — do not open until §5.1 and §5.2 are filled</b></summary>
 
 ### 4.1 Readings
 
@@ -86,21 +84,38 @@ argument.
 4. **Excluded rows** — for every other §9a row, the reading that rules it out.
    Every **Refuted** row must be addressed.
 5. **Observed vs. inferred** — list the inferred statements that the
-   conclusion depends on. These are what run 2 most needs to check.
+   conclusion depends on. These are what the review most needs to check.
 6. **Deviations and gaps** — anything skipped, changed or not observable, and
    how it limits the conclusion.
 
 **Conclusion (one line):** `<§9a row>` — confirmed / bypass as recorded /
 refuted / not confirmed / invalid run.
 
-</details>
+## 5. Review of run 1 — Jingsong
 
-## 5. Run 2 — Jingsong
+### 5.1 Check of run 1's conclusion
+
+| Part | Agree? | Note |
+|---|---|---|
+| 1. Validity | | |
+| 2. Readings | | |
+| 3. Matched row | | |
+| 4. Excluded rows | | |
+| 5. Observed vs. inferred | | |
+| 6. Deviations and gaps | | |
+
+### 5.2 Run 2?
+
+**Yes / no** — the reason, and the date decided.
+
+## 6. Run 2 — Jingsong (optional)
+
+"Not done" if §5.2 says no, and §7 is left out.
 
 **Scope:** the tiers and capacity values actually run. **Command log:**
 `[case-file stem]/run2/<file>`.
 
-### 5.1 Readings — recorded before opening §4's folded block
+### 6.1 Readings
 
 **Unit tier**
 
@@ -112,22 +127,11 @@ refuted / not confirmed / invalid run.
 | Capacity value | Run (control / A / B / C) | Observable (§9d) | Reading | Evidence (file) |
 |---|---|---|---|---|
 
-### 5.2 Matched row — before reading run 1's conclusion
+### 6.2 Matched row
 
 The §9a row these readings match, in one line.
 
-### 5.3 Check of run 1's conclusion
-
-| Part | Agree? | Note |
-|---|---|---|
-| 1. Validity | | |
-| 2. Readings | | |
-| 3. Matched row | | |
-| 4. Excluded rows | | |
-| 5. Observed vs. inferred | | |
-| 6. Deviations and gaps | | |
-
-## 6. Comparison
+## 7. Comparison — only if run 2 was done
 
 | Observable | Run 1 | Run 2 | Criterion (§1) | Agree? |
 |---|---|---|---|---|
@@ -135,12 +139,12 @@ The §9a row these readings match, in one line.
 **Same §9a row?** yes / no. If no, or if a reading disagrees: the cause, and
 how it was resolved (see "Compare and decide" in the README).
 
-## 7. Verdict — Jingsong
+## 8. Verdict — Jingsong
 
-| Tier | Verdict (§9a row) | Date |
-|---|---|---|
-| Unit | | |
-| Cluster | | |
+| Tier | Verdict (§9a row) | Basis | Date |
+|---|---|---|---|
+| Unit | | run 1 + review / run 1 + run 2 | |
+| Cluster | | run 1 + review / run 1 + run 2 | |
 
 **Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
 (commit), and any section amended (which one, commit) — or "none needed".

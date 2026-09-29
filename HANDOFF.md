@@ -113,19 +113,21 @@ this folder's own scope.
       undecided, not refused. Moved here from the stage-2 folder, since
       **stage 2 cannot produce a pattern deferral**.
   - **`stage4-runtime-verification/`** — opened 2026-09-25. Runs the §9 test
-    designs and reports back. **Every procedure runs twice** (2026-09-28): an
-    AI session first (run 1, which concludes with its logic), then Jingsong
-    by hand, blind to run 1 (run 2, who checks that logic and owns the
-    verdict).
-    - `README.md` — the two-run protocol, safety rules for the shared
+    designs and reports back. **Run 1 is required, run 2 optional**
+    (revised 2026-09-29; before that every procedure ran twice): an AI
+    session runs the procedure and concludes with its logic (run 1); Jingsong
+    reviews that conclusion and owns the verdict. Run 2 — Jingsong by hand,
+    not blind — is insurance, chosen after the review.
+    - `README.md` — the run protocol, safety rules for the shared
       infrastructure, and where each kind of feedback lands.
     - `environment.md` — **start here on a new node**: the exact install,
       clone and build steps that worked (JDK 11.0.32.1, Ant 1.10.12).
     - `_TEMPLATE.md` — template for a per-case results file.
-    - `harness/<case-file-stem>/` — committed test code both runs use
+    - `harness/<case-file-stem>/` — committed test code every run uses
       (e.g. the restored `HeapPoolTest.java`).
     - `results/<case-file-stem>.md` — one per case, plus
-      `results/<case-file-stem>/run1|run2/` for small log excerpts.
+      `results/<case-file-stem>/run1/` (and `run2/`, if one is done) for
+      small log excerpts.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
@@ -191,9 +193,10 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 | Step | State |
 |---|---|
-| Step 0 — freeze, harness, agreement criteria, environment | **Done.** §9a frozen at `98ad478`; harness `66ebf93`; criteria approved; node0 set up per `environment.md` (local clone `~/cassandra-run1`). |
-| Run 1 (AI), unit tier | **Done 2026-09-28.** Readings and conclusion are in the results file's **folded** §4 — do not summarise them to Jingsong before run 2 is recorded. Runbook defect #1 approved and fixed in §9c (`745c1ab`). |
-| Run 2 (Jingsong), unit tier | **Next.** Clone to `~/cassandra-run2`, follow `environment.md` and the case's §9c, fill §5.1–§5.3. Then compare (§6) and verdict (§7). |
+| Step 0 — freeze, harness, agreement criteria, environment | **Done.** §9a frozen at `98ad478`; harness `66ebf93`; criteria approved (kept, unused without a run 2); node0 set up per `environment.md` (local clone `~/cassandra-run1`). |
+| Run 1 (AI), unit tier | **Done 2026-09-28.** Readings and conclusion are in the results file's §4 (no longer folded). Runbook defect #1 approved and fixed in §9c (`745c1ab`). |
+| Review of run 1 (Jingsong), unit tier | **Done 2026-09-29.** Agreed on all six parts; note on part 5: confirm the wait with a thread dump later. Unit-tier verdict filed in §8; case file §10 updated. |
+| Run 2 (Jingsong), unit tier | **Not chosen** (2026-09-29, when run 2 became optional). |
 | Cluster tier | Not started. Needs the **Byteman rule** for scenario C (bypass volume), not written yet; scenarios A and B can run without it. |
 
 **Machine notes.** JDK and Ant exist only on node0 where they were installed
@@ -337,7 +340,7 @@ already-identified (b)/(c) rows, and the cheapest work in the corpus.
 **Every case you file also needs a §9 test design** — how stage 4 should vary
 the constraint and drive usage to the boundary (README §8). Stage 3 designs it;
 **do not run anything**, and record no measured numbers. Execution is stage 4,
-run by Jingsong, which reports back into
+run by an AI session and reviewed by Jingsong, who owns the verdict; it reports back into
 `cassandra/if-check-exp/stage4-runtime-verification/`.
 
 ### ⏵ Step 1 in detail — the AI banding (decided 2026-09-23)
@@ -580,7 +583,8 @@ What stage 3 still must not do: **execute anything, record a measured number,
 or call a case verified.** There is no `Status` field. A case still needs
 **manual verification** (a person reads the traced path and agrees) and
 **runtime verification** (execution actually driven into the disallow branch);
-both are stage 4, run by Jingsong.
+both are stage 4, run by an AI session and reviewed by Jingsong, who owns the
+verdict.
 
 **Feedback comes back, and can refute a case.** Measurements land in
 `cassandra/if-check-exp/stage4-runtime-verification/`; a refutation of the

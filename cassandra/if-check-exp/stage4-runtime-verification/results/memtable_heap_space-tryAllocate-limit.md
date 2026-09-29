@@ -2,12 +2,14 @@
 
 > **Case:** [`memtable_heap_space-tryAllocate-limit`](../../stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit.md)
 >
-> **Status:** run 1 done (unit tier) — waiting for run 2 (2026-09-28)
+> **Status:** run 1 done (unit tier, 2026-09-28); run 2 not chosen; reviewed by Jingsong; unit-tier verdict filed (2026-09-29) — cluster tier not run
 
-**Fill the sections in order, with one exception:** §5.1 and §5.2 (run 2) are
-filled **before** §4's folded block is opened. That is what keeps run 2
-independent. The protocol behind each section is in
-[`../README.md`](../README.md#the-two-run-protocol).
+**Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
+run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.
+The protocol behind each section is in
+[`../README.md`](../README.md#the-run-protocol).
+This file was started under the 2026-09-28 two-run protocol and moved to the
+2026-09-29 one before any run 2.
 
 ## 1. Before run 1
 
@@ -18,7 +20,8 @@ independent. The protocol behind each section is in
 | **Tiers and values** | **Unit tier now.** Cluster tier (128, 256, 512 MiB, default) later, once the Byteman rule exists. |
 | **Approved by Jingsong** | 2026-09-28 |
 
-**Agreement criteria** — approved 2026-09-28:
+**Agreement criteria** — approved 2026-09-28, under the two-run protocol. Kept
+for a later run 2; unused while there is none:
 
 | Observable | Must match | Tolerance |
 |---|---|---|
@@ -32,7 +35,7 @@ independent. The protocol behind each section is in
 
 ## 2. Environment
 
-| Field | Run 1 (AI) | Run 2 (Jingsong) |
+| Field | Run 1 (AI) | Run 2 (Jingsong, if done) |
 |---|---|---|
 | Date | 2026-09-28 | |
 | Node (CloudLab name and type) | `node0.jason92-317394` (40 cores, 125 GiB) | |
@@ -54,9 +57,6 @@ independent. The protocol behind each section is in
 
 **Scope:** unit tier only, 2026-09-28. Cluster tier not run.
 **Command log:** [`memtable_heap_space-tryAllocate-limit/run1/unit-run.sh`](memtable_heap_space-tryAllocate-limit/run1/unit-run.sh), run under `script`; full log on node0 at `~/stage4-logs/run1-unit/session.log` (856 lines); excerpt in [`memtable_heap_space-tryAllocate-limit/run1/unit-session-excerpt.txt`](memtable_heap_space-tryAllocate-limit/run1/unit-session-excerpt.txt), JUnit test cases in [`memtable_heap_space-tryAllocate-limit/run1/unit-junit-testcases.txt`](memtable_heap_space-tryAllocate-limit/run1/unit-junit-testcases.txt).
-
-<details>
-<summary><b>Readings and conclusion — do not open until §5.1 and §5.2 are filled</b></summary>
 
 ### 4.1 Readings
 
@@ -107,54 +107,36 @@ independent. The protocol behind each section is in
 
 **Conclusion (one line):** unit tier — consistent with **Confirmed** and **Escape hatch as recorded**; no Refuted row fired. The case's verdict still needs the cluster tier.
 
-</details>
+## 5. Review of run 1 — Jingsong
 
-## 5. Run 2 — Jingsong
+### 5.1 Check of run 1's conclusion
 
-**Scope:** the tiers and capacity values actually run. **Command log:**
-`memtable_heap_space-tryAllocate-limit/run2/<file>`.
-
-### 5.1 Readings — recorded before opening §4's folded block
-
-**Unit tier**
-
-| Test or assertion | Result | Evidence (file) |
-|---|---|---|
-
-**Cluster tier**
-
-| Capacity value | Run (control / A / B / C) | Observable (§9d) | Reading | Evidence (file) |
-|---|---|---|---|---|
-
-### 5.2 Matched row — before reading run 1's conclusion
-
-The §9a row these readings match, in one line.
-
-### 5.3 Check of run 1's conclusion
+Reviewed 2026-09-29.
 
 | Part | Agree? | Note |
 |---|---|---|
-| 1. Validity | | |
-| 2. Readings | | |
-| 3. Matched row | | |
-| 4. Excluded rows | | |
-| 5. Observed vs. inferred | | |
-| 6. Deviations and gaps | | |
+| 1. Validity | yes | |
+| 2. Readings | yes | |
+| 3. Matched row | yes | |
+| 4. Excluded rows | yes | |
+| 5. Observed vs. inferred | yes | The wait is inferred from a timeout; it may need verifying later with a thread dump. |
+| 6. Deviations and gaps | yes | |
 
-## 6. Comparison
+### 5.2 Run 2?
 
-| Observable | Run 1 | Run 2 | Criterion (§1) | Agree? |
-|---|---|---|---|---|
+**No** — decided 2026-09-29, with the change to the protocol that made run 2
+optional.
 
-**Same §9a row?** yes / no. If no, or if a reading disagrees: the cause, and
-how it was resolved (see "Compare and decide" in the README).
+## 6. Run 2 — Jingsong (optional)
 
-## 7. Verdict — Jingsong
+Not done (§5.2). §7 is left out.
 
-| Tier | Verdict (§9a row) | Date |
-|---|---|---|
-| Unit | | |
-| Cluster | | |
+## 8. Verdict — Jingsong
+
+| Tier | Verdict (§9a row) | Basis | Date |
+|---|---|---|---|
+| Unit | Consistent with **Confirmed** and **Escape hatch as recorded**; no Refuted row fired | run 1 + review | 2026-09-29 |
+| Cluster | | | |
 
 **Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
 (commit), and any section amended (which one, commit) — or "none needed".

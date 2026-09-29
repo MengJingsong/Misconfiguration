@@ -243,13 +243,20 @@ forced past the limit (the escape hatch, §6b).
 
 | Result | Conclusion |
 |---|---|
-| Writers wait in every run, the peak follows the knob, and outside scenario C the counter never passes the limit | **Confirmed** |
+| Writers wait in every run, the peak follows the knob, and the counter never passes the limit except by bytes forced through a flush's escape hatch | **Confirmed** |
 | The counter passes the limit, by no more than the bytes forced through the escape hatch | **Escape hatch as recorded** — expected. Record its size (Target-3 material). |
 | The counter passes the limit by more than the escape hatch explains, or with no escape-hatch call at all | **Refuted** — the check does not cap usage. |
 | Real heap grows well beyond the counter | **Refuted** — the counter does not track real heap; §8's ceiling claim is wrong. |
 | The peak is flat across the four values (and the startup log shows the limit did change) | **Refuted** — not the binding limit. Re-read, do not re-run. |
 | The peak follows the knob and the pool reaches 100%, but no writer ever waits | **Not confirmed** — the flush trigger, not this check, sets the ceiling; §6b is wrong. Re-read. |
 | No writer waits, and every flush starts well below the limit | **Invalid run** — flushing keeps up with the writes. Fix the setup (9b, 9c) and re-run. |
+
+*Amended 2026-09-29, before the cluster tier:* the Confirmed row read "outside
+scenario C the counter never passes the limit". Every flush marks the writes it
+waits for as blocking
+([`ColumnFamilyStore.java:1238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1238)),
+so B's limit-driven flushes can force writes through too; C only makes it
+certain. The unit-tier verdict does not depend on this wording.
 
 **Why the peak alone is not enough:** the automatic flush trigger is itself
 set at a fraction of the same limit, so the peak would follow the knob even if
@@ -305,12 +312,26 @@ ant testsome -Dtest.name=org.apache.cassandra.db.memtable.MemtableSizeUnslabbedT
 
 # cluster tier — pre-create the stress keyspace without durable writes
 bin/cqlsh -e "CREATE KEYSPACE keyspace1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND durable_writes = false;"
-tools/bin/cassandra-stress write n=<ops> -col 'size=FIXED(<bytes>)' -rate threads=<T>
+tools/bin/cassandra-stress write n=2000000 no-warmup -col 'size=FIXED(1024)' -rate threads=256
 ```
 
 The keyspace is created `IF NOT EXISTS` by `cassandra-stress`, so the
-pre-created one is kept. Raise `threads` or `size` until writers wait (9d,
-disallow evidence); if they never do, the run is invalid (9a).
+pre-created one is kept.
+
+**Starting values (amended 2026-09-29).** Estimates, not measurements:
+
+| Setting | Value | Why |
+|---|---|---|
+| Row size | 5 columns (stress's default count) × `FIXED(1024)` ≈ 5 KiB | More bytes per write, so memory fills faster than flushes empty it. |
+| Rows | `n=2000000` ≈ 10 GiB, the same at every capacity value | At least about ten limit-driven flushes at the default limit (≈ 1 GiB), and the node's 54 GB of free local disk still has room for compaction. |
+| Client threads | `threads=256` | Keeps all 32 `concurrent_writes` threads busy, so up to 32 writers can wait. |
+| `no-warmup` | set | Keeps the first limit-driven flush inside the measured run. |
+
+**If writers do not wait** (the `BlockedOnAllocation` count does not rise in
+B): stop, reset (9b), and repeat that capacity value with `threads=512`. If
+they still do not wait, use `size=FIXED(2048)` with `n=1000000` (same total
+bytes). Record each step up as a deviation. If no step makes writers wait,
+the run is invalid (9a).
 
 ### 9d. Observables
 
@@ -327,28 +348,89 @@ disallow evidence); if they never do, the run is invalid (9a).
 asserted values. `HeapPoolTest` builds the `HeapPool` directly, so the
 allocation-type setting does not affect it.
 
+**Before the cluster tier (amended 2026-09-29).** `<harness>` below stands for
+`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit`.
+
+1. **Instrument check.** Run `HeapPoolTest` with the rule attached. Expect
+   both tests to pass and the trace to hold exactly one line,
+   `forced=1 limit=100`:
+
+   ```bash
+   ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest \
+     -Dtest.jvm.args="-javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/escape-hatch.btm -Dstage4.byteman.out=$HOME/stage4-logs/cluster/instrument-check.txt"
+   ```
+
+2. **Start the node the same way for every run** — every capacity value,
+   every scenario, and the cleanup-threshold control. The rule is loaded from
+   startup, not only for C, because every flush marks the writes it waits for
+   as blocking
+   ([`ColumnFamilyStore.java:1238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1238)):
+   B's limit-driven flushes can force writes through too, and the rule must be
+   counting when they do.
+
+   ```bash
+   mkdir -p ~/stage4-logs/cluster/<value>
+   export MAX_HEAP_SIZE=4G    # G1: gives -Xms4G -Xmx4G; do not set HEAP_NEWSIZE
+   export JVM_EXTRA_OPTS="-javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/escape-hatch.btm,listener:true -Dstage4.byteman.out=$HOME/stage4-logs/cluster/<value>/escape-hatch.txt"
+   bin/cassandra -p cassandra.pid > ~/stage4-logs/cluster/<value>/stdout.txt 2>&1
+   ```
+
+   Once the node is up, confirm the rule is in place:
+
+   ```bash
+   java -cp build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+   ```
+
+   It must list `trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void`.
+   If it does not, stop: an empty trace would then mean nothing.
+
 **Cluster tier, for each capacity value:**
 
-1. **Control run** — set the knob, reset (9b), start the node. Grep both
-   confirmation lines (9b). With no writes, record real heap (9d).
+1. **Control run** — set the knob, reset (9b; in a source-tree clone the
+   directories are under `data/`), and move `logs/` to
+   `~/stage4-logs/cluster/<previous value>/logs/` **(amended 2026-09-29)**, so
+   each run's `system.log` starts empty and the first `MEMTABLE_LIMIT` line
+   is this run's. Start the node as above. Grep both confirmation lines (9b).
+   With no writes, record real heap (9d).
 2. **Scenario A — reach the limit** — pre-create the keyspace and start the
-   stress command (9c). Watch `logs/system.log` for the first
-   `Reason: MEMTABLE_LIMIT`. Record that `Usage` line, the `Used total` line
-   from the same moment, and the `BlockedOnAllocation` count.
+   stress command (9c), noting the time (`date +%s%3N`). Watch
+   `logs/system.log` for the first `Reason: MEMTABLE_LIMIT`. Record that
+   `Usage` line, the `Used total` line from the same moment, and the
+   `BlockedOnAllocation` count.
 3. **Scenario B — try to exceed the limit** — keep writing past the first
    limit-driven flush. Record `BlockedOnAllocation` count and percentiles
    before and after, take two or three thread dumps during flushes, and list
    every `Enqueuing flush` line with its `Reason`.
-4. **Scenario C — escape hatch** — with the Byteman rule loaded, wait until
-   the `BlockedOnAllocation` count is rising, then run
-   `bin/nodetool flush keyspace1 standard1`. Record the Byteman call count
-   and byte sum, and any `Used total` above `1.00`.
+4. **Scenario C — escape hatch** — wait until the `BlockedOnAllocation`
+   count is rising, note the time (`date +%s%3N`), then run
+   `bin/nodetool flush keyspace1 standard1`. Record any `Used total` above
+   `1.00`.
+5. **Stop and read the trace (amended 2026-09-29)** — `bin/nodetool
+   stopdaemon`, check `pgrep -f org.apache.cassandra.service.CassandraDaemon`
+   prints nothing, then sum the trace, in total and per scenario window
+   (`from`/`to` are the times noted above, in ms):
+
+   ```bash
+   T=~/stage4-logs/cluster/<value>/escape-hatch.txt
+   awk -F'[= ]' '{n++; s+=$2} END {print n+0 " calls, " s+0 " bytes"}' $T
+   awk -F'[= ]' -v from=<ms> -v to=<ms> '$6>=from && $6<to {n++; s+=$2} END {print n+0 " calls, " s+0 " bytes"}' $T
+   ```
+
+   No trace file means no allocation was forced through (the file is created
+   on the first one); the `Submit -l` check above is what rules out a rule
+   that never loaded. Every line's `limit` should equal the knob in bytes.
+
+**Cleanup-threshold control (§9b) (amended 2026-09-29)** — once, at
+`256MiB`: the control run, A and B, with `memtable_cleanup_threshold` left at
+its default (line removed). No C. Reported as a control; no §9a row depends
+on it.
 
 Stop when each scenario's records are taken; a run where no writer ever
 waits is invalid (9a) — fix the workload and repeat it.
 
 **Record for stage 4:** the `cassandra.yaml` diff and JVM options in force,
-the exact commands, and every reading above, per capacity value.
+the exact commands, every reading above, **and the `Submit -l` output and
+the trace file (amended 2026-09-29)**, per capacity value.
 
 ## 10. Provenance
 
@@ -357,8 +439,8 @@ the exact commands, and every reading above, per capacity value.
 | **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). Citations added to §1, §9 and §11 on 2026-09-28 checked against a fresh clone of the same tag (`b5f2a54`). |
 | **Escape hatch / Target-3 note** | `markBlocking()`-marked `OpOrder.Group` silently forces the allocation past `limit` instead of parking (`MemtableAllocator.SubAllocator.allocate():169-197`); see §6b. |
-| **Stage-4 feedback** | none yet |
-| **Notes** | §9 revised 2026-09-28, before any stage-4 run: the knob corrected from `heap_buffers` (builds a `SlabPool`) to `unslabbed_heap_buffers`; `memtable_cleanup_threshold` capped at the accepted `0.99`; `AllMemtablesOnHeapDataSize` shown blind to switched-out memtables, and `BlockedOnAllocation`, the cleaner's `Used total` and the flush log added as instruments; the cleaner-trigger confound added to §9d–§9f; the nonexistent `MemtablePoolTest` replaced by `MemtableSizeUnslabbedTest`; `HeapPoolTest` shown recoverable from git history. Later the same day §9 was restructured to the new template layout (9a summary for review, 9b–9e runbook); the old §9d "time to first wait falls with the limit" prediction was dropped as redundant, and a `cassandra-stress` keyspace step was added because stress creates its keyspace with `durable_writes = true`. §9c amended 2026-09-28 (stage-4 runbook defect #1, approved by Jingsong): the unit tier copies `HeapPoolTest` from the committed stage-4 harness instead of restoring it from git history; the test code is the same. §9a unchanged. |
+| **Stage-4 feedback** | Unit tier, 2026-09-29: consistent with **Confirmed** and **Escape hatch as recorded**; no Refuted row fired (run 1 + Jingsong's review, no run 2) — [results](../../stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md). No section amended. Cluster tier not run. |
+| **Notes** | §9 revised 2026-09-28, before any stage-4 run: the knob corrected from `heap_buffers` (builds a `SlabPool`) to `unslabbed_heap_buffers`; `memtable_cleanup_threshold` capped at the accepted `0.99`; `AllMemtablesOnHeapDataSize` shown blind to switched-out memtables, and `BlockedOnAllocation`, the cleaner's `Used total` and the flush log added as instruments; the cleaner-trigger confound added to §9d–§9f; the nonexistent `MemtablePoolTest` replaced by `MemtableSizeUnslabbedTest`; `HeapPoolTest` shown recoverable from git history. Later the same day §9 was restructured to the new template layout (9a summary for review, 9b–9e runbook); the old §9d "time to first wait falls with the limit" prediction was dropped as redundant, and a `cassandra-stress` keyspace step was added because stress creates its keyspace with `durable_writes = true`. §9c amended 2026-09-28 (stage-4 runbook defect #1, approved by Jingsong): the unit tier copies `HeapPoolTest` from the committed stage-4 harness instead of restoring it from git history; the test code is the same. §9a unchanged. §9a, §9c and §9e amended 2026-09-29, before the cluster tier (approved by Jingsong): §9a's Confirmed row now allows bytes forced through any flush's escape hatch, not only scenario C's; §9c gains fixed starting stress values and a step-up rule; §9e loads the Byteman rule (`harness/…/escape-hatch.btm`) at startup for every run, with an instrument check and a load check, moves logs aside between runs, sums the trace per scenario window, and schedules the cleanup-threshold control once at 256 MiB. |
 
 ---
 

@@ -1,0 +1,27 @@
+# Byteman rule for memtable_heap_space-tryAllocate-limit, §9d "Bypass volume".
+#
+# Traces every call to MemtableAllocator$SubAllocator.allocated(long). At
+# cassandra-5.0.9 that method is private and has one caller: the escape hatch in
+# allocate() (MemtableAllocator.java:180-183), where a write whose OpOrder group a
+# flush has marked blocking (ColumnFamilyStore.java:1238) is forced past the limit
+# instead of waiting. Every flush marks its barrier blocking, so the rule counts
+# force-throughs from any flush, not only scenario C's.
+#
+# One line per forced allocation:
+#
+#   forced=<bytes> limit=<pool limit in bytes> ms=<epoch millis> thread=<name>
+#
+# The bypass volume is the sum of `forced`. `limit` names the pool: the on-heap
+# pool's limit is memtable_heap_space in bytes.
+#
+# Output file: the system property stage4.byteman.out, or else escape-hatch.txt
+# in the JVM's working directory.
+
+RULE escape hatch forces an allocation past the limit
+CLASS org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator
+METHOD allocated(long)
+AT ENTRY
+IF true
+DO traceOpen("escapeHatch", java.lang.System.getProperty("stage4.byteman.out", "escape-hatch.txt"));
+   traceln("escapeHatch", "forced=" + $1 + " limit=" + $0.parent.limit + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE

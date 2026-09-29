@@ -8,9 +8,13 @@ and no run, and that rule survives only if execution lives elsewhere.
 
 Reserved by decision on 2026-09-23 and **opened on 2026-09-25**, when test
 design became part of stage 3 ([`../README.md` §8](../README.md#8-designing-a-test-for-a-case)).
-**Every procedure is run twice** (decided 2026-09-28): first by an AI session,
-which also draws the conclusion and states its logic; then independently by
-Jingsong, who checks that conclusion and owns the verdict.
+**Run 1 is required; run 2 is optional** (revised 2026-09-29). Every procedure
+is run by an AI session (run 1), which also draws the conclusion and states its
+logic. Jingsong reviews that conclusion and owns the verdict. Run 2 — Jingsong
+repeating the procedure by hand — is insurance: a check on run 1, chosen case
+by case after the review.
+*Replaces the decision of 2026-09-28, under which every procedure ran twice
+and run 2 was blind to run 1.*
 
 ## The division of labour
 
@@ -23,18 +27,19 @@ Jingsong, who checks that conclusion and owns the verdict.
 
 Within stage 4:
 
-| | Run 1 — AI session | Run 2 — Jingsong |
-|---|---|---|
-| Follows | the case's runbook (§9b–§9e), exactly | the same runbook, by hand — not run 1's script |
-| Records | raw readings and a full command log | raw readings, **before** opening run 1's |
-| Concludes | which §9a row matched, with its logic in a fixed format | which §9a row the readings match; then checks run 1's logic |
-| Owns the verdict | no | **yes** |
+| | Run 1 — AI session | Review — Jingsong | Run 2 — Jingsong |
+|---|---|---|---|
+| Required? | **yes** | **yes** | no — insurance, chosen after the review |
+| Follows | the case's runbook (§9b–§9e), exactly | run 1's results and raw files | the same runbook, by hand — not run 1's script |
+| Records | raw readings and a full command log | a part-by-part check of run 1's conclusion, and whether to do run 2 | raw readings and the §9a row they match |
+| Concludes | which §9a row matched, with its logic in a fixed format | whether each part of run 1's conclusion holds | whether run 1's readings reproduce |
+| Owns the verdict | no | **yes**, with or without run 2 | — |
 
 ## What stage 4 consumes
 
 Section 9 of a case file in [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/).
 Its intro and §9a are the summary: testability, the claim under test, the
-procedure, the prediction, and the conclusions table both runs are judged
+procedure, the prediction, and the conclusions table every run is judged
 against. §9b–§9e are the runbook: setup, workload, observables, and the
 scenario steps.
 
@@ -45,29 +50,28 @@ build; a config-testable one can be run as written.
 **Cases still in the old §9 layout** — every case except `memtable_heap_space`,
 as of 2026-09-28 — keep Testability in §9's field table, the prediction in
 §9d, the conclusions in §9e and §9f, and the controls in §9g. **Convert a case
-to the new layout before its first run**: §9a is what both runs are judged
+to the new layout before its first run**: §9a is what every run is judged
 against, so it has to exist and be reviewed first.
 
 If §9 cannot be executed as written, that is itself feedback — record it as a
 runbook defect (below) rather than improvising a different experiment, because
 a substituted workload no longer tests the traced path.
 
-## The two-run protocol
+## The run protocol
 
 ### Before run 1
 
 1. **Freeze the prediction.** Record the case file's commit in the results
-   file. §9a is now fixed: neither run edits it. If §9a turns out to be wrong,
-   that is a dated stage-3 amendment to the case file, and both runs start
+   file. §9a is now fixed: no run edits it. If §9a turns out to be wrong,
+   that is a dated stage-3 amendment to the case file, and the runs start
    again.
 2. **Commit the instruments.** Any code a run needs that is not upstream — a
    restored test class, a Byteman rule — goes under `harness/<case-file-stem>/`
-   in this folder before run 1, and both runs use those same files. Share
-   instruments, not procedure: run 2 follows the runbook by hand.
-3. **Agree what "agree" means.** Fill the results file's agreement table: for
-   each observable, whether the runs must match exactly (a unit test's
-   pass/fail, an exact ceiling) or in shape (a peak that follows the knob), and
-   with what tolerance. Jingsong approves it before run 1.
+   in this folder before run 1, and run 1 and any run 2 use those same files.
+   Share instruments, not procedure: a run 2 follows the runbook by hand.
+3. **Approve.** Jingsong approves the results file's §1 before run 1.
+   Agreement criteria are not set yet; they are needed only if a run 2 is
+   chosen (below).
 
 ### Run 1 — AI session
 
@@ -82,21 +86,38 @@ a substituted workload no longer tests the traced path.
   readings, matched row, excluded rows, observed vs. inferred, deviations and
   gaps. Every statement cites a raw file.
 
-### Run 2 — Jingsong
+### Review of run 1 — Jingsong (required)
 
+- Read run 1's readings and conclusion, and check the conclusion part by part
+  against the raw files — starting with the inferred statements it depends on
+  (part 5).
+- Then decide whether to do run 2, and record the decision and the reason.
+
+### Run 2 — Jingsong (optional)
+
+- **Purpose: insurance.** It checks that run 1's readings reproduce when the
+  runbook is followed by hand rather than by run 1's script. It is worth its
+  cost when, for example, the review cannot settle a part from run 1's
+  evidence, the conclusion rests on inferred statements, or the result would
+  refute the case or confirm a bypass.
+- **Before it starts,** fill the results file's agreement criteria: for each
+  observable, whether the runs must match exactly (a unit test's pass/fail, an
+  exact ceiling) or in shape (a peak that follows the knob), and with what
+  tolerance.
 - Same case-file commit and harness, following §9b–§9e by hand.
-- **Blind:** the readings, and the §9a row they match, are recorded before
-  run 1's readings and conclusion are opened. The template keeps those folded.
-- Then run 1's conclusion is checked, part by part.
+- **Not blind:** run 1's results were read in the review. Run 2 checks
+  reproduction, not independent judgement.
 
 ### Compare and decide
 
 | Situation | Action |
 |---|---|
-| Same §9a row, readings within the agreed tolerance | Verdict: that row. |
-| Readings differ beyond tolerance | Find the cause (environment, a deviation, an instrument) and re-run the affected tier. No verdict until they agree. |
+| No run 2; the review agrees with run 1 | Verdict: run 1's §9a row. |
+| No run 2; the review disagrees with a part | Settle it against §9a's table and run 1's raw files, or choose run 2. Record which part was wrong and why. |
+| Run 2 matches run 1's §9a row, readings within the agreed tolerance | Verdict: that row. |
+| Run 2's readings differ beyond tolerance | Find the cause (environment, a deviation, an instrument) and re-run the affected tier. No verdict until they agree. |
 | Readings agree, conclusions differ | A reasoning error. Settle it against §9a's table, and record which conclusion was wrong and why. |
-| No §9a row fits | Feedback to stage 3: the prediction missed an outcome. Amend §9a (dated); both runs repeat. |
+| No §9a row fits | Feedback to stage 3: the prediction missed an outcome. Amend §9a (dated); run 1 repeats. |
 
 ## Running safely on shared infrastructure
 
@@ -104,9 +125,9 @@ a substituted workload no longer tests the traced path.
 |---|---|
 | **Never build in, or add files to, the shared `cassandra-src` clone.** Clone it to local disk for each run: `git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src <local-dir>`. | Stage 3 reads that clone for line numbers. It already holds an untracked `HeapPoolTest.java` and a `build/` directory from earlier work. |
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
-| Both runs use the same node type and the same kind of storage. | Flush and write timings depend on the disk. |
+| A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
 | Stop every process a run starts, and check none is left: `pgrep -f org.apache.cassandra.service.CassandraDaemon`. | A leftover node holds ports and memory and contaminates the next run. |
-| Commit small text excerpts under `results/<case-file-stem>/run1/` and `run2/`; keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
+| Commit small text excerpts under `results/<case-file-stem>/run1/` (and `run2/`, if there is one); keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
 
 ## Environment
 
@@ -127,11 +148,11 @@ that judged it**, so measurements belong here, not in the case file.
 
 | Feedback kind | Lands in |
 |---|---|
-| Both runs — environment, readings, the AI's conclusion and logic, the check of it, the comparison, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
+| Every run and the review — environment, readings, the AI's conclusion and logic, Jingsong's check of it, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
 | A refutation of the traced path (a **Refuted** row of §9a) | **amends the case file** — the affected section, dated, citing the results file |
 | A bypass confirmed at runtime (the bypass row of §9a) | amends the case's §8 ceiling claim and its Target-3 note; the numbers stay here |
 | A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e, approved by Jingsong |
-| A disagreement between the runs that cannot be resolved | the results file; the case stays unverified |
+| A disagreement with run 1 — from the review or from run 2 — that cannot be resolved | the results file; the case stays unverified |
 
 Every case file carries a **Stage-4 feedback** field in §10, reading "none yet"
 until a run reports. That field is the index of this relationship; keep it
@@ -144,7 +165,7 @@ As of 2026-09-28 **every filed case carries a §9 test design**, so stage 4 is
 unblocked and waiting only on execution. Only `memtable_heap_space` is in the
 new §9 layout. No results file exists yet and no harness is committed.
 
-**Where to start: unit tiers first.** They test the two-run protocol cheaply
+**Where to start: unit tiers first.** They test the run protocol cheaply
 before any cluster run. Four cases are far cheaper than the rest because unit
 scaffolding already reaches the check:
 
