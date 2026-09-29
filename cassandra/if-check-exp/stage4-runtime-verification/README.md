@@ -136,10 +136,7 @@ Required by `build.xml` at the tag: **JDK 11** (the default) **or 17**, and
 versions, the local clone's commit, the case-file commit, and the harness
 commit — the results template has the table.
 
-**Setup steps are not written yet.** The machine used for stage-3 work on
-2026-09-28 had no `java`, `jcmd` or `ant` on its PATH. During the first run,
-write the steps that worked into `environment.md` here, so run 2 and later
-cases use the same ones.
+**Setup steps:** [`environment.md`](environment.md) (JDK, Ant, clone, build, and the cluster-tier tools). The machine used for stage-3 work had no `java`, `jcmd` or `ant` on its PATH.
 
 ## What stage 4 produces, and where feedback lands
 
@@ -159,11 +156,11 @@ until a run reports. That field is the index of this relationship; keep it
 current, because a case whose §8 claim has been refuted at runtime but still
 reads as settled prose is the worst outcome this pipeline can produce.
 
-## Eleven designs queued, nothing run
+## Eleven designs, one case run
 
 As of 2026-09-28 **every filed case carries a §9 test design**, so stage 4 is
 unblocked and waiting only on execution. Only `memtable_heap_space` is in the
-new §9 layout. No results file exists yet and no harness is committed.
+new §9 layout. **`memtable_heap_space` has been run (unit and cluster tiers, 2026-09-28/29)**: results in [`results/memtable_heap_space-tryAllocate-limit.md`](results/memtable_heap_space-tryAllocate-limit.md), harness in `harness/memtable_heap_space-tryAllocate-limit/`, the cluster run script in `results/…/run1/cluster-run.sh`. The other ten are still queued.
 
 **Where to start: unit tiers first.** They test the run protocol cheaply
 before any cluster run. Four cases are far cheaper than the rest because unit

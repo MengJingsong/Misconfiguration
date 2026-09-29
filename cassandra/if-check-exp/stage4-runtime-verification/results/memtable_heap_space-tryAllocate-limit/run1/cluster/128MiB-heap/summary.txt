@@ -1,0 +1,36 @@
+== 128MiB-heap: knob=128 cleanup_threshold=0.99 scenario C=no; stress n=2000000 size=1024 threads=256
+yaml diff: -# memtable_heap_space: 2048MiB|+memtable_heap_space: 128MiB|-# memtable_cleanup_threshold: 0.11|+memtable_cleanup_threshold: 0.99|-memtable_allocation_type: heap_buffers|+memtable_allocation_type: unslabbed_heap_buffers|
+MAX_HEAP_SIZE=4G
+JVM_EXTRA_OPTS=-javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/escape-hatch.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/cluster/128MiB-heap/escape-hatch.txt
+node pid 870032
+system.log: INFO  [main] 2026-09-29T21:58:53,156 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 128MiB
+debug.log:  DEBUG [main] 2026-09-29T21:58:55,135 AbstractAllocatorMemtable.java:98 - Memtables allocating with on-heap buffers
+resolved on-heap limit: 128MiB = 134217728 bytes
+idle real heap:  garbage-first heap total 4194304K, used 75562K [0x0000000700000000, 0x0000000800000000)
+idle BlockedOnAllocation Count = 0
+A: T_A0=1790719173942 T_A1=1790719181020 (ms), first limit flush after 7078 ms; BlockedOnAllocation Count = 96
+A 'Used total' line:   INFO  [HeapPoolCleaner] 2026-09-29T21:59:40,826 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='keyspace1', ColumnFamily='standard1') to free up room. Used total: 1.00/0.00, live: 1.00/0.00, flushing: 0.00/0.00, this: 1.00/0.00
+real heap endA:  garbage-first heap total 4194304K, used 754558K [0x0000000700000000, 0x0000000800000000); last 'Used total' line: Used total: 0.99/0.00
+A 'Enqueuing' line:    INFO  [HeapPoolCleaner] 2026-09-29T21:59:40,827 ColumnFamilyStore.java:1055 - Enqueuing flush of keyspace1.standard1, Reason: MEMTABLE_LIMIT, Usage: 127.979MiB (100%) on-heap, 0B (0%) off-heap
+B dump 1: at limit-flush #2 (all-Completed-flushing lines so far: 36); frames at MemtableAllocator.java:195 = 32
+B dump 2: at limit-flush #3 (all-Completed-flushing lines so far: 37); frames at MemtableAllocator.java:195 = 0
+B dump 3: at limit-flush #4 (all-Completed-flushing lines so far: 37); frames at MemtableAllocator.java:195 = 32
+B end: 1790719186823 ms; BlockedOnAllocation Count before B (at A) = 96, after B = 293
+  BlockedOnAllocation Count = 348
+  BlockedOnAllocation 50thPercentile = 654949.0
+  BlockedOnAllocation 95thPercentile = 1358102.0
+  BlockedOnAllocation 99thPercentile = 1358102.0
+  BlockedOnAllocation Max = 1358102.0
+real heap endB:  garbage-first heap total 4194304K, used 269956K [0x0000000700000000, 0x0000000800000000); last 'Used total' line: Used total: 0.99/0.00
+B tablestats: memtable cells outside keyspace1: .compaction_history=5 .local=3 .prepared_statements=2 .sstable_activity=19 .sstable_activity_v2=19 .roles=1 
+B Enqueuing flush reasons so far:      33 Reason: INTERNALLY_FORCED;     18 Reason: MEMTABLE_LIMIT;
+whole run: max 'Used total' on-heap ratio = 1.00
+stress log: 2 lines mention exception/timeout/error; last line: total,                                                396626,   22048,   22048,   22048,    14.0,     2.0,     4.2,  1018.7,  1022.4,  1022.9,   20.0, -0.97488,
+windows (ms): T_A0=1790719173942 T_A1=1790719181020 T_C0=1790719199354 T_STOP=1790719199937
+trace total: 1323 calls, 1088612 bytes
+trace A [T_A0,T_A1):  222 calls, 189144 bytes
+trace B [T_A1,T_C0):  1101 calls, 899468 bytes
+trace after B [T_C0,T_STOP): 0 calls, 0 bytes
+trace: distinct limit values: 134217728 (knob in bytes = 134217728)
+system.log key lines saved: 143 lines
+== 128MiB-heap: COMPLETE

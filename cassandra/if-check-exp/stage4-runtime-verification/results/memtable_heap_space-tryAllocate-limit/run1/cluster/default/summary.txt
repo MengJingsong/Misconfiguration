@@ -1,0 +1,39 @@
+== default: knob=unset cleanup_threshold=0.99 scenario C=yes; stress n=2000000 size=1024 threads=256
+yaml diff: -# memtable_cleanup_threshold: 0.11|+memtable_cleanup_threshold: 0.99|-memtable_allocation_type: heap_buffers|+memtable_allocation_type: unslabbed_heap_buffers|
+MAX_HEAP_SIZE=4G
+JVM_EXTRA_OPTS=-javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/escape-hatch.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/cluster/default/escape-hatch.txt
+node pid 838548
+system.log: INFO  [main] 2026-09-29T19:47:09,819 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 1024MiB
+debug.log:  DEBUG [main] 2026-09-29T19:47:11,734 AbstractAllocatorMemtable.java:98 - Memtables allocating with on-heap buffers
+resolved on-heap limit: 1024MiB = 1073741824 bytes
+idle real heap:  garbage-first heap total 4194304K, used 75560K [0x0000000700000000, 0x0000000800000000)
+idle BlockedOnAllocation Count = 0
+A: T_A0=1790711270532 T_A1=1790711280193 (ms), first limit flush after 9661 ms; BlockedOnAllocation Count = 0
+A 'Used total' line:   INFO  [HeapPoolCleaner] 2026-09-29T19:48:00,105 AbstractAllocatorMemtable.java:293 - Flushing largest CFS(Keyspace='keyspace1', ColumnFamily='standard1') to free up room. Used total: 0.99/0.00, live: 0.99/0.00, flushing: 0.00/0.00, this: 0.99/0.00
+A 'Enqueuing' line:    INFO  [HeapPoolCleaner] 2026-09-29T19:48:00,106 ColumnFamilyStore.java:1055 - Enqueuing flush of keyspace1.standard1, Reason: MEMTABLE_LIMIT, Usage: 1014.648MiB (99%) on-heap, 0B (0%) off-heap
+B dump 1: at limit-flush #2 (all-Completed-flushing lines so far: 34); frames at MemtableAllocator.java:195 = 32
+B dump 2: at limit-flush #3 (all-Completed-flushing lines so far: 35); frames at MemtableAllocator.java:195 = 32
+B dump 3: at limit-flush #4 (all-Completed-flushing lines so far: 36); frames at MemtableAllocator.java:195 = 32
+B end: 1790711306443 ms; BlockedOnAllocation Count before B (at A) = 0, after B = 96
+  BlockedOnAllocation Count = 96
+  BlockedOnAllocation 50thPercentile = 5839588.0
+  BlockedOnAllocation 95thPercentile = 8409007.0
+  BlockedOnAllocation 99thPercentile = 8409007.0
+  BlockedOnAllocation Max = 8409007.0
+B tablestats: memtable cells outside keyspace1: .standard1=1527 .compaction_history=4 .local=3 .prepared_statements=2 .sstable_activity=19 .sstable_activity_v2=19 .roles=1 
+B Enqueuing flush reasons so far:      33 Reason: INTERNALLY_FORCED;      5 Reason: MEMTABLE_LIMIT;
+C: count rising (128 -> 160)
+C: nodetool flush returned rc=0 after 10 s (T_C0=1790711324774)
+C 'Enqueuing flush' lines since T_C0: 1; reasons:       1 Reason: USER_FORCED;
+C 'Used total' on-heap ratios since T_C0: 
+C 'Used total' above 1.00: (end)
+whole run: max 'Used total' on-heap ratio = 0.99
+stress log: 2113 lines mention exception/timeout/error; last line: com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency LOCAL_ONE (1 replica were required but onl
+windows (ms): T_A0=1790711270532 T_A1=1790711280193 T_C0=1790711324774 T_STOP=1790711334866
+trace total: 288 calls, 234204 bytes
+trace A [T_A0,T_A1):  44 calls, 40380 bytes
+trace B [T_A1,T_C0):  0 calls, 0 bytes
+trace C [T_C0,T_STOP): 244 calls, 193824 bytes
+trace: distinct limit values: 1073741824 (knob in bytes = 1073741824)
+system.log key lines saved: 109 lines
+== default: COMPLETE

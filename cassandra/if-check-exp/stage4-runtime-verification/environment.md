@@ -64,10 +64,24 @@ ant build-test
 `ant testsome -Dtest.name=<class>` builds whatever is missing on its own, but
 building first separates a build failure from a test failure.
 
+## 4. Cluster tier (added 2026-09-29)
+
+Nothing more to install: `ant build-test` (section 3) already builds what the cluster tier needs. Checked on node0:
+
+| Tool | State |
+|---|---|
+| `tools/bin/cassandra-stress` | works from the clone (`build/classes/stress`) |
+| `bin/cqlsh` | 6.2.0, runs on the system Python 3.10.12 |
+| Byteman | `build/lib/jars/byteman-4.0.20.jar` and `byteman-submit-4.0.20.jar`, from the build itself |
+| `bin/nodetool sjk mx -mg -b <bean> -f <one attribute>` | works; `-f` takes a single attribute, and each call starts a JVM |
+| `jcmd <pid> GC.run`, `GC.heap_info`, `Thread.print` | work (same user) |
+
+Ports the node and agent use: 7000, 7199, 9042, and 9091 (Byteman `listener:true`); check they are free before a run. The node's data and logs are under the clone (`data/`, `logs/`), on local disk. Runs are driven by a script that logs to `~/stage4-logs/cluster/<value>/`; see the case's `run1/cluster-run.sh`.
+
 ## Logs
 
 Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:
-`apt-install.log`, `clone.log`, `build-test.log`.
+`apt-install.log`, `clone.log`, `build-test.log`; the cluster tier's are in `~/stage4-logs/cluster/`.
 
 ## Undo
 

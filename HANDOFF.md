@@ -187,7 +187,7 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ### ⏵ Resume here (state as of 2026-09-29, end of session)
 
-**Stage 4 has started, on `memtable_heap_space`.** Read
+**Stage 4 has run one case, `memtable_heap_space` (both tiers done).** Read
 `stage4-runtime-verification/README.md`, then the results file
 `results/memtable_heap_space-tryAllocate-limit.md`.
 
@@ -198,24 +198,22 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 | Review of run 1 (Jingsong), unit tier | **Done 2026-09-29.** Agreed on all six parts; note on part 5: confirm the wait with a thread dump later. Unit-tier verdict filed in §8; case file §10 updated. |
 | Run 2 (Jingsong), unit tier | **Not chosen** (2026-09-29, when run 2 became optional). |
 | Cluster tier — preparation | **Done 2026-09-29.** Byteman rule `harness/…/escape-hatch.btm` written and checked (see the harness README); §9a Confirmed row, §9c and §9e amended and frozen at `bf1f6bb`; results §1 approved by Jingsong 2026-09-29. |
-| Run 1 (AI), cluster tier | **Next — start it in a fresh session** (a long session re-reads its whole context on every call and uses the Pro 5-hour limit fast). Plan below. |
+| Run 1 (AI), cluster tier | **Done 2026-09-29.** Instrument check + five node runs (128, 256, 512 MiB, default, cleanup-threshold control at 256 MiB) and a second real-heap pass; every check passed first time. Readings in results §4.1, conclusion in §4.3: consistent with **Confirmed** at all four values. |
+| Review of the cluster tier (Jingsong) | Jingsong verified the cluster results 2026-09-29. **Results §8 "Cluster" verdict row is still blank — his to fill.** |
+| Runbook defect #2 | Approved and fixed 2026-09-29: §9d's real-heap reading must subtract the young generation (`heap_info` `N young (…K)` line). §9a unchanged; §10 feedback updated. |
+| Commit state | Stage-4 work committed and pushed 2026-09-29 (see `git log`). The band-A2 edits (below, ~line 301, and `stage2`/`stage3` files) were **not** part of it. |
 
-**Cluster-tier run 1 plan (approved by Jingsong 2026-09-29).** Follow the
-case's §9e exactly; one script, run unattended in the background, that
-**stops itself at the first failed check** (log it as a runbook defect and
-wait for Jingsong). Clone: reuse `~/cassandra-run1` (still run 1). Order:
-128 → 256 → 512 MiB → default → cleanup-threshold control at 256 MiB; read
-the first value's logs before letting the rest run. Choices §9e leaves open:
+**What the cluster tier found** (numbers are in results §4.1; do not restate them elsewhere). Writers wait at the limit, seen in thread dumps (32 of 32 threads at `MemtableAllocator.java:195` in 11 of 12 dumps). The peak follows the knob (first limit flush at 99.1–99.8% of the limit). The escape hatch fired at every value, forcing 0.02–0.94% of the limit through, and also fired during limit-driven flushes, not only in scenario C. Real heap minus young generation stays within +37/−22 MiB of idle + limit. Control: with the default threshold flushes start at 33%, but writers still waited. **Not measured:** the counter's excess over the limit (no gauge; inferred).
 
-| Choice | Decision |
+**How it was run — reuse for the next case.** One script, `results/memtable_heap_space-tryAllocate-limit/run1/cluster-run.sh`, with modes `instrument`, `value <label> <prev>`, `rest`, `heap`. It logs every command to `~/stage4-logs/cluster/<value>/session.log`, writes readings to `<value>/summary.txt`, exits non-zero at the first failed check, and stops the node on any failure. Run it in the background and read only `summary.txt` and greps (a long session re-reads its context on every call). It is specific to this case; copy its structure, not its numbers. Lessons: (1) before scripting, list every §9d observable and confirm the script samples each one — the first pass missed heap at end of A/B; (2) `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM (1–2 s lag); (3) keep `JVM_EXTRA_OPTS`/`MAX_HEAP_SIZE` out of the stress, `nodetool` and `cqlsh` JVMs after the node starts (the Byteman agent would clash on port 9091).
+
+**Next session — pick one:**
+
+| Option | Notes |
 |---|---|
-| Length of B | Three more limit-driven flushes after A's first, one thread dump during each (also answers the unit-tier review's part-5 note). |
-| Trace windows | A = stress start → first `MEMTABLE_LIMIT` flush; B = → C's `nodetool flush`; C = → node stop. |
-| After C | Stop stress once C's flush completes; do not wait for all 2M rows. |
-| Results layout | Cluster readings in §4.1's cluster table; a cluster-tier conclusion in the six-part format beside the unit-tier one. |
-
-Not yet exercised on this node: `bin/cqlsh` (Python 3.10) and the
-`nodetool sjk` read-out — both are hit early; a failure is a defect.
+| Fill results §8 (Jingsong), then close `memtable_heap_space` | Nothing else is open on this case. |
+| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `MAX_HINT_BUFFERS`, `max_space_usable_for_compactions_in_percentage`. Convert the case to the new §9 layout first (§9a, reviewed, before any run). |
+| Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
 **Machine notes.** JDK and Ant exist only on node0 where they were installed
 (CloudLab nodes are rebuilt from scratch). Full run logs are on node0 in

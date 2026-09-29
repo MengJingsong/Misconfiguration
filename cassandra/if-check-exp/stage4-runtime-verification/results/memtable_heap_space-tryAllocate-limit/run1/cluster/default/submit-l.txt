@@ -1,0 +1,14 @@
+# File /proj/misconfiguration-PG0/git-repos/misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/escape-hatch.btm line 24
+RULE escape hatch forces an allocation past the limit
+CLASS org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator
+METHOD allocated(long)
+NOCOMPILE
+AT ENTRY
+IF true
+DO traceOpen("escapeHatch", java.lang.System.getProperty("stage4.byteman.out", "escape-hatch.txt"));
+traceln("escapeHatch", "forced=" + $1 + " limit=" + $0.parent.limit + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void
+
