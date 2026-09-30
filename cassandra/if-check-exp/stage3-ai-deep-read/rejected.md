@@ -161,3 +161,47 @@ the pinned clone 2026-09-28.
   rows were described as "configured max term size" for a hardcoded
   `Short.MAX_VALUE`. Trust the row for *where to look*, never for *what the
   limit is*.
+
+## Batch: band A2, constants and structural bounds — 2026-09-29
+
+The 30 A2 rows from
+[`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md)
+(feed **3a**), read with the source open. **7 were already recorded** and are
+cited, not re-judged: `NativeAllocator.java:273`, `SlabAllocator.java:201` and
+`MmappedRegions.java:208` (capacity-word pass, above);
+`CaffeineCache.java:65`, `SerializingCache.java:71` and `:94` (the `cache/`
+subpackage survey, above — all three are `size > Integer.MAX_VALUE`); and
+`IndexSummaryBuilder.java:204` (the `Integer_MAX_VALUE` candidate in
+[`pending.md`](pending.md)). **No new candidate qualifies.** One row,
+`IndexSummaryBuilder.java:108`, joins that existing candidate as a second check
+site ([`pending.md`](pending.md)); one, `Envelope.java:429`, is undecided
+([`deferred.md`](deferred.md) §6). The remaining **21 are refused below**.
+
+| Row(s) | Check | Ground |
+|---|---|---|
+| `BlockingQueues.java:69`, `:81`, helper `BlockingQueues$Sync.offer()` (3 rows) | `wrapped.size() == capacity` | **Not production code.** `BlockingQueues.Sync` is constructed only by the simulator, [`InterceptorOfGlobalMethods.java:393`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/simulator/main/org/apache/cassandra/simulator/systems/InterceptorOfGlobalMethods.java#L393), which replaces `newBlockingQueue(capacity)` under test. In production that factory returns a JDK `LinkedBlockingQueue` ([`BlockingQueues.java:43-47`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/concurrent/BlockingQueues.java#L43-L47)), so neither line runs in a node. `:81` is also a release path — it `notify()`s from `poll()`. The *capacities* passed to `newBlockingQueue` are real and belong to their callers (e.g. the filed `MAX_HINT_BUFFERS` case), not to this class. |
+| `BufferPool.java:1521` | `size == capacity` in `freeUnusedPortion()` | **Rule 3, release path.** Returns early when there is no spare tail to hand back to the chunk. It frees slots; it gates no allocation. |
+| `BufferPool.java:910`, `:940` (2 rows) | `size > NORMAL_CHUNK_SIZE` | **Rule 3, path selection.** An oversized request skips the pool (`tryGet` returns `null`) and `get()` calls `allocate(size, OFF_HEAP)` directly. The same bytes are allocated on both branches. This is the uncapped fallback the filed [`file_cache_size`](cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md) case already records — useful context there, not a check of its own. |
+| `NativeAllocator.java:144`, `SlabAllocator.java:92` (2 rows) | `size > MAX_CLONED_SIZE` | **Rule 3, path selection.** An oversized value is allocated on its own (`allocateOversize`, or a dedicated `Region`) instead of inside the current region. The bytes are already charged to the memtable pool **before** the comparison ([`NativeAllocator.java:141`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L141), [`SlabAllocator.java:89`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/SlabAllocator.java#L89)); that charge is the filed `memtable_*_space` cases. Stage 2's reason ("rejecting the on-heap clone") is wrong — nothing is rejected. |
+| `NativeCell.java:100`, `OffHeapBitSet.java:43`, `DataOutputBuffer.java:152` (3 rows) | `size > Integer.MAX_VALUE`, `wordCount > Integer.MAX_VALUE`, `saturatedSize <= capacity()` | **Rule 2, per-item type bound.** Each throws when **one** object would pass a Java `int`/array limit: one native cell over 2GiB, one bloom filter over 16GiB, one `DataOutputBuffer` that can no longer grow past `MAX_ARRAY_SIZE`. None bounds a total — every other cell, filter or buffer is unaffected — and none can be changed by a user. The check turns an overflow into a clean exception. Same archetype as the `cache/` rows above. *Contrast with `IndexSummaryBuilder.java:204` in `pending.md`:* that type bound caps a structure that grows with data volume, and its disallow degrades and continues; these three are single-allocation guards that throw. |
+| `MmappedRegions.java:170` | `compressedFileLength - state.length <= MAX_SEGMENT_SIZE` | **Rule 2, chunking** — the same judgement as `:208` above. It picks which `updateState` overload splits the file into mmap segments; the whole file is mapped either way. |
+| `MerkleTree.java:1103`, `:1137`, `:1322`, `:1420` (4 rows) | `buffer.remaining() < maxOffHeapSize(...)` | **Rule 3, invariant guard.** The off-heap buffer is already allocated and sized for the whole tree; each line throws `IllegalStateException` if a node would not fit. It checks that the pre-sizing was right. Nothing is allocated on either branch. Four rows, one judgement. |
+| `Accumulator.java:60` | `insertPos >= values.length` | **Rule 3, invariant guard.** `values` is a fixed `Object[]` allocated in the constructor; `add()` only stores a reference into it. The check throws on overflow of a structure whose memory is already spent. |
+| `DynamicList.java:113` | `size >= maxSize` | **No production caller.** `DynamicList` and its subclass `LockedDynamicList` are not constructed anywhere in `src/java` except `DynamicList`'s own `main()` test harness ([`:231`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/DynamicList.java#L231)). Also fails Rule 3 on its own terms: the `Node` is allocated at `:112`, **before** the check. |
+| `LightweightRecycler.java:69` | `pool.size() < capacity()` | **Rule 2, negligible and not tunable.** Decides whether a finished object is kept in a per-thread reuse pool or left to GC — no allocation is withheld. The only production pool is `IncrementalTrieWriterBase`'s children-list recycler, capped at a hardcoded `CHILDREN_LIST_RECYCLER_LIMIT = 1024` ([`IncrementalTrieWriterBase.java:182`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/tries/IncrementalTrieWriterBase.java#L182)) cleared `ArrayList`s per thread — on the order of a megabyte per thread at most. |
+| `StreamingTombstoneHistogramBuilder.java:452`, helper `$Spool.tryAddOrAccumulate()` (2 rows) | `size > capacity` | **Rule 3.** The spool's `points`/`values` arrays are allocated once in its constructor ([`:433-434`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/streamhist/StreamingTombstoneHistogramBuilder.java#L433-L434)). On `false` the caller flushes the spool into the histogram and retries ([`:109-112`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/streamhist/StreamingTombstoneHistogramBuilder.java#L109-L112)). No allocation diverges; the point is recorded either way. |
+
+### What A2 taught, for A3 and band B
+
+- **A2's hit rate is 0/21 newly-judged rows** (plus one second check site for
+  an existing candidate). As `bands.md` predicted, constants and structural
+  bounds almost never name a constraint.
+- **Path selection is A2's dominant false positive** — four rows compare a size
+  against a chunk or clone threshold only to choose *where* to allocate. Ask
+  whether the disallow branch allocates the same bytes somewhere else.
+- **Invariant guards are the second** — five rows throw when a pre-sized
+  structure would overflow. The memory was spent when the structure was sized;
+  if a limit exists, it is at that sizing, not at the guard.
+- **Check that the class runs in production.** Two classes here
+  (`BlockingQueues.Sync`, `DynamicList`) have no production construction site.
+  One grep for the constructor settles it before any rule is applied.

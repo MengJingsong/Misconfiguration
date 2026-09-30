@@ -145,7 +145,8 @@ a verdict — see [`bands.md`](bands.md).
 | Ranking | ✅ complete, full coverage |
 | Rule-outs | None, from 2026-09-23. Stage 2 has no rejection file. |
 | Band A1 | ✅ **consumed by stage 3, 2026-09-28** — all 65 rows judged |
-| Next | Stage 3 reads **A2 (30)**, then A3 (39), then band B (174), then C (94) |
+| Band A2 | ✅ **consumed by stage 3, 2026-09-29** — all 30 rows judged |
+| Next | Stage 3 reads **A3 (39)**, then band B (174), then C (94) |
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **8 qualified** (in
@@ -156,6 +157,15 @@ batch "band A1"), **3 undecided** (in
 [`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) §5),
 and **21 already recorded** by earlier passes and cited rather than re-judged.
 Do not re-read these rows — cite the entry.
+
+**Band A2 is consumed (2026-09-29).** All 30 rows read with the source open:
+**no new candidate**, **21 refused** (`rejected.md`, batch "band A2"), **1 a
+second check site** of the `Integer_MAX_VALUE` candidate (`pending.md`), **1
+undecided** (`deferred.md` §6 — `Envelope.java:429`, whose limit is in fact
+configuration, `native_transport_max_frame_size`), and **7 already recorded**.
+Stage 2's A2 reasons were wrong about the limit's effect on two rows
+(`NativeAllocator.java:144`, `SlabAllocator.java:92` — "rejecting the on-heap
+clone", where nothing is rejected) and about its kind on one (`Envelope`).
 
 **What the pass says about the banding.** 8 of the 44 newly-judged rows
 qualified. A1 is genuinely dense with usage-vs-limit comparisons, exactly as

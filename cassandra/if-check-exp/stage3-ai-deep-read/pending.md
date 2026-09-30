@@ -39,6 +39,16 @@ three; none is written up as a case file yet.
   **type bound**, not config or a named constant. Target 1 explicitly admits
   "variable types" as a constraint source, so it qualifies, but §6.1 naming
   will need a judgement call.
+  **Second check site, found by the band-A2 pass (2026-09-29):**
+  [`IndexSummaryBuilder.java:108`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryBuilder.java#L108)
+  — `maxExpectedEntriesSize > Integer.MAX_VALUE` in the constructor. When the
+  *expected* summary would pass 2GiB, it raises the effective
+  `min_index_interval` (logging a warning), so fewer keys are sampled and the
+  `SafeMemoryWriter`s at `:125-126` are sized smaller. Both branches build the
+  builder; the divergence is retained size, as in `column_index_cache_size`.
+  `:108` is the up-front clamp on an estimate, `:204` the hard stop per entry —
+  list both in the case's Location section (README §6.1, "one case, several
+  check sites").
 - `TeeDataInputPlus_limit` is the weakest of the four — it bounds bytes
   mirrored into a buffer, and `limit`'s origin needs tracing before it is
   clear how meaningful the ceiling is. Confirm before writing it up.
