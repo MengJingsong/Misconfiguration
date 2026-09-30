@@ -1,0 +1,13 @@
+# Throwaway companion to hold-flush.btm, used only by hold-check.sh (not part of the harness).
+# Writes one line per entry into HintsWriteExecutor$FlushBufferTask.run(), whether or not the hold is
+# loaded, so the check can compare flushes with `hold` lines:  flush ms=<epoch millis>
+# Output file: the system property stage4.flush.out, or else flush-count.txt in the working directory.
+
+RULE count hints buffer flushes
+CLASS org.apache.cassandra.hints.HintsWriteExecutor$FlushBufferTask
+METHOD run
+AT ENTRY
+IF true
+DO traceOpen("flushCount", java.lang.System.getProperty("stage4.flush.out", "flush-count.txt"));
+   traceln("flushCount", "flush ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

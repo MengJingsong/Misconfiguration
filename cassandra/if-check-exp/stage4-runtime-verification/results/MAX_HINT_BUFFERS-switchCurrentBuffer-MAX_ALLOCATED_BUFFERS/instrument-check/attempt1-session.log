@@ -1,0 +1,92 @@
+[2026-09-30 16:29:52] script: hold-check.sh; node 1 jason92@pc66.cloudlab.umass.edu, node 2 jason92@pc80.cloudlab.umass.edu
+HintsPoolCeilingTest.java: OK
+hints-pool.btm: OK
+hold-flush.btm: OK
+[2026-09-30 16:29:54] CHECK PASS: node 1's harness copy equals the committed files
+[2026-09-30 16:29:54] == A: ring first-time step
+[2026-09-30 16:31:42] ring has 2 UN (~85 s)
+Op rate                   :    2,349 op/s  [WRITE: 2,349 op/s]
+Total errors              :          0 [WRITE: 0]
+Cassandra has shutdown.
+[2026-09-30 16:32:07] node 1 sees node 2 as DN (~4 s)
+Cassandra has shutdown.
+[2026-09-30 16:32:22] == B: node 1 alone, with hints-pool.btm (n = 3)
+[2026-09-30 16:33:16] node 1 up and native transport running (~36 s)
+[2026-09-30 16:33:16] CHECK PASS: node 1 started with the agent
+UN  198.22.255.77  396.02 KiB  16      100.0%            c3d9165d-4dbe-4d7d-8acd-5e56c3035fb0  rack1
+DN  198.22.255.91  ?           16      100.0%            b622df20-5c74-4de3-8bbb-63f019254ce0  rack1
+# File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 26
+RULE hints pool creates a buffer
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+traceln("hintsPool", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.hints.HintsBufferPool.createBuffer() org.apache.cassandra.hints.HintsBuffer
+compiled successfully
+# File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 35
+RULE hints pool writer waits at the cap
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+NOCOMPILE
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+traceln("hintsPool", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.hints.HintsBufferPool.switchCurrentBuffer(org.apache.cassandra.hints.HintsBuffer) boolean
+
+[2026-09-30 16:33:18] CHECK PASS: Submit -l lists triggers on HintsBufferPool.createBuffer() and switchCurrentBuffer()
+created=1 size=33554432 max=3 ms=1790800363399 thread=HintsWriteExecutor:1
+[2026-09-30 16:33:33] == C: load hold-flush.btm, write 10,000 rows, catch the hints writer held
+install rule hold each hints buffer flush
+
+1
+hints writer caught inside FlushBufferTask.run: found=1 (poll 13)
+"HintsWriteExecutor:1" #95 daemon prio=5 os_prio=0 cpu=41.63ms elapsed=56.76s tid=0x000055f6d78c1b70 nid=0x1108d1 waiting on condition  [0x00007f3e52f79000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+	at java.lang.Thread.sleep(java.base@11.0.32.1/Native Method)
+	at org.jboss.byteman.rule.helper.Helper.delay(Helper.java:868)
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(java.base@11.0.32.1/Native Method)
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(java.base@11.0.32.1/NativeMethodAccessorImpl.java:62)
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(java.base@11.0.32.1/DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(java.base@11.0.32.1/Method.java:566)
+	at org.jboss.byteman.rule.expression.MethodExpression.interpret(MethodExpression.java:379)
+	at org.jboss.byteman.rule.Action.interpret(Action.java:144)
+	at org.jboss.byteman.rule.helper.InterpretedHelper.fire(InterpretedHelper.java:170)
+	at org.jboss.byteman.rule.helper.InterpretedHelper.execute0(InterpretedHelper.java:138)
+Op rate                   :    5,059 op/s  [WRITE: 5,059 op/s]
+Total errors              :          0 [WRITE: 0]
+[2026-09-30 16:33:40] CHECK PASS: a thread dump caught the hints writer inside FlushBufferTask.run (held)
+[2026-09-30 16:33:40] == D: trace lines after the held write
+-- hints-pool.txt
+created=1 size=33554432 max=3 ms=1790800363399 thread=HintsWriteExecutor:1
+created=2 size=33554432 max=3 ms=1790800419683 thread=MutationStage-41
+-- hold.txt
+hold ms=1790800419709 delay=3000
+[2026-09-30 16:33:46] CHECK PASS: at least one hold line (delay=3000)
+[2026-09-30 16:33:46] CHECK PASS: created=2 is in the trace
+[2026-09-30 16:33:46] hold lines so far: 1
+[2026-09-30 16:33:46] == E: unload the rule, write 6,000 more rows; a flush must happen and must not be held
+uninstall RULE hold each hints buffer flush
+
+Op rate                   :    5,153 op/s  [WRITE: 5,153 op/s]
+Total errors              :          0 [WRITE: 0]
+-- hints-pool.txt
+created=1 size=33554432 max=3 ms=1790800363399 thread=HintsWriteExecutor:1
+created=2 size=33554432 max=3 ms=1790800419683 thread=MutationStage-41
+[2026-09-30 16:34:03] hold lines after the unload: 1
+[2026-09-30 16:34:03] CHECK FAIL: created=3 is in the trace (a buffer switch, hence a flush, happened after the unload)
+[2026-09-30 16:34:03] CHECK PASS: no new hold line after the unload
+0
+[2026-09-30 16:34:03] == done; cleanup follows
+[2026-09-30 16:34:04] == F: cleanup
+[2026-09-30 16:34:20] both nodes stopped; data/ and logs/ removed; node-side files copied to /tmp/claude-1000/-home-jingsong-repos-Misconfiguration/9f2c0642-941a-4a48-a9b6-a3f3dd708a19/scratchpad/hold-check-out
+[2026-09-30 16:34:20] RESULT: 1 check(s) failed
