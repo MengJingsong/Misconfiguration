@@ -302,10 +302,9 @@ can stay; every run writes the same 200,000 keys.
 
 Hints exist only while a replica is down, so the cluster tier needs a second
 node that has joined the ring and then been stopped. It is only a hint target;
-its memory is not measured. Setting it up (a second CloudLab node, or a second
-process from a separate copy of the clone on another loopback address) is not in
-[`environment.md`](../../stage4-runtime-verification/environment.md) yet; stage 4
-adds it.
+its memory is not measured. It is set up as a second CloudLab node, on the control network, as in
+[`environment.md`](../../stage4-runtime-verification/environment.md) §5
+(added 2026-09-30).
 
 Prefer a deterministic trigger over a race (README §8.2 rule 2). A natural run
 reaches the cap only if the writers outrun the flush, which depends on the disk
