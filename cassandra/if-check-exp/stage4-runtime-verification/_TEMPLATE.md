@@ -17,7 +17,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | `git hash-object` of the case file and the HEAD commit, recorded after the audit's amendments; §9a is frozen at this version |
+| **Case-file version** | the commit that holds the case file, and the hash of §9's text (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`), recorded after the audit's amendments; §9a is frozen at this version |
 | **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
 | **Audit bottom line** | Ready / Ready after amendments / Blocked — date |

@@ -185,9 +185,9 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ## Open items / next steps
 
-### ⏵ Resume here (state as of 2026-09-29, end of session)
+### ⏵ Resume here (state as of 2026-09-30)
 
-**Stage 4 has run one case, `memtable_heap_space` (both tiers done).** Read
+**Stage 4 has closed one case, `memtable_heap_space` (both tiers), and run the unit tier of a second, `MAX_HINT_BUFFERS` (2026-09-30; see its row below).** Read
 `stage4-runtime-verification/README.md`, then the results file
 `results/memtable_heap_space-tryAllocate-limit.md`.
 
@@ -213,7 +213,7 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 |---|---|
 | ~~Fill results §8~~ | Done 2026-09-30; `memtable_heap_space` is closed. |
 | Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `MAX_HINT_BUFFERS`, `max_space_usable_for_compactions_in_percentage`. Convert the case to the new §9 layout first (§9a, audited, before any run). |
-| **`MAX_HINT_BUFFERS` stage 4 (§9 converted 2026-09-30; design audited and harness written 2026-09-30, not yet run)** | **Audit: Ready after amendments** (results `results/MAX_HINT_BUFFERS-…md` §1.1). **Harness written and checked on node0** under `harness/MAX_HINT_BUFFERS-…/` (test, two Byteman rules, README; uncommitted): both rules type-check, and the unit instrument check at *n* = 3 passed after two fixes recorded as results §3 defects 1–2 (writer warm-up before the baseline; cluster `Count` reported, not asserted). §9a frozen at `git hash-object` `400b800`. **Open before run 1:** (1) second-node setup in `environment.md` (cluster tier only), then the hold-rule functional check (case 9e); (2) start run 1, unit tier first: upstream `HintsBufferPoolTest` and `HintsPoolCeilingTest` at *n* = 2, 3, 6 and the 2 MiB arm (node0 is ready: JDK 11, Ant, clone, `byteman-bmunit`). Note node0's clone has `conf/cassandra.yaml` modified by the heap run; reset it (`git checkout conf/cassandra.yaml`) before the cluster tier. NODE1 (`pc80`) answers ssh but has no JDK, Ant or clone, and its hostname shows a different CloudLab experiment. n = 1 is left out of the sweep (reason in §9b); Jingsong does not want it recorded as a stage-3 finding. |
+| **`MAX_HINT_BUFFERS` stage 4 (unit tier done 2026-09-30; cluster tier not started)** | **Audit:** Ready after amendments (results `results/MAX_HINT_BUFFERS-…md` §1.1). **Harness** under `harness/MAX_HINT_BUFFERS-…/` (test, two Byteman rules, README), committed in `0598801` with the audit; two instrument-check defects fixed before run 1 (results §3: writer warm-up before the baseline; cluster `Count` reported, not asserted). **§9 is frozen** at commit `0598801`, §9 hash `7625dee` (command in the stage-4 README); it was unchanged when the unit tier ended. **Unit tier, run 1 (AI), 2026-09-30, node0:** 7 JVMs (upstream `HintsBufferPoolTest` at *n* = 2, 3, 6; `HintsPoolCeilingTest` at *n* = 2, 3, 6 with 1 MiB buffers and *n* = 3 with 2 MiB), all passed; the pool held exactly *n* buffers, direct memory was exactly `n × bufferSize` (2, 3, 6 MiB; 3 × 2 MiB = 6 × 1 MiB), the writer waited at the check. **Self-checked and verdict filed: consistent with Confirmed** (results §4.2, §5, §8; evidence in `results/MAX_HINT_BUFFERS-…/run1/`, `unit-selfcheck.py` asserts 50 relations). No run 2. The upstream test ran under BMUnit on JDK 11.0.32, which closes the case's open Byteman-attach item. **Open before the cluster tier:** (1) second-node setup in `environment.md`, then the hold rule's functional check (case 9e); (2) reset node0's clone (`git checkout conf/cassandra.yaml`, left modified by the heap run; the unit tier does not read it); (3) write a cluster run script for this case (the heap one is an example, not a template). NODE1 (`pc80`) answers ssh but has no JDK, Ant or clone, and its hostname shows a different CloudLab experiment. **Commit state:** audit, harness and instrument check committed (`0598801`); the unit-tier results, the stage-4 README/template freeze fix (hash §9 only) and this row are uncommitted; nothing pushed. n = 1 is left out of the sweep (reason in §9b); Jingsong does not want it recorded as a stage-3 finding. |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
 **Machine notes.** JDK and Ant exist only on node0 where they were installed
@@ -235,8 +235,8 @@ in `bands.md`. **Eleven cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 has started** (see the table above) — eleven designs, one case in
-progress. Stage 3's own
+**Stage 4 has started** (see the table above) — eleven designs, one case closed and
+one (`MAX_HINT_BUFFERS`) through its unit tier. Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
 | Band | Meaning | Units |

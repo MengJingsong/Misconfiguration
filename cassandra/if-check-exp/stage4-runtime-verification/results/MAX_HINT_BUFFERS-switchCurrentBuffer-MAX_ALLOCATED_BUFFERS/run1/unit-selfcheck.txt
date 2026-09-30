@@ -1,0 +1,51 @@
+PASS unit-summary.txt: 7 JVMs, each tests=1 failures=0 errors=0, ant exit 0
+PASS unit-session.log: seven 'Tests run: 1, Failures: 0, Errors: 0' lines
+PASS unit-session.log: 'done; any test failed: 0'
+PASS unit-session.log: set-up printed no FAIL and three sha256sum 'OK' lines (harness = committed files)
+PASS unit-harness-readings.txt: four JVM blocks
+PASS ceiling-n2-1MiB: writer parked in take() under switchCurrentBuffer
+PASS ceiling-n2-1MiB: allocatedBuffers 2 == n 2; buffers handed to the callback 1 == n-1
+PASS ceiling-n2-1MiB: Count +2 == n; MemoryUsed +2097152 == n x bufferSize 2097152
+PASS ceiling-n2-1MiB: all six readings unchanged after 2 s (26886 hints written)
+PASS ceiling-n2-1MiB: hints written at the wait 26886 == n x floor(bufferSize/entrySize) = 2 x 13443
+PASS ceiling-n2-1MiB: one recycle let through 13443 hints (one buffer); allocatedBuffers, queued, Count, MemoryUsed unchanged
+PASS ceiling-n2-1MiB: at the end 67217 written == 67217 found in buffers == 67217 planned; still 2 buffers, +2097152
+PASS ceiling-n2-1MiB: planned hints 67217 = hints worth n+3 buffers
+PASS ceiling-n2-1MiB: direct Count rose one per buffer, [0, 1, 2], and stopped at n; final MemoryUsed step 2097152
+PASS ceiling-n2-1MiB: test printed PASS
+PASS ceiling-n3-1MiB: writer parked in take() under switchCurrentBuffer
+PASS ceiling-n3-1MiB: allocatedBuffers 3 == n 3; buffers handed to the callback 2 == n-1
+PASS ceiling-n3-1MiB: Count +3 == n; MemoryUsed +3145728 == n x bufferSize 3145728
+PASS ceiling-n3-1MiB: all six readings unchanged after 2 s (40329 hints written)
+PASS ceiling-n3-1MiB: hints written at the wait 40329 == n x floor(bufferSize/entrySize) = 3 x 13443
+PASS ceiling-n3-1MiB: one recycle let through 13443 hints (one buffer); allocatedBuffers, queued, Count, MemoryUsed unchanged
+PASS ceiling-n3-1MiB: at the end 80660 written == 80660 found in buffers == 80660 planned; still 3 buffers, +3145728
+PASS ceiling-n3-1MiB: planned hints 80660 = hints worth n+3 buffers
+PASS ceiling-n3-1MiB: direct Count rose one per buffer, [0, 1, 2, 3], and stopped at n; final MemoryUsed step 3145728
+PASS ceiling-n3-1MiB: test printed PASS
+PASS ceiling-n6-1MiB: writer parked in take() under switchCurrentBuffer
+PASS ceiling-n6-1MiB: allocatedBuffers 6 == n 6; buffers handed to the callback 5 == n-1
+PASS ceiling-n6-1MiB: Count +6 == n; MemoryUsed +6291456 == n x bufferSize 6291456
+PASS ceiling-n6-1MiB: all six readings unchanged after 2 s (80658 hints written)
+PASS ceiling-n6-1MiB: hints written at the wait 80658 == n x floor(bufferSize/entrySize) = 6 x 13443
+PASS ceiling-n6-1MiB: one recycle let through 13443 hints (one buffer); allocatedBuffers, queued, Count, MemoryUsed unchanged
+PASS ceiling-n6-1MiB: at the end 120990 written == 120990 found in buffers == 120990 planned; still 6 buffers, +6291456
+PASS ceiling-n6-1MiB: planned hints 120990 = hints worth n+3 buffers
+PASS ceiling-n6-1MiB: direct Count rose one per buffer, [0, 1, 2, 3, 4, 5, 6], and stopped at n; final MemoryUsed step 6291456
+PASS ceiling-n6-1MiB: test printed PASS
+PASS ceiling-n3-2MiB: writer parked in take() under switchCurrentBuffer
+PASS ceiling-n3-2MiB: allocatedBuffers 3 == n 3; buffers handed to the callback 2 == n-1
+PASS ceiling-n3-2MiB: Count +3 == n; MemoryUsed +6291456 == n x bufferSize 6291456
+PASS ceiling-n3-2MiB: all six readings unchanged after 2 s (80658 hints written)
+PASS ceiling-n3-2MiB: hints written at the wait 80658 == n x floor(bufferSize/entrySize) = 3 x 26886
+PASS ceiling-n3-2MiB: one recycle let through 26886 hints (one buffer); allocatedBuffers, queued, Count, MemoryUsed unchanged
+PASS ceiling-n3-2MiB: at the end 161320 written == 161320 found in buffers == 161320 planned; still 3 buffers, +6291456
+PASS ceiling-n3-2MiB: planned hints 161320 = hints worth n+3 buffers
+PASS ceiling-n3-2MiB: direct Count rose one per buffer, [0, 1, 2, 3], and stopped at n; final MemoryUsed step 6291456
+PASS ceiling-n3-2MiB: test printed PASS
+PASS the four JVMs started from the same baseline (same Count and MemoryUsed)
+PASS second-knob check: n=6 x 1 MiB and n=3 x 2 MiB both +6291456 bytes
+PASS the ceiling moves with n: 2097152 < 3145728 < 6291456
+PASS unit-ant-excerpts.txt: seven JVMs, clone HEAD b5f2a54, dirty
+PASS unit-ant-excerpts.txt: a harness JVM and an upstream JVM loaded test/conf/cassandra.yaml
+ALL CHECKS PASS

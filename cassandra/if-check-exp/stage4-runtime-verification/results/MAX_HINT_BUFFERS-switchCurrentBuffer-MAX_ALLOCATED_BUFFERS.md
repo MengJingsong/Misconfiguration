@@ -2,7 +2,7 @@
 
 > **Case:** [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`](../../stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md)
 >
-> **Status:** **audited 2026-09-30** (Ready after amendments); harness written and checked on node0 (unit instrument check passed, hold rule type-checked only); no run yet
+> **Status:** **unit tier: run 1 done 2026-09-30, self-checked, verdict filed** (consistent with Confirmed). Cluster tier not started: it needs the second-node setup and the hold-rule check. Run 2 not chosen.
 
 **Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
@@ -14,10 +14,10 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | `git hash-object` `400b80049d85b0b1ea71ffaa7bda4a4cfc58ebc3`, on top of HEAD `e462a97`, recorded 2026-09-30 after the audit's amendments and the two instrument-check fixes in §3 (not yet committed). The first freeze, `65a66cb…`, was superseded before any run. §9a is frozen at this version |
-| **Harness** | written 2026-09-30, not yet committed: `HintsPoolCeilingTest.java`, `hints-pool.btm`, `hold-flush.btm` and a README under `../harness/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/`. Checks: see §1.2 |
+| **Case-file version** | Committed in `0598801` (2026-09-30). §9's text, from `## 9.` to the next heading, hashes to `7625dee7fc24f43c2674ff0aed083c007a86c734` (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`); §9a is frozen at this version, and the hash is unchanged when run 1 ended. The whole file hashed `400b800…` at that commit and changes whenever §10 takes feedback, so the §9 hash is the freeze. (The first freeze, `65a66cb…`, was superseded before any run.) |
+| **Harness** | Committed in `0598801` under `../harness/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/`: `HintsPoolCeilingTest.java`, `hints-pool.btm`, `hold-flush.btm` and a README. Run 1 used a byte-identical copy on node0, checked with `sha256sum -c` (`run1/unit-session.log:17–19`). Checks: §1.2 |
 | **Tiers and values** | Unit first: upstream `HintsBufferPoolTest` and `HintsPoolCeilingTest` at *n* = 2, 3, 6, plus *n* = 3 with 2 MiB buffers. Then cluster: *n* = 2, 3, 6, the second-knob arm, the natural-load control. *n* = 1 is excluded (case §9b) |
-| **Audit bottom line** | **Ready after amendments** — 2026-09-30. Work still open before run 1 (step 1, not a design defect): add the second-node setup to `environment.md` (cluster tier only) and run the hold-rule check that needs it (case 9e, "Instrument check, hold rule"). Done 2026-09-30: harness written; node0 has JDK 11, Ant, the clone at `cassandra-5.0.9` and `byteman-bmunit-4.0.20.jar` |
+| **Audit bottom line** | **Ready after amendments** — 2026-09-30. Open before the cluster tier, not before the unit tier: the second-node setup in `environment.md`, and the hold rule's functional check (case 9e). Node0 has JDK 11, Ant, the clone at `cassandra-5.0.9` and `byteman-bmunit-4.0.20.jar`, and the upstream test ran under BMUnit there (run 1) |
 
 ### 1.1 Design audit
 
@@ -44,13 +44,15 @@ line of each group; cite the case-file section checked.
 
 | # | Recommendation | Applied? (amendment date and commit, or "left for stage 3") | Why |
 |---|---|---|---|
-| 1 | Add a reading rule: unit `Count` +*n*, `MemoryUsed` +`n × bufferSize`; cluster `Count` +(*n* − 1), `MemoryUsed` +(*n* − 1) × `bufferSize` over idle, 4 MiB band | Applied 2026-09-30, case 9a (uncommitted) | The conclusions need a decidable threshold, and the cluster cannot measure from a no-pool baseline. A 4 MiB band is an eighth of the smallest step (32 MiB), so it cannot hide an extra buffer |
+| 1 | Add a reading rule: unit `Count` +*n*, `MemoryUsed` +`n × bufferSize`; cluster `Count` +(*n* − 1), `MemoryUsed` +(*n* − 1) × `bufferSize` over idle, 4 MiB band | Applied 2026-09-30, case 9a (committed in `0598801`) | The conclusions need a decidable threshold, and the cluster cannot measure from a no-pool baseline. A 4 MiB band is an eighth of the smallest step (32 MiB), so it cannot hide an extra buffer |
 | 2 | Reword the Confirmed and third Refuted rows to the predicted amount; add rows for "second-knob arm disagrees" and "writer never resumes" | Applied 2026-09-30, case 9a | Both outcomes were plausible and had no row |
 | 3 | Add the in-flight hint estimate and an early stop for B on `HintsInProgress` > 75 % of `128 × cores`; sample it every 5 s | Applied 2026-09-30, case 9c, 9e | `StorageProxy.java:202` makes the limit scale with cores; the estimate (about 1,900 in 60 s, marked as not measured) approaches it on a 16-core node |
 | 4 | Note `max_hint_window` (3 h) under "Hold fixed" and in the hints-flowing trap; record when node 2 was stopped | Applied 2026-09-30, case 9b, 9d | `StorageProxy.java:2461-2463`: a long sweep would stop hinting silently |
 | 5 | Call `HintsBufferTest.defineSchema()` in the harness test | Applied 2026-09-30, case 9e | The hint helper needs the schema |
 | 6 | Scope `JVM_EXTRA_OPTS` to the `bin/cassandra` command (`VAR=… bin/cassandra`) instead of `export` | Applied 2026-09-30, case 9e | The handoff's heap-run lesson says it clashed on the Byteman port in the `nodetool` and stress JVMs; the scripts say it should not, and scoping is free |
 | 7 | For the stage-3 template: have each conclusions row use the quantity each tier can actually measure, and give the workload's hidden limits (here the in-flight hint limit) in the estimate | Left for stage 3 | Both gaps above came from the template not asking for them |
+
+All amendments above were made before any run and are in `0598801`.
 
 **Checked:** whether exporting `JVM_EXTRA_OPTS` in 9e reaches `nodetool` or
 `cassandra-stress`. Read from the scripts at the pinned tag, not run: only
@@ -74,8 +76,7 @@ node0 (`pc66`, 40 cores, JDK 11.0.32, local clone `~/cassandra-run1` at
 | Unit: the test without the agent, before the fixes | failed exactly as with the agent (`Count` +4, +128 B), so the agent is not what perturbs the direct-buffer readings (§3, defect 1). Not re-run without the agent after the fixes |
 | Hold rule, functional (case 9e, "Instrument check, hold rule") | **Not done.** It needs a node that has hints to flush, so a second node |
 
-These runs were at *n* = 3 only. The unit tier's values (*n* = 2, 6, and the
-2 MiB arm) have not been run.
+These checks were at *n* = 3 only. The unit tier's other values ran afterwards as run 1 (§4).
 
 **Agreement criteria** — only if run 2 is chosen; filled before run 2 starts.
 One row per observable in the case's §9d:
@@ -88,17 +89,17 @@ One row per observable in the case's §9d:
 
 | Field | Run 1 | Run 2 (fresh AI session, if done) |
 |---|---|---|
-| Date | | |
-| Node (CloudLab name and type) | | |
-| CPU cores (`nproc`) — sets the in-flight hint limit `128 × cores` (case 9c) | | |
-| Time node 2 was stopped, and time of each run (`max_hint_window`, case 9b) | | |
-| OS and kernel (`uname -r`) | | |
-| JDK (`java -version`) | | |
-| Ant (`ant -version`) | | |
-| Local `cassandra-src` clone commit | | |
-| Case-file commit / harness commit | | |
-| Storage for node data | | |
-| Full logs (path, outside the repo) | | |
+| Date | 2026-09-30, 19:39–19:42 UTC (unit tier) | |
+| Node (CloudLab name and type) | `node0.jason92-317394` (`pc66`; 40 cores, 125 GiB) | |
+| CPU cores (`nproc`) — sets the in-flight hint limit `128 × cores` (case 9c) | 40 (limit 5,120); not used by the unit tier | |
+| Time node 2 was stopped, and time of each run (`max_hint_window`, case 9b) | not applicable to the unit tier | |
+| OS and kernel (`uname -r`) | Ubuntu 22.04.2 LTS, `5.15.0-187-generic` | |
+| JDK (`java -version`) | OpenJDK 11.0.32.1 | |
+| Ant (`ant -version`) | 1.10.12 | |
+| Local `cassandra-src` clone commit | `b5f2a54` (`~/cassandra-run1`, tag `cassandra-5.0.9`). Dirty: `conf/cassandra.yaml` modified by the heap run, two untracked test files (part 6 of §4.2) | |
+| Case-file commit / harness commit | `0598801` / `0598801` | |
+| Storage for node data | local `/dev/sda3` (ext3); the unit tier writes only under the clone's `build/test` | |
+| Full logs (path, outside the repo) | node0 `~/stage4-logs/hints/unit/` (532 KB: one folder per JVM, `session.log`, `summary.txt`). Committed: `run1/unit-session.log` and the excerpts in §4 | |
 
 ## 3. Runbook defects
 
@@ -109,8 +110,8 @@ and the affected tier restarts from its beginning. If the fix would change
 
 | # | Run | Step (§9b–§9e) | Problem | Fix | Decision (date) | Case-file commit with the fix |
 |---|---|---|---|---|---|---|
-| 1 | Instrument check, unit, *n* = 3 | 9e unit, step 1 | The exact deltas failed: `Count` +4 and `MemoryUsed` +3 MiB + 128 B instead of +3 and +3 MiB. Cause, traced with a throwaway Byteman rule (`trace-alloc-ant.txt` on node0): the first `Mutation.serializedSize()` on a thread creates a netty `FastThreadLocal` scratch `DataOutputBuffer` whose constructor calls `allocateDirect(128)` (`Mutation.java:453`, `DataOutputBuffer.java:87`). The first attempt, with no GC settle, also read `Count` +1, because garbage buffers were freed mid-test | The writer thread serializes one hint before the baseline, the JVM settles (`System.gc()`, 500 ms), then the baseline is read. Harness test and 9e step 1 | AI, 2026-09-30 | uncommitted (case-file hash `400b800…`) |
-| 2 | Instrument check, unit (found by following 1 to its cause) | 9a reading rule; 9d "Real resource" | The same scratch buffer exists on every thread that serializes a mutation. In the cluster tier the 32 `MutationStage` threads each hold one, so the audit's rule "`Count` up by exactly *n* − 1" would fail for an unrelated reason | Cluster `Count` is reported, not asserted. `MemoryUsed` within the 4 MiB band and the create trace decide. Unit tier unchanged (exact, after the warm-up) | AI, 2026-09-30 | uncommitted (same hash) |
+| 1 | Instrument check, unit, *n* = 3 | 9e unit, step 1 | The exact deltas failed: `Count` +4 and `MemoryUsed` +3 MiB + 128 B instead of +3 and +3 MiB. Cause, traced with a throwaway Byteman rule (`trace-alloc-ant.txt` on node0): the first `Mutation.serializedSize()` on a thread creates a netty `FastThreadLocal` scratch `DataOutputBuffer` whose constructor calls `allocateDirect(128)` (`Mutation.java:453`, `DataOutputBuffer.java:87`). The first attempt, with no GC settle, also read `Count` +1, because garbage buffers were freed mid-test | The writer thread serializes one hint before the baseline, the JVM settles (`System.gc()`, 500 ms), then the baseline is read. Harness test and 9e step 1 | AI, 2026-09-30 | `0598801` |
+| 2 | Instrument check, unit (found by following 1 to its cause) | 9a reading rule; 9d "Real resource" | The same scratch buffer exists on every thread that serializes a mutation. In the cluster tier the 32 `MutationStage` threads each hold one, so the audit's rule "`Count` up by exactly *n* − 1" would fail for an unrelated reason | Cluster `Count` is reported, not asserted. `MemoryUsed` within the 4 MiB band and the create trace decide. Unit tier unchanged (exact, after the warm-up) | AI, 2026-09-30 | `0598801` |
 
 **Why these two fixes are not tuning.** Both change how the JVM-wide direct-buffer
 counters are read, before any run of the case. The pool's own readings matched the
@@ -119,8 +120,14 @@ The ceiling claim, the prediction and the conclusions rows are unchanged.
 
 ## 4. Run 1
 
-**Scope:** the tiers and capacity values actually run. **Command log:**
-`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/<file>`.
+**Scope:** unit tier, 2026-09-30, seven JVMs: the upstream `HintsBufferPoolTest` at *n* = 2, 3, 6, and
+`HintsPoolCeilingTest` at *n* = 2, 3, 6 with 1 MiB buffers and at *n* = 3 with 2 MiB. Cluster tier: not started.
+**Command log:** [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/unit-run.sh`](MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/unit-run.sh), run on node0 from
+`~/stage4-harness-run/`. Its whole log is committed as `run1/unit-session.log` (146 lines); per-JVM logs are on
+node0 under `~/stage4-logs/hints/unit/<label>/`. Files cited below are all in
+[`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/`](MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/):
+`unit-session.log`, `unit-summary.txt`, `unit-harness-readings.txt`, `unit-junit-testcases.txt`,
+`unit-ant-excerpts.txt`, and the self-check `unit-selfcheck.py` with its output `unit-selfcheck.txt`.
 
 ### 4.1 Readings
 
@@ -128,38 +135,126 @@ The ceiling claim, the prediction and the conclusions rows are unchanged.
 
 | Test or assertion | Result | Evidence (file) |
 |---|---|---|
+| Upstream `HintsBufferPoolTest.testBackpressure`, *n* = 2 | pass (1 test, 0 failures, 0 errors) | `unit-session.log:29`; `unit-junit-testcases.txt` |
+| Same, *n* = 3 | pass | `unit-session.log:37` |
+| Same, *n* = 6 | pass | `unit-session.log:45` |
+| `HintsPoolCeilingTest`, *n* = 2, 1 MiB buffers | pass. At the wait: `allocatedBuffers` 2, callback buffers 1, `Count` +2, `MemoryUsed` +2,097,152 | `unit-session.log:53`; `unit-harness-readings.txt`, block `ceiling-n2-1MiB` |
+| Same, *n* = 3, 1 MiB | pass. 3, 2, +3, +3,145,728 | `unit-session.log:74`; block `ceiling-n3-1MiB` |
+| Same, *n* = 6, 1 MiB | pass. 6, 5, +6, +6,291,456 | `unit-session.log:96`; block `ceiling-n6-1MiB` |
+| Same, *n* = 3, 2 MiB buffers | pass. 3, 2, +3, +6,291,456 | `unit-session.log:121`; block `ceiling-n3-2MiB` |
 
-**Cluster tier** — one row per capacity value, scenario and observable:
+The harness test in detail. Each JVM started from the same baseline (`Count` 15, `MemoryUsed` 267,010). "One buffer" is
+⌊`bufferSize` / 78⌋ hints, where 78 is the printed `entrySize` (a 66-byte hint plus 12 bytes of entry overhead).
+
+| Value | Hints written when the writer parked | 2 s later | After one recycle | At the end |
+|---|---|---|---|---|
+| *n* = 2 × 1 MiB | 26,886 = 2 × 13,443 | all six readings unchanged | 40,329 hints (+13,443); `allocatedBuffers`, callback buffers, `Count`, `MemoryUsed` unchanged | 67,217 written, 67,217 found in buffers; 2 buffers, +2,097,152 |
+| *n* = 3 × 1 MiB | 40,329 = 3 × 13,443 | unchanged | 53,772 (+13,443); unchanged | 80,660 and 80,660; 3 buffers, +3,145,728 |
+| *n* = 6 × 1 MiB | 80,658 = 6 × 13,443 | unchanged | 94,101 (+13,443); unchanged | 120,990 and 120,990; 6 buffers, +6,291,456 |
+| *n* = 3 × 2 MiB | 80,658 = 3 × 26,886 | unchanged | 107,544 (+26,886); unchanged | 161,320 and 161,320; 3 buffers, +6,291,456 |
+
+While the writer ran, `Count` rose one step per buffer, from baseline to baseline + *n*, and stopped there
+(`directChange` lines of each block). The 50 relations above are asserted by `unit-selfcheck.py` (`unit-selfcheck.txt`: all pass).
+
+**Cluster tier** — one row per capacity value, scenario and observable: **not run yet.**
 
 | Capacity value | Run (control / A / B / C) | Observable (§9d) | Reading | Evidence (file) |
 |---|---|---|---|---|
 
-### 4.2 Conclusion and logic
+### 4.2 Conclusion and logic — unit tier
 
-Tag every statement in parts 1–4 as **[observed: `<file>`]** or
-**[inferred: `<reason>`]**. An untagged statement is not part of the
-argument.
+Files are in `run1/`. **[observed: file]** means the file says it; **[inferred: reason]** gives the reason. The
+cluster tier has no conclusion yet.
 
-1. **Validity** — was the run valid? The limit was reached; each §9b "hold
-   fixed" setting is confirmed, with its evidence. If not valid, stop here: the
-   conclusion is "invalid run".
-2. **Readings** — anything unusual in §4.1: a gap, an outlier, a reading that
-   contradicts another.
-3. **Matched row** — the §9a row, quoted, and the reading that satisfies each
-   part of it.
-4. **Excluded rows** — for every other §9a row, the reading that rules it out.
-   Every **Refuted** row must be addressed.
-5. **Observed vs. inferred** — list the inferred statements that the
-   conclusion depends on. These are what the self-check most needs to check.
-6. **Deviations and gaps** — anything skipped, changed or not observable, and
-   how it limits the conclusion.
+1. **Validity — valid for the unit tier.**
+   - The code under test is the pinned tag [observed: `unit-session.log:11`, HEAD `b5f2a54`, `describe` `cassandra-5.0.9`]
+     and the committed instruments [observed: `unit-session.log:17–19`, `sha256sum -c` OK; `:22–23`, the test in the
+     clone and the harness copy have the same sha256]. The harness folder equalled commit `0598801` when it was copied
+     [observed: `git diff --quiet HEAD` on it, run locally before the copy; not in the node log].
+   - The knob took effect in every harness JVM: the test asserts `HintsBufferPool.MAX_ALLOCATED_BUFFERS` equals the
+     `cassandra.MAX_HINT_BUFFERS` it was given, before anything else, and all four passed [observed:
+     `HintsPoolCeilingTest.java:87` in the harness; `unit-summary.txt`]. The flag was passed to the three upstream JVMs
+     [observed: `unit-session.log:24, 32, 40`], but that test asserts no value [inferred: same `-D` route as the harness runs].
+   - The limit was reached in every harness JVM: the writer was parked in `LinkedBlockingQueue.take` under
+     `HintsBufferPool.switchCurrentBuffer` and `allocatedBuffers` equalled *n* [observed: the `parkedAt` and `atWait`
+     lines of each block of `unit-harness-readings.txt`]. The upstream test's Byteman flag was set at every *n*, since
+     the test asserts it [observed: pass at `unit-session.log:29, 37, 45`; the assertions are `HintsBufferPoolTest.java:66`
+     and `:72` at the pinned tag].
+   - The §9b "hold fixed" settings are cluster settings and do not apply. The unit JVMs loaded `test/conf/cassandra.yaml`,
+     not the clone's modified `conf/cassandra.yaml` [observed: `unit-ant-excerpts.txt`, the two "Configuration location" lines].
+2. **Readings — nothing unusual.** All seven JVMs passed [observed: `unit-summary.txt`; `unit-session.log:29–121`].
+   Every harness reading is exact, with no tolerance used [observed: `unit-harness-readings.txt`]: at the wait
+   `allocatedBuffers` = *n*, the callback had received *n* − 1 buffers, `Count` was up by *n* and `MemoryUsed` by
+   `n × bufferSize`. The same numbers had appeared at *n* = 3 in the instrument check after the two §3 fixes (a separate
+   JVM, not a reading). Two cross-checks that the numbers are not an artefact of the test's own arithmetic: the hints
+   written when the writer parked equal `n × ⌊bufferSize / 78⌋` exactly, so it stopped when the *n*-th buffer was full,
+   not before or after [observed: the `written` values; inferred: the ⌊bufferSize/78⌋ capacity, from the printed entry
+   size]; and one recycle let through exactly one buffer's worth of hints [observed: `afterOneRecycle` minus `after2s`].
+3. **Matched row — the unit-tier part of "Confirmed":** "The pool holds exactly *n* buffers at every value, direct memory
+   is up by the predicted amount …, a writer waits at the check, and the ceiling moves with *n* and with `bufferSize`".
+   The unit tier covers §9a procedure step 1 only.
+   - *The pool holds exactly *n* buffers when the writer waits:* `allocatedBuffers` was 2, 3, 6 and 3 [observed: `atWait`].
+   - *Direct memory is up by `n × bufferSize`:* `MemoryUsed` +2,097,152, +3,145,728, +6,291,456 and +6,291,456 (the
+     reading rule's unit tier: exact) and `Count` +2, +3, +6, +3 [observed: `atWait`]. It rose one step per buffer and
+     stopped at the *n*-th [observed: the `directChange` lines].
+   - *The ceiling moves with *n*:* 2, 3, 6 MiB at 1 MiB buffers, three values including the default 3 [observed].
+   - *…and with `bufferSize`, as a product:* 3 × 2 MiB and 6 × 1 MiB both land at 6,291,456 bytes [observed: blocks
+     `ceiling-n3-2MiB` and `ceiling-n6-1MiB`]. That is §9a's second-knob prediction, at the unit tier.
+   - *A writer waits at the check:* parked in `take()` under `switchCurrentBuffer` at every value [observed: `parkedAt`].
+     That the call site is line 118 is [inferred: the method has one `take()` call, `HintsBufferPool.java:118`, case §5].
+   - *Nothing grows while the writer waits:* `allocatedBuffers`, callback buffers, hints written, `Count` and `MemoryUsed`
+     were identical 2 s later [observed: `atWait` and `after2s`].
+   - *Recycling one buffer releases the writer without creating another:* the writer resumed (hints written rose by one
+     buffer's worth) and parked again, and `allocatedBuffers`, `Count` and `MemoryUsed` did not change [observed: `afterOneRecycle`].
+   - *The hint is not dropped (at this tier):* every hint written was found in exactly one buffer — 67,217, 80,660, 120,990
+     and 161,320 [observed: `atEnd`, `hintsCounted`]. This counts hints in buffers, not their delivery.
+4. **Excluded rows.**
+   - *Refuted — "More than *n* buffers are ever created":* excluded at this tier. Each writer wrote hints worth *n* + 3
+     buffers and the pool still held *n* at the end [observed: `atEnd`; `hintsToWrite` in each block].
+   - *Refuted — "direct memory keeps rising above the predicted amount":* excluded at this tier. `MemoryUsed` was exactly
+     `n × bufferSize` at the wait, after 2 s, after the recycle and at the end [observed]. The exactness depends on the §3
+     fixes (writer warm-up, settled baseline).
+   - *Refuted in part — "follows *n* but not `bufferSize`":* excluded; the 2 MiB arm landed at 6,291,456 [observed].
+   - *Not confirmed — "a writer waits but never resumes":* excluded at this tier; the writer resumed after each recycle
+     and finished [observed: `atEnd`; the test passed].
+   - *Refuted — "direct memory is flat across *n*":* excluded; it rose 2, 3, 6 MiB [observed].
+   - *Not confirmed — "no writer is ever seen waiting":* excluded [observed: `parkedAt` in all four blocks].
+   - *Invalid run:* excluded; the cap was reached at every value [observed: `atWait`].
+   - *Not testable at this tier:* the default 32 MiB buffers; `bufferSize` derived from `max_mutation_size`; the wiring
+     through `HintsService` and `HintsWriteExecutor` (the test's flush callback only queues buffers, and the test does the
+     recycling); the hold rule; node-wide direct memory with other users.
+5. **Observed vs. inferred — what the conclusion rests on that was not directly seen:**
+   - The parked call site is line 118 of `HintsBufferPool` [inferred from the frames and the single `take()` call].
+   - `MAX_HINT_BUFFERS` took effect in the three upstream JVMs [inferred]. The *n*-dependence rests on the harness JVMs,
+     which assert it.
+   - The per-buffer capacity 13,443 (26,886 at 2 MiB) is arithmetic on the printed entry size [inferred]; the exact
+     multiples in `written` support it.
+   - That recycling releases a waiting writer on a real node, through `HintsWriteExecutor.FlushBufferTask`
+     [inferred from source, case §6b; `HintsWriteExecutor.java:141–154`]. The unit tier does the recycling itself.
+   - The exact direct-memory deltas depend on the two §3 fixes. A buffer freed by the JVM mid-test would shift them.
+     The identical baseline and deltas across four JVMs [observed] make that unlikely here.
+6. **Deviations and gaps.**
+   - The instrument files were copied to node0 from the local repo (commit `0598801` is not pushed) and verified with
+     `sha256sum -c`, rather than read from the `/proj` clone.
+   - The node's clone is dirty: `conf/cassandra.yaml` holds the heap run's edits (`memtable_heap_space: 256MiB`,
+     `memtable_allocation_type: unslabbed_heap_buffers`, seen with `git diff` on node0 after the tier, not in the committed
+     log) and two test files are untracked [observed: `unit-session.log:12–15`; `git.sha=…-dirty` in `unit-ant-excerpts.txt`].
+     The unit JVMs do not read that file [observed]. It must be reset before the cluster tier.
+   - Before this run the harness test failed five times with the agent attached, plus two diagnostic runs (no agent; an
+     allocation trace), during the instrument check; the causes are §3 defects 1–2, fixed before this run. Those attempts
+     are not part of run 1.
+   - One JVM per value, no repeat. The numbers are exact and equal to the instrument check's at *n* = 3, but run-to-run
+     spread was not measured.
+   - The unit tier cannot show the node-level behaviour listed under "Not testable" in part 4.
+7. **Core question — does the constraint cap the resource, and does usage follow it?** At the unit tier, yes, for the pool
+   on its own. With `MAX_HINT_BUFFERS` = *n* the pool never held more than *n* direct buffers, however many hints were
+   written (part 4); when its writer needed an (*n*+1)-th buffer it waited at the check rather than allocating (part 3);
+   and the direct memory the pool held was exactly `n × bufferSize`, rising 2, 3, 6 MiB with *n* and reaching the same
+   6 MiB from 3 × 2 MiB as from 6 × 1 MiB (part 3). What this does not yet show is the same thing on a running node with
+   the default 32 MiB buffers and the real flush path; that is the cluster tier.
 
-7. **Core question** — in two or three sentences: did usage follow the
-   constraint, and does the constraint cap usage? Each step from reading to
-   answer cites the part above that supports it.
-
-**Conclusion (one line):** `<§9a row>` — confirmed / bypass as recorded /
-refuted / not confirmed / invalid run.
+**Conclusion (one line):** unit tier — consistent with **Confirmed**; no Refuted or Not-confirmed row fired. The case's
+verdict still needs the cluster tier.
 
 ## 5. Self-check of run 1 — AI
 
@@ -171,21 +266,24 @@ downgraded to *Not confirmed*.
 
 | Part | Holds? (yes / no) | Note (file re-read) |
 |---|---|---|
-| 1. Validity | | |
-| 2. Readings | | |
-| 3. Matched row | | |
-| 4. Excluded rows | | |
-| 5. Observed vs. inferred | | |
-| 6. Deviations and gaps | | |
-| 7. Core question — the steps from reading to answer follow the audited logic | | |
+| 1. Validity | yes | Re-read `unit-session.log` lines 11, 17–19, 22–24, 29, 32, 37, 40, 45: each says what part 1 says. `unit-ant-excerpts.txt`: both "Configuration location" lines name `test/conf/cassandra.yaml`. The harness's line 87 is the knob assertion. One statement is not in the node log: that the harness equalled commit `0598801` when copied (a local check); the node's `sha256sum -c` does cover the copy |
+| 2. Readings | yes | `unit-selfcheck.py` re-reads `unit-summary.txt`, `unit-session.log`, `unit-harness-readings.txt` and `unit-ant-excerpts.txt` and asserts 50 relations, all pass (`unit-selfcheck.txt`): the exact deltas, the same baseline in all four JVMs, `written` at the wait = *n* × ⌊bufferSize/78⌋, one recycle = one buffer's worth, written = found |
+| 3. Matched row | yes | Each bullet maps to a check above: *n* buffers (`allocatedBuffers`), exact `Count` and `MemoryUsed`, the ceiling moving 2 < 3 < 6 MiB, the second-knob equality (both 6,291,456), the writer parked, 2 s unchanged, recycle releases without a new buffer, written = found |
+| 4. Excluded rows | yes | Every Refuted and Not-confirmed row of §9a's table is addressed and maps to a reading. "Hints worth *n* + 3 buffers" is asserted (`hintsToWrite` = (*n*+3) × ⌊bufferSize/78⌋ + 1). "Not testable at this tier" lists what no reading covers |
+| 5. Observed vs. inferred | yes | The five inferred statements are the only ones without a file line. One more was checked and is observed, not inferred: the flush callback only queues buffers and the test does the recycling (harness lambda and recycle loop) |
+| 6. Deviations and gaps | yes | The dirty clone is in `unit-session.log:12–15` and `unit-ant-excerpts.txt`; the `git diff` of `conf/cassandra.yaml` is the one item from outside the committed log and is marked so. The count of failed instrument attempts (five with the agent, two diagnostic) matches `instrument-ant*.txt`, `noagent-ant.txt` and `trace-alloc-ant.txt` on node0 |
+| 7. Core question — the steps from reading to answer follow the audited logic | yes | The chain in part 7 uses only parts 3 and 4, and the audited logic (vary *n*, read the pool's real direct memory, find the disallow evidence, exclude the Refuted rows) was followed. The conclusion says "consistent with Confirmed" at the unit tier and does not claim the cluster-level result |
 
 ### 5.2 Run 2?
 
-**Yes / no** — the reason, and the date decided. Choose yes when the conclusion rests on inferred statements, a part of §5.1 cannot be settled from run 1's evidence, or the result refutes the case or confirms a bypass.
+**No** — 2026-09-30, for the unit tier. The readings are exact and were re-asserted mechanically; no part of §5.1 is
+open; and the result neither refutes the case nor confirms a bypass. The inferred statements (part 5) are about the
+cluster tier's questions. A run 2 is worth reconsidering for the cluster tier once it has run. *Criterion, for
+reference:* choose yes when the conclusion rests on inferred statements, a part of §5.1 cannot be settled from run 1's evidence, or the result refutes the case or confirms a bypass.
 
 ## 6. Run 2 — fresh AI session (optional)
 
-"Not done" if §5.2 says no, and §7 is left out.
+**Not done** (§5.2 says no), and §7 is left out.
 
 **Scope:** the tiers and capacity values actually run. **Command log:**
 `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run2/<file>`.
@@ -221,8 +319,9 @@ date and reason.
 
 | Tier | Verdict (§9a row) | Basis | Date |
 |---|---|---|---|
-| Unit | | run 1 + self-check / run 1 + run 2 | |
-| Cluster | | run 1 + self-check / run 1 + run 2 | |
+| Unit | Consistent with **Confirmed**; no Refuted or Not-confirmed row fired | run 1 + self-check | 2026-09-30 |
+| Cluster | Not run | — | — |
 
-**Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
-(commit), and any section amended (which one, commit) — or "none needed".
+**Feedback filed (uncommitted, 2026-09-30):** the case file's §10 "Stage-4 feedback" field updated for the unit tier.
+Sections amended: none after run 1 started. §9 was amended before it, in `0598801` (the audit; §3 defects 1–2). §8's
+ceiling claim and the Target-3 note: not amended. The freeze (§1) was checked at the end of run 1 and still holds.

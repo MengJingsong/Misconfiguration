@@ -105,9 +105,12 @@ with each, and a bottom line — **Ready**, **Ready after amendments**, or
 ### Before run 1
 
 1. **Audit** (above), then **freeze the prediction.** Record in the results file
-   the case file's `git hash-object` and the HEAD commit; §9a is now fixed. If
-   §9a turns out to be wrong later, that is a dated amendment to the case file
-   and the affected tier starts again — see the rule below.
+   the commit that holds the case file and a hash of §9's text:
+   `sed -n '/^## 9\. /,/^## 10\. /p' <case file> | git hash-object --stdin`.
+   The hash covers §9 only, because the file's §10 takes the feedback after every
+   run. §9a is now fixed. If §9a turns out to be wrong later, that is a dated
+   amendment to the case file and the affected tier starts again — see the rule
+   below.
 2. **Commit the instruments** — when Jingsong asks for a commit, as always.
    Any code a run needs that is not upstream — a restored test class, a Byteman
    rule — goes under `harness/<case-file-stem>/` in this folder before run 1,
