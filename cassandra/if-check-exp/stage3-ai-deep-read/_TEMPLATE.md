@@ -130,9 +130,13 @@ set out in
 [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
 Method and pitfalls: [README.md §8](../../README.md#8-designing-a-test-for-a-case).
 
-**Two audiences.** The intro and 9a are for **human review**: what the test
+**Two audiences.** The intro and 9a are for a **human reader**: what the test
 does and what each result would mean, readable on their own. 9b–9e are the
 **runbook**: steps a person or an AI session can follow on a Linux machine.
+**Stage 4 audits this section before any run**, against four groups of
+requirements (the core question, step-by-step logic, specificity, runnability) in
+[`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md#step-0--the-design-audit);
+write to them.
 
 _In a case file, keep this intro to two or three lines: what the test does,
 and the state of any run already done. Then delete this note and the writing

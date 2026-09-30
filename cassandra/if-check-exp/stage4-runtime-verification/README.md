@@ -1,39 +1,53 @@
 # Stage 4 — runtime verification
 
 **The stage that runs the experiment.** Stage 3 reads the source and writes a
-test design; stage 4 executes it on a real build or cluster, measures, and
-reports back. The two are deliberately separate: stage 3's rule is that
-everything it files is decidable from source alone, with no cluster, no build
-and no run, and that rule survives only if execution lives elsewhere.
+test design; stage 4 audits that design, executes it on a real build or
+cluster, measures, and reports back. The two are deliberately separate: stage
+3's rule is that everything it files is decidable from source alone, with no
+cluster, no build and no run, and that rule survives only if execution lives
+elsewhere.
 
 Reserved by decision on 2026-09-23 and **opened on 2026-09-25**, when test
 design became part of stage 3 ([`../README.md` §8](../README.md#8-designing-a-test-for-a-case)).
-**Run 1 is required; run 2 is optional** (revised 2026-09-29). Every procedure
-is run by an AI session (run 1), which also draws the conclusion and states its
-logic. Jingsong reviews that conclusion and owns the verdict. Run 2 — Jingsong
-repeating the procedure by hand — is insurance: a check on run 1, chosen case
-by case after the review.
-*Replaces the decision of 2026-09-28, under which every procedure ran twice
-and run 2 was blind to run 1.*
+**No human approval or review is required at any step** (decided 2026-09-30).
+An AI session audits the design, runs it, checks its own conclusion against the
+raw files, and owns the verdict. Jingsong may read and overrule any verdict at
+any time, but nothing waits for that; an override is recorded in the results
+file with its date and reason, and the case's §10 is amended.
+*Replaces the decision of 2026-09-29, under which Jingsong approved results §1,
+reviewed run 1 (required), approved runbook fixes, owned the verdict, and could
+run a by-hand run 2.*
+
+## What stage 4 tests
+
+**One question per case: does the constraint cap the resource (memory or disk)
+usage?** The common approach is dose-response — vary the constraint, drive usage
+to the limit and past it, and check that the measured usage follows the
+constraint ([`../README.md` §8.1](../README.md#81-the-shape-of-the-experiment)).
+A case whose knob cannot be varied (a hard-coded constant, a type bound) needs a
+different approach that still answers the same question, such as two arms that
+differ in one condition; the design has to say why and how.
 
 ## The division of labour
 
 | | Stage 3 | Stage 4 |
 |---|---|---|
 | Evidence | the source, against the three rules | a measured run |
-| Produces | a test design — §9 of each case file | numbers, and a verdict on the design's prediction |
+| Produces | a test design — §9 of each case file | a design audit, numbers, and a verdict on the design's prediction |
 | Records numbers? | **never** | yes, here |
 | Needs a cluster/build? | no | yes |
 
-Within stage 4:
+Within stage 4, every step is done by an AI session:
 
-| | Run 1 — AI session | Review — Jingsong | Run 2 — Jingsong |
-|---|---|---|---|
-| Required? | **yes** | **yes** | no — insurance, chosen after the review |
-| Follows | the case's runbook (§9b–§9e), exactly | run 1's results and raw files | the same runbook, by hand — not run 1's script |
-| Records | raw readings and a full command log | a part-by-part check of run 1's conclusion, and whether to do run 2 | raw readings and the §9a row they match |
-| Concludes | which §9a row matched, with its logic in a fixed format | whether each part of run 1's conclusion holds | whether run 1's readings reproduce |
-| Owns the verdict | no | **yes**, with or without run 2 | — |
+| Step | What it does | Output |
+|---|---|---|
+| 0. Design audit | Checks the case's §9 against the requirements below; recommends and applies amendments; freezes §9a | results §1 |
+| 1. Instruments | Writes, commits and checks the harness; confirms the environment | `harness/`, results §1 |
+| 2. Run 1 | Follows the runbook (§9b–§9e) exactly, scripted and logged | raw readings, command log |
+| 3. Conclusion | Matches the readings to one §9a row, with its logic in a fixed format | results §4 |
+| 4. Self-check | Re-reads every cited raw file against the conclusion and its logic | results §5 |
+| 5. Verdict and feedback | Files the verdict, the case's §10 field, any amendment | results §8 |
+| Run 2 (optional) | A fresh AI session repeats the runbook by hand, not run 1's script | results §6–§7 |
 
 ## What stage 4 consumes
 
@@ -47,86 +61,124 @@ scenario steps.
 *not settable* is not worth a CloudLab allocation until someone patches the
 build; a config-testable one can be run as written.
 
-**Cases still in the old §9 layout** — every case except `memtable_heap_space` and
-`MAX_HINT_BUFFERS`, as of 2026-09-30 — keep Testability in §9's field table, the prediction in
-§9d, the conclusions in §9e and §9f, and the controls in §9g. **Convert a case
-to the new layout before its first run**: §9a is what every run is judged
-against, so it has to exist and be reviewed first.
+**Cases still in the old §9 layout** keep Testability in §9's field table, the
+prediction in §9d, the conclusions in §9e and §9f, and the controls in §9g.
+**Convert a case to the new layout before its first run**: §9a is what every
+run is judged against, so it has to exist and be audited first. Which cases
+are converted is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md), not here.
 
 If §9 cannot be executed as written, that is itself feedback — record it as a
 runbook defect (below) rather than improvising a different experiment, because
 a substituted workload no longer tests the traced path.
 
+## Step 0 — the design audit
+
+Before anything runs, the AI session checks the case's §9 against four groups
+of requirements. Each line is rated **Met / Partly / Not met** with a one-line
+note citing the section it checked. Audit the proposal, not the case: the three
+rules were judged in stage 3. The exception is a finding that the claim itself
+is unsound, which goes back to stage 3 as feedback.
+
+| Group | The proposal must show |
+|---|---|
+| **A. It tests the core question** | The constrained quantity is named, and it is memory or disk bytes (or a count with a derivable byte size). The knob is varied — at least three values including the default — and usage is compared across them, so one can see whether usage follows the constraint. If the knob cannot be varied, the design says why and uses another approach that still answers "does it cap usage?". Usage is measured as the real resource (heap, off-heap, disk bytes), not only the check's own counter; if only the counter or a proxy is available, the gap is named. Usage is driven to the limit and past it. |
+| **B. The logic runs step by step to a conclusion** | Each step says what it establishes. The prediction is stated before the run, in numbers or a clear relation (an exact ceiling, proportional, `limit × N`), so a reading can contradict it. Every plausible outcome has a conclusions row naming its evidence, including *usage exceeds the limit*, *flat across values*, *counter capped but the real resource grows* and *limit never reached*. A confirmation needs both the ceiling following the knob and direct evidence that the disallow branch fired. Each alternative explanation names the control that rules it out. |
+| **C. It is specific and understandable to a human and an AI** | A human can follow the claim, the steps and the conclusions from the intro and §9a alone. An AI can run §9b–§9e without re-deriving the code path. The knob and how it is set, the values, workload sizes, commands, observables and how to read them, sampling times and stop conditions are exact. Terms are defined and each fact is stated once. |
+| **D. It is runnable as written** | The harness and environment prerequisites exist, or are listed as work for step 1. The workload arithmetic reaches the limit: estimate the data volume, time, and disk and memory needed against what the node has. The source citations the prediction depends on (knob wiring, the usage operand, the disallow effect) are spot-checked against the pinned clone. |
+
+**Output, in results §1:** the ratings, a list of recommendations, what was done
+with each, and a bottom line — **Ready**, **Ready after amendments**, or
+**Blocked** (with the reason, and the recommendation for stage 3).
+
+**What the AI does with recommendations.**
+
+- Those needed for a valid, unambiguous run — a missing value, command or stop
+  condition, an unstated outcome, a workload too small to reach the limit — are
+  **applied to the case file as dated amendments** before the freeze.
+- The rest stay listed as recommendations for stage 3 and are not applied.
+- A recommendation that changes §9a's claim, prediction or conclusions table is
+  allowed only here, before run 1 of that tier, and only for a reason that does
+  not depend on any reading.
+
 ## The run protocol
 
 ### Before run 1
 
-1. **Freeze the prediction.** Record the case file's commit in the results
-   file. §9a is now fixed: no run edits it. If §9a turns out to be wrong,
-   that is a dated stage-3 amendment to the case file, and the runs start
-   again.
-2. **Commit the instruments.** Any code a run needs that is not upstream — a
-   restored test class, a Byteman rule — goes under `harness/<case-file-stem>/`
-   in this folder before run 1, and run 1 and any run 2 use those same files.
-   Share instruments, not procedure: a run 2 follows the runbook by hand.
-3. **Approve.** Jingsong approves the results file's §1 before run 1.
-   Agreement criteria are not set yet; they are needed only if a run 2 is
-   chosen (below).
+1. **Audit** (above), then **freeze the prediction.** Record in the results file
+   the case file's `git hash-object` and the HEAD commit; §9a is now fixed. If
+   §9a turns out to be wrong later, that is a dated amendment to the case file
+   and the affected tier starts again — see the rule below.
+2. **Commit the instruments** — when Jingsong asks for a commit, as always.
+   Any code a run needs that is not upstream — a restored test class, a Byteman
+   rule — goes under `harness/<case-file-stem>/` in this folder before run 1,
+   and run 1 and any run 2 use those same files. Check each instrument before
+   run 1 (parse-check a rule, a known-answer run) and record the check. Share
+   instruments, not procedure: a run 2 follows the runbook by hand.
+3. **Fill results §1** from the template: the audit, the frozen version, the
+   harness, the tiers and capacity values. No approval is needed.
 
-### Run 1 — AI session
+**Predictions are not tuned to data.** Once any reading exists, §9a is not edited
+to fit it. A reading that contradicts the prediction is the result — a
+**Refuted** or **Not confirmed** row — and the feedback goes to the case file
+(below). Only a mistake that does not depend on the readings, such as a wrong
+line citation, may be amended, and then the tier restarts.
+
+### Run 1
 
 - **Scripted and logged.** Every step runs from a script that logs each command
   and its output (`script`, `tee`); the log is the evidence. Long steps run in
   the background and their logs are read, not guessed.
 - **Stops at the first step it cannot run as written.** It records a runbook
-  defect — the step, the problem, a proposed fix — and waits. Once Jingsong
-  approves, the fix is made in the case file (dated) and the affected tier
-  restarts from its beginning.
+  defect — the step, the problem, the fix — in results §3. If the fix leaves
+  §9a's claim, prediction and conclusions unchanged, the AI makes it in the case
+  file (dated) and the affected tier restarts from its beginning. If it would
+  change §9a, the case goes back to the audit.
 - **Concludes in the fixed format** of the results template: validity,
   readings, matched row, excluded rows, observed vs. inferred, deviations and
   gaps. Every statement cites a raw file.
 
-### Review of run 1 — Jingsong (required)
+### Self-check and verdict
 
-- Read run 1's readings and conclusion, and check the conclusion part by part
-  against the raw files — starting with the inferred statements it depends on
-  (part 5).
-- Then decide whether to do run 2, and record the decision and the reason.
+With no human review, the conclusion has to survive the AI's own second look.
 
-**Rule of thumb (added 2026-09-30): once Jingsong says a result is reviewed,
-the AI session fills in all the remaining content and reports what it filled.**
-That means the review table in the results file (all parts recorded as agreed
-unless Jingsong names one that is not), the status line, the verdict row and
-"Feedback filed" (with commits, checked in `git log`), the case file's §10
-Stage-4 feedback, and the state rows in `HANDOFF.md`. The AI does not invent
-disagreement or leave a review row blank, and it says which entries it filled so
-Jingsong can amend them. It does not commit or push.
+- **Re-read, don't recall.** Open each raw file the conclusion cites and confirm
+  it says what the conclusion says. Do it part by part, starting with the
+  inferred statements the conclusion depends on (part 5).
+- **Check the logic, not only the numbers.** The readings must lead to the
+  matched §9a row by the audited steps, and the conclusion must answer the core
+  question: does the constraint cap usage, and does usage follow it?
+- **Record each part** as holds / does not hold, with the note, in results §5.
+  A part that does not hold is fixed or it downgrades the conclusion to *Not
+  confirmed*; it is never left unrecorded.
+- **Then file the verdict**: the results file's §8 and status line, the case
+  file's §10 "Stage-4 feedback" (with commits, checked in `git log`), any section
+  the result amends, and the state rows in `HANDOFF.md`. The AI says what it
+  filled. It does not commit or push unless asked.
 
-### Run 2 — Jingsong (optional)
+### Run 2 — optional, fresh AI session
 
-- **Purpose: insurance.** It checks that run 1's readings reproduce when the
-  runbook is followed by hand rather than by run 1's script. It is worth its
-  cost when, for example, the review cannot settle a part from run 1's
-  evidence, the conclusion rests on inferred statements, or the result would
+- **Purpose: insurance.** The only independent check left, since no human
+  reviews. Worth its cost when the conclusion rests on inferred statements, the
+  self-check cannot settle a part from run 1's evidence, or the result would
   refute the case or confirm a bypass.
+- **Independent.** A new session follows §9b–§9e by hand with the same harness
+  and the same case-file version, and does not read run 1's conclusion until its
+  own is written.
 - **Before it starts,** fill the results file's agreement criteria: for each
   observable, whether the runs must match exactly (a unit test's pass/fail, an
   exact ceiling) or in shape (a peak that follows the knob), and with what
   tolerance.
-- Same case-file commit and harness, following §9b–§9e by hand.
-- **Not blind:** run 1's results were read in the review. Run 2 checks
-  reproduction, not independent judgement.
 
 ### Compare and decide
 
 | Situation | Action |
 |---|---|
-| No run 2; the review agrees with run 1 | Verdict: run 1's §9a row. |
-| No run 2; the review disagrees with a part | Settle it against §9a's table and run 1's raw files, or choose run 2. Record which part was wrong and why. |
+| No run 2; the self-check holds | Verdict: run 1's §9a row. |
+| No run 2; a part of the self-check does not hold | Fix it against §9a's table and run 1's raw files, or downgrade to *Not confirmed*, or choose run 2. Record which part was wrong and why. |
 | Run 2 matches run 1's §9a row, readings within the agreed tolerance | Verdict: that row. |
 | Run 2's readings differ beyond tolerance | Find the cause (environment, a deviation, an instrument) and re-run the affected tier. No verdict until they agree. |
 | Readings agree, conclusions differ | A reasoning error. Settle it against §9a's table, and record which conclusion was wrong and why. |
-| No §9a row fits | Feedback to stage 3: the prediction missed an outcome. Amend §9a (dated); run 1 repeats. |
+| No §9a row fits | Feedback to stage 3: the prediction missed an outcome. Amend §9a (dated) and start the tier again. |
 
 ## Running safely on shared infrastructure
 
@@ -154,22 +206,33 @@ that judged it**, so measurements belong here, not in the case file.
 
 | Feedback kind | Lands in |
 |---|---|
-| Every run and the review — environment, readings, the AI's conclusion and logic, Jingsong's check of it, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
+| The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
 | A refutation of the traced path (a **Refuted** row of §9a) | **amends the case file** — the affected section, dated, citing the results file |
 | A bypass confirmed at runtime (the bypass row of §9a) | amends the case's §8 ceiling claim and its Target-3 note; the numbers stay here |
-| A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e, approved by Jingsong |
-| A disagreement with run 1 — from the review or from run 2 — that cannot be resolved | the results file; the case stays unverified |
+| A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e (only if §9a is unchanged; otherwise back to the audit) |
+| A self-check part that does not hold, or a run 2 that disagrees with run 1, and cannot be resolved; or a human override | the results file; the case stays unverified (or follows the override, with its date and reason) |
 
 Every case file carries a **Stage-4 feedback** field in §10, reading "none yet"
 until a run reports. That field is the index of this relationship; keep it
 current, because a case whose §8 claim has been refuted at runtime but still
 reads as settled prose is the worst outcome this pipeline can produce.
 
-## Eleven designs, one case run
+## Where to start
 
-As of 2026-09-28 **every filed case carries a §9 test design**, so stage 4 is
-unblocked and waiting only on execution. `memtable_heap_space` and `MAX_HINT_BUFFERS` are in the
-new §9 layout. **`memtable_heap_space` has been run (unit and cluster tiers, 2026-09-28/29)**: results in [`results/memtable_heap_space-tryAllocate-limit.md`](results/memtable_heap_space-tryAllocate-limit.md), harness in `harness/memtable_heap_space-tryAllocate-limit/`, the cluster run script in `results/…/run1/cluster-run.sh`. The other ten are still queued.
+Every filed case carries a §9 test design, so stage 4 waits only on execution.
+**Which cases have run, and what comes next, is tracked in
+[`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds the protocol only.
+The first case run, `memtable_heap_space`, is the worked example: results in
+[`results/memtable_heap_space-tryAllocate-limit.md`](results/memtable_heap_space-tryAllocate-limit.md),
+harness in `harness/memtable_heap_space-tryAllocate-limit/`.
+
+**Scripts are per case, not a shared pattern.** Each case's workload, observables
+and instruments differ (a unit test, a Byteman rule, a fixed-size filesystem, a
+two-mode comparison), so there is no common runner. What every run script must
+do is set by the run protocol above: log each command and its output, stop at
+the first failed check, write a readings summary, and stop every process it
+started. `memtable_heap_space`'s `run1/cluster-run.sh` is one example of that;
+borrow what fits, not its structure.
 
 **Where to start: unit tiers first.** They test the run protocol cheaply
 before any cluster run. Four cases are far cheaper than the rest because unit
@@ -177,7 +240,7 @@ scaffolding already reaches the check:
 
 | Case | Why it is cheap |
 |---|---|
-| `memtable_heap_space` | Already in the new layout. Its unit tier is two `ant testsome` commands once `HeapPoolTest` is restored into `harness/` (see "Prior art" below). |
+| `memtable_heap_space` | Done — the worked example. Its unit tier is two `ant testsome` commands on the restored `HeapPoolTest` (see "Prior art" below). |
 | `cdc_total_space` | `CommitLogSegmentManagerCDCTest` already has a capacity-sweep helper (`testWithCDCSpaceInMb`) plus tests for the write failure, both modes' segment flagging, steady disk usage and mode switching. Very little to write. |
 | `MAX_HINT_BUFFERS` | Predicts an **exact** ceiling, `n × bufferSize` (96 MiB at defaults), not a trend — so it is the sharpest falsification in the set. `HintsBufferPoolTest.testBackpressure()` already proves the disallow branch via Byteman. Confirm Byteman resolves as a test dependency first. |
 | `max_space_usable_for_compactions_in_percentage` | `DirectoriesTest`, `PartialCompactionsTest` and `CompactionsBytemanTest` between them cover the arithmetic, the injection point and all three disallow outcomes. |
@@ -189,11 +252,6 @@ comparison of `throw_on_overload` true vs. false — a single-mode run correctly
 observes nothing) and `DataDirectory_getAvailableSpace` (the guard does not run
 under the default partitioner, so the two arms need **separate clusters**).
 
-**Prior art to recover first.** A unit test for the `memtable_heap_space` case,
-`HeapPoolTest.java`, was written and run on pc80 in September 2026. It is not
-upstream, and the copy in the shared `cassandra-src` clone is untracked, but
-its **full source is in this repo's history**:
-`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`.
-Restore it into `harness/memtable_heap_space-tryAllocate-limit/` — not into the
-shared clone — to re-run it as the control (the case's §9). Earlier per-case
+**Prior art.** The `memtable_heap_space` unit test, `HeapPoolTest.java`, is restored
+under `harness/` (its origin is recorded in that folder's README). Earlier per-case
 trigger notes are in `git show e7f9963:HANDOFF.md`.

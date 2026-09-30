@@ -386,7 +386,7 @@ cassandra/if-check-exp/
 │   └── cases/               #   THE RESULTS — flat, one file per case
 │       ├── <constraint>-<function>-<operand>.md
 │       └── <constraint>-<function>-<operand>.md
-└── stage4-runtime-verification/   # runs the §9 designs — AI runs, Jingsong reviews
+└── stage4-runtime-verification/   # audits and runs the §9 designs — AI only, no human gate
     └── README.md            #   the feedback contract: what it consumes/emits
 ```
 
@@ -645,9 +645,12 @@ case is complete as stage-3 evidence, not as a verified result.
 [`stage4-runtime-verification/`](stage4-runtime-verification/README.md); a
 refutation of the traced path amends the case file itself, dated and citing
 the run. Each case's §10 carries a **Stage-4 feedback** field, "none yet" until
-then. Two things a case still needs, unchanged from 2026-09-23: **manual
-verification** (a person reads the traced path and agrees) and **runtime
-verification** (execution actually driven into the disallow branch).
+then. Two things a case still needs: **design verification** (stage 4's AI
+design audit checks the proposal against the requirements in its README and
+spot-checks the load-bearing citations; revised 2026-09-30, previously "a person
+reads the traced path and agrees") and **runtime verification** (execution
+actually driven into the disallow branch). **No step of stage 4 waits for a
+human**; Jingsong may overrule a verdict at any time.
 
 *Replaces the decision of 2026-09-23, under which test design as well as
 execution sat outside this folder. Design moves in; execution stays out.

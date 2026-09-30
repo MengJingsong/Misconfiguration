@@ -113,11 +113,11 @@ this folder's own scope.
       undecided, not refused. Moved here from the stage-2 folder, since
       **stage 2 cannot produce a pattern deferral**.
   - **`stage4-runtime-verification/`** — opened 2026-09-25. Runs the §9 test
-    designs and reports back. **Run 1 is required, run 2 optional**
-    (revised 2026-09-29; before that every procedure ran twice): an AI
-    session runs the procedure and concludes with its logic (run 1); Jingsong
-    reviews that conclusion and owns the verdict. Run 2 — Jingsong by hand,
-    not blind — is insurance, chosen after the review.
+    designs and reports back. **No human approval or review is required**
+    (revised 2026-09-30): an AI session audits the case's §9 against the
+    README's requirements (step 0), runs it (run 1), checks its own conclusion
+    against the raw files, and owns the verdict. Run 2, a fresh AI session, is
+    optional insurance. Jingsong may overrule a verdict at any time.
     - `README.md` — the run protocol, safety rules for the shared
       infrastructure, and where each kind of feedback lands.
     - `environment.md` — **start here on a new node**: the exact install,
@@ -178,8 +178,8 @@ stage 1/2, `3b` = direct source reading).
 Each case's full detail lives in its own file.
 
 **Every case carries a §9 test design.** Only `memtable_heap_space` (2026-09-28)
-and `MAX_HINT_BUFFERS` (2026-09-30) are in the **new §9 layout**: the intro and §9a are a summary for human
-review (procedure and conclusions table), §9b–§9e are a Linux runbook. The
+and `MAX_HINT_BUFFERS` (2026-09-30) are in the **new §9 layout**: the intro and §9a are a summary for a human
+reader (procedure and conclusions table), §9b–§9e are a Linux runbook. The
 other nine are in the old layout and must be converted before their first
 stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
@@ -205,15 +205,15 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 **What the cluster tier found** (numbers are in results §4.1; do not restate them elsewhere). Writers wait at the limit, seen in thread dumps (32 of 32 threads at `MemtableAllocator.java:195` in 11 of 12 dumps). The peak follows the knob (first limit flush at 99.1–99.8% of the limit). The escape hatch fired at every value, forcing 0.02–0.94% of the limit through, and also fired during limit-driven flushes, not only in scenario C. Real heap minus young generation stays within +37/−22 MiB of idle + limit. Control: with the default threshold flushes start at 33%, but writers still waited. **Not measured:** the counter's excess over the limit (no gauge; inferred).
 
-**How it was run — reuse for the next case.** One script, `results/memtable_heap_space-tryAllocate-limit/run1/cluster-run.sh`, with modes `instrument`, `value <label> <prev>`, `rest`, `heap`. It logs every command to `~/stage4-logs/cluster/<value>/session.log`, writes readings to `<value>/summary.txt`, exits non-zero at the first failed check, and stops the node on any failure. Run it in the background and read only `summary.txt` and greps (a long session re-reads its context on every call). It is specific to this case; copy its structure, not its numbers. Lessons: (1) before scripting, list every §9d observable and confirm the script samples each one — the first pass missed heap at end of A/B; (2) `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM (1–2 s lag); (3) keep `JVM_EXTRA_OPTS`/`MAX_HEAP_SIZE` out of the stress, `nodetool` and `cqlsh` JVMs after the node starts (the Byteman agent would clash on port 9091).
+**How `memtable_heap_space` was run — an example, not a template.** One script, `results/memtable_heap_space-tryAllocate-limit/run1/cluster-run.sh`, with modes `instrument`, `value <label> <prev>`, `rest`, `heap`. It logs every command to `~/stage4-logs/cluster/<value>/session.log`, writes readings to `<value>/summary.txt`, exits non-zero at the first failed check, and stops the node on any failure. Run it in the background and read only `summary.txt` and greps (a long session re-reads its context on every call). It is specific to this case — other cases will need different runners (see the stage-4 README, "Where to start"). Lessons that generalize: (1) before scripting, list every §9d observable and confirm the script samples each one — the first pass missed heap at end of A/B; (2) `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM (1–2 s lag); (3) keep `JVM_EXTRA_OPTS`/`MAX_HEAP_SIZE` out of the stress, `nodetool` and `cqlsh` JVMs after the node starts (the Byteman agent would clash on port 9091).
 
 **Next session — pick one:**
 
 | Option | Notes |
 |---|---|
 | ~~Fill results §8~~ | Done 2026-09-30; `memtable_heap_space` is closed. |
-| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `MAX_HINT_BUFFERS`, `max_space_usable_for_compactions_in_percentage`. Convert the case to the new §9 layout first (§9a, reviewed, before any run). |
-| **`MAX_HINT_BUFFERS` stage 4 (§9 converted 2026-09-30, not yet run)** | Not ready. Before run 1: (1) Jingsong reviews and freezes §9a; (2) write and commit the harness under `harness/MAX_HINT_BUFFERS-…/`: `HintsPoolCeilingTest.java`, `hints-pool.btm`, `hold-flush.btm`, and parse-check the rules; (3) start `results/…md` from `_TEMPLATE.md`, Jingsong approves §1. Cluster tier also needs a second-node setup added to `environment.md`. n = 1 is left out of the sweep (reason in §9b); Jingsong does not want it recorded as a stage-3 finding. Unit tier first. |
+| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `MAX_HINT_BUFFERS`, `max_space_usable_for_compactions_in_percentage`. Convert the case to the new §9 layout first (§9a, audited, before any run). |
+| **`MAX_HINT_BUFFERS` stage 4 (§9 converted 2026-09-30, not yet run)** | Not ready. Before run 1: (1) the AI audits §9 (stage-4 README, step 0) and freezes §9a; (2) write and commit the harness under `harness/MAX_HINT_BUFFERS-…/`: `HintsPoolCeilingTest.java`, `hints-pool.btm`, `hold-flush.btm`, and parse-check the rules; (3) start `results/…md` from `_TEMPLATE.md`, with the audit in §1. Cluster tier also needs a second-node setup added to `environment.md`. n = 1 is left out of the sweep (reason in §9b); Jingsong does not want it recorded as a stage-3 finding. Unit tier first. |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
 **Machine notes.** JDK and Ant exist only on node0 where they were installed
@@ -222,8 +222,9 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 only record a new node inherits.
 
 **Open stage-4 follow-ups:** convert the other nine cases to the new §9 layout
-before their runs; update the stale §9d–§9g references in the root
-`README.md` §5/§7.5, `stage3-ai-deep-read/playbook.md` and `rejected.md`.
+before their runs. (The stale §9d–§9g references in the root `README.md`,
+`stage3-ai-deep-read/playbook.md` and `rejected.md` were cleared 2026-09-30; the
+remaining ones sit in old-layout case files, where they are correct.)
 
 **Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
 CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
@@ -360,7 +361,7 @@ already-identified (b)/(c) rows, and the cheapest work in the corpus.
 **Every case you file also needs a §9 test design** — how stage 4 should vary
 the constraint and drive usage to the boundary (README §8). Stage 3 designs it;
 **do not run anything**, and record no measured numbers. Execution is stage 4,
-run by an AI session and reviewed by Jingsong, who owns the verdict; it reports back into
+run and judged by an AI session (no human review; revised 2026-09-30); it reports back into
 `cassandra/if-check-exp/stage4-runtime-verification/`.
 
 ### ⏵ Step 1 in detail — the AI banding (decided 2026-09-23)
@@ -603,8 +604,8 @@ What stage 3 still must not do: **execute anything, record a measured number,
 or call a case verified.** There is no `Status` field. A case still needs
 **manual verification** (a person reads the traced path and agrees) and
 **runtime verification** (execution actually driven into the disallow branch);
-both are stage 4, run by an AI session and reviewed by Jingsong, who owns the
-verdict.
+both are stage 4, run by an AI session, which owns the verdict (revised
+2026-09-30: no human review; see the next decision).
 
 **Feedback comes back, and can refute a case.** Measurements land in
 `cassandra/if-check-exp/stage4-runtime-verification/`; a refutation of the
@@ -612,6 +613,21 @@ traced path amends the case file, dated and citing the run. Every case's §10
 carries a **Stage-4 feedback** field, "none yet" until then. Stage 4 keeps its
 own number because the stage numbers mean *evidence standard*, not pipeline
 position (README §7.2), and a measured run is a higher standard.
+
+**Stage 4 needs no human approval or review (2026-09-30).** Decided by
+Jingsong. In each case's stage 4 an AI session first **audits the stage-3
+proposal** — §9 must test the core question (does the constraint cap memory or
+disk usage; usage should follow the constraint), show step by step how the
+procedure leads to a conclusion, be specific and understandable to a human and
+an AI, and be runnable as written — and recommends amendments. It applies those
+needed for a valid run (dated, before the freeze), freezes §9a, runs, checks its
+own conclusion against the raw files, and files the verdict. Predictions are
+never edited to fit data. Run 2 becomes an optional fresh-AI re-run. Jingsong
+may overrule any verdict; nothing waits for it. Commit and push remain on
+request, and the shared-infrastructure safety rules stand. *Replaces the
+decision of 2026-09-29 (required review by Jingsong, who owned the verdict and
+could run a by-hand run 2).* The closed `memtable_heap_space` results keep the
+human review that did happen. Requirements and protocol: stage-4 README.
 
 Stage 4 is **opened but not built** — the folder and its contract exist, no
 results file does. Prior art worth recovering first: the earlier per-case

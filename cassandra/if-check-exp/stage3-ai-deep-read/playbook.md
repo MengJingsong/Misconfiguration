@@ -67,7 +67,7 @@ does not dominate, and that is its most useful result.
   nothing.
 - **A constraint that fails to govern usage is a result.** Two filed cases
   predict exactly that (the `markBlocking()` overshoot, the skipped disk
-  guard). Predict both curves in §9d, or stage 4 cannot tell a real bypass
+  guard). Predict both curves in §9a (§9d in the old layout), or stage 4 cannot tell a real bypass
   from experimental noise.
 - **Config name ≠ operand name.** `limit`, `queueCapacity`,
   `MAX_ALLOCATED_BUFFERS` are check-site names; the constraint name comes

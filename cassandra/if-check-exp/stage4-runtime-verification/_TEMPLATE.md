@@ -2,24 +2,51 @@
 
 > **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/cases/[case-file stem].md)
 >
-> **Status:** planned / run 1 done / reviewed / run 2 done / verdict filed
+> **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 
 **Relative links in this template** are written for where a *copy* of it lives
 — inside `results/` — not for the template's own location one level up.
 
-**Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
-run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.
+**Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
+(§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
+chooses run 2. No step waits for a human.
 The protocol behind each section is in
 [`../README.md`](../README.md#the-run-protocol).
 
-## 1. Before run 1
+## 1. Before run 1 — design audit and freeze
 
 | Field | Content |
 |---|---|
-| **Case-file commit** | the commit whose §9 every run follows; §9a is frozen at this commit |
+| **Case-file version** | `git hash-object` of the case file and the HEAD commit, recorded after the audit's amendments; §9a is frozen at this version |
 | **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
-| **Approved by Jingsong** | date — covers this table |
+| **Audit bottom line** | Ready / Ready after amendments / Blocked — date |
+
+### 1.1 Design audit
+
+The requirements are in the README, "Step 0 — the design audit". One row per
+line of each group; cite the case-file section checked.
+
+| Group | Check | Rating (Met / Partly / Not met) | Note (section checked) |
+|---|---|---|---|
+| A. Core question | constrained quantity is memory or disk bytes | | |
+| A. Core question | knob varied, ≥ 3 values incl. default — or another approach, with the reason | | |
+| A. Core question | real resource measured, not only the counter (gap named) | | |
+| A. Core question | usage driven to the limit and past it | | |
+| B. Logic | each step says what it establishes | | |
+| B. Logic | prediction stated in numbers or a clear relation | | |
+| B. Logic | every plausible outcome has a conclusions row with its evidence | | |
+| B. Logic | confirmation needs ceiling-follows-knob and direct disallow evidence | | |
+| B. Logic | alternative explanations and their controls | | |
+| C. Specific | a human can follow it from the intro and §9a | | |
+| C. Specific | an AI can run §9b–§9e without re-deriving the code path | | |
+| C. Specific | knob, values, workload, commands, observables, sampling, stop conditions exact | | |
+| D. Runnable | harness and environment prerequisites exist or are listed | | |
+| D. Runnable | workload arithmetic reaches the limit (data, time, disk, memory) | | |
+| D. Runnable | load-bearing citations spot-checked against the pinned clone | | |
+
+| # | Recommendation | Applied? (amendment date and commit, or "left for stage 3") | Why |
+|---|---|---|---|
 
 **Agreement criteria** — only if run 2 is chosen; filled before run 2 starts.
 One row per observable in the case's §9d:
@@ -30,7 +57,7 @@ One row per observable in the case's §9d:
 
 ## 2. Environment
 
-| Field | Run 1 (AI) | Run 2 (Jingsong, if done) |
+| Field | Run 1 | Run 2 (fresh AI session, if done) |
 |---|---|---|
 | Date | | |
 | Node (CloudLab name and type) | | |
@@ -45,13 +72,14 @@ One row per observable in the case's §9d:
 ## 3. Runbook defects
 
 Every step a run could not execute as written. The run stops at the
-defect; the fix is approved, made in the case file (dated), and the affected
-tier restarts from its beginning. "None" if there were none.
+defect; the fix is made in the case file (dated) if it leaves §9a unchanged,
+and the affected tier restarts from its beginning. If the fix would change
+§9a, the case goes back to the audit. "None" if there were none.
 
-| # | Run | Step (§9b–§9e) | Problem | Fix | Approved (date) | Case-file commit with the fix |
+| # | Run | Step (§9b–§9e) | Problem | Fix | Decision (date) | Case-file commit with the fix |
 |---|---|---|---|---|---|---|
 
-## 4. Run 1 — AI session
+## 4. Run 1
 
 **Scope:** the tiers and capacity values actually run. **Command log:**
 `[case-file stem]/run1/<file>`.
@@ -84,18 +112,26 @@ argument.
 4. **Excluded rows** — for every other §9a row, the reading that rules it out.
    Every **Refuted** row must be addressed.
 5. **Observed vs. inferred** — list the inferred statements that the
-   conclusion depends on. These are what the review most needs to check.
+   conclusion depends on. These are what the self-check most needs to check.
 6. **Deviations and gaps** — anything skipped, changed or not observable, and
    how it limits the conclusion.
+
+7. **Core question** — in two or three sentences: did usage follow the
+   constraint, and does the constraint cap usage? Each step from reading to
+   answer cites the part above that supports it.
 
 **Conclusion (one line):** `<§9a row>` — confirmed / bypass as recorded /
 refuted / not confirmed / invalid run.
 
-## 5. Review of run 1 — Jingsong
+## 5. Self-check of run 1 — AI
 
 ### 5.1 Check of run 1's conclusion
 
-| Part | Agree? | Note |
+Re-open every raw file the conclusion cites and confirm it says what the
+conclusion says. A part that does not hold is fixed, or the conclusion is
+downgraded to *Not confirmed*.
+
+| Part | Holds? (yes / no) | Note (file re-read) |
 |---|---|---|
 | 1. Validity | | |
 | 2. Readings | | |
@@ -103,12 +139,13 @@ refuted / not confirmed / invalid run.
 | 4. Excluded rows | | |
 | 5. Observed vs. inferred | | |
 | 6. Deviations and gaps | | |
+| 7. Core question — the steps from reading to answer follow the audited logic | | |
 
 ### 5.2 Run 2?
 
-**Yes / no** — the reason, and the date decided.
+**Yes / no** — the reason, and the date decided. Choose yes when the conclusion rests on inferred statements, a part of §5.1 cannot be settled from run 1's evidence, or the result refutes the case or confirms a bypass.
 
-## 6. Run 2 — Jingsong (optional)
+## 6. Run 2 — fresh AI session (optional)
 
 "Not done" if §5.2 says no, and §7 is left out.
 
@@ -139,12 +176,15 @@ The §9a row these readings match, in one line.
 **Same §9a row?** yes / no. If no, or if a reading disagrees: the cause, and
 how it was resolved (see "Compare and decide" in the README).
 
-## 8. Verdict — Jingsong
+## 8. Verdict — AI
+
+Jingsong may overrule any verdict at any time; record an override here with its
+date and reason.
 
 | Tier | Verdict (§9a row) | Basis | Date |
 |---|---|---|---|
-| Unit | | run 1 + review / run 1 + run 2 | |
-| Cluster | | run 1 + review / run 1 + run 2 | |
+| Unit | | run 1 + self-check / run 1 + run 2 | |
+| Cluster | | run 1 + self-check / run 1 + run 2 | |
 
 **Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
 (commit), and any section amended (which one, commit) — or "none needed".
