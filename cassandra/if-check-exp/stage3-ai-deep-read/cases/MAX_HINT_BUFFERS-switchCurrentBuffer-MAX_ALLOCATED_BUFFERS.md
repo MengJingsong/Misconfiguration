@@ -201,7 +201,8 @@ the hint is not dropped, and no way around the cap is recorded. This holds for
   writing resumes once a buffer is recycled. Direct memory is `n × bufferSize`
   counting from a node with no pool: 64, 96 and 192 MiB for *n* = 2, 3 and 6
   with the default 32 MiB buffers. The figures are exact apart from small,
-  unrelated direct buffers; the `Count` reading shows whether any moved. A node
+  unrelated direct buffers (each thread that serializes a mutation keeps a
+  per-thread scratch buffer, 128 bytes at first, `Mutation.java:453`). A node
   that has been up for ten seconds already holds one buffer, so the rise above
   idle is one buffer less (9d).
 - **Second-knob arm:** *n* = 3 with 64 MiB buffers reaches the same 192 MiB as
@@ -211,13 +212,28 @@ the hint is not dropped, and no way around the cap is recorded. This holds for
 No bypass is recorded, so the prediction has no allowed excess: any direct
 memory above `n × bufferSize` is unexplained.
 
+**Reading rule (added 2026-09-30, design audit; amended the same day, before any
+run, after the instrument check, see results §3).** Unit tier: `Count` up by
+exactly *n* and `MemoryUsed` by exactly `n × bufferSize`, taken from a baseline
+after the writer thread is warmed up (9e). Cluster tier, over the idle control:
+`MemoryUsed` up by `(n − 1) × bufferSize`, where a difference of up to 4 MiB is
+read as unrelated small buffers, provided the create trace shows exactly *n*
+buffers. `Count` is **reported, not asserted**, in the cluster tier: every
+thread that serializes a mutation holds a scratch direct buffer, so up to 32
+`MutationStage` threads add up to 32 to `Count` (and, estimated, well under 1 MiB
+in all at 5 KiB hints; not measured). The smallest step between *n* and *n* + 1
+buffers is 32 MiB (the default `bufferSize`), so the band cannot hide an extra
+buffer. A larger difference is decided by the create trace (9d).
+
 **Conclusions:**
 
 | Result | Conclusion |
 |---|---|
-| The pool holds exactly *n* buffers at every value, direct memory is `n × bufferSize`, a writer waits at the check, and the ceiling moves with *n* and with `bufferSize` | **Confirmed** — the check enforces as traced. |
+| The pool holds exactly *n* buffers at every value, direct memory is up by the predicted amount (reading rule above: unit `n × bufferSize`, cluster `(n − 1) × bufferSize` over idle), a writer waits at the check, and the ceiling moves with *n* and with `bufferSize` | **Confirmed** — the check enforces as traced. |
 | More than *n* buffers are ever created | **Refuted** — the check does not cap the pool. No bypass is recorded, so this is a new finding (Target-3 material): some path creates buffers around the check. |
-| Exactly *n* buffers are created, but direct memory keeps rising above `n × bufferSize` | **Refuted** — the counter does not track the resource; §8's ceiling claim is wrong. Rule out other direct-buffer users first (9d). |
+| Exactly *n* buffers are created, but direct memory keeps rising above the predicted amount | **Refuted** — the counter does not track the resource; §8's ceiling claim is wrong. Rule out other direct-buffer users first (9d). |
+| The buffer count and direct memory follow *n* but not `bufferSize` (the second-knob arm does not land at 192 MiB), while the create trace shows `size=` as set | **Refuted** in part — §8's product `n × bufferSize` is wrong. If `size=` is not as set, the setting did not take effect: **Invalid run**, fix 9b. |
+| A writer waits at the check, but after the hold is released it does not resume (no progress, `TotalHints` flat) | **Not confirmed** — the disallow is not the bounded wait traced in §6b. Re-read. |
 | Direct memory is flat across every value of *n*, with hints flowing and the pool at its cap | **Refuted** — not the binding limit. Re-read, do not re-run. |
 | The buffer count follows *n* and writers stall, but no writer is ever seen waiting at the check | **Not confirmed** — something else is holding the writers; §6b's disallow effect is not shown. Re-read. |
 | Fewer than *n* buffers are created, or no writer waits although more than `n × bufferSize` of hints were written under the hold | **Invalid run** — the cap was never reached. Fix the setup (9b, 9c) and re-run. |
@@ -246,6 +262,7 @@ count of buffers the pool made and the wait evidence tie it to the check.
 | `hints_compression` | unset (default) | Compression allocates buffers of its own ([`CompressedHintsWriter.java:55`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/CompressedHintsWriter.java#L55)) that would move the memory reading. |
 | `memtable_allocation_type` | `heap_buffers` (default) | Off-heap memtables also allocate off-heap memory. Start from `conf/cassandra.yaml`, **not** `conf/cassandra_latest.yaml`, which sets `offheap_objects` ([`:836`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/cassandra_latest.yaml#L836)). |
 | `concurrent_writes` | `32` (default) | The writers are `MutationStage` threads ([`Config.java:180`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L180)); this is how many can wait at once. |
+| `max_hint_window` | `3h` (default) | The coordinator stops hinting for a node that has been down longer than this ([`StorageProxy.java:2461-2463`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2461-L2463)). Node 2 stays down for the whole sweep, so record when it was stopped (results §2); a sweep that runs past 3 h would silently stop producing hints, and the hints-flowing control (9d) would show it. |
 | Hint, data and log directories | local disk, never `/proj` | The test writes about 1 GB of hints per run; see the safety rules in the stage-4 README. |
 | Client load | same command and thread count at every value | Other direct-buffer users move with the load. |
 
@@ -312,7 +329,7 @@ writes succeed and each one leaves a hint for node 2.
 | Rows | `n=200000`, about 1 GB of hints | More than the `(n+1) × 32 MiB` (224 MiB at *n* = 6) needed to force a wait, and it fits the node's local disk. |
 | Client threads | `threads=64` | More than `concurrent_writes` (32), so every writer thread has work. |
 | Hold | `-Dstage4.hold.ms=3000` | At most one 32 MiB buffer comes back per 3 s (about 10.7 MiB/s). 64 clients writing 5 KiB hints are expected to outrun that. |
-| Time in B | about 60 s | Long enough for several samples and dumps, short of the in-flight hint limit (9d). |
+| Time in B | about 60 s, **ended early** when `HintsInProgress` passes 75 % of `128 × cores` | Long enough for several samples and dumps. **Estimate, not measured (design audit, 2026-09-30):** while the pool is at its cap the writers are the `MutationStage` threads (32), one in `take()` and the rest blocked on the pool's monitor, so the coordinator's own local writes queue behind them and each of the 64 client threads times out after about 2 s (`write_request_timeout`). Each write submits a hint before it waits, which is up to 64 hints per 2 s, about 1,900 in 60 s, against a limit of 2,048 on 16 cores and 5,120 on 40. On a small node B can therefore hit the limit; record `nproc` (results §2) and apply the stop rule. |
 
 **If the pool does not reach *n* buffers** (no `created=<n>` line in A): stop,
 reset (9b) and repeat that value with `threads=128`, then with a longer hold.
@@ -324,8 +341,8 @@ Record each step as a deviation. If none works, the run is invalid (9a).
 |---|---|---|---|
 | **Usage counter** — `allocatedBuffers`, a private `int` on the pool ([`HintsBufferPool.java:46`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L46)), incremented only in `createBuffer()` ([`:132`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L132)) and never decremented. A recycled buffer reuses its slab ([`HintsBuffer.java:96-100`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBuffer.java#L96-L100)), so it also counts the direct buffers the pool owns. | Unit: read the field by reflection. Cluster: no gauge exposes it — `metrics/` holds only `HintsServiceMetrics` and `HintedHandoffMetrics` (checked 2026-09-30). Use the create trace: a Byteman rule at the exit of `createBuffer()` writes one line per buffer to `stage4.byteman.out`, `created=<allocatedBuffers> size=<bufferSize> max=<MAX_ALLOCATED_BUFFERS> ms=<epoch millis> thread=<name>`. The number of lines is the counter. | Unit: when the writer waits. Cluster: read the file at the end of each scenario; `ms` places each line in A or B. | An idle node already has one line. The periodic flush calls `currentBuffer()`, which creates the first buffer ([`HintsService.java:116-121`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsService.java#L116-L121), [`HintsWriteExecutor.java:168`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriteExecutor.java#L168), [`HintsBufferPool.java:93-105`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L93-L105)); its `thread=` is the hints executor, not a writer. |
 | **Disallow evidence** — a writer waiting at the check | (i) A second trace line, one per entry into the disallow branch, at the `BlockingQueue.take` invocation in `switchCurrentBuffer` (the location `HintsBufferPoolTest`'s rule uses): `waiting ms=<epoch millis> thread=<name>`. (ii) A thread dump, `jcmd <pid> Thread.print`: one `MutationStage` thread parked in `java.util.concurrent.LinkedBlockingQueue.take` under `HintsBufferPool.switchCurrentBuffer(HintsBufferPool.java:118)` ([link](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L118)). | (i) End of each scenario. (ii) Two or three dumps during B while the hold is in force. | `take()` runs only when the reserve is empty and the cap is reached ([`:112-118`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L112-L118)), and nothing else reads the property (`:41` and `:113` only; grep, 2026-09-30), so a `waiting` line belongs to this check. `switchCurrentBuffer` is `synchronized` ([`:107`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBufferPool.java#L107)), so **only one** writer is in `take()`; the others are BLOCKED on the pool's monitor in the same method. Do not count parked threads. Client write timeouts are a symptom, not evidence. So is `OverloadedException: Too many in flight hints`: it comes from `checkHintOverload` (limit `128 × cores`, [`StorageProxy.java:202`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L202), [`:1592-1597`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L1592-L1597)), not from this check. |
-| **Real resource** — direct memory | `bin/nodetool sjk mx -mg -b 'java.nio:type=BufferPool,name=direct' -f MemoryUsed` (bytes), and `-f Count` (number of direct buffers). Cross-check: start the JVM with `-XX:NativeMemoryTracking=summary`, then `jcmd <pid> VM.native_memory summary \| grep 'Other ('`. Direct buffers are counted under **Other** on this node's JDK; checked 2026-09-30: three `allocateDirect(32 MiB)` raised `MemoryUsed` by 100,663,296 bytes and `Count` by 3, and NMT's `Other` then read 98,314 KB (96 MiB plus 10 KB). Unit: the same beans in-process, `ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)`. | Idle control, end of A, every 5 s during B, end of B. | The idle floor already holds one hints buffer, so the rise **above idle** is `(n − 1) × bufferSize`; the same figure is `n × bufferSize` above a node with no pool. The floor also holds the executor's 256 KiB write buffer ([`HintsWriteExecutor.java:60`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriteExecutor.java#L60), constant) and any other `allocateDirect` user, so read `Count` too: a rise of exactly *n* − 1 says only the pool moved. If it did not, the create trace decides. Each `sjk` call starts a JVM (1–2 s), so time-stamp every reading. Never use process RSS. |
-| **Hints flowing** — the control for a null result | `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' -f Count` and `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.db:type=StorageProxy' -f HintsInProgress`. | Before A, and at the end of A and B. | `TotalHints` is incremented after the pool write returns ([`HintsService.java:169-171`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsService.java#L169-L171)), so it stops rising while writers wait. A run where it never rises had no hints: node 2 was not seen as down (`bin/nodetool status` shows `DN`), or it was never in the ring, and then the hint is discarded ([`StorageProxy.java:2801`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2801)). `HintsInProgress` near `128 × cores` (5,120 on 40 cores) means the coordinator is about to refuse writes: stop B early. |
+| **Real resource** — direct memory | `bin/nodetool sjk mx -mg -b 'java.nio:type=BufferPool,name=direct' -f MemoryUsed` (bytes), and `-f Count` (number of direct buffers). Cross-check: start the JVM with `-XX:NativeMemoryTracking=summary`, then `jcmd <pid> VM.native_memory summary \| grep 'Other ('`. Direct buffers are counted under **Other** on this node's JDK; checked 2026-09-30: three `allocateDirect(32 MiB)` raised `MemoryUsed` by 100,663,296 bytes and `Count` by 3, and NMT's `Other` then read 98,314 KB (96 MiB plus 10 KB). Unit: the same beans in-process, `ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)`. | Idle control, end of A, every 5 s during B, end of B. | The idle floor already holds one hints buffer, so the rise **above idle** is `(n − 1) × bufferSize`; the same figure is `n × bufferSize` above a node with no pool. The floor also holds the executor's 256 KiB write buffer ([`HintsWriteExecutor.java:60`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriteExecutor.java#L60), constant) and any other `allocateDirect` user, and every thread that serializes a mutation keeps a scratch direct buffer (`Mutation.java:453`; seen at the unit instrument check, 2026-09-30), so `Count` rises by more than *n* − 1 (up to 32 more on the `MutationStage`). Record `Count`; do not accept or reject on it. The create trace and the 4 MiB band on `MemoryUsed` decide. Each `sjk` call starts a JVM (1–2 s), so time-stamp every reading. Never use process RSS. |
+| **Hints flowing** — the control for a null result | `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' -f Count` and `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.db:type=StorageProxy' -f HintsInProgress`. | Before A, and at the end of A and B. | `TotalHints` is incremented after the pool write returns ([`HintsService.java:169-171`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsService.java#L169-L171)), so it stops rising while writers wait. A run where it never rises had no hints: node 2 was not seen as down (`bin/nodetool status` shows `DN`), or it has been down longer than `max_hint_window` (9b), or it was never in the ring, and then the hint is discarded ([`StorageProxy.java:2801`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2801)). `HintsInProgress` near `128 × cores` (5,120 on 40 cores) means the coordinator is about to refuse writes: stop B early. |
 
 ### 9e. Running the scenarios
 
@@ -334,11 +351,11 @@ Record each step as a deviation. If none works, the run is invalid (9a).
 1. Run the upstream `HintsBufferPoolTest` at *n* = 2, 3 and 6. Record pass or fail.
 2. Run `HintsPoolCeilingTest` at *n* = 2, 3 and 6 with `bufferSize` 1 MiB, and once
    more at *n* = 3 with 2 MiB: 3 × 2 MiB and 6 × 1 MiB are both 6 MiB, which is
-   the second-knob check. The test uses `HintsBufferTest`'s hint helper
+   the second-knob check. The test calls `HintsBufferTest.defineSchema()` first, as `HintsBufferPoolTest`'s `@BeforeClass` does (the helper needs the schema), and uses `HintsBufferTest`'s hint helper
    ([`HintsBufferTest.java:196`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/unit/org/apache/cassandra/hints/HintsBufferTest.java#L196))
    and a flush callback that queues buffers without recycling them, as
    `HintsBufferPoolTest` does. It:
-   1. asserts `MAX_ALLOCATED_BUFFERS == n`, then reads `Count` and `MemoryUsed` of the direct pool;
+   1. asserts `MAX_ALLOCATED_BUFFERS == n`; starts the writer and has it serialize one hint before it writes (its per-thread scratch buffer, `Mutation.java:453`, would otherwise land inside the deltas as `Count` +1 and `MemoryUsed` +128); settles with `System.gc()` and a 500 ms wait; then reads `Count` and `MemoryUsed` of the direct pool as the baseline and lets the writer go;
    2. starts a writer that writes hints until it waits, and waits (up to 60 s) for it to be parked in `LinkedBlockingQueue.take` under `HintsBufferPool.switchCurrentBuffer`;
    3. asserts `allocatedBuffers == n`, that the callback received *n* − 1 buffers, and that `Count` is up by *n* and `MemoryUsed` by `n × bufferSize`;
    4. sleeps 2 s and asserts none of that changed;
@@ -365,8 +382,8 @@ Record each step as a deviation. If none works, the run is invalid (9a).
 
    ```bash
    mkdir -p ~/stage4-logs/hints/<value>
-   export JVM_EXTRA_OPTS="-Dcassandra.MAX_HINT_BUFFERS=<n> -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=$HOME/stage4-logs/hints/<value>/hints-pool.txt -Dstage4.hold.out=$HOME/stage4-logs/hints/<value>/hold.txt -Dstage4.hold.ms=3000 -javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/hints-pool.btm,listener:true"
-   bin/cassandra -p cassandra.pid > ~/stage4-logs/hints/<value>/stdout.txt 2>&1
+   JVM_EXTRA_OPTS="-Dcassandra.MAX_HINT_BUFFERS=<n> -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=$HOME/stage4-logs/hints/<value>/hints-pool.txt -Dstage4.hold.out=$HOME/stage4-logs/hints/<value>/hold.txt -Dstage4.hold.ms=3000 -javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/hints-pool.btm,listener:true" \
+     bin/cassandra -p cassandra.pid > ~/stage4-logs/hints/<value>/stdout.txt 2>&1
    ```
 
    Once the node is up, confirm the rules are in place:
@@ -404,8 +421,9 @@ Record each step as a deviation. If none works, the run is invalid (9a).
    Poll the trace until `created=<n>` appears. Record its time and, at that
    moment, `MemoryUsed`, `Count`, NMT `Other` and `TotalHints`.
 3. **Scenario B — try to exceed the cap** — keep writing for about 60 s with the
-   hold in force. Every 5 s record `MemoryUsed` and `Count`; take two or three
-   thread dumps; read `HintsInProgress` at the end. Then release the hold:
+   hold in force. Every 5 s record `MemoryUsed`, `Count` and `HintsInProgress`;
+   end B early if `HintsInProgress` passes 75 % of `128 × cores` (9c); take two or
+   three thread dumps. Then release the hold:
 
    ```bash
    java -cp build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -u <harness>/hold-flush.btm
@@ -448,7 +466,7 @@ files, per capacity value.
 | **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). §9 rewritten 2026-09-30; every citation in it checked against the same clone. |
 | **Escape hatch / Target-3 note** | none found yet (see Notes). |
-| **Stage-4 feedback** | none yet |
+| **Stage-4 feedback** | Design audit 2026-09-30 (stage-4 README, step 0): **Ready after amendments**; see [`results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md`](../../stage4-runtime-verification/results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md) §1.1. Amended in §9 (all dated 2026-09-30, before any run): reading rule and 4 MiB band (9a), two new conclusions rows and the cluster/unit wording of the Confirmed row (9a), the in-flight-hint estimate and stop rule (9c, 9e), `max_hint_window` (9b, 9d), `defineSchema()` (9e), and `JVM_EXTRA_OPTS` scoped to the `bin/cassandra` command instead of exported (9e). **Instrument check, 2026-09-30 (unit, n = 3, on node0; not a reading):** two runbook defects found and fixed before run 1 (results §3): the unit baseline must follow a writer warm-up (9e step 1), and cluster `Count` cannot be asserted (reading rule in 9a, 9d). No run yet. |
 | **Notes** | §9 converted 2026-09-30 to the template layout (9a summary for review, 9b–9e runbook), before any stage-4 run. Moved: testability, prediction, conclusions and refutation → 9a; knob, values, scope, level, controls → 9b; workload → 9c; instruments → 9d; scenarios → 9e. **Changed, not only moved:** (1) capacity values {1, 2, 3, 6} → {2, 3, 6}: *n* = 1 is left out of the sweep; the reason is in 9b. It is not recorded as a stage-3 finding (Jingsong, 2026-09-30). (2) An idle node already holds one buffer, made by the periodic flush (`HintsService.java:116-121`); the memory rise above idle is `(n − 1) × bufferSize`, where the old text predicted `n × bufferSize` above idle. (3) Instruments: added a Byteman create trace as the usage counter, the JVM direct-buffer bean (`java.nio:type=BufferPool,name=direct`), and the NMT category (`Other`, checked 2026-09-30). (4) The cluster tier holds the flush back with a Byteman rule instead of relying on a load race; the harness (one test, two rules) is not written. (5) Dropped: the "time to first block" and "throughput falls with *n*" predictions (soft, and the hold sets them); "shrink `bufferSize`" as a way to reach the cap (`MIN_BUFFER_SIZE` clamps it at 32 MiB); "no hint is lost" at the cluster tier (only the unit tier can count hints, and `StorageProxy.checkHintOverload` can refuse writes first). (6) `HintsBufferPoolTest` range corrected from `:49-72` to `:49-73`. (7) The old open risk, whether Byteman resolves as a test dependency, is closed: `byteman-bmunit` 4.0.20 is a declared dependency. Whether its runtime attach works on this JDK is settled by the first run. |
 
 ---

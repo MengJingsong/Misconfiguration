@@ -1,0 +1,38 @@
+# Byteman rules for MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS, §9d.
+# Observation only: they change no behaviour, they write two kinds of trace line.
+#
+#   created=<allocatedBuffers> size=<bufferSize> max=<MAX_ALLOCATED_BUFFERS> ms=<epoch millis> thread=<name>
+#       one line per buffer the pool creates, written at the exit of
+#       HintsBufferPool.createBuffer() (HintsBufferPool.java:130-134). The number
+#       of lines is the usage counter: the pool exposes no gauge for it. The
+#       first line on an idle node comes from the hints executor's periodic
+#       flush, not from a writer (case 9d).
+#
+#   waiting ms=<epoch millis> thread=<name>
+#       one line per entry into the disallow branch, written at the
+#       BlockingQueue.take invocation in switchCurrentBuffer() (line 118) —
+#       the same location HintsBufferPoolTest's rule uses.
+#
+# Output file: the system property stage4.byteman.out, or else hints-pool.txt in
+# the JVM's working directory. Both rules share it.
+#
+# Loaded at node start with -javaagent:<byteman.jar>=script:<this file>,listener:true
+# (case 9e), or attached to the unit test with -Dtest.jvm.args.
+
+RULE hints pool creates a buffer
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+   traceln("hintsPool", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hints pool writer waits at the cap
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+   traceln("hintsPool", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
