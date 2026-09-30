@@ -164,6 +164,23 @@ this first: it decides whether the case is worth a cluster allocation at all.
 **Claim under test:** one sentence — which limit bounds which resource, and
 what the disallow outcome does (from §6b and §8).
 
+**How this verifies the hypothesis:** four to eight lines, placed here so a
+reader sees the argument before the steps. It restates the claim, procedure,
+prediction and conclusions below and adds no claim of its own; every line must
+match them. Four parts:
+
+- **Hypothesis:** the constraint caps this resource (memory or disk bytes), and
+  what the disallow outcome does.
+- **Test:** the knob varied, the values, how usage is driven to the limit and
+  past it, and what is measured (the real resource, not only the check's counter).
+- **Logic:** the readings in order, each with what it shows. Normally: the limit
+  is reached (else the run is invalid); usage stops at the limit; usage follows
+  the constraint when the knob changes; the disallow branch, not something else,
+  is what enforces it. Where the knob cannot be varied, say what replaces the
+  sweep and why.
+- **Refuted if:** the readings that would show the constraint does not cap usage
+  (rows of the Conclusions table).
+
 **Procedure:**
 
 1. **Unit tier** — drive the check to its limit. Assert the allow outcome at the

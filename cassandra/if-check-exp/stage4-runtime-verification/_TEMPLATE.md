@@ -117,8 +117,9 @@ argument.
    how it limits the conclusion.
 
 7. **Core question** — in two or three sentences: did usage follow the
-   constraint, and does the constraint cap usage? Each step from reading to
-   answer cites the part above that supports it.
+   constraint, and does the constraint cap usage? Follow the "Logic" steps of the
+   case's "How this verifies the hypothesis" block (§9a), and cite for each step
+   the part above that supports it.
 
 **Conclusion (one line):** `<§9a row>` — confirmed / bypass as recorded /
 refuted / not confirmed / invalid run.

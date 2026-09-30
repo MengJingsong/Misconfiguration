@@ -216,6 +216,28 @@ pool. When the pool is full, a writer waits until a flush frees memory; it is
 not rejected. One exception: writes that a starting flush is waiting on are
 forced past the limit (the escape hatch, §6b).
 
+**How this verifies the hypothesis** (a restatement of the claim, procedure,
+prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** `memtable_heap_space` caps the node-wide on-heap memtable pool.
+  When it is full a writer waits for a flush instead of being rejected, except
+  for bytes the escape hatch forces through.
+- **Test:** vary the limit (128, 256, 512 MiB and the default), write until the
+  pool fills and keep writing faster than flushes finish, and read the pool's
+  peak, the writers waiting, the bytes forced through, and real heap.
+- **Logic:** (1) at every value the pool must fill and flushes must start near the
+  limit, or the run is invalid. (2) Writers wait and the counter stops growing
+  while they wait: the check **stops usage at the limit**. (3) The peak moves with
+  the limit: usage **follows the constraint**. The peak alone is not proof, since
+  the flush trigger is a fraction of the same limit, so the waits are what show
+  this check fired. (4) Any excess over the limit is no more than the bytes
+  forced through the escape hatch (measured separately), and real heap tracks
+  the counter: the limit really bounds memory.
+- **Refuted if:** the counter passes the limit by more than the escape hatch
+  explains; real heap grows well beyond the counter; or the peak is flat across
+  the values. **Not confirmed** if no writer ever waits (rows of the Conclusions
+  table).
+
 **Procedure:**
 
 1. **Unit tier** — re-run `HeapPoolTest` (the limit holds, the next writer
@@ -439,7 +461,7 @@ the trace file (amended 2026-09-29)**, per capacity value.
 | **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). Citations added to §1, §9 and §11 on 2026-09-28 checked against a fresh clone of the same tag (`b5f2a54`). |
 | **Escape hatch / Target-3 note** | `markBlocking()`-marked `OpOrder.Group` silently forces the allocation past `limit` instead of parking (`MemtableAllocator.SubAllocator.allocate():169-197`); see §6b. |
-| **Stage-4 feedback** | Unit tier, 2026-09-29: consistent with **Confirmed** and **Escape hatch as recorded**; no Refuted row fired (run 1 + Jingsong's review, no run 2) — [results](../../stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md). §9d's "Real heap" row amended 2026-09-29 (runbook defect #2; §9a unchanged). Cluster tier, 2026-09-29: run 1 consistent with **Confirmed** at 128, 256, 512 MiB and the default, reviewed by Jingsong — writers wait (32 of 32 threads seen in 11 of 12 thread dumps), the peak follows the knob (99.1–99.8% of the limit), the escape hatch forced 0.02–0.94% of the limit through, and real heap minus young generation stays within +37/−22 MiB of idle + limit. Not measured: the counter's excess over the limit (inferred). Cleanup-threshold control: flushes started at 33%, writers still waited. See results §4.1 and §4.3. |
+| **Stage-4 feedback** | Unit tier, 2026-09-29: consistent with **Confirmed** and **Escape hatch as recorded**; no Refuted row fired (run 1 + Jingsong's review, no run 2) — [results](../../stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md). §9d's "Real heap" row amended 2026-09-29 (runbook defect #2; §9a unchanged). Cluster tier, 2026-09-29: run 1 consistent with **Confirmed** at 128, 256, 512 MiB and the default, reviewed by Jingsong — writers wait (32 of 32 threads seen in 11 of 12 thread dumps), the peak follows the knob (99.1–99.8% of the limit), the escape hatch forced 0.02–0.94% of the limit through, and real heap minus young generation stays within +37/−22 MiB of idle + limit. Not measured: the counter's excess over the limit (inferred). Cleanup-threshold control: flushes started at 33%, writers still waited. See results §4.1 and §4.3. **Documentation only, 2026-09-30 (after the case closed):** a "How this verifies the hypothesis" block was added to §9a, restating its claim, procedure, prediction and conclusions; none changed. |
 | **Notes** | §9 revised 2026-09-28, before any stage-4 run: the knob corrected from `heap_buffers` (builds a `SlabPool`) to `unslabbed_heap_buffers`; `memtable_cleanup_threshold` capped at the accepted `0.99`; `AllMemtablesOnHeapDataSize` shown blind to switched-out memtables, and `BlockedOnAllocation`, the cleaner's `Used total` and the flush log added as instruments; the cleaner-trigger confound added to §9d–§9f; the nonexistent `MemtablePoolTest` replaced by `MemtableSizeUnslabbedTest`; `HeapPoolTest` shown recoverable from git history. Later the same day §9 was restructured to the new template layout (9a summary for review, 9b–9e runbook); the old §9d "time to first wait falls with the limit" prediction was dropped as redundant, and a `cassandra-stress` keyspace step was added because stress creates its keyspace with `durable_writes = true`. §9c amended 2026-09-28 (stage-4 runbook defect #1, approved by Jingsong): the unit tier copies `HeapPoolTest` from the committed stage-4 harness instead of restoring it from git history; the test code is the same. §9a unchanged. §9a, §9c and §9e amended 2026-09-29, before the cluster tier (approved by Jingsong): §9a's Confirmed row now allows bytes forced through any flush's escape hatch, not only scenario C's; §9c gains fixed starting stress values and a step-up rule; §9e loads the Byteman rule (`harness/…/escape-hatch.btm`) at startup for every run, with an instrument check and a load check, moves logs aside between runs, sums the trace per scenario window, and schedules the cleanup-threshold control once at 256 MiB. |
 
 ---

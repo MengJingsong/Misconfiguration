@@ -159,8 +159,9 @@ and no verdict here; results go to
 [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
 The test changes `MAX_HINT_BUFFERS`, makes hints arrive faster than the disk
 flush can recycle buffers, and checks that the pool stops at *n* buffers and the
-writer waits. **Nothing has been run for this case**, and the harness it needs
-is not written yet (9c).
+writer waits. **Run so far:** the unit tier, 2026-09-30 (results file §4.2, §8);
+the cluster tier has not been run, and its second-node setup and hold-rule check
+are open (9c).
 
 ### 9a. Procedure and conclusions
 
@@ -173,6 +174,26 @@ direct memory (96 MiB at the defaults). When the cap is reached and the current
 buffer is full, the writing thread waits until the disk flush recycles a buffer;
 the hint is not dropped, and no way around the cap is recorded. This holds for
 *n* ≥ 2; at *n* = 1 the wait cannot end (9b).
+
+**How this verifies the hypothesis** (a restatement of the claim, procedure,
+prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** with `MAX_HINT_BUFFERS` = *n*, the hints pool creates at most
+  *n* off-heap buffers, so it holds at most `n × bufferSize` of direct memory, and
+  at the cap a writer waits instead of allocating.
+- **Test:** vary *n* (2, 3 the default, 6) and `bufferSize`, push hints in faster
+  than the flush returns buffers (at the cluster tier a Byteman rule holds the
+  flush back), and read the pool's buffer count and the JVM's real direct memory.
+- **Logic:** (1) at every value a writer must reach the cap and wait, or the run
+  is invalid. (2) While it waits, buffers created = *n* and direct memory =
+  `n × bufferSize`, unchanged over time: usage **stops at the limit**. (3) The same
+  holds at the other *n*, and `n × bufferSize` is the same from 3 × 2 MiB as from
+  6 × 1 MiB: usage **follows the constraint**. (4) Returning one buffer releases
+  the writer without a new allocation: the **wait**, not a rejection or a fresh
+  allocation, is what enforces the limit.
+- **Refuted if:** more than *n* buffers appear; direct memory rises above
+  `n × bufferSize` with *n* buffers; it stays flat across *n*; or it follows *n*
+  but not `bufferSize` (rows of the Conclusions table).
 
 **Procedure:**
 
