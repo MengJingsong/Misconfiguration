@@ -177,10 +177,10 @@ stage 1/2, `3b` = direct source reading).
 
 Each case's full detail lives in its own file.
 
-**Every case carries a §9 test design.** Only `memtable_heap_space` is in
-the **new §9 layout** (2026-09-28): the intro and §9a are a summary for human
+**Every case carries a §9 test design.** Only `memtable_heap_space` (2026-09-28)
+and `MAX_HINT_BUFFERS` (2026-09-30) are in the **new §9 layout**: the intro and §9a are a summary for human
 review (procedure and conclusions table), §9b–§9e are a Linux runbook. The
-other ten are in the old layout and must be converted before their first
+other nine are in the old layout and must be converted before their first
 stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ## Open items / next steps
@@ -199,7 +199,7 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 | Run 2 (Jingsong), unit tier | **Not chosen** (2026-09-29, when run 2 became optional). |
 | Cluster tier — preparation | **Done 2026-09-29.** Byteman rule `harness/…/escape-hatch.btm` written and checked (see the harness README); §9a Confirmed row, §9c and §9e amended and frozen at `bf1f6bb`; results §1 approved by Jingsong 2026-09-29. |
 | Run 1 (AI), cluster tier | **Done 2026-09-29.** Instrument check + five node runs (128, 256, 512 MiB, default, cleanup-threshold control at 256 MiB) and a second real-heap pass; every check passed first time. Readings in results §4.1, conclusion in §4.3: consistent with **Confirmed** at all four values. |
-| Review of the cluster tier (Jingsong) | Jingsong verified the cluster results 2026-09-29. **Results §8 "Cluster" verdict row is still blank — his to fill.** |
+| Review of the cluster tier (Jingsong) | Reviewed 2026-09-29. Review table (§5.1b) and §8 "Cluster" verdict filed 2026-09-30: consistent with **Confirmed**; **case closed**. |
 | Runbook defect #2 | Approved and fixed 2026-09-29: §9d's real-heap reading must subtract the young generation (`heap_info` `N young (…K)` line). §9a unchanged; §10 feedback updated. |
 | Commit state | Stage-4 work committed and pushed 2026-09-29 (see `git log`). The band-A2 edits (below, ~line 301, and `stage2`/`stage3` files) were **not** part of it. |
 
@@ -211,8 +211,9 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 | Option | Notes |
 |---|---|
-| Fill results §8 (Jingsong), then close `memtable_heap_space` | Nothing else is open on this case. |
+| ~~Fill results §8~~ | Done 2026-09-30; `memtable_heap_space` is closed. |
 | Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `MAX_HINT_BUFFERS`, `max_space_usable_for_compactions_in_percentage`. Convert the case to the new §9 layout first (§9a, reviewed, before any run). |
+| **`MAX_HINT_BUFFERS` stage 4 (§9 converted 2026-09-30, not yet run)** | Not ready. Before run 1: (1) Jingsong reviews and freezes §9a; (2) write and commit the harness under `harness/MAX_HINT_BUFFERS-…/`: `HintsPoolCeilingTest.java`, `hints-pool.btm`, `hold-flush.btm`, and parse-check the rules; (3) start `results/…md` from `_TEMPLATE.md`, Jingsong approves §1. Cluster tier also needs a second-node setup added to `environment.md`. n = 1 is left out of the sweep (reason in §9b); Jingsong does not want it recorded as a stage-3 finding. Unit tier first. |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
 **Machine notes.** JDK and Ant exist only on node0 where they were installed
@@ -220,7 +221,7 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 `~/stage4-logs/`, outside the repo. `HANDOFF.md` and the case files are the
 only record a new node inherits.
 
-**Open stage-4 follow-ups:** convert the other ten cases to the new §9 layout
+**Open stage-4 follow-ups:** convert the other nine cases to the new §9 layout
 before their runs; update the stale §9d–§9g references in the root
 `README.md` §5/§7.5, `stage3-ai-deep-read/playbook.md` and `rejected.md`.
 
@@ -296,8 +297,11 @@ is no saving worth buying with a heuristic that might drop a real case.
 1. **Stage 3 reads band A, in A1 → A2 → A3 order, under all three enforcement
    patterns.** **A1 is done — all 65 rows judged 2026-09-28**: 8 qualified
    (`pending.md`), 33 refused (`rejected.md`, batch "band A1"), 3 undecided
-   (`deferred.md` §5), 21 already recorded and cited. **Next is A2 (30), then
-   A3 (39).** 134 rows in total, but far fewer distinct arguments: A3's 39 rows
+   (`deferred.md` §5), 21 already recorded and cited. **A2 is done — all 30
+   rows judged 2026-09-29**: no new candidate, 21 refused (`rejected.md`, batch
+   "band A2"), 1 second check site for `Integer_MAX_VALUE` (`pending.md`), 1
+   undecided (`deferred.md` §6, `Envelope.java:429`), 7 already recorded.
+   **Next is A3 (39).** 134 rows in total, but far fewer distinct arguments: A3's 39 rows
    share one shape (`size == capacity` before growing an array), so judge them
    as a group rather than one at a time. Two A-band rows are **already
    refused** —

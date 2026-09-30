@@ -2,7 +2,7 @@
 
 > **Case:** [`memtable_heap_space-tryAllocate-limit`](../../stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit.md)
 >
-> **Status:** run 1 done — unit tier (2026-09-28) reviewed by Jingsong and its verdict filed (2026-09-29); cluster tier run 1 done 2026-09-29, **awaiting Jingsong's review**; run 2 not chosen
+> **Status:** run 1 done — unit tier (2026-09-28) reviewed by Jingsong and its verdict filed (2026-09-29); cluster tier run 1 done 2026-09-29, reviewed by Jingsong (2026-09-29) and its verdict filed (2026-09-30); run 2 not chosen. **Case closed.**
 
 **Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
 run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.
@@ -206,7 +206,7 @@ Cites `run1/cluster/<value>/summary.txt` unless another file is named; "table" m
 
 ## 5. Review of run 1 — Jingsong
 
-### 5.1 Check of run 1's conclusion
+### 5.1 Check of run 1's conclusion — unit tier
 
 Reviewed 2026-09-29.
 
@@ -219,10 +219,23 @@ Reviewed 2026-09-29.
 | 5. Observed vs. inferred | yes | The wait is inferred from a timeout; it may need verifying later with a thread dump. |
 | 6. Deviations and gaps | yes | |
 
+### 5.1b Check of run 1's conclusion — cluster tier
+
+Reviewed 2026-09-29 (§4.3). Filled in by the AI session on 2026-09-30, after Jingsong reported the review done: all six parts recorded as agreed. Amend any row Jingsong did not agree with.
+
+| Part | Agree? | Note |
+|---|---|---|
+| 1. Validity | yes | |
+| 2. Readings | yes | |
+| 3. Matched row | yes | Confirmed; the wait is now seen in thread dumps, which answers the unit-tier note on part 5. |
+| 4. Excluded rows | yes | "Passes the limit by more than the escape hatch explains" is not excluded by measurement (counter never read). |
+| 5. Observed vs. inferred | yes | The counter's excess over the limit is inferred, not read. |
+| 6. Deviations and gaps | yes | |
+
 ### 5.2 Run 2?
 
 **No** — decided 2026-09-29, with the change to the protocol that made run 2
-optional.
+optional. This covers both tiers.
 
 ## 6. Run 2 — Jingsong (optional)
 
@@ -233,7 +246,10 @@ Not done (§5.2). §7 is left out.
 | Tier | Verdict (§9a row) | Basis | Date |
 |---|---|---|---|
 | Unit | Consistent with **Confirmed** and **Escape hatch as recorded**; no Refuted row fired | run 1 + review | 2026-09-29 |
-| Cluster | | | |
+| Cluster | Consistent with **Confirmed** at 128, 256, 512 MiB and the default. **Escape hatch as recorded** not matched on its own terms: the counter was never read above the limit (the forced bytes were measured separately, by the Byteman trace). No Refuted row fired. Not measured: the counter's excess over the limit (inferred, not read). | run 1 + review (2026-09-29), no run 2 | 2026-09-30 |
 
-**Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
-(commit), and any section amended (which one, commit) — or "none needed".
+**Feedback filed:** the case file's §10 "Stage-4 feedback" field updated for
+both tiers (unit: `bf1f6bb`; cluster: `5ad5c16`). Sections amended: §9c
+(runbook defect #1, `745c1ab`); §9a's Confirmed row, §9c and §9e, before the
+cluster tier (`bf1f6bb`); §9d's "Real heap" row (runbook defect #2, `5ad5c16`).
+§8's ceiling claim and the Target-3 note: not amended.

@@ -47,8 +47,8 @@ scenario steps.
 *not settable* is not worth a CloudLab allocation until someone patches the
 build; a config-testable one can be run as written.
 
-**Cases still in the old §9 layout** — every case except `memtable_heap_space`,
-as of 2026-09-28 — keep Testability in §9's field table, the prediction in
+**Cases still in the old §9 layout** — every case except `memtable_heap_space` and
+`MAX_HINT_BUFFERS`, as of 2026-09-30 — keep Testability in §9's field table, the prediction in
 §9d, the conclusions in §9e and §9f, and the controls in §9g. **Convert a case
 to the new layout before its first run**: §9a is what every run is judged
 against, so it has to exist and be reviewed first.
@@ -92,6 +92,15 @@ a substituted workload no longer tests the traced path.
   against the raw files — starting with the inferred statements it depends on
   (part 5).
 - Then decide whether to do run 2, and record the decision and the reason.
+
+**Rule of thumb (added 2026-09-30): once Jingsong says a result is reviewed,
+the AI session fills in all the remaining content and reports what it filled.**
+That means the review table in the results file (all parts recorded as agreed
+unless Jingsong names one that is not), the status line, the verdict row and
+"Feedback filed" (with commits, checked in `git log`), the case file's §10
+Stage-4 feedback, and the state rows in `HANDOFF.md`. The AI does not invent
+disagreement or leave a review row blank, and it says which entries it filled so
+Jingsong can amend them. It does not commit or push.
 
 ### Run 2 — Jingsong (optional)
 
@@ -159,7 +168,7 @@ reads as settled prose is the worst outcome this pipeline can produce.
 ## Eleven designs, one case run
 
 As of 2026-09-28 **every filed case carries a §9 test design**, so stage 4 is
-unblocked and waiting only on execution. Only `memtable_heap_space` is in the
+unblocked and waiting only on execution. `memtable_heap_space` and `MAX_HINT_BUFFERS` are in the
 new §9 layout. **`memtable_heap_space` has been run (unit and cluster tiers, 2026-09-28/29)**: results in [`results/memtable_heap_space-tryAllocate-limit.md`](results/memtable_heap_space-tryAllocate-limit.md), harness in `harness/memtable_heap_space-tryAllocate-limit/`, the cluster run script in `results/…/run1/cluster-run.sh`. The other ten are still queued.
 
 **Where to start: unit tiers first.** They test the run protocol cheaply
