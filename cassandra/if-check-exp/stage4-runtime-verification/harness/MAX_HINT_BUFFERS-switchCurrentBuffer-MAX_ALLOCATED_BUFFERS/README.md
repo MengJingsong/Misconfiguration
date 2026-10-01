@@ -31,6 +31,6 @@ against the `cassandra-5.0.9` build:
 |---|---|
 | Byteman `TestScript` on both `.btm` files | no errors |
 | `HintsPoolCeilingTest` at *n* = 3, 1 MiB buffers, with `hints-pool.btm` attached | passed; trace has `created=1,2,3` (each `max=3`) and `waiting` lines |
-| `hold-flush.btm`, functional | **not done**: needs a node with hints to flush (a second node) |
+| `hold-flush.btm`, functional | passed 2026-09-30 on node0 with node 2 on `pc80` (results §1.2, `instrument-check/hold-check.sh`): the held flush is seen in a thread dump, and the unload releases it |
 
 These check the instruments, not the case; they are not stage-4 readings.

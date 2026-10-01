@@ -1,0 +1,58 @@
+[2026-09-30 14:52:45] script: /users/jason92/stage4-harness-run/cluster-run.sh smoke; host: node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu; label: smoke
+[2026-09-30 14:52:45] CHECK PASS: no CassandraDaemon running
+HintsPoolCeilingTest.java: OK
+hints-pool.btm: OK
+hold-flush.btm: OK
+[2026-09-30 14:52:45] CHECK PASS: yaml diff adds 3 lines
+JVM_EXTRA_OPTS=-Dcassandra.MAX_HINT_BUFFERS=3 -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=/users/jason92/stage4-logs/hints/cluster/smoke/hints-pool.txt -Dstage4.hold.out=/users/jason92/stage4-logs/hints/cluster/smoke/hold.txt -Dstage4.hold.ms=3000 -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/hints/hints-pool.btm,listener:true
+[2026-09-30 14:52:45] + JVM_EXTRA_OPTS=... bin/cassandra -p cassandra.pid > /users/jason92/stage4-logs/hints/cluster/smoke/stdout.txt 2>&1
+[2026-09-30 14:53:53] ok: node 1 UN and native transport running (after 27s)
+node 1 pid 1129269, up at 1790801633449
+UN  198.22.255.77  114.72 KiB  16      100.0%            8067c24f-5f78-49d7-9c8e-50158b4185dc  rack1
+    | # File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 26
+    | RULE hints pool creates a buffer
+    | CLASS org.apache.cassandra.hints.HintsBufferPool
+    | METHOD createBuffer
+    | NOCOMPILE
+    | AT EXIT
+    | IF true
+    | DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+    | traceln("hintsPool", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.hints.HintsBufferPool.createBuffer() org.apache.cassandra.hints.HintsBuffer
+    | compiled successfully
+    | # File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 35
+    | RULE hints pool writer waits at the cap
+    | CLASS org.apache.cassandra.hints.HintsBufferPool
+    | METHOD switchCurrentBuffer
+    | NOCOMPILE
+    | AT INVOKE java.util.concurrent.BlockingQueue.take
+    | IF true
+    | DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+    | traceln("hintsPool", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.hints.HintsBufferPool.switchCurrentBuffer(org.apache.cassandra.hints.HintsBuffer) boolean
+    | 
+[2026-09-30 14:53:54] CHECK PASS: Submit -l lists HintsBufferPool.createBuffer()
+[2026-09-30 14:53:54] CHECK PASS: Submit -l lists HintsBufferPool.switchCurrentBuffer(
+cassandra.MAX_HINT_BUFFERS=3
+[2026-09-30 14:53:55] CHECK PASS: the JVM has cassandra.MAX_HINT_BUFFERS=3
+[2026-09-30 14:53:55] -- readings
+[2026-09-30 14:54:01] reading smoke-control: MemoryUsed=50182384 Count=180 NMT_Other_KB=65408 TotalHints=0 HintsInProgress=0
+[2026-09-30 14:54:01] CHECK PASS: idle direct MemoryUsed is a positive number
+[2026-09-30 14:54:01] CHECK PASS: NMT 'Other' is a number
+[2026-09-30 14:54:01] -- thread dump parse
+thread dump smoke at 1790801642114: parked-in-take=0 blocked-on-monitor=0 other=0  (excerpt: dump-smoke-excerpt.txt)
+[2026-09-30 14:54:02] -- load and unload the hold
+install rule hold each hints buffer flush
+
+EXPECTED: Submit -l shows FlushBufferTask while the hold is loaded — yes
+uninstall RULE hold each hints buffer flush
+
+Cassandra has shutdown.
+ERROR lines in system.log: 0
+smoke done; data/ and logs/ removed

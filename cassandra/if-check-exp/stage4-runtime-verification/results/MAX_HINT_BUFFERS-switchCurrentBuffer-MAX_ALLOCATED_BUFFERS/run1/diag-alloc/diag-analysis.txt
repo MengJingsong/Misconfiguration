@@ -1,0 +1,35 @@
+allocateDirect calls traced since JVM start: 2637; total bytes requested: 162,604,941
+control reading at ms=1790804575113; A reading at ms=1790804590315 (15.2 s later)
+before the control reading: 2061 calls, 79,277,395 bytes requested; window (control, A]: 460 calls, 80,414,116 bytes requested
+direct pool change over the window: MemoryUsed +76,421,874, Count +123
+PASS allocateDirect(33554432) was called 3 times, equal to the 3 created lines (max=3)
+PASS every one of them was called from HintsBuffer.create: org.apache.cassandra.hints.HintsBuffer.create
+PASS two of the three fall in the window (created=2 and created=3); the first was made at idle, before the control reading
+PASS allocation at ms=1790804523387 thread=HintsWriteExecutor:1 matches created=1 line (ms=1790804523413, thread=HintsWriteExecutor:1)
+PASS allocation at ms=1790804584797 thread=MutationStage-48 matches created=2 line (ms=1790804584830, thread=MutationStage-48)
+PASS allocation at ms=1790804585292 thread=MutationStage-85 matches created=3 line (ms=1790804585323, thread=MutationStage-85)
+
+not the pool, in the window: 458 calls, 13,305,252 bytes requested
+calls        bytes  sizes (count x size)               allocating site (first cassandra/netty frame; immediate caller in brackets)
+    1    8,392,704  1x8392704                          org.apache.cassandra.utils.memory.BufferPool.allocateDirectAligned  [BufferPool.allocateDirectAligned]
+                     threads: epollEventLoopGroup x1; called by: BufferPool$GlobalPool.allocateMoreChunks x1
+   30    3,424,039  13x262144, 6x740, 4x51 …           org.apache.cassandra.io.compress.BufferType$2.allocate  [BufferType$2.allocate]
+                     threads: ReadStage x27, Native x3; called by: ThreadLocalByteBufferHolder.getBuffer x17, ThreadLocalReadAheadBuffer.getBlock x13
+  418    1,341,053  97x128, 75x8672, 75x4336 …         org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate  [DataOutputBuffer$1$1.allocate]
+                     threads: Native x375, MutationStage x42, HintsWriteExecutor x1; called by: DataOutputBuffer.expandToFit x321, BufferedDataOutputStreamPlus.<init> x97
+    9      147,456  9x16384                            io.netty.channel.unix.Buffer.allocateDirectWithNativeOrder  [Buffer.allocateDirectWithNativeOrder]
+                     threads: epollEventLoopGroup x9; called by: IovArray.<init> x9
+
+allocations of 1 MiB or more in the window that are not the pool's:
+  size=8,392,704 ms=1790804580358 thread=epollEventLoopGroup-5-2 site=org.apache.cassandra.utils.memory.BufferPool.allocateDirectAligned immediate caller=org.apache.cassandra.utils.memory.BufferPool.allocateDirectAligned
+
+accounting: bytes requested in the window 80,414,116 (pool 67,108,864 + other 13,305,252); bean change +76,421,874
+  requested minus bean change = 3,992,242 bytes (buffers the JVM freed within the window, or temporary NIO buffers replaced by larger ones)
+PASS exactly one 8,392,704-byte (8 MiB + 4 KiB alignment) call in the window, from org.apache.cassandra.utils.memory.BufferPool: org.apache.cassandra.utils.memory.BufferPool.allocateDirectAligned
+the bean's change less the pool's two buffers and that one chunk: 920,306 bytes over 120 more buffers (7669 bytes each on average)
+small allocations in the window by immediate caller (count, total bytes requested):
+    30 calls  3,424,039 bytes  org.apache.cassandra.io.compress.BufferType$2.allocate
+   418 calls  1,341,053 bytes  org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate
+     9 calls    147,456 bytes  io.netty.channel.unix.Buffer.allocateDirectWithNativeOrder
+
+ALL CHECKS PASS

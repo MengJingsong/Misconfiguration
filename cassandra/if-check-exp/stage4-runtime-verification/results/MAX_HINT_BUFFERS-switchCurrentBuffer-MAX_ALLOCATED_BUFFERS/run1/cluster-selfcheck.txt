@@ -1,0 +1,160 @@
+
+== n2: n=2 bufferSize=33554432
+PASS summary header gives n and bufferSize
+PASS JVM_EXTRA_OPTS has the knob, NMT and the agent with hints-pool.btm
+PASS the JVM reports cassandra.MAX_HINT_BUFFERS=2
+PASS node 1 saw node 2 as DN at start
+PASS the yaml diff adds 3 lines
+PASS session.log: 12 CHECK PASS lines, no CHECK FAILED / FAIL:
+PASS Submit -l lists createBuffer() and switchCurrentBuffer(...) triggers
+PASS no EXPECTED line of the script was answered NO
+PASS 0 ERROR lines in node 1's system.log
+PASS exactly 2 created lines, numbered 1..2
+PASS every created line has max=2 and size=33554432
+PASS created=1 is the hints executor's, made at idle before the control reading
+PASS created=2..2 are MutationStage writers, after the hold was loaded
+PASS 27 waiting lines, all MutationStage, the first not before created=2
+PASS 26 held flushes (hold lines)
+PASS MemoryUsed from A through B and the release stays within +1 KiB / -64 KiB of A (max +128, min -10617)
+PASS after the release MemoryUsed did not rise and no created line appeared: the wait ended without a new buffer
+PASS hints flowed: TotalHints A 19,284 < end of B 167,128 < after release 201,664
+PASS HintsInProgress never reached 75% of 128 x cores (B was not cut short)
+PASS 3 B dump(s); at least one shows 1 writer parked in take() and 31 blocked on the monitor
+PASS no dump shows more than one thread in take() (the method is synchronized)
+PASS dump B10: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B30: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B50: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS release dump: no thread in switchCurrentBuffer (excerpt empty; the independent recount agrees)
+INFO idle MemoryUsed 58,531,181 Count 176; at A 101,402,479 Count 298; rise 42,871,298; predicted (n-1) x bufferSize 33,554,432; difference +9,316,866 = +8.89 MiB; the 4 MiB band is EXCEEDED by 5,122,562 bytes
+INFO Count rose by 122: 1 pool buffers and 121 other direct buffers
+INFO NMT Other minus MemoryUsed (KB): control 16,396, A 1,327,122, Bend 1,327,115, release 1,327,115
+PASS NMT 'Other' minus MemoryUsed is the same at A, end of B and after release, within 8 KB (limit 64 KB): the two readings move together
+
+== n3: n=3 bufferSize=33554432
+PASS summary header gives n and bufferSize
+PASS JVM_EXTRA_OPTS has the knob, NMT and the agent with hints-pool.btm
+PASS the JVM reports cassandra.MAX_HINT_BUFFERS=3
+PASS node 1 saw node 2 as DN at start
+PASS the yaml diff adds 3 lines
+PASS session.log: 12 CHECK PASS lines, no CHECK FAILED / FAIL:
+PASS Submit -l lists createBuffer() and switchCurrentBuffer(...) triggers
+PASS no EXPECTED line of the script was answered NO
+PASS 0 ERROR lines in node 1's system.log
+PASS exactly 3 created lines, numbered 1..3
+PASS every created line has max=3 and size=33554432
+PASS created=1 is the hints executor's, made at idle before the control reading
+PASS created=2..3 are MutationStage writers, after the hold was loaded
+PASS 27 waiting lines, all MutationStage, the first not before created=3
+PASS 26 held flushes (hold lines)
+PASS MemoryUsed from A through B and the release stays within +1 KiB / -64 KiB of A (max +128, min -15581)
+PASS after the release MemoryUsed did not rise and no created line appeared: the wait ended without a new buffer
+PASS hints flowed: TotalHints A 25,712 < end of B 173,556 < after release 201,664
+PASS HintsInProgress never reached 75% of 128 x cores (B was not cut short)
+PASS 3 B dump(s); at least one shows 1 writer parked in take() and 31 blocked on the monitor
+PASS no dump shows more than one thread in take() (the method is synchronized)
+PASS dump B10: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B30: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B50: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS release dump: no thread in switchCurrentBuffer (excerpt empty; the independent recount agrees)
+INFO idle MemoryUsed 50,146,484 Count 176; at A 126,553,524 Count 297; rise 76,407,040; predicted (n-1) x bufferSize 67,108,864; difference +9,298,176 = +8.87 MiB; the 4 MiB band is EXCEEDED by 5,103,872 bytes
+INFO Count rose by 121: 2 pool buffers and 119 other direct buffers
+INFO NMT Other minus MemoryUsed (KB): control 16,398, A 1,327,125, Bend 1,327,114, release 1,327,114
+PASS NMT 'Other' minus MemoryUsed is the same at A, end of B and after release, within 11 KB (limit 64 KB): the two readings move together
+
+== n6: n=6 bufferSize=33554432
+PASS summary header gives n and bufferSize
+PASS JVM_EXTRA_OPTS has the knob, NMT and the agent with hints-pool.btm
+PASS the JVM reports cassandra.MAX_HINT_BUFFERS=6
+PASS node 1 saw node 2 as DN at start
+PASS the yaml diff adds 3 lines
+PASS session.log: 12 CHECK PASS lines, no CHECK FAILED / FAIL:
+PASS Submit -l lists createBuffer() and switchCurrentBuffer(...) triggers
+PASS no EXPECTED line of the script was answered NO
+PASS 0 ERROR lines in node 1's system.log
+PASS exactly 6 created lines, numbered 1..6
+PASS every created line has max=6 and size=33554432
+PASS created=1 is the hints executor's, made at idle before the control reading
+PASS created=2..6 are MutationStage writers, after the hold was loaded
+PASS 26 waiting lines, all MutationStage, the first not before created=6
+PASS 26 held flushes (hold lines)
+PASS MemoryUsed from A through B and the release stays within +1 KiB / -64 KiB of A (max +0, min -16637)
+PASS after the release MemoryUsed did not rise and no created line appeared: the wait ended without a new buffer
+PASS hints flowed: TotalHints A 51,424 < end of B 192,840 < after release 201,600
+PASS HintsInProgress never reached 75% of 128 x cores (B was not cut short)
+PASS 3 B dump(s); at least one shows 1 writer parked in take() and 31 blocked on the monitor
+PASS no dump shows more than one thread in take() (the method is synchronized)
+PASS dump B10: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B30: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B50 found no writer in the pool (all 32 MutationStage threads RUNNABLE in the independent recount): a hold line 114 ms before and a waiting line 47 ms after it (the refill window)
+PASS release dump: no thread in switchCurrentBuffer (excerpt empty; the independent recount agrees)
+INFO idle MemoryUsed 50,190,380 Count 180; at A 227,270,919 Count 305; rise 177,080,539; predicted (n-1) x bufferSize 167,772,160; difference +9,308,379 = +8.88 MiB; the 4 MiB band is EXCEEDED by 5,114,075 bytes
+INFO Count rose by 125: 5 pool buffers and 120 other direct buffers
+INFO NMT Other minus MemoryUsed (KB): control 16,398, A 1,327,124, Bend 1,327,114, release 1,327,114
+PASS NMT 'Other' minus MemoryUsed is the same at A, end of B and after release, within 10 KB (limit 64 KB): the two readings move together
+
+== n3-buf64MiB: n=3 bufferSize=67108864
+PASS summary header gives n and bufferSize
+PASS JVM_EXTRA_OPTS has the knob, NMT and the agent with hints-pool.btm
+PASS the JVM reports cassandra.MAX_HINT_BUFFERS=3
+PASS node 1 saw node 2 as DN at start
+PASS the yaml diff adds 5 lines
+PASS second-knob arm: the two lines of case 9b are in the diff
+PASS session.log: 12 CHECK PASS lines, no CHECK FAILED / FAIL:
+PASS Submit -l lists createBuffer() and switchCurrentBuffer(...) triggers
+PASS no EXPECTED line of the script was answered NO
+PASS 0 ERROR lines in node 1's system.log
+PASS exactly 3 created lines, numbered 1..3
+PASS every created line has max=3 and size=67108864
+PASS created=1 is the hints executor's, made at idle before the control reading
+PASS created=2..3 are MutationStage writers, after the hold was loaded
+PASS 26 waiting lines, all MutationStage, the first not before created=3
+PASS 25 held flushes (hold lines)
+PASS MemoryUsed from A through B and the release stays within +1 KiB / -64 KiB of A (max +136, min -16653)
+PASS after the release MemoryUsed did not rise and no created line appeared: the wait ended without a new buffer
+PASS hints flowed: TotalHints A 51,424 < end of B 334,256 < after release 401,536
+PASS HintsInProgress never reached 75% of 128 x cores (B was not cut short)
+PASS 3 B dump(s); at least one shows 1 writer parked in take() and 31 blocked on the monitor
+PASS no dump shows more than one thread in take() (the method is synchronized)
+PASS dump B10: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B30: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS dump B50: excerpt has the parked frame at HintsBufferPool.java:118 and a blocked example; the independent recount of the full dump agrees: 1 parked, 31 blocked
+PASS release dump: no thread in switchCurrentBuffer (excerpt empty; the independent recount agrees)
+INFO idle MemoryUsed 83,744,966 Count 180; at A 227,241,158 Count 304; rise 143,496,192; predicted (n-1) x bufferSize 134,217,728; difference +9,278,464 = +8.85 MiB; the 4 MiB band is EXCEEDED by 5,084,160 bytes
+INFO Count rose by 124: 2 pool buffers and 122 other direct buffers
+INFO NMT Other minus MemoryUsed (KB): control 16,398, A 1,327,125, Bend 1,327,114, release 1,327,114
+PASS NMT 'Other' minus MemoryUsed is the same at A, end of B and after release, within 11 KB (limit 64 KB): the two readings move together
+
+== n3-buf64MiB, attempt 1 (200,000 rows)
+PASS attempt 1 used 200,000 rows and the stress exited within B, at 30-39 s
+PASS attempt 1 took one B dump (B10: 1 parked, 31 blocked)
+PASS attempt 1: 3 created lines, size=67108864, max=3
+PASS attempt 1: nothing was left to resume at the release, which is why its release check is empty
+INFO attempt 1 rise over idle less (n-1) x 64 MiB: +9,286,511
+
+== n3-natural (control, no hold)
+PASS the hold rule was never loaded
+PASS 3 created lines, max=3, size=33554432
+PASS 16 waiting lines: the cap was reached and enforced with no hold
+PASS a B dump shows 1 writer parked in take() and 31 blocked
+PASS once the pool had filled MemoryUsed did not move (range 8 bytes over 4 readings)
+PASS TotalHints is 200,000 at the end: every row left its hint
+PASS the stress client reported 0 errors
+INFO natural load: highest created 3, peak MemoryUsed 126,669,866
+
+== across values
+INFO band table, difference from (n-1) x bufferSize: n2 +9,316,866 (+8.89 MiB), n3 +9,298,176 (+8.87 MiB), n6 +9,308,379 (+8.88 MiB), n3-buf64MiB +9,278,464 (+8.85 MiB)
+PASS OBSERVATION: the 4 MiB band is exceeded at all four hold values, so the rule's clause 'a larger difference is decided by the create trace' applies to every value
+PASS OBSERVATION: the excess is the same at every value and every bufferSize, within 38,402 bytes (limit 64 KiB): it does not depend on n or on bufferSize
+PASS OBSERVATION: rise(n3) - rise(n2) = 33,535,742; one 32 MiB buffer is 33,554,432 (off by -18,690)
+PASS OBSERVATION: rise(n6) - rise(n3) = 100,673,499; three 32 MiB buffers are 100,663,296 (off by +10,203)
+PASS second-knob arm: n x bufferSize is 192 MiB = 201,326,592 for n=6 x 32 MiB and for n=3 x 64 MiB, from the create trace
+PASS second-knob arm: MemoryUsed at A is 227,270,919 (n=6) and 227,241,158 (n=3 x 64 MiB), 29,761 bytes apart
+PASS second-knob arm: attempt 1 and attempt 2 agree on the excess within 64 KiB
+INFO direct memory that is not the pool's (MemoryUsed less created x bufferSize), at idle: n2 24,976,749, n3 16,592,052, n6 16,635,948, n3-buf64MiB 16,636,102, n3-natural 16,698,804
+INFO same, at A: n2 34,293,615, n3 25,890,228, n6 25,944,327, n3-buf64MiB 25,914,566; natural at end 26,006,570
+PASS OBSERVATION: the non-pool idle floor is the same in four of the five runs (n3, n6, 64 MiB arm, natural): 106,752 bytes apart
+PASS OBSERVATION: the n=2 run's non-pool floor is higher by one 8 MiB lump, at idle (8,384,697) and at A (8,403,387); it cancels in the rise over idle
+PASS OBSERVATION: the natural-load control's non-pool memory equals the hold runs' (within 256 KiB): the hold rule adds none
+PASS OBSERVATION: NMT 'Other' minus MemoryUsed at A is 1,327,122-1,327,125 KB at every value (limit on the spread 64 KB): the ~1.3 GB of native memory under load is not the pool and does not vary with n or bufferSize
+
+ALL CHECKS PASS

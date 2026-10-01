@@ -1,0 +1,20 @@
+# Byteman rule for the supplementary diagnostic (results §4.3). Observation only: it changes no behaviour.
+#
+# One line per ByteBuffer.allocateDirect(int) call in the JVM, which is the only way the JDK's "direct" BufferPoolMXBean
+# (the MemoryUsed and Count of case 9d) is ever raised:
+#
+#   alloc size=<bytes> ms=<epoch millis> thread=<name> stack=<the allocating thread's stack, flattened to one line>
+#
+# Output file: the system property stage4.diag.out, or else diag-alloc.txt in the JVM's working directory.
+# Loaded at node start beside hints-pool.btm. The rule is on a JDK class, so the agent needs boot:<byteman.jar> too, or the node
+# dies in startup with NoClassDefFoundError (org.jboss.byteman.rule.exception.EarlyReturnException):
+#   -javaagent:<byteman.jar>=boot:<byteman.jar>,script:<hints-pool.btm>,script:<this file>,listener:true
+
+RULE diag every allocateDirect
+CLASS java.nio.ByteBuffer
+METHOD allocateDirect(int)
+AT ENTRY
+IF true
+DO traceOpen("diagAlloc", java.lang.System.getProperty("stage4.diag.out", "diag-alloc.txt"));
+   traceln("diagAlloc", "alloc size=" + $1 + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName() + " stack=" + java.util.Arrays.toString(java.lang.Thread.currentThread().getStackTrace()))
+ENDRULE

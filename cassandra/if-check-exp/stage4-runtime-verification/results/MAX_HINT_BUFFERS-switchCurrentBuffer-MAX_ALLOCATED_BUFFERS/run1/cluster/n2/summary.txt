@@ -1,0 +1,31 @@
+== n2: n=2 bufferSize=33554432 hold=loaded, 3000 ms cores=40 in-flight-hint limit=5120 (B ends early at 3840); stress n=200000 1KiB x5 columns threads=64
+yaml diff: -cluster_name: 'Test Cluster'|+cluster_name: 'stage4-hints'|-      - seeds: "127.0.0.1:7000"|+      - seeds: "198.22.255.77:7000"|-listen_address: localhost|+listen_address: 198.22.255.77|
+JVM_EXTRA_OPTS=-Dcassandra.MAX_HINT_BUFFERS=2 -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=/users/jason92/stage4-logs/hints/cluster/n2/hints-pool.txt -Dstage4.hold.out=/users/jason92/stage4-logs/hints/cluster/n2/hold.txt -Dstage4.hold.ms=3000 -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/hints/hints-pool.btm,listener:true
+node 1 pid 1139673, up at 1790802600675
+UN  198.22.255.77  396.03 KiB  16      100.0%            53ea8bbe-26de-481e-94d1-d1d6d0f343dd  rack1
+DN  198.22.255.91  ?           16      100.0%            b79be723-970d-4c74-8b10-478505ac5d42  rack1
+cassandra.MAX_HINT_BUFFERS=2
+EXPECTED: exactly one created line at idle, from the hints executor — yes
+A: loading the hold at 1790802625571
+A: start at 1790802625805
+A: created=2 seen at 1790802632361 (~6560 ms after the start)
+B: start at 1790802639012
+thread dump B10 at 1790802653923: parked-in-take=1 blocked-on-monitor=31 other=0  (excerpt: dump-B10-excerpt.txt)
+thread dump B30 at 1790802673975: parked-in-take=1 blocked-on-monitor=31 other=0  (excerpt: dump-B30-excerpt.txt)
+thread dump B50 at 1790802693738: parked-in-take=1 blocked-on-monitor=31 other=0  (excerpt: dump-B50-excerpt.txt)
+B: 60s done
+release: unloading the hold at 1790802711410, TotalHints 173556
+thread dump release at 1790802717962: parked-in-take=0 blocked-on-monitor=0 other=0  (excerpt: dump-release-excerpt.txt)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency LOCAL_ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency LOCAL_ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency LOCAL_ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency LOCAL_ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency LOCAL_ONE (1 replica were required but only 0 acknowledged the write)
+traces: buffers ever created=2, entries into the disallow branch (waiting)=27, flushes held=26
+EXPECTED: every created line shows max=2 — yes
+EXPECTED: every created line shows size=33554432 — yes
+EXPECTED: created never exceeds n (2) — yes
+highest created value: 2
+peak MemoryUsed in readings.csv: 101402607
+ERROR lines in system.log: 0; hints directory: 1005M
+RESULT n2: run finished at 1790802746422

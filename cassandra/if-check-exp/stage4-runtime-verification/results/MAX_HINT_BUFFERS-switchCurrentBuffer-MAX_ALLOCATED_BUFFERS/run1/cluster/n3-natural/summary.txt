@@ -1,0 +1,23 @@
+== n3-natural: n=3 bufferSize=33554432 hold=none cores=40 in-flight-hint limit=5120 (B ends early at 3840); stress n=200000 1KiB x5 columns threads=64
+yaml diff: -cluster_name: 'Test Cluster'|+cluster_name: 'stage4-hints'|-      - seeds: "127.0.0.1:7000"|+      - seeds: "198.22.255.77:7000"|-listen_address: localhost|+listen_address: 198.22.255.77|
+JVM_EXTRA_OPTS=-Dcassandra.MAX_HINT_BUFFERS=3 -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=/users/jason92/stage4-logs/hints/cluster/n3-natural/hints-pool.txt -Dstage4.hold.out=/users/jason92/stage4-logs/hints/cluster/n3-natural/hold.txt -Dstage4.hold.ms=3000 -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/hints/hints-pool.btm,listener:true
+node 1 pid 1183420, up at 1790803572025
+UN  198.22.255.77  3.88 GiB  16      100.0%            53ea8bbe-26de-481e-94d1-d1d6d0f343dd  rack1
+DN  198.22.255.91  ?         16      100.0%            b79be723-970d-4c74-8b10-478505ac5d42  rack1
+cassandra.MAX_HINT_BUFFERS=3
+EXPECTED: exactly one created line at idle, from the hints executor — yes
+natural-load control: the hold is never loaded
+B: start at 1790803597041
+thread dump B10 at 1790803613990: parked-in-take=1 blocked-on-monitor=31 other=0  (excerpt: dump-B10-excerpt.txt)
+B: stress exited at 16s
+Op rate                   :   14,904 op/s  [WRITE: 14,904 op/s]
+Total partitions          :    200,000 [WRITE: 200,000]
+Total errors              :          0 [WRITE: 0]
+traces: buffers ever created=3, entries into the disallow branch (waiting)=16, flushes held=
+EXPECTED: every created line shows max=3 — yes
+EXPECTED: every created line shows size=33554432 — yes
+EXPECTED: created never exceeds n (3) — yes
+highest created value: 3
+peak MemoryUsed in readings.csv: 126669866
+ERROR lines in system.log: 0; hints directory: 997M
+RESULT n3-natural: run finished at 1790803648153

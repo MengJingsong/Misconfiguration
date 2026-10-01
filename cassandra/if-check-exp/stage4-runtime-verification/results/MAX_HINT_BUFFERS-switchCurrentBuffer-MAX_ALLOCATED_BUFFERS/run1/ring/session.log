@@ -1,0 +1,20 @@
+[2026-09-30 17:06:16] script: /home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/ring.sh
+cassandra-5.0.9
+3
+cassandra-5.0.9
+3
+[2026-09-30 17:06:16] == start both nodes
+[2026-09-30 17:08:05] ring has 2 UN and node 1's native transport is running (~85 s)
+UN  198.22.255.77  119.86 KiB  16      100.0%            53ea8bbe-26de-481e-94d1-d1d6d0f343dd  rack1
+UN  198.22.255.91  138.93 KiB  16      100.0%            b79be723-970d-4c74-8b10-478505ac5d42  rack1
+[2026-09-30 17:08:06] == keyspace1 (RF = 2) and the stress table
+Op rate                   :      818 op/s  [WRITE: 4,484 op/s]
+Total errors              :          0 [WRITE: 0]
+
+CREATE TABLE keyspace1.standard1 (
+    key blob PRIMARY KEY,
+[2026-09-30 17:08:17] == stop node 2, wait until node 1 shows it DN, stop node 1
+Cassandra has shutdown.
+[2026-09-30 17:08:31] node 1 sees node 2 as DN (~4 s)
+Cassandra has shutdown.
+[2026-09-30 17:08:46] RESULT: the ring is formed; both nodes are stopped; node 2 is a member; node 1 holds keyspace1

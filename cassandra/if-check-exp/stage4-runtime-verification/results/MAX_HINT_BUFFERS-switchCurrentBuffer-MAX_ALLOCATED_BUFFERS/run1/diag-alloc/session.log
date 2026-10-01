@@ -1,0 +1,37 @@
+[2026-09-30 15:41:41] script: /users/jason92/stage4-harness-run/diag-run.sh; host: node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu
+[2026-09-30 15:41:41] CHECK PASS: no CassandraDaemon running
+[2026-09-30 15:41:41] CHECK PASS: node 2 (198.22.255.91:7000) is stopped
+[2026-09-30 15:41:41] CHECK PASS: ports 7199/9042/9091 free
+[2026-09-30 15:41:41] CHECK PASS: the clone is at cassandra-5.0.9
+[2026-09-30 15:41:41] CHECK PASS: the ring's data is in place (keyspace1)
+HintsPoolCeilingTest.java: OK
+hints-pool.btm: OK
+hold-flush.btm: OK
+diag-alloc.btm: OK
+[2026-09-30 15:41:41] CHECK PASS: yaml diff adds 3 lines
+== diagnostic, n=3 bufferSize=33554432 hold=loaded, 3000 ms; stress n=200000 threads=64
+JVM_EXTRA_OPTS=-Dcassandra.MAX_HINT_BUFFERS=3 -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=/users/jason92/stage4-logs/hints/cluster/diag-alloc-n3/hints-pool.txt -Dstage4.hold.out=/users/jason92/stage4-logs/hints/cluster/diag-alloc-n3/hold.txt -Dstage4.hold.ms=3000 -Dstage4.diag.out=/users/jason92/stage4-logs/hints/cluster/diag-alloc-n3/diag-alloc.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/stage4-harness-run/hints/hints-pool.btm,script:/users/jason92/stage4-harness-run/diag/diag-alloc.btm,listener:true
+[2026-09-30 15:42:36] ok: node 1 UN and native transport running (after 21s)
+node 1 pid 1222567, up at 1790804556557
+[2026-09-30 15:42:38] CHECK PASS: node 2 (198.22.255.91) is DN on node 1
+[2026-09-30 15:42:38] CHECK PASS: Submit -l lists HintsBufferPool.createBuffer()
+[2026-09-30 15:42:38] CHECK PASS: Submit -l lists the diagnostic rule (allocateDirect)
+[2026-09-30 15:42:38] CHECK PASS: the JVM has cassandra.MAX_HINT_BUFFERS=3
+[2026-09-30 15:42:53] ok: the idle flush created the first buffer (after 0s)
+[2026-09-30 15:42:58] reading control: MemoryUsed=50146384 Count=178 NMT_Other_KB=65369 TotalHints=0
+A: loading the hold at 1790804578309
+install rule hold each hints buffer flush
+
+A: start at 1790804578446
+[2026-09-30 15:42:58] + tools/bin/cassandra-stress write n=200000 no-warmup -col size=FIXED(1024) -rate threads=64 -node 127.0.0.1 > /users/jason92/stage4-logs/hints/cluster/diag-alloc-n3/stress.txt &
+[2026-09-30 15:43:03] reading during: MemoryUsed=58699729 Count=202 NMT_Other_KB= TotalHints=
+[2026-09-30 15:43:08] reading during: MemoryUsed=126568130 Count=301 NMT_Other_KB= TotalHints=
+A: created=3 seen at 1790804588789 (~10344 ms after the start)
+[2026-09-30 15:43:13] reading A: MemoryUsed=126568258 Count=301 NMT_Other_KB=1450726 TotalHints=32140
+[2026-09-30 15:43:19] reading A-plus3s: MemoryUsed=126568266 Count=302 NMT_Other_KB= TotalHints=
+uninstall RULE hold each hints buffer flush
+
+Cassandra has shutdown.
+traces: created lines=3, diag-alloc lines=2637, diag-alloc bytes=8583970
+ERROR lines in system.log: 0
+RESULT diagnostic: finished at 1790804616661

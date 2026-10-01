@@ -1,0 +1,28 @@
+# File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 26
+RULE hints pool creates a buffer
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+traceln("hintsPool", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.hints.HintsBufferPool.createBuffer() org.apache.cassandra.hints.HintsBuffer
+compiled successfully
+# File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 35
+RULE hints pool writer waits at the cap
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+NOCOMPILE
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+traceln("hintsPool", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.hints.HintsBufferPool.switchCurrentBuffer(org.apache.cassandra.hints.HintsBuffer) boolean
+

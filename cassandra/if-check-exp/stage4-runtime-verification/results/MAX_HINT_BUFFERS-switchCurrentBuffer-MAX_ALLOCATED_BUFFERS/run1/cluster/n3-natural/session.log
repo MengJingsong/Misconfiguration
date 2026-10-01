@@ -1,0 +1,79 @@
+[2026-09-30 15:25:18] script: /users/jason92/stage4-harness-run/cluster-run.sh value n3-natural; host: node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu; label: n3-natural
+== n3-natural: n=3 bufferSize=33554432 hold=none cores=40 in-flight-hint limit=5120 (B ends early at 3840); stress n=200000 1KiB x5 columns threads=64
+[2026-09-30 15:25:18] CHECK PASS: no CassandraDaemon running
+[2026-09-30 15:25:18] CHECK PASS: node 2 (198.22.255.91:7000) is stopped
+[2026-09-30 15:25:18] CHECK PASS: ports 7199/9042/9091 free
+[2026-09-30 15:25:18] CHECK PASS: local disk has >= 20 GB free
+[2026-09-30 15:25:18] CHECK PASS: the clone is at cassandra-5.0.9
+[2026-09-30 15:25:18] CHECK PASS: the ring's data is in place (keyspace1)
+HintsPoolCeilingTest.java: OK
+hints-pool.btm: OK
+hold-flush.btm: OK
+yaml diff: -cluster_name: 'Test Cluster'|+cluster_name: 'stage4-hints'|-      - seeds: "127.0.0.1:7000"|+      - seeds: "198.22.255.77:7000"|-listen_address: localhost|+listen_address: 198.22.255.77|
+[2026-09-30 15:25:18] CHECK PASS: yaml diff adds 3 lines
+[2026-09-30 15:25:18] + mv logs /users/jason92/stage4-logs/hints/cluster/logs.before-n3-natural.1790803518
+[2026-09-30 15:25:18]   rc=0
+JVM_EXTRA_OPTS=-Dcassandra.MAX_HINT_BUFFERS=3 -XX:NativeMemoryTracking=summary -Dstage4.byteman.out=/users/jason92/stage4-logs/hints/cluster/n3-natural/hints-pool.txt -Dstage4.hold.out=/users/jason92/stage4-logs/hints/cluster/n3-natural/hold.txt -Dstage4.hold.ms=3000 -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/hints/hints-pool.btm,listener:true
+[2026-09-30 15:25:18] + JVM_EXTRA_OPTS=... bin/cassandra -p cassandra.pid > /users/jason92/stage4-logs/hints/cluster/n3-natural/stdout.txt 2>&1
+[2026-09-30 15:26:12] ok: node 1 UN and native transport running (after 21s)
+node 1 pid 1183420, up at 1790803572025
+UN  198.22.255.77  3.88 GiB  16      100.0%            53ea8bbe-26de-481e-94d1-d1d6d0f343dd  rack1
+DN  198.22.255.91  ?         16      100.0%            b79be723-970d-4c74-8b10-478505ac5d42  rack1
+[2026-09-30 15:26:14] CHECK PASS: node 2 (198.22.255.91) is DN on node 1
+    | # File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 26
+    | RULE hints pool creates a buffer
+    | CLASS org.apache.cassandra.hints.HintsBufferPool
+    | METHOD createBuffer
+    | NOCOMPILE
+    | AT EXIT
+    | IF true
+    | DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+    | traceln("hintsPool", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.hints.HintsBufferPool.createBuffer() org.apache.cassandra.hints.HintsBuffer
+    | compiled successfully
+    | # File /users/jason92/stage4-harness-run/hints/hints-pool.btm line 35
+    | RULE hints pool writer waits at the cap
+    | CLASS org.apache.cassandra.hints.HintsBufferPool
+    | METHOD switchCurrentBuffer
+    | NOCOMPILE
+    | AT INVOKE java.util.concurrent.BlockingQueue.take
+    | IF true
+    | DO traceOpen("hintsPool", java.lang.System.getProperty("stage4.byteman.out", "hints-pool.txt"));
+    | traceln("hintsPool", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.hints.HintsBufferPool.switchCurrentBuffer(org.apache.cassandra.hints.HintsBuffer) boolean
+    | 
+[2026-09-30 15:26:15] CHECK PASS: Submit -l lists HintsBufferPool.createBuffer()
+[2026-09-30 15:26:15] CHECK PASS: Submit -l lists HintsBufferPool.switchCurrentBuffer(
+cassandra.MAX_HINT_BUFFERS=3
+[2026-09-30 15:26:15] CHECK PASS: the JVM has cassandra.MAX_HINT_BUFFERS=3
+[2026-09-30 15:26:30] ok: the idle flush created the first buffer (after 0s)
+[2026-09-30 15:26:37] reading control: MemoryUsed=50253236 Count=179 NMT_Other_KB=65473 TotalHints=0 HintsInProgress=0
+EXPECTED: exactly one created line at idle, from the hints executor — yes
+natural-load control: the hold is never loaded
+[2026-09-30 15:26:37] + tools/bin/cassandra-stress write n=200000 no-warmup -col size=FIXED(1024) -rate threads=64 -node 127.0.0.1 > /users/jason92/stage4-logs/hints/cluster/n3-natural/stress.txt &
+B: start at 1790803597041
+[2026-09-30 15:26:41] reading B: MemoryUsed=50253236 Count=200 NMT_Other_KB= TotalHints= HintsInProgress=0
+[2026-09-30 15:26:48] reading B: MemoryUsed=126669858 Count=300 NMT_Other_KB= TotalHints= HintsInProgress=95
+[2026-09-30 15:26:53] reading B: MemoryUsed=126669866 Count=300 NMT_Other_KB= TotalHints= HintsInProgress=95
+thread dump B10 at 1790803613990: parked-in-take=1 blocked-on-monitor=31 other=0  (excerpt: dump-B10-excerpt.txt)
+[2026-09-30 15:26:58] reading B: MemoryUsed=126669866 Count=300 NMT_Other_KB= TotalHints= HintsInProgress=0
+B: stress exited at 16s
+[2026-09-30 15:27:04] reading Bend: MemoryUsed=126669866 Count=299 NMT_Other_KB=1450819 TotalHints=200000 HintsInProgress=0
+Op rate                   :   14,904 op/s  [WRITE: 14,904 op/s]
+Total partitions          :    200,000 [WRITE: 200,000]
+Total errors              :          0 [WRITE: 0]
+Cassandra has shutdown.
+traces: buffers ever created=3, entries into the disallow branch (waiting)=16, flushes held=
+EXPECTED: every created line shows max=3 — yes
+EXPECTED: every created line shows size=33554432 — yes
+EXPECTED: created never exceeds n (3) — yes
+highest created value: 3
+peak MemoryUsed in readings.csv: 126669866
+ERROR lines in system.log: 0; hints directory: 997M
+RESULT n3-natural: run finished at 1790803648153

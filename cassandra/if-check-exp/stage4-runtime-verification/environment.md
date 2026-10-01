@@ -153,7 +153,26 @@ fails with "Cannot connect".
 for two `UN`, create `keyspace1` with RF = 2 and write the stress table, stop node 2
 and wait until node 1 shows it `DN`. After that node 2 stays stopped with its data
 untouched, and each capacity value restarts node 1 only. Both trees were left with
-no `data/` or `logs/`, so the first run performs that first-time step itself.
+no `data/` or `logs/`; `results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/ring.sh` (run from the workstation, once) performs the first-time step and leaves both nodes stopped, and `run1/cluster-run.sh` then restarts node 1 alone for every capacity value.
+
+**Used for the cluster tier, 2026-09-30** (`MAX_HINT_BUFFERS`, results §4). `run1/ring.sh` formed the ring (two `UN` after 85 s, 2.5 min in
+all) and left both nodes stopped. `run1/cluster-run.sh value <label>` then ran each capacity value, about 2.5 min each (`ROWS`, `THREADS`,
+`HOLD_MS`, `B_SECONDS`, `A_TIMEOUT` are overridable environment variables). Every value started node 1 alone with the ring's `data/` in place
+and stopped it at the end; the script removes `data/hints/*`, moves `logs/` aside, and puts the yaml back to the tag plus the three ring edits.
+Lessons that generalize:
+
+- **A Byteman rule on a JDK class needs `boot:`.** A rule on `java.nio.ByteBuffer` (or any `java.*` class) runs in the bootstrap class loader,
+  which cannot see Byteman's classes, so the JVM dies in start-up with `NoClassDefFoundError: org/jboss/byteman/rule/exception/EarlyReturnException`.
+  Use `-javaagent:<byteman jar>=boot:<byteman jar>,script:<rules>,listener:true`. Rules on Cassandra classes do not need it.
+  `run1/diag-alloc/diag-alloc.btm` (one line per `allocateDirect` call, with the stack) is a working example.
+- A script that starts a node should fail at once if the daemon dies during start (`pgrep`), not wait out its 240 s timeout.
+- Run the values as separate background ssh commands, one after another; a failed value stops its own stress client and node 1, and the next
+  can start at once.
+
+**State after the run.** Both nodes are stopped and no stress client is left. Node0's `~/cassandra-run1/data/` (4.4 GB) holds the ring (`keyspace1`, 4.2 GB of
+table data from the stress writes) and the diagnostic's hints (226 MB); `logs/` is the diagnostic's; `data.heap-run-2026-09-29/` (2.4 GB) is still there. `pc80`'s `~/cassandra-node2/data/`
+is the ring member's data and must stay while this ring is used. To start a value again: nothing to reset, the script does it. To rebuild the ring:
+delete `data/` on both nodes and run `ring.sh`. The internode-port firewall rules are in place on both (in memory; re-apply if a node reboots).
 
 **Undo (node 2).** `sudo apt-get remove -y openjdk-11-jdk ant && sudo apt-get autoremove -y`;
 `rm -rf ~/cassandra-node2 ~/.m2 ~/stage4-logs`; and the firewall rules above.
