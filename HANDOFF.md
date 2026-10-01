@@ -53,6 +53,9 @@ this folder's own scope.
   changes) and wait for Jingsong's go-ahead. Show old-vs-new names or a
   file-by-file list when asked. Small factual fixes to a file you are
   already working on don't need this.
+- **Stage 4 has no human gate (decided 2026-09-30).** The AI audits the case's §9, runs it, checks its own
+  conclusion against the raw files and files the verdict; nothing waits for Jingsong, who may overrule a verdict at
+  any time. The shared-infrastructure safety rules in the stage-4 README still apply.
 - **Commit and push only on request.** "Commit" and "push" are asked for
   separately; never do either unprompted.
 - **Sync before restructuring.** Jingsong also uploads files to GitHub
@@ -185,11 +188,46 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ## Open items / next steps
 
-### ⏵ Resume here (state as of 2026-09-30)
+### ⏵ Resume here — stage 4 after `MAX_HINT_BUFFERS` (state as of 2026-09-30, end of session)
 
-**Stage 4 has closed one case, `memtable_heap_space` (both tiers), and run the unit tier of a second, `MAX_HINT_BUFFERS` (2026-09-30; see its row below).** Read
-`stage4-runtime-verification/README.md`, then the results file
-`results/memtable_heap_space-tryAllocate-limit.md`.
+**Stage 4 has closed two cases, `memtable_heap_space` and `MAX_HINT_BUFFERS`, both tiers each.** `MAX_HINT_BUFFERS` closed 2026-09-30. **Read, in this
+order:** `stage4-runtime-verification/README.md` (the protocol; **no human approval or review anywhere**), then
+`stage4-runtime-verification/results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` (§4.3 the cluster conclusion, §5.1b the self-check, §8 the
+verdict and the five recommendations for stage 3), then the case's §10 "Stage-4 feedback".
+
+**Verdict: Confirmed at both tiers**, with one recorded deviation at the cluster tier. The reading rule's 4 MiB band was exceeded at every value (+8.85 to
++8.89 MiB over `(n − 1) × bufferSize`). The rule's own clause sends a larger difference to the create trace, which shows exactly *n* buffers at every value;
+the excess is the same at every value (within 38 KB), and an allocation trace at *n* = 3 attributes it to non-pool allocations: one 8 MiB + 4 KiB `BufferPool`
+chunk and about 120 small per-thread buffers. **An open question for Jingsong (results §5.1b, part 3):** I read the rule's clause as deciding it. If the band
+is read as binding on its own, the tier has "no §9a row fits" and the README says to amend §9a and run the tier again.
+
+| Piece | State |
+|---|---|
+| `MAX_HINT_BUFFERS` | **Closed 2026-09-30.** Unit tier consistent with Confirmed; cluster tier Confirmed with the deviation above; no run 2 (results §5.2). §9a and §9b are byte-identical to the freeze (hash in results §1); §9c, §9e and the §9 intro were amended after the run, documentation only (the second-knob arm needs 400,000 rows). |
+| Recommendations for stage 3 | Five, in results §8: the band, the NMT cross-check, the arm's workload arithmetic, dump timing, Byteman `boot:`. **Not applied** (readings existed). Fold them into the case and `stage3-ai-deep-read/_TEMPLATE.md` when next touched. |
+| Nodes right now | Both stopped, nothing running. Node0's `data/` holds the ring, 4.2 GB of table data and the diagnostic's hints (226 MB); `data.heap-run-2026-09-29` (2.4 GB) can be deleted. `pc80`'s `data/` is the ring member's and must stay while this ring is used. The internode-port firewall rules are in place on both (in memory). Details and the `boot:` lesson: `environment.md` §5. |
+| Commit state | Committed and pushed through `88c07fb`. **Uncommitted, all of it:** the case file (§9c, §9e, §9 intro, §10), the results file, everything new under `results/MAX_HINT_BUFFERS-…/` (`run1/ring.sh`, `cluster-run.sh`, `cluster/`, `ring/`, `diag-alloc/`, both self-check scripts and outputs, `dump-recount.*`, `instrument-check/cluster-run-smoke/`), the harness README's hold-rule row, `environment.md` and this file. Nothing was committed or pushed. |
+
+**Access** (the tool shell does not source `~/.shell_common_init`, so use the literal hosts): node 1 = `jason92@pc66.cloudlab.umass.edu` (NODE0, measured),
+node 2 = `jason92@pc80.cloudlab.umass.edu` (NODE1, hint target); NODE2 is unused. Always `ssh -o BatchMode=yes -n`. Run anything long as a background task that
+holds the ssh command (a backgrounded script whose output goes through `tee` keeps the session open until it ends).
+
+**What the next case should take from this one** (details in its results file):
+
+- Convert the case to the new §9 layout and audit it first (README, step 0); freeze §9's hash before any run.
+- **Write the reading rule with a measured tolerance.** The 4 MiB band missed by about 5 MiB, because a stress load makes the JVM allocate an 8 MiB `BufferPool`
+  chunk and ~120 per-thread scratch buffers. Prefer evidence that does not depend on an absolute size: the create and disallow trace, and the *step* between
+  capacity values (here one buffer within 19 KB).
+- **Separate checks from readings in the self-check script, and record every correction to it.** Two of mine were mis-specified (an excerpt count, a
+  tolerance); results §5.1b says what changed and why.
+- One run script per case; run the values one at a time as background ssh tasks; each value writes `summary.txt`, `readings.csv` and `session.log`; pull only the
+  small files into `run1/cluster/<label>/` and keep the full logs on the node.
+- A Byteman rule on a JDK class needs `boot:` in the agent string. `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM. Start a node
+  only after `nodetool status` shows `UN` and `nodetool statusbinary` prints `running`. `JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command, never exported.
+- Stress-client `WriteTimeoutException` lines are a symptom of queued writers, not evidence; the client retries, so `Total errors` stays 0.
+
+**Reference, the first closed case, `memtable_heap_space` (state as of 2026-09-29/30).** Its results file is
+`stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md`.
 
 | Step | State |
 |---|---|
@@ -212,14 +250,16 @@ stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 | Option | Notes |
 |---|---|
 | ~~Fill results §8~~ | Done 2026-09-30; `memtable_heap_space` is closed. |
-| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `MAX_HINT_BUFFERS`, `max_space_usable_for_compactions_in_percentage`. Convert the case to the new §9 layout first (§9a, audited, before any run). |
-| **`MAX_HINT_BUFFERS` stage 4 (unit tier done 2026-09-30; cluster tier not started)** | **Audit:** Ready after amendments (results `results/MAX_HINT_BUFFERS-…md` §1.1). **Harness** under `harness/MAX_HINT_BUFFERS-…/` (test, two Byteman rules, README), committed in `0598801` with the audit; two instrument-check defects fixed before run 1 (results §3: writer warm-up before the baseline; cluster `Count` reported, not asserted). **§9 is frozen** at commit `0598801`, §9 hash `7625dee` (command in the stage-4 README); it was unchanged when the unit tier ended. **Unit tier, run 1 (AI), 2026-09-30, node0:** 7 JVMs (upstream `HintsBufferPoolTest` at *n* = 2, 3, 6; `HintsPoolCeilingTest` at *n* = 2, 3, 6 with 1 MiB buffers and *n* = 3 with 2 MiB), all passed; the pool held exactly *n* buffers, direct memory was exactly `n × bufferSize` (2, 3, 6 MiB; 3 × 2 MiB = 6 × 1 MiB), the writer waited at the check. **Self-checked and verdict filed: consistent with Confirmed** (results §4.2, §5, §8; evidence in `results/MAX_HINT_BUFFERS-…/run1/`, `unit-selfcheck.py` asserts 50 relations). No run 2. The upstream test ran under BMUnit on JDK 11.0.32, which closes the case's open Byteman-attach item. **Second node set up 2026-09-30** (`environment.md` §5): NODE1 (`pc80`, a separate CloudLab experiment on the same control subnet) has JDK 11, Ant, a clone `~/cassandra-node2` at `b5f2a54` and an `ant jar` build; both nodes run `cluster_name: 'stage4-hints'`, seed `198.22.255.77`, `listen_address` = own control address, client and JMX ports on localhost only; internode port 7000 restricted to the two nodes by in-memory iptables rules. Node0's clone was reset (heap-run `conf/cassandra.yaml` edits saved to `~/stage4-logs/heap-run-cassandra.yaml.diff`, its `data/` moved to `data.heap-run-2026-09-29`). A ring check passed: node 1 restarted alone with node 2 down wrote 2,000 rows with `TotalHints` 0 → 2000. Lesson for the run script: wait for `nodetool statusbinary` = `running`, not only `UN`. **Hold rule checked 2026-09-30** (results §1.2; `instrument-check/hold-check.sh`): `Submit -l`, the held flush seen in a thread dump, and the unload all work; note the pool reuses a recycled buffer before creating one, so `created` stops at the cap and does not step again after a release. Both trees were left with no `data/` or `logs/`. **Open before the cluster tier:** write the cluster run script for this case (the heap one is an example, not a template); the first run repeats the ring's first-time step. **Commit state:** audit and harness `0598801`; unit-tier results `bd8694c`; the "How this verifies the hypothesis" block (`0c8220e`, pushed); second node `f48389a` (pushed); uncommitted: the hold-rule check's script and evidence under `results/MAX_HINT_BUFFERS-…/instrument-check/`, and the two notes above. n = 1 is left out of the sweep (reason in §9b); Jingsong does not want it recorded as a stage-3 finding. |
+| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `max_space_usable_for_compactions_in_percentage` (`memtable_heap_space` and `MAX_HINT_BUFFERS` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
+| ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
+| Settle the band question and fold in the five recommendations | Decide whether the reading rule's band is binding (results §5.1b part 3); then apply the recommendations in results §8 to the case's §9 and to `stage3-ai-deep-read/_TEMPLATE.md`. |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
-**Machine notes.** JDK and Ant exist only on node0 where they were installed
-(CloudLab nodes are rebuilt from scratch). Full run logs are on node0 in
-`~/stage4-logs/`, outside the repo. `HANDOFF.md` and the case files are the
-only record a new node inherits.
+**Machine notes.** Two nodes are set up (`environment.md` §5): node0 (`pc66`, the measured node, tree
+`~/cassandra-run1`) and `pc80` (the hint target, tree `~/cassandra-node2`), both JDK 11 + Ant, in separate
+CloudLab experiments on one control subnet (`198.22.255.77` and `.91`). CloudLab nodes are rebuilt from scratch, so
+`HANDOFF.md`, `environment.md` and the case files are the only record a new node inherits. Full run logs are on each
+node in `~/stage4-logs/`, outside the repo. Access details are in the resume block above.
 
 **Open stage-4 follow-ups:** convert the other nine cases to the new §9 layout
 before their runs. (The stale §9d–§9g references in the root `README.md`,
@@ -235,8 +275,8 @@ in `bands.md`. **Eleven cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 has started** (see the table above) — eleven designs, one case closed and
-one (`MAX_HINT_BUFFERS`) through its unit tier. Stage 3's own
+**Stage 4 has started** (see the table above) — eleven designs, two cases closed
+(`memtable_heap_space`, `MAX_HINT_BUFFERS`). Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
 | Band | Meaning | Units |
