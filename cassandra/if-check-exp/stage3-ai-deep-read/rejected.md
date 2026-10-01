@@ -104,13 +104,18 @@ other two rules never need to be reached.
 
 The 65 A1 rows from
 [`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md)
-(feed **3a**), read with the source open. **21 were already recorded** by
-earlier passes and were cited rather than re-judged; **8 qualify** and are in
-[`pending.md`](pending.md); **3 are undecided** and are in
-[`deferred.md`](deferred.md); the remaining **33 are refused below**, grouped
-by the argument that refuses them — several rows share one judgement.
+(feed **3a**), read with the source open. The 65 split **21 pending, 34
+rejected, 10 deferred**; rows already recorded by earlier passes were cited
+rather than re-judged and are counted in the bucket of that earlier record.
+**39 were newly judged** here: 10 pending (8 qualifying rows plus 2 second
+check sites), **26 refused below**, grouped by the argument that refuses them
+(several rows share one judgement), and 3 undecided in
+[`deferred.md`](deferred.md) §5. The other 26 were recorded earlier: 11
+pending, 8 rejected, 7 deferred. (Counts corrected 2026-10-01; this section
+previously said 21 / 8 / 3 / 33. Row-by-row split:
+[A1 disposition table](#a1-disposition-table--all-65-rows) below.)
 
-**A1's hit rate is 8/44 newly-judged rows.** Stage 2 promised only a reading
+**A1's hit rate is 8/39 newly-judged rows** (65 − 26 already recorded). Stage 2 promised only a reading
 order and that is what it delivered: band A1 is dense with real
 usage-vs-limit comparisons, and most of them still fail Rule 2 or Rule 3.
 
@@ -131,6 +136,34 @@ usage-vs-limit comparisons, and most of them still fail Rule 2 or Rule 3.
 | `StorageProxy.java:1592` | `totalHintsInProgress > maxHintsInProgress` | **Rule 2, in-flight count cap.** Despite the comment ("avoid OOMing due to excess hints") the operand is a count of in-flight hints with no fixed per-hint footprint — the same reasoning as `concurrent_compactors` and the thread-pool rows above. The byte-level hint bounds are the filed `MAX_HINT_BUFFERS` case and the `max_hints_size_per_host` candidate in `pending.md`. |
 | `HeapUtils.java:115` | `freeSpaceBytes < 2 * maxMemoryBytes` | **Rule 2, one-off diagnostic precondition.** Refuses to start a heap dump unless the disk can hold twice the heap. It gates a single diagnostic file, bounds no steady-state usage, and its limit side is the device with no tunable term. Closest precedent: the `SSTableSplitter` CLI validation above. |
 | helper `needsCleaning()` (`MemtablePool.java:128`) | `used() > nextClean` | **Rule 3, reclaim trigger.** Crossing `nextClean` (= `limit × memtable_cleanup_threshold`) calls `cleaner.trigger()` to flush the largest memtable. Allocation proceeds in both branches; nothing is withheld. **Record the cross-reference, though:** this soft threshold is why the *hard* limit in the filed `memtable_heap_space` / `memtable_offheap_space` cases is rarely reached in practice, and both of those cases' §9 designs now say to raise `memtable_cleanup_threshold` or the experiment measures this instead. |
+
+### A1 disposition table — all 65 rows
+
+Added 2026-10-01, restructured the same day. Every `bands.md` A1 row appears
+once, filed under the bucket its record **started** in: **pending 21,
+rejected 34, deferred 10**. "Recorded" is not a bucket — rows recorded by
+earlier passes sit in the bucket of that earlier record and are marked
+*(recorded)*; rows first judged by the A1 pass are marked *(A1 pass)*.
+"Filed" means a pending or deferred row has since become a case file.
+
+| Bucket | Group | Rows | Count |
+|---|---|---|---|
+| **Pending (21)** | A1 pass — qualifies | `AbstractType:594`, `Mutation:172`, `Mutation:451`, `ReadCommand:715`, `RowIndexEntry:392`, `OutboundConnection:398`, `MerkleTree:409`, `StorageProxy:2492` (since filed) | 8 |
+| | A1 pass — second site of a new candidate | `CounterMutation:94` (of `Mutation:172`), `OutboundConnection:416` (of `:398`) | 2 |
+| | *(recorded)* still-open candidates | `QueryController:449` (`MAX_MATERIALIZED_KEYS`), `TeeDataInputPlus:58` (`TeeDataInputPlus_limit`) | 2 |
+| | *(recorded)* second site of a filed case | `CommitLogSegmentManagerCDC:200` (`cdc_total_space`), `ResourceLimits:213` (reserve sub-checks of the two `*_receive_queue_capacity` cases) | 2 |
+| | *(recorded)* pending → filed | `BufferPool:443`, `MemtablePool:156`, helper `tryAllocate()`, `AbstractMessageHandler:419`, `HintsBufferPool:113`, helper `switchCurrentBuffer()`, `CommitLogSegmentManagerCDC:345` | 7 |
+| **Rejected (34)** | A1 pass | `Message:817`, `OutboundConnection:331`, `:793`, `:979`, `HintsBuffer:152`, `QueryProcessor:825`, `AbstractMessageHandler:464`, `OutboundConnection:449`, `HintsWriteExecutor:247`, `HintsWriter:237`, `SSTableSimpleUnsortedWriter:110`, `PerSSTableIndexWriter:247`, `OnDiskIndexBuilder:167`, `PerSSTableIndexWriter:218`, `TrieMemIndex:84`, `SequentialWriter:227`, `RowIndexEntry:403`, `PartitionDenylist:419`, `:445`, `StorageProxy:1592`, `HeapUtils:115`; helpers `flushInternal()`, `needsCleaning()`, `isStillAllocating()`; the two re-cited rows `CommitLogSegment:246`, `BatchStatement:352` | 26 |
+| | *(recorded)* own entries above | `HintsBuffer:190`, `CQLMessageHandler:551` | 2 |
+| | *(recorded)* `db/compaction/` subpackage entry (selection logic, writer-switch-on-full) | `LeveledManifest:190`, `:557`, `:678`, `MajorLeveledCompactionWriter:75`, `:78`, `SplittingSizeTieredCompactionWriter:84` | 6 |
+| **Deferred (10)** | A1 pass — undecided (`deferred.md` §5) | `IndexSummaryRedistribution:341`, `SystemKeyspace:1919`, `ResourceLimits:138` | 3 |
+| | *(recorded)* deferred → filed | `Directories:551`, helper `hasDiskSpaceForCompactionsAndStreams()`, `BigFormatPartitionWriter:113`, `:171`, `RowIndexEntry:360`, `CompactionAwareWriter:282`, `Directories:453` | 7 |
+| **Total** | | 21 + 34 + 10 | **65** |
+
+Of the 65, 39 were newly judged by the A1 pass (10 pending + 26 rejected +
+3 deferred) and 26 were recorded earlier (11 pending + 8 rejected + 7
+deferred). Counting only rows that stand alone, the four second-site rows
+(two new, two recorded) come out of pending: 17 pending, 61 rows.
 
 ### Two line numbers corrected while re-reading
 

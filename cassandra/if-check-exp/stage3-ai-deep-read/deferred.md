@@ -270,9 +270,11 @@ comparison hides behind a helper such as `if (!pool.hasRoom())`, leaving the
 ## 5. Undecided rows from the band-A1 pass — 2026-09-28
 
 Three A1 rows that a single read did not settle. They are **not refused** —
-each needs one specific question answered, named below. The other 62 A1 rows
-were resolved: 8 to [`pending.md`](pending.md), 33 to
-[`rejected.md`](rejected.md), 21 already recorded by earlier passes.
+each needs one specific question answered, named below. Across all 65 A1
+rows the split is 21 pending, 34 rejected, 10 deferred (these 3 plus 7
+earlier-deferred rows since filed as cases); 26 of the 65 were recorded by
+earlier passes and are counted in the bucket of that record (counts corrected
+2026-10-01; see `rejected.md`, "A1 disposition table").
 
 | # | Row | What is undecided | What would settle it |
 |---|---|---|---|

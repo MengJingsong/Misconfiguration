@@ -348,9 +348,9 @@ is no saving worth buying with a heuristic that might drop a real case.
    `limit` is the row's own serialized length read from the SSTable). The file
    now holds no unjudged row; only its §2 re-audit remains, folded into item 1.
 1. **Stage 3 reads band A, in A1 → A2 → A3 order, under all three enforcement
-   patterns.** **A1 is done — all 65 rows judged 2026-09-28**: 8 qualified
-   (`pending.md`), 33 refused (`rejected.md`, batch "band A1"), 3 undecided
-   (`deferred.md` §5), 21 already recorded and cited. **A2 is done — all 30
+   patterns.** **A1 is done — all 65 rows judged 2026-09-28**: 21 pending, 34 rejected, 10 deferred
+   (39 newly judged: 10 / 26 / 3; 26 already recorded and counted by lineage:
+   11 / 8 / 7; counts corrected 2026-10-01, row-by-row table in `rejected.md`). **A2 is done — all 30
    rows judged 2026-09-29**: no new candidate, 21 refused (`rejected.md`, batch
    "band A2"), 1 second check site for `Integer_MAX_VALUE` (`pending.md`), 1
    undecided (`deferred.md` §6, `Envelope.java:429`), 7 already recorded.

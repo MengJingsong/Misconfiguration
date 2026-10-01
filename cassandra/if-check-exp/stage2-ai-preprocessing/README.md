@@ -149,13 +149,18 @@ a verdict — see [`bands.md`](bands.md).
 | Next | Stage 3 reads **A3 (39)**, then band B (174), then C (94) |
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
-read all 65 rows with the source open. Outcome: **8 qualified** (in
-[`../stage3-ai-deep-read/pending.md`](../stage3-ai-deep-read/pending.md)),
-**33 refused** (in
-[`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md),
-batch "band A1"), **3 undecided** (in
-[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) §5),
-and **21 already recorded** by earlier passes and cited rather than re-judged.
+read all 65 rows with the source open. Outcome: **21 pending** (in
+[`../stage3-ai-deep-read/pending.md`](../stage3-ai-deep-read/pending.md); 8
+of them since filed as cases, 2 more cited as second sites of filed cases),
+**34 rejected** (in
+[`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md)) and
+**10 deferred** (3 undecided in
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) §5,
+7 deferred earlier and since filed). 39 of the 65 were newly judged (10
+pending, 26 rejected, 3 deferred); 26 were already recorded by earlier passes
+and cited rather than re-judged (11 pending, 8 rejected, 7 deferred). Counts
+corrected 2026-10-01; row-by-row table in `rejected.md`, "A1 disposition
+table".
 Do not re-read these rows — cite the entry.
 
 **Band A2 is consumed (2026-09-29).** All 30 rows read with the source open:
@@ -167,7 +172,7 @@ Stage 2's A2 reasons were wrong about the limit's effect on two rows
 (`NativeAllocator.java:144`, `SlabAllocator.java:92` — "rejecting the on-heap
 clone", where nothing is rejected) and about its kind on one (`Envelope`).
 
-**What the pass says about the banding.** 8 of the 44 newly-judged rows
+**What the pass says about the banding.** 8 of the 39 newly-judged rows
 qualified. A1 is genuinely dense with usage-vs-limit comparisons, exactly as
 the band claims, and most of them still fail Rule 2 or Rule 3 — which is the
 banding working as specified, since a band was never a verdict. Two
