@@ -1,0 +1,18 @@
+ms=1790869854957 config totalSpaceMiB=16 segmentMiB=32 mode=blocking S=33554432 A=16777216 k=0 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+ms=1790869856067 idle links=0 linkBytes=0 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=0 allocatingState=FORBIDDEN
+ms=1790869856069 check PASS idle floor is min(k, 2) = 0 links, got 0
+ms=1790869856101 firstRejection accepted=0 links=0 linkBytes=0 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=0 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 0."
+ms=1790869856102 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 0.
+ms=1790869856107 rejectionCounter N=0 linkBytes=0 N-linkBytes=0
+ms=1790869856107 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+ms=1790869856111 check PASS links at the first rejection: L = 0, expected k = 0
+ms=1790869856111 check PASS every link is S bytes
+ms=1790869856113 check PASS apparent bytes are L x S: 0
+ms=1790869856113 check PASS N = 0 within L*S .. L*S + 64*L (L = 0)
+ms=1790869857211 afterTenMore rejected=10 links=0 linkBytes=0 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=0 allocatingState=FORBIDDEN
+ms=1790869857213 check PASS links unchanged after ten more rejections: 0 then 0
+ms=1790869857214 check PASS link bytes unchanged after ten more rejections
+ms=1790869857214 check PASS segment still forbidden, got FORBIDDEN
+ms=1790869857222 nonCdcWrite accepted=true
+ms=1790869857222 release skipped: k = 0, a segment can never be permitted
+ms=1790869857231 RESULT mismatches=0 totalSpaceMiB=16 segmentMiB=32 mode=blocking

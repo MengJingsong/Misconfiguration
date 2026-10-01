@@ -1,0 +1,78 @@
+ms=1790869988254 config totalSpaceMiB=280 segmentMiB=16 mode=blocking S=16777216 A=293601280 k=17 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+ms=1790869988358 linkEvent + CommitLog-7-1790869985517.log
+ms=1790869988359 linkEvent + CommitLog-7-1790869985518.log
+ms=1790869988359 linkCount n=2
+ms=1790869989367 idle links=2 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=PERMITTED
+ms=1790869989370 check PASS idle floor is min(k, 2) = 2 links, got 2
+ms=1790869989543 linkEvent + CommitLog-7-1790869985519.log
+ms=1790869989543 linkCount n=3
+ms=1790869989748 linkEvent + CommitLog-7-1790869985520.log
+ms=1790869989749 linkCount n=4
+ms=1790869989875 linkEvent + CommitLog-7-1790869985521.log
+ms=1790869989876 linkCount n=5
+ms=1790869989997 linkEvent + CommitLog-7-1790869985522.log
+ms=1790869989997 linkCount n=6
+ms=1790869990124 linkEvent + CommitLog-7-1790869985523.log
+ms=1790869990125 linkCount n=7
+ms=1790869990321 linkEvent + CommitLog-7-1790869985524.log
+ms=1790869990321 linkCount n=8
+ms=1790869990458 linkEvent + CommitLog-7-1790869985525.log
+ms=1790869990458 linkCount n=9
+ms=1790869990574 linkEvent + CommitLog-7-1790869985526.log
+ms=1790869990574 linkCount n=10
+ms=1790869990685 linkEvent + CommitLog-7-1790869985527.log
+ms=1790869990686 linkCount n=11
+ms=1790869990842 linkEvent + CommitLog-7-1790869985528.log
+ms=1790869990843 linkCount n=12
+ms=1790869990962 linkEvent + CommitLog-7-1790869985529.log
+ms=1790869990962 linkCount n=13
+ms=1790869991078 linkEvent + CommitLog-7-1790869985530.log
+ms=1790869991078 linkCount n=14
+ms=1790869991188 linkEvent + CommitLog-7-1790869985531.log
+ms=1790869991189 linkCount n=15
+ms=1790869991344 linkEvent + CommitLog-7-1790869985532.log
+ms=1790869991344 linkCount n=16
+ms=1790869991460 linkEvent + CommitLog-7-1790869985533.log
+ms=1790869991461 linkCount n=17
+ms=1790869991706 firstRejection accepted=255 links=17 linkBytes=285212672 everyLinkIsS=true idxFiles=17 idxBytes=306 counter=285212949 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 285212949."
+ms=1790869991708 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 285212949.
+ms=1790869991713 rejectionCounter N=285212949 linkBytes=285212672 N-linkBytes=277
+ms=1790869991713 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+ms=1790869991718 check PASS links at the first rejection: L = 17, expected k = 17
+ms=1790869991718 check PASS every link is S bytes
+ms=1790869991719 check PASS apparent bytes are L x S: 285212672
+ms=1790869991720 check PASS N = 285212949 within L*S .. L*S + 64*L (L = 17)
+ms=1790869992772 afterTenMore rejected=10 links=17 linkBytes=285212672 everyLinkIsS=true idxFiles=17 idxBytes=306 counter=285212978 allocatingState=FORBIDDEN
+ms=1790869992775 check PASS links unchanged after ten more rejections: 17 then 17
+ms=1790869992775 check PASS link bytes unchanged after ten more rejections
+ms=1790869992775 check PASS segment still forbidden, got FORBIDDEN
+ms=1790869992783 nonCdcWrite accepted=true
+ms=1790869992788 linkEvent - CommitLog-7-1790869985519.log
+ms=1790869992788 linkEvent - CommitLog-7-1790869985523.log
+ms=1790869992788 linkEvent - CommitLog-7-1790869985533.log
+ms=1790869992788 linkCount n=14
+ms=1790869992793 linkEvent - CommitLog-7-1790869985521.log
+ms=1790869992794 linkEvent - CommitLog-7-1790869985526.log
+ms=1790869992794 linkEvent - CommitLog-7-1790869985528.log
+ms=1790869992794 linkCount n=11
+ms=1790869992799 linkEvent - CommitLog-7-1790869985529.log
+ms=1790869992799 linkEvent - CommitLog-7-1790869985531.log
+ms=1790869992799 linkCount n=9
+ms=1790869992805 linkEvent - CommitLog-7-1790869985517.log
+ms=1790869992805 linkEvent - CommitLog-7-1790869985522.log
+ms=1790869992805 linkEvent - CommitLog-7-1790869985527.log
+ms=1790869992805 linkEvent - CommitLog-7-1790869985530.log
+ms=1790869992805 linkCount n=5
+ms=1790869992811 linkEvent - CommitLog-7-1790869985520.log
+ms=1790869992811 linkEvent - CommitLog-7-1790869985524.log
+ms=1790869992811 linkCount n=3
+ms=1790869992816 linkEvent - CommitLog-7-1790869985518.log
+ms=1790869992817 linkEvent - CommitLog-7-1790869985525.log
+ms=1790869992817 linkEvent - CommitLog-7-1790869985532.log
+ms=1790869992817 linkCount n=0
+ms=1790869992818 release consumerDeleted=34 files
+ms=1790869992930 linkEvent + CommitLog-7-1790869985534.log
+ms=1790869992931 linkCount n=1
+ms=1790869992936 release resumed=true afterMs=147 rejectedBefore=1 links=1 linkBytes=16777216 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=16777216 allocatingState=CONTAINS
+ms=1790869992937 check PASS the writer resumed within 10 s of the links being deleted
+ms=1790869992947 RESULT mismatches=0 totalSpaceMiB=280 segmentMiB=16 mode=blocking

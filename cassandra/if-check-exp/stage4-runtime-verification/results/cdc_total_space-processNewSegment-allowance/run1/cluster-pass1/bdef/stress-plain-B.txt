@@ -1,0 +1,78 @@
+******************** Stress Settings ********************
+Command:
+  Type: user
+  Count: -1
+  Duration: 60 SECONDS
+  No Warmup: true
+  Consistency Level: LOCAL_ONE
+  Target Uncertainty: not applicable
+  Command Ratios: {insert=1.0}
+  Command Clustering Distribution: clustering=gaussian(1..10)
+  Profile File(s): /users/jason92/stage4-harness-run/cdc/plain-rows.yaml
+Rate:
+  Auto: false
+  Thread Count: 2
+  OpsPer Sec: 10
+Population:
+  Sequence: 1..1000000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Errors:
+  Ignore: true
+  Tries: 1
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.1]
+[... excerpt: the full output is on the node ...]
+  Token Range Queries:
+  Insert Settings:
+    partitions: fixed(1)
+    batchtype: UNLOGGED
+Connected to cluster: Test Cluster, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: /127.0.0.1:9042; Rack: rack1
+com.datastax.driver.core.exceptions.OperationTimedOutException: [/127.0.0.1:9042] Timed out waiting for server response
+	at com.datastax.driver.core.exceptions.OperationTimedOutException.copy(OperationTimedOutException.java:45)
+	at com.datastax.driver.core.exceptions.OperationTimedOutException.copy(OperationTimedOutException.java:27)
+	at com.datastax.driver.core.DriverThrowables.propagateCause(DriverThrowables.java:37)
+	at com.datastax.driver.core.DefaultResultSetFuture.getUninterruptibly(DefaultResultSetFuture.java:295)
+	at com.datastax.driver.core.AbstractSession.execute(AbstractSession.java:60)
+	at org.apache.cassandra.stress.util.JavaDriverClient.execute(JavaDriverClient.java:228)
+	at org.apache.cassandra.stress.StressProfile.maybeCreateSchema(StressProfile.java:243)
+	at org.apache.cassandra.stress.StressProfile.newGenerator(StressProfile.java:689)
+	at org.apache.cassandra.stress.StressProfile.printSettings(StressProfile.java:126)
+	at org.apache.cassandra.stress.settings.StressSettings.lambda$printSettings$1(StressSettings.java:318)
+	at java.base/java.util.LinkedHashMap.forEach(LinkedHashMap.java:684)
+	at org.apache.cassandra.stress.settings.StressSettings.printSettings(StressSettings.java:318)
+	at org.apache.cassandra.stress.Stress.run(Stress.java:92)
+	at org.apache.cassandra.stress.Stress.main(Stress.java:54)
+Caused by: com.datastax.driver.core.exceptions.OperationTimedOutException: [/127.0.0.1:9042] Timed out waiting for server response
+	at com.datastax.driver.core.RequestHandler$SpeculativeExecution.onTimeout(RequestHandler.java:981)
+	at com.datastax.driver.core.Connection$ResponseHandler$1.run(Connection.java:1638)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.run(HashedWheelTimer.java:715)
+	at com.datastax.shaded.netty.util.concurrent.ImmediateExecutor.execute(ImmediateExecutor.java:34)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.expire(HashedWheelTimer.java:703)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelBucket.expireTimeouts(HashedWheelTimer.java:790)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:503)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+[2026-10-01 10:04:13] ERR line 156: tools/bin/cassandra-stress user profile="$HARNESS/$prof" "ops(insert=1)" $dur no-warmup "$@" -errors retries=0 ignore -node 127.0.0.1

@@ -1,0 +1,175 @@
+[2026-10-01 09:59:53] script: ./cluster-run.sh value b528; host: node0.jason92-318546.misconfiguration-pg0.cloudlab.umass.edu; label: b528
+== b528: cdc_total_space=528MiB commitlog_segment_size=32MiB mode=blocking kind=normal; stress threads=16, B throttle 100/s
+[2026-10-01 09:59:53] CHECK PASS: no CassandraDaemon running
+[2026-10-01 09:59:53] CHECK PASS: ports 7199/9042/9091 free
+[2026-10-01 09:59:53] CHECK PASS: local disk has >= 25 GB free
+[2026-10-01 09:59:53] CHECK PASS: the clone is at cassandra-5.0.9
+CdcTotalSpaceCeilingTest.java: OK
+cdc-verdict.btm: OK
+cdc-sampler.py: OK
+cdc-consumer.sh: OK
+cdc-analyze.py: OK
+cdc-rows.yaml: OK
+plain-rows.yaml: OK
+[2026-10-01 09:59:53] CHECK PASS: python3 and cqlsh are available
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 528MiB|
+[2026-10-01 09:59:53] CHECK PASS: yaml diff adds 2 lines
+[2026-10-01 09:59:53] + mv logs /users/jason92/stage4-logs/cdc/cluster/logs.before-b528.1790870393
+[2026-10-01 09:59:53]   rc=0
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/b528/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+[2026-10-01 09:59:53] + JVM_EXTRA_OPTS=... bin/cassandra -p cassandra.pid > /users/jason92/stage4-logs/cdc/cluster/b528/stdout.txt 2>&1
+node pid 32012, up at 1790870438433 (after 17s)
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 59
+    | RULE cdc write rejected
+    | CLASS org.apache.cassandra.exceptions.CDCWriteException
+    | METHOD <init>
+    | NOCOMPILE
+    | AT ENTRY
+    | BIND n : int = incrementCounter("stage4.cdcReject")
+    | IF n % 100 == 1
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "reject n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " msg=" + $1)
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.exceptions.CDCWriteException.<init>(java.lang.String) void
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 41
+    | RULE cdc verdict, state after
+    | CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+    | METHOD processNewSegment
+    | NOCOMPILE
+    | AT EXIT
+    | IF true
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "post seg=" + $1.logFile.name() + " state=" + $1.getCDCState() + " sip=" + $0.sizeInProgress.get() + " ms=" + java.lang.System.currentTimeMillis())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker.processNewSegment(org.apache.cassandra.db.commitlog.CommitLogSegment) void
+    | compiled successfully
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 32
+    | RULE cdc verdict, counter before
+    | CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+    | METHOD processNewSegment
+    | NOCOMPILE
+    | AT ENTRY
+    | IF true
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "pre seg=" + $1.logFile.name() + " sip=" + $0.sizeInProgress.get() + " allowance=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCTotalSpace() + " segSize=" + org.apache.cassandra.config.DatabaseDescriptor.getCommitLogSegmentSize() + " blocking=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCBlockWrites() + " ms=" + java.lang.System.currentTimeMillis())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+[2026-10-01 10:00:38] CHECK PASS: Submit -l lists CDCSizeTracker.processNewSegment
+[2026-10-01 10:00:38] CHECK PASS: Submit -l lists deleteOldLinkedCDCCommitLogSegment
+[2026-10-01 10:00:38] CHECK PASS: Submit -l lists CDCWriteException
+    | 
+    |  name                   | value
+    | ------------------------+---------------------
+    |        cdc_block_writes |                true
+    |             cdc_enabled |                true
+    |       cdc_raw_directory | bin/../data/cdc_raw
+    |         cdc_total_space |              528MiB
+    |  commitlog_segment_size |               32MiB
+    | 
+    | (5 rows)
+settings read back: cdc_total_space=528MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=true
+k = floor(528 / 32) = 16; exact multiple: no
+[2026-10-01 10:00:39] CHECK PASS: cdc_total_space read back as 528
+[2026-10-01 10:00:39] CHECK PASS: commitlog_segment_size read back as 32
+[2026-10-01 10:00:39] CHECK PASS: data/cdc_raw exists
+[2026-10-01 10:00:40] phase idle_start
+[2026-10-01 10:00:55] phase idle_end
+[2026-10-01 10:00:57] reading idle: links=2 link_bytes=67108864 alloc=69632 idx=0/0 Failures=0 WARN=0 created=2 forbidden=0
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+[2026-10-01 10:00:57] phase A_start
+[2026-10-01 10:00:57] + tools/bin/cassandra-stress user profile=/users/jason92/stage4-harness-run/cdc/cdc-rows.yaml "ops(insert=1)" n=1000000000 no-warmup -rate threads=16 -errors retries=0 ignore -node 127.0.0.1 > /users/jason92/stage4-logs/cdc/cluster/b528/stress-cdc-A.txt &
+[2026-10-01 10:01:04] phase A_first_rejection
+[2026-10-01 10:01:04] phase A_end
+[2026-10-01 10:01:06] reading A: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures=454 WARN=2 created=18 forbidden=2
+A: ended at 1790870466413, ~7 s after the start; stress A tail: com.datastax.driver.core.exceptions.WriteFailureException: Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)|Operation x1 on key(s) [600513408]: Error executing: (WriteFailureException): Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)||
+[2026-10-01 10:01:06] phase B_start
+[2026-10-01 10:01:06] + tools/bin/cassandra-stress user profile=/users/jason92/stage4-harness-run/cdc/cdc-rows.yaml "ops(insert=1)" duration=60s no-warmup -rate threads=16 throttle=100/s -errors retries=0 ignore -node 127.0.0.1 > /users/jason92/stage4-logs/cdc/cluster/b528/stress-cdc-B.txt &
+[2026-10-01 10:01:06] + tools/bin/cassandra-stress user profile=/users/jason92/stage4-harness-run/cdc/plain-rows.yaml "ops(insert=1)" duration=60s no-warmup -rate threads=2 throttle=10/s -errors retries=0 ignore -node 127.0.0.1 > /users/jason92/stage4-logs/cdc/cluster/b528/stress-plain-B.txt &
+[2026-10-01 10:01:06] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=2 created=18 forbidden=2
+[2026-10-01 10:01:11] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=2 created=18 forbidden=2
+[2026-10-01 10:01:16] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=3 created=18 forbidden=2
+[2026-10-01 10:01:21] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=3 created=18 forbidden=2
+[2026-10-01 10:01:26] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=4 created=18 forbidden=2
+[2026-10-01 10:01:31] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=4 created=18 forbidden=2
+[2026-10-01 10:01:36] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=5 created=18 forbidden=2
+[2026-10-01 10:01:41] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=5 created=18 forbidden=2
+[2026-10-01 10:01:46] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=6 created=18 forbidden=2
+[2026-10-01 10:01:51] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=6 created=18 forbidden=2
+[2026-10-01 10:01:56] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=7 created=18 forbidden=2
+[2026-10-01 10:02:01] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=7 created=18 forbidden=2
+[2026-10-01 10:02:06] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=8 created=19 forbidden=3
+[2026-10-01 10:02:11] reading B: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures= WARN=8 created=19 forbidden=3
+[2026-10-01 10:02:16] phase B_end
+[2026-10-01 10:02:18] reading Bend: links=16 link_bytes=536870912 alloc=520810496 idx=16/288 Failures=6469 WARN=9 created=19 forbidden=3
+CDC stress B: Op rate                   :       99 op/s  [insert: 99 op/s]
+CDC stress B: Total partitions          :      6,015 [insert: 6,015]
+CDC stress B: Total errors              :      6,015 [insert: 6,015]
+non-CDC stress B: Op rate                   :       10 op/s  [insert: 10 op/s]
+non-CDC stress B: Total partitions          :        602 [insert: 602]
+non-CDC stress B: Total errors              :          0 [insert: 0]
+EXPECTED: non-CDC control: no errors — yes
+EXPECTED: non-CDC control: wrote rows — yes
+[2026-10-01 10:02:18] phase R_start
+release: consumer pass deleted 16 links (L was 16 at B's end)
+[2026-10-01 10:02:20] phase R_end
+[2026-10-01 10:02:22] reading Rend: links=1 link_bytes=33554432 alloc=5984256 idx=0/0 Failures=6470 WARN=9 created=19 forbidden=3
+release: accepted=1 after 2 attempt(s), 4116 ms since the consumer pass
+EXPECTED: release: a CDC write was accepted within 30 s — yes
+Cassandra has shutdown.
+traces: segments created=20, created forbidden=3, 'Rejecting mutation' WARN entries in system.log=9, logged rejected writes (exception stacks)=6470, deleteOld lines=0, reject lines=65 (last n: 6401)
+sampler: ticks=2059 max_links=16 max_link_bytes=536870912 max_gap_ms=50 first_ms=1790870439713 last_ms=1790870542613
+ERROR entries in system.log: 6470 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 9.8M; DEBUG 'Freed up' lines in debug.log: 0
+disk: 544M data/ ; 54G free
+    | S=33554432  A=553648128  k=16  blocking=True  exact multiple of S: False
+    | 
+    | 1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  20 creations, 0 violations []
+    | 
+    | 2. each creation (links = files that existed just before it, from the timeline)
+    |    segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+    |    -1790870400942.log               0   0.00              0            0 PERMITTED 
+    |    -1790870400943.log               0   0.00              0            0 PERMITTED 
+    |    -1790870400944.log               2   1.00       33554432     33554432 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870400945.log               3   3.00      100663296            0 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400946.log               4   3.00      100663296     33554432 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400947.log               5   4.00      134217728     33554432 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400948.log               6   5.00      167772178     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400949.log               7   6.00      201326610     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400950.log               8   7.00      234881042     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400951.log               9   8.00      268435474     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400952.log              10  10.00      335544374          -54 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400953.log              11  11.00      369098806          -54 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400954.log              12  12.00      402653238          -54 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400955.log              13  13.00      436207724         -108 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400956.log              14  14.00      469762156         -108 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400957.log              15  15.00      503316588         -108 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870400958.log              16  16.00      536871074         -162 FORBIDDEN ambiguous (a link event within 100 ms before)
+    |    -1790870400959.log              16  16.00      536871074         -162 FORBIDDEN ambiguous (a link event within 100 ms before)
+    |    -1790870400960.log              16  16.00      536871200         -288 FORBIDDEN 
+    |    -1790870400961.log               1   1.00       33554432            0 PERMITTED 
+    |    stale (lag >= S/2) among 5 unambiguous creations: 1
+    | 
+    | 3. creations that made a link beyond k = 16
+    |    none
+    | 
+    | 4. link timeline: peak L = 16 before the first removal  (from the events; same-tick ordering can inflate it by 1, the CSV is exact)
+    |    first rejection traced at 1790870464474: L = 16; rejection lines traced: 65, rejections counted up to the last: 6401
+    | 
+    | 5. sampler CSV: 2059 ticks, max gap 50 ms
+    |    ticks where the link bytes were not exactly L x S: 0
+    |    idle_end                     L=2    link_bytes=67108864     (2.00 S)  allocated=69632        idx=0/0
+    |    A_first_rejection            L=16   link_bytes=536870912    (16.00 S)  allocated=520810496    idx=16/288
+    |    A_end                        L=16   link_bytes=536870912    (16.00 S)  allocated=520810496    idx=16/288
+    |    B_end                        L=16   link_bytes=536870912    (16.00 S)  allocated=520810496    idx=16/288
+    |    R_start                      L=16   link_bytes=536870912    (16.00 S)  allocated=520810496    idx=16/288
+    |    R_end                        L=1    link_bytes=33554432     (1.00 S)  allocated=5984256      idx=0/0
+    |    B window: peak L=16, min L=16, plateau (median over its last 20 s) L=16, bytes at peak=536870912
+    |    peak L over the whole run: 16 (536870912 bytes = 16.00 S)
+    | 
+    | 6. ceiling attribution (blocking): permitted creations = 17, k = 16, links made beyond k = 0
+    |    each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): n/a, none beyond k
+RESULT value b528: finished at 1790870558200

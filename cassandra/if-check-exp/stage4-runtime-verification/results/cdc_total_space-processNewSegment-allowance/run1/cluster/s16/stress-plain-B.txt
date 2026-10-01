@@ -1,0 +1,78 @@
+******************** Stress Settings ********************
+Command:
+  Type: user
+  Count: -1
+  Duration: 60 SECONDS
+  No Warmup: true
+  Consistency Level: LOCAL_ONE
+  Target Uncertainty: not applicable
+  Command Ratios: {insert=1.0}
+  Command Clustering Distribution: clustering=gaussian(1..10)
+  Profile File(s): /users/jason92/stage4-harness-run/cdc/plain-rows.yaml
+Rate:
+  Auto: false
+  Thread Count: 2
+  OpsPer Sec: 10
+Population:
+  Sequence: 1..1000000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Errors:
+  Ignore: true
+  Tries: 1
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.1]
+[... excerpt: the full output is on the node ...]
+total,                                                   515,      10,      10,      10,     3.8,     3.8,     4.6,     4.6,     4.6,     4.6,   52.0,  0.00959,      0,      0,       0,       0,       0,       0
+total,                                                   525,      10,      10,      10,     3.3,     3.3,     3.7,     3.7,     3.7,     3.7,   53.0,  0.00941,      0,      0,       0,       0,       0,       0
+total,                                                   535,      10,      10,      10,     3.2,     3.2,     3.9,     3.9,     3.9,     3.9,   54.0,  0.00923,      0,      0,       0,       0,       0,       0
+total,                                                   545,      10,      10,      10,     3.4,     3.0,     7.5,     7.5,     7.5,     7.5,   55.0,  0.00906,      0,      0,       0,       0,       0,       0
+total,                                                   555,      10,      10,      10,     3.2,     3.4,     3.9,     3.9,     3.9,     3.9,   56.0,  0.00890,      0,      0,       0,       0,       0,       0
+total,                                                   565,      10,      10,      10,     3.3,     3.3,     3.8,     3.8,     3.8,     3.8,   57.0,  0.00874,      0,      0,       0,       0,       0,       0
+total,                                                   575,      10,      10,      10,     3.4,     3.4,     3.8,     3.8,     3.8,     3.8,   58.0,  0.00859,      0,      0,       0,       0,       0,       0
+total,                                                   585,      10,      10,      10,     3.3,     3.3,     3.6,     3.6,     3.6,     3.6,   59.0,  0.00845,      0,      0,       0,       0,       0,       0
+total,                                                   595,      10,      10,      10,     3.5,     3.4,     4.2,     4.2,     4.2,     4.2,   60.0,  0.00831,      0,      0,       0,       0,       0,       0
+total,                                                   602,      10,      10,      10,     3.2,     3.3,     3.6,     3.6,     3.6,     3.6,   60.7,  0.00821,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :       10 op/s  [insert: 10 op/s]
+Partition rate            :       10 pk/s  [insert: 10 pk/s]
+Row rate                  :       10 row/s [insert: 10 row/s]
+Latency mean              :    4.3 ms [insert: 4.3 ms]
+Latency median            :    4.0 ms [insert: 4.0 ms]
+Latency 95th percentile   :    5.4 ms [insert: 5.4 ms]
+Latency 99th percentile   :   13.6 ms [insert: 13.6 ms]
+Latency 99.9th percentile :   34.1 ms [insert: 34.1 ms]
+Latency max               :   34.1 ms [insert: 34.1 ms]
+Total partitions          :        602 [insert: 602]
+Total errors              :          0 [insert: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:01:00
+
+END

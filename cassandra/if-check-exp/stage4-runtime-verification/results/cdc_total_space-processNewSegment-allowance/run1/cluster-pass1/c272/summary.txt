@@ -1,0 +1,17 @@
+== c272: cdc_total_space=272MiB commitlog_segment_size=32MiB mode=blocking kind=consumer; stress threads=16, B throttle 100/s
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 272MiB|
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/c272/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+node pid 53573, up at 1790871219052 (after 17s)
+settings read back: cdc_total_space=272MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=true
+k = floor(272 / 32) = 8; exact multiple: no
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+Op rate                   :       97 op/s  [insert: 100 op/s]
+Total partitions          :      3,016 [insert: 3,016]
+Total errors              :          0 [insert: 0]
+consumer control: WARN lines = 0, logged rejected writes = 0, segments created = 99, forbidden = 0, links deleted by the consumer = 97
+EXPECTED: no rejection in the consumer control — yes
+traces: segments created=100, created forbidden=1, 'Rejecting mutation' WARN entries in system.log=0, logged rejected writes (exception stacks)=0, deleteOld lines=0, reject lines=0 (last n: )
+sampler: ticks=1186 max_links=8 max_link_bytes=268435456 max_gap_ms=51 first_ms=1790871220265 last_ms=1790871279515
+ERROR entries in system.log: 0 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 92K; DEBUG 'Freed up' lines in debug.log: 0
+disk: 3.0G data/ ; 52G free
+RESULT value c272: finished at 1790871294838

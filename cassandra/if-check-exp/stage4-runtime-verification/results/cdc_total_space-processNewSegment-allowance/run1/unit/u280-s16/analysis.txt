@@ -1,0 +1,36 @@
+2 creation(s) before the current commit-log lifetime (segment id below 1790869985517) are left out: -1790869985514.log, -1790869985515.log
+S=16777216  A=293601280  k=17  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  19 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790869985517.log               0   0.00              0            0 PERMITTED 
+   -1790869985518.log               1   0.00              0     16777216 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+   -1790869985519.log               2   2.00       33554432            0 PERMITTED 
+   -1790869985520.log               3   2.00       33554432     16777216 PERMITTED STALE: counter 1.00 segments low
+   -1790869985521.log               4   3.00       50331666     16777198 PERMITTED STALE: counter 1.00 segments low
+   -1790869985522.log               5   4.00       67108900     16777180 PERMITTED STALE: counter 1.00 segments low
+   -1790869985523.log               6   5.00       83886152     16777144 PERMITTED STALE: counter 1.00 segments low
+   -1790869985524.log               7   6.00      100663386     16777126 PERMITTED STALE: counter 1.00 segments low
+   -1790869985525.log               8   8.00      134217836         -108 PERMITTED 
+   -1790869985526.log               9   8.00      134217843     16777101 PERMITTED STALE: counter 1.00 segments low
+   -1790869985527.log              10   9.00      150995077     16777083 PERMITTED STALE: counter 1.00 segments low
+   -1790869985528.log              11  10.00      167772322     16777054 PERMITTED STALE: counter 1.00 segments low
+   -1790869985529.log              12  11.00      184549556     16777036 PERMITTED STALE: counter 1.00 segments low
+   -1790869985530.log              13  13.00      218104013         -205 PERMITTED 
+   -1790869985531.log              14  14.00      234881229         -205 PERMITTED 
+   -1790869985532.log              15  15.00      251658481         -241 PERMITTED 
+   -1790869985533.log              16  16.00      268435697         -241 PERMITTED 
+   -1790869985534.log              17  17.00      285212949         -277 FORBIDDEN 
+   -1790869985535.log              17  17.00      285212949         -277 FORBIDDEN 
+   stale (lag >= S/2) among 19 unambiguous creations: 10
+
+3. creations that made a link beyond k = 17
+   none
+
+4. link timeline: peak L = 17 before the first removal  (per-tick link counts)
+   first rejection traced at 1790869991700: L = 17; rejection lines traced: 1, rejections counted up to the last: 1
+
+6. ceiling attribution (blocking): permitted creations = 17, k = 17, links made beyond k = 0
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): n/a, none beyond k

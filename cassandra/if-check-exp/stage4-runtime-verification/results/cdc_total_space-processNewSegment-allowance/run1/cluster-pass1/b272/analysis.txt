@@ -1,0 +1,40 @@
+S=33554432  A=285212672  k=8  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  13 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790870237649.log               0   0.00              0            0 PERMITTED 
+   -1790870237650.log               1   0.00              0     33554432 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+   -1790870237651.log               2   1.00       33554432     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870237652.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870237653.log               4   3.00      100663296     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870237654.log               5   4.00      134217728     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870237655.log               6   5.00      167772178     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790870237656.log               7   6.00      201326610     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790870237657.log               8   7.00      234881078     33554378 PERMITTED STALE: counter 1.00 segments low
+   -1790870237658.log               9   8.00      268435510     33554378 FORBIDDEN STALE: counter 1.00 segments low
+   -1790870237659.log               9   9.00      301989942          -54 FORBIDDEN 
+   -1790870237660.log               9   9.00      301990050         -162 FORBIDDEN 
+   -1790870237661.log               1   1.00       33554432            0 PERMITTED 
+   stale (lag >= S/2) among 13 unambiguous creations: 9
+
+3. creations that made a link beyond k = 8
+   -1790870237657.log: links before 8, counter 234881078 (7.00 S), S + counter <= A: True, S + files*S <= A: False  => stale counter let it through
+
+4. link timeline: peak L = 9 before the first removal  (from the events; same-tick ordering can inflate it by 1, the CSV is exact)
+   first rejection traced at 1790870300244: L = 9; rejection lines traced: 64, rejections counted up to the last: 6301
+
+5. sampler CSV: 2049 ticks, max gap 50 ms
+   ticks where the link bytes were not exactly L x S: 0
+   idle_end                     L=2    link_bytes=67108864     (2.00 S)  allocated=69632        idx=0/0
+   A_first_rejection            L=9    link_bytes=301989888    (9.00 S)  allocated=292982784    idx=9/162
+   A_end                        L=9    link_bytes=301989888    (9.00 S)  allocated=292982784    idx=9/162
+   B_end                        L=9    link_bytes=301989888    (9.00 S)  allocated=292982784    idx=9/162
+   R_start                      L=9    link_bytes=301989888    (9.00 S)  allocated=292982784    idx=9/162
+   R_end                        L=1    link_bytes=33554432     (1.00 S)  allocated=5984256      idx=0/0
+   B window: peak L=9, min L=9, plateau (median over its last 20 s) L=9.0, bytes at peak=301989888
+   peak L over the whole run: 9 (301989888 bytes = 9.00 S)
+
+6. ceiling attribution (blocking): permitted creations = 10, k = 8, links made beyond k = 1
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): yes

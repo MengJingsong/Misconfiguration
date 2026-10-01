@@ -1,0 +1,26 @@
+2 creation(s) before the current commit-log lifetime (segment id below 1790870009026) are left out: -1790870009023.log, -1790870009024.log
+S=33554432  A=83886080  k=2  blocking=False  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  12 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790870009026.log               0   0.00              0            0 PERMITTED 
+   -1790870009027.log               0   0.00              0            0 PERMITTED 
+   -1790870009028.log               2   2.00       67108864            0 PERMITTED 
+   -1790870009029.log               2   1.00       33554439     33554425 PERMITTED STALE: counter 1.00 segments low
+   -1790870009030.log               3   2.00       67108871     33554425 PERMITTED STALE: counter 1.00 segments low
+   -1790870009031.log               3   2.00       67108882     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790870009032.log               3   2.00       67108871     33554425 PERMITTED ambiguous (a link event within 10 ms before)
+   -1790870009033.log               3   2.00       67108882     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790870009034.log               3   2.00       67108871     33554425 PERMITTED STALE: counter 1.00 segments low
+   -1790870009035.log               3   2.00       67108882     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790870009036.log               3   2.00       67108882     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790870009037.log               3   2.00       67108882     33554414 PERMITTED STALE: counter 1.00 segments low
+   stale (lag >= S/2) among 11 unambiguous creations: 8
+
+3. creations that made a link beyond k = 2  (blocking mode only: in non-blocking mode every segment is permitted and the oldest links are deleted)
+   none
+
+4. link timeline: peak L = 3  (per-tick link counts)
+   deleteOld calls: 9; links removed: 9; removed in ascending segment order: True

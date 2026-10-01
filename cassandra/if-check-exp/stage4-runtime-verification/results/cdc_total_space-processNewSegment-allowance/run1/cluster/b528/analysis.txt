@@ -1,0 +1,47 @@
+S=33554432  A=553648128  k=16  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  20 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790871770841.log               0   0.00              0            0 PERMITTED 
+   -1790871770842.log               1   0.00              0     33554432 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+   -1790871770843.log               2   1.00       33554432     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790871770844.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790871770845.log               4   3.00      100663296     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790871770846.log               5   4.00      134217746     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790871770847.log               6   5.00      167772178     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790871770848.log               7   6.00      201326628     33554396 PERMITTED STALE: counter 1.00 segments low
+   -1790871770849.log               8   7.00      234881060     33554396 PERMITTED STALE: counter 1.00 segments low
+   -1790871770850.log               9   8.00      268435492     33554396 PERMITTED STALE: counter 1.00 segments low
+   -1790871770851.log              10  10.00      335544392          -72 PERMITTED 
+   -1790871770852.log              11  11.00      369098824          -72 PERMITTED 
+   -1790871770853.log              12  12.00      402653256          -72 PERMITTED 
+   -1790871770854.log              13  13.00      436207742         -126 PERMITTED 
+   -1790871770855.log              14  14.00      469762174         -126 PERMITTED 
+   -1790871770856.log              15  15.00      503316606         -126 PERMITTED 
+   -1790871770857.log              16  16.00      536871092         -180 FORBIDDEN 
+   -1790871770858.log              16  16.00      536871092         -180 FORBIDDEN 
+   -1790871770859.log              16  16.00      536871200         -288 FORBIDDEN 
+   -1790871770860.log               1   1.00       33554432            0 PERMITTED 
+   stale (lag >= S/2) among 20 unambiguous creations: 9
+
+3. creations that made a link beyond k = 16
+   none
+
+4. link timeline: peak L = 16 before the first removal  (from the events; same-tick ordering can inflate it by 1, the CSV is exact)
+   first rejection traced at 1790871836320: L = 16; rejection lines traced: 61, rejections counted up to the last: 6001
+
+5. sampler CSV: 2110 ticks, max gap 50 ms
+   ticks where the link bytes were not exactly L x S: 0
+   idle_end                     L=2    link_bytes=67108864     (2.00 S)  allocated=69632        idx=0/0
+   A_first_rejection            L=16   link_bytes=536870912    (16.00 S)  allocated=518152192    idx=10/180
+   A_end                        L=16   link_bytes=536870912    (16.00 S)  allocated=520814592    idx=10/180
+   B_end                        L=16   link_bytes=536870912    (16.00 S)  allocated=520814592    idx=16/288
+   R_start                      L=16   link_bytes=536870912    (16.00 S)  allocated=520814592    idx=16/288
+   R_end                        L=1    link_bytes=33554432     (1.00 S)  allocated=5984256      idx=0/0
+   B window: peak L=16, min L=16, plateau (median over its last 20 s) L=16.0, bytes at peak=536870912
+   peak L over the whole run: 16 (536870912 bytes = 16.00 S)
+
+6. ceiling attribution (blocking): permitted creations = 17, k = 16, links made beyond k = 0
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): n/a, none beyond k

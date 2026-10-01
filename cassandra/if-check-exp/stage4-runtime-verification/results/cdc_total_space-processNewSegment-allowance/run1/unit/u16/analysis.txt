@@ -1,0 +1,21 @@
+S=33554432  A=16777216  k=0  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  5 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790869852339.log               0   0.00              0            0 FORBIDDEN 
+   -1790869852340.log               0   0.00              0            0 FORBIDDEN 
+   -1790869852342.log               0   0.00              0            0 FORBIDDEN 
+   -1790869852343.log               0   0.00              0            0 FORBIDDEN 
+   -1790869852342.log               0   0.00              0            0 FORBIDDEN 
+   stale (lag >= S/2) among 5 unambiguous creations: 0
+
+3. creations that made a link beyond k = 0
+   none
+
+4. link timeline: peak L = 0 before the first removal  (per-tick link counts)
+   first rejection traced at 1790869856096: L = 0; rejection lines traced: 1, rejections counted up to the last: 1
+
+6. ceiling attribution (blocking): permitted creations = 0, k = 0, links made beyond k = 0
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): n/a, none beyond k

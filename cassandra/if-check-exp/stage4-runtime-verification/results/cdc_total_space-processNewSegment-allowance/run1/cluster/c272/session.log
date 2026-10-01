@@ -1,0 +1,230 @@
+[2026-10-01 10:35:57] script: ./cluster-run.sh value c272; host: node0.jason92-318546.misconfiguration-pg0.cloudlab.umass.edu; label: c272
+== c272: cdc_total_space=272MiB commitlog_segment_size=32MiB mode=blocking kind=consumer; stress threads=16, B throttle 100/s
+[2026-10-01 10:35:57] CHECK PASS: no CassandraDaemon running
+[2026-10-01 10:35:57] CHECK PASS: ports 7199/9042/9091 free
+[2026-10-01 10:35:57] CHECK PASS: local disk has >= 25 GB free
+[2026-10-01 10:35:57] CHECK PASS: the clone is at cassandra-5.0.9
+CdcTotalSpaceCeilingTest.java: OK
+cdc-verdict.btm: OK
+cdc-sampler.py: OK
+cdc-consumer.sh: OK
+cdc-analyze.py: OK
+cdc-rows.yaml: OK
+plain-rows.yaml: OK
+[2026-10-01 10:35:57] CHECK PASS: python3 and cqlsh are available
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 272MiB|
+[2026-10-01 10:35:57] CHECK PASS: yaml diff adds 2 lines
+[2026-10-01 10:35:57] + mv logs /users/jason92/stage4-logs/cdc/cluster/logs.before-c272.1790872557
+[2026-10-01 10:35:57]   rc=0
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/c272/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+[2026-10-01 10:35:57] + JVM_EXTRA_OPTS=... bin/cassandra -p cassandra.pid > /users/jason92/stage4-logs/cdc/cluster/c272/stdout.txt 2>&1
+node pid 93683, up at 1790872602231 (after 17s)
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 59
+    | RULE cdc write rejected
+    | CLASS org.apache.cassandra.exceptions.CDCWriteException
+    | METHOD <init>
+    | NOCOMPILE
+    | AT ENTRY
+    | BIND n : int = incrementCounter("stage4.cdcReject")
+    | IF n % 100 == 1
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "reject n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " msg=" + $1)
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.exceptions.CDCWriteException.<init>(java.lang.String) void
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 41
+    | RULE cdc verdict, state after
+    | CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+    | METHOD processNewSegment
+    | NOCOMPILE
+    | AT EXIT
+    | IF true
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "post seg=" + $1.logFile.name() + " state=" + $1.getCDCState() + " sip=" + $0.sizeInProgress.get() + " ms=" + java.lang.System.currentTimeMillis())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker.processNewSegment(org.apache.cassandra.db.commitlog.CommitLogSegment) void
+    | compiled successfully
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 32
+    | RULE cdc verdict, counter before
+    | CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+    | METHOD processNewSegment
+    | NOCOMPILE
+    | AT ENTRY
+    | IF true
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "pre seg=" + $1.logFile.name() + " sip=" + $0.sizeInProgress.get() + " allowance=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCTotalSpace() + " segSize=" + org.apache.cassandra.config.DatabaseDescriptor.getCommitLogSegmentSize() + " blocking=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCBlockWrites() + " ms=" + java.lang.System.currentTimeMillis())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+[2026-10-01 10:36:42] CHECK PASS: Submit -l lists CDCSizeTracker.processNewSegment
+[2026-10-01 10:36:42] CHECK PASS: Submit -l lists deleteOldLinkedCDCCommitLogSegment
+[2026-10-01 10:36:42] CHECK PASS: Submit -l lists CDCWriteException
+    | 
+    |  name                   | value
+    | ------------------------+---------------------
+    |        cdc_block_writes |                true
+    |             cdc_enabled |                true
+    |       cdc_raw_directory | bin/../data/cdc_raw
+    |         cdc_total_space |              272MiB
+    |  commitlog_segment_size |               32MiB
+    | 
+    | (5 rows)
+settings read back: cdc_total_space=272MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=true
+k = floor(272 / 32) = 8; exact multiple: no
+[2026-10-01 10:36:43] CHECK PASS: cdc_total_space read back as 272
+[2026-10-01 10:36:43] CHECK PASS: commitlog_segment_size read back as 32
+[2026-10-01 10:36:43] CHECK PASS: data/cdc_raw exists
+[2026-10-01 10:36:44] phase idle_start
+[2026-10-01 10:36:59] phase idle_end
+[2026-10-01 10:37:00] reading idle: links=2 link_bytes=67108864 alloc=69632 idx=0/0 Failures=0 WARN=0 created=2 forbidden=0
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+[2026-10-01 10:37:00] phase C_start
+[2026-10-01 10:37:00] + tools/bin/cassandra-stress user profile=/users/jason92/stage4-harness-run/cdc/cdc-rows.yaml "ops(insert=1)" duration=30s no-warmup -rate threads=16 throttle=100/s -errors retries=0 ignore -node 127.0.0.1 > /users/jason92/stage4-logs/cdc/cluster/c272/stress-cdc-C.txt &
+[2026-10-01 10:37:00] reading C: links=2 link_bytes=67108864 alloc=69632 idx=0/0 Failures= WARN=0 created=2 forbidden=0
+[2026-10-01 10:37:05] reading C: links=2 link_bytes=67108864 alloc=73728 idx=0/0 Failures= WARN=0 created=2 forbidden=0
+[2026-10-01 10:37:11] reading C: links=3 link_bytes=100663296 alloc=56700928 idx=2/25 Failures= WARN=0 created=14 forbidden=0
+[2026-10-01 10:37:16] reading C: links=2 link_bytes=67108864 alloc=27787264 idx=1/7 Failures= WARN=0 created=30 forbidden=0
+[2026-10-01 10:37:21] reading C: links=3 link_bytes=100663296 alloc=36691968 idx=1/7 Failures= WARN=0 created=47 forbidden=0
+[2026-10-01 10:37:26] reading C: links=3 link_bytes=100663296 alloc=40955904 idx=2/25 Failures= WARN=0 created=63 forbidden=0
+[2026-10-01 10:37:31] reading C: links=2 link_bytes=67108864 alloc=17858560 idx=1/7 Failures= WARN=0 created=79 forbidden=0
+[2026-10-01 10:37:36] reading C: links=4 link_bytes=134217728 alloc=89247744 idx=0/0 Failures= WARN=0 created=95 forbidden=0
+[2026-10-01 10:37:41] phase C_end
+[2026-10-01 10:37:42] reading Cend: links=2 link_bytes=67108864 alloc=8409088 idx=1/7 Failures=0 WARN=0 created=99 forbidden=0
+[2026-10-01 10:37:42] ERR line 230: wait "$CONSUMER_PID" 2> /dev/null
+Op rate                   :      100 op/s  [insert: 100 op/s]
+Total partitions          :      3,015 [insert: 3,015]
+Total errors              :          0 [insert: 0]
+consumer control: WARN lines = 0, logged rejected writes = 0, segments created = 99, forbidden = 0, links deleted by the consumer = 97
+EXPECTED: no rejection in the consumer control — yes
+Cassandra has shutdown.
+[2026-10-01 10:37:57] ERR line 335: sed -E 's/.* n=([0-9]+).*/\1/'
+traces: segments created=100, created forbidden=0, 'Rejecting mutation' WARN entries in system.log=0, logged rejected writes (exception stacks)=0, deleteOld lines=0, reject lines=0 (last n: )
+sampler: ticks=1186 max_links=8 max_link_bytes=268435456 max_gap_ms=59 first_ms=1790872603402 last_ms=1790872662661
+ERROR entries in system.log: 0 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 92K; DEBUG 'Freed up' lines in debug.log: 0
+disk: 3.0G data/ ; 52G free
+    | S=33554432  A=285212672  k=8  blocking=True  exact multiple of S: False
+    | 
+    | 1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  100 creations, 0 violations []
+    | 
+    | 2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+    |    segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+    |    -1790872564938.log               0   0.00              0            0 PERMITTED 
+    |    -1790872564939.log               1   0.00              0     33554432 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+    |    -1790872564940.log               2   1.00       33554432     33554432 PERMITTED STALE: counter 1.00 segments low
+    |    -1790872564941.log               2   2.00       67108864            0 PERMITTED 
+    |    -1790872564942.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564943.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564944.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564945.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564946.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564947.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564948.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564949.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564950.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564951.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564952.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564953.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564954.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564955.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564956.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564957.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564958.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564959.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564960.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564961.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564962.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564963.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564964.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564965.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564966.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564967.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564968.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564969.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564970.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564971.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564972.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564973.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564974.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564975.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564976.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564977.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564978.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564979.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564980.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564981.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564982.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564983.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564984.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564985.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564986.log               2   3.00      100663303    -33554439 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564987.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564988.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564989.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564990.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564991.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564992.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564993.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564994.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564995.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564996.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564997.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872564998.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872564999.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565000.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565001.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565002.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565003.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565004.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565005.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565006.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565007.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565008.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565009.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565010.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565011.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565012.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565013.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565014.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565015.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565016.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565017.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565018.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565019.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565020.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565021.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565022.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565023.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565024.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565025.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565026.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565027.log               2   3.00      100663303    -33554439 PERMITTED 
+    |    -1790872565028.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565029.log               2   2.00       67108871           -7 PERMITTED 
+    |    -1790872565030.log               2   2.00       67108871           -7 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790872565031.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+    |    -1790872565032.log               4   3.00      100663304     33554424 PERMITTED STALE: counter 1.00 segments low
+    |    -1790872565033.log               4   5.00      167772168    -33554440 PERMITTED 
+    |    -1790872565034.log               5   4.00      134217728     33554432 PERMITTED STALE: counter 1.00 segments low
+    |    -1790872565035.log               6   6.00      201326592            0 PERMITTED 
+    |    -1790872565036.log               7   7.00      234881024            0 PERMITTED 
+    |    -1790872565037.log               2   7.00      234881024   -167772160 PERMITTED 
+    |    stale (lag >= S/2) among 71 unambiguous creations: 5
+    | 
+    | 3. creations that made a link beyond k = 8
+    |    none
+    | 
+    | 4. link timeline: peak L = 3 before the first removal  (from the events; same-tick ordering can inflate it by 1, the CSV is exact)
+    | 
+    | 5. sampler CSV: 1186 ticks, max gap 59 ms
+    |    ticks where the link bytes were not exactly L x S: 0
+    |    idle_end                     L=2    link_bytes=67108864     (2.00 S)  allocated=69632        idx=0/0
+    |    C_end                        L=2    link_bytes=67108864     (2.00 S)  allocated=8409088      idx=1/7
+    |    C window: peak L=8, min L=2, plateau (median over its last 20 s) L=3.0, bytes at peak=268435456
+    |    peak L over the whole run: 8 (268435456 bytes = 8.00 S)
+    | 
+    | 6. ceiling attribution (blocking): permitted creations = 100, k = 8, links made beyond k = 0
+    |    each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): n/a, none beyond k
+RESULT value c272: finished at 1790872677479

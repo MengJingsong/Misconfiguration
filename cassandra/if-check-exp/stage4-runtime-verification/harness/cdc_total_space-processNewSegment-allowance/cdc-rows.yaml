@@ -1,0 +1,29 @@
+# cassandra-stress profile for the cdc_total_space case (case §9c): 1 MiB rows into a CDC-tracked table.
+#   tools/bin/cassandra-stress user profile=<this file> "ops(insert=1)" n=<rows> no-warmup \
+#     -rate threads=16 [throttle=100/s] -errors retries=0 ignore -node 127.0.0.1
+# Creates the keyspace and the table (WITH cdc = true) if they do not exist (the runner creates both tables first, while the node is idle). The runner kills stress, so n is only a ceiling.
+keyspace: stage4cdc
+
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS stage4cdc WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+table: cdc_rows
+
+table_definition: |
+  CREATE TABLE IF NOT EXISTS cdc_rows (
+    id bigint,
+    payload blob,
+    PRIMARY KEY (id)
+  ) WITH cdc = true
+
+columnspec:
+  - name: id
+    population: seq(1..1000000000)
+  - name: payload
+    size: fixed(1048576)
+
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+
+queries: {}

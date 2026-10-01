@@ -1,0 +1,366 @@
+[2026-10-01 09:48:10] script: ./unit-run.sh
+[2026-10-01 09:48:10] host: node0.jason92-318546.misconfiguration-pg0.cloudlab.umass.edu; kernel: 5.15.0-187-generic; cores: 40
+[2026-10-01 09:48:10] + java -version
+openjdk version "11.0.32.1" 2026-08-18
+OpenJDK Runtime Environment (build 11.0.32.1+1-post-1ubuntu1-22.04-Ubuntu)
+OpenJDK 64-Bit Server VM (build 11.0.32.1+1-post-1ubuntu1-22.04-Ubuntu, mixed mode, sharing)
+[2026-10-01 09:48:10]   rc=0
+[2026-10-01 09:48:10] + ant -version
+Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+[2026-10-01 09:48:10]   rc=0
+[2026-10-01 09:48:10] clone HEAD: b5f2a54210d541339c2e7c17a794195cac0e67c2; describe: cassandra-5.0.9
+[2026-10-01 09:48:10] clone status:
+?? test/unit/org/apache/cassandra/db/commitlog/CdcTotalSpaceCeilingTest.java
+[2026-10-01 09:48:10] harness copy: /users/jason92/stage4-harness-run/cdc
+CdcTotalSpaceCeilingTest.java: OK
+cdc-verdict.btm: OK
+cdc-sampler.py: OK
+cdc-consumer.sh: OK
+cdc-analyze.py: OK
+cdc-rows.yaml: OK
+plain-rows.yaml: OK
+[2026-10-01 09:48:10] + cp /users/jason92/stage4-harness-run/cdc/CdcTotalSpaceCeilingTest.java test/unit/org/apache/cassandra/db/commitlog/CdcTotalSpaceCeilingTest.java
+[2026-10-01 09:48:10]   rc=0
+8f5ab12b56b00276efd80d84fab0f0921e6f00929ae9ed8ff9e5832980c7467c  /users/jason92/stage4-harness-run/cdc/CdcTotalSpaceCeilingTest.java
+8f5ab12b56b00276efd80d84fab0f0921e6f00929ae9ed8ff9e5832980c7467c  test/unit/org/apache/cassandra/db/commitlog/CdcTotalSpaceCeilingTest.java
+[2026-10-01 09:48:10] unit yaml: commitlog_segment_size: 5MiB  (the harness sets its own S)
+[2026-10-01 09:48:10] === upstream-baseline: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDCTest, JVM args: 
+[2026-10-01 09:48:10] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDCTest -Dtest.jvm.args="" > /users/jason92/stage4-logs/cdc/unit/upstream-baseline/ant.txt
+[2026-10-01 09:50:36]   rc=0 (8608 lines in /users/jason92/stage4-logs/cdc/unit/upstream-baseline/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDCTest-_jdk11 Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 129.881 sec
+BUILD SUCCESSFUL
+upstream-baseline ant_exit=0 tests=10 failures=0 errors=0 
+[2026-10-01 09:50:36] === u16: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=16 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u16/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u16/cdc-verdict.txt
+[2026-10-01 09:50:36] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=16 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u16/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u16/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u16/ant.txt
+[2026-10-01 09:50:57]   rc=0 (450 lines in /users/jason92/stage4-logs/cdc/unit/u16/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.734 sec
+BUILD SUCCESSFUL
+[2026-10-01 09:50:57] test's own readings (/users/jason92/stage4-logs/cdc/unit/u16/readings.txt), without the link events:
+    | ms=1790869854957 config totalSpaceMiB=16 segmentMiB=32 mode=blocking S=33554432 A=16777216 k=0 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869856067 idle links=0 linkBytes=0 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=0 allocatingState=FORBIDDEN
+    | ms=1790869856069 check PASS idle floor is min(k, 2) = 0 links, got 0
+    | ms=1790869856101 firstRejection accepted=0 links=0 linkBytes=0 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=0 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 0."
+    | ms=1790869856102 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 0.
+    | ms=1790869856107 rejectionCounter N=0 linkBytes=0 N-linkBytes=0
+    | ms=1790869856107 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869856111 check PASS links at the first rejection: L = 0, expected k = 0
+    | ms=1790869856111 check PASS every link is S bytes
+    | ms=1790869856113 check PASS apparent bytes are L x S: 0
+    | ms=1790869856113 check PASS N = 0 within L*S .. L*S + 64*L (L = 0)
+    | ms=1790869857211 afterTenMore rejected=10 links=0 linkBytes=0 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=0 allocatingState=FORBIDDEN
+    | ms=1790869857213 check PASS links unchanged after ten more rejections: 0 then 0
+    | ms=1790869857214 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869857214 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869857222 nonCdcWrite accepted=true
+    | ms=1790869857222 release skipped: k = 0, a segment can never be permitted
+    | ms=1790869857231 RESULT mismatches=0 totalSpaceMiB=16 segmentMiB=32 mode=blocking
+u16 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=16 segmentMiB=32 mode=blocking
+[2026-10-01 09:50:57] === u48: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=48 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u48/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u48/cdc-verdict.txt
+[2026-10-01 09:50:57] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=48 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u48/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u48/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u48/ant.txt
+[2026-10-01 09:51:19]   rc=1 (475 lines in /users/jason92/stage4-logs/cdc/unit/u48/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 7.599 sec
+BUILD FAILED
+[2026-10-01 09:51:19] test's own readings (/users/jason92/stage4-logs/cdc/unit/u48/readings.txt), without the link events:
+    | ms=1790869875952 config totalSpaceMiB=48 segmentMiB=32 mode=blocking S=33554432 A=50331648 k=1 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869876059 linkCount n=2
+    | ms=1790869877066 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790869877069 check MISMATCH idle floor is min(k, 2) = 1 links, got 2
+    | ms=1790869877705 firstRejection accepted=62 links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=2 idxBytes=36 counter=67108889 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 67108864."
+    | ms=1790869877707 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 67108864.
+    | ms=1790869877712 rejectionCounter N=67108864 linkBytes=67108864 N-linkBytes=0
+    | ms=1790869877712 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869877717 check MISMATCH links at the first rejection: L = 2, expected k = 1
+    | ms=1790869877718 check PASS every link is S bytes
+    | ms=1790869877719 check PASS apparent bytes are L x S: 67108864
+    | ms=1790869877719 check PASS N = 67108864 within L*S .. L*S + 64*L (L = 2)
+    | ms=1790869878773 afterTenMore rejected=10 links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=2 idxBytes=36 counter=67108900 allocatingState=FORBIDDEN
+    | ms=1790869878777 check PASS links unchanged after ten more rejections: 2 then 2
+    | ms=1790869878777 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869878777 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869878786 nonCdcWrite accepted=true
+    | ms=1790869878787 release consumerDeleted=4 files
+    | ms=1790869878791 linkCount n=0
+    | ms=1790869878900 linkCount n=1
+    | ms=1790869878908 release resumed=true afterMs=115 rejectedBefore=1 links=1 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=CONTAINS
+    | ms=1790869878909 check PASS the writer resumed within 10 s of the links being deleted
+    | ms=1790869878917 RESULT mismatches=2 totalSpaceMiB=48 segmentMiB=32 mode=blocking [idle floor is min(k, 2) = 1 links, got 2, links at the first rejection: L = 2, expected k = 1]
+u48 ant_exit=1 tests=1 failures=1 errors=0 RESULT mismatches=2 totalSpaceMiB=48 segmentMiB=32 mode=blocking [idle floor is min(k, 2) = 1 links, got 2, links at the first rejection: L = 2, expected k = 1]
+[2026-10-01 09:51:19] === u80: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=80 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u80/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u80/cdc-verdict.txt
+[2026-10-01 09:51:19] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=80 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u80/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u80/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u80/ant.txt
+[2026-10-01 09:51:40]   rc=0 (462 lines in /users/jason92/stage4-logs/cdc/unit/u80/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.495 sec
+BUILD SUCCESSFUL
+[2026-10-01 09:51:40] test's own readings (/users/jason92/stage4-logs/cdc/unit/u80/readings.txt), without the link events:
+    | ms=1790869897738 config totalSpaceMiB=80 segmentMiB=32 mode=blocking S=33554432 A=83886080 k=2 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869897816 linkCount n=2
+    | ms=1790869898825 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790869898827 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790869899505 firstRejection accepted=62 links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=2 idxBytes=36 counter=67108889 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 67108864."
+    | ms=1790869899507 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 67108864.
+    | ms=1790869899511 rejectionCounter N=67108864 linkBytes=67108864 N-linkBytes=0
+    | ms=1790869899512 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869899516 check PASS links at the first rejection: L = 2, expected k = 2
+    | ms=1790869899516 check PASS every link is S bytes
+    | ms=1790869899518 check PASS apparent bytes are L x S: 67108864
+    | ms=1790869899518 check PASS N = 67108864 within L*S .. L*S + 64*L (L = 2)
+    | ms=1790869900581 afterTenMore rejected=10 links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=2 idxBytes=36 counter=67108900 allocatingState=FORBIDDEN
+    | ms=1790869900583 check PASS links unchanged after ten more rejections: 2 then 2
+    | ms=1790869900584 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869900584 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869900593 nonCdcWrite accepted=true
+    | ms=1790869900594 release consumerDeleted=4 files
+    | ms=1790869900596 linkCount n=0
+    | ms=1790869900710 linkCount n=1
+    | ms=1790869900716 release resumed=true afterMs=116 rejectedBefore=1 links=1 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=CONTAINS
+    | ms=1790869900717 check PASS the writer resumed within 10 s of the links being deleted
+    | ms=1790869900727 RESULT mismatches=0 totalSpaceMiB=80 segmentMiB=32 mode=blocking
+u80 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=80 segmentMiB=32 mode=blocking
+[2026-10-01 09:51:40] === u128: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=128 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u128/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u128/cdc-verdict.txt
+[2026-10-01 09:51:40] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=128 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u128/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u128/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u128/ant.txt
+[2026-10-01 09:52:03]   rc=0 (477 lines in /users/jason92/stage4-logs/cdc/unit/u128/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.07 sec
+BUILD SUCCESSFUL
+[2026-10-01 09:52:03] test's own readings (/users/jason92/stage4-logs/cdc/unit/u128/readings.txt), without the link events:
+    | ms=1790869919414 config totalSpaceMiB=128 segmentMiB=32 mode=blocking S=33554432 A=134217728 k=4 exactMultiple=true rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869919497 linkCount n=2
+    | ms=1790869920505 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790869920507 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790869920889 linkCount n=3
+    | ms=1790869921120 linkCount n=4
+    | ms=1790869921684 firstRejection accepted=124 links=4 linkBytes=134217728 everyLinkIsS=true idxFiles=4 idxBytes=72 counter=134217789 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 134217771.
+    | ms=1790869921686 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 134217771.
+    | ms=1790869921692 rejectionCounter N=134217771 linkBytes=134217728 N-linkBytes=43
+    | ms=1790869921692 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869921697 check PASS links at the first rejection: L = 4, expected k - 1 or k (k = 4, A an exact multiple of S)
+    | ms=1790869921698 check PASS every link is S bytes
+    | ms=1790869921699 check PASS apparent bytes are L x S: 134217728
+    | ms=1790869921700 check PASS N = 134217771 within L*S .. L*S + 64*L (L = 4)
+    | ms=1790869922757 afterTenMore rejected=10 links=4 linkBytes=134217728 everyLinkIsS=true idxFiles=4 idxBytes=72 counter=134217800 allocatingState=FORBIDDEN
+    | ms=1790869922760 check PASS links unchanged after ten more rejections: 4 then 4
+    | ms=1790869922760 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869922760 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869922770 nonCdcWrite accepted=true
+    | ms=1790869922772 linkCount n=0
+    | ms=1790869922775 release consumerDeleted=8 files
+    | ms=1790869922887 linkCount n=1
+    | ms=1790869922896 release resumed=true afterMs=119 rejectedBefore=1 links=1 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=CONTAINS
+    | ms=1790869922896 check PASS the writer resumed within 10 s of the links being deleted
+    | ms=1790869922903 RESULT mismatches=0 totalSpaceMiB=128 segmentMiB=32 mode=blocking
+u128 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=128 segmentMiB=32 mode=blocking
+[2026-10-01 09:52:03] === u144: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=144 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u144/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u144/cdc-verdict.txt
+[2026-10-01 09:52:03] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=144 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u144/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u144/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u144/ant.txt
+[2026-10-01 09:52:26]   rc=1 (493 lines in /users/jason92/stage4-logs/cdc/unit/u144/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 8.532 sec
+BUILD FAILED
+[2026-10-01 09:52:26] test's own readings (/users/jason92/stage4-logs/cdc/unit/u144/readings.txt), without the link events:
+    | ms=1790869941786 config totalSpaceMiB=144 segmentMiB=32 mode=blocking S=33554432 A=150994944 k=4 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869941892 linkCount n=2
+    | ms=1790869942902 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790869942905 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790869943290 linkCount n=3
+    | ms=1790869943552 linkCount n=4
+    | ms=1790869943887 linkCount n=5
+    | ms=1790869944503 firstRejection accepted=155 links=5 linkBytes=167772160 everyLinkIsS=true idxFiles=5 idxBytes=90 counter=167772250 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 167772239.
+    | ms=1790869944505 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 167772239.
+    | ms=1790869944509 rejectionCounter N=167772239 linkBytes=167772160 N-linkBytes=79
+    | ms=1790869944510 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869944514 check MISMATCH links at the first rejection: L = 5, expected k = 4
+    | ms=1790869944514 check PASS every link is S bytes
+    | ms=1790869944516 check PASS apparent bytes are L x S: 167772160
+    | ms=1790869944516 check PASS N = 167772239 within L*S .. L*S + 64*L (L = 5)
+    | ms=1790869945577 afterTenMore rejected=10 links=5 linkBytes=167772160 everyLinkIsS=true idxFiles=5 idxBytes=90 counter=167772250 allocatingState=FORBIDDEN
+    | ms=1790869945579 check PASS links unchanged after ten more rejections: 5 then 5
+    | ms=1790869945580 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869945580 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869945589 nonCdcWrite accepted=true
+    | ms=1790869945594 release consumerDeleted=10 files
+    | ms=1790869945595 linkCount n=0
+    | ms=1790869945710 linkCount n=1
+    | ms=1790869945715 release resumed=true afterMs=119 rejectedBefore=1 links=1 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=CONTAINS
+    | ms=1790869945715 check PASS the writer resumed within 10 s of the links being deleted
+    | ms=1790869945721 RESULT mismatches=1 totalSpaceMiB=144 segmentMiB=32 mode=blocking [links at the first rejection: L = 5, expected k = 4]
+u144 ant_exit=1 tests=1 failures=1 errors=0 RESULT mismatches=1 totalSpaceMiB=144 segmentMiB=32 mode=blocking [links at the first rejection: L = 5, expected k = 4]
+[2026-10-01 09:52:26] === u272: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=272 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u272/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u272/cdc-verdict.txt
+[2026-10-01 09:52:26] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=272 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u272/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u272/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u272/ant.txt
+[2026-10-01 09:52:49]   rc=1 (533 lines in /users/jason92/stage4-logs/cdc/unit/u272/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 9.43 sec
+BUILD FAILED
+[2026-10-01 09:52:49] test's own readings (/users/jason92/stage4-logs/cdc/unit/u272/readings.txt), without the link events:
+    | ms=1790869964553 config totalSpaceMiB=272 segmentMiB=32 mode=blocking S=33554432 A=285212672 k=8 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869964657 linkCount n=2
+    | ms=1790869965665 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790869965667 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790869966031 linkCount n=3
+    | ms=1790869966272 linkCount n=4
+    | ms=1790869966577 linkCount n=5
+    | ms=1790869966835 linkCount n=6
+    | ms=1790869967112 linkCount n=7
+    | ms=1790869967354 linkCount n=8
+    | ms=1790869967623 linkCount n=9
+    | ms=1790869968133 firstRejection accepted=279 links=9 linkBytes=301989888 everyLinkIsS=true idxFiles=9 idxBytes=162 counter=301990039 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 301990021
+    | ms=1790869968135 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 301990021.
+    | ms=1790869968139 rejectionCounter N=301990021 linkBytes=301989888 N-linkBytes=133
+    | ms=1790869968140 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869968144 check MISMATCH links at the first rejection: L = 9, expected k = 8
+    | ms=1790869968144 check PASS every link is S bytes
+    | ms=1790869968145 check PASS apparent bytes are L x S: 301989888
+    | ms=1790869968146 check PASS N = 301990021 within L*S .. L*S + 64*L (L = 9)
+    | ms=1790869969198 afterTenMore rejected=10 links=9 linkBytes=301989888 everyLinkIsS=true idxFiles=9 idxBytes=162 counter=301990050 allocatingState=FORBIDDEN
+    | ms=1790869969201 check PASS links unchanged after ten more rejections: 9 then 9
+    | ms=1790869969201 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869969201 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869969209 nonCdcWrite accepted=true
+    | ms=1790869969214 linkCount n=7
+    | ms=1790869969220 linkCount n=5
+    | ms=1790869969225 linkCount n=4
+    | ms=1790869969231 linkCount n=3
+    | ms=1790869969236 linkCount n=1
+    | ms=1790869969242 linkCount n=0
+    | ms=1790869969242 release consumerDeleted=18 files
+    | ms=1790869969357 linkCount n=1
+    | ms=1790869969361 release resumed=true afterMs=145 rejectedBefore=1 links=1 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=CONTAINS
+    | ms=1790869969361 check PASS the writer resumed within 10 s of the links being deleted
+    | ms=1790869969369 RESULT mismatches=1 totalSpaceMiB=272 segmentMiB=32 mode=blocking [links at the first rejection: L = 9, expected k = 8]
+u272 ant_exit=1 tests=1 failures=1 errors=0 RESULT mismatches=1 totalSpaceMiB=272 segmentMiB=32 mode=blocking [links at the first rejection: L = 9, expected k = 8]
+[2026-10-01 09:52:49] === u280-s16: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=280 -Dstage4.cdc.segmentMiB=16 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u280-s16/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u280-s16/cdc-verdict.txt
+[2026-10-01 09:52:49] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=280 -Dstage4.cdc.segmentMiB=16 -Dstage4.cdc.mode=blocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u280-s16/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u280-s16/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u280-s16/ant.txt
+[2026-10-01 09:53:13]   rc=0 (559 lines in /users/jason92/stage4-logs/cdc/unit/u280-s16/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.243 sec
+BUILD SUCCESSFUL
+[2026-10-01 09:53:13] test's own readings (/users/jason92/stage4-logs/cdc/unit/u280-s16/readings.txt), without the link events:
+    | ms=1790869988254 config totalSpaceMiB=280 segmentMiB=16 mode=blocking S=16777216 A=293601280 k=17 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790869988359 linkCount n=2
+    | ms=1790869989367 idle links=2 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=PERMITTED
+    | ms=1790869989370 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790869989543 linkCount n=3
+    | ms=1790869989749 linkCount n=4
+    | ms=1790869989876 linkCount n=5
+    | ms=1790869989997 linkCount n=6
+    | ms=1790869990125 linkCount n=7
+    | ms=1790869990321 linkCount n=8
+    | ms=1790869990458 linkCount n=9
+    | ms=1790869990574 linkCount n=10
+    | ms=1790869990686 linkCount n=11
+    | ms=1790869990843 linkCount n=12
+    | ms=1790869990962 linkCount n=13
+    | ms=1790869991078 linkCount n=14
+    | ms=1790869991189 linkCount n=15
+    | ms=1790869991344 linkCount n=16
+    | ms=1790869991461 linkCount n=17
+    | ms=1790869991706 firstRejection accepted=255 links=17 linkBytes=285212672 everyLinkIsS=true idxFiles=17 idxBytes=306 counter=285212949 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 2852129
+    | ms=1790869991708 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 285212949.
+    | ms=1790869991713 rejectionCounter N=285212949 linkBytes=285212672 N-linkBytes=277
+    | ms=1790869991713 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+    | ms=1790869991718 check PASS links at the first rejection: L = 17, expected k = 17
+    | ms=1790869991718 check PASS every link is S bytes
+    | ms=1790869991719 check PASS apparent bytes are L x S: 285212672
+    | ms=1790869991720 check PASS N = 285212949 within L*S .. L*S + 64*L (L = 17)
+    | ms=1790869992772 afterTenMore rejected=10 links=17 linkBytes=285212672 everyLinkIsS=true idxFiles=17 idxBytes=306 counter=285212978 allocatingState=FORBIDDEN
+    | ms=1790869992775 check PASS links unchanged after ten more rejections: 17 then 17
+    | ms=1790869992775 check PASS link bytes unchanged after ten more rejections
+    | ms=1790869992775 check PASS segment still forbidden, got FORBIDDEN
+    | ms=1790869992783 nonCdcWrite accepted=true
+    | ms=1790869992788 linkCount n=14
+    | ms=1790869992794 linkCount n=11
+    | ms=1790869992799 linkCount n=9
+    | ms=1790869992805 linkCount n=5
+    | ms=1790869992811 linkCount n=3
+    | ms=1790869992817 linkCount n=0
+    | ms=1790869992818 release consumerDeleted=34 files
+    | ms=1790869992931 linkCount n=1
+    | ms=1790869992936 release resumed=true afterMs=147 rejectedBefore=1 links=1 linkBytes=16777216 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=16777216 allocatingState=CONTAINS
+    | ms=1790869992937 check PASS the writer resumed within 10 s of the links being deleted
+    | ms=1790869992947 RESULT mismatches=0 totalSpaceMiB=280 segmentMiB=16 mode=blocking
+u280-s16 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=280 segmentMiB=16 mode=blocking
+[2026-10-01 09:53:13] === u80-nb: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=80 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=nonblocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u80-nb/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u80-nb/cdc-verdict.txt
+[2026-10-01 09:53:13] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=80 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=nonblocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u80-nb/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u80-nb/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u80-nb/ant.txt
+[2026-10-01 09:53:36]   rc=0 (519 lines in /users/jason92/stage4-logs/cdc/unit/u80-nb/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.391 sec
+BUILD SUCCESSFUL
+[2026-10-01 09:53:36] test's own readings (/users/jason92/stage4-logs/cdc/unit/u80-nb/readings.txt), without the link events:
+    | ms=1790870011743 config totalSpaceMiB=80 segmentMiB=32 mode=nonblocking S=33554432 A=83886080 k=2 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790870011848 linkCount n=2
+    | ms=1790870012856 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790870012858 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790870013232 linkCount n=1
+    | ms=1790870013238 linkCount n=2
+    | ms=1790870013463 linkCount n=3
+    | ms=1790870014008 linkCount n=2
+    | ms=1790870014014 linkCount n=3
+    | ms=1790870014317 linkCount n=2
+    | ms=1790870014322 linkCount n=3
+    | ms=1790870016577 nonBlocking rowsWritten=311 distinctLinksSeen=12 maxLinks=3 finalLinks=3 deletedLinks=9 firstSeen=CommitLog-7-1790870009026.log firstStillPresent=false links=3 linkBytes=100663296 everyLinkIsS=true idxFiles=2 idxBytes=25 counter=67108882 allocatingState=CONTAINS
+    | ms=1790870016581 nonBlocking bytesWritten=326107136 bytesRetained=100663296
+    | ms=1790870016581 check PASS no write was rejected in non-blocking mode
+    | ms=1790870016583 check PASS maximum L 3 is at most k + 1 = 3
+    | ms=1790870016583 check PASS the oldest link was deleted
+    | ms=1790870016584 check PASS final L 3 is at most k + 1
+    | ms=1790870016585 check PASS links were deleted: 9
+    | ms=1790870016597 RESULT mismatches=0 totalSpaceMiB=80 segmentMiB=32 mode=nonblocking
+u80-nb ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=80 segmentMiB=32 mode=nonblocking
+[2026-10-01 09:53:36] === u144-nb: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest, JVM args: -Dstage4.cdc.totalSpaceMiB=144 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=nonblocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u144-nb/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u144-nb/cdc-verdict.txt
+[2026-10-01 09:53:36] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest -Dtest.jvm.args="-Dstage4.cdc.totalSpaceMiB=144 -Dstage4.cdc.segmentMiB=32 -Dstage4.cdc.mode=nonblocking -Dstage4.unit.out=/users/jason92/stage4-logs/cdc/unit/u144-nb/readings.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm -Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/unit/u144-nb/cdc-verdict.txt" > /users/jason92/stage4-logs/cdc/unit/u144-nb/ant.txt
+[2026-10-01 09:54:01]   rc=0 (534 lines in /users/jason92/stage4-logs/cdc/unit/u144-nb/ant.txt)
+_get-git-sha:
+     [echo] git.sha=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CdcTotalSpaceCeilingTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.438 sec
+BUILD SUCCESSFUL
+[2026-10-01 09:54:01] test's own readings (/users/jason92/stage4-logs/cdc/unit/u144-nb/readings.txt), without the link events:
+    | ms=1790870035522 config totalSpaceMiB=144 segmentMiB=32 mode=nonblocking S=33554432 A=150994944 k=4 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+    | ms=1790870035627 linkCount n=2
+    | ms=1790870036636 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+    | ms=1790870036639 check PASS idle floor is min(k, 2) = 2 links, got 2
+    | ms=1790870037186 linkCount n=3
+    | ms=1790870037453 linkCount n=4
+    | ms=1790870037802 linkCount n=5
+    | ms=1790870038095 linkCount n=4
+    | ms=1790870038101 linkCount n=5
+    | ms=1790870038412 linkCount n=4
+    | ms=1790870038684 linkCount n=5
+    | ms=1790870039258 linkCount n=4
+    | ms=1790870039556 linkCount n=5
+    | ms=1790870039821 linkCount n=4
+    | ms=1790870039827 linkCount n=3
+    | ms=1790870039833 linkCount n=4
+    | ms=1790870040126 linkCount n=5
+    | ms=1790870040387 linkCount n=4
+    | ms=1790870040393 linkCount n=5
+    | ms=1790870041406 nonBlocking rowsWritten=374 distinctLinksSeen=14 maxLinks=5 finalLinks=5 deletedLinks=9 firstSeen=CommitLog-7-1790870032882.log firstStillPresent=false links=5 linkBytes=167772160 everyLinkIsS=true idxFiles=4 idxBytes=61 counter=167772221 allocatingState=CONTAINS
+    | ms=1790870041409 nonBlocking bytesWritten=392167424 bytesRetained=167772160
+    | ms=1790870041409 check PASS no write was rejected in non-blocking mode
+    | ms=1790870041411 check PASS maximum L 5 is at most k + 1 = 5
+    | ms=1790870041411 check PASS the oldest link was deleted
+    | ms=1790870041413 check PASS final L 5 is at most k + 1
+    | ms=1790870041413 check PASS links were deleted: 9
+    | ms=1790870041422 RESULT mismatches=0 totalSpaceMiB=144 segmentMiB=32 mode=nonblocking
+u144-nb ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=144 segmentMiB=32 mode=nonblocking
+[2026-10-01 09:54:01] SUMMARY (/users/jason92/stage4-logs/cdc/unit/summary.txt):
+upstream-baseline ant_exit=0 tests=10 failures=0 errors=0 
+u16 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=16 segmentMiB=32 mode=blocking
+u48 ant_exit=1 tests=1 failures=1 errors=0 RESULT mismatches=2 totalSpaceMiB=48 segmentMiB=32 mode=blocking [idle floor is min(k, 2) = 1 links, got 2, links at the first rejection: L = 2, expected k = 1]
+u80 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=80 segmentMiB=32 mode=blocking
+u128 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=128 segmentMiB=32 mode=blocking
+u144 ant_exit=1 tests=1 failures=1 errors=0 RESULT mismatches=1 totalSpaceMiB=144 segmentMiB=32 mode=blocking [links at the first rejection: L = 5, expected k = 4]
+u272 ant_exit=1 tests=1 failures=1 errors=0 RESULT mismatches=1 totalSpaceMiB=272 segmentMiB=32 mode=blocking [links at the first rejection: L = 9, expected k = 8]
+u280-s16 ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=280 segmentMiB=16 mode=blocking
+u80-nb ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=80 segmentMiB=32 mode=nonblocking
+u144-nb ant_exit=0 tests=1 failures=0 errors=0 RESULT mismatches=0 totalSpaceMiB=144 segmentMiB=32 mode=nonblocking
+[2026-10-01 09:54:01] done; any test failed: 1

@@ -1,0 +1,78 @@
+******************** Stress Settings ********************
+Command:
+  Type: user
+  Count: -1
+  Duration: 60 SECONDS
+  No Warmup: true
+  Consistency Level: LOCAL_ONE
+  Target Uncertainty: not applicable
+  Command Ratios: {insert=1.0}
+  Command Clustering Distribution: clustering=gaussian(1..10)
+  Profile File(s): /users/jason92/stage4-harness-run/cdc/cdc-rows.yaml
+Rate:
+  Auto: false
+  Thread Count: 16
+  OpsPer Sec: 100
+Population:
+  Sequence: 1..1000000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Errors:
+  Ignore: true
+  Tries: 1
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.1]
+[... excerpt: the full output is on the node ...]
+com.datastax.driver.core.exceptions.WriteFailureException: Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+Operation x1 on key(s) [-275453518]: Error executing: (WriteFailureException): Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+
+com.datastax.driver.core.exceptions.WriteFailureException: Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+Operation x1 on key(s) [-421512269]: Error executing: (WriteFailureException): Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+
+com.datastax.driver.core.exceptions.WriteFailureException: Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+Operation x1 on key(s) [-991145036]: Error executing: (WriteFailureException): Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+
+total,                                                  6015,     103,     103,     103,    13.4,    13.1,    16.7,    17.3,    17.3,    17.3,   60.4,  0.00440,     42,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :      100 op/s  [insert: 100 op/s]
+Partition rate            :      100 pk/s  [insert: 100 pk/s]
+Row rate                  :      100 row/s [insert: 100 row/s]
+Latency mean              :   13.2 ms [insert: 13.2 ms]
+Latency median            :   13.1 ms [insert: 13.1 ms]
+Latency 95th percentile   :   16.7 ms [insert: 16.7 ms]
+Latency 99th percentile   :   18.3 ms [insert: 18.3 ms]
+Latency 99.9th percentile :   25.0 ms [insert: 25.0 ms]
+Latency max               :   35.9 ms [insert: 35.9 ms]
+Total partitions          :      6,015 [insert: 6,015]
+Total errors              :      6,015 [insert: 6,015]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:01:00
+
+END

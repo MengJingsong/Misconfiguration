@@ -1,0 +1,56 @@
+# File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 59
+RULE cdc write rejected
+CLASS org.apache.cassandra.exceptions.CDCWriteException
+METHOD <init>
+NOCOMPILE
+AT ENTRY
+BIND n : int = incrementCounter("stage4.cdcReject")
+IF n % 100 == 1
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+traceln("cdcVerdict", "reject n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " msg=" + $1)
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.exceptions.CDCWriteException.<init>(java.lang.String) void
+# File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 41
+RULE cdc verdict, state after
+CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+METHOD processNewSegment
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+traceln("cdcVerdict", "post seg=" + $1.logFile.name() + " state=" + $1.getCDCState() + " sip=" + $0.sizeInProgress.get() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker.processNewSegment(org.apache.cassandra.db.commitlog.CommitLogSegment) void
+compiled successfully
+# File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 32
+RULE cdc verdict, counter before
+CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+METHOD processNewSegment
+NOCOMPILE
+AT ENTRY
+IF true
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+traceln("cdcVerdict", "pre seg=" + $1.logFile.name() + " sip=" + $0.sizeInProgress.get() + " allowance=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCTotalSpace() + " segSize=" + org.apache.cassandra.config.DatabaseDescriptor.getCommitLogSegmentSize() + " blocking=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCBlockWrites() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker.processNewSegment(org.apache.cassandra.db.commitlog.CommitLogSegment) void
+compiled successfully
+# File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 50
+RULE cdc oldest links deleted
+CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC
+METHOD deleteOldLinkedCDCCommitLogSegment
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+traceln("cdcVerdict", "deleteOld bytesToFree=" + $1 + " remaining=" + $! + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC.deleteOldLinkedCDCCommitLogSegment(long) long
+

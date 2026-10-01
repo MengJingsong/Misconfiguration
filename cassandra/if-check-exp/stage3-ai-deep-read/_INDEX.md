@@ -121,7 +121,7 @@ Hint buffering and dispatch module, covering writes stashed for temporarily-unre
 
 ### 3.4 commitlog
 Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). One case so far:
-- **`cdc_total_space-processNewSegment-allowance`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, compared in `CDCSizeTracker.processNewSegment()` (re-evaluated by `permitSegmentMaybe()`), which sets a per-segment `FORBIDDEN`/`PERMITTED` state read by the decision point `CommitLogSegmentManagerCDC.throwIfForbidden()` (pattern (b)). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. Escape hatch found: `cdc_block_writes = false` bypasses the check entirely.
+- **`cdc_total_space-processNewSegment-allowance`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, compared in `CDCSizeTracker.processNewSegment()` (re-evaluated by `permitSegmentMaybe()`), which sets a per-segment `FORBIDDEN`/`PERMITTED` state read by the decision point `CommitLogSegmentManagerCDC.throwIfForbidden()` (pattern (b)). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. `cdc_block_writes = false` turns off the rejection but not the cap: the tracker deletes the oldest un-consumed CDC links to stay under the allowance (stage 4, 2026-10-01), so data is lost instead of writes failing. Stage 4 closed this case 2026-10-01: with no consumer the node keeps `⌊limit/segmentSize⌋` links, or one more when the check's counter is stale (at most `limit + segmentSize` bytes).
 
 
 ### 3.5 sstable_index

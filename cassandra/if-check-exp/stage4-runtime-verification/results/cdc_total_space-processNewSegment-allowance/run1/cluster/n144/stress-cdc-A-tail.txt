@@ -1,0 +1,40 @@
+  Header frequency: *not set*
+
+******************** Profile(s) ********************
+  Keyspace Name: stage4cdc
+  Keyspace CQL: 
+***
+CREATE KEYSPACE IF NOT EXISTS stage4cdc WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+***
+
+  Table Name: cdc_rows
+  Table CQL: 
+***
+CREATE TABLE IF NOT EXISTS cdc_rows (
+  id bigint,
+  payload blob,
+  PRIMARY KEY (id)
+) WITH cdc = true
+***
+
+  Extra Schema Definitions: null
+  Generator Configs:
+    payload: Size: Fixed:  key=1048576;
+    id: Identity: Sequence:  start=1,end=1000000000;
+  Query Definitions:
+  Token Range Queries:
+  Insert Settings:
+    partitions: fixed(1)
+    batchtype: UNLOGGED
+Connected to cluster: Test Cluster, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: /127.0.0.1:9042; Rack: rack1
+Created schema. Sleeping 1s for propagation.
+WARN  16:32:30,763 Query 'com.datastax.driver.core.Statement$1@26c36d73;' generated server side warning(s): `USE <keyspace>` with prepared statements is considered to be an anti-pattern due to ambiguity in non-qualified table names. Please consider removing instances of `Session#setKeyspace(<keyspace>)`, `Session#execute("USE <keyspace>")` and `cluster.newSession(<keyspace>)` from your code, and always use fully qualified table names (e.g. <keyspace>.<table>). Keyspace used: stage4cdc, statement keyspace: stage4cdc, statement id: 5caec36720e0818f16e95cdf6466cdbc
+Insert Statement:
+  UPDATE cdc_rows SET payload = ? WHERE id = ?
+Generating batches with [1..1] partitions and [1..1] rows (of [1..1] total rows in the partitions)
+
+Sleeping 2s...
+Running [insert] with 16 threads for 1000000000 iteration
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+total,                                                   314,     314,     314,     314,    44.5,    40.3,   122.7,   133.0,   142.3,   142.3,    1.0,  0.00000,      0,      0,       0,       0,       0,       0

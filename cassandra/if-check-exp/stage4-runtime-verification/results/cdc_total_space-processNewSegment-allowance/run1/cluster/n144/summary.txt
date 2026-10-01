@@ -1,0 +1,20 @@
+== n144: cdc_total_space=144MiB commitlog_segment_size=32MiB mode=nonblocking kind=normal; stress threads=16, B throttle 100/s
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 144MiB|+cdc_block_writes: false|
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/n144/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+node pid 85905, up at 1790872326054 (after 17s)
+settings read back: cdc_total_space=144MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=false
+k = floor(144 / 32) = 4; exact multiple: no
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+A: ended at 1790872355893, ~7 s after the start; stress A tail: Running [insert] with 16 threads for 1000000000 iteration|type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb|total,                                                   314,     314,     314,     314,    44.5,    40.3,   122.7,   133.0,   142.3,   142.3,    1.0,  0.00000,      0,      0,       0,       0,       0,       0|
+settle: a non-CDC write was accepted promptly after 1 attempt(s), 699 ms (settle-probe.txt)
+EXPECTED: settle: the node took a non-CDC write promptly within 180 s — yes
+CDC stress B: Op rate                   :       99 op/s  [insert: 99 op/s]
+CDC stress B: Total partitions          :      3,015 [insert: 3,015]
+CDC stress B: Total errors              :          0 [insert: 0]
+EXPECTED: non-blocking: the CDC stress had no errors — yes
+EXPECTED: non-blocking: no rejection WARN — yes
+traces: segments created=116, created forbidden=0, 'Rejecting mutation' WARN entries in system.log=0, logged rejected writes (exception stacks)=0, deleteOld lines=105, reject lines=0 (last n: )
+sampler: ticks=1423 max_links=5 max_link_bytes=167772160 max_gap_ms=51 first_ms=1790872327251 last_ms=1790872398351
+ERROR entries in system.log: 0 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 96K; DEBUG 'Freed up' lines in debug.log: 105
+disk: 3.1G data/ ; 52G free
+RESULT value n144: finished at 1790872416469

@@ -1,0 +1,24 @@
+== b144: cdc_total_space=144MiB commitlog_segment_size=32MiB mode=blocking kind=normal; stress threads=16, B throttle 100/s
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 144MiB|
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/b144/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+node pid 23365, up at 1790870112429 (after 17s)
+settings read back: cdc_total_space=144MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=true
+k = floor(144 / 32) = 4; exact multiple: no
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+A: ended at 1790870139288, ~6 s after the start; stress A tail: Operation x1 on key(s) [-816520129]: Error executing: (WriteFailureException): Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)||com.datastax.driver.core.exceptions.WriteFailureException: Cassandra failure during write query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)|
+CDC stress B: Op rate                   :      100 op/s  [insert: 100 op/s]
+CDC stress B: Total partitions          :      6,015 [insert: 6,015]
+CDC stress B: Total errors              :      6,015 [insert: 6,015]
+non-CDC stress B: Op rate                   :       10 op/s  [insert: 10 op/s]
+non-CDC stress B: Total partitions          :        602 [insert: 602]
+non-CDC stress B: Total errors              :          0 [insert: 0]
+EXPECTED: non-CDC control: no errors — yes
+EXPECTED: non-CDC control: wrote rows — yes
+release: consumer pass deleted 5 links (L was 5 at B's end)
+release: accepted=1 after 2 attempt(s), 4116 ms since the consumer pass
+EXPECTED: release: a CDC write was accepted within 30 s — yes
+traces: segments created=9, created forbidden=3, 'Rejecting mutation' WARN entries in system.log=9, logged rejected writes (exception stacks)=6113, deleteOld lines=0, reject lines=62 (last n: 6101)
+sampler: ticks=2037 max_links=5 max_link_bytes=167772160 max_gap_ms=50 first_ms=1790870113604 last_ms=1790870215404
+ERROR entries in system.log: 6113 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 9.3M; DEBUG 'Freed up' lines in debug.log: 0
+disk: 201M data/ ; 55G free
+RESULT value b144: finished at 1790870229207

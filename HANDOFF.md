@@ -171,7 +171,7 @@ stage 1/2, `3b` = direct source reading).
 | `internode_application_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Per-connection byte cap (default 4MiB); disallow registers on a wait queue, message not dropped; no escape hatch found. |
 | `native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md` | (b) | 3b | Same check via `CQLMessageHandler` (default 1MiB). With the default `native_transport_throw_on_overload=false` the message is still decoded; only `throwOnOverload=true` rejects. |
 | `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` | (a) | 3b | JVM property cap (default 3) on off-heap `HintsBuffer`s; disallow blocks on `reserveBuffers.take()`; no escape hatch found. |
-| `cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). Escape hatch: `cdc_block_writes=false`. |
+| `cdc_total_space-processNewSegment-allowance.md` | (b) | 3b | Byte cap on un-consumed CDC segments; `processNewSegment():335` sets a `CDCState`, `throwIfForbidden():214` throws `CDCWriteException` (clean reject). **Stage 4 closed it 2026-10-01:** the cap holds at `⌊A/S⌋` links, one more when the check's counter is stale (at most `A + S`); `cdc_block_writes=false` turns off the rejection but not the cap — the oldest links are deleted, data is lost. |
 | `DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md` | (c) | 3b | Disk guard on compaction output vs. free space. **The guard does not dominate the allocation** — on the default `diskBoundaries != null` path the `SSTableWriter` is created with no space check at all. |
 | `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md` | (b) | **3a** | Compaction admission gate, per file store, counting in-flight compactions. Disallow is a **shrink-and-retry ladder**, not a refusal; abort only at the end of it. Fail-open on estimation error. First case from feed 3a. |
 | `max_hints_size_per_host-shouldHint-maxHintsSize.md` | (b) | 3a | Per-host byte cap on hint files on disk. **Off by default** (`0B`). Disallow silently skips the hint while the write succeeds — the folder's first disallow that loses data; no metric fires on it. |
@@ -180,51 +180,62 @@ stage 1/2, `3b` = direct source reading).
 
 Each case's full detail lives in its own file.
 
-**Every case carries a §9 test design.** Only `memtable_heap_space` (2026-09-28)
-and `MAX_HINT_BUFFERS` (2026-09-30) are in the **new §9 layout**: the intro and §9a are a summary for a human
+**Every case carries a §9 test design.** Only `memtable_heap_space` (2026-09-28),
+`MAX_HINT_BUFFERS` (2026-09-30) and `cdc_total_space` (2026-10-01) are in the **new §9 layout**: the intro and §9a are a summary for a human
 reader (procedure and conclusions table), §9b–§9e are a Linux runbook. The
-other nine are in the old layout and must be converted before their first
+other eight are in the old layout and must be converted before their first
 stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
 
 ## Open items / next steps
 
-### ⏵ Resume here — stage 4 after `MAX_HINT_BUFFERS` (state as of 2026-09-30, end of session)
+### ⏵ Resume here — stage 4 after `cdc_total_space` (state as of 2026-10-01, end of session)
 
-**Stage 4 has closed two cases, `memtable_heap_space` and `MAX_HINT_BUFFERS`, both tiers each.** `MAX_HINT_BUFFERS` closed 2026-09-30. **Read, in this
+**Stage 4 has closed three cases, `memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space`, both tiers each.** `cdc_total_space` closed 2026-10-01. **Read, in this
 order:** `stage4-runtime-verification/README.md` (the protocol; **no human approval or review anywhere**), then
-`stage4-runtime-verification/results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md` (§4.3 the cluster conclusion, §5.1b the self-check, §8 the
-verdict and the five recommendations for stage 3), then the case's §10 "Stage-4 feedback".
+`stage4-runtime-verification/results/cdc_total_space-processNewSegment-allowance.md` (§1.2 the instrument checks, §3 the six runbook defects, §4.3 the cluster conclusion,
+§5 the self-check, §8 the verdict and the six recommendations for stage 3), then the case's §10 "Stage-4 feedback". The case's **§6b item 3, §8, §10 and §11 were
+amended as feedback** (the non-blocking mode and the ceiling), so re-read them before using the case.
 
-**Verdict: Confirmed at both tiers**, with one recorded deviation at the cluster tier. The reading rule's 4 MiB band was exceeded at every value (+8.85 to
-+8.89 MiB over `(n − 1) × bufferSize`). The rule's own clause sends a larger difference to the create trace, which shows exactly *n* buffers at every value;
-the excess is the same at every value (within 38 KB), and an allocation trace at *n* = 3 attributes it to non-pool allocations: one 8 MiB + 4 KiB `BufferPool`
-chunk and about 120 small per-thread buffers. **An open question for Jingsong (results §5.1b, part 3):** I read the rule's clause as deciding it. If the band
-is read as binding on its own, the tier has "no §9a row fits" and the README says to amend §9a and run the tier again.
+**Verdict: Confirmed, with a one-segment overshoot, at both tiers; non-blocking mode: bypass as recorded, bounded by deletion.** With no CDC consumer the node keeps
+`⌊A/S⌋` hard links in `cdc_raw` (`A` = `cdc_total_space`, `S` = `commitlog_segment_size`), **one more when the check's counter is stale** when the last permitted
+segment is created (the counter was one segment low at 45 % of creations in the unit tier and 23 % in the cluster tier; the directory walk that refreshes it is
+submitted inside `processNewSegment` and often finishes before the new link exists), and one fewer at an exact multiple of `S` (the `_cdc.idx` bytes tip the last
+segment over). So the ceiling is at most `A + S`, not "at or below `A`", and §8's old "never below it" was wrong both ways. Past it every CDC write is rejected with
+`CDCWriteException` (6,015 of 6,015 in each 60 s) while non-CDC writes are accepted; deleting the links releases the writer in 0.1 to 2.8 s. `cdc_block_writes: false`
+**does not remove the bound**: the tracker deletes the oldest links, so un-consumed CDC data is lost instead of writes failing (the case's "bypasses the check entirely"
+was wrong; corrected). Same plateaus in two cluster passes. §9a's own sentence that a stale counter is "rare" is wrong about frequency; §9a is frozen, so that is
+recommendation 1 in results §8.
 
 | Piece | State |
 |---|---|
-| `MAX_HINT_BUFFERS` | **Closed 2026-09-30.** Unit tier consistent with Confirmed; cluster tier Confirmed with the deviation above; no run 2 (results §5.2). §9a and §9b are byte-identical to the freeze (hash in results §1); §9c, §9e and the §9 intro were amended after the run, documentation only (the second-knob arm needs 400,000 rows). |
-| Recommendations for stage 3 | Five, in results §8: the band, the NMT cross-check, the arm's workload arithmetic, dump timing, Byteman `boot:`. **Not applied** (readings existed). Fold them into the case and `stage3-ai-deep-read/_TEMPLATE.md` when next touched. |
-| Nodes right now | Both stopped, nothing running. Node0's `data/` holds the ring, 4.2 GB of table data and the diagnostic's hints (226 MB); `data.heap-run-2026-09-29` (2.4 GB) can be deleted. `pc80`'s `data/` is the ring member's and must stay while this ring is used. The internode-port firewall rules are in place on both (in memory). Details and the `boot:` lesson: `environment.md` §5. |
-| Commit state | Committed and pushed through `88c07fb`. **Uncommitted, all of it:** the case file (§9c, §9e, §9 intro, §10), the results file, everything new under `results/MAX_HINT_BUFFERS-…/` (`run1/ring.sh`, `cluster-run.sh`, `cluster/`, `ring/`, `diag-alloc/`, both self-check scripts and outputs, `dump-recount.*`, `instrument-check/cluster-run-smoke/`), the harness README's hold-rule row, `environment.md` and this file. Nothing was committed or pushed. |
+| `cdc_total_space` | **Closed 2026-10-01.** Unit tier: 10 JVMs in 6 min (upstream baseline, 7 blocking values, 2 non-blocking). Cluster tier: one node, 8 values (blocking at 144, 272, 528 MiB and the derived default 4096 MiB, a second-knob arm, 2 non-blocking, a consumer control), about 3 min each; pass 1 was superseded after a runbook defect (the default arm's non-CDC control stalled behind a 15 s commit-log sync), the default arm ran three times. No run 2 (results §5.2). §9a and §9b are byte-identical to the freeze (hashes in results §1); 9c to 9e were amended for six runbook defects, documentation only. |
+| Recommendations for stage 3 | Six in results §8 (§9a's stale-counter wording; judge `:345` as a check site; the replay path, a second unguarded path; a §6a citation; template changes; do not trust private upstream helpers) and the five of `MAX_HINT_BUFFERS` (results §8 there). **Not applied** (readings existed). |
+| Open question, still open | `MAX_HINT_BUFFERS` results §5.1b part 3: is its reading rule's 4 MiB band binding on its own, or does the create-trace clause decide? I read the clause as deciding; if the band is binding, that tier has "no §9a row fits" and the README says to amend §9a and run the tier again. |
+| Nodes right now | NODE1 (`pc80`) is the only node used; it is stopped, nothing running; `~/cassandra-run1` is built (`ant build-test`), its `data/` is wiped and `conf/cassandra.yaml` restored; the harness copies are in `~/stage4-harness-run/cdc/` and `cdc-run1/`, the logs in `~/stage4-logs/cdc/` (`cluster-pass1/`, `cluster/`, `unit/`). `~/cassandra-node2` (the hints ring member's data) was not touched. NODE0 (`pc66`) was not touched this session (per the previous handoff its `data/` holds the hints case's ring and diagnostic data; its state now is unchecked); NODE2 (`pc72`) was never needed. Details: `environment.md` §6. |
+| Commit state | Base `ec90cea`. **Nothing was committed or pushed this session.** Uncommitted, all of it: the case file (§6b, §8, §9, §10, §11), `_INDEX.md`, the stage-4 README row, `environment.md` §6, this file, the harness folder `harness/cdc_total_space-processNewSegment-allowance/`, the results file and `results/cdc_total_space-processNewSegment-allowance/` (`run1/` scripts, `unit/`, `cluster/`, `cluster-pass1/`, `cluster-attempts/`, the tables and the two self-check outputs). |
 
-**Access** (the tool shell does not source `~/.shell_common_init`, so use the literal hosts): node 1 = `jason92@pc66.cloudlab.umass.edu` (NODE0, measured),
-node 2 = `jason92@pc80.cloudlab.umass.edu` (NODE1, hint target); NODE2 is unused. Always `ssh -o BatchMode=yes -n`. Run anything long as a background task that
-holds the ssh command (a backgrounded script whose output goes through `tee` keeps the session open until it ends).
+**Access** (the tool shell does not source `~/.shell_common_init`, so use the literal hosts): NODE0 = `jason92@pc66.cloudlab.umass.edu`, NODE1 = `jason92@pc80.cloudlab.umass.edu`
+(used this session), NODE2 = `jason92@pc72.cloudlab.umass.edu` (its host key is not in `known_hosts`; it presents the same ED25519 key as `pc66` and `pc80`). Always `ssh -o BatchMode=yes -n`
+for commands, and **no `-n` when piping a script in** (it closes stdin and the script silently does nothing). Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
 
 **What the next case should take from this one** (details in its results file):
 
-- Convert the case to the new §9 layout and audit it first (README, step 0); freeze §9's hash before any run.
-- **Write the reading rule with a measured tolerance.** The 4 MiB band missed by about 5 MiB, because a stress load makes the JVM allocate an 8 MiB `BufferPool`
-  chunk and ~120 per-thread scratch buffers. Prefer evidence that does not depend on an absolute size: the create and disallow trace, and the *step* between
-  capacity values (here one buffer within 19 KB).
-- **Separate checks from readings in the self-check script, and record every correction to it.** Two of mine were mis-specified (an excerpt count, a
-  tolerance); results §5.1b says what changed and why.
-- One run script per case; run the values one at a time as background ssh tasks; each value writes `summary.txt`, `readings.csv` and `session.log`; pull only the
-  small files into `run1/cluster/<label>/` and keep the full logs on the node.
-- A Byteman rule on a JDK class needs `boot:` in the agent string. `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM. Start a node
-  only after `nodetool status` shows `UN` and `nodetool statusbinary` prints `running`. `JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command, never exported.
-- Stress-client `WriteTimeoutException` lines are a symptom of queued writers, not evidence; the client retries, so `Total errors` stays 0.
+- Convert the case to the new §9 layout and audit it first (README, step 0); freeze §9's hash before any run. **Check the unit yaml's defaults against the node's**
+  (`commitlog_segment_size` is 5 MiB in `test/conf/cassandra.yaml`, 32 MiB on a node) and set what the case needs in the harness. Do not assume an upstream test helper
+  is reusable: this case's `testWithCDCSpaceInMb` was private and its non-blocking assertion allowed three times the limit.
+- **Read the real resource first, the check's counter second.** The counter is an estimate refreshed asynchronously and can lag the disk; put a creation or refresh
+  trace next to the files so an overshoot can be *attributed* (here: counter one segment low, 1.000 S at most, in every run). State the prediction with that tolerance.
+- **Make the harness record a mismatch and go on**, so one wrong expectation does not hide the later steps' readings. Build every table from the raw files with a script
+  (nothing typed in by hand), write a second, independent self-check, and record each correction to a check (this run had three: C6, X1, the lifetime boundary).
+- **Settle the node before a control.** A bulk write of GBs through the mapped commit log stalls every logged write for 10 to 16 s at the first periodic sync; a rejected
+  write never reaches the log, so only a control notices. Probe until 15 prompt writes in a row.
+- One run script per case; run the values one at a time as background ssh tasks; each value writes `summary.txt`, `readings.csv`, `phases.csv` and `session.log`; pull only
+  the small files into the repo (`run1/pull-cluster.sh` shows how, including a gzipped filtered log) and keep the full logs on the node. Keep superseded passes (`cluster-pass1/`).
+- From the previous case (still true): a Byteman rule on a JDK class needs `boot:`; `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM; start a node
+  only after `nodetool status` shows `UN` and `nodetool statusbinary` prints `running`; `JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command, never exported; write the
+  reading rule with a measured tolerance and prefer evidence that does not depend on an absolute size.
+- `grep ' ERROR ' system.log` finds nothing (a level starts the line: `grep '^ERROR'`); `cassandra-stress` prints `Total errors   :   0 [insert: 0]` and `Total partitions`,
+  and prints every failed write's error (a 2.4 MB output for one B), so pull only its header and results block.
 
 **Reference, the first closed case, `memtable_heap_space` (state as of 2026-09-29/30).** Its results file is
 `stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md`.
@@ -250,18 +261,19 @@ holds the ssh command (a backgrounded script whose output goes through `tee` kee
 | Option | Notes |
 |---|---|
 | ~~Fill results §8~~ | Done 2026-09-30; `memtable_heap_space` is closed. |
-| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `cdc_total_space`, `max_space_usable_for_compactions_in_percentage` (`memtable_heap_space` and `MAX_HINT_BUFFERS` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
+| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `max_space_usable_for_compactions_in_percentage` is the one cheap case left (`memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
+| ~~`cdc_total_space`~~ | Done and closed 2026-10-01 (see the block above). Optional: a run 2 by a fresh session (harness, runner and results file are ready; it is cheap). |
 | ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
-| Settle the band question and fold in the five recommendations | Decide whether the reading rule's band is binding (results §5.1b part 3); then apply the recommendations in results §8 to the case's §9 and to `stage3-ai-deep-read/_TEMPLATE.md`. |
+| Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
-**Machine notes.** Two nodes are set up (`environment.md` §5): node0 (`pc66`, the measured node, tree
-`~/cassandra-run1`) and `pc80` (the hint target, tree `~/cassandra-node2`), both JDK 11 + Ant, in separate
+**Machine notes.** Two nodes are set up (`environment.md` §5, §6): node0 (`pc66`, the measured node of the hints case, tree
+`~/cassandra-run1`) and `pc80` (the hint target of that case, tree `~/cassandra-node2`; **the measured node of `cdc_total_space`**, new tree `~/cassandra-run1`), both JDK 11 + Ant, in separate
 CloudLab experiments on one control subnet (`198.22.255.77` and `.91`). CloudLab nodes are rebuilt from scratch, so
 `HANDOFF.md`, `environment.md` and the case files are the only record a new node inherits. Full run logs are on each
 node in `~/stage4-logs/`, outside the repo. Access details are in the resume block above.
 
-**Open stage-4 follow-ups:** convert the other nine cases to the new §9 layout
+**Open stage-4 follow-ups:** convert the other eight cases to the new §9 layout
 before their runs. (The stale §9d–§9g references in the root `README.md`,
 `stage3-ai-deep-read/playbook.md` and `rejected.md` were cleared 2026-09-30; the
 remaining ones sit in old-layout case files, where they are correct.)
@@ -275,8 +287,8 @@ in `bands.md`. **Eleven cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 has started** (see the table above) — eleven designs, two cases closed
-(`memtable_heap_space`, `MAX_HINT_BUFFERS`). Stage 3's own
+**Stage 4 has started** (see the table above) — eleven designs, three cases closed
+(`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`). Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
 | Band | Meaning | Units |
@@ -354,12 +366,15 @@ is no saving worth buying with a heuristic that might drop a real case.
    band A:
    - `CommitLogSegmentManagerCDC.java:345` — the third `cdc_total_space` site,
      which item 3 below says is recorded nowhere. Still needs judging, but the
-     §9 backfill established what it does: in non-blocking mode
-     (`cdc_block_writes=false`) it **deletes the oldest CDC hard links** to get
-     back under the allowance. So the escape hatch does not remove the bound —
-     it changes enforcement from rejecting writes to discarding un-consumed CDC
-     data. The case file's §10 and `_INDEX.md` still say "bypasses the check
-     entirely", which undersells it; correct both when this site is judged.
+     §9 backfill established what it does, and **stage 4 measured it
+     (2026-10-01)**: in non-blocking mode (`cdc_block_writes=false`) it
+     **deletes the oldest CDC hard links** at every segment creation beyond the
+     allowance, leaving at most `⌊A/S⌋ + 1` links; no write is rejected and
+     un-consumed CDC data is lost. So the escape hatch does not remove the
+     bound — it changes enforcement from rejecting writes to discarding data.
+     The case file's §6b, §10 and §11 and `_INDEX.md` were **corrected from
+     "bypasses the check entirely"** on 2026-10-01; what remains is the stage-3
+     judgement of `:345` as a check site.
    - `ResourceLimits$Basic.tryAllocate():213` and `$Concurrent:138` — the
      mechanism the two net cases fail to cite (item 3 below).
    - ~~`Directories.hasDiskSpaceForCompactionsAndStreams():551`~~ — **done

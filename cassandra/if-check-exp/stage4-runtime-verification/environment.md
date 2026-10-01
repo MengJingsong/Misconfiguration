@@ -177,6 +177,33 @@ delete `data/` on both nodes and run `ring.sh`. The internode-port firewall rule
 **Undo (node 2).** `sudo apt-get remove -y openjdk-11-jdk ant && sudo apt-get autoremove -y`;
 `rm -rf ~/cassandra-node2 ~/.m2 ~/stage4-logs`; and the firewall rules above.
 
+## 6. Measured node for the single-node cluster tier (added 2026-10-01)
+
+`cdc_total_space` needs one node, no ring (case §9). It was run on **NODE1** (`pc80`, `node0.jason92-318546`), the second node of
+section 5, by Jingsong's instruction of 2026-10-01 (use NODE1 and NODE2 if two nodes are needed; NODE0 was not used). **NODE2**
+(`pc72`) was not needed. For the record, its host key was not in `~/.ssh/known_hosts`; it presents the same ED25519 key as `pc66` and
+`pc80` (`SHA256:qkFN/SvBkCeQfIkD5YilK7WgBOUyfXwZPIEyp0Q9hYY`), which are already trusted, and was not added.
+
+| Field | Value |
+|---|---|
+| Node | `node0.jason92-318546.misconfiguration-pg0.cloudlab.umass.edu` (`pc80`), 40 cores, 125 GiB, Ubuntu 22.04.2, `5.15.0-187-generic` |
+| Tools | JDK 11.0.32.1, Ant 1.10.12 (from section 5), system Python 3.10 (the sampler, the analysis script, `cqlsh`) |
+| Tree | a **new** clone `~/cassandra-run1` (`git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src`, `b5f2a54`), built with `ant build-test` in 1 min 39 s (dependencies were already in `~/.m2`). `~/cassandra-node2` (the hints ring member, with its `data/`) was not touched |
+| Storage | `/dev/sda3`, 63 GB, 55 GB free at the start; node data, commit log and `cdc_raw` under `~/cassandra-run1/data/` |
+| Harness copy | `~/stage4-harness-run/cdc/` (with `SHA256SUMS`); run scripts in `~/stage4-harness-run/cdc-run1/`; logs in `~/stage4-logs/cdc/` |
+| Configuration | the tag's `conf/cassandra.yaml` plus the arm's edits, rebuilt from `git show HEAD:conf/cassandra.yaml` for every run (case 9e); `rpc_address` and `listen_address` stay `localhost` |
+| Ports | 7199 (JMX), 9042, 9091 (Byteman listener) must be free; the internode firewall rule of section 5 is still in memory and does not matter to a single node |
+
+The unit tier needs only the clone and `ant build-test`; the harness test is copied into `test/unit/org/apache/cassandra/db/commitlog/`.
+
+Lessons that generalize:
+
+- `ssh -n` closes standard input, so a script fed to `ssh host 'bash -s' <<EOF` silently does nothing: leave `-n` off when piping a script in.
+- The node's shell is in MDT, while Cassandra's log lines are in UTC; use epoch milliseconds (`date +%s%3N`) to line things up, as the scripts do.
+- In `system.log` a level starts the line (`ERROR  [thread] ...`), so `grep ' ERROR '` finds nothing; use `grep '^ERROR'`.
+- `cassandra-stress` prints `Total errors   :   0 [insert: 0]` and `Total partitions`; there is no `Total operation count` line.
+- Each CDC write rejected in blocking mode logs an `ERROR ... Failed to apply mutation locally` entry with a stack of about 1.7 KB, besides the rate-limited `WARN`; throttle the writer in B.
+
 ## Logs
 
 Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:

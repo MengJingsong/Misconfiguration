@@ -1,0 +1,78 @@
+******************** Stress Settings ********************
+Command:
+  Type: user
+  Count: -1
+  Duration: 30 SECONDS
+  No Warmup: true
+  Consistency Level: LOCAL_ONE
+  Target Uncertainty: not applicable
+  Command Ratios: {insert=1.0}
+  Command Clustering Distribution: clustering=gaussian(1..10)
+  Profile File(s): /users/jason92/stage4-harness-run/cdc/cdc-rows.yaml
+Rate:
+  Auto: false
+  Thread Count: 16
+  OpsPer Sec: 100
+Population:
+  Sequence: 1..1000000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Errors:
+  Ignore: true
+  Tries: 1
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.1]
+[... excerpt: the full output is on the node ...]
+total,                                                  2164,     101,     101,     101,    16.2,    16.0,    23.4,    26.9,    27.9,    27.9,   22.0,  0.01617,      0,      0,       0,       0,       0,       0
+total,                                                  2265,     101,     101,     101,    16.6,    17.1,    23.1,    27.1,    29.3,    29.3,   23.0,  0.01548,      0,      0,       0,       0,       0,       0
+total,                                                  2365,     100,     100,     100,    13.9,    13.3,    20.6,    21.7,    21.8,    21.8,   24.0,  0.01483,      0,      0,       0,       0,       0,       0
+total,                                                  2465,     100,     100,     100,    16.1,    16.5,    22.7,    23.8,    24.9,    24.9,   25.0,  0.01423,      0,      0,       0,       0,       0,       0
+total,                                                  2565,     100,     100,     100,    14.2,    14.2,    19.6,    22.0,    22.6,    22.6,   26.0,  0.01369,      0,      0,       0,       0,       0,       0
+total,                                                  2665,     100,     100,     100,    16.6,    16.8,    21.3,    24.2,    28.0,    28.0,   27.0,  0.01318,      0,      0,       0,       0,       0,       0
+total,                                                  2764,      99,      99,      99,    18.2,    17.9,    28.8,    45.3,    45.3,    45.3,   28.0,  0.01271,      0,      0,       0,       0,       0,       0
+total,                                                  2864,     100,     100,     100,    20.0,    19.6,    24.3,    37.0,    37.0,    37.0,   29.0,  0.01228,      0,      0,       0,       0,       0,       0
+total,                                                  2964,     100,     100,     100,    19.9,    19.6,    23.0,    25.0,    26.3,    26.3,   30.0,  0.01187,      0,      0,       0,       0,       0,       0
+total,                                                  3014,     101,     101,     101,    20.4,    20.1,    23.4,    24.1,    24.1,    24.1,   30.5,  0.01155,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :       99 op/s  [insert: 99 op/s]
+Partition rate            :       99 pk/s  [insert: 99 pk/s]
+Row rate                  :       99 row/s [insert: 99 row/s]
+Latency mean              :   18.4 ms [insert: 18.4 ms]
+Latency median            :   18.8 ms [insert: 18.8 ms]
+Latency 95th percentile   :   27.2 ms [insert: 27.2 ms]
+Latency 99th percentile   :   33.1 ms [insert: 33.1 ms]
+Latency 99.9th percentile :   42.7 ms [insert: 42.7 ms]
+Latency max               :   45.4 ms [insert: 45.4 ms]
+Total partitions          :      3,014 [insert: 3,014]
+Total errors              :          0 [insert: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:00:30
+
+END

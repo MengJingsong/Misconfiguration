@@ -1,0 +1,24 @@
+2 creation(s) before the current commit-log lifetime (segment id below 1790869939101) are left out: -1790869939098.log, -1790869939099.log
+S=33554432  A=150994944  k=4  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  7 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790869939101.log               0   0.00              0            0 PERMITTED 
+   -1790869939102.log               1   0.00              0     33554432 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+   -1790869939103.log               2   2.00       67108864            0 PERMITTED 
+   -1790869939104.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790869939105.log               4   3.00      100663321     33554407 PERMITTED STALE: counter 1.00 segments low
+   -1790869939106.log               5   4.00      134217782     33554378 FORBIDDEN STALE: counter 1.00 segments low
+   -1790869939107.log               5   5.00      167772239          -79 FORBIDDEN 
+   stale (lag >= S/2) among 7 unambiguous creations: 4
+
+3. creations that made a link beyond k = 4
+   -1790869939105.log: links before 4, counter 100663321 (3.00 S), S + counter <= A: True, S + files*S <= A: False  => stale counter let it through
+
+4. link timeline: peak L = 5 before the first removal  (per-tick link counts)
+   first rejection traced at 1790869944497: L = 5; rejection lines traced: 1, rejections counted up to the last: 1
+
+6. ceiling attribution (blocking): permitted creations = 5, k = 4, links made beyond k = 1
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): yes

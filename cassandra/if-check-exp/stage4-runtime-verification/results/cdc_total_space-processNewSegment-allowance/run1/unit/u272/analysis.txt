@@ -1,0 +1,28 @@
+2 creation(s) before the current commit-log lifetime (segment id below 1790869961769) are left out: -1790869961766.log, -1790869961767.log
+S=33554432  A=285212672  k=8  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  11 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790869961769.log               0   0.00              0            0 PERMITTED 
+   -1790869961770.log               1   0.00              0     33554432 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+   -1790869961771.log               2   2.00       67108864            0 PERMITTED 
+   -1790869961772.log               3   2.00       67108882     33554414 PERMITTED STALE: counter 1.00 segments low
+   -1790869961773.log               4   3.00      100663321     33554407 PERMITTED STALE: counter 1.00 segments low
+   -1790869961774.log               5   4.00      134217782     33554378 PERMITTED STALE: counter 1.00 segments low
+   -1790869961775.log               6   5.00      167772221     33554371 PERMITTED STALE: counter 1.00 segments low
+   -1790869961776.log               7   7.00      234881121          -97 PERMITTED 
+   -1790869961777.log               8   7.00      234881121     33554335 PERMITTED STALE: counter 1.00 segments low
+   -1790869961778.log               9   9.00      301990021         -133 FORBIDDEN 
+   -1790869961779.log               9   9.00      301990039         -151 FORBIDDEN 
+   stale (lag >= S/2) among 11 unambiguous creations: 6
+
+3. creations that made a link beyond k = 8
+   -1790869961777.log: links before 8, counter 234881121 (7.00 S), S + counter <= A: True, S + files*S <= A: False  => stale counter let it through
+
+4. link timeline: peak L = 9 before the first removal  (per-tick link counts)
+   first rejection traced at 1790869968127: L = 9; rejection lines traced: 1, rejections counted up to the last: 1
+
+6. ceiling attribution (blocking): permitted creations = 9, k = 8, links made beyond k = 1
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): yes

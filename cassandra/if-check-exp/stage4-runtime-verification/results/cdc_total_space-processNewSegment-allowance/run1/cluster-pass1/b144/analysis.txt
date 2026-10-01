@@ -1,0 +1,36 @@
+S=33554432  A=150994944  k=4  blocking=True  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  9 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790870075079.log               0   0.00              0            0 PERMITTED 
+   -1790870075080.log               1   0.00              0     33554432 PERMITTED STALE: counter 1.00 segments low  [timeline says 0 links]
+   -1790870075081.log               2   1.00       33554432     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870075082.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870075083.log               4   3.00      100663296     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870075084.log               5   4.00      134217746     33554414 FORBIDDEN STALE: counter 1.00 segments low
+   -1790870075085.log               5   5.00      167772196          -36 FORBIDDEN 
+   -1790870075086.log               5   5.00      167772250          -90 FORBIDDEN 
+   -1790870075087.log               1   1.00       33554432            0 PERMITTED 
+   stale (lag >= S/2) among 9 unambiguous creations: 5
+
+3. creations that made a link beyond k = 4
+   -1790870075083.log: links before 4, counter 100663296 (3.00 S), S + counter <= A: True, S + files*S <= A: False  => stale counter let it through
+
+4. link timeline: peak L = 5 before the first removal  (from the events; same-tick ordering can inflate it by 1, the CSV is exact)
+   first rejection traced at 1790870137639: L = 5; rejection lines traced: 62, rejections counted up to the last: 6101
+
+5. sampler CSV: 2037 ticks, max gap 50 ms
+   ticks where the link bytes were not exactly L x S: 0
+   idle_end                     L=2    link_bytes=67108864     (2.00 S)  allocated=69632        idx=0/0
+   A_first_rejection            L=5    link_bytes=167772160    (5.00 S)  allocated=162795520    idx=2/36
+   A_end                        L=5    link_bytes=167772160    (5.00 S)  allocated=162795520    idx=2/36
+   B_end                        L=5    link_bytes=167772160    (5.00 S)  allocated=162795520    idx=5/90
+   R_start                      L=5    link_bytes=167772160    (5.00 S)  allocated=162795520    idx=5/90
+   R_end                        L=1    link_bytes=33554432     (1.00 S)  allocated=5984256      idx=0/0
+   B window: peak L=5, min L=5, plateau (median over its last 20 s) L=5.0, bytes at peak=167772160
+   peak L over the whole run: 5 (167772160 bytes = 5.00 S)
+
+6. ceiling attribution (blocking): permitted creations = 6, k = 4, links made beyond k = 1
+   each beyond-k link made while `S + counter <= A` but `S + files > A` (stale counter): yes

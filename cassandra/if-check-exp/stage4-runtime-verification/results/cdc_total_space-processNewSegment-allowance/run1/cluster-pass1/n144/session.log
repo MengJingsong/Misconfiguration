@@ -1,0 +1,247 @@
+[2026-10-01 10:08:24] script: ./cluster-run.sh value n144; host: node0.jason92-318546.misconfiguration-pg0.cloudlab.umass.edu; label: n144
+== n144: cdc_total_space=144MiB commitlog_segment_size=32MiB mode=nonblocking kind=normal; stress threads=16, B throttle 100/s
+[2026-10-01 10:08:24] CHECK PASS: no CassandraDaemon running
+[2026-10-01 10:08:24] CHECK PASS: ports 7199/9042/9091 free
+[2026-10-01 10:08:24] CHECK PASS: local disk has >= 25 GB free
+[2026-10-01 10:08:24] CHECK PASS: the clone is at cassandra-5.0.9
+CdcTotalSpaceCeilingTest.java: OK
+cdc-verdict.btm: OK
+cdc-sampler.py: OK
+cdc-consumer.sh: OK
+cdc-analyze.py: OK
+cdc-rows.yaml: OK
+plain-rows.yaml: OK
+[2026-10-01 10:08:24] CHECK PASS: python3 and cqlsh are available
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 144MiB|+cdc_block_writes: false|
+[2026-10-01 10:08:24] CHECK PASS: yaml diff adds 3 lines
+[2026-10-01 10:08:24] + mv logs /users/jason92/stage4-logs/cdc/cluster/logs.before-n144.1790870904
+[2026-10-01 10:08:24]   rc=0
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/n144/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+[2026-10-01 10:08:24] + JVM_EXTRA_OPTS=... bin/cassandra -p cassandra.pid > /users/jason92/stage4-logs/cdc/cluster/n144/stdout.txt 2>&1
+node pid 45977, up at 1790870948799 (after 17s)
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 59
+    | RULE cdc write rejected
+    | CLASS org.apache.cassandra.exceptions.CDCWriteException
+    | METHOD <init>
+    | NOCOMPILE
+    | AT ENTRY
+    | BIND n : int = incrementCounter("stage4.cdcReject")
+    | IF n % 100 == 1
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "reject n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " msg=" + $1)
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.exceptions.CDCWriteException.<init>(java.lang.String) void
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 41
+    | RULE cdc verdict, state after
+    | CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+    | METHOD processNewSegment
+    | NOCOMPILE
+    | AT EXIT
+    | IF true
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "post seg=" + $1.logFile.name() + " state=" + $1.getCDCState() + " sip=" + $0.sizeInProgress.get() + " ms=" + java.lang.System.currentTimeMillis())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+    | trigger method: org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker.processNewSegment(org.apache.cassandra.db.commitlog.CommitLogSegment) void
+    | compiled successfully
+    | # File /users/jason92/stage4-harness-run/cdc/cdc-verdict.btm line 32
+    | RULE cdc verdict, counter before
+    | CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+    | METHOD processNewSegment
+    | NOCOMPILE
+    | AT ENTRY
+    | IF true
+    | DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+    | traceln("cdcVerdict", "pre seg=" + $1.logFile.name() + " sip=" + $0.sizeInProgress.get() + " allowance=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCTotalSpace() + " segSize=" + org.apache.cassandra.config.DatabaseDescriptor.getCommitLogSegmentSize() + " blocking=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCBlockWrites() + " ms=" + java.lang.System.currentTimeMillis())
+    | ENDRULE
+    | Transformed in:
+    | loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+[2026-10-01 10:09:08] CHECK PASS: Submit -l lists CDCSizeTracker.processNewSegment
+[2026-10-01 10:09:08] CHECK PASS: Submit -l lists deleteOldLinkedCDCCommitLogSegment
+[2026-10-01 10:09:08] CHECK PASS: Submit -l lists CDCWriteException
+    | 
+    |  name                   | value
+    | ------------------------+---------------------
+    |        cdc_block_writes |               false
+    |             cdc_enabled |                true
+    |       cdc_raw_directory | bin/../data/cdc_raw
+    |         cdc_total_space |              144MiB
+    |  commitlog_segment_size |               32MiB
+    | 
+    | (5 rows)
+settings read back: cdc_total_space=144MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=false
+k = floor(144 / 32) = 4; exact multiple: no
+[2026-10-01 10:09:09] CHECK PASS: cdc_total_space read back as 144
+[2026-10-01 10:09:09] CHECK PASS: commitlog_segment_size read back as 32
+[2026-10-01 10:09:09] CHECK PASS: data/cdc_raw exists
+[2026-10-01 10:09:10] phase idle_start
+[2026-10-01 10:09:25] phase idle_end
+[2026-10-01 10:09:27] reading idle: links=2 link_bytes=67108864 alloc=69632 idx=0/0 Failures=0 WARN=0 created=2 forbidden=0
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+[2026-10-01 10:09:27] phase A_start
+[2026-10-01 10:09:27] + tools/bin/cassandra-stress user profile=/users/jason92/stage4-harness-run/cdc/cdc-rows.yaml "ops(insert=1)" n=1000000000 no-warmup -rate threads=16 -errors retries=0 ignore -node 127.0.0.1 > /users/jason92/stage4-logs/cdc/cluster/n144/stress-cdc-A.txt &
+[2026-10-01 10:09:34] phase A_segments_reached
+[2026-10-01 10:09:34] phase A_end
+[2026-10-01 10:09:36] reading A: links=5 link_bytes=167772160 alloc=107704320 idx=1/18 Failures=0 WARN=0 created=13 forbidden=0
+A: ended at 1790870976088, ~7 s after the start; stress A tail: Running [insert] with 16 threads for 1000000000 iteration|type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb|total,                                                   132,     132,     132,     132,    63.4,    48.7,   150.3,   161.6,   163.3,   163.3,    1.0,  0.00000,      0,      1,      67,      67,       0,    1456|
+[2026-10-01 10:09:36] phase B_start
+[2026-10-01 10:09:36] + tools/bin/cassandra-stress user profile=/users/jason92/stage4-harness-run/cdc/cdc-rows.yaml "ops(insert=1)" duration=30s no-warmup -rate threads=16 throttle=100/s -errors retries=0 ignore -node 127.0.0.1 > /users/jason92/stage4-logs/cdc/cluster/n144/stress-cdc-B.txt &
+[2026-10-01 10:09:36] reading B: links=5 link_bytes=167772160 alloc=130191360 idx=6/98 Failures= WARN=0 created=13 forbidden=0
+[2026-10-01 10:09:41] reading B: links=5 link_bytes=167772160 alloc=130191360 idx=6/98 Failures= WARN=0 created=13 forbidden=0
+[2026-10-01 10:09:46] reading B: links=5 link_bytes=167772160 alloc=99651584 idx=5/79 Failures= WARN=0 created=27 forbidden=0
+[2026-10-01 10:09:51] reading B: links=5 link_bytes=167772160 alloc=128094208 idx=6/97 Failures= WARN=0 created=44 forbidden=0
+[2026-10-01 10:09:56] reading B: links=5 link_bytes=167772160 alloc=106049536 idx=6/97 Failures= WARN=0 created=60 forbidden=0
+[2026-10-01 10:10:01] reading B: links=5 link_bytes=167772160 alloc=109719552 idx=6/97 Failures= WARN=0 created=76 forbidden=0
+[2026-10-01 10:10:06] reading B: links=5 link_bytes=167772160 alloc=119697408 idx=5/90 Failures= WARN=0 created=92 forbidden=0
+[2026-10-01 10:10:11] reading B: links=4 link_bytes=134217728 alloc=91348992 idx=6/108 Failures= WARN=0 created=108 forbidden=0
+[2026-10-01 10:10:16] phase B_end
+[2026-10-01 10:10:17] reading Bend: links=4 link_bytes=134217728 alloc=73502720 idx=11/198 Failures=0 WARN=0 created=111 forbidden=0
+CDC stress B: Op rate                   :       97 op/s  [insert: 97 op/s]
+CDC stress B: Total partitions          :      3,015 [insert: 3,015]
+CDC stress B: Total errors              :          0 [insert: 0]
+EXPECTED: non-blocking: the CDC stress had no errors — yes
+EXPECTED: non-blocking: no rejection WARN — yes
+Cassandra has shutdown.
+[2026-10-01 10:10:34] ERR line 311: sed -E 's/.* n=([0-9]+).*/\1/'
+traces: segments created=112, created forbidden=0, 'Rejecting mutation' WARN entries in system.log=0, logged rejected writes (exception stacks)=0, deleteOld lines=102, reject lines=0 (last n: )
+sampler: ticks=1358 max_links=5 max_link_bytes=167772160 max_gap_ms=184 first_ms=1790870949888 last_ms=1790871017872
+ERROR entries in system.log: 0 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 92K; DEBUG 'Freed up' lines in debug.log: 102
+disk: 3.1G data/ ; 52G free
+    | S=33554432  A=150994944  k=4  blocking=False  exact multiple of S: False
+    | 
+    | 1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  112 creations, 0 violations []
+    | 
+    | 2. each creation (links = files that existed just before it, from the timeline)
+    |    segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+    |    -1790870911402.log               0   0.00              0            0 PERMITTED 
+    |    -1790870911403.log               0   0.00              0            0 PERMITTED 
+    |    -1790870911404.log               2   1.00       33554432     33554432 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911405.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911406.log               4   4.00      134217754          -26 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911407.log               4   3.00      100663314     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911408.log               5   4.00      134217764     33554396 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911409.log               5   4.00      134217746     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911410.log               5   4.00      134217746     33554414 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911411.log               5   4.00      134217728     33554432 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911412.log               5   4.00      134217728     33554432 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911413.log               5   5.00      167772160            0 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911414.log               4   3.00      100663296     33554432 PERMITTED ambiguous (a link event within 100 ms before)
+    |    -1790870911415.log               5   5.00      167772214          -54 PERMITTED 
+    |    -1790870911416.log               4   3.00      100663368     33554360 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911417.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911418.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911419.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911420.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911421.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911422.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911423.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911424.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911425.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911426.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911427.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911428.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911429.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911430.log               5   5.00      167772239          -79 PERMITTED 
+    |    -1790870911431.log               4   3.00      100663357     33554371 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911432.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911433.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911434.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911435.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911436.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911437.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911438.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911439.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911440.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911441.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911442.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911443.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911444.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911445.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911446.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911447.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911448.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911449.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911450.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911451.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911452.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911453.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911454.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911455.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911456.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911457.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911458.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911459.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911460.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911461.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911462.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911463.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911464.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911465.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911466.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911467.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911468.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911469.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911470.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911471.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911472.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911473.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911474.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911475.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911476.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911477.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911478.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911479.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911480.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911481.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911482.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911483.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911484.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911485.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911486.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911487.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911488.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911489.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911490.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911491.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911492.log               5   4.00      134217808     33554352 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911493.log               5   4.00      134217807     33554353 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911494.log               5   5.00      167772240          -80 PERMITTED 
+    |    -1790870911495.log               4   3.00      100663350     33554378 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911496.log               5   5.00      167772222          -62 PERMITTED 
+    |    -1790870911497.log               4   3.00      100663332     33554396 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911498.log               5   4.00      134217764     33554396 PERMITTED STALE: counter 1.00 segments low
+    |    -1790870911499.log               5   5.00      167772214          -54 PERMITTED 
+    |    -1790870911500.log               4   4.00      134217782          -54 PERMITTED 
+    |    -1790870911501.log               4   4.00      134217782          -54 PERMITTED 
+    |    -1790870911502.log               4   4.00      134217782          -54 PERMITTED 
+    |    -1790870911503.log               4   4.00      134217782          -54 PERMITTED 
+    |    -1790870911504.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911505.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911506.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911507.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911508.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911509.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911510.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911511.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911512.log               4   4.00      134217836         -108 PERMITTED 
+    |    -1790870911513.log               4   4.00      134218113         -385 PERMITTED 
+    |    stale (lag >= S/2) among 103 unambiguous creations: 82
+    | 
+    | 3. creations that made a link beyond k = 4  (blocking mode only: in non-blocking mode every segment is permitted and the oldest links are deleted)
+    |    none
+    | 
+    | 4. link timeline: peak L = 5  (from the events; same-tick ordering can inflate it by 1, the CSV is exact)
+    |    deleteOld calls: 102; links removed: 107; removed in ascending segment order: True
+    | 
+    | 5. sampler CSV: 1358 ticks, max gap 184 ms
+    |    ticks where the link bytes were not exactly L x S: 0
+    |    idle_end                     L=2    link_bytes=67108864     (2.00 S)  allocated=69632        idx=0/0
+    |    A_segments_reached           L=5    link_bytes=167772160    (5.00 S)  allocated=107704320    idx=1/18
+    |    A_end                        L=5    link_bytes=167772160    (5.00 S)  allocated=107704320    idx=1/18
+    |    B_end                        L=4    link_bytes=134217728    (4.00 S)  allocated=73502720     idx=11/198
+    |    B window: peak L=5, min L=4, plateau (median over its last 20 s) L=5.0, bytes at peak=167772160
+    |    peak L over the whole run: 5 (167772160 bytes = 5.00 S)
+RESULT value n144: finished at 1790871034783

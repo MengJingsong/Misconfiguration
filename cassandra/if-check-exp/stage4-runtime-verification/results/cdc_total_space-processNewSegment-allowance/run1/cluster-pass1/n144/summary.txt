@@ -1,0 +1,18 @@
+== n144: cdc_total_space=144MiB commitlog_segment_size=32MiB mode=nonblocking kind=normal; stress threads=16, B throttle 100/s
+yaml diff: -cdc_enabled: false|+cdc_enabled: true|+cdc_total_space: 144MiB|+cdc_block_writes: false|
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc/cluster/n144/cdc-verdict.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc/cdc-verdict.btm,listener:true
+node pid 45977, up at 1790870948799 (after 17s)
+settings read back: cdc_total_space=144MiB commitlog_segment_size=32MiB cdc_enabled=true cdc_block_writes=false
+k = floor(144 / 32) = 4; exact multiple: no
+EXPECTED: idle floor is min(k, 2) = 2 links — yes
+A: ended at 1790870976088, ~7 s after the start; stress A tail: Running [insert] with 16 threads for 1000000000 iteration|type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb|total,                                                   132,     132,     132,     132,    63.4,    48.7,   150.3,   161.6,   163.3,   163.3,    1.0,  0.00000,      0,      1,      67,      67,       0,    1456|
+CDC stress B: Op rate                   :       97 op/s  [insert: 97 op/s]
+CDC stress B: Total partitions          :      3,015 [insert: 3,015]
+CDC stress B: Total errors              :          0 [insert: 0]
+EXPECTED: non-blocking: the CDC stress had no errors — yes
+EXPECTED: non-blocking: no rejection WARN — yes
+traces: segments created=112, created forbidden=0, 'Rejecting mutation' WARN entries in system.log=0, logged rejected writes (exception stacks)=0, deleteOld lines=102, reject lines=0 (last n: )
+sampler: ticks=1358 max_links=5 max_link_bytes=167772160 max_gap_ms=184 first_ms=1790870949888 last_ms=1790871017872
+ERROR entries in system.log: 0 (each rejected write logs one: 'Failed to apply mutation locally'); system.log 92K; DEBUG 'Freed up' lines in debug.log: 102
+disk: 3.1G data/ ; 52G free
+RESULT value n144: finished at 1790871034783

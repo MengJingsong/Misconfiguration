@@ -1,0 +1,28 @@
+ms=1790869875952 config totalSpaceMiB=48 segmentMiB=32 mode=blocking S=33554432 A=50331648 k=1 exactMultiple=false rowBytes=1048576 cdcDir=build/test/cassandra/cdc_raw
+ms=1790869876058 linkEvent + CommitLog-7-1790869873263.log
+ms=1790869876058 linkEvent + CommitLog-7-1790869873264.log
+ms=1790869876059 linkCount n=2
+ms=1790869877066 idle links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=67108864 allocatingState=PERMITTED
+ms=1790869877069 check MISMATCH idle floor is min(k, 2) = 1 links, got 2
+ms=1790869877705 firstRejection accepted=62 links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=2 idxBytes=36 counter=67108889 allocatingState=FORBIDDEN message="Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 67108864."
+ms=1790869877707 check PASS the message is the check's: Rejecting mutation to keyspace cql_test_keyspace. Free up space in build/test/cassandra/cdc_raw by processing CDC logs. Total CDC bytes on disk is 67108864.
+ms=1790869877712 rejectionCounter N=67108864 linkBytes=67108864 N-linkBytes=0
+ms=1790869877712 check PASS segment state at the first rejection is FORBIDDEN, got FORBIDDEN
+ms=1790869877717 check MISMATCH links at the first rejection: L = 2, expected k = 1
+ms=1790869877718 check PASS every link is S bytes
+ms=1790869877719 check PASS apparent bytes are L x S: 67108864
+ms=1790869877719 check PASS N = 67108864 within L*S .. L*S + 64*L (L = 2)
+ms=1790869878773 afterTenMore rejected=10 links=2 linkBytes=67108864 everyLinkIsS=true idxFiles=2 idxBytes=36 counter=67108900 allocatingState=FORBIDDEN
+ms=1790869878777 check PASS links unchanged after ten more rejections: 2 then 2
+ms=1790869878777 check PASS link bytes unchanged after ten more rejections
+ms=1790869878777 check PASS segment still forbidden, got FORBIDDEN
+ms=1790869878786 nonCdcWrite accepted=true
+ms=1790869878787 release consumerDeleted=4 files
+ms=1790869878791 linkEvent - CommitLog-7-1790869873263.log
+ms=1790869878791 linkEvent - CommitLog-7-1790869873264.log
+ms=1790869878791 linkCount n=0
+ms=1790869878900 linkEvent + CommitLog-7-1790869873265.log
+ms=1790869878900 linkCount n=1
+ms=1790869878908 release resumed=true afterMs=115 rejectedBefore=1 links=1 linkBytes=33554432 everyLinkIsS=true idxFiles=0 idxBytes=0 counter=33554432 allocatingState=CONTAINS
+ms=1790869878909 check PASS the writer resumed within 10 s of the links being deleted
+ms=1790869878917 RESULT mismatches=2 totalSpaceMiB=48 segmentMiB=32 mode=blocking [idle floor is min(k, 2) = 1 links, got 2, links at the first rejection: L = 2, expected k = 1]

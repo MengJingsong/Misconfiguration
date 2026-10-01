@@ -1,0 +1,28 @@
+2 creation(s) before the current commit-log lifetime (segment id below 1790870032882) are left out: -1790870032879.log, -1790870032880.log
+S=33554432  A=150994944  k=4  blocking=False  exact multiple of S: False
+
+1. verdict formula  FORBIDDEN <=> blocking and S + pre.sip > A:  14 creations, 0 violations []
+
+2. each creation (links = files that existed just before it: counted from the earlier permitted creations in blocking mode, from the timeline otherwise)
+   segment                      links pre.sip/S        pre.sip    lag bytes verdict   note
+   -1790870032882.log               0   0.00              0            0 PERMITTED 
+   -1790870032883.log               0   0.00              0            0 PERMITTED 
+   -1790870032884.log               2   2.00       67108864            0 PERMITTED 
+   -1790870032885.log               3   2.00       67108864     33554432 PERMITTED STALE: counter 1.00 segments low
+   -1790870032886.log               4   3.00      100663321     33554407 PERMITTED STALE: counter 1.00 segments low
+   -1790870032887.log               5   4.00      134217771     33554389 PERMITTED ambiguous (a link event within 10 ms before)
+   -1790870032888.log               5   5.00      167772221          -61 PERMITTED ambiguous (a link event within 10 ms before)
+   -1790870032889.log               4   3.00      100663339     33554389 PERMITTED STALE: counter 1.00 segments low
+   -1790870032890.log               5   4.00      134217771     33554389 PERMITTED STALE: counter 1.00 segments low
+   -1790870032891.log               5   5.00      167772221          -61 PERMITTED ambiguous (a link event within 10 ms before)
+   -1790870032892.log               4   3.00      100663339     33554389 PERMITTED STALE: counter 1.00 segments low
+   -1790870032893.log               5   5.00      167772221          -61 PERMITTED ambiguous (a link event within 10 ms before)
+   -1790870032894.log               4   3.00      100663339     33554389 PERMITTED STALE: counter 1.00 segments low
+   -1790870032895.log               5   4.00      134217782     33554378 PERMITTED STALE: counter 1.00 segments low
+   stale (lag >= S/2) among 10 unambiguous creations: 7
+
+3. creations that made a link beyond k = 4  (blocking mode only: in non-blocking mode every segment is permitted and the oldest links are deleted)
+   none
+
+4. link timeline: peak L = 5  (per-tick link counts)
+   deleteOld calls: 6; links removed: 9; removed in ascending segment order: True

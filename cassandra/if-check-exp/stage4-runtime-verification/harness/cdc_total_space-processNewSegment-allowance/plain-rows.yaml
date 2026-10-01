@@ -1,0 +1,29 @@
+# cassandra-stress profile for the cdc_total_space case (case §9c): the non-CDC control, 64 KiB rows into a table
+# WITH cdc = false in the same keyspace.
+#   tools/bin/cassandra-stress user profile=<this file> "ops(insert=1)" n=<rows> no-warmup \
+#     -rate threads=2 throttle=10/s -errors retries=0 ignore -node 127.0.0.1
+keyspace: stage4cdc
+
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS stage4cdc WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+table: plain_rows
+
+table_definition: |
+  CREATE TABLE IF NOT EXISTS plain_rows (
+    id bigint,
+    payload blob,
+    PRIMARY KEY (id)
+  ) WITH cdc = false
+
+columnspec:
+  - name: id
+    population: seq(1..1000000000)
+  - name: payload
+    size: fixed(65536)
+
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+
+queries: {}
