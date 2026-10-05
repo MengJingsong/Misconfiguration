@@ -22,7 +22,7 @@ A (b) or (c) row is read and judged like any other.
 See [`../../README.md` §7.2](../../README.md#72-discover-and-qualify-candidate-capacity-checks)
 for how the three stages relate, and §3.2 for the enforcement patterns.
 
-## Files
+## 1. Files
 
 | File | Holds |
 |---|---|
@@ -33,13 +33,65 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 | [`_INDEX.md`](_INDEX.md) | Master index of those cases. |
 | [`pending.md`](pending.md) | Qualified against the three rules but **not yet written up**. Findings, not a queue — rows still awaiting a read live in `../../stage2-ai-preprocessing/bands.md`. |
 
-## The two feeds
+## 2. Guide: going through the long path for one case
+
+### 2.1 Ground rules
+
+- The long path is written by an **AI session in this repo**; it has no scripts.
+- **Read first:** [`../../../../HANDOFF.md`](../../../../HANDOFF.md), `_INDEX.md`, `rejected.md`
+  and `deferred.md`. Do not re-judge a line that is already recorded; cite it.
+- **Source:** the local Cassandra clone must be at the pinned tag
+  (`git describe --tags` prints `cassandra-5.0.9`).
+- **Stay blind:** do not open `../short-path/cases/<stem>.md`, or any other short-path
+  file for this case, until your case file is filed and committed.
+- **Run nothing and record no measured number.** Stage 4 executes the test you
+  design.
+- **Commit and push only when asked.**
+
+### 2.2 Steps
+
+| # | Step | Where it is spelled out | Result |
+|---|---|---|---|
+| 1 | Orient | [`playbook.md`](playbook.md) §1 | what exists, what is judged |
+| 2 | Pick a row from a feed (`3a` or `3b`) | [`../README.md`](../README.md) §4 | a candidate line |
+| 3 | Work the row: seven steps, each can end the judgment early | playbook §2 | a case, or a refusal |
+| 4 | Name the file `[constraint]-[function]-[operand].md` | [`../../README.md` §6.1](../../README.md#61-naming) | the stem |
+| 5 | Write the case file from `_TEMPLATE.md`, all nine questions, **both tiers in §9** | `_TEMPLATE.md`, section 2.3 below | `cases/<stem>.md` |
+| 6 | Verify every `file:line` against the clone; record the feed in the Notes | playbook §4 | a checked case |
+| 7 | File it: `_INDEX.md` row, module notes if the module is new; for feed `3a`, note the batch in the stage-2 coverage table | playbook §4 | the case is filed |
+| 8 | A refused line goes to `rejected.md`; one that qualifies but is not written up now goes to `pending.md`; a line not yet read stays in `deferred.md` | section 4 below | one place per line |
+| 9 | Commit and push (when you ask), then hand off to stage 4 | [`../README.md`](../README.md) §2 | the case is frozen in history |
+
+### 2.3 The two tiers (new cases)
+
+Every **new** case's §9 designs both tiers, or says why one is not possible:
+
+- **Unit tier:** drive the check's classes directly in a JVM test; measure the
+  check's own operand. It proves the mechanism.
+- **Cluster tier:** a real node with the knob at the boundary; measure the actual
+  resource (heap, off-heap or disk). It proves the dose-response claim.
+
+Each tier has its own setup, workload, observables, prediction and conclusions
+rows (method: [`../../README.md` §8](../../README.md#8-designing-a-test-for-a-case)). A tier
+that cannot be done keeps its place in §9 as `n/a: <reason>`, with what answers
+the same question instead; it is not deleted. The 11 cases already filed are
+**not** reworked: several describe one tier or none, and stage 4's audit handles
+them as it does today.
+
+### 2.4 What counts as done
+
+The case file is filed with all nine fields answered and every citation
+checked, its `_INDEX.md` row is in, any refused or deferred line is recorded, and
+the work is committed. There is no `Status` field: a filed case is complete as
+stage-3 evidence, not a verified result.
+
+## 3. The two feeds
 
 Both paths are entered from the same two feeds (3a from `bands.md`, 3b from raw
-source); they are described in [`../README.md`](../README.md#the-two-feeds).
+source); they are described in [`../README.md`](../README.md#4-the-two-feeds).
 Record the feed (`3a` or `3b`) on every case and every entry here.
 
-## Filed by the stage that judged, not the stage that surfaced the row
+## 4. Filed by the stage that judged, not the stage that surfaced the row
 
 This is the rule that decides where a verdict goes, and it is easy to get
 backwards. A row that **stage 2 ranked** and **stage 3 then read and

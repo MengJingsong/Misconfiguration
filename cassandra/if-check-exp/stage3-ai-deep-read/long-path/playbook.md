@@ -9,7 +9,7 @@ Practical technique. What stage 3 *is*, and where verdicts are filed, is in
 [`../../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case) and
 are **not** restated here — one source of truth for the rules.
 
-## Before starting
+## 1. Before starting
 
 1. Read [`../../../../HANDOFF.md`](../../../../HANDOFF.md), then `_INDEX.md` to
    see which cases exist and `rejected.md` / `deferred.md` to see which lines
@@ -21,7 +21,7 @@ are **not** restated here — one source of truth for the rules.
    `../../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
    then C; within A, read A1 → A2 → A3.
 
-## Working a row
+## 2. Working a row
 
 Order matters — each step can end the judgment early and save the next.
 
@@ -33,17 +33,39 @@ Order matters — each step can end the judgment early and save the next.
 | 4 | Rule 2 — does the gated allocation create a memory- or disk-significant object? | it gates a thread, permit, count or index |
 | 5 | Rule 3 — do the branches actually **diverge on object creation**? | both branches allocate |
 | 6 | Trace the limit back to its first declaration — this names the constraint (Target 1) and fixes the §6.1 file name | — |
-| 7 | **Design the test** stage 4 will run — §9 of the case file, per [`../../README.md` §8](../../README.md#8-designing-a-test-for-a-case) | — |
+| 7 | **Design the test** stage 4 will run — §9 of the case file, per [`../../README.md` §8](../../README.md#8-designing-a-test-for-a-case): a **unit tier and a cluster tier**, or `n/a: <reason>` for a tier that cannot be done (section 2.2 below) | — |
 
 Only after all seven does a case file get written, from `_TEMPLATE.md`.
 
-**Under (b) and (c), steps 3–5 cost more.** Rule 3 under (b) needs the
+### 2.1 Under (b) and (c)
+
+Steps 3–5 cost more. Rule 3 under (b) needs the
 verdict's path traced to whoever reads it; under (c) it needs domination
 checked across every caller that reaches the allocation. Non-domination is a
 **finding to record**, not grounds for rejection — the compaction case's guard
 does not dominate, and that is its most useful result.
 
-## Pitfalls, verified
+### 2.2 Step 7 in detail: the two tiers (new cases)
+
+A new case's §9 designs **both** tiers (the 11 cases filed earlier are not
+reworked):
+
+- **Unit tier:** construct or drive the check's classes directly in a JVM test
+  built from the tree; measure the check's own usage-side operand. Look in
+  `test/unit/...` for existing coverage of the class first and extend it rather
+  than writing a harness from scratch. It proves the mechanism.
+- **Cluster tier:** a real node with the knob at the boundary and a workload
+  through the normal client path; measure the actual resource (heap, off-heap or
+  disk), not process RSS. It proves the dose-response claim.
+
+Each tier gets its own setup (9b), workload (9c), observables (9d), prediction and
+conclusions rows (9a), and scenario steps (9e). If a tier cannot be done (the knob
+is a hard-coded constant, nothing can be driven without a node, the operand is
+unreachable), keep its place in §9 as `n/a: <reason>` and say what answers the
+same question instead; do not delete the tier silently. Record the case's
+Testability in 9a either way.
+
+## 3. Pitfalls, verified
 
 - **Don't assume the disallow branch rejects anything.** Trace its real
   effect first: it may reject, throw, block and wait, defer, or be bypassed
@@ -79,10 +101,10 @@ does not dominate, and that is its most useful result.
   against `Config.java` does not work — tried and refuted, see
   `../../stage2-ai-preprocessing/playbook.md`.
 
-## Finishing
+## 4. Finishing
 
 1. Write the case file from `_TEMPLATE.md`, answering all nine questions
-   in `../../README.md` §5 — including §9's test design. **Verify every `file:line` against the local clone
+   in `../../README.md` §5 — including §9's test design with both tiers (section 2.2). **Verify every `file:line` against the local clone
    before filing** — a case is not filed until its citations are checked.
 2. Record the feed (`3a` or `3b`) in the case's Notes.
 3. Add the `_INDEX.md` Master Index row and, if the module is new, a Notes

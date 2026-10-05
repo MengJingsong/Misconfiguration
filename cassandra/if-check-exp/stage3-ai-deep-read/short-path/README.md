@@ -2,13 +2,13 @@
 
 **An experiment, decided 2026-10-02.** The short path is stage 3's second path
 (see [`../README.md`](../README.md)); the established one is the
-[long path](../long-path/README.md). The first solution
-(`memtable_heap_space`, version 1, single tier) is filed and is being replaced by
-one written under the two-tier skeleton; the pilot on the three closed cases was
-skipped by decision, so the first real side-by-side happens when a case has both
-paths' stage-4 results.
+[long path](../long-path/README.md). The first case,
+`memtable_heap_space`, has a filed two-tier solution (version 2); version 1, a
+single-tier one, is kept as `--v1` and marked superseded. The pilot on the three
+closed cases was skipped by decision, so the first real side-by-side happens
+when a case has both paths' stage-4 results.
 
-## What it is
+## 1. What it is
 
 For a candidate code location, an AI does **two things**:
 
@@ -38,7 +38,7 @@ results side by side
 ([Two paths, two tiers](../../stage4-runtime-verification/README.md#two-paths-two-tiers-each)).
 There is no rating of the two solutions and no scoring across paths.
 
-## What stays, and what goes
+## 2. What stays, and what goes
 
 | Kept — objective and safety, not method | Dropped — method |
 |---|---|
@@ -51,7 +51,7 @@ There is no rating of the two solutions and no scoring across paths.
 the experiment's resource scope (§3.3 of its README). Revisit if the
 comparison shows the long path's Rule 2 excluded something real.
 
-## Files
+## 3. Files
 
 | File | Holds |
 |---|---|
@@ -62,13 +62,14 @@ comparison shows the long path's Rule 2 excluded something real.
 | [`_INDEX.md`](_INDEX.md) | One row per filed solution: stem, entry pointer, feed, filing date, sha256, model, isolation, leakage audit, comparison link, status (`current` or `superseded`). |
 | [`cases/`](cases/) | The solutions, one file per case, named by the same stem as the long-path file. |
 
-## Guide: going through the short path for one case
+## 4. Guide: going through the short path for one case
 
 The whole path in one page. Details of each step are in "Running a case" below.
 Commands use the script; `<stem>` is the case's file stem, and
 `SP=/home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/short-path`.
 
-**Ground rules (read once).**
+### 4.1 Ground rules (read once)
+
 - Run everything from a plain Linux terminal where the `claude` CLI is logged in
   (`claude -p hi` prints a reply). A `claude` started inside another Claude
   session may not authenticate.
@@ -78,7 +79,8 @@ Commands use the script; `<stem>` is the case's file stem, and
   rejected attempt is kept and the next one is `--attempt N+1`.
 - The scripts never commit. You commit and push when you choose.
 
-**A. Once per machine, CLI version, or change to the flags or allowlist**
+### 4.2 Once per machine, CLI version, or change to the flags or allowlist
+
 
 ```bash
 python3 $SP/isolation-test.py
@@ -88,7 +90,8 @@ Pass means `RESULT: PASS` (19 probes). Any `FAIL` means stop and do not run a
 writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt`.
 `run-case.py` refuses to start unless that report passed with the same flags.
 
-**B. Per case**
+### 4.3 Per case
+
 
 | Step | Command | Result |
 |---|---|---|
@@ -103,7 +106,8 @@ A case with no preset needs `--pointer <file:line> --feed 3a|3b` in step 2
 (`file:line` is the capacity check only; take it from the long-path index's
 *Capacity check* column, and nothing else from that row).
 
-**Judging the audit (step 3).**
+### 4.4 Judging the audit (step 3)
+
 
 | Verdict | Meaning | What to do |
 |---|---|---|
@@ -121,18 +125,26 @@ outside the source tree:
 | A vocabulary hit (`harness`, `run 1`, `results`, …) | it is ordinary engineering language in a design (a test harness it proposes) | it points to this experiment's artifacts, section names or measured numbers |
 | A denied attempt outside the clone | it is recorded and nothing else happened (a note, not a verdict) | it names this project or its files |
 
-**What counts as done for the short path:** the solution is filed, its sha256
+### 4.5 What counts as done
+
+For the short path: the solution is filed, its sha256
 is in `_INDEX.md`, and the commit is pushed. It is not judged here: the short
 path files no verdict, and whether it agrees with the long path is stage 4's
 decision.
 
-**First case, as a worked example (`memtable_heap_space-tryAllocate-limit`,
+### 4.6 Worked example
+
+**First case, version 1 (`memtable_heap_space-tryAllocate-limit`,
 2026-10-05).** The writer took about 3 minutes and made 28 tool calls, all
 inside the clone and none on the web. The audit passed everything except one
 `REVIEW` item: section C listed two paths seen only as grep hits. It was
-accepted, filed, committed and pushed; stage-4 runs are pending.
+accepted, filed, committed and pushed; stage-4 runs are pending. It was later
+superseded: version 2 was written under the two-tier skeleton (a fresh
+`--attempt 2`), filed with `--supersede`, and version 1 was kept as `--v1`.
 
-## Running a case — instructions for the AI session that runs it
+## 5. Running a case — instructions for the AI session that runs it
+
+### 5.1 Roles
 
 **Three roles, never the same session.**
 
@@ -153,7 +165,7 @@ step 6 once the audit passed (`--accept-review` after you have read every
 REVIEW item). It never edits a solution and never commits. The steps below say
 what it does, and what to do by hand if you cannot use it.
 
-### 0. Inputs
+### 5.2 Step 0 — Inputs
 
 - **Case stem.** The long-path file's stem if the case has one (for example
   `memtable_heap_space-tryAllocate-limit`), otherwise the §6.1 naming in the
@@ -166,7 +178,7 @@ what it does, and what to do by hand if you cannot use it.
   into the prompt.
 - **Feed** (`3a` or `3b`) for the index row.
 
-### 1. Prepare a clean workspace
+### 5.3 Step 1 — Prepare a clean workspace
 
 The workspace must sit **outside this repository's tree**, in a directory with
 no `CLAUDE.md` in it or in any parent directory, and the source clone must be
@@ -186,7 +198,7 @@ cd /home/jingsong/short-path-run/<stem>/src && git describe --tags && git status
 A second attempt on the same case gets its own directory (`<stem>--attempt2`),
 never a reused one.
 
-### 2. Build the prompt
+### 5.4 Step 2 — Build the prompt
 
 `BRIEF.md`, a blank line, `_TEMPLATE.md`, then the entry pointer and one
 return instruction. The return instruction is operational, not method: the
@@ -203,7 +215,7 @@ own words may be the entry-pointer line.
 grep -n -i -E '<words from the stem>|stage|result|long-path|handoff' /home/jingsong/short-path-run/<stem>/prompt.md
 ```
 
-### 3. Isolation test — before the first run on a machine or CLI version, and whenever the flags or the allowlist change
+### 5.5 Step 3 — Isolation test — before the first run on a machine or CLI version, and whenever the flags or the allowlist change
 
 The confinement is the only isolation; test it, do not assume it. The script
 runs probes through the **same flags** as the writer and grades each from the
@@ -232,7 +244,7 @@ probes.
 - The test does not replace the audits in step 5; it checks the mechanism, the
   audits check the run.
 
-### 4. Run the writer
+### 5.6 Step 4 — Run the writer
 
 The flags are fixed by `isolation-test.py` (print them with `--print-flags`),
 so the test and the run cannot drift apart:
@@ -266,7 +278,7 @@ the allowlist entries, paste the printed flags directly. Drop `--verbose` if the
 CLI rejects it. Run it in the background and read the log when it finishes; a
 solution can take many minutes.
 
-### 5. Extract the solution and audit it
+### 5.7 Step 5 — Extract the solution and audit it
 
 ```bash
 python3 - <<'EOF'
@@ -320,7 +332,7 @@ a missing section is a failed run, not something to patch.
 edit the solution, and never explain to the writer what went wrong. Keep the
 failed attempt's directory and note it in the index row.
 
-### 6. File and freeze
+### 5.8 Step 6 — File and freeze
 
 1. Copy `solution.md` to `cases/<stem>.md`. Fill in only the header table's
    *Session / date* row (model, CLI version, date, attempt number). Change
@@ -340,7 +352,7 @@ skeleton changed): run with a fresh `--attempt N`, then
 attempts are different things: an attempt is a run of the writer, a version is
 a filed solution.
 
-### 7. Hand off
+### 5.9 Step 7 — Hand off
 
 Stage 4 runs both tiers of this solution on its own protocol
 ([Two paths, two tiers](../../stage4-runtime-verification/README.md#two-paths-two-tiers-each)),
@@ -348,7 +360,7 @@ by a session that has read this path's solution and nothing from the other
 path. The side-by-side of the two paths' results is written at the end, by the
 session that finishes the last run.
 
-## Limits of the standard run, and variants
+## 6. Limits of the standard run, and variants
 
 The standard run reads the source tree and the allowlisted sites, nothing
 else: no `git log`/`blame` (Bash is removed), no GitHub, no search engine.

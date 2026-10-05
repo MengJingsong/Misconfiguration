@@ -152,8 +152,10 @@ rules below — they guide the case writer and belong only in the template._
   trap needs justifying. The intro and 9a have none.
 - **Shared setup is linked, not copied** — JDK, `ant`, building the clone, and
   the generic instruments in [README.md §8.3](../../../README.md#83-measuring-the-resource).
-- **Delete what does not apply** (a tier, scenario C, a row) instead of writing
-  "n/a".
+- **Delete what does not apply** (scenario C, a row) instead of writing "n/a".
+  **Never delete a tier:** a new case designs both a unit tier and a cluster tier.
+  If one cannot be done, keep its step and write `n/a: <reason>` with what
+  answers the same question instead (playbook §2.2).
 
 ### 9a. Procedure and conclusions
 
@@ -184,8 +186,10 @@ match them. Four parts:
 **Procedure:**
 
 1. **Unit tier** — drive the check to its limit. Assert the allow outcome at the
-   limit and the §6b disallow effect one step past it.
-2. **Cluster tier** — set up as in 9b and run every capacity value.
+   limit and the §6b disallow effect one step past it. (`n/a: <reason>` and an
+   alternative if it cannot be done.)
+2. **Cluster tier** — set up as in 9b and run every capacity value. (`n/a: <reason>`
+   and an alternative if it cannot be done.)
 3. **At each capacity value:** control run → **scenario A**, reach the limit →
    **scenario B**, try to exceed it → **scenario C**, the bypass arm (only if
    §6b or §10 records a bypass: an escape hatch, an unguarded path, or a

@@ -1,7 +1,9 @@
 # Stage 3 — AI deep read
 
 Stage 3 reads the Cassandra source. For every case it produces **two
-independent verification solutions**, one from each path:
+independent verification solutions**, one from each path.
+
+## 1. The two paths
 
 | | [Long path](long-path/README.md) | [Short path](short-path/README.md) |
 |---|---|---|
@@ -18,17 +20,54 @@ compared; both are run in
 [stage 4](../stage4-runtime-verification/README.md#two-paths-two-tiers-each),
 which reports their results side by side, not here.
 
-**Each path designs two tiers.** Every solution, from either path, is a
+**Each path designs two tiers.** Every **new** solution, from either path, is a
 **unit-tier** procedure (drive the relevant classes directly; measure the
 check's own operand) and a **cluster-tier** procedure (a real node; measure the
-actual resource), each complete with its own predictions and readings table.
+actual resource), each complete with its own predictions and readings table. A
+tier that cannot be done is written as `n/a: <reason>` with what answers the same
+question instead. The 11 long-path cases filed before this requirement are not
+reworked: several describe one tier or none, and stage 4's audit handles them as
+it does today.
 
 **Stage 3 never judges the pair.** The long path judges whether a line is a
 real case (its own verdict). Stage 4 runs both paths' solutions, both tiers
 each, and files the results side by side; there is no rating of the two
 solutions and no scoring across paths.
 
-## Rules that hold across both paths
+## 2. Completing stage 3 for a case
+
+### 2.1 Before you start
+
+- **Pick the case and its feed** (`3a` or `3b`, section 4). A case that already
+  has a long-path file needs only the short path.
+- **Who does what.** The long path is written by an AI session in this repo
+  following [`long-path/README.md`](long-path/README.md) §2 and the playbook. The
+  short path is run by you (or a runner session) with `run-case.py` in a terminal;
+  its writer is a separate, isolated process
+  ([`short-path/README.md`](short-path/README.md) §4).
+- **Order and blindness.** The two paths can go in either order, or at the same
+  time. Whoever writes the long-path file does not open
+  `short-path/cases/<stem>.md`, and the short-path runner does not open
+  `long-path/cases/<stem>.md`, until both are filed (section 3).
+
+### 2.2 The sequence
+
+| # | Step | Path | Result |
+|---|---|---|---|
+| 1 | Pick the case and feed | both | a stem and an entry pointer |
+| 2 | Write and verify the case file, with both tiers | long | `long-path/cases/<stem>.md` and an `_INDEX.md` row; or an entry in `rejected.md`, `deferred.md` or `pending.md` |
+| 3 | Isolation test once, then `run-case.py run`, judge the audit, `file` | short | `short-path/cases/<stem>.md` and an `_INDEX.md` row |
+| 4 | Commit and push each filed solution (when you ask) | both | the solution is frozen in history |
+| 5 | Hand off to stage 4 | both | up to four runs and a side-by-side |
+
+### 2.3 Done when
+
+Both files are filed and committed, each with its index row. A line the long path
+rejects or defers has no long-path solution to pair with; running the short path
+on it is optional and is not part of "done" (it would probe for false
+rejections, and there is no rule yet for comparing that).
+
+## 3. Rules that hold across both paths
 
 - **Blind both ways.** A session writing one path's solution for a case does
   not open the other path's file for that case. In stage 4, an executor
@@ -47,7 +86,7 @@ solutions and no scoring across paths.
 - **A line is recorded in exactly one place per path.** The long path's
   verdict-filing rule is in [`long-path/README.md`](long-path/README.md).
 
-## The two feeds
+## 4. The two feeds
 
 Stage 3 is entered from either of two directions, whichever path is being
 written. **Both are required; they cover different blind spots.**
@@ -71,7 +110,7 @@ written. **Both are required; they cover different blind spots.**
 different coverage properties and only 3a has a denominator; without the
 field, "stage 3 progress" has no coherent answer.
 
-## Folder map
+## 5. Folder map
 
 | Path | Holds |
 |---|---|
