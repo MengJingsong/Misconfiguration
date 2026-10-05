@@ -1,4 +1,4 @@
-# [constraint] — short-path solution  <!-- file: cases/[stem].md -->
+# [constraint] — verification solution  <!-- file: cases/[stem].md -->
 
 | Field | Value |
 |---|---|

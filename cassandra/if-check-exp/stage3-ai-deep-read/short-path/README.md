@@ -48,6 +48,7 @@ comparison shows the long path's Rule 2 excluded something real.
 |---|---|
 | [`BRIEF.md`](BRIEF.md) | The prompt the isolated agent receives, followed by `_TEMPLATE.md`, the entry pointer and one return instruction (see below). Self-contained: it links to nothing in this repo. |
 | [`_TEMPLATE.md`](_TEMPLATE.md) | The output skeleton: A. constraint trace, B. verification solution, C. paths read. No verdict field. |
+| [`run-case.py`](run-case.py) | Runs a case end to end (steps 1 to 6 below): workspace, prompt, the isolated writer, extraction, audits, and — only on request — filing. Refuses to start unless the isolation test passed with the same flags. `run` and `file` subcommands. |
 | [`isolation-test.py`](isolation-test.py) | The isolation test (canary) the runner executes before a writer run. It also holds the writer's exact CLI flags and the web allowlist: `python3 isolation-test.py --print-flags`. |
 | [`_INDEX.md`](_INDEX.md) | One row per filed solution: stem, entry pointer, feed, filing date, sha256, model, isolation, leakage audit, comparison link. |
 | [`cases/`](cases/) | The solutions, one file per case, named by the same stem as the long-path file. |
@@ -65,6 +66,12 @@ comparison shows the long path's Rule 2 excluded something real.
 The runner may have read this repository; the writer must not have. That is
 why the writer is a separate process whose file access you confine, not a
 subagent of your own session.
+
+**The script does steps 1 to 6.** `python3 run-case.py run --stem <stem>` does
+steps 1 to 5 and prints the audit; `python3 run-case.py file --stem <stem>` does
+step 6 once the audit passed (`--accept-review` after you have read every
+REVIEW item). It never edits a solution and never commits. The steps below say
+what it does, and what to do by hand if you cannot use it.
 
 ### 0. Inputs
 
