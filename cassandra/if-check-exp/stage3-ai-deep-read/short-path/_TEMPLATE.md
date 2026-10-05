@@ -4,7 +4,7 @@
 |---|---|
 | Entry pointer | `file:line` as given |
 | Pinned source | `cassandra-5.0.9` |
-| Session / date | |
+| Session / date | model, CLI version, date, attempt number (filled by the runner) |
 
 ## A. Constraint trace
 
