@@ -5,7 +5,7 @@ independent verification solutions**, one from each path:
 
 | | [Long path](long-path/README.md) | [Short path](short-path/README.md) |
 |---|---|---|
-| Status | the established method; 11 cases filed | **experiment** (decided 2026-10-02), none filed yet |
+| Status | the established method; 11 cases filed | **experiment** (decided 2026-10-02); first solution filed |
 | Method | the 7 steps of [`long-path/playbook.md`](long-path/playbook.md): the three rules ([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)), the three enforcement patterns (§3.2), the test-design method (§8) | two jobs and no rubric: trace the constraint, then design the verification solution from whatever the AI itself collects from the sources |
 | Decides | yes — qualifies, rejects or defers a line | **no** — it files no verdict |
 | Output | a case file in [`long-path/cases/`](long-path/cases/), or an entry in [`long-path/rejected.md`](long-path/rejected.md) / [`long-path/deferred.md`](long-path/deferred.md) | a solution file in [`short-path/cases/`](short-path/cases/) |
@@ -14,24 +14,32 @@ independent verification solutions**, one from each path:
 patterns, the design rules, the template. Nobody has tested whether that
 method helps the AI or limits it, because every filed case passed it by
 construction. The short path removes the method so the two solutions can be
-compared; the comparison is made in
-[stage 4](../stage4-runtime-verification/README.md#solution-comparison), not
-here.
+compared; both are run in
+[stage 4](../stage4-runtime-verification/README.md#two-paths-two-tiers-each),
+which reports their results side by side, not here.
+
+**Each path designs two tiers.** Every solution, from either path, is a
+**unit-tier** procedure (drive the relevant classes directly; measure the
+check's own operand) and a **cluster-tier** procedure (a real node; measure the
+actual resource), each complete with its own predictions and readings table.
 
 **Stage 3 never judges the pair.** The long path judges whether a line is a
-real case (its own verdict). Whether the short solution's constraint, mechanism
-and design agree with the long one, and how many tests that needs, is stage 4's
-decision.
+real case (its own verdict). Stage 4 runs both paths' solutions, both tiers
+each, and files the results side by side; there is no rating of the two
+solutions and no scoring across paths.
 
 ## Rules that hold across both paths
 
 - **Blind both ways.** A session writing one path's solution for a case does
-  not open the other path's file for that case. Only the stage-4 comparator
-  reads both. The short path additionally runs in isolation from this folder's
+  not open the other path's file for that case. In stage 4, an executor
+  reads only its own path's solution; only the session that writes the side-by-side
+  reads both paths' results. The short path additionally runs in isolation from this folder's
   guidance (see [`short-path/README.md`](short-path/README.md)).
 - **Frozen on filing.** Once a solution is filed, record its sha256 in the
-  path's `_INDEX.md`. Later edits are documentation-only and dated; stage 4
-  compares against the frozen version.
+  path's `_INDEX.md`. A short-path solution is never edited; a new version is
+  filed with `--supersede` and the old one is renamed `--vN`. A long-path case
+  file takes only dated, documentation-only edits, and stage 4 runs the version
+  frozen in its results §1.
 - **Neither path runs anything or records a measured number.** Both design a
   test; stage 4 executes it ([`../README.md` §7.5](../README.md#75-active-scope-decisions-revised-2026-09-25)).
 - **Same pinned source.** Both read `cassandra-5.0.9`

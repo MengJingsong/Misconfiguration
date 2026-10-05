@@ -395,11 +395,11 @@ cassandra/if-check-exp/
 │       ├── _TEMPLATE.md     #     output skeleton: constraint trace + verification solution
 │       ├── _INDEX.md        #     filed solutions: sha256, isolation, leakage audit
 │       └── cases/           #     one solution per case, same stem as the long file
-└── stage4-runtime-verification/   # compares the two solutions, audits and runs them — AI only, no human gate
-    ├── README.md            #   the protocol, including "Solution comparison"
-    ├── comparison/          #   one file per case that has both solutions, and its index
-    ├── harness/             #   per-case instruments (a `--short` folder only for a "Different" outcome)
-    └── results/             #   per-case results (a `--short` file only for a "Different" outcome)
+└── stage4-runtime-verification/   # audits and runs both paths' solutions, both tiers each — AI only, no human gate
+    ├── README.md            #   the protocol, including "Two paths, two tiers each"
+    ├── comparison/          #   the side-by-side of the two paths, one file per case, and its index
+    ├── harness/             #   per-case instruments (`<stem>/` long path, `<stem>--short/` short path)
+    └── results/             #   per-case results (`<stem>.md` long path, `<stem>--short.md` short path)
 ```
 
 Everything stage 3 produces lives in `stage3-ai-deep-read/`: the long path's
@@ -527,8 +527,9 @@ constraint and designs a verification solution **without** the rules, the
 patterns, the §8 design rules or the template, using whatever it collects from
 the sources, and files **no verdict**. The aim is to learn whether the long
 path's human method helps the AI or limits it. The two solutions are written
-blind to each other; **stage 4 compares them** and decides whether one run or
-two is needed (stage 4 README, "Solution comparison"). See
+blind to each other; **stage 4 runs both**, each solution with a unit tier and a
+cluster tier, and reports the results side by side (stage 4 README, "Two paths,
+two tiers each"). See
 [`stage3-ai-deep-read/README.md`](stage3-ai-deep-read/README.md) and
 [`stage3-ai-deep-read/short-path/README.md`](stage3-ai-deep-read/short-path/README.md).
 
@@ -684,31 +685,33 @@ Earlier trigger designs and the one executed test are recoverable from
 `git show e7f9963:HANDOFF.md` — note the `:HANDOFF.md` suffix, since that
 commit's own diff is an unrelated folder rename.*
 
-#### Stage 3 has two paths; stage 4 compares them (2026-10-02)
+#### Stage 3 has two paths; stage 4 runs both (2026-10-02, revised 2026-10-05)
 
 Every case gets **two independent verification solutions**: the long path's
 case file (the rules, the patterns, §8) and a short-path solution (no rules, no
-patterns, no template, no verdict). **Stage 3 does not judge the pair; stage 4
-does.** A fresh AI session rates the two on seven points and decides: if the
-solutions are the same experiment, run once and score both predictions on the
-same readings (**Equivalent**); if one can carry the other's additions, run
-once on the union (**Partly different**); if they name different constraints or
-mechanisms, or cannot share a setup, run two separate tests and file both
-conclusions (**Different**). Rationale and rules: stage 3 README, stage 4 README
-"Solution comparison".
+patterns, no template, no verdict). Each solution is a **unit-tier** and a
+**cluster-tier** procedure. **Stage 3 does not judge the pair.** Stage 4 audits
+and runs **both** paths, both tiers each (up to four runs per case), on its
+usual protocol, and files the results side by side. Rules: stage 3 README, stage
+4 README "Two paths, two tiers each".
 
 - **The short path decides nothing.** It carries no go/no-go: a short solution
   that finds the constraint does not cap usage states that as its claim and
-  designs the test for it, and the comparison treats it as **Different**.
+  designs the test for it; stage 4 runs it like any other.
 - **Scope stays memory and disk** for the short path as for the long (§3.3).
-- **Blind both ways, and frozen on filing** — see the stage 3 README.
-- **The pilot on the three closed cases was skipped** by decision. The first
-  comparison happens when a case has both solutions.
-- **The 11 filed cases are untouched.** They have no short solution yet and
-  follow stage 4 as before.
+- **Blind both ways, and frozen on filing** — see the stage 3 README. A
+  short-path solution is never edited; a new version is filed with `--supersede`.
+- **The pilot on the three closed cases was skipped** by decision.
+- **The 11 filed cases are untouched.** For the closed ones the long path's runs
+  already exist, so only the short path's runs would be new.
 
-*Adds to the two decisions above; replaces nothing. The folder move that made
-room for it (`long-path/` and `short-path/`) changed paths only.*
+*Revised 2026-10-05: the pre-run comparison that rated the two solutions on
+seven points and chose one run or two (Equivalent / Partly different /
+Different), and the cross-path scoring, were removed. Both paths always run;
+the only comparison is a plain side-by-side at the end. The two-tier
+requirement for the short path was added the same day. The folder move that
+made room for the short path (`long-path/` and `short-path/`) changed paths
+only.*
 
 ## 8. Designing a test for a case
 

@@ -1,60 +1,42 @@
-# [case-file stem] — solution comparison  <!-- file: comparison/[case-file stem].md -->
+# [case-file stem] — the two paths side by side  <!-- file: comparison/[case-file stem].md -->
 
-> **Long-path case:** [`[case-file stem]`](../../stage3-ai-deep-read/long-path/cases/[case-file stem].md)
+> **Long path:** [`results/[case-file stem].md`](../results/[case-file stem].md)
 >
-> **Short-path solution:** [`[case-file stem]`](../../stage3-ai-deep-read/short-path/cases/[case-file stem].md)
->
-> **Status:** compared / run plan filed / runs done / conclusions filed
+> **Short path:** [`results/[case-file stem]--short.md`](../results/[case-file stem]--short.md)
 
-Written by a fresh AI session that wrote neither solution; no human gate. The
-rules are in the README's [Solution comparison](../README.md#solution-comparison).
-Edit neither solution.
+Written at the end by the session that finished the last run of the case. The
+rules are in the README's [Two paths, two tiers each](../README.md#two-paths-two-tiers-each).
+It edits neither solution nor any results file, and **rates nothing**: it reports.
 
-## 1. What was compared
+## 1. Verdicts
 
-| Field | Content |
-|---|---|
-| Long-path version | the commit that holds the case file, and the hash of §9's text (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`) |
-| Short-path version | the commit, and `sha256sum` of the file — it must equal the value in `short-path/_INDEX.md` |
-| Compared by / date | |
-
-## 2. The seven points
-
-| # | Point | Rating (Same / Differs, immaterial / Differs, material) | Long path | Short path |
+| Path | Tier | Verdict (row of that path's own table) | Results file | Date |
 |---|---|---|---|---|
-| 1 | Constraint named | | | |
-| 2 | Mechanism claimed | | | |
-| 3 | Knob and values | | | |
-| 4 | Workload | | | |
-| 5 | Instruments and observables, and the gaps they name | | | |
-| 6 | Predictions | | | |
-| 7 | What would refute the claim | | | |
+| Long | Unit | | | |
+| Long | Cluster | | | |
+| Short | Unit | | | |
+| Short | Cluster | | | |
 
-Cite the section on each side (long: §4, §5, §6, §9a–§9e; short: A1–A3, B3–B8).
+A tier a solution declared `n/a`, or that was not run, says so and why.
 
-## 3. Outcome
+## 2. Do the conclusions agree?
 
-**Can one run produce the readings both solutions call for, and settle both
-predictions?** yes / yes, with additions / no — and why, in two or three sentences.
+In plain text: the claim each path ended with, whether they agree, and if they
+do not, the point where the designs differ (a different constraint, mechanism,
+knob range, observable). Neither path is overruled by the other; the readings
+decided each path's own prediction.
 
-**Outcome:** Equivalent / Partly different / Different
+## 3. What only one path's design produced
 
-## 4. Run plan
+Findings, observables, arms, or bypasses that one design surfaced and the other
+did not, or `none`. Name the design element that produced each (for example a
+second knob, an allocation trace, a particular workload size).
 
-- **Equivalent:** one run from the long-path runbook; results file `results/[case-file stem].md`.
-- **Partly different:** one run on the union. List the additions (arms, observables, knob values), who contributed each, and where the union is written down (results §1, harness path).
-- **Different:** two runs. Results files `results/[case-file stem].md` and `results/[case-file stem]--short.md`; harness `harness/[case-file stem]--short/`. Say what makes them incompatible.
+## 4. Runbook defects
 
-## 5. Conclusions — filled after the runs
+By path: the step that could not run as written, the cause, the fix (counts and
+one line each; the detail is in each results file's §3).
 
-| Path | Run (results file) | Prediction row matched | Verdict | Date |
-|---|---|---|---|---|
-| Long | | | | |
-| Short | | | | |
+## 5. Cost
 
-**Do the conclusions agree?** yes / no. If no: the point where the designs
-differ, how it was settled (re-run, or settled against the readings), and which
-conclusion was wrong and why.
-
-**What each design could see that the other could not** — findings only one
-design's observables or arms produced, or none.
+By path and tier: runs, JVMs or nodes, and wall-clock time.

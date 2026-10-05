@@ -4,9 +4,12 @@
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 >
-> **Solution run:** long / short / both (a shared run) — if the case has a short-path
-> solution, see [`comparison/[case-file stem].md`](../comparison/[case-file stem].md). For a
-> `--short` results file, the "case file" below is the short-path solution and "§9a" means its B7–B8.
+> **Path:** long / short. One results file per path. For a `--short` file
+> (`results/[case-file stem]--short.md`), the "case file" below is the short-path
+> solution, and for each tier "§9a" means that tier's predictions and conclusions
+> table: B2f and B2g (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or
+> B3a–B3e. If the case has both paths, see [`comparison/[case-file stem].md`](../comparison/[case-file stem].md)
+> for the side-by-side.
 
 **Relative links in this template** are written for where a *copy* of it lives
 — inside `results/` — not for the template's own location one level up.
@@ -120,11 +123,6 @@ argument.
 6. **Deviations and gaps** — anything skipped, changed or not observable, and
    how it limits the conclusion.
 
-**A run that serves both solutions** (comparison outcome Equivalent or Partly
-different): repeat parts 3 and 4 and the conclusion line for the short
-solution, against its own readings table (B8). Each path is scored against its
-own prediction, so the two conclusions may differ.
-
 7. **Core question** — in two or three sentences: did usage follow the
    constraint, and does the constraint cap usage? Follow the "Logic" steps of the
    case's "How this verifies the hypothesis" block (§9a), and cite for each step
@@ -191,12 +189,12 @@ how it was resolved (see "Compare and decide" in the README).
 Jingsong may overrule any verdict at any time; record an override here with its
 date and reason.
 
-| Tier | Path (long / short) | Verdict (§9a row) | Basis | Date |
-|---|---|---|---|---|
-| Unit | | | run 1 + self-check / run 1 + run 2 | |
-| Cluster | | | run 1 + self-check / run 1 + run 2 | |
+| Tier | Verdict (§9a row; for a short-path file, the B2g / B3g row) | Basis | Date |
+|---|---|---|---|
+| Unit | | run 1 + self-check / run 1 + run 2 | |
+| Cluster | | run 1 + self-check / run 1 + run 2 | |
 
-One row per path per tier when the run served both solutions; otherwise one row per tier, Path = the solution that was run.
+A tier the solution declares `n/a` gets a row saying `not run: <reason>`.
 
 **Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
 (commit), and any section amended (which one, commit) — or "none needed".

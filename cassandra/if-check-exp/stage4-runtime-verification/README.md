@@ -41,13 +41,14 @@ Within stage 4, every step is done by an AI session:
 
 | Step | What it does | Output |
 |---|---|---|
-| C. Solution comparison | **Only when a case has both a long-path and a short-path solution.** A fresh AI session rates how far they differ and decides one run or two; skipped otherwise | `comparison/<stem>.md` |
 | 0. Design audit | Checks the case's §9 against the requirements below; recommends and applies amendments; freezes §9a | results §1 |
 | 1. Instruments | Writes, commits and checks the harness; confirms the environment | `harness/`, results §1 |
 | 2. Run 1 | Follows the runbook (§9b–§9e) exactly, scripted and logged | raw readings, command log |
 | 3. Conclusion | Matches the readings to one §9a row, with its logic in a fixed format | results §4 |
 | 4. Self-check | Re-reads every cited raw file against the conclusion and its logic | results §5 |
 | 5. Verdict and feedback | Files the verdict, the case's §10 field, any amendment | results §8 |
+
+**Every step runs once per path and per tier.** A case with a short-path solution has up to four runs (long unit, long cluster, short unit, short cluster); see "Two paths, two tiers each" below.
 | Run 2 (optional) | A fresh AI session repeats the runbook by hand, not run 1's script | results §6–§7 |
 
 ## What stage 4 consumes
@@ -69,81 +70,78 @@ run is judged against, so it has to exist and be audited first. Which cases
 are converted is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md), not here.
 
 **A short-path solution** ([`../stage3-ai-deep-read/short-path/cases/`](../stage3-ai-deep-read/short-path/cases/))
-is the other thing stage 4 can consume, for a case that has one. Its parts B1–B10
-play the roles of §9a–§9e, and it is frozen whole (its sha256 is in
-[`../stage3-ai-deep-read/short-path/_INDEX.md`](../stage3-ai-deep-read/short-path/_INDEX.md)). It
-has no feedback field and is never amended; what a run learns goes into the
-comparison and results files. See "Solution comparison" below.
+is what stage 4 consumes for the short path of a case that has one. It is frozen
+whole (its sha256 is in
+[`../stage3-ai-deep-read/short-path/_INDEX.md`](../stage3-ai-deep-read/short-path/_INDEX.md)),
+has no feedback field and is never amended; what a run learns goes into its
+results file. Its parts play the roles of §9, per tier; the mapping is in "Two
+paths, two tiers each" below.
 
 If §9 cannot be executed as written, that is itself feedback — record it as a
 runbook defect (below) rather than improvising a different experiment, because
 a substituted workload no longer tests the traced path.
 
-## Solution comparison
+## Two paths, two tiers each
 
-**Applies only to a case that has both solutions** — a long-path case file
-and a short-path solution ([stage 3](../stage3-ai-deep-read/README.md)). A
-case with only a long-path file skips this section and follows the protocol
-below unchanged, as all 11 filed cases do today.
+**Applies to a case that has both a long-path case file and a short-path
+solution** ([stage 3](../stage3-ai-deep-read/README.md)). A case with only a
+long-path file follows the protocol below unchanged, as all 11 filed cases do
+today. Each solution has a **unit tier** and a **cluster tier**, so a case has up
+to four runs: long unit, long cluster, short unit, short cluster. Stage 4 runs
+**all** of them: there is no rating of the two solutions beforehand, no merging
+of them into one run, and no scoring across paths. (Decided 2026-10-05; it
+replaces the pre-run comparison of 2026-10-02.)
 
-**Who and when.** A fresh AI session that wrote neither solution does it,
-**before any audit or run**. No human gate. It reads both, edits neither, and
-does not run anything. It records the sha256 of the short file and the hash of
-the long file's §9 (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> | git hash-object --stdin`)
-in the comparison file, so the verdict names exactly what was compared.
+**Each path is its own run, on the same protocol.** Audit, instruments, run 1,
+conclusion, self-check, verdict and optional run 2 apply to each path and tier
+as written below. The conclusion matches the readings against **that path's own**
+prediction and readings table, never the other path's.
 
-**The deciding question:** *can one run produce the readings that both
-solutions call for, and settle both predictions?* Where it can, the two
-solutions are one experiment, or one experiment plus additions; where it
-cannot, they are two.
+| Protocol term | Long path | Short path |
+|---|---|---|
+| The design that is frozen | §9 of the case file (§9a frozen; hash of §9's text) | the whole solution file (its sha256 in `short-path/_INDEX.md`) |
+| Unit tier / cluster tier | the §9 runbook for that tier | B2 / B3 |
+| Runbook | §9b–§9e | B2a–B2e / B3a–B3e |
+| Prediction | §9a | B2f / B3f |
+| Conclusions table (what a reading means) | §9a | B2g / B3g |
+| Controls | §9a and the runbook | B2h / B3h |
+| Results file | `results/<stem>.md` | `results/<stem>--short.md` |
+| Harness | `harness/<stem>/` | `harness/<stem>--short/` |
+| Feedback into the case file (§10) | yes | none: the solution is never amended |
 
-### The seven points
+A tier a solution declares `n/a: <reason>` is not run; the results file says so
+and gives the reason. The short path's own predictions are frozen at the
+audit like the long path's (the hash goes in results §1).
 
-Rate each **Same**, **Differs, immaterial** or **Differs, material**, with a
-one-line note citing both sides. A difference is material if it changes what is
-measured, what is varied, or what is predicted; wording, ordering, and extra
-controls that leave the readings alone are not.
+**Independence.**
+- An executor reads only its own path's solution, the shared files (this README,
+  the templates, `environment.md`), and the Cassandra source. It does not open the
+  other path's solution, results file, harness or readings before its own results
+  are filed.
+- Runs on the shared infrastructure follow the safety rules below: a separate
+  local clone per run, one run at a time per node, every process stopped and
+  checked afterwards. Reusing a build or a node image between paths is fine;
+  reusing the other path's harness or readings is not.
+- Order: unit tier before cluster tier within a path (the cheap tier tests the
+  protocol first); the paths in either order.
 
-| # | Point | Long-path solution | Short-path solution |
-|---|---|---|---|
-| 1 | Constraint named | §4 and the file name | A1 |
-| 2 | Mechanism claimed (what is compared, what each outcome does, any bypass) | §5, §6a, §6b | A2, A3 |
-| 3 | Knob and values | §9a, §9b | B3 |
-| 4 | Workload | §9c | B4 |
-| 5 | Instruments and observables, and the gaps they name | §9d | B5 |
-| 6 | Predictions | §9a (old layout: §9d) | B7 |
-| 7 | What would refute the claim, and what other outcomes mean | §9a conclusions table (old layout: §9e, §9f) | B8 |
+**The side-by-side.** After the last run of a case, the session that finished it
+writes `comparison/<stem>.md` from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md)
+and a line in [`comparison/_INDEX.md`](comparison/_INDEX.md). It holds a table of
+verdicts by path and tier, whether the conclusions agree (in prose), findings that
+only one path's design produced, runbook defects per path, and cost. It edits
+neither solution nor any results file, and rates nothing.
 
-### The outcome
-
-| Outcome | Condition | Run plan | Recorded |
-|---|---|---|---|
-| **Equivalent** | Points 1 and 2 are Same, and none of 3 to 7 is material | **One run**, from the long-path runbook. Both solutions' predictions are scored against the same readings | One results file. §8 gets one row per path |
-| **Partly different** | Points 1 and 2 are Same; some of 3 to 7 differ materially, but one run can carry the **union** (extra arms, observables or knob values) | **One run on the union.** The union is written into results §1 and its harness before run 1, and frozen with the case-file hash | One results file, scored per path; the conclusions may differ |
-| **Different** | Point 1 or 2 differs (another constraint, another mechanism, or a short solution claiming the constraint does not cap usage), **or** the designs need setups no single run can combine | **Two separate tests**, each audited and run by this protocol: `results/<stem>.md` for the long solution, `results/<stem>--short.md` and `harness/<stem>--short/` for the short one | Two results files and two verdicts, then a closing comparison |
-
-If in doubt between two outcomes, take the one with more runs: a wrongly merged
-experiment hides a disagreement, a wrongly separated one only costs a run.
-
-### What the comparison file records
-
-`comparison/<stem>.md`, from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md):
-the two hashes, the seven ratings, the outcome and its reason, the run plan.
-After the runs it gains the **conclusions, one per path**, and whether they
-agree; and a line in [`comparison/_INDEX.md`](comparison/_INDEX.md).
-
-### After the runs
-
-| Situation | Action |
-|---|---|
-| One run, both predictions scored, conclusions agree | File both; the case's claim is supported by two independently designed solutions, which is worth noting |
-| One run, conclusions differ | The same readings were read two ways. Settle each against its own solution's readings table, and record which conclusion was wrong and why |
-| Two runs, verdicts agree | File both; note the agreement |
-| Two runs, verdicts differ | Find the point where the designs differ and **re-run that point**, in both designs if needed. The measurement decides; record the cause. Neither path's verdict is overruled by the other |
-| Short solution not runnable as written | A runbook defect, in results §3 with its fix, never an edit to the short file. If it cannot run at all, record "Not runnable" and have a new short solution written; the old one stays filed |
-
-Predictions are frozen per path exactly as in "Before run 1" below. Comparing
-the pair never rescues a prediction: each path is scored against its own.
+**What the two paths' results do.**
+- **Long path:** unchanged. A refutation or bypass amends the case file; the
+  numbers stay in the results file.
+- **Short path:** its results file is the record. Its solution is not amended,
+  and its brief and template are not corrected from run feedback (that would put
+  human method back into the path under test). Runbook defects go in results §3.
+- **Disagreement:** the readings decide each path's own prediction row. If the
+  two paths' conclusions differ, record both and the point where the designs
+  differ in the side-by-side; neither is overruled by the other. A re-run of that
+  point is optional and is a new run of one path on its own protocol.
 
 ## Step 0 — the design audit
 
@@ -178,9 +176,9 @@ with each, and a bottom line — **Ready**, **Ready after amendments**, or
 only** — group D, plus the shared-infrastructure rules below, plus a check that
 it states its predictions before any run. Do not apply groups A to C to it:
 they are the long path's design requirements, and applying them would pull the
-short solution into the long path's mold and defeat the comparison. Record
+short solution into the long path's mold and defeat the purpose of running the two paths independently. Record
 what groups A to C *would* have flagged as a side note in results §1, marked as
-not applied. The audit never edits the short file; fixes go to the harness and
+not applied. Audit each tier the solution defines (B2 and B3). The audit never edits the short file; fixes go to the harness and
 the runbook defect log.
 
 ## The run protocol
@@ -293,8 +291,8 @@ that judged it**, so measurements belong here, not in the case file.
 | Feedback kind | Lands in |
 |---|---|
 | The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
-| The comparison of a case's two solutions — the seven ratings, the outcome, the run plan, and later the conclusion per path | `comparison/<stem>.md`, copied from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md), and a line in `comparison/_INDEX.md` |
-| A short-path result (a **Different** outcome, or a conclusion scored per path in a shared run) | the results file for that run; the short solution file is never amended |
+| A case's two paths side by side — verdicts by path and tier, whether the conclusions agree, findings only one path produced, defects, cost | `comparison/<stem>.md`, copied from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md), and a line in `comparison/_INDEX.md` |
+| A short-path result (audit, runs, self-check, verdict, per tier) | `results/<stem>--short.md`; the short solution file is never amended |
 | A refutation of the traced path (a **Refuted** row of §9a) | **amends the case file** — the affected section, dated, citing the results file |
 | A bypass confirmed at runtime (the bypass row of §9a) | amends the case's §8 ceiling claim and its Target-3 note; the numbers stay here |
 | A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e (only if §9a is unchanged; otherwise back to the audit) |

@@ -2,9 +2,11 @@
 
 **An experiment, decided 2026-10-02.** The short path is stage 3's second path
 (see [`../README.md`](../README.md)); the established one is the
-[long path](../long-path/README.md). No solution is filed yet; the pilot on
-the three closed cases was skipped by decision, so the first real comparison
-happens when a case gets both solutions and reaches stage 4.
+[long path](../long-path/README.md). The first solution
+(`memtable_heap_space`, version 1, single tier) is filed and is being replaced by
+one written under the two-tier skeleton; the pilot on the three closed cases was
+skipped by decision, so the first real side-by-side happens when a case has both
+paths' stage-4 results.
 
 ## What it is
 
@@ -14,7 +16,12 @@ For a candidate code location, an AI does **two things**:
    default, how it is set, which resource it bounds, and the mechanism that
    enforces it.
 2. **Design a verification solution** — the test stage 4 would run — from
-   whatever the AI itself collects from the sources, and its own decisions.
+   whatever the AI itself collects from the sources, and its own decisions. The
+   solution has **two tiers**, each a complete procedure of its own: a **unit
+   tier** (drive the relevant classes directly; measure the check's own operand)
+   and a **cluster tier** (a real node; measure the actual resource). The
+   two-tier structure is the one thing asked of the AI about *how* to design;
+   everything inside each tier is its own decision.
 
 It applies **none of the long path's method**: not the three rules (§3.4–§3.6
 of the experiment README), not the three enforcement patterns (§3.2), not the
@@ -26,8 +33,10 @@ keep.
 
 **The short path files no verdict.** It does not say whether the line is "a
 case worth testing". It states the claim its own solution tests and designs
-that test. Whether the two solutions agree, and how many tests they need, is
-decided in stage 4 ([comparison](../../stage4-runtime-verification/README.md#solution-comparison)).
+that test. Stage 4 runs **both** paths, both tiers each, and reports the
+results side by side
+([Two paths, two tiers](../../stage4-runtime-verification/README.md#two-paths-two-tiers-each)).
+There is no rating of the two solutions and no scoring across paths.
 
 ## What stays, and what goes
 
@@ -47,10 +56,10 @@ comparison shows the long path's Rule 2 excluded something real.
 | File | Holds |
 |---|---|
 | [`BRIEF.md`](BRIEF.md) | The prompt the isolated agent receives, followed by `_TEMPLATE.md`, the entry pointer and one return instruction (see below). Self-contained: it links to nothing in this repo. |
-| [`_TEMPLATE.md`](_TEMPLATE.md) | The output skeleton: A. constraint trace, B. verification solution, C. paths read. No verdict field. |
+| [`_TEMPLATE.md`](_TEMPLATE.md) | The output skeleton: A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. paths read. No verdict field. |
 | [`run-case.py`](run-case.py) | Runs a case end to end (steps 1 to 6 below): workspace, prompt, the isolated writer, extraction, audits, and — only on request — filing. Refuses to start unless the isolation test passed with the same flags. `run` and `file` subcommands. |
 | [`isolation-test.py`](isolation-test.py) | The isolation test (canary) the runner executes before a writer run. It also holds the writer's exact CLI flags and the web allowlist: `python3 isolation-test.py --print-flags`. |
-| [`_INDEX.md`](_INDEX.md) | One row per filed solution: stem, entry pointer, feed, filing date, sha256, model, isolation, leakage audit, comparison link. |
+| [`_INDEX.md`](_INDEX.md) | One row per filed solution: stem, entry pointer, feed, filing date, sha256, model, isolation, leakage audit, comparison link, status (`current` or `superseded`). |
 | [`cases/`](cases/) | The solutions, one file per case, named by the same stem as the long-path file. |
 
 ## Guide: going through the short path for one case
@@ -64,7 +73,7 @@ Commands use the script; `<stem>` is the case's file stem, and
   (`claude -p hi` prints a reply). A `claude` started inside another Claude
   session may not authenticate.
 - **Stay blind:** do not open the case's long-path file or any stage-4 file for
-  it until its solution is filed. The comparison depends on it.
+  it until its solution is filed. The side-by-side depends on it.
 - **Never edit a solution, never reuse an attempt directory.** A failed or
   rejected attempt is kept and the next one is `--attempt N+1`.
 - The scripts never commit. You commit and push when you choose.
@@ -88,7 +97,7 @@ writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt
 | 3. Judge the audit | read `run-report.txt`; for `REVIEW`, read `solution.md` | see the table below |
 | 4. File it | `python3 $SP/run-case.py file --stem <stem>` (add `--accept-review` after a reviewed `REVIEW`) | copied to `cases/<stem>.md`, header filled, `_INDEX.md` row with its sha256 |
 | 5. Commit and push | `git add`, `git commit`, `git push` | the solution is frozen in history |
-| 6. Hand off | stage 4's "Solution comparison", by a **fresh** session | the comparison file |
+| 6. Hand off | stage 4 runs both tiers of this solution, by a session that sees only this path | `results/<stem>--short.md` |
 
 A case with no preset needs `--pointer <file:line> --feed 3a|3b` in step 2
 (`file:line` is the capacity check only; take it from the long-path index's
@@ -107,7 +116,7 @@ outside the source tree:
 
 | Item | Acceptable if | Reject if |
 |---|---|---|
-| Section C lists a path the log never opened | the file shows up only as a grep hit (a minor overstatement; note it for the comparator) | the claims about that file's contents could not have come from the grep output |
+| Section C lists a path the log never opened | the file shows up only as a grep hit (a minor overstatement; it stays on record) | the claims about that file's contents could not have come from the grep output |
 | URL cited but never fetched | it is a well-known public page the writer plausibly knew | it carries a specific figure or conclusion with no fetch behind it |
 | A vocabulary hit (`harness`, `run 1`, `results`, …) | it is ordinary engineering language in a design (a test harness it proposes) | it points to this experiment's artifacts, section names or measured numbers |
 | A denied attempt outside the clone | it is recorded and nothing else happened (a note, not a verdict) | it names this project or its files |
@@ -121,7 +130,7 @@ decision.
 2026-10-05).** The writer took about 3 minutes and made 28 tool calls, all
 inside the clone and none on the web. The audit passed everything except one
 `REVIEW` item: section C listed two paths seen only as grep hits. It was
-accepted, filed, committed and pushed; the comparison is pending.
+accepted, filed, committed and pushed; stage-4 runs are pending.
 
 ## Running a case — instructions for the AI session that runs it
 
@@ -131,7 +140,8 @@ accepted, filed, committed and pushed; the comparison is pending.
 |---|---|---|---|
 | **Runner** (you, following this section) | any session | this README, `BRIEF.md`, `_TEMPLATE.md`, `_INDEX.md`, and the Cassandra source | edit the solution; put anything about the case into the prompt beyond the entry pointer; open the case's long-path file or any stage-4 file for it before the solution is filed |
 | **Writer** | a fresh, isolated headless session you launch | the Cassandra source tree and nothing else | see anything else — the whole point of the path |
-| **Comparator** | a later fresh session | both frozen solutions | have been the runner or the writer of either |
+| **Stage-4 executor** (one per path) | a later session | only its own path's frozen solution | read the other path's solution or readings before its own runs are filed |
+| **Side-by-side writer** | the session that finishes the last run | both paths' results | edit either solution |
 
 The runner may have read this repository; the writer must not have. That is
 why the writer is a separate process whose file access you confine, not a
@@ -302,7 +312,7 @@ name or a section reference from this experiment is a **fail**.
 grep -n -i -E 'stage.4|long.path|handoff|results|run 1|measured|HeapPoolTest|harness' /home/jingsong/short-path-run/<stem>/solution.md
 ```
 
-**Audit 3 — completeness.** Sections A1–A5, B1–B10 and C are all present, and
+**Audit 3 — completeness.** Sections A1–A5, B1, B2a–h (unit tier), B3a–h (cluster tier), B4 and C are all present (a tier may instead say `n/a: <reason>`, which is accepted and noted), and
 section C's paths are a subset of what the tool-call log shows. A solution with
 a missing section is a failed run, not something to patch.
 
@@ -322,13 +332,21 @@ failed attempt's directory and note it in the index row.
 4. Commit only when Jingsong asks. A filed solution is **never amended**; it
    has no feedback field.
 
+**A new version of a case that already has a solution** (for example after the
+skeleton changed): run with a fresh `--attempt N`, then
+`file --stem <stem> --supersede`. The existing `cases/<stem>.md` is renamed
+`cases/<stem>--vN.md` with its content untouched, its index row is marked
+`superseded`, and the new solution takes `cases/<stem>.md`. Versions and
+attempts are different things: an attempt is a run of the writer, a version is
+a filed solution.
+
 ### 7. Hand off
 
-The comparison is stage 4's, by a fresh session
-([Solution comparison](../../stage4-runtime-verification/README.md#solution-comparison)).
-For a case that already has stage-4 results, the long side to compare is the
-**frozen** version — §9's hash recorded in that case's results §1 — not the
-later-amended §9c–e or §10, which carry measured outcomes.
+Stage 4 runs both tiers of this solution on its own protocol
+([Two paths, two tiers](../../stage4-runtime-verification/README.md#two-paths-two-tiers-each)),
+by a session that has read this path's solution and nothing from the other
+path. The side-by-side of the two paths' results is written at the end, by the
+session that finishes the last run.
 
 ## Limits of the standard run, and variants
 
@@ -347,7 +365,7 @@ test with the changed flags first.
 
 **Blind both ways.** Whoever writes a case's short solution does not open that
 case's long-path file, and whoever writes the long-path file does not open the
-short one. Only the stage-4 comparator reads both.
+short one. In stage 4, an executor reads only its own path's solution; only the session that writes the side-by-side reads both paths' results.
 
 **Noise check (optional).** Running the short path twice on a case, filed as
 `cases/<stem>--r2.md`, measures run-to-run variation, so a disagreement with the

@@ -56,11 +56,14 @@ this folder's own scope.
 - **Stage 4 has no human gate (decided 2026-09-30).** The AI audits the case's §9, runs it, checks its own
   conclusion against the raw files and files the verdict; nothing waits for Jingsong, who may overrule a verdict at
   any time. The shared-infrastructure safety rules in the stage-4 README still apply.
-- **Two solutions per case; the short path decides nothing (decided 2026-10-02).** Each case gets a
-  long-path case file and a short-path solution, written **blind to each other**; only the stage-4 comparator reads both.
-  The short path carries no go/no-go, uses none of the long path's method, and its solution is frozen on filing (sha256 in
-  `short-path/_INDEX.md`) and never amended. Judging the pair, and whether it needs one run or two, is stage 4's job. Scope
-  stays memory and disk. The pilot on the three closed cases was skipped; the 11 filed cases have no short solution yet.
+- **Two solutions per case, each with a unit and a cluster tier; the short path decides nothing (decided 2026-10-02, revised
+  2026-10-05).** Each case gets a long-path case file and a short-path solution, written **blind to each other**. The short
+  path carries no go/no-go, uses none of the long path's method (only the two-tier structure is asked of it), and its solution
+  is frozen on filing (sha256 in `short-path/_INDEX.md`) and never edited; a new version is filed with `--supersede`.
+  **Stage 4 runs both paths, both tiers each, with no rating of the two solutions and no cross-path scoring**; an executor
+  reads only its own path's solution, and a side-by-side is written at the end. Scope stays memory and disk. The pilot on the
+  three closed cases was skipped; the 11 filed cases have no short solution yet except `memtable_heap_space` (version 1,
+  single tier, to be superseded).
 - **Commit and push only on request.** "Commit" and "push" are asked for
   separately; never do either unprompted.
 - **Sync before restructuring.** Jingsong also uploads files to GitHub
@@ -145,18 +148,18 @@ this folder's own scope.
     - `environment.md` — **start here on a new node**: the exact install,
       clone and build steps that worked (JDK 11.0.32.1, Ant 1.10.12).
     - `_TEMPLATE.md` — template for a per-case results file.
-    - `comparison/` — **new 2026-10-02.** For a case that has both solutions,
-      a fresh AI session rates how far they differ (seven points) and decides
-      **one run or two**: Equivalent (one run, both predictions scored),
-      Partly different (one run on the union), Different (two separate tests).
-      `_TEMPLATE.md`, `_INDEX.md`, `<stem>.md`. Rules: the README's "Solution
-      comparison". Cases with only a long-path file skip it.
+    - `comparison/` — the **side-by-side** of a case's two paths, written at the
+      end by the session that finishes the last run: verdicts by path and tier,
+      whether the conclusions agree, findings only one path produced, defects,
+      cost. It rates nothing. `_TEMPLATE.md`, `_INDEX.md`, `<stem>.md`. Rules: the
+      README's "Two paths, two tiers each". (Replaced on 2026-10-05 the pre-run
+      comparison that rated the solutions and chose one run or two.)
     - `harness/<case-file-stem>/` — committed test code every run uses
       (e.g. the restored `HeapPoolTest.java`).
     - `results/<case-file-stem>.md` — one per case, plus
       `results/<case-file-stem>/run1/` (and `run2/`, if one is done) for
-      small log excerpts. A `<stem>--short.md` (and `harness/<stem>--short/`)
-      exists only for a "Different" comparison outcome.
+      small log excerpts. The short path's are `results/<stem>--short.md`
+      and `harness/<stem>--short/`.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
@@ -290,7 +293,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
 | Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `max_space_usable_for_compactions_in_percentage` is the one cheap case left (`memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
 | ~~`cdc_total_space`~~ | Done and closed 2026-10-01 (see the block above). Optional: a run 2 by a fresh session (harness, runner and results file are ready; it is cheap). |
 | ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
-| Write short-path solutions (first comparison) | Per `stage3-ai-deep-read/short-path/README.md`: a fresh, isolated session (it must not have read this repo) gets `BRIEF.md` + `_TEMPLATE.md` + one entry pointer. Do a not-yet-run case first, so its long solution has no results to leak; then run the stage-4 comparison. The README's runbook uses `claude --restricted` with a mandatory canary (confirm it blocks reads of this repo before the first real run), and the pilot's scoring against the three closed cases was skipped. |
+| Short path for `memtable_heap_space`, two-tier version | Version 1 (single tier) is filed. Run `python3 stage3-ai-deep-read/short-path/run-case.py run --stem memtable_heap_space-tryAllocate-limit --attempt 2`, then `file ... --attempt 2 --supersede` (the isolation test must have passed: `isolation-test.py`). Then stage 4 runs the short path's unit and cluster tiers; the long path's runs already exist. Runbook: the short-path README's Guide. |
 | Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/long-path/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 

@@ -28,30 +28,63 @@ links; `none` if none.
 
 ## B. Verification solution
 
-**B1. Claim under test.** One or two falsifiable sentences.
+**B1. Claim under test.** One or two falsifiable sentences, shared by both tiers.
 
-**B2. Environment and build.** Nodes, JVM options, configuration changes, build
-commands.
+### B2. Unit tier
 
-**B3. Knobs.** Which to vary, the values and why those, how each is set.
+Drive the relevant classes directly; measure the check's own operand. Write
+`n/a: <reason>` and an alternative if this tier cannot be done.
 
-**B4. Workload.** What drives usage to the limit and past it; sizes and the
-arithmetic showing the limit is reachable; duration.
+**B2a. Environment and build.** JDK, build commands, test source location, JVM
+options.
 
-**B5. Observables and instruments.** What is measured, with what tool, sampled
-how; and what cannot be observed directly.
+**B2b. Knobs.** Which value to vary, the values and why those, how each is set.
 
-**B6. Procedure.** Ordered steps with commands.
+**B2c. Workload.** What drives the operand to the limit and past it; sizes and
+the arithmetic showing the limit is reached.
 
-**B7. Predictions.** Per knob value, in numbers or a clear relation, stated
+**B2d. Observables and instruments.** What is measured, with what, sampled how;
+and what cannot be observed directly.
+
+**B2e. Procedure.** Ordered steps with commands.
+
+**B2f. Predictions.** Per knob value, in numbers or a clear relation, stated
 before any run.
 
-**B8. Readings.** A table of observation → what it would mean, including the
+**B2g. Readings.** A table of observation → what it would mean, including the
 observation that would show the claim wrong.
 
-**B9. Controls.** What rules out other explanations.
+**B2h. Controls.** What rules out other explanations.
 
-**B10. Risks and cleanup.**
+### B3. Cluster tier
+
+A real node (or small cluster) with the configuration at the boundary; measure
+the actual resource. Write `n/a: <reason>` and an alternative if this tier
+cannot be done.
+
+**B3a. Environment and build.** Nodes, JVM options, configuration changes, build
+commands.
+
+**B3b. Knobs.** Which to vary, the values and why those, how each is set.
+
+**B3c. Workload.** What drives usage to the limit and past it; sizes and the
+arithmetic showing the limit is reachable; duration.
+
+**B3d. Observables and instruments.** What is measured, with what tool, sampled
+how; and what cannot be observed directly.
+
+**B3e. Procedure.** Ordered steps with commands.
+
+**B3f. Predictions.** Per knob value, in numbers or a clear relation, stated
+before any run.
+
+**B3g. Readings.** A table of observation → what it would mean, including the
+observation that would show the claim wrong.
+
+**B3h. Controls.** What rules out other explanations.
+
+**B4. Risks and cleanup.** For both tiers: disk, shared storage, leftover
+processes, how to clean up.
 
 ## C. Paths read
 

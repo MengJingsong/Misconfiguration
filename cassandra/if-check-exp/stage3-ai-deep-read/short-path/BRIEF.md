@@ -13,7 +13,26 @@ the end of this brief, work out:
    declared, and what it caps.
 2. **How to verify, by running Cassandra, whether that constraint really caps
    the resource usage.** Design a verification solution that a separate engineer
-   or AI session can execute without re-deriving the code path.
+   or AI session can execute without re-deriving the code path. It has **two
+   tiers**, each a complete procedure of its own (see the next section).
+
+## The two tiers
+
+- **Unit tier.** Drive the relevant Cassandra classes directly, in a JVM
+  started from a test or a small program built from the tree: no cluster, no
+  running node. It measures the check's own usage-side value (the quantity the
+  code compares against the limit), so it shows whether the mechanism works as
+  you traced it.
+- **Cluster tier.** A real node (or a small cluster) with the configuration
+  pushed to the boundary and a workload driven through the normal client path.
+  It measures the **actual resource** (heap, off-heap or disk), so it shows
+  whether the limit governs what the node really uses.
+
+Each tier gets its own setup, knobs, workload, instruments, procedure,
+predictions, readings table and controls. If a tier cannot be done for this
+constraint (for example the limit cannot be set at all, or nothing can be
+driven without a node), write `n/a: <reason>` for that tier and say what you
+would do instead to answer the same question.
 
 ## Sources
 
@@ -47,8 +66,9 @@ These are practical limits, not a method:
   production data, and no change outside the nodes.
 - **Executable from the solution alone:** exact knob names, values, commands,
   workload sizes, instruments and sampling.
-- **Predictions are stated before any run**, as numbers or a clear relation, so
-  a reading can contradict them; say what would show the claim is wrong.
+- **Predictions are stated before any run**, per tier, as numbers or a clear
+  relation, so a reading can contradict them; say what would show the claim is
+  wrong.
 - **Shared-machine care:** never build in or add files to the shared source
   clone (clone it to local disk); never fill shared storage (node data, commit
   log and hints go on local disk of known size); stop every process the run

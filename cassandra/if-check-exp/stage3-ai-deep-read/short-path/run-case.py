@@ -11,8 +11,10 @@
        and audits it. It files nothing.
 `file` copies an audited solution into cases/, fills the header row, and adds
        the _INDEX.md row with its sha256. It refuses unless the audit passed
-       (or `--accept-review` after you read every REVIEW item). Nothing is
-       committed, ever.
+       (or `--accept-review` after you read every REVIEW item). `--supersede`
+       files a new version of a case that already has a solution: the old file
+       is renamed `<stem>--vN.md` (content untouched) and marked superseded in
+       the index. Nothing is committed, ever.
 
 `run` refuses to start unless the isolation test passed with the SAME flags
 and allowlist. A failed or review-needed attempt is kept and never edited; run
@@ -143,11 +145,24 @@ def audit(src, res, solution, template_text):
               ('; '.join(f'line {i}: {t[:100]!r}' for i, t in hits[:6]) + (f' (+{len(hits) - 6} more)' if len(hits) > 6 else ''))
               if hits else 'no stage-4 / project vocabulary'))
     # 3: completeness and consistency
-    missing = [h for h in [f'A{i}' for i in range(1, 6)] + [f'B{i}' for i in range(1, 11)]
-               if not re.search(rf'\b{h}\b', solution)]
+    missing, na = [h for h in [f'A{i}' for i in range(1, 6)] + ['B1', 'B4']
+                   if not re.search(rf'\b{h}\b', solution)], []
+    for tier, nxt in (('B2', 'B3'), ('B3', 'B4')):
+        m = re.search(rf'^#+\s*{tier}\.[^\n]*\n(.*?)(?=^#+\s*{nxt}\.|^\*\*{nxt}\.|\Z)', solution, re.M | re.S)
+        if not m:
+            missing.append(tier)
+            continue
+        body = m.group(1)
+        items = [f'{tier}{c}' for c in 'abcdefgh']
+        absent = [h for h in items if not re.search(rf'\b{h}\b', body)]
+        if absent and re.search(r'n/a\s*:(?!\s*`?<reason>)\s*\S', body, re.I):
+            na.append(tier)                       # a tier declared not doable, with a reason
+        else:
+            missing += absent
     if not re.search(r'^#+\s*C\.', solution, re.M): missing.append('C')
     A.append(('A3 completeness', 'FAIL' if missing else 'PASS',
-              f'missing sections: {missing}' if missing else 'A1-A5, B1-B10 and C present'))
+              f'missing sections: {missing}' if missing else
+              'A1-A5, B1, B2a-h, B3a-h, B4 and C present' + (f' ({", ".join(na)} declared n/a)' if na else '')))
     blob = ' '.join(json.dumps(c['input']) for c in calls)
     csec = re.split(r'^#+\s*C\.[^\n]*\n', solution, flags=re.M)
     unread = []
@@ -236,27 +251,51 @@ def cmd_file(a):
     if meta['overall'] == 'REVIEW' and not a.accept_review:
         sys.exit('the audit needs review: read the REVIEW items in run-report.txt, then pass --accept-review')
     sp = pathlib.Path(a.short_path_dir) if a.short_path_dir else HERE
-    dest = sp / 'cases' / (a.stem + ('--r2' if a.r2 else '') + '.md')
+    stem_out = a.stem + ('--r2' if a.r2 else '')
+    dest = sp / 'cases' / (stem_out + '.md')
+    idx = sp / '_INDEX.md'
+    old_dest = None
     if dest.exists():
-        sys.exit(f'{dest} already exists: a filed solution is never replaced')
+        if not a.supersede:
+            sys.exit(f'{dest} already exists: a filed solution is never replaced. '
+                     'To file a new version, pass --supersede (the old one is renamed --vN, not edited).')
+        n = 1
+        while (sp / 'cases' / f'{stem_out}--v{n}.md').exists():
+            n += 1
+        old_dest = sp / 'cases' / f'{stem_out}--v{n}.md'
     text = sol.read_text(encoding='utf-8')
     row = f"| Session / date | {meta['model']}, {meta['cli']}, {meta['date']}, attempt {meta['attempt']} |"
     if re.search(r'^\|\s*Session / date\s*\|.*$', text, re.M):
         text = re.sub(r'^\|\s*Session / date\s*\|.*$', lambda m: row, text, count=1, flags=re.M)
     else:
         text = re.sub(r'^(#[^\n]*\n)', lambda m: m.group(1) + f"\n*Session / date: {meta['model']}, {meta['cli']}, {meta['date']}, attempt {meta['attempt']}*\n", text, count=1)
+    lines = idx.read_text(encoding='utf-8').splitlines()
+    hdr = next(i for i, l in enumerate(lines) if l.startswith('| Stem'))
+    if 'Status' not in lines[hdr]:                     # migrate older indexes: add a Status column
+        lines[hdr] += ' Status |'
+        lines[hdr + 1] += '---|'
+        for i in range(hdr + 2, len(lines)):
+            if lines[i].startswith('|'): lines[i] += ' current |'
+    if old_dest:
+        for i in range(hdr + 2, len(lines)):
+            cells = lines[i].split('|')
+            if lines[i].startswith('|') and cells[1].strip() == stem_out:
+                cells[1] = f' {old_dest.stem} '
+                cells[-2] = f' superseded {meta["date"]} by `{dest.name}` '
+                lines[i] = '|'.join(cells)
+        old_dest_txt = dest.read_text(encoding='utf-8')
+        dest.rename(old_dest)
+        assert old_dest.read_text(encoding='utf-8') == old_dest_txt
     dest.parent.mkdir(exist_ok=True)
     dest.write_text(text if text.endswith('\n') else text + '\n', encoding='utf-8')
     digest = sha256(dest)
     audit_cell = 'pass' if meta['overall'] == 'PASS' else 'pass (reviewed)'
-    new = (f"| {a.stem}{'--r2' if a.r2 else ''} | `{meta['pointer']}` | {meta['feed']} | {meta['date']} | `{digest}` | "
-           f"{meta['model']} | {meta['isolation_cell']} | {audit_cell} | pending |")
-    idx = sp / '_INDEX.md'
-    lines = idx.read_text(encoding='utf-8').splitlines()
+    new = (f"| {stem_out} | `{meta['pointer']}` | {meta['feed']} | {meta['date']} | `{digest}` | "
+           f"{meta['model']} | {meta['isolation_cell']} | {audit_cell} | pending | current |")
     last = max(i for i, l in enumerate(lines) if l.startswith('|'))
     lines.insert(last + 1, new)
     idx.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-    print(f'filed {dest}\nsha256 {digest}\nadded a row to {idx}\nNothing is committed: commit when you are ready.')
+    print(f'filed {dest}\nsha256 {digest}\nadded a row to {idx}' + (f'\nthe previous solution was renamed to {old_dest.name} and marked superseded' if old_dest else '') + '\nNothing is committed: commit when you are ready.')
     return 0
 
 
@@ -274,6 +313,7 @@ def main():
     r.add_argument('--dry-run', action='store_true')
     f.add_argument('--accept-review', action='store_true')
     f.add_argument('--r2', action='store_true', help='file as <stem>--r2.md (a noise-check run)')
+    f.add_argument('--supersede', action='store_true', help='file a new version: rename the existing <stem>.md to --vN and mark it superseded')
     f.add_argument('--short-path-dir', help=argparse.SUPPRESS)
     a = ap.parse_args()
     return cmd_run(a) if a.cmd == 'run' else cmd_file(a)
