@@ -1,149 +1,165 @@
-# memtable_heap_space (MemtablePool.SubPool.tryAllocate hard cap) — verification solution  <!-- file: cases/memtable_heap_space-tryAllocate-limit.md -->
+# memtable_heap_space (MemtablePool on-heap limit) — verification solution  <!-- file: cases/memtable_heap_space-tryAllocate-limit.md -->
 
 | Field | Value |
 |---|---|
 | Entry pointer | `src/java/org/apache/cassandra/utils/memory/MemtablePool.java:156` |
 | Pinned source | `cassandra-5.0.9` |
-| Session / date | claude-sonnet-5, 2.1.272 (Claude Code), 2026-10-05, attempt 1 |
+| Session / date | claude-sonnet-5, 2.1.272 (Claude Code), 2026-10-05, attempt 2 |
 
 ## A. Constraint trace
 
 **A1. The constraint.**
-Name: **`memtable_heap_space`** (on-heap sibling: `memtable_offheap_space`). Kind: `cassandra.yaml` configuration entry, parsed into a `DataStorageSpec.IntMebibytesBound` field.
-First declared: `src/java/org/apache/cassandra/config/Config.java:186-189`:
-```
-186: @Replaces(oldName = "memtable_heap_space_in_mb", converter = Converters.MEBIBYTES_DATA_STORAGE_INT, deprecated = true)
-187: public DataStorageSpec.IntMebibytesBound memtable_heap_space;
-188: @Replaces(oldName = "memtable_offheap_space_in_mb", converter = Converters.MEBIBYTES_DATA_STORAGE_INT, deprecated = true)
-189: public DataStorageSpec.IntMebibytesBound memtable_offheap_space;
-```
-Unit: mebibytes (`DataStorageSpec.IntMebibytesBound`, `src/java/org/apache/cassandra/config/DataStorageSpec.java:404-464`).
-Default, when the yaml key is absent, computed in `DatabaseDescriptor.applyAll()`:
-```
-src/java/org/apache/cassandra/config/DatabaseDescriptor.java:583-587
-  conf.memtable_offheap_space = Runtime.getRuntime().maxMemory() / (4*1048576)  (MiB)
-  conf.memtable_heap_space    = Runtime.getRuntime().maxMemory() / (4*1048576)  (MiB)
-```
-i.e. 1/4 of the JVM's max heap (`-Xmx`) each, by default. A value of 0 MiB is rejected (`DatabaseDescriptor.java:588-589`).
-Settable: only via `cassandra.yaml` (`memtable_heap_space: <N>MiB`, min unit MiB — documented at `conf/cassandra.yaml:791-799`). There is no `-D` system property, no JMX setter (`grep` for `setMemtableHeapSpace*` in `DatabaseDescriptor.java` returns nothing), and no nodetool command. The value is read once into a **static final** pool object:
-```
-src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java:59
-  public static final MemtablePool MEMORY_POOL = AbstractAllocatorMemtable.createMemtableAllocatorPool();
-```
-so a change requires a **full node restart**; it is not reloadable.
+`memtable_heap_space` — a `cassandra.yaml` configuration entry, type `DataStorageSpec.IntMebibytesBound`, declared at `src/java/org/apache/cassandra/config/Config.java:187` (with a deprecated legacy alias `memtable_heap_space_in_mb`, `Config.java:186`). Unit: mebibytes (the class stores/validates MiB-granularity sizes; see `DataStorageSpec.IntMebibytesBound` at `src/java/org/apache/cassandra/config/DataStorageSpec.java:404`). It is the on-heap counterpart of the companion off-heap entry `memtable_offheap_space` (`Config.java:188-189`).
 
-**A2. What it caps.**
-Heap (or, with `offheap_buffers`/`offheap_objects` allocation types, off-heap) memory used by **memtable data across the whole node** — not per table. `MEMORY_POOL` is one process-wide singleton; every table's memtable allocator is obtained from it (`AbstractAllocatorMemtable.java:118`: `MEMORY_POOL.newAllocator(...)`). The quantity compared against the limit is `SubPool.allocated` (`MemtablePool.java:111,156`), the running total of bytes acquired by all live/flushing memtable allocators on the node.
-It does **not** cap disk; it only indirectly influences disk I/O by forcing flushes.
+Default: if the yaml key is omitted, `DatabaseDescriptor.applyMemtableConfig` sets it to ¼ of the JVM max heap: `conf.memtable_heap_space = new DataStorageSpec.IntMebibytesBound((int) (Runtime.getRuntime().maxMemory() / (4 * 1048576)))` (`src/java/org/apache/cassandra/config/DatabaseDescriptor.java:586-587`), and it must be `> 0` or startup fails (`DatabaseDescriptor.java:588-589`). Documented in `conf/cassandra.yaml:794-799` ("If omitted, Cassandra will set both to 1/4 the size of the heap").
 
-**A3. Mechanism.**
-1. Write path reaches `MemtableAllocator.SubAllocator.allocate(size, opGroup)` (`MemtableAllocator.java:169-197`).
-2. It calls `parent.tryAllocate(size)` → `MemtablePool.SubPool.tryAllocate` (`MemtablePool.java:151-161`), the entry pointer: `if ((cur = allocated) + size > limit) return false;` (line 156) else CAS `allocated += size` and return true.
-3. **If it succeeds**: the allocator records ownership (`acquired()`/`allocated()`), and `SubPool.maybeClean()` is invoked, which checks `needsCleaning()` (`MemtablePool.java:125-129`): `used() > nextClean`, where `nextClean = reclaiming + limit*cleanThreshold` (`MemtablePool.java:137-147`). `cleanThreshold` defaults to `1/(1+memtable_flush_writers)` (`DatabaseDescriptor.java:763`; `memtable_flush_writers` defaults to 2 with one data directory, `DatabaseDescriptor.java:755`, giving `cleanThreshold≈0.33`). Crossing this **soft** threshold triggers `MemtableCleanerThread.trigger()` → `AbstractAllocatorMemtable.flushLargestMemtable()` (`AbstractAllocatorMemtable.java:249` ff.), which async-flushes the largest memtable to free `allocated`.
-4. **If `tryAllocate` fails** (the hard cap, line 156) and the calling `OpOrder.Group` is not itself `isBlocking()`, the writer thread registers on `hasRoom` wait queue and blocks (`MemtableAllocator.java:180-196`), i.e. **the write stalls** until a flush completes and calls `SubPool.released()` (`MemtablePool.java:192-197`), which signals the queue. This is the documented behavior: `conf/cassandra.yaml:792-794`: *"Cassandra will stop accepting writes when the limit is exceeded until a flush completes."* The `blockedOnAllocating` `Timer` (`MemtablePool.java:50,63,252-255`) records exactly this stall.
-5. **Bypass/overshoot path**: if the `OpOrder.Group` the write belongs to is already marked `isBlocking` (set via `Barrier.markBlocking()`, `OpOrder.java:155-167` — used for in-flight writes on a memtable that a flush is already waiting to drain, to avoid deadlocking the flush barrier), `MemtableAllocator.allocate` takes the other branch: `allocated(size)` is called unconditionally (`MemtableAllocator.java:182`, `204-206`), which calls `SubPool.allocated()` → `adjustAllocated()` (`MemtablePool.java:167-175`), **bypassing the `limit` check entirely** (doc comment at `MemtablePool.java:163-165`: *"bypassing any limits or constraints"*). This is a narrow, deliberate escape valve for operations that must not deadlock a flush already in progress, not a general loophole for ordinary writes.
+Set via the yaml key `memtable_heap_space: <N>MiB` (or legacy `memtable_heap_space_in_mb: <N>`). There is no `-D` system property and no JMX setter: `DatabaseDescriptor.getMemtableHeapSpaceInMiB()` (`DatabaseDescriptor.java:4055-4057`) only reads the parsed config, and the value is consumed exactly once at class-init time into a `static final` field (see A3). **A changed value requires a full process restart** — it cannot be reloaded live.
 
-**A4. Other consumers.**
-Everything else competing for the same JVM heap is outside this constraint's control: read-path objects, row/key/chunk caches, bloom filters (on-heap portion), compaction merge buffers, client/Netty request buffers, JVM/GC overhead, secondary-index build structures, repair Merkle trees, and off-heap: direct byte buffers used by `offheap_buffers`/`offheap_objects` allocation types are counted, but SSTable-level off-heap structures (bloom filters, compression metadata when off-heap, `file_cache_size`/chunk cache) are governed by separate, unrelated settings and are not limited by `memtable_offheap_space`.
+**A2. What it caps.** On-heap bytes occupied by live (not-yet-flushed) memtables across the whole node (all tables), i.e. JVM heap memory. The quantity compared against the limit is `SubPool.allocated` (`MemtablePool.java:111`, read at `MemtablePool.java:156`), the running total of bytes acquired by all `MemtableAllocator`s attached to this `SubPool`, exposed via `SubPool.used()` (`MemtablePool.java:216-219`).
+
+**A3. Mechanism.** Step by step:
+1. At class-load, `AbstractAllocatorMemtable.MEMORY_POOL` is built once: `createMemtableAllocatorPool()` reads `DatabaseDescriptor.getMemtableHeapSpaceInMiB() << 20` into `heapLimit` and `getMemtableCleanupThreshold()` into `memtableCleanupThreshold` (`src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java:78-86`), then picks a pool implementation by `memtable_allocation_type` (`AbstractAllocatorMemtable.java:89-112`). The default type is `heap_buffers` (`Config.java:524`), which builds `new SlabPool(heapLimit, 0, memtableCleanupThreshold, cleaner)` (`AbstractAllocatorMemtable.java:102`); `heapLimit` becomes `MemtablePool.onHeap.limit` (`MemtablePool.java:55-60,117-121`).
+2. Every table's active `Memtable` gets a `MemtableAllocator` from this single pool (`AbstractAllocatorMemtable.java:118`, `MemtablePool.newAllocator`), so `onHeap` is shared cluster-wide-per-node across all keyspaces/tables.
+3. Each write path allocation goes through `MemtableAllocator.SubAllocator.allocate(size, opGroup)` (`src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java:169-197`), which first calls `parent.tryAllocate(size)` — this is the CAS loop at the entry pointer: `if ((cur = allocated) + size > limit) return false;` else CAS `allocated` to `cur+size` (`MemtablePool.java:151-161`).
+4. **If `tryAllocate` succeeds** (limit not exceeded), the allocation is accepted and `acquired(size)` runs, which calls `SubPool.acquired()` → `maybeClean()` → `needsCleaning()` (`MemtablePool.java:125-135,187-190`), comparing `used()` against a cached threshold `nextClean = reclaiming + limit*cleanThreshold` (`MemtablePool.java:137-147`); if crossed, it fires `cleaner.trigger()`, which schedules `AbstractAllocatorMemtable.flushLargestMemtable()` on a dedicated `MemtableCleanerThread` to flush the largest memtable and free heap (`MemtableAllocator.java:177`, `AbstractAllocatorMemtable.java:249-318`).
+5. **If `tryAllocate` fails** (over limit) and the caller's `OpOrder.Group` is **not** `isBlocking()`, the thread registers on `hasRoom` wait queue and blocks until a release (flush completing calls `SubPool.released()` → `hasRoom.signalAll()`, `MemtablePool.java:192-197`), re-tries `tryAllocate`, and only proceeds once there is room (`MemtableAllocator.java:180-196`). This is the actual backpressure that caps heap growth.
+6. **Overshoot/bypass path:** if the op-order group is already marked `isBlocking()` (meaning a flush barrier is waiting on this very operation to finish before it can start flushing — see `OpOrder.java:157-167,319-335`), `allocate()` takes the `allocated(size)` branch instead, which calls `SubPool.allocated(size)` (`MemtablePool.java:177-185`) — this *unconditionally* adds to `allocated` via `adjustAllocated`, **bypassing the `tryAllocate` limit check entirely** (the Javadoc at `MemtablePool.java:163-166` says "bypassing any limits or constraints"), to avoid deadlocking the in-flight write against the flush it would otherwise need to finish. This is a deliberate, bounded overshoot: it only happens for writes already in flight when a flush barrier is raised, not for new writes.
+
+**A4. Other consumers.** The same JVM heap is also used by: SSTable read/compaction buffers (if `memtable_allocation_type` is on-heap, `offheap_buffers`/`offheap_objects` move only payload data off-heap but key/metadata structures stay on-heap), the row cache/key cache/chunk cache, compaction, hints, gossip, client request processing, JVM/GC bookkeeping, and any off-heap `memtable_offheap_space`-controlled allocation reported through the sibling `MemtablePool.offHeap` SubPool (independent limit, same class). None of these are capped by `memtable_heap_space`; it only caps the `onHeap` `SubPool.allocated` total.
 
 **A5. Evidence beyond the source.**
-- `conf/cassandra.yaml:791-825` (shipped docs for `memtable_heap_space`, `memtable_offheap_space`, `memtable_cleanup_threshold`, `memtable_allocation_type`) — read as part of pinned tree, cited above.
-- No external issue/history was consulted beyond the pinned tree, per the brief's "read nothing else" instruction.
+- `conf/cassandra.yaml:794-812` — the shipped documentation for `memtable_heap_space`/`memtable_offheap_space`/`memtable_cleanup_threshold`.
+- `test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java:32-157` — existing unit test that drives a `MemtablePool` subclass (`NativePool`) directly with an explicit small limit and shows both the blocking path and the discarding/overshoot path (`allocator.allocate(30, group)` after `setDiscarding()` at lines 141-148 overshoots the limit of 100 to reach 110, exactly the A3 step-6 bypass).
+- `test/unit/org/apache/cassandra/db/memtable/MemtableSizeTestBase.java:86-105,166-200` — existing integration-style unit test that reconfigures `memtable_allocation_type`/`memtable_cleanup_threshold` via reflection on `DatabaseDescriptor` and measures `Memtable.getMemoryUsage(memtable).ownsOnHeap` against a `MemoryMeter` deep-size measurement — precedent for the unit-tier instrumentation used below.
+- `test/unit/org/apache/cassandra/utils/memory/MemtableCleanerThreadTest.java:40-179` — shows how `MemtablePool.needsCleaning()`/cleaner triggering is unit-tested with a mocked pool.
 
 ## B. Verification solution
 
-**B1. Claim under test.**
-(1) With `memtable_allocation_type: heap_buffers` (default) and `memtable_heap_space` set to `L` MiB, the node-wide sum of memtable on-heap ownership never sustainedly exceeds `L` MiB while a write workload that would otherwise allocate heap faster than it can be flushed is applied; instead throughput collapses to the flush-drain rate and writer threads measurably block. (2) Lowering `L` while holding the workload fixed increases blocking (count and time) monotonically and proportionally sooner. If allocation is observed to climb substantially and durably past `L` under sustained write pressure (not just a single `isBlocking`-bypass transient), the claim is false.
+**B1. Claim under test.** (1) `memtable_heap_space` (as `MemtablePool.onHeap.limit`) is the value that `SubPool.tryAllocate` (`MemtablePool.java:151-161`) compares `allocated` against, and crossing `allocated + size > limit` makes new, non-blocking memtable allocations stall until a flush releases space — i.e. the mechanism throttles on-heap memtable growth as traced in A3. (2) On a running node, setting `memtable_heap_space` to a small value and writing continuously causes the **sum of live memtables' on-heap footprint** to stay close to that bound (modulo the bounded A3-step-6 overshoot and modulo other on-heap consumers in A4), rather than growing unboundedly.
 
-**B2. Environment and build.**
-- 1 Linux node (can extend to 2-3 identical nodes with independent data dirs to show the cap is per-node, not cluster-wide; single node suffices for the core claim).
-- `git clone <local path to this repo> /data/local/cassandra-build` (clone to local disk, never build in the shared clone); `git checkout cassandra-5.0.9`.
-- JDK 11, Ant: `ant jar` from `/data/local/cassandra-build`.
-- Data/commitlog/hints directories on local disk of known size, e.g. `/data/local/ccm-node/{data,commitlog,hints,saved_caches}`, sized ≥ 2 GiB free (never shared storage).
-- JVM options in `jvm11-server.options` / `cassandra-env.sh`: fix `-Xms512M -Xmx512M` so the default 1/4-heap derivation is irrelevant (we set the cap explicitly, see B3) and heap behavior is reproducible.
-- `cassandra.yaml` changes:
-  - `memtable_allocation_type: heap_buffers` (default; exercises `SlabPool`, `MemtablePool.java:156` directly on-heap).
-  - `memtable_heap_space: 64MiB` (explicit `L`, overriding the derived default so the cap is a known, controlled number).
-  - `memtable_offheap_space: 64MiB` (unused by `heap_buffers`, set only so startup logging/validation is uniform).
-  - `memtable_flush_writers: 1` ⇒ default `memtable_cleanup_threshold = 1/(1+1) = 0.5` (soft-flush trigger at 50% of `L`).
-  - `commitlog_sync: periodic`, default `commitlog_sync_period: 10000ms` (keep commitlog off the critical path so memtable allocation, not commitlog fsync, is the bottleneck being measured).
-  - Create keyspace with `durable_writes = false` for the test table only if isolating memtable pressure from commitlog is desired (optional control, see B9).
+### B2. Unit tier
 
-**B3. Knobs.**
-- `L = memtable_heap_space`: test with **64 MiB** and **16 MiB** (4× smaller) to show the observed ceiling tracks `L`. Set via `cassandra.yaml`, requires node restart (A1).
-- `memtable_cleanup_threshold` (via `memtable_flush_writers: 1` ⇒ 0.5): held fixed across both `L` values so the soft/hard-limit ratio is identical, isolating `L` as the only variable.
-- Write concurrency: `cassandra-stress` thread count, swept at 50 and 200 threads, to confirm blocking (not just flush-triggering) appears once offered write rate exceeds flush-drain rate.
+**B2a. Environment and build.**
+```
+git clone <local-path-to-pinned-clone> /tmp/cass509-unit   # clone to local disk, not the shared tree
+cd /tmp/cass509-unit && git checkout cassandra-5.0.9
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk   # JDK 11
+ant jar
+```
+Add a new test file (do not edit shared clone) `test/unit/org/apache/cassandra/utils/memory/MemtablePoolLimitTest.java`, modeled directly on the existing `NativeAllocatorTest` (`test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java:32-157`), but using `SlabPool` to mirror the production default (`memtable_allocation_type: heap_buffers`). No `DatabaseDescriptor`/`CQLTester`/node bootstrap is needed — `MemtablePool` and `MemtableAllocator` have no dependency on a running server.
+Run with: `ant test -Dtest.name=MemtablePoolLimitTest`, default test JVM heap (`-Xmx` as set by `build.xml`'s unit target, typically 1–2 GiB) — large enough since test limits are only tens of bytes.
 
-**B4. Workload.**
-Single keyspace/table, one column of fixed-size blob, inserted with unique partition keys so no overwrites are compacted away in-memory (each insert adds new, not updates existing, allocated bytes).
-- Row payload: 4 KiB blob + key/overhead ≈ 4.2 KiB allocated per row (on-heap `SlabAllocator`, `SlabAllocator.java:78-114`).
-- To fill `L=64MiB` once: 64 MiB / 4.2 KiB ≈ 15,600 rows — reachable in well under a second of CPU-bound insert, so a workload of **2,000,000 rows** (≈ 8.4 GB raw data, ~128× the 64 MiB cap) forces on the order of 100+ flush cycles, giving a long steady-state window in which allocation should plateau at ≤ `L` rather than grow unbounded.
-- Driver: `tools/bin/cassandra-stress write n=2000000 cl=ONE -rate threads=50 -node 127.0.0.1 -col size=FIXED(4096)` (adjust column spec to the user-defined schema so payload ≈4 KiB).
-- Duration: expect several minutes; stop early once steady-state blocking is observed for ≥60s.
+**B2b. Knobs.**
+- `limit` passed straight into `new SlabPool(limit, 0, cleanThreshold, cleaner)` — the in-process analogue of `memtable_heap_space` (bytes, not MiB, since this bypasses `DatabaseDescriptor` entirely). Values: `100` and `1000` bytes — small enough to cross with a handful of `allocate()` calls, large enough to leave headroom to observe both success and failure before the limit.
+- `cleanThreshold`: `0.75f` (matches `NativeAllocatorTest.java:55`) so the cleaner fires before the hard limit, letting us observe the clean/flush-trigger path separately from the hard block.
+- `opGroup.isBlocking()` state — flipped explicitly via `OpOrder.Barrier.markBlocking()` to exercise the A3-step-6 overshoot deliberately, not accidentally.
 
-**B5. Observables and instruments.**
-- **`AllMemtablesOnHeapDataSize` (global table gauge)**, JMX ObjectName `org.apache.cassandra.metrics:type=Table,name=AllMemtablesOnHeapDataSize` (`TableMetrics.java:505-512`, aggregated by `GlobalTableGauge`, `TableMetrics.java:1331-1349`). Sampled every 1s via `jmxterm`/`jconsole`/a small JMX poller. This is the closest available proxy for `SubPool.allocated` at `MemtablePool.java:111`; there is no MBean exposing `allocated` directly, so this is an approximation (note as limitation).
-- **`BlockedOnAllocation` timer**, JMX `org.apache.cassandra.metrics:type=MemtablePool,name=BlockedOnAllocation` (`MemtablePool.java:50,63`). Count and mean/max duration sampled every 1s — direct evidence of code path A3 step 4 executing.
-- **`PendingFlushTasks` gauge**, JMX `org.apache.cassandra.metrics:type=MemtablePool,name=PendingFlushTasks` (`MemtablePool.java:51,64-65`).
-- `nodetool tablestats <ks>.<table>` for `Memtable cell count`, `Memtable data size`, `Memtable switch count` (corroborating flush cadence) and `nodetool tpstats` for `MemtableFlushWriter` pending/active counts.
-- cassandra-stress's own reported op/s over time (expect a drop once the cap is first hit, recovering in a sawtooth as flushes complete).
-- Cannot be observed directly: the exact instant an individual thread enters the CAS loop at `MemtablePool.java:151-161`; only the aggregate effect (gauge plateau, timer increments) is visible without attaching a debugger/async-profiler to that method.
+**B2c. Workload.** Drive `allocator.allocate(size, group)` with a sequence of sizes that sum past `limit`:
+- With `limit=100`: `allocate(60)` (60 ≤ 100, succeeds, `used()==60`), then `allocate(60)` again (60+60=120 > 100) — call this from a **second thread** (via the test's own `ScheduledExecutorService`, as in `NativeAllocatorTest.java:48,145-146`) so the call blocks instead of deadlocking the test thread; main thread asserts it is still blocked after e.g. 200 ms, then releases 60 bytes (`allocator.released(60)` or completing a mock flush), and asserts the blocked call returns and `used()==120-60=60... ` — concretely reproduce the arithmetic: start `used=60`; release `60` → `used=0`; blocked `allocate(60)` unblocks → `used=60`. This shows the exact boundary `cur+size>limit` at `MemtablePool.java:156`.
+- Separately, to exercise overshoot: `allocator.allocate(90, group)` (used=90, under 100), `setDiscarding()` (marks it reclaiming), then `allocate(30, group)` with the group's barrier `markBlocking()`'d first — expect `used()` to jump to `120`, i.e. **past** `limit=100`, confirming the bypass at `MemtablePool.java:177-185`.
 
-**B6. Procedure.**
-1. Build: `cd /data/local/cassandra-build && ant jar`.
-2. Configure node A with `memtable_heap_space: 64MiB` as in B2/B3; start: `bin/cassandra -f`.
-3. Create schema: `CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k uuid PRIMARY KEY, v blob);`
-4. Start JMX pollers for the three MBeans above at 1 Hz, logging to local files.
-5. Run cassandra-stress workload from B4 at 50 threads; let run until ≥5 full flush cycles observed (`Memtable switch count` increments) and the on-heap gauge shows a repeating sawtooth.
-6. Record steady-state max of `AllMemtablesOnHeapDataSize`, final value and trend of `BlockedOnAllocation` count/mean, and stress op/s over time.
-7. Repeat steps 2-6 with `memtable_heap_space: 16MiB` (restart required, A1), same workload and thread count.
-8. Repeat step 5 at 200 threads for the 64 MiB config to confirm blocking appears/intensifies once offered rate increases.
-9. Stop cassandra-stress, `nodetool flush`, `nodetool drain`, stop the Cassandra process (`kill <pid>`, confirm via `ps` that no `CassandraDaemon`/cleaner-thread JVM remains), remove the local data/commitlog/hints directories created in B2.
+**B2d. Observables and instruments.** Direct method calls, no external tool needed: `pool.onHeap.used()` (`MemtablePool.used()`, `MemtablePool.java:216-219`), `allocator.onHeap().owns()` (`MemtableAllocator.java:280-283`), `allocator.onHeap().getReclaiming()`, and whether the test thread calling `allocate()` is blocked (checked with `Future.get(timeout)` from the driving executor, as `NativeAllocatorTest` does with `exec.submit(test).get()` and `Uninterruptibles.sleepUninterruptibly`). Cannot be observed directly: actual JVM heap bytes consumed by the allocation (this tier never allocates real buffers of that size — `allocate()`'s `size` argument here is just an accounting integer, not a real buffer); that is left to the cluster tier.
 
-**B7. Predictions.**
-- `L=64MiB`: `AllMemtablesOnHeapDataSize` plateaus with peaks close to but not sustainedly above ≈64 MiB (allowing for an overshoot bounded by the size of one in-flight allocation request, since the CAS check at line 156 only prevents the *next* allocation once `cur+size>limit` — overshoot per flush cycle should be at most a few hundred KiB, i.e. roughly one row's worth, not megabytes).
-- `L=16MiB`: plateau ≈16 MiB, i.e. roughly 1/4 of the 64 MiB run's peak — a linear relation to `L`.
-- `BlockedOnAllocation` count: ≈0 or near-0 at low thread count (50) if flush keeps up; count should become clearly >0 and growing once offered write rate exceeds flush/disk drain rate (200 threads), and mean blocked time should be on the order of one flush's duration (seconds, not microseconds).
-- Stress op/s: sustained rate converges to the flush+disk drain rate once the cap is first reached, independent of client thread count beyond that point (adding threads at 200 should not raise sustained throughput much further versus 50, since the ceiling is now the SlabPool allocator, not client concurrency).
-- `Memtable switch count` should increase roughly every time `AllMemtablesOnHeapDataSize` crosses ~50% of `L` (the `cleanThreshold=0.5` soft trigger), i.e. flush-cycle count for the 2,000,000-row run on 64 MiB ≈ 8.4GB / (64MiB×0.5) ≈ 260 cycles (order-of-magnitude; exact count depends on per-row overhead not fully known ahead of time — stated as a relation, not an exact figure).
+**B2e. Procedure.**
+1. Clone pinned tag to local disk, build with `ant jar` (B2a).
+2. Add `MemtablePoolLimitTest.java` under `test/unit/org/apache/cassandra/utils/memory/`.
+3. `ant test -Dtest.name=MemtablePoolLimitTest -Dtest.methods=testHardLimitBlocks`
+4. `ant test -Dtest.name=MemtablePoolLimitTest -Dtest.methods=testDiscardingOvershoots`
+5. Inspect JUnit XML/console output under `build/test/output/` for assertion results and the logged `used()` values at each step (add `System.out.println` or assert messages, since this is an ad hoc test, not shipped).
 
-**B8. Readings.**
+**B2f. Predictions.**
+- `testHardLimitBlocks`, `limit=100`: after first `allocate(60)`, `used()==60`. Second `allocate(60)` from worker thread does **not** return within 200 ms (blocked), and `used()` stays `60` while blocked. After main thread calls `released(60)`, the worker's `allocate(60)` returns within the test timeout (≤5 s) and final `used()==60`.
+- `testDiscardingOvershoots`, `limit=100`: after `allocate(90)`, `used()==90`. After `setDiscarding()` + `allocate(30)` while the op-group `isBlocking()`, the call returns **immediately** (no block) and `used()==120`, i.e. `used() > limit`, confirmed `>` by exactly `20`.
+- If instead the second scenario shows `used()` capped at `100` or the call blocks, the traced bypass (A3 step 6) does not exist as read, and the claim is wrong.
+
+**B2g. Readings.**
 
 | Observation | Meaning |
 |---|---|
-| `AllMemtablesOnHeapDataSize` plateaus at ≈`L` (±one row), sawtooth with period matching flush cycles | Claim holds: `memtable_heap_space` caps node-wide memtable heap via `tryAllocate` |
-| `BlockedOnAllocation` count increases once offered rate > drain rate, stays flat when rate ≤ drain rate | Confirms the hard-limit blocking mechanism (A3 step 4) is what enforces the cap under pressure |
-| Gauge for `L=16MiB` plateaus at ≈1/4 of the `L=64MiB` plateau | Confirms the limit, not some other fixed ceiling (e.g. GC/heap size), governs the observed cap |
-| Gauge grows **without bound** past `L` (e.g. to several hundred MiB) while workload continues, with no corresponding plateau | **Claim is false** — either the cap is not enforced on this path, or some other code path (e.g. large unslabbed allocations, `SlabAllocator.java:92-100`, bypassing the per-region accounting) adds memory uncounted |
-| Gauge tracks `L` but stress op/s never drops (no blocking, `BlockedOnAllocation` stays 0 even at 200 threads) | Would suggest the workload never actually pressured the limit (control failure — raise thread count/row size rather than concluding the cap is absent) |
-| Node OOMs / GC death spiral despite gauge showing values at or below `L` | Would indicate the cap value itself is set too high relative to `-Xmx` for the non-memtable consumers in A4, not that the mechanism failed — distinguishes "cap doesn't stop OOM" from "cap doesn't cap memtable memory" |
+| `used()==60` after first allocate, second allocate blocks until release, then `used()==60` again | `tryAllocate`'s `cur+size>limit` check works as traced; it is the enforcement point |
+| Second allocate does **not** block, `used()` silently exceeds 100 without `markBlocking()`/`setDiscarding()` | contradicts claim — some other path besides A3 step 6 bypasses the check; re-trace |
+| `testDiscardingOvershoots`: `used()==120 > limit=100` with no blocking | confirms the deliberate, bounded overshoot of A3 step 6 |
+| `testDiscardingOvershoots`: call blocks or `used()` stays ≤100 | the bypass path does not exist as read from `MemtableAllocator.java:180-184`; claim about mechanism is wrong on this point |
 
-**B9. Controls.**
-- Fixed `-Xmx` across both `L` values isolates `memtable_heap_space` as the only changed input; if the plateau didn't scale with `L`, JVM heap limits (GC) rather than this constraint would be suspected.
-- Per-row size and unique keys (no updates) rule out compaction/overwrite coalescing as an alternative explanation for a lower-than-expected plateau.
-- `durable_writes=false` option isolates the memtable allocator from commitlog fsync latency, ruling out "blocking is due to commitlog, not memtable cap" as a confound (run once with and once without durable writes if that ambiguity needs resolving).
-- Running at both 50 and 200 stress threads with the same `L` separates "offered-rate-independent ceiling" (supports the claim) from "ceiling rises with more client threads" (would indicate the cap is not actually hard).
+**B2h. Controls.** Run each scenario twice with `limit` doubled (`200` instead of `100`, sizes doubled too) to confirm the blocking/overshoot boundary scales with `limit`, not some hidden constant. Run `testHardLimitBlocks` with the second `allocate` on the *same* thread as a negative control (expect deadlock/timeout — demonstrates why the test must use a second thread, and that blocking is real, not a no-op). No `DatabaseDescriptor`, no yaml, no CQL involved, so results are attributable only to `MemtablePool`/`MemtableAllocator`, not to config parsing or table/compaction code.
 
-**B10. Risks and cleanup.**
-- Risk: filling local disk with the 2,000,000-row workload (~8.4 GB raw before compaction) — pre-check free space ≥ 2× that figure before running; abort and truncate table if disk usage approaches the local partition's limit.
-- Risk: leaving the stress/cassandra JVMs running — step 9 explicitly stops both and verifies via `ps`/`jps` that no `CassandraDaemon` or lingering `MemtableFlushWriter`/cleaner thread JVM remains.
-- Risk: OOM-killing the node under the 200-thread run if `-Xmx` is too tight relative to non-memtable heap use (A4) — keep `-Xmx` at 512M only with the small 16/64 MiB caps used here; do not scale workload row size up without re-checking headroom.
-- Cleanup: remove the locally cloned build and the local `ccm-node` data/commitlog/hints directories; nothing is written outside the node's local disk per B2.
+### B3. Cluster tier
+
+**B3a. Environment and build.**
+```
+git clone <local-path-to-pinned-clone> /tmp/cass509-cluster1   # one clone per node, all on local disk
+cd /tmp/cass509-cluster1 && git checkout cassandra-5.0.9 && JAVA_HOME=<jdk11> ant jar
+```
+Single node is enough (the limit is per-node); use 1 node to keep the blast radius minimal, optionally 2 nodes (RF=1 each) only to confirm the limit is per-node, not cluster-wide. Local directories (not shared storage): `data_file_directories`, `commitlog_directory`, `hints_directory`, `saved_caches_directory` all under `/tmp/cass509-cluster1/data/*` on local disk; cap `/tmp` usage by pre-creating a dedicated local volume/dir of known size, e.g. 2 GiB, and setting `commitlog_total_space_in_mb: 512` to keep commitlog bounded.
+`cassandra.yaml` edits (local clone only):
+```
+memtable_heap_space: 64MiB
+memtable_allocation_type: heap_buffers
+memtable_cleanup_threshold: 0.5
+```
+JVM: in `conf/jvm11-server.options` (or `-D`/`-X` override at startup) set `-Xmx512m -Xms512m` so the 64 MiB memtable cap is a clearly distinguishable fraction of total heap, and so JFR/JMX heap histograms are small enough to read quickly. Start with `bin/cassandra -f` (foreground, so the process is easy to track and stop).
+
+**B3b. Knobs.**
+- `memtable_heap_space`: `64MiB` (boundary value, small enough to hit within seconds of writes) vs. a control run at `512MiB` (large enough that the same workload never approaches it, to show the flush-triggering behavior disappears) — both well under `-Xmx512m` so GC pressure doesn't confound the reading.
+- `memtable_cleanup_threshold`: `0.5` (flush triggers at 50% of the heap-space cap, i.e. 32 MiB for the 64 MiB run), to get an early, clearly-visible flush point distinct from the hard cap.
+- `memtable_allocation_type: heap_buffers` (the default; keeps everything on-heap so the heap reading is the full signal, no off-heap component to separate).
+
+**B3c. Workload.** A single table with wide values, written through `cassandra-stress` or `cqlsh`/driver, sized to comfortably exceed 64 MiB of live (serialized + object-overhead) data before any flush would occur if the cap didn't work, and to require several flush cycles if it does:
+- Table: `CREATE TABLE ks.t (k int PRIMARY KEY, v blob)`.
+- Write 20,000 rows of a 8 KiB blob each = 20,000 × 8 KiB ≈ 156 MiB of raw cell data (plus per-row/object overhead, typically 2-3×, so expected live heap footprint before any flush is roughly 300-470 MiB) — well past the 64 MiB on-heap cap, and past even the 512 MiB `-Xmx` if unthrottled, so if the cap is not enforced the node will visibly approach OOM or at minimum accumulate far more than 64 MiB of memtable heap.
+- Drive with: `cassandra-stress write n=20000 cl=ONE -schema 'replication(factor=1)' -col 'size=FIXED(8192)' -rate threads=4` (or an equivalent `cqlsh` `COPY`/batch script), run against the single node.
+- Duration: a few minutes; monitor continuously during the run, not just at the end, to see memtable heap rise and fall with each flush.
+
+**B3d. Observables and instruments.**
+- `nodetool tablestats ks.t` / `nodetool cfstats` — "Memtable data size" and "Memtable off heap memory used" per flush, sampled every 5 s during the run via a loop (`watch -n5 nodetool cfstats ks.t`).
+- JMX attribute `org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize` (or the global `AllMemtablesOnHeapDataSize`) polled via `jmxterm`/`nodetool` at the same cadence — this is the clearest proxy for `SubPool.used()` observed from outside the process.
+- JFR or `jcmd <pid> GC.heap_info` / `jstat -gcutil <pid> 1000` for actual JVM heap occupancy, to confirm the *real* resource (not just the accounting metric) stays bounded.
+- `system.log` lines "Flushing largest ... to free up room" (emitted at `AbstractAllocatorMemtable.java:293-295`) — confirms the cleaner fired, and at roughly what heap fraction.
+- Cannot observe directly: the exact moment `tryAllocate` returns `false` inside the JVM (internal CAS, not instrumented/logged) — inferred only from the flush log line and from JMX metrics staying near the configured cap rather than growing unbounded.
+
+**B3e. Procedure.**
+1. Clone+build per B3a; create local data dirs; edit yaml (64 MiB run).
+2. `bin/cassandra -f > /tmp/cass509-cluster1/node.log 2>&1 &` ; record PID.
+3. `bin/cqlsh -e "CREATE KEYSPACE ks WITH replication={'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k int PRIMARY KEY, v blob);"`
+4. Start a background poller: `while true; do date; nodetool tablestats ks.t | grep -i "memtable"; done | tee /tmp/cass509-cluster1/poll.log &` (sample every 5s via a sleep in the loop).
+5. Run the stress workload from B3c.
+6. Tail `/tmp/cass509-cluster1/node.log` for "Flushing largest" lines during the run.
+7. After the run, `jstat -gcutil <pid>` once more; stop the poller.
+8. Repeat steps 1-7 with `memtable_heap_space: 512MiB` (control) in a fresh local clone/data dir.
+9. Stop the node(s): `nodetool stopdaemon` or `kill <pid>`; confirm with `ps -ef | grep cassandra` that nothing remains; `rm -rf /tmp/cass509-cluster1 /tmp/cass509-cluster2` (or wherever local dirs were placed) once results are recorded.
+
+**B3f. Predictions.**
+- 64 MiB run: "Memtable data size" in `nodetool tablestats` should rise, peak **in the tens of MiB** (roughly 30-65 MiB, i.e. around the 32 MiB cleanup threshold up through the 64 MiB hard cap, with brief, bounded overshoot per A3 step 6), then drop sharply (flush) and repeat in a sawtooth — never sustained far above ~64 MiB for more than the time it takes one flush to complete. At least 2-3 "Flushing largest" log lines should appear given ~300+ MiB of total write volume against a 64 MiB cap.
+- 512 MiB control run: same total write volume (~300-470 MiB) stays under the cap the whole time; "Memtable data size" should rise roughly monotonically to the final total with **zero or very few** "Flushing largest ... MEMTABLE_LIMIT" log lines (periodic/size-triggered flushes from unrelated causes aside).
+- If instead the 64 MiB run's memtable data size climbs past, say, 200+ MiB with no corresponding flush log lines, or the node OOMs, that falsifies the claim that `memtable_heap_space` bounds actual on-heap memtable usage.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Memtable data size sawtooths in the 30-65 MiB band, with periodic "Flushing largest" log lines, 64 MiB run | cap is enforced on real heap usage as traced |
+| Memtable data size grows unbounded past ~100 MiB with no flush triggered, 64 MiB run | cap is not enforced; contradicts claim |
+| 512 MiB control shows no flush triggers for the same workload | isolates that the 64 MiB run's flushing is caused by the cap, not by unrelated flush policies (e.g. periodic flush, commitlog size) |
+| `jstat`/`jcmd` heap occupancy roughly tracks `nodetool` memtable data size plus a stable baseline | confirms the JMX/nodetool metric reflects real JVM heap, not just internal bookkeeping disconnected from actual memory |
+| Node OOMs or GC overhead limit exceeded during the 64 MiB run | strong evidence the cap failed to bound real usage |
+
+**B3h. Controls.** The 512 MiB control run with identical workload isolates the effect of the knob (same table, same stress command, same JVM flags, only `memtable_heap_space` differs) from unrelated flush triggers (`memtable_flush_period_in_ms`, commitlog segment flushing, `nodetool flush` calls) — none of which are invoked in this procedure. Confirming flush log lines explicitly say `MEMTABLE_LIMIT` as the `FlushReason` (`ColumnFamilyStore.FlushReason.MEMTABLE_LIMIT`, used at `AbstractAllocatorMemtable.java:297`) rather than `MEMTABLE_PERIOD_EXPIRED` or `SCHEMA_CHANGE` rules out other flush causes explaining the sawtooth.
+
+**B4. Risks and cleanup.** Both tiers run entirely from local-disk clones (`/tmp/cass509-unit`, `/tmp/cass509-cluster1[/2]`), never inside the shared pinned source tree, and never write test data anywhere but those local dirs. Disk: cap commitlog/data dirs with `commitlog_total_space_in_mb` and bound the write workload (~300-470 MiB raw, well under the pre-allocated 2 GiB local volume). Leftover processes: track the `bin/cassandra` PID explicitly at start, stop it with `nodetool stopdaemon`/`kill` at the end of each run, and verify with `ps -ef | grep cassandra` that no JVM remains before deleting the local directories; also kill any background `nodetool`/polling loop (`kill %1` or by PID) started in B3e step 4. Delete the local clones and data directories once results are recorded (`rm -rf /tmp/cass509-unit /tmp/cass509-cluster1 /tmp/cass509-cluster2`).
 
 ## C. Paths read
 
+```
 src/java/org/apache/cassandra/utils/memory/MemtablePool.java
-src/java/org/apache/cassandra/utils/memory/HeapPool.java
-src/java/org/apache/cassandra/utils/memory/NativePool.java
-src/java/org/apache/cassandra/utils/memory/SlabPool.java
-src/java/org/apache/cassandra/utils/memory/MemtableCleanerThread.java
 src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java
-src/java/org/apache/cassandra/utils/memory/SlabAllocator.java
+src/java/org/apache/cassandra/utils/memory/SlabPool.java
 src/java/org/apache/cassandra/utils/concurrent/OpOrder.java
 src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
 src/java/org/apache/cassandra/config/Config.java
 src/java/org/apache/cassandra/config/DatabaseDescriptor.java
 src/java/org/apache/cassandra/config/DataStorageSpec.java
-src/java/org/apache/cassandra/metrics/DefaultNameFactory.java
-src/java/org/apache/cassandra/metrics/TableMetrics.java
 conf/cassandra.yaml
+test/unit/org/apache/cassandra/db/memtable/MemtableSizeTestBase.java
+test/unit/org/apache/cassandra/utils/memory/NativeAllocatorTest.java
+test/unit/org/apache/cassandra/utils/memory/MemtableCleanerThreadTest.java
+```
