@@ -234,8 +234,8 @@ off-heap footprint.
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 
 **The best-instrumented case in this folder.** `BufferPoolMetrics` exposes the
 limit, the operand **and** the escape hatch as gauges, per pool. No proxies are

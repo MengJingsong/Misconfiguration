@@ -4,7 +4,7 @@ Rows and follow-ups that are **undecided**, not refused.
 
 **Unparked 2026-09-25, and cleared 2026-09-28.** All three enforcement
 patterns are in scope
-([`../README.md` §7.5](../README.md#75-active-scope-decisions-revised-2026-09-25)),
+([`../../README.md` §7.5](../../README.md#75-active-scope-decisions-revised-2026-09-25)),
 so nothing new arrives here: a (b) or (c) row is read and judged like any
 other. The three entries this file held were the cheapest rows in the corpus,
 because the reading behind them was already done — all three have now been
@@ -120,8 +120,8 @@ it may be the better constraint name.
 
 > **Two entries here, but the capacity-word pass is summarised everywhere as "3
 > deferred" (audit, 2026-09-24).** That summary is repeated in
-> `rejected.md`, `../../../HANDOFF.md` and
-> `../stage2-ai-preprocessing/README.md`, and its arithmetic is
+> `rejected.md`, `../../../../HANDOFF.md` and
+> `../../stage2-ai-preprocessing/README.md`, and its arithmetic is
 > 4 candidates + 22 rejected + 3 deferred + 5 already covered = 34 rows.
 > What is actually on file is 4 + 22 + **2** + 5 = **33**, so one row of the
 > 34 is unaccounted for. The third deferral was either never written up or
@@ -185,11 +185,11 @@ it may be the better constraint name.
 
 **Raised 2026-09-20; parked 2026-09-22; scheduled 2026-09-25.**
 
-Every batch in [`README.md`](README.md)'s coverage table, and every rejection
+Every batch in [`README.md`](../README.md)'s coverage table, and every rejection
 in [`_INDEX.md`](_INDEX.md), was judged under the older assumption that
 a capacity check is an `if` whose own branches decide allow vs. disallow —
 i.e. pattern (a) only. Patterns (b) and (c) were added to
-[`../README.md` §3.2](../README.md#32-enforcement-patterns) afterwards.
+[`../../README.md` §3.2](../../README.md#32-enforcement-patterns) afterwards.
 
 - **What needs re-reading:** rows rejected *solely* because "the `if`'s own
   branches don't diverge". Under (b) the compared value may be stored or
@@ -234,7 +234,7 @@ results — it was found by direct AI search instead. That case is the standing
 evidence that this gap is real, not theoretical.
 
 Three structural (still non-keyword) queries are specified in the
-[CodeQL pipeline README](../../../codeql-queries/cassandra/queries/if-check-exp/README.md)
+[CodeQL pipeline README](../../../../codeql-queries/cassandra/queries/if-check-exp/README.md)
 and **none is written yet**:
 
 1. **Comparisons anywhere** — the same numeric narrowing, but over all

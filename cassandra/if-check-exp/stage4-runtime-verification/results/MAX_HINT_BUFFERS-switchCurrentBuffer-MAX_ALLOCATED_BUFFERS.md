@@ -1,6 +1,6 @@
 # MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS — stage-4 results  <!-- file: results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md -->
 
-> **Case:** [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`](../../stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md)
+> **Case:** [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`](../../stage3-ai-deep-read/long-path/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS.md)
 >
 > **Status:** **both tiers: run 1 done 2026-09-30, self-checked, verdicts filed.** Unit tier: consistent with Confirmed. **Cluster tier: Confirmed, with one recorded deviation from the reading rule** (its 4 MiB band was exceeded at every value; the rule's create-trace clause decides, and a supplementary allocation trace attributes the excess to non-pool allocations: §4.3, §8). Run 2 not chosen.
 

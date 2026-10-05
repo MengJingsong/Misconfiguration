@@ -132,7 +132,7 @@ memory-only. A case whose limit-side operand bounds total on-disk bytes
 an on-disk object, qualifies the same way a memory case does — read
 "memory" as "memory or disk" throughout the rules. Lines rejected before
 that date specifically because they were disk-related are worth revisiting;
-they are flagged inline in `stage3-ai-deep-read/_INDEX.md`'s rejected table rather than
+they are flagged inline in `stage3-ai-deep-read/long-path/_INDEX.md`'s rejected table rather than
 silently re-triaged.
 
 ### 3.4 Rule 1 — Identify the capacity check and its limit-side operand
@@ -221,12 +221,12 @@ escape hatch elsewhere still lets the allocation through (in
 `native_transport_receive_queue_capacity`'s case, even by default). Tracing
 which of these applies — "trace the real effect, don't assume it rejects" —
 is exactly what Rule 3 is asking for, and the first pitfall in
-[`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md).
+[`stage3-ai-deep-read/long-path/playbook.md`](stage3-ai-deep-read/long-path/playbook.md).
 
 Checks that don't pass all three rules (pure validation, logging-only
 branches, null-guards unrelated to capacity, non-diverging outcomes, rate/
 concurrency limits, etc.) are out of scope — note them as "considered,
-rejected" in `stage3-ai-deep-read/_INDEX.md` rather than writing a case file, noting which rule
+rejected" in `stage3-ai-deep-read/long-path/_INDEX.md` rather than writing a case file, noting which rule
 they failed, so later passes don't re-discover and re-reject the same line.
 
 ## 4. Scope: what this folder does NOT cover
@@ -244,7 +244,7 @@ they failed, so later passes don't re-discover and re-reject the same line.
 
 ## 5. Required content per if-check case
 
-Every case file answers exactly these nine questions (see `stage3-ai-deep-read/_TEMPLATE.md`):
+Every case file answers exactly these nine questions (see `stage3-ai-deep-read/long-path/_TEMPLATE.md`):
 
 1. **Location** — the three locations from §3.1 (capacity check, decision
    point, allocation site), each as `file:line` pinned to `cassandra-5.0.9`,
@@ -275,7 +275,7 @@ Every case file answers exactly these nine questions (see `stage3-ai-deep-read/_
      "disallow" (reject / throw / block-and-wait / defer / a silent bypass
      elsewhere in the call chain) — trace the real effect before assuming it
      cleanly rejects anything (see
-     [`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md)).
+     [`stage3-ai-deep-read/long-path/playbook.md`](stage3-ai-deep-read/long-path/playbook.md)).
      For patterns (b) and (c), include the verdict's propagation from the
      capacity check to the decision point.
 7. **Object & resource** — what is being created (type), and what resource
@@ -300,12 +300,12 @@ Every case file answers exactly these nine questions (see `stage3-ai-deep-read/_
 ## 6. Files per case
 
 Each case is **one file**, all of them together in
-`stage3-ai-deep-read/cases/` — stage 3's positive output, filed with the
+`stage3-ai-deep-read/long-path/cases/` — stage 3's positive output, filed with the
 stage that produced it:
 
 | File | Content |
 |------|---------|
-| `stage3-ai-deep-read/cases/[constraint]-[function]-[operand].md` | All nine required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE.md`. |
+| `stage3-ai-deep-read/long-path/cases/[constraint]-[function]-[operand].md` | All nine required fields for one case. Use `stage3-ai-deep-read/long-path/_TEMPLATE.md`. |
 
 **The layout is flat; the module is a field, not a folder.** Cases were once
 filed under per-module directories; that was flattened 2026-09-23 because the
@@ -341,7 +341,7 @@ field.
   **capacity check** (§3.1; for pattern (a) that is the if-statement),
   no class prefix, verbatim, e.g. `tryAllocate`, `acquireCapacity`,
   `processNewSegment`. The exact `Class.method():line` of all three
-  locations is recorded in the case file's §1 and in `stage3-ai-deep-read/_INDEX.md`.
+  locations is recorded in the case file's §1 and in `stage3-ai-deep-read/long-path/_INDEX.md`.
 - `[operand]` — the limit-side operand's name exactly as written at the
   capacity check (§5, question 4), e.g. `limit`, `queueCapacity`,
   `allowance`, `MAX_ALLOCATED_BUFFERS`.
@@ -358,9 +358,9 @@ field.
   **newcomer** gets a numeric postfix `-2` (a third gets `-3`, and so on), e.g.
   `memtable_heap_space-tryAllocate-limit.md` (existing, untouched) /
   `memtable_heap_space-tryAllocate-limit-2.md` (new). The object created is not
-  part of the file name; it's the `Object` column in `stage3-ai-deep-read/_INDEX.md` and §5
+  part of the file name; it's the `Object` column in `stage3-ai-deep-read/long-path/_INDEX.md` and §5
   question 7.
-- **Case ID** — the filename stem (without `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `stage3-ai-deep-read/_INDEX.md` has no Case column; its `File` link identifies the case.
+- **Case ID** — the filename stem (without `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `stage3-ai-deep-read/long-path/_INDEX.md` has no Case column; its `File` link identifies the case.
 
 ### 6.2 Directory layout
 
@@ -402,7 +402,7 @@ rule that a verdict is filed with the stage that made it (§7.2).
    brief for a new session (what this experiment is, current state, open
    items) — then the Google Docs ([*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit),
    [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit)) for the current plan, scope, and next step.
-2. Open `stage3-ai-deep-read/_INDEX.md` to see which modules/cases already exist (and which
+2. Open `stage3-ai-deep-read/long-path/_INDEX.md` to see which modules/cases already exist (and which
    lines were considered and rejected) — continue from there, don't duplicate.
 ### 7.2 Discover and qualify candidate capacity checks
 
@@ -519,7 +519,7 @@ cannot surface at all because the comparison is not in an `if` condition. Record
 every verdict; without it, "stage 3 progress" has no coherent answer.
 
 Method, pitfalls and the order to work a row:
-[`stage3-ai-deep-read/playbook.md`](stage3-ai-deep-read/playbook.md). How to
+[`stage3-ai-deep-read/long-path/playbook.md`](stage3-ai-deep-read/long-path/playbook.md). How to
 write the test design: §8.
 
 #### Where verdicts live — filed by the stage that judged
@@ -530,10 +530,10 @@ Not by the stage that surfaced the row. A row **stage 2 ranked** and
 | | Stage 2 verdict | Stage 3 verdict |
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
-| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
+| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/long-path/cases/`, indexed in `stage3-ai-deep-read/long-path/_INDEX.md` |
 | Ranked | `stage2-ai-preprocessing/bands.md` — every row, banded A–D | *(n/a)* |
-| Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/rejected.md` |
-| Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/deferred.md` |
+| Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/long-path/rejected.md` |
+| Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/long-path/deferred.md` |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding a line "would
 qualify only under (b) or (c)" means tracing where the verdict is read and
@@ -545,14 +545,14 @@ already judged, cite the stage-3 entry rather than re-recording it.
 
 ### 7.3 Write up the case
 
-3. Fill `stage3-ai-deep-read/cases/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/_TEMPLATE.md`. If the limit side is
+3. Fill `stage3-ai-deep-read/long-path/cases/[constraint]-[function]-[operand].md` from `stage3-ai-deep-read/long-path/_TEMPLATE.md`. If the limit side is
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
 4. **Verify every `file:line` against the local clone before filing** (§2.1).
    This is a stage-3 exit condition, not a tracked state: a case is not filed
    until its citations are checked.
-5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns: Constraint name,
+5. Add/refresh the `stage3-ai-deep-read/long-path/_INDEX.md` Master Index row (columns: Constraint name,
    Capacity check, Decision point, Module, Object, Pattern, Feed, File), and
    record the stage-3 feed (`3a`/`3b`) in the case's Notes.
 
@@ -588,7 +588,7 @@ filter and no parking.
   it from the corpus), and pattern-(c) guard clauses such as
   [`TrackedDataInputPlus.checkCanRead():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L184)
   *are* `if` statements. **Corrected 2026-09-25:** this section and
-  `stage3-ai-deep-read/deferred.md` §3 previously called that filter
+  `stage3-ai-deep-read/long-path/deferred.md` §3 previously called that filter
   "structurally exactly pattern (a)" / "precisely pattern (a)". That was
   wrong, and it understated the corpus.
 - **The real gap is narrower, and it is about syntax.** A comparison written

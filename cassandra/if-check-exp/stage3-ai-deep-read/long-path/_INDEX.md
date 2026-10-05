@@ -1,7 +1,7 @@
 # If-Check Cases — Master Index
 
 Navigation hub and progress tracker for all if-check cases.
-See [README.md](README.md) for the format.
+See [README.md](../README.md) for the format.
 
 **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 **Pattern legend** (README §3.2): **(a)** the capacity check is the decision · **(b)** the check sets a verdict (flag, enum, return value) that a separate decision point reads · **(c)** guard clause(s) before an allocation outside any branch
@@ -47,7 +47,7 @@ See [README.md](README.md) for the format.
 >
 > Feed counts are not a progress bar. Only 3a has a denominator — its
 > remaining work is sized in
-> [`stage2-ai-preprocessing/README.md`](../stage2-ai-preprocessing/README.md)'s
+> [`stage2-ai-preprocessing/README.md`](../../stage2-ai-preprocessing/README.md)'s
 > "Progress at a glance". 3b is unbounded, so there is no percentage for it.
 
 ## 3. Notes on Modules

@@ -206,8 +206,8 @@ per-connection-type-per-peer one.
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 
 **Read §8 before designing anything here.** This check is **per connection
 type, per peer**, and the node's receive-side ceiling is

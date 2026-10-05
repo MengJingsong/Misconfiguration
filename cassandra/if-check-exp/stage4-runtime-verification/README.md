@@ -51,7 +51,7 @@ Within stage 4, every step is done by an AI session:
 
 ## What stage 4 consumes
 
-Section 9 of a case file in [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/).
+Section 9 of a case file in [`../stage3-ai-deep-read/long-path/cases/`](../stage3-ai-deep-read/long-path/cases/).
 Its intro and §9a are the summary: testability, the claim under test, the
 procedure, the prediction, and the conclusions table every run is judged
 against. §9b–§9e are the runbook: setup, workload, observables, and the

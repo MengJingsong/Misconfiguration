@@ -153,8 +153,8 @@ default rather than requiring any special caller state.
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 
 **This case's experiment is a comparison of two modes, not a single sweep.**
 §8 says the config in this case's title **does not bound anything by itself

@@ -6,7 +6,7 @@
 
 **Formatting note:** Link every code reference (`` `File.java:NN` `` or `` `Class.method():NN` ``) to the pinned source on GitHub. Use the format: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) `` (ranges use `#LNN-LMM`). Place the link *outside* the backticks so code renders as clickable text.
 
-**Relative links in this template** (`../_INDEX.md`, `../../README.md`) are written for
+**Relative links in this template** (`../_INDEX.md`, `../../../README.md`) are written for
 where a *copy* of it lives — inside `cases/` — **not** for the template's own location one
 level up. They look wrong here and resolve correctly in a real case file. When checking
 links repo-wide, resolve this file's relative links against `cases/`, not against its own
@@ -19,7 +19,7 @@ stale through the 2026-09-23 folder moves).
 |-------|---------|
 | **Case ID** | filename stem upper-cased, e.g., MEMTABLE_HEAP_SPACE-TRYALLOCATE-LIMIT |
 | **Constraint** | the resource constraint name (first part of the file name) and its source: configuration entry / JVM system property / constant / runtime-queried accessor (README §6.1) |
-| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](../../README.md#3-core-concept-the-if-check-case) |
+| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](../../../README.md#3-core-concept-the-if-check-case) |
 | **Capacity check** | [`Class.method():NN`](GitHub link) — the usage-vs-limit comparison (names the file: `[constraint]-[function]-[operand].md`). List any additional check sites feeding the same decision point. |
 | **Decision point** | [`Class.method():NN`](GitHub link) — where allow and disallow diverge (same as the capacity check for pattern (a)) |
 | **Allocation site** | [`Class.method():NN`](GitHub link) — where the memory/disk-significant object is created |
@@ -127,15 +127,15 @@ what one allowed object costs.
 **Stage 3 writes this section; stage 3 never runs it.** It carries **no
 measured numbers and no verdict** — those are stage 4's, and where they land is
 set out in
-[`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
-Method and pitfalls: [README.md §8](../../README.md#8-designing-a-test-for-a-case).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+Method and pitfalls: [README.md §8](../../../README.md#8-designing-a-test-for-a-case).
 
 **Two audiences.** The intro and 9a are for a **human reader**: what the test
 does and what each result would mean, readable on their own. 9b–9e are the
 **runbook**: steps a person or an AI session can follow on a Linux machine.
 **Stage 4 audits this section before any run**, against four groups of
 requirements (the core question, step-by-step logic, specificity, runnability) in
-[`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md#step-0--the-design-audit);
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#step-0--the-design-audit);
 write to them.
 
 _In a case file, keep this intro to two or three lines: what the test does,
@@ -151,7 +151,7 @@ rules below — they guide the case writer and belong only in the template._
 - **Source links only in 9b–9e**, and only where a setting is not obvious or a
   trap needs justifying. The intro and 9a have none.
 - **Shared setup is linked, not copied** — JDK, `ant`, building the clone, and
-  the generic instruments in [README.md §8.3](../../README.md#83-measuring-the-resource).
+  the generic instruments in [README.md §8.3](../../../README.md#83-measuring-the-resource).
 - **Delete what does not apply** (a tier, scenario C, a row) instead of writing
   "n/a".
 

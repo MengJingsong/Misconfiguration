@@ -78,9 +78,9 @@ this folder's own scope.
     fields, naming rules, workflow, how to verify/link line numbers against
     the local Cassandra source, and **§1.1 targets vs. stages** (the two
     numberings are unrelated) and **§7.2 the three stages**.
-  - `stage3-ai-deep-read/_INDEX.md` — master table of all cases and the coverage summary.
+  - `stage3-ai-deep-read/long-path/_INDEX.md` — master table of all cases and the coverage summary.
     **Cases only** — the "lines considered and rejected" table moved to
-    `stage3-ai-deep-read/rejected.md` on 2026-09-23.
+    `stage3-ai-deep-read/long-path/rejected.md` on 2026-09-23.
 
 
   - **`stage1-codeql-preprocessing/`** — stage-1 entry point. Holds no
@@ -107,7 +107,7 @@ this folder's own scope.
       the template lives with stage 3). Its §9 Provenance records the feed
       (`3a`/`3b`) and the date the cited lines were checked.
     - `rejected.md` — read with the source open, refused against the three
-      rules. Moved here from `stage3-ai-deep-read/_INDEX.md` on 2026-09-23.
+      rules. Moved here from `stage3-ai-deep-read/long-path/_INDEX.md` on 2026-09-23.
     - `cases/` — **the results**: one flat file per case (flattened from
       per-module folders 2026-09-23; module is a field, not a folder).
     - `deferred.md` — unjudged rows, identified but never read against the
@@ -184,7 +184,7 @@ Each case's full detail lives in its own file.
 `MAX_HINT_BUFFERS` (2026-09-30) and `cdc_total_space` (2026-10-01) are in the **new §9 layout**: the intro and §9a are a summary for a human
 reader (procedure and conclusions table), §9b–§9e are a Linux runbook. The
 other eight are in the old layout and must be converted before their first
-stage-4 run. Template: `stage3-ai-deep-read/_TEMPLATE.md`.
+stage-4 run. Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
 
 ## Open items / next steps
 
@@ -264,7 +264,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
 | Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `max_space_usable_for_compactions_in_percentage` is the one cheap case left (`memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
 | ~~`cdc_total_space`~~ | Done and closed 2026-10-01 (see the block above). Optional: a run 2 by a fresh session (harness, runner and results file are ready; it is cheap). |
 | ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
-| Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
+| Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/long-path/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 
 **Machine notes.** Two nodes are set up (`environment.md` §5, §6): node0 (`pc66`, the measured node of the hints case, tree
@@ -275,7 +275,7 @@ node in `~/stage4-logs/`, outside the repo. Access details are in the resume blo
 
 **Open stage-4 follow-ups:** convert the other eight cases to the new §9 layout
 before their runs. (The stale §9d–§9g references in the root `README.md`,
-`stage3-ai-deep-read/playbook.md` and `rejected.md` were cleared 2026-09-30; the
+`stage3-ai-deep-read/long-path/playbook.md` and `rejected.md` were cleared 2026-09-30; the
 remaining ones sit in old-layout case files, where they are correct.)
 
 **Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
@@ -499,9 +499,9 @@ then read and refused is a *stage-3* rejection.
 
 | | Stage 2 verdict | Stage 3 verdict |
 |---|---|---|
-| Rejected | *(cannot reject)* | `stage3-ai-deep-read/rejected.md` |
-| Deferred | *(cannot defer)* | `stage3-ai-deep-read/deferred.md` |
-| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `_INDEX.md` |
+| Rejected | *(cannot reject)* | `stage3-ai-deep-read/long-path/rejected.md` |
+| Deferred | *(cannot defer)* | `stage3-ai-deep-read/long-path/deferred.md` |
+| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/long-path/cases/`, indexed in `_INDEX.md` |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral** — deciding that needs
 the branches read, which no row shows. All deferrals are stage-3 judgments,
@@ -552,9 +552,9 @@ usage side — the top tier of the keyword scale, before that scale was
 dropped on 2026-09-23. All 34 deep-read against the three rules. Outcome: **4 new
 candidates, 22 rejected, 3 deferred as pattern (b)/(c), 5 already covered.**
 *(Audit 2026-09-24: only 2 deferrals are on file, so 33 of the 34 rows are
-accounted for — see `stage3-ai-deep-read/deferred.md` §1c.)*
+accounted for — see `stage3-ai-deep-read/long-path/deferred.md` §1c.)*
 Details in `stage2-ai-preprocessing/bands.md` and
-`stage3-ai-deep-read/rejected.md` / `deferred.md`.
+`stage3-ai-deep-read/long-path/rejected.md` / `deferred.md`.
 
 **The ranking validated.** The pass recovered both known filed cases as calibration
 and yielded 4 new candidates plus 1 strong pattern-(b) find — about a
@@ -706,16 +706,16 @@ an untracked copy also sits in the `cassandra-src` clone.
 batch-coverage table and the judging procedure) and the rest split into
 `bands.md`, `negatives.md` and `deferred.md`, so each file has one job.
 (`negatives.md` was deleted on 2026-09-24 — see below.)
-References in `stage3-ai-deep-read/_INDEX.md`, the codeql pipeline README and the
+References in `stage3-ai-deep-read/long-path/_INDEX.md`, the codeql pipeline README and the
 `native_transport` case file were updated to match.
 
-**There is one rejection file: `stage3-ai-deep-read/rejected.md`, and it is
+**There is one rejection file: `stage3-ai-deep-read/long-path/rejected.md`, and it is
 authoritative for every rejection in this folder.** The split by judging
 stage ended on 2026-09-24, when the stage-2 `negatives.md` was deleted —
 stage 2 had stopped rejecting rows on 2026-09-23, so the file could only ever
 shrink in relevance, and the 108 rows in it now carry band D in `bands.csv`.
 Its detail is in git history at `43a3c27` if a later pass wants the
-per-helper arguments. Check `stage3-ai-deep-read/_INDEX.md` before adding a
+per-helper arguments. Check `stage3-ai-deep-read/long-path/_INDEX.md` before adding a
 row.
 
 Remaining items, in the order they were previously prioritized:
@@ -751,7 +751,7 @@ Remaining items, in the order they were previously prioritized:
      1 cited to an existing entry, **1 candidate found** —
      `Directories.hasDiskSpaceForCompactionsAndStreams():551`, a per-filestore
      disk check gating whether a compaction starts at all. Pattern (b), so it
-     was parked in `stage3-ai-deep-read/deferred.md` rather than written up;
+     was parked in `stage3-ai-deep-read/long-path/deferred.md` rather than written up;
      **unparked 2026-09-25 and now first in that queue** — it passes all three
      rules and needs only writing up.
    - *Known gap (real, but not blocking):* the pipeline only sees comparisons
@@ -765,21 +765,21 @@ Remaining items, in the order they were previously prioritized:
    (`PreV5Handlers.java:197-209`, pre-protocol-V5 connections, uses
    `channelPayloadBytesInFlight`) may be a related but distinct capacity path;
    not yet investigated. `ConnectionLimitHandler` (connection-count caps) is
-   deferred rather than rejected; see `stage3-ai-deep-read/_INDEX.md`.
+   deferred rather than rejected; see `stage3-ai-deep-read/long-path/_INDEX.md`.
 ### The (b)/(c) worklist — unparked 2026-09-25
 
 Formerly "deferred until pattern (a) is finished". The 2026-09-22 scope
 decision that parked these was revised on 2026-09-25: all three patterns are
 triaged now, so this is a **queue**, and the cheapest work in the corpus — the
 reading behind each entry is already done. **The worklist itself lives in
-[`cassandra/if-check-exp/stage3-ai-deep-read/deferred.md`](cassandra/if-check-exp/stage3-ai-deep-read/deferred.md)**
+[`cassandra/if-check-exp/stage3-ai-deep-read/long-path/deferred.md`](cassandra/if-check-exp/stage3-ai-deep-read/long-path/deferred.md)**
 — full detail there; this is the summary.
 
 - ~~**The disk candidate** `getWriteDirectory():282`~~ — **done 2026-09-22**,
   processed via stage-3 feed 3b as a deliberate single-candidate exception to the
   pattern-(a) scope (feed 3b needs neither the stage-1 CSV nor the unwritten
   (b)/(c) queries). Filed as
-  [`cassandra/if-check-exp/stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
+  [`cassandra/if-check-exp/stage3-ai-deep-read/long-path/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/stage3-ai-deep-read/long-path/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
   **Headline finding: the guard does *not* dominate the allocation.** Its only
   caller consults it solely when the table has no disk boundaries; on the
   default path (`Murmur3Partitioner`, node owning ranges) the `SSTableWriter`
@@ -787,7 +787,7 @@ reading behind each entry is already done. **The worklist itself lives in
   than the memtable `markBlocking()` or native-transport
   `throw_on_overload=false` hatches, since the check is never executed rather
   than overridden. Flagged for Target 3. Two lessons carried into
-  `stage3-ai-deep-read/deferred.md` for the (c) reading: non-domination
+  `stage3-ai-deep-read/long-path/deferred.md` for the (c) reading: non-domination
   is a
   finding to record rather than grounds for rejection, and it cannot be seen
   in a CSV row — it requires reading the callers.
@@ -803,6 +803,6 @@ reading behind each entry is already done. **The worklist itself lives in
 Already explored, no case retained: the whole `db/compaction/` subpackage
 (the `concurrent_compactors` check fails Rule 2; the rest is selection logic,
 writer rollover, or config validation), `concurrent/` executors (thread-pool
-concurrency), and `cache/`. All are logged in `cassandra/if-check-exp/stage3-ai-deep-read/_INDEX.md`'s
+concurrency), and `cache/`. All are logged in `cassandra/if-check-exp/stage3-ai-deep-read/long-path/_INDEX.md`'s
 rejected table so they aren't re-scanned. The filter rules themselves are in
 `cassandra/if-check-exp/README.md` §3.4–§3.6.

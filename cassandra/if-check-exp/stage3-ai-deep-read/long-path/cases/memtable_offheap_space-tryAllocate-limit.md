@@ -154,8 +154,8 @@ two independent grounds; both flagged for Target 3, not resolved here.
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 
 > **Unit tier already executed, 2026-09-16, before stage 4 existed.**
 > The pre-existing `NativeAllocatorTest.testBookKeeping()` was run and passed

@@ -295,10 +295,10 @@ the whole sentence.
 *Helper progress:* 23 distinct helpers judged on 2026-09-22, covering the 114
 helper rows inside the four finished subtrees — 21 rejected (108 rows), 1
 cited to an existing
-[`../stage3-ai-deep-read/_INDEX.md`](../stage3-ai-deep-read/_INDEX.md) entry
+[`../stage3-ai-deep-read/long-path/_INDEX.md`](../stage3-ai-deep-read/long-path/_INDEX.md) entry
 (4 rows), 1 candidate found
 (`Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in
-[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) as
+[`../stage3-ai-deep-read/long-path/deferred.md`](../stage3-ai-deep-read/long-path/deferred.md) as
 pattern (b)). Those verdicts predate the bands; re-read them as D and A
 respectively if a band is needed.
 
@@ -332,7 +332,7 @@ read.
 
 **Stage 2 cannot defer.** Judging a row as pattern-(b)/(c)-only needs the
 branches read, so that is a stage-3 call recorded in
-[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md). A
+[`../stage3-ai-deep-read/long-path/deferred.md`](../stage3-ai-deep-read/long-path/deferred.md). A
 row that smells like (b)/(c) gets a low band — not a park, and not a refusal.
 
 Stage 3 then takes `bands.md` in band order, reads each row's context in

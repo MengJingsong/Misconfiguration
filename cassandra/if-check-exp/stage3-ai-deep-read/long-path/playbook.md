@@ -1,20 +1,20 @@
 # Stage 3 playbook — how to run a deep-read pass
 
 Practical technique. What stage 3 *is*, and where verdicts are filed, is in
-[`README.md`](README.md). The three rules themselves are in
-[`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case) and
+[`README.md`](../README.md). The three rules themselves are in
+[`../../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case) and
 are **not** restated here — one source of truth for the rules.
 
 ## Before starting
 
-1. Read [`../../../HANDOFF.md`](../../../HANDOFF.md), then `_INDEX.md` to
+1. Read [`../../../../HANDOFF.md`](../../../../HANDOFF.md), then `_INDEX.md` to
    see which cases exist and `rejected.md` / `deferred.md` to see which lines
    are already judged. **Don't re-judge a recorded line** — cite it.
 2. Confirm the source clone is at the pinned tag:
    `cd /proj/misconfiguration-PG0/git-repos/cassandra-src && git describe --tags`
    must print `cassandra-5.0.9`.
 3. Pick a feed (README's "two feeds"). For **3a**, take
-   `../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
+   `../../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
    then C; within A, read A1 → A2 → A3.
 
 ## Working a row
@@ -29,7 +29,7 @@ Order matters — each step can end the judgment early and save the next.
 | 4 | Rule 2 — does the gated allocation create a memory- or disk-significant object? | it gates a thread, permit, count or index |
 | 5 | Rule 3 — do the branches actually **diverge on object creation**? | both branches allocate |
 | 6 | Trace the limit back to its first declaration — this names the constraint (Target 1) and fixes the §6.1 file name | — |
-| 7 | **Design the test** stage 4 will run — §9 of the case file, per [`../README.md` §8](../README.md#8-designing-a-test-for-a-case) | — |
+| 7 | **Design the test** stage 4 will run — §9 of the case file, per [`../../README.md` §8](../../README.md#8-designing-a-test-for-a-case) | — |
 
 Only after all seven does a case file get written, from `_TEMPLATE.md`.
 
@@ -73,12 +73,12 @@ does not dominate, and that is its most useful result.
   `MAX_ALLOCATED_BUFFERS` are check-site names; the constraint name comes
   from tracing back to the declaration (step 6). Joining operand names
   against `Config.java` does not work — tried and refuted, see
-  `../stage2-ai-preprocessing/playbook.md`.
+  `../../stage2-ai-preprocessing/playbook.md`.
 
 ## Finishing
 
 1. Write the case file from `_TEMPLATE.md`, answering all nine questions
-   in `../README.md` §5 — including §9's test design. **Verify every `file:line` against the local clone
+   in `../../README.md` §5 — including §9's test design. **Verify every `file:line` against the local clone
    before filing** — a case is not filed until its citations are checked.
 2. Record the feed (`3a` or `3b`) in the case's Notes.
 3. Add the `_INDEX.md` Master Index row and, if the module is new, a Notes
@@ -89,5 +89,5 @@ does not dominate, and that is its most useful result.
    **qualifies but you are not writing up now** → [`pending.md`](pending.md),
    never left only in stage 2's files.
 5. If the feed was 3a, note the batch in
-   `../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
+   `../../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
    re-read.

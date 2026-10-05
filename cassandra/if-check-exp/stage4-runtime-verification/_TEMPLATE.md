@@ -1,6 +1,6 @@
 # [case-file stem] — stage-4 results  <!-- file: results/[case-file stem].md -->
 
-> **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/cases/[case-file stem].md)
+> **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/long-path/cases/[case-file stem].md)
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 

@@ -1,6 +1,6 @@
 # memtable_heap_space-tryAllocate-limit — stage-4 results
 
-> **Case:** [`memtable_heap_space-tryAllocate-limit`](../../stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit.md)
+> **Case:** [`memtable_heap_space-tryAllocate-limit`](../../stage3-ai-deep-read/long-path/cases/memtable_heap_space-tryAllocate-limit.md)
 >
 > **Status:** run 1 done — unit tier (2026-09-28) reviewed by Jingsong and its verdict filed (2026-09-29); cluster tier run 1 done 2026-09-29, reviewed by Jingsong (2026-09-29) and its verdict filed (2026-09-30); run 2 not chosen. **Case closed.**
 

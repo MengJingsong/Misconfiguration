@@ -246,8 +246,8 @@ regardless of its free space, and this ceiling does not apply.
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
+numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 
 **This case's design is dominated by §5: the guard does not run by default.**
 On the default `diskBoundaries != null` path — `Murmur3Partitioner`, node
