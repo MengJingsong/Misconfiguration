@@ -53,6 +53,76 @@ comparison shows the long path's Rule 2 excluded something real.
 | [`_INDEX.md`](_INDEX.md) | One row per filed solution: stem, entry pointer, feed, filing date, sha256, model, isolation, leakage audit, comparison link. |
 | [`cases/`](cases/) | The solutions, one file per case, named by the same stem as the long-path file. |
 
+## Guide: going through the short path for one case
+
+The whole path in one page. Details of each step are in "Running a case" below.
+Commands use the script; `<stem>` is the case's file stem, and
+`SP=/home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/short-path`.
+
+**Ground rules (read once).**
+- Run everything from a plain Linux terminal where the `claude` CLI is logged in
+  (`claude -p hi` prints a reply). A `claude` started inside another Claude
+  session may not authenticate.
+- **Stay blind:** do not open the case's long-path file or any stage-4 file for
+  it until its solution is filed. The comparison depends on it.
+- **Never edit a solution, never reuse an attempt directory.** A failed or
+  rejected attempt is kept and the next one is `--attempt N+1`.
+- The scripts never commit. You commit and push when you choose.
+
+**A. Once per machine, CLI version, or change to the flags or allowlist**
+
+```bash
+python3 $SP/isolation-test.py
+```
+
+Pass means `RESULT: PASS` (19 probes). Any `FAIL` means stop and do not run a
+writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt`.
+`run-case.py` refuses to start unless that report passed with the same flags.
+
+**B. Per case**
+
+| Step | Command | Result |
+|---|---|---|
+| 1. Preview (optional) | `python3 $SP/run-case.py run --stem <stem> --dry-run` | the entry pointer, flags and prompt tail; nothing is run |
+| 2. Run the writer | `python3 $SP/run-case.py run --stem <stem>` | a few minutes to tens of minutes; ends with `AUDIT: PASS`, `REVIEW` or `FAIL`; files in `~/short-path-run/<stem>/` |
+| 3. Judge the audit | read `run-report.txt`; for `REVIEW`, read `solution.md` | see the table below |
+| 4. File it | `python3 $SP/run-case.py file --stem <stem>` (add `--accept-review` after a reviewed `REVIEW`) | copied to `cases/<stem>.md`, header filled, `_INDEX.md` row with its sha256 |
+| 5. Commit and push | `git add`, `git commit`, `git push` | the solution is frozen in history |
+| 6. Hand off | stage 4's "Solution comparison", by a **fresh** session | the comparison file |
+
+A case with no preset needs `--pointer <file:line> --feed 3a|3b` in step 2
+(`file:line` is the capacity check only; take it from the long-path index's
+*Capacity check* column, and nothing else from that row).
+
+**Judging the audit (step 3).**
+
+| Verdict | Meaning | What to do |
+|---|---|---|
+| `PASS` | no tool call left the clone or the allowlist, no URL named the project, no stage-4 vocabulary, all sections present, section C matches the log | file it |
+| `REVIEW` | something needs a human look | read each item, then decide below |
+| `FAIL` | a leak, a forbidden tool, a project URL, or a missing section | discard; rerun with `--attempt N+1`; do not tell the writer why |
+
+For a `REVIEW` item, ask whether the writer could only have known it from
+outside the source tree:
+
+| Item | Acceptable if | Reject if |
+|---|---|---|
+| Section C lists a path the log never opened | the file shows up only as a grep hit (a minor overstatement; note it for the comparator) | the claims about that file's contents could not have come from the grep output |
+| URL cited but never fetched | it is a well-known public page the writer plausibly knew | it carries a specific figure or conclusion with no fetch behind it |
+| A vocabulary hit (`harness`, `run 1`, `results`, …) | it is ordinary engineering language in a design (a test harness it proposes) | it points to this experiment's artifacts, section names or measured numbers |
+| A denied attempt outside the clone | it is recorded and nothing else happened (a note, not a verdict) | it names this project or its files |
+
+**What counts as done for the short path:** the solution is filed, its sha256
+is in `_INDEX.md`, and the commit is pushed. It is not judged here: the short
+path files no verdict, and whether it agrees with the long path is stage 4's
+decision.
+
+**First case, as a worked example (`memtable_heap_space-tryAllocate-limit`,
+2026-10-05).** The writer took about 3 minutes and made 28 tool calls, all
+inside the clone and none on the web. The audit passed everything except one
+`REVIEW` item: section C listed two paths seen only as grep hits. It was
+accepted, filed, committed and pushed; the comparison is pending.
+
 ## Running a case — instructions for the AI session that runs it
 
 **Three roles, never the same session.**
