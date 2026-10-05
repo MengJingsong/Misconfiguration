@@ -28,6 +28,7 @@ The protocol behind each section is in
 | **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
 | **Audit bottom line** | Ready / Ready after amendments / Blocked — date |
+| **Files read** | For both paths' results files: every file opened from this repo during the session, one per line, so the blindness check has a record. For a `--short` file the other path's files (long-path folder, the case's long results and harness, `HANDOFF.md`, `comparison/`) must not appear; the same holds the other way round for a long-path file when the case has a short solution |
 
 ### 1.1 Design audit
 

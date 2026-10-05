@@ -204,6 +204,18 @@ Lessons that generalize:
 - `cassandra-stress` prints `Total errors   :   0 [insert: 0]` and `Total partitions`; there is no `Total operation count` line.
 - Each CDC write rejected in blocking mode logs an `ERROR ... Failed to apply mutation locally` entry with a stack of about 1.7 KB, besides the rate-limited `WARN`; throttle the writer in B.
 
+## 7. Nodes available for the short-path runs (checked 2026-10-05)
+
+Both answered over SSH (`ssh -o BatchMode=yes jason92@<host> ...`). CloudLab
+experiments expire, so check again before a run.
+
+| Node | State | Use |
+|---|---|---|
+| `pc80` (`node0.jason92-318546...`) | JDK 11.0.32.1, Ant (the cdc case's build is there); home holds `cassandra-run1`, `cassandra-node2`, `stage4-harness-run/` (`cdc`, `cdc-run1`), `stage4-logs/` (`cdc`, `second-node`, install and build logs); no `memtable_heap_space` artifacts | the quickest choice: install steps are already done. Work in a fresh directory (`~/short-run`); do not open or reuse the other cases' directories |
+| `pc72` (`node1.jason92-318546...`) | fresh: no JDK, no Ant, empty home; 40 cores, 125 GiB, 57 GB free on `/` | cleanest, but section 1 (install JDK 11 and Ant) must be done first |
+
+`pc66` (node0 of the hints case) was not checked.
+
 ## Logs
 
 Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:

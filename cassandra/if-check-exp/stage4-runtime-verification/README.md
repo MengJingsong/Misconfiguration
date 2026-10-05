@@ -122,6 +122,11 @@ audit like the long path's (the hash goes in results §1).
   local clone per run, one run at a time per node, every process stopped and
   checked afterwards. Reusing a build or a node image between paths is fine;
   reusing the other path's harness or readings is not.
+- Pre-flight, deny rules, the prompts to give an executor and a side-by-side writer,
+  and the transcript check are in [`executor-prompts.md`](executor-prompts.md);
+  [`check-blindness.py`](check-blindness.py) does the check. An executor ignores
+  `HANDOFF.md` (it names the long path's findings), even though "Where to start"
+  below sends other sessions there.
 - Order: unit tier before cluster tier within a path (the cheap tier tests the
   protocol first); the paths in either order.
 
