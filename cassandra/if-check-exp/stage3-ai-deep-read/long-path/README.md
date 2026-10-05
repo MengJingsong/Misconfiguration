@@ -1,10 +1,13 @@
-# Stage 3 — AI deep read (semantic qualification)
+# Stage 3, long path — AI deep read (semantic qualification)
 
-**The only stage that decides.** Stage 3 reads the Cassandra source and
+One of stage 3's two paths (see [`../README.md`](../README.md)); the other is
+the [short path](../short-path/README.md). **The long path is the one that
+decides.** It reads the Cassandra source and
 applies the three rules
 ([`../../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case))
 to judge whether a line is a real if-check case. Stages 1 and 2 only shrink
-and order what stage 3 must read; neither produces a finding.
+and order what stage 3 must read; neither produces a finding. The short path
+files no verdict, so a rejection or deferral is always a long-path entry.
 
 For every case that qualifies, stage 3 also **designs the test** that would
 confirm or refute it — §9 of the case file, written for
@@ -32,27 +35,9 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 
 ## The two feeds
 
-Stage 3 is entered from either of two directions. **Both are required; they
-cover different blind spots.**
-
-| Feed | What points stage 3 at a line | Coverage | Progress measurable? |
-|---|---|---|---|
-| **3a — from stage 1/2** | [`../../stage2-ai-preprocessing/bands.md`](../../stage2-ai-preprocessing/bands.md), band A first | bounded, enumerable (row counts, bands, batch table) | **yes** |
-| **3b — from raw source** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — there is no denominator |
-
-- **3a** is the cheap, systematic feed. Stages 1 and 2 exist precisely to
-  relieve stage 3's burden by shrinking and ordering what must be read.
-- **3b is not optional.** It is the standing insurance against stage 1's
-  *syntactic* blind spot — it found the `cdc_total_space` ternary, which
-  stage 1 cannot surface at all, because the comparison is not in an `if`
-  condition. It plays the same role against that blind spot that band C
-  plays against stage 2's *vocabulary* blind spot: insurance against a real
-  case that the mechanism is built not to see. Its weakness is cost: the full
-  source is far more than one session can read.
-
-**Record the feed (`3a` or `3b`) on every case and every entry here.** The
-two have different coverage properties and only 3a has a denominator; without
-the field, "stage 3 progress" has no coherent answer.
+Both paths are entered from the same two feeds (3a from `bands.md`, 3b from raw
+source); they are described in [`../README.md`](../README.md#the-two-feeds).
+Record the feed (`3a` or `3b`) on every case and every entry here.
 
 ## Filed by the stage that judged, not the stage that surfaced the row
 

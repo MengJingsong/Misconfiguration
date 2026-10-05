@@ -185,7 +185,7 @@ it may be the better constraint name.
 
 **Raised 2026-09-20; parked 2026-09-22; scheduled 2026-09-25.**
 
-Every batch in [`README.md`](../README.md)'s coverage table, and every rejection
+Every batch in [`README.md`](README.md)'s coverage table, and every rejection
 in [`_INDEX.md`](_INDEX.md), was judged under the older assumption that
 a capacity check is an `if` whose own branches decide allow vs. disallow —
 i.e. pattern (a) only. Patterns (b) and (c) were added to

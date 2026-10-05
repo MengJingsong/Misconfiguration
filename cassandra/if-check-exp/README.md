@@ -300,8 +300,10 @@ Every case file answers exactly these nine questions (see `stage3-ai-deep-read/l
 ## 6. Files per case
 
 Each case is **one file**, all of them together in
-`stage3-ai-deep-read/long-path/cases/` — stage 3's positive output, filed with the
-stage that produced it:
+`stage3-ai-deep-read/long-path/cases/` — the long path's positive output, filed
+with the stage that produced it. (A case may also have a **short-path
+solution** in `stage3-ai-deep-read/short-path/cases/`, under the same stem; see
+§7.2. Everything in this section describes the long-path file.)
 
 | File | Content |
 |------|---------|
@@ -375,24 +377,35 @@ cassandra/if-check-exp/
 │   ├── playbook.md          #   start here to run a batch: bands, procedure
 │   ├── bands.md             #   every row banded A-D = stage 3's 3a queue
 │   └── bands.csv            #   the per-row verdicts
-├── stage3-ai-deep-read/           # semantic qualification — the deciding stage
-│   ├── README.md            #   what stage 3 is, its two feeds, where verdicts go
-│   ├── playbook.md          #   how to run a pass: order of checks, pitfalls
-│   ├── _TEMPLATE.md         #   template for a new case file (stage 3's output)
-│   ├── _INDEX.md            #   master index of every case (cases only)
-│   ├── rejected.md          #   read with source open, refused against the rules
-│   ├── deferred.md          #   the (b)/(c) worklist — unjudged, now live (§7.5)
-│   ├── pending.md           #   qualified, not yet written up as a case
-│   └── cases/               #   THE RESULTS — flat, one file per case
-│       ├── <constraint>-<function>-<operand>.md
-│       └── <constraint>-<function>-<operand>.md
-└── stage4-runtime-verification/   # audits and runs the §9 designs — AI only, no human gate
-    └── README.md            #   the feedback contract: what it consumes/emits
+├── stage3-ai-deep-read/           # reads the source; two paths, two solutions per case — see §7.2
+│   ├── README.md            #   the two paths, the rules both obey, the two feeds
+│   ├── long-path/           #   the deciding path — the three rules, the case file
+│   │   ├── README.md        #     what it is, its files, where its verdicts go
+│   │   ├── playbook.md      #     how to run a pass: order of checks, pitfalls
+│   │   ├── _TEMPLATE.md     #     template for a new case file (the long path's output)
+│   │   ├── _INDEX.md        #     master index of every case (cases only)
+│   │   ├── rejected.md      #     read with source open, refused against the rules
+│   │   ├── deferred.md      #     the (b)/(c) worklist — unjudged, now live (§7.5)
+│   │   ├── pending.md       #     qualified, not yet written up as a case
+│   │   └── cases/           #     flat, one file per case
+│   │       └── <constraint>-<function>-<operand>.md
+│   └── short-path/          #   the experiment — no rules, no verdict (decided 2026-10-02)
+│       ├── README.md        #     the contract: what it drops, how a solution is made and frozen
+│       ├── BRIEF.md         #     the whole prompt the isolated agent gets
+│       ├── _TEMPLATE.md     #     output skeleton: constraint trace + verification solution
+│       ├── _INDEX.md        #     filed solutions: sha256, isolation, leakage audit
+│       └── cases/           #     one solution per case, same stem as the long file
+└── stage4-runtime-verification/   # compares the two solutions, audits and runs them — AI only, no human gate
+    ├── README.md            #   the protocol, including "Solution comparison"
+    ├── comparison/          #   one file per case that has both solutions, and its index
+    ├── harness/             #   per-case instruments (a `--short` folder only for a "Different" outcome)
+    └── results/             #   per-case results (a `--short` file only for a "Different" outcome)
 ```
 
-Everything stage 3 produces — the cases, their index, the template, and its
-rejected/deferred verdicts — lives in `stage3-ai-deep-read/`, matching the
-rule that a verdict is filed with the stage that made it (§7.2).
+Everything stage 3 produces lives in `stage3-ai-deep-read/`: the long path's
+cases, index, template and rejected/deferred verdicts under `long-path/`, the
+short path's solutions under `short-path/`. This matches the rule that a
+verdict is filed with the stage that made it (§7.2); the short path files none.
 
 ## 7. Workflow
 
@@ -505,6 +518,19 @@ design. Confirming it still needs **manual review and runtime verification**,
 which happen in [stage 4](stage4-runtime-verification/README.md), not here
 (§7.5). A filed case is complete *as stage-3 evidence*, not as a verified
 result — and it carries no measured numbers.
+
+**Stage 3 has two paths, and each case gets two solutions** (decided
+2026-10-02). What is described above is the **long path**: it applies the three
+rules and the three patterns, decides, and files a case file. The **short path**
+is an experiment alongside it: for the same code location an AI traces the
+constraint and designs a verification solution **without** the rules, the
+patterns, the §8 design rules or the template, using whatever it collects from
+the sources, and files **no verdict**. The aim is to learn whether the long
+path's human method helps the AI or limits it. The two solutions are written
+blind to each other; **stage 4 compares them** and decides whether one run or
+two is needed (stage 4 README, "Solution comparison"). See
+[`stage3-ai-deep-read/README.md`](stage3-ai-deep-read/README.md) and
+[`stage3-ai-deep-read/short-path/README.md`](stage3-ai-deep-read/short-path/README.md).
 
 **Stage 3 has two feeds, and both are required:**
 
@@ -658,10 +684,38 @@ Earlier trigger designs and the one executed test are recoverable from
 `git show e7f9963:HANDOFF.md` — note the `:HANDOFF.md` suffix, since that
 commit's own diff is an unrelated folder rename.*
 
+#### Stage 3 has two paths; stage 4 compares them (2026-10-02)
+
+Every case gets **two independent verification solutions**: the long path's
+case file (the rules, the patterns, §8) and a short-path solution (no rules, no
+patterns, no template, no verdict). **Stage 3 does not judge the pair; stage 4
+does.** A fresh AI session rates the two on seven points and decides: if the
+solutions are the same experiment, run once and score both predictions on the
+same readings (**Equivalent**); if one can carry the other's additions, run
+once on the union (**Partly different**); if they name different constraints or
+mechanisms, or cannot share a setup, run two separate tests and file both
+conclusions (**Different**). Rationale and rules: stage 3 README, stage 4 README
+"Solution comparison".
+
+- **The short path decides nothing.** It carries no go/no-go: a short solution
+  that finds the constraint does not cap usage states that as its claim and
+  designs the test for it, and the comparison treats it as **Different**.
+- **Scope stays memory and disk** for the short path as for the long (§3.3).
+- **Blind both ways, and frozen on filing** — see the stage 3 README.
+- **The pilot on the three closed cases was skipped** by decision. The first
+  comparison happens when a case has both solutions.
+- **The 11 filed cases are untouched.** They have no short solution yet and
+  follow stage 4 as before.
+
+*Adds to the two decisions above; replaces nothing. The folder move that made
+room for it (`long-path/` and `short-path/`) changed paths only.*
+
 ## 8. Designing a test for a case
 
 Stage 3 writes a design; [stage 4](stage4-runtime-verification/README.md) runs
-it. The design's purpose is to make the case **falsifiable**: it states, before
+it.
+(This section is the **long path's** method. The short path's AI designs its
+solution without it, by decision of 2026-10-02 (§7.5).) The design's purpose is to make the case **falsifiable**: it states, before
 any run, what should be observed if the traced path is the binding limit, and
 what would show it is not.
 

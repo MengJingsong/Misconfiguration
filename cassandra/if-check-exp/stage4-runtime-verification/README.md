@@ -41,6 +41,7 @@ Within stage 4, every step is done by an AI session:
 
 | Step | What it does | Output |
 |---|---|---|
+| C. Solution comparison | **Only when a case has both a long-path and a short-path solution.** A fresh AI session rates how far they differ and decides one run or two; skipped otherwise | `comparison/<stem>.md` |
 | 0. Design audit | Checks the case's §9 against the requirements below; recommends and applies amendments; freezes §9a | results §1 |
 | 1. Instruments | Writes, commits and checks the harness; confirms the environment | `harness/`, results §1 |
 | 2. Run 1 | Follows the runbook (§9b–§9e) exactly, scripted and logged | raw readings, command log |
@@ -67,9 +68,82 @@ prediction in §9d, the conclusions in §9e and §9f, and the controls in §9g.
 run is judged against, so it has to exist and be audited first. Which cases
 are converted is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md), not here.
 
+**A short-path solution** ([`../stage3-ai-deep-read/short-path/cases/`](../stage3-ai-deep-read/short-path/cases/))
+is the other thing stage 4 can consume, for a case that has one. Its parts B1–B10
+play the roles of §9a–§9e, and it is frozen whole (its sha256 is in
+[`../stage3-ai-deep-read/short-path/_INDEX.md`](../stage3-ai-deep-read/short-path/_INDEX.md)). It
+has no feedback field and is never amended; what a run learns goes into the
+comparison and results files. See "Solution comparison" below.
+
 If §9 cannot be executed as written, that is itself feedback — record it as a
 runbook defect (below) rather than improvising a different experiment, because
 a substituted workload no longer tests the traced path.
+
+## Solution comparison
+
+**Applies only to a case that has both solutions** — a long-path case file
+and a short-path solution ([stage 3](../stage3-ai-deep-read/README.md)). A
+case with only a long-path file skips this section and follows the protocol
+below unchanged, as all 11 filed cases do today.
+
+**Who and when.** A fresh AI session that wrote neither solution does it,
+**before any audit or run**. No human gate. It reads both, edits neither, and
+does not run anything. It records the sha256 of the short file and the hash of
+the long file's §9 (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> | git hash-object --stdin`)
+in the comparison file, so the verdict names exactly what was compared.
+
+**The deciding question:** *can one run produce the readings that both
+solutions call for, and settle both predictions?* Where it can, the two
+solutions are one experiment, or one experiment plus additions; where it
+cannot, they are two.
+
+### The seven points
+
+Rate each **Same**, **Differs, immaterial** or **Differs, material**, with a
+one-line note citing both sides. A difference is material if it changes what is
+measured, what is varied, or what is predicted; wording, ordering, and extra
+controls that leave the readings alone are not.
+
+| # | Point | Long-path solution | Short-path solution |
+|---|---|---|---|
+| 1 | Constraint named | §4 and the file name | A1 |
+| 2 | Mechanism claimed (what is compared, what each outcome does, any bypass) | §5, §6a, §6b | A2, A3 |
+| 3 | Knob and values | §9a, §9b | B3 |
+| 4 | Workload | §9c | B4 |
+| 5 | Instruments and observables, and the gaps they name | §9d | B5 |
+| 6 | Predictions | §9a (old layout: §9d) | B7 |
+| 7 | What would refute the claim, and what other outcomes mean | §9a conclusions table (old layout: §9e, §9f) | B8 |
+
+### The outcome
+
+| Outcome | Condition | Run plan | Recorded |
+|---|---|---|---|
+| **Equivalent** | Points 1 and 2 are Same, and none of 3 to 7 is material | **One run**, from the long-path runbook. Both solutions' predictions are scored against the same readings | One results file. §8 gets one row per path |
+| **Partly different** | Points 1 and 2 are Same; some of 3 to 7 differ materially, but one run can carry the **union** (extra arms, observables or knob values) | **One run on the union.** The union is written into results §1 and its harness before run 1, and frozen with the case-file hash | One results file, scored per path; the conclusions may differ |
+| **Different** | Point 1 or 2 differs (another constraint, another mechanism, or a short solution claiming the constraint does not cap usage), **or** the designs need setups no single run can combine | **Two separate tests**, each audited and run by this protocol: `results/<stem>.md` for the long solution, `results/<stem>--short.md` and `harness/<stem>--short/` for the short one | Two results files and two verdicts, then a closing comparison |
+
+If in doubt between two outcomes, take the one with more runs: a wrongly merged
+experiment hides a disagreement, a wrongly separated one only costs a run.
+
+### What the comparison file records
+
+`comparison/<stem>.md`, from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md):
+the two hashes, the seven ratings, the outcome and its reason, the run plan.
+After the runs it gains the **conclusions, one per path**, and whether they
+agree; and a line in [`comparison/_INDEX.md`](comparison/_INDEX.md).
+
+### After the runs
+
+| Situation | Action |
+|---|---|
+| One run, both predictions scored, conclusions agree | File both; the case's claim is supported by two independently designed solutions, which is worth noting |
+| One run, conclusions differ | The same readings were read two ways. Settle each against its own solution's readings table, and record which conclusion was wrong and why |
+| Two runs, verdicts agree | File both; note the agreement |
+| Two runs, verdicts differ | Find the point where the designs differ and **re-run that point**, in both designs if needed. The measurement decides; record the cause. Neither path's verdict is overruled by the other |
+| Short solution not runnable as written | A runbook defect, in results §3 with its fix, never an edit to the short file. If it cannot run at all, record "Not runnable" and have a new short solution written; the old one stays filed |
+
+Predictions are frozen per path exactly as in "Before run 1" below. Comparing
+the pair never rescues a prediction: each path is scored against its own.
 
 ## Step 0 — the design audit
 
@@ -99,6 +173,15 @@ with each, and a bottom line — **Ready**, **Ready after amendments**, or
 - A recommendation that changes §9a's claim, prediction or conclusions table is
   allowed only here, before run 1 of that tier, and only for a reason that does
   not depend on any reading.
+
+**Auditing a short-path solution.** Audit it for **runnability and safety
+only** — group D, plus the shared-infrastructure rules below, plus a check that
+it states its predictions before any run. Do not apply groups A to C to it:
+they are the long path's design requirements, and applying them would pull the
+short solution into the long path's mold and defeat the comparison. Record
+what groups A to C *would* have flagged as a side note in results §1, marked as
+not applied. The audit never edits the short file; fixes go to the harness and
+the runbook defect log.
 
 ## The run protocol
 
@@ -210,6 +293,8 @@ that judged it**, so measurements belong here, not in the case file.
 | Feedback kind | Lands in |
 |---|---|
 | The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
+| The comparison of a case's two solutions — the seven ratings, the outcome, the run plan, and later the conclusion per path | `comparison/<stem>.md`, copied from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md), and a line in `comparison/_INDEX.md` |
+| A short-path result (a **Different** outcome, or a conclusion scored per path in a shared run) | the results file for that run; the short solution file is never amended |
 | A refutation of the traced path (a **Refuted** row of §9a) | **amends the case file** — the affected section, dated, citing the results file |
 | A bypass confirmed at runtime (the bypass row of §9a) | amends the case's §8 ceiling claim and its Target-3 note; the numbers stay here |
 | A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e (only if §9a is unchanged; otherwise back to the audit) |

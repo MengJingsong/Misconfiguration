@@ -1,7 +1,11 @@
-# Stage 3 playbook — how to run a deep-read pass
+# Stage 3 long-path playbook — how to run a deep-read pass
+
+**This is the long path.** The short path ([`../short-path/README.md`](../short-path/README.md))
+does not use this playbook, the three rules or the case template; a session
+writing a short-path solution must not read it.
 
 Practical technique. What stage 3 *is*, and where verdicts are filed, is in
-[`README.md`](../README.md). The three rules themselves are in
+[`README.md`](README.md). The three rules themselves are in
 [`../../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case) and
 are **not** restated here — one source of truth for the rules.
 

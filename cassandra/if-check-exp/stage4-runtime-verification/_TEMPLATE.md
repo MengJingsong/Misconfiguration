@@ -3,6 +3,10 @@
 > **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/long-path/cases/[case-file stem].md)
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
+>
+> **Solution run:** long / short / both (a shared run) — if the case has a short-path
+> solution, see [`comparison/[case-file stem].md`](../comparison/[case-file stem].md). For a
+> `--short` results file, the "case file" below is the short-path solution and "§9a" means its B7–B8.
 
 **Relative links in this template** are written for where a *copy* of it lives
 — inside `results/` — not for the template's own location one level up.
@@ -116,6 +120,11 @@ argument.
 6. **Deviations and gaps** — anything skipped, changed or not observable, and
    how it limits the conclusion.
 
+**A run that serves both solutions** (comparison outcome Equivalent or Partly
+different): repeat parts 3 and 4 and the conclusion line for the short
+solution, against its own readings table (B8). Each path is scored against its
+own prediction, so the two conclusions may differ.
+
 7. **Core question** — in two or three sentences: did usage follow the
    constraint, and does the constraint cap usage? Follow the "Logic" steps of the
    case's "How this verifies the hypothesis" block (§9a), and cite for each step
@@ -182,10 +191,12 @@ how it was resolved (see "Compare and decide" in the README).
 Jingsong may overrule any verdict at any time; record an override here with its
 date and reason.
 
-| Tier | Verdict (§9a row) | Basis | Date |
-|---|---|---|---|
-| Unit | | run 1 + self-check / run 1 + run 2 | |
-| Cluster | | run 1 + self-check / run 1 + run 2 | |
+| Tier | Path (long / short) | Verdict (§9a row) | Basis | Date |
+|---|---|---|---|---|
+| Unit | | | run 1 + self-check / run 1 + run 2 | |
+| Cluster | | | run 1 + self-check / run 1 + run 2 | |
+
+One row per path per tier when the run served both solutions; otherwise one row per tier, Path = the solution that was run.
 
 **Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
 (commit), and any section amended (which one, commit) — or "none needed".

@@ -56,6 +56,11 @@ this folder's own scope.
 - **Stage 4 has no human gate (decided 2026-09-30).** The AI audits the case's §9, runs it, checks its own
   conclusion against the raw files and files the verdict; nothing waits for Jingsong, who may overrule a verdict at
   any time. The shared-infrastructure safety rules in the stage-4 README still apply.
+- **Two solutions per case; the short path decides nothing (decided 2026-10-02).** Each case gets a
+  long-path case file and a short-path solution, written **blind to each other**; only the stage-4 comparator reads both.
+  The short path carries no go/no-go, uses none of the long path's method, and its solution is frozen on filing (sha256 in
+  `short-path/_INDEX.md`) and never amended. Judging the pair, and whether it needs one run or two, is stage 4's job. Scope
+  stays memory and disk. The pilot on the three closed cases was skipped; the 11 filed cases have no short solution yet.
 - **Commit and push only on request.** "Commit" and "push" are asked for
   separately; never do either unprompted.
 - **Sync before restructuring.** Jingsong also uploads files to GitHub
@@ -98,23 +103,37 @@ this folder's own scope.
       what the limit is, run provenance. Stage 3's 3a queue.
     - `bands.csv` — **the per-row verdicts**, committed because an AI band
       cannot be regenerated the way the old keyword tiers could.
-  - **`stage3-ai-deep-read/`** — stage-3 verdicts (semantic, source open).
-    This is the deciding stage.
-    - `README.md` — what stage 3 is, its two feeds, and where verdicts go.
-    - `playbook.md` — how to run a pass: the order to check things, and the
-      verified pitfalls.
-    - `_TEMPLATE.md` — template for a new case file (stage 3's output, so
-      the template lives with stage 3). Its §9 Provenance records the feed
-      (`3a`/`3b`) and the date the cited lines were checked.
-    - `rejected.md` — read with the source open, refused against the three
-      rules. Moved here from `stage3-ai-deep-read/long-path/_INDEX.md` on 2026-09-23.
-    - `cases/` — **the results**: one flat file per case (flattened from
-      per-module folders 2026-09-23; module is a field, not a folder).
-    - `deferred.md` — unjudged rows, identified but never read against the
-      rules. Formerly the (b)/(c) parking lot; **unparked 2026-09-25**, so it
-      is now a worklist. Kept apart from `rejected.md` because they are
-      undecided, not refused. Moved here from the stage-2 folder, since
-      **stage 2 cannot produce a pattern deferral**.
+  - **`stage3-ai-deep-read/`** — reads the source. **Two paths, two
+    solutions per case** (decided 2026-10-02; the folder was split into
+    `long-path/` and `short-path/` the same day).
+    - `README.md` — the two paths, the rules both obey (blind both ways,
+      frozen on filing), and the two feeds.
+    - **`long-path/`** — the deciding path: the three rules, the case file.
+      - `README.md` — what it is, its files, where its verdicts go.
+      - `playbook.md` — how to run a pass: the order to check things, and the
+        verified pitfalls.
+      - `_TEMPLATE.md` — template for a new case file (the long path's output).
+        Its §9 Provenance records the feed (`3a`/`3b`) and the date the cited
+        lines were checked.
+      - `_INDEX.md` — master table of all cases.
+      - `rejected.md` — read with the source open, refused against the three
+        rules. Moved here from `_INDEX.md` on 2026-09-23.
+      - `cases/` — **the results**: one flat file per case (flattened from
+        per-module folders 2026-09-23; module is a field, not a folder).
+      - `deferred.md` — unjudged rows, identified but never read against the
+        rules. Formerly the (b)/(c) parking lot; **unparked 2026-09-25**, so it
+        is now a worklist. Kept apart from `rejected.md` because they are
+        undecided, not refused. Moved here from the stage-2 folder, since
+        **stage 2 cannot produce a pattern deferral**.
+      - `pending.md` — qualified, not yet written up.
+    - **`short-path/`** — an **experiment**, no solution filed yet. An AI
+      traces the constraint and designs a verification solution **without**
+      the rules, patterns, §8 design rules or template, and files **no
+      verdict**. `README.md` is the contract (how a solution is made, isolated,
+      audited and frozen); `BRIEF.md` + `_TEMPLATE.md` are the whole prompt the
+      isolated agent gets; `_INDEX.md` records sha256, isolation and leakage
+      audit; `cases/` holds the solutions. **Do not read it, or give it to the
+      agent, when writing a case's long-path file, and vice versa.**
   - **`stage4-runtime-verification/`** — opened 2026-09-25. Runs the §9 test
     designs and reports back. **No human approval or review is required**
     (revised 2026-09-30): an AI session audits the case's §9 against the
@@ -126,11 +145,18 @@ this folder's own scope.
     - `environment.md` — **start here on a new node**: the exact install,
       clone and build steps that worked (JDK 11.0.32.1, Ant 1.10.12).
     - `_TEMPLATE.md` — template for a per-case results file.
+    - `comparison/` — **new 2026-10-02.** For a case that has both solutions,
+      a fresh AI session rates how far they differ (seven points) and decides
+      **one run or two**: Equivalent (one run, both predictions scored),
+      Partly different (one run on the union), Different (two separate tests).
+      `_TEMPLATE.md`, `_INDEX.md`, `<stem>.md`. Rules: the README's "Solution
+      comparison". Cases with only a long-path file skip it.
     - `harness/<case-file-stem>/` — committed test code every run uses
       (e.g. the restored `HeapPoolTest.java`).
     - `results/<case-file-stem>.md` — one per case, plus
       `results/<case-file-stem>/run1/` (and `run2/`, if one is done) for
-      small log excerpts.
+      small log excerpts. A `<stem>--short.md` (and `harness/<stem>--short/`)
+      exists only for a "Different" comparison outcome.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
@@ -264,6 +290,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
 | Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `max_space_usable_for_compactions_in_percentage` is the one cheap case left (`memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
 | ~~`cdc_total_space`~~ | Done and closed 2026-10-01 (see the block above). Optional: a run 2 by a fresh session (harness, runner and results file are ready; it is cheap). |
 | ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
+| Write short-path solutions (first comparison) | Per `stage3-ai-deep-read/short-path/README.md`: a fresh, isolated session (it must not have read this repo) gets `BRIEF.md` + `_TEMPLATE.md` + one entry pointer. Do a not-yet-run case first, so its long solution has no results to leak; then run the stage-4 comparison. Two open points: whether the deny-rule isolation really blocks reads (check it), and the pilot's skipped scoring against the three closed cases. |
 | Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/long-path/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 

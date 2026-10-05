@@ -1,7 +1,7 @@
 # If-Check Cases — Master Index
 
 Navigation hub and progress tracker for all if-check cases.
-See [README.md](../README.md) for the format.
+See [README.md](README.md) for the format.
 
 **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 **Pattern legend** (README §3.2): **(a)** the capacity check is the decision · **(b)** the check sets a verdict (flag, enum, return value) that a separate decision point reads · **(c)** guard clause(s) before an allocation outside any branch
