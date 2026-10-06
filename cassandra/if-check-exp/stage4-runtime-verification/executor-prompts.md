@@ -32,12 +32,12 @@ it, and section 1.4 checks the session afterwards.
 {
   "permissions": {
     "deny": [
-      "Read(//home/jingsong/repos/Misconfiguration/HANDOFF.md)",
-      "Read(//home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/long-path/**)",
-      "Read(//home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md)",
-      "Read(//home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit/**)",
-      "Read(//home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/**)",
-      "Read(//home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/comparison/**)"
+      "Read(//home/jingsong/git-repos/Misconfiguration/HANDOFF.md)",
+      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/long-path/**)",
+      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md)",
+      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit/**)",
+      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/**)",
+      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/comparison/**)"
     ]
   }
 }
@@ -104,7 +104,7 @@ my decision.
    confirm it is the executor's; pass `--transcript FILE` to choose one.
 
    ```bash
-   python3 /home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/check-blindness.py --stem memtable_heap_space-tryAllocate-limit --for short
+   python3 /home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/check-blindness.py --stem memtable_heap_space-tryAllocate-limit --for short
    ```
 
    Zero hits (exit 0) is the pass. A hit means that tier's result is contaminated:
