@@ -218,108 +218,256 @@ destination host**, and the mechanism is refusal to create more:
 
 ## 9. Test design (guidance for stage 4)
 
-**Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+**Stage 3 writes this section; stage 3 never runs it** — no measured numbers
+and no verdict here; results go to
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+The test sets `max_hints_size_per_host` over JMX, writes through a coordinator
+while one replica is down, and checks that the down host's hint files stop
+growing near the ceiling while client writes keep succeeding, and that at the
+shipped default (`0B`) nothing stops them. **Run so far:** none. Converted to this
+layout 2026-10-06.
 
-**Two jobs, as with the compaction guard.** (1) Confirm the constraint enforces
-when enabled, by sweeping it. (2) Confirm it does **nothing** at the shipped
-default of `0B`, which is the Target-3-relevant result. A run that only does
-(1) overstates what an out-of-the-box node is protected by.
+### 9a. Procedure and conclusions
+
+**Testability:** config, **live-settable** — the `Config` field is read at every
+call, so a JMX change (`StorageProxy` MBean `MaxHintsSizePerHostInMiB`, **in MiB**
+while the comparison is in bytes) takes effect on the next hint decision with no
+restart; one cluster lifetime can run the whole sweep. There is no `nodetool`
+subcommand.
+
+**Two jobs.** (1) With the check enabled, confirm it bounds the hint files and what
+the disallow does. (2) At the shipped default `0B` the guard `maxHintsSize > 0`
+skips the comparison, so confirm that **nothing** bounds the files then. The second
+is the Target-3-relevant result; a run that only does (1) overstates what an
+out-of-the-box node is protected by.
+
+**Claim under test:** `max_hints_size_per_host`, when above zero, stops new hints for
+a destination host once the host's hint files on disk exceed it
+(`StorageProxy.shouldHint():2488-2497`). The disallow returns `false` to every caller
+(§5): no hint is stored, the client write still succeeds, no metric fires, and the
+host stays short of the mutation until a repair. The bound is per host, so
+node-wide hint bytes are at most `N × limit` for *N* down hosts, plus an overshoot
+(below).
+
+**How this verifies the hypothesis** (a restatement of the claim, procedure,
+prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** with the limit set, a down host's hint files stop growing just past
+  it and no new hint is made for that host; with the limit at `0B` they keep growing.
+- **Test:** vary the limit (16, 64, 256 MiB, then `0B`) over JMX on one coordinator
+  with one replica down, at a steady write rate, reading the host's hint-file bytes
+  (`du`, per host), `Hints_created`, the direct decision trace of `shouldHint`, and the
+  client's write results; then repeat at the default with two hosts down.
+- **Logic:** (1) at each value the files must reach the limit, or the run is invalid.
+  (2) The files stop growing within the stated overshoot, and `Hints_created` goes
+  flat: usage **stops at the limit**. (3) The plateau moves with the limit: usage
+  **follows the constraint**. (4) The decision trace shows `shouldHint` returning
+  `false` with the files above the limit, and no other reason (the time window
+  contributes nothing): the **disallow branch** is what stops it. (5) Client writes
+  still succeed; after the host returns, only the stored hints replay, so the rest is
+  missing. (6) At `0B` there is no plateau; with two hosts down the total is about
+  twice one host's.
+- **Refuted if:** the files keep growing past the limit plus the overshoot with the
+  check enabled; or the plateau does not move with the limit; or it is global rather
+  than per host (rows of the Conclusions table). The `0B` arm cannot refute the case:
+  unbounded growth there is its default-mode finding.
+
+**Procedure:**
+
+1. **Unit tier** — (a) run upstream `StorageProxyTest` (`testShouldHint`,
+   `testShouldHintOnExceedingSize`: the operand is replaced by a Byteman stub there).
+   (b) Run the harness test `ShouldHintSizeTest` (9c): the same `shouldHint` with the
+   **real** operand, `HintsService.getTotalHintsSize`, over hint files written through
+   `HintsService`, at the boundary, and at `0`.
+2. **Cluster tier** — three nodes; node 1 coordinates and is under test; stop node 3
+   (and node 2 in the two-host arm). One run per limit value, changed by JMX between
+   bursts.
+3. **At each value:** idle control → **A**, write until the host's files sit just below the
+   limit → **B**, keep writing past it. No scenario C: no bypass is recorded.
+4. **Compare** with the prediction and read the result below.
+
+**Prediction.** Notation: *L* = the limit in bytes; `T` = `HintsStore.getTotalFileSize` of the
+host (the check's operand: the sizes of its hint files, the current writer's included,
+as of each flush); `r` = bytes of hints accepted per second; *F* = `hints_flush_period`
+(1 s here); *H* = the size of one hint (about 5 KiB).
+
+- **A:** `T` rises toward *L*; `Hints_created` rises; every `shouldHint` returns `true`.
+- **B:** once `T > L` the decision flips and stays `false`; `Hints_created` and
+  `TotalHints` go flat while client writes keep succeeding. Hints already accepted
+  into the in-memory buffers still reach the file when flushed, so the on-disk total
+  rises past *L* by at most what was accepted since the last flush that left `T ≤ L`:
+  **overshoot ≤ `r × F + H`**, with `r ≈ 1 MiB/s` the figure is at most about
+  1 MiB (6 % of 16 MiB, under 0.5 % of 256 MiB). (§8 states the overshoot as one
+  hint; the per-flush bound is the one the source gives, since the operand moves only
+  when a flush closes its session, `HintsWriter.java:274`. The test reports the
+  measured overshoot against both.)
+- **Second knob, hosts:** with two hosts down, each host's files plateau at about *L*,
+  so the directory total is about `2 × L`.
+- **At `0B`:** no plateau; the files grow at `r` until the hint window (set above the
+  run), the file-size roll (`max_hints_file_size`, 128 MiB, which starts a new file but
+  does not stop growth) or the disk stops them.
+
+**Conclusions:**
+
+| Result | Conclusion |
+|---|---|
+| Each enabled value: the host's files plateau within `L + r × F + H`, the trace shows `false` returns with `T > L`, `Hints_created` flat, writes succeeding; the plateau follows *L* across 16/64/256 MiB; at `0B` no plateau; with two hosts down the total is about `2 × L` | **Confirmed** — the check enforces as traced; at the default it bounds nothing. |
+| As above, but the plateau is at `1 ×` *L* with two hosts down | **Confirmed per host; §8's multiplier refuted** — the bound is global; the config name misleads (Target-3 material). |
+| Files grow past `L + r × F + H` with the check enabled and `false` returns in the trace | **Refuted** — the check does not stop hint creation, or `T` misses files (the operand covers `dispatchDequeue`, `corruptedFiles` and the current writer only). |
+| Files grow past *L* and the trace shows `true` returns with `T > L` | **Invalid run** — the knob did not take (the MiB/bytes unit): read it back (9b) and re-run. |
+| The plateau does not move with *L* while the trace shows `false` returns | **Refuted** — not the binding limit. Re-read, do not re-run. |
+| At `0B` the files plateau anyway | **Not confirmed** (for the default-mode claim) — something else bounds them; find it (the time window and `Hints_not_stored` first). |
+| Writes fail or block at the plateau | **Not confirmed** — §6b's silent skip is not shown; read the error. |
+| After the host returns, replay delivers more than was stored, or all of it | **Not confirmed** for the loss claim — read the repair/replay path before concluding. |
+| The files never reach *L* (rate too low for the run's length) | **Invalid run** — raise the rate or lower *L* (9c) and re-run. |
+| `Hints_not_stored-<addr>` is non-zero | **Invalid run** — the time-window rejection fired; the arm measured the other rejection. |
+
+**Why the decision trace and not only `Hints_created`:** a flat `Hints_created` also
+happens when the host is not in the ring or the window expired; only the trace line
+naming `T`, *L* and the return value ties it to this comparison.
+
+### 9b. Setup
 
 | Field | Content |
 |-------|---------|
-| **Testability** | **Config-testable and hot-settable** — the best combination in this folder. The `Config` field is `volatile` and re-read at every call, so a JMX change takes effect on the next hint decision with no restart, and the sweep can run within a single cluster lifetime. |
-| **Constraint knob** | `max_hints_size_per_host` in `cassandra.yaml` (commented out at [line 111](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/cassandra.yaml#L111); uncomment and set). At runtime: JMX [`StorageProxyMBean.setMaxHintsSizePerHostInMiB(int)`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxyMBean.java#L36) — **note the unit is MiB**, while the config and the comparison are bytes. **No `nodetool` subcommand**; use a JMX client. |
-| **Capacity values to test** | `max_hints_size_per_host` ∈ {**`0B`** (default, = disabled), `16MiB`, `64MiB`, `256MiB`}. The `0B` arm is not a zero-capacity arm — it is the *disabled* arm, and must be read as a separate condition, not as the bottom of the curve. Values are per host, so with one down replica they are also the node total. |
-| **Usage-side observable** | `getTotalFileSize(hostId)` — the summed size of that host's hint files. |
-| **Instrument** | **The operand is a set of files, so measure it directly**: `du -sb` on the hints directory, and per-host by hint-file name (`HintsDescriptor` encodes the host id in the filename). This is not a proxy — it is what the check itself stats. For the *disallow* signal, note §6b: **there is no metric.** Use instead (1) `Hints_created-<addr>` ([`HintedHandoffMetrics.java:51-53`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/HintedHandoffMetrics.java#L51-L53)) **going flat while writes continue** — the clearest available evidence; (2) request tracing, which carries the `Tracing.trace` line at [`:2494-2495`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2494-L2495) naming both operands; (3) `StorageMetrics.TotalHints` ([`StorageMetrics.java:46`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/StorageMetrics.java#L46)) as the node-wide counterpart. **Do not use `Hints_not_stored-<addr>`** — it is marked only by the *time-window* rejection, never by this one, and would read as zero throughout a successful run. |
-| **Scope of the limit** | **Per destination host.** `N` = the number of simultaneously unreachable hosts being hinted, and node-wide hint bytes go as `N × limit`. **Run the sweep at `N = 1` first** (one down replica) so the per-host figure and the directory total coincide, then a second arm at `N = 2` or `3` to confirm §8's multiplier — which is the part an operator is most likely to get wrong. |
-| **Suggested level** | **Cluster only, realistically.** The check needs a real down replica, a real host id and real hint files on disk, so the unit tier has little to offer: `test/unit/org/apache/cassandra/hints/` has `HintsCatalogTest`, `HintsStoreTest` and `HintsBufferPoolTest` covering the store and buffers, but nothing exercises `StorageProxy.shouldHint()`. A focused unit test asserting `getTotalFileSize()` against files written by `HintsStore` would be worth having as an arithmetic check on the operand, and is cheap. |
+| **Constraint knob** | `max_hints_size_per_host` in `cassandra.yaml` (commented out at [`conf/cassandra.yaml:111`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/cassandra.yaml#L111); the default is `0B`). Live: `bin/nodetool sjk mx -ms -b 'org.apache.cassandra.db:type=StorageProxy' -f MaxHintsSizePerHostInMiB -v <MiB>` (`StorageProxyMBean.setMaxHintsSizePerHostInMiB(int)`, [`:36`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxyMBean.java#L36)); **MiB, not bytes**. Unit tier: `DatabaseDescriptor.setMaxHintsSizePerHostInMiB(int)`. |
+| **Confirm it took effect** | `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.db:type=StorageProxy' -f MaxHintsSizePerHostInMiB` after every change; the decision trace's `limit=` field (9d) is the value the check used, in bytes: it must equal the MiB value × 1,048,576. |
+| **Capacity values** | `16`, `64`, `256` (MiB), and `0` (the default, disabled): a separate arm, not the bottom of the curve. |
+| **Scope** | **Per destination host.** *N* = hosts down: 1 for the sweep; 2 in the two-host arm, at one value (64 MiB) and at `0`. The check compares one host's `getTotalFileSize` ([`HintsStore.java:260-271`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsStore.java#L260-L271)); a file in none of `dispatchDequeue`, `corruptedFiles` or the current writer is invisible to it. |
+| **Level** | Both. Unit: upstream `StorageProxyTest` and the harness `ShouldHintSizeTest`; `HintsCatalogTest`/`HintsStoreTest` cover the store. Cluster: the real down replica, host id and files. |
 
-### 9a. Workload — driving the usage operand
+**Cluster layout.** Three nodes: separate processes on loopback addresses, or the
+CloudLab nodes of [`environment.md`](../../../stage4-runtime-verification/environment.md) §5.
+Keyspace `SimpleStrategy`, `replication_factor` 3, one table. Node 1 is the coordinator
+and the node under test; write only through node 1.
 
-Hints accumulate only while a replica is unreachable, so the workload has a
-prerequisite the other cases do not.
+**Hold fixed:**
 
-- **Three-node cluster**, keyspace at `RF = 3`, one table. Node 1 is the coordinator and the node under test.
-- **Stop node 3.** Leave node 2 up so writes still satisfy a quorum.
-- Write from node 1 at `CONSISTENCY QUORUM` with `cassandra-stress` or a CQL client, so writes succeed while hints accumulate for node 3.
-- **Set `max_hint_window_in_ms` large** (hours) so the *time* limit does not fire first and mask the size limit — see §9g; the two rejections are adjacent in the same method and are easily confused.
-- Payload should be large enough that hint files grow to the smallest tested ceiling (16MiB) within a minute or two, so a sweep is practical.
+| Setting | Value | Why |
+|---|---|---|
+| `max_hint_window` | `24h` | The time rejection sits four lines above this check in the same method ([`StorageProxy.java:2461-2477`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2461-L2477)); a window that expires first stops hints for another reason. Record when each node was stopped. |
+| `hints_flush_period` | `1000ms` | Bounds how long accepted hints sit in the buffer, hence the overshoot (default `10s`, [`Config.java:445`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L445)). |
+| `max_hints_file_size` | `128MiB` (default) | Rolling a file does not stop growth; record the number of files. |
+| `hinted_handoff_enabled` | `true` (default) | With it off, no hint is written. |
+| Consistency level | `ONE` (writes), `ALL` (read-back) | Writes succeed with the live replicas while hints accumulate. |
+| Hint, data and log directories | local disk, never `/proj` | The `0B` arm writes GBs; see the stage-4 README's safety rules. |
+| Client load | same rate at every value | `r` enters the prediction. |
 
-**Deterministic single-shot form:** enable the check at a small value
-(`1MiB`), write enough to exceed it, then keep writing. The transition from
-"hints created" to "hints silently skipped" should be a step at a known
-directory size — and because the knob is hot-settable, the whole sweep can be
-done by changing it over JMX between write bursts without restarting anything.
+**Controls:**
 
-### 9b. Scenario A — just reach capacity
+- **Idle run** — all three nodes up, writes at the same rate: the hints directory stays empty, `Hints_created` flat.
+- **Default arm** — the same load at `0` (arm after the sweep).
+- **Window-contamination check** — `Hints_not_stored-<addr>` read at the end of every arm; any non-zero value voids it.
 
-With the check enabled, write until the hint directory for node 3 sits just
-below the ceiling, then stop.
+**Reset between runs:** with node 3 (and 2) still down, a changed value needs no reset. To start a fresh sweep, stop all nodes, empty the hints directory of node 1, restart all, stop node 3 and wait for `DN`. **Never restart the down host between arms:** its return dispatches and deletes the hint files and the operand collapses.
 
-Expect: `du -sb` on node 3's hint files ≈ but below `max_hints_size_per_host`;
-`Hints_created-<node3>` rising throughout; no tracing line about max hints
-size. The plateau should move with the knob across 16 / 64 / 256 MiB. This arm
-establishes that the knob moves the ceiling at all.
+### 9c. Workload
 
-### 9c. Scenario B — try to exceed capacity
+Hints accumulate only while a replica is down, so the cluster tier starts with node
+3 stopped (and node 2 in the two-host arm), waiting until node 1 shows `DN`.
 
-Keep writing past the ceiling. **Nothing fails and nothing blocks** (§6b):
+**Harness.** `<harness>` stands for
+`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/max_hints_size_per_host-shouldHint-maxHintsSize`.
+Work for step 1, before run 1:
 
-| Expected | Evidence |
+| File | What it is |
 |---|---|
-| Hint file total for node 3 **plateaus** at the ceiling (plus at most one hint of overshoot) | `du -sb` per host flat while writes continue. |
-| `Hints_created-<node3>` **stops rising** while client writes keep succeeding | The primary available evidence, since no rejection counter exists. |
-| The tracing line at `:2494` appears on traced writes, naming both operands | Enable tracing on a sample of writes — this is the only direct statement that *this* check fired. |
-| **Client writes continue to succeed**, at whatever CL the reachable replicas satisfy | Distinguishes this case from `cdc_total_space`, whose disallow the client sees as an exception. |
-| On restarting node 3, replay covers only the hints that were stored; the rest are **permanently missing** until a repair | Read back at `CONSISTENCY ALL` after replay, or compare row counts. Worth measuring: it quantifies the consistency cost of the bound. |
+| `ShouldHintSizeTest.java` | Unit tier. Package `org.apache.cassandra.service`; modelled on `StorageProxyTest.shouldHintTest` (a fake endpoint with a host id, marked dead). Writes real hints through `HintsService.instance.write(hostId, hint)` and flushes with `flushAndFsyncBlockingly`. See 9e. |
+| `should-hint.btm` | Byteman, observation only: one line at the exit of `StorageProxy.shouldHint(Replica, boolean)`: `shouldHint endpoint=<ep> result=<bool> total=<getTotalHintsSize> limit=<getMaxHintsSizePerHost> ms=<epoch millis>`. |
+| `hints-du.sh` | Prints, per host id, the sum of `stat -c %s` of `data/hints/<hostid>-*.hints`, the file count, and a timestamp; run every second. |
 
-### 9d. Expected dose-response
+```bash
+# unit tier
+ant testsome -Dtest.name=org.apache.cassandra.service.StorageProxyTest
+cp <harness>/ShouldHintSizeTest.java test/unit/org/apache/cassandra/service/
+ant testsome -Dtest.name=org.apache.cassandra.service.ShouldHintSizeTest
 
-If the traced path is the binding limit:
+# cluster tier, once: schema (all nodes up)
+bin/cqlsh 127.0.0.1 -e "CREATE KEYSPACE keyspace1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};"
+tools/bin/cassandra-stress write n=1000 no-warmup -node 127.0.0.1
+# node 3 stopped and shown DN; then, per value (set the limit first, over JMX), a throttled stream through node 1 only:
+tools/bin/cassandra-stress write n=<rows> no-warmup cl=ONE -col 'size=FIXED(1024)' -rate threads=8 throttle=200/s -node whitelist 127.0.0.1
+```
 
-- **Per-host hint bytes plateau linearly in `max_hints_size_per_host`** across 16 / 64 / 256 MiB, landing at or just above the configured value. The overshoot should be bounded by one hint's serialized size — worth confirming, since §8 claims exactly that.
-- **`Hints_created-<addr>` flattens earlier as the ceiling falls**, at constant write rate; the count of hints stored before flattening should scale with the ceiling.
-- **At `0B` (default) there is no plateau at all.** Hint bytes grow until the time window or the disk stops them. This is a *different curve shape*, not a low point on the same curve, and it is the arm that matters most.
-- **At `N = 2` down hosts**, total hint-directory size should plateau at roughly `2 ×` the per-host ceiling, confirming §8's multiplier. If it plateaus at `1 ×`, the limit is global and §8 is wrong.
+**Starting values.** Estimates, not measurements:
 
-### 9e. Interpretation — what each outcome means
+| Setting | Value | Why |
+|---|---|---|
+| Hint size | 5 columns × `FIXED(1024)` ≈ 5 KiB | Stress's default column count. |
+| Rate | `throttle=200/s` ≈ 1 MiB/s of hints | Makes the overshoot bound (`r × F`) about 1 MiB; 16 MiB is reached in about 16 s, 256 MiB in about 4.3 min. |
+| Rows per burst | enough to reach `1.5 × L` at 200/s: `n=4,800` (16 MiB), `n=19,200` (64 MiB), `n=77,000` (256 MiB) | Past the limit long enough to see the plateau and the flat counter (60 s at least). |
+| Window | the plateau is read over the last 60 s of each burst | Several `du` samples and two flush periods. |
+| `0B` arm | `n=250,000` (about 1.2 GiB) | Longer than the largest limit, so a plateau at 256 MiB would show; disk needed about 1.5 GiB. |
 
-| Observation at scenario B | Reading |
-|---|---|
-| Per-host hint bytes plateau at the ceiling; `Hints_created` flattens; writes keep succeeding | The check enforces as traced. |
-| Hint bytes keep growing past the ceiling | Either the check is disabled (confirm the knob actually took — the MiB/bytes unit mismatch in the setter is the likeliest cause), or `getTotalFileSize()` is not seeing files it should. The latter would be a real finding: the operand stats `dispatchDequeue`, `corruptedFiles` and the current writer, so a file in none of those is invisible to the check. |
-| Directory total plateaus at `1 ×` the ceiling with two hosts down | The bound is global, not per host. §8's multiplier claim is wrong and the config name is misleading — Target-3 material. |
-| Nothing plateaus and `Hints_created` never flattens, but hints *are* being written | The time window fired first, or the check was never enabled. Check `max_hint_window_in_ms` and `Hints_not_stored-<addr>` before concluding — a non-zero `Hints_not_stored` means the *other* rejection is what you measured. |
-| At `0B`, hint bytes plateau anyway | Something else bounds them. Find it: that would mean the default is not as unprotected as §8 claims. |
+**If the files do not reach the limit** (`T` flat below *L* with `shouldHint` returning `true`): check the rate (`TotalHints` rising) and that node 3 is `DN` and in the ring; raise `threads` to 16 and drop the throttle to `400/s`, and widen the overshoot bound accordingly in the results. Record each step.
 
-### 9f. What would refute this case
+### 9d. Observables
 
-The case claims the comparison at `shouldHint():2492` gates hint creation, so
-on-disk hint bytes per destination host are bounded by
-`max_hints_size_per_host` when it is set above zero. It is refuted if, with
-the check demonstrably enabled and a single host down, that host's hint files
-grow materially past the configured ceiling while writes continue.
+| Observable | How to read it | When to sample | Trap |
+|---|---|---|---|
+| **Usage counter** — the host's hint-file bytes, `T` | `hints-du.sh` (per host id; `nodetool status` gives the host ids) every second; the trace's `total=` field is the operand as the check read it. | Throughout | The check's `T` is the **cached** per-file size, refreshed when a flush session closes ([`HintsWriter.java:274`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriter.java#L274)), so `du` can sit above `total=` by what the current flush has written. Compare them; a persistent gap larger than one flush's bytes is a finding. `du` on the whole directory mixes hosts: use per-host-file sums. |
+| **Disallow evidence** | The decision trace: `result=false` lines with `total` above `limit`. Also `Hints_created-<addr>` flat (`bin/nodetool sjk mx -mg -b 'org.apache.cassandra.metrics:type=HintsService,name=Hints_created-<addr with : replaced by .>' -f Count`) and `StorageMetrics.TotalHints` flat, while the stress's result block shows writes succeeding. Request tracing on a sample of writes carries the line `Not hinting <ep> which has reached to the max hints size …` ([`StorageProxy.java:2494-2495`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2494-L2495)). | Every second (trace); counters at the start and end of each burst | **No metric fires on this disallow** (§6b). `Hints_not_stored-<addr>` is marked only by the time-window rejection, so it must stay at zero; **do not use it as the signal**, use it as the contamination check. `shouldHint` is read at seven sites (§5): the trace covers all of them. |
+| **Bypass volume** | None recorded. A `result=true` line with `total > limit` and `limit > 0` would be one (it should not exist). | — | The guard `maxHintsSize > 0` makes every line at `limit=0` `true`: that is the default-mode finding, not a bypass. |
+| **Real resource** — disk | `hints-du.sh` totals; `df` of the hints volume at the start and end. | Throughout | The hint-file bytes are the resource; no further read is needed. Do not read RSS or heap. |
+| **Loss after the burst** | After the sweep (and not before), restart the stopped host and, once its hints have drained (`HintsService` `PendingHints`/`ls data/hints` empty), read `SELECT count(*)` at `ALL` against the rows written. | Once, at the end | Needs the host back; it destroys the operand, so it is the last step. At `0B` and at the limit the counts differ by the rows not hinted. |
 
-**The `0B` arm cannot refute the case** — §4 and §8 already state that the
-default disables the check, so a run at the default showing unbounded growth
-is a confirmation of the case's most important claim, not a contradiction of
-it. Stage 4 should report it as such.
+### 9e. Running the scenarios
 
-A separate claim worth refuting on its own: §8 says the bound is per host and
-node-wide usage goes as `N × limit`. A two-host arm settles it, and a negative
-result there changes §8 without touching §5 or §6.
+**Unit tier.** Commands are in 9c. Record pass or fail and the asserted values.
 
-### 9g. Confounders and controls
+1. Run upstream `StorageProxyTest`. `testShouldHintOnExceedingSize` uses a Byteman stub
+   for the operand (`return 2097152`) against a 1 MiB limit: it shows the disallow but
+   not the real operand and not the boundary.
+2. Run `ShouldHintSizeTest`, with a fake endpoint marked dead and a host id in the
+   token metadata, as `shouldHintTest` does, and `max_hint_window` large:
+   1. with the limit at `0` (the default), writes 2 MiB of hints through
+      `HintsService` and flushes: `shouldHint` is `true` and `getTotalHintsSize` is the
+      sum of the files' lengths;
+   2. sets the limit to 1 MiB (`setMaxHintsSizePerHostInMiB(1)`) with the files at 2 MiB:
+      `shouldHint` is `false`;
+   3. at the boundary: removes the hints (`HintsService.instance.deleteAllHintsForEndpoint(<ep>)`)
+      and writes until `getTotalHintsSize` is exactly 1,048,576 bytes (adjusting the last
+      hint's payload): `shouldHint` is `true` (the comparison is `>`, [`:2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492)); one byte more: `false`;
+   4. the limit set back to `0`: `true` again with the same files;
+   5. the operand: after each flush `getTotalHintsSize` equals the sum of `File.length()` over the host's files.
 
-- **The hint *time* window is the dominant confounder**, and it lives four lines above this check in the same method. If `max_hint_window_in_ms` expires first, hints stop for a completely different reason and the directory plateaus anyway. Set it large, and watch `Hints_not_stored-<addr>` — **any** non-zero value there means the time-window rejection fired and the arm is contaminated.
-- **Hint dispatch lowers the operand.** `getTotalFileSize()` stats live files, so as soon as node 3 returns, files are dispatched and deleted and the total collapses. Keep node 3 down for the entire measurement, and do not let it be restarted between arms without re-establishing the baseline.
-- **The MiB/bytes unit mismatch** in `setMaxHintsSizePerHostInMiB` is an easy way to set a value 2²⁰ times larger than intended. Read the value back through the MBean getter and confirm against `du` scale before trusting an arm.
-- **Other down hosts** contribute their own hint files to the same directory. Keep exactly one host down in the primary arms, and per-host-file accounting (not `du` on the whole directory) in the multi-host arm.
-- **`max_hints_delivery_threads` and throttling** affect how fast files drain, not the ceiling — but they do affect how quickly the operand recovers after a restart.
-- **Baseline** at `0B` (default) with the same workload, to establish the unbounded growth curve; **idle control** with all three nodes up so no hints are generated, to confirm the directory stays empty.
+   Record pass or fail and, per step, the asserted numbers.
+
+**Before the cluster tier.**
+
+1. **Instrument check.** Run `ShouldHintSizeTest` with the rule attached and expect one
+   trace line per `shouldHint` call, with `limit=1048576` in steps 2 and 3:
+
+   ```bash
+   ant testsome -Dtest.name=org.apache.cassandra.service.ShouldHintSizeTest \
+     -Dtest.jvm.args="-javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/should-hint.btm -Dstage4.byteman.out=$HOME/stage4-logs/cluster/instrument-check.txt"
+   ```
+
+2. **Start node 1 with the rule; nodes 2 and 3 without:**
+
+   ```bash
+   mkdir -p ~/stage4-logs/cluster/<run>
+   export JVM_EXTRA_OPTS="-javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/should-hint.btm,listener:true -Dstage4.byteman.out=$HOME/stage4-logs/cluster/<run>/should-hint.txt"
+   bin/cassandra -p cassandra.pid > ~/stage4-logs/cluster/<run>/stdout.txt 2>&1   # in node 1's tree
+   ```
+
+   Confirm with `Submit -l` that the rule is loaded, and that `nodetool status` shows
+   `UN` on all three; then stop node 3.
+
+**Cluster tier, for each limit value:**
+
+1. **Control run** — with all nodes up, 30 s of the stress stream: the hints directory stays empty. Stop node 3, wait for `DN`, record the time and the hint-window clock.
+2. **Scenario A — reach the limit** — set the limit over JMX (and read it back), start `hints-du.sh` and the burst (9c) sized to stop just below *L*; record `T`, `Hints_created` and the trace. Expect `result=true` throughout.
+3. **Scenario B — try to exceed it** — run the rest of the burst past *L*; record the same, plus the stress result block and one traced write (`-tracing`-style sample: `bin/cqlsh -e "TRACING ON; INSERT …"` against node 1 at the plateau) showing the `Not hinting …` line.
+4. **Two-host arm** — at 64 MiB: stop node 2 as well (keyspace RF stays 3, writes at `ONE` need only node 1), repeat A and B; compare the per-host plateaus and the directory total.
+5. **Default arm** — set `0`, run the `0B` burst; read the growth and the file count; stop the burst before the disk passes 70 %.
+6. **Loss read-back** — start nodes 2 and 3, wait for `UN` and the hints to drain, read `count(*)` at `ALL`.
+
+**Window-contamination check (9b)** — `Hints_not_stored-<addr>` at the end of every arm.
+
+Stop when each scenario's records are taken; a run where the files never reach *L* is invalid (9a).
+
+**Record for stage 4:** every node's `cassandra.yaml` diff and JVM options, the exact commands, the `Submit -l` output, the trace, `hints-du.sh` output, the stress headers and result blocks, the traced-write output, and the read-back counts, per value.
 
 ## 10. Provenance
 
@@ -329,8 +477,8 @@ result there changes §8 without touching §5 or §6.
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). |
 | **Escape hatch / Target-3 note** | **The default is the gap.** `max_hints_size_per_host` defaults to `0B`, and `if (maxHintsSize > 0)` at [`:2489`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2489) skips the comparison entirely — so on an unconfigured node this constraint does not exist. That is a stronger default-mode gap than the `native_transport_throw_on_overload` case (where the check runs and is then ignored) and comparable to the compaction guard's non-domination (where the check is never reached), but arrived at a third way: the operator simply has not switched it on. Two further Target-3 observations: the bound is **per host**, so `N` down hosts multiply it, and the disallow path is **silent** — no counter, no log — which makes the resulting data loss hard to detect operationally. |
-| **Stage-4 feedback** | none yet |
-| **Notes** | `getTotalFileSize()` sums `dispatchDequeue`, `corruptedFiles` and the current writer's file. A hint file in none of those three would be invisible to the check; whether such a state is reachable was not established here and is left as an open question for §9e's second row. |
+| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
+| **Notes** | `getTotalFileSize()` sums `dispatchDequeue`, `corruptedFiles` and the current writer's file. A hint file in none of those three would be invisible to the check; whether such a state is reachable was not established here and is left as an open question for the "Files grow past" row of §9a's Conclusions. **Found while converting §9 (2026-10-06), for stage 3 to judge, not applied to §8:** the check's operand is the hint files' size as of the last flush session ([`HintsWriter.java:274`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriter.java#L274)), and hints are buffered and flushed every `hints_flush_period` (default 10 s), so the overshoot past the limit is up to the hints accepted in one flush period (and buffered), not "one hint". §9a states the prediction as `L + r × F + H` and measures both. |
 
 ---
 

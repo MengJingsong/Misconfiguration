@@ -231,13 +231,46 @@ stage 1/2, `3b` = direct source reading).
 
 Each case's full detail lives in its own file.
 
-**Every case carries a §9 test design.** Only `memtable_heap_space` (2026-09-28),
-`MAX_HINT_BUFFERS` (2026-09-30) and `cdc_total_space` (2026-10-01) are in the **new §9 layout**: the intro and §9a are a summary for a human
-reader (procedure and conclusions table), §9b–§9e are a Linux runbook. The
-other eight are in the old layout and must be converted before their first
-stage-4 run. Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
+**Every case carries a §9 test design, all in the new layout.** The intro and §9a are a summary for a human
+reader (procedure and conclusions table), §9b–§9e are a Linux runbook. `memtable_heap_space` (2026-09-28),
+`MAX_HINT_BUFFERS` (2026-09-30) and `cdc_total_space` (2026-10-01) were converted and audited at their stage-4 runs. **The other eight were converted
+2026-10-06** (an AI session, on Jingsong's request) and are **not yet audited or run**: each must pass the stage-4 step-0 audit and be frozen
+before its first run, and each lists the harness it needs (Java tests, Byteman rules, scripts) as work for step 1; none of that code exists yet.
+The conversion also found points where the old §9 or the case's §6b/§8 may be wrong (`native_transport` per-connection mode and the pause after an over-limit
+request; `max_hints` overshoot per flush; `memtable_offheap` physical bytes gated by the parking; `max_space` has no live setter; `internode` gauges per peer;
+`file_cache` chunk cache off by default). They are in each case's §10 Notes, **for stage 3 to judge, not applied to §5–§8**.
+Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
 
 ## Open items / next steps
+
+### ⏵ Resume here (2026-10-06) — write up the qualified cases (stage 3, long path)
+
+**State.** 11 cases filed, all with a §9 in the new layout (eight converted 2026-10-06, unaudited, no harness code yet).
+Band A1 (65 rows) and A2 (30) are fully judged. **Open: 9 candidate cases (13 rows) qualified but unwritten, 4 undecided rows, plus
+the `networking_cache_size` sibling.** The numbered write-up queue, with each candidate's pattern and hazard, is at the top of
+`cassandra/if-check-exp/stage3-ai-deep-read/long-path/pending.md`; the 4 undecided rows are in `deferred.md` §5 and §6.
+Nothing from this session is committed.
+
+**To start a new session** (paste something like this): *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `pending.md`'s
+write-up queue and `_TEMPLATE.md`. Write up queue item 1 as a case: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`),
+answer all nine fields, design both tiers in §9a to §9e, verify every citation, add the `_INDEX.md` row, strike the candidate in `pending.md`.
+Do not commit."* One candidate per session keeps the context small; do 2 or 3 if they are siblings (4 and 5; 1 and 3).
+
+**Method that worked on the eight conversions** (apply it to new §9s):
+1. Read the source path and the **upstream tests** that already touch the check (`grep -rn <method> test/unit`); reuse them as the unit tier and say what they do **not** prove.
+2. Find the check's own **debug/trace/metric** line; if none, design a Byteman observation rule and list it as harness work.
+3. Make the limit moveable on a **small dedicated filesystem or tiny pool**, not by waiting for a real node to fill.
+4. Derive the prediction from the source with its tolerance (flush period, chunk size, stale counter), before any run, as numbers.
+5. Cross-check each claim in the old prose against the code while converting; record contradictions in §10 Notes for stage 3, do not silently rewrite §5 to §8.
+6. Keep §9a to claim, how-this-verifies block, procedure, prediction and a Conclusions table with Refuted, Not confirmed and Invalid rows.
+
+**Filing checklist per case:** `cases/<stem>.md` (nine fields, §9a to §9e, §10 provenance with feed `3a` and the date citations were checked) →
+`_INDEX.md` row and module note → strike the entry in `pending.md` → for feed `3a` note the batch in `stage2-ai-preprocessing/README.md` →
+update the case count in this file and in `_INDEX.md` §2. Then stage 4 audits and freezes the case's §9 before any run.
+
+**Other open work, independent of the write-ups:** (a) stage-4 step-0 audit of the eight converted cases (`max_space_usable_for_compactions_in_percentage` first, it is the cheapest unit tier);
+(b) the side-by-side `comparison/memtable_heap_space-tryAllocate-limit.md` (`executor-prompts.md` §2); (c) the `MAX_HINT_BUFFERS` band question and the stage-3 recommendations of both results files;
+(d) stage 3 band A3 (39 rows, one judgement for the group), then band B (174) and C (94).
 
 ### ⏵ Resume here — stage 4 after `cdc_total_space` (state as of 2026-10-01, end of session)
 
@@ -260,7 +293,7 @@ recommendation 1 in results §8.
 | Piece | State |
 |---|---|
 | `cdc_total_space` | **Closed 2026-10-01.** Unit tier: 10 JVMs in 6 min (upstream baseline, 7 blocking values, 2 non-blocking). Cluster tier: one node, 8 values (blocking at 144, 272, 528 MiB and the derived default 4096 MiB, a second-knob arm, 2 non-blocking, a consumer control), about 3 min each; pass 1 was superseded after a runbook defect (the default arm's non-CDC control stalled behind a 15 s commit-log sync), the default arm ran three times. No run 2 (results §5.2). §9a and §9b are byte-identical to the freeze (hashes in results §1); 9c to 9e were amended for six runbook defects, documentation only. |
-| Recommendations for stage 3 | Six in results §8 (§9a's stale-counter wording; judge `:345` as a check site; the replay path, a second unguarded path; a §6a citation; template changes; do not trust private upstream helpers) and the five of `MAX_HINT_BUFFERS` (results §8 there). **Not applied** (readings existed). |
+| Recommendations for stage 3 | Six in results §8 (§9a's stale-counter wording; judge `:345` as a check site; the replay path, a second unguarded path; a §6a citation; template changes; do not trust private upstream helpers) and the five of `MAX_HINT_BUFFERS` (results §8 there). **Not applied** (readings existed), **except recommendation 1 of `cdc_total_space`** (§9a's stale-counter prediction), applied 2026-10-06 on Jingsong's approval after the runs: §9a is no longer byte-identical to the freeze, which its results §8 records. |
 | Open question, still open | `MAX_HINT_BUFFERS` results §5.1b part 3: is its reading rule's 4 MiB band binding on its own, or does the create-trace clause decide? I read the clause as deciding; if the band is binding, that tier has "no §9a row fits" and the README says to amend §9a and run the tier again. |
 | Nodes right now | NODE1 (`pc80`) is the only node used; it is stopped, nothing running; `~/cassandra-run1` is built (`ant build-test`), its `data/` is wiped and `conf/cassandra.yaml` restored; the harness copies are in `~/stage4-harness-run/cdc/` and `cdc-run1/`, the logs in `~/stage4-logs/cdc/` (`cluster-pass1/`, `cluster/`, `unit/`). `~/cassandra-node2` (the hints ring member's data) was not touched. NODE0 (`pc66`) was not touched this session (per the previous handoff its `data/` holds the hints case's ring and diagnostic data; its state now is unchecked); NODE2 (`pc72`) was never needed. Details: `environment.md` §6. |
 | Commit state | Base `ec90cea`. **Nothing was committed or pushed this session.** Uncommitted, all of it: the case file (§6b, §8, §9, §10, §11), `_INDEX.md`, the stage-4 README row, `environment.md` §6, this file, the harness folder `harness/cdc_total_space-processNewSegment-allowance/`, the results file and `results/cdc_total_space-processNewSegment-allowance/` (`run1/` scripts, `unit/`, `cluster/`, `cluster-pass1/`, `cluster-attempts/`, the tables and the two self-check outputs). |
@@ -325,8 +358,7 @@ CloudLab experiments on one control subnet (`198.22.255.77` and `.91`). CloudLab
 `HANDOFF.md`, `environment.md` and the case files are the only record a new node inherits. Full run logs are on each
 node in `~/stage4-logs/`, outside the repo. Access details are in the resume block above.
 
-**Open stage-4 follow-ups:** convert the other eight cases to the new §9 layout
-before their runs. (The stale §9d–§9g references in the root `README.md`,
+**Open stage-4 follow-ups:** audit and freeze each of the eight cases converted 2026-10-06, and write their harnesses, before their runs. (The stale §9d–§9g references in the root `README.md`,
 `stage3-ai-deep-read/long-path/playbook.md` and `rejected.md` were cleared 2026-09-30; the
 remaining ones sit in old-layout case files, where they are correct.)
 

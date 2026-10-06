@@ -172,7 +172,7 @@ The `tryGet` / `tryGetAtLeast` entry points at
 [`:224-230`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L224-L230)
 are the exception — their contract is explicitly "returns null if the pool is
 exhausted", so callers using those do see the refusal. Which callers use which
-entry point was not enumerated here; §9e leaves it as the question a null
+entry point was not enumerated here; §9a's Conclusions table leaves it as the question a null
 result would raise.
 
 ## 6. Code path
@@ -212,7 +212,7 @@ only the log level tells them apart.
 |-------|---------|
 | **Object created** | `BufferPool$Chunk`, wrapping an aligned direct `ByteBuffer` of `MACRO_CHUNK_SIZE`. |
 | **Resource consumed** | **Off-heap (direct) bytes.** |
-| **Rough sizing** | `MACRO_CHUNK_SIZE = 64 * NORMAL_CHUNK_SIZE` ([`:385`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L385)) with `NORMAL_CHUNK_SIZE = 128 << 10` ([`:128`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L128)) — i.e. **8 MiB**, fixed. **The comment above `MACRO_CHUNK_SIZE` says "1 MiB" and is stale**; the arithmetic gives 8 MiB. This matters for the test design, because the ceiling is quantised in 8 MiB steps (§9d). |
+| **Rough sizing** | `MACRO_CHUNK_SIZE = 64 * NORMAL_CHUNK_SIZE` ([`:385`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L385)) with `NORMAL_CHUNK_SIZE = 128 << 10` ([`:128`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L128)) — i.e. **8 MiB**, fixed. **The comment above `MACRO_CHUNK_SIZE` says "1 MiB" and is stale**; the arithmetic gives 8 MiB. This matters for the test design, because the ceiling is quantised in 8 MiB steps (§9a, Prediction). |
 | **Lifetime / release** | A macro chunk is held by the pool and recycled between callers rather than freed per use; `memoryAllocated` is decremented only when the pool actually releases a chunk. For the `chunk-cache` pool, `recyclePartially` is `true`, so partially-freed chunks are reused before new ones are taken. |
 
 ## 8. Maximum memory bound
@@ -233,110 +233,231 @@ off-heap footprint.
 
 ## 9. Test design (guidance for stage 4)
 
-**Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+**Stage 3 writes this section; stage 3 never runs it** — no measured numbers
+and no verdict here; results go to
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+The test sets `file_cache_size`, drives concurrent reads so that the `chunk-cache`
+pool wants more memory than the limit allows, and reads three things side by side:
+the bytes the pool reserved, the bytes handed out around the pool, and the
+node's real direct memory. **Run so far:** none. Converted to this layout 2026-10-06.
 
-**The best-instrumented case in this folder.** `BufferPoolMetrics` exposes the
-limit, the operand **and** the escape hatch as gauges, per pool. No proxies are
-needed, which is unusual here and makes this the case whose §8 claim can be
-settled most cleanly: the prediction is literally "`Size` plateaus at
-`Capacity` while `OverflowSize` grows", and both numbers are readable.
+### 9a. Procedure and conclusions
+
+**Testability:** config, **restart-only** — every step of the limit path is
+`static final` (§4): no setter and no JMX. Each capacity value costs a restart.
+
+**Claim under test:** `file_cache_size` bounds the **pooled** direct memory of the
+`chunk-cache` buffer pool: `memoryAllocated` never exceeds the threshold, and the
+pool stops one whole 8 MiB macro chunk short, at `⌊threshold / 8 MiB⌋ × 8 MiB`. When
+the pool is at its ceiling nothing fails and nothing waits: the caller allocates its
+buffer straight from the OS, counted as overflow with **no ceiling of its own**. So the
+node's off-heap memory for these reads is pooled plus overflow, and §8 claims that
+total does not move with the knob.
+
+**How this verifies the hypothesis** (a restatement of the claim, procedure,
+prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** pooled bytes are capped at the quantised limit; past it the
+  overflow takes the demand; the total is set by the demand, not by the knob.
+- **Test:** vary `file_cache_size` (16, 64, 100, 128 MiB and the default), apply the
+  same concurrent read load at each, and read the pool's `Capacity`, `Size`,
+  `OverflowSize`, `Hits` and `Misses`, and the JVM's native memory.
+- **Logic:** (1) at each value the load must exceed the pool, or the run is invalid.
+  (2) Pooled bytes (`Size − OverflowSize`) stop at the quantised limit while
+  `OverflowSize` rises: usage **stops at the limit** and the disallow branch fired.
+  (3) The plateau moves with the knob in 8 MiB steps: usage **follows the constraint**.
+  (4) The pooled-plus-overflow total and the native-memory rise stay (nearly) flat
+  across the sweep: §8's claim that the limit bounds the pool, not the memory.
+- **Refuted if:** pooled bytes pass the threshold or do not move with the knob; the
+  native-memory rise follows the knob (§8 refuted); or a caller sees the refusal
+  instead of overflowing (rows of the Conclusions table).
+
+**Procedure:**
+
+1. **Unit tier** — (a) run upstream `BufferPoolTest` (pool of 8 MiB; `testMaxMemoryExceeded*`
+   request double the maximum). (b) Run the harness test `BufferPoolCeilingTest` (9c):
+   pools of 16, 20 and 64 MiB, driven with 128 KiB requests to the ceiling and one past
+   it, asserting the quantised ceiling, a non-null buffer at the next request, a rising
+   `overflowMemoryInBytes()`, `tryGet` returning `null`, and the overflow returning to
+   zero when the buffers are put back.
+2. **Cluster tier** — one node, restarted per value; the same read load at each.
+3. **At each value:** idle control → **A**, a load below the pool → **B**, a load far
+   above it. No scenario C: the overflow is the escape hatch and is read in B.
+4. **Compare** with the prediction and read the result below.
+
+**Prediction.** Notation: *T* = `file_cache_size` in bytes; *M* = 8 MiB (the macro
+chunk, §7); `P` = `Size − OverflowSize` (the pooled reservation); `O` = `OverflowSize`;
+`D` = the demand: the direct bytes the readers want at once, the same at every value.
+
+- **Capacity:** the `Capacity` gauge equals *T* at every value; the startup line reads
+  `Global buffer pool limit is <T> for chunk-cache`.
+- **A (`D` < pool):** `P` rises to about `D` rounded up to chunks, `O = 0`, `Misses`
+  small against `Hits`, no `Maximum memory usage reached` line.
+- **B (`D` > pool):** `P` plateaus at `⌊T / M⌋ × M`: 16, 64, 96 (for 100 MiB: one chunk
+  short of the limit) and 128 MiB. `O` is positive and rises with `D − P`. `Misses`
+  rises.
+- **Total:** `P + O ≈ D` at every value above the saturation point, so it varies
+  across the sweep by much less than `P` does. Stated as a relation (estimate): from
+  16 to 128 MiB `P` changes by 112 MiB; the total and the native-memory rise over idle
+  change by at most 25 % of that (28 MiB).
+- **Default:** *T* = `min(512 MiB, maxMemory / 4)` = 512 MiB at `-Xmx4G`; if `D` is below
+  512 MiB the default arm is at A's shape (`O = 0`), which is the control that the
+  knob does nothing when the pool is not exhausted.
+
+**Conclusions:**
+
+| Result | Conclusion |
+|---|---|
+| `P` plateaus at `⌊T / M⌋ × M` at the saturated values and moves with *T* in 8 MiB steps, `O` rises, `Capacity` = *T*, and the total (and native memory over idle) is nearly flat across the sweep | **Confirmed**, including §8: the limit bounds the pool, not the memory. Report the pooled/overflow split at each value. |
+| `P` and the ceiling as above, but native memory over idle falls as *T* falls (beyond the 25 % band) | **Confirmed for the pool; §8 refuted** — the knob does bound the node's direct memory for these reads (check that the overflow is not being released earlier). |
+| `P` passes the threshold by more than one chunk | **Refuted** — the CAS accounting does not hold, or another path allocates chunks without passing `allocateMoreChunks()`. |
+| `P` does not move with *T* across the saturated values | **Refuted** — not the binding limit. Re-read, do not re-run (check that the startup line shows the value). |
+| `P` plateaus and `O` stays zero while readers block or error | **Not confirmed** — a caller uses `tryGet` / `tryGetAtLeast` (§5) and sees the refusal: identify it; §8 is then true per caller. |
+| `O` is positive but `P` is below the quantised ceiling | **Not confirmed** — the overflow has another cause (an oversize request, `size > NORMAL_CHUNK_SIZE`, `BufferPool.java:910`, or an `OutOfMemoryError` fallback, §6b): read the ERROR log and the request sizes. |
+| `P` never reaches the ceiling at any value (`O = 0` throughout) | **Invalid run** — the load never exhausted the pool; raise `D` (9c) and re-run. |
+| The log shows `failed to allocate chunk` (an `OutOfMemoryError`) | **Invalid run** — native memory ran out first; raise `-XX:MaxDirectMemorySize` (9b) and re-run. |
+
+**Why `Size` alone is not enough:** `Size` already includes the overflow
+([`BufferPool.java:276`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L276)),
+so it hides the effect; only `Size − OverflowSize` is the pooled reservation.
+
+### 9b. Setup
 
 | Field | Content |
 |-------|---------|
-| **Testability** | **Config-testable, restart-only.** Every step of the limit path is `static final` (§4): no setter, no JMX. Each capacity value costs a node restart. |
-| **Constraint knob** | `file_cache_size` in `cassandra.yaml` (MiB). **Pin `-Xmx` across the sweep** — when unset the value is auto-sized to `min(512MiB, maxMemory/4)` ([`DatabaseDescriptor.java:576-577`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L576-L577)), so an unpinned heap moves the default arm. Confirm the resolved value from the startup line "Global buffer pool limit is ..." ([`BufferPools.java:47-53`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPools.java#L47-L53)). |
-| **Capacity values to test** | `file_cache_size` ∈ {`64MiB`, `128MiB`, `256MiB`, **default**}. All are whole multiples of the 8 MiB macro chunk, so the quantisation in §8 does not blur the curve. Record the resolved default rather than assuming 512MiB — it is `min(512MiB, maxMemory/4)` and a small heap changes it. |
-| **Usage-side observable** | `memoryAllocated` — pooled bytes reserved. |
-| **Instrument** | **Direct, no proxy.** [`BufferPoolMetrics`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/BufferPoolMetrics.java#L54-L64) registers, scoped by pool name (use **`chunk-cache`**, not `networking`): `Capacity` → `memoryUsageThreshold` (the limit itself), `Size` → `sizeInBytes()` = **pooled + overflow**, `UsedSize` → `usedSizeInBytes()`, **`OverflowSize`** → `overflowMemoryInBytes()` (the escape hatch), plus `Hits` / `Misses` meters. **`Size` already includes overflow** ([`BufferPool.java:276`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L276)) — so the pooled figure is `Size − OverflowSize`, and plotting `Size` alone will **hide the very effect this case is about**. Cross-check with JVM Native Memory Tracking (`-XX:NativeMemoryTracking=summary`, then `jcmd <pid> VM.native_memory summary`). |
-| **Scope of the limit** | **Per pool, node-wide.** One `chunk-cache` pool per JVM, `static final`, shared by every table and every read. `N = 1`, no multiplier — but also no isolation, so any read on any table moves the operand. |
-| **Suggested level** | **Both.** Unit: `test/unit/org/apache/cassandra/utils/memory/BufferPoolTest.java` constructs pools directly and is the natural home for an assertion that `allocateMoreChunks()` returns `null` at the boundary and that the caller still gets a buffer via overflow — the latter is the escape hatch expressed as a test, and is the cheapest way to establish §5's claim. `test/unit/org/apache/cassandra/net/BufferPoolAllocatorTest.java` is also relevant. Cluster: needed for the dose-response and the NMT cross-check. |
+| **Constraint knob** | `file_cache_size` in `cassandra.yaml` (MiB); unset means `min(512MiB, maxMemory / 4)` ([`DatabaseDescriptor.java:576-577`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L576-L577)). Restart-only. Unit tier: the pool takes the threshold in its constructor, `new BufferPool(name, bytes, recyclePartially)` ([`:187`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L187)). |
+| **Confirm it took effect** | `logs/system.log`: `Global buffer pool limit is <T> for chunk-cache and <N> for networking` ([`BufferPools.java:47-53`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPools.java#L47-L53)); and the gauge `org.apache.cassandra.metrics:type=BufferPool,scope=chunk-cache,name=Capacity` (bytes). |
+| **Capacity values** | `16MiB`, `64MiB`, `100MiB` (not a multiple of 8 MiB: the quantisation), `128MiB`, and unset. Record the resolved default. |
+| **Scope** | **Per pool, node-wide.** One `chunk-cache` pool per JVM, shared by every table and every read. N = 1. |
+| **Level** | Both. Unit: `BufferPoolTest` (upstream) and the harness `BufferPoolCeilingTest`; `BufferPoolAllocatorTest` (`net`) is the networking instance, not this one. Cluster: for the demand-driven curve and the native-memory read. |
 
-### 9a. Workload — driving the usage operand
+**What drives the pool.** With the chunk cache **off** (the default:
+`cassandra.file_cache_enabled` is false; `ChunkCache` is built only when it is true,
+[`ChunkCache.java:51-54`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cache/ChunkCache.java#L51-L54)),
+the pool's users are the per-reader buffers of `BufferManagingRebufferer`
+([`:45`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/BufferManagingRebufferer.java#L45)),
+one per open reader, returned when the reader closes, plus compressed hint reads. So
+`D` is the number of concurrently open readers times their chunk size. The first run
+**confirms** that the load moves `Size` at all (control below); if not, set
+`disk_access_mode: standard` (the mmapped paths do not use the pool) and re-check.
 
-The operand grows when readers need off-heap buffers faster than the pool
-recycles them, so the workload is **read-heavy over compressed SSTables**.
+**Hold fixed:**
 
-- Single node, dedicated, `-Xmx` pinned, NMT enabled at JVM start.
-- One table with compression enabled (the default `LZ4Compressor`) — the chunk cache holds *decompressed* data, so an uncompressed table under-exercises the pool.
-- Load a dataset several times larger than `file_cache_size` so reads cannot all be served from cache, then run a **random-read** workload with `cassandra-stress` at high concurrency. Random access maximises chunk-cache misses and therefore buffer demand.
-- Keep `memtable_allocation_type: heap_buffers` so the memtable pools do not also move native memory (§9g).
+| Setting | Value | Why |
+|---|---|---|
+| `-Xms4G -Xmx4G` | fixed | The default limit derives from the heap size. |
+| `-XX:MaxDirectMemorySize` | `8G` | The JVM's own backstop (§8) must not bind: native exhaustion makes the pool return `null` for another reason (§6b). |
+| `-XX:NativeMemoryTracking=summary` | every arm | Must be set at JVM start; every arm has it, the idle control included. |
+| `networking_cache_size` | default | A separate pool and case; it also books native memory (read in the idle floor). |
+| `cassandra.file_cache_enabled` | `false` (default) | The cache would hold buffers and change `D`; the case is about the pool. |
+| `memtable_allocation_type` | `heap_buffers` (default) | Off-heap memtables also allocate native memory. Start from `conf/cassandra.yaml`, not `cassandra_latest.yaml`. |
+| Table | one table, `compression` default (`LZ4Compressor`, `chunk_length_in_kb` 16), `RF = 1` | Compressed reads go through the rebufferer. |
+| Dataset | built once and reused at every value | See 9c. |
+| Traffic | reads only during A and B; no writes, no repair | Flushes and compactions open readers too and move `D`. |
 
-**Deterministic single-shot form:** set `file_cache_size` to a small multiple
-of 8 MiB (say 64MiB = 8 chunks), then issue enough concurrent random reads that
-demand exceeds 8 chunks. The pool fills to exactly its ceiling within seconds
-and every further request goes to overflow — the boundary is reached on the
-first burst, with no throughput race.
+**Controls:**
 
-### 9b. Scenario A — just reach capacity
+- **Idle run** — node up, no reads: the pooled and overflow floors and the native-memory floor.
+- **Reader-demand check** — once, at the default, a short read load: `Size` must rise above its idle value; otherwise the load does not use the pool (9a, Invalid run).
+- **Default arm** — the same load at the unset value: usually A's shape.
 
-Drive read concurrency so pooled bytes approach but do not reach the ceiling.
+**Reset between runs:** stop the node (`bin/nodetool stopdaemon`), check nothing is left, move `logs/` aside, edit `file_cache_size`, start it again. **Keep the data directory** (the dataset is reused); do not run compactions.
 
-Expect at each value: `Size − OverflowSize` climbing toward `Capacity` and
-plateauing just below it; `OverflowSize` **at or near zero**; `Hits` high
-relative to `Misses`; no "Maximum memory usage reached" line in the log. The
-zero overflow is what makes this the control.
+### 9c. Workload
 
-### 9c. Scenario B — try to exceed capacity
+`D` must exceed the largest tested pool, so many readers must be open at once. A read
+of one partition opens a reader per SSTable that may hold it, so the dataset is built
+from **many overlapping SSTables** and read at high concurrency.
 
-Push read concurrency past what the pool can serve. **Nothing fails and
-nothing blocks** (§6b):
+**Harness.** `<harness>` stands for
+`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/file_cache_size-allocateMoreChunks-memoryUsageThreshold`.
+Work for step 1, before run 1:
 
-| Expected | Evidence |
+| File | What it is |
 |---|---|
-| Pooled bytes (`Size − OverflowSize`) **plateau at `floor(Capacity / 8MiB) × 8MiB`** | The core prediction, and the quantisation is testable: expect the plateau one macro chunk short of `Capacity` when `Capacity` is not a multiple of 8 MiB. |
-| **`OverflowSize` rises** and keeps rising under sustained load | The escape hatch, directly measured. This is the headline number. |
-| `Misses` rises relative to `Hits` | Secondary confirmation that the pool stopped serving. |
-| The `NoSpamLogger` INFO line "Maximum memory usage reached (...) for chunk-cache buffer pool" appears | Direct evidence the check fired — but **rate-limited**, so treat its presence as confirmation and its absence as inconclusive. |
-| **Total direct memory (NMT) keeps growing past `file_cache_size`** | The §8 claim, cross-checked outside Cassandra's own accounting. |
-| No exception, no stall, no client-visible effect | Distinguishes this from `cdc_total_space` and the hints case. |
+| `BufferPoolCeilingTest.java` | Unit tier. Package `org.apache.cassandra.utils.memory`; modelled on `BufferPoolTest`; see 9e. |
+| `pool-sampler.sh` | Cluster tier. Every 5 s prints, with a timestamp, `Capacity`, `Size`, `UsedSize`, `OverflowSize`, `Hits`, `Misses` (scope `chunk-cache`) and NMT `Other` (`jcmd <pid> VM.native_memory summary`). |
 
-### 9d. Expected dose-response
+```bash
+# unit tier
+ant testsome -Dtest.name=org.apache.cassandra.utils.memory.BufferPoolTest
+cp <harness>/BufferPoolCeilingTest.java test/unit/org/apache/cassandra/utils/memory/
+ant testsome -Dtest.name=org.apache.cassandra.utils.memory.BufferPoolCeilingTest
 
-If the traced path is the binding limit:
+# cluster tier — build the dataset once (default file_cache_size is fine), with compaction off
+bin/cqlsh -e "CREATE KEYSPACE keyspace1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+bin/nodetool disableautocompaction
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do   # same 200,000 keys each pass, new SSTable each time
+  tools/bin/cassandra-stress write n=200000 no-warmup -pop seq=1..200000 -rate threads=32; bin/nodetool flush keyspace1; done
+# per value: the read load
+tools/bin/cassandra-stress read n=3000000 no-warmup -pop dist=UNIFORM\(1..200000\) -rate threads=512
+```
 
-- **Pooled bytes plateau linearly in `file_cache_size`**, in 8 MiB steps, across 64 / 128 / 256 MiB. A plateau that is not a multiple of 8 MiB would mean §7's chunk size is wrong — worth checking, since the source comment claims 1 MiB and the arithmetic says 8 MiB.
-- **`OverflowSize` at saturation rises as `file_cache_size` falls**, at fixed offered load. Ideally the sum `pooled + overflow` is roughly *constant* across the sweep — that is the sharpest statement of §8: the knob moves bytes between two columns rather than changing the total.
-- **Total NMT direct memory should be roughly flat across the sweep.** This is the prediction that matters, and it is the opposite of what an operator expects from a config called "cache size".
-- **`Misses` rises as the knob falls**, quantifying the recycling cost.
+**Starting values.** Estimates, not measurements:
 
-### 9e. Interpretation — what each outcome means
+| Setting | Value | Why |
+|---|---|---|
+| SSTables | 20, each holding all 200,000 keys (about 40 MB each: stress's default is five 34-byte columns) | A read of one key may open a reader on up to 20 SSTables (bloom filters pass for all); 512 threads × up to 20 readers × one 16 KiB buffer ≈ 160 MiB wanted at once at most, above the 128 MiB value; a lower real overlap would make `D` smaller. |
+| Read threads | `threads=512` | Maximum overlap of open readers. |
+| Reads | `n=3000000` | Several minutes of sustained load at one value. |
+| Time in B | 120 s after the first sample with `O > 0` | Several samples. |
 
-| Observation at scenario B | Reading |
-|---|---|
-| Pooled bytes plateau at the quantised ceiling; `OverflowSize` grows; total direct memory roughly flat across the sweep | **The case is confirmed, including §8** — the limit bounds the pool, not the memory. Report the pooled/overflow split at each value. |
-| Pooled bytes plateau **and** `OverflowSize` stays at zero, with clients blocking or erroring | Some caller uses `tryGet`/`tryGetAtLeast` (§5) rather than `get`, and does see the refusal. Identify which — that would mean the constraint is a real ceiling on *that* path, and §8 needs qualifying per caller. |
-| Pooled bytes climb past `Capacity` | The CAS accounting is not holding, or another path allocates chunks without passing `allocateMoreChunks()`. A real finding; chase it. |
-| Total direct memory **falls** as `file_cache_size` falls | §8 is wrong: the knob does bound the node's off-heap usage after all. That would be a better outcome for operators and a correction to this case. |
-| Nothing moves at any value | The workload never exercised the pool. Confirm table compression is on and reads are missing the cache before concluding — `Hits`/`Misses` settles it. |
+**If the load does not exhaust the pool** (`O` stays zero at 16 MiB under the reads): stop; raise `threads` to 1,024; then set `disk_access_mode: standard`; then lower the limit to `8MiB`. Record each step. If none works, the run is invalid (9a).
 
-### 9f. What would refute this case
+### 9d. Observables
 
-The case claims the comparison at `allocateMoreChunks():443` gates creation of
-the pool's 8 MiB macro chunks, so **pooled** off-heap bytes for the
-`chunk-cache` pool are bounded by `file_cache_size`. It is refuted if
-`Size − OverflowSize` grows materially past `Capacity` under sustained load,
-or does not move when `file_cache_size` is swept.
+| Observable | How to read it | When to sample | Trap |
+|---|---|---|---|
+| **Usage counter** — pooled reservation, `P` | `Size − OverflowSize` of `org.apache.cassandra.metrics:type=BufferPool,scope=chunk-cache` ([`BufferPoolMetrics.java:54-64`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/BufferPoolMetrics.java#L54-L64)); `bin/nodetool sjk mx -mg -b '<name>' -f Value` per gauge. `pool-sampler.sh` does it. | Every 5 s | **`Size` includes `OverflowSize`**: subtract it. Read the two gauges within one second of each other, or `P` is a difference of two moments. The pool counts **reserved** bytes, not bytes in use (`UsedSize`). Use scope `chunk-cache`, not `networking`. |
+| **Disallow evidence** | The INFO line `Maximum memory usage reached (…) for chunk-cache buffer pool, cannot allocate chunk of 8MiB` in `logs/system.log` (grep); `Misses` rising against `Hits`; `OverflowSize` > 0. | Throughout | The line goes through a `NoSpamLogger` (rate-limited): its presence confirms, its absence does not refute. It is logged only when the threshold is above zero. |
+| **Bypass volume** — the overflow | `OverflowSize` (bytes currently outstanding outside the pool; it falls when those buffers are put back, [`BufferPool.java:246`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L246)), peak per scenario. | Every 5 s | It is a gauge of bytes outstanding, not a cumulative count: take the peak. It also holds legitimately oversize requests (`size > 128 KiB` go straight to `allocate`, `:910`); the load's 16 KiB buffers do not. |
+| **Real resource** — native memory | `jcmd <pid> VM.native_memory summary`, category `Other` (`allocateDirect` is booked there on this JDK; confirm on the idle run); cross-check `java.nio:type=BufferPool,name=direct` `MemoryUsed`. | Idle control; every 5 s in B | Rise **over the idle control**. The networking pool, Netty and other direct users also move `Other`: hold them fixed (9b). `allocateDirectAligned` reserves 8 MiB per macro chunk, so `Other` moves in 8 MiB steps with `P`. Each `jcmd` is a JVM start (1–2 s): time-stamp every reading. Never use RSS. |
 
-**`OverflowSize` growing does not refute the case** — §5, §6b and §8 all state
-that the caller falls back to unpooled direct allocation, and measuring how
-much is the most valuable thing stage 4 can do here. The claim that *is*
-independently falsifiable, and worth stating separately, is §8's: that total
-off-heap memory for file reads is roughly invariant under the knob. If NMT
-shows total direct memory tracking `file_cache_size` proportionally, §8 is
-wrong and this constraint is a genuine memory ceiling after all.
+### 9e. Running the scenarios
 
-### 9g. Confounders and controls
+**Unit tier.** Commands are in 9c. Record pass or fail and the asserted values.
 
-- **Other direct-memory consumers dominate an NMT total**: the `networking` `BufferPool` (its own instance, its own config), Netty's pooled buffers, and the memtable pools if `memtable_allocation_type` is off-heap. Set `memtable_allocation_type: heap_buffers`, scope every Cassandra metric to **`chunk-cache`**, and use NMT's category breakdown with an idle-node baseline subtracted.
-- **`-Xmx` changes the default `file_cache_size`.** Pin it; record the resolved limit from the startup log in every arm, including the default arm.
-- **Table compression must be on.** The chunk cache holds decompressed data; an uncompressed table exercises the pool far less.
-- **The dataset must exceed the cache.** If it fits, `Hits` stays high, the pool never saturates and every arm looks identical.
-- **`Size` includes overflow.** Plotting it alone hides the effect. Always plot `Size − OverflowSize` and `OverflowSize` separately.
-- **The INFO log is rate-limited** by `NoSpamLogger` — absence is not evidence the check did not fire.
-- **Distinguish the two `null` returns.** An `OutOfMemoryError` from `allocateDirectAligned` also yields `null` (§6b) and would look identical in the metrics. Check for the ERROR line naming `-XX:MaxDirectMemorySize`, and set `-XX:MaxDirectMemorySize` comfortably above every tested value so native exhaustion is never the binding constraint.
-- **Baseline** at the default with a light read load; **idle control** with the node up and no reads, for the pooled and overflow floors.
+1. Run upstream `BufferPoolTest`. Record pass or fail.
+2. Run `BufferPoolCeilingTest`. For each pool size (16 MiB, 20 MiB, 64 MiB), construct
+   `new BufferPool("stage4", <bytes>, true)` and:
+   1. request 128 KiB direct buffers (`get(128 << 10, BufferType.OFF_HEAP)`) from one
+      thread until `sizeInBytes()` stops rising by whole chunks: asserts
+      `sizeInBytes() − overflowMemoryInBytes()` equals `⌊bytes / 8 MiB⌋ × 8 MiB`
+      (16, 16 and 64 MiB) and `overflowMemoryInBytes()` is 0;
+   2. requests five more buffers: each returns **non-null**; `overflowMemoryInBytes()`
+      is up by 5 × 128 KiB; the pooled figure is unchanged (the refusal is absorbed);
+   3. `tryGet(128 << 10)` returns `null` (the refusal is visible on the `try` entry
+      point only);
+   4. puts the five overflow buffers back: `overflowMemoryInBytes()` returns to 0;
+   5. puts everything back: the pooled reservation stays (the pool recycles chunks).
+
+   Record pass or fail and, per pool size, the printed figures.
+
+**Before the cluster tier.** Build the dataset once, with the default limit, and check
+it: `bin/nodetool tablestats keyspace1.standard1` shows 20 SSTables. Run the
+**reader-demand check** (9b) and record `Size` against the idle floor.
+
+**Cluster tier, for each capacity value:**
+
+1. **Control run** — set `file_cache_size`, reset (9b), start with
+   `JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -XX:MaxDirectMemorySize=8G"` and
+   `MAX_HEAP_SIZE=4G`, grep the startup line, read `Capacity`, and with no reads take
+   the idle floor of every observable (9d) after 60 s.
+2. **Scenario A — below the pool** — start `pool-sampler.sh` and a light read load
+   (`threads=16`, `n=100000`): record `P`, `O`, `Misses` and native memory when `P` has
+   settled. Expect `O = 0`. (At 16 MiB, skip A and record why: the pool is exhausted by
+   any load.)
+3. **Scenario B — far above it** — start `threads=512`, note the time; sample for 120
+   s after `O > 0` first appears; grep the log for the INFO line; stop the load; wait
+   30 s and record the floor again (the overflow returns to 0, the reservation stays).
+4. **Stop** — `bin/nodetool stopdaemon`, check nothing is left, and keep the sampler
+   output and the log.
+
+**Default arm (9b)** — once, B only.
+
+Stop when each scenario's records are taken; a run where `O` stays zero at 16 MiB is invalid (9a).
+
+**Record for stage 4:** the `cassandra.yaml` diff and JVM options in force, the exact commands, the dataset check, the sampler output, the startup and INFO log lines, every reading above, per capacity value.
 
 ## 10. Provenance
 
@@ -346,8 +467,8 @@ wrong and this constraint is a genuine memory ceiling after all.
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). |
 | **Escape hatch / Target-3 note** | **Yes, and it is the point of the case.** The disallow branch withholds the `Chunk`, but [`LocalPool.get():923`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L923) then allocates the buffer directly from the OS via `ByteBuffer.allocateDirect`, tracked as `overflowMemoryUsage` with **no ceiling of its own**. So `file_cache_size` bounds the pool, not the node's off-heap memory. Unlike the memtable `markBlocking()` hatch this is not a special caller state and unlike the compaction guard it is not a skipped path — it is the ordinary, always-taken fallback. Two milder observations: an `OutOfMemoryError` in the allocation is funnelled into the same `null`/overflow path, so native exhaustion is indistinguishable from configured refusal in the metrics; and the `tryGet`/`tryGetAtLeast` entry points do propagate the refusal, so the hatch may not apply to every caller. |
-| **Stage-4 feedback** | none yet |
-| **Notes** | **Stale comment in the source**: [`BufferPool.java:384`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L384) documents `MACRO_CHUNK_SIZE` as "1 MiB", but `64 * (128 << 10)` is **8 MiB**. §7 and §9d use 8 MiB. Worth an upstream report. |
+| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
+| **Notes** | **Stale comment in the source**: [`BufferPool.java:384`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L384) documents `MACRO_CHUNK_SIZE` as "1 MiB", but `64 * (128 << 10)` is **8 MiB**. §7 and §9a use 8 MiB. Worth an upstream report. **Found while converting §9 (2026-10-06):** the chunk cache is off by default (`cassandra.file_cache_enabled`), so the `chunk-cache` pool's users are the per-reader buffers of `BufferManagingRebufferer`; the old §9 assumed the cache held the buffers. The case's claims are unchanged; §9b records the consequence for the workload. |
 
 ---
 

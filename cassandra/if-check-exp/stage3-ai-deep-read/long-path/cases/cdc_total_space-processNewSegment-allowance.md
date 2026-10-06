@@ -301,15 +301,19 @@ prediction and conclusions in this section; it adds none):
 at *A* = 280 MiB, *S* = 16 MiB):
 
 - **Plateau.** When the first rejection happens, and for as long as writes keep being
-  rejected, *L* = *k* and the links hold `k × S` bytes. The idle floor is min(*k*, 2)
-  links: the segment being written and the one prepared ahead, both made at start-up.
+  rejected, *L* = *k* or *k* + 1 and the links hold `L × S` bytes, so at most `A + S`.
+  The idle floor is min(*k*, 2) links: the segment being written and the one prepared
+  ahead, both made at start-up; at *k* = 1 the floor can therefore be 2 links, one above *k*.
   For *A* < *S* (*k* = 0) the first segment is forbidden, every CDC write is rejected
   from the first one, and `cdc_raw` stays empty.
 - **A segment is forbidden when it is created exactly when `S + counter > A`.** The
   counter adds *S* for each permitted segment, plus the few bytes of `_cdc.idx` files once
-  a directory walk has run. So *k* + 1 links can exist only if the counter was stale (one
-  segment low) when the (*k* + 1)-th segment was created: possible, rare (a race a few
-  microseconds wide), and recorded as a deviation if seen.
+  a directory walk has run. So *k* + 1 links exist exactly when the counter was stale (one
+  segment low) when the (*k* + 1)-th segment was created. The directory walk that refreshes the
+  counter is submitted inside `processNewSegment` and often finishes before the new segment's
+  hard link exists, so this is expected at a large share of creations (a fifth to a half), not
+  a rare race. It is not a deviation: the creation trace (counter against the links that existed)
+  is how each extra link is attributed.
 - **Step.** Between values the plateau moves by the difference in *k*: 4, 8, 16 links.
 - **Second knob.** At *A* = 280 MiB and *S* = 16 MiB, *L* = 17 (272 MiB), against 8
   links (256 MiB) at *S* = 32 MiB: the byte ceiling moves by 16 MiB with *S* alone.
@@ -346,8 +350,9 @@ values decide, not an absolute size.
 
 | Result | Conclusion |
 |---|---|
-| Blocking arms: a rejection occurs at every value; the plateau is *k* links (for *A* an exact multiple: *k* − 1 or *k*) and the peak never above *k*; the bytes stay flat through B; the creation trace shows a segment forbidden exactly when `S + counter > A`; the step between values follows ⌊*A*/*S*⌋ and the *S* = 16 arm lands at its own ⌊*A*/*S*⌋; deleting the links releases the writer; non-CDC writes succeed | **Confirmed** — the check enforces as traced; §8's ceiling is `⌊A/S⌋ × S`, at or below *A*. |
-| As above, but one value has a plateau or peak of *k* + 1 links, and the trace shows a counter lower than the files on disk when the extra segment was created | **Confirmed, with a one-segment overshoot** — the counter was stale; this qualifies §8 (the ceiling can exceed *A* by up to one segment) and is not a refutation. Record how often. |
+| Blocking arms: a rejection occurs at every value; the plateau is *k* or *k* + 1 links (for *A* an exact multiple: *k* − 1 or *k*) and never above *k* + 1, each extra link attributed by the creation trace to a stale counter; the bytes stay flat through B; the creation trace shows a segment forbidden exactly when `S + counter > A`; the step between values follows ⌊*A*/*S*⌋ and the *S* = 16 arm lands at its own ⌊*A*/*S*⌋; deleting the links releases the writer; non-CDC writes succeed | **Confirmed** — the check enforces as traced; §8's ceiling is `⌊A/S⌋ × S`, plus one segment when the counter is stale: at most `A + S`. |
+| A plateau or peak of *k* + 1 links at some value, and the trace shows a counter lower than the files on disk when the extra segment was created | **Confirmed, with a one-segment overshoot** — the counter was stale; this is the expected form of the first row, not a deviation. Record how often. |
+| A plateau or peak of *k* + 1 links with no stale counter in the trace, or more than *k* + 1 links | **Refuted** — something other than the traced check admitted the segment. |
 | Non-blocking arms: no rejection, *L* never above *k* + 1, the oldest names disappear, the trace shows the deletion (`bytesToFree`, `remaining`), bytes written far above bytes retained | **Bypass as recorded, bounded by deletion** — `cdc_block_writes: false` turns off the rejection, not the cap: the cap is kept by deleting un-consumed links. Target-3 material: correct §10's "bypassing the check entirely" and record the loss ratio. |
 | Non-blocking arm: no rejection and *L* grows past *k* + 1 | **Refuted** for the non-blocking path — the deletion branch does not hold the cap. |
 | Blocking: the plateau exceeds *k* + 1; or it is *k* + 1 and the trace does not show a counter lower than the files when the extra segment was created; or the bytes keep rising while writes are rejected | **Refuted** — the check does not cap usage, and no recorded mechanism accounts for the excess. |

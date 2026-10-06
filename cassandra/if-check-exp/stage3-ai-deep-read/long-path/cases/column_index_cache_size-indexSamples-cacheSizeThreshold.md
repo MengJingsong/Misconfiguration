@@ -245,7 +245,7 @@ carelessly would overclaim:
   the *mix*: fewer, fatter entries rather than more, thinner ones. Expect
   `KeyCache.Size` to stay near capacity either way while `KeyCache.Entries`
   falls as the threshold rises. This is the single most important thing to
-  know before designing an experiment on it (§9f).
+  know before designing an experiment on it (§9a, "Why the entry class and not the node's heap").
 - **Where it does move the ceiling.** Outside the key cache — entries held
   transiently during flush and compaction, and the `DataOutputBuffer` of
   `cacheSizeThreshold * 2` allocated per partition writer once the threshold
@@ -258,132 +258,229 @@ carelessly would overclaim:
 
 ## 9. Test design (guidance for stage 4)
 
+**Stage 3 writes this section; stage 3 never runs it** — no measured numbers
+and no verdict here; results go to
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+The test sets `column_index_cache_size` live, reads partitions whose block indexes are
+of known sizes, and checks that each entry is built as the array (`IndexedEntry`) or the
+file position (`ShallowIndexedEntry`) exactly where the threshold falls, and what that
+does to the key cache and the heap. **Run so far:** none. Converted to this layout
+2026-10-06.
+
+### 9a. Procedure and conclusions
+
+**Testability:** config, **live-settable** — the `Config` field is `volatile`; the JMX
+operation `StorageService.setColumnIndexCacheSizeInKiB(int)` (**KiB**, no `nodetool`
+subcommand; `SetColumnIndexSize` in `nodetool` is the different knob `column_index_size`)
+takes effect on the **read** path at the next deserialization, and on the **write** path
+only for partition writers built afterwards (§4). One node lifetime runs the whole sweep.
+
+**Claim under test:** `column_index_cache_size` selects, per partition, which object holds
+its block index: when the serialized index (plus 4 bytes per block) is at most the
+threshold the entry is an `IndexedEntry` retaining an `IndexInfo[]` on the heap, otherwise a
+`ShallowIndexedEntry` retaining a file position; nothing is rejected, the cost reappears as
+index-file reads. The ceiling is per entry (cached entries are charged their
+`unsharedHeapSize()` against `key_cache_size`), so the node-wide effect is indirect (§8).
+
+**How this verifies the hypothesis** (a restatement of the claim, procedure,
+prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** the entry class flips at the threshold, the flip changes the retained
+  bytes by the `IndexInfo[]`, and the key cache re-caps the total.
+- **Test:** four partition classes with block indexes of about 1, 8, 64 and 512 KiB, read
+  at thresholds of 0, 2, 16 and 256 KiB, with the key cache small and fixed; read the class
+  of each cached entry (heap histogram), the key cache's `Entries` and `Size`, and the
+  index-file reads.
+- **Logic:** (1) each class's index size must sit where intended against the thresholds, or
+  the run is invalid. (2) At each threshold, the classes whose index is at most it are
+  `IndexedEntry` and the others `ShallowIndexedEntry`: the decision **stops the retained
+  bytes at the threshold** per entry. (3) The number of `IndexedEntry` instances follows
+  the threshold: usage **follows the constraint**. (4) The flip is the only difference
+  between the arms; the read-path site follows a live change with no rewrite. (5) `Entries`
+  rises as `Size` falls when entries go shallow, and `Size` stays near the cache capacity
+  when they are indexed and demand exceeds it (§8's re-cap).
+- **Refuted if:** the entry class does not change where the threshold crosses the
+  index size; or the cached weights do not differ as the two `unsharedHeapSize()`
+  implementations say (rows of the Conclusions table). A flat node heap does not refute it
+  (§8).
+
+**Procedure:**
+
+1. **Unit tier** — (a) run upstream `RowIndexEntryTest` (the two ends of the sweep,
+   thresholds 99999 and 0). (b) Run the harness test `ColumnIndexThresholdTest` (9c): the
+   write-path entry and the read-path entry at thresholds of 0, 2, 16 and 256 KiB and at
+   the boundary, with asserted classes and `unsharedHeapSize()`.
+2. **Cluster tier** — one node, BIG format, four partition classes loaded once; the
+   threshold changed over JMX between reads, no restart.
+3. **At each value:** idle control → **A**, a class whose index is **below** the threshold
+   → **B**, a class **above** it. No scenario C: no bypass is recorded (the check cannot be
+   switched off; a table on BTI never reaches it, which is a setup condition here).
+4. **Compare** with the prediction and read the result below.
+
+**Prediction.** Notation: *T* = the threshold in bytes; for a partition with *n* blocks,
+`S(n)` = `indexSamplesSerializedSize + 4 n` (the check's operand, §4); the classes C1 to C4
+have `S` ≈ 1, 8, 64 and 512 KiB (to be measured at step 1; see 9c); an entry is indexed iff
+`S(n) ≤ T`, and `n > 1`.
+
+- **Class by threshold:** at *T* = 0: C1–C4 shallow. At 2 KiB: C1 indexed, C2–C4 shallow.
+  At 16 KiB: C1, C2 indexed. At 256 KiB: C1–C3 indexed, C4 shallow (C4 is never indexed
+  at any tested value: the never-allow control).
+- **Entry weights:** `IndexedEntry.unsharedHeapSize()` grows linearly with *n* (about
+  a few hundred bytes per block); `ShallowIndexedEntry.unsharedHeapSize()` is the constant
+  `BASE_SIZE`, independent of *n*.
+- **Key cache, per class read in full (cache capacity `K` = 8 MiB, enough partitions that the
+  indexed weights exceed `K`):** indexed: `Size` ≈ `K` (the weigher caps it) and `Entries`
+  low; shallow: `Size` well below `K`, `Entries` = the partitions read. So across the
+  sweep for a class, `Entries` falls and `Size` rises as it goes from shallow to indexed.
+- **Heap histogram:** instances of `RowIndexEntry$IndexedEntry` and `IndexInfo` appear
+  for the indexed classes and not for the shallow ones; instances of
+  `RowIndexEntry$ShallowIndexedEntry` appear for the shallow ones.
+- **Live read path:** after the threshold is lowered over JMX **without** rewriting
+  anything, re-reading the same SSTables yields shallow entries for the classes now above
+  it; no new SSTable is written.
+- **Total heap** barely moves across the sweep once the key cache is warm (the cache
+  re-caps it), moving only by the uncapped terms (the per-writer `DataOutputBuffer` of
+  `2 T`, transient flush entries).
+
+**Conclusions:**
+
+| Result | Conclusion |
+|---|---|
+| Entry class follows `S ≤ T` for every class and threshold (unit and cluster); `unsharedHeapSize()` is linear in *n* for indexed and constant for shallow; `Entries` and `Size` move as predicted; the live JMX change re-flips read-path entries with no rewrite | **Confirmed** — the check selects the representation as traced; the node-wide ceiling is re-capped by the key cache (§8). |
+| Entry class follows the threshold, but `Size` does not stay near `K` for indexed entries with demand above `K` | **Refuted** for §8's re-cap — the weigher is not applied as §5 says; chase it. |
+| Entry class does not change at the predicted *T* for any class | **Refuted** — the same representation is produced either side; or the table is not on BIG or the partitions are single-block (`:239`): check those first (they make it an **Invalid run**). |
+| Read-path entries follow a live change but write-path entries (new SSTables) lag it | **Confirmed, as §4 says** — the write path reads the value at writer construction; record the lag (not a refutation). |
+| Entry class follows the threshold but `Entries` does not rise when shallow | **Not confirmed** — the cache budget is not the binding term (the shallow weights are too small to matter, or `key_cache_size` is too large); lower `K` and re-run. |
+| Total node heap is flat across the sweep | **Expected, not a refutation** (§8). Report it as the key cache's budget. |
+| Index-file reads do not rise when entries go shallow | **Not confirmed** — §6b's displaced cost is not shown; read the reader metrics before concluding. |
+| `S` of the classes is not within a factor of 2 of 1, 8, 64, 512 KiB, or `tablestats` shows another SSTable format | **Invalid run** — rebuild the dataset (9c) or fix the format (9b). |
+
+**Why the entry class and not the node's heap:** the node's heap is dominated by other
+things and the key cache re-caps the total, so it can stay flat for reasons unrelated to
+this check; only the class of each entry, which the comparison alone decides, ties a
+reading to it.
+
+### 9b. Setup
+
 | Field | Content |
 |-------|---------|
-| **Testability** | **Config-testable, and hot-settable** — the field is `volatile` with a JMX setter, and the read-path site reads it live at every deserialization. This is the easiest case in the folder to sweep: no restart, no rebuild, no cluster strictly required. |
-| **Constraint knob** | `column_index_cache_size` in `cassandra.yaml` ([shipped at line 1200](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/cassandra.yaml#L1200), default `2KiB`). At runtime: JMX `StorageServiceMBean.setColumnIndexCacheSizeInKiB(int)` ([`StorageService.java:6815-6826`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageService.java#L6815-L6826)); the older `setColumnIndexCacheSize` is deprecated in 5.0 but still present. In a unit test: `DatabaseDescriptor.setColumnIndexCacheSize(int kib)` ([`DatabaseDescriptor.java:2054-2057`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L2054-L2057)). **No `nodetool` subcommand** — `tools/nodetool/` has `SetColumnIndexSize`, which is the *different* knob `column_index_size`; JMX directly is required. |
-| **Capacity values to test** | `column_index_cache_size` ∈ {`0KiB`, **`2KiB`** (default), `16KiB`, `256KiB`}. Four values spanning three decades, because the interesting transition is where it crosses a typical partition's index size, and that size is workload-dependent. `0KiB` is the degenerate control: every multi-block partition must go shallow. |
-| **Usage-side observable** | `indexSamplesSerializedSize + columnIndexCount * 4` on the write path; `size` on the read path. **What stage 4 can actually see is the outcome, not the operand**: the ratio of `IndexedEntry` to `ShallowIndexedEntry`. |
-| **Instrument** | **The operand is not exposed and there is no log line** — unlike the compaction case, neither site logs anything (checked 2026-09-28). Measure the *effect* instead, via three instruments: (1) **`KeyCache.Entries` and `KeyCache.Size`** gauges ([`CacheMetrics.java:69-71`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/CacheMetrics.java#L69-L71), over JMX or `nodetool info`) — at a fixed workload and fixed `key_cache_size`, `Entries` falling as the threshold rises is the signature of more partitions taking the allow branch; (2) **heap after a forced full GC** (`jcmd <pid> GC.heap_info`) for the absolute figure; (3) at the unit tier, call `unsharedHeapSize()` on the constructed entry directly and assert its class — this measures the operand's consequence exactly and is the only tier that can do so. |
-| **Scope of the limit** | **Per row index entry** — i.e. per partition, per SSTable. Node-wide effect is `threshold × N` where `N` is the number of resident entries, but `N` is not free: the key cache caps the product (§8). For the uncapped terms, the multiplier is the number of concurrent partition writers `C` for the `2 × threshold` buffer. Hold `key_cache_size`, `column_index_size` (block granularity, default **64KiB** for BIG via [`BigFormatPartitionWriter.DEFAULT_GRANULARITY:49`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L49)) and the partition width fixed across the sweep — all three move the same observable. |
-| **Suggested level** | **Unit first — scaffolding exists and already sweeps this exact knob.** [`test/unit/org/apache/cassandra/io/sstable/format/big/RowIndexEntryTest.java:106-118`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/unit/org/apache/cassandra/io/sstable/format/big/RowIndexEntryTest.java#L106-L118) has `testC11206AgainstPreviousArray` (`setColumnIndexCacheSize(99999)`) and `testC11206AgainstPreviousShallow` (`setColumnIndexCacheSize(0)`) — the two ends of the sweep, already written, differing only in this knob. Extend that pattern to assert the entry's **class and `unsharedHeapSize()`** at each of the four values. Also relevant: `test/unit/org/apache/cassandra/io/sstable/keycache/KeyCacheTest.java` and `test/unit/org/apache/cassandra/cql3/KeyCacheCqlTest.java`. Run: `ant testsome -Dtest.name=org.apache.cassandra.io.sstable.format.big.RowIndexEntryTest`. Then the cluster tier for the heap figure. |
+| **Constraint knob** | `column_index_cache_size` in `cassandra.yaml` ([shipped at `conf/cassandra.yaml:1200`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/cassandra.yaml#L1200), default `2KiB`). Live: `bin/nodetool sjk mx -ms -b 'org.apache.cassandra.db:type=StorageService' -f ColumnIndexCacheSizeInKiB -v <KiB>` (`StorageServiceMBean.setColumnIndexCacheSizeInKiB(int)`; **KiB**). Unit tier: `DatabaseDescriptor.setColumnIndexCacheSize(int kib)` ([`:2054-2057`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L2054-L2057)). |
+| **Confirm it took effect** | `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.db:type=StorageService' -f ColumnIndexCacheSizeInKiB` after every change; the unit test asserts `DatabaseDescriptor.getColumnIndexCacheSize()` in bytes. |
+| **Capacity values** | `0KiB`, `2KiB` (default), `16KiB`, `256KiB`, plus the boundary pair around one class's `S` (9e). |
+| **Scope** | **Per row-index entry** (per partition per SSTable). The node-wide effect is capped by `key_cache_size`; the uncapped terms are the per-writer `DataOutputBuffer` of `2 T` and transient flush entries (§8). |
+| **Level** | Both. Unit: upstream `RowIndexEntryTest` (`Assume.assumeTrue(BigFormat.isSelected())`), `KeyCacheTest`; harness `ColumnIndexThresholdTest`. Cluster: the key cache and the heap histogram. |
 
-### 9a. Workload — driving the usage operand
+**Hold fixed:**
 
-The usage operand is **one partition's serialized block index**, which grows
-with partition width. So the workload is: build partitions wide enough that
-their index crosses the threshold, and read them.
+| Setting | Value | Why |
+|---|---|---|
+| SSTable format | BIG (`sstable.selected_format` default) | The check is not reached on BTI; confirm with `bin/nodetool tablestats` / the file names (`nb-…-big-Data.db`). |
+| `column_index_size` | `4KiB` | Block granularity sets the block count, hence `S`: with 1 KiB rows it makes about 4 rows a block, so `S` ≈ 8 bytes a row (an estimate). Set it before loading; it is also `volatile`, so do not change it afterwards. |
+| `key_cache_size` | `8MiB` (`K`) | Small, so the indexed classes exceed it and the re-cap shows; the default (5 % of heap, at most 100 MiB) would hide it. |
+| `-Xms4G -Xmx4G` | fixed | Heap readings are compared across values. |
+| Table `ks1.t`, autocompaction | `(pk bigint, ck bigint, v blob, PRIMARY KEY (pk, ck))`, `'enabled': 'false'` | A compaction or flush rewrites entries with the *then-current* write-path threshold and mixes the arms. |
+| Payload | 1 KiB random blob per row | Fixed, so block counts are known from row counts. |
+| `row_cache_size` | `0` (default) | Row cache would answer reads without the index. |
 
-- Single node. `CREATE TABLE ... (pk bigint, ck bigint, v blob, PRIMARY KEY (pk, ck))`, **BIG format explicitly** (`sstable_format`/table option) — the check does not exist for BTI.
-- Write a small number of **very wide** partitions: a few hundred MiB across a handful of `pk` values, so each partition spans many 64KiB blocks and its index is kilobytes. `cassandra-stress` with a narrow partition-key distribution, or a small CQL client with an exact row count, which is preferable here because the index size must be predictable.
-- `nodetool flush`, then `nodetool invalidatekeycache` before each measurement so the cache refills under the threshold being tested.
-- Read the partitions back (point reads on `pk` with a mid-range `ck`) to force `deserialize()` and populate the key cache.
+**Controls:**
 
-**Deterministic single-shot form:** rather than sweeping until something
-changes, compute one partition's index size first — write it, then read
-`KeyCache.Size / Entries` at `column_index_cache_size = 0` versus a very large
-value; the difference is that partition's `IndexInfo` array cost. Then set the
-threshold just above and just below that figure. The transition is then a step
-at a known point, not a search.
+- **Idle run** — data loaded, no reads: the heap and key-cache floors.
+- **Key-cache-off arm** — `nodetool setcachecapacity 0 0 0` at one threshold: the capping removed (the cross-check of §8).
+- **Read-before-write check** — one threshold change over JMX followed by re-reading the same SSTables, without any flush: shows the live read path.
 
-### 9b. Scenario A — just reach capacity
+**Reset between runs:** to repeat an arm: `bin/nodetool invalidatekeycache`, then the same reads; do not restart (the key cache is saved and restored across restarts by `AutoSavingCache`). A new sweep: `invalidatekeycache`, set the next value, read.
 
-Set the threshold **just above** the measured index size of the test
-partitions, invalidate the key cache, and read them.
+### 9c. Workload
 
-Expect at each value: entries deserialize as `IndexedEntry`; `KeyCache.Size`
-per entry is high and `KeyCache.Entries` correspondingly low for a fixed
-`key_cache_size`; index-file reads after the first are avoided. At the unit
-tier, assert `entry instanceof IndexedEntry` and that `unsharedHeapSize()`
-scales with block count.
+The usage operand is one partition's serialized block index, which grows with the
+partition's width. Load four classes of partitions once, then read each class at each
+threshold.
 
-### 9c. Scenario B — try to exceed capacity
+**Harness.** `<harness>` stands for
+`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/column_index_cache_size-indexSamples-cacheSizeThreshold`.
+Work for step 1, before run 1:
 
-Set the threshold **just below** the same index size, invalidate the key
-cache, read again. **Nothing is rejected** — §6b — so the expected
-observations are all indirect:
-
-| Expected | Why, from §6b |
+| File | What it is |
 |---|---|
-| Entries deserialize as `ShallowIndexedEntry`; `unsharedHeapSize()` constant | `:367-372` skips the index bytes |
-| `KeyCache.Entries` rises at constant `KeyCache.Size` | each entry is cheaper, so more fit in the same budget |
-| More index-file reads per query; read latency for these partitions rises | the block index is re-read on each access |
-| **No** error, log line, exception or counter | the disallow path is silent |
+| `ColumnIndexThresholdTest.java` | Unit tier. Package `org.apache.cassandra.io.sstable.format.big`; modelled on `RowIndexEntryTest.DoubleSerializer` (which writes 100 KiB of fake bytes per row so each row becomes an `IndexInfo`); see 9e. |
+| `load-classes.sh` | Cluster tier. Loads the four classes (below) with a small CQL client or `cassandra-stress` user profile, flushes after each class, and prints `tablestats` and the table's `du -sb`. |
+| `read-class.sh` | Cluster tier. For one class, issues one point read per partition at a mid-range `ck`, with one pass, and prints the elapsed time. |
+| `entry-census.sh` | Cluster tier. `jcmd <pid> GC.class_histogram`, filtered to `RowIndexEntry$IndexedEntry`, `RowIndexEntry$ShallowIndexedEntry` and `IndexInfo`, with a timestamp. |
 
-The absence of any rejection signal is the defining feature of this case, and
-stage 4 should not wait for one.
+```bash
+# unit tier
+ant testsome -Dtest.name=org.apache.cassandra.io.sstable.format.big.RowIndexEntryTest
+cp <harness>/ColumnIndexThresholdTest.java test/unit/org/apache/cassandra/io/sstable/format/big/
+ant testsome -Dtest.name=org.apache.cassandra.io.sstable.format.big.ColumnIndexThresholdTest
 
-### 9d. Expected dose-response
+# cluster tier: schema once, load once, then per threshold
+bin/cqlsh -e "CREATE KEYSPACE ks1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}; CREATE TABLE ks1.t (pk bigint, ck bigint, v blob, PRIMARY KEY (pk, ck)) WITH compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'};"
+<harness>/load-classes.sh
+bin/nodetool sjk mx -ms -b 'org.apache.cassandra.db:type=StorageService' -f ColumnIndexCacheSizeInKiB -v <KiB>
+bin/nodetool invalidatekeycache
+<harness>/read-class.sh <C1|C2|C3|C4>; <harness>/entry-census.sh
+```
 
-If the traced path is the binding limit, across `0KiB → 2KiB → 16KiB → 256KiB`
-at a **fixed** workload, fixed `key_cache_size` and fixed partition width:
+**Starting values.** Estimates, not measurements:
 
-- **A step, not a ramp.** The `IndexedEntry` fraction goes from 0 to 1 as the
-  threshold crosses the partitions' index size. With uniform partitions the
-  transition is sharp; with a spread of widths it smears into an S-curve whose
-  shape is the partition-width distribution. Either is consistent with the
-  case; a *linear* response is not.
-- **`KeyCache.Entries` falls as the threshold rises**, while `KeyCache.Size`
-  stays pinned near `key_cache_size`. This is the key prediction, and it is
-  the opposite direction to a naive "bigger limit = more memory" expectation.
-- **Total heap is roughly flat** across the sweep once the key cache is warm,
-  moving only by the uncapped terms in §8 (per-writer buffers, transient
-  flush/compaction entries).
-- **Cross-check:** with the key cache disabled (`key_cache_size: 0`), heap
-  attributable to these entries should track the threshold much more directly,
-  because the capping mechanism is removed. If it does not, the §8 reading is
-  wrong.
+| Class | Partitions × rows | Partition size | `S` (estimate, ≈ 8 B per row) |
+|---|---|---|---|
+| C1 | 2,000 × 120 | 120 KiB | ≈ 1 KiB |
+| C2 | 500 × 1,000 | 1 MiB | ≈ 8 KiB |
+| C3 | 100 × 8,000 | 8 MiB | ≈ 64 KiB |
+| C4 | 16 × 64,000 | 64 MiB | ≈ 512 KiB |
 
-### 9e. Interpretation — what each outcome means
+About 2.5 GB in all. **Step 1 measures `S` per class** (the unit test prints `S(n)` for the same row shape; the cluster tier cross-checks it from the key cache `Size` of one class read at `0` against a very large value, the difference being that class's `IndexInfo` cost, as the case's single-shot form says), and the thresholds are then kept as 0, 2, 16, 256 KiB with the classes' row counts rescaled if an `S` is outside a factor of 2 of its target.
 
-| Observation at scenario B | Reading |
-|---|---|
-| Entry class flips to `ShallowIndexedEntry` at the predicted threshold; `KeyCache.Entries` rises; index-file reads rise | The check enforces as traced. |
-| Entry class never changes at any threshold | Either the table is not on the BIG format (the check does not exist for BTI — verify first), or partitions are single-block and hit [`:239`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L239) instead. Fix the workload, not the case. |
-| Entry class flips as predicted but total heap is unchanged | **Expected, not a refutation** — see §8 and §9f. The key cache caps the total; report it and move on. |
-| `KeyCache.Size` grows past `key_cache_size` as the threshold rises | The weigher is not being applied as §5 claims. That *would* refute part of §8, and is worth chasing. |
+**If the classes straddle the thresholds poorly** (for example C2's `S` above 16 KiB): scale its row count by the ratio and rebuild that class only; record it.
 
-### 9f. What would refute this case
+### 9d. Observables
 
-The case claims the comparison at `:113`/`:360` **determines which of two
-objects is created**, and that the chosen object's heap cost differs by the
-retained `IndexInfo[]`. It is refuted if, across the threshold sweep with the
-partition index size held fixed and known, the created entry's class does not
-change at the predicted point — i.e. the same representation is produced on
-both sides of the threshold.
+| Observable | How to read it | When to sample | Trap |
+|---|---|---|---|
+| **Usage counter** — `S`, the index size per partition | Unit: `partitionWriter.indexInfoSerializedSize()` and `getColumnIndexCount()` (the check's operands, [`BigFormatPartitionWriter.java:113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L113)). Cluster: not exposed (no log line, no gauge); `KeyCache.Size` at `0` against a large value for one class read in full, divided by the entries. | Step 1, and when a class is rebuilt | The cluster figure is the weight, not the serialized size; the unit test gives the exact `S`. |
+| **Disallow evidence** — the entry class | `entry-census.sh`: counts and bytes of `RowIndexEntry$IndexedEntry`, `RowIndexEntry$ShallowIndexedEntry`, `IndexInfo` after a read pass; unit: `entry instanceof IndexedEntry`. | After each read pass | `GC.class_histogram` forces a full collection and is the only direct census: take it after the pass, before the cache is invalidated. The disallow path logs nothing and no counter moves (§6b): do not wait for one. |
+| **Key cache** | `org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries` and `…name=Size` and `…name=Capacity` ([`CacheMetrics.java:69-71`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/CacheMetrics.java#L69-L71)); `bin/nodetool sjk mx -mg -b '<name>' -f Value`. | Before and after each read pass | `Size` is the weighted size (the weigher is the entries' `unsharedHeapSize()`, §5); `invalidatekeycache` first, or the previous threshold's entries remain. The cache is also filled by flushes and compactions: autocompaction is off. |
+| **Displaced cost** — index-file reads | The elapsed time of `read-class.sh`; the table's index-file reader activity (`nodetool tablestats` local read latency, or `iostat`) for the shallow arms. | Per read pass | Page cache hides the extra reads on a small dataset; compare shallow and indexed passes on the same class and take the ratio, and read `iostat` for the device. |
+| **Real resource** — heap | `jcmd <pid> GC.run` then `jcmd <pid> GC.heap_info` (the census already forces a collection); the heap after the pass minus the idle floor and the young generation (as the memtable cases do). | Idle control; after each pass | Flat across the sweep is expected (§8). Never use RSS. |
 
-**What would *not* refute it, and must be said plainly:** finding that total
-node heap barely moves across the sweep. §8 predicts exactly that, because the
-key cache re-caps the total. A stage-4 run that concludes "the constraint does
-not limit memory" from a flat heap curve has measured the key cache's budget,
-not this check. The falsifiable claim is about **per-entry** cost and **entry
-class**, which is why the unit tier — where both are directly observable — is
-the primary tier for this case rather than a supplement.
+### 9e. Running the scenarios
 
-### 9g. Confounders and controls
+**Unit tier.** Commands are in 9c. Record pass or fail and the asserted values.
 
-- **`key_cache_size` is the dominant confounder** (§8). Hold it fixed across
-  the sweep, and run one arm with it set to `0` as the control that separates
-  the per-entry effect from the cache's capping.
-- **`column_index_size` (block granularity, default 64KiB for BIG)** sets how
-  many blocks a partition has, hence its index size. Changing it moves the
-  transition point and would be mistaken for the knob under test. Hold fixed
-  and record it.
-- **Partition width distribution** is effectively the independent variable in
-  disguise. Use a fixed, known set of partitions; do not let a stress profile
-  vary widths between runs.
-- **SSTable format** — confirm BIG. On BTI this code is not reached at all.
-- **Key cache warmth** — `nodetool invalidatekeycache` before each
-  measurement, and allow the same number of reads to warm it, or `Entries`
-  comparisons are meaningless. Note the cache is also **saved and restored
-  across restarts** (`AutoSavingCache`), so a restart does not clear it.
-- **Compaction and flush** rewrite entries with the *then-current* threshold
-  on the write path, while the read path uses the live value — so a run that
-  changes the knob and then triggers compaction is measuring a mixture.
-  Disable autocompaction and avoid flushing mid-sweep.
-- **Baseline** at default `2KiB` with the standard workload; **idle control**
-  with the data loaded but no reads issued, to separate cache-driven heap from
-  everything else.
+1. Run `RowIndexEntryTest` (upstream). Record pass or fail.
+2. Run `ColumnIndexThresholdTest`. With the 100 KiB-per-row builder of
+   `RowIndexEntryTest.DoubleSerializer` (one `IndexInfo` per row), for *n* in 2, 10, 34, 270
+   and 2,200 rows and for each threshold in 0, 2, 16 and 256 KiB:
+   1. builds the partition and prints `S(n)` (`indexInfoSerializedSize() + 4 n`);
+   2. asserts the write-path entry from `RowIndexEntry.create(...)` is an `IndexedEntry` iff
+      `S(n) ≤ T` and `n > 1`, else a `ShallowIndexedEntry`;
+   3. serializes it and deserializes it at **each** of the four thresholds (a live change):
+      asserts the class of the deserialized entry follows `size ≤ getColumnIndexCacheSize()`
+      ([`RowIndexEntry.java:360`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L360)) whatever the write-time threshold was;
+   4. asserts `unsharedHeapSize()`: for `IndexedEntry` linear in *n*, for `ShallowIndexedEntry`
+      equal to the same constant for every *n*;
+   5. at the boundary: finds the *n* where `S(n)` crosses 2 KiB (the threshold's unit is KiB, so
+      the boundary is on the 2,048-byte line) and asserts the class flips between *n* and *n* + 1.
+
+   Record pass or fail and, per row, the printed `S(n)`, class and `unsharedHeapSize()`.
+
+**Before the cluster tier.**
+
+1. **Dataset check.** `tablestats` shows the table on BIG and the four classes' SSTables; step 1's `S` per class is within a factor of 2 of its target (9c).
+2. **Instrument check.** Read one C1 partition at `2KiB`, run `entry-census.sh`: it must show at least one `IndexedEntry` and non-zero `IndexInfo` bytes; then lower the threshold to `0` without a flush, `invalidatekeycache`, read again: `ShallowIndexedEntry` instead. A census that never shows either stops the run.
+
+**Cluster tier, for each threshold:**
+
+1. **Control run** — with the data loaded and autocompaction off, take the idle heap and key-cache readings and a census.
+2. **Scenario A (a class with `S ≤ T`)** — set the threshold, `invalidatekeycache`, read that class once through, record `Entries`, `Size`, the census, the elapsed time, and the heap.
+3. **Scenario B (a class with `S > T`)** — the same for a class above the threshold; also the C4 class at every value (never indexed).
+4. **Live-flip check** — at `256KiB` read C3 (indexed), then lower to `16KiB` **without** a flush or restart, `invalidatekeycache`, read C3 again: the entries are now shallow with no new SSTable (`ls` shows no new `*-Data.db`).
+5. **Key-cache-off arm** — at `256KiB`, `nodetool setcachecapacity 0 0 0`, read C3, take the heap: the retained bytes then track the entries without the cache's cap (restore the capacity afterwards).
+
+Stop when each scenario's records are taken; a run where the classes do not straddle the thresholds is invalid (9a).
+
+**Record for stage 4:** the `cassandra.yaml` diff (`column_index_size`, `key_cache_size`) and JVM options in force, the exact commands and thresholds, each class's `S`, the census, the key-cache readings, the elapsed times and the heap readings, per threshold and class.
 
 ## 10. Provenance
 
@@ -393,7 +490,7 @@ the primary tier for this case rather than a supplement.
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). All line numbers carried from `deferred.md` §1c (`:113`, `:171`, `:227`) confirmed unchanged. |
 | **Escape hatch / Target-3 note** | **No flag-style escape hatch** — the check cannot be switched off, only moved. Two adjacent observations for Target 3: (1) the constraint is **format-scoped**, so a table on the BTI format bypasses it entirely; (2) the read-path site reads the config **live per deserialization**, so a JMX change takes effect on already-written SSTables with no rewrite — an unusually cheap way to change a memory characteristic at runtime, in either direction. |
-| **Stage-4 feedback** | none yet |
+| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
 | **Notes** | The third check site (`RowIndexEntry.java:360`) was **not** recorded in `deferred.md` §1c, which listed only the two write-path sites. It is the site that governs steady-state heap, and it is pattern (a) rather than (b). Found while tracing the decision point for this write-up. |
 
 ---

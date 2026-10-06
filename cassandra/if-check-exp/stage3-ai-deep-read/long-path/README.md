@@ -80,9 +80,9 @@ Every **new** case's §9 designs both tiers, or says why one is not possible:
 Each tier has its own setup, workload, observables, prediction and conclusions
 rows (method: [`../../README.md` §8](../../README.md#8-designing-a-test-for-a-case)). A tier
 that cannot be done keeps its place in §9 as `n/a: <reason>`, with what answers
-the same question instead; it is not deleted. The 11 cases already filed are
-**not** reworked: several describe one tier or none, and stage 4's audit handles
-them as it does today.
+the same question instead; it is not deleted. All 11 filed cases are in the new §9
+layout (the last eight converted 2026-10-06, not yet audited); copy the structure from
+`_TEMPLATE.md` and the most recent conversions, not from older prose.
 
 ### 2.4 What counts as done
 

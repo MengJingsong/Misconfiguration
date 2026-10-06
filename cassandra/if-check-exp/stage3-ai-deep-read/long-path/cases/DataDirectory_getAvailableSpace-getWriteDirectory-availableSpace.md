@@ -245,134 +245,249 @@ regardless of its free space, and this ceiling does not apply.
 
 ## 9. Test design (guidance for stage 4)
 
-**Stage 3 writes this section; stage 3 never runs it.** Method and pitfalls:
-[README.md §8](../../../README.md#8-designing-a-test-for-a-case). Where stage 4's
-numbers go: [`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+**Stage 3 writes this section; stage 3 never runs it** — no measured numbers
+and no verdict here; results go to
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+The test runs the same major compaction on a nearly full filesystem under two
+partitioners — the default `Murmur3Partitioner`, where §5 says the guard never runs,
+and `ByteOrderedPartitioner`, where it does — and compares what each does. **Run so
+far:** none. Converted to this layout 2026-10-06.
 
-**This case's design is dominated by §5: the guard does not run by default.**
-On the default `diskBoundaries != null` path — `Murmur3Partitioner`, node
-owning ranges — `getWriteDirectory()` is never called and no disk-space check
-happens at all. So the experiment has **two distinct jobs**, and the second is
-the more valuable:
+### 9a. Procedure and conclusions
 
-1. **Confirm the non-domination**, by running the default configuration and
-   showing the guard never fires however little space is available. This is a
-   Target-3 result and the strongest default-mode gap recorded in this folder.
-2. **Measure the guard where it does run**, by forcing `diskBoundaries == null`
-   and sweeping the one tunable term on the limit path.
+**Testability:** partly config, partly not. The limit's dominant term, the device's
+usable bytes, is queried live from the OS ([`Directories.java:781-785`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L781-L785)):
+it is varied by **provisioning a small filesystem and a ballast file**, not by
+configuration. The tunable term `min_free_space_per_drive` is config, restart-only (no
+`volatile`, no JMX setter); at the unit tier `DatabaseDescriptor.setMinFreeSpacePerDriveInMebibytes(long)`
+sets it. The path selector, `partitioner`, is fixed when a cluster is initialised, so
+the two arms are **two clusters**, not a restart.
 
-A run that only does (2) has measured a code path the default configuration
-never takes, and would overstate the constraint badly. Do both, and report
-them as one result.
+**Two jobs.** (1) Where the guard runs (`diskBoundaries == null`), confirm that it
+refuses a compaction whose estimated output exceeds `usable − min_free_space_per_drive`
+before any file is made. (2) Where it does not (the default `Murmur3Partitioner` on a node
+that owns ranges), confirm that **no space check of this guard runs** and see what the
+compaction does instead. A run that only does (1) measures a path the default
+configuration never takes and overstates the constraint.
 
-**How to force the guarded path.** `DiskBoundaryManager.getDiskBoundaries()`
-short-circuits at [`:46-47`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/DiskBoundaryManager.java#L46-L47)
-when the partitioner has no splitter, returning boundaries with null
-`positions`. `IPartitioner.splitter()` defaults to `Optional.empty()`
-([`IPartitioner.java:148-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/dht/IPartitioner.java#L148-L151))
-and **`ByteOrderedPartitioner` and `LocalPartitioner` do not override it**,
-while `Murmur3Partitioner` ([`:435`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/dht/Murmur3Partitioner.java#L435))
-and `RandomPartitioner` do. Verified against the pinned clone 2026-09-28. So
-`partitioner: ByteOrderedPartitioner` in `cassandra.yaml` is the switch — note
-it is fixed at cluster initialization and cannot be changed on a cluster that
-already holds data, so the two arms need **separate clusters**, not a restart.
-The other route to null `positions` — empty local ranges
-([`:116-117`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/DiskBoundaryManager.java#L116-L117)) —
-is not usable, because a node owning no ranges receives no writes to compact.
+**Claim under test:** the comparison at `CompactionAwareWriter.getWriteDirectory():282`
+throws `RuntimeException` before any output `SSTableWriter` is created when the target
+directory's available bytes are below the compaction's estimated output (the sum of the
+inputs, §7); nothing is created, the inputs stay. It is reached only when
+`diskBoundaries == null` (§5): under `Murmur3Partitioner` the writer is created without
+any check (§5, §8's caveat).
+
+**How this verifies the hypothesis** (a restatement of the claim, procedure,
+prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** the guard refuses at `usable − min_free` on the guarded path, and does
+  not run on the default one.
+- **Test:** the same 8-SSTable table and the same major compaction on two clusters
+  (`ByteOrderedPartitioner` and `Murmur3Partitioner`), with free space set by ballast
+  above and below the inputs' total, and `min_free_space_per_drive` swept at a fixed
+  device; the sibling admission check is switched off so it cannot refuse first.
+- **Logic:** (1) at a free space above the total both arms compact; if not, the run is
+  invalid. (2) Below it, arm B throws the guard's exception before any output file exists:
+  usage **stops at the limit**; its message carries both operands. (3) The boundary moves
+  with free space and with `min_free_space_per_drive` by exactly the change: usage
+  **follows the constraint**. (4) Arm A throws no such exception and writes until the
+  filesystem is full: the guard is not what bounds it (**non-domination**).
+- **Refuted if:** arm B compacts with the estimate above the limit, or its boundary does
+  not follow the two terms; or arm A refuses at the guard's boundary with the guard's
+  message (rows of the Conclusions table).
+
+**Procedure:**
+
+1. **Unit tier** — (a) run upstream `CompactionAwareWriterTest` (the writers on a roomy
+   directory, `Murmur3Partitioner`). (b) Run the harness test `WriteDirectoryGuardTest` (9c)
+   once per partitioner: with the directory's available space stubbed low, the guarded
+   path throws the guard's message and creates no file; the default path throws nothing and
+   creates the writer.
+2. **Cluster tier** — two single-node clusters (arm B: `ByteOrderedPartitioner`; arm A:
+   `Murmur3Partitioner`), each with its data directory on a dedicated 4 GiB filesystem
+   (9b).
+3. **At each value:** idle control → **A**, free space above the inputs' total → **B**, free
+   space below it. No scenario C: the non-domination is arm A's reading in B, not a bypass
+   arm.
+4. **Compare** with the prediction and read the result below.
+
+**Prediction.** Notation: *T* = the inputs' on-disk total (8 × about 64 MiB = 512 MiB);
+*U* = `getUsableSpace()` of the data filesystem at the trigger (`df` "Available" for the
+user that runs Cassandra); *m* = `min_free_space_per_drive`; the guard compares
+`max(0, U − m)` with *T* (`availableSpace < estimatedWriteSize` refuses).
+
+- **A (`U − m ≥ T`), both arms:** the compaction completes, one output of about *T*,
+  no exception; peak disk use of the table about `2 T`, final about *T*.
+- **B, arm B (`U − m < T`):** `RuntimeException: Not enough space to write <T> to <dir> (<U − m>
+  available)` from `getWriteDirectory`, **before** any new file appears in the table
+  directory; the 8 inputs untouched; `du` of the table unchanged; no `SSTableWriter`.
+  Boundary: `U − m = T` is admitted, one byte less is refused.
+- **B, arm A:** no such exception. The writer is created without a check and writes; the
+  output grows until the filesystem is full, then the write fails with a filesystem error
+  (`No space left on device`, as an `FSWriteError`), the transaction aborts, the partial
+  output is removed and the inputs stay. `du` of the table peaks at about `T + U` (the
+  filesystem's free space) before the failure. What the node does next follows
+  `disk_failure_policy` (the shipped file says `stop`): read it, do not assume.
+- **Boundary shifts:** at a fixed *U* = `T + 256 MiB`, `m` = 50 MiB admits, `m` = 512 MiB
+  refuses (arm B), and `m` = 2 GiB refuses (the `availableSpace` clamp at 0). The refusal
+  point moves by exactly the change in *m*.
+- **Estimator margin:** the figure printed is *T* (the sum of the inputs), not the size of
+  the merged output; with incompressible, disjoint rows the output is about *T*, so the
+  guard refuses a compaction that is about to need about *T*, no over-refusal.
+
+**Conclusions:**
+
+| Result | Conclusion |
+|---|---|
+| Arm B refuses at `U − m < T` before any file, the boundary follows *U* and *m* exactly; arm A throws no guard message at the same *U* and fails later on a full filesystem | **Confirmed**, including §5's non-domination: the guard runs only on the guarded path. |
+| Arm B as above; arm A refuses with the guard's message at the same boundary | **§5 refuted** — some path does consult the guard under `Murmur3Partitioner` (first rule out the sibling admission check by its message); rewrite §5, §8's caveat and §10. |
+| Arm B compacts with `T > U − m` and no exception | **Refuted** for the guard — or the guarded path was not taken: check the partitioner and the `diskBoundaries` debug line first. |
+| Arm B refuses at a boundary that does not move with *m* by the change in *m* | **Refuted** in part — §4's limit arithmetic is misread. |
+| Arm B refuses but a file of the output exists in the table directory | **Refuted** for "before any file" — read §6b. |
+| Arm A completes although the filesystem cannot hold the output | **Not confirmed** for the failure mode — the estimate overstated; the output was smaller than the free space: lower the free space (ballast) and re-run. |
+| Both arms refuse with the **sibling's** message (`Not enough space for compaction … Reducing scope`) | **Invalid run** — the admission check was not switched off (9b); fix and re-run. |
+| `df` free space at the trigger differs from the intended *U* by more than 16 MiB | **Invalid run** — drift; recompute the ballast (9c) and re-run. |
+
+**Why the exception text and `df`, not `du`:** no metric or log line exposes the
+comparison on this path (only a `trace` line on success); the exception carries both
+operands, and `df` plus the inputs' `du` are the independent figures.
+
+### 9b. Setup
 
 | Field | Content |
 |-------|---------|
-| **Testability** | **Partly config-testable, partly not.** The dominant term — the device's usable bytes — is **not settable at all**; it is queried live from the OS ([`Directories.java:783`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L783)), so it is varied by **provisioning a small filesystem**, not by configuration. The tunable term `min_free_space_per_drive` is config-only (not `volatile`, no JMX setter → restart per value). The path selector `partitioner` is fixed at cluster init. Checked 2026-09-28. |
-| **Constraint knob** | Two, of different kinds. (1) **`min_free_space_per_drive`** in `cassandra.yaml` (default `50MiB`, [`Config.java:339`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L339)); at the unit tier `DatabaseDescriptor.setMinFreeSpacePerDriveInMebibytes(long)` ([`:2573-2577`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L2573-L2577), `@VisibleForTesting`). (2) **the device's free space**, varied by putting the data directory on a small dedicated filesystem — a loopback-mounted image or a small LVM volume — and by pre-filling it with ballast. The second is the honest way to move the real limit, and it is what makes this case awkward on shared CloudLab storage. |
-| **Capacity values to test** | Sweep the device: a data-directory filesystem of **1 / 2 / 4 / 8 GiB**, with a fixed compaction input size chosen so the guard's boundary falls inside that range. Cross-sweep `min_free_space_per_drive` ∈ {`50MiB` (default), `512MiB`, `2GiB`} at a fixed device size — since `availableSpace = usable − minFree`, raising the floor should shift the refusal point by exactly that many bytes, which is a sharper and much cheaper test than re-provisioning filesystems. |
-| **Usage-side observable** | `estimatedWriteSize` — `cfs.getExpectedCompactedFileSize(nonExpiredSSTables, txn.opType())`. For an ordinary compaction that is the **sum of the input SSTables' bytes**, so it is directly measurable as the on-disk size of the inputs. |
-| **Instrument** | **Neither operand is exposed as a metric**, and unlike the sibling admission case there is **no log line at the comparison** — `getWriteDirectory()` logs only a `trace` on the success path ([`:287`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L287)). So the instruments are: (1) the **`RuntimeException` message itself**, which carries both operands — "Not enough space to write X to Y (Z available)" ([`:283-286`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L283-L286)); (2) `df` on the data directory's filesystem for the limit side, and `du -sb` on the input SSTables for the usage side, both recorded before each compaction; (3) `nodetool compactionstats` and the compaction log for whether the task ran at all. |
-| **Scope of the limit** | **Per compaction attempt, per chosen directory.** Not node-wide and not cumulative: it asks only whether *this* compaction's output fits in *one* directory's free space, with no account taken of other compactions in flight — which is precisely what the sibling admission case adds. `N` = concurrent compactions, and this check does nothing to bound their sum. **Set `concurrent_compactors: 1`** so the arms are interpretable. |
-| **Suggested level** | **Unit tier strongly preferred for the guard itself; cluster tier for the non-domination.** `test/unit/org/apache/cassandra/db/compaction/writers/CompactionAwareWriterTest.java` ([`:58`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/unit/org/apache/cassandra/db/compaction/writers/CompactionAwareWriterTest.java#L58), a `CQLTester`) already constructs each `CompactionAwareWriter` subtype and drives compactions through them — the natural place to add a test that stubs `DataDirectory.getAvailableSpace()` low and asserts the `RuntimeException`, and a second asserting that on the boundary-based path **no exception is thrown however low the space**. That second test is the non-domination finding expressed as an assertion, and it is worth more than any cluster measurement. `CompactionsBytemanTest` shows the Byteman idiom for forcing a space check's outcome. Run: `ant testsome -Dtest.name=org.apache.cassandra.db.compaction.writers.CompactionAwareWriterTest`. |
+| **Constraint knobs** | (1) The device's free space: the data directory on a dedicated filesystem, varied by a **ballast** file. (2) `min_free_space_per_drive` in `cassandra.yaml` (default `50MiB`, [`Config.java:339`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L339)); restart-only; unit tier `DatabaseDescriptor.setMinFreeSpacePerDriveInMebibytes(long)`. (3) **The path selector**, `partitioner` in `cassandra.yaml`, set at cluster initialisation: `org.apache.cassandra.dht.ByteOrderedPartitioner` (no splitter, so `positions` is null, [`DiskBoundaryManager.java:46-47`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/DiskBoundaryManager.java#L46-L47), [`IPartitioner.java:148-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/dht/IPartitioner.java#L148-L151)) or `Murmur3Partitioner` (has one, [`:435`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/dht/Murmur3Partitioner.java#L435)). |
+| **Confirm it took effect** | `df -B1` of the data filesystem before each trigger (*U*); `bin/nodetool describecluster` prints the partitioner; the `Refreshing disk boundary cache for ks1.t` / `Updating boundaries` debug lines appear only on arm A (`DiskBoundaryManager`, with `DEBUG` set on it), and **never** on arm B. |
+| **Capacity values** | Device sweep at `m` = 50 MiB (arm B only is needed for the refusal; arm A is run at the same values): *U* = `T + 50 MiB + d` with `d` = +256 MiB (admitted) and −256 MiB (refused); plus a boundary pair `d` = +16 MiB and −16 MiB. `m` sweep at `U` = `T + 256 MiB`: `m` = `50MiB`, `512MiB`, `2GiB`. |
+| **Scope** | **Per compaction attempt, per chosen directory** — one compaction's output against one directory's free space, no account of other compactions. One data directory and `concurrent_compactors: 1`, so *N* = 1 and the fallback `getWriteableLocation()` (the second check site) is not reached; it is not run. |
+| **Level** | Both. Unit: the harness `WriteDirectoryGuardTest` and upstream `CompactionAwareWriterTest`; `CompactionsBytemanTest` shows the Byteman idiom. Cluster: both arms. |
 
-### 9a. Workload — driving the usage operand
+**Cluster layout.** Each cluster's data directory sits on a **dedicated 4 GiB loop
+filesystem** (the ballast makes free space exact):
 
-The operand is one compaction's estimated output, so the workload is: build
-SSTables of a known total size, constrain the device, and trigger a compaction.
+```bash
+truncate -s 4G ~/stage4-data.img && mkfs.ext4 -q ~/stage4-data.img
+sudo mkdir -p /mnt/stage4-data && sudo mount -o loop ~/stage4-data.img /mnt/stage4-data && sudo chown $USER /mnt/stage4-data
+```
 
-- Single node, **one data directory on a small dedicated filesystem** (loopback image or LVM volume), `concurrent_compactors: 1`.
-- **Arm A (default path):** `partitioner: Murmur3Partitioner`, ordinary cluster. **Arm B (guarded path):** a separate cluster initialized with `partitioner: ByteOrderedPartitioner`.
-- One table, `SizeTieredCompactionStrategy` with `'enabled': 'false'` so SSTables accumulate under the test's control.
-- Write and `nodetool flush` to produce a known number of SSTables of known total size; record `du -sb` on the table directory.
-- Add **ballast** — a plain file of known size on the same filesystem — to bring free space to the intended value. This is the cheap way to sweep the limit without re-provisioning: one filesystem, several ballast sizes.
-- Trigger with `nodetool compact <ks> <table>`.
+`data_file_directories: [/mnt/stage4-data]`; the commit log, hints and saved caches
+stay on local disk, never `/proj`. The two arms are two fresh clusters with the same
+yaml except `partitioner`.
 
-**Deterministic single-shot form:** size the ballast so that
-`usable − min_free_space_per_drive` sits just below the total input size, then
-issue one `nodetool compact`. The guard's boundary is crossed on the first
-evaluation, with no dependence on write throughput.
+**Hold fixed:**
 
-### 9b. Scenario A — just reach capacity
-
-Ballast set so free space is slightly **above** the input total, in both arms.
-
-Expect in both: the compaction runs, output written, no exception. Peak disk
-usage ≈ inputs + output while the transaction is open, falling back when it
-commits. This is the control, and it should be indistinguishable between the
-two arms — the arms diverge only when space runs short.
-
-### 9c. Scenario B — try to exceed capacity
-
-Ballast set so free space is **below** the input total. **The two arms should
-now behave completely differently**, which is the experiment:
-
-| Arm | Expected, from §5/§6b | Evidence |
+| Setting | Value | Why |
 |---|---|---|
-| **B (`ByteOrderedPartitioner`, guarded)** | `getWriteDirectory()` throws `RuntimeException` **before any output file exists**. Clean reject: no `Descriptor`, no `SSTableWriter`, no partial file, no retry and no alternate directory on this path. Input SSTables untouched. | The exception message, carrying both operands. No new files in the table directory. `du` unchanged. |
-| **A (`Murmur3Partitioner`, default)** | **No space check runs at all.** The compaction proceeds, `switchCompactionWriter()` is called directly, and the writer begins producing output on a filesystem that cannot hold it — expect the compaction to fail *later*, mid-write, with a filesystem-level error, having already consumed I/O and left a partial output file for the transaction to clean up. | Absence of the `getWriteDirectory` exception; presence of a mid-write failure with a different signature. `du` rising before the failure. |
+| `concurrent_compactors` | `1` | Another compaction's output would move free space under the test. |
+| Table `ks1.t` | `SizeTieredCompactionStrategy`, `'enabled': 'false'`, `compression = {'enabled': false}` | Autocompaction off; no compression, so the output is about the inputs' sum and the estimate is not an over-estimate. |
+| Admission check | switched off per table before each trigger: JMX `compactionDiskSpaceCheck(false)` on `org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t` | The sibling `max_space_usable_for_compactions…` check gates the same compaction earlier on both arms and would refuse first; it applies to `OperationType.COMPACTION` ([`CompactionTask.java:386-390`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L386-L390)). |
+| `disk_failure_policy` | as shipped (`stop`) | Arm A ends in a disk-write error; record the node's state after it. |
+| Data directories | exactly one | More activate the fallback (§6b). |
+| Payload | incompressible, distinct keys per SSTable | The estimate is the input sum; compressible or overlapping data shrinks the output and hides the refusal's accuracy. |
 
-**Arm A's result is the headline.** Capture the failure mode precisely — what
-exception, at what point, how much was written first, what state the data
-directory is left in. §5 predicts the gap; nobody has observed what it costs.
+**Controls:**
 
-### 9d. Expected dose-response
+- **Idle run** — dataset built, no `nodetool compact`: `df` stable over 30 s.
+- **Ample-space run** — *U* far above *T*, both arms: both must compact (the control for "the setup works").
+- **Sibling check on** — once on arm B, with the admission check left on: its message differs from the guard's, which shows the instrument can tell them apart.
 
-- **Arm B:** the refusal boundary should sit at `usable − min_free_space_per_drive` exactly. Sweeping ballast, the largest input total that still compacts should track free space linearly with slope 1; sweeping `min_free_space_per_drive` at fixed ballast should shift that boundary by exactly the change in the floor. The `min_free_space_per_drive` cross-sweep is the sharper of the two and much cheaper to run.
-- **Arm A:** **flat.** No boundary at any free-space value — compactions are always attempted, and fail only when the filesystem actually fills. A flat curve here is the **expected and correct** result, not a null finding, and it is what §5 claims.
-- **The contrast between the two curves is the deliverable.** Plot them together: one with a knee at the predicted point, one with none.
-- **The estimate is conservative** (§7/§11): `getExpectedCompactedFileSize` returns the sum of the *inputs*, while compaction normally shrinks data — so in Arm B expect refusals at input totals that would in fact have fitted. Quantify that over-refusal margin if the data is compressible.
+**Reset between runs:** stop the node, empty `/mnt/stage4-data`, rebuild the 8 inputs, recompute and write the ballast, confirm `df`, start. A new cluster for each arm (separate data, yaml, `cluster_name`).
 
-### 9e. Interpretation — what each outcome means
+### 9c. Workload
 
-| Observation at scenario B | Reading |
+The operand is one compaction's estimated output: build SSTables of a known total,
+set the free space with a ballast file, and issue one major compaction.
+
+**Harness.** `<harness>` stands for
+`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`.
+Work for step 1, before run 1:
+
+| File | What it is |
 |---|---|
-| Arm B refuses at `usable − minFree`, cleanly, before any file is created; Arm A does not refuse at all | **Both halves of the case confirmed**, including the non-domination. This is the expected result. |
-| Arm A **also** refuses, at the same boundary | §5 is wrong — some path does consult the guard under `Murmur3Partitioner`, or another disk check intervenes. Check whether the refusal came from `getWriteDirectory` or from the sibling admission case's `hasDiskSpaceForCompactionsAndStreams`, which **does** run by default and would produce a different message. A genuine correction to §5 if it really is this guard. |
-| Arm B does not refuse at any ballast level | Either the boundary path was not actually taken (confirm `ByteOrderedPartitioner` is in effect and `positions` is null), or the fallback path via `getWriteableLocation()` found another directory — with a single data directory it cannot. Check the partitioner first. |
-| Arm B refuses at a boundary that does not move with `min_free_space_per_drive` | §4's limit arithmetic is misread. That would refute part of the case. |
+| `WriteDirectoryGuardTest.java` | Unit tier. Package `org.apache.cassandra.db.compaction.writers`, modelled on `CompactionAwareWriterTest`; the partitioner comes from `-Dstage4.partitioner` (`Murmur3Partitioner` or `ByteOrderedPartitioner`), set before the server is prepared, as `MemtableSizeTestBase.setup(…, partitioner)` does (`StorageService.instance.setPartitionerUnsafe(partitioner)` then `CQLTester.prepareServer()`). See 9e. |
+| `build-inputs.sh` | Cluster tier. Writes the 8 equal SSTables, flushing after each, and prints `tablestats` and `du -sb` of the table directory (the same script as the sibling case's). |
+| `set-ballast.sh` | Cluster tier. Given the target *U*, computes `ballast = df_available − U` and writes (or resizes) `/mnt/stage4-data/ballast` with `fallocate`, then prints `df`. |
 
-### 9f. What would refute this case
+```bash
+# unit tier — one JVM per partitioner
+ant testsome -Dtest.name=org.apache.cassandra.db.compaction.writers.CompactionAwareWriterTest
+cp <harness>/WriteDirectoryGuardTest.java test/unit/org/apache/cassandra/db/compaction/writers/
+ant testsome -Dtest.name=org.apache.cassandra.db.compaction.writers.WriteDirectoryGuardTest \
+  -Dtest.jvm.args="-Dstage4.partitioner=ByteOrderedPartitioner"
+ant testsome -Dtest.name=org.apache.cassandra.db.compaction.writers.WriteDirectoryGuardTest \
+  -Dtest.jvm.args="-Dstage4.partitioner=Murmur3Partitioner"
 
-The case claims the comparison at `getWriteDirectory():282` refuses to create
-the compaction output `SSTableWriter` when the target directory's free space
-(device usable bytes minus `min_free_space_per_drive`) is below the
-compaction's estimated output. It is refuted if, **on the guarded path**, a
-compaction whose estimated output exceeds that figure proceeds to create a
-writer — i.e. no `RuntimeException` — or if the refusal boundary does not shift
-with `min_free_space_per_drive`.
+# cluster tier: schema (once per cluster), inputs, ballast, trigger
+bin/cqlsh -e "CREATE KEYSPACE ks1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}; CREATE TABLE ks1.t (pk int PRIMARY KEY, v blob) WITH compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'} AND compression = {'enabled': false};"
+<harness>/build-inputs.sh
+<harness>/set-ballast.sh <U in bytes>        # U = T + 50 MiB + d, or T + 256 MiB for the m sweep
+bin/nodetool compact ks1 t
+```
 
-**§5's non-domination claim is refuted separately, and in the opposite
-direction:** if Arm A (default `Murmur3Partitioner`) *does* refuse at this
-guard, then the guard does dominate after all and §5, §8's caveat and the
-Target-3 note in §10 all need rewriting. Of the two, that is the more
-consequential result, because the non-domination is what this case is chiefly
-known for in the index.
+**Starting values.** Estimates, not measurements:
 
-### 9g. Confounders and controls
+| Setting | Value | Why |
+|---|---|---|
+| Inputs | 8 SSTables of about 64 MiB (*T* about 512 MiB) | Output about *T* at no compression; the 4 GiB filesystem holds inputs, output and ballast with room. |
+| Payload | batches of 12,800 rows of one 5 KiB random blob, distinct keys per batch, then `nodetool flush ks1 t` | Disjoint, incompressible. |
+| Ballast | exact, from `df` at the trigger | Free space must be within 16 MiB of the intended *U*. |
+| Trigger | one `bin/nodetool compact ks1 t` | Routes through `CompactionTask`; `compactionstats` empty beforehand. |
 
-- **The sibling admission check runs on both arms and will confuse the result.** [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`](max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md) gates the same compaction earlier, by default, and its refusal message and shrink-ladder warnings are different from this guard's. **Disable it for these arms** via JMX `compactionDiskSpaceCheck(false)` on the table (it applies to `OperationType.COMPACTION`), or the sibling will refuse the compaction before this guard is ever reached — in which case Arm B measures the sibling, not this case.
-- **The partitioner is fixed at cluster init.** Arms A and B are separate clusters; do not attempt to switch one.
-- **Multiple data directories** activate the `getWriteableLocation()` fallback and its second check site, which changes the disallow behaviour from "throw" to "try another directory". Use exactly one data directory.
-- **`concurrent_compactors`** must be 1, or another compaction's output moves free space under the test.
-- **Autocompaction** must be off, and `nodetool compactionstats` checked before each trigger.
-- **Free space drifts** as data is written and compacted. Record `df` immediately before each trigger, and reset ballast between runs.
-- **The estimate is the input sum, not the output size** — an arm using highly compressible data will see refusals that a byte-accurate check would not have made. Use incompressible payloads unless measuring that margin deliberately.
-- **Baseline** with ample free space on both arms; **idle control** with the node up and no compaction, to confirm `df` is stable.
+**If sizes drift:** a `tablestats` count other than 8, or a `du` total off *T* by more than 10 %, means an automatic compaction ran or the payload changed: rebuild. Record each rebuild.
+
+### 9d. Observables
+
+| Observable | How to read it | When to sample | Trap |
+|---|---|---|---|
+| **Usage counter** — the estimate *T* | `du -sb` of the table's SSTable files before the trigger (the estimate is the sum of the inputs' on-disk lengths, [`ColumnFamilyStore.java:1700-1703`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L1700-L1703)); the exception text prints it rounded. | Before each trigger | The exception rounds with `prettyPrintMemory`; compare to the `du` total to a few percent, and take the exact boundary from the unit tier. |
+| **Limit** — `U − m` | `df -B1` Available of `/mnt/stage4-data`, minus `m`; the exception text prints it as `(<n> available)`. | Immediately before each trigger | `getUsableSpace()` excludes the filesystem's reserved blocks, as `df`'s Available does; do not use `Free`. |
+| **Disallow evidence** | `logs/system.log`: `RuntimeException: Not enough space to write <T> to <dir> (<x> available)` from `CompactionAwareWriter.getWriteDirectory` ([`:283-286`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/writers/CompactionAwareWriter.java#L283-L286)); `ls` of the table directory after the trigger: no new `*-Data.db`; `du` unchanged. | After each trigger | The sibling's text is `Not enough space for compaction <id> of ks.t, estimated sstables = …` and a `Reducing scope` warning: **different**. The guard's message is the one with `to <dir>`. |
+| **Bypass volume** — arm A's failure | The error in `system.log` (`FSWriteError` / `No space left on device`), `du -sb` of the table directory sampled each second (peak), `df` Available falling to about 0, the files left after the abort, `nodetool statusbinary` and `nodetool status` afterwards. | Throughout the trigger | Read the node's state **before** stopping it: `disk_failure_policy` may already have stopped gossip and the native transport. |
+| **Real resource** — disk | The same `du`/`df` samples. | Throughout | The inputs and the partial output coexist until the transaction aborts or commits. |
+
+### 9e. Running the scenarios
+
+**Unit tier.** Commands are in 9c. Record pass or fail and the asserted values.
+
+1. Run upstream `CompactionAwareWriterTest`. Record pass or fail.
+2. Run `WriteDirectoryGuardTest` twice (9c). In each JVM it creates a table, writes and
+   flushes a few SSTables, takes a `LifecycleTransaction` over them
+   (`OperationType.COMPACTION`) and builds a `DefaultCompactionWriter`, as
+   `CompactionAwareWriterTest.testDefaultCompactionWriter` does, with a `@BMRule` on
+   `Directories$DataDirectory.getAvailableSpace` returning 1 (the test runs under `BMUnitRunner`, as `StorageProxyTest` does):
+   1. `ByteOrderedPartitioner`: appending the first row throws `RuntimeException` whose
+      message starts `Not enough space to write` and contains `to ` and `(1 byte available)`
+      or `(0 bytes available)` (as `prettyPrintMemory` renders it); no new
+      `*-Data.db` exists in the table directory;
+   2. `Murmur3Partitioner`: appending the first row throws nothing; a `*-Data.db` for the
+      output exists (the writer was created without the check); the transaction is
+      aborted at the end of the test;
+   3. both: with the rule removed, the compaction completes.
+
+   Record pass or fail and, per step, the asserted values, and print `cfs.getDiskBoundaries().positions`
+   (null on arm B, non-null on arm A) to show which path ran.
+
+**Before the cluster tier.**
+
+1. **Instrument check.** On each arm, with ample space, build a small table, run
+   `nodetool compact`, and confirm it completes; then set the ballast to leave less than
+   the inputs' total and, on arm B only, confirm the guard's message appears. A message of
+   the sibling's form stops the run (9b).
+2. **Dataset check.** `bin/nodetool tablestats ks1.t` shows 8 SSTables of about 64 MiB.
+
+**Cluster tier, for each arm and each value (9b):**
+
+1. **Control run** — fresh cluster, mount (9b), start, build the 8 inputs, set the JMX `compactionDiskSpaceCheck(false)` on `ks1.t`, run `set-ballast.sh <U>`, record `df`, `du -sb` and the partitioner, and take 30 s of idle samples.
+2. **Scenario A (`d` = +256 MiB and +16 MiB)** — start the `du`/`df` sampler, `bin/nodetool compact ks1 t`, wait; record that it completes, the output size and the peak.
+3. **Scenario B (`d` = −16 MiB and −256 MiB)** — the same; record the exception text (arm B), or on arm A the growth of `du`, the error at the full filesystem, the files left, and the node's state.
+4. **`m` sweep (arm B)** — at `U = T + 256 MiB`, restart with `min_free_space_per_drive` = `50MiB`, `512MiB`, `2GiB` in turn (the table and inputs are kept), trigger, record admit or refuse and the printed available figure.
+5. **Stop** — `bin/nodetool stopdaemon` if the node still runs, check nothing is left, unmount, keep the logs.
+
+**Sibling-check control (9b)** — once on arm B with the admission check left on: record the message form.
+
+Stop when each scenario's records are taken; a run where the ballast leaves *U* outside the intended band is invalid (9a).
+
+**Record for stage 4:** the `cassandra.yaml` diff (partitioner, `min_free_space_per_drive`) and JVM options in force, the exact commands, `df` and `du` at each trigger, the `nodetool describecluster` output, the exception texts and error lines, the files left in the table directory, the node's state after arm A's failure, per arm and value.
 
 ## 10. Provenance
 
@@ -381,7 +496,7 @@ known for in the index.
 | **Stage-3 feed** | `3b` — established by deep-reading the source. (Stage 1/2 had surfaced this line as a row, but the case was made from the source, not the row.) |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | **Yes — significant.** The guard is bypassed entirely on the `diskBoundaries != null` path (§5), which is the **default** configuration (`Murmur3Partitioner`, node owning ranges): compaction output is then written to a boundary-selected directory with no free-space check at all. This is a stronger default-mode gap than the memtable cases' `markBlocking()` escape hatch or the native-transport `throw_on_overload=false` gap, because the check is not overridden — it is never executed. Flagged for Target 3; not pursued here. A second, milder observation: `estimatedWriteSize` is an estimate, so even on the guarded path an under-estimate admits a compaction that can still exhaust the drive mid-write. |
-| **Stage-4 feedback** | none yet |
+| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
 
 ---
 

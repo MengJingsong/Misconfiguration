@@ -17,6 +17,38 @@ which is stage 3's 3a queue.
 > judgements (source read, three rules applied), and a stage-2 file states in
 > its own header that it never applies those rules.
 
+## Write-up queue (updated 2026-10-06)
+
+**9 candidate cases** (13 rows) are qualified and unwritten, from band A1 (feed `3a`)
+and the capacity-word pass (feed `3b`); a tenth, the `networking_cache_size` sibling of
+`file_cache_size`, comes from no stage-2 row. Details of each are in the sections below.
+Filed entries stay in the section tables, struck through, only as a trail; the index of
+filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and clearest first.
+
+| # | Candidate (constraint name, §6.1) | Rows | Pattern | Notes for the write-up |
+|---|---|---|---|---|
+| 1 | `max_mutation_size` | `Mutation:172`, `CounterMutation:94` | (c) | Throws before `CommitLog.add():311` reserves segment space; the two sites are one constraint. |
+| 2 | `max_value_size` | `AbstractType:594` | (c) | **Does not dominate**: `readBuffer(in)` passes `Integer.MAX_VALUE`; list both call-site sets. |
+| 3 | `CACHEABLE_MUTATION_SIZE_LIMIT` | `Mutation:451`, `TeeDataInputPlus:58` | (a) | **One case** (serialize and deserialize sides); JVM property `cassandra.cacheable_mutation_size_limit_bytes`. Both branches allocate. |
+| 4 | `local_read_size_fail_threshold` | `ReadCommand:715` | (c) | Per-query running total; aborts. The warn twin is already rejected (Rule 3). |
+| 5 | `row_index_read_size_fail_threshold` | `RowIndexEntry:392` | (c) | Sibling of 4; throws before `new IndexedEntry` at `:362`; cross-link with the filed `column_index_cache_size`. |
+| 6 | `internode_application_send_queue_capacity` | `OutboundConnection:398`, `:416` | (b) | Send-side mirror of the two inbound cases; disallow **drops** the message (`onOverloaded`). |
+| 7 | `repair_session_max_tree_depth` | `MerkleTree:409` | (a) | The knob is a `min` cap on depth: establish which term binds before designing §9. |
+| 8 | `MAX_MATERIALIZED_KEYS` | `QueryController:449` | read it again (a or b) | Returns `null`, discarding the list; forces a different query path. Trace its constant. |
+| 9 | `Integer_MAX_VALUE` (index summary) | `IndexSummaryBuilder:204`, `:108` | (a) | Constraint is a **type bound**; §6.1 naming needs a judgement call; both sites in Location. |
+| 10 | `networking_cache_size` | none | (a) | Same check as the filed `file_cache_size`, second pool; shorter write-up, point to the sibling. |
+
+**Undecided rows to settle first or alongside** (cheap; they may add sites to the above):
+`IndexSummaryRedistribution:341`, `SystemKeyspace:1919`, `ResourceLimits:138`
+([`deferred.md`](deferred.md) §5) and `Envelope:429` (§6). Settle each by the question
+named there; the first can become a second site of the `index_summary_capacity` constraint,
+the second of `prepared_statements_cache_size`'s pool, the fourth a per-connection memory cap.
+
+**Work each candidate** per [`README.md`](README.md) §2.2 and [`playbook.md`](playbook.md):
+re-read the source with the clone open (do not trust the one-line rows below), write all nine
+fields, design **both tiers** in the §9a to §9e layout, verify every `file:line`, then move the
+candidate to `cases/` and `_INDEX.md` and strike it here.
+
 ### From the capacity-word pass, 2026-09-22 — 4 candidates, all pattern (a)
 
 Deep-read against the three rules with the source open. Each passes all
