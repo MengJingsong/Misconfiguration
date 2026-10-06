@@ -59,10 +59,12 @@ file restates its source ref in the header for this reason.
 
 ### 2.1 Verifying and linking against the local clone
 
-The pinned source is kept as a real git clone at
-`/proj/misconfiguration-PG0/git-repos/cassandra-src` (tag `cassandra-5.0.9`;
-see the root `README.md` §2). On another machine, create your own with the
-`git clone` command above. Use the clone instead of fetching whole files
+The pinned source is kept as a real git clone named `cassandra-src` (tag
+`cassandra-5.0.9`), beside this repository: at
+`/proj/misconfiguration-PG0/git-repos/cassandra-src` on CloudLab (see the root
+`README.md` §2), and for example `~/repos/cassandra-src` on a workstation. On
+another machine, create your own with the `git clone` command above. The scripts
+find it through `$CASSANDRA_SRC`, else the sibling of this repository. Use the clone instead of fetching whole files
 through GitHub — grep/window it, which saves tokens versus pulling entire
 files into context.
 
@@ -395,11 +397,14 @@ cassandra/if-check-exp/
 │       ├── _TEMPLATE.md     #     output skeleton: constraint trace + verification solution
 │       ├── _INDEX.md        #     filed solutions: sha256, isolation, leakage audit
 │       └── cases/           #     one solution per case, same stem as the long file
-└── stage4-runtime-verification/   # audits and runs both paths' solutions, both tiers each — AI only, no human gate
-    ├── README.md            #   the protocol, including "Two paths, two tiers each"
+└── stage4-runtime-verification/   # audits and runs both paths' solutions, both tiers each — the long path's runs are AI only, no human gate; the short path's executor is started by a human (`short-path/run-executor.py`)
+    ├── README.md            #   the protocol, including "Two paths, two tiers each" (shared: the short executor reads it)
+    ├── environment.md       #   generic node setup and lessons (shared, so case-neutral)
+    ├── executor-prompts.md  #   the short path's executor in brief, and the side-by-side writer's prompt
+    ├── check-blindness.py   #   the transcript audit for the short executor
     ├── comparison/          #   the side-by-side of the two paths, one file per case, and its index
-    ├── long-path/           #   the long path's runs: results/<stem>.md, results/<stem>/, harness/<stem>/
-    └── short-path/          #   the short path's runs, same layout (one folder per path, so one deny rule blinds a session to the other)
+    ├── long-path/           #   the long path's runs: README.md, environment-notes.md, results/<stem>.md, results/<stem>/, harness/<stem>/
+    └── short-path/          #   the short path's runs, same layout, plus README.md, run-executor.py and EXECUTOR-PROMPT.md
 ```
 
 Everything stage 3 produces lives in `stage3-ai-deep-read/`: the long path's
@@ -430,7 +435,7 @@ nothing to do with the Target numbers.
 | **1** | Structural — the shape of the code (CodeQL) | queries the DB | no | [`stage1-codeql-preprocessing/`](stage1-codeql-preprocessing/README.md) |
 | **2** | Lexical — operand, class, method and package *names* | **no** | no | [`stage2-ai-preprocessing/`](stage2-ai-preprocessing/README.md) |
 | **3** | Semantic — the code itself, against the three rules | yes | **yes** | [`stage3-ai-deep-read/`](stage3-ai-deep-read/README.md) |
-| **4** | Behavioral — manual review and a running cluster | *(planned)* | *(planned)* | — not created |
+| **4** | Behavioral — a measured run on a real node | yes (the nodes) | **yes**, for the design it runs | [`stage4-runtime-verification/`](stage4-runtime-verification/README.md) |
 
 **Stage 3 is the only stage that decides whether something is a real case.**
 Stage 2 only orders what stage 3 must read, and produces no findings of its
@@ -527,7 +532,7 @@ constraint and designs a verification solution **without** the rules, the
 patterns, the §8 design rules or the template, using whatever it collects from
 the sources, and files **no verdict**. The aim is to learn whether the long
 path's human method helps the AI or limits it. The two solutions are written
-blind to each other; **stage 4 runs both**, each solution with a unit tier and a
+blind to the long path (the long path goes first, decided 2026-10-06, so it has nothing to avoid); **stage 4 runs both**, each solution with a unit tier and a
 cluster tier, and reports the results side by side (stage 4 README, "Two paths,
 two tiers each"). See
 [`stage3-ai-deep-read/README.md`](stage3-ai-deep-read/README.md) and
@@ -585,8 +590,9 @@ already judged, cite the stage-3 entry rather than re-recording it.
 
 ### 7.4 Drafting convention
 
-Draft new/changed case files in the Claude session first for review, then
-push to `main` after approval.
+An AI session drafts, verifies and files new or changed case files locally; Jingsong
+may read and overrule at any time, but nothing waits for it. Commit and push to
+`main` only when asked.
 
 ### 7.5 Active scope decisions (revised 2026-09-25)
 
@@ -699,7 +705,7 @@ usual protocol, and files the results side by side. Rules: stage 3 README, stage
   that finds the constraint does not cap usage states that as its claim and
   designs the test for it; stage 4 runs it like any other.
 - **Scope stays memory and disk** for the short path as for the long (§3.3).
-- **Blind both ways, and frozen on filing** — see the stage 3 README. A
+- **The short path is blind to the long path, and frozen on filing** — see the stage 3 README. A
   short-path solution is never edited; a new version is filed with `--supersede`.
 - **The pilot on the three closed cases was skipped** by decision.
 - **The 11 filed cases are untouched.** For the closed ones the long path's runs
@@ -711,7 +717,10 @@ Different), and the cross-path scoring, were removed. Both paths always run;
 the only comparison is a plain side-by-side at the end. The two-tier
 requirement for the short path was added the same day. The folder move that
 made room for the short path (`long-path/` and `short-path/`) changed paths
-only.*
+only. Revised 2026-10-06: the long path always goes first, so only the short
+path is blind; the short path is human plus AI (a human starts the isolated
+writer and executor, an AI does the rest), with a script for each stage
+(`run-case.py`, `run-executor.py`).*
 
 ## 8. Designing a test for a case
 

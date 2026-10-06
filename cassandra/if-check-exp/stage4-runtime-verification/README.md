@@ -47,9 +47,9 @@ Within stage 4, every step is done by an AI session:
 | 3. Conclusion | Matches the readings to one §9a row, with its logic in a fixed format | results §4 |
 | 4. Self-check | Re-reads every cited raw file against the conclusion and its logic | results §5 |
 | 5. Verdict and feedback | Files the verdict, the case's §10 field, any amendment | results §8 |
+| Run 2 (optional) | A fresh AI session repeats the runbook by hand, not run 1's script | results §6–§7 |
 
 **Every step runs once per path and per tier.** A case with a short-path solution has up to four runs (long unit, long cluster, short unit, short cluster); see "Two paths, two tiers each" below.
-| Run 2 (optional) | A fresh AI session repeats the runbook by hand, not run 1's script | results §6–§7 |
 
 ## What stage 4 consumes
 
@@ -77,6 +77,10 @@ has no feedback field and is never amended; what a run learns goes into its
 results file. Its parts play the roles of §9, per tier; the mapping is in "Two
 paths, two tiers each" below.
 
+**A long-path case written before the two-tier rule** may describe one tier or none. The audit adds the missing tier as a dated
+amendment before the freeze (a unit tier: drive the check's classes directly; a cluster tier: a real node with the knob at the
+boundary), or records `n/a: <reason>` for it with what answers the same question instead. A tier is never silently dropped.
+
 If §9 cannot be executed as written, that is itself feedback — record it as a
 runbook defect (below) rather than improvising a different experiment, because
 a substituted workload no longer tests the traced path.
@@ -86,7 +90,9 @@ a substituted workload no longer tests the traced path.
 **Applies to a case that has both a long-path case file and a short-path
 solution** ([stage 3](../stage3-ai-deep-read/README.md)). A case with only a
 long-path file follows the protocol below unchanged, as all 11 filed cases do
-today. Each solution has a **unit tier** and a **cluster tier**, so a case has up
+today. **The long path always goes first** (decided 2026-10-06): its case file, then its
+runs, are done before the short path's solution is written or run. Only the short path
+has to be blind; the long path has no isolation rule. Each solution has a **unit tier** and a **cluster tier**, so a case has up
 to four runs: long unit, long cluster, short unit, short cluster. Stage 4 runs
 **all** of them: there is no rating of the two solutions beforehand, no merging
 of them into one run, and no scoring across paths. (Decided 2026-10-05; it
@@ -110,30 +116,30 @@ prediction and readings table, never the other path's.
 | Feedback into the case file (§10) | yes | none: the solution is never amended |
 
 Each path's results and harness live in that path's folder, `long-path/` or
-`short-path/` (split 2026-10-05), so one deny rule keeps an executor blind to the
-whole other path, for every case. `comparison/` is shared and read only by the
+`short-path/` (split 2026-10-05). `comparison/` is shared and read only by the
 side-by-side writer.
 
 A tier a solution declares `n/a: <reason>` is not run; the results file says so
 and gives the reason. The short path's own predictions are frozen at the
 audit like the long path's (the hash goes in results §1).
 
-**Independence.**
-- An executor reads only its own path's solution, the shared files (this README,
-  the templates, `environment.md`), and the Cassandra source. It does not open the
-  other path's solution, results file, harness or readings before its own results
-  are filed.
-- Runs on the shared infrastructure follow the safety rules below: a separate
-  local clone per run, one run at a time per node, every process stopped and
-  checked afterwards. Reusing a build or a node image between paths is fine;
-  reusing the other path's harness or readings is not.
-- Pre-flight, deny rules, the prompts to give an executor and a side-by-side writer,
-  and the transcript check are in [`executor-prompts.md`](executor-prompts.md);
-  [`check-blindness.py`](check-blindness.py) does the check. An executor ignores
-  `HANDOFF.md` (it names the long path's findings), even though "Where to start"
-  below sends other sessions there.
-- Order: unit tier before cluster tier within a path (the cheap tier tests the
-  protocol first); the paths in either order.
+**Independence (the short path only).**
+- **The long path's executor** is an ordinary AI session in this repository: it reads whatever it needs and follows the
+  protocol below. Nothing is hidden from it, because the short path does not exist yet when it runs.
+- **The short path's executor** reads only its own solution, the shared files (this README, `_TEMPLATE.md`,
+  `environment.md`) and the Cassandra source. It never sees the long path's case file, results, harness or readings,
+  `HANDOFF.md`, or `comparison/`. It is therefore not a session in this repository: a human starts it with
+  [`short-path/run-executor.py`](short-path/run-executor.py), which builds a workspace outside the repository holding only
+  those files, starts an interactive Claude Code session in it with the file tools confined to the workspace and no
+  memory, MCP servers or sub-agents, and afterwards audits every transcript (`collect`, using
+  [`check-blindness.py`](check-blindness.py)). The whole procedure, what is enforced and what is only audited, and the
+  prompts for the AI sessions around it are in [`short-path/README.md`](short-path/README.md). The shared files therefore
+  have to stay free of the long path's case-specific designs; those live in [`long-path/`](long-path/README.md).
+- Runs on the shared infrastructure follow the safety rules below: a separate local clone per run, one run at a time per
+  node, every process stopped and checked afterwards. Reusing a build or a node image between paths is fine; the short
+  executor never reuses the long path's harness, logs or readings.
+- Order: the long path first; unit tier before cluster tier within a path (the cheap tier tests the protocol first). The
+  long path's stage 4 may run before or after the short path's stage 3; the short executor is blind either way.
 
 **The side-by-side.** After the last run of a case, the session that finished it
 writes `comparison/<stem>.md` from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md)
@@ -278,10 +284,10 @@ With no human review, the conclusion has to survive the AI's own second look.
 
 | Rule | Why |
 |---|---|
-| **Never build in, or add files to, the shared `cassandra-src` clone.** Clone it to local disk for each run: `git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src <local-dir>`. | Stage 3 reads that clone for line numbers. It already holds an untracked `HeapPoolTest.java` and a `build/` directory from earlier work. |
+| **Never build in, or add files to, the shared `cassandra-src` clone.** Clone it to local disk for each run: `git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src <local-dir>`. | Stage 3 reads that clone for line numbers, and it may hold untracked files and a `build/` directory from earlier work. |
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
 | A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
-| Stop every process a run starts, and check none is left: `pgrep -f org.apache.cassandra.service.CassandraDaemon`. | A leftover node holds ports and memory and contaminates the next run. |
+| Stop every process a run starts, and check none is left: `ps -eo cmd | grep '[C]assandraDaemon'` (not `pgrep -f` inside an inline `ssh host '...'` string: it matches its own shell). | A leftover node holds ports and memory and contaminates the next run. |
 | Commit small text excerpts under `<path>/results/<case-file-stem>/run1/` (and `run2/`, if there is one); keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
 
 ## Environment
@@ -315,39 +321,16 @@ reads as settled prose is the worst outcome this pipeline can produce.
 
 ## Where to start
 
-Every filed case carries a §9 test design, so stage 4 waits only on execution.
-**Which cases have run, and what comes next, is tracked in
-[`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds the protocol only.
-The first case run, `memtable_heap_space`, is the worked example: results in
-[`long-path/results/memtable_heap_space-tryAllocate-limit.md`](long-path/results/memtable_heap_space-tryAllocate-limit.md),
-harness in `long-path/harness/memtable_heap_space-tryAllocate-limit/`.
+Every filed case carries a §9 test design, so stage 4 waits only on execution. **Which cases have run, and what comes next,
+is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds the protocol only.
 
-**Scripts are per case, not a shared pattern.** Each case's workload, observables
-and instruments differ (a unit test, a Byteman rule, a fixed-size filesystem, a
-two-mode comparison), so there is no common runner. What every run script must
-do is set by the run protocol above: log each command and its output, stop at
-the first failed check, write a readings summary, and stop every process it
-started. `memtable_heap_space`'s `run1/cluster-run.sh` is one example of that;
-borrow what fits, not its structure.
+- **The long path** (an AI session in this repository): start with [`long-path/README.md`](long-path/README.md), which lists
+  what the closed cases teach, which cases are cheap to start with and which need a cluster before they say anything, and
+  the worked examples.
+- **The short path** (a human starts it, then an AI): start with [`short-path/README.md`](short-path/README.md).
+- **Setting up a node:** [`environment.md`](environment.md).
 
-**Where to start: unit tiers first.** They test the run protocol cheaply
-before any cluster run. Four cases are far cheaper than the rest because unit
-scaffolding already reaches the check:
-
-| Case | Why it is cheap |
-|---|---|
-| `memtable_heap_space` | Done — the worked example. Its unit tier is two `ant testsome` commands on the restored `HeapPoolTest` (see "Prior art" below). |
-| `cdc_total_space` | Done 2026-10-01 (results file in `long-path/results/`). `CommitLogSegmentManagerCDCTest` has the scaffolding (`CQLTester`, the CDC setup) but **not** a usable sweep: its `testWithCDCSpaceInMb` is private, and its non-blocking assertion allows three times the limit. The run needed a new harness test (`CdcTotalSpaceCeilingTest`), a Byteman creation trace, a sampler for `cdc_raw`, and a consumer emulator. The unit yaml's `commitlog_segment_size` is 5 MiB, not the node's 32 MiB. |
-| `MAX_HINT_BUFFERS` | Predicts an **exact** ceiling, `n × bufferSize` (96 MiB at defaults), not a trend — so it is the sharpest falsification in the set. `HintsBufferPoolTest.testBackpressure()` already proves the disallow branch via Byteman. Confirm Byteman resolves as a test dependency first. |
-| `max_space_usable_for_compactions_in_percentage` | `DirectoriesTest`, `PartialCompactionsTest` and `CompactionsBytemanTest` between them cover the arithmetic, the injection point and all three disallow outcomes. |
-
-**Two designs need a cluster before they say anything**, because their finding
-is a default-mode gap rather than a limit:
-`native_transport_receive_queue_capacity` (the whole experiment is a
-comparison of `throw_on_overload` true vs. false — a single-mode run correctly
-observes nothing) and `DataDirectory_getAvailableSpace` (the guard does not run
-under the default partitioner, so the two arms need **separate clusters**).
-
-**Prior art.** The `memtable_heap_space` unit test, `HeapPoolTest.java`, is restored
-under `long-path/harness/` (its origin is recorded in that folder's README). Earlier per-case
-trigger notes are in `git show e7f9963:HANDOFF.md`.
+**Scripts are per case, not a shared pattern.** Each case's workload, observables and instruments differ (a unit test, a
+Byteman rule, a sampler), so there is no common runner. What every run script must do
+is set by the run protocol above: log each command and its output, stop at the first failed check, write a readings
+summary, and stop every process it started. **Unit tiers first:** they test the run protocol cheaply before any cluster run.

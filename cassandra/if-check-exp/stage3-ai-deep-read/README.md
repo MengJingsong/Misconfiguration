@@ -41,24 +41,28 @@ solutions and no scoring across paths.
 - **Pick the case and its feed** (`3a` or `3b`, section 4). A case that already
   has a long-path file needs only the short path.
 - **Who does what.** The long path is written by an AI session in this repo
-  following [`long-path/README.md`](long-path/README.md) §2 and the playbook. The
-  short path is run by you (or a runner session) with `run-case.py` in a terminal;
-  its writer is a separate, isolated process
-  ([`short-path/README.md`](short-path/README.md) §4).
-- **Order and blindness.** The two paths can go in either order, or at the same
-  time. Whoever writes the long-path file does not open
-  `short-path/cases/<stem>.md`, and the short-path runner does not open
-  `long-path/cases/<stem>.md`, until both are filed (section 3).
+  following [`long-path/README.md`](long-path/README.md) §2 and the playbook, with
+  no human step. The short path is human plus AI: the human starts the blind
+  writer from a terminal with `run-case.py` (the writer is a separate, isolated
+  process, [`short-path/README.md`](short-path/README.md) §4); an AI session in
+  this repo does the rest (judge the audit, file the solution).
+- **Order (decided 2026-10-06): the long path goes first.** For every case the
+  long path (stage 3, then stage 4) comes before the short path's solution is
+  written or run. So only the short path has to be blind, and the long path has
+  no isolation rule. The short path needs the case's row in
+  [`long-path/_INDEX.md`](long-path/_INDEX.md): `run-case.py` reads the capacity
+  check's `file:line` and the feed from it, and nothing else of the row.
 
 ### 2.2 The sequence
 
-| # | Step | Path | Result |
-|---|---|---|---|
-| 1 | Pick the case and feed | both | a stem and an entry pointer |
-| 2 | Write and verify the case file, with both tiers | long | `long-path/cases/<stem>.md` and an `_INDEX.md` row; or an entry in `rejected.md`, `deferred.md` or `pending.md` |
-| 3 | Isolation test once, then `run-case.py run`, judge the audit, `file` | short | `short-path/cases/<stem>.md` and an `_INDEX.md` row |
-| 4 | Commit and push each filed solution (when you ask) | both | the solution is frozen in history |
-| 5 | Hand off to stage 4 | both | up to four runs and a side-by-side |
+| # | Step | Path | Who | Result |
+|---|---|---|---|---|
+| 1 | Pick the case and feed | both | AI (or you) | a stem and an entry pointer |
+| 2 | Write and verify the case file, with both tiers | long | AI | `long-path/cases/<stem>.md` and an `_INDEX.md` row; or an entry in `rejected.md`, `deferred.md` or `pending.md` |
+| 3 | Isolation test once per machine, then `run-case.py run` | short | **human** (a terminal) | the blind writer's solution and audit report in `~/short-path-run/<stem>/` |
+| 4 | Judge the audit, then `run-case.py file` | short | AI | `short-path/cases/<stem>.md` and an `_INDEX.md` row |
+| 5 | Commit and push each filed solution (when you ask) | both | AI | the solution is frozen in history |
+| 6 | Hand off to stage 4 | both | long: AI; short: [`stage 4 short path`](../stage4-runtime-verification/short-path/README.md) | up to four runs and a side-by-side |
 
 ### 2.3 Done when
 
@@ -69,11 +73,14 @@ rejections, and there is no rule yet for comparing that).
 
 ## 3. Rules that hold across both paths
 
-- **Blind both ways.** A session writing one path's solution for a case does
-  not open the other path's file for that case. In stage 4, an executor
-  reads only its own path's solution; only the session that writes the side-by-side
-  reads both paths' results. The short path additionally runs in isolation from this folder's
-  guidance (see [`short-path/README.md`](short-path/README.md)).
+- **The short path is blind to the long path.** The session that writes a
+  short-path solution (the isolated writer) and the stage-4 executor that runs it
+  never see the long path's case file, its stage-4 results or harness,
+  `HANDOFF.md` or `comparison/`. Only the side-by-side writer, at the end, reads
+  both paths' results. The long path is not blind to anything: it runs first, so
+  the short path does not exist yet. The AI that judges the short writer's audit
+  has read the long path, which is fine: it judges leakage and completeness only,
+  never agreement with the long path, and never edits the solution.
 - **Frozen on filing.** Once a solution is filed, record its sha256 in the
   path's `_INDEX.md`. A short-path solution is never edited; a new version is
   filed with `--supersede` and the old one is renamed `--vN`. A long-path case

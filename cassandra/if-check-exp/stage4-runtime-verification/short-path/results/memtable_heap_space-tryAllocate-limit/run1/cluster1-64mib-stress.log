@@ -1,0 +1,140 @@
+Script started on 2026-10-06 11:53:08-06:00 [<not executed on terminal>]
+******************** Stress Settings ********************
+Command:
+  Type: write
+  Count: 20,000
+  No Warmup: true
+  Consistency Level: ONE
+  Target Uncertainty: not applicable
+  Key Size (bytes): 10
+  Counter Increment Distibution: add=fixed(1)
+Rate:
+  Auto: false
+  Thread Count: 4
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..20000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Columns:
+  Max Columns Per Key: 5
+  Column Names: [C0, C1, C2, C3, C4]
+  Comparator: AsciiType
+  Timestamp: null
+  Variable Column Count: false
+  Slice: false
+  Size Distribution: Fixed:  key=8192
+  Count Distribution: Fixed:  key=5
+Errors:
+  Ignore: false
+  Tries: 10
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [localhost]
+  Is White List: false
+  Datacenter: null
+Schema:
+  Keyspace: keyspace1
+  Replication Strategy: org.apache.cassandra.locator.SimpleStrategy
+  Replication Strategy Options: {replication_factor=1}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  Truststore: null
+  Truststore Password: null
+  Keystore: null
+  Keystore Password: null
+  SSL Protocol: TLS
+  SSL Algorithm: null
+  SSL Ciphers: null
+Port:
+  Native Port: 9042
+  JMX Port: 7199
+JMX:
+  Username: null
+  Password: *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: null
+  Operation: WRITE
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+Credentials file:
+  File: *not set*
+  CQL username: *not set*
+  CQL password: *not set*
+  JMX username: *not set*
+  JMX password: *not set*
+  Transport truststore password: *not set*
+  Transport keystore password: *not set*
+Reporting:
+  Output frequency: 1s
+  Header frequency: *not set*
+
+Connected to cluster: Test Cluster, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: localhost/127.0.0.1:9042; Rack: rack1
+Created keyspaces. Sleeping 1s for propagation.
+Sleeping 2s...
+Running WRITE with 4 threads for 20000 iteration
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+WARN  17:53:14,479 Query 'com.datastax.driver.core.Statement$1@4fb75896;' generated server side warning(s): `USE <keyspace>` with prepared statements is considered to be an anti-pattern due to ambiguity in non-qualified table names. Please consider removing instances of `Session#setKeyspace(<keyspace>)`, `Session#execute("USE <keyspace>")` and `cluster.newSession(<keyspace>)` from your code, and always use fully qualified table names (e.g. <keyspace>.<table>). Keyspace used: keyspace1, statement keyspace: keyspace1, statement id: e1d2f4aa887d02751110f92a52de4f20
+total,                                                   932,     932,     932,     932,     1.9,     1.6,     2.7,    10.3,    43.3,    43.3,    1.0,  0.00000,      0,      1,       7,       7,       0,     190
+total,                                                  3789,    2857,    2857,    2857,     1.2,     1.0,     1.4,     1.9,    47.9,    48.0,    2.0,  0.36054,      0,      2,      35,      60,       5,     354
+total,                                                  5682,    1893,    1893,    1893,     1.9,     1.0,     1.4,    14.3,   192.0,   192.0,    3.0,  0.23145,      0,      3,     180,     200,      80,     332
+total,                                                  8763,    3081,    3081,    3081,     1.1,     0.9,     1.3,     2.3,   159.1,   159.8,    4.0,  0.19943,      0,      3,     145,     160,      65,     470
+total,                                                  9748,     985,     985,     985,     3.9,     0.7,     1.2,     8.0,   545.3,   545.3,    5.0,  0.16567,      0,      1,       5,       5,       0,     188
+total,                                                 11288,    1540,    1540,    1540,     2.0,     0.9,     1.4,     6.5,   247.2,   247.6,    6.0,  0.14392,      0,      3,     208,     225,      94,     312
+total,                                                 12658,    1370,    1370,    1370,     3.2,     1.0,     1.7,     9.4,   360.2,   360.2,    7.0,  0.12571,      0,      1,       6,       6,       0,     198
+total,                                                 14348,    1690,    1690,    1690,     2.1,     0.9,     1.7,    42.4,   195.0,   195.3,    8.0,  0.11202,      0,      3,     186,     200,      84,     389
+total,                                                 15310,     962,     962,     962,     3.4,     0.7,     1.0,     2.2,   645.4,   645.4,    9.0,  0.09933,      0,      1,      12,      12,       0,     201
+total,                                                 16118,     808,     808,     808,     2.4,     0.7,     1.0,     1.3,   348.4,   348.4,   10.0,  0.10496,      0,      0,       0,       0,       0,       0
+total,                                                 17732,    1614,    1614,    1614,     3.3,     0.6,     1.3,     1.9,   646.4,   646.4,   11.0,  0.11987,      0,      3,     232,     248,     106,     303
+total,                                                 19332,    1600,    1600,    1600,     2.8,     0.7,     1.3,     1.8,   426.8,   427.0,   12.0,  0.10917,      0,      2,     196,     205,      94,     339
+total,                                                 20000,     917,     917,     917,     4.1,     0.8,     1.4,     1.9,   541.1,   541.1,   12.7,  0.10240,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :    1,571 op/s  [WRITE: 1,571 op/s]
+Partition rate            :    1,571 pk/s  [WRITE: 1,571 pk/s]
+Row rate                  :    1,571 row/s [WRITE: 1,571 row/s]
+Latency mean              :    2.3 ms [WRITE: 2.3 ms]
+Latency median            :    0.9 ms [WRITE: 0.9 ms]
+Latency 95th percentile   :    1.6 ms [WRITE: 1.6 ms]
+Latency 99th percentile   :    2.9 ms [WRITE: 2.9 ms]
+Latency 99.9th percentile :  381.7 ms [WRITE: 381.7 ms]
+Latency max               :  646.4 ms [WRITE: 646.4 ms]
+Total partitions          :     20,000 [WRITE: 20,000]
+Total errors              :          0 [WRITE: 0]
+Total GC count            : 23
+Total GC memory           : 3.199 GiB
+Total GC time             :    1.3 seconds
+Avg GC time               :   57.7 ms
+StdDev GC time            :   80.7 ms
+Total operation time      : 00:00:12
+
+END
+
+Script done on 2026-10-06 11:53:28-06:00 [COMMAND_EXIT_CODE="0"]

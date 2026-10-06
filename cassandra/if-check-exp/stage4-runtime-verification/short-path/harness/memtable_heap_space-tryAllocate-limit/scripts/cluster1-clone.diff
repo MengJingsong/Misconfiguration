@@ -1,0 +1,69 @@
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+diff --git a/conf/cassandra.yaml b/conf/cassandra.yaml
+index 69b82fc..f44827d 100644
+--- a/conf/cassandra.yaml
++++ b/conf/cassandra.yaml
+@@ -94,7 +94,7 @@ max_hints_delivery_threads: 2
+ 
+ # Directory where Cassandra should store hints.
+ # If not set, the default directory is $CASSANDRA_HOME/data/hints.
+-# hints_directory: /var/lib/cassandra/hints
++hints_directory: /users/jason92/short-run/memtable_heap_space-tryAllocate-limit/cluster1/data/hints
+ 
+ # How often hints should be flushed from the internal buffers to disk.
+ # Will *not* trigger fsync.
+@@ -392,7 +392,8 @@ partitioner: org.apache.cassandra.dht.Murmur3Partitioner
+ # directories are specified, Cassandra will spread data evenly across
+ # them by partitioning the token ranges.
+ # If not set, the default directory is $CASSANDRA_HOME/data/data.
+-# data_file_directories:
++data_file_directories: 
++    - /users/jason92/short-run/memtable_heap_space-tryAllocate-limit/cluster1/data/data
+ #     - /var/lib/cassandra/data
+ 
+ # Directory were Cassandra should store the data of the local system keyspaces.
+@@ -405,7 +406,7 @@ partitioner: org.apache.cassandra.dht.Murmur3Partitioner
+ # commit log.  when running on magnetic HDD, this should be a
+ # separate spindle than the data directories.
+ # If not set, the default directory is $CASSANDRA_HOME/data/commitlog.
+-# commitlog_directory: /var/lib/cassandra/commitlog
++commitlog_directory: /users/jason92/short-run/memtable_heap_space-tryAllocate-limit/cluster1/data/commitlog
+ 
+ # Enable / disable CDC functionality on a per-node basis. This modifies the logic used
+ # for write path allocation rejection (standard: never reject. cdc: reject Mutation
+@@ -608,7 +609,7 @@ counter_cache_save_period: 7200s
+ 
+ # saved caches
+ # If not set, the default directory is $CASSANDRA_HOME/data/saved_caches.
+-# saved_caches_directory: /var/lib/cassandra/saved_caches
++saved_caches_directory: /users/jason92/short-run/memtable_heap_space-tryAllocate-limit/cluster1/data/saved_caches
+ 
+ # Number of seconds the server will wait for each cache (row, key, etc ...) to load while starting
+ # the Cassandra process. Setting this to zero is equivalent to disabling all cache loading on startup
+@@ -794,7 +795,7 @@ memtable:
+ # and will trigger a flush based on memtable_cleanup_threshold
+ # If omitted, Cassandra will set both to 1/4 the size of the heap.
+ # Min unit: MiB
+-# memtable_heap_space: 2048MiB
++memtable_heap_space: 64MiB
+ # Min unit: MiB
+ # memtable_offheap_space: 2048MiB
+ 
+@@ -809,7 +810,7 @@ memtable:
+ # under heavy write load.
+ #
+ # memtable_cleanup_threshold defaults to 1 / (memtable_flush_writers + 1)
+-# memtable_cleanup_threshold: 0.11
++memtable_cleanup_threshold: 0.5
+ 
+ # Specify the way Cassandra allocates and manages memtable memory.
+ # Options are:
+@@ -880,7 +881,7 @@ memtable_allocation_type: heap_buffers
+ # The default value is the smaller of 8192, and 1/4 of the total space
+ # of the commitlog volume.
+ #
+-# commitlog_total_space: 8192MiB
++commitlog_total_space: 512MiB
+ 
+ # This sets the number of memtable flush writer threads per disk
+ # as well as the total number of memtables that can be flushed concurrently.

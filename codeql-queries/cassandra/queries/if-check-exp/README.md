@@ -189,7 +189,7 @@ qualifies is still decided by reading it (README §3.4–§3.6).
 
 ```bash
 export PATH="/proj/misconfiguration-PG0/tools/codeql:$PATH"
-cd /proj/misconfiguration-PG0/git-repos/misconfiguration/codeql-queries
+cd <your checkout>/codeql-queries   # the CloudLab copy was removed 2026-10-06 (root README §2); clone the repo to a node's local disk, not under /proj/.../git-repos
 ./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/NarrowedIfStatements.ql
 ```
 

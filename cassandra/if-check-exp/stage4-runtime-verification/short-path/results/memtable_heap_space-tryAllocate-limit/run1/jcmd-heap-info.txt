@@ -1,0 +1,32 @@
+64 MiB run (cluster1), PID 142408, after stress completed (20000 x 8KiB writes), jcmd <pid> GC.heap_info:
+
+142408:
+ garbage-first heap   total 524288K, used 96308K [0x00000000e0000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 58233K, capacity 60571K, committed 63568K, reserved 1103872K
+  class space    used 6705K, capacity 7716K, committed 8704K, reserved 1048576K
+
+nodetool tablestats keyspace1.standard1 (same moment):
+		Memtable cell count: 657
+		Memtable data size: 26995473
+		Memtable off heap memory used: 0
+		Memtable switch count: 24
+
+512 MiB control run (cluster2), PID 146946, after stress completed (20000 x 8KiB writes), jcmd <pid> GC.heap_info:
+
+146946:
+ garbage-first heap   total 786432K, used 399198K [0x00000000d0000000, 0x0000000100000000)
+  region size 16384K, 5 young (81920K), 0 survivors (0K)
+ Metaspace       used 57844K, capacity 60235K, committed 62800K, reserved 1103872K
+  class space    used 6736K, capacity 7805K, committed 8704K, reserved 1048576K
+
+nodetool tablestats keyspace1.standard1 (same moment):
+		Memtable cell count: 720
+		Memtable data size: 29584080
+		Memtable off heap memory used: 0
+		Memtable switch count: 3
+
+Note: jstat -gcutil <pid> failed on both runs with
+"sun.jvmstat.monitor.MonitorException ... Could not map vmid to user Name"
+(a jstat/attach permission quirk on this node, not a Cassandra behavior) --
+jcmd GC.heap_info was used instead as the real-heap observable, per B3d.

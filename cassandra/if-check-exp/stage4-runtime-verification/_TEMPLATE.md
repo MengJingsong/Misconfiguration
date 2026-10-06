@@ -25,11 +25,11 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | the commit that holds the case file, and the hash of §9's text (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`), recorded after the audit's amendments; §9a is frozen at this version |
+| **Case-file version** | **Long path:** the commit that holds the case file, and the hash of §9's text (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`), recorded after the audit's amendments; §9a is frozen at this version. **Short path:** the sha256 of the solution file (`sha256sum`), which must equal the one in `short-path/_INDEX.md`; the file is never amended |
 | **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
 | **Audit bottom line** | Ready / Ready after amendments / Blocked — date |
-| **Files read** | For both paths' results files: every file opened from this repo during the session, one per line, so the blindness check has a record. For a short-path file the other path's files (`stage3-ai-deep-read/long-path/`, `stage4-runtime-verification/long-path/`, `HANDOFF.md`, `comparison/`) must not appear; the same holds the other way round for a long-path file when the case has a short solution |
+| **Files read** | **Short path only:** every file opened from the workspace and every path touched outside it, one per line, so the blindness check (`short-path/run-executor.py collect`) has a record to compare with the transcript. The long path's files, `HANDOFF.md` and `comparison/` must not appear. A long-path results file leaves this row out |
 
 ### 1.1 Design audit
 

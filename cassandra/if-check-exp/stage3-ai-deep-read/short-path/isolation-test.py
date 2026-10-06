@@ -20,8 +20,20 @@ recording the new allowlist version in short-path/_INDEX.md.
 import argparse, datetime, json, os, pathlib, re, secrets, shutil, subprocess, sys
 
 HOME = pathlib.Path.home()
-UPSTREAM_CLONE = HOME / 'repos' / 'cassandra-src'          # local clone to copy from
-REPO = HOME / 'repos' / 'Misconfiguration'                 # what the writer must NOT reach
+REPO = pathlib.Path(__file__).resolve().parents[4]         # this repository's root: what the writer must NOT reach
+
+
+def find_clone():
+    """The pristine pinned clone to copy from: $CASSANDRA_SRC, else the sibling of this
+    repository (the layout on CloudLab and on both workstations), else the usual homes."""
+    for c in (os.environ.get('CASSANDRA_SRC'), REPO.parent / 'cassandra-src', HOME / 'repos' / 'cassandra-src',
+              HOME / 'git-repos' / 'cassandra-src', '/proj/misconfiguration-PG0/git-repos/cassandra-src'):
+        if c and pathlib.Path(c).is_dir():
+            return pathlib.Path(c)
+    return REPO.parent / 'cassandra-src'
+
+
+UPSTREAM_CLONE = find_clone()                              # local clone to copy from
 TAG = 'cassandra-5.0.9'
 DEFAULT_WORK = HOME / 'short-path-run' / 'isolation-test'
 
@@ -166,7 +178,8 @@ def parse(out):
                 error = final or str(e.get('terminal_reason'))
     denied_ids = {d.get('tool_use_id') for d in denials if isinstance(d, dict)}
     for c in calls.values():
-        c['denied'] = bool(c['is_error']) or c['id'] in denied_ids
+        c['perm_denied'] = c['id'] in denied_ids        # the permission layer refused it (a failed command is not this)
+        c['denied'] = bool(c['is_error']) or c['perm_denied']
     return dict(init_tools=init_tools, mcp=mcp, calls=list(calls.values()), final=final, model=model, error=error)
 
 

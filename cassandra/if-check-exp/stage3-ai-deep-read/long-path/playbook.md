@@ -1,8 +1,8 @@
 # Stage 3 long-path playbook — how to run a deep-read pass
 
 **This is the long path.** The short path ([`../short-path/README.md`](../short-path/README.md))
-does not use this playbook, the three rules or the case template; a session
-writing a short-path solution must not read it.
+does not use this playbook, the three rules or the case template, and its isolated
+writer cannot see them. The long path goes first and has no isolation rule.
 
 Practical technique. What stage 3 *is*, and where verdicts are filed, is in
 [`README.md`](README.md). The three rules themselves are in
@@ -14,9 +14,10 @@ are **not** restated here — one source of truth for the rules.
 1. Read [`../../../../HANDOFF.md`](../../../../HANDOFF.md), then `_INDEX.md` to
    see which cases exist and `rejected.md` / `deferred.md` to see which lines
    are already judged. **Don't re-judge a recorded line** — cite it.
-2. Confirm the source clone is at the pinned tag:
-   `cd /proj/misconfiguration-PG0/git-repos/cassandra-src && git describe --tags`
-   must print `cassandra-5.0.9`.
+2. Confirm the source clone is at the pinned tag: `git -C <clone> describe --tags`
+   must print `cassandra-5.0.9`. The clone is `$CASSANDRA_SRC`, else `cassandra-src`
+   next to this repository (for example `~/repos/cassandra-src`), else
+   `/proj/misconfiguration-PG0/git-repos/cassandra-src` on CloudLab.
 3. Pick a feed (README's "two feeds"). For **3a**, take
    `../../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
    then C; within A, read A1 → A2 → A3.

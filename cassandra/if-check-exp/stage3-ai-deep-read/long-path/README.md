@@ -41,12 +41,18 @@ for how the three stages relate, and §3.2 for the enforcement patterns.
 - **Read first:** [`../../../../HANDOFF.md`](../../../../HANDOFF.md), `_INDEX.md`, `rejected.md`
   and `deferred.md`. Do not re-judge a line that is already recorded; cite it.
 - **Source:** the local Cassandra clone must be at the pinned tag
-  (`git describe --tags` prints `cassandra-5.0.9`).
-- **Stay blind:** do not open `../short-path/cases/<stem>.md`, or any other short-path
-  file for this case, until your case file is filed and committed.
+  (`git describe --tags` prints `cassandra-5.0.9`). Its location varies by machine:
+  `$CASSANDRA_SRC`, else a sibling of this repository (`cassandra-src`), else
+  `/proj/misconfiguration-PG0/git-repos/cassandra-src` on CloudLab.
+- **No isolation rule.** The long path goes first for every case (decided 2026-10-06),
+  so there is no short-path file to avoid. Do not write a short-path solution
+  yourself: it is made by an isolated process
+  ([`../short-path/README.md`](../short-path/README.md)).
+- **No human step.** An AI session does this whole path. Draft, verify and file the
+  case locally; Jingsong may read and overrule at any time, but nothing waits for
+  that. Commit and push only when asked.
 - **Run nothing and record no measured number.** Stage 4 executes the test you
   design.
-- **Commit and push only when asked.**
 
 ### 2.2 Steps
 

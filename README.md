@@ -58,7 +58,6 @@ mount, alongside other resources that are **not** part of this repo:
 ```
 /proj/misconfiguration-PG0/          <- shared workspace, survives node/allocation expiry
 ├── git-repos/
-│   ├── misconfiguration/            <- THIS repo (what you're reading)
 │   └── cassandra-src/               <- git clone of apache/cassandra (tag cassandra-5.0.9),
 │                                        read by both Cassandra experiment folders (every
 │                                        file:line is checked against it) and used by
@@ -73,9 +72,17 @@ mount, alongside other resources that are **not** part of this repo:
 ```
 
 `git-repos/` exists because CloudLab's shared mount doesn't allow creating
-directories directly under `/proj/`, so both git repos this project uses
-(`misconfiguration` itself, and the separate `cassandra-src` source clone)
-live as siblings one level down instead.
+directories directly under `/proj/`, so the `cassandra-src` source clone lives
+one level down instead.
+
+**This repo is no longer checked out on the shared mount** (removed 2026-10-06).
+Every node sees that mount, so a copy there let the short path's stage-4 executor
+read the long path's files, which breaks the blindness that comparison rests on
+(`cassandra/if-check-exp/stage4-runtime-verification/`). Keep your checkout on a
+workstation, as a sibling of `cassandra-src`. What the old copy held that is not on
+GitHub (`config/environment.sh`, the gitignored CodeQL results, a `.claude/`
+folder) is archived at `/proj/misconfiguration-PG0/tarfiles/repo-copy-untracked-2026-10-06.tgz`.
+Do not put a checkout back under `git-repos/`.
 
 ## 3. Path configuration: local refs vs. external refs
 

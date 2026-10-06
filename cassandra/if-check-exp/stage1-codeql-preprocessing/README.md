@@ -28,7 +28,7 @@ Nothing here duplicates it.
 
 ```bash
 export PATH="/proj/misconfiguration-PG0/tools/codeql:$PATH"
-cd /proj/misconfiguration-PG0/git-repos/misconfiguration/codeql-queries
+cd <your checkout>/codeql-queries   # the CloudLab copy was removed 2026-10-06 (root README §2); clone the repo to a node's local disk, not under /proj/.../git-repos
 ./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/NarrowedIfStatements.ql
 ./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/HelperGuardedIfStatements.ql
 ```

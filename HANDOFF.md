@@ -57,13 +57,19 @@ this folder's own scope.
   conclusion against the raw files and files the verdict; nothing waits for Jingsong, who may overrule a verdict at
   any time. The shared-infrastructure safety rules in the stage-4 README still apply.
 - **Two solutions per case, each with a unit and a cluster tier; the short path decides nothing (decided 2026-10-02, revised
-  2026-10-05).** Each case gets a long-path case file and a short-path solution, written **blind to each other**. The short
-  path carries no go/no-go, uses none of the long path's method (only the two-tier structure is asked of it), and its solution
+  2026-10-05).** Each case gets a long-path case file and a short-path solution. **The long path always goes first
+  (decided 2026-10-06), so only the short path is blind** (to the long case file, its stage-4 results and harness, this file, and
+  `comparison/`); the long path has no isolation rule and is done entirely by an AI session. **The short path is human plus AI**:
+  a human starts the blind writer (`run-case.py`) and the blind stage-4 executor (`run-executor.py`) from a terminal, an AI
+  session does everything around them (judge the audits, file, review, side-by-side). The short path carries no go/no-go, uses none of the long path's method (only the two-tier structure is asked of it), and its solution
   is frozen on filing (sha256 in `short-path/_INDEX.md`) and never edited; a new version is filed with `--supersede`.
   **Stage 4 runs both paths, both tiers each, with no rating of the two solutions and no cross-path scoring**; an executor
   reads only its own path's solution, and a side-by-side is written at the end. Scope stays memory and disk. The pilot on the
-  three closed cases was skipped; the 11 filed cases have no short solution yet except `memtable_heap_space` (version 1,
-  single tier, to be superseded).
+  three closed cases was skipped; the 11 filed cases have no short solution yet except `memtable_heap_space` (version 2, two
+  tiers; version 1 kept as `--v1`).
+- **Decided 2026-10-06:** (1) the long path always goes first, so only the short path is blind; (2) shared stage-4 files
+  (`README.md`, `environment.md`, `_TEMPLATE.md`) stay free of the long path's case-specific designs, which live in
+  `stage4-runtime-verification/long-path/`; (3) the repository copy on the CloudLab shared mount was removed.
 - **Commit and push only on request.** "Commit" and "push" are asked for
   separately; never do either unprompted.
 - **Sync before restructuring.** Jingsong also uploads files to GitHub
@@ -80,7 +86,11 @@ this folder's own scope.
 - **Local clone:** kept wherever the current working session's local
   machine keeps it — path and device vary by environment, not fixed
   (a session only writes local files, and commits or pushes only when
-  Jingsong asks — see "Working preferences" below).
+  Jingsong asks — see "Working preferences" below). **There is no checkout on
+  the CloudLab shared mount any more** (removed 2026-10-06, so a node-side executor
+  cannot read it; root `README.md` §2). Scripts find their own paths from where
+  they sit, and the Cassandra clone as `$CASSANDRA_SRC` or `cassandra-src` beside
+  this repo.
 - **Folder:** `cassandra/if-check-exp/`
   - `README.md` — full format spec: scope, the three rules, required
     fields, naming rules, workflow, how to verify/link line numbers against
@@ -109,14 +119,15 @@ this folder's own scope.
   - **`stage3-ai-deep-read/`** — reads the source. **Two paths, two
     solutions per case** (decided 2026-10-02; the folder was split into
     `long-path/` and `short-path/` the same day).
-    - `README.md` — the two paths, the rules both obey (blind both ways,
-      frozen on filing), and the two feeds.
-    - **`long-path/`** — the deciding path: the three rules, the case file.
+    - `README.md` — the two paths, the rules both obey (the short path is blind to the
+      long path, which goes first; frozen on filing; who does what), and the two feeds.
+    - **`long-path/`** — the deciding path: the three rules, the case file. An AI session
+      does all of it; no isolation rule.
       - `README.md` — what it is, its files, where its verdicts go.
       - `playbook.md` — how to run a pass: the order to check things, and the
         verified pitfalls.
       - `_TEMPLATE.md` — template for a new case file (the long path's output).
-        Its §9 Provenance records the feed (`3a`/`3b`) and the date the cited
+        Its §10 Provenance records the feed (`3a`/`3b`) and the date the cited
         lines were checked.
       - `_INDEX.md` — master table of all cases.
       - `rejected.md` — read with the source open, refused against the three
@@ -129,14 +140,15 @@ this folder's own scope.
         undecided, not refused. Moved here from the stage-2 folder, since
         **stage 2 cannot produce a pattern deferral**.
       - `pending.md` — qualified, not yet written up.
-    - **`short-path/`** — an **experiment**, no solution filed yet. An AI
+    - **`short-path/`** — an **experiment**, one case filed (`memtable_heap_space`). An AI
       traces the constraint and designs a verification solution **without**
       the rules, patterns, §8 design rules or template, and files **no
       verdict**. `README.md` is the contract (how a solution is made, isolated,
       audited and frozen); `BRIEF.md` + `_TEMPLATE.md` are the whole prompt the
       isolated agent gets; `_INDEX.md` records sha256, isolation and leakage
-      audit; `cases/` holds the solutions. **Do not read it, or give it to the
-      agent, when writing a case's long-path file, and vice versa.**
+      audit; `cases/` holds the solutions; **`run-case.py` and `isolation-test.py` are the
+      scripts a human runs** (the entry pointer comes from the long-path index). The AI that
+      writes the long path never needs this folder.
   - **`stage4-runtime-verification/`** — opened 2026-09-25. Runs the §9 test
     designs and reports back. **No human approval or review is required**
     (revised 2026-09-30): an AI session audits the case's §9 against the
@@ -146,7 +158,11 @@ this folder's own scope.
     - `README.md` — the run protocol, safety rules for the shared
       infrastructure, and where each kind of feedback lands.
     - `environment.md` — **start here on a new node**: the exact install,
-      clone and build steps that worked (JDK 11.0.32.1, Ant 1.10.12).
+      clone and build steps that worked (JDK 11.0.32.1, Ant 1.10.12), more-than-one-node
+      setup, and the lessons that apply to any run. Case-neutral on purpose: the short
+      executor reads it. Case-specific node setup is in `long-path/environment-notes.md`.
+    - `executor-prompts.md` — the short executor in brief, and the side-by-side writer's prompt.
+    - `check-blindness.py` — the transcript audit for the short executor.
     - `_TEMPLATE.md` — template for a per-case results file.
     - `comparison/` — the **side-by-side** of a case's two paths, written at the
       end by the session that finishes the last run: verdicts by path and tier,
@@ -154,6 +170,10 @@ this folder's own scope.
       cost. It rates nothing. `_TEMPLATE.md`, `_INDEX.md`, `<stem>.md`. Rules: the
       README's "Two paths, two tiers each". (Replaced on 2026-10-05 the pre-run
       comparison that rated the solutions and chose one run or two.)
+    - `long-path/README.md` — what is specific to the long path's runs: where to start,
+      cheap cases, worked examples (moved out of the shared README on 2026-10-06).
+    - `short-path/README.md`, `run-executor.py`, `EXECUTOR-PROMPT.md` — the human guide and
+      script (`canary`, `run`, `collect`) for the short path's stage 4, and the executor's prompt.
     - `long-path/` and `short-path/` (split 2026-10-05) — one folder per
       path, each holding:
       - `harness/<case-file-stem>/` — committed test code every run uses
@@ -173,7 +193,8 @@ this folder's own scope.
 
 ## Cassandra source (for stage-3 reading)
 
-- **Local clone:** `/proj/misconfiguration-PG0/git-repos/cassandra-src`, a git
+- **Local clone:** `cassandra-src` beside this repo (on CloudLab
+  `/proj/misconfiguration-PG0/git-repos/cassandra-src`), a git
   clone of `apache/cassandra` at tag `cassandra-5.0.9` (separate from this
   repo, not tracked by it). On another machine, clone it yourself (command in
   `cassandra/if-check-exp/README.md` §2). Unit-test verification runs
@@ -294,7 +315,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
 | Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `max_space_usable_for_compactions_in_percentage` is the one cheap case left (`memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
 | ~~`cdc_total_space`~~ | Done and closed 2026-10-01 (see the block above). Optional: a run 2 by a fresh session (harness, runner and results file are ready; it is cheap). |
 | ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
-| Stage 4 runs of the short path for `memtable_heap_space` | The two-tier short solution (version 2) is filed; the long path's runs already exist. A **new session** executes the short path's unit then cluster tier: follow `stage4-runtime-verification/executor-prompts.md` (pre-flight, deny rules, the prompt, the transcript check with `check-blindness.py`). Nodes: `pc80` is ready (JDK 11, Ant); `pc72` is fresh (`environment.md` §7). Then a side-by-side writer session writes `comparison/memtable_heap_space-tryAllocate-limit.md`. |
+| ~~Stage 4 runs of the short path for `memtable_heap_space`~~ | **Done 2026-10-06** (first run of `short-path/run-executor.py`). Both tiers confirmed by the executor; results in `stage4-runtime-verification/short-path/results/memtable_heap_space-tryAllocate-limit.md`, harness (with its scripts) in `short-path/harness/...`. One audit hit accepted (an `ls` of `/proj/.../git-repos` that showed no names; copied with `--force`). Run directory on pc80 deleted. **Next: the side-by-side** (`executor-prompts.md` §2, a new AI session) writing `comparison/memtable_heap_space-tryAllocate-limit.md`; items for it: B2h controls skipped, control heap raised to 768m, B3g row 4 partly checked, 3 runbook defects. Nothing committed yet. |
 | Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/long-path/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
 | Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
 

@@ -6,7 +6,10 @@
 
 Written at the end by the session that finished the last run of the case. The
 rules are in the README's [Two paths, two tiers each](../README.md#two-paths-two-tiers-each).
-It edits neither solution nor any results file, and **rates nothing**: it reports.
+It edits neither solution nor any results file, and **rates nothing**: it reports. Its one edit elsewhere: the
+`Comparison` cell of the case's row in [`../../stage3-ai-deep-read/short-path/_INDEX.md`](../../stage3-ai-deep-read/short-path/_INDEX.md)
+changes from `pending` to a link to this file (the row's hash and the solution are not touched), and a line is added to
+[`_INDEX.md`](_INDEX.md).
 
 ## 1. Verdicts
 

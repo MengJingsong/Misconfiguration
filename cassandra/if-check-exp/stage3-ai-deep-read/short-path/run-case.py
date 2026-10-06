@@ -2,7 +2,7 @@
 """Run the stage-3 short path for one case, end to end (README steps 1 to 6).
 
     python3 run-case.py run  --stem memtable_heap_space-tryAllocate-limit
-    python3 run-case.py run  --stem <stem> --pointer src/java/...:123 --feed 3a
+    python3 run-case.py run  --stem <stem> --pointer src/java/...:123 --feed 3a   # only if no long-path row
     python3 run-case.py file --stem memtable_heap_space-tryAllocate-limit
     python3 run-case.py run  --stem <stem> --dry-run
 
@@ -16,6 +16,10 @@
        is renamed `<stem>--vN.md` (content untouched) and marked superseded in
        the index. Nothing is committed, ever.
 
+The entry pointer and feed default to the case's row in long-path/_INDEX.md (the long
+path runs first); this script reads only that row's capacity-check `file:line` and its
+feed, so nothing else of the long path reaches the writer's prompt.
+
 `run` refuses to start unless the isolation test passed with the SAME flags
 and allowlist. A failed or review-needed attempt is kept and never edited; run
 again with `--attempt N` for a fresh directory.
@@ -28,10 +32,7 @@ it = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(it)
 
 RUN_ROOT = it.DEFAULT_WORK.parent                       # ~/short-path-run
-PRESETS = {  # entry pointers: file:line of the capacity check only, relative to the clone root
-    'memtable_heap_space-tryAllocate-limit':
-        ('src/java/org/apache/cassandra/utils/memory/MemtablePool.java:156', '3b'),
-}
+LONG_INDEX = HERE.parent / 'long-path' / '_INDEX.md'     # the long path runs first, so every case has a row here
 PROJECT_WORDS = ['mengjingsong', 'misconfiguration', 'if-check', 'handoff', 'long-path',
                  'short-path', 'stage4', 'stage-4', 'docs.google.com']
 SCAN = re.compile(r'(stage[ -]?[34]\b|long[ -]path|short[ -]path|hand-?off|results? file|\brun ?[12]\b|'
@@ -42,6 +43,22 @@ PROMPT_TAIL = ('\n---\nEntry pointer: {pointer}\n\n'
 
 def case_dir(stem, attempt):
     return RUN_ROOT / (stem if attempt == 1 else f'{stem}--attempt{attempt}')
+
+
+def pointer_from_index(stem):
+    """(file:line, feed) of the case's capacity check, read by this script from the long path's master
+    index. Only the check's file:line and the feed are taken: nothing else of the row reaches the prompt."""
+    try:
+        text = LONG_INDEX.read_text(encoding='utf-8')
+    except OSError:
+        return None
+    for line in text.splitlines():
+        if line.startswith('|') and f'cases/{stem}.md' in line:
+            cells = [c.strip() for c in line.strip().strip('|').split('|')]
+            m = re.search(r'blob/[^/]+/([^#)\s]+)#L(\d+)', cells[1]) if len(cells) > 6 else None
+            if m and cells[6] in ('3a', '3b'):
+                return f'{m.group(1)}:{m.group(2)}', cells[6]
+    return None
 
 
 def sha256(path):
@@ -186,10 +203,11 @@ def audit(src, res, solution, template_text):
 def cmd_run(a):
     stem = a.stem
     pointer, feed = a.pointer or '', a.feed or ''
-    if stem in PRESETS:
-        pointer, feed = pointer or PRESETS[stem][0], feed or PRESETS[stem][1]
+    found = pointer_from_index(stem) if not (pointer and feed) else None
+    if found:
+        pointer, feed = pointer or found[0], feed or found[1]
     if not pointer or not feed:
-        sys.exit('this case has no preset: give --pointer <file:line> and --feed 3a|3b')
+        sys.exit('no row for this stem in long-path/_INDEX.md: give --pointer <file:line> and --feed 3a|3b')
     cdir = case_dir(stem, a.attempt)
     prompt, tmpl = build_prompt(pointer)
     flags = ' '.join(it.run_flags())
@@ -236,6 +254,13 @@ def cmd_run(a):
     rep = '\n'.join(lines)
     (cdir / 'run-report.txt').write_text(rep + '\n', encoding='utf-8')
     print('\n' + rep + f'\n\nfiles: {cdir}/{{solution.md,run-report.txt,audit.json,run.jsonl,tool-calls.txt}}')
+    att = f' --attempt {a.attempt}' if a.attempt > 1 else ''
+    if overall != 'FAIL':
+        print('\nhand-off: paste this to an AI session in this repository (it has read the long path; that is fine for this step):\n'
+              f'  Judge the short-path run for {stem}{att} and file it. Read stage3-ai-deep-read/short-path/README.md section 4.4, '
+              f'{cdir}/run-report.txt and, for any REVIEW item, {cdir}/solution.md. Judge leakage and completeness only, never agreement '
+              f'with the long path, and do not edit the solution. If it is acceptable, run run-case.py file --stem {stem}{att}'
+              f'{" --accept-review" if overall == "REVIEW" else ""}; do not commit.')
     return 0 if overall != 'FAIL' else 1
 
 

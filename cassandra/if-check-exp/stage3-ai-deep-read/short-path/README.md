@@ -8,6 +8,11 @@ single-tier one, is kept as `--v1` and marked superseded. The pilot on the three
 closed cases was skipped by decision, so the first real side-by-side happens
 when a case has both paths' stage-4 results.
 
+**Human plus AI, long path first (decided 2026-10-06).** The long path is finished for a case before the short path starts, so
+only the short path is blind. A human starts the blind writer from a terminal (one command); an AI session in this repository does
+everything around it. Stage 4's half is in
+[`../../stage4-runtime-verification/short-path/README.md`](../../stage4-runtime-verification/short-path/README.md).
+
 ## 1. What it is
 
 For a candidate code location, an AI does **two things**:
@@ -73,8 +78,11 @@ Commands use the script; `<stem>` is the case's file stem, and
 - Run everything from a plain Linux terminal where the `claude` CLI is logged in
   (`claude -p hi` prints a reply). A `claude` started inside another Claude
   session may not authenticate.
-- **Stay blind:** do not open the case's long-path file or any stage-4 file for
-  it until its solution is filed. The side-by-side depends on it.
+- **The writer is blind, you are not.** The isolated writer must never see the
+  long path; that is what the flags and the isolation test are for. You have read
+  it, and that is fine: your job is to start the writer and, afterwards, hand the
+  report to an AI session. Put nothing about the case in the prompt but the
+  entry pointer.
 - **Never edit a solution, never reuse an attempt directory.** A failed or
   rejected attempt is kept and the next one is `--attempt N+1`.
 - The scripts never commit. You commit and push when you choose.
@@ -93,18 +101,22 @@ writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt
 ### 4.3 Per case
 
 
-| Step | Command | Result |
-|---|---|---|
-| 1. Preview (optional) | `python3 $SP/run-case.py run --stem <stem> --dry-run` | the entry pointer, flags and prompt tail; nothing is run |
-| 2. Run the writer | `python3 $SP/run-case.py run --stem <stem>` | a few minutes to tens of minutes; ends with `AUDIT: PASS`, `REVIEW` or `FAIL`; files in `~/short-path-run/<stem>/` |
-| 3. Judge the audit | read `run-report.txt`; for `REVIEW`, read `solution.md` | see the table below |
-| 4. File it | `python3 $SP/run-case.py file --stem <stem>` (add `--accept-review` after a reviewed `REVIEW`) | copied to `cases/<stem>.md`, header filled, `_INDEX.md` row with its sha256 |
-| 5. Commit and push | `git add`, `git commit`, `git push` | the solution is frozen in history |
-| 6. Hand off | stage 4 runs both tiers of this solution, by a session that sees only this path | `stage4-runtime-verification/short-path/results/<stem>.md` |
+| Step | Who | Command | Result |
+|---|---|---|---|
+| 1. Preview (optional) | human | `python3 $SP/run-case.py run --stem <stem> --dry-run` | the entry pointer, flags and prompt tail; nothing is run |
+| 2. Run the writer | **human** | `python3 $SP/run-case.py run --stem <stem>` | a few minutes to tens of minutes; ends with `AUDIT: PASS`, `REVIEW` or `FAIL`; files in `~/short-path-run/<stem>/` |
+| 3. Judge the audit | AI (the script prints the prompt to paste) | read `run-report.txt`; for `REVIEW`, read `solution.md` | see the table below |
+| 4. File it | AI | `python3 $SP/run-case.py file --stem <stem>` (add `--accept-review` after a reviewed `REVIEW`) | copied to `cases/<stem>.md`, header filled, `_INDEX.md` row with its sha256 |
+| 5. Commit and push | AI, when you ask | `git add`, `git commit`, `git push` | the solution is frozen in history |
+| 6. Hand off | human + AI | stage 4 runs both tiers of this solution, by a session that sees only this path | `stage4-runtime-verification/short-path/results/<stem>.md` |
 
-A case with no preset needs `--pointer <file:line> --feed 3a|3b` in step 2
-(`file:line` is the capacity check only; take it from the long-path index's
-*Capacity check* column, and nothing else from that row).
+The entry pointer and feed come from the case's row in
+[`../long-path/_INDEX.md`](../long-path/_INDEX.md): the script reads the *Capacity
+check* column's `file:line` and the *Feed* column, and nothing else of the row.
+Only a case with no long-path row needs `--pointer <file:line> --feed 3a|3b`.
+
+If the audit **fails**, the AI says so and you rerun step 2 with `--attempt N+1`;
+never tell the writer why.
 
 ### 4.4 Judging the audit (step 3)
 
@@ -125,6 +137,13 @@ outside the source tree:
 | A vocabulary hit (`harness`, `run 1`, `results`, …) | it is ordinary engineering language in a design (a test harness it proposes) | it points to this experiment's artifacts, section names or measured numbers |
 | A denied attempt outside the clone | it is recorded and nothing else happened (a note, not a verdict) | it names this project or its files |
 
+**Rules for the AI judging the audit.** Judge **leakage and completeness only**.
+Never accept or reject a solution because it agrees or disagrees with the long
+path (it is allowed to find a different constraint, or that the line does not cap
+usage), never edit it, and never tell the writer anything. Record what you decided
+about each `REVIEW` item in the reply; the script's `--accept-review` is the only
+trace it keeps.
+
 ### 4.5 What counts as done
 
 For the short path: the solution is filed, its sha256
@@ -142,7 +161,7 @@ accepted, filed, committed and pushed; stage-4 runs are pending. It was later
 superseded: version 2 was written under the two-tier skeleton (a fresh
 `--attempt 2`), filed with `--supersede`, and version 1 was kept as `--v1`.
 
-## 5. Running a case — instructions for the AI session that runs it
+## 5. Running a case — the steps in detail (what the script does, and what to do by hand)
 
 ### 5.1 Roles
 
@@ -150,9 +169,9 @@ superseded: version 2 was written under the two-tier skeleton (a fresh
 
 | Role | Who | May read | Must not |
 |---|---|---|---|
-| **Runner** (you, following this section) | any session | this README, `BRIEF.md`, `_TEMPLATE.md`, `_INDEX.md`, and the Cassandra source | edit the solution; put anything about the case into the prompt beyond the entry pointer; open the case's long-path file or any stage-4 file for it before the solution is filed |
+| **Runner** (the human starting the script; the AI for steps 3 to 6) | human in a terminal, then any AI session | this README, `BRIEF.md`, `_TEMPLATE.md`, `_INDEX.md`, the long-path index row's entry pointer, and the Cassandra source | edit the solution; put anything about the case into the prompt beyond the entry pointer |
 | **Writer** | a fresh, isolated headless session you launch | the Cassandra source tree and nothing else | see anything else — the whole point of the path |
-| **Stage-4 executor** (one per path) | a later session | only its own path's frozen solution | read the other path's solution or readings before its own runs are filed |
+| **Stage-4 executor** (one per path) | the long path's: an AI session in this repo; the short path's: an isolated session started by `run-executor.py` | only its own path's frozen solution | (short path only) read the long path's solution, results, harness or readings |
 | **Side-by-side writer** | the session that finishes the last run | both paths' results | edit either solution |
 
 The runner may have read this repository; the writer must not have. That is
@@ -167,15 +186,14 @@ what it does, and what to do by hand if you cannot use it.
 
 ### 5.2 Step 0 — Inputs
 
-- **Case stem.** The long-path file's stem if the case has one (for example
-  `memtable_heap_space-tryAllocate-limit`), otherwise the §6.1 naming in the
-  experiment README. The writer never sees it.
+- **Case stem.** The long-path file's stem (for example
+  `memtable_heap_space-tryAllocate-limit`). The writer never sees it.
 - **Entry pointer:** a `file:line` in the pinned source, relative to the clone
-  root (Cassandra's layout makes that `src/java/org/apache/...`). Either Jingsong
-  gives it, or you copy **only** the `file:line` of the *Capacity check* column
-  from [`../long-path/_INDEX.md`](../long-path/_INDEX.md). Do not read the rest of that row: the
-  constraint name and decision point would leak into your context and then
-  into the prompt.
+  root (Cassandra's layout makes that `src/java/org/apache/...`). `run-case.py`
+  takes it from the *Capacity check* column of
+  [`../long-path/_INDEX.md`](../long-path/_INDEX.md), and nothing else of that
+  row, so the constraint name and decision point never reach the prompt. By hand,
+  copy only that `file:line`.
 - **Feed** (`3a` or `3b`) for the index row.
 
 ### 5.3 Step 1 — Prepare a clean workspace
@@ -375,9 +393,10 @@ test with the changed flags first.
 | `+git` | add `Bash(git log:*)`, `Bash(git show:*)`, `Bash(git blame:*)` to `--tools` and `--allowedTools` | Bash is still confined to the clone; the test's probes must still pass with this exact flag set |
 | `+domain` | add a `WebFetch(domain:...)` entry | The domain cannot serve this project's content; bump the allowlist version and record it |
 
-**Blind both ways.** Whoever writes a case's short solution does not open that
-case's long-path file, and whoever writes the long-path file does not open the
-short one. In stage 4, an executor reads only its own path's solution; only the session that writes the side-by-side reads both paths' results.
+**The short path is blind; the long path is not.** The writer never sees the long
+path, and in stage 4 the short executor reads only its own solution; only the session
+that writes the side-by-side reads both paths' results. The long path runs first, so it
+has nothing to avoid.
 
 **Noise check (optional).** Running the short path twice on a case, filed as
 `cases/<stem>--r2.md`, measures run-to-run variation, so a disagreement with the
