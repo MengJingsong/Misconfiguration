@@ -48,8 +48,8 @@ does not dominate, and that is its most useful result.
 
 ### 2.2 Step 7 in detail: the two tiers (new cases)
 
-A new case's §9 designs **both** tiers (the 11 cases filed earlier are not
-reworked):
+A new case's §9 designs **both** tiers (the 11 cases filed earlier have all been
+converted to it; see [`README.md`](README.md) §2.3):
 
 - **Unit tier:** construct or drive the check's classes directly in a JVM test
   built from the tree; measure the check's own usage-side operand. Look in

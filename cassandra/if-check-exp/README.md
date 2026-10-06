@@ -708,7 +708,7 @@ usual protocol, and files the results side by side. Rules: stage 3 README, stage
 - **The short path is blind to the long path, and frozen on filing** — see the stage 3 README. A
   short-path solution is never edited; a new version is filed with `--supersede`.
 - **The pilot on the three closed cases was skipped** by decision.
-- **The 11 filed cases are untouched.** For the closed ones the long path's runs
+- **The 11 cases filed when this was decided are untouched by it.** For the closed ones the long path's runs
   already exist, so only the short path's runs would be new.
 
 *Revised 2026-10-05: the pre-run comparison that rated the two solutions on

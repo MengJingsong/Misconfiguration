@@ -37,5 +37,5 @@ its structure). `cdc_total_space` and `MAX_HINT_BUFFERS` followed the same layou
 **Prior art.** The `memtable_heap_space` unit test, `HeapPoolTest.java`, is restored under `harness/` (its origin is recorded in
 that folder's README). Earlier per-case trigger notes are in `git show e7f9963:HANDOFF.md`.
 
-**Old-layout cases.** Eight of the eleven filed cases are still in the old §9 layout and may describe one tier or none; convert and
-complete them in the design audit, as [`../README.md`](../README.md) ("What stage 4 consumes") says.
+**Unaudited cases.** All 12 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth written in it), but those nine
+have not passed the design audit and have no harness code; both come before a run, as [`../README.md`](../README.md) ("Step 0") says.

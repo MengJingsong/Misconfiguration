@@ -7,7 +7,7 @@ independent verification solutions**, one from each path.
 
 | | [Long path](long-path/README.md) | [Short path](short-path/README.md) |
 |---|---|---|
-| Status | the established method; 11 cases filed | **experiment** (decided 2026-10-02); first solution filed |
+| Status | the established method; 12 cases filed | **experiment** (decided 2026-10-02); first solution filed |
 | Method | the 7 steps of [`long-path/playbook.md`](long-path/playbook.md): the three rules ([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)), the three enforcement patterns (§3.2), the test-design method (§8) | two jobs and no rubric: trace the constraint, then design the verification solution from whatever the AI itself collects from the sources |
 | Decides | yes — qualifies, rejects or defers a line | **no** — it files no verdict |
 | Output | a case file in [`long-path/cases/`](long-path/cases/), or an entry in [`long-path/rejected.md`](long-path/rejected.md) / [`long-path/deferred.md`](long-path/deferred.md) | a solution file in [`short-path/cases/`](short-path/cases/) |
@@ -25,9 +25,9 @@ which reports their results side by side, not here.
 check's own operand) and a **cluster-tier** procedure (a real node; measure the
 actual resource), each complete with its own predictions and readings table. A
 tier that cannot be done is written as `n/a: <reason>` with what answers the same
-question instead. The 11 long-path cases filed before this requirement are not
-reworked: several describe one tier or none, and stage 4's audit handles them as
-it does today.
+question instead. All 12 filed long-path cases are in this layout: three were
+converted at their stage-4 runs, eight on 2026-10-06 (not yet audited), and the
+twelfth was written in it.
 
 **Stage 3 never judges the pair.** The long path judges whether a line is a
 real case (its own verdict). Stage 4 runs both paths' solutions, both tiers

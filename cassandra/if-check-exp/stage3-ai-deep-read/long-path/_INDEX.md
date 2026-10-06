@@ -29,7 +29,7 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 8 |
+| Modules covered | 7 |
 | Total cases | 12 |
 | Found via feed 3b (raw source) | 9 |
 | Found via feed 3a (stage 1/2) | **3** |
