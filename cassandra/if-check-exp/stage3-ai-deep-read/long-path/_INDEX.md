@@ -21,6 +21,7 @@ See [README.md](README.md) for the format.
 | `column_index_cache_size` | [`BigFormatPartitionWriter.indexSamples():113`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L113) | [`RowIndexEntry.create():227-238`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L227-L238) | `sstable_index` | `rowindexentry` | (b) | 3b | [`column_index_cache_size-indexSamples-cacheSizeThreshold`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold.md) |
 | `max_hints_size_per_host` | [`StorageProxy.shouldHint():2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492) | [`StorageProxy.sendToHintedReplicas():1552-1558`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L1552-L1558) | `hints` | `hint` | (b) | 3a | [`max_hints_size_per_host-shouldHint-maxHintsSize`](cases/max_hints_size_per_host-shouldHint-maxHintsSize.md) |
 | `file_cache_size` | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) | [`BufferPool$GlobalPool.allocateMoreChunks():443-453`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443-L453) | `buffer_pool` | `chunk` | (a) | 3b | [`file_cache_size-allocateMoreChunks-memoryUsageThreshold`](cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md) |
+| `max_mutation_size` | [`Mutation.validateSize():172`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L172) | [`CommitLog.add():304`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L304) | `commitlog` | `allocation` | (c) | 3a | [`max_mutation_size-validateSize-MAX_MUTATION_SIZE`](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) |
 
 <!-- Add one row per case. -->
 
@@ -29,9 +30,9 @@ See [README.md](README.md) for the format.
 | Metric | Count |
 |--------|-------|
 | Modules covered | 8 |
-| Total cases | 11 |
+| Total cases | 12 |
 | Found via feed 3b (raw source) | 9 |
-| Found via feed 3a (stage 1/2) | **2** |
+| Found via feed 3a (stage 1/2) | **3** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -120,8 +121,19 @@ Hint buffering and dispatch module, covering writes stashed for temporarily-unre
   hint-window rejection four lines above.
 
 ### 3.4 commitlog
-Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). One case so far:
+Storage-engine module covering the write-ahead commit log and its Change Data Capture (CDC) variant (`db/commitlog`). Two cases so far:
 - **`cdc_total_space-processNewSegment-allowance`:** byte cap on total un-consumed CDC-hard-linked commit log segment data, compared in `CDCSizeTracker.processNewSegment()` (re-evaluated by `permitSegmentMaybe()`), which sets a per-segment `FORBIDDEN`/`PERMITTED` state read by the decision point `CommitLogSegmentManagerCDC.throwIfForbidden()` (pattern (b)). Disallow branch cleanly throws `CDCWriteException` — a real write rejection, unlike the memtable/hints/net cases' block-and-wait or backpressure semantics. `cdc_block_writes = false` turns off the rejection but not the cap: the tracker deletes the oldest un-consumed CDC links to stay under the allowance (stage 4, 2026-10-01), so data is lost instead of writes failing. Stage 4 closed this case 2026-10-01: with no consumer the node keeps `⌊limit/segmentSize⌋` links, or one more when the check's counter is stale (at most `limit + segmentSize` bytes).
+
+- **`max_mutation_size-validateSize-MAX_MUTATION_SIZE`:** byte cap on **one commit-log entry**, compared in
+  `Mutation.validateSize()` (second site `CounterMutation.validateSize()`) and enforced as the first statement of `CommitLog.add()`. Pattern (c), and
+  **the guard dominates the allocation**: the off-heap serialization buffer and the segment reservation both come after it; disallow is a clean
+  `InvalidRequestException`-family throw that reserves nothing. **A per-item bound, the folder's first:** it caps each entry, not any total, so the node-wide ceiling is
+  `limit × N` (§8). Distinctive points: the same verdict is read at **five call sites** (coordinator, replica verb handler, commit log, read repair, virtual
+  tables) of which only the commit-log one runs before new allocation, so the case rests on it; the limit is **frozen at class initialization**
+  (an interface constant, restart-only) and **derived from `commitlog_segment_size / 2`** when unset, which also derives the CQL transport's message cap and
+  the hints buffer size, so a sweep must hold them fixed; **at stock settings the transport's own caps equal it, so client writes are shadowed**; **replay is
+  unguarded**; counter refusals are not metered. A logged batch is the client-reachable way to the commit-log site (the batchlog entry). Found via
+  stage-3 feed **3a** (band A1, rows `Mutation.java:172` and `CounterMutation.java:94`); written up 2026-10-06.
 
 
 ### 3.5 sstable_index

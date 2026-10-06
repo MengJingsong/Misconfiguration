@@ -150,8 +150,9 @@ a verdict — see [`bands.md`](bands.md).
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
-[`../stage3-ai-deep-read/long-path/pending.md`](../stage3-ai-deep-read/long-path/pending.md); 8
-of them since filed as cases, 2 more cited as second sites of filed cases),
+[`../stage3-ai-deep-read/long-path/pending.md`](../stage3-ai-deep-read/long-path/pending.md); 9
+of them since filed as cases, 3 more cited as second sites of filed cases; `Mutation.java:172`, filed 2026-10-06 as
+`max_mutation_size`, and its second site `CounterMutation.java:94` are the latest),
 **34 rejected** (in
 [`../stage3-ai-deep-read/long-path/rejected.md`](../stage3-ai-deep-read/long-path/rejected.md)) and
 **10 deferred** (3 undecided in
