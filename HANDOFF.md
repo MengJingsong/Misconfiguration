@@ -65,7 +65,7 @@ this folder's own scope.
   is frozen on filing (sha256 in `short-path/_INDEX.md`) and never edited; a new version is filed with `--supersede`.
   **Stage 4 runs both paths, both tiers each, with no rating of the two solutions and no cross-path scoring**; an executor
   reads only its own path's solution, and a side-by-side is written at the end. Scope stays memory and disk. The pilot on the
-  three closed cases was skipped; the 12 filed cases have no short solution yet except `memtable_heap_space` (version 2, two
+  three closed cases was skipped; the 13 filed cases have no short solution yet except `memtable_heap_space` (version 2, two
   tiers; version 1 kept as `--v1`).
 - **Decided 2026-10-06:** (1) the long path always goes first, so only the short path is blind; (2) shared stage-4 files
   (`README.md`, `environment.md`, `_TEMPLATE.md`) stay free of the long path's case-specific designs, which live in
@@ -205,9 +205,9 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 12 cases filed
+## Current state — 13 cases filed
 
-All twelve are stage-3 complete: judged against the three rules with the
+All thirteen are stage-3 complete: judged against the three rules with the
 source open, citations checked against the pinned `cassandra-5.0.9` tag, and
 each carrying a §9 test design for stage 4.
 **There is no `Status` field** — manual and runtime verification happen in
@@ -229,6 +229,7 @@ stage 1/2, `3b` = direct source reading).
 | `file_cache_size-allocateMoreChunks-memoryUsageThreshold.md` | (a) | 3b | Byte ceiling on the chunk-cache pool's off-heap macro chunks. Disallow withholds the `Chunk`, but the caller then allocates straight from the OS with no ceiling — the limit bounds the pool, not the node's off-heap use. |
 | `column_index_cache_size-indexSamples-cacheSizeThreshold.md` | (b) | 3b | Threshold on a partition's block index: `IndexedEntry` (array on heap) vs. `ShallowIndexedEntry` (file position). **Both branches allocate** — the divergence is retained size. Key cache re-caps the total, so the ceiling claim is per entry. |
 | `max_mutation_size-validateSize-MAX_MUTATION_SIZE.md` | (c) | **3a** | Per-entry byte cap on one commit-log entry (a **per-item** bound: the node-wide ceiling is `limit × N`). The guard is the first statement of `CommitLog.add()` and **does dominate** the buffer and the segment reservation. The same verdict is read at **five call sites**, only one of which precedes new allocation; the limit is frozen at class initialization (restart-only) and derived from `commitlog_segment_size / 2`. At stock settings the CQL transport's own caps equal it, so client writes are shadowed; replay is unguarded; a logged batch is the client route to the commit-log site. |
+| `max_value_size-read-maxValueSize.md` | (c) | **3a** | Per-value sanity bound on a length decoded from a stream: the guard in `AbstractType.read()` throws before `new byte[l]`, which is allocated at full size before any byte is read. **It dominates the allocation for every production caller** (four call sites, all passing the configured limit; the unguarded `readBuffer(in)` overload has no production caller, which corrects the earlier note) **but not the 29 call sites of the sibling primitives** `readWithVIntLength` / `readWithLength`, **and not the write side**: nothing compares a value with it when written, so a value above the limit is accepted, held in the memtable and flushed, and fails only when read back, **as corruption** (the SSTable is marked suspect and left out of compaction, an inbound message is dropped, a commit-log replay stops the node starting). At stock settings a client cannot reach it (default 256 MiB, above the 16 MiB write-side caps); only the cell-value site can fire on data a client wrote. |
 
 Each case's full detail lives in its own file.
 
@@ -240,16 +241,16 @@ before its first run, and each lists the harness it needs (Java tests, Byteman r
 The conversion also found points where the old §9 or the case's §6b/§8 may be wrong (`native_transport` per-connection mode and the pause after an over-limit
 request; `max_hints` overshoot per flush; `memtable_offheap` physical bytes gated by the parking; `max_space` has no live setter; `internode` gauges per peer;
 `file_cache` chunk cache off by default). They are in each case's §10 Notes, **for stage 3 to judge, not applied to §5–§8**.
-The twelfth case, `max_mutation_size` (written 2026-10-06), has the new layout from the start (nothing was converted); it is likewise **not yet audited or run**,
-and its harness (a unit test, a client script, a run script) does not exist. Its §10 Notes record where it differs from the earlier notes on the same lines, also for stage 3 to judge.
+The twelfth and thirteenth cases, `max_mutation_size` and `max_value_size` (both written 2026-10-06), have the new layout from the start (nothing was converted); they are likewise **not yet audited or run**,
+and their harnesses do not exist (for `max_mutation_size` a unit test, a client script and a run script; for `max_value_size` a unit test, a Byteman rule, a client script and a run script). Their §10 Notes record where each differs from the earlier notes on the same lines, also for stage 3 to judge.
 Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
 
 ## Open items / next steps
 
 ### ⏵ Resume here (2026-10-06) — write up the qualified cases (stage 3, long path)
 
-**State.** 12 cases filed, all with a §9 in the new layout (eight converted 2026-10-06 and the twelfth, `max_mutation_size`, written 2026-10-06; unaudited, no harness code yet).
-Band A1 (65 rows) and A2 (30) are fully judged. **Open: 8 candidate cases (11 rows) qualified but unwritten (queue item 1, `max_mutation_size`, was filed 2026-10-06), 4 undecided rows, plus
+**State.** 13 cases filed, all with a §9 in the new layout (eight converted 2026-10-06; the twelfth, `max_mutation_size`, and the thirteenth, `max_value_size`, written 2026-10-06; unaudited, no harness code yet).
+Band A1 (65 rows) and A2 (30) are fully judged. **Open: 7 candidate cases (10 rows) qualified but unwritten (queue items 1 and 2, `max_mutation_size` and `max_value_size`, were filed 2026-10-06), 4 undecided rows, plus
 the `networking_cache_size` sibling.** The numbered write-up queue, with each candidate's pattern and hazard, is at the top of
 `cassandra/if-check-exp/stage3-ai-deep-read/long-path/pending.md`; the 4 undecided rows are in `deferred.md` §5 and §6.
 Nothing from this session is committed.
@@ -272,7 +273,7 @@ with the filed `max_mutation_size`, whose §10 Notes say to cite it.
 `_INDEX.md` row and module note → strike the entry in `pending.md` → for feed `3a` note the batch in `stage2-ai-preprocessing/README.md` →
 update the case count in this file and in `_INDEX.md` §2. Then stage 4 audits and freezes the case's §9 before any run.
 
-**Other open work, independent of the write-ups:** (a) stage-4 step-0 audit of the eight converted cases and of `max_mutation_size` (`max_space_usable_for_compactions_in_percentage` first, it is the cheapest unit tier; `max_mutation_size`'s unit tier is cheap too, but its harness test, client script and run script have to be written);
+**Other open work, independent of the write-ups:** (a) stage-4 step-0 audit of the eight converted cases, of `max_mutation_size` and of `max_value_size` (`max_space_usable_for_compactions_in_percentage` first, it is the cheapest unit tier; the unit tiers of `max_mutation_size` and `max_value_size` are cheap too, but each needs its harness test, client script and run script written, and `max_value_size` also a Byteman rule);
 (b) the side-by-side `comparison/memtable_heap_space-tryAllocate-limit.md` (`executor-prompts.md` §2); (c) the `MAX_HINT_BUFFERS` band question and the stage-3 recommendations of both results files;
 (d) stage 3 band A3 (39 rows, one judgement for the group), then band B (174) and C (94).
 
@@ -371,11 +372,11 @@ CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
 stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
 standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
 `claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `bands.md`. **Twelve cases are filed**, all stage-3 complete and all carrying
+in `bands.md`. **Thirteen cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 has started** (see the table above) — twelve designs, three cases closed
+**Stage 4 has started** (see the table above) — thirteen designs, three cases closed
 (`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`). Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 

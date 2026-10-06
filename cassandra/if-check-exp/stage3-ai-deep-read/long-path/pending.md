@@ -19,16 +19,16 @@ which is stage 3's 3a queue.
 
 ## Write-up queue (updated 2026-10-06)
 
-**8 candidate cases** (11 rows) are qualified and unwritten, from band A1 (feed `3a`)
+**7 candidate cases** (10 rows) are qualified and unwritten, from band A1 (feed `3a`)
 and the capacity-word pass (feed `3b`); one more, the `networking_cache_size` sibling of
-`file_cache_size`, comes from no stage-2 row. (Item 1, `max_mutation_size`, was filed 2026-10-06 and is struck below.) Details of each are in the sections below.
+`file_cache_size`, comes from no stage-2 row. (Items 1 and 2, `max_mutation_size` and `max_value_size`, were filed 2026-10-06 and are struck below.) Details of each are in the sections below.
 Filed entries stay in the section tables, struck through, only as a trail; the index of
 filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and clearest first.
 
 | # | Candidate (constraint name, §6.1) | Rows | Pattern | Notes for the write-up |
 |---|---|---|---|---|
 | 1 | ~~`max_mutation_size`~~ **— FILED 2026-10-06**, [case](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) | `Mutation:172`, `CounterMutation:94` | (c) | Throws before `CommitLog.add():311` reserves segment space; the two sites are one constraint. |
-| 2 | `max_value_size` | `AbstractType:594` | (c) | **Does not dominate**: `readBuffer(in)` passes `Integer.MAX_VALUE`; list both call-site sets. |
+| 2 | ~~`max_value_size`~~ **— FILED 2026-10-06**, [case](cases/max_value_size-read-maxValueSize.md) | `AbstractType:594` | (c) | **Does not dominate**: `readBuffer(in)` passes `Integer.MAX_VALUE`; list both call-site sets. *(Corrected in the case, §5 and §10: that overload has no production caller; the non-domination is the sibling primitives and the write side.)* |
 | 3 | `CACHEABLE_MUTATION_SIZE_LIMIT` | `Mutation:451`, `TeeDataInputPlus:58` | (a) | **One case** (serialize and deserialize sides); JVM property `cassandra.cacheable_mutation_size_limit_bytes`. Both branches allocate. |
 | 4 | `local_read_size_fail_threshold` | `ReadCommand:715` | (c) | Per-query running total; aborts. The warn twin is already rejected (Rule 3). |
 | 5 | `row_index_read_size_fail_threshold` | `RowIndexEntry:392` | (c) | Sibling of 4; throws before `new IndexedEntry` at `:362`; cross-link with the filed `column_index_cache_size`. |
@@ -108,7 +108,7 @@ undecided rows in [`deferred.md`](deferred.md).
 | Candidate | Check | Divergence on object creation | Pattern |
 |---|---|---|---|
 | ~~`max_hints_size_per_host`~~ **— FILED 2026-09-28**, [case](cases/max_hints_size_per_host-shouldHint-maxHintsSize.md) | [`StorageProxy.shouldHint():2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492) — `actualTotalHintsSize > maxHintsSize` | Returns `false`, so no hint file is written for that host; allow writes the hint to disk. A **running total of on-disk bytes per destination host**, not a per-item bound. | (b) |
-| **`max_value_size`** | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) — `l > maxValueSize` | Throws `IOException` before `accessor.read(in, l)`, which would allocate `l` bytes read straight from a length field on the wire/disk. | (c) |
+| ~~`max_value_size`~~ **— FILED 2026-10-06**, [case](cases/max_value_size-read-maxValueSize.md) | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) — `l > maxValueSize` | Throws `IOException` before `accessor.read(in, l)`, which would allocate `l` bytes read straight from a length field on the wire/disk. | (c) |
 | ~~`max_mutation_size`~~ **— FILED 2026-10-06**, [case](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) | [`Mutation.validateSize():172`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L172) — `totalSize > MAX_MUTATION_SIZE`. Second site: [`CounterMutation.validateSize():94`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/CounterMutation.java#L94) | Throws `MutationExceededMaxSizeException` from [`CommitLog.add():304`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L304), before the serialization scratch buffer is filled and before `segmentManager.allocate(mutation, totalSize)` at [`:311`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L311) reserves segment space. | (c) |
 | **`CACHEABLE_MUTATION_SIZE_LIMIT`** | [`Mutation$Serializer:451`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451) — `serializedSize < CACHEABLE_MUTATION_SIZE_LIMIT` | Allow builds a `CachedSerialization(dob.toByteArray())` — a byte array retained on heap; disallow builds a `SizeOnlyCacheableSerialization`, retaining nothing. **Both branches allocate**, as in `column_index_cache_size`. | (a) |
 | **`local_read_size_fail_threshold`** | [`ReadCommand$...addSize():715`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L715) — `sizeInBytes >= failBytes` | Throws `LocalReadSizeTooLargeException`, aborting the query mid-read so no further rows are materialized. A **running total per query**. | (c) |
@@ -124,7 +124,7 @@ undecided rows in [`deferred.md`](deferred.md).
   also complements the filed `MAX_HINT_BUFFERS` case — that one bounds the
   off-heap *buffers*, this one bounds the *files on disk*, per host. Check
   whether `getTotalHintsSize` is exact or sampled before writing §9.
-- **`max_value_size` does not dominate.** The no-argument overload
+- **`max_value_size` does not dominate.** *(Filed 2026-10-06; the case corrects this note: the overload below has no production caller, see its §5 and §10. The non-domination is the sibling length-prefixed read primitives and the unguarded write side.)* The no-argument overload
   [`AbstractType.readBuffer(in):566-569`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L566-L569)
   passes `Integer.MAX_VALUE`, disabling the guard for its callers. The guarded
   call sites pass `DatabaseDescriptor.getMaxValueSize()` explicitly — e.g.

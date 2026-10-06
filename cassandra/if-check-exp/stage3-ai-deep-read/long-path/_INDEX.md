@@ -22,6 +22,7 @@ See [README.md](README.md) for the format.
 | `max_hints_size_per_host` | [`StorageProxy.shouldHint():2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492) | [`StorageProxy.sendToHintedReplicas():1552-1558`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L1552-L1558) | `hints` | `hint` | (b) | 3a | [`max_hints_size_per_host-shouldHint-maxHintsSize`](cases/max_hints_size_per_host-shouldHint-maxHintsSize.md) |
 | `file_cache_size` | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) | [`BufferPool$GlobalPool.allocateMoreChunks():443-453`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443-L453) | `buffer_pool` | `chunk` | (a) | 3b | [`file_cache_size-allocateMoreChunks-memoryUsageThreshold`](cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md) |
 | `max_mutation_size` | [`Mutation.validateSize():172`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L172) | [`CommitLog.add():304`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L304) | `commitlog` | `allocation` | (c) | 3a | [`max_mutation_size-validateSize-MAX_MUTATION_SIZE`](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) |
+| `max_value_size` | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) | `marshal` | `bytearray` | (c) | 3a | [`max_value_size-read-maxValueSize`](cases/max_value_size-read-maxValueSize.md) |
 
 <!-- Add one row per case. -->
 
@@ -29,10 +30,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 7 |
-| Total cases | 12 |
+| Modules covered | 8 |
+| Total cases | 13 |
 | Found via feed 3b (raw source) | 9 |
-| Found via feed 3a (stage 1/2) | **3** |
+| Found via feed 3a (stage 1/2) | **4** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -174,3 +175,17 @@ Off-heap buffer pooling for file reads and networking (`utils/memory/BufferPool`
   one check — the `networking_cache_size` sibling is a separate case, not yet
   filed (`pending.md`). Source bug noted: `MACRO_CHUNK_SIZE`'s comment says
   1 MiB, the arithmetic gives 8 MiB.
+
+### 3.7 marshal
+Value types and their (de)serialization (`db/marshal`; the deserializers that call into it are in `db/rows`, `db` and `db/commitlog`). One case so far:
+- **`max_value_size-read-maxValueSize`:** per-value sanity bound on a length decoded from a stream, compared in `AbstractType.read()` and enforced as a
+  guard (pattern (c)) before `accessor.read(in, l)` allocates `new byte[l]` at full size, before any byte is read. **The guard dominates the allocation for every
+  production caller** (four call sites, all passing the configured limit; the unguarded `readBuffer(in)` overload has no production caller) **but not the sibling
+  primitives** (`ByteBufferUtil.readWithVIntLength` and `readWithLength`, 29 call sites with no limit, including the partition key of every inbound partition) **and
+  not the write side**: nothing compares a value with it when it is written, so a value above the limit is accepted, held in the memtable and flushed, and fails only
+  when read back — **as corruption**: the SSTable is marked suspect and left out of compaction, an inbound message is dropped, and a commit-log replay stops the node
+  starting (replay **is** guarded, unlike `max_mutation_size`'s). **At stock settings a client cannot reach it:** the default 256 MiB is above every write-side cap, so it
+  fires on damaged data only; and only the cell-value call site can fire on data a client wrote, since partition keys and the clustering values of row writes are limited to 64 KiB.
+  A **per-item** bound like `max_mutation_size`; the node-wide ceiling is `limit × N` (§8). The first case whose test design measures the **bytes a thread allocates**
+  across the check (`ThreadMXBean`, unit tier) and traces **allocation requests** with Byteman on a node. Found via stage-3 feed **3a** (band A1, row
+  `AbstractType.java:594`); written up 2026-10-06.

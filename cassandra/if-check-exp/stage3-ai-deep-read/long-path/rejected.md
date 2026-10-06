@@ -148,7 +148,7 @@ earlier passes sit in the bucket of that earlier record and are marked
 
 | Bucket | Group | Rows | Count |
 |---|---|---|---|
-| **Pending (21)** | A1 pass — qualifies | `AbstractType:594`, `Mutation:172` (since filed), `Mutation:451`, `ReadCommand:715`, `RowIndexEntry:392`, `OutboundConnection:398`, `MerkleTree:409`, `StorageProxy:2492` (since filed) | 8 |
+| **Pending (21)** | A1 pass — qualifies | `AbstractType:594` (since filed), `Mutation:172` (since filed), `Mutation:451`, `ReadCommand:715`, `RowIndexEntry:392`, `OutboundConnection:398`, `MerkleTree:409`, `StorageProxy:2492` (since filed) | 8 |
 | | A1 pass — second site of a new candidate | `CounterMutation:94` (of `Mutation:172`, since filed), `OutboundConnection:416` (of `:398`) | 2 |
 | | *(recorded)* still-open candidates | `QueryController:449` (`MAX_MATERIALIZED_KEYS`), `TeeDataInputPlus:58` (`TeeDataInputPlus_limit`) | 2 |
 | | *(recorded)* second site of a filed case | `CommitLogSegmentManagerCDC:200` (`cdc_total_space`), `ResourceLimits:213` (reserve sub-checks of the two `*_receive_queue_capacity` cases) | 2 |

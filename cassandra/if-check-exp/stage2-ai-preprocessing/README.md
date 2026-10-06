@@ -150,9 +150,9 @@ a verdict — see [`bands.md`](bands.md).
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
-[`../stage3-ai-deep-read/long-path/pending.md`](../stage3-ai-deep-read/long-path/pending.md); 9
-of them since filed as cases, 3 more cited as second sites of filed cases; `Mutation.java:172`, filed 2026-10-06 as
-`max_mutation_size`, and its second site `CounterMutation.java:94` are the latest),
+[`../stage3-ai-deep-read/long-path/pending.md`](../stage3-ai-deep-read/long-path/pending.md); 10
+of them since filed as cases, 3 more cited as second sites of filed cases; `Mutation.java:172` and `AbstractType.java:594`, filed 2026-10-06 as
+`max_mutation_size` and `max_value_size`, and the second site `CounterMutation.java:94` are the latest),
 **34 rejected** (in
 [`../stage3-ai-deep-read/long-path/rejected.md`](../stage3-ai-deep-read/long-path/rejected.md)) and
 **10 deferred** (3 undecided in
@@ -223,11 +223,11 @@ The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 2,941 rows.
 
-**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-06): 3 cases established,
+**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-06): 4 cases established,
 all from feed 3a (`max_space_usable_for_compactions_in_percentage`, `max_hints_size_per_host`,
-`max_mutation_size`); 8 candidates (11 rows) awaiting write-up
+`max_mutation_size`, `max_value_size`); 7 candidates (10 rows) awaiting write-up
 (`../stage3-ai-deep-read/long-path/pending.md`) and 4 undecided rows
-(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 12
+(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 13
 filed cases came from feed 3b.
 
 ## Batch coverage
