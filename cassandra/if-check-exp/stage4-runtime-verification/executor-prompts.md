@@ -24,8 +24,9 @@ pre-flight, the deny rules, and the prompts that enforce it. The worked case is
 
 ### 1.2 Deny rules
 
-These block the file tools (Read, Grep, Glob) from the other path's files for
-this case. They do **not** stop `cat` through Bash, so the prompt also forbids
+These block the file tools (Read, Grep, Glob) from the long path's files, for
+every case (the other cases' long-path results carry the long path's method
+too), so they need no editing per case. They do **not** stop `cat` through Bash, so the prompt also forbids
 it, and section 1.4 checks the session afterwards.
 
 ```json
@@ -34,9 +35,7 @@ it, and section 1.4 checks the session afterwards.
     "deny": [
       "Read(//home/jingsong/git-repos/Misconfiguration/HANDOFF.md)",
       "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/long-path/**)",
-      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md)",
-      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit/**)",
-      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit/**)",
+      "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/long-path/**)",
       "Read(//home/jingsong/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/comparison/**)"
     ]
   }
@@ -44,8 +43,8 @@ it, and section 1.4 checks the session afterwards.
 ```
 
 `HANDOFF.md` is blocked because it names the case's long-path finding. The
-`--short` results and harness names do not match these patterns, so the
-executor can create and read them.
+executor's own folder, `stage4-runtime-verification/short-path/`, is not
+blocked.
 
 ### 1.3 The prompt
 
@@ -62,16 +61,18 @@ Read only:
   (your design: it is frozen, never edit it)
 - the Cassandra source (clone it to local disk as the safety rules say).
 Do not open, by any tool (Bash and ssh included), and do not look up in git
-history: HANDOFF.md; anything under stage3-ai-deep-read/long-path/;
-results/memtable_heap_space-tryAllocate-limit.md or its folder; harness/
-memtable_heap_space-tryAllocate-limit/ (the one without --short); the
-comparison/ folder. If you open one by accident, stop and say so in results §1.
+history: HANDOFF.md; anything under stage3-ai-deep-read/long-path/; anything
+under stage4-runtime-verification/long-path/ (any case); the comparison/
+folder. If you open one by accident, stop and say so in results §1.
 
 Deliverables:
-1. results/memtable_heap_space-tryAllocate-limit--short.md, from _TEMPLATE.md.
+1. stage4-runtime-verification/short-path/results/
+   memtable_heap_space-tryAllocate-limit.md, from _TEMPLATE.md.
    In §1, list every file you opened from this repo ("Files read").
-2. harness/memtable_heap_space-tryAllocate-limit--short/ for any code your runs
-   need that is not upstream (a test class, a script).
+2. stage4-runtime-verification/short-path/harness/
+   memtable_heap_space-tryAllocate-limit/ for any code your runs need that is
+   not upstream (a test class, a script); small run excerpts under
+   short-path/results/memtable_heap_space-tryAllocate-limit/.
 
 Work tier by tier: the unit tier (B2) first, then the cluster tier (B3), each on
 the full protocol in the README: audit for runnability and shared-node safety
@@ -94,9 +95,9 @@ my decision.
 
 ### 1.4 After the session ends (you)
 
-1. **Check the deliverables:** `results/<stem>--short.md` has a verdict row for
-   each tier (or `not run: <reason>`) and a "Files read" list;
-   `harness/<stem>--short/` exists if any code was needed.
+1. **Check the deliverables:** `short-path/results/<stem>.md` has a verdict row
+   for each tier (or `not run: <reason>`) and a "Files read" list;
+   `short-path/harness/<stem>/` exists if any code was needed.
 2. **Check blindness** with [`check-blindness.py`](check-blindness.py). It scans the
    session transcript's tool calls (not the prompt, which names the blocked
    paths) for anything the short-path executor must not touch. It checks the
@@ -127,8 +128,8 @@ results. Start a new session.
 ```text
 Write cassandra/if-check-exp/stage4-runtime-verification/comparison/
 memtable_heap_space-tryAllocate-limit.md from comparison/_TEMPLATE.md, using
-results/memtable_heap_space-tryAllocate-limit.md (long path) and
-results/memtable_heap_space-tryAllocate-limit--short.md (short path). Report, rate
+long-path/results/memtable_heap_space-tryAllocate-limit.md and
+short-path/results/memtable_heap_space-tryAllocate-limit.md. Report, rate
 nothing; edit neither results file nor either solution. Add a line to
 comparison/_INDEX.md. Do not commit or push.
 ```

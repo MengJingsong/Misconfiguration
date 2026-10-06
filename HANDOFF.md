@@ -154,12 +154,13 @@ this folder's own scope.
       cost. It rates nothing. `_TEMPLATE.md`, `_INDEX.md`, `<stem>.md`. Rules: the
       README's "Two paths, two tiers each". (Replaced on 2026-10-05 the pre-run
       comparison that rated the solutions and chose one run or two.)
-    - `harness/<case-file-stem>/` — committed test code every run uses
-      (e.g. the restored `HeapPoolTest.java`).
-    - `results/<case-file-stem>.md` — one per case, plus
-      `results/<case-file-stem>/run1/` (and `run2/`, if one is done) for
-      small log excerpts. The short path's are `results/<stem>--short.md`
-      and `harness/<stem>--short/`.
+    - `long-path/` and `short-path/` (split 2026-10-05) — one folder per
+      path, each holding:
+      - `harness/<case-file-stem>/` — committed test code every run uses
+        (e.g. the restored `HeapPoolTest.java`).
+      - `results/<case-file-stem>.md` — one per case, plus
+        `results/<case-file-stem>/run1/` (and `run2/`, if one is done) for
+        small log excerpts.
 - **`codeql-queries/`** (repo root, [README](codeql-queries/README.md)) — the
   CodeQL query packs that feed `stage2-ai-preprocessing/`; the if-check queries
   and their
@@ -221,7 +222,7 @@ stage-4 run. Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
 
 **Stage 4 has closed three cases, `memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space`, both tiers each.** `cdc_total_space` closed 2026-10-01. **Read, in this
 order:** `stage4-runtime-verification/README.md` (the protocol; **no human approval or review anywhere**), then
-`stage4-runtime-verification/results/cdc_total_space-processNewSegment-allowance.md` (§1.2 the instrument checks, §3 the six runbook defects, §4.3 the cluster conclusion,
+`stage4-runtime-verification/long-path/results/cdc_total_space-processNewSegment-allowance.md` (§1.2 the instrument checks, §3 the six runbook defects, §4.3 the cluster conclusion,
 §5 the self-check, §8 the verdict and the six recommendations for stage 3), then the case's §10 "Stage-4 feedback". The case's **§6b item 3, §8, §10 and §11 were
 amended as feedback** (the non-blocking mode and the ceiling), so re-read them before using the case.
 
@@ -267,7 +268,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
   and prints every failed write's error (a 2.4 MB output for one B), so pull only its header and results block.
 
 **Reference, the first closed case, `memtable_heap_space` (state as of 2026-09-29/30).** Its results file is
-`stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit.md`.
+`stage4-runtime-verification/long-path/results/memtable_heap_space-tryAllocate-limit.md`.
 
 | Step | State |
 |---|---|
@@ -275,7 +276,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
 | Run 1 (AI), unit tier | **Done 2026-09-28.** Readings and conclusion are in the results file's §4 (no longer folded). Runbook defect #1 approved and fixed in §9c (`745c1ab`). |
 | Review of run 1 (Jingsong), unit tier | **Done 2026-09-29.** Agreed on all six parts; note on part 5: confirm the wait with a thread dump later. Unit-tier verdict filed in §8; case file §10 updated. |
 | Run 2 (Jingsong), unit tier | **Not chosen** (2026-09-29, when run 2 became optional). |
-| Cluster tier — preparation | **Done 2026-09-29.** Byteman rule `harness/…/escape-hatch.btm` written and checked (see the harness README); §9a Confirmed row, §9c and §9e amended and frozen at `bf1f6bb`; results §1 approved by Jingsong 2026-09-29. |
+| Cluster tier — preparation | **Done 2026-09-29.** Byteman rule `long-path/harness/…/escape-hatch.btm` written and checked (see the harness README); §9a Confirmed row, §9c and §9e amended and frozen at `bf1f6bb`; results §1 approved by Jingsong 2026-09-29. |
 | Run 1 (AI), cluster tier | **Done 2026-09-29.** Instrument check + five node runs (128, 256, 512 MiB, default, cleanup-threshold control at 256 MiB) and a second real-heap pass; every check passed first time. Readings in results §4.1, conclusion in §4.3: consistent with **Confirmed** at all four values. |
 | Review of the cluster tier (Jingsong) | Reviewed 2026-09-29. Review table (§5.1b) and §8 "Cluster" verdict filed 2026-09-30: consistent with **Confirmed**; **case closed**. |
 | Runbook defect #2 | Approved and fixed 2026-09-29: §9d's real-heap reading must subtract the young generation (`heap_info` `N young (…K)` line). §9a unchanged; §10 feedback updated. |
@@ -283,7 +284,7 @@ for commands, and **no `-n` when piping a script in** (it closes stdin and the s
 
 **What the cluster tier found** (numbers are in results §4.1; do not restate them elsewhere). Writers wait at the limit, seen in thread dumps (32 of 32 threads at `MemtableAllocator.java:195` in 11 of 12 dumps). The peak follows the knob (first limit flush at 99.1–99.8% of the limit). The escape hatch fired at every value, forcing 0.02–0.94% of the limit through, and also fired during limit-driven flushes, not only in scenario C. Real heap minus young generation stays within +37/−22 MiB of idle + limit. Control: with the default threshold flushes start at 33%, but writers still waited. **Not measured:** the counter's excess over the limit (no gauge; inferred).
 
-**How `memtable_heap_space` was run — an example, not a template.** One script, `results/memtable_heap_space-tryAllocate-limit/run1/cluster-run.sh`, with modes `instrument`, `value <label> <prev>`, `rest`, `heap`. It logs every command to `~/stage4-logs/cluster/<value>/session.log`, writes readings to `<value>/summary.txt`, exits non-zero at the first failed check, and stops the node on any failure. Run it in the background and read only `summary.txt` and greps (a long session re-reads its context on every call). It is specific to this case — other cases will need different runners (see the stage-4 README, "Where to start"). Lessons that generalize: (1) before scripting, list every §9d observable and confirm the script samples each one — the first pass missed heap at end of A/B; (2) `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM (1–2 s lag); (3) keep `JVM_EXTRA_OPTS`/`MAX_HEAP_SIZE` out of the stress, `nodetool` and `cqlsh` JVMs after the node starts (the Byteman agent would clash on port 9091).
+**How `memtable_heap_space` was run — an example, not a template.** One script, `long-path/results/memtable_heap_space-tryAllocate-limit/run1/cluster-run.sh`, with modes `instrument`, `value <label> <prev>`, `rest`, `heap`. It logs every command to `~/stage4-logs/cluster/<value>/session.log`, writes readings to `<value>/summary.txt`, exits non-zero at the first failed check, and stops the node on any failure. Run it in the background and read only `summary.txt` and greps (a long session re-reads its context on every call). It is specific to this case — other cases will need different runners (see the stage-4 README, "Where to start"). Lessons that generalize: (1) before scripting, list every §9d observable and confirm the script samples each one — the first pass missed heap at end of A/B; (2) `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM (1–2 s lag); (3) keep `JVM_EXTRA_OPTS`/`MAX_HEAP_SIZE` out of the stress, `nodetool` and `cqlsh` JVMs after the node starts (the Byteman agent would clash on port 9091).
 
 **Next session — pick one:**
 

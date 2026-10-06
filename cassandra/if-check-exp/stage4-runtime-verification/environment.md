@@ -153,7 +153,7 @@ fails with "Cannot connect".
 for two `UN`, create `keyspace1` with RF = 2 and write the stress table, stop node 2
 and wait until node 1 shows it `DN`. After that node 2 stays stopped with its data
 untouched, and each capacity value restarts node 1 only. Both trees were left with
-no `data/` or `logs/`; `results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/ring.sh` (run from the workstation, once) performs the first-time step and leaves both nodes stopped, and `run1/cluster-run.sh` then restarts node 1 alone for every capacity value.
+no `data/` or `logs/`; `long-path/results/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/run1/ring.sh` (run from the workstation, once) performs the first-time step and leaves both nodes stopped, and `run1/cluster-run.sh` then restarts node 1 alone for every capacity value.
 
 **Used for the cluster tier, 2026-09-30** (`MAX_HINT_BUFFERS`, results §4). `run1/ring.sh` formed the ring (two `UN` after 85 s, 2.5 min in
 all) and left both nodes stopped. `run1/cluster-run.sh value <label>` then ran each capacity value, about 2.5 min each (`ROWS`, `THREADS`,

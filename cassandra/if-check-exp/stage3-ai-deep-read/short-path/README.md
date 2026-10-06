@@ -100,7 +100,7 @@ writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt
 | 3. Judge the audit | read `run-report.txt`; for `REVIEW`, read `solution.md` | see the table below |
 | 4. File it | `python3 $SP/run-case.py file --stem <stem>` (add `--accept-review` after a reviewed `REVIEW`) | copied to `cases/<stem>.md`, header filled, `_INDEX.md` row with its sha256 |
 | 5. Commit and push | `git add`, `git commit`, `git push` | the solution is frozen in history |
-| 6. Hand off | stage 4 runs both tiers of this solution, by a session that sees only this path | `results/<stem>--short.md` |
+| 6. Hand off | stage 4 runs both tiers of this solution, by a session that sees only this path | `stage4-runtime-verification/short-path/results/<stem>.md` |
 
 A case with no preset needs `--pointer <file:line> --feed 3a|3b` in step 2
 (`file:line` is the capacity check only; take it from the long-path index's

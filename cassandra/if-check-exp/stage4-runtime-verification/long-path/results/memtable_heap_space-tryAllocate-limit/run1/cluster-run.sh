@@ -13,7 +13,7 @@
 # never waited in B, the §9c branch). On any non-zero exit it stops stress and the node.
 set -Eeuo pipefail
 
-H=/proj/misconfiguration-PG0/git-repos/misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable_heap_space-tryAllocate-limit
+H=/proj/misconfiguration-PG0/git-repos/misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_heap_space-tryAllocate-limit
 C=$HOME/cassandra-run1
 L=$HOME/stage4-logs/cluster
 RULE=$H/escape-hatch.btm

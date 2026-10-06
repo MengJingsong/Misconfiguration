@@ -1,8 +1,8 @@
 # [case-file stem] — the two paths side by side  <!-- file: comparison/[case-file stem].md -->
 
-> **Long path:** [`results/[case-file stem].md`](../results/[case-file stem].md)
+> **Long path:** [`long-path/results/[case-file stem].md`](../long-path/results/[case-file stem].md)
 >
-> **Short path:** [`results/[case-file stem]--short.md`](../results/[case-file stem]--short.md)
+> **Short path:** [`short-path/results/[case-file stem].md`](../short-path/results/[case-file stem].md)
 
 Written at the end by the session that finished the last run of the case. The
 rules are in the README's [Two paths, two tiers each](../README.md#two-paths-two-tiers-each).

@@ -1,6 +1,6 @@
 # cdc_total_space-processNewSegment-allowance — stage-4 results  <!-- file: results/cdc_total_space-processNewSegment-allowance.md -->
 
-> **Case:** [`cdc_total_space-processNewSegment-allowance`](../../stage3-ai-deep-read/long-path/cases/cdc_total_space-processNewSegment-allowance.md)
+> **Case:** [`cdc_total_space-processNewSegment-allowance`](../../../stage3-ai-deep-read/long-path/cases/cdc_total_space-processNewSegment-allowance.md)
 >
 > **Status:** **both tiers: run 1 done 2026-10-01, self-checked, verdicts filed.** Unit tier and cluster tier: **Confirmed, with a one-segment overshoot** (the node keeps ⌊*A*/*S*⌋ links, one more when the check's counter is stale, one fewer at an exact multiple); non-blocking mode: **bypass as recorded, bounded by deletion** (§4.2, §4.3, §8). Run 2 not chosen (§5.2). Nothing is committed.
 
@@ -8,7 +8,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../README.md`](../../README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

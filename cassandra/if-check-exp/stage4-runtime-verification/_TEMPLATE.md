@@ -1,24 +1,25 @@
-# [case-file stem] — stage-4 results  <!-- file: results/[case-file stem].md -->
+# [case-file stem] — stage-4 results  <!-- file: long-path/results/[case-file stem].md or short-path/results/[case-file stem].md -->
 
-> **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/long-path/cases/[case-file stem].md)
+> **Case:** [`[case-file stem]`](../../../stage3-ai-deep-read/long-path/cases/[case-file stem].md)
+> (short path: `../../../stage3-ai-deep-read/short-path/cases/[case-file stem].md`)
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 >
-> **Path:** long / short. One results file per path. For a `--short` file
-> (`results/[case-file stem]--short.md`), the "case file" below is the short-path
+> **Path:** long / short. One results file per path, each in its path's folder.
+> For a short-path file (`short-path/results/[case-file stem].md`), the "case file" below is the short-path
 > solution, and for each tier "§9a" means that tier's predictions and conclusions
 > table: B2f and B2g (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or
-> B3a–B3e. If the case has both paths, see [`comparison/[case-file stem].md`](../comparison/[case-file stem].md)
+> B3a–B3e. If the case has both paths, see [`comparison/[case-file stem].md`](../../comparison/[case-file stem].md)
 > for the side-by-side.
 
 **Relative links in this template** are written for where a *copy* of it lives
-— inside `results/` — not for the template's own location one level up.
+— inside `long-path/results/` or `short-path/results/` — not for the template's own location two levels up.
 
 **Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../README.md`](../../README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 
@@ -28,7 +29,7 @@ The protocol behind each section is in
 | **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
 | **Audit bottom line** | Ready / Ready after amendments / Blocked — date |
-| **Files read** | For both paths' results files: every file opened from this repo during the session, one per line, so the blindness check has a record. For a `--short` file the other path's files (long-path folder, the case's long results and harness, `HANDOFF.md`, `comparison/`) must not appear; the same holds the other way round for a long-path file when the case has a short solution |
+| **Files read** | For both paths' results files: every file opened from this repo during the session, one per line, so the blindness check has a record. For a short-path file the other path's files (`stage3-ai-deep-read/long-path/`, `stage4-runtime-verification/long-path/`, `HANDOFF.md`, `comparison/`) must not appear; the same holds the other way round for a long-path file when the case has a short solution |
 
 ### 1.1 Design audit
 

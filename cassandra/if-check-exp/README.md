@@ -398,8 +398,8 @@ cassandra/if-check-exp/
 └── stage4-runtime-verification/   # audits and runs both paths' solutions, both tiers each — AI only, no human gate
     ├── README.md            #   the protocol, including "Two paths, two tiers each"
     ├── comparison/          #   the side-by-side of the two paths, one file per case, and its index
-    ├── harness/             #   per-case instruments (`<stem>/` long path, `<stem>--short/` short path)
-    └── results/             #   per-case results (`<stem>.md` long path, `<stem>--short.md` short path)
+    ├── long-path/           #   the long path's runs: results/<stem>.md, results/<stem>/, harness/<stem>/
+    └── short-path/          #   the short path's runs, same layout (one folder per path, so one deny rule blinds a session to the other)
 ```
 
 Everything stage 3 produces lives in `stage3-ai-deep-read/`: the long path's

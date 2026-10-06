@@ -23,10 +23,10 @@ s = a.stem
 
 if a.path == 'short':      # the short executor must not see the long path
     bad = ['HANDOFF.md', 'stage3-ai-deep-read/long-path/', 'comparison/',
-           f'results/{s}.md', f'results/{s}/', f'harness/{s}/']
+           'stage4-runtime-verification/long-path/']
 else:                      # the long executor must not see the short path
     bad = ['HANDOFF.md', 'stage3-ai-deep-read/short-path/', 'comparison/',
-           f'results/{s}--short', f'harness/{s}--short']
+           'stage4-runtime-verification/short-path/']
 
 f = a.transcript
 if not f:

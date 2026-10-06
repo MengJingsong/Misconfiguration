@@ -1,13 +1,13 @@
 # memtable_heap_space-tryAllocate-limit — stage-4 results
 
-> **Case:** [`memtable_heap_space-tryAllocate-limit`](../../stage3-ai-deep-read/long-path/cases/memtable_heap_space-tryAllocate-limit.md)
+> **Case:** [`memtable_heap_space-tryAllocate-limit`](../../../stage3-ai-deep-read/long-path/cases/memtable_heap_space-tryAllocate-limit.md)
 >
 > **Status:** run 1 done — unit tier (2026-09-28) reviewed by Jingsong and its verdict filed (2026-09-29); cluster tier run 1 done 2026-09-29, reviewed by Jingsong (2026-09-29) and its verdict filed (2026-09-30); run 2 not chosen. **Case closed.**
 
 **Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
 run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../README.md`](../../README.md#the-run-protocol).
 This file was started under the 2026-09-28 two-run protocol and moved to the
 2026-09-29 one before any run 2.
 

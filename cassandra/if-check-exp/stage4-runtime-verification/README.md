@@ -42,7 +42,7 @@ Within stage 4, every step is done by an AI session:
 | Step | What it does | Output |
 |---|---|---|
 | 0. Design audit | Checks the case's §9 against the requirements below; recommends and applies amendments; freezes §9a | results §1 |
-| 1. Instruments | Writes, commits and checks the harness; confirms the environment | `harness/`, results §1 |
+| 1. Instruments | Writes, commits and checks the harness; confirms the environment | `<path>/harness/`, results §1 |
 | 2. Run 1 | Follows the runbook (§9b–§9e) exactly, scripted and logged | raw readings, command log |
 | 3. Conclusion | Matches the readings to one §9a row, with its logic in a fixed format | results §4 |
 | 4. Self-check | Re-reads every cited raw file against the conclusion and its logic | results §5 |
@@ -105,9 +105,14 @@ prediction and readings table, never the other path's.
 | Prediction | §9a | B2f / B3f |
 | Conclusions table (what a reading means) | §9a | B2g / B3g |
 | Controls | §9a and the runbook | B2h / B3h |
-| Results file | `results/<stem>.md` | `results/<stem>--short.md` |
-| Harness | `harness/<stem>/` | `harness/<stem>--short/` |
+| Results file | `long-path/results/<stem>.md` | `short-path/results/<stem>.md` |
+| Harness | `long-path/harness/<stem>/` | `short-path/harness/<stem>/` |
 | Feedback into the case file (§10) | yes | none: the solution is never amended |
+
+Each path's results and harness live in that path's folder, `long-path/` or
+`short-path/` (split 2026-10-05), so one deny rule keeps an executor blind to the
+whole other path, for every case. `comparison/` is shared and read only by the
+side-by-side writer.
 
 A tier a solution declares `n/a: <reason>` is not run; the results file says so
 and gives the reason. The short path's own predictions are frozen at the
@@ -199,7 +204,7 @@ the runbook defect log.
    below.
 2. **Commit the instruments** — when Jingsong asks for a commit, as always.
    Any code a run needs that is not upstream — a restored test class, a Byteman
-   rule — goes under `harness/<case-file-stem>/` in this folder before run 1,
+   rule — goes under `<path>/harness/<case-file-stem>/` in this folder (`long-path/` or `short-path/`) before run 1,
    and run 1 and any run 2 use those same files. Check each instrument before
    run 1 (parse-check a rule, a known-answer run) and record the check. Share
    instruments, not procedure: a run 2 follows the runbook by hand.
@@ -277,7 +282,7 @@ With no human review, the conclusion has to survive the AI's own second look.
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
 | A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
 | Stop every process a run starts, and check none is left: `pgrep -f org.apache.cassandra.service.CassandraDaemon`. | A leftover node holds ports and memory and contaminates the next run. |
-| Commit small text excerpts under `results/<case-file-stem>/run1/` (and `run2/`, if there is one); keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
+| Commit small text excerpts under `<path>/results/<case-file-stem>/run1/` (and `run2/`, if there is one); keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
 
 ## Environment
 
@@ -295,9 +300,9 @@ that judged it**, so measurements belong here, not in the case file.
 
 | Feedback kind | Lands in |
 |---|---|
-| The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
+| The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `long-path/results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
 | A case's two paths side by side — verdicts by path and tier, whether the conclusions agree, findings only one path produced, defects, cost | `comparison/<stem>.md`, copied from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md), and a line in `comparison/_INDEX.md` |
-| A short-path result (audit, runs, self-check, verdict, per tier) | `results/<stem>--short.md`; the short solution file is never amended |
+| A short-path result (audit, runs, self-check, verdict, per tier) | `short-path/results/<stem>.md`; the short solution file is never amended |
 | A refutation of the traced path (a **Refuted** row of §9a) | **amends the case file** — the affected section, dated, citing the results file |
 | A bypass confirmed at runtime (the bypass row of §9a) | amends the case's §8 ceiling claim and its Target-3 note; the numbers stay here |
 | A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e (only if §9a is unchanged; otherwise back to the audit) |
@@ -314,8 +319,8 @@ Every filed case carries a §9 test design, so stage 4 waits only on execution.
 **Which cases have run, and what comes next, is tracked in
 [`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds the protocol only.
 The first case run, `memtable_heap_space`, is the worked example: results in
-[`results/memtable_heap_space-tryAllocate-limit.md`](results/memtable_heap_space-tryAllocate-limit.md),
-harness in `harness/memtable_heap_space-tryAllocate-limit/`.
+[`long-path/results/memtable_heap_space-tryAllocate-limit.md`](long-path/results/memtable_heap_space-tryAllocate-limit.md),
+harness in `long-path/harness/memtable_heap_space-tryAllocate-limit/`.
 
 **Scripts are per case, not a shared pattern.** Each case's workload, observables
 and instruments differ (a unit test, a Byteman rule, a fixed-size filesystem, a
@@ -332,7 +337,7 @@ scaffolding already reaches the check:
 | Case | Why it is cheap |
 |---|---|
 | `memtable_heap_space` | Done — the worked example. Its unit tier is two `ant testsome` commands on the restored `HeapPoolTest` (see "Prior art" below). |
-| `cdc_total_space` | Done 2026-10-01 (results file in `results/`). `CommitLogSegmentManagerCDCTest` has the scaffolding (`CQLTester`, the CDC setup) but **not** a usable sweep: its `testWithCDCSpaceInMb` is private, and its non-blocking assertion allows three times the limit. The run needed a new harness test (`CdcTotalSpaceCeilingTest`), a Byteman creation trace, a sampler for `cdc_raw`, and a consumer emulator. The unit yaml's `commitlog_segment_size` is 5 MiB, not the node's 32 MiB. |
+| `cdc_total_space` | Done 2026-10-01 (results file in `long-path/results/`). `CommitLogSegmentManagerCDCTest` has the scaffolding (`CQLTester`, the CDC setup) but **not** a usable sweep: its `testWithCDCSpaceInMb` is private, and its non-blocking assertion allows three times the limit. The run needed a new harness test (`CdcTotalSpaceCeilingTest`), a Byteman creation trace, a sampler for `cdc_raw`, and a consumer emulator. The unit yaml's `commitlog_segment_size` is 5 MiB, not the node's 32 MiB. |
 | `MAX_HINT_BUFFERS` | Predicts an **exact** ceiling, `n × bufferSize` (96 MiB at defaults), not a trend — so it is the sharpest falsification in the set. `HintsBufferPoolTest.testBackpressure()` already proves the disallow branch via Byteman. Confirm Byteman resolves as a test dependency first. |
 | `max_space_usable_for_compactions_in_percentage` | `DirectoriesTest`, `PartialCompactionsTest` and `CompactionsBytemanTest` between them cover the arithmetic, the injection point and all three disallow outcomes. |
 
@@ -344,5 +349,5 @@ observes nothing) and `DataDirectory_getAvailableSpace` (the guard does not run
 under the default partitioner, so the two arms need **separate clusters**).
 
 **Prior art.** The `memtable_heap_space` unit test, `HeapPoolTest.java`, is restored
-under `harness/` (its origin is recorded in that folder's README). Earlier per-case
+under `long-path/harness/` (its origin is recorded in that folder's README). Earlier per-case
 trigger notes are in `git show e7f9963:HANDOFF.md`.
