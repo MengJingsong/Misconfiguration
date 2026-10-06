@@ -19,9 +19,9 @@ which is stage 3's 3a queue.
 
 ## Write-up queue (updated 2026-10-06)
 
-**7 candidate cases** (10 rows) are qualified and unwritten, from band A1 (feed `3a`)
+**6 candidate cases** (8 rows) are qualified and unwritten, from band A1 (feed `3a`)
 and the capacity-word pass (feed `3b`); one more, the `networking_cache_size` sibling of
-`file_cache_size`, comes from no stage-2 row. (Items 1 and 2, `max_mutation_size` and `max_value_size`, were filed 2026-10-06 and are struck below.) Details of each are in the sections below.
+`file_cache_size`, comes from no stage-2 row. (Items 1, 2 and 3, `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT`, were filed 2026-10-06 and are struck below.) Details of each are in the sections below.
 Filed entries stay in the section tables, struck through, only as a trail; the index of
 filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and clearest first.
 
@@ -29,7 +29,7 @@ filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and cleares
 |---|---|---|---|---|
 | 1 | ~~`max_mutation_size`~~ **— FILED 2026-10-06**, [case](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) | `Mutation:172`, `CounterMutation:94` | (c) | Throws before `CommitLog.add():311` reserves segment space; the two sites are one constraint. |
 | 2 | ~~`max_value_size`~~ **— FILED 2026-10-06**, [case](cases/max_value_size-read-maxValueSize.md) | `AbstractType:594` | (c) | **Does not dominate**: `readBuffer(in)` passes `Integer.MAX_VALUE`; list both call-site sets. *(Corrected in the case, §5 and §10: that overload has no production caller; the non-domination is the sibling primitives and the write side.)* |
-| 3 | `CACHEABLE_MUTATION_SIZE_LIMIT` | `Mutation:451`, `TeeDataInputPlus:58` | (a) | **One case** (serialize and deserialize sides); JVM property `cassandra.cacheable_mutation_size_limit_bytes`. Both branches allocate. |
+| 3 | ~~`CACHEABLE_MUTATION_SIZE_LIMIT`~~ **— FILED 2026-10-06**, [case](cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT.md) | `Mutation:451`, `TeeDataInputPlus:58` | (a) | **One case** (serialize and deserialize sides); JVM property `cassandra.cacheable_mutation_size_limit_bytes`. Both branches allocate. *(In the case: the receive site is split, (a) for the buffer writes and (b) for the copy; `limit <= 0` is unbounded on the receive side and "cache nothing" on the serialize side, so a value of 0 is an escape value; §5 and §10.)* |
 | 4 | `local_read_size_fail_threshold` | `ReadCommand:715` | (c) | Per-query running total; aborts. The warn twin is already rejected (Rule 3). |
 | 5 | `row_index_read_size_fail_threshold` | `RowIndexEntry:392` | (c) | Sibling of 4; throws before `new IndexedEntry` at `:362`; cross-link with the filed `column_index_cache_size`. |
 | 6 | `internode_application_send_queue_capacity` | `OutboundConnection:398`, `:416` | (b) | Send-side mirror of the two inbound cases; disallow **drops** the message (`onOverloaded`). |
@@ -59,7 +59,7 @@ three; none is written up as a case file yet.
 | ~~`BufferPool_memoryUsageThreshold`~~ **— FILED 2026-09-28** as [`file_cache_size`](cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md); its `networking_cache_size` sibling is **still open** (same check, second pool) | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) — `cur + MACRO_CHUNK_SIZE > memoryUsageThreshold` | Disallow returns `null` and logs; allow CASes the counter then `new Chunk(null, allocateDirectAligned(MACRO_CHUNK_SIZE))`. Clean, textbook pattern (a). |
 | **`MAX_MATERIALIZED_KEYS`** | [`QueryController.materializeKeysAndCloseSource():449`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/QueryController.java#L449) — `MAX_MATERIALIZED_KEYS < ++count` | Disallow returns `null`, discarding the `List<PrimaryKey>` built so far and forcing the caller onto an ORDER-BY-then-post-filter path; allow keeps accumulating and returns the list. |
 | **`Integer_MAX_VALUE` (index summary)** | [`IndexSummaryBuilder.maybeAddEntry():204`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryBuilder.java#L204) — `entries.length() + getEntrySize(key) <= Integer.MAX_VALUE` | Allow writes the key and offset into the growable `entries` buffer; disallow skips the entry and logs "Memory capacity of index summary exceeded (2GiB)". |
-| **`TeeDataInputPlus_limit`** | [`TeeDataInputPlus.maybeWrite():58`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TeeDataInputPlus.java#L58) — `teeBuffer.position() + length < limit` | Allow performs the write into `teeBuffer` (which grows); disallow sets `limitReached` and writes nothing. |
+| ~~`TeeDataInputPlus_limit`~~ **— FILED 2026-10-06** with `CACHEABLE_MUTATION_SIZE_LIMIT` (same constant; second site), [case](cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT.md) | [`TeeDataInputPlus.maybeWrite():58`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TeeDataInputPlus.java#L58) — `teeBuffer.position() + length < limit` | Allow performs the write into `teeBuffer` (which grows); disallow sets `limitReached` and writes nothing. |
 
 **Notes on these four.**
 
@@ -84,6 +84,9 @@ three; none is written up as a case file yet.
 - `TeeDataInputPlus_limit` is the weakest of the four — it bounds bytes
   mirrored into a buffer, and `limit`'s origin needs tracing before it is
   clear how meaningful the ceiling is. Confirm before writing it up.
+  *(Settled and filed 2026-10-06: its `limit` is `CACHEABLE_MUTATION_SIZE_LIMIT`, so it is
+  the second site of that case, not a case of its own; the case adds that `limit <= 0` is the
+  tee's "unbounded" setting.)*
 
 ### Already covered — cite, do not re-file
 
@@ -110,7 +113,7 @@ undecided rows in [`deferred.md`](deferred.md).
 | ~~`max_hints_size_per_host`~~ **— FILED 2026-09-28**, [case](cases/max_hints_size_per_host-shouldHint-maxHintsSize.md) | [`StorageProxy.shouldHint():2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492) — `actualTotalHintsSize > maxHintsSize` | Returns `false`, so no hint file is written for that host; allow writes the hint to disk. A **running total of on-disk bytes per destination host**, not a per-item bound. | (b) |
 | ~~`max_value_size`~~ **— FILED 2026-10-06**, [case](cases/max_value_size-read-maxValueSize.md) | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) — `l > maxValueSize` | Throws `IOException` before `accessor.read(in, l)`, which would allocate `l` bytes read straight from a length field on the wire/disk. | (c) |
 | ~~`max_mutation_size`~~ **— FILED 2026-10-06**, [case](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) | [`Mutation.validateSize():172`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L172) — `totalSize > MAX_MUTATION_SIZE`. Second site: [`CounterMutation.validateSize():94`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/CounterMutation.java#L94) | Throws `MutationExceededMaxSizeException` from [`CommitLog.add():304`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L304), before the serialization scratch buffer is filled and before `segmentManager.allocate(mutation, totalSize)` at [`:311`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L311) reserves segment space. | (c) |
-| **`CACHEABLE_MUTATION_SIZE_LIMIT`** | [`Mutation$Serializer:451`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451) — `serializedSize < CACHEABLE_MUTATION_SIZE_LIMIT` | Allow builds a `CachedSerialization(dob.toByteArray())` — a byte array retained on heap; disallow builds a `SizeOnlyCacheableSerialization`, retaining nothing. **Both branches allocate**, as in `column_index_cache_size`. | (a) |
+| ~~`CACHEABLE_MUTATION_SIZE_LIMIT`~~ **— FILED 2026-10-06**, [case](cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT.md) | [`Mutation$Serializer:451`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451) — `serializedSize < CACHEABLE_MUTATION_SIZE_LIMIT` | Allow builds a `CachedSerialization(dob.toByteArray())` — a byte array retained on heap; disallow builds a `SizeOnlyCacheableSerialization`, retaining nothing. **Both branches allocate**, as in `column_index_cache_size`. | (a) |
 | **`local_read_size_fail_threshold`** | [`ReadCommand$...addSize():715`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L715) — `sizeInBytes >= failBytes` | Throws `LocalReadSizeTooLargeException`, aborting the query mid-read so no further rows are materialized. A **running total per query**. | (c) |
 | **`row_index_read_size_fail_threshold`** | [`RowIndexEntry$Serializer.checkSize():392`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L392) — `estimatedMemory > failThreshold.toBytes()` | Throws `RowIndexEntryReadSizeTooLargeException` from [`:356`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L356), **before** the `new IndexedEntry(...)` at [`:362`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L362). | (c) |
 | **`internode_application_send_queue_capacity`** | [`OutboundConnection.acquireCapacity():398`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L398) — `pendingBytes(next) <= pendingCapacityInBytes`. Reserve sub-check at [`:416`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L416). | On `INSUFFICIENT_*`, [`enqueue():343-344`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L343-L344) calls `onOverloaded(message)` and **returns** — `queue.add(message)` is never reached and the message is dropped. | (b) |
@@ -131,7 +134,7 @@ undecided rows in [`deferred.md`](deferred.md).
   [`Cell.java:339`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/rows/Cell.java#L339),
   which is the hot path for every cell deserialized. Enumerate both sets when
   writing it up; non-domination is a finding, not a rejection.
-- **`CACHEABLE_MUTATION_SIZE_LIMIT` settles an open question.** The same
+- **`CACHEABLE_MUTATION_SIZE_LIMIT` settles an open question.** *(Filed 2026-10-06 as one case, as proposed here.)* The same
   constant is the `limit` passed to `TeeDataInputPlus` at
   [`Mutation.java:493`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L493),
   which is the `TeeDataInputPlus_limit` candidate already in this file. So

@@ -223,11 +223,11 @@ The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 2,941 rows.
 
-**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-06): 4 cases established,
+**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-06): 5 cases established,
 all from feed 3a (`max_space_usable_for_compactions_in_percentage`, `max_hints_size_per_host`,
-`max_mutation_size`, `max_value_size`); 7 candidates (10 rows) awaiting write-up
+`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`); 6 candidates (8 rows) awaiting write-up
 (`../stage3-ai-deep-read/long-path/pending.md`) and 4 undecided rows
-(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 13
+(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 14
 filed cases came from feed 3b.
 
 ## Batch coverage

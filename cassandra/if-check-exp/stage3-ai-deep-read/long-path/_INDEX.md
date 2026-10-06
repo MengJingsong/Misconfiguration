@@ -23,6 +23,7 @@ See [README.md](README.md) for the format.
 | `file_cache_size` | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) | [`BufferPool$GlobalPool.allocateMoreChunks():443-453`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443-L453) | `buffer_pool` | `chunk` | (a) | 3b | [`file_cache_size-allocateMoreChunks-memoryUsageThreshold`](cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md) |
 | `max_mutation_size` | [`Mutation.validateSize():172`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L172) | [`CommitLog.add():304`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L304) | `commitlog` | `allocation` | (c) | 3a | [`max_mutation_size-validateSize-MAX_MUTATION_SIZE`](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) |
 | `max_value_size` | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) | `marshal` | `bytearray` | (c) | 3a | [`max_value_size-read-maxValueSize`](cases/max_value_size-read-maxValueSize.md) |
+| `CACHEABLE_MUTATION_SIZE_LIMIT` | [`Mutation$MutationSerializer.serialization():451`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451) | [`Mutation$MutationSerializer.serialization():451-463`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451-L463) | `mutation` | `cachedserialization` | (a) | 3a | [`CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT`](cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT.md) |
 
 <!-- Add one row per case. -->
 
@@ -30,10 +31,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 8 |
-| Total cases | 13 |
+| Modules covered | 9 |
+| Total cases | 14 |
 | Found via feed 3b (raw source) | 9 |
-| Found via feed 3a (stage 1/2) | **4** |
+| Found via feed 3a (stage 1/2) | **5** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -189,3 +190,19 @@ Value types and their (de)serialization (`db/marshal`; the deserializers that ca
   A **per-item** bound like `max_mutation_size`; the node-wide ceiling is `limit × N` (§8). The first case whose test design measures the **bytes a thread allocates**
   across the check (`ThreadMXBean`, unit tier) and traces **allocation requests** with Byteman on a node. Found via stage-3 feed **3a** (band A1, row
   `AbstractType.java:594`); written up 2026-10-06.
+
+### 3.8 mutation
+The write object and its serialization (`db/Mutation`, `io/util/TeeDataInputPlus`). One case so far:
+- **`CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT`:** byte threshold on **one mutation's serialized size**, deciding whether the mutation keeps a
+  serialized copy on the heap (`CachedSerialization`, a `byte[]` of exactly that size) or only its size (`SizeOnlyCacheableSerialization`). **The second case where both outcomes
+  allocate**, after `column_index_cache_size`: what the check withholds is a **copy** beside the mutation's own heap, and the divergence is in retained size. **Two check sites on one
+  constraint, of different patterns:** `Mutation$MutationSerializer.serialization():451` is **(a)** and decides the copy for every mutation the node serializes; the receive side,
+  `TeeDataInputPlus.maybeWrite():58`, is (a) for each write into a scratch buffer and sets a flag (`limitReached`) that `Mutation.deserialize():518` reads to decide the copy (b), and it is
+  reached from every deserialization (network, commit-log replay, hints, batchlog, counters, schema). The two agree on the boundary: a copy is kept iff *T* < limit. **A per-copy bound:**
+  the node-wide extra heap is about `limit × N`, *N* being the live mutations just under the limit, which nothing here or in the in-flight request caps bounds. **A JVM property,
+  restart-only** (`cassandra.cacheable_mutation_size_limit_bytes`, default 1,000,000; no yaml key or JMX), frozen in a `static final` of `Mutation`. **The disallow is not a refusal:**
+  the mutation is still sent, logged and applied; the node spends CPU, re-walking the partition updates at every later serialization, instead of memory. **An escape value:** a limit of
+  0 or less caches nothing on the serialize side and **removes the bound on the receive side** (`limit <= 0` is the tee's "unbounded"), so the two sites read it in opposite senses.
+  `validateSize()` reaches this check, so measuring a mutation below the limit builds its copy (`max_mutation_size`). Its node tier reaches the **receive site on a real node through
+  commit-log replay**, holding writes in memory with a Byteman delay and counting live copies with a class histogram. Found via stage-3 feed **3a** (band A1, rows
+  `Mutation.java:451` and `TeeDataInputPlus.java:58`); written up 2026-10-06.
