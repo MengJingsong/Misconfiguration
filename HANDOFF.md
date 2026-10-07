@@ -237,691 +237,77 @@ stage 1/2, `3b` = direct source reading).
 
 Each case's full detail lives in its own file.
 
-**Every case carries a §9 test design, all in the new layout.** The intro and §9a are a summary for a human
-reader (procedure and conclusions table), §9b–§9e are a Linux runbook. `memtable_heap_space` (2026-09-28),
-`MAX_HINT_BUFFERS` (2026-09-30) and `cdc_total_space` (2026-10-01) were converted and audited at their stage-4 runs. **The other eight were converted
-2026-10-06** (an AI session, on Jingsong's request) and are **not yet audited or run**: each must pass the stage-4 step-0 audit and be frozen
-before its first run, and each lists the harness it needs (Java tests, Byteman rules, scripts) as work for step 1; none of that code exists yet.
-The conversion also found points where the old §9 or the case's §6b/§8 may be wrong (`native_transport` per-connection mode and the pause after an over-limit
-request; `max_hints` overshoot per flush; `memtable_offheap` physical bytes gated by the parking; `max_space` has no live setter; `internode` gauges per peer;
-`file_cache` chunk cache off by default). They are in each case's §10 Notes, **for stage 3 to judge, not applied to §5–§8**.
-The twelfth to fourteenth cases, `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` (all written 2026-10-06), have the new layout from the start (nothing was converted); they are likewise **not yet audited or run**,
+**Every case carries a §9 test design in the new layout** (§9a summary and conclusions table for a human; §9b–§9e a Linux
+runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the §9s:
 
-The fifteenth and sixteenth cases, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold` (written 2026-10-06), have the new layout from the start. **Both were audited, frozen, run and closed at stage 4 on 2026-10-07** (both tiers Confirmed; results in `stage4-runtime-verification/long-path/results/`, harnesses in `.../harness/`; node `pc80` for the unit tiers and the first, `pc66` for the second). Their §10 Notes record where each differs from the earlier notes on the same lines (per command, not per query; the estimate precedes the Indexed/Shallow choice; the row-index guard's inert paths). Their warn twin `ReadCommand:724` is now in `rejected.md`; the unjudged `coordinator_read_size_fail_threshold` is `pending.md` item 11.
-and their harnesses do not exist (for `max_mutation_size` a unit test, a client script and a run script; for `max_value_size` a unit test, a Byteman rule, a client script and a run script; for `CACHEABLE_MUTATION_SIZE_LIMIT` a unit test, two Byteman files, a client script, a histogram script and a run script). Their §10 Notes record where each differs from the earlier notes on the same lines, also for stage 3 to judge.
+- **Audited, run and closed at stage 4 (5):** `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`.
+- **Not yet audited or run (12):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
+  needs (Java tests, Byteman rules, scripts) as step-1 work; none of that code exists yet. The eight cases converted to the new layout on 2026-10-06 and the cases
+  written since (`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `internode_application_send_queue_capacity`) record in their §10 Notes
+  where they differ from earlier notes on the same lines, **for stage 3 to judge, not applied to §5–§8**.
+- **Untested central finding:** the seventeenth case's claim that the per-peer reserve is read from the receive-side key
+  `internode_application_receive_queue_reserve_endpoint_capacity` is derived from the source only; if unit step U10 or scenario C refutes it, amend the case's §4, §5, §8 and §10.
 
-The seventeenth case, `internode_application_send_queue_capacity` (written 2026-10-07, queue item 6), has the new layout from the start and is **not yet audited or run**; its harness does not exist (two unit-test classes, three Byteman files, a node-yaml script, a cluster driver and a CQL poller; the cluster tier needs **four** processes on one machine, one sender and three replicas, with tokens chosen so the sender owns nothing). Its §10 Notes list four points where it corrects the queue entry (`:416` is not a check; the drop also fails the callback and hints a plain write; the per-peer reserve follows the receive-side key; expiry is lazy on a connected link). Its central finding, the reserve key, is **derived from the source and untested**: if unit step U10 or scenario C refute it, the case's §4, §5, §8 and §10 are to be amended.
-Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
+## Latest status (2026-10-07) and next steps
 
-## Open items / next steps
+### Stage 3 — long path (the deciding path; an AI session does all of it)
 
-### ⏵ Stage 4 update (2026-10-07) — the two read-size guardrails run and closed
+- **Pipeline:** stage 1 (CodeQL, 5,588 rows) and stage 2 (AI banding, complete over all rows: A 134, B 174, C 94, D 4,387; verdicts in `stage2-ai-preprocessing/bands.csv`) are done.
+  Stage 3 is the bottleneck. Band A splits into **A1 (65, fully judged)**, **A2 (30, fully judged)** and **A3 (39 grow-when-full reallocations, not yet read; judge as one group)**. B (174) and C (94, the insurance band, not optional) follow; D last.
+- **17 cases filed** (9 from feed 3b, 8 from feed 3a), all stage-3 complete. Refusals are in `rejected.md` (the only rejection file); undecided rows in `deferred.md`.
+- **Write-up queue** (`long-path/pending.md`, items 1–6 filed and struck): next is **item 7 `repair_session_max_tree_depth`** (establish which term of its `min` binds before designing §9),
+  then 8 `MAX_MATERIALIZED_KEYS`, 9 `Integer_MAX_VALUE` (type bound; §6.1 naming judgement), 10 `networking_cache_size` (sibling of `file_cache_size`), 11 `coordinator_read_size_fail_threshold` (**unjudged**; may be post hoc under Rule 3).
+  Four undecided rows to settle first or alongside: `IndexSummaryRedistribution:341`, `SystemKeyspace:1919`, `ResourceLimits:138` (`deferred.md` §5) and `Envelope:429` (§6).
+- **Open stage-3 judgements fed back from stage 4:** `CommitLogSegmentManagerCDC:345` as a check site; the `MAX_HINT_BUFFERS` reading-rule band (results §5.1b part 3: is the 4 MiB band binding, or does the create-trace clause decide?);
+  the recommendations in each closed results file's §8 (not applied except `cdc_total_space`'s §9a stale-counter wording, applied 2026-10-06); the two read-size cases' stage-4 feedback (names-filter read allocates 77–78 %, not within 10 %; §9a "Default" bullet names an `active` field the Byteman rule does not print).
+  Link `ResourceLimits$Basic.tryAllocate():213` from the two net cases (not yet done).
+- **To start a write-up session:** *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `pending.md`'s write-up queue and `_TEMPLATE.md`. Write up the first unstruck item: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`), answer all nine fields, design both tiers in §9a–§9e, verify every citation, add the `_INDEX.md` row, strike the candidate in `pending.md`. Do not commit."* One candidate per session (2–3 if siblings).
+- **Method for a §9:** (1) read the upstream tests that touch the check and reuse them as the unit tier; (2) find the check's own debug/metric line, else design a Byteman rule; (3) make the limit moveable on a small dedicated filesystem or tiny pool; (4) derive the prediction from the source with its tolerance, as numbers, before any run;
+  (5) cross-check old prose against the code and record contradictions in §10 Notes; (6) keep §9a to claim, how-this-verifies, procedure, prediction and a Conclusions table with Refuted, Not confirmed and Invalid rows;
+  (7) trace the whole disallow chain to its callers, trace each limit's config key to where it is really read (a getter may read a sibling key), find who releases the resource before predicting a drain, grep the whole tree for "only caller" claims, and expand and check every `file:line` with a script.
+- **Filing checklist:** `cases/<stem>.md` (nine fields, §9a–§9e, §10 provenance with feed and date) → `_INDEX.md` row, module note and §2 counts → strike the entry in `pending.md` → for feed 3a note the batch in `stage2-ai-preprocessing/README.md` → update the case count in this file.
 
-**Stage 4 has now closed five cases**: `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space` (below) and, on 2026-10-07 and in one session, `local_read_size_fail_threshold` and
-`row_index_read_size_fail_threshold`. Both are **Confirmed at both tiers**; results `stage4-runtime-verification/long-path/results/<stem>.md` (+ `<stem>/run1/` with the raw excerpts and
-`selfcheck.py`/`selfcheck.txt`), harnesses `.../harness/<stem>/` (each has a README). No run 2.
+### Stage 3 — short path (blind, human plus AI)
 
-| Case | Verdict | What the next case should know |
-|---|---|---|
-| `local_read_size_fail_threshold` | Confirmed (unit and cluster); bypass as recorded (names-filter read, paging, unflagged read) | *X* (the check's counter) equals *T*(*i\**) exactly; node and unit tier agree on *b0* = 72 B, *h* = 1,216 B for a 1,000 B row. **A sub-prediction missed:** the limited names read allocates 77 to 78 % of the unlimited one (the case said within 10 %); left for stage 3 (case §10). |
-| `row_index_read_size_fail_threshold` | Confirmed (unit and cluster); bypass as recorded (key-cache hit, SSTable opened late, scan, no command); **scope: at the stock `column_index_cache_size` the limit bounds no heap** (accepted entries weigh 128 B whatever their blocks) | the lazy-opening analysis of the case's §5 was observed on a node. Recommendation 2 for stage 3: §9a's "Default" bullet names an `active` field the Byteman rule does not print (results §3 defect 4). |
+- **One solution filed:** `memtable_heap_space-tryAllocate-limit.md` (version 2, current, sha256 `31f017fe…`, claude-sonnet-5, isolation and leakage audit pass, 2026-10-05); version 1 kept as `--v1`, superseded. Comparison column in `short-path/_INDEX.md` is still **pending**.
+- **The other 16 cases have no short solution.** The pilot on the three first-closed cases was skipped. A human starts the blind writer with `run-case.py`; a filed solution is frozen and never edited (`--supersede` for a new version).
 
-**Lessons for the next harness** (all in the harness READMEs): the node runs from `build/apache-cassandra-*.jar`, so a Byteman helper class must go on the **boot class path**
-(`-Xbootclasspath/a:<jar>`), classes in `build/classes/main` are not seen; the Python driver bundled in `lib/` works at **protocol 5**, which is the only protocol that returns the per-replica failure
-code; a client connection reads system tables, which adds key-cache entries and Byteman lines (warm it with a `probe` read before a before-snapshot, filter lines on the case's keyspace);
-`Jmx.java` (in the row-index harness) reads several attributes per JVM start and sets one (`nodetool sjk mx` is slow); a foreground `pkill -f` over ssh matches its own command line, use `[c]luster-run.py`.
-Runs are Python (`cluster-run.py`), one per capacity value, about 3 to 7 minutes each.
+### Stage 4 — long path (AI audits §9, runs it, owns the verdict; no human gate)
 
-**Nodes right now:** `pc80` (unit tiers of both cases, cluster tier of the local-read case) and `pc66` (cluster tier of the row-index case) are idle, no daemon, clones `~/cassandra-run1` at `b5f2a54210`
-with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/{lrs,rirs,unit-lrs,unit-rirs}`; full logs in `~/stage4-logs/{lrs,rirs}/`.
+Five cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/long-path/results/<stem>.md` (+ `<stem>/run1/`), harnesses in `.../harness/<stem>/`.
 
-**Next:** the stage-4 audit and run of the other twelve filed cases (`max_space_usable_for_compactions_in_percentage` is still the cheapest unit tier), or stage 3's queue (item 7 next; item 6 was filed 2026-10-07).
-
-### ⏵ Resume here (2026-10-06) — write up the qualified cases (stage 3, long path)
-
-**State.** 17 cases filed (the seventeenth, `internode_application_send_queue_capacity`, on 2026-10-07), all with a §9 in the new layout (eight converted 2026-10-06; the fifteenth and sixteenth, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, written 2026-10-06 like the twelfth, `max_mutation_size`, the thirteenth, `max_value_size`, and the fourteenth, `CACHEABLE_MUTATION_SIZE_LIMIT`, written 2026-10-06; unaudited, no harness code yet; the fifteenth and sixteenth were closed at stage 4 on 2026-10-07).
-Band A1 (65 rows) and A2 (30) are fully judged. **Open: 3 candidate cases (4 rows) qualified but unwritten (queue items 1 to 5, `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, were filed 2026-10-06, and item 6, `internode_application_send_queue_capacity`, on 2026-10-07), 4 undecided rows, plus
-the `networking_cache_size` sibling.** The numbered write-up queue, with each candidate's pattern and hazard, is at the top of
-`cassandra/if-check-exp/stage3-ai-deep-read/long-path/pending.md`; the 4 undecided rows are in `deferred.md` §5 and §6.
-Everything through the seventeenth case (`internode_application_send_queue_capacity`, with its bookkeeping) is committed and pushed (`7a836d0`).
-
-**To start a new session** (paste something like this): *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `pending.md`'s
-write-up queue and `_TEMPLATE.md`. Write up the first unstruck item of the queue as a case: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`),
-answer all nine fields, design both tiers in §9a to §9e, verify every citation, add the `_INDEX.md` row, strike the candidate in `pending.md`.
-Do not commit."* One candidate per session keeps the context small; do 2 or 3 if they are siblings (4 and 5, the two read-size thresholds, which should be cross-linked). The next unstruck item is 7, `repair_session_max_tree_depth` (items 4 and 5, the two read-size thresholds, were filed 2026-10-06 as two cross-linked cases; item 6, `internode_application_send_queue_capacity`, on 2026-10-07; item 11, the unjudged coordinator-side `coordinator_read_size_fail_threshold`, was found while writing items 4 and 5). Item 7's `pending.md` note says to establish which term of its `min` binds before designing §9.
-
-**Method that worked on the eight conversions** (apply it to new §9s):
-1. Read the source path and the **upstream tests** that already touch the check (`grep -rn <method> test/unit`); reuse them as the unit tier and say what they do **not** prove.
-2. Find the check's own **debug/trace/metric** line; if none, design a Byteman observation rule and list it as harness work.
-3. Make the limit moveable on a **small dedicated filesystem or tiny pool**, not by waiting for a real node to fill.
-4. Derive the prediction from the source with its tolerance (flush period, chunk size, stale counter), before any run, as numbers.
-5. Cross-check each claim in the old prose against the code while converting; record contradictions in §10 Notes for stage 3, do not silently rewrite §5 to §8.
-6. Keep §9a to claim, how-this-verifies block, procedure, prediction and a Conclusions table with Refuted, Not confirmed and Invalid rows.
-7. **Lessons from the seventeenth case (2026-10-07):** (a) trace the *whole* disallow chain to its callers (the drop failed a callback and hinted a write; a queue entry's one-line "drops" was incomplete); (b) trace where each limit's **config key** really comes from, because a getter may read a sibling key (the per-peer reserve); (c) before predicting a "drain", find **who releases** the resource (expiry was lazy, so the prediction had to change); (d) grep the whole tree for "only caller" claims; (e) write link tokens in a draft and expand and check every `file:line` with a script (range exists, load-bearing snippet present) — the script used was ad hoc and is not in the repo.
-
-**Filing checklist per case:** `cases/<stem>.md` (nine fields, §9a to §9e, §10 provenance with feed `3a` and the date citations were checked) →
-`_INDEX.md` row and module note → strike the entry in `pending.md` → for feed `3a` note the batch in `stage2-ai-preprocessing/README.md` →
-update the case count in this file and in `_INDEX.md` §2. Then stage 4 audits and freezes the case's §9 before any run.
-
-**Other open work, independent of the write-ups:** (a) stage-4 step-0 audit of the eight converted cases, of `max_mutation_size`, of `max_value_size`, of `CACHEABLE_MUTATION_SIZE_LIMIT` and of `internode_application_send_queue_capacity` (its unit tier is two test classes and settles the reserve-key finding at once; its cluster tier is the heaviest design so far: four nodes, a Byteman hold on the large link's delivery, and a poller of `system_views.internode_outbound`) (`max_space_usable_for_compactions_in_percentage` first, it is the cheapest unit tier; the unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are cheap too, but each needs its harness test, client script and run script written, `max_value_size` also a Byteman rule, and `CACHEABLE_MUTATION_SIZE_LIMIT`'s cluster tier two Byteman files and a histogram script);
-(b) the side-by-side `comparison/memtable_heap_space-tryAllocate-limit.md` (`executor-prompts.md` §2); (c) the `MAX_HINT_BUFFERS` band question and the stage-3 recommendations of both results files;
-(d) stage 3 band A3 (39 rows, one judgement for the group), then band B (174) and C (94).
-
-### ⏵ Resume here — stage 4 after `cdc_total_space` (state as of 2026-10-01, end of session)
-
-**Stage 4 has closed three cases, `memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space`, both tiers each.** `cdc_total_space` closed 2026-10-01. **Read, in this
-order:** `stage4-runtime-verification/README.md` (the protocol; **no human approval or review anywhere**), then
-`stage4-runtime-verification/long-path/results/cdc_total_space-processNewSegment-allowance.md` (§1.2 the instrument checks, §3 the six runbook defects, §4.3 the cluster conclusion,
-§5 the self-check, §8 the verdict and the six recommendations for stage 3), then the case's §10 "Stage-4 feedback". The case's **§6b item 3, §8, §10 and §11 were
-amended as feedback** (the non-blocking mode and the ceiling), so re-read them before using the case.
-
-**Verdict: Confirmed, with a one-segment overshoot, at both tiers; non-blocking mode: bypass as recorded, bounded by deletion.** With no CDC consumer the node keeps
-`⌊A/S⌋` hard links in `cdc_raw` (`A` = `cdc_total_space`, `S` = `commitlog_segment_size`), **one more when the check's counter is stale** when the last permitted
-segment is created (the counter was one segment low at 45 % of creations in the unit tier and 23 % in the cluster tier; the directory walk that refreshes it is
-submitted inside `processNewSegment` and often finishes before the new link exists), and one fewer at an exact multiple of `S` (the `_cdc.idx` bytes tip the last
-segment over). So the ceiling is at most `A + S`, not "at or below `A`", and §8's old "never below it" was wrong both ways. Past it every CDC write is rejected with
-`CDCWriteException` (6,015 of 6,015 in each 60 s) while non-CDC writes are accepted; deleting the links releases the writer in 0.1 to 2.8 s. `cdc_block_writes: false`
-**does not remove the bound**: the tracker deletes the oldest links, so un-consumed CDC data is lost instead of writes failing (the case's "bypasses the check entirely"
-was wrong; corrected). Same plateaus in two cluster passes. §9a's own sentence that a stale counter is "rare" is wrong about frequency; §9a is frozen, so that is
-recommendation 1 in results §8.
-
-| Piece | State |
-|---|---|
-| `cdc_total_space` | **Closed 2026-10-01.** Unit tier: 10 JVMs in 6 min (upstream baseline, 7 blocking values, 2 non-blocking). Cluster tier: one node, 8 values (blocking at 144, 272, 528 MiB and the derived default 4096 MiB, a second-knob arm, 2 non-blocking, a consumer control), about 3 min each; pass 1 was superseded after a runbook defect (the default arm's non-CDC control stalled behind a 15 s commit-log sync), the default arm ran three times. No run 2 (results §5.2). §9a and §9b are byte-identical to the freeze (hashes in results §1); 9c to 9e were amended for six runbook defects, documentation only. |
-| Recommendations for stage 3 | Six in results §8 (§9a's stale-counter wording; judge `:345` as a check site; the replay path, a second unguarded path; a §6a citation; template changes; do not trust private upstream helpers) and the five of `MAX_HINT_BUFFERS` (results §8 there). **Not applied** (readings existed), **except recommendation 1 of `cdc_total_space`** (§9a's stale-counter prediction), applied 2026-10-06 on Jingsong's approval after the runs: §9a is no longer byte-identical to the freeze, which its results §8 records. |
-| Open question, still open | `MAX_HINT_BUFFERS` results §5.1b part 3: is its reading rule's 4 MiB band binding on its own, or does the create-trace clause decide? I read the clause as deciding; if the band is binding, that tier has "no §9a row fits" and the README says to amend §9a and run the tier again. |
-| Nodes right now | NODE1 (`pc80`) is the only node used; it is stopped, nothing running; `~/cassandra-run1` is built (`ant build-test`), its `data/` is wiped and `conf/cassandra.yaml` restored; the harness copies are in `~/stage4-harness-run/cdc/` and `cdc-run1/`, the logs in `~/stage4-logs/cdc/` (`cluster-pass1/`, `cluster/`, `unit/`). `~/cassandra-node2` (the hints ring member's data) was not touched. NODE0 (`pc66`) was not touched this session (per the previous handoff its `data/` holds the hints case's ring and diagnostic data; its state now is unchecked); NODE2 (`pc72`) was never needed. Details: `environment.md` §6. |
-| Commit state | Base `ec90cea`. **Nothing was committed or pushed this session.** Uncommitted, all of it: the case file (§6b, §8, §9, §10, §11), `_INDEX.md`, the stage-4 README row, `environment.md` §6, this file, the harness folder `harness/cdc_total_space-processNewSegment-allowance/`, the results file and `results/cdc_total_space-processNewSegment-allowance/` (`run1/` scripts, `unit/`, `cluster/`, `cluster-pass1/`, `cluster-attempts/`, the tables and the two self-check outputs). |
-
-**Access** (the tool shell does not source `~/.shell_common_init`, so use the literal hosts): NODE0 = `jason92@pc66.cloudlab.umass.edu`, NODE1 = `jason92@pc80.cloudlab.umass.edu`
-(used this session), NODE2 = `jason92@pc72.cloudlab.umass.edu` (its host key is not in `known_hosts`; it presents the same ED25519 key as `pc66` and `pc80`). Always `ssh -o BatchMode=yes -n`
-for commands, and **no `-n` when piping a script in** (it closes stdin and the script silently does nothing). Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
-
-**What the next case should take from this one** (details in its results file):
-
-- Convert the case to the new §9 layout and audit it first (README, step 0); freeze §9's hash before any run. **Check the unit yaml's defaults against the node's**
-  (`commitlog_segment_size` is 5 MiB in `test/conf/cassandra.yaml`, 32 MiB on a node) and set what the case needs in the harness. Do not assume an upstream test helper
-  is reusable: this case's `testWithCDCSpaceInMb` was private and its non-blocking assertion allowed three times the limit.
-- **Read the real resource first, the check's counter second.** The counter is an estimate refreshed asynchronously and can lag the disk; put a creation or refresh
-  trace next to the files so an overshoot can be *attributed* (here: counter one segment low, 1.000 S at most, in every run). State the prediction with that tolerance.
-- **Make the harness record a mismatch and go on**, so one wrong expectation does not hide the later steps' readings. Build every table from the raw files with a script
-  (nothing typed in by hand), write a second, independent self-check, and record each correction to a check (this run had three: C6, X1, the lifetime boundary).
-- **Settle the node before a control.** A bulk write of GBs through the mapped commit log stalls every logged write for 10 to 16 s at the first periodic sync; a rejected
-  write never reaches the log, so only a control notices. Probe until 15 prompt writes in a row.
-- One run script per case; run the values one at a time as background ssh tasks; each value writes `summary.txt`, `readings.csv`, `phases.csv` and `session.log`; pull only
-  the small files into the repo (`run1/pull-cluster.sh` shows how, including a gzipped filtered log) and keep the full logs on the node. Keep superseded passes (`cluster-pass1/`).
-- From the previous case (still true): a Byteman rule on a JDK class needs `boot:`; `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM; start a node
-  only after `nodetool status` shows `UN` and `nodetool statusbinary` prints `running`; `JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command, never exported; write the
-  reading rule with a measured tolerance and prefer evidence that does not depend on an absolute size.
-- `grep ' ERROR ' system.log` finds nothing (a level starts the line: `grep '^ERROR'`); `cassandra-stress` prints `Total errors   :   0 [insert: 0]` and `Total partitions`,
-  and prints every failed write's error (a 2.4 MB output for one B), so pull only its header and results block.
-
-**Reference, the first closed case, `memtable_heap_space` (state as of 2026-09-29/30).** Its results file is
-`stage4-runtime-verification/long-path/results/memtable_heap_space-tryAllocate-limit.md`.
-
-| Step | State |
-|---|---|
-| Step 0 — freeze, harness, agreement criteria, environment | **Done.** §9a frozen at `98ad478`; harness `66ebf93`; criteria approved (kept, unused without a run 2); node0 set up per `environment.md` (local clone `~/cassandra-run1`). |
-| Run 1 (AI), unit tier | **Done 2026-09-28.** Readings and conclusion are in the results file's §4 (no longer folded). Runbook defect #1 approved and fixed in §9c (`745c1ab`). |
-| Review of run 1 (Jingsong), unit tier | **Done 2026-09-29.** Agreed on all six parts; note on part 5: confirm the wait with a thread dump later. Unit-tier verdict filed in §8; case file §10 updated. |
-| Run 2 (Jingsong), unit tier | **Not chosen** (2026-09-29, when run 2 became optional). |
-| Cluster tier — preparation | **Done 2026-09-29.** Byteman rule `long-path/harness/…/escape-hatch.btm` written and checked (see the harness README); §9a Confirmed row, §9c and §9e amended and frozen at `bf1f6bb`; results §1 approved by Jingsong 2026-09-29. |
-| Run 1 (AI), cluster tier | **Done 2026-09-29.** Instrument check + five node runs (128, 256, 512 MiB, default, cleanup-threshold control at 256 MiB) and a second real-heap pass; every check passed first time. Readings in results §4.1, conclusion in §4.3: consistent with **Confirmed** at all four values. |
-| Review of the cluster tier (Jingsong) | Reviewed 2026-09-29. Review table (§5.1b) and §8 "Cluster" verdict filed 2026-09-30: consistent with **Confirmed**; **case closed**. |
-| Runbook defect #2 | Approved and fixed 2026-09-29: §9d's real-heap reading must subtract the young generation (`heap_info` `N young (…K)` line). §9a unchanged; §10 feedback updated. |
-| Commit state | Stage-4 work committed and pushed 2026-09-29 (see `git log`). The band-A2 edits (below, ~line 301, and `stage2`/`stage3` files) were **not** part of it. |
-
-**What the cluster tier found** (numbers are in results §4.1; do not restate them elsewhere). Writers wait at the limit, seen in thread dumps (32 of 32 threads at `MemtableAllocator.java:195` in 11 of 12 dumps). The peak follows the knob (first limit flush at 99.1–99.8% of the limit). The escape hatch fired at every value, forcing 0.02–0.94% of the limit through, and also fired during limit-driven flushes, not only in scenario C. Real heap minus young generation stays within +37/−22 MiB of idle + limit. Control: with the default threshold flushes start at 33%, but writers still waited. **Not measured:** the counter's excess over the limit (no gauge; inferred).
-
-**How `memtable_heap_space` was run — an example, not a template.** One script, `long-path/results/memtable_heap_space-tryAllocate-limit/run1/cluster-run.sh`, with modes `instrument`, `value <label> <prev>`, `rest`, `heap`. It logs every command to `~/stage4-logs/cluster/<value>/session.log`, writes readings to `<value>/summary.txt`, exits non-zero at the first failed check, and stops the node on any failure. Run it in the background and read only `summary.txt` and greps (a long session re-reads its context on every call). It is specific to this case — other cases will need different runners (see the stage-4 README, "Where to start"). Lessons that generalize: (1) before scripting, list every §9d observable and confirm the script samples each one — the first pass missed heap at end of A/B; (2) `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM (1–2 s lag); (3) keep `JVM_EXTRA_OPTS`/`MAX_HEAP_SIZE` out of the stress, `nodetool` and `cqlsh` JVMs after the node starts (the Byteman agent would clash on port 9091).
-
-**Next session — pick one:**
-
-| Option | Notes |
-|---|---|
-| ~~Fill results §8~~ | Done 2026-09-30; `memtable_heap_space` is closed. |
-| Start stage 4 on the next case | The stage-4 README suggests unit tiers first: `max_space_usable_for_compactions_in_percentage` is the one cheap case left (`memtable_heap_space`, `MAX_HINT_BUFFERS` and `cdc_total_space` are done). Convert the case to the new §9 layout first (§9a, audited, before any run). |
-| ~~`cdc_total_space`~~ | Done and closed 2026-10-01 (see the block above). Optional: a run 2 by a fresh session (harness, runner and results file are ready; it is cheap). |
-| ~~`MAX_HINT_BUFFERS` cluster tier~~ | Done and closed 2026-09-30 (see the block above). |
-| ~~Stage 4 runs of the short path for `memtable_heap_space`~~ | **Done 2026-10-06** (first run of `short-path/run-executor.py`). Both tiers confirmed by the executor; results in `stage4-runtime-verification/short-path/results/memtable_heap_space-tryAllocate-limit.md`, harness (with its scripts) in `short-path/harness/...`. One audit hit accepted (an `ls` of `/proj/.../git-repos` that showed no names; copied with `--force`). Run directory on pc80 deleted. **Next: the side-by-side** (`executor-prompts.md` §2, a new AI session) writing `comparison/memtable_heap_space-tryAllocate-limit.md`; items for it: B2h controls skipped, control heap raised to 768m, B3g row 4 partly checked, 3 runbook defects. Nothing committed yet. |
-| Settle the band question and fold in the recommendations | Decide whether `MAX_HINT_BUFFERS`'s reading-rule band is binding (its results §5.1b part 3); then apply the recommendations in both results files' §8 to the cases' §9 and to `stage3-ai-deep-read/long-path/_TEMPLATE.md` (the stale-counter wording of `cdc_total_space`'s §9a among them). |
-| Stage 3 | The band-A queue (A3, 39 rows) — see the band-A2 note below. |
-
-**Machine notes.** Two nodes are set up (`environment.md` §5, §6): node0 (`pc66`, the measured node of the hints case, tree
-`~/cassandra-run1`) and `pc80` (the hint target of that case, tree `~/cassandra-node2`; **the measured node of `cdc_total_space`**, new tree `~/cassandra-run1`), both JDK 11 + Ant, in separate
-CloudLab experiments on one control subnet (`198.22.255.77` and `.91`). CloudLab nodes are rebuilt from scratch, so
-`HANDOFF.md`, `environment.md` and the case files are the only record a new node inherits. Full run logs are on each
-node in `~/stage4-logs/`, outside the repo. Access details are in the resume block above.
-
-**Open stage-4 follow-ups:** audit and freeze each of the eight cases converted 2026-10-06, and write their harnesses, before their runs. (The stale §9d–§9g references in the root `README.md`,
-`stage3-ai-deep-read/long-path/playbook.md` and `rejected.md` were cleared 2026-09-30; the
-remaining ones sit in old-layout case files, where they are correct.)
-
-**Where the pipeline stands.** Stage 1 is complete for pattern (a) — four
-CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
-stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
-standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
-`claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `bands.md`. **Seventeen cases are filed**, all stage-3 complete and all carrying
-a §9 test design, and 34 further rows carry stage-3 verdicts from the
-capacity-word pass.
-
-**Stage 4 has started** (see the table above) — seventeen designs, five cases closed
-(`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`). Stage 3's own
-bottleneck is unchanged: the 134-row band-A queue.
-
-| Band | Meaning | Units |
-|---|---|---|
-| **A** | Reads as a real capacity check | **134** |
-| **B** | Plausibly a resource bound | 174 |
-| **C** | Named operands, nothing resource-shaped — the insurance band | 94 |
-| **D** | Clearly not one | 4,387 |
-
-Band A splits into **A1 configuration-derived (65)**, **A2 constants and
-structural bounds (30)**, **A3 grow-when-full reallocations (39)**. Only A1 is
-likely to survive §6.1. Anchors — the 8 labelled rows — passed on all 40
-batches; that is the only designed evidence separate batches share one
-yardstick, since run-to-run consistency is deliberately not measured. One
-accidental check corroborates it: 8 helpers fell into both batch scopes and
-were judged twice in unrelated batches, and all 8 agreed.
-
-**Stage 3 is now the bottleneck.** Its 3a queue is full for the first time.
-
-| Stage-1 corpus | Rows | magnitude | equality |
+| Case | Closed | Verdict | Key reading |
 |---|---|---|---|
-| `NarrowedIfStatements.csv` | 4,489 | 2,681 | 1,808 |
-| `HelperGuardedIfStatements.csv` | 1,099 | 577 | 522 |
-| **Total** | **5,588** | **3,258** | **2,330** |
+| `memtable_heap_space` | 2026-09-30 | Confirmed, unit and cluster | Writers wait at the limit; peak follows the knob (first limit flush at 99.1–99.8 % of it); the `markBlocking()` escape hatch fired at every value, forcing 0.02–0.94 % of the limit through. |
+| `MAX_HINT_BUFFERS` | 2026-09-30 | Unit: consistent with Confirmed. Cluster: Confirmed with one recorded deviation | The 4 MiB reading-rule band was exceeded at every value; the create-trace clause decides and a supplementary allocation trace attributes the excess to non-pool allocations (band question still open). |
+| `cdc_total_space` | 2026-10-01 | Confirmed with a one-segment overshoot, both tiers; non-blocking mode: bypass as recorded, bounded by deletion | Ceiling is `⌊A/S⌋` links, one more when the counter is stale (≤ `A + S`); `cdc_block_writes=false` deletes the oldest links, so data is lost. |
+| `local_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (names-filter read, paging, unflagged read) | The check's counter equals the predicted value exactly at 256 KiB, 1 MiB, 4 MiB. One sub-prediction missed (names read 77 % of unlimited). |
+| `row_index_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (key-cache hit, lazily opened SSTable, scan) | Accepted iff estimate ≤ limit; **at the stock `column_index_cache_size` every accepted entry weighs 128 B, so the limit bounds no heap.** |
 
-| Stage-2 coverage | Narrowed | Helper | Total |
-|---|---|---|---|
-| Consumed — 4 subtrees + the capacity-word pass (overlapping) | 329 | 114 | — |
-| Not yet consumed | 4,160 | 985 | **5,145** |
+**Next:** audit, freeze and run the other 12 cases. `max_space_usable_for_compactions_in_percentage` is the cheapest unit tier; the unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
 
-**All 5,588 rows need a band**, including the consumed ones if a band is ever
-wanted for them; coverage is tracked **per row**, by whether it carries a
-stage-3 verdict, not per band. The canonical version of every number here
-lives in `stage2-ai-preprocessing/README.md`'s "Progress at a glance" —
-update that first.
+### Stage 4 — short path (blind executor)
 
-**Stage 2 is one operation** — rank every stage-1 row by AI lexical and
-semantic judgement into four bands: **A** reads as a real capacity check, **B**
-plausibly a resource bound, **C** named operands with nothing resource-shaped
-(the insurance band), **D** clearly not one. Each row also carries a one-line
-reason. Output is `bands.md`.
+- **One case run:** `memtable_heap_space` (2026-10-06, first run of `short-path/run-executor.py`). Both tiers confirmed by the executor (unit: B2g rows 1 and 3; cluster: 24 `MEMTABLE_LIMIT` flushes at 64 MiB against 3 at 512 MiB); self-check holds, no run 2. Results in `stage4-runtime-verification/short-path/results/`, harness in `short-path/harness/`. One audit hit accepted (an `ls` of the shared git-repos directory); three runbook defects (B2h controls skipped, control heap raised to 768m, B3g row 4 partly checked).
+- **The side-by-side is not written:** `comparison/_INDEX.md` is empty. Next: a new AI session writes `comparison/memtable_heap_space-tryAllocate-limit.md` per `executor-prompts.md` §2 (it rates nothing).
 
-**It rules nothing out** (2026-09-23): a hopeless row takes band D rather than
-an exit from the queue, because a rule-out is permanent and invisible while a
-bad band self-corrects. **Stage 2 has no rejection file at all** — the
-former `negatives.md` was deleted on 2026-09-24. **The four keyword tiers
-were dropped the same day** — no fixed word list and no mechanical
-pre-filter; the banding is the AI's reading of the row, start to finish.
-Ranking the whole corpus costs about 107k input / 140k output tokens, so there
-is no saving worth buying with a heuristic that might drop a real case.
+### Lessons for the next harness
 
-**The immediate next work, in order:**
+- The node runs from `build/apache-cassandra-*.jar`: a Byteman helper class goes on the **boot class path** (`-Xbootclasspath/a:<jar>`); a rule on a JDK class needs `boot:`.
+- The bundled Python driver works at **protocol 5**, the only one that returns the per-replica failure code; a client connection reads system tables (adds key-cache entries and Byteman lines), so warm it with a probe read before a before-snapshot and filter lines on the case's keyspace.
+- `nodetool sjk mx -f` takes one attribute per call and each call starts a JVM; start a node only after `nodetool status` shows `UN` and `nodetool statusbinary` prints `running`; `JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command, never exported (the Byteman agent would clash on port 9091).
+- Check the unit yaml's defaults against the node's (e.g. `commitlog_segment_size` 5 MiB vs 32 MiB); do not assume an upstream test helper is reusable.
+- Read the real resource first and the check's counter second (the counter is an asynchronously refreshed estimate); put a trace next to the files so an overshoot can be attributed; state predictions with that tolerance.
+- Make the harness record a mismatch and go on; build every table from raw files with a script and write an independent self-check.
+- Settle the node before a control (a bulk commit-log write stalls logged writes 10–16 s at the first periodic sync).
+- One run script per case, values run one at a time as background ssh tasks, each writing `summary.txt`, `readings.csv`, `phases.csv`, `session.log`; pull only small files into the repo and keep full logs on the node. Read `summary.txt` and greps, not whole logs.
+- `grep '^ERROR' system.log` (a level starts the line); `cassandra-stress` prints every failed write's error, so pull only its header and results block. A foreground `pkill -f` over ssh matches its own command line.
 
-0. ~~**Clear the `deferred.md` queue first.**~~ **Done 2026-09-28.**
-   `hasDiskSpaceForCompactionsAndStreams` and `column_index_cache_size` are
-   filed as cases; `TrackedDataInputPlus_limit` is refused (Rule 1 — its
-   `limit` is the row's own serialized length read from the SSTable). The file
-   now holds no unjudged row; only its §2 re-audit remains, folded into item 1.
-1. **Stage 3 reads band A, in A1 → A2 → A3 order, under all three enforcement
-   patterns.** **A1 is done — all 65 rows judged 2026-09-28**: 21 pending, 34 rejected, 10 deferred
-   (39 newly judged: 10 / 26 / 3; 26 already recorded and counted by lineage:
-   11 / 8 / 7; counts corrected 2026-10-01, row-by-row table in `rejected.md`). **A2 is done — all 30
-   rows judged 2026-09-29**: no new candidate, 21 refused (`rejected.md`, batch
-   "band A2"), 1 second check site for `Integer_MAX_VALUE` (`pending.md`), 1
-   undecided (`deferred.md` §6, `Envelope.java:429`), 7 already recorded.
-   **Next is A3 (39).** 134 rows in total, but far fewer distinct arguments: A3's 39 rows
-   share one shape (`size == capacity` before growing an array), so judge them
-   as a group rather than one at a time. Two A-band rows are **already
-   refused** —
-   `NativeAllocator$Region.allocate():273` and
-   `SlabAllocator$Region.allocate():201`, in `rejected.md` — so check the
-   stage-3 files before reading any row. Every case that qualifies gets a §9
-   test design (README §8).
-2. **Three open items the banding independently surfaced**, each already in
-   band A:
-   - `CommitLogSegmentManagerCDC.java:345` — the third `cdc_total_space` site,
-     which item 3 below says is recorded nowhere. Still needs judging, but the
-     §9 backfill established what it does, and **stage 4 measured it
-     (2026-10-01)**: in non-blocking mode (`cdc_block_writes=false`) it
-     **deletes the oldest CDC hard links** at every segment creation beyond the
-     allowance, leaving at most `⌊A/S⌋ + 1` links; no write is rejected and
-     un-consumed CDC data is lost. So the escape hatch does not remove the
-     bound — it changes enforcement from rejecting writes to discarding data.
-     The case file's §6b, §10 and §11 and `_INDEX.md` were **corrected from
-     "bypasses the check entirely"** on 2026-10-01; what remains is the stage-3
-     judgement of `:345` as a check site.
-   - `ResourceLimits$Basic.tryAllocate():213` and `$Concurrent:138` — the
-     mechanism the two net cases fail to cite (item 3 below).
-   - ~~`Directories.hasDiskSpaceForCompactionsAndStreams():551`~~ — **done
-     2026-09-28**, filed as
-     `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`.
-3. **Write up `pending.md`'s candidates as case files — now 12, not 4.** The
-   A1 pass added 8 on 2026-09-28. Judged and recorded, but no case file exists
-   for any of them. The strongest of the new eight is
-   **`max_hints_size_per_host`** (`StorageProxy.java:2492`) — the only one
-   whose usage side is a running total against a configured ceiling with a
-   clean disallow. Two should be written up **as one case**:
-   `CACHEABLE_MUTATION_SIZE_LIMIT` (`Mutation.java:451`) and the older
-   `TeeDataInputPlus_limit`, which the A1 pass showed share that same constant —
-   settling the open question about that candidate's origin. Start with `BufferPool_memoryUsageThreshold` (strongest); its
-   main open task is tracing `memoryUsageThreshold` to its config source for
-   the §6.1 constraint name. `TeeDataInputPlus_limit` is the weakest — confirm
-   `limit`'s origin before committing to it. `Integer_MAX_VALUE` needs a §6.1
-   naming judgement, since the constraint is a *type bound*.
-4. **One correction to existing case files**, found by the capacity-word pass: the two
-   net cases should link `ResourceLimits$Basic.tryAllocate():213` as the
-   mechanism behind their reserve sub-checks. They currently name
-   `ResourceLimits.Outcome` (the enum) but never cite the comparison itself.
-   *(The other correction — `cdc_total_space` missing the
-   `permitSegmentMaybe():200` second check site — was **already applied**;
-   the case file cites it as "Second check site, same verdict". Verified
-   2026-09-23.)*
-5. **Then band B (174)**, then C (94) — C is the insurance band and is not
-   optional. D is 4,387 rows and is read last, if at all.
+### Nodes and access
 
-**What stage 2 will not tell you.** A band is a reading order, nothing more.
-The bands were assigned from the row alone, with the source unread, so a
-band-A row can still fail any of the three rules — and several will. The
-banding's only measured property is that the 8 labelled rows land in A.
+- `pc80` and `pc66` are idle with no daemon. Each has JDK 11 + Ant and a clone `~/cassandra-run1` at `b5f2a54210` with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/`, full logs in `~/stage4-logs/`. `pc72` was never needed. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
+- The tool shell does not source `~/.shell_common_init`, so use literal hosts: `jason92@pc66.cloudlab.umass.edu` (NODE0), `…@pc80…` (NODE1), `…@pc72…` (NODE2; its host key is not in `known_hosts`). Use `ssh -o BatchMode=yes -n` for commands and **no `-n` when piping a script in**. Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
 
-**Patterns (b) and (c) are in scope as of 2026-09-25** — read every band-A row
-under all three, with no pattern filter. `deferred.md` is now a queue of
-already-identified (b)/(c) rows, and the cheapest work in the corpus.
+### Commit state
 
-**Every case you file also needs a §9 test design** — how stage 4 should vary
-the constraint and drive usage to the boundary (README §8). Stage 3 designs it;
-**do not run anything**, and record no measured numbers. Execution is stage 4,
-run and judged by an AI session (no human review; revised 2026-09-30); it reports back into
-`cassandra/if-check-exp/stage4-runtime-verification/`.
-
-### ⏵ Step 1 in detail — the AI banding (decided 2026-09-23)
-
-**Ranking is AI lexical/semantic judgement of the row, and nothing else.** The
-fixed capacity-word list that produced the four tiers is gone, and so is the
-bare-literal / `compareTo` fast-reject; both were dropped on 2026-09-23. The
-full procedure is in `stage2-ai-preprocessing/playbook.md` — this is the
-summary.
-
-**Why the list went.** It failed in both directions. False positives:
-`phi_convict_threshold > 16`, `repair_session_max_tree_depth > 20`,
-`memtable_cleanup_threshold > 0.99f`, `default_keyspace_rf <
-..._fail_threshold` — all contain `threshold`/`max`, none bounds bytes, and
-all sit in `applySimpleConfig`, i.e. startup validation. False negatives:
-capacity-shaped vocabulary the list never anticipated (`remaining()`,
-`keysWritten >= keysEstimate`, `unused`). This is what README §7.2's
-"deliberately no fixed keyword list" rule always implied.
-
-**What went with it.** The list's track record — 4/4 known cases selected in
-527 of 2,681 magnitude rows, ~1-in-3 hit rate on the top tier — was evidence about *the
-list*, not about ranking in general. The banding starts its track record over.
-
-**How it works:**
-
-- Judge the row as a sentence — `declaringType` + `method` + `lhs op rhs`.
-  Context usually decides before the operand does; anything in
-  `applySimpleConfig`/`validate*` is validation whatever it compares, and
-  anything in a `*Pool.allocate` deserves a look whatever it is called.
-- Assign one of four bands — A real capacity check / B plausible / C named
-  operands, nothing resource-shaped / D clearly not one — plus a **one-line
-  reason**, which is what makes a wrong band reviewable.
-- **C is not optional.** `memtable_heap_space` and `MAX_HINT_BUFFERS` share no
-  vocabulary at all, so a real case can read as unremarkable in every word.
-  Merging C into D rebuilds the keyword list's blind spot.
-- **D is read eventually** — the bottom of the order, not a bin.
-- Anchor every batch against the same ~8 labelled rows; record model and date.
-  Run-to-run consistency is **not** measured (2026-09-23).
-- Acceptance test: the known cases must land in band A.
-
-**The limit that remains either way:** lexical meaning cannot settle the three
-rules. Stage 2 orders the queue; qualification stays with the deep read.
-
-
-### The three stages and stage 3's two feeds (revised 2026-09-23)
-
-Both feed the same case files and answer to the same three rules
-(README §3.4–§3.6); they are complementary, not alternatives. Full write-up
-in `cassandra/if-check-exp/README.md` §7.2.
-
-Work is organised as **three stages, numbered by evidence standard** — how
-strongly a line has been evidenced — not by position in a pipeline. A stage
-can be entered directly. (These numbers have nothing to do with the three
-Target numbers; see `cassandra/if-check-exp/README.md` §1.1.)
-
-| Stage | Evidence | Reads source? | Decides? | Folder |
-|---|---|---|---|---|
-| **1** | structural — the shape of the code (CodeQL) | queries the DB | no | `stage1-codeql-preprocessing/` |
-| **2** | lexical — operand, class, method and package *names*, banded A–D by AI | **no** | no | `stage2-ai-preprocessing/` |
-| **3** | semantic — the code itself, against the three rules | yes | **yes** | `stage3-ai-deep-read/` |
-
-**Stage 3 is the only stage that decides.** Stages 1 and 2 produce no
-findings — they shrink and order what stage 3 must read.
-
-**Stage 3 has two feeds, and both are required:**
-
-- **3a — from stage 1/2.** Takes `bands.md` in band order. Bounded and
-  enumerable, so progress is measurable.
-- **3b — from raw source.** The session reads subsystems and call chains
-  directly. Unbounded, so there is no denominator and no percentage to
-  report. **Not optional:** it is the standing insurance against stage 1's
-  structural blind spot — it found the `cdc_total_space` ternary, which
-  stage 1 cannot surface at all because it is not an `if` condition.
-
-Record the feed (`3a`/`3b`) on every case and verdict.
-
-**Verdicts are filed by the stage that judged them, not the stage that
-surfaced the row** (revised 2026-09-23). A row stage 2 ranked and stage 3
-then read and refused is a *stage-3* rejection.
-
-| | Stage 2 verdict | Stage 3 verdict |
-|---|---|---|
-| Rejected | *(cannot reject)* | `stage3-ai-deep-read/long-path/rejected.md` |
-| Deferred | *(cannot defer)* | `stage3-ai-deep-read/long-path/deferred.md` |
-| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/long-path/cases/`, indexed in `_INDEX.md` |
-
-**Stage 2 cannot produce a pattern-(b)/(c) deferral** — deciding that needs
-the branches read, which no row shows. All deferrals are stage-3 judgments,
-which is why `deferred.md` lives in the stage-3 folder.
-
-One line is recorded in exactly one place — if stage 2 reaches a line stage 3
-already judged, cite the stage-3 entry instead of re-recording it
-(`db/compaction/` rows were triaged both ways and would otherwise duplicate).
-
-**Priority 1 — CodeQL + AI preprocessing (2026-09-22).** Candidate discovery
-is an explicit two-stage pipeline, and running it takes precedence over the
-remaining items below.
-
-1. **Stage 1 — mechanical filtering (CodeQL).** Run the queries to narrow the
-   search space. Results stay where they already land: the **gitignored**
-   `codeql-queries/results/cassandra/` (decided 2026-09-22 — no
-   `mechanical-filtering-results/` folder in the experiment tree, and nothing
-   about a result set is pinned or committed, since it is regenerated per
-   machine from the pinned queries and the `cassandra-5.0.9` DB anyway).
-   CodeQL only shrinks the search space — it decides nothing about
-   qualification.
-2. **Stage 2 — AI filtering (preprocessing only).** Work from the stage-1
-   rows alone — operand names, enclosing class/method, package, operator
-   class — **without reading the Cassandra source**. One operation: **band
-   every row A–D** by AI lexical/semantic judgement of how likely it is to
-   become a valid case; nothing is ruled out. Record everything under
-   `cassandra/if-check-exp/stage2-ai-preprocessing/` — that
-   folder *is* the AI-filtering-results store. Every row goes to
-   `bands.md` with a band and a one-line reason — there is no second
-   destination; pattern-(b)/(c)-only rows to `deferred.md`.
-
-   **Stage 2 does *not* apply the three rules** (README §3.4–§3.6). Those
-   qualify a real case and need the code — Rule 3 asks whether the branches
-   diverge on object creation, which no row can answer. They belong to the
-   stage-3 pass, which takes `bands.md` in band order and
-   promotes what qualifies into case files.
-
-   **Because stage 2 is blind, it ranks and never rejects.** A wrong
-   rejection is permanent and invisible; a wrong promotion costs a little
-   reading. The band definitions, what band D looks like, and the grounds
-   that need the source instead are in
-   `stage2-ai-preprocessing/playbook.md`.
-
-### The capacity-word pass — run 2026-09-22, done
-
-The 34 rows selected by a capacity word on either side **and** a compound
-usage side — the top tier of the keyword scale, before that scale was
-dropped on 2026-09-23. All 34 deep-read against the three rules. Outcome: **4 new
-candidates, 22 rejected, 3 deferred as pattern (b)/(c), 5 already covered.**
-*(Audit 2026-09-24: only 2 deferrals are on file, so 33 of the 34 rows are
-accounted for — see `stage3-ai-deep-read/long-path/deferred.md` §1c.)*
-Details in `stage2-ai-preprocessing/bands.md` and
-`stage3-ai-deep-read/long-path/rejected.md` / `deferred.md`.
-
-**The ranking validated.** The pass recovered both known filed cases as calibration
-and yielded 4 new candidates plus 1 strong pattern-(b) find — about a
-1-in-3 hit rate on rows not already accounted for.
-
-> **Superseded 2026-09-23.** This section closed by naming the next tier
-> down — 371 rows — as the next step. The keyword tiers were dropped the
-> next day and that pass never ran; the whole corpus was banded A–D instead. **Do not act on that
-> next step** — the current one is band A, in the "Resume here" section
-> above. What survives from this pass is its 34 stage-3 verdicts and the 4
-> candidates below.
-
-**The 4 candidates** (none written up yet — this is the immediate next work):
-
-| Candidate | Check |
-|---|---|
-| `BufferPool_memoryUsageThreshold` | `BufferPool$GlobalPool.allocateMoreChunks():443` — disallow returns `null`, allow does `new Chunk(allocateDirectAligned(MACRO_CHUNK_SIZE))`. Strongest of the four; an explicit off-heap ceiling immediately before the allocation. |
-| `MAX_MATERIALIZED_KEYS` | `QueryController.materializeKeysAndCloseSource():449` — disallow discards the accumulated `List<PrimaryKey>` and returns `null`. |
-| `Integer_MAX_VALUE` (index summary) | `IndexSummaryBuilder.maybeAddEntry():204` — disallow skips the entry and logs "index summary exceeded (2GiB)". Constraint is a **type bound**, which Target 1 admits but §6.1 naming does not cleanly cover. |
-| `TeeDataInputPlus_limit` | `TeeDataInputPlus.maybeWrite():58` — weakest; confirm `limit`'s origin before writing it up. |
-
-**Two open actions on existing cases**, both surfaced by the capacity-word pass:
-
-1. `CommitLogSegmentManagerCDC.permitSegmentMaybe():200` is a **second check
-   site of the filed `cdc_total_space` case** (the re-permit path, same
-   `CDCState` verdict, same decision point). README §6.1's "one case, several
-   check sites" applies; that case file does not list it.
-2. `ResourceLimits$Basic.tryAllocate():213` is the generic limiter behind the
-   two net cases' reserve sub-checks. Worth linking from those case files
-   rather than filing separately.
-
-**Notable rejection worth remembering:** `NativeAllocator$Region.allocate():273`
-and `SlabAllocator$Region.allocate():201` look like memtable capacity checks
-but are writer-rollover — a full region just causes `trySwapRegion()` to
-allocate a new one. The real ceiling is the already-filed
-`MemtablePool.tryAllocate()`. Same archetype as the 5 `BTree MAX_KEYS` rows
-and `MmappedRegions`.
-
-### Scope decisions: all three patterns (revised 2026-09-25); stage 3 designs the test, stage 4 runs it (revised 2026-09-25); stage 2 never rules out (2026-09-23)
-
-**Triage is restricted to enforcement pattern (a)** — the capacity check is
-itself the `if` whose branches decide allow vs. disallow (README §3.2).
-Patterns (b) (check sets a verdict read by a separate decision point) and
-(c) (guard clause before an allocation outside any branch) **are triaged now**
-— unparked 2026-09-25, ahead of pattern (a) finishing. A row is read, its
-pattern identified, and the three rules applied, with no pattern filter.
-
-**Why it cost nothing to unpark.** The existing corpus already holds (b) and
-(c) candidates, and stage 2's banding was pattern-agnostic, so band A is
-readable under all three patterns with no new query. Expect (b)/(c) rows to
-take *longer per row*, though: Rule 3 under (b) needs the verdict traced to its
-reader, and under (c) needs domination checked across callers.
-
-What follows from this:
-
-- **Already-filed cases are unaffected.** Four of the seven existing cases
-  are pattern (b). This decision governs *new candidate triage* only;
-  existing case files keep their recorded pattern.
-- **`deferred.md` is now a worklist, not a parking lot.** Nothing new is
-  deferred by pattern. Its existing entries — `hasDiskSpaceForCompactions`
-  `AndStreams` (passes all three rules, needs writing up),
-  `column_index_cache_size` (strong), `TrackedDataInputPlus_limit` (weak) —
-  are queued, and its re-audit of rejections made under the old (a)-only
-  assumption is scheduled. Rejections on pattern-independent grounds (thread-pool or
-  concurrency caps, rate limiters, config validation, time checks, writer
-  rollover) were once recorded in the stage-2 `negatives.md`; it closed on
-  2026-09-23 when stage 2 stopped rejecting rows and was deleted on
-  2026-09-24, its rows now carrying band D in `bands.csv` — bottom-ranked,
-  not settled.
-- **What the CodeQL filter actually selects — corrected 2026-09-25.**
-  `NarrowedIfStatements.ql` selects `BinaryExpr` comparisons whose
-  `getEnclosingStmt()` is an `IfStmt`, numeric operands only, nulls and
-  literal-only pairs dropped. This was previously described as "structurally
-  exactly pattern (a)"; that is **wrong**. It is a *syntactic* filter —
-  comparison inside an `if` — and it spans all three patterns, which are
-  defined by where the decision sits relative to the comparison. Proof: the
-  pattern-(b) check at `Directories.java:551` is an ordinary `if` assigning a
-  flag (and stage 2 surfaced it), and pattern-(c) guard clauses *are* `if`
-  statements. The genuine gap is syntactic and narrower: a comparison written
-  as a ternary, assignment, `return` or method argument is invisible, and
-  since such a comparison cannot be pattern (a), every miss of that kind is a
-  (b) or (c) check. One way only: *not in an `if` ⟹ (b) or (c)*, never the
-  reverse. No query changes are needed and the three planned structural
-  queries are *not* prerequisites.
-  The boolean-helper gap — a pattern-(a) check hidden behind a helper such as
-  `if (!pool.hasRoom())`, leaving the `if` with no comparison — was **closed
-  2026-09-22** by the new `HelperGuardedIfStatements.ql` (1,099 rows from 300
-  distinct helpers), so stage 1's pattern-(a) input is now
-  `NarrowedIfStatements.csv` **plus** `HelperGuardedIfStatements.csv`. One
-  residual limit stands: the queries capture the *form* only, so Rule 3 (do
-  the branches actually diverge on allocation?) can be answered **only by the
-  stage 3** — not by stage 1, and not by stage 2 either, since neither sees
-  the branches.
-**Stage 3 designs the test; stage 4 runs it (revised 2026-09-25).** Decided by
-Jingsong. Each case file's §9 is a test design — the knob that moves the
-constraint, at least three capacity values, the observable and its instrument,
-how to just-reach and how to exceed, the predicted dose-response, and what
-would refute the case (README §8). Writing one needs no cluster, no build and
-no run, which is why it can live here.
-
-What stage 3 still must not do: **execute anything, record a measured number,
-or call a case verified.** There is no `Status` field. A case still needs
-**manual verification** (a person reads the traced path and agrees) and
-**runtime verification** (execution actually driven into the disallow branch);
-both are stage 4, run by an AI session, which owns the verdict (revised
-2026-09-30: no human review; see the next decision).
-
-**Feedback comes back, and can refute a case.** Measurements land in
-`cassandra/if-check-exp/stage4-runtime-verification/`; a refutation of the
-traced path amends the case file, dated and citing the run. Every case's §10
-carries a **Stage-4 feedback** field, "none yet" until then. Stage 4 keeps its
-own number because the stage numbers mean *evidence standard*, not pipeline
-position (README §7.2), and a measured run is a higher standard.
-
-**Stage 4 needs no human approval or review (2026-09-30).** Decided by
-Jingsong. In each case's stage 4 an AI session first **audits the stage-3
-proposal** — §9 must test the core question (does the constraint cap memory or
-disk usage; usage should follow the constraint), show step by step how the
-procedure leads to a conclusion, be specific and understandable to a human and
-an AI, and be runnable as written — and recommends amendments. It applies those
-needed for a valid run (dated, before the freeze), freezes §9a, runs, checks its
-own conclusion against the raw files, and files the verdict. Predictions are
-never edited to fit data. Run 2 becomes an optional fresh-AI re-run. Jingsong
-may overrule any verdict; nothing waits for it. Commit and push remain on
-request, and the shared-infrastructure safety rules stand. *Replaces the
-decision of 2026-09-29 (required review by Jingsong, who owned the verdict and
-could run a by-hand run 2).* The closed `memtable_heap_space` results keep the
-human review that did happen. Requirements and protocol: stage-4 README.
-
-Stage 4 is **opened but not built** — the folder and its contract exist, no
-results file does. Prior art worth recovering first: the earlier per-case
-trigger designs, and the run record of the one test that was actually written
-and run (`HeapPoolTest.java`), are in `git show e7f9963:HANDOFF.md` — note the
-`:HANDOFF.md` suffix, since that commit's own diff is an unrelated folder
-rename. The test's full source is in
-`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`;
-an untracked copy also sits in the `cassandra-src` clone.
-
-- **Deferred with (b)/(c):** the disk candidate `getWriteDirectory():282`
-  (pattern (c) — previously item 2 below), the three planned structural
-  CodeQL queries (comparisons anywhere, guard clauses, verdict links — they
-  exist only to surface (b)/(c)), and the 2026-09-20 re-audit of earlier
-  rejections under (b)/(c). All three are listed under "Deferred until
-  pattern (a) is finished" below.
-
-### `stage2-ai-preprocessing/` layout (applied 2026-09-22)
-
-`candidates.md` was folded into `stage2-ai-preprocessing/README.md` (which keeps the
-batch-coverage table and the judging procedure) and the rest split into
-`bands.md`, `negatives.md` and `deferred.md`, so each file has one job.
-(`negatives.md` was deleted on 2026-09-24 — see below.)
-References in `stage3-ai-deep-read/long-path/_INDEX.md`, the codeql pipeline README and the
-`native_transport` case file were updated to match.
-
-**There is one rejection file: `stage3-ai-deep-read/long-path/rejected.md`, and it is
-authoritative for every rejection in this folder.** The split by judging
-stage ended on 2026-09-24, when the stage-2 `negatives.md` was deleted —
-stage 2 had stopped rejecting rows on 2026-09-23, so the file could only ever
-shrink in relevance, and the 108 rows in it now carry band D in `bands.csv`.
-Its detail is in git history at `43a3c27` if a later pass wants the
-per-helper arguments. Check `stage3-ai-deep-read/long-path/_INDEX.md` before adding a
-row.
-
-Remaining items, in the order they were previously prioritized:
-
-1. **Verify the 4 pending cases** — *deferred (2026-09-22, see above); not
-   currently being worked.* Each case's designed trigger stays recorded in
-   the status table above, ready to run when verification resumes.
-2. **Continue the CodeQL-assisted triage** — carried out as the two-stage
-   pipeline in Priority 1 above, restricted to pattern (a).
-   - *Pipeline:* `codeql-queries/` (own [README](codeql-queries/README.md);
-     queries under `codeql-queries/cassandra/queries/if-check-exp/`, own
-     [README](codeql-queries/cassandra/queries/if-check-exp/README.md))
-     narrows ~17k `if` statements: `AllIfStatements.ql` →
-     `ComparisonIfStatements.ql` (~10,147 rows) → `NarrowedIfStatements.ql`
-     (null, literal-only and non-numeric comparisons dropped; ~4,490 rows).
-     This is stage 1; its output belongs in
-     the gitignored `codeql-queries/results/cassandra/`. There is
-     deliberately no fixed keyword list. Stage 2 ranks these rows from the
-     rows themselves; whether one *qualifies* is decided later, by reading
-     the source in stage 3.
-   - *Progress:* 329 of 4,489 `NarrowedIfStatements` rows triaged
-     (`concurrent`, `cache`, `transport`, `db/compaction` — each a subtree).
-     Refreshed counts, including the second input file, are in
-     `stage2-ai-preprocessing/README.md`. **Remaining: 5,145 rows (4,160
-     narrowed + 985
-     helper), of which 2,941 are magnitude-class** — the realistic first
-     pass, equality being a lower-priority sweep. Largest: `db` (529
-     magnitude), `utils` (476), `index` (343), `io` (329), `service` (309).
-     **First stage-2 batch run 2026-09-22:** the 114 helper rows inside the
-     four already-done subtrees, which predated
-     `HelperGuardedIfStatements.ql`. 23 distinct helpers judged (the
-     judge-the-helper-once trick held: 114 rows, 23 decisions); 21 rejected,
-     1 cited to an existing entry, **1 candidate found** —
-     `Directories.hasDiskSpaceForCompactionsAndStreams():551`, a per-filestore
-     disk check gating whether a compaction starts at all. Pattern (b), so it
-     was parked in `stage3-ai-deep-read/long-path/deferred.md` rather than written up;
-     **unparked 2026-09-25 and now first in that queue** — it passes all three
-     rules and needs only writing up.
-   - *Known gap (real, but not blocking):* the pipeline only sees comparisons
-     inside `if` conditions, so it cannot find a check written as a ternary or
-     assignment (the CDC comparison was missed). That is a **syntactic** gap,
-     not a pattern one — the CSVs do contain (b) and (c) rows, since both are
-     commonly written as `if`s. Of the three planned queries (none written),
-     only "comparisons anywhere" closes this gap; the other two are precision
-     aids. None blocks stage 3.
-3. **Native-transport follow-up:** `PreV5Handlers.LegacyDispatchHandler.checkLimits()`
-   (`PreV5Handlers.java:197-209`, pre-protocol-V5 connections, uses
-   `channelPayloadBytesInFlight`) may be a related but distinct capacity path;
-   not yet investigated. `ConnectionLimitHandler` (connection-count caps) is
-   deferred rather than rejected; see `stage3-ai-deep-read/long-path/_INDEX.md`.
-### The (b)/(c) worklist — unparked 2026-09-25
-
-Formerly "deferred until pattern (a) is finished". The 2026-09-22 scope
-decision that parked these was revised on 2026-09-25: all three patterns are
-triaged now, so this is a **queue**, and the cheapest work in the corpus — the
-reading behind each entry is already done. **The worklist itself lives in
-[`cassandra/if-check-exp/stage3-ai-deep-read/long-path/deferred.md`](cassandra/if-check-exp/stage3-ai-deep-read/long-path/deferred.md)**
-— full detail there; this is the summary.
-
-- ~~**The disk candidate** `getWriteDirectory():282`~~ — **done 2026-09-22**,
-  processed via stage-3 feed 3b as a deliberate single-candidate exception to the
-  pattern-(a) scope (feed 3b needs neither the stage-1 CSV nor the unwritten
-  (b)/(c) queries). Filed as
-  [`cassandra/if-check-exp/stage3-ai-deep-read/long-path/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md`](cassandra/if-check-exp/stage3-ai-deep-read/long-path/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace.md).
-  **Headline finding: the guard does *not* dominate the allocation.** Its only
-  caller consults it solely when the table has no disk boundaries; on the
-  default path (`Murmur3Partitioner`, node owning ranges) the `SSTableWriter`
-  is created with no disk-space check at all — a stronger default-mode gap
-  than the memtable `markBlocking()` or native-transport
-  `throw_on_overload=false` hatches, since the check is never executed rather
-  than overridden. Flagged for Target 3. Two lessons carried into
-  `stage3-ai-deep-read/long-path/deferred.md` for the (c) reading: non-domination
-  is a
-  finding to record rather than grounds for rejection, and it cannot be seen
-  in a CSV row — it requires reading the callers.
-- **The three planned structural CodeQL queries** — comparisons anywhere,
-  guard clauses, verdict links (specified in the CodeQL README). They exist
-  only to surface (b)/(c) candidates, so they are not needed for the
-  pattern-(a) pass.
-- **The 2026-09-20 re-audit** of rows and earlier rejections judged only on
-  "the `if`'s own branches don't diverge". These are `deferred-(b)/(c)`, not
-  rejected; recording them as such in `deferred.md` is what makes this
-  resumable as a filter rather than a re-scan.
-
-Already explored, no case retained: the whole `db/compaction/` subpackage
-(the `concurrent_compactors` check fails Rule 2; the rest is selection logic,
-writer rollover, or config validation), `concurrent/` executors (thread-pool
-concurrency), and `cache/`. All are logged in `cassandra/if-check-exp/stage3-ai-deep-read/long-path/_INDEX.md`'s
-rejected table so they aren't re-scanned. The filter rules themselves are in
-`cassandra/if-check-exp/README.md` §3.4–§3.6.
+HEAD `2e9cf7b` (2026-10-07), clean and in sync with `origin/main` before this edit; this rewrite of `HANDOFF.md` is uncommitted. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git log -p HANDOFF.md`, e.g. `git show 2e9cf7b:HANDOFF.md`.
