@@ -1,0 +1,30 @@
+yaml for 4m: read_thresholds_enabled: true;local_read_size_warn_threshold: 1B;local_read_size_fail_threshold: 4194304B;
+node up
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: meter readable
+INSTRUMENT alloc: the probe (a system read) wrote no read-alloc line
+DATASET rows loaded 8000, Data.db files 1
+INSTRUMENT idle control: no read-alloc line in 10 s
+READ calib c100: OK rows=100 X=121672 meter 0->0 alloc=[647408] codes=None
+READ calib c200: OK rows=200 X=243272 meter 0->0 alloc=[824736] codes=None
+EXPECTED: calibration equals the 16m run (b0, h) — yes
+CALIBRATION b0=72.0 h=1216.0 T(N)=9728072
+PREDICTION F=4194304: i*=3450 p*=3449 X_abort=4195272 X_A=4194056
+READ A ck<p*: OK rows=3449 X=4194056 meter 0->0 alloc=[13415208] codes=None
+EXPECTED: A completes with X = T(p*) < F — yes
+READ B1 ck<p*+1: ERR ReadFailure rows=None X=4195272 meter 0->1 alloc=[13454448] codes={'127.0.0.1': 4}
+EXPECTED: B1 aborts with X = T(i*) >= F, code 4, meter +1 — yes
+READ B2 whole partition: ERR ReadFailure rows=None X=4195272 meter 1->2 alloc=[13363144] codes={'127.0.0.1': 4}
+EXPECTED: B2 aborts with the same X as B1 — yes
+EXPECTED: alloc(B2) within 10% of alloc(B1) — yes
+READ C1 names IN: OK rows=2000 X=2432072 meter 2->2 alloc=[14697792] codes=None
+READ C1 slice ck<2000: OK rows=2000 X=2432072 meter 2->2 alloc=[7077912] codes=None
+READ C2 fetch 100: OK rows=8000 X=72 meter 2->2 alloc=[413096, 417152, 416136, 417568, 416576, 417392, 416400, 417808, 451984, 417616, 416648, 418032, 416992, 416272, 417136, 416120, 417552, 416512, 417376, 416336, 417840, 416552, 417936, 416944, 417760, 416696, 415976, 417432, 416392, 417256, 416216, 417672, 416632, 417568, 416456, 417992, 416872, 417736, 416720, 415976, 417528, 416096, 417552, 416512, 417376, 416336, 417792, 416776, 417616, 416576, 418032, 416992, 416272, 417136, 416096, 417552, 416512, 417424, 416336, 417792, 416752, 417616, 416576, 418032, 416992, 416272, 417136, 416120, 417552, 416512, 417376, 416336, 417792, 416752, 417616, 416576, 418032, 417016, 416272, 417136, 5704] codes=None
+READ C2 fetch 1000: OK rows=8000 X=72 meter 2->2 alloc=[3541544, 3548624, 3549840, 3548264, 3549184, 3550080, 3548800, 3549424, 5728] codes=None
+READ C3 filter: ERR ReadFailure rows=None X=4195272 meter 2->3 alloc=[5124976] codes={'127.0.0.1': 4}
+EXPECTED: C1 names aborts iff T(M) >= F — yes
+EXPECTED: C1 slice aborts iff T(M) >= F — yes
+EXPECTED: C2 fetch 100 completes iff T(100) < F and delivers all rows — yes
+EXPECTED: C2 fetch 1000 aborts iff T(1000) >= F — yes
+EXPECTED: C3 filter aborts iff T(N) >= F — yes
+DONE

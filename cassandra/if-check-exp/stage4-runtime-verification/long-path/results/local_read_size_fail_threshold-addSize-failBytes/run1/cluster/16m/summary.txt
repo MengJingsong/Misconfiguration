@@ -1,0 +1,24 @@
+yaml for 16m: read_thresholds_enabled: true;local_read_size_warn_threshold: 1B;local_read_size_fail_threshold: 16777216B;
+node up
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: meter readable
+INSTRUMENT alloc: the probe (a system read) wrote no read-alloc line
+DATASET rows loaded 8000, Data.db files 1
+INSTRUMENT idle control: no read-alloc line in 10 s
+READ calib c100: OK rows=100 X=121672 meter 0->0 alloc=[647192] codes=None
+READ calib c200: OK rows=200 X=243272 meter 0->0 alloc=[824792] codes=None
+READ calib full: OK rows=8000 X=9728072 meter 0->0 alloc=[28315920] codes=None
+EXPECTED: T(N) = b0 + N*h — yes
+EXPECTED: T(N) below 16 MiB (the run is invalid otherwise) — yes
+CALIBRATION b0=72.0 h=1216.0 T(N)=9728072
+READ B2 whole partition: OK rows=8000 X=9728072 meter 0->0 alloc=[28281776] codes=None
+EXPECTED: whole partition completes with all rows — yes
+READ C1 names IN: OK rows=2000 X=2432072 meter 0->0 alloc=[14697824] codes=None
+READ C1 slice ck<2000: OK rows=2000 X=2432072 meter 0->0 alloc=[7078016] codes=None
+READ C2 fetch 100: OK rows=8000 X=72 meter 0->0 alloc=[413552, 417184, 416168, 417600, 416560, 417448, 416384, 417840, 416800, 452856, 416656, 418160, 417024, 416304, 417216, 416128, 417608, 416544, 417408, 416368, 417824, 416488, 418016, 416928, 417768, 416752, 416008, 417464, 416448, 417288, 416248, 417752, 416688, 417608, 416488, 417944, 416928, 417768, 416752, 416008, 417464, 416128, 417584, 416616, 417432, 417152, 417824, 416784, 417648, 416608, 418064, 417072, 416304, 417168, 416128, 417584, 416544, 417576, 416368, 417824, 416784, 417768, 416680, 418064, 417024, 416304, 417192, 416152, 417632, 416544, 417408, 416368, 417824, 416784, 417648, 416664, 418320, 417280, 416560, 417424, 5736] codes=None
+READ C2 fetch 1000: OK rows=8000 X=72 meter 0->0 alloc=[3541576, 3548656, 3549872, 3548296, 3549216, 3550112, 3548832, 3549456, 5736] codes=None
+READ C3 filter: OK rows=0 X=9728072 meter 0->0 alloc=[11797008] codes=None
+EXPECTED: every arm completes when the limit is above the data or unset — yes
+EXPECTED: fetch 100 delivers all rows — yes
+EXPECTED: filter returns 0 rows — yes
+DONE

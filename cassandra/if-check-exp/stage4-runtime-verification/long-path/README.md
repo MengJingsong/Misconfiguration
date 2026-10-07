@@ -37,5 +37,10 @@ its structure). `cdc_total_space` and `MAX_HINT_BUFFERS` followed the same layou
 **Prior art.** The `memtable_heap_space` unit test, `HeapPoolTest.java`, is restored under `harness/` (its origin is recorded in
 that folder's README). Earlier per-case trigger notes are in `git show e7f9963:HANDOFF.md`.
 
-**Unaudited cases.** All 14 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth to fourteenth written in it), but those eleven
+**Two cases run entirely on one session, 2026-10-07** — `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, both tiers Confirmed. Their harnesses are the freshest examples of a
+Python run script (`cluster-run.py`: instrument checks, calibration, scenarios, `EXPECTED:` lines, node stopped on any exit), a unit test that mirrors the check's own arithmetic from the code's
+objects, a Byteman observation rule with a helper class on the boot class path (the node runs from the jar), and a small JMX client with a setter (`Jmx.java`); the lessons are in `../../../../HANDOFF.md`
+("Stage 4 update (2026-10-07)") and in each harness README.
+
+**Unaudited cases.** All 16 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth to sixteenth written in it); the fifteenth and sixteenth are closed, but the other eleven
 have not passed the design audit and have no harness code; both come before a run, as [`../README.md`](../README.md) ("Step 0") says.

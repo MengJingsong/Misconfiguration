@@ -1,0 +1,19 @@
+yaml for none: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;read_thresholds_enabled: true;
+node up
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: meter readable
+INSTRUMENT alloc: the probe (a system read) wrote no read-alloc line
+DATASET rows loaded 8000, Data.db files 1
+INSTRUMENT idle control: no read-alloc line in 10 s
+CALIBRATION b0=72.0 h=1216.0 T(N)=9728072
+READ B2 whole partition: OK rows=8000 X=None meter 0->0 alloc=[28306096] codes=None
+EXPECTED: whole partition completes with all rows — yes
+READ C1 names IN: OK rows=2000 X=None meter 0->0 alloc=[14647512] codes=None
+READ C1 slice ck<2000: OK rows=2000 X=None meter 0->0 alloc=[7027640] codes=None
+READ C2 fetch 100: OK rows=8000 X=None meter 0->0 alloc=[408496, 412504, 411512, 412896, 411928, 412744, 411704, 413184, 412120, 413008, 411944, 413400, 447552, 411624, 412488, 411448, 412904, 411864, 412728, 411688, 413144, 411808, 413264, 412224, 413112, 412048, 411328, 412784, 411768, 412632, 411568, 413048, 411984, 423648, 411808, 413264, 412320, 413088, 412200, 411400, 412784, 411448, 412928, 411864, 412752, 411688, 413192, 412104, 412992, 412000, 413384, 412344, 411648, 412488, 411448, 412904, 411864, 412728, 411688, 413144, 412104, 412968, 411928, 413384, 412344, 411624, 412488, 411472, 412904, 411864, 412728, 411688, 413144, 412104, 412968, 411928, 413384, 412344, 411672, 412488, 3920] codes=None
+READ C2 fetch 1000: OK rows=8000 X=None meter 0->0 alloc=[3515296, 3522376, 3523592, 3522016, 3522936, 3523832, 3522552, 3523296, 3456] codes=None
+READ C3 filter: OK rows=0 X=None meter 0->0 alloc=[11605440] codes=None
+EXPECTED: every arm completes when the limit is above the data or unset — yes
+EXPECTED: fetch 100 delivers all rows — yes
+EXPECTED: filter returns 0 rows — yes
+DONE

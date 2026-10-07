@@ -1,0 +1,23 @@
+# Byteman observation rules for row_index_read_size_fail_threshold-checkSize-failThreshold, case 9c/9d. They change no behaviour.
+# One line per call of RowIndexEntry.Serializer.checkSize(int entries, int bytes), written BEFORE the check's gate, to the file
+# named by -Dstage4.byteman.out:
+#   checksize thread=<name> entries=<blocks> bytes=<serialized length> command=<keyspace.table of ReadCommand.getCommand(), or null> ms=<epoch>
+# command=null is the inert case: no ReadCommand is registered on the thread, so the check returns at once.
+
+RULE checksize without a command
+CLASS org.apache.cassandra.io.sstable.format.big.RowIndexEntry$Serializer
+METHOD checkSize(int, int)
+AT ENTRY
+IF org.apache.cassandra.db.ReadCommand.getCommand() == null
+DO traceOpen("cs", java.lang.System.getProperty("stage4.byteman.out", "checksize.trace"));
+   traceln("cs", "checksize thread=" + java.lang.Thread.currentThread().getName() + " entries=" + $1 + " bytes=" + $2 + " command=null ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE checksize with a command
+CLASS org.apache.cassandra.io.sstable.format.big.RowIndexEntry$Serializer
+METHOD checkSize(int, int)
+AT ENTRY
+IF org.apache.cassandra.db.ReadCommand.getCommand() != null
+DO traceOpen("cs", java.lang.System.getProperty("stage4.byteman.out", "checksize.trace"));
+   traceln("cs", "checksize thread=" + java.lang.Thread.currentThread().getName() + " entries=" + $1 + " bytes=" + $2 + " command=" + org.apache.cassandra.db.ReadCommand.getCommand().metadata().keyspace + "." + org.apache.cassandra.db.ReadCommand.getCommand().metadata().name + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

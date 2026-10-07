@@ -1,0 +1,23 @@
+holds     unit: 43 checks printed
+holds     unit: the only MISMATCH is ['C1_names_alloc_within_10pct']
+holds     unit F=65536: i*=54, delivered 53, X 65736 == T(i*) 65736
+holds     unit F=262144: i*=216, delivered 215, X 262728 == T(i*) 262728
+holds     unit F=1048576: i*=863, delivered 862, X 1049480 == T(i*) 1049480
+holds     cluster calibration b0=72.0 h=1216.0 equals the unit tier's (72, 1216)
+holds     cluster 256k: A completes, X=261512 == T(p*)=261512 < F
+holds     cluster 256k: B1 aborts, X=262728 == T(i*)=262728 >= F, code {'127.0.0.1': 4}, meter 0->1
+holds     cluster 256k: whole partition aborts with the same X=262728
+holds     cluster 256k: alloc whole 846552 within 10% of alloc i*-row read 938000
+holds     cluster 1m: A completes, X=1048264 == T(p*)=1048264 < F
+holds     cluster 1m: B1 aborts, X=1049480 == T(i*)=1049480 >= F, code {'127.0.0.1': 4}, meter 0->1
+holds     cluster 1m: whole partition aborts with the same X=1049480
+holds     cluster 1m: alloc whole 3350944 within 10% of alloc i*-row read 3439104
+holds     cluster 4m: A completes, X=4194056 == T(p*)=4194056 < F
+holds     cluster 4m: B1 aborts, X=4195272 == T(i*)=4195272 >= F, code {'127.0.0.1': 4}, meter 0->1
+holds     cluster 4m: whole partition aborts with the same X=4195272
+holds     cluster 4m: alloc whole 13363144 within 10% of alloc i*-row read 13454448
+holds     cluster: alloc increments ratio 0.2501 (predicted 0.25)
+holds     cluster: unlimited whole-partition read allocates 28306096 = 33.4x the 256k abort; 16m completes
+holds     C1: names at 256k allocates 0.768 of unlimited (the 10% prediction is NOT met) and 13.2x the guarded slice
+holds     C2: fetch 100 delivers 8000 rows at 256k; fetch 1000 aborts
+holds     C3: the filter that matches nothing aborts at 256k and completes with 0 rows unlimited

@@ -1,0 +1,34 @@
+yaml for s16m: #         max_tables_per_assignment: 64;read_thresholds_enabled: true;row_index_read_size_warn_threshold: 1B;row_index_read_size_fail_threshold: 16777216B;column_index_size: 1KiB;
+node up
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: key cache entries 14 size 1120, RowIndexSize count 0, aborts 0
+INSTRUMENT jmx setter: current RowIndexReadSizeAbortThreshold='16777216B'; set-to-same ok=True (needed for arm C1 only)
+INSTRUMENT byteman: 72 checksize line(s) from system tables so far, none with a ks1 command (the rule fires for every deserialization)
+DATASET rows loaded 10684 (expected 10684), Data.db files 1
+INSTRUMENT idle control: no ks1 checksize line in 10 s (lines from system tables are ignored)
+READ ladder pk1: OK rows=1 est=11099 checksize=[(3, 140, 'null'), (2, 120, 'null'), (4, 143, 'null'), (8, 527, 'null'), (2, 114, 'null'), (8, 360, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (100, 2299, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 0->1 aborts 0->0 codes=None
+READ ladder pk2: OK rows=1 est=15651 checksize=[(2, 120, 'null'), (8, 527, 'null'), (3, 140, 'null'), (4, 143, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (2, 114, 'null'), (8, 360, 'null'), (141, 3243, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 1->2 aborts 0->0 codes=None
+READ ladder pk3: OK rows=1 est=22200 checksize=[(3, 140, 'null'), (4, 143, 'null'), (2, 120, 'null'), (8, 527, 'null'), (2, 114, 'null'), (8, 360, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (200, 4600, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 2->3 aborts 0->0 codes=None
+READ ladder pk4: OK rows=1 est=31413 checksize=[(2, 120, 'null'), (3, 140, 'null'), (8, 527, 'null'), (4, 143, 'null'), (2, 114, 'null'), (3, 235, 'null'), (8, 360, 'null'), (11, 745, 'null'), (2, 117, 'null'), (283, 6509, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 3->4 aborts 0->0 codes=None
+READ ladder pk5: OK rows=1 est=44400 checksize=[(3, 140, 'null'), (4, 143, 'null'), (2, 120, 'null'), (8, 527, 'null'), (2, 114, 'null'), (8, 360, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (400, 9200, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 4->5 aborts 0->0 codes=None
+READ ladder pk6: OK rows=1 est=62826 checksize=[(2, 120, 'null'), (8, 527, 'null'), (3, 140, 'null'), (4, 143, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (2, 114, 'null'), (8, 360, 'null'), (566, 13018, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 5->6 aborts 0->0 codes=None
+READ ladder pk7: OK rows=1 est=88800 checksize=[(3, 140, 'null'), (2, 120, 'null'), (4, 143, 'null'), (8, 527, 'null'), (2, 114, 'null'), (8, 360, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (800, 18400, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 6->7 aborts 0->0 codes=None
+READ ladder pk8: OK rows=1 est=125541 checksize=[(2, 120, 'null'), (3, 140, 'null'), (8, 527, 'null'), (4, 143, 'null'), (2, 114, 'null'), (3, 235, 'null'), (11, 745, 'null'), (8, 360, 'null'), (2, 117, 'null'), (1131, 26013, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 7->8 aborts 0->0 codes=None
+READ ladder pk9: OK rows=1 est=177600 checksize=[(2, 120, 'null'), (8, 527, 'null'), (3, 140, 'null'), (4, 143, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (2, 114, 'null'), (8, 360, 'null'), (1600, 36800, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 8->9 aborts 0->0 codes=None
+READ ladder pk10: OK rows=1 est=251731 checksize=[(3, 140, 'null'), (4, 143, 'null'), (2, 120, 'null'), (8, 527, 'null'), (2, 114, 'null'), (8, 360, 'null'), (3, 235, 'null'), (11, 745, 'null'), (2, 117, 'null'), (2263, 52587, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 9->10 aborts 0->0 codes=None
+READ ladder pk11: OK rows=1 est=356676 checksize=[(2, 120, 'null'), (3, 140, 'null'), (8, 527, 'null'), (4, 143, 'null'), (3, 235, 'null'), (2, 114, 'null'), (11, 745, 'null'), (8, 360, 'null'), (2, 117, 'null'), (3200, 75076, 'ks1.t')] cache entries 1->2 size 80->208 RowIndexSize count 10->11 aborts 0->0 codes=None
+EXPECTED: checksize lines present for every read — yes
+EXPECTED: B=100: accepted iff est(11099) <= F(16777216) — yes
+EXPECTED: B=141: accepted iff est(15651) <= F(16777216) — yes
+EXPECTED: B=200: accepted iff est(22200) <= F(16777216) — yes
+EXPECTED: B=283: accepted iff est(31413) <= F(16777216) — yes
+EXPECTED: B=400: accepted iff est(44400) <= F(16777216) — yes
+EXPECTED: B=566: accepted iff est(62826) <= F(16777216) — yes
+EXPECTED: B=800: accepted iff est(88800) <= F(16777216) — yes
+EXPECTED: B=1131: accepted iff est(125541) <= F(16777216) — yes
+EXPECTED: B=1600: accepted iff est(177600) <= F(16777216) — yes
+EXPECTED: B=2263: accepted iff est(251731) <= F(16777216) — yes
+EXPECTED: B=3200: accepted iff est(356676) <= F(16777216) — yes
+LARGEST ACCEPTED est=356676 (F=16777216; ladder step 1.41: expect F/1.42 < est <= F: False)
+SHALLOW weights added by accepted partitions: [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128]
+DONE
