@@ -403,7 +403,7 @@ a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
 **Stage 4 has started** (see the table above) — sixteen designs, five cases closed
-(`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`). Stage 3's own
+(`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`). Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
 | Band | Meaning | Units |
