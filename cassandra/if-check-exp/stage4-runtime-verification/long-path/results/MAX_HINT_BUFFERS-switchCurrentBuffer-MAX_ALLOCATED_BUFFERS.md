@@ -596,6 +596,8 @@ Sections amended after a reading existed, all documentation only: §9c (Rows, se
 arm), and the §9 intro's "run so far"; §9a and §9b are byte-identical to the freeze (§1). §8's ceiling claim and the Target-3 note: not amended (nothing
 refuted; no bypass seen). The freeze was checked at the end of the cluster tier and holds.
 
+**Applied 2026-10-07 (on Jingsong's approval; the 4 MiB band is not a hard constraint, so the open question of §5.1b part 3 is closed):** all five recommendations below are in the case file's §9 (reading rule in 9a rewritten so the create trace decides and `MemoryUsed` is read by its steps; 9c row formula; 9d NMT demoted and at least three dumps; boot: note). §9a is therefore no longer byte-identical to the freeze in §1. The verdicts above stand unchanged: they rested on the create trace.
+
 **Recommendations for stage 3** (not applied: readings existed, and only a reading-independent mistake may be amended; the tier did not restart because
 the rule's own clause covered the case):
 
