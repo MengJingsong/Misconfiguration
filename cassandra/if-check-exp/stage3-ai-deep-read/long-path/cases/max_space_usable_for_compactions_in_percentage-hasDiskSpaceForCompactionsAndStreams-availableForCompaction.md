@@ -297,7 +297,10 @@ The test sets `max_space_usable_for_compactions_in_percentage` so that the
 compaction budget straddles the size of a known set of SSTables, runs one major
 compaction at each value, and counts how the node shrinks, runs or aborts it; a
 second variant adds a compaction already in flight. **Run so far:** none. Converted
-to this layout 2026-10-06.
+to this layout 2026-10-06. **Audited 2026-10-07 (stage-4 step 0): Ready after
+amendments** ([results §1.1](../../../stage4-runtime-verification/long-path/results/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md));
+the amendments are marked *(amended 2026-10-07 …)* in 9a to 9e and listed in §10
+"Stage-4 feedback". All were made from the source, before any run.
 
 ### 9a. Procedure and conclusions
 
@@ -326,7 +329,9 @@ prediction and conclusions in this section; it adds none):
 - **Test:** build 8 equal SSTables on a small dedicated filesystem; at each value of
   `pct` (set so `B / total` = 1.5, 0.8, 0.4 and 0.1, plus the default 0.95) run one major
   compaction and read the check's own debug line, the three compaction counters and the
-  table's disk use over time; then repeat once with a second, slowed compaction in flight.
+  table's disk use over time; then, at 0.1, switch the check off on the table and trigger a
+  major and a background compaction; then compare the same compaction alone and with a
+  second, slowed compaction in flight *(both added 2026-10-07)*.
 - **Logic:** (1) at the value with `B` above the total, the compaction must run
   unreduced; if it does not the run is invalid. (2) Below it, `CompactionsReduced` and
   `SSTablesDroppedFromCompaction` rise by the arithmetic of the ladder: the decision
@@ -337,22 +342,34 @@ prediction and conclusions in this section; it adds none):
   `pct` refuses what it admitted alone: the in-flight term. (6) Disk use is read as
   *peak* and *final*, because a refusal leaves more on disk.
 - **Refuted if:** a compaction runs unreduced with inputs above `B` while the debug line
-  shows the check ran; the kept inputs do not follow `B`; or the in-flight term does not
-  move the boundary (rows of the Conclusions table).
+  shows the check ran; the kept inputs do not follow `B`; the in-flight term does not
+  move the boundary; or the hatch lets a major compaction through (rows of the Conclusions
+  table).
 
 **Procedure:**
 
-1. **Unit tier** — (a) run upstream `DirectoriesTest` and `CompactionsBytemanTest` (the
-   arithmetic against a mocked `FileStore`; the three disallow outcomes forced by Byteman).
+1. **Unit tier** — (a) run upstream `DirectoriesTest`, `CompactionsBytemanTest` and
+   `PartialCompactionsTest` (the arithmetic against a mocked `FileStore`; the three disallow
+   outcomes forced by Byteman; one real ladder step against a stubbed store).
    (b) Run the harness test `CompactionBudgetTest` (9c): the static
    `Directories.hasDiskSpaceForCompactionsAndStreams(...)` with a stubbed `FileStore`, at
    `pct` 0.95, 0.5, 0.1 and 0.01, at the boundary and one byte past it, with and without an
    in-flight term, and the second knob `min_free_space_per_drive`.
+   (c) *(added 2026-10-07)* Run the harness test `CompactionLadderTest` (9c): a real
+   `CompactionTask` on 8 real SSTables, the stubbed `FileStore` fixed at a known *U*, at
+   `B / total` = 1.5, 0.8, 0.4 and 0.1. (b) drives the check alone; nothing upstream drives the
+   decision point and the counters with real sizes, and (c) does, with no disk drift.
 2. **Cluster tier** — one node, one data directory on a dedicated 4 GiB loop-mounted
-   filesystem, restarted per value of `pct`.
+   filesystem. *(Amended 2026-10-07: two node starts per value, because `pct` depends on the
+   inputs' measured size and the knob is restart-only — a first start at the default builds
+   the inputs, a second carries the value; 9b.)*
 3. **At each value:** idle control → **A**, `B` above the inputs' total (admitted) → **B**,
-   `B` below it → **C**, the same trigger with the JMX escape hatch set on the table. An
-   extra arm adds a slowed compaction on a second table (9e).
+   `B` below it → **C**. *(Amended 2026-10-07: the old text said "the same trigger with the
+   JMX escape hatch set on the table"; that trigger cannot reach the hatch, see the
+   prediction.)* At the 0.1 value, after C and on the same inputs: **H1** — the hatch set
+   on the table, trigger `nodetool compact` again — and **H2** — the hatch still set, trigger
+   `nodetool enableautocompaction ks1 t`. An extra arm **I** adds a slowed compaction on a
+   second table (9e).
 4. **Compare** with the prediction and read the result below.
 
 **Prediction.** Notation: *s* = one input SSTable's on-disk size (about 64 MiB, equal for
@@ -375,13 +392,51 @@ total is `8 s`); *U* = `getUsableSpace()` of the store at the moment of the trig
   compaction`, no output, no input removed; `SSTablesDroppedFromCompaction` and
   `CompactionsReduced` unchanged (the counters move only after the loop exits normally,
   [`CompactionTask.java:450-454`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L450-L454)).
-- **Escape hatch:** the same trigger at 0.1 with the check disabled on the table: the info
-  line `Compaction space check is disabled - trying to compact all sstables`, no debug
-  line, the compaction runs in full (output `8 s`), whatever `pct`.
-- **In flight:** with a second compaction writing on the same store, with `R` bytes
-  remaining by the estimator, the first compaction's requested figure is `8 s + R` in the
-  debug line; at a `pct` where `8 s ≤ B < 8 s + R` it is admitted alone and shed when the
-  other runs.
+- **Escape hatch** *(rewritten 2026-10-07, from the source, before any run; the old bullet
+  said "the same trigger at 0.1 with the check disabled: the info line, no debug line, the
+  compaction runs in full")*. The hatch tests `compactionType == OperationType.COMPACTION`
+  ([`CompactionTask.java:386`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L386)),
+  and **`nodetool compact` does not produce that type**: it goes
+  `ColumnFamilyStore.forceMajorCompaction`
+  ([`:2518-2521`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L2518-L2521))
+  → `CompactionManager.performMaximal`
+  ([`:986-989`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionManager.java#L986-L989))
+  → `submitMaximal(..., OperationType.MAJOR_COMPACTION)`
+  ([`:993`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionManager.java#L993)),
+  and `getMaximalTasks` overwrites the task's type with it
+  ([`CompactionStrategyManager.java:1091`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionStrategyManager.java#L1091);
+  the task's own default is `COMPACTION`,
+  [`AbstractCompactionTask.java:50`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/AbstractCompactionTask.java#L50)).
+  A background task keeps the default type. So at the 0.1 value, with the check disabled on
+  the table: **H1** — `nodetool compact` is **still refused exactly as in scenario C**
+  (8 debug lines, the abort, `CompactionsAborted` +1, no info line) — the hatch does not
+  cover a major compaction; **H2** — `nodetool enableautocompaction ks1 t` (it sets the
+  strategy's flag unconditionally and submits a background check,
+  [`CompactionStrategyManager.java:932-939`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionStrategyManager.java#L932-L939),
+  [`ColumnFamilyStore.java:3013-3019`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3013-L3019))
+  makes the strategy take the 8 inputs as one `COMPACTION` task: the info line `Compaction
+  space check is disabled - trying to compact all sstables`, **no debug line from that
+  task**, the compaction runs in full (output about `8 s`), whatever `pct`.
+- **In flight** *(rewritten 2026-10-07, before any run; the old bullet said "at a `pct`
+  where `8 s ≤ B < 8 s + R` it is admitted alone and shed when the other runs", with a
+  second table of 16 SSTables and `B ≈ 8 s + R/2`, which makes `R ≈ 16 s` and every pass
+  fail — the task would abort, not be shed — and had no run of the same compaction alone at
+  that `pct`)*. Three equal tables `ks1.t`, `ks1.t2`, `ks1.slow` (8 SSTables each), one
+  node start, one `pct` with **`B = R₀ + 3.2 s`** at plan time (`R₀` = the Data.db total of
+  `ks1.slow`, about `8 s`, so `B ≈ 11.2 s`):
+  (I1) `ks1.t` alone is admitted whole — one pass, `requested = 8 s ≤ B`, *n* = 0;
+  (I2) with `ks1.slow` running at `compaction_throughput` 4 MiB/s, a major compaction of
+  `ks1.t2` prints a first pass `requested = 8 s + R`, where `R` is the estimator's
+  remaining write of the slow task, `total_compressed × (1 − completion_ratio)` of its row in
+  `system_views.sstable_tasks`
+  ([`CompactionInfo.java:196-205`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionInfo.java#L196-L205),
+  [`ActiveCompactions.java:59-76`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/ActiveCompactions.java#L59-L76)),
+  and keeps `k = ⌊(B − R) / s⌋ = 3`, so **n = 5** (`Reducing scope` ×5, `CompactionsReduced`
+  +1, `SSTablesDroppedFromCompaction` +5): the same compaction, admitted whole alone, is
+  shed by the in-flight term. As the slow task runs, `R` falls and `U` falls with it, so
+  `B − R` rises by about `(1 − pct)` of the slow task's progress (about `0.04 s` per second
+  at 4 MiB/s): *n* = 5 holds while `ks1.t2` is triggered within about 15 s of the slow
+  task's start; the passes' own `available` and `requested` decide the exact figure.
 - **Second knob:** with `pct = 0.95`, raising `min_free_space_per_drive` by *d* moves `B`
   by `0.95 d`, a constant offset independent of *U*; a change of `pct` moves it by
   `(U − 50 MiB) × Δpct`.
@@ -390,16 +445,21 @@ total is `8 s`); *U* = `getUsableSpace()` of the store at the moment of the trig
 
 | Result | Conclusion |
 |---|---|
-| The ladder follows the arithmetic at each value (n = 0, 2, 5, abort at 0.1); the debug line shows `available = B` and `requested` as predicted; the in-flight arm refuses what the alone arm admitted; the escape-hatch arm runs in full | **Confirmed** — the check enforces as traced; the disallow is a negotiation, abort only at its end. |
+| The ladder follows the arithmetic at each value (n = 0, 2, 5, abort at 0.1); the debug line shows `available = B` and `requested` as predicted; the in-flight arm sheds what the alone arm admitted whole (n = 5 against 0); H1 is refused and H2 runs in full *(amended 2026-10-07)* | **Confirmed** — the check enforces as traced; the disallow is a negotiation, abort only at its end. |
 | As above, but one value is off by one shed input and the debug line explains it (the estimate counts a different size than *s*) | **Confirmed, with an estimator offset** — record the offset; the ceiling is as traced. |
 | A compaction runs unreduced with inputs above `B` and the debug line shows the check was evaluated | **Refuted** — the budget does not gate admission. |
 | Compactions run in full at every `pct` with no `Reducing scope` and no debug line | **Not confirmed** — the escape hatch is on (the info line) or the task type has no ladder (`partialCompactionsAcceptable()` false) or the check is not reached; read the info line at `CompactionTask.java:388` first. |
 | *n* does not change across values 0.8 and 0.4 while the debug line shows `available` changing | **Refuted** — the ladder does not follow the budget; re-read §6b. |
-| The in-flight arm admits the compaction at a `pct` that the arithmetic refuses | **Refuted** for the in-flight term — `estimatedRemainingWriteToDiskBytes` does not reach the check; re-read §4. |
+| I2 admits `ks1.t2` whole (*n* = 0, first pass `requested = 8 s`) while `ks1.slow` is in flight and shown running in `sstable_tasks` | **Refuted** for the in-flight term — `estimatedRemainingWriteToDiskBytes` does not reach the check; re-read §4. *(Reworded 2026-10-07; the old row said "the in-flight arm admits the compaction at a `pct` that the arithmetic refuses".)* |
+| I2's first pass shows `requested − 8 s` that differs from `R` (the slow task's row in `sstable_tasks`, taken at the debug line's time) by more than 16 MiB, but *n* still follows `available` and `requested` | **Not confirmed** for the estimator — record the offset; the term reaches the check but is not the remaining write the case traced. *(Added 2026-10-07.)* |
 | The table's final disk use is lower at lower `pct` | **Not confirmed** — a refusal should leave inputs in place, so disk use should be higher or equal; check that the abort did not delete inputs. |
-| Escape-hatch arm: the debug line still appears | **Not confirmed** — the hatch did not take (it applies only to `OperationType.COMPACTION` and per table); check the table and the operation type. |
+| H1: `nodetool compact` with the check disabled prints the debug lines and aborts as in C | **As predicted** — the hatch does not cover `MAJOR_COMPACTION`; record it as a limit on the bypass, not a failure. *(Added 2026-10-07; this was the old "Not confirmed" row's situation.)* |
+| H1: `nodetool compact` with the check disabled prints the info line, no debug line, and runs in full | **Refuted** for the type restriction — the hatch covers a major compaction; re-read `CompactionTask.java:386` and the call chain in 9a. |
+| H2: the info line, no debug line from that task, the compaction runs in full (output about the inputs' total) at the 0.1 value | **Bypass as recorded** — with the check disabled on the table, a background compaction ignores the budget. The bound is removed for `OperationType.COMPACTION`; record the output size. |
+| H2: the debug lines or a ladder still appear for that task | **Not confirmed** — the hatch did not take; check that the JMX call went to `ks1.t` (bean name, `Tables`), that the task was a background one (`Compacting (…` with no major-compaction trigger) and that no `nodetool compact` ran in the window. |
 | Free space drifted so `B / total` is outside the intended band (the debug line's `available` differs from the computed `B` by more than 1 MiB) | **Invalid run** — recompute `pct` from the current *U* and re-run (9c). |
-| The inputs are not 8 equal SSTables of about 64 MiB (`tablestats` shows another count) | **Invalid run** — rebuild the dataset (9c). |
+| The inputs are not 8 equal SSTables of about 64 MiB (`tablestats` shows another count) | **Invalid run** — rebuild the dataset (9c). *(Amended 2026-10-07: "equal" is read on the Data.db lengths, 8 files per table, the largest at most 1.10 times the smallest and each within 10 % of 64 MiB; in the in-flight arm all three tables.)* |
+| The planned band does not hold at the trigger: the ladder simulated from the Data.db lengths and the debug line's own `available` gives another *n* than the planned 0, 2, 5 or abort *(added 2026-10-07)* | **Invalid run** — the free space moved between plan and trigger by more than the band allows; re-plan from the current *U* and re-run. |
 
 **Why the debug line and not `du`:** `du` moves for other reasons and, here, in the
 opposite direction to the other cases' (a refusal keeps more on disk). Only the line
@@ -412,39 +472,46 @@ that prints `available` and `requested` ties a reading to this comparison
 |-------|---------|
 | **Constraint knob** | `max_space_usable_for_compactions_in_percentage` in `cassandra.yaml` (a fraction, `0` to `1`; the default is `.95`, [`Config.java:344`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L344)); restart-only at the cluster tier. Unit tier: `DatabaseDescriptor.setMaxSpaceForCompactionsPerDrive(double)`. **Second knob** for the cross-check: `min_free_space_per_drive` (default `50MiB`, [`Config.java:339`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L339); unit: `setMinFreeSpacePerDriveInMebibytes`). |
 | **Confirm it took effect** | The debug line's `has <available> bytes available` equals `round((U − 50 MiB) × pct)` for the `df` figure read just before the trigger, to within 1 MiB (drift) — it is read-back and instrument check in one. Unit: an assertion on the getter. |
-| **Capacity values** | `pct` computed per run, `pct = f × 8 s / (U − 50 MiB)` with `f` = 1.5, 0.8, 0.4, 0.1 (so `B / total` = *f*), and the default `0.95` as its own arm. Record *U*, `df` and the resolved `pct` for each. |
+| **Capacity values** | `pct` computed per run, `pct = f × total / (U − 50 MiB)` with `f` = 1.5, 0.8, 0.4, 0.1 (so `B / total` = *f*), and the default `0.95` as its own arm (the entry left out of the yaml). Record *U*, `df` and the resolved `pct` for each. *(Amended 2026-10-07: definitions.)* `total` is the **sum of the inputs' `*-Data.db` file lengths**, which is what the check counts (`getExpectedCompactedFileSize` → `SSTableReader.getTotalBytes` → `onDiskLength()`: [`SSTableReader.java:541-547`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/SSTableReader.java#L541-L547), [`:983-986`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/SSTableReader.java#L983-L986); for a compressed table the handle's length is the compressed file's length, [`FileHandle.java:397`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/FileHandle.java#L397), [`:434`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/FileHandle.java#L434)) — not `tablestats`' "Space used" and not `du`, which count every component; *s* = `total / 8`; *U* = `df -B1 --output=avail` of the mount (`getUsableSpace()` is `f_bavail × f_frsize`, the same figure). In the in-flight arm `pct = (R₀ + 3.2 s) / (U − 50 MiB)` (9a). |
+| **Order within a run** *(added 2026-10-07)* | `pct` needs the inputs' measured size and the knob is restart-only, so each cluster run has **two node starts**: (1) at the default `pct`: format and mount, start, create the schema, build the inputs, check the dataset, `nodetool drain`, stop; (2) with the node stopped read the Data.db lengths and *U*, compute `pct`, write it to the yaml, start again, set `DEBUG`, wait for the node to settle, read `df` once more (this *U* gives the expected *B*), then trigger. The expected *B* and the simulated ladder use the second *U* and the measured lengths. |
 | **Scope** | **Per file store, node-wide across tables**; the in-flight term shares one budget among concurrent compactions on the device. One data directory on one device, so N = 1 and the per-store split ([`Directories.java:528-536`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L528-L536)) does not apply. |
-| **Level** | Both. Unit: upstream `DirectoriesTest`, `CompactionsBytemanTest`, `PartialCompactionsTest`; harness `CompactionBudgetTest`. Cluster: the real sizes, the ladder and the in-flight term. |
+| **Level** | Both. Unit: upstream `DirectoriesTest`, `CompactionsBytemanTest`, `PartialCompactionsTest`; harness `CompactionBudgetTest` (the check) and `CompactionLadderTest` (the decision point; *added 2026-10-07*). Cluster: the real sizes, the ladder, the in-flight term and the hatch. |
 
 **Cluster layout.** The data directory sits on a **dedicated 4 GiB filesystem**, so that
 `(U − 50 MiB) × pct` can reach the size of a few SSTables at ordinary `pct`:
 
 ```bash
-truncate -s 4G ~/stage4-data.img && mkfs.ext4 -q ~/stage4-data.img
-sudo mkdir -p /mnt/stage4-data && sudo mount -o loop ~/stage4-data.img /mnt/stage4-data && sudo chown $USER /mnt/stage4-data
+truncate -s 4G ~/stage4-data.img && mkfs.ext4 -q -F ~/stage4-data.img
+sudo mkdir -p /mnt/stage4-data && sudo mount -o loop ~/stage4-data.img /mnt/stage4-data
+sudo mkdir /mnt/stage4-data/data && sudo chown $USER: /mnt/stage4-data/data
 ```
 
-and `data_file_directories: [/mnt/stage4-data]` in `cassandra.yaml` (the commit log, hints
-and saved caches stay on the node's local disk, never `/proj`).
+and `data_file_directories: [/mnt/stage4-data/data]` in `cassandra.yaml` (the commit log,
+hints and saved caches stay on the node's local disk, never `/proj`). *(Amended 2026-10-07:
+a subdirectory, because a new ext4 filesystem has a `lost+found` at its root, and `-F` so
+that `mkfs` cannot stop to ask about a regular file. `df` and the check read the whole
+filesystem, so nothing else changes.)*
 
 **Hold fixed:**
 
 | Setting | Value | Why |
 |---|---|---|
-| Table `ks1.t` | `compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'}`, compression default | Autocompaction off, so SSTables accumulate and only the test triggers a compaction. |
-| `compaction_throughput` | `64MiB/s` (default) for the main arms; `nodetool setcompactionthroughput 4` for the slowed compaction in the in-flight arm only | A slow second compaction stays in flight long enough to be counted. |
+| Table `ks1.t` | `compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'}`, compression default, `pk int PRIMARY KEY, v blob`; in the in-flight arm also `ks1.t2` and `ks1.slow`, identical | Autocompaction off, so SSTables accumulate and only the test triggers a compaction. |
+| Blob content | random bytes from a seeded generator, 5,120 per row *(added 2026-10-07)* | Incompressible, so the SSTable sizes follow the payload whatever the table's compression is. |
+| `compaction_throughput` | `64MiB/s` (default) for the main arms; `nodetool setcompactionthroughput 4` for the slowed compaction in the in-flight arm only, back to 64 once the second compaction's passes are logged *(amended 2026-10-07)* | A slow second compaction stays in flight long enough to be counted. The limiter is shared by all compactions, so the second one is slowed too. |
 | `concurrent_compactors` | default | Two compactions must be able to run at once in the in-flight arm. |
 | Other tables | none besides `system*` | The in-flight term sums every compaction on the store. |
 | `-Xms4G -Xmx4G` | fixed | Not the resource, held for repeatability. |
-| Logging | `bin/nodetool setlogginglevel org.apache.cassandra.db.Directories DEBUG` after start | The debug line is the operand; it is off by default. |
+| Logging | `bin/nodetool setlogginglevel org.apache.cassandra.db.Directories DEBUG` after start, then `getlogginglevels` | The debug line is the operand. *(Amended 2026-10-07: it is **not** off by default at this tag — the shipped `conf/logback.xml` sets `org.apache.cassandra` to DEBUG ([`:132`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/logback.xml#L132)) and its async `debug.log` appender never discards ([`:69`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/logback.xml#L69)). The explicit call stays so that the run does not rest on that file; the level read back is recorded.)* |
 
 **Controls:**
 
-- **Idle run** — dataset written, no `nodetool compact`: the baseline disk figure and `df`.
+- **Idle run** — dataset written, no `nodetool compact`: the baseline disk figure and `df`, and 30 s of the sampler and of `debug.log` with no `FileStore` line from a compaction of `ks1`.
 - **Default arm** — `pct = 0.95`, with `8 s` far below `B`: must run unreduced.
-- **Escape-hatch control** — the 0.1 trigger once with `compactionDiskSpaceCheck(false)` (9e).
+- **Escape-hatch controls** *(amended 2026-10-07)* — at 0.1, scenario C is the control for H1 (the same trigger, the check enabled), and H1 is the control for H2 (the same inputs, the same hatch setting, a different task type).
+- **Alone control for the in-flight arm** — I1, the same `pct`, nothing in flight.
 
-**Reset between runs:** stop the node, empty `/mnt/stage4-data` and rebuild the 8 SSTables (9c), confirm `df` returns to the baseline, edit `pct`, start. Record `df` at the start of every run.
+**Reset between runs:** stop the node, remove `data`, `logs` and `saved_caches` of the clone, unmount and re-create the filesystem (above), then the two starts of "Order within a run". Record `df` at the start of every run. *(Amended 2026-10-07: a fresh filesystem per run instead of emptying it, so `df` starts from the same baseline; the system keyspaces are rebuilt each time.)*
 
 ### 9c. Workload
 
@@ -458,72 +525,81 @@ Work for step 1, before run 1:
 | File | What it is |
 |---|---|
 | `CompactionBudgetTest.java` | Unit tier. Package `org.apache.cassandra.db`; calls the `@VisibleForTesting` static `Directories.hasDiskSpaceForCompactionsAndStreams(Map<File,Long>, Map<File,Long>, Function<File,FileStore>)` with a stub `FileStore` (`getUsableSpace()` returns *U*); see 9e. |
-| `build-inputs.sh` | Cluster tier. Writes the 8 equal SSTables of 9c, flushing after each, and prints `tablestats` and `du -sb` of the table directory. |
-| `compaction-sampler.sh` | Cluster tier. Every 500 ms prints a timestamp, `du -sb` of the table directory, `df` of the filesystem, and `nodetool compactionstats` lines. |
+| `CompactionLadderTest.java` | *(Added 2026-10-07.)* Unit tier. Package `org.apache.cassandra.db.compaction`; builds 8 real SSTables, wraps the table's `Directories` so that the admission check reads a stub `FileStore` of fixed *U* (the technique of upstream `PartialCompactionsTest`), runs a major compaction at each `B / total`, and compares the debug lines, the counters and the live SSTables with a ladder simulated from the measured lengths; see 9e. |
+| `unit-run.sh` | Copies both harness tests into the clone and runs the five unit test classes; logs to `~/stage4-logs/mscp/unit/`. |
+| `cluster-run.py <label>` | Cluster tier, labels `d95 f15 f08 f04 f01 inflight`. **Replaces `build-inputs.sh` and `compaction-sampler.sh`** *(amended 2026-10-07)*: formats and mounts the filesystem, runs the two starts of 9b, builds the inputs, samples (every 500 ms: `du -sb` of each table directory, `df`, the rows of `system_views.sstable_tasks`) while the trigger runs, parses `debug.log` between byte offsets, reads the counters, writes `summary.txt` (`EXPECTED:` lines), `passes.csv`, `triggers.csv`, `samples.csv`. It writes the rows itself with the bundled Python driver (protocol 5), 12,800 rows of one seeded random 5 KiB blob per SSTable. |
+| `Jmx.java` | A small JMX client (`get` several attributes in one JVM start, `invoke` an operation with a boolean): the counters and `compactionDiskSpaceCheck(false)`. Replaces `nodetool sjk mx`, which starts a JVM per attribute. |
+| `make-node-yaml.sh <pct\|default>` | Rebuilds `conf/cassandra.yaml` from the tag plus the data directory and, unless `default`, the knob. |
 
 ```bash
-# unit tier
+# unit tier (on the measured node; unit-run.sh does all of it)
 ant testsome -Dtest.name=org.apache.cassandra.db.DirectoriesTest
 ant testsome -Dtest.name=org.apache.cassandra.db.compaction.CompactionsBytemanTest
+ant testsome -Dtest.name=org.apache.cassandra.db.compaction.PartialCompactionsTest
 cp <harness>/CompactionBudgetTest.java test/unit/org/apache/cassandra/db/
+cp <harness>/CompactionLadderTest.java test/unit/org/apache/cassandra/db/compaction/
 ant testsome -Dtest.name=org.apache.cassandra.db.CompactionBudgetTest
+ant testsome -Dtest.name=org.apache.cassandra.db.compaction.CompactionLadderTest
 
-# cluster tier: schema (once), inputs (every run), trigger
-bin/cqlsh -e "CREATE KEYSPACE ks1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}; CREATE TABLE ks1.t (pk int PRIMARY KEY, v blob) WITH compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'};"
-<harness>/build-inputs.sh                 # 8 flushes of about 64 MiB each
-df -B1 /mnt/stage4-data                   # U = the 'Available' column; compute pct = f * 8s / (U - 52428800)
-bin/nodetool compact ks1 t                # the trigger
+# cluster tier: one script per label, from the clone root (it does the schema, the inputs, the pct, the trigger)
+<harness>/cluster-run.py f08
 ```
+
+*(Amended 2026-10-07, documentation only for the commands: the schema is created by the script, `pct` is computed by it from the Data.db lengths and `df` with the node stopped (9b), and the trigger is `bin/nodetool compact ks1 t`, then for H2 `bin/nodetool enableautocompaction ks1 t`.)*
 
 **Starting values.** Estimates, not measurements:
 
 | Setting | Value | Why |
 |---|---|---|
 | SSTable size *s* | about 64 MiB, 8 of them (about 512 MiB total) | The ladder has room to show 0, 2 and 5 drops and an abort; `B / total` of 1.5 needs `B` ≈ 768 MiB, within the 4 GiB filesystem's free space (about 3.5 GiB). |
-| Writer | `build-inputs.sh`: eight times a batch of 12,800 rows of one 5 KiB blob (distinct keys per SSTable), then `nodetool flush ks1 t` | Distinct keys keep the SSTables disjoint, so the output is about the inputs' sum. Check the sizes in `tablestats`. |
-| In-flight arm | table `ks1.big`: 16 SSTables of 64 MiB (1 GiB), `nodetool setcompactionthroughput 4`, `nodetool compact ks1 big` first; then trigger `ks1.t` | At 4 MiB/s the second compaction stays in flight about 4 minutes; its output reaches 1 GiB, within the 4 GiB filesystem. |
+| Writer | `cluster-run.py`: eight times a batch of 12,800 rows of one 5 KiB random blob (distinct keys per SSTable: `pk = 1,000,000 × i + row`), then `nodetool flush ks1 <table>` | Distinct keys keep the SSTables disjoint, so the output is about the inputs' sum. Read the sizes from the Data.db files (9b), and check `nodetool tablestats` for the count. |
+| In-flight arm *(rewritten 2026-10-07; the old row was a 16-SSTable `ks1.big`)* | tables `ks1.t`, `ks1.t2`, `ks1.slow`, 8 SSTables of about 64 MiB each (1.5 GiB in all); order: I1 `nodetool compact ks1 t` alone; then `nodetool setcompactionthroughput 4`, `nodetool compact ks1 slow` in the background, wait until its row in `system_views.sstable_tasks` shows progress, then `nodetool compact ks1 t2`; once the second compaction's passes are in `debug.log`, `setcompactionthroughput 64` and wait for both | At 4 MiB/s the slow task needs about 130 s, so it is in flight when `ks1.t2`'s check runs, about 2 s later; its output stays far below the free space (peak about 2.2 GiB of the 3.5 GiB). |
 | `pct` at 0.95 | default | `8 s` ≪ *B*. |
 
-**If the sizes drift** (the 8 SSTables are not within 10 % of each other or of 64 MiB): drop the table and rebuild; if `tablestats` shows fewer than 8 SSTables, an automatic compaction ran: check that autocompaction is off. Record each rebuild.
+**If the sizes drift** (the 8 SSTables are not within 10 % of each other or of 64 MiB, on the Data.db lengths): the script stops; drop the table and rebuild. If there are fewer than 8 Data.db files, an automatic compaction ran: check that autocompaction is off. Record each rebuild.
 
 ### 9d. Observables
 
 | Observable | How to read it | When to sample | Trap |
 |---|---|---|---|
-| **Usage counter and limit** — the operand and the budget, per evaluation | `logs/debug.log`: `FileStore <store> has <available> bytes available, checking if we can write <requested> bytes` ([`Directories.java:550`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L550)), one per pass; it needs the `DEBUG` level on `org.apache.cassandra.db.Directories`. `available` is the limit *B*, `requested` is the usage (new output plus in-flight remaining). | During each trigger | Off by default; set it after start. Each pass of the ladder prints one line: count them. The log goes to `debug.log`, not `system.log`. |
-| **Disallow evidence** | `logs/system.log` `WARN`: `FileStore … has only <x> available, but <y> is needed` ([`Directories.java:552-556`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L552-L556)) and `Not enough space for compaction <id>, <n>MiB estimated. Reducing scope.` (one per dropped input); counters `org.apache.cassandra.metrics:type=Compaction,name=CompactionsReduced`, `…name=SSTablesDroppedFromCompaction`, `…name=CompactionsAborted` (`nodetool sjk mx -mg -b '<name>' -f Count`). | Before and after each trigger | The counters are node-wide and cumulative: read the difference. `CompactionsReduced` and `SSTablesDroppedFromCompaction` increase only when the loop ends with at least one drop; an abort leaves them unchanged. |
-| **Bypass volume** | The escape-hatch arm's info line `Compaction space check is disabled - trying to compact all sstables` ([`CompactionTask.java:388`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L388)), no debug line, and the output size. | In that arm | Per table, not persisted, and `OperationType.COMPACTION` only (§6b). |
-| **Real resource** — disk | `compaction-sampler.sh`: `du -sb` of `/mnt/stage4-data/.../ks1/t-*` every 500 ms; peak and final per trigger; `df` at the start and end. | Throughout | Peak is inputs plus output for a running compaction; the final figure of a refused compaction is **higher** than a completed one's. Do not read the whole directory (the `system*` keyspaces move). |
+| **Usage counter and limit** — the operand and the budget, per evaluation | `logs/debug.log`: `FileStore <store> has <available> bytes available, checking if we can write <requested> bytes` ([`Directories.java:550`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L550)), one per pass; it needs the `DEBUG` level on `org.apache.cassandra.db.Directories`. `available` is the limit *B*, `requested` is the usage (new output plus in-flight remaining). | During each trigger | *(Amended 2026-10-07: on by default at this tag — see 9b "Logging"; the harness still sets and reads back the level.)* Each pass of the ladder prints one line: count them. The line names no table and no task, and a background compaction of a `system*` table prints the same line, so the harness reads `debug.log` between byte offsets taken around each trigger and keeps the lines whose `requested` is at least 1 MiB. The log goes to `debug.log`, not `system.log`. |
+| **Disallow evidence** | `logs/system.log` `WARN` *(the harness reads the same lines from `debug.log`)*: `FileStore … has only <x> available, but <y> is needed` ([`Directories.java:552-556`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L552-L556)) and `Not enough space for compaction <id>, <n>MiB estimated. Reducing scope.` (one per dropped input); counters `org.apache.cassandra.metrics:type=Compaction,name=CompactionsReduced`, `…name=SSTablesDroppedFromCompaction`, `…name=CompactionsAborted` (attribute `Count`, read with `Jmx.java get`; amended 2026-10-07 from `nodetool sjk mx`, one JVM per attribute). | Before and after each trigger | The counters are node-wide and cumulative: read the difference. `CompactionsReduced` and `SSTablesDroppedFromCompaction` increase only when the loop ends with at least one drop; an abort leaves them unchanged. *(Added 2026-10-07, from the unit instrument run:)* the `WARN` line prints **rounded** sizes (`has only 451.84 MiB available, but 451.84 MiB is needed` for a refusal by a few bytes), so take exact figures from the `DEBUG` line only. |
+| **Bypass volume** | H2's info line `Compaction space check is disabled - trying to compact all sstables` ([`CompactionTask.java:388`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L388)), no debug line from that task, and the output size (the Data.db length of the one SSTable left). H1's absence of the info line is the other half. | In H1 and H2 | Per table, not persisted, and `OperationType.COMPACTION` only (§6b): H1 is a major compaction and is not covered. |
+| **Real resource** — disk | `cluster-run.py`'s sampler *(amended 2026-10-07 from `compaction-sampler.sh`)*: `du -sb` of each table directory under `/mnt/stage4-data/data/ks1/` every 500 ms; peak and final per trigger; `df` (`statvfs`, `f_bavail × f_frsize`) at the start and end. | Throughout | Peak is inputs plus output for a running compaction; the final figure of a refused compaction is **higher** than a completed one's. Do not read the whole directory (the `system*` keyspaces move). Final figures are read 8 s after the trigger returns: the obsolete inputs are deleted asynchronously. |
+| **In-flight remaining** *(added 2026-10-07)* | The same sampler reads `system_views.sstable_tasks` (`table_name`, `kind`, `progress`, `total`, `total_compressed`, `completion_ratio`) every 500 ms; the estimator's `R` is `total_compressed × (1 − progress / total)` of the slow task's row, interpolated to the debug line's timestamp. | I2 | A virtual-table read of the node's own tasks; it is not a `Directories` call and prints no `FileStore` line. |
 
 ### 9e. Running the scenarios
 
 **Unit tier.** Commands are in 9c. Record pass or fail and the asserted values.
 
-1. Run `DirectoriesTest` and `CompactionsBytemanTest` (upstream). Record pass or fail.
+1. Run `DirectoriesTest`, `CompactionsBytemanTest` and `PartialCompactionsTest` (upstream). Record pass or fail.
 2. Run `CompactionBudgetTest`, with a stub `FileStore` whose `getUsableSpace()` returns
    *U* = 1,000,000,000 and `min_free_space_per_drive` = 50 MiB:
    1. at `pct` = 0.95, 0.5, 0.1 and 0.01: asserts `getAvailableSpaceForCompactions(store)` equals `round((U − 52428800) × pct)`;
    2. for each, a request of exactly that figure: `true`; one byte more: `false` (the comparison is `available < toWrite`, [`Directories.java:551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L551));
    3. an in-flight term *R*: `hasDiskSpaceForCompactionsAndStreams({f: w}, {f: R}, mapper)` is `true` iff `w + R ≤ B`;
    4. two files mapped to two stores: the verdict is `false` if either fails (aggregation);
-   5. the second knob: `min_free_space_per_drive` raised by *d*: *B* falls by `pct × d`, whatever *U*.
+   5. the second knob: `min_free_space_per_drive` raised by *d*: *B* falls by `pct × d`, whatever *U*;
+   6. *(added 2026-10-07)* the floor: with *U* below `min_free_space_per_drive`, *B* is 0, a request of 0 is `true` and of 1 is `false` ([`Directories.java:568`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L568));
+   7. *(added 2026-10-07)* the lines the check logs, captured from the `Directories` logger, read `has <B> bytes available, checking if we can write <w + R> bytes` — the pattern the cluster tier parses — and a refusal adds the `WARN` line.
 
    Record pass or fail and, per step, the asserted numbers.
+3. *(Added 2026-10-07.)* Run `CompactionLadderTest`: the table's `Directories` reads a stub store of fixed *U* = 4 GiB; 8 SSTables of equal row count are written and flushed; `total` and the lengths are read from the readers' `onDiskLength()`; `pct = f × total / (U − 50 MiB)` for `f` = 1.5, 0.8, 0.4, 0.1; the expected ladder is **simulated from the lengths** (drop the largest while the rest exceeds *B*; abort at one); then `submitMaximal` runs and the test asserts, per `f`: (i) the debug lines, in order, carry `available = B` and the simulated `requested`, and there are as many as simulated; (ii) `CompactionsReduced` +1 and `SSTablesDroppedFromCompaction` +*n*, or `CompactionsAborted` +1 with neither of the others; (iii) `Reducing scope` warnings = *n* (7 at the abort); (iv) live SSTables afterwards: 1 for *n* = 0, 1 + *n* otherwise, 8 and the same files at the abort; (v) the simulated *n* equals the planned 0, 2, 5, abort. A mismatch is recorded as `MISMATCH` and the test goes on; it fails at the end.
 
-**Before the cluster tier.**
+**Before the cluster tier.** *(Rewritten 2026-10-07: the old step 1 set the hatch on a throw-away table and ran `nodetool compact`, which cannot reach the hatch — 9a.)*
 
-1. **Instrument check.** With `DEBUG` set, run one `nodetool compact` on a throw-away table and confirm one `FileStore … has … bytes available` line in `debug.log` whose `available` equals the computed *B*; set `compactionDiskSpaceCheck(false)` on that table over JMX and confirm the info line instead. A missing debug line stops the run.
-2. **Dataset check.** `bin/nodetool tablestats ks1.t` shows 8 SSTables; their `du -sb` sum is within 10 % of 512 MiB.
+1. **Instrument check, every run.** `Jmx.java get` returns the three counters (the JMX path works); `nodetool getlogginglevels` shows `DEBUG` for `org.apache.cassandra.db.Directories` after the explicit call; the **first trigger** of the run is its own check: the run stops unless its first pass line has `available` within 1 MiB of the *B* computed from the `df` read just before the trigger, and the number of lines with `requested ≥ 1 MiB` in its window equals the simulated number of passes. A missing debug line stops the run. On the 0.1 run the `invoke` of `compactionDiskSpaceCheck(false)` must return without an exception; its effect is read from H2.
+2. **Dataset check.** Per table: 8 `*-Data.db` files, the largest at most 1.10 times the smallest, each within 10 % of 64 MiB; `bin/nodetool tablestats` shows 8 SSTables; the `du -sb` of the directory is recorded.
 
-**Cluster tier, for each value of `pct`:**
+**Cluster tier, for each value of `pct`** (one script run per label: `d95`, `f15`, `f08`, `f04`, `f01`, `inflight`):
 
-1. **Control run** — format and mount (9b), start the node with the knob set, set `DEBUG`, build the 8 inputs (9c), record `df`, the table's `du -sb` and the three counters, and with no compaction take 30 s of the sampler (idle).
-2. **Scenario A (B/total = 1.5, and the 0.95 arm)** — start `compaction-sampler.sh`, `bin/nodetool compact ks1 t`, wait for it to finish; record the debug lines, the counters' deltas and the sampler peak and final.
+1. **Control run** — format and mount (9b), first start at the default, schema, build the inputs (9c), dataset check, drain, stop; read the lengths and *U*, compute `pct`, second start with the knob, `DEBUG`, settle; record `df`, the table's `du -sb` and the three counters, and with no compaction take 30 s of the sampler (idle) and read `debug.log` over the same 30 s.
+2. **Scenario A (B/total = 1.5, and the 0.95 arm)** — start the sampler, `bin/nodetool compact ks1 t`, wait for it to finish; record the debug lines, the counters' deltas, the Data.db files afterwards (one, about `8 s`) and the sampler peak and final.
 3. **Scenario B (B/total = 0.8, 0.4)** — the same; record every `Reducing scope` warning and the debug line per pass (`requested` falls by one *s* each time).
 4. **Scenario C (B/total = 0.1)** — the same; record the abort and `RuntimeException` text, that no output SSTable exists (`ls`), and that the 8 inputs are untouched.
-5. **Escape-hatch arm** — at the 0.1 value, before the trigger run the JMX operation `compactionDiskSpaceCheck(false)` on `org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t` (`nodetool sjk mx -mc -b '<name>' -op compactionDiskSpaceCheck -a false`), then trigger; record the info line and the output size.
-6. **In-flight arm** — at a `pct` with `B ≈ 8 s + R/2` (read *R* from the first `requested` of the slowed compaction's debug line), build `ks1.big`, slow the throughput, start its compaction, wait until `compactionstats` shows it running, then trigger `ks1.t`: record the debug lines (`requested = 8 s + R`), the warnings, the counters.
-7. **Stop** — `bin/nodetool stopdaemon`, check nothing is left, unmount and keep the logs.
+5. **Escape-hatch arms (0.1 only; amended 2026-10-07)** — after C, on the same inputs: `Jmx.java invoke org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck false`. **H1:** `bin/nodetool compact ks1 t` again; record the debug lines, the abort, the counters and that no info line appears. **H2:** `bin/nodetool enableautocompaction ks1 t`; wait until `ks1/t` holds one Data.db file and `sstable_tasks` shows no task of it (at most 180 s); record the info line, that no debug line with `requested ≥ 1 MiB` came from that task, the output's length and the counters.
+6. **In-flight arm (label `inflight`; rewritten 2026-10-07)** — `pct` from 9c's formula. **I1:** `bin/nodetool compact ks1 t`, wait; record the pass (n = 0). **I2:** `bin/nodetool setcompactionthroughput 4`; start `bin/nodetool compact ks1 slow` in the background; read the sampler's `sstable_tasks` rows until the slow task's row shows progress above 0 (every 0.2 s; stop the run after 60 s); read the row; at once `bin/nodetool compact ks1 t2`; poll `debug.log` every 0.5 s until the `Compacting (` line of `ks1/t2` has been written, which follows the passes (stop after 90 s); `bin/nodetool setcompactionthroughput 64`; wait for both. Record the passes of `ks1.t2` (`requested`, `available`), `R` from the sampler at the first pass's time, the warnings, the counters' deltas, the Data.db files of the three tables afterwards.
+7. **Stop** — `bin/nodetool stopdaemon`, check nothing is left, keep the mount until the logs are copied (the next run re-creates it).
 
 Stop when each scenario's records are taken; a run where the debug line is missing is invalid (9a).
 
@@ -537,8 +613,8 @@ Stop when each scenario's records are taken; a run where the debug line is missi
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). **Two corrections to `deferred.md` §1b**, which had the decision point at `:411` and the throw at `:441`: the `if` is at **412** (its `break` at 413) and the `throw` at **442**. |
 | **Escape hatch / Target-3 note** | **Yes, two.** (1) The check is skipped outright when `compactionDiskSpaceCheck` is `false` for the table *and* the operation is `OperationType.COMPACTION` ([`CompactionTask.java:386-390`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L386-L390)); the flag is per table, not persisted, and flipped over JMX. (2) An **exception in the estimation block is treated as allow**: the `catch` at [`:414-419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionTask.java#L414-L419) logs the error and `break`s out of the loop, so a failure to *compute* the check admits the compaction. `getAvailableSpaceForCompactions` throws `FSReadError` when `getUsableSpace` fails, which reaches this catch. Fail-open, not fail-closed. Flagged for Target 3; not pursued here. |
-| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
-| **Notes** | The sibling case's `estimatedWriteSize` and this case's `writeSize` come from the same accessor, `getExpectedCompactedFileSize`. They are not the same quantity at the comparison, though: this case adds the in-flight term and divides by output directory count. **Found while converting §9 (2026-10-06):** the old §9 called the knob "live-settable"; the only setter is `DatabaseDescriptor.setMaxSpaceForCompactionsPerDrive`, which no MBean or `nodetool` command calls, so a node needs a restart per value (corrected in §9a). |
+| **Stage-4 feedback** | **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9. **Design audit 2026-10-07** (stage-4 README, step 0): **Ready after amendments**; see [results §1.1](../../../stage4-runtime-verification/long-path/results/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md). Amended in §9, all dated 2026-10-07 and made from the source before any run: (1) **the escape-hatch arm** (9a procedure, prediction, conclusions, 9d, 9e): `nodetool compact` runs as `MAJOR_COMPACTION` and the hatch covers only `COMPACTION`, so the single arm became **H1** (hatch off + `nodetool compact`: still refused) and **H2** (hatch off + `nodetool enableautocompaction ks1 t`: runs in full); (2) **the in-flight arm** (9a, 9c, 9e): the old sizes (a 16-SSTable second table, `B ≈ 8 s + R/2`) make every pass fail, so the task would abort instead of being shed; now three equal tables, `B = R₀ + 3.2 s`, I1 alone then I2 with the slow task in flight, `R` read from `system_views.sstable_tasks`, n = 5; (3) two node starts per run and the definitions of `total` (Σ Data.db lengths), *s* and *U* (9a, 9b); (4) a unit step 3, `CompactionLadderTest`, and steps 2.6 and 2.7 of `CompactionBudgetTest` (9a, 9c, 9e); (5) documentation (9b to 9e): the `Directories` debug line is on by default at this tag, the sampler reads `sstable_tasks`, `cluster-run.py` replaces two shell scripts, the data directory is a subdirectory, the blobs are random, the `WARN` line prints rounded sizes. **Instrument checks, 2026-10-07 (`pc66`; not readings, §9a frozen before the first cluster one, hash in the results file):** one harness defect in the unit tier (`CompactionLadderTest` left auto-compaction on; fixed, results §3); the cluster script was shaken down once per code path (`f08` scenario B, `f01` scenario C with H1 and H2, `inflight` I1 and I2): every `EXPECTED:` line held, and the first trigger of each run met its own instrument check. Those runs are kept on the node as shakedowns and **run 1 repeats every tier from the beginning**. **Run 1: none yet.** |
+| **Notes** | The sibling case's `estimatedWriteSize` and this case's `writeSize` come from the same accessor, `getExpectedCompactedFileSize`. They are not the same quantity at the comparison, though: this case adds the in-flight term and divides by output directory count. **Found while converting §9 (2026-10-06):** the old §9 called the knob "live-settable"; the only setter is `DatabaseDescriptor.setMaxSpaceForCompactionsPerDrive`, which no MBean or `nodetool` command calls, so a node needs a restart per value (corrected in §9a). **Found at the stage-4 audit (2026-10-07), for stage 3 to judge; §5 to §8 are not changed:** §6b and §8 say the hatch "applies only to `OperationType.COMPACTION`"; the consequence is that a **major compaction** (`nodetool compact`, `compact -s`: `MAJOR_COMPACTION`, `CompactionManager.java:993`, `CompactionStrategyManager.java:1091`) **always runs the check, hatch or not**; the hatch bypasses background compactions (the case the instrument run exercised, H2) and, **derived from the source and not run**, user-defined ones, which have no ladder (`partialCompactionsAcceptable()` is `!isUserDefined`, `CompactionTask.java:469-472`) — a refusal there is an abort at the first pass. The ceiling claim in §8 ("the escape hatch removes it entirely for `OperationType.COMPACTION` on any table where JMX has disabled the check") is therefore narrower than it reads for an operator who runs `nodetool compact` after switching the check off. Also: the `WARN` line of a refusal prints rounded sizes, so only the `DEBUG` line carries the exact operands (9d). |
 
 ---
 

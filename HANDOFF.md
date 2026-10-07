@@ -241,7 +241,8 @@ Each case's full detail lives in its own file.
 runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the §9s:
 
 - **Audited, run and closed at stage 4 (5):** `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`.
-- **Not yet audited or run (12):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
+- **Audited, harness written and shaken down, run 1 not started (1):** `max_space_usable_for_compactions_in_percentage` — design audit 2026-10-07 (**Ready after amendments**: the escape-hatch arm's trigger could not reach the hatch, `nodetool compact` being a `MAJOR_COMPACTION`, and the in-flight arm would have aborted instead of shedding; both rewritten from the source), harness in `long-path/harness/<stem>/`, unit and cluster instrument checks on `pc66` all as the amended §9a predicts (results file §1, §3.1). §9a's hash is recorded in the results file; do not edit §9a.
+- **Not yet audited or run (11):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
   needs (Java tests, Byteman rules, scripts) as step-1 work; none of that code exists yet. The eight cases converted to the new layout on 2026-10-06 and the cases
   written since (`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `internode_application_send_queue_capacity`) record in their §10 Notes
   where they differ from earlier notes on the same lines, **for stage 3 to judge, not applied to §5–§8**.
@@ -284,7 +285,7 @@ Five cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/
 | `local_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (names-filter read, paging, unflagged read) | The check's counter equals the predicted value exactly at 256 KiB, 1 MiB, 4 MiB. One sub-prediction missed (names read 77 % of unlimited). |
 | `row_index_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (key-cache hit, lazily opened SSTable, scan) | Accepted iff estimate ≤ limit; **at the stock `column_index_cache_size` every accepted entry weighs 128 B, so the limit bounds no heap.** |
 
-**Next:** audit, freeze and run the other 12 cases. `max_space_usable_for_compactions_in_percentage` is the cheapest unit tier; the unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
+**Next:** run 1 of `max_space_usable_for_compactions_in_percentage` (start with `unit-run.sh`, then the six `cluster-run.py` labels `d95 f15 f08 f04 f01 inflight`; the results file's §4 has the plan), then audit, freeze and run the other 11 cases. The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
 
 ### Stage 4 — short path (blind executor)
 
@@ -301,11 +302,12 @@ Five cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/
 - Make the harness record a mismatch and go on; build every table from raw files with a script and write an independent self-check.
 - Settle the node before a control (a bulk commit-log write stalls logged writes 10–16 s at the first periodic sync).
 - One run script per case, values run one at a time as background ssh tasks, each writing `summary.txt`, `readings.csv`, `phases.csv`, `session.log`; pull only small files into the repo and keep full logs on the node. Read `summary.txt` and greps, not whole logs.
+- Before predicting a bypass, find the `OperationType` the trigger produces: `nodetool compact` is `MAJOR_COMPACTION`, so the `compactionType == COMPACTION` escape hatch of the compaction-admission case does not apply to it (`nodetool enableautocompaction` makes a `COMPACTION` task). `CompactionManager.disableAutoCompaction()` reaches only tables that exist when it is called. The `Directories` debug line is on by default in the shipped `logback.xml`. Launch a node-side script with `setsid nohup … < /dev/null & disown`; a plain `cd … && nohup … &` over ssh keeps the channel open.
 - `grep '^ERROR' system.log` (a level starts the line); `cassandra-stress` prints every failed write's error, so pull only its header and results block. A foreground `pkill -f` over ssh matches its own command line.
 
 ### Nodes and access
 
-- `pc80` and `pc66` are idle with no daemon. Each has JDK 11 + Ant and a clone `~/cassandra-run1` at `b5f2a54210` with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/`, full logs in `~/stage4-logs/`. `pc72` was never needed. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
+- `pc66` is idle with no daemon (the last `max_space…` shakedown left its 4 GiB loop filesystem mounted at `/mnt/stage4-data`; the next `cluster-run.py` unmounts it); **`pc80` did not answer ssh on 2026-10-07** (connection timed out), so check it before relying on it. Each has JDK 11 + Ant and a clone `~/cassandra-run1` at `b5f2a54210` with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/`, full logs in `~/stage4-logs/`. `pc72` was never needed. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
 - The tool shell does not source `~/.shell_common_init`, so use literal hosts: `jason92@pc66.cloudlab.umass.edu` (NODE0), `…@pc80…` (NODE1), `…@pc72…` (NODE2; its host key is not in `known_hosts`). Use `ssh -o BatchMode=yes -n` for commands and **no `-n` when piping a script in**. Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
 
 ### Commit state
