@@ -14,7 +14,7 @@
 | **Capacity check** | [`AbstractMessageHandler.acquireCapacity():419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L419) |
 | **Decision point** | [`InboundMessageHandler.processOneContainedMessage():139-151`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L139-L151) (returns without deserializing on a non-`SUCCESS` outcome) plus the wait-queue registration at [`AbstractMessageHandler.java:401-403`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L401-L403) |
 | **Allocation site** | [`InboundMessageHandler.java:163`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/InboundMessageHandler.java#L163) — `serializer.deserialize(...)` creates the `Message` |
-| **Related cases** | [`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`](native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) (same `acquireCapacity()` check, CQL side) |
+| **Related cases** | [`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`](native_transport_receive_queue_capacity-acquireCapacity-queueCapacity.md) (same `acquireCapacity()` check, CQL side); [`internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`](internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md) (the send-side mirror, filed 2026-10-07: a per-link allowance on outbound messages with the same `ResourceLimits` reserve mechanism, whose disallow **drops** the message instead of waiting) |
 
 ```java
 protected ResourceLimits.Outcome acquireCapacity(Limit endpointReserve, Limit globalReserve, int bytes)
@@ -331,7 +331,7 @@ the node under test; only its yaml carries the swept value.
 | Keyspace | `SimpleStrategy`, `replication_factor` = the node count (`P + 1`), one table | Every write fans out to `R`. |
 | Consistency level | `ALL` | The coordinator waits for `R`, so the throttle slows the sender and no write is hidden by an early return. |
 | `concurrent_writes` | `32` (default) on `R` | Sets how many held handlers pile up. |
-| `internode_application_send_queue_*` | defaults on every node | The senders' own send-side limit is the sibling `internode_application_send_queue_capacity` candidate; leave it. |
+| `internode_application_send_queue_*` | defaults on every node | The senders' own send-side limit is the sibling case [`internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`](internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md) (filed 2026-10-07); leave it. |
 | Hardware and JVM | same `-Xmx` on all nodes (`2G` each) | Hold fixed. |
 | Client traffic | none on `R`'s native port | The sibling case `native_transport_receive_queue_capacity` runs the same code on client connections. |
 

@@ -151,7 +151,7 @@ a verdict — see [`bands.md`](bands.md).
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
 [`../stage3-ai-deep-read/long-path/pending.md`](../stage3-ai-deep-read/long-path/pending.md); 13
-of them since filed as cases, 4 more cited as second sites of filed cases, 4 still open; `ReadCommand.java:715` and `RowIndexEntry.java:392` (filed 2026-10-06 as `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`), `Mutation.java:172` and `AbstractType.java:594`, filed 2026-10-06 as
+of them since filed as cases (the count is now 14), 5 more cited with filed cases (second sites, or a row the case shows is not a check), 2 still open; `OutboundConnection.java:398` (filed 2026-10-07 as `internode_application_send_queue_capacity`, with `:416` cited in it: that row is bookkeeping, not a check), `ReadCommand.java:715` and `RowIndexEntry.java:392` (filed 2026-10-06 as `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`), `Mutation.java:172` and `AbstractType.java:594`, filed 2026-10-06 as
 `max_mutation_size` and `max_value_size`, and the second site `CounterMutation.java:94` are the latest),
 **34 rejected** (in
 [`../stage3-ai-deep-read/long-path/rejected.md`](../stage3-ai-deep-read/long-path/rejected.md)) and
@@ -223,11 +223,11 @@ The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 2,941 rows.
 
-**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-06): 7 cases established,
+**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-07): 8 cases established,
 all from feed 3a (`max_space_usable_for_compactions_in_percentage`, `max_hints_size_per_host`,
-`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`); 4 candidates (6 rows) awaiting write-up
+`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `internode_application_send_queue_capacity`); 3 candidates (4 rows) awaiting write-up
 (`../stage3-ai-deep-read/long-path/pending.md`) and 4 undecided rows
-(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 16
+(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 17
 filed cases came from feed 3b.
 
 ## Batch coverage

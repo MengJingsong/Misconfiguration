@@ -42,5 +42,5 @@ Python run script (`cluster-run.py`: instrument checks, calibration, scenarios, 
 objects, a Byteman observation rule with a helper class on the boot class path (the node runs from the jar), and a small JMX client with a setter (`Jmx.java`); the lessons are in `../../../../HANDOFF.md`
 ("Stage 4 update (2026-10-07)") and in each harness README.
 
-**Unaudited cases.** All 16 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth to sixteenth written in it); the fifteenth and sixteenth are closed, but the other eleven
+**Unaudited cases.** All 17 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth to seventeenth written in it); the fifteenth and sixteenth are closed, but the other twelve
 have not passed the design audit and have no harness code; both come before a run, as [`../README.md`](../README.md) ("Step 0") says.

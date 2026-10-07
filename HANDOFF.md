@@ -65,7 +65,7 @@ this folder's own scope.
   is frozen on filing (sha256 in `short-path/_INDEX.md`) and never edited; a new version is filed with `--supersede`.
   **Stage 4 runs both paths, both tiers each, with no rating of the two solutions and no cross-path scoring**; an executor
   reads only its own path's solution, and a side-by-side is written at the end. Scope stays memory and disk. The pilot on the
-  three closed cases was skipped; the 16 filed cases have no short solution yet except `memtable_heap_space` (version 2, two
+  three closed cases was skipped; the 17 filed cases have no short solution yet except `memtable_heap_space` (version 2, two
   tiers; version 1 kept as `--v1`).
 - **Decided 2026-10-06:** (1) the long path always goes first, so only the short path is blind; (2) shared stage-4 files
   (`README.md`, `environment.md`, `_TEMPLATE.md`) stay free of the long path's case-specific designs, which live in
@@ -205,9 +205,9 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 16 cases filed
+## Current state — 17 cases filed
 
-All sixteen are stage-3 complete: judged against the three rules with the
+All seventeen are stage-3 complete: judged against the three rules with the
 source open, citations checked against the pinned `cassandra-5.0.9` tag, and
 each carrying a §9 test design for stage 4.
 **There is no `Status` field** — manual and runtime verification happen in
@@ -233,6 +233,7 @@ stage 1/2, `3b` = direct source reading).
 | `CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT.md` | (a) | **3a** | Byte threshold on **one mutation's serialized size**: below it the mutation keeps a heap copy of its serialized bytes (`CachedSerialization`, a `byte[]` of exactly that size), at or above it only the size, and the mutation is **still sent, logged and applied** (CPU is spent instead of memory). **Both outcomes allocate**, as in `column_index_cache_size`; what is withheld is a copy beside the mutation's own heap. A **per-copy** bound: the node-wide extra heap is about `limit × N`, and nothing bounds *N*. **Two check sites of different patterns:** `Mutation.serialization():451` (a) and, on the receive side, `TeeDataInputPlus.maybeWrite():58` (a for each buffer write, b for the copy via a `limitReached` flag), reached from every deserialization (network, commit-log replay, hints, batchlog). A **JVM property**, restart-only, no yaml key or JMX, frozen in a `static final`. **An escape value:** a limit of 0 caches nothing on the serialize side and removes the bound on the receive side (`limit <= 0` is the tee's "unbounded"). `validateSize()` reaches this check, so measuring a mutation below the limit builds its copy. |
 | `local_read_size_fail_threshold-addSize-failBytes.md` | (c) | **3a** | Running total of the heap sizes of what **one local read command** pulls from storage; `>=` aborts. **Per command, not per query** (each page and each `IN` partition resets it); a one-row overshoot; names-filter point reads build their rows before the guard; it counts before the row filter; the replica swallows the abort and answers empty and the coordinator decides. **Off by default** (limit `null`, master switch false), live-settable. **Stage 4 closed it 2026-10-07: both tiers Confirmed** — *X* = *T*(*i\**) exactly at 262,144 · 1,048,576 · 4,194,304 B, allocation of an over-limit read equals that of an *i\**-row read (increments 0.2501 against 0.25), bypass as recorded for the names-filter read (13 times the guarded slice), paging and the unflagged read; one sub-prediction missed (names read 77 % of unlimited, not within 10 %). |
 | `row_index_read_size_fail_threshold-checkSize-failThreshold.md` | (c) | **3a** | Limit on the **estimated** in-memory size of one partition's index entry, checked in `RowIndexEntry.Serializer.checkSize()` before either entry object is built. The estimate is made **before** `column_index_cache_size` decides whether the entry is built, so at stock settings it refuses only entries that would have been shallow and bounds no heap. **Inert unless a `ReadCommand` is on the thread:** key-cache hits, SSTables opened lazily after `executeLocally()` returns (derived) and scans are not checked. Off by default. **Stage 4 closed it 2026-10-07: both tiers Confirmed** — accepted iff est ≤ limit (88 B × blocks + bytes), largest admitted estimate 15,651 · 62,826 · 251,731 B at 16,384 · 65,536 · 262,144 B, refusals leave the key cache unchanged, cached weight 1.69 × the estimate; bypass as recorded for a key-cache hit, a lazily opened SSTable (the derived analysis observed on a node) and a scan; **at the stock `column_index_cache_size` every accepted entry weighs 128 B, so the limit bounds no heap**. |
+| `internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md` | (b) | **3a** | Per-**link** byte allowance on unsent outbound messages (urgent, small and large link per peer), with the excess borrowed from a per-peer and a node-wide reserve; **the disallow drops the message and does not slow the sender**: the request's callback is failed at once with `TIMEOUT` and an ordinary write is **hinted** on the coordinator (a counter write is not). **The per-peer reserve is read from the receive-side key** `internode_application_receive_queue_reserve_endpoint_capacity` on the production path (`OutboundConnectionSettings:395`, `withDefaults()` runs before `withDefaultReserveLimits()`), so `internode_application_send_queue_reserve_endpoint_capacity` is inert there (**derived from reading, not observed**; unit step U10 and scenario C test it). **At the defaults the reserves, not the capacity, are the large term:** node ceiling `3·P·C + min(P·E, G)`, 12 MiB per peer against up to 128 MiB per peer and 512 MiB per node. A link to an unreachable peer borrows nothing (capacity is a hard cap); a connected, full, non-draining link sheds no expired message by itself (the refusal precedes `queue.add()`, where pruning runs). `:416` (the stage-2 row's "reserve sub-check") is bookkeeping, the reserve comparison is `:419` into `ResourceLimits:138`. **Rule 3 holds in a weaker form:** the message exists before the check, so the branches diverge on retention and serialization buffers, not on creation. |
 
 Each case's full detail lives in its own file.
 
@@ -248,6 +249,8 @@ The twelfth to fourteenth cases, `max_mutation_size`, `max_value_size` and `CACH
 
 The fifteenth and sixteenth cases, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold` (written 2026-10-06), have the new layout from the start. **Both were audited, frozen, run and closed at stage 4 on 2026-10-07** (both tiers Confirmed; results in `stage4-runtime-verification/long-path/results/`, harnesses in `.../harness/`; node `pc80` for the unit tiers and the first, `pc66` for the second). Their §10 Notes record where each differs from the earlier notes on the same lines (per command, not per query; the estimate precedes the Indexed/Shallow choice; the row-index guard's inert paths). Their warn twin `ReadCommand:724` is now in `rejected.md`; the unjudged `coordinator_read_size_fail_threshold` is `pending.md` item 11.
 and their harnesses do not exist (for `max_mutation_size` a unit test, a client script and a run script; for `max_value_size` a unit test, a Byteman rule, a client script and a run script; for `CACHEABLE_MUTATION_SIZE_LIMIT` a unit test, two Byteman files, a client script, a histogram script and a run script). Their §10 Notes record where each differs from the earlier notes on the same lines, also for stage 3 to judge.
+
+The seventeenth case, `internode_application_send_queue_capacity` (written 2026-10-07, queue item 6), has the new layout from the start and is **not yet audited or run**; its harness does not exist (two unit-test classes, three Byteman files, a node-yaml script, a cluster driver and a CQL poller; the cluster tier needs **four** processes on one machine, one sender and three replicas, with tokens chosen so the sender owns nothing). Its §10 Notes list four points where it corrects the queue entry (`:416` is not a check; the drop also fails the callback and hints a plain write; the per-peer reserve follows the receive-side key; expiry is lazy on a connected link). Its central finding, the reserve key, is **derived from the source and untested**: if unit step U10 or scenario C refute it, the case's §4, §5, §8 and §10 are to be amended.
 Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`.
 
 ## Open items / next steps
@@ -272,20 +275,20 @@ Runs are Python (`cluster-run.py`), one per capacity value, about 3 to 7 minutes
 **Nodes right now:** `pc80` (unit tiers of both cases, cluster tier of the local-read case) and `pc66` (cluster tier of the row-index case) are idle, no daemon, clones `~/cassandra-run1` at `b5f2a54210`
 with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/{lrs,rirs,unit-lrs,unit-rirs}`; full logs in `~/stage4-logs/{lrs,rirs}/`.
 
-**Next:** the stage-4 audit and run of the other eleven filed cases (`max_space_usable_for_compactions_in_percentage` is still the cheapest unit tier), or stage 3's queue (item 6 next).
+**Next:** the stage-4 audit and run of the other twelve filed cases (`max_space_usable_for_compactions_in_percentage` is still the cheapest unit tier), or stage 3's queue (item 7 next; item 6 was filed 2026-10-07).
 
 ### ⏵ Resume here (2026-10-06) — write up the qualified cases (stage 3, long path)
 
-**State.** 16 cases filed, all with a §9 in the new layout (eight converted 2026-10-06; the fifteenth and sixteenth, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, written 2026-10-06 like the twelfth, `max_mutation_size`, the thirteenth, `max_value_size`, and the fourteenth, `CACHEABLE_MUTATION_SIZE_LIMIT`, written 2026-10-06; unaudited, no harness code yet; the fifteenth and sixteenth were closed at stage 4 on 2026-10-07).
-Band A1 (65 rows) and A2 (30) are fully judged. **Open: 4 candidate cases (6 rows) qualified but unwritten (queue items 1 to 5, `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, were filed 2026-10-06), 4 undecided rows, plus
+**State.** 17 cases filed (the seventeenth, `internode_application_send_queue_capacity`, on 2026-10-07), all with a §9 in the new layout (eight converted 2026-10-06; the fifteenth and sixteenth, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, written 2026-10-06 like the twelfth, `max_mutation_size`, the thirteenth, `max_value_size`, and the fourteenth, `CACHEABLE_MUTATION_SIZE_LIMIT`, written 2026-10-06; unaudited, no harness code yet; the fifteenth and sixteenth were closed at stage 4 on 2026-10-07).
+Band A1 (65 rows) and A2 (30) are fully judged. **Open: 3 candidate cases (4 rows) qualified but unwritten (queue items 1 to 5, `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, were filed 2026-10-06, and item 6, `internode_application_send_queue_capacity`, on 2026-10-07), 4 undecided rows, plus
 the `networking_cache_size` sibling.** The numbered write-up queue, with each candidate's pattern and hazard, is at the top of
 `cassandra/if-check-exp/stage3-ai-deep-read/long-path/pending.md`; the 4 undecided rows are in `deferred.md` §5 and §6.
-Everything through 2026-10-07 is committed and pushed (`79298c9`).
+Everything through the 2026-10-07 stage-4 runs is committed and pushed (`92baf69`); **the seventeenth case and its bookkeeping (`_INDEX.md`, `pending.md`, the case counts in the READMEs and this file, one pointer in the inbound sibling case) are written locally and not committed.**
 
 **To start a new session** (paste something like this): *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `pending.md`'s
 write-up queue and `_TEMPLATE.md`. Write up the first unstruck item of the queue as a case: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`),
 answer all nine fields, design both tiers in §9a to §9e, verify every citation, add the `_INDEX.md` row, strike the candidate in `pending.md`.
-Do not commit."* One candidate per session keeps the context small; do 2 or 3 if they are siblings (4 and 5, the two read-size thresholds, which should be cross-linked). The next unstruck item is 6, `internode_application_send_queue_capacity` (items 4 and 5, the two read-size thresholds, were filed 2026-10-06 as two cross-linked cases; item 11, the unjudged coordinator-side `coordinator_read_size_fail_threshold`, was found while writing them).
+Do not commit."* One candidate per session keeps the context small; do 2 or 3 if they are siblings (4 and 5, the two read-size thresholds, which should be cross-linked). The next unstruck item is 7, `repair_session_max_tree_depth` (items 4 and 5, the two read-size thresholds, were filed 2026-10-06 as two cross-linked cases; item 6, `internode_application_send_queue_capacity`, on 2026-10-07; item 11, the unjudged coordinator-side `coordinator_read_size_fail_threshold`, was found while writing items 4 and 5). Item 7's `pending.md` note says to establish which term of its `min` binds before designing §9.
 
 **Method that worked on the eight conversions** (apply it to new §9s):
 1. Read the source path and the **upstream tests** that already touch the check (`grep -rn <method> test/unit`); reuse them as the unit tier and say what they do **not** prove.
@@ -294,12 +297,13 @@ Do not commit."* One candidate per session keeps the context small; do 2 or 3 if
 4. Derive the prediction from the source with its tolerance (flush period, chunk size, stale counter), before any run, as numbers.
 5. Cross-check each claim in the old prose against the code while converting; record contradictions in §10 Notes for stage 3, do not silently rewrite §5 to §8.
 6. Keep §9a to claim, how-this-verifies block, procedure, prediction and a Conclusions table with Refuted, Not confirmed and Invalid rows.
+7. **Lessons from the seventeenth case (2026-10-07):** (a) trace the *whole* disallow chain to its callers (the drop failed a callback and hinted a write; a queue entry's one-line "drops" was incomplete); (b) trace where each limit's **config key** really comes from, because a getter may read a sibling key (the per-peer reserve); (c) before predicting a "drain", find **who releases** the resource (expiry was lazy, so the prediction had to change); (d) grep the whole tree for "only caller" claims; (e) write link tokens in a draft and expand and check every `file:line` with a script (range exists, load-bearing snippet present) — the script used was ad hoc and is not in the repo.
 
 **Filing checklist per case:** `cases/<stem>.md` (nine fields, §9a to §9e, §10 provenance with feed `3a` and the date citations were checked) →
 `_INDEX.md` row and module note → strike the entry in `pending.md` → for feed `3a` note the batch in `stage2-ai-preprocessing/README.md` →
 update the case count in this file and in `_INDEX.md` §2. Then stage 4 audits and freezes the case's §9 before any run.
 
-**Other open work, independent of the write-ups:** (a) stage-4 step-0 audit of the eight converted cases, of `max_mutation_size`, of `max_value_size`, and of `CACHEABLE_MUTATION_SIZE_LIMIT` (`max_space_usable_for_compactions_in_percentage` first, it is the cheapest unit tier; the unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are cheap too, but each needs its harness test, client script and run script written, `max_value_size` also a Byteman rule, and `CACHEABLE_MUTATION_SIZE_LIMIT`'s cluster tier two Byteman files and a histogram script);
+**Other open work, independent of the write-ups:** (a) stage-4 step-0 audit of the eight converted cases, of `max_mutation_size`, of `max_value_size`, of `CACHEABLE_MUTATION_SIZE_LIMIT` and of `internode_application_send_queue_capacity` (its unit tier is two test classes and settles the reserve-key finding at once; its cluster tier is the heaviest design so far: four nodes, a Byteman hold on the large link's delivery, and a poller of `system_views.internode_outbound`) (`max_space_usable_for_compactions_in_percentage` first, it is the cheapest unit tier; the unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are cheap too, but each needs its harness test, client script and run script written, `max_value_size` also a Byteman rule, and `CACHEABLE_MUTATION_SIZE_LIMIT`'s cluster tier two Byteman files and a histogram script);
 (b) the side-by-side `comparison/memtable_heap_space-tryAllocate-limit.md` (`executor-prompts.md` §2); (c) the `MAX_HINT_BUFFERS` band question and the stage-3 recommendations of both results files;
 (d) stage 3 band A3 (39 rows, one judgement for the group), then band B (174) and C (94).
 
@@ -398,11 +402,11 @@ CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
 stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
 standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
 `claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `bands.md`. **Sixteen cases are filed**, all stage-3 complete and all carrying
+in `bands.md`. **Seventeen cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 has started** (see the table above) — sixteen designs, five cases closed
+**Stage 4 has started** (see the table above) — seventeen designs, five cases closed
 (`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`). Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
