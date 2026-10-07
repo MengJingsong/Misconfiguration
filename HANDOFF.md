@@ -280,7 +280,7 @@ with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untrack
 Band A1 (65 rows) and A2 (30) are fully judged. **Open: 4 candidate cases (6 rows) qualified but unwritten (queue items 1 to 5, `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, were filed 2026-10-06), 4 undecided rows, plus
 the `networking_cache_size` sibling.** The numbered write-up queue, with each candidate's pattern and hazard, is at the top of
 `cassandra/if-check-exp/stage3-ai-deep-read/long-path/pending.md`; the 4 undecided rows are in `deferred.md` §5 and §6.
-Nothing from this session is committed.
+Everything through 2026-10-07 is committed and pushed (`79298c9`).
 
 **To start a new session** (paste something like this): *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `pending.md`'s
 write-up queue and `_TEMPLATE.md`. Write up the first unstruck item of the queue as a case: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`),
@@ -398,11 +398,11 @@ CodeQL queries, two CSVs, 5,588 rows. **Stage 2 is complete, with every
 stage-1 row banded**: 4,789 units (4,489 narrowed rows + 300 distinct helpers
 standing for 1,099 helper rows) over 40 batches on 2026-09-23/24 with
 `claude-opus-5`. Verdicts are in `stage2-ai-preprocessing/bands.csv`, grouped
-in `bands.md`. **Fourteen cases are filed**, all stage-3 complete and all carrying
+in `bands.md`. **Sixteen cases are filed**, all stage-3 complete and all carrying
 a §9 test design, and 34 further rows carry stage-3 verdicts from the
 capacity-word pass.
 
-**Stage 4 has started** (see the table above) — fourteen designs, three cases closed
+**Stage 4 has started** (see the table above) — sixteen designs, five cases closed
 (`memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`). Stage 3's own
 bottleneck is unchanged: the 134-row band-A queue.
 
