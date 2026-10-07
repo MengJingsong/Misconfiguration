@@ -24,6 +24,8 @@ See [README.md](README.md) for the format.
 | `max_mutation_size` | [`Mutation.validateSize():172`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L172) | [`CommitLog.add():304`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLog.java#L304) | `commitlog` | `allocation` | (c) | 3a | [`max_mutation_size-validateSize-MAX_MUTATION_SIZE`](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) |
 | `max_value_size` | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) | [`AbstractType.read():594`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/marshal/AbstractType.java#L594) | `marshal` | `bytearray` | (c) | 3a | [`max_value_size-read-maxValueSize`](cases/max_value_size-read-maxValueSize.md) |
 | `CACHEABLE_MUTATION_SIZE_LIMIT` | [`Mutation$MutationSerializer.serialization():451`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451) | [`Mutation$MutationSerializer.serialization():451-463`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Mutation.java#L451-L463) | `mutation` | `cachedserialization` | (a) | 3a | [`CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT`](cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT.md) |
+| `local_read_size_fail_threshold` | [`ReadCommand$QuerySizeTracking.addSize():715`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L715) | [`ReadCommand$QuerySizeTracking.addSize():722`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L722) | `read_path` | `row` | (c) | 3a | [`local_read_size_fail_threshold-addSize-failBytes`](cases/local_read_size_fail_threshold-addSize-failBytes.md) |
+| `row_index_read_size_fail_threshold` | [`RowIndexEntry$Serializer.checkSize():392`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L392) | [`RowIndexEntry$Serializer.checkSize():401`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L401) | `sstable_index` | `rowindexentry` | (c) | 3a | [`row_index_read_size_fail_threshold-checkSize-failThreshold`](cases/row_index_read_size_fail_threshold-checkSize-failThreshold.md) |
 
 <!-- Add one row per case. -->
 
@@ -31,10 +33,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 9 |
-| Total cases | 14 |
+| Modules covered | 10 |
+| Total cases | 16 |
 | Found via feed 3b (raw source) | 9 |
-| Found via feed 3a (stage 1/2) | **5** |
+| Found via feed 3a (stage 1/2) | **7** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -140,7 +142,7 @@ Storage-engine module covering the write-ahead commit log and its Change Data Ca
 
 ### 3.5 sstable_index
 On-disk index entries for wide partitions and the key cache that holds them
-(`io/sstable/format/big`, `cache`, `service/CacheService`). One case so far:
+(`io/sstable/format/big`, `cache`, `service/CacheService`). Two cases so far:
 - **`column_index_cache_size-indexSamples-cacheSizeThreshold`:** byte
   threshold on one partition's serialized block index, deciding whether the
   index is retained on heap as an `IndexInfo[]` (`IndexedEntry`) or left on
@@ -159,6 +161,19 @@ On-disk index entries for wide partitions and the key cache that holds them
   **format-scoped** (BIG only; BTI does not reach it), and the read-path site
   reads config **live per deserialization**, so a JMX change alters the
   memory behaviour of already-written SSTables with no rewrite.
+
+- **`row_index_read_size_fail_threshold-checkSize-failThreshold`:** byte limit on the **estimated in-memory size of one partition's
+  index entry**, compared in `RowIndexEntry.Serializer.checkSize()` (pattern (c)) before `deserialize()` builds either an `IndexedEntry` or a
+  `ShallowIndexedEntry`; a refusal throws, leaves nothing in the key cache and fails the read as `READ_SIZE`. **The folder's first guard on an
+  estimate rather than a measured quantity,** and the estimate is made **before** `column_index_cache_size` decides whether the entry is built,
+  so at stock settings it can refuse only entries that would have been shallow and bounds no heap; it binds heap only where that case's
+  threshold is raised (the upstream test sets it to 1 GiB). **The guard dominates lexically and is inert conditionally:** it returns at once
+  unless a `ReadCommand` is registered on the thread, which is true only while `executeLocally()` runs, so a key-cache hit, a reloaded key
+  cache, an SSTable opened lazily after it returns (derived from the lower-bound merge, tested by an arm) and every range scan are not checked.
+  **Off by default** (limit `null`, master switch false). The sibling of `local_read_size_fail_threshold` (same switch and reporting channel),
+  but it does not require the coordinator's `trackWarnings` flag, so an unflagged read turns the abort into an `UNKNOWN` failure (derived).
+  Its test design reads the **real weight** of what was built from the key cache (a refused read leaves it unchanged) and the check's own
+  operands from a Byteman rule on a node. Found via stage-3 feed **3a** (band A1, row `RowIndexEntry.java:392`); written up 2026-10-06.
 
 ### 3.6 buffer_pool
 Off-heap buffer pooling for file reads and networking (`utils/memory/BufferPool`,
@@ -206,3 +221,16 @@ The write object and its serialization (`db/Mutation`, `io/util/TeeDataInputPlus
   `validateSize()` reaches this check, so measuring a mutation below the limit builds its copy (`max_mutation_size`). Its node tier reaches the **receive site on a real node through
   commit-log replay**, holding writes in memory with a Byteman delay and counting live copies with a class histogram. Found via stage-3 feed **3a** (band A1, rows
   `Mutation.java:451` and `TeeDataInputPlus.java:58`); written up 2026-10-06.
+
+### 3.9 read_path
+Replica-side read and the guardrails wrapped around it (`db/ReadCommand`, `db/transform`, `service/reads/thresholds`). One case so far:
+- **`local_read_size_fail_threshold-addSize-failBytes`:** running total of the heap sizes of what **one local read command** pulls from storage,
+  compared in `ReadCommand.QuerySizeTracking.addSize()` (pattern (c)); reaching the limit (`>=`) throws `LocalReadSizeTooLargeException`. **Per
+  command, not per query:** each page of a paged query and each partition of an `IN` read has its own counter, so a query paged below the limit is
+  never aborted. **A guard in a lazy pipeline:** it runs after the row that crosses the limit has been built (a one-row overshoot) and dominates
+  every later row, but not a names-filter point read, which builds its rows into an `ImmutableBTreePartition` before the guard is attached. It
+  **counts what storage yields before any filtering**, so a filtered read that returns nothing can still abort. **The disallow is swallowed by the
+  replica, which answers empty with a note attached;** the coordinator decides whether the query fails (with a replica to spare it is only a
+  warning). **Off by default** (limit `null`, master switch false) and **live-settable**. The first case whose cluster tier measures the bytes a
+  replica thread allocates across the guard, with a Byteman rule on the read runnable. Found via stage-3 feed **3a** (band A1, row
+  `ReadCommand.java:715`); written up 2026-10-06.

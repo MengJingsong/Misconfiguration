@@ -89,7 +89,7 @@ a substituted workload no longer tests the traced path.
 
 **Applies to a case that has both a long-path case file and a short-path
 solution** ([stage 3](../stage3-ai-deep-read/README.md)). A case with only a
-long-path file follows the protocol below unchanged, as 13 of the 14 filed cases do
+long-path file follows the protocol below unchanged, as 15 of the 16 filed cases do
 today. **The long path always goes first** (decided 2026-10-06): its case file, then its
 runs, are done before the short path's solution is written or run. Only the short path
 has to be blind; the long path has no isolation rule. Each solution has a **unit tier** and a **cluster tier**, so a case has up

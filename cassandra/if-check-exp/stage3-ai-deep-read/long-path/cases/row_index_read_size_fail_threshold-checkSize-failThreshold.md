@@ -1,0 +1,431 @@
+# row_index_read_size_fail_threshold — partition index entry (`RowIndexEntry`)
+
+> **Index:** [../_INDEX.md](../_INDEX.md)
+>
+> **Source:** apache/cassandra @ tag `cassandra-5.0.9`
+
+## 1. Location
+
+| Field | Content |
+|-------|---------|
+| **Case ID** | ROW_INDEX_READ_SIZE_FAIL_THRESHOLD-CHECKSIZE-FAILTHRESHOLD |
+| **Constraint** | `row_index_read_size_fail_threshold` — a **configuration entry** ([`Config.java:532`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L532), `volatile LongBytesBound`, default `null`, which switches the check off). The shipped yaml carries it only as a comment, [`conf/cassandra.yaml:2027-2030`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/conf/cassandra.yaml#L2027-L2030), so it is **off by default**. It also needs the master switch `read_thresholds_enabled` ([`Config.java:526`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L526), default `false`), which this check reads **live at every deserialization** (§4). The unit-test yaml turns the switch on and sets this threshold to 8 MiB ([`test/conf/cassandra.yaml:68-69`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/conf/cassandra.yaml#L68-L69)). **Live-settable** (§4). **BIG format only**: the class is in `io/sstable/format/big`, and the BTI format has no such entry. |
+| **Enforcement pattern** | **(c)** — `checkSize()` is a guard clause in `RowIndexEntry.Serializer.deserialize()` that throws before either index-entry object is built; the allocation is the fall-through. **Lexically the guard dominates both allocations, but it is inert on many paths** (§5): it returns at once unless a `ReadCommand` is executing on the thread, and it is not reached at all on a key-cache hit. |
+| **Capacity check** | [`RowIndexEntry.Serializer.checkSize():392`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L392) — one check site. Its warn twin, [`:403`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L403), only records a parameter (refused, [`rejected.md`](../rejected.md)). |
+| **Decision point** | [`RowIndexEntry.Serializer.checkSize():401`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L401) — the throw. It leaves `checkSize()` into [`RowIndexEntry.Serializer.deserialize():356`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L356), the statement before the allocations. |
+| **Allocation site** | [`RowIndexEntry.Serializer.deserialize():362-363`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L362-L363), which builds an `IndexInfo[]` with one element per block and an `int[]` of offsets ([`IndexedEntry constructor:520-539`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L520-L539)), or, when the entry is above `column_index_cache_size`, [`:367-369`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L367-L369), a file position that holds no per-block objects. The entry is then offered to the key cache ([`BigTableReader.getRowIndexEntry():343`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L343)). |
+| **Related cases** | [`column_index_cache_size-indexSamples-cacheSizeThreshold.md`](column_index_cache_size-indexSamples-cacheSizeThreshold.md) — **decides which of the two objects this guard stands in front of**: its read-site check, `RowIndexEntry.deserialize():360`, comes two statements after this guard. [`local_read_size_fail_threshold-addSize-failBytes.md`](local_read_size_fail_threshold-addSize-failBytes.md) — the sibling: same master switch, same reporting channel and `RejectException` handling; it guards the rows a read takes from the data, this guards the index entry a read opens first. |
+
+```java
+// RowIndexEntry.Serializer.deserialize():341-375 — the guard and the two allocations it stands in front of
+public RowIndexEntry deserialize(DataInputPlus in, long indexFilePosition) throws IOException
+{
+    long position = in.readUnsignedVInt();
+    int size = in.readUnsignedVInt32();                    // :345 — serialized length of the whole entry
+    if (size == 0)
+        return new RowIndexEntry(position);                // :348 — a non-indexed entry, never checked
+    else
+    {
+        long headerLength = in.readUnsignedVInt();
+        DeletionTime deletionTime = DeletionTime.getSerializer(version).deserialize(in);
+        int columnsIndexCount = in.readUnsignedVInt32();   // :354 — number of blocks
+
+        checkSize(columnsIndexCount, size);                // <-- guard clause, :356
+
+        int indexedPartSize = size - serializedSize(deletionTime, headerLength, columnsIndexCount, version);
+        if (size <= DatabaseDescriptor.getColumnIndexCacheSize())                              // :360 — the sibling case
+            return new IndexedEntry(position, in, deletionTime, headerLength, columnsIndexCount,
+                                    idxInfoSerializer, indexedPartSize, version);              // :362 — per-block heap
+        else
+        {
+            in.skipBytes(indexedPartSize);
+            return new ShallowIndexedEntry(position, indexFilePosition, deletionTime, headerLength,
+                                           columnsIndexCount, indexedPartSize, idxInfoSerializer, version);   // :369 — a file position
+        }
+    }
+}
+
+// RowIndexEntry.Serializer.checkSize():377-419
+private void checkSize(int entries, int bytes)
+{
+    ReadCommand command = ReadCommand.getCommand();
+    if (command == null || SchemaConstants.isSystemKeyspace(command.metadata().keyspace) || !DatabaseDescriptor.getReadThresholdsEnabled())
+        return;                                                                                // :380 — the gate
+    ...                                                                                        // :383-386 — both thresholds null: return
+    long estimatedMemory = estimateMaterializedIndexSize(entries, bytes);                      // :388
+    if (tableMetrics != null) tableMetrics.rowIndexSize.update(estimatedMemory);               // :389-390
+    if (failThreshold != null && estimatedMemory > failThreshold.toBytes())                    // <-- capacity check, :392
+    {
+        ...
+        MessageParams.add(ParamType.ROW_INDEX_READ_SIZE_FAIL, estimatedMemory);                // :399
+        throw new RowIndexEntryReadSizeTooLargeException(msg);                                 // <-- disallow, :401
+    }
+    else if (warnThreshold != null && estimatedMemory > warnThreshold.toBytes()) ...           // warn twin, :403
+}
+// estimateMaterializedIndexSize():412-419 = (IndexInfo.EMPTY_SIZE + ArrayClustering.EMPTY_SIZE + DeletionTime.EMPTY_SIZE) * entries + bytes
+```
+
+## 2. Context
+
+A wide partition is stored with a small index that records, block by block, where in the data file each part of the partition begins; a read that wants the middle of the partition uses it to jump there. When a read looks a partition up in an SSTable it first reads that partition's index entry from the index file. Depending on a size threshold, Cassandra either builds the whole block list in memory (and usually keeps it in the key cache) or keeps only a pointer and re-reads blocks from disk on demand. A partition with a very large number of blocks therefore has an index entry that can be big.
+
+This guardrail estimates, from the header of the on-disk entry and before anything is built, how large the in-memory entry would be, and refuses the read if the estimate is over a configured limit. Like its sibling that guards the rows of a read, it is **off until an operator turns it on**: the limit has no default and a separate master switch must be on. When it fires, the replica answers empty with a note attached and the coordinator turns the notes into the client's error (§6b).
+
+## 3. Module
+
+| Field | Content |
+|-------|---------|
+| **Module** | `sstable_index` — on-disk index entries for wide partitions and the key cache that holds them (`io/sstable/format/big`, with the cache in `cache` and `service/CacheService`); the guardrail's reporting is in `service/reads/thresholds` |
+| **One-line role** | The BIG SSTable format indexes wide partitions by block; `RowIndexEntry` is the in-memory handle to one partition's index, built when a read opens it from the index file and kept by the key cache. |
+
+## 4. Capacity check & limit
+
+| Field | Content |
+|-------|---------|
+| **Is this a capacity check?** | **Yes, on an estimate.** It compares an **estimate of the heap an index entry would occupy once built**, computed from the entry's header before anything is built, with a byte limit. It is **per entry**, not cumulative: a read that opens entries in several SSTables checks each on its own. |
+| **Usage-side operand** | `estimatedMemory` ([`RowIndexEntry.java:388`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L388)), from [`estimateMaterializedIndexSize():412-419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L412-L419): `(IndexInfo.EMPTY_SIZE + ArrayClustering.EMPTY_SIZE + DeletionTime.EMPTY_SIZE) × entries + bytes`, where `entries` is the number of blocks (`columnsIndexCount`, read at `:354`) and `bytes` is `size`, the serialized length of the whole entry (`:345`). The three constants are `ObjectSizes.measure()` of empty objects ([`IndexInfo.java:61`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/IndexInfo.java#L61), [`ArrayClustering.java:26`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ArrayClustering.java#L26), [`DeletionTime.java:41`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/DeletionTime.java#L41)), so they depend on the JVM. **It is not the entry's own size:** the real weight of an `IndexedEntry` is [`IndexedEntry.unsharedHeapSize():613-621`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L613-L621), a sum over each block's [`IndexInfo.unsharedHeapSize():157-163`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/IndexInfo.java#L157-L163) (the object plus **two** clusterings, each with what it holds), whereas the estimate counts one clustering object per block and the serialized bytes; and that of a `ShallowIndexedEntry` is the constant [`ShallowIndexedEntry.unsharedHeapSize():767-769`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L767-L769). How close the estimate is to the weight is a measurement (§9), not a claim. |
+| **Limit-side operand** | `failThreshold.toBytes()`, read **live on every call** ([`RowIndexEntry.java:384`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L384), compared at `:392`). |
+| **Limit type** | **Configuration entry**, used raw (no derivation), default `null` = off, **live-settable**. |
+
+**Limit initialization path** (declare → validate → store → read):
+
+1. [`Config.row_index_read_size_fail_threshold:532`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L532) — declared, `volatile DataStorageSpec.LongBytesBound`, default `null`.
+2. [`DatabaseDescriptor.applySimpleConfig():785`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L785) → [`applyReadThresholdsValidations():1092-1105`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L1092-L1105) — the only startup check: when both are set, `fail` must be at least `warn`. No range, no derivation.
+3. [`DatabaseDescriptor.getRowIndexReadSizeFailThreshold()/setRowIndexReadSizeFailThreshold():4927-4936`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L4927-L4936) — read and written **live**; the same pair is the JMX attribute `RowIndexReadSizeAbortThreshold` on `StorageService` ([`StorageService.java:7346-7355`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageService.java#L7346-L7355)); no `nodetool` command wraps it.
+4. [`RowIndexEntry.Serializer.checkSize():383-386`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L383-L386) — read at the check; compared at `:392`.
+5. **The gate before the check.** [`RowIndexEntry.Serializer.checkSize():379-381`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L379-L381): the check does nothing unless **(i)** a `ReadCommand` is registered for the thread, (ii) its keyspace is not a system keyspace and (iii) the master switch is on — `DatabaseDescriptor.getReadThresholdsEnabled()` is read here, **on the replica, at every call**, unlike the sibling guard, which relies on a flag the coordinator sets. The registered command is a thread-local, [`ReadCommand.COMMAND:100`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L100), set by `executeLocally()` at [`:430`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L430) and cleared in its `finally` at [`:505`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L505); §5 follows what that means.
+
+**Naming note (Target 1).** The constraint is named after the first-declared variable on the path, the configuration entry; `checkSize` is the method that encloses the comparison and `failThreshold` is the operand as written there (README §6.1).
+
+## 5. Decision point & branch semantics
+
+| Field | Content |
+|-------|---------|
+| **Decision point** | [`RowIndexEntry.Serializer.checkSize():401`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L401) |
+| **Verdict** | Pattern (c): the guard is the `throw`; there is no flag or enum. The exception is a `RejectException` ([`RowIndexEntryReadSizeTooLargeException:895-901`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L895-L901)). **The verdict also travels as a parameter:** `checkSize()` puts `ROW_INDEX_READ_SIZE_FAIL` and the estimate into the thread's `MessageParams` ([`:399`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L399)), which the replica attaches to its reply (§6b). |
+
+| Outcome | Condition | Effect |
+|---------|-----------|--------|
+| **Allow** | `estimatedMemory <= failThreshold` (or no threshold, or the gate returns) | `deserialize()` goes on: `size <= column_index_cache_size` builds the `IndexedEntry`, otherwise the stream skips the blocks and a `ShallowIndexedEntry` is built; the entry is offered to the key cache |
+| **Disallow** | `estimatedMemory > failThreshold` | the fail parameter is set and `RowIndexEntryReadSizeTooLargeException` leaves `checkSize()`: **neither object is built**, the stream stops right after the entry's header, and nothing reaches the key cache |
+
+```java
+// allow — RowIndexEntry.Serializer.deserialize():358-373, after checkSize() returns
+if (size <= DatabaseDescriptor.getColumnIndexCacheSize())
+    return new IndexedEntry(...);                       // :362
+else { in.skipBytes(indexedPartSize); return new ShallowIndexedEntry(...); }   // :367-369
+```
+
+```java
+// disallow — RowIndexEntry.Serializer.checkSize():398-401
+MessageParams.remove(ParamType.ROW_INDEX_READ_SIZE_WARN);
+MessageParams.add(ParamType.ROW_INDEX_READ_SIZE_FAIL, estimatedMemory);
+throw new RowIndexEntryReadSizeTooLargeException(msg);
+```
+
+### What the estimate counts, and when it is computed
+
+- **The estimate is made before the entry is built and before `column_index_cache_size` is consulted.** `checkSize()` runs at `:356`; the branch that chooses between the two objects is at `:360`. So the guard measures the entry **as if it were materialized**, also when the next statement will build a `ShallowIndexedEntry` that holds no per-block objects. At the stock `column_index_cache_size` of 2 KiB ([`Config.java:328`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L328)) every entry whose serialized size is above 2 KiB is shallow, so at stock settings **a limit above the estimate of an entry of 2 KiB can refuse only entries that would not have been materialized**: an entry that is materialized has `size <= column_index_cache_size`, so its estimate is at most *o* × its blocks plus 2 KiB, with the blocks bounded by what 2 KiB of serialized `IndexInfo` can hold (derived; the bound is measured, and the shallow arm of §9 shows the refusals).
+- **`>`, not `>=`.** An estimate equal to the limit is accepted.
+- **Only indexed entries.** A partition with fewer than two blocks has `size == 0` ([`:346-349`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L346-L349)) and is never checked.
+- **Per entry.** Every SSTable the read opens is checked on its own against the same limit; nothing sums the entries of one read.
+- **The histogram is fed before the comparison.** `RowIndexSize` is updated at `:390` whenever either threshold is set and the gate passes, so it records the estimate of every entry opened, bucketed (not exact).
+- **The abort message prints the operand's parts:** `estimated to be <est> bytes in-memory (total entries: <blocks>, total bytes: <bytes>)` (`:394-397`).
+
+### Does the guard dominate the allocation?
+
+**Within `deserialize()`, yes**: both `new` statements follow `checkSize()` in the only method that builds them from the index file, and every caller of `deserialize()` goes through it. **But the guard is conditionally inert, and the conditions describe the paths that bypass it:**
+
+- **Outside a running `ReadCommand` it returns at `:380`.** `deserialize()` is also called with no command on the thread: through `getRowIndexEntry()` by compaction ([`CompactionController.java:322`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionController.java#L322)), by the scanners that walk the index file (below), and by the secondary-index path ([`BigTableReader.keyAtPositionFromSecondaryIndex():393`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L393)).
+- **A key-cache hit never reaches it.** [`BigTableReader.getRowIndexEntry():265-275`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L265-L275) returns the cached entry before the index file is read. An entry cached under a higher limit, or cached while the guard was off, is served after the limit is lowered; and when the key cache is reloaded from its saved file, [`RowIndexEntry.Serializer.deserializeForCache():304-319`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L304-L319) builds the entries by a different constructor with no check.
+- **The command is registered only while `executeLocally()` runs, and the iterator it returns is lazy.** `COMMAND` is cleared when `executeLocally()` returns (`:505`), but an SSTable iterator opens its index entry on its first `hasNext()` ([`UnfilteredRowIteratorWithLowerBound.initializeIterator():119-125`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/rows/UnfilteredRowIteratorWithLowerBound.java#L119-L125), reached from `LazilyInitializedUnfilteredRowIterator.maybeInit()`). For a **single-partition read** the iterators of the SSTables are merged by lower bound: [`UnfilteredRowIteratorWithLowerBound.partitionLevelDeletion():176-183`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/rows/UnfilteredRowIteratorWithLowerBound.java#L176-L183) answers without opening the SSTable unless it has partition-level deletions, and [`MergeIterator.Candidate:355-375`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MergeIterator.java#L355-L375) takes the lower bound as the head item without calling `hasNext()`. `executeLocally()` pulls only until the first real row, through [`SinglePartitionReadCommand.withSSTablesIterated():911-913`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/SinglePartitionReadCommand.java#L911-L913). So the SSTables whose lower bound sorts at or before the first row are opened **inside** the window, and **an SSTable whose lower bound sorts after the first row is opened later, during consumption, with no command on the thread and the guard inert** (derived from the source; arm C2 tests it). With one SSTable the single iterator is opened inside the window.
+- **A range scan reads each partition's entry as the scanner advances.** [`BigTableScanner.prepareToIterateRow():135`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableScanner.java#L135) and [`:154`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableScanner.java#L154) run during iteration, which for a range read is after `executeLocally()` has returned (the partition iterators are merged lazily). The upstream test skips scans for this guard ([`RowIndexSizeWarningTest.java:74-101`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/distributed/org/apache/cassandra/distributed/test/thresholds/RowIndexSizeWarningTest.java#L74-L101)). Derived, tested by arm C3.
+- **System keyspaces** are exempt (`:380`), and so is every read when the master switch is off or no threshold is set.
+
+## 6. Code path
+
+### 6a. Allow path → object creation
+
+1. [`ReadCommand.executeLocally():430`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L430) registers the command on the thread. `queryStorage()` reaches the SSTables: for a single-partition read, [`SinglePartitionReadCommand.queryMemtableAndDiskInternal():786-794`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/SinglePartitionReadCommand.java#L786-L794) creates one **lazy** iterator per intersecting SSTable and asks it for its partition-level deletion (which does not open it unless the SSTable has any, §5).
+2. When an SSTable iterator is opened, [`BigTableReader.rowIterator():126-134`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L126-L134) asks for the partition's index entry. [`BigTableReader.getRowIndexEntry():215-220`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L215-L220) checks the Bloom filter, then **the key cache** ([`:265-275`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L265-L275), a hit returns here), then binary-searches the index summary and scans the index file from the sampled position.
+3. On a match, [`BigTableReader.getRowIndexEntry():325`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L325) → `RowIndexEntry.Serializer.deserialize()`: reads the header, calls `checkSize()` at `:356`. With a command on the thread, a non-system keyspace, the master switch on and a threshold set, `checkSize()` computes the estimate (`:388`), updates the `RowIndexSize` histogram (`:390`), finds `:392` false and, if the warn limit is set and passed, records the warn parameter (`:403-408`); it returns.
+4. [`RowIndexEntry.Serializer.deserialize():358-363`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L358-L363) — `size` at or below `column_index_cache_size` builds the `IndexedEntry`: **object creation**, `new IndexInfo[columnsIndexCount]` and one `IndexInfo` deserialized per block, then `new int[]` of offsets ([`:520-539`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L520-L539)); above it the blocks are skipped (`:367`) and a `ShallowIndexedEntry` is built (`:369`).
+5. [`BigTableReader.getRowIndexEntry():343`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L343) offers the entry to the key cache, which charges it [`CaffeineCache.create():61-69`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cache/CaffeineCache.java#L61-L69) against `key_cache_size`; the entry is then returned and used to build the SSTable iterator ([`BigTableReader.rowIterator():136-143`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L136-L143)).
+
+### 6b. Disallow path effect
+
+1. [`checkSize():392-401`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L392-L401) puts the fail parameter into `MessageParams` (replacing the warn parameter) and throws. **Nothing is built:** the stream is left right after the header (`:352-354`), `new IndexedEntry` and `new ShallowIndexedEntry` are not reached, and `cacheKey()` at `BigTableReader:343` is not reached (the exception is a `RuntimeException`, and `getRowIndexEntry()` catches only `IOException`, [`:347-352`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableReader.java#L347-L352)), so no entry reaches the key cache. The estimate has already been written to the `RowIndexSize` histogram.
+2. **If the entry was opened inside `executeLocally()`** (one SSTable, or the SSTables that sort first), the exception leaves `executeLocally()` itself. The replica then does what it does for the sibling guard (case [`local_read_size_fail_threshold`](local_read_size_fail_threshold-addSize-failBytes.md) §6b): **swallows it and answers empty** with the parameters attached, **but only if the command tracks warnings**. Remote replica: [`ReadCommandVerbHandler.doVerb():97-110`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommandVerbHandler.java#L97-L110) — when the flag is missing the exception is **rethrown** (`:99-100`). Local replica: [`StorageProxy.LocalReadRunnable.runMayThrow():2213-2220`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2213-L2220), and when the flag is missing the throw reaches [`:2243-2254`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2243-L2254), which answers the handler with `UNKNOWN`. The difference from the sibling matters: **the row-index guard does not require `trackWarnings`**, so a node with the guard on and a coordinator with the switch off (no flag) turns the abort into a hard `UNKNOWN` failure instead of a reported one (derived from the source, not run).
+3. **The coordinator decides**, as for the sibling: [`WarningContext.updateCounters():46-80`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/thresholds/WarningContext.java#L46-L80) maps `ROW_INDEX_READ_SIZE_FAIL` to `READ_SIZE` and records the abort; `ReadCallback.awaitResults()` throws [`WarningsSnapshot.maybeAbort():117-118`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/thresholds/WarningsSnapshot.java#L117-L118) — a `ReadSizeAbortException` — when the failures leave fewer than `blockFor` data responses, and `CoordinatorWarnings.done()` marks the table meter `RowIndexSizeAborts` ([`CoordinatorWarnings.java:97`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/thresholds/CoordinatorWarnings.java#L97)) and logs the message at WARN. **The coordinator's message names the limit as `row_index_size_fail_threshold`** ([`WarningsSnapshot.rowIndexReadSizeAbortMessage():154-157`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/thresholds/WarningsSnapshot.java#L154-L157)), not `row_index_read_size_fail_threshold` as the replica's message and the yaml do. With replicas to spare the read succeeds and only the warning and the meter record the abort (derived, not run).
+4. **If the entry is opened outside the window, nothing happens:** `checkSize()` returns at `:380`, the entry is built and cached (§5).
+5. **Not a block, a retry or a hint.** The refused read is not retried; the client sees the failure and decides.
+6. **If the check were absent.** The entry would be built: an `IndexedEntry` holding one `IndexInfo` per block when it is at or below `column_index_cache_size`, otherwise a `ShallowIndexedEntry`, and cached. Derived from the source, not run.
+
+## 7. Object & resource
+
+| Field | Content |
+|-------|---------|
+| **Object created** | The partition's index entry: an `IndexedEntry` (an `IndexInfo[]` with one element per block, each holding two clusterings, plus an `int[]` of offsets), or a `ShallowIndexedEntry` (a position and a few fields). |
+| **Resource consumed** | **Heap bytes.** For an `IndexedEntry`, proportional to the number of blocks; for a `ShallowIndexedEntry`, a constant. |
+| **Rough sizing** | `IndexedEntry.unsharedHeapSize()` ([`:613-621`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L613-L621)): the object plus each block's `IndexInfo.unsharedHeapSize()` plus the reference array; `ShallowIndexedEntry.unsharedHeapSize()` is the constant `BASE_SIZE` ([`:767-769`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L767-L769)). The guard's estimate is neither (§4); the ratio between the estimate and the weight is measured in §9, not assumed. |
+| **Lifetime / release** | While the key cache holds the entry, charged its `unsharedHeapSize()` plus the key's against `key_cache_size`, until it is evicted or invalidated; when the table does not use the key cache (`caching = {'keys': 'NONE'}`) or the entry does not fit, for the duration of the read. A shallow entry also opens a file reader per use (`ShallowIndexedEntry.openWithIndex()`), which is not counted here. |
+
+## 8. Maximum memory/disk bound
+
+`row_index_read_size_fail_threshold` bounds the **estimated in-memory size of any one partition index entry that a guarded read opens from the index file**: an entry whose estimate is above the limit is never built. Raising or lowering the limit moves the largest **estimate** admitted one for one.
+
+What that does to **heap** depends on `column_index_cache_size`, because the entry that is built is an `IndexedEntry` only when its serialized size is at or below it:
+
+- **At the stock 2 KiB** an entry that is built on heap has a serialized size of at most 2 KiB, so its estimate is at most *o* × its blocks plus 2 KiB, and its heap weight is a fixed multiple of its serialized size (each serialized block becomes one `IndexInfo` with two clusterings; the multiple is measured in §9, not assumed), **whatever this limit is**. A limit above that bound refuses only entries that would have been shallow (§5) and bounds **no heap at all**; a limit at or below it binds entries that would have been built.
+- **With `column_index_cache_size` raised** (the upstream test sets it to 1 GiB), large entries are built, and this limit is the bound on them: raising it admits proportionally larger entries.
+
+It is **not a node-wide ceiling.** It bounds one entry. What a node holds is the sum over the entries in its key cache, which `key_cache_size` bounds by weight (the filed [`column_index_cache_size`](column_index_cache_size-indexSamples-cacheSizeThreshold.md) case's §8), plus the entries held by reads in flight: so the transient heap this admits is `limit × N`, *N* being the entries opened at once (reads in flight × SSTables per read), or fewer where the key cache already holds them.
+
+It bounds **none** of: entries read while the thread has no command, entries served from the key cache or loaded back from its saved file, entries of an SSTable opened after `executeLocally()` returned, the entries of a range scan, anything in a system keyspace, or the shallow entries' later per-block reads. It also does not bound the rows a read takes from the data (the sibling case).
+
+**Other settings interact with it,** which matters to a sweep (§9b holds them fixed): `column_index_cache_size` decides whether an admitted entry costs heap; `column_index_size` (default 64 KiB for the BIG format, [`BigFormatPartitionWriter.java:49`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L49)) sets how many blocks a partition has and is applied **when an SSTable is written**; `key_cache_size` and the table's `caching` decide whether the entry is kept; `read_thresholds_enabled` is the master switch for the whole family, and the sibling `local_read_size_*`, the `coordinator_read_size_*` pair and the tombstone thresholds abort through the same channel.
+
+## 9. Test design (guidance for stage 4)
+
+**Stage 3 writes this section; stage 3 never runs it** — no measured numbers and no verdict here; results go to
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+The test builds a ladder of partitions whose index entries grow with their block count and reads each at several values of `row_index_read_size_fail_threshold`. It checks that a partition is refused exactly when the estimate computed from its entry's header exceeds the limit, that a refused read builds and caches nothing while an accepted one adds an entry whose real weight is read, and that the limit moves the largest admitted entry. Arms run the paths that should escape the guard, and one runs the stock `column_index_cache_size`, where the guard refuses entries that would not have been built. **Run so far:** none. Written in this layout on 2026-10-06; not yet audited (stage-4 README, step 0).
+
+### 9a. Procedure and conclusions
+
+**Testability:** config, **live-settable**. The unit tier calls `DatabaseDescriptor.setRowIndexReadSizeFailThreshold()` inside one JVM; the cluster tier starts the node once per value (the JMX attribute `RowIndexReadSizeAbortThreshold` is also used live by arm C1; the exact `nodetool sjk mx` call to set it is checked at the instrument step, with a small JMX client as the fallback). The master switch `read_thresholds_enabled` must be on, the SSTable format must be **BIG** (the default, [`Config.java:373`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L373)), and the read must run inside `ReadCommand.executeLocally()` (§4, §5). Two settings that decide what the guard stands in front of are **write-time or read-time knobs of other cases**: `column_index_size` is applied when an SSTable is written, so it is set before the data is flushed; `column_index_cache_size` is read at every deserialization. No patched build is needed; the cluster tier reads the check's operands through a Byteman observation rule (harness work, 9c).
+
+**Claim under test:** with the master switch on, `row_index_read_size_fail_threshold` caps the **estimated in-memory size** of any partition index entry a guarded read opens from the index file. When `(IndexInfo.EMPTY_SIZE + ArrayClustering.EMPTY_SIZE + DeletionTime.EMPTY_SIZE) × blocks + serialized bytes` is above the limit (`>`), `deserialize()` throws before it builds the entry, so no `IndexedEntry` or `ShallowIndexedEntry` exists and nothing reaches the key cache, and the read fails as a `READ_SIZE` failure. The check runs only while a `ReadCommand` is executing on the thread: it does not run on a key-cache hit, for an SSTable opened after `executeLocally()` returned, or for a scan; and it bounds an estimate that tracks the entry's heap only when `column_index_cache_size` lets the entry be built (§5, §6b, §8).
+
+**How this verifies the hypothesis** (a restatement of the claim, procedure, prediction and conclusions in this section; it adds none):
+
+- **Hypothesis:** the constraint caps the estimated heap of one partition's index entry, a refused entry is never built or cached, and what is built is bounded by it only where `column_index_cache_size` allows.
+- **Test:** vary the limit over three values per tier, plus a value above the data and the default (unset). At each, read every partition of a ladder whose estimates step by a factor of about 1.4, after emptying the key cache. Read the estimate, the block count and the bytes the check saw, the outcome, and the key cache's size and entry count before and after (the real weight of the entry). Then run the arms that escape the guard, and repeat one value with the stock `column_index_cache_size`.
+- **Logic:** (1) the estimate in the abort message equals the formula applied to the entry count and bytes in the same message, with the three constants the harness reads: a known answer, else the run is invalid. (2) A partition is accepted exactly when its estimate is at most the limit, and an estimate equal to the limit is accepted: usage **stops at the limit**. (3) The largest admitted estimate and the real weight of the largest cached entry follow the limit (1 : 4 : 16): usage **follows the constraint**. (4) The abort carries the guard's message, the `READ_SIZE` code and the meter, and a refused read leaves the key cache unchanged: the guard, not something else, enforces it, before the allocation. (5) The escape arms show where it does not bind; the stock-cache arm shows what it binds there.
+- **Refuted if:** a partition with an estimate above the limit is admitted, a refused read leaves an entry in the key cache, the message's estimate is not the formula's value, or the largest admitted estimate does not move with the knob (rows of the Conclusions table).
+
+**Procedure:**
+
+1. **Unit tier** — set up as in 9b; run the harness test `RowIndexSizeGuardTest` (9c) in one JVM over all values.
+2. **Cluster tier** — set up as in 9b; for each value start a node, load the ladder, flush, and run the reads of 9e. Then the stock-cache starts and the bypass arms.
+3. **At each value:** idle control → **scenario A**, reach the limit (the largest partition that is admitted) → **scenario B**, try to exceed it (the next partition up) → **scenario C**, the bypass arms (key-cache hit, SSTable opened late, scan), and **scenario S**, the stock-cache arm.
+4. **Compare** with the prediction below and read the result in the table.
+
+**Prediction** (stated before any run, in numbers). Notation: *F* = the limit in bytes; *B* = the blocks of a partition, one per row by construction; *s*(*B*) = the serialized length of its index entry (`bytes` in the message); *o* = `IndexInfo.EMPTY_SIZE + ArrayClustering.EMPTY_SIZE + DeletionTime.EMPTY_SIZE`, JVM-dependent and **read, not assumed**; *est*(*B*) = *o*·*B* + *s*(*B*), the check's operand; *w*(*B*) = the real weight of the cached entry (`unsharedHeapSize()`).
+
+*Unit tier*, partitions of *B* = 20 · 40 · 80 · 160 · 320 · 640 · 1,280 rows of 1,200-byte blobs (one block per row, `column_index_size` 1 KiB) plus one single-row partition, in one flushed SSTable, `column_index_cache_size` large (4 MiB), at *F* = 8,192 · 32,768 · 131,072 · 8,388,608 (the unit yaml's own value, above the data) and unset:
+
+- **Read-back:** `getRowIndexReadSizeFailThreshold().toBytes()` equals *F* after each set.
+- **Known answer:** at *F* = 1 every indexed partition is refused with a message whose `total entries` is *B*, whose `estimated to be` value is *est*(*B*) = *o*·*B* + `total bytes`, and `MessageParams.get(ROW_INDEX_READ_SIZE_FAIL)` equals it; *o* computed from the message equals the sum of the three constants the harness prints. The single-row partition is not refused and does not move the `RowIndexSize` histogram's count (it has no index entry to check).
+- **Boundary (`>`):** for *B* = 160, *F* = *est* − 1 refuses it (the exception, the key cache's entry count unchanged, no cached position); *F* = *est* accepts it (one more entry, an `IndexedEntry`, whose `unsharedHeapSize()` is recorded as *w*).
+- **Ladder:** at each *F* a partition is accepted iff *est*(*B*) ≤ *F*; the accepted partitions are a prefix of the ladder; at 8,388,608 all are accepted; with both limits unset, all are accepted and `RowIndexSize`'s count does not move (the check returns before it).
+- **Real resource:** each accepted partition adds one cached entry; *w*(*B*) grows linearly with *B*: (*w*(*B*₂) − *w*(*B*₁))/(*est*(*B*₂) − *est*(*B*₁)) is the same for every pair of accepted rungs within 20 %. The ratio *w*/*est* is recorded; no value is predicted for it beyond being constant.
+- **Scenario S, stock cache size:** with `column_index_cache_size` 2 KiB and *F* = 32,768 the accepted and refused sets are **the same** as above, but every accepted partition whose *s*(*B*) is above 2,048 is cached as a `ShallowIndexedEntry` with one and the same `unsharedHeapSize()` whatever *B* is, and the refused partitions with *s*(*B*) above 2,048 are ones that would not have been built.
+- **Arm C0, no command:** `sstable.getRowIndexEntry(key, EQ)` called directly at *F* = 1 returns the entry and does not throw.
+- **Arm C1, key-cache hit:** at *F* = 131,072 read the *B* = 320 partition (accepted, cached); set *F* = *est*(320) − 1; read it again: it **completes**, the entry count is unchanged and `RowIndexSize`'s count does not move (`deserialize()` was not called); after `invalidateKeyCache()` the same read is refused.
+- **Arm C2, SSTable opened late:** a partition in two SSTables, ck 0 to 9 in the first and ck 1000 to 1639 (*B* = 640) in the second, table without key cache, at *F* = *est*(640) − 1: `ck >= 1000` is **refused**; the full ascending read **completes** with all 650 rows and `RowIndexSize`'s count rises by **one** (the small first SSTable's entry; the second's is read with no command on the thread); the full descending read is **refused**.
+- **Arm C3, scan:** a full-range read over the ladder table at *F* = 1 **completes** and `RowIndexSize`'s count does not move.
+- **Control, switch off:** with `read_thresholds_enabled` false nothing is refused at *F* = 1.
+
+*Cluster tier*, one node, RF 1, partitions of *B* = 100 · 141 · 200 · 283 · 400 · 566 · 800 · 1,131 · 1,600 · 2,263 · 3,200 rows of 1,200-byte blobs (consecutive rungs differ by a factor of about 1.41; about 15 MB in all), `column_index_size` 1 KiB, `column_index_cache_size` 4 MiB, at *F* = 16,384 · 65,536 · 262,144 · 16,777,216 (above the data) and unset; then the stock cache size (2 KiB) at 65,536 and 16,777,216. *o* and *est*(*B*) come from the Byteman line and the client text of the 16 MiB run.
+
+- **Read-back:** the abort message's `but the max allowed is` shows *F* (the spec as a string, for example `64KiB`), and the Byteman line shows `entries` = *B*.
+- **Scenario A and B:** after `nodetool invalidatekeycache`, a point read of each partition (`SELECT ck … WHERE pk = <k> LIMIT 1`) is accepted iff *est*(*B*) ≤ *F*; the largest accepted estimate *est\**(*F*) satisfies *F*/1.42 < *est\**(*F*) ≤ *F*, and so moves **1 : 4 : 16** over the three values within the ladder's step.
+- **Evidence:** each refusal gives a client `ReadFailure` whose failure map has code 4, one more `RowIndexSizeAborts` on the table, the coordinator's WARN line `1 nodes loaded over <est> bytes in RowIndexEntry and aborted the query` and the Byteman line with `command=ks1.t`; each acceptance gives the client warning `loaded over <est> bytes in RowIndexEntry` (the warn limit is 1 B) and the same Byteman line.
+- **Real resource:** the key cache's `Size` and `Entries` are unchanged by a refused read and rise by one entry and its weight (the entry's plus the key's) by an accepted one; at the three values the largest weight added follows *F* within the ladder's step; the weight added grows linearly with *B*.
+- **Scenario S:** at the stock cache size the accepted and refused sets are the same as with the large cache at the same *F*, and the weight added by every accepted partition whose `bytes` is above 2,048 is one constant, so at 16 MiB (nothing refused) the key cache's weight does not grow with *B* for those partitions: **the limit bounds no heap there**.
+- **Default:** with both limits unset every read is accepted, `RowIndexSize`'s count is 0 and no `checksize` line has `active` true.
+- **Arm C1:** on the 64 KiB node, read the largest accepted partition (*B* = 566 if the estimate is about 100 B per block; one `checksize` line), set the limit to its *est* − 1 over JMX and read it again: completed, no new `checksize` line, entry count unchanged; after `invalidatekeycache` the read is refused.
+- **Arm C2:** on `ks1.t2` (no key cache), with ck 0 to 9 in one SSTable and ck 1000 to 3262 (*B* = 2,263, *est* above 65,536) in another, at 65,536: `ck >= 1000 LIMIT 1` is refused; the full ascending read **completes** and the Byteman lines show the small entry with `command=ks1.t2` and the 2,263-block entry with **`command=null`**; the descending read is refused.
+- **Arm C3:** `SELECT ck FROM ks1.t` (a scan) at 16,384 **completes** although partitions with *est* above it exist, and the Byteman lines for the entries it reads have `command=null`.
+
+**Conclusions.**
+
+| Result | Conclusion |
+|---|---|
+| Unit: the known answer holds, every accepted partition has *est* ≤ *F* and every refused one *est* > *F*, the boundary pair behaves as `>` predicts, and a refused read leaves no cached entry. Cluster: *est\** and the largest cached weight follow the knob (1 : 4 : 16 within the ladder's step) and every refusal carries the guard's message, the failure code and the meter | **Confirmed** — the check enforces as traced, per entry, on its estimate. |
+| The key-cache hit, the SSTable opened late and the scan are not checked (C1, C2, C3), a read with no command is not checked (C0), nothing is checked with the switch off | **Bypass as recorded** — expected, not a refutation (§5). Record what went through: the weight of the cached entry (C1) and the partition's estimate (C2, C3) — Target-3 material. |
+| At the stock cache size the same partitions are refused but the accepted entries all weigh the same (S) | **Scope as recorded** — the guard bounds an estimate; with the stock `column_index_cache_size` the entries it refuses are ones that would not have been built, and no limit above the estimate of a 2 KiB entry bounds heap (§8). Record the limit at which the refused set first includes an entry that would have been built. |
+| A partition with *est* above the limit is accepted, or a refused read leaves a cached entry or one more key-cache entry | **Refuted** — the check does not stop at the limit, or does not precede the allocation (§6b is wrong). Re-read. |
+| The message's estimate is not *o*·entries + bytes, or the boundary is not `>` | **Refuted in part** — §4's formula or comparison is wrong. |
+| *est\** is the same at every value | **Refuted** — not the binding limit. Re-read, do not re-run. |
+| *est\** moves with the knob, but a refusal lacks the guard's message or the failure code 4 | **Not confirmed** — something else in the same reporting channel binds (`local_read_size_*`, `coordinator_read_size_*`, a tombstone limit; §8). Check the hold-fixed settings (9b). |
+| The SSTable opened late is refused (C2), or the scan is refused (C3) | **Refuted in part** — the window analysis of §5 is wrong for that path; amend §5 and re-read the iterator code. |
+| The cached read is refused after the limit is lowered (C1) | **Refuted in part** — the key-cache hit does reach the check; re-read `getRowIndexEntry()`. |
+| The known answer fails; the key cache is not empty after the invalidation; the SSTable format is not BIG; the Byteman rule did not load; no partition is refused at the smallest value, or all are refused at the largest; the instrument check fails | **Invalid run** — fix the setup (9b, 9c) and re-run. |
+
+Two rules behind this table:
+
+- **A confirmation needs both** the ceiling moving with the knob **and** direct evidence that the guard fired: the message that prints the estimate, the entry count and the bytes, the `READ_SIZE` code and the meter. A curve alone could come from a sibling guardrail that reports through the same channel.
+- **The escapes are attributed** by what the check itself reports: the Byteman line shows whether `checkSize()` was called and with which command (`command=null` is the inert case), and `RowIndexSize`'s count moves only when the gate passed. Without them "bypass" and "does not cap" look the same.
+
+**Why the message and the Byteman line, not the histogram:** the `RowIndexSize` histogram is bucketed, so it cannot resolve a boundary of one byte; the abort message and the Byteman line print the check's operands themselves. Its **count** is used only to show whether the check ran.
+
+### 9b. Setup
+
+| Field | Content |
+|-------|---------|
+| **Constraint knob** | `row_index_read_size_fail_threshold` in `cassandra.yaml` (the entry as §4's path names it), with `read_thresholds_enabled: true`. **Live-settable.** Unit tier: `DatabaseDescriptor.setRowIndexReadSizeFailThreshold(new DataStorageSpec.LongBytesBound(<bytes>, BYTES))` before each step. Cluster tier: the lines in the run clone's `conf/cassandra.yaml`, one node start per value; arm C1 changes it live over JMX. |
+| **Confirm it took effect** | Unit: the harness test prints and asserts `getRowIndexReadSizeFailThreshold().toBytes()` after each set. Cluster: the first refusal prints the limit; a secondary read to try at the instrument check: `SELECT name, value FROM system_views.settings WHERE name = 'row_index_read_size_fail_threshold'` (its absence is not a failure). |
+| **Capacity values** | **Unit:** 8,192 B, 32,768 B, 131,072 B, 8,388,608 B (above the data) and unset. **Cluster:** 16,384 B, 65,536 B, 262,144 B, 16,777,216 B (16 MiB, above the data) and unset (the default), all with `column_index_cache_size` 4 MiB; and 65,536 B and 16,777,216 B with the stock 2 KiB. There is no derived value; the default is "off". |
+| **Scope** | **Per entry** (§5). One read at a time, so *N* = 1 entry per read and one SSTable for the ladder; §8's `limit × N` claim is **not tested**. One node, RF 1: no remote replica, no digest read. |
+| **Level** | Both. **Unit:** the harness test `RowIndexSizeGuardTest`; no upstream unit test reaches the check. **Related upstream, optional:** `RowIndexSizeWarningTest` ([`RowIndexSizeWarningTest.java:32-52`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/distributed/org/apache/cassandra/distributed/test/thresholds/RowIndexSizeWarningTest.java#L32-L52)), an in-JVM dtest on three nodes at one pair of limits (1 KiB warn, 2 KiB fail), run with `ant test-jvm-dtest-some -Dtest.name=org.apache.cassandra.distributed.test.thresholds.RowIndexSizeWarningTest` (heavy: three in-JVM nodes, `-Xmx8G`). **Cluster:** one node. |
+
+**What the upstream test does and does not show.** It builds a three-node in-JVM cluster, sets the two limits to 1 KiB and 2 KiB, and **forces multi-block entries by setting `column_index_size` to 0 and `column_index_cache_size` to 1 GiB** ([`RowIndexSizeWarningTest.java:48-50`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/distributed/org/apache/cassandra/distributed/test/thresholds/RowIndexSizeWarningTest.java#L48-L50)), creates the table **without a key cache** so the entry is read every time ([`AbstractClientSizeWarning.java:93-94`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/distributed/org/apache/cassandra/distributed/test/thresholds/AbstractClientSizeWarning.java#L93-L94)), flushes, and checks for point reads that 15 rows give the warning and 40 rows the abort with `READ_SIZE` in the failure map, and the table meters move; with the master switch off the same reads are not counted. Scans are skipped. It does **not** show any other value, the exact boundary, the estimate against the real weight, a refused read leaving no cached entry, the stock cache size, a key-cache hit, several SSTables, or a real node. The harness test and the cluster tier add those.
+
+**Hold fixed — unit tier:**
+
+| Setting | Value | Why |
+|---|---|---|
+| `read_thresholds_enabled` | `true`, the unit yaml's ([`test/conf/cassandra.yaml:63`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/conf/cassandra.yaml#L63)), except in the switch-off control | the master switch |
+| `row_index_read_size_warn_threshold` | unset (`setRowIndexReadSizeWarnThreshold(null)`) | the unit yaml sets 4096 KiB, which would add a warn parameter |
+| `column_index_size` | 1 KiB (`DatabaseDescriptor.setColumnIndexSizeInKiB(1)`) **before** the flush | one block per 1,200-byte row; applied when the SSTable is written |
+| `column_index_cache_size` | 4 MiB (`setColumnIndexCacheSize(4096)`, in KiB), 2 KiB in scenario S | decides whether the entry is built on heap (the sibling case); read at every deserialization |
+| `local_read_size_*`, `coordinator_read_size_*` | not on this path (the command is not flagged) | the sibling guards would otherwise be a second abort source |
+| Table | `ks1.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck))`, compression off, autocompaction off, default caching (keys ALL); `ks1.t2` the same with `caching = {'keys': 'NONE'}` | the ladder, and the late-SSTable arm without cache hits |
+| SSTable format | BIG; the harness asserts `BigFormat.isSelected()` | the class under test is BIG-only |
+| JVM | the unit-test JVM's flags; record `UseCompressedOops` | *o* depends on them |
+
+**Hold fixed — cluster tier:**
+
+| Setting | Value | Why |
+|---|---|---|
+| `read_thresholds_enabled` | `true` | the master switch |
+| `row_index_read_size_warn_threshold` | `1B` at every value except the default control | makes every accepted read print its estimate in the client warning; it does not change the refusal |
+| `local_read_size_*`, `coordinator_read_size_*` | unset (the defaults) | sibling guardrails in the same channel |
+| `column_index_size` | `1KiB` | one block per 1,200-byte row; applied when the SSTable is written, so it stays fixed from the load to the end of the run |
+| `column_index_cache_size` | `4MiB`; the default `2KiB` in the stock-cache starts | decides whether the entry is built on heap (the sibling case) |
+| `key_cache_size` | the default (auto, at most 100 MiB) | the ladder's entries weigh far less than the capacity |
+| Heap | `MAX_HEAP_SIZE=4G`, `HEAP_NEWSIZE` unset | nothing here is near it |
+| Table | `ks1.t` as in the unit tier (default caching), `ks1.t2` with `caching = {'keys': 'NONE'}`; autocompaction off | exact blocks; no compaction re-caching (`key_cache_migrate_during_compaction` does not act) |
+| Replication | `SimpleStrategy`, RF 1, one node | the refusal fails the read |
+| Client | the bundled Python driver, **protocol 5** (the per-replica failure code is sent only from protocol 5), `fetch_size=None`, request timeout 120 s | one command per read |
+| Everything else | as shipped | nothing else moves |
+
+**Controls:**
+
+- **Idle run (both tiers)** — a read with both limits unset: nothing is counted (`RowIndexSize`'s count does not move) and no refusal.
+- **Known answer (both tiers)** — the formula reproduces the message's estimate.
+- **Single-row partition (unit)** — never checked.
+- **No command (unit, C0)** — a direct `getRowIndexEntry()` at *F* = 1 is not refused.
+- **Empty key cache before every read (both tiers)** — `invalidateKeyCache()` / `nodetool invalidatekeycache`, and a check that `Entries` is 0; without it a read may be served from the cache (arm C1's own point).
+- **Master switch off (unit, optional on the node)** — nothing is refused at *F* = 1.
+
+**Reset between runs:** unit — each `ant testsome` is a fresh JVM, and the harness drops and recreates the tables and invalidates the key cache first. Cluster — stop the node (`bin/nodetool stopdaemon`), check `ps -eo cmd | grep '[C]assandraDaemon'` is empty, delete the clone's `data/`, `logs/` **and `saved_caches/`** (a saved key cache is reloaded at start by `deserializeForCache()`, which has no check), restore `conf/cassandra.yaml` from `conf/cassandra.yaml.orig`, then write the next value's yaml.
+
+### 9c. Workload
+
+The operand is the estimate of one partition's index entry, so the workload is **a ladder of partitions with different block counts** and a point read of each. Write the data with `column_index_size` already set and flush it into one SSTable; read after emptying the key cache.
+
+**Harness.** `<harness>` stands for
+`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/row_index_read_size_fail_threshold-checkSize-failThreshold`.
+Work for step 1, before run 1 (none of it exists yet):
+
+| File | What it is |
+|---|---|
+| `RowIndexSizeGuardTest.java` | Unit tier. Package `org.apache.cassandra.db`. System property `stage4.out` (a file that also receives the `STAGE4` lines). Creates the tables with `SchemaLoader`, writes the ladder with `RowUpdateBuilder`, flushes with `Util.flush()` ([`Util.java:1229`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/test/unit/org/apache/cassandra/Util.java#L1229)), reads each partition with `SinglePartitionReadCommand` (a slice filter, `DataLimits.cqlLimits(1)`) through `executeLocally()` and consumes the result, reads `CacheService.instance.keyCache.weightedSize()` and `size()`, the cached entry with `getCachedPosition(key, false)` and its `unsharedHeapSize()`, the `RowIndexSize` histogram's count with `cfs.metric.rowIndexSize.cf.getCount()`, and `MessageParams`. Records `check MISMATCH` and goes on, failing at the end. Steps in 9e. |
+| `unit-run.sh` | Runs the harness test; optionally the upstream dtest. |
+| `make-node-yaml.sh <label> <value\|none> [stock-cache]` | From `conf/cassandra.yaml.orig` writes `conf/cassandra.yaml` with the hold-fixed settings of 9b and the knob (nothing for `none`, which also leaves the warn limit unset); `stock-cache` leaves `column_index_cache_size` at its default. |
+| `checksize.btm` | Byteman observation rule, no behaviour change. At the entry of `RowIndexEntry$Serializer.checkSize(int, int)` write `checksize thread=<name> entries=<$1> bytes=<$2> command=<keyspace.table of ReadCommand.getCommand(), or null> ms=<epoch>` to the file named by `stage4.byteman.out`. The class is Cassandra's, so no `boot:` is needed (see [`environment.md`](../../../stage4-runtime-verification/environment.md)); the method is private, which Byteman can instrument. Parse-check it with Byteman's `TestScript` against `build/classes/main` before run 1, as the earlier harnesses did. |
+| `send-read.py` | Cluster tier. A Python client on the driver bundled in `lib/cassandra-driver-internal-only-3.29.0.zip`, loaded as `bin/cqlsh.py` loads it ([`bin/cqlsh.py:47-56`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/bin/cqlsh.py#L47-L56)), **protocol 5** (the failure code is sent only from there; if the driver cannot negotiate it, an abort is identified by the message and the meter alone; record that), request timeout 120 s. Modes: `probe`, `load-ladder <table> <B,B,…> <payload>`, `load-rows <table> <pk> <from> <to> <payload>`, `read "<cql>"`. Prints `OK <rows>` or `ERR <class> <message> <failure map>`, then one `WARN <text>` per client warning; exit 0 or 1. |
+| `jmx.sh <bean> <attribute>` | `bin/nodetool sjk mx -mg -b <bean> -f <attribute>`: one attribute per call, each call a JVM start (about 1 to 2 s). A setter mode (`-ms`) is checked at the instrument step; if it does not work, a small JMX client replaces it. |
+| `cluster-run.sh` | One run script for the case (stage 4 writes it): modes `instrument`, `value <label>`, `bypass`. Logs every command to `~/stage4-logs/rirs/<label>/session.log`, writes `summary.txt` and `readings.csv`, exits at the first failed check and stops the node on any failure. |
+
+```bash
+# unit tier — in the local clone (never the shared cassandra-src); once:
+ant build-test
+cp <harness>/RowIndexSizeGuardTest.java test/unit/org/apache/cassandra/db/
+mkdir -p $HOME/stage4-logs/rirs/unit
+ant testsome -Dtest.name=org.apache.cassandra.db.RowIndexSizeGuardTest \
+  -Dtest.jvm.args="-Dstage4.out=$HOME/stage4-logs/rirs/unit/run.out"
+
+# cluster tier — per value; <label> is 16m (first, calibration), 16k, 64k, 256k, s64k, s16m, none
+<harness>/make-node-yaml.sh <label> <bytes|none> [stock-cache]
+MAX_HEAP_SIZE=4G JVM_EXTRA_OPTS="-javaagent:build/lib/jars/byteman-4.0.20.jar=script:<harness>/checksize.btm,listener:true -Dstage4.byteman.out=$HOME/stage4-logs/rirs/<label>/checksize.trace" \
+  bin/cassandra -p $HOME/stage4-logs/rirs/<label>/cassandra.pid > $HOME/stage4-logs/rirs/<label>/startup.log 2>&1
+bin/cqlsh -e "CREATE KEYSPACE ks1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}; CREATE TABLE ks1.t (pk int, ck int, v blob, PRIMARY KEY (pk, ck)) WITH compression = {'enabled': false} AND compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'};"
+<harness>/send-read.py load-ladder ks1.t 100,141,200,283,400,566,800,1131,1600,2263,3200 1200
+bin/nodetool flush ks1 t
+bin/nodetool invalidatekeycache
+<harness>/send-read.py read "SELECT ck FROM ks1.t WHERE pk = <k> LIMIT 1"
+<harness>/jmx.sh org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size Value
+<harness>/jmx.sh org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries Value
+<harness>/jmx.sh org.apache.cassandra.metrics:type=Table,keyspace=ks1,scope=t,name=RowIndexSizeAborts Count
+```
+
+**Starting values.** Estimates, not measurements:
+
+| Quantity | Value | Why |
+|---|---|---|
+| Rows, payload | 1,200 B per row, one row per block | a serialized row is above the 1,024-byte `column_index_size`, so each row closes its block ([`BigFormatPartitionWriter.addUnfiltered():213-214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigFormatPartitionWriter.java#L213-L214)) |
+| Ladder | unit 20 to 1,280 rows (doubling); cluster 100 to 3,200 rows (factor about 1.41), 11 partitions | estimates step by the same factor, so the largest admitted estimate is within 1.42 of the limit |
+| *est*(*B*) | about 100 B per block | *o* (three empty objects) plus about 20 serialized bytes per block; measured at calibration |
+| Limits | unit 8,192 · 32,768 · 131,072; cluster 16,384 · 65,536 · 262,144 | the admitted block counts are about 80, 320 and 1,300 in the unit tier and about 160, 650 and 2,600 on the node, inside the ladders |
+| Late-SSTable partition | ck 0 to 9, then ck 1000 to 1639 (unit) or 1000 to 3262 (cluster) | the second SSTable's entry has an estimate above the limit and its clusterings sort after the first row |
+
+**If sizes drift:** *o*, *s* and *est* are read per run and the predictions are recomputed from them; the harness stops the run if no ladder rung falls below the smallest limit or above the largest.
+
+### 9d. Observables
+
+| Observable | How to read it | When to sample | Trap |
+|---|---|---|---|
+| **Usage counter** — the estimate, the entry count and the bytes, and the limit *F* | Unit: the abort message `attempted to access a large RowIndexEntry estimated to be <est> bytes in-memory (total entries: <B>, total bytes: <s>) but the max allowed is <F>`, and `MessageParams.get(ParamType.ROW_INDEX_READ_SIZE_FAIL)` (refusal) or `…ROW_INDEX_READ_SIZE_WARN` (accepted, with a warn limit). Cluster: the `checksize` line (`entries`, `bytes`), the client warning `loaded over <est> bytes in RowIndexEntry` of an accepted read (warn limit 1 B), and the coordinator's abort message. | Unit: after every read. Cluster: with every read. | The `RowIndexSize` histogram is **bucketed**. The Byteman line is written **before** the gate, so it shows calls where the check then returns (`command=null`). The replica's own message is logged only for a **remote** replica, so on one node use the Byteman line and the coordinator's message. |
+| **Disallow evidence** — a signal only the guard produces | (1) The client's `ReadFailure` with failure-map code 4 (`READ_SIZE`). (2) `RowIndexSizeAborts` `Count` (`jmx.sh org.apache.cassandra.metrics:type=Table,keyspace=ks1,scope=t,name=RowIndexSizeAborts Count`). (3) `grep -n 'in RowIndexEntry and aborted the query' logs/system.log`. (4) Unit: the exception and its message. (5) The key cache unchanged by the read. | After each read. | The meter is marked **by the coordinator**, once per read. The coordinator's message names the limit `row_index_size_fail_threshold`, the replica's `row_index_read_size_fail_threshold`. The sibling and coordinator guardrails use the same code and a different message: confirm the text says `RowIndexEntry`. |
+| **Bypass volume** — what went through each escape | C1: the cached entry's weight, served after the limit was lowered. C2, C3: the estimate and entry count of the entries read with `command=null`, from the Byteman lines, and the rows returned. | With each arm. | The cache-hit arm needs the entry cached first and **no** `checksize` line on the second read; an invalidation in between ends the arm. |
+| **Real resource** — heap bytes of the built entry | (1) Unit: the cached entry's `unsharedHeapSize()` (`getCachedPosition()`), and the key cache's `weightedSize()` and `size()` before and after. (2) Cluster: `jmx.sh org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size Value` and `…Entries Value` before and after each read. | Before and after every read, after `invalidatekeycache`. | The cache charges the entry **plus the key** ([`CaffeineCache.create():63-64`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cache/CaffeineCache.java#L63-L64)); the key's part is constant, so use differences between rungs. The cache runs its maintenance on the calling thread ([`CaffeineCache.create():51-58`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cache/CaffeineCache.java#L51-L58)), so the size and weight are current after a read. An entry that is not cached (a refused read, a table without the key cache) is **not seen** by this reading. Transient heap of an entry that is built and not cached is not measured. |
+
+If the weight of an entry cannot be read, name the gap rather than substituting a proxy: on a node it is read only through the key cache's size, which requires the table to use the key cache.
+
+### 9e. Running the scenarios
+
+**Unit tier.** Commands are in 9c. Each check is printed as `STAGE4 check <name> <expected> <actual> ok|MISMATCH`; record pass or fail and the values.
+
+1. **Setup.** `DatabaseDescriptor.daemonInitialization()`; assert `BigFormat.isSelected()`; set `column_index_size` 1 KiB and `column_index_cache_size` 4 MiB; create `ks1.t` and `ks1.t2`; write the ladder (pk 1 to 7 with 20 to 1,280 rows of 1,200 bytes, pk 8 with one row), flush, assert one SSTable; assert each partition's `blockCount()` (`sstable.getRowIndexEntry(key, EQ)` called with no command) equals its rows; `invalidateKeyCache()`. Print `UseCompressedOops` and the three constants and their sum *o*.
+2. **Known answer.** Set *F* = 1 and the warn limit unset. For each partition: `invalidateKeyCache()`, read it, catch the exception; parse `estimated to be`, `total entries`, `total bytes`; assert entries = *B* and estimate = *o*·*B* + bytes and `ROW_INDEX_READ_SIZE_FAIL` = estimate. For pk 8: assert no exception and `RowIndexSize`'s count unchanged.
+3. **Boundary pair.** For pk 4 (*B* = 160) with estimate *e* from step 2: set *F* = *e* − 1, `invalidateKeyCache()`, read: expect the exception, `size()` 0, `getCachedPosition()` null. Set *F* = *e*, `invalidateKeyCache()`, read: expect no exception, `size()` 1, the cached entry's class and `unsharedHeapSize()` (*w*).
+4. **Ladder.** For *F* in 8,192, 32,768, 131,072: set it, and for each partition in order `invalidateKeyCache()`, read, record outcome, `size()` and `weightedSize()` before and after, and the cached entry's `unsharedHeapSize()` for accepted ones; compare the accepted set with *est* ≤ *F*. Then 8,388,608 and both limits unset (assert `RowIndexSize`'s count unchanged for the unset case). Compute the slope check of 9a.
+5. **Scenario S.** Set `column_index_cache_size` 2 KiB (`setColumnIndexCacheSize(2)`), *F* = 32,768, repeat step 4 for this *F*: record outcomes, the cached entry's class and `unsharedHeapSize()` for accepted partitions with bytes above 2,048; restore 4 MiB.
+6. **Scenario C.** (C0) at *F* = 1 call `sstable.getRowIndexEntry(key, EQ)` directly for pk 7: expect an entry, no exception. (C1) at *F* = 131,072: `invalidateKeyCache()`, read pk 5 (*B* = 320); set *F* = *e*(320) − 1; read again (expect completion, `size()` 1, count unchanged); `invalidateKeyCache()`; read again (expect the exception). (C2) write ck 0 to 9 into `ks1.t2` pk 1 and flush; write ck 1000 to 1639 and flush; assert two SSTables; set *F* = *e* − 1 with *e* the second entry's estimate; read `ck >= 1000` (expect the exception), the full ascending read to the end (expect completion and 650 rows, the count +1), the full descending read (expect the exception). (C3) at *F* = 1 run a `PartitionRangeReadCommand` over `ks1.t` to the end: expect completion and the count unchanged.
+7. **Controls.** With `setReadThresholdsEnabled(false)`, *F* = 1: no refusal for pk 7. Restore it.
+8. **Upstream (optional).** Run `RowIndexSizeWarningTest` once with the `ant test-jvm-dtest-some` command of 9b and record pass or fail.
+
+**Before the cluster tier:**
+
+1. **Instrument check.** On the node at the 16 MiB value: (i) `send-read.py probe` connects over protocol 5 and prints `release_version` and the protocol version in use; (ii) `jmx.sh` reads the key cache's `Size` and `Entries`, and the table's `RowIndexSize` `Count` and `RowIndexSizeAborts` `Count`; (iii) `checksize.btm` loads (the parse check passed): a read of `ks1.t` writes one `checksize` line with `command=ks1.t`, and `nodetool invalidatekeycache` brings `Entries` to 0; (iv) the **setter**: read the attribute `RowIndexReadSizeAbortThreshold` and set it to its own value with the `jmx.sh` setter mode; if the setter fails, build the small JMX client before arm C1; (v) the **calibration**: read every partition at 16 MiB; from the `checksize` lines compute *o* = (client estimate − `bytes`)/`entries` for each and check it is the same for all; stop the run if it is not, or if no partition's estimate is below 16,384 or above 262,144; (vi) the idle control: ten seconds with no reads write no `checksize` line for `ks1`. Any failure stops the run.
+2. **Dataset check.** After `nodetool flush ks1 t`, `ls data/data/ks1/t-*/*-Data.db` shows one file, and the load's own output lists the rows written per partition. Do not count by reading at a value with a limit set: an aggregate read opens the same entries and is a guarded read. At the `16m` start, where nothing is refused, the calibration reads each partition once and may be used to compare row counts.
+
+**Cluster tier, for each value** (`16m`, then `16k`, `64k`, `256k`, then `s64k`, `s16m`, then `none`):
+
+1. **Control run.** Fresh `data/`, `logs/` and `saved_caches/`, `make-node-yaml.sh`, start the node with the agent, wait for `UN` and for `statusbinary` to print `running`, create the schema, load the ladder, flush, run the dataset check. Read the key cache's `Size` and `Entries` and the two `RowIndexSize` counters; idle for 10 s and confirm no `checksize` line.
+2. **Scenario A and B — the ladder.** For each partition from *k* = 1 to 11: `bin/nodetool invalidatekeycache`; read `Entries` (expect 0) and `Size`; `send-read.py read "SELECT ck FROM ks1.t WHERE pk = <k> LIMIT 1"`; read `Entries`, `Size` and the two counters again. Record the outcome, the client warning or failure, the `checksize` line, and the differences. Compare the accepted set with *est* ≤ *F* from the calibration.
+3. **Scenario S** (starts `s64k`, `s16m`): as step 2 with the stock cache size; record the weight added by each accepted partition. At `s16m` nothing is refused: the weights show whether the limit bounds heap there.
+4. **Default** (start `none`): as step 2 with both limits unset; expect every read accepted, `RowIndexSize`'s count 0, no `checksize` line with a command.
+5. **Scenario C on the `64k` node, after step 2.** (C1) `invalidatekeycache`; read the partition that is the largest accepted at 65,536 (*k* = 6, *B* = 566, if the estimate is about 100 B per block; take it from the calibration); set the limit to its *est* − 1 over JMX; read it again: record the outcome, the new `checksize` lines (expect none) and `Entries`; `invalidatekeycache`; read again (expect the refusal); restore the limit. (C2) create `ks1.t2` with `caching = {'keys': 'NONE'}`; load ck 0 to 9 and flush; load ck 1000 to 3262 and flush; assert two SSTables; run `read "SELECT ck FROM ks1.t2 WHERE pk = 1 AND ck >= 1000 LIMIT 1"`, `read "SELECT ck FROM ks1.t2 WHERE pk = 1"` and `read "SELECT ck FROM ks1.t2 WHERE pk = 1 ORDER BY ck DESC"`; record each outcome and the `checksize` lines with their `command=` field. (C3) lower the limit to 16,384 and run `read "SELECT ck FROM ks1.t"`: record the outcome, the rows and the `checksize` lines.
+6. **Stop.** `bin/nodetool stopdaemon`, check no `CassandraDaemon` is left, copy `logs/system.log` and `checksize.trace` to `~/stage4-logs/rirs/<label>/`; `grep -c 'in RowIndexEntry and aborted the query' logs/system.log`.
+
+**Record for stage 4:** the `cassandra.yaml` diff against the shipped file and the JVM options in force (with `UseCompressedOops`), the exact commands, the node, OS, JDK and Ant versions and the clone's commit, and the raw readings of 9d for every read: the client's lines, the `checksize` lines, the key cache's size and entries and the meters before and after, and the `system.log` excerpts; for the unit tier the `STAGE4` lines. Keep the full logs on the node and a small excerpt per value in the results folder.
+
+**Budget.** Unit: about 2.5 minutes to build and a few minutes for the harness. Cluster: about 90 s to start a node, about 30 s to load and flush the ladder, about 2 minutes for the reads, so about 4 minutes per start; seven starts and the bypass arms come to about 30 minutes. The ladder is about 15 MB; the node has 125 GiB of memory and 63 GB of local disk.
+
+## 10. Provenance
+
+| Field | Content |
+|--------|---------|
+| **Stage-3 feed** | `3a` — from [`../../../stage2-ai-preprocessing/bands.md`](../../../stage2-ai-preprocessing/bands.md)'s **band A1** list, row `RowIndexEntry.java:392#1` ("estimated row index memory against a configured byte threshold"), ranked in stage-2 batch 25 (`bands.csv`, 2026-09-24). Its warn twin, `:403#1` (band A, the same batch), is refused in `rejected.md`. Judged in the band-A1 pass on 2026-09-28 and recorded in `pending.md` (item 5); written up 2026-10-06. |
+| **Filed by / Date** | Claude (`claude-sonnet-5-5`) session, 2026-10-06 |
+| **Line numbers checked** | 2026-10-06 against the local `cassandra-5.0.9` clone at `~/repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`, `HEAD` `b5f2a54210`). Every link in this file was produced from a citation that a script checks: the cited range must exist and, for the load-bearing ones, contain an expected snippet of code; the load-bearing ones were also read in context. |
+| **Escape hatch / Target-3 note** | **The guard is off in every stock configuration** (the threshold is `null` and the master switch is `false`), **it bounds an estimate, and it is inert on several paths.** (1) **Off by default.** (2) **It measures the entry as if it were built, before `column_index_cache_size` decides whether it will be** (§5): at the stock 2 KiB an entry that is built has a serialized size of at most 2 KiB, so the heap that is actually allocated is bounded by `column_index_cache_size`, not by this limit, unless this limit is at or below the estimate of such an entry; above that the guard refuses only entries that would have been shallow. The upstream test sets `column_index_cache_size` to 1 GiB to make the guard act on built entries. (3) **A key-cache hit is not checked,** and an entry cached under a higher limit, or while the guard was off, is served after the limit is lowered; **a reloaded key cache is not checked** (`deserializeForCache()`), and **entries built by a writer** (`RowIndexEntry.create()` at flush and compaction, with the compaction's migration of cached keys to the new SSTable, [`BigTableWriter.java:115-125`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/BigTableWriter.java#L115-L125)) never meet it. (4) **Only while `executeLocally()` is on the stack** (§5): an SSTable opened after it returned, and every range scan, are not checked (derived; arms C2 and C3). (5) **Paths with no command** — compaction, repair validation, streaming, the secondary-index path — are not checked. (6) **System keyspaces** are exempt. (7) **Per entry:** a read that opens many SSTables or partitions is not bounded as a whole. (8) **Live-settable** over JMX. (9) **Its abort differs from the sibling's when the coordinator does not flag the read:** the guard does not require `trackWarnings`, so the exception is rethrown and the read fails as `UNKNOWN` instead of being reported (§6b, derived, not run). (10) **Naming:** the coordinator's message and the setter's log line call the limits `row_index_size_*`, the yaml and the replica's message `row_index_read_size_*`. |
+| **Stage-4 feedback** | none yet. §9 was written in the new layout on 2026-10-06 (9a to 9e); it is not yet audited (stage-4 README, step 0) and not yet run. It lists its harness as work for step 1. |
+| **Notes** | **Found while writing this up (2026-10-06), for stage 3 to judge; `pending.md` is not rewritten except as noted.** *The estimate precedes the Indexed/Shallow choice:* `pending.md` says the guard throws "before the `new IndexedEntry(...)` at `:362`", which is true, and before `:369`; what it does not say is that the estimate is made for an entry that `:360` may then keep shallow, so at stock settings the guard is not evidence of heap (§5, §8). *Per entry, not per query:* `pending.md` groups it with the local-read guard as "per-query heap ceilings"; this one is an estimate for one index entry, per SSTable opened (§4). *The guard dominates lexically and is inert conditionally:* the thread-local `ReadCommand` is cleared when `executeLocally()` returns, and the iterator it returns is lazy; the lazy-opening analysis of §5 is derived from `UnfilteredRowIteratorWithLowerBound` and `MergeIterator` and is tested by arms C2 and C3 — if they refute it, §5 is to be amended. *The warn twin:* already recorded in `rejected.md` (`RowIndexEntry:403`). *The setter logs a different name:* [`DatabaseDescriptor.setRowIndexReadSizeWarnThreshold():4920-4924`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L4920-L4924) and the coordinator's message use `row_index_size_*`. *The filed `column_index_cache_size` case* names its read-site check `RowIndexEntry.deserialize():360` as "the site that governs steady-state heap"; this guard is the statement before it, and its estimate does not depend on that site's decision. (A one-line pointer to this case was added to that case's Related cases on 2026-10-06, documentation only.) |
+
+---
+
+## 11. Notes
+
+- **Why one check site and one case.** `checkSize()` is the only comparison against the fail limit; the warn twin at `:403` only records a parameter and is refused in `rejected.md` (Rule 3). The abort reaches the client by a route this case describes (§6b) but does not treat as another check site.
+- **Why this qualifies, and where it is weak.** Rule 2 asks whether changing the limit moves the maximum bytes resident. It does where the entry is built on heap: the refused entry is never built, and the largest admitted entry follows the limit. At the stock `column_index_cache_size` the bound on built entries is `column_index_cache_size`, and this limit moves a heap maximum only when it is set low enough to bind below it. The folder records a constraint that fails to govern usage as a result, not a rejection (playbook §3), so the case is filed with that stated in §5, §8 and §10 and measured by scenario S. Rule 3 holds: the guard throws before either object exists, and a refused read leaves nothing in the key cache, which §9 reads directly.
+- **Why pattern (c), and the dominance.** The allocation is the fall-through after a guard clause. The guard dominates the two `new` statements inside `deserialize()`; what it does not dominate are the paths that never reach it or reach it inert (§5). Both are recorded as bypasses, which is the case the pattern's definition asks for.
+- **Contrast with `column_index_cache_size`.** That case decides *which* object is built (a per-block array, or a position) from the serialized size, and both outcomes allocate. This one *refuses* the read, so neither is built, and it decides from an estimate of the array's size even when that case would build the position. Read together: `column_index_cache_size` bounds what is built; this limit bounds what a read may open.
+- **The unit yaml is not the node's.** `test/conf/cassandra.yaml:63-69` turns the family on and sets this limit to 8 MiB; a shipped node has none of it. The same trap as in [`max_mutation_size`](max_mutation_size-validateSize-MAX_MUTATION_SIZE.md) §11. The cluster tier writes the lines it needs and leaves the sibling guardrails unset.
+- **What this design does not cover.** RF above 1 (the abort as a warning, the digest reads); the remote-replica path and the mismatch between the coordinator's flag and the replica's settings (§6b); *N* > 1, the multiplier; the flush-time and compaction-time entries and the key-cache migration; the BTI format; the reads that shallow entries make later; the interaction with `key_cache_size` beyond the weight reading; and the key cache reload at start, which a restart arm could test. Each is recorded from the source in §5, §6b or §8.
+- **Nothing here was run.** No measured number appears in this file; every figure in §9 is derived from the source and is a prediction.

@@ -238,3 +238,17 @@ site ([`pending.md`](pending.md)); one, `Envelope.java:429`, is undecided
 - **Check that the class runs in production.** Two classes here
   (`BlockingQueues.Sync`, `DynamicList`) have no production construction site.
   One grep for the constructor settles it before any rule is applied.
+
+## Recorded while filing write-up queue items 4 and 5 — 2026-10-06
+
+One line refused while writing up `local_read_size_fail_threshold`
+([case](cases/local_read_size_fail_threshold-addSize-failBytes.md)). `pending.md` said
+its warn twin was "already rejected (Rule 3)", but only the row-index twin
+(`RowIndexEntry.java:403`, A1 table above) had been recorded; this is the
+other one. It is a band-B row of stage 2 (`bands.csv`: `ReadCommand.java:724#2`
+in batch 18, and `:724#1` in batch 03), not an A1 row, so it is not counted in
+the A1 disposition table.
+
+| Row | Check | Ground |
+|---|---|---|
+| `ReadCommand.java:724` | `warnBytes != -1 && this.sizeInBytes >= warnBytes` | **Rule 3, logging-only branch.** The warn twin of the qualifying fail threshold at `:715`: it records the `LOCAL_READ_SIZE_WARN` parameter for the client warning and goes on, so nothing diverges on object creation. The same judgement as `RowIndexEntry.java:403`. |
