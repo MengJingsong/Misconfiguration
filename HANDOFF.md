@@ -283,7 +283,7 @@ with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untrack
 Band A1 (65 rows) and A2 (30) are fully judged. **Open: 3 candidate cases (4 rows) qualified but unwritten (queue items 1 to 5, `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, were filed 2026-10-06, and item 6, `internode_application_send_queue_capacity`, on 2026-10-07), 4 undecided rows, plus
 the `networking_cache_size` sibling.** The numbered write-up queue, with each candidate's pattern and hazard, is at the top of
 `cassandra/if-check-exp/stage3-ai-deep-read/long-path/pending.md`; the 4 undecided rows are in `deferred.md` §5 and §6.
-Everything through the 2026-10-07 stage-4 runs is committed and pushed (`92baf69`); **the seventeenth case and its bookkeeping (`_INDEX.md`, `pending.md`, the case counts in the READMEs and this file, one pointer in the inbound sibling case) are written locally and not committed.**
+Everything through the seventeenth case (`internode_application_send_queue_capacity`, with its bookkeeping) is committed and pushed (`7a836d0`).
 
 **To start a new session** (paste something like this): *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `pending.md`'s
 write-up queue and `_TEMPLATE.md`. Write up the first unstruck item of the queue as a case: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`),
