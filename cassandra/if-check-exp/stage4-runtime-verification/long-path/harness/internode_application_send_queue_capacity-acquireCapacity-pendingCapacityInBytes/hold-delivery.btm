@@ -1,0 +1,18 @@
+# Byteman rule for internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes, case 9c: the trigger (amended 2026-10-07).
+# At the entry of LargeMessageDelivery.doRun the delivery thread PARKS inside stage4.Hold.park while the file named by -Dstage4.hold.file exists,
+# so nothing is polled or serialized and pending bytes only accumulate. Removing the file releases the same invocation, which then polls and drains the queue.
+# NOT "RETURN false": that would stop the link and, at the plateau, nothing could start it again (9a logic step 7).
+# stage4.Hold is compiled into a jar on the boot class path (-Xbootclasspath/a:) by cluster-run.py. Loaded on the sending node S only.
+# One line when a thread parks and one when it is released, to the file named by -Dstage4.byteman.out:
+#   hold park thread=<name> file=<path> ms=<epoch>      /      hold release ...
+
+RULE hold large delivery
+CLASS org.apache.cassandra.net.OutboundConnection$LargeMessageDelivery
+METHOD doRun
+AT ENTRY
+IF stage4.Hold.held(java.lang.System.getProperty("stage4.hold.file"))
+DO traceOpen("ssq", java.lang.System.getProperty("stage4.byteman.out", "send.trace"));
+   traceln("ssq", "hold park thread=" + java.lang.Thread.currentThread().getName() + " file=" + java.lang.System.getProperty("stage4.hold.file") + " ms=" + java.lang.System.currentTimeMillis());
+   stage4.Hold.park(java.lang.System.getProperty("stage4.hold.file"));
+   traceln("ssq", "hold release thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

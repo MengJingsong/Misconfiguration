@@ -1,0 +1,15 @@
+# Byteman observation rule for internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes, case 9c/9d. It changes no behaviour.
+# One line at the exit of OutboundConnection.acquireCapacity(long count, long bytes), i.e. once per acquire attempt (a retry after a prune is a second line),
+# to the file named by -Dstage4.byteman.out (the same file as send-config.btm):
+#   acquire type=<ConnectionType> peer=<to> count=<n> bytes=<message canonical size> outcome=<SUCCESS|INSUFFICIENT_ENDPOINT|INSUFFICIENT_GLOBAL>
+#           pending=<link pending bytes after> pendingCount=<n> overloaded=<link overload count> endpoint_using=<per-peer reserve in use> global_using=<node-wide reserve in use> ms=<epoch>
+# The reserve readings are taken after the call returned, so a concurrent acquire on another link may already be included.
+
+RULE send acquire
+CLASS org.apache.cassandra.net.OutboundConnection
+METHOD acquireCapacity(long, long)
+AT EXIT
+IF true
+DO traceOpen("ssq", java.lang.System.getProperty("stage4.byteman.out", "send.trace"));
+   traceln("ssq", "acquire type=" + $0.type() + " peer=" + $0.template.to + " count=" + $1 + " bytes=" + $2 + " outcome=" + $! + " pending=" + $0.pendingBytes() + " pendingCount=" + $0.pendingCount() + " overloaded=" + $0.overloadedCount() + " endpoint_using=" + $0.reserveCapacityInBytes.endpoint().using() + " global_using=" + $0.reserveCapacityInBytes.global().using() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

@@ -1,0 +1,13 @@
+# Byteman observation rule for internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes, case 9c/9d. It changes no behaviour.
+# One line at the exit of the OutboundConnection constructor, i.e. once per connection built (three per peer), to the file named by -Dstage4.byteman.out:
+#   config type=<ConnectionType> peer=<to> capacity=<settings.applicationSendQueueCapacityInBytes> endpoint=<per-peer reserve limit> global=<node-wide reserve limit> ms=<epoch>
+# These are the EFFECTIVE limits the connection will use (9b "Confirm it took effect"); endpoint= decides C1 and C2.
+
+RULE send config
+CLASS org.apache.cassandra.net.OutboundConnection
+METHOD <init>(org.apache.cassandra.net.ConnectionType, org.apache.cassandra.net.OutboundConnectionSettings, org.apache.cassandra.net.ResourceLimits$EndpointAndGlobal)
+AT EXIT
+IF true
+DO traceOpen("ssq", java.lang.System.getProperty("stage4.byteman.out", "send.trace"));
+   traceln("ssq", "config type=" + $1 + " peer=" + $2.to + " capacity=" + $2.applicationSendQueueCapacityInBytes + " endpoint=" + $3.endpoint().limit() + " global=" + $3.global().limit() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
