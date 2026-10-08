@@ -99,7 +99,7 @@ this folder's own scope.
   **Stage 4 runs both paths, both tiers each, with no rating of the two solutions and no cross-path scoring**; an executor
   reads only its own path's solution, and a side-by-side is written at the end. Scope stays memory and disk. The pilot on the
   three closed cases was skipped; of the 17 filed cases only two have a short solution: `memtable_heap_space` (version 2, two
-  tiers; version 1 kept as `--v1`) and `max_space_usable_for_compactions_in_percentage` (filed 2026-10-08).
+  tiers; version 1 kept as `--v1`) and `max_space_usable_for_compactions_in_percentage` (filed 2026-10-08). Both have been run at stage 4 on the short path; neither has a side-by-side.
 - **Decided 2026-10-06:** (1) the long path always goes first, so only the short path is blind; (2) shared stage-4 files
   (`README.md`, `environment.md`, `_TEMPLATE.md`) stay free of the long path's case-specific designs, which live in
   `stage4-runtime-verification/long-path/`; (3) the repository copy on the CloudLab shared mount was removed.
@@ -329,8 +329,11 @@ Seven cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification
 
 ### Stage 4 — short path (blind executor)
 
-- **One case run:** `memtable_heap_space` (2026-10-06, first run of `short-path/run-executor.py`). Both tiers confirmed by the executor (unit: B2g rows 1 and 3; cluster: 24 `MEMTABLE_LIMIT` flushes at 64 MiB against 3 at 512 MiB); self-check holds, no run 2. Results in `stage4-runtime-verification/short-path/results/`, harness in `short-path/harness/`. One audit hit accepted (an `ls` of the shared git-repos directory); three runbook defects (B2h controls skipped, control heap raised to 768m, B3g row 4 partly checked).
-- **The side-by-side is not written:** `comparison/_INDEX.md` is empty. Next: a new AI session writes `comparison/memtable_heap_space-tryAllocate-limit.md` per `executor-prompts.md` §2 (it rates nothing).
+- **Two cases run.** First: `memtable_heap_space` (2026-10-06, first run of `short-path/run-executor.py`). Both tiers confirmed by the executor (unit: B2g rows 1 and 3; cluster: 24 `MEMTABLE_LIMIT` flushes at 64 MiB against 3 at 512 MiB); self-check holds, no run 2. Results in `stage4-runtime-verification/short-path/results/`, harness in `short-path/harness/`. One audit hit accepted (an `ls` of the shared git-repos directory); three runbook defects (B2h controls skipped, control heap raised to 768m, B3g row 4 partly checked).
+- **Second: `max_space_usable_for_compactions_in_percentage`** (2026-10-08, `3d6afa9`). Executor (claude-opus-5-5, CLI 2.1.291, canary re-run for that version) on `pc57` measured, `pc50` listed but untouched. Unit tier **Confirmed** (B2g rows 1 and 3, 56/56 checks); cluster tier **Not confirmed: no B3g row fits** — B3f's pct=1.0 row refuted (11 "Reducing scope" WARNs, 3 of 14 sstables compacted) because the node's budget is pct × (free − min_free) at check time, not pct × capacity as B3c assumed; pct=0.5 row and B3g row 4 (flush overshoot) hold. No run 2. Runbook defects R1–R5, H1–H2 fixed in the harness (no root for a loop mount, so a 2 GiB tmpfs in a user namespace).
+  **Audit decision to carry into the side-by-side:** `collect` first gave `BLINDNESS: FAIL` on two Bash reads of the executor's own spilled output (`~/.claude/projects/<workspace>/<session>/tool-results/…`, its own run log, nothing else); Jingsong judged it harmless and it was copied with `--force`. `check-blindness.py` now exempts that folder (`d42baba`), so the committed `collect-report.txt` shows the re-run's PASS, not the original FAIL. `~/short-run` on `pc57` was deleted after commit (excerpts are in `results/<stem>/run1/`).
+- **No side-by-side is written yet:** `comparison/_INDEX.md` is empty. Next: a new AI session writes `comparison/<stem>.md` for `memtable_heap_space-tryAllocate-limit` and for `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`, per `executor-prompts.md` §2 (it rates nothing).
+- **Running the short path (learned 2026-10-08):** run `run-executor.py` (`canary`, `run`, `collect`) on the local machine where the repo and `~/sp-run/` live, never on a node; pass `pc57`/`pc50` as `jason92@pcNN.cloudlab.umass.edu` (the script's short names are only pc66/pc80/pc72); re-run the canary after every CLI update.
 
 ### Lessons for the next harness
 
