@@ -1,0 +1,416 @@
+[2026-10-07 20:12:56] LABEL inflight  date 2026-10-07 20:12:56  host node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu  kernel 5.15.0-187-generic
+[2026-10-07 20:12:56] + java -version 2>&1 | head -1
+openjdk version "11.0.32.1" 2026-08-18
+
+  rc=0
+[2026-10-07 20:12:56] + ant -version 2>&1 | head -1
+Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+
+  rc=0
+[2026-10-07 20:12:56] JAVA openjdk version "11.0.32.1" 2026-08-18 | ANT Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+[2026-10-07 20:12:56] + git describe --tags && git rev-parse HEAD
+cassandra-5.0.9
+b5f2a54210d541339c2e7c17a794195cac0e67c2
+
+  rc=0
+[2026-10-07 20:12:56] CLONE cassandra-5.0.9 b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-07 20:12:56] + git checkout -q conf/cassandra.yaml
+
+  rc=0
+[2026-10-07 20:12:56] + rm -rf /users/jason92/stage4-logs/mscp/inflight/jmx-classes && mkdir -p /users/jason92/stage4-logs/mscp/inflight/jmx-classes && javac -d /users/jason92/stage4-logs/mscp/inflight/jmx-classes /users/jason92/stage4-harness-run/mscp/Jmx.java
+
+  rc=0
+[2026-10-07 20:12:57] + if mountpoint -q /mnt/stage4-data; then sudo umount /mnt/stage4-data; fi
+
+  rc=0
+
+  rc=32
+[2026-10-07 20:12:57] + rm -f /users/jason92/stage4-data.img && truncate -s 4G /users/jason92/stage4-data.img && mkfs.ext4 -q -F /users/jason92/stage4-data.img
+
+  rc=0
+[2026-10-07 20:12:57] + sudo mkdir -p /mnt/stage4-data && sudo mount -o loop /users/jason92/stage4-data.img /mnt/stage4-data && sudo mkdir -p /mnt/stage4-data/data && sudo chown 20001:2574 /mnt/stage4-data/data
+
+  rc=0
+[2026-10-07 20:12:57] + df -B1 /mnt/stage4-data | tail -1
+/dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+
+  rc=0
+[2026-10-07 20:12:57] FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+[2026-10-07 20:12:57] + rm -rf data logs logs-build saved_caches
+
+  rc=0
+[2026-10-07 20:12:57] + /users/jason92/stage4-harness-run/mscp/make-node-yaml.sh default
+yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+
+  rc=0
+[2026-10-07 20:12:57] yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+[2026-10-07 20:12:57] + bin/cassandra -p /users/jason92/stage4-logs/mscp/inflight/cassandra.pid > /users/jason92/stage4-logs/mscp/inflight/startup-build.log 2>&1
+
+  rc=0
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+[2026-10-07 20:13:38] node up (build)
+[2026-10-07 20:13:43] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:13:49] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:13:55] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:14:01] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:14:07] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:14:13] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:14:18] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:14:24] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:14:26] + bin/nodetool tablestats ks1.t
+Total number of tables: 1
+----------------
+Keyspace: ks1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 102400
+	Write Latency: 0.023222041015625 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 8
+		Old SSTable count: 0
+		Max SSTable size: 63.316MiB
+		Space used (live): 531132517
+		Space used (total): 531132517
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 398336
+		SSTable Compression Ratio: 1.00423
+		Number of partitions (estimate): 102610
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 8
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 102400
+		Local write latency: 0.025 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 502.871MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 128128
+		Bloom filter off heap memory used: 128064
+		Index summary off heap memory used: 12800
+		Compression metadata off heap memory used: 257472
+		Compacted partition minimum bytes: 4769
+		Compacted partition maximum bytes: 5722
+		Compacted partition mean bytes: 5722
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+  rc=0
+[2026-10-07 20:14:28] DATASET ks1.t: Data.db lengths [66190449, 66190892, 66191085, 66190940, 66191303, 66191243, 66191207, 66190439]; tablestats SSTable count 8; du -sb 531132517
+[2026-10-07 20:14:31] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:14:37] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:14:43] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:14:49] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:14:55] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:15:01] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:15:06] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:15:12] + bin/nodetool flush ks1 t2
+
+  rc=0
+[2026-10-07 20:15:14] + bin/nodetool tablestats ks1.t2
+Total number of tables: 1
+----------------
+Keyspace: ks1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 204800
+	Write Latency: 0.023073110351562502 ms
+	Pending Flushes: 0
+		Table: t2
+		SSTable count: 8
+		Old SSTable count: 0
+		Max SSTable size: 63.317MiB
+		Space used (live): 531135206
+		Space used (total): 531135206
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 398336
+		SSTable Compression Ratio: 1.00423
+		Number of partitions (estimate): 102610
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 8
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 102400
+		Local write latency: 0.025 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 502.872MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 128128
+		Bloom filter off heap memory used: 128064
+		Index summary off heap memory used: 12800
+		Compression metadata off heap memory used: 257472
+		Compacted partition minimum bytes: 4769
+		Compacted partition maximum bytes: 5722
+		Compacted partition mean bytes: 5722
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+  rc=0
+[2026-10-07 20:15:16] DATASET ks1.t2: Data.db lengths [66191302, 66191678, 66190493, 66191274, 66191501, 66191460, 66191410, 66191133]; tablestats SSTable count 8; du -sb 531135206
+[2026-10-07 20:15:20] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:15:25] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:15:31] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:15:37] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:15:43] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:15:49] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:15:55] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:16:00] + bin/nodetool flush ks1 slow
+
+  rc=0
+[2026-10-07 20:16:02] + bin/nodetool tablestats ks1.slow
+Total number of tables: 1
+----------------
+Keyspace: ks1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 307200
+	Write Latency: 0.02405689127604167 ms
+	Pending Flushes: 0
+		Table: slow
+		SSTable count: 8
+		Old SSTable count: 0
+		Max SSTable size: 63.317MiB
+		Space used (live): 531133974
+		Space used (total): 531133974
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 398336
+		SSTable Compression Ratio: 1.00423
+		Number of partitions (estimate): 102610
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 8
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 102400
+		Local write latency: 0.027 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 502.871MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 128128
+		Bloom filter off heap memory used: 128064
+		Index summary off heap memory used: 12800
+		Compression metadata off heap memory used: 257472
+		Compacted partition minimum bytes: 4769
+		Compacted partition maximum bytes: 5722
+		Compacted partition mean bytes: 5722
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+  rc=0
+[2026-10-07 20:16:04] DATASET ks1.slow: Data.db lengths [66191258, 66190785, 66191232, 66190919, 66191207, 66192182, 66190831, 66190603]; tablestats SSTable count 8; du -sb 531133974
+[2026-10-07 20:16:04] + bin/nodetool drain
+
+  rc=0
+[2026-10-07 20:16:19] PLAN U 2317246464 (node stopped); totals {'t': 529527558, 't2': 529530251, 'slow': 529529017}; s = 66190945; pct 0.327328796478; planned B 741340040 = 1.4000 x total of ks1.t = R0 + 3.2 s
+[2026-10-07 20:16:19] + mv logs logs-build
+
+  rc=0
+[2026-10-07 20:16:19] + rm -rf saved_caches
+
+  rc=0
+[2026-10-07 20:16:19] + /users/jason92/stage4-harness-run/mscp/make-node-yaml.sh 0.327328796478
+yaml for pct=0.327328796478: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.327328796478;
+
+  rc=0
+[2026-10-07 20:16:19] yaml for pct=0.327328796478: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.327328796478;
+[2026-10-07 20:16:19] + bin/cassandra -p /users/jason92/stage4-logs/mscp/inflight/cassandra.pid > /users/jason92/stage4-logs/mscp/inflight/startup-run.log 2>&1
+
+  rc=0
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+[2026-10-07 20:16:32] node up (run)
+[2026-10-07 20:16:32] + bin/nodetool setlogginglevel org.apache.cassandra.db.Directories DEBUG
+
+  rc=0
+[2026-10-07 20:16:33] + bin/nodetool getlogginglevels
+
+Logger Name                                        Log Level
+ROOT                                                    INFO
+org.apache.cassandra                                   DEBUG
+org.apache.cassandra.db.Directories                    DEBUG
+
+  rc=0
+[2026-10-07 20:16:35] LOGGING org.apache.cassandra                                   DEBUG | org.apache.cassandra.db.Directories                    DEBUG
+[2026-10-07 20:16:35] COUNTERS at start {"CompactionsReduced": 0, "SSTablesDroppedFromCompaction": 0, "CompactionsAborted": 0}
+[2026-10-07 20:17:25] IDLE 30 s: 60 samples; df 2317283328 -> 2317283328; du t 531132517 -> 531132517; pass lines of a table-size compaction 0
+[2026-10-07 20:17:25] EXPECTED: IDLE: no compaction pass line of a table-size compaction in 30 s, df and du unchanged — yes
+[2026-10-07 20:17:25] SIM I1: table t Data.db lengths [66190449, 66190892, 66191085, 66190940, 66191303, 66191243, 66191207, 66190439] total 529527558; U 2317283328; pct 0.327328796478; B 741352107; B/total 1.4000; simulated passes [529527558]; dropped 0
+[2026-10-07 20:17:26] + bin/nodetool compact ks1 t
+
+  rc=0
+[2026-10-07 20:17:43] OBSERVED I1: rc 0; pass lines (available, requested): [(741352107, 529527558)]
+[2026-10-07 20:17:43] OBSERVED I1: counters delta {'CompactionsReduced': 0, 'SSTablesDroppedFromCompaction': 0, 'CompactionsAborted': 0}; Reducing scope x0; abort warnings x0; info lines x0; Data.db files 8 -> 1 (529539344 bytes); table du peak 1061786057 final 531124631; sampler window 35 samples
+[2026-10-07 20:17:43] EXPECTED: I1: the ladder simulated from the lengths and B gives the planned outcome (0); else INVALID RUN (band) — yes
+[2026-10-07 20:17:43] EXPECTED: I1: 1 pass lines with requested >= 33095219 (the simulated number) — yes
+[2026-10-07 20:17:43] EXPECTED: I1: every pass has available within 1 MiB of the expected B (741352107) — yes
+[2026-10-07 20:17:43] EXPECTED: I1: pass requested figures equal the simulated [529527558] — yes
+[2026-10-07 20:17:43] EXPECTED: I1: Reducing scope warnings = 0 — yes
+[2026-10-07 20:17:43] EXPECTED: I1: counters Reduced +0, Dropped +0, Aborted +0 — yes
+[2026-10-07 20:17:43] EXPECTED: I1: nodetool returned 0 — yes
+[2026-10-07 20:17:43] EXPECTED: I1: 1 Data.db files afterwards (one output plus 0 shed inputs) — yes
+[2026-10-07 20:17:43] INFO I1: output length 529539344 against the kept inputs 529527558
+[2026-10-07 20:17:43] EXPECTED: I1: no "Compaction space check is disabled" line — yes
+[2026-10-07 20:17:43] INSTRUMENT first trigger (I1): first pass available 741352107 vs expected B 741352107 (difference 0)
+[2026-10-07 20:17:43] + bin/nodetool setcompactionthroughput 4
+
+  rc=0
+[2026-10-07 20:17:45] + bin/nodetool compact ks1 slow (background)
+[2026-10-07 20:17:46] I2 slow task seen 1.4 s after its nodetool started: kind 'major compaction' progress 2832280 total 527298120 total_compressed 529529017
+[2026-10-07 20:17:47] + bin/nodetool compact ks1 t2 (background)
+[2026-10-07 20:17:48] + bin/nodetool setcompactionthroughput 64
+
+  rc=0
+[2026-10-07 20:18:09] OBSERVED I2 slow task own pass (available, requested): [(741389648, 529529017)] (R0 = sum of ks1.slow Data.db 529529017)
+[2026-10-07 20:18:09] OBSERVED I2 t2 passes (available, requested): [(737607424, 1047682544), (737602061, 981490866), (737596698, 915299365), (737596698, 849107905), (737591335, 782916495), (737591335, 716725193)]
+[2026-10-07 20:18:09] OBSERVED I2: counters delta {'CompactionsReduced': 1, 'SSTablesDroppedFromCompaction': 5, 'CompactionsAborted': 0}; Reducing scope x5; t2 Data.db files 6; slow files 1; t files 1; U at the slow task's first progress 2313576448 (B there 740138738), U before slow 2317398016
+[2026-10-07 20:18:09] EXPECTED: I2: the slow task was admitted whole (its own pass: requested = R0 <= available) — yes
+[2026-10-07 20:18:09] EXPECTED: I2: the t2 compaction printed passes — yes
+[2026-10-07 20:18:09] I2 first pass: requested 1047682544 - total of t2 529530251 = R 518152293; sampler R at the line's time 518272046.7982833; available 737607424
+[2026-10-07 20:18:09] EXPECTED: I2: first pass requested - 8 s = R, within 16 MiB of the slow task's remaining write read from sstable_tasks at that time — yes
+[2026-10-07 20:18:09] EXPECTED: I2: all passes have available within 1 MiB of the first — yes
+[2026-10-07 20:18:09] EXPECTED: I2: requested falls by the largest remaining input at each pass — yes
+[2026-10-07 20:18:09] EXPECTED: I2: the last pass is the first one with requested <= available (the check agrees with its own operands) — yes
+[2026-10-07 20:18:09] EXPECTED: I2: the number of inputs shed (5) equals passes - 1 (5) — yes
+[2026-10-07 20:18:09] EXPECTED: I2 (design): n = 5 (k = 3 kept) — yes
+[2026-10-07 20:18:09] EXPECTED: I2: the in-flight term moved the boundary: I1 shed 0, I2 shed more than 0 — yes
+[2026-10-07 20:18:09] EXPECTED: I2: counters Reduced +1, Dropped +5, Aborted +0 — yes
+[2026-10-07 20:18:09] EXPECTED: I2: Reducing scope warnings = 5 — yes
+[2026-10-07 20:18:09] EXPECTED: I2: t2 holds 6 Data.db files afterwards — yes
+[2026-10-07 20:18:10] DONE

@@ -1,0 +1,239 @@
+[2026-10-07 20:00:57] LABEL f08  date 2026-10-07 20:00:57  host node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu  kernel 5.15.0-187-generic
+[2026-10-07 20:00:57] + java -version 2>&1 | head -1
+openjdk version "11.0.32.1" 2026-08-18
+
+  rc=0
+[2026-10-07 20:00:57] + ant -version 2>&1 | head -1
+Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+
+  rc=0
+[2026-10-07 20:00:57] JAVA openjdk version "11.0.32.1" 2026-08-18 | ANT Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+[2026-10-07 20:00:57] + git describe --tags && git rev-parse HEAD
+cassandra-5.0.9
+b5f2a54210d541339c2e7c17a794195cac0e67c2
+
+  rc=0
+[2026-10-07 20:00:57] CLONE cassandra-5.0.9 b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-07 20:00:57] + git checkout -q conf/cassandra.yaml
+
+  rc=0
+[2026-10-07 20:00:57] + rm -rf /users/jason92/stage4-logs/mscp/f08/jmx-classes && mkdir -p /users/jason92/stage4-logs/mscp/f08/jmx-classes && javac -d /users/jason92/stage4-logs/mscp/f08/jmx-classes /users/jason92/stage4-harness-run/mscp/Jmx.java
+
+  rc=0
+[2026-10-07 20:00:58] + if mountpoint -q /mnt/stage4-data; then sudo umount /mnt/stage4-data; fi
+
+  rc=0
+
+  rc=32
+[2026-10-07 20:00:58] + rm -f /users/jason92/stage4-data.img && truncate -s 4G /users/jason92/stage4-data.img && mkfs.ext4 -q -F /users/jason92/stage4-data.img
+
+  rc=0
+[2026-10-07 20:00:58] + sudo mkdir -p /mnt/stage4-data && sudo mount -o loop /users/jason92/stage4-data.img /mnt/stage4-data && sudo mkdir -p /mnt/stage4-data/data && sudo chown 20001:2574 /mnt/stage4-data/data
+
+  rc=0
+[2026-10-07 20:00:58] + df -B1 /mnt/stage4-data | tail -1
+/dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+
+  rc=0
+[2026-10-07 20:00:58] FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+[2026-10-07 20:00:58] + rm -rf data logs logs-build saved_caches
+
+  rc=0
+[2026-10-07 20:00:58] + /users/jason92/stage4-harness-run/mscp/make-node-yaml.sh default
+yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+
+  rc=0
+[2026-10-07 20:00:58] yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+[2026-10-07 20:00:58] + bin/cassandra -p /users/jason92/stage4-logs/mscp/f08/cassandra.pid > /users/jason92/stage4-logs/mscp/f08/startup-build.log 2>&1
+
+  rc=0
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+[2026-10-07 20:01:39] node up (build)
+[2026-10-07 20:01:44] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:01:50] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:01:56] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:02:02] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:02:08] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:02:14] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:02:19] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:02:25] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:02:27] + bin/nodetool tablestats ks1.t
+Total number of tables: 1
+----------------
+Keyspace: ks1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 102400
+	Write Latency: 0.023403916015625 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 8
+		Old SSTable count: 0
+		Max SSTable size: 63.317MiB
+		Space used (live): 531134940
+		Space used (total): 531134940
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 398344
+		SSTable Compression Ratio: 1.00423
+		Number of partitions (estimate): 102610
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 8
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 102400
+		Local write latency: 0.025 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 502.873MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 128128
+		Bloom filter off heap memory used: 128064
+		Index summary off heap memory used: 12800
+		Compression metadata off heap memory used: 257480
+		Compacted partition minimum bytes: 4769
+		Compacted partition maximum bytes: 5722
+		Compacted partition mean bytes: 5722
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+  rc=0
+[2026-10-07 20:02:29] DATASET ks1.t: Data.db lengths [66191983, 66191206, 66190943, 66191004, 66191513, 66191309, 66190721, 66191296]; tablestats SSTable count 8; du -sb 531134940
+[2026-10-07 20:02:29] + bin/nodetool drain
+
+  rc=0
+[2026-10-07 20:02:44] PLAN U 3379875840 (node stopped); totals {'t': 529529975}; s = 66191247; pct 0.127312012756; planned B 423623980 = 0.8000 x total of ks1.t
+[2026-10-07 20:02:44] + mv logs logs-build
+
+  rc=0
+[2026-10-07 20:02:44] + rm -rf saved_caches
+
+  rc=0
+[2026-10-07 20:02:44] + /users/jason92/stage4-harness-run/mscp/make-node-yaml.sh 0.127312012756
+yaml for pct=0.127312012756: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.127312012756;
+
+  rc=0
+[2026-10-07 20:02:44] yaml for pct=0.127312012756: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.127312012756;
+[2026-10-07 20:02:44] + bin/cassandra -p /users/jason92/stage4-logs/mscp/f08/cassandra.pid > /users/jason92/stage4-logs/mscp/f08/startup-run.log 2>&1
+
+  rc=0
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+[2026-10-07 20:02:57] node up (run)
+[2026-10-07 20:02:57] + bin/nodetool setlogginglevel org.apache.cassandra.db.Directories DEBUG
+
+  rc=0
+[2026-10-07 20:02:58] + bin/nodetool getlogginglevels
+
+Logger Name                                        Log Level
+ROOT                                                    INFO
+org.apache.cassandra                                   DEBUG
+org.apache.cassandra.db.Directories                    DEBUG
+
+  rc=0
+[2026-10-07 20:02:59] LOGGING org.apache.cassandra                                   DEBUG | org.apache.cassandra.db.Directories                    DEBUG
+[2026-10-07 20:03:00] COUNTERS at start {"CompactionsReduced": 0, "SSTablesDroppedFromCompaction": 0, "CompactionsAborted": 0}
+[2026-10-07 20:03:50] IDLE 30 s: 60 samples; df 3379912704 -> 3379912704; du t 531134940 -> 531134940; pass lines of a table-size compaction 0
+[2026-10-07 20:03:50] EXPECTED: IDLE: no compaction pass line of a table-size compaction in 30 s, df and du unchanged — yes
+[2026-10-07 20:03:50] SIM B: table t Data.db lengths [66191983, 66191206, 66190943, 66191004, 66191513, 66191309, 66190721, 66191296] total 529529975; U 3379912704; pct 0.127312012756; B 423628673; B/total 0.8000; simulated passes [529529975, 463337992, 397146479]; dropped 2
+[2026-10-07 20:03:50] + bin/nodetool compact ks1 t
+
+  rc=0
+[2026-10-07 20:04:06] OBSERVED B: rc 0; pass lines (available, requested): [(423628673, 529529975), (423628673, 463337992), (423628673, 397146479)]
+[2026-10-07 20:04:06] OBSERVED B: counters delta {'CompactionsReduced': 1, 'SSTablesDroppedFromCompaction': 2, 'CompactionsAborted': 0}; Reducing scope x2; abort warnings x0; info lines x0; Data.db files 8 -> 3 (529538810 bytes); table du peak 929142306 final 531119014; sampler window 31 samples
+[2026-10-07 20:04:06] EXPECTED: B: the ladder simulated from the lengths and B gives the planned outcome (2); else INVALID RUN (band) — yes
+[2026-10-07 20:04:06] EXPECTED: B: 3 pass lines with requested >= 33095360 (the simulated number) — yes
+[2026-10-07 20:04:06] EXPECTED: B: every pass has available within 1 MiB of the expected B (423628673) — yes
+[2026-10-07 20:04:06] EXPECTED: B: pass requested figures equal the simulated [529529975, 463337992, 397146479] — yes
+[2026-10-07 20:04:06] EXPECTED: B: Reducing scope warnings = 2 — yes
+[2026-10-07 20:04:06] EXPECTED: B: counters Reduced +1, Dropped +2, Aborted +0 — yes
+[2026-10-07 20:04:06] EXPECTED: B: nodetool returned 0 — yes
+[2026-10-07 20:04:06] EXPECTED: B: 3 Data.db files afterwards (one output plus 2 shed inputs) — yes
+[2026-10-07 20:04:06] INFO B: output length 397155314 against the kept inputs 397146479
+[2026-10-07 20:04:06] EXPECTED: B: no "Compaction space check is disabled" line — yes
+[2026-10-07 20:04:06] INSTRUMENT first trigger (B): first pass available 423628673 vs expected B 423628673 (difference 0)
+[2026-10-07 20:04:07] DONE

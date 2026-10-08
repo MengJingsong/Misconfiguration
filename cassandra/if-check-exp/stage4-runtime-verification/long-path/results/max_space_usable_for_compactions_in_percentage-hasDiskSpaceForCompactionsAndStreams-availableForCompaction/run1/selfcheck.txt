@@ -1,0 +1,153 @@
+
+== UNIT TIER (unit/summary.txt, unit/run.out)
+holds          unit DirectoriesTest: 42 tests, no failure or error, ant rc 0 — DirectoriesTest: ant…
+holds          unit CompactionsBytemanTest: 6 tests, no failure or error, ant rc 0 — CompactionsBytemanTe…
+holds          unit PartialCompactionsTest: 1 tests, no failure or error, ant rc 0 — PartialCompactionsTe…
+holds          unit CompactionBudgetTest: 1 tests, no failure or error, ant rc 0 — CompactionBudgetTest…
+holds          unit CompactionLadderTest: 1 tests, no failure or error, ant rc 0 — CompactionLadderTest…
+holds          unit: every STAGE4 check line is ok (180 lines), no MISMATCH
+holds          unit: two 'STAGE4 summary mismatches 0' lines (one per new test)
+holds          unit ladder f1.5: 1 passes (predicted by 9a), observed = expected in the test — ('1', '1')
+holds          unit ladder f0.8: 3 passes (predicted by 9a), observed = expected in the test — ('3', '3')
+holds          unit ladder f0.4: 6 passes (predicted by 9a), observed = expected in the test — ('6', '6')
+holds          unit ladder f0.1: 8 passes (predicted by 9a), observed = expected in the test — ('8', '8')
+  info: budget arithmetic (CompactionBudgetTest): _pct0.95 B=900192640; _pct0.5 B=473785600; _pct0.1 B=94757120; _pct0.01 B=9475712
+
+== D95
+holds          d95: the node's own start-up configuration line shows max_space_usable_for_compactions_in_percentage = 0.95 — 0.95
+holds          d95: min_free_space_per_drive 50MiB, compaction_throughput 64MiB/s, concurrent_compactors default (null)
+holds          d95: JVM -Xms4G -Xmx4G
+holds          d95: every checked file store is /mnt/stage4-data (/dev/loop0), the dedicated filesystem
+holds          d95: dataset: 8 Data.db files per table, largest <= 1.10 x smallest, each within 10% of 64 MiB, payload incompressible (Data.db >= 12,800 x 5,120 B) — tables ['t'], spread ['1.00001']
+holds          d95: exactly one burst of table-size check lines in the raw debug.log (no other compaction >= 1 MiB) — 1 burst(s), 1 lines
+holds          d95: every pass's `available` = round((U - 50 MiB) x pct) = 3161109709 recomputed from df 3379912704 and the config value — available [3161109709]
+holds          d95: B / total = 5.9697 (intended default 0.95, far above)
+holds          d95: the raw pass lines' `requested` equal the ladder simulated from the Data.db lengths: [529529016]
+holds          d95: inputs dropped = 0 (9a: 0)
+holds          d95: last pass is the first with requested <= available; every earlier one exceeds it
+holds          d95: system.log: `Reducing scope` x0, `has only … but … is needed` x0, abort warning x0, ERROR x0
+holds          d95: system.log: no 'Compaction space check is disabled' line
+holds          d95: one `Compacting` line of ks1 with 8 input Data.db files; `Compacted … 8 sstables` — compacting [(1791424571.959, 8)] compacted [(1791424580.13, 8, 529528782.848, 529539268.608)]
+holds          d95: kept inputs 529529016 B, output 529539269 B in the Compacted line (within 0.01%); inputs' total is the over-estimate of the output, the output <= B — output 529539269 vs B 3161109709
+holds          d95: sampler du of ks1.t: baseline 531133974, peak 1061787469 (rise 1.0021 x the kept inputs), final 531124587 (the shed inputs stay: final within 0.01% of baseline)
+holds          d95: files 8 -> 1 in triggers.csv = 1 output + 0 shed inputs; nodetool rc 0
+holds          d95: counters (script's JMX read; raw values not kept): Reduced +0, Dropped +0, Aborted +0 — equals the log events (reducing lines 0)
+holds          d95: idle control: the sampler's first 60 rows (30 s) show du and df unchanged
+
+== F15
+holds          f15: the node's own start-up configuration line shows max_space_usable_for_compactions_in_percentage = 0.238710108666 — 0.238710108666
+holds          f15: min_free_space_per_drive 50MiB, compaction_throughput 64MiB/s, concurrent_compactors default (null)
+holds          f15: JVM -Xms4G -Xmx4G
+holds          f15: every checked file store is /mnt/stage4-data (/dev/loop0), the dedicated filesystem
+holds          f15: dataset: 8 Data.db files per table, largest <= 1.10 x smallest, each within 10% of 64 MiB, payload incompressible (Data.db >= 12,800 x 5,120 B) — tables ['t'], spread ['1.00002']
+holds          f15: exactly one burst of table-size check lines in the raw debug.log (no other compaction >= 1 MiB) — 1 burst(s), 1 lines
+holds          f15: every pass's `available` = round((U - 50 MiB) x pct) = 794304044 recomputed from df 3379912704 and the config value — available [794304044]
+holds          f15: B / total = 1.5000 (intended 1.5)
+holds          f15: the raw pass lines' `requested` equal the ladder simulated from the Data.db lengths: [529530163]
+holds          f15: inputs dropped = 0 (9a: 0)
+holds          f15: last pass is the first with requested <= available; every earlier one exceeds it
+holds          f15: system.log: `Reducing scope` x0, `has only … but … is needed` x0, abort warning x0, ERROR x0
+holds          f15: system.log: no 'Compaction space check is disabled' line
+holds          f15: one `Compacting` line of ks1 with 8 input Data.db files; `Compacted … 8 sstables` — compacting [(1791424808.891, 8)] compacted [(1791424817.051, 8, 529529831.424, 529539268.608)]
+holds          f15: kept inputs 529530163 B, output 529539269 B in the Compacted line (within 0.01%); inputs' total is the over-estimate of the output, the output <= B — output 529539269 vs B 794304044
+holds          f15: sampler du of ks1.t: baseline 531135143, peak 1061788860 (rise 1.0021 x the kept inputs), final 531124808 (the shed inputs stay: final within 0.01% of baseline)
+holds          f15: files 8 -> 1 in triggers.csv = 1 output + 0 shed inputs; nodetool rc 0
+holds          f15: counters (script's JMX read; raw values not kept): Reduced +0, Dropped +0, Aborted +0 — equals the log events (reducing lines 0)
+holds          f15: idle control: the sampler's first 60 rows (30 s) show du and df unchanged
+
+== F08
+holds          f08: the node's own start-up configuration line shows max_space_usable_for_compactions_in_percentage = 0.127312012756 — 0.127312012756
+holds          f08: min_free_space_per_drive 50MiB, compaction_throughput 64MiB/s, concurrent_compactors default (null)
+holds          f08: JVM -Xms4G -Xmx4G
+holds          f08: every checked file store is /mnt/stage4-data (/dev/loop0), the dedicated filesystem
+holds          f08: dataset: 8 Data.db files per table, largest <= 1.10 x smallest, each within 10% of 64 MiB, payload incompressible (Data.db >= 12,800 x 5,120 B) — tables ['t'], spread ['1.00002']
+holds          f08: exactly one burst of table-size check lines in the raw debug.log (no other compaction >= 1 MiB) — 1 burst(s), 3 lines
+holds          f08: every pass's `available` = round((U - 50 MiB) x pct) = 423628673 recomputed from df 3379912704 and the config value — available [423628673]
+holds          f08: B / total = 0.8000 (intended 0.8)
+holds          f08: the raw pass lines' `requested` equal the ladder simulated from the Data.db lengths: [529529975, 463337992, 397146479]
+holds          f08: inputs dropped = 2 (9a: 2)
+holds          f08: last pass is the first with requested <= available; every earlier one exceeds it
+holds          f08: system.log: `Reducing scope` x2, `has only … but … is needed` x2, abort warning x0, ERROR x0
+holds          f08: system.log: no 'Compaction space check is disabled' line
+holds          f08: one `Compacting` line of ks1 with 6 input Data.db files; `Compacted … 6 sstables` — compacting [(1791425032.322, 6)] compacted [(1791425038.198, 6, 397146062.848, 397155500.032)]
+holds          f08: kept inputs 397146479 B, output 397155500 B in the Compacted line (within 0.01%); inputs' total is the over-estimate of the output, the output <= B — output 397155500 vs B 423628673
+holds          f08: sampler du of ks1.t: baseline 531134940, peak 929142306 (rise 1.0022 x the kept inputs), final 531119014 (the shed inputs stay: final within 0.01% of baseline)
+holds          f08: files 8 -> 3 in triggers.csv = 1 output + 2 shed inputs; nodetool rc 0
+holds          f08: counters (script's JMX read; raw values not kept): Reduced +1, Dropped +2, Aborted +0 — equals the log events (reducing lines 2)
+holds          f08: idle control: the sampler's first 60 rows (30 s) show du and df unchanged
+
+== F04
+holds          f04: the node's own start-up configuration line shows max_space_usable_for_compactions_in_percentage = 0.063656081852 — 0.063656081852
+holds          f04: min_free_space_per_drive 50MiB, compaction_throughput 64MiB/s, concurrent_compactors default (null)
+holds          f04: JVM -Xms4G -Xmx4G
+holds          f04: every checked file store is /mnt/stage4-data (/dev/loop0), the dedicated filesystem
+holds          f04: dataset: 8 Data.db files per table, largest <= 1.10 x smallest, each within 10% of 64 MiB, payload incompressible (Data.db >= 12,800 x 5,120 B) — tables ['t'], spread ['1.00001']
+holds          f04: exactly one burst of table-size check lines in the raw debug.log (no other compaction >= 1 MiB) — 1 burst(s), 6 lines
+holds          f04: every pass's `available` = round((U - 50 MiB) x pct) = 211814327 recomputed from df 3379908608 and the config value — available [211814327]
+holds          f04: B / total = 0.4000 (intended 0.4)
+holds          f04: the raw pass lines' `requested` equal the ladder simulated from the Data.db lengths: [529529951, 463338316, 397146823, 330955384, 264764140, 198573004]
+holds          f04: inputs dropped = 5 (9a: 5)
+holds          f04: last pass is the first with requested <= available; every earlier one exceeds it
+holds          f04: system.log: `Reducing scope` x5, `has only … but … is needed` x5, abort warning x0, ERROR x0
+holds          f04: system.log: no 'Compaction space check is disabled' line
+holds          f04: one `Compacting` line of ks1 with 3 input Data.db files; `Compacted … 3 sstables` — compacting [(1791425280.317, 3)] compacted [(1791425282.984, 3, 198573031.424, 198577225.728)]
+holds          f04: kept inputs 198573004 B, output 198577226 B in the Compacted line (within 0.01%); inputs' total is the over-estimate of the output, the output <= B — output 198577226 vs B 211814327
+holds          f04: sampler du of ks1.t: baseline 531134918, peak 727261563 (rise 0.9877 x the kept inputs), final 531119454 (the shed inputs stay: final within 0.01% of baseline)
+holds          f04: files 8 -> 6 in triggers.csv = 1 output + 5 shed inputs; nodetool rc 0
+holds          f04: counters (script's JMX read; raw values not kept): Reduced +1, Dropped +5, Aborted +0 — equals the log events (reducing lines 5)
+holds          f04: idle control: the sampler's first 60 rows (30 s) show du and df unchanged
+
+== F01
+holds          f01: the node's own start-up configuration line shows max_space_usable_for_compactions_in_percentage = 0.015913941258 — 0.015913941258
+holds          f01: min_free_space_per_drive 50MiB, compaction_throughput 64MiB/s, concurrent_compactors default (null)
+holds          f01: JVM -Xms4G -Xmx4G
+holds          f01: every checked file store is /mnt/stage4-data (/dev/loop0), the dedicated filesystem
+holds          f01: dataset: 8 Data.db files per table, largest <= 1.10 x smallest, each within 10% of 64 MiB, payload incompressible (Data.db >= 12,800 x 5,120 B) — tables ['t'], spread ['1.00001']
+holds          f01: B = round((U - 50 MiB) x pct) = 52953514, B / total = 0.1000; simulated: 8 passes, abort = True
+holds          f01: two bursts of check lines in the raw debug.log (C and H1), none for H2 — 2
+holds          f01 C: 8 pass lines, `available` = 52953514, `requested` = the simulated [529529271, 463337922, 397146608, 330955334, 264764065, 198572817, 132381616, 66190626]
+holds          f01 C: no pass is admitted (every requested > available): the ladder reaches one input and aborts
+holds          f01 C: system.log: `Reducing scope` x7, one abort warning (CompactionTask:440), `has only` x8, exactly one ERROR whose exception is the RuntimeException 'Not enough space for compaction' — errors in window 1, in the file 2
+holds          f01 C: nodetool rc 2; files 8 -> 8 and Data.db total unchanged (529529271 = 529529271); counters +0/+0/+1
+holds          f01 H1: 8 pass lines, `available` = 52953514, `requested` = the simulated [529529271, 463337922, 397146608, 330955334, 264764065, 198572817, 132381616, 66190626]
+holds          f01 H1: no pass is admitted (every requested > available): the ladder reaches one input and aborts
+holds          f01 H1: system.log: `Reducing scope` x7, one abort warning (CompactionTask:440), `has only` x8, exactly one ERROR whose exception is the RuntimeException 'Not enough space for compaction' — errors in window 1, in the file 2
+holds          f01 H1: nodetool rc 2; files 8 -> 8 and Data.db total unchanged (529529271 = 529529271); counters +0/+0/+1
+holds          f01: sampler: du of ks1.t never rose above its baseline 531134244 while C and H1 ran (no output written), so the refusal left the inputs alone
+holds          f01 H2: the info line 'Compaction space check is disabled' once, after H1's last pass line
+holds          f01 H2: one `Compacting` line with 8 input files after it; `Compacted … 8 sstables` — [(1791425532.501, 8)] [(1791425540.593, 8, 529528782.848, 529539268.608)]
+holds          f01 H2: no raw debug pass line (requested >= 1 MiB) from that task: after H1 nothing more in the raw debug.log, although the output is 529539269 B against B = 52953514 (10.0 x the budget)
+holds          f01 H2: Data.db files 8 -> 1; output 529539178 B within 5% of the inputs' 529529271; rc 0; counters +0/+0/+0
+holds          f01: hatch invoke returned (session.log) before H1: JMX compactionDiskSpaceCheck(false) rc 0
+holds          f01: no automatic compaction ran: exactly one ks1 `Compacting` line in the whole system.log (H2's)
+
+== INFLIGHT
+holds          inflight: the node's own start-up configuration line shows max_space_usable_for_compactions_in_percentage = 0.327328796478 — 0.327328796478
+holds          inflight: min_free_space_per_drive 50MiB, compaction_throughput 64MiB/s, concurrent_compactors default (null)
+holds          inflight: JVM -Xms4G -Xmx4G
+holds          inflight: every checked file store is /mnt/stage4-data (/dev/loop0), the dedicated filesystem
+holds          inflight: dataset: 8 Data.db files per table, largest <= 1.10 x smallest, each within 10% of 64 MiB, payload incompressible (Data.db >= 12,800 x 5,120 B) — tables ['slow', 't', 't2'], spread ['1.00001', '1.00002', '1.00002']
+holds          inflight: pct was planned as B = R0 + 3.2 s: B(I1) = 741352107, R0 + 3.2 s = 741340623 (s = 66191127)
+holds          inflight: three bursts of check lines in the raw debug.log: I1 (t), the slow task, I2 (t2) — 3 bursts: [1, 1, 6]
+holds          inflight I1: one pass, requested = total of t = 529527558 <= available 741352107 (n = 0, 9a)
+holds          inflight slow task: its own pass requested = R0 = 529529017 (the sum of its Data.db lengths) <= available: admitted whole while nothing else ran
+holds          inflight I2: first pass requested 1047682544 = total of t2 529530251 + R 518152293
+holds          inflight I2: the raw `requested` equal R + the t2 ladder simulated from its Data.db lengths: [1047682544, 981490866, 915299365, 849107905, 782916495, 716725193]
+holds          inflight I2: 6 passes, 5 inputs dropped (9a: 5), last pass the first with requested <= available
+holds          inflight I2: all `available` within 1 MiB of the first (the store's free space falls as `slow` writes) — range 737591335 .. 737607424
+holds          inflight alone vs in flight: t alone dropped 0; t2 with `slow` running dropped 5
+holds          inflight I2: `available` of the first t2 pass 737607424 = round((U(t) - 50 MiB) x pct), U(t) = 2305823736 from the sampler's df at the line's time: 737601052, within 1 MiB — difference -6372 B
+holds          inflight I2: R from the line (518152293) vs the slow task's remaining write read from sstable_tasks and interpolated to the line's time (518273295): 121002 B apart (0.023%), within 16 MiB
+holds          inflight I2: the slow task was running (a `major compaction` row for `slow`) at the line's time, and its pass was logged before the t2 check
+holds          inflight I2: system.log `Reducing scope` x5, `has only` x5, no abort
+holds          inflight: ks1 `Compacting` lines: t (8 inputs), slow (8), t2 (3 inputs) — three in all — [8, 8, 3]
+holds          inflight I2: `Compacted … 3 sstables`, output 198579323 B ~ the kept inputs 198572900 (within 0.01%); output <= available - R = 219439042
+holds          inflight I2: files of t2 8 -> 6 (1 output + 5 shed); rc 0; counters +1/+5/+0 (script's JMX read) = log events 5
+holds          inflight I1: rc 0, files 8 -> 1, counters +0/+0/+0, no warning in its window
+holds          inflight: no 'Compaction space check is disabled' line
+holds          inflight I2: sampler du of ks1.t2 rose by 198972191 B = 1.0020 x the kept inputs 198572900
+
+== HARNESS (the schema the run script executed)
+holds          tables: STCS with 'enabled': 'false', pk int PRIMARY KEY, v blob, default compression
+
+ALL CHECKS HOLD

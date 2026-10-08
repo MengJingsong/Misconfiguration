@@ -1,0 +1,29 @@
+LABEL f04  date 2026-10-07 20:05:04  host node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu  kernel 5.15.0-187-generic
+JAVA openjdk version "11.0.32.1" 2026-08-18 | ANT Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+CLONE cassandra-5.0.9 b5f2a54210d541339c2e7c17a794195cac0e67c2
+FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+node up (build)
+DATASET ks1.t: Data.db lengths [66190874, 66191439, 66191635, 66191122, 66191493, 66191008, 66191244, 66191136]; tablestats SSTable count 8; du -sb 531134918
+PLAN U 3379871744 (node stopped); totals {'t': 529529951}; s = 66191244; pct 0.063656081852; planned B 211811980 = 0.4000 x total of ks1.t
+yaml for pct=0.063656081852: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.063656081852;
+node up (run)
+LOGGING org.apache.cassandra                                   DEBUG | org.apache.cassandra.db.Directories                    DEBUG
+COUNTERS at start {"CompactionsReduced": 0, "SSTablesDroppedFromCompaction": 0, "CompactionsAborted": 0}
+IDLE 30 s: 60 samples; df 3379908608 -> 3379908608; du t 531134918 -> 531134918; pass lines of a table-size compaction 0
+EXPECTED: IDLE: no compaction pass line of a table-size compaction in 30 s, df and du unchanged — yes
+SIM B: table t Data.db lengths [66190874, 66191439, 66191635, 66191122, 66191493, 66191008, 66191244, 66191136] total 529529951; U 3379908608; pct 0.063656081852; B 211814327; B/total 0.4000; simulated passes [529529951, 463338316, 397146823, 330955384, 264764140, 198573004]; dropped 5
+OBSERVED B: rc 0; pass lines (available, requested): [(211814327, 529529951), (211814327, 463338316), (211814327, 397146823), (211814327, 330955384), (211814327, 264764140), (211814327, 198573004)]
+OBSERVED B: counters delta {'CompactionsReduced': 1, 'SSTablesDroppedFromCompaction': 5, 'CompactionsAborted': 0}; Reducing scope x5; abort warnings x0; info lines x0; Data.db files 8 -> 6 (529534287 bytes); table du peak 727261563 final 531119454; sampler window 25 samples
+EXPECTED: B: the ladder simulated from the lengths and B gives the planned outcome (5); else INVALID RUN (band) — yes
+EXPECTED: B: 6 pass lines with requested >= 33095437 (the simulated number) — yes
+EXPECTED: B: every pass has available within 1 MiB of the expected B (211814327) — yes
+EXPECTED: B: pass requested figures equal the simulated [529529951, 463338316, 397146823, 330955384, 264764140, 198573004] — yes
+EXPECTED: B: Reducing scope warnings = 5 — yes
+EXPECTED: B: counters Reduced +1, Dropped +5, Aborted +0 — yes
+EXPECTED: B: nodetool returned 0 — yes
+EXPECTED: B: 6 Data.db files afterwards (one output plus 5 shed inputs) — yes
+INFO B: output length 198577340 against the kept inputs 198573004
+EXPECTED: B: no "Compaction space check is disabled" line — yes
+INSTRUMENT first trigger (B): first pass available 211814327 vs expected B 211814327 (difference 0)
+DONE

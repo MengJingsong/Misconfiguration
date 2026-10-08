@@ -1,0 +1,302 @@
+[2026-10-07 20:08:54] LABEL f01  date 2026-10-07 20:08:54  host node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu  kernel 5.15.0-187-generic
+[2026-10-07 20:08:54] + java -version 2>&1 | head -1
+openjdk version "11.0.32.1" 2026-08-18
+
+  rc=0
+[2026-10-07 20:08:55] + ant -version 2>&1 | head -1
+Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+
+  rc=0
+[2026-10-07 20:08:55] JAVA openjdk version "11.0.32.1" 2026-08-18 | ANT Apache Ant(TM) version 1.10.12 compiled on January 17 1970
+[2026-10-07 20:08:55] + git describe --tags && git rev-parse HEAD
+cassandra-5.0.9
+b5f2a54210d541339c2e7c17a794195cac0e67c2
+
+  rc=0
+[2026-10-07 20:08:55] CLONE cassandra-5.0.9 b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-07 20:08:55] + git checkout -q conf/cassandra.yaml
+
+  rc=0
+[2026-10-07 20:08:55] + rm -rf /users/jason92/stage4-logs/mscp/f01/jmx-classes && mkdir -p /users/jason92/stage4-logs/mscp/f01/jmx-classes && javac -d /users/jason92/stage4-logs/mscp/f01/jmx-classes /users/jason92/stage4-harness-run/mscp/Jmx.java
+
+  rc=0
+[2026-10-07 20:08:55] + if mountpoint -q /mnt/stage4-data; then sudo umount /mnt/stage4-data; fi
+
+  rc=0
+
+  rc=32
+[2026-10-07 20:08:56] + rm -f /users/jason92/stage4-data.img && truncate -s 4G /users/jason92/stage4-data.img && mkfs.ext4 -q -F /users/jason92/stage4-data.img
+
+  rc=0
+[2026-10-07 20:08:56] + sudo mkdir -p /mnt/stage4-data && sudo mount -o loop /users/jason92/stage4-data.img /mnt/stage4-data && sudo mkdir -p /mnt/stage4-data/data && sudo chown 20001:2574 /mnt/stage4-data/data
+
+  rc=0
+[2026-10-07 20:08:56] + df -B1 /mnt/stage4-data | tail -1
+/dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+
+  rc=0
+[2026-10-07 20:08:56] FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-data
+[2026-10-07 20:08:56] + rm -rf data logs logs-build saved_caches
+
+  rc=0
+[2026-10-07 20:08:56] + /users/jason92/stage4-harness-run/mscp/make-node-yaml.sh default
+yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+
+  rc=0
+[2026-10-07 20:08:56] yaml for pct=default: #         # exceed other configuration parameters like bytes_per_assignment or partitions_per_assignment.;#         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;
+[2026-10-07 20:08:56] + bin/cassandra -p /users/jason92/stage4-logs/mscp/f01/cassandra.pid > /users/jason92/stage4-logs/mscp/f01/startup-build.log 2>&1
+
+  rc=0
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+
+Error: No nodes present in the cluster. Has this node finished starting up?
+
+  rc=1
+[2026-10-07 20:09:37] node up (build)
+[2026-10-07 20:09:42] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:09:48] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:09:55] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:10:01] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:10:07] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:10:13] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:10:19] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:10:25] + bin/nodetool flush ks1 t
+
+  rc=0
+[2026-10-07 20:10:27] + bin/nodetool tablestats ks1.t
+Total number of tables: 1
+----------------
+Keyspace: ks1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 102400
+	Write Latency: 0.02414306640625 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 8
+		Old SSTable count: 0
+		Max SSTable size: 63.316MiB
+		Space used (live): 531134244
+		Space used (total): 531134244
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 398352
+		SSTable Compression Ratio: 1.00422
+		Number of partitions (estimate): 102610
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 8
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 102400
+		Local write latency: 0.026 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 502.875MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 128128
+		Bloom filter off heap memory used: 128064
+		Index summary off heap memory used: 12800
+		Compression metadata off heap memory used: 257488
+		Compacted partition minimum bytes: 4769
+		Compacted partition maximum bytes: 5722
+		Compacted partition mean bytes: 5722
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+  rc=0
+[2026-10-07 20:10:28] DATASET ks1.t: Data.db lengths [66191201, 66191349, 66191269, 66191274, 66190990, 66190626, 66191248, 66191314]; tablestats SSTable count 8; du -sb 531134244
+[2026-10-07 20:10:28] + bin/nodetool drain
+
+  rc=0
+[2026-10-07 20:10:44] PLAN U 3379884032 (node stopped); totals {'t': 529529271}; s = 66191159; pct 0.015913941258; planned B 52952927 = 0.1000 x total of ks1.t
+[2026-10-07 20:10:44] + mv logs logs-build
+
+  rc=0
+[2026-10-07 20:10:44] + rm -rf saved_caches
+
+  rc=0
+[2026-10-07 20:10:44] + /users/jason92/stage4-harness-run/mscp/make-node-yaml.sh 0.015913941258
+yaml for pct=0.015913941258: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.015913941258;
+
+  rc=0
+[2026-10-07 20:10:44] yaml for pct=0.015913941258: #         max_tables_per_assignment: 64;data_file_directories:;    - /mnt/stage4-data/data;max_space_usable_for_compactions_in_percentage: 0.015913941258;
+[2026-10-07 20:10:44] + bin/cassandra -p /users/jason92/stage4-logs/mscp/f01/cassandra.pid > /users/jason92/stage4-logs/mscp/f01/startup-run.log 2>&1
+
+  rc=0
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+nodetool: Failed to connect to '127.0.0.1:7199' - ConnectException: 'Connection refused (Connection refused)'.
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+  rc=1
+[2026-10-07 20:10:56] node up (run)
+[2026-10-07 20:10:56] + bin/nodetool setlogginglevel org.apache.cassandra.db.Directories DEBUG
+
+  rc=0
+[2026-10-07 20:10:57] + bin/nodetool getlogginglevels
+
+Logger Name                                        Log Level
+ROOT                                                    INFO
+org.apache.cassandra                                   DEBUG
+org.apache.cassandra.db.Directories                    DEBUG
+
+  rc=0
+[2026-10-07 20:10:59] LOGGING org.apache.cassandra                                   DEBUG | org.apache.cassandra.db.Directories                    DEBUG
+[2026-10-07 20:10:59] COUNTERS at start {"CompactionsReduced": 0, "SSTablesDroppedFromCompaction": 0, "CompactionsAborted": 0}
+[2026-10-07 20:11:50] IDLE 30 s: 60 samples; df 3379920896 -> 3379920896; du t 531134244 -> 531134244; pass lines of a table-size compaction 0
+[2026-10-07 20:11:50] EXPECTED: IDLE: no compaction pass line of a table-size compaction in 30 s, df and du unchanged — yes
+[2026-10-07 20:11:50] SIM C: table t Data.db lengths [66191201, 66191349, 66191269, 66191274, 66190990, 66190626, 66191248, 66191314] total 529529271; U 3379920896; pct 0.015913941258; B 52953514; B/total 0.1000; simulated passes [529529271, 463337922, 397146608, 330955334, 264764065, 198572817, 132381616, 66190626]; dropped -1
+[2026-10-07 20:11:50] + bin/nodetool compact ks1 t
+error: Not enough space for compaction (a03bd800-c2bd-11f1-b931-b361d523a753) of ks1.t, estimated sstables = 1, expected write size = 66190626
+-- StackTrace --
+java.lang.RuntimeException: Not enough space for compaction (a03bd800-c2bd-11f1-b931-b361d523a753) of ks1.t, estimated sstables = 1, expected write size = 66190626
+	at org.apache.cassandra.db.compaction.CompactionTask.buildCompactionCandidatesForAvailableDiskSpace(CompactionTask.java:442)
+	at org.apache.cassandra.db.compaction.CompactionTask.runMayThrow(CompactionTask.java:148)
+	at org.apache.cassandra.utils.WrappedRunnable.run(WrappedRunnable.java:26)
+	at org.apache.cassandra.db.compaction.CompactionTask.executeInternal(CompactionTask.java:94)
+	at org.apache.cassandra.db.compaction.AbstractCompactionTask.execute(AbstractCompactionTask.java:100)
+	at org.apache.cassandra.db.compaction.CompactionManager$9.runMayThrow(CompactionManager.java:1018)
+	at org.apache.cassandra.utils.WrappedRunnable.run(WrappedRunnable.java:26)
+	at org.apache.cassandra.concurrent.FutureTask$3.call(FutureTask.java:141)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+
+  rc=2
+[2026-10-07 20:12:00] OBSERVED C: rc 2; pass lines (available, requested): [(52953514, 529529271), (52953514, 463337922), (52953514, 397146608), (52953514, 330955334), (52953514, 264764065), (52953514, 198572817), (52953514, 132381616), (52953514, 66190626)]
+[2026-10-07 20:12:00] OBSERVED C: counters delta {'CompactionsReduced': 0, 'SSTablesDroppedFromCompaction': 0, 'CompactionsAborted': 1}; Reducing scope x7; abort warnings x1; info lines x0; Data.db files 8 -> 8 (529529271 bytes); table du peak 531134244 final 531134244; sampler window 19 samples
+[2026-10-07 20:12:00] EXPECTED: C: the ladder simulated from the lengths and B gives the planned outcome (-1); else INVALID RUN (band) — yes
+[2026-10-07 20:12:00] EXPECTED: C: 8 pass lines with requested >= 33095313 (the simulated number) — yes
+[2026-10-07 20:12:00] EXPECTED: C: every pass has available within 1 MiB of the expected B (52953514) — yes
+[2026-10-07 20:12:00] EXPECTED: C: pass requested figures equal the simulated [529529271, 463337922, 397146608, 330955334, 264764065, 198572817, 132381616, 66190626] — yes
+[2026-10-07 20:12:00] EXPECTED: C: Reducing scope warnings = 7 and one abort warning — yes
+[2026-10-07 20:12:00] EXPECTED: C: counters Reduced +0, Dropped +0, Aborted +1 — yes
+[2026-10-07 20:12:00] EXPECTED: C: nodetool returned non-zero (the task threw) — yes
+[2026-10-07 20:12:00] EXPECTED: C: the 8 inputs are untouched (same files, same lengths, no output) — yes
+[2026-10-07 20:12:00] INFO C: nodetool output tail: 'rrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:829)'
+[2026-10-07 20:12:00] EXPECTED: C: no "Compaction space check is disabled" line — yes
+[2026-10-07 20:12:00] INSTRUMENT first trigger (C): first pass available 52953514 vs expected B 52953514 (difference 0)
+[2026-10-07 20:12:00] + java -cp /users/jason92/stage4-logs/mscp/f01/jmx-classes Jmx invoke org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck false
+invoked org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck(false) -> null
+
+  rc=0
+[2026-10-07 20:12:00] HATCH invoke compactionDiskSpaceCheck(false) on ks1.t: rc 0: invoked org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck(false) -> null
+[2026-10-07 20:12:00] SIM H1: table t Data.db lengths [66191201, 66191349, 66191269, 66191274, 66190990, 66190626, 66191248, 66191314] total 529529271; U 3379920896; pct 0.015913941258; B 52953514; B/total 0.1000; simulated passes [529529271, 463337922, 397146608, 330955334, 264764065, 198572817, 132381616, 66190626]; dropped -1
+[2026-10-07 20:12:01] + bin/nodetool compact ks1 t
+error: Not enough space for compaction (a6868fc0-c2bd-11f1-b931-b361d523a753) of ks1.t, estimated sstables = 1, expected write size = 66190626
+-- StackTrace --
+java.lang.RuntimeException: Not enough space for compaction (a6868fc0-c2bd-11f1-b931-b361d523a753) of ks1.t, estimated sstables = 1, expected write size = 66190626
+	at org.apache.cassandra.db.compaction.CompactionTask.buildCompactionCandidatesForAvailableDiskSpace(CompactionTask.java:442)
+	at org.apache.cassandra.db.compaction.CompactionTask.runMayThrow(CompactionTask.java:148)
+	at org.apache.cassandra.utils.WrappedRunnable.run(WrappedRunnable.java:26)
+	at org.apache.cassandra.db.compaction.CompactionTask.executeInternal(CompactionTask.java:94)
+	at org.apache.cassandra.db.compaction.AbstractCompactionTask.execute(AbstractCompactionTask.java:100)
+	at org.apache.cassandra.db.compaction.CompactionManager$9.runMayThrow(CompactionManager.java:1018)
+	at org.apache.cassandra.utils.WrappedRunnable.run(WrappedRunnable.java:26)
+	at org.apache.cassandra.concurrent.FutureTask$3.call(FutureTask.java:141)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+
+
+  rc=2
+[2026-10-07 20:12:10] OBSERVED H1: rc 2; pass lines (available, requested): [(52953514, 529529271), (52953514, 463337922), (52953514, 397146608), (52953514, 330955334), (52953514, 264764065), (52953514, 198572817), (52953514, 132381616), (52953514, 66190626)]
+[2026-10-07 20:12:10] OBSERVED H1: counters delta {'CompactionsReduced': 0, 'SSTablesDroppedFromCompaction': 0, 'CompactionsAborted': 1}; Reducing scope x7; abort warnings x1; info lines x0; Data.db files 8 -> 8 (529529271 bytes); table du peak 531134244 final 531134244; sampler window 18 samples
+[2026-10-07 20:12:10] EXPECTED: H1: the ladder simulated from the lengths and B gives the planned outcome (-1); else INVALID RUN (band) — yes
+[2026-10-07 20:12:10] EXPECTED: H1: 8 pass lines with requested >= 33095313 (the simulated number) — yes
+[2026-10-07 20:12:10] EXPECTED: H1: every pass has available within 1 MiB of the expected B (52953514) — yes
+[2026-10-07 20:12:10] EXPECTED: H1: pass requested figures equal the simulated [529529271, 463337922, 397146608, 330955334, 264764065, 198572817, 132381616, 66190626] — yes
+[2026-10-07 20:12:10] EXPECTED: H1: Reducing scope warnings = 7 and one abort warning — yes
+[2026-10-07 20:12:10] EXPECTED: H1: counters Reduced +0, Dropped +0, Aborted +1 — yes
+[2026-10-07 20:12:10] EXPECTED: H1: nodetool returned non-zero (the task threw) — yes
+[2026-10-07 20:12:10] EXPECTED: H1: the 8 inputs are untouched (same files, same lengths, no output) — yes
+[2026-10-07 20:12:10] INFO H1: nodetool output tail: 'rrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:829)'
+[2026-10-07 20:12:10] EXPECTED: H1: no "Compaction space check is disabled" line — yes
+[2026-10-07 20:12:11] + bin/nodetool enableautocompaction ks1 t
+
+  rc=0
+[2026-10-07 20:12:29] OBSERVED H2: rc 0; finished True; pass lines []; info lines x1; Compacting lines x1; Data.db files 8 -> 1 (529539178 bytes against inputs 529529271); counters delta {'CompactionsReduced': 0, 'SSTablesDroppedFromCompaction': 0, 'CompactionsAborted': 0}
+[2026-10-07 20:12:29] EXPECTED: H2: the info line "Compaction space check is disabled" appears once for the background task — yes
+[2026-10-07 20:12:29] EXPECTED: H2: no debug pass line from that task (the check is not evaluated) — yes
+[2026-10-07 20:12:29] EXPECTED: H2: the compaction ran: 1 Data.db file whose length is the inputs' total within 5 % — yes
+[2026-10-07 20:12:29] EXPECTED: H2: counters unchanged (no reduction, no abort) — yes
+[2026-10-07 20:12:30] DONE
