@@ -1,0 +1,227 @@
+Self-check of run 1 — internode_application_send_queue_capacity
+RAW = /users/jason92/stage4-logs/ssq
+
+== UNIT TIER (unit/summary.txt)
+  holds          unit ConnectionTest.testInsufficientSpace: 1 tests, 0 failure/error, ant rc 0
+  holds          unit ConnectionTest.testAcquireReleaseOutbound: 1 tests, 0 failure/error, ant rc 0
+  holds          unit ResourceLimitsTest: 5 tests, 0 failure/error, ant rc 0
+  holds          unit SendQueueCapacityTest: 4 tests, 0 failure/error, ant rc 0
+  holds          unit SendQueueWiringTest: 2 tests, 0 failure/error, ant rc 0
+  holds          unit: 0 instrument MISMATCH lines — MISMATCH lines: 0
+
+== c512k  (C=524288 E=1048576 G=1048576 F=1048576 drops=True first=INSUFFICIENT_GLOBAL)
+  holds          c512k config R1: 3 conns, capacity=524288 endpoint=1048576 global=1048576
+  holds          c512k config R2: 3 conns, capacity=524288 endpoint=1048576 global=1048576
+  holds          c512k config R3: 3 conns, capacity=524288 endpoint=1048576 global=1048576
+  holds          c512k idle: pending bytes 0 and no overload on all links
+  info: c512k A: M=131136 X={'R1': 524544, 'R2': 0, 'R3': 0} accepted={'R1': 12, 'R2': 0, 'R3': 0} refused={'R1': 0, 'R2': 0, 'R3': 0} first=None
+  agrees         c512k A R1: X and accepted match scenarios.csv (524544, 12) — csv X=524544 acc=12
+  MISS (recorded) c512k A: X = 2M +-1 message (2M=262272, X=524544) — recorded missed prediction (X read ~4M)
+  holds          c512k A: no reserve use and no drop
+  info: c512k B: M=131136 X={'R1': 1442496, 'R2': 0, 'R3': 0} accepted={'R1': 11, 'R2': 0, 'R3': 0} refused={'R1': 111269, 'R2': 0, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         c512k B R1: X and accepted match scenarios.csv (1442496, 11) — csv X=1442496 acc=11
+  holds          c512k B: valid run, offered load D=33570816 exceeds C+F=1572864
+  holds          c512k B R1: overload branch fired (refused=111269>0, trace overloaded=111268)
+  holds          c512k B: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          c512k B: no SUCCESS acquire with pending above C+F (0 found)
+  holds          c512k B R1: peak X within (C+F-M, C+F] (1441728 < 1442496 <= 1572864)
+  holds          c512k B R1: using_reserve in (F-M, F] (917440 < 918208 <= 1048576)
+  holds          c512k B R1: plateau flat at 12.5s past the 10s deadline (JMX late 1442496 == peak 1442496), nothing expired (0)
+  holds          c512k B R1: drain -> pending 0 (0), timed-out=accepted (11=11), completed unchanged (0)
+  holds          c512k B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          c512k B: liveness probe delivered (R1 completed +1: 5->6)
+
+== c1m  (C=1048576 E=1048576 G=1048576 F=1048576 drops=True first=INSUFFICIENT_GLOBAL)
+  holds          c1m config R1: 3 conns, capacity=1048576 endpoint=1048576 global=1048576
+  holds          c1m config R2: 3 conns, capacity=1048576 endpoint=1048576 global=1048576
+  holds          c1m config R3: 3 conns, capacity=1048576 endpoint=1048576 global=1048576
+  holds          c1m idle: pending bytes 0 and no overload on all links
+  info: c1m A: M=131136 X={'R1': 524544, 'R2': 0, 'R3': 0} accepted={'R1': 12, 'R2': 0, 'R3': 0} refused={'R1': 0, 'R2': 0, 'R3': 0} first=None
+  agrees         c1m A R1: X and accepted match scenarios.csv (524544, 12) — csv X=524544 acc=12
+  MISS (recorded) c1m A: X = 2M +-1 message (2M=262272, X=524544) — recorded missed prediction (X read ~4M)
+  holds          c1m A: no reserve use and no drop
+  info: c1m B: M=131136 X={'R1': 1967040, 'R2': 0, 'R3': 0} accepted={'R1': 15, 'R2': 0, 'R3': 0} refused={'R1': 105805, 'R2': 0, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         c1m B R1: X and accepted match scenarios.csv (1967040, 15) — csv X=1967040 acc=15
+  holds          c1m B: valid run, offered load D=33570816 exceeds C+F=2097152
+  holds          c1m B R1: overload branch fired (refused=105805>0, trace overloaded=105804)
+  holds          c1m B: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          c1m B: no SUCCESS acquire with pending above C+F (0 found)
+  holds          c1m B R1: peak X within (C+F-M, C+F] (1966016 < 1967040 <= 2097152)
+  holds          c1m B R1: using_reserve in (F-M, F] (917440 < 918464 <= 1048576)
+  holds          c1m B R1: plateau flat at 12.5s past the 10s deadline (JMX late 1967040 == peak 1967040), nothing expired (0)
+  holds          c1m B R1: drain -> pending 0 (0), timed-out=accepted (15=15), completed unchanged (0)
+  holds          c1m B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          c1m B: liveness probe delivered (R1 completed +1: 5->6)
+
+== c4m  (C=4194304 E=1048576 G=1048576 F=1048576 drops=True first=INSUFFICIENT_GLOBAL)
+  holds          c4m config R1: 3 conns, capacity=4194304 endpoint=1048576 global=1048576
+  holds          c4m config R2: 3 conns, capacity=4194304 endpoint=1048576 global=1048576
+  holds          c4m config R3: 3 conns, capacity=4194304 endpoint=1048576 global=1048576
+  holds          c4m idle: pending bytes 0 and no overload on all links
+  info: c4m A: M=131136 X={'R1': 524544, 'R2': 0, 'R3': 0} accepted={'R1': 12, 'R2': 0, 'R3': 0} refused={'R1': 0, 'R2': 0, 'R3': 0} first=None
+  agrees         c4m A R1: X and accepted match scenarios.csv (524544, 12) — csv X=524544 acc=12
+  MISS (recorded) c4m A: X = 2M +-1 message (2M=262272, X=524544) — recorded missed prediction (X read ~4M)
+  holds          c4m A: no reserve use and no drop
+  info: c4m B: M=131136 X={'R1': 5114304, 'R2': 0, 'R3': 0} accepted={'R1': 39, 'R2': 0, 'R3': 0} refused={'R1': 86431, 'R2': 0, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         c4m B R1: X and accepted match scenarios.csv (5114304, 39) — csv X=5114304 acc=39
+  holds          c4m B: valid run, offered load D=33570816 exceeds C+F=5242880
+  holds          c4m B R1: overload branch fired (refused=86431>0, trace overloaded=86430)
+  holds          c4m B: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          c4m B: no SUCCESS acquire with pending above C+F (0 found)
+  holds          c4m B R1: peak X within (C+F-M, C+F] (5111744 < 5114304 <= 5242880)
+  holds          c4m B R1: using_reserve in (F-M, F] (917440 < 920000 <= 1048576)
+  holds          c4m B R1: plateau flat at 12.5s past the 10s deadline (JMX late 5114304 == peak 5114304), nothing expired (0)
+  holds          c4m B R1: drain -> pending 0 (0), timed-out=accepted (39=39), completed unchanged (0)
+  holds          c4m B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          c4m B: liveness probe delivered (R1 completed +1: 5->6)
+
+== c16m  (C=16777216 E=1048576 G=1048576 F=1048576 drops=True first=INSUFFICIENT_GLOBAL)
+  holds          c16m config R1: 3 conns, capacity=16777216 endpoint=1048576 global=1048576
+  holds          c16m config R2: 3 conns, capacity=16777216 endpoint=1048576 global=1048576
+  holds          c16m config R3: 3 conns, capacity=16777216 endpoint=1048576 global=1048576
+  holds          c16m idle: pending bytes 0 and no overload on all links
+  info: c16m A: M=131136 X={'R1': 524544, 'R2': 0, 'R3': 0} accepted={'R1': 12, 'R2': 0, 'R3': 0} refused={'R1': 0, 'R2': 0, 'R3': 0} first=None
+  agrees         c16m A R1: X and accepted match scenarios.csv (524544, 12) — csv X=524544 acc=12
+  MISS (recorded) c16m A: X = 2M +-1 message (2M=262272, X=524544) — recorded missed prediction (X read ~4M)
+  holds          c16m A: no reserve use and no drop
+  info: c16m B: M=131136 X={'R1': 17703360, 'R2': 0, 'R3': 0} accepted={'R1': 135, 'R2': 0, 'R3': 0} refused={'R1': 110155, 'R2': 0, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         c16m B R1: X and accepted match scenarios.csv (17703360, 135) — csv X=17703360 acc=135
+  holds          c16m B: valid run, offered load D=33570816 exceeds C+F=17825792
+  holds          c16m B R1: overload branch fired (refused=110155>0, trace overloaded=110154)
+  holds          c16m B: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          c16m B: no SUCCESS acquire with pending above C+F (0 found)
+  holds          c16m B R1: peak X within (C+F-M, C+F] (17694656 < 17703360 <= 17825792)
+  holds          c16m B R1: using_reserve in (F-M, F] (917440 < 926144 <= 1048576)
+  holds          c16m B R1: plateau flat at 12.5s past the 10s deadline (JMX late 17703360 == peak 17703360), nothing expired (0)
+  holds          c16m B R1: drain -> pending 0 (0), timed-out=accepted (135=135), completed unchanged (0)
+  holds          c16m B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          c16m B: liveness probe delivered (R1 completed +1: 5->6)
+
+== defres  (C=4194304 E=134217728 G=536870912 F=134217728 drops=False first=None)
+  holds          defres config R1: 3 conns, capacity=4194304 endpoint=134217728 global=536870912
+  holds          defres config R2: 3 conns, capacity=4194304 endpoint=134217728 global=536870912
+  holds          defres config R3: 3 conns, capacity=4194304 endpoint=134217728 global=536870912
+  holds          defres idle: pending bytes 0 and no overload on all links
+  info: defres B: M=131136 X={'R1': 43274880, 'R2': 0, 'R3': 0} accepted={'R1': 1792, 'R2': 0, 'R3': 0} refused={'R1': 0, 'R2': 0, 'R3': 0} first=None
+  agrees         defres B R1: X and accepted match scenarios.csv (43274880, 1792) — csv X=43274880 acc=1792
+  holds          defres B R1: nothing dropped (refused=0) and C does not bind (C=4194304 < X=43274880 <= C+F=138412032)
+  info: defres B: X=43274880 exceeds the 256*M offered-load estimate D=33570816 (clients send more than one per thread during the hold, as in scenario A)
+  holds          defres B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          defres B: liveness probe delivered (R1 completed +1: 258->259)
+
+== nohold  (C=1048576 E=1048576 G=1048576 F=1048576 drops=False first=None)
+  holds          nohold config R1: 3 conns, capacity=1048576 endpoint=1048576 global=1048576
+  holds          nohold config R2: 3 conns, capacity=1048576 endpoint=1048576 global=1048576
+  holds          nohold config R3: 3 conns, capacity=1048576 endpoint=1048576 global=1048576
+  holds          nohold idle: pending bytes 0 and no overload on all links
+  info: nohold B-nohold: M=131137 X={'R1': 1967055, 'R2': 0, 'R3': 0} accepted={'R1': 7090, 'R2': 0, 'R3': 0} refused={'R1': 21651, 'R2': 0, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         nohold B-nohold R1: X and accepted match scenarios.csv (1967055, 7090) — csv X=1967055 acc=7090
+  info: nohold B-nohold: no-hold control (empirical): X=1967055 vs C+F=2097152, refused=21651
+
+== c1  (C=4194304 E=134217728 G=536870912 F=134217728 drops=False first=None)
+  holds          c1 config R1: 3 conns, capacity=4194304 endpoint=134217728 global=536870912
+  holds          c1 config R2: 3 conns, capacity=4194304 endpoint=134217728 global=536870912
+  holds          c1 config R3: 3 conns, capacity=4194304 endpoint=134217728 global=536870912
+  holds          c1 idle: pending bytes 0 and no overload on all links
+  info: c1 B: M=131136 X={'R1': 35406720, 'R2': 0, 'R3': 0} accepted={'R1': 1792, 'R2': 0, 'R3': 0} refused={'R1': 0, 'R2': 0, 'R3': 0} first=None
+  agrees         c1 B R1: X and accepted match scenarios.csv (35406720, 1792) — csv X=35406720 acc=1792
+  holds          c1 B R1: nothing dropped (refused=0) and C does not bind (C=4194304 < X=35406720 <= C+F=138412032)
+  info: c1 B: X=35406720 exceeds the 256*M offered-load estimate D=33570816 (clients send more than one per thread during the hold, as in scenario A)
+  holds          c1 B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          c1 B: liveness probe delivered (R1 completed +1: 258->259)
+
+== c2  (C=4194304 E=1048576 G=536870912 F=1048576 drops=True first=INSUFFICIENT_ENDPOINT)
+  holds          c2 config R1: 3 conns, capacity=4194304 endpoint=1048576 global=536870912
+  holds          c2 config R2: 3 conns, capacity=4194304 endpoint=1048576 global=536870912
+  holds          c2 config R3: 3 conns, capacity=4194304 endpoint=1048576 global=536870912
+  holds          c2 idle: pending bytes 0 and no overload on all links
+  info: c2 B: M=131137 X={'R1': 5114343, 'R2': 0, 'R3': 0} accepted={'R1': 256, 'R2': 0, 'R3': 0} refused={'R1': 101399, 'R2': 0, 'R3': 0} first=INSUFFICIENT_ENDPOINT
+  agrees         c2 B R1: X and accepted match scenarios.csv (5114343, 256) — csv X=5114343 acc=256
+  holds          c2 B: valid run, offered load D=33571072 exceeds C+F=5242880
+  holds          c2 B R1: overload branch fired (refused=101399>0, trace overloaded=101289)
+  holds          c2 B: first refusal is INSUFFICIENT_ENDPOINT (was INSUFFICIENT_ENDPOINT)
+  holds          c2 B: no SUCCESS acquire with pending above C+F (0 found)
+  holds          c2 B R1: peak X within (C+F-M, C+F] (5111743 < 5114343 <= 5242880)
+  holds          c2 B R1: using_reserve in (F-M, F] (917439 < 920039 <= 1048576)
+  info: c2 B R1: endpoint-refusal arm churns (JMX late 3934110 <= peak 5114343; 226 expired by 12.5s) — INSUFFICIENT_ENDPOINT takes the prune-and-retry branch :337-341
+  holds          c2 B R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          c2 B: liveness probe delivered (R1 completed +1: 30->31)
+
+== peer  (C=4194304 E=1048576 G=1048576 F=1048576 drops=True first=INSUFFICIENT_GLOBAL)
+  holds          peer config R1: 3 conns, capacity=4194304 endpoint=1048576 global=1048576
+  holds          peer config R2: 3 conns, capacity=4194304 endpoint=1048576 global=1048576
+  holds          peer config R3: 3 conns, capacity=4194304 endpoint=1048576 global=1048576
+  holds          peer idle: pending bytes 0 and no overload on all links
+  info: peer B-rf1: M=131136 X={'R1': 5114304, 'R2': 0, 'R3': 0} accepted={'R1': 39, 'R2': 0, 'R3': 0} refused={'R1': 93231, 'R2': 0, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         peer B-rf1 R1: X and accepted match scenarios.csv (5114304, 39) — csv X=5114304 acc=39
+  holds          peer B-rf1: valid run, offered load D=33570816 exceeds C+F=5242880
+  holds          peer B-rf1 R1: overload branch fired (refused=93231>0, trace overloaded=93230)
+  holds          peer B-rf1: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          peer B-rf1: no SUCCESS acquire with pending above C+F (0 found)
+  holds          peer B-rf1 R1: peak X within (C+F-M, C+F] (5111744 < 5114304 <= 5242880)
+  holds          peer B-rf1 R1: using_reserve in (F-M, F] (917440 < 920000 <= 1048576)
+  holds          peer B-rf1 R1: plateau flat at 12.5s past the 10s deadline (JMX late 5114304 == peak 5114304), nothing expired (0)
+  holds          peer B-rf1 R1: drain -> pending 0 (0), timed-out=accepted (39=39), completed unchanged (0)
+  holds          peer B-rf1 R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          peer B-rf1: liveness probe delivered (R1 completed +1: 4->5)
+  info: peer B-rf2: M=131137 X={'R1': 4720932, 'R2': 4589795, 'R3': 0} accepted={'R1': 36, 'R2': 35, 'R3': 0} refused={'R1': 90954, 'R2': 90955, 'R3': 0} first=INSUFFICIENT_GLOBAL
+  agrees         peer B-rf2 R1: X and accepted match scenarios.csv (4720932, 36) — csv X=4720932 acc=36
+  agrees         peer B-rf2 R2: X and accepted match scenarios.csv (4589795, 35) — csv X=4589795 acc=35
+  holds          peer B-rf2: valid run, offered load D=33571072 exceeds C+F=5242880
+  holds          peer B-rf2 R1: overload branch fired (refused=90954>0, trace overloaded=184184)
+  holds          peer B-rf2 R2: overload branch fired (refused=90955>0, trace overloaded=90954)
+  holds          peer B-rf2: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          peer B-rf2: no SUCCESS acquire with pending above C+F (0 found)
+  holds          peer B-rf2 R1: plateau flat at 12.5s past the 10s deadline (JMX late 4720932 == peak 4720932), nothing expired (0)
+  holds          peer B-rf2 R2: plateau flat at 12.5s past the 10s deadline (JMX late 4589795 == peak 4589795), nothing expired (0)
+  holds          peer B-rf2 R1: drain -> pending 0 (0), timed-out=accepted (36=36), completed unchanged (0)
+  holds          peer B-rf2 R2: drain -> pending 0 (0), timed-out=accepted (35=35), completed unchanged (0)
+  holds          peer B-rf2 R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          peer B-rf2 R2: after the lift pending bytes return to 0 (no leak) (0)
+  holds          peer B-rf2: liveness probe delivered (R1 completed +1: 4->5)
+  info: peer B-rf3: M=131137 X={'R1': 5114343, 'R2': 4196384, 'R3': 4196384} accepted={'R1': 39, 'R2': 32, 'R3': 32} refused={'R1': 72021, 'R2': 72028, 'R3': 72028} first=INSUFFICIENT_GLOBAL
+  agrees         peer B-rf3 R1: X and accepted match scenarios.csv (5114343, 39) — csv X=5114343 acc=39
+  agrees         peer B-rf3 R2: X and accepted match scenarios.csv (4196384, 32) — csv X=4196384 acc=32
+  agrees         peer B-rf3 R3: X and accepted match scenarios.csv (4196384, 32) — csv X=4196384 acc=32
+  holds          peer B-rf3: valid run, offered load D=33571072 exceeds C+F=5242880
+  holds          peer B-rf3 R1: overload branch fired (refused=72021>0, trace overloaded=256205)
+  holds          peer B-rf3 R2: overload branch fired (refused=72028>0, trace overloaded=162982)
+  holds          peer B-rf3 R3: overload branch fired (refused=72028>0, trace overloaded=72027)
+  holds          peer B-rf3: first refusal is INSUFFICIENT_GLOBAL (was INSUFFICIENT_GLOBAL)
+  holds          peer B-rf3: no SUCCESS acquire with pending above C+F (0 found)
+  holds          peer B-rf3 R1: plateau flat at 12.5s past the 10s deadline (JMX late 5114343 == peak 5114343), nothing expired (0)
+  holds          peer B-rf3 R2: plateau flat at 12.5s past the 10s deadline (JMX late 4196384 == peak 4196384), nothing expired (0)
+  holds          peer B-rf3 R3: plateau flat at 12.5s past the 10s deadline (JMX late 4196384 == peak 4196384), nothing expired (0)
+  holds          peer B-rf3 R1: drain -> pending 0 (0), timed-out=accepted (39=39), completed unchanged (0)
+  holds          peer B-rf3 R2: drain -> pending 0 (0), timed-out=accepted (32=32), completed unchanged (0)
+  holds          peer B-rf3 R3: drain -> pending 0 (0), timed-out=accepted (32=32), completed unchanged (0)
+  holds          peer B-rf3 R1: after the lift pending bytes return to 0 (no leak) (0)
+  holds          peer B-rf3 R2: after the lift pending bytes return to 0 (no leak) (0)
+  holds          peer B-rf3 R3: after the lift pending bytes return to 0 (no leak) (0)
+  holds          peer B-rf3: liveness probe delivered (R1 completed +1: 4->5)
+  -- peer sweep (§9a node-wide formula P*C+G)
+  holds          B-rf1 P=1: sum of peaks in (P*C+G-(P+1)*M, P*C+G] = (4980608, 5242880]: 5114304
+  holds          B-rf1 P=1: each link at least C-M (4063168): {'R1': 5114304}
+  holds          B-rf1 P=1: each reserve gauge <= E (1048576) and sum <= G (1048576): {'R1': 920000}
+  holds          B-rf2 P=2: sum of peaks in (P*C+G-(P+1)*M, P*C+G] = (9043773, 9437184]: 9310727
+  holds          B-rf2 P=2: each link at least C-M (4063167): {'R1': 4720932, 'R2': 4589795}
+  holds          B-rf2 P=2: each reserve gauge <= E (1048576) and sum <= G (1048576): {'R1': 526628, 'R2': 395491}
+  holds          B-rf3 P=3: sum of peaks in (P*C+G-(P+1)*M, P*C+G] = (13106940, 13631488]: 13507111
+  holds          B-rf3 P=3: each link at least C-M (4063167): {'R1': 5114343, 'R2': 4196384, 'R3': 4196384}
+  holds          B-rf3 P=3: each reserve gauge <= E (1048576) and sum <= G (1048576): {'R1': 920039, 'R2': 2080, 'R3': 2080}
+
+== HEAP PROPORTIONALITY (C sweep, §9a heap row)
+  info: c512k: delta_heap=21597184 B, X=1442496, ratio=14.972, adjudicable(delta>3*spread)=False (spread=17074 KiB)
+  info: c1m: delta_heap=-569344 B, X=1967040, ratio=-0.289, adjudicable(delta>3*spread)=False (spread=16983 KiB)
+  info: c4m: delta_heap=15906474 B, X=5114304, ratio=3.110, adjudicable(delta>3*spread)=False (spread=15783 KiB)
+  info: c16m: delta_heap=10612736 B, X=17703360, ratio=0.599, adjudicable(delta>3*spread)=True (spread=689 KiB)
+  info: only ONE value (c16m) cleared 3x the idle-heap spread; proportionality across the sweep is not demonstrable (n=1). The other three idle floors were too noisy (spread 15-17 MiB). §9a heap row reads as accounting-only here, not a demonstrated heap proxy.
+
+== SUMMARY
+  load-bearing checks that DO NOT HOLD: 0
+  recorded missed predictions reproduced: 4
+     - c512k A: X = 2M +-1 message (2M=262272, X=524544)
+     - c1m A: X = 2M +-1 message (2M=262272, X=524544)
+     - c4m A: X = 2M +-1 message (2M=262272, X=524544)
+     - c16m A: X = 2M +-1 message (2M=262272, X=524544)
+  agreement checks that DISAGREE with the run script: 0

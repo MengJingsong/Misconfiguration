@@ -1,0 +1,88 @@
+label peer: capacity 4194304 B; extras {'internode_application_send_queue_reserve_global_capacity': '1MiB', 'internode_application_send_queue_reserve_endpoint_capacity': '1MiB', 'internode_application_receive_queue_reserve_endpoint_capacity': '1MiB'}; predicted effective E 1048576, G 1048576; drops expected True; hold True; scenario A False; RF [1, 2, 3]
+harness file hold-delivery.btm: md5 d7682826394919148c0cb96589fbbb58
+harness file send-config.btm: md5 af82114b359ab0a705d51be208879761
+harness file send-acquire.btm: md5 64ea0b4297e978caee012021f7aa9db2
+harness file Hold.java: md5 0ac9e4ec9b67f95096eac1affae4cfca
+Hold.class has held(): True
+ring: R1..R3 are up but still list S; stopping and wiping them to start a fresh ring
+R1 up: statusbinary running, 1 nodes UN (9 s)
+R2 up: statusbinary running, 2 nodes UN (9 s)
+R3 up: statusbinary running, 3 nodes UN (9 s)
+ring: started 3 of R1..R3 (they stay up between labels)
+schema keyspace1.standard1 created by one cassandra-stress write against R1 (S is not up yet): True
+RF -> 1: RF already 1, not altered
+S up: statusbinary running, 4 nodes UN (9 s)
+JMX scopes of S's connection metrics: {'R1': '127.0.0.3_7010', 'R2': '127.0.0.4_7010', 'R3': '127.0.0.5_7010'}
+config trace R1: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=1048576 global=1048576
+config trace R2: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=1048576 global=1048576
+config trace R3: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=1048576 global=1048576
+EXPECTED: [peer] config trace: every connection of R1..R3 has capacity=4194304 endpoint=1048576 global=1048576 — yes
+idle: large-link pending bytes {'R1': 0, 'R2': 0, 'R3': 0}; overload counts {'R1': 0, 'R2': 0, 'R3': 0}
+EXPECTED: idle: pending bytes of the large links are 0 and no overload — yes
+idle heap used after full GC (KiB): [91315, 91227, 91916]; mean 91486; spread 689
+hold check: pending 131135 (trace bytes [131135]), 3 s later 131135, completed 1 -> 1; Hold.park in the dump: True
+hold trace: hold park thread=Messaging-OUT-/127.0.0.2:7010->/127.0.0.3:7010-LARGE_MESSAGES file=/users/jason92/stage4-logs/ssq/peer/hold ms=1791440232845 | hold release thread=Messaging-OUT-/127.0.0.2:7010->/127.0.0.3:7010-LARGE_MESSAGES ms=1791440237923
+hold check passed: the write was held (pending = M, completed unchanged, thread parked in Hold.park) and delivered by itself after the file was removed
+RF -> 1: RF already 1, not altered
+B-rf1: heap used after full GC at ~5 s = 99406 KiB; histogram {'org.apache.cassandra.net.Message': (39, 1560), 'org.apache.cassandra.db.Mutation': (66, 3696)}
+[B-rf1] M = 131136 B (mode of accepted bytes); X (max pending seen by acquire, large link) = {'R1': 5114304, 'R2': 0, 'R3': 0}; accepted {'R1': 39, 'R2': 0, 'R3': 0}; refused {'R1': 93231, 'R2': 0, 'R3': 0}; first refusal INSUFFICIENT_GLOBAL; stress failed operations 9327, failed attempts 93270; parked delivery threads in the dump 1; drain settled in 0.38164281845092773 s; probe {'R1': 1}
+EXPECTED: [B-rf1] valid run: offered load D = 33570816 exceeds C + F = 5242880 — yes
+EXPECTED: [B-rf1] R1: C + F - M < X <= C + F (5111744 < 5114304 <= 5242880) — yes
+EXPECTED: [B-rf1] R1: overload_count rose (93231 refused lines in the trace; JMX delta 93231) — yes
+EXPECTED: [B-rf1] first refused acquire is INSUFFICIENT_GLOBAL (it was INSUFFICIENT_GLOBAL) — yes
+EXPECTED: [B-rf1] using_reserve_bytes ~ X - C: F - M < 920000 <= F (917440 < 920000 <= 1048576) — yes
+EXPECTED: [B-rf1] no SUCCESS acquire with pending above C + F (0 found) — yes
+EXPECTED: [B-rf1] R1: plateau still there at ~12.5 s, past the 10 s deadline (JMX 5114304 = peak 5114304) and nothing expired before the lift (0) — yes
+EXPECTED: [B-rf1] R1: after the lift pending bytes return to 0 (0), timed-out count = accepted (39 = 39), completed count does not move (0) — yes
+EXPECTED: [B-rf1] the parked delivery threads showed in the dump (found 1, expected 1) — yes
+EXPECTED: [B-rf1] liveness probe delivered: R1 completed count +1 ({'R1': 1}) — yes
+EXPECTED: [B-rf1] stress failed attempts ~ overload_count (+- threads in flight): 93270 (9327 operations) vs 93231 — yes
+[B-rf1] heap: used at ~5 s 99406 KiB; idle floor 91486 KiB (spread 689 KiB); delta 8110080 B; delta / X = 1.59 (X = 5114304); adjudicable (delta > 3 x spread): True
+RF -> 2: altered to RF 2
+B-rf2: heap used after full GC at ~5 s = 107639 KiB; histogram {'org.apache.cassandra.net.Message': (59, 2360), 'org.apache.cassandra.db.Mutation': (61, 3416)}
+[B-rf2] M = 131137 B (mode of accepted bytes); X (max pending seen by acquire, large link) = {'R1': 4720932, 'R2': 4589795, 'R3': 0}; accepted {'R1': 36, 'R2': 35, 'R3': 0}; refused {'R1': 90954, 'R2': 90955, 'R3': 0}; first refusal INSUFFICIENT_GLOBAL; stress failed operations 9099, failed attempts 90990; parked delivery threads in the dump 2; drain settled in 0.37799811363220215 s; probe {'R1': 1}
+EXPECTED: [B-rf2] valid run: offered load D = 33571072 exceeds C + F = 5242880 — yes
+EXPECTED: [B-rf2] R1: C + F - M < X <= C + F (5111743 < 4720932 <= 5242880) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B-rf2] R1: overload_count rose (90954 refused lines in the trace; JMX delta 90954) — yes
+EXPECTED: [B-rf2] R2: C + F - M < X <= C + F (5111743 < 4589795 <= 5242880) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B-rf2] R2: overload_count rose (90955 refused lines in the trace; JMX delta 90955) — yes
+EXPECTED: [B-rf2] first refused acquire is INSUFFICIENT_GLOBAL (it was INSUFFICIENT_GLOBAL) — yes
+EXPECTED: [B-rf2] no SUCCESS acquire with pending above C + F (0 found) — yes
+EXPECTED: [B-rf2] R1: plateau still there at ~12.5 s, past the 10 s deadline (JMX 4720932 = peak 4720932) and nothing expired before the lift (0) — yes
+EXPECTED: [B-rf2] R2: plateau still there at ~12.5 s, past the 10 s deadline (JMX 4589795 = peak 4589795) and nothing expired before the lift (0) — yes
+EXPECTED: [B-rf2] R1: after the lift pending bytes return to 0 (0), timed-out count = accepted (36 = 36), completed count does not move (0) — yes
+EXPECTED: [B-rf2] R2: after the lift pending bytes return to 0 (0), timed-out count = accepted (35 = 35), completed count does not move (0) — yes
+EXPECTED: [B-rf2] the parked delivery threads showed in the dump (found 2, expected 2) — yes
+EXPECTED: [B-rf2] liveness probe delivered: R1 completed count +1 ({'R1': 1}) — yes
+[B-rf2] heap: used at ~5 s 107639 KiB; idle floor 91486 KiB (spread 689 KiB); delta 16540672 B; delta / X = 1.78 (X = 9310727); adjudicable (delta > 3 x spread): True
+RF -> 3: altered to RF 3
+B-rf3: heap used after full GC at ~5 s = 110289 KiB; histogram {'org.apache.cassandra.net.Message': (233, 9320), 'org.apache.cassandra.db.Mutation': (235, 13160)}
+[B-rf3] M = 131137 B (mode of accepted bytes); X (max pending seen by acquire, large link) = {'R1': 5114343, 'R2': 4196384, 'R3': 4196384}; accepted {'R1': 39, 'R2': 32, 'R3': 32}; refused {'R1': 72021, 'R2': 72028, 'R3': 72028}; first refusal INSUFFICIENT_GLOBAL; stress failed operations 7206, failed attempts 72060; parked delivery threads in the dump 3; drain settled in 0.3666117191314697 s; probe {'R1': 1}
+EXPECTED: [B-rf3] valid run: offered load D = 33571072 exceeds C + F = 5242880 — yes
+EXPECTED: [B-rf3] R1: C + F - M < X <= C + F (5111743 < 5114343 <= 5242880) — yes
+EXPECTED: [B-rf3] R1: overload_count rose (72021 refused lines in the trace; JMX delta 72021) — yes
+EXPECTED: [B-rf3] R2: C + F - M < X <= C + F (5111743 < 4196384 <= 5242880) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B-rf3] R2: overload_count rose (72028 refused lines in the trace; JMX delta 72028) — yes
+EXPECTED: [B-rf3] R3: C + F - M < X <= C + F (5111743 < 4196384 <= 5242880) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B-rf3] R3: overload_count rose (72028 refused lines in the trace; JMX delta 72028) — yes
+EXPECTED: [B-rf3] first refused acquire is INSUFFICIENT_GLOBAL (it was INSUFFICIENT_GLOBAL) — yes
+EXPECTED: [B-rf3] no SUCCESS acquire with pending above C + F (0 found) — yes
+EXPECTED: [B-rf3] R1: plateau still there at ~12.5 s, past the 10 s deadline (JMX 5114343 = peak 5114343) and nothing expired before the lift (0) — yes
+EXPECTED: [B-rf3] R2: plateau still there at ~12.5 s, past the 10 s deadline (JMX 4196384 = peak 4196384) and nothing expired before the lift (0) — yes
+EXPECTED: [B-rf3] R3: plateau still there at ~12.5 s, past the 10 s deadline (JMX 4196384 = peak 4196384) and nothing expired before the lift (0) — yes
+EXPECTED: [B-rf3] R1: after the lift pending bytes return to 0 (0), timed-out count = accepted (39 = 39), completed count does not move (0) — yes
+EXPECTED: [B-rf3] R2: after the lift pending bytes return to 0 (0), timed-out count = accepted (32 = 32), completed count does not move (0) — yes
+EXPECTED: [B-rf3] R3: after the lift pending bytes return to 0 (0), timed-out count = accepted (32 = 32), completed count does not move (0) — yes
+EXPECTED: [B-rf3] the parked delivery threads showed in the dump (found 3, expected 3) — yes
+EXPECTED: [B-rf3] liveness probe delivered: R1 completed count +1 ({'R1': 1}) — yes
+[B-rf3] heap: used at ~5 s 110289 KiB; idle floor 91486 KiB (spread 689 KiB); delta 19254272 B; delta / X = 1.43 (X = 13507111); adjudicable (delta > 3 x spread): True
+EXPECTED: [B-rf1] P = 1: sum of the links' peaks within (P*C + G - (P+1)*M, P*C + G] = (4980608, 5242880]: 5114304 — yes
+EXPECTED: [B-rf1] P = 1: each link at least C - M (4063168): {'R1': 5114304} — yes
+EXPECTED: [B-rf1] P = 1: each peer's reserve gauge at most 1048576 and their sum at most G = 1048576: {'R1': 920000} — yes
+EXPECTED: [B-rf2] P = 2: sum of the links' peaks within (P*C + G - (P+1)*M, P*C + G] = (9043773, 9437184]: 9310727 — yes
+EXPECTED: [B-rf2] P = 2: each link at least C - M (4063167): {'R1': 4720932, 'R2': 4589795} — yes
+EXPECTED: [B-rf2] P = 2: each peer's reserve gauge at most 1048576 and their sum at most G = 1048576: {'R1': 526628, 'R2': 395491} — yes
+EXPECTED: [B-rf3] P = 3: sum of the links' peaks within (P*C + G - (P+1)*M, P*C + G] = (13106940, 13631488]: 13507111 — yes
+EXPECTED: [B-rf3] P = 3: each link at least C - M (4063167): {'R1': 5114343, 'R2': 4196384, 'R3': 4196384} — yes
+EXPECTED: [B-rf3] P = 3: each peer's reserve gauge at most 1048576 and their sum at most G = 1048576: {'R1': 920039, 'R2': 2080, 'R3': 2080} — yes
+done: label peer

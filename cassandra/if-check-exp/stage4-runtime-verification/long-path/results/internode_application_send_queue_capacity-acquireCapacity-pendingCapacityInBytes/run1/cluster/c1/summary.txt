@@ -1,0 +1,36 @@
+label c1: capacity 4194304 B; extras {'internode_application_send_queue_reserve_endpoint_capacity': '1MiB'}; predicted effective E 134217728, G 536870912; drops expected False; hold True; scenario A False; RF [1]
+harness file hold-delivery.btm: md5 d7682826394919148c0cb96589fbbb58
+harness file send-config.btm: md5 af82114b359ab0a705d51be208879761
+harness file send-acquire.btm: md5 64ea0b4297e978caee012021f7aa9db2
+harness file Hold.java: md5 0ac9e4ec9b67f95096eac1affae4cfca
+Hold.class has held(): True
+ring: R1..R3 are up but still list S; stopping and wiping them to start a fresh ring
+R1 up: statusbinary running, 1 nodes UN (9 s)
+R2 up: statusbinary running, 2 nodes UN (9 s)
+R3 up: statusbinary running, 3 nodes UN (9 s)
+ring: started 3 of R1..R3 (they stay up between labels)
+schema keyspace1.standard1 created by one cassandra-stress write against R1 (S is not up yet): True
+RF -> 1: RF already 1, not altered
+S up: statusbinary running, 4 nodes UN (9 s)
+JMX scopes of S's connection metrics: {'R1': '127.0.0.3_7010', 'R2': '127.0.0.4_7010', 'R3': '127.0.0.5_7010'}
+config trace R1: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=134217728 global=536870912
+config trace R2: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=134217728 global=536870912
+config trace R3: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=134217728 global=536870912
+EXPECTED: [c1] config trace: every connection of R1..R3 has capacity=4194304 endpoint=134217728 global=536870912 — yes
+idle: large-link pending bytes {'R1': 0, 'R2': 0, 'R3': 0}; overload counts {'R1': 0, 'R2': 0, 'R3': 0}
+EXPECTED: idle: pending bytes of the large links are 0 and no overload — yes
+idle heap used after full GC (KiB): [74922, 91217, 91907]; mean 86015.33333333333; spread 16985
+hold check: pending 131135 (trace bytes [131135]), 3 s later 131135, completed 1 -> 1; Hold.park in the dump: True
+hold trace: hold park thread=Messaging-OUT-/127.0.0.2:7010->/127.0.0.3:7010-LARGE_MESSAGES file=/users/jason92/stage4-logs/ssq/c1/hold ms=1791439775228 | hold release thread=Messaging-OUT-/127.0.0.2:7010->/127.0.0.3:7010-LARGE_MESSAGES ms=1791439780381
+hold check passed: the write was held (pending = M, completed unchanged, thread parked in Hold.park) and delivered by itself after the file was removed
+B: heap used after full GC at ~5 s = 99310 KiB; histogram {'org.apache.cassandra.net.Message': (256, 10240), 'org.apache.cassandra.db.Mutation': (256, 14336)}
+B stress: still running after 60 s; terminated
+[B] M = 131136 B (mode of accepted bytes); X (max pending seen by acquire, large link) = {'R1': 35406720, 'R2': 0, 'R3': 0}; accepted {'R1': 1792, 'R2': 0, 'R3': 0}; refused {'R1': 0, 'R2': 0, 'R3': 0}; first refusal None; stress failed operations 0, failed attempts 0; parked delivery threads in the dump 1; drain settled in 0.4073758125305176 s; probe {'R1': 1}
+EXPECTED: [B] R1: nothing dropped (refused 0) and X ~ D = 33570816 (|X - D| <= 2 M: 35406720) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B] no SUCCESS acquire with pending above C + F (0 found) — yes
+EXPECTED: [B] R1: plateau still there at ~12.5 s, past the 10 s deadline (JMX 33833088 = peak 35406720) and nothing expired before the lift (1534) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B] R1: after the lift pending bytes return to 0 (0), timed-out count = accepted (1536 = 1792), completed count does not move (256) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B] the parked delivery threads showed in the dump (found 1, expected 1) — yes
+EXPECTED: [B] liveness probe delivered: R1 completed count +1 ({'R1': 1}) — yes
+[B] heap: used at ~5 s 99310 KiB; idle floor 86015.33333333333 KiB (spread 16985 KiB); delta 13613738.666666672 B; delta / X = 0.38 (X = 35406720); adjudicable (delta > 3 x spread): False
+done: label c1

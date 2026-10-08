@@ -1,0 +1,26 @@
+label nohold: capacity 1048576 B; extras {'internode_application_send_queue_reserve_global_capacity': '1MiB', 'internode_application_send_queue_reserve_endpoint_capacity': '1MiB', 'internode_application_receive_queue_reserve_endpoint_capacity': '1MiB'}; predicted effective E 1048576, G 1048576; drops expected False; hold False; scenario A False; RF [1]
+harness file hold-delivery.btm: md5 d7682826394919148c0cb96589fbbb58
+harness file send-config.btm: md5 af82114b359ab0a705d51be208879761
+harness file send-acquire.btm: md5 64ea0b4297e978caee012021f7aa9db2
+harness file Hold.java: md5 0ac9e4ec9b67f95096eac1affae4cfca
+Hold.class has held(): True
+ring: R1..R3 are up but still list S; stopping and wiping them to start a fresh ring
+R1 up: statusbinary running, 1 nodes UN (9 s)
+R2 up: statusbinary running, 2 nodes UN (9 s)
+R3 up: statusbinary running, 3 nodes UN (9 s)
+ring: started 3 of R1..R3 (they stay up between labels)
+schema keyspace1.standard1 created by one cassandra-stress write against R1 (S is not up yet): True
+RF -> 1: RF already 1, not altered
+S up: statusbinary running, 4 nodes UN (9 s)
+JMX scopes of S's connection metrics: {'R1': '127.0.0.3_7010', 'R2': '127.0.0.4_7010', 'R3': '127.0.0.5_7010'}
+config trace R1: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=1048576 endpoint=1048576 global=1048576
+config trace R2: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=1048576 endpoint=1048576 global=1048576
+config trace R3: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=1048576 endpoint=1048576 global=1048576
+EXPECTED: [nohold] config trace: every connection of R1..R3 has capacity=1048576 endpoint=1048576 global=1048576 — yes
+idle: large-link pending bytes {'R1': 0, 'R2': 0, 'R3': 0}; overload counts {'R1': 0, 'R2': 0, 'R3': 0}
+EXPECTED: idle: pending bytes of the large links are 0 and no overload — yes
+idle heap used after full GC (KiB): [90988, 90903, 91593]; mean 91161.33333333333; spread 690
+B-nohold: heap used after full GC at ~5 s = 97508 KiB; histogram {'org.apache.cassandra.net.Message': (52, 2080), 'org.apache.cassandra.db.Mutation': (61, 3416)}
+[B-nohold] M = 131137 B (mode of accepted bytes); X (max pending seen by acquire, large link) = {'R1': 1967055, 'R2': 0, 'R3': 0}; accepted {'R1': 7090, 'R2': 0, 'R3': 0}; refused {'R1': 21651, 'R2': 0, 'R3': 0}; first refusal INSUFFICIENT_GLOBAL; stress failed operations 1087, failed attempts 10870; parked delivery threads in the dump 0; drain settled in 0 s; probe {}
+EXPECTED: [B-nohold] no-hold control: X far below C + F (1967055 < 1048576) and overload_count = 0 (21651 refused) — NO (recorded; the AI judges it in the results file)
+done: label nohold

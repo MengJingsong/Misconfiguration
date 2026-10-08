@@ -2,7 +2,7 @@
 
 > **Case:** [`internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`](../../../stage3-ai-deep-read/long-path/cases/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md)
 >
-> **Status:** audited and frozen 2026-10-07 (**Ready after amendments**); harness written and instrument-checked 2026-10-07 (unit tier; the cluster tier's hold check, §3); run 1 not started
+> **Status:** **Closed 2026-10-08 — Confirmed at both tiers** (run 1 on `pc66`, self-check exit 0, no run 2). Audited and frozen 2026-10-07 (**Ready after amendments**; §9a `efd85ccc…`, verified unchanged at run time). The central derived claim (per-peer reserve from the receive-side key) is confirmed; §4/§5/§8 stand unamended.
 >
 > **Path:** long. Unit tier and cluster tier.
 
@@ -59,20 +59,19 @@ Checked against the pinned clone `cassandra-5.0.9` (`~/git-repos/cassandra-src`,
 
 | Field | Run 1 | Run 2 (fresh AI session, if done) |
 |---|---|---|
-| Date | | |
-| Node (CloudLab name and type) | | |
-| OS and kernel (`uname -r`) | | |
-| JDK (`java -version`) | | |
-| Ant (`ant -version`) | | |
-| Local `cassandra-src` clone commit | | |
-| Case-file commit / harness commit | | |
-| Storage for node data | | |
-| Full logs (path, outside the repo) | | |
+| Date | 2026-10-07 23:44 – 2026-10-08 00:19 (−0600) | |
+| Node (CloudLab name and type) | `pc66` = `node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu`; 40 cores, 125 GiB RAM. One machine, four processes on loopback (S = `127.0.0.2`, R1–R3 = `127.0.0.3`–`.5`) | |
+| OS and kernel (`uname -r`) | Ubuntu 22.04, `5.15.0-187-generic` | |
+| JDK (`java -version`) | `openjdk 11.0.32.1 2026-08-18` | |
+| Ant (`ant -version`) | `1.10.12` | |
+| Local `cassandra-src` clone commit | `~/cassandra-run1` at tag `cassandra-5.0.9` (`b5f2a54`); harness unit tests copied into `test/unit/org/apache/cassandra/net/` (untracked) | |
+| Case-file commit / harness commit | case `1c9a913` (§9a frozen `efd85ccc…`, verified unchanged at run time); harness `ef01a31` | |
+| Storage for node data | local disk `/dev/sda3` (47 GiB free); node dirs `~/stage4-ssq/{R1,R2,R3,S}` (20–34 MiB each). S owns one token but the hold stops its delivery, so it stores little. No loop filesystem is used for this case (the `/mnt/stage4-data` loop fs on the node is leftover from the `max_space…` run) | |
+| Full logs (path, outside the repo) | `~/stage4-logs/ssq/<label>/` on `pc66` — per label: `send-trace.txt` (the Byteman acquire/config trace, 22–97 MiB), `readings.csv` (JMX), `<scenario>/poll.csv` (`system_views.internode_outbound`), `session.log`, `histogram-*.txt`, `threads.txt`, `summary.txt`, `scenarios.csv`. Small excerpts (each label's `summary.txt` and `scenarios.csv`, `unit/summary.txt`) are copied to `results/<stem>/run1/` with the self-check | |
 
 ## 3. Runbook defects
 
-None in a run yet (run 1 has not started). Defects found by reading, before any run, are the amendments of §1.1. Rows 1 to 5 were found in the
-`c1m` shakedowns of 2026-10-07 (evening), which are not readings.
+**Run 1 (2026-10-08) added no new runbook defect:** every label ran to its end and wrote `summary.txt`, `scenarios.csv`, `readings.csv` and the trace; the hold check passed on each (the `hold park` / `hold release` lines and the harness md5s are in each `summary.txt`, closing shakedown row 3). Defects found by reading, before any run, are the amendments of §1.1. Rows 1 to 5 were found in the `c1m` shakedowns of 2026-10-07 (evening), which are not readings.
 
 | # | Run | Step (§9b–§9e) | Problem | Fix | Decision (date) | Case-file commit with the fix |
 |---|---|---|---|---|---|---|
@@ -80,25 +79,57 @@ None in a run yet (run 1 has not started). Defects found by reading, before any 
 | 2 | shakedown `c1m` | ring start (9b) | a ring kept up from an earlier label still lists S; with S stopped, `ALTER KEYSPACE` is refused ("endpoints are not in normal state") and the script died | `ensure_ring()` stops and wipes a ring that lists S and starts it fresh; `cluster-run.py down` now also wipes the data of R1 to R3 and S (conf and logs stay). Tested: the third `c1m` run reset the ring by itself | fixed in the harness 2026-10-07; harness only | harness commit |
 | 3 | first shakedown `c1m` (22:18) | hold (9c, `hold-delivery.btm`) | the rule did not fire on that run: no `hold park` line, the 131,135-byte write was delivered at once (completed 1 → 2) and the hold check stopped the run | **Most likely cause, found from the run's own files: that run used an older rule and helper than the files on disk.** Its `hold-classes/stage4/Hold.class` (578 B, built 22:16) has `park()` only, while the current `Hold.java` (682 B class) also has `held()`, which the current rule calls; `Hold.java` and `hold-delivery.btm` were last changed at 22:19, after the run, and the run's copy of the old rule was not kept. Not proven (the old rule text is gone), but the same rule parks and releases in a standalone program and in five later `c1m` runs that reached the hold check (23:03 onward; the first of them with Byteman verbose, which showed the trigger inserted into `LargeMessageDelivery.doRun`). `cluster-run.py` now writes the md5 of the three `.btm` files and `Hold.java`, whether `Hold.class` has `held()`, and the run's `hold` trace lines into `summary.txt` | closed as a stale-version shakedown, 2026-10-07; run 1 must show its `hold park` and `hold release` lines in `summary.txt` | harness commit |
 | 4 | shakedown `c1m` | scenario B, the client-error line (9e) | the line `stress Total errors ~ overload_count` read **10** where the stress block prints `10,293`: the script's number parse stops at the comma. Stress also retries each failed operation ten times (`Operation x10 …`, 10,293 operations); the per-attempt `WriteTimeoutException` lines number 102,929 against 102,915 refused acquires | fixed: the script parses the number with its commas and compares the failed **attempts** (the sum of the `Operation xN` counts) with `overload_count` (± threads in flight). On the fourth run: 105,490 attempts (10,549 operations) against 105,475 refused (+15 = the accepted messages that timed out), `yes` | fixed in the harness 2026-10-07; harness only, §9a unchanged (the prediction "every refused write is an error at the client at once" holds) | harness commit |
-| 5 | shakedown `c1m` | scenario A (9a prediction, `X = 2M`) | `X` read 524,544 B (4 × *M*, *M* = 131,136) against the predicted 2*M* ± 1 message (131,136 to 393,408). The pending bytes rose in steps of two messages about every 10 s (+16.3 s, +26.3 s, +36.3 s), and 10 messages timed out before the lift: the two client threads evidently sent again about every 10 s while earlier messages were still queued. **The cause is inferred from this timing and not verified** (the client's timeout and the queue's expiry were not read separately). The prediction assumed one message in flight per thread | none to the harness. The reading is recorded as a **missed prediction**; §9a is frozen and is not edited | pending the decision on the two NO lines | |
+| 5 | shakedown `c1m` | scenario A (9a prediction, `X = 2M`) | `X` read 524,544 B (4 × *M*, *M* = 131,136) against the predicted 2*M* ± 1 message (131,136 to 393,408). The pending bytes rose in steps of two messages about every 10 s (+16.3 s, +26.3 s, +36.3 s), and 10 messages timed out before the lift: the two client threads evidently sent again about every 10 s while earlier messages were still queued. **The cause is inferred from this timing and not verified** (the client's timeout and the queue's expiry were not read separately). The prediction assumed one message in flight per thread | none to the harness. The reading is recorded as a **missed prediction**; §9a is frozen and is not edited | **run 1 reproduced it at all four C-sweep values** (`X` = 524,544 = 4*M* against the predicted 2*M* = 262,272); it is a **calibration** prediction (scenario A sets no capacity and triggers no refusal) and does not bear on the verdict — kept as a missed prediction, §9a untouched (§5, §8) | — |
 
 ## 4. Run 1
 
-Not started.
+Run on `pc66`, 2026-10-07 23:44 – 2026-10-08 00:19. **Unit tier:** the two upstream controls (`ConnectionTest#testInsufficientSpace`, `#testAcquireReleaseOutbound`), `ResourceLimitsTest` (5), `SendQueueCapacityTest` (4, U1–U9) and `SendQueueWiringTest` (2, **U10 and U11** — the receive-key wiring) all pass, 0 instrument-MISMATCH lines (`unit/summary.txt`). **Cluster tier:** nine labels, each a background job writing its own `summary.txt`, `scenarios.csv`, `readings.csv` and `send-trace.txt`; all ran to the end, each hold check passed. Values below are R1 unless noted; *M* = one message's canonical size ≈ 131,136 B (131,137 when the stress payload rounds up). *X* = the link's peak pending bytes seen at `acquireCapacity` (from the trace).
+
+| Label | C | E (eff) | G | drops | first refusal | *M* | *X* (peak pending) | accepted | refused | §9a band on *X* |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `c512k` | 512 KiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,136 | 1,442,496 | 11 | 111,269 | (1,441,728, 1,572,864] ✓ |
+| `c1m` | 1 MiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,136 | 1,967,040 | 15 | 105,805 | (1,966,016, 2,097,152] ✓ |
+| `c4m` | 4 MiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,136 | 5,114,304 | 39 | 86,431 | (5,111,744, 5,242,880] ✓ |
+| `c16m` | 16 MiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,136 | 17,703,360 | 135 | 110,155 | (17,694,656, 17,825,792] ✓ |
+| `defres` | 4 MiB | 128 MiB | 512 MiB | **no** | — | 131,136 | 43,274,880 | 1,792 | 0 | C < *X* ≤ C+F ✓ (reserves bind, not C) |
+| `nohold` | 1 MiB | 1 MiB | 1 MiB | no (control) | `INSUFFICIENT_GLOBAL` | 131,137 | 1,967,055 | 7,090 | 21,651 | empirical no-hold control |
+| `c1` | 4 MiB | **128 MiB** | 512 MiB | **no** | — | 131,136 | 35,406,720 | 1,792 | 0 | send-ep key inert → C+F huge → no drops ✓ |
+| `c2` | 4 MiB | **1 MiB** | 512 MiB | yes | `INSUFFICIENT_ENDPOINT` | 131,137 | 5,114,343 | 256 | 101,399 | (5,111,743, 5,242,880] ✓ |
+| `peer` rf1 | 4 MiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,136 | 5,114,304 (R1) | 39 | 93,231 | sum (4,980,608, 5,242,880]: 5,114,304 ✓ |
+| `peer` rf2 | 4 MiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,137 | R1 4,720,932 / R2 4,589,795 | 36 / 35 | 90,954 / 90,955 | sum (9,043,773, 9,437,184]: 9,310,727 ✓ |
+| `peer` rf3 | 4 MiB | 1 MiB | 1 MiB | yes | `INSUFFICIENT_GLOBAL` | 131,137 | R1 5,114,343 / R2,R3 4,196,384 | 39 / 32 / 32 | 72,021 / 72,028 / 72,028 | sum (13,106,940, 13,631,488]: 13,507,111 ✓ |
+
+Across every reserves-low arm (`c512k`–`c16m`, `c2`, `peer`): `overload_count` rose at the offered rate, the first refused acquire matched the predicted outcome, **no SUCCESS acquire ever recorded pending above C+F** (the check is never seen to admit past the limit), the reserve gauge from `system_views.internode_outbound` sat in (F−M, F], the plateau held flat past the 10 s deadline (global arm) and the accounting returned to zero after the lift. The liveness probe was delivered in every held arm (the parked delivery thread resumed by itself). **Scenario A** read *X* = 524,544 (= 4*M*) at all four C-sweep values against the predicted 2*M* — the recorded calibration miss (§3 row 5), which sets no capacity and triggers no refusal.
+
+Small excerpts in [`run1/`](internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes/run1/): `unit/summary.txt`, `cluster/<label>/{summary.txt,scenarios.csv}`, the self-check and its output. Full trace and JMX logs stay on `pc66` (§2).
 
 ## 5. Self-check of run 1 — AI
 
-Not started.
+[`run1/selfcheck.py`](internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes/run1/selfcheck.py) re-derives every figure **from the rawest files** — the Byteman `acquire`/`config` trace and the JMX `readings.csv` and poller — independently of the run script's `summary.txt`/`scenarios.csv`, and tests each against the frozen §9a prediction typed into the script (not read from the run's `EXPECTED:` lines). It runs on `pc66` against `~/stage4-logs/ssq`; output is [`run1/selfcheck.out`](internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes/run1/selfcheck.out). **Exit 0: 0 load-bearing §9a checks fail; 0 of the independently recomputed figures (X, M, accepted, refused) disagree with the run script's `scenarios.csv` (agreement to the byte); 4 recorded missed predictions reproduced (scenario A's X at the four C-sweep values).**
+
+What the self-check confirms, and three things it clarifies:
+
+1. **Capacity sweep.** Peak pending lands in (C+F−M, C+F] at 512 KiB · 1 · 4 · 16 MiB and moves one-for-one with C; `overload_count` rises; using-reserve in (F−M, F]; no SUCCESS acquire above C+F. **Usage stops at the limit by the disallow branch, and the plateau follows the knob.**
+2. **The central derived claim (§4 wiring) is confirmed by measurement, not just derived.** `c1` lowers only the **send-side** endpoint key and the config trace still shows effective `endpoint = 134,217,728` (128 MiB) with **no drops**; `c2` lowers the **receive-side** key and the link drops at C+F with `INSUFFICIENT_ENDPOINT`. So the per-peer reserve is read from the receive-side key and the send-side key is inert — matching U10/U11. The case's §4/§5/§8 need **no amendment**; the "untested central finding" is now tested and holds.
+3. **§8's node-wide formula `P·C + G`** holds across the peer sweep: sum-of-peaks in (P·C+G−(P+1)·M, P·C+G] at P = 1, 2, 3; each link ≥ C−M; reserve gauges ≤ E and their sum ≤ G.
+
+Clarifications for the verdict:
+
+- **The four "NO" lines in `peer`'s own `summary.txt` are not missed predictions.** They are the harness applying the *single-link* band (C+F−M < X ≤ C+F) to individual links of a *multi-link* sweep (e.g. rf2 R1 = 4,720,932, below the single-link lower bound). §9a's peer-sweep prediction is the **sum** band plus "each link ≥ C−M", and both hold at every P. The self-check applies §9a's actual sweep prediction and all pass.
+- **`c2` (endpoint refusal) churns where the global arms hold flat — as §9a's own amendment predicts.** Its late pending (3,934,110) is below its peak (5,114,343) and 226 messages expired by 12.5 s, because an `INSUFFICIENT_ENDPOINT` refusal **takes the prune-and-retry branch** (`OutboundConnection.java:337-341`) while `INSUFFICIENT_GLOBAL` does not; the held link therefore prunes and accepts more (256, one per thread) while the peak still obeys C+F. This is a confirmation of the mechanism §9a distinguishes, not a plateau failure. (Candidate §6b (iii) refinement — see §8 / §10.)
+- **The heap sub-claim is not demonstrable in this run (accounting-only).** Only one of the four C-sweep values (`c16m`) cleared three times its idle-heap spread; the other three idle floors were too noisy (spread 15–17 MiB vs `c16m`'s 689 KiB), so Δ*heap*/X proportionality across the sweep cannot be shown (n = 1). This is the §9a "heap row = Not confirmed" outcome, which **does not touch the plateau rows**; the capacity verdict stands on the accounting.
 
 ## 6. Run 2 — fresh AI session (optional)
 
-Not done.
+**Not recommended.** Both tiers are Confirmed; the self-check re-derived every figure from the raw trace independently and agreed with the run script to the byte, with no load-bearing failure; the one missed prediction is a calibration artifact that sets no capacity. A run 2 would add nothing the raw-log self-check has not already cross-checked. (Consistent with the folder's six other closed cases, none of which has a run 2.) If the heap proportionality is wanted as a positive result, that is a harness change (read the idle floor more times / at quiescence to cut the 15–17 MiB spread), not a re-run of the same harness.
 
 ## 8. Verdict — AI
 
 | Tier | Verdict (§9a row) | Basis | Date |
 |---|---|---|---|
-| Unit | — | — | — |
-| Cluster | — | — | — |
+| Unit | **Confirmed** | `SendQueueCapacityTest` (U1–U9) and the two upstream controls pass; **`SendQueueWiringTest` (U10, U11) passes**, so the receive-key wiring of §4 holds at the unit tier; 0 instrument-MISMATCH | 2026-10-08 |
+| Cluster | **Confirmed** (§9a Conclusions row 1: "Reserves low: X within (C+F−M, C+F] and moving with C … overload_count rises; using_reserve ≈ X−C; the peer sweep follows P·C+G; C1 shows no drops and C2 shows the plateau; drain returns to zero → **Confirmed**") | every clause of that row holds on the raw-log self-check (§4, §5): the plateau band at all four C values, the disallow evidence (`overload_count`, `INSUFFICIENT_*`, no admit above C+F), the receive-side reserve wiring (c1/c2), `P·C+G` across the sweep, and a clean drain to zero. **The §9a heap row is Not confirmed (accounting-only, n = 1 adjudicable)** and does not touch the plateau rows. Scenario A's X is a recorded calibration miss (§3 row 5) | 2026-10-08 |
 
-**Feedback filed:** the case file's §10 "Stage-4 feedback" carries the audit (2026-10-07); no run has reported yet.
+**Verdict:** `internode_application_send_queue_capacity` bounds a link's unsent bytes to within one message of C + F, borrows the excess from the per-peer and node-wide reserves, and drops past that — all confirmed at both tiers. The case's central derived claim (the per-peer reserve is read from the **receive-side** key) is confirmed, so §4/§5/§8 stand unamended. One mechanism is newly observed and worth a stage-3 note: an `INSUFFICIENT_ENDPOINT` refusal prunes the held link (`:337-341`) while `INSUFFICIENT_GLOBAL` does not, which sharpens §6b (iii). No run 2.
+
+**Feedback filed:** the case file's §10 "Stage-4 feedback" carries the audit (2026-10-07) and the run-1 result (2026-10-08).

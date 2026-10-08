@@ -21,28 +21,20 @@ Google Docs — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk2
 (running log of entry points, cases and findings); a session with the Google
 Drive connector enabled can read them directly.
 
-## Resume here — stage 4, long path, next case (written 2026-10-07 after `max_space…` closed)
+## Resume here — stage 4, long path, next case (updated 2026-10-08 after `internode_application_send_queue_capacity` closed)
 
-**State:** 6 of 17 cases closed at stage 4 (table in "Stage 4 — long path" below), 10 unaudited and unrun, **1 audited and frozen but not run** (below), no run 2
-anywhere. `1c9a913` (the audit of the seventeenth case) is pushed; **the commit after it adds the harness, the results-file notes and this block, and is not pushed**. No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no isolation rule. The pinned clone is now
+**State:** **7 of 17 cases closed at stage 4** (table in "Stage 4 — long path" below), 10 unaudited and unrun, no run 2
+anywhere. No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no isolation rule. The pinned clone is now
 local, `~/git-repos/cassandra-src` at `cassandra-5.0.9` (shallow, tag only), so step 0 needs no ssh.
 
-**In progress (2026-10-07 evening): `internode_application_send_queue_capacity`.** Step-0 audit done, **Ready after amendments**
-([results §1.1](cassandra/if-check-exp/stage4-runtime-verification/long-path/results/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md));
-**§9a frozen at `efd85ccc7840d755bbc3b254843733c3bfab9888`** (was `0eaefb90…` as filed; do not edit §9a). The audit found, from the source: (1) the hold must **park** the
-delivery thread, not `RETURN false` — at the plateau no write can restart a stopped link, so the drain would never have been seen; (2) S needs
-`native_transport_max_threads: 512` — each held write keeps a request thread (135 at 16 MiB, 256 in the default-reserves arms, pool of 128); (3) four nodes from one clone
-need per-node `CASSANDRA_CONF` / `CASSANDRA_LOG_DIR` and JMX ports (`cassandra-env.sh:235` hard-codes 7199) — ports 7102 to 7105; (4) the heap row now has a noise rule;
-(5) S's `data/` stays between values. **One machine is enough** (four processes on loopback, `pc66`). **Step 1 is done (2026-10-07 night):** the harness is written (`harness/<stem>/README.md` lists it) and the
-unit tier is instrument-checked (5 test classes pass, 0 mismatch lines). The cluster tier's hold check passes: `c1m` ran through four times (14 of 16 `EXPECTED:` lines yes in the first three, 15 of 16 in the fourth
-after the parse fix), these were shakedowns and are not readings. Five runbook defects are in results §3, four of them fixed in the harness. **Before run 1:** (a) one `EXPECTED:` line is still NO in the shakedowns, scenario A's `X = 2M` (`X` read 4*M*; results §3 row 5): a missed prediction, recorded and kept, §9a is not edited; (b) the stress client-error line is fixed (it compares failed attempts, 105,490 against 105,475 refused on the last shakedown); (c) the first shakedown's hold failure came from an older rule and helper than the files on disk (row 3), so run 1's `summary.txt` must show the `hold park` / `hold release` lines and the file md5s the script now writes. Then run 1 from the start: unit tier, then each cluster label as its own background job (`cluster-run.py <label>`; a label on a ring that
-lists S now resets the ring by itself, and `cluster-run.py down` stops and wipes it). The central claim (receive-side reserve key) is still only derived.
+**Just closed (2026-10-08): `internode_application_send_queue_capacity` — Confirmed at both tiers, no run 2.** Run 1 ran on `pc66` overnight (all nine cluster labels + unit, 2026-10-07 23:44 – 2026-10-08 00:19); the independent raw-log self-check
+([`results/<stem>/run1/selfcheck.py`](cassandra/if-check-exp/stage4-runtime-verification/long-path/results/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes/run1/selfcheck.py)) exited 0 — 0 load-bearing §9a failures and every recomputed figure agrees with the run script to the byte. Results filled (§2, §4, §5, §8) and the case's §10 updated; §9a hash `efd85ccc…` verified unchanged. **The central derived claim is now tested and holds** (c1/c2 and U10/U11 show the per-peer reserve following the receive-side key), so §4/§5/§8 stand unamended. Recorded, not applied: scenario A's calibration `X` read ~4*M* not 2*M* (results §3 row 5); the heap-proportionality row was not demonstrable (only `c16m` cleared the idle-heap noise). One stage-3 note for §6b (iii): an `INSUFFICIENT_ENDPOINT` refusal prunes the held link (`:337-341`) while `INSUFFICIENT_GLOBAL` does not.
 
-**Pick the case** (Jingsong chooses; these are suggestions, not checked against each §9): the siblings and unit-heavy designs are cheapest —
+**⚠️ Node teardown pending on `pc66`.** Run 1 left the ring **up**: three daemons (R1/R2/R3, JMX 7103/7104/7105) are still running, node S is down, and the `max_space…` loop fs is still mounted at `/mnt/stage4-data`. Run `~/stage4-harness-run/ssq/cluster-run.py down` on `pc66` to stop and wipe them before the next case (it also frees the ports). Full run-1 logs are on `pc66` at `~/stage4-logs/ssq/` (kept; not in the repo). Nothing is committed — this update and the run-1 files are local.
+
+**Pick the next case** (Jingsong chooses; these are suggestions, not checked against each §9): the siblings and unit-heavy designs are cheapest —
 `memtable_offheap_space` (same `SubPool.tryAllocate()` check as the closed `memtable_heap_space`; its `HeapPoolTest` harness may carry over),
-then `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT` (unit tiers need their harness written);
-`internode_application_send_queue_capacity` is the heaviest (four processes, a Byteman hold, a poller of `system_views.internode_outbound`; its
-central finding, the receive-side reserve key, is derived and untested). Two designs need a cluster before they say anything:
+then `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT` (unit tiers need their harness written). Two designs need a cluster before they say anything:
 `native_transport_receive_queue_capacity` and `DataDirectory_getAvailableSpace`.
 
 **Recipe** (protocol: `stage4-runtime-verification/README.md` "The run protocol"; worked example: `max_space…`, results file and `harness/<stem>/`):
@@ -54,9 +46,7 @@ central finding, the receive-side reserve key, is derived and untested). Two des
 4. **Self-check with an independent script that re-parses the raw logs** (`max_space…/run1/selfcheck.py` is the model), then fill results §4.2, §5, §8, the case's §10 "Stage-4 feedback" (and §8/Target-3 if a bypass is confirmed), and the state rows here. Decide run 2 and say why.
 5. Do not commit or push unless asked ("Commit and push only on request").
 
-**Node access (checked 2026-10-07):** `ssh -o BatchMode=yes jason92@pc66.cloudlab.umass.edu` works (also `pc66.cloudlab.umass.edu` alone; the long
-`node0.jason92-…` names fail host-key verification). `pc66` has JDK 11, Ant, `~/cassandra-run1` at `cassandra-5.0.9`, the harness tests copied in
-(untracked), no daemon running, `sudo` without password; a 4 GiB loop filesystem is still mounted at `/mnt/stage4-data` (the next `cluster-run.py` re-creates it).
+**Node access (checked 2026-10-08):** a session running **on** `pc66` (hostname `node0.jason92-317394…`) works locally — no ssh needed. From another host, `ssh -o BatchMode=yes jason92@pc66.cloudlab.umass.edu` was the route on 2026-10-07 (also `pc66.cloudlab.umass.edu` alone; the long `node0.jason92-…` names fail host-key verification); note that `ssh` *out* of `pc66` has no agent/known-hosts, so drive `pc66` locally. `pc66` has JDK 11, Ant, `~/cassandra-run1` at `cassandra-5.0.9`, the harness tests copied in (untracked), `sudo` without password. **The ssq ring from run 1 is still up (R1/R2/R3 daemons, JMX 7103–7105); tear it down with `~/stage4-harness-run/ssq/cluster-run.py down` before the next case.** A 4 GiB loop filesystem is still mounted at `/mnt/stage4-data` (the next `cluster-run.py <label>` re-creates/unmounts it).
 **Nodes now (checked 2026-10-07 evening): `pc66`, `pc57`, `pc50`.** `pc57` and `pc50` are fresh (one new experiment, `…-319347`, up about 1 h, empty home): do `environment.md` §1 to §3 first (JDK 11, Ant, clone, `ant build-test`), then the harness. `pc80` and `pc72` are no longer used (`pc80` refuses the key). Sync a new harness to `~/stage4-harness-run/<name>/` and compare `md5sum` with the repo before run 1.
 Launch node scripts as `( setsid nohup … < /dev/null > /dev/null 2>&1 & )` and wait with a background `until` loop, never a foreground `sleep`.
 
@@ -283,14 +273,13 @@ Each case's full detail lives in its own file.
 **Every case carries a §9 test design in the new layout** (§9a summary and conclusions table for a human; §9b–§9e a Linux
 runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the §9s:
 
-- **Audited, run and closed at stage 4 (6):** `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `max_space_usable_for_compactions_in_percentage` (audit 2026-10-07, **Ready after amendments**: the hatch arm's trigger, `nodetool compact`, is a `MAJOR_COMPACTION` and cannot reach the hatch, and the in-flight arm would have aborted instead of shedding; run 1 the same day, Confirmed at both tiers; §9a's hash `f17dad5a…` is unchanged, do not edit §9a).
-- **Audited, frozen, not run (1):** `internode_application_send_queue_capacity` (audit 2026-10-07, **Ready after amendments**; §9a hash `efd85ccc…`; harness written and instrument-checked, run 1 not started; see "Resume here").
+- **Audited, run and closed at stage 4 (7):** `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `max_space_usable_for_compactions_in_percentage` (audit 2026-10-07, **Ready after amendments**: the hatch arm's trigger, `nodetool compact`, is a `MAJOR_COMPACTION` and cannot reach the hatch, and the in-flight arm would have aborted instead of shedding; run 1 the same day, Confirmed at both tiers; §9a's hash `f17dad5a…` is unchanged, do not edit §9a), `internode_application_send_queue_capacity` (audit 2026-10-07 **Ready after amendments**, §9a `efd85ccc…`; **run 1 2026-10-08 `pc66`, Confirmed at both tiers, no run 2**; the receive-side reserve-key claim is tested and holds; §9a unchanged).
 - **Not yet audited or run (10):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
   needs (Java tests, Byteman rules, scripts) as step-1 work; none of that code exists yet. The eight cases converted to the new layout on 2026-10-06 and the cases
   written since (`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `internode_application_send_queue_capacity`) record in their §10 Notes
   where they differ from earlier notes on the same lines, **for stage 3 to judge, not applied to §5–§8**.
-- **Untested central finding:** the seventeenth case's claim that the per-peer reserve is read from the receive-side key
-  `internode_application_receive_queue_reserve_endpoint_capacity` is derived from the source only; if unit step U10 or scenario C refutes it, amend the case's §4, §5, §8 and §10.
+- **Central finding, now tested (2026-10-08):** the seventeenth case's claim that the per-peer reserve is read from the receive-side key
+  `internode_application_receive_queue_reserve_endpoint_capacity` **was confirmed** at stage 4 (unit U10/U11 pass; cluster `c1` sets only the send-side key and still reads `endpoint = 128 MiB` with no drops, `c2` sets the receive-side key and drops at C+F with `INSUFFICIENT_ENDPOINT`). §4, §5, §8 stand unamended.
 
 ## Latest status (2026-10-07) and next steps
 
@@ -319,7 +308,7 @@ runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the 
 
 ### Stage 4 — long path (AI audits §9, runs it, owns the verdict; no human gate)
 
-Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/long-path/results/<stem>.md` (+ `<stem>/run1/`), harnesses in `.../harness/<stem>/`.
+Seven cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/long-path/results/<stem>.md` (+ `<stem>/run1/`), harnesses in `.../harness/<stem>/`.
 
 | Case | Closed | Verdict | Key reading |
 |---|---|---|---|
@@ -329,8 +318,11 @@ Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/l
 | `local_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (names-filter read, paging, unflagged read) | The check's counter equals the predicted value exactly at 256 KiB, 1 MiB, 4 MiB. One sub-prediction missed (names read 77 % of unlimited). |
 | `row_index_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (key-cache hit, lazily opened SSTable, scan) | Accepted iff estimate ≤ limit; **at the stock `column_index_cache_size` every accepted entry weighs 128 B, so the limit bounds no heap.** |
 | `max_space_usable_for_compactions_in_percentage` | 2026-10-07 | Confirmed, unit and cluster; H1 as predicted (the hatch does not cover `nodetool compact`), H2 bypass as recorded (background compaction, 10 × the budget) | Ladder n = 0 · 0 · 2 · 5 · abort at 0.95 · 1.5 · 0.8 · 0.4 · 0.1 (`requested` equal to the simulation to the byte); in flight n = 5 against 0. 134 self-check checks from the raw logs (`run1/selfcheck.py`). |
+| `internode_application_send_queue_capacity` | 2026-10-08 | Confirmed, unit and cluster; no run 2. Central wiring claim (receive-side reserve key) tested and holds (c1/c2, U10/U11). Heap row not demonstrable (accounting-only, n=1); scenario A's X a recorded calibration miss | Peak pending in (C+F−M, C+F] across the C sweep (512 KiB→16 MiB); `P·C+G` across the peer sweep (P=1,2,3); drain to zero. New: `INSUFFICIENT_ENDPOINT` prunes the held link (`:337-341`), `INSUFFICIENT_GLOBAL` does not. Self-check `run1/selfcheck.py` exit 0, agrees with the run to the byte. |
 
-**Next:** run 1 of `internode_application_send_queue_capacity` (audited and frozen, harness written 2026-10-07, see "Resume here"), then audit, freeze and run the other 10 cases. The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
+**⚠️ Teardown pending:** `pc66` still has the ssq ring up (R1/R2/R3 daemons, JMX 7103–7105; S down; `/mnt/stage4-data` loop fs mounted). Run `~/stage4-harness-run/ssq/cluster-run.py down` on `pc66` before the next case.
+
+**Next:** audit, freeze and run the other 10 cases. The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are cheap but need their harness written; `memtable_offheap_space` may reuse the closed `memtable_heap_space` harness. `native_transport_receive_queue_capacity` and `DataDirectory_getAvailableSpace` need a cluster.
 
 ### Stage 4 — short path (blind executor)
 
@@ -356,14 +348,14 @@ Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/l
 
   | Node | Experiment host | Control address (`eno1`) | Experiment LAN | Hardware | State |
   |---|---|---|---|---|---|
-  | `pc66` | `node0.jason92-317394` | `198.22.255.77` | none | 40 cores, 125 GiB, 49 GB free | ready: JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9`, no daemon, passwordless `sudo`, Python 3.10 |
+  | `pc66` | `node0.jason92-317394` | `198.22.255.77` | none | 40 cores, 125 GiB, 47 GB free | JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9`, passwordless `sudo`, Python 3.10; **ssq ring up from run 1 (R1/R2/R3 daemons, JMX 7103–7105) — `cluster-run.py down` to clear** |
   | `pc57` | `node0.jason92-319347` | `198.22.255.67` | `10.10.1.1` | 32 cores, 251 GiB, 57 GB free | **fresh**: no JDK, no Ant, empty home, `sudo` ok, Python 3.10 |
   | `pc50` | `node1.jason92-319347` | `198.22.255.60` | `10.10.1.2` | 32 cores, 251 GiB, 57 GB free | **fresh**, same as `pc57`; `pc57` and `pc50` share the 10.10.1.0/24 LAN, so they can form a two-node ring |
 
   All three are Ubuntu 22.04.2, kernel `5.15.0-187-generic`, and present the same ED25519 host key (`SHA256:qkFN/SvBkCeQfIkD5YilK7WgBOUyfXwZPIEyp0Q9hYY`). **`pc57` and `pc50` are not in `~/.ssh/known_hosts`**, so plain `ssh` fails with "Host key verification failed"; the fingerprint matches the trusted one, and the 2026-10-07 check used a temporary known-hosts file (`ssh-keyscan -t ed25519 pcNN.cloudlab.umass.edu > kh; ssh -o UserKnownHostsFile=kh …`) without touching yours. Adding them is Jingsong's call. `pc80` (`…-318546`) now answers but refuses the key (`Permission denied (publickey)`) and `pc72` is untrusted: do not use either. The two nodes of a ring need the §5 firewall rules and the three yaml lines (`environment-notes.md` §1).
-- `pc66` details: idle with no daemon (run 1 of `max_space…` left its 4 GiB loop filesystem mounted at `/mnt/stage4-data`; the next `cluster-run.py` unmounts it; that run's logs are in `~/stage4-logs/mscp/{unit,d95,f15,f08,f04,f01,inflight}/`, the shakedowns beside them as `f08.20261007-114633`, `f01.shakedown-aside`, `inflight.20261007-115610`, `unit-instrument*`); It has a clone `~/cassandra-run1` at `b5f2a54210` with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/`, full logs in `~/stage4-logs/`. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
+- `pc66` details: **the `internode_application_send_queue_capacity` (ssq) ring is still up from run 1** — R1/R2/R3 daemons on JMX 7103/7104/7105, S down, node data in `~/stage4-ssq/{R1,R2,R3,S}`, the `max_space…` 4 GiB loop fs still mounted at `/mnt/stage4-data`. **Tear it down with `~/stage4-harness-run/ssq/cluster-run.py down`** (stops and wipes R1–R3 and S; the next `cluster-run.py <label>` also unmounts the loop fs). Run-1 logs: `~/stage4-logs/ssq/{unit,c512k,c1m,c4m,c16m,defres,nohold,c1,c2,peer}/` (full `send-trace.txt` 22–97 MiB each, `readings.csv`, `<sc>/poll.csv`, `session.log`), shakedowns in `~/stage4-logs/ssq-shakedown/`; the `max_space…` run's logs are in `~/stage4-logs/mscp/`. It has a clone `~/cassandra-run1` at `b5f2a54` with the harness tests copied into `test/unit/org/apache/cassandra/net/` (untracked); harness copies in `~/stage4-harness-run/ssq/`, full logs in `~/stage4-logs/`. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
 - The tool shell does not source `~/.shell_common_init`, so use literal hosts (the long CloudLab names of `environment.md`, e.g. `node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu`, **fail host-key verification** from the tool shell; the short ones work): `jason92@pc66.cloudlab.umass.edu`, `…@pc57…`, `…@pc50…` (the last two need the temporary known-hosts file above until their keys are added). Use `ssh -o BatchMode=yes -n` for commands and **no `-n` when piping a script in**. Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
 
 ### Commit state
 
-Last pushed commit: `1c9a913` (2026-10-07, the audit of `internode_application_send_queue_capacity` and the §9a freeze). The next commit (local, not pushed) adds that case's harness, the results-file notes and the "Resume here" update; its hash is in `git log`. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git show 2e9cf7b:HANDOFF.md`.
+Last pushed commit: `1c9a913` (2026-10-07, the audit of `internode_application_send_queue_capacity` and the §9a freeze). **Local is ahead by two commits, both unpushed** — `7903177` and `ef01a31` (the case's harness). **On top of them, uncommitted in the working tree (2026-10-08):** the run-1 results fill (results file §2/§4/§5/§8 and §3 intro), the case §10 "Stage-4 feedback" run-1 entry, the `results/<stem>/run1/` excerpts and self-check, and this HANDOFF update. Nothing is committed or pushed — do so only when Jingsong asks. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git show 2e9cf7b:HANDOFF.md`.

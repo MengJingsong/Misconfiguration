@@ -1,0 +1,41 @@
+label c2: capacity 4194304 B; extras {'internode_application_receive_queue_reserve_endpoint_capacity': '1MiB'}; predicted effective E 1048576, G 536870912; drops expected True; hold True; scenario A False; RF [1]
+harness file hold-delivery.btm: md5 d7682826394919148c0cb96589fbbb58
+harness file send-config.btm: md5 af82114b359ab0a705d51be208879761
+harness file send-acquire.btm: md5 64ea0b4297e978caee012021f7aa9db2
+harness file Hold.java: md5 0ac9e4ec9b67f95096eac1affae4cfca
+Hold.class has held(): True
+ring: R1..R3 are up but still list S; stopping and wiping them to start a fresh ring
+R1 up: statusbinary running, 1 nodes UN (9 s)
+R2 up: statusbinary running, 2 nodes UN (9 s)
+R3 up: statusbinary running, 3 nodes UN (9 s)
+ring: started 3 of R1..R3 (they stay up between labels)
+schema keyspace1.standard1 created by one cassandra-stress write against R1 (S is not up yet): True
+RF -> 1: RF already 1, not altered
+S up: statusbinary running, 4 nodes UN (9 s)
+JMX scopes of S's connection metrics: {'R1': '127.0.0.3_7010', 'R2': '127.0.0.4_7010', 'R3': '127.0.0.5_7010'}
+config trace R1: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=1048576 global=536870912
+config trace R2: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=1048576 global=536870912
+config trace R3: 3 connections ['LARGE_MESSAGES', 'SMALL_MESSAGES', 'URGENT_MESSAGES']; capacity=4194304 endpoint=1048576 global=536870912
+EXPECTED: [c2] config trace: every connection of R1..R3 has capacity=4194304 endpoint=1048576 global=536870912 — yes
+idle: large-link pending bytes {'R1': 0, 'R2': 0, 'R3': 0}; overload counts {'R1': 0, 'R2': 0, 'R3': 0}
+EXPECTED: idle: pending bytes of the large links are 0 and no overload — yes
+idle heap used after full GC (KiB): [91303, 74836, 91909]; mean 86016; spread 17073
+hold check: pending 131135 (trace bytes [131135]), 3 s later 131135, completed 1 -> 1; Hold.park in the dump: True
+hold trace: hold park thread=Messaging-OUT-/127.0.0.2:7010->/127.0.0.3:7010-LARGE_MESSAGES file=/users/jason92/stage4-logs/ssq/c2/hold ms=1791440002593 | hold release thread=Messaging-OUT-/127.0.0.2:7010->/127.0.0.3:7010-LARGE_MESSAGES ms=1791440008102
+hold check passed: the write was held (pending = M, completed unchanged, thread parked in Hold.park) and delivered by itself after the file was removed
+B: heap used after full GC at ~5 s = 99297 KiB; histogram {'org.apache.cassandra.net.Message': (48, 1920), 'org.apache.cassandra.db.Mutation': (52, 2912)}
+B stress: still running after 60 s; terminated
+[B] M = 131137 B (mode of accepted bytes); X (max pending seen by acquire, large link) = {'R1': 5114343, 'R2': 0, 'R3': 0}; accepted {'R1': 256, 'R2': 0, 'R3': 0}; refused {'R1': 101399, 'R2': 0, 'R3': 0}; first refusal INSUFFICIENT_ENDPOINT; stress failed operations 10128, failed attempts 101280; parked delivery threads in the dump 1; drain settled in 0.37382078170776367 s; probe {'R1': 1}
+EXPECTED: [B] valid run: offered load D = 33571072 exceeds C + F = 5242880 — yes
+EXPECTED: [B] R1: C + F - M < X <= C + F (5111743 < 5114343 <= 5242880) — yes
+EXPECTED: [B] R1: overload_count rose (101399 refused lines in the trace; JMX delta 101289) — yes
+EXPECTED: [B] first refused acquire is INSUFFICIENT_ENDPOINT (it was INSUFFICIENT_ENDPOINT) — yes
+EXPECTED: [B] using_reserve_bytes ~ X - C: F - M < 920039 <= F (917439 < 920039 <= 1048576) — yes
+EXPECTED: [B] no SUCCESS acquire with pending above C + F (0 found) — yes
+EXPECTED: [B] R1: plateau still there at ~12.5 s, past the 10 s deadline (JMX 3934110 = peak 5114343) and nothing expired before the lift (226) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B] R1: after the lift pending bytes return to 0 (0), timed-out count = accepted (228 = 256), completed count does not move (28) — NO (recorded; the AI judges it in the results file)
+EXPECTED: [B] the parked delivery threads showed in the dump (found 1, expected 1) — yes
+EXPECTED: [B] liveness probe delivered: R1 completed count +1 ({'R1': 1}) — yes
+EXPECTED: [B] stress failed attempts ~ overload_count (+- threads in flight): 101280 (10128 operations) vs 101399 — yes
+[B] heap: used at ~5 s 99297 KiB; idle floor 86016 KiB (spread 17073 KiB); delta 13599744 B; delta / X = 2.66 (X = 5114343); adjudicable (delta > 3 x spread): False
+done: label c2
