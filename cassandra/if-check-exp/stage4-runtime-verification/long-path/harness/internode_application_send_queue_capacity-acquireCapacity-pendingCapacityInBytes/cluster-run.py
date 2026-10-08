@@ -15,7 +15,7 @@ conf/ copy, log, data and token under ~/stage4-ssq/<node>/ (make-node-yaml.sh). 
 Writes ~/stage4-logs/ssq/<label>/{session.log, summary.txt, scenarios.csv, readings.csv, send-trace.txt, <scenario>/...}. Every EXPECTED: line
 is a prediction of 9a, computed before the readings; a NO is recorded, not tuned (the AI judges it in the results file). Exit 1: a set-up or instrument
 check failed; S is stopped on any exit, and the hold file removed."""
-import csv, glob, math, os, re, statistics, subprocess, sys, time
+import csv, glob, hashlib, math, os, re, statistics, subprocess, sys, time
 
 HOME = os.path.expanduser('~')
 C = os.environ.get('CASSANDRA_HOME', HOME + '/cassandra-run1')
@@ -346,11 +346,15 @@ def stress(tag, threads, seconds=None, n=None, rf=1, throttle=THROTTLE, node='S'
 
 
 def stress_errors(path):
+    """(failed operations, failed attempts) from a stress output. `Total errors` counts operations and prints thousands with commas
+    ("10,293"); stress retries a failed operation (`Operation xN on key(s) ...: Error executing`), so the attempts are the sum of the N."""
     if not os.path.exists(path):
-        return None
+        return None, None
     txt = open(path, errors='replace').read()
-    m = re.search(r'Total errors\s*:\s*(\d+)', txt)
-    return int(m.group(1)) if m else None
+    m = re.search(r'Total errors\s*:\s*([\d,]+)', txt)
+    ops = int(m.group(1).replace(',', '')) if m else None
+    attempts = sum(int(x) for x in re.findall(r'^Operation x(\d+) .*Error executing', txt, re.M))
+    return ops, attempts
 
 
 def wait_proc(p, timeout, what):
@@ -456,8 +460,8 @@ def scenario(sc, threads, seconds, rf, hold, cap, E, G, drops, first_ref, heap_i
     t1 = now_ms()
     cfg, acq, holds = read_trace(t0, t1)
     rows = poll_rows(sc)
-    errs = stress_errors(out)
-    res = dict(sc=sc, peers=peers, parked=parked, settle=settle, probe=probed, heap5=heap5, hist5=hist5, errors=errs, X={}, acc={}, ref={}, M=None, first=None)
+    errs, attempts = stress_errors(out)
+    res = dict(sc=sc, peers=peers, parked=parked, settle=settle, probe=probed, heap5=heap5, hist5=hist5, errors=errs, attempts=attempts, X={}, acc={}, ref={}, M=None, first=None)
     allM = [a['bytes'] for p_ in peers for a in large_lines(acq, p_) if a['outcome'] == 'SUCCESS']
     M = statistics.mode(allM) if allM else None
     res['M'] = M
@@ -486,7 +490,7 @@ def adjudicate_B(r, cap, E, G, drops, first_ref, hold, threads, heap_idle, sprea
     F = min(E, G)
     pe = peers[0]
     note(f'[{sc}] M = {M} B (mode of accepted bytes); X (max pending seen by acquire, large link) = {r["X"]}; accepted {r["acc"]}; refused {r["ref"]}; '
-         f'first refusal {r["first"]}; stress Total errors {r["errors"]}; parked delivery threads in the dump {r["parked"]}; drain settled in {r["settle"]} s; probe {r["probe"]}')
+         f'first refusal {r["first"]}; stress failed operations {r["errors"]}, failed attempts {r["attempts"]}; parked delivery threads in the dump {r["parked"]}; drain settled in {r["settle"]} s; probe {r["probe"]}')
     if M is None:
         expect(f'[{sc}] at least one message was accepted on the large link', False)
         return
@@ -533,7 +537,7 @@ def adjudicate_B(r, cap, E, G, drops, first_ref, hold, threads, heap_idle, sprea
     # RF = 1 only: client errors ~ overload count
     if len(peers) == 1 and r['errors'] is not None and drops:
         ov = r['ref'][pe]
-        expect(f'[{sc}] stress Total errors ~ overload_count (+- threads in flight): {r["errors"]} vs {ov}', abs(r['errors'] - ov) <= threads)
+        expect(f'[{sc}] stress failed attempts ~ overload_count (+- threads in flight): {r["attempts"]} ({r["errors"]} operations) vs {ov}', abs(r['attempts'] - ov) <= threads)
     # heap
     if r['heap5'] is not None and heap_idle is not None:
         dh = (r['heap5'] - heap_idle) * 1024
@@ -567,6 +571,10 @@ sh(f'rm -rf {D}/jmx-classes {D}/hold-classes && mkdir -p {D}/jmx-classes {D}/hol
    f'&& javac -d {D}/hold-classes {HARNESS}/Hold.java && jar cf {D}/stage4-hold.jar -C {D}/hold-classes .')
 try:
     note(f'label {label}: capacity {cap} B; extras {extras}; predicted effective E {E}, G {G}; drops expected {drops}; hold {hold}; scenario A {withA}; RF {rfs}')
+    # which rule and helper this run uses (a shakedown once ran a rule and a Hold.class older than the files on disk: results section 3, row 3)
+    for f_ in ('hold-delivery.btm', 'send-config.btm', 'send-acquire.btm', 'Hold.java'):
+        note(f'harness file {f_}: md5 ' + hashlib.md5(open(f'{HARNESS}/{f_}', 'rb').read()).hexdigest())
+    note('Hold.class has held(): ' + str('held' in sh(f'javap -cp {D}/hold-classes stage4.Hold', check=False, quiet=True)[1]))
     ensure_ring()
     # schema (once per ring): keyspace1.standard1 via stress, against R1
     if not cql(NODES['R1'][0], "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name = 'keyspace1'"):
@@ -645,6 +653,7 @@ try:
         wait_proc(p, 30, 'holdcheck stress')
         if not (r_[('R1', 'LargeMessageCompletedTasks')] == c0 + 1 and r_[('R1', 'LargeMessagePendingBytes')] == 0):
             fail(f'the hold was not released by removing the file (completed {c0} -> {r_[("R1", "LargeMessageCompletedTasks")]}, pending {r_[("R1", "LargeMessagePendingBytes")]})')
+        note('hold trace: ' + ' | '.join(read_trace(t_a, now_ms())[2]))
         note('hold check passed: the write was held (pending = M, completed unchanged, thread parked in Hold.park) and delivered by itself after the file was removed')
 
     # ---- scenario A
