@@ -358,4 +358,4 @@ Seven cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification
 
 ### Commit state
 
-Last pushed commit: `1c9a913` (2026-10-07, the audit of `internode_application_send_queue_capacity` and the §9a freeze). **Local is ahead, all unpushed** — `7903177` and `ef01a31` (the case's harness), `9614457` (run 1: results fill, case §10 entry, `results/<stem>/run1/` excerpts and self-check, HANDOFF update), and the commit recording the `pc66` teardown. Push only when Jingsong asks. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git show 2e9cf7b:HANDOFF.md`.
+Last pushed commit: `086d849` (2026-10-08, the `pc66` teardown note; `9614457` before it is the `internode_application_send_queue_capacity` run 1). Local and `origin/main` are in sync. Push only when Jingsong asks. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git show 2e9cf7b:HANDOFF.md`.
