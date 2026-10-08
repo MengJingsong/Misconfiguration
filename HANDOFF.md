@@ -23,9 +23,20 @@ Drive connector enabled can read them directly.
 
 ## Resume here — stage 4, long path, next case (written 2026-10-07 after `max_space…` closed)
 
-**State:** 6 of 17 cases closed at stage 4 (table in "Stage 4 — long path" below), 11 unaudited and unrun, no run 2 anywhere. HEAD is
-pushed; the working tree was clean. No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no
-isolation rule.
+**State:** 6 of 17 cases closed at stage 4 (table in "Stage 4 — long path" below), 10 unaudited and unrun, **1 audited and frozen but not run** (below), no run 2
+anywhere. HEAD `6453abb` is pushed; **the working tree holds the audit of the seventeenth case, uncommitted** (the case file's §9 amendments and its new
+results file). No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no isolation rule. The pinned clone is now
+local, `~/git-repos/cassandra-src` at `cassandra-5.0.9` (shallow, tag only), so step 0 needs no ssh.
+
+**In progress (2026-10-07 evening): `internode_application_send_queue_capacity`.** Step-0 audit done, **Ready after amendments**
+([results §1.1](cassandra/if-check-exp/stage4-runtime-verification/long-path/results/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md));
+**§9a frozen at `efd85ccc7840d755bbc3b254843733c3bfab9888`** (was `0eaefb90…` as filed; do not edit §9a). The audit found, from the source: (1) the hold must **park** the
+delivery thread, not `RETURN false` — at the plateau no write can restart a stopped link, so the drain would never have been seen; (2) S needs
+`native_transport_max_threads: 512` — each held write keeps a request thread (135 at 16 MiB, 256 in the default-reserves arms, pool of 128); (3) four nodes from one clone
+need per-node `CASSANDRA_CONF` / `CASSANDRA_LOG_DIR` and JMX ports (`cassandra-env.sh:235` hard-codes 7199) — ports 7102 to 7105; (4) the heap row now has a noise rule;
+(5) S's `data/` stays between values. **One machine is enough** (four processes on loopback, `pc66`). **Next: step 1** — write and instrument-check the harness listed in
+results §1 (`SendQueueCapacityTest`, `SendQueueWiringTest`, three `.btm` files, `Hold.java`, `make-node-yaml.sh`, `Jmx.java` with a port, `sample-outbound.py`,
+`cluster-run.py`, `unit-run.sh`), then the unit tier, then the cluster tier. The central claim (receive-side reserve key) is still only derived.
 
 **Pick the case** (Jingsong chooses; these are suggestions, not checked against each §9): the siblings and unit-heavy designs are cheapest —
 `memtable_offheap_space` (same `SubPool.tryAllocate()` check as the closed `memtable_heap_space`; its `HeapPoolTest` harness may carry over),
@@ -273,7 +284,8 @@ Each case's full detail lives in its own file.
 runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the §9s:
 
 - **Audited, run and closed at stage 4 (6):** `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `max_space_usable_for_compactions_in_percentage` (audit 2026-10-07, **Ready after amendments**: the hatch arm's trigger, `nodetool compact`, is a `MAJOR_COMPACTION` and cannot reach the hatch, and the in-flight arm would have aborted instead of shedding; run 1 the same day, Confirmed at both tiers; §9a's hash `f17dad5a…` is unchanged, do not edit §9a).
-- **Not yet audited or run (11):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
+- **Audited, frozen, not run (1):** `internode_application_send_queue_capacity` (audit 2026-10-07, **Ready after amendments**; §9a hash `efd85ccc…`; harness not written; see "Resume here").
+- **Not yet audited or run (10):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
   needs (Java tests, Byteman rules, scripts) as step-1 work; none of that code exists yet. The eight cases converted to the new layout on 2026-10-06 and the cases
   written since (`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `internode_application_send_queue_capacity`) record in their §10 Notes
   where they differ from earlier notes on the same lines, **for stage 3 to judge, not applied to §5–§8**.
@@ -318,7 +330,7 @@ Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/l
 | `row_index_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (key-cache hit, lazily opened SSTable, scan) | Accepted iff estimate ≤ limit; **at the stock `column_index_cache_size` every accepted entry weighs 128 B, so the limit bounds no heap.** |
 | `max_space_usable_for_compactions_in_percentage` | 2026-10-07 | Confirmed, unit and cluster; H1 as predicted (the hatch does not cover `nodetool compact`), H2 bypass as recorded (background compaction, 10 × the budget) | Ladder n = 0 · 0 · 2 · 5 · abort at 0.95 · 1.5 · 0.8 · 0.4 · 0.1 (`requested` equal to the simulation to the byte); in flight n = 5 against 0. 134 self-check checks from the raw logs (`run1/selfcheck.py`). |
 
-**Next:** audit, freeze and run the other 11 cases (see "Resume here" at the top). The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
+**Next:** write the harness for `internode_application_send_queue_capacity` (audited and frozen 2026-10-07, see "Resume here"), run it, then audit, freeze and run the other 10 cases. The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
 
 ### Stage 4 — short path (blind executor)
 
