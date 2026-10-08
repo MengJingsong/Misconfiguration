@@ -117,17 +117,20 @@ same `cluster_name`, the seed node's control address under `seeds`, and each nod
 - **`JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command**, never exported: an agent on a client JVM (`nodetool`, stress, `cqlsh`)
   would clash with the node's Byteman listener on port 9091.
 
-## 7. Nodes (checked 2026-10-06)
+## 7. Nodes (checked 2026-10-07)
 
-All three answered over SSH (`ssh -o BatchMode=yes jason92@<host> ...`). CloudLab experiments expire, so check again before a run. A node's
-home may hold directories from earlier runs; they are not yours. Work in a fresh directory named for your run, and never open, reuse
-or delete the others.
+All three answered over SSH (`ssh -o BatchMode=yes jason92@<host> ...`, with the short names `pcNN.cloudlab.umass.edu`; the long `node0.jason92-…` names fail host-key
+verification from the tool shell). CloudLab experiments expire, so check again before a run. A node's home may hold directories from earlier runs; they are not yours.
+Work in a fresh directory named for your run, and never open, reuse or delete the others.
 
 | Node | State | Use |
 |---|---|---|
-| `pc80` (`node0.jason92-318546...`) | JDK 11.0.32.1 and Ant installed; home holds earlier runs' directories | the quickest choice: sections 1 and 2 are done |
-| `pc66` (`node0.jason92-317394...`) | JDK and Ant installed; home holds earlier runs' directories | as `pc80` |
-| `pc72` (`node1.jason92-318546...`) | fresh as of 2026-10-05: no JDK, no Ant, empty home; 40 cores, 125 GiB, 57 GB free on `/` | cleanest, but section 1 (install JDK 11 and Ant) must be done first |
+| `pc66` (`node0.jason92-317394...`, `198.22.255.77`) | 40 cores, 125 GiB, 49 GB free; JDK 11.0.32.1 and Ant 1.10.12 installed; `~/cassandra-run1` at `cassandra-5.0.9`; home holds earlier runs' directories | the quickest choice: sections 1 to 3 are done |
+| `pc57` (`node0.jason92-319347...`, `198.22.255.67`, LAN `10.10.1.1`) | fresh as of 2026-10-07: no JDK, no Ant, empty home; 32 cores, 251 GiB, 57 GB free on `/`; passwordless `sudo`, Python 3.10 | clean; do sections 1 to 3 first |
+| `pc50` (`node1.jason92-319347...`, `198.22.255.60`, LAN `10.10.1.2`) | fresh as of 2026-10-07, same as `pc57`; the two share the `10.10.1.0/24` LAN | second node for a ring (section 5) |
+
+`pc57` and `pc50` are not in `~/.ssh/known_hosts` yet; they present the same ED25519 key as `pc66` (`SHA256:qkFN/SvBkCeQfIkD5YilK7WgBOUyfXwZPIEyp0Q9hYY`). Until added, use
+`ssh-keyscan -t ed25519 pcNN.cloudlab.umass.edu > kh` and `ssh -o UserKnownHostsFile=kh …`. `pc80` and `pc72` (experiment `…-318546`) are no longer used: `pc80` refuses the key.
 
 ## Logs
 

@@ -21,6 +21,38 @@ Google Docs — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk2
 (running log of entry points, cases and findings); a session with the Google
 Drive connector enabled can read them directly.
 
+## Resume here — stage 4, long path, next case (written 2026-10-07 after `max_space…` closed)
+
+**State:** 6 of 17 cases closed at stage 4 (table in "Stage 4 — long path" below), 11 unaudited and unrun, no run 2 anywhere. HEAD is
+pushed; the working tree was clean. No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no
+isolation rule.
+
+**Pick the case** (Jingsong chooses; these are suggestions, not checked against each §9): the siblings and unit-heavy designs are cheapest —
+`memtable_offheap_space` (same `SubPool.tryAllocate()` check as the closed `memtable_heap_space`; its `HeapPoolTest` harness may carry over),
+then `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT` (unit tiers need their harness written);
+`internode_application_send_queue_capacity` is the heaviest (four processes, a Byteman hold, a poller of `system_views.internode_outbound`; its
+central finding, the receive-side reserve key, is derived and untested). Two designs need a cluster before they say anything:
+`native_transport_receive_queue_capacity` and `DataDirectory_getAvailableSpace`.
+
+**Recipe** (protocol: `stage4-runtime-verification/README.md` "The run protocol"; worked example: `max_space…`, results file and `harness/<stem>/`):
+1. Read the case's §9 and run the **step-0 design audit** against the pinned clone `cassandra-5.0.9` (re-read every load-bearing citation; check
+   the trigger's `OperationType`/call chain reaches the check; check the prediction has numbers; check the arithmetic reaches the limit). Fix
+   what the source shows as dated amendments in the case's §9, then record the audit and **freeze §9a** (`sed -n '/^### 9a\. /,/^### 9b\. /p' <case> | git hash-object --stdin`) in the results file, from `_TEMPLATE.md`, before any reading.
+2. Write the harness under `long-path/harness/<stem>/` (unit test + one Python run script per case with `EXPECTED:` lines, a stop on a failed first-trigger instrument check, node stopped on any exit); **instrument-check it** and record that; shakedowns are not readings.
+3. Run 1 from the start: unit tier, then each cluster label as its own background job; read `summary.txt`, not whole logs. Pull small excerpts to `results/<stem>/run1/`; full logs stay on the node.
+4. **Self-check with an independent script that re-parses the raw logs** (`max_space…/run1/selfcheck.py` is the model), then fill results §4.2, §5, §8, the case's §10 "Stage-4 feedback" (and §8/Target-3 if a bypass is confirmed), and the state rows here. Decide run 2 and say why.
+5. Do not commit or push unless asked ("Commit and push only on request").
+
+**Node access (checked 2026-10-07):** `ssh -o BatchMode=yes jason92@pc66.cloudlab.umass.edu` works (also `pc66.cloudlab.umass.edu` alone; the long
+`node0.jason92-…` names fail host-key verification). `pc66` has JDK 11, Ant, `~/cassandra-run1` at `cassandra-5.0.9`, the harness tests copied in
+(untracked), no daemon running, `sudo` without password; a 4 GiB loop filesystem is still mounted at `/mnt/stage4-data` (the next `cluster-run.py` re-creates it).
+**Nodes now (checked 2026-10-07 evening): `pc66`, `pc57`, `pc50`.** `pc57` and `pc50` are fresh (one new experiment, `…-319347`, up about 1 h, empty home): do `environment.md` §1 to §3 first (JDK 11, Ant, clone, `ant build-test`), then the harness. `pc80` and `pc72` are no longer used (`pc80` refuses the key). Sync a new harness to `~/stage4-harness-run/<name>/` and compare `md5sum` with the repo before run 1.
+Launch node scripts as `( setsid nohup … < /dev/null > /dev/null 2>&1 & )` and wait with a background `until` loop, never a foreground `sleep`.
+
+**Traps seen so far** (details in "Lessons for the next harness"): find the `OperationType`/caller a trigger really produces before predicting a bypass;
+a `grep '^ERROR'` can miss a message on the next line; an ad hoc `awk` compare of numbers can compare strings (use `+0` or Python); the sampler can read a
+peak 1 % low; predictions are never tuned to readings; a runbook defect restarts the tier; leave the node stopped and clean.
+
 ## What this experiment is
 
 Part of the **misconfiguration** research project (Target 1: identify resource
@@ -286,7 +318,7 @@ Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/l
 | `row_index_read_size_fail_threshold` | 2026-10-07 | Confirmed, unit and cluster; bypass as recorded (key-cache hit, lazily opened SSTable, scan) | Accepted iff estimate ≤ limit; **at the stock `column_index_cache_size` every accepted entry weighs 128 B, so the limit bounds no heap.** |
 | `max_space_usable_for_compactions_in_percentage` | 2026-10-07 | Confirmed, unit and cluster; H1 as predicted (the hatch does not cover `nodetool compact`), H2 bypass as recorded (background compaction, 10 × the budget) | Ladder n = 0 · 0 · 2 · 5 · abort at 0.95 · 1.5 · 0.8 · 0.4 · 0.1 (`requested` equal to the simulation to the byte); in flight n = 5 against 0. 134 self-check checks from the raw logs (`run1/selfcheck.py`). |
 
-**Next:** audit, freeze and run the other 11 cases. The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
+**Next:** audit, freeze and run the other 11 cases (see "Resume here" at the top). The unit tiers of `max_mutation_size`, `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are also cheap but need their harness written; `internode_application_send_queue_capacity` is the heaviest design (four processes, a Byteman hold, a poller of `system_views.internode_outbound`).
 
 ### Stage 4 — short path (blind executor)
 
@@ -308,8 +340,17 @@ Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/l
 
 ### Nodes and access
 
-- `pc66` is idle with no daemon (run 1 of `max_space…` left its 4 GiB loop filesystem mounted at `/mnt/stage4-data`; the next `cluster-run.py` unmounts it; that run's logs are in `~/stage4-logs/mscp/{unit,d95,f15,f08,f04,f01,inflight}/`, the shakedowns beside them as `f08.20261007-114633`, `f01.shakedown-aside`, `inflight.20261007-115610`, `unit-instrument*`); **`pc80` did not answer ssh on 2026-10-07** (connection timed out), so check it before relying on it. Each has JDK 11 + Ant and a clone `~/cassandra-run1` at `b5f2a54210` with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/`, full logs in `~/stage4-logs/`. `pc72` was never needed. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
-- The tool shell does not source `~/.shell_common_init`, so use literal hosts (the long CloudLab names of `environment.md`, e.g. `node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu`, **fail host-key verification** from the tool shell; the short ones work): `jason92@pc66.cloudlab.umass.edu` (NODE0), `…@pc80…` (NODE1), `…@pc72…` (NODE2; its host key is not in `known_hosts`). Use `ssh -o BatchMode=yes -n` for commands and **no `-n` when piping a script in**. Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
+- **Available nodes (checked 2026-10-07 evening):**
+
+  | Node | Experiment host | Control address (`eno1`) | Experiment LAN | Hardware | State |
+  |---|---|---|---|---|---|
+  | `pc66` | `node0.jason92-317394` | `198.22.255.77` | none | 40 cores, 125 GiB, 49 GB free | ready: JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9`, no daemon, passwordless `sudo`, Python 3.10 |
+  | `pc57` | `node0.jason92-319347` | `198.22.255.67` | `10.10.1.1` | 32 cores, 251 GiB, 57 GB free | **fresh**: no JDK, no Ant, empty home, `sudo` ok, Python 3.10 |
+  | `pc50` | `node1.jason92-319347` | `198.22.255.60` | `10.10.1.2` | 32 cores, 251 GiB, 57 GB free | **fresh**, same as `pc57`; `pc57` and `pc50` share the 10.10.1.0/24 LAN, so they can form a two-node ring |
+
+  All three are Ubuntu 22.04.2, kernel `5.15.0-187-generic`, and present the same ED25519 host key (`SHA256:qkFN/SvBkCeQfIkD5YilK7WgBOUyfXwZPIEyp0Q9hYY`). **`pc57` and `pc50` are not in `~/.ssh/known_hosts`**, so plain `ssh` fails with "Host key verification failed"; the fingerprint matches the trusted one, and the 2026-10-07 check used a temporary known-hosts file (`ssh-keyscan -t ed25519 pcNN.cloudlab.umass.edu > kh; ssh -o UserKnownHostsFile=kh …`) without touching yours. Adding them is Jingsong's call. `pc80` (`…-318546`) now answers but refuses the key (`Permission denied (publickey)`) and `pc72` is untrusted: do not use either. The two nodes of a ring need the §5 firewall rules and the three yaml lines (`environment-notes.md` §1).
+- `pc66` details: idle with no daemon (run 1 of `max_space…` left its 4 GiB loop filesystem mounted at `/mnt/stage4-data`; the next `cluster-run.py` unmounts it; that run's logs are in `~/stage4-logs/mscp/{unit,d95,f15,f08,f04,f01,inflight}/`, the shakedowns beside them as `f08.20261007-114633`, `f01.shakedown-aside`, `inflight.20261007-115610`, `unit-instrument*`); It has a clone `~/cassandra-run1` at `b5f2a54210` with the harness tests copied into `test/unit/org/apache/cassandra/db/` (untracked); harness copies in `~/stage4-harness-run/`, full logs in `~/stage4-logs/`. CloudLab nodes are rebuilt from scratch, so `HANDOFF.md`, `stage4-runtime-verification/environment.md` and the case files are the only record a new node inherits.
+- The tool shell does not source `~/.shell_common_init`, so use literal hosts (the long CloudLab names of `environment.md`, e.g. `node0.jason92-317394.misconfiguration-pg0.cloudlab.umass.edu`, **fail host-key verification** from the tool shell; the short ones work): `jason92@pc66.cloudlab.umass.edu`, `…@pc57…`, `…@pc50…` (the last two need the temporary known-hosts file above until their keys are added). Use `ssh -o BatchMode=yes -n` for commands and **no `-n` when piping a script in**. Wait for a node run with a background `until` loop or the Monitor tool, not a foreground `sleep`.
 
 ### Commit state
 
