@@ -313,4 +313,4 @@ Six cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/l
 
 ### Commit state
 
-Last pushed commit before this edit: `e504e92` (2026-10-07 14:01, the `max_space…` audit, harness and instrument checks). **Uncommitted (2026-10-07, run 1 of `max_space…`):** the results file (§2, §4 to §8 filled), `long-path/results/<stem>/run1/` (32 excerpts, `selfcheck.py`, `selfcheck.txt`), the case file (§8 amendment, §10 feedback, Target-3 note, Notes, the "Run so far" line of §9), and this file. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git show 2e9cf7b:HANDOFF.md`.
+Last pushed commit: `37303ad` (2026-10-07, stage 4 run of `max_space…`: results, `run1/` evidence and self-check, case-file feedback, state rows). The working tree was clean after it. Older history (the 2026-09 banding procedure, the capacity-word pass, earlier resume blocks) is in git: `git show 2e9cf7b:HANDOFF.md`.
