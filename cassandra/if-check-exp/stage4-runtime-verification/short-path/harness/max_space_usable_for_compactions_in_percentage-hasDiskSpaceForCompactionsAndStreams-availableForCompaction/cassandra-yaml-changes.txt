@@ -1,0 +1,21 @@
+Configuration changes made by 20-cluster.sh (cluster tier, B3a). The stock conf/ of the cassandra-5.0.9 clone is
+copied to $C/conf (C = ~/short-run/<stem>/cluster/<tag>), and this block is appended to $C/conf/cassandra.yaml;
+nothing else is changed (the diff of the non-comment lines is in run1/cluster/<tag>.run.log.excerpt).
+<PCT> is 1.0 for tag pct1.0 and 0.5 for tag pct0.5.
+
+# --- stage-4 short path, case max_space_usable_for_compactions_in_percentage (B3a) ---
+data_file_directories:
+    - $C/mnt/data                 # 2 GiB tmpfs, mounted in a private user+mount namespace
+commitlog_directory: $C/commitlog # local disk (/dev/sda3)
+hints_directory: $C/hints
+saved_caches_directory: $C/saved_caches
+cdc_raw_directory: $C/cdc_raw
+max_space_usable_for_compactions_in_percentage: <PCT>
+min_free_space_per_drive: 10MiB
+skip_stream_disk_space_check: false
+
+Environment of the node process (scoped to the script, not exported elsewhere):
+CASSANDRA_CONF=$C/conf  CASSANDRA_LOG_DIR=$C/logs  HOME=$C/home
+JAVA_TOOL_OPTIONS="-XX:-UsePerfData -Djava.io.tmpdir=$C/tmp"
+bin/cassandra -f -R -p $C/cassandra.pid      (-R: the namespace maps the user to uid 0)
+Run-time change: nodetool disableautocompaction ks standard1 (before the load).
