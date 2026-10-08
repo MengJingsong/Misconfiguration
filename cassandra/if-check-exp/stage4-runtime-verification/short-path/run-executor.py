@@ -23,7 +23,7 @@
            results file and harness into short-path/results/ and short-path/harness/. Nothing is
            committed, ever.
 
-The workspace is ~/short-path-run/stage4/<stem>/ (exec/ is the executor's working directory, meta/
+The workspace is ~/sp-run/stage4/<stem>/ (exec/ is the executor's working directory, meta/
 holds the prompt, the run record and the reports). A second attempt gets its own directory.
 """
 import argparse, datetime, hashlib, importlib.util, json, os, pathlib, re, secrets, shutil, subprocess, sys, uuid
@@ -48,7 +48,7 @@ def load(name, path):
 it = load('isolation_test', S3SP / 'isolation-test.py')        # the web allowlist and the log parser, shared with stage 3
 cb = load('check_blindness', S4 / 'check-blindness.py')        # the audit
 
-RUN_ROOT = it.DEFAULT_WORK.parent / 'stage4'                    # ~/short-path-run/stage4
+RUN_ROOT = it.DEFAULT_WORK.parent / 'stage4'                    # ~/sp-run/stage4
 CANARY = RUN_ROOT / 'canary'
 NODES = {'pc66': 'jason92@pc66.cloudlab.umass.edu', 'pc80': 'jason92@pc80.cloudlab.umass.edu',
          'pc72': 'jason92@pc72.cloudlab.umass.edu'}

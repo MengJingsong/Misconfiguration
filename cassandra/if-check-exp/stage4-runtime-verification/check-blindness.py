@@ -163,7 +163,18 @@ def inside(path, base):
     # The session's own scratchpad (/tmp/claude-<uid>/<workspace path with every non-alphanumeric as '-'>/<session>/scratchpad)
     # is the harness's temp space for that session, not a way out of the workspace.
     enc = re.sub(r'[^A-Za-z0-9]', '-', b)
-    return re.match(rf'^/tmp/claude-\d+/{re.escape(enc)}/[0-9a-f-]+/scratchpad(/|$)', p) is not None
+    if re.match(rf'^/tmp/claude-\d+/{re.escape(enc)}/[0-9a-f-]+/scratchpad(/|$)', p):
+        return True
+    return own_tool_results(base).match(p) is not None
+
+
+def own_tool_results(workspace):
+    """The session's own spilled tool output (~/.claude/projects/<workspace encoded>/<session>/tool-results/<file>):
+    Claude Code writes a long command result there and the session reads its own output back. Only plain file names
+    directly in that folder match, so the pattern cannot reach the rest of ~/.claude."""
+    enc = re.sub(r'[^A-Za-z0-9]', '-', os.path.realpath(workspace))
+    home = re.escape(os.path.expanduser('~'))
+    return re.compile(rf'(?:{home}|~|\$HOME)/\.claude/projects/{re.escape(enc)}/[0-9a-f-]+/tool-results/[A-Za-z0-9_.-]+(?![A-Za-z0-9_./-])')
 
 
 def scan_calls(calls, which='short', repo=None, workspace=None):
@@ -171,6 +182,8 @@ def scan_calls(calls, which='short', repo=None, workspace=None):
     pats, hits = patterns(which, repo, workspace), []
     for c in calls:
         text = scan_text(c)
+        if workspace:                                   # reading its own spilled output back is not a way out
+            text = own_tool_results(workspace).sub('<own-tool-result>', text)
         why = [label for label, rx in pats if rx.search(text)]
         if workspace and c['name'] in FILE_TOOLS:
             for key in FILE_TOOLS[c['name']]:

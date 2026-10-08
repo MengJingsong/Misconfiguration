@@ -59,7 +59,7 @@ solutions and no scoring across paths.
 |---|---|---|---|---|
 | 1 | Pick the case and feed | both | AI (or you) | a stem and an entry pointer |
 | 2 | Write and verify the case file, with both tiers | long | AI | `long-path/cases/<stem>.md` and an `_INDEX.md` row; or an entry in `rejected.md`, `deferred.md` or `pending.md` |
-| 3 | Isolation test once per machine, then `run-case.py run` | short | **human** (a terminal) | the blind writer's solution and audit report in `~/short-path-run/<stem>/` |
+| 3 | Isolation test once per machine, then `run-case.py run` | short | **human** (a terminal) | the blind writer's solution and audit report in `~/sp-run/<stem>/` |
 | 4 | Judge the audit, then `run-case.py file` | short | AI | `short-path/cases/<stem>.md` and an `_INDEX.md` row |
 | 5 | Commit and push each filed solution (when you ask) | both | AI | the solution is frozen in history |
 | 6 | Hand off to stage 4 | both | long: AI; short: [`stage 4 short path`](../stage4-runtime-verification/short-path/README.md) | up to four runs and a side-by-side |

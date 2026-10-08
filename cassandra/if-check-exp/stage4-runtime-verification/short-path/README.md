@@ -20,7 +20,7 @@ The short path's stage 4: a **blind** AI executor runs a short-path solution on 
 
 ## 1. What `run` sets up
 
-- A workspace **outside the repository**, `~/short-path-run/stage4/<stem>/exec/`, mirroring the repository's relative layout but holding only what the executor may read: the stage-4 `README.md`, `_TEMPLATE.md`, `environment.md`, and its own solution (read-only). `meta/` next to it holds the prompt, the run record and the reports.
+- A workspace **outside the repository**, `~/sp-run/stage4/<stem>/exec/`, mirroring the repository's relative layout but holding only what the executor may read: the stage-4 `README.md`, `_TEMPLATE.md`, `environment.md`, and its own solution (read-only). `meta/` next to it holds the prompt, the run record and the reports.
 - An interactive Claude Code session started in it, with `--restricted --safe-mode --strict-mcp-config`: the file tools cannot leave the workspace, there are no MCP servers, memory, CLAUDE.md, hooks or sub-agents, and the web is limited to the stage-3 allowlist. Bash and ssh are on, because the executor works on the node.
 - The prompt, [`EXECUTOR-PROMPT.md`](EXECUTOR-PROMPT.md), with the stem, the node and the node's current home-directory listing filled in.
 

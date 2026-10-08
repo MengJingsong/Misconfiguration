@@ -95,7 +95,7 @@ python3 $SP/isolation-test.py
 ```
 
 Pass means `RESULT: PASS` (19 probes). Any `FAIL` means stop and do not run a
-writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt`.
+writer. The report is `~/sp-run/isolation-test/isolation-test-report.txt`.
 `run-case.py` refuses to start unless that report passed with the same flags.
 
 ### 4.3 Per case
@@ -104,7 +104,7 @@ writer. The report is `~/short-path-run/isolation-test/isolation-test-report.txt
 | Step | Who | Command | Result |
 |---|---|---|---|
 | 1. Preview (optional) | human | `python3 $SP/run-case.py run --stem <stem> --dry-run` | the entry pointer, flags and prompt tail; nothing is run |
-| 2. Run the writer | **human** | `python3 $SP/run-case.py run --stem <stem>` | a few minutes to tens of minutes; ends with `AUDIT: PASS`, `REVIEW` or `FAIL`; files in `~/short-path-run/<stem>/` |
+| 2. Run the writer | **human** | `python3 $SP/run-case.py run --stem <stem>` | a few minutes to tens of minutes; ends with `AUDIT: PASS`, `REVIEW` or `FAIL`; files in `~/sp-run/<stem>/` |
 | 3. Judge the audit | AI (the script prints the prompt to paste) | read `run-report.txt`; for `REVIEW`, read `solution.md` | see the table below |
 | 4. File it | AI | `python3 $SP/run-case.py file --stem <stem>` (add `--accept-review` after a reviewed `REVIEW`) | copied to `cases/<stem>.md`, header filled, `_INDEX.md` row with its sha256 |
 | 5. Commit and push | AI, when you ask | `git add`, `git commit`, `git push` | the solution is frozen in history |
@@ -203,14 +203,14 @@ no `CLAUDE.md` in it or in any parent directory, and the source clone must be
 pristine with no remote pointing back to a clone that holds extra files.
 
 ```bash
-CASE=/home/jingsong/short-path-run/<stem>; mkdir -p $CASE && git clone -q --branch cassandra-5.0.9 --no-hardlinks /home/jingsong/repos/cassandra-src $CASE/src && git -C $CASE/src remote remove origin
+CASE=/home/jingsong/sp-run/<stem>; mkdir -p $CASE && git clone -q --branch cassandra-5.0.9 --no-hardlinks /home/jingsong/repos/cassandra-src $CASE/src && git -C $CASE/src remote remove origin
 ```
 
 Verify: `git describe --tags` prints `cassandra-5.0.9`, `git status --short --ignored` prints nothing, and
 `ls -a | grep -i claude` prints nothing.
 
 ```bash
-cd /home/jingsong/short-path-run/<stem>/src && git describe --tags && git status --short --ignored && ls -a | grep -i claude
+cd /home/jingsong/sp-run/<stem>/src && git describe --tags && git status --short --ignored && ls -a | grep -i claude
 ```
 
 A second attempt on the same case gets its own directory (`<stem>--attempt2`),
@@ -223,14 +223,14 @@ return instruction. The return instruction is operational, not method: the
 writer cannot write files, so its final message is the solution.
 
 ```bash
-M=/home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/short-path; CASE=/home/jingsong/short-path-run/<stem>; { cat $M/BRIEF.md; echo; cat $M/_TEMPLATE.md; printf '\n---\nEntry pointer: <file>:<line>\n\nReturn the completed skeleton as your final message.\n'; } > $CASE/prompt.md
+M=/home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/short-path; CASE=/home/jingsong/sp-run/<stem>; { cat $M/BRIEF.md; echo; cat $M/_TEMPLATE.md; printf '\n---\nEntry pointer: <file>:<line>\n\nReturn the completed skeleton as your final message.\n'; } > $CASE/prompt.md
 ```
 
 Check that the prompt names nothing about the case. The only hit for the case's
 own words may be the entry-pointer line.
 
 ```bash
-grep -n -i -E '<words from the stem>|stage|result|long-path|handoff' /home/jingsong/short-path-run/<stem>/prompt.md
+grep -n -i -E '<words from the stem>|stage|result|long-path|handoff' /home/jingsong/sp-run/<stem>/prompt.md
 ```
 
 ### 5.5 Step 3 — Isolation test — before the first run on a machine or CLI version, and whenever the flags or the allowlist change
@@ -288,7 +288,7 @@ so the test and the run cannot drift apart:
 Record the model that ran (it is in the log's first line).
 
 ```bash
-cd /home/jingsong/short-path-run/<stem>/src && claude -p $(python3 /home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/short-path/isolation-test.py --print-flags | tr -d "'") --output-format stream-json --verbose < ../prompt.md > ../run.jsonl
+cd /home/jingsong/sp-run/<stem>/src && claude -p $(python3 /home/jingsong/repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/short-path/isolation-test.py --print-flags | tr -d "'") --output-format stream-json --verbose < ../prompt.md > ../run.jsonl
 ```
 
 The `$(…)` form is only a convenience; if the shell mangles the parentheses in
@@ -301,7 +301,7 @@ solution can take many minutes.
 ```bash
 python3 - <<'EOF'
 import json
-D='/home/jingsong/short-path-run/<stem>/'
+D='/home/jingsong/sp-run/<stem>/'
 calls=[]; result=''
 for l in open(D+'run.jsonl'):
     try: e=json.loads(l)
@@ -320,7 +320,7 @@ EOF
 clone. The output must be empty.
 
 ```bash
-grep -o '/home/[^" ]*' /home/jingsong/short-path-run/<stem>/tool-calls.txt | grep -v '/short-path-run/<stem>/src'
+grep -o '/home/[^" ]*' /home/jingsong/sp-run/<stem>/tool-calls.txt | grep -v '/sp-run/<stem>/src'
 ```
 
 **Audit 1b — web use.** Every `WebFetch` URL in the log must be on the
@@ -330,7 +330,7 @@ shows were fetched, each with its retrieval date. Keep `run.jsonl`: web pages
 change, and it holds the fetched content.
 
 ```bash
-grep -o 'WebFetch {[^}]*' /home/jingsong/short-path-run/<stem>/tool-calls.txt
+grep -o 'WebFetch {[^}]*' /home/jingsong/sp-run/<stem>/tool-calls.txt
 ```
 
 **Audit 2 — the solution's content.** Scan for signs of stage-4 knowledge.
@@ -339,7 +339,7 @@ supports it) is fine; a measured number, a results-file artifact, a harness
 name or a section reference from this experiment is a **fail**.
 
 ```bash
-grep -n -i -E 'stage.4|long.path|handoff|results|run 1|measured|HeapPoolTest|harness' /home/jingsong/short-path-run/<stem>/solution.md
+grep -n -i -E 'stage.4|long.path|handoff|results|run 1|measured|HeapPoolTest|harness' /home/jingsong/sp-run/<stem>/solution.md
 ```
 
 **Audit 3 — completeness.** Sections A1–A5, B1, B2a–h (unit tier), B3a–h (cluster tier), B4 and C are all present (a tier may instead say `n/a: <reason>`, which is accepted and noted), and

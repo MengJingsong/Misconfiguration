@@ -35,7 +35,7 @@ def find_clone():
 
 UPSTREAM_CLONE = find_clone()                              # local clone to copy from
 TAG = 'cassandra-5.0.9'
-DEFAULT_WORK = HOME / 'short-path-run' / 'isolation-test'
+DEFAULT_WORK = HOME / 'sp-run' / 'isolation-test'
 
 ALLOWLIST_VERSION = 'v1'
 ALLOW_DOMAINS = ['issues.apache.org', 'cassandra.apache.org', 'lists.apache.org',

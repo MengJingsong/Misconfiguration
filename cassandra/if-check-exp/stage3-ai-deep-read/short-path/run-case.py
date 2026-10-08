@@ -31,7 +31,7 @@ spec = importlib.util.spec_from_file_location('isolation_test', HERE / 'isolatio
 it = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(it)
 
-RUN_ROOT = it.DEFAULT_WORK.parent                       # ~/short-path-run
+RUN_ROOT = it.DEFAULT_WORK.parent                       # ~/sp-run
 LONG_INDEX = HERE.parent / 'long-path' / '_INDEX.md'     # the long path runs first, so every case has a row here
 PROJECT_WORDS = ['mengjingsong', 'misconfiguration', 'if-check', 'handoff', 'long-path',
                  'short-path', 'stage4', 'stage-4', 'docs.google.com']
