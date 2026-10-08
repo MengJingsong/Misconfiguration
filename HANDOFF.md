@@ -98,8 +98,8 @@ this folder's own scope.
   is frozen on filing (sha256 in `short-path/_INDEX.md`) and never edited; a new version is filed with `--supersede`.
   **Stage 4 runs both paths, both tiers each, with no rating of the two solutions and no cross-path scoring**; an executor
   reads only its own path's solution, and a side-by-side is written at the end. Scope stays memory and disk. The pilot on the
-  three closed cases was skipped; the 17 filed cases have no short solution yet except `memtable_heap_space` (version 2, two
-  tiers; version 1 kept as `--v1`).
+  three closed cases was skipped; of the 17 filed cases only two have a short solution: `memtable_heap_space` (version 2, two
+  tiers; version 1 kept as `--v1`) and `max_space_usable_for_compactions_in_percentage` (filed 2026-10-08).
 - **Decided 2026-10-06:** (1) the long path always goes first, so only the short path is blind; (2) shared stage-4 files
   (`README.md`, `environment.md`, `_TEMPLATE.md`) stay free of the long path's case-specific designs, which live in
   `stage4-runtime-verification/long-path/`; (3) the repository copy on the CloudLab shared mount was removed.
@@ -173,7 +173,7 @@ this folder's own scope.
         undecided, not refused. Moved here from the stage-2 folder, since
         **stage 2 cannot produce a pattern deferral**.
       - `pending.md` — qualified, not yet written up.
-    - **`short-path/`** — an **experiment**, one case filed (`memtable_heap_space`). An AI
+    - **`short-path/`** — an **experiment**, two cases filed (`memtable_heap_space`, `max_space_usable_for_compactions_in_percentage`). An AI
       traces the constraint and designs a verification solution **without**
       the rules, patterns, §8 design rules or template, and files **no
       verdict**. `README.md` is the contract (how a solution is made, isolated,
@@ -303,8 +303,11 @@ runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the 
 
 ### Stage 3 — short path (blind, human plus AI)
 
-- **One solution filed:** `memtable_heap_space-tryAllocate-limit.md` (version 2, current, sha256 `31f017fe…`, claude-sonnet-5, isolation and leakage audit pass, 2026-10-05); version 1 kept as `--v1`, superseded. Comparison column in `short-path/_INDEX.md` is still **pending**.
-- **The other 16 cases have no short solution.** The pilot on the three first-closed cases was skipped. A human starts the blind writer with `run-case.py`; a filed solution is frozen and never edited (`--supersede` for a new version).
+- **Two solutions filed:**
+  - `memtable_heap_space-tryAllocate-limit.md` (version 2, current, sha256 `31f017fe…`, claude-sonnet-5, isolation and leakage audit pass, 2026-10-05); version 1 kept as `--v1`, superseded.
+  - `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md` (version 1, current, sha256 `e8b505e1…`, claude-sonnet-5, attempt 1, 4 min, 16 Read + 21 Grep, no web fetch, 2026-10-08). Run on `pc66` (claude 2.1.294); the isolation test was rerun there first and passed 19/19. Audit `REVIEW`, accepted: section C lists `ColumnFamilyStoreMBean.java`, `StorageServiceMBean.java` and `StorageService.java`, which the writer saw only as grep hits; every claim about them (a method name, `StorageServiceMBean.java:1285-1286`) is in that grep output. **Next: its stage-4 short run** (`run-executor.py`).
+  - Comparison column in `short-path/_INDEX.md` is still **pending** for both.
+- **The other 15 cases have no short solution.** The pilot on the three first-closed cases was skipped. A human starts the blind writer with `run-case.py`; a filed solution is frozen and never edited (`--supersede` for a new version).
 
 ### Stage 4 — long path (AI audits §9, runs it, owns the verdict; no human gate)
 
