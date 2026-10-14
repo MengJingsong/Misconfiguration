@@ -359,19 +359,42 @@ partitions (the `Created ... merkle trees` debug line); *L* = leaves per tree.
   (20 unless set). With leaf + inner in (128, 256] bytes (§4), *d* rises by one
   per doubling of *b*: about 11, 13, 15, 17 for *s* = 1, 4, 16, 64 MiB at RF 2.
   *n* ≈ 2^19 for node 1's primary range of 2^20 partitions, so the partition
-  term (19) does not bind.
+  term (19) does not bind. **(Amended 2026-10-14, step-0 audit, before any
+  reading:** `estimatedMaxDepthForBytes` takes the partitioner, and leaf and
+  inner sizes depend on its token, so U3 prints *d*(*b*) for **both**
+  `Murmur3Partitioner` (arm M) and `ByteOrderedPartitioner` (unit tier, arm O),
+  for *b* = 0.5, 1, 2, 4, 8, 32 and 64 MiB; the cluster prediction for each
+  value is the exact *d* from that table, and "about" above is only the
+  expectation. The default *s* is read back over JMX before the sweep: 128 MiB
+  at `-Xmx2G` with G1, the shipped collector, where `maxMemory()` is the full
+  heap; *b* = 64 MiB at RF 2.)**
 - **Scenario B:** doubling the data leaves *L* unchanged while *d*(*b*) < log2 *n*.
 - **Depth cap:** with `repair_session_max_tree_depth: 15` and *s* = 64 MiB,
   `L = 2^15`.
 - **Heap:** the replica's `OnHeapLeaf` count equals *L* and `OnHeapInner` is
   *L* − 1; their bytes scale with *L*. **Off heap, coordinator (arm M):** two
-  buffers per range (its own tree and the peer's), each `(L − 1) × 50 + L × 32`
-  bytes, logged exactly (9d).
+  buffers per range (its own tree and the peer's), each `L × 50 + (L + 1) × 32`
+  = `82 L + 32` bytes, logged exactly (9d). **(Amended 2026-10-14, step-0
+  audit, before any reading:** the formula read `(L − 1) × 50 + L × 32`, but
+  `allocate()` is passed the **leaf** count: `moveOffHeap()` passes `size`
+  ([`MerkleTree.java:781`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L781)),
+  and the deserializer passes the serialized `size` field
+  ([`:714`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L714),
+  [`:789`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L789)),
+  into a parameter named `innerNodeCount`
+  ([`:799-802`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L799-L802)),
+  so each buffer has room for one inner node and one leaf more than the tree
+  uses. The histogram counts are the change from an idle `-histo:live`
+  taken on node 2 just before each held repair, so a tree an earlier
+  repair left reachable is not counted against *L*.)**
 - **Arm O:** the same *L*, and the refusal trace shows `size == maxsize` once
   per range per validation. With about 2^19 partitions in node 1's range there
   are about 2^19 / 128 = 4,096 key samples, so 2^13 and 2^15 leaves need about 2 and 8 splits per sample, far
   from the depth limit. If `split()` returns `false` with `size < maxsize`,
-  `TooDeep` bound instead (§5).
+  `TooDeep` bound instead (§5). (Amended 2026-10-14, step-0 audit: the sample
+  count is read from `split-trace.btm`'s `samples=` line, one per range, since
+  `nodetool tablestats` does not print index-summary entries; expected about
+  *n* / 128.)
 - **Arm M:** zero calls to `split()`; *L* as predicted.
 - **Overflow:** *s* = 2048 → *L* = 2 for every range; *s* = 4097 → the *L* of
   *s* = 1.
@@ -389,6 +412,7 @@ partitions (the `Created ... merkle trees` debug line); *L* = leaves per tree.
 | The overflow arms give large trees | **Refuted** for the overflow claim — §4's arithmetic is wrong; read the bytecode before concluding. |
 | *L* = 2^`ceil(log2 n)` at every value | **Invalid run** — the partition term binds; load more data (9c) and re-run. |
 | The read-back of `RepairSessionSpaceInMiB` differs from the value set | **Invalid run** — the knob did not take; fix 9b. |
+| An instrument is silent: a validation with no `Prepared AEService` line or no `split calls` line, arm O with no `samples` line, or a held repair whose hold line never appears (added 2026-10-14, step-0 audit) | **Invalid run** for that reading — fix the harness and repeat the value; the leaf count is not read from anything else. |
 
 **Why the leaf count and not only heap:** a validation's trees are short-lived
 and the heap holds other repair state; the leaf count from the debug line is
@@ -407,6 +431,14 @@ exact, and the heap and off-heap readings confirm it costs what §7 says.
 **Cluster layout.** Two nodes, `pc57` and `pc50` as a ring
 ([`environment-notes.md`](../../../stage4-runtime-verification/long-path/environment-notes.md) §1),
 `num_tokens: 1` with explicit `initial_token`s: `-9223372036854775808` and `0` for Murmur3 (arm O chooses its own, 9e).
+**(Amended 2026-10-14, step-0 audit:** both nodes run on `pc57`, on loopback
+addresses `127.0.0.2` (node 1) and `127.0.0.3` (node 2), each with its own
+`conf/`, data and log directories and JMX port (7102, 7103), as the
+`internode_application_send_queue_capacity` harness ran its four-node ring.
+Nothing this case measures depends on the network, and one host gives one
+clock and one file system for the logs; `pc50` is not needed. `nodetool` takes
+`-p <port>`; the knob is set and read with the harness's `Jmx.java`
+instead of `nodetool sjk`.)**
 Keyspace `SimpleStrategy`, `replication_factor` 2, one table. Node 1 runs every
 repair (`-pr`: its own primary range only).
 
@@ -419,7 +451,7 @@ repair (`-pr`: its own primary range only).
 | `concurrent_merkle_tree_requests` | `1` | One validation at a time per repair. |
 | `use_offheap_merkle_trees` | `true` (default) | Arm M's coordinator off-heap reading depends on it. |
 | `sstable.selected_format` | `big` (default) | BTI gives no key samples, so arm O would fall back to `init(range)` (§5). |
-| `auto_snapshot`, compaction | defaults; `nodetool disableautocompaction` before loading | The partition estimate (*n*) comes from SSTable key estimates; keep the SSTable set fixed across the sweep. |
+| `auto_snapshot`, compaction | defaults; the table is created before loading with `compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'}` (amended 2026-10-14: `disableautocompaction` cannot run before stress has created the table) | The partition estimate (*n*) comes from SSTable key estimates; keep the SSTable set fixed across the sweep. |
 | Partitioner | `Murmur3Partitioner` (arm M), `ByteOrderedPartitioner` (arm O, fresh data directories) | Decides the path (§5). |
 | Logging | `debug.log` at `DEBUG` for `org.apache.cassandra` (the shipped default) | The leaf count and off-heap lines are `DEBUG`. |
 
@@ -440,7 +472,9 @@ Work for step 1, before run 1:
 |---|---|
 | `RepairSessionSpaceTreeTest.java` | Unit tier, package `org.apache.cassandra.repair`, modelled on `ValidatorTest` (same schema set-up, `KeyspaceParams.simple(1)`, `CompactionsTest.populate`, `registerOutgoingMessageSink()`). Steps U1–U4 in 9e. |
 | `split-trace.btm` | Byteman, observation only: (1) `AT LINE 410` of `MerkleTree.split`: `split refused size=<size> maxsize=<maxsize>`; (2) at the `return false` of the `TooDeep` catch: `split toodeep size=<size> maxsize=<maxsize>`; (3) a counter of `split()` entries, printed with the session id at `Validator.complete()` entry: `split calls=<n> trees=<trees.size()>`. |
-| `hold-trees.btm` | Byteman: at `Validator.complete()` entry, `Thread.sleep(20000)`, so the built tree is still referenced while the histogram is taken. Loaded for the histogram runs only. |
+| `hold-trees.btm` | Byteman: at `Validator.complete()` entry, `Thread.sleep(20000)`, so the built tree is still referenced while the histogram is taken. Loaded for the histogram runs only. **(Amended 2026-10-14, step-0 audit:** loaded at node 2's start and gated by a flag file, so it sleeps only while the file exists, and it writes `hold start` before the sleep and `hold end` after it. The rules then never need loading at run time, and the harness takes the histogram after `hold start`.) |
+| Added 2026-10-14 (step-0 audit): `split-trace.btm` rule (4) | At `keys.clear()` in `Validator.prepare()` (the end of one range's split loop), `samples=<numKeys>`: the arm-O sample count. |
+| Added 2026-10-14: `Jmx.java`, `make-node-yaml.sh`, `cluster-run.py`, `unit-run.sh` | The JMX get/set client (ports 7102, 7103), the per-node `conf/` builder, the scripted cluster tier (labels per arm and scenario, `EXPECTED:` lines in `summary.txt`), the unit-tier runner. |
 
 ```bash
 # unit tier
@@ -451,7 +485,7 @@ ant testsome -Dtest.name=org.apache.cassandra.repair.RepairSessionSpaceTreeTest
 
 # cluster tier: schema and load (both nodes up), then flush; 2^20 partitions of one small row
 bin/cqlsh <node1> -e "CREATE KEYSPACE keyspace1 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 2};"
-tools/bin/cassandra-stress write n=1048576 cl=ALL no-warmup -col n=1 'size=FIXED(16)' -rate threads=32 -node <node1>,<node2>
+tools/bin/cassandra-stress write n=1048576 cl=ALL no-warmup -col 'n=FIXED(1)' 'size=FIXED(16)' -rate threads=32 -node <node1>,<node2>   # amended 2026-10-14: n=FIXED(1), stress's distribution syntax
 bin/nodetool -h <node1> flush keyspace1 standard1 && bin/nodetool -h <node2> flush keyspace1 standard1
 # per value: set the knob on both nodes (9b), then
 bin/nodetool -h <node1> repair -full -pr keyspace1 standard1
@@ -469,16 +503,16 @@ bin/nodetool -h <node1> repair -full -pr keyspace1 standard1
 | **Disallow evidence** (arm O) | `split refused size=… maxsize=…` lines from `split-trace.btm` (`size == maxsize`), and no `split toodeep` line. | Each validation | The caller cannot tell the two refusals apart (§5); only the trace and `size` can. |
 | **Path evidence** (arm M) | `split calls=0` from `split-trace.btm`. | Each validation | — |
 | **Real resource, replica heap** | With `hold-trees.btm` loaded, during the 20 s hold: `jmap -histo:live <pid> \| grep -E 'MerkleTree\$OnHeap(Leaf\|Inner)'` (instance counts and bytes), on the replica that is not the coordinator. | Once per value, in a separate repair | `-histo:live` forces a full GC; take it once per value, not repeatedly. The coordinator's own tree is moved off heap at the end. |
-| **Real resource, coordinator off heap** (arm M) | `grep 'Allocating direct buffer of size' logs/debug.log` on node 1 (`MerkleTree.java:750`): two per range. Cross-check `BufferPoolMXBean` `direct` `MemoryUsed` before and after (`nodetool sjk mx -mg -b 'java.nio:type=BufferPool,name=direct' -f MemoryUsed`). | Each repair | Arm O logs no such line (order-preserving trees stay on heap). |
+| **Real resource, coordinator off heap** (arm M) | `grep 'Allocating direct buffer of size' logs/debug.log` on node 1 (`MerkleTree.java:750`): two per range. Cross-check `BufferPoolMXBean` `direct` `MemoryUsed` before and after (`nodetool sjk mx -mg -b 'java.nio:type=BufferPool,name=direct' -f MemoryUsed`). **(Amended 2026-10-14, step-0 audit:** "after" cannot show the buffers, because the session releases its trees when it ends. The cross-check reads node 1's `MemoryUsed` idle, then **during node 2's hold**, when node 1's own tree is already off heap and waiting for the peer's: the rise should be one buffer, `82 L + 32` bytes, readable only where that clears the idle noise. Support, not a deciding reading.) | Each repair | Arm O logs no such line (order-preserving trees stay on heap). |
 
 ### 9e. Running the scenarios
 
 **Unit tier.** Commands in 9c. Record each assertion and the printed values.
 
-1. **U1, the check alone** (`RandomPartitioner`, as `MerkleTreeTest`): for `maxsize` *M* in {2, 1024, 16384}, a tree over the full range with `RECOMMENDED_DEPTH`; call `split` on random tokens until it returns `false`. Assert `size == M` when it does, and that one more call returns `false` with `size` unchanged. Measure allocation per call with `ThreadMXBean.getThreadAllocatedBytes`: a successful split allocates about one inner node and two leaves; a refused one about nothing.
+1. **U1, the check alone** (`RandomPartitioner`, as `MerkleTreeTest`): for `maxsize` *M* in {2, 1024, 16384}, a tree over the full range with `RECOMMENDED_DEPTH`; call `split` on random tokens until it returns `false`. Assert `size == M` when it does, and that one more call returns `false` with `size` unchanged. Measure allocation per call with `ThreadMXBean.getThreadAllocatedBytes`: a successful split allocates about one inner node and two leaves; a refused one about nothing. **(Amended 2026-10-14, step-0 audit, the numbers:** the baseline is the largest reading of 1,000 empty measurement intervals; each of 1,000 refused calls allocates **no more than that baseline**; every successful split allocates **at least** `shallow(OnHeapInner) + 2 × shallow(OnHeapLeaf)` (`ObjectSizes.measure`, printed); the first `false` comes with `size == M` exactly.)
 2. **U2, `init()`:** the same *M*, plus *M* = 1000: `init()` gives `size == M`, and 512 for 1000.
-3. **U3, the derivation:** load 2^14 partitions and flush (as `ValidatorTest.testSizeLimiting`). For *s* in {1, 2, 4} MiB with depth cap 20, validate with `evenTreeDistribution = true` (`init`): predicted *L* = 2^12, 2^13, 2^14 (the partition term binds at 4). Repeat *s* = 1 and 2 with `false` (split, `ByteOrderedPartitioner`): the same *L*, with the refusal at `size == maxsize`. Not *s* = 4 on the split path: 2^14 leaves from about 128 samples needs about 128 splits per sample, past the depth limit of 126, so `TooDeep` would stop it first (§5). Then *s* = 64 with `setRepairSessionMaxTreeDepth(10)`: *L* = 2^10. Print `MerkleTree.estimatedMaxDepthForBytes(partitioner, b, 32)` for *b* = 0.5, 1, 2, 8, 32 MiB: the table the cluster prediction uses.
-4. **U4, the overflow:** with the same data, *s* in {2047, 2048, 4096, 4097, 5120}: predicted *L* = 2^14, 2, 2, 2^12, 2^14.
+3. **U3, the derivation:** load 2^14 partitions and flush (as `ValidatorTest.testSizeLimiting`). For *s* in {1, 2, 4} MiB with depth cap 20, validate with `evenTreeDistribution = true` (`init`): predicted *L* = 2^12, 2^13, 2^14 (the partition term binds at 4). Repeat *s* = 1 and 2 with `false` (split, `ByteOrderedPartitioner`): the same *L*, with the refusal at `size == maxsize`. Not *s* = 4 on the split path: 2^14 leaves from about 128 samples needs about 128 splits per sample, past the depth limit of 126, so `TooDeep` would stop it first (§5). Then *s* = 64 with `setRepairSessionMaxTreeDepth(10)`: *L* = 2^10. Print `MerkleTree.estimatedMaxDepthForBytes(partitioner, b, 32)` for *b* = 0.5, 1, 2, 8, 32 MiB: the table the cluster prediction uses. **(Amended 2026-10-14, step-0 audit, before any reading:** (a) the table is printed for both `ByteOrderedPartitioner` and `Murmur3Partitioner`, and for *b* = 0.5, 1, 2, 4, 8, 32, 64 MiB (64 MiB is the default 128 MiB at RF 2), with the leaf and inner sizes the method uses. (b) **The split-path repeats run on a second table loaded with 2^16 partitions** (about 512 key samples), not the 2^14 one: with about 128 samples, 2^13 leaves need about 64 splits per sample on average and more on the most-picked one, and the test keys (decimal strings under a byte-order token) share long prefixes, so the deepest leaf could approach the depth limit of 126 and `TooDeep` could stop the loop before `maxsize`. At 2^16, *s* = 1 and 2 still give *L* = 2^12 and 2^13 (the partition term is 16), with about 8 and 16 splits per sample. Each split-path tree's `size` and `maxsize` are printed; `size < maxsize` marks a `TooDeep` stop.)
+4. **U4, the overflow:** with the same data, *s* in {2047, 2048, 4096, 4097, 5120}: predicted *L* = 2^14, 2, 2, 2^12, 2^14. (Amended 2026-10-14: on the `init()` path, `evenTreeDistribution = true`, so `TooDeep` cannot stop the 2^14-leaf rows; the test also prints `s × 1048576` computed in `int`, the product `:62` computes.)
 
 **Cluster tier, arm M (Murmur3).**
 
@@ -488,6 +522,7 @@ bin/nodetool -h <node1> repair -full -pr keyspace1 standard1
 4. **Scenario C** — *s* = 2048 and 4097: record *L* and the off-heap lines. Then the depth cap: stop both nodes, add `repair_session_max_tree_depth: 15`, restart, *s* = 64, repair, record *L*; remove the line afterwards. Optional: the over-streaming step (9c).
 
 **Cluster tier, arm O (`ByteOrderedPartitioner`).** Fresh data directories, `partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner`. A token is the key's raw bytes, so choose the two `initial_token`s from the keys stress writes: on a scratch single node with the same partitioner, load 1,000 rows and read `SELECT token(key) FROM keyspace1.standard1 LIMIT 20`; set node 1's token to the smallest and node 2's to the median, in hex. Load and flush as in arm M, then check that node 1's *n* (the `Created ... merkle trees` line of a first repair) is above 2^16; if not, move node 2's token and reload. For *s* = 4 and 16 MiB: repair with `split-trace.btm` loaded; record *L*, the refusal lines and their `size`/`maxsize`, any `toodeep` line, and the sample count (`nodetool tablestats` index summary entries).
+**(Amended 2026-10-14, step-0 audit:** (a) in a byte-ordered table `SELECT token(key) … LIMIT 20` returns the 20 **smallest** tokens, so their median is not the data's. Read all 1,000 tokens instead (`SELECT token(key) FROM keyspace1.standard1`, paging off), set **node 2's token to `00`** (one zero byte, below every stress key) and **node 1's to the median of the 1,000**. Node 1's primary range is then `(00, median]`, about half the keys, and does not wrap. (b) The sample count is the `samples=` line of `split-trace.btm` (rule 4): `nodetool tablestats` does not print index-summary entries.)**
 
 **Record for stage 4:** the configuration in force, the exact commands, and the raw readings from 9d for every run.
 
@@ -499,8 +534,8 @@ bin/nodetool -h <node1> repair -full -pr keyspace1 standard1
 | **Filed by / Date** | Claude (AI long path), 2026-10-13. |
 | **Line numbers checked** | 2026-10-13, every cited line against the local clone at `cassandra-5.0.9` (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | No path exceeds `maxsize`. Three Target-3 notes: (1) **the check is not reached on the default partitioner** (§5); (2) **the 32-bit overflow** at `ValidationManager.java:62` gives two-leaf trees from 2048 to 4096 MiB, the default at a 32 GiB heap (§4); (3) the coordinator holds trees sized by the **replicas'** settings (§8). |
-| **Stage-4 feedback** | none yet |
-| **Notes** | Renamed from the queue's `repair_session_max_tree_depth`: that key is deprecated in 5.0, defaults to 20 and only caps the depth, while `repair_session_space` is the budget a user tunes and binds below heaps of about 6 to 12 GiB at RF 3 (§4). |
+| **Stage-4 feedback** | **2026-10-14, long path, run 1 on `pc57`: Confirmed at both tiers; arm M non-domination as recorded; overflow as recorded; no run 2** ([results](../../../stage4-runtime-verification/long-path/results/repair_session_space-split-maxsize.md); harness `../../../stage4-runtime-verification/long-path/harness/repair_session_space-split-maxsize/`; uncommitted). Step-0 audit **Ready after amendments** (§9 hash `92f86a2d…`): the off-heap buffer is `82 L + 32` (`allocate()` gets the leaf count), the depth table is printed per partitioner, arm O's tokens and sample count, the U3 split path on 2^16 keys. Unit: `split()` refuses at `size == maxsize` and a refused call allocates 0 B; `init()` builds `maxsize` leaves; leaf + inner = 200 B (Murmur3) and 208 B (byte order); U4's 32-bit products wrap as §4 says (2048 → −2^31, 4096 → 0, 4097 → 2^20). Cluster, two nodes, RF 2, 2^20 rows: leaves per tree 2,048 · 8,192 · 32,768 · 131,072 · 262,144 at 1 · 4 · 16 · 64 · 128 (default) MiB, each the predicted `maxsize`, unchanged when the data doubles; on Murmur3 `split()` is never called; on byte order one refusal at `size == maxsize` per validation, no `TooDeep`; replica heap +*L* leaves and +(*L* − 1) inner nodes; coordinator two direct buffers of exactly `82 L + 32` B; depth cap 15 → 2^15. **2048 MiB gives two-leaf trees and 4097 MiB the 1 MiB count, at runtime.** The over-streaming step was not run. |
+| **Notes** | Renamed from the queue's `repair_session_max_tree_depth`: that key is deprecated in 5.0, defaults to 20 and only caps the depth, while `repair_session_space` is the budget a user tunes and binds below heaps of about 6 to 12 GiB at RF 3 (§4). **For stage 3 (2026-10-14, from the stage-4 audit, not applied):** §7's "Rough sizing" off-heap formula `(L − 1) × 50 + L × 32` should read `L × 50 + (L + 1) × 32` — `allocate()`'s `innerNodeCount` parameter receives the leaf count (`MerkleTree.java:781`, `:714`, `:789`, `:799-802`); stage 4 read exactly `82 L + 32` B per buffer. §5's concern that `TooDeep` may bind first: at the default, byte order, about 4,273 samples gave 2^18 leaves (≈ 61 splits per sample) with a capacity stop and no `TooDeep`. |
 
 ---
 

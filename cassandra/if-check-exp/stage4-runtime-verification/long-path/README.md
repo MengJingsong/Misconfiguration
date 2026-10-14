@@ -42,5 +42,5 @@ Python run script (`cluster-run.py`: instrument checks, calibration, scenarios, 
 objects, a Byteman observation rule with a helper class on the boot class path (the node runs from the jar), and a small JMX client with a setter (`Jmx.java`); the lessons are in `../../../../HANDOFF.md`
 ("Stage 4 update (2026-10-07)") and in each harness README.
 
-**Unaudited cases.** All 17 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth to seventeenth written in it); nine are closed (see `../../../../HANDOFF.md`; the newest, `memtable_offheap_space`, adds a Byteman region ledger for JNA `malloc` memory that NMT cannot see), but the others
+**Unaudited cases.** All 17 filed cases are in the new §9 layout (eight converted on 2026-10-06, the twelfth to seventeenth written in it); ten are closed (see `../../../../HANDOFF.md`; the newest, `repair_session_space`, runs a two-node ring on one host on loopback addresses and keeps each repair's raw log segments under `raw/` for the self-check), but the others
 have not passed the design audit and have no harness code; both come before a run, as [`../README.md`](../README.md) ("Step 0") says.

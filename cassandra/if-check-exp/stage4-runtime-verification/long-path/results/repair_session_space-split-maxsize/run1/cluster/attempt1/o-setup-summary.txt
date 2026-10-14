@@ -1,0 +1,16 @@
+SETUP arm O: partitioner org.apache.cassandra.dht.ByteOrderedPartitioner, tokens {'N1': '3835344d4b4c36363131', 'N2': '00'}, rows 1048576
+# ---- stage4 rss lines ----;cluster_name: stage4-rss;partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner;num_tokens: 1;initial_token: 3835344d4b4c36363131;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-rss/N1/data;commitlog_directory: /users/jason92/stage4-rss/N1/commitlog;hints_directory: /users/jason92/stage4-rss/N1/hints;saved_caches_directory: /users/jason92/stag
+N1 up: statusbinary running, UN ['127.0.0.2'] after 14 s
+# ---- stage4 rss lines ----;cluster_name: stage4-rss;partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner;num_tokens: 1;initial_token: 00;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-rss/N2/data;commitlog_directory: /users/jason92/stage4-rss/N2/commitlog;hints_directory: /users/jason92/stage4-rss/N2/hints;saved_caches_directory: /users/jason92/stage4-rss/N2/saved_ca
+N2 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 20 s
+N1 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 3 s
+SCHEMA keyspace1 RF 2, standard1 with autocompaction disabled
+STRESS n=1048576: partitions 1,048,576, errors 0
+SSTABLES N1: 4 Data.db files
+SSTABLES N2: 4 Data.db files
+DEFAULT repair_session_space read back {'N1': 128, 'N2': 128} (expected 128 at -Xmx2G, G1)
+EXPECTED: default repair_session_space = 128 MiB on both nodes — yes
+READ O o-setup first repair s=default N1: n=546816 L=262144 predicted=262144 {'prod': 134217728, 'b': 67108864, 'd': 18, 'max_depth': 18, 'depth': 18} split_calls=262144 refused=[(262144, 262144)] toodeep=[] samples=[4272] offheap=[]
+READ O o-setup first repair s=default N2: n=546944 L=262144 predicted=262144 {'prod': 134217728, 'b': 67108864, 'd': 18, 'max_depth': 18, 'depth': 18} split_calls=262144 refused=[(262144, 262144)] toodeep=[] samples=[4273] offheap=[]
+SET-UP repair o-setup first repair: readings above recorded as observations, not compared with the 9a prediction
+EXPECTED: O: node 1 n above 2^16 (65536); read 546816 — yes

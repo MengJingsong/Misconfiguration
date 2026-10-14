@@ -1,0 +1,19 @@
+DEPTH TABLE org.apache.cassandra.dht.Murmur3Partitioner: leaf 80 inner 120 d {524288: 11, 1048576: 12, 2097152: 13, 4194304: 14, 8388608: 15, 33554432: 17, 67108864: 18}
+KNOB N1 set 2048 read back 2048 / 2048
+KNOB N2 set 2048 read back 2048 / 2048
+READ M C-overflow s=2048 N1: n=1048960 L=2 predicted=2 {'prod': -2147483648, 'b': 1, 'd': 1, 'max_depth': 1, 'depth': 1} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[196, 196]
+READ M C-overflow s=2048 N2: n=1048576 L=2 predicted=2 {'prod': -2147483648, 'b': 1, 'd': 1, 'max_depth': 1, 'depth': 1} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M C-overflow s=2048 N1: L = 2 (2^min(ceil log2 n, d(b), D)); read 2 — yes
+EXPECTED: M C-overflow s=2048 N2: L = 2 (2^min(ceil log2 n, d(b), D)); read 2 — yes
+EXPECTED: M C-overflow s=2048 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M C-overflow s=2048 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M C-overflow s=2048 N1: two off-heap buffers of 82 L + 32 = [196, 196]; read [196, 196] — yes
+KNOB N1 set 4097 read back 4097 / 4097
+KNOB N2 set 4097 read back 4097 / 4097
+READ M C-overflow s=4097 N1: n=1048960 L=2048 predicted=2048 {'prod': 1048576, 'b': 524288, 'd': 11, 'max_depth': 11, 'depth': 11} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[167968, 167968]
+READ M C-overflow s=4097 N2: n=1048576 L=2048 predicted=2048 {'prod': 1048576, 'b': 524288, 'd': 11, 'max_depth': 11, 'depth': 11} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M C-overflow s=4097 N1: L = 2048 (2^min(ceil log2 n, d(b), D)); read 2048 — yes
+EXPECTED: M C-overflow s=4097 N2: L = 2048 (2^min(ceil log2 n, d(b), D)); read 2048 — yes
+EXPECTED: M C-overflow s=4097 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M C-overflow s=4097 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M C-overflow s=4097 N1: two off-heap buffers of 82 L + 32 = [167968, 167968]; read [167968, 167968] — yes

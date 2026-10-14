@@ -1,0 +1,273 @@
+PASS unit MerkleTreeTest JUnit — tests=27 failures=0 errors=0
+PASS unit ValidatorTest JUnit — tests=6 failures=0 errors=0
+PASS unit RepairSessionSpaceTreeTest JUnit — tests=4 failures=0 errors=0
+PASS unit harness: no MISMATCH line — 78 checks
+PASS unit ByteOrderedPartitioner: leaf+inner in (128, 256] (case 4, from ValidatorTest) — 208
+PASS unit ByteOrderedPartitioner: d rises by one per doubling of b (0.5 to 8 MiB) — {524288: 11, 1048576: 12, 2097152: 13, 4194304: 14, 8388608: 15, 33554432: 17, 67108864: 18}
+PASS unit Murmur3Partitioner: leaf+inner in (128, 256] (case 4, from ValidatorTest) — 200
+PASS unit Murmur3Partitioner: d rises by one per doubling of b (0.5 to 8 MiB) — {524288: 11, 1048576: 12, 2097152: 13, 4194304: 14, 8388608: 15, 33554432: 17, 67108864: 18}
+PASS unit U4 s=2047: leaves = 9e prediction 16384 and formula 16384 — n=16384 leaves=16384 size=16384 maxsize=16384
+PASS unit U4 s=2048: leaves = 9e prediction 2 and formula 2 — n=16384 leaves=2 size=2 maxsize=2
+PASS unit U4 s=4096: leaves = 9e prediction 2 and formula 2 — n=16384 leaves=2 size=2 maxsize=2
+PASS unit U4 s=4097: leaves = 9e prediction 4096 and formula 4096 — n=16384 leaves=4096 size=4096 maxsize=4096
+PASS unit U4 s=5120: leaves = 9e prediction 16384 and formula 16384 — n=16384 leaves=16384 size=16384 maxsize=16384
+PASS unit U3 init s=1: leaves = 9e prediction 4096 and formula 4096 — n=16384 leaves=4096 size=4096 maxsize=4096
+PASS unit U3 init s=2: leaves = 9e prediction 8192 and formula 8192 — n=16384 leaves=8192 size=8192 maxsize=8192
+PASS unit U3 init s=4: leaves = 9e prediction 16384 and formula 16384 — n=16384 leaves=16384 size=16384 maxsize=16384
+PASS unit U3 split s=1: leaves = 9e prediction 4096 and formula 4096 — n=65536 leaves=4096 size=4096 maxsize=4096
+PASS unit U3 split s=1: split loop stopped at size == maxsize (capacity, not TooDeep)
+PASS unit U3 split s=2: leaves = 9e prediction 8192 and formula 8192 — n=65536 leaves=8192 size=8192 maxsize=8192
+PASS unit U3 split s=2: split loop stopped at size == maxsize (capacity, not TooDeep)
+PASS unit U3 depthcap10 s=64: leaves = 9e prediction 1024 and formula 1024 — n=16384 leaves=1024 size=1024 maxsize=1024
+PASS unit U4 s=2048: 32-bit product -2147483648 — -2147483648
+PASS unit U4 s=4096: 32-bit product 0 — 0
+PASS unit U4 s=4097: 32-bit product 1048576 — 1048576
+PASS unit U4 s=5120: 32-bit product 1073741824 — 1073741824
+PASS unit U1 M=2: refuses at size == M, creates nothing after; refused calls allocate <= baseline — refused max 0 B, baseline 0 B
+PASS unit U1 M=1024: refuses at size == M, creates nothing after; refused calls allocate <= baseline — refused max 0 B, baseline 0 B
+PASS unit U1 M=16384: refuses at size == M, creates nothing after; refused calls allocate <= baseline — refused max 0 B, baseline 0 B
+PASS unit U2 M=2: init() builds 2 leaves
+PASS unit U2 M=1024: init() builds 1024 leaves
+PASS unit U2 M=16384: init() builds 16384 leaves
+PASS unit U2 M=1000: init() builds 512 leaves
+PASS cluster: default repair_session_space read back 128 on both nodes — DEFAULT repair_session_space read back {'N1': 128, 'N2': 128}
+PASS m-control control s=default N1: one Created and one Prepared line — 1/1
+PASS m-control control s=default N1: L = 2^min(ceil log2 n, d(b), D) = 262144 — n=524288 L=262144
+PASS m-control control s=default N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-control control s=default N1: one split-calls line — [0]
+PASS m-control control s=default N1: split() never called, no refusal line
+PASS m-control control s=default N2: one Created and one Prepared line — 1/1
+PASS m-control control s=default N2: L = 2^min(ceil log2 n, d(b), D) = 262144 — n=524288 L=262144
+PASS m-control control s=default N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-control control s=default N2: one split-calls line — [0]
+PASS m-control control s=default N2: split() never called, no refusal line
+PASS m-control control s=default N1: two off-heap buffers of 82 L + 32 = [21495840, 21495840] — N1 [21495840, 21495840] N2 []
+PASS m-control control-hold s=default N1: one Created and one Prepared line — 1/1
+PASS m-control control-hold s=default N1: L = 2^min(ceil log2 n, d(b), D) = 262144 — n=524288 L=262144
+PASS m-control control-hold s=default N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-control control-hold s=default N1: one split-calls line — [0]
+PASS m-control control-hold s=default N1: split() never called, no refusal line
+PASS m-control control-hold s=default N2: one Created and one Prepared line — 1/1
+PASS m-control control-hold s=default N2: L = 2^min(ceil log2 n, d(b), D) = 262144 — n=524288 L=262144
+PASS m-control control-hold s=default N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-control control-hold s=default N2: one split-calls line — [0]
+PASS m-control control-hold s=default N2: split() never called, no refusal line
+PASS m-control control-hold s=default N1: two off-heap buffers of 82 L + 32 = [21495840, 21495840] — N1 [21495840, 21495840] N2 []
+PASS m-control control-hold s=default N2: hold started once
+PASS m-control control-hold s=default N2 heap: OnHeapLeaf +262144, OnHeapInner +262143 — +262144 (8388608 B), +262143 (12582864 B); 80.0 B per leaf shallow
+INFO m-control control-hold s=default N1 direct MemoryUsed rise during hold 21496034 B against one buffer 21495840 B (1.0000) — support only
+PASS m-a: knob N1 set 1 read back 1/1
+PASS m-a: knob N2 set 1 read back 1/1
+PASS m-a: knob N1 set 4 read back 4/4
+PASS m-a: knob N2 set 4 read back 4/4
+PASS m-a: knob N1 set 16 read back 16/16
+PASS m-a: knob N2 set 16 read back 16/16
+PASS m-a: knob N1 set 64 read back 64/64
+PASS m-a: knob N2 set 64 read back 64/64
+PASS m-a A s=1 N1: one Created and one Prepared line — 1/1
+PASS m-a A s=1 N1: L = 2^min(ceil log2 n, d(b), D) = 2048 — n=524288 L=2048
+PASS m-a A s=1 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=1 N1: one split-calls line — [0]
+PASS m-a A s=1 N1: split() never called, no refusal line
+PASS m-a A s=1 N2: one Created and one Prepared line — 1/1
+PASS m-a A s=1 N2: L = 2^min(ceil log2 n, d(b), D) = 2048 — n=524288 L=2048
+PASS m-a A s=1 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=1 N2: one split-calls line — [0]
+PASS m-a A s=1 N2: split() never called, no refusal line
+PASS m-a A s=1 N1: two off-heap buffers of 82 L + 32 = [167968, 167968] — N1 [167968, 167968] N2 []
+PASS m-a A-hold s=1 N1: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=1 N1: L = 2^min(ceil log2 n, d(b), D) = 2048 — n=524288 L=2048
+PASS m-a A-hold s=1 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=1 N1: one split-calls line — [0]
+PASS m-a A-hold s=1 N1: split() never called, no refusal line
+PASS m-a A-hold s=1 N2: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=1 N2: L = 2^min(ceil log2 n, d(b), D) = 2048 — n=524288 L=2048
+PASS m-a A-hold s=1 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=1 N2: one split-calls line — [0]
+PASS m-a A-hold s=1 N2: split() never called, no refusal line
+PASS m-a A-hold s=1 N1: two off-heap buffers of 82 L + 32 = [167968, 167968] — N1 [167968, 167968] N2 []
+PASS m-a A-hold s=1 N2: hold started once
+PASS m-a A-hold s=1 N2 heap: OnHeapLeaf +2048, OnHeapInner +2047 — +2048 (65536 B), +2047 (98256 B); 80.0 B per leaf shallow
+INFO m-a A-hold s=1 N1 direct MemoryUsed rise during hold 167968 B against one buffer 167968 B (1.0000) — support only
+PASS m-a A s=4 N1: one Created and one Prepared line — 1/1
+PASS m-a A s=4 N1: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=524288 L=8192
+PASS m-a A s=4 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=4 N1: one split-calls line — [0]
+PASS m-a A s=4 N1: split() never called, no refusal line
+PASS m-a A s=4 N2: one Created and one Prepared line — 1/1
+PASS m-a A s=4 N2: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=524288 L=8192
+PASS m-a A s=4 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=4 N2: one split-calls line — [0]
+PASS m-a A s=4 N2: split() never called, no refusal line
+PASS m-a A s=4 N1: two off-heap buffers of 82 L + 32 = [671776, 671776] — N1 [671776, 671776] N2 []
+PASS m-a A-hold s=4 N1: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=4 N1: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=524288 L=8192
+PASS m-a A-hold s=4 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=4 N1: one split-calls line — [0]
+PASS m-a A-hold s=4 N1: split() never called, no refusal line
+PASS m-a A-hold s=4 N2: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=4 N2: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=524288 L=8192
+PASS m-a A-hold s=4 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=4 N2: one split-calls line — [0]
+PASS m-a A-hold s=4 N2: split() never called, no refusal line
+PASS m-a A-hold s=4 N1: two off-heap buffers of 82 L + 32 = [671776, 671776] — N1 [671776, 671776] N2 []
+PASS m-a A-hold s=4 N2: hold started once
+PASS m-a A-hold s=4 N2 heap: OnHeapLeaf +8192, OnHeapInner +8191 — +8192 (262144 B), +8191 (393168 B); 80.0 B per leaf shallow
+INFO m-a A-hold s=4 N1 direct MemoryUsed rise during hold 671392 B against one buffer 671776 B (0.9994) — support only
+PASS m-a A s=16 N1: one Created and one Prepared line — 1/1
+PASS m-a A s=16 N1: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=524288 L=32768
+PASS m-a A s=16 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=16 N1: one split-calls line — [0]
+PASS m-a A s=16 N1: split() never called, no refusal line
+PASS m-a A s=16 N2: one Created and one Prepared line — 1/1
+PASS m-a A s=16 N2: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=524288 L=32768
+PASS m-a A s=16 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=16 N2: one split-calls line — [0]
+PASS m-a A s=16 N2: split() never called, no refusal line
+PASS m-a A s=16 N1: two off-heap buffers of 82 L + 32 = [2687008, 2687008] — N1 [2687008, 2687008] N2 []
+PASS m-a A-hold s=16 N1: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=16 N1: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=524288 L=32768
+PASS m-a A-hold s=16 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=16 N1: one split-calls line — [0]
+PASS m-a A-hold s=16 N1: split() never called, no refusal line
+PASS m-a A-hold s=16 N2: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=16 N2: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=524288 L=32768
+PASS m-a A-hold s=16 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=16 N2: one split-calls line — [0]
+PASS m-a A-hold s=16 N2: split() never called, no refusal line
+PASS m-a A-hold s=16 N1: two off-heap buffers of 82 L + 32 = [2687008, 2687008] — N1 [2687008, 2687008] N2 []
+PASS m-a A-hold s=16 N2: hold started once
+PASS m-a A-hold s=16 N2 heap: OnHeapLeaf +32768, OnHeapInner +32767 — +32768 (1048576 B), +32767 (1572816 B); 80.0 B per leaf shallow
+INFO m-a A-hold s=16 N1 direct MemoryUsed rise during hold 2686624 B against one buffer 2687008 B (0.9999) — support only
+PASS m-a A s=64 N1: one Created and one Prepared line — 1/1
+PASS m-a A s=64 N1: L = 2^min(ceil log2 n, d(b), D) = 131072 — n=524288 L=131072
+PASS m-a A s=64 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=64 N1: one split-calls line — [0]
+PASS m-a A s=64 N1: split() never called, no refusal line
+PASS m-a A s=64 N2: one Created and one Prepared line — 1/1
+PASS m-a A s=64 N2: L = 2^min(ceil log2 n, d(b), D) = 131072 — n=524288 L=131072
+PASS m-a A s=64 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A s=64 N2: one split-calls line — [0]
+PASS m-a A s=64 N2: split() never called, no refusal line
+PASS m-a A s=64 N1: two off-heap buffers of 82 L + 32 = [10747936, 10747936] — N1 [10747936, 10747936] N2 []
+PASS m-a A-hold s=64 N1: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=64 N1: L = 2^min(ceil log2 n, d(b), D) = 131072 — n=524288 L=131072
+PASS m-a A-hold s=64 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=64 N1: one split-calls line — [0]
+PASS m-a A-hold s=64 N1: split() never called, no refusal line
+PASS m-a A-hold s=64 N2: one Created and one Prepared line — 1/1
+PASS m-a A-hold s=64 N2: L = 2^min(ceil log2 n, d(b), D) = 131072 — n=524288 L=131072
+PASS m-a A-hold s=64 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 19
+PASS m-a A-hold s=64 N2: one split-calls line — [0]
+PASS m-a A-hold s=64 N2: split() never called, no refusal line
+PASS m-a A-hold s=64 N1: two off-heap buffers of 82 L + 32 = [10747936, 10747936] — N1 [10747936, 10747936] N2 []
+PASS m-a A-hold s=64 N2: hold started once
+PASS m-a A-hold s=64 N2 heap: OnHeapLeaf +131072, OnHeapInner +131071 — +131072 (4194304 B), +131071 (6291408 B); 80.0 B per leaf shallow
+INFO m-a A-hold s=64 N1 direct MemoryUsed rise during hold 10747552 B against one buffer 10747936 B (1.0000) — support only
+PASS m-b: knob N1 set 4 read back 4/4
+PASS m-b: knob N2 set 4 read back 4/4
+PASS m-b: knob N1 set 16 read back 16/16
+PASS m-b: knob N2 set 16 read back 16/16
+PASS m-b B s=4 N1: one Created and one Prepared line — 1/1
+PASS m-b B s=4 N1: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=1048704 L=8192
+PASS m-b B s=4 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-b B s=4 N1: one split-calls line — [0]
+PASS m-b B s=4 N1: split() never called, no refusal line
+PASS m-b B s=4 N2: one Created and one Prepared line — 1/1
+PASS m-b B s=4 N2: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=1048704 L=8192
+PASS m-b B s=4 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-b B s=4 N2: one split-calls line — [0]
+PASS m-b B s=4 N2: split() never called, no refusal line
+PASS m-b B s=4 N1: two off-heap buffers of 82 L + 32 = [671776, 671776] — N1 [671776, 671776] N2 []
+PASS m-b B s=16 N1: one Created and one Prepared line — 1/1
+PASS m-b B s=16 N1: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=1048704 L=32768
+PASS m-b B s=16 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-b B s=16 N1: one split-calls line — [0]
+PASS m-b B s=16 N1: split() never called, no refusal line
+PASS m-b B s=16 N2: one Created and one Prepared line — 1/1
+PASS m-b B s=16 N2: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=1048704 L=32768
+PASS m-b B s=16 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-b B s=16 N2: one split-calls line — [0]
+PASS m-b B s=16 N2: split() never called, no refusal line
+PASS m-b B s=16 N1: two off-heap buffers of 82 L + 32 = [2687008, 2687008] — N1 [2687008, 2687008] N2 []
+PASS m-c: knob N1 set 2048 read back 2048/2048
+PASS m-c: knob N2 set 2048 read back 2048/2048
+PASS m-c: knob N1 set 4097 read back 4097/4097
+PASS m-c: knob N2 set 4097 read back 4097/4097
+PASS m-c C-overflow s=2048 N1: one Created and one Prepared line — 1/1
+PASS m-c C-overflow s=2048 N1: L = 2^min(ceil log2 n, d(b), D) = 2 — n=1048704 L=2
+PASS m-c C-overflow s=2048 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-c C-overflow s=2048 N1: one split-calls line — [0]
+PASS m-c C-overflow s=2048 N1: split() never called, no refusal line
+PASS m-c C-overflow s=2048 N2: one Created and one Prepared line — 1/1
+PASS m-c C-overflow s=2048 N2: L = 2^min(ceil log2 n, d(b), D) = 2 — n=1048704 L=2
+PASS m-c C-overflow s=2048 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-c C-overflow s=2048 N2: one split-calls line — [0]
+PASS m-c C-overflow s=2048 N2: split() never called, no refusal line
+PASS m-c C-overflow s=2048 N1: two off-heap buffers of 82 L + 32 = [196, 196] — N1 [196, 196] N2 []
+PASS m-c C-overflow s=4097 N1: one Created and one Prepared line — 1/1
+PASS m-c C-overflow s=4097 N1: L = 2^min(ceil log2 n, d(b), D) = 2048 — n=1048704 L=2048
+PASS m-c C-overflow s=4097 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-c C-overflow s=4097 N1: one split-calls line — [0]
+PASS m-c C-overflow s=4097 N1: split() never called, no refusal line
+PASS m-c C-overflow s=4097 N2: one Created and one Prepared line — 1/1
+PASS m-c C-overflow s=4097 N2: L = 2^min(ceil log2 n, d(b), D) = 2048 — n=1048704 L=2048
+PASS m-c C-overflow s=4097 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-c C-overflow s=4097 N2: one split-calls line — [0]
+PASS m-c C-overflow s=4097 N2: split() never called, no refusal line
+PASS m-c C-overflow s=4097 N1: two off-heap buffers of 82 L + 32 = [167968, 167968] — N1 [167968, 167968] N2 []
+PASS m-depth: knob N1 set 64 read back 64/64
+PASS m-depth: knob N2 set 64 read back 64/64
+PASS m-depth C-depthcap15 s=64 N1: one Created and one Prepared line — 1/1
+PASS m-depth C-depthcap15 s=64 N1: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=1048704 L=32768
+PASS m-depth C-depthcap15 s=64 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-depth C-depthcap15 s=64 N1: one split-calls line — [0]
+PASS m-depth C-depthcap15 s=64 N1: split() never called, no refusal line
+PASS m-depth C-depthcap15 s=64 N2: one Created and one Prepared line — 1/1
+PASS m-depth C-depthcap15 s=64 N2: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=1048704 L=32768
+PASS m-depth C-depthcap15 s=64 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 21
+PASS m-depth C-depthcap15 s=64 N2: one split-calls line — [0]
+PASS m-depth C-depthcap15 s=64 N2: split() never called, no refusal line
+PASS m-depth C-depthcap15 s=64 N1: two off-heap buffers of 82 L + 32 = [2687008, 2687008] — N1 [2687008, 2687008] N2 []
+PASS o-run: knob N1 set 4 read back 4/4
+PASS o-run: knob N2 set 4 read back 4/4
+PASS o-run: knob N1 set 16 read back 16/16
+PASS o-run: knob N2 set 16 read back 16/16
+PASS o-run A s=4 N1: one Created and one Prepared line — 1/1
+PASS o-run A s=4 N1: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=546944 L=8192
+PASS o-run A s=4 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 20
+PASS o-run A s=4 N1: one split-calls line — [8192]
+PASS o-run A s=4 N1: one capacity refusal at size == maxsize == L, no TooDeep — refused=[(8192, 8192)] toodeep=[]
+PASS o-run A s=4 N1: split calls = L (L - 1 splits + 1 refused) — [8192]
+PASS o-run A s=4 N1: samples ~ n/128 (within 2 %) — samples=[4273] n/128=4273
+PASS o-run A s=4 N2: one Created and one Prepared line — 1/1
+PASS o-run A s=4 N2: L = 2^min(ceil log2 n, d(b), D) = 8192 — n=546816 L=8192
+PASS o-run A s=4 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 20
+PASS o-run A s=4 N2: one split-calls line — [8192]
+PASS o-run A s=4 N2: one capacity refusal at size == maxsize == L, no TooDeep — refused=[(8192, 8192)] toodeep=[]
+PASS o-run A s=4 N2: split calls = L (L - 1 splits + 1 refused) — [8192]
+PASS o-run A s=4 N2: samples ~ n/128 (within 2 %) — samples=[4272] n/128=4272
+PASS o-run A s=4: no off-heap buffer line on either node
+PASS o-run A s=16 N1: one Created and one Prepared line — 1/1
+PASS o-run A s=16 N1: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=546944 L=32768
+PASS o-run A s=16 N1: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 20
+PASS o-run A s=16 N1: one split-calls line — [32768]
+PASS o-run A s=16 N1: one capacity refusal at size == maxsize == L, no TooDeep — refused=[(32768, 32768)] toodeep=[]
+PASS o-run A s=16 N1: split calls = L (L - 1 splits + 1 refused) — [32768]
+PASS o-run A s=16 N1: samples ~ n/128 (within 2 %) — samples=[4273] n/128=4273
+PASS o-run A s=16 N2: one Created and one Prepared line — 1/1
+PASS o-run A s=16 N2: L = 2^min(ceil log2 n, d(b), D) = 32768 — n=546816 L=32768
+PASS o-run A s=16 N2: partition term not binding (ceil log2 n > log2 L) — ceil log2 n = 20
+PASS o-run A s=16 N2: one split-calls line — [32768]
+PASS o-run A s=16 N2: one capacity refusal at size == maxsize == L, no TooDeep — refused=[(32768, 32768)] toodeep=[]
+PASS o-run A s=16 N2: split calls = L (L - 1 splits + 1 refused) — [32768]
+PASS o-run A s=16 N2: samples ~ n/128 (within 2 %) — samples=[4272] n/128=4272
+PASS o-run A s=16: no off-heap buffer line on either node
+PASS logic (3): arm M, L quadruples per quadrupling of s (1, 4, 16, 64 MiB) and doubles to the default (128) — [2048, 8192, 32768, 131072, 262144]
+PASS logic, scenario B: doubling the data leaves L unchanged at s = 4 and 16 — 8192, 32768
+PASS logic (6): s = 2048 gives 2 leaves; s = 4097 gives the s = 1 count — 2, 2048 vs 2048
+PASS depth cap 15 at s = 64: L = 2^15 — 32768
+PASS logic (4): arm O, same L as arm M at 4 and 16 — 8192, 32768
+PASS depth cap step: the deprecation warning logged on both nodes
+
+266 checks, 0 failed

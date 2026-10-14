@@ -1,0 +1,77 @@
+DEPTH TABLE org.apache.cassandra.dht.Murmur3Partitioner: leaf 80 inner 120 d {524288: 11, 1048576: 12, 2097152: 13, 4194304: 14, 8388608: 15, 33554432: 17, 67108864: 18}
+KNOB N1 set 1 read back 1 / 1
+KNOB N2 set 1 read back 1 / 1
+READ M A s=1 N1: n=524416 L=2048 predicted=2048 {'prod': 1048576, 'b': 524288, 'd': 11, 'max_depth': 11, 'depth': 11} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[167968, 167968]
+READ M A s=1 N2: n=524160 L=2048 predicted=2048 {'prod': 1048576, 'b': 524288, 'd': 11, 'max_depth': 11, 'depth': 11} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A s=1 N1: L = 2048 (2^min(ceil log2 n, d(b), D)); read 2048 — yes
+EXPECTED: M A s=1 N2: L = 2048 (2^min(ceil log2 n, d(b), D)); read 2048 — yes
+EXPECTED: M A s=1 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=1 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=1 N1: two off-heap buffers of 82 L + 32 = [167968, 167968]; read [167968, 167968] — yes
+READ M A-hold s=1 N1: n=524416 L=2048 predicted=2048 {'prod': 1048576, 'b': 524288, 'd': 11, 'max_depth': 11, 'depth': 11} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[167968, 167968]
+READ M A-hold s=1 N2: n=524160 L=2048 predicted=2048 {'prod': 1048576, 'b': 524288, 'd': 11, 'max_depth': 11, 'depth': 11} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A-hold s=1 N1: L = 2048 (2^min(ceil log2 n, d(b), D)); read 2048 — yes
+EXPECTED: M A-hold s=1 N2: L = 2048 (2^min(ceil log2 n, d(b), D)); read 2048 — yes
+EXPECTED: M A-hold s=1 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=1 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=1 N1: two off-heap buffers of 82 L + 32 = [167968, 167968]; read [167968, 167968] — yes
+HEAP N2 s=1: OnHeapLeaf (0, 0) -> (2048, 65536) (delta 2048), OnHeapInner (0, 0) -> (2047, 98256) (delta 2047); bytes delta leaf 65536 inner 98256
+EXPECTED: M A-hold s=1 N2 heap: OnHeapLeaf +2048, OnHeapInner +2047; read +2048, +2047 — yes
+DIRECT N1 s=1: MemoryUsed idle 74028421 during hold 74196005 (rise 167584; one buffer would be 167968) — support only
+KNOB N1 set 4 read back 4 / 4
+KNOB N2 set 4 read back 4 / 4
+READ M A s=4 N1: n=524416 L=8192 predicted=8192 {'prod': 4194304, 'b': 2097152, 'd': 13, 'max_depth': 13, 'depth': 13} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[671776, 671776]
+READ M A s=4 N2: n=524160 L=8192 predicted=8192 {'prod': 4194304, 'b': 2097152, 'd': 13, 'max_depth': 13, 'depth': 13} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A s=4 N1: L = 8192 (2^min(ceil log2 n, d(b), D)); read 8192 — yes
+EXPECTED: M A s=4 N2: L = 8192 (2^min(ceil log2 n, d(b), D)); read 8192 — yes
+EXPECTED: M A s=4 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=4 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=4 N1: two off-heap buffers of 82 L + 32 = [671776, 671776]; read [671776, 671776] — yes
+READ M A-hold s=4 N1: n=524416 L=8192 predicted=8192 {'prod': 4194304, 'b': 2097152, 'd': 13, 'max_depth': 13, 'depth': 13} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[671776, 671776]
+READ M A-hold s=4 N2: n=524160 L=8192 predicted=8192 {'prod': 4194304, 'b': 2097152, 'd': 13, 'max_depth': 13, 'depth': 13} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A-hold s=4 N1: L = 8192 (2^min(ceil log2 n, d(b), D)); read 8192 — yes
+EXPECTED: M A-hold s=4 N2: L = 8192 (2^min(ceil log2 n, d(b), D)); read 8192 — yes
+EXPECTED: M A-hold s=4 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=4 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=4 N1: two off-heap buffers of 82 L + 32 = [671776, 671776]; read [671776, 671776] — yes
+HEAP N2 s=4: OnHeapLeaf (0, 0) -> (8192, 262144) (delta 8192), OnHeapInner (0, 0) -> (8191, 393168) (delta 8191); bytes delta leaf 262144 inner 393168
+EXPECTED: M A-hold s=4 N2 heap: OnHeapLeaf +8192, OnHeapInner +8191; read +8192, +8191 — yes
+DIRECT N1 s=4: MemoryUsed idle 74028421 during hold 74699813 (rise 671392; one buffer would be 671776) — support only
+KNOB N1 set 16 read back 16 / 16
+KNOB N2 set 16 read back 16 / 16
+READ M A s=16 N1: n=524416 L=32768 predicted=32768 {'prod': 16777216, 'b': 8388608, 'd': 15, 'max_depth': 15, 'depth': 15} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[2687008, 2687008]
+READ M A s=16 N2: n=524160 L=32768 predicted=32768 {'prod': 16777216, 'b': 8388608, 'd': 15, 'max_depth': 15, 'depth': 15} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A s=16 N1: L = 32768 (2^min(ceil log2 n, d(b), D)); read 32768 — yes
+EXPECTED: M A s=16 N2: L = 32768 (2^min(ceil log2 n, d(b), D)); read 32768 — yes
+EXPECTED: M A s=16 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=16 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=16 N1: two off-heap buffers of 82 L + 32 = [2687008, 2687008]; read [2687008, 2687008] — yes
+READ M A-hold s=16 N1: n=524416 L=32768 predicted=32768 {'prod': 16777216, 'b': 8388608, 'd': 15, 'max_depth': 15, 'depth': 15} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[2687008, 2687008]
+READ M A-hold s=16 N2: n=524160 L=32768 predicted=32768 {'prod': 16777216, 'b': 8388608, 'd': 15, 'max_depth': 15, 'depth': 15} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A-hold s=16 N1: L = 32768 (2^min(ceil log2 n, d(b), D)); read 32768 — yes
+EXPECTED: M A-hold s=16 N2: L = 32768 (2^min(ceil log2 n, d(b), D)); read 32768 — yes
+EXPECTED: M A-hold s=16 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=16 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=16 N1: two off-heap buffers of 82 L + 32 = [2687008, 2687008]; read [2687008, 2687008] — yes
+HEAP N2 s=16: OnHeapLeaf (0, 0) -> (32768, 1048576) (delta 32768), OnHeapInner (0, 0) -> (32767, 1572816) (delta 32767); bytes delta leaf 1048576 inner 1572816
+EXPECTED: M A-hold s=16 N2 heap: OnHeapLeaf +32768, OnHeapInner +32767; read +32768, +32767 — yes
+DIRECT N1 s=16: MemoryUsed idle 74028421 during hold 76715045 (rise 2686624; one buffer would be 2687008) — support only
+KNOB N1 set 64 read back 64 / 64
+KNOB N2 set 64 read back 64 / 64
+READ M A s=64 N1: n=524416 L=131072 predicted=131072 {'prod': 67108864, 'b': 33554432, 'd': 17, 'max_depth': 17, 'depth': 17} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[10747936, 10747936]
+READ M A s=64 N2: n=524160 L=131072 predicted=131072 {'prod': 67108864, 'b': 33554432, 'd': 17, 'max_depth': 17, 'depth': 17} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A s=64 N1: L = 131072 (2^min(ceil log2 n, d(b), D)); read 131072 — yes
+EXPECTED: M A s=64 N2: L = 131072 (2^min(ceil log2 n, d(b), D)); read 131072 — yes
+EXPECTED: M A s=64 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=64 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A s=64 N1: two off-heap buffers of 82 L + 32 = [10747936, 10747936]; read [10747936, 10747936] — yes
+READ M A-hold s=64 N1: n=524416 L=131072 predicted=131072 {'prod': 67108864, 'b': 33554432, 'd': 17, 'max_depth': 17, 'depth': 17} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[10747936, 10747936]
+READ M A-hold s=64 N2: n=524160 L=131072 predicted=131072 {'prod': 67108864, 'b': 33554432, 'd': 17, 'max_depth': 17, 'depth': 17} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M A-hold s=64 N1: L = 131072 (2^min(ceil log2 n, d(b), D)); read 131072 — yes
+EXPECTED: M A-hold s=64 N2: L = 131072 (2^min(ceil log2 n, d(b), D)); read 131072 — yes
+EXPECTED: M A-hold s=64 N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=64 N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M A-hold s=64 N1: two off-heap buffers of 82 L + 32 = [10747936, 10747936]; read [10747936, 10747936] — yes
+HEAP N2 s=64: OnHeapLeaf (0, 0) -> (131072, 4194304) (delta 131072), OnHeapInner (0, 0) -> (131071, 6291408) (delta 131071); bytes delta leaf 4194304 inner 6291408
+EXPECTED: M A-hold s=64 N2 heap: OnHeapLeaf +131072, OnHeapInner +131071; read +131072, +131071 — yes
+DIRECT N1 s=64: MemoryUsed idle 74028421 during hold 84775973 (rise 10747552; one buffer would be 10747936) — support only

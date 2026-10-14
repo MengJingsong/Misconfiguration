@@ -1,0 +1,29 @@
+DEPTH TABLE org.apache.cassandra.dht.ByteOrderedPartitioner: leaf 80 inner 128 d {524288: 11, 1048576: 12, 2097152: 13, 4194304: 14, 8388608: 15, 33554432: 17, 67108864: 18}
+KNOB N1 set 4 read back 4 / 4
+KNOB N2 set 4 read back 4 / 4
+READ O A s=4 N1: n=546944 L=8192 predicted=8192 {'prod': 4194304, 'b': 2097152, 'd': 13, 'max_depth': 13, 'depth': 13} split_calls=8192 refused=[(8192, 8192)] toodeep=[] samples=[4273] offheap=[]
+READ O A s=4 N2: n=546816 L=8192 predicted=8192 {'prod': 4194304, 'b': 2097152, 'd': 13, 'max_depth': 13, 'depth': 13} split_calls=8192 refused=[(8192, 8192)] toodeep=[] samples=[4272] offheap=[]
+EXPECTED: O A s=4 N1: L = 8192 (2^min(ceil log2 n, d(b), D)); read 8192 — yes
+EXPECTED: O A s=4 N2: L = 8192 (2^min(ceil log2 n, d(b), D)); read 8192 — yes
+EXPECTED: O A s=4 N1: one refusal at size == maxsize == L, no toodeep; read refused=[(8192, 8192)] toodeep=[] — yes
+EXPECTED: O A s=4 N1: split calls = L (L - 1 splits and the refused call) = 8192; read 8192 — yes
+EXPECTED: O A s=4 N1: one samples line, about n/128 = 4273; read [4273] — yes
+EXPECTED: O A s=4 N1: no off-heap buffer line; read [] — yes
+EXPECTED: O A s=4 N2: one refusal at size == maxsize == L, no toodeep; read refused=[(8192, 8192)] toodeep=[] — yes
+EXPECTED: O A s=4 N2: split calls = L (L - 1 splits and the refused call) = 8192; read 8192 — yes
+EXPECTED: O A s=4 N2: one samples line, about n/128 = 4272; read [4272] — yes
+EXPECTED: O A s=4 N2: no off-heap buffer line; read [] — yes
+KNOB N1 set 16 read back 16 / 16
+KNOB N2 set 16 read back 16 / 16
+READ O A s=16 N1: n=546944 L=32768 predicted=32768 {'prod': 16777216, 'b': 8388608, 'd': 15, 'max_depth': 15, 'depth': 15} split_calls=32768 refused=[(32768, 32768)] toodeep=[] samples=[4273] offheap=[]
+READ O A s=16 N2: n=546816 L=32768 predicted=32768 {'prod': 16777216, 'b': 8388608, 'd': 15, 'max_depth': 15, 'depth': 15} split_calls=32768 refused=[(32768, 32768)] toodeep=[] samples=[4272] offheap=[]
+EXPECTED: O A s=16 N1: L = 32768 (2^min(ceil log2 n, d(b), D)); read 32768 — yes
+EXPECTED: O A s=16 N2: L = 32768 (2^min(ceil log2 n, d(b), D)); read 32768 — yes
+EXPECTED: O A s=16 N1: one refusal at size == maxsize == L, no toodeep; read refused=[(32768, 32768)] toodeep=[] — yes
+EXPECTED: O A s=16 N1: split calls = L (L - 1 splits and the refused call) = 32768; read 32768 — yes
+EXPECTED: O A s=16 N1: one samples line, about n/128 = 4273; read [4273] — yes
+EXPECTED: O A s=16 N1: no off-heap buffer line; read [] — yes
+EXPECTED: O A s=16 N2: one refusal at size == maxsize == L, no toodeep; read refused=[(32768, 32768)] toodeep=[] — yes
+EXPECTED: O A s=16 N2: split calls = L (L - 1 splits and the refused call) = 32768; read 32768 — yes
+EXPECTED: O A s=16 N2: one samples line, about n/128 = 4272; read [4272] — yes
+EXPECTED: O A s=16 N2: no off-heap buffer line; read [] — yes

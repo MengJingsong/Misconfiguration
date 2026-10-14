@@ -1,0 +1,51 @@
+# Byteman observation rules for repair_session_space-split-maxsize, case 9c/9d. They change no behaviour.
+# Lines go to the file named by -Dstage4.trace (one file per node):
+#   split refused size=<size> maxsize=<maxsize> ms=<epoch>     the capacity check's disallow branch (MerkleTree.java:409-410)
+#   split toodeep size=<size> maxsize=<maxsize> ms=<epoch>     split() returned false with size < maxsize: the TooDeep catch (:416-418)
+#   samples=<numKeys> trees=<n> ms=<epoch>                     one per range on the split path, at keys.clear() (Validator.java:154)
+#   split calls=<n> trees=<leaves> session=<id> ms=<epoch>     at Validator.complete() entry: split() entries since the last such line
+# A refused split leaves size unchanged and TooDeep is thrown before size++, so at exit "false and size < maxsize" is the TooDeep refusal.
+
+RULE rss split entry count
+CLASS org.apache.cassandra.utils.MerkleTree
+METHOD split
+AT ENTRY
+IF true
+DO incrementCounter("rss.split")
+ENDRULE
+
+RULE rss split refused at capacity
+CLASS org.apache.cassandra.utils.MerkleTree
+METHOD split
+AT LINE 410
+IF true
+DO traceOpen("rss", java.lang.System.getProperty("stage4.trace", "rss.trace"));
+   traceln("rss", "split refused size=" + $0.size + " maxsize=" + $0.maxsize + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rss split toodeep
+CLASS org.apache.cassandra.utils.MerkleTree
+METHOD split
+AT EXIT
+IF !$! && $0.size < $0.maxsize
+DO traceOpen("rss", java.lang.System.getProperty("stage4.trace", "rss.trace"));
+   traceln("rss", "split toodeep size=" + $0.size + " maxsize=" + $0.maxsize + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rss split samples
+CLASS org.apache.cassandra.repair.Validator
+METHOD prepare
+AT INVOKE java.util.List.clear
+IF true
+DO traceOpen("rss", java.lang.System.getProperty("stage4.trace", "rss.trace"));
+   traceln("rss", "samples=" + $numKeys + " trees=" + $trees.size() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rss split calls per validation
+CLASS org.apache.cassandra.repair.Validator
+METHOD complete
+AT ENTRY
+IF true
+DO traceOpen("rss", java.lang.System.getProperty("stage4.trace", "rss.trace"));
+   traceln("rss", "split calls=" + readCounter("rss.split", true) + " trees=" + $0.trees.size() + " session=" + $0.desc.sessionId + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
