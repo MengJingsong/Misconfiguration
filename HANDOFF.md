@@ -23,7 +23,7 @@ Drive connector enabled can read them directly.
 
 ## Resume here — stage 4, long path, next case (updated 2026-10-13 after `memtable_offheap_space` closed)
 
-**State:** **9 of 17 cases closed at stage 4** (table in "Stage 4 — long path" below), 8 unaudited and unrun, no run 2
+**State:** **9 of 18 cases closed at stage 4** (table in "Stage 4 — long path" below), 9 unaudited and unrun, no run 2
 anywhere. No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no isolation rule. The pinned clone is now
 local, `~/git-repos/cassandra-src` at `cassandra-5.0.9` (shallow, tag only), so step 0 needs no ssh.
 
@@ -237,7 +237,7 @@ this folder's own scope.
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
-## Current state — 17 cases filed
+## Current state — 18 cases filed
 
 All seventeen are stage-3 complete: judged against the three rules with the
 source open, citations checked against the pinned `cassandra-5.0.9` tag, and
@@ -273,7 +273,7 @@ Each case's full detail lives in its own file.
 runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the §9s:
 
 - **Audited, run and closed at stage 4 (9):** `memtable_heap_space`, `MAX_HINT_BUFFERS`, `cdc_total_space`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `max_space_usable_for_compactions_in_percentage` (audit 2026-10-07, **Ready after amendments**: the hatch arm's trigger, `nodetool compact`, is a `MAJOR_COMPACTION` and cannot reach the hatch, and the in-flight arm would have aborted instead of shedding; run 1 the same day, Confirmed at both tiers; §9a's hash `f17dad5a…` is unchanged, do not edit §9a), `internode_application_send_queue_capacity` (audit 2026-10-07 **Ready after amendments**, §9a `efd85ccc…`; **run 1 2026-10-08 `pc66`, Confirmed at both tiers, no run 2**; the receive-side reserve-key claim is tested and holds; §9a unchanged). `max_mutation_size` (audit 2026-10-11 **Ready after amendments**, §9 `16618c14…`; run 1 2026-10-11 `pc66`, Confirmed at both tiers, replay bypass as recorded, no run 2). `memtable_offheap_space` (audit 2026-10-13 **Ready after amendments**, §9 `cebea151…`; run 1 2026-10-13 `pc57`, Confirmed at both tiers, escape hatch as recorded, the process holds more at 512 MiB+ with 192 KiB cells, no run 2).
-- **Not yet audited or run (8):** every other case. Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
+- **Not yet audited or run (9):** every other case, including `repair_session_space` (filed 2026-10-13; its U4 overflow test is cheap and decisive). Each must pass the stage-4 step-0 audit and be frozen before its first run, and each lists the harness it
   needs (Java tests, Byteman rules, scripts) as step-1 work; none of that code exists yet. The eight cases converted to the new layout on 2026-10-06 and the cases
   written since (`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `internode_application_send_queue_capacity`) record in their §10 Notes
   where they differ from earlier notes on the same lines, **for stage 3 to judge, not applied to §5–§8**.
@@ -286,9 +286,9 @@ runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the 
 
 - **Pipeline:** stage 1 (CodeQL, 5,588 rows) and stage 2 (AI banding, complete over all rows: A 134, B 174, C 94, D 4,387; verdicts in `stage2-ai-preprocessing/bands.csv`) are done.
   Stage 3 is the bottleneck. Band A splits into **A1 (65, fully judged)**, **A2 (30, fully judged)** and **A3 (39, fully judged 2026-10-13: 38 refused in four groups, 1 cited, no candidate; `rejected.md` batch "band A3")**. **Band B (174, fully judged 2026-10-13: 148 refused in eleven groups, 21 cited, 1 candidate, 2 joined to open items, 1 deferred; `rejected.md` batch "band B")**. **Band C (94, fully judged 2026-10-13: 86 refused in six groups, 7 cited, 1 candidate, `DataOutputBuffer.java:73`; `rejected.md` batch "band C")**. Bands A, B and C are done; **D (4,387) is last**, and the write-up queue (items 7–13) and the undecided rows are the stage-3 work before it.
-- **17 cases filed** (9 from feed 3b, 8 from feed 3a), all stage-3 complete. Refusals are in `rejected.md` (the only rejection file); undecided rows in `deferred.md`.
-- **Write-up queue** (`long-path/pending.md`, items 1–6 filed and struck): next is **item 7 `repair_session_max_tree_depth`** (establish which term of its `min` binds before designing §9),
-  then 8 `MAX_MATERIALIZED_KEYS`, 9 `Integer_MAX_VALUE` (type bound; §6.1 naming judgement), 10 `networking_cache_size` (sibling of `file_cache_size`), 11 `coordinator_read_size_fail_threshold` (**unjudged**; may be post hoc under Rule 3), 12 `repair_disk_headroom_reject_ratio` (from band B; disk admission before a repair streams, off by default, admission only), 13 `DOB_MAX_RECYCLE_BYTES` (from band C; caps the direct memory each thread's scratch buffer keeps between uses, not its size in use).
+- **18 cases filed** (9 from feed 3b, 9 from feed 3a), all stage-3 complete. Newest: `repair_session_space-split-maxsize` (2026-10-13, queue item 7, renamed from `repair_session_max_tree_depth`; the check runs only on order-preserving partitioners, and a 32-bit overflow gives two-leaf trees from 2048 MiB). Refusals are in `rejected.md` (the only rejection file); undecided rows in `deferred.md`.
+- **Write-up queue** (`long-path/pending.md`, items 1–7 filed and struck): next is **item 8 `MAX_MATERIALIZED_KEYS`** (read it again, a or b; trace its constant),
+  then 9 `Integer_MAX_VALUE` (type bound; §6.1 naming judgement), 10 `networking_cache_size` (sibling of `file_cache_size`), 11 `coordinator_read_size_fail_threshold` (**unjudged**; may be post hoc under Rule 3), 12 `repair_disk_headroom_reject_ratio` (from band B; disk admission before a repair streams, off by default, admission only), 13 `DOB_MAX_RECYCLE_BYTES` (from band C; caps the direct memory each thread's scratch buffer keeps between uses, not its size in use).
   Five undecided rows to settle first or alongside: `IndexSummaryRedistribution:341` (+ `:258`), `SystemKeyspace:1919`, `ResourceLimits:138` (`deferred.md` §5), `Envelope:429` (+ `:441`, §6) and `ReplicaFilteringProtection:323` (§7: `cached_rows_fail_threshold`, **needs Jingsong's Rule 2 ruling** on count caps over held rows).
 - **Band C finding (Target 3 material, in `rejected.md`):** the trie memtable's flush threshold is read from `cassandra.memtable.row_overhead_size`, the property `SkipListMemtable` reads as per-row bytes; setting one sets the other in MiB.
 - **Notes for filed cases from the band-B pass (recorded in `rejected.md`, not applied):** `max_space_usable_for_compactions…` has a second decision point, stream receive (`StreamSession.checkDiskSpace()`, `:937`, bypassed by `skip_stream_disk_space_check`); `max_mutation_size` §5 calls `commitlog_total_space` a ceiling, but it is a reclaim target the commit log can exceed (`AbstractCommitLogSegmentManager.java:189` creates the segment before `:200` checks).
@@ -328,7 +328,7 @@ Nine cases closed, **no run 2** anywhere. Results: `stage4-runtime-verification/
 
 **Teardown done (2026-10-08):** the ssq ring on `pc66` is stopped and wiped; only the `/mnt/stage4-data` loop fs is still mounted.
 
-**Next:** audit, freeze and run the other 8 cases. The unit tiers of `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are cheap but need their harness written; `native_transport_receive_queue_capacity` and `DataDirectory_getAvailableSpace` need a cluster.
+**Next:** audit, freeze and run the other 9 cases (`repair_session_space` included). The unit tiers of `max_value_size` and `CACHEABLE_MUTATION_SIZE_LIMIT` are cheap but need their harness written. `native_transport_receive_queue_capacity` and `DataDirectory_getAvailableSpace` need a cluster.
 
 ### Stage 4 — short path (blind executor)
 

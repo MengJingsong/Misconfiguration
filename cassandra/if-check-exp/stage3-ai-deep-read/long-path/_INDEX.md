@@ -27,6 +27,7 @@ See [README.md](README.md) for the format.
 | `local_read_size_fail_threshold` | [`ReadCommand$QuerySizeTracking.addSize():715`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L715) | [`ReadCommand$QuerySizeTracking.addSize():722`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L722) | `read_path` | `row` | (c) | 3a | [`local_read_size_fail_threshold-addSize-failBytes`](cases/local_read_size_fail_threshold-addSize-failBytes.md) |
 | `row_index_read_size_fail_threshold` | [`RowIndexEntry$Serializer.checkSize():392`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L392) | [`RowIndexEntry$Serializer.checkSize():401`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/format/big/RowIndexEntry.java#L401) | `sstable_index` | `rowindexentry` | (c) | 3a | [`row_index_read_size_fail_threshold-checkSize-failThreshold`](cases/row_index_read_size_fail_threshold-checkSize-failThreshold.md) |
 | `internode_application_send_queue_capacity` | [`OutboundConnection.acquireCapacity():398`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L398) | [`OutboundConnection.enqueue():335-346`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L335-L346) | `net` | `message` | (b) | 3a | [`internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`](cases/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md) |
+| `repair_session_space` | [`MerkleTree.split():409`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409) | [`MerkleTree.split():409-410`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409-L410) | `repair` | `Merkle tree node` | (a) | 3a | [`repair_session_space-split-maxsize`](cases/repair_session_space-split-maxsize.md) |
 
 <!-- Add one row per case. -->
 
@@ -34,10 +35,10 @@ See [README.md](README.md) for the format.
 
 | Metric | Count |
 |--------|-------|
-| Modules covered | 10 |
-| Total cases | 17 |
+| Modules covered | 11 |
+| Total cases | 18 |
 | Found via feed 3b (raw source) | 9 |
-| Found via feed 3a (stage 1/2) | **8** |
+| Found via feed 3a (stage 1/2) | **9** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -236,3 +237,7 @@ Replica-side read and the guardrails wrapped around it (`db/ReadCommand`, `db/tr
   warning). **Off by default** (limit `null`, master switch false) and **live-settable**. The first case whose cluster tier measures the bytes a
   replica thread allocates across the guard, with a Byteman rule on the read runnable. Found via stage-3 feed **3a** (band A1, row
   `ReadCommand.java:715`); written up 2026-10-06.
+
+### 3.10 repair
+Anti-entropy repair: validation builds a Merkle tree per range and the coordinator compares the replicas' trees (`repair/`, `utils/MerkleTree`). One case so far:
+- **`repair_session_space-split-maxsize`:** a ceiling on the **leaves of each validation's Merkle tree**, `maxsize` = 2^`min(ceil(log2 n), depth(space / RF × share), repair_session_max_tree_depth)`, compared in `MerkleTree.split()` (pattern (a)): at `size >= maxsize` no node is created and the sampling loop stops, so the cost moves to over-streaming. **The comparison runs only on the order-preserving partitioners** (with BIG SSTables); on the default Murmur3 the same `maxsize` is built in one step by `init()`, with no check. Named after `repair_session_space` (default heap / 16, live over JMX), not the queue's deprecated `repair_session_max_tree_depth`, which only caps the depth at 20; the budget binds below heaps of about 6 to 12 GiB at RF 3, the partition count on small tables. **The MiB-to-bytes conversion is 32-bit**, so from 2048 MiB (the default at a 32 GiB heap) every tree has two leaves. Per validation, not node-wide: sessions, tables and vnode ranges multiply it, and the coordinator holds trees sized by the replicas' settings. Found via stage-3 feed **3a** (band A1, row `MerkleTree.java:409`); written up 2026-10-13.
