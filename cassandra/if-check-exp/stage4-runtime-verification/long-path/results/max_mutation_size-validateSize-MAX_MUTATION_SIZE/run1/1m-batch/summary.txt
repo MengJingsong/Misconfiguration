@@ -1,0 +1,32 @@
+yaml for 1m:
+< commitlog_sync: periodic
+> commitlog_sync: batch
+< commitlog_sync_period: 10000ms
+< write_request_timeout: 2000ms
+> write_request_timeout: 10000ms
+< batch_size_fail_threshold: 50KiB
+> batch_size_fail_threshold: 64MiB
+> 
+> # stage4 mms 1m
+> max_mutation_size: 1MiB
+> native_transport_max_frame_size: 64MiB
+> native_transport_max_message_size: 64MiB
+node up
+idle over 10 s: content [62621, 62786] (moved 165); OverSized [0, 0]
+EXPECTED: idle 10 s: content moved 165 < 65536 — yes
+unlogged: batch unlogged 10 11 576716 -> OK  T/M=None/None  content 62786->1216481 (delta 1153695)  OverSized 0->0
+EXPECTED: unlogged batch accepted — yes
+EXPECTED: unlogged: content rise 1153695 > M = 1048576 (about 1.1 M = 1153433) — yes
+readback 10: exists len=576716
+readback 11: exists len=576716
+EXPECTED: unlogged: readback 10 and 11 = payload — yes
+logged: batch logged 12 13 576716 -> ERR WriteFailure  T/M=None/None  content 1216481->1216481 (delta 0)  OverSized 0->1  msg: Error from server: code=1500 [Replica(s) failed to execute write] message="Operation failed - received 0 responses and 1 failures: UNKNOWN from localhost/127.0.0.1:7000" info={'consistency': 'ONE', 'r
+EXPECTED: logged batch refused with WriteFailure: WriteFailure — yes
+EXPECTED: logged: OverSized +1: 1 — yes
+EXPECTED: logged: content within 65536: 0 — yes
+readback 12: no row
+readback 13: no row
+EXPECTED: logged: readback 12 and 13: no row — yes
+EXPECTED: system.log: Failed to apply mutation locally with MutationExceededMaxSizeException naming keyspace system, batches — yes
+logged batch guard operands in system.log: 1153645/1048576
+node stopped; daemons left: 0

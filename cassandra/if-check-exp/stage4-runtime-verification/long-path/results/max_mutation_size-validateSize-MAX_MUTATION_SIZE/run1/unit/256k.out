@@ -1,0 +1,32 @@
+STAGE4 note commitlog_segment_size 5242880
+STAGE4 check readback.getMaxMutationSize 262144 262144 ok
+STAGE4 check readback.IMutation.MAX_MUTATION_SIZE 262144 262144 ok
+STAGE4 note p_star 262081
+STAGE4 note T_p_star 262144
+STAGE4 note T_p_star_plus_1 262145
+STAGE4 note k 63
+STAGE4 check calibrate.T_p_star_equals_M 262144 262144 ok
+STAGE4 check calibrate.T_p_star_plus_1_equals_M_plus_1 262145 262145 ok
+STAGE4 check validate.at_limit returned returned ok
+STAGE4 check validate.at_limit.meter_delta 0 0 ok
+STAGE4 check validate.over_limit threw threw ok
+STAGE4 check validate.over_limit.mutationSize 262145 262145 ok
+STAGE4 check validate.over_limit.message_has_operands true true ok
+STAGE4 note validate.over_limit.message Rejected an oversized mutation (262145/262144) for keyspace: MmsGuard. Top keys are: Standard1.k
+STAGE4 check validate.over_limit.meter_delta 1 1 ok
+STAGE4 note add.at_limit.before CommitLogPosition(segmentId=1791748117086, position=98) segments=1
+STAGE4 note add.at_limit.after CommitLogPosition(segmentId=1791748117086, position=262242) segments=1 returned=CommitLogPosition(segmentId=1791748117086, position=262242)
+STAGE4 note add.at_limit.position_delta 262144
+STAGE4 check add.at_limit.same_segment 1791748117086 1791748117086 ok
+STAGE4 check add.at_limit.position_delta_is_M_or_M_plus_8 true true ok
+STAGE4 check add.over_limit threw threw ok
+STAGE4 check add.over_limit.position_delta 0 0 ok
+STAGE4 check add.over_limit.segment_count 1 1 ok
+STAGE4 check add.over_limit.meter_delta 1 1 ok
+STAGE4 check add.over_limit.content_size_delta 0 0 ok
+STAGE4 check counter.size_is_T_plus_5 262132 262132 ok
+STAGE4 check counter.p_star_minus_5 returned returned ok
+STAGE4 check counter.p_star_minus_4 threw 262145 threw 262145 ok
+STAGE4 check counter.meter_delta 0 0 ok
+STAGE4 check idle.position_delta 0 0 ok
+STAGE4 done mismatches=0

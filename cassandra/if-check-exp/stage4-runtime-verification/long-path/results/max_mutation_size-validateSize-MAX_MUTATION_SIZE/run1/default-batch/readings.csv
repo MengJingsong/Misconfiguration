@@ -1,0 +1,9 @@
+run,step,command,outcome,T,M,cs_before,cs_after,cs_delta,ov_before,ov_after,detail
+default-batch,idle t=0,,,,,62621,,,0,,
+default-batch,idle t=10,,,,,62786,,,0,,
+default-batch,unlogged,batch unlogged 10 11 9227468,OK,,,62786,18517987,18455201,0,0,"{""mode"": ""batch"", ""args"": [""unlogged"", ""10"", ""11"", ""9227468""], ""kind"": ""unlogged"", ""pks"": [10, 11], ""payload_each"": 9227468, ""ok"": true, ""class"": null}"
+default-batch,readback 10,readback 10,OK,,,,,,,,"{""exists"": true, ""length"": 9227468}"
+default-batch,readback 11,readback 11,OK,,,,,,,,"{""exists"": true, ""length"": 9227468}"
+default-batch,logged,batch logged 12 13 9227468,ERR WriteFailure,,,18517987,18517987,0,0,1,"Error from server: code=1500 [Replica(s) failed to execute write] message=""Operation failed - received 0 responses and 1 failures: UNKNOWN from localhost/127.0.0.1:7000"" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures': 1}"
+default-batch,readback 12,readback 12,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+default-batch,readback 13,readback 13,OK,,,,,,,,"{""exists"": false, ""length"": null}"

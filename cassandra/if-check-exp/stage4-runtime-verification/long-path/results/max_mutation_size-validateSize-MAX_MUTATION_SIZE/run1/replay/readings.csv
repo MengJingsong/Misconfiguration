@@ -1,0 +1,5 @@
+run,step,command,outcome,T,M,cs_before,cs_after,cs_delta,ov_before,ov_after,detail
+replay,calibration,insert 29 16785408,ERR InvalidRequest,16785464,16777216,62630,62775,145,0,1,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (16785464/16777216) for keyspace: ks1. Top keys are: t.29"""
+replay,C write under 16 MiB,insert 30 16777160,OK,,,62940,16840164,16777224,1,1,"{""mode"": ""insert"", ""args"": [""30"", ""16777160""], ""pk"": 30, ""payload"": 16777160, ""ok"": true, ""class"": null}"
+replay,readback 30,readback 30,OK,,,,,,,,"{""exists"": true, ""length"": 16777160}"
+replay,C new write under 1 MiB,insert 31 16777160,ERR InvalidRequest,16777216,1048576,43991,43991,0,0,1,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (16777216/1048576) for keyspace: ks1. Top keys are: t.31"""

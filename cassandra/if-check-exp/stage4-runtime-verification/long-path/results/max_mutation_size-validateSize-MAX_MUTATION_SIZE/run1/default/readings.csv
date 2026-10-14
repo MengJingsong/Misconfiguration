@@ -1,0 +1,17 @@
+run,step,command,outcome,T,M,cs_before,cs_after,cs_delta,ov_before,ov_after,detail
+default,idle t=0,,,,,62639,,,0,,
+default,idle t=10,,,,,62804,,,0,,
+default,idle t=20,,,,,62804,,,0,,
+default,idle t=30,,,,,62804,,,0,,
+default,control 1KiB,insert 0 1024,OK,,,62804,64035,1231,0,0,"{""mode"": ""insert"", ""args"": [""0"", ""1024""], ""pk"": 0, ""payload"": 1024, ""ok"": true, ""class"": null}"
+default,calibration,insert 1 16785408,ERR InvalidRequest,16785464,16777216,64035,64035,0,0,1,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (16785464/16777216) for keyspace: ks1. Top keys are: t.1"""
+default,A exact,insert 2 16777160,OK,,,64035,16841259,16777224,1,1,"{""mode"": ""insert"", ""args"": [""2"", ""16777160""], ""pk"": 2, ""payload"": 16777160, ""ok"": true, ""class"": null}"
+default,B pk3,insert 3 16777161,ERR InvalidRequest,16777217,16777216,16841259,16841259,0,1,2,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (16777217/16777216) for keyspace: ks1. Top keys are: t.3"""
+default,B pk4,insert 4 16785408,ERR InvalidRequest,16785464,16777216,16841259,16841259,0,2,3,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (16785464/16777216) for keyspace: ks1. Top keys are: t.4"""
+default,B pk5,insert 5 17825792,ERR InvalidRequest,17825848,16777216,16841259,16841259,0,3,4,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (17825848/16777216) for keyspace: ks1. Top keys are: t.5"""
+default,readback 0,readback 0,OK,,,,,,,,"{""exists"": true, ""length"": 1024}"
+default,readback 2,readback 2,OK,,,,,,,,"{""exists"": true, ""length"": 16777160}"
+default,readback 1,readback 1,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+default,readback 3,readback 3,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+default,readback 4,readback 4,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+default,readback 5,readback 5,OK,,,,,,,,"{""exists"": false, ""length"": null}"

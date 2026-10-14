@@ -1,0 +1,8 @@
+run,step,command,outcome,T,M,cs_before,cs_after,cs_delta,ov_before,ov_after,detail
+instrument,instr 1KiB,insert 0 1024,OK,,,62621,64017,1396,0,0,"{""mode"": ""insert"", ""args"": [""0"", ""1024""], ""pk"": 0, ""payload"": 1024, ""ok"": true, ""class"": null}"
+instrument,instr logged batch,batch logged 40 41 1024,OK,,,64017,68519,4502,0,0,"{""mode"": ""batch"", ""args"": [""logged"", ""40"", ""41"", ""1024""], ""kind"": ""logged"", ""pks"": [40, 41], ""payload_each"": 1024, ""ok"": true, ""class"": null}"
+instrument,instr over,insert 1 1056768,ERR InvalidRequest,1056823,1048576,68519,68519,0,0,1,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (1056823/1048576) for keyspace: ks1. Top keys are: t.1"""
+instrument,idle t=0,,,,,68519,,,1,,
+instrument,idle t=10,,,,,68519,,,1,,
+instrument,idle t=20,,,,,68519,,,1,,
+instrument,idle t=30,,,,,68519,,,1,,

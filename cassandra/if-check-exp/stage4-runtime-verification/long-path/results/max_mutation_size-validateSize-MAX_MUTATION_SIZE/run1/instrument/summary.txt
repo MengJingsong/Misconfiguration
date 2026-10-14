@@ -1,0 +1,27 @@
+yaml for 1m:
+< commitlog_sync: periodic
+> commitlog_sync: batch
+< commitlog_sync_period: 10000ms
+< write_request_timeout: 2000ms
+> write_request_timeout: 10000ms
+< batch_size_fail_threshold: 50KiB
+> batch_size_fail_threshold: 64MiB
+> 
+> # stage4 mms 1m
+> max_mutation_size: 1MiB
+> native_transport_max_frame_size: 64MiB
+> native_transport_max_message_size: 64MiB
+node up
+EXPECTED: (i) probe over protocol 4: 5.0.9-SNAPSHOT protocol 4 — yes
+EXPECTED: (ii) jmx reads ActiveContentSize=62621 OverSizedMutations=0 — yes
+instr 1KiB: insert 0 1024 -> OK  T/M=None/None  content 62621->64017 (delta 1396)  OverSized 0->0
+EXPECTED: (iii) 1,024 B insert raises content by 1,044..1,536: 1396 — yes
+instr logged batch: batch logged 40 41 1024 -> OK  T/M=None/None  content 64017->68519 (delta 4502)  OverSized 0->0
+EXPECTED: (iv) logged batch of two 1,024 B rows succeeds — yes
+instr over: insert 1 1056768 -> ERR InvalidRequest  T/M=1056823/1048576  content 68519->68519 (delta 0)  OverSized 0->1  msg: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (1056823/1048576) for keyspace: ks1. Top keys are: t.1"
+EXPECTED: (v) M+8192 refused by the guard, (T/M) parses: 1056823/1048576 — yes
+idle over 30 s: content [68519, 68519, 68519, 68519] (moved 0); OverSized [1, 1, 1, 1]
+EXPECTED: (vi) idle 30 s moves content < 64 KiB: 0 — yes
+EXPECTED: (vii) system_views.settings max_mutation_size: [['max_mutation_size', '1MiB']] (secondary, not a failure) — yes
+instrument check passed
+node stopped; daemons left: 0

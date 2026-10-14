@@ -1,0 +1,17 @@
+run,step,command,outcome,T,M,cs_before,cs_after,cs_delta,ov_before,ov_after,detail
+1m,idle t=0,,,,,62629,,,0,,
+1m,idle t=10,,,,,62794,,,0,,
+1m,idle t=20,,,,,62794,,,0,,
+1m,idle t=30,,,,,62794,,,0,,
+1m,control 1KiB,insert 0 1024,OK,,,62794,64025,1231,0,0,"{""mode"": ""insert"", ""args"": [""0"", ""1024""], ""pk"": 0, ""payload"": 1024, ""ok"": true, ""class"": null}"
+1m,calibration,insert 1 1056768,ERR InvalidRequest,1056823,1048576,64025,64025,0,0,1,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (1056823/1048576) for keyspace: ks1. Top keys are: t.1"""
+1m,A exact,insert 2 1048521,OK,,,64025,1112609,1048584,1,1,"{""mode"": ""insert"", ""args"": [""2"", ""1048521""], ""pk"": 2, ""payload"": 1048521, ""ok"": true, ""class"": null}"
+1m,B pk3,insert 3 1048522,ERR InvalidRequest,1048577,1048576,1112609,1112609,0,1,2,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (1048577/1048576) for keyspace: ks1. Top keys are: t.3"""
+1m,B pk4,insert 4 1056768,ERR InvalidRequest,1056823,1048576,1112609,1112609,0,2,3,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (1056823/1048576) for keyspace: ks1. Top keys are: t.4"""
+1m,B pk5,insert 5 2097152,ERR InvalidRequest,2097208,1048576,1112609,1112609,0,3,4,"Error from server: code=2200 [Invalid query] message=""Rejected an oversized mutation (2097208/1048576) for keyspace: ks1. Top keys are: t.5"""
+1m,readback 0,readback 0,OK,,,,,,,,"{""exists"": true, ""length"": 1024}"
+1m,readback 2,readback 2,OK,,,,,,,,"{""exists"": true, ""length"": 1048521}"
+1m,readback 1,readback 1,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+1m,readback 3,readback 3,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+1m,readback 4,readback 4,OK,,,,,,,,"{""exists"": false, ""length"": null}"
+1m,readback 5,readback 5,OK,,,,,,,,"{""exists"": false, ""length"": null}"

@@ -1,0 +1,54 @@
+yaml for default:
+< commitlog_sync: periodic
+> commitlog_sync: batch
+< commitlog_sync_period: 10000ms
+< write_request_timeout: 2000ms
+> write_request_timeout: 10000ms
+< batch_size_fail_threshold: 50KiB
+> batch_size_fail_threshold: 64MiB
+> 
+> # stage4 mms default
+> native_transport_max_frame_size: 64MiB
+> native_transport_max_message_size: 64MiB
+node up
+idle over 30 s: content [62639, 62804, 62804, 62804] (moved 165); OverSized [0, 0, 0, 0]
+EXPECTED: idle control: content moved 165 < 65536 — yes
+control 1KiB: insert 0 1024 -> OK  T/M=None/None  content 62804->64035 (delta 1231)  OverSized 0->0
+EXPECTED: control: 1 KiB write raises content by 1,044..1,536: 1231 — yes
+calibration: insert 1 16785408 -> ERR InvalidRequest  T/M=16785464/16777216  content 64035->64035 (delta 0)  OverSized 0->1  msg: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (16785464/16777216) for keyspace: ks1. Top keys are: t.1"
+calibration: T=16785464 M=16777216 k=56; payload classes 4 / 4
+A exact: insert 2 16777160 -> OK  T/M=None/None  content 64035->16841259 (delta 16777224)  OverSized 1->1
+EXPECTED: A: T=M write accepted — yes
+EXPECTED: A: content rise 16777224 = M+8 = 16777224 (to within +65536) — yes
+EXPECTED: A: OverSized delta 0: 0 — yes
+B pk3: insert 3 16777161 -> ERR InvalidRequest  T/M=16777217/16777216  content 16841259->16841259 (delta 0)  OverSized 1->2  msg: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (16777217/16777216) for keyspace: ks1. Top keys are: t.3"
+EXPECTED: B pk3: refused with InvalidRequest and the guard message: InvalidRequest T/M=16777217/16777216 — yes
+EXPECTED: B pk3: T - payload - k = 0 = 0 — yes
+EXPECTED: B pk3: OverSized +1: 1 — yes
+EXPECTED: B pk3: content within 65536: 0 — yes
+B pk4: insert 4 16785408 -> ERR InvalidRequest  T/M=16785464/16777216  content 16841259->16841259 (delta 0)  OverSized 2->3  msg: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (16785464/16777216) for keyspace: ks1. Top keys are: t.4"
+EXPECTED: B pk4: refused with InvalidRequest and the guard message: InvalidRequest T/M=16785464/16777216 — yes
+EXPECTED: B pk4: T - payload - k = 0 in 0..4 — yes
+EXPECTED: B pk4: OverSized +1: 1 — yes
+EXPECTED: B pk4: content within 65536: 0 — yes
+B pk5: insert 5 17825792 -> ERR InvalidRequest  T/M=17825848/16777216  content 16841259->16841259 (delta 0)  OverSized 3->4  msg: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (17825848/16777216) for keyspace: ks1. Top keys are: t.5"
+EXPECTED: B pk5: refused with InvalidRequest and the guard message: InvalidRequest T/M=17825848/16777216 — yes
+EXPECTED: B pk5: T - payload - k = 0 in 0..4 — yes
+EXPECTED: B pk5: OverSized +1: 1 — yes
+EXPECTED: B pk5: content within 65536: 0 — yes
+Data.db sizes: [16778245]
+EXPECTED: Data.db total 16778245 in [M-k+1024, M-k+1024+8192] = [16778184, 16786376] — yes
+readback 0: exists len=1024
+readback 2: exists len=16777160
+EXPECTED: readback 0 = 1024 — yes
+EXPECTED: readback 2 = M-k = 16777160 — yes
+readback 1: no row
+EXPECTED: readback 1: no row — yes
+readback 3: no row
+EXPECTED: readback 3: no row — yes
+readback 4: no row
+EXPECTED: readback 4: no row — yes
+readback 5: no row
+EXPECTED: readback 5: no row — yes
+system.log ERROR lines: 0
+node stopped; daemons left: 0

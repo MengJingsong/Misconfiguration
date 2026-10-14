@@ -1,0 +1,19 @@
+yaml for derived:
+< commitlog_sync: periodic
+> commitlog_sync: batch
+< commitlog_sync_period: 10000ms
+< write_request_timeout: 2000ms
+> write_request_timeout: 10000ms
+< batch_size_fail_threshold: 50KiB
+> batch_size_fail_threshold: 64MiB
+> 
+> # stage4 mms derived
+node up
+idle over 10 s: content [62631, 62796] (moved 165); OverSized [0, 0]
+derived over: insert 20 16785408 -> ERR InvalidRequest  T/M=None/None  content 62796->62941 (delta 145)  OverSized 0->0  msg: Error from server: code=2200 [Invalid query] message="Request is too big: length 16785464 exceeds maximum allowed length 16777216."
+EXPECTED: derived: refused with "Request is too big ... maximum allowed length 16777216." — yes
+EXPECTED: derived: OverSized unchanged: 0 — yes
+EXPECTED: derived: content within 65536: 145 — yes
+derived 1KiB: insert 21 1024 -> OK  T/M=None/None  content 62941->64027 (delta 1086)  OverSized 0->0
+EXPECTED: derived: insert 21 1024 OK (the node still serves) — yes
+node stopped; daemons left: 0
