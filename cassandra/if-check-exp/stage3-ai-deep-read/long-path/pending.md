@@ -17,9 +17,10 @@ which is stage 3's 3a queue.
 > judgements (source read, three rules applied), and a stage-2 file states in
 > its own header that it never applies those rules.
 
-## Write-up queue (updated 2026-10-06)
+## Write-up queue (updated 2026-10-13)
 
-**3 candidate cases** (4 rows) are qualified and unwritten, from band A1 (feed `3a`)
+**4 candidate cases** (6 units) are qualified and unwritten, from band A1 and band B (feed `3a`;
+item 12, `repair_disk_headroom_reject_ratio`, from band B on 2026-10-13)
 and the capacity-word pass (feed `3b`); one more, the `networking_cache_size` sibling of
 `file_cache_size`, comes from no stage-2 row, and one, the coordinator-side `coordinator_read_size_fail_threshold` (item 11), is **unjudged** and was found while writing items 4 and 5. (Items 1 to 5, `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`, were filed 2026-10-06, and item 6, `internode_application_send_queue_capacity`, on 2026-10-07; all are struck below.) Details of each are in the sections below.
 Filed entries stay in the section tables, struck through, only as a trail; the index of
@@ -38,10 +39,12 @@ filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and cleares
 | 9 | `Integer_MAX_VALUE` (index summary) | `IndexSummaryBuilder:204`, `:108` | (a) | Constraint is a **type bound**; §6.1 naming needs a judgement call; both sites in Location. |
 | 10 | `networking_cache_size` | none | (a) | Same check as the filed `file_cache_size`, second pool; shorter write-up, point to the sibling. The outbound delivery's off-heap frames (`FrameEncoder.Payload`, [`FrameEncoder.java:32`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/FrameEncoder.java#L32) and [`:64`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/FrameEncoder.java#L64)) draw from this pool; the filed `internode_application_send_queue_capacity` case records them as outside its byte count (§7). |
 | 11 | `coordinator_read_size_fail_threshold` | `SelectStatement.maybeFail():1057-1080`, called at `:1092`, `:1104`, `:1132` | read it first | **Unjudged; found 2026-10-06 while writing items 4 and 5, and not surfaced by stage 2 (feed `3b`).** The coordinator-side sibling of item 4: `ResultSetBuilder.shouldReject()` (`size > threshold`, `ResultSetBuilder.java:95-98`) compares the sum of the selected value lengths, and `maybeFail()` runs after each row is added to the result (`:1126-1132`), so it may be post hoc (Rule 3), as `BatchStatement:352` was. Read the result-builder path, and decide (b)/(c) or refuse, before designing a §9. |
+| 12 | `repair_disk_headroom_reject_ratio` | `ActiveRepairService:655`, helper `verifyDiskHeadroomThreshold()` | (b) | **Qualified by the band-B pass, 2026-10-13 (feed `3a`).** `diskUsage + rejectRatio > 1` ([`ActiveRepairService.java:655`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/ActiveRepairService.java#L655)) returns `false`; two decision points read it before any streaming or anticompaction: the coordinator's `prepareForRepair()` fails the repair ([`:667-668`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/ActiveRepairService.java#L667-L668)), a participant answers `PREPARE_MSG` with a failure ([`RepairMessageVerbHandler.java:117-123`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/repair/RepairMessageVerbHandler.java#L117-L123)). Disk, not memory. **Write-up questions:** (1) default `0.0`, i.e. **off** ([`Config.java:352`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L352)), range [0, 1] (`DatabaseDescriptor.java:5347`); (2) **admission only**: nothing re-checks a repair once admitted, so usage can pass `1 − ratio` by what that repair writes; predict the overshoot; (3) `diskUsage` is `DiskUsageMonitor.getDiskUsage()` ([`:138`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/disk/usage/DiskUsageMonitor.java#L138)): data-directory bytes **plus all memtables**, over used + usable, with the total capped by `data_disk_usage_max_disk_size` (`:158`), which makes the limit moveable on a big disk for §9; (4) the JMX names say "incremental", but the check runs for **every** repair; check preview repairs. Sibling of the filed compaction case's admission check; the pending-compactions check beside it (`:641`) is refused (count). |
 
 **Undecided rows to settle first or alongside** (cheap; they may add sites to the above):
-`IndexSummaryRedistribution:341`, `SystemKeyspace:1919`, `ResourceLimits:138`
-([`deferred.md`](deferred.md) §5) and `Envelope:429` (§6). Settle each by the question
+`IndexSummaryRedistribution:341` (with `:258`, joined by band B), `SystemKeyspace:1919`, `ResourceLimits:138`
+([`deferred.md`](deferred.md) §5), `Envelope:429` (with `:441`; §6) and `ReplicaFilteringProtection:323`
+(§7, from band B: a count cap on held rows that needs a Rule 2 ruling). Settle each by the question
 named there; the first can become a second site of the `index_summary_capacity` constraint,
 the second of `prepared_statements_cache_size`'s pool, the fourth a per-connection memory cap.
 

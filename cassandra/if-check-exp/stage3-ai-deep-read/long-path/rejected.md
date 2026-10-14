@@ -301,3 +301,83 @@ refused (group 1: 20, group 2: 11, group 3: 2, group 4: 5). Pending 0, deferred 
   `cassandra.dob_max_recycle_bytes`, default 1 MiB). That is a **band C** row,
   not judged here; read it with care in the C pass, because its disallow branch
   does replace the retained buffer.
+
+## Batch: band B — 2026-10-13
+
+The 174 band-B units of
+[`../../stage2-ai-preprocessing/bands.csv`](../../stage2-ai-preprocessing/bands.csv)
+(157 rows and 17 helpers; feed **3a**), read with the source open (`cassandra-src`
+at `cassandra-5.0.9`). Outcome:
+
+- **21 already recorded**, cited, not re-judged (list below).
+- **1 new candidate** (2 units): `repair_disk_headroom_reject_ratio`,
+  `ActiveRepairService.java:655` and its helper `verifyDiskHeadroomThreshold()`
+  → [`pending.md`](pending.md) item 12.
+- **2 joined to open items**: `IndexSummaryRedistribution.java:258` to
+  [`deferred.md`](deferred.md) §5 item 1, `Envelope.java:441` to §6 item 1.
+- **1 undecided**: `ReplicaFilteringProtection.java:323`
+  ([`deferred.md`](deferred.md) §7).
+- **148 refused below**, in eleven groups.
+
+**Cited, already recorded (21):** `ReadCommand.java:715#1` (the enabled test of the
+filed [`local_read_size_fail_threshold`](cases/local_read_size_fail_threshold-addSize-failBytes.md)
+check, same expression); `ReadCommand.java:724#1`, `#2` (refused 2026-10-06, the warn
+twin); `TrackedDataInputPlus.java:184` (refused 2026-09-28, Rule 1);
+`ConnectionLimitHandler.java:93`, `:121` and `Flusher.java:152`, `:183`, `:303` (first
+table of this file); `AbstractCompactionStrategy.java:408`, `LeveledManifest.java:306`,
+`:548`, `:655`, `SizeTieredCompactionStrategy.java:123`, `:274` (4 units), `:301` (the
+`db/compaction/` subpackage entry, selection logic); `AutoSavingCache.java:305#2`, `:388`
+(the `cache/` subpackage entry).
+
+| Group | Row(s) | Ground |
+|---|---|---|
+| 1. Warn, log or diagnostic only (10) | `ResultSetBuilder.java:87` (2 units); `BatchStatement.java:340`, `:388`; `ReadCommand.java:639`; `ReplicaFilteringProtection.java:333`; `DatabaseDescriptor.java:726`, `:741`; `CommitLog.java:609`; `SimpleSeedProvider.java:110` | **Rule 3, logging-only branch.** Each logs, warns the client, bumps a metric or builds an error message, and goes on. `ResultSetBuilder.java:87` is the warn twin of `shouldReject()` (`:95-98`), the check of the unjudged `coordinator_read_size_fail_threshold` ([`pending.md`](pending.md) item 11); `BatchStatement.java:340` is the warn twin of the refused `:352`; `ReplicaFilteringProtection.java:333` the warn twin of the deferred `:323`. |
+| 2. Per-item format and type bounds (21) | `QueryProcessor.java:259`, `:758`; `Validation.java:51`; `ClusteringPrefix.java:278`, `:284`; `CassandraIndex.java:618`; `SortedTableWriter.java:169` and helper `verifyPartition()`; `UnbufferedDataOutputStreamPlus.java:274`; `CacheService.java:504`; `ClientWarn.java:79`; `ByteBufferUtil.java:766`; `FrameEncoderCrc.java:71`; `FrameEncoderLZ4.java:73`; `FrameEncoderUnprotected.java:53`; `StreamingMultiplexedChannel.java:231`; `BlockBalancedTreeWriter.java:651`; `AbstractTokenTreeBuilder.java:297`, `:323`; `OnDiskIndexBuilder.java:598`; helper `OutboundConnection.isMaxPendingCount()` | **Rule 2, per-item bound.** Each throws (or skips one item) when **one** key, value, string, frame, message or term would not fit an encoding: the 65,535-byte unsigned-short length (keys, clustering, indexed values, `writeUTF`, saved key cache, the client-warning list), the 128 KiB frame payload, the 1 GiB stream control message, an index file format field. None bounds a total and none is configuration. `isMaxPendingCount()` is the saturation of the pending-count bit field inside the filed `internode_application_send_queue_capacity` case's `acquireCapacity()` ([`OutboundConnection.java:391`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L391)): a type bound on the packed counter, not the byte cap. |
+| 3. Rollover and block cadence (18) | `BlockBalancedTreeWriter.java:528`; `AbstractBlockPackedWriter.java:62`; `PostingsWriter.java:222`; `AbstractTokenTreeBuilder.java:520`; `OnDiskIndexBuilder.java:497`; `IncrementalTrieWriterPageAware.java:125`, `:127`, `:135`, `:141`, `:167`, `:213`, `:215`; `HintsWriter.java:205`, `:214`; `BigFormatPartitionWriter.java:213`; `BtiFormatPartitionWriter.java:82`; helper `SSTableSimpleWriter.shouldSwitchToNewWriter()`; `SSTableRewriter.java:156` | **Rule 2, rollover** (README §3.5's edge case). A block, page, index block, buffer or writer is full, so it is written out or padded and the next one starts; every byte is written either way. `BigFormatPartitionWriter.java:213` and `BtiFormatPartitionWriter.java:82` close a row-index block at `column_index_size`: that sets how many index entries a partition gets, and the heap those entries cost on read is the filed `column_index_cache_size` and `row_index_read_size_fail_threshold` cases. `SSTableRewriter.java:156` reopens the new SSTable early every `sstable_preemptive_open_interval`: I/O scheduling, not a byte bound. |
+| 4. Fast/slow path and route selection (29) | `BufferedDataOutputStreamPlus.java:169`, `:191`, `:201`, `:211`; `RebufferingInputStream.java:195`, `:210`, `:219`, `:228`, `:250`, `:256`, `:287`, `:296`; `CompressedSequentialWriter.java:160`, `:163`; `InboundMessageHandler.java:148`; `OutboundConnections.java:215`; `OutboundConnection.java:796`; `FrameDecoderWith8bHeader.java:114`, `:129`; `BufferPool.java:929`, `:1602`; `ColumnFamilyStore.java:1931` and helper `isFilterFullyCoveredBy()`; `DataLimits.java:414`, `:417`; `SimpleClient.java:770`, `:777`, `:818`, `:838` | **Rule 3, path selection.** The comparison picks a route for the same bytes: a typed read or write from the buffer or through the slow path, a chunk written compressed or raw, a small or large message path or connection, a partial frame stashed or decoded, a tiny or normal pool allocation, a row served from the row cache or from SSTables. `SimpleClient` is the client side (stress and tests), not node code. |
+| 5. Growth, sizing and node layout (19) | `BTree.java:137`, `:231`, `:2530`, `:2558`, `:2575`, `:2608`, `:2712`, `:2832`, `:3064`, `:3185`; `BTreeRemoval.java:88`, `:90`, `:99`; helpers `BTree$LeafOrBranchBuilder.isSufficient()`, `mustRedistribute()`; `NativeAllocator.java:166`; `SafeMemoryWriter.java:52`; `BufferPoolAllocator.java:121`; helper `StreamingTombstoneHistogramBuilder$DataHolder.isFull()` | **Rule 1 and Rule 3**, band A3's ground. `MAX_KEYS`/`MIN_KEYS` are the B-tree's node fan-out (from `cassandra.btree.branchshift`); splitting, overflowing or redistributing a node lays out keys that are all stored. The others size a region, resize a buffer, or merge histogram bins in an array allocated once. |
+| 6. Release, reclaim and bookkeeping (7) | `AbstractMessageHandler.java:447`; `OutboundConnection.java:767`, `:871`; `CommitLogSegmentManagerCDC.java:93`; `AbstractCommitLogSegmentManager.java:249`, `:259`; `AbstractAllocatorMemtable.java:274` | **Rule 3, nothing withheld.** `AbstractMessageHandler.java:447` returns over-borrowed reserve inside the filed receive case's `acquireCapacity()`; `OutboundConnection.java:871` resumes delivery below the flush low-water mark (the bytes are still counted by the filed send case until `releaseCapacity()` at `:866`), `:767` stops when nothing is pending; `CommitLogSegmentManagerCDC.java:93` is the deletion path of the filed `cdc_total_space` case; `AbstractAllocatorMemtable.java:274` picks the largest memtable to flush. **`AbstractCommitLogSegmentManager.java:249`, `:259` are `commitlog_total_space`**, judged here for the first time: the manager thread creates the next segment ([`:189`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/AbstractCommitLogSegmentManager.java#L189)) and only afterwards calls `maybeFlushToReclaim()` ([`:200`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/AbstractCommitLogSegmentManager.java#L200)), which, over the limit ([`:447`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/AbstractCommitLogSegmentManager.java#L447)), flushes memtables so old segments can be recycled ([`:262`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/AbstractCommitLogSegmentManager.java#L262)). A reclaim trigger, the same judgement as `needsCleaning()` in the A1 batch: the commit log can exceed it. |
+| 7. Count, time, work and error thresholds (25) | `ReadCommand.java:591`; `DataLimits.java:509`, `:511`, `:986`, `:993`, `:1000`, `:1041` (2 units) and helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()`; `AutoRepair.java:459`; `MigrationCoordinator.java:290`; `ActiveRepairService.java:641` and helper `verifyCompactionsPendingThreshold()`; `StreamSession.java:989`; `CQLMessageHandler.java:345#2`, `:408`; helpers `AutoRepairUtils.keyspaceMaxRepairTimeExceeded()`, `tableMaxRepairTimeExceeded()`; helper `StartupClusterConnectivityChecker$AckMap.incrementAndCheck()`; `DiagnosticSnapshotService.java:147`; `RepairTokenRangeSplitter.java:238`, `:312`, `:360`; `TopPartitionTracker.java:239` | **Rule 2, not a byte ceiling.** Counts of SSTables, pending compactions, outstanding schema pulls, consecutive protocol errors, acks or snapshot ranges; elapsed repair time; repair work per schedule (`max_bytes_per_schedule` budgets bytes *examined*, a throughput limit). `DataLimits` stops at the query's own `LIMIT`, per-partition limit or page size, a client parameter, so it also fails Rule 1. `TopPartitionTracker.java:239` caps a top-*N* report (`max_top_size_partition_count`, default 10, [`Config.java:1150`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L1150)) per table: one partition key per entry, negligible at its scale. **`ReadCommand.java:591` (`tombstone_failure_threshold`) is the nearest miss:** it does abort the read ([`:601`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ReadCommand.java#L601)), but it counts tombstones **scanned** as they stream past the iterator, of no fixed size and not held by the check's structure; the byte bound on the same read is the filed `local_read_size_fail_threshold`. Contrast `ReplicaFilteringProtection.java:323` (deferred), whose rows are held. |
+| 8. Bounded in-memory logs and recyclers (4) | `LogMessagesTable.java:193`; `VirtualTableAppender.java:125`; `DiagnosticEventMemoryStore.java:56`; `Ref.java:435` | **Rule 2, count of variable or negligible entries.** The logs virtual table keeps at most `cassandra.virtual.logs.max.rows` messages ([`LogMessagesTable.java:149`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/virtual/LogMessagesTable.java#L149), clamped to [1,000, 100,000], default 50,000) and evicts the oldest; its appender is commented out in the shipped `logback.xml` (line 114), and `VirtualTableAppender.java:125` caps its pre-startup buffer at the same default. The diagnostic store keeps 200 events (diagnostics are off by default); `Ref.java:435` caps a recycler pool at 1,024, like `LightweightRecycler.java:69` in the A2 batch. Each bounds a **count** of entries whose size the code does not bound, and a ring buffer bounds by evicting, not by withholding (see "What band B taught"). |
+| 9. Configuration plumbing and validation (4) | `DatabaseDescriptor.java:3369`, `:3386`, `:1152`; `RepairTokenRangeSplitter.java:181` | **No allocation.** `:3369` and `:3386` turn `-1` into the default (heap/40, heap/10) of `native_transport_max_request_data_in_flight(_per_ip)`, whose enforcement is elsewhere; `:1152` derives the default `commitlog_total_space` and `cdc_total_space` from the volume size (`:669`, `:689`); `:181` validates two repair options against each other. |
+| 10. Read validation against the input's own length (4) | `ChecksummedDataInput.java:161`; `CBUtil.java:457`, `:666`; `EncryptionUtils.java:197` | **Rule 1**, `TrackedDataInputPlus`'s ground: the limit is the length of what is being read (a hint's serialized size, the bytes left in a message, a block's declared size) and the disallow throws on corrupt or short input. |
+| 11. Strategy and selection (7) | `AtomicBTreePartition.java:272` and helpers `updateWastedAllocationTracker()`, `useLock()`; `Overlaps.java:205`; `StreamSession.java:894`, `:913`; helper `StandaloneSplitter.isSSTableLargerEnough()` | **Rule 2 / Rule 3.** `AtomicBTreePartition` switches a hot partition from optimistic CAS to a lock once wasted allocation passes 10 MiB per interval: a concurrency strategy. `Overlaps.java:205` selects compaction inputs. `StreamSession.java:894`, `:913` skip empty stream summaries before the disk check (see the note below). `StandaloneSplitter` is the offline `sstablesplit` tool. |
+
+**Disposition, all 174:** 21 cited + 1 candidate (2 units) + 2 joined + 1 deferred +
+148 refused (10 + 21 + 18 + 29 + 19 + 7 + 25 + 4 + 4 + 4 + 7).
+
+### Notes for filed cases, recorded here and not applied
+
+- **`max_space_usable_for_compactions_in_percentage`** has a second decision point
+  the case does not list: the **stream receive** check. `StreamSession.checkDiskSpace()`
+  calls the same `Directories.hasDiskSpaceForCompactionsAndStreams()`
+  ([`StreamSession.java:937`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/streaming/StreamSession.java#L937))
+  with the incoming bytes plus ongoing stream and compaction writes, and a refusal
+  throws and fails the session ([`:872`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/streaming/StreamSession.java#L872));
+  it is reached from `:798` and `:827`, and skipped when `skip_stream_disk_space_check`
+  is set ([`:858`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/streaming/StreamSession.java#L858),
+  default false). For the case's §1 Location and §10, and a possible third scenario at stage 4.
+- **`max_mutation_size`**, §5: "the commit log's total size is held by
+  `commitlog_total_space`" overstates it. Group 6 above shows `commitlog_total_space`
+  is a reclaim target that the commit log can exceed, not a ceiling.
+
+### What band B taught, for band C
+
+- **Band B's hit rate is 1 candidate in 150 newly judged units** (174 − 21 cited − 2 joined
+  − 1 deferred). Stage 2's themes were accurate; most of the band is per-item encoding
+  bounds, rollover and path selection, which one look at the branch settles.
+- **The one candidate is an admission check on disk**, the same shape as the filed
+  compaction case. Disk admission checks are worth looking for in C: search for callers of
+  `DiskUsageMonitor`, `getAvailableSpace` and `hasDiskSpaceForCompactionsAndStreams`.
+- **Count caps on materialized rows need a ruling.** Earlier passes refused count caps
+  whose items have no fixed size (`StorageProxy.java:1592`, `PartitionDenylist`), and this
+  pass refused `tombstone_failure_threshold` on the same ground. `cached_rows_fail_threshold`
+  is harder: its rows are held on heap, withheld before they are stored, and nothing else
+  bounds them. It is deferred (§7) for a decision on whether a count of held rows of
+  table-bounded size passes Rule 2.
+- **A ring buffer bounds by eviction, not by withholding.** Rule 3 is written for a check
+  that withholds creation; a capped log or event store creates the new entry and drops the
+  oldest. None in B qualified on Rule 2 grounds, so the question did not need answering,
+  but a byte-weighted evicting store in C would need it.
+- **A soft limit is a finding even when the line is refused.** `commitlog_total_space` is
+  not a ceiling, and a filed case said it was; a refusal can correct a case.

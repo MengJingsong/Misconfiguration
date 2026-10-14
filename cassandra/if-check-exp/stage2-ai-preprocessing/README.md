@@ -147,7 +147,8 @@ a verdict — see [`bands.md`](bands.md).
 | Band A1 | ✅ **consumed by stage 3, 2026-09-28** — all 65 rows judged |
 | Band A2 | ✅ **consumed by stage 3, 2026-09-29** — all 30 rows judged |
 | Band A3 | ✅ **consumed by stage 3, 2026-10-13** — all 39 rows judged |
-| Next | Stage 3 reads **band B (174)**, then C (94) |
+| Band B | ✅ **consumed by stage 3, 2026-10-13** — all 174 units judged |
+| Next | Stage 3 reads **band C (94)** |
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
@@ -182,6 +183,15 @@ reason was wrong on 5 rows that are not grow-when-full at all (an invariant
 guard, a publication loop, a partial copy, two argument checks). Two rows carry
 a configurable number (`range_tombstone_list_growth_factor`,
 `DOB_DOUBLING_THRESHOLD_MB`); both set a growth step, not a ceiling.
+
+**Band B is consumed (2026-10-13).** All 174 units (157 rows, 17 helpers) read with
+the source open: **1 new candidate** (`repair_disk_headroom_reject_ratio`, 2 units,
+`pending.md` item 12), **148 refused** (`rejected.md`, batch "band B", in eleven
+groups), **21 already recorded**, **2 joined** to open `deferred.md` items, **1
+undecided** (`deferred.md` §7, `cached_rows_fail_threshold`, a Rule 2 ruling). The
+recurring themes this file lists for B were accurate. The pass also found that
+`commitlog_total_space` is a reclaim target, not a ceiling, and that stream receive
+is a second decision point of the filed compaction-space case.
 
 **What the pass says about the banding.** 8 of the 39 newly-judged rows
 qualified. A1 is genuinely dense with usage-vs-limit comparisons, exactly as
