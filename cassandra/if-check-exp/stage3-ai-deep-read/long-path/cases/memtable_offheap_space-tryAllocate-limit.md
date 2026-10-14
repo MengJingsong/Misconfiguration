@@ -150,6 +150,14 @@ boolean — so the *physical* off-heap bytes allocated can diverge from the
 `memtable_offheap_space` as a hard native-memory ceiling would be wrong on
 two independent grounds; both flagged for Target 3, not resolved here.
 
+**Stage 4 (2026-10-13, observed; §6b and the rest of §8 not rewritten):** the second ground does not hold
+at the allocator: `SubAllocator.allocate()` parks before `NativeAllocator.allocate()` reaches its region
+slice, and every discarded memtable held 0–1.6 MiB more region bytes than it had accounted. What does
+escape the knob is the process: freed regions stay with the C allocator (`RssAnon` does not fall at a
+discard), and with 192 KiB cells the process grew beyond the regions by more than the load explains at
+512 MiB and the default (results file, §4.3). The regions are JNA `malloc`, invisible to NMT and outside
+`-XX:MaxDirectMemorySize`.
+
 
 ## 9. Test design (guidance for stage 4)
 
@@ -162,7 +170,10 @@ the node really holds against the pool's counter. **Done so far:** the unit tier
 existing `NativeAllocatorTest.testBookKeeping()` was run and passed on 2026-09-16,
 before stage 4 existed (`Tests run: 1, Failures: 0`; prior evidence, not a
 stage-4 result). It never showed that a writer *waited*; a harness test does
-(9c). The cluster tier has never been run. Converted to this layout 2026-10-06.
+(9c). The cluster tier has never been run. Converted to this layout 2026-10-06. **Audited 2026-10-13 (stage-4
+step 0): Ready after amendments** — the physical reading moved from NMT, which cannot see this memory, to a
+Byteman region ledger, and the slack band was re-derived (9a to 9e, each dated); results in
+`../../../stage4-runtime-verification/long-path/results/memtable_offheap_space-tryAllocate-limit.md`.
 
 ### 9a. Procedure and conclusions
 
@@ -186,7 +197,8 @@ prediction and conclusions in this section; it adds none):
 - **Test:** vary the limit (128, 256, 512 MiB and the default), write until the
   pool fills and keep writing faster than flushes finish, and read, side by side,
   the pool's accounted peak, the writers waiting, the bytes forced through, and
-  the JVM's native memory (NMT).
+  the native bytes the allocator really holds (a ledger of every region it
+  allocates and frees; amended 2026-10-13, NMT cannot see them, see Prediction).
 - **Logic:** (1) at every value the pool must fill and flushes must start near the
   limit, or the run is invalid. (2) Writers wait and the accounted counter stops
   growing while they wait: the check **stops accounted usage at the limit**. (3)
@@ -194,8 +206,9 @@ prediction and conclusions in this section; it adds none):
   peak alone is not proof, since the flush trigger is a fraction of the same limit,
   so the waits are what show this check fired. (4) Any accounted excess over the
   limit is no more than the bytes forced through the escape hatch (measured
-  separately). (5) The physical rise over idle is set against the accounted peak at
-  every value: this is §8's "doubly non-hard" claim, settled by a number.
+  separately). (5) The physical bytes are set against the accounted bytes, per memtable when it
+  is discarded and node-wide at the run's peak, at every value: this is §8's "doubly
+  non-hard" claim, settled by a number.
 - **Refuted if:** the accounted counter passes the limit by more than the escape
   hatch explains, or the accounted peak is flat across the values. **§8's second
   ground is refuted** (physical bytes stay near the accounted bytes) or **sharpened**
@@ -234,29 +247,66 @@ prediction and conclusions in this section; it adds none):
   through the escape hatch (roughly concurrent writers × one write's size; an
   estimate, not traced line by line), and the excess disappears when the flush ends.
   Physical bytes follow it up by the same amount.
-- **Physical against accounted, the headline reading.** `P` = native bytes rise over
-  the idle control (NMT, category `Other`); `A` = accounted peak. Predicted
-  `A − 16 MiB ≤ P ≤ A + 16 MiB`: the slack is one partly used 1 MiB region per live
-  memtable (at most three in flight: current, flushing, next) plus the regions stashed
-  by lost races (at most 8 per size class, `NativeAllocator.java` `RaceAllocated`).
-  The oversize arm has no region slack (each cell gets a region of exactly its size),
-  so there `|P − A| ≤ 1 MiB`. The 16 MiB band is far below the 128 MiB step between
-  capacity values, so it cannot hide a difference between two values. A gap larger
-  than the band is the finding §8 predicts and is reported as a ratio `P / A` at each
-  value.
+- **Physical against accounted, the headline reading.** **(Amended 2026-10-13, step-0 audit, before any reading:** the
+  earlier reading, NMT category `Other`, cannot see this memory: `MemoryUtil.allocate()`
+  is JNA's `Native.malloc()` ([`MemoryUtil.java:25`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemoryUtil.java#L25),
+  [`:81-84`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemoryUtil.java#L81-L84)), a plain libc `malloc` that
+  NMT does not track, so `P` would have read flat at every value and fired the
+  "accounting is decorative" row. The earlier ±16 MiB band also left out part of the
+  slack: the race stash alone can hold 15.94 MiB.) `P` is read from a **region
+  ledger** (9c, `region-ledger.btm`): one line per `Region` built, which is one
+  `MemoryUtil.allocate()` ([`NativeAllocator.java:176`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L176),
+  [`:190`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L190)), and one per region freed
+  ([`:183`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L183),
+  [`:203`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L203)); `L(t)` is the bytes
+  allocated by memtable allocators and not yet freed. Three readings:
+  - **Per memtable, at its discard.** `NativeAllocator.setDiscarded()` frees the
+    memtable's regions ([`:200-206`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L200-L206))
+    before it releases the accounting (`super.setDiscarded()` →
+    [`MemtableAllocator.java:93-97`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L93-L97)),
+    so at that method's entry the memtable's accounted bytes `A_m`
+    (`offHeap().owns()`) and its region bytes `P_m` (the sum of the regions it then
+    frees) are both whole. Predicted **`0 ≤ P_m − A_m ≤ 1 MiB + 0.002 × A_m`**: every
+    accounted byte sits in a region (the accounting call, `:141`, comes before the
+    slice), and the excess is the unused rest of the last region (under 1 MiB,
+    `MAX_REGION_SIZE`) plus the tail each full region leaves when the next slice does
+    not fit (under one slice: about 1.1 KiB per 1 MiB region in the small arm; in the
+    oversize arm each cell's region is exactly its size). The same bound holds in
+    both arms.
+  - **Node-wide, against the knob.** **`0.99 × limit − L_idle − 1 MiB ≤ max_t L(t) − L_idle ≤ limit
+    + F + 19 MiB + 0.002 × limit`**, `F` = the bytes forced through the escape hatch
+    in that run (Byteman trace). The 19 MiB is up to three live memtables' last
+    regions (current, flushing, next: 3 × 1 MiB) plus the global race stash, which
+    keeps up to 8 regions per size class
+    ([`:50-57`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L50-L57),
+    [`:209-227`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L209-L227);
+    8 × (8 + 16 + … + 1,024 KiB) = 15.94 MiB) and never frees them. The lower bound
+    holds because a flush starts above 99 % of the pool, whose bytes all sit in regions
+    kept until the discard; `L_idle` (system tables' regions, part of the pool) and up to
+    1 MiB of writes accounted but not yet sliced are the only terms taken off. The bound band is far below the 128 MiB step between capacity values.
+  - **Process memory, the cross-check.** The process's anonymous resident memory
+    (`RssAnon` in `/proc/<pid>/status`; the heap is pre-touched by
+    `-XX:+AlwaysPreTouch`, `conf/jvm-server.options:128`, so it adds a constant)
+    rises with `L`: **`max_t ΔRssAnon(t) ≤ max_t ΔL(t) + max_t ΔRssAnon_ctl(t) + 64 MiB`**,
+    Δ over each run's own idle reading, `ctl` the load-floor control of the same arm. glibc may keep freed
+    `malloc` memory rather than return it to the OS; if it does, this fails while
+    the ledger holds, and the "process holds more" row applies.
+  - Report `P_m / A_m` and `max L / limit` at each value and arm.
 
 **Conclusions:**
 
 | Result | Conclusion |
 |---|---|
-| Writers wait in every run, the accounted peak follows the knob, the counter never passes the limit except by bytes forced through a flush's escape hatch, and `P` is within the band of `A` | **Confirmed** — the check enforces as traced, and the pool's counter tracks native memory. §8's second ground is not borne out by the numbers; report that. |
-| As above, but `P` exceeds `A` by more than the band (`P / A` stable across values) | **Confirmed for the counter, bounded gap** — the check enforces the accounting, and native memory runs above it by a measured ratio. §8's second ground stands, with the ratio as its size (Target-3 material). |
+| Writers wait in every run, the accounted peak follows the knob, the counter never passes the limit except by bytes forced through a flush's escape hatch, and `P` is within the band of `A` (both ledger bounds of the Prediction; amended 2026-10-13) | **Confirmed** — the check enforces as traced, and the pool's counter tracks native memory. §8's second ground is not borne out by the numbers; report that. |
+| As above, but `P` exceeds `A` by more than the band (`P_m − A_m` above its bound for some memtables, or `max L` above its bound, with `P / A` stable across values) | **Confirmed for the counter, bounded gap** — the check enforces the accounting, and native memory runs above it by a measured ratio. §8's second ground stands, with the ratio as its size (Target-3 material). |
 | As above, but `P` follows the knob only loosely or grows without bound while the accounted counter is capped | **Refuted** — the counter does not track the resource; §8's ceiling claim is wrong, and `memtable_offheap_space` bounds bookkeeping, not memory. |
 | The accounted counter passes the limit, by no more than the bytes forced through the escape hatch | **Escape hatch as recorded** — expected. Record its size (Target-3 material). |
 | The accounted counter passes the limit by more than the escape hatch explains, or with no escape-hatch call at all | **Refuted** — the check does not cap usage. |
 | The accounted peak is flat across the four values (and the startup log shows the limit did change) | **Refuted** — not the binding limit. Re-read, do not re-run. |
 | The peak follows the knob and the pool reaches 100 %, but no writer ever waits | **Not confirmed** — the flush trigger, not this check, sets the ceiling; §6b is wrong. Re-read. |
 | `P` is flat across the four values while `A` follows the knob | **Refuted** for §8's ceiling claim — the accounting is decorative; native memory does not respond to the knob at all. |
+| `P` is within the band of `A`, but `max ΔRssAnon` exceeds `max ΔL + max ΔRssAnon_ctl + 64 MiB` (added 2026-10-13) | **Confirmed for the allocator; the process holds more** — the check bounds the bytes the memtable allocator holds, and the process keeps more native memory than that (allocator retention). Record the excess per value (Target-3 material). |
+| The ledger has no line at all, or its malloc lines stop while writes continue (added 2026-10-13) | **Invalid run** — the instrument failed (9e instrument check). |
 | No writer waits, and every flush starts well below the limit | **Invalid run** — flushing keeps up with the writes. Fix the setup (9b, 9c) and re-run. |
 | `memtable_allocation_type` is not `offheap_objects` in the startup log | **Invalid run** — fix 9b. |
 
@@ -264,7 +314,8 @@ prediction and conclusions in this section; it adds none):
 at a fraction of the same limit, so the accounted peak would follow the knob even
 if this check never refused anything. Only the waits prove the check fired. **Why
 the accounted counter alone is not enough:** it is a sum of requested sizes, not a
-reading of the OS; only NMT shows what the process holds.
+reading of the memory; the ledger shows what the allocator holds, and `RssAnon` what
+the process holds (amended 2026-10-13: NMT does not see JNA `malloc`).
 
 ### 9b. Setup
 
@@ -284,7 +335,7 @@ reading of the OS; only NMT shows what the process holds.
 | `memtable_heap_space` | `2048MiB` (any value well above the off-heap limits) | `NativePool` also takes a heap limit and the cleaner fires on either pool; a large heap limit keeps it from being the one that binds. Record the startup line for it. |
 | `memtable_cleanup_threshold` | `0.99` | The flush trigger. The default (`1 / (1 + memtable_flush_writers)`, 0.33 with two writers) flushes at a third of the limit, so writers rarely wait. `0.99` is the highest value accepted ([`DatabaseDescriptor.java:772-773`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L772-L773)). |
 | JVM heap | `-Xms4G -Xmx4G` | The default limit derives from the heap size. |
-| NMT | `-XX:NativeMemoryTracking=summary`, in every arm | It must be set at JVM start, and it changes the process's own footprint slightly, so every arm (the idle control included) has it. |
+| NMT | `-XX:NativeMemoryTracking=summary`, in every arm | Support only (amended 2026-10-13): it cannot see the memtable regions (JNA `malloc`), but it attributes the JVM's own native growth (direct buffers, threads) when `RssAnon` is read. It must be set at JVM start and changes the footprint slightly, so every arm has it. |
 | Keyspace `durable_writes` | `false` | Stops commit-log-pressure flushes (`Reason: COMMITLOG_DIRTY`) from freeing memory mid-run. `cassandra-stress` creates its keyspace with `durable_writes = true`, so pre-create it (9c). |
 | Table `memtable_flush_period_in_ms` | `0` (default) | A periodic flush would free memory on its own schedule. |
 | `memtable_flush_writers` | ≥ 2 (default with one data directory) | Scenario C's forced flush needs a free flush thread. |
@@ -294,9 +345,10 @@ reading of the OS; only NMT shows what the process holds.
 
 **Controls:**
 
-- **Idle run** — node up for at least 60 s, no writes: the native-memory floor to subtract from `P`.
+- **Idle run** — node up for at least 60 s, no writes: the floors `L_idle` and `RssAnon_idle` (and NMT) to subtract.
+- **Load-floor control** (added 2026-10-13) — once per payload arm, at `256MiB`, with `memtable_allocation_type: unslabbed_heap_buffers` and `memtable_heap_space: 256MiB`, everything else as 9b; idle, A and B only. Same load, no off-heap memtable: its `ΔRssAnon` is the native growth the load causes elsewhere (network buffers, flush writers), the floor for the process cross-check. The ledger must stay empty in it.
 - **Cleanup-threshold control** — once, at `256MiB`, with `memtable_cleanup_threshold` at its default: shows what the flush trigger alone does to the peak.
-- **Oversize arm** — the payload with cells above 128 KiB (9c): same limit, different region sizing, so `P / A` should differ in a known direction (§7).
+- **Oversize arm** — the payload with cells above 128 KiB (9c): same limit, different region sizing (each cell gets a region of exactly its size, §7), so its region slack is smaller; the bounds of 9a are the same (amended 2026-10-13: the keys and clusterings still use slab regions, and the stash is global).
 
 **Reset between runs:** stop the node (`bin/nodetool stopdaemon`), empty the
 `data_file_directories`, `commitlog_directory` and `saved_caches_directory`
@@ -315,6 +367,9 @@ Work for step 1, before run 1 (the audit and the freeze come first):
 | File | What it is |
 |---|---|
 | `NativePoolTest.java` | Unit tier. Package `org.apache.cassandra.utils.memory`, to reach `NativePool`/`NativeAllocator`. Two `@Test`s modelled on the heap sibling's `HeapPoolTest`; see 9e. |
+| `region-ledger.btm` | Added 2026-10-13. Byteman, observation only: one line per `NativeAllocator$Region` built (`malloc peer=… cap=…`), per region freed by `trySwapRegion()` or `setDiscarded()` (`free peer=… cap=… site=…`), and at each `setDiscarded()` entry (`discard alloc=<id> owns=<A_m>`). Loaded with `escape-hatch.btm` (two `script:` entries). |
+| `ledger.py` | Added 2026-10-13. Reads the ledger: `L(t)`, `L_idle`, `max L`, and per discard `P_m`, `A_m`. |
+| `cluster-run.py`, `unit-run.sh` | Added 2026-10-13. One run script per tier, as the closed cases have: `EXPECTED:` lines, stops at the first failed instrument check, stops the node on any exit; the cluster script also runs an `RssAnon` sampler (`/proc/<pid>/status`, every 1 s). |
 | `escape-hatch.btm` | Byteman, observation only. The heap sibling's rule (`harness/memtable_heap_space-tryAllocate-limit/escape-hatch.btm`) copied: it appends one line, `forced=<size> limit=<limit> ms=<epoch millis>`, per call to `MemtableAllocator$SubAllocator.allocated(long)`. That method runs for both pools, so **keep only the lines whose `limit` equals the off-heap knob in bytes**. |
 
 ```bash
@@ -352,7 +407,7 @@ step as a deviation. If no step makes writers wait, the run is invalid (9a).
 | **Usage counter** — `SubPool.allocated` on the `offHeap` pool | Unit: `pool.offHeap.used()`, `allocator.offHeap().owns()`. Cluster: no gauge exposes it. Two log lines do: `Flushing largest … Used total: <on>/<off>`, where `<off>` is `allocated / limit` ([`AbstractAllocatorMemtable.java:289-295`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L289-L295)); and `Enqueuing flush of <ks>.<table>, Reason: <reason>, Usage: …`, whose `Usage` is that memtable's peak. | Only when a flush fires | **Do not use `AllMemtablesOffHeapDataSize` for a peak.** It reads only the current memtable, so it drops to near zero when a flush starts, while the old memtable (where the escape-hatch excess lands) still counts; the heap sibling's 9d has the citation. Flushes with a `Reason` other than `MEMTABLE_LIMIT` (except scenario C's) contaminate that cycle. |
 | **Disallow evidence** — writers waiting | Timer `org.apache.cassandra.metrics:type=MemtablePool,name=BlockedOnAllocation`: `bin/nodetool sjk mx -mg -b 'org.apache.cassandra.metrics:type=MemtablePool,name=BlockedOnAllocation' -f Count`. Thread dump (`jcmd <pid> Thread.print`): `MutationStage` threads with frame `MemtableAllocator$SubAllocator.allocate(MemtableAllocator.java:195)` ([link](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java#L195)). Unit: a thread state of `WAITING`/`TIMED_WAITING` with that frame. | Before and after each scenario; thread dumps during B | One timer serves both pools' `SubPool`s, so a wait on the **on-heap** pool also counts: with `memtable_heap_space` held at 2048 MiB that pool should not bind; if the count rises with the off-heap counter far from its limit, suspect it. The timer never counts an escape-hatch force-through. Client timeouts are a symptom, not evidence. |
 | **Bypass volume** — bytes forced through the escape hatch | The Byteman trace (9c): count lines and sum `forced=`, **only lines whose `limit` equals the off-heap knob in bytes**. | Throughout; per window in scenario C | No stock read-out shows the excess reliably: `Used total` goes above `1.00` only if a flush happens to fire in that window. |
-| **Real resource** — native memory | `jcmd <pid> VM.native_memory summary`; read the `Other` category (`MemoryUtil.allocate` is `Unsafe.allocateMemory`, which JDK 11 books under `Other`; **confirm on the first idle run** by reading `Other` before and after one `Unsafe.allocateMemory` in the unit harness, as the hints case did for direct buffers). Cross-check with `jcmd <pid> VM.native_memory baseline` then `summary.diff`. | Idle control; end of A; every 10 s during B; end of C | `P` is the rise **over the idle control's `Other`**, not an absolute. The chunk cache and buffer pool also book native memory under `Other`; hold them fixed (9b) and take the idle floor with the same uptime. Never use process RSS: it counts page cache and pre-touched pages. Each `jcmd` is a JVM start (1–2 s), so time-stamp every reading. The memtable's data is freed at `setDiscarded()` after a flush finishes, so `P` drops then; sample the peak before the flush's discard, i.e. at the `Enqueuing flush` line's time. |
+| **Real resource** — native memory (amended 2026-10-13) | **The region ledger** (`region-ledger.btm`, read with `ledger.py`): `L(t)` continuously; `P_m` and `A_m` at every discard. **The process:** `RssAnon` from `/proc/<pid>/status`, every 1 s (a file read, no JVM start). NMT summary (`jcmd <pid> VM.native_memory summary`) at idle and at the end of B, to attribute the JVM's own growth. | Ledger: throughout. `RssAnon`: every 1 s from the start to the stop. NMT: idle, end of B | **Not NMT `Other`:** `MemoryUtil.allocate()` is JNA `Native.malloc()`, invisible to NMT. `RssAnon` counts anonymous memory only (not page cache or mapped files); the heap is pre-touched, so it is a constant inside it. `P_m − A_m` is read at the `discard` line, not across it: the frees come before the accounting is released, so between them `L` is low against the pool. A ledger peer can be reused after a free; `ledger.py` matches frees to live peers in order. |
 
 ### 9e. Running the scenarios
 
@@ -373,20 +428,24 @@ step as a deviation. If no step makes writers wait, the run is invalid (9a).
    5. with the pool full again, runs a third request from a thread whose `OpOrder`
       group has been marked blocking (the `markBlocking` helper in
       `NativeAllocatorTest.setUp()`), and asserts it returns at once with
-      `used() == 110`.
+      `used() == 110`;
+   6. (added 2026-10-13, for the ledger's instrument check) discards the allocator
+      (`setDiscarding()`, then `setDiscarded()`) and asserts `used() == 0`.
 
    Record pass or fail and, per step, the asserted numbers.
 
 **Before the cluster tier.** The off-heap allocator's own trace must work before
 any reading is trusted:
 
-1. **Instrument check.** Run `NativePoolTest` with the rule attached, as the heap
+1. **Instrument check.** Run `NativePoolTest` with the rules attached, as the heap
    sibling does, and expect exactly one line with `forced=` equal to the forced
-   request and `limit=100`:
+   request and `limit=100`, and in the ledger (added 2026-10-13) one `malloc` of
+   `cap=8192` (the first region, `MIN_REGION_SIZE`), one `discard … owns=110` and one
+   `free` of the same peer with `cap=8192` when the test discards its allocator:
 
    ```bash
    ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NativePoolTest \
-     -Dtest.jvm.args="-javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/escape-hatch.btm -Dstage4.byteman.out=$HOME/stage4-logs/cluster/instrument-check.txt"
+     -Dtest.jvm.args="-javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/escape-hatch.btm,script:<harness>/region-ledger.btm -Dstage4.byteman.out=$HOME/stage4-logs/cluster/instrument-check.txt -Dstage4.ledger.out=$HOME/stage4-logs/cluster/instrument-ledger.txt"
    ```
 
 2. **Start the node the same way for every run** (every capacity value, every
@@ -396,35 +455,37 @@ any reading is trusted:
    ```bash
    mkdir -p ~/stage4-logs/cluster/<value>
    export MAX_HEAP_SIZE=4G    # G1: gives -Xms4G -Xmx4G; do not set HEAP_NEWSIZE
-   export JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/escape-hatch.btm,listener:true -Dstage4.byteman.out=$HOME/stage4-logs/cluster/<value>/escape-hatch.txt"
+   export JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -javaagent:$PWD/build/lib/jars/byteman-4.0.20.jar=script:<harness>/escape-hatch.btm,script:<harness>/region-ledger.btm,listener:true -Dstage4.byteman.out=$HOME/stage4-logs/cluster/<value>/escape-hatch.txt -Dstage4.ledger.out=$HOME/stage4-logs/cluster/<value>/ledger.txt"
    bin/cassandra -p cassandra.pid > ~/stage4-logs/cluster/<value>/stdout.txt 2>&1
    ```
 
    Once the node is up, confirm the rule is in place:
    `java -cp build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l`
-   must list `trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void`.
+   must list `trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void`,
+   and (added 2026-10-13) the ledger's triggers on `NativeAllocator$Region.<init>`, `NativeAllocator.trySwapRegion` and
+   `NativeAllocator.setDiscarded` once the first memtable has allocated.
    If it does not, stop: an empty trace would then mean nothing.
 
 **Cluster tier, for each capacity value** (and for each payload arm of 9c):
 
 1. **Control run** — set the knob, reset (9b), start the node as above, and grep
-   both confirmation lines (9b). With no writes, take the idle native-memory
-   reading (9d) after 60 s of uptime.
+   both confirmation lines (9b). With no writes, take the idle readings (9d) after
+   60 s of uptime: `L_idle` from the ledger, `RssAnon`, NMT (amended 2026-10-13).
 2. **Scenario A — reach the limit** — pre-create the keyspace and start the stress
    command (9c), noting the time (`date +%s%3N`). Watch `logs/system.log` for the
-   first `Reason: MEMTABLE_LIMIT`. At that line's time take the native-memory
-   reading, and record the `Usage` line, the `Used total` line and the
-   `BlockedOnAllocation` count.
+   first `Reason: MEMTABLE_LIMIT`. Record the `Usage` line, the `Used total` line
+   and the `BlockedOnAllocation` count; the ledger and `RssAnon` run throughout
+   (amended 2026-10-13: no sample needs timing).
 3. **Scenario B — try to exceed the limit** — keep writing past the first
    limit-driven flush. Record the `BlockedOnAllocation` count before and after,
-   take two or three thread dumps during flushes, read native memory every 10 s,
+   take two or three thread dumps during flushes, take the NMT summary at B's end,
    and list every `Enqueuing flush` line with its `Reason`.
 4. **Scenario C — escape hatch** — wait until the `BlockedOnAllocation` count is
    rising, note the time, then run `bin/nodetool flush keyspace1 standard1`.
-   Record any `Used total` above `1.00` and the native-memory reading right after.
+   Record any `Used total` above `1.00`.
 5. **Stop and read the trace** — `bin/nodetool stopdaemon`, check
-   `pgrep -f org.apache.cassandra.service.CassandraDaemon` prints nothing, then sum
-   the trace for the off-heap limit, in total and per scenario window:
+   `ps -eo cmd | grep '[C]assandraDaemon'` prints nothing (amended 2026-10-13, per the stage-4 README's safety rule), then sum
+   the trace for the off-heap limit, in total and per scenario window, and read the ledger with `ledger.py`:
 
    ```bash
    T=~/stage4-logs/cluster/<value>/escape-hatch.txt
@@ -437,6 +498,11 @@ any reading is trusted:
 **Cleanup-threshold control (9b)** — once, at `256MiB`, small-cell arm: the control
 run, A and B, with `memtable_cleanup_threshold` removed. No C. Reported as a
 control; no §9a row depends on it.
+
+**Load-floor control (9b, added 2026-10-13)** — once per payload arm, at `256MiB`, with
+`memtable_allocation_type: unslabbed_heap_buffers` and `memtable_heap_space: 256MiB`: the control
+run, A and B, no C, the same stress command. Record `RssAnon` and NMT as above; the ledger must have no
+`malloc` line. Its peak `ΔRssAnon` is the floor of the process cross-check (9a).
 
 Stop when each scenario's records are taken; a run where no writer ever waits is
 invalid (9a) — fix the workload and repeat it.
@@ -452,7 +518,7 @@ file, per capacity value and payload arm.
 | **Stage-3 feed** | `3b` — established by deep-reading the source; no stage-1/2 row led here. |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | `markBlocking()`/`isBlocking()` forces the allocation through past `limit` instead of parking; see §6b. |
-| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
+| **Stage-4 feedback** | **2026-10-13, long path, run 1 on `pc57`: Confirmed at both tiers, escape hatch as recorded, no run 2** ([results](../../../stage4-runtime-verification/long-path/results/memtable_offheap_space-tryAllocate-limit.md); harness `../../../stage4-runtime-verification/long-path/harness/memtable_offheap_space-tryAllocate-limit/`; commits pending). Step-0 audit **Ready after amendments** (§9 hash `cebea151…`): NMT cannot see memtable regions (`MemoryUtil.allocate()` is JNA `Native.malloc()`), so the physical reading became a Byteman region ledger, and the slack band was re-derived. Unit: the over-limit request parks in `SubAllocator.allocate:195` under `NativeAllocator.allocate:141`, counter unchanged, release wakes it, blocking group forces 10 B (110/100). Cluster, 128 · 256 · 512 MiB · default, 5 × 1 KiB and 192 KiB cells: writers wait in every run (32 threads at `:195`); first limit flush at 99–100 % of the knob (1 : 2 : 4 : 8); physical region bytes exceed the memtable's accounted bytes by 0–1.6 MiB in all 436 discards (*P_m*/*A_m* ≤ 1.007 at ≥ 128 MiB memtables), so §8's second ground is not borne out; 24 memtables were seen above the limit, each by ≤ the bytes the escape hatch forced (≤ 19.9 MB, 14.8 % of 128 MiB with 192 KiB cells). **The process holds more:** `RssAnon` does not fall when a memtable's regions are freed, and with 192 KiB cells it rose 46 and 332 MiB beyond the bound at 512 MiB and the default (cause inferred: C-heap retention). For stage 3: §9a's node-wide slack omits race-loser regions in flight (the cleanup control exceeded it by 8.4 MiB on 15 of them). |
 | **Notes** | **Found while converting §9 (2026-10-06), for stage 3 to judge, not applied to §6b/§8:** `SubAllocator.allocate()` parks or forces through before `NativeAllocator` calls `MemoryUtil.allocate()`, so the physical allocation happens only after the accounting call returns; the physical bytes are therefore expected within region slack of the accounted bytes, apart from the escape hatch. §9a states that as the prediction, which the test can contradict. |
 
 ---

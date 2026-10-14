@@ -1,0 +1,189 @@
+ok   unit: NativePoolTest 1 pool.offHeap.used = 100  100
+ok   unit: NativePoolTest 2 waiter.state = WAITING  WAITING
+ok   unit: NativePoolTest 2 parked_in_SubAllocator.allocate = 1  1
+ok   unit: NativePoolTest 2 future_get_300ms_timed_out = 1  1
+ok   unit: NativePoolTest 3 pool.offHeap.used_after_2s = 100  100
+ok   unit: NativePoolTest 3 still_parked = 1  1
+ok   unit: NativePoolTest 4 woken_allocation_returned_peer = 1  1
+ok   unit: NativePoolTest 4 pool.offHeap.used = 100  100
+ok   unit: NativePoolTest 5 forced_allocation_returned_peer = 1  1
+ok   unit: NativePoolTest 5 pool.offHeap.used = 110  110
+ok   unit: NativePoolTest 6 pool.offHeap.used_after_discard = 0  0
+ok   unit: waiter frame is SubAllocator.allocate:195
+ok   unit: no MISMATCH
+ok   unit: NativeAllocatorTest xml 0 errors, 0 failures, >=1 test  ('0', '0', '1')
+ok   unit: NativePoolTest xml 0 errors, 0 failures, >=1 test  ('0', '0', '1')
+ok   128-small: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 128MiB']
+ok   128-small: off-heap limit in system.log = 128 MiB  128
+ok   128-small: debug.log "Memtables allocating with off-heap objects"
+ok   128-small: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   128-small: session.log shows the stress start at T_A0
+ok   128-small: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  16
+ok   128-small: no off-heap Used total above 1.00  1.0
+ok   128-small: first keyspace1 limit flush off-heap Usage >= 97 %  100
+ok   128-small: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   128-small: ledger has malloc lines  2621
+ok   128-small: ledger frees all match live peers  0
+ok   128-small: allocator ids unique per discard  0
+ok   128-small: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (61 discards, 16 >= 8 MiB)  []
+ok   128-small: node-wide 125.69 <= max L - L_idle = 142.77 <= 147.71 MiB
+ok   128-small: every A_m <= limit + F  134357118
+ok   256-small: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 256MiB']
+ok   256-small: off-heap limit in system.log = 256 MiB  256
+ok   256-small: debug.log "Memtables allocating with off-heap objects"
+ok   256-small: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   256-small: session.log shows the stress start at T_A0
+ok   256-small: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  10
+ok   256-small: no off-heap Used total above 1.00  1.0
+ok   256-small: first keyspace1 limit flush off-heap Usage >= 97 %  100
+ok   256-small: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   256-small: ledger has malloc lines  3160
+ok   256-small: ledger frees all match live peers  0
+ok   256-small: allocator ids unique per discard  0
+ok   256-small: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (55 discards, 10 >= 8 MiB)  []
+ok   256-small: node-wide 252.41 <= max L - L_idle = 265.42 <= 275.84 MiB
+ok   256-small: every A_m <= limit + F  268565974
+ok   512-small: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 512MiB']
+ok   512-small: off-heap limit in system.log = 512 MiB  512
+ok   512-small: debug.log "Memtables allocating with off-heap objects"
+ok   512-small: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   512-small: session.log shows the stress start at T_A0
+ok   512-small: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  6
+ok   512-small: no off-heap Used total above 1.00  0.99
+ok   512-small: first keyspace1 limit flush off-heap Usage >= 97 %  99
+ok   512-small: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   512-small: ledger has malloc lines  3765
+ok   512-small: ledger frees all match live peers  0
+ok   512-small: allocator ids unique per discard  0
+ok   512-small: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (51 discards, 7 >= 8 MiB)  []
+ok   512-small: node-wide 505.85 <= max L - L_idle = 531.38 <= 532.18 MiB
+ok   512-small: every A_m <= limit + F  532884774
+ok   default-small: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB']
+ok   default-small: off-heap limit in system.log = about 1024 MiB  1024
+ok   default-small: debug.log "Memtables allocating with off-heap objects"
+ok   default-small: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   default-small: session.log shows the stress start at T_A0
+ok   default-small: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  7
+ok   default-small: no off-heap Used total above 1.00  0.99
+ok   default-small: first keyspace1 limit flush off-heap Usage >= 97 %  99
+ok   default-small: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   default-small: ledger has malloc lines  8640
+ok   default-small: ledger frees all match live peers  0
+ok   default-small: allocator ids unique per discard  0
+ok   default-small: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (52 discards, 8 >= 8 MiB)  []
+ok   default-small: node-wide 1012.73 <= max L - L_idle = 1039.26 <= 1045.19 MiB
+ok   default-small: every A_m <= limit + F  1066527226
+ok   128-oversize: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 128MiB']
+ok   128-oversize: off-heap limit in system.log = 128 MiB  128
+ok   128-oversize: debug.log "Memtables allocating with off-heap objects"
+ok   128-oversize: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   128-oversize: session.log shows the stress start at T_A0
+ok   128-oversize: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  15
+ok   128-oversize: no off-heap Used total above 1.00  1.0
+ok   128-oversize: first keyspace1 limit flush off-heap Usage >= 97 %  100
+ok   128-oversize: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 0]
+ok   128-oversize: ledger has malloc lines  11370
+ok   128-oversize: ledger frees all match live peers  0
+ok   128-oversize: allocator ids unique per discard  0
+ok   128-oversize: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (60 discards, 17 >= 8 MiB)  []
+ok   128-oversize: node-wide 125.69 <= max L - L_idle = 133.94 <= 166.20 MiB
+ok   128-oversize: every A_m <= limit + F  140405958
+ok   256-oversize: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 256MiB']
+ok   256-oversize: off-heap limit in system.log = 256 MiB  256
+ok   256-oversize: debug.log "Memtables allocating with off-heap objects"
+ok   256-oversize: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   256-oversize: session.log shows the stress start at T_A0
+ok   256-oversize: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  9
+ok   256-oversize: no off-heap Used total above 1.00  1.0
+ok   256-oversize: first keyspace1 limit flush off-heap Usage >= 97 %  100
+ok   256-oversize: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   256-oversize: ledger has malloc lines  12561
+ok   256-oversize: ledger frees all match live peers  0
+ok   256-oversize: allocator ids unique per discard  0
+ok   256-oversize: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (54 discards, 10 >= 8 MiB)  []
+ok   256-oversize: node-wide 252.41 <= max L - L_idle = 262.44 <= 287.70 MiB
+ok   256-oversize: every A_m <= limit + F  272946036
+ok   512-oversize: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 512MiB']
+ok   512-oversize: off-heap limit in system.log = 512 MiB  512
+ok   512-oversize: debug.log "Memtables allocating with off-heap objects"
+ok   512-oversize: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   512-oversize: session.log shows the stress start at T_A0
+ok   512-oversize: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  7
+ok   512-oversize: no off-heap Used total above 1.00  1.0
+ok   512-oversize: first keyspace1 limit flush off-heap Usage >= 97 %  100
+ok   512-oversize: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   512-oversize: ledger has malloc lines  19324
+ok   512-oversize: ledger frees all match live peers  0
+ok   512-oversize: allocator ids unique per discard  0
+ok   512-oversize: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (52 discards, 8 >= 8 MiB)  []
+ok   512-oversize: node-wide 505.85 <= max L - L_idle = 518.09 <= 542.15 MiB
+ok   512-oversize: every A_m <= limit + F  540385956
+ok   default-oversize: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 2048MiB']
+ok   default-oversize: off-heap limit in system.log = about 1024 MiB  1024
+ok   default-oversize: debug.log "Memtables allocating with off-heap objects"
+ok   default-oversize: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   default-oversize: session.log shows the stress start at T_A0
+ok   default-oversize: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  6
+ok   default-oversize: no off-heap Used total above 1.00  1.0
+ok   default-oversize: first keyspace1 limit flush off-heap Usage >= 97 %  100
+ok   default-oversize: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   default-oversize: ledger has malloc lines  32998
+ok   default-oversize: ledger frees all match live peers  0
+ok   default-oversize: allocator ids unique per discard  0
+ok   default-oversize: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (51 discards, 8 >= 8 MiB)  []
+ok   default-oversize: node-wide 1012.73 <= max L - L_idle = 1030.10 <= 1055.74 MiB
+ok   default-oversize: every A_m <= limit + F  1076247533
+ok   cleanup256-small: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: offheap_objects', '+memtable_heap_space: 2048MiB', '+memtable_offheap_space: 256MiB']
+ok   cleanup256-small: off-heap limit in system.log = 256 MiB  256
+ok   cleanup256-small: debug.log "Memtables allocating with off-heap objects"
+ok   cleanup256-small: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   cleanup256-small: session.log shows the stress start at T_A0
+ok   cleanup256-small: >= 4 MEMTABLE_LIMIT flushes of keyspace1.standard1  18
+ok   cleanup256-small: no off-heap Used total above 1.00  0.68
+ok   cleanup256-small: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 0, 32]
+ok   cleanup256-small: ledger has malloc lines  2124
+ok   cleanup256-small: ledger frees all match live peers  0
+ok   cleanup256-small: allocator ids unique per discard  0
+ok   cleanup256-small: per discard 0 <= P_m - A_m <= 1 MiB + 0.002 A_m (62 discards, 19 >= 8 MiB)  []
+FAIL cleanup256-small: node-wide 252.41 <= max L - L_idle = 283.95 <= 275.51 MiB
+ok   cleanup256-small: every A_m <= limit + F  91028966
+ok   floor256-small: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: unslabbed_heap_buffers', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 256MiB']
+ok   floor256-small: debug.log "Memtables allocating with on-heap buffers"
+ok   floor256-small: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   floor256-small: session.log shows the stress start at T_A0
+ok   floor256-small: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [32, 32, 32]
+ok   floor256-small: ledger has no malloc line
+ok   floor256-oversize: yaml diff is exactly the 9b lines  ['+memtable_allocation_type: unslabbed_heap_buffers', '+memtable_cleanup_threshold: 0.99', '+memtable_heap_space: 256MiB']
+ok   floor256-oversize: debug.log "Memtables allocating with on-heap buffers"
+ok   floor256-oversize: JVM -Xms4G -Xmx4G, NMT, Byteman
+ok   floor256-oversize: session.log shows the stress start at T_A0
+ok   floor256-oversize: writers seen parked at MemtableAllocator.java:195 in a B thread dump  [0, 32, 32]
+ok   floor256-oversize: ledger has no malloc line
+
+cross-run figures
+ok   small: max L - L_idle increases with the limit  [142.8, 265.4, 531.4, 1039.3]
+ok   small: first limit flush off-heap Usage increases with the limit  [127.997, 254.947, 507.511, 1014.662]
+  small 128: limit 128 MiB; first flush 127.997 MiB (100 %); limit flushes 16; max L - L_idle 142.77 MiB = 1.1154 x limit (bounds 125.69..147.71); P_m - A_m 0.144..0.889 MiB, P_m/A_m 1.00113..1.00700 over 16 discards >= 8 MiB; F 472820 B in 557 calls; max dRssAnon 348.3 MiB; NMT Other idle->endB 65370112->1149623296; dumps [32, 32, 32]; A_m above limit: 2 memtables, max excess 139390 B (F 472820); live keyspace1 memtables at max L: 2
+    process cross-check: max dRssAnon 348.3 MiB vs max dL + floor dRssAnon (201.2) + 64 = 407.9 MiB -> within
+  small 256: limit 256 MiB; first flush 254.947 MiB (100 %); limit flushes 10; max L - L_idle 265.42 MiB = 1.0368 x limit (bounds 252.41..275.84); P_m - A_m 0.306..1.156 MiB, P_m/A_m 1.00120..1.00454 over 10 discards >= 8 MiB; F 338908 B in 396 calls; max dRssAnon 419.6 MiB; NMT Other idle->endB 65370112->1149560832; dumps [32, 32, 32]; A_m above limit: 1 memtables, max excess 130518 B (F 338908); live keyspace1 memtables at max L: 2
+    process cross-check: max dRssAnon 419.6 MiB vs max dL + floor dRssAnon (201.2) + 64 = 530.6 MiB -> within
+  small 512: limit 512 MiB; first flush 507.511 MiB (99 %); limit flushes 6; max L - L_idle 531.38 MiB = 1.0378 x limit (bounds 505.85..532.18); P_m - A_m 0.431..1.283 MiB, P_m/A_m 1.00085..1.11551 over 7 discards >= 8 MiB; F 164193 B in 189 calls; max dRssAnon 738.1 MiB; NMT Other idle->endB 65370112->1149539328; dumps [32, 32, 32]; A_m above limit: 0 memtables, max excess 0 B (F 164193); live keyspace1 memtables at max L: 2
+    process cross-check: max dRssAnon 738.1 MiB vs max dL + floor dRssAnon (201.2) + 64 = 796.5 MiB -> within
+  small default: limit 1024 MiB; first flush 1014.662 MiB (99 %); limit flushes 7; max L - L_idle 1039.26 MiB = 1.0149 x limit (bounds 1012.73..1045.19); P_m - A_m 0.572..1.648 MiB, P_m/A_m 1.00086..1.06072 over 8 discards >= 8 MiB; F 149571 B in 177 calls; max dRssAnon 1259.8 MiB; NMT Other idle->endB 65370112->1149532160; dumps [32, 32, 32]; A_m above limit: 0 memtables, max excess 0 B (F 149571); live keyspace1 memtables at max L: 2
+    process cross-check: max dRssAnon 1259.8 MiB vs max dL + floor dRssAnon (201.2) + 64 = 1304.4 MiB -> within
+ok   oversize: max L - L_idle increases with the limit  [133.9, 262.4, 518.1, 1030.1]
+ok   oversize: first limit flush off-heap Usage increases with the limit  [127.901, 255.989, 511.977, 1023.953]
+  oversize 128: limit 128 MiB; first flush 127.901 MiB (100 %); limit flushes 15; max L - L_idle 133.94 MiB = 1.0464 x limit (bounds 125.69..166.20); P_m - A_m 0.003..0.012 MiB, P_m/A_m 1.00005..1.00010 over 17 discards >= 8 MiB; F 19860005 B in 220 calls; max dRssAnon 868.1 MiB; NMT Other idle->endB 65370112->1461520384; dumps [32, 32, 0]; A_m above limit: 12 memtables, max excess 6188230 B (F 19860005); live keyspace1 memtables at max L: 2
+    process cross-check: max dRssAnon 868.1 MiB vs max dL + floor dRssAnon (843.7) + 64 = 1041.6 MiB -> within
+  oversize 256: limit 256 MiB; first flush 255.989 MiB (100 %); limit flushes 9; max L - L_idle 262.44 MiB = 1.0252 x limit (bounds 252.41..287.70); P_m - A_m 0.000..0.031 MiB, P_m/A_m 1.00000..1.00020 over 10 discards >= 8 MiB; F 12781545 B in 160 calls; max dRssAnon 1074.4 MiB; NMT Other idle->endB 65370112->1721379840; dumps [32, 32, 32]; A_m above limit: 5 memtables, max excess 4510580 B (F 12781545); live keyspace1 memtables at max L: 3
+    process cross-check: max dRssAnon 1074.4 MiB vs max dL + floor dRssAnon (843.7) + 64 = 1170.1 MiB -> within
+  oversize 512: limit 512 MiB; first flush 511.977 MiB (100 %); limit flushes 7; max L - L_idle 518.09 MiB = 1.0119 x limit (bounds 505.85..542.15); P_m - A_m 0.007..0.009 MiB, P_m/A_m 1.00001..1.00025 over 8 discards >= 8 MiB; F 10618182 B in 108 calls; max dRssAnon 1471.5 MiB; NMT Other idle->endB 65370112->1332458496; dumps [32, 32, 32]; A_m above limit: 2 memtables, max excess 3515044 B (F 10618182); live keyspace1 memtables at max L: 3
+    process cross-check: max dRssAnon 1471.5 MiB vs max dL + floor dRssAnon (843.7) + 64 = 1425.8 MiB -> ABOVE
+  oversize default: limit 1024 MiB; first flush 1023.953 MiB (100 %); limit flushes 6; max L - L_idle 1030.10 MiB = 1.0060 x limit (bounds 1012.73..1055.74); P_m - A_m 0.007..0.027 MiB, P_m/A_m 1.00002..1.00057 over 8 discards >= 8 MiB; F 11208081 B in 114 calls; max dRssAnon 2269.3 MiB; NMT Other idle->endB 65370112->1422102528; dumps [32, 32, 32]; A_m above limit: 2 memtables, max excess 2505709 B (F 11208081); live keyspace1 memtables at max L: 3
+    process cross-check: max dRssAnon 2269.3 MiB vs max dL + floor dRssAnon (843.7) + 64 = 1937.8 MiB -> ABOVE
+  cleanup256-small: first flush 86.17 MiB (34 %), dumps [32, 0, 32], max L - L_idle 283.95 MiB (9a bound for the 0.99 runs 275.51); live keyspace1 memtables at max L: 3; limit flushes 18
+  floor256-small: max dRssAnon 201.2 MiB; NMT Other idle->endB 65370112->1149557760; dumps [32, 32, 32]
+  floor256-oversize: max dRssAnon 843.7 MiB; NMT Other idle->endB 65370112->1745567744; dumps [0, 32, 32]
+
+1 checks failed: cleanup256-small: node-wide 252.41 <= max L - L_idle = 283.95 <= 275.51 MiB
+exit 1

@@ -1,0 +1,61 @@
+# Byteman region ledger for memtable_offheap_space-tryAllocate-limit, case §9a "Physical against
+# accounted" and §9d "Real resource" (amended 2026-10-13). Observation only.
+#
+# Memtable regions come from MemoryUtil.allocate(), which is JNA Native.malloc() (MemoryUtil.java:81-84):
+# NMT cannot see them, so this ledger records each one. At cassandra-5.0.9 a NativeAllocator$Region is
+# built only right after MemoryUtil.allocate() (NativeAllocator.java:176 and :190), and a region is
+# freed only in trySwapRegion() when the race stash is full (:183) and in setDiscarded() (:203).
+#
+# Lines (ms = epoch millis):
+#   malloc peer=<address> cap=<bytes> ms=<ms> thread=<name>
+#   free peer=<address> cap=<bytes> site=race ms=<ms>
+#   discard alloc=<id> owns=<offHeap owns> ms=<ms>              setDiscarded() entry: regions not yet freed,
+#   free peer=<address> cap=<bytes> site=discard alloc=<id> ms=<ms>     accounting not yet released
+#   discarded alloc=<id> ms=<ms>                                setDiscarded() exit
+#
+# Output file: the system property stage4.ledger.out, or else ledger.txt in the JVM's working directory.
+
+RULE ledger region built
+CLASS org.apache.cassandra.utils.memory.NativeAllocator$Region
+METHOD <init>(long, int)
+AT EXIT
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("ledger", "malloc peer=" + $0.peer + " cap=" + $0.capacity + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE ledger region freed after a lost swap race
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD trySwapRegion
+AT INVOKE MemoryUtil.free
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("ledger", "free peer=" + $next.peer + " cap=" + $next.capacity + " site=race ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ledger discard begins
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD setDiscarded
+AT ENTRY
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("ledger", "discard alloc=" + java.lang.System.identityHashCode($0) + " owns=" + $0.offHeap().owns() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ledger region freed at discard
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD setDiscarded
+AT INVOKE MemoryUtil.free
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("ledger", "free peer=" + $region.peer + " cap=" + $region.capacity + " site=discard alloc=" + java.lang.System.identityHashCode($0) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ledger discard ends
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD setDiscarded
+AT EXIT
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("ledger", "discarded alloc=" + java.lang.System.identityHashCode($0) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

@@ -1,0 +1,46 @@
+clone HEAD: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: ff16703641113a9d64c794c23815006e  NativePoolTest.java;f498e9bbaf39e4ee72a21e2bdd3ac5d8  escape-hatch.btm;f14cf112b399b195cbdc1632b22ff03f  region-ledger.btm;d01a73ddc6503c658e5f58482a359301  cluster-run.py;176bb34bdcc6d0c98b02b71cd4e4afd3  ledger.py;427c0f3dc0895419126c0032c208a965  unit-run.sh;
+== floor256-oversize: type=unslabbed_heap_buffers offheap knob=unset heap=256MiB cleanup=0.99 C=no; stress n=60000 -col n=FIXED(1) size=FIXED(196608) threads=64
+yaml memtable lines: ['memtable_heap_space: 256MiB', 'memtable_cleanup_threshold: 0.99', 'memtable_allocation_type: unslabbed_heap_buffers']
+JVM_EXTRA_OPTS=-XX:NativeMemoryTracking=summary -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mos/escape-hatch.btm,script:/users/jason92/stage4-harness-run/mos/region-ledger.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mos/floor256-oversize/escape-hatch.txt -Dstage4.ledger.out=/users/jason92/stage4-logs/mos/floor256-oversize/ledger.txt
+node pid 101420, up after 39 s
+system.log: O  [main] 2026-10-14T01:10:18,223 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 1024MiB
+system.log: NFO  [main] 2026-10-14T01:10:18,223 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 256MiB
+debug.log has "Memtables allocating with on-heap buffers": True
+resolved off-heap limit: 1024 MiB = 1073741824 B
+Submit -l lists: trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void
+NMT idle: total committed 4729275 KB; Other committed 63838 KB
+idle at ms=1791940275386: BlockedOnAllocation Count=0; RssAnon=4832012 kB
+A: first limit flush after 7026 ms; BlockedOnAllocation Count=48
+A Enqueuing: Enqueuing flush of keyspace1.standard1, Reason: MEMTABLE_LIMIT, Usage: 255.863MiB (100%) on-heap, 0B (0%) off-heap
+A Used total: Flushing largest CFS(Keyspace='keyspace1', ColumnFamily='standard1') to free up room. Used total: 1.00/0.00, live: 1.00/0.00, flushing: 0.00/0.00, this: 1.00/0.00
+B dump 1: at limit flush #2; frames at MemtableAllocator.java:195 = 0
+B dump 2: at limit flush #3; frames at MemtableAllocator.java:195 = 32
+B dump 3: at limit flush #4; frames at MemtableAllocator.java:195 = 32
+B end ms=1791940291238: BlockedOnAllocation Count at A=48, after B=151
+  BlockedOnAllocation 50thPercentile = 943127.0
+  BlockedOnAllocation 95thPercentile = 1629722.0
+  BlockedOnAllocation Max = 4055269.0
+NMT endB: total committed 6439265 KB; Other committed 1704656 KB
+B Enqueuing flush reasons so far: {'INTERNALLY_FORCED': 33, 'MEMTABLE_LIMIT': 7}
+ps -eo cmd | grep '[C]assandraDaemon' finds nothing after stopdaemon
+stress: 424 lines mention timeout/exception (symptom only)
+windows (ms): T_idle=1791940275386 T_A0=1791940279082 T_A1=1791940286108 T_C0=1791940299299 T_STOP=1791940299299
+escape-hatch trace, lines with limit = off-heap knob (1073741824 B): 0 calls, 0 B; other-limit lines: 106
+  window A: 0 calls, 0 B
+  window B: 0 calls, 0 B
+  window after B: 0 calls, 0 B
+whole run: keyspace1 MEMTABLE_LIMIT flushes 7, off-heap Usage % at each: [0, 0, 0, 0, 0, 0, 0]
+whole run: max off-heap Used total = 0.0
+Traceback (most recent call last):
+  File "/users/jason92/stage4-harness-run/mos/ledger.py", line 130, in <module>
+    sys.exit(main())
+  File "/users/jason92/stage4-harness-run/mos/ledger.py", line 46, in main
+    ev = read(a.ledger)
+  File "/users/jason92/stage4-harness-run/mos/ledger.py", line 27, in read
+    with open(path) as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/users/jason92/stage4-logs/mos/floor256-oversize/ledger.txt'
+RssAnon: idle 4832012 kB; max in [T_A0,T_STOP] 5695940 kB at ms=1791940298779; max dRssAnon = 843.7 MiB
+EXPECTED: load-floor control: the ledger has no malloc line — yes
+== floor256-oversize: COMPLETE
+node stopped; ps -eo cmd | grep '[C]assandraDaemon' finds 0

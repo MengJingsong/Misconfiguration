@@ -1,0 +1,33 @@
+clone HEAD: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: ff16703641113a9d64c794c23815006e  NativePoolTest.java;f498e9bbaf39e4ee72a21e2bdd3ac5d8  escape-hatch.btm;f14cf112b399b195cbdc1632b22ff03f  region-ledger.btm;55e6aa3f0af7ddd1085c4e7d81cb10ba  cluster-run.py;176bb34bdcc6d0c98b02b71cd4e4afd3  ledger.py;427c0f3dc0895419126c0032c208a965  unit-run.sh;
+Byteman TestScript: Type checked rule "escape hatch forces an allocation past the limit" | Type checked rule "ledger region built" | Type checked rule "ledger region freed after a lost swap race" | Type checked rule "ledger discard begins" | Type checked rule "ledger region freed at discard" | Type checked rule "ledger discard ends" | TestScript: no errors
+ant: Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.104 sec | BUILD SUCCESSFUL
+STAGE4 lines:
+  STAGE4 1 pool.offHeap.used=100
+  STAGE4 1 allocator.offHeap.owns=100
+  STAGE4 2 waiter.state=WAITING
+  STAGE4 2 waiter.frames=MemtableAllocator$SubAllocator.allocate:195,NativeAllocator.allocate:141,NativePoolTest.lambda$testParksAtLimitWakesOnReleaseAndForcesThroughWhenBlocking$1:126,NativePoolTest$$Lambda$299/0x0000000840209440.call:-1,
+  STAGE4 2 parked_in_SubAllocator.allocate=1
+  STAGE4 2 future_get_300ms_timed_out=1
+  STAGE4 3 pool.offHeap.used_after_2s=100
+  STAGE4 3 still_parked=1
+  STAGE4 4 woken_allocation_returned_peer=1
+  STAGE4 4 pool.offHeap.used=100
+  STAGE4 5 forced_allocation_returned_peer=1
+  STAGE4 5 pool.offHeap.used=110
+  STAGE4 5 allocator.offHeap.owns=110
+  STAGE4 6 pool.offHeap.used_after_discard=0
+  STAGE4 done result=pass
+escape-hatch trace: ['forced=10 limit=100 ms=1791938827005 thread=pool-1-thread-2']
+ledger:
+  malloc peer=139737923059536 cap=8192 ms=1791938824596 thread=main
+  discard alloc=1101598632 owns=110 ms=1791938827012
+  free peer=139737923059536 cap=8192 site=discard alloc=1101598632 ms=1791938827017
+  discarded alloc=1101598632 ms=1791938827021
+ledger /users/jason92/stage4-logs/mos/instrument/instrument-ledger.txt: {'malloc': 1, 'free_race': 0, 'free_discard': 1, 'discard': 1, 'discarded': 1, 'bad': 0}; unmatched frees 0; mallocs of a live peer 0
+L_idle=0 B (0.000 MiB) at idle-ms=None
+max L=8192 B (0.008 MiB) at ms=1791938824596; max L - L_idle = 0.008 MiB (window None..None)
+L at end=0 B (0.000 MiB) in 0 live regions; discards still open: 0
+discards: 1 closed, 0 with owns >= 8 MiB, 0 outside 0 <= P_m - A_m <= 1 MiB + 0.002 A_m
+INSTRUMENT CHECK PASSED
+node stopped; ps -eo cmd | grep '[C]assandraDaemon' finds 0

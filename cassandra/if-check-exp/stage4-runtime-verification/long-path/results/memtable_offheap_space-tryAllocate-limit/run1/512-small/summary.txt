@@ -1,0 +1,59 @@
+clone HEAD: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: ff16703641113a9d64c794c23815006e  NativePoolTest.java;f498e9bbaf39e4ee72a21e2bdd3ac5d8  escape-hatch.btm;f14cf112b399b195cbdc1632b22ff03f  region-ledger.btm;d01a73ddc6503c658e5f58482a359301  cluster-run.py;176bb34bdcc6d0c98b02b71cd4e4afd3  ledger.py;427c0f3dc0895419126c0032c208a965  unit-run.sh;
+== 512-small: type=offheap_objects offheap knob=512 heap=2048MiB cleanup=0.99 C=yes; stress n=2000000 -col size=FIXED(1024) threads=256
+yaml memtable lines: ['memtable_heap_space: 2048MiB', 'memtable_offheap_space: 512MiB', 'memtable_cleanup_threshold: 0.99', 'memtable_allocation_type: offheap_objects']
+JVM_EXTRA_OPTS=-XX:NativeMemoryTracking=summary -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mos/escape-hatch.btm,script:/users/jason92/stage4-harness-run/mos/region-ledger.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mos/512-small/escape-hatch.txt -Dstage4.ledger.out=/users/jason92/stage4-logs/mos/512-small/ledger.txt
+node pid 82418, up after 39 s
+system.log: FO  [main] 2026-10-14T00:54:05,008 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 512MiB
+system.log: FO  [main] 2026-10-14T00:54:05,008 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 2048MiB
+debug.log has "Memtables allocating with off-heap objects": True
+resolved off-heap limit: 512 MiB = 536870912 B
+Submit -l lists: trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void; NativeAllocator$Region.<init>; NativeAllocator.trySwapRegion; NativeAllocator.setDiscarded
+NMT idle: total committed 4747385 KB; Other committed 63838 KB
+idle at ms=1791939302158: BlockedOnAllocation Count=0; RssAnon=4814684 kB
+A: first limit flush after 10040 ms; BlockedOnAllocation Count=0
+A Enqueuing: Enqueuing flush of keyspace1.standard1, Reason: MEMTABLE_LIMIT, Usage: 50.044MiB (2%) on-heap, 507.511MiB (99%) off-heap
+A Used total: Flushing largest CFS(Keyspace='keyspace1', ColumnFamily='standard1') to free up room. Used total: 0.02/0.99, live: 0.02/0.99, flushing: 0.00/0.00, this: 0.02/0.99
+B dump 1: at limit flush #2; frames at MemtableAllocator.java:195 = 32
+B dump 2: at limit flush #3; frames at MemtableAllocator.java:195 = 32
+B dump 3: at limit flush #4; frames at MemtableAllocator.java:195 = 32
+B end ms=1791939332356: BlockedOnAllocation Count at A=0, after B=155
+  BlockedOnAllocation 50thPercentile = 4055269.0
+  BlockedOnAllocation 95thPercentile = 4866323.0
+  BlockedOnAllocation Max = 4866323.0
+NMT endB: total committed 5986786 KB; Other committed 1122597 KB
+B Enqueuing flush reasons so far: {'INTERNALLY_FORCED': 33, 'MEMTABLE_LIMIT': 5}
+C: count rising (255 -> 355)
+C: nodetool flush returned after 5.0 s (T_C0=1791939346642)
+C Enqueuing since T_C0: 1; off-heap Used total since T_C0: []; above 1.00: []
+ps -eo cmd | grep '[C]assandraDaemon' finds nothing after stopdaemon
+stress: 5480 lines mention timeout/exception (symptom only)
+windows (ms): T_idle=1791939302158 T_A0=1791939305864 T_A1=1791939315904 T_C0=1791939346642 T_STOP=1791939351674
+escape-hatch trace, lines with limit = off-heap knob (536870912 B): 189 calls, 164193 B; other-limit lines: 0
+  window A: 0 calls, 0 B
+  window B: 0 calls, 0 B
+  window C: 189 calls, 164193 B
+whole run: keyspace1 MEMTABLE_LIMIT flushes 6, off-heap Usage % at each: [99, 99, 99, 99, 99, 99]
+whole run: max off-heap Used total = 0.99
+ledger /users/jason92/stage4-logs/mos/512-small/ledger.txt: {'malloc': 3765, 'free_race': 570, 'free_discard': 3164, 'discard': 51, 'discarded': 51, 'bad': 0}; unmatched frees 0; mallocs of a live peer 0
+L_idle=32768 B (0.031 MiB) at idle-ms=1791939302158
+max L=557219840 B (531.406 MiB) at ms=1791939320288; max L - L_idle = 531.375 MiB (window 1791939305864..1791939351674)
+L at end=6160384 B (5.875 MiB) in 31 live regions; discards still open: 0
+discards: 51 closed, 7 with owns >= 8 MiB, 0 outside 0 <= P_m - A_m <= 1 MiB + 0.002 A_m
+  discard alloc=1986095432 ms=1791939318964 A_m=532216930 P_m=532668416 regions=514 P_m-A_m=451486 (0.431 MiB, bound 2.015) P_m/A_m=1.00085 ok
+  discard alloc=1906874075 ms=1791939324380 A_m=531890096 P_m=532668416 regions=514 P_m-A_m=778320 (0.742 MiB, bound 2.014) P_m/A_m=1.00146 ok
+  discard alloc=218008207 ms=1791939329313 A_m=532791562 P_m=533716992 regions=515 P_m-A_m=925430 (0.883 MiB, bound 2.016) P_m/A_m=1.00174 ok
+  discard alloc=707438111 ms=1791939334527 A_m=532371662 P_m=533716992 regions=515 P_m-A_m=1345330 (1.283 MiB, bound 2.015) P_m/A_m=1.00253 ok
+  discard alloc=1055623533 ms=1791939343574 A_m=532634286 P_m=533716992 regions=515 P_m-A_m=1082706 (1.033 MiB, bound 2.016) P_m/A_m=1.00203 ok
+  discard alloc=188796453 ms=1791939351629 A_m=532884774 P_m=533716992 regions=515 P_m-A_m=832218 (0.794 MiB, bound 2.016) P_m/A_m=1.00156 ok
+  discard alloc=1857395985 ms=1791939361490 A_m=8452643 P_m=9428992 regions=15 P_m-A_m=976349 (0.931 MiB, bound 1.016) P_m/A_m=1.11551 ok
+RssAnon: idle 4814684 kB; max in [T_A0,T_STOP] 5570540 kB at ms=1791939337535; max dRssAnon = 738.1 MiB
+EXPECTED: writers waited in B (BlockedOnAllocation 0 -> 155) — yes
+EXPECTED: first limit flush at about 99 % of the limit (Usage 99 %) — yes
+EXPECTED: no off-heap Used total above 1.00 at any flush start (max 0.99) — yes
+EXPECTED: per discard: 0 <= P_m - A_m <= 1 MiB + 0.002 A_m for all 51 discards — yes
+EXPECTED: node-wide: 505.85 MiB <= max L - L_idle = 531.38 MiB <= 532.18 MiB (limit + F 164193 B + 19 MiB + 0.002 limit; stash max 15.94 MiB) — yes
+EXPECTED: ledger consistent (unmatched frees 0, mallocs of a live peer 0, bad lines 0) — yes
+max L / limit = 1.0379; max dRssAnon - (max L - L_idle) = 206.8 MiB (compared with the load-floor control in the results file)
+== 512-small: COMPLETE
+node stopped; ps -eo cmd | grep '[C]assandraDaemon' finds 0

@@ -1,0 +1,60 @@
+clone HEAD: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: ff16703641113a9d64c794c23815006e  NativePoolTest.java;f498e9bbaf39e4ee72a21e2bdd3ac5d8  escape-hatch.btm;f14cf112b399b195cbdc1632b22ff03f  region-ledger.btm;d01a73ddc6503c658e5f58482a359301  cluster-run.py;176bb34bdcc6d0c98b02b71cd4e4afd3  ledger.py;427c0f3dc0895419126c0032c208a965  unit-run.sh;
+== default-oversize: type=offheap_objects offheap knob=unset heap=2048MiB cleanup=0.99 C=yes; stress n=60000 -col n=FIXED(1) size=FIXED(196608) threads=64
+yaml memtable lines: ['memtable_heap_space: 2048MiB', 'memtable_cleanup_threshold: 0.99', 'memtable_allocation_type: offheap_objects']
+JVM_EXTRA_OPTS=-XX:NativeMemoryTracking=summary -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mos/escape-hatch.btm,script:/users/jason92/stage4-harness-run/mos/region-ledger.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mos/default-oversize/escape-hatch.txt -Dstage4.ledger.out=/users/jason92/stage4-logs/mos/default-oversize/ledger.txt
+node pid 94863, up after 39 s
+system.log: O  [main] 2026-10-14T01:04:35,102 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 1024MiB
+system.log: FO  [main] 2026-10-14T01:04:35,102 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 2048MiB
+debug.log has "Memtables allocating with off-heap objects": True
+resolved off-heap limit: 1024 MiB = 1073741824 B
+Submit -l lists: trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void; NativeAllocator$Region.<init>; NativeAllocator.trySwapRegion; NativeAllocator.setDiscarded
+NMT idle: total committed 4747519 KB; Other committed 63838 KB
+idle at ms=1791939932232: BlockedOnAllocation Count=0; RssAnon=4835764 kB
+A: first limit flush after 8028 ms; BlockedOnAllocation Count=12
+A Enqueuing: Enqueuing flush of keyspace1.standard1, Reason: MEMTABLE_LIMIT, Usage: 2.021MiB (0%) on-heap, 1023.953MiB (100%) off-heap
+A Used total: Flushing largest CFS(Keyspace='keyspace1', ColumnFamily='standard1') to free up room. Used total: 0.00/1.00, live: 0.00/1.00, flushing: 0.00/0.00, this: 0.00/1.00
+B dump 1: at limit flush #2; frames at MemtableAllocator.java:195 = 32
+B dump 2: at limit flush #3; frames at MemtableAllocator.java:195 = 32
+B dump 3: at limit flush #4; frames at MemtableAllocator.java:195 = 32
+B end ms=1791939971599: BlockedOnAllocation Count at A=12, after B=247
+  BlockedOnAllocation 50thPercentile = 372.0
+  BlockedOnAllocation 95thPercentile = 8409007.0
+  BlockedOnAllocation Max = 8409007.0
+NMT endB: total committed 6141700 KB; Other committed 1388772 KB
+B Enqueuing flush reasons so far: {'INTERNALLY_FORCED': 33, 'MEMTABLE_LIMIT': 5}
+C: count rising (343 -> 384)
+C: nodetool flush returned after 11.5 s (T_C0=1791939992158)
+C Enqueuing since T_C0: 1; off-heap Used total since T_C0: []; above 1.00: []
+ps -eo cmd | grep '[C]assandraDaemon' finds nothing after stopdaemon
+stress: 5472 lines mention timeout/exception (symptom only)
+windows (ms): T_idle=1791939932232 T_A0=1791939935831 T_A1=1791939943859 T_C0=1791939992158 T_STOP=1791940003685
+escape-hatch trace, lines with limit = off-heap knob (1073741824 B): 114 calls, 11208081 B; other-limit lines: 0
+  window A: 24 calls, 2359596 B
+  window B: 26 calls, 2556229 B
+  window C: 64 calls, 6292256 B
+whole run: keyspace1 MEMTABLE_LIMIT flushes 6, off-heap Usage % at each: [100, 99, 99, 100, 99, 99]
+whole run: max off-heap Used total = 1.0
+ledger /users/jason92/stage4-logs/mos/default-oversize/ledger.txt: {'malloc': 32998, 'free_race': 2, 'free_discard': 32985, 'discard': 51, 'discarded': 51, 'bad': 0}; unmatched frees 0; mallocs of a live peer 0
+L_idle=32768 B (0.031 MiB) at idle-ms=1791939932232
+max L=1080173188 B (1030.133 MiB) at ms=1791939993506; max L - L_idle = 1030.102 MiB (window 1791939935831..1791940003685)
+L at end=147456 B (0.141 MiB) in 11 live regions; discards still open: 0
+discards: 51 closed, 8 with owns >= 8 MiB, 0 outside 0 <= P_m - A_m <= 1 MiB + 0.002 A_m
+  discard alloc=685962435 ms=1791939950079 A_m=1076052384 P_m=1076076768 regions=5476 P_m-A_m=24384 (0.023 MiB, bound 3.052) P_m/A_m=1.00002 ok
+  discard alloc=398912219 ms=1791939959654 A_m=1064055581 P_m=1064082399 regions=5415 P_m-A_m=26818 (0.026 MiB, bound 3.030) P_m/A_m=1.00003 ok
+  discard alloc=683491340 ms=1791939968371 A_m=1067987653 P_m=1068014979 regions=5435 P_m-A_m=27326 (0.026 MiB, bound 3.037) P_m/A_m=1.00003 ok
+  discard alloc=1347061642 ms=1791939975743 A_m=1076247533 P_m=1076273397 regions=5477 P_m-A_m=25864 (0.025 MiB, bound 3.053) P_m/A_m=1.00002 ok
+  discard alloc=1671627866 ms=1791939991366 A_m=1067398318 P_m=1067425092 regions=5432 P_m-A_m=26774 (0.026 MiB, bound 3.036) P_m/A_m=1.00003 ok
+  discard alloc=1125366471 ms=1791940003657 A_m=1067593785 P_m=1067621721 regions=5433 P_m-A_m=27936 (0.027 MiB, bound 3.036) P_m/A_m=1.00003 ok
+  discard alloc=23871369 ms=1791940003781 A_m=12388761 P_m=12395819 regions=64 P_m-A_m=7058 (0.007 MiB, bound 1.024) P_m/A_m=1.00057 ok
+  discard alloc=2120534996 ms=1791940013650 A_m=39523745 P_m=39530621 regions=202 P_m-A_m=6876 (0.007 MiB, bound 1.075) P_m/A_m=1.00017 ok
+RssAnon: idle 4835764 kB; max in [T_A0,T_STOP] 7159516 kB at ms=1791940003632; max dRssAnon = 2269.3 MiB
+EXPECTED: writers waited in B (BlockedOnAllocation 0 -> 247) — yes
+EXPECTED: first limit flush at about 99 % of the limit (Usage 100 %) — yes
+EXPECTED: no off-heap Used total above 1.00 at any flush start (max 1.0) — yes
+EXPECTED: per discard: 0 <= P_m - A_m <= 1 MiB + 0.002 A_m for all 51 discards — yes
+EXPECTED: node-wide: 1012.73 MiB <= max L - L_idle = 1030.10 MiB <= 1055.74 MiB (limit + F 11208081 B + 19 MiB + 0.002 limit; stash max 15.94 MiB) — yes
+EXPECTED: ledger consistent (unmatched frees 0, mallocs of a live peer 0, bad lines 0) — yes
+max L / limit = 1.0060; max dRssAnon - (max L - L_idle) = 1239.2 MiB (compared with the load-floor control in the results file)
+== default-oversize: COMPLETE
+node stopped; ps -eo cmd | grep '[C]assandraDaemon' finds 0

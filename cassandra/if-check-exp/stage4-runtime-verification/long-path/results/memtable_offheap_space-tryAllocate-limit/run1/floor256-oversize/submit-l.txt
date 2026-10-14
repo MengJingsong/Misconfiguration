@@ -1,0 +1,76 @@
+# File /users/jason92/stage4-harness-run/mos/region-ledger.btm line 49
+RULE ledger region freed at discard
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD setDiscarded
+NOCOMPILE
+AT INVOKE MemoryUtil.free
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+traceln("ledger", "free peer=" + $region.peer + " cap=" + $region.capacity + " site=discard alloc=" + java.lang.System.identityHashCode($0) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.utils.memory.NativeAllocator.setDiscarded() void
+# File /users/jason92/stage4-harness-run/mos/region-ledger.btm line 22
+RULE ledger region built
+CLASS org.apache.cassandra.utils.memory.NativeAllocator$Region
+METHOD <init>(long, int)
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+traceln("ledger", "malloc peer=" + $0.peer + " cap=" + $0.capacity + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+# File /users/jason92/stage4-harness-run/mos/region-ledger.btm line 58
+RULE ledger discard ends
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD setDiscarded
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+traceln("ledger", "discarded alloc=" + java.lang.System.identityHashCode($0) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.utils.memory.NativeAllocator.setDiscarded() void
+# File /users/jason92/stage4-harness-run/mos/region-ledger.btm line 40
+RULE ledger discard begins
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD setDiscarded
+NOCOMPILE
+AT ENTRY
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+traceln("ledger", "discard alloc=" + java.lang.System.identityHashCode($0) + " owns=" + $0.offHeap().owns() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.utils.memory.NativeAllocator.setDiscarded() void
+# File /users/jason92/stage4-harness-run/mos/escape-hatch.btm line 25
+RULE escape hatch forces an allocation past the limit
+CLASS org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator
+METHOD allocated(long)
+NOCOMPILE
+AT ENTRY
+IF true
+DO traceOpen("escapeHatch", java.lang.System.getProperty("stage4.byteman.out", "escape-hatch.txt"));
+traceln("escapeHatch", "forced=" + $1 + " limit=" + $0.parent.limit + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator.allocated(long) void
+# File /users/jason92/stage4-harness-run/mos/region-ledger.btm line 31
+RULE ledger region freed after a lost swap race
+CLASS org.apache.cassandra.utils.memory.NativeAllocator
+METHOD trySwapRegion
+NOCOMPILE
+AT INVOKE MemoryUtil.free
+IF true
+DO traceOpen("ledger", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+traceln("ledger", "free peer=" + $next.peer + " cap=" + $next.capacity + " site=race ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.utils.memory.NativeAllocator.trySwapRegion(org.apache.cassandra.utils.memory.NativeAllocator$Region,int) void
+
