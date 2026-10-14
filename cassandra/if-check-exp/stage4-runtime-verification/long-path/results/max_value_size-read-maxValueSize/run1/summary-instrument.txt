@@ -1,0 +1,21 @@
+run instrument on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-14 11:55:34 MDT; epoch ms 1792000534463
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: f8512fa780a424aa2ad1197ec7215731  MaxValueSizeGuardTest.java;ef063c7f886c9c40fd014a7f88592dab  value-alloc.btm;a633c532c826ebe2b23005f51a002b45  cluster-run.py;0eda58c3f98d7985bf0da936418d387e  send-value.py;5dbf68ff5d78271432d13dc8729c02a6  make-node-yaml.sh;01009d13e617b4451e3dfcd40fe479f9  make-unit-yaml.sh;2173f470d51696aa15cbd5f9d23e1369  unit-run.sh;
+Byteman TestScript: Type checked rule "value array requested by ByteArrayAccessor" | Type checked rule "value array requested by ByteBufferUtil" | TestScript: no errors
+yaml for instrument: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < read_request_timeout: 5000ms | > read_request_timeout: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 10000ms | >  | > # stage4 mvs instrument | > max_value_size: 1MiB
+yaml in force: disk_failure_policy: stop ; commit_failure_policy: stop ; commitlog_sync: batch ; commitlog_segment_size: 32MiB ; memtable_allocation_type: heap_buffers ; read_request_timeout: 10000ms ; write_request_timeout: 10000ms ; max_value_size: 1MiB
+JVM_EXTRA_OPTS=-javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mvs/value-alloc.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mvs/instrument/alloc.trace
+start instrument: up after 40 s
+probe: release 5.0.9-SNAPSHOT protocol 4
+EXPECTED: (i) probe over protocol 4: 5.0.9-SNAPSHOT protocol 4 — yes
+Submit -l: RULE value array requested by ByteArrayAccessor | ENDRULE | trigger method: org.apache.cassandra.db.marshal.ByteArrayAccessor.read(org.apache.cassandra.io.util.DataInputPlus,int) byte | RULE value array requested by ByteBufferUtil | ENDRULE | trigger method: org.apache.cassandra.utils.ByteBufferUtil.read(java.io.DataInput,int) java.nio.ByteBuffer
+idle 10 s: trace lines 0 -> 0 (total 0)
+EXPECTED: (ii) idle 10 s leaves no alloc line: 0 — yes
+control insert 0: insert 0 1024 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+control insert 99: insert 99 307200 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+control readback 0: readback 0 -> OK length=1024  guard l/M=None/None  new trace lengths=[]  new log: -
+control readback 99: readback 99 -> OK length=307200  guard l/M=None/None  new trace lengths=[307200]  new log: -
+EXPECTED: control: rows read back at 1024 / 307200 (1024 / 307200); trace has 2 line(s) of 307,200 (>= 1) and 0 of 1,024 (0) — yes
+EXPECTED: (iv) system_views.settings max_value_size: [['max_value_size', '1MiB']] (secondary, not a failure) — yes
+instrument check passed
+node stopped; daemons left: 0; yaml restored

@@ -1,0 +1,35 @@
+run replay on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-14 12:05:47 MDT; epoch ms 1792001147478
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: f8512fa780a424aa2ad1197ec7215731  MaxValueSizeGuardTest.java;ef063c7f886c9c40fd014a7f88592dab  value-alloc.btm;a633c532c826ebe2b23005f51a002b45  cluster-run.py;0eda58c3f98d7985bf0da936418d387e  send-value.py;5dbf68ff5d78271432d13dc8729c02a6  make-node-yaml.sh;01009d13e617b4451e3dfcd40fe479f9  make-unit-yaml.sh;2173f470d51696aa15cbd5f9d23e1369  unit-run.sh;
+yaml for replay-4m: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < read_request_timeout: 5000ms | > read_request_timeout: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 10000ms | >  | > # stage4 mvs replay-4m | > max_value_size: 4MiB
+yaml in force: disk_failure_policy: stop ; commit_failure_policy: stop ; commitlog_sync: batch ; commitlog_segment_size: 32MiB ; memtable_allocation_type: heap_buffers ; read_request_timeout: 10000ms ; write_request_timeout: 10000ms ; max_value_size: 4MiB
+JVM_EXTRA_OPTS=-javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mvs/value-alloc.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mvs/replay/alloc.trace
+start replay-4m: up after 41 s
+probe: release 5.0.9-SNAPSHOT protocol 4
+write 30: insert 30 2097152 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+EXPECTED: replay: 2097152 B row acknowledged under 4 MiB — yes
+readback 30: readback 30 -> OK length=2097152  guard l/M=None/None  new trace lengths=[2097152]  new log: -
+EXPECTED: replay: readback 30 = 2097152 (2097152) — yes
+commit-log files before the kill: total 2120 | -rw-r--r-- 1 jason92 misconfiguration 33554432 Oct 14 12:06 CommitLog-7-1792001151985.log | -rw-r--r-- 1 jason92 misconfiguration 33554432 Oct 14 12:05 CommitLog-7-1792001151986.log
+EXPECTED: replay: a commit-log segment exists — yes
+EXPECTED: replay: no daemon after kill -9 — yes
+yaml for replay-1m: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < read_request_timeout: 5000ms | > read_request_timeout: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 10000ms | >  | > # stage4 mvs replay-1m | > max_value_size: 1MiB
+yaml in force: disk_failure_policy: stop ; commit_failure_policy: stop ; commitlog_sync: batch ; commitlog_segment_size: 32MiB ; memtable_allocation_type: heap_buffers ; read_request_timeout: 10000ms ; write_request_timeout: 10000ms ; max_value_size: 1MiB
+start replay-1m: exited after 13 s
+replay-1m log hits:
+  org.apache.cassandra.db.commitlog.CommitLogReadHandler$CommitLogReadException: Unexpected error deserializing mutation; saved to /tmp/mutation13579100519394862803dat.  This may be caused by replaying a mutation against a table with the same name but incompatible schema.  Exception follows: java.io.I
+EXPECTED: replay under 1 MiB: the node does not start, the process exits (exited) — yes
+EXPECTED: replay under 1 MiB: log has "Corrupt value length 2097152 encountered, as it exceeds the maximum of 1048576" — yes
+EXPECTED: replay under 1 MiB: log has "Replay stopped. If you wish to override this error" — NO (recorded; the AI judges it in the results file)
+saved mutation files in /tmp (newest): -rw------- 1 jason92 misconfiguration 2097196 Oct 14 12:06 /tmp/mutation13579100519394862803dat | -rw------- 1 jason92 misconfiguration 2097196 Oct 13 19:52 /tmp/mutation15178870741968685590dat
+yaml for replay-ctl-4m: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < read_request_timeout: 5000ms | > read_request_timeout: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 10000ms | >  | > # stage4 mvs replay-ctl-4m | > max_value_size: 4MiB
+yaml in force: disk_failure_policy: stop ; commit_failure_policy: stop ; commitlog_sync: batch ; commitlog_segment_size: 32MiB ; memtable_allocation_type: heap_buffers ; read_request_timeout: 10000ms ; write_request_timeout: 10000ms ; max_value_size: 4MiB
+start replay-ctl-4m: up after 9 s
+replay control log lines:
+  INFO  [main] 2026-10-14T18:06:51,657 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_filtering_enabled=true; allow_insecure_udfs=false; alter_table_enabled=true; audit_logging_options=Aud
+  INFO  [main] 2026-10-14T18:06:52,826 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, 
+  INFO  [main] 2026-10-14T18:06:56,639 CommitLog.java:206 - Replaying bin/../data/commitlog/CommitLog-7-1792001151985.log, bin/../data/commitlog/CommitLog-7-1792001151986.log, bin/../data/commitlog/CommitLog-7-1792001199761.log, bin/../data/commitlog/CommitLog-7-1792001199762.log
+  INFO  [main] 2026-10-14T18:06:56,924 CommitLog.java:210 - Log replay complete, 48 replayed mutations in 284 ms
+control readback 30: readback 30 -> OK length=2097152  guard l/M=None/None  new trace lengths=[]  new log: -
+EXPECTED: replay control under 4 MiB: the node starts and readback 30 = 2097152 (2097152) — yes
+node stopped; daemons left: 0; yaml restored

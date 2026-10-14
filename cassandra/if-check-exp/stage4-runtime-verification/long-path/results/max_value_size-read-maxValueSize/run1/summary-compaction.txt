@@ -1,0 +1,27 @@
+run compaction on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-14 12:04:33 MDT; epoch ms 1792001073973
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: f8512fa780a424aa2ad1197ec7215731  MaxValueSizeGuardTest.java;ef063c7f886c9c40fd014a7f88592dab  value-alloc.btm;a633c532c826ebe2b23005f51a002b45  cluster-run.py;0eda58c3f98d7985bf0da936418d387e  send-value.py;5dbf68ff5d78271432d13dc8729c02a6  make-node-yaml.sh;01009d13e617b4451e3dfcd40fe479f9  make-unit-yaml.sh;2173f470d51696aa15cbd5f9d23e1369  unit-run.sh;
+yaml for compaction: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < read_request_timeout: 5000ms | > read_request_timeout: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 10000ms | >  | > # stage4 mvs compaction | > max_value_size: 1MiB
+yaml in force: disk_failure_policy: stop ; commit_failure_policy: stop ; commitlog_sync: batch ; commitlog_segment_size: 32MiB ; memtable_allocation_type: heap_buffers ; read_request_timeout: 10000ms ; write_request_timeout: 10000ms ; max_value_size: 1MiB
+JVM_EXTRA_OPTS=-javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mvs/value-alloc.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mvs/compaction/alloc.trace
+start compaction: up after 40 s
+probe: release 5.0.9-SNAPSHOT protocol 4
+ok insert 0: insert --table ok 0 1024 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+t insert 1: insert 1 1048576 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+t insert 2: insert 2 1048577 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+EXPECTED: compaction arm: the three writes acknowledged — yes
+listing t before: ['nb-1-big-CRC.db', 'nb-1-big-Data.db', 'nb-1-big-Digest.crc32', 'nb-1-big-Filter.db', 'nb-1-big-Index.db', 'nb-1-big-Statistics.db', 'nb-1-big-Summary.db', 'nb-1-big-TOC.txt']
+listing ok before: ['nb-1-big-CRC.db', 'nb-1-big-Data.db', 'nb-1-big-Digest.crc32', 'nb-1-big-Filter.db', 'nb-1-big-Index.db', 'nb-1-big-Statistics.db', 'nb-1-big-Summary.db', 'nb-1-big-TOC.txt']
+Data.db t: [(1, 'nb-1-big-Data.db', 2097213)]; ok: [(1, 'nb-1-big-Data.db', 1051)]
+compact ks1 ok: rc=0; listing after: ['nb-2-big-CRC.db', 'nb-2-big-Data.db', 'nb-2-big-Digest.crc32', 'nb-2-big-Filter.db', 'nb-2-big-Index.db', 'nb-2-big-Statistics.db', 'nb-2-big-Summary.db', 'nb-2-big-TOC.txt']
+EXPECTED: control: ks1.ok compacted into a new generation (['nb-1-big-Data.db'] -> ['nb-2-big-Data.db']) — yes
+compact ks1 t (1st): rc=2; output: 'cp.TCPTransport$ConnectionHandler.run(TCPTransport.java:676)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)\n\tat java.base/java.lang.Thread.run(Thread.java:829)'
+listing t after the 1st: ['nb-1-big-CRC.db', 'nb-1-big-Data.db', 'nb-1-big-Digest.crc32', 'nb-1-big-Filter.db', 'nb-1-big-Index.db', 'nb-1-big-Statistics.db', 'nb-1-big-Summary.db', 'nb-1-big-TOC.txt']
+EXPECTED: 1st compact t: system.log has "Corrupt value length 1048577 encountered, as it exceeds the maximum of 1048576" in a CorruptSSTableException with a compaction class in the stack — yes
+EXPECTED: 1st compact t: listing equal to the one before, no *_txn_*.log — yes
+1st compact t failed at the client: rc=2 (non-zero expected)
+compact ks1 t (2nd): rc=0; output: ''; listing after: ['nb-1-big-CRC.db', 'nb-1-big-Data.db', 'nb-1-big-Digest.crc32', 'nb-1-big-Filter.db', 'nb-1-big-Index.db', 'nb-1-big-Statistics.db', 'nb-1-big-Summary.db', 'nb-1-big-TOC.txt']
+EXPECTED: 2nd compact t: no new guard message, listing unchanged (the SSTable is suspect) — yes
+readback 1: readback 1 -> OK length=1048576  guard l/M=None/None  new trace lengths=[1048576]  new log: -
+EXPECTED: readback 1 on t after the failed compaction = M (1048576) — yes
+node stopped; daemons left: 0; yaml restored

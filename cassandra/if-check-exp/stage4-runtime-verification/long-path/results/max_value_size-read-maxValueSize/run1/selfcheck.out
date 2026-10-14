@@ -1,0 +1,202 @@
+== instrument check
+ok   instrument: run folder present
+ok   instrument: Byteman TestScript reports no errors
+ok   instrument: probe over protocol 4
+ok   instrument: known-answer row traced (307,200), small row not (1,024)
+     (secondary) system_views.settings: OK {"mode": "settings", "table": "ks1.t", "args": [], "rows": [["max_value_size", "1MiB"]]}
+== unit: harness test (re-applied to the STAGE4 note lines)
+ok   unit: the harness printed its check lines, none MISMATCH  [186 checks]
+ok   unit: STAGE4 done mismatches=0
+ok   unit: read-back before any set = 268435456
+ok   M1048576.read-back = M
+ok   M1048576.check.readBuffer l=M: EOFException after M <= delta <= M+eps  [1050072]
+ok   M1048576.check.readBuffer l=M+1: guard IOException with both operands, delta < eps  [2144]
+ok   M1048576.array.readArray l=M: EOFException after M <= delta <= M+eps  [1049392]
+ok   M1048576.array.readArray l=M+1: guard IOException with both operands, delta < eps  [2144]
+ok   M1048576.clustering l=M: EOFException after M <= delta <= M+eps  [1050096]
+ok   M1048576.clustering l=M+1: guard IOException with both operands, delta < eps  [2168]
+ok   M1048576.l=2^31-1: guard, delta < eps
+ok   M1048576.l=2^31: VIntOutOfRangeException, delta < eps
+ok   M1048576.vint 2^64-1: negative-length IOException, delta < eps
+ok   M1048576.fixed-length control returned 4 bytes
+ok   M1048576.limit 0, l=1: guard 1/0
+ok   M1048576.skip l=M+1: EOFException, not the guard, delta < eps  [800]
+ok   M1048576.sibling l=M+1: EOFException after M+1 <= delta <= M+1+eps (bypass)  [1049400]
+ok   M1048576.mutation of M bytes returned, cell length M, delta >= M  [1051072]
+ok   M1048576.mutation of M+1: IOError caused by the guard, delta < eps  [8312]
+ok   M1048576.local_response of M bytes returned, cell length M, delta >= M  [1049496]
+ok   M1048576.local_response of M+1: IOError caused by the guard, delta < eps  [6480]
+ok   M1048576.live: 2 MiB refused under 1 MiB
+ok   M1048576.live: same bytes accepted after setMaxValueSize(4 MiB)
+ok   M4194304.read-back = M
+ok   M4194304.check.readBuffer l=M: EOFException after M <= delta <= M+eps  [4195800]
+ok   M4194304.check.readBuffer l=M+1: guard IOException with both operands, delta < eps  [2144]
+ok   M4194304.array.readArray l=M: EOFException after M <= delta <= M+eps  [4195120]
+ok   M4194304.array.readArray l=M+1: guard IOException with both operands, delta < eps  [2144]
+ok   M4194304.clustering l=M: EOFException after M <= delta <= M+eps  [4195824]
+ok   M4194304.clustering l=M+1: guard IOException with both operands, delta < eps  [2168]
+ok   M4194304.l=2^31-1: guard, delta < eps
+ok   M4194304.l=2^31: VIntOutOfRangeException, delta < eps
+ok   M4194304.vint 2^64-1: negative-length IOException, delta < eps
+ok   M4194304.fixed-length control returned 4 bytes
+ok   M4194304.limit 0, l=1: guard 1/0
+ok   M4194304.skip l=M+1: EOFException, not the guard, delta < eps  [800]
+ok   M4194304.sibling l=M+1: EOFException after M+1 <= delta <= M+1+eps (bypass)  [4195128]
+ok   M4194304.mutation of M bytes returned, cell length M, delta >= M  [4196824]
+ok   M4194304.mutation of M+1: IOError caused by the guard, delta < eps  [8336]
+ok   M4194304.local_response of M bytes returned, cell length M, delta >= M  [4195224]
+ok   M4194304.local_response of M+1: IOError caused by the guard, delta < eps  [6480]
+ok   M8388608.read-back = M
+ok   M8388608.check.readBuffer l=M: EOFException after M <= delta <= M+eps  [8390104]
+ok   M8388608.check.readBuffer l=M+1: guard IOException with both operands, delta < eps  [2144]
+ok   M8388608.array.readArray l=M: EOFException after M <= delta <= M+eps  [8389424]
+ok   M8388608.array.readArray l=M+1: guard IOException with both operands, delta < eps  [2144]
+ok   M8388608.clustering l=M: EOFException after M <= delta <= M+eps  [8390128]
+ok   M8388608.clustering l=M+1: guard IOException with both operands, delta < eps  [2168]
+ok   M8388608.l=2^31-1: guard, delta < eps
+ok   M8388608.l=2^31: VIntOutOfRangeException, delta < eps
+ok   M8388608.vint 2^64-1: negative-length IOException, delta < eps
+ok   M8388608.fixed-length control returned 4 bytes
+ok   M8388608.limit 0, l=1: guard 1/0
+ok   M8388608.skip l=M+1: EOFException, not the guard, delta < eps  [800]
+ok   M8388608.sibling l=M+1: EOFException after M+1 <= delta <= M+1+eps (bypass)  [8389432]
+ok   M8388608.mutation of M bytes returned, cell length M, delta >= M  [8391128]
+ok   M8388608.mutation of M+1: IOError caused by the guard, delta < eps  [8336]
+ok   M8388608.local_response of M bytes returned, cell length M, delta >= M  [8389528]
+ok   M8388608.local_response of M+1: IOError caused by the guard, delta < eps  [6480]
+ok   M268435456.read-back = M
+ok   M268435456.check.readBuffer l=M: EOFException after M <= delta <= M+eps  [268436952]
+ok   M268435456.check.readBuffer l=M+1: guard IOException with both operands, delta < eps  [2176]
+ok   M268435456.array.readArray l=M: EOFException after M <= delta <= M+eps  [268436272]
+ok   M268435456.array.readArray l=M+1: guard IOException with both operands, delta < eps  [2176]
+ok   M268435456.clustering l=M: EOFException after M <= delta <= M+eps  [268436976]
+ok   M268435456.clustering l=M+1: guard IOException with both operands, delta < eps  [2200]
+ok   M268435456.l=2^31-1: guard, delta < eps
+ok   M268435456.l=2^31: VIntOutOfRangeException, delta < eps
+ok   M268435456.vint 2^64-1: negative-length IOException, delta < eps
+ok   M268435456.fixed-length control returned 4 bytes
+ok   M268435456.limit 0, l=1: guard 1/0
+ok   M268435456.skip l=M+1: EOFException, not the guard, delta < eps  [800]
+ok   M268435456.sibling l=M+1: EOFException after M+1 <= delta <= M+1+eps (bypass)  [268436280]
+ok   unit: limit restored at the end
+== unit: range controls and upstream
+ok   range-hi: ConfigurationException "max_value_size must be smaller than 2048, but was 2048MiB" and no STAGE4 check line
+ok   range-zero: ConfigurationException "max_value_size must be positive" and no STAGE4 check line
+ok   upstream SSTableWriterTest XML present
+ok   upstream: 5 tests, 0 failures, 0 errors  [tests=5 failures=0 errors=0]
+ok   upstream: testValueTooBigCorruption ran and passed
+== cluster 1m (M=1048576)
+ok   1m: two flushes of ks1.t
+ok   1m control: readback 0 = 1024, readback 99 = 307200
+ok   1m control: trace has >= 1 line of 307,200 and none of 1,024  [2 of 307200]
+ok   1m idle: no trace line before the first insert
+ok   1m write pk 1 (1048576 B) acknowledged
+ok   1m write pk 2 (1048577 B) acknowledged
+ok   1m write pk 3 (1114112 B) acknowledged
+ok   1m C: Memtable data size in [3M+65537, +eps)  [3211412 in [3211265, 3276801)]
+ok   1m C: no trace line of M / M+1 / M+65536 before the first read of pk 1
+ok   1m C: three reads before the second flush, four after (A, B1, B2, separation)  [3 / 4]
+ok   1m C: readback 1 before the flush = M with exactly one trace line of M before the flush
+ok   1m C: readback of 1048577 before the flush -> ServerError carrying 1048577/1048576
+ok   1m C: system.log has the guard line for 1048577 under "Unexpected exception during request", no CorruptSSTableException  [1 entr(ies) at ['ExceptionHandlers.java:271']]
+ok   1m C: readback of 1114112 before the flush -> ServerError carrying 1114112/1048576
+ok   1m C: system.log has the guard line for 1114112 under "Unexpected exception during request", no CorruptSSTableException  [1 entr(ies) at ['ExceptionHandlers.java:271']]
+ok   1m C: no CorruptSSTableException before the second flush
+ok   1m: limit read back from the refusals = M  [[1048576]]
+ok   1m A: readback 1 after the flush = M
+ok   1m B: readback of 1048577 after the flush -> ReadFailure
+ok   1m B: guard line for 1048577/1048576 inside a CorruptSSTableException  [2 entr(ies)]
+ok   1m B: readback of 1114112 after the flush -> ReadFailure
+ok   1m B: guard line for 1114112/1048576 inside a CorruptSSTableException  [2 entr(ies)]
+ok   1m separation: readback 1 = M after the refused reads
+ok   1m: the reads after the flush are pk 1, 2, 3, 1 in that order
+ok   1m A: trace lines of M after the flush >= 1 per accepted read (A and separation)  [4 lines]
+ok   1m: no trace line of M+1 or M+65536 in the whole run
+ok   1m: no other large length in the trace
+== cluster 4m (M=4194304)
+ok   4m: two flushes of ks1.t
+ok   4m control: readback 0 = 1024, readback 99 = 307200
+ok   4m control: trace has >= 1 line of 307,200 and none of 1,024  [2 of 307200]
+ok   4m idle: no trace line before the first insert
+ok   4m write pk 1 (4194304 B) acknowledged
+ok   4m write pk 2 (4194305 B) acknowledged
+ok   4m write pk 3 (4259840 B) acknowledged
+ok   4m C: Memtable data size in [3M+65537, +eps)  [12648596 in [12648449, 12713985)]
+ok   4m C: no trace line of M / M+1 / M+65536 before the first read of pk 1
+ok   4m C: three reads before the second flush, four after (A, B1, B2, separation)  [3 / 4]
+ok   4m C: readback 1 before the flush = M with exactly one trace line of M before the flush
+ok   4m C: readback of 4194305 before the flush -> ServerError carrying 4194305/4194304
+ok   4m C: system.log has the guard line for 4194305 under "Unexpected exception during request", no CorruptSSTableException  [1 entr(ies) at ['ExceptionHandlers.java:271']]
+ok   4m C: readback of 4259840 before the flush -> ServerError carrying 4259840/4194304
+ok   4m C: system.log has the guard line for 4259840 under "Unexpected exception during request", no CorruptSSTableException  [1 entr(ies) at ['ExceptionHandlers.java:271']]
+ok   4m C: no CorruptSSTableException before the second flush
+ok   4m: limit read back from the refusals = M  [[4194304]]
+ok   4m A: readback 1 after the flush = M
+ok   4m B: readback of 4194305 after the flush -> ReadFailure
+ok   4m B: guard line for 4194305/4194304 inside a CorruptSSTableException  [2 entr(ies)]
+ok   4m B: readback of 4259840 after the flush -> ReadFailure
+ok   4m B: guard line for 4259840/4194304 inside a CorruptSSTableException  [2 entr(ies)]
+ok   4m separation: readback 1 = M after the refused reads
+ok   4m: the reads after the flush are pk 1, 2, 3, 1 in that order
+ok   4m A: trace lines of M after the flush >= 1 per accepted read (A and separation)  [4 lines]
+ok   4m: no trace line of M+1 or M+65536 in the whole run
+ok   4m: no other large length in the trace
+== cluster 8m (M=8388608)
+ok   8m: two flushes of ks1.t
+ok   8m control: readback 0 = 1024, readback 99 = 307200
+ok   8m control: trace has >= 1 line of 307,200 and none of 1,024  [2 of 307200]
+ok   8m idle: no trace line before the first insert
+ok   8m write pk 1 (8388608 B) acknowledged
+ok   8m write pk 2 (8388609 B) acknowledged
+ok   8m write pk 3 (8454144 B) acknowledged
+ok   8m C: Memtable data size in [3M+65537, +eps)  [25231508 in [25231361, 25296897)]
+ok   8m C: no trace line of M / M+1 / M+65536 before the first read of pk 1
+ok   8m C: three reads before the second flush, four after (A, B1, B2, separation)  [3 / 4]
+ok   8m C: readback 1 before the flush = M with exactly one trace line of M before the flush
+ok   8m C: readback of 8388609 before the flush -> ServerError carrying 8388609/8388608
+ok   8m C: system.log has the guard line for 8388609 under "Unexpected exception during request", no CorruptSSTableException  [1 entr(ies) at ['ExceptionHandlers.java:271']]
+ok   8m C: readback of 8454144 before the flush -> ServerError carrying 8454144/8388608
+ok   8m C: system.log has the guard line for 8454144 under "Unexpected exception during request", no CorruptSSTableException  [1 entr(ies) at ['ExceptionHandlers.java:271']]
+ok   8m C: no CorruptSSTableException before the second flush
+ok   8m: limit read back from the refusals = M  [[8388608]]
+ok   8m A: readback 1 after the flush = M
+ok   8m B: readback of 8388609 after the flush -> ReadFailure
+ok   8m B: guard line for 8388609/8388608 inside a CorruptSSTableException  [2 entr(ies)]
+ok   8m B: readback of 8454144 after the flush -> ReadFailure
+ok   8m B: guard line for 8454144/8388608 inside a CorruptSSTableException  [2 entr(ies)]
+ok   8m separation: readback 1 = M after the refused reads
+ok   8m: the reads after the flush are pk 1, 2, 3, 1 in that order
+ok   8m A: trace lines of M after the flush >= 1 per accepted read (A and separation)  [4 lines]
+ok   8m: no trace line of M+1 or M+65536 in the whole run
+ok   8m: no other large length in the trace
+== dose-response
+ok   largest value read back after the flush = M at 1, 4, 8 MiB (1 : 4 : 8)  [{'1m': 1048576, '4m': 4194304, '8m': 8388608}]
+== cluster default
+ok   default: 15,728,640 B row acknowledged
+ok   default: two reads of pk 1, one each side of the second flush
+ok   default: both reads return 15,728,640
+ok   default: no trace line of the row before its first read
+ok   default: one trace line of the row before the flush (local response), >= 1 after  [1 / 2]
+ok   default: system.log has no "Corrupt value length"
+== compaction arm (1 MiB)
+ok   compaction: the three writes acknowledged
+ok   compaction: three nodetool compact calls (ok, t, t)
+ok   compaction: exit codes 0 (ok), non-zero (1st t), 0 (2nd t)  [[0, 2, 0]]
+ok   compaction control: ks1.ok compacted (a "Compacted" line for its directory)  [1]
+ok   1st compact t: guard 1048577/1048576 in a CorruptSSTableException with a compaction frame  [1 entr(ies)]
+ok   compact t: no "Compacted" line for ks1.t
+ok   2nd compact t: no new guard line
+ok   compaction: t listing unchanged after both compactions, no _txn_ file (from the run script's listing lines)
+ok   compaction: readback 1 on t after the failed compaction = M
+== replay arm (4 -> 1 -> 4 MiB)
+ok   replay: 2 MiB row acknowledged and read back under 4 MiB
+ok   replay: a commit-log segment before the kill
+ok   replay 1 MiB: "Corrupt value length 2097152 encountered, as it exceeds the maximum of 1048576"
+ok   replay 1 MiB: no "Startup complete" and no CQL listener
+ok   replay 1 MiB: the process exited (run script start state)  [exited]
+FAIL replay 1 MiB (9a sub-prediction): log has "Replay stopped. If you wish to override this error"
+ok   replay 1 MiB (diagnostic): log has "Exiting due to error while processing commit log during initialization"
+ok   replay control 4 MiB: replay completes  [Log replay complete, 48 replayed mutations]
+ok   replay control 4 MiB: readback 30 = 2,097,152 after the restart
+
+188/189 checks hold; FAILED: replay 1 MiB (9a sub-prediction): log has "Replay stopped. If you wish to override this error"

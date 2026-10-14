@@ -1,0 +1,31 @@
+# Byteman observation rules for max_value_size-read-maxValueSize, case §9c and §9d "Real resource — array bytes".
+# No behaviour change. At cassandra-5.0.9 the guarded read allocates its array in one of two places, after the
+# check at AbstractType.read():594 passes (AbstractType.java:599):
+#   ByteArrayAccessor.read(DataInputPlus, int)   new byte[length]  (ByteArrayAccessor.java:100-105; the accessor cells use)
+#   ByteBufferUtil.read(DataInput, int)          new byte[length]  (ByteBufferUtil.java:444-452; ByteBufferAccessor, and
+#                                                                   the unguarded siblings readWithVIntLength/readWithLength)
+# A rule fires at the entry, before the allocation, for every length >= 262,144 (the trace threshold, 9c). One line each:
+#
+#   alloc class=<ByteArrayAccessor|ByteBufferUtil> length=<n> thread=<name> ms=<epoch millis>
+#
+# Read the trace only by the exact lengths of a run's rows: other readers of large lengths share ByteBufferUtil.read.
+# Output file: the system property stage4.byteman.out, or else value-alloc.txt in the JVM's working directory.
+# Both classes are Cassandra classes, so no boot: is needed (environment.md §6).
+
+RULE value array requested by ByteArrayAccessor
+CLASS org.apache.cassandra.db.marshal.ByteArrayAccessor
+METHOD read(org.apache.cassandra.io.util.DataInputPlus, int)
+AT ENTRY
+IF $2 >= 262144
+DO traceOpen("valueAlloc", java.lang.System.getProperty("stage4.byteman.out", "value-alloc.txt"));
+   traceln("valueAlloc", "alloc class=ByteArrayAccessor length=" + $2 + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE value array requested by ByteBufferUtil
+CLASS org.apache.cassandra.utils.ByteBufferUtil
+METHOD read(java.io.DataInput, int)
+AT ENTRY
+IF $2 >= 262144
+DO traceOpen("valueAlloc", java.lang.System.getProperty("stage4.byteman.out", "value-alloc.txt"));
+   traceln("valueAlloc", "alloc class=ByteBufferUtil length=" + $2 + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

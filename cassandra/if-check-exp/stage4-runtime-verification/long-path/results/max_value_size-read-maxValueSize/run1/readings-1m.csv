@@ -1,0 +1,15 @@
+run,step,command,outcome,length,guard_l,guard_M,trace_new_lengths,log_new,detail
+1m,control insert 0,insert 0 1024,OK,,,,,,
+1m,control insert 99,insert 99 307200,OK,,,,,,
+1m,control readback 0,readback 0,OK,1024,,,,,
+1m,control readback 99,readback 99,OK,307200,,,307200,,
+1m,write 1,insert 1 1048576,OK,,,,,,
+1m,write 2,insert 2 1048577,OK,,,,,,
+1m,write 3,insert 3 1114112,OK,,,,,,
+1m,C readback 1,readback 1,OK,1048576,,,1048576,,
+1m,C readback 2,readback 2,ERR ServerError,,1048577,1048576,,guard UnexpectedDuringRequest,"<Error from server: code=0000 [Server error] message=""java.io.IOError: java.io.IOException: Corrupt value length 1048577 encountered, as it exceeds the maximum of 1048576, which is set via max_value_size in cassandra.yaml"">"
+1m,C readback 3,readback 3,ERR ServerError,,1114112,1048576,,guard UnexpectedDuringRequest,"<Error from server: code=0000 [Server error] message=""java.io.IOError: java.io.IOException: Corrupt value length 1114112 encountered, as it exceeds the maximum of 1048576, which is set via max_value_size in cassandra.yaml"">"
+1m,A readback 1,readback 1,OK,1048576,,,1048576,,
+1m,B readback 2,readback 2,ERR ReadFailure,,1048577,1048576,,guard CorruptSSTableException,"Error from server: code=1300 [Replica(s) failed to execute read] message=""Operation failed - received 0 responses and 1 failures: UNKNOWN from localhost/127.0.0.1:7000"" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures': 1}"
+1m,B readback 3,readback 3,ERR ReadFailure,,1114112,1048576,,guard CorruptSSTableException,"Error from server: code=1300 [Replica(s) failed to execute read] message=""Operation failed - received 0 responses and 1 failures: UNKNOWN from localhost/127.0.0.1:7000"" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures': 1}"
+1m,separation readback 1,readback 1,OK,1048576,,,1048576,,

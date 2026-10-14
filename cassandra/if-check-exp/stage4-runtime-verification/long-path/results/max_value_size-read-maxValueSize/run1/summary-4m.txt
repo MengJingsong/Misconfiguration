@@ -1,0 +1,55 @@
+run 4m on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-14 12:00:15 MDT; epoch ms 1792000815462
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: f8512fa780a424aa2ad1197ec7215731  MaxValueSizeGuardTest.java;ef063c7f886c9c40fd014a7f88592dab  value-alloc.btm;a633c532c826ebe2b23005f51a002b45  cluster-run.py;0eda58c3f98d7985bf0da936418d387e  send-value.py;5dbf68ff5d78271432d13dc8729c02a6  make-node-yaml.sh;01009d13e617b4451e3dfcd40fe479f9  make-unit-yaml.sh;2173f470d51696aa15cbd5f9d23e1369  unit-run.sh;
+yaml for 4m: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < read_request_timeout: 5000ms | > read_request_timeout: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 10000ms | >  | > # stage4 mvs 4m | > max_value_size: 4MiB
+yaml in force: disk_failure_policy: stop ; commit_failure_policy: stop ; commitlog_sync: batch ; commitlog_segment_size: 32MiB ; memtable_allocation_type: heap_buffers ; read_request_timeout: 10000ms ; write_request_timeout: 10000ms ; max_value_size: 4MiB
+JVM_EXTRA_OPTS=-javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mvs/value-alloc.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/mvs/4m/alloc.trace
+start 4m: up after 40 s
+probe: release 5.0.9-SNAPSHOT protocol 4
+idle 10 s: trace lines 0 -> 0 (total 0)
+EXPECTED: idle control: no alloc line in 10 s (0) — yes
+control insert 0: insert 0 1024 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+control insert 99: insert 99 307200 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+control readback 0: readback 0 -> OK length=1024  guard l/M=None/None  new trace lengths=[]  new log: -
+control readback 99: readback 99 -> OK length=307200  guard l/M=None/None  new trace lengths=[307200]  new log: -
+EXPECTED: control: rows read back at 1024 / 307200 (1024 / 307200); trace has 2 line(s) of 307,200 (>= 1) and 0 of 1,024 (0) — yes
+write 1: insert 1 4194304 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+EXPECTED: write pk 1 (4194304 B) acknowledged — yes
+write 2: insert 2 4194305 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+EXPECTED: write pk 2 (4194305 B) acknowledged — yes
+write 3: insert 3 4259840 -> OK  guard l/M=None/None  new trace lengths=[]  new log: -
+EXPECTED: write pk 3 (4259840 B) acknowledged — yes
+EXPECTED: C: no trace line of M / M+1 / M+65536 after the writes (0 / 0 / 0) — yes
+EXPECTED: C: Memtable data size 12648596 in [12648449, 12713985) — yes
+C readback 1: readback 1 -> OK length=4194304  guard l/M=None/None  new trace lengths=[4194304]  new log: -
+EXPECTED: C: readback 1 (A) before the flush = M = 4194304 (4194304); trace gains a line of M (1) — yes
+C readback 2: readback 2 -> ERR ServerError  guard l/M=4194305/4194304  new trace lengths=[]  new log: ['guard', 'UnexpectedDuringRequest']  msg: <Error from server: code=0000 [Server error] message="java.io.IOError: java.io.IOException: Corrupt value length 4194305 encountered, as it exceeds the maximum of 4194304, which is set via max_value_size in cassandra.yaml">
+EXPECTED: C: readback 2 before the flush fails with ServerError (ServerError) — yes
+EXPECTED: C: guard operands 4194305/4194304 = 4194305/4194304 in the client message and system.log — yes
+EXPECTED: C: system.log entry under "Unexpected exception during request", no CorruptSSTableException — yes
+EXPECTED: C: no trace line of 4194305 — yes
+C readback 3: readback 3 -> ERR ServerError  guard l/M=4259840/4194304  new trace lengths=[]  new log: ['guard', 'UnexpectedDuringRequest']  msg: <Error from server: code=0000 [Server error] message="java.io.IOError: java.io.IOException: Corrupt value length 4259840 encountered, as it exceeds the maximum of 4194304, which is set via max_value_size in cassandra.yaml">
+EXPECTED: C: readback 3 before the flush fails with ServerError (ServerError) — yes
+EXPECTED: C: guard operands 4259840/4194304 = 4259840/4194304 in the client message and system.log — yes
+EXPECTED: C: system.log entry under "Unexpected exception during request", no CorruptSSTableException — yes
+EXPECTED: C: no trace line of 4259840 — yes
+limit read back from the first refusal: 4194304 = M
+Data.db after the flush: [(1, 'nb-1-big-Data.db', 308282), (2, 'nb-2-big-Data.db', 12648547)]
+EXPECTED: flush: newer Data.db 12648547 B in [12648449, 12713985) — yes
+A readback 1: readback 1 -> OK length=4194304  guard l/M=None/None  new trace lengths=[4194304]  new log: -
+EXPECTED: A: readback 1 after the flush = M (4194304); trace gains line(s) of M (2) — yes
+EXPECTED: A: no other new large length ([4194304]) — yes
+B readback 2: readback 2 -> ERR ReadFailure  guard l/M=4194305/4194304  new trace lengths=[]  new log: ['guard', 'CorruptSSTableException']  msg: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 failures: UNKNOWN from localhost/127.0.0.1:7000" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures': 1
+EXPECTED: B: readback 2 after the flush fails with ReadFailure (ReadFailure) — yes
+EXPECTED: B: system.log has "Corrupt value length 4194305 encountered, as it exceeds the maximum of 4194304" and a CorruptSSTableException — yes
+EXPECTED: B: no trace line of 4194305 — yes
+B readback 3: readback 3 -> ERR ReadFailure  guard l/M=4259840/4194304  new trace lengths=[]  new log: ['guard', 'CorruptSSTableException']  msg: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 failures: UNKNOWN from localhost/127.0.0.1:7000" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures': 1
+EXPECTED: B: readback 3 after the flush fails with ReadFailure (ReadFailure) — yes
+EXPECTED: B: system.log has "Corrupt value length 4259840 encountered, as it exceeds the maximum of 4194304" and a CorruptSSTableException — yes
+EXPECTED: B: no trace line of 4259840 — yes
+separation readback 1: readback 1 -> OK length=4194304  guard l/M=None/None  new trace lengths=[4194304]  new log: -
+EXPECTED: separation: readback 1 = M after the refused reads (4194304) — yes
+EXPECTED: whole run: no trace line of M+1 or M+65536 (0 / 0) — yes
+trace lines by length: [(307200, 2), (4194304, 5)]
+system.log ERROR lines: 6; lines with "Corrupt value length": 8
+node stopped; daemons left: 0; yaml restored
