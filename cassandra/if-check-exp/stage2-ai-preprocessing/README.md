@@ -148,7 +148,8 @@ a verdict — see [`bands.md`](bands.md).
 | Band A2 | ✅ **consumed by stage 3, 2026-09-29** — all 30 rows judged |
 | Band A3 | ✅ **consumed by stage 3, 2026-10-13** — all 39 rows judged |
 | Band B | ✅ **consumed by stage 3, 2026-10-13** — all 174 units judged |
-| Next | Stage 3 reads **band C (94)** |
+| Band C | ✅ **consumed by stage 3, 2026-10-13** — all 94 units judged |
+| Next | Band D (4,387) last; A, B and C are done |
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
@@ -192,6 +193,12 @@ undecided** (`deferred.md` §7, `cached_rows_fail_threshold`, a Rule 2 ruling). 
 recurring themes this file lists for B were accurate. The pass also found that
 `commitlog_total_space` is a reclaim target, not a ceiling, and that stream receive
 is a second decision point of the filed compaction-space case.
+
+**Band C is consumed (2026-10-13).** All 94 units (87 rows, 7 helpers) read with the
+source open: **1 new candidate** (`DOB_MAX_RECYCLE_BYTES`, `DataOutputBuffer.java:73`,
+`pending.md` item 13, the row band A3 pointed to), **86 refused** (`rejected.md`,
+batch "band C", in six groups), **7 already recorded**, nothing deferred. The band's
+label, "named operands, nothing resource-shaped", held for 86 of 87 newly judged units.
 
 **What the pass says about the banding.** 8 of the 39 newly-judged rows
 qualified. A1 is genuinely dense with usage-vs-limit comparisons, exactly as

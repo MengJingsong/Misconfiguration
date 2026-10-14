@@ -381,3 +381,72 @@ table of this file); `AbstractCompactionStrategy.java:408`, `LeveledManifest.jav
   but a byte-weighted evicting store in C would need it.
 - **A soft limit is a finding even when the line is refused.** `commitlog_total_space` is
   not a ceiling, and a filed case said it was; a refusal can correct a case.
+
+## Batch: band C, the insurance band — 2026-10-13
+
+The 94 band-C units of
+[`../../stage2-ai-preprocessing/bands.csv`](../../stage2-ai-preprocessing/bands.csv)
+(87 rows and 7 helpers; feed **3a**), read with the source open (`cassandra-src`
+at `cassandra-5.0.9`). Outcome:
+
+- **7 already recorded**, cited, not re-judged: `LeveledCompactionStrategy.java:78`,
+  `:81`, `unified/Controller.java:305` and `Dispatcher.java:345` with its helper
+  `hasQueueCapacity()` (first table of this file); `unified/Controller.java:613` (the
+  `db/compaction/` subpackage entry); `NopCacheProvider.java:39` (the `cache/` entry).
+- **1 new candidate**: `DOB_MAX_RECYCLE_BYTES`, `DataOutputBuffer.java:73`, the row
+  band A3 pointed to → [`pending.md`](pending.md) item 13.
+- **86 refused below**, in six groups. Nothing deferred.
+
+Stage 2 called C the band with "named operands, nothing resource-shaped", and it was
+right for 86 of 87 newly judged units: most are emptiness tests, enabled-switches and
+configuration validation of a limit enforced somewhere else.
+
+| Group | Row(s) | Ground |
+|---|---|---|
+| 1. Emptiness, sentinel, enabled and release tests (21) | `QueryProcessor.java:251`; `Validation.java:47`; `UDFDataType.java:177`; `StorageAttachedIndex.java:791`, `:1006`; `SSTableIndexWriter.java:221`; `SegmentBuilder.java:260`; `ColumnFamilyStore.java:2501`, `:2508` and helpers `isCounterCacheEnabled()`, `isRowCacheEnabled()`; `CounterMutation.java:213`; `MonitoringTask.java:221`; `ThrottledUnfilteredIterator.java:234`; `AtomicBTreePartition.java:283`, `:300` (2 units); `NativeAllocator.java:194`; `ClientResourceLimits.java:176`; `PreV5Handlers.java:127`; helper `CQLSSTableWriter$Builder.isMaxSSTableSizeUnset()` | **Rule 1, no limit compared.** An empty key, value or term; a capacity of `0` meaning "cache off" or "unthrottled"; a CAS or tracker sentinel; a reference count reaching zero. The caches' own capacities (`row_cache_size`, `counter_cache_size`) are enforced inside the cache implementations, not at these lines. `PreV5Handlers.java:127` unpauses a pre-v5 connection once in-flight bytes drop: the release side of the `native_transport_max_request_data_in_flight` limits. `StorageAttachedIndex.java:1006` charges SAI memtable-index growth to the memtable's on-heap count (`markExtraOnHeapUsed`) and drops decreases: accounting, no allocation gated. |
+| 2. Configuration and schema validation (30) | `DatabaseDescriptor.java:911`, `:914`, `:978`, `:981`, `:984`, `:987`, `:1016` (2 units), `:4093`, `:5347` (2 units); `GuardrailsOptions.java:1219`, `:1257`; `StorageAttachedIndexOptions.java:41`; `CQLSSTableWriter.java:539`; `CompressionParams.java:352`, `:456#2`; `KeyspaceMetadata.java:68`; `TableMetadata.java:517`; `CreateIndexStatement.java:213`; `ColumnFamilyStore.java:2185`; `InMemoryTrie.java:64` (2 units); `StorageService.java:6889` (2 units), `:6905` (2 units); `IndexMode.java:190`; `SAICodecUtils.java:129` (2 units) | **No allocation.** Range checks and cross-key checks at startup, in a setter or at schema creation: a message size must not exceed the in-flight and reserve caps (`:911`–`:987`), a ratio lies in [0, 1], a name fits a length, a guardrail's fail threshold is not below its warn threshold, SASI's flush memory is clamped to 100 GiB. The limits they validate are enforced elsewhere, several by filed cases or pending items. `InMemoryTrie.java:64` validates the trie size threshold; see the note on its property below. |
+| 3. Startup and OS environment checks, log only (9) | `DatabaseDescriptor.java:4096`; `NativeLibrary.java:197`; `SigarLibrary.java:78` (2 units), `:99` (2 units), `:120`; `StartupChecks.java:497`, `:554` | **Rule 3, logging-only.** `repair_session_space` above a quarter of the heap, `mlockall` failing with `ENOMEM`, the process and file limits, the address-space limit, read-ahead and `vm.max_map_count`: each is compared once at startup and logged. |
+| 4. Per-item format bounds and invariants (15) | `CodecUtils.java:101`, `:250`; `StorageAttachedIndex.java:503`; `MappedBuffer.java:63`, `:105` (2 units), `:119` (2 units); `Memory.java:147#3`, `:188` (3 units); `AsyncMessageOutputPlus.java:96`; `InMemoryTrie.java:148`; helper `StandardAnalyzer.incrementToken()` | **Rule 2, per-item bound.** Protocol v1/v2's 65,535 elements or bytes per collection, the ANN top-*k* cap per query, position/limit and copy bounds that throw `IndexOutOfBounds`, a serialized size that disagrees with the declared one, one trie's 2 GiB addressing limit (`SpaceExhaustedException`), SASI's minimum token length. |
+| 5. Path selection and growth (9) | `InMemoryTrie.java:145`; `RangeTombstoneList.java:213`; `TrieMemoryIndex.java:228`; `VectorMemoryIndex.java:190`, `:229` and helper `VectorIndexSegmentSearcher.shouldUseBruteForce()`; `RandomAccessReaderAdapter.java:69`, `:117`; helper `ByteBufferUtil.canMinimize()` | **Rule 3**, bands A3 and B's grounds: the next trie chunk is allocated when the current one is used up; a merge or per-item add; recursive or iterative insertion; brute-force or graph search; a read across a region boundary through a temporary buffer; whether a buffer can be trimmed. |
+| 6. Rate limiting (2) | `LimitingRebufferer.java:55`, `:58` | **Rule 2, rate.** The rebufferer acquires permits from a `RateLimiter` per chunk (compaction and streaming throughput): speed, not bytes held. |
+
+**Disposition, all 94:** 7 cited + 1 candidate + 86 refused (21 + 30 + 9 + 15 + 9 + 2).
+
+### Recorded while reading band C (feed 3b)
+
+One line that is not a stage-2 row was read while settling `StorageAttachedIndexOptions.java:41`.
+
+| Row | Check | Ground |
+|---|---|---|
+| `NamedMemoryLimiter.usageExceedsLimit():55`, read at `SSTableIndexWriter.shouldFlush():248` | `currentBytesUsed() > limitBytes` | **Rule 2, rollover**, the ground on which the A1 batch refused its SASI twin `PerSSTableIndexWriter.java:247`. `limitBytes` is `sai_options.segment_write_buffer_size` (default 1,024 MiB), shared node-wide by every SAI segment build ([`V1OnDiskFormat.java:126-128`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/disk/v1/V1OnDiskFormat.java#L126-L128)). Over the budget, a builder past its minimum flush size flushes its segment and starts another; the term is still added ([`SSTableIndexWriter.java:225`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/disk/v1/SSTableIndexWriter.java#L225)). A soft target, like `commitlog_total_space` in band B. |
+
+### A misconfiguration hazard found while reading `InMemoryTrie.java:64`
+
+Not a check to file, but Target 3 material. The trie memtable's per-shard size threshold
+(default 2048 × 10 / 11 MiB; reaching it schedules a flush,
+[`TrieMemtable.java:192-195`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/TrieMemtable.java#L192-L195))
+is read from the JVM property **`cassandra.memtable.row_overhead_size`**
+([`InMemoryTrie.java:63`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/tries/InMemoryTrie.java#L63),
+[`CassandraRelevantProperties.java:356`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/CassandraRelevantProperties.java#L356)).
+`SkipListMemtable` reads the same property as its per-row heap overhead **in bytes**
+([`SkipListMemtable.java:75-77`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/SkipListMemtable.java#L75-L77)).
+Setting it to tune one sets the other in a different unit: a row overhead of, say,
+200 bytes makes every trie memtable flush at 200 MiB per shard, and a value above
+2047 stops `InMemoryTrie` from initialising (`AssertionError`, `:64-66`). The same
+kind of finding as the send-queue case's reserve key read from its receive-side twin.
+
+### What band C taught
+
+- **The insurance band paid once.** 1 candidate in 87 newly judged units, and it was
+  the row band A3's reading pointed to, not one stage 2 ranked for itself; C's rows are
+  overwhelmingly the validation and enabled-switch side of limits enforced elsewhere.
+- **Rule 3's failing condition settles retention caps.** README §3.6 fails a check only
+  for "zero observable effect". A recycle cap keeps or frees the buffer, which is an
+  effect on what stays resident, so `DOB_MAX_RECYCLE_BYTES` passes. This answers band B's
+  open note for a byte-compared retention cap; band B's evicting logs were refused on
+  Rule 2 (counts of unsized entries), not Rule 3, and are unaffected.
+- **Soft targets are a pattern worth a list.** `commitlog_total_space` (band B),
+  `segment_write_buffer_size` (above), the SASI `max_flush_memory` (A1) and the trie
+  threshold (above) all trigger a flush rather than refuse, so none is a ceiling. They
+  are refused here, but they are where Target 3's "usage can exceed the configured
+  value" findings are likely to be.
