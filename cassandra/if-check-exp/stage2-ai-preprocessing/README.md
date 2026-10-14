@@ -146,7 +146,8 @@ a verdict — see [`bands.md`](bands.md).
 | Rule-outs | None, from 2026-09-23. Stage 2 has no rejection file. |
 | Band A1 | ✅ **consumed by stage 3, 2026-09-28** — all 65 rows judged |
 | Band A2 | ✅ **consumed by stage 3, 2026-09-29** — all 30 rows judged |
-| Next | Stage 3 reads **A3 (39)**, then band B (174), then C (94) |
+| Band A3 | ✅ **consumed by stage 3, 2026-10-13** — all 39 rows judged |
+| Next | Stage 3 reads **band B (174)**, then C (94) |
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
@@ -172,6 +173,15 @@ configuration, `native_transport_max_frame_size`), and **7 already recorded**.
 Stage 2's A2 reasons were wrong about the limit's effect on two rows
 (`NativeAllocator.java:144`, `SlabAllocator.java:92` — "rejecting the on-heap
 clone", where nothing is rejected) and about its kind on one (`Envelope`).
+
+**Band A3 is consumed (2026-10-13).** All 39 rows read with the source open:
+**no new candidate**, **38 refused** (`rejected.md`, batch "band A3", in four
+groups), **1 already recorded** (`Flusher.java:282`), nothing deferred.
+Grow-when-full did dispose of the band as one group, as predicted, but stage 2's
+reason was wrong on 5 rows that are not grow-when-full at all (an invariant
+guard, a publication loop, a partial copy, two argument checks). Two rows carry
+a configurable number (`range_tombstone_list_growth_factor`,
+`DOB_DOUBLING_THRESHOLD_MB`); both set a growth step, not a ceiling.
 
 **What the pass says about the banding.** 8 of the 39 newly-judged rows
 qualified. A1 is genuinely dense with usage-vs-limit comparisons, exactly as

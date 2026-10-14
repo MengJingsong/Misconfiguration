@@ -252,3 +252,52 @@ the A1 disposition table.
 | Row | Check | Ground |
 |---|---|---|
 | `ReadCommand.java:724` | `warnBytes != -1 && this.sizeInBytes >= warnBytes` | **Rule 3, logging-only branch.** The warn twin of the qualifying fail threshold at `:715`: it records the `LOCAL_READ_SIZE_WARN` parameter for the client warning and goes on, so nothing diverges on object creation. The same judgement as `RowIndexEntry.java:403`. |
+
+## Batch: band A3, grow-when-full reallocations — 2026-10-13
+
+The 39 A3 rows from
+[`../../stage2-ai-preprocessing/bands.md`](../../stage2-ai-preprocessing/bands.md)
+(feed **3a**), read with the source open (`cassandra-src` at `cassandra-5.0.9`).
+**1 was already recorded** and is cited, not re-judged: `Flusher.java:282` (the
+`Flusher.java` entry in the first table of this file). **No candidate qualifies**,
+none is deferred and none is a second site of an existing case. The other **38
+are refused below**, in four groups. `bands.md` was right that one argument
+disposes of most of them, but not of all: five rows are not grow-when-full at
+all (group 4), and two carry a number that does trace to configuration (group 3).
+
+| Group | Row(s) | Check | Ground |
+|---|---|---|---|
+| 1. Grow-when-full (20 rows) | `RangeTombstoneList.java:668`, `:696`; `CompressionMetadata.java:366`; `Walker.java:442`; `MmappedRegions.java:383`; `AbstractReplicaCollection.java:109`; `PrunableArrayQueue.java:71`; `HistogramBuilder.java:45`; `BTree.java:1538`, `:1573`, `:1600`; `ByteSourceInverse.java:424`; `Stack.java:94`; `InMemoryReadTrie.java:501`; `InMemoryTrie.java:670`; `TriePathReconstructor.java:33`, `:41`; `LongTimSort.java:821`; `BTreeSet.java:133`, `:477` | `size == capacity`, `array.length < required`, on the structure's own array | **Rule 1 and Rule 3.** The limit side is the structure's own current length, which earlier growth set from the data; no user sets it. The branches withhold nothing: the item is stored on both, and the "full" branch allocates **more** (a copy at 1.5–3×, or at the required length), the inverse of a constraint, as with `HintsWriter.java:237` in the A1 batch. None of these structures has a ceiling of its own; whatever bounds them is upstream. Pointers: `PrunableArrayQueue` is the internode outbound queue ([`OutboundMessageQueue.java:70`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundMessageQueue.java#L70)) and its `offer()` always returns `true`; the bytes it holds are bounded by the filed [`internode_application_send_queue_capacity`](cases/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes.md) case's `acquireCapacity()`, not here. `MmappedRegions.java:383` grows only the arrays of region references; the region was mapped at [`:379`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/MmappedRegions.java#L379), before the comparison. `BTreeSet.java:477` copies to a *shorter* array (it trims, not grows); it sits here because both branches still write every element. |
+| 2. Reusable buffer replaced when too small (11 rows) | `CompressedInputStream.java:144`; `CompressedChecksummedDataInput.java:118`, `:134`; `CompressedHintsWriter.java:53`; `EncryptedChecksummedDataInput.java:126`; `CompressedSequentialWriter.java:247`; `ThreadLocalByteBufferHolder.java:74`; `FrameDecoder.java:393`; `EncryptionUtils.java:134`; `ByteBufferUtil.java:817`; `CBUtil.java:105` | `buffer.capacity() < required` | **Rule 1 and Rule 3**, group 1's argument applied to a scratch buffer reused across calls. When it is too small it is freed (or returned to the `BufferPool`) and replaced by one of the required size; the read, write, decode or decompression proceeds on both branches. The required size is one item's: a compressed chunk, a hints block, one frame, one string. Where that is bounded, the bound is per item and elsewhere: the frame decoder's stash at `:393` holds one frame whose length is a 17-bit header field ([`FrameDecoderCrc.java:79`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/FrameDecoderCrc.java#L79), [`FrameDecoderLZ4.java:73`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/FrameDecoderLZ4.java#L73)), and `CompressedInputStream`'s buffer serves only chunks shorter than the table's `maxCompressedLength()` ([`:142`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/streaming/CompressedInputStream.java#L142)). `ByteBufferUtil.java:817` has a branch that does diverge: it throws when `allowBufferResize` is false ([`:819-820`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/ByteBufferUtil.java#L819-L820)). But its only caller is `EncryptionUtils`, and every production caller of that passes `true` (`EncryptedSegment.java:125`, `:128`; `CommitLogSegmentReader.java:385-386`; `EncryptedChecksummedDataInput.java:123-124`; `EncryptedHintsWriter.java:49-50`; and `EncryptionUtils.java:136` itself), so in a node it only grows. |
+| 3. Growth-policy knobs (2 rows) | `RangeTombstoneList.java:685`; `DataOutputBuffer.java:166` | `newLength <= capacity()`; `capacity > 1024L * 1024L * DOUBLING_THRESHOLD` | **Rule 2, a growth step, not a ceiling.** These are the only A3 rows whose number traces to configuration. `:685` is the fallback when `capacity() × range_tombstone_list_growth_factor` ([`:683`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/RangeTombstoneList.java#L683); [`Config.java:802`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L802), default 1.5, absent from `cassandra.yaml`, settable over JMX within [1.2, 5] at [`StorageService.java:6905`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageService.java#L6905)) would not grow the list. `:166` switches a `DataOutputBuffer` from doubling to +50 % above `cassandra.DOB_DOUBLING_THRESHOLD_MB` ([`CassandraRelevantProperties.java:203`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/CassandraRelevantProperties.java#L203), default 64). Both branches allocate. Changing either knob changes how much spare capacity one structure carries past its data, at most the growth factor times what the data needs; no maximum moves. |
+| 4. Not grow-when-full; stage 2's reason is wrong (5 rows) | `SegmentRowIdOrdinalPairs.java:55` | `size == capacity` | **Rule 3, invariant guard**, A2's archetype. The `int[]` is allocated once in the constructor ([`:45`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/disk/v1/vector/SegmentRowIdOrdinalPairs.java#L45)) at the size its caller computed for the row range (`VectorIndexSegmentSearcher.java:164`, `:299`), and `add()` throws `ArrayIndexOutOfBoundsException` instead of growing. The memory is spent at construction. |
+| | `Accumulator.java:75` | `cur != insertPos && (cur == values.length \|\| values[cur] == null)` | **Rule 3, no allocation.** Runs after the item is stored, in the loop that publishes `presentCount` to readers; it decides when to stop advancing the count. The array is fixed; its overflow guard `:60` was refused in the A2 batch. |
+| | `FrameDecoder.java:375` | `bytesToSize > in.remaining()` | **Rule 3, no allocation.** `copyToSize()` copies what has arrived into an existing stash and reports whether the frame is complete; neither branch allocates. |
+| | `EncryptionUtils.java:142` | `metadataBuffer.remaining() < ENCRYPTED_BLOCK_HEADER_SIZE` | **Rule 3, read validation.** Throws `IllegalStateException` (`:143`) on a short read of the 8-byte block header; nothing is allocated either way. |
+| | `ByteBufferUtil.java:815` | `0 > outputLength` | **Argument validation.** Throws `IllegalArgumentException` on a negative size. |
+
+**Disposition, all 39:** 1 recorded (`Flusher.java:282`, rejected) + 38 newly
+refused (group 1: 20, group 2: 11, group 3: 2, group 4: 5). Pending 0, deferred 0.
+
+### What A3 taught, for bands B and C
+
+- **A3's hit rate is 0/38 newly-judged rows**, as `bands.md` predicted.
+  Grow-when-full is settled by one question: *is the item stored on both
+  branches?* If so, the check sizes a structure; it does not limit one.
+- **Stage 2's reason was wrong on 5 of 39 rows**: an invariant guard, a
+  publication loop, a partial copy and two argument checks were all labelled
+  grow-when-full. A1's lesson holds: trust the row for where to look.
+- **A configurable growth factor is not a limit.** `range_tombstone_list_growth_factor`
+  and `DOB_DOUBLING_THRESHOLD_MB` set the slack of one structure, not a
+  ceiling. Growth-policy rows in B and C can be refused on the same ground.
+- **Retained high-water buffers have no limit at all.** Four reusable
+  thread-local buffers (`ThreadLocalByteBufferHolder`, `CBUtil`'s
+  `TL_CHAR_BUFFER`, `EncryptionUtils`' and `EncryptedChecksummedDataInput`'s
+  `reusableBuffers`) grow to the largest item their thread has handled and
+  never shrink. Nothing in A3 caps them, so there is no check to file. The one
+  cap on this kind of retention found so far is `DataOutputBuffer`'s recycle
+  check, [`DataOutputBuffer.java:73`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/DataOutputBuffer.java#L73)
+  (`buffer.capacity() <= MAX_RECYCLE_BUFFER_SIZE`, from
+  `cassandra.dob_max_recycle_bytes`, default 1 MiB). That is a **band C** row,
+  not judged here; read it with care in the C pass, because its disallow branch
+  does replace the retained buffer.

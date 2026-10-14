@@ -286,7 +286,7 @@ runbook). Template: `stage3-ai-deep-read/long-path/_TEMPLATE.md`. Status of the 
 ### Stage 3 — long path (the deciding path; an AI session does all of it)
 
 - **Pipeline:** stage 1 (CodeQL, 5,588 rows) and stage 2 (AI banding, complete over all rows: A 134, B 174, C 94, D 4,387; verdicts in `stage2-ai-preprocessing/bands.csv`) are done.
-  Stage 3 is the bottleneck. Band A splits into **A1 (65, fully judged)**, **A2 (30, fully judged)** and **A3 (39 grow-when-full reallocations, not yet read; judge as one group)**. B (174) and C (94, the insurance band, not optional) follow; D last.
+  Stage 3 is the bottleneck. Band A splits into **A1 (65, fully judged)**, **A2 (30, fully judged)** and **A3 (39, fully judged 2026-10-13: 38 refused in four groups, 1 cited, no candidate; `rejected.md` batch "band A3")**. **Next: band B (174)**, then C (94, the insurance band, not optional; read its row `DataOutputBuffer.java:73`, the recycle cap A3 pointed to, with care); D last.
 - **17 cases filed** (9 from feed 3b, 8 from feed 3a), all stage-3 complete. Refusals are in `rejected.md` (the only rejection file); undecided rows in `deferred.md`.
 - **Write-up queue** (`long-path/pending.md`, items 1–6 filed and struck): next is **item 7 `repair_session_max_tree_depth`** (establish which term of its `min` binds before designing §9),
   then 8 `MAX_MATERIALIZED_KEYS`, 9 `Integer_MAX_VALUE` (type bound; §6.1 naming judgement), 10 `networking_cache_size` (sibling of `file_cache_size`), 11 `coordinator_read_size_fail_threshold` (**unjudged**; may be post hoc under Rule 3).
