@@ -1,0 +1,123 @@
+run 2026-10-14 21:49:59 EDT values [4, 8] two-host 4 B 20.0 s control 10.0 s default 40.0 s logs /users/jason92/stage4-logs/mhs/shakedown2
+harness md5: Jmx.java=46dc9f56 ShouldHintSizeTest.java=a1d61127 cluster-run.py=85233d20 make-node-yaml.sh=4e12e7b9 should-hint.btm=53adfad2 unit-run.sh=68f9e0ab write-load.py=c3001b36
+clone: cassandra-5.0.9 b5f2a54
+TestScript: no errors
+# ---- stage4 mhs lines ----;cluster_name: stage4-mhs;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-mhs/N1/data;commitlog_directory: /users/jason92/stage4-mhs/N1/commitlog;hints_directory: /users/jason92/stage4-mhs/N1/hints;saved_caches_directory: /users/jason92/stage4-mhs/N1/saved_caches;cdc_raw_directory: /users/jason92/stage4-mhs/N1/cdc_raw;max_hint_window: 24h;hints_flush_period: 1000ms;
+N1 sees {'127.0.0.2': 'UN'} after 13 s
+# ---- stage4 mhs lines ----;cluster_name: stage4-mhs;num_tokens: 1;initial_token: -3074457345618258603;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-mhs/N2/data;commitlog_directory: /users/jason92/stage4-mhs/N2/commitlog;hints_directory: /users/jason92/stage4-mhs/N2/hints;saved_caches_directory: /users/jason92/stage4-mhs/N2/saved_caches;cdc_raw_directory: /users/jason92/stage4-mhs/N2/cdc_raw;max_hint_window: 24h;hints_flush_period: 1000ms;
+# ---- stage4 mhs lines ----;cluster_name: stage4-mhs;num_tokens: 1;initial_token: 3074457345618258602;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-mhs/N3/data;commitlog_directory: /users/jason92/stage4-mhs/N3/commitlog;hints_directory: /users/jason92/stage4-mhs/N3/hints;saved_caches_directory: /users/jason92/stage4-mhs/N3/saved_caches;cdc_raw_directory: /users/jason92/stage4-mhs/N3/cdc_raw;max_hint_window: 24h;hints_flush_period: 1000ms;
+N1 sees {'127.0.0.2': 'UN', '127.0.0.3': 'UN', '127.0.0.4': 'UN'} after 8 s
+N2 sees {'127.0.0.3': 'UN'} after 3 s
+N3 sees {'127.0.0.4': 'UN'} after 3 s
+host ids: {'N1': '30a80a45-6232-4259-b568-19a7be0b2a32', 'N2': '0cb68bc4-a4be-4601-aaab-df047748541d', 'N3': '8d7376c0-c756-4d8b-82a0-dbf5ab5c38af'}
+Submit -l: 6 mhs rules loaded
+default MaxHintsSizePerHostInMiB on N1: org.apache.cassandra.db:type=StorageProxy|MaxHintsSizePerHostInMiB|0
+--- control: all three nodes up
+WRITER control: written 2000 ok 2000 failed 0 pk 1..2000 199.49 rows/s, stopped by time
+EXPECTED: control: no .hints file on N1 (0) — yes
+EXPECTED: control: no decide line (0) — yes
+EXPECTED: control: Hints_created 0 (0) — yes
+EXPECTED: control: 0 failed writes (0 of 2000) — yes
+N1 sees {'127.0.0.4': 'DN'} after 3 s
+--- arm L4: MaxHintsSizePerHostInMiB = 4 MiB, host N3 (8d7376c0-c756-4d8b-82a0-dbf5ab5c38af)
+KNOB N1 MaxHintsSizePerHostInMiB set 4 read back 4
+L4: T0 (N3 files) = 0 B
+L4: first refusal for N3 at +5.2 s, checked=4836190 limit=4194304
+WRITER L4: written 5023 ok 5023 failed 0 pk 2001..7023 199.92 rows/s, stopped by flag
+L4: decide lines 5023 (true 932, false 4091), limits seen [4194304]; first refusal checked=4836190; flushes bracketing it 3798390 -> 4836190 B, F' = 1000 ms; H = 5189.0 B; r = 1037394 B/s; T_end = 4836190 B (1 files), overshoot 641886 B, bound 5236887; growth over B's last 60 s 0 B; site send true 932; Hints_created +932; TotalHints +932
+EXPECTED: L4: every decide for N3 has limit = 4194304 B — yes
+EXPECTED: L4: no decide true with checked > limit (count 0) — yes
+EXPECTED: L4: every false has checked > limit (exceptions 0) — yes
+EXPECTED: L4: no true after the first refusal (count 0) — yes
+EXPECTED: L4: the first refusal comes when checked first exceeds L (checked 4836190 > 4194304, previous trues all <= L) — yes
+EXPECTED: L4: T_end in (L, L + r*F' + H] = (4194304, 5236887] (T_end 4836190) — yes
+EXPECTED: L4: T_end <= L + 2 MiB (4836190 <= 6291456) — yes
+EXPECTED: L4: files unchanged over B's last 60 s (growth 0 B) — yes
+EXPECTED: L4: Hints_created for N3 (+932) = site send true lines (932) — yes
+EXPECTED: L4: TotalHints (+932) = site send true lines, all hosts (932) — yes
+EXPECTED: L4: 0 failed writes (0 of 5023) — yes
+EXPECTED: L4: Hints_not_stored absent or 0 (0) — yes
+EXPECTED: L4: (sub) files minus the last checked operand in A <= r*F' + H (max 0 B, 1042583) — yes
+--- arm L8: MaxHintsSizePerHostInMiB = 8 MiB, host N3 (8d7376c0-c756-4d8b-82a0-dbf5ab5c38af)
+KNOB N1 MaxHintsSizePerHostInMiB set 8 read back 8
+L8: T0 (N3 files) = 4836190 B
+L8: first refusal for N3 at +4.9 s, checked=9402510 limit=8388608
+WRITER L8: written 4924 ok 4924 failed 0 pk 7024..11947 199.7 rows/s, stopped by flag
+L8: decide lines 4924 (true 880, false 4044), limits seen [8388608]; first refusal checked=9402510; flushes bracketing it 8364710 -> 9402510 B, F' = 1001 ms; H = 5189.0 B; r = 1036243 B/s; T_end = 9402510 B (1 files), overshoot 1013902 B, bound 9431077; growth over B's last 60 s 0 B; site send true 880; Hints_created +880; TotalHints +880
+EXPECTED: L8: every decide for N3 has limit = 8388608 B — yes
+EXPECTED: L8: no decide true with checked > limit (count 0) — yes
+EXPECTED: L8: every false has checked > limit (exceptions 0) — yes
+EXPECTED: L8: no true after the first refusal (count 0) — yes
+EXPECTED: L8: the first refusal comes when checked first exceeds L (checked 9402510 > 8388608, previous trues all <= L) — yes
+EXPECTED: L8: T_end in (L, L + r*F' + H] = (8388608, 9431077] (T_end 9402510) — yes
+EXPECTED: L8: T_end <= L + 2 MiB (9402510 <= 10485760) — yes
+EXPECTED: L8: files unchanged over B's last 60 s (growth 0 B) — yes
+EXPECTED: L8: Hints_created for N3 (+880) = site send true lines (880) — yes
+EXPECTED: L8: TotalHints (+880) = site send true lines, all hosts (880) — yes
+EXPECTED: L8: 0 failed writes (0 of 4924) — yes
+EXPECTED: L8: Hints_not_stored absent or 0 (0) — yes
+EXPECTED: L8: (sub) files minus the last checked operand in A <= r*F' + H (max 0 B, 1042469) — yes
+N1 sees {'127.0.0.3': 'DN', '127.0.0.4': 'DN'} after 3 s
+--- arm two4: MaxHintsSizePerHostInMiB = 4 MiB, host N2 (0cb68bc4-a4be-4601-aaab-df047748541d)
+KNOB N1 MaxHintsSizePerHostInMiB set 4 read back 4
+two4: T0 (N2 files) = 0 B
+two4: first refusal for N2 at +5.1 s, checked=4737599 limit=4194304
+WRITER two4: written 4941 ok 4941 failed 0 pk 11948..16888 199.74 rows/s, stopped by flag
+two4: decide lines 4941 (true 913, false 4028), limits seen [4194304]; first refusal checked=4737599; flushes bracketing it 3684232 -> 4737599 B, F' = 1000 ms; H = 5189.0 B; r = 1036460 B/s; T_end = 4737599 B (1 files), overshoot 543295 B, bound 5235953; growth over B's last 60 s 0 B; site send true 913; Hints_created +913; TotalHints +913
+EXPECTED: two4: every decide for N2 has limit = 4194304 B — yes
+EXPECTED: two4: no decide true with checked > limit (count 0) — yes
+EXPECTED: two4: every false has checked > limit (exceptions 0) — yes
+EXPECTED: two4: no true after the first refusal (count 0) — yes
+EXPECTED: two4: the first refusal comes when checked first exceeds L (checked 4737599 > 4194304, previous trues all <= L) — yes
+EXPECTED: two4: T_end in (L, L + r*F' + H] = (4194304, 5235953] (T_end 4737599) — yes
+EXPECTED: two4: T_end <= L + 2 MiB (4737599 <= 6291456) — yes
+EXPECTED: two4: files unchanged over B's last 60 s (growth 0 B) — yes
+EXPECTED: two4: Hints_created for N2 (+913) = site send true lines (913) — yes
+EXPECTED: two4: TotalHints (+913) = site send true lines, all hosts (913) — yes
+EXPECTED: two4: 0 failed writes (0 of 4941) — yes
+EXPECTED: two4: Hints_not_stored absent or 0 (0) — yes
+EXPECTED: two4: (sub) files minus the last checked operand in A <= r*F' + H (max 0 B, 1041649) — yes
+EXPECTED: two4: every decide for N3 is false with checked > limit (4941 of 4941) — yes
+EXPECTED: two4: N3 files unchanged over the arm (9402510 -> 9402510) — yes
+EXPECTED: two4: Hints_created for N3 +0 (+0) — yes
+two4: directory total = N3 9402510 + N2 4737599 = 14140109 B
+--- default arm: MaxHintsSizePerHostInMiB = 0, N2 and N3 down, 40 s
+KNOB N1 MaxHintsSizePerHostInMiB set 0 read back 0
+WRITER default: written 8000 ok 8000 failed 0 pk 16889..24888 199.84 rows/s, stopped by time
+default: N2 grew 4737599 -> 46249599 B (41512000 B, files 1 -> 1, rolls 0); last 60 s 37713652 B; predicted 42284720 B (H 5189.0 x 199.84 rows/s x 41 s)
+EXPECTED: default: every decide for N2 true with limit=0 checked=-1 (8000 of 8000) — yes
+EXPECTED: default: N2 growth within 0.8-1.2 x predicted (0.982) — yes
+EXPECTED: default: N2 still growing in the last 60 s (37713652 B) — yes
+EXPECTED: default: N2 passed a 128 MiB roll (rolls 0, files 1 -> 1) — NO (recorded; the AI judges it in the results file)
+default: N3 grew 9402510 -> 50914510 B (41512000 B, files 1 -> 1, rolls 0); last 60 s 37713652 B; predicted 42284720 B (H 5189.0 x 199.84 rows/s x 41 s)
+EXPECTED: default: every decide for N3 true with limit=0 checked=-1 (8000 of 8000) — yes
+EXPECTED: default: N3 growth within 0.8-1.2 x predicted (0.982) — yes
+EXPECTED: default: N3 still growing in the last 60 s (37713652 B) — yes
+EXPECTED: default: N3 passed a 128 MiB roll (rolls 0, files 1 -> 1) — NO (recorded; the AI judges it in the results file)
+EXPECTED: default: the two hosts grow alike (N2/N3 = 1.0000, within 5 %) — yes
+EXPECTED: default: 0 failed writes (0 of 8000) — yes
+EXPECTED: default: Hints_not_stored absent or 0 (0) — yes
+EXPECTED: default: Hints_created for N2 (+8000) = site send true lines (8000) — yes
+EXPECTED: default: Hints_created for N3 (+8000) = site send true lines (8000) — yes
+EXPECTED: N2 and N3 own hints directories stayed empty (non-zero samples 0) — yes
+--- loss read-back (9d): throttle 0 on N1, N2 and N3 back, drain, then each host read alone
+# ---- stage4 mhs lines ----;cluster_name: stage4-mhs;num_tokens: 1;initial_token: -3074457345618258603;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-mhs/N2/data;commitlog_directory: /users/jason92/stage4-mhs/N2/commitlog;hints_directory: /users/jason92/stage4-mhs/N2/hints;saved_caches_directory: /users/jason92/stage4-mhs/N2/saved_caches;cdc_raw_directory: /users/jason92/stage4-mhs/N2/cdc_raw;max_hint_window: 24h;hints_flush_period: 1000ms;
+# ---- stage4 mhs lines ----;cluster_name: stage4-mhs;num_tokens: 1;initial_token: 3074457345618258602;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-mhs/N3/data;commitlog_directory: /users/jason92/stage4-mhs/N3/commitlog;hints_directory: /users/jason92/stage4-mhs/N3/hints;saved_caches_directory: /users/jason92/stage4-mhs/N3/saved_caches;cdc_raw_directory: /users/jason92/stage4-mhs/N3/cdc_raw;max_hint_window: 24h;hints_flush_period: 1000ms;
+N1 sees {'127.0.0.2': 'UN', '127.0.0.3': 'UN', '127.0.0.4': 'UN'} after 8 s
+hints drained in 15 s
+EXPECTED: read-back: one site send line for N3 per row written while it was down (22888 lines, 22888 rows) — yes
+N3 sees {'127.0.0.2': 'DN', '127.0.0.3': 'DN', '127.0.0.4': 'UN'} after 3 s
+# ---- stage4 mhs lines ----;cluster_name: stage4-mhs;num_tokens: 1;initial_token: -3074457345618258603;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-mhs/N2/data;commitlog_directory: /users/jason92/stage4-mhs/N2/commitlog;hints_directory: /users/jason92/stage4-mhs/N2/hints;saved_caches_directory: /users/jason92/stage4-mhs/N2/saved_caches;cdc_raw_directory: /users/jason92/stage4-mhs/N2/cdc_raw;max_hint_window: 24h;hints_flush_period: 1000ms;
+N2 sees {'127.0.0.2': 'DN', '127.0.0.3': 'UN', '127.0.0.4': 'DN'} after 22 s
+read-back N3: rows 11812, expected 11812, written 24888, missing 13076, refused for N3 13076; extra 0, short 0
+EXPECTED: read-back N3: holds exactly the expected rows (extra 0, short 0) — yes
+EXPECTED: read-back N3: the missing rows are exactly its refused rows (13076 vs 13076) — yes
+read-back N2: rows 20860, expected 20860, written 24888, missing 4028, refused for N2 4028; extra 0, short 0
+EXPECTED: read-back N2: holds exactly the expected rows (extra 0, short 0) — yes
+EXPECTED: read-back N2: the missing rows are exactly its refused rows (4028 vs 4028) — yes
+N1 system.log ERROR lines: 0
+N2 system.log ERROR lines: 0
+N3 system.log ERROR lines: 0
+other trace lines: 0
+EXPECTED totals: yes 63, NO 2
+left running: none

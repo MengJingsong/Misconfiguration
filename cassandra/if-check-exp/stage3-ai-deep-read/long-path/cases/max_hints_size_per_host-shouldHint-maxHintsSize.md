@@ -211,7 +211,7 @@ works around this; it is also a reasonable upstream bug report.
 `max_hints_size_per_host` caps the on-disk hint bytes held **for one
 destination host**, and the mechanism is refusal to create more:
 
-- **Per host.** Once `getTotalFileSize(hostId)` exceeds the ceiling, every path that could create a hint for that host stops doing so (§5's seven decision points), so the host's hint files stop growing. The bound is not byte-exact: the comparison is `>` against the total *before* the new hint, so the last admitted hint can carry the total past the ceiling by one hint's worth.
+- **Per host.** Once `getTotalFileSize(hostId)` exceeds the ceiling, every path that could create a hint for that host stops doing so (§5's seven decision points), so the host's hint files stop growing. The bound is not byte-exact: the comparison is `>` against the total *before* the new hint, so the last admitted hint can carry the total past the ceiling by one hint's worth. *Stage 4, 2026-10-14 ([results](../../../stage4-runtime-verification/long-path/results/max_hints_size_per_host-shouldHint-maxHintsSize.md)): the overshoot is up to one flush period's hints, not one hint* — the operand is the files' size as of the last flush session (§10 Notes), so every hint accepted since the host's buffer was last drained is admitted; measured 969,206 · 804,810 · 204,389 B past 16 · 64 · 256 MiB at about 1 MB/s of hints with `hints_flush_period` 1 s (at the default 10 s, about ten times that at the same rate: derived, not measured).
 - **Node-wide, multiply by hosts.** There is no global hint-size limit in this check. A node hinting `H` unreachable hosts can hold up to `H × max_hints_size_per_host` bytes plus overshoot. **The config name says "per host" and means it** — an operator sizing a hints partition must multiply by the number of peers that could plausibly be down at once, which in a large cluster is not a small number.
 - **Raising it** lets each host's backlog grow proportionally before hints start being dropped, trading disk for a smaller repair surface. **Lowering it** caps disk sooner at the cost of losing more writes to the down replica.
 - **At the default it bounds nothing.** `0B` disables the check (§4), leaving the hint directory bounded only by `max_hint_window_in_ms` and the device. This is the single most important thing to know about the constraint, and it distinguishes this case from the sibling `MAX_HINT_BUFFERS`, whose cap of 3 is always in force.
@@ -225,7 +225,9 @@ The test sets `max_hints_size_per_host` over JMX, writes through a coordinator
 while one replica is down, and checks that the down host's hint files stop
 growing near the ceiling while client writes keep succeeding, and that at the
 shipped default (`0B`) nothing stops them. **Run so far:** none. Converted to this
-layout 2026-10-06.
+layout 2026-10-06. **Audited 2026-10-14 (stage 4, step 0): Ready after amendments**; each amendment is marked
+"Amended 2026-10-14" and numbered as in the results file's §1 recommendations
+([`results`](../../../stage4-runtime-verification/long-path/results/max_hints_size_per_host-shouldHint-maxHintsSize.md)).
 
 ### 9a. Procedure and conclusions
 
@@ -258,6 +260,9 @@ prediction and conclusions in this section; it adds none):
   with one replica down, at a steady write rate, reading the host's hint-file bytes
   (`du`, per host), `Hints_created`, the direct decision trace of `shouldHint`, and the
   client's write results; then repeat at the default with two hosts down.
+  *Amended 2026-10-14 (rec. 1, 2):* the sweep runs in one cluster lifetime with node 3 down throughout, so each value
+  starts from the previous plateau; the two-host arm comes after it, when node 3's files already exceed 64 MiB, so it
+  tests per host against global directly (node 2 must fill to its own 64 MiB while node 3 gets nothing).
 - **Logic:** (1) at each value the files must reach the limit, or the run is invalid.
   (2) The files stop growing within the stated overshoot, and `Hints_created` goes
   flat: usage **stops at the limit**. (3) The plateau moves with the limit: usage
@@ -266,7 +271,8 @@ prediction and conclusions in this section; it adds none):
   contributes nothing): the **disallow branch** is what stops it. (5) Client writes
   still succeed; after the host returns, only the stored hints replay, so the rest is
   missing. (6) At `0B` there is no plateau; with two hosts down the total is about
-  twice one host's.
+  twice one host's. *Amended 2026-10-14 (rec. 2, 6):* (5) is read on the returned host alone (9d), as an exact
+  count; (6)'s per-host test is node 2 filling to *L* while node 3, already above *L*, gets no hint.
 - **Refuted if:** the files keep growing past the limit plus the overshoot with the
   check enabled; or the plateau does not move with the limit; or it is global rather
   than per host (rows of the Conclusions table). The `0B` arm cannot refute the case:
@@ -285,6 +291,11 @@ prediction and conclusions in this section; it adds none):
 3. **At each value:** idle control → **A**, write until the host's files sit just below the
    limit → **B**, keep writing past it. No scenario C: no bypass is recorded.
 4. **Compare** with the prediction and read the result below.
+
+*Amended 2026-10-14 (rec. 1, 3, 6):* steps 2–3 run as one lifetime of a three-node ring on one host (9b): control
+with all up → node 3 down → 16, 64, 256 MiB, each one continuous stream at the fixed rate whose part before the first
+`false` for the host is **A** and the 90 s after it **B** → node 2 down too → the two-host arm at 64 MiB (A and B for
+node 2) → `0` for 600 s → the loss read-back (9d). One fixed-rate writer replaces `cassandra-stress` (9c).
 
 **Prediction.** Notation: *L* = the limit in bytes; `T` = `HintsStore.getTotalFileSize` of the
 host (the check's operand: the sizes of its hint files, the current writer's included,
@@ -306,13 +317,39 @@ as of each flush); `r` = bytes of hints accepted per second; *F* = `hints_flush_
 - **At `0B`:** no plateau; the files grow at `r` until the hint window (set above the
   run), the file-size roll (`max_hints_file_size`, 128 MiB, which starts a new file but
   does not stop growth) or the disk stops them.
+- *Amended 2026-10-14 (rec. 2–6): the prediction in numbers.* *H* is one hint's entry in the file (the 9c row: a
+  5,120-byte blob, about 5.2 KB with the entry's 12 bytes and the mutation's framing; measured as ΔT / Δ`Hints_created`
+  in A), *r* = 200 · *H* ≈ 1.04 MB/s, and *F′* is the measured interval between the host's two `flush` trace lines
+  (9d) that bracket the first `false` (expected ≈ *F* = 1 s: the flush is submitted every *F*,
+  [`HintsService.java:117-121`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsService.java#L117-L121),
+  and `T` moves only when a flush session closes, `HintsWriter.java:274`, or a writer is created, `:84`).
+  - **Control** (all up, 30 s, 6,000 writes): no `.hints` file on node 1, `Hints_created` 0, no `decide` line, 0 failed writes.
+  - **Each enabled value, node 3 down:** every `decide` line for node 3 with `checked ≤ limit` is `true` and every one
+    with `checked > limit` is `false`, `limit` = the MiB value × 1,048,576 (**no `true` with `checked > limit`**); the
+    first `false` comes when `checked` first exceeds *L*, and every later one is `false`. **Plateau:** node 3's files at
+    the end of B, `T_end` ∈ (*L*, *L* + *r* · *F′* + *H*], and in no case above *L* + 2 MiB; they do not change over
+    B's last 60 s (0 bytes). `Hints_created` for node 3 equals the count of `site send … result=true` lines for it,
+    cumulatively at every value (exact); `TotalHints` the same. 0 failed writes; `Hints_not_stored` absent or 0.
+    The plateaus therefore follow *L*: `T_end` − *L* ∈ (0, 2 MiB] at 16, 64 and 256 MiB. Sub-prediction: at every
+    `decide`, node 3's file bytes (`hints-du`) minus `checked` stay within one flush's bytes (≤ *r* · *F′* + *H*).
+  - **Two-host arm, 64 MiB** (node 3 already at ≈ 256 MiB): every `decide` for node 3 is `false` and its files do not
+    change (0 bytes over the arm); node 2's files go from 0 to `T_end` ∈ (64 MiB, 64 MiB + *r* · *F′* + *H*] and stop
+    there (0 bytes over B's last 60 s), with the same `decide` rule. Directory total = node 3's plateau + node 2's.
+  - **Default arm, `0`, both down, 600 s:** every `decide` is `true` with `limit=0` and `checked=-1` (the guard at
+    `:2489` skips the operand); each host's files grow by ≈ *r* · 600 s ≈ 620 MB (between 0.8× and 1.2×), by more
+    than 0 in the last 60 s, and pass at least one 128 MiB roll (the file count rises); the two hosts grow alike.
+  - **Read-back** (9d): node 3 alone holds exactly the control's rows plus the rows whose `decide` for node 3 was `true`;
+    the rows with a `false` decide for node 3 are the missing ones (exact sets, by key). Node 2 alone: every row written
+    while it was up, plus its `true` rows; missing exactly its `false` rows.
 
 **Conclusions:**
 
 | Result | Conclusion |
 |---|---|
 | Each enabled value: the host's files plateau within `L + r × F + H`, the trace shows `false` returns with `T > L`, `Hints_created` flat, writes succeeding; the plateau follows *L* across 16/64/256 MiB; at `0B` no plateau; with two hosts down the total is about `2 × L` | **Confirmed** — the check enforces as traced; at the default it bounds nothing. |
-| As above, but the plateau is at `1 ×` *L* with two hosts down | **Confirmed per host; §8's multiplier refuted** — the bound is global; the config name misleads (Target-3 material). |
+| As above, but the plateau is at `1 ×` *L* with two hosts down. *Amended 2026-10-14 (rec. 2):* in the run order of 9e this reads: in the two-host arm node 2 gets no hint (or stops below *L*) while node 3's files already exceed *L* | **Confirmed per host; §8's multiplier refuted** — the bound is global; the config name misleads (Target-3 material). |
+| *Added 2026-10-14 (rec. 7):* the control (all nodes up) writes a `.hints` file or a `decide` line | **Invalid run** — something other than the down host makes hints; find it before reading any arm. |
+| *Added 2026-10-14 (rec. 6):* the read-back sets differ from the `decide` sets by some rows, while the plateau rows hold | **Confirmed** for the bound, **Not confirmed** for the exact loss claim — read the dispatch path (a hint lost or replayed twice) before concluding. |
 | Files grow past `L + r × F + H` with the check enabled and `false` returns in the trace | **Refuted** — the check does not stop hint creation, or `T` misses files (the operand covers `dispatchDequeue`, `corruptedFiles` and the current writer only). |
 | Files grow past *L* and the trace shows `true` returns with `T > L` | **Invalid run** — the knob did not take (the MiB/bytes unit): read it back (9b) and re-run. |
 | The plateau does not move with *L* while the trace shows `false` returns | **Refuted** — not the binding limit. Re-read, do not re-run. |
@@ -340,6 +377,10 @@ naming `T`, *L* and the return value ties it to this comparison.
 CloudLab nodes of [`environment.md`](../../../stage4-runtime-verification/environment.md) §5.
 Keyspace `SimpleStrategy`, `replication_factor` 3, one table. Node 1 is the coordinator
 and the node under test; write only through node 1.
+*Amended 2026-10-14 (rec. 3):* three processes on one host, `pc57`: N1 = 127.0.0.2 (JMX 7102, the Byteman rules with
+the listener), N2 = 127.0.0.3 (7103), N3 = 127.0.0.4 (7104), storage port 7010, `num_tokens: 1` with evenly spaced
+tokens, `auto_bootstrap: false`, every directory under `~/stage4-mhs/<node>/` on local disk, `MAX_HEAP_SIZE=2G`.
+Keyspace `ks`, table `ks.t (pk bigint PRIMARY KEY, v blob)`.
 
 **Hold fixed:**
 
@@ -352,6 +393,8 @@ and the node under test; write only through node 1.
 | Consistency level | `ONE` (writes), `ALL` (read-back) | Writes succeed with the live replicas while hints accumulate. |
 | Hint, data and log directories | local disk, never `/proj` | The `0B` arm writes GBs; see the stage-4 README's safety rules. |
 | Client load | same rate at every value | `r` enters the prediction. |
+| *Added 2026-10-14 (rec. 6):* `hinted_handoff_throttle` | `1024KiB` (default) for every arm; set to `0` (unthrottled, [`HintsDispatchExecutor.java:220-221`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsDispatchExecutor.java#L220-L221)) on N1 only before the read-back | Delivery is outside the claim; at the default, about 1.5 GB of hints would take over 25 min to replay. |
+| *Added 2026-10-14 (rec. 7):* `hint_window_persistent_enabled` | `true` (default) | With it the window is also measured from the oldest stored hint ([`StorageProxy.java:2472-2479`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2472-L2479)); 24 h covers both readings. |
 
 **Controls:**
 
@@ -375,6 +418,9 @@ Work for step 1, before run 1:
 | `ShouldHintSizeTest.java` | Unit tier. Package `org.apache.cassandra.service`; modelled on `StorageProxyTest.shouldHintTest` (a fake endpoint with a host id, marked dead). Writes real hints through `HintsService.instance.write(hostId, hint)` and flushes with `flushAndFsyncBlockingly`. See 9e. |
 | `should-hint.btm` | Byteman, observation only: one line at the exit of `StorageProxy.shouldHint(Replica, boolean)`: `shouldHint endpoint=<ep> result=<bool> total=<getTotalHintsSize> limit=<getMaxHintsSizePerHost> ms=<epoch millis>`. |
 | `hints-du.sh` | Prints, per host id, the sum of `stat -c %s` of `data/hints/<hostid>-*.hints`, the file count, and a timestamp; run every second. |
+| *Amended 2026-10-14 (rec. 4, 5):* `should-hint.btm` | Four observation rules instead of one, all to one file: `decide ep=<ep> result=<bool> checked=<T the check read, or -1 when the guard skipped it> limit=<the check's maxHintsSize> ms=` (the operand and limit are captured **after** the check's own `getTotalHintsSize` call, `:2491`, not re-read at exit, where a flush could have moved them); `site send ep=<ep> result=<bool> ms=` after the call at the primary decision point (`:1552`); `flush host=<hostId> size=<position> ms=` at the exit of `HintsWriter.Session.close()` (the moment `T` moves, `HintsWriter.java:274`); `roll host=<hostId> ms=` at `HintsStore.closeWriter()`. |
+| *Added 2026-10-14 (rec. 3, 5):* `write-load.py` | The writer (bundled Python driver, protocol 5, whitelist N1 only, CL `ONE`): one `INSERT INTO ks.t (pk, v)` per row, a fresh `pk` per row and a 5,120-byte random `v`, paced at 200 rows/s with at most 32 in flight; stops on a flag file or after a set time; logs every `pk` with its outcome. Also `count <host>`: every `pk` of `ks.t` read at `ONE` through one node. |
+| *Added 2026-10-14:* `Jmx.java`, `make-node-yaml.sh`, `cluster-run.py`, `unit-run.sh` | The JMX client (get/setint with read-back), the per-node yaml, the run script with `EXPECTED:` lines (the `hints-du` sampler is a thread in it), and the unit-tier runner. |
 
 ```bash
 # unit tier
@@ -399,6 +445,14 @@ tools/bin/cassandra-stress write n=<rows> no-warmup cl=ONE -col 'size=FIXED(1024
 | Window | the plateau is read over the last 60 s of each burst | Several `du` samples and two flush periods. |
 | `0B` arm | `n=250,000` (about 1.2 GiB) | Longer than the largest limit, so a plateau at 256 MiB would show; disk needed about 1.5 GiB. |
 
+*Amended 2026-10-14 (rec. 1, 3, 6), replacing the stress commands and the rows-per-burst row above:* the writer
+`write-load.py` at 200 rows/s, 5,120-byte values, distinct keys across the whole lifetime. Per enabled value one
+stream: **A** until the first `decide … result=false` for the host (stop and call the run invalid if none comes within
+2 × (*L* − `T₀`)/*r* + 60 s), then **B** for 90 s; the plateau is read over B's last 60 s. Expected A lengths from the
+previous plateau: about 16 s (16 MiB), 47 s (64 MiB), 190 s (256 MiB), 65 s (node 2 at 64 MiB). Control 30 s;
+default arm 600 s (about 620 MB per host, past every enabled value and across a 128 MiB roll). Whole lifetime about
+30 min; disk about 1.3 GB of table data per node and 1.6 GB of hints.
+
 **If the files do not reach the limit** (`T` flat below *L* with `shouldHint` returning `true`): check the rate (`TotalHints` rising) and that node 3 is `DN` and in the ring; raise `threads` to 16 and drop the throttle to `400/s`, and widen the overshoot bound accordingly in the results. Record each step.
 
 ### 9d. Observables
@@ -410,6 +464,7 @@ tools/bin/cassandra-stress write n=<rows> no-warmup cl=ONE -col 'size=FIXED(1024
 | **Bypass volume** | None recorded. A `result=true` line with `total > limit` and `limit > 0` would be one (it should not exist). | — | The guard `maxHintsSize > 0` makes every line at `limit=0` `true`: that is the default-mode finding, not a bypass. |
 | **Real resource** — disk | `hints-du.sh` totals; `df` of the hints volume at the start and end. | Throughout | The hint-file bytes are the resource; no further read is needed. Do not read RSS or heap. |
 | **Loss after the burst** | After the sweep (and not before), restart the stopped host and, once its hints have drained (`HintsService` `PendingHints`/`ls data/hints` empty), read `SELECT count(*)` at `ALL` against the rows written. | Once, at the end | Needs the host back; it destroys the operand, so it is the last step. At `0B` and at the limit the counts differ by the rows not hinted. |
+| *Amended 2026-10-14 (rec. 6):* **Loss, read on the host alone** | A read at `ALL` merges every replica (and repairs), and N1 holds every row, so it cannot show N3's loss. Instead: throttle `0` on N1, start N2 and N3, wait until N1 has no `.hints` file left; stop N1 and N2 and read every `pk` of `ks.t` through N3 at `ONE` (`write-load.py count`); then stop N3, start N2 alone and read it the same way. Compare the key sets with the writer's log and the `site send` lines. *Corrected 2026-10-14 after the instrument shakedown (§9a unchanged):* N2 started alone needs `-Dcassandra.allow_unsafe_join=true`, which skips only the start-up collision check; without it a non-seed node with no seed reachable fails its shadow round (`Unable to gossip with any peers`, [`StorageService.java:868-877`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageService.java#L868-L877)). | Once, at the end | A key read on a node alone is that node's own copy; the sets must match exactly (9a). |
 
 ### 9e. Running the scenarios
 
@@ -430,6 +485,13 @@ tools/bin/cassandra-stress write n=<rows> no-warmup cl=ONE -col 'size=FIXED(1024
       hint's payload): `shouldHint` is `true` (the comparison is `>`, [`:2492`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2492)); one byte more: `false`;
    4. the limit set back to `0`: `true` again with the same files;
    5. the operand: after each flush `getTotalHintsSize` equals the sum of `File.length()` over the host's files.
+
+   *Amended 2026-10-14 (rec. 8):* step 3 uses a **fresh endpoint and host id** instead of deleting the hints
+   (`HintsStore.deleteAllHints()`, `HintsStore.java:167-181`, deletes the queued files but not the open writer's, which `getTotalFileSize()` still counts, `:266-268`); "one byte more" is made
+   on the limit side, since a hint file cannot grow by one byte: `max_hints_size_per_host` set through the raw config to
+   1,048,575 B (`T` = *L* + 1) must give `false`. Added step 6, the lag behind the overshoot: with `T` just below
+   1 MiB, write hints totalling more than 1 MiB **without** a flush: `getTotalHintsSize` and `shouldHint` (`true`) do not
+   change; after the flush `T` jumps past 1 MiB and `shouldHint` is `false`.
 
    Record pass or fail and, per step, the asserted numbers.
 
@@ -463,6 +525,16 @@ tools/bin/cassandra-stress write n=<rows> no-warmup cl=ONE -col 'size=FIXED(1024
 5. **Default arm** — set `0`, run the `0B` burst; read the growth and the file count; stop the burst before the disk passes 70 %.
 6. **Loss read-back** — start nodes 2 and 3, wait for `UN` and the hints to drain, read `count(*)` at `ALL`.
 
+*Amended 2026-10-14 (rec. 1, 3, 6), replacing steps 1–6 above with the same scenarios in one lifetime:*
+`cluster-run.py` (1) builds the three yamls, starts N1 (rules + listener; `Submit -l` must list the four rules), N2
+and N3, waits for three `UN` and `statusbinary` running, creates `ks.t`, probes; (2) control: 30 s all up; (3) stops N3,
+waits for `DN` on N1, records the time; (4) for 16, 64, 256 MiB: sets the limit on N1 over JMX and reads it back, then
+one stream, A until the first `false` for N3, B for 90 s; JMX counters (`Hints_created-*`, `TotalHints`,
+`Hints_not_stored-*`) before and after each value; (5) stops N2, waits for `DN`; two-host arm at 64 MiB (A until the
+first `false` for N2, B 90 s); (6) sets `0`, 600 s; (7) the read-back of 9d; (8) stops every node. The `hints-du`
+sampler (1 s) runs throughout. A failed set-up or instrument check (knob read-back, no trace line, a node not
+`UN`/`DN`, a writer error) stops the run and every node.
+
 **Window-contamination check (9b)** — `Hints_not_stored-<addr>` at the end of every arm.
 
 Stop when each scenario's records are taken; a run where the files never reach *L* is invalid (9a).
@@ -477,7 +549,7 @@ Stop when each scenario's records are taken; a run where the files never reach *
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). |
 | **Escape hatch / Target-3 note** | **The default is the gap.** `max_hints_size_per_host` defaults to `0B`, and `if (maxHintsSize > 0)` at [`:2489`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2489) skips the comparison entirely — so on an unconfigured node this constraint does not exist. That is a stronger default-mode gap than the `native_transport_throw_on_overload` case (where the check runs and is then ignored) and comparable to the compaction guard's non-domination (where the check is never reached), but arrived at a third way: the operator simply has not switched it on. Two further Target-3 observations: the bound is **per host**, so `N` down hosts multiply it, and the disallow path is **silent** — no counter, no log — which makes the resulting data loss hard to detect operationally. |
-| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
+| **Stage-4 feedback** | **Closed 2026-10-14, long path, run 1 on `pc57`: unit Confirmed; cluster Confirmed (§9a row 1); no run 2** — [results](../../../stage4-runtime-verification/long-path/results/max_hints_size_per_host-shouldHint-maxHintsSize.md). Step-0 audit **Ready after amendments** (§9a frozen `c91d82d6…`, 21:30 EDT; §9 at run 1 `2d05e15c…`); amendments dated 2026-10-14 in §9 (phase boundaries set by the run, a fixed-rate writer, numbers per arm, the two-host arm in the run order, a read-back on each host alone, the trace capturing the check's own operand). Readings: the down host's files stop 969,206 · 804,810 · 204,389 B past 16 · 64 · 256 MiB and stay flat; all 72,308 refusals of the enabled arms carry the operand above the limit; `Hints_created` equals the allowed count exactly; 263,115 writes, 0 failed; with N3 already at 268.6 MB, N2 fills its own 64 MiB and N3 gets nothing (**per host**, §8 holds); at `0B` each down host grows 622.7 MB in 600 s (**no bound at the default**, §10 Target-3 note observed); after the replay each host holds exactly its hinted rows and misses exactly its refused ones (85,344 and 18,090), with no log line and no metric for any of them (§6b observed). **Missed sub-prediction** (recorded, not tuned): the amended tighter band *L* + *r* · *F′* + *H* with *F′* between the two bracketing `flush` lines, at 64 MiB by half a hint and, read literally, at 256 MiB (a roll inside the crossing flush); the Conclusions row's 1 s band holds everywhere. §8 amended (dated): the overshoot is a flush period's hints. **For stage 3, not applied:** (1) the overshoot bound is the hints accepted since the host's buffer was last drained — a periodic flush *or* a full 32 MiB `HintsBuffer` handed to `FlushBufferTask` (the sibling `MAX_HINT_BUFFERS` pipeline), whose session closes some ms after the switch — so "the interval between session closes" understates it slightly; a 128 MiB roll inside a flush gives two session lines; (2) §6b: the refusal's only trace is a request-tracing event; (3) §5: `checkHintOverload` (`:1585-1597`) reads `shouldHint` for live replicas too, only above `maxHintsInProgress`; (4) the operand is each file's cached size (`HintsDescriptor.java:229-243`), set at writer creation and each session close. |
 | **Notes** | `getTotalFileSize()` sums `dispatchDequeue`, `corruptedFiles` and the current writer's file. A hint file in none of those three would be invisible to the check; whether such a state is reachable was not established here and is left as an open question for the "Files grow past" row of §9a's Conclusions. **Found while converting §9 (2026-10-06), for stage 3 to judge, not applied to §8:** the check's operand is the hint files' size as of the last flush session ([`HintsWriter.java:274`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriter.java#L274)), and hints are buffered and flushed every `hints_flush_period` (default 10 s), so the overshoot past the limit is up to the hints accepted in one flush period (and buffered), not "one hint". §9a states the prediction as `L + r × F + H` and measures both. |
 
 ---

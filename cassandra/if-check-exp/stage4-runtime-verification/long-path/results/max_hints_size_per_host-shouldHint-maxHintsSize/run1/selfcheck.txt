@@ -1,0 +1,137 @@
+parsed: 408241 decide, 408241 site send, 1586 flush, 13 roll, 0 other trace lines; 3130 du samples; phases 22; key logs ['L16', 'L256', 'L64', 'control', 'default', 'two64']
+ok   trace has no unparsed lines — 0
+--- unit tier
+ok   upstream StorageProxyTest passes — StorageProxyTest exit=0 Tests run: 5, Failures: 0, Errors: 0
+ok   upstream testShouldHintOnExceedingSize ran without failure (self-closing testcase, no failure/error element in the file) — <testcase classname="org.apache.cassandra.service.StorageProxyTest" name="testShouldHintOnExceedingSize-_jdk11" time="0.144" />
+ok   harness: every STAGE4 check line re-judged equal — 80 checks
+ok   harness: no line marked MISMATCH
+ok   harness: step "3 T exactly 1 MiB" — ('1048576', '1048576')
+ok   harness: step "3 shouldHint T == L = 1048576" — ('true', 'true')
+ok   harness: step "3 shouldHint T == L + 1" — ('false', 'false')
+ok   harness: step "2 limit bytes" — ('1048576', '1048576')
+ok   harness: step "6 shouldHint true while T0 + buffered > L" — ('true', 'true')
+ok   harness: step "6 shouldHint after flush" — ('false', 'false')
+ok   harness test: 3 tests, 0 failures, 0 errors — Tests run: 3, Failures: 0, Errors: 0
+--- whole run
+ok   no decide true with checked > limit > 0 anywhere (no bypass) — 0
+ok   every decide false anywhere has checked > limit > 0 (no other rejection) — 0
+ok   no decide for N1 itself
+ok   Hints_not_stored absent or 0 at every counter read — {'control before': 0, 'control after': 0, 'L16 before': 0, 'L16 after': 0, 'L64 before': 0, 'L64 after': 0, 'L256 before': 0, 'L256 after': 0, 'two64 before': 0, 'two64 after': 0, 'default before': 0, 'default after': 0}
+ok   N2 and N3 own hints directories empty in every sample — 3130 samples
+ok   writer L16: every row ok — 0 of 21502 not ok
+ok   writer L256: every row ok — 0 of 56763 not ok
+ok   writer L64: every row ok — 0 of 27724 not ok
+ok   writer control: every row ok — 0 of 6000 not ok
+ok   writer default: every row ok — 0 of 120000 not ok
+ok   writer two64: every row ok — 0 of 31126 not ok
+ok   writer: keys distinct across the lifetime — 263115
+--- control
+ok   control: no decide line
+ok   control: no site send line
+ok   control: no flush line
+ok   control: Hints_created 0
+--- enabled arms ['L16', 'L64', 'L256', 'two64']
+ok   L16: a refusal exists for N3
+ok   L16: first refusal equals the run script's — 1792029880276 vs 1792029880276
+ok   L16: every decide limit = 16777216
+ok   L16: A all true with checked <= L (3420)
+ok   L16: B all false with checked > L (18082)
+ok   L16: the crossing flush size equals the first refusal's operand — 17746422 vs 17746422 (files 1)
+ok   L16: the flush before it left the operand <= L — 16708622
+ok   L16: T_end in (L, L + r*F'+H], F' literal (frozen Prediction) — T_end 17746422, L 16777216, bound 17822573 (r 1038092, F' 1002 ms, H 5189.0), over by -76151 B
+ok   L16: T_end in (L, L + r*F'+H], F' between flush tasks (interpretation) — F' task 1002 ms (1 session line(s) in the crossing task), bound 17822573, over by -76151 B
+ok   L16: T_end in (L, L + r*F+H], F = 1 s (Conclusions row 1) — bound 17820497, margin 74075 B
+ok   L16: T_end <= L + 2 MiB — overshoot 969206 B = 0.924 MiB
+ok   L16: 0 bytes over B's last 60 s — 0
+ok   L16: no site send true after the first refusal
+ok   L16: one site send line per row written — 21502 vs 21502
+ok   L16: Hints_created N3 delta = site send true — 3420 vs 3420
+ok   L16: TotalHints delta = site send true (all hosts) — 3420 vs 3420
+ok   L16: (sub) files - last checked operand in A <= r*F'+H — max 0 vs 1045357
+ok   L64: a refusal exists for N3
+ok   L64: first refusal equals the run script's — 1792030025283 vs 1792030025283
+ok   L64: every decide limit = 67108864
+ok   L64: A all true with checked <= L (9668)
+ok   L64: B all false with checked > L (18056)
+ok   L64: the crossing flush size equals the first refusal's operand — 67913674 vs 67913674 (files 1)
+ok   L64: the flush before it left the operand <= L — 67104190
+FAIL L64: T_end in (L, L + r*F'+H], F' literal (frozen Prediction) — T_end 67913674, L 67108864, bound 67911313 (r 1038100, F' 768 ms, H 5189.0), over by 2361 B
+FAIL L64: T_end in (L, L + r*F'+H], F' between flush tasks (interpretation) — F' task 768 ms (1 session line(s) in the crossing task), bound 67911313, over by 2361 B
+ok   L64: T_end in (L, L + r*F+H], F = 1 s (Conclusions row 1) — bound 68152153, margin 238479 B
+ok   L64: T_end <= L + 2 MiB — overshoot 804810 B = 0.768 MiB
+ok   L64: 0 bytes over B's last 60 s — 0
+ok   L64: no site send true after the first refusal
+ok   L64: one site send line per row written — 27724 vs 27724
+ok   L64: Hints_created N3 delta = site send true — 9668 vs 9668
+ok   L64: TotalHints delta = site send true (all hosts) — 9668 vs 9668
+ok   L64: (sub) files - last checked operand in A <= r*F'+H — max 228316 vs 802449
+ok   L256: a refusal exists for N3
+ok   L256: first refusal equals the run script's — 1792030315316 vs 1792030315316
+ok   L256: every decide limit = 268435456
+ok   L256: A all true with checked <= L (38683)
+ok   L256: B all false with checked > L (18080)
+ok   L256: the crossing flush size equals the first refusal's operand — 202413 vs 268639845 (files 3)
+ok   L256: the flush before it left the operand <= L — 134218716
+FAIL L256: T_end in (L, L + r*F'+H], F' literal (frozen Prediction) — T_end 268639845, L 268435456, bound 268445835 (r 1037928, F' 5 ms, H 5189.0), over by 194010 B
+ok   L256: T_end in (L, L + r*F'+H], F' between flush tasks (interpretation) — F' task 212 ms (2 session line(s) in the crossing task), bound 268660686, over by -20841 B
+ok   L256: T_end in (L, L + r*F+H], F = 1 s (Conclusions row 1) — bound 269478573, margin 838728 B
+ok   L256: T_end <= L + 2 MiB — overshoot 204389 B = 0.195 MiB
+ok   L256: 0 bytes over B's last 60 s — 0
+ok   L256: no site send true after the first refusal
+ok   L256: one site send line per row written — 56763 vs 56763
+ok   L256: Hints_created N3 delta = site send true — 38683 vs 38683
+ok   L256: TotalHints delta = site send true (all hosts) — 38683 vs 38683
+ok   L256: (sub) files - last checked operand in A <= r*F'+H — max 0 vs 10379
+ok   two64: a refusal exists for N2
+ok   two64: first refusal equals the run script's — 1792030494347 vs 1792030494347
+ok   two64: every decide limit = 67108864
+ok   two64: A all true with checked <= L (13036)
+ok   two64: B all false with checked > L (18090)
+ok   two64: the crossing flush size equals the first refusal's operand — 67643846 vs 67643846 (files 1)
+ok   two64: the flush before it left the operand <= L — 66881063
+ok   two64: T_end in (L, L + r*F'+H], F' literal (frozen Prediction) — T_end 67643846, L 67108864, bound 67856128 (r 1037867, F' 715 ms, H 5189.0), over by -212282 B
+ok   two64: T_end in (L, L + r*F'+H], F' between flush tasks (interpretation) — F' task 715 ms (1 session line(s) in the crossing task), bound 67856128, over by -212282 B
+ok   two64: T_end in (L, L + r*F+H], F = 1 s (Conclusions row 1) — bound 68151920, margin 508074 B
+ok   two64: T_end <= L + 2 MiB — overshoot 534982 B = 0.510 MiB
+ok   two64: 0 bytes over B's last 60 s — 0
+ok   two64: no site send true after the first refusal
+ok   two64: one site send line per row written — 31126 vs 31126
+ok   two64: Hints_created N2 delta = site send true — 13036 vs 13036
+ok   two64: TotalHints delta = site send true (all hosts) — 13036 vs 13036
+ok   two64: (sub) files - last checked operand in A <= r*F'+H — max 0 vs 747264
+arm,host,L,T0,T_end,overshoot,Fprime_ms,H,rows_per_s,bound,A_decides,B_decides,created
+L16,N3,16777216,0,17746422,969206,1002,5189.0,200.06,17822573,3420,18082,3420
+L64,N3,67108864,17746422,67913674,804810,768,5189.0,200.06,67911313,9668,18056,9668
+L256,N3,268435456,67913674,268639845,204389,5,5189.0,200.02,268445835,38683,18080,38683
+two64,N2,67108864,0,67643846,534982,715,5189.0,200.01,67856128,13036,18090,13036
+ok   plateau follows L: T_end - L in (0, 2 MiB] at every enabled value — [969206, 804810, 204389]
+ok   plateau ordering follows L
+ok   two64: every N3 decide false with checked > limit — 31126
+ok   two64: N3 files unchanged over the arm — 268639845 -> 268639845
+ok   two64: no N3 flush line during the arm
+ok   two64: Hints_created N3 delta 0
+two64: directory total N3 268639845 + N2 67643846 = 336283691
+--- default arm
+ok   default: every N2 decide true, limit 0, checked -1 — 120000
+ok   default: N2 growth 0.8-1.2 x predicted — 622680210 vs 623394042 (0.999)
+ok   default: N2 growing in the last 60 s — 63129416
+ok   default: N2 passed a 128 MiB roll — rolls 5, files 1 -> 6
+ok   default: Hints_created N2 delta = site send true
+ok   default: N2 files end above every enabled limit + 2 MiB — 690324056
+ok   default: every N3 decide true, limit 0, checked -1 — 120000
+ok   default: N3 growth 0.8-1.2 x predicted — 622680168 vs 623394042 (0.999)
+ok   default: N3 growing in the last 60 s — 63129374
+ok   default: N3 passed a 128 MiB roll — rolls 4, files 3 -> 7
+ok   default: Hints_created N3 delta = site send true
+ok   default: N3 files end above every enabled limit + 2 MiB — 891320013
+ok   default: the two hosts grow alike (within 5 %) — 1.0000
+--- read-back
+ok   read-back: every site send key is a written key
+ok   read-back: no key both true and false for one host
+ok   read-back N3: rows held = expected exactly — held 177771, expected 177771, extra 0, short 0
+ok   read-back N3: missing rows = its refused rows — missing 85344, refused 85344
+read-back N3: written 263115, held 177771, missing 85344 (32.4 %)
+ok   read-back N2: rows held = expected exactly — held 245025, expected 245025, extra 0, short 0
+ok   read-back N2: missing rows = its refused rows — missing 18090, refused 18090
+read-back N2: written 263115, held 245025, missing 18090 (6.9 %)
+SUMMARY ok 118 fail 3 — failed: ["L64: T_end in (L, L + r*F'+H], F' literal (frozen Prediction)", "L64: T_end in (L, L + r*F'+H], F' between flush tasks (interpretation)", "L256: T_end in (L, L + r*F'+H], F' literal (frozen Prediction)"]

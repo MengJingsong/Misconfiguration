@@ -1,0 +1,79 @@
+# File /users/jason92/stage4-harness-run/mhs/should-hint.btm line 52
+RULE mhs site send
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD sendToHintedReplicas
+NOCOMPILE
+AFTER INVOKE shouldHint(org.apache.cassandra.locator.Replica)
+IF true
+DO traceOpen("mhs", java.lang.System.getProperty("stage4.trace", "mhs.trace"));
+traceln("mhs", "site send ep=" + $destination.endpoint() + " result=" + $! + " key=" + org.apache.cassandra.utils.ByteBufferUtil.bytesToHex($1.key().getKey()) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.service.StorageProxy.sendToHintedReplicas(org.apache.cassandra.db.Mutation,org.apache.cassandra.locator.ReplicaPlan$ForWrite,org.apache.cassandra.service.AbstractWriteResponseHandler,java.lang.String,org.apache.cassandra.concurrent.Stage,org.apache.cassandra.transport.Dispatcher$RequestTime) void
+# File /users/jason92/stage4-harness-run/mhs/should-hint.btm line 70
+RULE mhs writer roll
+CLASS org.apache.cassandra.hints.HintsStore
+METHOD closeWriter
+NOCOMPILE
+AT ENTRY
+IF $0.hintsWriter != null
+DO traceOpen("mhs", java.lang.System.getProperty("stage4.trace", "mhs.trace"));
+traceln("mhs", "roll host=" + $0.hostId + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.hints.HintsStore.closeWriter() void
+# File /users/jason92/stage4-harness-run/mhs/should-hint.btm line 22
+RULE mhs decide clear
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+NOCOMPILE
+AT ENTRY
+IF true
+DO unlink("mhs.T", java.lang.Thread.currentThread());
+unlink("mhs.L", java.lang.Thread.currentThread())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.service.StorageProxy.shouldHint(org.apache.cassandra.locator.Replica,boolean) boolean
+# File /users/jason92/stage4-harness-run/mhs/should-hint.btm line 31
+RULE mhs decide operand
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+NOCOMPILE
+AFTER INVOKE org.apache.cassandra.hints.HintsService.getTotalHintsSize
+IF true
+DO link("mhs.T", java.lang.Thread.currentThread(), "" + $!);
+link("mhs.L", java.lang.Thread.currentThread(), "" + $maxHintsSize)
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.service.StorageProxy.shouldHint(org.apache.cassandra.locator.Replica,boolean) boolean
+# File /users/jason92/stage4-harness-run/mhs/should-hint.btm line 40
+RULE mhs decide exit
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("mhs", java.lang.System.getProperty("stage4.trace", "mhs.trace"));
+traceln("mhs", "decide ep=" + $1.endpoint() + " result=" + $!
++ " checked=" + (linked("mhs.T", java.lang.Thread.currentThread()) == null ? "-1" : linked("mhs.T", java.lang.Thread.currentThread()))
++ " limit=" + (linked("mhs.L", java.lang.Thread.currentThread()) == null ? "" + org.apache.cassandra.config.DatabaseDescriptor.getMaxHintsSizePerHost() : linked("mhs.L", java.lang.Thread.currentThread()))
++ " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.service.StorageProxy.shouldHint(org.apache.cassandra.locator.Replica,boolean) boolean
+# File /users/jason92/stage4-harness-run/mhs/should-hint.btm line 61
+RULE mhs flush session close
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD close
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("mhs", java.lang.System.getProperty("stage4.trace", "mhs.trace"));
+traceln("mhs", "flush host=" + $0.this$0.descriptor.hostId + " size=" + $0.position() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
