@@ -1,0 +1,98 @@
+# Byteman rules for networking_cache_size-allocateMoreChunks-memoryUsageThreshold (case 9c/9d, amended 2026-10-15). Observation only.
+# Lines go to the file named by -Dstage4.byteman.out:
+#   made n=<macro chunks created, networking pool, from start-up> ms=<epoch>       every slab (P = 8 MiB x n)
+#   dump made= refuse= overflow= overflow_bytes= ovfadd_bytes= ovfsub_bytes= payload_full= payload_small= encoded= freed= ms=
+#       on every StorageService.getReleaseVersion() (the run script reads ReleaseVersion over JMX at each phase edge and every second)
+# Counters are Byteman counters (process lifetime):
+#   refuse         allocateMoreChunks() returned null on the networking pool (the disallow branch)
+#   overflow       BufferPool.allocate() calls on the networking pool (served around the pool), overflow_bytes their sizes
+#   ovfadd/ovfsub  bytes added to / subtracted from the networking pool's overflow count (updateOverflowMemoryUsage)
+#   payload_full   FrameEncoder$Payload built with a buffer of capacity >= 131,070 (a full frame), payload_small the others
+#   encoded        FrameEncoderCrc.encode() of a frame buffer of capacity >= 131,070
+#   freed          BufferPoolAllocator$Wrapped.deallocate() of a wrapped buffer of capacity >= 131,070 (held frames = encoded - freed)
+
+RULE made
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! != null && $0.this$0.name.equals("networking")
+DO traceOpen("ncs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("ncs", "made n=" + incrementCounter("made") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE refuse
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! == null && $0.this$0.name.equals("networking")
+DO incrementCounter("refuse")
+ENDRULE
+
+RULE overflow
+CLASS org.apache.cassandra.utils.memory.BufferPool
+METHOD allocate(int, org.apache.cassandra.io.compress.BufferType)
+AT ENTRY
+IF $0.name.equals("networking")
+DO incrementCounter("overflow");
+   incrementCounter("overflow_bytes", $1)
+ENDRULE
+
+RULE ovfadd
+CLASS org.apache.cassandra.utils.memory.BufferPool
+METHOD updateOverflowMemoryUsage(int)
+AT ENTRY
+IF $0.name.equals("networking") && $1 > 0
+DO incrementCounter("ovfadd", $1)
+ENDRULE
+
+RULE ovfsub
+CLASS org.apache.cassandra.utils.memory.BufferPool
+METHOD updateOverflowMemoryUsage(int)
+AT ENTRY
+IF $0.name.equals("networking") && $1 < 0
+DO incrementCounter("ovfsub", 0 - $1)
+ENDRULE
+
+RULE payload full
+CLASS org.apache.cassandra.net.FrameEncoder$Payload
+METHOD <init>(boolean, int, int, int)
+AT EXIT
+IF $0.buffer.capacity() >= 131070
+DO incrementCounter("payload_full")
+ENDRULE
+
+RULE payload small
+CLASS org.apache.cassandra.net.FrameEncoder$Payload
+METHOD <init>(boolean, int, int, int)
+AT EXIT
+IF $0.buffer.capacity() < 131070
+DO incrementCounter("payload_small")
+ENDRULE
+
+RULE encoded
+CLASS org.apache.cassandra.net.FrameEncoderCrc
+METHOD encode(boolean, java.nio.ByteBuffer)
+AT ENTRY
+IF $2.capacity() >= 131070
+DO incrementCounter("encoded")
+ENDRULE
+
+RULE freed
+CLASS org.apache.cassandra.net.BufferPoolAllocator$Wrapped
+METHOD deallocate()
+AT ENTRY
+IF $0.wrapped != null && $0.wrapped.capacity() >= 131070
+DO incrementCounter("freed")
+ENDRULE
+
+RULE dump
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion()
+AT ENTRY
+IF true
+DO traceOpen("ncs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("ncs", "dump made=" + readCounter("made") + " refuse=" + readCounter("refuse") + " overflow=" + readCounter("overflow")
+           + " overflow_bytes=" + readCounter("overflow_bytes") + " ovfadd_bytes=" + readCounter("ovfadd") + " ovfsub_bytes=" + readCounter("ovfsub")
+           + " payload_full=" + readCounter("payload_full") + " payload_small=" + readCounter("payload_small")
+           + " encoded=" + readCounter("encoded") + " freed=" + readCounter("freed") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

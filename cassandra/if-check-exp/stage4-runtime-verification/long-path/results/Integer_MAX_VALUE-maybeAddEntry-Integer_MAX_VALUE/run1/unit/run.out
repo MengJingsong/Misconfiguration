@@ -1,0 +1,127 @@
+STAGE4 [cap] info partitioner ByteOrderedPartitioner; defaultExpectedKeySize 64
+STAGE4 [cap] info U1 K=3000 N=1000000 interval=1: n*=713924 size=713924 entriesLength=2147483392 entries.size=2147483392 offsets.size=2855696 offHeap=2150339088 maxNumberOfEntries=1000000 ERROR events=1 refusedAt keysWritten=713924 nextSamplePosition=713924 minIndexInterval=1
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 entries kept = min(coverage, n*) expected=713924 actual=713924 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 entriesLength = kept x (K + 8) expected=2147483392 actual=2147483392 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 entriesLength <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 trimmed entries region = entriesLength expected=2147483392 actual=2147483392 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 offsets region = 4 x size expected=2855696 actual=2855696 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 off-heap = kept x (K + 12) expected=2150339088 actual=2150339088 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 maxNumberOfEntries = ceil(N / interval) expected=1000000 actual=1000000 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 ERROR events expected=1 actual=1 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 refusal at keysWritten = n* x interval expected=713924 actual=713924 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 nextSamplePosition stays at the refused key expected=713924 actual=713924 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 entries length and capacity unchanged by the next key expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 length at the refusal = n* x (K + 8) expected=2147483392 actual=2147483392 -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 last entry is key 713923 expected=java.nio.HeapByteBuffer[pos=0 lim=3000 cap=3000] actual=java.nio.HeapByteBuffer[pos=0 lim=3000 cap=3000] -> ok
+STAGE4 [cap] check U1 K=3000 N=1000000 interval=1 binarySearch(last key) (scan from the last entry when uncovered) expected=-713925 actual=-713925 -> ok
+STAGE4 [cap] info U1 K=30000 N=80000 interval=1: n*=71563 size=71563 entriesLength=2147462504 entries.size=2147462504 offsets.size=286252 offHeap=2147748756 maxNumberOfEntries=80000 ERROR events=1 refusedAt keysWritten=71563 nextSamplePosition=71563 minIndexInterval=1
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 entries kept = min(coverage, n*) expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 entriesLength = kept x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 entriesLength <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 trimmed entries region = entriesLength expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 offsets region = 4 x size expected=286252 actual=286252 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 off-heap = kept x (K + 12) expected=2147748756 actual=2147748756 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 maxNumberOfEntries = ceil(N / interval) expected=80000 actual=80000 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 ERROR events expected=1 actual=1 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 refusal at keysWritten = n* x interval expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 nextSamplePosition stays at the refused key expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 entries length and capacity unchanged by the next key expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 length at the refusal = n* x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 last entry is key 71562 expected=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] actual=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] -> ok
+STAGE4 [cap] check U1 K=30000 N=80000 interval=1 binarySearch(last key) (scan from the last entry when uncovered) expected=-71564 actual=-71564 -> ok
+STAGE4 [cap] info U1 K=65535 N=40000 interval=1: n*=32764 size=32764 entriesLength=2147450852 entries.size=2147450852 offsets.size=131056 offHeap=2147581908 maxNumberOfEntries=40000 ERROR events=1 refusedAt keysWritten=32764 nextSamplePosition=32764 minIndexInterval=1
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 entries kept = min(coverage, n*) expected=32764 actual=32764 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 entriesLength = kept x (K + 8) expected=2147450852 actual=2147450852 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 entriesLength <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 trimmed entries region = entriesLength expected=2147450852 actual=2147450852 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 offsets region = 4 x size expected=131056 actual=131056 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 off-heap = kept x (K + 12) expected=2147581908 actual=2147581908 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 maxNumberOfEntries = ceil(N / interval) expected=40000 actual=40000 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 ERROR events expected=1 actual=1 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 refusal at keysWritten = n* x interval expected=32764 actual=32764 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 nextSamplePosition stays at the refused key expected=32764 actual=32764 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 entries length and capacity unchanged by the next key expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 length at the refusal = n* x (K + 8) expected=2147450852 actual=2147450852 -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 last entry is key 32763 expected=java.nio.HeapByteBuffer[pos=0 lim=65535 cap=65535] actual=java.nio.HeapByteBuffer[pos=0 lim=65535 cap=65535] -> ok
+STAGE4 [cap] check U1 K=65535 N=40000 interval=1 binarySearch(last key) (scan from the last entry when uncovered) expected=-32765 actual=-32765 -> ok
+STAGE4 [cap] info U1 K=30000 N=71563 interval=1: n*=71563 size=71563 entriesLength=2147462504 entries.size=2147462504 offsets.size=286252 offHeap=2147748756 maxNumberOfEntries=71563 ERROR events=0 refusedAt keysWritten=-1 nextSamplePosition=71563 minIndexInterval=1
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 entries kept = min(coverage, n*) expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 entriesLength = kept x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 entriesLength <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 trimmed entries region = entriesLength expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 offsets region = 4 x size expected=286252 actual=286252 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 off-heap = kept x (K + 12) expected=2147748756 actual=2147748756 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 maxNumberOfEntries = ceil(N / interval) expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 ERROR events expected=0 actual=0 -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 last entry is key 71562 expected=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] actual=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] -> ok
+STAGE4 [cap] check U1 K=30000 N=71563 interval=1 binarySearch(last key) (scan from the last entry when uncovered) expected=71562 actual=71562 -> ok
+STAGE4 [cap] info U1 K=30000 N=71564 interval=1: n*=71563 size=71563 entriesLength=2147462504 entries.size=2147462504 offsets.size=286252 offHeap=2147748756 maxNumberOfEntries=71564 ERROR events=1 refusedAt keysWritten=71563 nextSamplePosition=71563 minIndexInterval=1
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 entries kept = min(coverage, n*) expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 entriesLength = kept x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 entriesLength <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 trimmed entries region = entriesLength expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 offsets region = 4 x size expected=286252 actual=286252 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 off-heap = kept x (K + 12) expected=2147748756 actual=2147748756 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 maxNumberOfEntries = ceil(N / interval) expected=71564 actual=71564 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 ERROR events expected=1 actual=1 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 refusal at keysWritten = n* x interval expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 nextSamplePosition stays at the refused key expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 entries length and capacity unchanged by the next key expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 length at the refusal = n* x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 last entry is key 71562 expected=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] actual=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] -> ok
+STAGE4 [cap] check U1 K=30000 N=71564 interval=1 binarySearch(last key) (scan from the last entry when uncovered) expected=-71564 actual=-71564 -> ok
+STAGE4 [cap] info U1 K=30000 N=160000 interval=2: n*=71563 size=71563 entriesLength=2147462504 entries.size=2147462504 offsets.size=286252 offHeap=2147748756 maxNumberOfEntries=80000 ERROR events=1 refusedAt keysWritten=143126 nextSamplePosition=143126 minIndexInterval=2
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 entries kept = min(coverage, n*) expected=71563 actual=71563 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 entriesLength = kept x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 entriesLength <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 trimmed entries region = entriesLength expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 offsets region = 4 x size expected=286252 actual=286252 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 off-heap = kept x (K + 12) expected=2147748756 actual=2147748756 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 maxNumberOfEntries = ceil(N / interval) expected=80000 actual=80000 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 ERROR events expected=1 actual=1 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 refusal at keysWritten = n* x interval expected=143126 actual=143126 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 nextSamplePosition stays at the refused key expected=143126 actual=143126 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 entries length and capacity unchanged by the next key expected=true actual=true -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 length at the refusal = n* x (K + 8) expected=2147462504 actual=2147462504 -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 last entry is key 143124 expected=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] actual=java.nio.HeapByteBuffer[pos=0 lim=30000 cap=30000] -> ok
+STAGE4 [cap] check U1 K=30000 N=160000 interval=2 binarySearch(last key) (scan from the last entry when uncovered) expected=-71564 actual=-71564 -> ok
+STAGE4 [cap] info u1_realLimit done, mismatches 0
+STAGE4 [cap] info U2 E=64 expectedKeys=29826161: interval 1 entries capacity 2147483592 WARN [] built minIndexInterval 1
+STAGE4 [cap] check U2 E=64 expectedKeys=29826161 effective interval expected=1 actual=1 -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826161 entries capacity (the reservation) expected=2147483592 actual=2147483592 -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826161 capacity <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826161 WARN lines expected=0 actual=0 -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826161 built summary interval expected=1 actual=1 -> ok
+STAGE4 [cap] info U2 E=64 expectedKeys=29826162: interval 2 entries capacity 1073741832 WARN [min_index_interval of 1 is too low for 29826162 expected keys of avg size 64; using interval of 2 instead] built minIndexInterval 2
+STAGE4 [cap] check U2 E=64 expectedKeys=29826162 effective interval expected=2 actual=2 -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826162 entries capacity (the reservation) expected=1073741832 actual=1073741832 -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826162 capacity <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826162 WARN lines expected=1 actual=1 -> ok
+STAGE4 [cap] check U2 E=64 expectedKeys=29826162 built summary interval expected=2 actual=2 -> ok
+STAGE4 [cap] info U2 E=3000 expectedKeys=1000000: interval 2 entries capacity 1504000000 WARN [min_index_interval of 1 is too low for 1000000 expected keys of avg size 3000; using interval of 2 instead] built minIndexInterval 2
+STAGE4 [cap] check U2 E=3000 expectedKeys=1000000 effective interval expected=2 actual=2 -> ok
+STAGE4 [cap] check U2 E=3000 expectedKeys=1000000 entries capacity (the reservation) expected=1504000000 actual=1504000000 -> ok
+STAGE4 [cap] check U2 E=3000 expectedKeys=1000000 capacity <= 2^31 - 1 expected=true actual=true -> ok
+STAGE4 [cap] check U2 E=3000 expectedKeys=1000000 WARN lines expected=1 actual=1 -> ok
+STAGE4 [cap] check U2 E=3000 expectedKeys=1000000 built summary interval expected=2 actual=2 -> ok
+STAGE4 [cap] info u2_secondSite done, mismatches 0
+STAGE4 [moved] info U3 L=134217728 N=166440: size=133152 entriesLength=134217216 offHeap=134749824 ERROR events=1
+STAGE4 [moved] check U3 L=134217728 N=166440 entries kept = min(N, floor(L / 1008)) expected=133152 actual=133152 -> ok
+STAGE4 [moved] check U3 L=134217728 N=166440 entriesLength = kept x 1008 <= L expected=true actual=true -> ok
+STAGE4 [moved] check U3 L=134217728 N=166440 off-heap = kept x 1012 expected=134749824 actual=134749824 -> ok
+STAGE4 [moved] check U3 L=134217728 N=166440 ERROR events expected=1 actual=1 -> ok
+STAGE4 [moved] info U3 L=2147483647 N=41610: size=41610 entriesLength=41942880 offHeap=42109320 ERROR events=0
+STAGE4 [moved] check U3 L=2147483647 N=41610 entries kept = min(N, floor(L / 1008)) expected=41610 actual=41610 -> ok
+STAGE4 [moved] check U3 L=2147483647 N=41610 entriesLength = kept x 1008 <= L expected=true actual=true -> ok
+STAGE4 [moved] check U3 L=2147483647 N=41610 off-heap = kept x 1012 expected=42109320 actual=42109320 -> ok
+STAGE4 [moved] check U3 L=2147483647 N=41610 ERROR events expected=0 actual=0 -> ok
+STAGE4 [moved] info U3 L=8388608 N=10403: size=8322 entriesLength=8388576 offHeap=8421864 ERROR events=1
+STAGE4 [moved] check U3 L=8388608 N=10403 entries kept = min(N, floor(L / 1008)) expected=8322 actual=8322 -> ok
+STAGE4 [moved] check U3 L=8388608 N=10403 entriesLength = kept x 1008 <= L expected=true actual=true -> ok
+STAGE4 [moved] check U3 L=8388608 N=10403 off-heap = kept x 1012 expected=8421864 actual=8421864 -> ok
+STAGE4 [moved] check U3 L=8388608 N=10403 ERROR events expected=1 actual=1 -> ok
+STAGE4 [moved] info U3 L=33554432 N=41610: size=33288 entriesLength=33554304 offHeap=33687456 ERROR events=1
+STAGE4 [moved] check U3 L=33554432 N=41610 entries kept = min(N, floor(L / 1008)) expected=33288 actual=33288 -> ok
+STAGE4 [moved] check U3 L=33554432 N=41610 entriesLength = kept x 1008 <= L expected=true actual=true -> ok
+STAGE4 [moved] check U3 L=33554432 N=41610 off-heap = kept x 1012 expected=33687456 actual=33687456 -> ok
+STAGE4 [moved] check U3 L=33554432 N=41610 ERROR events expected=1 actual=1 -> ok

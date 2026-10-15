@@ -1,0 +1,79 @@
+# Byteman observation rules for Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE, case 9c/9d. They change no behaviour.
+# Lines go to the file named by -Dstage4.trace:
+#   writer id=<identityHashCode(summary builder)> path=<Index.db path> ms=       a BIG writer's IndexWriter, one per SSTable written
+#   init id= expectedKeys= minIndexInterval= effective= entriesCapacity= ms=     IndexSummaryBuilder.<init> exit (second site :108)
+#   refused id= keysWritten= length= entry= ms=                                  the disallow branch, :214
+#   built id= count= entriesLength= capacity= minIndexInterval= keysWritten= ms= IndexSummaryBuilder.build(IPartitioner, ReadableBoundary) exit
+#   rebuild path= rebuildSummary= ms=                                            the loader rebuilds a summary at start-up (added 2026-10-15)
+#   scan file= skips= found= ms=                                                 BigTableReader.getRowIndexEntry exit, keyspaces ks*:
+#                                                                                RowIndexEntry entries skipped by the index scan of that call
+
+RULE imv writer
+CLASS org.apache.cassandra.io.sstable.format.big.BigTableWriter$IndexWriter
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("imv", java.lang.System.getProperty("stage4.trace", "imv.trace"));
+   traceln("imv", "writer id=" + java.lang.System.identityHashCode($0.summary) + " path=" + $0.writer.getPath() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE imv init
+CLASS org.apache.cassandra.io.sstable.indexsummary.IndexSummaryBuilder
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("imv", java.lang.System.getProperty("stage4.trace", "imv.trace"));
+   traceln("imv", "init id=" + java.lang.System.identityHashCode($0) + " expectedKeys=" + $1 + " minIndexInterval=" + $2 + " effective=" + $0.minIndexInterval + " entriesCapacity=" + $0.entries.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE imv refused
+CLASS org.apache.cassandra.io.sstable.indexsummary.IndexSummaryBuilder
+METHOD maybeAddEntry(org.apache.cassandra.db.DecoratedKey,long,long,long)
+AT LINE 214
+IF true
+DO traceOpen("imv", java.lang.System.getProperty("stage4.trace", "imv.trace"));
+   traceln("imv", "refused id=" + java.lang.System.identityHashCode($0) + " keysWritten=" + $0.keysWritten + " length=" + $0.entries.length() + " entry=" + ($1.getKey().remaining() + 8) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE imv built
+CLASS org.apache.cassandra.io.sstable.indexsummary.IndexSummaryBuilder
+METHOD build(org.apache.cassandra.dht.IPartitioner,org.apache.cassandra.io.sstable.indexsummary.IndexSummaryBuilder$ReadableBoundary)
+AT EXIT
+IF true
+DO traceOpen("imv", java.lang.System.getProperty("stage4.trace", "imv.trace"));
+   traceln("imv", "built id=" + java.lang.System.identityHashCode($0) + " count=" + $!.size() + " entriesLength=" + $0.entries.length() + " capacity=" + $0.entries.capacity() + " minIndexInterval=" + $0.minIndexInterval + " keysWritten=" + $0.keysWritten + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE imv rebuild
+CLASS org.apache.cassandra.io.sstable.format.big.BigSSTableReaderLoadingBuilder
+METHOD buildSummaryAndBloomFilter
+AT ENTRY
+IF true
+DO traceOpen("imv", java.lang.System.getProperty("stage4.trace", "imv.trace"));
+   traceln("imv", "rebuild path=" + $0.descriptor + " rebuildFilter=" + $3 + " rebuildSummary=" + $4 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE imv scan reset
+CLASS org.apache.cassandra.io.sstable.format.big.BigTableReader
+METHOD getRowIndexEntry
+AT ENTRY
+IF true
+DO readCounter(java.lang.Thread.currentThread(), true)
+ENDRULE
+
+RULE imv scan skip
+CLASS org.apache.cassandra.io.sstable.format.big.RowIndexEntry$Serializer
+METHOD skip(org.apache.cassandra.io.util.DataInputPlus,org.apache.cassandra.io.sstable.format.Version)
+AT ENTRY
+IF callerEquals("getRowIndexEntry")
+DO incrementCounter(java.lang.Thread.currentThread())
+ENDRULE
+
+RULE imv scan print
+CLASS org.apache.cassandra.io.sstable.format.big.BigTableReader
+METHOD getRowIndexEntry
+AT EXIT
+IF $0.descriptor.ksname.startsWith("ks")
+DO traceOpen("imv", java.lang.System.getProperty("stage4.trace", "imv.trace"));
+   traceln("imv", "scan file=" + $0.descriptor.baseFile() + " skips=" + readCounter(java.lang.Thread.currentThread(), true) + " found=" + ($! != null) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

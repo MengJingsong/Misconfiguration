@@ -1,0 +1,47 @@
+INFO  [CompactionExecutor:2] 2026-10-15T08:16:37,250 CompactionTask.java:388 - Compaction space check is disabled - trying to compact all sstables
+INFO  [CompactionExecutor:2] 2026-10-15T08:16:37,250 CompactionTask.java:175 - Compacting (bddd5f10-c870-11f1-9f14-2d8d7523f2ed) [/mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-3-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-2-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-5-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-4-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-7-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-6-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-8-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-1-big-Data.db:level=0, ]
+INFO  [NonPeriodicTasks:1] 2026-10-15T08:16:41,087 BigFormat.java:231 - Deleting sstable: /mnt/stage4-dds/data/ks1/t-8ad763e0c87011f19f142d8d7523f2ed/nb-9-big
+ERROR [CompactionExecutor:2] 2026-10-15T08:16:41,086 JVMStabilityInspector.java:70 - Exception in thread Thread[CompactionExecutor:2,5,CompactionExecutor]
+org.apache.cassandra.io.FSWriteError: java.io.IOException: No space left on device
+	at org.apache.cassandra.io.util.SequentialWriter.flushData(SequentialWriter.java:258)
+	at org.apache.cassandra.io.util.ChecksummedSequentialWriter.flushData(ChecksummedSequentialWriter.java:45)
+	at org.apache.cassandra.io.util.SequentialWriter.doFlush(SequentialWriter.java:222)
+	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:135)
+	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:203)
+	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:140)
+	at org.apache.cassandra.io.sstable.format.SortedTablePartitionWriter.addUnfiltered(SortedTablePartitionWriter.java:143)
+	at org.apache.cassandra.io.sstable.format.big.BigFormatPartitionWriter.addUnfiltered(BigFormatPartitionWriter.java:210)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addRow(SortedTableWriter.java:212)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addUnfiltered(SortedTableWriter.java:203)
+	at org.apache.cassandra.io.sstable.format.SortedTableWriter.append(SortedTableWriter.java:149)
+	at org.apache.cassandra.io.sstable.SSTableRewriter.append(SSTableRewriter.java:136)
+	at org.apache.cassandra.db.compaction.writers.CompactionAwareWriter.realAppend(CompactionAwareWriter.java:158)
+	at org.apache.cassandra.db.compaction.writers.CompactionAwareWriter.append(CompactionAwareWriter.java:141)
+	at org.apache.cassandra.db.compaction.CompactionTask.runMayThrow(CompactionTask.java:224)
+	at org.apache.cassandra.utils.WrappedRunnable.run(WrappedRunnable.java:26)
+	at org.apache.cassandra.db.compaction.CompactionTask.executeInternal(CompactionTask.java:94)
+	at org.apache.cassandra.db.compaction.AbstractCompactionTask.execute(AbstractCompactionTask.java:100)
+	at org.apache.cassandra.db.compaction.CompactionManager$BackgroundCompactionCandidate.run(CompactionManager.java:374)
+	at org.apache.cassandra.concurrent.FutureTask$3.call(FutureTask.java:141)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: java.io.IOException: No space left on device
+	at java.base/sun.nio.ch.FileDispatcherImpl.write0(Native Method)
+	at java.base/sun.nio.ch.FileDispatcherImpl.write(FileDispatcherImpl.java:62)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:113)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:79)
+	at java.base/sun.nio.ch.FileChannelImpl.write(FileChannelImpl.java:280)
+	at org.apache.cassandra.io.util.SequentialWriter.flushData(SequentialWriter.java:253)
+	... 25 common frames omitted
+ERROR [CompactionExecutor:2] 2026-10-15T08:16:41,090 DefaultFSErrorHandler.java:72 - Stopping transports as disk_failure_policy is stop
+ERROR [CompactionExecutor:2] 2026-10-15T08:16:41,090 StorageService.java:684 - Stopping native transport
+INFO  [CompactionExecutor:2] 2026-10-15T08:16:41,093 Server.java:203 - Stop listening for CQL clients
+ERROR [CompactionExecutor:2] 2026-10-15T08:16:41,093 StorageService.java:689 - Stopping gossiper
+WARN  [CompactionExecutor:2] 2026-10-15T08:16:41,093 StorageService.java:588 - Stopping gossip by operator request
+INFO  [CompactionExecutor:2] 2026-10-15T08:16:41,094 Gossiper.java:2289 - Announcing shutdown
+INFO  [CompactionExecutor:2] 2026-10-15T08:16:41,094 StorageService.java:3320 - Node localhost/127.0.0.1:7000 state jump to shutdown
+INFO  [CompactionExecutor:2] 2026-10-15T08:16:41,095 StorageService.java:3320 - Node localhost/127.0.0.1:7000 state jump to shutdown

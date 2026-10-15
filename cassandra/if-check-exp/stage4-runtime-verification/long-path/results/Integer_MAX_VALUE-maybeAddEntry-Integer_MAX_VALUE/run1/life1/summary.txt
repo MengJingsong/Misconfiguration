@@ -1,0 +1,142 @@
+RUN run1 LABEL life1; date 2026-10-15 04:51:44 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu
+CLONE cassandra-5.0.9 b5f2a54 | HARNESS md5 33f9fe028cb5921cef38ad47dbfbbd6e
+Byteman TestScript: no errors
+YAML lines: cluster_name: stage4-imv; data_file_directories:;     - /users/jason92/stage4-imv/data; commitlog_directory: /users/jason92/stage4-imv/commitlog; hints_directory: /users/jason92/stage4-imv/hints; saved_caches_directory: /users/jason92/stage4-imv/saved_caches; cdc_raw_directory: /users/jason92/stage4-imv/cdc_raw; index_summary_resize_interval:; memtable_heap_space: 12GiB; commitlog_total_space: 8192MiB; read_request_timeout: 60000ms; native_transport_timeout: 120000ms
+node up (life1) after 50 s, pid 658905, property not set; Submit -l rules ['imv scan print', 'imv scan skip', 'imv rebuild', 'imv refused', 'imv scan reset', 'imv built', 'imv writer', 'imv init']
+ResizeIntervalInMinutes -1
+INSTRUMENT CHECK (not a reading): probe, 9,000 keys of 1,000 B, moved-limit-8 rule
+OBSERVED probe: writer lines 1; init [{'id': '325105117', 'expectedKeys': '9000', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '648000', 'ms': '1792054363617'}]; refused [{'id': '325105117', 'keysWritten': '8322', 'length': '8388576', 'entry': '1008', 'ms': '1792054364125'}]; built [{'id': '325105117', 'count': '8322', 'entriesLength': '8388576', 'capacity': '8388576', 'minIndexInterval': '1', 'keysWritten': '9000', 'ms': '1792054364167'}, {'id': '325105117', 'count': '8322', 'entriesLength': '8388576', 'capacity': '8388576', 'minIndexInterval': '1', 'keysWritten': '9000', 'ms': '1792054364201'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 8423896; gauge 8421864
+READS probe: scan rows 9000 of 9000 (distinct 9000); per read (rank, scan skips, predicted): [(0, [0], 0), (2080, [0], 0), (4161, [0], 0), (6241, [0], 0), (8321, [0], 0), (8995, [674], 674), (8996, [675], 675), (8997, [676], 676), (8998, [677], 677), (8999, [678], 678)]
+EXPECTED: probe: the token scan returned all 9000 rows — yes
+EXPECTED: probe: every point read returned its row (v = index) — yes
+EXPECTED: probe: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+INSTRUMENT CHECK passed
+IDLE: RssAnon 27365990400
+TABLE ks.c32: L 2147483647 (real); K 1000; N 41610; seed 32; n* 2130440; kept 41610; refusal False
+LOAD ks.c32: 41610 rows of 1000-byte keys, seed 32, in 12.4 s
+OBSERVED c32: writer lines 1; init [{'id': '236000917', 'expectedKeys': '41610', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '2995920', 'ms': '1792054387991'}]; refused []; built [{'id': '236000917', 'count': '41610', 'entriesLength': '41942880', 'capacity': '41942880', 'minIndexInterval': '1', 'keysWritten': '41610', 'ms': '1792054388932'}, {'id': '236000917', 'count': '41610', 'entriesLength': '41942880', 'capacity': '41942880', 'minIndexInterval': '1', 'keysWritten': '41610', 'ms': '1792054389048'}]; ERROR lines 0; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 42111352; gauge 42109320
+EXPECTED: c32: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: c32: entries kept 41610 (built count) — yes
+EXPECTED: c32: entriesLength 41942880 and the trimmed capacity equal to it — yes
+EXPECTED: c32: gauge = kept x (K + 12) = 42109320 — yes
+EXPECTED: c32: Summary.db = 24 + gauge + 2 (K + 4) = 42111352 — yes
+EXPECTED: c32: no refused line and no ERROR line — yes
+READS c32: scan rows 41610 of 41610 (distinct 41610); per read (rank, scan skips, predicted): [(0, [0], 0), (10402, [0], 0), (20805, [0], 0), (31207, [0], 0), (41605, [0], 0), (41606, [0], 0), (41607, [0], 0), (41608, [0], 0), (41609, [0], 0)]
+EXPECTED: c32: the token scan returned all 41610 rows — yes
+EXPECTED: c32: every point read returned its row (v = index) — yes
+EXPECTED: c32: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+TABLE ks.big: L 2147483647 (real); K 60000; N 40000; seed 60; n* 35786; kept 35786; refusal True
+RSS big: before load 27429240832
+LOAD ks.big: 40000 rows of 60000-byte keys, seed 60, in 29.1 s
+OBSERVED big: writer lines 1; init [{'id': '751812199', 'expectedKeys': '40000', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '2880000', 'ms': '1792054429754'}]; refused [{'id': '751812199', 'keysWritten': '35786', 'length': '2147446288', 'entry': '60008', 'ms': '1792054452116'}]; built [{'id': '751812199', 'count': '35786', 'entriesLength': '2147446288', 'capacity': '2147446288', 'minIndexInterval': '1', 'keysWritten': '40000', 'ms': '1792054468949'}, {'id': '751812199', 'count': '35786', 'entriesLength': '2147446288', 'capacity': '2147446288', 'minIndexInterval': '1', 'keysWritten': '40000', 'ms': '1792054483760'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 2147709464; gauge 2147589432
+EXPECTED: big: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: big: entries kept 35786 (built count) — yes
+EXPECTED: big: entriesLength 2147446288 and the trimmed capacity equal to it — yes
+EXPECTED: big: gauge = kept x (K + 12) = 2147589432 — yes
+EXPECTED: big: Summary.db = 24 + gauge + 2 (K + 4) = 2147709464 — yes
+EXPECTED: big: one refused line at keysWritten = n* = 35786 with length 2147446288, and one ERROR line — yes
+RSS big: after the flush 29594357760
+READS big: scan rows 40000 of 40000 (distinct 40000); per read (rank, scan skips, predicted): [(0, [0], 0), (8946, [0], 0), (17893, [0], 0), (26839, [0], 0), (35785, [0], 0), (39995, [4210], 4210), (39996, [4211], 4211), (39997, [4212], 4212), (39998, [4213], 4213), (39999, [4214], 4214)]
+EXPECTED: big: the token scan returned all 40000 rows — yes
+EXPECTED: big: every point read returned its row (v = index) — yes
+EXPECTED: big: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RSS big: 300 s after the flush 29596069888; gauge 2147589432
+TABLE ks.t8: L 8388608 (moved, 8 MiB); K 1000; N 10403; seed 8; n* 8322; kept 8322; refusal True
+RULE submitted moved-limit-8.btm rc 0; moved rules listed ['moved limit 8 MiB']
+LOAD ks.t8: 10403 rows of 1000-byte keys, seed 8, in 3.2 s
+OBSERVED t8: writer lines 1; init [{'id': '1293703278', 'expectedKeys': '10403', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '749016', 'ms': '1792054794440'}]; refused [{'id': '1293703278', 'keysWritten': '8322', 'length': '8388576', 'entry': '1008', 'ms': '1792054794702'}]; built [{'id': '1293703278', 'count': '8322', 'entriesLength': '8388576', 'capacity': '8388576', 'minIndexInterval': '1', 'keysWritten': '10403', 'ms': '1792054794754'}, {'id': '1293703278', 'count': '8322', 'entriesLength': '8388576', 'capacity': '8388576', 'minIndexInterval': '1', 'keysWritten': '10403', 'ms': '1792054794800'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 8423896; gauge 8421864
+EXPECTED: t8: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: t8: entries kept 8322 (built count) — yes
+EXPECTED: t8: entriesLength 8388576 and the trimmed capacity equal to it — yes
+EXPECTED: t8: gauge = kept x (K + 12) = 8421864 — yes
+EXPECTED: t8: Summary.db = 24 + gauge + 2 (K + 4) = 8423896 — yes
+EXPECTED: t8: one refused line at keysWritten = n* = 8322 with length 8388576, and one ERROR line — yes
+READS t8: scan rows 10403 of 10403 (distinct 10403); per read (rank, scan skips, predicted): [(0, [0], 0), (2080, [0], 0), (4161, [0], 0), (6241, [0], 0), (8321, [0], 0), (10398, [2077], 2077), (10399, [2078], 2078), (10400, [2079], 2079), (10401, [2080], 2080), (10402, [2081], 2081)]
+EXPECTED: t8: the token scan returned all 10403 rows — yes
+EXPECTED: t8: every point read returned its row (v = index) — yes
+EXPECTED: t8: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RULE unloaded rc 0; moved rules left []
+TABLE ks.t32: L 33554432 (moved, 32 MiB); K 1000; N 41610; seed 32; n* 33288; kept 33288; refusal True
+RULE submitted moved-limit-32.btm rc 0; moved rules listed ['moved limit 32 MiB']
+LOAD ks.t32: 41610 rows of 1000-byte keys, seed 32, in 12.5 s
+OBSERVED t32: writer lines 1; init [{'id': '1792033366', 'expectedKeys': '41610', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '2995920', 'ms': '1792054818542'}]; refused [{'id': '1792033366', 'keysWritten': '33288', 'length': '33554304', 'entry': '1008', 'ms': '1792054819417'}]; built [{'id': '1792033366', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '41610', 'ms': '1792054819615'}, {'id': '1792033366', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '41610', 'ms': '1792054819716'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 33689488; gauge 33687456
+EXPECTED: t32: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: t32: entries kept 33288 (built count) — yes
+EXPECTED: t32: entriesLength 33554304 and the trimmed capacity equal to it — yes
+EXPECTED: t32: gauge = kept x (K + 12) = 33687456 — yes
+EXPECTED: t32: Summary.db = 24 + gauge + 2 (K + 4) = 33689488 — yes
+EXPECTED: t32: one refused line at keysWritten = n* = 33288 with length 33554304, and one ERROR line — yes
+READS t32: scan rows 41610 of 41610 (distinct 41610); per read (rank, scan skips, predicted): [(0, [0], 0), (8322, [0], 0), (16644, [0], 0), (24966, [0], 0), (33287, [0], 0), (41605, [8318], 8318), (41606, [8319], 8319), (41607, [8320], 8320), (41608, [8321], 8321), (41609, [8322], 8322)]
+EXPECTED: t32: the token scan returned all 41610 rows — yes
+EXPECTED: t32: every point read returned its row (v = index) — yes
+EXPECTED: t32: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RULE unloaded rc 0; moved rules left []
+TABLE ks.t32a: L 33554432 (moved, 32 MiB); K 1000; N 33288; seed 33; n* 33288; kept 33288; refusal False
+RULE submitted moved-limit-32.btm rc 0; moved rules listed ['moved limit 32 MiB']
+LOAD ks.t32a: 33288 rows of 1000-byte keys, seed 33, in 9.8 s
+OBSERVED t32a: writer lines 1; init [{'id': '452528367', 'expectedKeys': '33288', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '2396736', 'ms': '1792054845563'}]; refused []; built [{'id': '452528367', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '33288', 'ms': '1792054846554'}, {'id': '452528367', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '33288', 'ms': '1792054846655'}]; ERROR lines 0; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 33689488; gauge 33687456
+EXPECTED: t32a: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: t32a: entries kept 33288 (built count) — yes
+EXPECTED: t32a: entriesLength 33554304 and the trimmed capacity equal to it — yes
+EXPECTED: t32a: gauge = kept x (K + 12) = 33687456 — yes
+EXPECTED: t32a: Summary.db = 24 + gauge + 2 (K + 4) = 33689488 — yes
+EXPECTED: t32a: no refused line and no ERROR line — yes
+READS t32a: scan rows 33288 of 33288 (distinct 33288); per read (rank, scan skips, predicted): [(0, [0], 0), (8322, [0], 0), (16644, [0], 0), (24966, [0], 0), (33283, [0], 0), (33284, [0], 0), (33285, [0], 0), (33286, [0], 0), (33287, [0], 0)]
+EXPECTED: t32a: the token scan returned all 33288 rows — yes
+EXPECTED: t32a: every point read returned its row (v = index) — yes
+EXPECTED: t32a: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RULE unloaded rc 0; moved rules left []
+TABLE ks.t32b: L 33554432 (moved, 32 MiB); K 1000; N 33289; seed 33; n* 33288; kept 33288; refusal True
+RULE submitted moved-limit-32.btm rc 0; moved rules listed ['moved limit 32 MiB']
+LOAD ks.t32b: 33289 rows of 1000-byte keys, seed 33, in 10.0 s
+OBSERVED t32b: writer lines 1; init [{'id': '610377007', 'expectedKeys': '33289', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '2396808', 'ms': '1792054869059'}]; refused [{'id': '610377007', 'keysWritten': '33288', 'length': '33554304', 'entry': '1008', 'ms': '1792054869950'}]; built [{'id': '610377007', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '33289', 'ms': '1792054870062'}, {'id': '610377007', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '33289', 'ms': '1792054870162'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 33689488; gauge 33687456
+EXPECTED: t32b: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: t32b: entries kept 33288 (built count) — yes
+EXPECTED: t32b: entriesLength 33554304 and the trimmed capacity equal to it — yes
+EXPECTED: t32b: gauge = kept x (K + 12) = 33687456 — yes
+EXPECTED: t32b: Summary.db = 24 + gauge + 2 (K + 4) = 33689488 — yes
+EXPECTED: t32b: one refused line at keysWritten = n* = 33288 with length 33554304, and one ERROR line — yes
+READS t32b: scan rows 33289 of 33289 (distinct 33289); per read (rank, scan skips, predicted): [(0, [0], 0), (8322, [0], 0), (16644, [0], 0), (24966, [0], 0), (33284, [0], 0), (33285, [0], 0), (33286, [0], 0), (33287, [0], 0), (33288, [1], 1)]
+EXPECTED: t32b: the token scan returned all 33289 rows — yes
+EXPECTED: t32b: every point read returned its row (v = index) — yes
+EXPECTED: t32b: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RULE unloaded rc 0; moved rules left []
+TABLE ks.t32c: L 33554432 (moved, 32 MiB); K 1000; N 83220; seed 34; n* 33288; kept 33288; refusal True
+RULE submitted moved-limit-32.btm rc 0; moved rules listed ['moved limit 32 MiB']
+LOAD ks.t32c: 83220 rows of 1000-byte keys, seed 34, in 24.9 s
+OBSERVED t32c: writer lines 1; init [{'id': '942662470', 'expectedKeys': '83220', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '5991840', 'ms': '1792054907299'}]; refused [{'id': '942662470', 'keysWritten': '33288', 'length': '33554304', 'entry': '1008', 'ms': '1792054908157'}]; built [{'id': '942662470', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '83220', 'ms': '1792054908979'}, {'id': '942662470', 'count': '33288', 'entriesLength': '33554304', 'capacity': '33554304', 'minIndexInterval': '1', 'keysWritten': '83220', 'ms': '1792054909070'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 33689488; gauge 33687456
+EXPECTED: t32c: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: t32c: entries kept 33288 (built count) — yes
+EXPECTED: t32c: entriesLength 33554304 and the trimmed capacity equal to it — yes
+EXPECTED: t32c: gauge = kept x (K + 12) = 33687456 — yes
+EXPECTED: t32c: Summary.db = 24 + gauge + 2 (K + 4) = 33689488 — yes
+EXPECTED: t32c: one refused line at keysWritten = n* = 33288 with length 33554304, and one ERROR line — yes
+READS t32c: scan rows 83220 of 83220 (distinct 83220); per read (rank, scan skips, predicted): [(0, [0], 0), (8322, [0], 0), (16644, [0], 0), (24966, [0], 0), (33287, [0], 0), (83215, [49928], 49928), (83216, [49929], 49929), (83217, [49930], 49930), (83218, [49931], 49931), (83219, [49932], 49932)]
+EXPECTED: t32c: the token scan returned all 83220 rows — yes
+EXPECTED: t32c: every point read returned its row (v = index) — yes
+EXPECTED: t32c: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RULE unloaded rc 0; moved rules left []
+TABLE ks.t128: L 134217728 (moved, 128 MiB); K 1000; N 166440; seed 128; n* 133152; kept 133152; refusal True
+RULE submitted moved-limit-128.btm rc 0; moved rules listed ['moved limit 128 MiB']
+LOAD ks.t128: 166440 rows of 1000-byte keys, seed 128, in 50.6 s
+OBSERVED t128: writer lines 1; init [{'id': '597756128', 'expectedKeys': '166440', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '11983680', 'ms': '1792055046784'}]; refused [{'id': '597756128', 'keysWritten': '133152', 'length': '134217216', 'entry': '1008', 'ms': '1792055050032'}]; built [{'id': '597756128', 'count': '133152', 'entriesLength': '134217216', 'capacity': '134217216', 'minIndexInterval': '1', 'keysWritten': '166440', 'ms': '1792055050776'}, {'id': '597756128', 'count': '133152', 'entriesLength': '134217216', 'capacity': '134217216', 'minIndexInterval': '1', 'keysWritten': '166440', 'ms': '1792055051033'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 134751856; gauge 134749824
+EXPECTED: t128: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: t128: entries kept 133152 (built count) — yes
+EXPECTED: t128: entriesLength 134217216 and the trimmed capacity equal to it — yes
+EXPECTED: t128: gauge = kept x (K + 12) = 134749824 — yes
+EXPECTED: t128: Summary.db = 24 + gauge + 2 (K + 4) = 134751856 — yes
+EXPECTED: t128: one refused line at keysWritten = n* = 133152 with length 134217216, and one ERROR line — yes
+READS t128: scan rows 166440 of 166440 (distinct 166440); per read (rank, scan skips, predicted): [(0, [0], 0), (33288, [0], 0), (66576, [0], 0), (99864, [0], 0), (133151, [0], 0), (166435, [33284], 33284), (166436, [33285], 33285), (166437, [33286], 33286), (166438, [33287], 33287), (166439, [33288], 33288)]
+EXPECTED: t128: the token scan returned all 166440 rows — yes
+EXPECTED: t128: every point read returned its row (v = index) — yes
+EXPECTED: t128: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+RULE unloaded rc 0; moved rules left []
+EXPECTED: dose-response: n* 8,322 : 33,288 : 133,152 across 8, 32, 128 MiB (observed [8322, 33288, 133152]) — yes
+node up (life1-restart) after 21 s, pid 666390, property not set; Submit -l rules ['imv scan print', 'imv scan skip', 'imv rebuild', 'imv refused', 'imv scan reset', 'imv built', 'imv writer', 'imv init']
+RESTART: big corrupted lines 0; gauge before 2147589432 after 2147589432
+EXPECTED: restart: big loads from Summary.db without a rebuild (no corrupted line) with the same gauge — yes
+READS big: scan rows 40000 of 40000 (distinct 40000); per read (rank, scan skips, predicted): [(0, [0], 0), (8946, [0], 0), (17893, [0], 0), (26839, [0], 0), (35785, [0], 0), (39995, [4210], 4210), (39996, [4211], 4211), (39997, [4212], 4212), (39998, [4213], 4213), (39999, [4214], 4214)]
+EXPECTED: big: the token scan returned all 40000 rows — yes
+EXPECTED: big: every point read returned its row (v = index) — yes
+EXPECTED: big: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+DONE

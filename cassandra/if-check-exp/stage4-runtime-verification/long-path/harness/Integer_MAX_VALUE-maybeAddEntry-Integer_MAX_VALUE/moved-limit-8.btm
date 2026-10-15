@@ -1,0 +1,9 @@
+# Moves the limit of IndexSummaryBuilder.java:204 to 8 MiB (case 9c): getEntrySize(DecoratedKey), whose only caller is :204,
+# returns its value plus 2^31 - 1 - 8 MiB = 2139095039, so the comparison reads entries.length() + K + 8 <= 8388608.
+RULE moved limit 8 MiB
+CLASS org.apache.cassandra.io.sstable.indexsummary.IndexSummaryBuilder
+METHOD getEntrySize(org.apache.cassandra.db.DecoratedKey)
+AT EXIT
+IF true
+DO return $! + 2139095039
+ENDRULE

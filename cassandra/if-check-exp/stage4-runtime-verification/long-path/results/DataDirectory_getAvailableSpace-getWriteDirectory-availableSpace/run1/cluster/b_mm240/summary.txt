@@ -1,0 +1,35 @@
+RUN run1 LABEL b_mm240: arm B, m 240 MiB, U = T + 256 MiB, sibling check off; date 2026-10-15 03:59:10 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; kernel 5.15.0-187-generic
+JAVA openjdk version "11.0.32.1" 2026-08-18 | CLONE cassandra-5.0.9 b5f2a54
+HARNESS md5 8ab6ace069be050a552b064b3802924d
+FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-dds
+YAML arm B: conf /users/jason92/stage4-dds/conf, partitioner org.apache.cassandra.dht.ByteOrderedPartitioner, token 00, m 240MiB; yaml tail: # ---- stage4 dds lines ----;cluster_name: stage4-dds-bop;partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner;num_tokens: 1;initial_token: 00;data_file_directories:;    - /mnt/stage4-dds/data;commitlog_directory: /users/jason92/stage4-dds/commitlog;hints_directory: /users/jason92/stage4-dds/hints;saved_caches_directory: /users/jason92/stage4-dds/saved_caches;cdc_raw_directory: /users/jason92/stage4-dds/cdc_raw;concurrent_compactors: 1;min_free_space_per_drive: 240MiB;
+Byteman TestScript: no errors
+node up after 12 s
+PARTITIONER org.apache.cassandra.dht.ByteOrderedPartitioner
+DATASET built in 49 s: Data.db lengths [65911854, 65911935, 65912049, 65912068, 65912069, 65912472, 65912655, 65912733]; T 527297835; tablestats SSTable count 8; du of the table 528677170
+PLAN T 527297835; U target 795733291 (U - T = 256.0 MiB); m 251658240; guard planned: admit (U - m - T = 16.0 MiB)
+BALLAST 2586829525 B; df Available 795725824; target U 795733291; difference -7467
+SWITCH compactionDiskSpaceCheck(false): invoked org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck(false) -> null
+SWITCH read back: CompactionDiskSpaceCheckEnabled = false
+IDLE 30 s: 60 samples; df 795725824 -> 795725824; du of the table 528677170 -> 528677170
+EXPECTED: IDLE: du of the table unchanged and df within 1 MiB over 30 s — yes
+TRIGGER: U 795725824 (U - m = 544067584, U - m - T = 16769749 B); files in the table directory 64; du 528677170
+TRIGGER ended after 9 s by: Compacted line; disableautocompaction rc 0
+OBSERVED trace lines in the window: guard 1, switch (ks1.t) 1, writeable 0; whole lifetime: writeable for ks1.t 8, writeable any 37
+OBSERVED guard: est 527297835 avail 544067584 refused False dir /mnt/stage4-dds/data (avail - est = 16769749 B)
+OBSERVED switch positions=null dir=/mnt/stage4-dds/data table=ks1.t ms=1792051250343
+OBSERVED system.log: guard messages []; Compacting lines 1 (inputs [8]); Compacted lines 1; "space check is disabled" lines 1; Reducing scope 0; sibling abort 0; ERROR lines 0; FSWriteError/No space lines 0; Stopping transports 0
+OBSERVED files: Data.db [65911854, 65911935, 65912049, 65912068, 65912069, 65912472, 65912655, 65912733] -> [527352733]; files 64 -> 8; new names ['nb-9-big-CRC.db', 'nb-9-big-Data.db', 'nb-9-big-Digest.crc32', 'nb-9-big-Filter.db', 'nb-9-big-Index.db', 'nb-9-big-Statistics.db', 'nb-9-big-Summary.db', 'nb-9-big-TOC.txt']; du 528677170 -> 528712657; peak du 1057168682; min df Available 267223040; df now 795795456; samples 40; DiskBoundaryManager debug lines for ks1.t (lifetime) 0
+NODE STATE after the trigger: daemon up; statusbinary 'running'; statusgossip 'running'
+EXPECTED: every task held all 8 inputs (one Compacting line with 8 Data.db) — else INVALID RUN — yes
+EXPECTED: the background task was a COMPACTION with the switch off: one "space check is disabled" line — yes
+EXPECTED: arm B: no "Refreshing disk boundary cache for ks1.t" debug line in the lifetime — yes
+EXPECTED: arm B: one writeable trace line for ks1.t per flush (>= 8) — yes
+EXPECTED: arm B: exactly one guard trace line — yes
+EXPECTED: guard line: refused == (avail < est) — yes
+EXPECTED: guard line: est == T (527297835) — yes
+EXPECTED: guard line: avail within 1 MiB of df at the trigger minus m (544067584) — yes
+EXPECTED: arm B admit: no guard exception, no sibling message — yes
+EXPECTED: arm B admit: one switch line with positions=null — yes
+EXPECTED: arm B admit: one Compacted line and one Data.db whose length is within 1 % of T — yes
+DONE

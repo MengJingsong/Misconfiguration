@@ -1,0 +1,35 @@
+RUN run1 LABEL b_p256: arm B, m 50 MiB, U = T + 50 MiB + 256 MiB, sibling check off; date 2026-10-15 03:48:01 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; kernel 5.15.0-187-generic
+JAVA openjdk version "11.0.32.1" 2026-08-18 | CLONE cassandra-5.0.9 b5f2a54
+HARNESS md5 8ab6ace069be050a552b064b3802924d
+FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-dds
+YAML arm B: conf /users/jason92/stage4-dds/conf, partitioner org.apache.cassandra.dht.ByteOrderedPartitioner, token 00, m 50MiB; yaml tail: # ---- stage4 dds lines ----;cluster_name: stage4-dds-bop;partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner;num_tokens: 1;initial_token: 00;data_file_directories:;    - /mnt/stage4-dds/data;commitlog_directory: /users/jason92/stage4-dds/commitlog;hints_directory: /users/jason92/stage4-dds/hints;saved_caches_directory: /users/jason92/stage4-dds/saved_caches;cdc_raw_directory: /users/jason92/stage4-dds/cdc_raw;concurrent_compactors: 1;min_free_space_per_drive: 50MiB;
+Byteman TestScript: no errors
+node up after 12 s
+PARTITIONER org.apache.cassandra.dht.ByteOrderedPartitioner
+DATASET built in 49 s: Data.db lengths [65911882, 65912049, 65912069, 65912136, 65912386, 65912454, 65912512, 65912600]; T 527298088; tablestats SSTable count 8; du of the table 528677420
+PLAN T 527298088; U target 848162344 (U - T = 306.0 MiB); m 52428800; guard planned: admit (U - m - T = 256.0 MiB)
+BALLAST 2534400472 B; df Available 848154624; target U 848162344; difference -7720
+SWITCH compactionDiskSpaceCheck(false): invoked org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck(false) -> null
+SWITCH read back: CompactionDiskSpaceCheckEnabled = false
+IDLE 30 s: 60 samples; df 848154624 -> 848154624; du of the table 528677420 -> 528677420
+EXPECTED: IDLE: du of the table unchanged and df within 1 MiB over 30 s — yes
+TRIGGER: U 848154624 (U - m = 795725824, U - m - T = 268427736 B); files in the table directory 64; du 528677420
+TRIGGER ended after 9 s by: Compacted line; disableautocompaction rc 0
+OBSERVED trace lines in the window: guard 1, switch (ks1.t) 1, writeable 0; whole lifetime: writeable for ks1.t 8, writeable any 37
+OBSERVED guard: est 527298088 avail 795725824 refused False dir /mnt/stage4-dds/data (avail - est = 268427736 B)
+OBSERVED switch positions=null dir=/mnt/stage4-dds/data table=ks1.t ms=1792050581144
+OBSERVED system.log: guard messages []; Compacting lines 1 (inputs [8]); Compacted lines 1; "space check is disabled" lines 1; Reducing scope 0; sibling abort 0; ERROR lines 0; FSWriteError/No space lines 0; Stopping transports 0
+OBSERVED files: Data.db [65911882, 65912049, 65912069, 65912136, 65912386, 65912454, 65912512, 65912600] -> [527352386]; files 64 -> 8; new names ['nb-9-big-CRC.db', 'nb-9-big-Data.db', 'nb-9-big-Digest.crc32', 'nb-9-big-Filter.db', 'nb-9-big-Index.db', 'nb-9-big-Statistics.db', 'nb-9-big-Summary.db', 'nb-9-big-TOC.txt']; du 528677420 -> 528712310; peak du 1057168586; min df Available 319651840; df now 848228352; samples 40; DiskBoundaryManager debug lines for ks1.t (lifetime) 0
+NODE STATE after the trigger: daemon up; statusbinary 'running'; statusgossip 'running'
+EXPECTED: every task held all 8 inputs (one Compacting line with 8 Data.db) — else INVALID RUN — yes
+EXPECTED: the background task was a COMPACTION with the switch off: one "space check is disabled" line — yes
+EXPECTED: arm B: no "Refreshing disk boundary cache for ks1.t" debug line in the lifetime — yes
+EXPECTED: arm B: one writeable trace line for ks1.t per flush (>= 8) — yes
+EXPECTED: arm B: exactly one guard trace line — yes
+EXPECTED: guard line: refused == (avail < est) — yes
+EXPECTED: guard line: est == T (527298088) — yes
+EXPECTED: guard line: avail within 1 MiB of df at the trigger minus m (795725824) — yes
+EXPECTED: arm B admit: no guard exception, no sibling message — yes
+EXPECTED: arm B admit: one switch line with positions=null — yes
+EXPECTED: arm B admit: one Compacted line and one Data.db whose length is within 1 % of T — yes
+DONE

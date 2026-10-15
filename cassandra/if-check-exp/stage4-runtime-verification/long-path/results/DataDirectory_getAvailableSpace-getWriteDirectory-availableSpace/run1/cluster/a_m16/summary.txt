@@ -1,0 +1,32 @@
+RUN run1 LABEL a_m16: arm A, m 50 MiB, U = T + 50 MiB + -16 MiB, sibling check off; date 2026-10-15 04:12:35 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; kernel 5.15.0-187-generic
+JAVA openjdk version "11.0.32.1" 2026-08-18 | CLONE cassandra-5.0.9 b5f2a54
+HARNESS md5 8ab6ace069be050a552b064b3802924d
+FILESYSTEM /dev/loop0     4143677440 28672 3912126464   1% /mnt/stage4-dds
+YAML arm A: conf /users/jason92/stage4-dds/conf, partitioner org.apache.cassandra.dht.Murmur3Partitioner, token 0, m 50MiB; yaml tail: # ---- stage4 dds lines ----;cluster_name: stage4-dds-m3;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: 0;data_file_directories:;    - /mnt/stage4-dds/data;commitlog_directory: /users/jason92/stage4-dds/commitlog;hints_directory: /users/jason92/stage4-dds/hints;saved_caches_directory: /users/jason92/stage4-dds/saved_caches;cdc_raw_directory: /users/jason92/stage4-dds/cdc_raw;concurrent_compactors: 1;min_free_space_per_drive: 50MiB;
+Byteman TestScript: no errors
+node up after 12 s
+PARTITIONER org.apache.cassandra.dht.Murmur3Partitioner
+DATASET built in 52 s: Data.db lengths [65912667, 65912919, 65912963, 65912967, 65913136, 65913245, 65913351, 65913423]; T 527304671; tablestats SSTable count 8; du of the table 528683974
+PLAN T 527304671; U target 562956255 (U - T = 34.0 MiB); m 52428800; guard planned: refuse (U - m - T = -16.0 MiB)
+BALLAST 2819577889 B; df Available 562950144; target U 562956255; difference -6111
+SWITCH compactionDiskSpaceCheck(false): invoked org.apache.cassandra.db:type=Tables,keyspace=ks1,table=t compactionDiskSpaceCheck(false) -> null
+SWITCH read back: CompactionDiskSpaceCheckEnabled = false
+IDLE 30 s: 60 samples; df 562950144 -> 562950144; du of the table 528683974 -> 528683974
+EXPECTED: IDLE: du of the table unchanged and df within 1 MiB over 30 s — yes
+TRIGGER: U 562950144 (U - m = 510521344, U - m - T = -16783327 B); files in the table directory 64; du 528683974
+TRIGGER ended after 9 s by: Compacted line; disableautocompaction rc 0
+OBSERVED trace lines in the window: guard 0, switch (ks1.t) 1, writeable 0; whole lifetime: writeable for ks1.t 0, writeable any 24
+OBSERVED switch positions=1 dir=/mnt/stage4-dds/data table=ks1.t ms=1792052058822
+OBSERVED system.log: guard messages []; Compacting lines 1 (inputs [8]); Compacted lines 1; "space check is disabled" lines 1; Reducing scope 0; sibling abort 0; ERROR lines 0; FSWriteError/No space lines 0; Stopping transports 0
+OBSERVED files: Data.db [65912667, 65912919, 65912963, 65912967, 65913136, 65913245, 65913351, 65913423] -> [527353423]; files 64 -> 8; new names ['nb-9-big-CRC.db', 'nb-9-big-Data.db', 'nb-9-big-Digest.crc32', 'nb-9-big-Filter.db', 'nb-9-big-Index.db', 'nb-9-big-Statistics.db', 'nb-9-big-Summary.db', 'nb-9-big-TOC.txt']; du 528683974 -> 528713342; peak du 1057176176; min df Available 34447360; df now 563048448; samples 40; DiskBoundaryManager debug lines for ks1.t (lifetime) 1
+NODE STATE after the trigger: daemon up; statusbinary 'running'; statusgossip 'running'
+EXPECTED: every task held all 8 inputs (one Compacting line with 8 Data.db) — else INVALID RUN — yes
+EXPECTED: the background task was a COMPACTION with the switch off: one "space check is disabled" line — yes
+EXPECTED: arm A: the "Refreshing disk boundary cache for ks1.t" debug line appears (lifetime) — yes
+EXPECTED: arm A: no writeable trace line in the whole lifetime (no flush or compaction reached the second check site) — NO (recorded; the AI judges it in the results file)
+EXPECTED: arm A: no guard trace line and no guard exception — yes
+EXPECTED: arm A: every switch line has positions=1 (the boundary path) — yes
+EXPECTED: arm A: no sibling message — yes
+EXPECTED: arm A: completed: one Compacted line, one Data.db within 1 % of T — yes
+EXPECTED: arm A d=-16: the minimum df Available during the compaction fell below m (52428800) and stayed above 0 — yes
+DONE

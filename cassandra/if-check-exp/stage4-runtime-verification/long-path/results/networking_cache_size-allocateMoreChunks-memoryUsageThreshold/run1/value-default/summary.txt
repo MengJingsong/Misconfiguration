@@ -1,0 +1,44 @@
+RUN run1 LABEL value-default; date 2026-10-15 05:22:16 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu
+CLONE cassandra-5.0.9 b5f2a54 | HARNESS md5 5da7ac7e70730572e2d9b5d4d448eb03
+yaml for networking_cache_size=default: # ---- stage4 ncs lines ----;data_file_directories:;    - /users/jason92/stage4-ncs/data;commitlog_directory: /users/jason92/stage4-ncs/commitlog;hints_directory: /users/jason92/stage4-ncs/hints;saved_caches_directory: /users/jason92/stage4-ncs/saved_caches;cdc_raw_directory: /users/jason92/stage4-ncs/cdc_raw;
+node up after 12 s, pid 688340
+STARTUP LINE INFO  [SSTableBatchOpen:1] 2026-10-15T09:22:23,532 BufferPools.java:49 - Global buffer pool limit is 512.000MiB for chunk-cache and 128.000MiB for networking; sysctl net.ipv4.tcp_wmem = 4096	16384	4194304; net.ipv4.tcp_rmem = 4096	131072	6291456
+probe 5.0.9-SNAPSHOT
+EXPECTED: Capacity gauge = T (134217728) — yes
+EXPECTED: startup line names 128.000MiB for networking — yes
+NMT idle: Other committed 252305 KB
+PHASE idle: counters {'made': 1, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 0, 'payload_small': 15, 'encoded': 0, 'freed': 0, 'ms': 1792056185533}; gauges {'t0_ms': 1792056185082, 't1_ms': 1792056185089, 'capacity': 134217728, 'size': 8388608, 'used': 0, 'overflow': 0, 'pooled': 8388608, 'hits': 25, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 57015258, 'direct_count': 159}
+IDLE: P 8388608; direct - cc median 48624602; overflow [0]
+EXPECTED: idle: P = 8 MiB (one slab), O = 0 — yes
+PHASE A-before: counters {'made': 1, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 0, 'payload_small': 15, 'encoded': 0, 'freed': 0, 'ms': 1792056187184}; gauges {'t0_ms': 1792056187083, 't1_ms': 1792056187091, 'capacity': 134217728, 'size': 8388608, 'used': 0, 'overflow': 0, 'pooled': 8388608, 'hits': 25, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 57015258, 'direct_count': 159}
+PHASE A-peak: counters {'made': 1, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 32, 'payload_small': 19, 'encoded': 32, 'freed': 19, 'ms': 1792056200096}; gauges {'t0_ms': 1792056200087, 't1_ms': 1792056200097, 'capacity': 134217728, 'size': 8388608, 'used': 1704384, 'overflow': 0, 'pooled': 8388608, 'hits': 62, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 57092161, 'direct_count': 163}
+PHASE A-after: counters {'made': 1, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 32, 'payload_small': 19, 'encoded': 32, 'freed': 32, 'ms': 1792056211748}; gauges {'t0_ms': 1792056211087, 't1_ms': 1792056211091, 'capacity': 134217728, 'size': 8388608, 'used': 0, 'overflow': 0, 'pooled': 8388608, 'hits': 62, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 57070581, 'direct_count': 159}
+SCENARIO A: R=4 framed=1.0035207271575928 P=8388608 P_after=8388608 O_peak=0 O_after=0 refuse=0 n_o=0 o_bytes=0 held=13 held_after=0 full=32 sendq=2488848 recvq=65496 S=2554344 direct_rise=78951 misses=0 client=READY; wrote 4 requests in 244 bytes; SO_RCVBUF 131072 | closed
+EXPECTED: A: no refusal, O = 0 throughout, P unchanged from idle (<= 16 MiB) — yes
+PHASE M-before: counters {'made': 1, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 32, 'payload_small': 19, 'encoded': 32, 'freed': 32, 'ms': 1792056213387}; gauges {'t0_ms': 1792056213087, 't1_ms': 1792056213094, 'capacity': 134217728, 'size': 8388608, 'used': 0, 'overflow': 0, 'pooled': 8388608, 'hits': 62, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 57070581, 'direct_count': 159}
+PHASE M-peak: counters {'made': 6, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 416, 'payload_small': 67, 'encoded': 416, 'freed': 51, 'ms': 1792056235559}; gauges {'t0_ms': 1792056235090, 't1_ms': 1792056235097, 'capacity': 134217728, 'size': 50331648, 'used': 47851584, 'overflow': 0, 'pooled': 50331648, 'hits': 497, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 99507233, 'direct_count': 185}
+PHASE M-after: counters {'made': 6, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 416, 'payload_small': 67, 'encoded': 416, 'freed': 416, 'ms': 1792056247253}; gauges {'t0_ms': 1792056247092, 't1_ms': 1792056247098, 'capacity': 134217728, 'size': 50331648, 'used': 0, 'overflow': 0, 'pooled': 50331648, 'hits': 497, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 99507233, 'direct_count': 185}
+SCENARIO M: R=48 framed=0.5026271343231201 P=50331648 P_after=50331648 O_peak=0 O_after=0 refuse=0 n_o=0 o_bytes=0 held=365 held_after=0 full=384 sendq=2488848 recvq=65496 S=2554344 direct_rise=42494023 misses=0 client=READY; wrote 48 requests in 2928 bytes; SO_RCVBUF 131072 | closed
+EXPECTED: M: P after M within [48, 56] MiB (64 at most), O = 0, no refusal — not T' (134217728) — yes
+EXPECTED: M: P - P_idle within 2 MiB of 40-48 MiB (not 125829120) — yes
+PHASE B-before: counters {'made': 6, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 416, 'payload_small': 67, 'encoded': 416, 'freed': 416, 'ms': 1792056249102}; gauges {'t0_ms': 1792056249093, 't1_ms': 1792056249102, 'capacity': 134217728, 'size': 50331648, 'used': 0, 'overflow': 0, 'pooled': 50331648, 'hits': 497, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 99507233, 'direct_count': 185}
+PHASE B-peak: counters {'made': 16, 'refuse': 494, 'overflow': 494, 'overflow_bytes': 64748580, 'ovfadd_bytes': 64748580, 'ovfsub_bytes': 2964, 'payload_full': 1952, 'payload_small': 259, 'encoded': 1952, 'freed': 435, 'ms': 1792056271780}; gauges {'t0_ms': 1792056271099, 't1_ms': 1792056271109, 'capacity': 134217728, 'size': 198963344, 'used': 198874832, 'overflow': 64745616, 'pooled': 134217728, 'hits': 1734, 'misses': 494, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 248791725, 'direct_count': 726}
+NMT B-peak: Other committed 1013018 KB
+PHASE B-after: counters {'made': 16, 'refuse': 494, 'overflow': 494, 'overflow_bytes': 64748580, 'ovfadd_bytes': 64748580, 'ovfsub_bytes': 64751544, 'payload_full': 1952, 'payload_small': 259, 'encoded': 1952, 'freed': 1952, 'ms': 1792056284114}; gauges {'t0_ms': 1792056284105, 't1_ms': 1792056284114, 'capacity': 134217728, 'size': 134214764, 'used': -2964, 'overflow': -2964, 'pooled': 134217728, 'hits': 1734, 'misses': 494, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 184043145, 'direct_count': 232}
+SCENARIO B: R=192 framed=1.0036852359771729 P=134217728 P_after=134217728 O_peak=64745616 O_after=-2964 refuse=494 n_o=494 o_bytes=64748580 held=1517 held_after=0 full=1536 sendq=2488848 recvq=65496 S=2554344 direct_rise=191778515 misses=494 client=READY; wrote 192 requests in 11712 bytes; SO_RCVBUF 131072 | closed
+EXPECTED: B: P = T' (134217728) exactly, never above — yes
+EXPECTED: B: P + O_peak within [D - S - 1 MiB, D + 1 MiB] = [197723672, 202375168] — yes
+EXPECTED: B: refusals > 0, Misses >= overflow allocations — yes
+EXPECTED: B: O_peak = 131,070 x n_o of full frames + < 1 KiB per response — yes
+EXPECTED: B: direct rise within [D - S - 10 MiB, D + 10 MiB] = [188286488, 211812352] — yes
+EXPECTED: B: held frames during the stall well above zero (the client did not read) — yes
+PHASE after-B: counters {'made': 16, 'refuse': 494, 'overflow': 494, 'overflow_bytes': 64748580, 'ovfadd_bytes': 64748580, 'ovfsub_bytes': 64751544, 'payload_full': 1952, 'payload_small': 259, 'encoded': 1952, 'freed': 1952, 'ms': 1792056300641}; gauges {'t0_ms': 1792056300106, 't1_ms': 1792056300114, 'capacity': 134217728, 'size': 134214764, 'used': -2964, 'overflow': -2964, 'pooled': 134217728, 'hits': 1734, 'misses': 494, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 184043145, 'direct_count': 232}
+NMT after-B: Other committed 949786 KB
+AFTER B: held 0; P 134217728; O -2964; direct - cc median 175654537.0 (rise 127029935.0); overflow allocations in the lifetime 494
+EXPECTED: after B: held frames 0 — yes
+EXPECTED: after B: P unchanged — yes
+EXPECTED: after B: O within a few KiB of zero (−6 B per overflowed full frame) — yes
+EXPECTED: after B: direct rise = T' - P_idle (125829120) ± 2 MiB — yes
+INFO lines for networking: 1; failed to allocate: 0
+RESULT value default: T 134217728 T' 134217728 | A P 8388608 O 0 | M P 50331648 O 0 S 2554344 | B P 134217728 O 64745616 S 2554344 direct_rise 191778515 | after direct_rise 127029935.0
+DONE

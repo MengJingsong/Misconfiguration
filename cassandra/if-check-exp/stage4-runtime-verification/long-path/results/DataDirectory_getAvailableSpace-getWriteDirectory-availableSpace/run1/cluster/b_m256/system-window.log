@@ -1,0 +1,20 @@
+INFO  [CompactionExecutor:2] 2026-10-15T07:56:25,826 CompactionTask.java:388 - Compaction space check is disabled - trying to compact all sstables
+INFO  [CompactionExecutor:2] 2026-10-15T07:56:25,826 CompactionTask.java:175 - Compacting (ebccbd10-c86d-11f1-b009-0dd6f77a91f0) [/mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-3-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-2-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-5-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-4-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-7-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-6-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-8-big-Data.db:level=0, /mnt/stage4-dds/data/ks1/t-b998def0c86d11f1b0090dd6f77a91f0/nb-1-big-Data.db:level=0, ]
+ERROR [CompactionExecutor:2] 2026-10-15T07:56:25,838 JVMStabilityInspector.java:70 - Exception in thread Thread[CompactionExecutor:2,5,CompactionExecutor]
+java.lang.RuntimeException: Not enough space to write 502.872MiB to /mnt/stage4-dds/data (246.867MiB available)
+	at org.apache.cassandra.db.compaction.writers.CompactionAwareWriter.getWriteDirectory(CompactionAwareWriter.java:283)
+	at org.apache.cassandra.db.compaction.writers.CompactionAwareWriter.maybeSwitchLocation(CompactionAwareWriter.java:185)
+	at org.apache.cassandra.db.compaction.writers.CompactionAwareWriter.maybeSwitchWriter(CompactionAwareWriter.java:168)
+	at org.apache.cassandra.db.compaction.writers.CompactionAwareWriter.append(CompactionAwareWriter.java:140)
+	at org.apache.cassandra.db.compaction.CompactionTask.runMayThrow(CompactionTask.java:224)
+	at org.apache.cassandra.utils.WrappedRunnable.run(WrappedRunnable.java:26)
+	at org.apache.cassandra.db.compaction.CompactionTask.executeInternal(CompactionTask.java:94)
+	at org.apache.cassandra.db.compaction.AbstractCompactionTask.execute(AbstractCompactionTask.java:100)
+	at org.apache.cassandra.db.compaction.CompactionManager$BackgroundCompactionCandidate.run(CompactionManager.java:374)
+	at org.apache.cassandra.concurrent.FutureTask$3.call(FutureTask.java:141)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)

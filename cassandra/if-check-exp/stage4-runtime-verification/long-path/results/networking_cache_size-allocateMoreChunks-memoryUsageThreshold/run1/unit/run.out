@@ -1,0 +1,145 @@
+STAGE4 figures stage4-net-recycle-true-fifo8 u3-end-holding size=67108864 overflow=0 pooled=67108864 used=524288 hits=20000 misses=0 capacity=67108864
+STAGE4 figures stage4-net-recycle-true-fifo8 recycleNormal=3 recyclePartial=5554 registerNormal=512 acquire=5557 pooled=67108864 overflow=0
+STAGE4 figures stage4-net-recycle-false-fifo8 u3-end-holding size=8388608 overflow=0 pooled=8388608 used=524288 hits=20000 misses=0 capacity=67108864
+STAGE4 figures stage4-net-recycle-false-fifo8 recycleNormal=5557 recyclePartial=0 registerNormal=64 acquire=5557 pooled=8388608 overflow=0
+STAGE4 info u3 FIFO 8: true pool recyclePartial 5554 pooled 67108864; false pool recyclePartial 0 pooled 8388608
+STAGE4 check u3-false U3 recyclePartial 0 on the networking-like pool expected=0 got=0 OK
+STAGE4 check u3-false U3 pooled 8 MiB at the end (one slab) expected=8388608 got=8388608 OK
+STAGE4 check u3-false U3 overflow 0 expected=0 got=0 OK
+STAGE4 check u3-true U3 recyclePartial > 0 on the chunk-cache-like pool expected=1 got=1 OK
+STAGE4 check u3-true U3 pooled above 8 MiB on the chunk-cache-like pool expected=1 got=1 OK
+STAGE4 info u3_recycleContrast done, mismatches 0
+STAGE4 check stage4-net-0 U2.capacity expected=0 got=0 OK
+STAGE4 figures stage4-net-0 1-first-overflow size=131070 overflow=131070 pooled=0 used=131070 hits=0 misses=1 capacity=0
+STAGE4 check stage4-net-0 U2.1 pooled = T' (floor(T / 8 MiB) x 8 MiB) expected=0 got=0 OK
+STAGE4 check stage4-net-0 U2.1 pooled buffers = 64 x T' / 8 MiB expected=0 got=0 OK
+STAGE4 check stage4-net-0 U2.1 first other buffer capacity expected=131070 got=131070 OK
+STAGE4 check stage4-net-0 U2.1 overflow = 131,070 expected=131070 got=131070 OK
+STAGE4 figures stage4-net-0 2-five-more size=786420 overflow=786420 pooled=0 used=786420 hits=0 misses=6 capacity=0
+STAGE4 check stage4-net-0 U2.2 five more: each non-null, direct, capacity 131,070 expected=0 got=0 OK
+STAGE4 check stage4-net-0 U2.2 overflow = 6 x 131,070 expected=786420 got=786420 OK
+STAGE4 check stage4-net-0 U2.2 Misses +5 expected=6 got=6 OK
+STAGE4 check stage4-net-0 U2.2 pooled unchanged expected=0 got=0 OK
+STAGE4 check stage4-net-0 U2.3 tryGetAtLeast(131070) is null expected=1 got=1 OK
+STAGE4 figures stage4-net-0 4-overflow-back size=0 overflow=0 pooled=0 used=0 hits=0 misses=7 capacity=0
+STAGE4 check stage4-net-0 U2.4 overflow 0 expected=0 got=0 OK
+STAGE4 figures stage4-net-0 5-all-back size=0 overflow=0 pooled=0 used=0 hits=0 misses=7 capacity=0
+STAGE4 check stage4-net-0 U2.5 pooled unchanged after all back expected=0 got=0 OK
+STAGE4 figures stage4-net-0 5-again size=0 overflow=0 pooled=0 used=0 hits=0 misses=7 capacity=0
+STAGE4 check stage4-net-0 U2.5 the same count again is all pooled expected=0 got=0 OK
+STAGE4 check stage4-net-0 U2.5 pooled unchanged (no new slab) expected=0 got=0 OK
+STAGE4 check stage4-net-0 U2.5 overflow 0 expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.capacity expected=4194304 got=4194304 OK
+STAGE4 figures stage4-net-4 1-first-overflow size=131070 overflow=131070 pooled=0 used=131070 hits=0 misses=1 capacity=4194304
+STAGE4 check stage4-net-4 U2.1 pooled = T' (floor(T / 8 MiB) x 8 MiB) expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.1 pooled buffers = 64 x T' / 8 MiB expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.1 first other buffer capacity expected=131070 got=131070 OK
+STAGE4 check stage4-net-4 U2.1 overflow = 131,070 expected=131070 got=131070 OK
+STAGE4 figures stage4-net-4 2-five-more size=786420 overflow=786420 pooled=0 used=786420 hits=0 misses=6 capacity=4194304
+STAGE4 check stage4-net-4 U2.2 five more: each non-null, direct, capacity 131,070 expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.2 overflow = 6 x 131,070 expected=786420 got=786420 OK
+STAGE4 check stage4-net-4 U2.2 Misses +5 expected=6 got=6 OK
+STAGE4 check stage4-net-4 U2.2 pooled unchanged expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.3 tryGetAtLeast(131070) is null expected=1 got=1 OK
+STAGE4 figures stage4-net-4 4-overflow-back size=0 overflow=0 pooled=0 used=0 hits=0 misses=7 capacity=4194304
+STAGE4 check stage4-net-4 U2.4 overflow 0 expected=0 got=0 OK
+STAGE4 figures stage4-net-4 5-all-back size=0 overflow=0 pooled=0 used=0 hits=0 misses=7 capacity=4194304
+STAGE4 check stage4-net-4 U2.5 pooled unchanged after all back expected=0 got=0 OK
+STAGE4 figures stage4-net-4 5-again size=0 overflow=0 pooled=0 used=0 hits=0 misses=7 capacity=4194304
+STAGE4 check stage4-net-4 U2.5 the same count again is all pooled expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.5 pooled unchanged (no new slab) expected=0 got=0 OK
+STAGE4 check stage4-net-4 U2.5 overflow 0 expected=0 got=0 OK
+STAGE4 check stage4-net-16 U2.capacity expected=16777216 got=16777216 OK
+STAGE4 figures stage4-net-16 1-first-overflow size=16908286 overflow=131070 pooled=16777216 used=16908286 hits=128 misses=1 capacity=16777216
+STAGE4 check stage4-net-16 U2.1 pooled = T' (floor(T / 8 MiB) x 8 MiB) expected=16777216 got=16777216 OK
+STAGE4 check stage4-net-16 U2.1 pooled buffers = 64 x T' / 8 MiB expected=128 got=128 OK
+STAGE4 check stage4-net-16 U2.1 first other buffer capacity expected=131070 got=131070 OK
+STAGE4 check stage4-net-16 U2.1 overflow = 131,070 expected=131070 got=131070 OK
+STAGE4 figures stage4-net-16 2-five-more size=17563636 overflow=786420 pooled=16777216 used=17563636 hits=128 misses=6 capacity=16777216
+STAGE4 check stage4-net-16 U2.2 five more: each non-null, direct, capacity 131,070 expected=0 got=0 OK
+STAGE4 check stage4-net-16 U2.2 overflow = 6 x 131,070 expected=786420 got=786420 OK
+STAGE4 check stage4-net-16 U2.2 Misses +5 expected=6 got=6 OK
+STAGE4 check stage4-net-16 U2.2 pooled unchanged expected=16777216 got=16777216 OK
+STAGE4 check stage4-net-16 U2.3 tryGetAtLeast(131070) is null expected=1 got=1 OK
+STAGE4 figures stage4-net-16 4-overflow-back size=16777216 overflow=0 pooled=16777216 used=16777216 hits=128 misses=7 capacity=16777216
+STAGE4 check stage4-net-16 U2.4 overflow 0 expected=0 got=0 OK
+STAGE4 figures stage4-net-16 5-all-back size=16777216 overflow=0 pooled=16777216 used=0 hits=128 misses=7 capacity=16777216
+STAGE4 check stage4-net-16 U2.5 pooled unchanged after all back expected=16777216 got=16777216 OK
+STAGE4 figures stage4-net-16 5-again size=16777216 overflow=0 pooled=16777216 used=16777216 hits=256 misses=7 capacity=16777216
+STAGE4 check stage4-net-16 U2.5 the same count again is all pooled expected=0 got=0 OK
+STAGE4 check stage4-net-16 U2.5 pooled unchanged (no new slab) expected=16777216 got=16777216 OK
+STAGE4 check stage4-net-16 U2.5 overflow 0 expected=0 got=0 OK
+STAGE4 check stage4-net-20 U2.capacity expected=20971520 got=20971520 OK
+STAGE4 figures stage4-net-20 1-first-overflow size=16908286 overflow=131070 pooled=16777216 used=16908286 hits=128 misses=1 capacity=20971520
+STAGE4 check stage4-net-20 U2.1 pooled = T' (floor(T / 8 MiB) x 8 MiB) expected=16777216 got=16777216 OK
+STAGE4 check stage4-net-20 U2.1 pooled buffers = 64 x T' / 8 MiB expected=128 got=128 OK
+STAGE4 check stage4-net-20 U2.1 first other buffer capacity expected=131070 got=131070 OK
+STAGE4 check stage4-net-20 U2.1 overflow = 131,070 expected=131070 got=131070 OK
+STAGE4 figures stage4-net-20 2-five-more size=17563636 overflow=786420 pooled=16777216 used=17563636 hits=128 misses=6 capacity=20971520
+STAGE4 check stage4-net-20 U2.2 five more: each non-null, direct, capacity 131,070 expected=0 got=0 OK
+STAGE4 check stage4-net-20 U2.2 overflow = 6 x 131,070 expected=786420 got=786420 OK
+STAGE4 check stage4-net-20 U2.2 Misses +5 expected=6 got=6 OK
+STAGE4 check stage4-net-20 U2.2 pooled unchanged expected=16777216 got=16777216 OK
+STAGE4 check stage4-net-20 U2.3 tryGetAtLeast(131070) is null expected=1 got=1 OK
+STAGE4 figures stage4-net-20 4-overflow-back size=16777216 overflow=0 pooled=16777216 used=16777216 hits=128 misses=7 capacity=20971520
+STAGE4 check stage4-net-20 U2.4 overflow 0 expected=0 got=0 OK
+STAGE4 figures stage4-net-20 5-all-back size=16777216 overflow=0 pooled=16777216 used=0 hits=128 misses=7 capacity=20971520
+STAGE4 check stage4-net-20 U2.5 pooled unchanged after all back expected=16777216 got=16777216 OK
+STAGE4 figures stage4-net-20 5-again size=16777216 overflow=0 pooled=16777216 used=16777216 hits=256 misses=7 capacity=20971520
+STAGE4 check stage4-net-20 U2.5 the same count again is all pooled expected=0 got=0 OK
+STAGE4 check stage4-net-20 U2.5 pooled unchanged (no new slab) expected=16777216 got=16777216 OK
+STAGE4 check stage4-net-20 U2.5 overflow 0 expected=0 got=0 OK
+STAGE4 check stage4-net-64 U2.capacity expected=67108864 got=67108864 OK
+STAGE4 figures stage4-net-64 1-first-overflow size=67239934 overflow=131070 pooled=67108864 used=67239934 hits=512 misses=1 capacity=67108864
+STAGE4 check stage4-net-64 U2.1 pooled = T' (floor(T / 8 MiB) x 8 MiB) expected=67108864 got=67108864 OK
+STAGE4 check stage4-net-64 U2.1 pooled buffers = 64 x T' / 8 MiB expected=512 got=512 OK
+STAGE4 check stage4-net-64 U2.1 first other buffer capacity expected=131070 got=131070 OK
+STAGE4 check stage4-net-64 U2.1 overflow = 131,070 expected=131070 got=131070 OK
+STAGE4 figures stage4-net-64 2-five-more size=67895284 overflow=786420 pooled=67108864 used=67895284 hits=512 misses=6 capacity=67108864
+STAGE4 check stage4-net-64 U2.2 five more: each non-null, direct, capacity 131,070 expected=0 got=0 OK
+STAGE4 check stage4-net-64 U2.2 overflow = 6 x 131,070 expected=786420 got=786420 OK
+STAGE4 check stage4-net-64 U2.2 Misses +5 expected=6 got=6 OK
+STAGE4 check stage4-net-64 U2.2 pooled unchanged expected=67108864 got=67108864 OK
+STAGE4 check stage4-net-64 U2.3 tryGetAtLeast(131070) is null expected=1 got=1 OK
+STAGE4 figures stage4-net-64 4-overflow-back size=67108864 overflow=0 pooled=67108864 used=67108864 hits=512 misses=7 capacity=67108864
+STAGE4 check stage4-net-64 U2.4 overflow 0 expected=0 got=0 OK
+STAGE4 figures stage4-net-64 5-all-back size=67108864 overflow=0 pooled=67108864 used=0 hits=512 misses=7 capacity=67108864
+STAGE4 check stage4-net-64 U2.5 pooled unchanged after all back expected=67108864 got=67108864 OK
+STAGE4 figures stage4-net-64 5-again size=67108864 overflow=0 pooled=67108864 used=67108864 hits=1024 misses=7 capacity=67108864
+STAGE4 check stage4-net-64 U2.5 the same count again is all pooled expected=0 got=0 OK
+STAGE4 check stage4-net-64 U2.5 pooled unchanged (no new slab) expected=67108864 got=67108864 OK
+STAGE4 check stage4-net-64 U2.5 overflow 0 expected=0 got=0 OK
+STAGE4 check stage4-net-100 U2.capacity expected=104857600 got=104857600 OK
+STAGE4 figures stage4-net-100 1-first-overflow size=100794366 overflow=131070 pooled=100663296 used=100794366 hits=768 misses=1 capacity=104857600
+STAGE4 check stage4-net-100 U2.1 pooled = T' (floor(T / 8 MiB) x 8 MiB) expected=100663296 got=100663296 OK
+STAGE4 check stage4-net-100 U2.1 pooled buffers = 64 x T' / 8 MiB expected=768 got=768 OK
+STAGE4 check stage4-net-100 U2.1 first other buffer capacity expected=131070 got=131070 OK
+STAGE4 check stage4-net-100 U2.1 overflow = 131,070 expected=131070 got=131070 OK
+STAGE4 figures stage4-net-100 2-five-more size=101449716 overflow=786420 pooled=100663296 used=101449716 hits=768 misses=6 capacity=104857600
+STAGE4 check stage4-net-100 U2.2 five more: each non-null, direct, capacity 131,070 expected=0 got=0 OK
+STAGE4 check stage4-net-100 U2.2 overflow = 6 x 131,070 expected=786420 got=786420 OK
+STAGE4 check stage4-net-100 U2.2 Misses +5 expected=6 got=6 OK
+STAGE4 check stage4-net-100 U2.2 pooled unchanged expected=100663296 got=100663296 OK
+STAGE4 check stage4-net-100 U2.3 tryGetAtLeast(131070) is null expected=1 got=1 OK
+STAGE4 figures stage4-net-100 4-overflow-back size=100663296 overflow=0 pooled=100663296 used=100663296 hits=768 misses=7 capacity=104857600
+STAGE4 check stage4-net-100 U2.4 overflow 0 expected=0 got=0 OK
+STAGE4 figures stage4-net-100 5-all-back size=100663296 overflow=0 pooled=100663296 used=0 hits=768 misses=7 capacity=104857600
+STAGE4 check stage4-net-100 U2.5 pooled unchanged after all back expected=100663296 got=100663296 OK
+STAGE4 figures stage4-net-100 5-again size=100663296 overflow=0 pooled=100663296 used=100663296 hits=1536 misses=7 capacity=104857600
+STAGE4 check stage4-net-100 U2.5 the same count again is all pooled expected=0 got=0 OK
+STAGE4 check stage4-net-100 U2.5 pooled unchanged (no new slab) expected=100663296 got=100663296 OK
+STAGE4 check stage4-net-100 U2.5 overflow 0 expected=0 got=0 OK
+STAGE4 info u2_ceiling done, mismatches 0
+STAGE4 info U4 MAX_FRAMED_PAYLOAD_SIZE 131060; networking threshold 16777216
+STAGE4 check U4 networking memoryUsageThreshold = 16 MiB expected=16777216 got=16777216 OK
+STAGE4 check U4 MAX_FRAMED_PAYLOAD_SIZE = 131,060 expected=131060 got=131060 OK
+STAGE4 info U4 after 128 payloads: size 16777216 overflow 0 pooled 16777216
+STAGE4 check U4 payloads 1-128 have capacity 131,072 expected=0 got=0 OK
+STAGE4 check U4 pooled reaches 16 MiB expected=16777216 got=16777216 OK
+STAGE4 check U4 overflow 0 after 128 expected=0 got=0 OK
+STAGE4 check U4 payload 129 capacity 131,070 expected=131070 got=131070 OK
+STAGE4 check U4 OverflowSize 131,070 after 129 expected=131070 got=131070 OK
+STAGE4 info U4 after finish and release: size 16777210 overflow -6 pooled 16777216 used -6
+STAGE4 check U4 OverflowSize -6 (one overflowed full frame) expected=-6 got=-6 OK
+STAGE4 check U4 pooled stays 16 MiB expected=16777216 got=16777216 OK
+STAGE4 info u4 done, mismatches 0

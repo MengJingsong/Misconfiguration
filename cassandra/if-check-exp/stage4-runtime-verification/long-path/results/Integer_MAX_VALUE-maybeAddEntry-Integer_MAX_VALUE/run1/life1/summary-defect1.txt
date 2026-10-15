@@ -1,0 +1,30 @@
+RUN run1 LABEL life1; date 2026-10-15 04:17:18 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu
+CLONE cassandra-5.0.9 b5f2a54 | HARNESS md5 59b940ae4c8254fe4c24bff61e0f8282
+Byteman TestScript: no errors
+YAML lines: cluster_name: stage4-imv; data_file_directories:;     - /users/jason92/stage4-imv/data; commitlog_directory: /users/jason92/stage4-imv/commitlog; hints_directory: /users/jason92/stage4-imv/hints; saved_caches_directory: /users/jason92/stage4-imv/saved_caches; cdc_raw_directory: /users/jason92/stage4-imv/cdc_raw; index_summary_resize_interval:; memtable_heap_space: 12GiB; commitlog_total_space: 8192MiB; read_request_timeout: 60000ms; native_transport_timeout: 120000ms
+node up (life1) after 50 s, pid 646719, property not set; Submit -l rules ['imv scan print', 'imv scan skip', 'imv rebuild', 'imv refused', 'imv scan reset', 'imv built', 'imv writer', 'imv init']
+ResizeIntervalInMinutes -1
+INSTRUMENT CHECK (not a reading): probe, 9,000 keys of 1,000 B, moved-limit-8 rule
+OBSERVED probe: writer lines 1; init [{'id': '1237414559', 'expectedKeys': '9000', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '648000', 'ms': '1792052301642'}]; refused [{'id': '1237414559', 'keysWritten': '8322', 'length': '8388576', 'entry': '1008', 'ms': '1792052302156'}]; built [{'id': '1237414559', 'count': '8322', 'entriesLength': '8388576', 'capacity': '8388576', 'minIndexInterval': '1', 'keysWritten': '9000', 'ms': '1792052302205'}, {'id': '1237414559', 'count': '8322', 'entriesLength': '8388576', 'capacity': '8388576', 'minIndexInterval': '1', 'keysWritten': '9000', 'ms': '1792052302235'}]; ERROR lines 1; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 8423896; gauge 8421864
+READS probe: scan rows 9000 of 9000 (distinct 9000); per read (rank, scan skips, predicted): [(0, [0], 0), (2080, [0], 0), (4161, [0], 0), (6241, [0], 0), (8321, [0], 0), (8995, [674], 674), (8996, [675], 675), (8997, [676], 676), (8998, [677], 677), (8999, [678], 678)]
+EXPECTED: probe: the token scan returned all 9000 rows — yes
+EXPECTED: probe: every point read returned its row (v = index) — yes
+EXPECTED: probe: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+INSTRUMENT CHECK passed
+IDLE: RssAnon 27326824448
+TABLE ks.c32: L 2147483647 (real); K 1000; N 41610; seed 32; n* 2130440; kept 41610; refusal False
+LOAD ks.c32: 41610 rows of 1000-byte keys, seed 32, in 30.8 s
+OBSERVED c32: writer lines 1; init [{'id': '483636059', 'expectedKeys': '41610', 'minIndexInterval': '1', 'effective': '1', 'entriesCapacity': '2995920', 'ms': '1792052344636'}]; refused []; built [{'id': '483636059', 'count': '41610', 'entriesLength': '41942880', 'capacity': '41942880', 'minIndexInterval': '1', 'keysWritten': '41610', 'ms': '1792052345572'}, {'id': '483636059', 'count': '41610', 'entriesLength': '41942880', 'capacity': '41942880', 'minIndexInterval': '1', 'keysWritten': '41610', 'ms': '1792052345687'}]; ERROR lines 0; WARN lines 0; Data.db files ['nb-1-big-Data.db']; Summary.db 42111352; gauge 42109320
+EXPECTED: c32: one SSTable (one Data.db), one writer and init line, built lines (2) all identical — yes
+EXPECTED: c32: entries kept 41610 (built count) — yes
+EXPECTED: c32: entriesLength 41942880 and the trimmed capacity equal to it — yes
+EXPECTED: c32: gauge = kept x (K + 12) = 42109320 — yes
+EXPECTED: c32: Summary.db = 24 + gauge + 2 (K + 4) = 42111352 — yes
+EXPECTED: c32: no refused line and no ERROR line — yes
+READS c32: scan rows 41610 of 41610 (distinct 41610); per read (rank, scan skips, predicted): [(0, [0], 0), (10402, [0], 0), (20805, [0], 0), (31207, [0], 0), (41605, [0], 0), (41606, [0], 0), (41607, [0], 0), (41608, [0], 0), (41609, [0], 0)]
+EXPECTED: c32: the token scan returned all 41610 rows — yes
+EXPECTED: c32: every point read returned its row (v = index) — yes
+EXPECTED: c32: every point read has exactly one scan line with skips = predicted (r < n*: 0; else r - n* + 1) — yes
+TABLE ks.big: L 2147483647 (real); K 60000; N 40000; seed 60; n* 35786; kept 35786; refusal True
+RSS big: before load 27395239936
+FAIL (exception): RuntimeError("command failed rc=-15: ['python3', '/users/jason92/stage4-harness-run/imv/load-keys.py', 'ks.big', '40000', '60000', '60']\n")

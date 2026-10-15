@@ -1,0 +1,15 @@
+RUN run1 LABEL leak; date 2026-10-15 05:25:13 EDT; host node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu
+CLONE cassandra-5.0.9 b5f2a54 | HARNESS md5 5da7ac7e70730572e2d9b5d4d448eb03
+yaml for networking_cache_size=default: # ---- stage4 ncs lines ----;data_file_directories:;    - /users/jason92/stage4-ncs/data;commitlog_directory: /users/jason92/stage4-ncs/commitlog;hints_directory: /users/jason92/stage4-ncs/hints;saved_caches_directory: /users/jason92/stage4-ncs/saved_caches;cdc_raw_directory: /users/jason92/stage4-ncs/cdc_raw;
+node up after 12 s, pid 691399
+PHASE L-idle: counters {'made': 0, 'refuse': 0, 'overflow': 0, 'overflow_bytes': 0, 'ovfadd_bytes': 0, 'ovfsub_bytes': 0, 'payload_full': 0, 'payload_small': 0, 'encoded': 0, 'freed': 0, 'ms': 1792056361667}; gauges {'t0_ms': 1792056361603, 't1_ms': 1792056361610, 'capacity': 134217728, 'size': 0, 'used': 0, 'overflow': 0, 'pooled': 0, 'hits': 0, 'misses': 0, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 48622322, 'direct_count': 150}
+big-insert acknowledged 64 of 64
+PHASE L-after-30s: counters {'made': 2, 'refuse': 0, 'overflow': 448, 'overflow_bytes': 58724288, 'ovfadd_bytes': 58724288, 'ovfsub_bytes': 0, 'payload_full': 0, 'payload_small': 80, 'encoded': 0, 'freed': 0, 'ms': 1792056396624}; gauges {'t0_ms': 1792056396609, 't1_ms': 1792056396614, 'capacity': 134217728, 'size': 75501504, 'used': 64098240, 'overflow': 58724288, 'pooled': 16777216, 'hits': 1242, 'misses': 448, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 124151268, 'direct_count': 608}
+PHASE L-after-GC: counters {'made': 2, 'refuse': 0, 'overflow': 448, 'overflow_bytes': 58724288, 'ovfadd_bytes': 58724288, 'ovfsub_bytes': 0, 'payload_full': 0, 'payload_small': 80, 'encoded': 0, 'freed': 0, 'ms': 1792056408877}; gauges {'t0_ms': 1792056408610, 't1_ms': 1792056408618, 'capacity': 134217728, 'size': 75501504, 'used': 64098240, 'overflow': 58724288, 'pooled': 16777216, 'hits': 1242, 'misses': 448, 'cc_size': 8388608, 'cc_overflow': 0, 'direct_used': 65379595, 'direct_count': 151}
+ARM L: OverflowSize residual 58724288; UsedSize - OverflowSize residual 5373952; overflow added 58724288 subtracted 0 (short by 58724288); direct 48622322 -> 124151268 -> after GC 65379595; OverflowSize after GC 58724288
+EXPECTED: arm L: every insert acknowledged — yes
+EXPECTED: arm L (leak as derived): OverflowSize residual = 58,724,288 B exactly — yes
+EXPECTED: arm L (leak as derived): UsedSize - OverflowSize residual = 5,373,952 B ± 64 x 2,048 — yes
+EXPECTED: arm L: overflow subtracted short of added by 58,724,288 B — yes
+EXPECTED: arm L: direct falls back after GC.run while OverflowSize does not — yes
+DONE

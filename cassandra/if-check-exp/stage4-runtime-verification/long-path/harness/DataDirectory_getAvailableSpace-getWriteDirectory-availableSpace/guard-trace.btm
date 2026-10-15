@@ -1,0 +1,37 @@
+# Byteman observation rules for DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace, case 9c/9d (added 2026-10-15).
+# They change no behaviour. Lines go to the file named by -Dstage4.trace:
+#   guard est=<estimatedWriteSize> avail=<getAvailableSpace() as returned> refused=<avail < est> dir=<location> ms=<epoch>
+#        after the call at CompactionAwareWriter.getWriteDirectory():281, i.e. the two operands the comparison at :282 reads
+#   switch positions=<null|n> dir=<location> ms=<epoch>
+#        at switchCompactionWriter() entry: one per SSTableWriter the compaction creates, and the path (null = guarded)
+#   writeable size=<writeSize> table=<ks.t> dirs=<n> avail=<getAvailableSpace() of the first data directory> ms=<epoch>
+#        at Directories.getWriteableLocation() entry: the second check site (:453), reached by flushes on the null-boundary path
+
+RULE dds guard operands
+CLASS org.apache.cassandra.db.compaction.writers.CompactionAwareWriter
+METHOD getWriteDirectory
+AFTER INVOKE org.apache.cassandra.db.Directories$DataDirectory.getAvailableSpace
+IF true
+DO traceOpen("dds", java.lang.System.getProperty("stage4.trace", "dds.trace"));
+   traceln("dds", "guard est=" + $2 + " avail=" + $! + " refused=" + ($! < $2) + " dir=" + $d.location + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dds switch writer
+CLASS org.apache.cassandra.db.compaction.writers.CompactionAwareWriter
+METHOD switchCompactionWriter
+AT ENTRY
+IF true
+DO traceOpen("dds", java.lang.System.getProperty("stage4.trace", "dds.trace"));
+   traceln("dds", "switch positions=" + ($0.diskBoundaries == null ? "null" : java.lang.String.valueOf($0.diskBoundaries.size())) + " dir=" + $1.location + " table=" + $0.cfs.getKeyspaceName() + "." + $0.cfs.name + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dds writeable location
+CLASS org.apache.cassandra.db.Directories
+METHOD getWriteableLocation
+AT ENTRY
+BIND dirs = $0.paths;
+     first = dirs[0]
+IF true
+DO traceOpen("dds", java.lang.System.getProperty("stage4.trace", "dds.trace"));
+   traceln("dds", "writeable size=" + $1 + " table=" + $0.metadata.keyspace + "." + $0.metadata.name + " dirs=" + dirs.length + " avail=" + first.getAvailableSpace() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
