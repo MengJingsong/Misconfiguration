@@ -1,0 +1,19 @@
+# The trigger for CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT, case 9c (amended 2026-10-14).
+# At the entry of Keyspace.applyInternal() for keyspace ks1 only, appends a line to stage4.hold.out and delays the applying thread
+# by stage4.hold.ms. Every apply path passes there (Keyspace.java:472-510): a coordinator's local apply, a replica's applyFuture(),
+# and replay's rebuilt mutation (CommitLogReplayer.java:323). The held thread keeps the mutation reachable; at a coordinator the
+# hold is before the commit-log append (CassandraKeyspaceWriteHandler.beginWrite()).
+#     held ks=ks1 pk=<int> delay=<ms> thread=<name> ms=<epoch millis>
+# Properties: stage4.hold.ms (default 45000) and stage4.hold.out (default hold.txt in the JVM's working directory).
+
+RULE hold each ks1 apply
+CLASS org.apache.cassandra.db.Keyspace
+METHOD applyInternal
+AT ENTRY
+IF $1.getKeyspaceName().equals("ks1")
+DO traceOpen("cmsHold", java.lang.System.getProperty("stage4.hold.out", "hold.txt"));
+   traceln("cmsHold", "held ks=ks1 pk=" + $1.key().getKey().getInt($1.key().getKey().position())
+           + " delay=" + java.lang.System.getProperty("stage4.hold.ms", "45000")
+           + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis());
+   delay(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "45000")))
+ENDRULE

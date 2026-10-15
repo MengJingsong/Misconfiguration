@@ -1,0 +1,53 @@
+run 1 on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-14 16:12:54 EDT; epoch ms 1792008774090
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: 7e37cfea6eb7ab43ae51e2952cb779f0  CacheableMutationSizeTest.java;8dad5a66a92213c5a6a590f8fcddd28a  cache-trace.btm;7de238cbcfeafb81852a0013a4de5ecf  hold.btm;37d0e55c8a6079d6b342b52ed4dde9a8  cluster-run.py;87650f8001442cd0669fbf4f7fd11027  send-mutation.py;58f69a94ea1b14bc2edc52c863f3c01d  histo.sh;4ccafe3bfbf6b1daf7edcab47e8ece91  make-node-yaml.sh;07f265843abec143e0e904b4ad1575e5  unit-run.sh;
+yaml for 1-p1: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 120000ms | >  | > # stage4 cms 1-p1 | > native_transport_timeout: 180000ms
+yaml in force: commitlog_sync: batch ; commitlog_segment_size: 32MiB ; concurrent_writes: 32 ; memtable_allocation_type: heap_buffers ; write_request_timeout: 120000ms ; storage_compatibility_mode: CASSANDRA_4 ; native_transport_timeout: 180000ms
+JVM_EXTRA_OPTS=-Dcassandra.cacheable_mutation_size_limit_bytes=1 -Dstage4.hold.ms=45000 -Dstage4.hold.out=/users/jason92/stage4-logs/cms/1/hold-p1.txt -Dstage4.byteman.out=/users/jason92/stage4-logs/cms/1/trace-p1.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cms/cache-trace.btm,script:/users/jason92/stage4-harness-run/cms/hold.btm,listener:true
+start p1: up after 41 s
+VM.system_properties: cassandra.cacheable_mutation_size_limit_bytes=1 (set 1)
+probe: release 5.0.9-SNAPSHOT protocol 4
+histo p1 idle-1: [B 105538 / 15275384 B; CachedSerialization 0 (0 B); SizeOnly 0; Mutation 0; jcmd 461 ms
+histo p1 idle-2: [B 105676 / 16329056 B; CachedSerialization 0 (0 B); SizeOnly 0; Mutation 0; jcmd 455 ms
+idle pair: CachedSerialization 0 / 0; SizeOnly 0 / 0; [B bytes 15275384 / 16329056 (spread 1053672)
+EXPECTED: idle control: the two idle histograms have equal live counts (Cached 0/0, SizeOnly 0/0) — yes
+control write ks0.ctl pk 0, 1,024 B: OK in 0.009 s; new held lines 0; serialize lines for ks0: [(1066, 'SizeOnlyCacheableSerialization')]
+EXPECTED: control write: serialize T=1066 (just above 1,024) cached=SizeOnlyCacheableSerialization (predicted SizeOnlyCacheableSerialization) — yes
+held lines p1: 24 within 1.0 s
+histo p1 held-1: [B 106008 / 39192408 B; CachedSerialization 0 (0 B); SizeOnly 24; Mutation 24; jcmd 463 ms
+histo p1 held-2: [B 106015 / 39192872 B; CachedSerialization 0 (0 B); SizeOnly 24; Mutation 24; jcmd 447 ms
+histo p1 release: [B 105905 / 43711040 B; CachedSerialization 0 (0 B); SizeOnly 0; Mutation 0; jcmd 439 ms
+p1 size 90000: 8 serialize lines, T [90043], cached ['SizeOnlyCacheableSerialization']
+p1 size 500000: 8 serialize lines, T [500043], cached ['SizeOnlyCacheableSerialization']
+p1 size 2000000: 8 serialize lines, T [2000043], cached ['SizeOnlyCacheableSerialization']
+T1, T2, T3 = [90043, 500043, 2000043]; c(L=1) = 0
+EXPECTED: p1 trace: every serialize line has cached=CachedSerialization iff T < L (24 lines, 0 wrong) — yes
+EXPECTED: p1 versions: every serialize line v= [12] (one version) — yes
+EXPECTED: p1 held-1: CachedSerialization held - idle = (0, 0), predicted +0 — yes
+EXPECTED: p1 held-1: SizeOnlyCacheableSerialization held - idle = (24, 24), predicted +24 — yes
+EXPECTED: p1 held-2: CachedSerialization held - idle = (0, 0), predicted +0 — yes
+EXPECTED: p1 held-2: SizeOnlyCacheableSerialization held - idle = (24, 24), predicted +24 — yes
+EXPECTED: p1 writers: 24/24 OK (all), completed 45.018 .. 45.121 s after the start (hold 45 s) — yes
+EXPECTED: p1 release: Cached - idle = (0, 0), SizeOnly - idle = (0, 0) (0 within the idle spread) — yes
+killed -9; data/ and commitlog/ kept
+yaml for 1-p2: | < commitlog_sync: periodic | > commitlog_sync: batch | < commitlog_sync_period: 10000ms | < write_request_timeout: 2000ms | > write_request_timeout: 120000ms | >  | > # stage4 cms 1-p2 | > native_transport_timeout: 180000ms
+yaml in force: commitlog_sync: batch ; commitlog_segment_size: 32MiB ; concurrent_writes: 32 ; memtable_allocation_type: heap_buffers ; write_request_timeout: 120000ms ; storage_compatibility_mode: CASSANDRA_4 ; native_transport_timeout: 180000ms
+JVM_EXTRA_OPTS=-Dcassandra.cacheable_mutation_size_limit_bytes=1 -Dstage4.hold.ms=45000 -Dstage4.hold.out=/users/jason92/stage4-logs/cms/1/hold-p2.txt -Dstage4.byteman.out=/users/jason92/stage4-logs/cms/1/trace-p2.txt -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cms/cache-trace.btm,script:/users/jason92/stage4-harness-run/cms/hold.btm,listener:true
+held lines p2: 24 within 8.3 s of the start command
+histo p2 held-1: [B 93581 / 40931728 B; CachedSerialization 0 (0 B); SizeOnly 0; Mutation 48; jcmd 604 ms
+histo p2 held-2: [B 93642 / 40921592 B; CachedSerialization 0 (0 B); SizeOnly 0; Mutation 48; jcmd 431 ms
+start p2: up after 58 s
+histo p2 release: [B 99376 / 25444560 B; CachedSerialization 0 (0 B); SizeOnly 0; Mutation 0; jcmd 441 ms
+replay lines in system.log: 2:INFO  [main] 2026-10-14T20:12:56,609 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_ | 113:INFO  [main] 2026-10-14T20:13:01,815 CommitLog.java:201 - No commitlog files found; skipping replay | 330:INFO  [main] 2026-10-14T20:14:48,785 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allo | 468:INFO  [main] 2026-10-14T20:14:53,956 CommitLog.java:206 - Replaying bin/../data/commitlog/CommitLog-7-1792008778601.log, bin/../data/commitlog/CommitLog-7-1792008778602.log | 503:INFO  [main] 2026-10-14T20:15:39,368 CommitLog.java:210 - Log replay complete, 83 replayed mutations in 45411 ms
+EXPECTED: a replayed segment in system.log (a "Replaying" / "replayed" line) — yes
+p2 size 90000: 8 deserialize lines, cached [False], teeLen [0] (T = 90043)
+p2 size 500000: 8 deserialize lines, cached [False], teeLen [0] (T = 500043)
+p2 size 2000000: 8 deserialize lines, cached [False], teeLen [0] (T = 2000043)
+EXPECTED: p2 trace: 24 deserialize lines (ks1: 24), cached=true with teeLen = T on 0, cached=false (teeLen < L) on the rest; wrong pks [] — yes
+p2 control (ks0, recorded, not counted): [(False, 0)]
+EXPECTED: p2 held-1: CachedSerialization held - after = 0, predicted +0 (tolerance: the p1 idle spread, 0) — yes
+p2 held-1: SizeOnlyCacheableSerialization held - after = 0 (recorded; predicted unchanged: 0)
+EXPECTED: p2 held-2: CachedSerialization held - after = 0, predicted +0 (tolerance: the p1 idle spread, 0) — yes
+p2 held-2: SizeOnlyCacheableSerialization held - after = 0 (recorded; predicted unchanged: 0)
+EXPECTED: p2 release: after-replay Cached - p1 idle = (0, 0), SizeOnly - p1 idle = (0, 0) (0 within the p1 idle spread) — yes
+node stopped; daemons left: 0; yaml restored

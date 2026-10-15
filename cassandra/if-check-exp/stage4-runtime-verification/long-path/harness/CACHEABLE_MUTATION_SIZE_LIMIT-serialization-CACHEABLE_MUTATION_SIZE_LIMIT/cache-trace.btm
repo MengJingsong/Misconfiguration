@@ -1,0 +1,35 @@
+# Byteman observation rules for CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT, case 9c (amended 2026-10-14).
+# No behaviour change. Keyspaces ks0 (the control write) and ks1 (the held writes) only.
+#
+# serialize: Mutation$MutationSerializer.serialization(), AT LINE 463 = the store into the slot, after the decision at :451 and the
+#   copy at :456. Fires once per mutation and version, when the slot was empty. T is the check's operand; cached names the object
+#   stored (CachedSerialization = the allow branch, SizeOnlyCacheableSerialization = the disallow branch).
+#     serialize T=<n> cached=<class> ks=<ks> pk=<int> v=<version> thread=<name> ms=<epoch millis>
+# deserialize: Mutation$MutationSerializer.deserialize(DataInputPlus, int, Flag), AT LINE 518 = the receive-side decision, after the
+#   tee has read the whole mutation. cached = !limitReached (true: line 519 builds the copy); teeLen = bytes the tee mirrored
+#   (cropped below the limit when cached=false).
+#     deserialize cached=<bool> teeLen=<n> ks=<ks> pk=<int> v=<version> thread=<name> ms=<epoch millis>
+# Output file: the system property stage4.byteman.out, or else cache-trace.txt in the JVM's working directory.
+# Local variables need the class files' variable table (build.xml:33, debuglevel source,lines,vars).
+
+RULE serialize decision stored
+CLASS org.apache.cassandra.db.Mutation$MutationSerializer
+METHOD serialization(org.apache.cassandra.db.Mutation, int)
+AT LINE 463
+IF $mutation.getKeyspaceName().equals("ks1") || $mutation.getKeyspaceName().equals("ks0")
+DO traceOpen("cacheTrace", java.lang.System.getProperty("stage4.byteman.out", "cache-trace.txt"));
+   traceln("cacheTrace", "serialize T=" + $serializedSize + " cached=" + $serialization.getClass().getSimpleName()
+           + " ks=" + $mutation.getKeyspaceName() + " pk=" + $mutation.key().getKey().getInt($mutation.key().getKey().position())
+           + " v=" + $version + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE deserialize decision
+CLASS org.apache.cassandra.db.Mutation$MutationSerializer
+METHOD deserialize(org.apache.cassandra.io.util.DataInputPlus, int, org.apache.cassandra.db.rows.DeserializationHelper$Flag)
+AT LINE 518
+IF $m.getKeyspaceName().equals("ks1") || $m.getKeyspaceName().equals("ks0")
+DO traceOpen("cacheTrace", java.lang.System.getProperty("stage4.byteman.out", "cache-trace.txt"));
+   traceln("cacheTrace", "deserialize cached=" + ($teeIn.isLimitReached() ? "false" : "true") + " teeLen=" + $dob.getLength()
+           + " ks=" + $m.getKeyspaceName() + " pk=" + $m.key().getKey().getInt($m.key().getKey().position())
+           + " v=" + $version + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

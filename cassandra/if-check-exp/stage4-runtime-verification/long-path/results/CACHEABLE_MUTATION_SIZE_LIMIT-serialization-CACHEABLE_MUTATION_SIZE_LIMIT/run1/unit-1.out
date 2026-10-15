@@ -1,0 +1,28 @@
+STAGE4 setup L=1 current_version=12 ordinal=2 versions=[VERSION_30, VERSION_3014, VERSION_40, VERSION_50] dob.allocate_type=null dob_max_recycle_bytes=null java=11.0.32.1
+STAGE4 check setup.allocated_bytes_supported true true ok
+STAGE4 check readback.field 1 1 ok
+STAGE4 check readback.property 1 1 ok
+STAGE4 note ser.1024 payload=1024 T=1074 slot=SizeOnlyCacheableSerialization delta=592 scratch 2048->2048
+STAGE4 check ser.1024.class SizeOnlyCacheableSerialization SizeOnlyCacheableSerialization ok
+STAGE4 note ser.100000 payload=100000 T=100051 slot=SizeOnlyCacheableSerialization delta=592 scratch 2048->2048
+STAGE4 check ser.100000.class SizeOnlyCacheableSerialization SizeOnlyCacheableSerialization ok
+STAGE4 note ser.3000000 payload=3000000 T=3000052 slot=SizeOnlyCacheableSerialization delta=592 scratch 2048->2048
+STAGE4 check ser.3000000.class SizeOnlyCacheableSerialization SizeOnlyCacheableSerialization ok
+STAGE4 note recv.1024 payload=1024 W=1074 slot=null
+STAGE4 check recv.1024.wire_length_is_T 1074 1074 ok
+STAGE4 check recv.1024.class null null ok
+STAGE4 check recv.1024.after_size.class SizeOnlyCacheableSerialization SizeOnlyCacheableSerialization ok
+STAGE4 note recv.100000 payload=100000 W=100051 slot=null
+STAGE4 check recv.100000.wire_length_is_T 100051 100051 ok
+STAGE4 check recv.100000.class null null ok
+STAGE4 check recv.100000.after_size.class SizeOnlyCacheableSerialization SizeOnlyCacheableSerialization ok
+STAGE4 note recv.3000000 payload=3000000 W=3000052 slot=null
+STAGE4 check recv.3000000.wire_length_is_T 3000052 3000052 ok
+STAGE4 check recv.3000000.class null null ok
+STAGE4 check recv.3000000.after_size.class SizeOnlyCacheableSerialization SizeOnlyCacheableSerialization ok
+STAGE4 check tee.L.limit_reached true true ok
+STAGE4 check tee.L.mirrored 0 0 ok
+STAGE4 note idle meter=0 delta=0 scratch 2048->2048
+STAGE4 check idle.alloc_delta_equals_meter 0 0 ok
+STAGE4 check idle.scratch_unchanged 2048 2048 ok
+STAGE4 done L=1 checks=19 mismatches=0
