@@ -1,0 +1,18 @@
+LABEL overshoot start 2026-10-15 09:41:10 EDT; harness md5 4dbdae965fb1 5db558a3e4ea 0cf159b2044c e09e91ca2755 
+O preview: rc=0 N2 Accepting [268649724] ; estimated ['2 ranges, 14 sstables, 256.204MiB bytes', '2 ranges, 14 sstables, 256.204MiB bytes']
+EXPECTED: O preview: out of sync, node 2 logs Accepting with S_prv in 268.4-269.5 MB — yes
+KNOB N2 set 0.5 read back 0.5
+O: node 2 D=185941 pad=532490667 walk=532676608 (U0 532676608)
+O repair: rc=0; N2 HDR usage [0.4961]; N1 HDR lines 1; N2 Accepting [268649724]; U0 532676608 -> U1 801326332 (growth 268649724); u1 = 0.74629; overshoot U1 - L = 264455420; node 1 walk 268867707 -> 268867707
+EXPECTED: O: admitted at u = 0.49610 +/- 0.0005 (one HDR usage line on node 2, admit=true) — yes
+EXPECTED: O: node 2 Accepting S = S_prv — yes
+EXPECTED: O: node 2 grew by S +/- 1 MiB (growth 268649724, S 268649724) — yes
+EXPECTED: O: node 2 ends above L (U1 in 801.1-802.2 MB; u1 0.7461-0.7471) — yes
+EXPECTED: O: the sampler shows usage crossing L during the repair with no further HDR usage line on node 2 — yes
+EXPECTED: O: node 1 data directory changed by < 1 MiB — yes
+O re-check at 0.5: rc=2 ERROR ['[[repair #278b8900-c89e-11f1-9337-77ba40e09997]] Rejecting incoming repair, disk usage (74.63%) above threshold (50.00%)']
+EXPECTED: O re-check at 0.5 refused: ERROR (74.6x%) above threshold (50.00%) — yes
+KNOB N2 set 0.2 read back 0.2
+EXPECTED: O re-check at 0.2 admitted — yes
+KNOB N2 set 0.0 read back 0.0
+DONE overshoot expected 9/9 yes

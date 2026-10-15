@@ -1,0 +1,30 @@
+# Byteman observation rules for local_read_size_fail_threshold-addSize-failBytes, case 9c/9d. They change no behaviour.
+# One line per local read command on keyspace ks1, written to the file named by -Dstage4.byteman.out:
+#   read-alloc thread=<name> bytes=<bytes the thread allocated while LocalReadRunnable.runMayThrow() ran> ms=<epoch>
+# stage4.Alloc is compiled into a jar on the boot class path by cluster-run.py before the node starts (the node runs from build/apache-cassandra-*.jar, not build/classes/main).
+
+RULE read alloc entry
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT ENTRY
+IF $0.command.metadata().keyspace.equals("ks1")
+DO stage4.Alloc.start()
+ENDRULE
+
+RULE read alloc exit
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT EXIT
+IF $0.command.metadata().keyspace.equals("ks1")
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "alloc.trace"));
+   traceln("ra", stage4.Alloc.end())
+ENDRULE
+
+RULE read alloc exception exit
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT EXCEPTION EXIT
+IF $0.command.metadata().keyspace.equals("ks1")
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "alloc.trace"));
+   traceln("ra", stage4.Alloc.end() + " exceptional=true")
+ENDRULE

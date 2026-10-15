@@ -1,0 +1,73 @@
+# Byteman observation rules for DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE (case 9d): a ledger of every thread-local
+# scratch buffer. No behaviour change. Output to the file named by -Dstage4.ledger.out; every line carries
+# tid=<Thread.getId()> name=<thread name> dob=<identityHashCode of the DataOutputBuffer$1$1 instance> ms=<epoch>.
+#   new     cap=<capacity at creation>                      DataOutputBuffer$1.initialValue exit
+#   alloc   size=<bytes> direct=<bool>                      DataOutputBuffer$1$1.allocate(int) exit (creation, growth, replacement)
+#   grow-free cap=<old capacity>                            DataOutputBuffer.expandToFit, before setBuffer (scratch instances only)
+#   close   cap= pos= limit= L=<MAX_RECYCLE_BUFFER_SIZE>    DataOutputBuffer$1$1.close entry
+#   kept    cap=                                            line 75 (allow)
+#   replaced cap=<old capacity>                             line 79 (disallow), before allocate(128)
+#   closed  cap=                                            close exit
+
+RULE dob new
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1
+METHOD initialValue
+AT EXIT
+IF true
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "new tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($!) + " cap=" + $!.buffer.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dob alloc
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD allocate(int)
+AT EXIT
+IF true
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "alloc tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($0) + " size=" + $1 + " direct=" + $!.isDirect() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dob grow free
+CLASS org.apache.cassandra.io.util.DataOutputBuffer
+METHOD expandToFit
+AT INVOKE setBuffer
+IF $0.getClass().getName().endsWith("DataOutputBuffer$1$1")
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "grow-free tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($0) + " cap=" + $0.buffer.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dob close entry
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD close
+AT ENTRY
+IF true
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "close tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($0) + " cap=" + ($0.buffer == null ? -1 : $0.buffer.capacity()) + " pos=" + ($0.buffer == null ? -1 : $0.buffer.position()) + " limit=" + ($0.buffer == null ? -1 : $0.buffer.limit()) + " L=" + org.apache.cassandra.io.util.DataOutputBuffer.MAX_RECYCLE_BUFFER_SIZE + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dob kept
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD close
+AT LINE 75
+IF true
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "kept tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($0) + " cap=" + $0.buffer.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dob replaced
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD close
+AT LINE 79
+IF true
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "replaced tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($0) + " cap=" + ($0.buffer == null ? -1 : $0.buffer.capacity()) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dob closed
+CLASS org.apache.cassandra.io.util.DataOutputBuffer$1$1
+METHOD close
+AT EXIT
+IF true
+DO traceOpen("dob", java.lang.System.getProperty("stage4.ledger.out", "ledger.txt"));
+   traceln("dob", "closed tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " dob=" + java.lang.System.identityHashCode($0) + " cap=" + $0.buffer.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

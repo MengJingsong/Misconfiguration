@@ -1,0 +1,25 @@
+LABEL Ldefault-BN: L=1048576 (default) batch=BN N=4 heap=False start 2026-10-15 10:15:24 EDT; harness md5 f39b2550e973 ca679a4fc36f c2e46c3eb995 1e0c7056ae79 7e176cbafd8c 
+yaml tail: write_request_timeout: 30000ms;native_transport_timeout: 30s; diff:  1 file changed, 2 insertions(+), 1 deletion(-)
+READBACK system properties: cassandra.cacheable_mutation_size_limit_bytes=1
+CALIBRATION S0=20043 P=42 (ledger close line on tid 91, cap 40084); ledger L=1048576
+PLAN V=450000 C=2(V+P)=900084 -> kept at L=1048576; N=4
+TWIN ks0 n=4 V=450000: acked=4 failed=0 ms=12; scratch events during the twin: 5 (growth or free above 128 B: 0)
+EXPECTED: twin warm-up (ks0) grew or freed no scratch buffer above 128 B — yes
+READING before: MemoryUsed=57229304 Count=180 ledger R=80020 off=316699
+READING hold: MemoryUsed=60867892 Count=184 ledger R=3678052 off=319400
+BATCH ks1 n=4 V=450000: acked=4 failed=0 ms=5055; held lines 4, distinct tids 4: [90, 93, 95, 97]
+READING after: MemoryUsed=60867892 Count=184 ledger R=3678052 off=319400
+EXPECTED: each of the 4 threads used one scratch instance in the window — yes
+EXPECTED: every ks1 close line shows cap = C = 900084 and limit = S = 450043 — yes
+EXPECTED: every branch line is kept (C <= L) — yes
+EXPECTED: every batch thread ends at capacity 900084 — yes
+EXPECTED: each write grew its buffer by exactly two allocations, V+P = 450042 then 900084 (+128 at creation / replacement) — yes
+EXPECTED: each write's transient peak = 3(V+P) = 1350126 — yes
+LEDGER R before 80020 after 3678052 dR 3598032; sum over batch threads (final - initial) 3598032; other changed instances {}
+EXPECTED: dR = sum over the batch threads of (final - initial capacity), and no other scratch buffer changed — yes
+RETAINED by the 4 batch threads: 3600336 B (16C predicted 3600336)
+EXPECTED: retained = 4 x 900084 = 3600336 — yes
+POOL dMemoryUsed 3638588 vs dR 3598032 (diff 40556); dCount 4 vs new instances 2
+EXPECTED: |dMemoryUsed - dR| <= tau = 262144 — yes
+EXPECTED: dCount = new scratch instances in the window — NO (recorded; the AI judges it in the results file)
+DONE Ldefault-BN expected 10/11 yes

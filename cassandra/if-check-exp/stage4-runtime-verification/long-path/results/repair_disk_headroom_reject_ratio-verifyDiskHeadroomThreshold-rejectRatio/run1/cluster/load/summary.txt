@@ -1,0 +1,10 @@
+LABEL load start 2026-10-15 09:40:27 EDT; harness md5 4dbdae965fb1 5db558a3e4ea 0cf159b2044c e09e91ca2755 
+EXPECTED: O load: node 2 is DN on node 1 — yes
+O load: 4096 rows of 65,536 random bytes written at ONE to node 1
+O load: node 1 hdr directory 268658076 B (du -sb)
+EXPECTED: O load: node 1 holds 268.4 to 269.5 MB — yes
+EXPECTED: O load: node 2 holds no hdr.t Data.db — yes
+# ---- stage4 hdr lines ----;cluster_name: stage4-hdr;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: 0;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/stage4-hdr/N2/data;commitlog_directory: /users/jason92/stage4-hdr/N2/commitlog;hints_directory: /users/jason92/stage4-hdr/N2/hints;saved_caches_directory: /users/jason92/stage4-hdr/N2/saved_caches;cdc_raw_directory: /users/jason92/stage4-hdr/N2/cdc_raw;data_disk_usage_max_disk_size: 1073741824B;h
+N2 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 21 s
+EXPECTED: O load: node 2 still holds no hdr.t Data.db after its restart (no hints) — yes
+DONE load expected 4/4 yes

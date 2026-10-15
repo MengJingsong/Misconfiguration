@@ -1,0 +1,13 @@
+# SUPPLEMENTARY (after run 1, not a reading): explains the missed ΔCount sub-prediction; used with a copy of cluster-run.py that adds
+# script:dbb-supp.btm,boot:<byteman jar> and -Dorg.jboss.byteman.transform.all=true (pc57:~/stage4-harness-run/dob-supp/).
+# Supplementary diagnostic for DOB_MAX_RECYCLE_BYTES (not a reading): every JDK direct buffer created on a shared-pool worker
+# (Native-Transport-Requests / MutationStage names), with its capacity and the allocating stack. Needs the agent's boot: option
+# and -Dorg.jboss.byteman.transform.all=true (a java.nio class).
+RULE dbb init
+CLASS java.nio.DirectByteBuffer
+METHOD <init>(int)
+AT EXIT
+IF true
+DO traceOpen("dbb", java.lang.System.getProperty("stage4.dbb.out", "dbb.txt"));
+   traceln("dbb", "dbb cap=" + $1 + " tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis() + "\n" + formatStack("  ", 14))
+ENDRULE

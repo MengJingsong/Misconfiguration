@@ -1,0 +1,25 @@
+LABEL L2147483647-B3: L=2147483647 (2147483647) batch=B3 N=16 heap=False start 2026-10-15 10:17:10 EDT; harness md5 f39b2550e973 ca679a4fc36f c2e46c3eb995 1e0c7056ae79 7e176cbafd8c 
+yaml tail: write_request_timeout: 30000ms;native_transport_timeout: 30s; diff:  1 file changed, 2 insertions(+), 1 deletion(-)
+READBACK system properties: cassandra.dob_max_recycle_bytes=2147483647 ; cassandra.cacheable_mutation_size_limit_bytes=1
+CALIBRATION S0=20043 P=42 (ledger close line on tid 91, cap 40084); ledger L=2147483647
+PLAN V=1900000 C=2(V+P)=3800084 -> kept at L=2147483647; N=16
+TWIN ks0 n=16 V=1900000: acked=16 failed=0 ms=172; scratch events during the twin: 3 (growth or free above 128 B: 0)
+EXPECTED: twin warm-up (ks0) grew or freed no scratch buffer above 128 B — yes
+READING before: MemoryUsed=57236769 Count=179 ledger R=80020 off=316421
+READING hold: MemoryUsed=118028867 Count=195 ledger R=60839232 off=328540
+BATCH ks1 n=16 V=1900000: acked=16 failed=0 ms=5184; held lines 16, distinct tids 16: [91, 93, 95, 97, 100, 101, 103, 105, 107, 120, 122, 124, 126, 128, 130, 132]
+READING after: MemoryUsed=118028867 Count=195 ledger R=60839232 off=328540
+EXPECTED: each of the 16 threads used one scratch instance in the window — yes
+EXPECTED: every ks1 close line shows cap = C = 3800084 and limit = S = 1900043 — yes
+EXPECTED: every branch line is kept (C <= L) — yes
+EXPECTED: every batch thread ends at capacity 3800084 — yes
+EXPECTED: each write grew its buffer by exactly two allocations, V+P = 1900042 then 3800084 (+128 at creation / replacement) — yes
+EXPECTED: each write's transient peak = 3(V+P) = 5700126 — yes
+LEDGER R before 80020 after 60839232 dR 60759212; sum over batch threads (final - initial) 60759212; other changed instances {}
+EXPECTED: dR = sum over the batch threads of (final - initial capacity), and no other scratch buffer changed — yes
+RETAINED by the 16 batch threads: 60801344 B (16C predicted 60801344)
+EXPECTED: retained = 16 x 3800084 = 60801344 — yes
+POOL dMemoryUsed 60792098 vs dR 60759212 (diff 32886); dCount 16 vs new instances 14
+EXPECTED: |dMemoryUsed - dR| <= tau = 262144 — yes
+EXPECTED: dCount = new scratch instances in the window — NO (recorded; the AI judges it in the results file)
+DONE L2147483647-B3 expected 10/11 yes

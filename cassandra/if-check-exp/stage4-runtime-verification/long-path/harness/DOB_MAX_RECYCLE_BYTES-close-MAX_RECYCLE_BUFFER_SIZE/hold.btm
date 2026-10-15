@@ -1,0 +1,12 @@
+# Byteman rule for DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE (case 9d): hold each ks1 write for stage4.hold.ms
+# (default 5000) at the exit of CommitLog.add(), after its scratch close(), so a batch's writes are in flight together on
+# distinct threads. Output to -Dstage4.hold.out:  held tid=<id> name=<name> ms=<epoch>
+RULE hold ks1 commitlog add
+CLASS org.apache.cassandra.db.commitlog.CommitLog
+METHOD add(org.apache.cassandra.db.Mutation)
+AT EXIT
+IF $1.getKeyspaceName().equals("ks1")
+DO traceOpen("hold", java.lang.System.getProperty("stage4.hold.out", "hold.txt"));
+   traceln("hold", "held tid=" + java.lang.Thread.currentThread().getId() + " name=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis());
+   delay(java.lang.Long.getLong("stage4.hold.ms", 5000L).longValue())
+ENDRULE

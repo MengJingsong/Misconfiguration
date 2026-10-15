@@ -1,0 +1,44 @@
+ok   trace groups = 21 reads (instrument, warm-up, 3 control, 3x(A,B,B), 16M, C1x2, C2, C3, C5, C4) got 21
+ok   instrument ck<10: completed, result size = 1008*10, frame = 37 + 1020*10, no guard-fail ['result size=10080 rows=10 ms=1792069617933', 'frame rows=10 bytes=10237 ms=1792069617950']
+ok   warm-up (not a reading): abort at F=262144, guard-fail size = X = 263088, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=263088 limit=262144 ms=1792069630166']
+ok   control ck<1000: completed, result size = 1008*1000, frame = 37 + 1020*1000, no guard-fail ['result size=1008000 rows=1000 ms=1792069631521', 'frame rows=1000 bytes=1020037 ms=1792069631522']
+ok   control ck<2000: completed, result size = 1008*2000, frame = 37 + 1020*2000, no guard-fail ['result size=2016000 rows=2000 ms=1792069632903', 'frame rows=2000 bytes=2040037 ms=1792069632905']
+ok   control whole: completed, result size = 1008*8000, frame = 37 + 1020*8000, no guard-fail ['result size=8064000 rows=8000 ms=1792069634328', 'frame rows=8000 bytes=8160037 ms=1792069634332']
+info a = 1454.0 B/row from coord-alloc of the controls; read-alloc(whole, unset) = 28113848
+ok   A F=262144 ck<n*: completed, result size = 1008*261, frame = 37 + 1020*261, no guard-fail ['result size=263088 rows=261 ms=1792069636688', 'frame rows=261 bytes=266257 ms=1792069636688']
+ok   B F=262144 ck<n*+1: abort at F=262144, guard-fail size = X = 263088, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=263088 limit=262144 ms=1792069638078']
+ok   B F=262144 whole: abort at F=262144, guard-fail size = X = 263088, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=263088 limit=262144 ms=1792069639496']
+ok   F=262144: coord-alloc whole abort within 5% of the n*+1 abort 406520 vs 407280 (-0.19%)
+ok   A F=1048576 ck<n*: completed, result size = 1008*1041, frame = 37 + 1020*1041, no guard-fail ['result size=1049328 rows=1041 ms=1792069641722', 'frame rows=1041 bytes=1061857 ms=1792069641724']
+ok   B F=1048576 ck<n*+1: abort at F=1048576, guard-fail size = X = 1049328, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=1049328 limit=1048576 ms=1792069643081']
+ok   B F=1048576 whole: abort at F=1048576, guard-fail size = X = 1049328, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=1049328 limit=1048576 ms=1792069644480']
+ok   F=1048576: coord-alloc whole abort within 5% of the n*+1 abort 1506920 vs 1554536 (-3.06%)
+ok   A F=4194304 ck<n*: completed, result size = 1008*4162, frame = 37 + 1020*4162, no guard-fail ['result size=4195296 rows=4162 ms=1792069646724', 'frame rows=4162 bytes=4245277 ms=1792069646725']
+ok   B F=4194304 ck<n*+1: abort at F=4194304, guard-fail size = X = 4195296, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=4195296 limit=4194304 ms=1792069648170']
+ok   B F=4194304 whole: abort at F=4194304, guard-fail size = X = 4195296, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=4195296 limit=4194304 ms=1792069649573']
+ok   F=4194304: coord-alloc whole abort within 5% of the n*+1 abort 5936504 vs 5937608 (-0.02%)
+ok   F=16777216 whole (above the data): completed, result size = 1008*8000, frame = 37 + 1020*8000, no guard-fail ['result size=8064000 rows=8000 ms=1792069651865', 'frame rows=8000 bytes=8160037 ms=1792069651868']
+ok   coord-alloc increments (1M-256K):(4M-1M) = 0.25 +/- 0.03 0.2484
+ok   abort at 262,144 allocates < 10% of the unset whole read 406520 vs 11638752 (3.49%)
+info abort slope 1417.6 B/row vs completed-read a 1454.0 (not a §9a cluster relation; recorded)
+ok   read-alloc(whole) within 5% of unset at every F {'unset': 28113848, 262144: 28087432, 1048576: 28087432, 4194304: 28087384, 16777216: 28087432}
+ok   C1 fetch 100: no guard-fail, results sum to 8,000 rows, each page <= 100 rows of 1008 B 81 pages
+ok   C1 fetch 1000 (page 1): abort at F=262144, guard-fail size = X = 263088, no result, no frame, process() exited by exception ['guard-fail ks=ks1 size=263088 limit=262144 ms=1792069655544']
+ok   C2 count(*): one output row of 8 value bytes, no guard-fail ['result size=8 rows=1 ms=1792069657031']
+ok   C3 switch off whole: completed, result size = 1008*8000, frame = 37 + 1020*8000, no guard-fail ['result size=8064000 rows=8000 ms=1792069658811', 'frame rows=8000 bytes=8160037 ms=1792069658813']
+ok   C5 scan: one guard-fail ks1 size 263,088 limit 262,144, no result, no frame ['guard-fail ks=ks1 size=263088 limit=262144 ms=1792069660713']
+ok   C4: one guard-fail ks=system_schema limit=1, size > 1, no ks1 line ['guard-fail ks=system_schema size=11 limit=1 ms=1792069662447']
+ok   system.log: 10 WARN lines (warm-up + 9 aborts), limits in order 10
+ok   system.log: WARN lines name ks1.t except the last (system_schema.keyspaces) 
+ok   system.log: the INFO updates in order ['262144B', 'null', '262144B', '1048576B', '4194304B', '16777216B', '262144B', '1B', '16777216B']
+ok   client: 9 reads failed, each ReadFailure with failure map {127.0.0.1: 4} 9
+ok   meters: table +1 per ks1 abort, client-request +1 per abort, 0 otherwise 
+ok   WARN delta per aborted ks1 read is 1, per completed read 0 
+ok   C1 fetch 100 delivered 8000 rows READ F=262144 C1 fetch 100: OK rows=8000 pages=81 guard-fail=[] result=[(100800,
+ok   C2 count(*) returned 8000 
+ok   unit: 101 checks, 0 MISMATCH 101
+ok   unit: at 65,536 / 262,144 / 1,048,576 the n* read completes with X, both longer reads abort with X and n*+1 rows pulled 
+ok   unit: abort slope within 15% of a (recomputed) 1454.5 vs 1456.9
+ok   unit: increment ratio 0.25 +/- 0.03 (recomputed) 0.2509
+ok   unit: frame difference 102,000 B for 100 rows 
+TOTAL ok 41 fail 0

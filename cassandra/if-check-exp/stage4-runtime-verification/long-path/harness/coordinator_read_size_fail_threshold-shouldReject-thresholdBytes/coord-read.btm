@@ -1,0 +1,60 @@
+# Byteman observation rules for coordinator_read_size_fail_threshold-shouldReject-thresholdBytes, case 9c/9d. No behaviour change.
+# Output to the file named by -Dstage4.byteman.out (shared with read-alloc.btm through the same trace key "ra"):
+#   guard-fail ks=<ks> size=<ResultSetBuilder.size> limit=<thresholdBytes> ms=<epoch>     at the throw of SelectStatement.maybeFail (all keyspaces)
+#   result size=<size> rows=<rows> ms=<epoch>                                             ResultSetBuilder.build() exit, ks1.t results only
+#   coord-alloc thread=<t> bytes=<allocated inside process()> exit=<normal|exception> ms=  8-argument SelectStatement.process() on ks1
+#   frame rows=<rows> bytes=<ResultSet encodedSize> ms=<epoch>                            ResultSet$Codec.encode entry, ks1.t results only
+# stage4.CoordAlloc / stage4.Alloc are compiled into a jar on the boot class path (the node runs from the jar).
+
+RULE guard fail
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD maybeFail
+AT THROW
+IF true
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "crs.trace"));
+   traceln("ra", "guard-fail ks=" + $0.keyspace() + " size=" + $1.getSize() + " limit=" + $2.getCoordinatorReadSizeAbortThresholdBytes() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE result built
+CLASS org.apache.cassandra.cql3.selection.ResultSetBuilder
+METHOD build
+AT EXIT
+IF $!.metadata.toString().contains("(ks1, t)")
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "crs.trace"));
+   traceln("ra", "result size=" + $0.getSize() + " rows=" + $!.size() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE coord alloc entry
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD process(org.apache.cassandra.db.partitions.PartitionIterator, org.apache.cassandra.cql3.QueryOptions, org.apache.cassandra.cql3.selection.Selection$Selectors, long, int, org.apache.cassandra.db.aggregation.AggregationSpecification, boolean, org.apache.cassandra.service.ClientState)
+AT ENTRY
+IF $0.keyspace().equals("ks1")
+DO stage4.CoordAlloc.start()
+ENDRULE
+
+RULE coord alloc exit
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD process(org.apache.cassandra.db.partitions.PartitionIterator, org.apache.cassandra.cql3.QueryOptions, org.apache.cassandra.cql3.selection.Selection$Selectors, long, int, org.apache.cassandra.db.aggregation.AggregationSpecification, boolean, org.apache.cassandra.service.ClientState)
+AT EXIT
+IF $0.keyspace().equals("ks1")
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "crs.trace"));
+   traceln("ra", stage4.CoordAlloc.end("normal"))
+ENDRULE
+
+RULE coord alloc exception exit
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD process(org.apache.cassandra.db.partitions.PartitionIterator, org.apache.cassandra.cql3.QueryOptions, org.apache.cassandra.cql3.selection.Selection$Selectors, long, int, org.apache.cassandra.db.aggregation.AggregationSpecification, boolean, org.apache.cassandra.service.ClientState)
+AT EXCEPTION EXIT
+IF $0.keyspace().equals("ks1")
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "crs.trace"));
+   traceln("ra", stage4.CoordAlloc.end("exception"))
+ENDRULE
+
+RULE frame encode
+CLASS org.apache.cassandra.cql3.ResultSet$Codec
+METHOD encode
+AT ENTRY
+IF $1.metadata.toString().contains("(ks1, t)")
+DO traceOpen("ra", java.lang.System.getProperty("stage4.byteman.out", "crs.trace"));
+   traceln("ra", "frame rows=" + $1.size() + " bytes=" + $0.encodedSize($1, $3) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

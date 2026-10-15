@@ -1,0 +1,74 @@
+yaml: read_thresholds_enabled: true; diff vs tag:  1 file changed, 1 insertion(+)
+INSTRUMENT Byteman TestScript: no errors
+node up; JVM options: -Xms4G -Xmx4G -Xbootclasspath/a:/users/jason92/stage4-logs/crs/run1/cluster/stage4-helpers.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/crs/coord-read.btm,script:/users/jason92/stage4-harness-run/crs/read-alloc.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/crs/run1/cluster/crs.trace 
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: org.apache.cassandra.db:type=StorageService|CoordinatorLargeReadAbortThreshold|null ; org.apache.cassandra.db:type=StorageService|ReadThresholdsEnabled|true
+DATASET rows loaded 8000, Data.db files 1
+SESSION one driver session, protocol 5 (held for the lifetime)
+INSTRUMENT ks1 read ck<10: ok=True rows=10 lines ['coord-alloc', 'frame', 'read-alloc', 'result']
+INSTRUMENT system.local read: ok=True lines 0
+INSTRUMENT idle control: no trace line in 10 s
+SET CoordinatorLargeReadAbortThreshold 262144B -> read back 262144B
+WARMUP (not a reading): ck<300 at 262144 ok=False codes={'127.0.0.1': 4} lines ['read-alloc', 'guard-fail', 'coord-alloc']
+SET CoordinatorLargeReadAbortThreshold null -> read back null
+READ F=unset control ck<1000: OK rows=1000 pages=1 guard-fail=[] result=[(1008000, 1000)] frame=[(1020037, 1000)] coord-alloc=[1460904] read-alloc=[3517432] tmeter 1->1 cmeter 1->1 warn+0 first=1
+READ F=unset control ck<2000: OK rows=2000 pages=1 guard-fail=[] result=[(2016000, 2000)] frame=[(2040037, 2000)] coord-alloc=[2920344] read-alloc=[7028256] tmeter 1->1 cmeter 1->1 warn+0 first=1
+READ F=unset control whole: OK rows=8000 pages=1 guard-fail=[] result=[(8064000, 8000)] frame=[(8160037, 8000)] coord-alloc=[11638752] read-alloc=[28113848] tmeter 1->1 cmeter 1->1 warn+0 first=1
+EXPECTED: control: no guard-fail, meters unchanged — yes
+EXPECTED: frame bytes = B0 + 1020*rows exactly for the controls (B0=37) — yes
+CALIBRATION B0=37 a=1454.0 B/row delta0=6926 read-alloc(whole, unset)=28113848
+SET CoordinatorLargeReadAbortThreshold 262144B -> read back 262144B
+EXPECTED: F=262144: read-back 262144B and the INFO line logged — yes
+READ F=262144 A ck<n*: OK rows=261 pages=1 guard-fail=[] result=[(263088, 261)] frame=[(266257, 261)] coord-alloc=[386200] read-alloc=[1426560] tmeter 1->1 cmeter 1->1 warn+0 first=1
+EXPECTED: F=262144 A: completes with n*=261 rows, result size X=263088, frame = B0+1020*n* — yes
+READ F=262144 B ck<n*+1: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(263088, 262144)] result=[] frame=[] coord-alloc=[407280] read-alloc=[1427960] tmeter 1->2 cmeter 1->2 warn+1
+EXPECTED: F=262144 B ck<n*+1: abort, code 4, guard-fail size=263088 limit=262144, meters +1, one WARN, client warning, no frame — yes
+READ F=262144 B whole: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(263088, 262144)] result=[] frame=[] coord-alloc=[406520] read-alloc=[28087432] tmeter 2->3 cmeter 2->3 warn+1
+EXPECTED: F=262144 B whole: abort, code 4, guard-fail size=263088 limit=262144, meters +1, one WARN, client warning, no frame — yes
+EXPECTED: F=262144: coord-alloc(whole abort) = coord-alloc(n*+1 abort) within 5% (406520 vs 407280) — yes
+SET CoordinatorLargeReadAbortThreshold 1048576B -> read back 1048576B
+EXPECTED: F=1048576: read-back 1048576B and the INFO line logged — yes
+READ F=1048576 A ck<n*: OK rows=1041 pages=1 guard-fail=[] result=[(1049328, 1041)] frame=[(1061857, 1041)] coord-alloc=[1519896] read-alloc=[5680544] tmeter 3->3 cmeter 3->3 warn+0 first=1
+EXPECTED: F=1048576 A: completes with n*=1041 rows, result size X=1049328, frame = B0+1020*n* — yes
+READ F=1048576 B ck<n*+1: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(1049328, 1048576)] result=[] frame=[] coord-alloc=[1554536] read-alloc=[5681944] tmeter 3->4 cmeter 3->4 warn+1
+EXPECTED: F=1048576 B ck<n*+1: abort, code 4, guard-fail size=1049328 limit=1048576, meters +1, one WARN, client warning, no frame — yes
+READ F=1048576 B whole: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(1049328, 1048576)] result=[] frame=[] coord-alloc=[1506920] read-alloc=[28087432] tmeter 4->5 cmeter 4->5 warn+1
+EXPECTED: F=1048576 B whole: abort, code 4, guard-fail size=1049328 limit=1048576, meters +1, one WARN, client warning, no frame — yes
+EXPECTED: F=1048576: coord-alloc(whole abort) = coord-alloc(n*+1 abort) within 5% (1506920 vs 1554536) — yes
+SET CoordinatorLargeReadAbortThreshold 4194304B -> read back 4194304B
+EXPECTED: F=4194304: read-back 4194304B and the INFO line logged — yes
+READ F=4194304 A ck<n*: OK rows=4162 pages=1 guard-fail=[] result=[(4195296, 4162)] frame=[(4245277, 4162)] coord-alloc=[5916168] read-alloc=[22697496] tmeter 5->5 cmeter 5->5 warn+0 first=1
+EXPECTED: F=4194304 A: completes with n*=4162 rows, result size X=4195296, frame = B0+1020*n* — yes
+READ F=4194304 B ck<n*+1: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(4195296, 4194304)] result=[] frame=[] coord-alloc=[5937608] read-alloc=[22698896] tmeter 5->6 cmeter 5->6 warn+1
+EXPECTED: F=4194304 B ck<n*+1: abort, code 4, guard-fail size=4195296 limit=4194304, meters +1, one WARN, client warning, no frame — yes
+READ F=4194304 B whole: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(4195296, 4194304)] result=[] frame=[] coord-alloc=[5936504] read-alloc=[28087384] tmeter 6->7 cmeter 6->7 warn+1
+EXPECTED: F=4194304 B whole: abort, code 4, guard-fail size=4195296 limit=4194304, meters +1, one WARN, client warning, no frame — yes
+EXPECTED: F=4194304: coord-alloc(whole abort) = coord-alloc(n*+1 abort) within 5% (5936504 vs 5937608) — yes
+SET CoordinatorLargeReadAbortThreshold 16777216B -> read back 16777216B
+EXPECTED: F=16777216: read-back 16777216B and the INFO line logged — yes
+READ F=16777216 whole above the data: OK rows=8000 pages=1 guard-fail=[] result=[(8064000, 8000)] frame=[(8160037, 8000)] coord-alloc=[11382568] read-alloc=[28087432] tmeter 7->7 cmeter 7->7 warn+0 first=1
+EXPECTED: F=16777216: whole partition completes, result size 8,064,000, no guard-fail — yes
+EXPECTED: coord-alloc increments (1M-256K):(4M-1M) = 0.25 +/- 0.03 (got 0.2484) — yes
+EXPECTED: abort at 262,144 allocates < 10% of the unset whole read (406520 vs 11638752) — yes
+EXPECTED: read-alloc(whole) within 5% of unset at every F ({'unset': 28113848, 262144: 28087432, 1048576: 28087432, 4194304: 28087384, 16777216: 28087432}) — yes
+SET CoordinatorLargeReadAbortThreshold 262144B -> read back 262144B
+READ F=262144 C1 fetch 100: OK rows=8000 pages=81 guard-fail=[] result=[(100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (100800, 100), (0, 0)] frame=[(102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (102059, 100), (37, 0)] coord-alloc=[172720, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 151200, 4904] read-alloc=[417288, 412544, 411424, 412880, 411936, 412704, 411664, 413120, 412080, 412992, 411904, 413360, 412320, 411600, 412512, 411544, 413296, 411936, 412704, 411688, 413120, 411784, 413408, 412200, 413064, 412048, 411328, 412784, 411744, 412608, 411568, 413128, 412008, 412848, 411832, 413288, 412296, 413160, 412048, 411328, 412784, 411448, 412904, 411960, 412752, 411712, 413192, 412104, 412968, 411928, 413480, 412344, 422448, 412488, 411448, 412904, 411864, 412776, 411760, 413144, 412104, 412968, 411928, 413408, 412344, 411624, 412488, 411448, 412928, 411888, 412728, 411688, 413144, 412104, 412968, 411928, 413384, 412600, 411880, 412768, 3456] tmeter 7->7 cmeter 7->7 warn+0 first=1
+EXPECTED: C1 fetch 100: all 8,000 rows (pages recorded), no guard-fail — yes
+READ F=262144 C1 fetch 1000: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(263088, 262144)] result=[] frame=[] coord-alloc=[406520] read-alloc=[3515296] tmeter 7->8 cmeter 7->8 warn+1
+EXPECTED: C1 fetch 1000: aborts on page 1 (code 4, guard-fail size=263088) — yes
+READ F=262144 C2 count(*): OK rows=1 pages=1 guard-fail=[] result=[(8, 1)] frame=[(41, 1)] coord-alloc=[10723272] read-alloc=[28087456] tmeter 8->8 cmeter 8->8 warn+0 first=8000
+EXPECTED: C2 count(*) returns 8,000, no guard-fail — yes
+SET ReadThresholdsEnabled false -> org.apache.cassandra.db:type=StorageService|ReadThresholdsEnabled|false
+READ F=262144 C3 switch off whole: OK rows=8000 pages=1 guard-fail=[] result=[(8064000, 8000)] frame=[(8160037, 8000)] coord-alloc=[11638080] read-alloc=[28087504] tmeter 8->8 cmeter 8->8 warn+0 first=1
+EXPECTED: C3 switch off: whole completes, no guard-fail, meters unchanged — yes
+SET ReadThresholdsEnabled true -> org.apache.cassandra.db:type=StorageService|ReadThresholdsEnabled|true
+READ F=262144 C5 scan: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(263088, 262144)] result=[] frame=[] coord-alloc=[1363096] read-alloc=[28090992] tmeter 8->9 cmeter 8->9 warn+1
+EXPECTED: C5 scan: aborts with guard-fail size=263088 (as the whole-partition read) — yes
+SET CoordinatorLargeReadAbortThreshold 1B -> read back 1B
+READ F=1 C4 system_schema.keyspaces: ERR ReadFailure codes={'127.0.0.1': 4} guard-fail=[(11, 1)] result=[] frame=[] coord-alloc=[] read-alloc=[] tmeter 9->9 cmeter 9->10 warn+1
+SET CoordinatorLargeReadAbortThreshold 16777216B -> read back 16777216B
+EXPECTED: C4 system_schema read aborts with code 4 and guard-fail ks=system_schema — yes
+C4 window: WARN lines 1, of other tables 0
+SUMMARY aborts caused by this script 10, WARN lines in system.log 10
+EXPECTED: WARN lines = aborts caused (+ other tables in the 1 B window) — yes
+DONE expected 29/29 yes

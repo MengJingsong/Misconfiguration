@@ -1,0 +1,78 @@
+LABEL sweep-p start 2026-10-15 09:33:50 EDT; harness md5 4dbdae965fb1 5db558a3e4ea 0cf159b2044c e09e91ca2755 
+TRIGGER P control before r=0.0: knob None r=0.0 U0=None D=None pad=None u_plan=None | usage {'N1': [(0.00015, 0.0)], 'N2': [(0.00015, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=11973960-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:33:55,647] Repair session 119c4270-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:33:55,660] Repair command #2 finished in 0 seconds
+EXPECTED: P r=0.0 control: admitted — yes
+KNOB N2 set 0.0 read back 0.0
+TRIGGER P A r=0.0: knob N2 r=0.0 U0=1069547520 D=164346 pad=1069383174 u_plan=0.9961 | usage {'N1': [(0.00016, 0.0)], 'N2': [(0.9961, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=1674a580-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:34:03,787] Repair session 167827f0-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:34:03,792] Repair command #3 finished in 0 seconds
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.0 A: admitted (two HDR lines admit=true, nodetool rc 0 finished, no Rejecting line) — yes
+EXPECTED: P r=0.0 A: operand u=0.9961 within +/-0.0005 of plan 0.9961 — yes
+KNOB N2 set 0.0 read back 0.0
+TRIGGER P B r=0.0: knob N2 r=0.0 U0=1077936128 D=176371 pad=1077759757 u_plan=1.00391 | usage {'N1': [(0.00017, 0.0)], 'N2': [(1.00391, 0.0)]} verdict {'N1': [True], 'N2': [False]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=2 id=1bd72020-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 1 | not-started lines N1 0 N2 0 | dirs changed False | participates: 1bd72020-c89d-11f1-9337-77ba40e09997 |         NONE | Not enough disk headroom to perform repair
+  ERROR N2: [[repair #1bd72020-c89d-11f1-9337-77ba40e09997]] Rejecting incoming repair, disk usage (100.39%) above threshold (100.00%)
+  nodetool: 12,821] Repair command #4 failed with error Got negative replies from endpoints [/127.0.0.3:7010] / [2026-10-15 09:34:12,827] Repair command #4 finished with error / error: Repair job has failed with the error message: Repair command #4 failed with error Got negative replies from endpoints [/127.0.0.3:7010]. Check the logs on the repair participants for further details / java.lang.RuntimeException
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.0 B: refused by N2 (participant), verdict lines and nodetool text as 9a — yes
+EXPECTED: P r=0.0 B: one ERROR line on N2 only, "Rejecting incoming repair, disk usage (100.39%) above threshold (100.00%)" — yes
+EXPECTED: P r=0.0 B: ERROR percentages 100.39% / 100.00% as planned (u within 0.0005 of plan) — yes
+EXPECTED: P r=0.0 B: nothing started (no merkle/AEService/stream/snapshot/anticompaction line, table dirs unchanged) — yes
+EXPECTED: P r=0.0 B: operand u=1.00391 within +/-0.0005 of plan 1.00391 — yes
+TRIGGER P control before r=0.2: knob None r=0.0 U0=None D=None pad=None u_plan=None | usage {'N1': [(0.00016, 0.0)], 'N2': [(0.00016, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=212db3e0-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:34:21,788] Repair session 2131f9a0-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:34:21,794] Repair command #5 finished in 0 seconds
+EXPECTED: P r=0.2 control: admitted — yes
+KNOB N2 set 0.2 read back 0.2
+TRIGGER P A r=0.2: knob N2 r=0.2 U0=854799155 D=176962 pad=854622193 u_plan=0.7961 | usage {'N1': [(0.00018, 0.0)], 'N2': [(0.7961, 0.2)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=261f4440-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:34:30,093] Repair session 262537b0-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:34:30,100] Repair command #6 finished in 0 seconds
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.2 A: admitted (two HDR lines admit=true, nodetool rc 0 finished, no Rejecting line) — yes
+EXPECTED: P r=0.2 A: operand u=0.7961 within +/-0.0005 of plan 0.7961 — yes
+KNOB N2 set 0.2 read back 0.2
+TRIGGER P B r=0.2: knob N2 r=0.2 U0=863187763 D=200271 pad=862987492 u_plan=0.80391 | usage {'N1': [(0.0002, 0.0)], 'N2': [(0.80391, 0.2)]} verdict {'N1': [True], 'N2': [False]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=2 id=2b873d20-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 1 | not-started lines N1 0 N2 0 | dirs changed False | participates: 2b873d20-c89d-11f1-9337-77ba40e09997 |         NONE | Not enough disk headroom to perform repair
+  ERROR N2: [[repair #2b873d20-c89d-11f1-9337-77ba40e09997]] Rejecting incoming repair, disk usage (80.39%) above threshold (80.00%)
+  nodetool: 39,119] Repair command #7 failed with error Got negative replies from endpoints [/127.0.0.3:7010] / [2026-10-15 09:34:39,123] Repair command #7 finished with error / error: Repair job has failed with the error message: Repair command #7 failed with error Got negative replies from endpoints [/127.0.0.3:7010]. Check the logs on the repair participants for further details / java.lang.RuntimeException
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.2 B: refused by N2 (participant), verdict lines and nodetool text as 9a — yes
+EXPECTED: P r=0.2 B: one ERROR line on N2 only, "Rejecting incoming repair, disk usage (80.39%) above threshold (80.00%)" — yes
+EXPECTED: P r=0.2 B: ERROR percentages 80.39% / 80.00% as planned (u within 0.0005 of plan) — yes
+EXPECTED: P r=0.2 B: nothing started (no merkle/AEService/stream/snapshot/anticompaction line, table dirs unchanged) — yes
+EXPECTED: P r=0.2 B: operand u=0.80391 within +/-0.0005 of plan 0.80391 — yes
+TRIGGER P control before r=0.5: knob None r=0.0 U0=None D=None pad=None u_plan=None | usage {'N1': [(0.00019, 0.0)], 'N2': [(0.00018, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=30e60e40-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:34:48,161] Repair session 30ea2cf0-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:34:48,166] Repair command #8 finished in 0 seconds
+EXPECTED: P r=0.5 control: admitted — yes
+KNOB N2 set 0.5 read back 0.5
+TRIGGER P A r=0.5: knob N2 r=0.5 U0=532676608 D=177470 pad=532499138 u_plan=0.4961 | usage {'N1': [(0.00018, 0.0)], 'N2': [(0.4961, 0.5)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=35dea380-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:34:56,499] Repair session 35e2e940-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:34:56,506] Repair command #9 finished in 0 seconds
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.5 A: admitted (two HDR lines admit=true, nodetool rc 0 finished, no Rejecting line) — yes
+EXPECTED: P r=0.5 A: operand u=0.4961 within +/-0.0005 of plan 0.4961 — yes
+KNOB N2 set 0.5 read back 0.5
+TRIGGER P B r=0.5: knob N2 r=0.5 U0=541065216 D=171269 pad=540893947 u_plan=0.50391 | usage {'N1': [(0.00017, 0.0)], 'N2': [(0.50391, 0.5)]} verdict {'N1': [True], 'N2': [False]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=2 id=3b3f9780-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 1 | not-started lines N1 0 N2 0 | dirs changed False | participates: 3b3f9780-c89d-11f1-9337-77ba40e09997 |         NONE | Not enough disk headroom to perform repair
+  ERROR N2: [[repair #3b3f9780-c89d-11f1-9337-77ba40e09997]] Rejecting incoming repair, disk usage (50.39%) above threshold (50.00%)
+  nodetool: 86] Repair command #10 failed with error Got negative replies from endpoints [/127.0.0.3:7010] / [2026-10-15 09:35:05,490] Repair command #10 finished with error / error: Repair job has failed with the error message: Repair command #10 failed with error Got negative replies from endpoints [/127.0.0.3:7010]. Check the logs on the repair participants for further details / java.lang.RuntimeException:
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.5 B: refused by N2 (participant), verdict lines and nodetool text as 9a — yes
+EXPECTED: P r=0.5 B: one ERROR line on N2 only, "Rejecting incoming repair, disk usage (50.39%) above threshold (50.00%)" — yes
+EXPECTED: P r=0.5 B: ERROR percentages 50.39% / 50.00% as planned (u within 0.0005 of plan) — yes
+EXPECTED: P r=0.5 B: nothing started (no merkle/AEService/stream/snapshot/anticompaction line, table dirs unchanged) — yes
+EXPECTED: P r=0.5 B: operand u=0.50391 within +/-0.0005 of plan 0.50391 — yes
+TRIGGER P control before r=0.8: knob None r=0.0 U0=None D=None pad=None u_plan=None | usage {'N1': [(0.00018, 0.0)], 'N2': [(0.00017, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=409f04e0-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:35:14,539] Repair session 40a32390-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:35:14,544] Repair command #11 finished in 0 seconds
+EXPECTED: P r=0.8 control: admitted — yes
+KNOB N2 set 0.8 read back 0.8
+TRIGGER P A r=0.8: knob N2 r=0.8 U0=210554061 D=183013 pad=210371048 u_plan=0.1961 | usage {'N1': [(0.00019, 0.0)], 'N2': [(0.1961, 0.8)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=45909540-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-15 09:35:22,830] Repair session 45943ec0-c89d-11f1-9337-77ba40e09997 for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-15 09:35:22,836] Repair command #12 finished in 0 seconds
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.8 A: admitted (two HDR lines admit=true, nodetool rc 0 finished, no Rejecting line) — yes
+EXPECTED: P r=0.8 A: operand u=0.1961 within +/-0.0005 of plan 0.1961 — yes
+KNOB N2 set 0.8 read back 0.8
+TRIGGER P B r=0.8: knob N2 r=0.8 U0=218942669 D=183457 pad=218759212 u_plan=0.20391 | usage {'N1': [(0.0002, 0.0)], 'N2': [(0.20391, 0.8)]} verdict {'N1': [True], 'N2': [False]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=2 id=4ae490f0-c89d-11f1-9337-77ba40e09997 | ERROR lines N1 0 N2 1 | not-started lines N1 0 N2 0 | dirs changed False | participates: 4ae490f0-c89d-11f1-9337-77ba40e09997 |         NONE | Not enough disk headroom to perform repair
+  ERROR N2: [[repair #4ae490f0-c89d-11f1-9337-77ba40e09997]] Rejecting incoming repair, disk usage (20.39%) above threshold (20.00%)
+  nodetool: 31] Repair command #13 failed with error Got negative replies from endpoints [/127.0.0.3:7010] / [2026-10-15 09:35:31,734] Repair command #13 finished with error / error: Repair job has failed with the error message: Repair command #13 failed with error Got negative replies from endpoints [/127.0.0.3:7010]. Check the logs on the repair participants for further details / java.lang.RuntimeException:
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: P r=0.8 B: refused by N2 (participant), verdict lines and nodetool text as 9a — yes
+EXPECTED: P r=0.8 B: one ERROR line on N2 only, "Rejecting incoming repair, disk usage (20.39%) above threshold (20.00%)" — yes
+EXPECTED: P r=0.8 B: ERROR percentages 20.39% / 20.00% as planned (u within 0.0005 of plan) — yes
+EXPECTED: P r=0.8 B: nothing started (no merkle/AEService/stream/snapshot/anticompaction line, table dirs unchanged) — yes
+EXPECTED: P r=0.8 B: operand u=0.20391 within +/-0.0005 of plan 0.20391 — yes
+DONE sweep-p expected 32/32 yes

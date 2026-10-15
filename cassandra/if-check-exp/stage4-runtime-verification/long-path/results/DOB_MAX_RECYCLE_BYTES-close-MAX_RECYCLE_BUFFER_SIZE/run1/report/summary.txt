@@ -1,0 +1,28 @@
+labels with a result: L2147483647-B3 L262144-B1 L262144-B2 L262144-B3 L262144-BA L262144-BB L4194304-B1 L4194304-B2 L4194304-B3 L4194304-BA L4194304-BB L64-B1 Ldefault-B1 Ldefault-B2 Ldefault-B2-heap Ldefault-B3 Ldefault-B3-heap Ldefault-BA Ldefault-BB Ldefault-BN
+STAIRCASE B1: L=262144: C=200084 kept retained=3201344 dMU=3202038 | L=default: C=200084 kept retained=3201344 dMU=3239777 | L=4194304: C=200084 kept retained=3201344 dMU=3234732
+STAIRCASE B2: L=262144: C=900084 replaced retained=2048 dMU=42723 | L=default: C=900084 kept retained=14401344 dMU=14397768 | L=4194304: C=900084 kept retained=14401344 dMU=14439359
+STAIRCASE B3: L=262144: C=3800084 replaced retained=2048 dMU=-200 | L=default: C=3800084 replaced retained=2048 dMU=-2562 | L=4194304: C=3800084 kept retained=60801344 dMU=60797243
+STAIRCASE BA: L=262144: C=262144 kept retained=4194304 dMU=4184546 | L=default: C=1048576 kept retained=16777216 dMU=16773038 | L=4194304: C=4194304 kept retained=67108864 dMU=67101744
+STAIRCASE BB: L=262144: C=262146 replaced retained=2048 dMU=-4681 | L=default: C=1048578 replaced retained=2048 dMU=-510 | L=4194304: C=4194306 replaced retained=2048 dMU=2517
+EXPECTED: staircase B1 at L=262144: kept, 16C — yes
+EXPECTED: staircase B1 at L=default: kept, 16C — yes
+EXPECTED: staircase B1 at L=4194304: kept, 16C — yes
+EXPECTED: staircase B2 at L=262144: replaced, 2,048 B — yes
+EXPECTED: staircase B2 at L=default: kept, 16C — yes
+EXPECTED: staircase B2 at L=4194304: kept, 16C — yes
+EXPECTED: staircase B3 at L=262144: replaced, 2,048 B — yes
+EXPECTED: staircase B3 at L=default: replaced, 2,048 B — yes
+EXPECTED: staircase B3 at L=4194304: kept, 16C — yes
+EXPECTED: boundary at L=262144: BA C = L kept (16L retained), BB C = L + 2 replaced (2,048 B) — yes
+EXPECTED: boundary at L=default: BA C = L kept (16L retained), BB C = L + 2 replaced (2,048 B) — yes
+EXPECTED: boundary at L=4194304: BA C = L kept (16L retained), BB C = L + 2 replaced (2,048 B) — yes
+EXPECTED: in-use peak of B1 identical at every L ({'262144': [300126], 'default': [300126], '4194304': [300126]}) — yes
+EXPECTED: in-use peak of B2 identical at every L ({'262144': [1350126], 'default': [1350126], '4194304': [1350126]}) — yes
+EXPECTED: in-use peak of B3 identical at every L ({'262144': [5700126], 'default': [5700126], '4194304': [5700126]}) — yes
+EXPECTED: xN: BN retains a quarter of B2 by the ledger (3600336 vs 14401344) — yes
+EXPECTED: xN: dMU(B2) - 4 dMU(BN) within 4 tau of 0 (-156584) — yes
+EXPECTED: scenario C, L = 2^31 - 1, B3: kept, 16C retained (60801344) — yes
+EXPECTED: scenario C, L = 64, B1: replaced, ks1 threads retain 2,048 B (2048) — yes
+EXPECTED: arm H B2: live [B higher than direct mode by 14401344 +/- 2 MB (got 14445808) — yes
+EXPECTED: arm H B3: live [B higher than direct mode by 0 +/- 2 MB (got 12816) — yes
+DONE report expected 21/21 yes
