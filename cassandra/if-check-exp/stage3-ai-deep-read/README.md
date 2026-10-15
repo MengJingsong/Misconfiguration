@@ -25,9 +25,9 @@ which reports their results side by side, not here.
 check's own operand) and a **cluster-tier** procedure (a real node; measure the
 actual resource), each complete with its own predictions and readings table. A
 tier that cannot be done is written as `n/a: <reason>` with what answers the same
-question instead. All 17 filed long-path cases are in this layout: three were
-converted at their stage-4 runs, eight on 2026-10-06 (not yet audited), and the
-twelfth to seventeenth were written in it.
+question instead. All 19 filed long-path cases are in this layout: three were
+converted at their stage-4 runs, eight on 2026-10-06, and the
+twelfth to nineteenth were written in it.
 
 **Stage 3 never judges the pair.** The long path judges whether a line is a
 real case (its own verdict). Stage 4 runs both paths' solutions, both tiers
