@@ -1,0 +1,172 @@
+ok   unit: harness checks present and all ok 569 checks
+ok   unit write n=2 tw=0 S=59 class=ShallowIndexedEntry
+ok   unit write n=2 tw=2048 S=59 class=IndexedEntry
+ok   unit write n=2 tw=16384 S=59 class=IndexedEntry
+ok   unit write n=2 tw=262144 S=59 class=IndexedEntry
+ok   unit write n=10 tw=0 S=299 class=ShallowIndexedEntry
+ok   unit write n=10 tw=2048 S=299 class=IndexedEntry
+ok   unit write n=10 tw=16384 S=299 class=IndexedEntry
+ok   unit write n=10 tw=262144 S=299 class=IndexedEntry
+ok   unit write n=34 tw=0 S=1037 class=ShallowIndexedEntry
+ok   unit write n=34 tw=2048 S=1037 class=IndexedEntry
+ok   unit write n=34 tw=16384 S=1037 class=IndexedEntry
+ok   unit write n=34 tw=262144 S=1037 class=IndexedEntry
+ok   unit write n=270 tw=0 S=8353 class=ShallowIndexedEntry
+ok   unit write n=270 tw=2048 S=8353 class=ShallowIndexedEntry
+ok   unit write n=270 tw=16384 S=8353 class=IndexedEntry
+ok   unit write n=270 tw=262144 S=8353 class=IndexedEntry
+ok   unit write n=2200 tw=0 S=68385 class=ShallowIndexedEntry
+ok   unit write n=2200 tw=2048 S=68385 class=ShallowIndexedEntry
+ok   unit write n=2200 tw=16384 S=68385 class=ShallowIndexedEntry
+ok   unit write n=2200 tw=262144 S=68385 class=IndexedEntry
+ok   unit write n=18000 tw=0 S=573985 class=ShallowIndexedEntry
+ok   unit write n=18000 tw=2048 S=573985 class=ShallowIndexedEntry
+ok   unit write n=18000 tw=16384 S=573985 class=ShallowIndexedEntry
+ok   unit write n=18000 tw=262144 S=573985 class=ShallowIndexedEntry
+ok   unit read: class iff size <= tr for every (n, tw, tr) 96 reads, 0 wrong
+ok   unit: one shallow weight {'72'}
+ok   unit: read-path IndexedEntry weight linear in n (slope spread <= 1 B/block) [(2, 448), (10, 1952), (34, 6464), (270, 50832), (2200, 413672)] slopes [188.0, 188.0, 188.0, 188.0]
+ok   unit boundary: write class flips after nw, read class after nr nw=66 nr=66
+ok   dataset C1: exactly one write line per partition 2000 lines / 2000
+ok   dataset C1: one n, S spread <= 1 %, S within x2 of target n {30} S 925..925
+ok   write path at load C1: IndexedEntry iff S <= T T [2048] wrong []
+ok   dataset CB: exactly one write line per partition 21 lines / 21
+ok   write path at load CB: IndexedEntry iff S <= T T [2048] wrong []
+ok   dataset C2: exactly one write line per partition 500 lines / 500
+ok   dataset C2: one n, S spread <= 1 %, S within x2 of target n {250} S 7745..7745
+ok   write path at load C2: IndexedEntry iff S <= T T [2048] wrong []
+ok   dataset C3: exactly one write line per partition 100 lines / 100
+ok   dataset C3: one n, S spread <= 1 %, S within x2 of target n {2000} S 63492..63493
+ok   write path at load C3: IndexedEntry iff S <= T T [2048] wrong []
+ok   dataset C4: exactly one write line per partition 16 lines / 16
+ok   dataset C4: one n, S spread <= 1 %, S within x2 of target n {16000} S 511492..511492
+ok   write path at load C4: IndexedEntry iff S <= T T [2048] wrong []
+ok   sweep T=0 C1: a disk read line for every partition, each on the branch size <= T 2000/2000, mismatches 0
+ok   sweep T=0 C1: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=0 C1 shallow: fetch lines >= P 22000
+ok   sweep T=0 C1 shallow: live ShallowIndexedEntry >= P 2000
+ok   sweep T=0 C1 shallow: Entries + P 2000
+ok   sweep T=0 CB: a disk read line for every partition, each on the branch size <= T 21/21, mismatches 0
+ok   sweep T=0 CB: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=0 CB shallow: fetch lines >= P 273
+ok   sweep T=0 CB shallow: live ShallowIndexedEntry >= P 21
+ok   sweep T=0 CB shallow: Entries + P 21
+ok   sweep T=0 C2: a disk read line for every partition, each on the branch size <= T 500/500, mismatches 0
+ok   sweep T=0 C2: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=0 C2 shallow: fetch lines >= P 7500
+ok   sweep T=0 C2 shallow: live ShallowIndexedEntry >= P 500
+ok   sweep T=0 C2 shallow: Entries + P 500
+ok   sweep T=0 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   sweep T=0 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=0 C3 shallow: fetch lines >= P 2100
+ok   sweep T=0 C3 shallow: live ShallowIndexedEntry >= P 100
+ok   sweep T=0 C3 shallow: Entries + P 100
+ok   sweep T=0 C4: a disk read line for every partition, each on the branch size <= T 16/16, mismatches 0
+ok   sweep T=0 C4: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=0 C4 shallow: fetch lines >= P 432
+ok   sweep T=0 C4 shallow: live ShallowIndexedEntry >= P 16
+ok   sweep T=0 C4 shallow: Entries + P 16
+ok   sweep T=2048 C1: a disk read line for every partition, each on the branch size <= T 2000/2000, mismatches 0
+ok   sweep T=2048 C1: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=2048 C1 indexed: no fetch line 0
+ok   sweep T=2048 C1 indexed: live IndexInfo = n x live IndexedEntry 43620 vs 30 x 1454
+ok   sweep T=2048 C1 indexed: K - w <= Size <= K and Entries < P Size 8386672 Entries 1454
+ok   sweep T=2048 C1 indexed: census IndexedEntry within 50 of Entries 1454 vs 1454
+ok   sweep T=2048 CB: a disk read line for every partition, each on the branch size <= T 21/21, mismatches 0
+ok   sweep T=2048 CB: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+info sweep T=2048 CB: mixed, indexed 6 shallow 15
+ok   sweep T=2048 C2: a disk read line for every partition, each on the branch size <= T 500/500, mismatches 0
+ok   sweep T=2048 C2: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=2048 C2 shallow: fetch lines >= P 7500
+ok   sweep T=2048 C2 shallow: live ShallowIndexedEntry >= P 500
+ok   sweep T=2048 C2 shallow: Entries + P 500
+ok   sweep T=2048 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   sweep T=2048 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=2048 C3 shallow: fetch lines >= P 2100
+ok   sweep T=2048 C3 shallow: live ShallowIndexedEntry >= P 100
+ok   sweep T=2048 C3 shallow: Entries + P 100
+ok   sweep T=2048 C4: a disk read line for every partition, each on the branch size <= T 16/16, mismatches 0
+ok   sweep T=2048 C4: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=2048 C4 shallow: fetch lines >= P 432
+ok   sweep T=2048 C4 shallow: live ShallowIndexedEntry >= P 16
+ok   sweep T=2048 C4 shallow: Entries + P 16
+ok   sweep T=16384 C1: a disk read line for every partition, each on the branch size <= T 2000/2000, mismatches 0
+ok   sweep T=16384 C1: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=16384 C1 indexed: no fetch line 0
+ok   sweep T=16384 C1 indexed: live IndexInfo = n x live IndexedEntry 43620 vs 30 x 1454
+ok   sweep T=16384 C1 indexed: K - w <= Size <= K and Entries < P Size 8386752 Entries 1455
+ok   sweep T=16384 C1 indexed: census IndexedEntry within 50 of Entries 1454 vs 1455
+ok   sweep T=16384 CB: a disk read line for every partition, each on the branch size <= T 21/21, mismatches 0
+ok   sweep T=16384 CB: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=16384 CB indexed: no fetch line 0
+ok   sweep T=16384 CB indexed: live IndexInfo = sum of n over the 21 cached entries 1470 vs 1470, IndexedEntry 21
+ok   sweep T=16384 C2: a disk read line for every partition, each on the branch size <= T 500/500, mismatches 0
+ok   sweep T=16384 C2: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=16384 C2 indexed: no fetch line 0
+ok   sweep T=16384 C2 indexed: live IndexInfo = n x live IndexedEntry 44250 vs 250 x 177
+ok   sweep T=16384 C2 indexed: K - w <= Size <= K and Entries < P Size 8341736 Entries 178
+ok   sweep T=16384 C2 indexed: census IndexedEntry within 50 of Entries 177 vs 178
+ok   sweep T=16384 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   sweep T=16384 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=16384 C3 shallow: fetch lines >= P 2100
+ok   sweep T=16384 C3 shallow: live ShallowIndexedEntry >= P 100
+ok   sweep T=16384 C3 shallow: Entries + P 100
+ok   sweep T=16384 C4: a disk read line for every partition, each on the branch size <= T 16/16, mismatches 0
+ok   sweep T=16384 C4: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=16384 C4 shallow: fetch lines >= P 432
+ok   sweep T=16384 C4 shallow: live ShallowIndexedEntry >= P 16
+ok   sweep T=16384 C4 shallow: Entries + P 16
+ok   sweep T=262144 C1: a disk read line for every partition, each on the branch size <= T 2000/2000, mismatches 0
+ok   sweep T=262144 C1: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=262144 C1 indexed: no fetch line 0
+ok   sweep T=262144 C1 indexed: live IndexInfo = n x live IndexedEntry 43620 vs 30 x 1454
+ok   sweep T=262144 C1 indexed: K - w <= Size <= K and Entries < P Size 8386672 Entries 1454
+ok   sweep T=262144 C1 indexed: census IndexedEntry within 50 of Entries 1454 vs 1454
+ok   sweep T=262144 CB: a disk read line for every partition, each on the branch size <= T 21/21, mismatches 0
+ok   sweep T=262144 CB: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=262144 CB indexed: no fetch line 0
+ok   sweep T=262144 CB indexed: live IndexInfo = sum of n over the 21 cached entries 1470 vs 1470, IndexedEntry 21
+ok   sweep T=262144 C2: a disk read line for every partition, each on the branch size <= T 500/500, mismatches 0
+ok   sweep T=262144 C2: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=262144 C2 indexed: no fetch line 0
+ok   sweep T=262144 C2 indexed: live IndexInfo = n x live IndexedEntry 44250 vs 250 x 177
+ok   sweep T=262144 C2 indexed: K - w <= Size <= K and Entries < P Size 8341736 Entries 178
+ok   sweep T=262144 C2 indexed: census IndexedEntry within 50 of Entries 177 vs 178
+ok   sweep T=262144 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   sweep T=262144 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=262144 C3 indexed: no fetch line 0
+ok   sweep T=262144 C3 indexed: live IndexInfo = n x live IndexedEntry 44000 vs 2000 x 22
+ok   sweep T=262144 C3 indexed: K - w <= Size <= K and Entries < P Size 8274896 Entries 24
+ok   sweep T=262144 C3 indexed: census IndexedEntry within 50 of Entries 22 vs 24
+ok   sweep T=262144 C4: a disk read line for every partition, each on the branch size <= T 16/16, mismatches 0
+ok   sweep T=262144 C4: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   sweep T=262144 C4 shallow: fetch lines >= P 432
+ok   sweep T=262144 C4 shallow: live ShallowIndexedEntry >= P 16
+ok   sweep T=262144 C4 shallow: Entries + P 16
+ok   flip T=262144 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   flip T=262144 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   flip T=262144 C3 indexed: no fetch line 0
+ok   flip T=262144 C3 indexed: live IndexInfo = n x live IndexedEntry 44000 vs 2000 x 22
+ok   flip T=262144 C3 indexed: K - w <= Size <= K and Entries < P Size 8274896 Entries 23
+ok   flip T=262144 C3 indexed: census IndexedEntry within 50 of Entries 22 vs 23
+ok   flip T=16384 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   flip T=16384 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   flip T=16384 C3 shallow: fetch lines >= P 2100
+ok   flip T=16384 C3 shallow: live ShallowIndexedEntry >= P 100
+ok   flip T=16384 C3 shallow: Entries + P 100
+ok   large T=262144 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   large T=262144 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   large T=262144 C3 indexed: no fetch line 0
+ok   large T=262144 C3 indexed: live IndexInfo = n x live IndexedEntry 200000 vs 2000 x 100
+ok   large T=16384 C3: a disk read line for every partition, each on the branch size <= T 100/100, mismatches 0
+ok   large T=16384 C3: size - S = 12 + vint(headerLength=1 B) + vint(n) on every disk line 0 off
+ok   large T=16384 C3 shallow: fetch lines >= P 2100
+ok   large T=16384 C3 shallow: live ShallowIndexedEntry >= P 100
+ok   large T=16384 C3 shallow: Entries + P 100
+ok   every shallow pass adds the same Size per entry {128.0}
+info CB at 2 KiB (n, S, size, write class, read class): [(60, 1855, 1869, 'IndexedEntry', 'IndexedEntry'), (61, 1886, 1900, 'IndexedEntry', 'IndexedEntry'), (62, 1917, 1931, 'IndexedEntry', 'IndexedEntry'), (63, 1948, 1962, 'IndexedEntry', 'IndexedEntry'), (64, 1979, 1993, 'IndexedEntry', 'IndexedEntry'), (65, 2010, 2024, 'IndexedEntry', 'IndexedEntry'), (66, 2041, 2055, 'IndexedEntry', 'ShallowIndexedEntry'), (67, 2072, 2086, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (68, 2103, 2117, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (69, 2134, 2148, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (70, 2165, 2179, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (71, 2196, 2210, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (72, 2227, 2241, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (73, 2258, 2272, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (74, 2289, 2303, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (75, 2320, 2334, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (76, 2351, 2365, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (77, 2382, 2396, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (78, 2413, 2427, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (79, 2444, 2458, 'ShallowIndexedEntry', 'ShallowIndexedEntry'), (80, 2475, 2489, 'ShallowIndexedEntry', 'ShallowIndexedEntry')]
+ok   CB at 2 KiB: write class iff S <= 2048 and read class iff size <= 2048 
+ok   arm W: pk 1-5 IndexedEntry at T=16384, pk 6-10 Shallow at T=2048 
+ok   ks1.t written only at load 
+ok   large cache C3 at 256 KiB: 100 entries added, all indexed, IndexInfo = 2000 x IndexedEntry +100 indexed 100 census {'indexed': 100, 'shallow': 0, 'indexinfo': 200000, 'indexinfo_bytes': 8000000}
+TOTAL 169 checks, 0 failed

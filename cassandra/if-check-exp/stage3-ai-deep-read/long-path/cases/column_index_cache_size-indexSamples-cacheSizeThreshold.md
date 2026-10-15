@@ -265,7 +265,8 @@ The test sets `column_index_cache_size` live, reads partitions whose block index
 of known sizes, and checks that each entry is built as the array (`IndexedEntry`) or the
 file position (`ShallowIndexedEntry`) exactly where the threshold falls, and what that
 does to the key cache and the heap. **Run so far:** none. Converted to this layout
-2026-10-06.
+2026-10-06. **Step-0 audit: Ready after amendments, 2026-10-14** (the amendments below are marked "Amended 2026-10-14,
+step-0 audit"; made before any reading of this case existed).
 
 ### 9a. Procedure and conclusions
 
@@ -321,6 +322,14 @@ prediction and conclusions in this section; it adds none):
 `S(n)` = `indexSamplesSerializedSize + 4 n` (the check's operand, §4); the classes C1 to C4
 have `S` ≈ 1, 8, 64 and 512 KiB (to be measured at step 1; see 9c); an entry is indexed iff
 `S(n) ≤ T`, and `n > 1`.
+(Amended 2026-10-14, step-0 audit: **the two paths compare different operands.** The write path (`:113`) compares
+`S(n)`; the read path (`RowIndexEntry.java:360`) compares `size`, the entry's serialized length read at `:345`, which
+is `S(n) + h(n)` with `h(n)` = `sizeofUnsignedVInt(headerLength)` + the serialized `DeletionTime` (12 B at the node's
+`nb` version, a live partition) + `sizeofUnsignedVInt(n)` (written at `:630` and `:777`, subtracted at `:358`, the
+sum at `:459-465`), about 14–15 B. So a write-path entry is indexed iff `S(n) ≤ T`, a read-path entry iff
+`S(n) + h(n) ≤ T`, and an entry whose `S(n)` lies in `(T − h(n), T]` is written indexed and read back shallow at the
+same *T*. The classes' `S + h` are far from every tested *T*; the boundary is tested in unit step 5 and with cluster
+class CB, where both flip points are predicted separately.)
 
 - **Class by threshold:** at *T* = 0: C1–C4 shallow. At 2 KiB: C1 indexed, C2–C4 shallow.
   At 16 KiB: C1, C2 indexed. At 256 KiB: C1–C3 indexed, C4 shallow (C4 is never indexed
@@ -341,6 +350,21 @@ have `S` ≈ 1, 8, 64 and 512 KiB (to be measured at step 1; see 9c); an entry i
 - **Total heap** barely moves across the sweep once the key cache is warm (the cache
   re-caps it), moving only by the uncapped terms (the per-writer `DataOutputBuffer` of
   `2 T`, transient flush entries).
+- (Amended 2026-10-14, step-0 audit: exact forms of the rows above, read from the instruments of 9d.)
+  **Branch per read:** every `read` trace line of a pass has `class=IndexedEntry` iff `size ≤ T`, and `size` = the
+  class's `S` + `h` from the `write` trace. **Displaced cost:** in a shallow pass every read writes at least one `fetch`
+  line (an `IndexInfo` read from the index file, `RowIndexEntry.java:826-839`); an indexed pass writes none.
+  **Key cache, shallow pass:** `Entries` rises by exactly the partitions read (no eviction: their weight is far below
+  `K`), and `Size` rises by the same constant per entry in every shallow pass, whatever the class and *T* (the
+  shallow weight does not depend on *n*). **Key cache, indexed pass:** `K − w ≤ Size ≤ K`, where *w* is one cached
+  entry's weight (key plus entry), and fewer entries than partitions read remain. **Census after an indexed pass:**
+  live `IndexInfo` instances = the class's *n* × live `RowIndexEntry$IndexedEntry` instances, and the `IndexedEntry`
+  count matches the cache's `Entries` to within the few system-table entries the client adds. **Large-cache arm**
+  (9b Controls): with `K` = 256 MiB, C3 indexed leaves all 100 entries cached, `Size` = 100 × *w*, and the heap after a
+  full collection is higher than in the capped C3 pass by about the `Size` difference (≈ 30 MB, against a pass-to-pass
+  noise read from the idle controls). **Write path on the node** (arm W): partitions of C2's shape written and flushed
+  after *T* is set to 16 KiB are `IndexedEntry` in the `write` trace; the same shape written after *T* is set back to
+  2 KiB is `ShallowIndexedEntry`.
 
 **Conclusions:**
 
@@ -354,6 +378,13 @@ have `S` ≈ 1, 8, 64 and 512 KiB (to be measured at step 1; see 9c); an entry i
 | Total node heap is flat across the sweep | **Expected, not a refutation** (§8). Report it as the key cache's budget. |
 | Index-file reads do not rise when entries go shallow | **Not confirmed** — §6b's displaced cost is not shown; read the reader metrics before concluding. |
 | `S` of the classes is not within a factor of 2 of 1, 8, 64, 512 KiB, or `tablestats` shows another SSTable format | **Invalid run** — rebuild the dataset (9c) or fix the format (9b). |
+
+(Amended 2026-10-14, step-0 audit: in every row, "follows `S ≤ T`" means `S ≤ T` for a write-path entry and
+`S + h ≤ T` for a read-path entry (Prediction). An off-by-one at a boundary — a class flip one block away from the
+predicted *n* at either site — is the **Refuted** row's "does not change at the predicted *T*" for that site, recorded
+with the two operands. A per-pass row that misses one of the exact forms (Prediction, last bullet) while the entry
+class follows the threshold is recorded against the row it belongs to: `Size` / `Entries` → the re-cap rows; `fetch`
+lines → the index-file row; census counts → "cached weights do not differ as the two `unsharedHeapSize()` say".)
 
 **Why the entry class and not the node's heap:** the node's heap is dominated by other
 things and the key cache re-caps the total, so it can stay flat for reasons unrelated to
@@ -386,6 +417,17 @@ reading to it.
 
 - **Idle run** — data loaded, no reads: the heap and key-cache floors.
 - **Key-cache-off arm** — `nodetool setcachecapacity 0 0 0` at one threshold: the capping removed (the cross-check of §8).
+  (Amended 2026-10-14, step-0 audit: **replaced by a large-cache arm.** With capacity 0 the cache retains nothing,
+  so the entries become garbage after each read and the arm would remove the retention, not the cap. Instead, at
+  256 KiB the key cache capacity is raised to 256 MiB over JMX (`org.apache.cassandra.db:type=Caches`,
+  operation `setKeyCacheCapacityInMB`, `CacheService.java:336-342`), C3 is read, and the capacity is restored to
+  8 MiB. This shows the uncapped total, entries × weight, and its heap. Corrected 2026-10-14 at the instrument check,
+  before run 1: JMX exposes the setter as the write-only **attribute** `KeyCacheCapacityInMB`, not as an operation (an
+  `invoke` fails with `NoSuchMethodException`); the `Capacity` gauge confirms the change.)
+- **Write-path arm W** (added 2026-10-14, step-0 audit) — after the sweep, set 16 KiB over JMX, write 5 partitions of
+  C2's shape to a second table `ks1.w` (same schema, autocompaction off), flush; set 2 KiB, write 5 more, flush. The
+  `write` trace shows the class each new entry got, so the write path is also observed on the node at two values, and
+  `ks1.t` is not rewritten.
 - **Read-before-write check** — one threshold change over JMX followed by re-reading the same SSTables, without any flush: shows the live read path.
 
 **Reset between runs:** to repeat an arm: `bin/nodetool invalidatekeycache`, then the same reads; do not restart (the key cache is saved and restored across restarts by `AutoSavingCache`). A new sweep: `invalidatekeycache`, set the next value, read.
@@ -434,6 +476,36 @@ About 2.5 GB in all. **Step 1 measures `S` per class** (the unit test prints `S(
 
 **If the classes straddle the thresholds poorly** (for example C2's `S` above 16 KiB): scale its row count by the ratio and rebuild that class only; record it.
 
+**(Amended 2026-10-14, step-0 audit: harness, loading and the boundary class.)**
+
+- **Each partition must sit in one SSTable.** At `-Xmx4G` the memtable space is 1 GiB and a flush starts at about a
+  third of it (`memtable_cleanup_threshold` = 1 / (1 + 2 flush writers), shipped yaml `:811`), so loading C3 (800 MB)
+  or C4 (1 GiB) in one go would flush in the middle of partitions and split their indexes across SSTables. The loader
+  writes whole partitions in order and runs `nodetool flush ks1 t` at partition boundaries every ≤ 100,000 rows
+  (C1 every 800 partitions, C2 every 100, C3 every 12, C4 after each). **Dataset check:** the `write` trace has exactly
+  one line per `ks1.t` partition, with the same *n* and `S` for every partition of a class (rows of 1 KiB make exactly
+  4 rows a block at `column_index_size` 4 KiB, so *n* = rows / 4 = 30, 250, 2,000, 16,000). (Runbook defect 1, fixed
+  2026-10-14 after run 1's first start stopped at this check, §9a unchanged: `S` may differ by a byte between
+  partitions of a class, because a row's timestamp is encoded against each flush's minimum and can change a block
+  width's vint (C3: 63,492 and 63,493 B). The check is one *n* per class and an `S` spread of at most 1 %; every
+  prediction uses each partition's own `S` from the `write` trace.)
+- **Boundary class CB** (added): 21 partitions with 240, 244, …, 320 rows (*n* = 60 … 80 blocks, `S` ≈ 2 KiB), loaded
+  with C1. At 2 KiB the `write` trace gives each `S(n)`; the prediction is write-path class indexed iff `S(n) ≤ 2048`
+  (seen at load, *T* = 2 KiB) and read-path class indexed iff `S(n) + h(n) ≤ 2048`. CB is read at every *T*.
+- **Instruments (replace the elapsed time and the key-cache estimate of `S`):** `index-trace.btm`, Byteman, observing
+  only: `write` — `BigTableWriter.createRowIndexEntry()` at exit, `ks1` tables only: `pk`, *n*, `S`
+  (`indexInfoSerializedSize()`), the entry class; `read` — `RowIndexEntry$Serializer.deserialize(DataInputPlus, long)`
+  at exit with a `ks1` `ReadCommand` on the thread: `size`, *T* (`getColumnIndexCacheSize()`), the class, *n*;
+  `fetch` — `RowIndexEntry$ShallowInfoRetriever.fetchIndex(int)` with a `ks1` command: one line per `IndexInfo` read
+  from the index file. Plus `Jmx.java` (get, set with a typed value, invoke an operation), `histo.sh` (the census:
+  `GC.class_histogram`, the three classes and `IndexInfo`) and `cluster-run.py` (Python) in place of
+  `load-classes.sh`, `read-class.sh` and `entry-census.sh`; `send-cql.py` loads with single-partition unlogged batches
+  of 32 rows (below `batch_size_fail_threshold` 50 KiB) and reads with `SELECT ck FROM ks1.t WHERE pk = ? AND ck = ?`
+  at a mid-range `ck`.
+- **Unit harness:** the `DoubleSerializer` pattern with **1,024** fake bytes per row and `column_index_size` 1 KiB
+  (one block per row, as with 100 KiB at the default, without writing 220 MB per build); `DeletionTime.LIVE`; *n* in
+  2, 10, 34, 270, 2,200 and **18,000** (a 512 KiB analogue of C4, never indexed at 256 KiB).
+
 ### 9d. Observables
 
 | Observable | How to read it | When to sample | Trap |
@@ -465,6 +537,14 @@ About 2.5 GB in all. **Step 1 measures `S` per class** (the unit test prints `S(
 
    Record pass or fail and, per row, the printed `S(n)`, class and `unsharedHeapSize()`.
 
+   (Amended 2026-10-14, step-0 audit: step 3 asserts the read-path class against `size ≤ T`, `size` read back from the
+   serialized entry, and also asserts `size − S(n)` = `h(n)` computed from its three terms; step 5 finds both flip
+   points, *n*w (the largest *n* with `S(n) ≤ 2048`, write path) and *n*r (the largest with `S(n) + h(n) ≤ 2048`, read
+   path), builds every *n* from 50 to 90, and asserts each site flips exactly there (*n*r ≤ *n*w). Added: each shallow
+   build's `buffer()` capacity is at least `2 T` (exactly `2 T` when `S ≤ 2 T`; `reuseOrAllocateBuffer():204`), and
+   `indexSamples()` is `null` iff `S > T`. One JVM runs the whole test; `unit-run.sh` writes the lines to
+   `~/stage4-logs/cics/unit/`.)
+
 **Before the cluster tier.**
 
 1. **Dataset check.** `tablestats` shows the table on BIG and the four classes' SSTables; step 1's `S` per class is within a factor of 2 of its target (9c).
@@ -480,6 +560,22 @@ About 2.5 GB in all. **Step 1 measures `S` per class** (the unit test prints `S(
 
 Stop when each scenario's records are taken; a run where the classes do not straddle the thresholds is invalid (9a).
 
+(Amended 2026-10-14, step-0 audit: the cluster tier as `cluster-run.py` runs it, one node lifetime.)
+1. Fresh `data/`, `commitlog/`, `saved_caches/`, `logs/`; node yaml = the tag's plus `column_index_size: 4KiB` and
+   `key_cache_size: 8MiB` (`column_index_cache_size` left at the shipped 2 KiB); `MAX_HEAP_SIZE=4G`; the Byteman agent
+   with `index-trace.btm`. Schema; load C1 + CB, C2, C3, C4 with the flushes of 9c; dataset check (9c amendment, and
+   `nb-*-big-Data.db` names). Stop if it fails.
+2. Instrument check (above, "Before the cluster tier" 2), plus: a `read` line and, at 0, `fetch` lines appear for the
+   read; not a reading.
+3. Sweep *T* = 0, 2, 16, 256 KiB. At each: set over JMX and read it back; idle control (census, heap, `Entries`,
+   `Size`); then **every class** C1, CB, C2, C3, C4 in turn, each pass = `invalidatekeycache`, a probe read, the
+   before readings, one point read per partition, the after readings, the census and the heap. A class with
+   `S + h ≤ T` is that value's scenario A, the others scenario B.
+4. Live-flip check at 256 → 16 KiB on C3 (step 4 above), with `ls` and the `write` trace showing no new `ks1.t` SSTable.
+5. Large-cache arm (9b Controls amendment) at 256 KiB on C3, then C3 at 16 KiB with the large cache; restore 8 MiB.
+6. Arm W (9b Controls). Then stop the node. Every `EXPECTED:` line is written to `summary.txt`; a failed instrument or
+   dataset check stops the run; the node is stopped on any exit.
+
 **Record for stage 4:** the `cassandra.yaml` diff (`column_index_size`, `key_cache_size`) and JVM options in force, the exact commands and thresholds, each class's `S`, the census, the key-cache readings, the elapsed times and the heap readings, per threshold and class.
 
 ## 10. Provenance
@@ -490,7 +586,7 @@ Stop when each scenario's records are taken; a run where the classes do not stra
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). All line numbers carried from `deferred.md` §1c (`:113`, `:171`, `:227`) confirmed unchanged. |
 | **Escape hatch / Target-3 note** | **No flag-style escape hatch** — the check cannot be switched off, only moved. Two adjacent observations for Target 3: (1) the constraint is **format-scoped**, so a table on the BTI format bypasses it entirely; (2) the read-path site reads the config **live per deserialization**, so a JMX change takes effect on already-written SSTables with no rewrite — an unusually cheap way to change a memory characteristic at runtime, in either direction. |
-| **Stage-4 feedback** | none yet. **§9 converted to the new layout 2026-10-06** (9a to 9e) from the old §9; not yet audited (stage-4 README, step 0) and not yet run. The new §9 lists its harness as work for step 1. |
+| **Stage-4 feedback** | **2026-10-14, long path, run 1 on `pc57`: Confirmed at both tiers; no run 2** ([results](../../../stage4-runtime-verification/long-path/results/column_index_cache_size-indexSamples-cacheSizeThreshold.md); harness `../../../stage4-runtime-verification/long-path/harness/column_index_cache_size-indexSamples-cacheSizeThreshold/`; uncommitted). Step-0 audit Ready after amendments (§9 marked "Amended 2026-10-14"; one runbook defect fixed before any reading). Unit: class follows `S ≤ T` written and `S + h ≤ T` read at 0 · 2 · 16 · 256 KiB, `ShallowIndexedEntry` 72 B for every *n*, read-path `IndexedEntry` 188 B per block. Node: indexed reads per *T* C1 0 · 2,000 · 2,000 · 2,000, C2 0 · 0 · 500 · 500, C3 0 · 0 · 0 · 100, C4 none, live over JMX with no rewrite; key cache held within one entry of 8 MiB when indexed (C1 1,454 entries of 5.8 KB, C3 22 of 376 KB), +128 B per entry when shallow; 11–27 index-file `IndexInfo` reads per shallow read, none per indexed read; large cache (256 MiB): heap +29.99 MB for `Size` +29.34 MB. **Stage-3 notes, not applied:** (1) the read path (`:360`) compares the entry's serialized `size` = `S + h` (`h` = 14–16 B), so an entry with `S` in (`T − h`, `T`] is written indexed and loaded shallow — seen on the node (*n* = 66: `S` 2,041, `size` 2,055 at 2 KiB); §5's "the two sites necessarily agree" holds for `:113`/`:171` only. (2) A write-path `IndexedEntry` weighs 284 B per block against 188 B read back (buffer-backed clusterings); it reaches the key cache only through key-cache migration (§6a step 6). (3) `IndexedEntry.unsharedHeapSize()` omits the `int[] offsets` array (16 + 4*n* B, `:497`, `:534`, `:613-620`). No bypass found; §8 and the Target-3 note stand. |
 | **Notes** | The third check site (`RowIndexEntry.java:360`) was **not** recorded in `deferred.md` §1c, which listed only the two write-path sites. It is the site that governs steady-state heap, and it is pattern (a) rather than (b). Found while tracing the decision point for this write-up. |
 
 ---

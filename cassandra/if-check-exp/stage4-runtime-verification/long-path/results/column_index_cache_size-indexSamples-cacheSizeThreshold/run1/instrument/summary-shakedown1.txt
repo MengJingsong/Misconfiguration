@@ -1,0 +1,38 @@
+yaml for instrument: | < key_cache_size: | > key_cache_size: 8MiB | < # column_index_size: 4KiB | > column_index_size: 4KiB
+Byteman TestScript: no errors
+node up; Submit -l: # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 42 | RULE read size | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 50 | RULE read | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 34 | RULE read clear | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 63 | RULE fetch | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 15 | RULE write context | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 23 | RULE write
+JVM heap flags: -XX:+UseG1GC -Xms4G -Xmx4G
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: key cache {'entries': 13, 'size': 1040, 'capacity': 8388608, 'iir': 0}
+SET column_index_cache_size 2 KiB over JMX; read back 2
+INSTRUMENT census parses: {'epoch_ms': 1792014309260, 'jcmd_ms': 469, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 13, 'heap_used_kb': 83097}
+LOADED C1: 5 partitions, rows [120]..., flush every 5
+LOADED C2: 2 partitions, rows [1000]..., flush every 2
+DATASET Data.db files 2; all nb-*-big: True; write lines for ks1.t 7
+DATASET C1: n [30] S [925] (target 1024, rows/4 = 30.0); one n and S: True; S within x2 of target: True
+EXPECTED: C1: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['IndexedEntry'], mismatches [] — yes
+DATASET C2: n [250] S [7745] (target 8192, rows/4 = 250.0); one n and S: True; S within x2 of target: True
+EXPECTED: C2: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['ShallowIndexedEntry'], mismatches [] — yes
+SET column_index_cache_size 0 KiB over JMX; read back 0
+INSTRUMENT CHECK 9e: at 2 KiB read [('read', 'IndexedEntry')] census {'epoch_ms': 1792014317694, 'jcmd_ms': 457, 'indexed_inst': 1, 'indexed_bytes': 56, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 30, 'indexinfo_bytes': 1200, 'rie_inst': 1, 'heap_used_kb': 99433}; at 0 read [('read', 'ShallowIndexedEntry')] fetch 11 census {'epoch_ms': 1792014322083, 'jcmd_ms': 468, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 1, 'shallow_bytes': 72, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 116062}
+INSTRUMENT CHECK PASSED
+SET column_index_cache_size 256 KiB over JMX; read back 256
+PASS instrument T=262144 C2: client ok=True found=2/2 elapsed=0.012s; read lines disk=2 (pks 2) cache=0 indexed=2 shallow=0 branch mismatches=0 []; h=[15]; fetch=0; cache Entries 1->3 Size 80->94336 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792014328291, 'jcmd_ms': 472, 'indexed_inst': 2, 'indexed_bytes': 112, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 500, 'indexinfo_bytes': 20000, 'rie_inst': 1, 'heap_used_kb': 100245}
+EXPECTED: instrument T=262144 C2: every partition read found its row — yes
+EXPECTED: instrument T=262144 C2: a disk read line for every partition (2/2) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: instrument T=262144 C2 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: instrument T=262144 C2 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 31445: Size 94336, fewer entries than partitions (3 < 2) — NO (recorded; the AI judges it in the results file)
+EXPECTED: instrument T=262144 C2 (indexed): live IndexInfo = n x live IndexedEntry: 500 = 250 x 2 = 500 — yes
+EXPECTED: instrument T=262144 C2 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 2 <= 3 and 3 - 2 <= 50 — yes
+SET column_index_cache_size 0 KiB over JMX; read back 0
+PASS instrument T=0 C2: client ok=True found=2/2 elapsed=0.014s; read lines disk=2 (pks 2) cache=0 indexed=0 shallow=2 branch mismatches=0 []; h=[15]; fetch=30; cache Entries 1->3 Size 80->336 Capacity 8388608; IndexInfoReads +6; census {'epoch_ms': 1792014334503, 'jcmd_ms': 466, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 2, 'shallow_bytes': 144, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 100622}
+EXPECTED: instrument T=0 C2: every partition read found its row — yes
+EXPECTED: instrument T=0 C2: a disk read line for every partition (2/2) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: instrument T=0 C2 (shallow): every read fetched IndexInfo from the index file: fetch lines 30 >= 2 — yes
+EXPECTED: instrument T=0 C2 (shallow): Entries rose by exactly the partitions read: 2 = 2 — yes
+INFO instrument T=0 C2: Size per shallow entry 128.0
+EXPECTED: instrument T=0 C2 (shallow): live ShallowIndexedEntry >= P: 2 >= 2 — yes
+SET key cache capacity 256 MiB; Capacity gauge 8388608
+SET key cache capacity 8 MiB; Capacity gauge 8388608
+INSTRUMENT large-cache invoke: capacity 8388608
+DONE (instrument)

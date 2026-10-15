@@ -1,0 +1,214 @@
+yaml for run: | < key_cache_size: | > key_cache_size: 8MiB | < # column_index_size: 4KiB | > column_index_size: 4KiB
+Byteman TestScript: no errors
+node up; Submit -l: # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 42 | RULE read size | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 50 | RULE read | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 34 | RULE read clear | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 63 | RULE fetch | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 15 | RULE write context | # File /users/jason92/stage4-harness-run/cics/index-trace.btm line 23 | RULE write
+JVM heap flags: -XX:+UseG1GC -Xms4G -Xmx4G
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+INSTRUMENT jmx: key cache {'entries': 13, 'size': 1040, 'capacity': 8388608, 'iir': 0}
+SET column_index_cache_size 2 KiB over JMX; read back 2
+INSTRUMENT census parses: {'epoch_ms': 1792014809909, 'jcmd_ms': 472, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 13, 'heap_used_kb': 83095}
+LOADED C1: 2000 partitions, rows [120]..., flush every 800
+LOADED CB: 21 partitions, rows [240, 244, 248]..., flush every 21
+LOADED C2: 500 partitions, rows [1000]..., flush every 100
+LOADED C3: 100 partitions, rows [8000]..., flush every 12
+LOADED C4: 16 partitions, rows [64000]..., flush every 1
+DATASET Data.db files 34; all nb-*-big: True; write lines for ks1.t 2637
+DATASET C1: n [30] S [925] (target 1024, rows/4 = 30.0); one n and S spread <= 1 %: True; S within x2 of target: True
+EXPECTED: C1: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['IndexedEntry'], mismatches [] — yes
+DATASET CB: per pk (rows, n, S): [(240, 60, 1855), (244, 61, 1886), (248, 62, 1917), (252, 63, 1948), (256, 64, 1979), (260, 65, 2010), (264, 66, 2041), (268, 67, 2072), (272, 68, 2103), (276, 69, 2134), (280, 70, 2165), (284, 71, 2196), (288, 72, 2227), (292, 73, 2258), (296, 74, 2289), (300, 75, 2320), (304, 76, 2351), (308, 77, 2382), (312, 78, 2413), (316, 79, 2444), (320, 80, 2475)]
+EXPECTED: CB: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['IndexedEntry', 'ShallowIndexedEntry'], mismatches [] — yes
+DATASET C2: n [250] S [7745] (target 8192, rows/4 = 250.0); one n and S spread <= 1 %: True; S within x2 of target: True
+EXPECTED: C2: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['ShallowIndexedEntry'], mismatches [] — yes
+DATASET C3: n [2000] S [63492, 63493] (target 65536, rows/4 = 2000.0); one n and S spread <= 1 %: True; S within x2 of target: True
+EXPECTED: C3: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['ShallowIndexedEntry'], mismatches [] — yes
+DATASET C4: n [16000] S [511492] (target 524288, rows/4 = 16000.0); one n and S spread <= 1 %: True; S within x2 of target: True
+EXPECTED: C4: write-path class at load (T = [2048]) is IndexedEntry iff S <= T: classes ['ShallowIndexedEntry'], mismatches [] — yes
+SET column_index_cache_size 0 KiB over JMX; read back 0
+INSTRUMENT CHECK 9e: at 2 KiB read [('read', 'IndexedEntry')] census {'epoch_ms': 1792015006068, 'jcmd_ms': 559, 'indexed_inst': 1, 'indexed_bytes': 56, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 30, 'indexinfo_bytes': 1200, 'rie_inst': 1, 'heap_used_kb': 531988}; at 0 read [('read', 'ShallowIndexedEntry')] fetch 11 census {'epoch_ms': 1792015010595, 'jcmd_ms': 491, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 1, 'shallow_bytes': 72, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 531999}
+INSTRUMENT CHECK PASSED
+SET column_index_cache_size 0 KiB over JMX; read back 0
+IDLE T=0: cache {'entries': 1, 'size': 80, 'capacity': 8388608, 'iir': 9}; census {'epoch_ms': 1792015016864, 'jcmd_ms': 480, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532001}
+PASS sweep T=0 C1: client ok=True found=2000/2000 elapsed=1.461s; read lines disk=2000 (pks 2000) cache=0 indexed=0 shallow=2000 branch mismatches=0 []; h=[14]; fetch=22000; cache Entries 1->2001 Size 80->256080 Capacity 8388608; IndexInfoReads +2004; census {'epoch_ms': 1792015023979, 'jcmd_ms': 536, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 2000, 'shallow_bytes': 144000, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532466}
+EXPECTED: sweep T=0 C1: every partition read found its row — yes
+EXPECTED: sweep T=0 C1: a disk read line for every partition (2000/2000) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=0 C1 (shallow): every read fetched IndexInfo from the index file: fetch lines 22000 >= 2000 — yes
+EXPECTED: sweep T=0 C1 (shallow): Entries rose by exactly the partitions read: 2000 = 2000 — yes
+INFO sweep T=0 C1: Size per shallow entry 128.0
+EXPECTED: sweep T=0 C1 (shallow): live ShallowIndexedEntry >= P: 2000 >= 2000 — yes
+PASS sweep T=0 CB: client ok=True found=21/21 elapsed=0.021s; read lines disk=21 (pks 21) cache=0 indexed=0 shallow=21 branch mismatches=0 []; h=[14]; fetch=273; cache Entries 1->22 Size 80->2768 Capacity 8388608; IndexInfoReads +25; census {'epoch_ms': 1792015029588, 'jcmd_ms': 495, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 21, 'shallow_bytes': 1512, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532084}
+EXPECTED: sweep T=0 CB: every partition read found its row — yes
+EXPECTED: sweep T=0 CB: a disk read line for every partition (21/21) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=0 CB (shallow): every read fetched IndexInfo from the index file: fetch lines 273 >= 21 — yes
+EXPECTED: sweep T=0 CB (shallow): Entries rose by exactly the partitions read: 21 = 21 — yes
+INFO sweep T=0 CB: Size per shallow entry 128.0
+EXPECTED: sweep T=0 CB (shallow): live ShallowIndexedEntry >= P: 21 >= 21 — yes
+PASS sweep T=0 C2: client ok=True found=500/500 elapsed=0.319s; read lines disk=500 (pks 500) cache=0 indexed=0 shallow=500 branch mismatches=0 []; h=[15]; fetch=7500; cache Entries 1->501 Size 80->64080 Capacity 8388608; IndexInfoReads +504; census {'epoch_ms': 1792015035545, 'jcmd_ms': 486, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 500, 'shallow_bytes': 36000, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532187}
+EXPECTED: sweep T=0 C2: every partition read found its row — yes
+EXPECTED: sweep T=0 C2: a disk read line for every partition (500/500) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=0 C2 (shallow): every read fetched IndexInfo from the index file: fetch lines 7500 >= 500 — yes
+EXPECTED: sweep T=0 C2 (shallow): Entries rose by exactly the partitions read: 500 = 500 — yes
+INFO sweep T=0 C2: Size per shallow entry 128.0
+EXPECTED: sweep T=0 C2 (shallow): live ShallowIndexedEntry >= P: 500 >= 500 — yes
+PASS sweep T=0 C3: client ok=True found=100/100 elapsed=0.089s; read lines disk=100 (pks 100) cache=0 indexed=0 shallow=100 branch mismatches=0 []; h=[15]; fetch=2100; cache Entries 1->101 Size 80->12880 Capacity 8388608; IndexInfoReads +104; census {'epoch_ms': 1792015041116, 'jcmd_ms': 524, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 100, 'shallow_bytes': 7200, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532116}
+EXPECTED: sweep T=0 C3: every partition read found its row — yes
+EXPECTED: sweep T=0 C3: a disk read line for every partition (100/100) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=0 C3 (shallow): every read fetched IndexInfo from the index file: fetch lines 2100 >= 100 — yes
+EXPECTED: sweep T=0 C3 (shallow): Entries rose by exactly the partitions read: 100 = 100 — yes
+INFO sweep T=0 C3: Size per shallow entry 128.0
+EXPECTED: sweep T=0 C3 (shallow): live ShallowIndexedEntry >= P: 100 >= 100 — yes
+PASS sweep T=0 C4: client ok=True found=16/16 elapsed=0.028s; read lines disk=16 (pks 16) cache=0 indexed=0 shallow=16 branch mismatches=0 []; h=[15]; fetch=432; cache Entries 1->17 Size 80->2128 Capacity 8388608; IndexInfoReads +20; census {'epoch_ms': 1792015046683, 'jcmd_ms': 546, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 16, 'shallow_bytes': 1152, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532102}
+EXPECTED: sweep T=0 C4: every partition read found its row — yes
+EXPECTED: sweep T=0 C4: a disk read line for every partition (16/16) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=0 C4 (shallow): every read fetched IndexInfo from the index file: fetch lines 432 >= 16 — yes
+EXPECTED: sweep T=0 C4 (shallow): Entries rose by exactly the partitions read: 16 = 16 — yes
+INFO sweep T=0 C4: Size per shallow entry 128.0
+EXPECTED: sweep T=0 C4 (shallow): live ShallowIndexedEntry >= P: 16 >= 16 — yes
+SET column_index_cache_size 2 KiB over JMX; read back 2
+IDLE T=2048: cache {'entries': 1, 'size': 80, 'capacity': 8388608, 'iir': 2686}; census {'epoch_ms': 1792015053104, 'jcmd_ms': 487, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532103}
+PASS sweep T=2048 C1: client ok=True found=2000/2000 elapsed=1.084s; read lines disk=2000 (pks 2000) cache=0 indexed=2000 shallow=0 branch mismatches=0 []; h=[14]; fetch=0; cache Entries 1->1454 Size 80->8386672 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015059764, 'jcmd_ms': 509, 'indexed_inst': 1454, 'indexed_bytes': 81424, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 43620, 'indexinfo_bytes': 1744800, 'rie_inst': 0, 'heap_used_kb': 540605}
+EXPECTED: sweep T=2048 C1: every partition read found its row — yes
+EXPECTED: sweep T=2048 C1: a disk read line for every partition (2000/2000) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=2048 C1 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=2048 C1 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 5768: Size 8386672, fewer entries than partitions (1454 < 2000) — yes
+EXPECTED: sweep T=2048 C1 (indexed): live IndexInfo = n x live IndexedEntry: 43620 = 30 x 1454 = 43620 — yes
+EXPECTED: sweep T=2048 C1 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 1454 <= 1454 and 1454 - 1454 <= 50 — yes
+PASS sweep T=2048 CB: client ok=True found=21/21 elapsed=0.02s; read lines disk=21 (pks 21) cache=0 indexed=6 shallow=15 branch mismatches=0 []; h=[14]; fetch=197; cache Entries 1->22 Size 80->73280 Capacity 8388608; IndexInfoReads +15; census {'epoch_ms': 1792015065398, 'jcmd_ms': 541, 'indexed_inst': 6, 'indexed_bytes': 336, 'shallow_inst': 15, 'shallow_bytes': 1080, 'indexinfo_inst': 375, 'indexinfo_bytes': 15000, 'rie_inst': 1, 'heap_used_kb': 532196}
+EXPECTED: sweep T=2048 CB: every partition read found its row — yes
+EXPECTED: sweep T=2048 CB: a disk read line for every partition (21/21) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+INFO sweep T=2048 CB: mixed branches (indexed 6, shallow 15) — boundary class or a mismatch
+EXPECTED: sweep T=2048 CB: fetch lines >= the shallow reads (197 >= 15) — yes
+PASS sweep T=2048 C2: client ok=True found=500/500 elapsed=0.373s; read lines disk=500 (pks 500) cache=0 indexed=0 shallow=500 branch mismatches=0 []; h=[15]; fetch=7500; cache Entries 1->501 Size 80->64080 Capacity 8388608; IndexInfoReads +500; census {'epoch_ms': 1792015071458, 'jcmd_ms': 502, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 500, 'shallow_bytes': 36000, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532220}
+EXPECTED: sweep T=2048 C2: every partition read found its row — yes
+EXPECTED: sweep T=2048 C2: a disk read line for every partition (500/500) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=2048 C2 (shallow): every read fetched IndexInfo from the index file: fetch lines 7500 >= 500 — yes
+EXPECTED: sweep T=2048 C2 (shallow): Entries rose by exactly the partitions read: 500 = 500 — yes
+INFO sweep T=2048 C2: Size per shallow entry 128.0
+EXPECTED: sweep T=2048 C2 (shallow): live ShallowIndexedEntry >= P: 500 >= 500 — yes
+PASS sweep T=2048 C3: client ok=True found=100/100 elapsed=0.08s; read lines disk=100 (pks 100) cache=0 indexed=0 shallow=100 branch mismatches=0 []; h=[15]; fetch=2100; cache Entries 1->101 Size 80->12880 Capacity 8388608; IndexInfoReads +100; census {'epoch_ms': 1792015077151, 'jcmd_ms': 517, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 100, 'shallow_bytes': 7200, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532146}
+EXPECTED: sweep T=2048 C3: every partition read found its row — yes
+EXPECTED: sweep T=2048 C3: a disk read line for every partition (100/100) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=2048 C3 (shallow): every read fetched IndexInfo from the index file: fetch lines 2100 >= 100 — yes
+EXPECTED: sweep T=2048 C3 (shallow): Entries rose by exactly the partitions read: 100 = 100 — yes
+INFO sweep T=2048 C3: Size per shallow entry 128.0
+EXPECTED: sweep T=2048 C3 (shallow): live ShallowIndexedEntry >= P: 100 >= 100 — yes
+PASS sweep T=2048 C4: client ok=True found=16/16 elapsed=0.025s; read lines disk=16 (pks 16) cache=0 indexed=0 shallow=16 branch mismatches=0 []; h=[15]; fetch=432; cache Entries 1->17 Size 80->2128 Capacity 8388608; IndexInfoReads +16; census {'epoch_ms': 1792015082751, 'jcmd_ms': 503, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 16, 'shallow_bytes': 1152, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532133}
+EXPECTED: sweep T=2048 C4: every partition read found its row — yes
+EXPECTED: sweep T=2048 C4: a disk read line for every partition (16/16) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=2048 C4 (shallow): every read fetched IndexInfo from the index file: fetch lines 432 >= 16 — yes
+EXPECTED: sweep T=2048 C4 (shallow): Entries rose by exactly the partitions read: 16 = 16 — yes
+INFO sweep T=2048 C4: Size per shallow entry 128.0
+EXPECTED: sweep T=2048 C4 (shallow): live ShallowIndexedEntry >= P: 16 >= 16 — yes
+SET column_index_cache_size 16 KiB over JMX; read back 16
+IDLE T=16384: cache {'entries': 1, 'size': 80, 'capacity': 8388608, 'iir': 3317}; census {'epoch_ms': 1792015089084, 'jcmd_ms': 510, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 532133}
+PASS sweep T=16384 C1: client ok=True found=2000/2000 elapsed=0.95s; read lines disk=2000 (pks 2000) cache=0 indexed=2000 shallow=0 branch mismatches=0 []; h=[14]; fetch=0; cache Entries 1->1455 Size 80->8386752 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015095616, 'jcmd_ms': 517, 'indexed_inst': 1454, 'indexed_bytes': 81424, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 43620, 'indexinfo_bytes': 1744800, 'rie_inst': 1, 'heap_used_kb': 540625}
+EXPECTED: sweep T=16384 C1: every partition read found its row — yes
+EXPECTED: sweep T=16384 C1: a disk read line for every partition (2000/2000) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=16384 C1 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=16384 C1 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 5764: Size 8386752, fewer entries than partitions (1455 < 2000) — yes
+EXPECTED: sweep T=16384 C1 (indexed): live IndexInfo = n x live IndexedEntry: 43620 = 30 x 1454 = 43620 — yes
+EXPECTED: sweep T=16384 C1 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 1454 <= 1455 and 1455 - 1454 <= 50 — yes
+PASS sweep T=16384 CB: client ok=True found=21/21 elapsed=0.017s; read lines disk=21 (pks 21) cache=0 indexed=21 shallow=0 branch mismatches=0 []; h=[14]; fetch=0; cache Entries 1->22 Size 80->279168 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015101159, 'jcmd_ms': 504, 'indexed_inst': 21, 'indexed_bytes': 1176, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 1470, 'indexinfo_bytes': 58800, 'rie_inst': 1, 'heap_used_kb': 532421}
+EXPECTED: sweep T=16384 CB: every partition read found its row — yes
+EXPECTED: sweep T=16384 CB: a disk read line for every partition (21/21) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=16384 CB (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=16384 CB (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 12689: Size 279168, fewer entries than partitions (22 < 21) — NO (recorded; the AI judges it in the results file)
+EXPECTED: sweep T=16384 CB (indexed): live IndexInfo = n x live IndexedEntry: 1470 = 60 x 21 = 1260 — NO (recorded; the AI judges it in the results file)
+EXPECTED: sweep T=16384 CB (indexed): live IndexedEntry within the system-table entries of the cache Entries: 21 <= 22 and 22 - 21 <= 50 — yes
+PASS sweep T=16384 C2: client ok=True found=500/500 elapsed=0.271s; read lines disk=500 (pks 500) cache=0 indexed=500 shallow=0 branch mismatches=0 []; h=[15]; fetch=0; cache Entries 1->178 Size 80->8341736 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015106997, 'jcmd_ms': 545, 'indexed_inst': 177, 'indexed_bytes': 9912, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 44250, 'indexinfo_bytes': 1770000, 'rie_inst': 1, 'heap_used_kb': 541946}
+EXPECTED: sweep T=16384 C2: every partition read found its row — yes
+EXPECTED: sweep T=16384 C2: a disk read line for every partition (500/500) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=16384 C2 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=16384 C2 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 46864: Size 8341736, fewer entries than partitions (178 < 500) — yes
+EXPECTED: sweep T=16384 C2 (indexed): live IndexInfo = n x live IndexedEntry: 44250 = 250 x 177 = 44250 — yes
+EXPECTED: sweep T=16384 C2 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 177 <= 178 and 178 - 177 <= 50 — yes
+PASS sweep T=16384 C3: client ok=True found=100/100 elapsed=0.094s; read lines disk=100 (pks 100) cache=0 indexed=0 shallow=100 branch mismatches=0 []; h=[15]; fetch=2100; cache Entries 1->101 Size 80->12880 Capacity 8388608; IndexInfoReads +100; census {'epoch_ms': 1792015112726, 'jcmd_ms': 519, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 100, 'shallow_bytes': 7200, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 533634}
+EXPECTED: sweep T=16384 C3: every partition read found its row — yes
+EXPECTED: sweep T=16384 C3: a disk read line for every partition (100/100) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=16384 C3 (shallow): every read fetched IndexInfo from the index file: fetch lines 2100 >= 100 — yes
+EXPECTED: sweep T=16384 C3 (shallow): Entries rose by exactly the partitions read: 100 = 100 — yes
+INFO sweep T=16384 C3: Size per shallow entry 128.0
+EXPECTED: sweep T=16384 C3 (shallow): live ShallowIndexedEntry >= P: 100 >= 100 — yes
+PASS sweep T=16384 C4: client ok=True found=16/16 elapsed=0.031s; read lines disk=16 (pks 16) cache=0 indexed=0 shallow=16 branch mismatches=0 []; h=[15]; fetch=432; cache Entries 1->17 Size 80->2128 Capacity 8388608; IndexInfoReads +16; census {'epoch_ms': 1792015118348, 'jcmd_ms': 480, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 16, 'shallow_bytes': 1152, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 533621}
+EXPECTED: sweep T=16384 C4: every partition read found its row — yes
+EXPECTED: sweep T=16384 C4: a disk read line for every partition (16/16) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=16384 C4 (shallow): every read fetched IndexInfo from the index file: fetch lines 432 >= 16 — yes
+EXPECTED: sweep T=16384 C4 (shallow): Entries rose by exactly the partitions read: 16 = 16 — yes
+INFO sweep T=16384 C4: Size per shallow entry 128.0
+EXPECTED: sweep T=16384 C4 (shallow): live ShallowIndexedEntry >= P: 16 >= 16 — yes
+SET column_index_cache_size 256 KiB over JMX; read back 256
+IDLE T=262144: cache {'entries': 1, 'size': 80, 'capacity': 8388608, 'iir': 3433}; census {'epoch_ms': 1792015124707, 'jcmd_ms': 540, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 533621}
+PASS sweep T=262144 C1: client ok=True found=2000/2000 elapsed=1.025s; read lines disk=2000 (pks 2000) cache=0 indexed=2000 shallow=0 branch mismatches=0 []; h=[14]; fetch=0; cache Entries 1->1454 Size 80->8386672 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015131376, 'jcmd_ms': 480, 'indexed_inst': 1454, 'indexed_bytes': 81424, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 43620, 'indexinfo_bytes': 1744800, 'rie_inst': 0, 'heap_used_kb': 542107}
+EXPECTED: sweep T=262144 C1: every partition read found its row — yes
+EXPECTED: sweep T=262144 C1: a disk read line for every partition (2000/2000) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=262144 C1 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=262144 C1 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 5768: Size 8386672, fewer entries than partitions (1454 < 2000) — yes
+EXPECTED: sweep T=262144 C1 (indexed): live IndexInfo = n x live IndexedEntry: 43620 = 30 x 1454 = 43620 — yes
+EXPECTED: sweep T=262144 C1 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 1454 <= 1454 and 1454 - 1454 <= 50 — yes
+PASS sweep T=262144 CB: client ok=True found=21/21 elapsed=0.016s; read lines disk=21 (pks 21) cache=0 indexed=21 shallow=0 branch mismatches=0 []; h=[14]; fetch=0; cache Entries 1->22 Size 80->279168 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015136910, 'jcmd_ms': 530, 'indexed_inst': 21, 'indexed_bytes': 1176, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 1470, 'indexinfo_bytes': 58800, 'rie_inst': 1, 'heap_used_kb': 533904}
+EXPECTED: sweep T=262144 CB: every partition read found its row — yes
+EXPECTED: sweep T=262144 CB: a disk read line for every partition (21/21) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=262144 CB (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=262144 CB (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 12689: Size 279168, fewer entries than partitions (22 < 21) — NO (recorded; the AI judges it in the results file)
+EXPECTED: sweep T=262144 CB (indexed): live IndexInfo = n x live IndexedEntry: 1470 = 60 x 21 = 1260 — NO (recorded; the AI judges it in the results file)
+EXPECTED: sweep T=262144 CB (indexed): live IndexedEntry within the system-table entries of the cache Entries: 21 <= 22 and 22 - 21 <= 50 — yes
+PASS sweep T=262144 C2: client ok=True found=500/500 elapsed=0.276s; read lines disk=500 (pks 500) cache=0 indexed=500 shallow=0 branch mismatches=0 []; h=[15]; fetch=0; cache Entries 1->178 Size 80->8341736 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015142836, 'jcmd_ms': 513, 'indexed_inst': 177, 'indexed_bytes': 9912, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 44250, 'indexinfo_bytes': 1770000, 'rie_inst': 1, 'heap_used_kb': 541962}
+EXPECTED: sweep T=262144 C2: every partition read found its row — yes
+EXPECTED: sweep T=262144 C2: a disk read line for every partition (500/500) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=262144 C2 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=262144 C2 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 46864: Size 8341736, fewer entries than partitions (178 < 500) — yes
+EXPECTED: sweep T=262144 C2 (indexed): live IndexInfo = n x live IndexedEntry: 44250 = 250 x 177 = 44250 — yes
+EXPECTED: sweep T=262144 C2 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 177 <= 178 and 178 - 177 <= 50 — yes
+PASS sweep T=262144 C3: client ok=True found=100/100 elapsed=0.094s; read lines disk=100 (pks 100) cache=0 indexed=100 shallow=0 branch mismatches=0 []; h=[15]; fetch=0; cache Entries 1->24 Size 80->8274896 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015148564, 'jcmd_ms': 535, 'indexed_inst': 22, 'indexed_bytes': 1232, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 44000, 'indexinfo_bytes': 1760000, 'rie_inst': 1, 'heap_used_kb': 541887}
+EXPECTED: sweep T=262144 C3: every partition read found its row — yes
+EXPECTED: sweep T=262144 C3: a disk read line for every partition (100/100) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=262144 C3 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: sweep T=262144 C3 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 344787: Size 8274896, fewer entries than partitions (24 < 100) — yes
+EXPECTED: sweep T=262144 C3 (indexed): live IndexInfo = n x live IndexedEntry: 44000 = 2000 x 22 = 44000 — yes
+EXPECTED: sweep T=262144 C3 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 22 <= 24 and 24 - 22 <= 50 — yes
+PASS sweep T=262144 C4: client ok=True found=16/16 elapsed=0.029s; read lines disk=16 (pks 16) cache=0 indexed=0 shallow=16 branch mismatches=0 []; h=[15]; fetch=432; cache Entries 1->17 Size 80->2128 Capacity 8388608; IndexInfoReads +16; census {'epoch_ms': 1792015154163, 'jcmd_ms': 478, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 16, 'shallow_bytes': 1152, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 533638}
+EXPECTED: sweep T=262144 C4: every partition read found its row — yes
+EXPECTED: sweep T=262144 C4: a disk read line for every partition (16/16) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: sweep T=262144 C4 (shallow): every read fetched IndexInfo from the index file: fetch lines 432 >= 16 — yes
+EXPECTED: sweep T=262144 C4 (shallow): Entries rose by exactly the partitions read: 16 = 16 — yes
+INFO sweep T=262144 C4: Size per shallow entry 128.0
+EXPECTED: sweep T=262144 C4 (shallow): live ShallowIndexedEntry >= P: 16 >= 16 — yes
+SET column_index_cache_size 256 KiB over JMX; read back 256
+PASS flip T=262144 C3: client ok=True found=100/100 elapsed=0.06s; read lines disk=100 (pks 100) cache=0 indexed=100 shallow=0 branch mismatches=0 []; h=[15]; fetch=0; cache Entries 1->23 Size 80->8274896 Capacity 8388608; IndexInfoReads +0; census {'epoch_ms': 1792015161060, 'jcmd_ms': 497, 'indexed_inst': 22, 'indexed_bytes': 1232, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 44000, 'indexinfo_bytes': 1760000, 'rie_inst': 1, 'heap_used_kb': 541894}
+SET column_index_cache_size 16 KiB over JMX; read back 16
+PASS flip T=16384 C3: client ok=True found=100/100 elapsed=0.11s; read lines disk=100 (pks 100) cache=0 indexed=0 shallow=100 branch mismatches=0 []; h=[15]; fetch=2100; cache Entries 1->101 Size 80->12880 Capacity 8388608; IndexInfoReads +100; census {'epoch_ms': 1792015167481, 'jcmd_ms': 535, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 100, 'shallow_bytes': 7200, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 533664}
+EXPECTED: live flip: C3 indexed at 256 KiB (100/100) and shallow at 16 KiB (100/100) with no new SSTable (34 -> 34 Data.db) and no new ks1.t write line (0) — yes
+EXPECTED: flip T=262144 C3: every partition read found its row — yes
+EXPECTED: flip T=262144 C3: a disk read line for every partition (100/100) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: flip T=262144 C3 (indexed): no IndexInfo read from the index file: fetch lines 0 — yes
+EXPECTED: flip T=262144 C3 (indexed, K = 8 MiB): K - w <= Size <= K with w ~ Size/Entries = 359778: Size 8274896, fewer entries than partitions (23 < 100) — yes
+EXPECTED: flip T=262144 C3 (indexed): live IndexInfo = n x live IndexedEntry: 44000 = 2000 x 22 = 44000 — yes
+EXPECTED: flip T=262144 C3 (indexed): live IndexedEntry within the system-table entries of the cache Entries: 22 <= 23 and 23 - 22 <= 50 — yes
+EXPECTED: flip T=16384 C3: every partition read found its row — yes
+EXPECTED: flip T=16384 C3: a disk read line for every partition (100/100) and every one on the predicted branch (size <= T) — mismatches 0 — yes
+EXPECTED: flip T=16384 C3 (shallow): every read fetched IndexInfo from the index file: fetch lines 2100 >= 100 — yes
+EXPECTED: flip T=16384 C3 (shallow): Entries rose by exactly the partitions read: 100 = 100 — yes
+INFO flip T=16384 C3: Size per shallow entry 128.0
+EXPECTED: flip T=16384 C3 (shallow): live ShallowIndexedEntry >= P: 100 >= 100 — yes
+SET column_index_cache_size 256 KiB over JMX; read back 256
+SET key cache capacity 256 MiB; Capacity gauge 268435456
+PASS large T=262144 C3: client ok=True found=100/100 elapsed=0.067s; read lines disk=100 (pks 100) cache=0 indexed=100 shallow=0 branch mismatches=0 []; h=[15]; fetch=0; cache Entries 1->101 Size 80->37612880 Capacity 268435456; IndexInfoReads +0; census {'epoch_ms': 1792015175186, 'jcmd_ms': 605, 'indexed_inst': 100, 'indexed_bytes': 5600, 'shallow_inst': 0, 'shallow_bytes': 0, 'indexinfo_inst': 200000, 'indexinfo_bytes': 8000000, 'rie_inst': 1, 'heap_used_kb': 571170}
+EXPECTED: large cache (capacity 268435456): all 100 C3 entries cached indexed: Entries +100, Size +37612800 (w = 376128 per entry) — yes
+EXPECTED: large cache: live IndexInfo = n x IndexedEntry: 200000 = 2000 x 100 — yes
+LARGE vs CAPPED C3 at 256 KiB: heap after GC +29985792 B, cache Size +29337984 B; idle heap spread 1620 KiB over [532001, 532103, 532133, 533621]
+EXPECTED: large cache: heap after a full collection higher than the capped C3 pass by about the Size difference: +29985792 vs +29337984 B (noise 1620 KiB) — yes
+SET column_index_cache_size 16 KiB over JMX; read back 16
+PASS large T=16384 C3: client ok=True found=100/100 elapsed=0.103s; read lines disk=100 (pks 100) cache=0 indexed=0 shallow=100 branch mismatches=0 []; h=[15]; fetch=2100; cache Entries 1->101 Size 80->12880 Capacity 268435456; IndexInfoReads +100; census {'epoch_ms': 1792015181759, 'jcmd_ms': 526, 'indexed_inst': 0, 'indexed_bytes': 0, 'shallow_inst': 100, 'shallow_bytes': 7200, 'indexinfo_inst': 0, 'indexinfo_bytes': 0, 'rie_inst': 1, 'heap_used_kb': 533673}
+EXPECTED: large cache at 16 KiB: C3 shallow, Entries +100 = 100, Size per entry 128.0 = the shallow constant 128.0 — yes
+SET key cache capacity 8 MiB; Capacity gauge 8388608
+SET column_index_cache_size 16 KiB over JMX; read back 16
+SET column_index_cache_size 2 KiB over JMX; read back 2
+ARM W write lines: [(1, '250', '7745', 'IndexedEntry', '16384'), (2, '250', '7745', 'IndexedEntry', '16384'), (3, '250', '7745', 'IndexedEntry', '16384'), (4, '250', '7745', 'IndexedEntry', '16384'), (5, '250', '7745', 'IndexedEntry', '16384'), (6, '250', '7745', 'ShallowIndexedEntry', '2048'), (7, '250', '7745', 'ShallowIndexedEntry', '2048'), (8, '250', '7745', 'ShallowIndexedEntry', '2048'), (9, '250', '7745', 'ShallowIndexedEntry', '2048'), (10, '250', '7745', 'ShallowIndexedEntry', '2048')]
+EXPECTED: arm W: the 5 partitions flushed at 16 KiB are IndexedEntry (T=16384 in the line) and the 5 flushed at 2 KiB are ShallowIndexedEntry (T=2048) — yes
+EXPECTED: arm W: ks1.t not rewritten (write lines for ks1.t: 0) — yes
+EXPECTED: every shallow pass added the same Size per entry, whatever the class and T: [128.0] over 12 passes — yes
+h per class (size - S): {'C1': [14], 'CB': [14], 'C2': [15], 'C3': [15], 'C4': [15]}
+MATRIX C1: indexed reads per T (KiB) {0: 0, 2: 2000, 16: 2000, 256: 2000} of 2000
+MATRIX CB: indexed reads per T (KiB) {0: 0, 2: 6, 16: 21, 256: 21} of 21
+MATRIX C2: indexed reads per T (KiB) {0: 0, 2: 0, 16: 500, 256: 500} of 500
+MATRIX C3: indexed reads per T (KiB) {0: 0, 2: 0, 16: 0, 256: 100} of 100
+MATRIX C4: indexed reads per T (KiB) {0: 0, 2: 0, 16: 0, 256: 0} of 16
+DONE

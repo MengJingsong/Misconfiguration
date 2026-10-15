@@ -1,0 +1,66 @@
+# Byteman observation rules for column_index_cache_size-indexSamples-cacheSizeThreshold (case 9c/9d, amended 2026-10-14).
+# They change no behaviour. Lines go to the file named by -Dstage4.byteman.out:
+#   write tbl=<ks1 table> key=<DecoratedKey(token, hex pk)> n=<blocks> S=<indexedPartSize> samples=<null|list> class=<entry class> T=<bytes> ms=<epoch>
+#       one per partition written to a ks1 SSTable (flush), from RowIndexEntry.create() called by BigTableWriter.createRowIndexEntry()
+#   read tbl=<ks1 table> key=<...> src=<disk|cache> size=<serialized entry size, disk only> n=<blocks> class=<entry class> T=<bytes> sst=<id> ms=<epoch>
+#       one per BigTableReader.getRowIndexEntry() on a ks1 SSTable returning a multi-block entry; src=disk when this call deserialized it
+#   fetch tbl=<path's table dir> i=<block> ms=<epoch>
+#       one per IndexInfo read from a ks1 index file by a ShallowIndexedEntry (RowIndexEntry.java:826-839)
+# Joins are per thread through Byteman link maps: the entry of the outer call records context, the inner call consumes it.
+
+RULE write context
+CLASS org.apache.cassandra.io.sstable.format.big.BigTableWriter
+METHOD createRowIndexEntry(org.apache.cassandra.db.DecoratedKey, org.apache.cassandra.db.DeletionTime, long)
+AT ENTRY
+IF $0.metadata().keyspace.equals("ks1")
+DO link("cicsw", java.lang.Thread.currentThread(), "tbl=" + $0.metadata().name + " key=" + $1)
+ENDRULE
+
+RULE write
+CLASS org.apache.cassandra.io.sstable.format.big.RowIndexEntry
+METHOD create(long, long, org.apache.cassandra.db.DeletionTime, long, int, int, java.util.List, int[], org.apache.cassandra.io.ISerializer, org.apache.cassandra.io.sstable.format.Version)
+AT EXIT
+IF linked("cicsw", java.lang.Thread.currentThread()) != null
+DO traceOpen("ix", java.lang.System.getProperty("stage4.byteman.out", "index.trace"));
+   traceln("ix", "write " + linked("cicsw", java.lang.Thread.currentThread()) + " n=" + $5 + " S=" + $6 + " samples=" + ($7 == null ? "null" : "list")
+           + " class=" + $!.getClass().getSimpleName() + " T=" + org.apache.cassandra.config.DatabaseDescriptor.getColumnIndexCacheSize() + " ms=" + java.lang.System.currentTimeMillis());
+   unlink("cicsw", java.lang.Thread.currentThread())
+ENDRULE
+
+RULE read clear
+CLASS org.apache.cassandra.io.sstable.format.big.BigTableReader
+METHOD getRowIndexEntry(org.apache.cassandra.db.PartitionPosition, org.apache.cassandra.io.sstable.format.SSTableReader$Operator, boolean, org.apache.cassandra.io.sstable.SSTableReadsListener)
+AT ENTRY
+IF true
+DO unlink("cicsr", java.lang.Thread.currentThread())
+ENDRULE
+
+RULE read size
+CLASS org.apache.cassandra.io.sstable.format.big.RowIndexEntry$Serializer
+METHOD deserialize(org.apache.cassandra.io.util.DataInputPlus, long)
+AT EXIT
+IF true
+DO link("cicsr", java.lang.Thread.currentThread(), "" + $size)
+ENDRULE
+
+RULE read
+CLASS org.apache.cassandra.io.sstable.format.big.BigTableReader
+METHOD getRowIndexEntry(org.apache.cassandra.db.PartitionPosition, org.apache.cassandra.io.sstable.format.SSTableReader$Operator, boolean, org.apache.cassandra.io.sstable.SSTableReadsListener)
+AT EXIT
+IF $! != null && $!.blockCount() > 1 && $0.metadata().keyspace.equals("ks1")
+DO traceOpen("ix", java.lang.System.getProperty("stage4.byteman.out", "index.trace"));
+   traceln("ix", "read tbl=" + $0.metadata().name + " key=" + $1
+           + (linked("cicsr", java.lang.Thread.currentThread()) == null ? " src=cache size=-1" : " src=disk size=" + linked("cicsr", java.lang.Thread.currentThread()))
+           + " n=" + $!.blockCount() + " class=" + $!.getClass().getSimpleName() + " T=" + org.apache.cassandra.config.DatabaseDescriptor.getColumnIndexCacheSize()
+           + " sst=" + $0.descriptor.id + " ms=" + java.lang.System.currentTimeMillis());
+   unlink("cicsr", java.lang.Thread.currentThread())
+ENDRULE
+
+RULE fetch
+CLASS org.apache.cassandra.io.sstable.format.big.RowIndexEntry$ShallowInfoRetriever
+METHOD fetchIndex(int)
+AT ENTRY
+IF $0.indexReader.getPath().contains("/ks1/")
+DO traceOpen("ix", java.lang.System.getProperty("stage4.byteman.out", "index.trace"));
+   traceln("ix", "fetch path=" + $0.indexReader.getPath() + " i=" + $1 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
