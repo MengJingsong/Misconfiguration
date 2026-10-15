@@ -1,0 +1,12 @@
+# Byteman trigger for the unit tier of native_transport_receive_queue_capacity-acquireCapacity-queueCapacity (case 9e,
+# amended 2026-10-15). At the entry of the static Dispatcher.processRequest(Channel, Request, Overload, RequestTime)
+# (the request executor, after decode), a request of the test (its text contains "ntq_unit") waits until the test opens
+# its gate: NativeQueueModesTest.awaitGate() blocks while the gate is closed. Requests of other tables pass.
+
+RULE ntq unit hold
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD processRequest(io.netty.channel.Channel, org.apache.cassandra.transport.Message$Request, org.apache.cassandra.transport.ClientResourceLimits$Overload, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT ENTRY
+IF $2.toString().contains("ntq_unit")
+DO org.apache.cassandra.transport.NativeQueueModesTest.awaitGate()
+ENDRULE

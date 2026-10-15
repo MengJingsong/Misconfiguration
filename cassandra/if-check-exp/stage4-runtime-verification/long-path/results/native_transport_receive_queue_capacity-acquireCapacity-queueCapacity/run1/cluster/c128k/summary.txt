@@ -1,0 +1,103 @@
+cluster-run c128k 2026-10-15 01:30:17 EDT run=run1 scale=1.0 arms=all
+harness md5: Jmx.java=2f18ec53c4d4 NativeFlood.java=f9d52bb5c2df NativeQueueModesTest.java=8f575e1a82ee README.md=bb04308004d1 cluster-run.py=095973a66034 flood-logback.xml=4f91920358c0 hold-request.btm=3ba52df212e2 make-node-yaml.sh=401ea6cc8bca ntq-trace.btm=98056c2a12dc unit-hold.btm=2d9e85b388a0 unit-run.sh=5b595d342f24
+yaml: # ---- stage4 ntq lines ----;cluster_name: stage4-ntq;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-ntq/data/commitlog;hints_directory: /users/jason92/stage4-ntq/data/hints;saved_caches_directory: /users/jason92/stage4-ntq/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-ntq/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 60s;read_request_timeout: 60000ms;native_transport_throw_on_overload: false;native_transport_rate_limiting_enabled: false;native_transport_receive_queue_capacity: 128KiB;native_transport_max_request_data_in_flight_per_ip: 4MiB;native_transport_max_request_data_in_flight: 4MiB;native_transport_max_message_size: 2MiB;
+EXPECTED: Submit -l lists the 9 rules of ntq-trace.btm and hold-request.btm (9: ['ntq acquire exit', 'ntq decode', 'ntq discard large', 'ntq discard small', 'ntq hold request', 'ntq new handler', 'ntq release decoded', 'ntq release decrement', 'ntq ticket fired']) — yes
+jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/ntq/ntq-trace.btm,script:/users/jason92/stage4-harness-run/ntq/hold-request.btm,listener:true -Dstage4.trace=/users/jason92/stage4-logs/ntq/run1/c128k/ntq.trace -Dstage4.hold.file=/users/jason92/stage4-ntq/hold -Dstage4.hold.ms=500
+schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+==== arm c128k/ctrl: kind=ctrl throw=None value=0 N=10 W=0 s=10 C=131072 K=5505024
+ctrl: handlers 0 (throw 0, default 0) cap []; M=None; acquires ok 0 refused 0 (global 0, endpoint 0); dec 0 (bp=BYTES_IN_FLIGHT 0); rls 0; disc 0; ldisc 0; wake 0; peak sumA 0 sumD 0; end sumA 0 sumD 0; gl max 0; client {}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 0
+EXPECTED: ctrl: no refusal and no decode on the arm's handlers (refused 0, dec 0); no refusal anywhere in the window (0) — yes
+==== arm c128k/connidle: kind=connidle throw=None value=0 N=10 W=0 s=10 C=131072 K=5505024
+connidle: handlers 20 (throw 10, default 10) cap [131072]; M=None; acquires ok 0 refused 0 (global 0, endpoint 0); dec 0 (bp=BYTES_IN_FLIGHT 0); rls 0; disc 0; ldisc 0; wake 0; peak sumA 0 sumD 0; end sumA 0 sumD 0; gl max 0; client {}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 0
+EXPECTED: connidle: read-back: 20 handlers, every cap = 131072 ([131072]), 10 throwing and 10 default — yes
+EXPECTED: connidle: no refusal and no decode on the arm's handlers (refused 0, dec 0); no refusal anywhere in the window (0) — yes
+==== arm c128k/A_throw: kind=A throw=True value=65000 N=10 W=2 s=20 C=131072 K=5505024
+A_throw: handlers 10 (throw 10, default 0) cap [131072]; M=65074; acquires ok 800 refused 0 (global 0, endpoint 0); dec 800 (bp=BYTES_IN_FLIGHT 0); rls 800; disc 0; ldisc 0; wake 0; peak sumA 1301480 sumD 1301480; end sumA 0 sumD 0; gl max 0; client {'sent': 800, 'ok': 800, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792042313872}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 800
+EXPECTED: A_throw: read-back: 10 handlers, cap 131072, throw=True (10, [131072], {True}) — yes
+EXPECTED: A_throw: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: A_throw: the client got every response (outstanding 0) — yes
+EXPECTED: A_throw: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: A_throw: no refusal (0), no discard (0, RequestDiscarded +0), no warning (0) — yes
+EXPECTED: A_throw: peak sumA 1301480 <= N*floor(C/M)*M = 1301480 — yes
+EXPECTED: A_throw: every handler ends at A_i = 0 ([0]) — yes
+==== arm c128k/A_def: kind=A throw=False value=65000 N=10 W=2 s=20 C=131072 K=5505024
+A_def: handlers 10 (throw 0, default 10) cap [131072]; M=65074; acquires ok 800 refused 0 (global 0, endpoint 0); dec 800 (bp=BYTES_IN_FLIGHT 0); rls 800; disc 0; ldisc 0; wake 0; peak sumA 1301480 sumD 1301480; end sumA 0 sumD 0; gl max 0; client {'sent': 800, 'ok': 800, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792042340026}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 1600
+EXPECTED: A_def: read-back: 10 handlers, cap 131072, throw=False (10, [131072], {False}) — yes
+EXPECTED: A_def: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: A_def: the client got every response (outstanding 0) — yes
+EXPECTED: A_def: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: A_def: no refusal (0), no discard (0, RequestDiscarded +0), no warning (0) — yes
+EXPECTED: A_def: peak sumA 1301480 <= N*floor(C/M)*M = 1301480 — yes
+EXPECTED: A_def: every handler ends at A_i = 0 ([0]) — yes
+==== arm c128k/Bts: kind=Bt throw=True value=65000 N=10 W=17 s=60 C=131072 K=5505024
+Bts: handlers 10 (throw 10, default 0) cap [131072]; M=65074; acquires ok 9996 refused 50425 (global 50425, endpoint 0); dec 9996 (bp=BYTES_IN_FLIGHT 0); rls 9996; disc 50425; ldisc 0; wake 0; peak sumA 5466216 sumD 5466216; end sumA 0 sumD 0; gl max 4156420; client {'sent': 60421, 'ok': 9996, 'warned': 0, 'ovl_bytes': 50425, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792042406196}; meters delta {'RequestDiscarded': 50425, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 11596
+Bts: histogram 1 1792042364150-1792042364785 ms: QueryMessage 83, [B 21921448 B; sumD/M over the interval ±1 s 76.0..84.0
+Bts: histogram 2 1792042384218-1792042384705 ms: QueryMessage 84, [B 21962032 B; sumD/M over the interval ±1 s 34.0..84.0
+EXPECTED: Bts: read-back: 10 handlers, cap 131072, throw=True (10, [131072], {True}) — yes
+EXPECTED: Bts: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: Bts: the client got every response (outstanding 0) — yes
+EXPECTED: Bts: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: Bts: refusals occur (50425) — yes
+EXPECTED: Bts: sumA <= K = 5505024 at every trace line (violations 0; peak 5466216) — yes
+EXPECTED: Bts: peak sumA 5466216 in (K - 2M, K] = (5374876, 5505024] — yes
+EXPECTED: Bts: sumD <= sumA at every line (violations 0) — yes
+EXPECTED: Bts: refusals 50425 = RequestDiscarded delta 50425 = client ovl_bytes 50425 — yes
+EXPECTED: Bts: every refusal is a discard (disc 50425 = refusals 50425) and nothing refused is decoded (dec 9996 = successful acquires 9996) — yes
+EXPECTED: Bts: every handler ends at A_i = 0 ([0]) — yes
+EXPECTED: Bts: histogram 1: live QueryMessage 83 within sumD/M over its interval ±1 s [76.0, 84.0] — yes
+EXPECTED: Bts: histogram 2: live QueryMessage 84 within sumD/M over its interval ±1 s [34.0, 84.0] — yes
+==== arm c128k/Btl: kind=Bt throw=True value=262000 N=10 W=5 s=60 C=131072 K=5505024
+Btl: handlers 10 (throw 10, default 0) cap [131072]; M=262074; acquires ok 2500 refused 16943 (global 16943, endpoint 0); dec 2500 (bp=BYTES_IN_FLIGHT 0); rls 2500; disc 0; ldisc 16943; wake 0; peak sumA 5503554 sumD 5503554; end sumA 0 sumD 0; gl max 4192904; client {'sent': 19443, 'ok': 2500, 'warned': 0, 'ovl_bytes': 16943, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792042473192}; meters delta {'RequestDiscarded': 16943, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 84558279, 'OverflowSize': -49659449}; RequestsSize after 0; holds so far 14096
+Btl: histogram 1 1792042431153-1792042431623 ms: QueryMessage 21, [B 22021384 B; sumD/M over the interval ±1 s 4.0..21.0
+Btl: histogram 2 1792042451257-1792042451735 ms: QueryMessage 21, [B 22005760 B; sumD/M over the interval ±1 s 16.0..21.0
+EXPECTED: Btl: read-back: 10 handlers, cap 131072, throw=True (10, [131072], {True}) — yes
+EXPECTED: Btl: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: Btl: the client got every response (outstanding 0) — yes
+EXPECTED: Btl: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: Btl: refusals occur (16943) — yes
+EXPECTED: Btl: sumA <= K = 5505024 at every trace line (violations 0; peak 5503554) — yes
+EXPECTED: Btl: peak sumA 5503554 in (K - 2M, K] = (4980876, 5505024] — yes
+EXPECTED: Btl: sumD <= sumA at every line (violations 0) — yes
+EXPECTED: Btl: refusals 16943 = RequestDiscarded delta 16943 = client ovl_bytes 16943 — yes
+EXPECTED: Btl: every refusal is a discard (ldisc 16943 = refusals 16943) and nothing refused is decoded (dec 2500 = successful acquires 2500) — yes
+EXPECTED: Btl: every handler ends at A_i = 0 ([0]) — yes
+EXPECTED: Btl: histogram 1: live QueryMessage 21 within sumD/M over its interval ±1 s [4.0, 21.0] — yes
+EXPECTED: Btl: histogram 2: live QueryMessage 21 within sumD/M over its interval ±1 s [16.0, 21.0] — yes
+==== arm c128k/Bdl: kind=Bdl throw=False value=262000 N=10 W=32 s=60 C=131072 K=5505024
+Bdl: handlers 10 (throw 0, default 10) cap [131072]; M=262074; acquires ok 2798 refused 2710 (global 2710, endpoint 0); dec 2798 (bp=BYTES_IN_FLIGHT 0); rls 2798; disc 0; ldisc 0; wake 2710; peak sumA 5503554 sumD 5503554; end sumA 0 sumD 0; gl max 4192834; client {'sent': 2798, 'ok': 2798, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792042547180}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': -2710, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 732049348, 'OverflowSize': 732049348}; RequestsSize after 0; holds so far 16894
+Bdl: histogram 1 1792042497578-1792042498088 ms: QueryMessage 21, [B 23598280 B; sumD/M over the interval ±1 s 3.0..21.0
+Bdl: histogram 2 1792042517720-1792042518184 ms: QueryMessage 21, [B 22009240 B; sumD/M over the interval ±1 s 18.0..21.0
+EXPECTED: Bdl: read-back: 10 handlers, cap 131072, throw=False (10, [131072], {False}) — yes
+EXPECTED: Bdl: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: Bdl: the client got every response (outstanding 0) — yes
+EXPECTED: Bdl: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: Bdl: refusals occur (2710) — yes
+EXPECTED: Bdl: no error or warning reaches the client (ovl_bytes 0, warned 0) and RequestDiscarded does not move (+0) — yes
+EXPECTED: Bdl: per handler, decodes = successful acquires (handlers that differ: 0; dec 2798, succ 2798, dec bp=BYTES_IN_FLIGHT 0) — yes
+EXPECTED: Bdl: sumA <= K = 5505024 at every line (violations 0; peak 5503554) — yes
+EXPECTED: Bdl: peak sumA 5503554 in (K - 2M, K] = (4980876, 5505024] — yes
+EXPECTED: Bdl: sumD <= sumA at every line (violations 0) — yes
+EXPECTED: Bdl: every handler ends at A_i = 0, no drift ([0]) — yes
+EXPECTED: Bdl: histogram 1: live QueryMessage 21 within sumD/M over its interval ±1 s [3.0, 21.0] — yes
+EXPECTED: Bdl: histogram 2: live QueryMessage 21 within sumD/M over its interval ±1 s [18.0, 21.0] — yes
+==== arm c128k/Bds: kind=Bds throw=False value=65000 N=10 W=128 s=180 C=131072 K=5505024
+Bds: handlers 10 (throw 0, default 10) cap [131072]; M=65074; acquires ok 45992 refused 1196 (global 1196, endpoint 0); dec 47188 (bp=BYTES_IN_FLIGHT 1196); rls 47188; disc 0; ldisc 0; wake 1196; peak sumA 5466216 sumD 83294720; end sumA -77828504 sumD 0; gl max 4160116; client {'sent': 47188, 'ok': 47188, 'warned': 1196, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792042736481}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 1196, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': -20957532, 'OverflowSize': -20957532}; RequestsSize after 0; holds so far 64082
+Bds: histogram 1 1792042609912-1792042610382 ms: QueryMessage 1274, [B 101549552 B; sumD/M over the interval ±1 s 1262.0..1280.0
+Bds: histogram 2 1792042669870-1792042670328 ms: QueryMessage 1280, [B 101941376 B; sumD/M over the interval ±1 s 1190.0..1280.0
+EXPECTED: Bds: read-back: 10 handlers, cap 131072, throw=False (10, [131072], {False}) — yes
+EXPECTED: Bds: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: Bds: the client got every response (outstanding 0) — yes
+EXPECTED: Bds: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: Bds: refusals occur (1196) — yes
+EXPECTED: Bds: every refusal is decoded with bp=BYTES_IN_FLIGHT: per handler equal (differ: 0); total 1196 = refusals 1196 = client warned 1196 — yes
+EXPECTED: Bds: RequestDiscarded does not move (+0), no overload error (0) — yes
+EXPECTED: Bds: every handler ends at A_i = -k_i*M (the drift; handlers that differ: []; sum k_i 1196, sum A_i -77828504) — yes
+EXPECTED: Bds: peak sumD 83294720 > K = 5505024 — yes
+EXPECTED: Bds: mean sumD over the last third 82638967.73940428 > over the first third 78942250.28118454 — yes
+EXPECTED: Bds: histogram 1: live QueryMessage 1274 within sumD/M over its interval ±1 s [1262.0, 1280.0] — yes
+EXPECTED: Bds: histogram 2: live QueryMessage 1280 within sumD/M over its interval ±1 s [1190.0, 1280.0] — yes
+EXPECTED: Bds: histogram 2: live QueryMessage 1280 > K/M = 84.59636721271168 — yes
+EXPECTED: system.log: no line with another overload text (requests/second, spent over, timed out before it could start): 0 — yes
+system.log overload lines (first 5): INFO  [epollEventLoopGroup-5-53] 2026-10-15T05:32:25,761 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4155496/4194304 bytes, Global: 4155496/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-46] 2026-10-15T05:32:31,871 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4090422/4194304 bytes, Global: 4090422/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-48] 2026-10-15T05:32:31,871 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4025348/4194304 bytes, Global: 4025348/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-54] 2026-10-15T05:32:31,887 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 3896124/4194304 bytes, Global: 3896124/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-54] 2026-10-15T05:32:32,394 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 3960274/4194304 bytes, Globa
+system.log ERROR lines: 0
+node stopped; {'yes': 71, 'no': 0}

@@ -1,0 +1,62 @@
+STAGE4 check u0.cap expected=1048576 actual=1048576 ok
+STAGE4 check u0.queueSize_eq_inflight expected=4192 actual=4192 ok
+STAGE4 check u0.M M=4192 ok
+STAGE4 check u0.response_ok expected=false actual=false ok
+STAGE4 check u0.queueSize_end expected=0 actual=0 ok
+STAGE4 note M=4192 C=12576 reserves=8384
+STAGE4 check u1.throw expected=true actual=true ok
+STAGE4 check u1.accepted_queueSize_at_C expected=12576 actual=12576 ok
+STAGE4 check u1.decoded3 expected=3 actual=3 ok
+STAGE4 check u1.fourth_overloaded_bytes response=ERROR OVERLOADED: Request breached limit on bytes in flight. (Endpoint: 8384/8384 bytes, Global: 8384/8384 bytes.)Server is currently in an overloaded state and cannot accept more requests. ok
+STAGE4 check u1.discarded_delta expected=1 actual=1 ok
+STAGE4 check u1.queueSize_after_refusal expected=12576 actual=12576 ok
+STAGE4 check u1.inflight_after_refusal expected=12576 actual=12576 ok
+STAGE4 check u1.not_decoded expected=3 actual=3 ok
+STAGE4 check u1.three_ok expected=0 actual=0 ok
+STAGE4 check u1.queueSize_end expected=0 actual=0 ok
+STAGE4 check u2.throw expected=false actual=false ok
+STAGE4 check u2.accepted_queueSize_at_C expected=12576 actual=12576 ok
+STAGE4 check u2.fourth_decoded expected=4 actual=4 ok
+STAGE4 check u2.inflight_4M expected=16768 actual=16768 ok
+STAGE4 check u2.queueSize_stays_C expected=12576 actual=12576 ok
+STAGE4 check u2.fifth_not_decoded arrivals=4 ok
+STAGE4 check u2.inflight_still_4M expected=16768 actual=16768 ok
+STAGE4 check u2.four_ok expected=0 actual=0 ok
+STAGE4 check u2.warned expected=1 actual=1 ok
+STAGE4 check u2.discarded_delta expected=0 actual=0 ok
+STAGE4 check u2.queueSize_after_releases expected=-4192 actual=-4192 ok
+STAGE4 check u2.fifth_still_waiting arrivals=4 ok
+STAGE4 check u2.fifth_ok_after_reserve expected=false actual=false ok
+STAGE4 check u2.fifth_no_warning expected= actual= ok
+STAGE4 check u2.queueSize_end expected=-4192 actual=-4192 ok
+STAGE4 check u2.inflight_end expected=0 actual=0 ok
+STAGE4 check u3.four_decoded expected=4 actual=4 ok
+STAGE4 check u3.queueSize expected=12576 actual=12576 ok
+STAGE4 check u3.inflight_4M expected=16768 actual=16768 ok
+STAGE4 check u3.no_warning expected=0 actual=0 ok
+STAGE4 check u3.queueSize_end expected=-4192 actual=-4192 ok
+STAGE4 check u4.decoded3 expected=3 actual=3 ok
+STAGE4 check u4.queueSize_C expected=12576 actual=12576 ok
+STAGE4 check u4.fourth_not_decoded arrivals=3 ok
+STAGE4 check u4.inflight_not_raised_large_path expected=0 actual=0 ok
+STAGE4 check u4.three_ok expected=0 actual=0 ok
+STAGE4 check u4.queueSize_0_after_releases expected=0 actual=0 ok
+STAGE4 check u4.fourth_waits_for_reserve arrivals=3 ok
+STAGE4 check u4.fourth_ok expected=false actual=false ok
+STAGE4 check u4.fourth_no_warning expected= actual= ok
+STAGE4 check u4.decoded4 expected=4 actual=4 ok
+STAGE4 check u4.discarded_delta expected=0 actual=0 ok
+STAGE4 check u4.queueSize_end expected=0 actual=0 ok
+STAGE4 check u5.decoded3 expected=3 actual=3 ok
+STAGE4 check u5.fourth_overloaded_bytes response=ERROR OVERLOADED: Request breached limit on bytes in flight. (Endpoint: 8384/8384 bytes, Global: 8384/8384 bytes.)Server is currently in an overloaded state and cannot accept more requests. ok
+STAGE4 check u5.discarded_delta expected=1 actual=1 ok
+STAGE4 check u5.not_decoded expected=3 actual=3 ok
+STAGE4 check u5.queueSize_C expected=12576 actual=12576 ok
+STAGE4 check u5.queueSize_end expected=0 actual=0 ok
+STAGE4 check u6.cap1 expected=123456 actual=123456 ok
+STAGE4 check u6.cap2 expected=654321 actual=654321 ok
+STAGE4 check u6.cap1_unchanged expected=123456 actual=123456 ok
+STAGE4 check u6.throw_option expected=true actual=true ok
+STAGE4 check u6.no_option_takes_config_false expected=false actual=false ok
+STAGE4 check u6.no_option_takes_config_true expected=true actual=true ok
+STAGE4 summary checks=60 mismatches=0

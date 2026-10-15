@@ -1,0 +1,18 @@
+cluster-run defres 2026-10-15 02:08:51 EDT run=run1 scale=1.0 arms=all
+harness md5: Jmx.java=2f18ec53c4d4 NativeFlood.java=f9d52bb5c2df NativeQueueModesTest.java=8f575e1a82ee README.md=bb04308004d1 cluster-run.py=095973a66034 flood-logback.xml=4f91920358c0 hold-request.btm=3ba52df212e2 make-node-yaml.sh=401ea6cc8bca ntq-trace.btm=98056c2a12dc unit-hold.btm=2d9e85b388a0 unit-run.sh=5b595d342f24
+yaml: # ---- stage4 ntq lines ----;cluster_name: stage4-ntq;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-ntq/data/commitlog;hints_directory: /users/jason92/stage4-ntq/data/hints;saved_caches_directory: /users/jason92/stage4-ntq/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-ntq/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 60s;read_request_timeout: 60000ms;native_transport_throw_on_overload: false;native_transport_rate_limiting_enabled: false;native_transport_receive_queue_capacity: 512KiB;
+EXPECTED: Submit -l lists the 9 rules of ntq-trace.btm and hold-request.btm (9: ['ntq acquire exit', 'ntq decode', 'ntq discard large', 'ntq discard small', 'ntq hold request', 'ntq new handler', 'ntq release decoded', 'ntq release decrement', 'ntq ticket fired']) — yes
+jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/ntq/ntq-trace.btm,script:/users/jason92/stage4-harness-run/ntq/hold-request.btm,listener:true -Dstage4.trace=/users/jason92/stage4-logs/ntq/run1/defres/ntq.trace -Dstage4.hold.file=/users/jason92/stage4-ntq/hold -Dstage4.hold.ms=500
+schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+==== arm defres/defres: kind=defres throw=True value=65000 N=10 W=128 s=60 C=524288 K=None
+defres: handlers 10 (throw 10, default 0) cap [524288]; M=65074; acquires ok 16512 refused 0 (global 0, endpoint 0); dec 16512 (bp=BYTES_IN_FLIGHT 0); rls 16512; disc 0; ldisc 0; wake 0; peak sumA 83294720 sumD 83294720; end sumA 0 sumD 0; gl max 78051840; client {'sent': 16512, 'ok': 16512, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792044644331}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 16512
+EXPECTED: defres: read-back: 10 handlers, cap 524288, throw=True (10, [524288], {True}) — yes
+EXPECTED: defres: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: defres: the client got every response (outstanding 0) — yes
+EXPECTED: defres: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: defres: no refusal (0), no discard (+0, ovl_bytes 0) — yes
+EXPECTED: defres: peak sumA 83294720 = the window N*W*M = 83294720 — yes
+EXPECTED: system.log: no line with another overload text (requests/second, spent over, timed out before it could start): 0 — yes
+system.log overload lines (first 5): none
+system.log ERROR lines: 0
+node stopped; {'yes': 8, 'no': 0}

@@ -1,0 +1,44 @@
+cluster-run nsweep 2026-10-15 02:05:57 EDT run=run1 scale=1.0 arms=all
+harness md5: Jmx.java=2f18ec53c4d4 NativeFlood.java=f9d52bb5c2df NativeQueueModesTest.java=8f575e1a82ee README.md=bb04308004d1 cluster-run.py=095973a66034 flood-logback.xml=4f91920358c0 hold-request.btm=3ba52df212e2 make-node-yaml.sh=401ea6cc8bca ntq-trace.btm=98056c2a12dc unit-hold.btm=2d9e85b388a0 unit-run.sh=5b595d342f24
+yaml: # ---- stage4 ntq lines ----;cluster_name: stage4-ntq;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-ntq/data/commitlog;hints_directory: /users/jason92/stage4-ntq/data/hints;saved_caches_directory: /users/jason92/stage4-ntq/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-ntq/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 60s;read_request_timeout: 60000ms;native_transport_throw_on_overload: false;native_transport_rate_limiting_enabled: false;native_transport_receive_queue_capacity: 1MiB;native_transport_max_request_data_in_flight_per_ip: 4MiB;native_transport_max_request_data_in_flight: 4MiB;native_transport_max_message_size: 2MiB;
+EXPECTED: Submit -l lists the 9 rules of ntq-trace.btm and hold-request.btm (9: ['ntq acquire exit', 'ntq decode', 'ntq discard large', 'ntq discard small', 'ntq hold request', 'ntq new handler', 'ntq release decoded', 'ntq release decrement', 'ntq ticket fired']) — yes
+jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/ntq/ntq-trace.btm,script:/users/jason92/stage4-harness-run/ntq/hold-request.btm,listener:true -Dstage4.trace=/users/jason92/stage4-logs/ntq/run1/nsweep/ntq.trace -Dstage4.hold.file=/users/jason92/stage4-ntq/hold -Dstage4.hold.ms=500
+schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+==== arm nsweep/n1: kind=n throw=True value=65000 N=1 W=32 s=30 C=1048576 K=5242880
+n1: handlers 1 (throw 1, default 0) cap [1048576]; M=65074; acquires ok 1888 refused 0 (global 0, endpoint 0); dec 1888 (bp=BYTES_IN_FLIGHT 0); rls 1888; disc 0; ldisc 0; wake 0; peak sumA 2082368 sumD 2082368; end sumA 0 sumD 0; gl max 1033792; client {'sent': 1888, 'ok': 1888, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792044436064}; meters delta {'RequestDiscarded': 0, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 1888
+EXPECTED: n1: read-back: 1 handlers, cap 1048576, throw=True (1, [1048576], {True}) — yes
+EXPECTED: n1: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: n1: the client got every response (outstanding 0) — yes
+EXPECTED: n1: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: n1: N = 1: no refusal (0) — yes
+EXPECTED: n1: N = 1: peak sumA 2082368 = 32*M = 2082368 (the window binds) — yes
+==== arm nsweep/n10: kind=n throw=True value=65000 N=10 W=32 s=30 C=1048576 K=14680064
+n10: handlers 10 (throw 10, default 0) cap [1048576]; M=65074; acquires ok 7777 refused 27788 (global 27788, endpoint 0); dec 7777 (bp=BYTES_IN_FLIGHT 0); rls 7777; disc 27788; ldisc 0; wake 0; peak sumA 14641650 sumD 14641650; end sumA 0 sumD 0; gl max 4178066; client {'sent': 35565, 'ok': 7777, 'warned': 0, 'ovl_bytes': 27788, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792044473013}; meters delta {'RequestDiscarded': 27788, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 9665
+EXPECTED: n10: read-back: 10 handlers, cap 1048576, throw=True (10, [1048576], {True}) — yes
+EXPECTED: n10: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: n10: the client got every response (outstanding 0) — yes
+EXPECTED: n10: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: n10: refusals occur (27788) — yes
+EXPECTED: n10: sumA <= K = 14680064 at every trace line (violations 0; peak 14641650) — yes
+EXPECTED: n10: peak sumA 14641650 in (K - 2M, K] = (14549916, 14680064] — yes
+EXPECTED: n10: sumD <= sumA at every line (violations 0) — yes
+EXPECTED: n10: refusals 27788 = RequestDiscarded delta 27788 = client ovl_bytes 27788 — yes
+EXPECTED: n10: every refusal is a discard (disc 27788 = refusals 27788) and nothing refused is decoded (dec 7777 = successful acquires 7777) — yes
+EXPECTED: n10: every handler ends at A_i = 0 ([0]) — yes
+==== arm nsweep/n100: kind=n throw=True value=65000 N=100 W=32 s=30 C=1048576 K=109051904
+n100: handlers 100 (throw 100, default 0) cap [1048576]; M=65074; acquires ok 9222 refused 167679 (global 167679, endpoint 0); dec 9222 (bp=BYTES_IN_FLIGHT 0); rls 9222; disc 167679; ldisc 0; wake 0; peak sumA 108673580 sumD 108673580; end sumA 0 sumD 0; gl max 4192972; client {'sent': 176901, 'ok': 9222, 'warned': 0, 'ovl_bytes': 167679, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1792044516372}; meters delta {'RequestDiscarded': 167679, 'RequestsSize': 0, 'PausedConnections': 0, 'ConnectionPaused': 0, 'TimedOutBeforeProcessing': 0, 'ProtocolException': 0, 'UsedSize': 0, 'OverflowSize': 0}; RequestsSize after 0; holds so far 18887
+EXPECTED: n100: read-back: 100 handlers, cap 1048576, throw=True (100, [1048576], {True}) — yes
+EXPECTED: n100: no other overload: client ovl_other 0, err 0, TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+EXPECTED: n100: the client got every response (outstanding 0) — yes
+EXPECTED: n100: global reserve in use back to 0 after the drain (RequestsSize 0) — yes
+EXPECTED: n100: refusals occur (167679) — yes
+EXPECTED: n100: sumA <= K = 109051904 at every trace line (violations 0; peak 108673580) — yes
+EXPECTED: n100: peak sumA 108673580 in (K - 2M, K] = (108921756, 109051904] — NO (recorded; the AI judges it in the results file)
+EXPECTED: n100: sumD <= sumA at every line (violations 0) — yes
+EXPECTED: n100: refusals 167679 = RequestDiscarded delta 167679 = client ovl_bytes 167679 — yes
+EXPECTED: n100: every refusal is a discard (disc 167679 = refusals 167679) and nothing refused is decoded (dec 9222 = successful acquires 9222) — yes
+EXPECTED: n100: every handler ends at A_i = 0 ([0]) — yes
+EXPECTED: system.log: no line with another overload text (requests/second, spent over, timed out before it could start): 0 — yes
+system.log overload lines (first 5): INFO  [epollEventLoopGroup-5-9] 2026-10-15T06:07:22,084 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4155890/4194304 bytes, Global: 4155890/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-14] 2026-10-15T06:07:23,085 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4170674/4194304 bytes, Global: 4170674/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-7] 2026-10-15T06:07:26,051 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4163282/4194304 bytes, Global: 4163282/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-15] 2026-10-15T06:07:26,156 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4098208/4194304 bytes, Global: 4098208/4194304 bytes.)Server is currently in an overloaded state and cannot accept more requests. || INFO  [epollEventLoopGroup-5-7] 2026-10-15T06:07:26,157 NoSpamLogger.java:104 - org.apache.cassandra.exceptions.OverloadedException: Request breached limit on bytes in flight. (Endpoint: 4040526/4194304 bytes, Global: 
+system.log ERROR lines: 0
+node stopped; {'yes': 29, 'no': 1}

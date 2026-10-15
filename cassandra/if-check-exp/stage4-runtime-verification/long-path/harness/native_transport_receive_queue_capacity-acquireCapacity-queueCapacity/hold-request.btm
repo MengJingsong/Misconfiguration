@@ -1,0 +1,17 @@
+# Byteman trigger for native_transport_receive_queue_capacity-acquireCapacity-queueCapacity (cluster tier, case 9c,
+# amended 2026-10-15). At the entry of the static Dispatcher.processRequest(Channel, Request, Overload, RequestTime),
+# which runs on the native request executor after the request was decoded, a request of the harness
+# (QUERY SELECT pk FROM ks.t ...) sleeps -Dstage4.hold.ms (500) while the file -Dstage4.hold.file exists, as a slow
+# query would: its capacity is released only after its response is flushed, so the node holds decoded requests.
+# One "hold" line per held request goes to the trace file of ntq-trace.btm.
+
+RULE ntq hold request
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD processRequest(io.netty.channel.Channel, org.apache.cassandra.transport.Message$Request, org.apache.cassandra.transport.ClientResourceLimits$Overload, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT ENTRY
+IF $2.toString().startsWith("QUERY SELECT pk FROM ks.t ")
+   AND (new java.io.File(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"))).exists()
+DO java.lang.Thread.sleep(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "500")));
+   traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+   traceln("ntq", "hold ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
