@@ -187,7 +187,7 @@ a configurable number (`range_tombstone_list_growth_factor`,
 
 **Band B is consumed (2026-10-13).** All 174 units (157 rows, 17 helpers) read with
 the source open: **1 new candidate** (`repair_disk_headroom_reject_ratio`, 2 units,
-`pending.md` item 12), **148 refused** (`rejected.md`, batch "band B", in eleven
+`pending.md` item 12, **filed 2026-10-15** as [`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`](../stage3-ai-deep-read/long-path/cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio.md)), **148 refused** (`rejected.md`, batch "band B", in eleven
 groups), **21 already recorded**, **2 joined** to open `deferred.md` items, **1
 undecided** (`deferred.md` §7, `cached_rows_fail_threshold`, a Rule 2 ruling). The
 recurring themes this file lists for B were accurate. The pass also found that
@@ -196,7 +196,7 @@ is a second decision point of the filed compaction-space case.
 
 **Band C is consumed (2026-10-13).** All 94 units (87 rows, 7 helpers) read with the
 source open: **1 new candidate** (`DOB_MAX_RECYCLE_BYTES`, `DataOutputBuffer.java:73`,
-`pending.md` item 13, the row band A3 pointed to), **86 refused** (`rejected.md`,
+`pending.md` item 13, the row band A3 pointed to; **filed 2026-10-15** as [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](../stage3-ai-deep-read/long-path/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE.md)), **86 refused** (`rejected.md`,
 batch "band C", in six groups), **7 already recorded**, nothing deferred. The band's
 label, "named operands, nothing resource-shaped", held for 86 of 87 newly judged units.
 
@@ -250,12 +250,12 @@ The 487 remaining helper-magnitude rows collapse to **185 distinct helpers**,
 so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 2,941 rows.
 
-**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-07): 8 cases established,
+**Stage-3 outcomes from rows this folder ranked** (as of 2026-10-15): 11 cases established,
 all from feed 3a (`max_space_usable_for_compactions_in_percentage`, `max_hints_size_per_host`,
-`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `internode_application_send_queue_capacity`); 3 candidates (4 rows) awaiting write-up
-(`../stage3-ai-deep-read/long-path/pending.md`) and 4 undecided rows
-(`../stage3-ai-deep-read/long-path/deferred.md` §5 and §6). The other 9 of the 17
-filed cases came from feed 3b.
+`max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `internode_application_send_queue_capacity`, `repair_session_space`, `repair_disk_headroom_reject_ratio`, `DOB_MAX_RECYCLE_BYTES`); the band-A2 row `IndexSummaryBuilder.java:108` is the second site of the feed-3b case `Integer_MAX_VALUE`; no candidate from a ranked row awaits write-up
+(`../stage3-ai-deep-read/long-path/pending.md`; item 8 is from the capacity-word pass) and 5 undecided rows
+(`../stage3-ai-deep-read/long-path/deferred.md` §5 to §7). The other 12 of the 23
+filed cases came from feed 3b (the helper `ResultSetBuilder.shouldReject()` behind `coordinator_read_size_fail_threshold` was banded D, batch 35).
 
 ## Batch coverage
 

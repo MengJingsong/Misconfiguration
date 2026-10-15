@@ -30,6 +30,12 @@ See [README.md](README.md) for the format.
 | `repair_session_space` | [`MerkleTree.split():409`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409) | [`MerkleTree.split():409-410`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409-L410) | `repair` | `Merkle tree node` | (a) | 3a | [`repair_session_space-split-maxsize`](cases/repair_session_space-split-maxsize.md) |
 | `SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS` | [`QueryController.materializeKeysAndCloseSource():449`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/QueryController.java#L449) | [`QueryController.materializeKeysAndCloseSource():449-453`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/QueryController.java#L449-L453) | `sai` | `primarykey` | (a) | 3b | [`SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS`](cases/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS.md) |
 
+| `Integer_MAX_VALUE` | [`IndexSummaryBuilder.maybeAddEntry():204`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryBuilder.java#L204) | [`IndexSummaryBuilder.maybeAddEntry():204-216`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryBuilder.java#L204-L216) | `sstable_index` | `index summary entry` | (a) | 3b | [`Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE`](cases/Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE.md) |
+| `networking_cache_size` | [`BufferPool$GlobalPool.allocateMoreChunks():443`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443) | [`BufferPool$GlobalPool.allocateMoreChunks():443-453`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L443-L453) | `buffer_pool` | `chunk` | (a) | 3b | [`networking_cache_size-allocateMoreChunks-memoryUsageThreshold`](cases/networking_cache_size-allocateMoreChunks-memoryUsageThreshold.md) |
+| `coordinator_read_size_fail_threshold` | [`ResultSetBuilder.shouldReject():97`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cql3/selection/ResultSetBuilder.java#L97) | [`SelectStatement.maybeFail():1061-1079`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java#L1061-L1079) | `read_path` | `resultset` | (b) | 3b | [`coordinator_read_size_fail_threshold-shouldReject-thresholdBytes`](cases/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes.md) |
+| `repair_disk_headroom_reject_ratio` | [`ActiveRepairService.verifyDiskHeadroomThreshold():655`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/ActiveRepairService.java#L655) | [`ActiveRepairService.prepareForRepair():667-668`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/ActiveRepairService.java#L667-L668); [`RepairMessageVerbHandler.doVerb():117-123`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/repair/RepairMessageVerbHandler.java#L117-L123) | `repair` | `streamed sstable` | (b) | 3a | [`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`](cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio.md) |
+| `DOB_MAX_RECYCLE_BYTES` | [`DataOutputBuffer$1$1.close():73`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/DataOutputBuffer.java#L73) | [`DataOutputBuffer$1$1.close():73-80`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/DataOutputBuffer.java#L73-L80) | `io_buffers` | `bytebuffer` | (a) | 3a | [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE.md) |
+
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -37,9 +43,9 @@ See [README.md](README.md) for the format.
 | Metric | Count |
 |--------|-------|
 | Modules covered | 12 |
-| Total cases | 19 |
-| Found via feed 3b (raw source) | 10 |
-| Found via feed 3a (stage 1/2) | **9** |
+| Total cases | 24 |
+| Found via feed 3b (raw source) | 13 |
+| Found via feed 3a (stage 1/2) | **11** |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -145,8 +151,8 @@ Storage-engine module covering the write-ahead commit log and its Change Data Ca
 
 
 ### 3.5 sstable_index
-On-disk index entries for wide partitions and the key cache that holds them
-(`io/sstable/format/big`, `cache`, `service/CacheService`). Two cases so far:
+On-disk index entries for wide partitions, the index summary and the key cache that holds them
+(`io/sstable/format/big`, `io/sstable/indexsummary`, `cache`, `service/CacheService`). Three cases so far:
 - **`column_index_cache_size-indexSamples-cacheSizeThreshold`:** byte
   threshold on one partition's serialized block index, deciding whether the
   index is retained on heap as an `IndexInfo[]` (`IndexedEntry`) or left on
@@ -179,9 +185,20 @@ On-disk index entries for wide partitions and the key cache that holds them
   Its test design reads the **real weight** of what was built from the key cache (a refused read leaves it unchanged) and the check's own
   operands from a Byteman rule on a node. Found via stage-3 feed **3a** (band A1, row `RowIndexEntry.java:392`); written up 2026-10-06.
 
+- **`Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE`:** the folder's first **type-bound** case. One BIG SSTable's off-heap index summary
+  cannot hold more than 2^31−1 bytes of sampled entries (key + 8 B each), because entry offsets are 32-bit `int`s.
+  `IndexSummaryBuilder.maybeAddEntry():204` refuses the first entry that would cross the bound, with one `ERROR` line, and **no later key is
+  sampled** (the next sample position is not advanced); reads of uncovered keys still find them by scanning `Index.db` linearly from the last
+  sample, so memory is traded for index reads and no data is lost. A second site, the constructor's `:108`, clamps the up-front reservation and
+  raises the sampling interval when the *expected* summary (expected keys × the `cassandra.index_summary_expected_key_size` estimate, default
+  64 B) would pass 2 GiB; that raised interval is persisted, so every restart rebuilds the summary (derived). No knob moves the limit, and it can
+  only be lowered: the test design moves it with a Byteman offset on `getEntrySize()` and reaches the real 2 GiB unpatched with 60,000-byte keys
+  at `min_index_interval` 1. Per SSTable; the node total belongs to `index_summary_capacity` (`deferred.md` §5). BIG only. Found via stage-3
+  feed **3b** (capacity-word pass), with the second site from band A2 (`IndexSummaryBuilder.java:108`); written up 2026-10-15.
+
 ### 3.6 buffer_pool
 Off-heap buffer pooling for file reads and networking (`utils/memory/BufferPool`,
-`utils/memory/BufferPools`). One case so far:
+`utils/memory/BufferPools`). Two cases so far:
 - **`file_cache_size-allocateMoreChunks-memoryUsageThreshold`:** byte ceiling on
   the `chunk-cache` pool's reserved off-heap memory, gating creation of its
   8 MiB macro chunks. **The folder's clearest pool-versus-resource case:** the
@@ -192,9 +209,21 @@ Off-heap buffer pooling for file reads and networking (`utils/memory/BufferPool`
   instrumented: `BufferPoolMetrics` publishes the limit (`Capacity`), the
   operand (`Size`) and the escape hatch (`OverflowSize`) as gauges, so §8's
   claim can be settled rather than merely predicted. Two config entries drive
-  one check — the `networking_cache_size` sibling is a separate case, not yet
-  filed (`pending.md`). Source bug noted: `MACRO_CHUNK_SIZE`'s comment says
+  one check — the `networking_cache_size` sibling is a separate case (filed
+  2026-10-15, below). Source bug noted: `MACRO_CHUNK_SIZE`'s comment says
   1 MiB, the arithmetic gives 8 MiB.
+- **`networking_cache_size-allocateMoreChunks-memoryUsageThreshold`:** the same check on the
+  `networking` pool (internode framing, streaming, native-protocol-v5 frames; v4 and older use
+  Netty's own allocator), default `min(128MiB, heap/16)`, restart-only. Same escape as the sibling:
+  a refusal becomes an unbounded `allocateDirect` overflow (no production code calls `tryGet` in
+  either pool). **It differs in recycling:** `recyclePartially = false`, so a chunk returns only
+  when fully free and the pool should grow to its peak demand, not fill to its limit as the
+  sibling's did at stage 4 (derived, tested by U3 and scenario M). The knob therefore bounds the
+  memory retained after a burst, not the burst itself. Its cluster tier drives the pool with a
+  native-v5 client that stops reading: nothing in `transport` caps the response backlog. Derived and
+  not observed: large (≥ 128 KiB) native-v5 requests never release their frame buffers
+  (`CQLMessageHandler.onComplete()`), which arm L tests. Found via stage-3 feed **3b** (the
+  capacity-word pass's second `BufferPool` instance); written up 2026-10-15.
 
 ### 3.7 marshal
 Value types and their (de)serialization (`db/marshal`; the deserializers that call into it are in `db/rows`, `db` and `db/commitlog`). One case so far:
@@ -227,7 +256,7 @@ The write object and its serialization (`db/Mutation`, `io/util/TeeDataInputPlus
   `Mutation.java:451` and `TeeDataInputPlus.java:58`); written up 2026-10-06.
 
 ### 3.9 read_path
-Replica-side read and the guardrails wrapped around it (`db/ReadCommand`, `db/transform`, `service/reads/thresholds`). One case so far:
+Replica- and coordinator-side read and the guardrails wrapped around it (`db/ReadCommand`, `db/transform`, `service/reads/thresholds`, `cql3/statements/SelectStatement`, `cql3/selection/ResultSetBuilder`). Two cases so far:
 - **`local_read_size_fail_threshold-addSize-failBytes`:** running total of the heap sizes of what **one local read command** pulls from storage,
   compared in `ReadCommand.QuerySizeTracking.addSize()` (pattern (c)); reaching the limit (`>=`) throws `LocalReadSizeTooLargeException`. **Per
   command, not per query:** each page of a paged query and each partition of an `IN` read has its own counter, so a query paged below the limit is
@@ -238,11 +267,27 @@ Replica-side read and the guardrails wrapped around it (`db/ReadCommand`, `db/tr
   warning). **Off by default** (limit `null`, master switch false) and **live-settable**. The first case whose cluster tier measures the bytes a
   replica thread allocates across the guard, with a Byteman rule on the read runnable. Found via stage-3 feed **3a** (band A1, row
   `ReadCommand.java:715`); written up 2026-10-06.
+- **`coordinator_read_size_fail_threshold-shouldReject-thresholdBytes`:** running total of the **value bytes placed in one request's CQL
+  `ResultSet`** on the coordinator, compared in `ResultSetBuilder.shouldReject()` (`size > thresholdBytes`) and read by
+  `SelectStatement.maybeFail()`, which throws `ReadSizeAbortException` (pattern (b)). **Inside the result loop, after the replicas have
+  answered:** the throw stops further rows being deserialized and added, the response frame (pooled direct) and, on a scan, later range
+  requests, but every replica response of a single-partition read is already in memory, so that half is post hoc and recorded as not gated.
+  **Permissive by one row:** it checks after the previous row is added and never checks the last, so a read of *n* rows of *s* bytes completes
+  iff (*n*−1)·*s* ≤ limit. **Per request, so per page**, reset every page; aggregates count only output rows. **No exemptions:** system
+  keyspaces, internal queries, superusers and driver metadata reads are refused like any client read, and the request fails outright (failure
+  code 4 from protocol 5), with no replica to spare. **Off by default** (limit `null`, master switch false, shared with the replica guards) and
+  **live-settable** (JMX `CoordinatorLargeReadAbortThreshold`, captured per request). Found via stage-3 feed **3b** (while writing up
+  `local_read_size_fail_threshold`; stage 2 had banded the helper `shouldReject()` D); written up 2026-10-15.
 
 ### 3.10 repair
-Anti-entropy repair: validation builds a Merkle tree per range and the coordinator compares the replicas' trees (`repair/`, `utils/MerkleTree`). One case so far:
+Anti-entropy repair: validation builds a Merkle tree per range and the coordinator compares the replicas' trees (`repair/`, `utils/MerkleTree`); admission of a repair (`service/ActiveRepairService`). Two cases so far:
 - **`repair_session_space-split-maxsize`:** a ceiling on the **leaves of each validation's Merkle tree**, `maxsize` = 2^`min(ceil(log2 n), depth(space / RF × share), repair_session_max_tree_depth)`, compared in `MerkleTree.split()` (pattern (a)): at `size >= maxsize` no node is created and the sampling loop stops, so the cost moves to over-streaming. **The comparison runs only on the order-preserving partitioners** (with BIG SSTables); on the default Murmur3 the same `maxsize` is built in one step by `init()`, with no check. Named after `repair_session_space` (default heap / 16, live over JMX), not the queue's deprecated `repair_session_max_tree_depth`, which only caps the depth at 20; the budget binds below heaps of about 6 to 12 GiB at RF 3, the partition count on small tables. **The MiB-to-bytes conversion is 32-bit**, so from 2048 MiB (the default at a 32 GiB heap) every tree has two leaves. Per validation, not node-wide: sessions, tables and vnode ranges multiply it, and the coordinator holds trees sized by the replicas' settings. Found via stage-3 feed **3a** (band A1, row `MerkleTree.java:409`); written up 2026-10-13.
+- **`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`:** an **admission check on data-disk usage**, `diskUsage + rejectRatio > 1` (pattern (b)). The coordinator reads it in `prepareForRepair()`, failing the repair before anything is registered; each participant reads it on `PREPARE_MSG`, answering `FAILURE_RSP` before registering; either way nothing is validated, snapshotted, streamed or anticompacted. `diskUsage` is recomputed at every call: the apparent bytes of the data directories (snapshots, backups and each hard link included) plus all memtables, over `min(used + usable, data_disk_usage_max_disk_size)`, rounded up to 5 decimals. It can exceed 1, so **the "disabled" default 0.0 still refuses above 100 %**. **Admission only:** an admitted repair's writes are neither counted nor checked again, so usage can pass `1 − ratio` by what it streams. **Every repair kind is checked**, preview and paxos-only included, despite the JMX name `IncrementalRepairDiskHeadroomRejectRatio`. The ratio is live over JMX, has no `nodetool` command, and a yaml value is not range-checked. Found via stage-3 feed **3a** (band B, row `ActiveRepairService.java:655` and its helper); written up 2026-10-15.
 
-### 3.11 sai
+### 3.11 io_buffers
+Reusable serialization buffers (`io/util/DataOutputBuffer` and its per-thread scratch instance), used by the commit log, mutation serialization, SSTable row writing and hints. One case so far:
+- **`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`:** per-thread cap on the **idle** capacity of the scratch buffer. When the buffer is handed back (`DataOutputBuffer$1$1.close()`, a nested anonymous class), it is kept if it is at most the limit, otherwise it is freed at once and replaced by 128 bytes (pattern (a)). **Rule 3 is passed on retention, not withheld creation**: the buffer grows to fit the item whatever the limit, and the over-limit branch is the one that allocates (the refusal text is ready in the case's §11 if the rule is read strictly). A JVM property, restart-only (`cassandra.dob_max_recycle_bytes`, default 1 MiB, no range check), with buffers direct by default. Node-wide retention is threads × limit, and most of those threads are shared-pool workers that never time out. In-use size is up to 2(S − 1) at the commit log and unbounded at SSTable row writing. The cluster tier uses a Byteman ledger of every scratch buffer against the direct buffer-pool bean. Found via stage-3 feed **3a** (band C, row `DataOutputBuffer.java:73`); written up 2026-10-15.
+
+### 3.12 sai
 Storage-attached secondary indexes, including vector (ANN) search and its query planning (`index/sai/`). One case so far:
 - **`SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS`:** a **count** cap on the primary keys one **hybrid vector query** (`ORDER BY … ANN OF` plus another indexed restriction) materializes into a list on each replica, compared in `QueryController.materializeKeysAndCloseSource()` (pattern (a)); JVM property `cassandra.sai.vector_search.max_materialized_keys`, default 16,000, restart-only. **Its disallow re-plans rather than refuses:** at the (*L* + 1)-th key the list is dropped and the query switches to an ANN search of the whole index with the filter applied to each row read. The folder's first case whose disallow branch **has an unbounded cost of its own**: that plan keeps every rejected key in `processedKeys`, up to every non-matching row on the replica when the matches are far from the query vector, so lowering the limit can *raise* a query's heap; the knob caps one plan's memory, not the query's. Also: the allow plan sizes an `int` array by the whole list in every SSTable segment (about *S* × *M*, derived); memtable matches are collected before the check (references only); 0 and `Integer.MAX_VALUE` switch always and never. Per command per replica, multiplied by the hybrid queries in flight. Found via stage-3 feed **3b** (the 2026-09-22 capacity-word pass; also band-A row `QueryController.java:449`); queued as `MAX_MATERIALIZED_KEYS` and named after the `CassandraRelevantProperties` constant; written up 2026-10-14.
