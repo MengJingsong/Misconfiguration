@@ -1,0 +1,17 @@
+yaml for file_cache_size=16: | < concurrent_reads: 32 | > concurrent_reads: 256 | < # native_transport_max_threads: 128 | > native_transport_max_threads: 256 | > file_cache_size: 16MiB
+Byteman TestScript: no errors
+node up; Byteman rules loaded: 8 (refuse, overflow, made, refuse trace, hold trace, dump, overflow trace, hold)
+JVM flags: -Xms4G -Xmx4G -XX:MaxDirectMemorySize=15872M -XX:NativeMemoryTracking=summary -XX:MaxDirectMemorySize=8G
+startup line: INFO  [SSTableBatchOpen:2] 2026-10-15T00:14:44,871 BufferPools.java:49 - Global buffer pool limit is 16.000MiB for chunk-cache and 128.000MiB for networking
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+READINGS 16: Capacity 16777216 (T 16777216); ceiling 16.0 MiB; idle pooled 16.0 MiB, direct 62.37 MiB; A pooled max 16.0 MiB, O max 0; B pooled max 17.12 MiB (after first O: 15.19..17.12), O peak 234.25 MiB, Size peak 250.25 MiB, direct rise 254.88 MiB, NMT Other rise 1067.1 MiB; first O at +2.0 s, B lasted 21.4 s after it; max in hold 199; INFO lines 1 (chunk-cache 0); OOM lines 0; ERROR lines 0; SSTables/read {'50%': 20.0, '95%': 20.0, '99%': 20.0, 'Max': 20.0}
+COUNTERS 16: A [156, 0, 979, 0] B [6966, 0, 131668, 129434, 8482586624] (holds, made, refuse, overflow[, bytes]); Misses A +0 B +129434; Hits A +3051 B +9897
+CLIENT 16: A {"ok": true, "concurrency": 4, "reads": 156, "succeeded": 156, "wrong_row_count": 0, "errors": [], "reads_per_s": 7.8, "elapsed_s": 20.099} | B {"ok": true, "concurrency": 200, "reads": 6966, "succeeded": 6966, "wrong_row_count": 0, "errors": [], "reads_per_s": 338.3, "elapsed_s": 20.593}
+EXPECTED: instrument: SSTables per read 20 at 50% and 99% — yes
+EXPECTED: instrument: reader-demand check, Size in A above its idle value — NO (recorded; the AI judges it in the results file)
+EXPECTED: instrument: O > 0 in B — yes
+EXPECTED: instrument: refusal and overflow counters move in B — yes
+EXPECTED: instrument: reads held at once in B >= 150 — yes
+EXPECTED: instrument: NMT Other parses — yes
+EXPECTED: instrument: client reads succeed — yes
+INSTRUMENT CHECK FAILED

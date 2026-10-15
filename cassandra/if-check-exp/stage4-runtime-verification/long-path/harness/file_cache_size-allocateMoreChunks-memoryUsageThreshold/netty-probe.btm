@@ -1,0 +1,45 @@
+# Supplementary diagnostic (2026-10-14, after run 1; not part of the counted runs): on every StorageService.getReleaseVersion()
+# (`nodetool version`, which cluster-run.py calls at each phase edge) print Netty's own direct-memory figures, to attribute NMT "Other"
+# memory that java.nio's direct pool does not count. Loaded beside hold.btm in a separate lifetime with its own log root.
+#   netty used_nocleaner=<PlatformDependent.usedDirectMemory()> pooled_direct=<PooledByteBufAllocator.DEFAULT used direct bytes>
+#         arenas=<direct arenas> ms=<epoch>
+RULE netty dump
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion()
+AT ENTRY
+IF true
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "netty used_nocleaner=" + io.netty.util.internal.PlatformDependent.usedDirectMemory()
+           + " pooled_direct=" + io.netty.buffer.PooledByteBufAllocator.DEFAULT.metric().usedDirectMemory()
+           + " arenas=" + io.netty.buffer.PooledByteBufAllocator.DEFAULT.metric().numDirectArenas()
+           + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+# Also (same supplementary lifetime): how the chunk-cache pool's normal chunks come back. GlobalPool.recycle() puts a fully free chunk
+# on the `chunks` queue; GlobalPool.recyclePartially() puts an evicted, partly free chunk on `partiallyFreedChunks`, which getInternal()
+# polls only after allocateMoreChunks() has refused (BufferPool.java:417-431).
+#   recycle full=<n> partial=<n> ms=<epoch>     on every getReleaseVersion()
+RULE count recycle full
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD recycle(org.apache.cassandra.utils.memory.BufferPool$Chunk)
+AT ENTRY
+IF $0.this$0.name.equals("chunk-cache")
+DO incrementCounter("rfull")
+ENDRULE
+
+RULE count recycle partial
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD recyclePartially(org.apache.cassandra.utils.memory.BufferPool$Chunk)
+AT ENTRY
+IF $0.this$0.name.equals("chunk-cache")
+DO incrementCounter("rpart")
+ENDRULE
+
+RULE recycle dump
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion()
+AT ENTRY
+IF true
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "recycle full=" + readCounter("rfull") + " partial=" + readCounter("rpart") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

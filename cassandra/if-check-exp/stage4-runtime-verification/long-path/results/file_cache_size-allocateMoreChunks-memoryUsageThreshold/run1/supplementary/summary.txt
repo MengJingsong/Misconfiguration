@@ -1,0 +1,25 @@
+yaml for file_cache_size=default: | < concurrent_reads: 32 | > concurrent_reads: 256 | < # native_transport_max_threads: 128 | > native_transport_max_threads: 256
+Byteman TestScript: no errors
+node up; Byteman rules loaded: 12 (refuse, overflow, netty dump, made, refuse trace, count recycle, hold trace, recycle dump, dump, overflow trace, hold, count recycle)
+JVM flags: -Xms4G -Xmx4G -XX:MaxDirectMemorySize=15872M -XX:NativeMemoryTracking=summary -XX:MaxDirectMemorySize=8G
+startup line: INFO  [SSTableBatchOpen:1] 2026-10-15T00:48:28,782 BufferPools.java:49 - Global buffer pool limit is 512.000MiB for chunk-cache and 128.000MiB for networking
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+READINGS default: Capacity 536870912 (T 536870912); ceiling 512.0 MiB; macro chunks made 64; P (made x 8 MiB) idle 8.0, A max 208.0, B max 512.0 (after first O: None..None) MiB; sampler Size-OverflowSize idle 8.0, A max 208.0, B max 512.0 MiB; idle direct 54.36 MiB; O max A 0, O peak B 0.0 MiB, Size peak 512.0 MiB, direct rise 523.47 MiB, NMT Other rise 1339.5 MiB; first O at +None s, B lasted None s after it; max in hold 199; INFO lines 1 (chunk-cache 1); OOM lines 0; ERROR lines 0; SSTables/read {'50%': 20.0, '95%': 20.0, '99%': 20.0, 'Max': 20.0}
+COUNTERS default: A [236, 25, 0, 0] B [52867, 38, 370740, 0, 0] (holds, made, refuse, overflow[, bytes]); Misses A +0 B +0; Hits A +4740 B +1057360
+CLIENT default: A {"ok": true, "concurrency": 4, "reads": 236, "succeeded": 236, "wrong_row_count": 0, "errors": [], "reads_per_s": 7.8, "elapsed_s": 30.416} | B {"ok": true, "concurrency": 200, "reads": 52867, "succeeded": 52867, "wrong_row_count": 0, "errors": [], "reads_per_s": 351.2, "elapsed_s": 150.517}
+EXPECTED: Capacity = T (536870912) — yes
+EXPECTED: startup line names the value for chunk-cache — yes
+EXPECTED: A: P (made x 8 MiB) max <= 16 MiB — NO (recorded; the AI judges it in the results file)
+EXPECTED: A: O = 0 at every sample — yes
+EXPECTED: A: no overflow allocation in the trace — yes
+EXPECTED: A and B: client reads all succeed with 4 rows — yes
+EXPECTED: B: SSTables per read = 20 (50% and 99%) — yes
+EXPECTED: B: reads held at once >= 180 (C = 200) — yes
+EXPECTED: no OOM fallback line — yes
+EXPECTED: default: B P (made x 8 MiB) max in [248, 264] MiB — NO (recorded; the AI judges it in the results file)
+EXPECTED: default: O = 0 at every B sample — yes
+EXPECTED: default: no overflow allocation and no refusal (trace) — NO (recorded; the AI judges it in the results file)
+EXPECTED: default: no INFO line — NO (recorded; the AI judges it in the results file)
+EXPECTED: default: direct rise in [P - 8 MiB, P + 40 MiB] — yes
+EXPECTED: after B: overflow back to 0 and P unchanged (reservation kept; made trace, and sampler Size-OverflowSize) — yes
+node stopped; no CassandraDaemon left

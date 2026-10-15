@@ -1,0 +1,11 @@
+value | Capacity | ceiling | P idle | P A max | P B max (min after first O) | O peak | Size peak | direct rise | NMT Other rise | INFO | refuse | overflow
+16 | 16777216 | 16.0 | 8.0 | 16.0 | 16.0 (16.0) | 234.31 | 250.31 | 263.47 | 1079.4 | 1 | 947479 | 933145
+64 | 67108864 | 64.0 | 8.0 | 64.0 | 64.0 (64.0) | 187.38 | 251.38 | 263.93 | 1063.5 | 1 | 817138 | 739111
+100 | 104857600 | 96.0 | 8.0 | 96.0 | 96.0 (96.0) | 154.81 | 250.81 | 262.65 | 1078.0 | 1 | 746676 | 618779
+128 | 134217728 | 128.0 | 8.0 | 128.0 | 128.0 (128.0) | 122.44 | 250.44 | 262.15 | 1078.4 | 1 | 679439 | 499427
+default | 536870912 | 512.0 | 8.0 | 216.0 | 512.0 (None) | 0.0 | 512.0 | 524.9 | 1340.9 | 1 | 372244 | 0
+EXPECTED: pooled plateau moves with T: 16, 64, 96, 128 MiB — yes
+EXPECTED: total P + O_peak spread across the saturated values <= 28 MiB (got 1.06) — yes
+EXPECTED: direct rise spread across all values <= 28 MiB (got 262.75) — NO (recorded; the AI judges it in the results file)
+EXPECTED: NMT Other rise spread across all values <= 28 MiB (got 277.4) — NO (recorded; the AI judges it in the results file)
+pooled change 16 -> 128: 112.0 MiB; direct-rise change: -1.32 MiB

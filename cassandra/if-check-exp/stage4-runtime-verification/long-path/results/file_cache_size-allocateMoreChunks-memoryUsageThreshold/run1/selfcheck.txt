@@ -1,0 +1,100 @@
+CHECK U1 ok harness checks 96, all OK: True
+CHECK U2.16 ok 16 MiB pool: pooled at ceiling 16.0 MiB (expect 16), overflow 0
+CHECK U3.16 ok 16 MiB: five past the ceiling -> overflow 655360 B, pooled unchanged, misses 5
+CHECK U4.16 ok 16 MiB: all back -> pooled 16.0 MiB kept, used 0, overflow 0
+CHECK U2.20 ok 20 MiB pool: pooled at ceiling 16.0 MiB (expect 16), overflow 0
+CHECK U3.20 ok 20 MiB: five past the ceiling -> overflow 655360 B, pooled unchanged, misses 5
+CHECK U4.20 ok 20 MiB: all back -> pooled 16.0 MiB kept, used 0, overflow 0
+CHECK U2.64 ok 64 MiB pool: pooled at ceiling 64.0 MiB (expect 64), overflow 0
+CHECK U3.64 ok 64 MiB: five past the ceiling -> overflow 655360 B, pooled unchanged, misses 5
+CHECK U4.64 ok 64 MiB: all back -> pooled 64.0 MiB kept, used 0, overflow 0
+CHECK U2.100 ok 100 MiB pool: pooled at ceiling 96.0 MiB (expect 96), overflow 0
+CHECK U3.100 ok 100 MiB: five past the ceiling -> overflow 655360 B, pooled unchanged, misses 5
+CHECK U4.100 ok 100 MiB: all back -> pooled 96.0 MiB kept, used 0, overflow 0
+CHECK U5 ok TEST-org.apache.cassandra.utils.memory.BufferPoolTest.xml: tests 38, errors 0, failures 0
+CHECK U5 ok TEST-org.apache.cassandra.utils.memory.BufferPoolCeilingTest.xml: tests 4, errors 0, failures 0
+CHECK C1.16 ok 16: startup line 16.0 MiB, Capacity gauge [16777216] (expect 16777216)
+CHECK C2.16 ok 16: sampler rows 305, error rows 0
+CHECK C3.16 ok 16: A P max 16.0 MiB (<= 16), O max 0, overflow allocations 0
+CHECK C4.16 ok 16: SSTables per read {'50%': 20.0, '99%': 20.0}, max reads in the hold 198
+CHECK C5.16 ok 16: macro chunks made in the lifetime 2 = 16.0 MiB <= T
+CHECK C6.16 ok 16: OOM fallback lines 0
+CHECK C7.16 ok 16: P after the first O > 0: [16.0] MiB (expect 16.0)
+CHECK C8.16 ok 16: first O > 0 at +2.4 s; 150.9 s sampled after it
+CHECK C9.16 ok 16: P + O_peak = 16.0 + 234.31 = 250.31 MiB in [225, 266]
+CHECK C10.16 ok 16: refusals 947479, overflow allocations 933145 of 61154590720 B (= n x 65,536: True), Misses +933145
+CHECK C11.16 ok 16: INFO lines 1 (in A..B: 1): INFO  [ReadStage-7] 2026-10-15T00:21:19,080 NoSpamLogger.java:104 - Maximum memory usage reached (16.000MiB) for chunk-cache buffer pool, cannot allocate chunk 
+CHECK C12.16 ok 16: direct MemoryUsed rise 263.47 MiB in [242.31, 290.31]
+CHECK C13.16 ok 16: after B: O [0], P (trace) [16.0], Size-OverflowSize [16.0] MiB
+CHECK C14.16 ok 16: client A 236 reads, B 50322 reads, all ok with 4 rows
+CHECK C15.16 ok 16: own figures equal result.json (O peak, P, direct rise, refusals, overflow, NMT)
+CHECK C1.64 ok 64: startup line 64.0 MiB, Capacity gauge [67108864] (expect 67108864)
+CHECK C2.64 ok 64: sampler rows 305, error rows 0
+CHECK C3.64 FAIL 64: A P max 64.0 MiB (<= 16), O max 0, overflow allocations 0
+CHECK C4.64 ok 64: SSTables per read {'50%': 20.0, '99%': 20.0}, max reads in the hold 199
+CHECK C5.64 ok 64: macro chunks made in the lifetime 8 = 64.0 MiB <= T
+CHECK C6.64 ok 64: OOM fallback lines 0
+CHECK C7.64 ok 64: P after the first O > 0: [64.0] MiB (expect 64.0)
+CHECK C8.64 ok 64: first O > 0 at +2.4 s; 150.9 s sampled after it
+CHECK C9.64 ok 64: P + O_peak = 64.0 + 187.38 = 251.38 MiB in [225, 266]
+CHECK C10.64 ok 64: refusals 817138, overflow allocations 739111 of 48438378496 B (= n x 65,536: True), Misses +739111
+CHECK C11.64 ok 64: INFO lines 1 (in A..B: 1): INFO  [ReadStage-6] 2026-10-15T00:27:00,291 NoSpamLogger.java:104 - Maximum memory usage reached (64.000MiB) for chunk-cache buffer pool, cannot allocate chunk 
+CHECK C12.64 ok 64: direct MemoryUsed rise 263.93 MiB in [243.38, 291.38]
+CHECK C13.64 ok 64: after B: O [0], P (trace) [64.0], Size-OverflowSize [64.0] MiB
+CHECK C14.64 ok 64: client A 236 reads, B 51252 reads, all ok with 4 rows
+CHECK C15.64 ok 64: own figures equal result.json (O peak, P, direct rise, refusals, overflow, NMT)
+CHECK C1.100 ok 100: startup line 100.0 MiB, Capacity gauge [104857600] (expect 104857600)
+CHECK C2.100 ok 100: sampler rows 305, error rows 0
+CHECK C3.100 FAIL 100: A P max 96.0 MiB (<= 16), O max 0, overflow allocations 0
+CHECK C4.100 ok 100: SSTables per read {'50%': 20.0, '99%': 20.0}, max reads in the hold 199
+CHECK C5.100 ok 100: macro chunks made in the lifetime 12 = 96.0 MiB <= T
+CHECK C6.100 ok 100: OOM fallback lines 0
+CHECK C7.100 ok 100: P after the first O > 0: [96.0] MiB (expect 96.0)
+CHECK C8.100 ok 100: first O > 0 at +2.4 s; 151.0 s sampled after it
+CHECK C9.100 ok 100: P + O_peak = 96.0 + 154.81 = 250.81 MiB in [225, 266]
+CHECK C10.100 ok 100: refusals 746676, overflow allocations 618779 of 40552300544 B (= n x 65,536: True), Misses +618779
+CHECK C11.100 ok 100: INFO lines 1 (in A..B: 1): INFO  [ReadStage-2] 2026-10-15T00:32:38,769 NoSpamLogger.java:104 - Maximum memory usage reached (100.000MiB) for chunk-cache buffer pool, cannot allocate chunk
+CHECK C12.100 ok 100: direct MemoryUsed rise 262.65 MiB in [242.81, 290.81]
+CHECK C13.100 ok 100: after B: O [0], P (trace) [96.0], Size-OverflowSize [96.0] MiB
+CHECK C14.100 ok 100: client A 236 reads, B 52156 reads, all ok with 4 rows
+CHECK C15.100 ok 100: own figures equal result.json (O peak, P, direct rise, refusals, overflow, NMT)
+CHECK C1.128 ok 128: startup line 128.0 MiB, Capacity gauge [134217728] (expect 134217728)
+CHECK C2.128 ok 128: sampler rows 305, error rows 0
+CHECK C3.128 FAIL 128: A P max 128.0 MiB (<= 16), O max 0, overflow allocations 0
+CHECK C4.128 ok 128: SSTables per read {'50%': 20.0, '99%': 20.0}, max reads in the hold 198
+CHECK C5.128 ok 128: macro chunks made in the lifetime 16 = 128.0 MiB <= T
+CHECK C6.128 ok 128: OOM fallback lines 0
+CHECK C7.128 ok 128: P after the first O > 0: [128.0] MiB (expect 128.0)
+CHECK C8.128 ok 128: first O > 0 at +2.4 s; 151.0 s sampled after it
+CHECK C9.128 ok 128: P + O_peak = 128.0 + 122.44 = 250.44 MiB in [225, 266]
+CHECK C10.128 ok 128: refusals 679439, overflow allocations 499427 of 32730447872 B (= n x 65,536: True), Misses +499427
+CHECK C11.128 ok 128: INFO lines 1 (in A..B: 1): INFO  [ReadStage-1] 2026-10-15T00:38:16,887 NoSpamLogger.java:104 - Maximum memory usage reached (128.000MiB) for chunk-cache buffer pool, cannot allocate chunk
+CHECK C12.128 ok 128: direct MemoryUsed rise 262.15 MiB in [242.44, 290.44]
+CHECK C13.128 ok 128: after B: O [0], P (trace) [128.0], Size-OverflowSize [128.0] MiB
+CHECK C14.128 ok 128: client A 236 reads, B 53292 reads, all ok with 4 rows
+CHECK C15.128 ok 128: own figures equal result.json (O peak, P, direct rise, refusals, overflow, NMT)
+CHECK C1.default ok default: startup line 512.0 MiB, Capacity gauge [536870912] (expect 536870912)
+CHECK C2.default ok default: sampler rows 305, error rows 0
+CHECK C3.default FAIL default: A P max 216.0 MiB (<= 16), O max 0, overflow allocations 0
+CHECK C4.default ok default: SSTables per read {'50%': 20.0, '99%': 20.0}, max reads in the hold 199
+CHECK C5.default ok default: macro chunks made in the lifetime 64 = 512.0 MiB <= T
+CHECK C6.default ok default: OOM fallback lines 0
+CHECK C7.default FAIL default: B P max 512.0 MiB in [248, 264]
+CHECK C8.default FAIL default: O peak 0, overflow allocations 0, refusals 372244, Misses +0
+CHECK C11.default FAIL default: INFO lines 1
+CHECK C12.default ok default: direct MemoryUsed rise 524.9 MiB in [504.0, 552.0]
+CHECK C13.default ok default: after B: O [0], P (trace) [512.0], Size-OverflowSize [512.0] MiB
+CHECK C14.default ok default: client A 236 reads, B 53080 reads, all ok with 4 rows
+CHECK C15.default ok default: own figures equal result.json (O peak, P, direct rise, refusals, overflow, NMT)
+CHECK X1 ok plateau P_B 16/64/100/128: [16.0, 64.0, 96.0, 128.0] MiB (expect 16, 64, 96, 128)
+CHECK X2 ok P + O_peak at the saturated values [250.31, 251.38, 250.81, 250.44] MiB, spread 1.06 <= 28
+CHECK X3 FAIL direct rise over idle, all five values [263.47, 263.93, 262.65, 262.15, 524.9] MiB, spread 262.75 <= 28
+CHECK X4 FAIL NMT Other rise over idle, all five values [1079.4, 1063.5, 1078.0, 1078.4, 1340.9] MiB, spread 277.4 <= 28 (frozen 9a clause)
+CHECK X5 FAIL NMT Other rise within P + O_peak + 40 MiB at every value (frozen 9a clause): [('16', 1079.4), ('64', 1063.5), ('100', 1078.0), ('128', 1078.4), ('default', 1340.9)]
+TABLE value | T MiB | ceiling | P idle | P A | P B | O peak | P+O | Size peak | direct rise | NMT Other rise | refusals | overflow n | Misses | INFO | first O s | in hold | B reads
+TABLE 16 | 16.0 | 16.0 | 8.0 | 16.0 | 16.0 | 234.31 | 250.31 | 250.31 | 263.47 | 1079.4 | 947479 | 933145 | 933145 | 1 | 2.4 | 198 | 50322
+TABLE 64 | 64.0 | 64.0 | 8.0 | 64.0 | 64.0 | 187.38 | 251.38 | 251.38 | 263.93 | 1063.5 | 817138 | 739111 | 739111 | 1 | 2.4 | 199 | 51252
+TABLE 100 | 100.0 | 96.0 | 8.0 | 96.0 | 96.0 | 154.81 | 250.81 | 250.81 | 262.65 | 1078.0 | 746676 | 618779 | 618779 | 1 | 2.4 | 199 | 52156
+TABLE 128 | 128.0 | 128.0 | 8.0 | 128.0 | 128.0 | 122.44 | 250.44 | 250.44 | 262.15 | 1078.4 | 679439 | 499427 | 499427 | 1 | 2.4 | 198 | 53292
+TABLE default | 512.0 | 512.0 | 8.0 | 216.0 | 512.0 | 0.0 | 512.0 | 512.0 | 524.9 | 1340.9 | 372244 | 0 | 0 | 1 | None | 199 | 53080
+SELFCHECK 83 ok, 10 failed

@@ -1,0 +1,86 @@
+# Byteman rules for file_cache_size-allocateMoreChunks-memoryUsageThreshold (case 9b/9c/9d, amended 2026-10-14).
+# One rule changes behaviour: "hold" sleeps 500 ms at entry to UnfilteredRowMergeIterator.close() for a ks1 read, when every
+# SSTable reader of the read is still open (SinglePartitionReadCommand.java:756-830; UnfilteredRowIterators.java:534-541).
+# The others only count. Lines go to the file named by -Dstage4.byteman.out:
+#   hold n=<holds so far> inhold=<reads in the hold now> ms=<epoch>             every 200th hold
+#   made n=<macro chunks created, chunk-cache> ms=<epoch>                        every macro chunk (at most 64 at 512 MiB)
+#   refuse n=<allocateMoreChunks() refusals, chunk-cache> ms=<epoch>             about every 500th (n % 500 == 1)
+#   overflow n=<BufferPool.allocate() calls, chunk-cache> bytes=<sum> ms=<epoch>  about every 500th (n % 500 == 1)
+#   dump holds=<n> inhold=<n> made=<n> refuse=<n> overflow=<n> overflow_bytes=<n> ms=<epoch>
+#       on every StorageService.getReleaseVersion() (the run script reads the ReleaseVersion attribute over JMX at each phase edge)
+# Counters are Byteman counters (process lifetime). A counting rule and its trace rule share an injection point; the trace rule
+# reads the counter, so a printed n is within one of the event it marks.
+
+RULE hold
+CLASS org.apache.cassandra.db.rows.UnfilteredRowIterators$UnfilteredRowMergeIterator
+METHOD close()
+AT ENTRY
+IF $0.metadata().keyspace.equals("ks1")
+DO incrementCounter("inhold");
+   incrementCounter("holds");
+   delay(500);
+   decrementCounter("inhold")
+ENDRULE
+
+RULE hold trace
+CLASS org.apache.cassandra.db.rows.UnfilteredRowIterators$UnfilteredRowMergeIterator
+METHOD close()
+AT ENTRY
+IF $0.metadata().keyspace.equals("ks1") && readCounter("holds") % 200 == 1
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "hold n=" + readCounter("holds") + " inhold=" + readCounter("inhold") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE made
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! != null && $0.this$0.name.equals("chunk-cache")
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "made n=" + incrementCounter("made") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE refuse
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! == null && $0.this$0.name.equals("chunk-cache")
+DO incrementCounter("refuse")
+ENDRULE
+
+RULE refuse trace
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! == null && $0.this$0.name.equals("chunk-cache") && readCounter("refuse") % 500 == 1
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "refuse n=" + readCounter("refuse") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE overflow
+CLASS org.apache.cassandra.utils.memory.BufferPool
+METHOD allocate(int, org.apache.cassandra.io.compress.BufferType)
+AT ENTRY
+IF $0.name.equals("chunk-cache")
+DO incrementCounter("overflow_kib", $1 / 1024);
+   incrementCounter("overflow")
+ENDRULE
+
+RULE overflow trace
+CLASS org.apache.cassandra.utils.memory.BufferPool
+METHOD allocate(int, org.apache.cassandra.io.compress.BufferType)
+AT ENTRY
+IF $0.name.equals("chunk-cache") && readCounter("overflow") % 500 == 1
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "overflow n=" + readCounter("overflow") + " bytes=" + (1024L * readCounter("overflow_kib")) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE dump
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion()
+AT ENTRY
+IF true
+DO traceOpen("fcs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("fcs", "dump holds=" + readCounter("holds") + " inhold=" + readCounter("inhold") + " made=" + readCounter("made") + " refuse=" + readCounter("refuse")
+           + " overflow=" + readCounter("overflow") + " overflow_bytes=" + (1024L * readCounter("overflow_kib")) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

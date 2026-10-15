@@ -1,0 +1,29 @@
+yaml for file_cache_size=16: | < concurrent_reads: 32 | > concurrent_reads: 256 | < # native_transport_max_threads: 128 | > native_transport_max_threads: 256 | > file_cache_size: 16MiB
+Byteman TestScript: no errors
+node up; Byteman rules loaded: 8 (refuse, overflow, made, refuse trace, hold trace, dump, overflow trace, hold)
+JVM flags: -Xms4G -Xmx4G -XX:MaxDirectMemorySize=15872M -XX:NativeMemoryTracking=summary -XX:MaxDirectMemorySize=8G
+startup line: INFO  [SSTableBatchOpen:1] 2026-10-15T00:20:06,599 BufferPools.java:49 - Global buffer pool limit is 16.000MiB for chunk-cache and 128.000MiB for networking
+INSTRUMENT probe: release 5.0.9-SNAPSHOT protocol 5
+READINGS 16: Capacity 16777216 (T 16777216); ceiling 16.0 MiB; macro chunks made 2; P (made x 8 MiB) idle 8.0, A max 16.0, B max 16.0 (after first O: 16.0..16.0) MiB; sampler Size-OverflowSize idle 8.0, A max 16.0, B max 30.5 MiB; idle direct 54.41 MiB; O max A 0, O peak B 234.31 MiB, Size peak 250.31 MiB, direct rise 263.47 MiB, NMT Other rise 1079.4 MiB; first O at +2.4 s, B lasted 150.9 s after it; max in hold 198; INFO lines 1 (chunk-cache 1); OOM lines 0; ERROR lines 0; SSTables/read {'50%': 20.0, '95%': 20.0, '99%': 20.0, 'Max': 20.0}
+COUNTERS 16: A [236, 1, 1537, 0] B [50322, 0, 947479, 933145, 61154590720] (holds, made, refuse, overflow[, bytes]); Misses A +0 B +933145; Hits A +4666 B +73321
+CLIENT 16: A {"ok": true, "concurrency": 4, "reads": 236, "succeeded": 236, "wrong_row_count": 0, "errors": [], "reads_per_s": 7.8, "elapsed_s": 30.363} | B {"ok": true, "concurrency": 200, "reads": 50322, "succeeded": 50322, "wrong_row_count": 0, "errors": [], "reads_per_s": 334.2, "elapsed_s": 150.559}
+EXPECTED: Capacity = T (16777216) — yes
+EXPECTED: startup line names the value for chunk-cache — yes
+EXPECTED: A: P (made x 8 MiB) max <= 16 MiB — yes
+EXPECTED: A: O = 0 at every sample — yes
+EXPECTED: A: no overflow allocation in the trace — yes
+EXPECTED: A and B: client reads all succeed with 4 rows — yes
+EXPECTED: B: SSTables per read = 20 (50% and 99%) — yes
+EXPECTED: B: reads held at once >= 180 (C = 200) — yes
+EXPECTED: no OOM fallback line — yes
+EXPECTED: B: P (made x 8 MiB) = floor(T/M)*M = 16777216 at every sample after the first O > 0 — yes
+EXPECTED: B: P never above T (made trace, whole lifetime) — yes
+EXPECTED: B: O > 0 — yes
+EXPECTED: B: 120 s or more sampled after the first O > 0 — yes
+EXPECTED: B: P + O_peak in [0.9 D_B, D_B + 16 MiB] = [225, 266] MiB — yes
+EXPECTED: B: refusals and overflow allocations counted (trace) — yes
+EXPECTED: B: Misses rises — yes
+EXPECTED: INFO line exactly once, naming chunk-cache and 8MiB — yes
+EXPECTED: direct rise in [P + O_peak - 8 MiB, P + O_peak + 40 MiB] — yes
+EXPECTED: after B: overflow back to 0 and P unchanged (reservation kept; made trace, and sampler Size-OverflowSize) — yes
+node stopped; no CassandraDaemon left
