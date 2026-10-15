@@ -1,0 +1,947 @@
+chain start 2026-10-15T00:12:42-04:00
+[2026-10-15 00:12:42] cluster-run down 2026-10-15 00:12:42 -0400 run shakedown4; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:12:42] + bin/nodetool -p 7106 stopdaemon
+[2026-10-15 00:12:52] + bin/nodetool -p 7105 stopdaemon
+[2026-10-15 00:13:05] + bin/nodetool -p 7104 stopdaemon
+[2026-10-15 00:13:18] + bin/nodetool -p 7103 stopdaemon
+[2026-10-15 00:13:31] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:13:45] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-15 00:13:45] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-15 00:13:45] down: no CassandraDaemon left
+[2026-10-15 00:13:45] + df -h /mnt/stage4-rqc | tail -1
+[2026-10-15 00:13:45] data tmpfs: tmpfs            48G  4.7M   48G   1% /mnt/stage4-rqc
+cluster-run down 2026-10-15 00:12:42 -0400 run shakedown4; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+down: no CassandraDaemon left
+data tmpfs: tmpfs            48G  4.7M   48G   1% /mnt/stage4-rqc
+shakedown ring down rc=0
+unit-run instrument 2026-10-15T00:13:45-04:00 clone cassandra-5.0.9 b5f2a54 md5 AcquireCapacityTest.java=490d3cfa6feb ReceiveQueueWiringTest.java=2dbaaba5c09a receive-trace.btm=8835ba357406 
+org.apache.cassandra.net.AcquireCapacityTest exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+trace 'acq ': 11
+trace 'acq .*cap=1000 ': 11
+trace 'acq .*out=SUCCESS': 7
+trace 'acq .*out=INSUFFICIENT_GLOBAL': 2
+trace 'acq .*out=INSUFFICIENT_ENDPOINT': 2
+trace 'acq .*gl=300/700': 1
+trace 'rel ': 3
+unit instrument rc=1
+unit-run all 2026-10-15T00:14:02-04:00 clone cassandra-5.0.9 b5f2a54 md5 AcquireCapacityTest.java=490d3cfa6feb ReceiveQueueWiringTest.java=2dbaaba5c09a receive-trace.btm=8835ba357406 
+org.apache.cassandra.net.ResourceLimitsTest exit=0 Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+org.apache.cassandra.net.AcquireCapacityTest exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+org.apache.cassandra.net.ReceiveQueueWiringTest exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+STAGE4 checks: 74 ok: 74 MISMATCH: 0
+STAGE4 note u5.retry [SUCCESS ep=300/800 lease=300/700] throttledNanos=54960423
+STAGE4 summary checks=54 mismatches=0
+STAGE4 summary checks=20 mismatches=0
+unit all rc=0
+[2026-10-15 00:14:51] cluster-run ring 2026-10-15 00:14:51 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:14:51] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-15 00:14:51] + rm -rf /users/jason92/stage4-rqc/R /users/jason92/stage4-rqc/S1 /users/jason92/stage4-rqc/S2 /users/jason92/stage4-rqc/S3 /users/jason92/stage4-rqc/S4 /mnt/stage4-rqc/R /mnt/stage4-rqc/S1 /mnt/stage4-rqc/S2 /mnt/stage4-rqc/S3 /mnt/stage4-rqc/S4
+[2026-10-15 00:14:51] + javac -d /users/jason92/stage4-rqc/jmxcls /users/jason92/stage4-harness-run/rqc/Jmx.java
+[2026-10-15 00:14:52] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh R 
+[2026-10-15 00:14:52] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;
+[2026-10-15 00:14:52] + bin/cassandra -p /users/jason92/stage4-rqc/R/cassandra.pid > /users/jason92/stage4-rqc/R/stdout0.txt 2>&1
+[2026-10-15 00:14:57] + bin/nodetool -p 7102 status
+[2026-10-15 00:14:58] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:15:02] + bin/nodetool -p 7102 status
+[2026-10-15 00:15:03] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:15:06] + bin/nodetool -p 7102 status
+[2026-10-15 00:15:08] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:15:09] R sees ['R'] UN after 13 s
+[2026-10-15 00:15:09] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh S1 
+[2026-10-15 00:15:09] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -5534023222112865485;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S1/commitlog;hints_directory: /mnt/stage4-rqc/S1/hints;saved_caches_directory: /mnt/stage4-rqc/S1/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S1/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+[2026-10-15 00:15:09] + bin/cassandra -p /users/jason92/stage4-rqc/S1/cassandra.pid > /users/jason92/stage4-rqc/S1/stdout0.txt 2>&1
+[2026-10-15 00:15:14] + bin/nodetool -p 7103 status
+[2026-10-15 00:15:15] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:15:18] + bin/nodetool -p 7103 status
+[2026-10-15 00:15:20] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:15:23] + bin/nodetool -p 7103 status
+[2026-10-15 00:15:25] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:15:26] S1 sees ['R', 'S1'] UN after 13 s
+[2026-10-15 00:15:26] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh S2 
+[2026-10-15 00:15:26] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -1844674407370955162;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S2/commitlog;hints_directory: /mnt/stage4-rqc/S2/hints;saved_caches_directory: /mnt/stage4-rqc/S2/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S2/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+[2026-10-15 00:15:26] + bin/cassandra -p /users/jason92/stage4-rqc/S2/cassandra.pid > /users/jason92/stage4-rqc/S2/stdout0.txt 2>&1
+[2026-10-15 00:15:31] + bin/nodetool -p 7104 status
+[2026-10-15 00:15:32] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:15:35] + bin/nodetool -p 7104 status
+[2026-10-15 00:15:37] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:15:40] + bin/nodetool -p 7104 status
+[2026-10-15 00:15:42] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:15:45] + bin/nodetool -p 7104 status
+[2026-10-15 00:15:47] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:15:48] S2 sees ['R', 'S2'] UN after 18 s
+[2026-10-15 00:15:48] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh S3 
+[2026-10-15 00:15:48] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: 1844674407370955161;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S3/commitlog;hints_directory: /mnt/stage4-rqc/S3/hints;saved_caches_directory: /mnt/stage4-rqc/S3/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S3/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+[2026-10-15 00:15:48] + bin/cassandra -p /users/jason92/stage4-rqc/S3/cassandra.pid > /users/jason92/stage4-rqc/S3/stdout0.txt 2>&1
+[2026-10-15 00:15:53] + bin/nodetool -p 7105 status
+[2026-10-15 00:15:54] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:15:57] + bin/nodetool -p 7105 status
+[2026-10-15 00:15:59] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:16:02] + bin/nodetool -p 7105 status
+[2026-10-15 00:16:04] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:16:07] + bin/nodetool -p 7105 status
+[2026-10-15 00:16:09] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:16:10] S3 sees ['R', 'S3'] UN after 18 s
+[2026-10-15 00:16:10] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh S4 
+[2026-10-15 00:16:10] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: 5534023222112865484;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.6;rpc_address: 127.0.0.6;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S4/commitlog;hints_directory: /mnt/stage4-rqc/S4/hints;saved_caches_directory: /mnt/stage4-rqc/S4/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S4/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+[2026-10-15 00:16:10] + bin/cassandra -p /users/jason92/stage4-rqc/S4/cassandra.pid > /users/jason92/stage4-rqc/S4/stdout0.txt 2>&1
+[2026-10-15 00:16:15] + bin/nodetool -p 7106 status
+[2026-10-15 00:16:16] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:16:19] + bin/nodetool -p 7106 status
+[2026-10-15 00:16:21] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:16:24] + bin/nodetool -p 7106 status
+[2026-10-15 00:16:26] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:16:29] + bin/nodetool -p 7106 status
+[2026-10-15 00:16:31] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:16:32] S4 sees ['R', 'S4'] UN after 18 s
+[2026-10-15 00:16:32] + bin/nodetool -p 7102 status
+[2026-10-15 00:16:34] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:16:35] R sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:16:35] + bin/nodetool -p 7103 status
+[2026-10-15 00:16:36] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:16:38] S1 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:16:38] + bin/nodetool -p 7104 status
+[2026-10-15 00:16:39] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:16:41] S2 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:16:41] + bin/nodetool -p 7105 status
+[2026-10-15 00:16:42] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:16:44] S3 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:16:44] + bin/nodetool -p 7106 status
+[2026-10-15 00:16:45] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:16:47] S4 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:16:47] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py schema 127.0.0.3 5
+[2026-10-15 00:16:50] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py probe 127.0.0.3
+[2026-10-15 00:16:51] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py probe 127.0.0.4
+[2026-10-15 00:16:52] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py probe 127.0.0.5
+[2026-10-15 00:16:52] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py probe 127.0.0.6
+[2026-10-15 00:16:53] + bin/nodetool -p 7102 status
+[2026-10-15 00:16:54] RING up: UN 127.0.0.5 UN 127.0.0.3 UN 127.0.0.6 UN 127.0.0.2 UN 127.0.0.4
+[2026-10-15 00:16:54] ring: schema ks RF 5; probes ok; {'yes': 0, 'no': 0}
+cluster-run ring 2026-10-15 00:14:51 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -5534023222112865485;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S1/commitlog;hints_directory: /mnt/stage4-rqc/S1/hints;saved_caches_directory: /mnt/stage4-rqc/S1/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S1/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -1844674407370955162;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S2/commitlog;hints_directory: /mnt/stage4-rqc/S2/hints;saved_caches_directory: /mnt/stage4-rqc/S2/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S2/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: 1844674407370955161;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S3/commitlog;hints_directory: /mnt/stage4-rqc/S3/hints;saved_caches_directory: /mnt/stage4-rqc/S3/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S3/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: 5534023222112865484;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.6;rpc_address: 127.0.0.6;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/S4/commitlog;hints_directory: /mnt/stage4-rqc/S4/hints;saved_caches_directory: /mnt/stage4-rqc/S4/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/S4/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;native_transport_max_threads: 512;
+RING up: UN 127.0.0.5 UN 127.0.0.3 UN 127.0.0.6 UN 127.0.0.2 UN 127.0.0.4
+ring: schema ks RF 5; probes ok; {'yes': 0, 'no': 0}
+ring rc=0
+[2026-10-15 00:16:54] cluster-run c512k 2026-10-15 00:16:54 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:16:54] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:17:05] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh R 'internode_application_receive_queue_capacity=512KiB' 'internode_application_receive_queue_reserve_endpoint_capacity=1MiB' 'internode_application_receive_queue_reserve_global_capacity=1MiB'
+[2026-10-15 00:17:05] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 512KiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+[2026-10-15 00:17:05] + bin/cassandra -p /users/jason92/stage4-rqc/R/cassandra.pid > /users/jason92/stage4-rqc/R/stdout1.txt 2>&1
+[2026-10-15 00:17:09] + bin/nodetool -p 7102 status
+[2026-10-15 00:17:11] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:17:14] + bin/nodetool -p 7102 status
+[2026-10-15 00:17:16] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:17:19] + bin/nodetool -p 7102 status
+[2026-10-15 00:17:21] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:17:24] + bin/nodetool -p 7102 status
+[2026-10-15 00:17:26] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:17:29] + bin/nodetool -p 7102 status
+[2026-10-15 00:17:31] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:17:32] R sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 23 s
+[2026-10-15 00:17:32] + bin/nodetool -p 7103 status
+[2026-10-15 00:17:33] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:17:35] S1 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:17:35] + bin/nodetool -p 7104 status
+[2026-10-15 00:17:36] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:17:38] S2 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:17:38] + bin/nodetool -p 7105 status
+[2026-10-15 00:17:39] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:17:41] S3 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:17:41] + bin/nodetool -p 7106 status
+[2026-10-15 00:17:42] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:17:43] S4 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:17:43] + java -cp /users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar:/users/jason92/cassandra-run1/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+[2026-10-15 00:17:43] Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+[2026-10-15 00:17:43] READ-BACK first acq: id=/127.0.0.6:7010->/127.0.0.2:7010-URGENT_MESSAGES-cbd08fec cap=524288 ep limit=1048576 gl limit=1048576
+[2026-10-15 00:17:43] EXPECTED: read-back: queueCapacity 524288 = 524288, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+[2026-10-15 00:17:43] ==== arm c512k/B: P=1 W=128 payload=262144 hold=True C=524288 E=1048576 G=1048576
+[2026-10-15 00:17:43] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:17:45] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:17:46] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:17:48] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:17:49] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:17:51] EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:17:51] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:17:51] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:17:51] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:17:52] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:17:52] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:17:52] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c512k/B/vt-before.csv once
+[2026-10-15 00:18:03] + jcmd 456280 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c512k/B/histo-idle.txt
+[2026-10-15 00:18:04] B control: 10340 ms; idle Mutation instances 0, [B bytes 31181552
+[2026-10-15 00:18:04] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c512k/B/vt-preA.csv once
+[2026-10-15 00:18:05] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 100000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c512k/B/keys-A.csv 200
+[2026-10-15 00:18:13] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c512k/B/vt-postA.csv once
+[2026-10-15 00:18:14] B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 100000000, "last_pk": 100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 7.913, "rows_per_s": 25.11, "t0_ms": 1792037885664, "stop_ms": 1792037893576, "elapsed_s": 7.99}
+[2026-10-15 00:18:15] B writers started at 1792037895258: ['S1']
+[2026-10-15 00:18:25] + jcmd 456280 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c512k/B/histo-b1.txt
+[2026-10-15 00:18:25] + jcmd 456280 Thread.print > /users/jason92/stage4-logs/rqc/run1/c512k/B/threads-b1.txt
+[2026-10-15 00:18:35] + jcmd 456280 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c512k/B/histo-b2.txt
+[2026-10-15 00:18:35] + jcmd 456280 Thread.print > /users/jason92/stage4-logs/rqc/run1/c512k/B/threads-b2.txt
+[2026-10-15 00:18:51] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c512k/B/vt-drain.csv once
+[2026-10-15 00:18:54] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:18:54] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:18:55] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:18:55] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:18:56] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:18:56] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c512k/B/vt-after.csv once
+[2026-10-15 00:18:57] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c512k/B/tpstats-after.txt
+[2026-10-15 00:18:58] B B writer S1: {"ok": true, "written": 858, "succeeded": 858, "failed": 0, "errors": [], "first_pk": 110000000, "last_pk": 110000857, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.128, "rows_per_s": 24.36, "t0_ms": 1792037895756, "stop_ms": 1792037925883, "elapsed_s": 35.221}
+[2026-10-15 00:18:58] B readings: M median 262205 min 262205 max 262205; data peak q {'/127.0.0.3:7010': 1311025} (max 1311025, 5.000 M); refusals 259 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786737 of 1048576; lease lines 349; node total max 1311505 (trace rebuild; rel pairs out of event order 15; sampled from using_bytes 1311025); throttled delta {'S1': (259, 34157582957)}; hold lines 858; MutationStage threads held 5/5; Mutation instances above idle 5/5 ([B 148952376/213250224); pool above idle mean 128750.93333333333 max 387072 drift -3481.5999999999913; writes on R 1058 vs rows 1058; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (5730 ms after the last send)
+[2026-10-15 00:18:58] EXPECTED: B: the hold fired (hold lines 858 > 0, MutationStage threads in doVerb sleeping at b1 5 > 0) — yes
+[2026-10-15 00:18:58] EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+[2026-10-15 00:18:58] EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:18:58] EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 1058 = rows sent 1058, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:18:58] EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (5, 5); predicted 5 — yes
+[2026-10-15 00:18:58] EXPECTED: B: data-handler peak q 1311025 in (C + E - M_max, C + E] = (1310659, 1572864] and = n·M: 5.000 rounds to 5 — yes
+[2026-10-15 00:18:58] EXPECTED: B: refusals 259 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (259, 34157582957)} — yes
+[2026-10-15 00:18:58] EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+[2026-10-15 00:18:58] EXPECTED: B: live Mutation instances above idle 5, 5 within -3/+2 of min(n, 32) = 5, and within 3 of each other — yes
+[2026-10-15 00:18:58] EXPECTED: B: networking pool in use above idle, mean over B 128750.93333333333 below 2 MiB — yes
+[2026-10-15 00:18:58] EXPECTED: B: networking pool flat over B (last third - first third -3481.5999999999913 < M 262205) — yes
+[2026-10-15 00:18:58] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:19:00] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:19:01] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:19:03] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:19:04] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:19:06] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:19:06] B: truncate ok
+[2026-10-15 00:19:06] trace: 3889 acq/rel lines, 858 hold lines, 0 other lines (first: [])
+[2026-10-15 00:19:06] END c512k: EXPECTED yes 13 no 0; R left running with this label; senders up
+cluster-run c512k 2026-10-15 00:16:54 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 512KiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.6:7010->/127.0.0.2:7010-URGENT_MESSAGES-cbd08fec cap=524288 ep limit=1048576 gl limit=1048576
+EXPECTED: read-back: queueCapacity 524288 = 524288, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+==== arm c512k/B: P=1 W=128 payload=262144 hold=True C=524288 E=1048576 G=1048576
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10340 ms; idle Mutation instances 0, [B bytes 31181552
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 100000000, "last_pk": 100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 7.913, "rows_per_s": 25.11, "t0_ms": 1792037885664, "stop_ms": 1792037893576, "elapsed_s": 7.99}
+B B writer S1: {"ok": true, "written": 858, "succeeded": 858, "failed": 0, "errors": [], "first_pk": 110000000, "last_pk": 110000857, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.128, "rows_per_s": 24.36, "t0_ms": 1792037895756, "stop_ms": 1792037925883, "elapsed_s": 35.221}
+B readings: M median 262205 min 262205 max 262205; data peak q {'/127.0.0.3:7010': 1311025} (max 1311025, 5.000 M); refusals 259 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786737 of 1048576; lease lines 349; node total max 1311505 (trace rebuild; rel pairs out of event order 15; sampled from using_bytes 1311025); throttled delta {'S1': (259, 34157582957)}; hold lines 858; MutationStage threads held 5/5; Mutation instances above idle 5/5 ([B 148952376/213250224); pool above idle mean 128750.93333333333 max 387072 drift -3481.5999999999913; writes on R 1058 vs rows 1058; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (5730 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 858 > 0, MutationStage threads in doVerb sleeping at b1 5 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 1058 = rows sent 1058, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (5, 5); predicted 5 — yes
+EXPECTED: B: data-handler peak q 1311025 in (C + E - M_max, C + E] = (1310659, 1572864] and = n·M: 5.000 rounds to 5 — yes
+EXPECTED: B: refusals 259 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (259, 34157582957)} — yes
+EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+EXPECTED: B: live Mutation instances above idle 5, 5 within -3/+2 of min(n, 32) = 5, and within 3 of each other — yes
+EXPECTED: B: networking pool in use above idle, mean over B 128750.93333333333 below 2 MiB — yes
+EXPECTED: B: networking pool flat over B (last third - first third -3481.5999999999913 < M 262205) — yes
+B: truncate ok
+trace: 3889 acq/rel lines, 858 hold lines, 0 other lines (first: [])
+END c512k: EXPECTED yes 13 no 0; R left running with this label; senders up
+c512k rc=0 2026-10-15T00:19:07-04:00
+[2026-10-15 00:19:07] cluster-run c4m 2026-10-15 00:19:07 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:19:07] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:19:17] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh R 'internode_application_receive_queue_capacity=4MiB' 'internode_application_receive_queue_reserve_endpoint_capacity=1MiB' 'internode_application_receive_queue_reserve_global_capacity=1MiB'
+[2026-10-15 00:19:17] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 4MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+[2026-10-15 00:19:17] + bin/cassandra -p /users/jason92/stage4-rqc/R/cassandra.pid > /users/jason92/stage4-rqc/R/stdout2.txt 2>&1
+[2026-10-15 00:19:21] + bin/nodetool -p 7102 status
+[2026-10-15 00:19:23] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:19:26] + bin/nodetool -p 7102 status
+[2026-10-15 00:19:28] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:19:31] + bin/nodetool -p 7102 status
+[2026-10-15 00:19:33] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:19:36] + bin/nodetool -p 7102 status
+[2026-10-15 00:19:38] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:19:41] + bin/nodetool -p 7102 status
+[2026-10-15 00:19:43] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:19:44] R sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 23 s
+[2026-10-15 00:19:44] + bin/nodetool -p 7103 status
+[2026-10-15 00:19:46] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:19:47] S1 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:19:47] + bin/nodetool -p 7104 status
+[2026-10-15 00:19:48] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:19:50] S2 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:19:50] + bin/nodetool -p 7105 status
+[2026-10-15 00:19:51] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:19:53] S3 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:19:53] + bin/nodetool -p 7106 status
+[2026-10-15 00:19:54] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:19:56] S4 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:19:56] + java -cp /users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar:/users/jason92/cassandra-run1/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+[2026-10-15 00:19:56] Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+[2026-10-15 00:19:56] READ-BACK first acq: id=/127.0.0.4:7010->/127.0.0.2:7010-URGENT_MESSAGES-c1a2bc37 cap=4194304 ep limit=1048576 gl limit=1048576
+[2026-10-15 00:19:56] EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+[2026-10-15 00:19:56] ==== arm c4m/B: P=1 W=128 payload=262144 hold=True C=4194304 E=1048576 G=1048576
+[2026-10-15 00:19:56] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:19:57] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:19:58] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:20:00] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:20:01] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:20:02] EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:20:02] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:20:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:20:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:20:04] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:20:04] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:20:04] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/B/vt-before.csv once
+[2026-10-15 00:20:15] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/B/histo-idle.txt
+[2026-10-15 00:20:16] B control: 10391 ms; idle Mutation instances 0, [B bytes 30152608
+[2026-10-15 00:20:16] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/B/vt-preA.csv once
+[2026-10-15 00:20:17] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 2100000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c4m/B/keys-A.csv 200
+[2026-10-15 00:20:24] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/B/vt-postA.csv once
+[2026-10-15 00:20:24] B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2100000000, "last_pk": 2100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 6.445, "rows_per_s": 31.0, "t0_ms": 1792038017601, "stop_ms": 1792038024046, "elapsed_s": 6.455}
+[2026-10-15 00:20:25] B writers started at 1792038025652: ['S1']
+[2026-10-15 00:20:35] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/B/histo-b1.txt
+[2026-10-15 00:20:36] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/B/threads-b1.txt
+[2026-10-15 00:20:45] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/B/histo-b2.txt
+[2026-10-15 00:20:46] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/B/threads-b2.txt
+[2026-10-15 00:20:57] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/B/vt-drain.csv once
+[2026-10-15 00:21:01] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:21:01] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:01] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:02] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:02] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:02] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/B/vt-after.csv once
+[2026-10-15 00:21:03] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c4m/B/tpstats-after.txt
+[2026-10-15 00:21:05] B B writer S1: {"ok": true, "written": 2902, "succeeded": 2902, "failed": 0, "errors": [], "first_pk": 2110000000, "last_pk": 2110002901, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.12, "rows_per_s": 92.5, "t0_ms": 1792038026143, "stop_ms": 1792038056263, "elapsed_s": 31.376}
+[2026-10-15 00:21:05] B readings: M median 262205.0 min 262205 max 262205; data peak q {'/127.0.0.3:7010': 4981895} (max 4981895, 19.000 M); refusals 976 ['INSUFFICIENT_GLOBAL']; other handlers max q 870, refusals 0; global in use max 787591 of 1048576; lease lines 1059; node total max 4982482 (trace rebuild; rel pairs out of event order 47; sampled from using_bytes 4982045); throttled delta {'S1': (976, 29099471765)}; hold lines 2902; MutationStage threads held 19/19; Mutation instances above idle 19/19 ([B 147925024/212166640); pool above idle mean 138869.33333333334 max 602112 drift 23507.199999999997; writes on R 3102 vs rows 3102; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1917 ms after the last send)
+[2026-10-15 00:21:05] EXPECTED: B: the hold fired (hold lines 2902 > 0, MutationStage threads in doVerb sleeping at b1 19 > 0) — yes
+[2026-10-15 00:21:05] EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+[2026-10-15 00:21:05] EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:21:05] EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 3102 = rows sent 3102, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:21:05] EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (19, 19); predicted 19 — yes
+[2026-10-15 00:21:05] EXPECTED: B: data-handler peak q 4981895 in (C + E - M_max, C + E] = (4980675, 5242880] and = n·M: 19.000 rounds to 19 — yes
+[2026-10-15 00:21:05] EXPECTED: B: refusals 976 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (976, 29099471765)} — yes
+[2026-10-15 00:21:05] EXPECTED: B: the other handlers stay at or below C (max q 870) and take no refusal (0) — yes
+[2026-10-15 00:21:05] EXPECTED: B: live Mutation instances above idle 19, 19 within -3/+2 of min(n, 32) = 19, and within 3 of each other — yes
+[2026-10-15 00:21:05] EXPECTED: B: networking pool in use above idle, mean over B 138869.33333333334 below 2 MiB — yes
+[2026-10-15 00:21:05] EXPECTED: B: networking pool flat over B (last third - first third 23507.199999999997 < M 262205.0) — yes
+[2026-10-15 00:21:05] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:21:06] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:21:08] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:21:09] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:21:10] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:21:12] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:21:13] B: truncate ok
+[2026-10-15 00:21:13] ==== arm c4m/p2: P=2 W=128 payload=262144 hold=True C=4194304 E=1048576 G=1048576
+[2026-10-15 00:21:13] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:21:14] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:21:15] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:21:17] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:21:18] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:21:20] EXPECTED: p2: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:21:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:21:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:21] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:21] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:21:22] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p2/vt-before.csv once
+[2026-10-15 00:21:33] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/p2/histo-idle.txt
+[2026-10-15 00:21:33] p2 control: 10574 ms; idle Mutation instances 0, [B bytes 32874016
+[2026-10-15 00:21:33] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p2/vt-preA.csv once
+[2026-10-15 00:21:34] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 2200000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c4m/p2/keys-A.csv 200
+[2026-10-15 00:21:42] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p2/vt-postA.csv once
+[2026-10-15 00:21:43] p2 A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2200000000, "last_pk": 2200000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.095, "rows_per_s": 24.56, "t0_ms": 1792038094699, "stop_ms": 1792038102794, "elapsed_s": 8.146}
+[2026-10-15 00:21:44] B writers started at 1792038104421: ['S1', 'S2']
+[2026-10-15 00:21:54] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/p2/histo-b1.txt
+[2026-10-15 00:21:54] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/p2/threads-b1.txt
+[2026-10-15 00:22:04] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/p2/histo-b2.txt
+[2026-10-15 00:22:04] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/p2/threads-b2.txt
+[2026-10-15 00:22:16] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p2/vt-drain.csv once
+[2026-10-15 00:22:19] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:22:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:21] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:21] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p2/vt-after.csv once
+[2026-10-15 00:22:22] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c4m/p2/tpstats-after.txt
+[2026-10-15 00:22:24] p2 B writer S1: {"ok": true, "written": 2478, "succeeded": 2478, "failed": 0, "errors": [], "first_pk": 2210000000, "last_pk": 2210002477, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.017, "rows_per_s": 78.74, "t0_ms": 1792038104936, "stop_ms": 1792038134953, "elapsed_s": 31.476}
+[2026-10-15 00:22:24] p2 B writer S2: {"ok": true, "written": 2477, "succeeded": 2477, "failed": 0, "errors": [], "first_pk": 2220000000, "last_pk": 2220002476, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.005, "rows_per_s": 78.73, "t0_ms": 1792038104949, "stop_ms": 1792038134954, "elapsed_s": 31.473}
+[2026-10-15 00:22:24] p2 readings: M median 262205.0 min 262205 max 262205; data peak q {'/127.0.0.3:7010': 4981895, '/127.0.0.4:7010': 4981895} (max 4981895, 19.000 M); refusals 2911 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 789543 of 1048576; lease lines 2994; node total max 9439380 (trace rebuild; rel pairs out of event order 125; sampled from using_bytes 9177175); throttled delta {'S1': (1457, 29452699948), 'S2': (1454, 29462230709)}; hold lines 4955; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 148010176/198948000); pool above idle mean 1318572.8 max 1474560 drift 24371.199999999953; writes on R 5155 vs rows 5155; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (2067 ms after the last send)
+[2026-10-15 00:22:24] EXPECTED: p2: the hold fired (hold lines 4955 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+[2026-10-15 00:22:24] EXPECTED: p2: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+[2026-10-15 00:22:24] EXPECTED: p2: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:22:24] EXPECTED: p2: no write lost: writer failures A 0 B 0, R local writes 5155 = rows sent 5155, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:22:24] EXPECTED: p2: each writing peer peaks in [floor(C/M)·M, C + E] = [3933075, 5242880]: {'S1': 4981895, 'S2': 4981895} — yes
+[2026-10-15 00:22:24] EXPECTED: p2: global reserve in use peaks in (G - M_max, G] = (786371, 1048576]: 789543 — yes
+[2026-10-15 00:22:24] EXPECTED: p2: the node total never exceeds P·C + G + 64 KiB = 9502720: 9439380; sum of peer peaks 9963790 >= P·floor(C/M)·M = 7866150 — yes
+[2026-10-15 00:22:24] EXPECTED: p2: refusals 2911 > 0 and every writing peer throttled {'S1': (1457, 29452699948), 'S2': (1454, 29462230709)} — yes
+[2026-10-15 00:22:24] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:22:25] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:22:27] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:22:28] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:22:30] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:22:31] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:22:32] p2: truncate ok
+[2026-10-15 00:22:32] ==== arm c4m/p4: P=4 W=128 payload=262144 hold=True C=4194304 E=1048576 G=1048576
+[2026-10-15 00:22:32] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:22:33] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:22:34] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:22:36] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:22:37] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:22:39] EXPECTED: p4: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:22:39] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:22:39] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:39] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:40] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:40] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:22:41] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p4/vt-before.csv once
+[2026-10-15 00:22:51] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/p4/histo-idle.txt
+[2026-10-15 00:22:52] p4 control: 10391 ms; idle Mutation instances 0, [B bytes 32898040
+[2026-10-15 00:22:52] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p4/vt-preA.csv once
+[2026-10-15 00:22:53] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 2300000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c4m/p4/keys-A.csv 200
+[2026-10-15 00:23:03] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p4/vt-postA.csv once
+[2026-10-15 00:23:03] p4 A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2300000000, "last_pk": 2300000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 9.87, "rows_per_s": 20.25, "t0_ms": 1792038173548, "stop_ms": 1792038183418, "elapsed_s": 9.879}
+[2026-10-15 00:23:04] B writers started at 1792038184993: ['S1', 'S2', 'S3', 'S4']
+[2026-10-15 00:23:15] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/p4/histo-b1.txt
+[2026-10-15 00:23:15] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/p4/threads-b1.txt
+[2026-10-15 00:23:24] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/p4/histo-b2.txt
+[2026-10-15 00:23:25] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/p4/threads-b2.txt
+[2026-10-15 00:23:38] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p4/vt-drain.csv once
+[2026-10-15 00:23:42] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:23:42] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:23:43] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:23:43] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:23:43] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:23:44] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/p4/vt-after.csv once
+[2026-10-15 00:23:44] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c4m/p4/tpstats-after.txt
+[2026-10-15 00:23:46] p4 B writer S1: {"ok": true, "written": 1302, "succeeded": 1302, "failed": 0, "errors": [], "first_pk": 2310000000, "last_pk": 2310001301, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.032, "rows_per_s": 39.32, "t0_ms": 1792038185503, "stop_ms": 1792038215535, "elapsed_s": 33.12}
+cluster-run c4m 2026-10-15 00:19:07 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 4MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.4:7010->/127.0.0.2:7010-URGENT_MESSAGES-c1a2bc37 cap=4194304 ep limit=1048576 gl limit=1048576
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+==== arm c4m/B: P=1 W=128 payload=262144 hold=True C=4194304 E=1048576 G=1048576
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10391 ms; idle Mutation instances 0, [B bytes 30152608
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2100000000, "last_pk": 2100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 6.445, "rows_per_s": 31.0, "t0_ms": 1792038017601, "stop_ms": 1792038024046, "elapsed_s": 6.455}
+B B writer S1: {"ok": true, "written": 2902, "succeeded": 2902, "failed": 0, "errors": [], "first_pk": 2110000000, "last_pk": 2110002901, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.12, "rows_per_s": 92.5, "t0_ms": 1792038026143, "stop_ms": 1792038056263, "elapsed_s": 31.376}
+B readings: M median 262205.0 min 262205 max 262205; data peak q {'/127.0.0.3:7010': 4981895} (max 4981895, 19.000 M); refusals 976 ['INSUFFICIENT_GLOBAL']; other handlers max q 870, refusals 0; global in use max 787591 of 1048576; lease lines 1059; node total max 4982482 (trace rebuild; rel pairs out of event order 47; sampled from using_bytes 4982045); throttled delta {'S1': (976, 29099471765)}; hold lines 2902; MutationStage threads held 19/19; Mutation instances above idle 19/19 ([B 147925024/212166640); pool above idle mean 138869.33333333334 max 602112 drift 23507.199999999997; writes on R 3102 vs rows 3102; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1917 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 2902 > 0, MutationStage threads in doVerb sleeping at b1 19 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 3102 = rows sent 3102, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (19, 19); predicted 19 — yes
+EXPECTED: B: data-handler peak q 4981895 in (C + E - M_max, C + E] = (4980675, 5242880] and = n·M: 19.000 rounds to 19 — yes
+EXPECTED: B: refusals 976 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (976, 29099471765)} — yes
+EXPECTED: B: the other handlers stay at or below C (max q 870) and take no refusal (0) — yes
+EXPECTED: B: live Mutation instances above idle 19, 19 within -3/+2 of min(n, 32) = 19, and within 3 of each other — yes
+EXPECTED: B: networking pool in use above idle, mean over B 138869.33333333334 below 2 MiB — yes
+EXPECTED: B: networking pool flat over B (last third - first third 23507.199999999997 < M 262205.0) — yes
+B: truncate ok
+==== arm c4m/p2: P=2 W=128 payload=262144 hold=True C=4194304 E=1048576 G=1048576
+EXPECTED: p2: no node holds a pending hint at the arm's start (none) — yes
+p2 control: 10574 ms; idle Mutation instances 0, [B bytes 32874016
+p2 A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2200000000, "last_pk": 2200000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.095, "rows_per_s": 24.56, "t0_ms": 1792038094699, "stop_ms": 1792038102794, "elapsed_s": 8.146}
+p2 B writer S1: {"ok": true, "written": 2478, "succeeded": 2478, "failed": 0, "errors": [], "first_pk": 2210000000, "last_pk": 2210002477, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.017, "rows_per_s": 78.74, "t0_ms": 1792038104936, "stop_ms": 1792038134953, "elapsed_s": 31.476}
+p2 B writer S2: {"ok": true, "written": 2477, "succeeded": 2477, "failed": 0, "errors": [], "first_pk": 2220000000, "last_pk": 2220002476, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.005, "rows_per_s": 78.73, "t0_ms": 1792038104949, "stop_ms": 1792038134954, "elapsed_s": 31.473}
+p2 readings: M median 262205.0 min 262205 max 262205; data peak q {'/127.0.0.3:7010': 4981895, '/127.0.0.4:7010': 4981895} (max 4981895, 19.000 M); refusals 2911 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 789543 of 1048576; lease lines 2994; node total max 9439380 (trace rebuild; rel pairs out of event order 125; sampled from using_bytes 9177175); throttled delta {'S1': (1457, 29452699948), 'S2': (1454, 29462230709)}; hold lines 4955; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 148010176/198948000); pool above idle mean 1318572.8 max 1474560 drift 24371.199999999953; writes on R 5155 vs rows 5155; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (2067 ms after the last send)
+EXPECTED: p2: the hold fired (hold lines 4955 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+EXPECTED: p2: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+EXPECTED: p2: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: p2: no write lost: writer failures A 0 B 0, R local writes 5155 = rows sent 5155, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: p2: each writing peer peaks in [floor(C/M)·M, C + E] = [3933075, 5242880]: {'S1': 4981895, 'S2': 4981895} — yes
+EXPECTED: p2: global reserve in use peaks in (G - M_max, G] = (786371, 1048576]: 789543 — yes
+EXPECTED: p2: the node total never exceeds P·C + G + 64 KiB = 9502720: 9439380; sum of peer peaks 9963790 >= P·floor(C/M)·M = 7866150 — yes
+EXPECTED: p2: refusals 2911 > 0 and every writing peer throttled {'S1': (1457, 29452699948), 'S2': (1454, 29462230709)} — yes
+p2: truncate ok
+==== arm c4m/p4: P=4 W=128 payload=262144 hold=True C=4194304 E=1048576 G=1048576
+EXPECTED: p4: no node holds a pending hint at the arm's start (none) — yes
+p4 control: 10391 ms; idle Mutation instances 0, [B bytes 32898040
+p4 A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2300000000, "last_pk": 2300000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 9.87, "rows_per_s": 20.25, "t0_ms": 1792038173548, "stop_ms": 1792038183418, "elapsed_s": 9.879}
+p4 B writer S1: {"ok": true, "written": 1302, "succeeded": 1302, "failed": 0, "errors": [], "first_pk": 2310000000, "last_pk": 2310001301, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.032, "rows_per_s": 39.32, "t0_ms": 1792038185503, "stop_ms": 1792038215535, "elapsed_s": 33.12}
+[2026-10-15 00:23:46] p4 B writer S2: {"ok": true, "written": 1313, "succeeded": 1313, "failed": 0, "errors": [], "first_pk": 2320000000, "last_pk": 2320001312, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.034, "rows_per_s": 39.65, "t0_ms": 1792038185502, "stop_ms": 1792038215537, "elapsed_s": 33.12}
+[2026-10-15 00:23:46] p4 B writer S3: {"ok": true, "written": 1305, "succeeded": 1305, "failed": 0, "errors": [], "first_pk": 2330000000, "last_pk": 2330001304, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.003, "rows_per_s": 39.27, "t0_ms": 1792038185537, "stop_ms": 1792038215540, "elapsed_s": 33.253}
+[2026-10-15 00:23:46] p4 B writer S4: {"ok": true, "written": 1298, "succeeded": 1298, "failed": 0, "errors": [], "first_pk": 2340000000, "last_pk": 2340001297, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.005, "rows_per_s": 39.23, "t0_ms": 1792038185537, "stop_ms": 1792038215542, "elapsed_s": 33.103}
+[2026-10-15 00:23:47] p4 readings: M median 262205 min 262205 max 262205; data peak q {'/127.0.0.4:7010': 4981895, '/127.0.0.3:7010': 4981895, '/127.0.0.5:7010': 4981895, '/127.0.0.6:7010': 4981895} (max 4981895, 19.000 M); refusals 4377 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 792471 of 1048576; lease lines 4462; node total max 17829940 (trace rebuild; rel pairs out of event order 72; sampled from using_bytes 17567735); throttled delta {'S1': (1089, 31359362046), 'S2': (1090, 31607816900), 'S3': (1104, 31492147746), 'S4': (1094, 31407340235)}; hold lines 5218; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 147502632/199220840); pool above idle mean 13734026.666666666 max 14434304 drift 85196.79999999888; writes on R 5418 vs rows 5418; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (3835 ms after the last send)
+[2026-10-15 00:23:47] EXPECTED: p4: the hold fired (hold lines 5218 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+[2026-10-15 00:23:47] EXPECTED: p4: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+[2026-10-15 00:23:47] EXPECTED: p4: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:23:47] EXPECTED: p4: no write lost: writer failures A 0 B 0, R local writes 5418 = rows sent 5418, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:23:47] EXPECTED: p4: each writing peer peaks in [floor(C/M)·M, C + E] = [3933075, 5242880]: {'S1': 4981895, 'S2': 4981895, 'S3': 4981895, 'S4': 4981895} — yes
+[2026-10-15 00:23:47] EXPECTED: p4: global reserve in use peaks in (G - M_max, G] = (786371, 1048576]: 792471 — yes
+[2026-10-15 00:23:47] EXPECTED: p4: the node total never exceeds P·C + G + 64 KiB = 17891328: 17829940; sum of peer peaks 19927580 >= P·floor(C/M)·M = 15732300 — yes
+[2026-10-15 00:23:47] EXPECTED: p4: refusals 4377 > 0 and every writing peer throttled {'S1': (1089, 31359362046), 'S2': (1090, 31607816900), 'S3': (1104, 31492147746), 'S4': (1094, 31407340235)} — yes
+[2026-10-15 00:23:47] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:23:48] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:23:49] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:23:51] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:23:52] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:23:54] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:23:55] p4: truncate ok
+[2026-10-15 00:23:55] ==== arm c4m/small: P=1 W=256 payload=32768 hold=True C=4194304 E=1048576 G=1048576
+[2026-10-15 00:23:55] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:23:56] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:23:57] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:23:59] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:24:00] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:24:02] EXPECTED: small: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:24:02] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:24:02] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:24:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:24:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:24:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:24:04] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/small/vt-before.csv once
+[2026-10-15 00:24:15] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/small/histo-idle.txt
+[2026-10-15 00:24:15] small control: 10578 ms; idle Mutation instances 0, [B bytes 32912528
+[2026-10-15 00:24:15] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/small/vt-preA.csv once
+[2026-10-15 00:24:16] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 2400000000 1 120 32768 /users/jason92/stage4-logs/rqc/run1/c4m/small/keys-A.csv 200
+[2026-10-15 00:24:25] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/small/vt-postA.csv once
+[2026-10-15 00:24:26] small A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2400000000, "last_pk": 2400000199, "w": 1, "max_inflight": 1, "payload": 32768, "send_s": 8.99, "rows_per_s": 22.14, "t0_ms": 1792038256802, "stop_ms": 1792038265792, "elapsed_s": 9.037}
+[2026-10-15 00:24:27] B writers started at 1792038267405: ['S1']
+[2026-10-15 00:24:37] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/small/histo-b1.txt
+[2026-10-15 00:24:37] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/small/threads-b1.txt
+[2026-10-15 00:24:47] + jcmd 460826 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c4m/small/histo-b2.txt
+[2026-10-15 00:24:47] + jcmd 460826 Thread.print > /users/jason92/stage4-logs/rqc/run1/c4m/small/threads-b2.txt
+[2026-10-15 00:24:59] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/small/vt-drain.csv once
+[2026-10-15 00:25:02] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:25:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:25:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:25:03] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:25:04] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:25:04] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c4m/small/vt-after.csv once
+[2026-10-15 00:25:05] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c4m/small/tpstats-after.txt
+[2026-10-15 00:25:06] small B writer S1: {"ok": true, "written": 4965, "succeeded": 4965, "failed": 0, "errors": [], "first_pk": 2410000000, "last_pk": 2410004964, "w": 256, "max_inflight": 256, "payload": 32768, "send_s": 30.0, "rows_per_s": 157.13, "t0_ms": 1792038267891, "stop_ms": 1792038297892, "elapsed_s": 31.602}
+[2026-10-15 00:25:07] small readings: M median 32829.0 min 32829 max 32829; data peak q {'/127.0.0.3:7010': 5219811} (max 5219811, 159.000 M); refusals 1073 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 1025507 of 1048576; lease lines 1156; node total max 5220288 (trace rebuild; rel pairs out of event order 503; sampled from using_bytes 5219811); throttled delta {'S1': (1073, 28403085576)}; hold lines 4965; MutationStage threads held 32/32; Mutation instances above idle 159/159 ([B 102110784/156639360); pool above idle mean 116599.46666666666 max 135168 drift -6963.200000000012; writes on R 5165 vs rows 5165; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (2211 ms after the last send)
+[2026-10-15 00:25:07] EXPECTED: small: the hold fired (hold lines 4965 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+[2026-10-15 00:25:07] EXPECTED: small: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 32829 <= M_max 32829 — yes
+[2026-10-15 00:25:07] EXPECTED: small: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:25:07] EXPECTED: small: no write lost: writer failures A 0 B 0, R local writes 5165 = rows sent 5165, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:25:07] EXPECTED: small: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (159, 159); predicted 159 — yes
+[2026-10-15 00:25:07] EXPECTED: small: data-handler peak q 5219811 in (C + E - M_max, C + E] = (5210051, 5242880] and = n·M: 159.000 rounds to 159 — yes
+[2026-10-15 00:25:07] EXPECTED: small: refusals 1073 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (1073, 28403085576)} — yes
+[2026-10-15 00:25:07] EXPECTED: small: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+[2026-10-15 00:25:07] EXPECTED: small: live Mutation instances above idle 159, 159 within -4/+2 of n_s = 159, and within 3 of each other — yes
+[2026-10-15 00:25:07] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:25:08] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:25:09] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:25:11] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:25:12] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:25:14] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:25:15] small: truncate ok
+[2026-10-15 00:25:15] trace: 51893 acq/rel lines, 18040 hold lines, 0 other lines (first: [])
+[2026-10-15 00:25:15] END c4m: EXPECTED yes 41 no 0; R left running with this label; senders up
+p4 B writer S2: {"ok": true, "written": 1313, "succeeded": 1313, "failed": 0, "errors": [], "first_pk": 2320000000, "last_pk": 2320001312, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.034, "rows_per_s": 39.65, "t0_ms": 1792038185502, "stop_ms": 1792038215537, "elapsed_s": 33.12}
+p4 B writer S3: {"ok": true, "written": 1305, "succeeded": 1305, "failed": 0, "errors": [], "first_pk": 2330000000, "last_pk": 2330001304, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.003, "rows_per_s": 39.27, "t0_ms": 1792038185537, "stop_ms": 1792038215540, "elapsed_s": 33.253}
+p4 B writer S4: {"ok": true, "written": 1298, "succeeded": 1298, "failed": 0, "errors": [], "first_pk": 2340000000, "last_pk": 2340001297, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.005, "rows_per_s": 39.23, "t0_ms": 1792038185537, "stop_ms": 1792038215542, "elapsed_s": 33.103}
+p4 readings: M median 262205 min 262205 max 262205; data peak q {'/127.0.0.4:7010': 4981895, '/127.0.0.3:7010': 4981895, '/127.0.0.5:7010': 4981895, '/127.0.0.6:7010': 4981895} (max 4981895, 19.000 M); refusals 4377 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 792471 of 1048576; lease lines 4462; node total max 17829940 (trace rebuild; rel pairs out of event order 72; sampled from using_bytes 17567735); throttled delta {'S1': (1089, 31359362046), 'S2': (1090, 31607816900), 'S3': (1104, 31492147746), 'S4': (1094, 31407340235)}; hold lines 5218; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 147502632/199220840); pool above idle mean 13734026.666666666 max 14434304 drift 85196.79999999888; writes on R 5418 vs rows 5418; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (3835 ms after the last send)
+EXPECTED: p4: the hold fired (hold lines 5218 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+EXPECTED: p4: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262205 — yes
+EXPECTED: p4: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: p4: no write lost: writer failures A 0 B 0, R local writes 5418 = rows sent 5418, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: p4: each writing peer peaks in [floor(C/M)·M, C + E] = [3933075, 5242880]: {'S1': 4981895, 'S2': 4981895, 'S3': 4981895, 'S4': 4981895} — yes
+EXPECTED: p4: global reserve in use peaks in (G - M_max, G] = (786371, 1048576]: 792471 — yes
+EXPECTED: p4: the node total never exceeds P·C + G + 64 KiB = 17891328: 17829940; sum of peer peaks 19927580 >= P·floor(C/M)·M = 15732300 — yes
+EXPECTED: p4: refusals 4377 > 0 and every writing peer throttled {'S1': (1089, 31359362046), 'S2': (1090, 31607816900), 'S3': (1104, 31492147746), 'S4': (1094, 31407340235)} — yes
+p4: truncate ok
+==== arm c4m/small: P=1 W=256 payload=32768 hold=True C=4194304 E=1048576 G=1048576
+EXPECTED: small: no node holds a pending hint at the arm's start (none) — yes
+small control: 10578 ms; idle Mutation instances 0, [B bytes 32912528
+small A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 2400000000, "last_pk": 2400000199, "w": 1, "max_inflight": 1, "payload": 32768, "send_s": 8.99, "rows_per_s": 22.14, "t0_ms": 1792038256802, "stop_ms": 1792038265792, "elapsed_s": 9.037}
+small B writer S1: {"ok": true, "written": 4965, "succeeded": 4965, "failed": 0, "errors": [], "first_pk": 2410000000, "last_pk": 2410004964, "w": 256, "max_inflight": 256, "payload": 32768, "send_s": 30.0, "rows_per_s": 157.13, "t0_ms": 1792038267891, "stop_ms": 1792038297892, "elapsed_s": 31.602}
+small readings: M median 32829.0 min 32829 max 32829; data peak q {'/127.0.0.3:7010': 5219811} (max 5219811, 159.000 M); refusals 1073 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 1025507 of 1048576; lease lines 1156; node total max 5220288 (trace rebuild; rel pairs out of event order 503; sampled from using_bytes 5219811); throttled delta {'S1': (1073, 28403085576)}; hold lines 4965; MutationStage threads held 32/32; Mutation instances above idle 159/159 ([B 102110784/156639360); pool above idle mean 116599.46666666666 max 135168 drift -6963.200000000012; writes on R 5165 vs rows 5165; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (2211 ms after the last send)
+EXPECTED: small: the hold fired (hold lines 4965 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+EXPECTED: small: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 32829 <= M_max 32829 — yes
+EXPECTED: small: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: small: no write lost: writer failures A 0 B 0, R local writes 5165 = rows sent 5165, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: small: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (159, 159); predicted 159 — yes
+EXPECTED: small: data-handler peak q 5219811 in (C + E - M_max, C + E] = (5210051, 5242880] and = n·M: 159.000 rounds to 159 — yes
+EXPECTED: small: refusals 1073 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (1073, 28403085576)} — yes
+EXPECTED: small: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+EXPECTED: small: live Mutation instances above idle 159, 159 within -4/+2 of n_s = 159, and within 3 of each other — yes
+small: truncate ok
+trace: 51893 acq/rel lines, 18040 hold lines, 0 other lines (first: [])
+END c4m: EXPECTED yes 41 no 0; R left running with this label; senders up
+c4m rc=0 2026-10-15T00:25:15-04:00
+[2026-10-15 00:25:15] cluster-run c16m 2026-10-15 00:25:15 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:25:15] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:25:25] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh R 'internode_application_receive_queue_capacity=16MiB' 'internode_application_receive_queue_reserve_endpoint_capacity=1MiB' 'internode_application_receive_queue_reserve_global_capacity=1MiB'
+[2026-10-15 00:25:25] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+[2026-10-15 00:25:25] + bin/cassandra -p /users/jason92/stage4-rqc/R/cassandra.pid > /users/jason92/stage4-rqc/R/stdout3.txt 2>&1
+[2026-10-15 00:25:30] + bin/nodetool -p 7102 status
+[2026-10-15 00:25:31] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:25:35] + bin/nodetool -p 7102 status
+[2026-10-15 00:25:36] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:25:40] + bin/nodetool -p 7102 status
+[2026-10-15 00:25:41] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:25:45] + bin/nodetool -p 7102 status
+[2026-10-15 00:25:46] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:25:49] + bin/nodetool -p 7102 status
+[2026-10-15 00:25:51] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:25:52] R sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 22 s
+[2026-10-15 00:25:52] + bin/nodetool -p 7103 status
+[2026-10-15 00:25:54] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:25:55] S1 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:25:55] + bin/nodetool -p 7104 status
+[2026-10-15 00:25:57] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:25:58] S2 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:25:58] + bin/nodetool -p 7105 status
+[2026-10-15 00:25:59] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:26:01] S3 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:26:01] + bin/nodetool -p 7106 status
+[2026-10-15 00:26:02] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:26:04] S4 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:26:04] + java -cp /users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar:/users/jason92/cassandra-run1/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+[2026-10-15 00:26:04] Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+[2026-10-15 00:26:04] READ-BACK first acq: id=/127.0.0.5:7010->/127.0.0.2:7010-URGENT_MESSAGES-15c22231 cap=16777216 ep limit=1048576 gl limit=1048576
+[2026-10-15 00:26:04] EXPECTED: read-back: queueCapacity 16777216 = 16777216, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+[2026-10-15 00:26:04] ==== arm c16m/B: P=1 W=128 payload=262144 hold=True C=16777216 E=1048576 G=1048576
+[2026-10-15 00:26:04] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:26:05] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:26:07] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:26:08] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:26:09] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:26:11] EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:26:11] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:26:11] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:26:12] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:26:12] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:26:12] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:26:13] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c16m/B/vt-before.csv once
+[2026-10-15 00:26:24] + jcmd 471325 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c16m/B/histo-idle.txt
+[2026-10-15 00:26:24] B control: 10384 ms; idle Mutation instances 0, [B bytes 30172864
+[2026-10-15 00:26:24] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c16m/B/vt-preA.csv once
+[2026-10-15 00:26:25] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 3100000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c16m/B/keys-A.csv 200
+[2026-10-15 00:26:34] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c16m/B/vt-postA.csv once
+[2026-10-15 00:26:35] B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 3100000000, "last_pk": 3100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.936, "rows_per_s": 22.36, "t0_ms": 1792038385987, "stop_ms": 1792038394923, "elapsed_s": 8.948}
+[2026-10-15 00:26:36] B writers started at 1792038396535: ['S1']
+[2026-10-15 00:26:46] + jcmd 471325 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c16m/B/histo-b1.txt
+[2026-10-15 00:26:47] + jcmd 471325 Thread.print > /users/jason92/stage4-logs/rqc/run1/c16m/B/threads-b1.txt
+[2026-10-15 00:26:56] + jcmd 471325 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c16m/B/histo-b2.txt
+[2026-10-15 00:26:57] + jcmd 471325 Thread.print > /users/jason92/stage4-logs/rqc/run1/c16m/B/threads-b2.txt
+[2026-10-15 00:27:07] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c16m/B/vt-drain.csv once
+[2026-10-15 00:27:10] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:27:11] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:27:11] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:27:12] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:27:12] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:27:12] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c16m/B/vt-after.csv once
+[2026-10-15 00:27:13] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c16m/B/tpstats-after.txt
+[2026-10-15 00:27:15] B B writer S1: {"ok": true, "written": 4829, "succeeded": 4829, "failed": 0, "errors": [], "first_pk": 3110000000, "last_pk": 3110004828, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.032, "rows_per_s": 157.56, "t0_ms": 1792038397028, "stop_ms": 1792038427061, "elapsed_s": 30.652}
+[2026-10-15 00:27:15] B readings: M median 262206 min 262205 max 262206; data peak q {'/127.0.0.3:7010': 17567802} (max 17567802, 67.000 M); refusals 814 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 794554 of 1048576; lease lines 895; node total max 17568278 (trace rebuild; rel pairs out of event order 793; sampled from using_bytes 17567872); throttled delta {'S1': (814, 27224336218)}; hold lines 4829; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 145858672/196269712); pool above idle mean 13467654.4 max 14350336 drift -244326.40000000037; writes on R 5029 vs rows 5029; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1247 ms after the last send)
+[2026-10-15 00:27:15] EXPECTED: B: the hold fired (hold lines 4829 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+[2026-10-15 00:27:15] EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262206 — yes
+[2026-10-15 00:27:15] EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:27:15] EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 5029 = rows sent 5029, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:27:15] EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (67, 67); predicted 67 — yes
+[2026-10-15 00:27:15] EXPECTED: B: data-handler peak q 17567802 in (C + E - M_max, C + E] = (17563586, 17825792] and = n·M: 67.000 rounds to 67 — yes
+[2026-10-15 00:27:15] EXPECTED: B: refusals 814 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (814, 27224336218)} — yes
+[2026-10-15 00:27:15] EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+[2026-10-15 00:27:15] EXPECTED: B: live Mutation instances above idle 32, 32 within -3/+2 of min(n, 32) = 32, and within 3 of each other — yes
+[2026-10-15 00:27:15] EXPECTED: B: networking pool in use above idle, mean over B 13467654.4 within x2 of (n - 32)·M = 9177210 — yes
+[2026-10-15 00:27:15] EXPECTED: B: networking pool flat over B (last third - first third -244326.40000000037 < M 262206) — yes
+[2026-10-15 00:27:15] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:27:16] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:27:18] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:27:19] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:27:21] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:27:22] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:27:23] B: truncate ok
+[2026-10-15 00:27:23] trace: 12322 acq/rel lines, 4829 hold lines, 0 other lines (first: [])
+[2026-10-15 00:27:23] END c16m: EXPECTED yes 13 no 0; R left running with this label; senders up
+cluster-run c16m 2026-10-15 00:25:15 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.5:7010->/127.0.0.2:7010-URGENT_MESSAGES-15c22231 cap=16777216 ep limit=1048576 gl limit=1048576
+EXPECTED: read-back: queueCapacity 16777216 = 16777216, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+==== arm c16m/B: P=1 W=128 payload=262144 hold=True C=16777216 E=1048576 G=1048576
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10384 ms; idle Mutation instances 0, [B bytes 30172864
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 3100000000, "last_pk": 3100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.936, "rows_per_s": 22.36, "t0_ms": 1792038385987, "stop_ms": 1792038394923, "elapsed_s": 8.948}
+B B writer S1: {"ok": true, "written": 4829, "succeeded": 4829, "failed": 0, "errors": [], "first_pk": 3110000000, "last_pk": 3110004828, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.032, "rows_per_s": 157.56, "t0_ms": 1792038397028, "stop_ms": 1792038427061, "elapsed_s": 30.652}
+B readings: M median 262206 min 262205 max 262206; data peak q {'/127.0.0.3:7010': 17567802} (max 17567802, 67.000 M); refusals 814 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 794554 of 1048576; lease lines 895; node total max 17568278 (trace rebuild; rel pairs out of event order 793; sampled from using_bytes 17567872); throttled delta {'S1': (814, 27224336218)}; hold lines 4829; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 145858672/196269712); pool above idle mean 13467654.4 max 14350336 drift -244326.40000000037; writes on R 5029 vs rows 5029; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1247 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 4829 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262206 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 5029 = rows sent 5029, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (67, 67); predicted 67 — yes
+EXPECTED: B: data-handler peak q 17567802 in (C + E - M_max, C + E] = (17563586, 17825792] and = n·M: 67.000 rounds to 67 — yes
+EXPECTED: B: refusals 814 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (814, 27224336218)} — yes
+EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+EXPECTED: B: live Mutation instances above idle 32, 32 within -3/+2 of min(n, 32) = 32, and within 3 of each other — yes
+EXPECTED: B: networking pool in use above idle, mean over B 13467654.4 within x2 of (n - 32)·M = 9177210 — yes
+EXPECTED: B: networking pool flat over B (last third - first third -244326.40000000037 < M 262206) — yes
+B: truncate ok
+trace: 12322 acq/rel lines, 4829 hold lines, 0 other lines (first: [])
+END c16m: EXPECTED yes 13 no 0; R left running with this label; senders up
+c16m rc=0 2026-10-15T00:27:23-04:00
+[2026-10-15 00:27:23] cluster-run defres 2026-10-15 00:27:23 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:27:23] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:27:33] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh R 
+[2026-10-15 00:27:34] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;
+[2026-10-15 00:27:34] + bin/cassandra -p /users/jason92/stage4-rqc/R/cassandra.pid > /users/jason92/stage4-rqc/R/stdout4.txt 2>&1
+[2026-10-15 00:27:38] + bin/nodetool -p 7102 status
+[2026-10-15 00:27:39] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:27:43] + bin/nodetool -p 7102 status
+[2026-10-15 00:27:44] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:27:48] + bin/nodetool -p 7102 status
+[2026-10-15 00:27:49] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:27:53] + bin/nodetool -p 7102 status
+[2026-10-15 00:27:54] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:27:58] + bin/nodetool -p 7102 status
+[2026-10-15 00:27:59] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:28:00] R sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 23 s
+[2026-10-15 00:28:00] + bin/nodetool -p 7103 status
+[2026-10-15 00:28:02] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:28:03] S1 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:28:03] + bin/nodetool -p 7104 status
+[2026-10-15 00:28:05] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:28:06] S2 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:28:06] + bin/nodetool -p 7105 status
+[2026-10-15 00:28:08] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:28:09] S3 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:28:09] + bin/nodetool -p 7106 status
+[2026-10-15 00:28:11] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:28:12] S4 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:28:12] + java -cp /users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar:/users/jason92/cassandra-run1/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+[2026-10-15 00:28:12] Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+[2026-10-15 00:28:12] READ-BACK first acq: id=/127.0.0.3:7010->/127.0.0.2:7010-URGENT_MESSAGES-6eccb5e4 cap=4194304 ep limit=134217728 gl limit=536870912
+[2026-10-15 00:28:12] EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 134217728 = 134217728, global reserve 536870912 = 536870912 — yes
+[2026-10-15 00:28:12] ==== arm defres/B: P=1 W=128 payload=262144 hold=True C=4194304 E=134217728 G=536870912
+[2026-10-15 00:28:12] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:28:14] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:28:15] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:28:16] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:28:18] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:28:19] EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:28:19] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:28:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:28:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:28:21] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:28:21] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:28:21] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/defres/B/vt-before.csv once
+[2026-10-15 00:28:32] + jcmd 475634 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/defres/B/histo-idle.txt
+[2026-10-15 00:28:33] B control: 10386 ms; idle Mutation instances 0, [B bytes 30141440
+[2026-10-15 00:28:33] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/defres/B/vt-preA.csv once
+[2026-10-15 00:28:34] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 4100000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/defres/B/keys-A.csv 200
+[2026-10-15 00:28:42] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/defres/B/vt-postA.csv once
+[2026-10-15 00:28:43] B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 4100000000, "last_pk": 4100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.399, "rows_per_s": 23.79, "t0_ms": 1792038514516, "stop_ms": 1792038522915, "elapsed_s": 8.41}
+[2026-10-15 00:28:44] B writers started at 1792038524513: ['S1']
+[2026-10-15 00:28:54] + jcmd 475634 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/defres/B/histo-b1.txt
+[2026-10-15 00:28:55] + jcmd 475634 Thread.print > /users/jason92/stage4-logs/rqc/run1/defres/B/threads-b1.txt
+[2026-10-15 00:29:04] + jcmd 475634 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/defres/B/histo-b2.txt
+[2026-10-15 00:29:05] + jcmd 475634 Thread.print > /users/jason92/stage4-logs/rqc/run1/defres/B/threads-b2.txt
+[2026-10-15 00:29:15] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/defres/B/vt-drain.csv once
+[2026-10-15 00:29:18] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:29:19] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:29:19] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:29:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:29:20] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:29:20] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/defres/B/vt-after.csv once
+[2026-10-15 00:29:21] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/defres/B/tpstats-after.txt
+[2026-10-15 00:29:23] B B writer S1: {"ok": true, "written": 4832, "succeeded": 4832, "failed": 0, "errors": [], "first_pk": 4110000000, "last_pk": 4110004831, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.047, "rows_per_s": 157.57, "t0_ms": 1792038525002, "stop_ms": 1792038555049, "elapsed_s": 30.669}
+[2026-10-15 00:29:23] B readings: M median 262206.0 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 33562368} (max 33562368, 128.000 M); refusals 0 []; other handlers max q 521, refusals 0; global in use max 29368064 of 536870912; lease lines 81; node total max 33562843 (trace rebuild; rel pairs out of event order 870; sampled from using_bytes 33562368); throttled delta {'S1': (0, 0)}; hold lines 4832; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 147137224/195189912); pool above idle mean 30041848.774193548 max 35829760 drift -2652160.0; writes on R 5032 vs rows 5032; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1244 ms after the last send)
+[2026-10-15 00:29:23] EXPECTED: B: the hold fired (hold lines 4832 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+[2026-10-15 00:29:23] EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+[2026-10-15 00:29:23] EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:29:23] EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 5032 = rows sent 5032, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:29:23] EXPECTED: B: default reserves: no refusal (0), throttled delta 0 {'S1': (0, 0)}, data peak 33562368 in (C + 1 MiB, W·M_max] = (5242880, 33562368] — yes
+[2026-10-15 00:29:23] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:29:24] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:29:26] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:29:27] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:29:29] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:29:30] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:29:31] B: truncate ok
+[2026-10-15 00:29:31] trace: 11526 acq/rel lines, 4832 hold lines, 0 other lines (first: [])
+[2026-10-15 00:29:31] END defres: EXPECTED yes 7 no 0; R left running with this label; senders up
+cluster-run defres 2026-10-15 00:27:23 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.3:7010->/127.0.0.2:7010-URGENT_MESSAGES-6eccb5e4 cap=4194304 ep limit=134217728 gl limit=536870912
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 134217728 = 134217728, global reserve 536870912 = 536870912 — yes
+==== arm defres/B: P=1 W=128 payload=262144 hold=True C=4194304 E=134217728 G=536870912
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10386 ms; idle Mutation instances 0, [B bytes 30141440
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 4100000000, "last_pk": 4100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.399, "rows_per_s": 23.79, "t0_ms": 1792038514516, "stop_ms": 1792038522915, "elapsed_s": 8.41}
+B B writer S1: {"ok": true, "written": 4832, "succeeded": 4832, "failed": 0, "errors": [], "first_pk": 4110000000, "last_pk": 4110004831, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.047, "rows_per_s": 157.57, "t0_ms": 1792038525002, "stop_ms": 1792038555049, "elapsed_s": 30.669}
+B readings: M median 262206.0 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 33562368} (max 33562368, 128.000 M); refusals 0 []; other handlers max q 521, refusals 0; global in use max 29368064 of 536870912; lease lines 81; node total max 33562843 (trace rebuild; rel pairs out of event order 870; sampled from using_bytes 33562368); throttled delta {'S1': (0, 0)}; hold lines 4832; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 147137224/195189912); pool above idle mean 30041848.774193548 max 35829760 drift -2652160.0; writes on R 5032 vs rows 5032; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1244 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 4832 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 5032 = rows sent 5032, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: default reserves: no refusal (0), throttled delta 0 {'S1': (0, 0)}, data peak 33562368 in (C + 1 MiB, W·M_max] = (5242880, 33562368] — yes
+B: truncate ok
+trace: 11526 acq/rel lines, 4832 hold lines, 0 other lines (first: [])
+END defres: EXPECTED yes 7 no 0; R left running with this label; senders up
+defres rc=0 2026-10-15T00:29:31-04:00
+[2026-10-15 00:29:31] cluster-run c1m 2026-10-15 00:29:31 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:29:31] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:29:41] + /users/jason92/stage4-harness-run/rqc/make-node-yaml.sh R 'internode_application_receive_queue_capacity=1MiB' 'internode_application_receive_queue_reserve_endpoint_capacity=1MiB' 'internode_application_receive_queue_reserve_global_capacity=1MiB'
+[2026-10-15 00:29:41] # ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 1MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+[2026-10-15 00:29:41] + bin/cassandra -p /users/jason92/stage4-rqc/R/cassandra.pid > /users/jason92/stage4-rqc/R/stdout5.txt 2>&1
+[2026-10-15 00:29:46] + bin/nodetool -p 7102 status
+[2026-10-15 00:29:47] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:29:51] + bin/nodetool -p 7102 status
+[2026-10-15 00:29:52] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:29:55] + bin/nodetool -p 7102 status
+[2026-10-15 00:29:57] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:30:00] + bin/nodetool -p 7102 status
+[2026-10-15 00:30:02] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:30:05] + bin/nodetool -p 7102 status
+[2026-10-15 00:30:07] + bin/nodetool -p 7102 statusbinary
+[2026-10-15 00:30:08] R sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 22 s
+[2026-10-15 00:30:08] + bin/nodetool -p 7103 status
+[2026-10-15 00:30:10] + bin/nodetool -p 7103 statusbinary
+[2026-10-15 00:30:11] S1 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:30:11] + bin/nodetool -p 7104 status
+[2026-10-15 00:30:12] + bin/nodetool -p 7104 statusbinary
+[2026-10-15 00:30:14] S2 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:30:14] + bin/nodetool -p 7105 status
+[2026-10-15 00:30:15] + bin/nodetool -p 7105 statusbinary
+[2026-10-15 00:30:17] S3 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:30:17] + bin/nodetool -p 7106 status
+[2026-10-15 00:30:18] + bin/nodetool -p 7106 statusbinary
+[2026-10-15 00:30:20] S4 sees ['R', 'S1', 'S2', 'S3', 'S4'] UN after 3 s
+[2026-10-15 00:30:20] + java -cp /users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar:/users/jason92/cassandra-run1/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+[2026-10-15 00:30:20] Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+[2026-10-15 00:30:20] READ-BACK first acq: id=/127.0.0.4:7010->/127.0.0.2:7010-URGENT_MESSAGES-c5368003 cap=1048576 ep limit=1048576 gl limit=1048576
+[2026-10-15 00:30:20] EXPECTED: read-back: queueCapacity 1048576 = 1048576, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+[2026-10-15 00:30:20] ==== arm c1m/B: P=1 W=128 payload=262144 hold=True C=1048576 E=1048576 G=1048576
+[2026-10-15 00:30:20] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:30:21] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:30:22] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:30:24] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:30:25] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:30:27] EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:30:27] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:30:27] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:30:27] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:30:28] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:30:28] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:30:28] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/B/vt-before.csv once
+[2026-10-15 00:30:40] + jcmd 479938 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c1m/B/histo-idle.txt
+[2026-10-15 00:30:40] B control: 10390 ms; idle Mutation instances 0, [B bytes 30148080
+[2026-10-15 00:30:40] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/B/vt-preA.csv once
+[2026-10-15 00:30:41] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 1100000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c1m/B/keys-A.csv 200
+[2026-10-15 00:30:49] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/B/vt-postA.csv once
+[2026-10-15 00:30:50] B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 1100000000, "last_pk": 1100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 7.794, "rows_per_s": 25.63, "t0_ms": 1792038641757, "stop_ms": 1792038649551, "elapsed_s": 7.805}
+[2026-10-15 00:30:51] B writers started at 1792038651154: ['S1']
+[2026-10-15 00:31:01] + jcmd 479938 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c1m/B/histo-b1.txt
+[2026-10-15 00:31:01] + jcmd 479938 Thread.print > /users/jason92/stage4-logs/rqc/run1/c1m/B/threads-b1.txt
+[2026-10-15 00:31:11] + jcmd 479938 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c1m/B/histo-b2.txt
+[2026-10-15 00:31:11] + jcmd 479938 Thread.print > /users/jason92/stage4-logs/rqc/run1/c1m/B/threads-b2.txt
+[2026-10-15 00:31:25] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/B/vt-drain.csv once
+[2026-10-15 00:31:28] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:31:28] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:29] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:29] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:30] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:30] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/B/vt-after.csv once
+[2026-10-15 00:31:30] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c1m/B/tpstats-after.txt
+[2026-10-15 00:31:32] B B writer S1: {"ok": true, "written": 1150, "succeeded": 1150, "failed": 0, "errors": [], "first_pk": 1110000000, "last_pk": 1110001149, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.153, "rows_per_s": 34.02, "t0_ms": 1792038651640, "stop_ms": 1792038681793, "elapsed_s": 33.811}
+[2026-10-15 00:31:32] B readings: M median 262206 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 1835442} (max 1835442, 7.000 M); refusals 431 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786866 of 1048576; lease lines 518; node total max 1835935 (trace rebuild; rel pairs out of event order 18; sampled from using_bytes 1835442); throttled delta {'S1': (431, 32474083841)}; hold lines 1150; MutationStage threads held 7/7; Mutation instances above idle 7/7 ([B 173614296/84485664); pool above idle mean 148004.26666666666 max 536576 drift 36652.79999999999; writes on R 1350 vs rows 1350; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (4257 ms after the last send)
+[2026-10-15 00:31:32] EXPECTED: B: the hold fired (hold lines 1150 > 0, MutationStage threads in doVerb sleeping at b1 7 > 0) — yes
+[2026-10-15 00:31:32] EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+[2026-10-15 00:31:32] EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:31:32] EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 1350 = rows sent 1350, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:31:32] EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (7, 7); predicted 7 — yes
+[2026-10-15 00:31:32] EXPECTED: B: data-handler peak q 1835442 in (C + E - M_max, C + E] = (1834946, 2097152] and = n·M: 7.000 rounds to 7 — yes
+[2026-10-15 00:31:32] EXPECTED: B: refusals 431 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (431, 32474083841)} — yes
+[2026-10-15 00:31:32] EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+[2026-10-15 00:31:32] EXPECTED: B: live Mutation instances above idle 7, 7 within -3/+2 of min(n, 32) = 7, and within 3 of each other — yes
+[2026-10-15 00:31:32] EXPECTED: B: networking pool in use above idle, mean over B 148004.26666666666 below 2 MiB — yes
+[2026-10-15 00:31:32] EXPECTED: B: networking pool flat over B (last third - first third 36652.79999999999 < M 262206) — yes
+[2026-10-15 00:31:32] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:31:34] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:31:35] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:31:36] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:31:38] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:31:39] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:31:40] B: truncate ok
+[2026-10-15 00:31:40] ==== arm c1m/nohold: P=1 W=128 payload=262144 hold=False C=1048576 E=1048576 G=1048576
+[2026-10-15 00:31:40] + bin/nodetool -p 7102 listpendinghints
+[2026-10-15 00:31:42] + bin/nodetool -p 7103 listpendinghints
+[2026-10-15 00:31:43] + bin/nodetool -p 7104 listpendinghints
+[2026-10-15 00:31:45] + bin/nodetool -p 7105 listpendinghints
+[2026-10-15 00:31:46] + bin/nodetool -p 7106 listpendinghints
+[2026-10-15 00:31:47] EXPECTED: nohold: no node holds a pending hint at the arm's start (none) — yes
+[2026-10-15 00:31:47] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:31:48] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:48] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:48] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:49] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:31:49] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/nohold/vt-before.csv once
+[2026-10-15 00:32:00] + jcmd 479938 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c1m/nohold/histo-idle.txt
+[2026-10-15 00:32:01] nohold control: 10391 ms; idle Mutation instances 0, [B bytes 32860520
+[2026-10-15 00:32:01] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/nohold/vt-preA.csv once
+[2026-10-15 00:32:01] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py inflight 127.0.0.3 1200000000 1 120 262144 /users/jason92/stage4-logs/rqc/run1/c1m/nohold/keys-A.csv 200
+[2026-10-15 00:32:11] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/nohold/vt-postA.csv once
+[2026-10-15 00:32:11] nohold A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 1200000000, "last_pk": 1200000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.972, "rows_per_s": 22.17, "t0_ms": 1792038722174, "stop_ms": 1792038731147, "elapsed_s": 9.023}
+[2026-10-15 00:32:12] B writers started at 1792038732764: ['S1']
+[2026-10-15 00:32:22] + jcmd 479938 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c1m/nohold/histo-b1.txt
+[2026-10-15 00:32:23] + jcmd 479938 Thread.print > /users/jason92/stage4-logs/rqc/run1/c1m/nohold/threads-b1.txt
+[2026-10-15 00:32:32] + jcmd 479938 GC.class_histogram > /users/jason92/stage4-logs/rqc/run1/c1m/nohold/histo-b2.txt
+[2026-10-15 00:32:33] + jcmd 479938 Thread.print > /users/jason92/stage4-logs/rqc/run1/c1m/nohold/threads-b2.txt
+[2026-10-15 00:32:43] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/nohold/vt-drain.csv once
+[2026-10-15 00:32:46] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7102 'get' 'org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=WriteLatency' 'Count' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count'
+[2026-10-15 00:32:46] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7103 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:32:47] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7104 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:32:47] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7105 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:32:47] + java -cp /users/jason92/stage4-rqc/jmxcls Jmx 7106 'get' 'org.apache.cassandra.metrics:type=DroppedMessage,scope=MUTATION,name=Dropped' 'Count' 'org.apache.cassandra.metrics:type=Storage,name=TotalHints' 'Count'
+[2026-10-15 00:32:48] + python3 /users/jason92/stage4-harness-run/rqc/sample-inbound.py 127.0.0.2 1 /nonexistent /users/jason92/stage4-logs/rqc/run1/c1m/nohold/vt-after.csv once
+[2026-10-15 00:32:48] + bin/nodetool -p 7102 tpstats > /users/jason92/stage4-logs/rqc/run1/c1m/nohold/tpstats-after.txt
+[2026-10-15 00:32:50] nohold B writer S1: {"ok": true, "written": 13316, "succeeded": 13316, "failed": 0, "errors": [], "first_pk": 1210000000, "last_pk": 1210013315, "w": 128, "max_inflight": 75, "payload": 262144, "send_s": 30.002, "rows_per_s": 443.78, "t0_ms": 1792038733242, "stop_ms": 1792038763244, "elapsed_s": 30.008}
+[2026-10-15 00:32:51] nohold readings: M median 262206 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 1835442} (max 1835442, 7.000 M); refusals 3 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786866 of 1048576; lease lines 82; node total max 1835498 (trace rebuild; rel pairs out of event order 19; sampled from using_bytes 1573236); throttled delta {'S1': (3, 0)}; hold lines 0; MutationStage threads held 0/0; Mutation instances above idle 0/0 ([B 170209960/259295488); pool above idle mean 47988.57142857143 max 366688 drift -56856; writes on R 13516 vs rows 13516; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (573 ms after the last send)
+[2026-10-15 00:32:51] EXPECTED: nohold: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+[2026-10-15 00:32:51] EXPECTED: nohold: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+[2026-10-15 00:32:51] CONTROL (no 9a row): nohold: no write lost: writer failures A 0 B 0, R local writes 13516 = rows sent 13516, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+[2026-10-15 00:32:51] + bin/nodetool -p 7102 truncatehints
+[2026-10-15 00:32:52] + bin/nodetool -p 7103 truncatehints
+[2026-10-15 00:32:54] + bin/nodetool -p 7104 truncatehints
+[2026-10-15 00:32:55] + bin/nodetool -p 7105 truncatehints
+[2026-10-15 00:32:56] + bin/nodetool -p 7106 truncatehints
+[2026-10-15 00:32:58] + python3 /users/jason92/stage4-harness-run/rqc/write-load.py truncate 127.0.0.3
+[2026-10-15 00:32:59] nohold: truncate ok
+[2026-10-15 00:32:59] trace: 32820 acq/rel lines, 1150 hold lines, 0 other lines (first: [])
+[2026-10-15 00:32:59] END c1m: EXPECTED yes 16 no 0; R left running with this label; senders up
+cluster-run c1m 2026-10-15 00:29:31 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 1MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.4:7010->/127.0.0.2:7010-URGENT_MESSAGES-c5368003 cap=1048576 ep limit=1048576 gl limit=1048576
+EXPECTED: read-back: queueCapacity 1048576 = 1048576, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+==== arm c1m/B: P=1 W=128 payload=262144 hold=True C=1048576 E=1048576 G=1048576
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10390 ms; idle Mutation instances 0, [B bytes 30148080
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 1100000000, "last_pk": 1100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 7.794, "rows_per_s": 25.63, "t0_ms": 1792038641757, "stop_ms": 1792038649551, "elapsed_s": 7.805}
+B B writer S1: {"ok": true, "written": 1150, "succeeded": 1150, "failed": 0, "errors": [], "first_pk": 1110000000, "last_pk": 1110001149, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.153, "rows_per_s": 34.02, "t0_ms": 1792038651640, "stop_ms": 1792038681793, "elapsed_s": 33.811}
+B readings: M median 262206 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 1835442} (max 1835442, 7.000 M); refusals 431 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786866 of 1048576; lease lines 518; node total max 1835935 (trace rebuild; rel pairs out of event order 18; sampled from using_bytes 1835442); throttled delta {'S1': (431, 32474083841)}; hold lines 1150; MutationStage threads held 7/7; Mutation instances above idle 7/7 ([B 173614296/84485664); pool above idle mean 148004.26666666666 max 536576 drift 36652.79999999999; writes on R 1350 vs rows 1350; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (4257 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 1150 > 0, MutationStage threads in doVerb sleeping at b1 7 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 1350 = rows sent 1350, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (7, 7); predicted 7 — yes
+EXPECTED: B: data-handler peak q 1835442 in (C + E - M_max, C + E] = (1834946, 2097152] and = n·M: 7.000 rounds to 7 — yes
+EXPECTED: B: refusals 431 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (431, 32474083841)} — yes
+EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+EXPECTED: B: live Mutation instances above idle 7, 7 within -3/+2 of min(n, 32) = 7, and within 3 of each other — yes
+EXPECTED: B: networking pool in use above idle, mean over B 148004.26666666666 below 2 MiB — yes
+EXPECTED: B: networking pool flat over B (last third - first third 36652.79999999999 < M 262206) — yes
+B: truncate ok
+==== arm c1m/nohold: P=1 W=128 payload=262144 hold=False C=1048576 E=1048576 G=1048576
+EXPECTED: nohold: no node holds a pending hint at the arm's start (none) — yes
+nohold control: 10391 ms; idle Mutation instances 0, [B bytes 32860520
+nohold A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 1200000000, "last_pk": 1200000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.972, "rows_per_s": 22.17, "t0_ms": 1792038722174, "stop_ms": 1792038731147, "elapsed_s": 9.023}
+nohold B writer S1: {"ok": true, "written": 13316, "succeeded": 13316, "failed": 0, "errors": [], "first_pk": 1210000000, "last_pk": 1210013315, "w": 128, "max_inflight": 75, "payload": 262144, "send_s": 30.002, "rows_per_s": 443.78, "t0_ms": 1792038733242, "stop_ms": 1792038763244, "elapsed_s": 30.008}
+nohold readings: M median 262206 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 1835442} (max 1835442, 7.000 M); refusals 3 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786866 of 1048576; lease lines 82; node total max 1835498 (trace rebuild; rel pairs out of event order 19; sampled from using_bytes 1573236); throttled delta {'S1': (3, 0)}; hold lines 0; MutationStage threads held 0/0; Mutation instances above idle 0/0 ([B 170209960/259295488); pool above idle mean 47988.57142857143 max 366688 drift -56856; writes on R 13516 vs rows 13516; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (573 ms after the last send)
+EXPECTED: nohold: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+EXPECTED: nohold: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+CONTROL (no 9a row): nohold: no write lost: writer failures A 0 B 0, R local writes 13516 = rows sent 13516, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+nohold: truncate ok
+trace: 32820 acq/rel lines, 1150 hold lines, 0 other lines (first: [])
+END c1m: EXPECTED yes 16 no 0; R left running with this label; senders up
+c1m rc=0 2026-10-15T00:32:59-04:00
+[2026-10-15 00:32:59] cluster-run down 2026-10-15 00:32:59 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+[2026-10-15 00:32:59] + bin/nodetool -p 7106 stopdaemon
+[2026-10-15 00:33:09] + bin/nodetool -p 7105 stopdaemon
+[2026-10-15 00:33:22] + bin/nodetool -p 7104 stopdaemon
+[2026-10-15 00:33:35] + bin/nodetool -p 7103 stopdaemon
+[2026-10-15 00:33:48] + bin/nodetool -p 7102 stopdaemon
+[2026-10-15 00:34:01] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-15 00:34:01] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-15 00:34:01] down: no CassandraDaemon left
+[2026-10-15 00:34:01] + df -h /mnt/stage4-rqc | tail -1
+[2026-10-15 00:34:02] data tmpfs: tmpfs            48G  5.2M   48G   1% /mnt/stage4-rqc
+cluster-run down 2026-10-15 00:32:59 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+down: no CassandraDaemon left
+data tmpfs: tmpfs            48G  5.2M   48G   1% /mnt/stage4-rqc
+down rc=0
+chain end 2026-10-15T00:34:02-04:00

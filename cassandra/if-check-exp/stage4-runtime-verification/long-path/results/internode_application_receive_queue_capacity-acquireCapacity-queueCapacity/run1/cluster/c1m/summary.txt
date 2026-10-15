@@ -1,0 +1,35 @@
+cluster-run c1m 2026-10-15 00:29:31 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 1MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.4:7010->/127.0.0.2:7010-URGENT_MESSAGES-c5368003 cap=1048576 ep limit=1048576 gl limit=1048576
+EXPECTED: read-back: queueCapacity 1048576 = 1048576, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+==== arm c1m/B: P=1 W=128 payload=262144 hold=True C=1048576 E=1048576 G=1048576
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10390 ms; idle Mutation instances 0, [B bytes 30148080
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 1100000000, "last_pk": 1100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 7.794, "rows_per_s": 25.63, "t0_ms": 1792038641757, "stop_ms": 1792038649551, "elapsed_s": 7.805}
+B B writer S1: {"ok": true, "written": 1150, "succeeded": 1150, "failed": 0, "errors": [], "first_pk": 1110000000, "last_pk": 1110001149, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.153, "rows_per_s": 34.02, "t0_ms": 1792038651640, "stop_ms": 1792038681793, "elapsed_s": 33.811}
+B readings: M median 262206 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 1835442} (max 1835442, 7.000 M); refusals 431 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786866 of 1048576; lease lines 518; node total max 1835935 (trace rebuild; rel pairs out of event order 18; sampled from using_bytes 1835442); throttled delta {'S1': (431, 32474083841)}; hold lines 1150; MutationStage threads held 7/7; Mutation instances above idle 7/7 ([B 173614296/84485664); pool above idle mean 148004.26666666666 max 536576 drift 36652.79999999999; writes on R 1350 vs rows 1350; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (4257 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 1150 > 0, MutationStage threads in doVerb sleeping at b1 7 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 1350 = rows sent 1350, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (7, 7); predicted 7 — yes
+EXPECTED: B: data-handler peak q 1835442 in (C + E - M_max, C + E] = (1834946, 2097152] and = n·M: 7.000 rounds to 7 — yes
+EXPECTED: B: refusals 431 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (431, 32474083841)} — yes
+EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+EXPECTED: B: live Mutation instances above idle 7, 7 within -3/+2 of min(n, 32) = 7, and within 3 of each other — yes
+EXPECTED: B: networking pool in use above idle, mean over B 148004.26666666666 below 2 MiB — yes
+EXPECTED: B: networking pool flat over B (last third - first third 36652.79999999999 < M 262206) — yes
+B: truncate ok
+==== arm c1m/nohold: P=1 W=128 payload=262144 hold=False C=1048576 E=1048576 G=1048576
+EXPECTED: nohold: no node holds a pending hint at the arm's start (none) — yes
+nohold control: 10391 ms; idle Mutation instances 0, [B bytes 32860520
+nohold A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 1200000000, "last_pk": 1200000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.972, "rows_per_s": 22.17, "t0_ms": 1792038722174, "stop_ms": 1792038731147, "elapsed_s": 9.023}
+nohold B writer S1: {"ok": true, "written": 13316, "succeeded": 13316, "failed": 0, "errors": [], "first_pk": 1210000000, "last_pk": 1210013315, "w": 128, "max_inflight": 75, "payload": 262144, "send_s": 30.002, "rows_per_s": 443.78, "t0_ms": 1792038733242, "stop_ms": 1792038763244, "elapsed_s": 30.008}
+nohold readings: M median 262206 min 262206 max 262206; data peak q {'/127.0.0.3:7010': 1835442} (max 1835442, 7.000 M); refusals 3 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 786866 of 1048576; lease lines 82; node total max 1835498 (trace rebuild; rel pairs out of event order 19; sampled from using_bytes 1573236); throttled delta {'S1': (3, 0)}; hold lines 0; MutationStage threads held 0/0; Mutation instances above idle 0/0 ([B 170209960/259295488); pool above idle mean 47988.57142857143 max 366688 drift -56856; writes on R 13516 vs rows 13516; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (573 ms after the last send)
+EXPECTED: nohold: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262206 <= M_max 262206 — yes
+EXPECTED: nohold: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+CONTROL (no 9a row): nohold: no write lost: writer failures A 0 B 0, R local writes 13516 = rows sent 13516, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+nohold: truncate ok
+trace: 32820 acq/rel lines, 1150 hold lines, 0 other lines (first: [])
+END c1m: EXPECTED yes 16 no 0; R left running with this label; senders up

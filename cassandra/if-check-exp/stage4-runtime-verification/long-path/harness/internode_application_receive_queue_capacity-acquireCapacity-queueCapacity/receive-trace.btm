@@ -1,0 +1,33 @@
+# Byteman observation rules for internode_application_receive_queue_capacity-acquireCapacity-queueCapacity (case 9c/9d,
+# amended 2026-10-14). They change no behaviour. Every line goes to the file named by -Dstage4.trace (default rqc.trace):
+#
+#   acq id=<handler id: peer, self, connection type, channel> b=<bytes> out=<Outcome> q=<queueSize after>
+#       cap=<queueCapacity> ep=<endpoint reserve using>/<limit> gl=<global reserve using>/<limit> ms=<epoch ms>
+#     at the exit of AbstractMessageHandler.acquireCapacity(Limit, Limit, int), the method holding the check (:419).
+#     The two reserves are the ones passed in: on a reactivation one of them is the wait queue's lease (a Basic limit
+#     of the waiting message's size), not the configured reserve.
+#   rel id=<handler id> b=<bytes> q=<queueSize after> ms=<epoch ms>
+#     in AbstractMessageHandler.releaseCapacity(int) (every release: processed, expired, failed, aborted), right after its
+#     queueSizeUpdater.getAndAdd(this, -bytes), q = the returned old value - bytes: before the method releases the
+#     reserves and signals the wait queues, so an acquire that uses the freed room is always written after this line.
+#     (Corrected 2026-10-15 after shakedown 3: at the method's exit, a reactivated handler's acq line could precede it.)
+
+RULE rqc acquire exit
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD acquireCapacity(org.apache.cassandra.net.ResourceLimits$Limit, org.apache.cassandra.net.ResourceLimits$Limit, int)
+AT EXIT
+IF true
+DO traceOpen("rqc", java.lang.System.getProperty("stage4.trace", "rqc.trace"));
+   traceln("rqc", "acq id=" + $0.id() + " b=" + $3 + " out=" + $! + " q=" + $0.queueSize + " cap=" + $0.queueCapacity
+                  + " ep=" + $1.using() + "/" + $1.limit() + " gl=" + $2.using() + "/" + $2.limit()
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rqc release decrement
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD releaseCapacity(int)
+AFTER INVOKE java.util.concurrent.atomic.AtomicLongFieldUpdater.getAndAdd
+IF true
+DO traceOpen("rqc", java.lang.System.getProperty("stage4.trace", "rqc.trace"));
+   traceln("rqc", "rel id=" + $0.id() + " b=" + $1 + " q=" + ($! - $1) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

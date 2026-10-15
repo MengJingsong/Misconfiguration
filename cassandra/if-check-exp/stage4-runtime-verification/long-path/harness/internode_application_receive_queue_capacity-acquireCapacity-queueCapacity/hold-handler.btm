@@ -1,0 +1,16 @@
+# Byteman trigger for internode_application_receive_queue_capacity-acquireCapacity-queueCapacity (case 9c, amended
+# 2026-10-14). Loaded on R only. While the file named by -Dstage4.hold.file exists, each MUTATION_REQ's verb handler
+# sleeps -Dstage4.hold.ms (200) at its entry, as a slow disk would: the MutationStage thread keeps the message's
+# capacity (released only after the verb handler returns, InboundMessageHandler.java:427-442), so R accepts bytes faster
+# than it completes them. Without the file the rule does nothing (the idle control, scenario A, the no-hold control).
+# One "hold" line per held call goes to the trace file of receive-trace.btm.
+
+RULE rqc hold mutation verb handler
+CLASS org.apache.cassandra.db.MutationVerbHandler
+METHOD doVerb
+AT ENTRY
+IF (new java.io.File(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"))).exists()
+DO java.lang.Thread.sleep(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "200")));
+   traceOpen("rqc", java.lang.System.getProperty("stage4.trace", "rqc.trace"));
+   traceln("rqc", "hold thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

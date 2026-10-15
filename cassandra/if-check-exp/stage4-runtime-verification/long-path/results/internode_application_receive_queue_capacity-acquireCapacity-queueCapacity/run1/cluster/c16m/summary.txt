@@ -1,0 +1,25 @@
+cluster-run c16m 2026-10-15 00:25:15 -0400 run run1; harness md5 4f642943c643  hold-handler.btm; 8835ba357406  receive-trace.btm; 292b83e228e9  cluster-run.py; ce2aac20810d  sample-inbound.py; fc8ef3e07fe0  write-load.py; 490d3cfa6feb  AcquireCapacityTest.java; 2f18ec53c4d4  Jmx.java; 2dbaaba5c09a  ReceiveQueueWiringTest.java; 1978b2cec0fb  make-node-yaml.sh; 4c5bc56716e3  unit-run.sh; 
+# ---- stage4 rqc lines ----;cluster_name: stage4-rqc;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rqc/R/commitlog;hints_directory: /mnt/stage4-rqc/R/hints;saved_caches_directory: /mnt/stage4-rqc/R/saved_caches;cdc_raw_directory: /mnt/stage4-rqc/R/cdc_raw;write_request_timeout: 10000ms;auto_snapshot: false;internode_application_receive_queue_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 1MiB;internode_application_receive_queue_reserve_global_capacity: 1MiB;
+Submit -l: 3 rules: ['rqc acquire exit', 'rqc hold mutation verb handler', 'rqc release decrement']
+READ-BACK first acq: id=/127.0.0.5:7010->/127.0.0.2:7010-URGENT_MESSAGES-15c22231 cap=16777216 ep limit=1048576 gl limit=1048576
+EXPECTED: read-back: queueCapacity 16777216 = 16777216, endpoint reserve 1048576 = 1048576, global reserve 1048576 = 1048576 — yes
+==== arm c16m/B: P=1 W=128 payload=262144 hold=True C=16777216 E=1048576 G=1048576
+EXPECTED: B: no node holds a pending hint at the arm's start (none) — yes
+B control: 10384 ms; idle Mutation instances 0, [B bytes 30172864
+B A: {"ok": true, "written": 200, "succeeded": 200, "failed": 0, "errors": [], "first_pk": 3100000000, "last_pk": 3100000199, "w": 1, "max_inflight": 1, "payload": 262144, "send_s": 8.936, "rows_per_s": 22.36, "t0_ms": 1792038385987, "stop_ms": 1792038394923, "elapsed_s": 8.948}
+B B writer S1: {"ok": true, "written": 4829, "succeeded": 4829, "failed": 0, "errors": [], "first_pk": 3110000000, "last_pk": 3110004828, "w": 128, "max_inflight": 128, "payload": 262144, "send_s": 30.032, "rows_per_s": 157.56, "t0_ms": 1792038397028, "stop_ms": 1792038427061, "elapsed_s": 30.652}
+B readings: M median 262206 min 262205 max 262206; data peak q {'/127.0.0.3:7010': 17567802} (max 17567802, 67.000 M); refusals 814 ['INSUFFICIENT_GLOBAL']; other handlers max q 521, refusals 0; global in use max 794554 of 1048576; lease lines 895; node total max 17568278 (trace rebuild; rel pairs out of event order 793; sampled from using_bytes 17567872); throttled delta {'S1': (814, 27224336218)}; hold lines 4829; MutationStage threads held 32/32; Mutation instances above idle 32/32 ([B 145858672/196269712); pool above idle mean 13467654.4 max 14350336 drift -244326.40000000037; writes on R 5029 vs rows 5029; drops 0; expired 0; senders: dropped MUTATION 0, hints written 0; drained True (1247 ms after the last send)
+EXPECTED: B: the hold fired (hold lines 4829 > 0, MutationStage threads in doVerb sleeping at b1 32 > 0) — yes
+EXPECTED: B: A (one in flight, no hold) took no refusal (refusal lines 0, throttled delta 0) and its data peak 262205 <= M_max 262206 — yes
+EXPECTED: B: every SUCCESS line has q <= cap + E (violations 0); global in use <= its limit on every line (violations 0) — yes
+EXPECTED: B: no write lost: writer failures A 0 B 0, R local writes 5029 = rows sent 5029, dropped MUTATION on R 0, expired 0, senders dropped 0 and hinted 0, drained True — yes
+EXPECTED: B: n = floor((C + 1 MiB)/M) is the same for M_min and M_max (67, 67); predicted 67 — yes
+EXPECTED: B: data-handler peak q 17567802 in (C + E - M_max, C + E] = (17563586, 17825792] and = n·M: 67.000 rounds to 67 — yes
+EXPECTED: B: refusals 814 > 0, all INSUFFICIENT_GLOBAL (['INSUFFICIENT_GLOBAL']); throttled count and nanos rose {'S1': (814, 27224336218)} — yes
+EXPECTED: B: the other handlers stay at or below C (max q 521) and take no refusal (0) — yes
+EXPECTED: B: live Mutation instances above idle 32, 32 within -3/+2 of min(n, 32) = 32, and within 3 of each other — yes
+EXPECTED: B: networking pool in use above idle, mean over B 13467654.4 within x2 of (n - 32)·M = 9177210 — yes
+EXPECTED: B: networking pool flat over B (last third - first third -244326.40000000037 < M 262206) — yes
+B: truncate ok
+trace: 12322 acq/rel lines, 4829 hold lines, 0 other lines (first: [])
+END c16m: EXPECTED yes 13 no 0; R left running with this label; senders up
