@@ -253,6 +253,22 @@ The test drives hybrid vector queries with a known number of matching rows
 around the limit, at several limits, and reads the list's size at the check,
 the plan taken, and the keys held on the heap. **Run so far:** none.
 
+*Amended 2026-10-15 (stage-4 audit, before any reading; rec. numbers are those of the results file's §1).* (1) **`TotalPartitionReads`
+does not move for a top-k query:** only the plain `ResultRetriever.close()` calls `tableQueryMetrics.record(queryContext)`
+([`StorageAttachedIndexSearcher.java:520-524`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/StorageAttachedIndexSearcher.java#L520-L524)); `ScoreOrderedResultRetriever.close()` (`:828-831`) closes its
+iterator and records nothing. C2's partition reads are therefore read from the same field the metric would have summed,
+`queryContext.partitionsRead` (`:773`), printed by rule (7) at the retriever's `close()` as `reads=`; the prediction's numbers
+are unchanged. (2) **C2's far-matches data is built by rank, not as two antipodal clusters:** two tight clusters at *q* and −*q*
+are near-duplicate vectors under cosine similarity, and nothing guarantees the graph links them, so the resumed search
+(`AutoResumingNodeScoreIterator`, [`DiskAnn.java:117-120`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/disk/v1/vector/DiskAnn.java#L117-L120)) could end without reaching the matches, an outcome
+with no row. Instead every vector is drawn as for `ks.t` and `i` is the row's rank by cosine similarity to *q*, ascending
+(9b), so the *M* matches are exactly the *M* rows least similar to *q*; a conclusions row for a C2 query returning fewer than
+*k* rows is added. (3) **The `ann` line also marks the ANN-only control**, which enters the same
+`getTopKRows(QueryExpressionView)` ([`Operation.java:333-335`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/Operation.java#L333-L335)); "if and only if" applies to hybrid queries. (4) **The unit
+tier loads its rules with `-javaagent`** (as the `native_transport_receive_queue_capacity` harness), not `BMUnitRunner`: no SAI
+test uses the runner, and the rules call a static recorder in the test either way. (5) Hold point (c) is `AT NEW
+InMemoryUnfilteredPartitionIterator` in `takeTopKThenSortByPrimaryKey()`, whose only caller is the searcher (`:148`).
+
 ### 9a. Procedure and conclusions
 
 **Testability:** JVM system property, **restart-only** on a node
@@ -318,8 +334,8 @@ SSTable-derived key, from U2.
 - **List size at the check** (`mat` lines, 9d): *M* ≤ *L* → returned list of
   *M*; *M* > *L* → `null`, with exactly *L* + 1 keys in the list and `count` =
   *L* + 1 at the refusal. One `mat` line per query (one command per replica,
-  §5). The ANN-only control: no `mat` line.
-- **Plan:** the ANN-plan entry (`ann` line) and the trace event "WHERE clause
+  §5). The ANN-only control: no `mat` line (*amended 2026-10-15, rec. 3:* and one `ann` line, the same method).
+- **Plan:** on a hybrid query, the ANN-plan entry (`ann` line) and the trace event "WHERE clause
   generated more than *L* rows" appear **if and only if** the list is `null`;
   the list plan's entry (`hybrid size=<M>`) appears otherwise.
 - **Heap per key:** U2's slope *b* is between 120 and 200 B for `int`
@@ -341,7 +357,8 @@ SSTable-derived key, from U2.
 - **C2 (far-matches table, *N* = 50,000, the 16,001 rows with `i` ≤ 16,001
   pointing away from the query vector, query `i <= 16001 … LIMIT 10`):**
   at *L* = 1,000 and 16,000 (*M* > *L*): refusal; partition reads per query
-  (`TotalPartitionReads` change) at least 0.9 × (*N* − *M*) = 30,599 and at most
+  (*amended 2026-10-15, rec. 1:* `reads=`, the retriever's `queryContext.partitionsRead`, which `TotalPartitionReads` would sum
+  but does not record for top-k) at least 0.9 × (*N* − *M*) = 30,599 and at most
   *N*; `processed=` (which counts the accepted keys as well as the rejected ones, `:816`) equal to the partition reads within 10;
   held (*Q* = 8, at the end of the top-k loop) at least 0.9 × *Q* × 33,999 =
   244,792 live `SkinnyPrimaryKey`, above the *Q* × 16,001 = 128,008 the list plan
@@ -360,6 +377,7 @@ SSTable-derived key, from U2.
 | The held key count does not move with *L* while *M* > *L* | **Refuted** — not the binding limit; re-read §6a, do not re-run. |
 | The `mat` sizes follow *L* but the histogram's key count does not match *Q* × list size | **Refuted** for §7/§8 — the list is not what holds the keys (or they are not new objects); re-read the source of `source.next()`. |
 | A refusal with no `ann` line, or an `ann` line with no refusal | **Refuted** — the verdict is read elsewhere than traced (§5). |
+| *Added 2026-10-15 (rec. 2):* a C2 query on the ANN plan returns fewer than 10 rows (no error) | **Not confirmed** for §6b — the resumed search ended before reaching the matches; record `reads=` and the rows returned. |
 | C2 at *L* < *M* reads ≤ 20 rows per query | **Not confirmed** for §6b's retention claim — the ANN plan did not meet the far matches first; check the data's vectors (9c) before concluding. |
 | `pairs` capacities are near *M* / *S* rather than *M* | **Not confirmed** for §6a step 4's derived sizing (segments do not span the ring); the case's claim does not rest on it. Record it. |
 | A query returns a row with `i` > *M* | **Refuted** for the "same answer" claim of §6b. |
@@ -387,9 +405,12 @@ and U2 gives the bytes per key.
   `val` 8 floats drawn from a seeded normal distribution (independent of `i`).
   Rows inserted in a seeded random order and flushed after every 50,000, so
   *S* = 4 SSTables each spread over the ring.
-- `ks.far` (same schema), *N* = 50,000: rows with `i` ≤ 16,001 get `val` =
+- `ks.far` (same schema), *N* = 50,000: ~~rows with `i` ≤ 16,001 get `val` =
   −*q* + ε, the others *q* + ε, with *q* the query vector and ε small seeded
-  noise (|ε| ≤ 0.01 per component); one flush.
+  noise (|ε| ≤ 0.01 per component); one flush.~~ *Amended 2026-10-15 (rec. 2):* 50,000
+  vectors drawn as for `ks.t` (its own seed); `i` = `pk` = the vector's rank by cosine similarity to *q*, ascending
+  (`i` = 1 the least similar), so `i` ≤ 16,001 selects exactly the 16,001 rows farthest from *q*; inserted in a seeded
+  random order; one flush.
 
 **Hold fixed:**
 
@@ -420,12 +441,20 @@ Work for step 1, before run 1:
 
 | File | What it is |
 |---|---|
-| `MaterializedKeysLimitTest.java` | Unit tier, package `org.apache.cassandra.index.sai.cql`, extends `SAITester`, `@RunWith(BMUnitRunner.class)` with the rules below calling a static recorder in the test (as `StorageProxyTest` uses Byteman). Steps U1–U5 (9e). Not `VectorTester`: it is parameterized over `FORCE_BRUTE_FORCE_ANN`, which this test leaves `null`. |
-| `mat-trace.btm` | Byteman, observation only, on `org.apache.cassandra.index.sai.plan.QueryController`: (1) `materializeKeysAndCloseSource` AT ENTRY, first call: `limit=<MAX_MATERIALIZED_KEYS>`; (2) AT INVOKE `Tracing.trace` in that method: `mat refuse size=<$primaryKeys.size()> count=<$count> limit=<…>`; (3) AT EXIT: `mat exit returned=<null\|$!.size()>`; (4) `getTopKRows(QueryViewBuilder$QueryExpressionView)` AT ENTRY: `ann`; (5) `getTopKRows(java.util.List, QueryViewBuilder$QueryExpressionView)` AT ENTRY: `hybrid size=<$1.size()>`; (6) `SegmentRowIdOrdinalPairs.<init>` AT ENTRY: `pairs cap=<$1>`; (7) `StorageAttachedIndexSearcher$ScoreOrderedResultRetriever.close` AT ENTRY: `processed=<$0.processedKeys.size()>`. Locals are visible: the build compiles with `debuglevel="source,lines,vars"`. |
-| `hold.btm` | Byteman, loaded at start and gated by a flag file (as the `repair_session_space` harness): while `/tmp/mmk-hold` exists, sleep 15 s at (a) rule (2)'s point (refusal), (b) `materializeKeysAndCloseSource` AT EXIT (allowed lists), (c) AT INVOKE `InMemoryUnfilteredPartitionIterator.<init>` in `VectorTopKProcessor.takeTopKThenSortByPrimaryKey` ([`VectorTopKProcessor.java:183`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/VectorTopKProcessor.java#L183), C2: the retriever and its `processedKeys` are still open); each writes `hold start <point>` and `hold end`. A file per point selects it. |
+| `MaterializedKeysLimitTest.java` | Unit tier, package `org.apache.cassandra.index.sai.cql`, extends `SAITester`, ~~`@RunWith(BMUnitRunner.class)`~~ (*amended 2026-10-15, rec. 4:* the JVM loads `unit-trace.btm` with `-javaagent`) with the rules below calling a static recorder in the test. Steps U1–U5 (9e). Not `VectorTester`: it is parameterized over `FORCE_BRUTE_FORCE_ANN`, which this test leaves `null`. |
+| `mat-trace.btm` | Byteman, observation only, on `org.apache.cassandra.index.sai.plan.QueryController`: (1) `materializeKeysAndCloseSource` AT ENTRY, first call: `limit=<MAX_MATERIALIZED_KEYS>`; (2) AT INVOKE `Tracing.trace` in that method: `mat refuse size=<$primaryKeys.size()> count=<$count> limit=<…>`; (3) AT EXIT: `mat exit returned=<null\|$!.size()>`; (4) `getTopKRows(QueryViewBuilder$QueryExpressionView)` AT ENTRY: `ann`; (5) `getTopKRows(java.util.List, QueryViewBuilder$QueryExpressionView)` AT ENTRY: `hybrid size=<$1.size()>`; (6) `SegmentRowIdOrdinalPairs.<init>` AT ENTRY: `pairs cap=<$1>`; (7) `StorageAttachedIndexSearcher$ScoreOrderedResultRetriever.close` AT ENTRY: `processed=<$0.processedKeys.size()>` (*amended 2026-10-15, rec. 1:* and `reads=<$0.this$0.queryContext.partitionsRead>`). Locals are visible: the build compiles with `debuglevel="source,lines,vars"`. |
+| `hold.btm` | Byteman, loaded at start and gated by a flag file (as the `repair_session_space` harness): while `/tmp/mmk-hold` exists, sleep 15 s at (a) rule (2)'s point (refusal), (b) `materializeKeysAndCloseSource` AT EXIT (allowed lists), (c) AT INVOKE `InMemoryUnfilteredPartitionIterator.<init>` (*amended 2026-10-15, rec. 5:* `AT NEW`) in `VectorTopKProcessor.takeTopKThenSortByPrimaryKey` ([`VectorTopKProcessor.java:183`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/VectorTopKProcessor.java#L183), C2: the retriever and its `processedKeys` are still open); each writes `hold start <point>` and `hold end`. A file per point selects it. |
 | `load.py` | Creates the schema and loads `ks.t` and `ks.far` (9b) with the driver bundled with `cqlsh` (as earlier harnesses' `send-*.py`); seeds printed; flushes as 9b says. |
 | `query.py` | Runs one query or *Q* concurrent copies, at `ONE`, with a 200 s timeout; prints the rows, checks every `i` ≤ *M*, and with `--trace` prints the trace events. |
 | `cluster-run.py`, `unit-run.sh` | The scripted tiers with `EXPECTED:` lines in `summary.txt`; stop the node on any exit. |
+
+*Amended 2026-10-15 (unit shakedown 1, before run 1; §9a unchanged):* `MaterializedKeysLimitTest` extends `CQLTester`, not
+`SAITester`, whose `ResourceLeakDetector` attaches a second Byteman agent (`Injections.loadAgent()`) that fails to initialize in
+a JVM already running `unit-trace.btm`'s agent; and `VectorTypeTest` is parameterized (`VectorTester`), so `-Dtest.methods`
+matches nothing: the whole class runs and the three `testTooManyMaterializedKeys[…]` cases are read from its report. The cluster
+node runs with its own `CASSANDRA_CONF` and directories under `~/stage4-mmk` (`pc57` is shared with another session's node), and
+a helper jar `Mmk.java` on the boot class path gates the holds (Byteman 4.0.20 cannot parse `new` in a condition, as in the
+`repair_session_space` harness).
 
 ```bash
 # unit tier
@@ -446,7 +475,7 @@ python3 <harness>/query.py --table t --m <M> [--q 8] [--trace]      # per readin
 | **Disallow evidence** | `mat refuse` line, then `ann`; and on a `--trace` query the `system_traces.events` activity "WHERE clause generated more than *L* rows. Switching to ORDER BY then post filter." | Every query; trace once per (*L*, *M*) | The trace line is only written when the query is traced; the Byteman lines are the deciding evidence. |
 | **Plan evidence** | `hybrid size=<M>` (list plan) or `ann` (ANN plan) | Every query | — |
 | **Real resource, heap** | During a hold (after `hold start` for all 8 queries): `jmap -histo:live <pid> \| grep -E 'PrimaryKey\$Factory\$SkinnyPrimaryKey\|BufferDecoratedKey\|LongToken\|HeapByteBuffer\|^ *[0-9]+: .* \[B'`, minus the idle baseline | Once per held reading | `-histo:live` forces a full GC: once per reading. Memtable-derived keys are not new objects (flush first, 9b). |
-| **Disallow plan's work (C2)** | `TotalPartitionReads` on `org.apache.cassandra.metrics:type=StorageAttachedIndex,keyspace=ks,table=far,scope=TableQueryMetrics,name=TotalPartitionReads` (`Count`), before and after one query ([`TableQueryMetrics.java:52`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/metrics/TableQueryMetrics.java#L52), `:147`); `processed=` line | Each C2 query | The counter is recorded at the end of the query; read it after the client has its rows. |
+| **Disallow plan's work (C2)** | ~~`TotalPartitionReads` … before and after one query~~ *amended 2026-10-15, rec. 1:* the `reads=` and `processed=` fields of rule (7)'s line; `TotalPartitionReads` is read before and after as a recorded side reading (expected unchanged: top-k does not record it) | Each C2 query | — |
 | **Allow plan's arrays** | `pairs cap=` lines | Scenario A queries | One per segment searched; a memtable index adds none. |
 
 ### 9e. Running the scenarios
@@ -458,7 +487,7 @@ python3 <harness>/query.py --table t --m <M> [--q 8] [--trace]      # per readin
 2. **U2, heap per key:** *N* = 16,010, flushed. At the refusal for *L* = 100, 1,000, 4,000 (*M* = 4*L*), record `ObjectSizes.measureDeep($primaryKeys)` from rule (2). *b* = the slope between each pair of *L*; assert 120 ≤ *b* ≤ 200 and the three slopes within 2 %.
 3. **U3, the escape values:** on U2's table, *L* = 0 with *M* = 5: `refuse size=1`; *L* = `Integer.MAX_VALUE` with *M* = 16,000: `returned=16000`, no refusal.
 4. **U4, per-segment arrays:** *N* = 16,000 inserted in shuffled order, flushed after every 4,000 (*S* = 4), *L* = *M* = 4,000: four `pairs cap=` lines, each ≥ 3,950.
-5. **U5, the disallow plan's retention:** a far-matches table (*N* = 2,000; `i` ≤ 101 away from *q*), query `i <= 101 … LIMIT 3`: at *L* = 100, a refusal and `processed=` ≥ 0.9 × 1,899 = 1,709; at *L* = 1,000, no refusal and `processed=` ≤ 10 (the 3 accepted keys and any stale ones). Both return 3 rows with `i` ≤ 101.
+5. **U5, the disallow plan's retention:** a far-matches table (*N* = 2,000; `i` ≤ 101 the rows least similar to *q*, built by rank as `ks.far`, amended 2026-10-15), query `i <= 101 … LIMIT 3`: at *L* = 100, a refusal and `processed=` ≥ 0.9 × 1,899 = 1,709; at *L* = 1,000, no refusal and `processed=` ≤ 10 (the 3 accepted keys and any stale ones). Both return 3 rows with `i` ≤ 101.
 
 **Cluster tier** (one node on `pc57`, 9b; data loaded once).
 
@@ -466,7 +495,7 @@ python3 <harness>/query.py --table t --m <M> [--q 8] [--trace]      # per readin
 2. **Scenario A** — for each *L*: *M* = *L*, one query (record `mat`, `hybrid`, `pairs`), then *Q* = 8 held at the method's exit (hold point b): histogram.
 3. **Scenario B** — for each *L*: *M* = *L* + 1 (one traced query: `mat refuse`, `ann`, the trace event), then *M* = 4*L* (200,000 at *L* = 64,000), *Q* = 8 held at the refusal (hold point a): histogram.
 4. **Scenario C1** — restart at *L* = 0, then at 2,147,483,647: *M* = 5 and *M* = 200,000 respectively; for the latter, *Q* = 8 held at the exit: histogram.
-5. **Scenario C2** — on `ks.far`, at *L* = 1,000, 16,000 and 64,000 (in the same restarts as B): one query reading `TotalPartitionReads` before and after, then *Q* = 8 held at hold point c: histogram.
+5. **Scenario C2** — on `ks.far`, at *L* = 1,000, 16,000 and 64,000 (in the same restarts as B): one query (record `reads=`, `processed=`; `TotalPartitionReads` before and after as a side reading), then *Q* = 8 held at hold point c: histogram.
 
 **Record for stage 4:** the configuration in force, the exact commands, and the raw readings from 9d for every run.
 
@@ -477,8 +506,8 @@ python3 <harness>/query.py --table t --m <M> [--q 8] [--trace]      # per readin
 | **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly, and recorded in `pending.md` under the operand's name `MAX_MATERIALIZED_KEYS` (write-up queue item 8, "read it again (a or b); trace its constant"). Also surfaced by stage 1/2 as band-A row `QueryController.java:449#1` (`bands.md`, anchors). Written up 2026-10-14. |
 | **Filed by / Date** | Claude (AI long path), 2026-10-14. |
 | **Line numbers checked** | 2026-10-14, every cited line against the local clone at `cassandra-5.0.9` (`git describe --tags`). |
-| **Escape hatch / Target-3 note** | Three notes. (1) **The disallow branch is not bounded by the knob**: the ANN plan keeps every rejected key in `processedKeys`, up to *N* − *M* on data whose matches are far from the query vector, so lowering the limit can raise a query's heap (§6b, §8). (2) **Escape values**: *L* ≤ 0 always switches, `Integer.MAX_VALUE` never does; neither is rejected (§8). (3) **Memtable matches are collected before the check** (references only, §6b). |
-| **Stage-4 feedback** | none yet |
+| **Escape hatch / Target-3 note** | *Stage 4 (2026-10-15) observed (1) and (2): C2 held 245,256 keys at *L* < *M*; *L* = 0 made a 5-match query scan 115,401 rows and time out.* Three notes. (1) **The disallow branch is not bounded by the knob**: the ANN plan keeps every rejected key in `processedKeys`, up to *N* − *M* on data whose matches are far from the query vector, so lowering the limit can raise a query's heap (§6b, §8). (2) **Escape values**: *L* ≤ 0 always switches, `Integer.MAX_VALUE` never does; neither is rejected (§8). (3) **Memtable matches are collected before the check** (references only, §6b). |
+| **Stage-4 feedback** | **2026-10-15, long path run 1 on `pc57` — unit Confirmed; cluster Confirmed (§9a row 1), escape values and disallow retention as recorded; no run 2** ([results](../../../stage4-runtime-verification/long-path/results/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS.md)). Audit amendments before run 1 (§9 note, dated): C2 reads from `queryContext.partitionsRead` because `TotalPartitionReads` is never recorded for top-k queries; `ks.far` built by rank. Readings: every refusal at exactly *L* + 1 (unit *L* = 0 … 4,000; cluster 1,000 · 4,000 · 16,000 · 64,000), lists of *M* below it, plan switch and trace event only at refusals; 8 held queries hold 8*L* (allowed) and 8(*L* + 1) + 32 (refused) live `SkinnyPrimaryKey`, ≈ 152 B each (U2 *b* = 156 B); *L* = 2^31 − 1 holds 1,600,000; C2 at *L* = 1,000 and 16,000: 30,656 rows read and 245,256 keys held for 10 rows, against 10 reads at 64,000. **Beyond §9a (no row): at *L* = 0 a hybrid query matching 5 rows read 115,401 partitions and failed with `ReadTimeout` at the 120 s quota** — the escape value turns every selective hybrid query into a whole-replica scan (§8 "Escape values" understates it; Target-3 material). Missed sub-prediction: five-class bytes for B held at *L* = 1,000 / 4,000 (trace rows of the preceding traced query in the idle-to-held difference). Not predicted, recorded: the allow plan does **not** keep the list for the whole command — at the end of the top-k loop only 88 keys were live (§7 "Lifetime" and §6a's last paragraph overstate it). |
 | **Notes** | Renamed from the queue's `MAX_MATERIALIZED_KEYS` to the `CassandraRelevantProperties` constant it is read from (§4, "Name"). The queue's "(a) or (b)" question is settled as (a) with the caller's `null` test recorded as the plan switch (§5). The queue's phrase "forces a different query path" holds; the case adds that the path is not a refusal and that its own retention is unbounded by the limit. |
 
 ---

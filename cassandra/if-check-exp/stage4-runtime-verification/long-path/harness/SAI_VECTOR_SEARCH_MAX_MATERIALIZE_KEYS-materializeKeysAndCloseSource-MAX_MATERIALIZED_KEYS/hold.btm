@@ -1,0 +1,40 @@
+# Hold rules for SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS, case 9c "hold.btm"
+# (amended 2026-10-15). Loaded at start, inert unless a flag file exists; each point has its own file:
+#   /tmp/mmk-hold-a  (a) at the disallow branch's Tracing.trace call: the list holds L + 1 keys
+#   /tmp/mmk-hold-b  (b) at every non-null return of materializeKeysAndCloseSource(): an allowed list
+#   /tmp/mmk-hold-c  (c) AT NEW InMemoryUnfilteredPartitionIterator in VectorTopKProcessor.takeTopKThenSortByPrimaryKey(): the
+#                        top-k loop is done, the retriever (and its processedKeys) still open
+# The thread sleeps stage4.hold.ms (default 15000). Lines "hold start <p> ..." and "hold end <p> ..." go to stage4.mat.out.
+
+RULE mmk hold a refusal
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT INVOKE org.apache.cassandra.tracing.Tracing.trace
+IF stage4.Mmk.holding("a")
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "hold start a size=" + $primaryKeys.size() + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis());
+   delay(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "15000")));
+   traceln("mmk", "hold end a thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk hold b allowed list
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT EXIT
+IF $! != null && stage4.Mmk.holding("b")
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "hold start b size=" + $!.size() + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis());
+   delay(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "15000")));
+   traceln("mmk", "hold end b thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk hold c after top-k loop
+CLASS org.apache.cassandra.index.sai.plan.VectorTopKProcessor
+METHOD takeTopKThenSortByPrimaryKey
+AT NEW InMemoryUnfilteredPartitionIterator
+IF stage4.Mmk.holding("c")
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "hold start c thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis());
+   delay(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "15000")));
+   traceln("mmk", "hold end c thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

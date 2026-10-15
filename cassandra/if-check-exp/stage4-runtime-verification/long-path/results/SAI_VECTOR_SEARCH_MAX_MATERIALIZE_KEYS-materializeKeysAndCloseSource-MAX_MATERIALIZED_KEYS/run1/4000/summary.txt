@@ -1,0 +1,41 @@
+run run1 label 4000 (L = 4000) on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-15 03:34:42 EDT; epoch ms 1792049682724
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  Jmx.java;cb5984740809933e349f06f5a66cc9ac  MaterializedKeysLimitTest.java;92a1cf29f2dfadbde18df13784e66896  Mmk.java;9be36c0f59258d5e38a686ff633c2d4d  hold.btm;77dabca8a911bc9d67e490157f6593a5  mat-trace.btm;aec68d8e32bfab09ff3d93e668fb5a7d  unit-trace.btm;d6d75316b94b8b502c3202130ffa1943  cluster-run.py;7be0a31422b62419cf92d79e76cd2169  driver.py;01340f116f26558a5d4d96cbd3b25ae7  load.py;8c6739440e59861066c5c0d4a5783ffd  mmkdata.py;d019e79bbab85bb2bb8430c6070cfc6c  query.py;81debc35bef0d117d0d3a0ab8f9e46ac  histo.sh;78617b5b57d03d1ec6d3106c7b317961  make-node-yaml.sh;289d32caf9f4c6cfaaf1f7451a6262c3  unit-run.sh;
+yaml for run1-4000: | < read_request_timeout: 5000ms > read_request_timeout: 120000ms < range_request_timeout: 10000ms > range_request_timeout: 120000ms >  > # stage4 mmk run1-4000 > native_transport_timeout: 180000ms > data_file_directories: >     - /users/jason92/stage4-mmk/data > commitlog_directory: /users/jason92/stage4-mmk/commitlog > hints_directory: /users/jason92/stage4-mmk/hints > saved_caches_directory: /users/jason92/stage4-mmk/saved_caches > cdc_raw_directory: /users/jason92/stage4-mmk/cdc_raw
+JVM_EXTRA_OPTS=-Dcassandra.sai.vector_search.max_materialized_keys=4000 -Dstage4.mat.out=/users/jason92/stage4-logs/mmk/run1/4000/mat.trace -Dstage4.hold.ms=15000 -Xbootclasspath/a:/users/jason92/stage4-mmk/helper/mmk.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS/mat-trace.btm,script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS/hold.btm,listener:true
+node 582679: up
+VM.system_properties: cassandra.sai.vector_search.max_materialized_keys=4000 (set -Dcassandra.sai.vector_search.max_materialized_keys=4000)
+control ANN-only: client OK rows=10 bad=0 max_i=163985 err=None secs=0.43; lines: refuse=[] exit=[] ann=1 hybrid=[] pairs=[] processed=['processed=10 reads=10 thr=ReadStage-1 ms=1792049697581']
+EXPECTED: control: ANN-only query returns 10 rows with no mat line and one ann line — yes
+A single: client OK rows=10 bad=0 max_i=3764 err=None secs=0.16; lines: refuse=[] exit=['mat exit tbl=t returned=4000 thr=ReadStage-1 ms=1792049699218'] ann=0 hybrid=['hybrid tbl=t size=4000 thr=ReadStage-1 ms=1792049699222'] pairs=[4000, 4000, 4000, 4000] processed=['processed=24 reads=24 thr=ReadStage-1 ms=1792049699305']
+limit lines: ['limit=4000 thr=ReadStage-1 ms=1792049699188']
+EXPECTED: A single M=L: exactly one mat exit line (one command per query) — yes
+EXPECTED: A single M=L: 10 rows, each with i <= 4000 — yes
+EXPECTED: A single M=L: no refusal, returned = hybrid size = 4000, no ann line — yes
+EXPECTED: A single: 4 pairs lines, each cap >= 3950 (derived, §6a step 4) — yes
+histo idle: SkinnyPrimaryKey 20 (640 B); BufferDecoratedKey 83; LongToken 226; HeapByteBuffer 3877; [B 363614 / 32211816 B; heap used 103362 KB; jcmd 446 ms
+A held: 8 hold starts at point b after 0.8 s; hold ends before the histogram: 0
+histo A_held: SkinnyPrimaryKey 32020 (1024640 B); BufferDecoratedKey 32083; LongToken 32242; HeapByteBuffer 36029; [B 396079 / 32958432 B; heap used 125222 KB; jcmd 444 ms
+A held: hold ends by the end of the histogram: 0 (0 = all 8 still held)
+A held: client OK rows=[10, 10, 10, 10, 10, 10, 10, 10] bad=0 errs=[]; refuse sizes=[] exit returned=[4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000] ann=0 hybrid sizes=[4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000] processed=[24, 24, 24, 24, 24, 24, 24, 24] reads=[24, 24, 24, 24, 24, 24, 24, 24]
+A held: change from idle: SkinnyPrimaryKey +32000, BufferDecoratedKey +32000, LongToken +32016, HeapByteBuffer +32152, [B +32465; five-class bytes +4850296
+EXPECTED: A held: client OK (8 x 10 rows, i <= 4000) — yes
+EXPECTED: A held: 8 lists returned = 4000 — yes
+EXPECTED: A held: SkinnyPrimaryKey change +32000 = Q x L = 32000 within 1 % + 100 — yes
+EXPECTED: A held: BufferDecoratedKey change +32000 = Q x L = 32000 within 1 % + 100 — yes
+B traced: client OK rows=10 bad=0 max_i=3764 err=None secs=0.63; lines: refuse=['mat refuse tbl=t size=4001 count=4001 limit=4000 thr=ReadStage-1 ms=1792049718330'] exit=['mat exit tbl=t returned=null thr=ReadStage-1 ms=1792049718333'] ann=1 hybrid=[] pairs=[] processed=['processed=398 reads=398 thr=ReadStage-1 ms=1792049718593']
+B traced: trace events 1751; switch events: ['WHERE clause generated more than 4000 rows. Switching to ORDER BY then post filter.']
+EXPECTED: B traced M=L+1: exactly one mat exit line (one command per query) — yes
+EXPECTED: B traced M=L+1: 10 rows, each with i <= 4001 — yes
+EXPECTED: B traced M=L+1: refusal with size = count = 4001, returned null, one ann line, no hybrid line — yes
+EXPECTED: B traced: the trace event "WHERE clause generated more than 4000 rows" is present — yes
+B held: 8 hold starts at point a after 0.8 s; hold ends before the histogram: 0
+histo B_held: SkinnyPrimaryKey 32060 (1025920 B); BufferDecoratedKey 32125; LongToken 32300; HeapByteBuffer 46610; [B 397187 / 35106664 B; heap used 113671 KB; jcmd 434 ms
+B held: hold ends by the end of the histogram: 0 (0 = all 8 still held)
+B held: client OK rows=[10, 10, 10, 10, 10, 10, 10, 10] bad=0 errs=[]; refuse sizes=[4001, 4001, 4001, 4001, 4001, 4001, 4001, 4001] exit returned=[None, None, None, None, None, None, None, None] ann=8 hybrid sizes=[] processed=[74, 74, 74, 74, 74, 74, 74, 74] reads=[74, 74, 74, 74, 74, 74, 74, 74]
+B held: change from idle: SkinnyPrimaryKey +32040, BufferDecoratedKey +32042, LongToken +32074, HeapByteBuffer +42733, [B +33573; five-class bytes +7510096
+EXPECTED: B held: client OK (8 x 10 rows, i <= 16000) — yes
+EXPECTED: B held: 8 refusals with size 4001, 8 ann lines, no hybrid — yes
+EXPECTED: B held: SkinnyPrimaryKey change +32040 = Q x (L + 1) = 32008 within 1 % + 100 — yes
+EXPECTED: B held: BufferDecoratedKey change +32042 = Q x (L + 1) = 32008 within 1 % + 100 — yes
+node stopped; our pid 582679 alive: False; daemons on host: 0

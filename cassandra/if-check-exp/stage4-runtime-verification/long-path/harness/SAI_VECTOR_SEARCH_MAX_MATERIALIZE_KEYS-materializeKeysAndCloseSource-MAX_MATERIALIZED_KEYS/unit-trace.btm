@@ -1,0 +1,59 @@
+# Unit-tier rules for SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS (case 9c, amended
+# 2026-10-15, rec. 4): rules (2)-(7) of mat-trace.btm with the same line text, handed to MaterializedKeysLimitTest.rec() instead of a
+# file; at the refusal the list itself is also passed to MaterializedKeysLimitTest.measure() (U2). Loaded with -javaagent by unit-run.sh.
+
+RULE mmk unit refuse
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT INVOKE org.apache.cassandra.tracing.Tracing.trace
+IF true
+DO org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.rec("mat refuse tbl=" + $0.cfs.name + " size=" + $primaryKeys.size() + " count=" + $count
+           + " limit=" + org.apache.cassandra.index.sai.plan.QueryController.MAX_MATERIALIZED_KEYS
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis());
+   org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.measure($primaryKeys)
+ENDRULE
+
+RULE mmk unit exit
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT EXIT
+IF true
+DO org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.rec("mat exit tbl=" + $0.cfs.name + " returned=" + ($! == null ? "null" : java.lang.String.valueOf($!.size()))
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk unit ann plan
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD getTopKRows(org.apache.cassandra.index.sai.plan.QueryViewBuilder$QueryExpressionView)
+AT ENTRY
+IF true
+DO org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.rec("ann tbl=" + $0.cfs.name
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk unit list plan
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD getTopKRows(java.util.List, org.apache.cassandra.index.sai.plan.QueryViewBuilder$QueryExpressionView)
+AT ENTRY
+IF true
+DO org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.rec("hybrid tbl=" + $0.cfs.name + " size=" + $1.size()
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk unit pairs
+CLASS org.apache.cassandra.index.sai.disk.v1.vector.SegmentRowIdOrdinalPairs
+METHOD <init>(int)
+AT ENTRY
+IF true
+DO org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.rec("pairs cap=" + $1
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk unit retriever close
+CLASS org.apache.cassandra.index.sai.plan.StorageAttachedIndexSearcher$ScoreOrderedResultRetriever
+METHOD close
+AT ENTRY
+IF true
+DO org.apache.cassandra.index.sai.cql.MaterializedKeysLimitTest.rec("processed=" + $0.processedKeys.size() + " reads=" + $0.this$0.queryContext.partitionsRead
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

@@ -1,0 +1,84 @@
+# Observation rules for SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS, case 9c
+# "mat-trace.btm" (amended 2026-10-15). Observation only: no rule changes control flow. Every line goes to the file named by the
+# system property stage4.mat.out (default mat.trace in the JVM's working directory), with the thread and epoch millis:
+#   limit=<MAX_MATERIALIZED_KEYS>                                   first materializeKeysAndCloseSource() entry of the JVM   (1)
+#   mat refuse tbl=<t> size=<list size> count=<count> limit=<L>     at the Tracing.trace call of the disallow branch (:451)   (2)
+#   mat exit tbl=<t> returned=<null|size>                            every return of materializeKeysAndCloseSource()          (3)
+#   ann tbl=<t>                                                      getTopKRows(QueryExpressionView) entry: the ANN plan       (4)
+#   hybrid tbl=<t> size=<n>                                          getTopKRows(List, QueryExpressionView) entry: list plan   (5)
+#   pairs cap=<n>                                                    SegmentRowIdOrdinalPairs.<init>(int)                      (6)
+#   processed=<n> reads=<n>                                          ScoreOrderedResultRetriever.close(): processedKeys.size()
+#                                                                    and the outer searcher's queryContext.partitionsRead      (7)
+# Each line ends with " thr=<thread> ms=<epoch ms>".
+
+RULE mmk limit at first materialize
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT ENTRY
+IF NOT flagged("mmkLimitPrinted")
+DO flag("mmkLimitPrinted");
+   traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "limit=" + org.apache.cassandra.index.sai.plan.QueryController.MAX_MATERIALIZED_KEYS
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk refuse
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT INVOKE org.apache.cassandra.tracing.Tracing.trace
+IF true
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "mat refuse tbl=" + $0.cfs.name + " size=" + $primaryKeys.size() + " count=" + $count
+           + " limit=" + org.apache.cassandra.index.sai.plan.QueryController.MAX_MATERIALIZED_KEYS
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk exit
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD materializeKeysAndCloseSource
+AT EXIT
+IF true
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "mat exit tbl=" + $0.cfs.name + " returned=" + ($! == null ? "null" : java.lang.String.valueOf($!.size()))
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk ann plan
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD getTopKRows(org.apache.cassandra.index.sai.plan.QueryViewBuilder$QueryExpressionView)
+AT ENTRY
+IF true
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "ann tbl=" + $0.cfs.name
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk list plan
+CLASS org.apache.cassandra.index.sai.plan.QueryController
+METHOD getTopKRows(java.util.List, org.apache.cassandra.index.sai.plan.QueryViewBuilder$QueryExpressionView)
+AT ENTRY
+IF true
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "hybrid tbl=" + $0.cfs.name + " size=" + $1.size()
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk pairs
+CLASS org.apache.cassandra.index.sai.disk.v1.vector.SegmentRowIdOrdinalPairs
+METHOD <init>(int)
+AT ENTRY
+IF true
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "pairs cap=" + $1
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mmk retriever close
+CLASS org.apache.cassandra.index.sai.plan.StorageAttachedIndexSearcher$ScoreOrderedResultRetriever
+METHOD close
+AT ENTRY
+IF true
+DO traceOpen("mmk", java.lang.System.getProperty("stage4.mat.out", "mat.trace"));
+   traceln("mmk", "processed=" + $0.processedKeys.size() + " reads=" + $0.this$0.queryContext.partitionsRead
+           + " thr=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

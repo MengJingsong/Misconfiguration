@@ -1,0 +1,55 @@
+run run1 label 64000 (L = 64000) on node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu; 2026-10-15 03:38:34 EDT; epoch ms 1792049914778
+clone: b5f2a54210d541339c2e7c17a794195cac0e67c2 cassandra-5.0.9
+harness md5: 2f18ec53c4d427ffdbc72d30b6a11dbd  Jmx.java;cb5984740809933e349f06f5a66cc9ac  MaterializedKeysLimitTest.java;92a1cf29f2dfadbde18df13784e66896  Mmk.java;9be36c0f59258d5e38a686ff633c2d4d  hold.btm;77dabca8a911bc9d67e490157f6593a5  mat-trace.btm;aec68d8e32bfab09ff3d93e668fb5a7d  unit-trace.btm;d6d75316b94b8b502c3202130ffa1943  cluster-run.py;7be0a31422b62419cf92d79e76cd2169  driver.py;01340f116f26558a5d4d96cbd3b25ae7  load.py;8c6739440e59861066c5c0d4a5783ffd  mmkdata.py;d019e79bbab85bb2bb8430c6070cfc6c  query.py;81debc35bef0d117d0d3a0ab8f9e46ac  histo.sh;78617b5b57d03d1ec6d3106c7b317961  make-node-yaml.sh;289d32caf9f4c6cfaaf1f7451a6262c3  unit-run.sh;
+yaml for run1-64000: | < read_request_timeout: 5000ms > read_request_timeout: 120000ms < range_request_timeout: 10000ms > range_request_timeout: 120000ms >  > # stage4 mmk run1-64000 > native_transport_timeout: 180000ms > data_file_directories: >     - /users/jason92/stage4-mmk/data > commitlog_directory: /users/jason92/stage4-mmk/commitlog > hints_directory: /users/jason92/stage4-mmk/hints > saved_caches_directory: /users/jason92/stage4-mmk/saved_caches > cdc_raw_directory: /users/jason92/stage4-mmk/cdc_raw
+JVM_EXTRA_OPTS=-Dcassandra.sai.vector_search.max_materialized_keys=64000 -Dstage4.mat.out=/users/jason92/stage4-logs/mmk/run1/64000/mat.trace -Dstage4.hold.ms=15000 -Xbootclasspath/a:/users/jason92/stage4-mmk/helper/mmk.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS/mat-trace.btm,script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS/hold.btm,listener:true
+node 589064: up
+VM.system_properties: cassandra.sai.vector_search.max_materialized_keys=64000 (set -Dcassandra.sai.vector_search.max_materialized_keys=64000)
+control ANN-only: client OK rows=10 bad=0 max_i=163985 err=None secs=0.48; lines: refuse=[] exit=[] ann=1 hybrid=[] pairs=[] processed=['processed=10 reads=10 thr=ReadStage-1 ms=1792049929643']
+EXPECTED: control: ANN-only query returns 10 rows with no mat line and one ann line — yes
+A single: client OK rows=10 bad=0 max_i=55827 err=None secs=0.74; lines: refuse=[] exit=['mat exit tbl=t returned=64000 thr=ReadStage-1 ms=1792049931516'] ann=0 hybrid=['hybrid tbl=t size=64000 thr=ReadStage-1 ms=1792049931522'] pairs=[63999, 63999, 63996, 63997] processed=['processed=24 reads=24 thr=ReadStage-1 ms=1792049931973']
+limit lines: ['limit=64000 thr=ReadStage-1 ms=1792049931289']
+EXPECTED: A single M=L: exactly one mat exit line (one command per query) — yes
+EXPECTED: A single M=L: 10 rows, each with i <= 64000 — yes
+EXPECTED: A single M=L: no refusal, returned = hybrid size = 64000, no ann line — yes
+EXPECTED: A single: 4 pairs lines, each cap >= 63950 (derived, §6a step 4) — yes
+histo idle: SkinnyPrimaryKey 20 (640 B); BufferDecoratedKey 160; LongToken 293; HeapByteBuffer 4110; [B 363617 / 32210392 B; heap used 103378 KB; jcmd 491 ms
+A held: 8 hold starts at point b after 1.0 s; hold ends before the histogram: 0
+histo A_held: SkinnyPrimaryKey 512020 (16384640 B); BufferDecoratedKey 512160; LongToken 512309; HeapByteBuffer 516262; [B 876243 / 44481968 B; heap used 182243 KB; jcmd 523 ms
+A held: hold ends by the end of the histogram: 0 (0 = all 8 still held)
+A held: client OK rows=[10, 10, 10, 10, 10, 10, 10, 10] bad=0 errs=[]; refuse sizes=[] exit returned=[64000, 64000, 64000, 64000, 64000, 64000, 64000, 64000] ann=0 hybrid sizes=[64000, 64000, 64000, 64000, 64000, 64000, 64000, 64000] processed=[24, 24, 24, 24, 24, 24, 24, 24] reads=[24, 24, 24, 24, 24, 24, 24, 24]
+A held: change from idle: SkinnyPrimaryKey +512000, BufferDecoratedKey +512000, LongToken +512016, HeapByteBuffer +512152, [B +512626; five-class bytes +77815256
+EXPECTED: A held: client OK (8 x 10 rows, i <= 64000) — yes
+EXPECTED: A held: 8 lists returned = 64000 — yes
+EXPECTED: A held: SkinnyPrimaryKey change +512000 = Q x L = 512000 within 1 % + 100 — yes
+EXPECTED: A held: BufferDecoratedKey change +512000 = Q x L = 512000 within 1 % + 100 — yes
+B traced: client OK rows=10 bad=0 max_i=55827 err=None secs=0.16; lines: refuse=['mat refuse tbl=t size=64001 count=64001 limit=64000 thr=ReadStage-1 ms=1792049951598'] exit=['mat exit tbl=t returned=null thr=ReadStage-1 ms=1792049951602'] ann=1 hybrid=[] pairs=[] processed=['processed=32 reads=32 thr=ReadStage-1 ms=1792049951636']
+B traced: trace events 164; switch events: ['WHERE clause generated more than 64000 rows. Switching to ORDER BY then post filter.']
+EXPECTED: B traced M=L+1: exactly one mat exit line (one command per query) — yes
+EXPECTED: B traced M=L+1: 10 rows, each with i <= 64001 — yes
+EXPECTED: B traced M=L+1: refusal with size = count = 64001, returned null, one ann line, no hybrid line — yes
+EXPECTED: B traced: the trace event "WHERE clause generated more than 64000 rows" is present — yes
+B held: 8 hold starts at point a after 0.8 s; hold ends before the histogram: 0
+histo B_held: SkinnyPrimaryKey 512060 (16385920 B); BufferDecoratedKey 512202; LongToken 512349; HeapByteBuffer 517303; [B 876558 / 46600984 B; heap used 169899 KB; jcmd 561 ms
+B held: hold ends by the end of the histogram: 0 (0 = all 8 still held)
+B held: client OK rows=[10, 10, 10, 10, 10, 10, 10, 10] bad=0 errs=[]; refuse sizes=[64001, 64001, 64001, 64001, 64001, 64001, 64001, 64001] exit returned=[None, None, None, None, None, None, None, None] ann=8 hybrid sizes=[] processed=[10, 10, 10, 10, 10, 10, 10, 10] reads=[10, 10, 10, 10, 10, 10, 10, 10]
+B held: change from idle: SkinnyPrimaryKey +512040, BufferDecoratedKey +512042, LongToken +512056, HeapByteBuffer +513193, [B +512941; five-class bytes +79987488
+EXPECTED: B held: client OK (8 x 10 rows, i <= 200000) — yes
+EXPECTED: B held: 8 refusals with size 64001, 8 ann lines, no hybrid — yes
+EXPECTED: B held: SkinnyPrimaryKey change +512040 = Q x (L + 1) = 512008 within 1 % + 100 — yes
+EXPECTED: B held: BufferDecoratedKey change +512042 = Q x (L + 1) = 512008 within 1 % + 100 — yes
+C2 single: client OK rows=10 bad=0 max_i=15974 err=None secs=0.05; lines: refuse=[] exit=['mat exit tbl=far returned=16001 thr=ReadStage-1 ms=1792049970411'] ann=0 hybrid=['hybrid tbl=far size=16001 thr=ReadStage-1 ms=1792049970411'] pairs=[16001] processed=['processed=10 reads=10 thr=ReadStage-1 ms=1792049970440']
+C2 single: TotalPartitionReads (side reading) before 0 after 0
+EXPECTED: C2 single: 10 rows, each with i <= 16001 — yes
+EXPECTED: C2 single L=64000: exactly one mat exit line (one command per query) — yes
+EXPECTED: C2 single L=64000: 10 rows, each with i <= 16001 — yes
+EXPECTED: C2 single L=64000: no refusal, returned = hybrid size = 16001, no ann line — yes
+EXPECTED: C2 single: reads=10 <= 20 — yes
+C2 held: 8 hold starts at point c after 0.8 s; hold ends before the histogram: 0
+histo C2_held: SkinnyPrimaryKey 108 (3456 B); BufferDecoratedKey 258; LongToken 405; HeapByteBuffer 10145; [B 462011 / 39179344 B; heap used 104963 KB; jcmd 441 ms
+C2 held: hold ends by the end of the histogram: 0 (0 = all 8 still held)
+C2 held: client OK rows=[10, 10, 10, 10, 10, 10, 10, 10] bad=0 errs=[]; refuse sizes=[] exit returned=[16001, 16001, 16001, 16001, 16001, 16001, 16001, 16001] ann=0 hybrid sizes=[16001, 16001, 16001, 16001, 16001, 16001, 16001, 16001] processed=[10, 10, 10, 10, 10, 10, 10, 10] reads=[10, 10, 10, 10, 10, 10, 10, 10]
+C2 held: change from idle: SkinnyPrimaryKey +88, BufferDecoratedKey +98, LongToken +112, HeapByteBuffer +6035, [B +98394; five-class bytes +7266488
+EXPECTED: C2 held: client OK (8 x 10 rows, i <= 16001) — yes
+C2 held at L=64000 (list plan): SkinnyPrimaryKey change +88 (recorded; 9a predicts no refusal and <= 20 reads only)
+node stopped; our pid 589064 alive: False; daemons on host: 0

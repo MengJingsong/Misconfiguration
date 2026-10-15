@@ -1,0 +1,156 @@
+ok   unit U1 memtable L=100 M=100: allow, list = M  refuse=[] exit=['100'] ann=0 hybrid=[100]
+ok   unit U1 memtable L=100 M=101: refuse at L + 1, then ANN plan  refuse=[101] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 memtable L=100 M=400: refuse at L + 1, then ANN plan  refuse=[101] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 memtable L=100 M=99: allow, list = M  refuse=[] exit=['99'] ann=0 hybrid=[99]
+ok   unit U1 sstable L=10 M=10: allow, list = M  refuse=[] exit=['10'] ann=0 hybrid=[10]
+ok   unit U1 sstable L=10 M=11: refuse at L + 1, then ANN plan  refuse=[11] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 sstable L=10 M=40: refuse at L + 1, then ANN plan  refuse=[11] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 sstable L=10 M=9: allow, list = M  refuse=[] exit=['9'] ann=0 hybrid=[9]
+ok   unit U1 sstable L=100 M=100: allow, list = M  refuse=[] exit=['100'] ann=0 hybrid=[100]
+ok   unit U1 sstable L=100 M=101: refuse at L + 1, then ANN plan  refuse=[101] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 sstable L=100 M=400: refuse at L + 1, then ANN plan  refuse=[101] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 sstable L=100 M=99: allow, list = M  refuse=[] exit=['99'] ann=0 hybrid=[99]
+ok   unit U1 sstable L=1000 M=1000: allow, list = M  refuse=[] exit=['1000'] ann=0 hybrid=[1000]
+ok   unit U1 sstable L=1000 M=1001: refuse at L + 1, then ANN plan  refuse=[1001] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 sstable L=1000 M=4000: refuse at L + 1, then ANN plan  refuse=[1001] exit=['null'] ann=1 hybrid=[]
+ok   unit U1 sstable L=1000 M=999: allow, list = M  refuse=[] exit=['999'] ann=0 hybrid=[999]
+ok   unit U2: every slope b in 120..200 B/key  b=[157.0, 155.91, 156.16]
+ok   unit U2: slopes within 2 %  ratio=1.0070
+ok   1000: JVM property  ['-Dcassandra.sai.vector_search.max_materialized_keys=1000']
+ok   1000: VM.system_properties read-back  cassandra.sai.vector_search.max_materialized_keys=1000
+ok   1000: one start-up limit line = 1000  ['limit=1000 thr=ReadStage-1 ms=1792049531910']
+ok   1000 control: ANN-only, 10 rows, no mat line, one ann  exit=0 ann=1
+ok   1000: idle histogram SkinnyPrimaryKey small  (20, 640)
+ok   1000 A single: rows i <= 1000  
+ok   1000 A single M=1000: 1 list(s) of 1000, hybrid size 1000, no refusal, no ann  exit=[1000] hybrid=[1000] ann=0
+ok   1000 A single: 4 pairs caps >= 950  caps=[1000, 1000, 1000, 1000]
+ok   1000 A held: 8 x rows  
+ok   1000 A held: 8 list(s) of 1000, hybrid size 1000, no refusal, no ann  exit=[1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000] hybrid=[1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000] ann=0
+ok   1000 A_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=442 ms
+ok   1000 A held: SkinnyPrimaryKey change = Q x L = 8000  +8000
+ok   1000 A held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +1200280 B / 8000 keys = 150.0 B/key
+ok   1000 A held: BufferDecoratedKey change = Q x L  +8000
+ok   1000 B traced: rows i <= 1001  
+ok   1000 B traced M=1001: 1 refusal(s) at size = count = 1001, list null, 1 ann, no hybrid  refuse=[1001] exit=1 ann=1 hybrid=0
+ok   1000 B traced: trace event names L  
+ok   1000 B held: 8 x rows i <= 4000  
+ok   1000 B held: 8 refusal(s) at size = count = 1001, list null, 8 ann, no hybrid  refuse=[1001, 1001, 1001, 1001, 1001, 1001, 1001, 1001] exit=8 ann=8 hybrid=0
+ok   1000 B_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=442 ms
+ok   1000 B held: SkinnyPrimaryKey change = Q x (L + 1) = 8008  +8040
+ok   1000 B held: BufferDecoratedKey change = Q x (L + 1)  +8042
+FAIL 1000 B held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +5085528 B / 8040 keys = 632.5 B/key
+ok   1000 C2 single: 10 rows, i <= 16001  
+ok   1000 C2 single: 1 refusal(s) at size = count = 1001, list null, 1 ann, no hybrid  refuse=[1001] exit=1 ann=1 hybrid=0
+ok   1000 C2 single: reads in [0.9 (N - M), N] = [30599, 50000]  reads=30656
+ok   1000 C2 single: processed = reads within 10  processed=30656
+ok   1000 C2 held: 8 x rows  
+ok   1000 C2_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=561 ms
+ok   1000 C2 held: SkinnyPrimaryKey change >= 0.9 Q (N - M) = 244792 and > Q M  +245256
+ok   1000: every client call consumed  left=0
+ok   4000: JVM property  ['-Dcassandra.sai.vector_search.max_materialized_keys=4000']
+ok   4000: VM.system_properties read-back  cassandra.sai.vector_search.max_materialized_keys=4000
+ok   4000: one start-up limit line = 4000  ['limit=4000 thr=ReadStage-1 ms=1792049699188']
+ok   4000 control: ANN-only, 10 rows, no mat line, one ann  exit=0 ann=1
+ok   4000: idle histogram SkinnyPrimaryKey small  (20, 640)
+ok   4000 A single: rows i <= 4000  
+ok   4000 A single M=4000: 1 list(s) of 4000, hybrid size 4000, no refusal, no ann  exit=[4000] hybrid=[4000] ann=0
+ok   4000 A single: 4 pairs caps >= 3950  caps=[4000, 4000, 4000, 4000]
+ok   4000 A held: 8 x rows  
+ok   4000 A held: 8 list(s) of 4000, hybrid size 4000, no refusal, no ann  exit=[4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000] hybrid=[4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000] ann=0
+ok   4000 A_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=606 ms
+ok   4000 A held: SkinnyPrimaryKey change = Q x L = 32000  +32000
+ok   4000 A held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +4850296 B / 32000 keys = 151.6 B/key
+ok   4000 A held: BufferDecoratedKey change = Q x L  +32000
+ok   4000 B traced: rows i <= 4001  
+ok   4000 B traced M=4001: 1 refusal(s) at size = count = 4001, list null, 1 ann, no hybrid  refuse=[4001] exit=1 ann=1 hybrid=0
+ok   4000 B traced: trace event names L  
+ok   4000 B held: 8 x rows i <= 16000  
+ok   4000 B held: 8 refusal(s) at size = count = 4001, list null, 8 ann, no hybrid  refuse=[4001, 4001, 4001, 4001, 4001, 4001, 4001, 4001] exit=8 ann=8 hybrid=0
+ok   4000 B_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=609 ms
+ok   4000 B held: SkinnyPrimaryKey change = Q x (L + 1) = 32008  +32040
+ok   4000 B held: BufferDecoratedKey change = Q x (L + 1)  +32042
+FAIL 4000 B held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +7510096 B / 32040 keys = 234.4 B/key
+ok   4000: every client call consumed  left=0
+ok   default: JVM property  []
+ok   default: VM.system_properties read-back  absent
+ok   default: one start-up limit line = 16000  ['limit=16000 thr=ReadStage-8 ms=1792049763825']
+ok   default control: ANN-only, 10 rows, no mat line, one ann  exit=0 ann=1
+ok   default: idle histogram SkinnyPrimaryKey small  (20, 640)
+ok   default A single: rows i <= 16000  
+ok   default A single M=16000: 1 list(s) of 16000, hybrid size 16000, no refusal, no ann  exit=[16000] hybrid=[16000] ann=0
+ok   default A single: 4 pairs caps >= 15950  caps=[16000, 15999, 15999, 15999]
+ok   default A held: 8 x rows  
+ok   default A held: 8 list(s) of 16000, hybrid size 16000, no refusal, no ann  exit=[16000, 16000, 16000, 16000, 16000, 16000, 16000, 16000] hybrid=[16000, 16000, 16000, 16000, 16000, 16000, 16000, 16000] ann=0
+ok   default A_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=522 ms
+ok   default A held: SkinnyPrimaryKey change = Q x L = 128000  +128000
+ok   default A held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +19446648 B / 128000 keys = 151.9 B/key
+ok   default A held: BufferDecoratedKey change = Q x L  +128000
+ok   default B traced: rows i <= 16001  
+ok   default B traced M=16001: 1 refusal(s) at size = count = 16001, list null, 1 ann, no hybrid  refuse=[16001] exit=1 ann=1 hybrid=0
+ok   default B traced: trace event names L  
+ok   default B held: 8 x rows i <= 64000  
+ok   default B held: 8 refusal(s) at size = count = 16001, list null, 8 ann, no hybrid  refuse=[16001, 16001, 16001, 16001, 16001, 16001, 16001, 16001] exit=8 ann=8 hybrid=0
+ok   default B_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=649 ms
+ok   default B held: SkinnyPrimaryKey change = Q x (L + 1) = 128008  +128040
+ok   default B held: BufferDecoratedKey change = Q x (L + 1)  +128042
+ok   default B held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +21681376 B / 128040 keys = 169.3 B/key
+ok   default C2 single: 10 rows, i <= 16001  
+ok   default C2 single: 1 refusal(s) at size = count = 16001, list null, 1 ann, no hybrid  refuse=[16001] exit=1 ann=1 hybrid=0
+ok   default C2 single: reads in [0.9 (N - M), N] = [30599, 50000]  reads=30656
+ok   default C2 single: processed = reads within 10  processed=30656
+ok   default C2 held: 8 x rows  
+ok   default C2_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=623 ms
+ok   default C2 held: SkinnyPrimaryKey change >= 0.9 Q (N - M) = 244792 and > Q M  +245256
+ok   default: every client call consumed  left=0
+ok   64000: JVM property  ['-Dcassandra.sai.vector_search.max_materialized_keys=64000']
+ok   64000: VM.system_properties read-back  cassandra.sai.vector_search.max_materialized_keys=64000
+ok   64000: one start-up limit line = 64000  ['limit=64000 thr=ReadStage-1 ms=1792049931289']
+ok   64000 control: ANN-only, 10 rows, no mat line, one ann  exit=0 ann=1
+ok   64000: idle histogram SkinnyPrimaryKey small  (20, 640)
+ok   64000 A single: rows i <= 64000  
+ok   64000 A single M=64000: 1 list(s) of 64000, hybrid size 64000, no refusal, no ann  exit=[64000] hybrid=[64000] ann=0
+ok   64000 A single: 4 pairs caps >= 63950  caps=[63999, 63999, 63996, 63997]
+ok   64000 A held: 8 x rows  
+ok   64000 A held: 8 list(s) of 64000, hybrid size 64000, no refusal, no ann  exit=[64000, 64000, 64000, 64000, 64000, 64000, 64000, 64000] hybrid=[64000, 64000, 64000, 64000, 64000, 64000, 64000, 64000] ann=0
+ok   64000 A_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=643 ms
+ok   64000 A held: SkinnyPrimaryKey change = Q x L = 512000  +512000
+ok   64000 A held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +77815256 B / 512000 keys = 152.0 B/key
+ok   64000 A held: BufferDecoratedKey change = Q x L  +512000
+ok   64000 B traced: rows i <= 64001  
+ok   64000 B traced M=64001: 1 refusal(s) at size = count = 64001, list null, 1 ann, no hybrid  refuse=[64001] exit=1 ann=1 hybrid=0
+ok   64000 B traced: trace event names L  
+ok   64000 B held: 8 x rows i <= 200000  
+ok   64000 B held: 8 refusal(s) at size = count = 64001, list null, 8 ann, no hybrid  refuse=[64001, 64001, 64001, 64001, 64001, 64001, 64001, 64001] exit=8 ann=8 hybrid=0
+ok   64000 B_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=684 ms
+ok   64000 B held: SkinnyPrimaryKey change = Q x (L + 1) = 512008  +512040
+ok   64000 B held: BufferDecoratedKey change = Q x (L + 1)  +512042
+ok   64000 B held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +79987488 B / 512040 keys = 156.2 B/key
+ok   64000 C2 single: 10 rows, i <= 16001  
+ok   64000 C2 single: 1 list(s) of 16001, hybrid size 16001, no refusal, no ann  exit=[16001] hybrid=[16001] ann=0
+ok   64000 C2 single: reads <= 20  reads=10
+ok   64000 C2 held: 8 x rows  
+ok   64000 C2_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=625 ms
+note 64000 C2 held (list plan): SkinnyPrimaryKey change +88 (recorded, no prediction)
+ok   64000: every client call consumed  left=0
+ok   0: JVM property  ['-Dcassandra.sai.vector_search.max_materialized_keys=0']
+ok   0: VM.system_properties read-back  cassandra.sai.vector_search.max_materialized_keys=0
+ok   0: one start-up limit line = 0  ['limit=0 thr=ReadStage-1 ms=1792050016054']
+ok   0 control: ANN-only, 10 rows, no mat line, one ann  exit=0 ann=1
+ok   0: idle histogram SkinnyPrimaryKey small  (20, 640)
+FAIL 0 C1 single: rows  
+ok   0 C1 single M=5: 1 refusal(s) at size = count = 1, list null, 1 ann, no hybrid  refuse=[1] exit=1 ann=1 hybrid=0
+ok   2147483647: JVM property  ['-Dcassandra.sai.vector_search.max_materialized_keys=2147483647']
+ok   2147483647: VM.system_properties read-back  cassandra.sai.vector_search.max_materialized_keys=2147483647
+ok   2147483647: one start-up limit line = 2147483647  ['limit=2147483647 thr=ReadStage-2 ms=1792050165131']
+ok   2147483647 control: ANN-only, 10 rows, no mat line, one ann  exit=0 ann=1
+ok   2147483647: idle histogram SkinnyPrimaryKey small  (20, 640)
+ok   2147483647 C1 single: rows  
+ok   2147483647 C1 single M=200000: 1 list(s) of 200000, hybrid size 200000, no refusal, no ann  exit=[200000] hybrid=[200000] ann=0
+ok   2147483647 C1 held: rows  
+ok   2147483647 C1 held: 8 list(s) of 200000, hybrid size 200000, no refusal, no ann  exit=[200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000] hybrid=[200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000] ann=0
+ok   2147483647 C1_held: histogram taken while all 8 held (last start < jcmd end < first end)  starts=8 ends=8 jcmd_end-last_start=878 ms
+ok   2147483647 C1 held: five-class bytes change = keys x b (U2 b = 156.5) within 10 %  +243187904 B / 1600000 keys = 152.0 B/key
+ok   2147483647 C1 held: SkinnyPrimaryKey change = Q x M = 1600000 (1 % + 100)  +1600000
+ok   2147483647 C1 held: BufferDecoratedKey change = Q x M  +1600000
+note B held key ratio 1000:4000:16000:64000 = 1.000 : 3.985 : 15.925 : 63.687 (predicted 1 : 4.003 : 16.010 : 63.999)
+TOTAL 153 checks, 150 ok, 3 failed
