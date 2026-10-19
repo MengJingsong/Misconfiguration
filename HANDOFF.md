@@ -36,7 +36,7 @@ Decided with Jingsong on 2026-10-19 and carried out the same day (nothing commit
 4. **Both agents judge the line.** `qualifies` / `does not cap` / `unsure` (autonomous), `qualifies` / `rejected` / `deferred` (guided). A rejected or
    does-not-cap line still gets a full two-tier verification solution, designed to test that usage does **not** follow the constraint, so stage 4 can
    confirm or refute the rejection. **Next big task: write up the ~450 existing `rejected.md` entries as case files** (the entries stay as a queue; each
-   becomes a one-line pointer when its file lands). Open: the stage-4 verdict wording for a "does not cap" file.
+   becomes a one-line pointer when its file lands). Verdict wording for a "does not cap" file (decided 2026-10-19): "Confirmed" always means the file's own claim held; each results file records the claim tested and an **Effect on the constraint** field; such a file needs a positive control and the extra conclusions rows; a refuted rejection is not re-judged (stage 4 README, "Verdict wording").
 5. **Stage 4 audits and runs every case file** and saves the conclusion; autonomous files now get the full A–D audit and may take dated amendments
    (group B is mapped onto B1, B2f–g, B3f–g; the file's feedback goes in its new section D; the amended file's sha256 goes in `_INDEX.md` §4).
 6. **How to read the rest of this file.** The dated entries below were written under the old names and are left as written. Read "long path" as the

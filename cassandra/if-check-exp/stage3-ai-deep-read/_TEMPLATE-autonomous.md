@@ -54,7 +54,9 @@ and what cannot be observed directly.
 before any run.
 
 **B2g. Readings.** A table of observation → what it would mean, including the
-observation that would show the claim wrong.
+observation that would show the claim wrong. For a `does not cap` judgment the table
+also needs: usage follows the knob (claim refuted); usage flat while the positive control
+moves (claim confirmed); the limit never reached or the control did not move (not confirmed).
 
 **B2h. Controls.** What rules out other explanations.
 
@@ -81,7 +83,8 @@ how; and what cannot be observed directly.
 before any run.
 
 **B3g. Readings.** A table of observation → what it would mean, including the
-observation that would show the claim wrong.
+observation that would show the claim wrong. For a `does not cap` judgment, same extra
+rows as B2g, with a positive control: the same workload shown to move usage where a cap is known to bind.
 
 **B3h. Controls.** What rules out other explanations.
 

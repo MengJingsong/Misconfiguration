@@ -187,10 +187,16 @@ how it was resolved (see "Compare and decide" in the README).
 Jingsong may overrule any verdict at any time; record an override here with its
 date and reason.
 
-| Tier | Verdict (§9a row; for an autonomous file, the B2g / B3g row) | Basis | Date |
-|---|---|---|---|
-| Unit | | run 1 + self-check / run 1 + run 2 | |
-| Cluster | | run 1 + self-check / run 1 + run 2 | |
+**Claim tested:** (copy it from §9a or B1; for a `rejected` / `does not cap` file it says usage does **not** follow the constraint.)
+"Confirmed" below always means this claim held.
+
+| Tier | Verdict (§9a row; for an autonomous file, the B2g / B3g row) | Effect on the constraint | Basis | Date |
+|---|---|---|---|---|
+| Unit | | caps / does not cap / caps only on some paths (bypass) / undetermined | run 1 + self-check / run 1 + run 2 | |
+| Cluster | | caps / does not cap / caps only on some paths (bypass) / undetermined | run 1 + self-check / run 1 + run 2 | |
+
+**Positive control** (a `rejected` / `does not cap` file only): what moved usage under a known-binding condition, with the
+reading — or why none was possible (then no tier of this file can be Confirmed).
 
 A tier the solution declares `n/a` gets a row saying `not run: <reason>`.
 

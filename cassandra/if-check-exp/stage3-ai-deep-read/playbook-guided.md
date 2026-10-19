@@ -120,7 +120,7 @@ Testability in 9a either way.
 3. **A line that fails a rule is still written up.** Record the judgment `rejected`
    and the rule it failed, mark the sections that do not apply `n/a: <reason>`,
    and design §9 to test the opposite claim, that usage does **not** follow the
-   constraint, so stage 4 can confirm or refute the rejection. A deferred line
+   constraint, so stage 4 can confirm or refute the rejection. Include the positive control and the extra conclusions rows described in `_TEMPLATE-guided.md` §9a. A deferred line
    (not read against the rules) gets no case file and stays in
    [`deferred.md`](deferred.md).
 4. Add the `_INDEX.md` Master Index row (Agent `guided`, Judgment) and, if the

@@ -220,6 +220,12 @@ settles.
 | The ceiling moves, but there is no disallow evidence | **Not confirmed** — something else derived from the same limit may be binding. Re-read. |
 | The limit is never reached | **Invalid run** — fix the setup (9b, 9c) and re-run. |
 
+**A `rejected` file** states in §9a the opposite claim, that usage does not follow the constraint, and its
+table must also hold these rows: usage follows the knob (**Refuted**, the rejection is wrong); usage is flat across
+the knob values while the positive control moves (**Confirmed**); the limit is never reached or the control does not
+move (**Not confirmed** or **Invalid**, never Confirmed). The setup (9b) includes the positive control, a workload
+shown to move usage where a cap is known to bind. See stage 4 README, "Verdict wording".
+
 Two rules behind this table:
 
 - **A confirmation needs both** the ceiling moving with the knob **and** direct
