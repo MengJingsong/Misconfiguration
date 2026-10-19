@@ -41,6 +41,12 @@ on an autonomous row.
 | `memtable_heap_space` | [`MemtablePool.java:156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) | — | — | — | — | 3b | autonomous | qualifies | [`memtable_heap_space-tryAllocate-limit`](cases/memtable_heap_space-tryAllocate-limit--autonomous.md) |
 | `max_space_usable_for_compactions_in_percentage` | [`Directories.java:551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/Directories.java#L551) | — | — | — | — | 3a | autonomous | qualifies | [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous.md) |
 
+| `concurrent_compactors` | [`CompactionManager.submitBackground():245`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionManager.java#L245) | — | `compaction` | `executor` | — | 3b | guided | rejected | [`concurrent_compactors-submitBackground-getMaximumPoolSize`](cases/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md) |
+| `batch_size_fail_threshold` | [`BatchStatement.verifyBatchSize():352`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cql3/statements/BatchStatement.java#L352) | — | `cql3` | `mutation batch` | (c) | 3b | guided | rejected | [`batch_size_fail_threshold-verifyBatchSize-failThreshold`](cases/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided.md) |
+| `native_transport_max_message_size` | [`CQLMessageHandler.processFirstFrameOfLargeMessage():551`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/CQLMessageHandler.java#L551) | LargeMessage.onIntactFrame():799 | `transport` | `large CQL request` | (b) | 3b | guided | rejected | [`native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize`](cases/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md) |
+| `native_transport_max_concurrent_connections` | [`ConnectionLimitHandler.channelActive():93`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/ConnectionLimitHandler.java#L93) | — | `transport` | `connection` | (a) | 3b | guided | rejected | [`native_transport_max_concurrent_connections-channelActive-limit`](cases/native_transport_max_concurrent_connections-channelActive-limit--guided.md) |
+| `native_transport_queue_max_item_age_threshold` | [`Dispatcher.hasQueueCapacity():348`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/Dispatcher.java#L348) | — | `transport` | `queued request` | (b) | 3b | guided | rejected | [`native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime`](cases/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided.md) |
+
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -48,7 +54,8 @@ on an autonomous row.
 | Metric | Count |
 |--------|-------|
 | Modules covered | 12 (guided files) |
-| Total case files | 26 (24 guided, 2 autonomous) |
+| Total case files | 31 (29 guided, 2 autonomous) |
+| of which judged `rejected` | 5 (guided, written up 2026-10-19 as the pilot of the `rejected.md` write-up) |
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
 
