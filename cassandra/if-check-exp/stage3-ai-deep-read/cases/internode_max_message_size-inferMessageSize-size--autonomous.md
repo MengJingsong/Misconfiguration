@@ -5,7 +5,7 @@
 | Entry pointer | `src/java/org/apache/cassandra/net/Message.java:817` |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Sonnet 5.5 (claude-sonnet-5-5), Claude Code agent, 2026-10-19 |
-| Judgment | `qualifies`. `internode_max_message_size` is a hard per-message cap on the on-wire size of one internode message, checked on both the send and the receive side. A message that exceeds it is never buffered, deserialized or queued. This bounds the heap / direct memory one message can pin, but not the aggregate (aggregate is bounded by the separate reserve-capacity limits, A4). |
+| Estimate | `positive`. `internode_max_message_size` is a hard per-message cap on the on-wire size of one internode message, checked on both the send and the receive side. A message that exceeds it is never buffered, deserialized or queued. This bounds the heap / direct memory one message can pin, but not the aggregate (aggregate is bounded by the separate reserve-capacity limits, A4). |
 
 ## A. Constraint trace
 

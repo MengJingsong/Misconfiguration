@@ -1,7 +1,7 @@
 # Stage 3 — AI deep read
 
 Stage 3 reads the Cassandra source. For every target line it produces a **case
-file**: a trace of the constraint, a judgment of the line, and a two-tier
+file**: a trace of the constraint, an estimate for the line, and a two-tier
 verification solution that [stage 4](../stage4-runtime-verification/README.md) runs.
 Stages 1 and 2 only shrink and order what stage 3 must read; neither produces a
 finding.
@@ -16,7 +16,7 @@ says which one wrote it: `<stem>--autonomous.md` or `<stem>--guided.md`
 |---|---|---|
 | Playbook | [`playbook-autonomous.md`](playbook-autonomous.md): the target only | [`playbook-guided.md`](playbook-guided.md): the target plus human suggestions (the three rules, the enforcement patterns, the test-design method) |
 | Template | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) |
-| Judges the line | yes (`qualifies`, `does not cap`, `unsure`) | yes (`qualifies`, `rejected`, `deferred`) |
+| Estimates the line | yes (`positive`, `negative`, `undetermined`) | yes (`positive`, `negative`, `undetermined`) |
 | Output | `cases/<stem>--autonomous.md` | `cases/<stem>--guided.md` |
 | Started by | you, by hand, in a Claude Code session (desktop app) | an AI session in this repo; it asks you whether to read the autonomous file |
 
@@ -38,12 +38,12 @@ There is no comparison step and no scoring across agents.
 | [`playbook-autonomous.md`](playbook-autonomous.md) | The autonomous agent's whole instruction. |
 | [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls. |
 | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. sources read, D. stage-4 feedback. |
-| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §9 is the test design; §10 holds provenance, judgment and stage-4 feedback. |
+| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §9 is the test design; §10 holds provenance, estimate and stage-4 feedback. |
 | [`cases/`](cases/) | The case files of both agents. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](_INDEX.md) | One row per case file, with an Agent column. |
-| [`rejected.md`](rejected.md) | Lines read with the source open and refused, each citing the rule it failed. Existing entries have **no case file yet**; each leaves this file when its case file is written (section 4). |
-| [`deferred.md`](deferred.md) | Lines left **unjudged**; a worklist. No case file for a deferred line. |
-| [`pending.md`](pending.md) | Qualified against the three rules but not yet written up. |
+| [`predicted-negative.md`](predicted-negative.md) | Lines read with the source open and refused, each citing the rule it failed. Existing entries have **no case file yet**; each leaves this file when its case file is written (section 4). |
+| [`undetermined.md`](undetermined.md) | Lines left **unjudged**; a worklist. No case file for an undetermined line. |
+| [`predicted-positive.md`](predicted-positive.md) | Qualified against the three rules but not yet written up. |
 
 ## 3. Completing stage 3 for a case
 
@@ -54,7 +54,7 @@ There is no comparison step and no scoring across agents.
 | 1 | Pick the case and its feed (section 5) | you (or an AI) | a stem and an entry pointer (`file:line`) |
 | 2 | Run the autonomous agent with the playbook, the template and the target | you start it by hand | `cases/<stem>--autonomous.md` |
 | 3 | Check the file against its template; add its `_INDEX.md` row (with sha256, section 6) | AI | a filed case |
-| 4 | Only if needed, run the guided agent | AI session in this repo | `cases/<stem>--guided.md`, or an entry in `deferred.md` |
+| 4 | Only if needed, run the guided agent | AI session in this repo | `cases/<stem>--guided.md`, or an entry in `undetermined.md` |
 | 5 | Commit and push (when you ask) | AI | the file is frozen in history |
 | 6 | Hand off to stage 4 | AI | one results file per case file |
 
@@ -67,8 +67,8 @@ it works from the target and the playbook alone.
 
 ### 3.3 Done when
 
-Each case file you want is filed, carries its judgment, and has its `_INDEX.md` row.
-A line that only has a `rejected.md` or `deferred.md` entry is not done.
+Each case file you want is filed, carries its estimate and ground, and has its `_INDEX.md` row.
+A line that only has a `predicted-negative.md` or `undetermined.md` entry is not done.
 
 ## 4. Where a line is recorded
 
@@ -77,10 +77,10 @@ judged it, not the stage that surfaced it.**
 
 | Outcome | Home |
 |---|---|
-| Qualifies | a case file in [`cases/`](cases/); a guided qualification not yet written up waits in [`pending.md`](pending.md) |
-| Does not cap / rejected (either agent) | **also a case file** in [`cases/`](cases/), with its judgment and the reason; its verification solution tests that usage does *not* follow the constraint |
-| Unsure / deferred | [`deferred.md`](deferred.md), or an `unsure` judgment in the case file; no verdict yet |
-| Existing `rejected.md` entries | stay where they are as a queue; **each one is to be written up as a case file**, and its entry is replaced by a one-line pointer to the file |
+| Positive estimate | a case file in [`cases/`](cases/); a guided positive estimate not yet written up waits in [`predicted-positive.md`](predicted-positive.md) |
+| Negative estimate (either agent) | **also a case file** in [`cases/`](cases/), with its estimate and ground; its verification solution tests that usage does *not* follow the constraint |
+| Undetermined | [`undetermined.md`](undetermined.md), or an `undetermined` estimate in the case file; no prediction yet |
+| Existing `predicted-negative.md` entries | stay where they are as a queue; **each one is to be written up as a case file**, and its entry is replaced by a one-line pointer to the file |
 
 Stage 2 cannot produce a (b)/(c) deferral: deciding that a line "would qualify only
 under (b) or (c)" means tracing where the verdict is read, which no row shows.

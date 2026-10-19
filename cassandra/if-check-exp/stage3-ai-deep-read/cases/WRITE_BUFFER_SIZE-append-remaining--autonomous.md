@@ -5,7 +5,7 @@
 | Entry pointer | `src/java/org/apache/cassandra/hints/HintsWriter.java:237` |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Sonnet 5.5 (claude-sonnet-5-5), Claude Code CLI via Agent SDK, 2026-10-19 |
-| Judgment | `does not cap`. The operand `buffer.remaining()` is bounded by a fixed 256 KiB constant (`WRITE_BUFFER_SIZE`) that is a flush-batching size, not a limit on memory or disk: a hint larger than the buffer is still written (via a temporary heap buffer in this test-only overload, or directly from the hint buffer in the production overload), and the real hint memory/disk bounds are elsewhere (`HintsBuffer` slab, `max_hints_size_per_host`). The line itself is in `append(Hint)`, which only tests call. |
+| Estimate | `negative`. The operand `buffer.remaining()` is bounded by a fixed 256 KiB constant (`WRITE_BUFFER_SIZE`) that is a flush-batching size, not a limit on memory or disk: a hint larger than the buffer is still written (via a temporary heap buffer in this test-only overload, or directly from the hint buffer in the production overload), and the real hint memory/disk bounds are elsewhere (`HintsBuffer` slab, `max_hints_size_per_host`). The line itself is in `append(Hint)`, which only tests call. |
 
 ## A. Constraint trace
 

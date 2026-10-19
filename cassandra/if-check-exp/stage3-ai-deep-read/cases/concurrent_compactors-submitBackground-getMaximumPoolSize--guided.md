@@ -4,7 +4,7 @@
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
-**Judgment: `rejected`** (Rule 2, recorded in `rejected.md`, batch "the capacity-word pass"). This file writes the rejection up with a test of the opposite claim: that `concurrent_compactors` does **not** bound the memory or disk a node uses for compaction.
+**Estimate: negative** (Rule 2, recorded in `predicted-negative.md`, batch "the capacity-word pass"). This file writes the negative estimate up with a test of the opposite claim: that `concurrent_compactors` does **not** bound the memory or disk a node uses for compaction.
 
 ## 1. Location
 
@@ -188,9 +188,10 @@ nodetool enableautocompaction ks          # releases all 8 compactions at once
 
 | Field | Content |
 |--------|---------|
-| **Judgment** | `rejected` — Rule 2: the limit-side operand is a thread-pool size (`rejected.md`, batch "the capacity-word pass") |
+| **Estimate** | `negative` |
+| **Ground** | Rule 2: the limit-side operand is a thread-pool size (`predicted-negative.md`, batch "the capacity-word pass") |
 | **Autonomous reference** | none |
-| **Stage-3 feed** | 3b (found by reading the source; recorded in `rejected.md`) |
+| **Stage-3 feed** | 3b (found by reading the source; recorded in `predicted-negative.md`) |
 | **Filed by / Date** | guided agent session, 2026-10-19 |
 | **Line numbers checked** | 2026-10-19 against `cassandra-5.0.9` |
 | **Escape hatch / Target-3 note** | `nodetool setconcurrentcompactors` raises the pool live; the queue is unbounded (`Integer.MAX_VALUE`, [`CompactionManager.java:2024`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/CompactionManager.java#L2024)) |

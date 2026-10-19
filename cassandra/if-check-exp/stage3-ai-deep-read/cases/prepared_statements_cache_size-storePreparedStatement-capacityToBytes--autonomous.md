@@ -5,7 +5,7 @@
 | Entry pointer | `src/java/org/apache/cassandra/cql3/QueryProcessor.java:825` |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Sonnet 5.5 (claude-sonnet-5-5), Claude Code agent, 2026-10-19 |
-| Judgment | `qualifies`: the entry bounds the total weighted size of the on-heap prepared-statement cache (Caffeine `maximumWeight`), and line 825 is a secondary per-statement guard that rejects any single statement heavier than the whole cache. Caveat: the weight is an estimate (`ObjectSizes.measureDeep`), so the cap is on estimated, not exact, heap. |
+| Estimate | `positive`: the entry bounds the total weighted size of the on-heap prepared-statement cache (Caffeine `maximumWeight`), and line 825 is a secondary per-statement guard that rejects any single statement heavier than the whole cache. Caveat: the weight is an estimate (`ObjectSizes.measureDeep`), so the cap is on estimated, not exact, heap. |
 
 ## A. Constraint trace
 

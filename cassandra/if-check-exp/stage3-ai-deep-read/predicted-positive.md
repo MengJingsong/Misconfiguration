@@ -1,4 +1,4 @@
-# Stage 3 — qualified, pending write-up
+# Stage 3 — predicted positive, pending write-up (formerly `pending.md`)
 
 Lines stage 3 has **read against the three rules and accepted**, but which do
 not yet exist as case files in [`cases/`](cases/). They are findings, not a
@@ -28,7 +28,7 @@ filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and cleares
 | 1 | ~~`max_mutation_size`~~ **— FILED 2026-10-06**, [case](cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md) | `Mutation:172`, `CounterMutation:94` | (c) | Throws before `CommitLog.add():311` reserves segment space; the two sites are one constraint. |
 | 2 | ~~`max_value_size`~~ **— FILED 2026-10-06**, [case](cases/max_value_size-read-maxValueSize--guided.md) | `AbstractType:594` | (c) | **Does not dominate**: `readBuffer(in)` passes `Integer.MAX_VALUE`; list both call-site sets. *(Corrected in the case, §5 and §10: that overload has no production caller; the non-domination is the sibling primitives and the write side.)* |
 | 3 | ~~`CACHEABLE_MUTATION_SIZE_LIMIT`~~ **— FILED 2026-10-06**, [case](cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT--guided.md) | `Mutation:451`, `TeeDataInputPlus:58` | (a) | **One case** (serialize and deserialize sides); JVM property `cassandra.cacheable_mutation_size_limit_bytes`. Both branches allocate. *(In the case: the receive site is split, (a) for the buffer writes and (b) for the copy; `limit <= 0` is unbounded on the receive side and "cache nothing" on the serialize side, so a value of 0 is an escape value; §5 and §10.)* |
-| 4 | ~~`local_read_size_fail_threshold`~~ **— FILED 2026-10-06**, [case](cases/local_read_size_fail_threshold-addSize-failBytes--guided.md) | `ReadCommand:715` | (c) | Per-query running total; aborts. The warn twin is already rejected (Rule 3). *(In the case: the total is per **command**, not per query; the check runs after the row that crosses the limit is built; a names-filter point read builds its rows before the guard; it counts before the row filter; the replica swallows the abort and answers empty, and the coordinator decides; §5, §6b and §10. The warn twin, `ReadCommand:724`, was not in `rejected.md` and is recorded there now.)* |
+| 4 | ~~`local_read_size_fail_threshold`~~ **— FILED 2026-10-06**, [case](cases/local_read_size_fail_threshold-addSize-failBytes--guided.md) | `ReadCommand:715` | (c) | Per-query running total; aborts. The warn twin is already rejected (Rule 3). *(In the case: the total is per **command**, not per query; the check runs after the row that crosses the limit is built; a names-filter point read builds its rows before the guard; it counts before the row filter; the replica swallows the abort and answers empty, and the coordinator decides; §5, §6b and §10. The warn twin, `ReadCommand:724`, was not in `predicted-negative.md` and is recorded there now.)* |
 | 5 | ~~`row_index_read_size_fail_threshold`~~ **— FILED 2026-10-06**, [case](cases/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md) | `RowIndexEntry:392` | (c) | Sibling of 4; throws before `new IndexedEntry` at `:362`; cross-link with the filed `column_index_cache_size`. *(In the case: the estimate is made **before** `column_index_cache_size` decides whether the entry is built, so at stock settings it refuses only entries that would have been shallow; the guard is inert unless a `ReadCommand` is registered on the thread, so key-cache hits, SSTables opened lazily after `executeLocally()` returns (derived) and scans are not checked; §4, §5, §8 and §10.)* |
 | 6 | ~~`internode_application_send_queue_capacity`~~ **— FILED 2026-10-07**, [case](cases/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes--guided.md) | `OutboundConnection:398`, `:416` | (b) | Send-side mirror of the two inbound cases; disallow **drops** the message (`onOverloaded`). *(In the case: `:416` is not a check, the reserve comparison is `:419` into `ResourceLimits:138`; the drop also fails the request's callback at once and, for a plain mutation, submits a hint; **the per-peer reserve is read from the receive-side key** `internode_application_receive_queue_reserve_endpoint_capacity` on the production path (derived, tested by unit step U10 and scenario C); the ceiling is per link, `3·P·C + min(P·E, G)`, with the reserves the large term at the defaults; a connected, full, non-draining link sheds no expired message by itself; Rule 3 holds in a weaker form, retention rather than creation; §1, §4, §6b, §7, §8 and §10.)* |
 | 7 | ~~`repair_session_max_tree_depth`~~ **— FILED 2026-10-13 as `repair_session_space`**, [case](cases/repair_session_space-split-maxsize--guided.md) | `MerkleTree:409` | (a) | The knob is a `min` cap on depth: establish which term binds before designing §9. *(In the case: all three terms of the `min` bind in different regimes, and the case is named after `repair_session_space`, the budget a user tunes, since `repair_session_max_tree_depth` is deprecated and only caps the depth at 20; the comparison runs only on order-preserving partitioners, `init()` sizes the tree on Murmur3; and the MiB-to-bytes conversion overflows from 2048 MiB, giving two-leaf trees. §4, §5, §10.)* |
@@ -41,7 +41,7 @@ filed cases is [`_INDEX.md`](_INDEX.md). Suggested order is cheapest and cleares
 
 **Undecided rows to settle first or alongside** (cheap; they may add sites to the above):
 `IndexSummaryRedistribution:341` (with `:258`, joined by band B), `SystemKeyspace:1919`, `ResourceLimits:138`
-([`deferred.md`](deferred.md) §5), `Envelope:429` (with `:441`; §6) and `ReplicaFilteringProtection:323`
+([`undetermined.md`](undetermined.md) §5), `Envelope:429` (with `:441`; §6) and `ReplicaFilteringProtection:323`
 (§7, from band B: a count cap on held rows that needs a Rule 2 ruling). Settle each by the question
 named there; the first can become a second site of the `index_summary_capacity` constraint,
 the second of `prepared_statements_cache_size`'s pool, the fourth a per-connection memory cap.
@@ -98,7 +98,7 @@ The same pass surfaced five rows that belong to existing records:
 |---|---|
 | `MemtablePool.tryAllocate():156` | The two filed memtable cases (verified). Served as calibration — the pass found them. |
 | `AbstractMessageHandler.acquireCapacity():419` | The two filed `*_receive_queue_capacity` cases. Also calibration. |
-| `HintsBuffer.allocateBytes():190` | Already rejected in `rejected.md` (writer-rollover). Cited, not re-judged. |
+| `HintsBuffer.allocateBytes():190` | Already rejected in `predicted-negative.md` (writer-rollover). Cited, not re-judged. |
 | [`CommitLogSegmentManagerCDC.permitSegmentMaybe():200`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java#L200) | **A second check site of the filed `cdc_total_space` case** — `sizeInProgress + getCommitLogSegmentSize() < getCDCTotalSpace()`, the re-permit path, setting the same `CDCState` verdict that `throwIfForbidden()` reads. Per README §6.1 "one case, several check sites", it belongs in that case file's Location section — **applied; verified present 2026-09-23.** |
 | [`ResourceLimits$Basic.tryAllocate():213`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L213) | `using + amount > limit` — the generic limiter class behind the two net cases' endpoint/global *reserve* sub-checks, which both case files already mention. Not a separate constraint; it is the mechanism. Worth linking from those cases rather than filing anew. |
 
@@ -107,8 +107,8 @@ The same pass surfaced five rows that belong to existing records:
 Deep-read against the three rules with the source open, from
 [`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md)'s
 A1 list (feed **3a**). Each passes all three rules; none is written up yet.
-The A1 pass's rejections are in [`rejected.md`](rejected.md) and its three
-undecided rows in [`deferred.md`](deferred.md).
+The A1 pass's rejections are in [`predicted-negative.md`](predicted-negative.md) and its three
+undecided rows in [`undetermined.md`](undetermined.md).
 
 | Candidate | Check | Divergence on object creation | Pattern |
 |---|---|---|---|
@@ -148,7 +148,7 @@ undecided rows in [`deferred.md`](deferred.md).
 - **The two read guardrails are siblings.** `local_read_size_fail_threshold`
   and `row_index_read_size_fail_threshold` are both per-query heap ceilings
   that abort rather than degrade, and both have a `*_warn_threshold` twin that
-  only logs (the warn twin fails Rule 3 — see `rejected.md`). Consider one
+  only logs (the warn twin fails Rule 3 — see `predicted-negative.md`). Consider one
   case file per threshold, cross-linked, rather than one combined.
   *(Filed 2026-10-06 as two cases, [local read](cases/local_read_size_fail_threshold-addSize-failBytes--guided.md) and [row index](cases/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md). They correct this note: the local-read total is per **command**, not per query, and the row-index figure is an **estimate** for one index entry, per SSTable opened. Both are off by default; the row-index guard is inert on several paths, and the local-read guard is not on a names-filter read.)*
 - **`internode_application_send_queue_capacity` is the send-side mirror** of

@@ -96,7 +96,7 @@ whole: the second plan keeps state of its own that the limit does not bound
 2. [`QueryController.java:96`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/QueryController.java#L96) — configured and stored: `public static int MAX_MATERIALIZED_KEYS = CassandraRelevantProperties.SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS.getInt();`, evaluated when `QueryController` is first loaded (the first SAI query), so `-D` at JVM start is the only production setting.
 3. [`QueryController.java:449`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/plan/QueryController.java#L449) — read at the point of comparison, on every key. Because the field is read at each comparison, a write to it (a test, a Byteman rule) takes effect on the next key.
 
-**Name.** The queue (`pending.md` item 8) carried the operand's name,
+**Name.** The queue (`predicted-positive.md` item 8) carried the operand's name,
 `MAX_MATERIALIZED_KEYS`. Traced to its declaration it is the
 `CassandraRelevantProperties` constant, which names the case per README §6.1,
 as `MAX_HINT_BUFFERS` and `CACHEABLE_MUTATION_SIZE_LIMIT` were named; the
@@ -503,7 +503,7 @@ python3 <harness>/query.py --table t --m <M> [--q 8] [--trace]      # per readin
 
 | Field | Content |
 |--------|---------|
-| **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly, and recorded in `pending.md` under the operand's name `MAX_MATERIALIZED_KEYS` (write-up queue item 8, "read it again (a or b); trace its constant"). Also surfaced by stage 1/2 as band-A row `QueryController.java:449#1` (`bands.md`, anchors). Written up 2026-10-14. |
+| **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly, and recorded in `predicted-positive.md` under the operand's name `MAX_MATERIALIZED_KEYS` (write-up queue item 8, "read it again (a or b); trace its constant"). Also surfaced by stage 1/2 as band-A row `QueryController.java:449#1` (`bands.md`, anchors). Written up 2026-10-14. |
 | **Filed by / Date** | Claude (AI long path), 2026-10-14. |
 | **Line numbers checked** | 2026-10-14, every cited line against the local clone at `cassandra-5.0.9` (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | *Stage 4 (2026-10-15) observed (1) and (2): C2 held 245,256 keys at *L* < *M*; *L* = 0 made a 5-match query scan 115,401 rows and time out.* Three notes. (1) **The disallow branch is not bounded by the knob**: the ANN plan keeps every rejected key in `processedKeys`, up to *N* − *M* on data whose matches are far from the query vector, so lowering the limit can raise a query's heap (§6b, §8). (2) **Escape values**: *L* ≤ 0 always switches, `Integer.MAX_VALUE` never does; neither is rejected (§8). (3) **Memtable matches are collected before the check** (references only, §6b). |

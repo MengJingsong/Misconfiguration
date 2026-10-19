@@ -582,12 +582,12 @@ Stop when each scenario's records are taken; a run where the classes do not stra
 
 | Field | Content |
 |--------|---------|
-| **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly. Judged as a qualifying pattern-(b) candidate and parked in `deferred.md` §1c ("strong") under the then-current (a)-only scope; unparked 2026-09-25; written up 2026-09-28. |
+| **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly. Judged as a qualifying pattern-(b) candidate and parked in `undetermined.md` §1c ("strong") under the then-current (a)-only scope; unparked 2026-09-25; written up 2026-09-28. |
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
-| **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). All line numbers carried from `deferred.md` §1c (`:113`, `:171`, `:227`) confirmed unchanged. |
+| **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). All line numbers carried from `undetermined.md` §1c (`:113`, `:171`, `:227`) confirmed unchanged. |
 | **Escape hatch / Target-3 note** | **No flag-style escape hatch** — the check cannot be switched off, only moved. Two adjacent observations for Target 3: (1) the constraint is **format-scoped**, so a table on the BTI format bypasses it entirely; (2) the read-path site reads the config **live per deserialization**, so a JMX change takes effect on already-written SSTables with no rewrite — an unusually cheap way to change a memory characteristic at runtime, in either direction. |
 | **Stage-4 feedback** | **2026-10-14, long path, run 1 on `pc57`: Confirmed at both tiers; no run 2** ([results](../../stage4-runtime-verification/results/column_index_cache_size-indexSamples-cacheSizeThreshold--guided.md); harness `../../../stage4-runtime-verification/long-path/harness/column_index_cache_size-indexSamples-cacheSizeThreshold/`; uncommitted). Step-0 audit Ready after amendments (§9 marked "Amended 2026-10-14"; one runbook defect fixed before any reading). Unit: class follows `S ≤ T` written and `S + h ≤ T` read at 0 · 2 · 16 · 256 KiB, `ShallowIndexedEntry` 72 B for every *n*, read-path `IndexedEntry` 188 B per block. Node: indexed reads per *T* C1 0 · 2,000 · 2,000 · 2,000, C2 0 · 0 · 500 · 500, C3 0 · 0 · 0 · 100, C4 none, live over JMX with no rewrite; key cache held within one entry of 8 MiB when indexed (C1 1,454 entries of 5.8 KB, C3 22 of 376 KB), +128 B per entry when shallow; 11–27 index-file `IndexInfo` reads per shallow read, none per indexed read; large cache (256 MiB): heap +29.99 MB for `Size` +29.34 MB. **Stage-3 notes, not applied:** (1) the read path (`:360`) compares the entry's serialized `size` = `S + h` (`h` = 14–16 B), so an entry with `S` in (`T − h`, `T`] is written indexed and loaded shallow — seen on the node (*n* = 66: `S` 2,041, `size` 2,055 at 2 KiB); §5's "the two sites necessarily agree" holds for `:113`/`:171` only. (2) A write-path `IndexedEntry` weighs 284 B per block against 188 B read back (buffer-backed clusterings); it reaches the key cache only through key-cache migration (§6a step 6). (3) `IndexedEntry.unsharedHeapSize()` omits the `int[] offsets` array (16 + 4*n* B, `:497`, `:534`, `:613-620`). No bypass found; §8 and the Target-3 note stand. |
-| **Notes** | The third check site (`RowIndexEntry.java:360`) was **not** recorded in `deferred.md` §1c, which listed only the two write-path sites. It is the site that governs steady-state heap, and it is pattern (a) rather than (b). Found while tracing the decision point for this write-up. |
+| **Notes** | The third check site (`RowIndexEntry.java:360`) was **not** recorded in `undetermined.md` §1c, which listed only the two write-path sites. It is the site that governs steady-state heap, and it is pattern (a) rather than (b). Found while tracing the decision point for this write-up. |
 
 ---
 
@@ -598,7 +598,7 @@ Stop when each scenario's records are taken; a run where the classes do not stra
   are not equal in kind: `:113` and `:171` decide what is *written* into the
   entry's representation, and `:360` decides how an already-written entry is
   *loaded*. The write-path site is the origin of the constraint's effect and
-  is the row that was queued in `deferred.md`, so it names the case. But for
+  is the row that was queued in `undetermined.md`, so it names the case. But for
   anyone reading this case to understand the memory behaviour, `:360` is the
   site that matters, and §9 is designed around it. If a later pass prefers to
   split them, the natural split is by path (write vs read), not by class.

@@ -228,9 +228,9 @@ is exactly what Rule 3 is asking for, and the first pitfall in
 Checks that don't pass all three rules (pure validation, logging-only
 branches, null-guards unrelated to capacity, non-diverging outcomes, rate/
 concurrency limits, etc.) are out of scope as cases that cap a resource. Since 2026-10-19 they are still written up: a case file in
-`stage3-ai-deep-read/cases/` with the judgment `rejected` (or `does not cap`), the rule it failed, and a
+`stage3-ai-deep-read/cases/` with the estimate `negative`, the rule it failed as its ground, and a
 verification solution that tests whether usage follows the constraint, so later passes don't re-discover
-and re-reject the same line and stage 4 can confirm the rejection.
+and re-reject the same line and stage 4 can confirm the estimate.
 
 ## 4. Scope: what this folder does NOT cover
 
@@ -386,10 +386,10 @@ cassandra/if-check-exp/
 │   ├── playbook-guided.md   #   the guided agent: target plus human suggestions (rules, patterns, design method)
 │   ├── _TEMPLATE-autonomous.md #  output skeleton: constraint trace + verification solution
 │   ├── _TEMPLATE-guided.md  #   template for a guided case file (nine questions, §9 test design)
-│   ├── _INDEX.md            #   master index of every case file, with Agent and Judgment columns
-│   ├── rejected.md          #   read with source open, refused; a queue to be written up as case files
-│   ├── deferred.md          #   the (b)/(c) worklist — unjudged, now live (§7.5)
-│   ├── pending.md           #   qualified, not yet written up as a case
+│   ├── _INDEX.md            #   master index of every case file, with Agent, Estimate and Ground columns
+│   ├── predicted-negative.md          #   read with source open, refused; a queue to be written up as case files
+│   ├── undetermined.md          #   the (b)/(c) worklist — unjudged, now live (§7.5)
+│   ├── predicted-positive.md           #   qualified, not yet written up as a case
 │   └── cases/               #   flat, one file per case file: <stem>--autonomous.md or <stem>--guided.md
 └── stage4-runtime-verification/   # audits and runs the verification solution in every case file, both tiers each, and saves the conclusion
     ├── README.md            #   the protocol
@@ -402,7 +402,7 @@ cassandra/if-check-exp/
 ```
 
 Everything stage 3 produces lives in `stage3-ai-deep-read/`: the case files of both
-agents in `cases/`, with the index, templates, playbooks and the rejected/deferred
+agents in `cases/`, with the index, templates, playbooks and the predicted-negative / predicted-positive / undetermined
 worklists beside them. A verdict is filed with the stage that made it (§7.2).
 
 ## 7. Workflow
@@ -554,8 +554,8 @@ Not by the stage that surfaced the row. A row **stage 2 ranked** and
 | Evidence | the row alone, source unread | the source, against the three rules |
 | Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
 | Ranked | `stage2-ai-preprocessing/bands.md` — every row, banded A–D | *(n/a)* |
-| Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/rejected.md` |
-| Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/deferred.md` |
+| Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/predicted-negative.md` |
+| Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/undetermined.md` |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding a line "would
 qualify only under (b) or (c)" means tracing where the verdict is read and
@@ -611,7 +611,7 @@ filter and no parking.
   it from the corpus), and pattern-(c) guard clauses such as
   [`TrackedDataInputPlus.checkCanRead():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L184)
   *are* `if` statements. **Corrected 2026-09-25:** this section and
-  `stage3-ai-deep-read/deferred.md` §3 previously called that filter
+  `stage3-ai-deep-read/undetermined.md` §3 previously called that filter
   "structurally exactly pattern (a)" / "precisely pattern (a)". That was
   wrong, and it understated the corpus.
 - **The real gap is narrower, and it is about syntax.** A comparison written
@@ -627,7 +627,7 @@ filter and no parking.
   clauses" and "verdict links" are **precision aids**, since (c) guards and
   flag-setting (b) checks are already in the corpus. None gates the band-A
   pass.
-- **`deferred.md` is now a live worklist, not a parking lot.** Its entries —
+- **`undetermined.md` is now a live worklist, not a parking lot.** Its entries —
   `hasDiskSpaceForCompactionsAndStreams`, `column_index_cache_size`,
   `TrackedDataInputPlus_limit` — are queued for reading, and its §2 re-audit
   of rejections made under the old (a)-only assumption is scheduled rather
@@ -694,9 +694,11 @@ stage 4 ran both and wrote a side-by-side. Revised 2026-10-19:
   user says so.
 - **One folder per stage.** Case files of both agents share `cases/` and are named by agent. Each
   agent has its own playbook and template.
-- **Both agents judge the line.** A line judged `rejected` or `does not cap` is still written up with a
+- **Both agents estimate the line** (`positive` / `negative` / `undetermined`, a prediction from the source; renamed from the
+  judgment `qualifies` / `rejected` / `does not cap` on 2026-10-19). A negative estimate is still written up with a
   full two-tier solution, designed to test that usage does **not** follow the constraint, so stage 4 can
-  confirm or refute the rejection. The ~450 existing entries in `rejected.md` are to be written up this way.
+  confirm or refute it. The existing entries in `predicted-negative.md` (a few hundred rows, most of them trivial grounds)
+  are to be written up this way.
 - **Stage 4 runs every case file** and saves the conclusion; the side-by-side was dropped, and there is
   no rating or scoring across agents.
 - **Scope stays memory and disk** (§3.3). The 24 guided files and 2 autonomous files filed before the

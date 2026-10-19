@@ -55,7 +55,7 @@ Within stage 4, every step is done by an AI session:
 
 **Every case file in [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/), whichever agent wrote it.** The suffix of the file name says which:
 `<stem>--guided.md` or `<stem>--autonomous.md`. The results file and the harness folder take the same name, so a
-case's stem including its suffix is its key everywhere in this stage. A file whose judgment is `rejected` or `does not cap`
+case's stem including its suffix is its key everywhere in this stage. A file with a negative estimate
 is run like any other: its claim is that usage does **not** follow the constraint, and the conclusion table says what each
 outcome means for that claim.
 
@@ -110,7 +110,7 @@ is unsound, which goes back to stage 3 as feedback.
 
 | Group | The proposal must show |
 |---|---|
-| **A. It tests the core question** | The constrained quantity is named, and it is memory or disk bytes (or a count with a derivable byte size). The knob is varied — at least three values including the default — and usage is compared across them, so one can see whether usage follows the constraint. If the knob cannot be varied, the design says why and uses another approach that still answers "does it cap usage?". Usage is measured as the real resource (heap, off-heap, disk bytes), not only the check's own counter; if only the counter or a proxy is available, the gap is named. Usage is driven to the limit and past it. **For a file whose claim is that the constraint does not cap usage** (judgment `rejected` or `does not cap`), the design also needs a **positive control**: the same workload and instruments, shown to move usage under a condition where a cap is known to bind (a closed `Confirmed` case, or a second knob that binds on the same resource). Without one, "flat" cannot be told from "the workload could not have shown an effect", and the file cannot reach Confirmed. |
+| **A. It tests the core question** | The constrained quantity is named, and it is memory or disk bytes (or a count with a derivable byte size). The knob is varied — at least three values including the default — and usage is compared across them, so one can see whether usage follows the constraint. If the knob cannot be varied, the design says why and uses another approach that still answers "does it cap usage?". Usage is measured as the real resource (heap, off-heap, disk bytes), not only the check's own counter; if only the counter or a proxy is available, the gap is named. Usage is driven to the limit and past it. **For a file whose claim is that the constraint does not cap usage** (negative estimate), the design also needs a **positive control**: the same workload and instruments, shown to move usage under a condition where a cap is known to bind (a closed `Confirmed` case, or a second knob that binds on the same resource). Without one, "flat" cannot be told from "the workload could not have shown an effect", and the file cannot reach Confirmed. |
 | **B. The logic runs step by step to a conclusion** | §9a opens with a short "How this verifies the hypothesis" block (hypothesis, test, logic, refuted-if) that matches the steps, prediction and conclusions below it. Each step says what it establishes. The prediction is stated before the run, in numbers or a clear relation (an exact ceiling, proportional, `limit × N`), so a reading can contradict it. Every plausible outcome has a conclusions row naming its evidence, including *usage exceeds the limit*, *flat across values*, *counter capped but the real resource grows* and *limit never reached*. A confirmation needs both the ceiling following the knob and direct evidence that the disallow branch fired. Each alternative explanation names the control that rules it out. |
 | **C. It is specific and understandable to a human and an AI** | A human can follow the claim, the steps and the conclusions from the intro and §9a alone. An AI can run §9b–§9e without re-deriving the code path. The knob and how it is set, the values, workload sizes, commands, observables and how to read them, sampling times and stop conditions are exact. Terms are defined and each fact is stated once. |
 | **D. It is runnable as written** | The harness and environment prerequisites exist, or are listed as work for step 1. The workload arithmetic reaches the limit: estimate the data volume, time, and disk and memory needed against what the node has. The source citations the prediction depends on (knob wiring, the usage operand, the disallow effect) are spot-checked against the pinned clone. |
@@ -122,10 +122,10 @@ means the file's own claim held**, whichever way the claim points. Each results 
 "Confirmed — does not cap". A file that claims "does not cap" must have at least these rows: usage follows the constraint
 (**Refuted**), usage is flat across the knob values with the positive control moving (**Confirmed**), and the limit was never
 reached or the control did not move (**Not confirmed** or **Invalid**, never Confirmed).
-**A refuted rejection is not re-judged.** If the readings show usage does follow the constraint, the file's Judgment line is
+**A refuted negative estimate is not re-estimated.** If the readings show usage does follow the constraint, the file's Estimate line is
 left as filed; the refutation is recorded in the results file's verdict and Effect field and in the case file's feedback field
-(§10, or section D), and `_INDEX.md` keeps the original judgment with a pointer to the results file. Stage 3 does not re-run
-a judgment because of it.
+(§10, or section D), and `_INDEX.md` keeps the original estimate with a pointer to the results file. Stage 3 does not re-estimate
+because of it.
 
 **Output, in results §1:** the ratings, a list of recommendations, what was done
 with each, and a bottom line — **Ready**, **Ready after amendments**, or

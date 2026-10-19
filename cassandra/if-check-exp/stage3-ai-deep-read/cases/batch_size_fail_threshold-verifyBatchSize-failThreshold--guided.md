@@ -4,7 +4,7 @@
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
-**Judgment: `rejected`** (Rule 3, recorded in `rejected.md`, batch "the capacity-word pass": the check runs after the batch's mutations are fully built, so it does not gate object creation). This file writes the rejection up with a test of the opposite claim: that `batch_size_fail_threshold` does **not** cap the memory a node uses to handle a batch.
+**Estimate: negative** (Rule 3, recorded in `predicted-negative.md`, batch "the capacity-word pass": the check runs after the batch's mutations are fully built, so it does not gate object creation). This file writes the negative estimate up with a test of the opposite claim: that `batch_size_fail_threshold` does **not** cap the memory a node uses to handle a batch.
 
 ## 1. Location
 
@@ -182,9 +182,10 @@ Unit tier: the same batch through `BatchStatement.execute` in a `CQLTester`-base
 
 | Field | Content |
 |--------|---------|
-| **Judgment** | `rejected` — Rule 3: the check does not gate object creation, it rejects an already-built batch post hoc |
+| **Estimate** | `negative` |
+| **Ground** | Rule 3: the check does not gate object creation, it rejects an already-built batch post hoc |
 | **Autonomous reference** | none |
-| **Stage-3 feed** | 3b (capacity-word pass, recorded in `rejected.md`) |
+| **Stage-3 feed** | 3b (capacity-word pass, recorded in `predicted-negative.md`) |
 | **Filed by / Date** | guided agent session, 2026-10-19 |
 | **Line numbers checked** | 2026-10-19 against `cassandra-5.0.9` |
 | **Escape hatch / Target-3 note** | single-mutation batches and conditional batches are never checked (§5) |
@@ -195,4 +196,4 @@ Unit tier: the same batch through `BatchStatement.execute` in a `CQLTester`-base
 
 ## 11. Notes
 
-- The first rejection line in `rejected.md` for this check (`BatchStatement.java:352`, "line corrected 2026-09-28, recorded as `:349`") already carries the corrected line.
+- The first rejection line in `predicted-negative.md` for this check (`BatchStatement.java:352`, "line corrected 2026-09-28, recorded as `:349`") already carries the corrected line.

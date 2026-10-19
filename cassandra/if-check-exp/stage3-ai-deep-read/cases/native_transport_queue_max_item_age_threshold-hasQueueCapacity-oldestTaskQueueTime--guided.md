@@ -4,7 +4,7 @@
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
-**Judgment: `rejected`** (Rule 2, recorded in `rejected.md`, batch "the capacity-word pass": time-based — the age of the oldest queued item — not a byte or capacity comparison). This file writes the rejection up with a test of the opposite claim: that `native_transport_queue_max_item_age_threshold` does **not** bound the memory held by queued client requests.
+**Estimate: negative** (Rule 2, recorded in `predicted-negative.md`, batch "the capacity-word pass": time-based — the age of the oldest queued item — not a byte or capacity comparison). This file writes the negative estimate up with a test of the opposite claim: that `native_transport_queue_max_item_age_threshold` does **not** bound the memory held by queued client requests.
 
 ## 1. Location
 
@@ -181,9 +181,10 @@ python3 harness/fixed_rate_writer.py --rate 100 --size-kib 64 --duration-s 60 --
 
 | Field | Content |
 |--------|---------|
-| **Judgment** | `rejected` — Rule 2: a time-based check, not a byte or capacity comparison (`rejected.md`, batch "the capacity-word pass") |
+| **Estimate** | `negative` |
+| **Ground** | Rule 2: a time-based check, not a byte or capacity comparison (`predicted-negative.md`, batch "the capacity-word pass") |
 | **Autonomous reference** | none |
-| **Stage-3 feed** | 3b (recorded in `rejected.md`) |
+| **Stage-3 feed** | 3b (recorded in `predicted-negative.md`) |
 | **Filed by / Date** | guided agent session, 2026-10-19 |
 | **Line numbers checked** | 2026-10-19 against `cassandra-5.0.9` |
 | **Escape hatch / Target-3 note** | default is off (`Double.MAX_VALUE`); in default (non-throwing) mode the check only delays reads (§6b) |
@@ -194,4 +195,4 @@ python3 harness/fixed_rate_writer.py --rate 100 --size-kib 64 --duration-s 60 --
 
 ## 11. Notes
 
-- The earlier `rejected.md` entry cites `Dispatcher.java:345`; the method is at line 348 in the pinned tree (the entry's line has drifted by 3).
+- The earlier `predicted-negative.md` entry cites `Dispatcher.java:345`; the method is at line 348 in the pinned tree (the entry's line has drifted by 3).

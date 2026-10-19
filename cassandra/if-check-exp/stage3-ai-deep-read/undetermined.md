@@ -1,4 +1,4 @@
-# Deferred — the (b)/(c) worklist, now empty
+# Stage 3 — undetermined (formerly `deferred.md`; the (b)/(c) worklist, now empty)
 
 Rows and follow-ups that are **undecided**, not refused.
 
@@ -17,13 +17,13 @@ remains: the §2 re-audit, folded into the band-A pass.
 |---|---|---|---|
 | 1 | `hasDiskSpaceForCompactionsAndStreams` (§1b) | (b) | **Filed** — [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction.md`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--guided.md) |
 | 2 | `column_index_cache_size` (§1c) | (b) | **Filed** — [`column_index_cache_size-indexSamples-cacheSizeThreshold.md`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold--guided.md) |
-| 3 | `TrackedDataInputPlus_limit` (§1c) | (c) | **Refused, Rule 1** — `limit` is the row's own serialized length, read from the data being deserialized. See [`rejected.md`](rejected.md), batch 2026-09-28. |
+| 3 | `TrackedDataInputPlus_limit` (§1c) | (c) | **Refused, Rule 1** — `limit` is the row's own serialized length, read from the data being deserialized. See [`predicted-negative.md`](predicted-negative.md), batch 2026-09-28. |
 | 4 | The §2 re-audit | both | **Still scheduled** — rejections made under the old (a)-only assumption; run it inside the band-A pass, not separately. |
 
 The per-entry sections below are kept as the reading record: they are what
 made items 1–3 cheap to resolve, and §3–§4 document stage 1's limits
 independently of any one row. Keeping this file apart from
-[`rejected.md`](rejected.md) is still the point — nothing here was refused
+[`predicted-negative.md`](predicted-negative.md) is still the point — nothing here was refused
 *as a class*, and item 3's refusal now lives in the rejection store where it
 belongs.
 
@@ -120,7 +120,7 @@ it may be the better constraint name.
 
 > **Two entries here, but the capacity-word pass is summarised everywhere as "3
 > deferred" (audit, 2026-09-24).** That summary is repeated in
-> `rejected.md`, `../../../HANDOFF.md` and
+> `predicted-negative.md`, `../../../HANDOFF.md` and
 > `../stage2-ai-preprocessing/README.md`, and its arithmetic is
 > 4 candidates + 22 rejected + 3 deferred + 5 already covered = 34 rows.
 > What is actually on file is 4 + 22 + **2** + 5 = **33**, so one row of the
@@ -164,7 +164,7 @@ it may be the better constraint name.
 ### `TrackedDataInputPlus_limit` — pattern (c) — weak
 
 > **Resolved 2026-09-28 — refused, and moved to
-> [`rejected.md`](rejected.md)** (batch 2026-09-28). The suspicion recorded
+> [`predicted-negative.md`](predicted-negative.md)** (batch 2026-09-28). The suspicion recorded
 > below was right. `limit` comes from
 > `new TrackedDataInputPlus(in, rowSize)` at `UnfilteredSerializer.java:587`,
 > where `rowSize` is read out of the SSTable itself — so it is **data, not a
@@ -274,21 +274,21 @@ each needs one specific question answered, named below. Across all 65 A1
 rows the split is 21 pending, 34 rejected, 10 deferred (these 3 plus 7
 earlier-deferred rows since filed as cases); 26 of the 65 were recorded by
 earlier passes and are counted in the bucket of that record (counts corrected
-2026-10-01; see `rejected.md`, "A1 disposition table").
+2026-10-01; see `predicted-negative.md`, "A1 disposition table").
 
 | # | Row | What is undecided | What would settle it |
 |---|---|---|---|
 | 1 | [`IndexSummaryRedistribution.java:341`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryRedistribution.java#L341) — `extraSpaceRequired <= remainingSpace` | This line is **selection logic** inside the redistribution loop: it decides which SSTables keep their current sampling level out of a leftover budget, and both branches keep a summary. But the enclosing mechanism is a genuine off-heap ceiling — `index_summary_capacity` bounds the total memory all index summaries may occupy, and summaries are *downsampled* to fit. So the row is probably not the check, while the class probably contains one. | Read the class for the line that enforces the pool total rather than distributes it, and judge **that** line. If it exists, this row becomes a second check site; if the enforcement is spread across the redistribution rather than located at a comparison, the constraint may be real while no single if-check qualifies — which is itself worth recording. |
 | 2 | [`SystemKeyspace.java:1919`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/SystemKeyspace.java#L1919) — `preparedBytesLoaded > preparedBytesLoadThreshold` | Returns early from the startup load of prepared statements, so it **does** withhold further object creation and bounds heap at startup. What is unclear is whether it is a *distinct* constraint or the prepared-statements cache capacity seen a second time — the comment calls it a safety valve for a known leak (CASSANDRA-19703). | Trace `preparedBytesLoadThreshold` to its declaration. If it derives from `prepared_statements_cache_size`, record it as a second check site of that constraint (whose primary comparison, `QueryProcessor.java:825`, is already refused) rather than a case. If it is independent, judge it on its own. |
-| 3 | [`ResourceLimits.java:138`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L138) — `next > limit` in `Concurrent.tryAllocate` | The `Basic` variant at [`:213`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L213) is already in `pending.md`. Both are the **shared reserve mechanism** behind the two filed net cases, the `internode_application_send_queue_capacity` candidate, and the native-transport in-flight limits — but `limit` is a constructor parameter with no single declaration, so there is no one constraint to name it after (README §6.1). | Decide the filing question, not the code question: is `ResourceLimits` a case at all, or only a mechanism that other cases cite? The standing HANDOFF item says the two net cases should **cite** `:213` as the mechanism behind their reserve sub-checks. If citing is the answer, both rows leave this file for a note in those cases, and neither becomes a case. |
+| 3 | [`ResourceLimits.java:138`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L138) — `next > limit` in `Concurrent.tryAllocate` | The `Basic` variant at [`:213`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L213) is already in `predicted-positive.md`. Both are the **shared reserve mechanism** behind the two filed net cases, the `internode_application_send_queue_capacity` candidate, and the native-transport in-flight limits — but `limit` is a constructor parameter with no single declaration, so there is no one constraint to name it after (README §6.1). | Decide the filing question, not the code question: is `ResourceLimits` a case at all, or only a mechanism that other cases cite? The standing HANDOFF item says the two net cases should **cite** `:213` as the mechanism behind their reserve sub-checks. If citing is the answer, both rows leave this file for a note in those cases, and neither becomes a case. |
 
 **Joined by the band-B pass (2026-10-13):** `IndexSummaryRedistribution.java:258` (`remainingSpace > 0`: spend the leftover budget letting SSTables planned for downsampling keep their sampling level, via `distributeRemainingSpace()`, the method that holds `:341`) is another line of the same redistribution as item 1. It is not judged on its own; it is settled with item 1.
 
 ## 6. Undecided row from the band-A2 pass — 2026-09-29
 
 One A2 row that a single read did not settle. It is **not refused**. The other
-29 A2 rows were resolved: 21 to [`rejected.md`](rejected.md) (batch "band A2"),
-1 as a second check site in [`pending.md`](pending.md), 7 already recorded.
+29 A2 rows were resolved: 21 to [`predicted-negative.md`](predicted-negative.md) (batch "band A2"),
+1 as a second check site in [`predicted-positive.md`](predicted-positive.md), 7 already recorded.
 
 | # | Row | What is undecided | What would settle it |
 |---|---|---|---|
@@ -299,9 +299,9 @@ One A2 row that a single read did not settle. It is **not refused**. The other
 ## 7. Undecided row from the band-B pass — 2026-10-13
 
 One band-B row that the rules as written do not settle. It is **not refused**. The other
-173 band-B units were resolved in [`rejected.md`](rejected.md) (batch "band B"), in
-[`pending.md`](pending.md) (item 12) and by joining §5 and §6 above.
+173 band-B units were resolved in [`predicted-negative.md`](predicted-negative.md) (batch "band B"), in
+[`predicted-positive.md`](predicted-positive.md) (item 12) and by joining §5 and §6 above.
 
 | # | Row | What is undecided | What would settle it |
 |---|---|---|---|
-| 1 | [`ReplicaFilteringProtection.java:323`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L323) — `currentRowsCached == cachedRowsFailThreshold + 1` | `replica_filtering_protection.cached_rows_fail_threshold` (default 32,000 in `cassandra.yaml`) fails a filtering or index query with `OverloadedException` ([`:331`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L331)) when the coordinator has cached that many replica rows. The count is raised in `PartitionBuilder.addRow()` **before** the row is stored ([`:481`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L481)) and released per partition ([`:564`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L564)), so Rules 1 and 3 hold (the yaml says it limits rows "materialize[d] on-heap"), and no other cap bounds these rows. **Rule 2 is the question:** it counts rows, whose size the code does not fix. Earlier passes refused count caps on that ground (`StorageProxy.java:1592`, `PartitionDenylist`), and band B refused `tombstone_failure_threshold` (`ReadCommand.java:591`), but those items were either not held or already bounded in bytes elsewhere. These rows are held, and nothing else bounds them. | A ruling on Rule 2, not more reading: does "a count of objects whose per-object footprint is fixed/derivable" admit a count of **held** rows whose size is fixed per table by its schema (a stage-4 design can hold row size constant and read heap = count × row size)? If yes, it qualifies as `cached_rows_fail_threshold` (pattern (c), per query, scaled by concurrent filtering queries) and goes to `pending.md`. If no, refuse it with the other count caps, and record the ruling in the README's Rule 2 so later bands apply it the same way. |
+| 1 | [`ReplicaFilteringProtection.java:323`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L323) — `currentRowsCached == cachedRowsFailThreshold + 1` | `replica_filtering_protection.cached_rows_fail_threshold` (default 32,000 in `cassandra.yaml`) fails a filtering or index query with `OverloadedException` ([`:331`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L331)) when the coordinator has cached that many replica rows. The count is raised in `PartitionBuilder.addRow()` **before** the row is stored ([`:481`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L481)) and released per partition ([`:564`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/reads/ReplicaFilteringProtection.java#L564)), so Rules 1 and 3 hold (the yaml says it limits rows "materialize[d] on-heap"), and no other cap bounds these rows. **Rule 2 is the question:** it counts rows, whose size the code does not fix. Earlier passes refused count caps on that ground (`StorageProxy.java:1592`, `PartitionDenylist`), and band B refused `tombstone_failure_threshold` (`ReadCommand.java:591`), but those items were either not held or already bounded in bytes elsewhere. These rows are held, and nothing else bounds them. | A ruling on Rule 2, not more reading: does "a count of objects whose per-object footprint is fixed/derivable" admit a count of **held** rows whose size is fixed per table by its schema (a stage-4 design can hold row size constant and read heap = count × row size)? If yes, it qualifies as `cached_rows_fail_threshold` (pattern (c), per query, scaled by concurrent filtering queries) and goes to `predicted-positive.md`. If no, refuse it with the other count caps, and record the ruling in the README's Rule 2 so later bands apply it the same way. |

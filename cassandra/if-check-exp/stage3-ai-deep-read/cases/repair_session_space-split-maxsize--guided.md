@@ -14,7 +14,7 @@
 | **Capacity check** | [`MerkleTree.split():409`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409) — `size >= maxsize`. |
 | **Decision point** | The same line ([`:409-410`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409-L410)); its `false` is read by the sampling loop in [`Validator.prepare():146-152`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/repair/Validator.java#L146-L152), which stops splitting that range. |
 | **Allocation site** | [`MerkleTree.splitHelper():438-439`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L438-L439) — `size++; return new OnHeapInner(midpoint, new OnHeapLeaf(), new OnHeapLeaf());`. The default path's equivalent, outside any comparison: [`MerkleTree.init():139-146`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L139-L146) → [`initHelper():149-162`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L149-L162). |
-| **Related cases** | None filed in `repair`. Same subsystem: the pending `repair_disk_headroom_reject_ratio` (`pending.md` item 12), which admits or refuses a repair on disk usage. |
+| **Related cases** | None filed in `repair`. Same subsystem: the pending `repair_disk_headroom_reject_ratio` (`predicted-positive.md` item 12), which admits or refuses a repair on disk usage. |
 
 ```java
 // MerkleTree.split():407-419 — the capacity check and decision point.
@@ -115,7 +115,7 @@ every tree is cut to two leaves.
 5. [`MerkleTrees.addMerkleTree():108-119`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTrees.java#L108-L119) → `new MerkleTree(partitioner, range, RECOMMENDED_DEPTH, maxsize)` — stored at [`MerkleTree.java:129`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L129).
 6. Read at [`:409`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L409) (split path) or at [`init():142`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/MerkleTree.java#L142) (default path).
 
-**Which term binds** (the question `pending.md` left open). Three terms meet in
+**Which term binds** (the question `predicted-positive.md` left open). Three terms meet in
 `min`, and each binds in a different regime:
 
 - **Partition count** — a range with fewer than 2^`maxDepth` partitions gets
@@ -530,7 +530,7 @@ bin/nodetool -h <node1> repair -full -pr keyspace1 standard1
 
 | Field | Content |
 |--------|---------|
-| **Stage-3 feed** | `3a` — band A1, row `MerkleTree.java:409#1` of `stage2-ai-preprocessing/bands.md`, judged qualifying in the A1 pass (2026-09-28) and queued as `pending.md` item 7 under the name `repair_session_max_tree_depth`. |
+| **Stage-3 feed** | `3a` — band A1, row `MerkleTree.java:409#1` of `stage2-ai-preprocessing/bands.md`, judged qualifying in the A1 pass (2026-09-28) and queued as `predicted-positive.md` item 7 under the name `repair_session_max_tree_depth`. |
 | **Filed by / Date** | Claude (AI long path), 2026-10-13. |
 | **Line numbers checked** | 2026-10-13, every cited line against the local clone at `cassandra-5.0.9` (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | No path exceeds `maxsize`. Three Target-3 notes: (1) **the check is not reached on the default partitioner** (§5); (2) **the 32-bit overflow** at `ValidationManager.java:62` gives two-leaf trees from 2048 to 4096 MiB, the default at a 32 GiB heap (§4); (3) the coordinator holds trees sized by the **replicas'** settings (§8). |

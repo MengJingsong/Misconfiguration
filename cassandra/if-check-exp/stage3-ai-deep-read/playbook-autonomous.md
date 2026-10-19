@@ -61,11 +61,12 @@ main enforcement point, or may not constrain memory or disk at all. State the
 claim your solution tests, whatever it turns out to be, including "this does
 not cap usage" if that is what you find.
 
-**Judge the line.** Say in the template's Judgment field whether the target is a
-real case: `qualifies` (the constraint caps memory or disk), `does not cap`
+**Estimate the line.** Say in the template's Estimate field whether usage follows the
+constraint: `positive` (the constraint caps memory or disk), `negative`
 (you traced it and it does not, or it does not bound a memory- or disk-significant
-object), or `unsure`. Give the reason. Either way, design the verification
-solution in full: for `does not cap`, the solution tests the opposite claim, that
+object), or `undetermined`. Give the reason, and for a negative the ground. This is a
+prediction from the source; stage 4 confirms or refutes it. Either way, design the verification
+solution in full: for a negative estimate, the solution tests the opposite claim, that
 usage does **not** follow the constraint, so stage 4 can confirm or refute it. Include a positive control: the same workload shown to move usage where a cap is known to bind (see the template's B2g and B3g notes).
 
 ## What the solution must satisfy

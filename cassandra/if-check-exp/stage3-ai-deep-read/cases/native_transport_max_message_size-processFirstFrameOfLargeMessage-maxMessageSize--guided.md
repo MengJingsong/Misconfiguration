@@ -4,7 +4,7 @@
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
-**Judgment: `rejected`** (Rule 1, recorded in `rejected.md`, batch "the capacity-word pass": "rejects a single oversized frame outright (protocol/sanity bound on one message), not a running-total capacity check"). This file writes the rejection up with a test of the opposite claim: that `native_transport_max_message_size` does **not** bound the memory the server holds for a large request.
+**Estimate: negative** (Rule 1, recorded in `predicted-negative.md`, batch "the capacity-word pass": "rejects a single oversized frame outright (protocol/sanity bound on one message), not a running-total capacity check"). This file writes the negative estimate up with a test of the opposite claim: that `native_transport_max_message_size` does **not** bound the memory the server holds for a large request.
 
 ## 1. Location
 
@@ -188,9 +188,10 @@ python3 harness/hold_large_request.py --size-mib 8 --hold-s 30
 
 | Field | Content |
 |--------|---------|
-| **Judgment** | `rejected` — recorded ground: not a running-total capacity check (`rejected.md`) |
+| **Estimate** | `negative` |
+| **Ground** | recorded ground: not a running-total capacity check (`predicted-negative.md`) |
 | **Autonomous reference** | none |
-| **Stage-3 feed** | 3b (found by reading the native-transport package; recorded in `rejected.md`) |
+| **Stage-3 feed** | 3b (found by reading the native-transport package; recorded in `predicted-negative.md`) |
 | **Filed by / Date** | guided agent session, 2026-10-19 |
 | **Line numbers checked** | 2026-10-19 against `cassandra-5.0.9` |
 | **Escape hatch / Target-3 note** | single-frame requests and protocol v4 are outside this check (§5); a request just under the limit still occupies up to the limit |
@@ -201,4 +202,4 @@ python3 harness/hold_large_request.py --size-mib 8 --hold-s 30
 
 ## 11. Notes
 
-- `rejected.md` says "Rejects a single oversized frame outright"; the code rejects a multi-frame *request* by declared size, after the first frame, and keeps draining the rest.
+- `predicted-negative.md` says "Rejects a single oversized frame outright"; the code rejects a multi-frame *request* by declared size, after the first frame, and keeps draining the rest.

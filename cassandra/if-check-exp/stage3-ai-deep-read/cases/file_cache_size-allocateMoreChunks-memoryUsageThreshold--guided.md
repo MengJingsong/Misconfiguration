@@ -120,7 +120,7 @@ README §6.1's rule for a configuration entry names the case after the config,
 so this is the `file_cache_size` case and the `networking` pool's is a separate
 one — exactly the precedent set by `memtable_heap_space` /
 `memtable_offheap_space`, which are two cases over one `tryAllocate()` check.
-This resolves the open naming question `pending.md` recorded for this candidate
+This resolves the open naming question `predicted-positive.md` recorded for this candidate
 on 2026-09-22.
 
 ## 5. Decision point & branch semantics
@@ -594,7 +594,7 @@ Stop when each scenario's records are taken; a run where `O` stays zero at 16 Mi
 
 | Field | Content |
 |--------|---------|
-| **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly, and recorded in `pending.md` as `BufferPool_memoryUsageThreshold`, the strongest of that pass's four candidates. Also independently surfaced by stage 1/2 as band-A1 row `BufferPool.java:443#1`. Written up 2026-09-28. |
+| **Stage-3 feed** | `3b` — found 2026-09-22 by the capacity-word pass reading the source directly, and recorded in `predicted-positive.md` as `BufferPool_memoryUsageThreshold`, the strongest of that pass's four candidates. Also independently surfaced by stage 1/2 as band-A1 row `BufferPool.java:443#1`. Written up 2026-09-28. |
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). |
 | **Escape hatch / Target-3 note** | **Yes, and it is the point of the case.** The disallow branch withholds the `Chunk`, but [`LocalPool.get():923`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/BufferPool.java#L923) then allocates the buffer directly from the OS via `ByteBuffer.allocateDirect`, tracked as `overflowMemoryUsage` with **no ceiling of its own**. So `file_cache_size` bounds the pool, not the node's off-heap memory. Unlike the memtable `markBlocking()` hatch this is not a special caller state and unlike the compaction guard it is not a skipped path — it is the ordinary, always-taken fallback. Two milder observations: an `OutOfMemoryError` in the allocation is funnelled into the same `null`/overflow path, so native exhaustion is indistinguishable from configured refusal in the metrics; and the `tryGet`/`tryGetAtLeast` entry points do propagate the refusal, so the hatch may not apply to every caller. |
@@ -612,7 +612,7 @@ Stop when each scenario's records are taken; a run where `O` stays zero at 16 Mi
   ([`Config.java:493-494`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L493-L494),
   default `min(128MiB, maxMemory/16)`). It is a separate case by §6.1, exactly
   as `memtable_offheap_space` is separate from `memtable_heap_space`, and is
-  recorded in [`../pending.md`](../pending.md). The interesting difference to
+  recorded in [`../predicted-positive.md`](../predicted-positive.md). The interesting difference to
   write up is lifetime, not code: the class comments say chunk-cache buffers
   "may be held for arbitrary period" while networking buffers "should be
   released immediately after use", so the two pools should saturate under
@@ -633,7 +633,7 @@ Stop when each scenario's records are taken; a run where `O` stays zero at 16 Mi
   `Size − OverflowSize` a valid measurement in §9.
 
 - **Two config entries, one check, two cases.** The naming question
-  `pending.md` left open on 2026-09-22 — "trace `memoryUsageThreshold` to its
+  `predicted-positive.md` left open on 2026-09-22 — "trace `memoryUsageThreshold` to its
   config source" — has two answers, not one, because the field is a
   constructor parameter. §6.1's configuration-entry rule resolves it by
   filing one case per config, which also matches how the two memtable pools

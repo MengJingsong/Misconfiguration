@@ -5,7 +5,7 @@
 | Entry pointer | `src/java/org/apache/cassandra/net/AbstractMessageHandler.java:464` |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Sonnet 5.5 (claude-sonnet-5-5), Claude Code agent, 2026-10-19 |
-| Judgment | `qualifies`. The target line is the release half of the per-connection inbound byte accounting (`if (oldQueueSize > queueCapacity)`), not the enforcement point; the constraint it belongs to, `internode_application_receive_queue_capacity`, does bound (together with the two reserve limits) the serialized bytes of inbound internode messages that are admitted but not yet fully processed, which is a heap-significant object population. The cap is on accounted wire bytes, a proxy for heap (class Javadoc of `AbstractMessageHandler.java`, last paragraph before the class declaration: "good enough proxy"), so the real-heap relation is what the cluster tier tests. |
+| Estimate | `positive`. The target line is the release half of the per-connection inbound byte accounting (`if (oldQueueSize > queueCapacity)`), not the enforcement point; the constraint it belongs to, `internode_application_receive_queue_capacity`, does bound (together with the two reserve limits) the serialized bytes of inbound internode messages that are admitted but not yet fully processed, which is a heap-significant object population. The cap is on accounted wire bytes, a proxy for heap (class Javadoc of `AbstractMessageHandler.java`, last paragraph before the class declaration: "good enough proxy"), so the real-heap relation is what the cluster tier tests. |
 
 ## A. Constraint trace
 

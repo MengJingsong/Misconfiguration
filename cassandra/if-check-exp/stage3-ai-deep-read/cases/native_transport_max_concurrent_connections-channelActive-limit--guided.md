@@ -4,7 +4,7 @@
 >
 > **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 
-**Judgment: `rejected`** (Rule 2, recorded in `rejected.md`, batch "the capacity-word pass": it bounds the *count* of connections, not bytes, and a connection's memory is not fixed at this check). This file writes the rejection up with a test of the opposite claim: that `native_transport_max_concurrent_connections` (and its per-IP twin) does **not** bound the memory a node uses for client connections.
+**Estimate: negative** (Rule 2, recorded in `predicted-negative.md`, batch "the capacity-word pass": it bounds the *count* of connections, not bytes, and a connection's memory is not fixed at this check). This file writes the negative estimate up with a test of the opposite claim: that `native_transport_max_concurrent_connections` (and its per-IP twin) does **not** bound the memory a node uses for client connections.
 
 ## 1. Location
 
@@ -182,9 +182,10 @@ python3 harness/hold_connections.py --count 4000 --hold-s 60
 
 | Field | Content |
 |--------|---------|
-| **Judgment** | `rejected` — Rule 2: counts of connections, not bytes (`rejected.md`, batch "the capacity-word pass") |
+| **Estimate** | `negative` |
+| **Ground** | Rule 2: counts of connections, not bytes (`predicted-negative.md`, batch "the capacity-word pass") |
 | **Autonomous reference** | none |
-| **Stage-3 feed** | 3b (recorded in `rejected.md`) |
+| **Stage-3 feed** | 3b (recorded in `predicted-negative.md`) |
 | **Filed by / Date** | guided agent session, 2026-10-19 |
 | **Line numbers checked** | 2026-10-19 against `cassandra-5.0.9` |
 | **Escape hatch / Target-3 note** | connections created while the limits are -1 are never counted and are not closed when a limit is switched on (§5) |
@@ -195,4 +196,4 @@ python3 harness/hold_connections.py --count 4000 --hold-s 60
 
 ## 11. Notes
 
-- The earlier `rejected.md` entry cites `ConnectionLimitHandler.java:93,121`; the lines still match.
+- The earlier `predicted-negative.md` entry cites `ConnectionLimitHandler.java:93,121`; the lines still match.

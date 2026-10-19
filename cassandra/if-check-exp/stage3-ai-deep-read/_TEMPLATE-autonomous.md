@@ -5,7 +5,8 @@
 | Entry pointer | `file:line` as given |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | model, CLI version, date (filled by the agent) |
-| Judgment | `qualifies` / `does not cap` / `unsure`, with the reason in one or two sentences |
+| Estimate | `positive` (usage follows the constraint) / `negative` (it does not) / `undetermined`, with the reason in one or two sentences |
+| Ground | for a negative estimate, why usage should not follow the constraint; otherwise `—` |
 
 ## A. Constraint trace
 
@@ -30,7 +31,7 @@ links; `none` if none.
 ## B. Verification solution
 
 **B1. Claim under test.** One or two falsifiable sentences, shared by both tiers.
-For a `does not cap` judgment, the claim is that usage does not follow the constraint.
+For a negative estimate, the claim is that usage does not follow the constraint.
 
 ### B2. Unit tier
 
@@ -54,7 +55,7 @@ and what cannot be observed directly.
 before any run.
 
 **B2g. Readings.** A table of observation → what it would mean, including the
-observation that would show the claim wrong. For a `does not cap` judgment the table
+observation that would show the claim wrong. For a negative estimate the table
 also needs: usage follows the knob (claim refuted); usage flat while the positive control
 moves (claim confirmed); the limit never reached or the control did not move (not confirmed).
 
@@ -83,7 +84,7 @@ how; and what cannot be observed directly.
 before any run.
 
 **B3g. Readings.** A table of observation → what it would mean, including the
-observation that would show the claim wrong. For a `does not cap` judgment, same extra
+observation that would show the claim wrong. For a negative estimate, same extra
 rows as B2g, with a positive control: the same workload shown to move usage where a cap is known to bind.
 
 **B3h. Controls.** What rules out other explanations.

@@ -5,7 +5,7 @@
 | Entry pointer | `src/java/org/apache/cassandra/hints/HintsBuffer.java:190` |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | claude-sonnet-5-5, Claude Code (Agent SDK), 2026-10-19 |
-| Judgment | `qualifies`, with a caveat: the slab is a fixed-size direct buffer allocated up front, so the line-190 check bounds how much hint data one slab holds. The real off-heap bound is slab size x `MAX_HINT_BUFFERS` (default 3), and slab size is derived from `max_mutation_size` with a 32 MiB floor. The line does not trigger or avoid any allocation. |
+| Estimate | `positive`, with a caveat: the slab is a fixed-size direct buffer allocated up front, so the line-190 check bounds how much hint data one slab holds. The real off-heap bound is slab size x `MAX_HINT_BUFFERS` (default 3), and slab size is derived from `max_mutation_size` with a 32 MiB floor. The line does not trigger or avoid any allocation. |
 
 ## A. Constraint trace
 

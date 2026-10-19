@@ -5,7 +5,7 @@
 | Entry pointer | `src/java/org/apache/cassandra/net/OutboundConnection.java:331` |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Sonnet 5.5 (claude-sonnet-5-5), Claude Code agent, 2026-10-19 |
-| Judgment | `qualifies` (weakly): the entry is a per-message size ceiling applied on the outbound and inbound paths, so it bounds the largest single object the internode layer will queue, serialize into a buffer, or accumulate on receive. It does not bound total usage (that is the queue and reserve capacities), and it does not bound the on-heap `Message` the caller already built. |
+| Estimate | `positive` (weakly): the entry is a per-message size ceiling applied on the outbound and inbound paths, so it bounds the largest single object the internode layer will queue, serialize into a buffer, or accumulate on receive. It does not bound total usage (that is the queue and reserve capacities), and it does not bound the on-heap `Message` the caller already built. |
 
 ## A. Constraint trace
 

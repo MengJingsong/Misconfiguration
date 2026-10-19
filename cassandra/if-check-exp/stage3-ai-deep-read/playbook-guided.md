@@ -19,7 +19,7 @@ are **not** restated here — one source of truth for the rules.
    record it in §10 ("Autonomous reference"). If no, work from the target and this
    playbook alone. The answer is per case or per batch, never assumed.
 2. Read [`../../../HANDOFF.md`](../../../HANDOFF.md), then `_INDEX.md` to
-   see which cases exist and `rejected.md` / `deferred.md` to see which lines
+   see which cases exist and `predicted-negative.md` / `undetermined.md` to see which lines
    are already judged. **Don't re-judge a recorded line** — cite it.
 3. Confirm the source clone is at the pinned tag: `git -C <clone> describe --tags`
    must print `cassandra-5.0.9`. The clone is `$CASSANDRA_SRC`, else `cassandra-src`
@@ -31,7 +31,7 @@ are **not** restated here — one source of truth for the rules.
 
 ## 2. Working a row
 
-Order matters — each step can end the judgment early and save the next.
+Order matters — each step can end the estimate early and save the next.
 
 | # | Step | Ends early if |
 |---|---|---|
@@ -115,19 +115,19 @@ Testability in 9a either way.
    in `../README.md` §5 — including §9's test design with both tiers (section 2.2).
    **Verify every `file:line` against the local clone before filing** — a case is
    not filed until its citations are checked. Save it as `cases/<stem>--guided.md`.
-2. Record the judgment, the autonomous reference (or `none`) and the feed (`3a` or
+2. Record the estimate and its ground, the autonomous reference (or `none`) and the feed (`3a` or
    `3b`) in §10.
-3. **A line that fails a rule is still written up.** Record the judgment `rejected`
-   and the rule it failed, mark the sections that do not apply `n/a: <reason>`,
+3. **A line that fails a rule is still written up.** Record the estimate `negative`
+   and the rule it failed as its ground, mark the sections that do not apply `n/a: <reason>`,
    and design §9 to test the opposite claim, that usage does **not** follow the
-   constraint, so stage 4 can confirm or refute the rejection. Include the positive control and the extra conclusions rows described in `_TEMPLATE-guided.md` §9a. A deferred line
+   constraint, so stage 4 can confirm or refute the estimate. Include the positive control and the extra conclusions rows described in `_TEMPLATE-guided.md` §9a. An undetermined line
    (not read against the rules) gets no case file and stays in
-   [`deferred.md`](deferred.md).
-4. Add the `_INDEX.md` Master Index row (Agent `guided`, Judgment) and, if the
-   module is new, a Notes entry. For a rejection written up from an existing
-   [`rejected.md`](rejected.md) entry, replace that entry with a one-line pointer to
+   [`undetermined.md`](undetermined.md).
+4. Add the `_INDEX.md` Master Index row (Agent `guided`, Estimate, Ground) and, if the
+   module is new, a Notes entry. For a negative estimate written up from an existing
+   [`predicted-negative.md`](predicted-negative.md) entry, replace that entry with a one-line pointer to
    the case file. A line that **qualifies but you are not writing up now** →
-   [`pending.md`](pending.md), never left only in stage 2's files.
+   [`predicted-positive.md`](predicted-positive.md), never left only in stage 2's files.
 5. If the feed was 3a, note the batch in
    `../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
    re-read.

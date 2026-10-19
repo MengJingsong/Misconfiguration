@@ -13,10 +13,10 @@ links repo-wide, resolve this file's relative links against `cases/`, not agains
 directory: skipping the file instead hides real breakage (that is how these two links went
 stale through the 2026-09-23 folder moves).
 
-**Judgment.** Record it in §10. A line that fails a rule is still written up: sections the
+**Estimate.** Record it, with its ground, in §10. A line with a negative estimate (it fails a rule) is still written up: sections the
 failed rule makes inapplicable (for example §6a or §8 when nothing is allocated) say
 `n/a: <reason>`, and §9 stays mandatory, designed to test the opposite claim, that usage
-does **not** follow the constraint, so stage 4 can confirm or refute the rejection.
+does **not** follow the constraint, so stage 4 can confirm or refute the estimate.
 
 ## 1. Location
 
@@ -220,7 +220,7 @@ settles.
 | The ceiling moves, but there is no disallow evidence | **Not confirmed** — something else derived from the same limit may be binding. Re-read. |
 | The limit is never reached | **Invalid run** — fix the setup (9b, 9c) and re-run. |
 
-**A `rejected` file** states in §9a the opposite claim, that usage does not follow the constraint, and its
+**A negative-estimate file** states in §9a the opposite claim, that usage does not follow the constraint, and its
 table must also hold these rows: usage follows the knob (**Refuted**, the rejection is wrong); usage is flat across
 the knob values while the positive control moves (**Confirmed**); the limit is never reached or the control does not
 move (**Not confirmed** or **Invalid**, never Confirmed). The setup (9b) includes the positive control, a workload
@@ -306,7 +306,8 @@ raw readings from 9d for every run.
 
 | Field | Content |
 |--------|---------|
-| **Judgment** | `qualifies` / `rejected` (cite the rule it failed, README §3.4–§3.6) / `deferred` (a deferred line has no case file; this value is for completeness only) |
+| **Estimate** | `positive` (usage follows the constraint) / `negative` (it does not) / `undetermined` (an undetermined line has no case file and stays in `undetermined.md`; this value is for completeness only). A prediction from the source; stage 4 confirms or refutes it. |
+| **Ground** | for a negative estimate, the rule it fails (README §3.4–§3.6) or the reason usage should not follow; otherwise `—` |
 | **Autonomous reference** | the `--autonomous` case file read for this case, or `none` (the user is asked per case or batch, see `playbook-guided.md` §1) |
 | **Stage-3 feed** | `3a` (from stage 1/2 — cite the `bands.md` row and its band) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
 | **Filed by / Date** | Who wrote this case up and when |
