@@ -1,125 +1,122 @@
 # Stage 3 — AI deep read
 
-Stage 3 reads the Cassandra source. For every case it produces **two
-independent verification solutions**, one from each path.
+Stage 3 reads the Cassandra source. For every target line it produces a **case
+file**: a trace of the constraint, a judgment of the line, and a two-tier
+verification solution that [stage 4](../stage4-runtime-verification/README.md) runs.
+Stages 1 and 2 only shrink and order what stage 3 must read; neither produces a
+finding.
 
-## 1. The two paths
+## 1. Two agents, one folder
 
-| | [Long path](long-path/README.md) | [Short path](short-path/README.md) |
+Two agents write case files. Both write into [`cases/`](cases/), and the file name
+says which one wrote it: `<stem>--autonomous.md` or `<stem>--guided.md`
+(`<stem>` is `[constraint]-[function]-[operand]`, [`../README.md` §6.1](../README.md#61-naming)).
+
+| | Autonomous agent | Guided agent |
 |---|---|---|
-| Status | the established method; 17 cases filed | **experiment** (decided 2026-10-02); first solution filed |
-| Method | the 7 steps of [`long-path/playbook.md`](long-path/playbook.md): the three rules ([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)), the three enforcement patterns (§3.2), the test-design method (§8) | two jobs and no rubric: trace the constraint, then design the verification solution from whatever the AI itself collects from the sources |
-| Decides | yes — qualifies, rejects or defers a line | **no** — it files no verdict |
-| Output | a case file in [`long-path/cases/`](long-path/cases/), or an entry in [`long-path/rejected.md`](long-path/rejected.md) / [`long-path/deferred.md`](long-path/deferred.md) | a solution file in [`short-path/cases/`](short-path/cases/) |
+| Playbook | [`playbook-autonomous.md`](playbook-autonomous.md): the target only | [`playbook-guided.md`](playbook-guided.md): the target plus human suggestions (the three rules, the enforcement patterns, the test-design method) |
+| Template | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) |
+| Judges the line | yes (`qualifies`, `does not cap`, `unsure`) | yes (`qualifies`, `rejected`, `deferred`) |
+| Output | `cases/<stem>--autonomous.md` | `cases/<stem>--guided.md` |
+| Started by | you, by hand, in a Claude Code session (desktop app) | an AI session in this repo; it asks you whether to read the autonomous file |
 
-**Why two paths.** The long path carries human method — the rules, the
-patterns, the design rules, the template. Nobody has tested whether that
-method helps the AI or limits it, because every filed case passed it by
-construction. The short path removes the method so the two solutions can be
-compared; both are run in
-[stage 4](../stage4-runtime-verification/README.md#two-paths-two-tiers-each),
-which reports their results side by side, not here.
+**Order for a new case.** Run the autonomous agent first. Run the guided agent only
+if needed (you decide, for example when the autonomous file is incomplete or
+unsure); otherwise it is skipped. A case may therefore have one file or two. There
+is no isolation rule: the guided agent may read the autonomous file, when you say
+so (section 3.2).
 
-**Each path designs two tiers.** Every **new** solution, from either path, is a
-**unit-tier** procedure (drive the relevant classes directly; measure the
-check's own operand) and a **cluster-tier** procedure (a real node; measure the
-actual resource), each complete with its own predictions and readings table. A
-tier that cannot be done is written as `n/a: <reason>` with what answers the same
-question instead. All 19 filed long-path cases are in this layout: three were
-converted at their stage-4 runs, eight on 2026-10-06, and the
-twelfth to nineteenth were written in it.
+**Stage 4 does not care which agent wrote a file.** It audits the verification
+solution in each case file, runs it, and saves the conclusion in
+[`../stage4-runtime-verification/results/`](../stage4-runtime-verification/results/).
+There is no comparison step and no scoring across agents.
 
-**Stage 3 never judges the pair.** The long path judges whether a line is a
-real case (its own verdict). Stage 4 runs both paths' solutions, both tiers
-each, and files the results side by side; there is no rating of the two
-solutions and no scoring across paths.
+## 2. Files
 
-## 2. Completing stage 3 for a case
+| File | Holds |
+|---|---|
+| [`playbook-autonomous.md`](playbook-autonomous.md) | The autonomous agent's whole instruction. |
+| [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls. |
+| [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. sources read, D. stage-4 feedback. |
+| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §9 is the test design; §10 holds provenance, judgment and stage-4 feedback. |
+| [`cases/`](cases/) | The case files of both agents. Flat; the module is a field, not a folder. |
+| [`_INDEX.md`](_INDEX.md) | One row per case file, with an Agent column. |
+| [`rejected.md`](rejected.md) | Lines read with the source open and refused, each citing the rule it failed. Existing entries have **no case file yet**; each leaves this file when its case file is written (section 4). |
+| [`deferred.md`](deferred.md) | Lines left **unjudged**; a worklist. No case file for a deferred line. |
+| [`pending.md`](pending.md) | Qualified against the three rules but not yet written up. |
 
-### 2.1 Before you start
+## 3. Completing stage 3 for a case
 
-- **Pick the case and its feed** (`3a` or `3b`, section 4). A case that already
-  has a long-path file needs only the short path.
-- **Who does what.** The long path is written by an AI session in this repo
-  following [`long-path/README.md`](long-path/README.md) §2 and the playbook, with
-  no human step. The short path is human plus AI: the human starts the blind
-  writer from a terminal with `run-case.py` (the writer is a separate, isolated
-  process, [`short-path/README.md`](short-path/README.md) §4); an AI session in
-  this repo does the rest (judge the audit, file the solution).
-- **Order (decided 2026-10-06): the long path goes first.** For every case the
-  long path (stage 3, then stage 4) comes before the short path's solution is
-  written or run. So only the short path has to be blind, and the long path has
-  no isolation rule. The short path needs the case's row in
-  [`long-path/_INDEX.md`](long-path/_INDEX.md): `run-case.py` reads the capacity
-  check's `file:line` and the feed from it, and nothing else of the row.
+### 3.1 Sequence
 
-### 2.2 The sequence
+| # | Step | Who | Result |
+|---|---|---|---|
+| 1 | Pick the case and its feed (section 5) | you (or an AI) | a stem and an entry pointer (`file:line`) |
+| 2 | Run the autonomous agent with the playbook, the template and the target | you start it by hand | `cases/<stem>--autonomous.md` |
+| 3 | Check the file against its template; add its `_INDEX.md` row (with sha256, section 6) | AI | a filed case |
+| 4 | Only if needed, run the guided agent | AI session in this repo | `cases/<stem>--guided.md`, or an entry in `deferred.md` |
+| 5 | Commit and push (when you ask) | AI | the file is frozen in history |
+| 6 | Hand off to stage 4 | AI | one results file per case file |
 
-| # | Step | Path | Who | Result |
-|---|---|---|---|---|
-| 1 | Pick the case and feed | both | AI (or you) | a stem and an entry pointer |
-| 2 | Write and verify the case file, with both tiers | long | AI | `long-path/cases/<stem>.md` and an `_INDEX.md` row; or an entry in `rejected.md`, `deferred.md` or `pending.md` |
-| 3 | Isolation test once per machine, then `run-case.py run` | short | **human** (a terminal) | the blind writer's solution and audit report in `~/sp-run/<stem>/` |
-| 4 | Judge the audit, then `run-case.py file` | short | AI | `short-path/cases/<stem>.md` and an `_INDEX.md` row |
-| 5 | Commit and push each filed solution (when you ask) | both | AI | the solution is frozen in history |
-| 6 | Hand off to stage 4 | both | long: AI; short: [`stage 4 short path`](../stage4-runtime-verification/short-path/README.md) | up to four runs and a side-by-side |
+### 3.2 The guided agent's first step
 
-### 2.3 Done when
+Before it starts a case, or a batch of cases, the guided agent asks you whether it
+may read the autonomous agent's file for each case. If you say yes, you name the
+file and the guided file records it in §10 ("Autonomous reference"). If you say no,
+it works from the target and the playbook alone.
 
-Both files are filed and committed, each with its index row. A line the long path
-rejects or defers has no long-path solution to pair with; running the short path
-on it is optional and is not part of "done" (it would probe for false
-rejections, and there is no rule yet for comparing that).
+### 3.3 Done when
 
-## 3. Rules that hold across both paths
+Each case file you want is filed, carries its judgment, and has its `_INDEX.md` row.
+A line that only has a `rejected.md` or `deferred.md` entry is not done.
 
-- **The short path is blind to the long path.** The session that writes a
-  short-path solution (the isolated writer) and the stage-4 executor that runs it
-  never see the long path's case file, its stage-4 results or harness,
-  `HANDOFF.md` or `comparison/`. Only the side-by-side writer, at the end, reads
-  both paths' results. The long path is not blind to anything: it runs first, so
-  the short path does not exist yet. The AI that judges the short writer's audit
-  has read the long path, which is fine: it judges leakage and completeness only,
-  never agreement with the long path, and never edits the solution.
-- **Frozen on filing.** Once a solution is filed, record its sha256 in the
-  path's `_INDEX.md`. A short-path solution is never edited; a new version is
-  filed with `--supersede` and the old one is renamed `--vN`. A long-path case
-  file takes only dated, documentation-only edits, and stage 4 runs the version
-  frozen in its results §1.
-- **Neither path runs anything or records a measured number.** Both design a
-  test; stage 4 executes it ([`../README.md` §7.5](../README.md#75-active-scope-decisions-revised-2026-09-25)).
-- **Same pinned source.** Both read `cassandra-5.0.9`
-  ([`../README.md` §2](../README.md#2-source-of-truth-version-pinning--read-this-first)).
-- **A line is recorded in exactly one place per path.** The long path's
-  verdict-filing rule is in [`long-path/README.md`](long-path/README.md).
+## 4. Where a line is recorded
 
-## 4. The two feeds
+Every line has exactly one home, and one rule decides it: **filed by the stage that
+judged it, not the stage that surfaced it.**
 
-Stage 3 is entered from either of two directions, whichever path is being
-written. **Both are required; they cover different blind spots.**
+| Outcome | Home |
+|---|---|
+| Qualifies | a case file in [`cases/`](cases/); a guided qualification not yet written up waits in [`pending.md`](pending.md) |
+| Does not cap / rejected (either agent) | **also a case file** in [`cases/`](cases/), with its judgment and the reason; its verification solution tests that usage does *not* follow the constraint |
+| Unsure / deferred | [`deferred.md`](deferred.md), or an `unsure` judgment in the case file; no verdict yet |
+| Existing `rejected.md` entries | stay where they are as a queue; **each one is to be written up as a case file**, and its entry is replaced by a one-line pointer to the file |
+
+Stage 2 cannot produce a (b)/(c) deferral: deciding that a line "would qualify only
+under (b) or (c)" means tracing where the verdict is read, which no row shows.
+All deferrals are therefore stage-3 judgments. If stage 2 reaches a line stage 3
+already judged, cite the entry rather than re-recording it.
+
+## 5. The two feeds
+
+Stage 3 is entered from either of two directions, for either agent. **Both are
+required; they cover different blind spots.**
 
 | Feed | What points stage 3 at a line | Coverage | Progress measurable? |
 |---|---|---|---|
 | **3a — from stage 1/2** | [`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md), band A first | bounded, enumerable (row counts, bands, batch table) | **yes** |
 | **3b — from raw source** | the session's own reading of subsystems and call chains | unbounded, opportunistic | **no** — there is no denominator |
 
-- **3a** is the cheap, systematic feed. Stages 1 and 2 exist precisely to
-  relieve stage 3's burden by shrinking and ordering what must be read.
-- **3b is not optional.** It is the standing insurance against stage 1's
-  *syntactic* blind spot — it found the `cdc_total_space` ternary, which
-  stage 1 cannot surface at all, because the comparison is not in an `if`
-  condition. It plays the same role against that blind spot that band C
-  plays against stage 2's *vocabulary* blind spot: insurance against a real
-  case that the mechanism is built not to see. Its weakness is cost: the full
-  source is far more than one session can read.
+- **3a** is the cheap, systematic feed. Stages 1 and 2 exist to shrink and order what stage 3 must read.
+- **3b is not optional.** It is the standing insurance against stage 1's *syntactic* blind spot: it found the `cdc_total_space` ternary, which stage 1 cannot surface at all, because the comparison is not in an `if` condition. It plays the same role against that blind spot that band C plays against stage 2's *vocabulary* blind spot. Its weakness is cost: the full source is far more than one session can read.
 
-**Record the feed (`3a` or `3b`) on every case and every entry.** The two have
-different coverage properties and only 3a has a denominator; without the
-field, "stage 3 progress" has no coherent answer.
+**Record the feed (`3a` or `3b`) on every case and every entry.** Only 3a has a
+denominator; without the field, "stage 3 progress" has no coherent answer.
 
-## 5. Folder map
+## 6. Rules that hold for both agents
 
-| Path | Holds |
-|---|---|
-| [`long-path/`](long-path/README.md) | The long path: playbook, case template, master index, the cases, and the rejected / deferred / pending worklists |
-| [`short-path/`](short-path/README.md) | The short path: contract, brief, template, index, and the solutions |
+- **Frozen on filing.** Once an autonomous file is filed, record its sha256 in
+  `_INDEX.md` §4. Both kinds of file take dated amendments from stage 4's design
+  audit (see its README); an autonomous file's index line then gets the amendment's
+  date and new hash, and a guided file's frozen §9 hash is recorded in its stage-4
+  results §1. Apart from those, a guided file takes only dated, documentation-only
+  edits. Stage 4 runs the version frozen in its results §1.
+- **Neither agent runs anything or records a measured number.** Both design a test;
+  stage 4 executes it ([`../README.md` §7.5](../README.md#75-active-scope-decisions-revised-2026-09-25)).
+- **Same pinned source.** Both read `cassandra-5.0.9`
+  ([`../README.md` §2](../README.md#2-source-of-truth-version-pinning--read-this-first)).
+- **Both tiers, always.** Every new file designs a unit tier and a cluster tier, or
+  writes `n/a: <reason>` for a tier that cannot be done, with what answers the same
+  question instead.
+- **A file's agent is its name.** `--autonomous` or `--guided`; a file is never
+  renamed to the other.

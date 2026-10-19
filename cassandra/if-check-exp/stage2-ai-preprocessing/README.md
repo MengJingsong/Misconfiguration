@@ -67,7 +67,7 @@ and that is the decision this folder reversed.
 pattern (b) or (c)" means tracing where the verdict is read and whether the
 branches diverge — which no row shows. Deferral is a stage-3 judgment and
 lives in
-[`../stage3-ai-deep-read/long-path/deferred.md`](../stage3-ai-deep-read/long-path/deferred.md).
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md).
 If a row *smells* like (b)/(c), **downrank it and let stage 3 decide**; do
 not park it and do not refuse it.
 
@@ -85,7 +85,7 @@ no reject step.
 ## One line, one place
 
 Rejections made by **stage 3** (source open, three rules applied) live in
-[`../stage3-ai-deep-read/long-path/rejected.md`](../stage3-ai-deep-read/long-path/rejected.md),
+[`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md),
 not here — they differ in kind: few, narrative, often
 deferred-rather-than-refused, and citing a rule rather than a row-level
 ground. If stage 2 reaches a line that stage 3 already judged, **cite that
@@ -153,13 +153,13 @@ a verdict — see [`bands.md`](bands.md).
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
-[`../stage3-ai-deep-read/long-path/pending.md`](../stage3-ai-deep-read/long-path/pending.md); 13
+[`../stage3-ai-deep-read/pending.md`](../stage3-ai-deep-read/pending.md); 13
 of them since filed as cases (the count is now 14), 5 more cited with filed cases (second sites, or a row the case shows is not a check), 2 still open; `OutboundConnection.java:398` (filed 2026-10-07 as `internode_application_send_queue_capacity`, with `:416` cited in it: that row is bookkeeping, not a check), `ReadCommand.java:715` and `RowIndexEntry.java:392` (filed 2026-10-06 as `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`), `Mutation.java:172` and `AbstractType.java:594`, filed 2026-10-06 as
 `max_mutation_size` and `max_value_size`, and the second site `CounterMutation.java:94` are the latest),
 **34 rejected** (in
-[`../stage3-ai-deep-read/long-path/rejected.md`](../stage3-ai-deep-read/long-path/rejected.md)) and
+[`../stage3-ai-deep-read/rejected.md`](../stage3-ai-deep-read/rejected.md)) and
 **10 deferred** (3 undecided in
-[`../stage3-ai-deep-read/long-path/deferred.md`](../stage3-ai-deep-read/long-path/deferred.md) §5,
+[`../stage3-ai-deep-read/deferred.md`](../stage3-ai-deep-read/deferred.md) §5,
 7 deferred earlier and since filed). 39 of the 65 were newly judged (10
 pending, 26 rejected, 3 deferred); 26 were already recorded by earlier passes
 and cited rather than re-judged (11 pending, 8 rejected, 7 deferred). Counts
@@ -187,7 +187,7 @@ a configurable number (`range_tombstone_list_growth_factor`,
 
 **Band B is consumed (2026-10-13).** All 174 units (157 rows, 17 helpers) read with
 the source open: **1 new candidate** (`repair_disk_headroom_reject_ratio`, 2 units,
-`pending.md` item 12, **filed 2026-10-15** as [`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`](../stage3-ai-deep-read/long-path/cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio.md)), **148 refused** (`rejected.md`, batch "band B", in eleven
+`pending.md` item 12, **filed 2026-10-15** as [`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`](../stage3-ai-deep-read/cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md)), **148 refused** (`rejected.md`, batch "band B", in eleven
 groups), **21 already recorded**, **2 joined** to open `deferred.md` items, **1
 undecided** (`deferred.md` §7, `cached_rows_fail_threshold`, a Rule 2 ruling). The
 recurring themes this file lists for B were accurate. The pass also found that
@@ -196,7 +196,7 @@ is a second decision point of the filed compaction-space case.
 
 **Band C is consumed (2026-10-13).** All 94 units (87 rows, 7 helpers) read with the
 source open: **1 new candidate** (`DOB_MAX_RECYCLE_BYTES`, `DataOutputBuffer.java:73`,
-`pending.md` item 13, the row band A3 pointed to; **filed 2026-10-15** as [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](../stage3-ai-deep-read/long-path/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE.md)), **86 refused** (`rejected.md`,
+`pending.md` item 13, the row band A3 pointed to; **filed 2026-10-15** as [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](../stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md)), **86 refused** (`rejected.md`,
 batch "band C", in six groups), **7 already recorded**, nothing deferred. The band's
 label, "named operands, nothing resource-shaped", held for 86 of 87 newly judged units.
 
@@ -253,8 +253,8 @@ so the honest workload is ~2,454 narrowed rows + ~185 helper judgments, not
 **Stage-3 outcomes from rows this folder ranked** (as of 2026-10-15): 11 cases established,
 all from feed 3a (`max_space_usable_for_compactions_in_percentage`, `max_hints_size_per_host`,
 `max_mutation_size`, `max_value_size`, `CACHEABLE_MUTATION_SIZE_LIMIT`, `local_read_size_fail_threshold`, `row_index_read_size_fail_threshold`, `internode_application_send_queue_capacity`, `repair_session_space`, `repair_disk_headroom_reject_ratio`, `DOB_MAX_RECYCLE_BYTES`); the band-A2 row `IndexSummaryBuilder.java:108` is the second site of the feed-3b case `Integer_MAX_VALUE`; no candidate from a ranked row awaits write-up
-(`../stage3-ai-deep-read/long-path/pending.md`; item 8 is from the capacity-word pass) and 5 undecided rows
-(`../stage3-ai-deep-read/long-path/deferred.md` §5 to §7). The other 12 of the 23
+(`../stage3-ai-deep-read/pending.md`; item 8 is from the capacity-word pass) and 5 undecided rows
+(`../stage3-ai-deep-read/deferred.md` §5 to §7). The other 12 of the 23
 filed cases came from feed 3b (the helper `ResultSetBuilder.shouldReject()` behind `coordinator_read_size_fail_threshold` was banded D, batch 35).
 
 ## Batch coverage
@@ -286,12 +286,12 @@ it to reproduce a batch.
 |---|---|---|---|
 | `concurrent` | 17 | 2026-09-18 | 0 survivors — all thread-pool/permit concurrency checks (Rule 2 fail, same reasoning as `concurrent_compactors`). |
 | `cache` | 15 | 2026-09-18 | 0 survivors — ref-counting, overflow guards, and trivial validation; no capacity-vs-limit divergence found. |
-| `transport` | 89 | 2026-09-18 | 1 survivor, since promoted to a case file + rejects logged in `../stage3-ai-deep-read/long-path/rejected.md`. |
-| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up. Rejects logged in `../stage3-ai-deep-read/long-path/rejected.md`. |
-| helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `../stage3-ai-deep-read/long-path/_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `../stage3-ai-deep-read/long-path/deferred.md` as pattern (b). Those 21 helpers now carry band D in `bands.csv`; the
+| `transport` | 89 | 2026-09-18 | 1 survivor, since promoted to a case file + rejects logged in `../stage3-ai-deep-read/rejected.md`. |
+| `db/compaction` | 208 | 2026-09-18 | 0 survivors under the then-current scope; 1 row later reclassified as a live candidate and since written up. Rejects logged in `../stage3-ai-deep-read/rejected.md`. |
+| helper rows in those four subtrees | 114 | 2026-09-22 | **Done.** 23 distinct helpers judged; 21 rejected (108 rows), 1 cited to an existing `../stage3-ai-deep-read/_INDEX.md` entry (4 rows), 1 candidate found: `Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in `../stage3-ai-deep-read/deferred.md` as pattern (b). Those 21 helpers now carry band D in `bands.csv`; the
 per-helper arguments are in git history at `43a3c27`. |
 
-| **Capacity-word pass, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done** — but by **stage 3**, not stage 2. 4 candidates (`../stage3-ai-deep-read/long-path/pending.md`), 22 rejected (`../stage3-ai-deep-read/long-path/rejected.md`), 3 deferred (`../stage3-ai-deep-read/long-path/deferred.md` — **only 2 are on file**, see its §1c), 5 already covered. Spans ~15 packages and completes none of them — see the note below. |
+| **Capacity-word pass, corpus-wide** (not a package) | 34 | 2026-09-22 | **Done** — but by **stage 3**, not stage 2. 4 candidates (`../stage3-ai-deep-read/pending.md`), 22 rejected (`../stage3-ai-deep-read/rejected.md`), 3 deferred (`../stage3-ai-deep-read/deferred.md` — **only 2 are on file**, see its §1c), 5 already covered. Spans ~15 packages and completes none of them — see the note below. |
 
 **Narrowed: 329 of 4,489 rows. Helper: 114 of 1,099 rows. Capacity-word pass: 34
 rows (deep-read, overlapping the package counts).**
@@ -299,7 +299,7 @@ rows (deep-read, overlapping the package counts).**
 > **Those 34 rows are not a package.** They are scattered across ~15
 > packages, so no package may be marked done on their account. When a package
 > batch runs later, some of its rows are already judged — check
-> `../stage3-ai-deep-read/long-path/pending.md`, `rejected.md` and `deferred.md` before
+> `../stage3-ai-deep-read/pending.md`, `rejected.md` and `deferred.md` before
 > re-reading a row. This is why coverage is now tracked per row rather than
 > per band.
 >
@@ -383,7 +383,7 @@ remaining work and are better attempted once the judging pace is established.
   need the source — moved to [`playbook.md`](playbook.md) first, since that
   guidance is still live; the 108 refused rows carry band D in `bands.csv`,
   and the per-helper arguments stay recoverable in git history at `43a3c27`.
-  **`../stage3-ai-deep-read/long-path/rejected.md` is now the experiment's only
+  **`../stage3-ai-deep-read/rejected.md` is now the experiment's only
   rejection file.** No verdict changed and no count moved.
 - **2026-09-24** — **coverage closed**: the 329 rows in the four
   already-triaged subtrees, and the 8 anchor rows, had no band — 4,438 units
@@ -418,7 +418,7 @@ remaining work and are better attempted once the judging pace is established.
   and the 114 unread helper rows inside the four done batches recorded.
 - **2026-09-22** — folder restructured into `positives.md` (now `bands.md`) /
   `negatives.md` (since deleted) /
-  `../stage3-ai-deep-read/long-path/deferred.md`; the former single `candidates.md` was folded into this
+  `../stage3-ai-deep-read/deferred.md`; the former single `candidates.md` was folded into this
   README (coverage table) and those three files.
 - **2026-09-18** — disk (on-disk bytes) added alongside memory to this
   folder's scope, per Jingsong's call; see

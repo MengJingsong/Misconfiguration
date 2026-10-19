@@ -1,35 +1,31 @@
-# [case-file stem] — stage-4 results  <!-- file: long-path/results/[case-file stem].md or short-path/results/[case-file stem].md -->
+# [case-file stem] — stage-4 results  <!-- file: results/[case-file stem].md; the stem ends in --guided or --autonomous -->
 
-> **Case:** [`[case-file stem]`](../../../stage3-ai-deep-read/long-path/cases/[case-file stem].md)
-> (short path: `../../../stage3-ai-deep-read/short-path/cases/[case-file stem].md`)
+> **Case:** [`[case-file stem]`](../../stage3-ai-deep-read/cases/[case-file stem].md)
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 >
-> **Path:** long / short. One results file per path, each in its path's folder.
-> For a short-path file (`short-path/results/[case-file stem].md`), the "case file" below is the short-path
-> solution, and for each tier "§9a" means that tier's predictions and conclusions
-> table: B2f and B2g (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or
-> B3a–B3e. If the case has both paths, see [`comparison/[case-file stem].md`](../../comparison/[case-file stem].md)
-> for the side-by-side.
+> **Agent:** guided / autonomous (the suffix of the case-file stem). For an autonomous
+> file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
+> (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; and the case
+> file's feedback section is its section D, not §10. One results file per case file.
 
 **Relative links in this template** are written for where a *copy* of it lives
-— inside `long-path/results/` or `short-path/results/` — not for the template's own location two levels up.
+— inside `results/` — not for the template's own location one level up.
 
 **Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../../README.md`](../../README.md#the-run-protocol).
+[`../README.md`](../README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 
 | Field | Content |
 |---|---|
-| **Case-file version** | **Long path:** the commit that holds the case file, and the hash of §9's text (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`), recorded after the audit's amendments; §9a is frozen at this version. **Short path:** the sha256 of the solution file (`sha256sum`), which must equal the one in `short-path/_INDEX.md`; the file is never amended |
-| **Harness** | committed paths under `../harness/[case-file stem]/`, and their commit — or "none" |
+| **Case-file version** | **Guided file:** the commit that holds the case file, and the hash of §9's text (`sed -n '/^## 9\. /,/^## 10\. /p' <case file> \| git hash-object --stdin`), recorded after the audit's amendments; §9a is frozen at this version. **Autonomous file:** the commit that holds the file, and the sha256 of the whole file (`sha256sum`) recorded after the audit's amendments; this hash goes in `_INDEX.md` (column sha256) |
+| **Harness** | committed paths under `harness/[case-file stem]/`, and their commit — or "none" |
 | **Tiers and values** | which tiers (unit / cluster) and capacity values this file covers |
 | **Audit bottom line** | Ready / Ready after amendments / Blocked — date |
-| **Files read** | **Short path only:** every file opened from the workspace and every path touched outside it, one per line, so the blindness check (`short-path/run-executor.py collect`) has a record to compare with the transcript. The long path's files, `HANDOFF.md` and `comparison/` must not appear. A long-path results file leaves this row out |
 
 ### 1.1 Design audit
 
@@ -191,7 +187,7 @@ how it was resolved (see "Compare and decide" in the README).
 Jingsong may overrule any verdict at any time; record an override here with its
 date and reason.
 
-| Tier | Verdict (§9a row; for a short-path file, the B2g / B3g row) | Basis | Date |
+| Tier | Verdict (§9a row; for an autonomous file, the B2g / B3g row) | Basis | Date |
 |---|---|---|---|
 | Unit | | run 1 + self-check / run 1 + run 2 | |
 | Cluster | | run 1 + self-check / run 1 + run 2 | |

@@ -41,123 +41,64 @@ Within stage 4, every step is done by an AI session:
 
 | Step | What it does | Output |
 |---|---|---|
-| 0. Design audit | Checks the case's §9 against the requirements below; recommends and applies amendments; freezes §9a | results §1 |
-| 1. Instruments | Writes, commits and checks the harness; confirms the environment | `<path>/harness/`, results §1 |
+| 0. Design audit | Checks the case file's design (§9 of a guided file; section B of an autonomous file) against the requirements below; recommends and applies amendments; freezes the design | results §1 |
+| 1. Instruments | Writes, commits and checks the harness; confirms the environment | `harness/<case-file-stem>/`, results §1 |
 | 2. Run 1 | Follows the runbook (§9b–§9e) exactly, scripted and logged | raw readings, command log |
 | 3. Conclusion | Matches the readings to one §9a row, with its logic in a fixed format | results §4 |
 | 4. Self-check | Re-reads every cited raw file against the conclusion and its logic | results §5 |
-| 5. Verdict and feedback | Files the verdict, the case's §10 field, any amendment | results §8 |
+| 5. Verdict and feedback | Files the verdict, the case file's feedback field (§10 of a guided file, section D of an autonomous file), any amendment | results §8 |
 | Run 2 (optional) | A fresh AI session repeats the runbook by hand, not run 1's script | results §6–§7 |
 
-**Every step runs once per path and per tier.** A case with a short-path solution has up to four runs (long unit, long cluster, short unit, short cluster); see "Two paths, two tiers each" below.
+**Every step runs once per case file and per tier.** A case file has up to two runs (unit tier, cluster tier). A case with two files, one from each agent, is two independent sets of runs; stage 4 does not compare them.
 
 ## What stage 4 consumes
 
-Section 9 of a case file in [`../stage3-ai-deep-read/long-path/cases/`](../stage3-ai-deep-read/long-path/cases/).
-Its intro and §9a are the summary: testability, the claim under test, the
-procedure, the prediction, and the conclusions table every run is judged
-against. §9b–§9e are the runbook: setup, workload, observables, and the
-scenario steps.
+**Every case file in [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/), whichever agent wrote it.** The suffix of the file name says which:
+`<stem>--guided.md` or `<stem>--autonomous.md`. The results file and the harness folder take the same name, so a
+case's stem including its suffix is its key everywhere in this stage. A file whose judgment is `rejected` or `does not cap`
+is run like any other: its claim is that usage does **not** follow the constraint, and the conclusion table says what each
+outcome means for that claim.
 
-**Read §9a's Testability line first.** A case marked *needs patched build* or
-*not settable* is not worth a CloudLab allocation until someone patches the
-build; a config-testable one can be run as written.
-
-**Cases still in the old §9 layout** keep Testability in §9's field table, the
-prediction in §9d, the conclusions in §9e and §9f, and the controls in §9g.
-**Convert a case to the new layout before its first run**: §9a is what every
-run is judged against, so it has to exist and be audited first. Which cases
-are converted is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md), not here.
-
-**A short-path solution** ([`../stage3-ai-deep-read/short-path/cases/`](../stage3-ai-deep-read/short-path/cases/))
-is what stage 4 consumes for the short path of a case that has one. It is frozen
-whole (its sha256 is in
-[`../stage3-ai-deep-read/short-path/_INDEX.md`](../stage3-ai-deep-read/short-path/_INDEX.md)),
-has no feedback field and is never amended; what a run learns goes into its
-results file. Its parts play the roles of §9, per tier; the mapping is in "Two
-paths, two tiers each" below.
-
-**A long-path case written before the two-tier rule** may describe one tier or none. The audit adds the missing tier as a dated
-amendment before the freeze (a unit tier: drive the check's classes directly; a cluster tier: a real node with the knob at the
-boundary), or records `n/a: <reason>` for it with what answers the same question instead. A tier is never silently dropped.
-
-If §9 cannot be executed as written, that is itself feedback — record it as a
-runbook defect (below) rather than improvising a different experiment, because
-a substituted workload no longer tests the traced path.
-
-## Two paths, two tiers each
-
-**Applies to a case that has both a long-path case file and a short-path
-solution** ([stage 3](../stage3-ai-deep-read/README.md)). A case with only a
-long-path file follows the protocol below unchanged, as 16 of the 17 filed cases do
-today. **The long path always goes first** (decided 2026-10-06): its case file, then its
-runs, are done before the short path's solution is written or run. Only the short path
-has to be blind; the long path has no isolation rule. Each solution has a **unit tier** and a **cluster tier**, so a case has up
-to four runs: long unit, long cluster, short unit, short cluster. Stage 4 runs
-**all** of them: there is no rating of the two solutions beforehand, no merging
-of them into one run, and no scoring across paths. (Decided 2026-10-05; it
-replaces the pre-run comparison of 2026-10-02.)
-
-**Each path is its own run, on the same protocol.** Audit, instruments, run 1,
-conclusion, self-check, verdict and optional run 2 apply to each path and tier
-as written below. The conclusion matches the readings against **that path's own**
-prediction and readings table, never the other path's.
-
-| Protocol term | Long path | Short path |
+| Protocol term | Guided file | Autonomous file |
 |---|---|---|
-| The design that is frozen | §9 of the case file (§9a frozen; hash of §9's text) | the whole solution file (its sha256 in `short-path/_INDEX.md`) |
+| The design that is frozen | §9 (§9a frozen; hash of §9's text) | the whole file (sha256 of the file after the audit's amendments) |
 | Unit tier / cluster tier | the §9 runbook for that tier | B2 / B3 |
 | Runbook | §9b–§9e | B2a–B2e / B3a–B3e |
 | Prediction | §9a | B2f / B3f |
 | Conclusions table (what a reading means) | §9a | B2g / B3g |
 | Controls | §9a and the runbook | B2h / B3h |
-| Results file | `long-path/results/<stem>.md` | `short-path/results/<stem>.md` |
-| Harness | `long-path/harness/<stem>/` | `short-path/harness/<stem>/` |
-| Feedback into the case file (§10) | yes | none: the solution is never amended |
+| Feedback field in the case file | §10 | section D |
+| Results file | `results/<stem>--guided.md` | `results/<stem>--autonomous.md` |
+| Harness | `harness/<stem>--guided/` | `harness/<stem>--autonomous/` |
 
-Each path's results and harness live in that path's folder, `long-path/` or
-`short-path/` (split 2026-10-05). `comparison/` is shared and read only by the
-side-by-side writer.
+Below, "§9a" means the prediction and conclusions table of the tier being run, and "§9b–§9e" its runbook, in either kind of file.
 
-A tier a solution declares `n/a: <reason>` is not run; the results file says so
-and gives the reason. The short path's own predictions are frozen at the
-audit like the long path's (the hash goes in results §1).
+**Read the Testability line first** (§9a of a guided file; B1 or the head of a tier in an autonomous file). A case marked
+*needs patched build* or *not settable* is not worth a CloudLab allocation until someone patches the build; a
+config-testable one can be run as written.
 
-**Independence (the short path only).**
-- **The long path's executor** is an ordinary AI session in this repository: it reads whatever it needs and follows the
-  protocol below. Nothing is hidden from it, because the short path does not exist yet when it runs.
-- **The short path's executor** reads only its own solution, the shared files (this README, `_TEMPLATE.md`,
-  `environment.md`) and the Cassandra source. It never sees the long path's case file, results, harness or readings,
-  `HANDOFF.md`, or `comparison/`. It is therefore not a session in this repository: a human starts it with
-  [`short-path/run-executor.py`](short-path/run-executor.py), which builds a workspace outside the repository holding only
-  those files, starts an interactive Claude Code session in it with the file tools confined to the workspace and no
-  memory, MCP servers or sub-agents, and afterwards audits every transcript (`collect`, using
-  [`check-blindness.py`](check-blindness.py)). The whole procedure, what is enforced and what is only audited, and the
-  prompts for the AI sessions around it are in [`short-path/README.md`](short-path/README.md). The shared files therefore
-  have to stay free of the long path's case-specific designs; those live in [`long-path/`](long-path/README.md).
+**A file written before the two-tier rule** may describe one tier or none. The audit adds the missing tier as a dated
+amendment before the freeze (a unit tier: drive the check's classes directly; a cluster tier: a real node with the knob at the
+boundary), or records `n/a: <reason>` for it with what answers the same question instead. A tier is never silently dropped.
+Which cases are converted is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md), not here.
+
+A tier a file declares `n/a: <reason>` is not run; the results file says so and gives the reason.
+
+If the design cannot be executed as written, that is itself feedback — record it as a runbook defect (below) rather than
+improvising a different experiment, because a substituted workload no longer tests the traced path.
+
+## Order and independence
+
+- **Unit tier before cluster tier** within a case file: the cheap tier tests the protocol first.
+- **Each case file is its own run, on the same protocol.** The conclusion matches the readings against **that file's own**
+  prediction and readings table, never another file's. If a case has an autonomous and a guided file whose conclusions
+  differ, record both in their own results files; neither is overruled by the other. There is no side-by-side file and no
+  scoring across agents (decided 2026-10-19; it replaces the 2026-10-05 rule of four runs per case with a comparison).
+- **No blind executor.** The session that runs a file is an ordinary AI session in this repository and reads whatever it
+  needs. The isolation machinery of the earlier short path (the isolated executor, its blindness check and the prompts around
+  it) was removed on 2026-10-19.
 - Runs on the shared infrastructure follow the safety rules below: a separate local clone per run, one run at a time per
-  node, every process stopped and checked afterwards. Reusing a build or a node image between paths is fine; the short
-  executor never reuses the long path's harness, logs or readings.
-- Order: the long path first; unit tier before cluster tier within a path (the cheap tier tests the protocol first). The
-  long path's stage 4 may run before or after the short path's stage 3; the short executor is blind either way.
-
-**The side-by-side.** After the last run of a case, the session that finished it
-writes `comparison/<stem>.md` from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md)
-and a line in [`comparison/_INDEX.md`](comparison/_INDEX.md). It holds a table of
-verdicts by path and tier, whether the conclusions agree (in prose), findings that
-only one path's design produced, runbook defects per path, and cost. It edits
-neither solution nor any results file, and rates nothing.
-
-**What the two paths' results do.**
-- **Long path:** unchanged. A refutation or bypass amends the case file; the
-  numbers stay in the results file.
-- **Short path:** its results file is the record. Its solution is not amended,
-  and its brief and template are not corrected from run feedback (that would put
-  human method back into the path under test). Runbook defects go in results §3.
-- **Disagreement:** the readings decide each path's own prediction row. If the
-  two paths' conclusions differ, record both and the point where the designs
-  differ in the side-by-side; neither is overruled by the other. A re-run of that
-  point is optional and is a new run of one path on its own protocol.
+  node, every process stopped and checked afterwards.
 
 ## Step 0 — the design audit
 
@@ -188,21 +129,19 @@ with each, and a bottom line — **Ready**, **Ready after amendments**, or
   allowed only here, before run 1 of that tier, and only for a reason that does
   not depend on any reading.
 
-**Auditing a short-path solution.** Audit it for **runnability and safety
-only** — group D, plus the shared-infrastructure rules below, plus a check that
-it states its predictions before any run. Do not apply groups A to C to it:
-they are the long path's design requirements, and applying them would pull the
-short solution into the long path's mold and defeat the purpose of running the two paths independently. Record
-what groups A to C *would* have flagged as a side note in results §1, marked as
-not applied. Audit each tier the solution defines (B2 and B3). The audit never edits the short file; fixes go to the harness and
-the runbook defect log.
+**Auditing an autonomous file.** Apply groups A to D as for a guided file, reading each group against the file's own sections
+instead of §9. Group B's "How this verifies the hypothesis" block is mapped, not added: the hypothesis is B1, the test and
+logic are B2b–B2e and B3b–B3e, the prediction is B2f and B3f, and the conclusions table is B2g and B3g (refuted-if is the
+row of B2g and B3g that contradicts B1). Amendments are dated, appear in the file next to the text they change, and are
+recorded in the stage-3 index (`_INDEX.md` §4) with the new sha256, which is the frozen version in results §1. The file's
+feedback goes in its section D.
 
 ## The run protocol
 
 ### Before run 1
 
 1. **Audit** (above), then **freeze the prediction.** Record in the results file
-   the commit that holds the case file and a hash of §9's text:
+   the commit that holds the case file and, for a guided file, a hash of §9's text (for an autonomous file, its sha256):
    `sed -n '/^## 9\. /,/^## 10\. /p' <case file> | git hash-object --stdin`.
    The hash covers §9 only, because the file's §10 takes the feedback after every
    run. §9a is now fixed. If §9a turns out to be wrong later, that is a dated
@@ -210,7 +149,7 @@ the runbook defect log.
    below.
 2. **Commit the instruments** — when Jingsong asks for a commit, as always.
    Any code a run needs that is not upstream — a restored test class, a Byteman
-   rule — goes under `<path>/harness/<case-file-stem>/` in this folder (`long-path/` or `short-path/`) before run 1,
+   rule — goes under `harness/<case-file-stem>/` in this folder before run 1,
    and run 1 and any run 2 use those same files. Check each instrument before
    run 1 (parse-check a rule, a known-answer run) and record the check. Share
    instruments, not procedure: a run 2 follows the runbook by hand.
@@ -288,7 +227,7 @@ With no human review, the conclusion has to survive the AI's own second look.
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
 | A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
 | Stop every process a run starts, and check none is left: `ps -eo cmd | grep '[C]assandraDaemon'` (not `pgrep -f` inside an inline `ssh host '...'` string: it matches its own shell). | A leftover node holds ports and memory and contaminates the next run. |
-| Commit small text excerpts under `<path>/results/<case-file-stem>/run1/` (and `run2/`, if there is one); keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
+| Commit small text excerpts under `results/<case-file-stem>/run1/` (and `run2/`, if there is one); keep full logs outside the repo and record their path. | Keeps the repo small without losing the evidence. |
 
 ## Environment
 
@@ -306,15 +245,13 @@ that judged it**, so measurements belong here, not in the case file.
 
 | Feedback kind | Lands in |
 |---|---|
-| The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `long-path/results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
-| A case's two paths side by side — verdicts by path and tier, whether the conclusions agree, findings only one path produced, defects, cost | `comparison/<stem>.md`, copied from [`comparison/_TEMPLATE.md`](comparison/_TEMPLATE.md), and a line in `comparison/_INDEX.md` |
-| A short-path result (audit, runs, self-check, verdict, per tier) | `short-path/results/<stem>.md`; the short solution file is never amended |
+| The design audit, every run, and the self-check — environment, readings, the AI's conclusion and logic, any comparison with run 2, and the verdict | a results file, `results/<case-file-stem>.md`, copied from [`_TEMPLATE.md`](_TEMPLATE.md) |
 | A refutation of the traced path (a **Refuted** row of §9a) | **amends the case file** — the affected section, dated, citing the results file |
 | A bypass confirmed at runtime (the bypass row of §9a) | amends the case's §8 ceiling claim and its Target-3 note; the numbers stay here |
 | A runbook defect (a step cannot run as written) | the results file's defect log, plus a dated fix to the case's §9b–§9e (only if §9a is unchanged; otherwise back to the audit) |
 | A self-check part that does not hold, or a run 2 that disagrees with run 1, and cannot be resolved; or a human override | the results file; the case stays unverified (or follows the override, with its date and reason) |
 
-Every case file carries a **Stage-4 feedback** field in §10, reading "none yet"
+Every case file carries a **Stage-4 feedback** field (§10 of a guided file, section D of an autonomous file), reading "none yet"
 until a run reports. That field is the index of this relationship; keep it
 current, because a case whose §8 claim has been refuted at runtime but still
 reads as settled prose is the worst outcome this pipeline can produce.
@@ -324,10 +261,8 @@ reads as settled prose is the worst outcome this pipeline can produce.
 Every filed case carries a §9 test design, so stage 4 waits only on execution. **Which cases have run, and what comes next,
 is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds the protocol only.
 
-- **The long path** (an AI session in this repository): start with [`long-path/README.md`](long-path/README.md), which lists
-  what the closed cases teach, which cases are cheap to start with and which need a cluster before they say anything, and
-  the worked examples.
-- **The short path** (a human starts it, then an AI): start with [`short-path/README.md`](short-path/README.md).
+- **Any case file:** start with [`case-notes.md`](case-notes.md), which lists what the closed cases teach, which are cheap
+  to start with and which need a cluster before they say anything, and the worked examples.
 - **Setting up a node:** [`environment.md`](environment.md).
 
 **Scripts are per case, not a shared pattern.** Each case's workload, observables and instruments differ (a unit test, a

@@ -75,14 +75,12 @@ mount, alongside other resources that are **not** part of this repo:
 directories directly under `/proj/`, so the `cassandra-src` source clone lives
 one level down instead.
 
-**This repo is no longer checked out on the shared mount** (removed 2026-10-06).
-Every node sees that mount, so a copy there let the short path's stage-4 executor
-read the long path's files, which breaks the blindness that comparison rests on
-(`cassandra/if-check-exp/stage4-runtime-verification/`). Keep your checkout on a
-workstation, as a sibling of `cassandra-src`. What the old copy held that is not on
-GitHub (`config/environment.sh`, the gitignored CodeQL results, a `.claude/`
-folder) is archived at `/proj/misconfiguration-PG0/tarfiles/repo-copy-untracked-2026-10-06.tgz`.
-Do not put a checkout back under `git-repos/`.
+**Checkout location.** The repo was removed from the shared mount on 2026-10-06 so that the short path's
+stage-4 executor, which every node could reach through that mount, could not read the long path's files. That
+reason ended on 2026-10-19, when the blind executor and the leakage controls were removed (stage 3 now has an
+autonomous and a guided agent, and stage 4 runs every case file in one folder), so a checkout under `git-repos/` is
+allowed again. What the old copy held that is not on GitHub (`config/environment.sh`, the gitignored CodeQL results,
+a `.claude/` folder) is archived at `/proj/misconfiguration-PG0/tarfiles/repo-copy-untracked-2026-10-06.tgz`.
 
 ## 3. Path configuration: local refs vs. external refs
 
