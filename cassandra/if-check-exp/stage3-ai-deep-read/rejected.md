@@ -456,3 +456,16 @@ kind of finding as the send-queue case's reserve key read from its receive-side 
   threshold (above) all trigger a flush rather than refuse, so none is a ceiling. They
   are refused here, but they are where Target 3's "usage can exceed the configured
   value" findings are likely to be.
+
+## Written up by the autonomous agent — 2026-10-19
+
+First wave of the rejected-entry write-up by the autonomous agent (target `file:line` only). The agents read the source and ran nothing. **Their judgments are recorded in the case files and are not yet reviewed; the entries above keep the recorded ground.** Two of the six overlap a closed case, and two target the same constraint.
+
+| Rejected site | Case file (`cases/…--autonomous.md`) | Agent's judgment | Against the recorded ground |
+|---|---|---|---|
+| `QueryProcessor.java:825` | [`prepared_statements_cache_size-storePreparedStatement-capacityToBytes`](cases/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md) | qualifies | reverses |
+| `Message.java:817` | [`internode_max_message_size-inferMessageSize-size`](cases/internode_max_message_size-inferMessageSize-size--autonomous.md) | qualifies | reverses; same constraint as the next row |
+| `OutboundConnection.java:331` | [`internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes`](cases/internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md) | qualifies (weakly) | reverses; send side of the same constraint |
+| `HintsBuffer.java:190` | [`max_mutation_size-allocateBytes-slabCapacity`](cases/max_mutation_size-allocateBytes-slabCapacity--autonomous.md) | qualifies, with a caveat | reverses in part; same mechanism as the closed `MAX_HINT_BUFFERS` case |
+| `HintsWriter.java:237` | [`WRITE_BUFFER_SIZE-append-remaining`](cases/WRITE_BUFFER_SIZE-append-remaining--autonomous.md) | does not cap | agrees |
+| `AbstractMessageHandler.java:464` | [`internode_application_receive_queue_capacity-releaseCapacity-queueCapacity`](cases/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md) | qualifies | reverses in part; release half of the closed `internode_application_receive_queue_capacity` case |

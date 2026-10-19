@@ -47,6 +47,13 @@ on an autonomous row.
 | `native_transport_max_concurrent_connections` | [`ConnectionLimitHandler.channelActive():93`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/ConnectionLimitHandler.java#L93) | — | `transport` | `connection` | (a) | 3b | guided | rejected | [`native_transport_max_concurrent_connections-channelActive-limit`](cases/native_transport_max_concurrent_connections-channelActive-limit--guided.md) |
 | `native_transport_queue_max_item_age_threshold` | [`Dispatcher.hasQueueCapacity():348`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/Dispatcher.java#L348) | — | `transport` | `queued request` | (b) | 3b | guided | rejected | [`native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime`](cases/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided.md) |
 
+| `prepared_statements_cache_size` | [`QueryProcessor.storePreparedStatement():825`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cql3/QueryProcessor.java#L825) | — | `cql3` | `prepared statement` | — | 3a | autonomous | qualifies | [`prepared_statements_cache_size-storePreparedStatement-capacityToBytes`](cases/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md) |
+| `internode_max_message_size` | [`Message.inferMessageSize():817`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/Message.java#L817) | — | `net` | `message` | — | 3a | autonomous | qualifies | [`internode_max_message_size-inferMessageSize-size`](cases/internode_max_message_size-inferMessageSize-size--autonomous.md) |
+| `internode_max_message_size` | [`OutboundConnection.enqueue():331`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/OutboundConnection.java#L331) | — | `net` | `message` | — | 3a | autonomous | qualifies | [`internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes`](cases/internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md) |
+| `max_mutation_size` | [`HintsBuffer.allocate():190`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsBuffer.java#L190) | — | `hints` | `hint slab` | — | 3a | autonomous | qualifies | [`max_mutation_size-allocateBytes-slabCapacity`](cases/max_mutation_size-allocateBytes-slabCapacity--autonomous.md) |
+| `WRITE_BUFFER_SIZE` | [`HintsWriter.append():237`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriter.java#L237) | — | `hints` | `write buffer` | — | 3a | autonomous | does not cap | [`WRITE_BUFFER_SIZE-append-remaining`](cases/WRITE_BUFFER_SIZE-append-remaining--autonomous.md) |
+| `internode_application_receive_queue_capacity` | [`AbstractMessageHandler.releaseCapacity():464`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/AbstractMessageHandler.java#L464) | — | `net` | `message` | — | 3a | autonomous | qualifies | [`internode_application_receive_queue_capacity-releaseCapacity-queueCapacity`](cases/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md) |
+
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -54,7 +61,7 @@ on an autonomous row.
 | Metric | Count |
 |--------|-------|
 | Modules covered | 12 (guided files) |
-| Total case files | 31 (29 guided, 2 autonomous) |
+| Total case files | 37 (29 guided, 8 autonomous) |
 | of which judged `rejected` | 5 (guided, written up 2026-10-19 as the pilot of the `rejected.md` write-up) |
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
@@ -313,3 +320,9 @@ dated amendment adds a line here with its date and the new hash.
 |---|---|---|
 | `memtable_heap_space-tryAllocate-limit--autonomous.md` | `31f017feea820dd6d9df3db04ef0d5aa50a81c1733819850d1fd027795e46126` | 2026-10-05 (claude-sonnet-5) |
 | `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous.md` | `e8b505e1802722d76642c664e71a55ee2cbb23536bb88e1852edecce143ae7b1` | 2026-10-08 (claude-sonnet-5) |
+| `prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md` | `eed9dba82b0fdb52ac626f8d151eccd3c7137b75082cb130d1a0651659ee36d0` | 2026-10-19 (autonomous agent, rejected-entry write-up) |
+| `internode_max_message_size-inferMessageSize-size--autonomous.md` | `4b726289116b96b6ed0e1cfd4aae7a84b549e885cef2a36f92231314f59db378` | 2026-10-19 (autonomous agent, rejected-entry write-up) |
+| `internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md` | `e1f4831a8d6938ce798239b9a0672435762160608ef8f7a4e63437d7d4481c30` | 2026-10-19 (autonomous agent, rejected-entry write-up) |
+| `max_mutation_size-allocateBytes-slabCapacity--autonomous.md` | `1aeb680dfb712e7c143c1b6071d9c39b0c2104515b049d975b44ac8de35945c4` | 2026-10-19 (autonomous agent, rejected-entry write-up) |
+| `WRITE_BUFFER_SIZE-append-remaining--autonomous.md` | `aa666f45bd7949f757935e411dd7f419c61a3910a9e1c0bd52891ac86876fea0` | 2026-10-19 (autonomous agent, rejected-entry write-up) |
+| `internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md` | `3ab71fddc776457850b50735cccaba514d8e02a5c22876ab5e0e2adfed496bf1` | 2026-10-19 (autonomous agent, rejected-entry write-up) |
