@@ -2,7 +2,7 @@
 
 > **Case:** [`file_cache_size-allocateMoreChunks-memoryUsageThreshold`](../../stage3-ai-deep-read/cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md)
 >
-> **Status:** verdict filed (2026-10-14) — **unit: Confirmed; cluster: Confirmed for the pool, §8 refuted in part** (the plateau is ⌊*T*/8 MiB⌋ × 8 MiB at 16 · 64 · 100 · 128 MiB and the node's direct memory does not move below the demand, but above it the pool fills to *T* under churn: at the default, 512 MiB reserved for a 250 MiB demand); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-14) — **unit: Confirmed; cluster: Confirmed for the pool, §8 refuted in part** (the plateau is ⌊*T*/8 MiB⌋ × 8 MiB at 16 · 64 · 100 · 128 MiB and the node's direct memory does not move below the demand, but above it the pool fills to *T* under churn: at the default, 512 MiB reserved for a 250 MiB demand); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

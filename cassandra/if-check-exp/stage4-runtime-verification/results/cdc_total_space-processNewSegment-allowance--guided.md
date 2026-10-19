@@ -2,7 +2,7 @@
 
 > **Case:** [`cdc_total_space-processNewSegment-allowance`](../../stage3-ai-deep-read/cases/cdc_total_space-processNewSegment-allowance--guided.md)
 >
-> **Status:** **both tiers: run 1 done 2026-10-01, self-checked, verdicts filed.** Unit tier and cluster tier: **Confirmed, with a one-segment overshoot** (the node keeps ⌊*A*/*S*⌋ links, one more when the check's counter is stale, one fewer at an exact multiple); non-blocking mode: **bypass as recorded, bounded by deletion** (§4.2, §4.3, §8). Run 2 not chosen (§5.2). Nothing is committed.
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** **both tiers: run 1 done 2026-10-01, self-checked, verdicts filed.** Unit tier and cluster tier: **Confirmed, with a one-segment overshoot** (the node keeps ⌊*A*/*S*⌋ links, one more when the check's counter is stale, one fewer at an exact multiple); non-blocking mode: **bypass as recorded, bounded by deletion** (§4.2, §4.3, §8). Run 2 not chosen (§5.2). Nothing is committed.
 
 **Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2

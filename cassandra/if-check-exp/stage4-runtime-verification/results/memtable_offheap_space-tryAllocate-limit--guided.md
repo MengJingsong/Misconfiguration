@@ -2,7 +2,7 @@
 
 > **Case:** [`memtable_offheap_space-tryAllocate-limit`](../../stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md)
 >
-> **Status:** verdict filed (2026-10-13) — **Confirmed at both tiers**; **escape hatch as recorded**; oversize arm at 512 MiB and the default: **the process holds more** than the allocator; no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-13) — **Confirmed at both tiers**; **escape hatch as recorded**; oversize arm at 512 MiB and the default: **the process holds more** than the allocator; no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 > For a short-path file (`short-path/results/memtable_offheap_space-tryAllocate-limit.md`), the "case file" below is the short-path

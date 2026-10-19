@@ -2,7 +2,7 @@
 
 > **Case:** [`repair_session_space-split-maxsize`](../../stage3-ai-deep-read/cases/repair_session_space-split-maxsize--guided.md)
 >
-> **Status:** verdict filed (2026-10-14) — **Confirmed at both tiers**; arm M **non-domination as recorded** (the check is never reached on Murmur3; `init()` sizes the tree); **overflow as recorded** (2048 MiB → two-leaf trees); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-14) — **Confirmed at both tiers**; arm M **non-domination as recorded** (the check is never reached on Murmur3; `init()` sizes the tree); **overflow as recorded** (2048 MiB → two-leaf trees); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

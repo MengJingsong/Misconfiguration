@@ -58,9 +58,11 @@ Decided with Jingsong on 2026-10-19 and carried out the same day (nothing commit
 8. **Checks done:** every markdown link resolves except the templates' copy-relative links and two older files of `entry-restriction-exp`;
    the two autonomous files' sha256 match the index.
 
-## Resume here — stage 4 (updated 2026-10-15 10:45: all 24 guided case files closed)
+## Resume here — stage 4 (updated 2026-10-19: 26 of 37 case files closed; 11 not yet run)
 
-**Status at a glance (2026-10-14):**
+**Current (2026-10-19):** 37 case files (29 guided, 8 autonomous). **Stage 4 closed: 26** (24 guided positive + 2 autonomous: `memtable_heap_space`, `max_space…`), all Confirmed at every tier run, no run 2. **Not yet run: 11** — 5 guided `rejected` (`concurrent_compactors`, `batch_size_fail_threshold`, `native_transport_max_message_size`, `native_transport_max_concurrent_connections`, `native_transport_queue_max_item_age_threshold`) and 6 autonomous (`prepared_statements_cache_size`, `internode_max_message_size` ×2, `max_mutation_size` hints slab, `internode_application_receive_queue_capacity` releaseCapacity — all positive — and `WRITE_BUFFER_SIZE`, negative); each still needs the step-0 audit and freeze. The results files of the 26 carry a `Closed` Status line (21 marked 2026-10-19).
+
+**Status at a glance (2026-10-14, written under the old names: long path = guided, short path = autonomous):**
 
 | Stage | Done | Open |
 |---|---|---|
@@ -69,7 +71,7 @@ Decided with Jingsong on 2026-10-19 and carried out the same day (nothing commit
 | 3 long path | 24 cases filed (11 feed 3a, 13 feed 3b); bands A, B, C fully judged; write-up queue empty | five undecided rows, band D (4,387) |
 | 3 short path | 2 solutions (`memtable_heap_space`, `max_space…`) | the other 22 cases |
 | 4 long path | **24 closed (all)**, all Confirmed at both tiers (`coordinator_read_size_fail_threshold`: refuses exactly the reads whose rows before the last exceed the limit, paging escapes; `repair_disk_headroom_reject_ratio`: admission only — an admitted repair ended 0.246 *C* past the line; `DOB_MAX_RECYCLE_BYTES`: per-thread idle cap exact, one sub-prediction missed; `DataDirectory_getAvailableSpace`: guard exact on the guarded path, **not run at all on the default path**; `networking_cache_size`: the large-request leak observed; `file_cache_size` cluster: §8 refuted above the demand; `native_transport_receive_queue_capacity`: §6b/§8 confirmed for one-frame requests, refuted for multi-frame ones; `SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS`: escape values and disallow retention as recorded, *L* = 0 timeout beyond §9a); no run 2 | none on the long path (run 2 nowhere; the short path has solutions for 2 cases only) |
-| 4 short path | 2 run, 2 side-by-sides | — |
+| 4 short path | 2 run (side-by-sides since removed) | 6 autonomous files filed 2026-10-19, not run |
 
 **State:** **all 24 cases closed at stage 4** (table in "Stage 4 — long path" below), no run 2
 anywhere. No deny rules are active (the stage 3 long-path files and this file are readable); the long path has no isolation rule. The pinned clone is now

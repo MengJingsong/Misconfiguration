@@ -2,7 +2,7 @@
 
 > **Case:** [`max_hints_size_per_host-shouldHint-maxHintsSize`](../../stage3-ai-deep-read/cases/max_hints_size_per_host-shouldHint-maxHintsSize--guided.md)
 >
-> **Status:** verdict filed (2026-10-14) — **unit: Confirmed; cluster: Confirmed** (§9a row 1: per-host plateau 0.2–0.97 MB past *L* at 16 · 64 · 256 MiB, every refusal with the operand above *L*, refused rows lost exactly and silently; at the default `0B` no bound, +622.7 MB per down host in 600 s); the amended tighter band with the literal *F′* missed at 64 and 256 MiB (recorded); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-14) — **unit: Confirmed; cluster: Confirmed** (§9a row 1: per-host plateau 0.2–0.97 MB past *L* at 16 · 64 · 256 MiB, every refusal with the operand above *L*, refused rows lost exactly and silently; at the default `0B` no bound, +622.7 MB per down host in 600 s); the amended tighter band with the literal *F′* missed at 64 and 256 MiB (recorded); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

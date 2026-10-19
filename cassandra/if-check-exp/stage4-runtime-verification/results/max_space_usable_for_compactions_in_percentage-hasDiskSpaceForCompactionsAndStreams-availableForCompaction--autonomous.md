@@ -2,7 +2,7 @@
 
 > **Case:** [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous`](../../stage3-ai-deep-read/cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous.md)
 >
-> **Status:** verdict filed (unit and cluster tiers, run 1 + self-check; no run 2)
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (unit and cluster tiers, run 1 + self-check; no run 2)
 >
 > **Path:** short. The "case file" below is the short-path solution; "§9a" means B2f/B2g (unit) and B3f/B3g (cluster);
 > "§9b–§9e" means B2a–B2e or B3a–B3e.

@@ -65,6 +65,8 @@ on an autonomous row.
 | of which negative estimates | 6 (5 guided, written up 2026-10-19 as the pilot of the `predicted-negative.md` write-up, and 1 autonomous) |
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
+| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **26** (24 guided positive, 2 autonomous), as of 2026-10-19 |
+| Stage 4 not yet run | **11** (5 guided `rejected`, 6 autonomous: 5 positive, 1 negative) |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first

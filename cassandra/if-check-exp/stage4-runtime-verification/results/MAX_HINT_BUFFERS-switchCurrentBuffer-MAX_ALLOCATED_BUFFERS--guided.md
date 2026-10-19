@@ -2,7 +2,7 @@
 
 > **Case:** [`MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`](../../stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided.md)
 >
-> **Status:** **both tiers: run 1 done 2026-09-30, self-checked, verdicts filed.** Unit tier: consistent with Confirmed. **Cluster tier: Confirmed, with one recorded deviation from the reading rule** (its 4 MiB band was exceeded at every value; the rule's create-trace clause decides, and a supplementary allocation trace attributes the excess to non-pool allocations: §4.3, §8). Run 2 not chosen.
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** **both tiers: run 1 done 2026-09-30, self-checked, verdicts filed.** Unit tier: consistent with Confirmed. **Cluster tier: Confirmed, with one recorded deviation from the reading rule** (its 4 MiB band was exceeded at every value; the rule's create-trace clause decides, and a supplementary allocation trace attributes the excess to non-pool allocations: §4.3, §8). Run 2 not chosen.
 
 **Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2

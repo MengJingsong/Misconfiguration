@@ -2,7 +2,7 @@
 
 > **Case:** [`DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`](../../stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace--guided.md)
 >
-> **Status:** verdict filed (2026-10-15) — **unit: Confirmed; cluster: Confirmed** (§9a row 1, including §5's non-domination): on the guarded path (`ByteOrderedPartitioner`) the guard refused at `U − m < T` to the byte at both sides of two boundaries 206 MiB apart (`d` = ±16 MiB at `m` = 50 MiB; `m` = 240/272 MiB at `U` = *T* + 256 MiB), before any file; on the default path (`Murmur3Partitioner`) no guard ran, the compaction ate 18 MB into the 50 MiB reserve at `d` = −16 MiB and filled the disk at −256 MiB (`FSWriteError`, transports stopped); one sub-prediction missed (start-up flushes on arm A pass the second check site); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-15) — **unit: Confirmed; cluster: Confirmed** (§9a row 1, including §5's non-domination): on the guarded path (`ByteOrderedPartitioner`) the guard refused at `U − m < T` to the byte at both sides of two boundaries 206 MiB apart (`d` = ±16 MiB at `m` = 50 MiB; `m` = 240/272 MiB at `U` = *T* + 256 MiB), before any file; on the default path (`Murmur3Partitioner`) no guard ran, the compaction ate 18 MB into the 50 MiB reserve at `d` = −16 MiB and filled the disk at −256 MiB (`FSWriteError`, transports stopped); one sub-prediction missed (start-up flushes on arm A pass the second check site); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

@@ -2,7 +2,7 @@
 
 > **Case:** [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](../../stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md)
 >
-> **Status:** verdict filed (2026-10-15) — **unit: Confirmed; cluster: Confirmed** (§9a row 1) with one missed sub-prediction (ΔCount; explained, not the check): every scratch buffer with *C* ≤ *L* was kept and every one with *C* > *L* replaced by 128 B, at the boundary pair too (*C* = *L* kept, *L* + 2 replaced at 262,144 · 1,048,576 · 4,194,304); the 16 held threads retained 16*C* or 2,048 B exactly, by the ledger and within 41 KB by the JDK direct pool; the staircase moved as tabled (B2: 2,048 B → 14,401,344 B from 256 KiB to 1 MiB; B3: 2,048 B → 60,801,344 B at 4 MiB); the in-use peak 3(*V* + *P*) was the same at every *L*; **bypass as recorded** (*L* = 2³¹ − 1 keeps 60,801,344 B for B3); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-15) — **unit: Confirmed; cluster: Confirmed** (§9a row 1) with one missed sub-prediction (ΔCount; explained, not the check): every scratch buffer with *C* ≤ *L* was kept and every one with *C* > *L* replaced by 128 B, at the boundary pair too (*C* = *L* kept, *L* + 2 replaced at 262,144 · 1,048,576 · 4,194,304); the 16 held threads retained 16*C* or 2,048 B exactly, by the ledger and within 41 KB by the JDK direct pool; the staircase moved as tabled (B2: 2,048 B → 14,401,344 B from 256 KiB to 1 MiB; B3: 2,048 B → 60,801,344 B at 4 MiB); the in-use peak 3(*V* + *P*) was the same at every *L*; **bypass as recorded** (*L* = 2³¹ − 1 keeps 60,801,344 B for B3); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

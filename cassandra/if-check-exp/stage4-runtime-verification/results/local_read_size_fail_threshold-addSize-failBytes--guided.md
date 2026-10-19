@@ -2,7 +2,7 @@
 
 > **Case:** [`local_read_size_fail_threshold-addSize-failBytes`](../../stage3-ai-deep-read/cases/local_read_size_fail_threshold-addSize-failBytes--guided.md)
 >
-> **Status:** verdict filed (run 1 and self-check; no run 2)
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (run 1 and self-check; no run 2)
 >
 > **Path:** long. Unit tier and cluster tier, run 2026-10-07.
 

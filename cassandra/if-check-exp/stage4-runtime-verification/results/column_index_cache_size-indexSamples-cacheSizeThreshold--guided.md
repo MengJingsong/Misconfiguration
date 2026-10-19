@@ -2,7 +2,7 @@
 
 > **Case:** [`column_index_cache_size-indexSamples-cacheSizeThreshold`](../../stage3-ai-deep-read/cases/column_index_cache_size-indexSamples-cacheSizeThreshold--guided.md)
 >
-> **Status:** verdict filed (2026-10-14) — **Confirmed at both tiers**, both sites (write path at three values on the node, read path at four, live); the read path's operand is `S + h`, seen on the node at the boundary (*n* = 66 written indexed, read shallow at 2 KiB); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-14) — **Confirmed at both tiers**, both sites (write path at three values on the node, read path at four, live); the read path's operand is `S + h`, seen on the node at the boundary (*n* = 66 written indexed, read shallow at 2 KiB); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

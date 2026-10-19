@@ -2,7 +2,7 @@
 
 > **Case:** [`CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT`](../../stage3-ai-deep-read/cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT--guided.md)
 >
-> **Status:** verdict filed (2026-10-14) — **Confirmed at both tiers, both check sites**; *L* = 0 **bypass as recorded** (the receive side keeps every copy, 2 MB included, the serialize side none); no run 2
+> **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-14) — **Confirmed at both tiers, both check sites**; *L* = 0 **bypass as recorded** (the receive side keeps every copy, 2 MB included, the serialize side none); no run 2
 >
 > **Path:** long. One results file per path, each in its path's folder.
 
