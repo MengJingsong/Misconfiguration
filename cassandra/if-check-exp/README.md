@@ -574,8 +574,9 @@ already judged, cite the stage-3 entry rather than re-recording it.
 4. **Verify every `file:line` against the local clone before filing** (§2.1).
    This is a stage-3 exit condition, not a tracked state: a case is not filed
    until its citations are checked.
-5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns: Constraint name,
-   Capacity check, Decision point, Module, Object, Pattern, Feed, File), and
+5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns, since 2026-10-20: Constraint
+   (the name, linked to the case file), Capacity check (plain text, no URL; the link is in the case file's §1),
+   Module, Object, Pattern, Feed, Agent, Estimate, Ground, Stage 4 (linked to the results file once one exists)), and
    record the stage-3 feed (`3a`/`3b`) in the case's Notes.
 
 ### 7.4 Drafting convention
