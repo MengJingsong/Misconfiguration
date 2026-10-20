@@ -386,7 +386,7 @@ cassandra/if-check-exp/
 │   ├── playbook-guided.md   #   the guided agent: target plus human suggestions (rules, patterns, design method)
 │   ├── _TEMPLATE-autonomous.md #  output skeleton: constraint trace + verification solution
 │   ├── _TEMPLATE-guided.md  #   template for a guided case file (nine questions, §9 test design)
-│   ├── _INDEX.md            #   master index of every case file, with Agent, Estimate and Ground columns
+│   ├── _INDEX.md            #   master index of every case file: constraint, Agent, Estimate, Stage 4
 │   ├── predicted-negative.md          #   read with source open, refused; a queue to be written up as case files
 │   ├── undetermined.md          #   the (b)/(c) worklist — unjudged, now live (§7.5)
 │   ├── predicted-positive.md           #   qualified, not yet written up as a case
@@ -574,9 +574,9 @@ already judged, cite the stage-3 entry rather than re-recording it.
 4. **Verify every `file:line` against the local clone before filing** (§2.1).
    This is a stage-3 exit condition, not a tracked state: a case is not filed
    until its citations are checked.
-5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (columns, since 2026-10-20: Constraint
-   (the name, linked to the case file), Capacity check (plain text, no URL; the link is in the case file's §1),
-   Module, Object, Pattern, Feed, Agent, Estimate, Ground, Stage 4 (linked to the results file once one exists)), and
+5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (four columns since 2026-10-20: Constraint
+   (the name linked to the case file; add the checking method after a `·` when the same constraint and agent
+   already have a row), Agent, Estimate, Stage 4 (linked to the results file once one exists)), and
    record the stage-3 feed (`3a`/`3b`) in the case's Notes.
 
 ### 7.4 Drafting convention
