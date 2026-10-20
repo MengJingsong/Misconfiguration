@@ -95,6 +95,14 @@
 
 **B4. Risks and cleanup.** Disk: up to about 6.4GiB offered, written only on accepted runs, to a local dir of known size (>= 20GiB free); commit log and hints on local disk, hints disabled (`hinted_handoff_enabled: false`) so rejected writes do not fill disk. Never build in the shared tree. Unit tier leaves no files outside the local clone. After runs, kill both JVMs and verify `pgrep -f CassandraDaemon`, `ss -ltnp` for ports 7000/9042 on both loopbacks, and remove the clone and data dirs.
 
+**Audit amendments (stage 4 step 0, 2026-10-20).** Made before any run or reading; each leaves B1, the predictions and the readings tables as filed, except where it says it adds a row or corrects a number (results file §1.1 gives the reason for each). Where an amendment corrects text above, the amendment governs.
+
+- **R1 (B3b: values).** Add a third run at the default (`internode_max_message_size` not set, 128 MiB) beside 1 MiB and 8 MiB, same workload and instruments, so the default is among the values. Expected like the 8 MiB run (the limit does not bind).
+- **R2 (B3d: instruments).** Also read `org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=Size` and `UsedSize` on both nodes every second. It is chunk-granular, so a short hold of a 2 MiB message is visible between samples; `java.nio` `MemoryUsed` rises and falls and can miss it.
+- **R3 (B3c, B4: arithmetic).** With RF=2 on two nodes each write is sent once to the peer, so the wire carries 6.4 GiB from node 1 to node 2 on an accepted run (not 3.2 GiB per node), and each node writes up to 6.4 GiB of table data plus its commit log (default total space 8 GiB). Plan up to about 15 GiB per node per accepted run, start every run from empty data directories and delete them after; the node has about 47 GB free, so `df` is checked before each run.
+- **R4 (B3d: metric path).** The outbound gauges are `org.apache.cassandra.metrics:type=Connection,scope=<peer address>,name=LargeMessagePendingBytes` (and `SmallMessagePendingBytes`, `UrgentMessagePendingBytes`, `…PendingTasks`); there is no `PendingBytes` gauge, so read the three by-type gauges, and `type=Messaging` and `type=InternodeOutbound` do not exist (`InternodeOutboundMetrics.java:33,122,125,136,147`). `ExpiredCount` and `OverloadedCount` are not checked here: confirm each name in step 1 or drop it.
+- **R5 (B3a: hints).** Set `hinted_handoff_enabled: false` on both nodes in B3a, not only in B4, so a rejected replica write does not create hints.
+
 ## C. Sources read
 
 - `src/java/org/apache/cassandra/net/OutboundConnection.java` (lines 290-370, 440-480, 770-800, 960-995, 1040-1050)

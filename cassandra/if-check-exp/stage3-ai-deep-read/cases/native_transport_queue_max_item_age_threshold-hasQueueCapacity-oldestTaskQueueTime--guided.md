@@ -177,6 +177,15 @@ python3 harness/fixed_rate_writer.py --rate 100 --size-kib 64 --duration-s 60 --
 3. **Scenario B — vary the threshold** — repeat at 0.5, 0.1 and 0.02, then once in default (non-throwing) mode at 0.1.
 4. **Scenario C — positive control** — check off, in-flight budget 8 MiB; repeat.
 
+### 9f. Stage-4 audit amendments (2026-10-20)
+
+Made at the step-0 audit, before any run or reading; each is a dated change that leaves the claim, the prediction and the conclusions table as filed (results file §1.1 gives the reason for each). Where one corrects a number or a procedure above, this block governs.
+
+- **R1 (9d: queued bytes).** The "request-bytes-in-flight gauge" is `org.apache.cassandra.metrics:type=Client,name=RequestsSize` (`ClientMetrics.java:129`, backed by `ClientResourceLimits.getCurrentGlobalUsage`). Read it every 2 s together with the networking pool `Size` gauge.
+- **R2 (9b, 9c: the stall).** The Byteman rule holds `org.apache.cassandra.transport.Dispatcher$RequestProcessor.run` (`Dispatcher.java:304`) at entry until a flag file appears, with `native_transport_max_threads` 4, so four requests run (stalled) and the rest wait in the executor queue. `oldestTaskQueueTime` reads only the head of that queue (`SEPExecutor.java:88-100`), not running tasks, so the check has an age to read once a fifth request is queued. Write and check the rule in step 1.
+- **R3 (9b: mode).** Set `native_transport_throw_on_overload` in the yaml as the connection default (`Config.java:1393`; `PipelineConfigurator.java:309-313` uses it when the client's STARTUP option is absent): true for the main sweep, false for the single repeat at 0.1.
+- **R4 (9a: criteria).** The noise band is the range of the peak queued bytes over three repeats of the check-off arm. "The same" means the peaks at 0.5, 0.1 and 0.02 are within that band of the check-off peak; "fall with the threshold" means the peak at 0.02 is more than 50 % below the check-off peak and more than three times the band below it. With the workers stalled and nothing completing, the check-off peak is expected near the offered 375 MiB.
+
 ## 10. Provenance
 
 | Field | Content |

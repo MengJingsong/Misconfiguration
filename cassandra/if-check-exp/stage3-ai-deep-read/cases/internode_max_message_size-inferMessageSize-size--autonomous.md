@@ -87,6 +87,13 @@ All values satisfy `DatabaseDescriptor.java:974-989` because the reserves are 12
 
 **B4. Risks and cleanup.** Disk: each node writes at most ~240MiB x runs to commitlog/memtables; keep all under `$WORK` on local disk with >= 5 GiB free, check `df` before each run; do not use shared storage. Memory: 1G heap + 1G direct per node, two nodes; check host free memory first. Processes: stop A and B by PID, verify with `pgrep -f CassandraDaemon` and `ss -ltnp | grep -E '7000|9042|7199'` that nothing remains. Unit tier: delete the clone; nothing is written to the shared source tree.
 
+**Audit amendments (stage 4 step 0, 2026-10-20).** Made before any run or reading; each leaves B1, the predictions and the readings tables as filed, except where it says it adds a row or corrects a number (results file §1.1 gives the reason for each). Where an amendment corrects text above, the amendment governs.
+
+- **R1 (B3b: values).** Add run R0 with both nodes at the default (`internode_max_message_size` not set, 128 MiB), same workload and instruments, so the default is among the values; expected like R1.
+- **R2 (B3d: instruments).** Also read `BufferPool,scope=networking,name=Size` and `UsedSize` on node B every second. A large message is accumulated in the networking pool on the receive side, and the gauge is chunk-granular, so a short hold is visible between samples; `java.nio` `MemoryUsed` can miss it.
+- **R3 (B3a: hints).** Set `hinted_handoff_enabled: false` on both nodes, so a replica write that fails does not create hints on node A and change the disk reading.
+- **R4 (B3a: client frame).** `native_transport_max_message_size` is left at its derived default, `min(max_mutation_size, heap/10, heap/40)` = 16 MiB at `-Xmx1G` (`DatabaseDescriptor.java:3237-3245`), which admits the 12 MiB blob request; raising it to 32 MiB would fail at startup (it may not exceed the per-ip limit of about 25 MiB), so do not raise it.
+
 ## C. Sources read
 
 - /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md

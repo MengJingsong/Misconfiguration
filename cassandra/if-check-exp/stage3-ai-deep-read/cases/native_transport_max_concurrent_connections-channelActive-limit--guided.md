@@ -178,6 +178,13 @@ python3 harness/hold_connections.py --count 4000 --hold-s 60
 3. **Scenario B — limits 1,000 and 500** — repeat.
 4. **Scenario C — positive control** — the byte-budget arm in 9a procedure step 3.
 
+### 9f. Stage-4 audit amendments (2026-10-20)
+
+Made at the step-0 audit, before any run or reading; each is a dated change that leaves the claim, the prediction and the conclusions table as filed (results file §1.1 gives the reason for each). Where one corrects a number or a procedure above, this block governs.
+
+- **R1 (9a: noise band and criteria).** The noise band is the range of `RssAnon` and of the live `NioSocketChannel` count over three repeats of the limit −1 arm (4,000 connections). "Flat" means the readings at 500, 1,000 and 2,000 differ by no more than that band; "follows the limit" means the reading at 2,000 exceeds that at 500 by more than twice the band, with a slope consistent across the three limits.
+- **R2 (9a procedure 3, 9e scenario C: control arithmetic).** 64 connections × 1 MiB is 64 MiB of demand. At `-Xmx2G` the defaults are `native_transport_max_request_data_in_flight` of about 205 MiB and `…_per_ip` of about 51 MiB (heap/10, heap/40), so the filed "default budget" arm is already per-ip-bound and a 64 MiB budget would not bind. Use two arms with the same 64 × 1 MiB load: both limits at 1 GiB (not binding), and both at 16 MiB (below the demand). The held request bytes of the second arm must stay near 16 MiB; the first must reach about 64 MiB. `native_transport_max_message_size` is left at its derived default (16 MiB, above the 1 MiB requests).
+
 ## 10. Provenance
 
 | Field | Content |

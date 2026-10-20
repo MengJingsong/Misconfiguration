@@ -120,6 +120,19 @@ Each is a restart of node A.
 
 **B4. Risks and cleanup.** Disk: hints, data and commitlog total under 3 GB per run on a local disk of known size; never use shared storage. Memory: with `-XX:MaxDirectMemorySize=2g` the worst case is bounded. Processes: kill nodes A and B and the stress client, verify with `ps -u $USER | grep -i -E 'cassandra|stress'`; remove the node directories and the clone's build output.
 
+**Audit amendments (stage 4 step 0, 2026-10-20).** Made before any run or reading; each leaves B1, the predictions and the readings tables as filed, except where it says it adds a row or corrects a number (results file §1.1 gives the reason for each). Where an amendment corrects text above, the amendment governs.
+
+- **R1 (B3g: added rows).** Add before any reading:
+
+  | Observation | Meaning |
+  |---|---|
+  | `MAX_HINT_BUFFERS=1` delta stays at one slab plus noise, and hint write latency rises | The slab count governs the plateau (prediction holds) |
+  | `MAX_HINT_BUFFERS=1` delta equals the default run's | The count does not bind; claim (2) partly wrong |
+  | The 17 MiB write is accepted at the default setting | The coordinator's `max_mutation_size` guard is not as traced; stop and re-trace |
+
+- **R2 (B3f: the 17 MiB bullet).** At the default `max_mutation_size` (16 MiB) the coordinator refuses a 17 MiB write with a mutation-too-large error before any hint exists, so the cluster tier exercises that guard, not the slab's `capacity/2` guard; the slab guard is tested only in the unit tier (B2c). Read the bullet as: the write fails at the coordinator, no hint is written, no direct-memory change.
+- **R3 (B3a: exact value).** `hints_flush_period: 3600000ms` (a duration in milliseconds; default 10 s).
+
 ## C. Sources read
 
 - `src/java/org/apache/cassandra/hints/HintsBuffer.java` (lines 60-258)

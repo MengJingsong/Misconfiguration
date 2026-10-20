@@ -105,6 +105,12 @@ Outcomes at limit: flush (no failure, no drop, no error). Bypass/overshoot: any 
 
 **B4. Risks and cleanup.** Disk: up to ~2 GiB of hints per run on local disk; use `nodetool truncatehints` or `rm -rf $RUN` after; never place `$RUN` on shared storage, and keep `df` free space >= 10 GiB. Memory: JVM limited by `-Xmx2g` and `MaxDirectMemorySize=1g`; 8 MiB hints with 8 threads use at most 3 slabs. Processes: stop both Cassandra JVMs, any `jmxterm`/`jstat`/stress client, and confirm with `pgrep -f 'CassandraDaemon|jstat|jmxterm'` empty. Unit tier writes only to a tmp dir deleted at the end. The probe test exists only in the local clone; the shared source tree is untouched.
 
+**Audit amendments (stage 4 step 0, 2026-10-20).** Made before any run or reading; each leaves B1, the predictions and the readings tables as filed, except where it says it adds a row or corrects a number (results file §1.1 gives the reason for each). Where an amendment corrects text above, the amendment governs.
+
+- **R1 (B3g: added row).** The memory-side positive control (B3b item 3, `MAX_HINT_BUFFERS=1`) has no row for a control that does not move. Add: | `MAX_HINT_BUFFERS=1` peak direct-pool delta is not lower than the default run's | The memory-side control did not move; the instrument or the workload cannot show a cap on memory: Not confirmed |
+- **R2 (B3e step 3: reset).** Between value-size runs also truncate the table (`TRUNCATE ks.t`) or recreate the keyspace: `nodetool truncatehints` clears only the hints, and each run leaves about 2 GiB of table data and commit log on node A.
+- **R3 (B3b item 2: live setter).** `setMaxHintsSizePerHostInMiB` is at `StorageProxy.java:2418` (cited as 2413).
+
 ## C. Sources read
 
 - `src/java/org/apache/cassandra/hints/HintsWriter.java`

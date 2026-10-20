@@ -145,7 +145,7 @@ By the rejection's reading, the threshold bounds what reaches the replicas, not 
 
 | Setting | Value | Why |
 |---|---|---|
-| `native_transport_max_message_size` | 256 MiB except in the control | keeps the transport from rejecting first |
+| `native_transport_max_message_size` | 64 MiB except in the control (**amended 2026-10-20, R1:** with `native_transport_max_request_data_in_flight` and `…_per_ip` both 256 MiB; the filed 256 MiB would fail at startup) | keeps the transport from rejecting first |
 | batch type | `UNLOGGED`, 64 partitions per batch | removes batchlog writes, keeps `mutations.size() > 1` |
 | heap | `-Xms4G -Xmx4G` | removes sizing as a variable |
 | concurrency | 1 client, 1 request in flight | one batch per measurement |
@@ -177,6 +177,16 @@ Unit tier: the same batch through `BatchStatement.execute` in a `CQLTester`-base
 2. **Scenario A — default threshold** — 1, 4 and 16 MiB batches; all rejected; record allocation per size.
 3. **Scenario B — vary the threshold** — repeat at 500 KiB and 5 MiB; the 1 MiB batch is accepted at 5 MiB.
 4. **Scenario C — positive control** — set `native_transport_max_message_size` to 512 KiB, send the 16 MiB batch; the transport must discard it; record allocation.
+
+### 9f. Stage-4 audit amendments (2026-10-20)
+
+Made at the step-0 audit, before any run or reading; each is a dated change that leaves the claim, the prediction and the conclusions table as filed (results file §1.1 gives the reason for each). Where one corrects a number or a procedure above, this block governs.
+
+- **R1 (9b: transport settings).** With `-Xmx4G` the defaults are `native_transport_max_request_data_in_flight` = heap/10 (about 410 MiB) and `…_per_ip` = heap/40 (about 102 MiB), and `native_transport_max_message_size` may not exceed either (`DatabaseDescriptor.java:911-915`); the derived default is `min(max_mutation_size, both)` = 16 MiB, which would refuse the 16 MiB batch at the transport. Set in the yaml (restart) `native_transport_max_request_data_in_flight` and `native_transport_max_request_data_in_flight_per_ip` to 256 MiB and `native_transport_max_message_size` to 64 MiB for every arm except the control, which lowers `native_transport_max_message_size` to 512 KiB.
+- **R2 (9d: control reading).** A request the transport discards never reaches `BatchStatement.execute`, so the executing thread's allocation is trivially 0 there. For the control also read the networking pool `Size` delta (`BufferPool,scope=networking,name=Size`) and the heap high-water; the control's effect is on retained and decoded buffers.
+- **R3 (9a: "within the noise band", "falls").** At a fixed batch size, "the same" means the medians of the 20 requests at the three thresholds differ by less than 10 % of one another; "falls with the threshold" means the median at 50 KiB is more than 50 % below the median at 5 MiB.
+- **R4 (9c: protocol).** All arms use native protocol v5 (the control's discard is the v5 large-message path; v4 and older fall under `native_transport_max_frame_size`, `Envelope.java:429`). Reuse the in-tree `SimpleClient` of the closed `native_transport_receive_queue_capacity` harness.
+- **R5 (9a: which pairs the prediction covers).** At the 5 MiB threshold the 1 MiB and 4 MiB batches are accepted, not rejected. The prediction is read on the rejected pairs only: 50 KiB and 500 KiB with 1, 4 and 16 MiB, and 5 MiB with 16 MiB. The accepted pairs are read to show that the allocation includes the build.
 
 ## 10. Provenance
 

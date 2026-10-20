@@ -124,7 +124,7 @@ Per request, the retained bytes are at most the limit (a request above it retain
 
 1. **Unit tier** — drive `CQLMessageHandler`'s large-message path with a test frame decoder: feed the first frame of a request whose declared size is above, at and below the limit, then the remaining frames; read the `LargeMessage`'s retained buffer count and bytes and the `RequestDiscarded` metric.
 2. **Cluster tier** — one node, three restarts (one per knob value); a raw v5 client sends all but the last frame of an 8 MiB request and waits; read the pool's retained bytes; then send the last frame and read the response.
-3. **Positive control** — at the 16 MiB value, set `native_transport_receive_queue_capacity` to 2 MiB (restart) and repeat; the held request must stall or be refused.
+3. **Positive control** — at the 16 MiB value, set `native_transport_receive_queue_capacity` to 2 MiB (restart) and repeat; the held request must stall or be refused. **Replaced 2026-10-20 (R1, see 9f): this control does not bind a multi-frame request; use the two-request reserves control in 9f.**
 4. **Compare** with the prediction.
 
 **Prediction (what the rejection claims):** retained bytes while the request is held are about 8 MiB at every knob value; the response is an oversized error at 1 MiB and 4 MiB and success at 16 MiB; the positive control lowers retention.
@@ -182,7 +182,17 @@ python3 harness/hold_large_request.py --size-mib 8 --hold-s 30
 1. **Control run** — idle connection, then a 64 KiB request; record pool baseline and response.
 2. **Scenario A — knob at 16 MiB** — hold the 8 MiB request; record retained bytes and the response.
 3. **Scenario B — knob at 4 MiB and 1 MiB** — restart and repeat.
-4. **Scenario C — positive control** — knob 16 MiB, receive-queue capacity 2 MiB; repeat.
+4. **Scenario C — positive control** — knob 16 MiB, receive-queue capacity 2 MiB; repeat. **Replaced 2026-10-20 (R1): run the two-request arms of 9f.**
+
+### 9f. Stage-4 audit amendments (2026-10-20)
+
+Made at the step-0 audit, before any run or reading; each is a dated change that leaves the claim, the prediction and the conclusions table as filed (results file §1.1 gives the reason for each). Where one corrects a number or a procedure above, this block governs.
+
+- **R1 (9a procedure 3, 9e scenario C: the positive control).** The filed control (`native_transport_receive_queue_capacity` 2 MiB, reserves 256 MiB) does not bind: `AbstractMessageHandler` borrows from the endpoint and global reserves only the part of a request beyond the connection's own capacity, and a multi-frame request is held to the reserves (closed `native_transport_receive_queue_capacity` results, part 3 and unit step u4), which at 256 MiB are far above one 8 MiB request. Replace it with two arms that differ only in the reserves, both at knob 12 MiB and with two connections from one address, each sending all but the last frame of an 8 MiB request and holding:
+  - **reference arm:** `native_transport_max_request_data_in_flight` and `…_per_ip` 256 MiB, `native_transport_receive_queue_capacity` 128 MiB. Expected retained bytes: about 16 MiB (both requests).
+  - **control arm:** both in-flight limits 12 MiB, `native_transport_receive_queue_capacity` 1 MiB (the default). Each request borrows 7 MiB from the reserves, so the second cannot be admitted (14 MiB > 12 MiB) and waits at its first frame. Expected retained bytes: about 8 MiB plus at most one frame.
+  The 12 MiB knob satisfies the startup rule (it may not exceed either in-flight limit) and both 8 MiB requests are in the allowed branch, so the knob is not what differs. The conclusions rows are unchanged: the control must lower retention, else "Not confirmed".
+- **R2 (9a: tolerances).** "About 8 MiB" means 6 to 10 MiB over the baseline taken with the connection idle; "about one frame" means at most 1 MiB over that baseline (a frame is at most 128 KiB, `FrameEncoder.Payload.MAX_SIZE`).
 
 ## 10. Provenance
 

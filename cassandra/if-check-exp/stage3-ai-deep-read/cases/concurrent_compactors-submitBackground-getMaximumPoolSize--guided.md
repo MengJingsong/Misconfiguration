@@ -144,7 +144,7 @@ By the rejection's reading, the pool size bounds threads, not bytes: each task's
 
 | Setting | Value | Why |
 |---|---|---|
-| `compaction_throughput` | `nodetool setcompactionthroughput 16` (MiB/s) | keeps each ~1 GiB compaction alive for about a minute so peaks can be sampled |
+| `compaction_throughput` | `nodetool setcompactionthroughput 16` (MiB/s) | keeps compactions alive long enough to sample (**amended 2026-10-20, R1:** the limiter is shared by all running compactions, so the 8 GiB of output takes about 8.5 min at every *n*; only at *n* = 1 does one compaction last about a minute) |
 | `data_file_directories` | one local directory on a 40 GiB filesystem | a known disk size, not `/proj` |
 | compaction strategy | `SizeTieredCompactionStrategy`, `min_threshold=4`, `max_threshold=4` | one compaction per table, equal sizes |
 | `max_space_usable_for_compactions_in_percentage` | 0.95 (default) except in the control | otherwise the byte budget would bind |
@@ -183,6 +183,15 @@ nodetool enableautocompaction ks          # releases all 8 compactions at once
 2. **Scenario A — default knob (2)** — load, enable compaction, sample until no compaction is active; record peak extra disk and peak running tasks.
 3. **Scenario B — vary the knob** — repeat from a clean node for 1, 4 and 8.
 4. **Scenario C — positive control** — at 8, set `max_space_usable_for_compactions_in_percentage` to a value whose budget fits about two 1 GiB compactions (budget ≈ `(40 GiB - baseline) × p`; choose `p` accordingly) and repeat; the peak must drop toward two compactions' output.
+
+### 9f. Stage-4 audit amendments (2026-10-20)
+
+Made at the step-0 audit, before any run or reading; each is a dated change that leaves the claim, the prediction and the conclusions table as filed (results file §1.1 gives the reason for each). Where one corrects a number or a procedure above, this block governs.
+
+- **R1 (9b, 9d: duration and stop).** `compaction_throughput` is one limiter for all running compactions, so total time is about 8.5 min (8 GiB at 16 MiB/s) at every value, and at *n* = 8 all eight compactions advance together and finish near the end. Sampling runs until no compaction is active, at most 20 min; the peak is the maximum over the whole run.
+- **R2 (9c: input size).** "256 MiB" means on-disk bytes of each input SSTable. Create the tables with `compression = {'enabled': 'false'}` and random (incompressible) blob values, take `du -sb` of each table's data directory after the load, and compute the expected ceiling as `min(n, 8)` × (the measured input bytes of one table), not a nominal 1 GiB.
+- **R3 (9e step 4: control budget).** Choose `p` in a step-1 dry run so the budget fits two but not three compactions, on a fixed-size local loopback filesystem (as for `DataDirectory_getAvailableSpace`; `~/stage4-dds.img` is one) so that `available` is known. The chosen `p`, the filesystem size and the baseline go into results §2.
+- **R4 (9a: "within the noise band").** The noise band is the range of peak extra disk over three repeats of the default value (*n* = 2). "Flat" means the peaks at 1, 2, 4 and 8 differ by no more than that band; "rises with the knob" means the peak at 8 exceeds the peak at 1 by more than twice the band.
 
 ## 10. Provenance
 
