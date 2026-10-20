@@ -198,6 +198,8 @@ i.e. pattern (a) only. Patterns (b) and (c) were added to
 - **What does not:** rejections on pattern-independent grounds — thread-pool
   or concurrency caps, rate limiters, config validation, time-based checks,
   writer rollover. Those stand settled regardless of pattern.
+  *Note 2026-10-20: stage 4 refuted the thread-pool rejection of `concurrent_compactors` (usage = running tasks × per-task bytes), so
+  thread-pool and concurrency caps whose tasks each hold bytes are not settled; see `predicted-negative.md`.*
 - **Scope of the re-read:** the four batches triaged so far — `concurrent/`,
   `cache/`, `transport/`, `db/compaction/`.
 - **How to run it:** fold it into the band-A reading rather than running it as
