@@ -66,7 +66,8 @@ on an autonomous row.
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
 | Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **27** (24 guided positive, 3 autonomous), as of 2026-10-19 |
-| Stage 4 not yet run | **10** (5 guided `rejected`, 5 autonomous: 4 positive, 1 negative) |
+| Stage 4 closed, estimate refuted | **1** — `concurrent_compactors` (negative estimate, **Refuted** 2026-10-20), results `../stage4-runtime-verification/results/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md`: peak extra disk follows `min(n, 8)` × one compaction's output; the estimate stays as filed |
+| Stage 4 not yet run | **9** (4 guided `rejected`, 5 autonomous: 4 positive, 1 negative); all 9 audited 2026-10-20 |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first

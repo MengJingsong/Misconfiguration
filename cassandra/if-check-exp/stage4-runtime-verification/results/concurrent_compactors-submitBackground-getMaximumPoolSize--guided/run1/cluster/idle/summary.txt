@@ -1,0 +1,10 @@
+INPUT per-table Data.db bytes [1074249653, 1074249956, 1074250083, 1074250318, 1074250253, 1074250242, 1074250353, 1074250200]; total 8594001058; avail before start 22595411968
+YAML tail: data_file_directories: |     - /mnt/stage4-cc/data | concurrent_compactors: 2 | autocompaction_on_startup_enabled: false
+node up (run); pid 2490500
+READBACK Current compaction throughput: 16 MB/s | Current concurrent compactors in the system is:  2
+EXPECTED: getconcurrentcompactors = 2 — yes
+READBACK CompactionExecutor MaxPoolSize {('org.apache.cassandra.metrics:type=ThreadPools,path=internal,scope=CompactionExecutor,name=MaxPoolSize', 'Value'): '2'}
+EXPECTED: CompactionExecutor MaxPoolSize = 2 — yes
+COUNTERS before {'CompactionsReduced': 0, 'SSTablesDroppedFromCompaction': 0, 'CompactionsAborted': 0}
+BASELINE ks1 bytes 8596623858; heap used 1623205888
+IDLE peak ks1 bytes 8596623858; max running 0; heap used samples [1623205888, 1639983104, 1639983104, 1656760320, 1656760320]

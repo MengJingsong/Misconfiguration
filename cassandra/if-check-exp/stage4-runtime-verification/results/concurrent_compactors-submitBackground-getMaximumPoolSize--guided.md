@@ -1,7 +1,7 @@
 # concurrent_compactors-submitBackground-getMaximumPoolSize--guided — stage-4 results  <!-- file: results/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md; the stem ends in --guided or --autonomous -->
 > **Case:** [`concurrent_compactors-submitBackground-getMaximumPoolSize--guided`](../../stage3-ai-deep-read/cases/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md)
 >
-> **Status:** audited 2026-10-20 — estimate negative; claim under test: the knob does not bound compaction's disk or memory (source reading predicts Refuted); not run
+> **Status:** verdict filed 2026-10-20 — cluster Refuted (peak extra disk follows `min(n, 8)` × one compaction's output), unit Refuted at the executor level; the claim "does not cap" is refuted; one runbook defect (the control), fixed; no run 2
 >
 > **Agent:** guided (the suffix of the case-file stem). One results file per case file.
 
@@ -18,10 +18,10 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `06caa02b4db6752a1f765de1abf9bdef516334a4`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
-| **Harness** | `harness/concurrent_compactors-submitBackground-getMaximumPoolSize--guided/` — none yet; to be written in step 1 (list in the recommendations below). |
+| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `06caa02b4db6752a1f765de1abf9bdef516334a4`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f (R1–R5). The R6 amendment of 2026-10-20 (control, after the first control run) changes the hash to `391ccb2aa001c0ae9f59eed6182cb89a9a466503`. Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Harness** | `harness/concurrent_compactors-submitBackground-getMaximumPoolSize--guided/` — written 2026-10-20 after the freeze and before run 1: `ConcurrentCompactorsProbeTest.java`, `unit-run.sh`, `cluster-run.py`, `run-all.sh`, `Jmx.java`; commit: filled when committed. |
 | **Tiers and values** | Unit (9c): Byteman-held `CompactionTask.runMayThrow` over 8 tables, pool sizes 1 · 2 · 4 · 8. Cluster (9e): one node, `concurrent_compactors` 1 · 2 (default on a one-directory node) · 4 · 8, 8 tables × 4 SSTables × 256 MiB, throughput 16 MiB/s, positive control at 8 with a lowered `max_space_usable_for_compactions_in_percentage`. |
-| **Audit bottom line** | **Ready after amendments** — 2026-10-20 |
+| **Audit bottom line** | **Ready after amendments** — 2026-10-20. After run 1 the control was amended (R6, §3): the §9 hash became `391ccb2aa001c0ae9f59eed6182cb89a9a466503`; the claim, prediction and conclusions rows are unchanged, so the sweep arms were not repeated. |
 
 ### 1.1 Design audit
 
@@ -65,143 +65,110 @@ One row per observable in the case's runbook observables:
 
 | Field | Run 1 | Run 2 (fresh AI session, if done) |
 |---|---|---|
-| Date | | |
-| Node (CloudLab name and type) | | |
-| OS and kernel (`uname -r`) | | |
-| JDK (`java -version`) | | |
-| Ant (`ant -version`) | | |
-| Local `cassandra-src` clone commit | | |
-| Case-file commit / harness commit | | |
-| Storage for node data | | |
-| Full logs (path, outside the repo) | | |
+| Date | 2026-10-20 (cluster runs 15:25–17:12 EDT; unit run 1 at 17:14 EDT) | not done |
+| Node (CloudLab name and type) | `node0.jason92-319347.misconfiguration-pg0.cloudlab.umass.edu` (`pc57`), 32 cores, 251 GiB | — |
+| OS and kernel (`uname -r`) | Ubuntu 22.04, `5.15.0-187-generic` | — |
+| JDK (`java -version`) | openjdk 11.0.32.1 | — |
+| Ant (`ant -version`) | Apache Ant 1.10.12 | — |
+| Local `cassandra-src` clone commit | `~/cassandra-run4` at `cassandra-5.0.9` (`b5f2a54210d541339c2e7c17a794195cac0e67c2`), `ant build-test` successful in 1 min 33 s | — |
+| Case-file commit / harness commit | base `cd7fec5` plus the uncommitted 2026-10-20 R6 amendment / uncommitted | — |
+| Storage for node data | `/dev/loop0`, ext4, 40 GiB (41,956,900,864 B) loop-mounted at `/mnt/stage4-cc` from `~/stage4-cc.img` on `/dev/sda3`; commit log on `/dev/sda3` | — |
+| Full logs (path, outside the repo) | `~/stage4-logs/cc/<label>/` (`session.log`, `summary.txt`, `samples.csv`, `system.log`, `debug.log`), `~/stage4-logs/cc/unit-run1/` | — |
+
+Heap 8 GiB (`Heap size: 8.000GiB/8.000GiB`, `system.log`); `compaction_throughput` 16 MiB/s (`nodetool getcompactionthroughput` read-back in every `summary.txt`).
 
 ## 3. Runbook defects
 
-Every step a run could not execute as written. The run stops at the
-defect; the fix is made in the case file (dated) if it leaves §9a unchanged,
-and the affected tier restarts from its beginning. If the fix would change
-§9a, the case goes back to the audit. "None" if there were none.
-
 | # | Run | Step (§9b–§9e) | Problem | Fix | Decision (date) | Case-file commit with the fix |
 |---|---|---|---|---|---|---|
+| 1 | idle check (before run 1) | 9b "Reset between runs" / 9c load | `nodetool disableautocompaction` at load time is not persistent: after the restore and restart the node compacted at once (idle run: running 2, ks1 +1 GB) | node yaml `autocompaction_on_startup_enabled: false` for every run (harness only; no case-file change) | 2026-10-20 | none needed |
+| 2 | `ctl8` | 9e step 4 (control) | A budget that "fits about two compactions" does not bind: the budget check is made per task when it starts, all eight tasks (n = 8) checked in the same millisecond (`ctl8/budget-lines.txt`: 20:07:52,804), each saw the same budget of 2,419,296,249 B and asked for about 1.07 GB, so all eight were admitted (`CompactionsReduced`, `SSTablesDroppedFromCompaction`, `CompactionsAborted` all 0; peak extra disk 7.98 compactions) | the control is two arms with a budget below one compaction (`ctl8r` 0.8 ×, `ctl8a` 0.45 × one compaction's input): case-file 9f R6 and a note in 9e step 4; claim, prediction and conclusions rows unchanged; the sweep arms are not repeated because they do not depend on step 4 (a departure from "the affected tier restarts", decided here by the AI; may be overruled) | 2026-10-20 | filled when committed |
 
 ## 4. Run 1
 
-**Scope:** the tiers and capacity values actually run. **Command log:**
-`[case-file stem]/run1/<file>`.
+**Scope:** unit tier, pool sizes 1 · 2 · 4 · 8 (one `ant testsome`); cluster tier, labels `idle`, `n2a` `n2b` `n2c` (default 2, three repeats), `n1`, `n4`, `n8`, and controls `ctl8` (filed, did not bind), `ctl8r`, `ctl8a` (amended). **Command log:** `concurrent_compactors-submitBackground-getMaximumPoolSize--guided/run1/` (`cluster/<label>/summary.txt`, `samples.csv`, `budget-lines.txt`; `cluster/run-all*.out`; `unit/run.out`; `selfcheck.py` and `selfcheck.txt`).
 
 ### 4.1 Readings
 
-**Unit tier**
+**Unit tier** (`unit/run.out`; test passed, 1 run, 0 failures; 8 tables × 4 SSTables, every `CompactionTask.runMayThrow` held by Byteman)
 
 | Test or assertion | Result | Evidence (file) |
 |---|---|---|
+| n = 1: `getMaximumPoolSize`, held tasks, executor active count, held input bytes / one table's input | 1, 1, 1; 1.00 | `unit/run.out` |
+| n = 2 | 2, 2, 2; 2.00 | `unit/run.out` |
+| n = 4 | 4, 4, 4; 4.00 | `unit/run.out` |
+| n = 8 | 8, 8, 8; 8.00 (pending 0) | `unit/run.out` |
+| All 8 tables end with one SSTable after release (each n) | yes | `unit/run.out` |
 
-**Cluster tier** — one row per capacity value, scenario and observable:
+**Cluster tier** — baseline `ks1` bytes 8,596,623,858 in every label; one table's four Data.db = 1,074,250,132 B (*C*); `selfcheck.txt` recomputes every figure from `samples.csv`.
 
 | Capacity value | Run (control / A / B / C) | Observable (§9d) | Reading | Evidence (file) |
 |---|---|---|---|---|
+| idle | control | extra disk; running tasks; heap used | 0 B; 0; 1.62–1.66 GB | `cluster/idle/summary.txt` |
+| 2 (default) | A: `n2a` | running tasks (peak); peak extra disk | 2; 2,125,250,744 B = 1.98 *C* | `cluster/n2a/samples.csv` |
+| 2 (default) | A repeats `n2b`, `n2c` | same | 2,141,634,744 (1.99 *C*); 2,129,182,903 (1.98 *C*) | `cluster/n2b`, `n2c` |
+| 1 | B: `n1` | same | 1; 1,068,752,988 B = 0.99 *C* | `cluster/n1/samples.csv` |
+| 4 | B: `n4` | same | 4; 4,297,957,962 B = 4.00 *C* | `cluster/n4/samples.csv` |
+| 8 | B: `n8` | same | 8; 8,561,033,949 B = 7.97 *C* | `cluster/n8/samples.csv` |
+| 8, budget 2.42 GB | C filed: `ctl8` | same; `CompactionsReduced/Dropped/Aborted` | 8; 8,574,665,437 B = 7.98 *C*; 0/0/0 (did not bind, §3 defect 2) | `cluster/ctl8/` |
+| 8, budget 0.859 GB (0.8 *C*) | C amended: `ctl8r` | same | 8 tasks started; 6,447,019,332 B = 6.00 *C*; Reduced 8, Dropped 8 (each task kept 3 of 4 inputs), Aborted 0; "Not enough space … Reducing scope" ×8 | `cluster/ctl8r/` |
+| 8, budget 0.483 GB (0.45 *C*) | C amended: `ctl8a` | same | 2,141,127,389 B = 1.99 *C* (8 single-input rewrites of 256 MiB); Reduced 94, Dropped 282, Aborted 116; the node kept retrying until the 25-min cap | `cluster/ctl8a/` |
+
+Noise band (range of the three default runs): 16,384,000 B = 0.015 *C*; peak at 8 minus peak at 1 = 7,492,280,961 B, far above twice the band (32,768,000 B) (`selfcheck.txt`). Every sweep run ended with one SSTable per table and `ks1` bytes = baseline − 200 KB (output = input).
 
 ### 4.2 Conclusion and logic
 
-Tag every statement in parts 1–4 as **[observed: `<file>`]** or
-**[inferred: `<reason>`]**. An untagged statement is not part of the
-argument.
+1. **Validity** — valid. The limit was reached: the running-task count equals `min(n, 8)` at 1, 2, 4, 8 [observed: `selfcheck.txt`, `samples.csv`; unit `run.out`]. Hold-fixed settings: `compaction_throughput` 16 MiB/s [observed: each `summary.txt` READBACK], default `max_space_usable_for_compactions_in_percentage` 0.95 (no key in the yaml; no Reduced/Aborted in `n1`–`n8`, `n2*`) [observed: `summary.txt` counters], STCS 4/4 and the 8 × 4 × 256 MiB layout [observed: `prepare/summary.txt` DATA lines, 256.1 MiB each], one local 40 GiB filesystem [observed: FILESYSTEM line], heap 8 GiB [observed: `system.log`], `getconcurrentcompactors` and `MaxPoolSize` equal to *n* [observed: EXPECTED lines]. The backlog was large enough (8 tables ≥ every *n*).
+2. **Readings** — the idle-check defect and the unbound filed control are in §3. `ctl8a` did not drop to about 0 as the amendment expected: with budget below two inputs a single-input rewrite (256 MiB) still fits, so eight such rewrites ran repeatedly [observed: `ctl8a/summary.txt`, `system.log` "Compacted … 1 sstables … 256.121MiB"]; its peak 1.99 *C* is still far below 7.97 *C*.
+3. **Matched row** — "Peak extra disk rises with the knob (about `min(n, 8)` × one compaction's output) → **Refuted** — usage follows the constraint, indirectly through the number of tasks": peak extra disk 0.99, 1.98, 4.00, 7.97 *C* at *n* = 1, 2, 4, 8 [observed: `selfcheck.txt`], i.e. slope one compaction's output per pool thread; the task count follows the knob [observed]; the spread of the default repeats is 0.015 *C* [observed].
+4. **Excluded rows** — flat across values: ruled out by the 7.49 GB rise from 1 to 8 against a 16 MB band [observed]; "task count never reaches the pool size" (Invalid): ruled out, peak tasks = `min(n, 8)` [observed]; "flat but the control does not move" (Not confirmed): the peak is not flat; "rises but less than proportionally, flattening at a second limit": the rise is proportional to within 1 % at every step (0.99, 1.98, 4.00, 7.97) [observed]; the byte-budget control lowers the peak, as a second limit would, but only when set below one compaction (§4.1).
+5. **Observed vs. inferred** — inferred: that the peak extra disk is the in-flight compaction output [inferred: output size = input size, `final_ks1` = baseline − 200 KB, and `ks1` bytes rise about 8.4 MB/s per running task in `samples.csv`]; that the unit tier's held-input bytes equal the extra disk the cluster tier sees [inferred: both scale with the task count].
+6. **Deviations and gaps** — the filed control (budget fitting two compactions) did not bind and was replaced by two sub-compaction budgets (§3 defect 2); `ctl8a`'s prediction (about 0) was not met because a one-input rewrite fits; heap (secondary reading) rose with running tasks in `ctl8`/`n8` but was not analysed as a conclusion; no run 2; the sweep arms were not repeated after the §9e step 4 amendment (departure recorded in §3).
+7. **Core question** — usage follows the constraint: with 8 equal backlog tables, peak extra disk is `min(n, 8)` × one compaction's output at *n* = 1, 2, 4, 8, so `concurrent_compactors` bounds the disk held by in-flight compaction output indirectly through the pool size; the "does not cap" claim fails. Steps: (1) task count `min(n, 8)` [part 1]; (2) peak extra disk per value [part 3]; (3) a known byte cap moves the peak down (`ctl8r` 6.00 *C*, `ctl8a` 1.99 *C*) so the instrument can see a cap [part 2]; (4) the claim needed flat peaks, which did not occur [part 4].
 
-1. **Validity** — was the run valid? The limit was reached; each §9b "hold
-   fixed" setting is confirmed, with its evidence. If not valid, stop here: the
-   conclusion is "invalid run".
-2. **Readings** — anything unusual in §4.1: a gap, an outlier, a reading that
-   contradicts another.
-3. **Matched row** — the §9a row, quoted, and the reading that satisfies each
-   part of it.
-4. **Excluded rows** — for every other §9a row, the reading that rules it out.
-   Every **Refuted** row must be addressed.
-5. **Observed vs. inferred** — list the inferred statements that the
-   conclusion depends on. These are what the self-check most needs to check.
-6. **Deviations and gaps** — anything skipped, changed or not observable, and
-   how it limits the conclusion.
-
-7. **Core question** — in two or three sentences: did usage follow the
-   constraint, and does the constraint cap usage? Follow the "Logic" steps of the
-   case's "How this verifies the hypothesis" block (§9a), and cite for each step
-   the part above that supports it.
-
-**Conclusion (one line):** `<§9a row>` — confirmed / bypass as recorded /
-refuted / not confirmed / invalid run.
+**Conclusion (one line):** "Peak extra disk rises with the knob (about `min(n, 8)` × one compaction's output)" — **Refuted** (the file's claim fails; usage follows the constraint, indirectly through the number of tasks).
 
 ## 5. Self-check of run 1 — AI
 
 ### 5.1 Check of run 1's conclusion
 
-Re-open every raw file the conclusion cites and confirm it says what the
-conclusion says. A part that does not hold is fixed, or the conclusion is
-downgraded to *Not confirmed*.
+Every cited raw file was re-opened on 2026-10-20: `selfcheck.py` re-derives each label's baseline, peak extra bytes and peak running tasks from `samples.csv` alone (`selfcheck.txt`), and the READBACK / EXPECTED / counter lines of each `summary.txt`, the `budget-lines.txt` of the controls and the unit `run.out` were read directly.
 
 | Part | Holds? (yes / no) | Note (file re-read) |
 |---|---|---|
-| 1. Validity | | |
-| 2. Readings | | |
-| 3. Matched row | | |
-| 4. Excluded rows | | |
-| 5. Observed vs. inferred | | |
-| 6. Deviations and gaps | | |
-| 7. Core question — the steps from reading to answer follow the audited logic | | |
+| 1. Validity | yes | `samples.csv` max running = `min(n, 8)` in `n1`–`n8`; READBACK throughput 16 MB/s, `getconcurrentcompactors` = *n*, `MaxPoolSize` = *n* in every `summary.txt`; baseline equals 8,596,623,858 in every label (`selfcheck.txt`) |
+| 2. Readings | yes | the `ctl8a` retry loop is in `ctl8a/summary.txt` (Reduced 94, Aborted 116) and `system.log` shows 1-sstable "Compacted" lines; `ctl8` budget lines show eight simultaneous checks at 20:07:52,804 against 2,419,296,249 B |
+| 3. Matched row | yes | recomputed peaks 0.99 / 1.98 / 4.00 / 7.97 *C* (`selfcheck.txt`) match the rise row; the unit ratios 1.00 / 2.00 / 4.00 / 8.00 match |
+| 4. Excluded rows | yes | 7,492,280,961 B rise vs 32,768,000 B (twice the band); proportional steps recomputed |
+| 5. Observed vs. inferred | yes | `final_ks1` 8,596,423,151 vs baseline 8,596,623,858 in `n*` summaries; the per-task slope read from consecutive `samples.csv` rows (`n2a`: `ks1` grows about 33.7 MB per 2-s sample with two tasks, about 8.4 MB/s each) |
+| 6. Deviations and gaps | yes | the defect, the amended control, `ctl8a`'s missed prediction and the omitted repeat of the sweep are all listed |
+| 7. Core question — the steps from reading to answer follow the audited logic | yes | the rise row, not the control, decides the verdict; the control only shows the instrument can see a cap |
 
 ### 5.2 Run 2?
 
-**Yes / no** — the reason, and the date decided. Choose yes when the conclusion rests on inferred statements, a part of §5.1 cannot be settled from run 1's evidence, or the result refutes the case or confirms a bypass.
+**No** (2026-10-20). The readings are exact and repeatable (three default repeats within 0.015 *C*); the conclusion rests on observed peaks, not on inferred statements; the verdict refutes the file's own (negative) claim, but the effect is the plain consequence of the pool size and the numbers agree across the unit and cluster tiers.
 
 ## 6. Run 2 — fresh AI session (optional)
 
-"Not done" if §5.2 says no, and §7 is left out.
-
-**Scope:** the tiers and capacity values actually run. **Command log:**
-`[case-file stem]/run2/<file>`.
-
-### 6.1 Readings
-
-**Unit tier**
-
-| Test or assertion | Result | Evidence (file) |
-|---|---|---|
-
-**Cluster tier**
-
-| Capacity value | Run (control / A / B / C) | Observable (§9d) | Reading | Evidence (file) |
-|---|---|---|---|---|
-
-### 6.2 Matched row
-
-The §9a row these readings match, in one line.
+Not done.
 
 ## 7. Comparison — only if run 2 was done
 
-| Observable | Run 1 | Run 2 | Criterion (§1) | Agree? |
-|---|---|---|---|---|
-
-**Same §9a row?** yes / no. If no, or if a reading disagrees: the cause, and
-how it was resolved (see "Compare and decide" in the README).
+Not applicable.
 
 ## 8. Verdict — AI
 
-Jingsong may overrule any verdict at any time; record an override here with its
-date and reason.
+Jingsong may overrule any verdict at any time; record an override here with its date and reason.
 
-**Stage-3 estimate:** positive / negative / undetermined (from the case file; the Effect column below is what the run found, and a mismatch is the result).
+**Stage-3 estimate:** negative (Rule 2: the limit-side operand is a thread-pool size).
 
-**Claim tested:** (copy it from §9a or B1; for a negative-estimate file it says usage does **not** follow the constraint.)
-"Confirmed" below always means this claim held.
+**Claim tested:** `concurrent_compactors` does not bound compaction's disk or memory usage; the peak extra disk held for in-flight compaction output is the same at every value of the knob. "Confirmed" below means this claim held.
 
-| Tier | Verdict (§9a row; for an autonomous file, the B2g / B3g row) | Effect on the constraint | Basis | Date |
+| Tier | Verdict (§9a row) | Effect on the constraint | Basis | Date |
 |---|---|---|---|---|
-| Unit | | caps / does not cap / caps only on some paths (bypass) / undetermined | run 1 + self-check / run 1 + run 2 | |
-| Cluster | | caps / does not cap / caps only on some paths (bypass) / undetermined | run 1 + self-check / run 1 + run 2 | |
+| Unit | **Refuted** — held tasks and their summed input bytes equal `min(n, 8)` × one table's input (1.00 / 2.00 / 4.00 / 8.00) | caps (indirectly: the pool size bounds the number of concurrent compaction outputs) | run 1 + self-check | 2026-10-20 |
+| Cluster | **Refuted** — peak extra disk 0.99 / 1.98 / 4.00 / 7.97 compactions' output at 1 / 2 / 4 / 8, default repeats within 0.015 | caps (indirectly: peak = `min(n, 8)` × one compaction's output) | run 1 + self-check | 2026-10-20 |
 
-**Positive control** (a negative-estimate file only): what moved usage under a known-binding condition, with the
-reading — or why none was possible (then no tier of this file can be Confirmed).
+**Positive control** (a negative-estimate file only): a byte budget below one compaction moved usage under the same workload and instrument — `max_space_usable_for_compactions_in_percentage` giving a budget of 0.8 × one compaction cut the peak from 7.97 to 6.00 compactions' output (`ctl8r`: eight tasks each reduced to three inputs), and 0.45 × one compaction cut it to 1.99 (`ctl8a`). The filed control (budget 2.25 GiB) did not bind because the budget is checked per task and all eight tasks checked at once (§3). Because the verdict rests on a rising peak, not on a flat one, the control's role is only to show the instrument can see a cap.
 
-A tier the solution declares `n/a` gets a row saying `not run: <reason>`.
-
-**Feedback filed:** the case file's §10 "Stage-4 feedback" field updated
-(commit), and any section amended (which one, commit) — or "none needed".
+**Feedback filed:** the case file's §10 "Stage-4 feedback" field and Notes updated (commit: filled when committed); 9e step 4 and 9f R6 amended (control); `_INDEX.md` row to point at this file; the Rule 2 ground "a thread-pool size is not a byte limit" is too strong for pools whose tasks each hold bytes (the other thread-pool rejections, `SEPExecutor` and `concurrent_reads`, deserve the same re-examination).
