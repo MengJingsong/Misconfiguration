@@ -1,0 +1,21 @@
+=== prepared_statements_cache_size 4 MiB (cap 4194304 B), rate 500.0/s, max 200000 statements, sample 30.0s, restart check False
+yaml for prepared_statements_cache_size=4: # ---- stage4 psc lines ----;data_file_directories:;    - /users/jason92/stage4-psc/data;commitlog_directory: /users/jason92/stage4-psc/commitlog;hints_directory: /users/jason92/stage4-psc/hints;saved_caches_directory: /users/jason92/stage4-psc/saved_caches;cdc_raw_directory: /users/jason92/stage4-psc/cdc_raw;prepared_statements_cache_size: 4MiB;
+READBACK log: "Initialized prepared statement caches with 4 MiB"
+RESULT setup ok 5.0.9-SNAPSHOT
+HISTO 0-baseline live_bytes=66737216 live_objects=709528 prepared_instances=29 prepared_shallow=1392 heap_used_kb=65173
+RESULT plain n=20000 done=20000 errors=0 seconds=40.0 first_error=None
+HISTO 1-after-plain live_bytes=68034992 live_objects=710225 prepared_instances=29 prepared_shallow=1392 heap_used_kb=66440
+COUNTERS after-plain count=0 evicted=0 memtable_heap=0
+RESULT dup prepared=100
+DUP count_before=0 count_after=1 (adds at most one: True)
+STOP RULE met at 304s: evicted=150224 >= 5 x count=1581; last 10 counts 1581..1581
+STOP RULE met at 335s: evicted=150243 >= 5 x count=1581; last 10 counts 1581..1581
+RESULT load offered=200000 prepared=151807 errors=0 seconds=303.6 rate=500/s hot_executes_ok=760 first_error=None
+COUNTERS final count=1581 evicted=150243 memtable_heap=110337022 stop_rule_met=True
+HISTO 2-after-load live_bytes=163788496 live_objects=3341822 prepared_instances=1612 prepared_shallow=77376 heap_used_kb=159949
+HEAP DELTA vs baseline-after-plain: 95753504 B (vs first baseline 97051280); memtable heap of system.prepared_statements 110337022 B; delta minus memtable -14583518
+DISK system.prepared_statements bytes=4096
+ROWS system.prepared_statements: 1581
+RESULT oversize chars=5242911 rejected InvalidRequest('Error from server: code=2200 [Invalid query] message="Prepared statement of size 10488360 bytes is larger than allowed maximum of 4 MB: SELECT v FROM ks.t WHERE k = \'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+OVERSIZE count_before=1581 count_after=1581
+STOPPED: no CassandraDaemon left

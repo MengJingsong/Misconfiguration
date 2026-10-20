@@ -1,0 +1,21 @@
+=== prepared_statements_cache_size 64 MiB (cap 67108864 B), rate 500.0/s, max 200000 statements, sample 30.0s, restart check False
+yaml for prepared_statements_cache_size=64: # ---- stage4 psc lines ----;data_file_directories:;    - /users/jason92/stage4-psc/data;commitlog_directory: /users/jason92/stage4-psc/commitlog;hints_directory: /users/jason92/stage4-psc/hints;saved_caches_directory: /users/jason92/stage4-psc/saved_caches;cdc_raw_directory: /users/jason92/stage4-psc/cdc_raw;prepared_statements_cache_size: 64MiB;
+READBACK log: "Initialized prepared statement caches with 64 MiB"
+RESULT setup ok 5.0.9-SNAPSHOT
+HISTO 0-baseline live_bytes=66736264 live_objects=709468 prepared_instances=29 prepared_shallow=1392 heap_used_kb=65172
+RESULT plain n=20000 done=20000 errors=0 seconds=40.0 first_error=None
+HISTO 1-after-plain live_bytes=68247880 live_objects=711029 prepared_instances=29 prepared_shallow=1392 heap_used_kb=66648
+COUNTERS after-plain count=0 evicted=0 memtable_heap=0
+RESULT dup prepared=100
+DUP count_before=0 count_after=1 (adds at most one: True)
+STOP RULE met at 335s: evicted=141742 >= 5 x count=25305; last 10 counts 25305..25305
+STOP RULE met at 365s: evicted=141762 >= 5 x count=25305; last 10 counts 25305..25305
+RESULT load offered=200000 prepared=167056 errors=0 seconds=334.1 rate=500/s hot_executes_ok=836 first_error=None
+COUNTERS final count=25305 evicted=141762 memtable_heap=120298992 stop_rule_met=True
+HISTO 2-after-load live_bytes=224063048 live_objects=5208881 prepared_instances=25336 prepared_shallow=1216128 heap_used_kb=218811
+HEAP DELTA vs baseline-after-plain: 155815168 B (vs first baseline 157326784); memtable heap of system.prepared_statements 120298992 B; delta minus memtable 35516176
+DISK system.prepared_statements bytes=4096
+ROWS system.prepared_statements: 25305
+RESULT oversize chars=68157471 rejected InvalidRequest('Error from server: code=2200 [Invalid query] message="CQL Message of size 68157479 bytes exceeds allowed maximum of 16777216 bytes"')
+OVERSIZE count_before=25305 count_after=25305
+STOPPED: no CassandraDaemon left

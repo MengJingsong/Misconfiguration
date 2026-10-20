@@ -1,0 +1,117 @@
+[2026-10-19 18:13:54] === prepared_statements_cache_size 1 MiB (cap 1048576 B), rate 500.0/s, max 200000 statements, sample 30.0s, restart check True
+[2026-10-19 18:13:54] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-19 18:13:54] + rm -rf /users/jason92/stage4-psc/data /users/jason92/stage4-psc/commitlog /users/jason92/stage4-psc/saved_caches /users/jason92/stage4-psc/hints /users/jason92/stage4-psc/cdc_raw /users/jason92/stage4-psc/logs /users/jason92/stage4-psc/cassandra.pid
+
+  rc=0
+[2026-10-19 18:13:54] + javac -d /users/jason92/stage4-psc/jmx /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/Jmx.java
+
+  rc=0
+[2026-10-19 18:13:55] + /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/make-node-yaml.sh 1
+yaml for prepared_statements_cache_size=1: # ---- stage4 psc lines ----;data_file_directories:;    - /users/jason92/stage4-psc/data;commitlog_directory: /users/jason92/stage4-psc/commitlog;hints_directory: /users/jason92/stage4-psc/hints;saved_caches_directory: /users/jason92/stage4-psc/saved_caches;cdc_raw_directory: /users/jason92/stage4-psc/cdc_raw;prepared_statements_cache_size: 1MiB;
+
+  rc=0
+[2026-10-19 18:13:55] yaml for prepared_statements_cache_size=1: # ---- stage4 psc lines ----;data_file_directories:;    - /users/jason92/stage4-psc/data;commitlog_directory: /users/jason92/stage4-psc/commitlog;hints_directory: /users/jason92/stage4-psc/hints;saved_caches_directory: /users/jason92/stage4-psc/saved_caches;cdc_raw_directory: /users/jason92/stage4-psc/cdc_raw;prepared_statements_cache_size: 1MiB;
+[2026-10-19 18:13:55] + bin/cassandra -p /users/jason92/stage4-psc/cassandra.pid > /users/jason92/stage4-psc/stdout.txt 2>&1
+
+  rc=0
+[2026-10-19 18:14:40] READBACK log: "Initialized prepared statement caches with 1 MiB"
+[2026-10-19 18:14:40] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/prep-load.py setup
+RESULT setup ok 5.0.9-SNAPSHOT
+
+  rc=0
+[2026-10-19 18:14:41] RESULT setup ok 5.0.9-SNAPSHOT
+[2026-10-19 18:14:41] + jmap -histo:live 2413448 > /users/jason92/stage4-logs/psc/cluster/k1/histo-0-baseline.txt
+
+  rc=0
+[2026-10-19 18:14:42] + jcmd 2413448 GC.heap_info > /users/jason92/stage4-logs/psc/cluster/k1/heapinfo-0-baseline.txt
+
+  rc=0
+[2026-10-19 18:14:42] HISTO 0-baseline live_bytes=66734472 live_objects=709462 prepared_instances=29 prepared_shallow=1392 heap_used_kb=81554
+[2026-10-19 18:14:42] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/prep-load.py plain 20000 500.0
+RESULT plain n=20000 done=20000 errors=0 seconds=40.0 first_error=None
+
+  rc=0
+[2026-10-19 18:15:22] RESULT plain n=20000 done=20000 errors=0 seconds=40.0 first_error=None
+[2026-10-19 18:15:22] + jmap -histo:live 2413448 > /users/jason92/stage4-logs/psc/cluster/k1/histo-1-after-plain.txt
+
+  rc=0
+[2026-10-19 18:15:23] + jcmd 2413448 GC.heap_info > /users/jason92/stage4-logs/psc/cluster/k1/heapinfo-1-after-plain.txt
+
+  rc=0
+[2026-10-19 18:15:23] HISTO 1-after-plain live_bytes=68139848 live_objects=710630 prepared_instances=29 prepared_shallow=1392 heap_used_kb=66542
+[2026-10-19 18:15:23] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:15:24] COUNTERS after-plain count=0 evicted=0 memtable_heap=0
+[2026-10-19 18:15:24] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:15:24] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/prep-load.py dup 100
+RESULT dup prepared=100
+
+  rc=0
+[2026-10-19 18:15:25] RESULT dup prepared=100
+[2026-10-19 18:15:25] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:15:25] DUP count_before=0 count_after=1 (adds at most one: True)
+[2026-10-19 18:15:25] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:15:55] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:15:56] sample count=395 evicted=14567 memtable_heap=10838150
+[2026-10-19 18:16:26] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:16:26] sample count=395 evicted=29773 memtable_heap=21892185
+[2026-10-19 18:16:56] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:16:57] sample count=395 evicted=44981 memtable_heap=32949128
+[2026-10-19 18:17:27] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:17:27] sample count=395 evicted=60178 memtable_heap=43997347
+[2026-10-19 18:17:57] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:17:57] sample count=395 evicted=75379 memtable_heap=55048474
+[2026-10-19 18:18:27] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:18:28] sample count=395 evicted=90591 memtable_heap=66107598
+[2026-10-19 18:18:58] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:18:58] sample count=395 evicted=105804 memtable_heap=77173623
+[2026-10-19 18:19:28] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:19:29] sample count=395 evicted=121004 memtable_heap=88239223
+[2026-10-19 18:19:59] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:19:59] sample count=395 evicted=136216 memtable_heap=99313559
+[2026-10-19 18:20:29] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:20:29] sample count=395 evicted=151430 memtable_heap=110389351
+[2026-10-19 18:20:29] STOP RULE met at 304s: evicted=151430 >= 5 x count=395; last 10 counts 395..395
+[2026-10-19 18:20:59] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:21:00] sample count=395 evicted=151450 memtable_heap=110403183
+[2026-10-19 18:21:00] STOP RULE met at 335s: evicted=151450 >= 5 x count=395; last 10 counts 395..395
+[2026-10-19 18:21:00] RESULT load offered=200000 prepared=151819 errors=0 seconds=303.6 rate=500/s hot_executes_ok=760 first_error=None
+[2026-10-19 18:21:30] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:21:30] COUNTERS final count=395 evicted=151450 memtable_heap=110403183 stop_rule_met=True
+[2026-10-19 18:21:30] + jmap -histo:live 2413448 > /users/jason92/stage4-logs/psc/cluster/k1/histo-2-after-load.txt
+
+  rc=0
+[2026-10-19 18:21:31] + jcmd 2413448 GC.heap_info > /users/jason92/stage4-logs/psc/cluster/k1/heapinfo-2-after-load.txt
+
+  rc=0
+[2026-10-19 18:21:31] HISTO 2-after-load live_bytes=161349504 live_objects=3261748 prepared_instances=426 prepared_shallow=20448 heap_used_kb=157567
+[2026-10-19 18:21:31] HEAP DELTA vs baseline-after-plain: 93209656 B (vs first baseline 94615032); memtable heap of system.prepared_statements 110403183 B; delta minus memtable -17193527
+[2026-10-19 18:21:31] + du -sb /users/jason92/stage4-psc/data/system/prepared_statements-* 2>/dev/null | cut -f1
+[2026-10-19 18:21:31] DISK system.prepared_statements bytes=4096
+[2026-10-19 18:21:31] + bin/cqlsh --request-timeout=300 127.0.0.1 -e "SELECT count(*) FROM system.prepared_statements" 2>&1 | grep -E '^ +[0-9]+ *$' 
+[2026-10-19 18:21:32] ROWS system.prepared_statements: 395
+[2026-10-19 18:21:32] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/prep-load.py oversize 2097152
+RESULT oversize chars=2097183 rejected InvalidRequest('Error from server: code=2200 [Invalid query] message="Prepared statement of size 4196904 bytes is larger than allowed maximum of 1 MB: SELECT v FROM ks.t WHERE k = \'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  rc=0
+[2026-10-19 18:21:33] RESULT oversize chars=2097183 rejected InvalidRequest('Error from server: code=2200 [Invalid query] message="Prepared statement of size 4196904 bytes is larger than allowed maximum of 1 MB: SELECT v FROM ks.t WHERE k = \'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+[2026-10-19 18:21:33] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:21:33] OVERSIZE count_before=395 count_after=395
+[2026-10-19 18:21:33] + bin/nodetool stopdaemon
+Cassandra has shutdown.
+WARN  18:21:35,494 Only 50.027GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+
+  rc=0
+[2026-10-19 18:21:44] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-19 18:21:44] RESTART: node stopped; starting without wiping
+[2026-10-19 18:21:44] + bin/cassandra -p /users/jason92/stage4-psc/cassandra.pid > /users/jason92/stage4-psc/stdout.txt 2>&1
+
+  rc=0
+[2026-10-19 18:22:00] + java -cp /users/jason92/stage4-psc/jmx Jmx 7199 get org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsCount Value org.apache.cassandra.metrics:type=CQL,name=PreparedStatementsEvicted Count org.apache.cassandra.metrics:type=Table,keyspace=system,scope=prepared_statements,name=AllMemtablesHeapSize Value
+[2026-10-19 18:22:00] RESTART preload lines=[('395', '787')]; filling-up warnings=0; count after restart=395
+[2026-10-19 18:22:00] + bin/nodetool stopdaemon
+Cassandra has shutdown.
+WARN  18:22:02,278 Only 50.048GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+
+  rc=0
+[2026-10-19 18:22:10] + ps -eo cmd | grep '[C]assandraDaemon' || true
+[2026-10-19 18:22:11] STOPPED: no CassandraDaemon left

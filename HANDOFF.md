@@ -58,9 +58,9 @@ Decided with Jingsong on 2026-10-19 and carried out the same day (nothing commit
 8. **Checks done:** every markdown link resolves except the templates' copy-relative links and two older files of `entry-restriction-exp`;
    the two autonomous files' sha256 match the index.
 
-## Resume here — stage 4 (updated 2026-10-19: 26 of 37 case files closed; 11 not yet run)
+## Resume here — stage 4 (updated 2026-10-19: 27 of 37 case files closed; 10 not yet run)
 
-**Current (2026-10-19):** 37 case files (29 guided, 8 autonomous). **Stage 4 closed: 26** (24 guided positive + 2 autonomous: `memtable_heap_space`, `max_space…`), all Confirmed at every tier run, no run 2. **Not yet run: 11** — 5 guided `rejected` (`concurrent_compactors`, `batch_size_fail_threshold`, `native_transport_max_message_size`, `native_transport_max_concurrent_connections`, `native_transport_queue_max_item_age_threshold`) and 6 autonomous (`prepared_statements_cache_size`, `internode_max_message_size` ×2, `max_mutation_size` hints slab, `internode_application_receive_queue_capacity` releaseCapacity — all positive — and `WRITE_BUFFER_SIZE`, negative); each still needs the step-0 audit and freeze. The results files of the 26 carry a `Closed` Status line (21 marked 2026-10-19).
+**Current (2026-10-19):** 37 case files (29 guided, 8 autonomous). **Stage 4 closed: 27** (24 guided positive + 3 autonomous: `memtable_heap_space`, `max_space…`, `prepared_statements_cache_size` — cache capped, bypass through the `system.prepared_statements` memtable), all Confirmed at every tier run, no run 2. **Not yet run: 10** — 5 guided `rejected` (`concurrent_compactors`, `batch_size_fail_threshold`, `native_transport_max_message_size`, `native_transport_max_concurrent_connections`, `native_transport_queue_max_item_age_threshold`) and 5 autonomous (`internode_max_message_size` ×2, `max_mutation_size` hints slab, `internode_application_receive_queue_capacity` releaseCapacity — all positive — and `WRITE_BUFFER_SIZE`, negative); each still needs the step-0 audit and freeze. The results files of the 27 carry a `Closed` Status line (21 marked 2026-10-19).
 
 **Status at a glance (2026-10-14, written under the old names: long path = guided, short path = autonomous):**
 

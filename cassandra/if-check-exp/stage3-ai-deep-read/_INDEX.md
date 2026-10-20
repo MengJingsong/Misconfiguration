@@ -65,8 +65,8 @@ on an autonomous row.
 | of which negative estimates | 6 (5 guided, written up 2026-10-19 as the pilot of the `predicted-negative.md` write-up, and 1 autonomous) |
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
-| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **26** (24 guided positive, 2 autonomous), as of 2026-10-19 |
-| Stage 4 not yet run | **11** (5 guided `rejected`, 6 autonomous: 5 positive, 1 negative) |
+| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **27** (24 guided positive, 3 autonomous), as of 2026-10-19 |
+| Stage 4 not yet run | **10** (5 guided `rejected`, 5 autonomous: 4 positive, 1 negative) |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -323,6 +323,7 @@ dated amendment adds a line here with its date and the new hash.
 | `memtable_heap_space-tryAllocate-limit--autonomous.md` | `31f017feea820dd6d9df3db04ef0d5aa50a81c1733819850d1fd027795e46126` | 2026-10-05 (claude-sonnet-5) |
 | `max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous.md` | `e8b505e1802722d76642c664e71a55ee2cbb23536bb88e1852edecce143ae7b1` | 2026-10-08 (claude-sonnet-5) |
 | `prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md` | `f086b0d230352fd2aa54016d6403a7d5d9e7a578ead3b5a32981059f36c59c3f` | 2026-10-19 (autonomous agent, rejected-entry write-up) | (hash after the 2026-10-19 Judgment → Estimate label rename) |
+| `prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md` | `b055bdde92e1f4861f05424defc1d19a994dd39ac4893fcceb7abe9232aba812` | 2026-10-19 stage-4 step-0 audit amendments (one cache entry per statement, test-yaml knob, live-heap instrument, two over-count rows); the frozen version | (hash above after the amendments; section D feedback added after the freeze, 2026-10-19) |
 | `internode_max_message_size-inferMessageSize-size--autonomous.md` | `b204d619b862d6f9a78a9e9860ca7ebb41aabe94fe9dea083dce8c8ffe0777fb` | 2026-10-19 (autonomous agent, rejected-entry write-up) | (hash after the 2026-10-19 Judgment → Estimate label rename) |
 | `internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md` | `b8f001f77ddaae019ccb673e3a269edb3094e3c2de93734a1f85b5409b0e5b3f` | 2026-10-19 (autonomous agent, rejected-entry write-up) | (hash after the 2026-10-19 Judgment → Estimate label rename) |
 | `max_mutation_size-allocateBytes-slabCapacity--autonomous.md` | `47acc75811952dcd70e6b2ad0fd038833c1f0a2afe4da8e9fcde9a23c4cbf66f` | 2026-10-19 (autonomous agent, rejected-entry write-up) | (hash after the 2026-10-19 Judgment → Estimate label rename) |

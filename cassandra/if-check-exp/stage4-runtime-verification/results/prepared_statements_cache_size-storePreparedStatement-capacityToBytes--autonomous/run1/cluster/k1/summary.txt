@@ -1,0 +1,23 @@
+=== prepared_statements_cache_size 1 MiB (cap 1048576 B), rate 500.0/s, max 200000 statements, sample 30.0s, restart check True
+yaml for prepared_statements_cache_size=1: # ---- stage4 psc lines ----;data_file_directories:;    - /users/jason92/stage4-psc/data;commitlog_directory: /users/jason92/stage4-psc/commitlog;hints_directory: /users/jason92/stage4-psc/hints;saved_caches_directory: /users/jason92/stage4-psc/saved_caches;cdc_raw_directory: /users/jason92/stage4-psc/cdc_raw;prepared_statements_cache_size: 1MiB;
+READBACK log: "Initialized prepared statement caches with 1 MiB"
+RESULT setup ok 5.0.9-SNAPSHOT
+HISTO 0-baseline live_bytes=66734472 live_objects=709462 prepared_instances=29 prepared_shallow=1392 heap_used_kb=81554
+RESULT plain n=20000 done=20000 errors=0 seconds=40.0 first_error=None
+HISTO 1-after-plain live_bytes=68139848 live_objects=710630 prepared_instances=29 prepared_shallow=1392 heap_used_kb=66542
+COUNTERS after-plain count=0 evicted=0 memtable_heap=0
+RESULT dup prepared=100
+DUP count_before=0 count_after=1 (adds at most one: True)
+STOP RULE met at 304s: evicted=151430 >= 5 x count=395; last 10 counts 395..395
+STOP RULE met at 335s: evicted=151450 >= 5 x count=395; last 10 counts 395..395
+RESULT load offered=200000 prepared=151819 errors=0 seconds=303.6 rate=500/s hot_executes_ok=760 first_error=None
+COUNTERS final count=395 evicted=151450 memtable_heap=110403183 stop_rule_met=True
+HISTO 2-after-load live_bytes=161349504 live_objects=3261748 prepared_instances=426 prepared_shallow=20448 heap_used_kb=157567
+HEAP DELTA vs baseline-after-plain: 93209656 B (vs first baseline 94615032); memtable heap of system.prepared_statements 110403183 B; delta minus memtable -17193527
+DISK system.prepared_statements bytes=4096
+ROWS system.prepared_statements: 395
+RESULT oversize chars=2097183 rejected InvalidRequest('Error from server: code=2200 [Invalid query] message="Prepared statement of size 4196904 bytes is larger than allowed maximum of 1 MB: SELECT v FROM ks.t WHERE k = \'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+OVERSIZE count_before=395 count_after=395
+RESTART: node stopped; starting without wiping
+RESTART preload lines=[('395', '787')]; filling-up warnings=0; count after restart=395
+STOPPED: no CassandraDaemon left
