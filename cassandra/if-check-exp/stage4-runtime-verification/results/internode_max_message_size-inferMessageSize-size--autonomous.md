@@ -21,7 +21,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `46d2788e90644e4835d69e728ec6cac99769453d7dbf0f6f30ccfaca2e5eb437` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `46d2788e90644e4835d69e728ec6cac99769453d7dbf0f6f30ccfaca2e5eb437` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/internode_max_message_size-inferMessageSize-size--autonomous/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (B2): `Message.serializer.inferMessageSize` with L = 64 KiB · 1 MiB · 16 MiB, the exact boundary and a truncated payload. Cluster (B3): two nodes, RF=2, runs R1 (16/16 MiB), R2 (16/1 MiB), R3 (1/1 MiB) and R0 (default/default, added R1), blobs 512 KiB · 4 MiB · 12 MiB at CL=ALL. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

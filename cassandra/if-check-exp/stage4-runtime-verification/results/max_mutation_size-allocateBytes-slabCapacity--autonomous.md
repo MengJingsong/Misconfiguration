@@ -21,7 +21,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `8ecb18b22d2fe470942b0dbbb77bfb1636fddd9cda4c3f5b0058d467dfe352ca` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `8ecb18b22d2fe470942b0dbbb77bfb1636fddd9cda4c3f5b0058d467dfe352ca` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/max_mutation_size-allocateBytes-slabCapacity--autonomous/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (B2): `HintsBuffer.create(C)` with C = 1 · 4 · 32 MiB, fill to the first null, boundary at `C/2 − 12`, `recycle()`, plus the derived-slab arithmetic. Cluster (B3): node A with `max_mutation_size` unset (16 MiB, slab 32 MiB) · 4096 KiB (floor) · 32768 KiB (slab 64 MiB), and `MAX_HINT_BUFFERS` 3 · 1; node B down. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

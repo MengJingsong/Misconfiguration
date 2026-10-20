@@ -18,7 +18,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `dcad2ce895b243c8d9efb09f392df461e142dc89`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `dcad2ce895b243c8d9efb09f392df461e142dc89`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (9a step 1): `Dispatcher` over a held executor, `hasQueueCapacity()` at thresholds above, at and below the head's age. Cluster (9e): one node, `native_transport_max_threads` 4, Byteman stall, 100 × 64 KiB requests/s for 60 s, threshold off · 0.5 · 0.1 · 0.02 (throwing mode; one repeat in default mode at 0.1), positive control with in-flight limit 8 MiB. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

@@ -117,7 +117,7 @@ same `cluster_name`, the seed node's control address under `seeds`, and each nod
 - **`JVM_EXTRA_OPTS` is scoped to the `bin/cassandra` command**, never exported: an agent on a client JVM (`nodetool`, stress, `cqlsh`)
   would clash with the node's Byteman listener on port 9091.
 
-## 7. Nodes (checked 2026-10-07; updated 2026-10-13)
+## 7. Nodes (checked 2026-10-07; updated 2026-10-13 and 2026-10-20)
 
 All three answered over SSH (`ssh -o BatchMode=yes jason92@<host> ...`, with the short names `pcNN.cloudlab.umass.edu`; the long `node0.jason92-…` names fail host-key
 verification from the tool shell). CloudLab experiments expire, so check again before a run. A node's home may hold directories from earlier runs; they are not yours.
@@ -131,6 +131,8 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 
 `pc57` and `pc50` were added to `~/.ssh/known_hosts` on 2026-10-13 (ECDSA key `SHA256:qDJ4amzV…`); on 2026-10-13 `pc66` timed out on port 22. They present the same ED25519 key as `pc66` (`SHA256:qkFN/SvBkCeQfIkD5YilK7WgBOUyfXwZPIEyp0Q9hYY`). Until added, use
 `ssh-keyscan -t ed25519 pcNN.cloudlab.umass.edu > kh` and `ssh -o UserKnownHostsFile=kh …`. `pc80` and `pc72` (experiment `…-318546`) are no longer used: `pc80` refuses the key.
+
+**2026-10-20:** `pc57` was the run node (32 cores, 251 GiB, about 47 GB free on `/`; Ubuntu 22.04, `5.15.0-187-generic`, JDK 11.0.32.1, Ant 1.10.12). A fresh clone `~/cassandra-run4` at `cassandra-5.0.9` (`b5f2a54210`) was built with `ant build-test` in 1 min 33 s; `~/cassandra-run1` holds untracked test files from earlier cases, so use a fresh clone per case. `pc50` answered over SSH with JDK 11 and a built `~/cassandra-run1` (55 GB free). `pc66` was not checked.
 
 ## Logs
 

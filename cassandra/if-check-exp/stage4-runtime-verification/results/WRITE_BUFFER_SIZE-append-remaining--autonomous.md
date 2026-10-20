@@ -21,7 +21,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `55bf043e43ebcbb70b926e214b47356edd69ce76a20a9d4aee7d832563bc5ab6` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `55bf043e43ebcbb70b926e214b47356edd69ce76a20a9d4aee7d832563bc5ab6` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/WRITE_BUFFER_SIZE-append-remaining--autonomous/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (B2): `HintsWriter.Session.append(Hint)` and `append(ByteBuffer)` with hint sizes 1 · 100 · 255 · 257 KiB · 1 · 4 · 15 MiB, the 256 KiB buffer and a 64 KiB variant, positive control `HintsBuffer.allocate` at `capacity/2`. Cluster (B3): node A, B down, 100 KiB · 1 MiB · 8 MiB values (2 GiB each), `MAX_HINT_BUFFERS` 3 · 1, `max_hints_size_per_host` 0 · 64 MiB. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

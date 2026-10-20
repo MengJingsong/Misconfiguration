@@ -21,7 +21,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `9edf2196d46995984e00dd37d7497dc48fafc363bfc545e17196520f555154f0` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `9edf2196d46995984e00dd37d7497dc48fafc363bfc545e17196520f555154f0` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (B2): `OutboundConnection.enqueue` with L = 64 KiB · 1 MiB · 8 MiB and an unlimited control, S = L−1 · L · L+1 · 2L. Cluster (B3): two nodes, RF=2, 2 MiB blobs at CL=ALL, L = 1 MiB · 8 MiB · 128 MiB (default, added R1), 256 KiB control. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

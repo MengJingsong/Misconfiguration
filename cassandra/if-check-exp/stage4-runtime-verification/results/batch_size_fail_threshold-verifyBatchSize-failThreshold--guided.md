@@ -18,7 +18,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `ce9fe324dbdb69c9c358b3f8a6df117289f8294d`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `ce9fe324dbdb69c9c358b3f8a6df117289f8294d`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (9c): `BatchStatement.execute` under `CQLTester`, thresholds 50 KiB · 500 KiB · 5 MiB. Cluster (9e): one node, `-Xmx4G`, native v5, 64-partition unlogged batches of 1 · 4 · 16 MiB, positive control with `native_transport_max_message_size` 512 KiB. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

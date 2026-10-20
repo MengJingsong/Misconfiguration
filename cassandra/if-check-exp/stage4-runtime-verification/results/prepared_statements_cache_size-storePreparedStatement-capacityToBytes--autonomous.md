@@ -22,7 +22,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Autonomous file, sha256 after the audit's amendments: `b055bdde92e1f4861f05424defc1d19a994dd39ac4893fcceb7abe9232aba812` (`sha256sum`, run 2026-10-19 before any harness or run; filed hash `f086b0d2…` in `_INDEX.md` §4, the new line there is this one). Commit holding the file: filled when committed (HEAD before the amendments: `dc5227d`). |
+| **Case-file version** | Autonomous file, sha256 after the audit's amendments: `b055bdde92e1f4861f05424defc1d19a994dd39ac4893fcceb7abe9232aba812` (`sha256sum`, run 2026-10-19 before any harness or run; filed hash `f086b0d2…` in `_INDEX.md` §4, the new line there is this one). Commit holding the file: `0df2870` (HEAD before the amendments: `dc5227d`). |
 | **Harness** | `harness/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous/` (to be written in step 1; none yet) |
 | **Tiers and values** | Unit (B2): knob 1 · 2 · 4 · 8 MiB plus the 10 MiB auto default, `-Xmx1g`, plus the oversize statement and the 64 MiB no-eviction control (B2h a). Cluster (B3): 1 · 4 · 16 · 64 MiB, one node, `-Xms2g -Xmx2g`, G1. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-19 |

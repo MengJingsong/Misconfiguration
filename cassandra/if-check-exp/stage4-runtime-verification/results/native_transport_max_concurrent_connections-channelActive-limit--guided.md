@@ -18,7 +18,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `52393486b28d1c0f3a5aec5b16b1019a1ddac005`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `52393486b28d1c0f3a5aec5b16b1019a1ddac005`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/native_transport_max_concurrent_connections-channelActive-limit--guided/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (9a step 1): `ConnectionLimitHandler` in an `EmbeddedChannel`, limits below, at and above *k*. Cluster (9e): one node `-Xmx2G`, limits 500 · 1,000 · 2,000 · −1 (default), 4,000 idle sockets from one address; positive control: 64 connections × 1 MiB with in-flight limits 1 GiB vs 16 MiB. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

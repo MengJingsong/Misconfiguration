@@ -18,7 +18,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `14c3b5fd4cf4bfa36ad10c616a096d871b62ea60`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Guided file, hash of §9's text after the audit's amendments (`sed -n '/^## 9\. /,/^## 10\. /p' <file> | git hash-object --stdin`): `14c3b5fd4cf4bfa36ad10c616a096d871b62ea60`, computed 2026-10-20 before any harness or run. §9a is frozen at this version, including the dated block 9f. Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (9a step 1): `CQLMessageHandler` large-message path, first frame above, at and below the limit. Cluster (9e): knob 1 · 4 · 16 MiB (default derived = 16 MiB) with one 8 MiB v5 request held; positive control replaced by the two-request reserves arms (9f R1). |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |

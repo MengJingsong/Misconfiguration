@@ -21,7 +21,7 @@ The protocol behind each section is in
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `b63484779685490d51411d3ac753f84f9cd78c29e146076c69d43940b7ddb631` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: filled when committed (HEAD before the amendments: `42f9069`). |
+| **Case-file version** | Autonomous file, sha256 of the whole file after the audit's amendments: `b63484779685490d51411d3ac753f84f9cd78c29e146076c69d43940b7ddb631` (`sha256sum`, run 2026-10-20 before any harness or run; the new line in `_INDEX.md` §4 is this one). Commit holding the file: `cd7fec5` (the step-0 audit commit on `main`). |
 | **Harness** | `harness/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous/` — none yet; to be written in step 1 (list in the recommendations below). |
 | **Tiers and values** | Unit (B2): `AbstractMessageHandler` acquire/release script with Q = 1024 · 4096 B and reserves 2048 · 8192 B, boundary cases, a concurrent release, a mutation that must fail (R1). Cluster (B3): B receives from A, Byteman 200 ms stall, 512 KiB blobs, Q = 64 KiB · 4 MiB (default) · 32 MiB, reserves 16 MiB (set 1) and default 128/512 MiB (set 2). |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-20 |
