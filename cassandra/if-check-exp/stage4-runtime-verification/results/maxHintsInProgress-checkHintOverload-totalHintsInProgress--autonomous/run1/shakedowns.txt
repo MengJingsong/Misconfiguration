@@ -1,0 +1,16 @@
+# shakedowns (instrument checks, not readings): summaries
+== shakedown1 F-1
+stress main: rc=0 11 s; Total errors=40943; Total partitions=50000; "Too many in flight hints" in stress output: 96288
+samples=202 limit_seen=[1] max_hintsInProgress=8 max_mutationPending=16 max_heapUsed=976 MiB max_old%=None unavailables_delta=48144 (sampler 0->48144) TotalHints_delta=14356 n1 ERROR lines=0
+EXPECTED totals F-1: {'yes': 6, 'no': 0}
+== shakedown1 O-1
+stress main: rc=0 9 s; Total errors=0; Total partitions=50000; "Too many in flight hints" in stress output: 0
+samples=196 limit_seen=[1] max_hintsInProgress=124 max_mutationPending=248 max_heapUsed=961 MiB max_old%=None unavailables_delta=0 (sampler 0->0) TotalHints_delta=62500 n1 ERROR lines=0
+EXPECTED totals O-1: {'yes': 7, 'no': 1}
+== shakedown2 O-1
+stress main: rc=0 10 s; Total errors=0; Total partitions=50000; "Too many in flight hints" in stress output: 0
+samples=198 limit_seen=[1] max_hintsInProgress=126 max_mutationPending=250 max_heapUsed=945 MiB max_oldgen_after_gc=0 MiB (0.0 % of 2 GiB, 44 samples) unavailables_delta=0 (sampler 0->0) TotalHints_delta=62500 n1 ERROR lines=0
+EXPECTED totals O-1: {'yes': 7, 'no': 1}
+== shakedown1 O-1 jstat.txt (defect D1)
+sun.jvmstat.monitor.MonitorException: 234238 not found
+	at jdk.internal.jvmstat/sun.jvmstat.perfdata.monitor.protocol.local.PerfDataBuffer.<init>(PerfDataBuffer.java:84)

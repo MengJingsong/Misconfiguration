@@ -1,0 +1,27 @@
+run O-1 2026-10-21 12:02:31 -0400 host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu build /users/jason92/cassandra-mhp L=1 N=1000000 threads=400
+build check (jar used by bin/cassandra): private static final com.google.common.cache.CacheLoader<org.apache.cassandra.locator.InetAddressAndPort, java.util.concurrent.atomic.AtomicInteger> hintsInProgress;
+free on / at start: 52.9 GiB
+yaml/env diffs: 26c26 | < cluster_name: 'Test Cluster' | --- | > cluster_name: 'stage4-mhp' | 706c706 | <       - seeds: "127.0.0.1:7000" | --- | >       - seeds: "127.0.0.21:7000" | 723c723 | < concurrent_writes: 32 | --- | > concurrent_writes: 2 | 981c981 | < listen_address: localhost | --- | > listen_address: 127.0.0.21 | 1090c1090 | < rpc_address: localhost | --- | > rpc_address: 127.0.0.21 | 235c235 | < JMX_PORT="7199" | --- | > JMX_PORT="7221" | 
+n1 started pid 269500
+n2 started pid 272008
+two UN after 68 s
+stress schema: rc=0 10 s; Total errors=0; Total partitions=1000; "Too many in flight hints" in stress output: 0
+n1 sees n2 DN after 1 s (n2 pid 272008 alive=True)
+set MaxHintsInProgress: read back 1
+before: {'TotalHints': '0', 'Count': '0', 'HintsInProgress': '0'}
+stress main: rc=0 26 s; Total errors=0; Total partitions=1000000; "Too many in flight hints" in stress output: 0
+after (+30 s): {'TotalHints': '1050000', 'Count': '0', 'HintsInProgress': '0'}
+"Too many in flight hints" in n1 logs: /users/jason92/stage4-mhp/run1/O-1/n1/logs/system.log:0
+/users/jason92/stage4-mhp/run1/O-1/n1/logs/debug.log:0
+n1 hints: 1150800378 B in 9 files (du -sb 1150804535)
+samples=277 limit_seen=[1] max_hintsInProgress=129 max_mutationPending=255 max_heapUsed=1982 MiB max_oldgen_used=923.6 MiB (45.1 % of 2 GiB; after-GC 317.2 MiB; 61 samples) unavailables_delta=0 (sampler 0->0) TotalHints_delta=1050000 n1 ERROR lines=0
+EXPECTED: O-1: limit in force during the run (sampler limit column = 1) — yes
+EXPECTED: O-1: n2 DN at the end, TotalHints grew — yes
+EXPECTED: O-1: "Too many in flight hints" lines in n1 logs = 0 (R5: none in any run) — yes
+EXPECTED: O-1: write Unavailables delta = 0 — yes
+EXPECTED: O-1: stress Total errors = 0 — yes
+EXPECTED: O-1: max hintsInProgress >= 2 — yes
+EXPECTED: O-1: max hintsInProgress > L = 1 (the limit was passed) — yes
+EXPECTED: O-1: hints on disk 1.0-1.3 GB (~1 M hints) — yes
+processes of this run left: []
+EXPECTED totals O-1: {'yes': 8, 'no': 0}

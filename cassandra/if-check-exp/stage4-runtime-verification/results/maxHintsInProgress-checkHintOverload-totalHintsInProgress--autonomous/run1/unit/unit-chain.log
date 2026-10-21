@@ -1,0 +1,20 @@
+chain start 2026-10-21T11:46:44-04:00
+unit-run orig 2026-10-21T11:46:44-04:00 host node0 clone /users/jason92/cassandra-mhp cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 HintOverloadCheckTest.java=4fd714725e20 unit-run.sh=ac7378460d59 hintsInProgress-LoadingCache.diff=e81ae4fe073f 
+clone diff vs tag (src/java): 
+field: private static final com.google.common.cache.CacheLoader<org.apache.cassandra.locator.InetAddressAndPort, java.util.concurrent.atomic.AtomicInteger> hintsInProgress;
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+INFO maxHeapMiB=
+RESULT L=
+DRAINED L=
+done 2026-10-21T11:47:04-04:00
+unit-run fixed 2026-10-21T11:47:04-04:00 host node0 clone /users/jason92/cassandra-mhp-patched cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 HintOverloadCheckTest.java=4fd714725e20 unit-run.sh=ac7378460d59 hintsInProgress-LoadingCache.diff=e81ae4fe073f 
+clone diff vs tag (src/java):  1 file changed, 6 insertions(+), 8 deletions(-)
+field: private static final com.google.common.cache.LoadingCache<org.apache.cassandra.locator.InetAddressAndPort, java.util.concurrent.atomic.AtomicInteger> hintsInProgress;
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+INFO maxHeapMiB=
+RESULT L=
+DRAINED L=
+done 2026-10-21T11:47:25-04:00
+chain end 2026-10-21T11:47:25-04:00

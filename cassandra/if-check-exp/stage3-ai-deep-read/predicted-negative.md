@@ -23,10 +23,13 @@ does not follow the constraint. Stage 4 confirms or refutes it.
   the limit moves a maximum of bytes) and Rule 3 (the branches diverge on object
   creation). The earlier per-pass layout, with its counts and the stage-2 band of
   each row, is in git at commit `acecd48`.
-- **Re-examine first:** two entries rest on the "count of concurrent tasks"
+- **Re-examine first:** one entry rests on the "count of concurrent tasks"
   reasoning that stage 4 refuted for `concurrent_compactors` (usage = tasks ×
-  per-task bytes): `SEPExecutor` / `SEPWorker` and `StorageProxy.java:1592`, both
-  in [§10](#10-count-time-rate-and-work-thresholds).
+  per-task bytes): `SEPExecutor` / `SEPWorker` in
+  [§10](#10-count-time-rate-and-work-thresholds). The other, `StorageProxy.java:1592`
+  (`maxHintsInProgress`), left this file on 2026-10-21, verified at stage 4 as
+  Confirmed — does not cap, on a different ground: its per-destination counter is a bare
+  `CacheLoader`, so the check never fires (see `_INDEX.md` §1).
 
 Contents: [1](#1-configuration-and-argument-validation) validation ·
 [2](#2-logging-warning-or-diagnostic-only) logging only ·
@@ -258,7 +261,6 @@ done rather than bytes held.
 | If statement | Reason rejected |
 |---|---|
 | `SEPExecutor.java:135`, `:165`, `:175`, `:196`, `:373`, `:384`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). |
-| `StorageProxy.java:1592` `totalHintsInProgress > maxHintsInProgress` | A count of in-flight hints with no fixed size; byte bounds are the filed `MAX_HINT_BUFFERS` and `max_hints_size_per_host` cases. **Re-examine,** as above. |
 | `PartitionDenylist.java:419`, `:445` `results.size() > limit` | Rule 3 too: the result set is fully built before the check, which then logs and truncates. |
 | `DataLimits$CQLCounter.incrementRowCount():509`, `:511`; `$GroupByAwareCounter:986` | The query's own `LIMIT` and per-partition limit, a client parameter (also Rule 1). |
 | `DataLimits.java:993`, `:1000`, `:1041` (2 units); helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()` | Same: the query's limits or page size. |

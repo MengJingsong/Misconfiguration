@@ -1,0 +1,87 @@
+# excerpt of /users/jason92/stage4-logs/mhp/run1/cluster/F-1/stress-main.out (full file on pc07): head, the Results block, and the refusal messages summarised
+******************** Stress Settings ********************
+Command:
+  Type: write
+  Count: 1,000,000
+  No Warmup: false
+  Consistency Level: ONE
+  Target Uncertainty: not applicable
+  Key Size (bytes): 10
+  Counter Increment Distibution: add=fixed(1)
+Rate:
+  Auto: false
+  Thread Count: 400
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..1000000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Columns:
+  Max Columns Per Key: 1
+  Column Names: [C0]
+  Comparator: AsciiType
+  Timestamp: null
+  Variable Column Count: false
+  Slice: false
+  Size Distribution: Fixed:  key=1024
+  Count Distribution: Fixed:  key=1
+Errors:
+  Ignore: true
+  Tries: 1
+Log:
+  No Summary: false
+  No Settings: false
+  File: /users/jason92/stage4-logs/mhp/run1/cluster/F-1/stress-main.log
+  Interval Millis: 1000
+  Level: NORMAL
+...
+Results:
+Op rate                   :   16,384 op/s  [WRITE: 16,384 op/s]
+Partition rate            :   16,384 pk/s  [WRITE: 16,384 pk/s]
+Row rate                  :   16,384 row/s [WRITE: 16,384 row/s]
+Latency mean              :   24.2 ms [WRITE: 24.2 ms]
+Latency median            :   24.5 ms [WRITE: 24.5 ms]
+Latency 95th percentile   :   33.5 ms [WRITE: 33.5 ms]
+Latency 99th percentile   :   41.2 ms [WRITE: 41.2 ms]
+Latency 99.9th percentile :   60.3 ms [WRITE: 60.3 ms]
+Latency max               :  124.5 ms [WRITE: 124.5 ms]
+Total partitions          :  1,000,000 [WRITE: 1,000,000]
+Total errors              :    804,749 [WRITE: 804,749]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:01:01
+
+END
+# lines containing 'Too many in flight hints': 1666958
+com.datastax.driver.core.exceptions.OverloadedException: Queried host (/127.0.0.21:9042) was overloaded: Too many in flight hints: 26 destination: Full(/127.0.0.22:7000,(-6264163235900828087,-5783709723635647798]) destination hints: 21
+com.datastax.driver.core.exceptions.OverloadedException: Queried host (/127.0.0.21:9042) was overloaded: Too many in flight hints: 32 destination: Full(/127.0.0.22:7000,(-7677137537473578132,-6859465604861227338]) destination hints: 31
+com.datastax.driver.core.exceptions.OverloadedException: Queried host (/127.0.0.21:9042) was overloaded: Too many in flight hints: 26 destination: Full(/127.0.0.22:7000,(-3218143983208827678,-2724901217796560526]) destination hints: 22
+# operand value in the messages (count value):
+   1722 0
+  26862 1
+1094412 2
+ 398502 3
+ 109768 4
+  26728 5
+   6420 6
+   1310 7
+    718 8
+    264 9
+    118 10
+     18 25
+     44 26
+      6 27
+      4 28
+      4 29
+      2 30
+     50 32
+      2 33
+      4 35

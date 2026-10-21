@@ -1,0 +1,40 @@
+diff --git a/src/java/org/apache/cassandra/service/StorageProxy.java b/src/java/org/apache/cassandra/service/StorageProxy.java
+index c098d84..0e1fd88 100644
+--- a/src/java/org/apache/cassandra/service/StorageProxy.java
++++ b/src/java/org/apache/cassandra/service/StorageProxy.java
+@@ -41,7 +41,9 @@ import java.util.function.Function;
+ import java.util.stream.Collectors;
+ 
+ import com.google.common.base.Preconditions;
++import com.google.common.cache.CacheBuilder;
+ import com.google.common.cache.CacheLoader;
++import com.google.common.cache.LoadingCache;
+ import com.google.common.collect.Iterables;
+ import com.google.common.util.concurrent.Uninterruptibles;
+ 
+@@ -200,13 +202,9 @@ public class StorageProxy implements StorageProxyMBean
+     public static final StorageProxy instance = new StorageProxy();
+ 
+     private static volatile int maxHintsInProgress = 128 * FBUtilities.getAvailableProcessors();
+-    private static final CacheLoader<InetAddressAndPort, AtomicInteger> hintsInProgress = new CacheLoader<InetAddressAndPort, AtomicInteger>()
+-    {
+-        public AtomicInteger load(InetAddressAndPort inetAddress)
+-        {
+-            return new AtomicInteger(0);
+-        }
+-    };
++    private static final LoadingCache<InetAddressAndPort, AtomicInteger> hintsInProgress =
++        CacheBuilder.newBuilder().concurrencyLevel(1).build(new CacheLoader<InetAddressAndPort, AtomicInteger>() {
++            public AtomicInteger load(InetAddressAndPort a) { return new AtomicInteger(0); } });
+ 
+     private static final DenylistMetrics denylistMetrics = new DenylistMetrics();
+ 
+@@ -2765,7 +2763,7 @@ public class StorageProxy implements StorageProxyMBean
+     {
+         try
+         {
+-            return hintsInProgress.load(destination);
++            return hintsInProgress.get(destination);
+         }
+         catch (Exception e)
+         {

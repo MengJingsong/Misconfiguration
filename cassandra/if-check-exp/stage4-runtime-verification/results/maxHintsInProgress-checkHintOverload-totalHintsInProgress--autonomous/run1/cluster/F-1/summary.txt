@@ -1,0 +1,25 @@
+run F-1 2026-10-21 12:13:58 -0400 host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu build /users/jason92/cassandra-mhp-patched L=1 N=1000000 threads=400
+build check (jar used by bin/cassandra): private static final com.google.common.cache.LoadingCache<org.apache.cassandra.locator.InetAddressAndPort, java.util.concurrent.atomic.AtomicInteger> hintsInProgress;
+free on / at start: 52.9 GiB
+yaml/env diffs: 26c26 | < cluster_name: 'Test Cluster' | --- | > cluster_name: 'stage4-mhp' | 706c706 | <       - seeds: "127.0.0.1:7000" | --- | >       - seeds: "127.0.0.21:7000" | 723c723 | < concurrent_writes: 32 | --- | > concurrent_writes: 2 | 981c981 | < listen_address: localhost | --- | > listen_address: 127.0.0.21 | 1090c1090 | < rpc_address: localhost | --- | > rpc_address: 127.0.0.21 | 235c235 | < JMX_PORT="7199" | --- | > JMX_PORT="7221" | 
+n1 started pid 291068
+n2 started pid 293908
+two UN after 69 s
+stress schema: rc=0 10 s; Total errors=0; Total partitions=1000; "Too many in flight hints" in stress output: 0
+n1 sees n2 DN after 1 s (n2 pid 293908 alive=True)
+set MaxHintsInProgress: read back 1
+before: {'TotalHints': '0', 'Count': '0', 'HintsInProgress': '0'}
+stress main: rc=0 72 s; Total errors=804749; Total partitions=1000000; "Too many in flight hints" in stress output: 1666958
+after (+30 s): {'TotalHints': '216521', 'Count': '833479', 'HintsInProgress': '0'}
+"Too many in flight hints" in n1 logs: /users/jason92/stage4-mhp/run1/F-1/n1/logs/system.log:0
+/users/jason92/stage4-mhp/run1/F-1/n1/logs/debug.log:0
+n1 hints: 237307100 B in 2 files (du -sb 237311204)
+samples=505 limit_seen=[1] max_hintsInProgress=4 max_mutationPending=4 max_heapUsed=1514 MiB max_oldgen_used=344.8 MiB (16.83 % of 2 GiB; after-GC 0.0 MiB; 106 samples) unavailables_delta=833479 (sampler 0->833479) TotalHints_delta=216521 n1 ERROR lines=0
+EXPECTED: F-1: limit in force during the run (sampler limit column = 1) — yes
+EXPECTED: F-1: n2 DN at the end, TotalHints grew — yes
+EXPECTED: F-1: "Too many in flight hints" lines in n1 logs = 0 (R5: none in any run) — yes
+EXPECTED: F-1: write Unavailables delta > 0 — yes
+EXPECTED: F-1: stress Total errors > 0 — yes
+EXPECTED: F-1: max hintsInProgress <= ~130 (1 + native request threads) — yes
+processes of this run left: []
+EXPECTED totals F-1: {'yes': 6, 'no': 0}

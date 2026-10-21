@@ -1,0 +1,17 @@
+runs: F-1, F-MAX, O-1, O-128, O-MAX
+O-1: L=1 max_hip=129 max_pending=255 max_heap=1982MiB max_old%=45.1 una_delta=0 stress_errors=0 hints_bytes=1150800378 hints_delta=1050000 stress_s=26.4
+O-128: L=128 max_hip=129 max_pending=255 max_heap=1758MiB max_old%=43.17 una_delta=0 stress_errors=0 hints_bytes=1150800378 hints_delta=1050000 stress_s=26.0
+O-MAX: L=2147483647 max_hip=129 max_pending=255 max_heap=2002MiB max_old%=41.85 una_delta=0 stress_errors=0 hints_bytes=1150800378 hints_delta=1050000 stress_s=25.9
+F-1: L=1 max_hip=4 max_pending=4 max_heap=1514MiB max_old%=16.83 una_delta=833479 stress_errors=804749 hints_bytes=237307100 hints_delta=216521 stress_s=72.1
+F-MAX: L=2147483647 max_hip=129 max_pending=255 max_heap=1978MiB max_old%=91.9 una_delta=0 stress_errors=0 hints_bytes=1150800378 hints_delta=1050000 stress_s=27.2
+EXPECTED: X1 O-*: peak hintsInProgress within ±25 % of each other ([129, 129, 129]; max/min = 1.00; read as max <= 1.25 x min) — yes
+EXPECTED: X1 O-*: peak MutationStage pending within ±25 % of each other ([255, 255, 255]; max/min = 1.00; read as max <= 1.25 x min) — yes
+EXPECTED: X1 O-*: peak old-gen use (bytes; jstat O equivalent) within ±25 % of each other ([968512200, 927142040, 898621552]; max/min = 1.08; read as max <= 1.25 x min) — yes
+EXPECTED: X2 O-MAX: max hintsInProgress > 128 (129) — yes
+EXPECTED: X3 O-1 vs O-MAX hint bytes within ±5 % (1150800378 vs 1150800378, ratio 1.0000) — yes
+EXPECTED: X4 O-1 heap/hint volume not >25 % below O-MAX (heap 1982 vs 2002 MiB) — yes
+EXPECTED: X5 F-1 hints on disk well below O-1 (237307100 vs 1150800378, ratio 0.206; 'well below' read as < 0.75) — yes
+EXPECTED: X6 F-1 peak MutationStage pending below O-1 (4 vs 255) — yes
+EXPECTED: X7 F-1 Unavailables a substantial share of the writes (833479 of 1000000; 'substantial' read as >= 10 %) — yes
+EXPECTED: X8 F-MAX matches O-MAX: 0 Unavailables in both, hint bytes within ±5 % (1150800378 vs 1150800378) — yes
+EXPECTED totals analysis: {'yes': 10, 'no': 0}

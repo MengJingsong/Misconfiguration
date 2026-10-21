@@ -1,0 +1,114 @@
+[2026-10-21 12:02:31] run O-1 2026-10-21 12:02:31 -0400 host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu build /users/jason92/cassandra-mhp L=1 N=1000000 threads=400
+[2026-10-21 12:02:31] + javap -p -cp /users/jason92/cassandra-mhp/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.service.StorageProxy | grep ' hintsInProgress;'
+[2026-10-21 12:02:31] build check (jar used by bin/cassandra): private static final com.google.common.cache.CacheLoader<org.apache.cassandra.locator.InetAddressAndPort, java.util.concurrent.atomic.AtomicInteger> hintsInProgress;
+[2026-10-21 12:02:31] + ps -eo pid,args
+[2026-10-21 12:02:31] + rm -rf /users/jason92/stage4-mhp/run1/O-1 && mkdir -p /users/jason92/stage4-mhp/run1/O-1
+
+  rc=0
+[2026-10-21 12:02:31] + df -B1 --output=avail /users/jason92 | tail -1
+[2026-10-21 12:02:31] free on / at start: 52.9 GiB
+[2026-10-21 12:02:31] + mkdir -p /users/jason92/stage4-mhp/run1/O-1/n1 && rsync -a --exclude=.git --exclude=/data --exclude=/logs --exclude=/build/test /users/jason92/cassandra-mhp/ /users/jason92/stage4-mhp/run1/O-1/n1/
+
+  rc=0
+[2026-10-21 12:02:32] + cd /users/jason92/stage4-mhp/run1/O-1/n1 && diff /users/jason92/cassandra-mhp/conf/cassandra.yaml conf/cassandra.yaml > /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n1-yaml.diff; diff /users/jason92/cassandra-mhp/conf/cassandra-env.sh conf/cassandra-env.sh >> /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n1-yaml.diff; true
+
+  rc=0
+[2026-10-21 12:02:32] + mkdir -p /users/jason92/stage4-mhp/run1/O-1/n2 && rsync -a --exclude=.git --exclude=/data --exclude=/logs --exclude=/build/test /users/jason92/cassandra-mhp/ /users/jason92/stage4-mhp/run1/O-1/n2/
+
+  rc=0
+[2026-10-21 12:02:33] + cd /users/jason92/stage4-mhp/run1/O-1/n2 && diff /users/jason92/cassandra-mhp/conf/cassandra.yaml conf/cassandra.yaml > /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n2-yaml.diff; diff /users/jason92/cassandra-mhp/conf/cassandra-env.sh conf/cassandra-env.sh >> /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n2-yaml.diff; true
+
+  rc=0
+[2026-10-21 12:02:33] yaml/env diffs: 26c26 | < cluster_name: 'Test Cluster' | --- | > cluster_name: 'stage4-mhp' | 706c706 | <       - seeds: "127.0.0.1:7000" | --- | >       - seeds: "127.0.0.21:7000" | 723c723 | < concurrent_writes: 32 | --- | > concurrent_writes: 2 | 981c981 | < listen_address: localhost | --- | > listen_address: 127.0.0.21 | 1090c1090 | < rpc_address: localhost | --- | > rpc_address: 127.0.0.21 | 235c235 | < JMX_PORT="7199" | --- | > JMX_PORT="7221" | 
+[2026-10-21 12:02:33] + ulimit -n 100000; cd /users/jason92/stage4-mhp/run1/O-1/n1 && bin/cassandra -p /users/jason92/stage4-mhp/run1/O-1/n1.pid > /users/jason92/stage4-mhp/run1/O-1/n1/stdout.txt 2>&1
+
+  rc=0
+[2026-10-21 12:02:35] n1 started pid 269500
+[2026-10-21 12:03:35] n1: "Starting listening for CQL clients" after 60 s
+[2026-10-21 12:03:35] + ulimit -n 100000; cd /users/jason92/stage4-mhp/run1/O-1/n2 && bin/cassandra -p /users/jason92/stage4-mhp/run1/O-1/n2.pid > /users/jason92/stage4-mhp/run1/O-1/n2/stdout.txt 2>&1
+
+  rc=0
+[2026-10-21 12:03:36] n2 started pid 272008
+[2026-10-21 12:03:36] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:03:42] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:03:48] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:03:54] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:00] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:07] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:13] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:19] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:25] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:31] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:37] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:43] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:04:44] two UN after 68 s
+[2026-10-21 12:04:50] n2: "Starting listening for CQL clients" after 6 s
+[2026-10-21 12:04:50] + cd /users/jason92/stage4-mhp/run1/O-1/n1 && tools/bin/cassandra-stress write n=1000 cl=ONE -schema "replication(factor=2)" -col "size=FIXED(1024)" "n=FIXED(1)" -rate threads=400 -errors ignore retries=0 -node 127.0.0.21 -log file=/users/jason92/stage4-logs/mhp/run1/cluster/O-1/stress-schema.log > /users/jason92/stage4-logs/mhp/run1/cluster/O-1/stress-schema.out 2>&1
+
+  rc=0
+[2026-10-21 12:05:00] stress schema: rc=0 10 s; Total errors=0; Total partitions=1000; "Too many in flight hints" in stress output: 0
+[2026-10-21 12:05:00] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:05:01] n1 sees n2 DN after 1 s (n2 pid 272008 alive=True)
+[2026-10-21 12:05:05] + jshell /users/jason92/stage4-harness-run/mhp/jmx.jsh
+MaxHintsInProgress=1
+Error:
+reached end of file while parsing
+else {
+      ^
+Error:
+reached end of file while parsing
+else {
+     ^
+Exception java.lang.NullPointerException
+      at FileOutputStream.<init> (FileOutputStream.java:228)
+      at FileOutputStream.<init> (FileOutputStream.java:126)
+      at FileWriter.<init> (FileWriter.java:66)
+      at do_it$Aux (#13:1)
+      at (#13:1)
+Exception java.lang.NullPointerException
+      at (#14:1)
+Exception java.lang.NullPointerException
+      at (#15:2)
+Exception java.lang.NullPointerException
+      at (#16:1)
+Error:
+illegal start of statement
+}
+^
+
+  rc=0
+[2026-10-21 12:05:09] set MaxHintsInProgress: read back 1
+[2026-10-21 12:05:09] + java -cp /users/jason92/stage4-mhp/jmxcls Jmx 7221 get 'org.apache.cassandra.db:type=StorageProxy' 'TotalHints' 'org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Unavailables' 'Count' 'org.apache.cassandra.db:type=StorageProxy' 'HintsInProgress'
+[2026-10-21 12:05:10] before: {'TotalHints': '0', 'Count': '0', 'HintsInProgress': '0'}
+[2026-10-21 12:05:10] + jshell /users/jason92/stage4-harness-run/mhp/jmx.jsh (sample) &
+[2026-10-21 12:05:14] + cd /users/jason92/stage4-mhp/run1/O-1/n1 && tools/bin/cassandra-stress write n=1000000 cl=ONE -schema "replication(factor=2)" -col "size=FIXED(1024)" "n=FIXED(1)" -rate threads=400 -errors ignore retries=0 -node 127.0.0.21 -log file=/users/jason92/stage4-logs/mhp/run1/cluster/O-1/stress-main.log > /users/jason92/stage4-logs/mhp/run1/cluster/O-1/stress-main.out 2>&1
+
+  rc=0
+[2026-10-21 12:05:40] stress main: rc=0 26 s; Total errors=0; Total partitions=1000000; "Too many in flight hints" in stress output: 0
+[2026-10-21 12:06:11] + java -cp /users/jason92/stage4-mhp/jmxcls Jmx 7221 get 'org.apache.cassandra.db:type=StorageProxy' 'TotalHints' 'org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Unavailables' 'Count' 'org.apache.cassandra.db:type=StorageProxy' 'HintsInProgress'
+[2026-10-21 12:06:11] after (+30 s): {'TotalHints': '1050000', 'Count': '0', 'HintsInProgress': '0'}
+[2026-10-21 12:06:11] + grep -c "Too many in flight hints" /users/jason92/stage4-mhp/run1/O-1/n1/logs/system.log /users/jason92/stage4-mhp/run1/O-1/n1/logs/debug.log
+[2026-10-21 12:06:11] "Too many in flight hints" in n1 logs: /users/jason92/stage4-mhp/run1/O-1/n1/logs/system.log:0
+/users/jason92/stage4-mhp/run1/O-1/n1/logs/debug.log:0
+[2026-10-21 12:06:11] + du -sb /users/jason92/stage4-mhp/run1/O-1/n1/data/hints
+[2026-10-21 12:06:11] n1 hints: 1150800378 B in 9 files (du -sb 1150804535)
+[2026-10-21 12:06:11] + /users/jason92/stage4-mhp/run1/O-1/n1/bin/nodetool -h 127.0.0.1 -p 7221 status
+[2026-10-21 12:06:12] + grep -c '^ERROR' /users/jason92/stage4-mhp/run1/O-1/n1/logs/system.log
+[2026-10-21 12:06:12] samples=277 limit_seen=[1] max_hintsInProgress=129 max_mutationPending=255 max_heapUsed=1982 MiB max_oldgen_used=923.6 MiB (45.1 % of 2 GiB; after-GC 317.2 MiB; 61 samples) unavailables_delta=0 (sampler 0->0) TotalHints_delta=1050000 n1 ERROR lines=0
+[2026-10-21 12:06:12] EXPECTED: O-1: limit in force during the run (sampler limit column = 1) — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: n2 DN at the end, TotalHints grew — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: "Too many in flight hints" lines in n1 logs = 0 (R5: none in any run) — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: write Unavailables delta = 0 — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: stress Total errors = 0 — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: max hintsInProgress >= 2 — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: max hintsInProgress > L = 1 (the limit was passed) — yes
+[2026-10-21 12:06:12] EXPECTED: O-1: hints on disk 1.0-1.3 GB (~1 M hints) — yes
+[2026-10-21 12:06:12] kill n1 pid 269500
+[2026-10-21 12:06:20] + cp -r /users/jason92/stage4-mhp/run1/O-1/n1/logs /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n1-logs 2>/dev/null; cp /users/jason92/stage4-mhp/run1/O-1/n1/stdout.txt /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n1-stdout.txt 2>/dev/null
+[2026-10-21 12:06:20] + cp -r /users/jason92/stage4-mhp/run1/O-1/n2/logs /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n2-logs 2>/dev/null; cp /users/jason92/stage4-mhp/run1/O-1/n2/stdout.txt /users/jason92/stage4-logs/mhp/run1/cluster/O-1/n2-stdout.txt 2>/dev/null
+[2026-10-21 12:06:20] + ps -eo pid,args
+[2026-10-21 12:06:20] processes of this run left: []
+[2026-10-21 12:06:20] EXPECTED totals O-1: {'yes': 8, 'no': 0}
+[2026-10-21 12:06:20] + rm -rf /users/jason92/stage4-mhp/run1/O-1
+
+  rc=0
