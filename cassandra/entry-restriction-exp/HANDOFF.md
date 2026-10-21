@@ -13,6 +13,15 @@ withdrawn or superseded, and the recorded pairs stand as finished results.
 
 A session should **not** start new work here unless Jingsong asks for it.
 
+## Available nodes (2026-10-20)
+
+This folder needs no cluster (stage-3-style source reading). If a later resumption needs a machine, the current CloudLab experiment `jason92-320876` has four nodes:
+- `pc07` (node0): set up, with JDK 11, Ant and a built `cassandra-5.0.9` clone.
+- `pc12` (node1), `pc06` (node2), `pc13` (node3): reachable, but with no JDK and an empty home.
+
+All four have 40 cores and 251 GiB, with passwordless `sudo`. The table, addresses and the SSH key to use (`-i /proj/misconfiguration-PG0/.ssh/id_ed25519`) are in
+[`../if-check-exp/stage4-runtime-verification/environment.md` §7](../if-check-exp/stage4-runtime-verification/environment.md#7-nodes-checked-2026-10-07-updated-2026-10-13-and-2026-10-20).
+
 ## What this folder is
 
 Part of the **misconfiguration** research project, scoped to **Apache

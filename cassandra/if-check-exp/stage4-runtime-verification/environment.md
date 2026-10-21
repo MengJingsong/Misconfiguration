@@ -134,7 +134,21 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 
 **2026-10-20:** `pc57` was the run node (32 cores, 251 GiB, about 47 GB free on `/`; Ubuntu 22.04, `5.15.0-187-generic`, JDK 11.0.32.1, Ant 1.10.12). A fresh clone `~/cassandra-run4` at `cassandra-5.0.9` (`b5f2a54210`) was built with `ant build-test` in 1 min 33 s; `~/cassandra-run1` holds untracked test files from earlier cases, so use a fresh clone per case. `pc50` answered over SSH with JDK 11 and a built `~/cassandra-run1` (55 GB free). `pc66` was not checked.
 
-**2026-10-20 (late):** a new experiment `node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, 55 GB free on `/`; Ubuntu 22.04.2, `5.15.0-187-generic`) came up with an empty home and no JDK. Sections 1 to 3 were run on it: JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9` (`b5f2a54210`), `ant build-test` successful in 1 min 55 s (logs `~/stage4-logs/{apt-install,clone,build-test}.log`). The session ran on that node directly (no ssh); the `batch_size_fail_threshold` case ran there.
+**2026-10-20 (late): experiment `jason92-320876`, four nodes — the current set.** The experiments above (`…-317394`, `…-319347`) were not checked again and should be taken as gone. All four nodes are 40 cores and 251 GiB, run Ubuntu 22.04.2 with `5.15.0-187-generic`, have passwordless `sudo`, and run no `CassandraDaemon`. Checked 2026-10-20 22:55 MDT.
+
+| Node | Name | Control address | LAN (`enp3s0f0np0`) | State | Use |
+|---|---|---|---|---|---|
+| `pc07` | `node0.jason92-320876…` | `198.22.255.17` | `10.10.1.1` | JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9` (`b5f2a54210`); `ant build-test` passed in 1 min 55 s (logs `~/stage4-logs/{apt-install,clone,build-test}.log`); 55 GB free on `/`; home holds `~/stage4-logs/bsf`, `~/stage4-harness-run/bsf`, `~/stage4-bsf` (the `batch_size_fail_threshold` run) | the run node: sections 1 to 3 are done; sessions run here directly (no ssh) |
+| `pc12` | `node1.jason92-320876…` | `198.22.255.22` | **none:** the interface is absent, and `10.10.1.2` (`node1` in `/etc/hosts`) does not answer | no JDK or Ant; empty home; 57 GB free | a unit-tier node, or a ring member over the control addresses only (section 5's firewall rules) |
+| `pc06` | `node2.jason92-320876…` | `198.22.255.16` | `10.10.1.3` | no JDK or Ant; empty home; 57 GB free | second node for a ring (section 5) over the LAN |
+| `pc13` | `node3.jason92-320876…` | `198.22.255.23` | `10.10.1.4` | no JDK or Ant; empty home; 57 GB free | third node for a ring over the LAN |
+
+To set up `pc12`, `pc06` or `pc13` for a run, follow sections 1 and 2, then section 3, or `ant jar` for a node that runs no tests.
+
+**SSH from `pc07`:**
+- Peers: `ssh -o IdentitiesOnly=yes -i /proj/misconfiguration-PG0/.ssh/id_ed25519 jason92@pcNN.cloudlab.umass.edu` works.
+- `ssh pcNN` alone **fails** with `Permission denied (publickey)`. `~/.ssh/config`'s `setup-node: peer` stanzas name `/proj/misconfiguration-PG0/.ssh/cluster_ed25519`, which the peers do not accept. Either pass `-i …/id_ed25519` as above, or add `cluster_ed25519.pub` to each peer's `~/.ssh/authorized_keys`.
+- GitHub: `id_ed25519` works for `git push` (the `github.com` stanza).
 
 ## Logs
 
