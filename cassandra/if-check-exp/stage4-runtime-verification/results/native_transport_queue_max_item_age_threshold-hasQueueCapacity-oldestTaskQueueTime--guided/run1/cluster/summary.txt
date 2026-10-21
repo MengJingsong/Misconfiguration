@@ -1,0 +1,179 @@
+cluster-run run1 off1 t0.5 t0.1 t0.02 off2 d0.1 ctl off3 2026-10-20 21:33:04 MDT host node3.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu clone cassandra-5.0.9 b5f2a54210d541339c2e7c17a794195cac0e67c2 rate 100/s value 65536 B seconds 60.0 poll 2000 ms
+harness md5 NqaHold.java=3ce294460d70 nqa.btm=8844d35650e7 QueueAgeWriter.java=fed242e52f59 Jmx.java=2f18ec53c4d4 cluster-run.py=bae55b35ec3f make-node-yaml.sh=8df91d6795ff client-logback.xml=5a733ca9903b
+==== off1 2026-10-20 21:33:07
+[off1] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 1GiB;
+EXPECTED: [off1] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[off1] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/off1/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/off1/release.flag
+EXPECTED: [off1] node open-file limit >= 100000 (100000) — yes
+[off1] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [off1] threshold 1.7976931348623157e+308 (9b) — yes
+EXPECTED: [off1] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [off1] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [off1] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [off1] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [off1] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [off1] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[off1] at sendend+2 s: {"requests_size": 392503424.0, "pending": 5996.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 807617168.0, "discarded": 0.0, "paused": 0.0, "bytes_received": 393608385.0, "direct_used": 58630810.0, "ms": 1792553708901}; hold in lines 4; histogram: 1: 127869 411145392 [B (java.base@11.0.32.1) | 23: 6000 336000 org.apache.cassandra.transport.messages.ExecuteMessage | 29: 6000 288000 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 39: 6000 192000 org.apache.cassandra.concurrent.FutureTask | 45: 6000 144000 org.apache.cassandra.transport.Envelope | Total 885523 469057824
+ARM off1: {"label": "off1", "throw": true, "thr": "off", "limit_ms": null, "sent": 6000, "M": 65592.0, "peak_requests_size": 392503424, "final_requests_size": 392503424, "final_pending": 5996, "final_active": 4, "queued_bytes_count": 393552086, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 455295632, "hist_execute": 6000, "hist_processor": 6000, "discarded": 0, "paused": 0, "bytearray_bytes_idle": 16217328, "bytearray_bytes_peak": 411145392, "bytearray_rise": 394928064, "live_rise": 399638160, "peak_direct_used": 59405594, "chk_false": 0, "first_false_after_first_queued_ms": null, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 896, "warned": 0, "ovl_queue": 0, "ovl_late": 5104, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [off1] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [off1] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [off1] check off: queued bytes grow for the whole run (RequestsSize series nondecreasing, 33 samples, last poll 392503424, final 392503424; refusals 0+0) — yes
+==== t0.5 2026-10-20 21:35:24
+[t0.5] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 1GiB;native_transport_queue_max_item_age_threshold: 0.5;
+EXPECTED: [t0.5] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[t0.5] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/t0.5/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/t0.5/release.flag
+EXPECTED: [t0.5] node open-file limit >= 100000 (100000) — yes
+[t0.5] JMX read-back: threshold=0.5 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [t0.5] threshold 0.5 (9b) — yes
+EXPECTED: [t0.5] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [t0.5] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [t0.5] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [t0.5] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [t0.5] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [t0.5] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[t0.5] at sendend+2 s: {"requests_size": 38634584.0, "pending": 601.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 455303688.0, "discarded": 5395.0, "paused": 0.0, "bytes_received": 393608385.0, "direct_used": 58630836.0, "ms": 1792553842165}; hold in lines 4; histogram: 1: 106503 57029520 [B (java.base@11.0.32.1) | 78: 605 33880 org.apache.cassandra.transport.messages.ExecuteMessage | 85: 605 29040 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 119: 605 19360 org.apache.cassandra.concurrent.FutureTask | 143: 605 14520 org.apache.cassandra.transport.Envelope | Total 761942 110807144
+ARM t0.5: {"label": "t0.5", "throw": true, "thr": 0.5, "limit_ms": 6000.0, "sent": 6000, "M": 65592.0, "peak_requests_size": 38634584, "final_requests_size": 38634584, "final_pending": 601, "final_active": 4, "queued_bytes_count": 39683168, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 119759368, "hist_execute": 605, "hist_processor": 605, "discarded": 5395, "paused": 0, "bytearray_bytes_idle": 16224664, "bytearray_bytes_peak": 57029520, "bytearray_rise": 40804856, "live_rise": 41379424, "peak_direct_used": 58656390, "chk_false": 5395, "first_false_after_first_queued_ms": 6011, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 0, "warned": 0, "ovl_queue": 5395, "ovl_late": 605, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [t0.5] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [t0.5] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [t0.5] disallow evidence: queue-age refusals at the client 5395 = RequestDiscarded 5395, chk ret=false 5395 — yes
+==== t0.1 2026-10-20 21:37:37
+[t0.1] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 1GiB;native_transport_queue_max_item_age_threshold: 0.1;
+EXPECTED: [t0.1] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[t0.1] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/t0.1/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/t0.1/release.flag
+EXPECTED: [t0.1] node open-file limit >= 100000 (100000) — yes
+[t0.1] JMX read-back: threshold=0.1 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [t0.1] threshold 0.1 (9b) — yes
+EXPECTED: [t0.1] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [t0.1] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [t0.1] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [t0.1] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [t0.1] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [t0.1] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[t0.1] at sendend+2 s: {"requests_size": 7150424.0, "pending": 121.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 438515920.0, "discarded": 5875.0, "paused": 0.0, "bytes_received": 393608385.0, "direct_used": 58626803.0, "ms": 1792553975407}; hold in lines 4; histogram: 1: 104519 25534392 [B (java.base@11.0.32.1) | 216: 125 7000 org.apache.cassandra.transport.messages.ExecuteMessage | 238: 125 6000 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 286: 125 4000 org.apache.cassandra.concurrent.FutureTask | 342: 125 3000 org.apache.cassandra.transport.Envelope | Total 750791 78942976
+ARM t0.1: {"label": "t0.1", "throw": true, "thr": 0.1, "limit_ms": 1200.0, "sent": 6000, "M": 65592.0, "peak_requests_size": 7150424, "final_requests_size": 7150424, "final_pending": 121, "final_active": 4, "queued_bytes_count": 8199001, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 86100944, "hist_execute": 125, "hist_processor": 125, "discarded": 5875, "paused": 0, "bytearray_bytes_idle": 16218128, "bytearray_bytes_peak": 25534392, "bytearray_rise": 9316264, "live_rise": 9525808, "peak_direct_used": 58651589, "chk_false": 5875, "first_false_after_first_queued_ms": 1211, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 0, "warned": 0, "ovl_queue": 5875, "ovl_late": 125, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [t0.1] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [t0.1] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [t0.1] disallow evidence: queue-age refusals at the client 5875 = RequestDiscarded 5875, chk ret=false 5875 — yes
+==== t0.02 2026-10-20 21:39:50
+[t0.02] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 1GiB;native_transport_queue_max_item_age_threshold: 0.02;
+EXPECTED: [t0.02] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[t0.02] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/t0.02/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/t0.02/release.flag
+EXPECTED: [t0.02] node open-file limit >= 100000 (100000) — yes
+[t0.02] JMX read-back: threshold=0.02 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [t0.02] threshold 0.02 (9b) — yes
+EXPECTED: [t0.02] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [t0.02] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [t0.02] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [t0.02] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [t0.02] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [t0.02] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[t0.02] at sendend+2 s: {"requests_size": 853592.0, "pending": 25.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 421647072.0, "discarded": 5971.0, "paused": 0.0, "bytes_received": 393608385.0, "direct_used": 58629711.0, "ms": 1792554112598}; hold in lines 4; histogram: 1: 104188 19218280 [B (java.base@11.0.32.1) | 463: 29 1624 org.apache.cassandra.transport.messages.ExecuteMessage | 514: 29 1392 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 630: 29 928 org.apache.cassandra.concurrent.FutureTask | 738: 29 696 org.apache.cassandra.transport.Envelope | Total 748425 72455992
+ARM t0.02: {"label": "t0.02", "throw": true, "thr": 0.02, "limit_ms": 240.0, "sent": 6000, "M": 65592.0, "peak_requests_size": 853592, "final_requests_size": 853592, "final_pending": 25, "final_active": 4, "queued_bytes_count": 1902168, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 86042000, "hist_execute": 29, "hist_processor": 29, "discarded": 5971, "paused": 0, "bytearray_bytes_idle": 16220816, "bytearray_bytes_peak": 19218280, "bytearray_rise": 2997464, "live_rise": 3130456, "peak_direct_used": 58654497, "chk_false": 5971, "first_false_after_first_queued_ms": 251, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 0, "warned": 0, "ovl_queue": 5971, "ovl_late": 29, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [t0.02] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [t0.02] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [t0.02] disallow evidence: queue-age refusals at the client 5971 = RequestDiscarded 5971, chk ret=false 5971 — yes
+==== off2 2026-10-20 21:42:07
+[off2] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 1GiB;
+EXPECTED: [off2] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[off2] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/off2/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/off2/release.flag
+EXPECTED: [off2] node open-file limit >= 100000 (100000) — yes
+[off2] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [off2] threshold 1.7976931348623157e+308 (9b) — yes
+EXPECTED: [off2] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [off2] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [off2] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [off2] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [off2] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [off2] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[off2] at sendend+2 s: {"requests_size": 392503424.0, "pending": 5996.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 807620016.0, "discarded": 0.0, "paused": 0.0, "bytes_received": 393608385.0, "direct_used": 58626112.0, "ms": 1792554245692}; hold in lines 4; histogram: 1: 127916 411165096 [B (java.base@11.0.32.1) | 23: 6000 336000 org.apache.cassandra.transport.messages.ExecuteMessage | 29: 6000 288000 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 39: 6000 192000 org.apache.cassandra.concurrent.FutureTask | 45: 6000 144000 org.apache.cassandra.transport.Envelope | Total 885614 469078992
+ARM off2: {"label": "off2", "throw": true, "thr": "off", "limit_ms": null, "sent": 6000, "M": 65592.0, "peak_requests_size": 392503424, "final_requests_size": 392503424, "final_pending": 5996, "final_active": 4, "queued_bytes_count": 393552086, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 472075696, "hist_execute": 6000, "hist_processor": 6000, "discarded": 0, "paused": 0, "bytearray_bytes_idle": 16219704, "bytearray_bytes_peak": 411165096, "bytearray_rise": 394945392, "live_rise": 399656480, "peak_direct_used": 59401152, "chk_false": 0, "first_false_after_first_queued_ms": null, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 902, "warned": 0, "ovl_queue": 0, "ovl_late": 5098, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [off2] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [off2] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [off2] check off: queued bytes grow for the whole run (RequestsSize series nondecreasing, 33 samples, last poll 392503424, final 392503424; refusals 0+0) — yes
+==== d0.1 2026-10-20 21:44:21
+[d0.1] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: false;native_transport_max_request_data_in_flight: 1GiB;native_transport_queue_max_item_age_threshold: 0.1;
+EXPECTED: [d0.1] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[d0.1] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/d0.1/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/d0.1/release.flag
+EXPECTED: [d0.1] node open-file limit >= 100000 (100000) — yes
+[d0.1] JMX read-back: threshold=0.1 throw_on_overload=false timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [d0.1] threshold 0.1 (9b) — yes
+EXPECTED: [d0.1] native_transport_throw_on_overload false (R3) — yes
+EXPECTED: [d0.1] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [d0.1] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [d0.1] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [d0.1] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [d0.1] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[d0.1] at sendend+2 s: {"requests_size": 33321632.0, "pending": 520.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 67584.0, "pool_overflow": 0.0, "heap_used": 388202152.0, "discarded": 0.0, "paused": 399.0, "bytes_received": 34377309.0, "direct_used": 58626965.0, "ms": 1792554379116}; hold in lines 4; histogram: 1: 105889 51826264 [B (java.base@11.0.32.1) | 83: 526 29456 org.apache.cassandra.transport.messages.ExecuteMessage | 92: 526 25248 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 131: 526 16832 org.apache.cassandra.concurrent.FutureTask | 153: 526 12624 org.apache.cassandra.transport.Envelope | Total 759453 105532680
+ARM d0.1: {"label": "d0.1", "throw": false, "thr": 0.1, "limit_ms": 1200.0, "sent": 6000, "M": 5720.2, "peak_requests_size": 33321632, "final_requests_size": 33321632, "final_pending": 520, "final_active": 4, "queued_bytes_count": 34370215, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 19103400, "hist_execute": 526, "hist_processor": 526, "discarded": 0, "paused": 399, "bytearray_bytes_idle": 16228168, "bytearray_bytes_peak": 51826264, "bytearray_rise": 35598096, "live_rise": 36097632, "peak_direct_used": 59467584, "chk_false": 402, "first_false_after_first_queued_ms": 1211, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 5473, "warned": 60, "ovl_queue": 0, "ovl_late": 467, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [d0.1] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [d0.1] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [d0.1] default mode: nothing refused (ovl_queue 0), connection paused 399 times, chk ret=false 402 — yes
+==== ctl 2026-10-20 21:46:36
+[ctl] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 8MiB;
+EXPECTED: [ctl] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[ctl] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/ctl/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/ctl/release.flag
+EXPECTED: [ctl] node open-file limit >= 100000 (100000) — yes
+[ctl] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=8388608 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [ctl] threshold 1.7976931348623157e+308 (9b) — yes
+EXPECTED: [ctl] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [ctl] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [ctl] in-flight limit 8388608 B (9b/9e C) — yes
+EXPECTED: [ctl] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [ctl] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [ctl] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[ctl] at sendend+2 s: {"requests_size": 8331080.0, "pending": 139.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 371419160.0, "discarded": 5857.0, "paused": 0.0, "bytes_received": 393608660.0, "direct_used": 58631637.0, "ms": 1792554518773}; hold in lines 4; histogram: 1: 104591 26699056 [B (java.base@11.0.32.1) | 197: 143 8008 org.apache.cassandra.transport.messages.ExecuteMessage | 221: 143 6864 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 268: 143 4576 org.apache.cassandra.concurrent.FutureTask | 314: 143 3432 org.apache.cassandra.transport.Envelope | Total 751340 80126816
+ARM ctl: {"label": "ctl", "throw": true, "thr": "off", "limit_ms": null, "sent": 6000, "M": 65592.0, "peak_requests_size": 8331080, "final_requests_size": 8331080, "final_pending": 139, "final_active": 4, "queued_bytes_count": 9379658, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 2320408, "hist_execute": 143, "hist_processor": 143, "discarded": 5857, "paused": 0, "bytearray_bytes_idle": 16220848, "bytearray_bytes_peak": 26699056, "bytearray_rise": 10478208, "live_rise": 10697544, "peak_direct_used": 58656423, "chk_false": 0, "first_false_after_first_queued_ms": null, "hold_in": 4, "all_answered": true, "global": 8388608, "ok": 0, "warned": 0, "ovl_queue": 0, "ovl_late": 143, "ovl_bytes": 5857, "ovl_other": 0, "err": 0}
+EXPECTED: [ctl] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [ctl] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [ctl] positive control: RequestsSize peak 8331080 <= 8 MiB and refusals "bytes in flight" 5857 > 0 — yes
+==== off3 2026-10-20 21:48:53
+[off3] yaml: # ---- stage4 nqa lines ----;cluster_name: stage4-nqa;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nqa/data/commitlog;hints_directory: /users/jason92/stage4-nqa/data/hints;saved_caches_directory: /users/jason92/stage4-nqa/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nqa/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 12s;native_transport_max_threads: 4;native_transport_rate_limiting_enabled: false;native_transport_max_request_data_in_flight_per_ip: 1GiB;native_transport_throw_on_overload: true;native_transport_max_request_data_in_flight: 1GiB;
+EXPECTED: [off3] Submit -l lists the 2 rules of nqa.btm (['nqa chk', 'nqa hold']) — yes
+[off3] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms31744M -Xmx31744M -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nqa/nqa.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/nqa/run1/cluster/stage4-nqa-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/nqa/run1/cluster/off3/nqa.trace -Dstage4.release.file=/users/jason92/stage4-logs/nqa/run1/cluster/off3/release.flag
+EXPECTED: [off3] node open-file limit >= 100000 (100000) — yes
+[off3] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+EXPECTED: [off3] threshold 1.7976931348623157e+308 (9b) — yes
+EXPECTED: [off3] native_transport_throw_on_overload true (R3) — yes
+EXPECTED: [off3] native_transport_timeout 12000 ms (9b) — yes
+EXPECTED: [off3] in-flight limit 1073741824 B (9b/9e C) — yes
+EXPECTED: [off3] in-flight per-IP limit 1073741824 B (9b) — yes
+EXPECTED: [off3] native request pool MaxPoolSize 4 (9b native_transport_max_threads) — yes
+EXPECTED: [off3] idle control: 5 samples, RequestsSize [0], PendingTasks [0], no hold line (0) — yes
+[off3] at sendend+2 s: {"requests_size": 392503424.0, "pending": 5996.0, "active": 4.0, "pool_size": 8388608.0, "pool_used": 0.0, "pool_overflow": 0.0, "heap_used": 790738192.0, "discarded": 0.0, "paused": 0.0, "bytes_received": 393608385.0, "direct_used": 58630868.0, "ms": 1792554655486}; hold in lines 4; histogram: 1: 127863 411143448 [B (java.base@11.0.32.1) | 23: 6000 336000 org.apache.cassandra.transport.messages.ExecuteMessage | 29: 6000 288000 org.apache.cassandra.transport.Dispatcher$RequestProcessor | 39: 6000 192000 org.apache.cassandra.concurrent.FutureTask | 44: 6000 144000 org.apache.cassandra.transport.Envelope | Total 885142 468953408
+ARM off3: {"label": "off3", "throw": true, "thr": "off", "limit_ms": null, "sent": 6000, "M": 65592.0, "peak_requests_size": 392503424, "final_requests_size": 392503424, "final_pending": 5996, "final_active": 4, "queued_bytes_count": 393552086, "peak_pool_size": 8388608, "peak_pool_overflow": 0, "heap_rise": 455100160, "hist_execute": 6000, "hist_processor": 6000, "discarded": 0, "paused": 0, "bytearray_bytes_idle": 16218360, "bytearray_bytes_peak": 411143448, "bytearray_rise": 394925088, "live_rise": 399635504, "peak_direct_used": 59405652, "chk_false": 0, "first_false_after_first_queued_ms": null, "hold_in": 4, "all_answered": true, "global": 1073741824, "ok": 901, "warned": 0, "ovl_queue": 0, "ovl_late": 5099, "ovl_bytes": 0, "ovl_other": 0, "err": 0}
+EXPECTED: [off3] client sent 6000 = 6000 and every request was answered (rc=0) — yes
+EXPECTED: [off3] the stall held 4 running requests (hold in lines 4, ActiveTasks at the peak 4) — yes
+EXPECTED: [off3] check off: queued bytes grow for the whole run (RequestsSize series nondecreasing, 33 samples, last poll 392503424, final 392503424; refusals 0+0) — yes
+no CassandraDaemon left running
+JUDGE peak_requests_size: check-off peaks [392503424, 392503424, 392503424], mean 392503424, band (range) 0
+JUDGE peak_requests_size t0.5: 38634584 = 9.84 % of the check-off mean; within the band: False; below by 353868840 = inf bands
+JUDGE peak_requests_size t0.1: 7150424 = 1.82 % of the check-off mean; within the band: False; below by 385353000 = inf bands
+JUDGE peak_requests_size t0.02: 853592 = 0.22 % of the check-off mean; within the band: False; below by 391649832 = inf bands
+JUDGE peak_requests_size d0.1: 33321632 = 8.49 % of the check-off mean; within the band: False; below by 359181792 = inf bands
+EXPECTED: [peak_requests_size] Confirmed edge (R4): peaks at 0.5, 0.1, 0.02 within the band of the check-off peak — NO (recorded; the AI judges it in the results file)
+EXPECTED: [peak_requests_size] Refuted edge (R4): the peak at 0.02 more than 50 % below the check-off peak and more than 3 bands below — yes
+EXPECTED: [peak_requests_size] the control moved queued bytes: 8331080 vs the check-off mean 392503424 — yes
+JUDGE queued_bytes_count: check-off peaks [393552086, 393552086, 393552086], mean 393552086, band (range) 0
+JUDGE queued_bytes_count t0.5: 39683168 = 10.08 % of the check-off mean; within the band: False; below by 353868918 = inf bands
+JUDGE queued_bytes_count t0.1: 8199001 = 2.08 % of the check-off mean; within the band: False; below by 385353085 = inf bands
+JUDGE queued_bytes_count t0.02: 1902168 = 0.48 % of the check-off mean; within the band: False; below by 391649918 = inf bands
+JUDGE queued_bytes_count d0.1: 34370215 = 8.73 % of the check-off mean; within the band: False; below by 359181871 = inf bands
+EXPECTED: [queued_bytes_count] Confirmed edge (R4): peaks at 0.5, 0.1, 0.02 within the band of the check-off peak — NO (recorded; the AI judges it in the results file)
+EXPECTED: [queued_bytes_count] Refuted edge (R4): the peak at 0.02 more than 50 % below the check-off peak and more than 3 bands below — yes
+EXPECTED: [queued_bytes_count] the control moved queued bytes: 9379658 vs the check-off mean 393552086 — yes
+JUDGE bytearray_rise: check-off peaks [394928064, 394945392, 394925088], mean 394932848, band (range) 20304
+JUDGE bytearray_rise t0.5: 40804856 = 10.33 % of the check-off mean; within the band: False; below by 354127992 = 17441.3 bands
+JUDGE bytearray_rise t0.1: 9316264 = 2.36 % of the check-off mean; within the band: False; below by 385616584 = 18992.1 bands
+JUDGE bytearray_rise t0.02: 2997464 = 0.76 % of the check-off mean; within the band: False; below by 391935384 = 19303.4 bands
+JUDGE bytearray_rise d0.1: 35598096 = 9.01 % of the check-off mean; within the band: False; below by 359334752 = 17697.7 bands
+EXPECTED: [bytearray_rise] Confirmed edge (R4): peaks at 0.5, 0.1, 0.02 within the band of the check-off peak — NO (recorded; the AI judges it in the results file)
+EXPECTED: [bytearray_rise] Refuted edge (R4): the peak at 0.02 more than 50 % below the check-off peak and more than 3 bands below — yes
+EXPECTED: [bytearray_rise] the control moved queued bytes: 10478208 vs the check-off mean 394932848 — yes
+JUDGE live_rise: check-off peaks [399638160, 399656480, 399635504], mean 399643381, band (range) 20976
+JUDGE live_rise t0.5: 41379424 = 10.35 % of the check-off mean; within the band: False; below by 358263957 = 17079.7 bands
+JUDGE live_rise t0.1: 9525808 = 2.38 % of the check-off mean; within the band: False; below by 390117573 = 18598.3 bands
+JUDGE live_rise t0.02: 3130456 = 0.78 % of the check-off mean; within the band: False; below by 396512925 = 18903.2 bands
+JUDGE live_rise d0.1: 36097632 = 9.03 % of the check-off mean; within the band: False; below by 363545749 = 17331.5 bands
+EXPECTED: [live_rise] Confirmed edge (R4): peaks at 0.5, 0.1, 0.02 within the band of the check-off peak — NO (recorded; the AI judges it in the results file)
+EXPECTED: [live_rise] Refuted edge (R4): the peak at 0.02 more than 50 % below the check-off peak and more than 3 bands below — yes
+EXPECTED: [live_rise] the control moved queued bytes: 10697544 vs the check-off mean 399643381 — yes

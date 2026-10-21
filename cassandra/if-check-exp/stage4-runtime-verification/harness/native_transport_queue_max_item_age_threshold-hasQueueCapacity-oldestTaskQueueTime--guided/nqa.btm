@@ -1,0 +1,42 @@
+# Byteman rules for native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided
+# (case 9f R2 and 9d "queue age", 2026-10-20). Both tiers. Two rules, one trace file (-Dstage4.trace):
+#
+#  nqa hold  The stall (R2). At the entry of Dispatcher$RequestProcessor.run (Dispatcher.java:304), a request of type
+#            EXECUTE waits while the file -Dstage4.release.file is absent (stage4.NqaHold.await polls it every 10 ms).
+#            With native_transport_max_threads 4 the four running requests wait here and every later one waits in the
+#            executor queue, whose head oldestTaskQueueTime reads (SEPExecutor.java:88-100). STARTUP, OPTIONS, PREPARE
+#            and QUERY (cqlsh) are never held. Lines:
+#              hold in ms=<epoch> held=<n held now> thread=<t>
+#              hold out ms=<epoch> waited_ms=<ms> thread=<t>
+#  nqa chk   Observation only. At the exit of Dispatcher.hasQueueCapacity (Dispatcher.java:341-348): the head's age read
+#            again (the same call the check makes, one approx-clock tick later at most), the threshold, the timeout and
+#            the verdict. Line:
+#              chk ms=<epoch> age_ns=<oldestTaskQueueTime> thr=<threshold> timeout_ns=<native_transport_timeout> ret=<bool> thread=<t>
+#            ("thread" tells the event loop's calls from a unit test's direct calls.)
+
+RULE nqa hold
+CLASS org.apache.cassandra.transport.Dispatcher$RequestProcessor
+METHOD run
+AT ENTRY
+BIND f = java.lang.System.getProperty("stage4.release.file", "/nonexistent-stage4-nqa-release");
+     t0 = java.lang.System.currentTimeMillis()
+IF $0.request.type.name().equals("EXECUTE")
+   AND !(new java.io.File(f)).exists()
+DO traceOpen("nqa", java.lang.System.getProperty("stage4.trace", "nqa.trace"));
+   traceln("nqa", "hold in ms=" + t0 + " held=" + (stage4.NqaHold.held.get() + 1) + " thread=" + java.lang.Thread.currentThread().getName());
+   stage4.NqaHold.await(f);
+   traceln("nqa", "hold out ms=" + java.lang.System.currentTimeMillis() + " waited_ms=" + (java.lang.System.currentTimeMillis() - t0) + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE nqa chk
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD hasQueueCapacity
+AT EXIT
+IF true
+DO traceOpen("nqa", java.lang.System.getProperty("stage4.trace", "nqa.trace"));
+   traceln("nqa", "chk ms=" + java.lang.System.currentTimeMillis()
+                  + " age_ns=" + org.apache.cassandra.transport.Dispatcher.requestExecutor.oldestTaskQueueTime()
+                  + " thr=" + org.apache.cassandra.config.DatabaseDescriptor.getNativeTransportQueueMaxItemAgeThreshold()
+                  + " timeout_ns=" + org.apache.cassandra.config.DatabaseDescriptor.getNativeTransportTimeout(java.util.concurrent.TimeUnit.NANOSECONDS)
+                  + " ret=" + $! + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE

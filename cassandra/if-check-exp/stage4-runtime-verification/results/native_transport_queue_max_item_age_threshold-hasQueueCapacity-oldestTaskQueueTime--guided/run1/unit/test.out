@@ -1,0 +1,61 @@
+STAGE4 info max_pool=4 timeout_ns=12000000000 global=1073741824 endpoint=1073741824 recv_queue_capacity=1048576 throw_default=false heap_max=1056309248
+STAGE4 info M=65605 outcome=ok
+STAGE4 state u0 pending=0 active=4 age_ns=0 requests_size=0 thr=1.7976931348623157E308 ms=1792553561024
+STAGE4 check u0 active expected=4 actual=4 ok
+STAGE4 check u0 pending expected=0 actual=0 ok
+STAGE4 check u0 age with nothing queued expected=0 actual=0 ok
+STAGE4 check u0 hasQueueCapacity at a 12 ns limit, nothing queued expected=true actual=true ok
+STAGE4 state u1 pending=1 active=4 age_ns=601803034 requests_size=0 thr=1.7976931348623157E308 ms=1792553561667
+STAGE4 check u1 head age >= 600 ms expected=>=600000000 actual=603866541 ok
+STAGE4 check u1 threshold 0 (off) expected=true actual=true ok
+STAGE4 check u1 threshold -1 (off) expected=true actual=true ok
+STAGE4 check u1 threshold Double.MAX_VALUE (default, off) expected=true actual=true ok
+STAGE4 check u1 limit 2 s above the age expected=true actual=true ok
+STAGE4 info u1 at-limit limit_ns=6.07992025E8 age_before=607992025
+STAGE4 check u1 limit = an age read just before the call (strict <) expected=false actual=false age_before=607992025 age_after=610054509 ok
+STAGE4 check u1 limit 300 ms below the age expected=false actual=false ok
+STAGE4 check u1 queued requests unchanged by the calls expected=1 actual=1 ok
+STAGE4 check u1 RequestsSize unchanged by the calls expected=0+(<=M) actual=0 ok
+STAGE4 check u1 age is the head's (older than the 2nd queued request) expected=>=603866541 actual=632742566 ok
+STAGE4 check u2 hasQueueCapacity false before the send expected=false actual=false ok
+STAGE4 state u2 pending=2 active=4 age_ns=645118036 requests_size=0 thr=0.044395213833333336 ms=1792553561709
+STAGE4 check u2 refused with the queue-age OverloadedException expected=ovl_queue actual=ovl_queue ok
+STAGE4 info u2 text=Request has spent over 0.044395213833333336 time of the maximum timeout 12000ms in the queue
+STAGE4 check u2 RequestDiscarded +1 expected=1 actual=1 ok
+STAGE4 check u2 pending unchanged expected=2 actual=2 ok
+STAGE4 check u2 RequestsSize unchanged expected=0 actual=0 ok
+STAGE4 check u2 at threshold off the next request is queued expected=3 actual=3 ok
+STAGE4 state u3 pending=4 active=4 age_ns=756976979 requests_size=0 thr=0.045984355 ms=1792553561822
+STAGE4 check u3 default mode: queued despite the overload expected=4 actual=4 ok
+STAGE4 check u3 default mode: no response before the release expected=-1 actual=-1 ok
+STAGE4 check u3 ConnectionPaused +1 expected=1 actual=1 ok
+STAGE4 check u3 default mode: the request ran, with the 'spent over' warning expected=warned actual=warned ok
+STAGE4 info u0-u2 outcomes after release conn_a=ok,ok,ok,ok,ok,ok, conn_b=ovl_queue,ok
+STAGE4 state u4 thr=off end-of-send pending=196 active=4 age_ns=4196743368 requests_size=12069824 thr=1.7976931348623157E308 ms=1792553566131
+STAGE4 arm u4 thr=off limit_ms=inf global=1073741824 sent=200 peak_pending=196 peak_active=4 admitted=200 queued_bytes=13121000 peak_requests_size=12069824 refused_queue=0 refused_bytes=0 discarded=0 send_ms=4283
+STAGE4 arm u4 thr=off after-release counts sent=200 ok=200 warned=0 ovl_queue=0 ovl_late=0 ovl_bytes=0 ovl_other=0 err=0 outstanding=0 ms=1792553566429 all_answered=true
+STAGE4 check u4 thr=off sent expected=200 actual=200 ok
+STAGE4 check u4 thr=off admitted + refused during the stall = sent expected=200 actual=200 ok
+STAGE4 check u4 thr=off check off: every request admitted expected=200 actual=200 ok
+STAGE4 state u4 thr=0.2 end-of-send pending=121 active=4 age_ns=4203036671 requests_size=7150424 thr=0.2 ms=1792553570734
+STAGE4 arm u4 thr=0.2 limit_ms=2400 global=1073741824 sent=200 peak_pending=121 peak_active=4 admitted=125 queued_bytes=8200625 peak_requests_size=7216016 refused_queue=75 refused_bytes=0 discarded=75 send_ms=4285
+STAGE4 arm u4 thr=0.2 after-release counts sent=200 ok=125 warned=0 ovl_queue=75 ovl_late=0 ovl_bytes=0 ovl_other=0 err=0 outstanding=0 ms=1792553570811 all_answered=true
+STAGE4 check u4 thr=0.2 sent expected=200 actual=200 ok
+STAGE4 check u4 thr=0.2 admitted + refused during the stall = sent expected=200 actual=200 ok
+STAGE4 state u4 thr=0.05 end-of-send pending=31 active=4 age_ns=4201023290 requests_size=1247144 thr=0.05 ms=1792553575104
+STAGE4 arm u4 thr=0.05 limit_ms=600 global=1073741824 sent=200 peak_pending=31 peak_active=4 admitted=35 queued_bytes=2296175 peak_requests_size=1312736 refused_queue=165 refused_bytes=0 discarded=165 send_ms=4285
+STAGE4 arm u4 thr=0.05 after-release counts sent=200 ok=35 warned=0 ovl_queue=165 ovl_late=0 ovl_bytes=0 ovl_other=0 err=0 outstanding=0 ms=1792553575151 all_answered=true
+STAGE4 check u4 thr=0.05 sent expected=200 actual=200 ok
+STAGE4 check u4 thr=0.05 admitted + refused during the stall = sent expected=200 actual=200 ok
+STAGE4 state u4 thr=0.01 end-of-send pending=7 active=4 age_ns=4202552579 requests_size=0 thr=0.01 ms=1792553579444
+STAGE4 arm u4 thr=0.01 limit_ms=120 global=1073741824 sent=200 peak_pending=7 peak_active=4 admitted=11 queued_bytes=721655 peak_requests_size=0 refused_queue=189 refused_bytes=0 discarded=189 send_ms=4285
+STAGE4 arm u4 thr=0.01 after-release counts sent=200 ok=11 warned=0 ovl_queue=189 ovl_late=0 ovl_bytes=0 ovl_other=0 err=0 outstanding=0 ms=1792553579460 all_answered=true
+STAGE4 check u4 thr=0.01 sent expected=200 actual=200 ok
+STAGE4 check u4 thr=0.01 admitted + refused during the stall = sent expected=200 actual=200 ok
+STAGE4 state u5 thr=off end-of-send pending=43 active=4 age_ns=4197870797 requests_size=2034248 thr=1.7976931348623157E308 ms=1792553583749
+STAGE4 arm u5 thr=off limit_ms=inf global=2097152 sent=200 peak_pending=43 peak_active=4 admitted=47 queued_bytes=3083435 peak_requests_size=2034248 refused_queue=0 refused_bytes=153 discarded=153 send_ms=4281
+STAGE4 arm u5 thr=off after-release counts sent=200 ok=47 warned=0 ovl_queue=0 ovl_late=0 ovl_bytes=153 ovl_other=0 err=0 outstanding=0 ms=1792553583780 all_answered=true
+STAGE4 check u5 thr=off sent expected=200 actual=200 ok
+STAGE4 check u5 thr=off admitted + refused during the stall = sent expected=200 actual=200 ok
+STAGE4 check u5 thr=off control: RequestsSize <= the global limit expected=<=2097152 actual=2034248 ok
+STAGE4 summary mismatches=0

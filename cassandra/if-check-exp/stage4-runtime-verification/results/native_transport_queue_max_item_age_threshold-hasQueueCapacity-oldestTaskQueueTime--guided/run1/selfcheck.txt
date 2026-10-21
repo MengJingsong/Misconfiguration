@@ -1,0 +1,111 @@
+ok   unit: STAGE4 check lines present and none MISMATCH — 36 checks
+info unit M = 65605 B
+ok   unit ('u4', 'off'): queued_bytes = admitted x M — 13121000 vs 200x65605
+ok   unit ('u4', 'off'): admitted + refused = sent
+ok   unit ('u4', 'off'): RequestDiscarded = refusals
+ok   unit ('u4', '0.2'): queued_bytes = admitted x M — 8200625 vs 125x65605
+ok   unit ('u4', '0.2'): admitted + refused = sent
+ok   unit ('u4', '0.2'): RequestDiscarded = refusals
+info unit ('u4', '0.2'): admitted 125 vs source estimate 5 + 50 x limit = 125.0
+ok   unit ('u4', '0.05'): queued_bytes = admitted x M — 2296175 vs 35x65605
+ok   unit ('u4', '0.05'): admitted + refused = sent
+ok   unit ('u4', '0.05'): RequestDiscarded = refusals
+info unit ('u4', '0.05'): admitted 35 vs source estimate 5 + 50 x limit = 35.0
+ok   unit ('u4', '0.01'): queued_bytes = admitted x M — 721655 vs 11x65605
+ok   unit ('u4', '0.01'): admitted + refused = sent
+ok   unit ('u4', '0.01'): RequestDiscarded = refusals
+info unit ('u4', '0.01'): admitted 11 vs source estimate 5 + 50 x limit = 11.0
+ok   unit ('u5', 'off'): queued_bytes = admitted x M — 3083435 vs 47x65605
+ok   unit ('u5', 'off'): admitted + refused = sent
+ok   unit ('u5', 'off'): RequestDiscarded = refusals
+info unit u4 thr=0.2: queued bytes 8200625 = 62.5 % of check-off 13121000
+info unit u4 thr=0.05: queued bytes 2296175 = 17.5 % of check-off 13121000
+info unit u4 thr=0.01: queued bytes 721655 = 5.5 % of check-off 13121000
+ok   unit u4: queued bytes fall monotonically with the threshold (off > 0.2 > 0.05 > 0.01)
+ok   unit u5 control: RequestsSize <= 2 MiB with "bytes in flight" refusals — 2034248, 153
+ok   unit trace: every hold in has a hold out — 24/24
+ok   unit trace: every chk verdict = (age < timeout x threshold) away from the edge — 867 lines, 0 disagree
+ok   off1: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [off1] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   off1: 6000 requests sent, every one answered — {'ovl_late': 5104, 'ok': 896}
+ok   off1: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   off1: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   off1: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 6000 / 6000.0 / 6000
+ok   off1: arms.csv peak_requests_size agrees with the raw poll
+ok   off1: arms.csv bytearray_rise agrees with the raw histograms
+info off1: peak RequestsSize 392503424, admitted 6000, queued at peak 6000.0, byte[] rise 394928064, live rise 399638160, outcomes {'ovl_late': 5104, 'ok': 896}, chk false 0, first false None ms after the first queued request, RequestDiscarded 0.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+ok   t0.5: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [t0.5] JMX read-back: threshold=0.5 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   t0.5: 6000 requests sent, every one answered — {'ovl_late': 605, 'ovl_queue': 5395}
+ok   t0.5: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   t0.5: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   t0.5: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 605 / 605.0 / 605
+ok   t0.5: arms.csv peak_requests_size agrees with the raw poll
+ok   t0.5: arms.csv bytearray_rise agrees with the raw histograms
+info t0.5: peak RequestsSize 38634584, admitted 605, queued at peak 605.0, byte[] rise 40804856, live rise 41379424, outcomes {'ovl_late': 605, 'ovl_queue': 5395}, chk false 5395, first false 6011 ms after the first queued request, RequestDiscarded 5395.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+ok   t0.1: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [t0.1] JMX read-back: threshold=0.1 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   t0.1: 6000 requests sent, every one answered — {'ovl_late': 125, 'ovl_queue': 5875}
+ok   t0.1: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   t0.1: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   t0.1: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 125 / 125.0 / 125
+ok   t0.1: arms.csv peak_requests_size agrees with the raw poll
+ok   t0.1: arms.csv bytearray_rise agrees with the raw histograms
+info t0.1: peak RequestsSize 7150424, admitted 125, queued at peak 125.0, byte[] rise 9316264, live rise 9525808, outcomes {'ovl_late': 125, 'ovl_queue': 5875}, chk false 5875, first false 1211 ms after the first queued request, RequestDiscarded 5875.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+ok   t0.02: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [t0.02] JMX read-back: threshold=0.02 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   t0.02: 6000 requests sent, every one answered — {'ovl_late': 29, 'ovl_queue': 5971}
+ok   t0.02: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   t0.02: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   t0.02: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 29 / 29.0 / 29
+ok   t0.02: arms.csv peak_requests_size agrees with the raw poll
+ok   t0.02: arms.csv bytearray_rise agrees with the raw histograms
+info t0.02: peak RequestsSize 853592, admitted 29, queued at peak 29.0, byte[] rise 2997464, live rise 3130456, outcomes {'ovl_late': 29, 'ovl_queue': 5971}, chk false 5971, first false 251 ms after the first queued request, RequestDiscarded 5971.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+ok   off2: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [off2] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   off2: 6000 requests sent, every one answered — {'ovl_late': 5098, 'ok': 902}
+ok   off2: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   off2: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   off2: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 6000 / 6000.0 / 6000
+ok   off2: arms.csv peak_requests_size agrees with the raw poll
+ok   off2: arms.csv bytearray_rise agrees with the raw histograms
+info off2: peak RequestsSize 392503424, admitted 6000, queued at peak 6000.0, byte[] rise 394945392, live rise 399656480, outcomes {'ovl_late': 5098, 'ok': 902}, chk false 0, first false None ms after the first queued request, RequestDiscarded 0.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+ok   d0.1: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [d0.1] JMX read-back: threshold=0.1 throw_on_overload=false timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   d0.1: 6000 requests sent, every one answered — {'ovl_late': 467, 'warned': 60, 'ok': 5473}
+ok   d0.1: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   d0.1: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   d0.1: arms.csv peak_requests_size agrees with the raw poll
+ok   d0.1: arms.csv bytearray_rise agrees with the raw histograms
+info d0.1: peak RequestsSize 33321632, admitted 6000, queued at peak 524.0, byte[] rise 35598096, live rise 36097632, outcomes {'ovl_late': 467, 'warned': 60, 'ok': 5473}, chk false 402, first false 1211 ms after the first queued request, RequestDiscarded 0.0, ConnectionPaused 399.0, pool Size max 8388608 Overflow max 0
+ok   ctl: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [ctl] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=8388608 in_flight_per_ip=1073741824 request_pool_max=4
+ok   ctl: 6000 requests sent, every one answered — {'ovl_late': 143, 'ovl_bytes': 5857}
+ok   ctl: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   ctl: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   ctl: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 143 / 143.0 / 143
+ok   ctl: arms.csv peak_requests_size agrees with the raw poll
+ok   ctl: arms.csv bytearray_rise agrees with the raw histograms
+info ctl: peak RequestsSize 8331080, admitted 143, queued at peak 143.0, byte[] rise 10478208, live rise 10697544, outcomes {'ovl_late': 143, 'ovl_bytes': 5857}, chk false 0, first false None ms after the first queued request, RequestDiscarded 5857.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+ok   off3: JMX read-back threshold, mode, 12 s timeout, in-flight limits, pool 4 — [off3] JMX read-back: threshold=1.7976931348623157E308 throw_on_overload=true timeout_ms=12000 in_flight=1073741824 in_flight_per_ip=1073741824 request_pool_max=4
+ok   off3: 6000 requests sent, every one answered — {'ovl_late': 5099, 'ok': 901}
+ok   off3: send span 59.99 s at 100/s (59.99 s nominal, within 0.5 s)
+ok   off3: stall held exactly 4 (hold in lines; ActiveTasks 4.0)
+ok   off3: admitted (client outcomes) = PendingTasks + ActiveTasks at the peak = live ExecuteMessage — 6000 / 6000.0 / 6000
+ok   off3: arms.csv peak_requests_size agrees with the raw poll
+ok   off3: arms.csv bytearray_rise agrees with the raw histograms
+info off3: peak RequestsSize 392503424, admitted 6000, queued at peak 6000.0, byte[] rise 394925088, live rise 399635504, outcomes {'ovl_late': 5099, 'ok': 901}, chk false 0, first false None ms after the first queued request, RequestDiscarded 0.0, ConnectionPaused 0.0, pool Size max 8388608 Overflow max 0
+info cluster M (BytesReceived per request - 9) = 65592.0 B
+ok   off1: check off — RequestsSize nondecreasing over the run and at the end ~= 6000 x M - 1 MiB, nothing refused — 33 samples, peak 392503424
+ok   off2: check off — RequestsSize nondecreasing over the run and at the end ~= 6000 x M - 1 MiB, nothing refused — 33 samples, peak 392503424
+ok   off3: check off — RequestsSize nondecreasing over the run and at the end ~= 6000 x M - 1 MiB, nothing refused — 33 samples, peak 392503424
+ok   t0.5: queue-age refusals = RequestDiscarded = chk false, first false within 50 ms after limit 6000 ms — 5395 / 5395.0 / 5395, first 6011 ms
+info t0.5: admitted 605 vs source estimate 5 + 100 x limit = 605.0
+ok   t0.1: queue-age refusals = RequestDiscarded = chk false, first false within 50 ms after limit 1200 ms — 5875 / 5875.0 / 5875, first 1211 ms
+info t0.1: admitted 125 vs source estimate 5 + 100 x limit = 125.0
+ok   t0.02: queue-age refusals = RequestDiscarded = chk false, first false within 50 ms after limit 240 ms — 5971 / 5971.0 / 5971, first 251 ms
+info t0.02: admitted 29 vs source estimate 5 + 100 x limit = 29.0
+ok   d0.1: default mode refuses nothing, pauses the connection — paused 399.0
+ok   ctl: positive control caps RequestsSize at <= 8 MiB, refusals "bytes in flight" — 8331080, 5857
+info peak_rs: check-off [392503424.0, 392503424.0, 392503424.0] mean 392503424 band 0; t0.5 38634584 (9.84 %); t0.1 7150424 (1.82 %); t0.02 853592 (0.22 %); d0.1 33321632 (8.49 %); ctl 8331080 (2.12 %)
+info peak_rs: R4 "the same" (Confirmed edge) False; R4 "falls" (Refuted edge) True; control < 50 % of check-off True
+ok   frozen observable (R1 RequestsSize): matches exactly one §9a row edge
+info ba_rise: check-off [394928064, 394945392, 394925088] mean 394932848 band 20304; t0.5 40804856 (10.33 %); t0.1 9316264 (2.36 %); t0.02 2997464 (0.76 %); d0.1 35598096 (9.01 %); ctl 10478208 (2.65 %)
+info ba_rise: R4 "the same" (Confirmed edge) False; R4 "falls" (Refuted edge) True; control < 50 % of check-off True
+info live_rise: check-off [399638160, 399656480, 399635504] mean 399643381 band 20976; t0.5 41379424 (10.35 %); t0.1 9525808 (2.38 %); t0.02 3130456 (0.78 %); d0.1 36097632 (9.03 %); ctl 10697544 (2.68 %)
+info live_rise: R4 "the same" (Confirmed edge) False; R4 "falls" (Refuted edge) True; control < 50 % of check-off True
+info §9a row on the R1 gauge: Refuted
+SUMMARY 84 ok / 0 FAIL of 84 checks

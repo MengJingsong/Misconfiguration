@@ -1,0 +1,33 @@
+# File /users/jason92/stage4-harness-run/nqa/nqa.btm line 21
+RULE nqa hold
+CLASS org.apache.cassandra.transport.Dispatcher$RequestProcessor
+METHOD run
+NOCOMPILE
+AT ENTRY
+BIND f = java.lang.System.getProperty("stage4.release.file", "/nonexistent-stage4-nqa-release");
+t0 = java.lang.System.currentTimeMillis()
+IF $0.request.type.name().equals("EXECUTE")
+AND !(new java.io.File(f)).exists()
+DO traceOpen("nqa", java.lang.System.getProperty("stage4.trace", "nqa.trace"));
+traceln("nqa", "hold in ms=" + t0 + " held=" + (stage4.NqaHold.held.get() + 1) + " thread=" + java.lang.Thread.currentThread().getName());
+stage4.NqaHold.await(f);
+traceln("nqa", "hold out ms=" + java.lang.System.currentTimeMillis() + " waited_ms=" + (java.lang.System.currentTimeMillis() - t0) + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+# File /users/jason92/stage4-harness-run/nqa/nqa.btm line 35
+RULE nqa chk
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD hasQueueCapacity
+NOCOMPILE
+AT EXIT
+IF true
+DO traceOpen("nqa", java.lang.System.getProperty("stage4.trace", "nqa.trace"));
+traceln("nqa", "chk ms=" + java.lang.System.currentTimeMillis()
++ " age_ns=" + org.apache.cassandra.transport.Dispatcher.requestExecutor.oldestTaskQueueTime()
++ " thr=" + org.apache.cassandra.config.DatabaseDescriptor.getNativeTransportQueueMaxItemAgeThreshold()
++ " timeout_ns=" + org.apache.cassandra.config.DatabaseDescriptor.getNativeTransportTimeout(java.util.concurrent.TimeUnit.NANOSECONDS)
++ " ret=" + $! + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.Dispatcher.hasQueueCapacity() boolean
+
