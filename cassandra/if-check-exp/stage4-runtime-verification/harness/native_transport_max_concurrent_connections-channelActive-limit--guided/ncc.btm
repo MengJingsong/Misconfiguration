@@ -1,0 +1,75 @@
+# Byteman rules for native_transport_max_concurrent_connections-channelActive-limit--guided (stage 4, written 2026-10-20
+# before any reading). Every line goes to the file named by -Dstage4.trace (default ncc.trace) and ends with ms=<epoch ms>.
+# Observation only, except "ncc hold request", which holds the positive control's requests (9f R2) while the hold file
+# exists.
+#
+#   acc n=<count> lim=<limit>   ConnectionLimitHandler.channelActive, at the fireChannelActive call: admitted
+#   rej n=<count> lim=<limit>   ConnectionLimitHandler.channelActive, at the first ctx.close() call (:97, the global
+#                               check): refused; the per-IP limit is -1 throughout, so its close calls are not reached
+#   ina n=<counter after the decrement>     exit of ConnectionLimitHandler.channelInactive
+#   new id= cap=<queueCapacity> remote=     exit of the CQLMessageHandler constructor (control: the receive queue
+#                               capacity read back per connection)
+#   acq id= b=<bytes> out=<Outcome> q=<queueSize> cap= ep=<using>/<limit> gl=<using>/<limit>
+#                               exit of AbstractMessageHandler.acquireCapacity(Limit, Limit, int), server handlers only
+#   hin / hout waited=<ms>      the control's request enters / leaves the hold at Dispatcher.processRequest entry
+# The acq and new rules are copied from the native_transport_receive_queue_capacity harness (ntq-trace.btm).
+
+RULE ncc accept
+CLASS org.apache.cassandra.transport.ConnectionLimitHandler
+METHOD channelActive
+AT INVOKE fireChannelActive
+IF true
+DO traceOpen("ncc", java.lang.System.getProperty("stage4.trace", "ncc.trace"));
+   traceln("ncc", "acc n=" + $count + " lim=" + $limit + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ncc refuse
+CLASS org.apache.cassandra.transport.ConnectionLimitHandler
+METHOD channelActive
+AT INVOKE close
+IF true
+DO traceOpen("ncc", java.lang.System.getProperty("stage4.trace", "ncc.trace"));
+   traceln("ncc", "rej n=" + $count + " lim=" + $limit + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ncc inactive
+CLASS org.apache.cassandra.transport.ConnectionLimitHandler
+METHOD channelInactive
+AT EXIT
+IF true
+DO traceOpen("ncc", java.lang.System.getProperty("stage4.trace", "ncc.trace"));
+   traceln("ncc", "ina n=" + $0.counter.get() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ncc new handler
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD <init>
+AT EXIT
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ncc", java.lang.System.getProperty("stage4.trace", "ncc.trace"));
+   traceln("ncc", "new id=" + $0.id() + " cap=" + $0.queueCapacity + " remote=" + $0.channel.remoteAddress()
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ncc acquire exit
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD acquireCapacity(org.apache.cassandra.net.ResourceLimits$Limit, org.apache.cassandra.net.ResourceLimits$Limit, int)
+AT EXIT
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ncc", java.lang.System.getProperty("stage4.trace", "ncc.trace"));
+   traceln("ncc", "acq id=" + $0.id() + " b=" + $3 + " out=" + $! + " q=" + $0.queueSize + " cap=" + $0.queueCapacity
+                  + " ep=" + $1.using() + "/" + $1.limit() + " gl=" + $2.using() + "/" + $2.limit()
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE ncc hold request
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD processRequest(io.netty.channel.Channel, org.apache.cassandra.transport.Message$Request, org.apache.cassandra.transport.ClientResourceLimits$Overload, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT ENTRY
+IF $2.toString().startsWith("QUERY SELECT pk FROM ks.t ")
+   AND (new java.io.File(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"))).exists()
+DO traceOpen("ncc", java.lang.System.getProperty("stage4.trace", "ncc.trace"));
+   traceln("ncc", "hin ms=" + java.lang.System.currentTimeMillis());
+   traceln("ncc", "hout waited=" + stage4.Hold.await(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"), 90000L)
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

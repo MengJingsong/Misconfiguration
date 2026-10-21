@@ -1,0 +1,92 @@
+== idle lifetime: per arm (client HELD line, trace between this burst and the next arm, histograms, status)
+   warm: L=-1 client open=4000 closed=0 errors=0; acc=0 rej=0 ina=0; Epoll live 0 -> 4000; Nio 0; total 63781032 -> 70935240; RssAnon 2777845760
+   m1a: L=-1 client open=4000 closed=0 errors=0; acc=0 rej=0 ina=0; Epoll live 0 -> 4000; Nio 0; total 74208560 -> 79327392; RssAnon 2781523968
+ok   m1a open = min(4000, L) = 4000 (client): 4000 open, 0 errors
+ok   m1a closed by server = 0: 0
+ok   m1a live EpollSocketChannel at 30 s = 4000: 4000
+ok   m1a no NioSocketChannel: 0
+ok   m1a no handler lines at -1: (0, 0, 0)
+   L2000: L=2000 client open=2000 closed=2000 errors=0; acc=2000 rej=2000 ina=4000; Epoll live 0 -> 2000; Nio 0; total 74181016 -> 76939320; RssAnon 2796101632
+ok   L2000 open = min(4000, L) = 2000 (client): 2000 open, 0 errors
+ok   L2000 closed by server = 2000: 2000
+ok   L2000 live EpollSocketChannel at 30 s = 2000: 2000
+ok   L2000 no NioSocketChannel: 0
+ok   L2000 acc lines 2000, numbered 1..2000: 2000, n [1]..[2000]
+ok   L2000 rej lines 2000, every n > L: 2000, n min [2001]
+ok   L2000 ina lines 4000, counter ends 0: 4000, last 0
+   m1b: L=-1 client open=4000 closed=0 errors=0; acc=0 rej=0 ina=0; Epoll live 0 -> 4000; Nio 0; total 74259496 -> 79412808; RssAnon 2797068288
+ok   m1b open = min(4000, L) = 4000 (client): 4000 open, 0 errors
+ok   m1b closed by server = 0: 0
+ok   m1b live EpollSocketChannel at 30 s = 4000: 4000
+ok   m1b no NioSocketChannel: 0
+ok   m1b no handler lines at -1: (0, 0, 0)
+   L1000: L=1000 client open=1000 closed=3000 errors=0; acc=1000 rej=3000 ina=4000; Epoll live 0 -> 1000; Nio 0; total 74263624 -> 75610488; RssAnon 2796388352
+ok   L1000 open = min(4000, L) = 1000 (client): 1000 open, 0 errors
+ok   L1000 closed by server = 3000: 3000
+ok   L1000 live EpollSocketChannel at 30 s = 1000: 1000
+ok   L1000 no NioSocketChannel: 0
+ok   L1000 acc lines 1000, numbered 1..1000: 1000, n [1]..[1000]
+ok   L1000 rej lines 3000, every n > L: 3000, n min [1001]
+ok   L1000 ina lines 4000, counter ends 0: 4000, last 0
+   m1c: L=-1 client open=4000 closed=0 errors=0; acc=0 rej=0 ina=0; Epoll live 0 -> 4000; Nio 0; total 74268440 -> 79421352; RssAnon 2797219840
+ok   m1c open = min(4000, L) = 4000 (client): 4000 open, 0 errors
+ok   m1c closed by server = 0: 0
+ok   m1c live EpollSocketChannel at 30 s = 4000: 4000
+ok   m1c no NioSocketChannel: 0
+ok   m1c no handler lines at -1: (0, 0, 0)
+   L500: L=500 client open=500 closed=3500 errors=0; acc=500 rej=3500 ina=4000; Epoll live 0 -> 500; Nio 0; total 74270912 -> 74944904; RssAnon 2798084096
+ok   L500 open = min(4000, L) = 500 (client): 500 open, 0 errors
+ok   L500 closed by server = 3500: 3500
+ok   L500 live EpollSocketChannel at 30 s = 500: 500
+ok   L500 no NioSocketChannel: 0
+ok   L500 acc lines 500, numbered 1..500: 500, n [1]..[500]
+ok   L500 rej lines 3500, every n > L: 3500, n min [501]
+ok   L500 ina lines 4000, counter ends 0: 4000, last 0
+== system.log: "Exceeded maximum native connection limit of <L>" lines by limit
+   {2000: [2035], 1000: [1001], 500: [501]}
+ok   log line for limit 2000: [2035]
+ok   log line for limit 1000: [1001]
+ok   log line for limit 500: [501]
+== R1 (band = range over the three -1 arms; held readings)
+   live EpollSocketChannel: -1 [4000, 4000, 4000] band 0; 500 500 1000 1000 2000 2000; spread 1500; slope 1.0/conn (segments 1.0, 1.0); -> follows
+ok   live channels follow the limit by R1: 1500 > 2 x 0
+   live heap, histogram Total: -1 [79327392, 79412808, 79421352] band 93960; 500 74944904 1000 75610488 2000 76939320; spread 1994416; slope 1329.6/conn (segments 1331.2, 1328.8); -> follows
+      line through 500 and 2000 extended to 4000: 79598541; -1 mean 79387184; difference -211357 (-4.5 % of the 500->4000 rise)
+ok   live heap follows the limit by R1: 1994416 > 2 x 93960
+   RssAnon: -1 [2781523968, 2797068288, 2797219840] band 15695872; 500 2798084096 1000 2796388352 2000 2796101632; spread 1982464; slope -1321.6/conn (segments -3391.5, -286.7); -> flat
+      RssAnon: flat (spread 1982464 vs band 15695872); AlwaysPreTouch makes the heap resident from start
+== per-connection heap composition (held - base, mean of the three -1 arms, per connection; top 12 classes)
+      168.0 B  io.netty.channel.DefaultChannelHandlerContext
+      128.0 B  io.netty.channel.epoll.EpollSocketChannel
+       72.0 B  org.apache.cassandra.transport.Envelope$Decoder
+       72.0 B  io.netty.channel.epoll.EpollSocketChannelConfig
+       64.0 B  java.net.InetAddress$InetAddressHolder
+       64.0 B  io.netty.channel.DefaultChannelPipeline$HeadContext
+       64.0 B  io.netty.channel.ChannelOutboundBuffer
+       56.0 B  org.apache.cassandra.transport.InitialConnectionHandler
+       56.0 B  io.netty.channel.epoll.EpollSocketChannel$EpollSocketChannelUnsafe
+       56.0 B  io.netty.channel.DefaultChannelPipeline$TailContext
+       48.0 B  [B
+       48.0 B  java.net.InetSocketAddress$InetSocketAddressHolder
+   sum over all classes 1285.5 B per connection
+== control lifetimes
+   C0-1g: cap ['1048576']; b 1048650; held at the sample 64 (= 67113600 B); large acquires 64 (INSUFFICIENT 0); reserve max 4736 (poll max 4736); live heap held - base 76437288; QueryMessage live 64; client ('64', '0', '0')
+ok   C0-1g every connection answered: ('64', '0', '0')
+   C0-16m: cap ['1048576']; b 1048650; held at the sample 64 (= 67113600 B); large acquires 64 (INSUFFICIENT 0); reserve max 4736 (poll max 4736); live heap held - base 76327160; QueryMessage live 64; client ('64', '0', '0')
+ok   C0-16m every connection answered: ('64', '0', '0')
+   C-1g: cap ['0']; b 1048650; held at the sample 64 (= 67113600 B); large acquires 64 (INSUFFICIENT 0); reserve max 67113600 (poll max 67113600); live heap held - base 76325208; QueryMessage live 64; client ('64', '0', '0')
+ok   C-1g every connection answered: ('64', '0', '0')
+   C-16m: cap ['0']; b 1048650; held at the sample 15 (= 15729750 B); large acquires 113 (INSUFFICIENT 49); reserve max 15729750 (poll max 15729750); live heap held - base 24627280; QueryMessage live 15; client ('64', '0', '0')
+ok   C-16m every connection answered: ('64', '0', '0')
+ok   as filed (C0): the 16 MiB arm holds as many requests as the 1 GiB arm: (64, 64)
+ok   control (C): 1 GiB arm holds 64 requests, 16 MiB arm at most 15: (64, 15)
+ok   control (C): reserve max <= 16 MiB in the 16 MiB arm: 15729750
+ok   control (C): held heap lower in the 16 MiB arm by > 32 MiB: (76325208, 24627280)
+== agreement with the run script (summary.txt ARM lines)
+ok   summary m1a matches the raw files: ('0', '4000', '74208560', '79327392', '2783338496', '2781523968')
+ok   summary L2000 matches the raw files: ('0', '2000', '74181016', '76939320', '2781618176', '2796101632')
+ok   summary m1b matches the raw files: ('0', '4000', '74259496', '79412808', '2796732416', '2797068288')
+ok   summary L1000 matches the raw files: ('0', '1000', '74263624', '75610488', '2796638208', '2796388352')
+ok   summary m1c matches the raw files: ('0', '4000', '74268440', '79421352', '2797387776', '2797219840')
+ok   summary L500 matches the raw files: ('0', '500', '74270912', '74944904', '2796965888', '2798084096')
+== 55 ok, 0 fail

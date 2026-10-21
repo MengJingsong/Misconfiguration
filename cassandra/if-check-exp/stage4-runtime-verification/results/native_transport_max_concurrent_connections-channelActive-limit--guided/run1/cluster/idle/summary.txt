@@ -1,0 +1,89 @@
+cluster-run run1 idle 2026-10-20 23:26:11 EDT host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu count 4000 hold 30.0 s limits [2000, 1000, 500]
+harness md5 ncc.btm=df2746a08380 Hold.java=66e23e8872e9 HeldRequests.java=51cf94a5e328 hold_connections.py=bc503f302e0c Jmx.java=d24411a92dea cluster-run.py=d9a3a3ddfac4 make-node-yaml.sh=38b6e9b72bbc
+[idle] yaml: # ---- stage4 ncc lines ----;cluster_name: stage4-ncc;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-ncc/data/commitlog;hints_directory: /users/jason92/stage4-ncc/data/hints;saved_caches_directory: /users/jason92/stage4-ncc/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-ncc/data/cdc_raw;auto_snapshot: false;native_transport_idle_timeout: 0ms;native_transport_max_concurrent_connections: -1;native_transport_max_concurrent_connections_per_ip: -1;native_transport_timeout: 120s;read_request_timeout: 120s;
+EXPECTED: [idle] Submit -l lists the 6 rules of ncc.btm (6: ['ncc accept', 'ncc acquire exit', 'ncc hold request', 'ncc inactive', 'ncc new handler', 'ncc refuse']) — yes
+[idle] jvm: -XX:+UseThreadPriorities -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms2G -Xmx2G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/ncc/ncc.btm,listener:true -Xbootclasspath/a:/users/jason92/stage4-logs/ncc/run1/cluster/stage4-hold.jar -Dstage4.trace=/users/jason92/stage4-logs/ncc/run1/cluster/idle/ncc.trace -Dstage4.hold.file=/users/jason92/stage4-logs/ncc/run1/cluster/idle/hold
+EXPECTED: [idle] heap -Xms2G -Xmx2G (9b hold fixed) — yes
+EXPECTED: [idle] node open-file limit 1048576 >= 10,000 (9b hold fixed) — yes
+EXPECTED: [idle] client open-file limit 1048576 >= 10,000 (9b hold fixed) — yes
+[idle] yaml keys: native_transport_allow_older_protocols: true; native_transport_port: 9042; native_transport_idle_timeout: 0ms; native_transport_max_concurrent_connections: -1; native_transport_max_concurrent_connections_per_ip: -1; native_transport_timeout: 120s; read_request_timeout: 120s
+EXPECTED: [idle] JMX global limit -1, per-IP limit -1 (both -1 at start) — yes
+EXPECTED: limit set live to -1, read back -1 — yes
+SAMPLE [idle] warm base: ss 0; histo total 63781032; heap_info used 63780864; RssAnon 2768297984; fd 637; connectedNativeClients 0; RequestsSize 0; direct 50143784; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] warm held: ss 4000; histo total 70935240; heap_info used 70934528; RssAnon 2777845760; fd 4637; connectedNativeClients 0; RequestsSize 0; direct 50144296; pool used 0 overflow 0; EpollSocketChannel=4000 NioSocketChannel=0 DefaultChannelPipeline=4002 DefaultChannelHandlerContext=12002 InitialConnectionHandler=4000 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] warm: limit -1; client HELD open 4000 closed_by_server 0 errors 0; FINAL ('4000', '0', '0'); ss held 4000, after close 0; trace acc 0 rej 0 ina 0 counter at the end None; "Exceeded maximum native connection limit" lines +0; EpollSocketChannel 0 -> 4000; histo total 63781032 -> 70935240; RssAnon 2768297984 -> 2777845760; fd 637 -> 4637
+EXPECTED: limit set live to -1, read back -1 — yes
+SAMPLE [idle] m1a base: ss 0; histo total 74208560; heap_info used 74208256; RssAnon 2783338496; fd 637; connectedNativeClients 0; RequestsSize 0; direct 50144296; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] m1a held: ss 4000; histo total 79327392; heap_info used 79327232; RssAnon 2781523968; fd 4637; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=4000 NioSocketChannel=0 DefaultChannelPipeline=4002 DefaultChannelHandlerContext=12002 InitialConnectionHandler=4000 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] m1a: limit -1; client HELD open 4000 closed_by_server 0 errors 0; FINAL ('4000', '0', '0'); ss held 4000, after close 0; trace acc 0 rej 0 ina 0 counter at the end None; "Exceeded maximum native connection limit" lines +0; EpollSocketChannel 0 -> 4000; histo total 74208560 -> 79327392; RssAnon 2783338496 -> 2781523968; fd 637 -> 4637
+EXPECTED: m1a: client connect errors 0 (0) — yes
+EXPECTED: m1a: open connections at 30 s = min(4000, limit) = 4000 (client 4000, ss 4000) — yes
+EXPECTED: m1a: closed by the server = 0 (client 0) — yes
+EXPECTED: m1a: no handler installed at -1: no acc/rej/ina line (0, 0, 0) — yes
+EXPECTED: m1a: live EpollSocketChannel objects held - base = 4000 (4000) — yes
+EXPECTED: m1a: every socket closed afterwards (ss 0) — yes
+EXPECTED: limit set live to 2000, read back 2000 — yes
+SAMPLE [idle] L2000 base: ss 0; histo total 74181016; heap_info used 90957824; RssAnon 2781618176; fd 637; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] L2000 held: ss 2000; histo total 76939320; heap_info used 76939264; RssAnon 2796101632; fd 2638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=2000 NioSocketChannel=0 DefaultChannelPipeline=2002 DefaultChannelHandlerContext=8002 InitialConnectionHandler=2000 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] L2000: limit 2000; client HELD open 2000 closed_by_server 2000 errors 0; FINAL ('2000', '2000', '0'); ss held 2000, after close 0; trace acc 2000 rej 2000 ina 4000 counter at the end 0; "Exceeded maximum native connection limit" lines +1; EpollSocketChannel 0 -> 2000; histo total 74181016 -> 76939320; RssAnon 2781618176 -> 2796101632; fd 637 -> 2638
+EXPECTED: L2000: client connect errors 0 (0) — yes
+EXPECTED: L2000: open connections at 30 s = min(4000, limit) = 2000 (client 2000, ss 2000) — yes
+EXPECTED: L2000: closed by the server = 2000 (client 2000) — yes
+EXPECTED: L2000: trace acc = 2000, rej = 2000 (2000, 2000) — yes
+EXPECTED: L2000: at least one "Exceeded maximum native connection limit of 2000" line (1; NoSpamLogger 1/min) — yes
+EXPECTED: L2000: the handler counter back to 0 after the close (0) — yes
+EXPECTED: L2000: live EpollSocketChannel objects held - base = 2000 (2000) — yes
+EXPECTED: L2000: every socket closed afterwards (ss 0) — yes
+EXPECTED: limit set live to -1, read back -1 — yes
+SAMPLE [idle] m1b base: ss 0; histo total 74259496; heap_info used 74259456; RssAnon 2796732416; fd 638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] m1b held: ss 4000; histo total 79412808; heap_info used 79412224; RssAnon 2797068288; fd 4638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=4000 NioSocketChannel=0 DefaultChannelPipeline=4002 DefaultChannelHandlerContext=12002 InitialConnectionHandler=4000 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] m1b: limit -1; client HELD open 4000 closed_by_server 0 errors 0; FINAL ('4000', '0', '0'); ss held 4000, after close 0; trace acc 0 rej 0 ina 0 counter at the end None; "Exceeded maximum native connection limit" lines +0; EpollSocketChannel 0 -> 4000; histo total 74259496 -> 79412808; RssAnon 2796732416 -> 2797068288; fd 638 -> 4638
+EXPECTED: m1b: client connect errors 0 (0) — yes
+EXPECTED: m1b: open connections at 30 s = min(4000, limit) = 4000 (client 4000, ss 4000) — yes
+EXPECTED: m1b: closed by the server = 0 (client 0) — yes
+EXPECTED: m1b: no handler installed at -1: no acc/rej/ina line (0, 0, 0) — yes
+EXPECTED: m1b: live EpollSocketChannel objects held - base = 4000 (4000) — yes
+EXPECTED: m1b: every socket closed afterwards (ss 0) — yes
+EXPECTED: limit set live to 1000, read back 1000 — yes
+SAMPLE [idle] L1000 base: ss 0; histo total 74263624; heap_info used 74263552; RssAnon 2796638208; fd 638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] L1000 held: ss 1000; histo total 75610488; heap_info used 75610112; RssAnon 2796388352; fd 1638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=1000 NioSocketChannel=0 DefaultChannelPipeline=1002 DefaultChannelHandlerContext=4002 InitialConnectionHandler=1000 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] L1000: limit 1000; client HELD open 1000 closed_by_server 3000 errors 0; FINAL ('1000', '3000', '0'); ss held 1000, after close 0; trace acc 1000 rej 3000 ina 4000 counter at the end 0; "Exceeded maximum native connection limit" lines +1; EpollSocketChannel 0 -> 1000; histo total 74263624 -> 75610488; RssAnon 2796638208 -> 2796388352; fd 638 -> 1638
+EXPECTED: L1000: client connect errors 0 (0) — yes
+EXPECTED: L1000: open connections at 30 s = min(4000, limit) = 1000 (client 1000, ss 1000) — yes
+EXPECTED: L1000: closed by the server = 3000 (client 3000) — yes
+EXPECTED: L1000: trace acc = 1000, rej = 3000 (1000, 3000) — yes
+EXPECTED: L1000: at least one "Exceeded maximum native connection limit of 1000" line (1; NoSpamLogger 1/min) — yes
+EXPECTED: L1000: the handler counter back to 0 after the close (0) — yes
+EXPECTED: L1000: live EpollSocketChannel objects held - base = 1000 (1000) — yes
+EXPECTED: L1000: every socket closed afterwards (ss 0) — yes
+EXPECTED: limit set live to -1, read back -1 — yes
+SAMPLE [idle] m1c base: ss 0; histo total 74268440; heap_info used 74267648; RssAnon 2797387776; fd 638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] m1c held: ss 4000; histo total 79421352; heap_info used 79420416; RssAnon 2797219840; fd 4638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=4000 NioSocketChannel=0 DefaultChannelPipeline=4002 DefaultChannelHandlerContext=12002 InitialConnectionHandler=4000 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] m1c: limit -1; client HELD open 4000 closed_by_server 0 errors 0; FINAL ('4000', '0', '0'); ss held 4000, after close 0; trace acc 0 rej 0 ina 0 counter at the end None; "Exceeded maximum native connection limit" lines +0; EpollSocketChannel 0 -> 4000; histo total 74268440 -> 79421352; RssAnon 2797387776 -> 2797219840; fd 638 -> 4638
+EXPECTED: m1c: client connect errors 0 (0) — yes
+EXPECTED: m1c: open connections at 30 s = min(4000, limit) = 4000 (client 4000, ss 4000) — yes
+EXPECTED: m1c: closed by the server = 0 (client 0) — yes
+EXPECTED: m1c: no handler installed at -1: no acc/rej/ina line (0, 0, 0) — yes
+EXPECTED: m1c: live EpollSocketChannel objects held - base = 4000 (4000) — yes
+EXPECTED: m1c: every socket closed afterwards (ss 0) — yes
+EXPECTED: limit set live to 500, read back 500 — yes
+SAMPLE [idle] L500 base: ss 0; histo total 74270912; heap_info used 74270720; RssAnon 2796965888; fd 638; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=0 NioSocketChannel=0 DefaultChannelPipeline=2 DefaultChannelHandlerContext=2 InitialConnectionHandler=0 QueryMessage=0 CQLMessageHandler=0
+SAMPLE [idle] L500 held: ss 500; histo total 74944904; heap_info used 74944512; RssAnon 2798084096; fd 1138; connectedNativeClients 0; RequestsSize 0; direct 50123394; pool used 0 overflow 0; EpollSocketChannel=500 NioSocketChannel=0 DefaultChannelPipeline=502 DefaultChannelHandlerContext=2002 InitialConnectionHandler=500 QueryMessage=0 CQLMessageHandler=0
+ARM [idle] L500: limit 500; client HELD open 500 closed_by_server 3500 errors 0; FINAL ('500', '3500', '0'); ss held 500, after close 0; trace acc 500 rej 3500 ina 4000 counter at the end 0; "Exceeded maximum native connection limit" lines +1; EpollSocketChannel 0 -> 500; histo total 74270912 -> 74944904; RssAnon 2796965888 -> 2798084096; fd 638 -> 1138
+EXPECTED: L500: client connect errors 0 (0) — yes
+EXPECTED: L500: open connections at 30 s = min(4000, limit) = 500 (client 500, ss 500) — yes
+EXPECTED: L500: closed by the server = 3500 (client 3500) — yes
+EXPECTED: L500: trace acc = 500, rej = 3500 (500, 3500) — yes
+EXPECTED: L500: at least one "Exceeded maximum native connection limit of 500" line (1; NoSpamLogger 1/min) — yes
+EXPECTED: L500: the handler counter back to 0 after the close (0) — yes
+EXPECTED: L500: live EpollSocketChannel objects held - base = 500 (500) — yes
+EXPECTED: L500: every socket closed afterwards (ss 0) — yes
+EXPECTED: limit set live to -1, read back -1 — yes
+---- R1 analysis (held readings; band = range over the three -1 arms) ----
+R1 live EpollSocketChannel: -1 arms [4000, 4000, 4000] (band 0); L500 500 L1000 1000 L2000 2000 (spread 1500); slope 500->2000 1.0 per connection, segments 1.0 / 1.0; -1 mean 4000; line at 4000 4000 -> follows the limit
+R1 live DefaultChannelPipeline: -1 arms [4002, 4002, 4002] (band 0); L500 502 L1000 1002 L2000 2002 (spread 1500); slope 500->2000 1.0 per connection, segments 1.0 / 1.0; -1 mean 4002; line at 4000 4002 -> follows the limit
+R1 live heap (histogram Total, after full GC): -1 arms [79327392, 79412808, 79421352] (band 93960); L500 74944904 L1000 75610488 L2000 76939320 (spread 1994416); slope 500->2000 1329.6 per connection, segments 1331.2 / 1328.8; -1 mean 79387184; line at 4000 79598541 -> follows the limit
+R1 heap used after GC (GC.heap_info): -1 arms [79327232, 79412224, 79420416] (band 93184); L500 74944512 L1000 75610112 L2000 76939264 (spread 1994752); slope 500->2000 1329.8 per connection, segments 1331.2 / 1329.2; -1 mean 79386624; line at 4000 79598933 -> follows the limit
+R1 RssAnon: -1 arms [2781523968, 2797068288, 2797219840] (band 15695872); L500 2798084096 L1000 2796388352 L2000 2796101632 (spread 1982464); slope 500->2000 -1321.6 per connection, segments -3391.5 / -286.7; -1 mean 2791937365; line at 4000 2793458347 -> flat
+R1 process file descriptors: -1 arms [4637, 4638, 4638] (band 1); L500 1138 L1000 1638 L2000 2638 (spread 1500); slope 500->2000 1.0 per connection, segments 1.0 / 1.0; -1 mean 4638; line at 4000 4638 -> follows the limit
+(R1 operationalized in this harness before any reading: "flat" = spread of the three limit readings <= band; "follows" = L(high) - L(low) > 2 x band and both segment slopes > 0 within a factor 1.5 of each other.)

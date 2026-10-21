@@ -1,0 +1,50 @@
+STAGE4 info protocol unit tier, DatabaseDescriptor defaults: global -1 per-ip -1 idle timeout 0
+STAGE4 check u1 L=99 open expected=99 actual=99 ok
+STAGE4 check u1 L=99 downstream-active expected=99 actual=99 ok
+STAGE4 check u1 L=99 counter expected=99 actual=99 ok
+STAGE4 check u1 L=99 refused expected=1 actual=1 ok
+STAGE4 check u1 L=99 last-channel-open expected=false actual=false ok
+STAGE4 check u1 L=99 counter-after-close expected=0 actual=0 ok
+STAGE4 check u1 L=100 open expected=100 actual=100 ok
+STAGE4 check u1 L=100 downstream-active expected=100 actual=100 ok
+STAGE4 check u1 L=100 counter expected=100 actual=100 ok
+STAGE4 check u1 L=100 refused expected=0 actual=0 ok
+STAGE4 check u1 L=100 last-channel-open expected=true actual=true ok
+STAGE4 check u1 L=100 counter-after-close expected=0 actual=0 ok
+STAGE4 check u1 L=101 open expected=100 actual=100 ok
+STAGE4 check u1 L=101 downstream-active expected=100 actual=100 ok
+STAGE4 check u1 L=101 counter expected=100 actual=100 ok
+STAGE4 check u1 L=101 refused expected=0 actual=0 ok
+STAGE4 check u1 L=101 last-channel-open expected=true actual=true ok
+STAGE4 check u1 L=101 counter-after-close expected=0 actual=0 ok
+STAGE4 check u1 L=50 open expected=50 actual=50 ok
+STAGE4 check u1 L=50 downstream-active expected=50 actual=50 ok
+STAGE4 check u1 L=50 counter expected=50 actual=50 ok
+STAGE4 check u1 L=50 refused expected=50 actual=50 ok
+STAGE4 check u1 L=50 last-channel-open expected=false actual=false ok
+STAGE4 check u1 L=50 counter-after-close expected=0 actual=0 ok
+STAGE4 check u1 L=-1 open expected=100 actual=100 ok
+STAGE4 check u1 L=-1 downstream-active expected=100 actual=100 ok
+STAGE4 check u1 L=-1 counter expected=100 actual=100 ok
+STAGE4 check u1 L=-1 refused expected=0 actual=0 ok
+STAGE4 check u1 L=-1 last-channel-open expected=true actual=true ok
+STAGE4 check u1 L=-1 counter-after-close expected=0 actual=0 ok
+STAGE4 check u2 per-ip=10 open from address A expected=10 actual=10 ok
+STAGE4 check u2 per-ip=10 open from address B expected=10 actual=10 ok
+STAGE4 check u2 per-ip=10 downstream-active expected=20 actual=20 ok
+STAGE4 check u2 counter-after-close expected=0 actual=0 ok
+STAGE4 check u3 three channels open under 500 stay open after the limit drops to 2 expected=3 actual=3 ok
+STAGE4 check u3 a fourth channel under limit 2 is refused expected=false actual=false ok
+STAGE4 check u3 counter (3 open; the refused one decremented) expected=3 actual=3 ok
+STAGE4 check u3 counter-after-close expected=0 actual=0 ok
+STAGE4 check u4 global=-1 per-ip=-1 handler installed expected=false actual=false ok
+STAGE4 info u4 global=-1 per-ip=-1 pipeline [envelopeEncoder, initialHandler, exceptionHandler, DefaultChannelPipeline$TailContext#0]
+STAGE4 check u4 global=500 per-ip=-1 handler installed expected=true actual=true ok
+STAGE4 check u4 global=500 per-ip=-1 handler first expected=connectionLimitHandler actual=connectionLimitHandler ok
+STAGE4 info u4 global=500 per-ip=-1 pipeline [connectionLimitHandler, envelopeEncoder, initialHandler, exceptionHandler, DefaultChannelPipeline$TailContext#0]
+STAGE4 check u4 global=-1 per-ip=10 handler installed expected=true actual=true ok
+STAGE4 check u4 global=-1 per-ip=10 handler first expected=connectionLimitHandler actual=connectionLimitHandler ok
+STAGE4 info u4 global=-1 per-ip=10 pipeline [connectionLimitHandler, envelopeEncoder, initialHandler, exceptionHandler, DefaultChannelPipeline$TailContext#0]
+STAGE4 check u4 global=0 per-ip=0 handler installed expected=false actual=false ok
+STAGE4 info u4 global=0 per-ip=0 pipeline [envelopeEncoder, initialHandler, exceptionHandler, DefaultChannelPipeline$TailContext#0]
+STAGE4 info mismatches=0
