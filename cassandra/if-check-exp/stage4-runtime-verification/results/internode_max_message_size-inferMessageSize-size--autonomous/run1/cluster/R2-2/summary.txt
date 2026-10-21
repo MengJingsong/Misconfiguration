@@ -1,0 +1,31 @@
+cluster-run R2-2 2026-10-20 18:45:34 EDT host node0 clone /users/jason92/cassandra-run5 ['cassandra-5.0.9', 'b5f2a54'] IMM_N=20
+harness md5: 81ecbb4c181d6673c52329292c6d0e17  cluster-run.py 0b3afdc50c6c51148e4b071de6bb917a  client.py 485d25fd1022405300b0e8a8216a37d5  make-node-yaml.sh 2f18ec53c4d427ffdbc72d30b6a11dbd  Jmx.java 
+label R2: A internode_max_message_size=16MiB, B=1MiB
+free on /users/jason92: 45.3 GiB
+# ---- stage4 imm lines ----;cluster_name: stage4-imm;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-imm/A/commitlog;hints_directory: /users/jason92/stage4-imm/A/hints;saved_caches_directory: /users/jason92/stage4-imm/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-imm/A/cdc_raw;commitlog_segment_size: 32MiB;hinted_handoff_enabled: false;internode_max_message_size: 16MiB;
+# ---- stage4 imm lines ----;cluster_name: stage4-imm;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-imm/B/commitlog;hints_directory: /users/jason92/stage4-imm/B/hints;saved_caches_directory: /users/jason92/stage4-imm/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-imm/B/cdc_raw;commitlog_segment_size: 32MiB;hinted_handoff_enabled: false;internode_max_message_size: 1MiB;
+read-back A: internode_max_message_size=16MiB native_transport_max_message_size=16777216B hinted_handoff_enabled=false
+read-back B: internode_max_message_size=1MiB native_transport_max_message_size=16777216B hinted_handoff_enabled=false
+size 524288: writes {'first': 0, 'n': 20, 'bytes': 524288, 'ok': 20, 'err': 0, 'errors': {}}; B local writes +20, A local writes +20; B inbound from A: received +10491537 B (+41 msgs), processed +10491537 B, errors +0; B dropped MUTATION_REQ +0
+size 4194304: writes {'first': 20, 'n': 20, 'bytes': 4194304, 'ok': 0, 'err': 20, 'errors': {'WriteTimeout': 20}}; B local writes +0, A local writes +20; B inbound from A: received +4792 B (+24 msgs), processed +4792 B, errors +0; B dropped MUTATION_REQ +0
+size 12582912: writes {'first': 40, 'n': 20, 'bytes': 12582912, 'ok': 0, 'err': 20, 'errors': {'WriteTimeout': 20}}; B local writes +0, A local writes +20; B inbound from A: received +5990 B (+30 msgs), processed +5990 B, errors +0; B dropped MUTATION_REQ +0
+baseline (median of the 10 s control, B): direct_used=54.48MiB, pool_size=8.00MiB, pool_used=0.00MiB, pool_overflow=0.00MiB, heap_used=83.03MiB, rss=1730.07MiB
+S=524288: 32 samples; peak increment over baseline (200 ms / 1 s): direct_used +0.50/+0.50MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +32.00/+32.00MiB, rss +10.52/+10.52MiB
+S=4194304: 37 samples; peak increment over baseline (200 ms / 1 s): direct_used +0.50/+0.50MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +48.00/+48.00MiB, rss +18.51/+18.51MiB
+S=12582912: 46 samples; peak increment over baseline (200 ms / 1 s): direct_used +0.50/+0.50MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +64.00/+64.00MiB, rss +15.26/+15.20MiB
+B tpstats dropped MUTATION_REQ: 0
+A system.log (this lifetime, before the counts): 0 "exceeds allowed maximum" lines [], 0 "terminating connection" lines
+B system.log (this lifetime, before the counts): 40 "exceeds allowed maximum" lines [((4194363, 1048576), 20), ((12582971, 1048576), 20)], 40 "terminating connection" lines
+A: tablestats local write count 60, partitions (estimate) 60; count(*) at ONE through A: 33
+B: tablestats local write count 20, partitions (estimate) 20; count(*) at ONE through B: None
+A system.log during the counts: 0 "exceeds allowed maximum" lines []
+B system.log during the counts: 1 "exceeds allowed maximum" lines [(4194356, 1048576)]
+EXPECTED: S=512KiB: all 20 writes succeed and B applies 20 — yes
+EXPECTED: S=4194304: no write succeeds and B applies none — yes
+EXPECTED: S=4194304: B logs "exceeds allowed maximum of 1048576 bytes" for messages of about S — yes
+EXPECTED: S=12582912: no write succeeds and B applies none — yes
+EXPECTED: S=12582912: B logs "exceeds allowed maximum of 1048576 bytes" for messages of about S — yes
+EXPECTED: A logs no "exceeds allowed maximum" line — yes
+EXPECTED: B pool Size / direct increment does not scale with S (12MiB peak <= 4MiB peak + 1 MiB) — yes
+EXPECTED totals: yes=7 no=0
+cleanup: CassandraDaemon left: none; listeners on 7000/7199/7299/9042: none

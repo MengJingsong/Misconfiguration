@@ -1,0 +1,74 @@
+STAGE4 env version=12 maxMemory=2130051072 default_limit=134217728
+STAGE4 case L=65536 under P=64512 size=64525 given=64525 -> returned 64525
+STAGE4 check L=65536 under returns serializedSize expected=returned 64525 actual=returned 64525 ok
+STAGE4 check L=65536 under bytes written == serializedSize expected=64525 actual=64525 ok
+STAGE4 case L=64525 limit=size P=64512 size=64525 given=64525 -> returned 64525
+STAGE4 check L=size(64525) returns expected=returned 64525 actual=returned 64525 ok
+STAGE4 case L=64524 limit=size-1 P=64512 size=64525 given=64525 -> threw Message of size 64525 bytes exceeds allowed maximum of 64524 bytes
+STAGE4 check L=size-1(64524) throws expected=threw Message of size 64525 bytes exceeds allowed maximum of 64524 bytes actual=threw Message of size 64525 bytes exceeds allowed maximum of 64524 bytes ok
+STAGE4 case L=65536 under-truncated P=64512 size=64525 given=13 -> returned 64525
+STAGE4 check L=65536 under, payload absent, returns size expected=returned 64525 actual=returned 64525 ok
+STAGE4 case L=65536 size=L P=65523 size=65536 given=65536 -> returned 65536
+STAGE4 check L=65536 size=L returns expected=returned 65536 actual=returned 65536 ok
+STAGE4 case L=65536 size=L+1 P=65524 size=65537 given=65537 -> threw Message of size 65537 bytes exceeds allowed maximum of 65536 bytes
+STAGE4 check L=65536 size=L+1 throws expected=threw Message of size 65537 bytes exceeds allowed maximum of 65536 bytes actual=threw Message of size 65537 bytes exceeds allowed maximum of 65536 bytes ok
+STAGE4 case L=65536 2L P=131072 size=131085 given=131085 -> threw Message of size 131085 bytes exceeds allowed maximum of 65536 bytes
+STAGE4 check L=65536 P=2L throws with N=serializedSize expected=threw Message of size 131085 bytes exceeds allowed maximum of 65536 bytes actual=threw Message of size 131085 bytes exceeds allowed maximum of 65536 bytes ok
+STAGE4 case L=65536 2L-truncated P=131072 size=131085 given=13 -> threw Message of size 131085 bytes exceeds allowed maximum of 65536 bytes
+STAGE4 check L=65536 2L, payload absent, throws expected=threw Message of size 131085 bytes exceeds allowed maximum of 65536 bytes actual=threw Message of size 131085 bytes exceeds allowed maximum of 65536 bytes ok
+STAGE4 case L=65536 2L-vint-incomplete P=131072 size=131085 given=12 -> returned -1
+STAGE4 check L=65536 2L, length vint incomplete, returns -1 expected=returned -1 actual=returned -1 ok
+STAGE4 note L=65536 2L prefix=13 B of 131085 (payload-length vint 3 B)
+STAGE4 case L=65536 8L P=524288 size=524301 given=524301 -> threw Message of size 524301 bytes exceeds allowed maximum of 65536 bytes
+STAGE4 check L=65536 P=8L throws with N=serializedSize expected=threw Message of size 524301 bytes exceeds allowed maximum of 65536 bytes actual=threw Message of size 524301 bytes exceeds allowed maximum of 65536 bytes ok
+STAGE4 case L=1048576 under P=1047552 size=1047565 given=1047565 -> returned 1047565
+STAGE4 check L=1048576 under returns serializedSize expected=returned 1047565 actual=returned 1047565 ok
+STAGE4 check L=1048576 under bytes written == serializedSize expected=1047565 actual=1047565 ok
+STAGE4 case L=1047565 limit=size P=1047552 size=1047565 given=1047565 -> returned 1047565
+STAGE4 check L=size(1047565) returns expected=returned 1047565 actual=returned 1047565 ok
+STAGE4 case L=1047564 limit=size-1 P=1047552 size=1047565 given=1047565 -> threw Message of size 1047565 bytes exceeds allowed maximum of 1047564 bytes
+STAGE4 check L=size-1(1047564) throws expected=threw Message of size 1047565 bytes exceeds allowed maximum of 1047564 bytes actual=threw Message of size 1047565 bytes exceeds allowed maximum of 1047564 bytes ok
+STAGE4 case L=1048576 under-truncated P=1047552 size=1047565 given=13 -> returned 1047565
+STAGE4 check L=1048576 under, payload absent, returns size expected=returned 1047565 actual=returned 1047565 ok
+STAGE4 case L=1048576 size=L P=1048563 size=1048576 given=1048576 -> returned 1048576
+STAGE4 check L=1048576 size=L returns expected=returned 1048576 actual=returned 1048576 ok
+STAGE4 case L=1048576 size=L+1 P=1048564 size=1048577 given=1048577 -> threw Message of size 1048577 bytes exceeds allowed maximum of 1048576 bytes
+STAGE4 check L=1048576 size=L+1 throws expected=threw Message of size 1048577 bytes exceeds allowed maximum of 1048576 bytes actual=threw Message of size 1048577 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 case L=1048576 2L P=2097152 size=2097166 given=2097166 -> threw Message of size 2097166 bytes exceeds allowed maximum of 1048576 bytes
+STAGE4 check L=1048576 P=2L throws with N=serializedSize expected=threw Message of size 2097166 bytes exceeds allowed maximum of 1048576 bytes actual=threw Message of size 2097166 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 case L=1048576 2L-truncated P=2097152 size=2097166 given=14 -> threw Message of size 2097166 bytes exceeds allowed maximum of 1048576 bytes
+STAGE4 check L=1048576 2L, payload absent, throws expected=threw Message of size 2097166 bytes exceeds allowed maximum of 1048576 bytes actual=threw Message of size 2097166 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 case L=1048576 2L-vint-incomplete P=2097152 size=2097166 given=13 -> returned -1
+STAGE4 check L=1048576 2L, length vint incomplete, returns -1 expected=returned -1 actual=returned -1 ok
+STAGE4 note L=1048576 2L prefix=14 B of 2097166 (payload-length vint 4 B)
+STAGE4 case L=1048576 8L P=8388608 size=8388622 given=8388622 -> threw Message of size 8388622 bytes exceeds allowed maximum of 1048576 bytes
+STAGE4 check L=1048576 P=8L throws with N=serializedSize expected=threw Message of size 8388622 bytes exceeds allowed maximum of 1048576 bytes actual=threw Message of size 8388622 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 case L=16777216 under P=16776192 size=16776206 given=16776206 -> returned 16776206
+STAGE4 check L=16777216 under returns serializedSize expected=returned 16776206 actual=returned 16776206 ok
+STAGE4 check L=16777216 under bytes written == serializedSize expected=16776206 actual=16776206 ok
+STAGE4 case L=16776206 limit=size P=16776192 size=16776206 given=16776206 -> returned 16776206
+STAGE4 check L=size(16776206) returns expected=returned 16776206 actual=returned 16776206 ok
+STAGE4 case L=16776205 limit=size-1 P=16776192 size=16776206 given=16776206 -> threw Message of size 16776206 bytes exceeds allowed maximum of 16776205 bytes
+STAGE4 check L=size-1(16776205) throws expected=threw Message of size 16776206 bytes exceeds allowed maximum of 16776205 bytes actual=threw Message of size 16776206 bytes exceeds allowed maximum of 16776205 bytes ok
+STAGE4 case L=16777216 under-truncated P=16776192 size=16776206 given=14 -> returned 16776206
+STAGE4 check L=16777216 under, payload absent, returns size expected=returned 16776206 actual=returned 16776206 ok
+STAGE4 case L=16777216 size=L P=16777202 size=16777216 given=16777216 -> returned 16777216
+STAGE4 check L=16777216 size=L returns expected=returned 16777216 actual=returned 16777216 ok
+STAGE4 case L=16777216 size=L+1 P=16777203 size=16777217 given=16777217 -> threw Message of size 16777217 bytes exceeds allowed maximum of 16777216 bytes
+STAGE4 check L=16777216 size=L+1 throws expected=threw Message of size 16777217 bytes exceeds allowed maximum of 16777216 bytes actual=threw Message of size 16777217 bytes exceeds allowed maximum of 16777216 bytes ok
+STAGE4 case L=16777216 2L P=33554432 size=33554446 given=33554446 -> threw Message of size 33554446 bytes exceeds allowed maximum of 16777216 bytes
+STAGE4 check L=16777216 P=2L throws with N=serializedSize expected=threw Message of size 33554446 bytes exceeds allowed maximum of 16777216 bytes actual=threw Message of size 33554446 bytes exceeds allowed maximum of 16777216 bytes ok
+STAGE4 case L=16777216 2L-truncated P=33554432 size=33554446 given=14 -> threw Message of size 33554446 bytes exceeds allowed maximum of 16777216 bytes
+STAGE4 check L=16777216 2L, payload absent, throws expected=threw Message of size 33554446 bytes exceeds allowed maximum of 16777216 bytes actual=threw Message of size 33554446 bytes exceeds allowed maximum of 16777216 bytes ok
+STAGE4 case L=16777216 2L-vint-incomplete P=33554432 size=33554446 given=13 -> returned -1
+STAGE4 check L=16777216 2L, length vint incomplete, returns -1 expected=returned -1 actual=returned -1 ok
+STAGE4 note L=16777216 2L prefix=14 B of 33554446 (payload-length vint 4 B)
+STAGE4 case L=16777216 8L P=134217728 size=134217742 given=134217742 -> threw Message of size 134217742 bytes exceeds allowed maximum of 16777216 bytes
+STAGE4 check L=16777216 P=8L throws with N=serializedSize expected=threw Message of size 134217742 bytes exceeds allowed maximum of 16777216 bytes actual=threw Message of size 134217742 bytes exceeds allowed maximum of 16777216 bytes ok
+STAGE4 case L=2147483646 control-max P=134217728 size=134217742 given=134217742 -> returned 134217742
+STAGE4 check control L=Integer.MAX_VALUE-1 passes 8x16MiB expected=returned 134217742 actual=returned 134217742 ok
+STAGE4 case L=16777216 control-flip-a P=4194304 size=4194318 given=4194318 -> returned 4194318
+STAGE4 case L=1048576 control-flip-b P=4194304 size=4194318 given=4194318 -> threw Message of size 4194318 bytes exceeds allowed maximum of 1048576 bytes
+STAGE4 check control flip 4MiB at 16MiB returns expected=returned 4194318 actual=returned 4194318 ok
+STAGE4 check control flip 4MiB at 1MiB throws expected=threw Message of size 4194318 bytes exceeds allowed maximum of 1048576 bytes actual=threw Message of size 4194318 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 summary checks=36 mismatches=0

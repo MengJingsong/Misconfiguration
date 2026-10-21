@@ -94,6 +94,11 @@ All values satisfy `DatabaseDescriptor.java:974-989` because the reserves are 12
 - **R3 (B3a: hints).** Set `hinted_handoff_enabled: false` on both nodes, so a replica write that fails does not create hints on node A and change the disk reading.
 - **R4 (B3a: client frame).** `native_transport_max_message_size` is left at its derived default, `min(max_mutation_size, heap/10, heap/40)` = 16 MiB at `-Xmx1G` (`DatabaseDescriptor.java:3237-3245`), which admits the 12 MiB blob request; raising it to 32 MiB would fail at startup (it may not exceed the per-ip limit of about 25 MiB), so do not raise it.
 
+**Runbook fix (stage 4, 2026-10-20).** Found in the harness shakedown before run 1. Run 1 used both fixes. Neither changes B1, the predictions or the readings tables ([results §3](../../stage4-runtime-verification/results/internode_max_message_size-inferMessageSize-size--autonomous.md#3-runbook-defects)).
+
+- **B3d (6) / B3e step 6: the count.** Run `select count(*)` with one row per page (driver `fetch_size=1`). An unpaged count's replica reply is one internode message holding every row, so it is itself refused by `internode_max_message_size`. Take each node's row count from `nodetool tablestats` "Local write count" and from B's `Table WriteLatency` count before and after each size. A count at ONE through a node does not say which replica's rows it counted.
+- **B2h: the control limit.** Use `Integer.MAX_VALUE - 1`. `DataStorageSpec.IntBytesBound` refuses `Integer.MAX_VALUE` (`DataStorageSpec.java:111`).
+
 ## C. Sources read
 
 - /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
@@ -109,4 +114,19 @@ All values satisfy `DatabaseDescriptor.java:974-989` because the reserves are 12
 
 ## D. Stage-4 feedback
 
-`none yet`
+**Stage 4 closed 2026-10-20** ([results](../../stage4-runtime-verification/results/internode_max_message_size-inferMessageSize-size--autonomous.md)); estimate `positive` held. Effect: caps one message's wire size, on both sides.
+
+- **Unit tier: Confirmed.** `inferMessageSize` throws if and only if size > *L*, exactly at the boundary, at 64 KiB, 1 MiB and 16 MiB. It decides from the header and the length vint with the payload absent, and returns −1 only while the vint is incomplete. Results are identical at 1 and 2 GiB heap (36/36 checks).
+- **Cluster tier: Confirmed** (two nodes, R0–R3, each run twice).
+  - **R2 (B at 1 MiB):** every 4 and 12 MiB replica write fails (0/20). B logs one rejection per message at `inferMessageSize` ← `processFirstFrameOfLargeMessage` (`InboundMessageHandler.java:214`), closes the large-messages connection, and applies none of the writes. B's peak direct memory is +0.5 MiB, flat in *S*, against +52.5 MiB when R1 admits the same 12 MiB messages. The networking pool's `Size` stays at 0 against +16 MiB.
+  - **R3 (A at 1 MiB):** A refuses at `OutboundConnection.enqueue:332`, and B receives at most 6 KB per size.
+  - **R0 (the 128 MiB default):** behaves as R1.
+- **A3 item 2's open point is now observed.** The connection is closed by `fatalExceptionCaught` and the coordinator reports a write timeout within 60–150 ms. The rejection does not show in the inbound `ErrorCount`.
+- **Side observations, outside B1:**
+  - A coordinator still applies a write it could not send, so in R2/R3 A holds 60 rows and B 20, with no hint.
+  - The limit refuses read replies too: an unpaged `count(*)` reply at the replica's `enqueue`, and a one-row reply larger than the coordinator's limit at its `inferMessageSize`.
+- **Notes for stage 3, not applied:**
+  - A1's upper bound is `Integer.MAX_VALUE − 1` in practice.
+  - A3 bypass (a), the deserialized footprint of an accepted message, is not tested.
+
+The runbook fix above (B2h, B3d) was added after the freeze. The new sha256 is in `_INDEX.md` §4.
