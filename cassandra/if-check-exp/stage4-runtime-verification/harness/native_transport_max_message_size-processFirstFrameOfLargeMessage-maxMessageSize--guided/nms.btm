@@ -1,0 +1,68 @@
+# Byteman rules for native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided (cluster tier,
+# 9d "disallow evidence" and the per-frame kept-buffer count beside the pool gauge). Observation only. Lines go to the
+# file named by -Dstage4.byteman.out; h= is System.identityHashCode of the connection's CQLMessageHandler.
+#   lm     h= size=<envelope bytes> limit=<knob read now> ms=      a CQL LargeMessage was built (first frame of a large request)
+#   toobig h= size= ms=                                             markTooBig(): the check refused it
+#   ffl    h= ret=<true|false> ms=                                  processFirstFrameOfLargeMessage() returned (false = paused)
+#   acq    h= bytes= out=<SUCCESS|INSUFFICIENT_ENDPOINT|INSUFFICIENT_GLOBAL> ms=   capacity for a request above 131,071 B
+#   frm    h= toobig= ovl= n=<buffers kept after this frame> recv=<bytes before it> fs=<frame payload> size= ms=
+#   done   h= toobig= n= size= ms=                                  onComplete() (the last frame)
+
+RULE lm new
+CLASS org.apache.cassandra.transport.CQLMessageHandler$LargeMessage
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("nms", java.lang.System.getProperty("stage4.byteman.out", "nms.trace"));
+   traceln("nms", "lm h=" + java.lang.System.identityHashCode($0.this$0) + " size=" + $0.size
+           + " limit=" + org.apache.cassandra.config.DatabaseDescriptor.getNativeTransportMaxMessageSizeInBytes()
+           + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE toobig
+CLASS org.apache.cassandra.transport.CQLMessageHandler$LargeMessage
+METHOD markTooBig
+AT ENTRY
+IF true
+DO traceOpen("nms", java.lang.System.getProperty("stage4.byteman.out", "nms.trace"));
+   traceln("nms", "toobig h=" + java.lang.System.identityHashCode($0.this$0) + " size=" + $0.size + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE first frame returned
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD processFirstFrameOfLargeMessage
+AT EXIT
+IF true
+DO traceOpen("nms", java.lang.System.getProperty("stage4.byteman.out", "nms.trace"));
+   traceln("nms", "ffl h=" + java.lang.System.identityHashCode($0) + " ret=" + $! + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE acquire large
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD acquireCapacity(org.apache.cassandra.net.ResourceLimits$Limit, org.apache.cassandra.net.ResourceLimits$Limit, int)
+AT EXIT
+IF $0 instanceof org.apache.cassandra.transport.CQLMessageHandler && $3 > 131071
+DO traceOpen("nms", java.lang.System.getProperty("stage4.byteman.out", "nms.trace"));
+   traceln("nms", "acq h=" + java.lang.System.identityHashCode($0) + " bytes=" + $3 + " out=" + $! + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE frame
+CLASS org.apache.cassandra.transport.CQLMessageHandler$LargeMessage
+METHOD onIntactFrame
+AT EXIT
+IF true
+DO traceOpen("nms", java.lang.System.getProperty("stage4.byteman.out", "nms.trace"));
+   traceln("nms", "frm h=" + java.lang.System.identityHashCode($0.this$0) + " toobig=" + $0.tooBig + " ovl=" + $0.overload
+           + " n=" + $0.buffers.size() + " recv=" + $0.received + " fs=" + $1.frameSize + " size=" + $0.size
+           + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE complete
+CLASS org.apache.cassandra.transport.CQLMessageHandler$LargeMessage
+METHOD onComplete
+AT ENTRY
+IF true
+DO traceOpen("nms", java.lang.System.getProperty("stage4.byteman.out", "nms.trace"));
+   traceln("nms", "done h=" + java.lang.System.identityHashCode($0.this$0) + " toobig=" + $0.tooBig + " n=" + $0.buffers.size()
+           + " size=" + $0.size + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

@@ -1,0 +1,80 @@
+== unit tier
+ok   unit readings present 16 lines
+ok   unit harness instrument checks all ok STAGE4 summary checks=34 mismatches=0
+ok   unit control-64k frame count frames 1 expected 1
+ok   unit control-64k single-frame: no LargeMessage, RESULT lm 0 op 8
+ok   unit L1m-above frame count frames 9 expected 9
+ok   unit L1m-above refused: tooBig, 0 buffers, discarded +1, oversized error toobig 1 buffers 0 bytes 0 disc 1 8704 CQL_Message_of_size_1048577_bytes_exceeds_allowed_maximum_of_1048576_bytes
+ok   unit L1m-at frame count frames 9 expected 9
+ok   unit L1m-at admitted: every sent frame kept, discarded +0, RESULT buffers 8/8 bytes 1048568 disc 0 op 8
+ok   unit L1m-below frame count frames 9 expected 9
+ok   unit L1m-below admitted: every sent frame kept, discarded +0, RESULT buffers 8/8 bytes 1048568 disc 0 op 8
+ok   unit L1m-req8m frame count frames 65 expected 65
+ok   unit L1m-req8m refused: tooBig, 0 buffers, discarded +1, oversized error toobig 1 buffers 0 bytes 0 disc 1 8704 CQL_Message_of_size_8388726_bytes_exceeds_allowed_maximum_of_1048576_bytes
+ok   unit L1m-after-64k frame count frames 1 expected 1
+ok   unit L1m-after-64k single-frame: no LargeMessage, RESULT lm 0 op 8
+ok   unit L4m-above frame count frames 33 expected 33
+ok   unit L4m-above refused: tooBig, 0 buffers, discarded +1, oversized error toobig 1 buffers 0 bytes 0 disc 1 8704 CQL_Message_of_size_4194305_bytes_exceeds_allowed_maximum_of_4194304_bytes
+ok   unit L4m-at frame count frames 33 expected 33
+ok   unit L4m-at admitted: every sent frame kept, discarded +0, RESULT buffers 32/32 bytes 4194272 disc 0 op 8
+ok   unit L4m-below frame count frames 33 expected 33
+ok   unit L4m-below admitted: every sent frame kept, discarded +0, RESULT buffers 32/32 bytes 4194272 disc 0 op 8
+ok   unit L4m-req8m frame count frames 65 expected 65
+ok   unit L4m-req8m refused: tooBig, 0 buffers, discarded +1, oversized error toobig 1 buffers 0 bytes 0 disc 1 8704 CQL_Message_of_size_8388726_bytes_exceeds_allowed_maximum_of_4194304_bytes
+ok   unit L4m-after-64k frame count frames 1 expected 1
+ok   unit L4m-after-64k single-frame: no LargeMessage, RESULT lm 0 op 8
+ok   unit L16m-above frame count frames 129 expected 129
+ok   unit L16m-above refused: tooBig, 0 buffers, discarded +1, oversized error toobig 1 buffers 0 bytes 0 disc 1 8704 CQL_Message_of_size_16777217_bytes_exceeds_allowed_maximum_of_16777216_bytes
+ok   unit L16m-at frame count frames 129 expected 129
+ok   unit L16m-at admitted: every sent frame kept, discarded +0, RESULT buffers 128/128 bytes 16777088 disc 0 op 8
+ok   unit L16m-below frame count frames 129 expected 129
+ok   unit L16m-below admitted: every sent frame kept, discarded +0, RESULT buffers 128/128 bytes 16777088 disc 0 op 8
+ok   unit L16m-req8m frame count frames 65 expected 65
+ok   unit L16m-req8m admitted: every sent frame kept, discarded +0, RESULT buffers 64/64 bytes 8388544 disc 0 op 8
+ok   unit L16m-after-64k frame count frames 1 expected 1
+ok   unit L16m-after-64k single-frame: no LargeMessage, RESULT lm 0 op 8
+     unit 8 MiB request kept at 1 MiB: 0 B (0.000 MiB) -> about one frame
+     unit 8 MiB request kept at 4 MiB: 0 B (0.000 MiB) -> about one frame
+     unit 8 MiB request kept at 16 MiB: 8388544 B (8.000 MiB) -> about 8 MiB
+UNIT ROW (derived): Refuted
+== cluster tier
+ok   k16 retained recomputed = run script 8389184 vs 8389184
+ok   k16 pool rise is all overflow (frame stashes); direct memory rises the same Size +8389184 Overflow +8389184 direct +8389184
+     k16: retained 8389184 B = 64.00 frame stashes of 131081 B; trace buffers kept 64 (879616201:n=64,toobig=false)
+     k16: knob in config dump 16MiB; LargeMessage sizes [8388673]; RequestDiscarded +0; responses: opcode=8 code=1 msg= ms=1792553142985
+ok   k4 retained recomputed = run script 0 vs 0
+ok   k4 pool rise is all overflow (frame stashes); direct memory rises the same Size +0 Overflow +0 direct +0
+     k4: retained 0 B = 0.00 frame stashes of 131081 B; trace buffers kept 0 (1039059326:n=0,toobig=true)
+     k4: knob in config dump 4MiB; LargeMessage sizes [8388673]; RequestDiscarded +1; responses: opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_4194304_bytes ms=179255324
+ok   k1 retained recomputed = run script 0 vs 0
+ok   k1 pool rise is all overflow (frame stashes); direct memory rises the same Size +0 Overflow +0 direct +0
+     k1: retained 0 B = 0.00 frame stashes of 131081 B; trace buffers kept 0 (600054164:n=0,toobig=true)
+     k1: knob in config dump 1MiB; LargeMessage sizes [8388673]; RequestDiscarded +1; responses: opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_1048576_bytes ms=179255334
+ok   kdef retained recomputed = run script 8389184 vs 8389184
+ok   kdef pool rise is all overflow (frame stashes); direct memory rises the same Size +8389184 Overflow +8389184 direct +8389184
+     kdef: retained 8389184 B = 64.00 frame stashes of 131081 B; trace buffers kept 64 (1526020259:n=64,toobig=false)
+     kdef: knob in config dump null; LargeMessage sizes [8388673]; RequestDiscarded +0; responses: opcode=8 code=1 msg= ms=1792553452155
+ok   ref retained recomputed = run script 16778368 vs 16778368
+ok   ref pool rise is all overflow (frame stashes); direct memory rises the same Size +16778368 Overflow +16778368 direct +16778368
+     ref: retained 16778368 B = 128.00 frame stashes of 131081 B; trace buffers kept 128 (854897471:n=64,toobig=false, 1132107397:n=64,toobig=false)
+     ref: knob in config dump 12MiB; LargeMessage sizes [8388673]; RequestDiscarded +0; responses: opcode=8 code=1 msg= ms=1792553551913 | opcode=8 code=1 msg= ms=1792553551983
+ok   ctl retained recomputed = run script 8651346 vs 8651346
+ok   ctl pool rise is all overflow (frame stashes); direct memory rises the same Size +8651346 Overflow +8651346 direct +8651346
+     ctl: retained 8651346 B = 66.00 frame stashes of 131081 B; trace buffers kept 64 (1550592546:n=64,toobig=false)
+     ctl: knob in config dump 12MiB; LargeMessage sizes [8388673]; RequestDiscarded +0; responses: opcode=8 code=1 msg= ms=1792553659932 | opcode=8 code=1 msg= ms=1792553660069
+ok   k4: refused by the check (toobig trace, discarded +1, oversized error, nothing kept) RESP conn=0 opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_4194304_bytes ms=1792553
+ok   k1: refused by the check (toobig trace, discarded +1, oversized error, nothing kept) RESP conn=0 opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_1048576_bytes ms=1792553
+ok   k16: every request admitted and answered RESULT, discarded +0 RESP conn=0 opcode=8 code=1 msg= ms=1792553142985
+ok   k16: retained = kept frame stashes (+ at most 8 paused stashes) 8389184 vs 64 x 131081
+ok   kdef: every request admitted and answered RESULT, discarded +0 RESP conn=0 opcode=8 code=1 msg= ms=1792553452155
+ok   kdef: retained = kept frame stashes (+ at most 8 paused stashes) 8389184 vs 64 x 131081
+ok   ref: every request admitted and answered RESULT, discarded +0 RESP conn=0 opcode=8 code=1 msg= ms=1792553551913 | RESP conn=1 opcode=8 code=1 msg= ms=1792553551983
+ok   ref: retained = kept frame stashes (+ at most 8 paused stashes) 16778368 vs 128 x 131081
+ok   ctl: every request admitted and answered RESULT, discarded +0 RESP conn=0 opcode=8 code=1 msg= ms=1792553659932 | RESP conn=1 opcode=8 code=1 msg= ms=1792553660069
+ok   ctl: retained = kept frame stashes (+ at most 8 paused stashes) 8651346 vs 64 x 131081
+ok   ctl: during the hold one request admitted, the other refused capacity (R1 binds) ['SUCCESS', 'INSUFFICIENT_GLOBAL']
+ok   ref: both requests admitted with no reserve failure 
+     bands {'k16': 'about 8 MiB', 'k4': 'about one frame', 'k1': 'about one frame'}; ref 16.001 MiB, ctl 8.251 MiB, control lowers: True
+ok   cluster row derived here = run script row Refuted vs Refuted 
+CLUSTER ROW (derived): Refuted
+checks ok 59 fail 0

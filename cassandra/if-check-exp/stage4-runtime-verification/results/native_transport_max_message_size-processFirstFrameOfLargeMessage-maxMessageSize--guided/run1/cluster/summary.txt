@@ -1,0 +1,173 @@
+cluster-run run1 2026-10-20 21:24:11 MDT host node2.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu clone cassandra-5.0.9 b5f2a54210d541339c2e7c17a794195cac0e67c2 labels ['k16', 'k4', 'k1', 'kdef', 'ref', 'ctl']
+harness md5 cluster-run.py=4d1d7138aa47 hold-client.py=b115701a5e51 drv.py=0ea74402ab55 nms.btm=efd80a0c2ec6 Jmx.java=d160dfae0cb9 make-node-yaml.sh=1a3bb346a837
+==== k16: knob 16777216, 1 connection(s), blob 8388608 B, hold 30 s
+[k16] yaml: # ---- stage4 nms lines ----;cluster_name: stage4-nms;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nms/data/commitlog;hints_directory: /users/jason92/stage4-nms/data/hints;saved_caches_directory: /users/jason92/stage4-nms/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nms/data/cdc_raw;auto_snapshot: false;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 128MiB;native_transport_max_message_size: 16MiB;
+EXPECTED: [k16] Submit -l lists the 6 rules of nms.btm (6) — yes
+[k16] jvm: -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nms/nms.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/nms/run1/cluster/k16/nms.trace -XX:NativeMemoryTracking=summary; max open files 100000
+EXPECTED: [k16] heap -Xms4G -Xmx4G — yes
+[k16] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[k16] config dump: native_transport_max_message_size=16MiB; native_transport_max_request_data_in_flight=256MiB; native_transport_max_request_data_in_flight_per_ip=256MiB; native_transport_receive_queue_capacity=128MiB; native_transport_throw_on_overload=false; max_mutation_size=null; native_transport_max_frame_size=16MiB
+EXPECTED: [k16] baseline samples with the connection(s) open and idle: 30 (>= 10) — yes
+[k16] baseline (median of 30): Size 8388608 UsedSize 0 OverflowSize 0 direct 58850861 direct count 199 RequestDiscarded 0
+[k16] at 5 s of the hold (sample ms 1792553117680, HELD+4816 ms): Size 16777792 UsedSize 8389184 OverflowSize 8389184 direct 67240045 count 263 RequestDiscarded 0
+READING [k16] retained (Size at 5 s - baseline) = 8389184 B = 8.001 MiB; OverflowSize +8389184; UsedSize +8389184; direct +8389184; max Size over the hold - baseline = 8389184; RssAnon +1679360; RequestDiscarded +0 by the end
+[k16] client: SEND conn=0 frames=65 env=8388673 body=8388664 ms=1792553112663
+[k16] client: SENT conn=0 frames=64 bytes=8389184 ms=1792553112688
+[k16] client: HELD sent=8389184 done=1 ms=1792553112864
+[k16] client: RESP conn=0 opcode=8 code=1 msg= ms=1792553142985
+[k16] client: FOLLOW resp=opcode=8,code=1,msg= ms=1792553142990
+[k16] client: CTL resp=opcode=8,code=1,msg= ms=1792553104529
+[k16] trace lines: {'lm': 1, 'acq': 1, 'frm': 65, 'ffl': 1, 'done': 1} (0 before the client)
+[k16] trace at 5 s of the hold, connection h=879616201: last frame seen toobig=false ovl=NONE buffers kept n=64 received before it 8257473 of size 8388673
+[k16] trace: lm h=879616201 size=8388673 limit=16777216 ms=1792553112680
+[k16] trace: acq h=879616201 bytes=8388664 out=SUCCESS ms=1792553112680
+[k16] trace: ffl h=879616201 ret=true ms=1792553112685
+[k16] trace: done h=879616201 toobig=false n=65 size=8388673 ms=1792553142899
+EXPECTED: [k16] config dump native_transport_max_message_size = 16777216 B (16MiB) — yes
+==== k4: knob 4194304, 1 connection(s), blob 8388608 B, hold 30 s
+[k4] yaml: # ---- stage4 nms lines ----;cluster_name: stage4-nms;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nms/data/commitlog;hints_directory: /users/jason92/stage4-nms/data/hints;saved_caches_directory: /users/jason92/stage4-nms/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nms/data/cdc_raw;auto_snapshot: false;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 128MiB;native_transport_max_message_size: 4MiB;
+EXPECTED: [k4] Submit -l lists the 6 rules of nms.btm (6) — yes
+[k4] jvm: -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nms/nms.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/nms/run1/cluster/k4/nms.trace -XX:NativeMemoryTracking=summary; max open files 100000
+EXPECTED: [k4] heap -Xms4G -Xmx4G — yes
+[k4] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[k4] config dump: native_transport_max_message_size=4MiB; native_transport_max_request_data_in_flight=256MiB; native_transport_max_request_data_in_flight_per_ip=256MiB; native_transport_receive_queue_capacity=128MiB; native_transport_throw_on_overload=false; max_mutation_size=null; native_transport_max_frame_size=16MiB
+EXPECTED: [k4] baseline samples with the connection(s) open and idle: 30 (>= 10) — yes
+[k4] baseline (median of 30): Size 8388608 UsedSize 0 OverflowSize 0 direct 58846217 direct count 198 RequestDiscarded 0
+[k4] at 5 s of the hold (sample ms 1792553218257, HELD+4876 ms): Size 8388608 UsedSize 0 OverflowSize 0 direct 58846217 count 198 RequestDiscarded 1
+READING [k4] retained (Size at 5 s - baseline) = 0 B = 0.000 MiB; OverflowSize +0; UsedSize +0; direct +0; max Size over the hold - baseline = 0; RssAnon +1777664; RequestDiscarded +1 by the end
+[k4] client: SEND conn=0 frames=65 env=8388673 body=8388664 ms=1792553213180
+[k4] client: SENT conn=0 frames=64 bytes=8389184 ms=1792553213201
+[k4] client: HELD sent=8389184 done=1 ms=1792553213381
+[k4] client: RESP conn=0 opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_4194304_bytes ms=1792553243418
+[k4] client: FOLLOW resp=opcode=8,code=1,msg= ms=1792553243429
+[k4] client: CTL resp=opcode=8,code=1,msg= ms=1792553205104
+[k4] trace lines: {'lm': 1, 'toobig': 1, 'frm': 65, 'ffl': 1, 'done': 1} (0 before the client)
+[k4] trace at 5 s of the hold, connection h=1039059326: last frame seen toobig=true ovl=NONE buffers kept n=0 received before it 8257473 of size 8388673
+[k4] trace: lm h=1039059326 size=8388673 limit=4194304 ms=1792553213192
+[k4] trace: toobig h=1039059326 size=8388673 ms=1792553213194
+[k4] trace: ffl h=1039059326 ret=true ms=1792553213199
+[k4] trace: done h=1039059326 toobig=true n=0 size=8388673 ms=1792553243415
+EXPECTED: [k4] config dump native_transport_max_message_size = 4194304 B (4MiB) — yes
+==== k1: knob 1048576, 1 connection(s), blob 8388608 B, hold 30 s
+[k1] yaml: # ---- stage4 nms lines ----;cluster_name: stage4-nms;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nms/data/commitlog;hints_directory: /users/jason92/stage4-nms/data/hints;saved_caches_directory: /users/jason92/stage4-nms/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nms/data/cdc_raw;auto_snapshot: false;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 128MiB;native_transport_max_message_size: 1MiB;
+EXPECTED: [k1] Submit -l lists the 6 rules of nms.btm (6) — yes
+[k1] jvm: -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nms/nms.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/nms/run1/cluster/k1/nms.trace -XX:NativeMemoryTracking=summary; max open files 100000
+EXPECTED: [k1] heap -Xms4G -Xmx4G — yes
+[k1] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[k1] config dump: native_transport_max_message_size=1MiB; native_transport_max_request_data_in_flight=256MiB; native_transport_max_request_data_in_flight_per_ip=256MiB; native_transport_receive_queue_capacity=128MiB; native_transport_throw_on_overload=false; max_mutation_size=null; native_transport_max_frame_size=16MiB
+EXPECTED: [k1] baseline samples with the connection(s) open and idle: 30 (>= 10) — yes
+[k1] baseline (median of 30): Size 8388608 UsedSize 0 OverflowSize 0 direct 58852336 direct count 200 RequestDiscarded 0
+[k1] at 5 s of the hold (sample ms 1792553322378, HELD+4837 ms): Size 8388608 UsedSize 0 OverflowSize 0 direct 58852336 count 200 RequestDiscarded 1
+READING [k1] retained (Size at 5 s - baseline) = 0 B = 0.000 MiB; OverflowSize +0; UsedSize +0; direct +0; max Size over the hold - baseline = 0; RssAnon +1245184; RequestDiscarded +1 by the end
+[k1] client: SEND conn=0 frames=65 env=8388673 body=8388664 ms=1792553317340
+[k1] client: SENT conn=0 frames=64 bytes=8389184 ms=1792553317361
+[k1] client: HELD sent=8389184 done=1 ms=1792553317541
+[k1] client: RESP conn=0 opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_1048576_bytes ms=1792553347578
+[k1] client: FOLLOW resp=opcode=8,code=1,msg= ms=1792553347589
+[k1] client: CTL resp=opcode=8,code=1,msg= ms=1792553309255
+[k1] trace lines: {'lm': 1, 'toobig': 1, 'frm': 65, 'ffl': 1, 'done': 1} (0 before the client)
+[k1] trace at 5 s of the hold, connection h=600054164: last frame seen toobig=true ovl=NONE buffers kept n=0 received before it 8257473 of size 8388673
+[k1] trace: lm h=600054164 size=8388673 limit=1048576 ms=1792553317352
+[k1] trace: toobig h=600054164 size=8388673 ms=1792553317354
+[k1] trace: ffl h=600054164 ret=true ms=1792553317359
+[k1] trace: done h=600054164 toobig=true n=0 size=8388673 ms=1792553347575
+EXPECTED: [k1] config dump native_transport_max_message_size = 1048576 B (1MiB) — yes
+==== kdef: knob unset, 1 connection(s), blob 8388608 B, hold 30 s
+[kdef] yaml: # ---- stage4 nms lines ----;cluster_name: stage4-nms;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nms/data/commitlog;hints_directory: /users/jason92/stage4-nms/data/hints;saved_caches_directory: /users/jason92/stage4-nms/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nms/data/cdc_raw;auto_snapshot: false;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 128MiB;
+EXPECTED: [kdef] Submit -l lists the 6 rules of nms.btm (6) — yes
+[kdef] jvm: -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nms/nms.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/nms/run1/cluster/kdef/nms.trace -XX:NativeMemoryTracking=summary; max open files 100000
+EXPECTED: [kdef] heap -Xms4G -Xmx4G — yes
+[kdef] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[kdef] config dump: native_transport_max_message_size=null; native_transport_max_request_data_in_flight=256MiB; native_transport_max_request_data_in_flight_per_ip=256MiB; native_transport_receive_queue_capacity=128MiB; native_transport_throw_on_overload=false; max_mutation_size=null; native_transport_max_frame_size=16MiB
+EXPECTED: [kdef] baseline samples with the connection(s) open and idle: 30 (>= 10) — yes
+[kdef] baseline (median of 30): Size 8388608 UsedSize 0 OverflowSize 0 direct 58854677 direct count 201 RequestDiscarded 0
+[kdef] at 5 s of the hold (sample ms 1792553426922, HELD+4888 ms): Size 16777792 UsedSize 8389184 OverflowSize 8389184 direct 67243861 count 265 RequestDiscarded 0
+READING [kdef] retained (Size at 5 s - baseline) = 8389184 B = 8.001 MiB; OverflowSize +8389184; UsedSize +8389184; direct +8389184; max Size over the hold - baseline = 8389184; RssAnon +1482752; RequestDiscarded +0 by the end
+[kdef] client: SEND conn=0 frames=65 env=8388673 body=8388664 ms=1792553421834
+[kdef] client: SENT conn=0 frames=64 bytes=8389184 ms=1792553421855
+[kdef] client: HELD sent=8389184 done=1 ms=1792553422034
+[kdef] client: RESP conn=0 opcode=8 code=1 msg= ms=1792553452155
+[kdef] client: FOLLOW resp=opcode=8,code=1,msg= ms=1792553452159
+[kdef] client: CTL resp=opcode=8,code=1,msg= ms=1792553413759
+[kdef] trace lines: {'lm': 1, 'acq': 1, 'frm': 65, 'ffl': 1, 'done': 1} (0 before the client)
+[kdef] trace at 5 s of the hold, connection h=1526020259: last frame seen toobig=false ovl=NONE buffers kept n=64 received before it 8257473 of size 8388673
+[kdef] trace: lm h=1526020259 size=8388673 limit=16777216 ms=1792553421846
+[kdef] trace: acq h=1526020259 bytes=8388664 out=SUCCESS ms=1792553421847
+[kdef] trace: ffl h=1526020259 ret=true ms=1792553421852
+[kdef] trace: done h=1526020259 toobig=false n=65 size=8388673 ms=1792553452070
+==== ref: knob 12582912, 2 connection(s), blob 8388608 B, hold 30 s
+[ref] yaml: # ---- stage4 nms lines ----;cluster_name: stage4-nms;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nms/data/commitlog;hints_directory: /users/jason92/stage4-nms/data/hints;saved_caches_directory: /users/jason92/stage4-nms/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nms/data/cdc_raw;auto_snapshot: false;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 128MiB;native_transport_max_message_size: 12MiB;
+EXPECTED: [ref] Submit -l lists the 6 rules of nms.btm (6) — yes
+[ref] jvm: -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nms/nms.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/nms/run1/cluster/ref/nms.trace -XX:NativeMemoryTracking=summary; max open files 100000
+EXPECTED: [ref] heap -Xms4G -Xmx4G — yes
+[ref] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[ref] config dump: native_transport_max_message_size=12MiB; native_transport_max_request_data_in_flight=256MiB; native_transport_max_request_data_in_flight_per_ip=256MiB; native_transport_receive_queue_capacity=128MiB; native_transport_throw_on_overload=false; max_mutation_size=null; native_transport_max_frame_size=16MiB
+EXPECTED: [ref] baseline samples with the connection(s) open and idle: 31 (>= 10) — yes
+[ref] baseline (median of 31): Size 8388608 UsedSize 0 OverflowSize 0 direct 58868818 direct count 202 RequestDiscarded 0
+[ref] at 5 s of the hold (sample ms 1792553526685, HELD+4893 ms): Size 25166976 UsedSize 16778368 OverflowSize 16778368 direct 75647186 count 330 RequestDiscarded 0
+READING [ref] retained (Size at 5 s - baseline) = 16778368 B = 16.001 MiB; OverflowSize +16778368; UsedSize +16778368; direct +16778368; max Size over the hold - baseline = 16778368; RssAnon +1777664; RequestDiscarded +0 by the end
+[ref] client: SEND conn=0 frames=65 env=8388673 body=8388664 ms=1792553521548
+[ref] client: SEND conn=1 frames=65 env=8388673 body=8388664 ms=1792553521591
+[ref] client: SENT conn=0 frames=64 bytes=8389184 ms=1792553521614
+[ref] client: SENT conn=1 frames=64 bytes=8389184 ms=1792553521614
+[ref] client: HELD sent=8389184/8389184 done=1/1 ms=1792553521792
+[ref] client: RESP conn=0 opcode=8 code=1 msg= ms=1792553551913
+[ref] client: RESP conn=1 opcode=8 code=1 msg= ms=1792553551983
+[ref] client: FOLLOW resp=opcode=8,code=1,msg= ms=1792553551987
+[ref] client: CTL resp=opcode=8,code=1,msg= ms=1792553513468
+[ref] trace lines: {'lm': 2, 'acq': 2, 'frm': 130, 'ffl': 2, 'done': 2} (0 before the client)
+[ref] trace at 5 s of the hold, connection h=854897471: last frame seen toobig=false ovl=NONE buffers kept n=64 received before it 8257473 of size 8388673
+[ref] trace at 5 s of the hold, connection h=1132107397: last frame seen toobig=false ovl=NONE buffers kept n=64 received before it 8257473 of size 8388673
+[ref] trace: lm h=854897471 size=8388673 limit=12582912 ms=1792553521605
+[ref] trace: lm h=1132107397 size=8388673 limit=12582912 ms=1792553521605
+[ref] trace: acq h=854897471 bytes=8388664 out=SUCCESS ms=1792553521605
+[ref] trace: acq h=1132107397 bytes=8388664 out=SUCCESS ms=1792553521605
+[ref] trace: ffl h=854897471 ret=true ms=1792553521610
+[ref] trace: ffl h=1132107397 ret=true ms=1792553521610
+[ref] trace: done h=854897471 toobig=false n=65 size=8388673 ms=1792553551827
+[ref] trace: done h=1132107397 toobig=false n=65 size=8388673 ms=1792553551914
+EXPECTED: [ref] config dump native_transport_max_message_size = 12582912 B (12MiB) — yes
+==== ctl: knob 12582912, 2 connection(s), blob 8388608 B, hold 30 s
+[ctl] yaml: # ---- stage4 nms lines ----;cluster_name: stage4-nms;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-nms/data/commitlog;hints_directory: /users/jason92/stage4-nms/data/hints;saved_caches_directory: /users/jason92/stage4-nms/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-nms/data/cdc_raw;auto_snapshot: false;native_transport_max_request_data_in_flight: 12MiB;native_transport_max_request_data_in_flight_per_ip: 12MiB;native_transport_receive_queue_capacity: 1MiB;native_transport_max_message_size: 12MiB;
+EXPECTED: [ctl] Submit -l lists the 6 rules of nms.btm (6) — yes
+[ctl] jvm: -Xms4G -Xmx4G -javaagent:bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/nms/nms.btm,listener:true -Dstage4.byteman.out=/users/jason92/stage4-logs/nms/run1/cluster/ctl/nms.trace -XX:NativeMemoryTracking=summary; max open files 100000
+EXPECTED: [ctl] heap -Xms4G -Xmx4G — yes
+[ctl] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[ctl] config dump: native_transport_max_message_size=12MiB; native_transport_max_request_data_in_flight=12MiB; native_transport_max_request_data_in_flight_per_ip=12MiB; native_transport_receive_queue_capacity=1MiB; native_transport_throw_on_overload=false; max_mutation_size=null; native_transport_max_frame_size=16MiB
+EXPECTED: [ctl] baseline samples with the connection(s) open and idle: 30 (>= 10) — yes
+[ctl] baseline (median of 30): Size 8388608 UsedSize 0 OverflowSize 0 direct 58867664 direct count 199 RequestDiscarded 0
+[ctl] at 5 s of the hold (sample ms 1792553634670, HELD+4866 ms): Size 17039954 UsedSize 8651346 OverflowSize 8651346 direct 67519010 count 265 RequestDiscarded 0
+READING [ctl] retained (Size at 5 s - baseline) = 8651346 B = 8.251 MiB; OverflowSize +8651346; UsedSize +8651346; direct +8651346; max Size over the hold - baseline = 8651346; RssAnon +2027520; RequestDiscarded +0 by the end
+[ctl] client: SEND conn=0 frames=65 env=8388673 body=8388664 ms=1792553626575
+[ctl] client: SEND conn=1 frames=65 env=8388673 body=8388664 ms=1792553626599
+[ctl] client: SENT conn=0 frames=64 bytes=8389184 ms=1792553626620
+[ctl] client: SENT conn=1 frames=64 bytes=8389184 ms=1792553659942
+[ctl] client: HELD sent=8389184/2621620 done=1/0 ms=1792553629804
+[ctl] client: RESP conn=0 opcode=8 code=1 msg= ms=1792553659932
+[ctl] client: RESP conn=1 opcode=8 code=1 msg= ms=1792553660069
+[ctl] client: FOLLOW resp=opcode=8,code=1,msg= ms=1792553660074
+[ctl] client: CTL resp=opcode=8,code=1,msg= ms=1792553618490
+[ctl] trace lines: {'lm': 3, 'acq': 3, 'ffl': 3, 'frm': 130, 'done': 2} (0 before the client)
+[ctl] trace at 5 s of the hold, connection h=1550592546: last frame seen toobig=false ovl=NONE buffers kept n=64 received before it 8257473 of size 8388673
+[ctl] trace: lm h=1550592546 size=8388673 limit=12582912 ms=1792553626612
+[ctl] trace: lm h=1966204072 size=8388673 limit=12582912 ms=1792553626612
+[ctl] trace: acq h=1550592546 bytes=8388664 out=SUCCESS ms=1792553626613
+[ctl] trace: acq h=1966204072 bytes=8388664 out=INSUFFICIENT_GLOBAL ms=1792553626613
+[ctl] trace: ffl h=1966204072 ret=false ms=1792553626616
+[ctl] trace: ffl h=1550592546 ret=true ms=1792553626617
+[ctl] trace: done h=1550592546 toobig=false n=65 size=8388673 ms=1792553659840
+[ctl] trace: lm h=1966204072 size=8388673 limit=12582912 ms=1792553659937
+[ctl] trace: acq h=1966204072 bytes=8388664 out=SUCCESS ms=1792553659937
+[ctl] trace: ffl h=1966204072 ret=true ms=1792553659938
+[ctl] trace: done h=1966204072 toobig=false n=65 size=8388673 ms=1792553660001
+EXPECTED: [ctl] config dump native_transport_max_message_size = 12582912 B (12MiB) — yes
+no CassandraDaemon left running
+---- 9a readings (R2: about 8 MiB = 6-10 MiB over the idle baseline; about one frame <= 1 MiB)
+SUMMARY k16: retained 8.001 MiB -> about 8 MiB; responses: opcode=8 code=1 msg= ms=1792553142985
+SUMMARY k4: retained 0.000 MiB -> about one frame; responses: opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_4194304_bytes ms=1792553243418
+SUMMARY k1: retained 0.000 MiB -> about one frame; responses: opcode=0 code=8704 msg=CQL_Message_of_size_8388664_bytes_exceeds_allowed_maximum_of_1048576_bytes ms=1792553347578
+SUMMARY kdef: retained 8.001 MiB -> about 8 MiB; responses: opcode=8 code=1 msg= ms=1792553452155
+SUMMARY ref: retained 16.001 MiB -> neither; responses: opcode=8 code=1 msg= ms=1792553551913 | opcode=8 code=1 msg= ms=1792553551983
+SUMMARY ctl: retained 8.251 MiB -> about 8 MiB; responses: opcode=8 code=1 msg= ms=1792553659932 | opcode=8 code=1 msg= ms=1792553660069
+control: ref 16.001 MiB, ctl 8.251 MiB -> control lowers retention: True
+ROW (computed by the run script; the AI judges it in the results file): Refuted (retained memory follows the knob, per request); per value {'k16': 'about 8 MiB', 'k4': 'about one frame', 'k1': 'about one frame'}
