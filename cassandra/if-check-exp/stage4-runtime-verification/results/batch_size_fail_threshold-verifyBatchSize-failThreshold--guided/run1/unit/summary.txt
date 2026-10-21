@@ -1,0 +1,49 @@
+unit-run 2026-10-20T20:09:55-06:00 host node0 clone cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 Alloc.java=80aee67442ca batch-alloc.btm=977546415c9d SendBatches.java=5b4e77f60499 BatchSizeAllocTest.java=c87920ad9a12 analyze.py=b2a12399d38c 
+TestScript: 10 rules type checked; TestScript: no errors
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[junit-timeout] INFO  [SecondaryIndexManagement:1] 2026-10-21T02:10:11,800 SubstituteLogger.java:222 - org.jboss.byteman.agent.Transformer : possible trigger for rule exe exception exit in class org.apache.cassandra.transport.messages.BatchMessage
+[junit-timeout] INFO  [SecondaryIndexManagement:1] 2026-10-21T02:10:11,805 SubstituteLogger.java:222 - org.jboss.byteman.agent.Transformer : inserted trigger for exe exception exit in class org.apache.cassandra.transport.messages.BatchMessage
+[junit-timeout] INFO  [Native-Transport-Requests-1] 2026-10-21T02:10:13,347 SubstituteLogger.java:222 - org.jboss.byteman.agent.Transformer : possible trigger for rule bst exception exit in class org.apache.cassandra.cql3.statements.BatchStatement
+[junit-timeout] INFO  [Native-Transport-Requests-1] 2026-10-21T02:10:13,353 SubstituteLogger.java:222 - org.jboss.byteman.agent.Transformer : inserted trigger for bst exception exit in class org.apache.cassandra.cql3.statements.BatchStatement
+STAGE4 check alloc-known-answer expected=[8388608,8454144] actual=8396728 ok
+STAGE4 info protocol=5/v5 heap_max=1056309248
+req lines: 220
+tier unit: 220 requests in 11 arms
+arm | n | outcomes | rej | size med | dec med (min..max) | exe med | bst med | total med (min..max) | total/nominal
+ctl16k | 20 | {'ok': 20} | 0 | 20864 | 43888 (43888..129176) | 591204 | 538032 | 635092 (634336..15786808) | 38.763
+t50k-b1m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 1053056 | 1076432 (1076432..1077296) | 1433240 | 1380072 | 2509672 (2505576..2783992) | 2.393
+t50k-b4m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 4198784 | 4221712 (4221712..4222160) | 4572408 | 4524200 | 8794136 (8794104..8797648) | 2.097
+t50k-b16m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 16781696 | 16804624 (16804624..16804624) | 17155344 | 17107152 | 33959968 (33959968..33961232) | 2.024
+t500k-b1m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 1053056 | 1075984 (1075984..1076016) | 1409492 | 1361264 | 2485476 (2485440..2495064) | 2.370
+t500k-b4m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 4198784 | 4221712 (4221712..4221712) | 4555168 | 4506976 | 8776880 (8776880..8780224) | 2.093
+t500k-b16m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 16781696 | 16804624 (16804624..16804624) | 17138112 | 17089920 | 33942736 (33940688..33942904) | 2.023
+t5120k-b1m | 20 | {'ok': 20} | 0 | 1053056 | 1075984 (1075984..1075984) | 1603408 | 1560520 | 2679392 (2666216..3729832) | 2.555
+t5120k-b4m | 20 | {'ok': 20} | 0 | 4198784 | 4221712 (4221712..4221712) | 5791796 | 5752872 | 10013508 (8950480..12114848) | 2.387
+t5120k-b16m | 20 | {'InvalidRequestException:Batch_too_large': 20} | 20 | 16781696 | 16804624 (16804624..16804624) | 17105328 | 17073008 | 33909952 (33909952..33925304) | 2.021
+C-msg512k-b16m | 20 | {'InvalidRequestException:CQL_Message_of_size_16779337_bytes_excee': 20} | 0 | -1 | -1 (-1..-1) | -1 | -1 | 0 (0..0) | 0.000
+EXPECTED: V1 every batch outside the control reached verifyBatchSize and was rejected (client "Batch too large" and rej line) iff dataSize > threshold — mismatches 0 — yes
+EXPECTED: V2 one dec, exe, bst, siz line per request outside the control — yes
+EXPECTED: V4 some batch exceeded the threshold (else Invalid run) — yes
+EXPECTED: V5 control ctl16k: every 16 KiB batch accepted — yes
+EXPECTED: P0 the rejected pairs of R5 were all rejected, and t5120k-b1m, t5120k-b4m all accepted — yes
+-- primary total = dec + exe (R7)
+EXPECTED: P1[total] 1 MiB: rejected medians across thresholds {'t50k-b1m': 2509672.0, 't500k-b1m': 2485476.0} differ by 1.0 % (< 10 %: "the same", R3) — yes
+EXPECTED: P1[total] 4 MiB: rejected medians across thresholds {'t50k-b4m': 8794136.0, 't500k-b4m': 8776880.0} differ by 0.2 % (< 10 %: "the same", R3) — yes
+EXPECTED: P1[total] 16 MiB: rejected medians across thresholds {'t50k-b16m': 33959968.0, 't500k-b16m': 33942736.0, 't5120k-b16m': 33909952.0} differ by 0.1 % (< 10 %: "the same", R3) — yes
+EXPECTED: P2[total] grows with batch size at 50 KiB: medians 1/4/16 MiB [2509672.0, 8794136.0, 33959968.0] (ratios 4/1 3.50, 16/4 3.86) — yes
+EXPECTED: P2[total] grows with batch size at 500 KiB: medians [2485476.0, 8776880.0, 33942736.0] — yes
+EXPECTED: R[total] "falls with the threshold" (R3): 16 MiB median at 50 KiB 33959968 more than 50 % below the median at 5 MiB 33909952? ratio 1.001 — expected NOT — yes
+EXPECTED: F[total] "flat in batch size": 16 MiB median within 10 % of 1 MiB at 50 KiB (33959968 vs 2509672) — expected NOT — yes
+INFO[total] accepted pairs at 5 MiB (R5, include the build and the hand-off): 1 MiB 2679392.0, 4 MiB 10013508.0; rejected at 50 KiB: 1 MiB 2509672.0, 4 MiB 8794136.0
+-- secondary bst (the filed 9d reading)
+EXPECTED: P1[bst] 1 MiB: rejected medians across thresholds {'t50k-b1m': 1380072.0, 't500k-b1m': 1361264.0} differ by 1.4 % (< 10 %: "the same", R3) — yes
+EXPECTED: P1[bst] 4 MiB: rejected medians across thresholds {'t50k-b4m': 4524200.0, 't500k-b4m': 4506976.0} differ by 0.4 % (< 10 %: "the same", R3) — yes
+EXPECTED: P1[bst] 16 MiB: rejected medians across thresholds {'t50k-b16m': 17107152.0, 't500k-b16m': 17089920.0, 't5120k-b16m': 17073008.0} differ by 0.2 % (< 10 %: "the same", R3) — yes
+EXPECTED: P2[bst] grows with batch size at 50 KiB: medians 1/4/16 MiB [1380072.0, 4524200.0, 17107152.0] (ratios 4/1 3.28, 16/4 3.78) — yes
+EXPECTED: P2[bst] grows with batch size at 500 KiB: medians [1361264.0, 4506976.0, 17089920.0] — yes
+EXPECTED: R[bst] "falls with the threshold" (R3): 16 MiB median at 50 KiB 17107152 more than 50 % below the median at 5 MiB 17073008? ratio 1.002 — expected NOT — yes
+EXPECTED: F[bst] "flat in batch size": 16 MiB median within 10 % of 1 MiB at 50 KiB (17107152 vs 1380072) — expected NOT — yes
+INFO[bst] accepted pairs at 5 MiB (R5, include the build and the hand-off): 1 MiB 1560520.0, 4 MiB 5752872.0; rejected at 50 KiB: 1 MiB 1380072.0, 4 MiB 4524200.0
+EXPECTED: C1 control: every 16 MiB batch discarded by the transport before the decode (no dec/exe/bst/siz line, a transport error) — outcomes {'ERR:InvalidRequestException:CQL_Message_of_size_16779337_bytes_exceeds_allowed_m'} — yes
+EXPECTED: C2 control cuts the allocation: median total 0 vs 33959968 without the control (below 50 %) — yes

@@ -1,0 +1,107 @@
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 22
+RULE dec exit
+CLASS org.apache.cassandra.transport.messages.BatchMessage$1
+METHOD decode(io.netty.buffer.ByteBuf, org.apache.cassandra.transport.ProtocolVersion)
+NOCOMPILE
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("dec", "")
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.messages.BatchMessage$1.decode(io.netty.buffer.ByteBuf,org.apache.cassandra.transport.ProtocolVersion) org.apache.cassandra.transport.messages.BatchMessage
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 38
+RULE exe exit
+CLASS org.apache.cassandra.transport.messages.BatchMessage
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.transport.Dispatcher$RequestTime, boolean)
+NOCOMPILE
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("exe", "resp=" + $!.getClass().getSimpleName())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.messages.BatchMessage.execute(org.apache.cassandra.service.QueryState,org.apache.cassandra.transport.Dispatcher$RequestTime,boolean) org.apache.cassandra.transport.Message$Response
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 30
+RULE exe entry
+CLASS org.apache.cassandra.transport.messages.BatchMessage
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.transport.Dispatcher$RequestTime, boolean)
+NOCOMPILE
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("exe")
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.messages.BatchMessage.execute(org.apache.cassandra.service.QueryState,org.apache.cassandra.transport.Dispatcher$RequestTime,boolean) org.apache.cassandra.transport.Message$Response
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 78
+RULE siz
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD verifyBatchSize
+NOCOMPILE
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.line("siz", "n=" + $1.size() + " size=" + org.apache.cassandra.db.IMutation.dataSize($1)
++ " fail=" + org.apache.cassandra.config.DatabaseDescriptor.getBatchSizeFailThreshold())
+ENDRULE
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 46
+RULE exe exception exit
+CLASS org.apache.cassandra.transport.messages.BatchMessage
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.transport.Dispatcher$RequestTime, boolean)
+NOCOMPILE
+AT EXCEPTION EXIT
+IF TRUE
+DO stage4.Alloc.end("exe", "resp=exception")
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.messages.BatchMessage.execute(org.apache.cassandra.service.QueryState,org.apache.cassandra.transport.Dispatcher$RequestTime,boolean) org.apache.cassandra.transport.Message$Response
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 87
+RULE rej
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD verifyBatchSize
+NOCOMPILE
+AT THROW
+IF TRUE
+DO stage4.Alloc.line("rej", "")
+ENDRULE
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 70
+RULE bst exception exit
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.BatchQueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+NOCOMPILE
+AT EXCEPTION EXIT
+IF TRUE
+DO stage4.Alloc.end("bst", "exc=true")
+ENDRULE
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 14
+RULE dec entry
+CLASS org.apache.cassandra.transport.messages.BatchMessage$1
+METHOD decode(io.netty.buffer.ByteBuf, org.apache.cassandra.transport.ProtocolVersion)
+NOCOMPILE
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("dec")
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.messages.BatchMessage$1.decode(io.netty.buffer.ByteBuf,org.apache.cassandra.transport.ProtocolVersion) org.apache.cassandra.transport.messages.BatchMessage
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 54
+RULE bst entry
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.BatchQueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+NOCOMPILE
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("bst")
+ENDRULE
+# File /users/jason92/stage4-harness-run/bsf/batch-alloc.btm line 62
+RULE bst exit
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.BatchQueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+NOCOMPILE
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("bst", "exc=false")
+ENDRULE
+

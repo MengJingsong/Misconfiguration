@@ -42,7 +42,7 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`memtable_heap_space`](cases/memtable_heap_space-tryAllocate-limit--autonomous.md) | autonomous | positive | [Confirmed](../stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit--autonomous.md) |
 | [`max_space_usable_for_compactions_in_percentage`](cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous.md) | autonomous | positive | [Confirmed](../stage4-runtime-verification/results/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--autonomous.md) |
 | [`concurrent_compactors`](cases/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md) | guided | negative | [**Refuted**](../stage4-runtime-verification/results/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md) |
-| [`batch_size_fail_threshold`](cases/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided.md) | guided | negative | [audited, not run](../stage4-runtime-verification/results/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided.md) |
+| [`batch_size_fail_threshold`](cases/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided.md) | guided | negative | [**Confirmed** — does not cap](../stage4-runtime-verification/results/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided.md) |
 | [`native_transport_max_message_size`](cases/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md) | guided | negative | [audited, not run](../stage4-runtime-verification/results/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md) |
 | [`native_transport_max_concurrent_connections`](cases/native_transport_max_concurrent_connections-channelActive-limit--guided.md) | guided | negative | [audited, not run](../stage4-runtime-verification/results/native_transport_max_concurrent_connections-channelActive-limit--guided.md) |
 | [`native_transport_queue_max_item_age_threshold`](cases/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided.md) | guided | negative | [audited, not run](../stage4-runtime-verification/results/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided.md) |
@@ -64,9 +64,9 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | of which negative estimates | 6 (5 guided, written up 2026-10-19 as the pilot of the `predicted-negative.md` write-up, and 1 autonomous) |
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
-| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **28** (24 guided positive, 4 autonomous), as of 2026-10-20 (`internode_max_message_size` · `inferMessageSize` closed 2026-10-20) |
+| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **29** (24 guided positive, 1 guided negative, 4 autonomous), as of 2026-10-20 (`internode_max_message_size` · `inferMessageSize` and `batch_size_fail_threshold` closed 2026-10-20; the latter Confirmed — does not cap: a rejected batch's coordinator allocation is about 2 × its bytes at every threshold) |
 | Stage 4 closed, estimate refuted | **1** — `concurrent_compactors` (negative estimate, **Refuted** 2026-10-20), results `../stage4-runtime-verification/results/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md`: peak extra disk follows `min(n, 8)` × one compaction's output; the estimate stays as filed |
-| Stage 4 not yet run | **8** (4 guided `rejected`, 4 autonomous: 3 positive, 1 negative); all 8 audited 2026-10-20 |
+| Stage 4 not yet run | **7** (3 guided `rejected`, 4 autonomous: 3 positive, 1 negative); all 7 audited 2026-10-20 |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first

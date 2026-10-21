@@ -134,6 +134,8 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 
 **2026-10-20:** `pc57` was the run node (32 cores, 251 GiB, about 47 GB free on `/`; Ubuntu 22.04, `5.15.0-187-generic`, JDK 11.0.32.1, Ant 1.10.12). A fresh clone `~/cassandra-run4` at `cassandra-5.0.9` (`b5f2a54210`) was built with `ant build-test` in 1 min 33 s; `~/cassandra-run1` holds untracked test files from earlier cases, so use a fresh clone per case. `pc50` answered over SSH with JDK 11 and a built `~/cassandra-run1` (55 GB free). `pc66` was not checked.
 
+**2026-10-20 (late):** a new experiment `node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, 55 GB free on `/`; Ubuntu 22.04.2, `5.15.0-187-generic`) came up with an empty home and no JDK. Sections 1 to 3 were run on it: JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9` (`b5f2a54210`), `ant build-test` successful in 1 min 55 s (logs `~/stage4-logs/{apt-install,clone,build-test}.log`). The session ran on that node directly (no ssh); the `batch_size_fail_threshold` case ran there.
+
 ## Logs
 
 Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:
