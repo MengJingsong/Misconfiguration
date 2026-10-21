@@ -10,8 +10,10 @@ other. The three entries this file held were the cheapest rows in the corpus,
 because the reading behind them was already done — all three have now been
 judged.
 
-**No row in this file is awaiting judgement.** One scheduled follow-up
-remains: the §2 re-audit, folded into the band-A pass.
+**No row in this file is awaiting judgement (again, 2026-10-21).** The
+five rows that the band-A1, A2 and B passes left here (§5–§7) were all
+settled on 2026-10-21; their outcomes are in the second table below. One
+scheduled follow-up remains: the §2 re-audit.
 
 | # | Entry | Pattern | Outcome, 2026-09-28 |
 |---|---|---|---|
@@ -19,6 +21,14 @@ remains: the §2 re-audit, folded into the band-A pass.
 | 2 | `column_index_cache_size` (§1c) | (b) | **Filed** — [`column_index_cache_size-indexSamples-cacheSizeThreshold.md`](cases/column_index_cache_size-indexSamples-cacheSizeThreshold--guided.md) |
 | 3 | `TrackedDataInputPlus_limit` (§1c) | (c) | **Refused, Rule 1** — `limit` is the row's own serialized length, read from the data being deserialized. See [`predicted-negative.md`](predicted-negative.md), batch 2026-09-28. |
 | 4 | The §2 re-audit | both | **Still scheduled** — rejections made under the old (a)-only assumption; run it inside the band-A pass, not separately. |
+
+| § | Row | Outcome, 2026-10-21 |
+|---|---|---|
+| 5.1 | `IndexSummaryRedistribution.java:341` (+ `:258`) | **Refused** (negative, soft target): selection inside the redistribution; the class has no line that enforces the `index_summary_capacity` total. [`predicted-negative.md`](predicted-negative.md) §9; case file to follow. |
+| 5.2 | `SystemKeyspace.java:1919` | **Second check site of `prepared_statements_cache_size`**, not a case: `preparedBytesLoadThreshold = PREPARED_STATEMENT_CACHE_SIZE_BYTES × 1.1` (`:1907`), the same constant that sizes the cache (`QueryProcessor.java:107`, `:115`). It stops the startup preload from paging further; residency is bounded by the cache's own weight cap either way, so it bounds startup work and transient garbage. The filed case is a frozen autonomous file; the site is recorded here and in `HANDOFF.md` for its next amendment. |
+| 5.3 | `ResourceLimits.java:138` / `:213` | **Cited, not a case** (the HANDOFF answer). Correction to the row: the production reserves are all `Concurrent` (`:138`); `Basic` (`:213`) is wake-up bookkeeping at `AbstractMessageHandler.java:736` and the test client. Notes added to the three net cases' §11. |
+| 6.1 | `Envelope.java:429` (+ `:441`) | **Accepted** (positive): `native_transport_max_frame_size`, a per-connection cap on bytes buffered before decode. No byte cap binds first: the pre-v5 in-flight limits are taken after decode (`PreV5Handlers.java:151`). [`predicted-positive.md`](predicted-positive.md) item 15. |
+| 7.1 | `ReplicaFilteringProtection.java:323` | **Accepted** (positive) on Jingsong's Rule 2 ruling (held rows of schema-fixed size count; README §3.5): `cached_rows_fail_threshold`. [`predicted-positive.md`](predicted-positive.md) item 14. |
 
 The per-entry sections below are kept as the reading record: they are what
 made items 1–3 cheap to resolve, and §3–§4 document stage 1's limits
@@ -269,7 +279,7 @@ comparison hides behind a helper such as `if (!pool.hasRoom())`, leaving the
 `HelperGuardedIfStatements.ql`. Stage 1's pattern-(a) input is therefore
 `NarrowedIfStatements.csv` **plus** `HelperGuardedIfStatements.csv`.
 
-## 5. Undecided rows from the band-A1 pass — 2026-09-28
+## 5. Undecided rows from the band-A1 pass — 2026-09-28 — *settled 2026-10-21*
 
 Three A1 rows that a single read did not settle. They are **not refused** —
 each needs one specific question answered, named below. Across all 65 A1
@@ -286,7 +296,7 @@ earlier passes and are counted in the bucket of that record (counts corrected
 
 **Joined by the band-B pass (2026-10-13):** `IndexSummaryRedistribution.java:258` (`remainingSpace > 0`: spend the leftover budget letting SSTables planned for downsampling keep their sampling level, via `distributeRemainingSpace()`, the method that holds `:341`) is another line of the same redistribution as item 1. It is not judged on its own; it is settled with item 1.
 
-## 6. Undecided row from the band-A2 pass — 2026-09-29
+## 6. Undecided row from the band-A2 pass — 2026-09-29 — *settled 2026-10-21*
 
 One A2 row that a single read did not settle. It is **not refused**. The other
 29 A2 rows were resolved: 21 to [`predicted-negative.md`](predicted-negative.md) (batch "band A2"),
@@ -298,7 +308,7 @@ One A2 row that a single read did not settle. It is **not refused**. The other
 
 **Joined by the band-B pass (2026-10-13):** `Envelope.java:441` (`readableBytes < totalLength`, return `null` and wait for more bytes) is the allow side of item 1, already cited above as `:441-442`. It is settled with item 1.
 
-## 7. Undecided row from the band-B pass — 2026-10-13
+## 7. Undecided row from the band-B pass — 2026-10-13 — *settled 2026-10-21*
 
 One band-B row that the rules as written do not settle. It is **not refused**. The other
 173 band-B units were resolved in [`predicted-negative.md`](predicted-negative.md) (batch "band B"), in

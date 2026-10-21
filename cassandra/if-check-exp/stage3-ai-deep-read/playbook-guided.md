@@ -141,9 +141,13 @@ rejections by these patterns).
   `DiskUsageMonitor`, `getAvailableSpace` and
   `hasDiskSpaceForCompactionsAndStreams`.
 - **A ring buffer bounds by eviction, not by withholding**, and a count cap on
-  entries of no fixed size fails Rule 2. A count cap on held rows of
-  table-bounded size needs a ruling (`cached_rows_fail_threshold`,
-  [`undetermined.md`](undetermined.md) §7).
+  entries of no fixed size fails Rule 2. A count cap on **held** rows of
+  table-bounded size passes it (ruled 2026-10-21, README §3.5:
+  `cached_rows_fail_threshold`).
+- **A pool target with no admission check is a soft target.** If new objects
+  are built at full size and a periodic job shrinks them toward the pool
+  (`index_summary_capacity`), no comparison withholds creation: the
+  constraint is real, but no single if-check qualifies.
 - **A retention cap passes Rule 3.** Keeping or freeing a buffer is an effect on
   what stays resident (`DOB_MAX_RECYCLE_BYTES`).
 - **A soft limit is a finding even when the line is rejected.** A flush or

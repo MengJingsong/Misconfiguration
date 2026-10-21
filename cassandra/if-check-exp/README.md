@@ -163,6 +163,13 @@ written/held on disk change as a direct consequence?
   (so total bytes = count × size). Example: `memtable_heap_space` bounds
   the bytes a `HeapPool` can hold; raising it lets more `ByteBuffer`s be
   allocated.
+  *Ruling 2026-10-21 (Jingsong):* a count of **held** objects whose size is
+  fixed per table by its schema (rows, cells) counts as a fixed/derivable
+  per-object footprint: a test can hold the row size constant and read
+  bytes = count × row size. First applied to `cached_rows_fail_threshold`
+  (`ReplicaFilteringProtection.java:323`). A count of items that are
+  **scanned** but not held (`tombstone_failure_threshold`), or of entries of
+  no bounded size, still fails Rule 2.
 - **Valid (disk)** — the limit is compared against on-disk bytes (available
   disk space, an SSTable/segment size cap, a total-on-disk-data ceiling) and
   directly gates whether an on-disk object (SSTable, commitlog segment,
