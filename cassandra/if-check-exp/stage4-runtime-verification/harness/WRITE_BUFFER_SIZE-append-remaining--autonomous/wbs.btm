@@ -1,0 +1,93 @@
+# Byteman observation rules for WRITE_BUFFER_SIZE-append-remaining--autonomous, cluster tier (B3d). They change no
+# behaviour. Every line goes to the file named by -Dstage4.trace (default wbs.trace). Loaded on node A only, at start:
+#   -javaagent:<byteman jar>=script:<this file>   (no listener; rules on Cassandra classes need no boot: entry)
+#
+#   created=<allocatedBuffers> size=<bufferSize> max=<MAX_ALLOCATED_BUFFERS> ms=<epoch> thread=<name>
+#       HintsBufferPool.createBuffer() exit: one line per 32 MiB direct slab the pool creates (from the
+#       MAX_HINT_BUFFERS harness's hints-pool.btm). The pool has no gauge; these lines are its usage counter.
+#   waiting ms=<epoch> thread=<name>
+#       a writer enters the pool's disallow branch, BlockingQueue.take in switchCurrentBuffer() (HintsBufferPool.java:118).
+#   app sz=<hint.remaining()> rem=<buffer.remaining()> cap=<buffer.capacity()> direct=<hint.isDirect()> ms=<epoch>
+#       HintsWriter.Session.append(ByteBuffer) entry (the production overload, HintsWriter.java:200): the entry's size
+#       and the 256 KiB write buffer's remaining bytes as the comparison at :205 sees them. sz > cap: the hint can never
+#       fit and is written straight to the channel (:219-220).
+#   wr sz=<bytes> buf=<true if the write buffer itself> ms=<epoch>
+#       HintsWriter.writeBuffer(ByteBuffer) entry (:157): one line per channel write; buf=true when the buffer's capacity is
+#       WRITE_BUFFER_SIZE (the shared write buffer), false for a hint written directly (a view of the 32 MiB slab).
+#   refuse ep=<endpoint> checked=<on-disk bytes the check read> limit=<maxHintsSize> ms=<epoch>
+#       StorageProxy.shouldHint(Replica, boolean) returned false with the per-host size check having run
+#       (StorageProxy.java:2488-2497); from the max_hints_size_per_host harness's should-hint.btm.
+#   flush host=<hostId> size=<file position> ms=<epoch>
+#       HintsWriter.Session.close() exit: a file's new length (the per-host operand moves here).
+
+RULE wbs pool creates a buffer
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("wbs", java.lang.System.getProperty("stage4.trace", "wbs.trace"));
+   traceln("wbs", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE wbs pool writer waits at the cap
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("wbs", java.lang.System.getProperty("stage4.trace", "wbs.trace"));
+   traceln("wbs", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE wbs session append entry
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD append(java.nio.ByteBuffer)
+AT ENTRY
+IF true
+DO traceOpen("wbs", java.lang.System.getProperty("stage4.trace", "wbs.trace"));
+   traceln("wbs", "app sz=" + $1.remaining() + " rem=" + $0.buffer.remaining() + " cap=" + $0.buffer.capacity() + " direct=" + $1.isDirect() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE wbs channel write
+CLASS org.apache.cassandra.hints.HintsWriter
+METHOD writeBuffer(java.nio.ByteBuffer)
+AT ENTRY
+IF true
+DO traceOpen("wbs", java.lang.System.getProperty("stage4.trace", "wbs.trace"));
+   traceln("wbs", "wr sz=" + $1.remaining() + " buf=" + ($1.capacity() == org.apache.cassandra.hints.HintsWriteExecutor.WRITE_BUFFER_SIZE) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE wbs decide clear
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AT ENTRY
+IF true
+DO unlink("wbs.T", java.lang.Thread.currentThread());
+   unlink("wbs.L", java.lang.Thread.currentThread())
+ENDRULE
+
+RULE wbs decide operand
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AFTER INVOKE org.apache.cassandra.hints.HintsService.getTotalHintsSize
+IF true
+DO link("wbs.T", java.lang.Thread.currentThread(), "" + $!);
+   link("wbs.L", java.lang.Thread.currentThread(), "" + $maxHintsSize)
+ENDRULE
+
+RULE wbs decide refuse
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AT EXIT
+IF !$! && linked("wbs.T", java.lang.Thread.currentThread()) != null
+DO traceOpen("wbs", java.lang.System.getProperty("stage4.trace", "wbs.trace"));
+   traceln("wbs", "refuse ep=" + $1.endpoint() + " checked=" + linked("wbs.T", java.lang.Thread.currentThread()) + " limit=" + linked("wbs.L", java.lang.Thread.currentThread()) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE wbs flush session close
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD close
+AT EXIT
+IF true
+DO traceOpen("wbs", java.lang.System.getProperty("stage4.trace", "wbs.trace"));
+   traceln("wbs", "flush host=" + $0.this$0.descriptor.hostId + " size=" + $0.position() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

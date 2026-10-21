@@ -127,4 +127,12 @@ Outcomes at limit: flush (no failure, no drop, no error). Bypass/overshoot: any 
 
 ## D. Stage-4 feedback
 
-`none yet`
+**2026-10-21 — run 1 closed: unit Confirmed, cluster Confirmed — does not cap** (the negative estimate held; no run 2). Results: [`results/WRITE_BUFFER_SIZE-append-remaining--autonomous.md`](../../stage4-runtime-verification/results/WRITE_BUFFER_SIZE-append-remaining--autonomous.md); harness `stage4-runtime-verification/harness/WRITE_BUFFER_SIZE-append-remaining--autonomous/`. Run on `pc07`, both nodes on loopback (environment deviation; the design is unchanged).
+
+- **Unit (B2g rows 1–2):** hints of 257 KiB–15 MiB written in full and read back. `append(Hint)` allocates `totalSize` + ≤ 638 B per append above the buffer and 56 B below it; `append(ByteBuffer)` allocates 0 B. With a 64 KiB buffer, 100 KiB moves from 56 B to 102,592 B.
+- **Cluster (B3g rows 1–2):** 2 GiB of hints reach disk at 100 KiB, 1 MiB and 8 MiB alike (1.0000–1.0007 × the values, 16–17 files of 128 MiB). Every entry above 256 KiB is written to the channel directly. Hint memory is 3 slabs (96.25 MiB) by default and 1 slab (32.25 MiB) with `MAX_HINT_BUFFERS=1`. Disk stops at 72/78 MiB only under `max_hints_size_per_host` 64 MiB, with every refusal's operand above it.
+- **Missed sub-prediction:** B3f's "writes still succeed at CL=ONE" in the limit arms held for 2,040 of 2,048 writes. The 8 timeouts per arm came during back-to-back memtable flushes (inferred), not from the limit.
+- **Defects in this file found by stage 4 (no B2f–B3g change):**
+  - B2h's positive-control size: 400 KiB + 12 B is below `capacity/2` = 512 KiB, so it cannot refuse. The harness added 600 KiB and the `capacity/2` boundary pair.
+  - B3e step 3 (and R2): `nodetool truncatehints` never deletes the file the writer has open (`HintsStore.java:167-181`). Each arm needs a restart of A before truncation; the cluster tier was rerun so.
+  - B3b item 3: `MAX_HINT_BUFFERS=1` can never recycle a buffer (`HintsBufferPool.java:79-80`, `:112-118`). After one slab (31 × 1 MiB hints) the hint writer waits forever, all 32 `MutationStage` threads stall, client writes time out and `stopdaemon` does not return. Its memory reading is still valid, but the arm is a stall, not a load at a lower cap.
