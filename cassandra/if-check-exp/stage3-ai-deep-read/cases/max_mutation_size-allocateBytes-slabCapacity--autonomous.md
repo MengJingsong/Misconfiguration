@@ -148,4 +148,20 @@ Each is a restart of node A.
 
 ## D. Stage-4 feedback
 
-`none yet`
+**2026-10-20, run 1 (`pc06`; nodes A and B on loopback on one host, an environment deviation from the audit's `pc57` + `pc50`). Unit Confirmed (B2g row 1); cluster Confirmed (B3g row 1, R1 row 1) — caps; no run 2.** Results: [`stage4-runtime-verification/results/max_mutation_size-allocateBytes-slabCapacity--autonomous.md`](../../stage4-runtime-verification/results/max_mutation_size-allocateBytes-slabCapacity--autonomous.md). B1, B2f and B3f stand. The sections above are not amended; these notes are for a later reader.
+
+- **Readings.**
+  - Unit: n = ⌊C/(h+12)⌋ exactly at C = 1, 4 and 32 MiB; direct +C and `Count` +1 per `create`; no growth on fill or `recycle`; `C/2 − 12` is the largest legal hint (115/115 checks).
+  - Cluster: hint-pool direct memory 64.2 MiB (2 × 32 MiB) at the default, 64.2 MiB at `max_mutation_size` 4096KiB (the floor), 128.2 MiB (2 × 64 MiB, a per-slab step of 1.996×) at 32768KiB, and 31.9 MiB (one slab) at `MAX_HINT_BUFFERS=1`. Each was flat across 200,000 hints and 0.4 GB of hint files.
+- **The first slab exists before any hint (A3, B3e step 2).** An idle node creates it about RING_DELAY after start, through `BatchlogManager` → `HintsService.flushAndFsyncBlockingly` → `HintsWriteExecutor$PartiallyFlushBufferPoolTask` → `HintsBufferPool.currentBuffer()`. A baseline "with no hints yet" therefore already contains one slab. This happens even with `hinted_handoff_enabled: false`. The literal delta after the first hint (32.2 MiB) is the second slab.
+- **Only 2 of the 3 default slabs were ever needed.** The flush kept up and recycled 12–13 slabs per lifetime, so B3f's 96 MiB bound is an upper bound that was not reached.
+- **`MAX_HINT_BUFFERS=1` deadlocks the hint path for good** (B3f bullet 4 said "writers briefly block while the flush completes"; refuted in that part).
+  - The single slab filled after 15,849 hints. The switching writer then parked in `reserveBuffers.take()` (`HintsBufferPool.java:118`) while holding the pool monitor, and the full slab is flushed only after `switchCurrentBuffer()` returns (`:79-80`). Nothing ever offered a slab back.
+  - Consequences: 31 more `MutationStage` threads blocked on the monitor; MutationStage showed 32 active and 41,483 pending; local writes stopped; `nodetool stopdaemon` hung.
+  - The guided `MAX_HINT_BUFFERS` case used n ≥ 2 throughout, which is why it never saw this. Worth a JIRA check as an upstream issue candidate (a property value of 1 makes a node stop writing).
+- **The 17 MiB write (B3f bullet 6, R2) never reaches `max_mutation_size`.** The CQL transport refuses it first.
+  - Under protocol 4: `native_transport_max_frame_size` (16 MiB, `Envelope.java:429`, "Request is too big").
+  - Under v5: `native_transport_max_message_size`, which defaults to min(`max_mutation_size`, heap/10, heap/40).
+  - R2's observable claims held (the write fails, no hint is written, no direct change); its naming of the guard did not. A test of that guard through CQL needs a value between `max_mutation_size` and the transport limit. The M4 arm had one by accident: its 8 MiB writes were refused by `Mutation.validateSize` ("Rejected an oversized mutation (8388664/4194304)"), and v4 frames are not checked against the 4 MiB `native_transport_max_message_size`.
+- **RSS "rises by about the same amount" (B3f bullet 5)** held within 25 % at the end of the 2 KiB phase in all four lifetimes. After the 8 MiB phase it missed in D-1 (96.6 vs 64.2 MiB) and M32 (199 vs 128 MiB); the cause was not traced.
+

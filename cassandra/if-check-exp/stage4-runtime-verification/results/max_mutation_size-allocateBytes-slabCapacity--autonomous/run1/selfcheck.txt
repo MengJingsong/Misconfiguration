@@ -1,0 +1,104 @@
+CHECK unit: harness checks all ok ok 115 checks, 0 mismatches
+CHECK unit: C=1MiB create: direct +C, Count +1 ok C=1MiB create direct_used 8193->1056769 count 2->3
+CHECK unit: C=1MiB h=100: n = floor(C/(h+12)) recomputed ok n=9362 mine=9362 sum=1048544 C=1048576 next=1048656
+CHECK unit: C=1MiB h=1024: n = floor(C/(h+12)) recomputed ok n=1012 mine=1012 sum=1048432 C=1048576 next=1049468
+CHECK unit: C=1MiB h=524276: n = floor(C/(h+12)) recomputed ok n=2 mine=2 sum=1048576 C=1048576 next=1572864
+CHECK unit: C=4MiB create: direct +C, Count +1 ok C=4MiB create direct_used 8193->4202497 count 2->3
+CHECK unit: C=4MiB h=100: n = floor(C/(h+12)) recomputed ok n=37449 mine=37449 sum=4194288 C=4194304 next=4194400
+CHECK unit: C=4MiB h=1024: n = floor(C/(h+12)) recomputed ok n=4048 mine=4048 sum=4193728 C=4194304 next=4194764
+CHECK unit: C=4MiB h=2097140: n = floor(C/(h+12)) recomputed ok n=2 mine=2 sum=4194304 C=4194304 next=6291456
+CHECK unit: C=32MiB create: direct +C, Count +1 ok C=32MiB create direct_used 8193->33562625 count 2->3
+CHECK unit: C=32MiB h=100: n = floor(C/(h+12)) recomputed ok n=299593 mine=299593 sum=33554416 C=33554432 next=33554528
+CHECK unit: C=32MiB h=1024: n = floor(C/(h+12)) recomputed ok n=32388 mine=32388 sum=33553968 C=33554432 next=33555004
+CHECK unit: C=32MiB h=16777204: n = floor(C/(h+12)) recomputed ok n=2 mine=2 sum=33554432 C=33554432 next=50331648
+CHECK unit: 9 fill cases parsed ok 9
+CHECK unit: TEST-org.apache.cassandra.hints.HintsBufferPoolTest.xml tests/failures/errors ok tests=1 failures=0 errors=0
+CHECK unit: TEST-org.apache.cassandra.hints.HintsBufferTest.xml tests/failures/errors ok tests=2 failures=0 errors=0
+CHECK unit: TEST-org.apache.cassandra.hints.SlabCapacityProbeTest.xml tests/failures/errors ok tests=1 failures=0 errors=0
+lifetimes: ['B1-1', 'D-1', 'D-2', 'M32-1', 'M4-1', 'OFF-1']
+CHECK B1-1: own end delta agrees with the run script (direct, rss, hints) ok mine direct +385576 hints +15849; printed {}
+CHECK B1-1: B down for the whole workload (alive samples after the bulk start) ok 0
+CHECK B1-1: one slab, made before the bulk start, none after ok 1 (1 pre), max [1]
+CHECK B1-1: one writer at take() (waiting line), no slab ever offered back ok waiting 1, offer 0
+CHECK B1-1: TotalHints stopped (15849) for the rest of the lifetime ok flat for 656 s
+CHECK B1-1: thread dump: 1 thread in take() inside switchCurrentBuffer, the others blocked on the pool, HintsWriteExecutor idle ok in take 1, waiting to lock 31, executor idle True, MutationStage active/pending/completed ('32', '41483', '16758')
+CHECK D-1: own end delta agrees with the run script (direct, rss, hints) ok mine direct +34295916 hints +200004; printed {'direct': 34295916, 'rss': 221097984, 'hints': 200004}
+CHECK D-1: B down for the whole workload (alive samples after the bulk start) ok 0
+CHECK D-1: bulk all acknowledged ok 200000/200000
+CHECK D-1: slab allocations in the direct trace = created lines ok 2 vs 2
+CHECK D-1: hints written >= bulk n ok 200004
+CHECK D-1: every slab has the predicted size and max ok sizes [33554432] max [3]
+CHECK D-1: slab count <= MAX_HINT_BUFFERS ok 2 (1 before the bulk start)
+CHECK D-1: line 190 true branch: every closed line prev + total > cap = slab ok 55 lines, 0 bad, 13 fills
+CHECK D-2: own end delta agrees with the run script (direct, rss, hints) ok mine direct +34286875 hints +200004; printed {'direct': 34286875, 'rss': 191475712, 'hints': 200004}
+CHECK D-2: B down for the whole workload (alive samples after the bulk start) ok 0
+CHECK D-2: bulk all acknowledged ok 200000/200000
+CHECK D-2: slab allocations in the direct trace = created lines ok 2 vs 2
+CHECK D-2: hints written >= bulk n ok 200004
+CHECK D-2: every slab has the predicted size and max ok sizes [33554432] max [3]
+CHECK D-2: slab count <= MAX_HINT_BUFFERS ok 2 (1 before the bulk start)
+CHECK D-2: line 190 true branch: every closed line prev + total > cap = slab ok 70 lines, 0 bad, 13 fills
+CHECK M32-1: own end delta agrees with the run script (direct, rss, hints) ok mine direct +67843827 hints +200004; printed {'direct': 67843827, 'rss': 295071744, 'hints': 200004}
+CHECK M32-1: B down for the whole workload (alive samples after the bulk start) ok 0
+CHECK M32-1: bulk all acknowledged ok 200000/200000
+CHECK M32-1: slab allocations in the direct trace = created lines ok 2 vs 2
+CHECK M32-1: hints written >= bulk n ok 200004
+CHECK M32-1: every slab has the predicted size and max ok sizes [67108864] max [3]
+CHECK M32-1: slab count <= MAX_HINT_BUFFERS ok 2 (1 before the bulk start)
+CHECK M32-1: line 190 true branch: every closed line prev + total > cap = slab ok 62 lines, 0 bad, 6 fills
+CHECK M4-1: own end delta agrees with the run script (direct, rss, hints) ok mine direct +34230608 hints +200000; printed {'direct': 34263549, 'rss': 191549440, 'hints': 200000}
+CHECK M4-1: B down for the whole workload (alive samples after the bulk start) ok 0
+CHECK M4-1: bulk all acknowledged ok 200000/200000
+CHECK M4-1: slab allocations in the direct trace = created lines ok 2 vs 2
+CHECK M4-1: hints written >= bulk n ok 200000
+CHECK M4-1: every slab has the predicted size and max ok sizes [33554432] max [3]
+CHECK M4-1: slab count <= MAX_HINT_BUFFERS ok 2 (1 before the bulk start)
+CHECK M4-1: line 190 true branch: every closed line prev + total > cap = slab ok 66 lines, 0 bad, 12 fills
+CHECK OFF-1: own end delta agrees with the run script (direct, rss, hints) ok mine direct +499671 hints +0; printed {'direct': 499671, 'rss': 153399296, 'hints': 0}
+CHECK OFF-1: B down for the whole workload (alive samples after the bulk start) ok 0
+CHECK OFF-1: bulk all acknowledged ok 200000/200000
+CHECK OFF-1: slab allocations in the direct trace = created lines ok 1 vs 1
+CHECK OFF-1: control: no slab after the bulk start, TotalHints +0 ok post 0, pre 1, hints +0
+
+lifetime | slabs (pre) | literal arm-OFF MiB | pool (incl. pre) MiB | peak MiB | RSS arm-OFF+pre MiB | hints | lat mean/p99 ms | slow hints n/max us | waiting | fills | 17 MiB
+B1-1 | 1 (1) | -0.11 | 31.89 | 31.91 | -2.07 | 15849 | None/None | 22/7441 | 1 | - | not reached
+D-1 | 2 (1) | 32.23 | 64.23 | 64.23 | 96.56 | 200004 | 3.367/10.486 | 80/46621 | 0 | 13 | native frame limit (Request is too big)
+D-2 | 2 (1) | 32.22 | 64.22 | 64.22 | 68.31 | 200004 | 4.412/13.562 | 85/51800 | 0 | 13 | native frame limit (Request is too big)
+M32-1 | 2 (1) | 64.22 | 128.22 | 128.22 | 199.11 | 200004 | 3.786/11.745 | 75/87591 | 0 | 6 | native frame limit (Request is too big)
+M4-1 | 2 (1) | 32.17 | 64.17 | 64.17 | 68.26 | 200000 | 3.667/10.931 | 76/45886 | 0 | 12 | native frame limit (Request is too big)
+OFF-1 | 1 (1) | control: direct +0.48, peak +0.48, rss +146.29 | | | | 0 | 4.151/10.895 | 0/0 | 0 | | err: InvalidRequest: Error from server: code=2200 [Invalid query]
+
+CHECK B1-1: pool direct in [slab - B, kmax x slab + B] (B3f) ok 31.89 MiB
+CHECK B1-1: peak <= kmax x slab + B (B3g row 2 excluded) ok 31.91 MiB
+CHECK B1-1: pool = slabs x slab within B (no growth past the slabs) ok 31.89 vs 32 MiB
+NOTE B1-1: RSS (arm - OFF + pre) -2.07 MiB at the stall (not comparable: the workload never finished)
+CHECK D-1: pool direct in [slab - B, kmax x slab + B] (B3f) ok 64.23 MiB
+CHECK D-1: peak <= kmax x slab + B (B3g row 2 excluded) ok 64.23 MiB
+CHECK D-1: pool = slabs x slab within B (no growth past the slabs) ok 64.23 vs 64 MiB
+CHECK D-1: RSS within 25 % of the pool direct (B3f bullet 5) FAIL rss 96.56 vs 64.23 MiB
+CHECK D-1: 17 MiB write refused, no hint (R2: write fails, no hint) ok native frame limit (Request is too big)
+CHECK D-2: pool direct in [slab - B, kmax x slab + B] (B3f) ok 64.22 MiB
+CHECK D-2: peak <= kmax x slab + B (B3g row 2 excluded) ok 64.22 MiB
+CHECK D-2: pool = slabs x slab within B (no growth past the slabs) ok 64.22 vs 64 MiB
+CHECK D-2: RSS within 25 % of the pool direct (B3f bullet 5) ok rss 68.31 vs 64.22 MiB
+CHECK D-2: 17 MiB write refused, no hint (R2: write fails, no hint) ok native frame limit (Request is too big)
+CHECK M32-1: pool direct in [slab - B, kmax x slab + B] (B3f) ok 128.22 MiB
+CHECK M32-1: peak <= kmax x slab + B (B3g row 2 excluded) ok 128.22 MiB
+CHECK M32-1: pool = slabs x slab within B (no growth past the slabs) ok 128.22 vs 128 MiB
+CHECK M32-1: RSS within 25 % of the pool direct (B3f bullet 5) FAIL rss 199.11 vs 128.22 MiB
+CHECK M4-1: pool direct in [slab - B, kmax x slab + B] (B3f) ok 64.17 MiB
+CHECK M4-1: peak <= kmax x slab + B (B3g row 2 excluded) ok 64.17 MiB
+CHECK M4-1: pool = slabs x slab within B (no growth past the slabs) ok 64.17 vs 64 MiB
+CHECK M4-1: RSS within 25 % of the pool direct (B3f bullet 5) ok rss 68.26 vs 64.17 MiB
+CHECK M4-1: 17 MiB write refused, no hint (R2: write fails, no hint) ok native frame limit (Request is too big)
+CHECK B1-1: one slab (R1 row 1) ok 1, 31.89 MiB
+CHECK B1-1: writers waited at take() ok 1
+CHECK B1-1: hint write latency rises (slow writes n and max above every default run) FAIL B1 22/7441 vs D [(80, 46621), (85, 51800)]
+CHECK B1-1: differs from default by more than B (R1 row 2 excluded) ok 31.89 vs [64.23, 64.22]
+CHECK M32-1: one-slab step doubles (B3f bullet 3) ok ratio 1.996
+CHECK M32-1: pool in [64, 192] MiB +- B (B3g row 4 excluded) ok 128.22
+CHECK M4-1: same as default (B3f bullet 2, B3g row 3 excluded) ok 64.17 in [56.22, 72.23]
+CHECK M4-1: 8 MiB writes (recorded): outcome ok ['err InvalidRequest: Error from server: code=2200 [Invalid query] message="']
+default repeat spread: 0.01 MiB
+
+SELFCHECK ok 87 fail 3

@@ -1,0 +1,82 @@
+# Byteman rules, cluster tier (B3d) of max_mutation_size-allocateBytes-slabCapacity--autonomous. Observation only:
+# no rule changes behaviour. Loaded on node A at start with
+#   -javaagent:<byteman.jar>=boot:<byteman.jar>,script:<this file>,listener:true -Dstage4.trace=<file>
+# (boot: because the last rule is on java.nio.ByteBuffer). One file, one line per event:
+#
+#   created n=<allocatedBuffers> size=<bufferSize> max=<MAX_ALLOCATED_BUFFERS> ms=<epoch ms> thread=<name>
+#       HintsBufferPool.createBuffer() exit (HintsBufferPool.java:130-134): a new slab (from the MAX_HINT_BUFFERS harness)
+#   closed prev=<prev> total=<totalSize> cap=<slab.capacity()> ms=<epoch ms> thread=<name>
+#       HintsBuffer.allocateBytes(), the true branch of the check under test (HintsBuffer.java:190), at the
+#       position.set(Long.MIN_VALUE) call: prev + total > cap (the operand and the constraint)
+#   waiting ms=<epoch ms> thread=<name>
+#       HintsBufferPool.switchCurrentBuffer() at reserveBuffers.take() (line 118): a writer blocks, all slabs in flight
+#   offer ms=<epoch ms>
+#       HintsBufferPool.offer(): a flushed, recycled slab returns to the reserve queue
+#   slowhint us=<micros> thread=<name>
+#       HintsBufferPool.write() took >= 5 ms (the hint write latency of R1's row)
+#   direct size=<bytes> ms=<epoch ms> thread=<name> at=<the allocating stack>
+#       every ByteBuffer.allocateDirect(int) of >= 1 MiB in the JVM (attribution of the direct pool's rises)
+
+RULE mss slab created
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("mss", java.lang.System.getProperty("stage4.trace", "mss.trace"));
+   traceln("mss", "created n=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE mss slab closed at capacity
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD allocateBytes
+AT INVOKE java.util.concurrent.atomic.AtomicLong.set
+IF true
+DO traceOpen("mss", java.lang.System.getProperty("stage4.trace", "mss.trace"));
+   traceln("mss", "closed prev=" + $prev + " total=" + $totalSize + " cap=" + $0.slab.capacity() + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE mss writer waits
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("mss", java.lang.System.getProperty("stage4.trace", "mss.trace"));
+   traceln("mss", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE mss slab offered back
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD offer
+AT ENTRY
+IF true
+DO traceOpen("mss", java.lang.System.getProperty("stage4.trace", "mss.trace"));
+   traceln("mss", "offer ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mss hint write start
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD write
+AT ENTRY
+IF true
+DO link("mssT", java.lang.Thread.currentThread(), java.lang.Long.valueOf(java.lang.System.nanoTime()))
+ENDRULE
+
+RULE mss hint write end
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD write
+AT EXIT
+BIND t0:java.lang.Long = unlink("mssT", java.lang.Thread.currentThread());
+     us:long = (java.lang.System.nanoTime() - t0.longValue()) / 1000
+IF us >= 5000
+DO traceOpen("mss", java.lang.System.getProperty("stage4.trace", "mss.trace"));
+   traceln("mss", "slowhint us=" + us + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE mss direct allocation of 1 MiB or more
+CLASS java.nio.ByteBuffer
+METHOD allocateDirect(int)
+AT ENTRY
+IF $1 >= 1048576
+DO traceOpen("mss", java.lang.System.getProperty("stage4.trace", "mss.trace"));
+   traceln("mss", "direct size=" + $1 + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName() + " at=" + java.util.Arrays.toString(java.lang.Thread.currentThread().getStackTrace()))
+ENDRULE

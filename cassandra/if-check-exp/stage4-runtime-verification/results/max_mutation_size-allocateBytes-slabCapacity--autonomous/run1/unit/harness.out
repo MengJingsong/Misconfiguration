@@ -1,0 +1,133 @@
+STAGE4 start java=11.0.32.1 maxMemory=1056309248 ENTRY_OVERHEAD_SIZE=12
+STAGE4 case C=1MiB create direct_used 8193->1056769 count 2->3
+STAGE4 check C=1MiB create: direct MemoryUsed +C ok delta=1048576 C=1048576
+STAGE4 check C=1MiB create: direct Count +1 ok delta=1
+STAGE4 check C=1MiB capacity()==C ok capacity=1048576
+STAGE4 check C=1MiB fresh: remaining()==C and open ok remaining=1048576
+STAGE4 case C=1MiB h=100 n=9362 expected_n=9362 sum=1048544 C=1048576 remaining_after=0 closed=true
+STAGE4 check C=1MiB h=100 null at n+1, n=floor(C/(h+12)) ok n=9362 expected=9362
+STAGE4 check C=1MiB h=100 accepted sum <= C ok sum=1048544 C=1048576 C-sum=32
+STAGE4 check C=1MiB h=100 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=1MiB h=100 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=1MiB h=100 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=1MiB h=100 no direct growth while filling and after close ok used 1056769/1056769/1056769 count 3/3/3
+STAGE4 check C=1MiB h=100 recycle: capacity C, remaining C, open ok capacity=1048576 remaining=1048576 closed=false
+STAGE4 check C=1MiB h=100 recycle: same n accepted again ok n=9362 sum=1048544
+STAGE4 check C=1MiB h=100 recycle: no direct growth ok used 1056769/1056769 count 3/3
+STAGE4 case C=1MiB h=1024 n=1012 expected_n=1012 sum=1048432 C=1048576 remaining_after=0 closed=true
+STAGE4 check C=1MiB h=1024 null at n+1, n=floor(C/(h+12)) ok n=1012 expected=1012
+STAGE4 check C=1MiB h=1024 accepted sum <= C ok sum=1048432 C=1048576 C-sum=144
+STAGE4 check C=1MiB h=1024 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=1MiB h=1024 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=1MiB h=1024 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=1MiB h=1024 no direct growth while filling and after close ok used 1056769/1056769/1056769 count 3/3/3
+STAGE4 check C=1MiB h=1024 recycle: capacity C, remaining C, open ok capacity=1048576 remaining=1048576 closed=false
+STAGE4 check C=1MiB h=1024 recycle: same n accepted again ok n=1012 sum=1048432
+STAGE4 check C=1MiB h=1024 recycle: no direct growth ok used 1056769/1056769 count 3/3
+STAGE4 case C=1MiB h=524276 n=2 expected_n=2 sum=1048576 C=1048576 remaining_after=0 closed=true
+STAGE4 check C=1MiB h=524276 null at n+1, n=floor(C/(h+12)) ok n=2 expected=2
+STAGE4 check C=1MiB h=524276 accepted sum <= C ok sum=1048576 C=1048576 C-sum=0
+STAGE4 check C=1MiB h=524276 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=1MiB h=524276 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=1MiB h=524276 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=1MiB h=524276 no direct growth while filling and after close ok used 1056769/1056769/1056769 count 3/3/3
+STAGE4 check C=1MiB h=524276 recycle: capacity C, remaining C, open ok capacity=1048576 remaining=1048576 closed=false
+STAGE4 check C=1MiB h=524276 recycle: same n accepted again ok n=2 sum=1048576
+STAGE4 check C=1MiB h=524276 recycle: no direct growth ok used 1056769/1056769 count 3/3
+STAGE4 check C=1MiB allocate(C/2-12) accepted on an empty slab ok accepted=true remaining=524288
+STAGE4 check C=1MiB allocate(C/2-11) throws IllegalArgumentException ok threw=true
+STAGE4 check C=1MiB allocate(C/2) throws IllegalArgumentException ok threw=true
+STAGE4 check C=1MiB a refused oversize hint leaves the slab untouched ok remaining=1048576 closed=false
+STAGE4 check C=1MiB end of C: direct pool still +C over the pre-create baseline ok used delta=1048576 count delta=1
+STAGE4 case C=1MiB free direct_used 1056769->8193 count 3->2
+STAGE4 check C=1MiB free (extra): direct MemoryUsed -C, Count -1 ok used delta=-1048576 count delta=-1
+STAGE4 case C=4MiB create direct_used 8193->4202497 count 2->3
+STAGE4 check C=4MiB create: direct MemoryUsed +C ok delta=4194304 C=4194304
+STAGE4 check C=4MiB create: direct Count +1 ok delta=1
+STAGE4 check C=4MiB capacity()==C ok capacity=4194304
+STAGE4 check C=4MiB fresh: remaining()==C and open ok remaining=4194304
+STAGE4 case C=4MiB h=100 n=37449 expected_n=37449 sum=4194288 C=4194304 remaining_after=0 closed=true
+STAGE4 check C=4MiB h=100 null at n+1, n=floor(C/(h+12)) ok n=37449 expected=37449
+STAGE4 check C=4MiB h=100 accepted sum <= C ok sum=4194288 C=4194304 C-sum=16
+STAGE4 check C=4MiB h=100 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=4MiB h=100 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=4MiB h=100 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=4MiB h=100 no direct growth while filling and after close ok used 4202497/4202497/4202497 count 3/3/3
+STAGE4 check C=4MiB h=100 recycle: capacity C, remaining C, open ok capacity=4194304 remaining=4194304 closed=false
+STAGE4 check C=4MiB h=100 recycle: same n accepted again ok n=37449 sum=4194288
+STAGE4 check C=4MiB h=100 recycle: no direct growth ok used 4202497/4202497 count 3/3
+STAGE4 case C=4MiB h=1024 n=4048 expected_n=4048 sum=4193728 C=4194304 remaining_after=0 closed=true
+STAGE4 check C=4MiB h=1024 null at n+1, n=floor(C/(h+12)) ok n=4048 expected=4048
+STAGE4 check C=4MiB h=1024 accepted sum <= C ok sum=4193728 C=4194304 C-sum=576
+STAGE4 check C=4MiB h=1024 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=4MiB h=1024 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=4MiB h=1024 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=4MiB h=1024 no direct growth while filling and after close ok used 4202497/4202497/4202497 count 3/3/3
+STAGE4 check C=4MiB h=1024 recycle: capacity C, remaining C, open ok capacity=4194304 remaining=4194304 closed=false
+STAGE4 check C=4MiB h=1024 recycle: same n accepted again ok n=4048 sum=4193728
+STAGE4 check C=4MiB h=1024 recycle: no direct growth ok used 4202497/4202497 count 3/3
+STAGE4 case C=4MiB h=2097140 n=2 expected_n=2 sum=4194304 C=4194304 remaining_after=0 closed=true
+STAGE4 check C=4MiB h=2097140 null at n+1, n=floor(C/(h+12)) ok n=2 expected=2
+STAGE4 check C=4MiB h=2097140 accepted sum <= C ok sum=4194304 C=4194304 C-sum=0
+STAGE4 check C=4MiB h=2097140 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=4MiB h=2097140 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=4MiB h=2097140 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=4MiB h=2097140 no direct growth while filling and after close ok used 4202497/4202497/4202497 count 3/3/3
+STAGE4 check C=4MiB h=2097140 recycle: capacity C, remaining C, open ok capacity=4194304 remaining=4194304 closed=false
+STAGE4 check C=4MiB h=2097140 recycle: same n accepted again ok n=2 sum=4194304
+STAGE4 check C=4MiB h=2097140 recycle: no direct growth ok used 4202497/4202497 count 3/3
+STAGE4 check C=4MiB allocate(C/2-12) accepted on an empty slab ok accepted=true remaining=2097152
+STAGE4 check C=4MiB allocate(C/2-11) throws IllegalArgumentException ok threw=true
+STAGE4 check C=4MiB allocate(C/2) throws IllegalArgumentException ok threw=true
+STAGE4 check C=4MiB a refused oversize hint leaves the slab untouched ok remaining=4194304 closed=false
+STAGE4 check C=4MiB end of C: direct pool still +C over the pre-create baseline ok used delta=4194304 count delta=1
+STAGE4 case C=4MiB free direct_used 4202497->8193 count 3->2
+STAGE4 check C=4MiB free (extra): direct MemoryUsed -C, Count -1 ok used delta=-4194304 count delta=-1
+STAGE4 case C=32MiB create direct_used 8193->33562625 count 2->3
+STAGE4 check C=32MiB create: direct MemoryUsed +C ok delta=33554432 C=33554432
+STAGE4 check C=32MiB create: direct Count +1 ok delta=1
+STAGE4 check C=32MiB capacity()==C ok capacity=33554432
+STAGE4 check C=32MiB fresh: remaining()==C and open ok remaining=33554432
+STAGE4 case C=32MiB h=100 n=299593 expected_n=299593 sum=33554416 C=33554432 remaining_after=0 closed=true
+STAGE4 check C=32MiB h=100 null at n+1, n=floor(C/(h+12)) ok n=299593 expected=299593
+STAGE4 check C=32MiB h=100 accepted sum <= C ok sum=33554416 C=33554432 C-sum=16
+STAGE4 check C=32MiB h=100 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=32MiB h=100 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=32MiB h=100 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=32MiB h=100 no direct growth while filling and after close ok used 33562625/33562625/33562625 count 3/3/3
+STAGE4 check C=32MiB h=100 recycle: capacity C, remaining C, open ok capacity=33554432 remaining=33554432 closed=false
+STAGE4 check C=32MiB h=100 recycle: same n accepted again ok n=299593 sum=33554416
+STAGE4 check C=32MiB h=100 recycle: no direct growth ok used 33562625/33562625 count 3/3
+STAGE4 case C=32MiB h=1024 n=32388 expected_n=32388 sum=33553968 C=33554432 remaining_after=0 closed=true
+STAGE4 check C=32MiB h=1024 null at n+1, n=floor(C/(h+12)) ok n=32388 expected=32388
+STAGE4 check C=32MiB h=1024 accepted sum <= C ok sum=33553968 C=33554432 C-sum=464
+STAGE4 check C=32MiB h=1024 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=32MiB h=1024 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=32MiB h=1024 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=32MiB h=1024 no direct growth while filling and after close ok used 33562625/33562625/33562625 count 3/3/3
+STAGE4 check C=32MiB h=1024 recycle: capacity C, remaining C, open ok capacity=33554432 remaining=33554432 closed=false
+STAGE4 check C=32MiB h=1024 recycle: same n accepted again ok n=32388 sum=33553968
+STAGE4 check C=32MiB h=1024 recycle: no direct growth ok used 33562625/33562625 count 3/3
+STAGE4 case C=32MiB h=16777204 n=2 expected_n=2 sum=33554432 C=33554432 remaining_after=0 closed=true
+STAGE4 check C=32MiB h=16777204 null at n+1, n=floor(C/(h+12)) ok n=2 expected=2
+STAGE4 check C=32MiB h=16777204 accepted sum <= C ok sum=33554432 C=33554432 C-sum=0
+STAGE4 check C=32MiB h=16777204 remaining()==C-sum after every accepted allocation ok bad=0
+STAGE4 check C=32MiB h=16777204 after the null: remaining()==0 and isClosed() ok remaining=0 closed=true
+STAGE4 check C=32MiB h=16777204 closed slab: 5 more allocate (1 B and h) all null ok null pairs=5
+STAGE4 check C=32MiB h=16777204 no direct growth while filling and after close ok used 33562625/33562625/33562625 count 3/3/3
+STAGE4 check C=32MiB h=16777204 recycle: capacity C, remaining C, open ok capacity=33554432 remaining=33554432 closed=false
+STAGE4 check C=32MiB h=16777204 recycle: same n accepted again ok n=2 sum=33554432
+STAGE4 check C=32MiB h=16777204 recycle: no direct growth ok used 33562625/33562625 count 3/3
+STAGE4 check C=32MiB allocate(C/2-12) accepted on an empty slab ok accepted=true remaining=16777216
+STAGE4 check C=32MiB allocate(C/2-11) throws IllegalArgumentException ok threw=true
+STAGE4 check C=32MiB allocate(C/2) throws IllegalArgumentException ok threw=true
+STAGE4 check C=32MiB a refused oversize hint leaves the slab untouched ok remaining=33554432 closed=false
+STAGE4 check C=32MiB end of C: direct pool still +C over the pre-create baseline ok used delta=33554432 count delta=1
+STAGE4 case C=32MiB free direct_used 33562625->8193 count 3->2
+STAGE4 check C=32MiB free (extra): direct MemoryUsed -C, Count -1 ok used delta=-33554432 count delta=-1
+STAGE4 check derived slab mms=4MiB -> 32MiB ok slab=33554432
+STAGE4 check derived slab mms=16MiB -> 32MiB ok slab=33554432
+STAGE4 check derived slab mms=32MiB -> 64MiB ok slab=67108864
+STAGE4 check derived default mms = 32MiB/2 = 16384KiB -> slab 32MiB ok mmsKiB=16384
+STAGE4 case test-yaml max_mutation_size=2621440 -> slab 33554432
+STAGE4 summary checks=115 mismatches=0

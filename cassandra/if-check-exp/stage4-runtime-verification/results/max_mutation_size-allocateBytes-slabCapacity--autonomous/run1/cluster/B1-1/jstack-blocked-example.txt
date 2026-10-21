@@ -1,0 +1,18 @@
+"MutationStage-1" #102 daemon prio=5 os_prio=0 cpu=1227.26ms elapsed=750.46s tid=0x00007ff609124550 nid=0x1a991 waiting for monitor entry  [0x00007ff5e657b000]
+   java.lang.Thread.State: BLOCKED (on object monitor)
+	at org.apache.cassandra.hints.HintsBufferPool.switchCurrentBuffer(HintsBufferPool.java:109)
+	- waiting to lock <0x000000008da7bea0> (a org.apache.cassandra.hints.HintsBufferPool)
+	at org.apache.cassandra.hints.HintsBufferPool.allocate(HintsBufferPool.java:79)
+	at org.apache.cassandra.hints.HintsBufferPool.write(HintsBufferPool.java:62)
+	at org.apache.cassandra.hints.HintsService.write(HintsService.java:169)
+	at org.apache.cassandra.service.StorageProxy$7.runMayThrow(StorageProxy.java:2811)
+	at org.apache.cassandra.service.StorageProxy$HintRunnable.run(StorageProxy.java:2721)
+	at org.apache.cassandra.concurrent.FutureTask$2.call(FutureTask.java:124)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTaskWithResources.call(FutureTaskWithResources.java:54)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(java.base@11.0.32.1/Thread.java:829)
+
+threads waiting to lock the HintsBufferPool monitor: 31

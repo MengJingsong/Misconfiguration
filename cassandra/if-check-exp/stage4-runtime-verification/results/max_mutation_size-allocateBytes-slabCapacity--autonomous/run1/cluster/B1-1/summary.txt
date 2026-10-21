@@ -1,0 +1,17 @@
+cluster-run B1-1 2026-10-20 22:22:27 MDT host node2 clone /users/jason92/cassandra-run1 ['cassandra-5.0.9', 'b5f2a54'] MSS_N=200000
+harness md5: 5ba163f28ce1fd9266e482e44b5f4add  cluster-run.py fe7bed353035b2a5c3e55a58afab68a6  client.py 0136eb42c8878a42a8f3326ebf25f243  make-node-yaml.sh a9ef136f33e71303c64d0a1caf1d3898  Jmx.java aa374b5bf9cfa9623b1045d2ac13fbb1  slab.btm 
+arm B1: yaml (none: defaults); MAX_HINT_BUFFERS 1; predicted slab 33554432; max slabs 1; hints on
+free on /users/jason92: 54.1 GiB
+# ---- stage4 mss lines ----;cluster_name: stage4-mss;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mss/A/commitlog;hints_directory: /users/jason92/stage4-mss/A/hints;saved_caches_directory: /users/jason92/stage4-mss/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-mss/A/cdc_raw;hinted_handoff_enabled: true;max_hints_size_per_host: 0B;hints_flush_period: 3600000ms;commitlog_segment_size: 32MiB;
+A JVM_EXTRA_OPTS: -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/stage4-harness-run/mss/slab.btm,listener:true -Dorg.jboss.byteman.verbose=false -Dstage4.trace=/users/jason92/stage4-logs/mss/run1/cluster/B1-1/mss.trace -Dcassandra.MAX_HINT_BUFFERS=1
+# ---- stage4 mss lines ----;cluster_name: stage4-mss;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mss/B/commitlog;hints_directory: /users/jason92/stage4-mss/B/hints;saved_caches_directory: /users/jason92/stage4-mss/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-mss/B/cdc_raw;hinted_handoff_enabled: true;max_hints_size_per_host: 0B;hints_flush_period: 3600000ms;commitlog_segment_size: 32MiB;
+schema: {'schema': 'ok', 'agreement': True, 'replication': "{'class': 'SimpleStrategy', 'replication_factor': '2'}"}
+A settings: {'max_mutation_size': '16384KiB', 'commitlog_segment_size': '32MiB', 'hinted_handoff_enabled': 'true', 'hints_flush_period': '3600000ms', 'max_hints_size_per_host': '0B', 'native_transport_max_message_size': '16777216B'}
+A command line MAX_HINT_BUFFERS: ['1']; MaxDirectMemorySize: ['-XX:MaxDirectMemorySize=2g']; Xmx: ['-Xmx2G']
+EXPECTED: read-back: hints_flush_period is 3600000ms (3600000ms) — yes
+EXPECTED: read-back: hinted_handoff_enabled True (true) — yes
+B stopped and seen DN by A after 12.3 s
+trace before the workload: 1 created, 0 closed, 3 direct lines
+S: 200000 INSERTs of 2048 B at CL ONE, 64 in flight
+FAIL: bulk client failed
+FAIL: TimeoutExpired: Command 'bin/nodetool -p 7102 stopdaemon' timed out after 180 seconds

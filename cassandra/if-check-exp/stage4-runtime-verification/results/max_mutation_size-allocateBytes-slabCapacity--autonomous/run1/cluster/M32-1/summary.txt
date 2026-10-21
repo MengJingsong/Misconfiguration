@@ -1,0 +1,44 @@
+cluster-run M32-1 2026-10-20 22:18:07 MDT host node2 clone /users/jason92/cassandra-run1 ['cassandra-5.0.9', 'b5f2a54'] MSS_N=200000
+harness md5: 5ba163f28ce1fd9266e482e44b5f4add  cluster-run.py fe7bed353035b2a5c3e55a58afab68a6  client.py 0136eb42c8878a42a8f3326ebf25f243  make-node-yaml.sh a9ef136f33e71303c64d0a1caf1d3898  Jmx.java aa374b5bf9cfa9623b1045d2ac13fbb1  slab.btm 
+arm M32: yaml ['max_mutation_size=32768KiB', 'commitlog_segment_size=64MiB']; MAX_HINT_BUFFERS default (3); predicted slab 67108864; max slabs 3; hints on
+free on /users/jason92: 54.1 GiB
+# ---- stage4 mss lines ----;cluster_name: stage4-mss;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mss/A/commitlog;hints_directory: /users/jason92/stage4-mss/A/hints;saved_caches_directory: /users/jason92/stage4-mss/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-mss/A/cdc_raw;hinted_handoff_enabled: true;max_hints_size_per_host: 0B;hints_flush_period: 3600000ms;commitlog_segment_size: 64MiB;max_mutation_size: 32768KiB;
+A JVM_EXTRA_OPTS: -javaagent:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/cassandra-run1/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/stage4-harness-run/mss/slab.btm,listener:true -Dorg.jboss.byteman.verbose=false -Dstage4.trace=/users/jason92/stage4-logs/mss/run1/cluster/M32-1/mss.trace
+# ---- stage4 mss lines ----;cluster_name: stage4-mss;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mss/B/commitlog;hints_directory: /users/jason92/stage4-mss/B/hints;saved_caches_directory: /users/jason92/stage4-mss/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-mss/B/cdc_raw;hinted_handoff_enabled: true;max_hints_size_per_host: 0B;hints_flush_period: 3600000ms;commitlog_segment_size: 64MiB;max_mutation_size: 32768KiB;
+schema: {'schema': 'ok', 'agreement': True, 'replication': "{'class': 'SimpleStrategy', 'replication_factor': '2'}"}
+A settings: {'max_mutation_size': '32768KiB', 'commitlog_segment_size': '64MiB', 'hinted_handoff_enabled': 'true', 'hints_flush_period': '3600000ms', 'max_hints_size_per_host': '0B', 'native_transport_max_message_size': '33554432B'}
+A command line MAX_HINT_BUFFERS: absent (default 3); MaxDirectMemorySize: ['-XX:MaxDirectMemorySize=2g']; Xmx: ['-Xmx2G']
+EXPECTED: read-back: hints_flush_period is 3600000ms (3600000ms) — yes
+EXPECTED: read-back: hinted_handoff_enabled True (true) — yes
+B stopped and seen DN by A after 12.4 s
+trace before the workload: 1 created, 0 closed, 3 direct lines
+S: 200000 INSERTs of 2048 B at CL ONE, 64 in flight
+S result: {'n': 200000, 'bytes': 2048, 'conc': 64, 'ok': 200000, 'err': 0, 'errors': {}, 'seconds': 41.652, 'rate': 4801.7, 'lat_mean_ms': 3.786, 'lat_p50_ms': 3.053, 'lat_p99_ms': 11.745, 'lat_max_ms': 82.556, 'ms_start': 1792556460938, 'ms_end': 1792556502688}
+L write 1: {'k': 1, 'bytes': 8388608, 'result': 'ok', 'why': '', 'ms_sent': 1792556513177, 'ms_done': 1792556513319}
+L write 2: {'k': 2, 'bytes': 8388608, 'result': 'ok', 'why': '', 'ms_sent': 1792556513850, 'ms_done': 1792556513971}
+L write 3: {'k': 3, 'bytes': 8388608, 'result': 'ok', 'why': '', 'ms_sent': 1792556514781, 'ms_done': 1792556514904}
+L write 4: {'k': 4, 'bytes': 8388608, 'result': 'ok', 'why': '', 'ms_sent': 1792556515402, 'ms_done': 1792556515525}
+X write (17 MiB): {'k': 100, 'bytes': 17825792, 'result': 'err', 'why': 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Request is too big: length 17825848 exceeds maximum allowed length 16777216."', 'ms_sent': 1792556521025, 'ms_done': 1792556521138}
+baseline direct_used 92257779 count 208 rss 3010420736 total_hints 0
+delta at end_bulk: direct_used +67631802, direct_count +101, rss +197091328, total_hints +200000, hints_dir_bytes +402640840
+delta at end_big: direct_used +67811059, direct_count +109, rss +294850560, total_hints +200004, hints_dir_bytes +402640840
+delta at end: direct_used +67843827, direct_count +111, rss +295071744, total_hints +200004, hints_dir_bytes +402640840
+peak direct_used delta +67843827 (64.70 MiB); at 1.5 slabs: {'ms': 1792556467825, 'direct_used_delta': 67486316.0, 'total_hints_delta': 32510.0}
+trace: {'created': 2, 'closed': 62, 'waiting': 0, 'offer': 6, 'slowhint': 75, 'direct': 16}; created ['created n=1 size=67108864 max=3 ms=1792556326362 thread=HintsWriteExecutor:1', 'created n=2 size=67108864 max=3 ms=1792556467600 thread=MutationStage-14']; slab bytes 134217728; created per phase {'S': 1, 'L': 0, 'X': 0}; direct >= 1 MiB not from HintsBuffer.create: 151003683 B; slowhint {'n': 75, 'max_us': 87591, 'sum_us': 3038797}
+hints dir at end 402640840 B; B status at end DN; B alive samples 0; listpendinghints: 'Host ID                              Address        Rack  DC          Status Total files Newest                  Oldest                 \n4b42c9a2-c2e7-4d4f-98d2-5aee63d05253 127.0.0.3:7000 rack1 datacenter1 DOWN   2           2026-10-21 04:21:20,764 2026-10-21 04:21:07,604'
+log counts: {'[Mm]utation of .* is too large': 0, 'MutationExceededMaxSizeException': 0, 'too large': 0, 'exceeds': 1, 'Hint of': 0, '[Hh]inted handoff': 0, 'Finished hinted': 0, 'OutOfMemory': 1, '[Dd]irect buffer memory': 0, 'ERROR': 0, 'WARN': 8}
+EXPECTED: validity: B down for the whole workload (alive samples 0, A sees DN) — yes
+EXPECTED: bulk: 200000 of 200000 acknowledged, 0 errors — yes
+EXPECTED: validity: TotalHints +200000 over S >= 200000 (hints written) — yes
+EXPECTED: validity: hints exceed one slab (62 closed lines >= 1; hints dir 402640840 B) — yes
+EXPECTED: hints offered over S (TotalHints x 2048 B = 409600000 B) exceed 3 x slab (201326592): ratio 2.03 — yes
+EXPECTED: every created line: size=67108864 (['67108864']) — yes
+EXPECTED: every created line: max=3 (['3']) — yes
+EXPECTED: created lines 2 <= MAX_HINT_BUFFERS 3 — yes
+EXPECTED: every closed line has prev + total > cap and cap = slab (62 lines, 0 not; 6 with prev <= cap, i.e. slab fills) — yes
+EXPECTED: direct allocations >= 1 MiB from HintsBuffer.create (2) = created lines (2) — yes
+L: 4 of 4 8 MiB writes acknowledged; errors: []
+EXPECTED: L: 4 x 8 MiB writes acknowledged (4) — yes
+X (M32, max_mutation_size 32 MiB, no prediction): {'k': 100, 'bytes': 17825792, 'result': 'err', 'why': 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Request is too big: length 17825848 exceeds maximum allowed length 16777216."', 'ms_sent': 1792556521025, 'ms_done': 1792556521138}
+EXPECTED yes 13 no 0
+end 2026-10-20 22:22:27 MDT

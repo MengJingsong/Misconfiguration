@@ -1,0 +1,26 @@
+analyze 2026-10-20 22:44:24 MDT: lifetimes ['D-1', 'D-2', 'M32-1', 'M4-1', 'OFF-1']
+D-1: slabs 2 x 33554432 (1 before the baseline); literal (arm - OFF, from the pre-write baseline) end 32.23 MiB; hint-attributable direct (arm - OFF) end_bulk 64.23 MiB, end 64.23 MiB, peak 64.23 MiB; RSS (arm - OFF) end 96.56 MiB; client lat mean 3.367 ms p99 10.486 ms; slow hint writes 80 (max 46621 us); waiting 0
+EXPECTED: D-1: hint-attributable direct at end 64.23 MiB in [24, 104] MiB — yes
+EXPECTED: D-1: peak 64.23 MiB <= 3 x slab + band (104 MiB) — yes
+EXPECTED: D-1: no growth past the created slabs: end 64.23 MiB = 2 x slab (64 MiB) within the band — yes
+EXPECTED: D-1: RSS (arm - OFF) 96.56 MiB within 25 % of the direct 64.23 MiB — NO (recorded; the AI judges it in the results file)
+D-2: slabs 2 x 33554432 (1 before the baseline); literal (arm - OFF, from the pre-write baseline) end 32.22 MiB; hint-attributable direct (arm - OFF) end_bulk 64.22 MiB, end 64.22 MiB, peak 64.22 MiB; RSS (arm - OFF) end 68.31 MiB; client lat mean 4.412 ms p99 13.562 ms; slow hint writes 85 (max 51800 us); waiting 0
+EXPECTED: D-2: hint-attributable direct at end 64.22 MiB in [24, 104] MiB — yes
+EXPECTED: D-2: peak 64.22 MiB <= 3 x slab + band (104 MiB) — yes
+EXPECTED: D-2: no growth past the created slabs: end 64.22 MiB = 2 x slab (64 MiB) within the band — yes
+EXPECTED: D-2: RSS (arm - OFF) 68.31 MiB within 25 % of the direct 64.22 MiB — yes
+M32-1: slabs 2 x 67108864 (1 before the baseline); literal (arm - OFF, from the pre-write baseline) end 64.22 MiB; hint-attributable direct (arm - OFF) end_bulk 128.23 MiB, end 128.22 MiB, peak 128.22 MiB; RSS (arm - OFF) end 199.11 MiB; client lat mean 3.786 ms p99 11.745 ms; slow hint writes 75 (max 87591 us); waiting 0
+EXPECTED: M32-1: hint-attributable direct at end 128.22 MiB in [56, 200] MiB — yes
+EXPECTED: M32-1: peak 128.22 MiB <= 3 x slab + band (200 MiB) — yes
+EXPECTED: M32-1: no growth past the created slabs: end 128.22 MiB = 2 x slab (128 MiB) within the band — yes
+EXPECTED: M32-1: RSS (arm - OFF) 199.11 MiB within 25 % of the direct 128.22 MiB — NO (recorded; the AI judges it in the results file)
+M4-1: slabs 2 x 33554432 (1 before the baseline); literal (arm - OFF, from the pre-write baseline) end 32.20 MiB; hint-attributable direct (arm - OFF) end_bulk 64.23 MiB, end 64.20 MiB, peak 64.20 MiB; RSS (arm - OFF) end 68.38 MiB; client lat mean 3.667 ms p99 10.931 ms; slow hint writes 76 (max 45886 us); waiting 0
+EXPECTED: M4-1: hint-attributable direct at end 64.20 MiB in [24, 104] MiB — yes
+EXPECTED: M4-1: peak 64.20 MiB <= 3 x slab + band (104 MiB) — yes
+EXPECTED: M4-1: no growth past the created slabs: end 64.20 MiB = 2 x slab (64 MiB) within the band — yes
+EXPECTED: M4-1: RSS (arm - OFF) 68.38 MiB within 25 % of the direct 64.20 MiB — yes
+default repeats: x_end [64.23, 64.22] MiB, spread 0.01 MiB (control 3)
+EXPECTED: M32-1: one-slab step doubles: per-slab 64.11 MiB / default 32.11 MiB = 1.996 in [1.8, 2.2] — yes
+EXPECTED: M4-1: same as default: 64.20 MiB in [56.22, 72.23] MiB — yes
+EXPECTED: M4-1: slab size from the trace 32 MiB = the default's — yes
+EXPECTED yes 17 no 2
