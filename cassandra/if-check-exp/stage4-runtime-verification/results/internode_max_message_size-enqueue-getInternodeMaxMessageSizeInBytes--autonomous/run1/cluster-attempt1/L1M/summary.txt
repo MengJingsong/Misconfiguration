@@ -1,0 +1,47 @@
+cluster-run L1M 2026-10-20 21:30:51 MDT host node1 clone /users/jason92/cassandra-run1 ['cassandra-5.0.9', 'b5f2a54'] threads 16 x 200 writes
+harness md5: 570774974a3dc51e93a285f60cd487e2  cluster-run.py 5abde33f473f220104dad6037715df02  client.py 9893874155fb738beed385bc3319866d  make-node-yaml.sh 2f18ec53c4d427ffdbc72d30b6a11dbd  Jmx.java 
+label L1M: internode_max_message_size on both nodes = 1MiB
+free on /mydata/stage4-ime: 714.1 GiB
+free on /users/jason92: 55.0 GiB
+# ---- stage4 ime lines ----;cluster_name: stage4-ime;num_tokens: 1;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mydata/stage4-ime/A/commitlog;hints_directory: /mydata/stage4-ime/A/hints;saved_caches_directory: /mydata/stage4-ime/A/saved_caches;cdc_raw_directory: /mydata/stage4-ime/A/cdc_raw;write_request_timeout: 30s;hinted_handoff_enabled: false;internode_max_message_size: 1MiB;
+# ---- stage4 ime lines ----;cluster_name: stage4-ime;num_tokens: 1;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /mydata/stage4-ime/B/commitlog;hints_directory: /mydata/stage4-ime/B/hints;saved_caches_directory: /mydata/stage4-ime/B/saved_caches;cdc_raw_directory: /mydata/stage4-ime/B/cdc_raw;write_request_timeout: 30s;hinted_handoff_enabled: false;internode_max_message_size: 1MiB;
+read-back A: internode_max_message_size=1MiB, write_request_timeout=30s, hinted_handoff_enabled=false, internode_application_send_queue_capacity=4MiB, internode_application_send_queue_reserve_endpoint_capacity=128MiB, internode_application_receive_queue_reserve_endpoint_capacity=128MiB, max_mutation_size=16384KiB, native_transport_max_message_size=16777216B, num_tokens=1
+read-back B: internode_max_message_size=1MiB, write_request_timeout=30s, hinted_handoff_enabled=false, internode_application_send_queue_capacity=4MiB, internode_application_send_queue_reserve_endpoint_capacity=128MiB, internode_application_receive_queue_reserve_endpoint_capacity=128MiB, max_mutation_size=16384KiB, native_transport_max_message_size=16777216B, num_tokens=1
+metric scopes: A type=Connection scope=127.0.0.3_7000; B type=InboundConnection scope=127.0.0.2_7000
+R4 name check on A: 9/9 outbound gauges readable; missing []
+P2M (2097152 B): client {'first': 0, 'threads': 16, 'per_thread': 200, 'bytes': 2097152, 'ok': 0, 'err': 3200, 'errors': {'ServerError': 312, 'ConnectionShutdown': 16, 'NoHostAvailable': 2872}, 'seconds': 7.9, 'protocol': 4}
+P2M: A local writes +0, A client writes +-1; B local writes +0, B client writes +0; B dropped MUTATION_REQ +0
+P2M: A outbound to B: LargeMessageCompletedTasks +-2, LargeMessageCompletedBytes +-25, LargeMessageDroppedTasksDueToOverload +0, LargeMessageDroppedTasksDueToTimeout +0, LargeMessageDroppedTasksDueToError +0
+P2M: B inbound from A: ReceivedBytes +2192, ReceivedCount +13, ProcessedBytes +2192, ErrorCount +0
+P256K (262144 B): client None
+P256K: A local writes +0, A client writes +0; B local writes +0, B client writes +0; B dropped MUTATION_REQ +0
+P256K: A outbound to B: LargeMessageCompletedTasks +0, LargeMessageCompletedBytes +0, LargeMessageDroppedTasksDueToOverload +0, LargeMessageDroppedTasksDueToTimeout +0, LargeMessageDroppedTasksDueToError +0
+P256K: B inbound from A: ReceivedBytes +0, ReceivedCount +0, ProcessedBytes +0, ErrorCount +0
+baseline A (median of the 10 s control): direct_used=56.19MiB, pool_size=8.00MiB, pool_used=0.00MiB, pool_overflow=0.00MiB, heap_used=92.05MiB, rss=1763.05MiB
+baseline B (median of the 10 s control): direct_used=56.18MiB, pool_size=8.00MiB, pool_used=0.00MiB, pool_overflow=0.00MiB, heap_used=92.96MiB, rss=1797.75MiB
+P2M A: 20 samples; peak increment over baseline (200 ms / 1 s): direct_used +17.08/+15.11MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +798.00/+772.93MiB, rss +135.63/+131.52MiB, LargeMessagePendingBytes +0.00/+0.00MiB, LargeMessagePendingTasks +0.00/+0.00MiB
+P2M B: 67 samples; peak increment over baseline (200 ms / 1 s): direct_used +0.00/+0.00MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +16.00/+16.00MiB, rss +8.63/+8.63MiB
+P2M A: samples with LargeMessagePendingBytes > 0: 0 of 20; LargeMessagePendingTasks peak 0
+P256K A: 0 samples; peak increment over baseline (200 ms / 1 s): direct_used -56.19/-56.19MiB, pool_size -8.00/-8.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used -92.05/-92.05MiB, rss -1763.05/-1763.05MiB, LargeMessagePendingBytes +0.00/+0.00MiB, LargeMessagePendingTasks +0.00/+0.00MiB
+P256K B: 27 samples; peak increment over baseline (200 ms / 1 s): direct_used +0.00/+0.00MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +16.00/+16.00MiB, rss +5.00/+5.00MiB
+P256K A: samples with LargeMessagePendingBytes > 0: 0 of 0; LargeMessagePendingTasks peak 0
+A: tpstats dropped MUTATION_REQ ?; tablestats local write count ?
+B: tpstats dropped MUTATION_REQ 0; tablestats local write count 0
+P2M A system.log: 312 "exceeds allowed maximum" lines [((2097211, 1048576), 312)], 312 "Unexpected exception during request" lines
+P256K A system.log: 0 "exceeds allowed maximum" lines [], 0 "Unexpected exception during request" lines
+A system.log whole lifetime: 312 exceeds lines, 312 unexpected-exception lines
+P2M B system.log: 0 "exceeds allowed maximum" lines [], 0 "Unexpected exception during request" lines
+P256K B system.log: 0 "exceeds allowed maximum" lines [], 0 "Unexpected exception during request" lines
+B system.log whole lifetime: 0 exceeds lines, 0 unexpected-exception lines
+A on-disk bytes: data 655.6 MiB, commitlog 192.0 MiB, hints 0.0 MiB
+B on-disk bytes: data 0.3 MiB, commitlog 64.0 MiB, hints 0.0 MiB
+EXPECTED: node B is not a coordinator: B client writes +0 in every phase — yes
+EXPECTED: P2M: client writes at CL ALL fail (3200 of 3200 err) — yes
+EXPECTED: P2M: A logs "Message of size ~2.1e6 bytes exceeds allowed maximum of 1048576 bytes" — yes
+EXPECTED: P2M: peak LargeMessagePendingBytes on A toward B about 0 (= 0 in every 200 ms sample) — yes
+EXPECTED: P2M: no direct-memory growth from large payloads on A (direct and pool Size peak increment < one 2 MiB message) — NO (recorded; the AI judges it in the results file)
+EXPECTED: P2M: no direct-memory growth from large payloads on B (direct and pool Size peak increment < one 2 MiB message) — yes
+EXPECTED: P256K: all 3200 writes succeed — NO (recorded; the AI judges it in the results file)
+EXPECTED: P256K: no "exceeds allowed maximum" line on A or B — yes
+EXPECTED totals: yes=6 no=2
+cleanup: CassandraDaemon left: none; listeners on 7000/7102/7103/9042: none; data, commit log and hints deleted

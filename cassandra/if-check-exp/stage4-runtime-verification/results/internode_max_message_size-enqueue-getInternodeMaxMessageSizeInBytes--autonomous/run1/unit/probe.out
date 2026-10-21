@@ -1,0 +1,141 @@
+STAGE4 env maxMemory=1056309248 current_version=12 default_limit=134217728 send_queue_capacity=4194304 reserve_endpoint=134217728 reserve_global=536870912 silent_port=41829
+STAGE4 check L=65536 limit read back expected=65536 actual=65536 ok
+STAGE4 case L=65536 limit=65536 S=L-1 size=65535 payload=65522 size40=65535 size50=65535 linkVersion=12 outcome=accepted dPendingBytes=65535 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=65535 attempts=0 dHeapUsed=0
+STAGE4 check L=65536 L-1 size at current_version expected=65535 actual=65535 ok
+STAGE4 check L=65536 L-1 size40 == size50 (B2h) expected=65535 actual=65535 ok
+STAGE4 check L=65536 L-1 outcome expected=accepted actual=accepted ok
+STAGE4 check L=65536 L-1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=65535,1,1,0 actual=65535,1,1,0 ok
+STAGE4 case L=65536 limit=65536 S=L size=65536 payload=65523 size40=65536 size50=65536 linkVersion=12 outcome=accepted dPendingBytes=65536 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=131071 attempts=1 dHeapUsed=0
+STAGE4 check L=65536 L size at current_version expected=65536 actual=65536 ok
+STAGE4 check L=65536 L size40 == size50 (B2h) expected=65536 actual=65536 ok
+STAGE4 check L=65536 L outcome expected=accepted actual=accepted ok
+STAGE4 check L=65536 L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=65536,1,1,0 actual=65536,1,1,0 ok
+STAGE4 case L=65536 limit=65536 S=L+1 size=65537 payload=65524 size40=65537 size50=65537 linkVersion=12 outcome=OversizedMessageException dPendingBytes=0 dPendingCount=0 dSubmitted=0 dOverloaded=0 pendingBytes=131071 attempts=1 dHeapUsed=0 msg="Message of size 65537 bytes exceeds allowed maximum of 65536 bytes"
+STAGE4 check L=65536 L+1 size at current_version expected=65537 actual=65537 ok
+STAGE4 check L=65536 L+1 size40 == size50 (B2h) expected=65537 actual=65537 ok
+STAGE4 check L=65536 L+1 outcome expected=OversizedMessageException actual=OversizedMessageException ok
+STAGE4 check L=65536 L+1 message expected=Message of size 65537 bytes exceeds allowed maximum of 65536 bytes actual=Message of size 65537 bytes exceeds allowed maximum of 65536 bytes ok
+STAGE4 check L=65536 L+1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=0,0,0,0 actual=0,0,0,0 ok
+STAGE4 case L=65536 limit=65536 S=2L size=131072 payload=131059 size40=131072 size50=131072 linkVersion=12 outcome=OversizedMessageException dPendingBytes=0 dPendingCount=0 dSubmitted=0 dOverloaded=0 pendingBytes=131071 attempts=1 dHeapUsed=0 msg="Message of size 131072 bytes exceeds allowed maximum of 65536 bytes"
+STAGE4 check L=65536 2L size at current_version expected=131072 actual=131072 ok
+STAGE4 check L=65536 2L size40 == size50 (B2h) expected=131072 actual=131072 ok
+STAGE4 check L=65536 2L outcome expected=OversizedMessageException actual=OversizedMessageException ok
+STAGE4 check L=65536 2L message expected=Message of size 131072 bytes exceeds allowed maximum of 65536 bytes actual=Message of size 131072 bytes exceeds allowed maximum of 65536 bytes ok
+STAGE4 check L=65536 2L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=0,0,0,0 actual=0,0,0,0 ok
+STAGE4 info L=65536 close requested (completed within 2 s: false); pendingBytes now=131071
+STAGE4 check L=1048576 limit read back expected=1048576 actual=1048576 ok
+STAGE4 case L=1048576 limit=1048576 S=L-1 size=1048575 payload=1048562 size40=1048575 size50=1048575 linkVersion=12 outcome=accepted dPendingBytes=1048575 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=1048575 attempts=0 dHeapUsed=0
+STAGE4 check L=1048576 L-1 size at current_version expected=1048575 actual=1048575 ok
+STAGE4 check L=1048576 L-1 size40 == size50 (B2h) expected=1048575 actual=1048575 ok
+STAGE4 check L=1048576 L-1 outcome expected=accepted actual=accepted ok
+STAGE4 check L=1048576 L-1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=1048575,1,1,0 actual=1048575,1,1,0 ok
+STAGE4 case L=1048576 limit=1048576 S=L size=1048576 payload=1048563 size40=1048576 size50=1048576 linkVersion=12 outcome=accepted dPendingBytes=1048576 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=2097151 attempts=1 dHeapUsed=0
+STAGE4 check L=1048576 L size at current_version expected=1048576 actual=1048576 ok
+STAGE4 check L=1048576 L size40 == size50 (B2h) expected=1048576 actual=1048576 ok
+STAGE4 check L=1048576 L outcome expected=accepted actual=accepted ok
+STAGE4 check L=1048576 L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=1048576,1,1,0 actual=1048576,1,1,0 ok
+STAGE4 case L=1048576 limit=1048576 S=L+1 size=1048577 payload=1048564 size40=1048577 size50=1048577 linkVersion=12 outcome=OversizedMessageException dPendingBytes=0 dPendingCount=0 dSubmitted=0 dOverloaded=0 pendingBytes=2097151 attempts=1 dHeapUsed=0 msg="Message of size 1048577 bytes exceeds allowed maximum of 1048576 bytes"
+STAGE4 check L=1048576 L+1 size at current_version expected=1048577 actual=1048577 ok
+STAGE4 check L=1048576 L+1 size40 == size50 (B2h) expected=1048577 actual=1048577 ok
+STAGE4 check L=1048576 L+1 outcome expected=OversizedMessageException actual=OversizedMessageException ok
+STAGE4 check L=1048576 L+1 message expected=Message of size 1048577 bytes exceeds allowed maximum of 1048576 bytes actual=Message of size 1048577 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 check L=1048576 L+1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=0,0,0,0 actual=0,0,0,0 ok
+STAGE4 case L=1048576 limit=1048576 S=2L size=2097152 payload=2097139 size40=2097152 size50=2097152 linkVersion=12 outcome=OversizedMessageException dPendingBytes=0 dPendingCount=0 dSubmitted=0 dOverloaded=0 pendingBytes=2097151 attempts=1 dHeapUsed=0 msg="Message of size 2097152 bytes exceeds allowed maximum of 1048576 bytes"
+STAGE4 check L=1048576 2L size at current_version expected=2097152 actual=2097152 ok
+STAGE4 check L=1048576 2L size40 == size50 (B2h) expected=2097152 actual=2097152 ok
+STAGE4 check L=1048576 2L outcome expected=OversizedMessageException actual=OversizedMessageException ok
+STAGE4 check L=1048576 2L message expected=Message of size 2097152 bytes exceeds allowed maximum of 1048576 bytes actual=Message of size 2097152 bytes exceeds allowed maximum of 1048576 bytes ok
+STAGE4 check L=1048576 2L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=0,0,0,0 actual=0,0,0,0 ok
+STAGE4 info L=1048576 close requested (completed within 2 s: false); pendingBytes now=2097151
+STAGE4 check L=8388608 limit read back expected=8388608 actual=8388608 ok
+STAGE4 case L=8388608 limit=8388608 S=L-1 size=8388607 payload=8388593 size40=8388607 size50=8388607 linkVersion=12 outcome=accepted dPendingBytes=8388607 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=8388607 attempts=0 dHeapUsed=0
+STAGE4 check L=8388608 L-1 size at current_version expected=8388607 actual=8388607 ok
+STAGE4 check L=8388608 L-1 size40 == size50 (B2h) expected=8388607 actual=8388607 ok
+STAGE4 check L=8388608 L-1 outcome expected=accepted actual=accepted ok
+STAGE4 check L=8388608 L-1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=8388607,1,1,0 actual=8388607,1,1,0 ok
+STAGE4 case L=8388608 limit=8388608 S=L size=8388608 payload=8388594 size40=8388608 size50=8388608 linkVersion=12 outcome=accepted dPendingBytes=8388608 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=16777215 attempts=1 dHeapUsed=0
+STAGE4 check L=8388608 L size at current_version expected=8388608 actual=8388608 ok
+STAGE4 check L=8388608 L size40 == size50 (B2h) expected=8388608 actual=8388608 ok
+STAGE4 check L=8388608 L outcome expected=accepted actual=accepted ok
+STAGE4 check L=8388608 L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=8388608,1,1,0 actual=8388608,1,1,0 ok
+STAGE4 case L=8388608 limit=8388608 S=L+1 size=8388609 payload=8388595 size40=8388609 size50=8388609 linkVersion=12 outcome=OversizedMessageException dPendingBytes=0 dPendingCount=0 dSubmitted=0 dOverloaded=0 pendingBytes=16777215 attempts=1 dHeapUsed=0 msg="Message of size 8388609 bytes exceeds allowed maximum of 8388608 bytes"
+STAGE4 check L=8388608 L+1 size at current_version expected=8388609 actual=8388609 ok
+STAGE4 check L=8388608 L+1 size40 == size50 (B2h) expected=8388609 actual=8388609 ok
+STAGE4 check L=8388608 L+1 outcome expected=OversizedMessageException actual=OversizedMessageException ok
+STAGE4 check L=8388608 L+1 message expected=Message of size 8388609 bytes exceeds allowed maximum of 8388608 bytes actual=Message of size 8388609 bytes exceeds allowed maximum of 8388608 bytes ok
+STAGE4 check L=8388608 L+1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=0,0,0,0 actual=0,0,0,0 ok
+STAGE4 case L=8388608 limit=8388608 S=2L size=16777216 payload=16777202 size40=16777216 size50=16777216 linkVersion=12 outcome=OversizedMessageException dPendingBytes=0 dPendingCount=0 dSubmitted=0 dOverloaded=0 pendingBytes=16777215 attempts=1 dHeapUsed=0 msg="Message of size 16777216 bytes exceeds allowed maximum of 8388608 bytes"
+STAGE4 check L=8388608 2L size at current_version expected=16777216 actual=16777216 ok
+STAGE4 check L=8388608 2L size40 == size50 (B2h) expected=16777216 actual=16777216 ok
+STAGE4 check L=8388608 2L outcome expected=OversizedMessageException actual=OversizedMessageException ok
+STAGE4 check L=8388608 2L message expected=Message of size 16777216 bytes exceeds allowed maximum of 8388608 bytes actual=Message of size 16777216 bytes exceeds allowed maximum of 8388608 bytes ok
+STAGE4 check L=8388608 2L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=0,0,0,0 actual=0,0,0,0 ok
+STAGE4 info L=8388608 close requested (completed within 2 s: false); pendingBytes now=16777215
+STAGE4 check control(L=65536) limit read back expected=2147483646 actual=2147483646 ok
+STAGE4 case control(L=65536) limit=2147483646 S=L-1 size=65535 payload=65522 size40=65535 size50=65535 linkVersion=12 outcome=accepted dPendingBytes=65535 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=65535 attempts=0 dHeapUsed=0
+STAGE4 check control(L=65536) L-1 size at current_version expected=65535 actual=65535 ok
+STAGE4 check control(L=65536) L-1 size40 == size50 (B2h) expected=65535 actual=65535 ok
+STAGE4 check control(L=65536) L-1 outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=65536) L-1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=65535,1,1,0 actual=65535,1,1,0 ok
+STAGE4 case control(L=65536) limit=2147483646 S=L size=65536 payload=65523 size40=65536 size50=65536 linkVersion=12 outcome=accepted dPendingBytes=65536 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=131071 attempts=1 dHeapUsed=0
+STAGE4 check control(L=65536) L size at current_version expected=65536 actual=65536 ok
+STAGE4 check control(L=65536) L size40 == size50 (B2h) expected=65536 actual=65536 ok
+STAGE4 check control(L=65536) L outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=65536) L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=65536,1,1,0 actual=65536,1,1,0 ok
+STAGE4 case control(L=65536) limit=2147483646 S=L+1 size=65537 payload=65524 size40=65537 size50=65537 linkVersion=12 outcome=accepted dPendingBytes=65537 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=196608 attempts=1 dHeapUsed=0
+STAGE4 check control(L=65536) L+1 size at current_version expected=65537 actual=65537 ok
+STAGE4 check control(L=65536) L+1 size40 == size50 (B2h) expected=65537 actual=65537 ok
+STAGE4 check control(L=65536) L+1 outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=65536) L+1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=65537,1,1,0 actual=65537,1,1,0 ok
+STAGE4 case control(L=65536) limit=2147483646 S=2L size=131072 payload=131059 size40=131072 size50=131072 linkVersion=12 outcome=accepted dPendingBytes=131072 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=327680 attempts=1 dHeapUsed=0
+STAGE4 check control(L=65536) 2L size at current_version expected=131072 actual=131072 ok
+STAGE4 check control(L=65536) 2L size40 == size50 (B2h) expected=131072 actual=131072 ok
+STAGE4 check control(L=65536) 2L outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=65536) 2L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=131072,1,1,0 actual=131072,1,1,0 ok
+STAGE4 info control(L=65536) close requested (completed within 2 s: false); pendingBytes now=327680
+STAGE4 check control(L=1048576) limit read back expected=2147483646 actual=2147483646 ok
+STAGE4 case control(L=1048576) limit=2147483646 S=L-1 size=1048575 payload=1048562 size40=1048575 size50=1048575 linkVersion=12 outcome=accepted dPendingBytes=1048575 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=1048575 attempts=0 dHeapUsed=0
+STAGE4 check control(L=1048576) L-1 size at current_version expected=1048575 actual=1048575 ok
+STAGE4 check control(L=1048576) L-1 size40 == size50 (B2h) expected=1048575 actual=1048575 ok
+STAGE4 check control(L=1048576) L-1 outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=1048576) L-1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=1048575,1,1,0 actual=1048575,1,1,0 ok
+STAGE4 case control(L=1048576) limit=2147483646 S=L size=1048576 payload=1048563 size40=1048576 size50=1048576 linkVersion=12 outcome=accepted dPendingBytes=1048576 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=2097151 attempts=1 dHeapUsed=0
+STAGE4 check control(L=1048576) L size at current_version expected=1048576 actual=1048576 ok
+STAGE4 check control(L=1048576) L size40 == size50 (B2h) expected=1048576 actual=1048576 ok
+STAGE4 check control(L=1048576) L outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=1048576) L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=1048576,1,1,0 actual=1048576,1,1,0 ok
+STAGE4 case control(L=1048576) limit=2147483646 S=L+1 size=1048577 payload=1048564 size40=1048577 size50=1048577 linkVersion=12 outcome=accepted dPendingBytes=1048577 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=3145728 attempts=1 dHeapUsed=0
+STAGE4 check control(L=1048576) L+1 size at current_version expected=1048577 actual=1048577 ok
+STAGE4 check control(L=1048576) L+1 size40 == size50 (B2h) expected=1048577 actual=1048577 ok
+STAGE4 check control(L=1048576) L+1 outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=1048576) L+1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=1048577,1,1,0 actual=1048577,1,1,0 ok
+STAGE4 case control(L=1048576) limit=2147483646 S=2L size=2097152 payload=2097139 size40=2097152 size50=2097152 linkVersion=12 outcome=accepted dPendingBytes=2097152 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=5242880 attempts=1 dHeapUsed=0
+STAGE4 check control(L=1048576) 2L size at current_version expected=2097152 actual=2097152 ok
+STAGE4 check control(L=1048576) 2L size40 == size50 (B2h) expected=2097152 actual=2097152 ok
+STAGE4 check control(L=1048576) 2L outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=1048576) 2L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=2097152,1,1,0 actual=2097152,1,1,0 ok
+STAGE4 info control(L=1048576) close requested (completed within 2 s: false); pendingBytes now=5242880
+STAGE4 check control(L=8388608) limit read back expected=2147483646 actual=2147483646 ok
+STAGE4 case control(L=8388608) limit=2147483646 S=L-1 size=8388607 payload=8388593 size40=8388607 size50=8388607 linkVersion=12 outcome=accepted dPendingBytes=8388607 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=8388607 attempts=0 dHeapUsed=0
+STAGE4 check control(L=8388608) L-1 size at current_version expected=8388607 actual=8388607 ok
+STAGE4 check control(L=8388608) L-1 size40 == size50 (B2h) expected=8388607 actual=8388607 ok
+STAGE4 check control(L=8388608) L-1 outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=8388608) L-1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=8388607,1,1,0 actual=8388607,1,1,0 ok
+STAGE4 case control(L=8388608) limit=2147483646 S=L size=8388608 payload=8388594 size40=8388608 size50=8388608 linkVersion=12 outcome=accepted dPendingBytes=8388608 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=16777215 attempts=1 dHeapUsed=0
+STAGE4 check control(L=8388608) L size at current_version expected=8388608 actual=8388608 ok
+STAGE4 check control(L=8388608) L size40 == size50 (B2h) expected=8388608 actual=8388608 ok
+STAGE4 check control(L=8388608) L outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=8388608) L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=8388608,1,1,0 actual=8388608,1,1,0 ok
+STAGE4 case control(L=8388608) limit=2147483646 S=L+1 size=8388609 payload=8388595 size40=8388609 size50=8388609 linkVersion=12 outcome=accepted dPendingBytes=8388609 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=25165824 attempts=1 dHeapUsed=0
+STAGE4 check control(L=8388608) L+1 size at current_version expected=8388609 actual=8388609 ok
+STAGE4 check control(L=8388608) L+1 size40 == size50 (B2h) expected=8388609 actual=8388609 ok
+STAGE4 check control(L=8388608) L+1 outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=8388608) L+1 dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=8388609,1,1,0 actual=8388609,1,1,0 ok
+STAGE4 case control(L=8388608) limit=2147483646 S=2L size=16777216 payload=16777202 size40=16777216 size50=16777216 linkVersion=12 outcome=accepted dPendingBytes=16777216 dPendingCount=1 dSubmitted=1 dOverloaded=0 pendingBytes=41943040 attempts=1 dHeapUsed=0
+STAGE4 check control(L=8388608) 2L size at current_version expected=16777216 actual=16777216 ok
+STAGE4 check control(L=8388608) 2L size40 == size50 (B2h) expected=16777216 actual=16777216 ok
+STAGE4 check control(L=8388608) 2L outcome expected=accepted actual=accepted ok
+STAGE4 check control(L=8388608) 2L dPendingBytes,dPendingCount,dSubmitted,dOverloaded expected=16777216,1,1,0 actual=16777216,1,1,0 ok
+STAGE4 info control(L=8388608) close requested (completed within 2 s: false); pendingBytes now=16777216
+STAGE4 info MessagingService.shutdown() returned
+STAGE4 summary checks=108 mismatches=0

@@ -1,0 +1,39 @@
+cluster-run L1M 2026-10-20 21:59:37 MDT host node1 clone /users/jason92/cassandra-run1 ['cassandra-5.0.9', 'b5f2a54'] threads 16 x 200 writes
+harness md5: 393bdefc5aafde0344640124eebe7051  cluster-run.py 5abde33f473f220104dad6037715df02  client.py 9893874155fb738beed385bc3319866d  make-node-yaml.sh 3ce3fff3bd3e0c8828c6c15a4ccc1a8f  Jmx.java 
+label L1M: internode_max_message_size on both nodes = 1MiB
+free on /mydata/stage4-ime: 714.1 GiB
+free on /users/jason92: 54.9 GiB
+# ---- stage4 ime lines ----;cluster_name: stage4-ime;num_tokens: 1;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mydata/stage4-ime/A/commitlog;hints_directory: /mydata/stage4-ime/A/hints;saved_caches_directory: /mydata/stage4-ime/A/saved_caches;cdc_raw_directory: /mydata/stage4-ime/A/cdc_raw;write_request_timeout: 30s;hinted_handoff_enabled: false;internode_max_message_size: 1MiB;
+# ---- stage4 ime lines ----;cluster_name: stage4-ime;num_tokens: 1;endpoint_snitch: SimpleSnitch;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /mydata/stage4-ime/B/commitlog;hints_directory: /mydata/stage4-ime/B/hints;saved_caches_directory: /mydata/stage4-ime/B/saved_caches;cdc_raw_directory: /mydata/stage4-ime/B/cdc_raw;write_request_timeout: 30s;hinted_handoff_enabled: false;internode_max_message_size: 1MiB;
+read-back A: internode_max_message_size=1MiB, write_request_timeout=30s, hinted_handoff_enabled=false, internode_application_send_queue_capacity=4MiB, internode_application_send_queue_reserve_endpoint_capacity=128MiB, internode_application_receive_queue_reserve_endpoint_capacity=128MiB, max_mutation_size=16384KiB, native_transport_max_message_size=16777216B, num_tokens=1
+read-back B: internode_max_message_size=1MiB, write_request_timeout=30s, hinted_handoff_enabled=false, internode_application_send_queue_capacity=4MiB, internode_application_send_queue_reserve_endpoint_capacity=128MiB, internode_application_receive_queue_reserve_endpoint_capacity=128MiB, max_mutation_size=16384KiB, native_transport_max_message_size=16777216B, num_tokens=1
+metric scopes: A type=Connection scope=127.0.0.3_7000; B type=InboundConnection scope=127.0.0.2_7000
+R4 name check on A: 9/9 outbound gauges readable; missing []
+P2M (2097152 B): client {'first': 0, 'threads': 16, 'per_thread': 200, 'bytes': 2097152, 'ok': 0, 'err': 3200, 'errors': {'ServerError': 336, 'ConnectionShutdown': 16, 'NoHostAvailable': 2848}, 'seconds': 10.4, 'protocol': 4}
+P2M: alive after the phase: A NO, B yes
+P2M: A local writes +0, A client writes +-1; B local writes +0, B client writes +0; B dropped MUTATION_REQ +0
+P2M: A outbound to B: LargeMessageCompletedTasks +-2, LargeMessageCompletedBytes +-25, LargeMessageDroppedTasksDueToOverload +0, LargeMessageDroppedTasksDueToTimeout +0, LargeMessageDroppedTasksDueToError +0
+P2M: B inbound from A: ReceivedBytes +2212, ReceivedCount +13, ProcessedBytes +2212, ErrorCount +0
+baseline A (median of the 10 s control): direct_used=56.20MiB, pool_size=8.00MiB, pool_used=0.00MiB, pool_overflow=0.00MiB, heap_used=92.08MiB, rss=1771.08MiB
+baseline B (median of the 10 s control): direct_used=56.17MiB, pool_size=8.00MiB, pool_used=0.00MiB, pool_overflow=0.00MiB, heap_used=93.06MiB, rss=1762.15MiB
+P2M A: 80 samples; peak increment over baseline (200 ms / 1 s): direct_used +17.10/+13.10MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +790.98/+766.94MiB, rss +136.02/+124.67MiB, mutation_pending +0.00/+0.00MiB, ntr_pending +0.00/+0.00MiB, memtable_heap +80.02/+52.01MiB, LargeMessagePendingBytes +0.00/+0.00MiB, LargeMessagePendingTasks +0.00/+0.00MiB
+P2M B: 80 samples; peak increment over baseline (200 ms / 1 s): direct_used +0.00/+0.00MiB, pool_size +0.00/+0.00MiB, pool_used +0.00/+0.00MiB, pool_overflow +0.00/+0.00MiB, heap_used +16.00/+16.00MiB, rss -0.11/-0.11MiB, mutation_pending +0.00/+0.00MiB, ntr_pending +0.00/+0.00MiB, memtable_heap +0.00/+0.00MiB
+P2M A: samples with LargeMessagePendingBytes > 0: 0 of 80; LargeMessagePendingTasks peak 0
+A: tpstats dropped MUTATION_REQ ?; tablestats local write count ?
+B: tpstats dropped MUTATION_REQ 0; tablestats local write count 0
+P2M A system.log: 336 "exceeds allowed maximum" lines [((2097211, 1048576), 336)], 336 "Unexpected exception during request" lines
+A system.log whole lifetime: 336 exceeds lines, 336 unexpected-exception lines
+P2M B system.log: 0 "exceeds allowed maximum" lines [], 0 "Unexpected exception during request" lines
+B system.log whole lifetime: 0 exceeds lines, 0 unexpected-exception lines
+A on-disk bytes: data 734.8 MiB, commitlog 256.0 MiB, hints 0.0 MiB
+B on-disk bytes: data 0.3 MiB, commitlog 64.0 MiB, hints 0.0 MiB
+node A alive at the end of the workload: NO
+node B alive at the end of the workload: yes
+EXPECTED: node B is not a coordinator: B client writes +0 in every phase — yes
+EXPECTED: P2M: client writes at CL ALL fail (3200 of 3200 err) — yes
+EXPECTED: P2M: A logs "Message of size ~2.1e6 bytes exceeds allowed maximum of 1048576 bytes" — yes
+EXPECTED: P2M: peak LargeMessagePendingBytes on A toward B about 0 (= 0 in every 200 ms sample) — yes
+EXPECTED: P2M: no direct-memory growth from large payloads on A (direct and pool Size peak increment < one 2 MiB message) — NO (recorded; the AI judges it in the results file)
+EXPECTED: P2M: no direct-memory growth from large payloads on B (direct and pool Size peak increment < one 2 MiB message) — yes
+EXPECTED totals: yes=5 no=1
+cleanup: CassandraDaemon left: none; listeners on 7000/7102/7103/9042: none; data, commit log and hints deleted

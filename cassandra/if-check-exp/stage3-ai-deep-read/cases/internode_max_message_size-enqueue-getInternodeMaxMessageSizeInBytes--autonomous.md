@@ -117,4 +117,35 @@
 
 ## D. Stage-4 feedback
 
-`none yet`
+**Run 1, 2026-10-20 (stage 4; results file
+[`internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md`](../../stage4-runtime-verification/results/internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md);
+not committed).** Frozen version `9edf2196…`; run on `pc12` with both cluster nodes on loopback (127.0.0.2/.3; the
+audit's `pc57` + `pc50` are no longer in the experiment). No run 2.
+
+- **Unit (B2): Confirmed — B2g rows 1 and 4.** `enqueue` refuses exactly the *S* > *L* messages at 64 KiB, 1 MiB and
+  8 MiB (*L* accepted, *L* + 1 refused), a refused one adds 0 to `pendingBytes`/`pendingCount`/`submittedCount`/
+  `overloadedCount`, an accepted one exactly *S*; the control accepts all; 108/108 checks. Effect: caps.
+- **Cluster (B3): Confirmed — B3g row 1**, two sub-predictions missed. At 1 MiB all 2 MiB writes are refused at
+  `OutboundConnection.enqueue:332`, `LargeMessagePendingBytes` stays 0 and node 2 receives nothing; at 8 MiB and the
+  default (R1) all 3200 are accepted, pending peaks 18 / 16 MiB, node 2's direct pool +115 / +81 MiB. The 256 KiB
+  control passes. Missed: "no direct-memory growth" holds on node 2 but not on node 1 (+17 MiB, the client side, as in
+  the control); "higher by MiB to tens of MiB" is +108 MiB on node 2 at 8 MiB. Effect: caps only on some paths
+  (bypass) — see the first observation.
+- **A3 bypass (a) observed, sharper than written:** the refused `Message` is not only "already on the caller's heap";
+  `MessagingService.sendWriteWithCallback` registers its callback (holding the message) before `send()` throws, so it
+  stays until the write timeout (supplementary histogram: 20 refused writes keep 20 `CallbackInfo` and 41.9 MB, gone
+  after 30 s). The refusal reaches the client at once, so nothing slows it: at 1 MiB a 16-thread client exhausted
+  node 1's 1 GiB heap in 7–10 s, three times out of three. The coordinator also applies each refused write locally.
+- **A3 item 3 ("whether callers handle it is not traced") — observed:** the exception reaches `ErrorMessage` and the
+  client gets `ServerError` ("Unexpected exception during request", one `ERROR` with stack per write); the drop
+  counters stay 0.
+- **Runbook fixes made in the harness (dated 2026-10-20; B is left as filed in this session, so they are recorded
+  here):** (1) B2e step 4: `Integer.MAX_VALUE` is not settable (`DataStorageSpec.java:111`); use
+  `Integer.MAX_VALUE − 1`. (2) B2c: a peer that is not listening makes the link "failing to connect", which refuses
+  every reserve (`OutboundConnection.java:409-413`), and a started `InboundSockets` drains `pendingBytes`; use a bound
+  socket that is never accepted. (3) B3e step 4: run the 256 KiB control in its own lifetime at 1 MiB — node 1 runs
+  out of heap during the 2 MiB workload. (4) harness only: a JMX sampler bug (`,,ERR`) — fixed.
+- **Recommendations for stage 3 (not applied):** name the coordinator-side retention (callback until the write
+  timeout, local apply) in A3/A4 as a memory path the limit does not cover; B3d should name which node each memory
+  reading is for (the receiver holds the large-message buffers, the sender's networking pool did not move); B3f's
+  "MiB to tens of MiB" was too narrow for the receiver at 16 writes in flight.
