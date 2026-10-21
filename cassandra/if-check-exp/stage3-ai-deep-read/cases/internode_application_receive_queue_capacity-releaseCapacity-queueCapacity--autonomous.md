@@ -115,4 +115,41 @@ Bypasses and overshoot: (a) a single message can exceed `queueCapacity` and is a
 
 ## D. Stage-4 feedback
 
-`none yet`
+**2026-10-21 — run 1 (stage 4), closed; no run 2.** Results:
+[`stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md`](../../stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md);
+harness `stage4-runtime-verification/harness/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous/`
+(not committed). Two loopback nodes on `pc13` instead of `pc57` + `pc50` (environment deviation; the design is unchanged).
+
+- **Unit (B2): Confirmed — B2g row 1.** Every B2f value held (sequence `600/0, 1200/176, 1200/176, 600/0, 0/0`; old = Q
+  releases 0, old = Q + 1 releases 1; `throttledCount` +1 outer / +0 inner; Q 4096 borrows nothing; 5 × 100,000
+  concurrent messages end at (0, 0); 4 MiB default, 8 MiB via config). R1's mutants: releasing `bytes` instead of
+  `excess` and removing the guard both fail the test; the filed `>=` mutant passes (equivalent, as R1 said).
+- **Cluster (B3): B3g row 3 — partial, refines B1.** The accounting holds exactly: the large handler's plateau is
+  ⌊(Q + E)/M⌋·M (32 · 39 · 95 messages of 524,350 B at Q 64 KiB · 4 MiB · 32 MiB with 16 MiB reserves; 256 · 263 · 319
+  with the default reserves, refused `INSUFFICIENT_ENDPOINT`), and on the node every release with `old > cap` returned
+  exactly `min(old − cap, b)` and none with `old ≤ cap` returned anything (`:464`), reserves back to 0 after every drain.
+  **B1's heap clause does not hold for 512 KiB messages:** the retained heap (`Mutation` + `[B`) stayed at 36.4–37.5 MB
+  at every Q and both reserve sets (Δ 64 KiB → 32 MiB 0.60 MB < 2 × noise 2.21 MB, B3f's own claim-wrong clause), with
+  `ThrottledCount` > 0 throughout. **Row 3's stated meaning ("only the reserve binds") is wrong:** Q binds the accounted
+  bytes exactly; the heap is flat because a message above the 64 KiB large-message threshold is queued as frames from
+  the off-heap networking `BufferPool` and deserialized only on the `MutationStage` thread
+  (`InboundMessageHandler.java:358-384`, `:481-510`), so the heap holds at most `concurrent_writes` (32) deserialized
+  messages; the pool held the rest (0.9 → 5.9 → 50.8 MB above idle in set 1, 174–217 MB in set 2). The heap does follow
+  the limit when the ceiling holds fewer than 32 messages (B3h(b), 4 MiB reserves: 8 messages, 11.2 MB, ratio 0.31 for a
+  ceiling ratio 0.25) and for small messages, which are deserialized before they queue (B3h(c): 19,341 live
+  `Mutation`s, 2.17 × C). Effect: caps (accounting and held memory); the heap only on the small-message path.
+- **Missed sub-predictions (B3f/B3h):** k in 1.2–3 at 32 MiB (0.735); retained heap rising with Q; `ThrottledCount` rate
+  falling with Q (61.3 → 61.0 → 43.4/s: not between 64 KiB and 4 MiB); set 2 at 4 MiB "throttling near zero" and
+  "heap about 100 MiB × k" (1,076 refusals, 37.5 MB — at CL ONE the open loop of R4 fills any ceiling); B3h(a) "queued
+  bytes near zero without the hold" (B still reached 32 / 62 messages, but throttled 5 / 0 times against 1,900 / 1,344);
+  B3h(c) "1 KiB writes do not hit the limits" (they reached C = 20,971,520 B exactly, 2,060 refusals, and 15,496
+  expired at B behind a ~120 s backlog).
+- **Runbook defects (fixed in the harness before run 1; this file was frozen):** (1) R3 is not enough to keep messages
+  from expiring: the coordinator stamps a `MUTATION_REQ`'s expiry with the nearer of the verb timeout and
+  `native_transport_timeout` (12 s; `Dispatcher.java:238-244`, `Message.java:222-233`), so B3a also needs
+  `native_transport_timeout: 60000ms`. (2) B3e's `NetworkTopologyStrategy` `dc1: 2` places no replica under B3a's
+  `SimpleSnitch`; its data centre is `datacenter1`.
+- **For stage 3:** A2/A4 and B1/B3f should treat the queued bytes of large messages (> `LARGE_MESSAGE_THRESHOLD`) as
+  off-heap networking-pool memory, not heap; the heap share is bounded by `concurrent_writes` × message size. The
+  harness also set `hinted_handoff_enabled: false` and, on B, `memtable_allocation_type: offheap_buffers` (so the
+  histogram is not swamped by the memtable's copies), recorded in results §1.

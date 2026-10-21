@@ -1,0 +1,144 @@
+CHAIN start 2026-10-20T22:26:07-06:00
+UNIT-DONE 2026-10-20T22:28:40-06:00
+LABEL s1q64k 2026-10-20T22:28:40-06:00
+EXPECTED: read-back: queueCapacity 65536 = 65536, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: s1q64k: the hold fired (hold lines 3584 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: s1q64k: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4010, old > cap 3584, relx 3584) — yes
+EXPECTED: s1q64k: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s1q64k: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances -1 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s1q64k: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: s1q64k: limit reached: ThrottledCount delta 1900.0 > 0 and refusals 1900 > 0 (R2; B3g row 4) — yes
+EXPECTED: s1q64k: accounted ceiling (R2, Q + reserve): data peak q 16779232 in (C - M_max, C] = (16318401, 16842752] — yes
+EXPECTED: s1q64k: node-wide accounted bytes from A (vt using_bytes max 16779232) <= 4 x Q + E = 17039360 — yes
+EXPECTED: s1q64k: retained message heap (Mutation + [B above idle) peak 36410808 = k x C with 1.2 <= k <= 3 (k = 2.162) — yes
+EXPECTED: s1q64k: claim-wrong test: retained peak 36410808 not much greater than 3 x 16 MiB (line: 2 x 48 MiB = 100663296) — yes
+END s1q64k: EXPECTED yes 11 no 0
+LABEL s1q64k exit 0 2026-10-20T22:30:46-06:00
+LABEL s1q4m-1 2026-10-20T22:30:46-06:00
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: s1q4m-1: the hold fired (hold lines 3685 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: s1q4m-1: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4099, old > cap 3678, relx 3678) — yes
+EXPECTED: s1q4m-1: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s1q4m-1: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s1q4m-1: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: s1q4m-1: limit reached: ThrottledCount delta 1892.0 > 0 and refusals 1892 > 0 (R2; B3g row 4) — yes
+EXPECTED: s1q4m-1: accounted ceiling (R2, Q + reserve): data peak q 20449689 in (C - M_max, C] = (20447169, 20971520] — yes
+EXPECTED: s1q4m-1: node-wide accounted bytes from A (vt using_bytes max 20449689) <= 4 x Q + E = 33554432 — yes
+EXPECTED: s1q4m-1: retained message heap (Mutation + [B above idle) peak 36433424 = k x C with 1.2 <= k <= 3 (k = 1.737) — yes
+END s1q4m-1: EXPECTED yes 10 no 0
+LABEL s1q4m-1 exit 0 2026-10-20T22:32:47-06:00
+LABEL s1q32m 2026-10-20T22:32:47-06:00
+EXPECTED: read-back: queueCapacity 33554432 = 33554432, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: s1q32m: the hold fired (hold lines 3810 > 0, MutationStage threads in doVerb sleeping at the first load sample 29 > 0) — yes
+EXPECTED: s1q32m: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4224, old > cap 3745, relx 3745) — yes
+EXPECTED: s1q32m: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s1q32m: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s1q32m: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: s1q32m: limit reached: ThrottledCount delta 1344.0 > 0 and refusals 1344 > 0 (R2; B3g row 4) — yes
+EXPECTED: s1q32m: accounted ceiling (R2, Q + reserve): data peak q 49813345 in (C - M_max, C] = (49807297, 50331648] — yes
+EXPECTED: s1q32m: node-wide accounted bytes from A (vt using_bytes max 49813345) <= 4 x Q + E = 150994944 — yes
+EXPECTED: s1q32m: retained message heap (Mutation + [B above idle) peak 37013392 = k x C with 1.2 <= k <= 3 (k = 0.735) — NO (recorded; the AI judges it in the results file)
+END s1q32m: EXPECTED yes 9 no 1
+LABEL s1q32m exit 0 2026-10-20T22:34:48-06:00
+LABEL s1q4m-2 2026-10-20T22:34:48-06:00
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: s1q4m-2: the hold fired (hold lines 3663 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: s1q4m-2: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4076, old > cap 3650, relx 3650) — yes
+EXPECTED: s1q4m-2: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s1q4m-2: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s1q4m-2: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: s1q4m-2: limit reached: ThrottledCount delta 1889.0 > 0 and refusals 1889 > 0 (R2; B3g row 4) — yes
+EXPECTED: s1q4m-2: accounted ceiling (R2, Q + reserve): data peak q 20449689 in (C - M_max, C] = (20447169, 20971520] — yes
+EXPECTED: s1q4m-2: node-wide accounted bytes from A (vt using_bytes max 20449689) <= 4 x Q + E = 33554432 — yes
+EXPECTED: s1q4m-2: retained message heap (Mutation + [B above idle) peak 36946536 = k x C with 1.2 <= k <= 3 (k = 1.762) — yes
+END s1q4m-2: EXPECTED yes 10 no 0
+LABEL s1q4m-2 exit 0 2026-10-20T22:36:49-06:00
+LABEL s2q64k 2026-10-20T22:36:49-06:00
+EXPECTED: read-back: queueCapacity 65536 = 65536, endpoint reserve 134217728 = 134217728, global reserve 536870912 = 536870912 — yes
+EXPECTED: s2q64k: the hold fired (hold lines 4376 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: s2q64k: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4822, old > cap 4376, relx 4376) — yes
+EXPECTED: s2q64k: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s2q64k: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s2q64k: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+END s2q64k: EXPECTED yes 6 no 0
+LABEL s2q64k exit 0 2026-10-20T22:38:53-06:00
+LABEL s2q4m 2026-10-20T22:38:53-06:00
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 134217728 = 134217728, global reserve 536870912 = 536870912 — yes
+EXPECTED: s2q4m: the hold fired (hold lines 4344 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: s2q4m: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4787, old > cap 4337, relx 4337) — yes
+EXPECTED: s2q4m: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s2q4m: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s2q4m: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: s2q4m: set 2, Q 4 MiB: throttling near zero (delta 1076.0 <= 1 % of 4443.0 received) — NO (recorded; the AI judges it in the results file)
+EXPECTED: s2q4m: set 2, Q 4 MiB: peak queued heap bounded by the workload, about 100 MiB x k (k 1.2-3): 37537952 in [125829120, 314572800] — NO (recorded; the AI judges it in the results file)
+END s2q4m: EXPECTED yes 6 no 2
+LABEL s2q4m exit 0 2026-10-20T22:40:57-06:00
+LABEL s2q32m 2026-10-20T22:40:57-06:00
+EXPECTED: read-back: queueCapacity 33554432 = 33554432, endpoint reserve 134217728 = 134217728, global reserve 536870912 = 536870912 — yes
+EXPECTED: s2q32m: the hold fired (hold lines 4530 > 0, MutationStage threads in doVerb sleeping at the first load sample 31 > 0) — yes
+EXPECTED: s2q32m: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 4991, old > cap 4463, relx 4463) — yes
+EXPECTED: s2q32m: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s2q32m: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s2q32m: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+END s2q32m: EXPECTED yes 6 no 0
+LABEL s2q32m exit 0 2026-10-20T22:43:06-06:00
+LABEL s1q4m-3 2026-10-20T22:43:06-06:00
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: s1q4m-3: the hold fired (hold lines 3540 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: s1q4m-3: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 3950, old > cap 3533, relx 3533) — yes
+EXPECTED: s1q4m-3: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: s1q4m-3: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: s1q4m-3: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: s1q4m-3: limit reached: ThrottledCount delta 1711.0 > 0 and refusals 1711 > 0 (R2; B3g row 4) — yes
+EXPECTED: s1q4m-3: accounted ceiling (R2, Q + reserve): data peak q 20449689 in (C - M_max, C] = (20447169, 20971520] — yes
+EXPECTED: s1q4m-3: node-wide accounted bytes from A (vt using_bytes max 20449689) <= 4 x Q + E = 33554432 — yes
+EXPECTED: s1q4m-3: retained message heap (Mutation + [B above idle) peak 37536176 = k x C with 1.2 <= k <= 3 (k = 1.79) — yes
+END s1q4m-3: EXPECTED yes 10 no 0
+LABEL s1q4m-3 exit 0 2026-10-20T22:45:06-06:00
+LABEL ctla-q64k 2026-10-20T22:45:06-06:00
+EXPECTED: read-back: queueCapacity 65536 = 65536, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: ctla-q64k: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 22692, old > cap 22279, relx 22279) — yes
+EXPECTED: ctla-q64k: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: ctla-q64k: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: ctla-q64k: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+END ctla-q64k: EXPECTED yes 5 no 0
+LABEL ctla-q64k exit 0 2026-10-20T22:47:09-06:00
+LABEL ctla-q32m 2026-10-20T22:47:09-06:00
+EXPECTED: read-back: queueCapacity 33554432 = 33554432, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: ctla-q32m: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 23129, old > cap 0, relx 0) — yes
+EXPECTED: ctla-q32m: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: ctla-q32m: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: ctla-q32m: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+END ctla-q32m: EXPECTED yes 5 no 0
+LABEL ctla-q32m exit 0 2026-10-20T22:49:12-06:00
+LABEL ctlb 2026-10-20T22:49:12-06:00
+EXPECTED: read-back: queueCapacity 65536 = 65536, endpoint reserve 4194304 = 4194304, global reserve 4194304 = 4194304 — yes
+EXPECTED: ctlb: the hold fired (hold lines 1174 > 0, MutationStage threads in doVerb sleeping at the first load sample 8 > 0) — yes
+EXPECTED: ctlb: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 1702, old > cap 1174, relx 1174) — yes
+EXPECTED: ctlb: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: ctlb: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: ctlb: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: ctlb: limit reached: ThrottledCount delta 760.0 > 0 and refusals 760 > 0 (R2; B3g row 4) — yes
+EXPECTED: ctlb: accounted ceiling (R2, Q + reserve): data peak q 4194808 in (C - M_max, C] = (3735489, 4259840] — yes
+EXPECTED: ctlb: node-wide accounted bytes from A (vt using_bytes max 4194808) <= 4 x Q + E = 4456448 — yes
+END ctlb: EXPECTED yes 9 no 0
+LABEL ctlb exit 0 2026-10-20T22:51:19-06:00
+LABEL ctlc 2026-10-20T22:51:19-06:00
+EXPECTED: read-back: queueCapacity 4194304 = 4194304, endpoint reserve 16777216 = 16777216, global reserve 16777216 = 16777216 — yes
+EXPECTED: ctlc: the hold fired (hold lines 9504 > 0, MutationStage threads in doVerb sleeping at the first load sample 32 > 0) — yes
+EXPECTED: ctlc: line 464 on the node: every release with old > cap is followed by one excess release of min(old - cap, b), none with old <= cap ({'relx_missing': 0, 'relx_unexpected': 0, 'excess_wrong': 0, 'relx_orphan': 0}; rel 26114, old > cap 21007, relx 21007) — yes
+EXPECTED: ctlc: every internode SUCCESS acq has q <= cap + E (violations 0); no reserve above its limit (0) — yes
+EXPECTED: ctlc: drained: A's using_bytes 0 and using_reserve_bytes 0 back to 0; live Mutation instances 0 <= idle + 2 (B3g row 5) — yes
+EXPECTED: ctlc: no OutOfMemoryError on B (0) or A (0), no UnrecoverableIllegalStateException on B (0) — yes
+EXPECTED: ctlc: 1 KiB writes do not hit the limits: no refusal (2060), ThrottledCount delta 2060.0 = 0, data peak q 20971520 <= Q 4194304 — NO (recorded; the AI judges it in the results file)
+END ctlc: EXPECTED yes 6 no 1
+LABEL ctlc exit 0 2026-10-20T22:53:59-06:00
+EXPECTED: B3g row 1 / B3f: retained heap rises with Q in set 1: 36410808 < 36972045 < 37013392, and 32 MiB - 64 KiB = 602584 > 2 x noise 2205504 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3f: the claim-wrong clause "does not change from 64 KiB to 32 MiB" is not met: |difference| 602584 > 2 x noise 2205504 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3f / B3g row 1: ThrottledCount rate falls as Q rises: 61.29 > 61.02 > 43.35 /s (differences > 2 x noise 12.071) — NO (recorded; the AI judges it in the results file)
+EXPECTED: accounted ceiling rises with Q in set 1: peak q 16779232 < 20449689 < 49813345 (each step > 2 x noise 0) — yes
+EXPECTED: B3h(a): unheld ctla-q64k: data peak q 16779232 <= 10 % of the held s1q64k peak 16779232, and ThrottledCount delta 5.0 = 0 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3h(a): unheld ctla-q32m: data peak q 32509700 <= 10 % of the held s1q32m peak 49813345, and ThrottledCount delta 0.0 = 0 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3h(b): reserves 16 -> 4 MiB at Q 64 KiB: retained ratio 0.307 within x2 of the ceiling ratio 0.253 ("drops proportionally") — yes
+END analyze: EXPECTED yes 2 no 5
+CHAIN-DONE 2026-10-20T22:53:59-06:00

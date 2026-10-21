@@ -1,0 +1,20 @@
+# cassandra-stress user profile for internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous
+# (case file B3c, control B3h(c): 1 KiB writes): one blob column of fixed(1024) bytes, one row per
+# partition. The keyspace is created beforehand by client.py (NetworkTopologyStrategy, the SimpleSnitch's datacenter1: 2,
+# so every write through A is forwarded to B); the definitions below are used only if it is missing.
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE ks WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 2};
+table: t
+table_definition: |
+  CREATE TABLE t (pk bigint PRIMARY KEY, v blob)
+columnspec:
+  - name: pk
+    population: seq(1..1000000000)
+  - name: v
+    size: fixed(1024)
+insert:
+  partitions: fixed(1)
+  select: fixed(1)/1
+  batchtype: UNLOGGED
+queries: {}

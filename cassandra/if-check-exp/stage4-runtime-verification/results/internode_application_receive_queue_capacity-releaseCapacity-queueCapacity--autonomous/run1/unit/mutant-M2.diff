@@ -1,0 +1,15 @@
+ src/java/org/apache/cassandra/net/AbstractMessageHandler.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+diff --git a/src/java/org/apache/cassandra/net/AbstractMessageHandler.java b/src/java/org/apache/cassandra/net/AbstractMessageHandler.java
+index 5b5b8b7..4e7a8f5 100644
+--- a/src/java/org/apache/cassandra/net/AbstractMessageHandler.java
++++ b/src/java/org/apache/cassandra/net/AbstractMessageHandler.java
+@@ -461,7 +461,7 @@ public abstract class AbstractMessageHandler extends ChannelInboundHandlerAdapte
+     public void releaseCapacity(int bytes)
+     {
+         long oldQueueSize = queueSizeUpdater.getAndAdd(this, -bytes);
+-        if (oldQueueSize > queueCapacity)
++        if (true) // STAGE4 MUTANT M2 (guard removed)
+         {
+             long excess = min(oldQueueSize - queueCapacity, bytes);
+ 

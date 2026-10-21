@@ -1,0 +1,24 @@
+# ---- stage4 rrc lines ----
+cluster_name: stage4-rrc
+num_tokens: 1
+initial_token: 0
+endpoint_snitch: SimpleSnitch
+auto_bootstrap: false
+listen_address: 127.0.0.3
+rpc_address: 127.0.0.3
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.2:7000"
+data_file_directories:
+    - /mnt/stage4-rrc/B/data
+commitlog_directory: /mnt/stage4-rrc/B/commitlog
+hints_directory: /mnt/stage4-rrc/B/hints
+saved_caches_directory: /mnt/stage4-rrc/B/saved_caches
+cdc_raw_directory: /mnt/stage4-rrc/B/cdc_raw
+write_request_timeout: 60000ms
+native_transport_timeout: 60000ms
+hinted_handoff_enabled: false
+auto_snapshot: false
+memtable_allocation_type: offheap_buffers
+internode_application_receive_queue_capacity: 64KiB

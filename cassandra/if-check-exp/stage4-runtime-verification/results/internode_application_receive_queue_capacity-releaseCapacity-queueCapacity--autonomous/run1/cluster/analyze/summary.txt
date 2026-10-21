@@ -1,0 +1,23 @@
+cluster-run analyze 2026-10-20 22:53:59 -0600 run run1; clone /users/jason92/cassandra-run1; harness md5 0aaa45f7c3ab  hold-handler.btm; ac1fcb36f0fc  receive-trace.btm; a309f5a2f2cf  client.py; 0a064f95c592  cluster-run.py; 10190b6aa96b  sample-vt.py; 70e73632af6c  Jmx.java; be0c1b20d351  ReleaseCapacityConfigTest.java; 49d08bef6e2d  ReleaseCapacityProbeTest.java; 01f9a4a3775b  make-node-yaml.sh; 0cbed68be3d7  unit-run.sh; 66473d6296af  big.yaml; f2e9957a0523  small.yaml; 
+analyze 2026-10-20 22:53:59: labels present ['ctla-q32m', 'ctla-q64k', 'ctlb', 'ctlc', 's1q32m', 's1q4m-1', 's1q4m-2', 's1q4m-3', 's1q64k', 's2q32m', 's2q4m', 's2q64k']
+  s1q64k: C 16842752 peak_q 16779232 retained_peak 36410808 k 2.1618087115454765 throttled 1900.0 rate 61.292299751604894 received 3677.0 pool_max 903168.0 live Mutation [31, 30, 31]
+  s1q4m-1: C 20971520 peak_q 20449689 retained_peak 36433424 k 1.737281036376953 throttled 1892.0 rate 63.0687689589653 received 3773.0 pool_max 5885952.0 live Mutation [31, 31, 32]
+  s1q4m-2: C 20971520 peak_q 20449689 retained_peak 36946536 k 1.7617481231689454 throttled 1889.0 rate 62.96876562552085 received 3751.0 pool_max 5820416.0 live Mutation [32, 32, 32]
+  s1q4m-3: C 20971520 peak_q 20449689 retained_peak 37536176 k 1.7898643493652344 throttled 1711.0 rate 57.03333333333333 received 3630.0 pool_max 5820416.0 live Mutation [21, 32, 32]
+  s1q32m: C 50331648 peak_q 49813345 retained_peak 37013392 k 0.7353900273640951 throttled 1344.0 rate 43.354838709677416 received 3901.0 pool_max 50765824.0 live Mutation [31, 31, 32]
+  s2q64k: C 134283264 peak_q 134233856 retained_peak 36422272 k 0.271234634272816 throttled 1326.0 rate 38.9988529749125 received 4476.0 pool_max 174038699.0 live Mutation [32, 32, 32]
+  s2q4m: C 138412032 peak_q 137904313 retained_peak 37537952 k 0.2712043993400805 throttled 1076.0 rate 31.647058823529413 received 4443.0 pool_max 175355627.0 live Mutation [32, 32, 32]
+  s2q32m: C 167772160 peak_q 167267969 retained_peak 37008528 k 0.22058801651000975 throttled 915.0 rate 26.142857142857142 received 4633.0 pool_max 217371913.0 live Mutation [31, 32, 32]
+  ctla-q64k: C 16842752 peak_q 16779232 retained_peak 5663608 k 0.3362638124696012 throttled 5.0 rate 0.16666666666666666 received 22367.0 pool_max 4118528.0 live Mutation [1, 2, 0]
+  ctla-q32m: C 50331648 peak_q 32509700 retained_peak 6782488 k 0.13475592931111655 throttled 0.0 rate 0.0 received 22805.0 pool_max 1261568.0 live Mutation [1, 2, 0]
+  ctlb: C 4259840 peak_q 4194808 retained_peak 11171720 k 2.6225679837740383 throttled 760.0 rate 20.54054054054054 received 1285.0 pool_max 802816.0 live Mutation [8, 8, 8]
+  ctlc: C 20971520 peak_q 20971520 retained_peak 45498992 k 2.169561004638672 throttled 2060.0 rate 30.746268656716417 received 25200.0 pool_max 131136.0 live Mutation [17452, 19341, 19340, 19339, 18312, 16744]
+noise (B3h(d), range of 3 repeats of set 1 Q 4 MiB): retained [36433424, 36946536, 37536176] -> 1102752; peak q [20449689, 20449689, 20449689] -> 0; throttled rate [63.0687689589653, 62.96876562552085, 57.03333333333333] -> 6.035
+EXPECTED: B3g row 1 / B3f: retained heap rises with Q in set 1: 36410808 < 36972045 < 37013392, and 32 MiB - 64 KiB = 602584 > 2 x noise 2205504 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3f: the claim-wrong clause "does not change from 64 KiB to 32 MiB" is not met: |difference| 602584 > 2 x noise 2205504 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3f / B3g row 1: ThrottledCount rate falls as Q rises: 61.29 > 61.02 > 43.35 /s (differences > 2 x noise 12.071) — NO (recorded; the AI judges it in the results file)
+EXPECTED: accounted ceiling rises with Q in set 1: peak q 16779232 < 20449689 < 49813345 (each step > 2 x noise 0) — yes
+EXPECTED: B3h(a): unheld ctla-q64k: data peak q 16779232 <= 10 % of the held s1q64k peak 16779232, and ThrottledCount delta 5.0 = 0 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3h(a): unheld ctla-q32m: data peak q 32509700 <= 10 % of the held s1q32m peak 49813345, and ThrottledCount delta 0.0 = 0 — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3h(b): reserves 16 -> 4 MiB at Q 64 KiB: retained ratio 0.307 within x2 of the ceiling ratio 0.253 ("drops proportionally") — yes
+END analyze: EXPECTED yes 2 no 5

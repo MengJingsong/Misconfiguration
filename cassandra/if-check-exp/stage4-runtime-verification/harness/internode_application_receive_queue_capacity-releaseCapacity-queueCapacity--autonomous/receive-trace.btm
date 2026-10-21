@@ -1,0 +1,49 @@
+# Byteman observation rules for internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous
+# (case file B3d(1): "use the Byteman rule on AbstractMessageHandler.releaseCapacity to log queueSize per call").
+# They change no behaviour. Every line goes to the file named by -Dstage4.trace (default rrc.trace). Adapted from the
+# closed sibling's receive-trace.btm (acquireCapacity--guided); the release side is extended to the target line :464.
+#
+#   acq id=<handler id> b=<bytes> out=<Outcome> q=<queueSize after> cap=<queueCapacity> ep=<using>/<limit>
+#       gl=<using>/<limit> ms=<epoch ms>
+#     at the exit of AbstractMessageHandler.acquireCapacity(Limit, Limit, int) (the check, :419). On a reactivation one of
+#     the two reserves is the wait queue's lease (a Basic limit), not the configured reserve.
+#   rel id=<handler id> t=<thread> b=<bytes> old=<oldQueueSize> cap=<queueCapacity> ms=<epoch ms>
+#     in releaseCapacity(int) right after queueSizeUpdater.getAndAdd(this, -bytes) (:463): old is its return value, the
+#     operand of the target line :464.
+#   relx id=<handler id> t=<thread> old=<oldQueueSize> excess=<excess> b=<bytes> ms=<epoch ms>
+#     in releaseCapacity(int) at the first invocation of Limit.release(long) (:468, the endpoint reserve), i.e. only when
+#     the guard `oldQueueSize > queueCapacity` was true; excess is the local the method releases to both reserves (:466).
+#     (The build compiles with debuglevel source,lines,vars, so the locals are visible.) A rel line with old > cap is
+#     followed, on the same thread, by exactly one relx line with excess = min(old - cap, b); a rel line with old <= cap
+#     by none.
+
+RULE rrc acquire exit
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD acquireCapacity(org.apache.cassandra.net.ResourceLimits$Limit, org.apache.cassandra.net.ResourceLimits$Limit, int)
+AT EXIT
+IF true
+DO traceOpen("rrc", java.lang.System.getProperty("stage4.trace", "rrc.trace"));
+   traceln("rrc", "acq id=" + $0.id() + " b=" + $3 + " out=" + $! + " q=" + $0.queueSize + " cap=" + $0.queueCapacity
+                  + " ep=" + $1.using() + "/" + $1.limit() + " gl=" + $2.using() + "/" + $2.limit()
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rrc release decrement
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD releaseCapacity(int)
+AFTER INVOKE java.util.concurrent.atomic.AtomicLongFieldUpdater.getAndAdd
+IF true
+DO traceOpen("rrc", java.lang.System.getProperty("stage4.trace", "rrc.trace"));
+   traceln("rrc", "rel id=" + $0.id() + " t=" + java.lang.Thread.currentThread().getName() + " b=" + $1 + " old=" + $!
+                  + " cap=" + $0.queueCapacity + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rrc release excess
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD releaseCapacity(int)
+AT INVOKE release(long)
+IF true
+DO traceOpen("rrc", java.lang.System.getProperty("stage4.trace", "rrc.trace"));
+   traceln("rrc", "relx id=" + $0.id() + " t=" + java.lang.Thread.currentThread().getName() + " old=" + $oldQueueSize
+                  + " excess=" + $excess + " b=" + $1 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

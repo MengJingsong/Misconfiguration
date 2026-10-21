@@ -1,0 +1,133 @@
+ok   unit: every check line ok: 109 checks, 0 not ok, 0 with expected != actual
+ok   unit B2f script.Q1024.R2048.sequence: actual [600/0, 1200/176, 1200/176, 600/0, 0/0] vs B2f [600/0, 1200/176, 1200/176, 600/0, 0/0]
+ok   unit B2f script.Q1024.R2048.outcomes: actual [SUCCESS, SUCCESS, INSUFFICIENT_GLOBAL] vs B2f [SUCCESS, SUCCESS, INSUFFICIENT_GLOBAL]
+ok   unit B2f boundary.eq.rel.released: actual E=100 G=100 vs B2f E=100 G=100
+ok   unit B2f boundary.plus1.rel.released1: actual E=100 G=100 vs B2f E=100 G=100
+ok   unit B2f throttled.outer.count: actual 1 vs B2f 1
+ok   unit B2f throttled.inner.count: actual 0 vs B2f 0
+ok   unit B2f script.Q4096.R2048.borrowsNothing: actual 0 vs B2f 0
+ok   unit B2f script.Q4096.R8192.borrowsNothing: actual 0 vs B2f 0
+ok   unit B2f defaults.queueCapacity: actual 4194304 vs B2f 4194304
+ok   unit B2f config.8MiB.queueCapacity: actual 8388608 vs B2f 8388608
+ok   unit B2f concurrent.rep1.final: actual (0,0,0) vs B2f (0,0,0)
+ok   unit B2f concurrent.rep2.final: actual (0,0,0) vs B2f (0,0,0)
+ok   unit B2f concurrent.rep3.final: actual (0,0,0) vs B2f (0,0,0)
+ok   unit B2f concurrent.rep4.final: actual (0,0,0) vs B2f (0,0,0)
+ok   unit B2f concurrent.rep5.final: actual (0,0,0) vs B2f (0,0,0)
+ok   unit B2f concurrent.rep1.errors: actual [] vs B2f []
+ok   unit B2f concurrent.rep2.errors: actual [] vs B2f []
+ok   unit B2f concurrent.rep3.errors: actual [] vs B2f []
+ok   unit B2f concurrent.rep4.errors: actual [] vs B2f []
+ok   unit B2f concurrent.rep5.errors: actual [] vs B2f []
+ok   unit B2f invariant E == G == max(0, q - Q) at every script step: 23 steps
+ok   unit B2f never q - Q > R for an admitted state: 23 steps
+ok   unit B2f final state (0,0,0) for all four (Q, R): ['script.Q1024.R2048.final', 'script.Q1024.R8192.final', 'script.Q4096.R2048.final', 'script.Q4096.R8192.final']
+ok   unit upstream-ResourceLimitsTest.ant.log: passes: tests/failures/errors (5, 0, 0), build ok True
+ok   unit probe.ant.log: passes: tests/failures/errors (6, 0, 0), build ok True
+ok   unit config.ant.log: passes: tests/failures/errors (1, 0, 0), build ok True
+ok   unit mutant-M1.ant.log: fails: tests/failures/errors (6, 1, 3), build ok False
+ok   unit mutant-M2.ant.log: fails: tests/failures/errors (6, 3, 0), build ok False
+ok   unit mutant-M0.ant.log: passes: tests/failures/errors (6, 0, 0), build ok True
+     mutant M1 diff: -            long excess = min(oldQueueSize - queueCapacity, bytes); | +            long excess = bytes; // STAGE4 MUTANT M1
+     mutant M2 diff: -        if (oldQueueSize > queueCapacity) | +        if (true) // STAGE4 MUTANT M2 (guard removed)
+     mutant M0 diff: -        if (oldQueueSize > queueCapacity) | +        if (oldQueueSize >= queueCapacity) // STAGE4 MUTANT M0 (filed, equivalent per R1)
+     mutant M1: 16 mismatching checks, e.g. STAGE4 check boundary.plus1.rel.released1 expected=E=100 G=100 actual=E=96 G=96 MISMATCH
+     mutant M2: 11 mismatching checks, e.g. STAGE4 check concurrent.rep1.errors expected=[] actual=[java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError] 
+ok   s1q64k: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 3584 releases above cap, released 1879205961 B
+     s1q64k: M 524350.0, peak q 16779232 (32.000 M), C 16842752, refusals 1900 {'INSUFFICIENT_GLOBAL': 1900}, ThrottledCount delta 1900.0 over 30.999 s = 61.29/s, retained [36320672, 35365240, 36410808] peak 36410808 (k 2.162), live Mutation [31, 30, 31], held workers 32, hold lines 3584, drained True, OOM 0
+ok   s1q64k: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/16779232/1900/36410808 vs run 524350.0/16779232/1900/36410808
+ok   s1q64k: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1900.0 vs 1900.0
+ok   s1q64k: the hold fired: hold lines 3584, held workers 32
+ok   s1q64k: drained, live Mutation back to idle (+-1), no OOM: 
+ok   s1q64k: B3f/R2 accounted ceiling: peak in (C - M, C]: 16779232 in (16318402.0, 16842752]
+ok   s1q64k: limit reached (B3g row 4 excluded): refusals > 0, ThrottledCount > 0: 1900, 1900.0
+     s1q64k: B3f k = retained / C = 2.162 (B3f band 1.2-3: in)
+ok   s1q4m-1: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 3678 releases above cap, released 1928036621 B
+     s1q4m-1: M 524350, peak q 20449689 (39.000 M), C 20971520, refusals 1892 {'INSUFFICIENT_GLOBAL': 1892}, ThrottledCount delta 1892.0 over 31.0 s = 61.03/s, retained [35278080, 35965056, 36433424] peak 36433424 (k 1.737), live Mutation [31, 31, 32], held workers 32, hold lines 3685, drained True, OOM 0
+ok   s1q4m-1: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350/20449689/1892/36433424 vs run 524350/20449689/1892/36433424
+ok   s1q4m-1: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1892.0 vs 1892.0
+ok   s1q4m-1: the hold fired: hold lines 3685, held workers 32
+ok   s1q4m-1: drained, live Mutation back to idle (+0), no OOM: 
+ok   s1q4m-1: B3f/R2 accounted ceiling: peak in (C - M, C]: 20449689 in (20447170, 20971520]
+ok   s1q4m-1: limit reached (B3g row 4 excluded): refusals > 0, ThrottledCount > 0: 1892, 1892.0
+     s1q4m-1: B3f k = retained / C = 1.737 (B3f band 1.2-3: in)
+ok   s1q4m-2: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 3650 releases above cap, released 1913354775 B
+     s1q4m-2: M 524350.0, peak q 20449689 (39.000 M), C 20971520, refusals 1889 {'INSUFFICIENT_GLOBAL': 1889}, ThrottledCount delta 1889.0 over 31.0 s = 60.94/s, retained [36327968, 36946536, 36436688] peak 36946536 (k 1.762), live Mutation [32, 32, 32], held workers 32, hold lines 3663, drained True, OOM 0
+ok   s1q4m-2: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/20449689/1889/36946536 vs run 524350.0/20449689/1889/36946536
+ok   s1q4m-2: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1889.0 vs 1889.0
+ok   s1q4m-2: the hold fired: hold lines 3663, held workers 32
+ok   s1q4m-2: drained, live Mutation back to idle (+0), no OOM: 
+ok   s1q4m-2: B3f/R2 accounted ceiling: peak in (C - M, C]: 20449689 in (20447170.0, 20971520]
+ok   s1q4m-2: limit reached (B3g row 4 excluded): refusals > 0, ThrottledCount > 0: 1889, 1889.0
+     s1q4m-2: B3f k = retained / C = 1.762 (B3f band 1.2-3: in)
+ok   s1q4m-3: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 3533 releases above cap, released 1852005799 B
+     s1q4m-3: M 524350, peak q 20449689 (39.000 M), C 20971520, refusals 1711 {'INSUFFICIENT_GLOBAL': 1711}, ThrottledCount delta 1711.0 over 31.001 s = 55.19/s, retained [24789248, 37536176, 36955656] peak 37536176 (k 1.790), live Mutation [21, 32, 32], held workers 32, hold lines 3540, drained True, OOM 0
+ok   s1q4m-3: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350/20449689/1711/37536176 vs run 524350/20449689/1711/37536176
+ok   s1q4m-3: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1711.0 vs 1711.0
+ok   s1q4m-3: the hold fired: hold lines 3540, held workers 32
+ok   s1q4m-3: drained, live Mutation back to idle (+0), no OOM: 
+ok   s1q4m-3: B3f/R2 accounted ceiling: peak in (C - M, C]: 20449689 in (20447170, 20971520]
+ok   s1q4m-3: limit reached (B3g row 4 excluded): refusals > 0, ThrottledCount > 0: 1711, 1711.0
+     s1q4m-3: B3f k = retained / C = 1.79 (B3f band 1.2-3: in)
+ok   s1q32m: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 3745 releases above cap, released 1963171531 B
+     s1q32m: M 524350.0, peak q 49813345 (95.000 M), C 50331648, refusals 1344 {'INSUFFICIENT_GLOBAL': 1344}, ThrottledCount delta 1344.0 over 31.0 s = 43.35/s, retained [35801016, 37013392, 36416624] peak 37013392 (k 0.735), live Mutation [31, 31, 32], held workers 29, hold lines 3810, drained True, OOM 0
+ok   s1q32m: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/49813345/1344/37013392 vs run 524350.0/49813345/1344/37013392
+ok   s1q32m: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1344.0 vs 1344.0
+ok   s1q32m: the hold fired: hold lines 3810, held workers 29
+ok   s1q32m: drained, live Mutation back to idle (+0), no OOM: 
+ok   s1q32m: B3f/R2 accounted ceiling: peak in (C - M, C]: 49813345 in (49807298.0, 50331648]
+ok   s1q32m: limit reached (B3g row 4 excluded): refusals > 0, ThrottledCount > 0: 1344, 1344.0
+     s1q32m: B3f k = retained / C = 0.735 (B3f band 1.2-3: OUT)
+ok   s2q64k: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 4376 releases above cap, released 2294491405 B
+     s2q64k: M 524350.0, peak q 134233856 (256.000 M), C 134283264, refusals 1326 {'INSUFFICIENT_ENDPOINT': 1326}, ThrottledCount delta 1326.0 over 34.001 s = 39.0/s, retained [36328544, 36422272, 36419696] peak 36422272 (k 0.271), live Mutation [32, 32, 32], held workers 32, hold lines 4376, drained True, OOM 0
+ok   s2q64k: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/134233856/1326/36422272 vs run 524350.0/134233856/1326/36422272
+ok   s2q64k: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1326.0 vs 1326.0
+ok   s2q64k: the hold fired: hold lines 4376, held workers 32
+ok   s2q64k: drained, live Mutation back to idle (+0), no OOM: 
+ok   s2q4m: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 4337 releases above cap, released 2273583433 B
+     s2q4m: M 524350.0, peak q 137904313 (263.001 M), C 138412032, refusals 1076 {'INSUFFICIENT_ENDPOINT': 1076}, ThrottledCount delta 1076.0 over 34.999 s = 30.74/s, retained [36326016, 37537952, 36433272] peak 37537952 (k 0.271), live Mutation [32, 32, 32], held workers 32, hold lines 4344, drained True, OOM 0
+ok   s2q4m: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/137904313/1076/37537952 vs run 524350.0/137904313/1076/37537952
+ok   s2q4m: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 1076.0 vs 1076.0
+ok   s2q4m: the hold fired: hold lines 4344, held workers 32
+ok   s2q4m: drained, live Mutation back to idle (+0), no OOM: 
+ok   s2q32m: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 4463 releases above cap, released 2339655034 B
+     s2q32m: M 524350, peak q 167267969 (319.001 M), C 167772160, refusals 915 {'INSUFFICIENT_ENDPOINT': 915}, ThrottledCount delta 915.0 over 35.0 s = 26.14/s, retained [35276448, 37008528, 36429976] peak 37008528 (k 0.221), live Mutation [31, 32, 32], held workers 31, hold lines 4530, drained True, OOM 0
+ok   s2q32m: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350/167267969/915/37008528 vs run 524350/167267969/915/37008528
+ok   s2q32m: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 915.0 vs 915.0
+ok   s2q32m: the hold fired: hold lines 4530, held workers 31
+ok   s2q32m: drained, live Mutation back to idle (+0), no OOM: 
+ok   ctla-q64k: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 22279 releases above cap, released 11673220109 B
+     ctla-q64k: M 524350.0, peak q 16779232 (32.000 M), C 16842752, refusals 5 {'INSUFFICIENT_GLOBAL': 5}, ThrottledCount delta 5.0 over 31.0 s = 0.16/s, retained [5534976, 5663608, 2934456] peak 5663608 (k 0.336), live Mutation [1, 2, 0], held workers 0, hold lines 0, drained True, OOM 0
+ok   ctla-q64k: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/16779232/5/5663608 vs run 524350.0/16779232/5/5663608
+ok   ctla-q64k: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 5.0 vs 5.0
+ok   ctla-q64k: drained, live Mutation back to idle (+0), no OOM: 
+ok   ctla-q32m: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 0 handlers, 0 releases above cap, released 0 B
+     ctla-q32m: M 524350, peak q 32509700 (62.000 M), C 50331648, refusals 0 {}, ThrottledCount delta 0.0 over 32.0 s = 0.0/s, retained [4419760, 6782488, 3537744] peak 6782488 (k 0.135), live Mutation [1, 2, 0], held workers 0, hold lines 0, drained True, OOM 0
+ok   ctla-q32m: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350/32509700/0/6782488 vs run 524350/32509700/0/6782488
+ok   ctla-q32m: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 0.0 vs 0.0
+ok   ctla-q32m: drained, live Mutation back to idle (+0), no OOM: 
+ok   ctlb: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 1174 releases above cap, released 615521628 B
+     ctlb: M 524350.0, peak q 4194808 (8.000 M), C 4259840, refusals 760 {'INSUFFICIENT_GLOBAL': 760}, ThrottledCount delta 760.0 over 37.0 s = 20.54/s, retained [11149152, 11167568, 11171720] peak 11171720 (k 2.623), live Mutation [8, 8, 8], held workers 8, hold lines 1174, drained True, OOM 0
+ok   ctlb: agrees with readings.json (M, peak q, refusals, retained peak): mine 524350.0/4194808/760/11171720 vs run 524350.0/4194808/760/11171720
+ok   ctlb: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 760.0 vs 760.0
+ok   ctlb: the hold fired: hold lines 1174, held workers 8
+ok   ctlb: drained, live Mutation back to idle (+0), no OOM: 
+ok   ctlb: B3f/R2 accounted ceiling: peak in (C - M, C]: 4194808 in (3735490.0, 4259840]
+ok   ctlb: limit reached (B3g row 4 excluded): refusals > 0, ThrottledCount > 0: 760, 760.0
+ok   ctlc: line 464 per handler: sum of min(old - cap, b) over releases with old > cap = sum of released excess, counts equal, no excess release at old <= cap: 1 handlers, 21007 releases above cap, released 22775708 B
+     ctlc: M 1084, peak q 20971520 (19346.421 M), C 20971520, refusals 2060 {'INSUFFICIENT_GLOBAL': 2060}, ThrottledCount delta 2060.0 over 67.0 s = 30.75/s, retained [41296688, 45493704, 45498152, 45498992, 43239104, 39779688] peak 45498992 (k 2.170), live Mutation [17452, 19341, 19340, 19339, 18312, 16744], held workers 32, hold lines 9504, drained True, OOM 0
+ok   ctlc: agrees with readings.json (M, peak q, refusals, retained peak): mine 1084/20971520/2060/45498992 vs run 1084.0/20971520/2060/45498992
+ok   ctlc: ThrottledCount delta agrees with readings.json within 1 % (window from session.log, 1 s grain): 2060.0 vs 2060.0
+ok   ctlc: the hold fired: hold lines 9504, held workers 32
+ok   ctlc: drained, live Mutation back to idle (+0), no OOM: 
+     noise (range of 3 repeats): retained 1102752, rate 5.840/s, peak q 0
+     set 1 retained peak 64K / 4M (mean) / 32M: 36410808 / 36972045 / 37013392; 32M - 64K = 602584 vs 2 x noise 2205504
+     set 1 ThrottledCount rate 64K / 4M (mean) / 32M: 61.29 / 59.05 / 43.35 /s
+     set 1 accounted peak 64K / 4M / 32M: 16779232 / 20449689 / 49813345
+ok   cross-run: "retained heap rises with Q in set 1" recomputed = False; analyze says False: 
+ok   cross-run: "ThrottledCount rate falls as Q rises" recomputed = False; analyze says False: 
+     B3h(a) ctla-q64k: unheld peak q 16779232 vs held 16779232 (1.000); ThrottledCount 5.0; retained 5663608
+     B3h(a) ctla-q32m: unheld peak q 32509700 vs held 49813345 (0.653); ThrottledCount 0.0; retained 6782488
+     B3h(b): retained ratio 0.307 vs ceiling ratio 0.253
+     B3h(c): 1 KiB: refusals 2060, ThrottledCount 2060.0, peak q 20971520 vs Q 4194304, retained 45498992, live Mutation [17452, 19341, 19340, 19339, 18312, 16744]
+SELFCHECK ok: 102 ok, 0 failed

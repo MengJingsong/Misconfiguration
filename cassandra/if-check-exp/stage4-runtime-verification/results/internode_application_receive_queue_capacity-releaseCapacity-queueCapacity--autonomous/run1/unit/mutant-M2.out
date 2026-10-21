@@ -1,0 +1,72 @@
+STAGE4 check boundary.other.acq expected=SUCCESS actual=SUCCESS ok
+STAGE4 check boundary.other.reserve expected=E=100 G=100 actual=E=100 G=100 ok
+STAGE4 check boundary.eq.acq expected=SUCCESS actual=SUCCESS ok
+STAGE4 check boundary.eq.acq.reserve expected=E=100 G=100 actual=E=100 G=100 ok
+STAGE4 check boundary.eq.rel.q expected=1000 actual=1000 ok
+STAGE4 check boundary.eq.rel.released expected=E=100 G=100 actual=E=100 G=100 ok
+STAGE4 check boundary.plus1.acq expected=SUCCESS actual=SUCCESS ok
+STAGE4 check boundary.plus1.acq.reserve expected=E=101 G=101 actual=E=101 G=101 ok
+STAGE4 check boundary.plus1.rel.q expected=1020 actual=1020 ok
+STAGE4 check boundary.plus1.rel.released1 expected=E=100 G=100 actual=E=100 G=100 ok
+STAGE4 check x.react.h.acq expected=true actual=true ok
+STAGE4 check x.react.w.acq1 expected=true actual=true ok
+STAGE4 check x.react.w.acq2 expected=true actual=true ok
+STAGE4 check x.react.h.refused expected=false actual=false ok
+STAGE4 check x.react.none.yet expected=0 actual=0 ok
+STAGE4 check x.react.w.rel1.reserve expected=E=0 actual=E=0 ok
+STAGE4 check x.react.after.rel_aboveQ expected=1 actual=1 ok
+STAGE4 check x.react.retry.state.q expected=2600 actual=2600 ok
+STAGE4 check x.react.retry.inv expected=E=1576 G=1576 actual=E=1576 G=1576 ok
+STAGE4 note x.react [SUCCESS q=2600 lease=1576/2000]
+STAGE4 check x.react.h.refused2 expected=false actual=false ok
+STAGE4 check x.react.after.rel_atQ expected=1 actual=1 ok
+STAGE4 check x.react.after.rel_atQ.reserve expected=E=1576 G=1576 actual=E=1576 G=1576 ok
+STAGE4 check x.react.drain expected=q=0,0 E=0 G=0 actual=q=0,0 E=0 G=0 ok
+STAGE4 method reactivation mismatches=0
+STAGE4 check concurrent.rep1.errors expected=[] actual=[java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError] MISMATCH
+STAGE4 check concurrent.rep1.released expected=100000 actual=1 MISMATCH
+STAGE4 check concurrent.rep1.final expected=(0,0,0) actual=(322,0,0) MISMATCH
+STAGE4 check concurrent.rep1.maxReserve.withinR expected=true actual=true ok
+STAGE4 note concurrent.rep1 refusals=0 maxE=49 maxG=49 thread=main
+STAGE4 check concurrent.rep2.errors expected=[] actual=[java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError] MISMATCH
+STAGE4 check concurrent.rep2.released expected=100000 actual=2 MISMATCH
+STAGE4 check concurrent.rep2.final expected=(0,0,0) actual=(0,0,0) ok
+STAGE4 check concurrent.rep2.maxReserve.withinR expected=true actual=true ok
+STAGE4 note concurrent.rep2 refusals=0 maxE=540 maxG=540 thread=main
+STAGE4 check concurrent.rep3.errors expected=[] actual=[java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError] MISMATCH
+STAGE4 check concurrent.rep3.released expected=100000 actual=1 MISMATCH
+STAGE4 check concurrent.rep3.final expected=(0,0,0) actual=(0,0,0) ok
+STAGE4 check concurrent.rep3.maxReserve.withinR expected=true actual=true ok
+STAGE4 note concurrent.rep3 refusals=0 maxE=355 maxG=355 thread=main
+STAGE4 check concurrent.rep4.errors expected=[] actual=[java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError] MISMATCH
+STAGE4 check concurrent.rep4.released expected=100000 actual=2 MISMATCH
+STAGE4 check concurrent.rep4.final expected=(0,0,0) actual=(0,0,0) ok
+STAGE4 check concurrent.rep4.maxReserve.withinR expected=true actual=true ok
+STAGE4 note concurrent.rep4 refusals=0 maxE=199 maxG=199 thread=main
+STAGE4 check concurrent.rep5.errors expected=[] actual=[java.lang.AssertionError, java.lang.AssertionError, java.lang.AssertionError] MISMATCH
+STAGE4 check concurrent.rep5.released expected=100000 actual=2 MISMATCH
+STAGE4 check concurrent.rep5.final expected=(0,0,0) actual=(0,0,0) ok
+STAGE4 check concurrent.rep5.maxReserve.withinR expected=true actual=true ok
+STAGE4 note concurrent.rep5 refusals=0 maxE=393 maxG=393 thread=main
+STAGE4 method concurrent mismatches=11
+STAGE4 check throttled.a1 expected=true actual=true ok
+STAGE4 check throttled.a2 expected=true actual=true ok
+STAGE4 check throttled.before expected=0 actual=0 ok
+STAGE4 check throttled.inner.outcome expected=INSUFFICIENT_GLOBAL actual=INSUFFICIENT_GLOBAL ok
+STAGE4 check throttled.inner.count expected=0 actual=0 ok
+STAGE4 check throttled.inner.state expected=(1200,176,176) actual=(1200,176,176) ok
+STAGE4 check throttled.outer.result expected=false actual=false ok
+STAGE4 check throttled.outer.count expected=1 actual=1 ok
+STAGE4 check throttled.outer.state expected=(1200,176,176) actual=(1200,176,176) ok
+STAGE4 method throttled mismatches=0
+STAGE4 check script.Q1024.R2048.acq1_600.inv expected=E=0 G=0 actual=E=0 G=0 ok
+STAGE4 check script.Q1024.R2048.acq1_600.withinR expected=true actual=true ok
+STAGE4 check script.Q1024.R2048.acq2_600.inv expected=E=176 G=176 actual=E=176 G=176 ok
+STAGE4 check script.Q1024.R2048.acq2_600.withinR expected=true actual=true ok
+STAGE4 check script.Q1024.R2048.acq3_2000.inv expected=E=176 G=176 actual=E=176 G=176 ok
+STAGE4 check script.Q1024.R2048.acq3_2000.withinR expected=true actual=true ok
+STAGE4 check script.Q1024.R2048.rel1_600.inv expected=E=0 G=0 actual=E=0 G=0 ok
+STAGE4 check script.Q1024.R2048.rel1_600.withinR expected=true actual=true ok
+STAGE4 check defaults.queueCapacity expected=4194304 actual=4194304 ok
+STAGE4 method defaults mismatches=0
+STAGE4 summary checks=61 mismatches=11

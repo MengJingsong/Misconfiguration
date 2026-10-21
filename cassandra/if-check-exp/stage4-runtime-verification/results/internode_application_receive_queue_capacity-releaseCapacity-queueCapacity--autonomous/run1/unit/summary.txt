@@ -1,0 +1,23 @@
+unit-run all 2026-10-20T22:26:07-06:00 clone /users/jason92/cassandra-run1 cassandra-5.0.9 b5f2a54 md5 ReleaseCapacityProbeTest.java=49d08bef6e2d ReleaseCapacityConfigTest.java=be0c1b20d351 unit-run.sh=0cbed68be3d7 
+upstream-ResourceLimitsTest org.apache.cassandra.net.ResourceLimitsTest exit=0 Tests run: 5, Failures: 0, Errors: 0, Skipped: 0 BUILD SUCCESSFUL
+probe org.apache.cassandra.net.ReleaseCapacityProbeTest exit=0 Tests run: 6, Failures: 0, Errors: 0, Skipped: 0 BUILD SUCCESSFUL
+config org.apache.cassandra.net.ReleaseCapacityConfigTest exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 BUILD SUCCESSFUL
+STAGE4 checks: 109 ok: 109 MISMATCH: 0
+STAGE4 method boundary mismatches=0
+STAGE4 method reactivation mismatches=0
+STAGE4 method concurrent mismatches=0
+STAGE4 method throttled mismatches=0
+STAGE4 method script mismatches=0
+STAGE4 method defaults mismatches=0
+STAGE4 summary checks=108 mismatches=0
+mutant clone cassandra-5.0.9 b5f2a54
+mutant clone build-test: BUILD SUCCESSFUL
+mutant-M1 org.apache.cassandra.net.ReleaseCapacityProbeTest exit=1 Tests run: 6, Failures: 1, Errors: 3, Skipped: 0 BUILD FAILED
+MUTANT M1: tests fail (expected fail); failing methods: concurrent  errors: 3       4 UnrecoverableIllegalStateException 
+mutant-M2 org.apache.cassandra.net.ReleaseCapacityProbeTest exit=1 Tests run: 6, Failures: 3, Errors: 0, Skipped: 0 BUILD FAILED
+MUTANT M2: tests fail (expected fail); failing methods: concurrent  errors: 0      12 AssertionError 
+mutant-M0 org.apache.cassandra.net.ReleaseCapacityProbeTest exit=0 Tests run: 6, Failures: 0, Errors: 0, Skipped: 0 BUILD SUCCESSFUL
+MUTANT M0: tests pass (expected pass); failing methods:  errors: 0 
+mutant clone reverted: diff lines 0
+mutant clone removed: yes
+unit-run all end 2026-10-20T22:28:40-06:00
