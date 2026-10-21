@@ -473,6 +473,14 @@ bin/cqlsh -e "CREATE KEYSPACE ks1 WITH replication = {'class': 'SimpleStrategy',
 
 ## 11. Notes
 
+- **`commitlog_total_space` is not a ceiling** (recorded 2026-10-13 by the
+  band-B pass, moved here 2026-10-21 from `predicted-negative.md`). §8 says
+  "the commit log's total size is held by `commitlog_total_space`"; that
+  overstates it. The segment manager creates the next segment before
+  `maybeFlushToReclaim()` runs, and over the limit it only flushes memtables so
+  old segments can be recycled (`AbstractCommitLogSegmentManager.java:189`,
+  `:200`, `:447`, `:262`). It is a reclaim target the commit log can exceed.
+
 - **Why one case for two comparison sites and five call sites.** `Mutation.validateSize()` and `CounterMutation.validateSize()` are the same
   comparison on two `IMutation` types: they read the same constant and feed the same decision, so README §6.1's "one case, several check sites"
   applies and the case is named after the primary site (`Mutation:172`), with `CounterMutation:94` listed in §1. The five *call* sites of §5 are a

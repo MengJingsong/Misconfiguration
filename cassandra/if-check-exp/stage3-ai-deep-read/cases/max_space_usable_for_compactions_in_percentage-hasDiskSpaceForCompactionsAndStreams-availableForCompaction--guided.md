@@ -633,6 +633,19 @@ Stop when each scenario's records are taken; a run where the debug line is missi
 
 ## 11. Notes
 
+- **A second decision point: the stream receive check** (recorded 2026-10-13 by
+  the band-B pass, moved here 2026-10-21 from `predicted-negative.md`; not run
+  at stage 4). `StreamSession.checkDiskSpace()` calls the same
+  `Directories.hasDiskSpaceForCompactionsAndStreams()`
+  ([`StreamSession.java:937`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/streaming/StreamSession.java#L937))
+  with the incoming bytes plus ongoing stream and compaction writes, and a
+  refusal throws and fails the session
+  ([`:872`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/streaming/StreamSession.java#L872)).
+  It is reached from `:798` and `:827`, and skipped when
+  `skip_stream_disk_space_check` is set
+  ([`:858`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/streaming/StreamSession.java#L858),
+  default false). A candidate for §1 Location and a third scenario in a run 2.
+
 - **Why this is a separate case from `DataDirectory_getAvailableSpace`.** Both
   guard compaction output against free disk, so the question is fair. They
   differ on every axis the format cares about:

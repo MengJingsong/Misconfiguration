@@ -109,6 +109,55 @@ Testability in 9a either way.
   against `Config.java` does not work — tried and refuted, see
   `../stage2-ai-preprocessing/playbook.md`.
 
+### 3.1 Lines that look like capacity checks but are not
+
+Learned from the stage-3 passes over bands A1 to C (2026-09-22 to 2026-10-13;
+moved here 2026-10-21 from `predicted-negative.md`, which now groups its
+rejections by these patterns).
+
+- **Ask where the limit's number comes from.** A comparison can be shaped like
+  a capacity check, with an operand named `limit`, and still have no constraint
+  on that side. If the number is the length of the data being read, it fails
+  Rule 1 and the other rules need not be reached.
+- **Per-item sanity bounds are the commonest false positive.** A byte count on
+  each side and a config name on the limit, but the check refuses one item.
+  Rule 2's test settles it: does changing the value move a maximum? Ask which
+  value binds the total before judging.
+- **Rollover is the second.** "The current buffer, file or segment is full,
+  start another" is README §3.5's edge case; the caller's read settles it.
+- **Path selection:** ask whether the disallow branch allocates the same bytes
+  somewhere else. **Grow when full:** ask whether the item is stored on both
+  branches. If so, the check sizes a structure; it does not limit one. A
+  configurable growth factor sets slack, not a ceiling.
+- **Invariant guards** throw when a pre-sized structure would overflow. The
+  memory was spent at the sizing; if there is a limit, it is there.
+- **Check the release path.** The same comparison as a filed case can sit in
+  `releaseCapacity()` rather than the acquiring method.
+- **Check that the class runs in production.** One grep for the constructor
+  settles it before any rule is applied.
+- **Stage 2's one-line reason can be wrong about the limit's kind.** Trust the
+  row for where to look, never for what the limit is.
+- **Disk admission checks are worth searching for:** callers of
+  `DiskUsageMonitor`, `getAvailableSpace` and
+  `hasDiskSpaceForCompactionsAndStreams`.
+- **A ring buffer bounds by eviction, not by withholding**, and a count cap on
+  entries of no fixed size fails Rule 2. A count cap on held rows of
+  table-bounded size needs a ruling (`cached_rows_fail_threshold`,
+  [`undetermined.md`](undetermined.md) §7).
+- **A retention cap passes Rule 3.** Keeping or freeing a buffer is an effect on
+  what stays resident (`DOB_MAX_RECYCLE_BYTES`).
+- **A soft limit is a finding even when the line is rejected.** A flush or
+  reclaim trigger is not a ceiling (`commitlog_total_space`), and a rejection
+  can correct a filed case that called it one.
+- **Stage 4 refuted 4 of the 6 negative estimates it ran (2026-10-20/21).**
+  A count of concurrent tasks (`concurrent_compactors`), of connections
+  (`native_transport_max_concurrent_connections`), a per-request bound
+  (`native_transport_max_message_size`) and a time-based check
+  (`native_transport_queue_max_item_age_threshold`) all capped memory after
+  all: each limits how many items are admitted or held, and memory follows
+  that count. Before rejecting a count, time or per-item check, ask how many
+  bytes each admitted item holds.
+
 ## 4. Finishing
 
 1. Write the case file from `_TEMPLATE-guided.md`, answering all nine questions
@@ -125,8 +174,8 @@ Testability in 9a either way.
    [`undetermined.md`](undetermined.md).
 4. Add the `_INDEX.md` Master Index row (Agent `guided`, Estimate, Ground) and, if the
    module is new, a Notes entry. For a negative estimate written up from an existing
-   [`predicted-negative.md`](predicted-negative.md) entry, replace that entry with a one-line pointer to
-   the case file. A line that **qualifies but you are not writing up now** →
+   [`predicted-negative.md`](predicted-negative.md) entry, link the case file from that entry's
+   reason; the entry is removed once the case is verified at stage 4. A line that **qualifies but you are not writing up now** →
    [`predicted-positive.md`](predicted-positive.md), never left only in stage 2's files.
 5. If the feed was 3a, note the batch in
    `../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
