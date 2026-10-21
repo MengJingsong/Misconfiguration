@@ -1,0 +1,73 @@
+cluster-run all 2026-10-21 12:30:14 EDT host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu clone /users/jason92/cassandra-sep; free 56.3 GB
+harness md5 cluster-run.py=2dae2418700c make-node-yaml.sh=cb9c1df5c419 Jmx.java=ff84741a6e3a
+# ---- stage4 sep lines ----;cluster_name: stage4-sep;listen_address: 127.0.0.11;rpc_address: 127.0.0.11;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-sep/node1/commitlog;saved_caches_directory: /users/jason92/stage4-sep/node1/saved_caches;hints_directory: /users/jason92/stage4-sep/node1/hints;cdc_raw_directory: /users/jason92/stage4-sep/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 32;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;
+start lifetime 1 (R0): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=32']
+jvm: -Dcassandra.jmx.local.port=7211 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs/cassandra-1792600215-pid333183.hprof -Xms2G -Xmx2G
+R0 schema/table: 100-row stress write {'op_rate': '156', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:00', 'write_timeouts_logged': 0}
+EXPECTED: R0 getconcurrency MutationStage = 32 at start — yes
+R0 stress started (unthrottled, 120 s): tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=128 -errors ignore retries=0 -mode native cql3 -node 127.0.0.11 -log file=/users/jason92/stage4-logs/sep/run1/cluster/stress-R0.log
+EXPECTED: R0 getconcurrency MutationStage = 0 after setconcurrency 0 (read 0) — yes
+R0 supplementary class histogram taken at +126 s (Pending then 7169)
+EXPECTED: R0 getconcurrency MutationStage = 32 after restore (read 32) — yes
+R0 Pending back to 0 at +1 s after the restore
+R0 stress: {'op_rate': '209', 'total_partitions': '25336', 'total_errors': '7424', 'elapsed': '00:02:01', 'write_timeouts_logged': 14848}
+# ---- stage4 sep lines ----;cluster_name: stage4-sep;listen_address: 127.0.0.11;rpc_address: 127.0.0.11;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-sep/node1/commitlog;saved_caches_directory: /users/jason92/stage4-sep/node1/saved_caches;hints_directory: /users/jason92/stage4-sep/node1/hints;cdc_raw_directory: /users/jason92/stage4-sep/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 32;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;
+start lifetime 2 (R32): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=32']
+jvm: -Dcassandra.jmx.local.port=7211 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs/cassandra-1792600545-pid345132.hprof -Xms2G -Xmx2G
+EXPECTED: R32 getconcurrency MutationStage = 32 (read 32) — yes
+R32 stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=128 throttle=400/s -errors ignore retries=0 -mode native cql3 -node 127.0.0.11 -log file=/users/jason92/stage4-logs/sep/run1/cluster/stress-R32.log; free 56.3 GB
+R32 stress: {'op_rate': '398', 'total_partitions': '48129', 'total_errors': '0', 'elapsed': '00:02:00', 'write_timeouts_logged': 0}
+# ---- stage4 sep lines ----;cluster_name: stage4-sep;listen_address: 127.0.0.11;rpc_address: 127.0.0.11;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-sep/node1/commitlog;saved_caches_directory: /users/jason92/stage4-sep/node1/saved_caches;hints_directory: /users/jason92/stage4-sep/node1/hints;cdc_raw_directory: /users/jason92/stage4-sep/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 2;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;
+start lifetime 3 (R2): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=2']
+jvm: -Dcassandra.jmx.local.port=7211 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs/cassandra-1792600777-pid353172.hprof -Xms2G -Xmx2G
+EXPECTED: R2 getconcurrency MutationStage = 2 (read 2) — yes
+R2 stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=128 throttle=400/s -errors ignore retries=0 -mode native cql3 -node 127.0.0.11 -log file=/users/jason92/stage4-logs/sep/run1/cluster/stress-R2.log; free 56.3 GB
+R2 stress: {'op_rate': '400', 'total_partitions': '48129', 'total_errors': '0', 'elapsed': '00:02:00', 'write_timeouts_logged': 0}
+# ---- stage4 sep lines ----;cluster_name: stage4-sep;listen_address: 127.0.0.11;rpc_address: 127.0.0.11;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-sep/node1/commitlog;saved_caches_directory: /users/jason92/stage4-sep/node1/saved_caches;hints_directory: /users/jason92/stage4-sep/node1/hints;cdc_raw_directory: /users/jason92/stage4-sep/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 128;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;
+start lifetime 4 (R128): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=128']
+jvm: -Dcassandra.jmx.local.port=7211 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs/cassandra-1792601008-pid361220.hprof -Xms2G -Xmx2G
+EXPECTED: R128 getconcurrency MutationStage = 128 (read 128) — yes
+R128 stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=128 throttle=400/s -errors ignore retries=0 -mode native cql3 -node 127.0.0.11 -log file=/users/jason92/stage4-logs/sep/run1/cluster/stress-R128.log; free 56.3 GB
+R128 stress: {'op_rate': '399', 'total_partitions': '48129', 'total_errors': '0', 'elapsed': '00:02:00', 'write_timeouts_logged': 0}
+# ---- stage4 sep lines ----;cluster_name: stage4-sep;listen_address: 127.0.0.11;rpc_address: 127.0.0.11;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-sep/node1/commitlog;saved_caches_directory: /users/jason92/stage4-sep/node1/saved_caches;hints_directory: /users/jason92/stage4-sep/node1/hints;cdc_raw_directory: /users/jason92/stage4-sep/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 32;native_transport_receive_queue_capacity: 0B;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;
+start lifetime 5 (PC0): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=32', 'native_transport_receive_queue_capacity=0B']
+jvm: -Dcassandra.jmx.local.port=7211 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs/cassandra-1792601240-pid369640.hprof -Xms2G -Xmx2G
+EXPECTED: PC0 getconcurrency MutationStage = 32 (read 32) — yes
+PC0 stress started: tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=128 -errors ignore retries=0 -mode native cql3 -node 127.0.0.11 -log file=/users/jason92/stage4-logs/sep/run1/cluster/stress-PC0.log; free 56.3 GB
+PC0 stress: {'op_rate': '1123', 'total_partitions': '69228', 'total_errors': '2176', 'elapsed': '00:01:01', 'write_timeouts_logged': 4352}
+# ---- stage4 sep lines ----;cluster_name: stage4-sep;listen_address: 127.0.0.11;rpc_address: 127.0.0.11;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-sep/node1/commitlog;saved_caches_directory: /users/jason92/stage4-sep/node1/saved_caches;hints_directory: /users/jason92/stage4-sep/node1/hints;cdc_raw_directory: /users/jason92/stage4-sep/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 32;native_transport_receive_queue_capacity: 0B;native_transport_max_request_data_in_flight_per_ip: 4MiB;native_transport_max_request_data_in_flight: 256MiB;
+start lifetime 6 (PC): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=32', 'native_transport_receive_queue_capacity=0B', 'native_transport_max_request_data_in_flight_per_ip=4MiB']
+jvm: -Dcassandra.jmx.local.port=7211 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-sep/node1/logs/cassandra-1792601411-pid376100.hprof -Xms2G -Xmx2G
+EXPECTED: PC getconcurrency MutationStage = 32 (read 32) — yes
+PC stress started: tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=128 -errors ignore retries=0 -mode native cql3 -node 127.0.0.11 -log file=/users/jason92/stage4-logs/sep/run1/cluster/stress-PC.log; free 56.3 GB
+PC stress: {'op_rate': '1107', 'total_partitions': '68686', 'total_errors': '1920', 'elapsed': '00:01:02', 'write_timeouts_logged': 3840}
+R0 (D2): baseline heap - memtable 86.4 MiB; queue heap at the last pool-0 sample 887.5 MiB (max 887.5); raw heap rise over the baseline 983.6 MiB; slope within the window 98.9 KiB per pending mutation
+R0: baseline heap after GC 86.4 MiB (4 samples); pool-0 window 120 s; Active max 0 (samples after the first 5 s: [0, 0, 0]...); Pending max 7296; heap after GC max 1070.0 MiB (raw rise 983.6 MiB), last 1070.0 MiB with Pending 6912; RequestsSize max 0.07 MiB
+EXPECTED: R0: MutationStage Active = 0 at every tpstats sample of the pool-0 window after its first 5 s — yes
+EXPECTED: R0: Pending rises to ≈ 7700 (±30 %: 5390–10010) by the restore (max 7296) — yes
+EXPECTED: R0: Pending never falls during the pool-0 window (no queue bound, no rejection) — yes
+EXPECTED: R0: queue heap 887.5 MiB ≈ Pending × 65 KiB = 438.8 MiB (±30 %) — NO (recorded; the AI judges it in the results file)
+EXPECTED: R0: queue heap ≈ 480 MiB (±30 %: 336–624) (read 887.5) — NO (recorded; the AI judges it in the results file)
+EXPECTED: R0: RequestsSize ≤ 8 MiB throughout the pool-0 window (max 0.07 MiB), below the 256 MiB cap — yes
+EXPECTED: R0: queue heap 887.5 MiB is above the 256 MiB native in-flight cap and > 400 MiB above the in-flight bytes counted (RequestsSize max 0.07 MiB) — yes
+EXPECTED: R5 row check: R0 queue heap ≥ 256 MiB (read 887.5) — yes
+R0 drain: last heap after GC 133.2 MiB, memtable data size 35.6 MiB (baseline 0.0)
+EXPECTED: R0 drain: heap back within 50 MiB of baseline plus memtable growth (46.8 MiB above baseline, memtable +35.6 MiB) — yes
+R0 memtable data size during pool 0: min 96.01 max 96.01 MiB
+EXPECTED: R0: memtable data size flat (within 1 MiB) during the pool-0 window (B3h) — yes
+R2: heap after GC mean 240.8 MiB, max 311.3 MiB (8 samples); Active max 1; Pending max 1; memtable max 167.4 MiB; stress {'op_rate': '400', 'total_partitions': '48129', 'total_errors': '0', 'elapsed': '00:02:00', 'write_timeouts_logged': 0}
+EXPECTED: R2: Active ≤ N = 2 at every sample (max 1) — yes
+R32: heap after GC mean 241.8 MiB, max 312.8 MiB (8 samples); Active max 1; Pending max 0; memtable max 144.3 MiB; stress {'op_rate': '398', 'total_partitions': '48129', 'total_errors': '0', 'elapsed': '00:02:00', 'write_timeouts_logged': 0}
+EXPECTED: R32: Active ≤ N = 32 at every sample (max 1) — yes
+R128: heap after GC mean 237.9 MiB, max 313.1 MiB (8 samples); Active max 1; Pending max 0; memtable max 148.2 MiB; stress {'op_rate': '399', 'total_partitions': '48129', 'total_errors': '0', 'elapsed': '00:02:00', 'write_timeouts_logged': 0}
+EXPECTED: R128: Active ≤ N = 128 at every sample (max 1) — yes
+EXPECTED: R2/R32/R128: heap means within 20 % (max/min 1.016) or higher for R2 (R2 240.8, R32 241.8, R128 237.9) — yes
+EXPECTED: R2/R32/R128: heap does NOT rise with N (R4 definition: strictly increasing and R128 > 1.2 × R2) — yes
+EXPECTED: R2 Pending max ≥ R32 Pending max (1 vs 0); not lower for smaller N — yes
+PC0: RequestsSize max 8.01 MiB, mean 7.02 MiB; stress op rate 1123.0
+PC: RequestsSize max 3.88 MiB, mean 3.24 MiB; stress op rate 1107.0
+EXPECTED: PC: RequestsSize plateaus ≤ 4 MiB (max 3.88 MiB) — yes
+EXPECTED: PC0 (R3 reference): RequestsSize above 4 MiB without the per-IP cap (max 8.01 MiB) — yes
+EXPECTED: PC: stress op rate lower than PC0 (1107.0 vs 1123.0) — the cap binds — yes
+node stopped; leftover daemons of this harness: 0
+EXPECTED tally: 25 yes, 2 NO; done 2026-10-21 12:53:03 EDT

@@ -1,0 +1,28 @@
+== system-1.log: pool resizes
+INFO  [RMI TCP Connection(91)-127.0.0.1] 2026-10-21T16:32:30,022 SEPExecutor.java:388 - Resized MutationStage maximum pool size from 32 to 0
+INFO  [RMI TCP Connection(161)-127.0.0.1] 2026-10-21T16:34:29,708 SEPExecutor.java:388 - Resized MutationStage maximum pool size from 0 to 32
+== session.log: getconcurrency outputs
+59:[2026-10-21 12:31:29] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+61:MutationStage                           0              32
+64:[2026-10-21 12:31:30] EXPECTED: R0 getconcurrency MutationStage = 32 at start — yes
+172:[2026-10-21 12:32:30] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+176:MutationStage                           0               0
+179:[2026-10-21 12:32:31] EXPECTED: R0 getconcurrency MutationStage = 0 after setconcurrency 0 (read 0) — yes
+303:[2026-10-21 12:34:29] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+305:MutationStage                           0              32
+308:[2026-10-21 12:34:30] EXPECTED: R0 getconcurrency MutationStage = 32 after restore (read 32) — yes
+415:[2026-10-21 12:36:04] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+417:MutationStage                           0              32
+420:[2026-10-21 12:36:05] EXPECTED: R32 getconcurrency MutationStage = 32 (read 32) — yes
+704:[2026-10-21 12:39:55] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+706:MutationStage                           0               2
+709:[2026-10-21 12:39:57] EXPECTED: R2 getconcurrency MutationStage = 2 (read 2) — yes
+993:[2026-10-21 12:43:47] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+995:MutationStage                           0             128
+998:[2026-10-21 12:43:48] EXPECTED: R128 getconcurrency MutationStage = 128 (read 128) — yes
+1282:[2026-10-21 12:47:38] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+1284:MutationStage                           0              32
+1287:[2026-10-21 12:47:39] EXPECTED: PC0 getconcurrency MutationStage = 32 (read 32) — yes
+1511:[2026-10-21 12:50:30] + bin/nodetool -h 127.0.0.1 -p 7211 getconcurrency MutationStage
+1513:MutationStage                           0              32
+1516:[2026-10-21 12:50:31] EXPECTED: PC getconcurrency MutationStage = 32 (read 32) — yes

@@ -26,7 +26,8 @@ does not follow the constraint. Stage 4 confirms or refutes it.
 - **Re-examine first:** one entry rests on the "count of concurrent tasks"
   reasoning that stage 4 refuted for `concurrent_compactors` (usage = tasks ×
   per-task bytes): `SEPExecutor` / `SEPWorker` in
-  [§10](#10-count-time-rate-and-work-thresholds). The other, `StorageProxy.java:1592`
+  [§10](#10-count-time-rate-and-work-thresholds); its `SEPExecutor.java:196` left on
+  2026-10-21 (Confirmed — does not cap), the other lines of that row are untested. The other, `StorageProxy.java:1592`
   (`maxHintsInProgress`), left this file on 2026-10-21, verified at stage 4 as
   Confirmed — does not cap, on a different ground: its per-destination counter is a bare
   `CacheLoader`, so the check never fires (see `_INDEX.md` §1).
@@ -261,7 +262,7 @@ done rather than bytes held.
 
 | If statement | Reason rejected |
 |---|---|
-| `SEPExecutor.java:135`, `:165`, `:175`, `:196`, `:373`, `:384`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). |
+| `SEPExecutor.java:135`, `:165`, `:175`, `:373`, `:384`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). `SEPExecutor.java:196` (`takeWorkPermit`, `concurrent_writes`) left this row on 2026-10-21, verified at stage 4 as Confirmed — does not cap ([case](cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md), `_INDEX.md` §1): excess mutations queue unbounded on the heap, 887.5 MiB at pool size 0. That run tested only `:196` and never made the pool bind under load, so the lines left here stay unverified. |
 | `PartitionDenylist.java:419`, `:445` `results.size() > limit` | Rule 3 too: the result set is fully built before the check, which then logs and truncates. |
 | `DataLimits$CQLCounter.incrementRowCount():509`, `:511`; `$GroupByAwareCounter:986` | The query's own `LIMIT` and per-partition limit, a client parameter (also Rule 1). |
 | `DataLimits.java:993`, `:1000`, `:1041` (2 units); helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()` | Same: the query's limits or page size. |

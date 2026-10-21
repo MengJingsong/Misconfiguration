@@ -53,6 +53,7 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`WRITE_BUFFER_SIZE`](cases/WRITE_BUFFER_SIZE-append-remaining--autonomous.md) | autonomous | negative | [**Confirmed** — does not cap](../stage4-runtime-verification/results/WRITE_BUFFER_SIZE-append-remaining--autonomous.md) |
 | [`internode_application_receive_queue_capacity`](cases/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md) | autonomous | positive | [Unit Confirmed; cluster partial (accounting capped, heap not for large messages)](../stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md) |
 | [`maxHintsInProgress`](cases/maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous.md) | autonomous | negative | [**Confirmed** — does not cap](../stage4-runtime-verification/results/maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous.md) |
+| [`concurrent_writes`](cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md) | autonomous | negative | [**Confirmed** — does not cap](../stage4-runtime-verification/results/concurrent_writes-takeWorkPermit-workPermits--autonomous.md) |
 
 <!-- Add one row per case. -->
 
@@ -61,14 +62,14 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | Metric | Count |
 |--------|-------|
 | Modules covered | 12 (guided files) |
-| Total case files | 38 (29 guided, 9 autonomous) |
-| of which negative estimates | 7 (5 guided, written up 2026-10-19 as the pilot of the `predicted-negative.md` write-up, and 2 autonomous: `WRITE_BUFFER_SIZE`, `maxHintsInProgress` (filed 2026-10-21)) |
+| Total case files | 39 (29 guided, 10 autonomous) |
+| of which negative estimates | 8 (5 guided, written up 2026-10-19 as the pilot of the `predicted-negative.md` write-up, and 3 autonomous: `WRITE_BUFFER_SIZE`, `maxHintsInProgress` and `concurrent_writes` (both filed 2026-10-21)) |
 | Found via feed 3b (raw source) | 13 |
 | Found via feed 3a (stage 1/2) | **11** |
-| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **33** (24 guided positive, 1 guided negative, 8 autonomous), as of 2026-10-21 (2026-10-21: `maxHintsInProgress` — Confirmed, does not cap; 2026-10-20/21: `internode_max_message_size` · `inferMessageSize` and · `enqueue`, `batch_size_fail_threshold` and `WRITE_BUFFER_SIZE` — both Confirmed, does not cap — and `max_mutation_size` · `allocateBytes`) |
+| Stage 4 closed (all tiers Confirmed; see `../stage4-runtime-verification/results/`) | **34** (24 guided positive, 1 guided negative, 9 autonomous), as of 2026-10-21 (2026-10-21: `maxHintsInProgress` and `concurrent_writes` — both Confirmed, does not cap; 2026-10-20/21: `internode_max_message_size` · `inferMessageSize` and · `enqueue`, `batch_size_fail_threshold` and `WRITE_BUFFER_SIZE` — both Confirmed, does not cap — and `max_mutation_size` · `allocateBytes`) |
 | Stage 4 closed, estimate refuted | **4**, all guided negative estimates: `concurrent_compactors` (2026-10-20; peak extra disk follows `min(n, 8)` × one compaction's output), `native_transport_max_message_size` (caps per request), `native_transport_max_concurrent_connections` (cluster; ≈ 1,330 B heap per idle connection), `native_transport_queue_max_item_age_threshold` (caps in throwing mode, default mode only slows growth) — all 2026-10-20; the estimates stay as filed (a refuted rejection is not re-judged) |
 | Stage 4 closed, partial | **1** — `internode_application_receive_queue_capacity` · `releaseCapacity` (autonomous, 2026-10-21): unit Confirmed; cluster B3g row 3 — accounting capped exactly, heap does not track the cap for 512 KiB messages (they wait off heap in the networking pool) |
-| Stage 4 not yet run | **0** (the last 7 run 2026-10-20/21, and `maxHintsInProgress` filed and run 2026-10-21; no case has a run 2) |
+| Stage 4 not yet run | **0** (the last 7 run 2026-10-20/21, and `maxHintsInProgress` and `concurrent_writes` filed and run 2026-10-21; no case has a run 2) |
 
 > **Feed 3a has its first case, as of 2026-09-28.**
 > `max_space_usable_for_compactions_in_percentage` was surfaced by the first
@@ -344,3 +345,7 @@ dated amendment adds a line here with its date and the new hash.
 | `maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous.md` | `2cda58a133d25f3aa3b6546739289d9d525cfcc178557e647b4769f8249e39e4` | 2026-10-21 (autonomous agent, subagent) | (hash as filed) |
 | `maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous.md` | `af8d24c24d212b7c05896cec190eeeaa3eb6205ad75a378c0f69f80999dc3312` | 2026-10-21 stage-4 step-0 audit amendments (R1–R6: clones and test heap, compiling mutation builder, loopback addresses, stress `retries=0`, no node log line for the refusal, own-PID check); the frozen version | (hash above after the amendments) |
 | `maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous.md` | `a8405af450f7f934e88f5b869ece4b16f85ea9d4145525425ccb7ac699c15dd6` | 2026-10-21 stage-4 section D feedback, after run 1 | (not a new frozen version: run 1 used the frozen design above) |
+| `concurrent_writes-takeWorkPermit-workPermits--autonomous.md` | `559d1f85512a403b6cff0ee56fbf8e867ae4f9f4e9121416f2578a00d26076f8` | 2026-10-21 (autonomous agent, subagent) | (hash as filed) |
+| `concurrent_writes-takeWorkPermit-workPermits--autonomous.md` | `af2af2e5a979c7073fcb6df22cabb0900b032f28294fc8928659517b6d59c454` | 2026-10-21 stage-4 step-0 audit amendments (R1–R6: stress `no-warmup`, one lifetime per steady run, PC0 reference arm, heap statistics and "rises with N", R0-below-cap row, unit repeat and terms); the frozen version (the unit tier ran on it) | (hash above after the amendments) |
+| `concurrent_writes-takeWorkPermit-workPermits--autonomous.md` | `12fb743b3319bcccb80eb317b87fbae1a1162f9b22f69fd2e087b7a11ba896b2` | 2026-10-21 stage-4 runbook fixes D1–D2 (PC/PC0 receive queue 0B so the per-IP cap can bind; memtable-separated queue heap in R0), found by the cluster instrument check before run 1; B1 and B2f–B3g unchanged | (the version the cluster tier ran on) |
+| `concurrent_writes-takeWorkPermit-workPermits--autonomous.md` | `beb9abf09c1103ae11c8a45a9b83847b0bb3712ad269649316db994bc5fe6186` | 2026-10-21 stage-4 section D feedback, after run 1 | (not a new frozen version: run 1 used the versions above) |
