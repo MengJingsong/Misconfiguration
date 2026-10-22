@@ -127,6 +127,12 @@ left as filed; the refutation is recorded in the results file's verdict and Effe
 (§10, or section D), and `_INDEX.md` keeps the original estimate with a pointer to the results file. Stage 3 does not re-estimate
 because of it.
 
+### Outcome class
+
+Once stage 4 has run, a case is classed by comparing its stage-3 estimate with the stage-4 effect on the constraint (stage 4 taken as the truth): **true positive** (estimate `positive`, effect `caps`), **false positive** (`positive`, `does not cap`), **true negative** (`negative`, `does not cap`), **false negative** (`negative`, `caps`), or **undetermined** (the unit and cluster tiers disagree, or a tier could not settle the effect: Not confirmed, partial). `caps` includes soft caps and caps with a recorded bypass. The class is recorded beside the verdict; Confirmed / Refuted and the Effect field keep their meaning, and a refuted estimate is still not re-estimated. Abbreviations in tables: TP, FP, TN, FN.
+
+The results file records it on the line after Status (`Outcome class:`) and §8 gives the one-line reason; the stage-3 index carries it in the Outcome class column.
+
 **Output, in results §1:** the ratings, a list of recommendations, what was done
 with each, and a bottom line — **Ready**, **Ready after amendments**, or
 **Blocked** (with the reason, and the recommendation for stage 3).

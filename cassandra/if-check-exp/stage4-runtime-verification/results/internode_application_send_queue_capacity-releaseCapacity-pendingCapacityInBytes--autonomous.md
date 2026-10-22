@@ -3,6 +3,8 @@
 > **Case:** [`internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous`](../../stage3-ai-deep-read/cases/internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21. Unit: Confirmed (B2g row 1). Cluster: B3g row 4 by its trigger, partial (refines the claim).** On the node, the accounting and the release at `:449` are confirmed: the plateau is within one message of C + reserve at C = 4 · 64 · 256 MiB and at the positive control, the reserve held is exactly pending − C, and it returns to 0. The heap clause as worded is refuted: k = ΔH / plateau = 11.6 · 3.91 · 3.44 varies 3.4×. Heap does follow C, but additively, not in proportion: a constant 3.27 heap bytes per counted byte plus a C-independent offset of about 42 MiB. **Effect: caps.** No run 2. Audited 2026-10-21 (estimate positive). Run on `pc13`.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means each tier's predictions and conclusions table: B2f and B2g (unit), B3f and B3g
 > (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; the case file's feedback section is its section D.

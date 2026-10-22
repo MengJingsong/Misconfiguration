@@ -3,6 +3,8 @@
 > **Case:** [`SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS`](../../stage3-ai-deep-read/cases/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS--guided.md)
 >
 > **Status:** **Closed 2026-10-15 — unit Confirmed; cluster Confirmed (§9a row 1), escape values and disallow retention as recorded; two sub-predictions missed; no run 2.** The limit caps the per-query key list at exactly *L* + 1 and the held keys follow *L* (8,040 → 512,040 for 8 queries); past it the ANN plan read 30,656 rows and held 245,256 keys on far-matching data, and at *L* = 0 a five-match query read 115,401 rows and timed out.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. Unit tier and cluster tier.
 

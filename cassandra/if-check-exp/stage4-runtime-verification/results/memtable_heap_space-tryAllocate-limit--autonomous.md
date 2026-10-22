@@ -3,6 +3,8 @@
 > **Case:** [`memtable_heap_space-tryAllocate-limit--autonomous`](../../stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--autonomous.md)
 >
 > **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** short. This is the short-path results file. "§9a" below means each
 > tier's own predictions/conclusions table (B2f/B2g for unit, B3f/B3g for

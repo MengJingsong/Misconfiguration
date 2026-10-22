@@ -3,6 +3,8 @@
 > **Case:** [`internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`](../../stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md)
 >
 > **Status:** **Closed 2026-10-15 — Confirmed at both tiers** (run 1 on `pc57`, 00:12–00:34 EDT; independent self-check 95/95; no run 2). Audited 2026-10-14 (**Ready after amendments**), §9a frozen 23:37 EDT `5ef01c26…` before any harness code or reading, verified unchanged at the end of run 1.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. Unit tier and cluster tier.
 

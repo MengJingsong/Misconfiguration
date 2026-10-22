@@ -1,0 +1,13 @@
+== plainb128-r2: mode=blocking cap=128MiB cdc_enabled=true table=plain rows=6144 (=384 MiB) rate=52/s heap=2G
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc2/cluster/plainb128-r2/cdc-verdict.txt -javaagent:/users/jason92/cassandra-cdc/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc2/cdc-verdict.btm,listener:true; ulimit -n 100000
+node up after 18s
+idle: links=2 cdc_raw_exists=yes 1792682800602,2,67108864,73728,0,0,0,50
+stress W: Op rate : 52 op/s [insert: 52 op/s]|Total partitions : 6,144 [insert: 6,144]|Total errors : 0 [insert: 0]| ended 1792682926882
+after workload: links=5 1792682929852,5,167772160,101548032,0,0,0,50 WARN=0 Freed_up=0 wall=129s
+after flush: links=2 1792682934102,2,67108864,864256,0,0,0,50
+final: links=2 1792682934102,2,67108864,864256,0,0,0,50
+final listing: CommitLog-7-1792682757205.log:33554432 CommitLog-7-1792682757206.log:33554432 
+commit log dir: 67112960 bytes; data: 405406406; free: 52G
+traces: created=15 forbidden=8 deleteOld=0 rejectLines=0 WARN=0 FreedUp=0 ERROR=0
+sampler: ticks=2771 max_links=5 max_link_bytes=167772160 max_gap_ms=50 first_ms=1792682795652 last_ms=1792682934152
+RESULT plainb128-r2 finished 1792682944130; disk free 53G

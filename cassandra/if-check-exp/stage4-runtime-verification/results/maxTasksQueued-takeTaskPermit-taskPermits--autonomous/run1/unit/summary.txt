@@ -1,0 +1,184 @@
+unit-run 2026-10-22T07:59:54-06:00 host node3 clone cassandra-5.0.9 b5f2a54 openjdk version "11.0.32.1" 2026-08-18
+harness md5 SEPQueueBoundProbe.java=38bd14825120 unit-run.sh=4d651e12eec6 unit-analyze.py=f19a71bfdf4f 
+jvm options: -Xms2g -Xmx2g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/users/jason92/stage4-logs/mtt/run1/unit/dumps --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED  -Dcassandra.config=file:///users/jason92/cassandra-mtt/test/conf/cassandra.yaml
+sep P=0 rep1 exit=0: 6 probe lines, OOM lines 0
+PROBE kind=sep P=0 rep=rep1 N=0 active=1 pending=0 maxQueued=2147483647 heapMiB=7.12 deltaMiB=0.00
+PROBE kind=sep P=0 rep=rep1 N=10000 submitted=10000 active=1 pending=10000 maxQueued=2147483647 wallMs=19 maxCallUs=819 err=none heapMiB=7.91 deltaMiB=0.79 perTaskB=82.9
+PROBE kind=sep P=0 rep=rep1 N=100000 submitted=90000 active=1 pending=100000 maxQueued=2147483647 wallMs=54 maxCallUs=22 err=none heapMiB=14.77 deltaMiB=7.66 perTaskB=80.3
+PROBE kind=sep P=0 rep=rep1 N=1000000 submitted=900000 active=1 pending=1000000 maxQueued=2147483647 wallMs=164 maxCallUs=24 err=none heapMiB=83.44 deltaMiB=76.32 perTaskB=80.0
+PROBE kind=sep P=0 rep=rep1 N=4000000 submitted=3000000 active=1 pending=4000000 maxQueued=2147483647 wallMs=3638 maxCallUs=1755538 err=none heapMiB=312.32 deltaMiB=305.20 perTaskB=80.0
+  HISTO 1:       4000001       96000024  java.util.concurrent.ConcurrentLinkedQueue$Node (java.base@11.0.32.1)
+  HISTO 3:       4018949       67917152  [B (java.base@11.0.32.1)
+  HISTO 4:       4000000       64000000  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$255/0x0000000840164c40
+  HISTO 532:             1             72  java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask (java.base@11.0.32.1)
+  HISTO 1204:             1             16  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$249/0x0000000840166040
+  HISTO Total      16100879      327568440
+PROBE kind=sep P=0 rep=rep1 DRAIN pending=0 active=0 completed=4000001 expectedCompleted=4000001
+sep P=1024 rep1 exit=0: 5 probe lines, OOM lines 0
+PROBE kind=sep P=1024 rep=rep1 N=0 active=1 pending=0 maxQueued=2147483647 heapMiB=7.12 deltaMiB=0.00
+PROBE kind=sep P=1024 rep=rep1 N=10000 submitted=10000 active=1 pending=10000 maxQueued=2147483647 wallMs=20 maxCallUs=813 err=none heapMiB=17.67 deltaMiB=10.56 perTaskB=1106.9
+PROBE kind=sep P=1024 rep=rep1 N=100000 submitted=90000 active=1 pending=100000 maxQueued=2147483647 wallMs=107 maxCallUs=34 err=none heapMiB=112.43 deltaMiB=105.31 perTaskB=1104.3
+PROBE kind=sep P=1024 rep=rep1 N=1000000 submitted=900000 active=1 pending=1000000 maxQueued=2147483647 wallMs=1451 maxCallUs=140813 err=none heapMiB=1060.00 deltaMiB=1052.89 perTaskB=1104.0
+  HISTO 1:       1018949     1043917152  [B (java.base@11.0.32.1)
+  HISTO 2:       1000001       24000024  java.util.concurrent.ConcurrentLinkedQueue$Node (java.base@11.0.32.1)
+  HISTO 4:       1000000       16000000  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$255/0x0000000840164c40
+  HISTO 532:             1             72  java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask (java.base@11.0.32.1)
+  HISTO 1204:             1             16  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$249/0x0000000840166040
+  HISTO Total       4100879     1111568440
+PROBE kind=sep P=1024 rep=rep1 DRAIN pending=0 active=0 completed=1000001 expectedCompleted=1000001
+control P=0 rep1 exit=0: 5 probe lines, OOM lines 0
+PROBE kind=control P=0 rep=rep1 N=10000 accepted=10000 rejected=0 queued=10000 firstReject=none wallMs=13 heapMiB=1.54 deltaMiB=0.37
+PROBE kind=control P=0 rep=rep1 N=100000 accepted=10000 rejected=90000 queued=10000 firstReject=afterAccepted=10000 wallMs=372 heapMiB=1.66 deltaMiB=0.49
+PROBE kind=control P=0 rep=rep1 N=1000000 accepted=10000 rejected=990000 queued=10000 firstReject=afterAccepted=10000 wallMs=2157 heapMiB=1.66 deltaMiB=0.49
+PROBE kind=control P=0 rep=rep1 N=4000000 accepted=10000 rejected=3990000 queued=10000 firstReject=afterAccepted=10000 wallMs=5315 heapMiB=1.66 deltaMiB=0.49
+PROBE kind=control P=0 rep=rep1 DRAIN completed=10001
+control P=1024 rep1 exit=0: 4 probe lines, OOM lines 0
+PROBE kind=control P=1024 rep=rep1 N=10000 accepted=10000 rejected=0 queued=10000 firstReject=none wallMs=22 heapMiB=11.30 deltaMiB=10.14
+PROBE kind=control P=1024 rep=rep1 N=100000 accepted=10000 rejected=90000 queued=10000 firstReject=afterAccepted=10000 wallMs=428 heapMiB=11.42 deltaMiB=10.26
+PROBE kind=control P=1024 rep=rep1 N=1000000 accepted=10000 rejected=990000 queued=10000 firstReject=afterAccepted=10000 wallMs=2235 heapMiB=11.42 deltaMiB=10.26
+PROBE kind=control P=1024 rep=rep1 DRAIN completed=10001
+sep P=0 rep2 exit=0: 6 probe lines, OOM lines 0
+PROBE kind=sep P=0 rep=rep2 N=0 active=1 pending=0 maxQueued=2147483647 heapMiB=7.12 deltaMiB=0.00
+PROBE kind=sep P=0 rep=rep2 N=10000 submitted=10000 active=1 pending=10000 maxQueued=2147483647 wallMs=19 maxCallUs=801 err=none heapMiB=7.91 deltaMiB=0.79 perTaskB=82.9
+PROBE kind=sep P=0 rep=rep2 N=100000 submitted=90000 active=1 pending=100000 maxQueued=2147483647 wallMs=54 maxCallUs=41 err=none heapMiB=14.77 deltaMiB=7.66 perTaskB=80.3
+PROBE kind=sep P=0 rep=rep2 N=1000000 submitted=900000 active=1 pending=1000000 maxQueued=2147483647 wallMs=153 maxCallUs=13 err=none heapMiB=83.44 deltaMiB=76.32 perTaskB=80.0
+PROBE kind=sep P=0 rep=rep2 N=4000000 submitted=3000000 active=1 pending=4000000 maxQueued=2147483647 wallMs=3563 maxCallUs=1698317 err=none heapMiB=312.32 deltaMiB=305.20 perTaskB=80.0
+  HISTO 1:       4000001       96000024  java.util.concurrent.ConcurrentLinkedQueue$Node (java.base@11.0.32.1)
+  HISTO 3:       4018950       67917208  [B (java.base@11.0.32.1)
+  HISTO 4:       4000000       64000000  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$255/0x0000000840164c40
+  HISTO 532:             1             72  java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask (java.base@11.0.32.1)
+  HISTO 1204:             1             16  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$249/0x0000000840166040
+  HISTO Total      16100882      327568544
+PROBE kind=sep P=0 rep=rep2 DRAIN pending=0 active=0 completed=4000001 expectedCompleted=4000001
+sep P=1024 rep2 exit=0: 5 probe lines, OOM lines 0
+PROBE kind=sep P=1024 rep=rep2 N=0 active=1 pending=0 maxQueued=2147483647 heapMiB=7.12 deltaMiB=0.00
+PROBE kind=sep P=1024 rep=rep2 N=10000 submitted=10000 active=1 pending=10000 maxQueued=2147483647 wallMs=20 maxCallUs=836 err=none heapMiB=17.67 deltaMiB=10.56 perTaskB=1106.9
+PROBE kind=sep P=1024 rep=rep2 N=100000 submitted=90000 active=1 pending=100000 maxQueued=2147483647 wallMs=103 maxCallUs=32 err=none heapMiB=112.43 deltaMiB=105.31 perTaskB=1104.3
+PROBE kind=sep P=1024 rep=rep2 N=1000000 submitted=900000 active=1 pending=1000000 maxQueued=2147483647 wallMs=1423 maxCallUs=139845 err=none heapMiB=1060.00 deltaMiB=1052.89 perTaskB=1104.0
+  HISTO 1:       1018949     1043917152  [B (java.base@11.0.32.1)
+  HISTO 2:       1000001       24000024  java.util.concurrent.ConcurrentLinkedQueue$Node (java.base@11.0.32.1)
+  HISTO 4:       1000000       16000000  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$255/0x0000000840164c40
+  HISTO 532:             1             72  java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask (java.base@11.0.32.1)
+  HISTO 1204:             1             16  org.apache.cassandra.concurrent.SEPQueueBoundProbe$$Lambda$249/0x0000000840166040
+  HISTO Total       4100879     1111568440
+PROBE kind=sep P=1024 rep=rep2 DRAIN pending=0 active=0 completed=1000001 expectedCompleted=1000001
+control P=0 rep2 exit=0: 5 probe lines, OOM lines 0
+PROBE kind=control P=0 rep=rep2 N=10000 accepted=10000 rejected=0 queued=10000 firstReject=none wallMs=14 heapMiB=1.54 deltaMiB=0.37
+PROBE kind=control P=0 rep=rep2 N=100000 accepted=10000 rejected=90000 queued=10000 firstReject=afterAccepted=10000 wallMs=394 heapMiB=1.66 deltaMiB=0.49
+PROBE kind=control P=0 rep=rep2 N=1000000 accepted=10000 rejected=990000 queued=10000 firstReject=afterAccepted=10000 wallMs=2193 heapMiB=1.66 deltaMiB=0.49
+PROBE kind=control P=0 rep=rep2 N=4000000 accepted=10000 rejected=3990000 queued=10000 firstReject=afterAccepted=10000 wallMs=5440 heapMiB=1.66 deltaMiB=0.49
+PROBE kind=control P=0 rep=rep2 DRAIN completed=10001
+control P=1024 rep2 exit=0: 4 probe lines, OOM lines 0
+PROBE kind=control P=1024 rep=rep2 N=10000 accepted=10000 rejected=0 queued=10000 firstReject=none wallMs=22 heapMiB=11.30 deltaMiB=10.14
+PROBE kind=control P=1024 rep=rep2 N=100000 accepted=10000 rejected=90000 queued=10000 firstReject=afterAccepted=10000 wallMs=430 heapMiB=11.42 deltaMiB=10.26
+PROBE kind=control P=1024 rep=rep2 N=1000000 accepted=10000 rejected=990000 queued=10000 firstReject=afterAccepted=10000 wallMs=2287 heapMiB=11.42 deltaMiB=10.26
+PROBE kind=control P=1024 rep=rep2 DRAIN completed=10001
+leftover probe JVMs: 0
+EXPECTED: control-P0-rep1.log: no OutOfMemoryError - yes
+EXPECTED: control-P0-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: control-P0-rep2.log: no OutOfMemoryError - yes
+EXPECTED: control-P0-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: control-P1024-rep1.log: no OutOfMemoryError - yes
+EXPECTED: control-P1024-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: control-P1024-rep2.log: no OutOfMemoryError - yes
+EXPECTED: control-P1024-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P0-rep1.log: no OutOfMemoryError - yes
+EXPECTED: sep-P0-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P0-rep1.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=4000000 (4000001) - yes
+EXPECTED: sep-P0-rep2.log: no OutOfMemoryError - yes
+EXPECTED: sep-P0-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P0-rep2.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=4000000 (4000001) - yes
+EXPECTED: sep-P1024-rep1.log: no OutOfMemoryError - yes
+EXPECTED: sep-P1024-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P1024-rep1.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=1000000 (1000001) - yes
+EXPECTED: sep-P1024-rep2.log: no OutOfMemoryError - yes
+EXPECTED: sep-P1024-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P1024-rep2.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=1000000 (1000001) - yes
+EXPECTED: sep P=0 rep1: points N = [10000, 100000, 1000000, 4000000] - yes
+EXPECTED: sep P=0 rep1 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep1 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep1 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep1 N=4000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=4000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=4000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - NO (recorded; judged in the results file)
+EXPECTED: sep P=0 rep1: slope 1e4->1e5 80.0 B/task and 1e5->1e6 80.0 B/task, each in [P+32, P+250] = [32, 250] - yes
+EXPECTED: sep P=0 rep1: slopes agree within 25 % (80.0 vs 80.0) - yes
+EXPECTED: sep P=0 rep1: heap not flat (delta at 1e6 76.3 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=0 rep1: drain: pending 0, completed = total + 1 (4000001 vs 4000001) - yes
+EXPECTED: sep P=0 rep2: points N = [10000, 100000, 1000000, 4000000] - yes
+EXPECTED: sep P=0 rep2 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep2 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep2 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep2 N=4000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=4000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=4000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - NO (recorded; judged in the results file)
+EXPECTED: sep P=0 rep2: slope 1e4->1e5 80.0 B/task and 1e5->1e6 80.0 B/task, each in [P+32, P+250] = [32, 250] - yes
+EXPECTED: sep P=0 rep2: slopes agree within 25 % (80.0 vs 80.0) - yes
+EXPECTED: sep P=0 rep2: heap not flat (delta at 1e6 76.3 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=0 rep2: drain: pending 0, completed = total + 1 (4000001 vs 4000001) - yes
+EXPECTED: sep P=1024 rep1: points N = [10000, 100000, 1000000] - yes
+EXPECTED: sep P=1024 rep1 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep1 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep1 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep1 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep1 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep1 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep1 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep1 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep1 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep1: slope 1e4->1e5 1103.9 B/task and 1e5->1e6 1104.0 B/task, each in [P+32, P+250] = [1056, 1274] - yes
+EXPECTED: sep P=1024 rep1: slopes agree within 25 % (1103.9 vs 1104.0) - yes
+EXPECTED: sep P=1024 rep1: heap not flat (delta at 1e6 1052.9 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=1024 rep1: drain: pending 0, completed = total + 1 (1000001 vs 1000001) - yes
+EXPECTED: sep P=1024 rep2: points N = [10000, 100000, 1000000] - yes
+EXPECTED: sep P=1024 rep2 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep2 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep2 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep2 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep2 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep2 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep2 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep2 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep2 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep2: slope 1e4->1e5 1103.9 B/task and 1e5->1e6 1104.0 B/task, each in [P+32, P+250] = [1056, 1274] - yes
+EXPECTED: sep P=1024 rep2: slopes agree within 25 % (1103.9 vs 1104.0) - yes
+EXPECTED: sep P=1024 rep2: heap not flat (delta at 1e6 1052.9 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=1024 rep2: drain: pending 0, completed = total + 1 (1000001 vs 1000001) - yes
+EXPECTED: rep1: per-task difference P=1024 minus P=0 at 1e6 = 1024.0 B in [874, 1174] - yes
+EXPECTED: rep2: per-task difference P=1024 minus P=0 at 1e6 = 1024.0 B in [874, 1174] - yes
+EXPECTED: P=0: the two repetitions agree within 10 % (80.0 vs 80.0) - yes
+EXPECTED: P=1024: the two repetitions agree within 10 % (1104.0 vs 1104.0) - yes
+EXPECTED: control P=0 rep1 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - NO (recorded; judged in the results file)
+EXPECTED: control P=0 rep1 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=0 rep1 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=0 rep1 N=4000000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=0 rep1: heap plateaus (delta 0.37 MiB at 1e4, 0.49 MiB at 4000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=0 rep2 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - NO (recorded; judged in the results file)
+EXPECTED: control P=0 rep2 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=0 rep2 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=0 rep2 N=4000000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=0 rep2: heap plateaus (delta 0.37 MiB at 1e4, 0.49 MiB at 4000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=1024 rep1 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - NO (recorded; judged in the results file)
+EXPECTED: control P=1024 rep1 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=1024 rep1 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=1024 rep1: heap plateaus (delta 10.14 MiB at 1e4, 10.26 MiB at 1000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=1024 rep1: the sep arm at 1e6 holds >= 10 x the control (1052.89 vs 10.26 MiB) - yes
+EXPECTED: control P=1024 rep2 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - NO (recorded; judged in the results file)
+EXPECTED: control P=1024 rep2 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=1024 rep2 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject after 10000 accepted - yes
+EXPECTED: control P=1024 rep2: heap plateaus (delta 10.14 MiB at 1e4, 10.26 MiB at 1000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=1024 rep2: the sep arm at 1e6 holds >= 10 x the control (1052.89 vs 10.26 MiB) - yes
+EXPECTED summary: 100 yes, 6 NO
+done 2026-10-22T08:01:24-06:00

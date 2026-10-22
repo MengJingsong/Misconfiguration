@@ -3,6 +3,8 @@
 > **Case:** [`coordinator_read_size_fail_threshold-shouldReject-thresholdBytes`](../../stage3-ai-deep-read/cases/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md)
 >
 > **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-15) — **unit: Confirmed; cluster: Confirmed** (§9a row 1): the guard refuses exactly the reads whose rows before the last exceed the limit, the counter at every abort is *X* = (⌊*F*/1,008⌋ + 1)·1,008 whatever the rows asked for (263,088 · 1,049,328 · 4,195,296 at 262,144 · 1,048,576 · 4,194,304), *n\** = 261 · 1,041 · 4,162 follows the knob, an abort builds no result and no frame and allocates on the coordinator what the (*n\**+1)-row read allocates (406,520 B vs 11,638,752 B for the unset read); **bypass as recorded** (paging delivers all 8,000 rows at 262,144, `count(*)`, switch off); **replica answer not withheld, as recorded** (28.09 MB built at every value); no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

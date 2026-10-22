@@ -3,6 +3,8 @@
 > **Case:** [`internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`](../../stage3-ai-deep-read/cases/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes--guided.md)
 >
 > **Status:** **Closed 2026-10-08 — Confirmed at both tiers** (run 1 on `pc66`, self-check exit 0, no run 2). Audited and frozen 2026-10-07 (**Ready after amendments**; §9a `efd85ccc…`, verified unchanged at run time). The central derived claim (per-peer reserve from the receive-side key) is confirmed; §4/§5/§8 stand unamended.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. Unit tier and cluster tier.
 

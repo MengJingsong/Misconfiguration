@@ -4,6 +4,8 @@
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 >
+> **Outcome class:** true positive / false positive / true negative / false negative / undetermined — the stage-3 estimate against the effect found below ([definition](../README.md#outcome-class)); fill it when both tiers are filed
+>
 > **Agent:** guided / autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
 > (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; and the case
@@ -187,7 +189,7 @@ how it was resolved (see "Compare and decide" in the README).
 Jingsong may overrule any verdict at any time; record an override here with its
 date and reason.
 
-**Stage-3 estimate:** positive / negative / undetermined (from the case file; the Effect column below is what the run found, and a mismatch is the result).
+**Stage-3 estimate:** positive / negative / undetermined (from the case file; the Effect column below is what the run found). **Outcome class:** true positive (positive, caps) / false positive (positive, does not cap) / true negative (negative, does not cap) / false negative (negative, caps) / undetermined (tiers disagree or a tier could not settle it); a mismatch is the result.
 
 **Claim tested:** (copy it from §9a or B1; for a negative-estimate file it says usage does **not** follow the constraint.)
 "Confirmed" below always means this claim held.

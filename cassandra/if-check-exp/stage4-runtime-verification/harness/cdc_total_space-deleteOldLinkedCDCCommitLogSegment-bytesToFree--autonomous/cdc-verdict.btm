@@ -1,0 +1,63 @@
+# Byteman rules for cdc_total_space-processNewSegment-allowance, case §9d.
+# Observation only: they change no behaviour. They write four kinds of trace line to the file named by the
+# system property stage4.byteman.out (default cdc-verdict.txt in the JVM's working directory), all in one
+# stream, in the order they happen.
+#
+#   pre seg=<name> sip=<counter> allowance=<A bytes> segSize=<S bytes> blocking=<bool> ms=<epoch millis>
+#       at the entry of CDCSizeTracker.processNewSegment() (CommitLogSegmentManagerCDC.java:326), once per
+#       segment created: the counter *before* this segment is counted, the limit, S and the mode. The case's
+#       check is `blocking && S + sip > allowance`  (:335-337).
+#
+#   post seg=<name> state=<PERMITTED|FORBIDDEN> sip=<counter> ms=<epoch millis>
+#       at the exit of the same method: the verdict and the counter after it. In non-blocking mode the counter
+#       here is after the deletion pass (:345-354), so it can be below `pre + S`.
+#
+#   deleteOld bytesToFree=<n> remaining=<bytes of the .log links left> ms=<epoch millis>
+#       at the exit of deleteOldLinkedCDCCommitLogSegment() (:91-131), the non-blocking deletion pass, once
+#       per call.
+#
+#   reject n=<count> ms=<epoch millis> msg=<the exception message>
+#       at the entry of CDCWriteException's constructor: one per rejected write (the exception is created
+#       only by throwIfForbidden(), :226). Only the 1st, 101st, 201st ... are written, to keep the trace small;
+#       n counts all of them.
+#
+# Loaded at node start with -javaagent:<byteman.jar>=script:<this file>,listener:true (case 9e), or attached to
+# the unit test with -Dtest.jvm.args. The private fields of the nested class are read directly, as the
+# MAX_HINT_BUFFERS rules read HintsBufferPool.allocatedBuffers.
+
+RULE cdc verdict, counter before
+CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+METHOD processNewSegment
+AT ENTRY
+IF true
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+   traceln("cdcVerdict", "pre seg=" + $1.logFile.name() + " sip=" + $0.sizeInProgress.get() + " allowance=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCTotalSpace() + " segSize=" + org.apache.cassandra.config.DatabaseDescriptor.getCommitLogSegmentSize() + " blocking=" + org.apache.cassandra.config.DatabaseDescriptor.getCDCBlockWrites() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cdc verdict, state after
+CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC$CDCSizeTracker
+METHOD processNewSegment
+AT EXIT
+IF true
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+   traceln("cdcVerdict", "post seg=" + $1.logFile.name() + " state=" + $1.getCDCState() + " sip=" + $0.sizeInProgress.get() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cdc oldest links deleted
+CLASS org.apache.cassandra.db.commitlog.CommitLogSegmentManagerCDC
+METHOD deleteOldLinkedCDCCommitLogSegment
+AT EXIT
+IF true
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+   traceln("cdcVerdict", "deleteOld bytesToFree=" + $1 + " remaining=" + $! + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cdc write rejected
+CLASS org.apache.cassandra.exceptions.CDCWriteException
+METHOD <init>
+AT ENTRY
+BIND n : int = incrementCounter("stage4.cdcReject")
+IF n % 100 == 1
+DO traceOpen("cdcVerdict", java.lang.System.getProperty("stage4.byteman.out", "cdc-verdict.txt"));
+   traceln("cdcVerdict", "reject n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " msg=" + $1)
+ENDRULE

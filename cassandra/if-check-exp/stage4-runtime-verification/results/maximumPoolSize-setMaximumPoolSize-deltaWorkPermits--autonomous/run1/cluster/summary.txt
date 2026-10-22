@@ -1,0 +1,124 @@
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;
+start lifetime 1 (n32): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792681119-pid1127329.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: n32 getconcurrency ReadStage = 32 (read 32) — yes
+EXPECTED: n32 getconcurrency MutationStage = 32 (read 32) — yes
+n32 write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n32-W.log; free 52.1 GB
+n32 write phase: {'op_rate': '62614', 'total_partitions': '3000000', 'total_errors': '0', 'elapsed': '00:00:47', 'timeouts_logged': 0}
+n32 read phase started: tools/bin/cassandra-stress mixed 'ratio(write=1,read=3)' duration=600s cl=ONE no-warmup -pop 'dist=UNIFORM(1..3000000)' -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n32-R.log
+n32 read phase: {'op_rate': '108381', 'total_partitions': '65047043', 'total_errors': '0', 'elapsed': '00:10:00', 'timeouts_logged': 0}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 4;concurrent_writes: 4;
+start lifetime 2 (n4): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=4', 'concurrent_writes=4']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792682109-pid1154032.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: n4 getconcurrency ReadStage = 4 (read 4) — yes
+EXPECTED: n4 getconcurrency MutationStage = 4 (read 4) — yes
+n4 write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n4-W.log; free 52.1 GB
+n4 write phase: {'op_rate': '63871', 'total_partitions': '3000000', 'total_errors': '384', 'elapsed': '00:00:46', 'timeouts_logged': 768}
+n4 read phase started: tools/bin/cassandra-stress mixed 'ratio(write=1,read=3)' duration=600s cl=ONE no-warmup -pop 'dist=UNIFORM(1..3000000)' -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n4-R.log
+n4 read phase: {'op_rate': '58522', 'total_partitions': '35135133', 'total_errors': '0', 'elapsed': '00:10:00', 'timeouts_logged': 0}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 256;concurrent_writes: 256;
+start lifetime 3 (n256): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=256', 'concurrent_writes=256']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792683053-pid1178612.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: n256 getconcurrency ReadStage = 256 (read 256) — yes
+EXPECTED: n256 getconcurrency MutationStage = 256 (read 256) — yes
+n256 write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n256-W.log; free 52.1 GB
+n256 write phase: {'op_rate': '62970', 'total_partitions': '3000000', 'total_errors': '0', 'elapsed': '00:00:47', 'timeouts_logged': 0}
+n256 read phase started: tools/bin/cassandra-stress mixed 'ratio(write=1,read=3)' duration=600s cl=ONE no-warmup -pop 'dist=UNIFORM(1..3000000)' -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n256-R.log
+n256 read phase: {'op_rate': '106596', 'total_partitions': '64061708', 'total_errors': '0', 'elapsed': '00:10:00', 'timeouts_logged': 0}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;
+start lifetime 4 (n32b): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792683995-pid1203843.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: n32b getconcurrency ReadStage = 32 (read 32) — yes
+EXPECTED: n32b getconcurrency MutationStage = 32 (read 32) — yes
+n32b write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n32b-W.log; free 52.1 GB
+n32b write phase: {'op_rate': '62570', 'total_partitions': '3000000', 'total_errors': '640', 'elapsed': '00:00:47', 'timeouts_logged': 1280}
+n32b read phase started: tools/bin/cassandra-stress mixed 'ratio(write=1,read=3)' duration=600s cl=ONE no-warmup -pop 'dist=UNIFORM(1..3000000)' -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-n32b-R.log
+n32b read phase: {'op_rate': '109112', 'total_partitions': '65533930', 'total_errors': '0', 'elapsed': '00:10:00', 'timeouts_logged': 0}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;
+start lifetime 5 (RS): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792684939-pid1228737.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+RS write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-RS-W.log; free 52.1 GB
+RS write phase: {'op_rate': '63732', 'total_partitions': '3000000', 'total_errors': '256', 'elapsed': '00:00:47', 'timeouts_logged': 512}
+RS read phase started: tools/bin/cassandra-stress mixed 'ratio(write=1,read=3)' duration=360s cl=ONE no-warmup -pop 'dist=UNIFORM(1..3000000)' -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-RS-R.log
+RS read phase: {'op_rate': '107309', 'total_partitions': '38677771', 'total_errors': '0', 'elapsed': '00:06:00', 'timeouts_logged': 0}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;native_transport_receive_queue_capacity: 0B;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;
+start lifetime 6 (PC0): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32', 'native_transport_receive_queue_capacity=0B', 'native_transport_max_request_data_in_flight=256MiB', 'native_transport_max_request_data_in_flight_per_ip=256MiB']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792685522-pid1246610.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: PC0 getconcurrency ReadStage = 32 (read 32) — yes
+EXPECTED: PC0 getconcurrency MutationStage = 32 (read 32) — yes
+PC0 write phase started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-PC0-W.log; free 52.1 GB
+PC0 write phase: {'op_rate': '64010', 'total_partitions': '5776175', 'total_errors': '256', 'elapsed': '00:01:30', 'timeouts_logged': 512}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;native_transport_receive_queue_capacity: 0B;native_transport_max_request_data_in_flight: 128KiB;native_transport_max_request_data_in_flight_per_ip: 128KiB;
+start lifetime 7 (PC): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32', 'native_transport_receive_queue_capacity=0B', 'native_transport_max_request_data_in_flight=128KiB', 'native_transport_max_request_data_in_flight_per_ip=128KiB']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792685750-pid1253895.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: PC getconcurrency ReadStage = 32 (read 32) — yes
+EXPECTED: PC getconcurrency MutationStage = 32 (read 32) — yes
+PC write phase started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-PC-W.log; free 52.1 GB
+PC write phase: {'op_rate': '62105', 'total_partitions': '5597649', 'total_errors': '512', 'elapsed': '00:01:30', 'timeouts_logged': 1024}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;memtable_heap_space: 64MiB;
+start lifetime 8 (M64): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32', 'memtable_heap_space=64MiB']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792685977-pid1261161.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: M64 getconcurrency ReadStage = 32 (read 32) — yes
+EXPECTED: M64 getconcurrency MutationStage = 32 (read 32) — yes
+M64 write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-M64-W.log; free 52.1 GB
+M64 write phase: {'op_rate': '52438', 'total_partitions': '3000000', 'total_errors': '0', 'elapsed': '00:00:57', 'timeouts_logged': 0}
+# ---- stage4 mps2 lines ----;cluster_name: stage4-mps2;listen_address: 127.0.0.5;rpc_address: 127.0.0.5;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mps2/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mps2/node1/saved_caches;hints_directory: /users/jason92/stage4-mps2/node1/hints;cdc_raw_directory: /users/jason92/stage4-mps2/node1/cdc;commitlog_total_space: 2GiB;concurrent_reads: 32;concurrent_writes: 32;memtable_heap_space: 256MiB;
+start lifetime 9 (M256): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_reads=32', 'concurrent_writes=32', 'memtable_heap_space=256MiB']
+jvm: -Dcassandra.jmx.local.port=7205 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mps2/node1/logs/cassandra-1792686173-pid1267675.hprof -XX:NativeMemoryTracking=summary -Xms2G -Xmx2G
+EXPECTED: M256 getconcurrency ReadStage = 32 (read 32) — yes
+EXPECTED: M256 getconcurrency MutationStage = 32 (read 32) — yes
+M256 write phase started: tools/bin/cassandra-stress write n=3000000 cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(1024)' -rate threads=400 -errors ignore retries=0 -mode native cql3 -node 127.0.0.5 -log file=/users/jason92/stage4-logs/mps2/run1/cluster/stress-M256-W.log; free 52.1 GB
+M256 write phase: {'op_rate': '55713', 'total_partitions': '3000000', 'total_errors': '0', 'elapsed': '00:00:53', 'timeouts_logged': 0}
+READING n32: heap_base=69.3, heapW=367.8, heapR=512.2, heapRmax=592.6, heapWmax=590.6, rssR=2861.4, rssW=2838.8, thrR=262.0, thrW=222.0, rdthrR=25.0, muthrR=18.0, spthrR=0.0, nmtThreadR=131.2, rd_pend_R=4.0, mu_pend_R=1.0, rd_pend_Rmax=99.0, mu_pend_Rmax=96.0, mu_pend_W=96.0, jrd_pend_R=5.0, jmu_pend_R=1.0, jrd_pend_Rmax=101.0, jmu_pend_Rmax=96.0, act_max=32.0, tp_act_max=32.0, rs_max=0.0, mt_max=170.3
+READING n4: heap_base=84.4, heapW=600.4, heapR=418.1, heapRmax=526.3, heapWmax=600.4, rssR=2798.9, rssW=2773.9, thrR=206.0, thrW=191.0, rdthrR=4.0, muthrR=5.0, spthrR=0.0, nmtThreadR=121.8, rd_pend_R=121.0, mu_pend_R=0.0, rd_pend_Rmax=124.0, mu_pend_Rmax=1.0, mu_pend_W=124.0, jrd_pend_R=121.0, jmu_pend_R=0.0, jrd_pend_Rmax=124.0, jmu_pend_Rmax=124.0, act_max=4.0, tp_act_max=4.0, rs_max=0.0, mt_max=169.6
+READING n256: heap_base=83.6, heapW=392.6, heapR=522.1, heapRmax=669.0, heapWmax=604.8, rssR=2808.5, rssW=2775.7, thrR=286.0, thrW=259.5, rdthrR=18.5, muthrR=26.0, spthrR=0.0, nmtThreadR=132.7, rd_pend_R=1.0, mu_pend_R=1.0, rd_pend_Rmax=2.0, mu_pend_Rmax=2.0, mu_pend_W=0.0, jrd_pend_R=1.0, jmu_pend_R=1.0, jrd_pend_Rmax=2.0, jmu_pend_Rmax=2.0, act_max=128.0, tp_act_max=128.0, rs_max=0.0, mt_max=172.0
+READING n32b: heap_base=83.7, heapW=389.0, heapR=474.0, heapRmax=592.1, heapWmax=605.5, rssR=2818.2, rssW=2800.2, thrR=260.0, thrW=219.0, rdthrR=26.5, muthrR=16.5, spthrR=0.0, nmtThreadR=128.9, rd_pend_R=6.0, mu_pend_R=1.0, rd_pend_Rmax=102.0, mu_pend_Rmax=96.0, mu_pend_W=96.0, jrd_pend_R=4.0, jmu_pend_R=1.0, jrd_pend_Rmax=102.0, jmu_pend_Rmax=96.0, act_max=32.0, tp_act_max=32.0, rs_max=0.0, mt_max=169.3
+READING RS: heap_base=83.6, heapW=540.8, heapR=467.9, heapRmax=602.9, heapWmax=540.8, rssR=2824.3, rssW=2801.0, thrR=264.0, thrW=220.0, rdthrR=26.0, muthrR=20.0, spthrR=0.0, nmtThreadR=132.2, rd_pend_R=1.0, mu_pend_R=1.0, rd_pend_Rmax=117.0, mu_pend_Rmax=120.0, mu_pend_W=96.0, jrd_pend_R=1.0, jmu_pend_R=1.0, jrd_pend_Rmax=119.0, jmu_pend_Rmax=96.0, act_max=64.0, tp_act_max=64.0, rs_max=0.0, mt_max=169.5
+READING PC0: heap_base=83.7, heapW=609.0, heapR=nan, heapRmax=0.0, heapWmax=610.4, rssR=nan, rssW=2778.1, thrR=nan, thrW=220.5, rdthrR=nan, muthrR=nan, spthrR=nan, nmtThreadR=nan, rd_pend_R=nan, mu_pend_R=nan, rd_pend_Rmax=0.0, mu_pend_Rmax=0.0, mu_pend_W=96.0, jrd_pend_R=nan, jmu_pend_R=nan, jrd_pend_Rmax=0.0, jmu_pend_Rmax=0.0, act_max=32.0, tp_act_max=32.0, rs_max=428.9, mt_max=169.0
+READING PC: heap_base=83.8, heapW=606.5, heapR=nan, heapRmax=0.0, heapWmax=611.1, rssR=nan, rssW=2857.8, thrR=nan, thrW=220.0, rdthrR=nan, muthrR=nan, spthrR=nan, nmtThreadR=nan, rd_pend_R=nan, mu_pend_R=nan, rd_pend_Rmax=0.0, mu_pend_Rmax=0.0, mu_pend_W=95.0, jrd_pend_R=nan, jmu_pend_R=nan, jrd_pend_Rmax=0.0, jmu_pend_Rmax=0.0, act_max=32.0, tp_act_max=32.0, rs_max=127.6, mt_max=160.9
+READING M64: heap_base=83.7, heapW=178.9, heapR=nan, heapRmax=0.0, heapWmax=187.7, rssR=nan, rssW=2843.1, thrR=nan, thrW=220.0, rdthrR=nan, muthrR=nan, spthrR=nan, nmtThreadR=nan, rd_pend_R=nan, mu_pend_R=nan, rd_pend_Rmax=0.0, mu_pend_Rmax=0.0, mu_pend_W=96.0, jrd_pend_R=nan, jmu_pend_R=nan, jrd_pend_Rmax=0.0, jmu_pend_Rmax=0.0, act_max=32.0, tp_act_max=32.0, rs_max=0.0, mt_max=20.5
+READING M256: heap_base=83.8, heapW=319.3, heapR=nan, heapRmax=0.0, heapWmax=356.8, rssR=nan, rssW=2811.5, thrR=nan, thrW=219.0, rdthrR=nan, muthrR=nan, spthrR=nan, nmtThreadR=nan, rd_pend_R=nan, mu_pend_R=nan, rd_pend_Rmax=0.0, mu_pend_Rmax=0.0, mu_pend_W=96.0, jrd_pend_R=nan, jmu_pend_R=nan, jrd_pend_Rmax=0.0, jmu_pend_Rmax=0.0, act_max=32.0, tp_act_max=32.0, rs_max=0.0, mt_max=80.6
+EXPECTED: n32: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: n4: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: n256: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: n32b: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: RS: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: PC0: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: PC: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: M64: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: M256: no full GC other than System.gc()/Heap Inspection (C4, D1) and no OutOfMemoryError (found 0 / 0) — yes
+EXPECTED: C5 HEAP(n) in R about equal across n = 4 · 32 · 256: [418.1, 512.2, 522.1] MiB, max/min 1.249 <= 1.15 — NO (recorded; the AI judges it in the results file)
+EXPECTED: C5 HEAP(n) in R does not track n (refuting needs monotone and max/min >= 1.5): monotone True, ratio 1.249 — yes
+EXPECTED: C5 HEAP(n) in W about equal across n = 4 · 32 · 256: [600.4, 367.8, 392.6] MiB, max/min 1.633 <= 1.15 — NO (recorded; the AI judges it in the results file)
+EXPECTED: C5 HEAP(n) in W does not track n (refuting needs monotone and max/min >= 1.5): monotone False, ratio 1.633 — yes
+EXPECTED: C5 RSS(n) in R about equal across n = 4 · 32 · 256: [2798.9, 2861.4, 2808.5] MiB, max/min 1.022 <= 1.15 — yes
+EXPECTED: C5 RSS(n) in R does not track n (refuting needs monotone and max/min >= 1.5): monotone False, ratio 1.022 — yes
+EXPECTED: B3f sub: RSS(256) - RSS(4) <= 64 MiB (read 9.6) — yes
+READING pending median in R, rd: n=4 121.0, n=32 4.0, n=256 1.0
+READING pending median in R, mu: n=4 0.0, n=32 1.0, n=256 1.0
+EXPECTED: C5 load reached the limit at n = 4: median Pending in R >= 20 for ReadStage or MutationStage — yes
+EXPECTED: C5 Pending(4) >> Pending(256) for ['rd']: >= 5 x max(P256,1) — yes
+EXPECTED: B3f Pending not capped by n: Pending max at n = 4 exceeds 4 (rd 124.0, mu 1.0) — yes
+EXPECTED: C6b n4: Active <= 4 at every sample (JMX 1 s max 4.0, tpstats max 4.0) — yes
+EXPECTED: C6b n32: Active <= 32 at every sample (JMX 1 s max 32.0, tpstats max 32.0) — yes
+EXPECTED: C6b n256: Active <= 256 at every sample (JMX 1 s max 128.0, tpstats max 128.0) — yes
+READING Active reached n? n4: JMX Active max 4.0 (n = 4)
+READING Active reached n? n32: JMX Active max 32.0 (n = 32)
+READING Active reached n? n256: JMX Active max 128.0 (n = 256)
+EXPECTED: C6a noise: HEAP(32) of the two n = 32 lifetimes, ratio 1.081 <= 1.15 (512.2, 474.0) — yes
+EXPECTED: C6c RS ReadStage: exactly 3 "Resized" lines 32->8, 8->64, 64->32 (none for the same-value call): [('32', '8'), ('8', '64'), ('64', '32')] — yes
+EXPECTED: C6c RS MutationStage: exactly 3 "Resized" lines 32->8, 8->64, 64->32 (none for the same-value call): [('32', '8'), ('8', '64'), ('64', '32')] — yes
+EXPECTED: RS setconcurrency ReadStage 32 rc 0 and read back 32 — yes
+EXPECTED: RS setconcurrency MutationStage 32 rc 0 and read back 32 — yes
+EXPECTED: RS setconcurrency ReadStage 8 rc 0 and read back 8 — yes
+EXPECTED: RS setconcurrency MutationStage 8 rc 0 and read back 8 — yes
+EXPECTED: RS setconcurrency ReadStage 64 rc 0 and read back 64 — yes
+EXPECTED: RS setconcurrency MutationStage 64 rc 0 and read back 64 — yes
+EXPECTED: RS setconcurrency ReadStage 32 rc 0 and read back 32 — yes
+EXPECTED: RS setconcurrency MutationStage 32 rc 0 and read back 32 — yes
+EXPECTED: C7(i) PC RequestsSize max <= 1.25 x 128 KiB (read 127.6 KiB) and PC0 >= 2 x PC (read 428.9 KiB) — yes
+READING stress PC0 {'op_rate': '64010', 'total_partitions': '5776175', 'total_errors': '256', 'elapsed': '00:01:30', 'timeouts_logged': 512}; PC {'op_rate': '62105', 'total_partitions': '5597649', 'total_errors': '512', 'elapsed': '00:01:30', 'timeouts_logged': 1024}
+EXPECTED: C7(ii) peak MemtableOnHeapSize M64 20.5 <= M256 80.6 / 1.3 <= n32 reference 170.3 / 1.69 — yes
+EXPECTED: C7(ii) HEAP(W) ordered M64 < M256 < reference: 178.9 < 319.3 < 367.8 — yes
+SUMMARY: 50 yes, 2 NO
+daemons left of this harness: 0; free 52.1 GB

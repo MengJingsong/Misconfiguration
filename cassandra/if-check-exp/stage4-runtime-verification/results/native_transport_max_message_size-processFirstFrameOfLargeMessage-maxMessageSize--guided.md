@@ -2,6 +2,8 @@
 > **Case:** [`native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided`](../../stage3-ai-deep-read/cases/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md)
 >
 > **Status:** **Closed 2026-10-20 — verdict filed: unit Refuted; cluster Refuted** (§9a row 2: "retained memory follows the knob, per request"). The claim under test (the negative estimate: the knob does not bound the memory held for a large request) does not hold: one 8 MiB v5 request held before its last frame kept 8,389,184 B (64 frame stashes) at 16 MiB and at the derived default, and 0 B at 4 and 1 MiB, where it was refused at its first frame; the reserves control lowered two held requests from 16.001 to 8.251 MiB. The source reading of the case's §10 Notes is borne out. No run 2 (§5.2).
+> 
+> **Outcome class:** false negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** guided (the suffix of the case-file stem). One results file per case file.
 

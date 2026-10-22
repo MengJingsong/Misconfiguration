@@ -707,6 +707,7 @@ stage 4 ran both and wrote a side-by-side. Revised 2026-10-19:
   full two-tier solution, designed to test that usage does **not** follow the constraint, so stage 4 can
   confirm or refute it. The existing entries in `predicted-negative.md` (a few hundred rows, most of them trivial grounds)
   are to be written up this way.
+- **Outcome class (2026-10-22).** Once stage 4 has run, a case is classed by comparing its stage-3 estimate with the stage-4 effect on the constraint (stage 4 taken as the truth): **true positive** (estimate `positive`, effect `caps`), **false positive** (`positive`, `does not cap`), **true negative** (`negative`, `does not cap`), **false negative** (`negative`, `caps`), or **undetermined** (the unit and cluster tiers disagree, or a tier could not settle the effect: Not confirmed, partial). `caps` includes soft caps and caps with a recorded bypass. The class is recorded beside the verdict; Confirmed / Refuted and the Effect field keep their meaning, and a refuted estimate is still not re-estimated. Abbreviations in tables: TP, FP, TN, FN.
 - **Stage 4 runs every case file** and saves the conclusion; the side-by-side was dropped, and there is
   no rating or scoring across agents.
 - **Scope stays memory and disk** (§3.3). The 24 guided files and 2 autonomous files filed before the

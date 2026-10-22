@@ -1,0 +1,16 @@
+# Byteman hold for internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous
+# (case file B3b "mutation stage busy", audit amendment R5). Loaded on node A (the target) only. From the closed sibling's
+# hold-handler.btm: while the file named by -Dstage4.hold.file exists, each MUTATION_REQ's verb handler sleeps
+# -Dstage4.hold.ms (20 in this case) at its entry, so the MutationStage thread keeps the message's capacity (released only
+# after the verb handler returns, InboundMessageHandler.java:427-442). Without the file the rule does nothing.
+# One "hold" line per held call goes to the trace file of receive-trace.btm.
+
+RULE rsv hold mutation verb handler
+CLASS org.apache.cassandra.db.MutationVerbHandler
+METHOD doVerb
+AT ENTRY
+IF (new java.io.File(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"))).exists()
+DO java.lang.Thread.sleep(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "20")));
+   traceOpen("rsv", java.lang.System.getProperty("stage4.trace", "rsv.trace"));
+   traceln("rsv", "hold thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

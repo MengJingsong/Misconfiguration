@@ -2,6 +2,8 @@
 > **Case:** [`native_transport_max_concurrent_connections-channelActive-limit--guided`](../../stage3-ai-deep-read/cases/native_transport_max_concurrent_connections-channelActive-limit--guided.md)
 >
 > **Status:** **Closed 2026-10-20** — estimate negative; claim under test: memory does not follow the connection limit. Unit: counts only (open = min(*k*, *L*) at every limit; no memory reading at this tier). Cluster: **Refuted — caps**: live heap follows min(4000, *L*) at 1,329.6 B per idle connection (plus one file descriptor); the positive control moved memory (after defect 1's fix). No run 2.
+> 
+> **Outcome class:** false negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** guided (the suffix of the case-file stem). One results file per case file.
 

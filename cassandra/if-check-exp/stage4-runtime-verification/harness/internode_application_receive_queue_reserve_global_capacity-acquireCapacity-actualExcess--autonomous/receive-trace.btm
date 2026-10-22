@@ -1,0 +1,32 @@
+# Byteman observation rules for internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous
+# (case file B3d, audit amendment R7). They change no behaviour. Every line goes to the file named by -Dstage4.trace.
+# Adapted from the closed sibling's receive-trace.btm (releaseCapacity--autonomous).
+#
+#   acq id=<handler id> b=<bytes> out=<Outcome> q=<queueSize after> cap=<queueCapacity> ep=<using>/<limit> gl=<using>/<limit> ms=<epoch ms>
+#     at the exit of AbstractMessageHandler.acquireCapacity(Limit, Limit, int) (the check; the line of interest :447 runs inside).
+#     On a reactivation one of the two limits is the wait queue's lease (a Basic limit), not the configured reserve.
+#   rel id=<handler id> b=<bytes> q=<queueSize after> ep=<using>/<limit> gl=<using>/<limit> ms=<epoch ms>
+#     at the exit of releaseCapacity(int), reading the handler's own reserve fields (the configured endpoint and global reserve).
+
+RULE rsv acquire exit
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD acquireCapacity(org.apache.cassandra.net.ResourceLimits$Limit, org.apache.cassandra.net.ResourceLimits$Limit, int)
+AT EXIT
+IF true
+DO traceOpen("rsv", java.lang.System.getProperty("stage4.trace", "rsv.trace"));
+   traceln("rsv", "acq id=" + $0.id() + " b=" + $3 + " out=" + $! + " q=" + $0.queueSize + " cap=" + $0.queueCapacity
+                  + " ep=" + $1.using() + "/" + $1.limit() + " gl=" + $2.using() + "/" + $2.limit()
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rsv release exit
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD releaseCapacity(int)
+AT EXIT
+IF true
+DO traceOpen("rsv", java.lang.System.getProperty("stage4.trace", "rsv.trace"));
+   traceln("rsv", "rel id=" + $0.id() + " b=" + $1 + " q=" + $0.queueSize
+                  + " ep=" + $0.endpointReserveCapacity.using() + "/" + $0.endpointReserveCapacity.limit()
+                  + " gl=" + $0.globalReserveCapacity.using() + "/" + $0.globalReserveCapacity.limit()
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

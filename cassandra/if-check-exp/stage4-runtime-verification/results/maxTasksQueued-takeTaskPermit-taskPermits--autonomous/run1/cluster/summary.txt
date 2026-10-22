@@ -1,0 +1,59 @@
+cluster-run 2026-10-22 08:01:50 host node3.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu arms ['A', 'B', 'A2'] stress 360 s warm 60 s clone /users/jason92/cassandra-mtt
+# ---- stage4 mtt lines ----;cluster_name: stage4-mtt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mtt/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mtt/node1/saved_caches;hints_directory: /users/jason92/stage4-mtt/node1/hints;cdc_raw_directory: /users/jason92/stage4-mtt/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 2;native_transport_max_threads: 4096;native_transport_receive_queue_capacity: 0B;write_request_timeout: 120000ms;native_transport_timeout: 120s;commitlog_sync: batch;native_transport_max_request_data_in_flight: 512MiB;native_transport_max_request_data_in_flight_per_ip: 512MiB;
+start lifetime 1 (A): yaml ['concurrent_writes=2', 'native_transport_max_threads=4096', 'native_transport_receive_queue_capacity=0B', 'write_request_timeout=120000ms', 'native_transport_timeout=120s', 'commitlog_sync=batch', '-commitlog_sync_period', 'native_transport_max_request_data_in_flight=512MiB', 'native_transport_max_request_data_in_flight_per_ip=512MiB']
+jvm: MaxHeapSize 1024 MiB; G1 True
+A schema/table: 100-row stress write {'op_rate': '96', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:01', 'write_timeouts_logged': 0, 'exceptions_logged': 0}
+EXPECTED: A concurrent_writes = 2 (getconcurrency: MutationStage                           0               2) — yes
+A stress started (2000 threads, in-flight 512 MiB, 360 s): tools/bin/cassandra-stress write duration=360s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(32768)' -pop 'dist=UNIFORM(1..4000)' -rate threads=2000 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 -node 127.0.0.1 -log file=/users/jason92/stage4-logs/mtt/run1/cluster/stress-A.log; free 56.1 GB
+A class histogram taken at +181 s (MutationStage Pending then 1996)
+A stress: {'op_rate': '2435', 'total_partitions': '878686', 'total_errors': '0', 'elapsed': '00:06:00', 'write_timeouts_logged': 0, 'exceptions_logged': 0}
+# ---- stage4 mtt lines ----;cluster_name: stage4-mtt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mtt/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mtt/node1/saved_caches;hints_directory: /users/jason92/stage4-mtt/node1/hints;cdc_raw_directory: /users/jason92/stage4-mtt/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 2;native_transport_max_threads: 4096;native_transport_receive_queue_capacity: 0B;write_request_timeout: 120000ms;native_transport_timeout: 120s;commitlog_sync: batch;native_transport_max_request_data_in_flight: 16MiB;native_transport_max_request_data_in_flight_per_ip: 16MiB;
+start lifetime 2 (B): yaml ['concurrent_writes=2', 'native_transport_max_threads=4096', 'native_transport_receive_queue_capacity=0B', 'write_request_timeout=120000ms', 'native_transport_timeout=120s', 'commitlog_sync=batch', '-commitlog_sync_period', 'native_transport_max_request_data_in_flight=16MiB', 'native_transport_max_request_data_in_flight_per_ip=16MiB']
+jvm: MaxHeapSize 1024 MiB; G1 True
+B schema/table: 100-row stress write {'op_rate': '284', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:00', 'write_timeouts_logged': 0, 'exceptions_logged': 0}
+EXPECTED: B concurrent_writes = 2 (getconcurrency: MutationStage                           0               2) — yes
+B stress started (2000 threads, in-flight 16 MiB, 360 s): tools/bin/cassandra-stress write duration=360s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(32768)' -pop 'dist=UNIFORM(1..4000)' -rate threads=2000 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 -node 127.0.0.1 -log file=/users/jason92/stage4-logs/mtt/run1/cluster/stress-B.log; free 56.1 GB
+B class histogram taken at +181 s (MutationStage Pending then 1994)
+B stress: {'op_rate': '2391', 'total_partitions': '863404', 'total_errors': '0', 'elapsed': '00:06:01', 'write_timeouts_logged': 0, 'exceptions_logged': 0}
+# ---- stage4 mtt lines ----;cluster_name: stage4-mtt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mtt/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mtt/node1/saved_caches;hints_directory: /users/jason92/stage4-mtt/node1/hints;cdc_raw_directory: /users/jason92/stage4-mtt/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 2;native_transport_max_threads: 4096;native_transport_receive_queue_capacity: 0B;write_request_timeout: 120000ms;native_transport_timeout: 120s;commitlog_sync: batch;native_transport_max_request_data_in_flight: 512MiB;native_transport_max_request_data_in_flight_per_ip: 512MiB;
+start lifetime 3 (A2): yaml ['concurrent_writes=2', 'native_transport_max_threads=4096', 'native_transport_receive_queue_capacity=0B', 'write_request_timeout=120000ms', 'native_transport_timeout=120s', 'commitlog_sync=batch', '-commitlog_sync_period', 'native_transport_max_request_data_in_flight=512MiB', 'native_transport_max_request_data_in_flight_per_ip=512MiB']
+jvm: MaxHeapSize 1024 MiB; G1 True
+A2 schema/table: 100-row stress write {'op_rate': '91', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:01', 'write_timeouts_logged': 0, 'exceptions_logged': 0}
+EXPECTED: A2 concurrent_writes = 2 (getconcurrency: MutationStage                           0               2) — yes
+A2 stress started (256 threads, in-flight 512 MiB, 360 s): tools/bin/cassandra-stress write duration=360s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(32768)' -pop 'dist=UNIFORM(1..4000)' -rate threads=256 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 -node 127.0.0.1 -log file=/users/jason92/stage4-logs/mtt/run1/cluster/stress-A2.log; free 56.1 GB
+A2 class histogram taken at +181 s (MutationStage Pending then 254)
+A2 stress: {'op_rate': '2750', 'total_partitions': '992373', 'total_errors': '0', 'elapsed': '00:06:00', 'write_timeouts_logged': 0, 'exceptions_logged': 0}
+A: {"n_tp": 62, "n_heap": 20, "n_jmx": 308, "Pn": 1996.0, "Pmax": 1998, "Pmin": 0, "Pn_jmx": 1996.0, "Pmax_jmx": 1998.0, "NTRpend_median": 0.0, "active_max": 2, "dropped_delta": 0, "completed_delta": 739098, "rate_per_s": 2423.217, "P_first_half_median": 1996, "P_second_half_median": 1997, "Hn_MiB": 413.275, "H_base_MiB": 76.735, "H_raw_median_MiB": 509.091, "req_size_max_MiB": 62.641, "req_size_mean_MiB": 62.055, "maxq_all_const": true, "heap_used_max_MiB": 943.59}
+A histogram at peak: CLQ$Node (6448, 154752), byte[] (204467, 218479312) (baseline (197617, 19878856)), db.Mutation (2000, 112000)
+B: {"n_tp": 61, "n_heap": 20, "n_jmx": 309, "Pn": 1996, "Pmax": 1998, "Pmin": 460, "Pn_jmx": 1996.0, "Pmax_jmx": 1998.0, "NTRpend_median": 0, "active_max": 2, "dropped_delta": 0, "completed_delta": 748403, "rate_per_s": 2494.61, "P_first_half_median": 1996.0, "P_second_half_median": 1996, "Hn_MiB": 417.502, "H_base_MiB": 76.73, "H_raw_median_MiB": 521.755, "req_size_max_MiB": 15.973, "req_size_mean_MiB": 15.69, "maxq_all_const": true, "heap_used_max_MiB": 952.706}
+B histogram at peak: CLQ$Node (6431, 154344), byte[] (204453, 206815536) (baseline (197623, 19879264)), db.Mutation (1998, 111888)
+A2: {"n_tp": 62, "n_heap": 20, "n_jmx": 308, "Pn": 252.0, "Pmax": 254, "Pmin": 0, "Pn_jmx": 252.0, "Pmax_jmx": 254.0, "NTRpend_median": 0.0, "active_max": 2, "dropped_delta": 0, "completed_delta": 831556, "rate_per_s": 2726.377, "P_first_half_median": 252, "P_second_half_median": 252, "Hn_MiB": 146.182, "H_base_MiB": 76.614, "H_raw_median_MiB": 241.777, "req_size_max_MiB": 8.018, "req_size_mean_MiB": 7.903, "maxq_all_const": true, "heap_used_max_MiB": 940.791}
+A2 histogram at peak: CLQ$Node (1193, 28632), byte[] (194061, 102681480) (baseline (197596, 19876872)), db.Mutation (254, 14224)
+EXPECTED: A MaxTasksQueued = 2147483647 at every 1-s JMX sample (308 samples) — yes
+EXPECTED: A MutationStage Active max <= 2 (concurrent_writes 2) — yes
+EXPECTED: A statistics window has >= 40 tpstats samples and >= 12 heap samples — yes
+EXPECTED: B MaxTasksQueued = 2147483647 at every 1-s JMX sample (309 samples) — yes
+EXPECTED: B MutationStage Active max <= 2 (concurrent_writes 2) — yes
+EXPECTED: B statistics window has >= 40 tpstats samples and >= 12 heap samples — yes
+EXPECTED: A2 MaxTasksQueued = 2147483647 at every 1-s JMX sample (308 samples) — yes
+EXPECTED: A2 MutationStage Active max <= 2 (concurrent_writes 2) — yes
+EXPECTED: A2 statistics window has >= 40 tpstats samples and >= 12 heap samples — yes
+EXPECTED: A Pn >= 1000 (sub-prediction; Pn(A) = 1996.0) — yes
+EXPECTED: A Pmax <= 2200 (= 1.1 x threads; Pmax = 1998) — yes
+EXPECTED: A2 Pn in [128, 282] (0.5-1.1 x 256; Pn = 252.0) — yes
+EXPECTED: Pn(A) >= 2 x Pn(A2) (1996.0 vs 252.0) — yes
+EXPECTED: B Pmax <= 563 (1.1 x 16 MiB / 32 KiB; Pmax = 1998) — NO (recorded; the AI judges it in the results file)
+EXPECTED: Pn(B) <= 0.5 x Pn(A) (1996 vs 1996.0) — NO (recorded; the AI judges it in the results file)
+EXPECTED: B RequestsSize max >= 14.4 MiB (90 % of 16 MiB; 15.973491668701172) — yes
+EXPECTED: B RequestsSize max <= 16.5 MiB (15.973491668701172) — yes
+EXPECTED: A RequestsSize max < 512 MiB (62.641143798828125) — yes
+EXPECTED: Hn(A) - Hn(B) >= 0.5 x (Pn(A) - Pn(B)) x 32 KiB: -4.2 MiB vs 0.0 MiB — NO (recorded; the AI judges it in the results file)
+EXPECTED: Hn(A) - Hn(A2) >= 0.5 x (Pn(A) - Pn(A2)) x 32 KiB: 267.1 MiB vs 27.2 MiB — yes
+EXPECTED: A heap per queued mutation >= 32 KiB, the payload (reported 212.0 KiB) — yes
+EXPECTED: B heap per queued mutation >= 32 KiB, the payload (reported 214.2 KiB) — yes
+EXPECTED: A2 heap per queued mutation >= 32 KiB, the payload (reported 594.0 KiB) — yes
+A drift: Pending median first half 1996, second half 1997
+B drift: Pending median first half 1996.0, second half 1996
+A2 drift: Pending median first half 252, second half 252
+EXPECTED summary: 23 yes, 3 NO
+left running: 0

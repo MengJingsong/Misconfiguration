@@ -2,6 +2,8 @@
 > **Case:** [`concurrent_compactors-submitBackground-getMaximumPoolSize--guided`](../../stage3-ai-deep-read/cases/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md)
 >
 > **Status:** verdict filed 2026-10-20 — cluster Refuted (peak extra disk follows `min(n, 8)` × one compaction's output), unit Refuted at the executor level; the claim "does not cap" is refuted; one runbook defect (the control), fixed; no run 2
+> 
+> **Outcome class:** false negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** guided (the suffix of the case-file stem). One results file per case file.
 

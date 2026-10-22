@@ -3,6 +3,8 @@
 > **Case:** [`largestRatio-flushLargestMemtable-largestRatio--autonomous`](../../stage3-ai-deep-read/cases/largestRatio-flushLargestMemtable-largestRatio--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Refuted — does not cap; cluster Confirmed — does not cap** (estimate negative). Line 274 never let accounted memtable usage pass `memtable_heap_space`; that ceiling followed the knob (positive control 3.35–4.26×), and disabling the selection (M-never) only stopped writes at exactly L. The unit tier is Refuted on the claim's "same peak/L" part: at L = 128 MiB, below the cap, the skewed selection held 0.58 L and the even one 0.42 L. Supplementary: the M-first mutant kept the accounted pool ≤ L but filled a 1 GiB test heap (OOM). No run 2.
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

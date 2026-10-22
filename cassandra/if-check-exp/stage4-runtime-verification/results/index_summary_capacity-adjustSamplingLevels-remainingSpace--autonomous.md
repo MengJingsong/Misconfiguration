@@ -3,6 +3,8 @@
 > **Case:** [`index_summary_capacity-adjustSamplingLevels-remainingSpace--autonomous`](../../stage3-ai-deep-read/cases/index_summary_capacity-adjustSamplingLevels-remainingSpace--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Confirmed (caps), cluster Confirmed — caps only on some paths (bypass)** (estimate positive
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 > with bypasses, matched). The operand of line 258 equals `pool − Σ planned floor` to the byte at both tiers (unit: `P − N·F'` for
 > five pools; node: `C·2^20 − ΣF' − 316 B` at six capacities), negative only below the floor sum (C = 8 MiB: −7,439,403 B, branch not
 > taken, usage 15.09 MiB). After each run the summaries are 1930.2 / 972.7 / 493.9 / 398.1 / 15.1 / 15.1 MiB at 4096 / 1024 / 512 /

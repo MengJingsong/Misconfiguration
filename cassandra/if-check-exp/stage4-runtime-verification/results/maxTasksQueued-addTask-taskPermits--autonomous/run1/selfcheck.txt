@@ -1,0 +1,35 @@
+CHECK U1: holds - 16 sep configurations present (16)
+CHECK U2: holds - maxTasksQueued 2147483647 and rejected 0 in all 16
+CHECK U3: holds - pending == submitted == N and c blockers active in all 14 non-OOM configurations
+CHECK U4: holds - only the two P=1024 N=4e6 configurations ran out of memory; pending == submitted in both: c=1 submitted 1909616 pending 1909616, c=8 submitted 1909179 pending 1909179
+CHECK U5: holds - bytes/task within ±10 % of the mean and k in [20, 300] for every (c, P); k values: P=64: 88.0, P=1024: 88.0
+CHECK U6: holds - c=1 / c=8 bytes per task in [0.9, 1.1]
+CHECK U7: holds - drain: pendingAfter 0 and live after <= 64 MiB in all 16 drains
+CHECK U8: holds - control: queue 1000, 999000 rejected, live heap <= 4 MiB in both
+CHECK U9-miss: DOES NOT HOLD - (recorded miss if it does not hold) blocks >= 5 s only in: {('sep', 8, 1024, 4000000): 15.52, ('sep', 1, 1024, 4000000): 19.33}
+CHECK U10-c1: holds - GC pauses in the OOM JVM total 30.3 s (67 pauses) against the submit loop 28.1 s (inferred: the long blocks are GC thrash near the heap limit)
+CHECK U10-c8: holds - GC pauses in the OOM JVM total 27.8 s (67 pauses) against the submit loop 22.5 s (inferred: the long blocks are GC thrash near the heap limit)
+CHECK C1: holds - four arms A B C D with (cap, w) = (256,1) (32,1) (256,8) (32,8)
+CHECK C2-A: holds - yaml in-flight and per-IP both 256 MiB: ['concurrent_writes=2', 'native_transport_max_request_data_in_flight=256MiB', 'native_transport_max_request_data_in_flight_per_ip=256MiB']
+CHECK C2-B: holds - yaml in-flight and per-IP both 32 MiB: ['concurrent_writes=2', 'native_transport_max_request_data_in_flight=32MiB', 'native_transport_max_request_data_in_flight_per_ip=32MiB']
+CHECK C2-C: holds - yaml in-flight and per-IP both 256 MiB: ['concurrent_writes=8', 'native_transport_max_request_data_in_flight=256MiB', 'native_transport_max_request_data_in_flight_per_ip=256MiB']
+CHECK C2-D: holds - yaml in-flight and per-IP both 32 MiB: ['concurrent_writes=8', 'native_transport_max_request_data_in_flight=32MiB', 'native_transport_max_request_data_in_flight_per_ip=32MiB']
+CHECK C3: holds - receive queue 0B in the yaml tail of summary.txt
+CHECK C4: holds - the stress command of each arm: threads=6000 connectionsPerHost=16 maxPending=1024 (session.log)
+CHECK C5: holds - heap 2G in each lifetime
+CHECK C6-A: holds - MaxTasksQueued gauge only 2147483647 at 236 samples; window 138 samples
+CHECK C7-A: holds - peak RequestsSize 255.98 MiB for cap 256 MiB
+CHECK C6-B: holds - MaxTasksQueued gauge only 2147483647 at 232 samples; window 135 samples
+CHECK C7-B: holds - peak RequestsSize 31.97 MiB for cap 32 MiB
+CHECK C6-C: holds - MaxTasksQueued gauge only 2147483647 at 234 samples; window 136 samples
+CHECK C7-C: holds - peak RequestsSize 255.98 MiB for cap 256 MiB
+CHECK C6-D: holds - MaxTasksQueued gauge only 2147483647 at 234 samples; window 136 samples
+CHECK C7-D: holds - peak RequestsSize 31.97 MiB for cap 32 MiB
+SUPPL peaks P: {'A': 383.0, 'B': 383.0, 'C': 1289.0, 'D': 376.0} medians: {'A': 127.0, 'B': 127.0, 'C': 120.0, 'D': 120.0} HQ MiB: {'A': 883, 'B': 1080, 'C': 1081, 'D': 911}
+SUPPL smallest nonzero pending values in the window: {'A': [125, 126, 127, 255, 383], 'B': [125, 126, 127, 255, 375, 383], 'C': [117, 118, 119, 120, 164, 169, 248, 313], 'D': [116, 118, 119, 120, 136, 248, 376]}
+CHECK C8: holds - row 1 (scales ~8x) is not satisfied: P(A)/P(B) = 1.00, P(C)/P(D) = 3.43
+CHECK C9: holds - row 2 (same plateau, both ratios < 2) is not satisfied by the frozen statistic: 1.00, 3.43
+CHECK C10: holds - row 3 (never grows) is not satisfied: peaks [383.0, 383.0, 1289.0, 376.0]
+CHECK C11: holds - row 4 is not satisfied: HQ(C)/HQ(A) 1.22, HQ(D)/HQ(B) 0.84
+CHECK C12: holds - row C-a is not satisfied: P x 64 KiB / cap = {'A': 0.09, 'B': 0.75, 'C': 0.31, 'D': 0.73}
+selfcheck: 31 hold, 1 DO NOT HOLD (the "-miss" checks and the not-satisfied rows are recorded, not errors)

@@ -2,6 +2,8 @@
 > **Case:** [`batch_size_fail_threshold-verifyBatchSize-failThreshold--guided`](../../stage3-ai-deep-read/cases/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided.md)
 >
 > **Status:** **Closed 2026-10-20 — verdict filed: unit Confirmed, cluster Confirmed — does not cap.** Estimate negative; claim under test: coordinator memory for a batch follows the batch size, not the threshold. A rejected batch's coordinator allocation is about 2.0–2.4 × its bytes at every threshold (medians within 1 %); the positive control (`native_transport_max_message_size` 512 KiB) cuts it to 0. Step-1 amendments R7, R8; one harness defect (§3), the cluster tier restarted; no run 2.
+> 
+> **Outcome class:** true negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** guided (the suffix of the case-file stem). One results file per case file.
 

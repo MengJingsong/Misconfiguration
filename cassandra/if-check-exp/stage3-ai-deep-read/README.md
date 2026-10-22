@@ -17,6 +17,7 @@ says which one wrote it: `<stem>--autonomous.md` or `<stem>--guided.md`
 | Playbook | [`playbook-autonomous.md`](playbook-autonomous.md): the target only | [`playbook-guided.md`](playbook-guided.md): the target plus human suggestions (the three rules, the enforcement patterns, the test-design method) |
 | Template | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) |
 | Estimates the line | yes (`positive`, `negative`, `undetermined`) | yes (`positive`, `negative`, `undetermined`) |
+| Judged after stage 4 | true positive / false positive / true negative / false negative / undetermined, by comparing the estimate with the stage-4 effect ([`../stage4-runtime-verification/README.md`](../stage4-runtime-verification/README.md#outcome-class)) | same |
 | Output | `cases/<stem>--autonomous.md` | `cases/<stem>--guided.md` |
 | Started by | you, by hand, in a Claude Code session (desktop app) | an AI session in this repo; it asks you whether to read the autonomous file |
 

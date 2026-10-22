@@ -3,6 +3,8 @@
 > **Case:** [`memtable_heap_space-tryAllocate-limit`](../../stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--guided.md)
 >
 > **Status:** run 1 done — unit tier (2026-09-28) reviewed by Jingsong and its verdict filed (2026-09-29); cluster tier run 1 done 2026-09-29, reviewed by Jingsong (2026-09-29) and its verdict filed (2026-09-30); run 2 not chosen. **Case closed.**
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 
 **Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
 run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.

@@ -2,6 +2,8 @@
 > **Case:** [`max_mutation_size-allocateBytes-slabCapacity--autonomous`](../../stage3-ai-deep-read/cases/max_mutation_size-allocateBytes-slabCapacity--autonomous.md)
 >
 > **Status:** **Closed 2026-10-20 — unit Confirmed (B2g row 1); cluster Confirmed (B3g row 1 and R1 row 1) — caps.** Hint direct memory = slabs × slab size (32 MiB at the default and at 4 MiB, 64 MiB at 32 MiB, flat over 200,000 hints); three sub-predictions missed (RSS in 2 of 4 lifetimes; the B1 "writers briefly block" — at `MAX_HINT_BUFFERS=1` hint writers deadlock for good; R2's guard identity — the 17 MiB write is refused by the CQL frame limit, not `max_mutation_size`); no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

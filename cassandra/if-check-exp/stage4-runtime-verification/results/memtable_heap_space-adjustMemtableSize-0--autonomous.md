@@ -3,6 +3,8 @@
 > **Case:** [`memtable_heap_space-adjustMemtableSize-0--autonomous`](../../stage3-ai-deep-read/cases/memtable_heap_space-adjustMemtableSize-0--autonomous.md)
 >
 > **Status:** verdict filed 2026-10-22. **Unit Confirmed — caps (loose, r = 3.5); cluster Not confirmed (no matching row) — undetermined.** Run 1 only.
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster); "§9b–§9e" means B2a–B2e / B3a–B3e; the
 > feedback section is the case file's section D.

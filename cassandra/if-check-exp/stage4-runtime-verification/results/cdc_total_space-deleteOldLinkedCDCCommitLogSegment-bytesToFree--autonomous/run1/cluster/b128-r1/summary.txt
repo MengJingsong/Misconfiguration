@@ -1,0 +1,26 @@
+== b128-r1: mode=blocking cap=128MiB cdc_enabled=true table=cdc rows=6144 (=384 MiB) rate=52/s heap=2G
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc2/cluster/b128-r1/cdc-verdict.txt -javaagent:/users/jason92/cassandra-cdc/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc2/cdc-verdict.btm,listener:true; ulimit -n 100000
+node up after 18s
+idle: links=2 cdc_raw_exists=yes 1792678097300,2,67108864,73728,0,0,0,50
+stress W: Op rate : 52 op/s [insert: 52 op/s]|Total partitions : 6,144 [insert: 6,144]|Total errors : 4,612 [insert: 4,612]| ended 1792678223564
+after workload: links=3 1792678226550,3,100663296,100683776,3,54,0,50 WARN=11 Freed_up=0 wall=129s
+after flush: links=3 1792678231050,3,100663296,100683776,3,54,0,50
+settle: streak 15 after 23 s
+before release: links=3 listing=CommitLog-7-1792678054026_cdc.idx:18 CommitLog-7-1792678054026.log:33554432 CommitLog-7-1792678054027_cdc.idx:18 CommitLog-7-1792678054027.log:33554432 CommitLog-7-1792678054028_cdc.idx:18 CommitLog-7-1792678054028.log:33554432 
+release: deleted CommitLog-7-1792678054026.log
+release: deleted CommitLog-7-1792678054027.log
+release: accepted=1 after 2 probe(s), 1323 ms; links=2
+stress R2: Op rate : 98 op/s [insert: 98 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ended 1792678273948
+after more inserts: links=3 1792678276950,3,100663296,99241984,3,44,0,50 WARN=12
+stress REFILL: Op rate : 99 op/s [insert: 99 op/s]|Total partitions : 2,688 [insert: 2,688]|Total errors : 2,666 [insert: 2,666]| ended 1792678313044
+before switch: links=3 WARN=17 probe_cdc=rejected CDCBlockWrites=true
+switch: CDCBlockWrites now false; jmx-set: org.apache.cassandra.db:type=Commitlog 
+switch: first CDC probe accepted=1 after 1 probe(s), 561 ms
+stress S2: Op rate : 98 op/s [insert: 98 op/s]|Total partitions : 3,072 [insert: 3,072]|Total errors : 0 [insert: 0]| ended 1792678360469
+switch: links before=[CommitLog-7-1792678054028.log CommitLog-7-1792678054029.log CommitLog-7-1792678054030.log ] after=[CommitLog-7-1792678054035.log CommitLog-7-1792678054036.log CommitLog-7-1792678054037.log CommitLog-7-1792678054038.log ] Freed_up=5 WARN=18
+final: links=4 1792678363500,4,134217728,67530752,4,59,0,50
+final listing: CommitLog-7-1792678054031_cdc.idx:18 CommitLog-7-1792678054035_cdc.idx:18 CommitLog-7-1792678054035.log:33554432 CommitLog-7-1792678054036_cdc.idx:18 CommitLog-7-1792678054036.log:33554432 CommitLog-7-1792678054037_cdc.idx:5 CommitLog-7-1792678054037.log:33554432 CommitLog-7-1792678054038.log:33554432 
+commit log dir: 335548416 bytes; data: 101381080; free: 53G
+traces: created=14 forbidden=4 deleteOld=6 rejectLines=73 WARN=18 FreedUp=6 ERROR=7280
+sampler: ticks=5424 max_links=4 max_link_bytes=134217728 max_gap_ms=50 first_ms=1792678092350 last_ms=1792678363500
+RESULT b128-r1 finished 1792678374130; disk free 53G

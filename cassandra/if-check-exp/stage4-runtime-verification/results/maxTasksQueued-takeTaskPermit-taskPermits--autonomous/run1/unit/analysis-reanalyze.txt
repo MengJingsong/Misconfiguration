@@ -1,0 +1,107 @@
+EXPECTED: control-P0-rep1.log: no OutOfMemoryError - yes
+EXPECTED: control-P0-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: control-P0-rep2.log: no OutOfMemoryError - yes
+EXPECTED: control-P0-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: control-P1024-rep1.log: no OutOfMemoryError - yes
+EXPECTED: control-P1024-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: control-P1024-rep2.log: no OutOfMemoryError - yes
+EXPECTED: control-P1024-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P0-rep1.log: no OutOfMemoryError - yes
+EXPECTED: sep-P0-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P0-rep1.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=4000000 (4000001) - yes
+EXPECTED: sep-P0-rep2.log: no OutOfMemoryError - yes
+EXPECTED: sep-P0-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P0-rep2.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=4000000 (4000001) - yes
+EXPECTED: sep-P1024-rep1.log: no OutOfMemoryError - yes
+EXPECTED: sep-P1024-rep1.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P1024-rep1.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=1000000 (1000001) - yes
+EXPECTED: sep-P1024-rep2.log: no OutOfMemoryError - yes
+EXPECTED: sep-P1024-rep2.log: JVM max heap 2048 MiB - yes
+EXPECTED: sep-P1024-rep2.log: class histogram ConcurrentLinkedQueue$Node count within 1 % of N+1 at N=1000000 (1000001) - yes
+EXPECTED: sep P=0 rep1: points N = [10000, 100000, 1000000, 4000000] - yes
+EXPECTED: sep P=0 rep1 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep1 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep1 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep1 N=4000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep1 N=4000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep1 N=4000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - NO (recorded; judged in the results file)
+EXPECTED: sep P=0 rep1: slope 1e4->1e5 80.0 B/task and 1e5->1e6 80.0 B/task, each in [P+32, P+250] = [32, 250] - yes
+EXPECTED: sep P=0 rep1: slopes agree within 25 % (80.0 vs 80.0) - yes
+EXPECTED: sep P=0 rep1: heap not flat (delta at 1e6 76.3 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=0 rep1: drain: pending 0, completed = total + 1 (4000001 vs 4000001) - yes
+EXPECTED: sep P=0 rep2: points N = [10000, 100000, 1000000, 4000000] - yes
+EXPECTED: sep P=0 rep2 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep2 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep2 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=0 rep2 N=4000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=0 rep2 N=4000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=0 rep2 N=4000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - NO (recorded; judged in the results file)
+EXPECTED: sep P=0 rep2: slope 1e4->1e5 80.0 B/task and 1e5->1e6 80.0 B/task, each in [P+32, P+250] = [32, 250] - yes
+EXPECTED: sep P=0 rep2: slopes agree within 25 % (80.0 vs 80.0) - yes
+EXPECTED: sep P=0 rep2: heap not flat (delta at 1e6 76.3 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=0 rep2: drain: pending 0, completed = total + 1 (4000001 vs 4000001) - yes
+EXPECTED: sep P=1024 rep1: points N = [10000, 100000, 1000000] - yes
+EXPECTED: sep P=1024 rep1 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep1 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep1 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep1 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep1 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep1 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep1 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep1 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep1 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep1: slope 1e4->1e5 1103.9 B/task and 1e5->1e6 1104.0 B/task, each in [P+32, P+250] = [1056, 1274] - yes
+EXPECTED: sep P=1024 rep1: slopes agree within 25 % (1103.9 vs 1104.0) - yes
+EXPECTED: sep P=1024 rep1: heap not flat (delta at 1e6 1052.9 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=1024 rep1: drain: pending 0, completed = total + 1 (1000001 vs 1000001) - yes
+EXPECTED: sep P=1024 rep2: points N = [10000, 100000, 1000000] - yes
+EXPECTED: sep P=1024 rep2 N=10000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep2 N=10000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep2 N=10000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep2 N=100000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep2 N=100000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep2 N=100000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep2 N=1000000: submitted = pending = N, no error, maxQueued = 2147483647 - yes
+EXPECTED: sep P=1024 rep2 N=1000000: active = 1 (the blocker) - yes
+EXPECTED: sep P=1024 rep2 N=1000000: no blocking (batch wall per task <= 100 us; slowest call <= 1 s) - yes
+EXPECTED: sep P=1024 rep2: slope 1e4->1e5 1103.9 B/task and 1e5->1e6 1104.0 B/task, each in [P+32, P+250] = [1056, 1274] - yes
+EXPECTED: sep P=1024 rep2: slopes agree within 25 % (1103.9 vs 1104.0) - yes
+EXPECTED: sep P=1024 rep2: heap not flat (delta at 1e6 1052.9 MiB >= 0.5 x N x (P+32)) - yes
+EXPECTED: sep P=1024 rep2: drain: pending 0, completed = total + 1 (1000001 vs 1000001) - yes
+EXPECTED: rep1: per-task difference P=1024 minus P=0 at 1e6 = 1024.0 B in [874, 1174] - yes
+EXPECTED: rep2: per-task difference P=1024 minus P=0 at 1e6 = 1024.0 B in [874, 1174] - yes
+EXPECTED: P=0: the two repetitions agree within 10 % (80.0 vs 80.0) - yes
+EXPECTED: P=1024: the two repetitions agree within 10 % (1104.0 vs 1104.0) - yes
+EXPECTED: control P=0 rep1 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep1 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep1 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep1 N=4000000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep1: heap plateaus (delta 0.37 MiB at 1e4, 0.49 MiB at 4000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=0 rep2 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep2 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep2 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep2 N=4000000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=0 rep2: heap plateaus (delta 0.37 MiB at 1e4, 0.49 MiB at 4000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=1024 rep1 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=1024 rep1 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=1024 rep1 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=1024 rep1: heap plateaus (delta 10.14 MiB at 1e4, 10.26 MiB at 1000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=1024 rep1: the sep arm at 1e6 holds >= 10 x the control (1052.89 vs 10.26 MiB) - yes
+EXPECTED: control P=1024 rep2 N=10000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=1024 rep2 N=100000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=1024 rep2 N=1000000: accepted 10000, rejected N-10000, queued 10000, first reject (once there is one) after 10000 accepted - yes
+EXPECTED: control P=1024 rep2: heap plateaus (delta 10.14 MiB at 1e4, 10.26 MiB at 1000000: growth <= 20 % or <= 2 MiB) - yes
+EXPECTED: control P=1024 rep2: the sep arm at 1e6 holds >= 10 x the control (1052.89 vs 10.26 MiB) - yes
+EXPECTED summary: 104 yes, 2 NO

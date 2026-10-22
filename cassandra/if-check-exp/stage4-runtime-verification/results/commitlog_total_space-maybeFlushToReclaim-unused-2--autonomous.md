@@ -3,6 +3,8 @@
 > **Case:** [`commitlog_total_space-maybeFlushToReclaim-unused-2--autonomous`](../../stage3-ai-deep-read/cases/commitlog_total_space-maybeFlushToReclaim-unused-2--autonomous.md) (entry `AbstractCommitLogSegmentManager.java:259`, the sibling of `:249`)
 >
 > **Status:** **Closed 2026-10-21.**
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 > - **Unit: Confirmed — caps (soft)** (B2g row 4), with two missed sub-predictions.
 > - **Line 259: Confirmed** (B2i row i5, added by the audit). The stop condition picks exactly the segments needed, and that choice, not a flush of everything, keeps usage at T.
 > - **Cluster: Not confirmed (no matching row) — undetermined** (overruled 2026-10-22; row 4c, added after attempt 1, struck). Was: Not confirmed — caps (soft), B3g row 4c. At about 90 k writes/s, usage is held below the uncapped run and reclaimed to ≤ T, but the peak is set by flush throughput, not by T. The cluster tier ran twice (attempt 1 kept but not counted); both attempts gave the same peaks.

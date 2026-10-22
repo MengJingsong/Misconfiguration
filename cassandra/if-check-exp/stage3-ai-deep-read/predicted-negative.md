@@ -75,6 +75,17 @@ does not follow the constraint. Stage 4 confirms or refutes it.
   Not confirmed on an under-sampled sawtooth row). The "release / soft target" lesson held for
   lines whose operand is a configurable byte count; it did not for hard-coded water marks and
   pool-internal bookkeeping.
+- **Fourth write-up batch (2026-10-22).** The last two §9 lines and three §10 `SEPExecutor` lines were
+  written up by fresh autonomous agents and run at stage 4; all five **left this file** (verdicts in
+  [`_INDEX.md`](_INDEX.md) §1). Two came back positive and Confirmed — caps:
+  `AbstractMessageHandler.java:447` (`internode_application_receive_queue_reserve_global_capacity`; the
+  release-back branch keeps the reserve exact, accounted peak ≤ Q + G; the held memory is off-heap, 1.4–1.5 ×
+  accounted) and `CommitLogSegmentManagerCDC.java:93` (`cdc_total_space`; `cdc_raw` plateau at the cap, soft by
+  at most a segment). Three kept a negative estimate with the unit tier Confirmed — does not cap and the cluster
+  tier Not confirmed: `SEPExecutor.java:175` and `:135` (both resolved to the hard-coded
+  `getMaxTasksQueued() = Integer.MAX_VALUE`; queued tasks are unbounded) and `:384` (`maximumPoolSize`
+  resize). Lesson: a thread-pool permit line is a clean unit-tier "does not cap", but the cluster tier cannot
+  separate the pool size from the upstream in-flight byte limits and `native_transport_max_threads`.
 
 Contents: [1](#1-configuration-and-argument-validation) validation ·
 [2](#2-logging-warning-or-diagnostic-only) logging only ·
@@ -286,8 +297,6 @@ both branches. A reclaim target can be exceeded, so it is not a ceiling.
 
 | If statement | Reason rejected |
 |---|---|
-| `AbstractMessageHandler.java:447` | Returns over-borrowed reserve inside the filed receive case's `acquireCapacity()`. |
-| `CommitLogSegmentManagerCDC.java:93` | The deletion path of the filed `cdc_total_space` case. |
 
 ## 10. Count, time, rate and work thresholds
 
@@ -297,7 +306,7 @@ done rather than bytes held.
 
 | If statement | Reason rejected |
 |---|---|
-| `SEPExecutor.java:135`, `:175`, `:373`, `:384`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). `SEPExecutor.java:196` (`takeWorkPermit`, `concurrent_writes`) left this row on 2026-10-21, verified at stage 4 as Confirmed — does not cap ([case](cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md), `_INDEX.md` §1): excess mutations queue unbounded on the heap, 887.5 MiB at pool size 0. That run tested only `:196` and never made the pool bind under load, so the lines left here stay unverified. **`SEPExecutor.java:165`** (`takeTaskPermit`, pool `maximumPoolSize`) left this row on 2026-10-21 ([case](cases/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md)): unit Confirmed — does not cap (queued heap 125 MiB at every pool size); cluster Not confirmed (BIND-5). That run made the pool bind (Active = v at 1 · 8 · 32 · 128): for **large internode mutations** (> 64 KiB, deserialized only when a worker runs them) heap follows running tasks × per-task bytes (live +5.5 → +70.2 MiB) while the queue waits off heap, bounded by the receive reserve; small mutations are flat. So the queue is uncapped at `:196` and `:165`, and the `concurrent_compactors` pattern holds for heap on the large-message path only. `ReadStage` and `Native-Transport-Requests` have no binding test yet. |
+| `SEPExecutor.java:373`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). `SEPExecutor.java:196` (`takeWorkPermit`, `concurrent_writes`) left this row on 2026-10-21, verified at stage 4 as Confirmed — does not cap ([case](cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md), `_INDEX.md` §1): excess mutations queue unbounded on the heap, 887.5 MiB at pool size 0. That run tested only `:196` and never made the pool bind under load, so the lines left here stay unverified. **`SEPExecutor.java:165`** (`takeTaskPermit`, pool `maximumPoolSize`) left this row on 2026-10-21 ([case](cases/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md)): unit Confirmed — does not cap (queued heap 125 MiB at every pool size); cluster Not confirmed (BIND-5). That run made the pool bind (Active = v at 1 · 8 · 32 · 128): for **large internode mutations** (> 64 KiB, deserialized only when a worker runs them) heap follows running tasks × per-task bytes (live +5.5 → +70.2 MiB) while the queue waits off heap, bounded by the receive reserve; small mutations are flat. So the queue is uncapped at `:196` and `:165`, and the `concurrent_compactors` pattern holds for heap on the large-message path only. `ReadStage` and `Native-Transport-Requests` have no binding test yet. |
 | `PartitionDenylist.java:419`, `:445` `results.size() > limit` | Rule 3 too: the result set is fully built before the check, which then logs and truncates. |
 | `DataLimits$CQLCounter.incrementRowCount():509`, `:511`; `$GroupByAwareCounter:986` | The query's own `LIMIT` and per-partition limit, a client parameter (also Rule 1). |
 | `DataLimits.java:993`, `:1000`, `:1041` (2 units); helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()` | Same: the query's limits or page size. |

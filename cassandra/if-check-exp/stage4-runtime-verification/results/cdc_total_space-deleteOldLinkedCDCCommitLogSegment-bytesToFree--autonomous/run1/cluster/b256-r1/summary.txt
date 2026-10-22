@@ -1,0 +1,26 @@
+== b256-r1: mode=blocking cap=256MiB cdc_enabled=true table=cdc rows=12288 (=768 MiB) rate=103/s heap=2G
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc2/cluster/b256-r1/cdc-verdict.txt -javaagent:/users/jason92/cassandra-cdc/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc2/cdc-verdict.btm,listener:true; ulimit -n 100000
+node up after 18s
+idle: links=2 cdc_raw_exists=yes 1792678611547,2,67108864,73728,0,0,0,50
+stress W: Op rate : 102 op/s [insert: 102 op/s]|Total partitions : 12,288 [insert: 12,288]|Total errors : 8,201 [insert: 8,201]| ended 1792678739842
+after workload: links=8 1792678742847,8,268435456,268496896,8,144,0,50 WARN=10 Freed_up=0 wall=131s
+after flush: links=8 1792678747747,8,268435456,268496896,8,144,0,50
+settle: streak 15 after 23 s
+before release: links=8 listing=CommitLog-7-1792678568007_cdc.idx:18 CommitLog-7-1792678568007.log:33554432 CommitLog-7-1792678568008_cdc.idx:18 CommitLog-7-1792678568008.log:33554432 CommitLog-7-1792678568009_cdc.idx:18 CommitLog-7-1792678568009.log:33554432 CommitLog-7-1792678568010_cdc.idx:18 CommitLog-7-1792678568010.log:33554432 CommitLog-7-1792678568011_cdc.idx:18 CommitLog-7-1792678568011.log:33554432 CommitLog-7-1792678568012_cdc.idx:18 CommitLog-7-1792678568012.log:33554432 CommitLog-7-1792678568013_cdc.idx:18 CommitLog-7-1792678568013.log:33554432 CommitLog-7-1792678568014_cdc.idx:18 CommitLog-7-1792678568014.log:33554432 
+release: deleted CommitLog-7-1792678568007.log
+release: deleted CommitLog-7-1792678568008.log
+release: accepted=1 after 2 probe(s), 1317 ms; links=7
+stress R2: Op rate : 100 op/s [insert: 100 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 489 [insert: 489]| ended 1792678790828
+after more inserts: links=7 1792678793797,7,234881024,234938368,7,126,0,50 WARN=14
+stress REFILL: Op rate : 100 op/s [insert: 100 op/s]|Total partitions : 4,736 [insert: 4,736]|Total errors : 4,736 [insert: 4,736]| ended 1792678849966
+before switch: links=7 WARN=19 probe_cdc=rejected CDCBlockWrites=true
+switch: CDCBlockWrites now false; jmx-set: org.apache.cassandra.db:type=Commitlog 
+switch: first CDC probe accepted=1 after 1 probe(s), 554 ms
+stress S2: Op rate : 98 op/s [insert: 98 op/s]|Total partitions : 3,072 [insert: 3,072]|Total errors : 0 [insert: 0]| ended 1792678897372
+switch: links before=[CommitLog-7-1792678568009.log CommitLog-7-1792678568010.log CommitLog-7-1792678568011.log CommitLog-7-1792678568012.log CommitLog-7-1792678568013.log CommitLog-7-1792678568014.log CommitLog-7-1792678568015.log ] after=[CommitLog-7-1792678568015.log CommitLog-7-1792678568017.log CommitLog-7-1792678568018.log CommitLog-7-1792678568019.log CommitLog-7-1792678568020.log CommitLog-7-1792678568021.log CommitLog-7-1792678568022.log CommitLog-7-1792678568023.log ] Freed_up=5 WARN=20
+final: links=8 1792678900397,8,268435456,201781248,8,132,0,50
+final listing: CommitLog-7-1792678568015_cdc.idx:18 CommitLog-7-1792678568015.log:33554432 CommitLog-7-1792678568016_cdc.idx:18 CommitLog-7-1792678568017_cdc.idx:18 CommitLog-7-1792678568017.log:33554432 CommitLog-7-1792678568018_cdc.idx:18 CommitLog-7-1792678568018.log:33554432 CommitLog-7-1792678568019_cdc.idx:18 CommitLog-7-1792678568019.log:33554432 CommitLog-7-1792678568020_cdc.idx:18 CommitLog-7-1792678568020.log:33554432 CommitLog-7-1792678568021_cdc.idx:18 CommitLog-7-1792678568021.log:33554432 CommitLog-7-1792678568022_cdc.idx:6 CommitLog-7-1792678568022.log:33554432 CommitLog-7-1792678568023.log:33554432 
+commit log dir: 301993984 bytes; data: 269804565; free: 53G
+traces: created=18 forbidden=3 deleteOld=6 rejectLines=135 WARN=20 FreedUp=6 ERROR=13428
+sampler: ticks=5877 max_links=8 max_link_bytes=268435456 max_gap_ms=51 first_ms=1792678606596 last_ms=1792678900397
+RESULT b256-r1 finished 1792678911022; disk free 53G

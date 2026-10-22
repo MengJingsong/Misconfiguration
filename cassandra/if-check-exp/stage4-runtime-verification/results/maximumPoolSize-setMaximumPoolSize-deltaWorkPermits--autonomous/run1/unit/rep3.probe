@@ -1,0 +1,32 @@
+PROBE-ENV label=rep3 maxHeapMiB=2048 jvm=[-Xmx2g, -Xms2g, -Xss256k, -XX:+UseG1GC, -XX:G1HeapRegionSize=4m, -XX:NativeMemoryTracking=summary, -Xlog:gc:file=/users/jason92/stage4-logs/mps2/run1/unit/gc-rep3.log]
+PROBE A n=1 T=2000 label=rep3 maxPool=1 active=1 pending=1999 running=1 registryMiB=1 allocatedMiB=1 heapDeltaMiB=2.0 threads=8 threadsDelta=1 poolThreads=1 nmtThreadDeltaKB=248 submitErr=0 submitMs=14 maxSubmitUs=8254
+PROBE-DONE A n=1 completed=2000
+PROBE A n=4 T=2000 label=rep3 maxPool=4 active=4 pending=1996 running=4 registryMiB=4 allocatedMiB=4 heapDeltaMiB=4.2 threads=11 threadsDelta=4 poolThreads=4 nmtThreadDeltaKB=435 submitErr=0 submitMs=3 maxSubmitUs=265
+PROBE-DONE A n=4 completed=2000
+PROBE A n=32 T=2000 label=rep3 maxPool=32 active=32 pending=1968 running=32 registryMiB=32 allocatedMiB=32 heapDeltaMiB=32.2 threads=39 threadsDelta=32 poolThreads=32 nmtThreadDeltaKB=3411 submitErr=0 submitMs=4 maxSubmitUs=271
+PROBE-DONE A n=32 completed=2000
+PROBE A n=128 T=2000 label=rep3 maxPool=128 active=128 pending=1872 running=128 registryMiB=128 allocatedMiB=128 heapDeltaMiB=128.2 threads=135 threadsDelta=128 poolThreads=128 nmtThreadDeltaKB=13858 submitErr=0 submitMs=2 maxSubmitUs=256
+PROBE-DONE A n=128 completed=2000
+PROBE B n=1 T=600 label=rep3 maxPool=1 active=1 pending=599 running=1 registryMiB=1 allocatedMiB=600 heapDeltaMiB=600.1 threads=8 threadsDelta=1 poolThreads=1 nmtThreadDeltaKB=-111 submitErr=0 submitMs=93 maxSubmitUs=169
+PROBE-DONE B n=1 completed=600
+PROBE B n=4 T=600 label=rep3 maxPool=4 active=4 pending=596 running=4 registryMiB=4 allocatedMiB=600 heapDeltaMiB=600.1 threads=12 threadsDelta=5 poolThreads=5 nmtThreadDeltaKB=544 submitErr=0 submitMs=95 maxSubmitUs=169
+PROBE-DONE B n=4 completed=600
+PROBE B n=32 T=600 label=rep3 maxPool=32 active=32 pending=568 running=32 registryMiB=32 allocatedMiB=600 heapDeltaMiB=600.1 threads=40 threadsDelta=33 poolThreads=33 nmtThreadDeltaKB=3555 submitErr=0 submitMs=96 maxSubmitUs=134
+PROBE-DONE B n=32 completed=600
+PROBE B n=128 T=600 label=rep3 maxPool=128 active=128 pending=472 running=128 registryMiB=128 allocatedMiB=600 heapDeltaMiB=600.1 threads=136 threadsDelta=129 poolThreads=129 nmtThreadDeltaKB=14074 submitErr=0 submitMs=116 maxSubmitUs=247
+PROBE-DONE B n=128 completed=600
+CTRL n=4 T=600 accepted=68 rejected=532 queue=64 active=4 heapDeltaMiB=68.0
+CTRL n=32 T=600 accepted=96 rejected=504 queue=64 active=32 heapDeltaMiB=96.0
+CTRL n=128 T=600 accepted=192 rejected=408 queue=64 active=128 heapDeltaMiB=192.1
+RESIZE step=[initial n=4] maxPool=4 active=4 pending=596 started=2 finished=0 listenerCalls=0 resizedLogLines=0 lines=
+10:58:29.133 [main] INFO org.apache.cassandra.concurrent.SEPExecutor -- Resized probe maximum pool size from 4 to 32
+RESIZE step=[set 4->32] maxPool=32 active=32 pending=568 started=32 finished=0 listenerCalls=1 resizedLogLines=1 lines=Resized_probe_maximum_pool_size_from_4_to_32;
+RESIZE step=[set 32->32 (line 384 no-op)] maxPool=32 active=32 pending=568 started=32 finished=0 listenerCalls=1 resizedLogLines=1 lines=Resized_probe_maximum_pool_size_from_4_to_32;
+RESIZE step=[set 32->32 again] maxPool=32 active=32 pending=568 started=32 finished=0 listenerCalls=1 resizedLogLines=1 lines=Resized_probe_maximum_pool_size_from_4_to_32;
+10:58:33.140 [main] INFO org.apache.cassandra.concurrent.SEPExecutor -- Resized probe maximum pool size from 32 to 8
+RESIZE step=[set 32->8 (32 tasks running)] maxPool=8 active=32 pending=568 started=32 finished=0 listenerCalls=2 resizedLogLines=2 lines=Resized_probe_maximum_pool_size_from_4_to_32;Resized_probe_maximum_pool_size_from_32_to_8;
+RESIZE step=[released 4 tasks] maxPool=8 active=28 pending=568 started=32 finished=4 listenerCalls=2 resizedLogLines=2 lines=Resized_probe_maximum_pool_size_from_4_to_32;Resized_probe_maximum_pool_size_from_32_to_8;
+RESIZE step=[released 24 tasks in total] maxPool=8 active=8 pending=568 started=32 finished=24 listenerCalls=2 resizedLogLines=2 lines=Resized_probe_maximum_pool_size_from_4_to_32;Resized_probe_maximum_pool_size_from_32_to_8;
+RESIZE step=[released 26 tasks in total] maxPool=8 active=8 pending=566 started=34 finished=26 listenerCalls=2 resizedLogLines=2 lines=Resized_probe_maximum_pool_size_from_4_to_32;Resized_probe_maximum_pool_size_from_32_to_8;
+RESIZE finished=600
+PROBE-END label=rep3

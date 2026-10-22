@@ -2,6 +2,8 @@
 > **Case:** [`maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous`](../../stage3-ai-deep-read/cases/maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21: unit Confirmed, cluster Confirmed, does not cap** (estimate negative, matched). One sub-prediction missed: F-MAX's old-gen peak was 2.2 × O-MAX's, from GC timing. No run 2.
+> 
+> **Outcome class:** true negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

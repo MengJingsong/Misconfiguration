@@ -3,6 +3,8 @@
 > **Case:** [`prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous`](../../stage3-ai-deep-read/cases/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md)
 >
 > **Status:** verdict filed 2026-10-19 — unit Confirmed; cluster Confirmed for the cache with one prediction missed (total heap is not flat); the persisted-statement memtable is a bypass; no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

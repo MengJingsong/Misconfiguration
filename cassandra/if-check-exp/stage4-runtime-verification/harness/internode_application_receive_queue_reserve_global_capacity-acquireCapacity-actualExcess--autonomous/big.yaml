@@ -1,0 +1,19 @@
+# cassandra-stress user profile for internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous
+# (case file B3c with amendment R4): one blob column of fixed(262144) bytes (256 KiB), one row per partition. The keyspace is
+# created beforehand by client.py (NetworkTopologyStrategy, datacenter1: 2, so every write through B is forwarded to A).
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE ks WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 2};
+table: t
+table_definition: |
+  CREATE TABLE t (pk bigint PRIMARY KEY, v blob)
+columnspec:
+  - name: pk
+    population: seq(1..1000000000)
+  - name: v
+    size: fixed(262144)
+insert:
+  partitions: fixed(1)
+  select: fixed(1)/1
+  batchtype: UNLOGGED
+queries: {}

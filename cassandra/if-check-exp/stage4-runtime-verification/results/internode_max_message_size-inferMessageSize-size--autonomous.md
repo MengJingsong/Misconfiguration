@@ -2,6 +2,8 @@
 > **Case:** [`internode_max_message_size-inferMessageSize-size--autonomous`](../../stage3-ai-deep-read/cases/internode_max_message_size-inferMessageSize-size--autonomous.md)
 >
 > **Status:** Closed — verdict filed 2026-10-20: unit Confirmed; cluster Confirmed (R2: the receiver rejects at `inferMessageSize` and holds nothing that scales with the message; R3: the sender rejects at `enqueue`); effect: caps (one message's wire size, both sides); no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

@@ -1,0 +1,51 @@
+cluster-run 2026-10-22 10:01:34 host node0 clone ['cassandra-5.0.9', 'b5f2a54'] cores 40 load ['69.20', '32.01', '15.12'] stress threads 6000 duration 150s
+harness md5: 31e23f8979ecd4a6f037fede67b6b0ce  cluster-run.py 54a92f9c5cd5ccbc00588adf08d79c26  make-node-yaml.sh ff84741a6e3a1e694764c1939fe7c8a5  Jmx.java 
+# ---- stage4 mta lines ----;cluster_name: stage4-mta;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mta/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mta/node1/saved_caches;hints_directory: /users/jason92/stage4-mta/node1/hints;cdc_raw_directory: /users/jason92/stage4-mta/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 2;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 0B;
+start lifetime 1 (A): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=2', 'native_transport_max_request_data_in_flight=256MiB', 'native_transport_max_request_data_in_flight_per_ip=256MiB']
+jvm: -Dcassandra.jmx.local.port=7204 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs/cassandra-1792677695-pid970139.hprof -Xms2G -Xmx2G
+EXPECTED: A getconcurrency MutationStage = 1 (read 1) — yes
+A schema/table: 100-row stress write {'op_rate': '120', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:00', 'write_timeouts_logged': 0}
+A stress started (256 MiB in flight, concurrent_writes 1): tools/bin/cassandra-stress write duration=150s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=6000 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 maxPending=1024 -node 127.0.0.4 -log file=/users/jason92/stage4-logs/mta/run1/cluster/stress-A.log; free 50.7 GB
+A stress: {'op_rate': '701', 'total_partitions': '112106', 'total_errors': '4096', 'elapsed': '00:02:40', 'write_timeouts_logged': 8192}; MaxTasksQueued gauge 2147483647 -> 2147483647
+# ---- stage4 mta lines ----;cluster_name: stage4-mta;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mta/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mta/node1/saved_caches;hints_directory: /users/jason92/stage4-mta/node1/hints;cdc_raw_directory: /users/jason92/stage4-mta/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 2;native_transport_max_request_data_in_flight: 32MiB;native_transport_max_request_data_in_flight_per_ip: 32MiB;native_transport_receive_queue_capacity: 0B;
+start lifetime 2 (B): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=2', 'native_transport_max_request_data_in_flight=32MiB', 'native_transport_max_request_data_in_flight_per_ip=32MiB']
+jvm: -Dcassandra.jmx.local.port=7204 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs/cassandra-1792678026-pid996922.hprof -Xms2G -Xmx2G
+EXPECTED: B getconcurrency MutationStage = 1 (read 1) — yes
+B schema/table: 100-row stress write {'op_rate': '95', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:01', 'write_timeouts_logged': 0}
+B stress started (32 MiB in flight, concurrent_writes 1): tools/bin/cassandra-stress write duration=150s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=6000 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 maxPending=1024 -node 127.0.0.4 -log file=/users/jason92/stage4-logs/mta/run1/cluster/stress-B.log; free 52.2 GB
+B stress: {'op_rate': '635', 'total_partitions': '98351', 'total_errors': '3770', 'elapsed': '00:02:34', 'write_timeouts_logged': 6430}; MaxTasksQueued gauge 2147483647 -> 2147483647
+# ---- stage4 mta lines ----;cluster_name: stage4-mta;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mta/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mta/node1/saved_caches;hints_directory: /users/jason92/stage4-mta/node1/hints;cdc_raw_directory: /users/jason92/stage4-mta/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 8;native_transport_max_request_data_in_flight: 256MiB;native_transport_max_request_data_in_flight_per_ip: 256MiB;native_transport_receive_queue_capacity: 0B;
+start lifetime 3 (C): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=8', 'native_transport_max_request_data_in_flight=256MiB', 'native_transport_max_request_data_in_flight_per_ip=256MiB']
+jvm: -Dcassandra.jmx.local.port=7204 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs/cassandra-1792678309-pid1022117.hprof -Xms2G -Xmx2G
+EXPECTED: C getconcurrency MutationStage = 8 (read 8) — yes
+C schema/table: 100-row stress write {'op_rate': '384', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:00', 'write_timeouts_logged': 0}
+C stress started (256 MiB in flight, concurrent_writes 8): tools/bin/cassandra-stress write duration=150s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=6000 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 maxPending=1024 -node 127.0.0.4 -log file=/users/jason92/stage4-logs/mta/run1/cluster/stress-C.log; free 52.2 GB
+C stress: {'op_rate': '684', 'total_partitions': '108381', 'total_errors': '6357', 'elapsed': '00:02:38', 'write_timeouts_logged': 11954}; MaxTasksQueued gauge 2147483647 -> 2147483647
+# ---- stage4 mta lines ----;cluster_name: stage4-mta;listen_address: 127.0.0.4;rpc_address: 127.0.0.4;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-mta/node1/commitlog;saved_caches_directory: /users/jason92/stage4-mta/node1/saved_caches;hints_directory: /users/jason92/stage4-mta/node1/hints;cdc_raw_directory: /users/jason92/stage4-mta/node1/cdc;commitlog_total_space: 2GiB;concurrent_writes: 8;native_transport_max_request_data_in_flight: 32MiB;native_transport_max_request_data_in_flight_per_ip: 32MiB;native_transport_receive_queue_capacity: 0B;
+start lifetime 4 (D): MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M, yaml ['concurrent_writes=8', 'native_transport_max_request_data_in_flight=32MiB', 'native_transport_max_request_data_in_flight_per_ip=32MiB']
+jvm: -Dcassandra.jmx.local.port=7204 -XX:+UseG1GC -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs -XX:HeapDumpPath=/users/jason92/stage4-mta/node1/logs/cassandra-1792678588-pid1045458.hprof -Xms2G -Xmx2G
+EXPECTED: D getconcurrency MutationStage = 8 (read 8) — yes
+D schema/table: 100-row stress write {'op_rate': '82', 'total_partitions': '100', 'total_errors': '0', 'elapsed': '00:00:01', 'write_timeouts_logged': 0}
+D stress started (32 MiB in flight, concurrent_writes 8): tools/bin/cassandra-stress write duration=150s cl=ONE no-warmup -col 'n=FIXED(1)' 'size=FIXED(65536)' -rate threads=6000 -errors ignore retries=0 -mode native cql3 connectionsPerHost=16 maxPending=1024 -node 127.0.0.4 -log file=/users/jason92/stage4-logs/mta/run1/cluster/stress-D.log; free 51.9 GB
+D stress: {'op_rate': '943', 'total_partitions': '147744', 'total_errors': '6258', 'elapsed': '00:02:36', 'write_timeouts_logged': 12514}; MaxTasksQueued gauge 2147483647 -> 2147483647
+A (cap 256 MiB, concurrent_writes 1): window 138 JMX samples, 9 heap samples; P (peak Pending) 383; Active max 1; RS (peak RequestsSize) 255.98 MiB; HQ (median post-GC heap - memtable) 883.3 MiB; heap used max 1897 MiB; MaxTasksQueued gauge values [2147483647.0]; guard None
+B (cap 32 MiB, concurrent_writes 1): window 135 JMX samples, 9 heap samples; P (peak Pending) 383; Active max 1; RS (peak RequestsSize) 31.97 MiB; HQ (median post-GC heap - memtable) 1080.1 MiB; heap used max 1944 MiB; MaxTasksQueued gauge values [2147483647.0]; guard None
+C (cap 256 MiB, concurrent_writes 8): window 136 JMX samples, 9 heap samples; P (peak Pending) 1289; Active max 8; RS (peak RequestsSize) 255.98 MiB; HQ (median post-GC heap - memtable) 1081.3 MiB; heap used max 1939 MiB; MaxTasksQueued gauge values [2147483647.0]; guard None
+D (cap 32 MiB, concurrent_writes 8): window 136 JMX samples, 9 heap samples; P (peak Pending) 376; Active max 8; RS (peak RequestsSize) 31.97 MiB; HQ (median post-GC heap - memtable) 911.0 MiB; heap used max 1936 MiB; MaxTasksQueued gauge values [2147483647.0]; guard None
+EXPECTED: A: MaxTasksQueued gauge = 2147483647 at every sample ([2147483647.0]) — yes
+EXPECTED: A: RS reaches >= 80 % of the cap and stays <= cap + 1 MiB (RS 255.98 MiB, cap 256 MiB) — yes
+EXPECTED: B: MaxTasksQueued gauge = 2147483647 at every sample ([2147483647.0]) — yes
+EXPECTED: B: RS reaches >= 80 % of the cap and stays <= cap + 1 MiB (RS 31.97 MiB, cap 32 MiB) — yes
+EXPECTED: C: MaxTasksQueued gauge = 2147483647 at every sample ([2147483647.0]) — yes
+EXPECTED: C: RS reaches >= 80 % of the cap and stays <= cap + 1 MiB (RS 255.98 MiB, cap 256 MiB) — yes
+EXPECTED: D: MaxTasksQueued gauge = 2147483647 at every sample ([2147483647.0]) — yes
+EXPECTED: D: RS reaches >= 80 % of the cap and stays <= cap + 1 MiB (RS 31.97 MiB, cap 32 MiB) — yes
+ratios: P(A)/P(B) 1.00, P(C)/P(D) 3.43, HQ(C)/HQ(A) 1.22, HQ(D)/HQ(B) 0.84
+EXPECTED: B3g row 1: 4 <= P(A)/P(B) <= 12 (1.00) and 4 <= P(C)/P(D) <= 12 (3.43) [C6] — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3g row 3 (never grows): P < 20 in all four arms [C6] — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3g row 2 (same plateau regardless of cap): P(A)/P(B) < 2 and P(C)/P(D) < 2 [C6] (1.00, 3.43) — NO (recorded; the AI judges it in the results file)
+EXPECTED: B3g row 4 (heap follows concurrent_writes): HQ(w=8) >= 1.3 x HQ(w=1) at both caps [C6] (C/A 1.22, D/B 0.84) — NO (recorded; the AI judges it in the results file)
+P x 64 KiB / cap per arm: A 0.09, B 0.75, C 0.31, D 0.73
+EXPECTED: C7 row (C-a): P x 65536 > 1.25 x cap in at least one arm while RS <= cap + 1 MiB — NO (recorded; the AI judges it in the results file)
+analysis: 12 yes, 5 NO
+daemons left: []

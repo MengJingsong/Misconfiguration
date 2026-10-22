@@ -3,6 +3,8 @@
 > **Case:** [`flushLowWaterMark-doRun-flushLowWaterMark--autonomous`](../../stage3-ai-deep-read/cases/flushLowWaterMark-doRun-flushLowWaterMark--autonomous.md)
 >
 > **Status:** **Verdict filed 2026-10-22, run 1 + self-check, no run 2.**
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 > - **Unit: Not confirmed (no matching row) — Effect undetermined.**
 > - **Cluster: Not confirmed (B3g/A10 row 5) — Effect undetermined.**
 >

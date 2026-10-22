@@ -1,0 +1,27 @@
+cluster-run g32 2026-10-22 08:20:03 -0600 run run1; clone /users/jason92/cassandra-rsv; harness md5 6ea8b4aae9c1  hold-handler.btm; 7f090a380d5a  receive-trace.btm; 83e8e97dd91e  client.py; 446e7e57e6ea  cluster-run.py; d9b29231a693  sample-vt.py; 623c1ee056de  AcquireExcessConfigTest.java; 14ef8fa2c094  AcquireExcessProbeTest.java; 70e73632af6c  Jmx.java; eaf72e899c77  make-node-yaml.sh; ddfa53e07b9c  run1-chain.sh; bdaa99bff234  unit-run.sh; bb91f1165df8  big.yaml; 
+==== g32: Q=1048576 E=33554432 G=33554432 stress=True (262144 B, 192 threads, 120 s, cl=ALL) A yaml=['internode_application_receive_queue_capacity=1MiB', 'internode_application_receive_queue_reserve_endpoint_capacity=32MiB', 'internode_application_receive_queue_reserve_global_capacity=32MiB']
+data tmpfs before: tmpfs          42949672960     0 42949672960   0% /mnt/stage4-rsv
+# ---- stage4 rsv lines ----;cluster_name: stage4-rsv;num_tokens: 1;initial_token: -9223372036854775808;endpoint_snitch: SimpleSnitch;auto_bootstrap: false;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rsv/A/commitlog;hints_directory: /mnt/stage4-rsv/A/hints;saved_caches_directory: /mnt/stage4-rsv/A/saved_caches;cdc_raw_directory: /mnt/stage4-rsv/A/cdc_raw;write_request_timeout: 60000ms;native_transport_timeout: 60000ms;hinted_handoff_enabled: false;auto_snapshot: false;concurrent_writes: 2;memtable_allocation_type: offheap_buffers;internode_application_receive_queue_capacity: 1MiB;internode_application_receive_queue_reserve_endpoint_capacity: 32MiB;internode_application_receive_queue_reserve_global_capacity: 32MiB;
+# ---- stage4 rsv lines ----;cluster_name: stage4-rsv;num_tokens: 1;initial_token: 0;endpoint_snitch: SimpleSnitch;auto_bootstrap: false;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;data_file_directories:;commitlog_directory: /mnt/stage4-rsv/B/commitlog;hints_directory: /mnt/stage4-rsv/B/hints;saved_caches_directory: /mnt/stage4-rsv/B/saved_caches;cdc_raw_directory: /mnt/stage4-rsv/B/cdc_raw;write_request_timeout: 60000ms;native_transport_timeout: 60000ms;hinted_handoff_enabled: false;auto_snapshot: false;native_transport_max_threads: 256;
+schema: {'ok': True, 'schema_agreement': True, 'elapsed_s': 1.307}
+Submit -l: ['rsv acquire exit', 'rsv hold mutation verb handler', 'rsv release exit']
+READ-BACK first acq from B: id=/127.0.0.3:7000->/127.0.0.2:7000-URGENT_MESSAGES-b9d39d93 cap=1048576 ep limit=33554432 gl limit=33554432
+EXPECTED: read-back: queueCapacity 1048576 = 1048576, endpoint reserve 33554432 = 33554432, global reserve 33554432 = 33554432 - yes
+load on at 1792678867402 (4.5 s after the stress launch)
+stress exit 0 after 131.3 s
+stress: Op rate                   :       89 op/s  [insert: 90 op/s]
+stress: Partition rate            :       89 pk/s  [insert: 90 pk/s]
+stress: Total partitions          :     10,933 [insert: 10,933]
+stress: Total errors              :          0 [insert: 0]
+stress: Total operation time      : 00:02:03
+drained: True (1.0 s after the stress)
+data tmpfs after: tmpfs          42949672960 6854426624 36095246336  16% /mnt/stage4-rsv
+both nodes stopped, data wiped: no CassandraDaemon left
+g32 readings: M(msg) median 262206 max 262206; C = Q + min(E,G) = 34603008; acc 34348986 (0.993 C); refusals 9674 {'INSUFFICIENT_GLOBAL': 9674}; trace max using ep 33300410 gl 33300410 (over: 0/0); vt using max 34349378 reserve max 33300410; ThrottledCount delta 9674.0 over 132.0 s, received 11329.0; H 4221224 (samples [3766048, 3784224, 3792320, 4112664, 3790984, 3793784, 3826264, 3898328, 4221224, 4158024, 3826304, 4159608, 3830736]), P 51988015.0, M 56209239.0; live Mutation above idle [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]; direct max 231562018.0; heap max 685258560.0; MutationStage pending max 129.0; hold lines 10933, held threads 2; after drain: retained 2783240, live Mutation 0, vt {'ms': 1792679002977, 'address': '127.0.0.3', 'port': 7000, 'using_bytes': 0, 'using_reserve_bytes': 0, 'scheduled_bytes': 0, 'scheduled_count': 0, 'received_count': 11457, 'received_bytes': 2866789478, 'processed_count': 11457, 'throttled_count': 9674, 'throttled_nanos': 113675953193, 'expired_count': 0, 'error_count': 0}, last trace line {'ms': 1792679014954, 'id': '/127.0.0.3:7000->/127.0.0.2:7000-URGENT_MESSAGES-b9d39d93', 'b': 404, 'out': 'SUCCESS', 'q': 404, 'cap': 1048576, 'epu': 0, 'epl': 33554432, 'glu': 0, 'gll': 33554432}; expired A 0, dropped A 0.0; B overload 0 expired 0; OOM A/B 0/0
+EXPECTED: g32: the hold fired (hold lines 10933 > 0, MutationStage threads in doVerb sleeping at the first load sample 2 > 0) - yes
+EXPECTED: g32: B3f "never above G": no trace line of the configured limits with endpoint using > 33554432 (0) or global using > 33554432 (0); max ep 33300410, max gl 33300410; vtable using_reserve_bytes max 33300410 <= 33554432 - yes
+EXPECTED: g32: every SUCCESS acquire of an internode handler has q <= cap + min(E, G) (violations 0); accounted peak 34348986 <= C = 34603008 - yes
+EXPECTED: g32: idle: vtable using_bytes 0 and using_reserve_bytes 0 0, last configured-limit trace line ep/gl using 0/0 0, live Mutation 0 <= 2 - yes
+EXPECTED: g32: no OutOfMemoryError on A (0) or B (0), no UnrecoverableIllegalStateException on A (0) - yes
+EXPECTED: g32: limit reached: ThrottledCount delta 9674.0 > 0 and refusals 9674 > 0 and accounted peak 34348986 within one message (262206) of C = 34603008 - yes
+END g32: EXPECTED yes 7 no 0

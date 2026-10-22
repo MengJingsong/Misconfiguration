@@ -1,0 +1,140 @@
+unit-run 2026-10-22T09:53:50-04:00 host node0 clone cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18 cores 40 load 11.54 10.36 4.85
+harness md5 SepQueueProbe.java=bce87304db28 unit-run.sh=3cdbc6039fc9 unit-analyze.py=85c45e2504a3 
+  PROBE mode=sep c=1 P=1024 N=4000000 activeBefore=1 active=1 submitted=1909616 rejected=0 ooms=1 thrown=OutOfMemoryError pending=1909616 maxTasksQueued=2147483647 liveMiB=-0.0 bytesPerTask=-1.0 maxBlockS=19.33 totalS=28.14
+  DRAIN mode=sep c=1 P=1024 N=4000000 skipped_after_oom
+  [sep-c1-P1024-N4000000] exit=1
+  PROBE mode=sep c=8 P=1024 N=4000000 activeBefore=8 active=8 submitted=1909179 rejected=0 ooms=1 thrown=OutOfMemoryError pending=1909179 maxTasksQueued=2147483647 liveMiB=-0.0 bytesPerTask=-1.0 maxBlockS=15.52 totalS=22.54
+  DRAIN mode=sep c=8 P=1024 N=4000000 skipped_after_oom
+  [sep-c8-P1024-N4000000] exit=1
+leftover probe JVMs: 0
+EXPECTED: all 16 sep configurations ran (found 16) — yes
+EXPECTED: sep c=1 P=64 N=10000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=64 N=10000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=64 N=10000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=64 N=10000: no block of 1e5 submits >= 5 s (max 0.02 s) — yes
+EXPECTED: sep c=1 P=64 N=10000: pending == N (read 10000) — yes
+EXPECTED: sep c=1 P=64 N=10000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=64 N=10000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=64 N=100000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=64 N=100000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=64 N=100000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=64 N=100000: no block of 1e5 submits >= 5 s (max 0.08 s) — yes
+EXPECTED: sep c=1 P=64 N=100000: pending == N (read 100000) — yes
+EXPECTED: sep c=1 P=64 N=100000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=64 N=100000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=64 N=1000000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=64 N=1000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=64 N=1000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=64 N=1000000: no block of 1e5 submits >= 5 s (max 0.71 s) — yes
+EXPECTED: sep c=1 P=64 N=1000000: pending == N (read 1000000) — yes
+EXPECTED: sep c=1 P=64 N=1000000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=64 N=1000000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=64 N=4000000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=64 N=4000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=64 N=4000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=64 N=4000000: no block of 1e5 submits >= 5 s (max 0.72 s) — yes
+EXPECTED: sep c=1 P=64 N=4000000: pending == N (read 4000000) — yes
+EXPECTED: sep c=1 P=64 N=4000000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=64 N=4000000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=1024 N=10000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=1024 N=10000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=1024 N=10000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=1024 N=10000: no block of 1e5 submits >= 5 s (max 0.02 s) — yes
+EXPECTED: sep c=1 P=1024 N=10000: pending == N (read 10000) — yes
+EXPECTED: sep c=1 P=1024 N=10000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=1024 N=10000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=1024 N=100000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=1024 N=100000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=1024 N=100000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=1024 N=100000: no block of 1e5 submits >= 5 s (max 0.23 s) — yes
+EXPECTED: sep c=1 P=1024 N=100000: pending == N (read 100000) — yes
+EXPECTED: sep c=1 P=1024 N=100000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=1024 N=100000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: no block of 1e5 submits >= 5 s (max 0.23 s) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: pending == N (read 1000000) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: no OOM (ooms 0) — yes
+EXPECTED: sep c=1 P=1024 N=1000000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=1 P=1024 N=4000000: c blockers active before the N submissions (activeBefore 1 == 1) — yes
+EXPECTED: sep c=1 P=1024 N=4000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=1 P=1024 N=4000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=1 P=1024 N=4000000: no block of 1e5 submits >= 5 s (max 19.33 s) — NO
+EXPECTED: sep c=1 P=1024 N=4000000: U-a OutOfMemoryError thrown to the submitter (ooms 1, thrown OutOfMemoryError), submitted 1909616 < N — yes
+EXPECTED: sep c=1 P=1024 N=4000000: U-a pending 1909616 in {submitted, submitted+1} (1909616) — yes
+EXPECTED: sep c=8 P=64 N=10000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=64 N=10000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=64 N=10000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=64 N=10000: no block of 1e5 submits >= 5 s (max 0.02 s) — yes
+EXPECTED: sep c=8 P=64 N=10000: pending == N (read 10000) — yes
+EXPECTED: sep c=8 P=64 N=10000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=64 N=10000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=64 N=100000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=64 N=100000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=64 N=100000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=64 N=100000: no block of 1e5 submits >= 5 s (max 0.07 s) — yes
+EXPECTED: sep c=8 P=64 N=100000: pending == N (read 100000) — yes
+EXPECTED: sep c=8 P=64 N=100000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=64 N=100000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=64 N=1000000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=64 N=1000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=64 N=1000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=64 N=1000000: no block of 1e5 submits >= 5 s (max 0.73 s) — yes
+EXPECTED: sep c=8 P=64 N=1000000: pending == N (read 1000000) — yes
+EXPECTED: sep c=8 P=64 N=1000000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=64 N=1000000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=64 N=4000000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=64 N=4000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=64 N=4000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=64 N=4000000: no block of 1e5 submits >= 5 s (max 0.73 s) — yes
+EXPECTED: sep c=8 P=64 N=4000000: pending == N (read 4000000) — yes
+EXPECTED: sep c=8 P=64 N=4000000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=64 N=4000000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=1024 N=10000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=1024 N=10000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=1024 N=10000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=1024 N=10000: no block of 1e5 submits >= 5 s (max 0.03 s) — yes
+EXPECTED: sep c=8 P=1024 N=10000: pending == N (read 10000) — yes
+EXPECTED: sep c=8 P=1024 N=10000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=1024 N=10000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=1024 N=100000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=1024 N=100000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=1024 N=100000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=1024 N=100000: no block of 1e5 submits >= 5 s (max 0.25 s) — yes
+EXPECTED: sep c=8 P=1024 N=100000: pending == N (read 100000) — yes
+EXPECTED: sep c=8 P=1024 N=100000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=1024 N=100000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: no block of 1e5 submits >= 5 s (max 0.24 s) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: pending == N (read 1000000) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: no OOM (ooms 0) — yes
+EXPECTED: sep c=8 P=1024 N=1000000: U-d drained: pendingAfter 0 and liveAfter <= 64 MiB (read 0, 0.0) — yes
+EXPECTED: sep c=8 P=1024 N=4000000: c blockers active before the N submissions (activeBefore 8 == 8) — yes
+EXPECTED: sep c=8 P=1024 N=4000000: no RejectedExecutionException (rejected 0) — yes
+EXPECTED: sep c=8 P=1024 N=4000000: maxTasksQueued == 2147483647 (read 2147483647) — yes
+EXPECTED: sep c=8 P=1024 N=4000000: no block of 1e5 submits >= 5 s (max 15.52 s) — NO
+EXPECTED: sep c=8 P=1024 N=4000000: U-a OutOfMemoryError thrown to the submitter (ooms 1, thrown OutOfMemoryError), submitted 1909179 < N — yes
+EXPECTED: sep c=8 P=1024 N=4000000: U-a pending 1909179 in {submitted, submitted+1} (1909179) — yes
+EXPECTED: c=1 P=64: bytes/task within ±10 % of the mean 152.0 for N in [100000, 1000000, 4000000] (152.0, 152.0, 152.0) — yes
+EXPECTED: c=1 P=64: k = bytes/task - P in [20, 300] (88.0, 88.0, 88.0) — yes
+EXPECTED: c=1 P=1024: bytes/task within ±10 % of the mean 1112.0 for N in [100000, 1000000] (1112.0, 1112.0) — yes
+EXPECTED: c=1 P=1024: k = bytes/task - P in [20, 300] (88.0, 88.0) — yes
+EXPECTED: c=8 P=64: bytes/task within ±10 % of the mean 152.0 for N in [100000, 1000000, 4000000] (152.0, 152.0, 152.0) — yes
+EXPECTED: c=8 P=64: k = bytes/task - P in [20, 300] (88.0, 88.0, 88.0) — yes
+EXPECTED: c=8 P=1024: bytes/task within ±10 % of the mean 1112.0 for N in [100000, 1000000] (1112.0, 1112.0) — yes
+EXPECTED: c=8 P=1024: k = bytes/task - P in [20, 300] (88.0, 88.0) — yes
+EXPECTED: P=64 N=100000: bytes/task c=1 over c=8 = 1.000 in [0.9, 1.1] — yes
+EXPECTED: P=64 N=1000000: bytes/task c=1 over c=8 = 1.000 in [0.9, 1.1] — yes
+EXPECTED: P=64 N=4000000: bytes/task c=1 over c=8 = 1.000 in [0.9, 1.1] — yes
+EXPECTED: P=1024 N=100000: bytes/task c=1 over c=8 = 1.000 in [0.9, 1.1] — yes
+EXPECTED: P=1024 N=1000000: bytes/task c=1 over c=8 = 1.000 in [0.9, 1.1] — yes
+EXPECTED: positive control ran (found 2 tpe rows) — yes
+EXPECTED: tpe c=1 P=1024 N=1000000: queue plateaus at 1000 (pending 1000, submitted 1000) and 999000 rejected (read 999000) — yes
+EXPECTED: tpe c=1 P=1024 N=1000000: retained heap flat beyond 1000 (liveMiB 1.0 <= 4) — yes
+EXPECTED: tpe c=8 P=1024 N=1000000: queue plateaus at 1000 (pending 1000, submitted 1000) and 999000 rejected (read 999000) — yes
+EXPECTED: tpe c=8 P=1024 N=1000000: retained heap flat beyond 1000 (liveMiB 1.0 <= 4) — yes
+unit-analyze: 127 yes, 2 NO
+done 2026-10-22T09:54:57-04:00

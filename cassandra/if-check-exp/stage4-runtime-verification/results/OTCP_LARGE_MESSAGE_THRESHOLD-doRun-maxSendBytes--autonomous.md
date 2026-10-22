@@ -3,6 +3,8 @@
 > **Case:** [`OTCP_LARGE_MESSAGE_THRESHOLD-doRun-maxSendBytes--autonomous`](../../stage3-ai-deep-read/cases/OTCP_LARGE_MESSAGE_THRESHOLD-doRun-maxSendBytes--autonomous.md)
 >
 > **Status:** **verdict filed 2026-10-22. Unit: Not confirmed (B2g row U9, pool band missed) — undetermined. Cluster: Confirmed (B3g row C1) — does not cap.** No run 2. Audited 2026-10-22 (estimate negative). Run on `pc06`.
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means each tier's predictions and conclusions table: B2f and B2g (unit), B3f and B3g
 > (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; the case file's feedback section is its section D.

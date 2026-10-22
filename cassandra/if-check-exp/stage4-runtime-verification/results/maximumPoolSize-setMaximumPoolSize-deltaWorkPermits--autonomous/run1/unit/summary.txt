@@ -1,0 +1,140 @@
+unit-run 2026-10-22T10:56:23-04:00 host node0 cpus 40 load 49.55 45.60 31.77 clone cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 SepCapProbe.java=fba743e77d2a unit-run.sh=7c7f89c5c298 unit-analyze.py=e865fc90a5a4 
+rep1 exit=0 45 s; lines PROBE=8 CTRL=3 RESIZE=9; stderr lines 0
+rep2 exit=0 45 s; lines PROBE=8 CTRL=3 RESIZE=9; stderr lines 0
+rep3 exit=0 45 s; lines PROBE=8 CTRL=3 RESIZE=9; stderr lines 0
+leftover SepCapProbe JVMs: 0
+EXPECTED: three reps present and each ended (PROBE-END): ['rep1', 'rep2', 'rep3'] — yes
+EXPECTED: rep1 variant A: 4 rows, variant B: 4 rows, control 3 rows, resize steps 8 — yes
+EXPECTED: rep1 A n=1: maxPool=1, active=min(n,T)=1, pending=T-n=1999 (read 1/1/1999) — yes
+EXPECTED: rep1 A n=1: registry = 1 MiB and |heapDelta - n| <= 8 (registry 1, heapDelta 2.0) — yes
+EXPECTED: rep1 A n=1: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 8.4 ms) — yes
+EXPECTED: rep1 A n=1: pool threads <= n + 8 (read 1) — yes
+EXPECTED: rep1 A n=4: maxPool=4, active=min(n,T)=4, pending=T-n=1996 (read 4/4/1996) — yes
+EXPECTED: rep1 A n=4: registry = 4 MiB and |heapDelta - n| <= 8 (registry 4, heapDelta 4.2) — yes
+EXPECTED: rep1 A n=4: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.3 ms) — yes
+EXPECTED: rep1 A n=4: pool threads <= n + 8 (read 4) — yes
+EXPECTED: rep1 A n=32: maxPool=32, active=min(n,T)=32, pending=T-n=1968 (read 32/32/1968) — yes
+EXPECTED: rep1 A n=32: registry = 32 MiB and |heapDelta - n| <= 8 (registry 32, heapDelta 32.2) — yes
+EXPECTED: rep1 A n=32: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep1 A n=32: pool threads <= n + 8 (read 32) — yes
+EXPECTED: rep1 A n=128: maxPool=128, active=min(n,T)=128, pending=T-n=1872 (read 128/128/1872) — yes
+EXPECTED: rep1 A n=128: registry = 128 MiB and |heapDelta - n| <= 8 (registry 128, heapDelta 128.2) — yes
+EXPECTED: rep1 A n=128: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep1 A n=128: pool threads <= n + 8 (read 128) — yes
+EXPECTED: rep1 B n=1: active=min(n,T), pending=T-n (read 1/599) — yes
+EXPECTED: rep1 B n=1: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep1 B n=1: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep1 B n=4: active=min(n,T), pending=T-n (read 4/596) — yes
+EXPECTED: rep1 B n=4: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep1 B n=4: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep1 B n=32: active=min(n,T), pending=T-n (read 32/568) — yes
+EXPECTED: rep1 B n=32: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep1 B n=32: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep1 B n=128: active=min(n,T), pending=T-n (read 128/472) — yes
+EXPECTED: rep1 B n=128: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep1 B n=128: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep1 B: heapDelta max-min across n <= 5 MiB (read 0.0) — yes
+EXPECTED: rep1 A: NMT Thread committed(n=128) - (n=1) <= 32 MiB (read 13.7 MiB) — yes
+EXPECTED: rep1 control n=4: queue 64, accepted n+64=68, rejected T-n-64=532 (read 64/68/532) — yes
+EXPECTED: rep1 control n=4: heapDelta in [n+62, n+72] (read 68.0) — yes
+EXPECTED: rep1 control n=32: queue 64, accepted n+64=96, rejected T-n-64=504 (read 64/96/504) — yes
+EXPECTED: rep1 control n=32: heapDelta in [n+62, n+72] (read 96.0) — yes
+EXPECTED: rep1 control n=128: queue 64, accepted n+64=192, rejected T-n-64=408 (read 64/192/408) — yes
+EXPECTED: rep1 control n=128: heapDelta in [n+62, n+72] (read 192.1) — yes
+EXPECTED: rep1 resize: 4->32 raises active to 32 (read 32) — yes
+EXPECTED: rep1 resize set 32->32 (line 384 no-op): listenerCalls and "Resized" lines unchanged from 4->32 (1/1 vs 1/1) — yes
+EXPECTED: rep1 resize set 32->32 again: listenerCalls and "Resized" lines unchanged from 4->32 (1/1 vs 1/1) — yes
+EXPECTED: rep1 resize: 4->32 gave one listener call and one log line (read 1/1) — yes
+EXPECTED: rep1 resize: shrink to 8 leaves the 32 running tasks running (active 32, finished 0, listener 2, lines 2) — yes
+RECORDED (not predicted): initial n=4: active=4 pending=596 started=4 finished=0; set 4->32: active=32 pending=568 started=32 finished=0; set 32->32 (line 384 no-op): active=32 pending=568 started=32 finished=0; set 32->32 again: active=32 pending=568 started=32 finished=0; set 32->8 (32 tasks running): active=32 pending=568 started=32 finished=0; released 4 tasks: active=28 pending=568 started=32 finished=4; released 24 tasks in total: active=8 pending=568 started=32 finished=24; released 26 tasks in total: active=8 pending=566 started=34 finished=26
+EXPECTED: rep2 variant A: 4 rows, variant B: 4 rows, control 3 rows, resize steps 8 — yes
+EXPECTED: rep2 A n=1: maxPool=1, active=min(n,T)=1, pending=T-n=1999 (read 1/1/1999) — yes
+EXPECTED: rep2 A n=1: registry = 1 MiB and |heapDelta - n| <= 8 (registry 1, heapDelta 2.0) — yes
+EXPECTED: rep2 A n=1: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 8.4 ms) — yes
+EXPECTED: rep2 A n=1: pool threads <= n + 8 (read 1) — yes
+EXPECTED: rep2 A n=4: maxPool=4, active=min(n,T)=4, pending=T-n=1996 (read 4/4/1996) — yes
+EXPECTED: rep2 A n=4: registry = 4 MiB and |heapDelta - n| <= 8 (registry 4, heapDelta 4.2) — yes
+EXPECTED: rep2 A n=4: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep2 A n=4: pool threads <= n + 8 (read 4) — yes
+EXPECTED: rep2 A n=32: maxPool=32, active=min(n,T)=32, pending=T-n=1968 (read 32/32/1968) — yes
+EXPECTED: rep2 A n=32: registry = 32 MiB and |heapDelta - n| <= 8 (registry 32, heapDelta 32.2) — yes
+EXPECTED: rep2 A n=32: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep2 A n=32: pool threads <= n + 8 (read 32) — yes
+EXPECTED: rep2 A n=128: maxPool=128, active=min(n,T)=128, pending=T-n=1872 (read 128/128/1872) — yes
+EXPECTED: rep2 A n=128: registry = 128 MiB and |heapDelta - n| <= 8 (registry 128, heapDelta 128.2) — yes
+EXPECTED: rep2 A n=128: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.3 ms) — yes
+EXPECTED: rep2 A n=128: pool threads <= n + 8 (read 128) — yes
+EXPECTED: rep2 B n=1: active=min(n,T), pending=T-n (read 1/599) — yes
+EXPECTED: rep2 B n=1: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep2 B n=1: no rejection, longest execute <= 100 ms (read 0, 0.1 ms) — yes
+EXPECTED: rep2 B n=4: active=min(n,T), pending=T-n (read 4/596) — yes
+EXPECTED: rep2 B n=4: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep2 B n=4: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep2 B n=32: active=min(n,T), pending=T-n (read 32/568) — yes
+EXPECTED: rep2 B n=32: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep2 B n=32: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep2 B n=128: active=min(n,T), pending=T-n (read 128/472) — yes
+EXPECTED: rep2 B n=128: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep2 B n=128: no rejection, longest execute <= 100 ms (read 0, 0.1 ms) — yes
+EXPECTED: rep2 B: heapDelta max-min across n <= 5 MiB (read 0.0) — yes
+EXPECTED: rep2 A: NMT Thread committed(n=128) - (n=1) <= 32 MiB (read 13.4 MiB) — yes
+EXPECTED: rep2 control n=4: queue 64, accepted n+64=68, rejected T-n-64=532 (read 64/68/532) — yes
+EXPECTED: rep2 control n=4: heapDelta in [n+62, n+72] (read 68.0) — yes
+EXPECTED: rep2 control n=32: queue 64, accepted n+64=96, rejected T-n-64=504 (read 64/96/504) — yes
+EXPECTED: rep2 control n=32: heapDelta in [n+62, n+72] (read 96.0) — yes
+EXPECTED: rep2 control n=128: queue 64, accepted n+64=192, rejected T-n-64=408 (read 64/192/408) — yes
+EXPECTED: rep2 control n=128: heapDelta in [n+62, n+72] (read 192.1) — yes
+EXPECTED: rep2 resize: 4->32 raises active to 32 (read 32) — yes
+EXPECTED: rep2 resize set 32->32 (line 384 no-op): listenerCalls and "Resized" lines unchanged from 4->32 (1/1 vs 1/1) — yes
+EXPECTED: rep2 resize set 32->32 again: listenerCalls and "Resized" lines unchanged from 4->32 (1/1 vs 1/1) — yes
+EXPECTED: rep2 resize: 4->32 gave one listener call and one log line (read 1/1) — yes
+EXPECTED: rep2 resize: shrink to 8 leaves the 32 running tasks running (active 32, finished 0, listener 2, lines 2) — yes
+RECORDED (not predicted): initial n=4: active=4 pending=596 started=4 finished=0; set 4->32: active=32 pending=568 started=32 finished=0; set 32->32 (line 384 no-op): active=32 pending=568 started=32 finished=0; set 32->32 again: active=32 pending=568 started=32 finished=0; set 32->8 (32 tasks running): active=32 pending=568 started=32 finished=0; released 4 tasks: active=28 pending=568 started=32 finished=4; released 24 tasks in total: active=8 pending=568 started=32 finished=24; released 26 tasks in total: active=8 pending=566 started=34 finished=26
+EXPECTED: rep3 variant A: 4 rows, variant B: 4 rows, control 3 rows, resize steps 8 — yes
+EXPECTED: rep3 A n=1: maxPool=1, active=min(n,T)=1, pending=T-n=1999 (read 1/1/1999) — yes
+EXPECTED: rep3 A n=1: registry = 1 MiB and |heapDelta - n| <= 8 (registry 1, heapDelta 2.0) — yes
+EXPECTED: rep3 A n=1: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 8.3 ms) — yes
+EXPECTED: rep3 A n=1: pool threads <= n + 8 (read 1) — yes
+EXPECTED: rep3 A n=4: maxPool=4, active=min(n,T)=4, pending=T-n=1996 (read 4/4/1996) — yes
+EXPECTED: rep3 A n=4: registry = 4 MiB and |heapDelta - n| <= 8 (registry 4, heapDelta 4.2) — yes
+EXPECTED: rep3 A n=4: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.3 ms) — yes
+EXPECTED: rep3 A n=4: pool threads <= n + 8 (read 4) — yes
+EXPECTED: rep3 A n=32: maxPool=32, active=min(n,T)=32, pending=T-n=1968 (read 32/32/1968) — yes
+EXPECTED: rep3 A n=32: registry = 32 MiB and |heapDelta - n| <= 8 (registry 32, heapDelta 32.2) — yes
+EXPECTED: rep3 A n=32: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.3 ms) — yes
+EXPECTED: rep3 A n=32: pool threads <= n + 8 (read 32) — yes
+EXPECTED: rep3 A n=128: maxPool=128, active=min(n,T)=128, pending=T-n=1872 (read 128/128/1872) — yes
+EXPECTED: rep3 A n=128: registry = 128 MiB and |heapDelta - n| <= 8 (registry 128, heapDelta 128.2) — yes
+EXPECTED: rep3 A n=128: no rejection (submitErr 0) and longest execute <= 100 ms (read 0, 0.3 ms) — yes
+EXPECTED: rep3 A n=128: pool threads <= n + 8 (read 128) — yes
+EXPECTED: rep3 B n=1: active=min(n,T), pending=T-n (read 1/599) — yes
+EXPECTED: rep3 B n=1: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep3 B n=1: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep3 B n=4: active=min(n,T), pending=T-n (read 4/596) — yes
+EXPECTED: rep3 B n=4: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep3 B n=4: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep3 B n=32: active=min(n,T), pending=T-n (read 32/568) — yes
+EXPECTED: rep3 B n=32: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep3 B n=32: no rejection, longest execute <= 100 ms (read 0, 0.1 ms) — yes
+EXPECTED: rep3 B n=128: active=min(n,T), pending=T-n (read 128/472) — yes
+EXPECTED: rep3 B n=128: T <= heapDelta <= T+8 with T=600 (read 600.1) — yes
+EXPECTED: rep3 B n=128: no rejection, longest execute <= 100 ms (read 0, 0.2 ms) — yes
+EXPECTED: rep3 B: heapDelta max-min across n <= 5 MiB (read 0.0) — yes
+EXPECTED: rep3 A: NMT Thread committed(n=128) - (n=1) <= 32 MiB (read 13.3 MiB) — yes
+EXPECTED: rep3 control n=4: queue 64, accepted n+64=68, rejected T-n-64=532 (read 64/68/532) — yes
+EXPECTED: rep3 control n=4: heapDelta in [n+62, n+72] (read 68.0) — yes
+EXPECTED: rep3 control n=32: queue 64, accepted n+64=96, rejected T-n-64=504 (read 64/96/504) — yes
+EXPECTED: rep3 control n=32: heapDelta in [n+62, n+72] (read 96.0) — yes
+EXPECTED: rep3 control n=128: queue 64, accepted n+64=192, rejected T-n-64=408 (read 64/192/408) — yes
+EXPECTED: rep3 control n=128: heapDelta in [n+62, n+72] (read 192.1) — yes
+EXPECTED: rep3 resize: 4->32 raises active to 32 (read 32) — yes
+EXPECTED: rep3 resize set 32->32 (line 384 no-op): listenerCalls and "Resized" lines unchanged from 4->32 (1/1 vs 1/1) — yes
+EXPECTED: rep3 resize set 32->32 again: listenerCalls and "Resized" lines unchanged from 4->32 (1/1 vs 1/1) — yes
+EXPECTED: rep3 resize: 4->32 gave one listener call and one log line (read 1/1) — yes
+EXPECTED: rep3 resize: shrink to 8 leaves the 32 running tasks running (active 32, finished 0, listener 2, lines 2) — yes
+RECORDED (not predicted): initial n=4: active=4 pending=596 started=2 finished=0; set 4->32: active=32 pending=568 started=32 finished=0; set 32->32 (line 384 no-op): active=32 pending=568 started=32 finished=0; set 32->32 again: active=32 pending=568 started=32 finished=0; set 32->8 (32 tasks running): active=32 pending=568 started=32 finished=0; released 4 tasks: active=28 pending=568 started=32 finished=4; released 24 tasks in total: active=8 pending=568 started=32 finished=24; released 26 tasks in total: active=8 pending=566 started=34 finished=26
+EXPECTED: U4a: active/pending/maxPool identical in the three reps — yes
+EXPECTED: U4a: heapDelta differs between reps by <= 5 MiB (worst 0.0) — yes
+SUMMARY: 129 yes, 0 NO
+done 2026-10-22T10:58:38-04:00

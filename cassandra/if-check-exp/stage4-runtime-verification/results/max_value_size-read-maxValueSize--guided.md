@@ -3,6 +3,8 @@
 > **Case:** [`max_value_size-read-maxValueSize`](../../stage3-ai-deep-read/cases/max_value_size-read-maxValueSize--guided.md)
 >
 > **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-14) — **Confirmed at both tiers**; write side **bypass as recorded** (values above the limit accepted and held, refused on every read); sibling primitive **bypass as recorded**; compaction and replay **refusal as traced**; one replay sub-prediction missed (no `Replay stopped` line); no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

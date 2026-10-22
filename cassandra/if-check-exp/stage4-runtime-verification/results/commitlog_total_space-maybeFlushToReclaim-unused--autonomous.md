@@ -2,6 +2,8 @@
 > **Case:** [`commitlog_total_space-maybeFlushToReclaim-unused--autonomous`](../../stage3-ai-deep-read/cases/commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21: unit Confirmed, cluster Confirmed, caps (soft)** (the autonomous estimate, positive soft cap, matched; it contradicts `predicted-negative.md` §9's earlier negative entry). Both tiers match the R3 row 4 ("bounded, overshoot larger than predicted"). Missed sub-predictions: unit C = 50 peaked at 75 MiB against a 70 MiB bound; cluster C = 1024 peaked at 1,184 MiB against 1,152 MiB; the unthrottled cluster probe peaked at 2,048 MiB = 8 × C, against < 1 GiB. No run 2.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

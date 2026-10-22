@@ -3,6 +3,8 @@
 > **Case:** [`NORMAL_CHUNK_SIZE-freeUnusedPortion-capacity--autonomous`](../../stage3-ai-deep-read/cases/NORMAL_CHUNK_SIZE-freeUnusedPortion-capacity--autonomous.md)
 >
 > **Status:** verdict filed 2026-10-22. **Unit: Confirmed — does not cap. Cluster: Not confirmed (row K2b-4: the cap was never reached in a run where the check runs) — undetermined.** Run 1 only.
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster); "§9b–§9e" means B2a–B2e / B3a–B3e; the feedback section is the case file's section D.
 

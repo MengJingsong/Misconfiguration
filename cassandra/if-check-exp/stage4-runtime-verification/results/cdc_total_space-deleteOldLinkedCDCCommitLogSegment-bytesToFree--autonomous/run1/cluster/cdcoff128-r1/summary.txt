@@ -1,0 +1,13 @@
+== cdcoff128-r1: mode=nonblocking cap=128MiB cdc_enabled=false table=cdc rows=6144 (=384 MiB) rate=52/s heap=2G
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/stage4-logs/cdc2/cluster/cdcoff128-r1/cdc-verdict.txt -javaagent:/users/jason92/cassandra-cdc/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/cdc2/cdc-verdict.btm,listener:true; ulimit -n 100000
+node up after 18s
+idle: links=0 cdc_raw_exists=yes 1792683186351,0,0,0,0,0,0,50
+stress W: Op rate : 52 op/s [insert: 52 op/s]|Total partitions : 6,144 [insert: 6,144]|Total errors : 0 [insert: 0]| ended 1792683312631
+after workload: links=0 1792683315601,0,0,0,0,0,0,50 WARN=0 Freed_up=0 wall=129s
+after flush: links=0 1792683319901,0,0,0,0,0,0,50
+final: links=0 1792683319901,0,0,0,0,0,0,50
+final listing: 
+commit log dir: 67112960 bytes; data: 405406365; free: 52G
+traces: created= forbidden= deleteOld= rejectLines= WARN=0 FreedUp=0 ERROR=0
+sampler: ticks=2771 max_links=0 max_link_bytes=0 max_gap_ms=51 first_ms=1792683181400 last_ms=1792683319901
+RESULT cdcoff128-r1 finished 1792683329709; disk free 53G

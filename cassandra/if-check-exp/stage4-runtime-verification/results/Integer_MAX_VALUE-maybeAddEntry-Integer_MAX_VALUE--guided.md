@@ -3,6 +3,8 @@
 > **Case:** [`Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE`](../../stage3-ai-deep-read/cases/Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE--guided.md)
 >
 > **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-15) — **unit: Confirmed; cluster: Confirmed** (§9a row 1): one SSTable's summary keeps exactly ⌊*L*/(*K* + 8)⌋ entries at the real 2^31 − 1 (35,786 entries of 60,008 B, 2,147,446,288 B) and at Byteman-moved 8 · 32 · 128 MiB (8,322 · 33,288 · 133,152, 1 : 4 : 16), one refusal and one `ERROR` at `keysWritten` = *n*\*, gauge and `Summary.db` to the byte; reads past the last sample return their rows after *r* − *n*\* + 1 skipped index entries; the second site doubles the interval at the predicted boundary, and a start-up rebuild keeps its untrimmed 1.36 GB reservation; no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. One results file per path, each in its path's folder.
 

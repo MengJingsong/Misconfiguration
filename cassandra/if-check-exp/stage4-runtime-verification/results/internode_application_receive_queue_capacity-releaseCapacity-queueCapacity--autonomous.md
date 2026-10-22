@@ -2,6 +2,8 @@
 > **Case:** [`internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous`](../../stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Confirmed (B2g row 1); cluster B3g row 3, partial: the accounted cap (⌊(Q + E)/M⌋·M exact at every value) and the release at `:464` confirmed on the node, the heap-tracking clause refuted for 512 KiB messages (heap flat at ~36–37 MB = `concurrent_writes` × M from C = 16.8 MiB to 160 MiB; the rest of the queue waits off heap in the networking pool).** Effect: caps (accounting and held memory; heap only on the small-message path). No run 2. Audited 2026-10-20 (estimate positive).
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

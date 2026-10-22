@@ -1,0 +1,14 @@
+cluster-run analyze 2026-10-22 08:35:02 -0600 run run1; clone /users/jason92/cassandra-rsv; harness md5 6ea8b4aae9c1  hold-handler.btm; 7f090a380d5a  receive-trace.btm; 83e8e97dd91e  client.py; 446e7e57e6ea  cluster-run.py; d9b29231a693  sample-vt.py; 623c1ee056de  AcquireExcessConfigTest.java; 14ef8fa2c094  AcquireExcessProbeTest.java; 70e73632af6c  Jmx.java; eaf72e899c77  make-node-yaml.sh; ddfa53e07b9c  run1-chain.sh; bdaa99bff234  unit-run.sh; bb91f1165df8  big.yaml; 
+analyze 2026-10-22 08:35:02: labels present ['base', 'ctlq16', 'g32', 'g4', 'g512']
+  g4: C 5242880 acc 4981914 H 4215616 P 6989824.0 M 11205440.0 throttled 10226.0 received 11337.0 refusals 10226 vt reserve max 3933338
+  g32: C 34603008 acc 34348986 H 4221224 P 51988015.0 M 56209239.0 throttled 9674.0 received 11329.0 refusals 9674 vt reserve max 33300410
+  g512: C 537919488 acc 50343552 H 4218816 P 70856183.0 M 75074999.0 throttled 0.0 received 11379.0 refusals 0 vt reserve max 49294976
+  ctlq16: C 20971520 acc 20714274 H 4213704 P 31109120.0 M 35322824.0 throttled 10233.0 received 11324.0 refusals 10233 vt reserve max 3937058
+  base: C 5242880 acc 0 H 2709440 P 0.0 M 2709440.0 throttled 0.0 received 362.0 refusals 0 vt reserve max 0
+noise (B3h baseline `base`: H range + P range) = 14552
+EXPECTED: B3f memory grows with G over {4, 32} MiB: M(g32) - M(g4) = 45003799.0 >= 10 MiB and >= 2 x noise 29104 - yes
+EXPECTED: B3f inflation factor r = (M(g32) - M(g4)) / (acc(g32) - acc(g4)) = 45003799.0 / 29367072 = 1.532 in [1, 3] - yes
+EXPECTED: B3f flat or load-limited at 512 MiB: M(g512) 75074999.0 <= 3 x acc(g512) 151030656 - yes
+EXPECTED: B3h positive control: Q 1 -> 16 MiB at G = 4 MiB moves memory: M(ctlq16) - M(g4) = 24117384.0 >= 15 MiB and acc 20714274 > 4981914 - yes
+M by G: 4 MiB 11205440.0, 32 MiB 56209239.0, 512 MiB 75074999.0; throttled 10226.0 / 9674.0 / 0.0
+END analyze: EXPECTED yes 4 no 0

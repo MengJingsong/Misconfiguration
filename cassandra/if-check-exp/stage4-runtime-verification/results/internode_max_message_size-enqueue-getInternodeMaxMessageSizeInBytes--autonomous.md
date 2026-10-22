@@ -2,6 +2,8 @@
 > **Case:** [`internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous`](../../stage3-ai-deep-read/cases/internode_max_message_size-enqueue-getInternodeMaxMessageSizeInBytes--autonomous.md)
 >
 > **Status:** Closed — verdict filed 2026-10-20: unit Confirmed (B2g rows 1, 4); cluster Confirmed (B3g row 1; two sub-predictions missed); effect: caps the internode send queue and wire per message, but the coordinator keeps a refused message on its heap until the write timeout (A3 bypass (a), observed: node A out of heap at 1 MiB, 3 of 3 attempts); no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

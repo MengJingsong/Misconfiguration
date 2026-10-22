@@ -3,6 +3,8 @@
 > **Case:** [`index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous`](../../stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Confirmed (caps), cluster Confirmed — caps only on some paths (bypass)** (estimate positive, matched). Line 341 sets the summary total to exactly F + kept·d ≤ pool (unit, 11/11 rows exact); on a node the resize task brings 808.7 MiB of summaries under 409 / 400 / 100 MiB and to the floor 6.3 MiB at 0, and RssAnon falls by the same bytes (within 1–3 %). Bypasses as the estimate said: new sstables add +202 MiB over a 100 MiB cap with no run, and `max_index_interval` forces 808.7 MiB at a 0 MiB cap. Cluster tier ran twice (runbook fix D3, a definition error in an audit amendment); self-check 93/93. No run 2.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means each tier's predictions and conclusions table: B2f and B2g (unit), B3f and B3g
 > (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; the case file's feedback section is its section D. One results file per case file.

@@ -3,6 +3,8 @@
 > **Case:** [`tombstone_failure_threshold-countTombstone-tombstones--autonomous`](../../stage3-ai-deep-read/cases/tombstone_failure_threshold-countTombstone-tombstones--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Confirmed — caps (per read); cluster Not confirmed (partial) — caps per read, node-level peak not shown** (B3g row added by audit amendment R6). Estimate positive. No run 2.
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

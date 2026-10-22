@@ -2,6 +2,8 @@
 > **Case:** [`concurrent_writes-takeWorkPermit-workPermits--autonomous`](../../stage3-ai-deep-read/cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Confirmed, cluster Confirmed — does not cap** (estimate negative, matched). Two sub-predictions missed on the cluster tier: each queued mutation holds about 2 × its value (887.5 MiB of queue heap instead of ≈ 480 MiB), and the PC throughput drop is only 1.4 %. No run 2.
+> 
+> **Outcome class:** true negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

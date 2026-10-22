@@ -2,6 +2,8 @@
 > **Case:** [`native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided`](../../stage3-ai-deep-read/cases/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided.md)
 >
 > **Status:** **Closed 2026-10-20 — Refuted (unit and cluster) — caps in throwing mode, only slows growth in default mode.** Estimate negative (left as filed); run 1 on `pc13`, self-check 84/84, no run 2.
+> 
+> **Outcome class:** false negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** guided (the suffix of the case-file stem). One results file per case file.
 

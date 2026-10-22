@@ -3,6 +3,8 @@
 > **Case:** [`memtable_heap_space-needsCleaning-nextClean--autonomous`](../../stage3-ai-deep-read/cases/memtable_heap_space-needsCleaning-nextClean--autonomous.md)
 >
 > **Status:** verdict filed 2026-10-22. **Unit Confirmed — caps; cluster Confirmed — caps** (soft trigger at exactly `L·t`; two sub-predictions missed, the hard cap not reached on the node). Run 1 only.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster); "§9b–§9e" means B2a–B2e / B3a–B3e; the feedback section is the case file's section D.
 

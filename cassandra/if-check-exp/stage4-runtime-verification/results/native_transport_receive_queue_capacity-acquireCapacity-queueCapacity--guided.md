@@ -3,6 +3,8 @@
 > **Case:** [`native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`](../../stage3-ai-deep-read/cases/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md)
 >
 > **Status:** **Closed 2026-10-15 — unit Confirmed; cluster Confirmed (amended §9a row 1): the capacity bounds decoded requests in the throwing mode at both sizes; in the default mode it bounds large requests (by pausing the connection) and bounds nothing for small ones, whose every refusal also lowers the connection's `queueSize` by one request for good; one sub-prediction missed (`n100` peak band); no run 2.** Run 1 on `pc57`, 01:29–02:10 EDT; independent self-check 613/614 (the one failure = that missed band). Audited 2026-10-15 (**Ready after amendments**), §9a frozen 00:58 EDT `892454c7…` before any harness code or reading, verified unchanged at the end of run 1.
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. Unit tier and cluster tier.
 

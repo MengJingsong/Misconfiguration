@@ -3,6 +3,8 @@
 > **Case:** [`max_mutation_size-validateSize-MAX_MUTATION_SIZE`](../../stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md)
 >
 > **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** verdict filed (2026-10-11) — **Confirmed at both tiers**; replay **bypass as recorded**; derived-cap control **shadowed as recorded**; no run 2
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. One results file per path, each in its path's folder.
 > For a short-path file (`short-path/results/max_mutation_size-validateSize-MAX_MUTATION_SIZE.md`), the "case file" below is the short-path

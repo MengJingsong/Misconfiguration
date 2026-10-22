@@ -3,6 +3,8 @@
 > **Case:** [`max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction`](../../stage3-ai-deep-read/cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--guided.md)
 >
 > **Status:** **Closed 2026-10-19 — all tiers verified at stage 4 (verdicts below).** audited and frozen 2026-10-07; run 1 (unit and cluster tiers) done and self-checked 2026-10-07, no run 2; **Confirmed at both tiers — H1 as predicted, H2 bypass as recorded**
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Path:** long. Unit tier and cluster tier.
 

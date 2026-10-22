@@ -4,6 +4,8 @@
 > (target `PreV5Handlers.java:127`, the unpause condition in `LegacyDispatchHandler.releaseItem`; from `predicted-negative.md` §9)
 >
 > **Status:** verdict filed (run 1 at both tiers + self-check; no run 2) — 2026-10-22
+> 
+> **Outcome class:** true positive — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster), "§9b–§9e" means B2a–B2e or B3a–B3e, and the
 > case file's feedback section is its section D.

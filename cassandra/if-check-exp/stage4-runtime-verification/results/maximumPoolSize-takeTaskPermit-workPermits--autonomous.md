@@ -2,6 +2,8 @@
 > **Case:** [`maximumPoolSize-takeTaskPermit-workPermits--autonomous`](../../stage3-ai-deep-read/cases/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21. Unit: Confirmed — does not cap. Cluster: Not confirmed (R5 row BIND-5) — undetermined.** "Running tasks × per-task bytes" was tested with the pool binding at every value. Large internode mutations (> 64 KiB) hold heap only while *running*: `Mutation` instances = v exactly, and live heap +5.5 / 9.4 / 21.9 / 70.2 MiB at v = 1 / 8 / 32 / 128. The queue waits off heap, bounded by the receive reserve. Small mutations hold a flat ≈ 240–272 MiB on heap. The frozen statistics put both just outside the BIND-2 row: GC.heap_info is non-monotone at 8 → 32 by 3.5 MiB, and the small arm's max/min of live bytes is 1.2001. The filed phases' "H small at v ≥ 8" and drift rows also missed, because of the heap held by the write load itself. No run 2.
+> 
+> **Outcome class:** undetermined — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster), "§9b–§9e" means B2a–B2e or B3a–B3e, and the case file's feedback section is its section D.
 

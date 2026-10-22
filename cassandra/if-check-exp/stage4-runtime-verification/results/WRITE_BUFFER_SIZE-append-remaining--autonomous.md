@@ -2,6 +2,8 @@
 > **Case:** [`WRITE_BUFFER_SIZE-append-remaining--autonomous`](../../stage3-ai-deep-read/cases/WRITE_BUFFER_SIZE-append-remaining--autonomous.md)
 >
 > **Status:** **Closed 2026-10-21 — unit Confirmed, cluster Confirmed — does not cap** (estimate negative, matched); one sub-prediction missed (8/2048 write timeouts per limit arm); no run 2
+> 
+> **Outcome class:** true negative — stage-3 estimate vs the stage-4 effect on the constraint
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
