@@ -86,7 +86,7 @@
 ### B2. Unit tier
 
 **B2a. Environment and build.**
-- Use the runner's own clone `~/cassandra-run1` (tag cassandra-5.0.9, `ant build-test` already done), with JDK 11 and Ant. Never touch the shared `/proj/.../cassandra-src`.
+- Use the runner's own clone `~/cassandra-run1` (tag cassandra-5.0.9, `ant build-test` already done), with JDK 11 and Ant. Never touch the repository's `cassandra/cassandra-5.0.9/`.
 - Add one file, `~/cassandra-run1/test/unit/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryCapacityProbeTest.java` (contents in B2e). It uses the standard unit-test harness (`test/conf/cassandra.yaml`, BIG format by default) and default `testsome` JVM options.
 
 **B2b. Knobs.**

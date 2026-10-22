@@ -90,7 +90,7 @@ All in-tree default memtables do extend it: `SkipListMemtable`, `TrieMemtable`, 
 - JDK 11.0.32.1, Ant 1.10.12.
 - Clone to local disk; never build in the shared tree:
   ```
-  git clone /proj/misconfiguration-PG0/git-repos/cassandra-src /tmp/c509-unit
+  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/c509-unit
   cd /tmp/c509-unit
   git checkout cassandra-5.0.9 2>/dev/null || true
   rm -f test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java
@@ -224,7 +224,7 @@ All in-tree default memtables do extend it: `SkipListMemtable`, `TrieMemtable`, 
 - One node on 127.0.0.1. A second node is not needed: the pool is per-JVM.
 - Build from a local clone:
   ```
-  git clone /proj/misconfiguration-PG0/git-repos/cassandra-src /tmp/c509-node
+  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/c509-node
   cd /tmp/c509-node
   rm -f test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java
   ant -Dno-checkstyle=true jar

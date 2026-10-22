@@ -99,7 +99,7 @@
 - Clone the tag to local disk. Never build inside the shared tree.
   ```
   W=/tmp/s3-inflight; df -h /tmp   # must be local disk with >= 15 GB free
-  git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src $W/cassandra
+  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh $W/cassandra
   cd $W/cassandra && ant jar build-test
   ```
 - Test source: `$W/cassandra/test/unit/org/apache/cassandra/transport/PreV5InflightCapTest.java`. It is in that package because `LegacyDispatchHandler`'s constructor, `Envelope.Decoder.decode(ByteBuf)` and `Flusher.FlushItem.release()` are package-private.

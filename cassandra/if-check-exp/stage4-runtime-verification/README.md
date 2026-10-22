@@ -97,7 +97,7 @@ improvising a different experiment, because a substituted workload no longer tes
 - **No blind executor.** The session that runs a file is an ordinary AI session in this repository and reads whatever it
   needs. The isolation machinery of the earlier short path (the isolated executor, its blindness check and the prompts around
   it) was removed on 2026-10-19.
-- Runs on the shared infrastructure follow the safety rules below: a separate local clone per run, one run at a time per
+- Runs on the shared infrastructure follow the safety rules below: a separate local copy per run, one run at a time per
   node, every process stopped and checked afterwards.
 
 ## Step 0 — the design audit
@@ -241,7 +241,7 @@ With no human review, the conclusion has to survive the AI's own second look.
 
 | Rule | Why |
 |---|---|
-| **Never build in, or add files to, the shared `cassandra-src` clone.** Clone it to local disk for each run: `git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src <local-dir>`. | Stage 3 reads that clone for line numbers, and it may hold untracked files and a `build/` directory from earlier work. |
+| **Never build in, or add files to, the repository's `cassandra/cassandra-5.0.9/`.** Copy it to local disk for each run: [`copy-source.sh`](copy-source.sh) `<local-dir>` ([`environment.md`](environment.md) §2). Runs before 2026-10-22 cloned the separate `cassandra-src` clone instead, which held the same files. | Stage 3 reads that source for line numbers, and a build or a copied test file there would show up as a change to this repository. |
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
 | A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
 | Stop every process a run starts, and check none is left: `ps -eo cmd | grep '[C]assandraDaemon'` (not `pgrep -f` inside an inline `ssh host '...'` string: it matches its own shell). | A leftover node holds ports and memory and contaminates the next run. |
@@ -251,10 +251,10 @@ With no human review, the conclusion has to survive the AI's own second look.
 
 Required by `build.xml` at the tag: **JDK 11** (the default) **or 17**, and
 **Apache Ant 1.10 or later**. Record, for every run: the node, OS, JDK and Ant
-versions, the local clone's commit, the case-file commit, and the harness
+versions, the local copy's source (repository commit), the case-file commit, and the harness
 commit — the results template has the table.
 
-**Setup steps:** [`environment.md`](environment.md) (JDK, Ant, clone, build, and the cluster-tier tools). The machine used for stage-3 work had no `java`, `jcmd` or `ant` on its PATH.
+**Setup steps:** [`environment.md`](environment.md) (JDK, Ant, copy, build, and the cluster-tier tools). The machine used for stage-3 work had no `java`, `jcmd` or `ant` on its PATH.
 
 ## What stage 4 produces, and where feedback lands
 

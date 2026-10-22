@@ -377,7 +377,7 @@ Work for step 1, before run 1 (none of it exists yet):
 | `cluster-run.py` (named `cluster-run.sh` before the 2026-10-11 audit; the language is the harness's choice) | One run script for the case (stage 4 writes it): modes `instrument`, `value <label>` (Phase 1), `batch <label>` (Phase 2), `derived`, `replay`. Logs every command to `~/stage4-logs/mms/<label>/session.log`, writes `summary.txt` and `readings.csv`, exits at the first failed check and stops the node on any failure. |
 
 ```bash
-# unit tier — in the local clone (never the shared cassandra-src); once:
+# unit tier — in the local clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/); once:
 ant build-test
 cp <harness>/MaxMutationSizeGuardTest.java test/unit/org/apache/cassandra/db/commitlog/
 ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.GroupCommitLogTest      # upstream, derived 2,621,440

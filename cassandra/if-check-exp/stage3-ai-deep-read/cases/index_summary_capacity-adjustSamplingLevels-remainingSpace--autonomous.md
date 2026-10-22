@@ -87,7 +87,7 @@ On disk, `Summary.db` files are written alongside every BIG sstable and are rewr
 
 **B2a. Environment and build.**
 - JDK 11.0.32.1, Ant 1.10.12.
-- Get a local copy of the tree (never touch the shared clone): `git clone /proj/misconfiguration-PG0/git-repos/cassandra-src /tmp/isr-c5 && cd /tmp/isr-c5 && git checkout cassandra-5.0.9`. If the shared tree is not a git repository, use `cp -a` instead.
+- Get a local copy of the tree (never touch the repository's `cassandra/cassandra-5.0.9/`): `<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/isr-c5 && cd /tmp/isr-c5`.
 - Build: `ant -Dno-checkstyle=true build-test`.
 - New test file (in the local copy only): `test/unit/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryCapacityProbeTest.java`.
 - Run with `ant testsome -Dtest.name=org.apache.cassandra.io.sstable.indexsummary.IndexSummaryCapacityProbeTest`.
@@ -403,7 +403,7 @@ On disk, `Summary.db` files are written alongside every BIG sstable and are rewr
 - **Zero reads.** No read traffic is run, and the 15-minute read rate in the log trace stays at 0.
 
 **B4. Risks and cleanup.**
-- **Shared tree.** Never build in, or add files to, `/proj/.../cassandra-src`. All work is done in `/tmp/isr-c5`, `/tmp/isr-node` and `/tmp/isr-work` on local `/`.
+- **Shared tree.** Never build in, or add files to, the repository's `cassandra/cassandra-5.0.9/`. All work is done in `/tmp/isr-c5`, `/tmp/isr-node` and `/tmp/isr-work` on local `/`.
 - **Disk.** The unit tier uses under 1 GB (build plus test data in `build/test`). The cluster tier uses under 10 GB. Check `df -h /` before and after.
 - **Memory.** The node uses an 8 GB heap plus about 2 GB of summaries, well within 251 GiB.
 - **Processes.**

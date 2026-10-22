@@ -425,7 +425,7 @@ prediction as an `EXPECTED: … NO` line and goes on, and stops only at a failed
 asynchronous execution on one session, and takes `--ks` for the control write's keyspace. `make-node-yaml.sh` also writes `native_transport_timeout: 180000ms` (9b).)
 
 ```bash
-# unit tier — in the local clone (never the shared cassandra-src); once:
+# unit tier — in the local clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/); once:
 ant build-test
 cp <harness>/CacheableMutationSizeTest.java test/unit/org/apache/cassandra/db/
 ant testsome -Dtest.name=org.apache.cassandra.utils.TeeDataInputPlusTest                       # upstream

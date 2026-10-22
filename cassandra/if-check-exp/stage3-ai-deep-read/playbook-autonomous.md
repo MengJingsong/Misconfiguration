@@ -6,9 +6,10 @@ gets the same target plus human suggestions. Both fill a template, and
 [stage 4](../stage4-runtime-verification/README.md) runs whatever solution a case file
 holds; what stage 3 is, and where results are filed, is in [`README.md`](README.md).
 
-**How to run it (by hand).** Open a Claude Code session in the Cassandra clone at tag
-`cassandra-5.0.9`. Give it this file, `_TEMPLATE-autonomous.md`, and the target as a
-code location (`file:line`, relative to the clone). Nothing else about the case.
+**How to run it (by hand).** Open a Claude Code session in a copy of the Cassandra source at tag
+`cassandra-5.0.9` made **outside this repository** (`rsync -a cassandra/cassandra-5.0.9/ ~/cassandra-5.0.9/`),
+so the session cannot read the other case and results files. Give it this file, `_TEMPLATE-autonomous.md`, and the target as a
+code location (`file:line`, relative to the source root). Nothing else about the case.
 
 You are helping verify a claim about **Apache Cassandra 5.0.9**.
 
@@ -77,7 +78,7 @@ These are practical limits, not a method:
   numbers from anywhere; a solution describes what to run and what should be
   seen.
 - **Target environment:** a Linux node, or a small cluster of two to three,
-  with JDK 11 and Ant, building Cassandra from a local clone of the tag. No
+  with JDK 11 and Ant, building Cassandra from a local copy of the tag. No
   production data, and no change outside the nodes.
 - **Executable from the solution alone:** exact knob names, values, commands,
   workload sizes, instruments and sampling.
@@ -85,7 +86,7 @@ These are practical limits, not a method:
   relation, so a reading can contradict them; say what would show the claim is
   wrong.
 - **Shared-machine care:** never build in or add files to the shared source
-  clone (clone it to local disk); never fill shared storage (node data, commit
+  tree (copy it to local disk); never fill shared storage (node data, commit
   log and hints go on local disk of known size); stop every process the run
   starts and check none is left.
 

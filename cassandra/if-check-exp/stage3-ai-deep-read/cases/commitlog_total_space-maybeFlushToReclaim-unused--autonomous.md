@@ -361,7 +361,7 @@ Further predictions:
 - The startup log line printing the config (`Node configuration:[...commitlog_total_space=...]`) confirms the value used.
 
 **B4. Risks and cleanup.**
-- **Disk.** The unit tier writes ≤ ~0.5 GiB under `~/cassandra-run1/build/test`. The cluster tier writes ≤ ~4 GiB of commit log plus ≤ ~4 GiB of data per arm under `$RUN` on a local disk that was checked beforehand. Nothing goes on shared or NFS storage, and nothing is built or written in `/proj/.../cassandra-src`.
+- **Disk.** The unit tier writes ≤ ~0.5 GiB under `~/cassandra-run1/build/test`. The cluster tier writes ≤ ~4 GiB of commit log plus ≤ ~4 GiB of data per arm under `$RUN` on a local disk that was checked beforehand. Nothing goes on shared or NFS storage, and nothing is built or written in the repository's `cassandra/cassandra-5.0.9/`.
 - **Processes.** Unit tests run in an Ant-forked JVM that exits by itself. After the cluster arms, run `pgrep -u $USER -f 'CassandraDaemon|cassandra-stress'` and kill anything left. Kill the sampler loop by its pid.
 - **Cleanup.**
   - `rm -rf /tmp/clcap ~/cassandra-run1/build/test/cassandra`

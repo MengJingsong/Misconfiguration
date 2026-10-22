@@ -98,10 +98,9 @@ The claim is wrong if any of the following holds:
 - Make a local clone. Never build in the shared tree.
   ```
   mkdir -p /tmp/s3mhs && cd /tmp/s3mhs
-  git clone --no-hardlinks /proj/misconfiguration-PG0/git-repos/cassandra-src cassandra
-  cd cassandra && git checkout -q cassandra-5.0.9 && git status --short   # expect empty
+  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh cassandra
+  cd cassandra && git status --short   # expect empty
   ```
-  If the shared tree is not a usable git repo, use `rsync -a --exclude test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java /proj/…/cassandra-src/ /tmp/s3mhs/cassandra/` instead.
 - Test source: create `/tmp/s3mhs/cassandra/test/unit/org/apache/cassandra/utils/memory/NextCleanBoundaryTest.java`. It must be in package `org.apache.cassandra.utils.memory` to reach the package-private `needsCleaning()`, `nextClean`, `setDiscarding()` and `setDiscarded()`.
 - Build and run: `ant testsome -Dtest.name=org.apache.cassandra.utils.memory.NextCleanBoundaryTest` (builds main and test classes, then runs JUnit with the default test JVM options from `build.xml`). Later reruns: add `-Dno-build-test=true` after compiling with `ant build-test`.
 - No `DatabaseDescriptor` initialisation is needed: `NativeAllocatorTest` constructs a pool the same way. If an `ExceptionInInitializerError` appears, add `@BeforeClass public static void init() { org.apache.cassandra.config.DatabaseDescriptor.daemonInitialization(); }`.

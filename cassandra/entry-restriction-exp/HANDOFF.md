@@ -74,9 +74,10 @@ See [`_INDEX.md`](_INDEX.md) for the authoritative per-pair table.
   - `_TEMPLATE-summary.md` / `_TEMPLATE-codepath.md` — the two files each
     pair is written as.
   - `<entry_point>/` — one folder per entry point.
-- **Cassandra source:** `/proj/misconfiguration-PG0/git-repos/cassandra-src`,
-  a clone of `apache/cassandra` at tag `cassandra-5.0.9`. Confirm with
-  `git describe --tags`. **Always grep/read the local clone to verify a line
+- **Cassandra source:** `cassandra/cassandra-5.0.9/` in this repository,
+  `apache/cassandra` at tag `cassandra-5.0.9`, unmodified (before 2026-10-22,
+  the separate clone `/proj/misconfiguration-PG0/git-repos/cassandra-src`).
+  Confirm with `build.xml`'s `base.version` (`5.0.9`). **Always grep/read the local source to verify a line
   number** — every `file:line` here is pinned to that tag and will drift on
   any other checkout.
 

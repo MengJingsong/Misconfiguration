@@ -2,7 +2,7 @@
 
 | File | What it is | Where it goes |
 |---|---|---|
-| `HintsPoolCeilingTest.java` | Unit test for the case's unit tier (case §9e). Not upstream. Package `org.apache.cassandra.hints`, because the pool is package-private. | `test/unit/org/apache/cassandra/hints/HintsPoolCeilingTest.java` in a local clone, never the shared `cassandra-src` |
+| `HintsPoolCeilingTest.java` | Unit test for the case's unit tier (case §9e). Not upstream. Package `org.apache.cassandra.hints`, because the pool is package-private. | `test/unit/org/apache/cassandra/hints/HintsPoolCeilingTest.java` in a local copy (`../../copy-source.sh`), never the repository's `cassandra/cassandra-5.0.9/` |
 | `hints-pool.btm` | Byteman rules, observation only: the `created` and `waiting` trace lines (formats in the file and in case §9d). | Loaded at node start with `-javaagent`, or attached to the unit test with `-Dtest.jvm.args` |
 | `hold-flush.btm` | Byteman rule, the trigger: delays every `HintsWriteExecutor$FlushBufferTask.run()` by `stage4.hold.ms` and logs a `hold` line. | Loaded and unloaded at run time with `Submit` / `Submit -u` (case §9e) |
 

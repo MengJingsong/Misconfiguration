@@ -344,7 +344,7 @@ Work for step 1, before run 1 (**none of it exists yet**):
 **(Amended 2026-10-14, step-0 audit:** the run script is `cluster-run.py` (Python, as the other long-path harnesses), with the same modes plus `down`; it records a failed prediction as an `EXPECTED: … NO` line and goes on, and stops only at a failed instrument, control or set-up check. `send-value.py` sets the driver's `FallthroughRetryPolicy`: the default policy retries a `ServerError` on the next host, which on a one-node cluster surfaces as `NoHostAvailable` and hides the class scenario C reads. It also has a `settings` mode for 9b's secondary read. The unit test adds the local-read-response step (9a).)
 
 ```bash
-# unit tier — in the local clone (never the shared cassandra-src); once:
+# unit tier — in the local clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/); once:
 ant build-test
 cp <harness>/MaxValueSizeGuardTest.java test/unit/org/apache/cassandra/db/marshal/
 mkdir -p $HOME/stage4-logs/mvs/unit

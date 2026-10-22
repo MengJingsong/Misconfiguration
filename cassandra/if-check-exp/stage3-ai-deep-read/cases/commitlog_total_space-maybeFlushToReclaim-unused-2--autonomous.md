@@ -76,7 +76,7 @@ Bypass and overshoot paths:
 **B2a. Environment and build.**
 - JDK 11.0.32.1, Ant 1.10.12.
 - Copy the tree to local disk. Never build in the shared clone.
-  `mkdir -p /tmp/clcap && rsync -a --exclude build /proj/misconfiguration-PG0/git-repos/cassandra-src/ /tmp/clcap/cassandra/`
+  `mkdir -p /tmp/clcap && <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/clcap/cassandra`
 - Build in the copy: `cd /tmp/clcap/cassandra && ant jar build-test` (`build-test`, `build.xml:1017`).
 - New test file, in the copy only: `/tmp/clcap/cassandra/test/unit/org/apache/cassandra/db/commitlog/CommitLogTotalSpaceTest.java`.
 - The test conf (`test/conf/cassandra.yaml:8-12`) sets periodic sync, `commitlog_disk_access_mode: legacy` (→ mmap on 64-bit), and `commitlog_directory: build/test/cassandra/commitlog`. That directory is inside the copy, on local disk.
@@ -395,7 +395,7 @@ Not observable directly: the per-switch `unused` value. It is inferred from (i) 
   - Never point any directory at `/proj` (shared).
   - Check `df -h /tmp` before each run and keep ≥ 10 GB free.
 - Processes: after each tier, `pgrep -fa 'CassandraDaemon|cassandra-stress|junit'` must show nothing started by this run. Kill leftovers by PID.
-- Final cleanup: `rm -rf /tmp/clcap`. The shared clone `/proj/misconfiguration-PG0/git-repos/cassandra-src` is never modified.
+- Final cleanup: `rm -rf /tmp/clcap`. The repository's `cassandra/cassandra-5.0.9/` is never modified.
 
 ## C. Sources read
 

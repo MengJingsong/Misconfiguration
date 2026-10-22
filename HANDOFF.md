@@ -195,7 +195,7 @@ None of the three is committed. Before them:
 **Next (no long-path case left at stage 4):** for Jingsong to choose — run 2 of any case (none has one), short-path solutions for the 22 cases without one, stage 3's undecided rows and band D, or committing this day's uncommitted work (Commit state below). **Trap seen 2026-10-14:** any design that holds a client request longer than 12 s must raise `native_transport_timeout` (the coordinator's wait is the nearer of it and the verb timeout).
 
 **Recipe** (protocol: `stage4-runtime-verification/README.md` "The run protocol"; worked example: `max_space…`, results file and `harness/<stem>/`):
-1. Read the case's §9 and run the **step-0 design audit** against the pinned clone `cassandra-5.0.9` (re-read every load-bearing citation; check
+1. Read the case's §9 and run the **step-0 design audit** against the pinned source `cassandra/cassandra-5.0.9/` (re-read every load-bearing citation; check
    the trigger's `OperationType`/call chain reaches the check; check the prediction has numbers; check the arithmetic reaches the limit). Fix
    what the source shows as dated amendments in the case's §9, then record the audit and **freeze §9a** (`sed -n '/^### 9a\. /,/^### 9b\. /p' <case> | git hash-object --stdin`) in the results file, from `_TEMPLATE.md`, before any reading.
 2. Write the harness under `long-path/harness/<stem>/` (unit test + one Python run script per case with `EXPECTED:` lines, a stop on a failed first-trigger instrument check, node stopped on any exit); **instrument-check it** and record that; shakedowns are not readings.
@@ -279,8 +279,8 @@ this folder's own scope.
   Jingsong asks — see "Working preferences" below). **There is no checkout on
   the CloudLab shared mount any more** (removed 2026-10-06, so a node-side executor
   cannot read it; root `README.md` §2). Scripts find their own paths from where
-  they sit, and the Cassandra clone as `$CASSANDRA_SRC` or `cassandra-src` beside
-  this repo.
+  they sit, and the Cassandra source as `$CASSANDRA_SRC` or
+  `cassandra/cassandra-5.0.9/` in this repo.
 - **Folder:** `cassandra/if-check-exp/`
   - `README.md` — full format spec: scope, the three rules, required
     fields, naming rules, workflow, how to verify/link line numbers against
@@ -331,19 +331,20 @@ this folder's own scope.
   the gitignored `codeql-queries/results/` and must be regenerated on a new
   machine.
 - **Outside this repo (CloudLab shared mount, see root `README.md` §2):**
-  `git-repos/cassandra-src`, `tools/codeql/`, `codeql-dbs/`.
+  `tools/codeql/`, `codeql-dbs/`, and the older `git-repos/cassandra-src` clone
+  (superseded by `cassandra/cassandra-5.0.9/`).
 
 ## Cassandra source (for stage-3 reading)
 
-- **Local clone:** `cassandra-src` beside this repo (on CloudLab
-  `/proj/misconfiguration-PG0/git-repos/cassandra-src`), a git
-  clone of `apache/cassandra` at tag `cassandra-5.0.9` (separate from this
-  repo, not tracked by it). On another machine, clone it yourself (command in
-  `cassandra/if-check-exp/README.md` §2). Unit-test verification runs
-  `ant testsome` in this clone.
-- Confirm the version with `git describe --tags` (prints `cassandra-5.0.9`);
-  `build.xml`'s `base.version` and `CHANGES.txt`'s top entry both read `5.0.9`.
-- **Always grep/read the local clone to verify a line number**, then build
+- **In this repo:** `cassandra/cassandra-5.0.9/`, the `apache/cassandra` tree
+  at tag `cassandra-5.0.9` (commit `b5f2a54`), unmodified, committed 2026-10-22
+  in `5c87990`. Never build in it or add files to it: unit-test and cluster
+  runs copy it to local disk first (`stage4-runtime-verification/environment.md`
+  §2). Records dated before 2026-10-22 name the separate `cassandra-src` clone,
+  which held the same files.
+- Confirm the version with `build.xml`'s `base.version` and `CHANGES.txt`'s top
+  entry (both `5.0.9`), and `git status cassandra/cassandra-5.0.9` (nothing changed).
+- **Always grep/read the local source to verify a line number**, then build
   the GitHub link as `.../blob/cassandra-5.0.9/<path relative to repo
   root>#L<NN>`. Never cite a line from memory or from a GitHub fetch alone.
 
@@ -412,7 +413,7 @@ runbook). Template: `stage3-ai-deep-read/_TEMPLATE.md`. Status of the §9s:
   the recommendations in each closed results file's §8 (applied: `cdc_total_space`'s §9a stale-counter wording, 2026-10-06, and all five of `MAX_HINT_BUFFERS`, 2026-10-07; the others not yet); the two read-size cases' stage-4 feedback (names-filter read allocates 77–78 %, not within 10 %; §9a "Default" bullet names an `active` field the Byteman rule does not print).
   Link `ResourceLimits` from the net cases: **done 2026-10-21** (§11 notes; the production reserves are `Concurrent:138`, not `Basic:213`).
   `max_space_usable_for_compactions…` (run 1, 2026-10-07; in its §10 Notes): the hatch's reach is now observed (`nodetool compact` is checked with the hatch off, a background compaction is not), so §6b can list which operations count as `COMPACTION` (audit recommendation 8; the §8 amendment is already made); §7 and §11 call the inputs' total a deliberate over-estimate, which does not hold for disjoint, incompressible inputs (the output was 0.002 % larger); an abort's message is on the line after its `ERROR`.
-- **To start a write-up session:** *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `predicted-positive.md`'s write-up queue and `_TEMPLATE.md`. Write up the first unstruck item: re-read the source in `cassandra-src` (tag `cassandra-5.0.9`), answer all nine fields, design both tiers in §9a–§9e, verify every citation, add the `_INDEX.md` row, strike the candidate in `predicted-positive.md`. Do not commit."* One candidate per session (2–3 if siblings).
+- **To start a write-up session:** *"Read HANDOFF.md, then `long-path/README.md` §2, `playbook.md`, `predicted-positive.md`'s write-up queue and `_TEMPLATE.md`. Write up the first unstruck item: re-read the source in `cassandra/cassandra-5.0.9/` (tag `cassandra-5.0.9`), answer all nine fields, design both tiers in §9a–§9e, verify every citation, add the `_INDEX.md` row, strike the candidate in `predicted-positive.md`. Do not commit."* One candidate per session (2–3 if siblings).
 - **Method for a §9:** (1) read the upstream tests that touch the check and reuse them as the unit tier; (2) find the check's own debug/metric line, else design a Byteman rule; (3) make the limit moveable on a small dedicated filesystem or tiny pool; (4) derive the prediction from the source with its tolerance, as numbers, before any run;
   (5) cross-check old prose against the code and record contradictions in §10 Notes; (6) keep §9a to claim, how-this-verifies, procedure, prediction and a Conclusions table with Refuted, Not confirmed and Invalid rows;
   (7) trace the whole disallow chain to its callers, trace each limit's config key to where it is really read (a getter may read a sibling key), find who releases the resource before predicting a drain, grep the whole tree for "only caller" claims, and expand and check every `file:line` with a script.

@@ -2,7 +2,7 @@
 
 | File | What it is | Where it goes |
 |---|---|---|
-| `CdcTotalSpaceCeilingTest.java` | Unit test for the case's unit tier (case §9e). Not upstream. Package `org.apache.cassandra.db.commitlog`, because it uses package-private `awaitManagementTasksCompletion()` and `allocatingFrom()`. | `test/unit/org/apache/cassandra/db/commitlog/CdcTotalSpaceCeilingTest.java` in a local clone, never the shared `cassandra-src` |
+| `CdcTotalSpaceCeilingTest.java` | Unit test for the case's unit tier (case §9e). Not upstream. Package `org.apache.cassandra.db.commitlog`, because it uses package-private `awaitManagementTasksCompletion()` and `allocatingFrom()`. | `test/unit/org/apache/cassandra/db/commitlog/CdcTotalSpaceCeilingTest.java` in a local copy (`../../copy-source.sh`), never the repository's `cassandra/cassandra-5.0.9/` |
 | `cdc-verdict.btm` | Byteman rules, observation only: the creation trace (`pre`, `post`), the non-blocking deletion pass (`deleteOld`) and a rate-limited `reject` line (formats in the file and in case §9d). | Loaded at node start with `-javaagent`, or attached to the unit test with `-Dtest.jvm.args` |
 | `cdc-sampler.py` | Lists `cdc_raw` 20 times a second: `.csv` (links, apparent and allocated bytes, index files, gap), `.events` (a line per file that appears or disappears), `.summary`. | Run in the background on the node, from node start to stop |
 | `cdc-consumer.sh` | Emulates a CDC consumer: deletes the link and index of every segment whose index says `COMPLETED`. `once` or `loop <seconds>`. | Release step and consumer control (case §9e) |

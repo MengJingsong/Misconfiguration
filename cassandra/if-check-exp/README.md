@@ -57,24 +57,24 @@ Before trusting or extending any case, check out that exact tag and re-verify th
 lines — a different checkout (trunk, another patch release) will drift. Each case
 file restates its source ref in the header for this reason.
 
-### 2.1 Verifying and linking against the local clone
+### 2.1 Verifying and linking against the local source
 
-The pinned source is kept as a real git clone named `cassandra-src` (tag
-`cassandra-5.0.9`), beside this repository: at
-`/proj/misconfiguration-PG0/git-repos/cassandra-src` on CloudLab (see the root
-`README.md` §2), and for example `~/repos/cassandra-src` on a workstation. On
-another machine, create your own with the `git clone` command above. The scripts
-find it through `$CASSANDRA_SRC`, else the sibling of this repository. Use the clone instead of fetching whole files
-through GitHub — grep/window it, which saves tokens versus pulling entire
-files into context.
+The pinned source is part of this repository, at
+[`../cassandra-5.0.9/`](../cassandra-5.0.9/): the `apache/cassandra` tree at
+tag `cassandra-5.0.9`, unmodified (exported with `git archive` on 2026-10-22;
+every file matches the tag). Scripts may also find it through
+`$CASSANDRA_SRC`. Records dated before 2026-10-22 name a separate git clone,
+`cassandra-src`, which held the same files. Read it instead of fetching whole
+files through GitHub — grep/window it, which saves tokens versus pulling
+entire files into context. Never build in it or add files to it.
 
-- **Root mapping:** the clone's root is the repo root (it directly contains
-  `build.xml`, `CHANGES.txt`, `src/`, etc.), so every path in it maps 1:1
-  onto the GitHub repo's paths.
-- **Version confirmation:** `git describe --tags` prints `cassandra-5.0.9`.
-  Independently, `build.xml`'s `base.version` property and `CHANGES.txt`'s
-  top entry both read `5.0.9`. If a copy has no usable `.git` (for example a
-  tag tarball), confirm by those two files.
+- **Root mapping:** `cassandra/cassandra-5.0.9/` is the upstream repo root (it
+  directly contains `build.xml`, `CHANGES.txt`, `src/`, etc.), so every path in
+  it maps 1:1 onto the GitHub repo's paths.
+- **Version confirmation:** the copy has no `.git` of its own, so confirm by
+  `build.xml`'s `base.version` property and `CHANGES.txt`'s top entry, which
+  both read `5.0.9`. `git status cassandra/cassandra-5.0.9` in this repository
+  must show nothing changed.
 - **Building a link:** take the file's path **relative to that root** (e.g.
   `src/java/org/apache/cassandra/utils/memory/MemtablePool.java`) and splice
   it into `https://github.com/apache/cassandra/blob/cassandra-5.0.9/<that path>#L<NN>`
@@ -511,7 +511,7 @@ and the three enforcement patterns (§3.2): it identifies the pattern, locates
 the decision point and the allocation site, and judges whether the verdict
 reaches a decision point that diverges on object creation (Rule 3) — not only
 whether the comparison's own branches diverge, since under patterns (b) and
-(c) they may not. Prefer the local clone over fetching whole files through
+(c) they may not. Prefer the local source (`../cassandra-5.0.9/`) over fetching whole files through
 GitHub (grep/window it — saves tokens).
 
 It then **designs the test** that would confirm or refute the case — §9 of the
@@ -578,7 +578,7 @@ already judged, cite the stage-3 entry rather than re-recording it.
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
-4. **Verify every `file:line` against the local clone before filing** (§2.1).
+4. **Verify every `file:line` against the local source before filing** (§2.1).
    This is a stage-3 exit condition, not a tracked state: a case is not filed
    until its citations are checked.
 5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (four columns since 2026-10-20: Constraint

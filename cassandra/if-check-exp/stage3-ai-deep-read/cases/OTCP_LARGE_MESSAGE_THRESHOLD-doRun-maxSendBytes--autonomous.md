@@ -91,7 +91,7 @@ Changing the send-queue capacity, under the same workload, does move both. The c
 - JDK 11.0.32.1 and Ant 1.10.12.
 - Clone the tag to local disk. Never build in `/proj/...`:
   ```
-  mkdir -p /tmp/lmt && git clone --depth 1 --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src /tmp/lmt/src
+  mkdir -p /tmp/lmt && <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/lmt/src
   ```
 - Build: `cd /tmp/lmt/src && ant -Dno-checkstyle=true build-test`.
 - New test file: `/tmp/lmt/src/test/unit/org/apache/cassandra/net/LargeMessageThresholdFrameTest.java`. It is in package `org.apache.cassandra.net` so that it can use the package-private `OutboundDebugCallbacks`, `withDebugCallbacks`, `pendingBytes()` and `settings()`.
@@ -365,7 +365,7 @@ Rows are applied in order: run validity (C4, C5), then C2, then C3 and C6, then 
 
 ## C. Sources read
 
-All paths below are in the source tree at `/proj/misconfiguration-PG0/git-repos/cassandra-src`.
+All paths below are in the source tree at `cassandra/cassandra-5.0.9/` in this repository.
 
 - `src/java/org/apache/cassandra/net/OutboundConnection.java`
 - `src/java/org/apache/cassandra/net/OutboundConnections.java`

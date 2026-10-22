@@ -21,10 +21,10 @@ are **not** restated here — one source of truth for the rules.
 2. Read [`../../../HANDOFF.md`](../../../HANDOFF.md), then `_INDEX.md` to
    see which cases exist and `predicted-negative.md` / `undetermined.md` to see which lines
    are already judged. **Don't re-judge a recorded line** — cite it.
-3. Confirm the source clone is at the pinned tag: `git -C <clone> describe --tags`
-   must print `cassandra-5.0.9`. The clone is `$CASSANDRA_SRC`, else `cassandra-src`
-   next to this repository (for example `~/repos/cassandra-src`), else
-   `/proj/misconfiguration-PG0/git-repos/cassandra-src` on CloudLab.
+3. Confirm the source is the pinned tag: the source is
+   [`../../cassandra-5.0.9/`](../../cassandra-5.0.9/) in this repository;
+   its `build.xml` `base.version` must read `5.0.9`, and
+   `git status cassandra/cassandra-5.0.9` must show nothing changed.
 4. Pick a feed (README's "two feeds"). For **3a**, take
    `../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
    then C; within A, read A1 → A2 → A3.
@@ -35,7 +35,7 @@ Order matters — each step can end the estimate early and save the next.
 
 | # | Step | Ends early if |
 |---|---|---|
-| 1 | Open the line in the local clone and confirm it still reads as the row claims | the row is stale or the operand was misparsed |
+| 1 | Open the line in the local source and confirm it still reads as the row claims | the row is stale or the operand was misparsed |
 | 2 | Identify the **enforcement pattern** (§3.2): is this `if` itself the decision point (a), does it set a verdict read elsewhere (b), or is it a guard before an unbranched allocation (c)? | — all three are in scope (§7.5, revised 2026-09-25); the pattern sets how much tracing steps 3–5 need, not whether to continue |
 | 3 | Rule 1 — which operand is the limit, and what is it? | neither side is a limit |
 | 4 | Rule 2 — does the gated allocation create a memory- or disk-significant object? | it gates a thread, permit, count or index |
@@ -166,7 +166,7 @@ rejections by these patterns).
 
 1. Write the case file from `_TEMPLATE-guided.md`, answering all nine questions
    in `../README.md` §5 — including §9's test design with both tiers (section 2.2).
-   **Verify every `file:line` against the local clone before filing** — a case is
+   **Verify every `file:line` against the local source before filing** — a case is
    not filed until its citations are checked. Save it as `cases/<stem>--guided.md`.
 2. Record the estimate and its ground, the autonomous reference (or `none`) and the feed (`3a` or
    `3b`) in §10.

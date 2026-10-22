@@ -33,17 +33,27 @@ which jcmd jstack  # /usr/bin/jcmd, /usr/bin/jstack
 JDK 11 is `build.xml`'s `java.default` (11 and 17 are both supported). No
 `JAVA_HOME` was needed: the package makes JDK 11 the `java` alternative.
 
-## 2. Clone the source to local disk
+## 2. Copy the source to local disk
 
-Clone from the shared clone. Never build in the shared clone itself.
+Copy from this repository's `cassandra/cassandra-5.0.9/` (the `cassandra-5.0.9`
+tag, commit `b5f2a54210d541339c2e7c17a794195cac0e67c2`, unmodified). Never build
+in it. Cassandra's build does not need a `.git` directory.
 
 ```bash
-git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src ~/cassandra-run<N>
-git -C ~/cassandra-run<N> rev-parse HEAD      # b5f2a54210d541339c2e7c17a794195cac0e67c2
-git -C ~/cassandra-run<N> describe --tags     # cassandra-5.0.9
+git -C <repo> status --short cassandra/cassandra-5.0.9   # must print nothing
+<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh ~/cassandra-run<N>
+git -C ~/cassandra-run<N> describe --tags     # cassandra-5.0.9 (a local one-commit baseline)
 ```
 
-Use a separate clone per run (`~/cassandra-run1`, `~/cassandra-run2`), so
+[`copy-source.sh`](copy-source.sh) checks that the source is 5.0.9, copies it with
+`rsync`, and gives the copy a local git baseline tagged `cassandra-5.0.9`, so
+`git describe`, `git diff` and `git checkout -- <file>` work in it as in a clone
+(the commit hash is local, not `b5f2a54`).
+
+Record the repository commit the copy came from (`git -C <repo> rev-parse --short HEAD`).
+Runs before 2026-10-22 cloned the separate `cassandra-src` clone at the same tag instead.
+
+Use a separate copy per run (`~/cassandra-run1`, `~/cassandra-run2`), so
 neither run's build or copied test files affect the other.
 
 ## 3. Build the tests
@@ -68,7 +78,7 @@ Nothing more to install: `ant build-test` (section 3) already builds what the cl
 
 | Tool | State |
 |---|---|
-| `tools/bin/cassandra-stress` | works from the clone (`build/classes/stress`) |
+| `tools/bin/cassandra-stress` | works from the local copy (`build/classes/stress`) |
 | `bin/cqlsh` | 6.2.0, runs on the system Python 3.10.12 |
 | Byteman | `build/lib/jars/byteman-4.0.20.jar` and `byteman-submit-4.0.20.jar`, from the build itself |
 | `bin/nodetool sjk mx -mg -b <bean> -f <one attribute>` | works; `-f` takes a single attribute, and each call starts a JVM |
@@ -143,7 +153,7 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 | `pc06` | `node2.jason92-320876…` | `198.22.255.16` | `10.10.1.3` | **set up 2026-10-20:** JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9` (`b5f2a54210`); `ant build` 1 min 2 s and `ant build-test` 49 s `BUILD SUCCESSFUL` (logs `~/stage4-logs/{precheck,apt-install,clone,build,build-test}.log`); 55 GB free on `/`; Python 3.10.12; `ulimit -n` is **1024** soft (1048576 hard; run `ulimit -n 100000` before starting a node) | second node for a ring (section 5) over the LAN |
 | `pc13` | `node3.jason92-320876…` | `198.22.255.23` | `10.10.1.4` | **set up 2026-10-20:** JDK 11.0.32.1, Ant 1.10.12, `~/cassandra-run1` at `cassandra-5.0.9` (`b5f2a54210`); `ant build` 1 min 1 s and `ant build-test` 51 s `BUILD SUCCESSFUL` (logs `~/stage4-logs/{precheck,apt-install,clone,build,build-test}.log`); 55 GB free on `/`; Python 3.10.12; `ulimit -n` is **1024** soft (1048576 hard; run `ulimit -n 100000` before starting a node) | third node for a ring over the LAN |
 
-`pc12`, `pc06` and `pc13` were set up on 2026-10-20 (sections 1 to 3). Use a fresh clone per case if `~/cassandra-run1` has been used. When feeding a script to `ssh … 'bash -s' < script`, give `ant` `</dev/null`: it reads standard input and swallows the rest of the script.
+`pc12`, `pc06` and `pc13` were set up on 2026-10-20 (sections 1 to 3). Use a fresh copy per case (`copy-source.sh`) if `~/cassandra-run1` has been used. When feeding a script to `ssh … 'bash -s' < script`, give `ant` `</dev/null`: it reads standard input and swallows the rest of the script.
 
 **SSH from `pc07`:**
 - Peers: `ssh -o IdentitiesOnly=yes -i /proj/misconfiguration-PG0/.ssh/id_ed25519 jason92@pcNN.cloudlab.umass.edu` works.

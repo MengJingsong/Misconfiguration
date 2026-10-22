@@ -50,7 +50,7 @@ Bypass and overshoot:
 **B2a. Environment and build.** JDK 11.0.32.1, Ant 1.10.12, on local disk:
 ```
 mkdir -p /tmp/s3bp && cd /tmp/s3bp
-git clone --branch cassandra-5.0.9 --depth 1 file:///proj/misconfiguration-PG0/git-repos/cassandra-src cassandra
+<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh cassandra
 cd cassandra && ant jar        # also builds test deps on first testsome
 ```
 Test source: `/tmp/s3bp/cassandra/test/unit/org/apache/cassandra/utils/memory/FreeUnusedPortionProbeTest.java`, in the same package so that it can reach the package-private `Chunk`, `Chunk.roundUp`, `Chunk.free`, and `Chunk.getParentChunk`. Use the default test JVM options from `build.xml` (`-ea` is on).

@@ -30,7 +30,7 @@
 
 ### B2. Unit tier
 
-**B2a. Environment and build.** Local clone of the tag on local disk (`git clone` of `/proj/misconfiguration-PG0/git-repos/cassandra-src` into `$WORK/cassandra`, JDK 11, Ant). Add a new test class `test/unit/org/apache/cassandra/net/InferMessageSizeLimitTest.java` in the package `org.apache.cassandra.net` (needed because `inferMessageSize` is package-private, `Message.java:777`), modelled on `MessageTest.java`. Build with `ant jar` in the clone, then run `ant testsome -Dtest.name=org.apache.cassandra.net.InferMessageSizeLimitTest`. JVM: default test options (`-Xmx1g`), `DatabaseDescriptor.daemonInitialization()` in `@BeforeClass`.
+**B2a. Environment and build.** Local copy of the tag on local disk (`<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh $WORK/cassandra`, JDK 11, Ant). Add a new test class `test/unit/org/apache/cassandra/net/InferMessageSizeLimitTest.java` in the package `org.apache.cassandra.net` (needed because `inferMessageSize` is package-private, `Message.java:777`), modelled on `MessageTest.java`. Build with `ant jar` in the clone, then run `ant testsome -Dtest.name=org.apache.cassandra.net.InferMessageSizeLimitTest`. JVM: default test options (`-Xmx1g`), `DatabaseDescriptor.daemonInitialization()` in `@BeforeClass`.
 
 **B2b. Knobs.** `DatabaseDescriptor.setInternodeMaxMessageSizeInBytes(L)` with L in {64 KiB, 1 MiB, 16 MiB}. The payload size P is varied relative to L: P = {L-1KiB, L+1KiB-overhead boundary, 2L, 8L}. Boundaries are tested exactly by computing the serialized size first and setting L = serializedSize and L = serializedSize-1.
 

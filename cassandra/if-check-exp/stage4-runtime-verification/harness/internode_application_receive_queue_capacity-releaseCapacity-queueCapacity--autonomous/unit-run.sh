@@ -41,7 +41,7 @@ fi
 if [ "$what" = mutant ] || [ "$what" = all ]; then
   M=$HOME/cassandra-rrc-mut; F=src/java/org/apache/cassandra/net/AbstractMessageHandler.java
   rm -rf "$M"
-  git clone --quiet --branch cassandra-5.0.9 --depth 1 /proj/misconfiguration-PG0/git-repos/cassandra-src "$M" > "$L/mutant-clone.log" 2>&1
+  "$H/../../copy-source.sh" "$M" > "$L/mutant-clone.log" 2>&1
   say "mutant clone $(git -C "$M" describe --tags) $(git -C "$M" rev-parse --short HEAD)"
   ( cd "$M" && ant build-test > "$L/mutant-build.log" 2>&1 < /dev/null ); say "mutant clone build-test: $(grep -m1 -o 'BUILD [A-Z]*' "$L/mutant-build.log")"
   cp "$H/ReleaseCapacityProbeTest.java" "$M/$T/"

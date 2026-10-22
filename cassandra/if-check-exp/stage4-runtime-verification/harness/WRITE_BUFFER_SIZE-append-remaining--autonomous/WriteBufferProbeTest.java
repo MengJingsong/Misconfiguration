@@ -1,7 +1,7 @@
 /*
  * Stage-4 harness, unit tier (B2) of WRITE_BUFFER_SIZE-append-remaining--autonomous. Not upstream.
- * Copy into test/unit/org/apache/cassandra/hints/ of a local clone (package-private HintsWriter, Session,
- * HintsWriteExecutor.WRITE_BUFFER_SIZE, HintsBuffer). Never into the shared cassandra-src clone.
+ * Copy into test/unit/org/apache/cassandra/hints/ of a local copy (package-private HintsWriter, Session,
+ * HintsWriteExecutor.WRITE_BUFFER_SIZE, HintsBuffer). Never into the repository's cassandra/cassandra-5.0.9/.
  *
  * What it does (B2c-B2e):
  *  - one table ks.t (k int PRIMARY KEY, v blob); per hint size S (the blob value) one Hint, reused for every append;

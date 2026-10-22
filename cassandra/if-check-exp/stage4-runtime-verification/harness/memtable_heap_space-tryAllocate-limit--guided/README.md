@@ -8,7 +8,7 @@
 **Origin.** Restored verbatim from the Java block in
 `git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`
 (lines 245–403 of that file). It is the test run on 2026-09-16 on pc80.
-The untracked copy in the shared `cassandra-src` clone differs from it in one
+An untracked copy that sat in the old `cassandra-src` clone (deleted 2026-10-22) differed from it in one
 comment line only (an older case-file name); the code is identical.
 
 **`escape-hatch.btm` — checked 2026-09-29, before any cluster run,** against

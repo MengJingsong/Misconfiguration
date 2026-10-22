@@ -58,14 +58,12 @@ mount, alongside other resources that are **not** part of this repo:
 ```
 /proj/misconfiguration-PG0/          <- shared workspace, survives node/allocation expiry
 ├── git-repos/
-│   └── cassandra-src/               <- git clone of apache/cassandra (tag cassandra-5.0.9),
-│                                        read by both Cassandra experiment folders (every
-│                                        file:line is checked against it) and used by
-│                                        codeql-queries/ for database builds;
-│                                        NOT tracked by this repo
+│   └── cassandra-src/               <- older git clone of apache/cassandra (tag cassandra-5.0.9);
+│                                        superseded by this repo's cassandra/cassandra-5.0.9/
+│                                        (see below); NOT tracked by this repo
 ├── tools/codeql/                    <- CodeQL CLI bundle, used by codeql-queries/; NOT tracked by this repo
 ├── codeql-dbs/                      <- compiled CodeQL databases (e.g. cassandra-db), built from
-│                                        cassandra-src by codeql-queries/; NOT tracked by this repo
+│                                        the Cassandra source by codeql-queries/; NOT tracked by this repo
 ├── tarfiles/                        <- downloaded release tarballs (gitignored equivalent; lives outside this repo)
 ├── exp/, deltas/, groups/, images/, logs/, rpms/, templates/, tiplogs/
                                       <- CloudLab platform-managed scaffold dirs, not ours
@@ -74,6 +72,16 @@ mount, alongside other resources that are **not** part of this repo:
 `git-repos/` exists because CloudLab's shared mount doesn't allow creating
 directories directly under `/proj/`, so the `cassandra-src` source clone lives
 one level down instead.
+
+**Cassandra source.** Since 2026-10-22 the source is part of this repo:
+`cassandra/cassandra-5.0.9/` is the `apache/cassandra` tree at tag
+`cassandra-5.0.9`, unmodified (exported with `git archive`; its own
+`.gitattributes` keeps the bytes as upstream). Both Cassandra experiment
+folders check every `file:line` against it and codeql-queries/ builds its
+databases from it. Never build in it or add files to it; copy it to local disk
+first (`cassandra/if-check-exp/stage4-runtime-verification/environment.md` §2).
+Records dated before 2026-10-22 name the `cassandra-src` clone, which held the
+same files.
 
 **Checkout location.** The repo was removed from the shared mount on 2026-10-06 so that the short path's
 stage-4 executor, which every node could reach through that mount, could not read the long path's files. That
@@ -100,7 +108,7 @@ change independently:
 - **`config/environment.sh`** (gitignored — copy from
   `config/environment.sh.example`, see §1 above) — **external refs**:
   facts about *where this checkout is deployed* (the shared-mount path,
-  the separate `cassandra-src` clone's location, `/mydata` install paths,
+  the Cassandra source location (`CASSANDRA_SRC`), `/mydata` install paths,
   node hostnames/IPs, Cassandra version). Edit this whenever the repo is
   loaded into a new environment or CloudLab allocation swaps node
   hostnames/IPs (`orchestrator/check-ips.sh` rewrites the `CLUSTER_IP`
@@ -133,8 +141,8 @@ never scattered across individual scripts.
 
   `if-check-exp` organises its work as **three stages by evidence standard** —
   structural (CodeQL) → lexical (rows only) → semantic (source open) — with
-  one folder each. Every cited line is checked against the `cassandra-src`
-  clone described above. **Behavioral verification (running a trigger into
+  one folder each. Every cited line is checked against the
+  `cassandra/cassandra-5.0.9/` source described above. **Behavioral verification (running a trigger into
   the disallow branch) is out of scope** as of 2026-09-23: a case's evidence
   is its traced code path.
 
@@ -159,7 +167,7 @@ never scattered across individual scripts.
   `cassandra-5.0.9`, but **`cassandra.yaml` is not** — it is missing sections
   that 5.0.9 ships (e.g. the `paxos_variant` block), so it predates the
   pinned tag. It was committed in `56a7d0b`, before the repo pinned 5.0.9.
-  Re-copy it from `cassandra-src/conf/` before treating it as the 5.0.9
+  Re-copy it from `cassandra/cassandra-5.0.9/conf/` before treating it as the 5.0.9
   baseline.
 
 ### 4.5 `hadoop/build-hadoop-src/`

@@ -50,7 +50,7 @@ line of each group; cite the case-file section checked.
 | C. Specific | knob, values, workload, commands, observables, sampling, stop conditions exact | | |
 | D. Runnable | harness and environment prerequisites exist or are listed | | |
 | D. Runnable | workload arithmetic reaches the limit (data, time, disk, memory) | | |
-| D. Runnable | load-bearing citations spot-checked against the pinned clone | | |
+| D. Runnable | load-bearing citations spot-checked against the pinned source | | |
 
 | # | Recommendation | Applied? (amendment date and commit, or "left for stage 3") | Why |
 |---|---|---|---|
@@ -71,7 +71,7 @@ One row per observable in the case's §9d:
 | OS and kernel (`uname -r`) | | |
 | JDK (`java -version`) | | |
 | Ant (`ant -version`) | | |
-| Local `cassandra-src` clone commit | | |
+| Local source copy (from `cassandra/cassandra-5.0.9/` at repository commit …) | | |
 | Case-file commit / harness commit | | |
 | Storage for node data | | |
 | Full logs (path, outside the repo) | | |

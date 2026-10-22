@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Environment setup on the measured node (environment.md sections 1-3).
-# Installs JDK 11 + Ant, clones cassandra-5.0.9 to local disk under the run dir, builds.
+# Installs JDK 11 + Ant, copies cassandra-5.0.9 to local disk under the run dir (../../copy-source.sh), builds.
 # Logs every command (set -x) and its output to $RUN/logs/00-setup.log; stops at the first failure.
 set -euo pipefail
+H=$(cd "$(dirname "$0")" && pwd)
 RUN=~/short-run/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction
 mkdir -p "$RUN/logs"
 exec > >(tee -a "$RUN/logs/00-setup.log") 2>&1
@@ -14,7 +15,7 @@ java -version
 ant -version
 which jcmd jstack
 if [ ! -d "$RUN/cassandra" ]; then
-  git clone --branch cassandra-5.0.9 /proj/misconfiguration-PG0/git-repos/cassandra-src "$RUN/cassandra"
+  "$H/../../copy-source.sh" "$RUN/cassandra"
 fi
 git -C "$RUN/cassandra" rev-parse HEAD
 git -C "$RUN/cassandra" describe --tags

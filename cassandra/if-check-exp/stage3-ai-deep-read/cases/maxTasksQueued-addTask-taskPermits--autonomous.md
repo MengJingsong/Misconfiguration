@@ -57,8 +57,8 @@ growth is stopped only by an upstream limit or the JVM heap, not by the executor
 
 ### B2. Unit tier
 
-**B2a. Environment and build.** JDK 11, Ant. Clone the tag to local disk (never build in the
-shared clone): `git clone --branch cassandra-5.0.9 --depth 1 /proj/misconfiguration-PG0/git-repos/cassandra-src /tmp/c509`,
+**B2a. Environment and build.** JDK 11, Ant. Copy the tag to local disk (never build in the
+repository's `cassandra/cassandra-5.0.9/`): `<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/c509`,
 `cd /tmp/c509 && ant jar` (and `ant build-test` for a JUnit variant). Harness: a small `main`
 (`SepQueueProbe`) compiled against `build/classes/main` + `lib/*.jar` + `build/lib/jars/*.jar`,
 placed outside the clone (`/tmp/probe`). It must set `DatabaseDescriptor.daemonInitialization()`

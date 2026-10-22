@@ -152,10 +152,10 @@ rules below — they guide the case writer and belong only in the template._
 - **State each fact once.** Settings live in 9b, conclusions in 9a; other
   subsections point to them rather than restating them.
 - **Commands are copy-pasteable**, with `<placeholders>` in angle brackets and
-  paths relative to the Cassandra clone root.
+  paths relative to the Cassandra source root.
 - **Source links only in 9b–9e**, and only where a setting is not obvious or a
   trap needs justifying. The intro and 9a have none.
-- **Shared setup is linked, not copied** — JDK, `ant`, building the clone, and
+- **Shared setup is linked, not copied** — JDK, `ant`, copying and building the source, and
   the generic instruments in [README.md §8.3](../../README.md#83-measuring-the-resource).
 - **Delete what does not apply** (scenario C, a row) instead of writing "n/a".
   **Never delete a tier:** a new case designs both a unit tier and a cluster tier.
@@ -311,7 +311,7 @@ raw readings from 9d for every run.
 | **Autonomous reference** | the `--autonomous` case file read for this case, or `none` (the user is asked per case or batch, see `playbook-guided.md` §1) |
 | **Stage-3 feed** | `3a` (from stage 1/2 — cite the `bands.md` row and its band) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
 | **Filed by / Date** | Who wrote this case up and when |
-| **Line numbers checked** | date each cited line was checked against the local pinned-tag clone (`git describe --tags` = `cassandra-5.0.9`) — a case is not filed until this is done |
+| **Line numbers checked** | date each cited line was checked against the pinned source `cassandra/cassandra-5.0.9/` (`build.xml` `base.version` = `5.0.9`) — a case is not filed until this is done |
 | **Escape hatch / Target-3 note** | any bypass of the disallow branch noticed (flag for Target 3, do not chase here), or "none found yet" |
 | **Stage-4 feedback** | "none yet" until stage 4 reports. Then: a link to its results entry, and — if the feedback corrected anything above — which section was amended and when. Measured numbers stay in stage 4's file; they are not copied here. |
 | **Notes** | Any other caveats or outstanding questions |

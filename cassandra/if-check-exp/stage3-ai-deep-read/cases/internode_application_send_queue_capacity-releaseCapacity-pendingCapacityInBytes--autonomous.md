@@ -98,7 +98,7 @@
 - Clone the tag to local disk and build tests:
   ```
   mkdir -p /local/$USER/s3 && cd /local/$USER/s3   # any local (non-shared) dir on /, ≥ 10 GB free
-  git clone --no-hardlinks /proj/misconfiguration-PG0/git-repos/cassandra-src c509 && cd c509 && git checkout -q cassandra-5.0.9
+  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh c509 && cd c509
   ant build-test   # first run downloads deps into ~/.m2 and build/
   ```
 - Test source: `c509/test/unit/org/apache/cassandra/net/SendQueueCapacityProbeTest.java`. It must be in package `org.apache.cassandra.net` to reach the package-private constructor `OutboundConnection(ConnectionType, OutboundConnectionSettings, EndpointAndGlobal)` and the `@VisibleForTesting` hooks `unsafeAcquireCapacity`, `unsafeReleaseCapacity`, `unsafeGetEndpointReserveLimits` (`OutboundConnection.java:1750-1778`) and `queue`.

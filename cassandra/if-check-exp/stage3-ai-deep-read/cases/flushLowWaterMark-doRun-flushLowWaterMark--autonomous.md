@@ -67,7 +67,7 @@ The claim is wrong if the stalled peak changes with `flushLowWaterMark` by more 
 - **Clone and build:** JDK 11.0.32.1, Ant 1.10.12. Clone the tag to local disk, never to the shared tree:
   ```
   mkdir -p /tmp/fwm && cd /tmp/fwm
-  git clone --branch cassandra-5.0.9 --depth 1 file:///proj/misconfiguration-PG0/git-repos/cassandra-src c509
+  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh c509
   cd c509 && ant -Dno-checkstyle=true jar build-test
   ```
 - **Test source:** a new file in the local clone only, `/tmp/fwm/c509/test/unit/org/apache/cassandra/net/FlushWaterMarkProbeTest.java`. It must be in package `org.apache.cassandra.net` to reach the package-private `OutboundConnection` constructor and `OutboundDebugCallbacks`. Run it with
@@ -364,7 +364,7 @@ The large H makes the per-connection effect (tens of MiB) visible above node-lev
 - **Repetitions (2 per variant)** give a noise estimate.
 
 **B4. Risks and cleanup.**
-- **Shared clone:** never build or write in `/proj/.../cassandra-src`. All clones, builds, data and results live under `/tmp/fwm` on local `/`.
+- **Shared clone:** never build or write in the repository's `cassandra/cassandra-5.0.9/`. All clones, builds, data and results live under `/tmp/fwm` on local `/`.
 - **Disk:** unit tier < 1 GB (build). Cluster tier: 5 build copies × ~1.5 GB, plus ≤ 3 GB data per run. Check that `df -h /` has ≥ 20 GB free before starting.
 - **Memory:** A may hold up to ~132 MiB queued plus 64 MiB in flight, far below 4 GB heap and the host RAM.
 - **Processes:** the unit-tier test JVM exits after `testsome`. In the cluster tier, a frozen B must be `kill -CONT` before stopping, otherwise `stopdaemon` hangs. After each run, `pgrep -f 'CassandraDaemon|cassandra-stress|FlushWaterMarkProbeTest'` must be empty; kill any leftovers with `kill -9`. Kill sampler loops with `kill %1 %2 ...` or `pkill -f 'sjk mx'`.
