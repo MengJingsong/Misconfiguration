@@ -1,0 +1,77 @@
+[2026-10-21T15:41:52-0600] unit-run start N=300 arms=15:10 25:10 50:10 100000:10 25:0 clone=/users/jason92/cassandra-cts head=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T15:41:52-0600] EXPECTED: B2f (S=5 MiB): 15:10 peak<=35MiB final<=20MiB sw>=15 | 25:10 peak<=45 final<=30 sw>=10 | 50:10 peak<=70 final<=55 sw>=5 | 100000:10 peak~375-400 rising, sw=0 | 25:0 45<peak<150 final<=30 sw>=5; COMMITLOG_DIRTY>0 in capped arms, 0 in control (R2/R3)
+[2026-10-21T15:41:52-0600] === arm cap15-s10
+[2026-10-21T15:41:52-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T15:41:52-0600] rc=0
+[2026-10-21T15:41:52-0600] + CLCAP_MIB=15 CLCAP_SLEEP_MS=10 CLCAP_N=300 CLCAP_OUT=/users/jason92/stage4-logs/cts/run1/unit/cap15-s10/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T15:42:14-0600] ant rc=0 (22 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.299 sec BUILD SUCCESSFUL 
+INFO capMiB=15 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=15 sleepMs=10 n=300 peakOnDisk=31457280 peakDir=31457280 final=15728640 finalDir=15728640 switches=38
+COMMITLOG_DIRTY 38
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 38
+REASON      38 Enqueuing flush of CLCapKS.t, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+SEGMENT_UNUSED_LINES 73
+ERRORS 0
+[2026-10-21T15:42:14-0600] === arm cap25-s10
+[2026-10-21T15:42:14-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T15:42:14-0600] rc=0
+[2026-10-21T15:42:14-0600] + CLCAP_MIB=25 CLCAP_SLEEP_MS=10 CLCAP_N=300 CLCAP_OUT=/users/jason92/stage4-logs/cts/run1/unit/cap25-s10/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T15:42:35-0600] ant rc=0 (21 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.002 sec BUILD SUCCESSFUL 
+INFO capMiB=25 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=25 sleepMs=10 n=300 peakOnDisk=41943040 peakDir=41943040 final=20971520 finalDir=20971520 switches=18
+COMMITLOG_DIRTY 18
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 18
+REASON      18 Enqueuing flush of CLCapKS.t, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+SEGMENT_UNUSED_LINES 72
+ERRORS 0
+[2026-10-21T15:42:35-0600] === arm cap50-s10
+[2026-10-21T15:42:35-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T15:42:35-0600] rc=0
+[2026-10-21T15:42:35-0600] + CLCAP_MIB=50 CLCAP_SLEEP_MS=10 CLCAP_N=300 CLCAP_OUT=/users/jason92/stage4-logs/cts/run1/unit/cap50-s10/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T15:42:56-0600] ant rc=0 (21 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.114 sec BUILD SUCCESSFUL 
+INFO capMiB=50 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=50 sleepMs=10 n=300 peakOnDisk=78643200 peakDir=78643200 final=20971520 finalDir=20971520 switches=8
+COMMITLOG_DIRTY 8
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 8
+REASON       8 Enqueuing flush of CLCapKS.t, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+SEGMENT_UNUSED_LINES 72
+ERRORS 0
+[2026-10-21T15:42:56-0600] === arm cap100000-s10
+[2026-10-21T15:42:56-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T15:42:56-0600] rc=0
+[2026-10-21T15:42:56-0600] + CLCAP_MIB=100000 CLCAP_SLEEP_MS=10 CLCAP_N=300 CLCAP_OUT=/users/jason92/stage4-logs/cts/run1/unit/cap100000-s10/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T15:43:17-0600] ant rc=0 (21 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.408 sec BUILD SUCCESSFUL 
+INFO capMiB=100000 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=100000 sleepMs=10 n=300 peakOnDisk=398458880 peakDir=398458880 final=398458880 finalDir=398458880 switches=0
+COMMITLOG_DIRTY 0
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 0
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+SEGMENT_UNUSED_LINES 0
+ERRORS 0
+[2026-10-21T15:43:17-0600] === arm cap25-s0
+[2026-10-21T15:43:17-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T15:43:17-0600] rc=0
+[2026-10-21T15:43:17-0600] + CLCAP_MIB=25 CLCAP_SLEEP_MS=0 CLCAP_N=300 CLCAP_OUT=/users/jason92/stage4-logs/cts/run1/unit/cap25-s0/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T15:43:34-0600] ant rc=0 (17 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.322 sec BUILD SUCCESSFUL 
+INFO capMiB=25 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=25 sleepMs=0 n=300 peakOnDisk=104857600 peakDir=99614720 final=15728640 finalDir=15728640 switches=19
+COMMITLOG_DIRTY 19
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 19
+REASON      19 Enqueuing flush of CLCapKS.t, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+SEGMENT_UNUSED_LINES 73
+ERRORS 0
+[2026-10-21T15:43:34-0600] unit-run end

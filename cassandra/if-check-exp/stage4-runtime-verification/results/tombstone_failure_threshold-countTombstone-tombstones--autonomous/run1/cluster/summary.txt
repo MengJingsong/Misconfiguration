@@ -1,0 +1,63 @@
+cluster analysis of /users/jason92/stage4-logs/tft/run1/cluster: N=200000 NLIVE=20000 C=8 R=5; s = 1009.6 B per tombstone (unit tier, T=MAX)
+T=1000000 pk=0: reads 40 {'OK:0': 40}; storm 8.0 s; T read back 1000000; "Scanned over" lines 0 values []; TombstoneFailures +0 (storm); hist Max 219342
+   JFR dob events 353, max buffer 226.93 MB (216.42 MiB), out-of-TLAB sum/read 609.90 MB, largest other alloc 0.00 MB; node alloc/read (R5) 1152.88 MB
+   heap: idle median EU+OU 2529 MB; peak rise EU+OU 5777 MB, OU 6262 MB; gc.log max humongous regions 408 (x16 MiB = 6528 MiB); OOM False
+T=1000000 pk=1: reads 40 {'OK:20000': 40}; storm 26.5 s; T read back 1000000; "Scanned over" lines 0 values []; TombstoneFailures +0 (storm); hist Max 219342
+   JFR dob events 339, max buffer 0.13 MB (0.13 MiB), out-of-TLAB sum/read 0.31 MB, largest other alloc 0.00 MB; node alloc/read (R5) 127.04 MB
+   heap: idle median EU+OU 5302 MB; peak rise EU+OU 2819 MB, OU 0 MB; gc.log max humongous regions 408 (x16 MiB = 6528 MiB); OOM False
+T=300000 pk=0: reads 40 {'OK:0': 40}; storm 8.1 s; T read back 300000; "Scanned over" lines 0 values []; TombstoneFailures +0 (storm); hist Max 219342
+   JFR dob events 339, max buffer 226.93 MB (216.42 MiB), out-of-TLAB sum/read 609.33 MB, largest other alloc 0.00 MB; node alloc/read (R5) 1176.10 MB
+   heap: idle median EU+OU 2638 MB; peak rise EU+OU 5369 MB, OU 6015 MB; gc.log max humongous regions 357 (x16 MiB = 5712 MiB); OOM False
+T=100000 pk=0: reads 40 {'FAIL_TOMBSTONE': 40}; storm 5.6 s; T read back 100000; "Scanned over" lines 41 values [100001]; TombstoneFailures +40 (storm); hist Max 105778
+   JFR dob events 296, max buffer 151.29 MB (144.28 MiB), out-of-TLAB sum/read 382.10 MB, largest other alloc 0.00 MB; node alloc/read (R5) 544.18 MB
+   heap: idle median EU+OU 2144 MB; peak rise EU+OU 5710 MB, OU 6050 MB; gc.log max humongous regions 355 (x16 MiB = 5680 MiB); OOM False
+T=20000 pk=0: reads 40 {'FAIL_TOMBSTONE': 40}; storm 3.7 s; T read back 20000; "Scanned over" lines 41 values [20001]; TombstoneFailures +40 (storm); hist Max 20501
+   JFR dob events 168, max buffer 33.62 MB (32.06 MiB), out-of-TLAB sum/read 61.94 MB, largest other alloc 0.00 MB; node alloc/read (R5) 103.06 MB
+   heap: idle median EU+OU 84 MB; peak rise EU+OU 6308 MB, OU 4009 MB; gc.log max humongous regions 6 (x16 MiB = 96 MiB); OOM False
+T=1000 pk=0: reads 40 {'FAIL_TOMBSTONE': 40}; storm 3.3 s; T read back 1000; "Scanned over" lines 41 values [1001]; TombstoneFailures +40 (storm); hist Max 1109
+   JFR dob events 22, max buffer 1.05 MB (1.00 MiB), out-of-TLAB sum/read 0.35 MB, largest other alloc 0.00 MB; node alloc/read (R5) 8.01 MB
+   heap: idle median EU+OU 1342 MB; peak rise EU+OU -402 MB, OU 0 MB; gc.log max humongous regions 0 (x16 MiB = 0 MiB); OOM False
+T=1000 pk=1: reads 40 {'OK:20000': 40}; storm 26.5 s; T read back 1000; "Scanned over" lines 41 values [1001]; TombstoneFailures +40 (storm); hist Max 1109
+   JFR dob events 332, max buffer 0.13 MB (0.13 MiB), out-of-TLAB sum/read 0.31 MB, largest other alloc 0.00 MB; node alloc/read (R5) 129.77 MB
+   heap: idle median EU+OU 990 MB; peak rise EU+OU 3221 MB, OU 22 MB; gc.log max humongous regions 0 (x16 MiB = 0 MiB); OOM False
+
+-- R4 decisive criteria (B3g row 1)
+EXPECTED: (a) T<N: all 40 reads fail with READ_TOO_MANY_TOMBSTONES — yes
+EXPECTED: (a) T<N: every "Scanned over" line says T+1 (and >= one per read) — yes
+EXPECTED: (a) T>=N: all 40 reads succeed with 0 rows — yes
+EXPECTED: (b) max buffer strictly ordered 1.05 < 33.62 < 151.29 < 226.93 MB — yes
+EXPECTED: (b) max buffer at T>N within +-15% of T=300000 (1.000) — yes
+EXPECTED: (b) failing T: max buffer <= 2.2 x s x (T+1) (1.04, 1.66, 1.50 x s(T+1)) — yes
+EXPECTED: (c, D2) OU peak rise strictly ordered 0 < 4009 < 6050 < 6015 MB — NO
+EXPECTED: (c, D2) OU peak rise at T>N within +-15% of T=300000 (1.041) — yes
+EXPECTED: (d) live control maxbuf at T=1000 vs T=1000000: 0.13 vs 0.13 MB within +-15% or both < 4 MiB — yes
+EXPECTED: (d) live control rise_old at T=1000 vs T=1000000: 22.35 vs 0.00 MB within +-15% or both < 4 MiB — NO
+EXPECTED: (d) live control: all reads succeed with 20000 rows at both T — yes
+
+-- B3f sub-predictions (reported, not decisive)
+EXPECTED: sub: T=1000 max buffer 1.05 MB in 0-2 MB — yes
+EXPECTED: sub: T=20000 max buffer 33.62 MB in 20-41 MB — yes
+EXPECTED: sub: T=100000 max buffer 151.29 MB in 102-205 MB — yes
+EXPECTED: sub: T=300000 max buffer 226.93 MB in 204-410 MB — yes
+EXPECTED: sub: T=1000000 max buffer 226.93 MB in 204-410 MB — yes
+EXPECTED: sub: T=1000 peak-heap rise -0.402 GB in 0.00-0.10 GB — NO
+EXPECTED: sub: T=20000 peak-heap rise 6.308 GB in 0.16-0.50 GB — NO
+EXPECTED: sub: T=100000 peak-heap rise 5.710 GB in 0.80-2.40 GB — NO
+EXPECTED: sub: T=300000 peak-heap rise 5.369 GB in 1.60-4.90 GB — NO
+EXPECTED: sub: T=1000000 peak-heap rise 5.777 GB in 1.60-4.90 GB — NO
+EXPECTED: sub: T=1000 TombstoneFailures +40 = 40 — yes
+EXPECTED: sub: T=20000 TombstoneFailures +40 = 40 — yes
+EXPECTED: sub: T=100000 TombstoneFailures +40 = 40 — yes
+EXPECTED: sub: T=300000 TombstoneScannedHistogram Max 219342 = 200000 (histogram bucket: N <= Max <= 1.25 N) — yes
+EXPECTED: sub: T=1000000 TombstoneScannedHistogram Max 219342 = 200000 (histogram bucket: N <= Max <= 1.25 N) — yes
+EXPECTED: sub: JFR out-of-TLAB sum/read 20k:1k = 174.57 in 14-26 — NO
+EXPECTED: sub: JFR out-of-TLAB sum/read 100k:20k = 6.17 in 3.5-6.5 — yes
+EXPECTED: sub: JFR out-of-TLAB sum/read 1M:300k = 1.00 in 0.85-1.15 — yes
+EXPECTED: sub: node alloc/read (R5) 20k:1k = 12.86 in 14-26 — NO
+EXPECTED: sub: node alloc/read (R5) 100k:20k = 5.28 in 3.5-6.5 — yes
+EXPECTED: sub: node alloc/read (R5) 1M:300k = 0.98 in 0.85-1.15 — yes
+EXPECTED: sub: no OutOfMemoryError in any lifetime — yes
+peak rise above C x 3 x content at T = [20000, 100000, 300000, 1000000] (B3g row 5 if non-empty)
+
+-- row decision
+MATCHED: B3g R6 row (per-read cap confirmed, node-level peak not shown: Not confirmed (partial)); extra-consumer note: yes; OOM: False; EXPECTED yes=24 NO=9

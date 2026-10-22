@@ -1,0 +1,73 @@
+v32: H = 146.3 MiB (heap 262.0 − baseline 115.7); P(t≈90) = 0; Mutation 0, CachedSerialization 0, byte[] 89.5 MiB; Active max 32; inbound using 0.0 + reserve 0.0 MiB; A histo 135.9 MiB; stress {'op_rate': '19882', 'total_partitions': '2400069', 'total_errors': '0'}
+v8: H = 261.4 MiB (heap 377.1 − baseline 115.7); P(t≈90) = 0; Mutation 43, CachedSerialization 43, byte[] 159.7 MiB; Active max 8; inbound using 0.0 + reserve 0.0 MiB; A histo 380.1 MiB; stress {'op_rate': '19952', 'total_partitions': '2400072', 'total_errors': '0'}
+v1: H = 361.7 MiB (heap 477.4 − baseline 115.7); P(t≈90) = 59; Mutation 43024, CachedSerialization 43024, byte[] 199.1 MiB; Active max 1; inbound using 56.0 + reserve 52.0 MiB; A histo 280.0 MiB; stress {'op_rate': '19969', 'total_partitions': '2400072', 'total_errors': '0'}
+v0: H = 374.9 MiB (heap 490.6 − baseline 115.7); P(t≈90) = 134432; Mutation 134432, CachedSerialization 134432, byte[] 301.4 MiB; Active max 0; inbound using 140.0 + reserve 128.0 MiB; A histo 349.4 MiB; stress {'op_rate': '19871', 'total_partitions': '2397214', 'total_errors': '0'}
+v0-ctl16MiB: H = 101.2 MiB (heap 219.1 − baseline 117.9); P(t≈90) = 26886; Mutation 26886, CachedSerialization 26886, byte[] 87.8 MiB; Active max 0; inbound using 28.0 + reserve 16.0 MiB; A histo 373.4 MiB; stress {'op_rate': '19963', 'total_partitions': '2400065', 'total_errors': '0'}
+v0-ctl128MiB: H = 427.7 MiB (heap 561.8 − baseline 134.1); P(t≈90) = 134432; Mutation 134432, CachedSerialization 134432, byte[] 314.3 MiB; Active max 0; inbound using 140.0 + reserve 128.0 MiB; A histo 367.2 MiB; stress {'op_rate': '19893', 'total_partitions': '2400064', 'total_errors': '0'}
+v0-ctl512MiB: H = 1515.5 MiB (heap 1681.6 − baseline 166.1); P(t≈90) = 503162; Mutation 503162, CachedSerialization 503162, byte[] 1090.7 MiB; Active max 0; inbound using 524.0 + reserve 512.0 MiB; A histo 310.3 MiB; stress {'op_rate': '19900', 'total_partitions': '2400067', 'total_errors': '0'}
+v32-rep: H = 432.1 MiB (heap 598.2 − baseline 166.1); P(t≈90) = 0; Mutation 3, CachedSerialization 3, byte[] 150.6 MiB; Active max 32; inbound using 0.0 + reserve 0.0 MiB; A histo 531.7 MiB; stress {'op_rate': '19980', 'total_partitions': '2400067', 'total_errors': '0'}
+v0-rep: H = 335.0 MiB (heap 501.1 − baseline 166.1); P(t≈90) = 134432; Mutation 134432, CachedSerialization 134432, byte[] 314.3 MiB; Active max 0; inbound using 140.0 + reserve 128.0 MiB; A histo 359.2 MiB; stress {'op_rate': '19967', 'total_partitions': '2400062', 'total_errors': '0'}
+EXPECTED: B3f v32: P ≤ 1000 (0), H < 100 MiB (146.3), Mutation ≤ 1000 (0) — NO (recorded; judged in the results file)
+EXPECTED: B3f v8: P ≤ 1000 (0), H < 100 MiB (261.4), Mutation ≤ 1000 (43) — NO (recorded; judged in the results file)
+EXPECTED: B3f v1: H(1) not below H(32) by more than 50 MiB (361.7 vs 146.3) — yes
+EXPECTED: B3f v0: Active 0 in the plateau samples ([0, 0, 0, 0, 0, 0]) — yes
+EXPECTED: B3f v0: P plateau 90,000–150,000 (134432) — yes
+EXPECTED: B3f v0: P flat over t = 60–90 s (max/min 1.029 ≤ 1.05) — yes
+EXPECTED: B3f v0: H 130–550 MiB (374.9) — yes
+EXPECTED: B3f v0: Mutation instances ≈ P (within 20 %: 134432 vs 134432) — yes
+EXPECTED: B3g row 1 part: H(32), H(8) < 100 and H(0) − H(32) ≥ 100 MiB (146.3, 261.4, 374.9) — NO (recorded; judged in the results file)
+EXPECTED: B3g row 2 (Refuted) NOT met: H does not decrease with v (R2 definition) — yes
+EXPECTED: B3f control 16MiB: P ≈ 18,000 (±40 %: 26886), H 20–80 MiB (101.2) — NO (recorded; judged in the results file)
+EXPECTED: B3f control 128MiB: as v0 — P 90,000–150,000 (134432), H 130–550 (427.7) — yes
+EXPECTED: B3f control 512MiB: P ≈ 480,000 (±40 %: 503162), H 0.5–2 GiB (1515.5 MiB) — yes
+EXPECTED: B3f/R2 control: H ordered 16 < 128 < 512 and H(512)/H(16) ≥ 8 (101.2, 427.7, 1515.5) — yes
+EXPECTED: R3 drift: |H(32 rep) − H(32)| ≤ 50 (432.1 vs 146.3), |H(0 rep) − H(0)| ≤ 50 (335.0 vs 374.9), P(0 rep) within 25 % (134432 vs 134432) — NO (recorded; judged in the results file)
+S1: H = 238.8 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [1, 1, 1, 1, 1, 1, 1, 1]); P(t≈60) 4214; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 0.3 MiB; Mutation 4215, CachedSerialization 4215, byte[] Δ 266.0 MiB; stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S1: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S1: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4214: [4214, 4214, 4214, 4214, 4214, 4214]) — yes
+EXPECTED: R5(b) S1: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S1: Pending 3,000–5,500 (4214) — yes
+EXPECTED: R5(c) S1: H_S 185–345 MiB (238.8) — yes
+S8: H = 255.3 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [8, 8, 8, 8, 8, 8, 8, 8]); P(t≈60) 4207; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 0.4 MiB; Mutation 4215, CachedSerialization 4215, byte[] Δ 266.0 MiB; stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S8: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S8: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4207: [4207, 4207, 4207, 4207, 4207, 4207]) — yes
+EXPECTED: R5(b) S8: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S8: Pending 3,000–5,500 (4207) — yes
+EXPECTED: R5(c) S8: H_S 185–345 MiB (255.3) — yes
+S32: H = 258.9 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [32, 32, 32, 32, 32, 32, 32, 32]); P(t≈60) 4183; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 1.2 MiB; Mutation 3489, CachedSerialization 3489, byte[] Δ 221.6 MiB; stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S32: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S32: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4183: [4183, 4183, 4183, 4183, 4183, 4183]) — yes
+EXPECTED: R5(b) S32: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S32: Pending 3,000–5,500 (4183) — yes
+EXPECTED: R5(c) S32: H_S 185–345 MiB (258.9) — yes
+S128: H = 240.2 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [128, 128, 128, 128, 128, 128, 128, 128]); P(t≈60) 4087; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 4.2 MiB; Mutation 4215, CachedSerialization 4215, byte[] Δ 266.1 MiB; stress {'op_rate': '399', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S128: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S128: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4087: [4087, 4087, 4087, 4087, 4087, 4087]) — yes
+EXPECTED: R5(b) S128: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S128: Pending 3,000–5,500 (4087) — yes
+EXPECTED: R5(c) S128: H_S 185–345 MiB (240.2) — yes
+L1: H = 5.5 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [1, 1, 1, 1, 1, 1, 1, 1]); P(t≈60) 526; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ -121.4 MiB; direct Δ 222.1 MiB; Mutation 1, CachedSerialization 1, byte[] Δ 2.6 MiB; stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L1: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L1: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 526: [526, 526, 526, 526, 526, 526]) — yes
+EXPECTED: R5(b) L1: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L1: Pending ≈ 528 − v = 527 (±25 %: 526) — yes
+L8: H = 57.4 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [8, 8, 8, 8, 8, 8, 8, 8]); P(t≈60) 519; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ 213.3 MiB; direct Δ 230.1 MiB; Mutation 8, CachedSerialization 8, byte[] Δ 6.1 MiB; stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L8: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L8: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 519: [519, 519, 519, 519, 519, 519]) — yes
+EXPECTED: R5(b) L8: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L8: Pending ≈ 528 − v = 520 (±25 %: 519) — yes
+L32: H = 53.9 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [32, 32, 32, 32, 32, 32, 32, 32]); P(t≈60) 495; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ 244.9 MiB; direct Δ 228.1 MiB; Mutation 32, CachedSerialization 32, byte[] Δ 18.1 MiB; stress {'op_rate': '100', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L32: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L32: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 495: [495, 495, 495, 495, 495, 495]) — yes
+EXPECTED: R5(b) L32: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L32: Pending ≈ 528 − v = 496 (±25 %: 495) — yes
+L128: H = 86.2 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [128, 128, 128, 128, 128, 128, 128, 128]); P(t≈60) 399; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ 190.3 MiB; direct Δ 239.9 MiB; Mutation 128, CachedSerialization 128, byte[] Δ 66.1 MiB; stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L128: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L128: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 399: [399, 399, 399, 399, 399, 399]) — yes
+EXPECTED: R5(b) L128: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L128: Pending ≈ 528 − v = 400 (±25 %: 399) — yes
+EXPECTED: R5(c) H_S flat over v = 1,8,32,128 (238.8, 255.3, 258.9, 240.2) — yes
+EXPECTED: R5(d) H_L increasing over 8 < 32 < 128 with H_L(128) − H_L(1) ≥ 40 MiB (5.5, 57.4, 53.9, 86.2) — NO (recorded; judged in the results file)
+EXPECTED: R5(d) L networking pool used+overflow larger at v = 1 than at v = 128 (-121.4 vs 190.3 MiB) — NO (recorded; judged in the results file)
+R5 row by the rules: BIND-5 (bound True, S flat True, S increasing False, L flat False, L increasing False)
+EXPECTED tally (reanalysis): 47 yes, 7 NO

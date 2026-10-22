@@ -1,0 +1,27 @@
+[2026-10-21T11:37:42-0600] unit-run start N=40 arms=15:10 100000:10 clone=/users/jason92/cassandra-cts head=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T11:37:42-0600] EXPECTED: B2f (S=5 MiB): 15:10 peak<=35MiB final<=20MiB sw>=15 | 25:10 peak<=45 final<=30 sw>=10 | 50:10 peak<=70 final<=55 sw>=5 | 100000:10 peak~375-400 rising, sw=0 | 25:0 45<peak<150 final<=30 sw>=5; COMMITLOG_DIRTY>0 in capped arms, 0 in control (R2/R3)
+[2026-10-21T11:37:42-0600] === arm cap15-s10
+[2026-10-21T11:37:42-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T11:37:42-0600] rc=0
+[2026-10-21T11:37:42-0600] + CLCAP_MIB=15 CLCAP_SLEEP_MS=10 CLCAP_N=40 CLCAP_OUT=/users/jason92/stage4-logs/cts/unit-shakedown/cap15-s10/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T11:37:59-0600] ant rc=0 (17 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.471 sec BUILD SUCCESSFUL 
+INFO capMiB=15 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=15 sleepMs=10 n=40 peakOnDisk=31457280 peakDir=31457280 final=10485760 finalDir=10485760 switches=5
+COMMITLOG_DIRTY 0
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 0
+SEGMENT_UNUSED_LINES 0
+ERRORS 0
+[2026-10-21T11:37:59-0600] === arm cap100000-s10
+[2026-10-21T11:37:59-0600] + rm -rf build/test/cassandra build/test/logs
+[2026-10-21T11:37:59-0600] rc=0
+[2026-10-21T11:37:59-0600] + CLCAP_MIB=100000 CLCAP_SLEEP_MS=10 CLCAP_N=40 CLCAP_OUT=/users/jason92/stage4-logs/cts/unit-shakedown/cap100000-s10/cap.csv ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+[2026-10-21T11:38:15-0600] ant rc=0 (16 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.202 sec BUILD SUCCESSFUL 
+INFO capMiB=100000 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=100000 sleepMs=10 n=40 peakOnDisk=57671680 peakDir=57671680 final=57671680 finalDir=57671680 switches=0
+COMMITLOG_DIRTY 0
+MEMTABLE_LIMIT 0
+ALL_REASONS_T 0
+SEGMENT_UNUSED_LINES 0
+ERRORS 0
+[2026-10-21T11:38:15-0600] unit-run end

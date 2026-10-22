@@ -1,0 +1,247 @@
+cluster-run all 2026-10-21 18:44:47 EDT host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu clone /users/jason92/cassandra-mps; free 55.7 GB; only=''
+harness md5 cluster-run.py=0bd4d720726f make-node-yaml.sh=a0722715b40f Jmx.java=ff84741a6e3a
+A: conf /users/jason92/stage4-mps/A/conf, JMX 7221, address 127.0.0.21; extra:
+start A lifetime 1 (L1-start): MAX_HEAP_SIZE=8G, yaml extra [], JVM_EXTRA_OPTS None
+A jvm: -Dcassandra.jmx.local.port=7221 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra:
+start B lifetime 1 (L1-start): MAX_HEAP_SIZE=8G, yaml extra [], JVM_EXTRA_OPTS None
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+warm-up: {'op_rate': '19323', 'total_partitions': '400068', 'total_errors': '0'}
+v32: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+EXPECTED: v32: getconcurrency = 32 (read 32) — yes
+v32: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v32.log
+v32-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v32: Pending back to 0 3.668 s after the restore
+v32: TRUNCATE rc=0 
+v32: du 1.2M /users/jason92/stage4-mps/A/data ; 1.2M /users/jason92/stage4-mps/B/data ; 478M /users/jason92/stage4-mps/A/commitlog ; 477M /users/jason92/stage4-mps/B/commitlog ;  free 54.7 GB
+v32: stress {'op_rate': '19882', 'total_partitions': '2400069', 'total_errors': '0'}
+v8: setconcurrency MutationStage 8 on B, getconcurrency reads 8
+EXPECTED: v8: getconcurrency = 8 (read 8) — yes
+v8: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v8.log
+v8-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v8: Pending back to 0 4.837 s after the restore
+v8: TRUNCATE rc=0 
+v8: du 1.2M /users/jason92/stage4-mps/A/data ; 1.2M /users/jason92/stage4-mps/B/data ; 1019M /users/jason92/stage4-mps/A/commitlog ; 943M /users/jason92/stage4-mps/B/commitlog ;  free 53.6 GB
+v8: stress {'op_rate': '19952', 'total_partitions': '2400072', 'total_errors': '0'}
+v1: setconcurrency MutationStage 1 on B, getconcurrency reads 1
+EXPECTED: v1: getconcurrency = 1 (read 1) — yes
+v1: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v1.log
+v1-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v1: Pending back to 0 0.282 s after the restore
+v1: TRUNCATE rc=0 
+v1: du 1.2M /users/jason92/stage4-mps/A/data ; 1.2M /users/jason92/stage4-mps/B/data ; 1.5G /users/jason92/stage4-mps/A/commitlog ; 1.4G /users/jason92/stage4-mps/B/commitlog ;  free 52.6 GB
+v1: stress {'op_rate': '19969', 'total_partitions': '2400072', 'total_errors': '0'}
+v0: setconcurrency MutationStage 0 on B, getconcurrency reads 0
+EXPECTED: v0: getconcurrency = 0 (read 0) — yes
+v0: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v0.log
+v0-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v0: Pending back to 0 0.603 s after the restore
+v0: TRUNCATE rc=0 
+v0: du 1.2M /users/jason92/stage4-mps/A/data ; 1.2M /users/jason92/stage4-mps/B/data ; 1.9G /users/jason92/stage4-mps/A/commitlog ; 1.4G /users/jason92/stage4-mps/B/commitlog ;  free 52.2 GB
+v0: stress {'op_rate': '19871', 'total_partitions': '2397214', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: internode_application_receive_queue_reserve_endpoint_capacity=16MiB
+start B lifetime 2 (ctl16MiB-start): MAX_HEAP_SIZE=8G, yaml extra ['internode_application_receive_queue_reserve_endpoint_capacity=16MiB'], JVM_EXTRA_OPTS None
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+v0-ctl16MiB: setconcurrency MutationStage 0 on B, getconcurrency reads 0
+EXPECTED: v0-ctl16MiB: getconcurrency = 0 (read 0) — yes
+v0-ctl16MiB: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v0-ctl16MiB.log
+v0-ctl16MiB-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v0-ctl16MiB: Pending back to 0 1.83 s after the restore
+v0-ctl16MiB: TRUNCATE rc=0 
+v0-ctl16MiB: du 1.2M /users/jason92/stage4-mps/A/data ; 1.3M /users/jason92/stage4-mps/B/data ; 2.3G /users/jason92/stage4-mps/A/commitlog ; 144K /users/jason92/stage4-mps/B/commitlog ;  free 53.2 GB
+v0-ctl16MiB: stress {'op_rate': '19963', 'total_partitions': '2400065', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: internode_application_receive_queue_reserve_endpoint_capacity=128MiB
+start B lifetime 3 (ctl128MiB-start): MAX_HEAP_SIZE=8G, yaml extra ['internode_application_receive_queue_reserve_endpoint_capacity=128MiB'], JVM_EXTRA_OPTS None
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+v0-ctl128MiB: setconcurrency MutationStage 0 on B, getconcurrency reads 0
+EXPECTED: v0-ctl128MiB: getconcurrency = 0 (read 0) — yes
+v0-ctl128MiB: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v0-ctl128MiB.log
+v0-ctl128MiB-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v0-ctl128MiB: Pending back to 0 0.519 s after the restore
+v0-ctl128MiB: TRUNCATE rc=0 
+v0-ctl128MiB: du 1.2M /users/jason92/stage4-mps/A/data ; 1.6M /users/jason92/stage4-mps/B/data ; 2.8G /users/jason92/stage4-mps/A/commitlog ; 148K /users/jason92/stage4-mps/B/commitlog ;  free 52.7 GB
+v0-ctl128MiB: stress {'op_rate': '19893', 'total_partitions': '2400064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: internode_application_receive_queue_reserve_endpoint_capacity=512MiB internode_application_receive_queue_reserve_global_capacity=1GiB
+start B lifetime 4 (ctl512MiB-start): MAX_HEAP_SIZE=8G, yaml extra ['internode_application_receive_queue_reserve_endpoint_capacity=512MiB', 'internode_application_receive_queue_reserve_global_capacity=1GiB'], JVM_EXTRA_OPTS None
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+v0-ctl512MiB: setconcurrency MutationStage 0 on B, getconcurrency reads 0
+EXPECTED: v0-ctl512MiB: getconcurrency = 0 (read 0) — yes
+v0-ctl512MiB: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v0-ctl512MiB.log
+v0-ctl512MiB-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v0-ctl512MiB: Pending back to 0 1.097 s after the restore
+v0-ctl512MiB: TRUNCATE rc=0 
+v0-ctl512MiB: du 1.2M /users/jason92/stage4-mps/A/data ; 1.7M /users/jason92/stage4-mps/B/data ; 3.2G /users/jason92/stage4-mps/A/commitlog ; 148K /users/jason92/stage4-mps/B/commitlog ;  free 52.3 GB
+v0-ctl512MiB: stress {'op_rate': '19900', 'total_partitions': '2400067', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra:
+start B lifetime 5 (drift-start): MAX_HEAP_SIZE=8G, yaml extra [], JVM_EXTRA_OPTS None
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+v32-rep: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+EXPECTED: v32-rep: getconcurrency = 32 (read 32) — yes
+v32-rep: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v32-rep.log
+v32-rep-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v32-rep: Pending back to 0 0.769 s after the restore
+v32-rep: TRUNCATE rc=0 
+v32-rep: du 1.2M /users/jason92/stage4-mps/A/data ; 1.2M /users/jason92/stage4-mps/B/data ; 3.7G /users/jason92/stage4-mps/A/commitlog ; 542M /users/jason92/stage4-mps/B/commitlog ;  free 51.2 GB
+v32-rep: stress {'op_rate': '19980', 'total_partitions': '2400067', 'total_errors': '0'}
+v0-rep: setconcurrency MutationStage 0 on B, getconcurrency reads 0
+EXPECTED: v0-rep: getconcurrency = 0 (read 0) — yes
+v0-rep: stress started: tools/bin/cassandra-stress write duration=120s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(5)" "size=FIXED(200)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-v0-rep.log
+v0-rep-drain: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+v0-rep: Pending back to 0 4.465 s after the restore
+v0-rep: TRUNCATE rc=0 
+v0-rep: du 1.2M /users/jason92/stage4-mps/A/data ; 1.3M /users/jason92/stage4-mps/B/data ; 4.1G /users/jason92/stage4-mps/A/commitlog ; 542M /users/jason92/stage4-mps/B/commitlog ;  free 50.7 GB
+v0-rep: stress {'op_rate': '19967', 'total_partitions': '2400062', 'total_errors': '0'}
+A: conf /users/jason92/stage4-mps/A/conf, JMX 7221, address 127.0.0.21; extra: write_request_timeout=300000ms
+start A lifetime 2 (bind-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS None
+A jvm: -Dcassandra.jmx.local.port=7221 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:bin/../lib/jamm-0.4.0.jar
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 6 (S1-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+S1: setconcurrency MutationStage 1 on B, getconcurrency reads 1
+EXPECTED: S1: getconcurrency = 1 (read 1) — yes
+S1: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(32768)" -rate threads=64 fixed=400/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-S1.log
+S1-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+S1: Pending 0 at 3 samples 18.63 s after setconcurrency 512
+S1-drain: TRUNCATE rc=0 
+S1-drain: du 1.4M /users/jason92/stage4-mps/A/data ; 1.5M /users/jason92/stage4-mps/B/data ; 138M /users/jason92/stage4-mps/A/commitlog ; 316K /users/jason92/stage4-mps/B/commitlog ;  free 55.5 GB
+S1: stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 7 (S8-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+S8: setconcurrency MutationStage 8 on B, getconcurrency reads 8
+EXPECTED: S8: getconcurrency = 8 (read 8) — yes
+S8: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(32768)" -rate threads=64 fixed=400/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-S8.log
+S8-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+S8: Pending 0 at 3 samples 19.404 s after setconcurrency 512
+S8-drain: TRUNCATE rc=0 
+S8-drain: du 1.5M /users/jason92/stage4-mps/A/data ; 1.9M /users/jason92/stage4-mps/B/data ; 275M /users/jason92/stage4-mps/A/commitlog ; 1.5M /users/jason92/stage4-mps/B/commitlog ;  free 55.3 GB
+S8: stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 8 (S32-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+S32: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+EXPECTED: S32: getconcurrency = 32 (read 32) — yes
+S32: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(32768)" -rate threads=64 fixed=400/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-S32.log
+S32-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+S32: Pending 0 at 3 samples 19.459 s after setconcurrency 512
+S32-drain: TRUNCATE rc=0 
+S32-drain: du 1.4M /users/jason92/stage4-mps/A/data ; 1.2M /users/jason92/stage4-mps/B/data ; 413M /users/jason92/stage4-mps/A/commitlog ; 6.2M /users/jason92/stage4-mps/B/commitlog ;  free 55.2 GB
+S32: stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 9 (S128-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+S128: setconcurrency MutationStage 128 on B, getconcurrency reads 128
+EXPECTED: S128: getconcurrency = 128 (read 128) — yes
+S128: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(32768)" -rate threads=64 fixed=400/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-S128.log
+S128-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+S128: Pending 0 at 3 samples 18.637 s after setconcurrency 512
+S128-drain: TRUNCATE rc=0 
+S128-drain: du 1.4M /users/jason92/stage4-mps/A/data ; 1.4M /users/jason92/stage4-mps/B/data ; 550M /users/jason92/stage4-mps/A/commitlog ; 25M /users/jason92/stage4-mps/B/commitlog ;  free 55.0 GB
+S128: stress {'op_rate': '399', 'total_partitions': '36064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 10 (L1-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+L1: setconcurrency MutationStage 1 on B, getconcurrency reads 1
+EXPECTED: L1: getconcurrency = 1 (read 1) — yes
+L1: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(262144)" -rate threads=64 fixed=100/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-L1.log
+L1-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+L1: Pending 0 at 3 samples 13.581 s after setconcurrency 512
+L1-drain: TRUNCATE rc=0 
+L1-drain: du 1.5M /users/jason92/stage4-mps/A/data ; 1.9M /users/jason92/stage4-mps/B/data ; 785M /users/jason92/stage4-mps/A/commitlog ; 64M /users/jason92/stage4-mps/B/commitlog ;  free 54.7 GB
+L1: stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 11 (L8-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+L8: setconcurrency MutationStage 8 on B, getconcurrency reads 8
+EXPECTED: L8: getconcurrency = 8 (read 8) — yes
+L8: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(262144)" -rate threads=64 fixed=100/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-L8.log
+L8-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+L8: Pending 0 at 3 samples 12.909 s after setconcurrency 512
+L8-drain: TRUNCATE rc=0 
+L8-drain: du 1.4M /users/jason92/stage4-mps/A/data ; 1.4M /users/jason92/stage4-mps/B/data ; 1.1G /users/jason92/stage4-mps/A/commitlog ; 39M /users/jason92/stage4-mps/B/commitlog ;  free 54.5 GB
+L8: stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 12 (L32-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+L32: setconcurrency MutationStage 32 on B, getconcurrency reads 32
+EXPECTED: L32: getconcurrency = 32 (read 32) — yes
+L32: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(262144)" -rate threads=64 fixed=100/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-L32.log
+L32-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+L32: Pending 0 at 3 samples 13.035 s after setconcurrency 512
+L32-drain: TRUNCATE rc=0 
+L32-drain: du 1.4M /users/jason92/stage4-mps/A/data ; 1.4M /users/jason92/stage4-mps/B/data ; 1.3G /users/jason92/stage4-mps/A/commitlog ; 36M /users/jason92/stage4-mps/B/commitlog ;  free 54.3 GB
+L32: stress {'op_rate': '100', 'total_partitions': '9064', 'total_errors': '0'}
+B: conf /users/jason92/stage4-mps/B/conf, JMX 7222, address 127.0.0.22; extra: write_request_timeout=300000ms
+start B lifetime 13 (L128-start): MAX_HEAP_SIZE=8G, yaml extra ['write_request_timeout=300000ms'], JVM_EXTRA_OPTS '-javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm'
+B jvm: -Dcassandra.jmx.local.port=7222 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/users/jason92/cassandra-mps/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-harness-run/mps/hold-mutation.btm -javaagent:bin/../lib/jamm-0.4.0.jar
+L128: setconcurrency MutationStage 128 on B, getconcurrency reads 128
+EXPECTED: L128: getconcurrency = 128 (read 128) — yes
+L128: stress started: tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "n=FIXED(1)" "size=FIXED(262144)" -rate threads=64 fixed=100/s -node whitelist 127.0.0.21 -port jmx=7221 -log file=/users/jason92/stage4-logs/mps/run1/cluster/stress-L128.log
+L128-drain: setconcurrency MutationStage 512 on B, getconcurrency reads 512
+L128: Pending 0 at 3 samples 12.423 s after setconcurrency 512
+L128-drain: TRUNCATE rc=0 
+L128-drain: du 1.5M /users/jason92/stage4-mps/A/data ; 1.8M /users/jason92/stage4-mps/B/data ; 1.6G /users/jason92/stage4-mps/A/commitlog ; 124M /users/jason92/stage4-mps/B/commitlog ;  free 53.9 GB
+L128: stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+v32: sample or baseline missing
+v8: sample or baseline missing
+v1: sample or baseline missing
+v0: sample or baseline missing
+v0-ctl16MiB: H = 101.2 MiB (heap 219.1 − baseline 117.9); P(t≈90) = 26886; Mutation 26886, CachedSerialization 26886, byte[] 87.8 MiB; Active max 0; inbound using 28.0 + reserve 16.0 MiB; A histo 373.4 MiB; stress {'op_rate': '19963', 'total_partitions': '2400065', 'total_errors': '0'}
+v0-ctl128MiB: H = 427.7 MiB (heap 561.8 − baseline 134.1); P(t≈90) = 134432; Mutation 134432, CachedSerialization 134432, byte[] 314.3 MiB; Active max 0; inbound using 140.0 + reserve 128.0 MiB; A histo 367.2 MiB; stress {'op_rate': '19893', 'total_partitions': '2400064', 'total_errors': '0'}
+v0-ctl512MiB: H = 1515.5 MiB (heap 1681.6 − baseline 166.1); P(t≈90) = 503162; Mutation 503162, CachedSerialization 503162, byte[] 1090.7 MiB; Active max 0; inbound using 524.0 + reserve 512.0 MiB; A histo 310.3 MiB; stress {'op_rate': '19900', 'total_partitions': '2400067', 'total_errors': '0'}
+v32-rep: H = 432.1 MiB (heap 598.2 − baseline 166.1); P(t≈90) = 0; Mutation 3, CachedSerialization 3, byte[] 150.6 MiB; Active max 32; inbound using 0.0 + reserve 0.0 MiB; A histo 531.7 MiB; stress {'op_rate': '19980', 'total_partitions': '2400067', 'total_errors': '0'}
+v0-rep: H = 335.0 MiB (heap 501.1 − baseline 166.1); P(t≈90) = 134432; Mutation 134432, CachedSerialization 134432, byte[] 314.3 MiB; Active max 0; inbound using 140.0 + reserve 128.0 MiB; A histo 359.2 MiB; stress {'op_rate': '19967', 'total_partitions': '2400062', 'total_errors': '0'}
+EXPECTED: B3f control 16MiB: P ≈ 18,000 (±40 %: 26886), H 20–80 MiB (101.2) — NO (recorded; judged in the results file)
+EXPECTED: B3f control 128MiB: as v0 — P 90,000–150,000 (134432), H 130–550 (427.7) — yes
+EXPECTED: B3f control 512MiB: P ≈ 480,000 (±40 %: 503162), H 0.5–2 GiB (1515.5 MiB) — yes
+EXPECTED: B3f/R2 control: H ordered 16 < 128 < 512 and H(512)/H(16) ≥ 8 (101.2, 427.7, 1515.5) — yes
+S1: H = 238.8 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [1, 1, 1, 1, 1, 1, 1, 1]); P(t≈60) 4214; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 0.3 MiB; Mutation 4215, CachedSerialization 4215, byte[] Δ 266.0 MiB; stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S1: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S1: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4214: [4214, 4214, 4214, 4214, 4214, 4214]) — yes
+EXPECTED: R5(b) S1: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S1: Pending 3,000–5,500 (4214) — yes
+EXPECTED: R5(c) S1: H_S 185–345 MiB (238.8) — yes
+S8: H = 255.3 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [8, 8, 8, 8, 8, 8, 8, 8]); P(t≈60) 4207; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 0.4 MiB; Mutation 4215, CachedSerialization 4215, byte[] Δ 266.0 MiB; stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S8: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S8: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4207: [4207, 4207, 4207, 4207, 4207, 4207]) — yes
+EXPECTED: R5(b) S8: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S8: Pending 3,000–5,500 (4207) — yes
+EXPECTED: R5(c) S8: H_S 185–345 MiB (255.3) — yes
+S32: H = 258.9 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [32, 32, 32, 32, 32, 32, 32, 32]); P(t≈60) 4183; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 1.2 MiB; Mutation 3489, CachedSerialization 3489, byte[] Δ 221.6 MiB; stress {'op_rate': '396', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S32: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S32: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4183: [4183, 4183, 4183, 4183, 4183, 4183]) — yes
+EXPECTED: R5(b) S32: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S32: Pending 3,000–5,500 (4183) — yes
+EXPECTED: R5(c) S32: H_S 185–345 MiB (258.9) — yes
+S128: H = 240.2 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [128, 128, 128, 128, 128, 128, 128, 128]); P(t≈60) 4087; inbound using_bytes 132.0 MiB; networking pool used+overflow Δ 0.1 MiB; direct Δ 4.2 MiB; Mutation 4215, CachedSerialization 4215, byte[] Δ 266.1 MiB; stress {'op_rate': '399', 'total_partitions': '36064', 'total_errors': '0'}
+EXPECTED: R5(a) S128: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) S128: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 4087: [4087, 4087, 4087, 4087, 4087, 4087]) — yes
+EXPECTED: R5(b) S128: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (132.0) — yes
+EXPECTED: R5(b) S128: Pending 3,000–5,500 (4087) — yes
+EXPECTED: R5(c) S128: H_S 185–345 MiB (240.2) — yes
+L1: H = 5.5 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [1, 1, 1, 1, 1, 1, 1, 1]); P(t≈60) 526; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ -121.4 MiB; direct Δ 222.1 MiB; Mutation 1, CachedSerialization 1, byte[] Δ 2.6 MiB; stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L1: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L1: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 526: [526, 526, 526, 526, 526, 526]) — yes
+EXPECTED: R5(b) L1: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L1: Pending ≈ 528 − v = 527 (±25 %: 526) — yes
+L8: H = 57.4 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [8, 8, 8, 8, 8, 8, 8, 8]); P(t≈60) 519; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ 213.3 MiB; direct Δ 230.1 MiB; Mutation 8, CachedSerialization 8, byte[] Δ 6.1 MiB; stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L8: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L8: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 519: [519, 519, 519, 519, 519, 519]) — yes
+EXPECTED: R5(b) L8: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L8: Pending ≈ 528 − v = 520 (±25 %: 519) — yes
+L32: H = 53.9 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [32, 32, 32, 32, 32, 32, 32, 32]); P(t≈60) 495; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ 244.9 MiB; direct Δ 228.1 MiB; Mutation 32, CachedSerialization 32, byte[] Δ 18.1 MiB; stress {'op_rate': '100', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L32: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L32: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 495: [495, 495, 495, 495, 495, 495]) — yes
+EXPECTED: R5(b) L32: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L32: Pending ≈ 528 − v = 496 (±25 %: 495) — yes
+L128: H = 86.2 MiB; Active ≥ 0.9v at 100 % of 8 samples (t 20–60 s: [128, 128, 128, 128, 128, 128, 128, 128]); P(t≈60) 399; inbound using_bytes 131.8 MiB; networking pool used+overflow Δ 190.3 MiB; direct Δ 239.9 MiB; Mutation 128, CachedSerialization 128, byte[] Δ 66.1 MiB; stress {'op_rate': '99', 'total_partitions': '9064', 'total_errors': '0'}
+EXPECTED: R5(a) L128: Active ≥ 0.9 v at ≥ 80 % of samples (100 %) — yes
+EXPECTED: R5(a) L128: Pending at a plateau over t = 30–60 s (all within ±10 % of mean 399: [399, 399, 399, 399, 399, 399]) — yes
+EXPECTED: R5(b) L128: reserve usage (internode_inbound using_bytes, which includes the reserve part) 100–140 MiB (131.8) — yes
+EXPECTED: R5(b) L128: Pending ≈ 528 − v = 400 (±25 %: 399) — yes
+EXPECTED: R5(c) H_S flat over v = 1,8,32,128 (238.8, 255.3, 258.9, 240.2) — yes
+EXPECTED: R5(d) H_L increasing over 8 < 32 < 128 with H_L(128) − H_L(1) ≥ 40 MiB (5.5, 57.4, 53.9, 86.2) — NO (recorded; judged in the results file)
+EXPECTED: R5(d) L networking pool used+overflow larger at v = 1 than at v = 128 (-121.4 vs 190.3 MiB) — NO (recorded; judged in the results file)
+R5 row by the rules: BIND-5 (bound True, S flat True, S increasing False, L flat False, L increasing False)
+nodes stopped; leftover daemons of this harness: 0
+EXPECTED tally: 57 yes, 3 NO; done 2026-10-21 19:34:34 EDT

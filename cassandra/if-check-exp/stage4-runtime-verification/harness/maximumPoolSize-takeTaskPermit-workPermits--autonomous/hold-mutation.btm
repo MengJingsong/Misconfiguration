@@ -1,0 +1,11 @@
+# Runbook fix D2 (2026-10-21), R5 bind arm only, node B only: every MutationStage task that handles a MUTATION_REQ
+# sleeps 2 s at the entry of MutationVerbHandler.doVerb. The message is already deserialized there
+# (InboundMessageHandler.java:427-429: provideMessage() before consumer.accept), so each RUNNING task holds its mutation
+# for 2 s and B applies at most v/2 writes/s: the pool binds at every v <= 128 against 400/s (S) and 100/s (L).
+RULE mps hold running mutation task
+CLASS org.apache.cassandra.db.MutationVerbHandler
+METHOD doVerb
+AT ENTRY
+IF true
+DO Thread.sleep(2000L)
+ENDRULE

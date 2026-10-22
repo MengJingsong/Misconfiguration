@@ -1,0 +1,82 @@
+ok   unit rep1: 14 PROBE records rebuilt from the per-test log (got 14)
+ok   unit rep1 P1: active = n, pending = 2000 − n ({1: (1, 1999), 4: (4, 1996), 32: (32, 1968), 128: (128, 1872)})
+ok   unit rep1 P1: heap flat within ±10 MiB of the mean and in 110–145 ({1: 125.2, 4: 125.2, 32: 125.2, 128: 125.3})
+ok   unit rep1 P2: active 32 > max 4 after the shrink, then 4 running, 196 pending ({'phase': '2b', 'max': '4', 'active': '32', 'pending': '200', 'running': '32'}, {'phase': '2c', 'max': '4', 'active': '4', 'pending': '196', 'running': '4', 'heapDeltaMiB': '12.6'})
+ok   unit rep1 P3: control heap tracks the cap ({16: 16.0, 64: 64.1})
+ok   unit rep1 P4: heap ∝ n (MiB per running task [2.025, 2.006, 2.002], all within 5 % of each other)
+FAIL unit rep1 P4 sub-prediction n × 1 MiB (+2): {1: 2.1, 4: 8.1, 32: 64.2, 128: 256.2}
+ok   unit rep2: 14 PROBE records rebuilt from the per-test log (got 14)
+ok   unit rep2 P1: active = n, pending = 2000 − n ({1: (1, 1999), 4: (4, 1996), 32: (32, 1968), 128: (128, 1872)})
+ok   unit rep2 P1: heap flat within ±10 MiB of the mean and in 110–145 ({1: 125.2, 4: 125.2, 32: 125.2, 128: 125.3})
+ok   unit rep2 P2: active 32 > max 4 after the shrink, then 4 running, 196 pending ({'phase': '2b', 'max': '4', 'active': '32', 'pending': '200', 'running': '32'}, {'phase': '2c', 'max': '4', 'active': '4', 'pending': '196', 'running': '4', 'heapDeltaMiB': '12.6'})
+ok   unit rep2 P3: control heap tracks the cap ({16: 16.0, 64: 64.1})
+ok   unit rep2 P4: heap ∝ n (MiB per running task [2.025, 2.006, 2.002], all within 5 % of each other)
+FAIL unit rep2 P4 sub-prediction n × 1 MiB (+2): {1: 2.1, 4: 8.1, 32: 64.2, 128: 256.2}
+ok   unit rep3: 14 PROBE records rebuilt from the per-test log (got 14)
+ok   unit rep3 P1: active = n, pending = 2000 − n ({1: (1, 1999), 4: (4, 1996), 32: (32, 1968), 128: (128, 1872)})
+ok   unit rep3 P1: heap flat within ±10 MiB of the mean and in 110–145 ({1: 125.2, 4: 125.2, 32: 125.2, 128: 125.3})
+ok   unit rep3 P2: active 32 > max 4 after the shrink, then 4 running, 196 pending ({'phase': '2b', 'max': '4', 'active': '32', 'pending': '200', 'running': '32'}, {'phase': '2c', 'max': '4', 'active': '4', 'pending': '196', 'running': '4', 'heapDeltaMiB': '12.6'})
+ok   unit rep3 P3: control heap tracks the cap ({16: 16.0, 64: 64.1})
+ok   unit rep3 P4: heap ∝ n (MiB per running task [2.025, 2.006, 2.002], all within 5 % of each other)
+FAIL unit rep3 P4 sub-prediction n × 1 MiB (+2): {1: 2.1, 4: 8.1, 32: 64.2, 128: 256.2}
+ok   unit repeats agree within 10 MiB (worst 0.00)
+resize sequence on B (system.log): [8, 32, 1, 32, 0, 32, 0, 32, 0, 32, 0, 32, 0, 32, 1, 512, 8, 512, 512, 128, 512, 1, 512, 8, 512, 512, 128, 512]
+ok   resize lines begin with the filed sequence 8,32,1,32,0,32 then (0,32) per control and drift ([8, 32, 1, 32, 0, 32, 0, 32, 0, 32, 0, 32, 0, 32])
+ok   bind lifetimes: pairs (v, 512) for v = 1, 8, 32, 128 twice ([1, 512, 8, 512, 512, 128, 512, 1, 512, 8, 512, 512, 128, 512]; v = 32 equals the default and logs no resize)
+NOTE harness defect H2: histo-L1-baseline-B.txt was overwritten by R5's L1 baseline (same label); the filed lifetime-1 phases are compared against that later file (an R5-lifetime baseline, idle node), which is the only raw baseline left
+v32: live-bytes rise 110.9 MiB; P(t≈90) 0; Mutation 0; stress op rate 19,882
+v8: live-bytes rise 258.0 MiB; P(t≈90) 0; Mutation 43; stress op rate 19,952
+v1: live-bytes rise 294.3 MiB; P(t≈90) 59; Mutation 43024; stress op rate 19,969
+v0: live-bytes rise 403.5 MiB; P(t≈90) 134432; Mutation 134432; stress op rate 19,871
+v0-ctl16MiB: live-bytes rise 85.2 MiB; P(t≈90) 26886; Mutation 26886; stress op rate 19,963
+v0-ctl128MiB: live-bytes rise 411.7 MiB; P(t≈90) 134432; Mutation 134432; stress op rate 19,893
+v0-ctl512MiB: live-bytes rise 1531.5 MiB; P(t≈90) 503162; Mutation 503162; stress op rate 19,900
+v32-rep: live-bytes rise 224.1 MiB; P(t≈90) 0; Mutation 3; stress op rate 19,980
+v0-rep: live-bytes rise 415.0 MiB; P(t≈90) 134432; Mutation 134432; stress op rate 19,967
+FAIL filed row 1: H(32), H(8) < 100 MiB and H(0) − H(32) ≥ 100 MiB on live bytes (110.9, 258.0, 403.5)
+ok   filed row 2 (Refuted) not met: H not decreasing 0 < 1 < 8 < 32
+ok   v0: P in 90,000–150,000 (134432) and Mutation ≈ P within 20 % (134432)
+ok   v0: Active 0 at every sample after the first 10 s (max 0)
+ok   control: live bytes ordered 16 < 128 < 512 and ratio ≥ 8 ([85.2, 411.7, 1531.5]; P [26886, 134432, 503162])
+FAIL drift: |Δ| ≤ 50 MiB on live bytes (v32 110.9/224.1, v0 403.5/415.0)
+inbound using_bytes samples (MiB): [0.0, 0.0, 0.0, 0.0, 0.0, 56.0, 0.0, 140.0, 0.0, 0.0, 0.0, 0.0, 140.0, 0.0, 0.0, 0.0, 0.0, 140.0, 0.0, 0.0, 132.0, 0.0, 132.0, 0.0, 132.0, 132.0, 131.8, 0.0, 131.8, 0.0, 131.8, 0.0]
+S1: live-bytes rise 270.8 MiB; Active ≥ 0.9v fraction 1.00 ([1, 1, 1, 1, 1, 1, 1, 1]); Pending last 4214; Mutation 4215
+ok   S1: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+S8: live-bytes rise 271.3 MiB; Active ≥ 0.9v fraction 1.00 ([8, 8, 8, 8, 8, 8, 8, 8]); Pending last 4207; Mutation 4215
+ok   S8: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+S32: live-bytes rise 226.9 MiB; Active ≥ 0.9v fraction 1.00 ([32, 32, 32, 32, 32, 32, 32, 32]); Pending last 4183; Mutation 3489
+ok   S32: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+S128: live-bytes rise 272.2 MiB; Active ≥ 0.9v fraction 1.00 ([128, 128, 128, 128, 128, 128, 128, 128]); Pending last 4087; Mutation 4215
+ok   S128: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+L1: live-bytes rise 5.5 MiB; Active ≥ 0.9v fraction 1.00 ([1, 1, 1, 1, 1, 1, 1, 1]); Pending last 526; Mutation 1
+ok   L1: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+L8: live-bytes rise 9.4 MiB; Active ≥ 0.9v fraction 1.00 ([8, 8, 8, 8, 8, 8, 8, 8]); Pending last 519; Mutation 8
+ok   L8: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+L32: live-bytes rise 21.9 MiB; Active ≥ 0.9v fraction 1.00 ([32, 32, 32, 32, 32, 32, 32, 32]); Pending last 495; Mutation 32
+ok   L32: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+L128: live-bytes rise 70.2 MiB; Active ≥ 0.9v fraction 1.00 ([128, 128, 128, 128, 128, 128, 128, 128]); Pending last 399; Mutation 128
+ok   L128: the pool binds (Active ≥ 0.9 v at ≥ 80 % of samples, 1.00)
+live-bytes H_S [270.8, 271.3, 226.9, 272.2], H_L [5.5, 9.4, 21.9, 70.2] -> BIND-5
+ok   R5 row on live bytes (independent statistic): BIND-5
+ok   L: Mutation instances at t = 60 s ≈ v (running only; [1, 8, 32, 128])
+FAIL S: Mutation instances at t = 60 s ≈ Pending + v ([(4215, 4214), (4215, 4207), (3489, 4183), (4215, 4087)])
+R5_ROW BIND-5
+stress-L1.out errors 0
+stress-L128.out errors 0
+stress-L32.out errors 0
+stress-L8.out errors 0
+stress-S1.out errors 0
+stress-S128.out errors 0
+stress-S32.out errors 0
+stress-S8.out errors 0
+stress-v0-ctl128MiB.out errors 0
+stress-v0-ctl16MiB.out errors 0
+stress-v0-ctl512MiB.out errors 0
+stress-v0-rep.out errors 0
+stress-v0.out errors 0
+stress-v1.out errors 0
+stress-v32-rep.out errors 0
+stress-v32.out errors 0
+stress-v8.out errors 0
+stress-warmup.out errors 0
+TALLY 35 ok, 6 FAIL

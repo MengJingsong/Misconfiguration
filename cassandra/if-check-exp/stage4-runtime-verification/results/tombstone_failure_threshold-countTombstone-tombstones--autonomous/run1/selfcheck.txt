@@ -1,0 +1,53 @@
+unit: 14 TFT records from the test JVM log (test.log)
+ok   unit: 14 records (2 pk x 7 T)
+ok   unit: pk0 TOE exactly for T < 30000, count T+1
+ok   unit: A strictly increasing for T < N: 4.10, 53.36, 106.68, 126.39
+ok   unit: A(1000)/A(MAX) = 0.0326 <= 0.10
+ok   unit: A(29999), A(30000), A(100000) within 10% of A(MAX)
+ok   unit: OK reads hold 30000 unfiltered
+ok   unit: pk1 all OK, max/min 1.014 <= 1.10
+unit: s = 1009.6 B; A(10k)/A(1k) = 13.01 (band 7-13); A(20k)/A(10k) = 2.00
+ok   unit: junit reports Tests run: 1, Failures: 0, Errors: 0
+ok   T=1000000: node config dump says tombstone_failure_threshold=1000000
+ok   T=1000000: read back by sjk in session.log
+ok   T=1000000: no java.lang.OutOfMemoryError in system.log
+T1000000-pk0: reads 40 fail 0 rows [0]; jfr events 9758 max expandToFit alloc 226.93 MB; OU rise 6262 MB, EU+OU rise 5777 MB (41 samples); node alloc/read 1152.9 MB; ERROR "Scanned over" lines 0 []; humongous max 408
+T1000000-pk1: reads 40 fail 0 rows [20000]; jfr events 1475 max expandToFit alloc 0.13 MB; OU rise 0 MB, EU+OU rise 2819 MB (115 samples); node alloc/read 127.0 MB; ERROR "Scanned over" lines 0 []; humongous max 408
+ok   T=300000: node config dump says tombstone_failure_threshold=300000
+ok   T=300000: read back by sjk in session.log
+ok   T=300000: no java.lang.OutOfMemoryError in system.log
+T300000-pk0: reads 40 fail 0 rows [0]; jfr events 12696 max expandToFit alloc 226.93 MB; OU rise 6015 MB, EU+OU rise 5369 MB (42 samples); node alloc/read 1176.1 MB; ERROR "Scanned over" lines 0 []; humongous max 357
+ok   T=100000: node config dump says tombstone_failure_threshold=100000
+ok   T=100000: read back by sjk in session.log
+ok   T=100000: no java.lang.OutOfMemoryError in system.log
+T100000-pk0: reads 40 fail 40 rows []; jfr events 2652 max expandToFit alloc 151.29 MB; OU rise 6050 MB, EU+OU rise 5710 MB (32 samples); node alloc/read 544.2 MB; ERROR "Scanned over" lines 41 [100001]; humongous max 355
+ok   T=20000: node config dump says tombstone_failure_threshold=20000
+ok   T=20000: read back by sjk in session.log
+ok   T=20000: no java.lang.OutOfMemoryError in system.log
+T20000-pk0: reads 40 fail 40 rows []; jfr events 749 max expandToFit alloc 33.62 MB; OU rise 4009 MB, EU+OU rise 6308 MB (24 samples); node alloc/read 103.1 MB; ERROR "Scanned over" lines 41 [20001]; humongous max 6
+ok   T=1000: node config dump says tombstone_failure_threshold=1000
+ok   T=1000: read back by sjk in session.log
+ok   T=1000: no java.lang.OutOfMemoryError in system.log
+T1000-pk0: reads 40 fail 40 rows []; jfr events 285 max expandToFit alloc 1.05 MB; OU rise 0 MB, EU+OU rise -402 MB (22 samples); node alloc/read 8.0 MB; ERROR "Scanned over" lines 41 [1001]; humongous max 0
+T1000-pk1: reads 40 fail 0 rows [20000]; jfr events 1217 max expandToFit alloc 0.13 MB; OU rise 22 MB, EU+OU rise 3221 MB (115 samples); node alloc/read 129.8 MB; ERROR "Scanned over" lines 41 [1001]; humongous max 0
+ok   (a) T=1000: 40/40 reads failed with READ_TOO_MANY_TOMBSTONES (expect 40/40)
+ok   (a) T=1000: 41 ERROR lines, all "Scanned over 1001" (>= 41 incl. warm-up)
+ok   (b) T=1000: max buffer 1.05 MB <= 2.2 x s x (T+1) = 2.22 MB
+ok   (a) T=20000: 40/40 reads failed with READ_TOO_MANY_TOMBSTONES (expect 40/40)
+ok   (a) T=20000: 41 ERROR lines, all "Scanned over 20001" (>= 41 incl. warm-up)
+ok   (b) T=20000: max buffer 33.62 MB <= 2.2 x s x (T+1) = 44.42 MB
+ok   (a) T=100000: 40/40 reads failed with READ_TOO_MANY_TOMBSTONES (expect 40/40)
+ok   (a) T=100000: 41 ERROR lines, all "Scanned over 100001" (>= 41 incl. warm-up)
+ok   (b) T=100000: max buffer 151.29 MB <= 2.2 x s x (T+1) = 222.11 MB
+ok   (a) T=300000: 40 reads OK with 0 rows, no ERROR line
+ok   (a) T=1000000: 40 reads OK with 0 rows, no ERROR line
+ok   (b) max buffer ordered 1.05 < 33.62 < 151.29 < 226.93
+ok   (b) max buffer at 1M within 15% of 300k
+FAIL (c) OU rise ordered 0 < 4009 < 6050 < 6015
+ok   (c) OU rise at 1M within 15% of 300k
+ok   (d) control maxbuf: 0.13 vs 0.13 MB (15% or both < 4 MiB)
+FAIL (d) control ou: 22.35 vs 0.00 MB (15% or both < 4 MiB)
+ok   (d) control: all 80 reads returned 20000 rows
+ok   positive control: T=1M max buffer > 100 x T=1k max buffer
+ok   no CassandraDaemon left
+SELF-CHECK: 41 ok, 2 FAIL

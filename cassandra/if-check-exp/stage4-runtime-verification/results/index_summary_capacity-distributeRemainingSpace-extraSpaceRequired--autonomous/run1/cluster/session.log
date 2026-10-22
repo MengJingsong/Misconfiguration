@@ -1,0 +1,458 @@
+2026-10-21T16:48:04 1792622884278 cluster-run start: N=4000000 N2=1000000 PHASES=all host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu clone /users/jason92/cassandra-isc
+2026-10-21T16:48:04 1792622884278 $ cd /users/jason92/cassandra-isc && git describe --tags && git rev-parse HEAD; java -version 2>&1 | head -1; uname -r; ss -ltn | grep -E ":(17000|17001|19042|17199) " || echo ports-free
+  | cassandra-5.0.9
+  | b5f2a54210d541339c2e7c17a794195cac0e67c2
+  | openjdk version "11.0.32.1" 2026-08-18
+  | 5.15.0-187-generic
+  | ports-free
+  | exit 0
+2026-10-21T16:48:04 1792622884334 $ md5sum /users/jason92/stage4-harness-run/isc/*
+  | 4574adc61ccfa73bd9982c7c5d5b4593  /users/jason92/stage4-harness-run/isc/cluster-analyze.py
+  | 9e78d1846ba8e1a8eb8aba98a5f7ddd8  /users/jason92/stage4-harness-run/isc/cluster-run.py
+  | 188fe32fd038a2a664132c6bc4512a6a  /users/jason92/stage4-harness-run/isc/IndexSummaryCapacityProbeTest.java
+  | db3531dd42e44bdb75b4b3dad9bc7d89  /users/jason92/stage4-harness-run/isc/README.md
+  | 83fb74c3a271acfd3ff6ede1c7f2e9d4  /users/jason92/stage4-harness-run/isc/selfcheck.py
+  | 08c6eae27dadc28b54a26aea20143a76  /users/jason92/stage4-harness-run/isc/unit-analyze.py
+  | 9d93fc9677c9ae66e442da6b553160ef  /users/jason92/stage4-harness-run/isc/unit-run.sh
+  | exit 0
+2026-10-21T16:48:04 1792622884355 $ rm -rf /tmp/isc-jason92
+  | exit 0
+2026-10-21T16:48:04 1792622884772 $ mkdir -p /tmp/isc-jason92/data /tmp/isc-jason92/commitlog /tmp/isc-jason92/hints /tmp/isc-jason92/saved_caches /tmp/isc-jason92/cdc_raw /tmp/isc-jason92/logs
+  | exit 0
+2026-10-21T16:48:04 1792622884777 $ stat -f -c %T /tmp/isc-jason92; df -h /tmp/isc-jason92
+  | ext2/ext3
+  | Filesystem      Size  Used Avail Use% Mounted on
+  | /dev/sda3        63G  4.9G   55G   9% /
+  | exit 0
+2026-10-21T16:48:04 1792622884781 $ rm -rf /tmp/isc-jason92/conf && cp -r /users/jason92/cassandra-isc/conf /tmp/isc-jason92/conf
+  | exit 0
+2026-10-21T16:48:04 1792622884787 $ sed -i -e "s/^cluster_name:.*/cluster_name: 'isc-probe'/"        -e 's/^storage_port:.*/storage_port: 17000/' -e 's/^ssl_storage_port:.*/ssl_storage_port: 17001/'        -e 's/^native_transport_port:.*/native_transport_port: 19042/'        -e 's/^listen_address:.*/listen_address: 127.0.0.1/' -e 's/^rpc_address:.*/rpc_address: 127.0.0.1/'        -e 's/"127.0.0.1:7000"/"127.0.0.1:17000"/'        -e 's/^index_summary_capacity:.*/index_summary_capacity: 4096MiB/'        -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/'        -e 's/^key_cache_size:.*/key_cache_size: 0MiB/' /tmp/isc-jason92/conf/cassandra.yaml
+  | exit 0
+2026-10-21T16:48:04 1792622884794 $ sed -i 's/^JMX_PORT="7199"/JMX_PORT="17199"/' /tmp/isc-jason92/conf/cassandra-env.sh
+  | exit 0
+2026-10-21T16:48:04 1792622884797 $ grep -nE '^(cluster_name|storage_port|ssl_storage_port|native_transport_port|listen_address|rpc_address|index_summary_capacity|index_summary_resize_interval|key_cache_size|memtable_heap_space|commitlog_directory)|seeds:' /tmp/isc-jason92/conf/cassandra.yaml; tail -8 /tmp/isc-jason92/conf/cassandra.yaml; grep -n ISRTRACE -A1 /tmp/isc-jason92/conf/logback.xml; grep -n '^JMX_PORT' /tmp/isc-jason92/conf/cassandra-env.sh
+  | 26:cluster_name: 'isc-probe'
+  | 525:key_cache_size: 0MiB
+  | 706:      - seeds: "127.0.0.1:17000"
+  | 939:index_summary_capacity: 4096MiB
+  | 947:index_summary_resize_interval: 1m
+  | 960:storage_port: 17000
+  | 966:ssl_storage_port: 17001
+  | 981:listen_address: 127.0.0.1
+  | 1023:native_transport_port: 19042
+  | 1090:rpc_address: 127.0.0.1
+  | 2488:commitlog_directory: /tmp/isc-jason92/commitlog
+  | 2492:memtable_heap_space: 256MiB
+  | #         max_tables_per_assignment: 64
+  | data_file_directories:
+  |     - /tmp/isc-jason92/data
+  | commitlog_directory: /tmp/isc-jason92/commitlog
+  | hints_directory: /tmp/isc-jason92/hints
+  | saved_caches_directory: /tmp/isc-jason92/saved_caches
+  | cdc_raw_directory: /tmp/isc-jason92/cdc_raw
+  | memtable_heap_space: 256MiB
+  | 133:  <appender name="ISRTRACE" class="ch.qos.logback.core.FileAppender">
+  | 134-    <file>${cassandra.logdir}/isr-trace.log</file>
+  | --
+  | 138:    <appender-ref ref="ISRTRACE"/>
+  | 139-  </logger>
+  | 235:JMX_PORT="17199"
+  | exit 0
+2026-10-21T16:48:04 1792622884805 $ cat /tmp/isc-jason92/isc.yaml
+  | keyspace: isc
+  | keyspace_definition: |
+  |   CREATE KEYSPACE isc WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+  | table: t
+  | table_definition: |
+  |   CREATE TABLE t (k blob PRIMARY KEY, v blob)
+  |     WITH min_index_interval = 1 AND max_index_interval = 128
+  |     AND bloom_filter_fp_chance = 1.0
+  |     AND caching = {'keys': 'NONE', 'rows_per_partition': 'NONE'}
+  |     AND compression = {'enabled': 'false'}
+  |     AND compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'};
+  | columnspec:
+  |   - name: k
+  |     size: fixed(200)
+  |   - name: v
+  |     size: fixed(16)
+  | insert:
+  |   partitions: fixed(1)
+  |   batchtype: UNLOGGED
+  | queries:
+  |   read1:
+  |     cql: SELECT v FROM t WHERE k = ?
+  |     fields: samerow
+  | exit 0
+2026-10-21T16:48:04 1792622884826 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 4096MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 4096MiB
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T16:48:04 1792622884832 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L0-load.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T16:48:43 1792622923450 L0-load: up pid=176797 in 39 s; Initializing index summary manager with a memory pool size of 4096 MB and a resize interval of 1 minutes
+2026-10-21T16:48:43 1792622923450 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/176797/status
+  | running
+  | VmRSS:	 9366704 kB
+  | RssAnon:	 9187140 kB
+  | RssFile:	  179564 kB
+  | exit 0
+2026-10-21T16:48:44 1792622924531 $ /users/jason92/cassandra-isc/tools/bin/cassandra-stress user profile=/tmp/isc-jason92/isc.yaml "ops(insert=1)" n=4000000 no-warmup cl=ONE  -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason92/stage4-logs/isc/run1/cluster/stress-load.out 2>&1; echo exit $?; grep -E "^(Op rate|Partition rate|Total partitions|Total errors|Total operation time)" /users/jason92/stage4-logs/isc/run1/cluster/stress-load.out; tail -3 /users/jason92/stage4-logs/isc/run1/cluster/stress-load.out
+  | exit 0
+  | Op rate                   :  122,336 op/s  [insert: 122,336 op/s]
+  | Partition rate            :  122,336 pk/s  [insert: 122,336 pk/s]
+  | Total partitions          :  4,000,000 [insert: 4,000,000]
+  | Total errors              :          0 [insert: 0]
+  | Total operation time      : 00:00:32
+  | Total operation time      : 00:00:32
+  | 
+  | END
+  | exit 0
+2026-10-21T16:49:24 1792622964878 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 flush isc t; ls /tmp/isc-jason92/data/isc/t-*/*-Data.db | wc -l; du -sb /tmp/isc-jason92/data/isc /tmp/isc-jason92/commitlog; df -h /tmp/isc-jason92
+  | 31
+  | 2636096676	/tmp/isc-jason92/data/isc
+  | 100667392	/tmp/isc-jason92/commitlog
+  | Filesystem      Size  Used Avail Use% Mounted on
+  | /dev/sda3        63G  7.4G   52G  13% /
+  | exit 0
+2026-10-21T16:49:26 1792622966737 $ ls /tmp/isc-jason92/data/isc/t-*/*-Data.db | wc -l
+  | 31
+  | exit 0
+2026-10-21T16:49:26 1792622966740 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T16:49:36 1792622976949 L0-load: stopped; daemons left []
+2026-10-21T16:49:36 1792622976964 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 4096MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 4096MiB
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T16:49:36 1792622976971 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L1-4096.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T16:49:45 1792622985279 L1-4096: up pid=178125 in 8 s; Initializing index summary manager with a memory pool size of 4096 MB and a resize interval of 1 minutes
+2026-10-21T16:49:45 1792622985279 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/178125/status
+  | running
+  | VmRSS:	10163200 kB
+  | RssAnon:	 9983660 kB
+  | RssFile:	  179540 kB
+  | exit 0
+2026-10-21T16:50:44 1792623044943 L1-4096/first: Beginning redistribution of index summaries for 50 sstables with memory pool size 4096 MiB; current spaced used is 808.7162609100342 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 808.7162609100342 MiB, time spent: 37ms
+2026-10-21T16:51:55 1792623115015 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 848000000
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 848000000
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T16:51:56 1792623116487 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T16:51:56 1792623116493 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 848013392	total
+  | exit 0
+2026-10-21T16:51:56 1792623116498 L1-4096/first: T=808.7163 MiB, before 808.7163, R=9785.2 MiB, tablestats isc 848000000 B, Summary.db total 848013392 B over 31 files, trace keep/resample isc 31/0
+2026-10-21T16:51:56 1792623116499 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T16:52:06 1792623126761 L1-4096: stopped; daemons left []
+2026-10-21T16:52:06 1792623126776 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity:/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity:
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T16:52:06 1792623126785 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L2-default.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T16:52:15 1792623135097 L2-default: up pid=179071 in 8 s; Initializing index summary manager with a memory pool size of 409 MB and a resize interval of 1 minutes
+2026-10-21T16:52:15 1792623135097 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/179071/status
+  | running
+  | VmRSS:	10154496 kB
+  | RssAnon:	 9974944 kB
+  | RssFile:	  179552 kB
+  | exit 0
+2026-10-21T16:53:16 1792623196835 L2-default/first: Beginning redistribution of index summaries for 65 sstables with memory pool size 409 MiB; current spaced used is 808.7166433334351 MiB | index summaries: downsample: 16, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 393.70592403411865 MiB, time spent: 672ms
+2026-10-21T16:54:26 1792623266906 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 412829720
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 412829720
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T16:54:28 1792623268319 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T16:54:28 1792623268324 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 412843112	total
+  | exit 0
+2026-10-21T16:54:28 1792623268329 L2-default/first: T=393.7059 MiB, before 808.7166, R=9358.5 MiB, tablestats isc 412829720 B, Summary.db total 412843112 B over 31 files, trace keep/resample isc 15/16
+2026-10-21T16:54:28 1792623268330 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T16:54:38 1792623278576 L2-default: stopped; daemons left []
+2026-10-21T16:54:38 1792623278596 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 400MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 400MiB
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T16:54:38 1792623278601 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L3-400.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T16:54:46 1792623286911 L3-400: up pid=180063 in 8 s; Initializing index summary manager with a memory pool size of 400 MB and a resize interval of 1 minutes
+2026-10-21T16:54:46 1792623286911 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/180063/status
+  | running
+  | VmRSS:	 9725168 kB
+  | RssAnon:	 9545636 kB
+  | RssFile:	  179532 kB
+  | exit 0
+2026-10-21T16:55:46 1792623346635 L3-400/first: Beginning redistribution of index summaries for 73 sstables with memory pool size 400 MiB; current spaced used is 393.70615577697754 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 393.70615577697754 MiB, time spent: 46ms
+2026-10-21T16:56:56 1792623416707 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 412829720
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 412829720
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T16:56:58 1792623418125 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T16:56:58 1792623418130 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 412843112	total
+  | exit 0
+2026-10-21T16:56:58 1792623418134 L3-400/first: T=393.7062 MiB, before 393.7062, R=9363.3 MiB, tablestats isc 412829720 B, Summary.db total 412843112 B over 31 files, trace keep/resample isc 15/0
+2026-10-21T16:56:58 1792623418135 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T16:57:08 1792623428464 L3-400: stopped; daemons left []
+2026-10-21T16:57:08 1792623428480 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 100MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 100MiB
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T16:57:08 1792623428487 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L4-100.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T16:57:16 1792623436811 L4-100: up pid=181048 in 8 s; Initializing index summary manager with a memory pool size of 100 MB and a resize interval of 1 minutes
+2026-10-21T16:57:16 1792623436811 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/181048/status
+  | running
+  | VmRSS:	 9737268 kB
+  | RssAnon:	 9557764 kB
+  | RssFile:	  179504 kB
+  | exit 0
+2026-10-21T16:58:18 1792623498450 L4-100/first: Beginning redistribution of index summaries for 49 sstables with memory pool size 100 MiB; current spaced used is 393.70552158355713 MiB | index summaries: downsample: 12, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 82.61680698394775 MiB, time spent: 589ms
+2026-10-21T16:59:28 1792623568521 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 86629560
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 86629560
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T16:59:29 1792623569976 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T16:59:29 1792623569981 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 86642952	total
+  | exit 0
+2026-10-21T16:59:29 1792623569985 L4-100/first: T=82.6168 MiB, before 393.7055, R=9056.1 MiB, tablestats isc 86629560 B, Summary.db total 86642952 B over 31 files, trace keep/resample isc 3/12
+2026-10-21T16:59:29 1792623569986 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T16:59:40 1792623580321 L4-100: stopped; daemons left []
+2026-10-21T16:59:40 1792623580338 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 0MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 0MiB
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T16:59:40 1792623580346 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L5-0a.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T16:59:48 1792623588646 L5-0a: up pid=182170 in 8 s; Initializing index summary manager with a memory pool size of 0 MB and a resize interval of 1 minutes
+2026-10-21T16:59:48 1792623588646 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/182170/status
+  | running
+  | VmRSS:	 9418312 kB
+  | RssAnon:	 9238724 kB
+  | RssFile:	  179588 kB
+  | exit 0
+2026-10-21T17:00:48 1792623648351 L5-0a/first: Beginning redistribution of index summaries for 63 sstables with memory pool size 0 MiB; current spaced used is 82.61717700958252 MiB | index summaries: downsample: 3, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 6.3213090896606445 MiB, time spent: 199ms
+2026-10-21T17:01:58 1792623718422 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 6627544
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 6627544
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T17:01:59 1792623719775 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T17:01:59 1792623719781 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 6640936	total
+  | exit 0
+2026-10-21T17:01:59 1792623719786 L5-0a/first: T=6.3213 MiB, before 82.6172, R=8981.3 MiB, tablestats isc 6627544 B, Summary.db total 6640936 B over 31 files, trace keep/resample isc 0/3
+2026-10-21T17:01:59 1792623719787 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T17:02:10 1792623730069 L5-0a: stopped; daemons left []
+2026-10-21T17:02:10 1792623730087 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 0MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: 1m/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 0MiB
+  | 947:index_summary_resize_interval: 1m
+  | exit 0
+2026-10-21T17:02:10 1792623730094 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L6-0b.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T17:02:18 1792623738399 L6-0b: up pid=183130 in 8 s; Initializing index summary manager with a memory pool size of 0 MB and a resize interval of 1 minutes
+2026-10-21T17:02:18 1792623738399 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/183130/status
+  | running
+  | VmRSS:	 9362444 kB
+  | RssAnon:	 9182816 kB
+  | RssFile:	  179628 kB
+  | exit 0
+2026-10-21T17:03:18 1792623798070 L6-0b/first: Beginning redistribution of index summaries for 71 sstables with memory pool size 0 MiB; current spaced used is 6.321521759033203 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 6.321521759033203 MiB, time spent: 39ms
+2026-10-21T17:04:28 1792623868142 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 6627544
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 6627544
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T17:04:29 1792623869574 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T17:04:29 1792623869580 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 6640936	total
+  | exit 0
+2026-10-21T17:04:29 1792623869584 L6-0b/first: T=6.3215 MiB, before 6.3215, R=9004.1 MiB, tablestats isc 6627544 B, Summary.db total 6640936 B over 31 files, trace keep/resample isc 0/0
+2026-10-21T17:04:29 1792623869586 $ /users/jason92/cassandra-isc/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isc.t WITH min_index_interval = 1 AND max_index_interval = 1"
+  | exit 0
+2026-10-21T17:05:23 1792623923150 L6-0b/after_alter_max1: Beginning redistribution of index summaries for 55 sstables with memory pool size 0 MiB; current spaced used is 6.321140289306641 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 31 | Completed resizing of index summaries; current approximate memory used: 808.7164421081543 MiB, time spent: 5099ms
+2026-10-21T17:06:33 1792623993221 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 848000000
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 848000000
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T17:06:34 1792623994491 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T17:06:34 1792623994495 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 848013392	total
+  | exit 0
+2026-10-21T17:06:34 1792623994499 L6-0b/after_alter_max1: T=808.7164 MiB, before 6.3211, R=9832.6 MiB, tablestats isc 848000000 B, Summary.db total 848013392 B over 31 files, trace keep/resample isc 0/31
+2026-10-21T17:06:34 1792623994501 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T17:06:44 1792624004762 L6-0b: stopped; daemons left []
+2026-10-21T17:06:44 1792624004780 $ sed -i -e 's/^index_summary_capacity:.*/index_summary_capacity: 100MiB/' -e 's/^index_summary_resize_interval:.*/index_summary_resize_interval: null/' /tmp/isc-jason92/conf/cassandra.yaml; grep -nE '^index_summary_(capacity|resize_interval)' /tmp/isc-jason92/conf/cassandra.yaml
+  | 939:index_summary_capacity: 100MiB
+  | 947:index_summary_resize_interval: null
+  | exit 0
+2026-10-21T17:06:44 1792624004786 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-isc/bin/cassandra -p /tmp/isc-jason92/cassandra.pid > /tmp/isc-jason92/logs/stdout-L7-step6.txt 2>&1
+  | 100000
+  | exit 0
+2026-10-21T17:06:53 1792624013097 L7-step6: up pid=184459 in 8 s; Initializing index summary manager with a memory pool size of 100 MB and a resize interval of -1 minutes
+2026-10-21T17:06:53 1792624013097 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E '^(VmRSS|RssAnon|RssFile)' /proc/184459/status
+  | running
+  | VmRSS:	10168096 kB
+  | RssAnon:	 9988640 kB
+  | RssFile:	  179456 kB
+  | exit 0
+2026-10-21T17:06:54 1792624014157 $ /users/jason92/cassandra-isc/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isc.t WITH min_index_interval = 1 AND max_index_interval = 128; DESCRIBE TABLE isc.t" | grep -E "index_interval"
+  |     AND max_index_interval = 128
+  |     AND min_index_interval = 1
+  | exit 0
+2026-10-21T17:06:55 1792624015121 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 sjk mx -b org.apache.cassandra.db:type=IndexSummaries -mc -op redistributeSummaries
+  | org.apache.cassandra.db:type=IndexSummaries
+  | null
+  | exit 0
+2026-10-21T17:06:57 1792624017437 L7-step6/manual_run: Beginning redistribution of index summaries for 66 sstables with memory pool size 100 MiB; current spaced used is 808.7167348861694 MiB | index summaries: downsample: 28, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summaries; current approximate memory used: 82.61730098724365 MiB, time spent: 1209ms
+2026-10-21T17:08:07 1792624087509 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap|Bloom filter off heap|Compression metadata off heap|Off heap memory used"
+  | 		SSTable count: 31
+  | 		Old SSTable count: 0
+  | 		Off heap memory used (total): 86629560
+  | 		Bloom filter off heap memory used: 0
+  | 		Index summary off heap memory used: 86629560
+  | 		Compression metadata off heap memory used: 0
+  | exit 0
+2026-10-21T17:08:08 1792624088930 $ ls -l /tmp/isc-jason92/data/isc/t-*/*-Summary.db
+  | exit 0
+2026-10-21T17:08:08 1792624088937 $ du -cb /tmp/isc-jason92/data/isc/t-*/*-Summary.db | tail -1
+  | 86642952	total
+  | exit 0
+2026-10-21T17:08:08 1792624088941 L7-step6/manual_run: T=82.6173 MiB, before 808.7167, R=9074.5 MiB, tablestats isc 86629560 B, Summary.db total 86642952 B over 31 files, trace keep/resample isc 3/28
+2026-10-21T17:08:08 1792624088942 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 sjk mx -b org.apache.cassandra.db:type=IndexSummaries -mg -f MemoryPoolSizeInMB
+  | org.apache.cassandra.db:type=IndexSummaries
+  | 82.61730098724365
+  | exit 0
+2026-10-21T17:08:10 1792624090026 $ /users/jason92/cassandra-isc/tools/bin/cassandra-stress user profile=/tmp/isc-jason92/isc.yaml "ops(insert=1)" n=1000000 no-warmup cl=ONE -pop seq=4000001..5000000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason92/stage4-logs/isc/run1/cluster/stress-extra.out 2>&1; echo exit $?; grep -E "^(Op rate|Partition rate|Total partitions|Total errors|Total operation time)" /users/jason92/stage4-logs/isc/run1/cluster/stress-extra.out; tail -3 /users/jason92/stage4-logs/isc/run1/cluster/stress-extra.out
+  | exit 0
+  | Op rate                   :  104,240 op/s  [insert: 104,240 op/s]
+  | Partition rate            :  104,240 pk/s  [insert: 104,240 pk/s]
+  | Total partitions          :  1,000,000 [insert: 1,000,000]
+  | Total errors              :          0 [insert: 0]
+  | Total operation time      : 00:00:09
+  | Total operation time      : 00:00:09
+  | 
+  | END
+  | exit 0
+2026-10-21T17:08:26 1792624106775 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 flush isc t
+  | exit 0
+2026-10-21T17:08:28 1792624108186 waiting 120 s with no resize run (interval null)
+2026-10-21T17:10:28 1792624228286 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 sjk mx -b org.apache.cassandra.db:type=IndexSummaries -mg -f MemoryPoolSizeInMB
+  | org.apache.cassandra.db:type=IndexSummaries
+  | 284.79625606536865
+  | exit 0
+2026-10-21T17:10:29 1792624229354 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 tablestats isc.t | grep -E "SSTable count|Index summary off heap"
+  | 		SSTable count: 39
+  | 		Old SSTable count: 0
+  | 		Index summary off heap memory used: 298629560
+  | exit 0
+2026-10-21T17:10:30 1792624230619 step6: T_trig=82.617 MiB (jmx 82.61730098724365), T_after jmx=284.79625606536865 MiB, tablestats 298629560 B, Completed lines after manual run: 0
+2026-10-21T17:10:30 1792624230621 $ /users/jason92/cassandra-isc/bin/nodetool -h 127.0.0.1 -p 17199 drain
+  | exit 0
+2026-10-21T17:10:40 1792624240796 L7-step6: stopped; daemons left []
+2026-10-21T17:10:40 1792624240851 daemons left: []; stress left: 0
+2026-10-21T17:10:40 1792624240851 $ python3 /users/jason92/stage4-harness-run/isc/cluster-analyze.py /users/jason92/stage4-logs/isc/run1/cluster > /users/jason92/stage4-logs/isc/run1/cluster/summary.txt 2>&1; cat /users/jason92/stage4-logs/isc/run1/cluster/summary.txt
+  | N=4000000 load sstables=31
+  | life | pool MB | T_before | T MiB | R MiB | R_pre MiB | dRw | tablestats isc MiB | Summary.db MiB | files | trace keep/resample (isc) | downsample
+  | L1-4096/first | 4096 | 808.716 | 808.716 | 9785.2 | 9784.5 | -0.7 | 808.716 | 808.729 | 31 | 31/0 | 0
+  | L2-default/first | 409 | 808.717 | 393.706 | 9358.5 | 9776.2 | 417.7 | 393.705 | 393.718 | 31 | 15/16 | 16
+  | L3-400/first | 400 | 393.706 | 393.706 | 9363.3 | 9362.4 | -0.9 | 393.705 | 393.718 | 31 | 15/0 | 0
+  | L4-100/first | 100 | 393.706 | 82.617 | 9056.1 | 9369.0 | 312.9 | 82.616 | 82.629 | 31 | 3/12 | 12
+  | L5-0a/first | 0 | 82.617 | 6.321 | 8981.3 | 9057.5 | 76.3 | 6.321 | 6.333 | 31 | 0/3 | 3
+  | L6-0b/first | 0 | 6.322 | 6.322 | 9004.1 | 9003.6 | -0.5 | 6.321 | 6.333 | 31 | 0/0 | 0
+  | L6-0b/after_alter_max1 | 0 | 6.321 | 808.716 | 9832.6 | None | None | 808.716 | 808.729 | 31 | 0/31 | 0
+  | L7-step6/manual_run | 100 | 808.717 | 82.617 | 9074.5 | None | None | 82.616 | 82.629 | 31 | 3/28 | 28
+  | EXPECTED: pool sizes as set (4096, 409 default, 400, 100, 0, 0; L7 100): HIT -- {'L0-load': 4096, 'L1-4096': 4096, 'L2-default': 409, 'L3-400': 400, 'L4-100': 100, 'L5-0a': 0, 'L6-0b': 0, 'L7-step6': 100}
+  | EXPECTED: row 5 (invalid if missed): a Completed resizing line in every lifetime: HIT -- 
+  | S_full measured T4096 = 808.716 MiB; r_max = 26.187 MiB (largest Summary.db at 4096); sstables 31
+  | EXPECTED: row 4 positive control: T4096 >= 728 MiB: HIT -- 808.716
+  | EXPECTED: B3f sub: T4096 = 808.7 MiB +-2%: HIT -- 808.716
+  | EXPECTED: B3f: at 4096 nothing downsampled (trace keep = isc sstables, resample 0): HIT -- 31/0 of 31
+  | EXPECTED: row 1/2 X=default: T <= X (+64 KiB): HIT -- T=393.7059 X=409
+  | EXPECTED: B3f X=default: T > X - r_max: HIT -- 393.706 > 382.813
+  | EXPECTED: B3f X=default: tablestats isc <= T: HIT -- 393.7051
+  | EXPECTED: B3f X=default: Summary.db total = T +-5%: HIT -- 393.718
+  | EXPECTED: R4 X=default: line 341 both outcomes seen (trace keep > 0 and resample > 0 for isc): HIT -- 15/16
+  | EXPECTED: row 1/2 X=400: T <= X (+64 KiB): HIT -- T=393.7062 X=400
+  | EXPECTED: B3f X=400: T > X - r_max: HIT -- 393.706 > 373.813
+  | EXPECTED: B3f X=400: tablestats isc <= T: HIT -- 393.7051
+  | EXPECTED: B3f X=400: Summary.db total = T +-5%: HIT -- 393.718
+  | EXPECTED: R4 X=400: run changed nothing: no isc sstable re-sampled: HIT -- 15/0
+  | EXPECTED: row 1/2 X=100: T <= X (+64 KiB): HIT -- T=82.6168 X=100
+  | EXPECTED: B3f X=100: T > X - r_max: HIT -- 82.617 > 73.813
+  | EXPECTED: B3f X=100: tablestats isc <= T: HIT -- 82.6164
+  | EXPECTED: B3f X=100: Summary.db total = T +-5%: HIT -- 82.629
+  | EXPECTED: R4 X=100: line 341 both outcomes seen (trace keep > 0 and resample > 0 for isc): HIT -- 3/12
+  | EXPECTED: row 6: T ~ F at X=0 (3 <= T0 <= 12 MiB): HIT -- 6.321
+  | EXPECTED: row 6: X=0 keeps nothing (trace keep 0): HIT -- 0/3
+  | EXPECTED: R5 "T does not fall" row absent: T(100) <= 0.9*T4096: HIT -- 82.61680698394775
+  | EXPECTED: R5 noise: sigma <= 0.25*(T4096 - T0): HIT -- sigma=22.79296875
+  | EXPECTED: row 1 RSS X=default: across-lifetime fall >= 0.5*dT: HIT -- fall=426.6 dT=415.0
+  | EXPECTED: B3f sub X=default: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |426.6-415.0|
+  | EXPECTED: R5/D3 within-lifetime X=default: dRw=417.7 vs 0.5*dTw=207.5, same side as the across-lifetime fall: HIT -- 
+  | EXPECTED: row 1 RSS X=400: across-lifetime fall >= 0.5*dT: HIT -- fall=421.8 dT=415.0
+  | EXPECTED: B3f sub X=400: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |421.8-415.0|
+  | EXPECTED: R5/D3 within-lifetime X=400: run changed T by 0.0 < 16 MiB, so |dRw|=0.9 <= 3 sigma: HIT -- 
+  | EXPECTED: row 1 RSS X=100: across-lifetime fall >= 0.5*dT: HIT -- fall=729.1 dT=726.1
+  | EXPECTED: B3f sub X=100: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |729.1-726.1|
+  | EXPECTED: R5/D3 within-lifetime X=100: dRw=312.9 vs 0.5*dTw=155.5, same side as the across-lifetime fall: HIT -- 
+  | EXPECTED: row 1 RSS X=0: across-lifetime fall >= 0.5*dT: HIT -- fall=803.9 dT=802.4
+  | EXPECTED: B3f sub X=0: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |803.9-802.4|
+  | EXPECTED: R5/D3 within-lifetime X=0: dRw=76.3 vs 0.5*dTw=38.1, same side as the across-lifetime fall: HIT -- 
+  | EXPECTED: step 5 floor control moved: T after max_index_interval=1 > 2*T0: HIT -- 808.716; force upsample 31
+  | EXPECTED: B3f sub step 5: T ~ S_full again (+-5% of T4096): HIT -- 808.716
+  | EXPECTED: B3f sub step 5: RssAnon back to about R4096 (within 0.25*T4096): HIT -- 9832.6 vs 9785.2
+  | EXPECTED: step 6: manual run T_trig <= 100 MiB (+64 KiB): HIT -- 82.617
+  | EXPECTED: step 6 (A3 7b): T_after > 100 MiB with no run: HIT -- T_after=284.79625606536865, tablestats=298629560, Completed lines after manual run=0
+  | EXPECTED: step 6: no Completed resizing after the manual run: HIT -- 
+  | EXPECTED: B3f sub step 6: T_after ~ T_trig + N2*212 B (+-10%): HIT -- 284.79625606536865 vs 284.8
+  | CLUSTER VERDICT (R5 mapping): Confirmed; Effect: caps only on some paths (bypass)
+  | exit 0

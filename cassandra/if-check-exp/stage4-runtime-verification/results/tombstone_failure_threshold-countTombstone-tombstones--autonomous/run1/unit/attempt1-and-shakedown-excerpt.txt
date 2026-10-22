@@ -1,0 +1,11 @@
+run1-unit.out
+unit
+unit-run 2026-10-21T15:43:54-06:00 host node3 clone cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 TombstoneFailureThresholdMemoryTest.java=7a800626cda1 unit-run.sh=a3b5138b0664 unit-analyze.py=aa7c4b07e15d 
+df: /dev/sda3        63G  4.9G   55G   9% /
+ant exit=1 Tests run: 1, Failures: 0, Errors: 1, Skipped: 0 19 s
+TFT lines: 0; tsv rows: 0
+[junit-timeout] org.apache.cassandra.io.sstable.format.big.RowIndexEntry$RowIndexEntryReadSizeTooLargeException: Query SELECT * FROM cql_test_keyspace.table_sweep_00 WHERE pk = 0 ALLOW FILTERING attempted to access a large RowIndexEntry estimated to be 12647595 bytes in-memory (total entries: 6000, total bytes: 12119595) but the max allowed is 8192KiB; query aborted  (see row_index_read_size_fail_
+[2026-10-21 15:49:58] + jcmd 162413 JFR.start name=tft settings=profile filename=/local/tft-shake/jfr/T10000-pk0.jfr
+sun.jvmstat.monitor.MonitorException: 162413 not found
+	at jdk.internal.jvmstat/sun.jvmstat.perfdata.monitor.protocol.local.PerfDataBuffer.<init>(PerfDataBuffer.java:84)

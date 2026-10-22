@@ -1,0 +1,150 @@
+EXPECTED: B3f (S=32 MiB, du -sb): 256 peak<=384MiB settle<=288MiB CLD>=8 ML=0 | 1024 peak<=1152 settle<=1056 CLD>=2 ML=0 | 16384 peak>=2.8GiB rising, CLD=0 ML=0 | 256p 384<peak<1024 settle<=288 CLD>=8 ML=0
+[2026-10-21T15:46:17] arm 256
+[2026-10-21T15:46:17.498-0600] cluster-run start arm=256 cap=256MiB throttled=1 n=3000000 clone=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T15:46:17.531-0600] df: /dev/sda3      ext3  65478604 4990864  57132300   9% /
+[2026-10-21T15:46:17.548-0600] + bin/cassandra -p /tmp/clcap/node/cassandra.pid (ulimit -n 100000)
+[2026-10-21T15:47:04.005-0600] node up pid=137229
+CONFIG commitlog_total_space=256MiB
+CONFIG commitlog_segment_size=32MiB
+CONFIG memtable_allocation_type=offheap_objects
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=4096MiB
+CONFIG memtable_offheap_space=8192MiB
+[2026-10-21T15:47:04.015-0600] samplers 138257 138258
+[2026-10-21T15:47:04.019-0600] STRESS_START 1792619224017 rate=[threads=32 throttle=20000/s]
+[2026-10-21T15:49:41.931-0600] STRESS_END 1792619381928 rc=0 (157 s)
+Op rate                   :   19,908 op/s  [WRITE: 19,908 op/s]
+Partition rate            :   19,908 pk/s  [WRITE: 19,908 pk/s]
+Row rate                  :   19,908 row/s [WRITE: 19,908 row/s]
+Total partitions          :  3,000,000 [WRITE: 3,000,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:02:30
+END
+[2026-10-21T15:50:41.938-0600] SETTLE_END 1792619441936
+COMMITLOG_DIRTY_standard1 13
+MEMTABLE_LIMIT_standard1 0
+REASON      13 Enqueuing flush of keyspace1.standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system_auth.roles, Reason: COMMITLOG_DIRTY
+REASON       3 Enqueuing flush of system.compaction_history, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.local, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.prepared_statements, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system.sstable_activity, Reason: COMMITLOG_DIRTY
+REASON       3 Enqueuing flush of system.sstable_activity_v2, Reason: COMMITLOG_DIRTY
+ERRORS 0
+WARN_lines 0
+[2026-10-21T15:50:51.001-0600] daemons left: []
+[2026-10-21T15:50:51.587-0600] cluster-run end arm=256
+[2026-10-21T15:50:51] arm 1024
+[2026-10-21T15:50:51.600-0600] cluster-run start arm=1024 cap=1024MiB throttled=1 n=3000000 clone=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T15:50:51.633-0600] df: /dev/sda3      ext3  65478604 4994728  57128436   9% /
+[2026-10-21T15:50:51.649-0600] + bin/cassandra -p /tmp/clcap/node/cassandra.pid (ulimit -n 100000)
+[2026-10-21T15:51:37.468-0600] node up pid=144175
+CONFIG commitlog_total_space=1024MiB
+CONFIG commitlog_segment_size=32MiB
+CONFIG memtable_allocation_type=offheap_objects
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=4096MiB
+CONFIG memtable_offheap_space=8192MiB
+[2026-10-21T15:51:37.479-0600] samplers 145187 145188
+[2026-10-21T15:51:37.482-0600] STRESS_START 1792619497481 rate=[threads=32 throttle=20000/s]
+[2026-10-21T15:54:15.431-0600] STRESS_END 1792619655429 rc=0 (157 s)
+Op rate                   :   19,974 op/s  [WRITE: 19,974 op/s]
+Partition rate            :   19,974 pk/s  [WRITE: 19,974 pk/s]
+Row rate                  :   19,974 row/s [WRITE: 19,974 row/s]
+Total partitions          :  3,000,000 [WRITE: 3,000,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:02:30
+END
+[2026-10-21T15:55:15.440-0600] SETTLE_END 1792619715438
+COMMITLOG_DIRTY_standard1 3
+MEMTABLE_LIMIT_standard1 0
+REASON       3 Enqueuing flush of keyspace1.standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system_auth.roles, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.compaction_history, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.local, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.prepared_statements, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.sstable_activity, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.sstable_activity_v2, Reason: COMMITLOG_DIRTY
+ERRORS 0
+WARN_lines 0
+[2026-10-21T15:55:24.496-0600] daemons left: []
+[2026-10-21T15:55:25.051-0600] cluster-run end arm=1024
+[2026-10-21T15:55:25] arm 16384
+[2026-10-21T15:55:25.064-0600] cluster-run start arm=16384 cap=16384MiB throttled=1 n=3000000 clone=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T15:55:25.096-0600] df: /dev/sda3      ext3  65478604 4998092  57125072   9% /
+[2026-10-21T15:55:25.113-0600] + bin/cassandra -p /tmp/clcap/node/cassandra.pid (ulimit -n 100000)
+[2026-10-21T15:56:10.920-0600] node up pid=151079
+CONFIG commitlog_total_space=16384MiB
+CONFIG commitlog_segment_size=32MiB
+CONFIG memtable_allocation_type=offheap_objects
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=4096MiB
+CONFIG memtable_offheap_space=8192MiB
+[2026-10-21T15:56:10.931-0600] samplers 152069 152070
+[2026-10-21T15:56:10.936-0600] STRESS_START 1792619770933 rate=[threads=32 throttle=20000/s]
+[2026-10-21T15:58:49.002-0600] STRESS_END 1792619929000 rc=0 (158 s)
+Op rate                   :   19,905 op/s  [WRITE: 19,905 op/s]
+Partition rate            :   19,905 pk/s  [WRITE: 19,905 pk/s]
+Row rate                  :   19,905 row/s [WRITE: 19,905 row/s]
+Total partitions          :  3,000,000 [WRITE: 3,000,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:02:30
+END
+[2026-10-21T15:59:49.012-0600] SETTLE_END 1792619989009
+COMMITLOG_DIRTY_standard1 0
+MEMTABLE_LIMIT_standard1 0
+REASON       2 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+ERRORS 0
+WARN_lines 1
+[2026-10-21T16:00:22.117-0600] daemons left: []
+[2026-10-21T16:00:22.576-0600] cluster-run end arm=16384
+[2026-10-21T16:00:22] arm 256p
+[2026-10-21T16:00:22.588-0600] cluster-run start arm=256p cap=256MiB throttled=0 n=3000000 clone=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T16:00:22.620-0600] df: /dev/sda3      ext3  65478604 5001488  57121676   9% /
+[2026-10-21T16:00:22.636-0600] + bin/cassandra -p /tmp/clcap/node/cassandra.pid (ulimit -n 100000)
+[2026-10-21T16:01:08.189-0600] node up pid=158102
+CONFIG commitlog_total_space=256MiB
+CONFIG commitlog_segment_size=32MiB
+CONFIG memtable_allocation_type=offheap_objects
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=4096MiB
+CONFIG memtable_offheap_space=8192MiB
+[2026-10-21T16:01:08.198-0600] samplers 159103 159104
+[2026-10-21T16:01:08.202-0600] STRESS_START 1792620068200 rate=[threads=128]
+[2026-10-21T16:01:44.125-0600] STRESS_END 1792620104123 rc=0 (35 s)
+Op rate                   :  107,488 op/s  [WRITE: 107,488 op/s]
+Partition rate            :  107,488 pk/s  [WRITE: 107,488 pk/s]
+Row rate                  :  107,488 row/s [WRITE: 107,488 row/s]
+Total partitions          :  3,000,000 [WRITE: 3,000,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:00:27
+END
+[2026-10-21T16:02:44.134-0600] SETTLE_END 1792620164131
+COMMITLOG_DIRTY_standard1 13
+MEMTABLE_LIMIT_standard1 0
+REASON      13 Enqueuing flush of keyspace1.standard1, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system_auth.roles, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system.compaction_history, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system.local, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.prepared_statements, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.sstable_activity, Reason: COMMITLOG_DIRTY
+REASON       2 Enqueuing flush of system.sstable_activity_v2, Reason: COMMITLOG_DIRTY
+ERRORS 0
+WARN_lines 0
+[2026-10-21T16:02:53.195-0600] daemons left: []
+[2026-10-21T16:02:53.786-0600] cluster-run end arm=256p

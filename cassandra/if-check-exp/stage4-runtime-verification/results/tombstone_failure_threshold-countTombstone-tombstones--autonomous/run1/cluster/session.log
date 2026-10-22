@@ -1,0 +1,398 @@
+[2026-10-21 15:59:02] cluster-run run1: RUN=/local/tft-run N=200000 NLIVE=20000 TS=[1000000, 300000, 100000, 20000, 1000] CTRL=[1000, 1000000] C=8 R=5 IDLE_S=30 clone=/users/jason92/cassandra-tft
+[2026-10-21 15:59:02] + git describe --tags; git rev-parse --short HEAD; java -version 2>&1 | head -1; uname -r; df -h /local
+cassandra-5.0.9
+b5f2a54
+openjdk version "11.0.32.1" 2026-08-18
+5.15.0-187-generic
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3        63G  4.9G   55G   9% /
+
+  rc=0
+[2026-10-21 15:59:02] + ss -ltn
+[2026-10-21 15:59:02] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 15:59:02] + rm -rf /local/tft-run && mkdir -p /local/tft-run/data /local/tft-run/commitlog /local/tft-run/hints /local/tft-run/saved_caches /local/tft-run/cdc_raw /local/tft-run/logs /local/tft-run/jfr /local/tft-run/client /local/tft-run/tools
+
+  rc=0
+[2026-10-21 15:59:02] + javac -d /local/tft-run/tools /users/jason92/stage4-harness-run/tft/ThreadAlloc.java /users/jason92/stage4-harness-run/tft/JfrBuf.java /users/jason92/stage4-harness-run/tft/HeapPoll.java
+
+  rc=0
+[2026-10-21 15:59:02] + rm -rf /local/tft-run/conf && cp -r /users/jason92/cassandra-tft/conf /local/tft-run/conf
+
+  rc=0
+[2026-10-21 15:59:02] conf for T=1000000 label=setup: cluster_name='tft'; commitlog_directory=/local/tft-run/commitlog; hints_directory=/local/tft-run/hints; saved_caches_directory=/local/tft-run/saved_caches; cdc_raw_directory=/local/tft-run/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7100; ssl_storage_port=7101; native_transport_port=9142; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; tombstone_warn_threshold=1000; tombstone_failure_threshold=1000000
+[2026-10-21 15:59:02] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 15:59:02] + bash -c "ulimit -n 100000; bin/cassandra -p /local/tft-run/cassandra.pid > /local/tft-run/logs/start-setup.out 2>&1"
+
+  rc=0
+[2026-10-21 15:59:06] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:11] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:15] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:19] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:23] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:27] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:31] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:35] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:39] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:43] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 15:59:44] + bin/nodetool -h 127.0.0.1 -p 7299 statusbinary
+[2026-10-21 15:59:45] node up (setup) after 42 s, pid 181490
+[2026-10-21 15:59:45] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CREATE KEYSPACE ks WITH replication={'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (pk int, ck text, v text, PRIMARY KEY (pk, ck));" > /users/jason92/stage4-logs/tft/run1/cluster/schema.out 2>&1
+
+  rc=0
+[2026-10-21 15:59:46] ingest.cql: 231554000 B
+[2026-10-21 15:59:46] + bin/cqlsh 127.0.0.1 9142 --request-timeout=120 -f /local/tft-run/ingest.cql > /users/jason92/stage4-logs/tft/run1/cluster/ingest.out 2>&1
+
+  rc=0
+[2026-10-21 16:15:24] ingest rc=0 in 938 s; errors in output: 0
+[2026-10-21 16:15:24] + bin/nodetool -h 127.0.0.1 -p 7299 flush ks t
+[2026-10-21 16:15:26] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CONSISTENCY ONE; TRACING ON; SELECT * FROM ks.t WHERE pk=0;" > /users/jason92/stage4-logs/tft/run1/cluster/check-trace.out 2>&1
+
+  rc=0
+[2026-10-21 16:15:27] + du -sb /local/tft-run/data
+10761670	/local/tft-run/data
+
+  rc=0
+[2026-10-21 16:15:27] B3e step 4: trace [('0', '200000'), ('0', '200000')]; data 10761670 B
+[2026-10-21 16:15:27] + bin/nodetool -h 127.0.0.1 -p 7299 tablestats ks.t > /users/jason92/stage4-logs/tft/run1/cluster/tablestats.txt
+[2026-10-21 16:15:28] stopping node pid 181490
+[2026-10-21 16:15:28] + kill 181490
+
+  rc=0
+[2026-10-21 16:15:34] node stopped
+[2026-10-21 16:15:34] + cp /local/tft-run/logs/gc-setup.log /users/jason92/stage4-logs/tft/run1/cluster/ 2>/dev/null; true
+
+  rc=0
+[2026-10-21 16:15:34] + rm -rf /local/tft-run/conf && cp -r /users/jason92/cassandra-tft/conf /local/tft-run/conf
+
+  rc=0
+[2026-10-21 16:15:34] conf for T=1000000 label=T1000000: cluster_name='tft'; commitlog_directory=/local/tft-run/commitlog; hints_directory=/local/tft-run/hints; saved_caches_directory=/local/tft-run/saved_caches; cdc_raw_directory=/local/tft-run/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7100; ssl_storage_port=7101; native_transport_port=9142; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; tombstone_warn_threshold=1000; tombstone_failure_threshold=1000000
+[2026-10-21 16:15:34] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 16:15:34] + bash -c "ulimit -n 100000; bin/cassandra -p /local/tft-run/cassandra.pid > /local/tft-run/logs/start-T1000000.out 2>&1"
+
+  rc=0
+[2026-10-21 16:15:38] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:15:42] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:15:43] + bin/nodetool -h 127.0.0.1 -p 7299 statusbinary
+[2026-10-21 16:15:44] node up (T1000000) after 10 s, pid 184065
+[2026-10-21 16:15:44] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.db:type=StorageService" -mg -f TombstoneFailureThreshold
+[2026-10-21 16:15:45] T confirmed by sjk: 1000000
+[2026-10-21 16:15:45] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CONSISTENCY ONE; TRACING ON; SELECT * FROM ks.t WHERE pk=0;" > /users/jason92/stage4-logs/tft/run1/cluster/warm-T1000000.out 2>&1
+
+  rc=0
+[2026-10-21 16:15:47] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:15:48] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T1000000-pk0.txt
+
+  rc=0
+[2026-10-21 16:16:18] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T1000000-pk0.txt
+
+  rc=0
+[2026-10-21 16:16:19] + jcmd 184065 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T1000000-pk0.jfr
+184065:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 184065 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:16:30] + jcmd 184065 JFR.stop name=tft
+184065:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:16:30] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T1000000-pk0.txt
+
+  rc=0
+[2026-10-21 16:16:31] storm T1000000-pk0: 8049 ms, outcomes {'OK:0': 40}
+[2026-10-21 16:16:31] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T1000000-pk0.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T1000000-pk0.tsv
+
+  rc=0
+[2026-10-21 16:16:31] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:16:32] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:16:33] metrics T1000000-pk0: TombstoneFailures 0, TombstoneScannedHistogram.Max 219342
+[2026-10-21 16:16:33] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T1000000-pk1.txt
+
+  rc=0
+[2026-10-21 16:17:04] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T1000000-pk1.txt
+
+  rc=0
+[2026-10-21 16:17:04] + jcmd 184065 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T1000000-pk1.jfr
+184065:
+Started recording 2. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 184065 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:17:33] + jcmd 184065 JFR.stop name=tft
+184065:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:17:33] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T1000000-pk1.txt
+
+  rc=0
+[2026-10-21 16:17:34] storm T1000000-pk1: 26506 ms, outcomes {'OK:20000': 40}
+[2026-10-21 16:17:34] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T1000000-pk1.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T1000000-pk1.tsv
+
+  rc=0
+[2026-10-21 16:17:34] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:17:35] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:17:36] metrics T1000000-pk1: TombstoneFailures 0, TombstoneScannedHistogram.Max 219342
+[2026-10-21 16:17:36] T1000000: system.log "Scanned over" lines 0 values []; OOM False
+[2026-10-21 16:17:36] stopping node pid 184065
+[2026-10-21 16:17:36] + kill 184065
+
+  rc=0
+[2026-10-21 16:17:42] node stopped
+[2026-10-21 16:17:42] + cp /local/tft-run/logs/gc-T1000000.log /users/jason92/stage4-logs/tft/run1/cluster/ 2>/dev/null; true
+
+  rc=0
+[2026-10-21 16:17:42] + rm -rf /local/tft-run/conf && cp -r /users/jason92/cassandra-tft/conf /local/tft-run/conf
+
+  rc=0
+[2026-10-21 16:17:42] conf for T=300000 label=T300000: cluster_name='tft'; commitlog_directory=/local/tft-run/commitlog; hints_directory=/local/tft-run/hints; saved_caches_directory=/local/tft-run/saved_caches; cdc_raw_directory=/local/tft-run/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7100; ssl_storage_port=7101; native_transport_port=9142; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; tombstone_warn_threshold=1000; tombstone_failure_threshold=300000
+[2026-10-21 16:17:42] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 16:17:42] + bash -c "ulimit -n 100000; bin/cassandra -p /local/tft-run/cassandra.pid > /local/tft-run/logs/start-T300000.out 2>&1"
+
+  rc=0
+[2026-10-21 16:17:46] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:17:50] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:17:51] + bin/nodetool -h 127.0.0.1 -p 7299 statusbinary
+[2026-10-21 16:17:52] node up (T300000) after 10 s, pid 187111
+[2026-10-21 16:17:52] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.db:type=StorageService" -mg -f TombstoneFailureThreshold
+[2026-10-21 16:17:53] T confirmed by sjk: 300000
+[2026-10-21 16:17:53] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CONSISTENCY ONE; TRACING ON; SELECT * FROM ks.t WHERE pk=0;" > /users/jason92/stage4-logs/tft/run1/cluster/warm-T300000.out 2>&1
+
+  rc=0
+[2026-10-21 16:17:55] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:17:56] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T300000-pk0.txt
+
+  rc=0
+[2026-10-21 16:18:27] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T300000-pk0.txt
+
+  rc=0
+[2026-10-21 16:18:27] + jcmd 187111 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T300000-pk0.jfr
+187111:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 187111 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:18:38] + jcmd 187111 JFR.stop name=tft
+187111:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:18:38] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T300000-pk0.txt
+
+  rc=0
+[2026-10-21 16:18:39] storm T300000-pk0: 8125 ms, outcomes {'OK:0': 40}
+[2026-10-21 16:18:39] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T300000-pk0.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T300000-pk0.tsv
+
+  rc=0
+[2026-10-21 16:18:39] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:18:40] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:18:41] metrics T300000-pk0: TombstoneFailures 0, TombstoneScannedHistogram.Max 219342
+[2026-10-21 16:18:41] T300000: system.log "Scanned over" lines 0 values []; OOM False
+[2026-10-21 16:18:41] stopping node pid 187111
+[2026-10-21 16:18:41] + kill 187111
+
+  rc=0
+[2026-10-21 16:18:47] node stopped
+[2026-10-21 16:18:47] + cp /local/tft-run/logs/gc-T300000.log /users/jason92/stage4-logs/tft/run1/cluster/ 2>/dev/null; true
+
+  rc=0
+[2026-10-21 16:18:48] + rm -rf /local/tft-run/conf && cp -r /users/jason92/cassandra-tft/conf /local/tft-run/conf
+
+  rc=0
+[2026-10-21 16:18:48] conf for T=100000 label=T100000: cluster_name='tft'; commitlog_directory=/local/tft-run/commitlog; hints_directory=/local/tft-run/hints; saved_caches_directory=/local/tft-run/saved_caches; cdc_raw_directory=/local/tft-run/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7100; ssl_storage_port=7101; native_transport_port=9142; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; tombstone_warn_threshold=1000; tombstone_failure_threshold=100000
+[2026-10-21 16:18:48] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 16:18:48] + bash -c "ulimit -n 100000; bin/cassandra -p /local/tft-run/cassandra.pid > /local/tft-run/logs/start-T100000.out 2>&1"
+
+  rc=0
+[2026-10-21 16:18:51] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:18:56] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:18:57] + bin/nodetool -h 127.0.0.1 -p 7299 statusbinary
+[2026-10-21 16:18:58] node up (T100000) after 10 s, pid 189223
+[2026-10-21 16:18:58] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.db:type=StorageService" -mg -f TombstoneFailureThreshold
+[2026-10-21 16:18:59] T confirmed by sjk: 100000
+[2026-10-21 16:18:59] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CONSISTENCY ONE; TRACING ON; SELECT * FROM ks.t WHERE pk=0;" > /users/jason92/stage4-logs/tft/run1/cluster/warm-T100000.out 2>&1
+
+  rc=2
+[2026-10-21 16:19:00] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:19:01] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T100000-pk0.txt
+
+  rc=0
+[2026-10-21 16:19:31] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T100000-pk0.txt
+
+  rc=0
+[2026-10-21 16:19:32] + jcmd 189223 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T100000-pk0.jfr
+189223:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 189223 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:19:40] + jcmd 189223 JFR.stop name=tft
+189223:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:19:41] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T100000-pk0.txt
+
+  rc=0
+[2026-10-21 16:19:41] storm T100000-pk0: 5622 ms, outcomes {'FAIL_TOMBSTONE': 40}
+[2026-10-21 16:19:41] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T100000-pk0.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T100000-pk0.tsv
+
+  rc=0
+[2026-10-21 16:19:41] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:19:42] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:19:43] metrics T100000-pk0: TombstoneFailures 41, TombstoneScannedHistogram.Max 105778
+[2026-10-21 16:19:43] T100000: system.log "Scanned over" lines 41 values ['100001']; OOM False
+[2026-10-21 16:19:43] stopping node pid 189223
+[2026-10-21 16:19:43] + kill 189223
+
+  rc=0
+[2026-10-21 16:19:49] node stopped
+[2026-10-21 16:19:49] + cp /local/tft-run/logs/gc-T100000.log /users/jason92/stage4-logs/tft/run1/cluster/ 2>/dev/null; true
+
+  rc=0
+[2026-10-21 16:19:49] + rm -rf /local/tft-run/conf && cp -r /users/jason92/cassandra-tft/conf /local/tft-run/conf
+
+  rc=0
+[2026-10-21 16:19:49] conf for T=20000 label=T20000: cluster_name='tft'; commitlog_directory=/local/tft-run/commitlog; hints_directory=/local/tft-run/hints; saved_caches_directory=/local/tft-run/saved_caches; cdc_raw_directory=/local/tft-run/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7100; ssl_storage_port=7101; native_transport_port=9142; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; tombstone_warn_threshold=1000; tombstone_failure_threshold=20000
+[2026-10-21 16:19:49] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 16:19:49] + bash -c "ulimit -n 100000; bin/cassandra -p /local/tft-run/cassandra.pid > /local/tft-run/logs/start-T20000.out 2>&1"
+
+  rc=0
+[2026-10-21 16:19:53] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:19:58] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:19:59] + bin/nodetool -h 127.0.0.1 -p 7299 statusbinary
+[2026-10-21 16:20:00] node up (T20000) after 10 s, pid 191279
+[2026-10-21 16:20:00] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.db:type=StorageService" -mg -f TombstoneFailureThreshold
+[2026-10-21 16:20:01] T confirmed by sjk: 20000
+[2026-10-21 16:20:01] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CONSISTENCY ONE; TRACING ON; SELECT * FROM ks.t WHERE pk=0;" > /users/jason92/stage4-logs/tft/run1/cluster/warm-T20000.out 2>&1
+
+  rc=2
+[2026-10-21 16:20:02] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:20:03] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T20000-pk0.txt
+
+  rc=0
+[2026-10-21 16:20:33] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T20000-pk0.txt
+
+  rc=0
+[2026-10-21 16:20:33] + jcmd 191279 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T20000-pk0.jfr
+191279:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 191279 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:20:40] + jcmd 191279 JFR.stop name=tft
+191279:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:20:41] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T20000-pk0.txt
+
+  rc=0
+[2026-10-21 16:20:41] storm T20000-pk0: 3732 ms, outcomes {'FAIL_TOMBSTONE': 40}
+[2026-10-21 16:20:41] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T20000-pk0.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T20000-pk0.tsv
+
+  rc=0
+[2026-10-21 16:20:41] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:20:42] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:20:43] metrics T20000-pk0: TombstoneFailures 41, TombstoneScannedHistogram.Max 20501
+[2026-10-21 16:20:43] T20000: system.log "Scanned over" lines 41 values ['20001']; OOM False
+[2026-10-21 16:20:43] stopping node pid 191279
+[2026-10-21 16:20:43] + kill 191279
+
+  rc=0
+[2026-10-21 16:20:49] node stopped
+[2026-10-21 16:20:49] + cp /local/tft-run/logs/gc-T20000.log /users/jason92/stage4-logs/tft/run1/cluster/ 2>/dev/null; true
+
+  rc=0
+[2026-10-21 16:20:49] + rm -rf /local/tft-run/conf && cp -r /users/jason92/cassandra-tft/conf /local/tft-run/conf
+
+  rc=0
+[2026-10-21 16:20:49] conf for T=1000 label=T1000: cluster_name='tft'; commitlog_directory=/local/tft-run/commitlog; hints_directory=/local/tft-run/hints; saved_caches_directory=/local/tft-run/saved_caches; cdc_raw_directory=/local/tft-run/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7100; ssl_storage_port=7101; native_transport_port=9142; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; tombstone_warn_threshold=1000; tombstone_failure_threshold=1000
+[2026-10-21 16:20:49] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 16:20:49] + bash -c "ulimit -n 100000; bin/cassandra -p /local/tft-run/cassandra.pid > /local/tft-run/logs/start-T1000.out 2>&1"
+
+  rc=0
+[2026-10-21 16:20:53] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:20:57] + bin/nodetool -h 127.0.0.1 -p 7299 status
+[2026-10-21 16:20:58] + bin/nodetool -h 127.0.0.1 -p 7299 statusbinary
+[2026-10-21 16:20:59] node up (T1000) after 10 s, pid 193333
+[2026-10-21 16:20:59] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.db:type=StorageService" -mg -f TombstoneFailureThreshold
+[2026-10-21 16:21:00] T confirmed by sjk: 1000
+[2026-10-21 16:21:00] + bin/cqlsh 127.0.0.1 9142 --request-timeout=180 -e "CONSISTENCY ONE; TRACING ON; SELECT * FROM ks.t WHERE pk=0;" > /users/jason92/stage4-logs/tft/run1/cluster/warm-T1000.out 2>&1
+
+  rc=2
+[2026-10-21 16:21:01] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:21:02] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T1000-pk0.txt
+
+  rc=0
+[2026-10-21 16:21:33] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T1000-pk0.txt
+
+  rc=0
+[2026-10-21 16:21:33] + jcmd 193333 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T1000-pk0.jfr
+193333:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 193333 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:21:39] + jcmd 193333 JFR.stop name=tft
+193333:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:21:40] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T1000-pk0.txt
+
+  rc=0
+[2026-10-21 16:21:40] storm T1000-pk0: 3275 ms, outcomes {'FAIL_TOMBSTONE': 40}
+[2026-10-21 16:21:40] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T1000-pk0.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T1000-pk0.tsv
+
+  rc=0
+[2026-10-21 16:21:40] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:21:41] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:21:42] metrics T1000-pk0: TombstoneFailures 41, TombstoneScannedHistogram.Max 1109
+[2026-10-21 16:21:42] + java -cp /local/tft-run/tools HeapPoll 7299 250 120 > /users/jason92/stage4-logs/tft/run1/cluster/jstat-idle-T1000-pk1.txt
+
+  rc=0
+[2026-10-21 16:22:13] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-before-T1000-pk1.txt
+
+  rc=0
+[2026-10-21 16:22:13] + jcmd 193333 JFR.start name=tft settings=profile filename=/local/tft-run/jfr/T1000-pk1.jfr
+193333:
+Started recording 2. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 193333 JFR.dump name=tft to copy recording data to file.
+
+  rc=0
+[2026-10-21 16:22:42] + jcmd 193333 JFR.stop name=tft
+193333:
+Stopped recording "tft".
+
+  rc=0
+[2026-10-21 16:22:42] + java -cp /local/tft-run/tools ThreadAlloc 7299 > /users/jason92/stage4-logs/tft/run1/cluster/alloc-after-T1000-pk1.txt
+
+  rc=0
+[2026-10-21 16:22:43] storm T1000-pk1: 26467 ms, outcomes {'OK:20000': 40}
+[2026-10-21 16:22:43] + java -cp /local/tft-run/tools JfrBuf /local/tft-run/jfr/T1000-pk1.jfr > /users/jason92/stage4-logs/tft/run1/cluster/jfr-T1000-pk1.tsv
+
+  rc=0
+[2026-10-21 16:22:43] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneFailures" -mg -f Count
+[2026-10-21 16:22:44] + bin/nodetool -h 127.0.0.1 -p 7299 sjk mx -b "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=TombstoneScannedHistogram" -mg -f Max
+[2026-10-21 16:22:45] metrics T1000-pk1: TombstoneFailures 41, TombstoneScannedHistogram.Max 1109
+[2026-10-21 16:22:45] T1000: system.log "Scanned over" lines 41 values ['1001']; OOM False
+[2026-10-21 16:22:45] stopping node pid 193333
+[2026-10-21 16:22:45] + kill 193333
+
+  rc=0
+[2026-10-21 16:22:52] node stopped
+[2026-10-21 16:22:52] + cp /local/tft-run/logs/gc-T1000.log /users/jason92/stage4-logs/tft/run1/cluster/ 2>/dev/null; true
+
+  rc=0
+[2026-10-21 16:22:52] all lifetimes done
+[2026-10-21 16:22:52] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-21 16:22:52] daemons left: []

@@ -1,0 +1,99 @@
+ok   unit cap15-s10 knob in force csv cap {15}
+ok   unit cap15-s10 test env: 5 MiB mmap segments, memtable heap 768 MiB, cleanup 0.99 INFO capMiB=15 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap
+ok   unit cap15-s10 300 writes + 10 settle rows 300+10
+ok   unit cap15-s10 JUnit passed 
+ok   unit cap15-s10 SUMMARY agrees with the CSV peak 30 MiB, dir 30, sw 38
+ok   unit cap15-s10 switch count = COMMITLOG_DIRTY + MEMTABLE_LIMIT + other flush lines of CLCapKS.t 38 vs 38+0+0
+     cap15-s10: peak 30 MiB, peakDir 30, final 15, switches 38, COMMITLOG_DIRTY 38, MEMTABLE_LIMIT 0, falls 38
+ok   unit cap25-s10 knob in force csv cap {25}
+ok   unit cap25-s10 test env: 5 MiB mmap segments, memtable heap 768 MiB, cleanup 0.99 INFO capMiB=25 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap
+ok   unit cap25-s10 300 writes + 10 settle rows 300+10
+ok   unit cap25-s10 JUnit passed 
+ok   unit cap25-s10 SUMMARY agrees with the CSV peak 40 MiB, dir 40, sw 18
+ok   unit cap25-s10 switch count = COMMITLOG_DIRTY + MEMTABLE_LIMIT + other flush lines of CLCapKS.t 18 vs 18+0+0
+     cap25-s10: peak 40 MiB, peakDir 40, final 20, switches 18, COMMITLOG_DIRTY 18, MEMTABLE_LIMIT 0, falls 21
+ok   unit cap50-s10 knob in force csv cap {50}
+ok   unit cap50-s10 test env: 5 MiB mmap segments, memtable heap 768 MiB, cleanup 0.99 INFO capMiB=50 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap
+ok   unit cap50-s10 300 writes + 10 settle rows 300+10
+ok   unit cap50-s10 JUnit passed 
+ok   unit cap50-s10 SUMMARY agrees with the CSV peak 75 MiB, dir 75, sw 8
+ok   unit cap50-s10 switch count = COMMITLOG_DIRTY + MEMTABLE_LIMIT + other flush lines of CLCapKS.t 8 vs 8+0+0
+     cap50-s10: peak 75 MiB, peakDir 75, final 20, switches 8, COMMITLOG_DIRTY 8, MEMTABLE_LIMIT 0, falls 14
+ok   unit cap100000-s10 knob in force csv cap {100000}
+ok   unit cap100000-s10 test env: 5 MiB mmap segments, memtable heap 768 MiB, cleanup 0.99 INFO capMiB=100000 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap
+ok   unit cap100000-s10 300 writes + 10 settle rows 300+10
+ok   unit cap100000-s10 JUnit passed 
+ok   unit cap100000-s10 SUMMARY agrees with the CSV peak 380 MiB, dir 380, sw 0
+ok   unit cap100000-s10 switch count = COMMITLOG_DIRTY + MEMTABLE_LIMIT + other flush lines of CLCapKS.t 0 vs 0+0+0
+     cap100000-s10: peak 380 MiB, peakDir 380, final 380, switches 0, COMMITLOG_DIRTY 0, MEMTABLE_LIMIT 0, falls 0
+ok   unit cap25-s0 knob in force csv cap {25}
+ok   unit cap25-s0 test env: 5 MiB mmap segments, memtable heap 768 MiB, cleanup 0.99 INFO capMiB=25 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap
+ok   unit cap25-s0 300 writes + 10 settle rows 300+10
+ok   unit cap25-s0 JUnit passed 
+ok   unit cap25-s0 SUMMARY agrees with the CSV peak 100 MiB, dir 95, sw 19
+ok   unit cap25-s0 switch count = COMMITLOG_DIRTY + MEMTABLE_LIMIT + other flush lines of CLCapKS.t 19 vs 19+0+0
+     cap25-s0: peak 100 MiB, peakDir 95, final 15, switches 19, COMMITLOG_DIRTY 19, MEMTABLE_LIMIT 0, falls 37
+ok   unit control: valid (>3x largest C, 0 flushes of any reason, monotone) 380 MiB
+ok   unit control within B2f (375-400 MiB) 
+ok   unit cap15-s10 R3(b) COMMITLOG_DIRTY>0 and (c) falls>0 
+ok   unit cap15-s10 not Refuted: peak and dirBytes peak < 0.8 x control 
+ok   unit cap15-s10 B2f peak <= 35 MiB (sub-prediction) 30
+ok   unit cap15-s10 B2f final <= 20 MiB and switches >= 15 
+ok   unit cap15-s10 final >= floor 2S 
+ok   unit cap25-s10 R3(b) COMMITLOG_DIRTY>0 and (c) falls>0 
+ok   unit cap25-s10 not Refuted: peak and dirBytes peak < 0.8 x control 
+ok   unit cap25-s10 B2f peak <= 45 MiB (sub-prediction) 40
+ok   unit cap25-s10 B2f final <= 30 MiB and switches >= 10 
+ok   unit cap25-s10 final >= floor 2S 
+ok   unit cap50-s10 R3(b) COMMITLOG_DIRTY>0 and (c) falls>0 
+ok   unit cap50-s10 not Refuted: peak and dirBytes peak < 0.8 x control 
+FAIL unit cap50-s10 B2f peak <= 70 MiB (sub-prediction) 75
+ok   unit cap50-s10 B2f final <= 55 MiB and switches >= 5 
+ok   unit cap50-s10 final >= floor 2S 
+ok   unit probe 45 < peak < 150 MiB, final <= 30, switches >= 5 100
+ok   unit probe < 0.8 x control (no bypass row) 
+ok   unit all onDiskSize multiples of S, |dir - counter| <= S 
+ok   unit monotone in C (peak up, switches down) 
+UNIT ROW: row 4 (Confirmed - caps, soft; overshoot bound missed in cap50-s10)
+ok   cluster 256 du -sb ~ 32 MiB x file count (within 1 segment) 2/214 samples differ, max 32 MiB
+ok   cluster 256 knob in force (startup config line) 256MiB
+ok   cluster 256 3,000,000 partitions written, 0 errors 3,000,000 / 0
+ok   cluster 256 sampler covers start to settle end, max gap <= 5 s 214 samples, max step 1242 ms
+     256: peak 352.0 MiB at +63 s, settle 256.0, standard1 COMMITLOG_DIRTY 13 (followed by deletion and fall: 13), MEMTABLE_LIMIT 0, segments deleted 91, falls >= 1 seg 14, stress 158 s
+ok   cluster 1024 du -sb ~ 32 MiB x file count (within 1 segment) 1/215 samples differ, max 32 MiB
+ok   cluster 1024 knob in force (startup config line) 1024MiB
+ok   cluster 1024 3,000,000 partitions written, 0 errors 3,000,000 / 0
+ok   cluster 1024 sampler covers start to settle end, max gap <= 5 s 215 samples, max step 1152 ms
+     1024: peak 1184.0 MiB at +60 s, settle 192.0, standard1 COMMITLOG_DIRTY 3 (followed by deletion and fall: 3), MEMTABLE_LIMIT 0, segments deleted 93, falls >= 1 seg 4, stress 158 s
+ok   cluster 16384 du -sb ~ 32 MiB x file count (within 1 segment) 1/215 samples differ, max 32 MiB
+ok   cluster 16384 knob in force (startup config line) 16384MiB
+ok   cluster 16384 3,000,000 partitions written, 0 errors 3,000,000 / 0
+ok   cluster 16384 sampler covers start to settle end, max gap <= 5 s 215 samples, max step 1024 ms
+     16384: peak 3168.0 MiB at +156 s, settle 3168.0, standard1 COMMITLOG_DIRTY 0 (followed by deletion and fall: 0), MEMTABLE_LIMIT 0, segments deleted 0, falls >= 1 seg 0, stress 158 s
+ok   cluster 256p du -sb ~ 32 MiB x file count (within 1 segment) 2/95 samples differ, max 32 MiB
+ok   cluster 256p knob in force (startup config line) 256MiB
+ok   cluster 256p 3,000,000 partitions written, 0 errors 3,000,000 / 0
+ok   cluster 256p sampler covers start to settle end, max gap <= 5 s 95 samples, max step 1093 ms
+     256p: peak 2048.0 MiB at +34 s, settle 224.0, standard1 COMMITLOG_DIRTY 13 (followed by deletion and fall: 13), MEMTABLE_LIMIT 0, segments deleted 92, falls >= 1 seg 10, stress 36 s
+ok   cluster control valid: peak >= 2.8 GiB (> 1.5 GiB), 0 MEMTABLE_LIMIT, 0 COMMITLOG_DIRTY 3168 MiB
+ok   cluster control settle ~ peak 
+ok   cluster 256 R3(b) COMMITLOG_DIRTY >= 1 and (c) falls > 0 
+ok   cluster 256 not Refuted: peak < 0.8 x control 0.111
+ok   cluster 256 MEMTABLE_LIMIT = 0 
+ok   cluster 256 every COMMITLOG_DIRTY flush followed by deletion and a fall 13/13
+ok   cluster 256 B3f peak <= 384 MiB (sub-prediction) 352.0
+ok   cluster 256 B3f settle <= 288 MiB (sub-prediction) 256.0
+ok   cluster 256 B3f COMMITLOG_DIRTY >= 8 (sub-prediction) 13
+ok   cluster 1024 R3(b) COMMITLOG_DIRTY >= 1 and (c) falls > 0 
+ok   cluster 1024 not Refuted: peak < 0.8 x control 0.374
+ok   cluster 1024 MEMTABLE_LIMIT = 0 
+ok   cluster 1024 every COMMITLOG_DIRTY flush followed by deletion and a fall 3/3
+FAIL cluster 1024 B3f peak <= 1152 MiB (sub-prediction) 1184.0
+ok   cluster 1024 B3f settle <= 1056 MiB (sub-prediction) 192.0
+ok   cluster 1024 B3f COMMITLOG_DIRTY >= 2 (sub-prediction) 3
+ok   cluster probe: COMMITLOG_DIRTY >= 8, MEMTABLE_LIMIT = 0 13/0
+FAIL cluster probe peak < 1024 MiB and settle <= 288 MiB (sub-prediction) 2048.0/224.0
+ok   cluster probe < 0.8 x control (no bypass row) 0.646
+ok   cluster peak order 256 < 1024 < control 
+CLUSTER ROW: row 4 (Confirmed - caps, soft; bound missed in 1024)
+SELFCHECK 84 ok, 3 FAIL

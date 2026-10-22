@@ -1,0 +1,45 @@
+unit-run 2026-10-21T15:45:44-06:00 host node3 clone cassandra-5.0.9 b5f2a54 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 TombstoneFailureThresholdMemoryTest.java=9d4a063ec72f unit-run.sh=a3b5138b0664 unit-analyze.py=aeb456cc39e7 
+df: /dev/sda3        63G  4.9G   55G   9% /
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 27 s
+TFT lines: 14; tsv rows: 14
+  pk	T	outcome	count_at_throw	resp_bytes	unfiltered_in_resp	alloc_median	alloc_min	alloc_max
+  0	1000	TOE	1001	-1	-1	4101272	4100616	5101744
+  0	10000	TOE	10001	-1	-1	53356288	53356176	58258344
+  0	20000	TOE	20001	-1	-1	106683536	106683536	112051680
+  0	29999	TOE	30000	-1	-1	126387152	126387056	131788016
+  0	30000	OK	-1	30287664	30000	125885208	125885208	126365224
+  0	100000	OK	-1	30287664	30000	125885208	125885208	125885208
+  0	2147483647	OK	-1	30287664	30000	125885208	125885208	125885208
+  1	1000	OK	-1	30257666	30000	123005008	122762912	139688744
+  1	10000	OK	-1	30257666	30000	122524992	122524992	122524992
+  1	20000	OK	-1	30257666	30000	122524992	121324992	122525384
+  1	29999	OK	-1	30257666	30000	121324992	121324992	121324992
+  1	30000	OK	-1	30257666	30000	121324992	121324992	121326000
+  1	100000	OK	-1	30257666	30000	121324992	121324992	121324992
+  1	2147483647	OK	-1	30257666	30000	121324992	121324992	121324992
+cleanup: test file removed; leftover junit JVMs: 0
+pk0 resp_bytes at T=MAX 30287664; s = 1009.6 B per tombstone
+  pk0 T=1000: TOE count=1001 A=4.10 MB (min 4.10, max 5.10); A/(s*min(T+1,N)) = 4.06; pk1 A=123.01 MB
+  pk0 T=10000: TOE count=10001 A=53.36 MB (min 53.36, max 58.26); A/(s*min(T+1,N)) = 5.28; pk1 A=122.52 MB
+  pk0 T=20000: TOE count=20001 A=106.68 MB (min 106.68, max 112.05); A/(s*min(T+1,N)) = 5.28; pk1 A=122.52 MB
+  pk0 T=29999: TOE count=30000 A=126.39 MB (min 126.39, max 131.79); A/(s*min(T+1,N)) = 4.17; pk1 A=121.32 MB
+  pk0 T=30000: OK count=-1 A=125.89 MB (min 125.89, max 126.37); A/(s*min(T+1,N)) = 4.16; pk1 A=121.32 MB
+  pk0 T=100000: OK count=-1 A=125.89 MB (min 125.89, max 125.89); A/(s*min(T+1,N)) = 4.16; pk1 A=121.32 MB
+  pk0 T=2147483647: OK count=-1 A=125.89 MB (min 125.89, max 125.89); A/(s*min(T+1,N)) = 4.16; pk1 A=121.32 MB
+EXPECTED: pk0 throws (TOE) exactly for T < N, with count = T+1 — yes
+EXPECTED: A(T) strictly increasing over the T < N values [1000, 10000, 20000, 29999] — yes
+EXPECTED: A(lowest T) <= 0.10 x A(MAX) (ratio 0.0326) — yes
+EXPECTED: A(N-1), A(N), A(default) within +-10% of A(MAX) (1.004, 1.000, 1.000) — yes
+EXPECTED: every OK read has unfiltered_in_resp = N — yes
+EXPECTED: pk1: all OK and max/min of A <= 1.10 (1.014) — yes
+EXPECTED: sub: A(10k)/A(1k) in 7-13 (13.01) — NO
+EXPECTED: sub: A(20k)/A(10k) in 1.6-2.4 (2.00) — yes
+EXPECTED: sub: 2 x s x min(T+1,N) <= A(T) <= 6 x s x min(T+1,N) for every T — yes
+EXPECTED: sub: A(1k) in 2-6 MB (4.10) — yes
+EXPECTED: sub: A(MAX) in 60-190 MB (125.89) — yes
+EXPECTED: sub: resp_bytes at T>=N in 30-32 MB (30.29) — yes
+EXPECTED: sub: pk1 resp_bytes 30-32 MB (30.26) — yes
+EXPECTED: sub: A(MAX) > A(lowest T) (positive control moves) — yes
+MATCHED: B2g row 1 (claim confirmed at unit level); EXPECTED yes=13 NO=1
+done 2026-10-21T15:46:11-06:00

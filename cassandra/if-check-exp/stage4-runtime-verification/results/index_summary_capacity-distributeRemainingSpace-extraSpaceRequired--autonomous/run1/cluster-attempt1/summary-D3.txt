@@ -1,0 +1,55 @@
+N=4000000 load sstables=31
+life | pool MB | T_before | T MiB | R MiB | R_pre MiB | dRw | tablestats isc MiB | Summary.db MiB | files | trace keep/resample (isc) | downsample
+L1-4096/first | 4096 | 808.716 | 808.716 | 9785.9 | 9785.1 | -0.9 | 808.716 | 808.729 | 31 | 31/0 | 0
+L2-default/first | 409 | 808.717 | 393.140 | 9372.2 | 9790.4 | 418.3 | 393.139 | 393.152 | 31 | 15/16 | 16
+L3-400/first | 400 | 393.140 | 393.140 | 9362.1 | 9361.7 | -0.4 | 393.139 | 393.152 | 31 | 15/0 | 0
+L4-100/first | 100 | 393.140 | 81.601 | 9053.6 | 9366.4 | 312.8 | 81.601 | 81.614 | 31 | 3/12 | 12
+L5-0a/first | 0 | 81.602 | 6.323 | 8979.9 | 9055.3 | 75.4 | 6.322 | 6.335 | 31 | 0/3 | 3
+L6-0b/first | 0 | 6.323 | 6.323 | 8968.5 | 8967.9 | -0.6 | 6.322 | 6.335 | 31 | 0/0 | 0
+L6-0b/after_alter_max1 | 0 | 6.322 | 808.716 | 9794.9 | None | None | 808.716 | 808.729 | 31 | 0/31 | 0
+L7-step6/manual_run | 100 | 808.717 | 81.602 | 9080.8 | None | None | 81.601 | 81.614 | 31 | 3/28 | 28
+EXPECTED: pool sizes as set (4096, 409 default, 400, 100, 0, 0; L7 100): HIT -- {'L0-load': 4096, 'L1-4096': 4096, 'L2-default': 409, 'L3-400': 400, 'L4-100': 100, 'L5-0a': 0, 'L6-0b': 0, 'L7-step6': 100}
+EXPECTED: row 5 (invalid if missed): a Completed resizing line in every lifetime: HIT -- 
+S_full measured T4096 = 808.716 MiB; r_max = 26.213 MiB (largest Summary.db at 4096); sstables 31
+EXPECTED: row 4 positive control: T4096 >= 728 MiB: HIT -- 808.716
+EXPECTED: B3f sub: T4096 = 808.7 MiB +-2%: HIT -- 808.716
+EXPECTED: B3f: at 4096 nothing downsampled (trace keep = isc sstables, resample 0): HIT -- 31/0 of 31
+EXPECTED: row 1/2 X=default: T <= X (+64 KiB): HIT -- T=393.1400 X=409
+EXPECTED: B3f X=default: T > X - r_max: HIT -- 393.140 > 382.787
+EXPECTED: B3f X=default: tablestats isc <= T: HIT -- 393.1392
+EXPECTED: B3f X=default: Summary.db total = T +-5%: HIT -- 393.152
+EXPECTED: R4 X=default: line 341 both outcomes seen (trace keep > 0 and resample > 0 for isc): HIT -- 15/16
+EXPECTED: row 1/2 X=400: T <= X (+64 KiB): HIT -- T=393.1403 X=400
+EXPECTED: B3f X=400: T > X - r_max: HIT -- 393.140 > 373.787
+EXPECTED: B3f X=400: tablestats isc <= T: HIT -- 393.1392
+EXPECTED: B3f X=400: Summary.db total = T +-5%: HIT -- 393.152
+EXPECTED: R4 X=400: run changed nothing: no isc sstable re-sampled: HIT -- 15/0
+EXPECTED: row 1/2 X=100: T <= X (+64 KiB): HIT -- T=81.6013 X=100
+EXPECTED: B3f X=100: T > X - r_max: HIT -- 81.601 > 73.787
+EXPECTED: B3f X=100: tablestats isc <= T: HIT -- 81.6008
+EXPECTED: B3f X=100: Summary.db total = T +-5%: HIT -- 81.614
+EXPECTED: R4 X=100: line 341 both outcomes seen (trace keep > 0 and resample > 0 for isc): HIT -- 3/12
+EXPECTED: row 6: T ~ F at X=0 (3 <= T0 <= 12 MiB): HIT -- 6.323
+EXPECTED: row 6: X=0 keeps nothing (trace keep 0): HIT -- 0/3
+EXPECTED: R5 "T does not fall" row absent: T(100) <= 0.9*T4096: HIT -- 81.60126209259033
+EXPECTED: R5 noise: sigma <= 0.25*(T4096 - T0): HIT -- sigma=11.4921875
+EXPECTED: row 1 RSS X=default: across-lifetime fall >= 0.5*dT: HIT -- fall=413.8 dT=415.6
+EXPECTED: B3f sub X=default: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |413.8-415.6|
+EXPECTED: R5/D3 within-lifetime X=default: dRw=418.3 vs 0.5*dTw=207.8, same side as the across-lifetime fall: HIT -- 
+EXPECTED: row 1 RSS X=400: across-lifetime fall >= 0.5*dT: HIT -- fall=423.8 dT=415.6
+EXPECTED: B3f sub X=400: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |423.8-415.6|
+EXPECTED: R5/D3 within-lifetime X=400: run changed T by 0.0 < 16 MiB, so |dRw|=0.4 <= 3 sigma: HIT -- 
+EXPECTED: row 1 RSS X=100: across-lifetime fall >= 0.5*dT: HIT -- fall=732.3 dT=727.1
+EXPECTED: B3f sub X=100: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |732.3-727.1|
+EXPECTED: R5/D3 within-lifetime X=100: dRw=312.8 vs 0.5*dTw=155.8, same side as the across-lifetime fall: HIT -- 
+EXPECTED: row 1 RSS X=0: across-lifetime fall >= 0.5*dT: HIT -- fall=806.0 dT=802.4
+EXPECTED: B3f sub X=0: |fall - dT| <= max(3 sigma, 0.15 dT): HIT -- |806.0-802.4|
+EXPECTED: R5/D3 within-lifetime X=0: dRw=75.4 vs 0.5*dTw=37.6, same side as the across-lifetime fall: HIT -- 
+EXPECTED: step 5 floor control moved: T after max_index_interval=1 > 2*T0: HIT -- 808.716; force upsample 31
+EXPECTED: B3f sub step 5: T ~ S_full again (+-5% of T4096): HIT -- 808.716
+EXPECTED: B3f sub step 5: RssAnon back to about R4096 (within 0.25*T4096): HIT -- 9794.9 vs 9785.9
+EXPECTED: step 6: manual run T_trig <= 100 MiB (+64 KiB): HIT -- 81.602
+EXPECTED: step 6 (A3 7b): T_after > 100 MiB with no run: HIT -- T_after=283.78071117401123, tablestats=297564684, Completed lines after manual run=0
+EXPECTED: step 6: no Completed resizing after the manual run: HIT -- 
+EXPECTED: B3f sub step 6: T_after ~ T_trig + N2*212 B (+-10%): HIT -- 283.78071117401123 vs 283.8
+CLUSTER VERDICT (R5 mapping): Confirmed; Effect: caps only on some paths (bypass)
