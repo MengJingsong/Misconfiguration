@@ -1,0 +1,26 @@
+RULE diag 854
+CLASS org.apache.cassandra.net.OutboundConnection$EventLoopDelivery
+METHOD doRun
+AT LINE 854
+IF true
+DO traceOpen("flw", "@TRACE@");
+   traceln("flw", "D854 " + System.currentTimeMillis() + " " + Thread.currentThread().getName() + " f=" + $this.flushingBytes + " canon=" + $canonicalSize + " sending=" + $sendingBytes + " w=" + $this.isWritable + " H=" + $settings.flushHighWaterMark)
+ENDRULE
+
+RULE diag 857
+CLASS org.apache.cassandra.net.OutboundConnection$EventLoopDelivery
+METHOD doRun
+AT LINE 857
+IF true
+DO traceOpen("flw", "@TRACE@");
+   traceln("flw", "D857 " + System.currentTimeMillis() + " " + Thread.currentThread().getName() + " f=" + $this.flushingBytes + " canon=" + $canonicalSize + " over=" + $hasOverflowed + " w=" + $this.isWritable + " H=" + $settings.flushHighWaterMark)
+ENDRULE
+
+RULE diag 859
+CLASS org.apache.cassandra.net.OutboundConnection$EventLoopDelivery
+METHOD doRun
+AFTER WRITE $this.isWritable
+IF true
+DO traceOpen("flw", "@TRACE@");
+   traceln("flw", "DWRITE " + System.currentTimeMillis() + " f=" + $this.flushingBytes + " w=" + $this.isWritable)
+ENDRULE

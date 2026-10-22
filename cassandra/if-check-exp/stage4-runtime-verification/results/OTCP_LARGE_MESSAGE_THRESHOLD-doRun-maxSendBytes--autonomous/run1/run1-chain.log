@@ -1,0 +1,250 @@
+=== 1792657643786 lifetime v16k-1
+02:27:23 1792657643830 === lifetime v16k-1 {'V': 16384, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:27:23 1792657643857 $ df -h /users/jason92 | tail -1
+02:27:23 1792657643859   | /dev/sda3        63G  5.7G   54G  10% /
+02:27:23 1792657643859 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:27:23 1792657643911   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:27:23 1792657643911   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:27:23 1792657643911 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=16384 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:28:05 1792657685102 1 UN after 41 s
+02:28:05 1792657685102 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:28:05 1792657685153   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:28:05 1792657685153   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:28:05 1792657685153 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=16384 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:29:13 1792657753920 2 UN after 69 s
+02:29:13 1792657753921 n1 pid 294409 command line carries V=16384: True
+02:29:13 1792657753927 n2 pid 296201 command line carries V=16384: True
+02:29:17 1792657757759 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:29:47 1792657787789 SIGSTOP n2 pid 296201
+02:30:00 1792657800726 histogram taken
+02:30:03 1792657803179 NMT taken
+02:30:07 1792657807764 SIGCONT n2 pid 296201
+02:30:57 1792657857957 stress exit 0
+02:31:09 1792657869378 $ bin/nodetool -p 7299 drain
+02:31:16 1792657876823 n2 stopped
+02:31:16 1792657876840 $ bin/nodetool -p 7199 drain
+02:31:26 1792657886387 n1 stopped
+02:31:28 1792657888427 daemons of this clone left: 0
+02:31:29 1792657889260 SUMMARY {"label": "v16k-1", "V": 16384, "ctl": false, "samples": 113, "base_samples": 15, "win_samples": 20, "pending_peak": 3145417, "pending_base": 1063, "pending_delta": 3144354, "used_peak": 86080, "used_base": 2080, "used_delta": 84000, "direct_peak": 59368244, "direct_base": 59161736, "direct_delta": 206508, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.259, "dropBytes_at_stop": 0, "dropBytes_at_cont": 624063914, "dropTimeout_end": 2883, "heapUsed_peak": 3173064600, "pending_end": 0, "histo_total": 225042792, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 2, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,770 op/s  [WRITE: 29,770 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,250 [WRITE: 2,700,250]", "nmt_other_committed_kb": 1385107, "nmt_total_committed_kb": 6208871}
+=== 1792657889272 lifetime v64k-1
+02:31:29 1792657889311 === lifetime v64k-1 {'V': 65536, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:31:29 1792657889339 $ df -h /users/jason92 | tail -1
+02:31:29 1792657889342   | /dev/sda3        63G  5.8G   54G  10% /
+02:31:29 1792657889342 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:31:29 1792657889392   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:31:29 1792657889393   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:31:29 1792657889393 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:32:10 1792657930255 1 UN after 41 s
+02:32:10 1792657930255 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:32:10 1792657930304   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:32:10 1792657930304   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:32:10 1792657930304 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:33:19 1792657999814 2 UN after 69 s
+02:33:19 1792657999814 n1 pid 300555 command line carries V=65536: True
+02:33:19 1792657999820 n2 pid 302283 command line carries V=65536: True
+02:33:23 1792658003696 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:33:53 1792658033725 SIGSTOP n2 pid 302283
+02:34:06 1792658046594 histogram taken
+02:34:09 1792658049005 NMT taken
+02:34:13 1792658053701 SIGCONT n2 pid 302283
+02:35:03 1792658103637 stress exit 0
+02:35:15 1792658115238 $ bin/nodetool -p 7299 drain
+02:35:22 1792658122870 n2 stopped
+02:35:22 1792658122887 $ bin/nodetool -p 7199 drain
+02:35:32 1792658132172 n1 stopped
+02:35:34 1792658134211 daemons of this clone left: 0
+02:35:35 1792658135070 SUMMARY {"label": "v64k-1", "V": 65536, "ctl": false, "samples": 113, "base_samples": 15, "win_samples": 20, "pending_peak": 3145417, "pending_base": 1063, "pending_delta": 3144354, "used_peak": 104832, "used_base": 2048, "used_delta": 102784, "direct_peak": 59421500, "direct_base": 59192402, "direct_delta": 229098, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.251, "dropBytes_at_stop": 0, "dropBytes_at_cont": 621683857, "dropTimeout_end": 2897, "heapUsed_peak": 3250188448, "pending_end": 0, "histo_total": 236564528, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 2, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,875 op/s  [WRITE: 29,875 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,341 [WRITE: 2,700,341]", "nmt_other_committed_kb": 1385159, "nmt_total_committed_kb": 6211767}
+=== 1792658135083 lifetime v128k-1
+02:35:35 1792658135124 === lifetime v128k-1 {'V': 131072, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:35:35 1792658135149 $ df -h /users/jason92 | tail -1
+02:35:35 1792658135151   | /dev/sda3        63G  5.8G   54G  10% /
+02:35:35 1792658135152 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:35:35 1792658135202   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:35:35 1792658135202   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:35:35 1792658135202 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=131072 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:36:16 1792658176051 1 UN after 41 s
+02:36:16 1792658176051 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:36:16 1792658176101   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:36:16 1792658176101   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:36:16 1792658176101 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=131072 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:37:26 1792658246079 2 UN after 70 s
+02:37:26 1792658246079 n1 pid 306631 command line carries V=131072: True
+02:37:26 1792658246084 n2 pid 308358 command line carries V=131072: True
+02:37:29 1792658249783 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:37:59 1792658279811 SIGSTOP n2 pid 308358
+02:38:12 1792658292579 histogram taken
+02:38:15 1792658295403 NMT taken
+02:38:19 1792658299787 SIGCONT n2 pid 308358
+02:39:10 1792658350180 stress exit 0
+02:39:22 1792658362335 $ bin/nodetool -p 7299 drain
+02:39:30 1792658370081 n2 stopped
+02:39:30 1792658370097 $ bin/nodetool -p 7199 drain
+02:39:39 1792658379667 n1 stopped
+02:39:41 1792658381709 daemons of this clone left: 0
+02:39:42 1792658382586 SUMMARY {"label": "v128k-1", "V": 131072, "ctl": false, "samples": 114, "base_samples": 15, "win_samples": 20, "pending_peak": 3145417, "pending_base": 1063, "pending_delta": 3144354, "used_peak": 98304, "used_base": 4096, "used_delta": 94208, "direct_peak": 59389933, "direct_base": 59186419, "direct_delta": 203514, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.299, "dropBytes_at_stop": 0, "dropBytes_at_cont": 622924378, "dropTimeout_end": 2897, "heapUsed_peak": 3273533216, "pending_end": 0, "histo_total": 203804416, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 2, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,711 op/s  [WRITE: 30,041 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,255 [WRITE: 2,700,255]", "nmt_other_committed_kb": 1385126, "nmt_total_committed_kb": 6234776}
+=== 1792658382603 lifetime ctl-1
+02:39:42 1792658382647 === lifetime ctl-1 {'V': 65536, 'ctl': True, 'C': 16, 'E': 16, 'G': 32} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:39:42 1792658382673 $ df -h /users/jason92 | tail -1
+02:39:42 1792658382676   | /dev/sda3        63G  5.8G   54G  10% /
+02:39:42 1792658382676 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=16MiB internode_application_send_queue_reserve_endpoint_capacity=16MiB internode_application_receive_queue_reserve_endpoint_capacity=16MiB internode_application_send_queue_reserve_global_capacity=32MiB internode_max_message_size=1MiB
+02:39:42 1792658382728   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:39:42 1792658382728   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 16MiB;internode_application_send_queue_reserve_endpoint_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 16MiB;internode_application_send_queue_reserve_global_capacity: 32MiB;internode_max_message_size: 1MiB;
+02:39:42 1792658382728 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:40:23 1792658423560 1 UN after 41 s
+02:40:23 1792658423560 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=16MiB internode_application_send_queue_reserve_endpoint_capacity=16MiB internode_application_receive_queue_reserve_endpoint_capacity=16MiB internode_application_send_queue_reserve_global_capacity=32MiB internode_max_message_size=1MiB
+02:40:23 1792658423607   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:40:23 1792658423607   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 16MiB;internode_application_send_queue_reserve_endpoint_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 16MiB;internode_application_send_queue_reserve_global_capacity: 32MiB;internode_max_message_size: 1MiB;
+02:40:23 1792658423607 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:41:32 1792658492783 2 UN after 69 s
+02:41:32 1792658492783 n1 pid 312732 command line carries V=65536: True
+02:41:32 1792658492789 n2 pid 314473 command line carries V=65536: True
+02:41:36 1792658496578 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:42:06 1792658526607 SIGSTOP n2 pid 314473
+02:42:19 1792658539543 histogram taken
+02:42:22 1792658542202 NMT taken
+02:42:26 1792658546584 SIGCONT n2 pid 314473
+02:43:16 1792658596671 stress exit 0
+02:43:28 1792658608265 $ bin/nodetool -p 7299 drain
+02:43:36 1792658616167 n2 stopped
+02:43:36 1792658616182 $ bin/nodetool -p 7199 drain
+02:43:45 1792658625631 n1 stopped
+02:43:47 1792658627671 daemons of this clone left: 0
+02:43:48 1792658628510 SUMMARY {"label": "ctl-1", "V": 65536, "ctl": true, "samples": 113, "base_samples": 15, "win_samples": 20, "pending_peak": 33553595, "pending_base": 1063, "pending_delta": 33552532, "used_peak": 124960, "used_base": 2048, "used_delta": 122912, "direct_peak": 59413205, "direct_base": 59181335, "direct_delta": 231870, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.246, "dropBytes_at_stop": 0, "dropBytes_at_cont": 561707271, "dropTimeout_end": 33909, "heapUsed_peak": 3042089472, "pending_end": 0, "histo_total": 655113664, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 1, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,863 op/s  [WRITE: 29,863 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,243 [WRITE: 2,700,243]", "nmt_other_committed_kb": 1385149, "nmt_total_committed_kb": 6227098}
+=== 1792658628524 lifetime v16k-2
+02:43:48 1792658628564 === lifetime v16k-2 {'V': 16384, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:43:48 1792658628590 $ df -h /users/jason92 | tail -1
+02:43:48 1792658628592   | /dev/sda3        63G  5.8G   54G  10% /
+02:43:48 1792658628592 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:43:48 1792658628644   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:43:48 1792658628644   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:43:48 1792658628644 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=16384 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:44:29 1792658669631 1 UN after 41 s
+02:44:29 1792658669631 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:44:29 1792658669685   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:44:29 1792658669685   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:44:29 1792658669685 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=16384 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:45:38 1792658738681 2 UN after 69 s
+02:45:38 1792658738681 n1 pid 318825 command line carries V=16384: True
+02:45:38 1792658738687 n2 pid 320547 command line carries V=16384: True
+02:45:42 1792658742427 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:46:12 1792658772456 SIGSTOP n2 pid 320547
+02:46:25 1792658785264 histogram taken
+02:46:28 1792658788106 NMT taken
+02:46:32 1792658792428 SIGCONT n2 pid 320547
+02:47:22 1792658842729 stress exit 0
+02:47:35 1792658855185 $ bin/nodetool -p 7299 drain
+02:47:42 1792658862562 n2 stopped
+02:47:42 1792658862577 $ bin/nodetool -p 7199 drain
+02:47:52 1792658872228 n1 stopped
+02:47:54 1792658874270 daemons of this clone left: 0
+02:47:55 1792658875146 SUMMARY {"label": "v16k-2", "V": 16384, "ctl": false, "samples": 114, "base_samples": 15, "win_samples": 20, "pending_peak": 3145417, "pending_base": 0, "pending_delta": 3145417, "used_peak": 129088, "used_base": 2080, "used_delta": 127008, "direct_peak": 59412734, "direct_base": 59197406, "direct_delta": 215328, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.278, "dropBytes_at_stop": 21540632, "dropBytes_at_cont": 644113157, "dropTimeout_end": 2897, "heapUsed_peak": 3205748672, "pending_end": 0, "histo_total": 546609496, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 3, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,841 op/s  [WRITE: 29,841 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,259 [WRITE: 2,700,259]", "nmt_other_committed_kb": 1385149, "nmt_total_committed_kb": 6232874}
+=== 1792658875160 lifetime v64k-2
+02:47:55 1792658875199 === lifetime v64k-2 {'V': 65536, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:47:55 1792658875226 $ df -h /users/jason92 | tail -1
+02:47:55 1792658875229   | /dev/sda3        63G  5.8G   54G  10% /
+02:47:55 1792658875229 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:47:55 1792658875280   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:47:55 1792658875280   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:47:55 1792658875280 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:48:36 1792658916141 1 UN after 41 s
+02:48:36 1792658916141 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:48:36 1792658916191   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:48:36 1792658916191   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:48:36 1792658916191 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:49:46 1792658986377 2 UN after 70 s
+02:49:46 1792658986377 n1 pid 324910 command line carries V=65536: True
+02:49:46 1792658986383 n2 pid 326639 command line carries V=65536: True
+02:49:50 1792658990211 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:50:20 1792659020240 SIGSTOP n2 pid 326639
+02:50:33 1792659033065 histogram taken
+02:50:35 1792659035679 NMT taken
+02:50:40 1792659040216 SIGCONT n2 pid 326639
+02:51:30 1792659090648 stress exit 0
+02:51:43 1792659103055 $ bin/nodetool -p 7299 drain
+02:51:50 1792659110855 n2 stopped
+02:51:50 1792659110871 $ bin/nodetool -p 7199 drain
+02:52:00 1792659120743 n1 stopped
+02:52:02 1792659122784 daemons of this clone left: 0
+02:52:03 1792659123695 SUMMARY {"label": "v64k-2", "V": 65536, "ctl": false, "samples": 114, "base_samples": 15, "win_samples": 20, "pending_peak": 3145417, "pending_base": 1063, "pending_delta": 3144354, "used_peak": 104512, "used_base": 2112, "used_delta": 102400, "direct_peak": 59387186, "direct_base": 59179265, "direct_delta": 207921, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.261, "dropBytes_at_stop": 0, "dropBytes_at_cont": 621801850, "dropTimeout_end": 2897, "heapUsed_peak": 3274607184, "pending_end": 0, "histo_total": 226617464, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 1, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,953 op/s  [WRITE: 29,953 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,243 [WRITE: 2,700,243]", "nmt_other_committed_kb": 1385124, "nmt_total_committed_kb": 6203179}
+=== 1792659123709 lifetime v128k-2
+02:52:03 1792659123750 === lifetime v128k-2 {'V': 131072, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:52:03 1792659123776 $ df -h /users/jason92 | tail -1
+02:52:03 1792659123779   | /dev/sda3        63G  5.8G   54G  10% /
+02:52:03 1792659123779 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:52:03 1792659123831   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:52:03 1792659123831   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:52:03 1792659123832 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=131072 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:52:44 1792659164971 1 UN after 41 s
+02:52:44 1792659164971 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:52:45 1792659165026   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:52:45 1792659165026   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:52:45 1792659165026 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=131072 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:53:54 1792659234191 2 UN after 69 s
+02:53:54 1792659234192 n1 pid 330986 command line carries V=131072: True
+02:53:54 1792659234196 n2 pid 332715 command line carries V=131072: True
+02:53:57 1792659237976 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:54:28 1792659268006 SIGSTOP n2 pid 332715
+02:54:41 1792659281058 histogram taken
+02:54:43 1792659283381 NMT taken
+02:54:47 1792659287981 SIGCONT n2 pid 332715
+02:55:38 1792659338370 stress exit 0
+02:55:50 1792659350761 $ bin/nodetool -p 7299 drain
+02:55:58 1792659358177 n2 stopped
+02:55:58 1792659358194 $ bin/nodetool -p 7199 drain
+02:56:07 1792659367682 n1 stopped
+02:56:09 1792659369721 daemons of this clone left: 0
+02:56:10 1792659370827 SUMMARY {"label": "v128k-2", "V": 131072, "ctl": false, "samples": 114, "base_samples": 15, "win_samples": 20, "pending_peak": 3145417, "pending_base": 1063, "pending_delta": 3144354, "used_peak": 108544, "used_base": 2048, "used_delta": 106496, "direct_peak": 59374325, "direct_base": 59168713, "direct_delta": 205612, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.252, "dropBytes_at_stop": 1212883, "dropBytes_at_cont": 624657068, "dropTimeout_end": 2897, "heapUsed_peak": 2959187248, "pending_end": 0, "histo_total": 220361960, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 3, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,971 op/s  [WRITE: 29,971 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,277 [WRITE: 2,700,277]", "nmt_other_committed_kb": 1385113, "nmt_total_committed_kb": 6208028}
+=== 1792659370844 lifetime ctl-2
+02:56:10 1792659370888 === lifetime ctl-2 {'V': 65536, 'ctl': True, 'C': 16, 'E': 16, 'G': 32} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:56:10 1792659370916 $ df -h /users/jason92 | tail -1
+02:56:10 1792659370918   | /dev/sda3        63G  5.8G   54G  10% /
+02:56:10 1792659370919 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=16MiB internode_application_send_queue_reserve_endpoint_capacity=16MiB internode_application_receive_queue_reserve_endpoint_capacity=16MiB internode_application_send_queue_reserve_global_capacity=32MiB internode_max_message_size=1MiB
+02:56:10 1792659370974   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:56:10 1792659370974   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 16MiB;internode_application_send_queue_reserve_endpoint_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 16MiB;internode_application_send_queue_reserve_global_capacity: 32MiB;internode_max_message_size: 1MiB;
+02:56:10 1792659370974 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:56:52 1792659412249 1 UN after 41 s
+02:56:52 1792659412249 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=16MiB internode_application_send_queue_reserve_endpoint_capacity=16MiB internode_application_receive_queue_reserve_endpoint_capacity=16MiB internode_application_send_queue_reserve_global_capacity=32MiB internode_max_message_size=1MiB
+02:56:52 1792659412300   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:56:52 1792659412300   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 16MiB;internode_application_send_queue_reserve_endpoint_capacity: 16MiB;internode_application_receive_queue_reserve_endpoint_capacity: 16MiB;internode_application_send_queue_reserve_global_capacity: 32MiB;internode_max_message_size: 1MiB;
+02:56:52 1792659412300 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:58:01 1792659481247 2 UN after 69 s
+02:58:01 1792659481247 n1 pid 337085 command line carries V=65536: True
+02:58:01 1792659481251 n2 pid 338863 command line carries V=65536: True
+02:58:05 1792659485073 $ tools/bin/cassandra-stress write duration=90s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:58:35 1792659515103 SIGSTOP n2 pid 338863
+02:58:47 1792659527856 histogram taken
+02:58:50 1792659530764 NMT taken
+02:58:55 1792659535076 SIGCONT n2 pid 338863
+02:59:44 1792659584210 stress exit 0
+02:59:55 1792659595722 $ bin/nodetool -p 7299 drain
+03:00:03 1792659603845 n2 stopped
+03:00:03 1792659603860 $ bin/nodetool -p 7199 drain
+03:00:13 1792659613021 n1 stopped
+03:00:15 1792659615059 daemons of this clone left: 0
+03:00:15 1792659615924 SUMMARY {"label": "ctl-2", "V": 65536, "ctl": true, "samples": 112, "base_samples": 15, "win_samples": 20, "pending_peak": 33553595, "pending_base": 1063, "pending_delta": 33552532, "used_peak": 71712, "used_base": 2112, "used_delta": 69600, "direct_peak": 59433368, "direct_base": 59219434, "direct_delta": 213934, "overflow_peak": 0, "overflow_base": 0, "overflow_delta": 0, "poolSize_peak": 8388608, "poolSize_base": 8388608, "poolSize_delta": 0, "urgentPending_peak": 0, "urgentPending_base": 0, "urgentPending_delta": 0, "largePending_peak": 0, "largePending_base": 0, "largePending_delta": 0, "pending_first_ge_90pct_s": 1.248, "dropBytes_at_stop": 0, "dropBytes_at_cont": 561951761, "dropTimeout_end": 31503, "heapUsed_peak": 3304259072, "pending_end": 0, "histo_total": 353433528, "n1_down_lines": 1, "n1_down_in_stall": 0, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 1, "n1_lmt_logged": null, "n2_down_any": false, "Op_rate": "29,670 op/s  [WRITE: 29,670 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "2,700,251 [WRITE: 2,700,251]", "nmt_other_committed_kb": 1385139, "nmt_total_committed_kb": 6163648}
+03:00:15 1792659615978 lifetimes found: ['v16k-1', 'v64k-1', 'v128k-1', 'ctl-1', 'v16k-2', 'v64k-2', 'v128k-2', 'ctl-2']
+03:00:15 1792659615979 v16k-1: V=16384 pending_peak=3145417 used_delta=84000 direct_delta=206508 overflow_delta=0 histo_total=225042792 down=1 frameErr=0 errors=0 t90=1.259 rate=29,770 op/s  [WRITE: 29,770 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 v64k-1: V=65536 pending_peak=3145417 used_delta=102784 direct_delta=229098 overflow_delta=0 histo_total=236564528 down=1 frameErr=0 errors=0 t90=1.251 rate=29,875 op/s  [WRITE: 29,875 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 v128k-1: V=131072 pending_peak=3145417 used_delta=94208 direct_delta=203514 overflow_delta=0 histo_total=203804416 down=1 frameErr=0 errors=0 t90=1.299 rate=29,711 op/s  [WRITE: 30,041 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 ctl-1: V=65536 pending_peak=33553595 used_delta=122912 direct_delta=231870 overflow_delta=0 histo_total=655113664 down=1 frameErr=0 errors=0 t90=1.246 rate=29,863 op/s  [WRITE: 29,863 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 v16k-2: V=16384 pending_peak=3145417 used_delta=127008 direct_delta=215328 overflow_delta=0 histo_total=546609496 down=1 frameErr=0 errors=0 t90=1.278 rate=29,841 op/s  [WRITE: 29,841 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 v64k-2: V=65536 pending_peak=3145417 used_delta=102400 direct_delta=207921 overflow_delta=0 histo_total=226617464 down=1 frameErr=0 errors=0 t90=1.261 rate=29,953 op/s  [WRITE: 29,953 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 v128k-2: V=131072 pending_peak=3145417 used_delta=106496 direct_delta=205612 overflow_delta=0 histo_total=220361960 down=1 frameErr=0 errors=0 t90=1.252 rate=29,971 op/s  [WRITE: 29,971 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 ctl-2: V=65536 pending_peak=33553595 used_delta=69600 direct_delta=213934 overflow_delta=0 histo_total=353433528 down=1 frameErr=0 errors=0 t90=1.248 rate=29,670 op/s  [WRITE: 29,670 op/s] stressErr=0 [WRITE: 0]
+03:00:15 1792659615979 per-V V=16384: {'pending_peak': 3145417, 'used_delta': 105504, 'direct_delta': 210918, 'n': 2}
+03:00:15 1792659615979 per-V V=65536: {'pending_peak': 3145417, 'used_delta': 102592, 'direct_delta': 218509.5, 'n': 2}
+03:00:15 1792659615979 per-V V=131072: {'pending_peak': 3145417, 'used_delta': 100352, 'direct_delta': 204563, 'n': 2}
+03:00:15 1792659615979 C4 (n2 down in a run): []; C5 (frame errors): []; V with no counting run: []
+03:00:15 1792659615979 C2 (monotonic increase with V by > 1 MiB): []
+03:00:15 1792659615979 C3 (cap not reached): []; C6 (cap exceeded): []
+03:00:15 1792659615979 pending per-V span 0 B (0.00 % of mean)
+03:00:15 1792659615979 UsedSize per-V span 5152 B
+03:00:15 1792659615979 direct per-V span 13946 B
+03:00:15 1792659615979 C1 band: main pending in [0.9*3MiB, 3MiB+2KiB]: True
+03:00:15 1792659615979 C1 band: per-V pending span < 5% of mean: True
+03:00:15 1792659615979 C1 band: per-V UsedSize span < 0.5 MiB: True
+03:00:15 1792659615979 C1 band: per-V direct span < 1 MiB: True
+03:00:15 1792659615979 C1 band: control pending in [0.9*32MiB, 32MiB+2KiB]: True
+03:00:15 1792659615979 heap sub-prediction: control histogram total mean 504273596 vs V=65536 mean 231590996: diff 272682600 B (predicted >= ~29 MB)
+03:00:15 1792659615979 VERDICT (B3g as amended by S4-A9): C1 Confirmed
+=== 1792659615985 chain done

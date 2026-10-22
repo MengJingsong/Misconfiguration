@@ -1,0 +1,115 @@
+== 2026-10-22T05:07:44-04:00 R6 L=1024MiB kind=plain table=t_plain
+d54a2ad11b7f338e0708a1f4436ef446c767c041bc1b35967e8a22f3fb50ef4d  /users/jason92/stage4-harness-run/sai/attempt2/all-runs.sh
+51d1f67c456ff17af5a62fda18249e96d1061e18fc4ad96d8225e3f31a7b14cc  /users/jason92/stage4-harness-run/sai/attempt2/analyze.py
+d202365e1e2ce667334202007c3f7d7063bbb801b4669214a62c1004b3e89008  /users/jason92/stage4-harness-run/sai/attempt2/cluster-run.sh
+f1f7a42dffef600531bb6169eef50a21c6b0f2b0c68e238d44bd73d8f7b86fdd  /users/jason92/stage4-harness-run/sai/attempt2/plain-profile.yaml
+8c0cab7ed13321342618ec3537f905319eccd6cea74e38da1d33c85e9dd330ce  /users/jason92/stage4-harness-run/sai/attempt2/README.md
+0416842d6eeaf16510390f0180313cf5696e51d951ef75b05e818cc4e7ca02a7  /users/jason92/stage4-harness-run/sai/attempt2/SaiMemtableChargeTest.java
+7d52ced4117852c2dcbab7b8cfdd8bb69980bb3014d60ceda3c06787f8ed0339  /users/jason92/stage4-harness-run/sai/attempt2/SaiPoll.java
+4126846b651f21b74c68c5b56b96c08479c7369ba1b8a036eb3c1244267a9178  /users/jason92/stage4-harness-run/sai/attempt2/sai-profile.yaml
+79078cfa8cb71f789c23818d59a2e85d17fdb89b3dd6a36cf24f63166adca66d  /users/jason92/stage4-harness-run/sai/attempt2/SHA256SUMS
+5ce1512733da9d36743407f7ed10cc71fc817c2bcf6fbe23705c7e4e4a6f4f17  /users/jason92/stage4-harness-run/sai/attempt2/unit-run.sh
+free on / : 48G
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'saiexp'
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /users/jason92/stage4-sai/node/hints
+395c395
+< # data_file_directories:
+---
+> data_file_directories: [/users/jason92/stage4-sai/node/data]
+408c408
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /users/jason92/stage4-sai/node/commitlog
+431c431
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /users/jason92/stage4-sai/node/cdc_raw
+611c611
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /users/jason92/stage4-sai/node/saved_caches
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.5:7000"
+797c797
+< # memtable_heap_space: 2048MiB
+---
+> memtable_heap_space: 1024MiB
+883c883
+< # commitlog_total_space: 8192MiB
+---
+> commitlog_total_space: 8192MiB
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.5
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.5
+1230c1230
+< # concurrent_compactors: 1
+---
+> concurrent_compactors: 2
+1790c1790
+< # sai_options:
+---
+> sai_options:
+1794c1794
+<   # segment_write_buffer_size: 1024MiB
+---
+>   segment_write_buffer_size: 16MiB
+235:JMX_PORT="7205"
+PID=894433 mypids=894433
+INFO  [main] 2026-10-22T09:07:47,099 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 1024MiB
+-Xms4G
+-Xmx4G
+Total partitions          :          1 [insert: 1]
+Total errors              :          0 [insert: 0]
+Total partitions          :          1 [insert: 1]
+Total errors              :          0 [insert: 0]
+Total partitions          :          1 [insert: 1]
+Total errors              :          0 [insert: 0]
+Total partitions          :          1 [insert: 1]
+Total errors              :          0 [insert: 0]
+Total partitions          :          1 [insert: 1]
+Total errors              :          0 [insert: 0]
+schema:
+CREATE TABLE saiks.t_plain (
+H0 Total        733682       71419968
+system.log offset 86020
+stress rc=0
+Op rate                   :  111,714 op/s  [insert: 111,714 op/s]
+Total partitions          : 10,000,000 [insert: 10,000,000]
+Total errors              :          0 [insert: 0]
+Total operation time      : 00:01:29
+OOM/crash evidence: /users/jason92/stage4-logs/sai/R6/logs/system.log:0 /users/jason92/stage4-logs/sai/R6/out.log:0  hs_err: 
+final 1792660456354 Total        704163      101444448
+Flushing largest lines: 14
+N_flush saiks.t_plain MEMTABLE_LIMIT: 14
+saiks.t_plain flushes other reasons: 1
+INFO  [RMI TCP Connection(36)-127.0.0.1] 2026-10-22T09:14:15,728 ColumnFamilyStore.java:1055 - Enqueuing flush of saiks.t_plain, Reason: USER_FORCED, Usage: 140.593MiB (14%) on-heap, 0B (0%) off-heap
+other tables' MEMTABLE_LIMIT flushes: 0
+BlockedOnAllocation Count: 0
+		SSTable count: 8
+		Old SSTable count: 0
+		Space used (live): 645786784
+		Memtable switch count: 16
+concurrent compactors                2                                                                  
+pending tasks                        2                                                                  
+saiks                                t_plain         2                                                  
+ERROR lines: 0
+samples: 112; histograms: 10; saipoll.err: 0
+806M	/users/jason92/stage4-sai/node
+/dev/sda3        63G   11G   49G  18% /
+== 2026-10-22T05:14:21-04:00 R6 done
+== stopping node
+leftover cassandra-sai java: daemon=[] stress=[]
+== 2026-10-22T05:14:36-04:00 R6 exit

@@ -1,0 +1,20 @@
+V0 rep 0: H=65536 L=32768; jmx samples 86, vt samples 22; freeze 1792657827388..1792657827388 (0.0 s)
+  used: pre median 63488.0 (n=20), plateau median 65536.0 (n=24), delta 2048.0 = 0.002 MiB
+  direct: pre median 59107568.0 (n=20), plateau median 59339044.0 (n=24), delta 231476.0 = 0.221 MiB
+  smallPending: pre median 57540207.0 (n=20), plateau median 4281108.0 (n=24), delta -53259099.0 = -50.792 MiB
+  heap: pre median 751131648.0 (n=20), plateau median 2945139200.0 (n=24), delta 2194007552.0 = 2092.369 MiB
+  UsedSize in plateau window min/max 0/131104
+  Small PendingBytes during freeze: max None; median in plateau 4281108.0
+  trace: STALL 49, RESUME 49; (H,L) seen [(65536, 32768)]; expected (65536, 32768)
+  STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 49 e.g. [{'ms': 1792657822865, 'type': 'SMALL_MESSAGES', 'to': '/127.0.0.2:7000', 'id': '101546151', 'f': 0, 'H': 65536, 'L': 32768}, {'ms': 1792657828701, 'type': 'SMALL_MESSAGES', 'to': '/127.0.0.2:7000', 'id': '101546151', 'f': 63554, 'H': 65536, 'L': 32768}, {'ms': 1792657828701, 'type': 'SMALL_MESSAGES', 'to': '/127.0.0.2:7000', 'id': '101546151', 'f': 63554, 'H': 65536, 'L': 32768}]; RESUME level > L: 10 e.g. [{'ms': 1792657828701, 'type': 'SMALL_MESSAGES', 'to': '/127.0.0.2:7000', 'id': '101546151', 'f': 63554, 'L': 32768}, {'ms': 1792657828702, 'type': 'SMALL_MESSAGES', 'to': '/127.0.0.2:7000', 'id': '101546151', 'f': 63554, 'L': 32768}, {'ms': 1792657828702, 'type': 'SMALL_MESSAGES', 'to': '/127.0.0.2:7000', 'id': '101546151', 'f': 63554, 'L': 32768}]
+  STALL level min/max over all: 0/65441; types ['SMALL_MESSAGES']
+  RESUME level min/median/max: 0/0/65441
+  small-link STALLs to 127.0.0.2 inside the freeze: 0; max level None; first at pause+None s
+  STALLs before the freeze: 1; RESUMEs before the freeze: 1
+  A system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+  B system.log: ERROR 0, WARN 7, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+    A log: INFO  [GossipStage:1] 2026-10-22T08:29:48,546 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+  stress Op rate                   :   19,037 op/s  [WRITE: 19,989 op/s]
+  stress Total errors              :          0 [WRITE: 0]
+  stress Total partitions          :    400,069 [WRITE: 400,069]
+  stress Total operation time      : 00:00:21

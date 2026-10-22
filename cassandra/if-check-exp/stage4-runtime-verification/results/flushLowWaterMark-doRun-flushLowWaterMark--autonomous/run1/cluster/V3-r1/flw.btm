@@ -1,0 +1,32 @@
+# Byteman observation rules for node A, cluster tier (B3) of flushLowWaterMark-doRun-flushLowWaterMark--autonomous,
+# amendment A8. cluster-run.py replaces /users/jason92/stage4-logs/flw/run1/cluster/V3-r1/flw.trace with the lifetime's trace file and loads the script with
+# -javaagent:<byteman jar>=script:<this file> (no listener). Observation only: no rule changes control flow.
+#
+# STALL  after the call to promiseToExecuteLater() in doRun (OutboundConnection.java:858; its only call site in doRun,
+#        bytecode offset 641, inside the `if (hasOverflowed)` branch, right after isWritable = false at :857):
+#        epoch ms, link type, peer, delivery id, flushingBytes, H and L of the running connection's settings.
+#        (Harness fix 2026-10-22, before run 1: the first version used AT LINE 857, but Byteman injects at the first
+#        bytecode whose line is >= the target, which in doRun is an inlined copy of the finally block (line 902, offset
+#        104, an early-return path); the shakedown showed STALL levels of 0 and one frame, below H.)
+# RESUME at the first doRun entry after a STALL of the same delivery that finds isWritable true again (set at :873 by the
+#        :871 check): epoch ms, link type, peer, delivery id, flushingBytes (<= the level at the flip), L.
+
+RULE flw stall
+CLASS org.apache.cassandra.net.OutboundConnection$EventLoopDelivery
+METHOD doRun
+AFTER INVOKE promiseToExecuteLater
+IF true
+DO traceOpen("flw", "/users/jason92/stage4-logs/flw/run1/cluster/V3-r1/flw.trace");
+   flag($this);
+   traceln("flw", "STALL " + System.currentTimeMillis() + " " + $this.this$0.type + " " + $settings.to + " " + System.identityHashCode($this) + " " + $this.flushingBytes + " " + $settings.flushHighWaterMark + " " + $settings.flushLowWaterMark)
+ENDRULE
+
+RULE flw resume
+CLASS org.apache.cassandra.net.OutboundConnection$EventLoopDelivery
+METHOD doRun
+AT ENTRY
+IF flagged($this) && $this.isWritable
+DO traceOpen("flw", "/users/jason92/stage4-logs/flw/run1/cluster/V3-r1/flw.trace");
+   clear($this);
+   traceln("flw", "RESUME " + System.currentTimeMillis() + " " + $this.this$0.type + " " + $1.settings.to + " " + System.identityHashCode($this) + " " + $this.flushingBytes + " " + $1.settings.flushLowWaterMark)
+ENDRULE

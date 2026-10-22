@@ -1,0 +1,26 @@
+27 RESULT lines
+PASS  27 RESULT lines (3 V x 3 runs x 3 methods)  
+PASS  lmt = V - 21 in every line  
+PASS  V=16384: six C=4MiB readings  
+PASS  V=65536: six C=4MiB readings  
+PASS  V=131072: six C=4MiB readings  
+per-V pendingPeak medians {16384: 4226796.0, 65536: 4226796.0, 131072: 4226796.0}
+per-V poolPeakDelta medians {16384: 106496.0, 65536: 262144.0, 131072: 458752.0} span 352256.0 B
+U5 0 U7 0 U8 0 U2 False U3 False U4 0 U6 0 U9 True
+  U1 part: every C4M maxFrame in band: True
+  U1 part: pendingPeak medians differ <= S: True
+  U1 part: C1M > 2 MiB below C4M median at 65536: True
+  U1 part: poolPeakDelta medians span < 300 KiB: False
+  U1 part: every poolPeakDelta < 1 MiB: True
+UNIT VERDICT ROW: U9
+PASS  sub: V=16384 poolPeakDelta <= 128KiB + 2(LMT+2KiB) = 167894  max 114688
+PASS  sub: V=65536 poolPeakDelta <= 128KiB + 2(LMT+2KiB) = 266198  max 262144
+FAIL  sub: V=131072 poolPeakDelta <= 128KiB + 2(LMT+2KiB) = 397270  max 458752
+PASS  sub: overflowDelta 0 everywhere  
+PASS  sub: V=16384 frames about 256  [259, 263]
+PASS  sub: V=65536 frames about 64  [65, 66]
+PASS  sub: V=131072 frames about 32  [33]
+PASS  sub: pendingPeak in [C-S, C+R] everywhere  
+FAIL  sub (S4-A3 expectation): pendingPeak <= C everywhere  [('C1M', 1048476), ('C4M', 4193904), ('C4M_repeat', 4259688)]
+PASS  sub: errors 0 and sent = accepted  
+13/15 checks pass; verdict row U9

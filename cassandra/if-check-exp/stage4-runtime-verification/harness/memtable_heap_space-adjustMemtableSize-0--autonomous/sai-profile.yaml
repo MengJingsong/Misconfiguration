@@ -1,0 +1,20 @@
+keyspace: saiks
+keyspace_definition: |
+  CREATE KEYSPACE saiks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+table: t_sai
+table_definition: |
+  CREATE TABLE t_sai (pk bigint PRIMARY KEY, v text) WITH compaction = {'class':'SizeTieredCompactionStrategy'};
+extra_definitions:
+  - CREATE INDEX IF NOT EXISTS t_sai_v_idx ON saiks.t_sai(v) USING 'sai';
+columnspec:
+  - name: v
+    size: fixed(32)
+    population: uniform(1..2000000000)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+  select: fixed(1)/1
+queries:
+  read1:
+    cql: select * from t_sai where pk = ?
+    fields: samerow

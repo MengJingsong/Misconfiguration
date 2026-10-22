@@ -1,0 +1,22 @@
+V1 rep 1: H=67108864 L=1024; jmx samples 165, vt samples 41; freeze 1792658920332..1792658945344 (25.0 s)
+  used: pre median 144.0 (n=20), plateau median 122124320.0 (n=24), delta 122124176.0 = 116.467 MiB
+  direct: pre median 59226199.0 (n=20), plateau median 185348037.0 (n=24), delta 126121838.0 = 120.279 MiB
+  smallPending: pre median 2111.0 (n=20), plateau median 138381327.5 (n=24), delta 138379216.5 = 131.969 MiB
+  heap: pre median 737546240.0 (n=20), plateau median 2505855488.0 (n=24), delta 1768309248.0 = 1686.391 MiB
+  UsedSize in plateau window min/max 122124288/122128448
+  Small PendingBytes during freeze: max 138411937; median in plateau 138381327.5
+  vt during freeze: pending_bytes max 138409826, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->71970, expired_count 0->347275
+  trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 1024)]; expected (67108864, 1024)
+  STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+  STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+  RESUME level min/median/max: 0/0/0
+  small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.81 s
+  STALLs before the freeze: 0; RESUMEs before the freeze: 0
+  A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+  B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+    A log: INFO  [GossipStage:1] 2026-10-22T08:48:01,079 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+    A log: WARN  [Native-Transport-Requests-7] 2026-10-22T08:48:43,833 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-a0b42e77 overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.002MiB global)
+  stress Op rate                   :   19,833 op/s  [WRITE: 19,833 op/s]
+  stress Total errors              :          0 [WRITE: 0]
+  stress Total partitions          :  1,200,072 [WRITE: 1,200,072]
+  stress Total operation time      : 00:01:00

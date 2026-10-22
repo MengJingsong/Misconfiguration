@@ -1,0 +1,140 @@
+== 2026-10-22T04:49:00-04:00 V128 networking_cache_size=128MiB
+sha256sum: /users/jason92/stage4-harness-run/ncs/classes: Is a directory
+1c1a1ba536f07fdfda478ffe6dac1a224967119b891d0079dce09ca52786c458  /users/jason92/stage4-harness-run/ncs/all-runs.sh
+a7c38e84423cced04d2838512b6a6aaabc4336052e8a1ad85ea80ad822de1579  /users/jason92/stage4-harness-run/ncs/cluster-run.sh
+3fb21b54efed241462f95a704043c35b0a875f248805751f0c37797d9027899b  /users/jason92/stage4-harness-run/ncs/FreeUnusedPortionProbeTest.java
+d85a0e7a4e7e3a1ccb92cce6e43415de830a5b99545aaaafbed12cc08922c311  /users/jason92/stage4-harness-run/ncs/ncs.btm
+ebf9f5a851b77ed2afc448b118e4b9f6c3f51b4abffc7aa3b297ca702c9aba5d  /users/jason92/stage4-harness-run/ncs/PoolSampler.java
+fb1995287f422b3a817d0abd1638c3e27878d87865381126be341e7079669a1f  /users/jason92/stage4-harness-run/ncs/SHA256SUMS
+a883735e1ae29836a3df96caa6a4612cea28d6b433fe5ffe322d83e5fda301da  /users/jason92/stage4-harness-run/ncs/unit-run.sh
+/dev/sda3        63G  9.7G   50G  17% /
+-- n4 yaml diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'ncs-stage4'
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /users/jason92/stage4-ncs/n4/hints
+395c395
+< # data_file_directories:
+---
+> data_file_directories: [/users/jason92/stage4-ncs/n4/data]
+408c408
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /users/jason92/stage4-ncs/n4/commitlog
+431c431
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /users/jason92/stage4-ncs/n4/cdc_raw
+611c611
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /users/jason92/stage4-ncs/n4/saved_caches
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.4:7000"
+738c738
+< # networking_cache_size: 128MiB
+---
+> networking_cache_size: 128MiB
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.4
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.4
+235:JMX_PORT="7204"
+-- n6 yaml diff
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'ncs-stage4'
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /users/jason92/stage4-ncs/n6/hints
+395c395
+< # data_file_directories:
+---
+> data_file_directories: [/users/jason92/stage4-ncs/n6/data]
+408c408
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /users/jason92/stage4-ncs/n6/commitlog
+431c431
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /users/jason92/stage4-ncs/n6/cdc_raw
+611c611
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /users/jason92/stage4-ncs/n6/saved_caches
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.4:7000"
+738c738
+< # networking_cache_size: 128MiB
+---
+> networking_cache_size: 128MiB
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.6
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.6
+235:JMX_PORT="7206"
+n4 up, pid 875871, 66 s
+INFO  [MemtableFlushWriter:1] 2026-10-22T08:49:06,296 BufferPools.java:49 - Global buffer pool limit is 512.000MiB for chunk-cache and 128.000MiB for networking
+n4 out.log byteman/rule errors: 1
+n6 up, pid 877396, 80 s
+INFO  [MemtableFlushWriter:1] 2026-10-22T08:50:14,857 BufferPools.java:49 - Global buffer pool limit is 512.000MiB for chunk-cache and 128.000MiB for networking
+n6 out.log byteman/rule errors: 1
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.6  119.67 KiB  16      100.0%            c40c500b-cdbf-46b4-af7c-00b03b069775  rack1
+UN  127.0.0.4  119.82 KiB  16      100.0%            c82ea3eb-9f80-49e8-9717-0c4d6c67aa58  rack1
+
+== idle baseline 30 s
+write rc=0
+Op rate                   :   14,241 op/s  [WRITE: 14,241 op/s]
+Total partitions          :  1,500,000 [WRITE: 1,500,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:01:45
+read rc=0
+Op rate                   :   51,873 op/s  [READ: 51,873 op/s]
+Total partitions          :  1,000,000 [READ: 1,000,000]
+Total errors              :          0 [READ: 0]
+Total operation time      : 00:00:19
+== tail 60 s
+-- n4: 'Maximum memory usage reached' lines: 0
+-- n4: ^ERROR lines: 0; ^WARN lines: 11
+-- n4: made lines 1; last dump: dump made=1 refuse=0 gtrue=2014716 gfalse=938013 gtiny=1201210 ovftrim=0 ms=1792659329757
+-- n4: samples 50, ERR 0
+-- n6: 'Maximum memory usage reached' lines: 0
+-- n6: ^ERROR lines: 0; ^WARN lines: 11
+-- n6: made lines 1; last dump: dump made=1 refuse=0 gtrue=2016634 gfalse=943337 gtiny=1211411 ovftrim=0 ms=1792659329746
+-- n6: samples 50, ERR 0
+		SSTable count: 6
+		Old SSTable count: 0
+		Space used (live): 3874170126
+		Number of partitions (estimate): 1483749
+3.7G	/users/jason92/stage4-ncs/n4/data
+3.7G	/users/jason92/stage4-ncs/n6/data
+== 2026-10-22T04:55:36-04:00 V128 done
+== stopping nodes
+leftover cassandra-ncs java: 0
+756K	/users/jason92/stage4-ncs
+/dev/sda3        63G  9.7G   50G  17% /
+== 2026-10-22T04:56:06-04:00 V128 cleanup done

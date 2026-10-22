@@ -60,6 +60,21 @@ does not follow the constraint. Stage 4 confirms or refutes it.
   selected": the selection moves usage below L, and a changed selection wasted heap in slab
   regions. Lesson: "release / soft target" rows that hand back or trigger on a byte operand
   tied to a knob behave as caps at runtime; re-read the rest of §9 with that in mind.
+- **Third write-up batch (2026-10-22).** Five more §9 lines were written up by fresh autonomous
+  agents and run at stage 4; all five **left this file** (verdicts in [`_INDEX.md`](_INDEX.md) §1).
+  Three kept a negative estimate and no tier refuted it: `BufferPool.java:1521`
+  (`NORMAL_CHUNK_SIZE`; unit Confirmed — does not cap, neither outcome moves reserved or direct
+  memory; the overflow trim at `:883-885` drives `OverflowSize` to −14.7 GB),
+  `OutboundConnection.java:767` (`OTCP_LARGE_MESSAGE_THRESHOLD`; cluster Confirmed — does not cap,
+  queued bytes set by the send-queue cap; unit pool peak rose ~3 frames, < 0.5 MiB) and `:871`
+  (`flushLowWaterMark`; both tiers Not confirmed on one size prediction each, readings flat in the
+  low mark). Two came back positive: `PreV5Handlers.java:127`
+  (`native_transport_max_request_data_in_flight`; Confirmed — caps (soft), peak exactly one
+  request over L plus one per connection) and `StorageAttachedIndex.java:1006`
+  (`memtable_heap_space`; the SAI charge is exact and the pool caps it, ~3.5 × held; cluster
+  Not confirmed on an under-sampled sawtooth row). The "release / soft target" lesson held for
+  lines whose operand is a configurable byte count; it did not for hard-coded water marks and
+  pool-internal bookkeeping.
 
 Contents: [1](#1-configuration-and-argument-validation) validation ·
 [2](#2-logging-warning-or-diagnostic-only) logging only ·
@@ -272,11 +287,7 @@ both branches. A reclaim target can be exceeded, so it is not a ceiling.
 | If statement | Reason rejected |
 |---|---|
 | `AbstractMessageHandler.java:447` | Returns over-borrowed reserve inside the filed receive case's `acquireCapacity()`. |
-| `OutboundConnection.java:767`, `:871` | `:871` resumes delivery below the flush low-water mark (the bytes stay counted until `releaseCapacity()` at `:866`); `:767` stops when nothing is pending. |
-| `BufferPool.java:1521` `size == capacity` in `freeUnusedPortion()` | Returns early when there is no spare tail to give back. |
 | `CommitLogSegmentManagerCDC.java:93` | The deletion path of the filed `cdc_total_space` case. |
-| `PreV5Handlers.java:127` | Unpauses a pre-v5 connection once in-flight bytes drop: the release side of the in-flight limits. |
-| `StorageAttachedIndex.java:1006` | Charges SAI memtable-index growth to the memtable's on-heap count and drops decreases: accounting. |
 
 ## 10. Count, time, rate and work thresholds
 

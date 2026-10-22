@@ -1,0 +1,28 @@
+U1: N=100000 W=100000 S=12979488 dS=69979488 dP=57000000 dS-dP=12979488 (dS-dP-S=0) flushes=0
+U2: D=45310184 D2=45310184 K=216 (D-K)/S=3.491 (D-K)-S=32330480 = 323.3 B/row
+U3 L=32MiB index=False: samples=81 rows=400000 flushes=20 maxPool=32975043 (0.983 L) maxS=0 (0.000 L) S decreases=0
+U3 L=32MiB index=True: samples=81 rows=400000 flushes=25 maxPool=23602929 (0.703 L) maxS=4393824 (0.131 L) S decreases=24
+U3 L=96MiB index=False: samples=81 rows=400000 flushes=6 maxPool=46171887 (0.459 L) maxS=0 (0.000 L) S decreases=0
+U3 L=96MiB index=True: samples=81 rows=400000 flushes=8 maxPool=57066119 (0.567 L) maxS=11567008 (0.115 L) S decreases=7
+
+Unit sub-predictions (B2f):
+  HIT  U1 dS-dP == S exactly
+  HIT  U1 S > 0
+  HIT  U1 W == N
+  HIT  U1 flushes == 0
+  HIT  U1 S/N in 100..400 (129.8)
+  MISS U2 r_unit in 1.2..2.5 (3.491)
+  HIT  U2 (D-K)-S >= 100*N
+  HIT  U2 D2 <= D
+  HIT  U3 L=32 flushes(sai)/flushes(plain)=1.250 within 25% of dS/dP=1.228
+  HIT  U3 L=32 every poolUsed <= L
+  HIT  U3 L=32 every S <= L
+  HIT  U3 L=32 peak S <= L/2
+  HIT  U3 L=96 flushes(sai)/flushes(plain)=1.333 within 25% of dS/dP=1.228
+  HIT  U3 L=96 every poolUsed <= L
+  HIT  U3 L=96 every S <= L
+  HIT  U3 L=96 peak S <= L/2
+  HIT  U3 flushes(32)/flushes(96) = 3.125 in 3 +- 1
+  HIT  U3 maxS(96)/maxS(32) = 2.633 in 2..4
+
+UNIT ROW: 7 Confirmed - caps; qualifiers: ['Qb (D-K)/S > 3']

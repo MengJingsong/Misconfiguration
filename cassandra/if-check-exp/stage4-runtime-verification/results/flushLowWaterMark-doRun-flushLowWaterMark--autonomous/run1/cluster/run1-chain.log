@@ -1,0 +1,568 @@
+=== 2026-10-22T08:44:09Z lifetime V0 rep 1
+02:44:09 1792658649654 === lifetime V0 rep 1 tree /users/jason92/cassandra-flw harness /users/jason92/stage4-harness-run/flw expected (H,L)=(65536, 32768) shake=False
+02:44:09 1792658649673 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+02:44:10 1792658650066   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+02:44:10 1792658650066   | /dev/sda3        63G  7.6G   52G  13% /
+02:44:10 1792658650070 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+02:44:10 1792658650073   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 15, 1 << 16, null, null, null, null, null, null, null, null);
+02:44:10 1792658650073 $ CASSANDRA_HOME=/users/jason92/cassandra-flw bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+02:44:10 1792658650122   | node A: tree /users/jason92/cassandra-flw conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:44:10 1792658650122   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+02:44:10 1792658650122 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+02:44:53 1792658693134 1 UN after 43 s
+02:44:53 1792658693134 $ CASSANDRA_HOME=/users/jason92/cassandra-flw bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+02:44:53 1792658693184   | node B: tree /users/jason92/cassandra-flw conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:44:53 1792658693184   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+02:44:53 1792658693184 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+02:45:21 1792658721319 2 UN after 28 s
+02:45:24 1792658724972 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:45:39 1792658739984 SIGSTOP B pid 265236
+02:46:04 1792658764997 SIGCONT B pid 265236
+02:46:33 1792658793776 stress exit 0
+02:46:44 1792658804515 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V0-r1/stop /users/jason92/stage4-logs/flw/run1/cluster/V0-r1/vt-final.csv once
+02:46:44 1792658804948   | samples=1
+02:46:44 1792658804982 $ bin/nodetool -p 7299 stopdaemon
+02:46:55 1792658815242   | WARN  08:46:46,453 Only 54.867GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:46:55 1792658815242   | Cassandra has shutdown.
+02:46:55 1792658815262 B stopped
+02:46:55 1792658815277 $ bin/nodetool -p 7199 stopdaemon
+02:47:08 1792658828343   | WARN  08:46:56,587 Only 54.879GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:47:08 1792658828343   | Cassandra has shutdown.
+02:47:08 1792658828362 A stopped
+02:47:09 1792658829398 daemons of the variant trees left: 0
+02:47:09 1792658829400 V0 rep 1: H=65536 L=32768; jmx samples 164, vt samples 41; freeze 1792658739984..1792658764997 (25.0 s)
+02:47:09 1792658829400   used: pre median 16.0 (n=20), plateau median 69664.0 (n=24), delta 69648.0 = 0.066 MiB
+02:47:09 1792658829400   direct: pre median 59185298.0 (n=20), plateau median 59416972.0 (n=24), delta 231674.0 = 0.221 MiB
+02:47:09 1792658829400   smallPending: pre median 2110.5 (n=20), plateau median 84701764.0 (n=24), delta 84699653.5 = 80.776 MiB
+02:47:09 1792658829400   heap: pre median 762811072.0 (n=20), plateau median 2341052552.0 (n=24), delta 1578241480.0 = 1505.128 MiB
+02:47:09 1792658829401   UsedSize in plateau window min/max 69632/77824
+02:47:09 1792658829401   Small PendingBytes during freeze: max 87082972; median in plateau 84701764.0
+02:47:09 1792658829401   vt during freeze: pending_bytes max 84879088, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->0, expired_count 0->444939
+02:47:09 1792658829401   trace: STALL 32, RESUME 32; (H,L) seen [(65536, 32768)]; expected (65536, 32768)
+02:47:09 1792658829401   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+02:47:09 1792658829401   STALL level min/max over all: 67552/130882; types ['SMALL_MESSAGES']
+02:47:09 1792658829401   RESUME level min/median/max: 0/0.0/0
+02:47:09 1792658829401   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67552; first at pause+0.226 s
+02:47:09 1792658829401   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+02:47:09 1792658829407   A system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:47:09 1792658829412   B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:47:09 1792658829413     A log: INFO  [GossipStage:1] 2026-10-22T08:45:01,239 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+02:47:09 1792658829414   stress Op rate                   :   19,801 op/s  [WRITE: 19,801 op/s]
+02:47:09 1792658829415   stress Total errors              :          0 [WRITE: 0]
+02:47:09 1792658829415   stress Total partitions          :  1,200,072 [WRITE: 1,200,072]
+02:47:09 1792658829416   stress Total operation time      : 00:01:00
+=== 2026-10-22T08:47:09Z lifetime V0 rep 1 exit 0
+=== 2026-10-22T08:47:09Z lifetime V1 rep 1
+02:47:09 1792658829463 === lifetime V1 rep 1 tree /users/jason92/cassandra-flw-p1 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(67108864, 1024) shake=False
+02:47:09 1792658829482 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+02:47:09 1792658829877   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+02:47:09 1792658829877   | /dev/sda3        63G  7.6G   52G  13% /
+02:47:09 1792658829882 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+02:47:09 1792658829884   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 10, 1 << 26, null, null, null, null, null, null, null, null);
+02:47:09 1792658829884 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p1 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+02:47:09 1792658829931   | node A: tree /users/jason92/cassandra-flw-p1 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:47:09 1792658829931   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+02:47:09 1792658829931 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+02:47:53 1792658873074 1 UN after 43 s
+02:47:53 1792658873074 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p1 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+02:47:53 1792658873116   | node B: tree /users/jason92/cassandra-flw-p1 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:47:53 1792658873116   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+02:47:53 1792658873116 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+02:48:21 1792658901647 2 UN after 28 s
+02:48:25 1792658905320 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:48:40 1792658920332 SIGSTOP B pid 270153
+02:49:05 1792658945344 SIGCONT B pid 270153
+02:49:34 1792658974672 stress exit 0
+02:49:46 1792658986712 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V1-r1/stop /users/jason92/stage4-logs/flw/run1/cluster/V1-r1/vt-final.csv once
+02:49:47 1792658987141   | samples=1
+02:49:47 1792658987175 $ bin/nodetool -p 7299 stopdaemon
+02:49:57 1792658997299   | WARN  08:49:48,571 Only 54.866GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:49:57 1792658997299   | Cassandra has shutdown.
+02:49:57 1792658997320 B stopped
+02:49:57 1792658997338 $ bin/nodetool -p 7199 stopdaemon
+02:50:10 1792659010013   | WARN  08:49:58,727 Only 54.878GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:50:10 1792659010013   | Cassandra has shutdown.
+02:50:10 1792659010029 A stopped
+02:50:11 1792659011066 daemons of the variant trees left: 0
+02:50:11 1792659011068 V1 rep 1: H=67108864 L=1024; jmx samples 165, vt samples 41; freeze 1792658920332..1792658945344 (25.0 s)
+02:50:11 1792659011068   used: pre median 144.0 (n=20), plateau median 122124320.0 (n=24), delta 122124176.0 = 116.467 MiB
+02:50:11 1792659011068   direct: pre median 59226199.0 (n=20), plateau median 185348037.0 (n=24), delta 126121838.0 = 120.279 MiB
+02:50:11 1792659011068   smallPending: pre median 2111.0 (n=20), plateau median 138381327.5 (n=24), delta 138379216.5 = 131.969 MiB
+02:50:11 1792659011068   heap: pre median 737546240.0 (n=20), plateau median 2505855488.0 (n=24), delta 1768309248.0 = 1686.391 MiB
+02:50:11 1792659011068   UsedSize in plateau window min/max 122124288/122128448
+02:50:11 1792659011068   Small PendingBytes during freeze: max 138411937; median in plateau 138381327.5
+02:50:11 1792659011068   vt during freeze: pending_bytes max 138409826, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->71970, expired_count 0->347275
+02:50:11 1792659011069   trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 1024)]; expected (67108864, 1024)
+02:50:11 1792659011069   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+02:50:11 1792659011069   STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+02:50:11 1792659011069   RESUME level min/median/max: 0/0/0
+02:50:11 1792659011069   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.81 s
+02:50:11 1792659011069   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+02:50:11 1792659011074   A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:50:11 1792659011079   B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:50:11 1792659011080     A log: INFO  [GossipStage:1] 2026-10-22T08:48:01,079 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+02:50:11 1792659011080     A log: WARN  [Native-Transport-Requests-7] 2026-10-22T08:48:43,833 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-a0b42e77 overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.002MiB global)
+02:50:11 1792659011081   stress Op rate                   :   19,833 op/s  [WRITE: 19,833 op/s]
+02:50:11 1792659011081   stress Total errors              :          0 [WRITE: 0]
+02:50:11 1792659011082   stress Total partitions          :  1,200,072 [WRITE: 1,200,072]
+02:50:11 1792659011083   stress Total operation time      : 00:01:00
+=== 2026-10-22T08:50:11Z lifetime V1 rep 1 exit 0
+=== 2026-10-22T08:50:11Z lifetime V2 rep 1
+02:50:11 1792659011134 === lifetime V2 rep 1 tree /users/jason92/cassandra-flw-p2 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(67108864, 33554432) shake=False
+02:50:11 1792659011153 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+02:50:11 1792659011550   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+02:50:11 1792659011550   | /dev/sda3        63G  7.6G   52G  13% /
+02:50:11 1792659011555 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+02:50:11 1792659011558   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 25, 1 << 26, null, null, null, null, null, null, null, null);
+02:50:11 1792659011558 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p2 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+02:50:11 1792659011606   | node A: tree /users/jason92/cassandra-flw-p2 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:50:11 1792659011606   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+02:50:11 1792659011606 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+02:50:54 1792659054905 1 UN after 43 s
+02:50:54 1792659054905 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p2 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+02:50:54 1792659054951   | node B: tree /users/jason92/cassandra-flw-p2 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:50:54 1792659054951   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+02:50:54 1792659054951 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+02:51:28 1792659088392 2 UN after 33 s
+02:51:32 1792659092073 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:51:47 1792659107088 SIGSTOP B pid 275100
+02:52:12 1792659132097 SIGCONT B pid 275100
+02:52:41 1792659161518 stress exit 0
+02:52:53 1792659173458 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V2-r1/stop /users/jason92/stage4-logs/flw/run1/cluster/V2-r1/vt-final.csv once
+02:52:53 1792659173869   | samples=1
+02:52:53 1792659173903 $ bin/nodetool -p 7299 stopdaemon
+02:53:04 1792659184193   | WARN  08:52:55,390 Only 54.864GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:53:04 1792659184193   | Cassandra has shutdown.
+02:53:04 1792659184213 B stopped
+02:53:04 1792659184228 $ bin/nodetool -p 7199 stopdaemon
+02:53:17 1792659197678   | WARN  08:53:05,682 Only 54.877GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:53:17 1792659197678   | Cassandra has shutdown.
+02:53:17 1792659197697 A stopped
+02:53:18 1792659198724 daemons of the variant trees left: 0
+02:53:18 1792659198725 V2 rep 1: H=67108864 L=33554432; jmx samples 165, vt samples 41; freeze 1792659107088..1792659132097 (25.0 s)
+02:53:18 1792659198725   used: pre median 16.0 (n=20), plateau median 121866272.0 (n=24), delta 121866256.0 = 116.221 MiB
+02:53:18 1792659198725   direct: pre median 59214269.0 (n=20), plateau median 185370545.0 (n=24), delta 126156276.0 = 120.312 MiB
+02:53:18 1792659198725   smallPending: pre median 0.0 (n=20), plateau median 138284221.5 (n=24), delta 138284221.5 = 131.878 MiB
+02:53:18 1792659198725   heap: pre median 592740752.0 (n=20), plateau median 2099299880.0 (n=24), delta 1506559128.0 = 1436.767 MiB
+02:53:18 1792659198725   UsedSize in plateau window min/max 121866240/121888768
+02:53:18 1792659198725   Small PendingBytes during freeze: max 138411937; median in plateau 138284221.5
+02:53:18 1792659198725   vt during freeze: pending_bytes max 138411937, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->74144, expired_count 0->346399
+02:53:18 1792659198725   trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 33554432)]; expected (67108864, 33554432)
+02:53:18 1792659198725   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+02:53:18 1792659198725   STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+02:53:18 1792659198725   RESUME level min/median/max: 2233438/2233438/2233438
+02:53:18 1792659198725   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.788 s
+02:53:18 1792659198725   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+02:53:18 1792659198728   A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:53:18 1792659198730   B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:53:18 1792659198730     A log: INFO  [GossipStage:1] 2026-10-22T08:51:03,137 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+02:53:18 1792659198730     A log: WARN  [Native-Transport-Requests-3] 2026-10-22T08:51:50,561 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-84213d99 overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.000MiB global)
+02:53:18 1792659198730   stress Op rate                   :   19,891 op/s  [WRITE: 19,891 op/s]
+02:53:18 1792659198731   stress Total errors              :          0 [WRITE: 0]
+02:53:18 1792659198731   stress Total partitions          :  1,200,072 [WRITE: 1,200,072]
+02:53:18 1792659198731   stress Total operation time      : 00:01:00
+=== 2026-10-22T08:53:18Z lifetime V2 rep 1 exit 0
+=== 2026-10-22T08:53:18Z lifetime V3 rep 1
+02:53:18 1792659198774 === lifetime V3 rep 1 tree /users/jason92/cassandra-flw-p3 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(67108864, 66060288) shake=False
+02:53:18 1792659198793 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+02:53:19 1792659199186   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+02:53:19 1792659199186   | /dev/sda3        63G  7.6G   52G  13% /
+02:53:19 1792659199190 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+02:53:19 1792659199193   | this(null, to, preferred, null, null, null, null, null, null, null, (1 << 26) - (1 << 20), 1 << 26, null, null, null, null, null, null, null, null);
+02:53:19 1792659199193 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p3 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+02:53:19 1792659199240   | node A: tree /users/jason92/cassandra-flw-p3 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:53:19 1792659199240   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+02:53:19 1792659199240 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+02:54:02 1792659242369 1 UN after 43 s
+02:54:02 1792659242369 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p3 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+02:54:02 1792659242417   | node B: tree /users/jason92/cassandra-flw-p3 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:54:02 1792659242417   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+02:54:02 1792659242417 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+02:54:35 1792659275821 2 UN after 33 s
+02:54:39 1792659279470 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:54:54 1792659294485 SIGSTOP B pid 280220
+02:55:19 1792659319492 SIGCONT B pid 280220
+02:55:49 1792659349269 stress exit 0
+02:56:01 1792659361009 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V3-r1/stop /users/jason92/stage4-logs/flw/run1/cluster/V3-r1/vt-final.csv once
+02:56:01 1792659361433   | samples=1
+02:56:01 1792659361467 $ bin/nodetool -p 7299 stopdaemon
+02:56:11 1792659371722   | WARN  08:56:02,942 Only 54.863GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:56:11 1792659371722   | Cassandra has shutdown.
+02:56:11 1792659371738 B stopped
+02:56:11 1792659371752 $ bin/nodetool -p 7199 stopdaemon
+02:56:24 1792659384689   | WARN  08:56:13,109 Only 54.876GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:56:24 1792659384690   | Cassandra has shutdown.
+02:56:24 1792659384709 A stopped
+02:56:25 1792659385743 daemons of the variant trees left: 0
+02:56:25 1792659385745 V3 rep 1: H=67108864 L=66060288; jmx samples 166, vt samples 42; freeze 1792659294485..1792659319492 (25.0 s)
+02:56:25 1792659385746   used: pre median 48.0 (n=20), plateau median 121860096.0 (n=24), delta 121860048.0 = 116.215 MiB
+02:56:25 1792659385746   direct: pre median 59220734.5 (n=20), plateau median 185372161.0 (n=24), delta 126151426.5 = 120.307 MiB
+02:56:25 1792659385746   smallPending: pre median 0.0 (n=20), plateau median 138329608.0 (n=24), delta 138329608.0 = 131.921 MiB
+02:56:25 1792659385746   heap: pre median 594945076.0 (n=20), plateau median 2608377856.0 (n=24), delta 2013432780.0 = 1920.159 MiB
+02:56:25 1792659385746   UsedSize in plateau window min/max 121860096/121864224
+02:56:25 1792659385746   Small PendingBytes during freeze: max 138411937; median in plateau 138329608.0
+02:56:25 1792659385746   vt during freeze: pending_bytes max 138409826, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->73885, expired_count 0->345510
+02:56:25 1792659385746   trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 66060288)]; expected (67108864, 66060288)
+02:56:25 1792659385746   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+02:56:25 1792659385746   STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+02:56:25 1792659385746   RESUME level min/median/max: 41255273/41255273/41255273
+02:56:25 1792659385746   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.803 s
+02:56:25 1792659385746   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+02:56:25 1792659385752   A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:56:25 1792659385756   B system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:56:25 1792659385757     A log: INFO  [GossipStage:1] 2026-10-22T08:54:10,645 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+02:56:25 1792659385757     A log: WARN  [Native-Transport-Requests-1] 2026-10-22T08:54:57,975 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-a69ea7b7 overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.000MiB global)
+02:56:25 1792659385758   stress Op rate                   :   19,977 op/s  [WRITE: 19,977 op/s]
+02:56:25 1792659385759   stress Total errors              :          0 [WRITE: 0]
+02:56:25 1792659385759   stress Total partitions          :  1,200,070 [WRITE: 1,200,070]
+02:56:25 1792659385760   stress Total operation time      : 00:01:00
+=== 2026-10-22T08:56:25Z lifetime V3 rep 1 exit 0
+=== 2026-10-22T08:56:25Z lifetime V4 rep 1
+02:56:25 1792659385810 === lifetime V4 rep 1 tree /users/jason92/cassandra-flw-p4 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(4194304, 2097152) shake=False
+02:56:25 1792659385827 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+02:56:26 1792659386196   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+02:56:26 1792659386196   | /dev/sda3        63G  7.6G   52G  13% /
+02:56:26 1792659386201 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+02:56:26 1792659386202   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 21, 1 << 22, null, null, null, null, null, null, null, null);
+02:56:26 1792659386202 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p4 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+02:56:26 1792659386251   | node A: tree /users/jason92/cassandra-flw-p4 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:56:26 1792659386251   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+02:56:26 1792659386251 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+02:57:09 1792659429540 1 UN after 43 s
+02:57:09 1792659429540 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p4 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+02:57:09 1792659429591   | node B: tree /users/jason92/cassandra-flw-p4 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:57:09 1792659429591   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+02:57:09 1792659429591 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+02:57:37 1792659457854 2 UN after 28 s
+02:57:41 1792659461490 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:57:56 1792659476504 SIGSTOP B pid 285382
+02:58:21 1792659501512 SIGCONT B pid 285382
+02:58:51 1792659531336 stress exit 0
+02:59:03 1792659543026 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V4-r1/stop /users/jason92/stage4-logs/flw/run1/cluster/V4-r1/vt-final.csv once
+02:59:03 1792659543452   | samples=1
+02:59:03 1792659543484 $ bin/nodetool -p 7299 stopdaemon
+02:59:13 1792659553614   | WARN  08:59:04,892 Only 54.862GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:59:13 1792659553614   | Cassandra has shutdown.
+02:59:13 1792659553633 B stopped
+02:59:13 1792659553648 $ bin/nodetool -p 7199 stopdaemon
+02:59:26 1792659566510   | WARN  08:59:14,951 Only 54.874GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+02:59:26 1792659566511   | Cassandra has shutdown.
+02:59:26 1792659566529 A stopped
+02:59:27 1792659567560 daemons of the variant trees left: 0
+02:59:27 1792659567561 V4 rep 1: H=4194304 L=2097152; jmx samples 166, vt samples 42; freeze 1792659476504..1792659501512 (25.0 s)
+02:59:27 1792659567561   used: pre median 32.0 (n=20), plateau median 7612432.0 (n=24), delta 7612400.0 = 7.260 MiB
+02:59:27 1792659567561   direct: pre median 59179625.5 (n=20), plateau median 118218270.0 (n=24), delta 59038644.5 = 56.304 MiB
+02:59:27 1792659567561   smallPending: pre median 0.0 (n=20), plateau median 88841435.0 (n=24), delta 88841435.0 = 84.726 MiB
+02:59:27 1792659567561   heap: pre median 556120048.0 (n=20), plateau median 2307962520.0 (n=24), delta 1751842472.0 = 1670.687 MiB
+02:59:27 1792659567561   UsedSize in plateau window min/max 7612416/7639072
+02:59:27 1792659567561   Small PendingBytes during freeze: max 92708787; median in plateau 88841435.0
+02:59:27 1792659567561   vt during freeze: pending_bytes max 90251583, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->0, expired_count 0->443370
+02:59:27 1792659567562   trace: STALL 25, RESUME 25; (H,L) seen [(4194304, 2097152)]; expected (4194304, 2097152)
+02:59:27 1792659567562   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+02:59:27 1792659567562   STALL level min/max over all: 4196668/4253665; types ['SMALL_MESSAGES']
+02:59:27 1792659567562   RESUME level min/median/max: 0/850733/2028671
+02:59:27 1792659567562   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 4196668; first at pause+0.287 s
+02:59:27 1792659567562   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+02:59:27 1792659567564   A system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:59:27 1792659567566   B system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+02:59:27 1792659567566     A log: INFO  [GossipStage:1] 2026-10-22T08:57:17,694 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+02:59:27 1792659567567   stress Op rate                   :   19,956 op/s  [WRITE: 19,956 op/s]
+02:59:27 1792659567567   stress Total errors              :          0 [WRITE: 0]
+02:59:27 1792659567567   stress Total partitions          :  1,200,068 [WRITE: 1,200,068]
+02:59:27 1792659567568   stress Total operation time      : 00:01:00
+=== 2026-10-22T08:59:27Z lifetime V4 rep 1 exit 0
+=== 2026-10-22T08:59:27Z lifetime V0 rep 2
+02:59:27 1792659567613 === lifetime V0 rep 2 tree /users/jason92/cassandra-flw harness /users/jason92/stage4-harness-run/flw expected (H,L)=(65536, 32768) shake=False
+02:59:27 1792659567632 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+02:59:28 1792659568023   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+02:59:28 1792659568023   | /dev/sda3        63G  7.6G   52G  13% /
+02:59:28 1792659568027 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+02:59:28 1792659568030   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 15, 1 << 16, null, null, null, null, null, null, null, null);
+02:59:28 1792659568031 $ CASSANDRA_HOME=/users/jason92/cassandra-flw bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+02:59:28 1792659568079   | node A: tree /users/jason92/cassandra-flw conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:59:28 1792659568079   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+02:59:28 1792659568079 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+03:00:11 1792659611408 1 UN after 43 s
+03:00:11 1792659611408 $ CASSANDRA_HOME=/users/jason92/cassandra-flw bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+03:00:11 1792659611458   | node B: tree /users/jason92/cassandra-flw conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+03:00:11 1792659611458   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+03:00:11 1792659611458 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+03:00:44 1792659644511 2 UN after 33 s
+03:00:48 1792659648168 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+03:01:03 1792659663180 SIGSTOP B pid 290304
+03:01:28 1792659688192 SIGCONT B pid 290304
+03:01:58 1792659718018 stress exit 0
+03:02:09 1792659729707 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V0-r2/stop /users/jason92/stage4-logs/flw/run1/cluster/V0-r2/vt-final.csv once
+03:02:10 1792659730121   | samples=1
+03:02:10 1792659730153 $ bin/nodetool -p 7299 stopdaemon
+03:02:20 1792659740403   | WARN  09:02:11,590 Only 54.861GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:02:20 1792659740403   | Cassandra has shutdown.
+03:02:20 1792659740422 B stopped
+03:02:20 1792659740437 $ bin/nodetool -p 7199 stopdaemon
+03:02:33 1792659753253   | WARN  09:02:21,883 Only 54.873GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:02:33 1792659753253   | Cassandra has shutdown.
+03:02:33 1792659753268 A stopped
+03:02:34 1792659754294 daemons of the variant trees left: 0
+03:02:34 1792659754297 V0 rep 2: H=65536 L=32768; jmx samples 166, vt samples 42; freeze 1792659663180..1792659688192 (25.0 s)
+03:02:34 1792659754297   used: pre median 64.0 (n=20), plateau median 69632.0 (n=24), delta 69568.0 = 0.066 MiB
+03:02:34 1792659754297   direct: pre median 59173585.5 (n=20), plateau median 59407829.0 (n=24), delta 234243.5 = 0.223 MiB
+03:02:34 1792659754297   smallPending: pre median 1055.5 (n=20), plateau median 84709152.5 (n=24), delta 84708097.0 = 80.784 MiB
+03:02:34 1792659754297   heap: pre median 588850176.0 (n=20), plateau median 2594605568.0 (n=24), delta 2005755392.0 = 1912.837 MiB
+03:02:34 1792659754297   UsedSize in plateau window min/max 69632/73760
+03:02:34 1792659754297   Small PendingBytes during freeze: max 85005748; median in plateau 84709152.5
+03:02:34 1792659754297   vt during freeze: pending_bytes max 84959306, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->0, expired_count 0->445278
+03:02:34 1792659754298   trace: STALL 36, RESUME 36; (H,L) seen [(65536, 32768)]; expected (65536, 32768)
+03:02:34 1792659754298   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+03:02:34 1792659754298   STALL level min/max over all: 67552/130882; types ['SMALL_MESSAGES']
+03:02:34 1792659754298   RESUME level min/median/max: 0/0.0/0
+03:02:34 1792659754298   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67552; first at pause+0.217 s
+03:02:34 1792659754298   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+03:02:34 1792659754303   A system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:02:34 1792659754308   B system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:02:34 1792659754309     A log: INFO  [GossipStage:1] 2026-10-22T09:00:19,580 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+03:02:34 1792659754310   stress Op rate                   :   19,730 op/s  [WRITE: 19,730 op/s]
+03:02:34 1792659754311   stress Total errors              :          0 [WRITE: 0]
+03:02:34 1792659754311   stress Total partitions          :  1,200,066 [WRITE: 1,200,066]
+03:02:34 1792659754312   stress Total operation time      : 00:01:00
+=== 2026-10-22T09:02:34Z lifetime V0 rep 2 exit 0
+=== 2026-10-22T09:02:34Z lifetime V1 rep 2
+03:02:34 1792659754363 === lifetime V1 rep 2 tree /users/jason92/cassandra-flw-p1 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(67108864, 1024) shake=False
+03:02:34 1792659754384 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+03:02:34 1792659754785   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+03:02:34 1792659754785   | /dev/sda3        63G  7.6G   52G  13% /
+03:02:34 1792659754789 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+03:02:34 1792659754791   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 10, 1 << 26, null, null, null, null, null, null, null, null);
+03:02:34 1792659754792 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p1 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+03:02:34 1792659754840   | node A: tree /users/jason92/cassandra-flw-p1 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+03:02:34 1792659754840   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+03:02:34 1792659754840 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+03:03:18 1792659798255 1 UN after 43 s
+03:03:18 1792659798255 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p1 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+03:03:18 1792659798305   | node B: tree /users/jason92/cassandra-flw-p1 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+03:03:18 1792659798305   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+03:03:18 1792659798305 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+03:03:51 1792659831511 2 UN after 33 s
+03:03:55 1792659835160 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+03:04:10 1792659850174 SIGSTOP B pid 295382
+03:04:35 1792659875184 SIGCONT B pid 295382
+03:05:04 1792659904960 stress exit 0
+03:05:16 1792659916700 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V1-r2/stop /users/jason92/stage4-logs/flw/run1/cluster/V1-r2/vt-final.csv once
+03:05:17 1792659917115   | samples=1
+03:05:17 1792659917148 $ bin/nodetool -p 7299 stopdaemon
+03:05:27 1792659927321   | WARN  09:05:18,591 Only 54.859GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:05:27 1792659927321   | Cassandra has shutdown.
+03:05:27 1792659927340 B stopped
+03:05:27 1792659927356 $ bin/nodetool -p 7199 stopdaemon
+03:05:40 1792659940406   | WARN  09:05:28,730 Only 54.872GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:05:40 1792659940406   | Cassandra has shutdown.
+03:05:40 1792659940426 A stopped
+03:05:41 1792659941458 daemons of the variant trees left: 0
+03:05:41 1792659941460 V1 rep 2: H=67108864 L=1024; jmx samples 166, vt samples 42; freeze 1792659850174..1792659875184 (25.0 s)
+03:05:41 1792659941460   used: pre median 64.0 (n=20), plateau median 122509344.0 (n=24), delta 122509280.0 = 116.834 MiB
+03:05:41 1792659941460   direct: pre median 59125866.5 (n=20), plateau median 185294802.0 (n=24), delta 126168935.5 = 120.324 MiB
+03:05:41 1792659941460   smallPending: pre median 1055.5 (n=20), plateau median 138313775.5 (n=24), delta 138312720.0 = 131.905 MiB
+03:05:41 1792659941460   heap: pre median 630589184.0 (n=20), plateau median 2304701796.0 (n=24), delta 1674112612.0 = 1596.558 MiB
+03:05:41 1792659941460   UsedSize in plateau window min/max 122509312/122513440
+03:05:41 1792659941460   Small PendingBytes during freeze: max 138411937; median in plateau 138313775.5
+03:05:41 1792659941460   vt during freeze: pending_bytes max 138411937, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->73493, expired_count 0->346446
+03:05:41 1792659941461   trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 1024)]; expected (67108864, 1024)
+03:05:41 1792659941461   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+03:05:41 1792659941461   STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+03:05:41 1792659941461   RESUME level min/median/max: 0/0/0
+03:05:41 1792659941461   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.796 s
+03:05:41 1792659941461   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+03:05:41 1792659941466   A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:05:41 1792659941471   B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:05:41 1792659941472     A log: INFO  [GossipStage:1] 2026-10-22T09:03:26,447 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+03:05:41 1792659941472     A log: WARN  [Native-Transport-Requests-45] 2026-10-22T09:04:13,661 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-c60da57f overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.000MiB global)
+03:05:41 1792659941473   stress Op rate                   :   19,743 op/s  [WRITE: 19,743 op/s]
+03:05:41 1792659941474   stress Total errors              :          0 [WRITE: 0]
+03:05:41 1792659941474   stress Total partitions          :  1,200,074 [WRITE: 1,200,074]
+03:05:41 1792659941475   stress Total operation time      : 00:01:00
+=== 2026-10-22T09:05:41Z lifetime V1 rep 2 exit 0
+=== 2026-10-22T09:05:41Z lifetime V2 rep 2
+03:05:41 1792659941526 === lifetime V2 rep 2 tree /users/jason92/cassandra-flw-p2 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(67108864, 33554432) shake=False
+03:05:41 1792659941545 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+03:05:41 1792659941934   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+03:05:41 1792659941934   | /dev/sda3        63G  7.6G   52G  13% /
+03:05:41 1792659941938 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+03:05:41 1792659941940   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 25, 1 << 26, null, null, null, null, null, null, null, null);
+03:05:41 1792659941941 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p2 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+03:05:41 1792659941987   | node A: tree /users/jason92/cassandra-flw-p2 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+03:05:41 1792659941987   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+03:05:41 1792659941988 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+03:06:25 1792659985293 1 UN after 43 s
+03:06:25 1792659985293 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p2 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+03:06:25 1792659985335   | node B: tree /users/jason92/cassandra-flw-p2 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+03:06:25 1792659985335   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+03:06:25 1792659985335 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+03:06:53 1792660013526 2 UN after 28 s
+03:06:57 1792660017187 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+03:07:12 1792660032200 SIGSTOP B pid 300539
+03:07:37 1792660057212 SIGCONT B pid 300539
+03:08:06 1792660086985 stress exit 0
+03:08:18 1792660098727 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V2-r2/stop /users/jason92/stage4-logs/flw/run1/cluster/V2-r2/vt-final.csv once
+03:08:19 1792660099157   | samples=1
+03:08:19 1792660099190 $ bin/nodetool -p 7299 stopdaemon
+03:08:29 1792660109380   | WARN  09:08:20,563 Only 54.858GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:08:29 1792660109381   | Cassandra has shutdown.
+03:08:29 1792660109399 B stopped
+03:08:29 1792660109414 $ bin/nodetool -p 7199 stopdaemon
+03:08:42 1792660122124   | WARN  09:08:30,779 Only 54.870GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:08:42 1792660122124   | Cassandra has shutdown.
+03:08:42 1792660122144 A stopped
+03:08:43 1792660123175 daemons of the variant trees left: 0
+03:08:43 1792660123177 V2 rep 2: H=67108864 L=33554432; jmx samples 166, vt samples 42; freeze 1792660032200..1792660057212 (25.0 s)
+03:08:43 1792660123178   used: pre median 48.0 (n=20), plateau median 122351648.0 (n=24), delta 122351600.0 = 116.684 MiB
+03:08:43 1792660123178   direct: pre median 59226254.0 (n=20), plateau median 185387585.0 (n=24), delta 126161331.0 = 120.317 MiB
+03:08:43 1792660123178   smallPending: pre median 2111.0 (n=20), plateau median 138381327.5 (n=24), delta 138379216.5 = 131.969 MiB
+03:08:43 1792660123178   heap: pre median 660025344.0 (n=20), plateau median 2557262336.0 (n=24), delta 1897236992.0 = 1809.346 MiB
+03:08:43 1792660123178   UsedSize in plateau window min/max 122351616/122355776
+03:08:43 1792660123178   Small PendingBytes during freeze: max 138411937; median in plateau 138381327.5
+03:08:43 1792660123178   vt during freeze: pending_bytes max 138380272, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->71562, expired_count 0->347971
+03:08:43 1792660123178   trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 33554432)]; expected (67108864, 33554432)
+03:08:43 1792660123178   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+03:08:43 1792660123178   STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+03:08:43 1792660123178   RESUME level min/median/max: 2214439/2214439/2214439
+03:08:43 1792660123178   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.808 s
+03:08:43 1792660123178   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+03:08:43 1792660123184   A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:08:43 1792660123189   B system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:08:43 1792660123190     A log: INFO  [GossipStage:1] 2026-10-22T09:06:33,352 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+03:08:43 1792660123190     A log: WARN  [Native-Transport-Requests-2] 2026-10-22T09:07:15,694 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-e10ca928 overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.000MiB global)
+03:08:43 1792660123191   stress Op rate                   :   19,746 op/s  [WRITE: 19,746 op/s]
+03:08:43 1792660123192   stress Total errors              :          0 [WRITE: 0]
+03:08:43 1792660123192   stress Total partitions          :  1,200,064 [WRITE: 1,200,064]
+03:08:43 1792660123193   stress Total operation time      : 00:01:00
+=== 2026-10-22T09:08:43Z lifetime V2 rep 2 exit 0
+=== 2026-10-22T09:08:43Z lifetime V3 rep 2
+03:08:43 1792660123243 === lifetime V3 rep 2 tree /users/jason92/cassandra-flw-p3 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(67108864, 66060288) shake=False
+03:08:43 1792660123260 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+03:08:43 1792660123648   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+03:08:43 1792660123648   | /dev/sda3        63G  7.6G   52G  13% /
+03:08:43 1792660123653 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+03:08:43 1792660123655   | this(null, to, preferred, null, null, null, null, null, null, null, (1 << 26) - (1 << 20), 1 << 26, null, null, null, null, null, null, null, null);
+03:08:43 1792660123655 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p3 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+03:08:43 1792660123703   | node A: tree /users/jason92/cassandra-flw-p3 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+03:08:43 1792660123703   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+03:08:43 1792660123703 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+03:09:26 1792660166884 1 UN after 43 s
+03:09:26 1792660166884 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p3 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+03:09:26 1792660166933   | node B: tree /users/jason92/cassandra-flw-p3 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+03:09:26 1792660166933   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+03:09:26 1792660166933 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+03:09:55 1792660195114 2 UN after 28 s
+03:09:58 1792660198782 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+03:10:13 1792660213796 SIGSTOP B pid 305509
+03:10:38 1792660238804 SIGCONT B pid 305509
+03:11:07 1792660267780 stress exit 0
+03:11:18 1792660278317 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V3-r2/stop /users/jason92/stage4-logs/flw/run1/cluster/V3-r2/vt-final.csv once
+03:11:18 1792660278756   | samples=1
+03:11:18 1792660278787 $ bin/nodetool -p 7299 stopdaemon
+03:11:29 1792660289131   | WARN  09:11:20,250 Only 54.857GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:11:29 1792660289131   | Cassandra has shutdown.
+03:11:29 1792660289150 B stopped
+03:11:29 1792660289166 $ bin/nodetool -p 7199 stopdaemon
+03:11:41 1792660301883   | WARN  09:11:30,561 Only 54.869GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:11:41 1792660301883   | Cassandra has shutdown.
+03:11:41 1792660301902 A stopped
+03:11:42 1792660302936 daemons of the variant trees left: 0
+03:11:42 1792660302938 V3 rep 2: H=67108864 L=66060288; jmx samples 164, vt samples 41; freeze 1792660213796..1792660238804 (25.0 s)
+03:11:42 1792660302939   used: pre median 16.0 (n=20), plateau median 122095648.0 (n=24), delta 122095632.0 = 116.439 MiB
+03:11:42 1792660302939   direct: pre median 59148618.0 (n=20), plateau median 185270636.0 (n=24), delta 126122018.0 = 120.279 MiB
+03:11:42 1792660302939   smallPending: pre median 0.0 (n=20), plateau median 138328552.5 (n=24), delta 138328552.5 = 131.920 MiB
+03:11:42 1792660302939   heap: pre median 725869568.0 (n=20), plateau median 2495516672.0 (n=24), delta 1769647104.0 = 1687.667 MiB
+03:11:42 1792660302939   UsedSize in plateau window min/max 122095616/122110048
+03:11:42 1792660302939   Small PendingBytes during freeze: max 138411937; median in plateau 138328552.5
+03:11:42 1792660302939   vt during freeze: pending_bytes max 138403493, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->71408, expired_count 0->348458
+03:11:42 1792660302939   trace: STALL 1, RESUME 1; (H,L) seen [(67108864, 66060288)]; expected (67108864, 66060288)
+03:11:42 1792660302939   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+03:11:42 1792660302939   STALL level min/max over all: 67110801/67110801; types ['SMALL_MESSAGES']
+03:11:42 1792660302939   RESUME level min/median/max: 41039951/41039951/41039951
+03:11:42 1792660302939   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67110801; first at pause+1.783 s
+03:11:42 1792660302939   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+03:11:42 1792660302945   A system.log: ERROR 0, WARN 9, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:11:42 1792660302951   B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:11:42 1792660302952     A log: INFO  [GossipStage:1] 2026-10-22T09:09:34,877 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+03:11:42 1792660302952     A log: WARN  [Native-Transport-Requests-42] 2026-10-22T09:10:17,271 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-9a135791 overloaded; dropping 2.062KiB message (queue: 132.000MiB local, 128.000MiB endpoint, 128.000MiB global)
+03:11:42 1792660302953   stress Op rate                   :   19,802 op/s  [WRITE: 19,802 op/s]
+03:11:42 1792660302953   stress Total errors              :          0 [WRITE: 0]
+03:11:42 1792660302954   stress Total partitions          :  1,200,070 [WRITE: 1,200,070]
+03:11:42 1792660302954   stress Total operation time      : 00:01:00
+=== 2026-10-22T09:11:42Z lifetime V3 rep 2 exit 0
+=== 2026-10-22T09:11:42Z lifetime V4 rep 2
+03:11:42 1792660303002 === lifetime V4 rep 2 tree /users/jason92/cassandra-flw-p4 harness /users/jason92/stage4-harness-run/flw expected (H,L)=(4194304, 2097152) shake=False
+03:11:43 1792660303020 $ rm -rf /users/jason92/stage4-flw/nodes/A /users/jason92/stage4-flw/nodes/B; mkdir -p /users/jason92/stage4-flw/A /users/jason92/stage4-flw/B; df -h /users/jason92/stage4-flw/nodes / | tail -2
+03:11:43 1792660303411   | tmpfs            40G     0   40G   0% /users/jason92/stage4-flw/nodes
+03:11:43 1792660303411   | /dev/sda3        63G  7.6G   52G  13% /
+03:11:43 1792660303416 $ sed -n 104p src/java/org/apache/cassandra/net/OutboundConnectionSettings.java
+03:11:43 1792660303417   | this(null, to, preferred, null, null, null, null, null, null, null, 1 << 21, 1 << 22, null, null, null, null, null, null, null, null);
+03:11:43 1792660303418 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p4 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh A
+03:11:43 1792660303465   | node A: tree /users/jason92/cassandra-flw-p4 conf /users/jason92/stage4-flw/A/conf, JMX 7199, address 127.0.0.1; yaml tail:
+03:11:43 1792660303465   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/A/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/A/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/A/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/A/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;
+03:11:43 1792660303465 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/A/cassandra.pid > /users/jason92/stage4-flw/A/stdout.txt 2>&1
+03:12:26 1792660346470 1 UN after 43 s
+03:12:26 1792660346470 $ CASSANDRA_HOME=/users/jason92/cassandra-flw-p4 bash /users/jason92/stage4-harness-run/flw/make-node-yaml.sh B
+03:12:26 1792660346518   | node B: tree /users/jason92/cassandra-flw-p4 conf /users/jason92/stage4-flw/B/conf, JMX 7299, address 127.0.0.2; yaml tail:
+03:12:26 1792660346518   | # ---- stage4 flw lines ----;cluster_name: fwm;num_tokens: 16;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-flw/nodes/B/commitlog;hints_directory: /users/jason92/stage4-flw/nodes/B/hints;saved_caches_directory: /users/jason92/stage4-flw/nodes/B/saved_caches;cdc_raw_directory: /users/jason92/stage4-flw/nodes/B/cdc_raw;hinted_handoff_enabled: false;internode_compression: none;internode_tcp_user_timeout: 0ms;phi_convict_threshold: 16;concurrent_compactors: 2;auto_snapshot: false;auto_bootstrap: false;
+03:12:26 1792660346518 $ ulimit -n 100000 && bin/cassandra -p /users/jason92/stage4-flw/B/cassandra.pid > /users/jason92/stage4-flw/B/stdout.txt 2>&1
+03:12:54 1792660374635 2 UN after 28 s
+03:12:58 1792660378312 $ tools/bin/cassandra-stress write duration=60s cl=ONE no-warmup -schema "replication(strategy=SimpleStrategy,factor=2)" keyspace=fwm -col "size=FIXED(2048)" "n=FIXED(1)" -rate threads=64 fixed=20000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+03:13:13 1792660393324 SIGSTOP B pid 310441
+03:13:38 1792660418336 SIGCONT B pid 310441
+03:14:07 1792660447461 stress exit 0
+03:14:17 1792660457845 $ python3 /users/jason92/stage4-harness-run/flw/sample-vt.py 127.0.0.1 outbound 1 /users/jason92/stage4-logs/flw/run1/cluster/V4-r2/stop /users/jason92/stage4-logs/flw/run1/cluster/V4-r2/vt-final.csv once
+03:14:18 1792660458288   | samples=1
+03:14:18 1792660458321 $ bin/nodetool -p 7299 stopdaemon
+03:14:28 1792660468426   | WARN  09:14:19,685 Only 54.855GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:14:28 1792660468427   | Cassandra has shutdown.
+03:14:28 1792660468442 B stopped
+03:14:28 1792660468455 $ bin/nodetool -p 7199 stopdaemon
+03:14:41 1792660481931   | WARN  09:14:29,882 Only 54.868GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+03:14:41 1792660481931   | Cassandra has shutdown.
+03:14:41 1792660481950 A stopped
+03:14:42 1792660482984 daemons of the variant trees left: 0
+03:14:42 1792660482986 V4 rep 2: H=4194304 L=2097152; jmx samples 164, vt samples 41; freeze 1792660393324..1792660418336 (25.0 s)
+03:14:42 1792660482987   used: pre median 32.0 (n=20), plateau median 7456800.0 (n=24), delta 7456768.0 = 7.111 MiB
+03:14:42 1792660482987   direct: pre median 59202677.0 (n=20), plateau median 126575515.0 (n=24), delta 67372838.0 = 64.252 MiB
+03:14:42 1792660482987   smallPending: pre median 1055.5 (n=20), plateau median 88841435.0 (n=24), delta 88840379.5 = 84.725 MiB
+03:14:42 1792660482987   heap: pre median 720130048.0 (n=20), plateau median 2586110720.0 (n=24), delta 1865980672.0 = 1779.538 MiB
+03:14:42 1792660482987   UsedSize in plateau window min/max 7456768/7493664
+03:14:42 1792660482987   Small PendingBytes during freeze: max 98216386; median in plateau 88841435.0
+03:14:42 1792660482987   vt during freeze: pending_bytes max 88885766, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->0, expired_count 0->443587
+03:14:42 1792660482987   trace: STALL 25, RESUME 25; (H,L) seen [(4194304, 2097152)]; expected (4194304, 2097152)
+03:14:42 1792660482987   STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+03:14:42 1792660482988   STALL level min/max over all: 4198779/4253665; types ['SMALL_MESSAGES']
+03:14:42 1792660482988   RESUME level min/median/max: 0/981615/1897789
+03:14:42 1792660482988   small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 4198779; first at pause+0.303 s
+03:14:42 1792660482988   STALLs before the freeze: 0; RESUMEs before the freeze: 0
+03:14:42 1792660482993   A system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:14:42 1792660482999   B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+03:14:42 1792660482999     A log: INFO  [GossipStage:1] 2026-10-22T09:12:34,553 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+03:14:42 1792660483000   stress Op rate                   :   19,902 op/s  [WRITE: 19,902 op/s]
+03:14:42 1792660483001   stress Total errors              :          0 [WRITE: 0]
+03:14:42 1792660483001   stress Total partitions          :  1,199,897 [WRITE: 1,199,897]
+03:14:42 1792660483002   stress Total operation time      : 00:01:00
+=== 2026-10-22T09:14:43Z lifetime V4 rep 2 exit 0
+lifetime: D (MiB), D_direct (MiB), small-link freeze stall max, stall levels min..max, resume max, (H,L) seen, bad (H,L), out-of-range stalls, resume>L, vt pending max (MiB), active min, interrupted, down
+  V0-r1: D 0.066, D_direct 0.221, smallFreezeStallMax 67552, stalls 67552..130882 (n=32), resumeMax 0 (n=32), HL [[65536, 32768]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 80.947, activeMin 3, interrupted 0, down 0
+  V0-r2: D 0.066, D_direct 0.223, smallFreezeStallMax 67552, stalls 67552..130882 (n=36), resumeMax 0 (n=36), HL [[65536, 32768]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 81.024, activeMin 3, interrupted 0, down 0
+  V1-r1: D 116.467, D_direct 120.279, smallFreezeStallMax 67110801, stalls 67110801..67110801 (n=1), resumeMax 0 (n=1), HL [[67108864, 1024]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 131.998, activeMin 3, interrupted 0, down 0
+  V1-r2: D 116.834, D_direct 120.324, smallFreezeStallMax 67110801, stalls 67110801..67110801 (n=1), resumeMax 0 (n=1), HL [[67108864, 1024]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 132.0, activeMin 3, interrupted 0, down 0
+  V2-r1: D 116.221, D_direct 120.312, smallFreezeStallMax 67110801, stalls 67110801..67110801 (n=1), resumeMax 2233438 (n=1), HL [[67108864, 33554432]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 132.0, activeMin 3, interrupted 0, down 0
+  V2-r2: D 116.684, D_direct 120.317, smallFreezeStallMax 67110801, stalls 67110801..67110801 (n=1), resumeMax 2214439 (n=1), HL [[67108864, 33554432]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 131.97, activeMin 3, interrupted 0, down 0
+  V3-r1: D 116.215, D_direct 120.307, smallFreezeStallMax 67110801, stalls 67110801..67110801 (n=1), resumeMax 41255273 (n=1), HL [[67108864, 66060288]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 131.998, activeMin 3, interrupted 0, down 0
+  V3-r2: D 116.439, D_direct 120.279, smallFreezeStallMax 67110801, stalls 67110801..67110801 (n=1), resumeMax 41039951 (n=1), HL [[67108864, 66060288]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 131.992, activeMin 3, interrupted 0, down 0
+  V4-r1: D 7.26, D_direct 56.304, smallFreezeStallMax 4196668, stalls 4196668..4253665 (n=25), resumeMax 2028671 (n=25), HL [[4194304, 2097152]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 86.071, activeMin 3, interrupted 0, down 0
+  V4-r2: D 7.111, D_direct 64.252, smallFreezeStallMax 4198779, stalls 4198779..4253665 (n=25), resumeMax 1897789 (n=25), HL [[4194304, 2097152]], badHL 0, outOfRange 0, resume>L 0, vtPendingMax 84.768, activeMin 3, interrupted 0, down 0
+V0: mean D = 0.066 MiB over 2 lifetimes
+V1: mean D = 116.650 MiB over 2 lifetimes
+V2: mean D = 116.452 MiB over 2 lifetimes
+V3: mean D = 116.327 MiB over 2 lifetimes
+V4: mean D = 7.186 MiB over 2 lifetimes
+V1-V3 means (L ascending 1 KiB, 32 MiB, 63 MiB): [116.65, 116.452, 116.327]; max pairwise |diff| = 0.323 MiB (<= 4 MiB: True); monotone in L: True; ordered by L (monotone and spread > 4 MiB): False
+each V1-V3 lifetime D in [64, 70] MiB: {'V1-r1': False, 'V1-r2': False, 'V2-r1': False, 'V2-r2': False, 'V3-r1': False, 'V3-r2': False}
+each V4 lifetime D in [4, 8] MiB: {'V4-r1': True, 'V4-r2': True}
+D(V2) - D(V4) = 109.267 MiB (>= 56 MiB: True)
+D(V0) mean 0.066 MiB (< 1 MiB: True)
+=== 2026-10-22T09:14:43Z chain end

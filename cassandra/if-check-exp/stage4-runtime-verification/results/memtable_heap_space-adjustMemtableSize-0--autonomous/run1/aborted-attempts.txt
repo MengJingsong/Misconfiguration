@@ -1,0 +1,9 @@
+Cluster tier attempt 1 (not counted), 2026-10-22 04:26-04:31 EDT, logs pc07:~/stage4-logs/sai/attempt1-R1/:
+R1 started (64 MiB), schema created by the n=1 stress run, H0 taken; the load stress then failed at once with
+InvalidQueryException: Index 't_sai_v_idx' already exists (the profile's extra_definitions run on every stress call).
+No load written (0 MEMTABLE_LIMIT flushes). Sequence stopped before R2. Defect D1 fixed (CREATE INDEX IF NOT EXISTS),
+cluster tier restarted from R1 as attempt 2 = run 1 (harness copy ~/stage4-harness-run/sai/attempt2/).
+Also fixed then: the OOM counter matched the JVM flag -XX:+HeapDumpOnOutOfMemoryError (now counts 'OutOfMemoryError: ').
+stress rc=1
+OOM/crash evidence: /users/jason92/stage4-logs/sai/R1/logs/system.log:1 /users/jason92/stage4-logs/sai/R1/out.log:2  hs_err: 
+final 1792657857422 Total        751045       73096520

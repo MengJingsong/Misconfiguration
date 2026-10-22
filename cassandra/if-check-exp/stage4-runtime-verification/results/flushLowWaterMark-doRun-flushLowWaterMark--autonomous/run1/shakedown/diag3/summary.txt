@@ -1,0 +1,21 @@
+V0 rep 9: H=65536 L=32768; jmx samples 163, vt samples 41; freeze 1792658520156..1792658545168 (25.0 s)
+  used: pre median 80.0 (n=20), plateau median 69632.0 (n=24), delta 69552.0 = 0.066 MiB
+  direct: pre median 59187606.0 (n=20), plateau median 59418884.0 (n=24), delta 231278.0 = 0.221 MiB
+  smallPending: pre median 2110.5 (n=20), plateau median 84705986.0 (n=24), delta 84703875.5 = 80.780 MiB
+  heap: pre median 803618304.0 (n=20), plateau median 2466401024.0 (n=24), delta 1662782720.0 = 1585.753 MiB
+  UsedSize in plateau window min/max 69632/77856
+  Small PendingBytes during freeze: max 85883924; median in plateau 84705986.0
+  vt during freeze: pending_bytes max 90099591, active_connections min/max 3/3, connection_attempts 3->3, overload_count 0->0, expired_count 0->445290
+  trace: STALL 25, RESUME 25; (H,L) seen [(65536, 32768)]; expected (65536, 32768)
+  STALL with (H,L) != variant: 0; STALL level outside [H, H+65536): 0; RESUME level > L: 0
+  STALL level min/max over all: 67552/130882; types ['SMALL_MESSAGES']
+  RESUME level min/median/max: 0/0/0
+  small-link STALLs to 127.0.0.2 inside the freeze: 1; max level 67552; first at pause+0.202 s
+  STALLs before the freeze: 0; RESUMEs before the freeze: 0
+  A system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+  B system.log: ERROR 0, WARN 8, "Interrupted outbound connections to /127.0.0.2" 0, "is now DOWN" 0, OutOfMemoryError 0
+    A log: INFO  [GossipStage:1] 2026-10-22T08:41:21,017 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+  stress Op rate                   :   19,853 op/s  [WRITE: 19,853 op/s]
+  stress Total errors              :          0 [WRITE: 0]
+  stress Total partitions          :  1,200,066 [WRITE: 1,200,066]
+  stress Total operation time      : 00:01:00

@@ -1,0 +1,23 @@
+02:23:49 1792657429019 === lifetime shake {'V': 65536, 'duration': 20, 'nostop': True, 'C': 1, 'E': 2, 'G': 4} clone /users/jason92/cassandra-otc harness /users/jason92/stage4-harness-run/otc
+02:23:49 1792657429045 $ df -h /users/jason92 | tail -1
+02:23:49 1792657429047   | /dev/sda3        63G  5.7G   54G  10% /
+02:23:49 1792657429047 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n1 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:23:49 1792657429097   | node n1: conf /users/jason92/stage4-otc/n1/conf, JMX 7199, address 127.0.0.1; yaml tail:
+02:23:49 1792657429097   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n1/data/commitlog;hints_directory: /users/jason92/stage4-otc/n1/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n1/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n1/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:23:49 1792657429097 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n1/cassandra.pid > /users/jason92/stage4-otc/n1/stdout.txt 2>&1
+02:24:30 1792657470025 1 UN after 41 s
+02:24:30 1792657470025 $ bash /users/jason92/stage4-harness-run/otc/make-node-yaml.sh n2 internode_application_send_queue_capacity=1MiB internode_application_send_queue_reserve_endpoint_capacity=2MiB internode_application_receive_queue_reserve_endpoint_capacity=2MiB internode_application_send_queue_reserve_global_capacity=4MiB internode_max_message_size=1MiB
+02:24:30 1792657470075   | node n2: conf /users/jason92/stage4-otc/n2/conf, JMX 7299, address 127.0.0.2; yaml tail:
+02:24:30 1792657470075   | # ---- stage4 otc lines ----;cluster_name: lmt;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/stage4-otc/n2/data/commitlog;hints_directory: /users/jason92/stage4-otc/n2/data/hints;saved_caches_directory: /users/jason92/stage4-otc/n2/data/saved_caches;cdc_raw_directory: /users/jason92/stage4-otc/n2/data/cdc_raw;write_request_timeout: 10000ms;phi_convict_threshold: 16;internode_compression: none;hinted_handoff_enabled: false;internode_application_send_queue_capacity: 1MiB;internode_application_send_queue_reserve_endpoint_capacity: 2MiB;internode_application_receive_queue_reserve_endpoint_capacity: 2MiB;internode_application_send_queue_reserve_global_capacity: 4MiB;internode_max_message_size: 1MiB;
+02:24:30 1792657470075 $ ulimit -n 100000 && JVM_EXTRA_OPTS="-Dcassandra.otcp_large_message_threshold=65536 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-otc/n2/cassandra.pid > /users/jason92/stage4-otc/n2/stdout.txt 2>&1
+02:25:39 1792657539728 2 UN after 69 s
+02:25:39 1792657539729 n1 pid 288107 command line carries V=65536: True
+02:25:39 1792657539734 n2 pid 289888 command line carries V=65536: True
+02:25:43 1792657543529 $ tools/bin/cassandra-stress write duration=20s cl=ONE no-warmup -schema "replication(factor=2)" -col "size=FIXED(1000)" "n=FIXED(1)" -rate threads=200 fixed=30000/s -node whitelist 127.0.0.1 -mode native cql3 -log interval=1s
+02:26:12 1792657572669 stress exit 0
+02:26:24 1792657584196 $ bin/nodetool -p 7299 drain
+02:26:31 1792657591328 n2 stopped
+02:26:31 1792657591344 $ bin/nodetool -p 7199 drain
+02:26:41 1792657601402 n1 stopped
+02:26:43 1792657603445 daemons of this clone left: 0
+02:26:43 1792657603700 SUMMARY {"label": "shake", "V": 65536, "ctl": false, "samples": 42, "base_samples": 15, "n1_down_lines": 1, "n1_frame_errors": 0, "n1_error_lines": 0, "n1_overload_warn": 0, "n1_lmt_logged": null, "Op_rate": "29,400 op/s  [WRITE: 29,400 op/s]", "Total_errors": "0 [WRITE: 0]", "Total_partitions": "600,236 [WRITE: 600,236]", "nmt_other_committed_kb": null, "nmt_total_committed_kb": null}

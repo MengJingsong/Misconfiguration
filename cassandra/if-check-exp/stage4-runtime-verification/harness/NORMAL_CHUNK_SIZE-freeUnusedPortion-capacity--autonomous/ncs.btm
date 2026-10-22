@@ -1,0 +1,76 @@
+# Byteman rules for NORMAL_CHUNK_SIZE-freeUnusedPortion-capacity--autonomous, cluster tier (case file B3d, amendment K1/K2
+# of 2026-10-22). Observation only: no rule changes control flow. Adapted from the networking_cache_size guided harness (net.btm).
+# Lines go to the file named by -Dstage4.byteman.out (CassandraDaemon closes stdout, so traceOpen to a file):
+#   made n=<macro chunks created by the networking pool since start-up> ms=<epoch>      one line per 8 MiB slab
+#        pooled_exact = n x 8 MiB (memoryAllocated; macro chunks are never freed outside unsafeReset)
+#   dump made= refuse= gtrue= gfalse= gtiny= ovftrim= ms=     on every StorageService.getReleaseVersion() (the sampler reads
+#        ReleaseVersion over JMX on every pass)
+# Counters (Byteman counters, process lifetime):
+#   refuse   GlobalPool.allocateMoreChunks() returned null on the networking pool (the real cap's disallow branch, :443)
+#   gtrue    Chunk.freeUnusedPortion() entered with roundUp(limit) == roundUp(capacity): the :1521 return branch
+#   gfalse   Chunk.freeUnusedPortion() entered with roundUp(limit) != roundUp(capacity): the slot-freeing branch
+#   gtiny    of gtrue + gfalse, the calls on a tiny chunk (unit 32 B)
+#   ovftrim  LocalPool.putUnusedPortion() on an unpooled (overflow) buffer: the updateOverflowMemoryUsage(-(capacity-limit))
+#            call at :883, the source of the OverflowSize drift (A3)
+# Every caller of putUnusedPortion in 5.0.9 uses BufferPools.forNetworking() (FrameEncoder:32, BufferPoolAllocator:40,
+# AsyncStreamingOutputPlus:58), so the g* and ovftrim counters need no pool filter.
+
+RULE made
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! != null && $0.this$0.name.equals("networking")
+DO traceOpen("ncs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("ncs", "made n=" + incrementCounter("made") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE refuse
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks()
+AT EXIT
+IF $! == null && $0.this$0.name.equals("networking")
+DO incrementCounter("refuse")
+ENDRULE
+
+RULE guard true
+CLASS org.apache.cassandra.utils.memory.BufferPool$Chunk
+METHOD freeUnusedPortion(java.nio.ByteBuffer)
+AT ENTRY
+IF $0.roundUp($1.limit()) == $0.roundUp($1.capacity())
+DO incrementCounter("gtrue")
+ENDRULE
+
+RULE guard false
+CLASS org.apache.cassandra.utils.memory.BufferPool$Chunk
+METHOD freeUnusedPortion(java.nio.ByteBuffer)
+AT ENTRY
+IF $0.roundUp($1.limit()) != $0.roundUp($1.capacity())
+DO incrementCounter("gfalse")
+ENDRULE
+
+RULE guard tiny
+CLASS org.apache.cassandra.utils.memory.BufferPool$Chunk
+METHOD freeUnusedPortion(java.nio.ByteBuffer)
+AT ENTRY
+IF $0.unit() == 32
+DO incrementCounter("gtiny")
+ENDRULE
+
+RULE overflow trim
+CLASS org.apache.cassandra.utils.memory.BufferPool$LocalPool
+METHOD putUnusedPortion(java.nio.ByteBuffer)
+AT INVOKE updateOverflowMemoryUsage
+IF true
+DO incrementCounter("ovftrim")
+ENDRULE
+
+RULE dump
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion()
+AT ENTRY
+IF true
+DO traceOpen("ncs", java.lang.System.getProperty("stage4.byteman.out", "bm.trace"));
+   traceln("ncs", "dump made=" + readCounter("made") + " refuse=" + readCounter("refuse") + " gtrue=" + readCounter("gtrue")
+           + " gfalse=" + readCounter("gfalse") + " gtiny=" + readCounter("gtiny") + " ovftrim=" + readCounter("ovftrim")
+           + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

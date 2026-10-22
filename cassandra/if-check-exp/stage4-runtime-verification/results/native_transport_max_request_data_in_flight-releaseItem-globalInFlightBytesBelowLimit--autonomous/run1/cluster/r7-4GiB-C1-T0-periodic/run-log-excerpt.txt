@@ -1,0 +1,97 @@
+[1792665554390] START r7-4GiB-C1-T0-periodic L=4GiB C=1 THROW=0 MODE=periodic NREQ=1024 BLOB=1048576 PROBE_MS=480000 NETTY_FLAG=1
+[1792665554391] + git -C /users/jason92/cassandra-pv5 describe --tags
+cassandra-5.0.9
+[1792665554394] + git -C /users/jason92/cassandra-pv5 rev-parse HEAD
+b5f2a54210d541339c2e7c17a794195cac0e67c2
+[1792665554396] + sha256sum /users/jason92/stage4-harness-run/pv5/v4load.py /users/jason92/stage4-harness-run/pv5/InflightProbe.java /users/jason92/stage4-harness-run/pv5/cluster-run.sh
+a5b14db448b9fcf3ffe07f6f8fced309e95475805e194f316c80a2b28913b21d  /users/jason92/stage4-harness-run/pv5/v4load.py
+cbf1d621a949a7f5c2be80431caefc7cb9ecb4546d553e4905babde1a548affe  /users/jason92/stage4-harness-run/pv5/InflightProbe.java
+85ac4074a6b3594de30c550780be739d56a52c7e2bc46e3c990d3aa503a0e78f  /users/jason92/stage4-harness-run/pv5/cluster-run.sh
+[1792665555454] + rm -rf /users/jason92/stage4-pv5/data
+[1792665555459] + mkdir -p /users/jason92/stage4-pv5/data/data /users/jason92/stage4-pv5/data/commitlog /users/jason92/stage4-pv5/data/hints /users/jason92/stage4-pv5/data/saved_caches /users/jason92/stage4-pv5/data/cdc_raw
+[1792665555487] + grep -nE request_data_in_flight|commitlog_segment_size|max_mutation_size|commitlog_sync|write_request_timeout|native_transport_timeout|auto_snapshot|_directory|data_file /users/jason92/cassandra-pv5/conf/cassandra.yaml
+634:commitlog_sync: periodic
+636:commitlog_sync_period: 10000ms
+1329:counter_write_request_timeout: 5000ms
+2482:native_transport_max_request_data_in_flight: 4GiB
+2483:native_transport_max_request_data_in_flight_per_ip: 4GiB
+2484:commitlog_segment_size: 1536MiB
+2485:max_mutation_size: 16MiB
+2486:write_request_timeout: 600000ms
+2487:native_transport_timeout: 600000ms
+2488:auto_snapshot: false
+2489:data_file_directories:
+2491:commitlog_directory: /users/jason92/stage4-pv5/data/commitlog
+2492:hints_directory: /users/jason92/stage4-pv5/data/hints
+2493:saved_caches_directory: /users/jason92/stage4-pv5/data/saved_caches
+2494:cdc_raw_directory: /users/jason92/stage4-pv5/data/cdc_raw
+[1792665555493] yaml diff saved (23 lines)
+[1792665555495] ulimit -n 100000
+[1792665555496] + CASSANDRA_LOG_DIR=/users/jason92/stage4-logs/pv5/cluster/r7-4GiB-C1-T0-periodic/logs MAX_HEAP_SIZE=8G JVM_EXTRA_OPTS="-Dio.netty.maxDirectMemory=0 -XX:NativeMemoryTracking=summary" bin/cassandra -p /users/jason92/stage4-logs/pv5/cluster/r7-4GiB-C1-T0-periodic/cassandra.pid
+[1792665599168] node up after 44 s, pid 395144
+[1792665599169] + bin/nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.1  114.72 KiB  16      100.0%            24f63ef5-f9fc-45b4-bd3c-edafcf7b086b  rack1
+
+jvm-arg: -XX:+UseG1GC
+jvm-arg: -Xms8G
+jvm-arg: -Xmx8G
+jvm-arg: -XX:MaxDirectMemorySize=15872M
+jvm-arg: -Dio.netty.maxDirectMemory=0
+jvm-arg: -XX:NativeMemoryTracking=summary
+[1792665600177] + bin/nodetool sjk mx -b org.apache.cassandra.db:type=StorageService -mg -f NativeTransportMaxConcurrentRequestsInBytes
+4294967296
+[1792665601286] + bin/nodetool sjk mx -b org.apache.cassandra.db:type=StorageService -mg -f NativeTransportMaxConcurrentRequestsInBytesPerIp
+4294967296
+[1792665602375] + python3 /users/jason92/stage4-harness-run/pv5/v4load.py 127.0.0.1 9042 1 1 1 0 setup
+8
+8
+[1792665604634] + sleep 15
+[1792665619637] + java -cp /users/jason92/stage4-harness-run/pv5 InflightProbe 127.0.0.1 7199 200 10000 > /users/jason92/stage4-logs/pv5/cluster/r7-4GiB-C1-T0-periodic/base.csv
+[1792665629917] baseline rows: 49
+t=1792665629918 baseline
+-                     Other (reserved=98219KB, committed=98219KB)
+                            (malloc=98219KB #202) 
+[1792665630217] probe started pid 396458 at 1792665630216
+[1792665631223] client start 1792665631221
+RESULT conns=1 reqs=1024 blob=1048576 throw=0 secs=2.5 {'ok': 1024, 'overloaded': 0, 'other_err': 0}
+[1792665633741] client end 1792665633740 (elapsed 2519 ms; probe offset start 1005 ms, end 3524 ms)
+[1792665633742] waiting for probe
+[1792666110635] probe exit 0
+[1792666110637] + bin/nodetool sjk mx -b org.apache.cassandra.metrics:type=Client,name=RequestsSize -mg -f Value
+0
+system.log ERROR+WARN lines: 6
+netty LEAK lines: 0
+[1792666111688] stopping node pids: 395144
+[1792666116862] node stopped; none left
+[1792666116864] + python3 /users/jason92/stage4-harness-run/pv5/reduce.py /users/jason92/stage4-logs/pv5/cluster/r7-4GiB-C1-T0-periodic
+samples=2382
+baseline_samples=49
+baseline_requests_size_max=0
+baseline_direct_median=100551387
+peak_requests_size=10486340
+peak_requests_size_t_ms=1661
+peak_requests_size_MiB=10.001
+max_paused=0
+peak_direct_used=705593009
+peak_delta_direct=605041622
+peak_delta_direct_MiB=577.0
+last_delta_direct_MiB=576.0
+peak_heap_MiB=2608.0
+last_requests_size=0
+samples_with_requests_size_gt0=12
+nmt_other_samples=402
+nmt_other_first_MiB=273.9
+nmt_other_peak_delta_MiB=398.0
+nmt_other_base_MiB=95.9
+nmt_other_peak_over_base_MiB=576.0
+client=RESULT conns=1 reqs=1024 blob=1048576 throw=0 secs=2.5 {'ok': 1024, 'overloaded': 0, 'other_err': 0}
+ok=1024
+overloaded=0
+other_err=0
+[1792666116923] no node running
+[1792666116924] END r7-4GiB-C1-T0-periodic

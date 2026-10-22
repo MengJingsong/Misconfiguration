@@ -1,0 +1,18 @@
+keyspace: saiks
+keyspace_definition: |
+  CREATE KEYSPACE saiks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+table: t_plain
+table_definition: |
+  CREATE TABLE t_plain (pk bigint PRIMARY KEY, v text) WITH compaction = {'class':'SizeTieredCompactionStrategy'};
+columnspec:
+  - name: v
+    size: fixed(32)
+    population: uniform(1..2000000000)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+  select: fixed(1)/1
+queries:
+  read1:
+    cql: select * from t_plain where pk = ?
+    fields: samerow
