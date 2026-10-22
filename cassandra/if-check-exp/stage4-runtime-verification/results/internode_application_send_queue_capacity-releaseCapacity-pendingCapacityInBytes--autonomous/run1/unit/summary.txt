@@ -1,0 +1,19 @@
+2026-10-22T03:00:51.594Z unit-run.sh run1 all; clone /users/jason92/cassandra-sq2 b5f2a54 cassandra-5.0.9; harness md5 5520ecf2d329
+2026-10-22T03:00:51.597Z ant testsome ConnectionTest -Dtest.methods=testAcquireReleaseOutbound,testInsufficientSpace
+2026-10-22T03:01:11.789Z   ConnectionTest: rc=0; Testsuite: org.apache.cassandra.net.ConnectionTest-_jdk11 Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.251 sec; BUILD FAILED x0
+2026-10-22T03:01:11.792Z ant testsome org.apache.cassandra.net.SendQueueCapacityProbeTest (repetition 1)
+2026-10-22T03:01:44.065Z   probe 1: rc=0; Testsuite: org.apache.cassandra.net.SendQueueCapacityProbeTest-_jdk11 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 21.527 sec; BUILD FAILED x0; MISMATCH lines 1; check lines 72
+2026-10-22T03:01:44.067Z ant testsome org.apache.cassandra.net.SendQueueCapacityProbeTest (repetition 2)
+2026-10-22T03:02:16.277Z   probe 2: rc=0; Testsuite: org.apache.cassandra.net.SendQueueCapacityProbeTest-_jdk11 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 21.584 sec; BUILD FAILED x0; MISMATCH lines 3; check lines 72
+2026-10-22T03:02:16.280Z ant testsome org.apache.cassandra.net.SendQueueCapacityProbeTest (repetition 3)
+2026-10-22T03:02:48.609Z   probe 3: rc=0; Testsuite: org.apache.cassandra.net.SendQueueCapacityProbeTest-_jdk11 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 21.584 sec; BUILD FAILED x0; MISMATCH lines 2; check lines 72
+2026-10-22T03:02:51.327Z mutant M1 diff: 2 changed lines: + reserveCapacityInBytes.release(bytes);
+2026-10-22T03:03:07.830Z   build M1: rc=0 1 BUILD SUCCESSFUL
+2026-10-22T03:03:21.738Z   mutant M1 bytecode at releaseCapacity:  52: lload_3
+2026-10-22T03:03:21.749Z   mutant M1 u1Accounting: rc=0; Testsuite: org.apache.cassandra.net.SendQueueCapacityProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 2.695 sec; BUILD FAILED x1; MISMATCH lines 0; exceptions in log: org.apache.cassandra.exceptions.UnrecoverableIllegalStateException: 
+2026-10-22T03:03:21.771Z mutant M2 diff: 2 changed lines: + if (true)
+2026-10-22T03:03:33.170Z   build M2: rc=0 1 BUILD SUCCESSFUL
+2026-10-22T03:03:47.413Z   mutant M2 bytecode at releaseCapacity:  39: lload 9
+2026-10-22T03:03:47.422Z   mutant M2 u1Accounting: rc=0; Testsuite: org.apache.cassandra.net.SendQueueCapacityProbeTest-_jdk11 Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 2.73 sec; BUILD FAILED x1; MISMATCH lines 0; exceptions in log: 
+2026-10-22T03:03:47.710Z mutant clone removed
+2026-10-22T03:03:47.712Z done

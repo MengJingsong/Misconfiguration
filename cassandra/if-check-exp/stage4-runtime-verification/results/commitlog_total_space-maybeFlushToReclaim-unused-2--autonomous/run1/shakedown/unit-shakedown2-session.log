@@ -1,0 +1,23 @@
+[2026-10-21T20:51:43-0600] unit-run start N=60 arms=M:4:20:M:false clone=/users/jason92/cassandra-cl2 head=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T20:51:43-0600] EXPECTED: B2f (S=1MiB): T3 peak<=5MiB settled<=3 CLD>=4 | T4 peak<=6 settled<=4 CLD>=4 | T8 peak<=10 settled<=8 CLD>=2 | T1024 ~17-18MiB rising, CLD=0 | T4-s0 peak<=T+4S=8 settled<=4 | M (B2i) >=4 SELECT; every SELECT stop259&minimal or k=older; >=1 stop259 with k<older; switching M* tables per SELECT <= k+1; onDisk>=5MiB from first SELECT to end of write; settled in [5,8] MiB | M-nobreak: k=older always; >=1 SELECT switching >=3 M* tables; trough<=3MiB; peak<=10MiB
+[2026-10-21T20:51:43-0600] === arm M T=4 sleep=20 mode=M nobreak=false
+[2026-10-21T20:51:43-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=4 -Dclcap.sleepMs=20 -Dclcap.n=60 -Dclcap.mode=M -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/unit-shakedown2/M/cap.csv"
+[2026-10-21T20:51:51-0600] ant rc=0 (8 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.865 sec BUILD SUCCESSFUL 
+INFO totalMiB=4 segMiB=1 sleepMs=20 n=60 mode=M nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=24
+SUMMARY totalMiB=4 sleepMs=20 mode=M nobreak=false peakOnDisk=5242880 peakDir=5242880 settledOnDisk=4194304 settledDir=4194304 switches=1
+COMMITLOG_DIRTY_CLCap 1
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       1 Enqueuing flush of CLCap.M00, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 2
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=6 SELECT=1 FLUSH=1
+[2026-10-21T20:51:52-0600] unit-run end

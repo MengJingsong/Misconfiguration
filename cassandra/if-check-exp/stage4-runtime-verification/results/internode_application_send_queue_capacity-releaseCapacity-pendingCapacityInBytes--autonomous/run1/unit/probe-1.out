@@ -1,0 +1,99 @@
+STAGE4 info SendQueueCapacityProbeTest start; current_version=12 maxMessage=134217728 maxHeap=1056309248 gc=ParNew
+STAGE4 check U3_C=8388608_validity:_connectionAttempts_>=_2_(failing_to_connect) true true ok [attempts=3]
+PROBE U3 C=8388608 s=16402 M=1124 attempts=5 pending=8381840 count=512 endpointUsing=0 globalUsing=0 overloaded=613 overloadedBytes=10055039 heapBefore=32687984 heapAfter=41393584 heapDelta=8705600 ratio=1.0386
+STAGE4 check U3_C=8388608_pending_in_(C-s,_C] true true ok [pending=8381840]
+STAGE4 check U3_C=8388608_endpoint,global_using 0,0 0,0 ok
+STAGE4 check U3_C=8388608_heapDelta/pending_in_[1.0,_1.15] true true ok [ratio=1.0386]
+STAGE4 check U3_C=8388608_overloadedCount_==_M_-_accepted_bulk_(pendingCount_-_1_warm-up) 613 613 ok
+STAGE4 check U3_C=8388608_overloadedCount_~_M_-_C/s_(+-2) true true ok [overloaded=613 M-C/s=613]
+PROBE U3-closed C=8388608 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=613 overloadedBytes=10055039
+STAGE4 check U3_C=8388608_after_close_pending,endpoint,global 0,0,0 0,0,0 ok
+STAGE4 check U3_C=33554432_validity:_connectionAttempts_>=_2_(failing_to_connect) true true ok [attempts=3]
+PROBE U3 C=33554432 s=16403 M=4196 attempts=5 pending=33544168 count=2046 endpointUsing=0 globalUsing=0 overloaded=2151 overloadedBytes=35282853 heapBefore=32918560 heapAfter=66880536 heapDelta=33961976 ratio=1.0125
+STAGE4 check U3_C=33554432_pending_in_(C-s,_C] true true ok [pending=33544168]
+STAGE4 check U3_C=33554432_endpoint,global_using 0,0 0,0 ok
+STAGE4 check U3_C=33554432_heapDelta/pending_in_[1.0,_1.15] true true ok [ratio=1.0125]
+STAGE4 check U3_C=33554432_overloadedCount_==_M_-_accepted_bulk_(pendingCount_-_1_warm-up) 2151 2151 ok
+STAGE4 check U3_C=33554432_overloadedCount_~_M_-_C/s_(+-2) true true ok [overloaded=2151 M-C/s=2151]
+PROBE U3-closed C=33554432 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=2151 overloadedBytes=35282853
+STAGE4 check U3_C=33554432_after_close_pending,endpoint,global 0,0,0 0,0,0 ok
+STAGE4 check U2-control-M0_C=8388608_connected_and_drained_before_the_load true true ok [pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0]
+STAGE4 check U2-control-M0_C=8388608_event_loop_parked true true ok []
+STAGE4 info histogram U2-control-M0-C8388608 written; heapUsedNow=33317216
+PROBE U2-control-M0 C=8388608 s=16403 M=0 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0 heapBefore=34185776 heapAfter=32789056 heapDelta=-1396720 ratio=na
+STAGE4 check U2-control-M0_heapDelta_within_+-2_MiB true true ok [heapDelta=-1396720]
+PROBE U2-control-M0-closed C=8388608 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0
+STAGE4 check U2-control-M0_C=8388608_after_close_pending,endpoint,global 0,0,0 0,0,0 ok
+STAGE4 check U2_C=8388608_connected_and_drained_before_the_load true true ok [pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0]
+STAGE4 check U2_C=8388608_event_loop_parked true true ok []
+STAGE4 info histogram U2-C8388608 written; heapUsedNow=43408664
+PROBE U2 C=8388608 s=16403 M=1252 pending=9431725 count=575 endpointUsing=1043117 globalUsing=1043117 overloaded=677 overloadedBytes=11104831 heapBefore=33423480 heapAfter=42926208 heapDelta=9502728 ratio=1.0075
+STAGE4 check U2_C=8388608_pending_in_(C+R-s,_C+R] true true ok [pending=9431725 s=16403]
+STAGE4 check U2_C=8388608_endpointUsing_==_pending_-_C 1043117 1043117 ok
+STAGE4 check U2_C=8388608_globalUsing_==_endpointUsing 1043117 1043117 ok
+STAGE4 check U2_C=8388608_overloadedCount_==_M_-_accepted 677 677 ok
+STAGE4 check U2_C=8388608_heapDelta/pending_in_[1.0,_1.15] true true ok [ratio=1.0075]
+PROBE U2-closed C=8388608 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=677 overloadedBytes=11104831
+STAGE4 check U2_C=8388608_after_close_pending,endpoint,global 0,0,0 0,0,0 ok
+STAGE4 check U2_C=33554432_connected_and_drained_before_the_load true true ok [pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0]
+STAGE4 check U2_C=33554432_event_loop_parked true true ok []
+STAGE4 info histogram U2-C33554432 written; heapUsedNow=68339624
+PROBE U2 C=33554432 s=16403 M=4324 pending=34593927 count=2109 endpointUsing=1039495 globalUsing=1039495 overloaded=2215 overloadedBytes=36332645 heapBefore=33428792 heapAfter=67857168 heapDelta=34428376 ratio=0.9952
+STAGE4 check U2_C=33554432_pending_in_(C+R-s,_C+R] true true ok [pending=34593927 s=16403]
+STAGE4 check U2_C=33554432_endpointUsing_==_pending_-_C 1039495 1039495 ok
+STAGE4 check U2_C=33554432_globalUsing_==_endpointUsing 1039495 1039495 ok
+STAGE4 check U2_C=33554432_overloadedCount_==_M_-_accepted 2215 2215 ok
+STAGE4 check U2_C=33554432_heapDelta/pending_in_[1.0,_1.15] true false MISMATCH [ratio=0.9952]
+PROBE U2-closed C=33554432 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=2215 overloadedBytes=36332645
+STAGE4 check U2_C=33554432_after_close_pending,endpoint,global 0,0,0 0,0,0 ok
+STAGE4 check U2_C=134217728_connected_and_drained_before_the_load true true ok [pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0]
+STAGE4 check U2_C=134217728_event_loop_parked true true ok []
+STAGE4 info histogram U2-C134217728 written; heapUsedNow=169540448
+PROBE U2 C=134217728 s=16403 M=16612 pending=135261909 count=8246 endpointUsing=1044181 globalUsing=1044181 overloaded=8366 overloadedBytes=137235864 heapBefore=33202440 heapAfter=169057824 heapDelta=135855384 ratio=1.0044
+STAGE4 check U2_C=134217728_pending_in_(C+R-s,_C+R] true true ok [pending=135261909 s=16403]
+STAGE4 check U2_C=134217728_endpointUsing_==_pending_-_C 1044181 1044181 ok
+STAGE4 check U2_C=134217728_globalUsing_==_endpointUsing 1044181 1044181 ok
+STAGE4 check U2_C=134217728_overloadedCount_==_M_-_accepted 8366 8366 ok
+STAGE4 check U2_C=134217728_heapDelta/pending_in_[1.0,_1.15] true true ok [ratio=1.0044]
+PROBE U2-closed C=134217728 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=8366 overloadedBytes=137235864
+STAGE4 check U2_C=134217728_after_close_pending,endpoint,global 0,0,0 0,0,0 ok
+PROBE U1-full C=65536 successes=327 pending=327000 count=327 endpointUsing=261464 globalUsing=261464 overloaded=0 overloadedBytes=0
+STAGE4 check U1_C=65536_successes 327 327 ok
+STAGE4 check U1_C=65536_pending_at_first_failure 327000 327000 ok
+STAGE4 check U1_C=65536_endpointUsing 261464 261464 ok
+STAGE4 check U1_C=65536_globalUsing 261464 261464 ok
+PROBE U1-released C=65536 violations=0 endpointFirstZeroAtPending=65000 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0
+STAGE4 check U1_C=65536_release-step_violations_of_endpoint==max(0,pending-C)==global 0 0 ok
+STAGE4 check U1_C=65536_endpoint_reaches_0_exactly_when_pending_first_drops_to_<=_C true true ok [pendingAtZero=65000]
+STAGE4 check U1_C=65536_final_pending,endpoint,global 0,0,0 0,0,0 ok
+PROBE U1-stress C=65536 cycles=200 threads=16 totalMin=326513 totalMax=327680 totalFirst=327586 totalLast=327491 band=[323585,327680] barrierViolations=0 bandViolations=0 nonZeroAfterRelease=0
+STAGE4 check U1-stress_C=65536_barrier_violations_(pending<=C+Re,_endpoint==max(0,pending-C)==global) 0 0 ok
+STAGE4 check U1-stress_C=65536_cycles_with_total_outside_[C+Re-4095,_C+Re] 0 0 ok
+STAGE4 check U1-stress_C=65536_cycles_not_back_to_0,0,0_after_release 0 0 ok
+PROBE U1-full C=1048576 successes=1310 pending=1310000 count=1310 endpointUsing=261424 globalUsing=261424 overloaded=0 overloadedBytes=0
+STAGE4 check U1_C=1048576_successes 1310 1310 ok
+STAGE4 check U1_C=1048576_pending_at_first_failure 1310000 1310000 ok
+STAGE4 check U1_C=1048576_endpointUsing 261424 261424 ok
+STAGE4 check U1_C=1048576_globalUsing 261424 261424 ok
+PROBE U1-released C=1048576 violations=0 endpointFirstZeroAtPending=1048000 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0
+STAGE4 check U1_C=1048576_release-step_violations_of_endpoint==max(0,pending-C)==global 0 0 ok
+STAGE4 check U1_C=1048576_endpoint_reaches_0_exactly_when_pending_first_drops_to_<=_C true true ok [pendingAtZero=1048000]
+STAGE4 check U1_C=1048576_final_pending,endpoint,global 0,0,0 0,0,0 ok
+PROBE U1-stress C=1048576 cycles=200 threads=16 totalMin=1307882 totalMax=1310720 totalFirst=1310687 totalLast=1310465 band=[1306625,1310720] barrierViolations=0 bandViolations=0 nonZeroAfterRelease=0
+STAGE4 check U1-stress_C=1048576_barrier_violations_(pending<=C+Re,_endpoint==max(0,pending-C)==global) 0 0 ok
+STAGE4 check U1-stress_C=1048576_cycles_with_total_outside_[C+Re-4095,_C+Re] 0 0 ok
+STAGE4 check U1-stress_C=1048576_cycles_not_back_to_0,0,0_after_release 0 0 ok
+PROBE U1-full C=4194304 successes=4456 pending=4456000 count=4456 endpointUsing=261696 globalUsing=261696 overloaded=0 overloadedBytes=0
+STAGE4 check U1_C=4194304_successes 4456 4456 ok
+STAGE4 check U1_C=4194304_pending_at_first_failure 4456000 4456000 ok
+STAGE4 check U1_C=4194304_endpointUsing 261696 261696 ok
+STAGE4 check U1_C=4194304_globalUsing 261696 261696 ok
+PROBE U1-released C=4194304 violations=0 endpointFirstZeroAtPending=4194000 pending=0 count=0 endpointUsing=0 globalUsing=0 overloaded=0 overloadedBytes=0
+STAGE4 check U1_C=4194304_release-step_violations_of_endpoint==max(0,pending-C)==global 0 0 ok
+STAGE4 check U1_C=4194304_endpoint_reaches_0_exactly_when_pending_first_drops_to_<=_C true true ok [pendingAtZero=4194000]
+STAGE4 check U1_C=4194304_final_pending,endpoint,global 0,0,0 0,0,0 ok
+PROBE U1-stress C=4194304 cycles=200 threads=16 totalMin=4452438 totalMax=4456447 totalFirst=4456316 totalLast=4456259 band=[4452353,4456448] barrierViolations=0 bandViolations=0 nonZeroAfterRelease=0
+STAGE4 check U1-stress_C=4194304_barrier_violations_(pending<=C+Re,_endpoint==max(0,pending-C)==global) 0 0 ok
+STAGE4 check U1-stress_C=4194304_cycles_with_total_outside_[C+Re-4095,_C+Re] 0 0 ok
+STAGE4 check U1-stress_C=4194304_cycles_not_back_to_0,0,0_after_release 0 0 ok
+STAGE4 info SendQueueCapacityProbeTest end; mismatches=1

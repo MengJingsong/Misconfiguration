@@ -1,0 +1,85 @@
+== 2026-10-21T23:52:17-04:00 R4 L=512MiB t=0.15
+/dev/sda3        63G   13G   48G  21% /
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 's3mhs'
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /users/jason92/stage4-ncl/hints
+395c395
+< # data_file_directories:
+---
+> data_file_directories: [/users/jason92/stage4-ncl/data]
+408c408
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /users/jason92/stage4-ncl/commitlog
+431c431
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /users/jason92/stage4-ncl/cdc_raw
+611c611
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /users/jason92/stage4-ncl/saved_caches
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.5:7000"
+797c797
+< # memtable_heap_space: 2048MiB
+---
+> memtable_heap_space: 512MiB
+812c812
+< # memtable_cleanup_threshold: 0.11
+---
+> memtable_cleanup_threshold: 0.15
+883c883
+< # commitlog_total_space: 8192MiB
+---
+> commitlog_total_space: 4096MiB
+912c912
+< # memtable_flush_writers: 2
+---
+> memtable_flush_writers: 2
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.5
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.5
+235:JMX_PORT="7205"
+PID=766719
+INFO  [main] 2026-10-22T03:52:20,337 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB
+deprecation lines: 1
+out.log lines mentioning byteman/rule errors: 1
+Total partitions          :      1,000 [WRITE: 1,000]
+Total errors              :          0 [WRITE: 0]
+system.log offset 93967, out.log offset 77095
+1792641216 Total        763902       78309960
+1792641247 Total        763660       78296800
+1792641277 Total        762651       78230320
+stress rc=0
+Op rate                   :    9,976 op/s  [WRITE: 9,976 op/s]
+Total partitions          :  3,000,000 [WRITE: 3,000,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:05:00
+triggers(all tables): 0
+N_flush keyspace1.standard1 MEMTABLE_LIMIT: 0
+keyspace1 flushes other reasons: 0
+BlockedOnAllocation Count: 0
+		SSTable count: 6
+		Old SSTable count: 0
+		Space used (live): 3214345499
+		Memtable switch count: 57
+byteman lines: 104
+ERROR lines: 0
+3.6G	/users/jason92/stage4-ncl
+/dev/sda3        63G   13G   48G  21% /
+== 2026-10-22T00:01:03-04:00 R4 done
+== stopping node
+leftover cassandra-ncl java: 0

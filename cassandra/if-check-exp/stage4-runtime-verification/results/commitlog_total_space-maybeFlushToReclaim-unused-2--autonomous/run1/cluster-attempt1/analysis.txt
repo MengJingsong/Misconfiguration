@@ -1,0 +1,45 @@
+ARM 8192: stress partitions=1,000,000 errors=0 rate=91,130 op/s write=19.9s samples=312 | peak=1120MiB at +17.8s, end-of-write=1120, settled=1120 | JMX peak=1120MiB (64 samples) | CLD standard1=0 (in write 0, before peak 0) ML=0 | segment deletions=0 | du falls=0 | max|du-32MiB*files|=0MiB in 0 samples
+   CLD at +s []
+   deletions at +s []
+   other flush reasons in run window: []
+ARM 128: stress partitions=1,000,000 errors=0 rate=91,211 op/s write=20.3s samples=313 | peak=544MiB at +18.4s, end-of-write=256, settled=64 | JMX peak=544MiB (63 samples) | CLD standard1=11 (in write 11, before peak 11) ML=0 | segment deletions=33 | du falls=10 | max|du-32MiB*files|=0MiB in 0 samples
+   CLD at +s [8.1, 9.2, 10.2, 11.1, 12.0, 13.0, 14.1, 15.1, 16.0, 17.2, 18.0]
+   deletions at +s [8.9, 8.9, 8.9, 10.0, 10.0, 10.0, 10.9, 10.9, 10.9, 11.8, 11.8, 11.8, 12.7, 12.7, 12.7, 13.8, 13.8, 13.8, 18.4, 18.4, 18.4, 19.7, 19.7, 19.7, 19.7, 19.7, 19.7, 22.4, 22.4, 22.4, 22.4, 22.4, 22.4]
+   other flush reasons in run window: []
+ARM 256: stress partitions=1,000,000 errors=0 rate=92,607 op/s write=19.9s samples=311 | peak=448MiB at +17.7s, end-of-write=224, settled=224 | JMX peak=448MiB (63 samples) | CLD standard1=4 (in write 4, before peak 4) ML=0 | segment deletions=28 | du falls=5 | max|du-32MiB*files|=32MiB in 1 samples
+   CLD at +s [9.4, 11.7, 13.9, 16.1]
+   deletions at +s [11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 13.3, 13.3, 13.3, 13.3, 13.3, 13.3, 13.3, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.6, 18.5, 18.6, 18.6, 18.6, 18.6, 18.6, 18.6]
+   other flush reasons in run window: []
+ARM 512: stress partitions=1,000,000 errors=0 rate=89,343 op/s write=20.2s samples=312 | peak=832MiB at +15.1s, end-of-write=640, settled=160 | JMX peak=736MiB (64 samples) | CLD standard1=2 (in write 2, before peak 1) ML=0 | segment deletions=30 | du falls=3 | max|du-32MiB*files|=32MiB in 2 samples
+   CLD at +s [12.0, 16.9]
+   deletions at +s [15.4, 15.4, 15.4, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 15.5, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.2, 21.3, 21.3]
+   other flush reasons in run window: []
+
+== B3f
+EXPECTED: 128: peak 544 <= T+4S = 256 MiB: NO
+EXPECTED: 128: settled 64 <= T: yes
+EXPECTED: 128: COMMITLOG_DIRTY 11 >= 5: yes
+EXPECTED: 256: peak 448 <= T+4S = 384 MiB: NO
+EXPECTED: 256: settled 224 <= T: yes
+EXPECTED: 256: COMMITLOG_DIRTY 4 >= 3: yes
+EXPECTED: 512: peak 832 <= T+4S = 640 MiB: NO
+EXPECTED: 512: settled 160 <= T: yes
+EXPECTED: 512: COMMITLOG_DIRTY 2 >= 1: yes
+EXPECTED: control peak 1120 MiB in 1.0-1.1 GiB: yes
+EXPECTED: control settled ~ peak (1120 vs 1120): yes
+EXPECTED: control COMMITLOG_DIRTY 0 (0): yes
+EXPECTED: peak - T about the same across 128/256/512: [416.0, 192.0, 320.0]: NO
+EXPECTED: 8192: du within one segment of 32 MiB x files: yes
+EXPECTED: 8192: MEMTABLE_LIMIT 0 (0): yes
+EXPECTED: 128: du within one segment of 32 MiB x files: yes
+EXPECTED: 128: MEMTABLE_LIMIT 0 (0): yes
+EXPECTED: 256: du within one segment of 32 MiB x files: yes
+EXPECTED: 256: MEMTABLE_LIMIT 0 (0): yes
+EXPECTED: 512: du within one segment of 32 MiB x files: yes
+EXPECTED: 512: MEMTABLE_LIMIT 0 (0): yes
+
+== B3g rows (R3), in order
+peaks [544.0, 448.0, 832.0] MiB; control 1120; 0.8*control 896; follows T: False; fell back: {128: True, 256: True, 512: True}
+CLUSTER B3g ROW: 4c Not confirmed (peak set by flush throughput, not T) - caps (soft)
+
+TOTAL EXPECTED yes=17 NO=4

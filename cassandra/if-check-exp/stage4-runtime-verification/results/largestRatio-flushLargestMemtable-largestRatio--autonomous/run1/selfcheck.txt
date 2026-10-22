@@ -1,0 +1,38 @@
+ok: unit first-L128: ant-log PROBE lines equal probe.txt (4 vs 4)
+ok: unit first-L32: ant-log PROBE lines equal probe.txt (4 vs 4)
+ok: unit orig-L128: ant-log PROBE lines equal probe.txt (8 vs 8)
+ok: unit U1: changed [cql_test_keyspace.table_u1selection_02] = argmax cql_test_keyspace.table_u1selection_02, result true
+ok: unit U2 valid attempt 2: result false, nothing changed
+ok: unit orig-L32: ant-log PROBE lines equal probe.txt (4 vs 4)
+ok: unit M-orig L=128: skew 0.5808 - even 0.4174 > 0.10 (the Refuted reading)
+ok: unit M-orig L=32: |skew - even| <= 0.10
+ok: unit: every variant peakUsed <= L (no sample over L)
+ok: unit PC skew: L128/L32 = 4.26 in [3, 5]
+ok: unit PC even: L128/L32 = 3.35 in [3, 5]
+ok: unit M-never: peak 33554109 within 1 KiB of L, 4 threads timed out, 0 switches
+ok: unit M-first L=128 even: OOM lines 9 > 0 with peakUsed 122.2 MiB <= 128 and rows 149954 < 208000
+ok: unit M-first L=128: a Full GC left >= 900 MiB live in the 1 GiB JVM (max after Full GC 1005 MiB)
+  info: orig-L128 Full GC after-values [13, 18]
+  info: orig-L32 Full GC after-values [13, 18]
+  info: L256-skew: 66 selections, a max 0.8 median 0.67, g median 0.33; AllMem peak 85.2 MiB over 79 samples; stress-table flush reasons ['MEMTABLE_LIMIT']
+  info: L256-even: 166 selections, a max 1.0 median 0.87, g median 0.13; AllMem peak 85.6 MiB over 119 samples; stress-table flush reasons ['MEMTABLE_LIMIT']
+  info: L1024-skew: 16 selections, a max 0.69 median 0.67, g median 0.33; AllMem peak 350.0 MiB over 69 samples; stress-table flush reasons ['MEMTABLE_LIMIT']
+  info: L1024-even: 41 selections, a max 1.0 median 0.86, g median 0.13; AllMem peak 341.3 MiB over 79 samples; stress-table flush reasons ['MEMTABLE_LIMIT']
+  info: never: 0 selections, a max None median None, g median None; AllMem peak 256.0 MiB over 301 samples; stress-table flush reasons []
+ok: cluster L256-skew: selections > 0, every a <= 1.02, AllMem peak <= L, stress-table flushes all MEMTABLE_LIMIT
+ok: cluster L256-even: selections > 0, every a <= 1.02, AllMem peak <= L, stress-table flushes all MEMTABLE_LIMIT
+ok: cluster L1024-skew: selections > 0, every a <= 1.02, AllMem peak <= L, stress-table flushes all MEMTABLE_LIMIT
+ok: cluster L1024-even: selections > 0, every a <= 1.02, AllMem peak <= L, stress-table flushes all MEMTABLE_LIMIT
+ok: cluster L=256: max a skew 0.8 vs even 1.0 differ by > 0.10 and medians 0.67 vs 0.87 by > 0.10 (the Refuted reading)
+ok: cluster L=256: AllMem peak/L skew 0.333 vs even 0.334 within 0.10
+ok: cluster L=1024: max a skew 0.69 vs even 1.0 differ by > 0.10 and medians 0.67 vs 0.86 by > 0.10 (the Refuted reading)
+ok: cluster L=1024: AllMem peak/L skew 0.342 vs even 0.333 within 0.10
+ok: cluster PC skew: AllMem peak L1024/L256 = 4.11 in [3, 5]
+ok: cluster PC even: AllMem peak L1024/L256 = 3.99 in [3, 5]
+ok: cluster never: 0 selections, 0 MEMTABLE_LIMIT flushes, AllMem peak 256.00 MiB in [0.9 L, 1.02 L]
+ok: cluster never: stress output holds timeouts (10026 lines) and no OOM in system.log
+  info: L256-skew Full GC (before->after MiB): []
+  info: L256-even Full GC (before->after MiB): [('4066', '343'), ('3981', '327')]
+  info: L1024-skew Full GC (before->after MiB): [('4076', '771'), ('3859', '949'), ('3836', '961'), ('3795', '804')]
+  info: L1024-even Full GC (before->after MiB): [('4070', '616'), ('3896', '1010'), ('3879', '852'), ('3835', '1049')]
+selfcheck totals: 26 ok, 0 FAIL

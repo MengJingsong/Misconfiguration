@@ -1,0 +1,68 @@
+   INFO R1 O7: 53 lines, 32 self-consistent, 32 of those exact; live-T over consistent lines: min 7 max 3296 B
+R1 {'L': 128, 't': 0.3333, 'T': 44739244, 'ntrig': 101, 'live_med': 0.33, 'live_min': 0.33, 'live_max': 0.33, 'used_min': 0.33, 'nflush': 101, 'other': 0, 'Ppool': 75156712, 'O1max': 44434369, 'nO1': 156, 'B': 86544032, 'Plive': 44902432, 'nlive': 22, 'blocked': 0, 'n128': 53, 'exact128': 35, 'lv128_max_over': 3296, 'lv128_min_over': -44739048, 'nblk_trace': 0}
+   MiB: T=42.7 Ppool=71.7 O1max=42.4 B=82.5 Plive=42.8
+   INFO R2 O7: 26 lines, 18 self-consistent, 18 of those exact; live-T over consistent lines: min 38 max 1548 B
+R2 {'L': 512, 't': 0.3333, 'T': 178956976, 'ntrig': 25, 'live_med': 0.33, 'live_min': 0.33, 'live_max': 0.33, 'used_min': 0.33, 'nflush': 25, 'other': 0, 'Ppool': 237148865, 'O1max': 173704360, 'nO1': 148, 'B': 69397504, 'Plive': 189148304, 'nlive': 22, 'blocked': 0, 'n128': 26, 'exact128': 20, 'lv128_max_over': 1548, 'lv128_min_over': -178955756, 'nblk_trace': 0}
+   MiB: T=170.7 Ppool=226.2 O1max=165.7 B=66.2 Plive=180.4
+   INFO R3 O7: 10 lines, 10 self-consistent, 10 of those exact; live-T over consistent lines: min 981 max 1375 B
+R3 {'L': 1024, 't': 0.3333, 'T': 357913952, 'ntrig': 12, 'live_med': 0.33, 'live_min': 0.33, 'live_max': 0.33, 'used_min': 0.33, 'nflush': 12, 'other': 0, 'Ppool': 490162356, 'O1max': 355905473, 'nO1': 148, 'B': 77064416, 'Plive': 381131672, 'nlive': 22, 'blocked': 0, 'n128': 10, 'exact128': 10, 'lv128_max_over': 1375, 'lv128_min_over': 981, 'nblk_trace': 0}
+   MiB: T=341.3 Ppool=467.5 O1max=339.4 B=73.5 Plive=363.5
+   INFO R4 O7: 48 lines, 36 self-consistent, 36 of those exact; live-T over consistent lines: min 48 max 7770 B
+R4 {'L': 512, 't': 0.15, 'T': 80530640, 'ntrig': 56, 'live_med': 0.15, 'live_min': 0.15, 'live_max': 0.15, 'used_min': 0.15, 'nflush': 56, 'other': 0, 'Ppool': 119849407, 'O1max': 80154371, 'nO1': 156, 'B': 78296800, 'Plive': 102742456, 'nlive': 22, 'blocked': 0, 'n128': 48, 'exact128': 39, 'lv128_max_over': 7770, 'lv128_min_over': -80530630, 'nblk_trace': 0}
+   MiB: T=76.8 Ppool=114.3 O1max=76.4 B=74.7 Plive=98.0
+   INFO R5 O7: 11 lines, 9 self-consistent, 9 of those exact; live-T over consistent lines: min 314 max 4436 B
+R5 {'L': 512, 't': 0.66, 'T': 354334816, 'ntrig': 12, 'live_med': 0.66, 'live_min': 0.66, 'live_max': 0.66, 'used_min': 0.66, 'nflush': 12, 'other': 0, 'Ppool': 393832160, 'O1max': 354057073, 'nO1': 157, 'B': 80813872, 'Plive': 361610096, 'nlive': 22, 'blocked': 0, 'n128': 11, 'exact128': 10, 'lv128_max_over': 4436, 'lv128_min_over': -354334620, 'nblk_trace': 0}
+   MiB: T=337.9 Ppool=375.6 O1max=337.7 B=77.1 Plive=344.9
+
+PASS P1 R1 median live_trig in [0.3,0.42]: 0.33
+PASS P1 R1 Used total >= 0.30 at every trigger: 0.33
+FAIL P1b R1 nextClean-recl == (long)(L*t) in >=95% of line-128 trues: 35/53
+PASS P2 R1 P_pool <= L+8MiB: 71.7 MiB
+PASS P2 R1 P_pool >= t*L: 71.7 >= 42.7 MiB
+PASS P2 R1 O1 (live memtables) <= L: 42.4 MiB
+INFO R1 BlockedOnAllocation Count (expected 0 or small): 0
+PASS P4 R1 P_live <= 1.15 P_pool + 64MiB: 42.8 <= 146.4 MiB
+PASS Attr R1 no keyspace1 flush with another reason: 0
+PASS P1 R2 median live_trig in [0.3,0.42]: 0.33
+PASS P1 R2 Used total >= 0.30 at every trigger: 0.33
+FAIL P1b R2 nextClean-recl == (long)(L*t) in >=95% of line-128 trues: 20/26
+PASS P2 R2 P_pool <= L+8MiB: 226.2 MiB
+PASS P2 R2 P_pool >= t*L: 226.2 >= 170.7 MiB
+PASS P2 R2 O1 (live memtables) <= L: 165.7 MiB
+INFO R2 BlockedOnAllocation Count (expected 0 or small): 0
+PASS P4 R2 P_live <= 1.15 P_pool + 64MiB: 180.4 <= 324.1 MiB
+PASS Attr R2 no keyspace1 flush with another reason: 0
+PASS P1 R3 median live_trig in [0.3,0.42]: 0.33
+PASS P1 R3 Used total >= 0.30 at every trigger: 0.33
+PASS P1b R3 nextClean-recl == (long)(L*t) in >=95% of line-128 trues: 10/10
+PASS P2 R3 P_pool <= L+8MiB: 467.5 MiB
+PASS P2 R3 P_pool >= t*L: 467.5 >= 341.3 MiB
+PASS P2 R3 O1 (live memtables) <= L: 339.4 MiB
+INFO R3 BlockedOnAllocation Count (expected 0 or small): 0
+PASS P4 R3 P_live <= 1.15 P_pool + 64MiB: 363.5 <= 601.6 MiB
+PASS Attr R3 no keyspace1 flush with another reason: 0
+PASS P1 R4 median live_trig in [0.13,0.22]: 0.15
+FAIL P1b R4 nextClean-recl == (long)(L*t) in >=95% of line-128 trues: 39/48
+PASS P2 R4 P_pool <= L+8MiB: 114.3 MiB
+PASS P2 R4 P_pool >= t*L: 114.3 >= 76.8 MiB
+PASS P2 R4 O1 (live memtables) <= L: 76.4 MiB
+INFO R4 BlockedOnAllocation Count (expected 0 or small): 0
+PASS P4 R4 P_live <= 1.15 P_pool + 64MiB: 98.0 <= 195.4 MiB
+PASS Attr R4 no keyspace1 flush with another reason: 0
+PASS P1 R5 median live_trig in [0.64,0.75]: 0.66
+FAIL P1b R5 nextClean-recl == (long)(L*t) in >=95% of line-128 trues: 10/11
+PASS P2 R5 P_pool <= L+8MiB: 375.6 MiB
+PASS P2 R5 P_pool >= t*L: 375.6 >= 337.9 MiB
+PASS P2 R5 O1 (live memtables) <= L: 337.7 MiB
+FAIL P2 R5 P_pool >= 0.85 L: 375.6 MiB
+INFO R5 BlockedOnAllocation Count (expected > 0): 0
+PASS P4 R5 P_live <= 1.15 P_pool + 64MiB: 344.9 <= 495.9 MiB
+PASS Attr R5 no keyspace1 flush with another reason: 0
+PASS P3 N_flush(R1)/N_flush(R3) in [6,10]: 8.42 (101/12)
+PASS P3 N_flush(R1) in 85..125: 101
+PASS P3 N_flush(R3) in 11..16: 12
+PASS P5 P_live(R3)-P_live(R1) >= 250 MiB: 320.7 MiB
+PASS P3 N_flush(R4)/N_flush(R2) in [1.7,2.6]: 2.24 (56/25)
+
+refuted-if (B3f): P_pool>1.1L any run; P_live>1.15L+64MiB in R1/R2; N_flush R1/R3<3; live_trig not moving R4/R2/R5; P_live(R3)-P_live(R1)<100MiB
+summary: 39 PASS, 5 FAIL

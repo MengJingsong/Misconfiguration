@@ -1,0 +1,110 @@
+HOLDS: unit: ant-log PROBE lines equal probe.out -- 8 vs 8 lines
+HOLDS: unit: rep2 identical to rep1 -- 
+HOLDS: unit: S and F as B2c arithmetic -- S=25000 F=800 Fp=800
+HOLDS: unit P0: P as B2b -- 4000 vs 4000
+HOLDS: unit P0: both operand readers = P - N*F -- -4000 -4000 -4000
+HOLDS: unit P0: k as B2f table -- 0 vs 0
+HOLDS: unit P0: T = k*S + (N-k)*F -- 8000
+HOLDS: unit P0: branch sign (R>0 except P0) -- 
+HOLDS: unit P0: T<=P except P0 (T = N*F > P0) -- 
+HOLDS: unit P0: reset to full before (tBefore = N*S) -- 
+HOLDS: unit P1: P as B2b -- 20100 vs 20100
+HOLDS: unit P1: both operand readers = P - N*F -- 12100 12100 12100
+HOLDS: unit P1: k as B2f table -- 0 vs 0
+HOLDS: unit P1: T = k*S + (N-k)*F -- 8000
+HOLDS: unit P1: branch sign (R>0 except P0) -- 
+HOLDS: unit P1: T<=P except P0 (T = N*F > P0) -- 
+HOLDS: unit P1: reset to full before (tBefore = N*S) -- 
+HOLDS: unit P2: P as B2b -- 92700 vs 92700
+HOLDS: unit P2: both operand readers = P - N*F -- 84700 84700 84700
+HOLDS: unit P2: k as B2f table -- 3 vs 3
+HOLDS: unit P2: T = k*S + (N-k)*F -- 80600
+HOLDS: unit P2: branch sign (R>0 except P0) -- 
+HOLDS: unit P2: T<=P except P0 (T = N*F > P0) -- 
+HOLDS: unit P2: reset to full before (tBefore = N*S) -- 
+HOLDS: unit P3: P as B2b -- 189500 vs 189500
+HOLDS: unit P3: both operand readers = P - N*F -- 181500 181500 181500
+HOLDS: unit P3: k as B2f table -- 7 vs 7
+HOLDS: unit P3: T = k*S + (N-k)*F -- 177400
+HOLDS: unit P3: branch sign (R>0 except P0) -- 
+HOLDS: unit P3: T<=P except P0 (T = N*F > P0) -- 
+HOLDS: unit P3: reset to full before (tBefore = N*S) -- 
+HOLDS: unit P4: P as B2b -- 251024 vs 251024
+HOLDS: unit P4: both operand readers = P - N*F -- 243024 243024 243024
+HOLDS: unit P4: k as B2f table -- 10 vs 10
+HOLDS: unit P4: T = k*S + (N-k)*F -- 250000
+HOLDS: unit P4: branch sign (R>0 except P0) -- 
+HOLDS: unit P4: T<=P except P0 (T = N*F > P0) -- 
+HOLDS: unit P4: reset to full before (tBefore = N*S) -- 
+HOLDS: unit: levels at P2 hold three 128s -- 128,4,128,4,128,4,4,4,4,4,
+HOLDS: load: 20 batches x 100,000 partitions, 0 errors -- [100000, 100000, 100000]… errors {'0'}
+HOLDS: load: first isr tablestats = 2,000,000 x 1012 B (distinct 1000-byte keys) -- 2024000000
+HOLDS: cluster: L0 run order 4096,8192,1024,8192,512,8192,64,8192,8,8192 -- [4096, 8192, 1024, 8192, 512, 8192, 64, 8192, 8, 8192]
+HOLDS: cluster: L0 pool line 64 MB, L1 pool line 409 MB -- 
+HOLDS: cluster: L1 one run at 409 -- [409]
+HOLDS: cluster: one R258 line per run, pools match -- 
+HOLDS: cluster C=4096: started from full -- before=1930.237117767334
+HOLDS: cluster C=4096: T <= C + 1 (row 1) -- T=1930.237
+HOLDS: cluster C=4096: R258 > 0 -- R=4279139300 (4080.905 MiB)
+HOLDS: cluster C=4096: keep(isr) = B3f table k -- 20 vs 20
+HOLDS: cluster C=4096: no keep line when R258 <= 0 -- 
+HOLDS: cluster C=4096: matches phases.json T -- 
+HOLDS: cluster restore #1: T back to full (>= 1929.2) -- T=1930.2371463775635
+HOLDS: cluster C=1024: started from full -- before=1930.2371320724487
+HOLDS: cluster C=1024: T <= C + 1 (row 1) -- T=972.666
+HOLDS: cluster C=1024: R258 > 0 -- R=1057913813 (1008.905 MiB)
+HOLDS: cluster C=1024: keep(isr) = B3f table k -- 10 vs 10
+HOLDS: cluster C=1024: no keep line when R258 <= 0 -- 
+HOLDS: cluster C=1024: matches phases.json T -- 
+HOLDS: cluster restore #3: T back to full (>= 1929.2) -- T=1930.237117767334
+HOLDS: cluster C=512: started from full -- before=1930.2371463775635
+HOLDS: cluster C=512: T <= C + 1 (row 1) -- T=493.880
+HOLDS: cluster C=512: R258 > 0 -- R=521042886 (496.905 MiB)
+HOLDS: cluster C=512: keep(isr) = B3f table k -- 5 vs 5
+HOLDS: cluster C=512: no keep line when R258 <= 0 -- 
+HOLDS: cluster C=512: matches phases.json T -- 
+HOLDS: cluster restore #5: T back to full (>= 1929.2) -- T=1930.2371320724487
+HOLDS: cluster C=64: started from full -- before=1930.237117767334
+HOLDS: cluster C=64: T <= C + 1 (row 1) -- T=15.095
+HOLDS: cluster C=64: R258 > 0 -- R=51280868 (48.905 MiB)
+HOLDS: cluster C=64: keep(isr) = B3f table k -- 0 vs 0
+HOLDS: cluster C=64: no keep line when R258 <= 0 -- 
+HOLDS: cluster C=64: matches phases.json T -- 
+HOLDS: cluster restore #7: T back to full (>= 1929.2) -- T=1930.2371463775635
+HOLDS: cluster C=8: started from full -- before=1930.2371320724487
+HOLDS: cluster C=8: R258 < 0 and T > C (floor overshoot) -- R=-7439403 T=15.095
+HOLDS: cluster C=8: keep(isr) = B3f table k -- 0 vs 0
+HOLDS: cluster C=8: no keep line when R258 <= 0 -- 
+HOLDS: cluster C=8: matches phases.json T -- 
+HOLDS: cluster restore #9: T back to full (>= 1929.2) -- T=1930.237117767334
+HOLDS: cluster C=409: started from full -- before=1930.2372856140137
+HOLDS: cluster C=409: T <= C + 1 (row 1) -- T=398.123
+HOLDS: cluster C=409: R258 > 0 -- R=413039412 (393.905 MiB)
+HOLDS: cluster C=409: keep(isr) = B3f table k -- 4 vs 4
+HOLDS: cluster C=409: no keep line when R258 <= 0 -- 
+HOLDS: cluster C=409: matches phases.json T -- 
+HOLDS: rss reader 2 C4096: agrees with script within 32 MiB -- 11062.5/11063.0 vs 11062.5/11062.9
+HOLDS: rss reader 2 C4096: fall -0.5 ~ dT 0.0 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 restore-after-C4096: agrees with script within 32 MiB -- 11063.6/11063.6 vs 11063.6/11063.6
+HOLDS: rss reader 2 restore-after-C4096: fall 0.0 ~ dT 0.0 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 C1024: agrees with script within 32 MiB -- 11064.5/10106.9 vs 11064.5/10106.9
+HOLDS: rss reader 2 C1024: fall 957.6 ~ dT 957.6 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 restore-after-C1024: agrees with script within 32 MiB -- 10106.9/11064.7 vs 10106.9/11064.7
+HOLDS: rss reader 2 restore-after-C1024: fall -957.8 ~ dT -957.6 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 C512: agrees with script within 32 MiB -- 11064.7/9628.1 vs 11064.7/9628.1
+HOLDS: rss reader 2 C512: fall 1436.6 ~ dT 1436.4 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 restore-after-C512: agrees with script within 32 MiB -- 9628.5/11065.4 vs 9628.6/11065.4
+HOLDS: rss reader 2 restore-after-C512: fall -1436.9 ~ dT -1436.4 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 C64: agrees with script within 32 MiB -- 11066.1/9155.2 vs 11066.1/9155.2
+HOLDS: rss reader 2 C64: fall 1910.9 ~ dT 1915.1 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 restore-after-C64: agrees with script within 32 MiB -- 9155.8/11067.9 vs 9155.8/11067.9
+HOLDS: rss reader 2 restore-after-C64: fall -1912.1 ~ dT -1915.1 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 C8: agrees with script within 32 MiB -- 11068.7/9152.0 vs 11068.7/9152.0
+HOLDS: rss reader 2 C8: fall 1916.7 ~ dT 1915.1 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 restore-after-C8: agrees with script within 32 MiB -- 9152.4/11068.4 vs 9152.4/11068.4
+HOLDS: rss reader 2 restore-after-C8: fall -1916.0 ~ dT -1915.1 (max(0.15 dT, 64)) -- 
+HOLDS: rss reader 2 Cauto: agrees with script within 32 MiB -- 10921.6/9393.3 vs 10921.6/9393.2
+HOLDS: rss reader 2 Cauto: fall 1528.3 ~ dT 1532.1 (max(0.15 dT, 64)) -- 
+HOLDS: negative control: 2-s sampler range <= 64 MiB over the window -- n=145 range=0.2 MiB
+HOLDS: negative control: no Redistributing between the C=8 restore and the stop -- 
+SELF-CHECK: 109 / 109 hold; failing: none

@@ -1,0 +1,64 @@
+ARM T3-s20: ant_ok=True samples=4824 (write 4400, settle 424) T=3 sleep=20 mode=single nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=4MiB peakDir=4 settled=3 settledDir=3 switches=8 falls=15 writeMonotone=False max|dir-counter|=1MiB census={'COMMITLOG_DIRTY': 8} trace CHECK=20 SELECT=8
+ARM T4-s20: ant_ok=True samples=4781 (write 4362, settle 419) T=4 sleep=20 mode=single nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=5MiB peakDir=5 settled=4 settledDir=4 switches=5 falls=13 writeMonotone=False max|dir-counter|=1MiB census={'COMMITLOG_DIRTY': 5} trace CHECK=20 SELECT=5
+ARM T8-s20: ant_ok=True samples=4741 (write 4323, settle 418) T=8 sleep=20 mode=single nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=9MiB peakDir=9 settled=5 settledDir=5 switches=2 falls=9 writeMonotone=False max|dir-counter|=1MiB census={'COMMITLOG_DIRTY': 2} trace CHECK=20 SELECT=2
+ARM T1024-s20: ant_ok=True samples=4572 (write 4202, settle 370) T=1024 sleep=20 mode=single nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=19MiB peakDir=19 settled=19 settledDir=19 switches=0 falls=0 writeMonotone=True max|dir-counter|=1MiB census={} trace CHECK=20 SELECT=0
+ARM T4-s0: ant_ok=True samples=677 (write 250, settle 427) T=4 sleep=0 mode=single nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=11MiB peakDir=11 settled=3 settledDir=3 switches=5 falls=11 writeMonotone=False max|dir-counter|=1MiB census={'COMMITLOG_DIRTY': 5} trace CHECK=20 SELECT=15
+ARM T1024-s0: ant_ok=True samples=454 (write 209, settle 245) T=1024 sleep=0 mode=single nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=19MiB peakDir=19 settled=19 settledDir=19 switches=0 falls=0 writeMonotone=True max|dir-counter|=1MiB census={} trace CHECK=20 SELECT=0
+ARM M: ant_ok=True samples=4694 (write 4262, settle 432) T=8 sleep=20 mode=M nobreak=false segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=9MiB peakDir=9 settled=8 settledDir=8 switches=11 falls=11 writeMonotone=False max|dir-counter|=1MiB census={'COMMITLOG_DIRTY': 11} trace CHECK=20 SELECT=11
+ARM M-nobreak: ant_ok=True samples=4705 (write 4283, settle 422) T=8 sleep=20 mode=M nobreak=true segMiB=1 accessMode=mmap heapMaxMiB=1007 memtableHeapMiB=251 | peak=9MiB peakDir=9 settled=5 settledDir=5 switches=14 falls=14 writeMonotone=False max|dir-counter|=1MiB census={'COMMITLOG_DIRTY': 14} trace CHECK=20 SELECT=2
+
+== B2f (S = 1 MiB, 20 ms)
+EXPECTED: T3-s20 peak 4 <= T+2S = 5 MiB: yes
+EXPECTED: T3-s20 settled 3 <= T = 3 MiB: yes
+EXPECTED: T3-s20 COMMITLOG_DIRTY 8 >= 4: yes
+EXPECTED: T3-s20 file-length sum within 1 segment of onDiskSize (max diff 1 MiB): yes
+EXPECTED: T4-s20 peak 5 <= T+2S = 6 MiB: yes
+EXPECTED: T4-s20 settled 4 <= T = 4 MiB: yes
+EXPECTED: T4-s20 COMMITLOG_DIRTY 5 >= 4: yes
+EXPECTED: T4-s20 file-length sum within 1 segment of onDiskSize (max diff 1 MiB): yes
+EXPECTED: T8-s20 peak 9 <= T+2S = 10 MiB: yes
+EXPECTED: T8-s20 settled 5 <= T = 8 MiB: yes
+EXPECTED: T8-s20 COMMITLOG_DIRTY 2 >= 2: yes
+EXPECTED: T8-s20 file-length sum within 1 segment of onDiskSize (max diff 1 MiB): yes
+EXPECTED: control peak 19 MiB in 17-18 MiB: NO
+EXPECTED: control rises monotonically in write phase: yes
+EXPECTED: control settled = peak (19): yes
+EXPECTED: control COMMITLOG_DIRTY 0 (0): yes
+EXPECTED: peak - T roughly the same across 3,4,8: [1.0, 1.0, 1.0]: yes
+EXPECTED: unthrottled T=4 peak 11 <= T+4S = 8 MiB: NO
+EXPECTED: unthrottled T=4 settled 3 <= 4 MiB: yes
+INFO unthrottled control peak 19 MiB, COMMITLOG_DIRTY 0
+
+== B2g rows (R3), in order
+peaks [4.0, 5.0, 9.0] MiB, control 19, 0.8*control 15.2; peak follows T: True
+UNIT B2g ROW: 4 Confirmed (missed sub-predictions)
+
+== B2i (line 259)
+M: SELECT events 11; trough after first SELECT (write phase) 8 MiB; settled 8 MiB; peak 9 MiB; switching M* tables per SELECT {1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1}
+  SELECT 1: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 2: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 3: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 4: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 5: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 6: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 7: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 8: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 9: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 10: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+  SELECT 11: unused=-1MiB sel=1MiB k=1 gap=6 stop259=true minimal=true concurrentSwitch=False
+M-nobreak: SELECT events 2; trough after first SELECT (write phase) 2 MiB; settled 5 MiB; peak 9 MiB; switching M* tables per SELECT {1: 7, 2: 7}
+  SELECT 1: unused=-1MiB sel=7MiB k=7 gap=0 stop259=true minimal=false concurrentSwitch=False
+  SELECT 2: unused=-1MiB sel=7MiB k=7 gap=0 stop259=true minimal=false concurrentSwitch=False
+EXPECTED: M P1 >= 4 SELECT events (11): yes
+EXPECTED: M P2 every SELECT stop259&minimal or gap=0 (11 without concurrent switch): yes
+EXPECTED: M P2 >= 1 SELECT with stop259 and gap>0: yes
+EXPECTED: M P3 switching M* tables per SELECT <= k+1 ({1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1}): yes
+EXPECTED: M P4 trough 8 MiB >= T-3S = 5 MiB: yes
+EXPECTED: M P4 settled 8 MiB in [5, 8]: yes
+EXPECTED: M-nobreak every SELECT gap=0: yes
+EXPECTED: M-nobreak >= 1 SELECT switching >= 3 M* tables ({1: 7, 2: 7}): yes
+EXPECTED: M-nobreak trough 2 MiB <= 3S: yes
+EXPECTED: M-nobreak peak 9 <= T+2S: yes
+UNIT B2i ROW: i5 Confirmed
+
+TOTAL EXPECTED yes=27 NO=2

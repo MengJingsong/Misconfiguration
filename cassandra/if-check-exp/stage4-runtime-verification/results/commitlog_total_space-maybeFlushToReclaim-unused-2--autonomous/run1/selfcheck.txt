@@ -1,0 +1,19 @@
+== unit: peak / settled-at-end / min, from cap.csv; COMMITLOG_DIRTY and MEMTABLE_* lines from the raw test-log tree
+T3-s20     samples=4824 peak=4MiB last=3MiB max|dir-counter|=1MiB CLD=8 ML=0 junitOK=1
+T4-s20     samples=4781 peak=5MiB last=4MiB max|dir-counter|=1MiB CLD=5 ML=0 junitOK=1
+T8-s20     samples=4741 peak=9MiB last=5MiB max|dir-counter|=1MiB CLD=2 ML=0 junitOK=1
+T1024-s20  samples=4572 peak=19MiB last=19MiB max|dir-counter|=1MiB CLD=0 ML=0 junitOK=1
+T4-s0      samples=677 peak=11MiB last=3MiB max|dir-counter|=1MiB CLD=5 ML=0 junitOK=1
+T1024-s0   samples=454 peak=19MiB last=19MiB max|dir-counter|=1MiB CLD=0 ML=0 junitOK=1
+M          samples=4694 peak=9MiB last=8MiB max|dir-counter|=1MiB CLD=11 ML=0 junitOK=1
+M-nobreak  samples=4705 peak=9MiB last=5MiB max|dir-counter|=1MiB CLD=14 ML=0 junitOK=1
+== unit B2i: from the Byteman trace
+M          SELECT=11 gap>0=11 stop259&minimal=11 concurrent=0 switchingFLUSH=11 k/gap: 1/6 1/6 1/6 1/6 1/6 1/6 1/6 1/6 1/6 1/6 1/6 
+           trough after first SELECT (write phase) = 8 MiB
+M-nobreak  SELECT=2 gap>0=0 stop259&minimal=0 concurrent=0 switchingFLUSH=14 k/gap: 7/0 7/0 
+           trough after first SELECT (write phase) = 2 MiB
+== cluster: du peak and last sample <= TS (apparent size minus 4096), CLD lines in system.log, deletions in debug.log
+8192  du peak=1120MiB settled=1120MiB CLD(lifetime)=0 ML=0 deletions(lifetime)=34 partitions=1,000,000 errors=0 config=commitlog_total_space=8192MiB
+128   du peak=544MiB settled=64MiB CLD(lifetime)=11 ML=0 deletions(lifetime)=34 partitions=1,000,000 errors=0 config=commitlog_total_space=128MiB
+256   du peak=448MiB settled=224MiB CLD(lifetime)=4 ML=0 deletions(lifetime)=34 partitions=1,000,000 errors=0 config=commitlog_total_space=256MiB
+512   du peak=832MiB settled=160MiB CLD(lifetime)=2 ML=0 deletions(lifetime)=34 partitions=1,000,000 errors=0 config=commitlog_total_space=512MiB

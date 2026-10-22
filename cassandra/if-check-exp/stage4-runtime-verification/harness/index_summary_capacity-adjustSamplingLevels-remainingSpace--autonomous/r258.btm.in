@@ -1,0 +1,10 @@
+# Stage-4 instrument (amendment R6 item 2): the operand of IndexSummaryRedistribution.java:258, `if (remainingSpace > 0)`.
+# cluster-run.py replaces @OUT@ with the output file. Parameter 4 of adjustSamplingLevels is memoryPoolCapacity.
+RULE is2 remainingSpace at line 258
+CLASS org.apache.cassandra.io.sstable.indexsummary.IndexSummaryRedistribution
+METHOD adjustSamplingLevels
+AT LINE 258
+IF true
+DO traceOpen("r258", "@OUT@");
+   traceln("r258", "R258 epoch_ms=" + System.currentTimeMillis() + " remainingSpace=" + $this.remainingSpace + " memoryPoolCapacity=" + $4 + " branch=" + ($this.remainingSpace > 0))
+ENDRULE

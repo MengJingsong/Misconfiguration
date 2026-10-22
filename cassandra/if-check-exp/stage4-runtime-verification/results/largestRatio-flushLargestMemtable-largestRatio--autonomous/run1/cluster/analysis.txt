@@ -1,0 +1,79 @@
+--- L256-skew: L=256 MiB build=M-orig workload=skew stress 79 s rc=[0] limit_stop=False samples=79
+  selections (Flushing largest) 66; a max 0.8 median 0.67; g median 0.33; owners ["CFS(Keyspace='ks1', ColumnFamily='standard1')"]
+  flush reasons (stress table?, reason): {(True, 'MEMTABLE_LIMIT'): 66}
+  AllMemtablesOnHeapDataSize peak 85.2 MiB = 0.333 L; BlockedOnAllocation 0 -> 1450; heap used max 2944 MiB; old-gen post-GC median 416 MiB max 1008 MiB
+  gc.log old+humongous after GC in window: 27 pauses
+  stress: {'stress-ks1.out': {'op_rate': '57,026', 'partitions': '4,000,000', 'errors': '0', 'timeouts_lines': 0, 'bytes': 18222}}
+  system.log ERROR lines 0, OOM False; du ['4289629798', '/users/jason92/stage4-lrt/node/data', '536875008', '/users/jason92/stage4-lrt/node/commitlog']
+--- L256-even: L=256 MiB build=M-orig workload=even stress 119 s rc=[0, 0, 0, 0] limit_stop=False samples=119
+  selections (Flushing largest) 166; a max 1.0 median 0.87; g median 0.13; owners ["CFS(Keyspace='ks1', ColumnFamily='standard1')", "CFS(Keyspace='ks2', ColumnFamily='standard1')", "CFS(Keyspace='ks3', ColumnFamily='standard1')", "CFS(Keyspace='ks4', ColumnFamily='standard1')"]
+  flush reasons (stress table?, reason): {(True, 'MEMTABLE_LIMIT'): 166}
+  AllMemtablesOnHeapDataSize peak 85.6 MiB = 0.334 L; BlockedOnAllocation 0 -> 2338; heap used max 3717 MiB; old-gen post-GC median 1056 MiB max 4096 MiB
+  gc.log old+humongous after GC in window: 37 pauses
+  stress: {'stress-ks1.out': {'op_rate': '8,913', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 42, 'bytes': 33072}, 'stress-ks2.out': {'op_rate': '8,910', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 39, 'bytes': 32526}, 'stress-ks3.out': {'op_rate': '8,902', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 41, 'bytes': 32890}, 'stress-ks4.out': {'op_rate': '8,921', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 46, 'bytes': 33800}}
+  system.log ERROR lines 0, OOM False; du ['4258302010', '/users/jason92/stage4-lrt/node/data', '1275072512', '/users/jason92/stage4-lrt/node/commitlog']
+--- L1024-skew: L=1024 MiB build=M-orig workload=skew stress 69 s rc=[0] limit_stop=False samples=69
+  selections (Flushing largest) 16; a max 0.69 median 0.67; g median 0.33; owners ["CFS(Keyspace='ks1', ColumnFamily='standard1')"]
+  flush reasons (stress table?, reason): {(True, 'MEMTABLE_LIMIT'): 16}
+  AllMemtablesOnHeapDataSize peak 350.0 MiB = 0.342 L; BlockedOnAllocation 0 -> 356; heap used max 3643 MiB; old-gen post-GC median 1472 MiB max 4096 MiB
+  gc.log old+humongous after GC in window: 35 pauses
+  stress: {'stress-ks1.out': {'op_rate': '66,179', 'partitions': '4,000,000', 'errors': '0', 'timeouts_lines': 301, 'bytes': 68552}}
+  system.log ERROR lines 0, OOM False; du ['5424673872', '/users/jason92/stage4-lrt/node/data', '369102848', '/users/jason92/stage4-lrt/node/commitlog']
+--- L1024-even: L=1024 MiB build=M-orig workload=even stress 79 s rc=[0, 0, 0, 0] limit_stop=False samples=79
+  selections (Flushing largest) 41; a max 1.0 median 0.86; g median 0.13; owners ["CFS(Keyspace='ks1', ColumnFamily='standard1')", "CFS(Keyspace='ks2', ColumnFamily='standard1')", "CFS(Keyspace='ks3', ColumnFamily='standard1')", "CFS(Keyspace='ks4', ColumnFamily='standard1')"]
+  flush reasons (stress table?, reason): {(True, 'MEMTABLE_LIMIT'): 41}
+  AllMemtablesOnHeapDataSize peak 341.3 MiB = 0.333 L; BlockedOnAllocation 0 -> 363; heap used max 3471 MiB; old-gen post-GC median 1424 MiB max 4096 MiB
+  gc.log old+humongous after GC in window: 35 pauses
+  stress: {'stress-ks1.out': {'op_rate': '14,004', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 42, 'bytes': 25018}, 'stress-ks2.out': {'op_rate': '13,982', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 38, 'bytes': 24290}, 'stress-ks3.out': {'op_rate': '13,945', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 37, 'bytes': 24108}, 'stress-ks4.out': {'op_rate': '13,964', 'partitions': '1,000,000', 'errors': '0', 'timeouts_lines': 45, 'bytes': 25564}}
+  system.log ERROR lines 0, OOM False; du ['4144954850', '/users/jason92/stage4-lrt/node/data', '603983872', '/users/jason92/stage4-lrt/node/commitlog']
+--- never: L=256 MiB build=M-never workload=skew stress 301 s rc=[-9] limit_stop=True samples=301
+  selections (Flushing largest) 0; a max None median None; g median None; owners []
+  flush reasons (stress table?, reason): {}
+  AllMemtablesOnHeapDataSize peak 256.0 MiB = 1.000 L; BlockedOnAllocation 0 -> 0; heap used max 2755 MiB; old-gen post-GC median 384 MiB max 400 MiB
+  gc.log old+humongous after GC in window: 56 pauses
+  stress: {'stress-ks1.out': {'op_rate': None, 'partitions': None, 'errors': None, 'timeouts_lines': 10026, 'bytes': 1866129}}
+  system.log ERROR lines 0, OOM False; du ['353418', '/users/jason92/stage4-lrt/node/data', '234885120', '/users/jason92/stage4-lrt/node/commitlog']
+
+EXPECTED: L256-skew: selections happened (Flushing largest lines) [B3g "not reached" row excluded] — yes
+EXPECTED: L256-skew: every a <= 1.02 (max 0.8) — yes
+EXPECTED: L256-skew: peak AllMemtablesOnHeapDataSize <= L (0.333 L) — yes
+EXPECTED: L256-skew: median a in [0.33, 0.7] (0.67) — yes
+EXPECTED: L256-skew: B3h — every flush of a stress table is MEMTABLE_LIMIT (others {}) — yes
+EXPECTED: L256-even: selections happened (Flushing largest lines) [B3g "not reached" row excluded] — yes
+EXPECTED: L256-even: every a <= 1.02 (max 1.0) — yes
+EXPECTED: L256-even: peak AllMemtablesOnHeapDataSize <= L (0.334 L) — yes
+EXPECTED: L256-even: median a in [0.33, 0.7] (0.87) — NO
+EXPECTED: L256-even: B3h — every flush of a stress table is MEMTABLE_LIMIT (others {}) — yes
+EXPECTED: L1024-skew: selections happened (Flushing largest lines) [B3g "not reached" row excluded] — yes
+EXPECTED: L1024-skew: every a <= 1.02 (max 0.69) — yes
+EXPECTED: L1024-skew: peak AllMemtablesOnHeapDataSize <= L (0.342 L) — yes
+EXPECTED: L1024-skew: median a in [0.33, 0.7] (0.67) — yes
+EXPECTED: L1024-skew: B3h — every flush of a stress table is MEMTABLE_LIMIT (others {}) — yes
+EXPECTED: L1024-even: selections happened (Flushing largest lines) [B3g "not reached" row excluded] — yes
+EXPECTED: L1024-even: every a <= 1.02 (max 1.0) — yes
+EXPECTED: L1024-even: peak AllMemtablesOnHeapDataSize <= L (0.333 L) — yes
+EXPECTED: L1024-even: median a in [0.33, 0.7] (0.86) — NO
+EXPECTED: L1024-even: B3h — every flush of a stress table is MEMTABLE_LIMIT (others {}) — yes
+EXPECTED: L=256: |median a skew - even| <= 0.10 (0.67 vs 0.87) — NO
+EXPECTED: L=256: |max a skew - even| <= 0.10 (0.8 vs 1.0) — NO
+EXPECTED: L=256: |peak AllMem/L skew - even| <= 0.10 (0.333 vs 0.334) — yes
+EXPECTED: L=256: g median even in [0.08, 0.15] (0.13), skew in [0.33, 0.6] (0.33) — yes
+EXPECTED: L=256: MEMTABLE_LIMIT flushes even/skew in [2, 4] (166/66 = 2.52) — yes
+EXPECTED: L=1024: |median a skew - even| <= 0.10 (0.67 vs 0.86) — NO
+EXPECTED: L=1024: |max a skew - even| <= 0.10 (0.69 vs 1.0) — NO
+EXPECTED: L=1024: |peak AllMem/L skew - even| <= 0.10 (0.342 vs 0.333) — yes
+EXPECTED: L=1024: g median even in [0.08, 0.15] (0.13), skew in [0.33, 0.6] (0.33) — yes
+EXPECTED: L=1024: MEMTABLE_LIMIT flushes even/skew in [2, 4] (41/16 = 2.56) — yes
+EXPECTED: PC skew: peak AllMem L1024 / L256 in [3, 5] (350 / 85 MiB = 4.11) — yes
+EXPECTED: PC skew: old-gen post-GC baseline L1024 - L256 = 0.5 +- 0.3 GiB (1.03 GiB) — NO
+EXPECTED: PC even: peak AllMem L1024 / L256 in [3, 5] (341 / 86 MiB = 3.99) — yes
+EXPECTED: PC even: old-gen post-GC baseline L1024 - L256 = 0.5 +- 0.3 GiB (0.36 GiB) — yes
+EXPECTED: never: no Flushing largest lines (0) and no MEMTABLE_LIMIT flush of ks1 (0) [R8 invalid row excluded] — yes
+EXPECTED: never: AllMem plateau <= 1.02 L (1.000 L) — yes
+EXPECTED: never: AllMem plateau >= 0.9 L [R8 not-reached row excluded] (1.000 L) — yes
+EXPECTED: never: BlockedOnAllocation count rises ((0, 0)) — NO
+EXPECTED: never: stress shows timeouts or zero throughput after the plateau ({'op_rate': None, 'partitions': None, 'errors': None, 'timeouts_lines': 10026, 'bytes': 1866129}) — yes
+EXPECTED: never: no OOM (False) — yes
+EXPECTED: never: R8 — old-gen post-GC after the plateau does not end > 1.5 L above its first post-plateau sample (320 -> 400 MiB) — yes
+never: plateau (>= 0.9 L) first reached 9 s after stress start; AllMem at end 256.0 MiB
+EXPECTED totals: 33 yes, 8 NO

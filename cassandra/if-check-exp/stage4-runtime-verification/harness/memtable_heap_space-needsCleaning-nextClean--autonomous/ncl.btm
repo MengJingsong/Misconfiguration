@@ -1,0 +1,37 @@
+# Stage-4 observation rules (audit amendment K1, 2026-10-21) for
+# cases/memtable_heap_space-needsCleaning-nextClean--autonomous.md, B3d O1b / O7.
+# Output: the file named by -Dncl.trace (CassandraDaemon closes System.out after start-up, so plain traceln is lost;
+# harness fix 2026-10-21). Observation only: no rule changes control flow. Only the on-heap sub-pool (limit > 0) is traced.
+
+# O7: line 128 (needsCleaning) returned true. One line per distinct `reclaiming` value while true,
+# i.e. about one per trigger episode. Fields: epoch ms, used (allocated), reclaiming, nextClean, limit, threshold.
+RULE ncl line128 true
+CLASS org.apache.cassandra.utils.memory.MemtablePool$SubPool
+METHOD needsCleaning
+AT EXIT
+IF $! && $0.limit > 0 && !String.valueOf($0.reclaiming).equals(linked("ncl", "r"))
+DO link("ncl", "r", String.valueOf($0.reclaiming));
+   traceOpen("ncl", System.getProperty("ncl.trace"));
+   traceln("ncl", "NCL128 " + System.currentTimeMillis() + " used=" + $0.allocated + " recl=" + $0.reclaiming + " nextClean=" + $0.nextClean + " limit=" + $0.limit + " thr=" + $0.cleanThreshold)
+ENDRULE
+
+# O1b: pool usage just before each release of >= 64 KiB. used() only falls in released(), so the max of
+# usedBefore over the run (and the end value) is the run's peak SubPool.used() up to releases < 64 KiB.
+RULE ncl released
+CLASS org.apache.cassandra.utils.memory.MemtablePool$SubPool
+METHOD released
+AT ENTRY
+IF $0.limit > 0 && $1 >= 65536
+DO traceOpen("ncl", System.getProperty("ncl.trace"));
+   traceln("ncl", "NCLREL " + System.currentTimeMillis() + " usedBefore=" + $0.allocated + " size=" + $1 + " recl=" + $0.reclaiming)
+ENDRULE
+
+# O5b: tryAllocate refused (allocated + size > limit): the first and every 1000th refusal.
+RULE ncl tryAllocate refused
+CLASS org.apache.cassandra.utils.memory.MemtablePool$SubPool
+METHOD tryAllocate
+AT EXIT
+IF !$! && $0.limit > 0 && (incrementCounter("ncl-blk") % 1000 == 1)
+DO traceOpen("ncl", System.getProperty("ncl.trace"));
+   traceln("ncl", "NCLBLK " + System.currentTimeMillis() + " n=" + readCounter("ncl-blk") + " used=" + $0.allocated + " size=" + $1 + " limit=" + $0.limit)
+ENDRULE

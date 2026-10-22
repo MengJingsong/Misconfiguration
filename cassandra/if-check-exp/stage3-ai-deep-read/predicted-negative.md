@@ -41,6 +41,25 @@ does not follow the constraint. Stage 4 confirms or refutes it.
   readers is not). The fourth, `SEPExecutor.java:165`, is above. Lesson for the remaining
   entries: "counts items, not bytes" and "a soft target, not a ceiling" are weak grounds
   when each item has a known size or the target is enforced periodically.
+- **Second write-up batch (2026-10-21/22).** Five §9 entries were written up by fresh
+  autonomous agents and run at stage 4; all five **left this file** (verdicts in
+  [`_INDEX.md`](_INDEX.md) §1). Four came back with a positive estimate and usage follows the
+  knob for all four, so their grounds here did not hold:
+  `AbstractCommitLogSegmentManager.java:259` (`commitlog_total_space`; picks just enough
+  segments to bring the log back to the limit; caps (soft), unit Confirmed, cluster Not
+  confirmed: unthrottled peaks set by flush speed, not the limit),
+  `IndexSummaryRedistribution.java:258` (`index_summary_capacity`; the operand is
+  pool − floors exactly; caps only on some paths, as for `:341`),
+  `OutboundConnection.java:449` (`internode_application_send_queue_capacity`; the release
+  keeps the reserve at exactly max(0, pending − C); queued bytes cap at C + reserve, heap
+  linear in C plus a ~42 MiB offset), and `MemtablePool.java:128`
+  (`memtable_heap_space` × `memtable_cleanup_threshold`; the soft trigger fires exactly above
+  L·t and holds memtable heap there; caps). The fifth, `AbstractAllocatorMemtable.java:274`
+  (written up as `largestRatio`, estimate negative), held on the ceiling (L is set by
+  `memtable_heap_space`, not this line) but the unit tier refuted "same peak/L whatever is
+  selected": the selection moves usage below L, and a changed selection wasted heap in slab
+  regions. Lesson: "release / soft target" rows that hand back or trigger on a byte operand
+  tied to a knob behave as caps at runtime; re-read the rest of §9 with that in mind.
 
 Contents: [1](#1-configuration-and-argument-validation) validation ·
 [2](#2-logging-warning-or-diagnostic-only) logging only ·
@@ -252,17 +271,12 @@ both branches. A reclaim target can be exceeded, so it is not a ceiling.
 
 | If statement | Reason rejected |
 |---|---|
-| `OutboundConnection.java:449` `pendingBytes(prev) > pendingCapacityInBytes` | In `releaseCapacity()`: how much borrowed reserve to hand back. The receive-side twin (`AbstractMessageHandler.java:464`) was verified at stage 4 as a positive case. |
 | `AbstractMessageHandler.java:447` | Returns over-borrowed reserve inside the filed receive case's `acquireCapacity()`. |
 | `OutboundConnection.java:767`, `:871` | `:871` resumes delivery below the flush low-water mark (the bytes stay counted until `releaseCapacity()` at `:866`); `:767` stops when nothing is pending. |
 | `BufferPool.java:1521` `size == capacity` in `freeUnusedPortion()` | Returns early when there is no spare tail to give back. |
-| helper `needsCleaning()` (`MemtablePool.java:128`) `used() > nextClean` | Flushes the largest memtable at `limit × memtable_cleanup_threshold`. This soft threshold is why the hard limit of the filed `memtable_*_space` cases is rarely reached. |
-| `AbstractAllocatorMemtable.java:274` | Picks the largest memtable to flush. |
-| `AbstractCommitLogSegmentManager.java:259` (`commitlog_total_space`) | **`:249` left this row on 2026-10-21**, written up autonomously with estimate *positive* and verified at stage 4 as **Confirmed — caps (soft)** ([case](cases/commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md), `_INDEX.md` §1): the forced flushes do keep the commit log near the limit, overshooting by a few segments when throttled and up to 8 × C in an unthrottled burst. The ground below did not hold for `:249`; `:259` is the same reclaim path and is untested, so **re-examine it first**. Ground as recorded: The next segment is created (`:189`) before `maybeFlushToReclaim()` (`:200`), which over the limit (`:447`) flushes memtables so old segments can be recycled (`:262`). The commit log can exceed it. |
 | `CommitLogSegmentManagerCDC.java:93` | The deletion path of the filed `cdc_total_space` case. |
 | `PreV5Handlers.java:127` | Unpauses a pre-v5 connection once in-flight bytes drop: the release side of the in-flight limits. |
 | `StorageAttachedIndex.java:1006` | Charges SAI memtable-index growth to the memtable's on-heap count and drops decreases: accounting. |
-| `IndexSummaryRedistribution.java:258` `remainingSpace > 0` (`index_summary_capacity`) | **`:341` left this row on 2026-10-21**, written up autonomously with estimate *positive* and verified at stage 4 as **Confirmed — caps only on some paths (bypass)** ([case](cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md), `_INDEX.md` §1): each resize run brings the summary total, and RssAnon, under the capacity, down to the `max_index_interval` floor; the between-runs and table-parameter bypasses named below were both observed. The line-level reading (selection, both branches keep a summary) stands, but the constraint caps at the redistribution as a whole. `:258` is the same method and untested. Ground as recorded: Both lines spend the leftover budget letting SSTables planned for downsampling keep their level: selection, a summary is kept on both branches. The class has **no line that enforces the pool total**. New summaries are built at full sampling with no pool check (`BigTableWriter.java:255`); the pool is a target the redistribution shrinks toward every `index_summary_resize_interval` (default 60 m, `IndexSummaryManager.java:141`), as a proportional share per SSTable (`:182`) and the down/upsample thresholds (`:235`, `:241`), each replacement built by `cloneWithNewSummarySamplingLevel()` (`:285`). It can be exceeded: between runs, by SSTables in other compactions (`nonRedistributingOffHeapSize`, never shrunk), by the `max_index_interval` floor on downsampling, and by the keep branch (`:251`), which charges the current size even past zero. A real constraint with no qualifying if-check. |
 
 ## 10. Count, time, rate and work thresholds
 

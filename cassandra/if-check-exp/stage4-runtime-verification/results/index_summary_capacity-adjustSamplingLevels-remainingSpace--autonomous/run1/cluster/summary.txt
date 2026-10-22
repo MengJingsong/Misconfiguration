@@ -1,0 +1,64 @@
+S=101200000 B (96.512 MiB) Fp=791384 B sumF'=15.094 MiB S-Fp=95.757 MiB eps(system)=0.000 MiB
+baseline: yaml cap 64 MB (JMX 64.0), T=1930.237117767334 MiB, sstables=20, completed lines 0, RssAnon median 11062.2 MiB
+EXPECTED: format BIG: 20 -big-Summary.db: PASS -- 20/20
+EXPECTED: bypass (a): baseline T >> cap 64 with no run: PASS -- T=1930.237117767334 cap=64 completed=0
+C4096: cap=4096 k=20 (table 20) Tpred=1930.237 T=1930.237 (before 1930.237) R258=4279139300 pred=4279139300 (4080.905 vs 4080.905 MiB) keep/resample isr 20/0 dT=0.0 dRssAnon=-0.5 tol=64.0 downsample=0 r258 lines=1
+EXPECTED: C4096 row 1: T <= C+1 and T ~ pred (2 MiB): PASS -- T=1930.237 pred=1930.237 C=4096
+EXPECTED: C4096 R258 > 0 (branch taken): PASS -- R258=4279139300
+EXPECTED: C4096 RssAnon falls by ~dT: PASS -- dR=-0.5 dT=0.0 tol=64.0
+EXPECTED (sub-prediction): C4096 R258 within 2 MiB of C-sumF'-eps: PASS -- 4279139300 vs 4279139300
+EXPECTED (sub-prediction): C4096 keep(isr) = k: PASS -- 20 vs 20
+EXPECTED (sub-prediction): C4096 k = B3f table: PASS -- 20 vs 20
+EXPECTED: C4096 mechanism row not hit: PASS -- 
+C1024: cap=1024 k=10 (table 10) Tpred=972.666 T=972.666 (before 1930.237) R258=1057913813 pred=1057913828 (1008.905 vs 1008.905 MiB) keep/resample isr 10/10 dT=957.6 dRssAnon=957.6 tol=143.6 downsample=10 r258 lines=1
+EXPECTED: C1024 row 1: T <= C+1 and T ~ pred (2 MiB): PASS -- T=972.666 pred=972.666 C=1024
+EXPECTED: C1024 R258 > 0 (branch taken): PASS -- R258=1057913813
+EXPECTED: C1024 RssAnon falls by ~dT: PASS -- dR=957.6 dT=957.6 tol=143.6
+EXPECTED (sub-prediction): C1024 R258 within 2 MiB of C-sumF'-eps: PASS -- 1057913813 vs 1057913828
+EXPECTED (sub-prediction): C1024 keep(isr) = k: PASS -- 10 vs 10
+EXPECTED (sub-prediction): C1024 k = B3f table: PASS -- 10 vs 10
+EXPECTED: C1024 mechanism row not hit: PASS -- 
+C512: cap=512 k=5 (table 5) Tpred=493.880 T=493.880 (before 1930.237) R258=521042886 pred=521042916 (496.905 vs 496.905 MiB) keep/resample isr 5/15 dT=1436.4 dRssAnon=1436.6 tol=215.5 downsample=15 r258 lines=1
+EXPECTED: C512 row 1: T <= C+1 and T ~ pred (2 MiB): PASS -- T=493.880 pred=493.880 C=512
+EXPECTED: C512 R258 > 0 (branch taken): PASS -- R258=521042886
+EXPECTED: C512 RssAnon falls by ~dT: PASS -- dR=1436.6 dT=1436.4 tol=215.5
+EXPECTED (sub-prediction): C512 R258 within 2 MiB of C-sumF'-eps: PASS -- 521042886 vs 521042916
+EXPECTED (sub-prediction): C512 keep(isr) = k: PASS -- 5 vs 5
+EXPECTED (sub-prediction): C512 k = B3f table: PASS -- 5 vs 5
+EXPECTED: C512 mechanism row not hit: PASS -- 
+C64: cap=64 k=0 (table 0) Tpred=15.095 T=15.095 (before 1930.237) R258=51280868 pred=51280868 (48.905 vs 48.905 MiB) keep/resample isr 0/20 dT=1915.1 dRssAnon=1910.9 tol=287.3 downsample=20 r258 lines=1
+EXPECTED: C64 row 1: T <= C+1 and T ~ pred (2 MiB): PASS -- T=15.095 pred=15.095 C=64
+EXPECTED: C64 R258 > 0 (branch taken): PASS -- R258=51280868
+EXPECTED: C64 RssAnon falls by ~dT: PASS -- dR=1910.9 dT=1915.1 tol=287.3
+EXPECTED (sub-prediction): C64 R258 within 2 MiB of C-sumF'-eps: PASS -- 51280868 vs 51280868
+EXPECTED (sub-prediction): C64 keep(isr) = k: PASS -- 0 vs 0
+EXPECTED (sub-prediction): C64 k = B3f table: PASS -- 0 vs 0
+EXPECTED: C64 mechanism row not hit: PASS -- 
+C8: cap=8 k=0 (table 0) Tpred=15.095 T=15.095 (before 1930.237) R258=-7439403 pred=-7439388 (-7.095 vs -7.095 MiB) keep/resample isr 0/20 dT=1915.1 dRssAnon=1916.7 tol=287.3 downsample=20 r258 lines=1
+EXPECTED: C=8 overshoot: T ~ sumF > 8, R258 < 0, no keep: PASS -- T=15.095 R258=-7439403
+EXPECTED: C8 RssAnon falls by ~dT: PASS -- dR=1916.7 dT=1915.1 tol=287.3
+EXPECTED (sub-prediction): C8 R258 within 2 MiB of C-sumF'-eps: PASS -- -7439403 vs -7439388
+EXPECTED (sub-prediction): C8 keep(isr) = k: PASS -- 0 vs 0
+EXPECTED (sub-prediction): C8 k = B3f table: PASS -- 0 vs 0
+EXPECTED: C8 mechanism row not hit: PASS -- 
+Cauto: cap=409 k=4 (table 4) Tpred=398.123 T=398.123 (before 1930.237) R258=413039412 pred=413039588 (393.905 vs 393.905 MiB) keep/resample isr 4/16 dT=1532.1 dRssAnon=1528.4 tol=229.8 downsample=16 r258 lines=1
+EXPECTED: Cauto row 1: T <= C+1 and T ~ pred (2 MiB): PASS -- T=398.123 pred=398.123 C=409
+EXPECTED: Cauto R258 > 0 (branch taken): PASS -- R258=413039412
+EXPECTED: Cauto RssAnon falls by ~dT: PASS -- dR=1528.4 dT=1532.1 tol=229.8
+EXPECTED (sub-prediction): Cauto R258 within 2 MiB of C-sumF'-eps: PASS -- 413039412 vs 413039588
+EXPECTED (sub-prediction): Cauto keep(isr) = k: PASS -- 4 vs 4
+EXPECTED (sub-prediction): Cauto k = B3f table: PASS -- 4 vs 4
+EXPECTED: Cauto mechanism row not hit: PASS -- 
+EXPECTED: restore-after-C4096 restored full: PASS -- T=1930.237 intervals=[1] n=20 force_upsample=0
+EXPECTED: restore-after-C1024 restored full: PASS -- T=1930.237 intervals=[1] n=20 force_upsample=10
+EXPECTED: restore-after-C512 restored full: PASS -- T=1930.237 intervals=[1] n=20 force_upsample=15
+EXPECTED: restore-after-C64 restored full: PASS -- T=1930.237 intervals=[1] n=20 force_upsample=20
+EXPECTED: restore-after-C8 restored full: PASS -- T=1930.237 intervals=[1] n=20 force_upsample=20
+EXPECTED: negative control flat (300 s, cap 64, no run): PASS -- dT=0.000 RssAnon first 11068.7 last 11068.8 range 0.2 MiB completed=0 T=1930.2371463775635
+sigma(RssAnon, negative control) = 0.1 MiB
+EXPECTED: positive control: T(4096) - T(64) >= 0.9 * 20(S-F): PASS -- 1915.1 vs 1915.1 MiB; dRss 1910.9
+EXPECTED (sub-prediction): auto pool line 409 MB: PASS -- 409
+EXPECTED: sstable count 20 at every reading: PASS -- 
+EXPECTED: no compaction other than index summary redistribution: PASS -- 
+missed sub-predictions: none
+VERDICT: Confirmed -- Effect: caps only on some paths (bypass)

@@ -1,0 +1,52 @@
+unit-run 2026-10-21T20:51:45-06:00 host node1 clone cassandra-5.0.9 b5f2a54 partitions=10000 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 IndexSummaryCapacityProbeTest.java=8154eaf0b1af unit-run.sh=db5ee333d263 unit-analyze.py=ae6a18e90930 
+rep1 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 18 s; probe lines 8
+  rep1 PROBE setup N=10 partitions=10000 S=25000 sFull=250000 entries=1250 maxEntries=1250 minLevel=4 floorEntries=40 Fp=800
+  rep1 PROBE floor P=0 R_refl=-8000 R_compl=-8000 Rpred=-8000 T=8000 F=800 floorEntriesActual=40 levels=4,4,4,4,4,4,4,4,4,4,
+  rep1 PROBE P0 P=4000 tBefore=250000 R_refl=-4000 R_compl=-4000 Rpred=-4000 branch=false k=0 kPred=0 T=8000 Tpred=8000 T<=P=false levels=4,4,4,4,4,4,4,4,4,4, sizes=800,800,800,800,800,800,800,800,800,800,
+  rep1 PROBE P1 P=20100 tBefore=250000 R_refl=12100 R_compl=12100 Rpred=12100 branch=true k=0 kPred=0 T=8000 Tpred=8000 T<=P=true levels=4,4,4,4,4,4,4,4,4,4, sizes=800,800,800,800,800,800,800,800,800,800,
+  rep1 PROBE P2 P=92700 tBefore=250000 R_refl=84700 R_compl=84700 Rpred=84700 branch=true k=3 kPred=3 T=80600 Tpred=80600 T<=P=true levels=128,4,128,4,128,4,4,4,4,4, sizes=25000,800,25000,800,25000,800,800,800,800,800,
+  rep1 PROBE P3 P=189500 tBefore=250000 R_refl=181500 R_compl=181500 Rpred=181500 branch=true k=7 kPred=7 T=177400 Tpred=177400 T<=P=true levels=128,4,128,128,128,128,128,4,128,4, sizes=25000,800,25000,25000,25000,25000,25000,800,25000,800,
+  rep1 PROBE P4 P=251024 tBefore=250000 R_refl=243024 R_compl=243024 Rpred=243024 branch=true k=10 kPred=10 T=250000 Tpred=250000 T<=P=true levels=128,128,128,128,128,128,128,128,128,128, sizes=25000,25000,25000,25000,25000,25000,25000,25000,25000,25000,
+  rep1 PROBE done
+rep2 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 17 s; probe lines 8
+  rep2 PROBE setup N=10 partitions=10000 S=25000 sFull=250000 entries=1250 maxEntries=1250 minLevel=4 floorEntries=40 Fp=800
+  rep2 PROBE floor P=0 R_refl=-8000 R_compl=-8000 Rpred=-8000 T=8000 F=800 floorEntriesActual=40 levels=4,4,4,4,4,4,4,4,4,4,
+  rep2 PROBE P0 P=4000 tBefore=250000 R_refl=-4000 R_compl=-4000 Rpred=-4000 branch=false k=0 kPred=0 T=8000 Tpred=8000 T<=P=false levels=4,4,4,4,4,4,4,4,4,4, sizes=800,800,800,800,800,800,800,800,800,800,
+  rep2 PROBE P1 P=20100 tBefore=250000 R_refl=12100 R_compl=12100 Rpred=12100 branch=true k=0 kPred=0 T=8000 Tpred=8000 T<=P=true levels=4,4,4,4,4,4,4,4,4,4, sizes=800,800,800,800,800,800,800,800,800,800,
+  rep2 PROBE P2 P=92700 tBefore=250000 R_refl=84700 R_compl=84700 Rpred=84700 branch=true k=3 kPred=3 T=80600 Tpred=80600 T<=P=true levels=128,4,128,4,128,4,4,4,4,4, sizes=25000,800,25000,800,25000,800,800,800,800,800,
+  rep2 PROBE P3 P=189500 tBefore=250000 R_refl=181500 R_compl=181500 Rpred=181500 branch=true k=7 kPred=7 T=177400 Tpred=177400 T<=P=true levels=128,4,128,128,128,128,128,4,128,4, sizes=25000,800,25000,25000,25000,25000,25000,800,25000,800,
+  rep2 PROBE P4 P=251024 tBefore=250000 R_refl=243024 R_compl=243024 Rpred=243024 branch=true k=10 kPred=10 T=250000 Tpred=250000 T<=P=true levels=128,128,128,128,128,128,128,128,128,128, sizes=25000,25000,25000,25000,25000,25000,25000,25000,25000,25000,
+  rep2 PROBE done
+leftover junit JVMs: 0
+setup: N=10 S=25000 Fp=800 F=800 S-Fp=24200 N*F=8000
+EXPECTED: floor operand: PASS -- R_refl=-8000 R_compl=-8000 pred=-8000
+P0: P=4000 R=-4000 (compl -4000, pred -4000) branch=False k=0 (kPred 0, B2f 0) T=8000 (Tpred 8000) T<=P=False tBefore=250000
+EXPECTED: P0 reset full: PASS -- tBefore=250000 N*S=250000
+EXPECTED: P0 k = B2f table (+-1): PASS -- k=0 table=0
+EXPECTED: P0 row 4: R<0, branch not taken, k=0, T=N*F>P0: PASS -- R=-4000 k=0 T=8000 P0=4000
+P1: P=20100 R=12100 (compl 12100, pred 12100) branch=True k=0 (kPred 0, B2f 0) T=8000 (Tpred 8000) T<=P=True tBefore=250000
+EXPECTED: P1 reset full: PASS -- tBefore=250000 N*S=250000
+EXPECTED: P1 k = B2f table (+-1): PASS -- k=0 table=0
+EXPECTED: P1 row 1: R>0 and T<=P: PASS -- R=12100 T=8000 P=20100
+P2: P=92700 R=84700 (compl 84700, pred 84700) branch=True k=3 (kPred 3, B2f 3) T=80600 (Tpred 80600) T<=P=True tBefore=250000
+EXPECTED: P2 reset full: PASS -- tBefore=250000 N*S=250000
+EXPECTED: P2 k = B2f table (+-1): PASS -- k=3 table=3
+EXPECTED: P2 row 1: R>0 and T<=P: PASS -- R=84700 T=80600 P=92700
+P3: P=189500 R=181500 (compl 181500, pred 181500) branch=True k=7 (kPred 7, B2f 7) T=177400 (Tpred 177400) T<=P=True tBefore=250000
+EXPECTED: P3 reset full: PASS -- tBefore=250000 N*S=250000
+EXPECTED: P3 k = B2f table (+-1): PASS -- k=7 table=7
+EXPECTED: P3 row 1: R>0 and T<=P: PASS -- R=181500 T=177400 P=189500
+P4: P=251024 R=243024 (compl 243024, pred 243024) branch=True k=10 (kPred 10, B2f 10) T=250000 (Tpred 250000) T<=P=True tBefore=250000
+EXPECTED: P4 reset full: PASS -- tBefore=250000 N*S=250000
+EXPECTED: P4 k = B2f table (+-1): PASS -- k=10 table=10
+EXPECTED: P4 row 1: R>0 and T<=P: PASS -- R=243024 T=250000 P=251024
+EXPECTED: readers agree (R3): PASS -- reflection vs pool - completed, all P
+EXPECTED: operand exact R=P-N*Fp, k, T formula (R3): PASS -- 
+EXPECTED: k increases P1<=P2<P3<P4: PASS -- 
+EXPECTED: row 3 ruled out: k>0 at P2,P3 with R>0: PASS -- 
+EXPECTED: positive control P4-P1 ~ N(S-F): PASS -- diff=242000 N(S-F)=242000
+EXPECTED: ablation: P1 k=0, P2 k=3: PASS -- 
+EXPECTED: repeat rep2 == rep1: PASS -- 
+VERDICT: Confirmed -- Effect: caps
+done 2026-10-21T20:52:20-06:00

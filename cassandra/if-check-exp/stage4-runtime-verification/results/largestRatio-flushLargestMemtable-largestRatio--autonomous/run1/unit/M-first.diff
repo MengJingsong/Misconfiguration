@@ -1,0 +1,13 @@
+diff --git a/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java b/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
+index 8526dac..744a44b 100644
+--- a/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
++++ b/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
+@@ -271,7 +271,7 @@ public abstract class AbstractAllocatorMemtable extends AbstractMemtableWithComm
+                     indexMemtable.addMemoryUsageTo(usage);
+ 
+             float ratio = Math.max(usage.ownershipRatioOnHeap, usage.ownershipRatioOffHeap);
+-            if (ratio > largestRatio)
++            if (largestMemtable == null && ratio > 0f)
+             {
+                 largestMemtable = current;
+                 largestUsage = usage;

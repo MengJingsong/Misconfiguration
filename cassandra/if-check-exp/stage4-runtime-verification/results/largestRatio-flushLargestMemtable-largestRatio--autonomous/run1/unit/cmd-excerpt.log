@@ -1,0 +1,62 @@
+[2026-10-21 23:21:32] unit-run run1 all host node0 java openjdk version "11.0.32.1" 2026-08-18 harness md5 e5dac33e5542
+[2026-10-21 23:21:32] free on /:   48G
+[2026-10-21 23:21:32] clone /users/jason92/cassandra-lrt cassandra-5.0.9 b5f2a54 diff-of-src: 
+[2026-10-21 23:21:32] yaml /users/jason92/cassandra-lrt: 6:memtable_allocation_type: heap_buffers 71:memtable_heap_space: 128MiB 72:memtable: 
+[2026-10-21 23:21:32] + [orig-L128] ant testsome org.apache.cassandra.db.memtable.FlushLargestSelectionTest methods= L=128MiB mutant=M-orig (clone /users/jason92/cassandra-lrt)
+[2026-10-21 23:22:01]   [orig-L128] ant rc=0 29 s; Tests run: 4, Failures: 0, Errors: 0, Skipped: 0; probe lines 8
+  [orig-L128] PROBE u1 mutant=M-orig L=134217728 T1=table_u1selection_00 r1=0.01466 T2=table_u1selection_01 r2=0.02931 T3=table_u1selection_02 r3=0.04397 nonzero=3 poolUsed=11802510 argmax=cql_test_keyspace.table_u1selection_02 argmaxRatio=0.04397 top=[ cql_test_keyspace.table_u1selection_02=0.04397 cql_test_keyspace.table_u1selection_01=0.02931 cql_test_keyspace.table_u1selection_00=0.01466 ]
+  [orig-L128] PROBE u1-result mutant=M-orig result=true changed=[cql_test_keyspace.table_u1selection_02] detail=[ cql_test_keyspace.table_u1selection_02:sstables+1 ] argmax=cql_test_keyspace.table_u1selection_02 match=true
+  [orig-L128] PROBE u3 mutant=M-orig variant=even L=134217728 rowsPerThread=52000 rowsDone=208000 timedOutThreads=0 used0=0 peakUsed=56019975 peakRatio=0.4174 peakReclaiming=21960600 samplesOverL=0 samples=890 switchesT=4,3,3,4 switchesTestTotal=14 switchesAllCfs=14 bytesFlushedTotal=177678559 meanFlushBytes=12691325 blockedOnAllocating=0 wallMs=4877 usedAtEnd=48762017
+  [orig-L128] PROBE u3 mutant=M-orig variant=skew L=134217728 rowsPerThread=52000 rowsDone=208000 timedOutThreads=0 used0=7333 peakUsed=77958509 peakRatio=0.5808 peakReclaiming=44853852 samplesOverL=0 samples=492 switchesT=6,0,0,0 switchesTestTotal=6 switchesAllCfs=6 bytesFlushedTotal=177782816 meanFlushBytes=29630469 blockedOnAllocating=0 wallMs=2811 usedAtEnd=48642259
+  [orig-L128] PROBE u2 mutant=M-orig attempt=1 nonzeroBefore=3 nonzero=[ system.compaction_history=0.000008 system.sstable_activity_v2=0.000010 system.sstable_activity=0.000003 ] poolUsed=4737 result=true changed=[system.sstable_activity_v2] valid=false
+  [orig-L128] PROBE u2 mutant=M-orig attempt=2 nonzeroBefore=0 nonzero=[ ] poolUsed=0 result=false changed=[] valid=true
+[2026-10-21 23:22:01] yaml /users/jason92/cassandra-lrt: 6:memtable_allocation_type: heap_buffers 71:memtable_heap_space: 32MiB 72:memtable: 
+[2026-10-21 23:22:01] + [orig-L32] ant testsome org.apache.cassandra.db.memtable.FlushLargestSelectionTest methods=u3CapSkew,u3CapEven L=32MiB mutant=M-orig (clone /users/jason92/cassandra-lrt)
+[2026-10-21 23:22:21]   [orig-L32] ant rc=0 20 s; Tests run: 2, Failures: 0, Errors: 0, Skipped: 0; probe lines 4
+  [orig-L32] PROBE u3 mutant=M-orig variant=even L=33554432 rowsPerThread=13000 rowsDone=52000 timedOutThreads=0 used0=0 peakUsed=16725704 peakRatio=0.4985 peakReclaiming=9538860 samplesOverL=0 samples=299 switchesT=4,4,3,3 switchesTestTotal=14 switchesAllCfs=14 bytesFlushedTotal=44592188 meanFlushBytes=3185156 blockedOnAllocating=0 wallMs=1647 usedAtEnd=11971720
+  [orig-L32] PROBE u3 mutant=M-orig variant=skew L=33554432 rowsPerThread=13000 rowsDone=52000 timedOutThreads=0 used0=4805 peakUsed=18313423 peakRatio=0.5458 peakReclaiming=11209530 samplesOverL=0 samples=280 switchesT=6,0,0,0 switchesTestTotal=6 switchesAllCfs=6 bytesFlushedTotal=44428630 meanFlushBytes=7404771 blockedOnAllocating=0 wallMs=1474 usedAtEnd=12191323
+diff --git a/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java b/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
+index 8526dac..744a44b 100644
+--- a/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
++++ b/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
+@@ -271,7 +271,7 @@ public abstract class AbstractAllocatorMemtable extends AbstractMemtableWithComm
+                     indexMemtable.addMemoryUsageTo(usage);
+             float ratio = Math.max(usage.ownershipRatioOnHeap, usage.ownershipRatioOffHeap);
+-            if (ratio > largestRatio)
++            if (largestMemtable == null && ratio > 0f)
+             {
+                 largestMemtable = current;
+                 largestUsage = usage;
+[2026-10-21 23:22:21] + ant build-test in /users/jason92/cassandra-lrt-mut
+[2026-10-21 23:22:32]   build M-first rc=0 BUILD SUCCESSFUL
+[2026-10-21 23:22:32] yaml /users/jason92/cassandra-lrt-mut: 6:memtable_allocation_type: heap_buffers 71:memtable_heap_space: 32MiB 72:memtable: 
+[2026-10-21 23:22:32] + [first-L32] ant testsome org.apache.cassandra.db.memtable.FlushLargestSelectionTest methods=u3CapSkew,u3CapEven L=32MiB mutant=M-first (clone /users/jason92/cassandra-lrt-mut)
+[2026-10-21 23:22:59]   [first-L32] ant rc=0 27 s; Tests run: 2, Failures: 0, Errors: 0, Skipped: 0; probe lines 4
+  [first-L32] PROBE u3 mutant=M-first variant=even L=33554432 rowsPerThread=13000 rowsDone=52000 timedOutThreads=0 used0=0 peakUsed=33554430 peakRatio=1.0000 peakReclaiming=33553748 samplesOverL=0 samples=1104 switchesT=543,1,401,4 switchesTestTotal=949 switchesAllCfs=949 bytesFlushedTotal=44646944 meanFlushBytes=47046 blockedOnAllocating=2189 wallMs=7543 usedAtEnd=11919400
+  [first-L32] PROBE u3 mutant=M-first variant=skew L=33554432 rowsPerThread=13000 rowsDone=52000 timedOutThreads=0 used0=3866 peakUsed=17728467 peakRatio=0.5283 peakReclaiming=11208872 samplesOverL=0 samples=217 switchesT=6,0,0,0 switchesTestTotal=6 switchesAllCfs=6 bytesFlushedTotal=44423846 meanFlushBytes=7403974 blockedOnAllocating=0 wallMs=1156 usedAtEnd=12193903
+[2026-10-21 23:23:00] yaml /users/jason92/cassandra-lrt-mut: 6:memtable_allocation_type: heap_buffers 71:memtable_heap_space: 128MiB 72:memtable: 
+[2026-10-21 23:23:00] + [first-L128] ant testsome org.apache.cassandra.db.memtable.FlushLargestSelectionTest methods=u3CapSkew,u3CapEven L=128MiB mutant=M-first (clone /users/jason92/cassandra-lrt-mut)
+[2026-10-21 23:23:45]   [first-L128] ant rc=0 45 s; Tests run: 2, Failures: 0, Errors: 0, Skipped: 0; probe lines 4
+  [first-L128] PROBE u3 mutant=M-first variant=even L=134217728 rowsPerThread=52000 rowsDone=149954 timedOutThreads=0 used0=0 peakUsed=128171614 peakRatio=0.9550 peakReclaiming=125413723 samplesOverL=0 samples=1221 switchesT=0,1,309,205 switchesTestTotal=515 switchesAllCfs=515 bytesFlushedTotal=73522926 meanFlushBytes=142762 blockedOnAllocating=0 wallMs=18424 usedAtEnd=104159658
+  [first-L128] PROBE u3 mutant=M-first variant=skew L=134217728 rowsPerThread=52000 rowsDone=208000 timedOutThreads=0 used0=4037 peakUsed=65403032 peakRatio=0.4873 peakReclaiming=44778941 samplesOverL=0 samples=785 switchesT=6,0,0,0 switchesTestTotal=6 switchesAllCfs=6 bytesFlushedTotal=177527897 meanFlushBytes=29587982 blockedOnAllocating=0 wallMs=4244 usedAtEnd=48961860
+diff --git a/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java b/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
+index 8526dac..9e7ce93 100644
+--- a/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
++++ b/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
+@@ -248,7 +248,7 @@ public abstract class AbstractAllocatorMemtable extends AbstractMemtableWithComm
+      */
+     public static Future<Boolean> flushLargestMemtable()
+     {
+-        float largestRatio = 0f;
++        float largestRatio = Float.MAX_VALUE;
+         AbstractAllocatorMemtable largestMemtable = null;
+         Memtable.MemoryUsage largestUsage = null;
+         float liveOnHeap = 0, liveOffHeap = 0;
+[2026-10-21 23:23:45] + ant build-test in /users/jason92/cassandra-lrt-mut
+[2026-10-21 23:23:56]   build M-never rc=0 BUILD SUCCESSFUL
+[2026-10-21 23:23:56] yaml /users/jason92/cassandra-lrt-mut: 6:memtable_allocation_type: heap_buffers 71:memtable_heap_space: 32MiB 72:memtable: 
+[2026-10-21 23:23:56] + [never-L32] ant testsome org.apache.cassandra.db.memtable.FlushLargestSelectionTest methods=u3CapSkew L=32MiB mutant=M-never (clone /users/jason92/cassandra-lrt-mut)
+[2026-10-21 23:28:08]   [never-L32] ant rc=1 252 s; Tests run: 1, Failures: 0, Errors: 1, Skipped: 0; probe lines 2
+  [never-L32] PROBE u3 mutant=M-never variant=skew L=33554432 rowsPerThread=13000 rowsDone=25587 timedOutThreads=4 used0=0 peakUsed=33554109 peakRatio=1.0000 peakReclaiming=0 samplesOverL=0 samples=5987 switchesT=0,0,0,0 switchesTestTotal=0 switchesAllCfs=0 bytesFlushedTotal=0 meanFlushBytes=0 blockedOnAllocating=0 wallMs=31181 usedAtEnd=33554109
+[2026-10-21 23:28:08] leftover java of the clones: 0
+[2026-10-21 23:28:08] done all

@@ -1,0 +1,24 @@
+label c256m: C=268435456 G(reserves)=1048576 stop=True; jmx samples 128, vt samples 128
+plateau(median pause+5..25s)=269483536.0 max=269483536 limit C+G=269484032 (C+G)-plateau=496.0 reached>=C at pause+9.2s s(median bytes/task)=1064.0
+window pending bytes min/max = 157810352/269483536; pending tasks median 253274.0
+overload dropped tasks: at pause 0, at pause+25s 495067, at end 639284; timeout-dropped tasks at pause+25s 0, at end 0
+first overload drop at pause+9.2s
+max Urgent pending bytes 0, max Large pending bytes 0
+vt window: using_reserve_bytes median 1048080.0 max 1048080; pending_bytes median 269483536.0; reserve - max(0, pending - 3C) checks below
+vt samples with using_reserve > max(0, pending - C) + 2 MiB: 0 of 128
+vt after SIGCONT+15s: 60 samples; last: pending_bytes=0 using_bytes=0 using_reserve_bytes=0; max reserve in these 0; samples with pending<64KiB and reserve>0: 0
+vt final (after the 25 s drain): pending_bytes=0 using_reserve_bytes=0 overload_count=639284 expired_count=0
+histogram totals: pre 91722640 plateau 1010721984; at plateau histogram: SmallPendingBytes 269483536 SmallPendingTasks 253274
+  class org.apache.cassandra.db.Mutation: pre (5, 280) plateau (262003, 14672168)
+  class org.apache.cassandra.net.Message: pre (2, 80) plateau (253213, 10128520)
+  class org.apache.cassandra.net.Message$Header: pre (2, 112) plateau (253213, 14179928)
+  class org.apache.cassandra.db.partitions.PartitionUpdate: pre (5, 160) plateau (262003, 8384096)
+  class [B: pre (108912, 11389736) plateau (895186, 566830528)
+A system.log: ERROR 0, WARN 8, "overloaded; dropping" 1, "is now DOWN" 0, UnrecoverableIllegalState 0, OutOfMemoryError 0
+B system.log: ERROR 0, WARN 8, "overloaded; dropping" 0, "is now DOWN" 0, UnrecoverableIllegalState 0, OutOfMemoryError 0
+  A log: INFO  [GossipStage:1] 2026-10-22T03:18:35,925 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+  A log: WARN  [Native-Transport-Requests-39] 2026-10-22T03:19:28,638 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-6402c3e0 overloaded; dropping 1.039KiB message (queue: 257.000MiB local, 1023.516KiB endpoint, 1023.516KiB global)
+stress Op rate                   :   29,856 op/s  [WRITE: 29,856 op/s]
+stress Total errors              :          0 [WRITE: 0]
+stress Total partitions          :  2,700,102 [WRITE: 2,700,102]
+stress Total operation time      : 00:01:30

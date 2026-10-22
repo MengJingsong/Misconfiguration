@@ -1,0 +1,13 @@
+diff --git a/src/java/org/apache/cassandra/net/OutboundConnection.java b/src/java/org/apache/cassandra/net/OutboundConnection.java
+index cfb9f1f..f09435f 100644
+--- a/src/java/org/apache/cassandra/net/OutboundConnection.java
++++ b/src/java/org/apache/cassandra/net/OutboundConnection.java
+@@ -446,7 +446,7 @@ public class OutboundConnection
+     {
+         long decrement = pendingCountAndBytes(count, bytes);
+         long prev = pendingCountAndBytesUpdater.getAndAdd(this, -decrement);
+-        if (pendingBytes(prev) > pendingCapacityInBytes)
++        if (true)
+         {
+             long excess = min(pendingBytes(prev) - pendingCapacityInBytes, bytes);
+             reserveCapacityInBytes.release(excess);

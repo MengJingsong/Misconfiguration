@@ -1,0 +1,184 @@
+[2026-10-21T20:51:56-0600] unit-run start N=256 arms=T3-s20:3:20:single:false T4-s20:4:20:single:false T8-s20:8:20:single:false T1024-s20:1024:20:single:false T4-s0:4:0:single:false T1024-s0:1024:0:single:false M:8:20:M:false M-nobreak:8:20:M:true clone=/users/jason92/cassandra-cl2 head=b5f2a54210d541339c2e7c17a794195cac0e67c2
+[2026-10-21T20:51:56-0600] EXPECTED: B2f (S=1MiB): T3 peak<=5MiB settled<=3 CLD>=4 | T4 peak<=6 settled<=4 CLD>=4 | T8 peak<=10 settled<=8 CLD>=2 | T1024 ~17-18MiB rising, CLD=0 | T4-s0 peak<=T+4S=8 settled<=4 | M (B2i) >=4 SELECT; every SELECT stop259&minimal or k=older; >=1 stop259 with k<older; switching M* tables per SELECT <= k+1; onDisk>=5MiB from first SELECT to end of write; settled in [5,8] MiB | M-nobreak: k=older always; >=1 SELECT switching >=3 M* tables; trough<=3MiB; peak<=10MiB
+[2026-10-21T20:51:56-0600] === arm T3-s20 T=3 sleep=20 mode=single nobreak=false
+[2026-10-21T20:51:56-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=3 -Dclcap.sleepMs=20 -Dclcap.n=256 -Dclcap.mode=single -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/T3-s20/cap.csv"
+[2026-10-21T20:52:09-0600] ant rc=0 (13 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.995 sec BUILD SUCCESSFUL 
+INFO totalMiB=3 segMiB=1 sleepMs=20 n=256 mode=single nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=1
+SUMMARY totalMiB=3 sleepMs=20 mode=single nobreak=false peakOnDisk=4194304 peakDir=4194304 settledOnDisk=3145728 settledDir=3145728 switches=8
+COMMITLOG_DIRTY_CLCap 8
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       8 Enqueuing flush of CLCap.Standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 17
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=8 FLUSH=8
+[2026-10-21T20:52:09-0600] === arm T4-s20 T=4 sleep=20 mode=single nobreak=false
+[2026-10-21T20:52:09-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=4 -Dclcap.sleepMs=20 -Dclcap.n=256 -Dclcap.mode=single -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/T4-s20/cap.csv"
+[2026-10-21T20:52:22-0600] ant rc=0 (13 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.049 sec BUILD SUCCESSFUL 
+INFO totalMiB=4 segMiB=1 sleepMs=20 n=256 mode=single nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=1
+SUMMARY totalMiB=4 sleepMs=20 mode=single nobreak=false peakOnDisk=5242880 peakDir=5242880 settledOnDisk=4194304 settledDir=4194304 switches=5
+COMMITLOG_DIRTY_CLCap 5
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       5 Enqueuing flush of CLCap.Standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 16
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=5 FLUSH=5
+[2026-10-21T20:52:22-0600] === arm T8-s20 T=8 sleep=20 mode=single nobreak=false
+[2026-10-21T20:52:22-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=8 -Dclcap.sleepMs=20 -Dclcap.n=256 -Dclcap.mode=single -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/T8-s20/cap.csv"
+[2026-10-21T20:52:36-0600] ant rc=0 (14 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.208 sec BUILD SUCCESSFUL 
+INFO totalMiB=8 segMiB=1 sleepMs=20 n=256 mode=single nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=1
+SUMMARY totalMiB=8 sleepMs=20 mode=single nobreak=false peakOnDisk=9437184 peakDir=9437184 settledOnDisk=5242880 settledDir=5242880 switches=2
+COMMITLOG_DIRTY_CLCap 2
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       2 Enqueuing flush of CLCap.Standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 15
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=2 FLUSH=2
+[2026-10-21T20:52:36-0600] === arm T1024-s20 T=1024 sleep=20 mode=single nobreak=false
+[2026-10-21T20:52:36-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=1024 -Dclcap.sleepMs=20 -Dclcap.n=256 -Dclcap.mode=single -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/T1024-s20/cap.csv"
+[2026-10-21T20:52:49-0600] ant rc=0 (13 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.083 sec BUILD SUCCESSFUL 
+INFO totalMiB=1024 segMiB=1 sleepMs=20 n=256 mode=single nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=1
+SUMMARY totalMiB=1024 sleepMs=20 mode=single nobreak=false peakOnDisk=19922944 peakDir=19922944 settledOnDisk=19922944 settledDir=19922944 switches=0
+COMMITLOG_DIRTY_CLCap 0
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 1
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=0 FLUSH=0
+[2026-10-21T20:52:49-0600] === arm T4-s0 T=4 sleep=0 mode=single nobreak=false
+[2026-10-21T20:52:49-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=4 -Dclcap.sleepMs=0 -Dclcap.n=256 -Dclcap.mode=single -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/T4-s0/cap.csv"
+[2026-10-21T20:52:57-0600] ant rc=0 (8 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.648 sec BUILD SUCCESSFUL 
+INFO totalMiB=4 segMiB=1 sleepMs=0 n=256 mode=single nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=1
+SUMMARY totalMiB=4 sleepMs=0 mode=single nobreak=false peakOnDisk=11534336 peakDir=11534336 settledOnDisk=3145728 settledDir=3145728 switches=5
+COMMITLOG_DIRTY_CLCap 5
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       5 Enqueuing flush of CLCap.Standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 17
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=15 FLUSH=15
+[2026-10-21T20:52:57-0600] === arm T1024-s0 T=1024 sleep=0 mode=single nobreak=false
+[2026-10-21T20:52:57-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=1024 -Dclcap.sleepMs=0 -Dclcap.n=256 -Dclcap.mode=single -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/T1024-s0/cap.csv"
+[2026-10-21T20:53:05-0600] ant rc=0 (8 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.591 sec BUILD SUCCESSFUL 
+INFO totalMiB=1024 segMiB=1 sleepMs=0 n=256 mode=single nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=1
+SUMMARY totalMiB=1024 sleepMs=0 mode=single nobreak=false peakOnDisk=19922944 peakDir=19922944 settledOnDisk=19922944 settledDir=19922944 switches=0
+COMMITLOG_DIRTY_CLCap 0
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 1
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=0 FLUSH=0
+[2026-10-21T20:53:05-0600] === arm M T=8 sleep=20 mode=M nobreak=false
+[2026-10-21T20:53:05-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=8 -Dclcap.sleepMs=20 -Dclcap.n=256 -Dclcap.mode=M -Dclcap.nobreak=false -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/M/cap.csv"
+[2026-10-21T20:53:18-0600] ant rc=0 (13 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.581 sec BUILD SUCCESSFUL 
+INFO totalMiB=8 segMiB=1 sleepMs=20 n=256 mode=M nobreak=false heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=24
+SUMMARY totalMiB=8 sleepMs=20 mode=M nobreak=false peakOnDisk=9437184 peakDir=9437184 settledOnDisk=8388608 settledDir=8388608 switches=11
+COMMITLOG_DIRTY_CLCap 11
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       1 Enqueuing flush of CLCap.M00, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M01, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M02, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M03, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M04, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M05, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M06, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M07, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M08, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M09, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M10, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 12
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=11 FLUSH=11
+[2026-10-21T20:53:19-0600] === arm M-nobreak T=8 sleep=20 mode=M nobreak=true
+[2026-10-21T20:53:19-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest -Dno-build-test=true -Dtest.jvm.args="-Dclcap.totalMiB=8 -Dclcap.sleepMs=20 -Dclcap.n=256 -Dclcap.mode=M -Dclcap.nobreak=true -Dclcap.out=/users/jason92/stage4-logs/cl2/run1/unit/M-nobreak/cap.csv"
+[2026-10-21T20:53:32-0600] ant rc=0 (13 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.1 sec BUILD SUCCESSFUL 
+INFO totalMiB=8 segMiB=1 sleepMs=20 n=256 mode=M nobreak=true heapMaxMiB=1007 memtableHeapMiB=251 accessMode=mmap startOnDisk=2097152 startActive=1 tables=24
+SUMMARY totalMiB=8 sleepMs=20 mode=M nobreak=true peakOnDisk=9437184 peakDir=9437184 settledOnDisk=5242880 settledDir=5242880 switches=14
+COMMITLOG_DIRTY_CLCap 14
+MEMTABLE_LIMIT_CLCap 0
+MEMTABLE_PERIOD_EXPIRED_CLCap 0
+REASON       1 Enqueuing flush of CLCap.M00, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M01, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M02, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M03, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M04, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M05, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M06, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M07, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M08, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M09, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M10, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M11, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M12, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of CLCap.M13, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of system.IndexInfo, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.column_masks, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.columns, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.keyspaces, Reason: UNIT_TESTS
+REASON       1 Enqueuing flush of system_schema.tables, Reason: UNIT_TESTS
+SEGMENT_DELETED_LINES 15
+BYTEMAN_LINES 0
+ERRORS 0
+TRACE CHECK=20 SELECT=2 FLUSH=14
+[2026-10-21T20:53:32-0600] unit-run end

@@ -1,0 +1,168 @@
+2026-10-21T21:20:05 1792639205408 cluster-run start: BATCH=100000 BATCHES=20 CAPS=[4096, 1024, 512, 64, 8] host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu clone /users/jason92/cassandra-is2
+2026-10-21T21:20:05 1792639205590 $ df -h /users/jason92/stage4-is2; ls /usr/lib/x86_64-linux-gnu | grep -c jemalloc || true
+  |   WITH min_index_interval = 1 AND max_index_interval = 2048
+2026-10-21T21:20:05 1792639205646 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-is2/bin/cassandra -p /users/jason92/stage4-is2/cassandra.pid > /users/jason92/stage4-is2/logs/stdout-L0-main.txt 2>&1
+2026-10-21T21:20:44 1792639244154 L0-main: up pid=213241 in 39 s; Initializing index summary manager with a memory pool size of 64 MB and a resize interval of -1 minutes
+2026-10-21T21:20:44 1792639244154 $ /users/jason92/cassandra-is2/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E "^(VmRSS|RssAnon|RssFile)" /proc/213241/status; grep -c jemalloc /proc/213241/maps; tr "\0" " " < /proc/213241/cmdline | grep -o "javaagent[^ ]*"; tr "\0" "\n" < /proc/213241/env
+  | RssAnon:	 9210648 kB
+  | javaagent:/users/jason92/cassandra-is2/bin/../lib/jamm-0.4.0.jar
+  | javaagent:/users/jason92/cassandra-is2/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-is2/r258.btm
+  | MALLOC_MMAP_THRESHOLD_=131072
+2026-10-21T21:20:45 1792639245228 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1..100000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason92/st
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:20:58 1792639258529 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=100001..200000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:21:10 1792639270081 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=200001..300000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:21:21 1792639281440 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=300001..400000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:21:32 1792639292710 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=400001..500000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:21:43 1792639303855 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=500001..600000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:21:56 1792639316379 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=600001..700000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:22:08 1792639328522 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=700001..800000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:22:19 1792639339966 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=800001..900000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jason
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:22:32 1792639352723 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=900001..1000000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jaso
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:22:44 1792639364022 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1000001..1100000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:22:55 1792639375425 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1100001..1200000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:23:07 1792639387901 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1200001..1300000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:23:19 1792639399601 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1300001..1400000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:23:31 1792639411776 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1400001..1500000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:23:44 1792639424525 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1500001..1600000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:23:55 1792639435836 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1600001..1700000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:24:07 1792639447105 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1700001..1800000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:24:19 1792639459126 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1800001..1900000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:24:31 1792639471821 $ /users/jason92/cassandra-is2/tools/bin/cassandra-stress user profile=/users/jason92/stage4-is2/isr.yaml "ops(insert=1)" n=100000 no-warmup cl=ONE -pop seq=1900001..2000000 -rate threads=64 -node 127.0.0.1 -port native=19042 jmx=17199 -mode native cql3 > /users/jas
+  | Total partitions          :    100,000 [insert: 100,000]
+  | Total errors              :          0 [insert: 0]
+2026-10-21T21:25:48 1792639548567 L0-main/baseline: T_jmx=1930.237117767334 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:26:21 1792639581383 L0-main/C4096/before: T_jmx=1930.237117767334 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:26:47 1792639607486 L0-main/C4096: Beginning redistribution of index summaries for 34 sstables with memory pool size 4096 MiB; current spaced used is 1930.237117767334 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index 
+2026-10-21T21:28:02 1792639682137 L0-main/C4096/after: T_jmx=1930.237117767334 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:28:02 1792639682137 L0-main/C4096: cap=4096 T=1930.237 (before 1930.237) R258=[[1792639607453, 4279139300, 4294967296, 'true']] keep/resample isr 20/0 R_before=11062.5 R_after=11062.9 MiB
+2026-10-21T21:28:02 1792639682139 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 1"
+2026-10-21T21:28:09 1792639689528 L0-main/restore-after-C4096/before: T_jmx=1930.2371463775635 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:28:35 1792639715687 L0-main/restore-after-C4096: Beginning redistribution of index summaries for 36 sstables with memory pool size 8192 MiB; current spaced used is 1930.2371463775635 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 0 | Completed res
+2026-10-21T21:29:50 1792639790144 L0-main/restore-after-C4096/after: T_jmx=1930.2371463775635 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:29:50 1792639790144 L0-main/restore-after-C4096: cap=8192 T=1930.237 (before 1930.237) R258=[[1792639715667, 6565934246, 8589934592, 'true']] keep/resample isr 0/0 R_before=11063.6 R_after=11063.6 MiB
+2026-10-21T21:29:50 1792639790146 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 2048; DESCRIBE TABLE isr.t" | grep -E "index_interval"
+  |     AND max_index_interval = 2048
+  |     AND min_index_interval = 1
+2026-10-21T21:29:50 1792639790830 L0-main/restore-after-C4096: restore ok=True
+2026-10-21T21:29:57 1792639797567 L0-main/C1024/before: T_jmx=1930.2371320724487 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:30:24 1792639824148 L0-main/C1024: Beginning redistribution of index summaries for 35 sstables with memory pool size 1024 MiB; current spaced used is 1930.2371320724487 MiB | index summaries: downsample: 10, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of inde
+2026-10-21T21:31:38 1792639898746 L0-main/C1024/after: T_jmx=972.6659498214722 MiB isr=1019913840 B sstables=20 intervals=[1, 128] Summary.db 20 files 1019954480 B
+2026-10-21T21:31:38 1792639898746 L0-main/C1024: cap=1024 T=972.666 (before 1930.237) R258=[[1792639823663, 1057913813, 1073741824, 'true']] keep/resample isr 10/10 R_before=11064.5 R_after=10106.9 MiB
+2026-10-21T21:31:38 1792639898749 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 1"
+2026-10-21T21:31:46 1792639906141 L0-main/restore-after-C1024/before: T_jmx=972.6659355163574 MiB isr=1019913840 B sstables=20 intervals=[1, 128] Summary.db 20 files 1019954480 B
+2026-10-21T21:32:17 1792639937485 L0-main/restore-after-C1024: Beginning redistribution of index summaries for 34 sstables with memory pool size 8192 MiB; current spaced used is 972.6659355163574 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 10 | Completed res
+2026-10-21T21:33:32 1792640012057 L0-main/restore-after-C1024/after: T_jmx=1930.237117767334 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:33:32 1792640012057 L0-main/restore-after-C1024: cap=8192 T=1930.237 (before 972.666) R258=[[1792639932207, 6565934276, 8589934592, 'true']] keep/resample isr 0/10 R_before=10106.9 R_after=11064.7 MiB
+2026-10-21T21:33:32 1792640012060 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 2048; DESCRIBE TABLE isr.t" | grep -E "index_interval"
+  |     AND max_index_interval = 2048
+  |     AND min_index_interval = 1
+2026-10-21T21:33:32 1792640012749 L0-main/restore-after-C1024: restore ok=True
+2026-10-21T21:33:39 1792640019520 L0-main/C512/before: T_jmx=1930.2371463775635 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:34:06 1792640046209 L0-main/C512: Beginning redistribution of index summaries for 36 sstables with memory pool size 512 MiB; current spaced used is 1930.2371463775635 MiB | index summaries: downsample: 15, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index 
+2026-10-21T21:35:20 1792640120702 L0-main/C512/after: T_jmx=493.88037300109863 MiB isr=517870760 B sstables=20 intervals=[1, 128] Summary.db 20 files 517911400 B
+2026-10-21T21:35:20 1792640120702 L0-main/C512: cap=512 T=493.880 (before 1930.237) R258=[[1792640045608, 521042886, 536870912, 'true']] keep/resample isr 5/15 R_before=11064.7 R_after=9628.1 MiB
+2026-10-21T21:35:20 1792640120706 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 1"
+2026-10-21T21:35:28 1792640128063 L0-main/restore-after-C512/before: T_jmx=493.8803586959839 MiB isr=517870760 B sstables=20 intervals=[1, 128] Summary.db 20 files 517911400 B
+2026-10-21T21:36:02 1792640162034 L0-main/restore-after-C512: Beginning redistribution of index summaries for 35 sstables with memory pool size 8192 MiB; current spaced used is 493.8803586959839 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 15 | Completed resi
+2026-10-21T21:37:16 1792640236629 L0-main/restore-after-C512/after: T_jmx=1930.2371320724487 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:37:16 1792640236630 L0-main/restore-after-C512: cap=8192 T=1930.237 (before 493.880) R258=[[1792640154146, 6565934261, 8589934592, 'true']] keep/resample isr 0/15 R_before=9628.6 R_after=11065.4 MiB
+2026-10-21T21:37:16 1792640236633 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 2048; DESCRIBE TABLE isr.t" | grep -E "index_interval"
+  |     AND max_index_interval = 2048
+  |     AND min_index_interval = 1
+2026-10-21T21:37:17 1792640237315 L0-main/restore-after-C512: restore ok=True
+2026-10-21T21:37:24 1792640244042 L0-main/C64/before: T_jmx=1930.237117767334 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:37:50 1792640270963 L0-main/C64: Beginning redistribution of index summaries for 34 sstables with memory pool size 64 MiB; current spaced used is 1930.237117767334 MiB | index summaries: downsample: 20, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index sum
+2026-10-21T21:39:05 1792640345498 L0-main/C64/after: T_jmx=15.09475326538086 MiB isr=15827680 B sstables=20 intervals=[128] Summary.db 20 files 15868320 B
+2026-10-21T21:39:05 1792640345498 L0-main/C64: cap=64 T=15.095 (before 1930.237) R258=[[1792640270172, 51280868, 67108864, 'true']] keep/resample isr 0/20 R_before=11066.1 R_after=9155.2 MiB
+2026-10-21T21:39:05 1792640345500 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 1"
+2026-10-21T21:39:12 1792640352856 L0-main/restore-after-C64/before: T_jmx=15.094781875610352 MiB isr=15827680 B sstables=20 intervals=[128] Summary.db 20 files 15868320 B
+2026-10-21T21:39:49 1792640389388 L0-main/restore-after-C64: Beginning redistribution of index summaries for 36 sstables with memory pool size 8192 MiB; current spaced used is 15.094781875610352 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 20 | Completed resi
+2026-10-21T21:41:03 1792640463909 L0-main/restore-after-C64/after: T_jmx=1930.2371463775635 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:41:03 1792640463909 L0-main/restore-after-C64: cap=8192 T=1930.237 (before 15.095) R258=[[1792640378942, 6565934246, 8589934592, 'true']] keep/resample isr 0/20 R_before=9155.8 R_after=11067.9 MiB
+2026-10-21T21:41:03 1792640463911 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 2048; DESCRIBE TABLE isr.t" | grep -E "index_interval"
+  |     AND max_index_interval = 2048
+  |     AND min_index_interval = 1
+2026-10-21T21:41:04 1792640464601 L0-main/restore-after-C64: restore ok=True
+2026-10-21T21:41:11 1792640471158 L0-main/C8/before: T_jmx=1930.2371320724487 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:41:38 1792640498015 L0-main/C8: Beginning redistribution of index summaries for 35 sstables with memory pool size 8 MiB; current spaced used is 1930.2371320724487 MiB | index summaries: downsample: 20, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index summ
+2026-10-21T21:42:52 1792640572541 L0-main/C8/after: T_jmx=15.094767570495605 MiB isr=15827680 B sstables=20 intervals=[128] Summary.db 20 files 15868320 B
+2026-10-21T21:42:52 1792640572541 L0-main/C8: cap=8 T=15.095 (before 1930.237) R258=[[1792640497262, -7439403, 8388608, 'false']] keep/resample isr 0/20 R_before=11068.7 R_after=9152.0 MiB
+2026-10-21T21:42:52 1792640572547 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 1"
+2026-10-21T21:43:00 1792640580041 L0-main/restore-after-C8/before: T_jmx=15.09475326538086 MiB isr=15827680 B sstables=20 intervals=[128] Summary.db 20 files 15868320 B
+2026-10-21T21:43:36 1792640616639 L0-main/restore-after-C8: Beginning redistribution of index summaries for 34 sstables with memory pool size 8192 MiB; current spaced used is 15.09475326538086 MiB | index summaries: downsample: 0, force resample: 0, upsample: 0, force upsample: 20 | Completed resizi
+2026-10-21T21:44:51 1792640691180 L0-main/restore-after-C8/after: T_jmx=1930.237117767334 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:44:51 1792640691180 L0-main/restore-after-C8: cap=8192 T=1930.237 (before 15.095) R258=[[1792640606130, 6565934276, 8589934592, 'true']] keep/resample isr 0/20 R_before=9152.4 R_after=11068.4 MiB
+2026-10-21T21:44:51 1792640691184 $ /users/jason92/cassandra-is2/bin/cqlsh 127.0.0.1 19042 -e "ALTER TABLE isr.t WITH min_index_interval = 1 AND max_index_interval = 2048; DESCRIBE TABLE isr.t" | grep -E "index_interval"
+  |     AND max_index_interval = 2048
+  |     AND min_index_interval = 1
+2026-10-21T21:44:51 1792640691858 L0-main/restore-after-C8: restore ok=True
+2026-10-21T21:44:58 1792640698454 L0-main/neg/before: T_jmx=1930.2371463775635 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:49:53 1792640993349 L0-main/neg/after: T_jmx=1930.2371463775635 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:50:04 1792641004693 L0-main: stopped; daemons left []
+2026-10-21T21:50:04 1792641004721 $ ulimit -n 100000; ulimit -n; /users/jason92/cassandra-is2/bin/cassandra -p /users/jason92/stage4-is2/cassandra.pid > /users/jason92/stage4-is2/logs/stdout-L1-auto.txt 2>&1
+2026-10-21T21:50:12 1792641012912 L1-auto: up pid=234073 in 8 s; Initializing index summary manager with a memory pool size of 409 MB and a resize interval of -1 minutes
+2026-10-21T21:50:12 1792641012912 $ /users/jason92/cassandra-is2/bin/nodetool -h 127.0.0.1 -p 17199 statusbinary; grep -E "^(VmRSS|RssAnon|RssFile)" /proc/234073/status; grep -c jemalloc /proc/234073/maps; tr "\0" " " < /proc/234073/cmdline | grep -o "javaagent[^ ]*"; tr "\0" "\n" < /proc/234073/env
+  | RssAnon:	11147236 kB
+  | javaagent:/users/jason92/cassandra-is2/bin/../lib/jamm-0.4.0.jar
+  | javaagent:/users/jason92/cassandra-is2/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/stage4-is2/r258.btm
+  | MALLOC_MMAP_THRESHOLD_=131072
+2026-10-21T21:50:18 1792641018592 L1-auto/auto/baseline: T_jmx=1930.2372856140137 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:50:25 1792641025282 L1-auto/Cauto/before: T_jmx=1930.2372856140137 MiB isr=2024000000 B sstables=20 intervals=[1] Summary.db 20 files 2024040640 B
+2026-10-21T21:50:52 1792641052244 L1-auto/Cauto: Beginning redistribution of index summaries for 41 sstables with memory pool size 409 MiB; current spaced used is 1930.2372856140137 MiB | index summaries: downsample: 16, force resample: 0, upsample: 0, force upsample: 0 | Completed resizing of index
+2026-10-21T21:52:06 1792641126804 L1-auto/Cauto/after: T_jmx=398.1233940124512 MiB isr=417462144 B sstables=20 intervals=[1, 128] Summary.db 20 files 417502784 B
+2026-10-21T21:52:06 1792641126804 L1-auto/Cauto: cap=409 T=398.123 (before 1930.237) R258=[[1792641051485, 413039412, 428867584, 'true']] keep/resample isr 4/16 R_before=10921.6 R_after=9393.2 MiB
+2026-10-21T21:52:17 1792641137132 L1-auto: stopped; daemons left []
+2026-10-21T21:52:17 1792641137199 daemons left: []; stress left: 0
+  | baseline: yaml cap 64 MB (JMX 64.0), T=1930.237117767334 MiB, sstables=20, completed lines 0, RssAnon median 11062.2 MiB
+  | C4096: cap=4096 k=20 (table 20) Tpred=1930.237 T=1930.237 (before 1930.237) R258=4279139300 pred=4279139300 (4080.905 vs 4080.905 MiB) keep/resample isr 20/0 dT=0.0 dRssAnon=-0.5 tol=64.0 downsample=0 r258 lines=1
+  | EXPECTED: C4096 RssAnon falls by ~dT: PASS -- dR=-0.5 dT=0.0 tol=64.0
+  | C1024: cap=1024 k=10 (table 10) Tpred=972.666 T=972.666 (before 1930.237) R258=1057913813 pred=1057913828 (1008.905 vs 1008.905 MiB) keep/resample isr 10/10 dT=957.6 dRssAnon=957.6 tol=143.6 downsample=10 r258 lines=1
+  | EXPECTED: C1024 RssAnon falls by ~dT: PASS -- dR=957.6 dT=957.6 tol=143.6
+  | C512: cap=512 k=5 (table 5) Tpred=493.880 T=493.880 (before 1930.237) R258=521042886 pred=521042916 (496.905 vs 496.905 MiB) keep/resample isr 5/15 dT=1436.4 dRssAnon=1436.6 tol=215.5 downsample=15 r258 lines=1
+  | EXPECTED: C512 RssAnon falls by ~dT: PASS -- dR=1436.6 dT=1436.4 tol=215.5
+  | C64: cap=64 k=0 (table 0) Tpred=15.095 T=15.095 (before 1930.237) R258=51280868 pred=51280868 (48.905 vs 48.905 MiB) keep/resample isr 0/20 dT=1915.1 dRssAnon=1910.9 tol=287.3 downsample=20 r258 lines=1
+  | EXPECTED: C64 RssAnon falls by ~dT: PASS -- dR=1910.9 dT=1915.1 tol=287.3
+  | C8: cap=8 k=0 (table 0) Tpred=15.095 T=15.095 (before 1930.237) R258=-7439403 pred=-7439388 (-7.095 vs -7.095 MiB) keep/resample isr 0/20 dT=1915.1 dRssAnon=1916.7 tol=287.3 downsample=20 r258 lines=1
+  | EXPECTED: C8 RssAnon falls by ~dT: PASS -- dR=1916.7 dT=1915.1 tol=287.3
+  | Cauto: cap=409 k=4 (table 4) Tpred=398.123 T=398.123 (before 1930.237) R258=413039412 pred=413039588 (393.905 vs 393.905 MiB) keep/resample isr 4/16 dT=1532.1 dRssAnon=1528.4 tol=229.8 downsample=16 r258 lines=1
+  | EXPECTED: Cauto RssAnon falls by ~dT: PASS -- dR=1528.4 dT=1532.1 tol=229.8
+  | EXPECTED: negative control flat (300 s, cap 64, no run): PASS -- dT=0.000 RssAnon first 11068.7 last 11068.8 range 0.2 MiB completed=0 T=1930.2371463775635
+  | sigma(RssAnon, negative control) = 0.1 MiB

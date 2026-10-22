@@ -1,0 +1,298 @@
+26,58d25
+< cluster_name: 'Test Cluster'
+< 
+< # This defines the number of tokens randomly assigned to this node on the ring
+< # The more tokens, relative to other nodes, the larger the proportion of data
+< # that this node will store. You probably want all nodes to have the same number
+< # of tokens assuming they have equal hardware capability.
+< #
+< # If you leave this unspecified, Cassandra will use the default of 1 token for legacy compatibility,
+< # and will use the initial_token as described below.
+< #
+< # Specifying initial_token will override this setting on the node's initial start,
+< # on subsequent starts, this setting will apply even if initial token is set.
+< #
+< # See https://cassandra.apache.org/doc/latest/getting-started/production.html#tokens for
+< # best practice information about num_tokens.
+< #
+< num_tokens: 16
+< 
+< # Triggers automatic allocation of num_tokens tokens for this node. The allocation
+< # algorithm attempts to choose tokens in a way that optimizes replicated load over
+< # the nodes in the datacenter for the replica factor.
+< #
+< # The load assigned to each node will be close to proportional to its number of
+< # vnodes.
+< #
+< # Only supported with the Murmur3Partitioner.
+< 
+< # Replica factor is determined via the replication strategy used by the specified
+< # keyspace.
+< # allocate_tokens_for_keyspace: KEYSPACE
+< 
+< # Replica factor is explicitly set, regardless of keyspace or datacenter.
+< # This is the replica factor within the datacenter, like NTS.
+68,79d34
+< hinted_handoff_enabled: true
+< 
+< # When hinted_handoff_enabled is true, a black list of data centers that will not
+< # perform hinted handoff
+< # hinted_handoff_disabled_datacenters:
+< #    - DC1
+< #    - DC2
+< 
+< # this defines the maximum amount of time a dead host will have hints
+< # generated.  After it has been dead this long, new hints for it will not be
+< # created until it has been seen alive and gone down again.
+< # Min unit: ms
+697,721d651
+< seed_provider:
+<   # Addresses of hosts that are deemed contact points.
+<   # Cassandra nodes use this list of hosts to find each other and learn
+<   # the topology of the ring.  You must change this if you are running
+<   # multiple nodes!
+<   - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+<     parameters:
+<       # seeds is actually a comma-delimited list of addresses.
+<       # Ex: "<ip1>,<ip2>,<ip3>"
+<       - seeds: "127.0.0.1:7000"
+<       # If set to "true", SimpleSeedProvider will return all IP addresses for a DNS name,
+<       # based on the configured name service on the system. Defaults to "false".
+<       #  resolve_multiple_ip_addresses_per_dns_record: "false"
+< 
+< # For workloads with more data than can fit in memory, Cassandra's
+< # bottleneck will be reads that need to fetch data from
+< # disk. "concurrent_reads" should be set to (16 * number_of_drives) in
+< # order to allow the operations to enqueue low enough in the stack
+< # that the OS and drives can reorder them. Same applies to
+< # "concurrent_counter_writes", since counter writes read the current
+< # values before incrementing and writing them back.
+< #
+< # On the other hand, since writes are almost never IO bound, the ideal
+< # number of "concurrent_writes" is dependent on the number of cores in
+< # your system; (8 * number_of_cores) is a good rule of thumb.
+825,938d754
+< memtable_allocation_type: heap_buffers
+< 
+< # Limit memory usage for Merkle tree calculations during repairs of a certain
+< # table and common token range. Repair commands targetting multiple tables or
+< # virtual nodes can exceed this limit depending on concurrent_merkle_tree_requests.
+< #
+< # The default is 1/16th of the available heap. The main tradeoff is that
+< # smaller trees have less resolution, which can lead to over-streaming data.
+< # If you see heap pressure during repairs, consider lowering this, but you
+< # cannot go below one mebibyte. If you see lots of over-streaming, consider
+< # raising this or using subrange repair.
+< #
+< # For more details see https://issues.apache.org/jira/browse/CASSANDRA-14096.
+< #
+< # Min unit: MiB
+< # repair_session_space:
+< 
+< # The number of simultaneous Merkle tree requests during repairs that can
+< # be performed by a repair command. The size of each validation request is
+< # limited by the repair_session_space property, so setting this to 1 will make
+< # sure that a repair command doesn't exceed that limit, even if the repair
+< # command is repairing multiple tables or multiple virtual nodes.
+< #
+< # There isn't a limit by default for backwards compatibility, but this can
+< # produce OOM for  commands repairing multiple tables or multiple virtual nodes.
+< # A limit of just 1 simultaneous Merkle tree request is generally recommended
+< # with no virtual nodes so repair_session_space, and thereof the Merkle tree
+< # resolution, can be high. For virtual nodes a value of 1 with the default
+< # repair_session_space value will produce higher resolution Merkle trees
+< # at the expense of speed. Alternatively, when working with virtual nodes it
+< # can make sense to reduce the repair_session_space and increase the value of
+< # concurrent_merkle_tree_requests because each range will contain fewer data.
+< #
+< # For more details see https://issues.apache.org/jira/browse/CASSANDRA-19336.
+< #
+< # A zero value means no limit.
+< # concurrent_merkle_tree_requests: 0
+< 
+< # repair:
+< #   # Configure the retries for each of the repair messages that support it.  As of this moment retries use an exponential algorithm where each attempt sleeps longer based off the base_sleep_time and attempt.
+< #   retries:
+< #     max_attempts: 10
+< #     base_sleep_time: 200ms
+< #     max_sleep_time: 1s
+< #     # Increase the timeout of validation responses due to them containing the merkle tree
+< #     merkle_tree_response:
+< #       base_sleep_time: 30s
+< #       max_sleep_time: 1m
+< 
+< # Total space to use for commit logs on disk.
+< #
+< # If space gets above this value, Cassandra will flush every dirty CF
+< # in the oldest segment and remove it.  So a small total commitlog space
+< # will tend to cause more flush activity on less-active columnfamilies.
+< #
+< # The default value is the smaller of 8192, and 1/4 of the total space
+< # of the commitlog volume.
+< #
+< # commitlog_total_space: 8192MiB
+< 
+< # This sets the number of memtable flush writer threads per disk
+< # as well as the total number of memtables that can be flushed concurrently.
+< # These are generally a combination of compute and IO bound.
+< #
+< # Memtable flushing is more CPU efficient than memtable ingest and a single thread
+< # can keep up with the ingest rate of a whole server on a single fast disk
+< # until it temporarily becomes IO bound under contention typically with compaction.
+< # At that point you need multiple flush threads. At some point in the future
+< # it may become CPU bound all the time.
+< #
+< # You can tell if flushing is falling behind using the MemtablePool.BlockedOnAllocation
+< # metric which should be 0, but will be non-zero if threads are blocked waiting on flushing
+< # to free memory.
+< #
+< # memtable_flush_writers defaults to two for a single data directory.
+< # This means that two  memtables can be flushed concurrently to the single data directory.
+< # If you have multiple data directories the default is one memtable flushing at a time
+< # but the flush will use a thread per data directory so you will get two or more writers.
+< #
+< # Two is generally enough to flush on a fast disk [array] mounted as a single data directory.
+< # Adding more flush writers will result in smaller more frequent flushes that introduce more
+< # compaction overhead.
+< #
+< # There is a direct tradeoff between number of memtables that can be flushed concurrently
+< # and flush size and frequency. More is not better you just need enough flush writers
+< # to never stall waiting for flushing to free memory.
+< #
+< # memtable_flush_writers: 2
+< 
+< # Total space to use for change-data-capture logs on disk.
+< #
+< # If space gets above this value, Cassandra will throw WriteTimeoutException
+< # on Mutations including tables with CDC enabled. A CDCCompactor is responsible
+< # for parsing the raw CDC logs and deleting them when parsing is completed.
+< #
+< # The default value is the min of 4096 MiB and 1/8th of the total space
+< # of the drive where cdc_raw_directory resides.
+< # Min unit: MiB
+< # cdc_total_space: 4096MiB
+< 
+< # When we hit our cdc_raw limit and the CDCCompactor is either running behind
+< # or experiencing backpressure, we check at the following interval to see if any
+< # new space for cdc-tracked tables has been made available. Default to 250ms
+< # Min unit: ms
+< # cdc_free_space_check_interval: 250ms
+< 
+< # A fixed memory pool size in MB for for SSTable index summaries. If left
+< # empty, this will default to 5% of the heap size. If the memory usage of
+< # all index summaries exceeds this limit, SSTables with low read rates will
+< # shrink their index summaries in order to meet this limit.  However, this
+< # is a best-effort process. In extreme conditions Cassandra may need to use
+< # more than this amount of memory.
+< # Only relevant to formats that use an index summary, e.g. BIG.
+< # Min unit: KiB
+981,1019d796
+< listen_address: localhost
+< 
+< # Set listen_address OR listen_interface, not both. Interfaces must correspond
+< # to a single address, IP aliasing is not supported.
+< # listen_interface: eth0
+< 
+< # If you choose to specify the interface by name and the interface has an ipv4 and an ipv6 address
+< # you can specify which should be chosen using listen_interface_prefer_ipv6. If false the first ipv4
+< # address will be used. If true the first ipv6 address will be used. Defaults to false preferring
+< # ipv4. If there is only one address it will be selected regardless of ipv4/ipv6.
+< # listen_interface_prefer_ipv6: false
+< 
+< # Address to broadcast to other Cassandra nodes
+< # Leaving this blank will set it to the same value as listen_address
+< # broadcast_address: 1.2.3.4
+< 
+< # When using multiple physical network interfaces, set this
+< # to true to listen on broadcast_address in addition to
+< # the listen_address, allowing nodes to communicate in both
+< # interfaces.
+< # Ignore this property if the network configuration automatically
+< # routes  between the public and private networks such as EC2.
+< # listen_on_broadcast_address: false
+< 
+< # Internode authentication backend, implementing IInternodeAuthenticator;
+< # used to allow/disallow connections from peer nodes.
+< #internode_authenticator:
+< #  class_name: org.apache.cassandra.auth.AllowAllInternodeAuthenticator
+< #  parameters:
+< # MutualTlsInternodeAuthenticator can be configured using the following configuration.One can add their own validator
+< # which implements MutualTlsCertificateValidator class and provide logic for extracting identity out of certificates
+< # and validating certificates.
+< #  class_name: org.apache.cassandra.auth.MutualTlsInternodeAuthenticator
+< #  parameters:
+< #    validator_class_name: org.apache.cassandra.auth.SpiffeCertificateValidator
+< #    trusted_peer_identities: "spiffe1,spiffe2"
+< #    node_identity: "spiffe1"
+< # Whether to start the native transport server.
+< # The address on which the native transport is bound is defined by rpc_address.
+1090,1108d866
+< rpc_address: localhost
+< 
+< # Set rpc_address OR rpc_interface, not both. Interfaces must correspond
+< # to a single address, IP aliasing is not supported.
+< # rpc_interface: eth1
+< 
+< # If you choose to specify the interface by name and the interface has an ipv4 and an ipv6 address
+< # you can specify which should be chosen using rpc_interface_prefer_ipv6. If false the first ipv4
+< # address will be used. If true the first ipv6 address will be used. Defaults to false preferring
+< # ipv4. If there is only one address it will be selected regardless of ipv4/ipv6.
+< # rpc_interface_prefer_ipv6: false
+< 
+< # RPC address to broadcast to drivers and other Cassandra nodes. This cannot
+< # be set to 0.0.0.0. If left blank, this will be set to the value of
+< # rpc_address. If rpc_address is set to 0.0.0.0, broadcast_rpc_address must
+< # be set.
+< # broadcast_rpc_address: 1.2.3.4
+< 
+< # enable or disable keepalive on rpc/native connections
+1147,1161d904
+< auto_snapshot: true
+< 
+< # Adds a time-to-live (TTL) to auto snapshots generated by table
+< # truncation or drop (when enabled).
+< # After the TTL is elapsed, the snapshot is automatically cleared.
+< # By default, auto snapshots *do not* have TTL, uncomment the property below
+< # to enable TTL on auto snapshots.
+< # Accepted units: d (days), h (hours) or m (minutes)
+< # auto_snapshot_ttl: 30d
+< 
+< # The act of creating or clearing a snapshot involves creating or removing
+< # potentially tens of thousands of links, which can cause significant performance
+< # impact, especially on consumer grade SSDs. A non-zero value here can
+< # be used to throttle these links to avoid negative performance impact of
+< # taking and clearing snapshots
+1330,1333d1072
+< write_request_timeout: 2000ms
+< # How long the coordinator should wait for counter writes to complete.
+< # Lowest acceptable value is 10 ms.
+< # Min unit: ms
+2485a2225,2252
+> # ---- stage4 sq2 lines ----
+> cluster_name: s3probe
+> num_tokens: 16
+> listen_address: 127.0.0.1
+> rpc_address: 127.0.0.1
+> seed_provider:
+>   - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+>     parameters:
+>       - seeds: "127.0.0.1:7000"
+> data_file_directories:
+>     - /users/jason92/stage4-sq2/nodes/A/data
+> commitlog_directory: /users/jason92/stage4-sq2/nodes/A/commitlog
+> hints_directory: /users/jason92/stage4-sq2/nodes/A/hints
+> saved_caches_directory: /users/jason92/stage4-sq2/nodes/A/saved_caches
+> cdc_raw_directory: /users/jason92/stage4-sq2/nodes/A/cdc_raw
+> hinted_handoff_enabled: false
+> write_request_timeout: 60000ms
+> native_transport_timeout: 60000ms
+> phi_convict_threshold: 16
+> internode_tcp_user_timeout: 0ms
+> memtable_allocation_type: offheap_objects
+> memtable_heap_space: 64MiB
+> memtable_offheap_space: 512MiB
+> auto_snapshot: false
+> internode_application_send_queue_capacity: 4MiB
+> internode_application_send_queue_reserve_endpoint_capacity: 128MiB
+> internode_application_send_queue_reserve_global_capacity: 128MiB
+> internode_max_message_size: 1MiB

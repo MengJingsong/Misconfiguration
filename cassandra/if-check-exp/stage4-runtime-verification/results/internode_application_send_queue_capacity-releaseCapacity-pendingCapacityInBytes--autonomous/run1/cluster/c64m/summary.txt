@@ -1,0 +1,24 @@
+label c64m: C=67108864 G(reserves)=1048576 stop=True; jmx samples 128, vt samples 128
+plateau(median pause+5..25s)=68156648.0 max=68156648 limit C+G=68157440 (C+G)-plateau=792.0 reached>=C at pause+3.2s s(median bytes/task)=1064.0
+window pending bytes min/max = 68156648/68156648; pending tasks median 64057.0
+overload dropped tasks: at pause 0, at pause+25s 684437, at end 828209; timeout-dropped tasks at pause+25s 0, at end 0
+first overload drop at pause+3.2s
+max Urgent pending bytes 0, max Large pending bytes 0
+vt window: using_reserve_bytes median 1047784.0 max 1047784; pending_bytes median 68156648.0; reserve - max(0, pending - 3C) checks below
+vt samples with using_reserve > max(0, pending - C) + 2 MiB: 0 of 128
+vt after SIGCONT+15s: 60 samples; last: pending_bytes=0 using_bytes=0 using_reserve_bytes=0; max reserve in these 0; samples with pending<64KiB and reserve>0: 0
+vt final (after the 25 s drain): pending_bytes=0 using_reserve_bytes=0 overload_count=828209 expired_count=0
+histogram totals: pre 90062120 plateau 351268896; at plateau histogram: SmallPendingBytes 68156648 SmallPendingTasks 64057
+  class org.apache.cassandra.db.Mutation: pre (3, 168) plateau (72734, 4073104)
+  class org.apache.cassandra.net.Message: pre (2, 80) plateau (63996, 2559840)
+  class org.apache.cassandra.net.Message$Header: pre (2, 112) plateau (63996, 3583776)
+  class org.apache.cassandra.db.partitions.PartitionUpdate: pre (3, 96) plateau (72734, 2327488)
+  class [B: pre (108844, 11243448) plateau (327354, 165579184)
+A system.log: ERROR 0, WARN 8, "overloaded; dropping" 1, "is now DOWN" 0, UnrecoverableIllegalState 0, OutOfMemoryError 0
+B system.log: ERROR 0, WARN 9, "overloaded; dropping" 0, "is now DOWN" 0, UnrecoverableIllegalState 0, OutOfMemoryError 0
+  A log: INFO  [GossipStage:1] 2026-10-22T03:14:44,934 Gossiper.java:1492 - InetAddress /127.0.0.2:7000 is now UP
+  A log: WARN  [Native-Transport-Requests-55] 2026-10-22T03:15:36,511 NoSpamLogger.java:107 - /127.0.0.1:7000->/127.0.0.2:7000-SMALL_MESSAGES-041728e0 overloaded; dropping 1.039KiB message (queue: 64.999MiB local, 1023.227KiB endpoint, 1023.227KiB global)
+stress Op rate                   :   29,871 op/s  [WRITE: 29,871 op/s]
+stress Total errors              :          0 [WRITE: 0]
+stress Total partitions          :  2,700,101 [WRITE: 2,700,101]
+stress Total operation time      : 00:01:30
