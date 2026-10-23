@@ -1,5 +1,10 @@
 # misconfiguration
 
+> **Always check [`HANDOFF.md`](HANDOFF.md) first.** It tells you which personal handoff file to
+> use: **Jingsong Meng** → [`HANDOFF-Jingsong.md`](HANDOFF-Jingsong.md), **Yang Wang** →
+> [`HANDOFF-Yang.md`](HANDOFF-Yang.md). Common notes go in `HANDOFF.md`; personal handoff
+> instructions go in your own file.
+
 Research repo for the **misconfiguration** project: Cassandra/Hadoop
 memory-throttling misconfiguration experiments (CloudLab-based).
 

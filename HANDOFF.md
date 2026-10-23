@@ -5,6 +5,21 @@ For a new session picking up `if-check-exp` work. Read this first, then
 The paused sibling experiment has its own brief at
 [`cassandra/entry-restriction-exp/HANDOFF.md`](cassandra/entry-restriction-exp/HANDOFF.md).
 
+## Which handoff file to use (read first)
+
+**Always check this file first.** It holds the notes common to everyone; personal instructions
+and progress live in a per-person file. Work out who you are (ask if unclear), then:
+
+| If you are | Also read | Leave your personal handoff notes in |
+|---|---|---|
+| **Jingsong Meng** | [`HANDOFF-Jingsong.md`](HANDOFF-Jingsong.md) | `HANDOFF-Jingsong.md` |
+| **Yang Wang** | [`HANDOFF-Yang.md`](HANDOFF-Yang.md) | `HANDOFF-Yang.md` |
+
+- **Common notes** (shared background, decisions in force, lessons, nodes, follow-ups that concern
+  both people) go in this file, `HANDOFF.md`.
+- **Personal notes** (your set's job, progress, batch log, your nodes) go only in your own file.
+  Do not edit the other person's file.
+
 **Cleaned up 2026-10-23.** The dated batch logs, per-case run narratives and old node notes were
 removed; every closed case's detail is in its case file and results file. The full previous
 version is in git: `git show d40ee0c:HANDOFF.md` (older: `git show 2e9cf7b:HANDOFF.md`).
