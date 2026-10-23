@@ -1,8 +1,9 @@
 # Stage 3 autonomous-agent playbook
 
 **This is the autonomous agent's whole instruction.** It gets the target and nothing
-else: no rules, no patterns, no design method. The [guided agent](playbook-guided.md)
-gets the same target plus human suggestions. Both fill a template, and
+else: no rules, no patterns, no design method. The guided agent
+gets the same target plus human suggestions. **Do not access, open or read the guided
+agent's playbook (`playbook-guided.md`).** Both fill a template, and
 [stage 4](../stage4-runtime-verification/README.md) runs whatever solution a case file
 holds; what stage 3 is, and where results are filed, is in [`README.md`](README.md).
 
