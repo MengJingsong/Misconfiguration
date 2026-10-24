@@ -1,0 +1,31 @@
+CHECK 1: every checkpoint counter lies within the range of the 2-second counter series of its cell -> HOLDS (30 checkpoints, 0 outside)
+     control C-1.5-256MiB cp1: live tombstones 74309 of 250000 written (the rest was flushed, by design)
+     control C-1.5-256MiB cp2: live tombstones 148628 of 500000 written (the rest was flushed, by design)
+     control C-1.5-256MiB cp3: live tombstones 121545 of 1000000 written (the rest was flushed, by design)
+CHECK 2: raw histograms: live tombstones (BufferClusteringBound/2) == tombstones written at every checkpoint of every flush-free range-delete cell (controls excluded: they flush by design) -> HOLDS (0 off by more than 1 %)
+CHECK 3: raw histograms: allocated slots / live tombstones at the last checkpoint is within [1, f] of the cell factor (one growth per merge) -> HOLDS ([('F-1.2-1', 1.2, 1.2), ('F-5.0-2', 5.0, 5.0), ('F-1.5-3', 1.5, 1.5), ('F-2.0-4', 2.0, 2.0), ('F-2.0-5', 2.0, 2.0), ('F-1.5-6', 1.5, 1.5)])
+CHECK 4: session.log: every checkpoint load acknowledged all its writes with 0 errors -> HOLDS (30 loads, 10000000 writes)
+CHECK 5: system.log C-1.5-256MiB: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 6: system.log C-1.5-256MiB (control): memtable-limit flushes of ks.t/t2 happened during the load -> HOLDS (reasons {'MEMTABLE_LIMIT': 5, 'USER_FORCED': 1}; 5 non-user flushes inside the load windows)
+CHECK 7: system.log L1: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 8: system.log L1: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 9}; usage at the forced flushes: ['480.544MiB (16%)', '553.020MiB (18%)', '486.266MiB (16%)', '495.802MiB (16%)'])
+CHECK 9: trace F-1.2-1: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (995 lines, min 1.2000 max 1.2079)
+CHECK 10: trace F-5.0-2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (995 lines, min 5.0000 max 5.0000)
+CHECK 11: trace F-1.5-3: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (995 lines, min 1.5000 max 1.5050)
+CHECK 12: trace F-2.0-4: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 2.0 -> HOLDS (995 lines, min 2.0000 max 2.0000)
+CHECK 13: trace F-2.0-5: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 2.0 -> HOLDS (995 lines, min 2.0000 max 2.0000)
+CHECK 14: trace F-1.5-6: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (995 lines, min 1.5000 max 1.5027)
+CHECK 15: trace F-5.0-7: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (995 lines, min 5.0000 max 5.0000)
+CHECK 16: trace F-1.2-8: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (995 lines, min 1.2000 max 1.2037)
+CHECK 17: trace C-1.5-256MiB: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (969 lines, min 1.5000 max 1.5050)
+     F-1.2-1: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     F-5.0-2: MemtableSwitchCount start 1, end(after final flush) 2; last checkpoint 1
+     F-1.5-3: MemtableSwitchCount start 2, end(after final flush) 3; last checkpoint 2
+     F-2.0-4: MemtableSwitchCount start 3, end(after final flush) 4; last checkpoint 3
+     F-2.0-5: MemtableSwitchCount start 4, end(after final flush) 5; last checkpoint 4
+     F-1.5-6: MemtableSwitchCount start 5, end(after final flush) 6; last checkpoint 5
+     F-5.0-7: MemtableSwitchCount start 6, end(after final flush) 7; last checkpoint 6
+     F-1.2-8: MemtableSwitchCount start 7, end(after final flush) 8; last checkpoint 7
+     INS-1.5: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     C-1.5-256MiB: MemtableSwitchCount start 0, end(after final flush) 6; last checkpoint 5
+process check (manual): ps -eo cmd | grep [C]assandraDaemon after the run

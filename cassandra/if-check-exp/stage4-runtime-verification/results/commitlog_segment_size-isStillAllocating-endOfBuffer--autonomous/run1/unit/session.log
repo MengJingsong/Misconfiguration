@@ -1,0 +1,113 @@
+[2026-10-23T10:09:44-0600] unit-run start tree=/users/jason92/stage4-seg/treeB head=c3e89402546090906344e6bd7dd4608b932017bb arms=mmap-1:1:mmap mmap-4:4:mmap mmap-32:32:mmap lz4-1:1:lz4 lz4-4:4:lz4 lz4-32:32:lz4 direct-1:1:direct direct-4:4:direct direct-32:32:direct mmap-4-rep:4:mmap
+[2026-10-23T10:09:44-0600] EXPECTED (B2f as amended B2i): every arm: capacity==n*2^20 (direct too: exactly); every returned end and every retired endOfBuffer < capacity; violations=0; mmap fileLength==onDiskSize==n*2^20; lz4 fileLength<=n*2^20+ceil(n*2^20/255)+32*blocks+64; direct fileLength<=n*2^20 and a multiple of 4096; retired segments: isStillAllocating false, allocatePosition==capacity+1, endOfBuffer<capacity; the active one: true, allocatePosition<endOfBuffer==capacity; more than one segment per arm (64 adds of n/16 = 4n); max-accepted ok; oversize throws MutationExceededMaxSizeException oversized+1 allocatePositionDelta=0; capacity scales 1:4:32; assertion capacity==(n+1)MiB false
+[2026-10-23T10:09:44-0600] === arm mmap-1 n=1MiB mode=mmap
+[2026-10-23T10:09:49-0600] ant rc=0 (5 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.749 sec BUILD SUCCESSFUL 
+INFO S=1048576 maxMutationSize=524288 entry=65536 adds=64 fill=random accessMode=mmap compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=65536 entryTotal=65605
+PROBE max-accepted total=524288 seg=1792771787335 end=786744
+PROBE oversize total=524289 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=1048576 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: mmap
+[2026-10-23T10:09:49-0600] === arm mmap-4 n=4MiB mode=mmap
+[2026-10-23T10:09:55-0600] ant rc=0 (6 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.909 sec BUILD SUCCESSFUL 
+INFO S=4194304 maxMutationSize=2097152 entry=65536 adds=64 fill=random accessMode=mmap compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=262144 entryTotal=262213
+PROBE max-accepted total=2097152 seg=1792771792640 end=3146040
+PROBE oversize total=2097153 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=4194304 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: mmap
+[2026-10-23T10:09:55-0600] === arm mmap-32 n=32MiB mode=mmap
+[2026-10-23T10:10:01-0600] ant rc=0 (6 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.036 sec BUILD SUCCESSFUL 
+INFO S=33554432 maxMutationSize=16777216 entry=65536 adds=64 fill=random accessMode=mmap compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=2097152 entryTotal=2097222
+PROBE max-accepted total=16777216 seg=1792771798114 end=25166148
+PROBE oversize total=16777217 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=33554432 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: mmap
+[2026-10-23T10:10:01-0600] === arm lz4-1 n=1MiB mode=lz4
+[2026-10-23T10:10:07-0600] ant rc=0 (6 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.746 sec BUILD SUCCESSFUL 
+INFO S=1048576 maxMutationSize=524288 entry=65536 adds=64 fill=random accessMode=standard compression=LZ4Compressor segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=65536 entryTotal=65605
+PROBE max-accepted total=524288 seg=1792771804650 end=786807
+PROBE oversize total=524289 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=1048576 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: standard
+[2026-10-23T10:10:07-0600] === arm lz4-4 n=4MiB mode=lz4
+[2026-10-23T10:10:12-0600] ant rc=0 (5 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.039 sec BUILD SUCCESSFUL 
+INFO S=4194304 maxMutationSize=2097152 entry=65536 adds=64 fill=random accessMode=standard compression=LZ4Compressor segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=262144 entryTotal=262213
+PROBE max-accepted total=2097152 seg=1792771810061 end=3146103
+PROBE oversize total=2097153 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=4194304 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: standard
+[2026-10-23T10:10:12-0600] === arm lz4-32 n=32MiB mode=lz4
+[2026-10-23T10:10:19-0600] ant rc=0 (7 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.813 sec BUILD SUCCESSFUL 
+INFO S=33554432 maxMutationSize=16777216 entry=65536 adds=64 fill=random accessMode=standard compression=LZ4Compressor segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=2097152 entryTotal=2097222
+PROBE max-accepted total=16777216 seg=1792771815534 end=25166203
+PROBE oversize total=16777217 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=33554432 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: standard
+[2026-10-23T10:10:19-0600] === arm direct-1 n=1MiB mode=direct
+[2026-10-23T10:10:24-0600] ant rc=0 (5 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.735 sec BUILD SUCCESSFUL 
+INFO S=1048576 maxMutationSize=524288 entry=65536 adds=64 fill=random accessMode=direct compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=65536 entryTotal=65605
+PROBE max-accepted total=524288 seg=1792771821972 end=786744
+PROBE oversize total=524289 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=1048576 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG 
+[2026-10-23T10:10:24-0600] === arm direct-4 n=4MiB mode=direct
+[2026-10-23T10:10:29-0600] ant rc=0 (5 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.957 sec BUILD SUCCESSFUL 
+INFO S=4194304 maxMutationSize=2097152 entry=65536 adds=64 fill=random accessMode=direct compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=262144 entryTotal=262213
+PROBE max-accepted total=2097152 seg=1792771827272 end=3146040
+PROBE oversize total=2097153 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=4194304 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG 
+[2026-10-23T10:10:29-0600] === arm direct-32 n=32MiB mode=direct
+[2026-10-23T10:10:36-0600] ant rc=0 (7 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.013 sec BUILD SUCCESSFUL 
+INFO S=33554432 maxMutationSize=16777216 entry=65536 adds=64 fill=random accessMode=direct compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=2097152 entryTotal=2097222
+PROBE max-accepted total=16777216 seg=1792771832781 end=25166148
+PROBE oversize total=16777217 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=33554432 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG 
+[2026-10-23T10:10:36-0600] === arm mmap-4-rep n=4MiB mode=mmap
+[2026-10-23T10:10:41-0600] ant rc=0 (5 s); [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.SegmentCapProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.864 sec BUILD SUCCESSFUL 
+INFO S=4194304 maxMutationSize=2097152 entry=65536 adds=64 fill=random accessMode=mmap compression=none segments0=1 memtableHeapMiB=600
+PROBE main adds=64 payload=262144 entryTotal=262213
+PROBE max-accepted total=2097152 seg=1792771839262 end=3146040
+PROBE oversize total=2097153 exception=MutationExceededMaxSizeException oversizedMutations+1 allocatePositionDelta=0 sameSegment=true
+SUMMARY S=4194304 segments=5 violations=0 oversized=1
+FLUSHES 0
+SEGMENT_DELETED_LINES 0
+ERRORS 0
+CONFIG commitlog_disk_access_mode resolved to: mmap
+[2026-10-23T10:10:41-0600] unit-run end

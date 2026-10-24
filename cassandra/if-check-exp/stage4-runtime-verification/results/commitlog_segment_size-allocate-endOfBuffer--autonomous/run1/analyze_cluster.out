@@ -1,0 +1,34 @@
+ARM attempt1-lz4zero-s32-loader-import-failed: S=32MiB mode=lz4 total_space=4096MiB load=loader n=600000 load_s=0
+   largest file (stat, all samples)=15976 (0.015 MiB; S=32) | per-file max over names=15976 | files seen during run (created)=0 (est>= 15) | idle baseline files=2
+   peak live files=2 peak total(stat)=0.0 MiB peak JMX TotalCommitLogSize=0.0 MiB | maps peak n=0 bytes=0.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | compressible: max file < 5% of S: True | rolls >= est: False
+ARM ctl-s8-t64: S=8MiB mode=mmap total_space=64MiB load=stress n=600000 load_s=15
+   largest file (stat, all samples)=8388608 (8.000 MiB; S=8) | per-file max over names=8388608 | files seen during run (created)=82 (est>= 60) | idle baseline files=2
+   peak live files=16 peak total(stat)=128.0 MiB peak JMX TotalCommitLogSize=88.0 MiB | maps peak n=3 bytes=24.0 MiB | flush reasons: REASON      11 Enqueuing flush of keyspace1.standard1, Reason: COMMITLOG_DIRTY; ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+ARM idle-s32: S=32MiB mode=mmap total_space=4096MiB load=none n=0 load_s=30
+   largest file (stat, all samples)=33554432 (32.000 MiB; S=32) | per-file max over names=33554432 | files seen during run (created)=0 (est>= 0) | idle baseline files=2
+   peak live files=2 peak total(stat)=64.0 MiB peak JMX TotalCommitLogSize=64.0 MiB | maps peak n=2 bytes=64.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True
+ARM lz4-s32: S=32MiB mode=lz4 total_space=4096MiB load=stress n=600000 load_s=14
+   largest file (stat, all samples)=32601662 (31.091 MiB; S=32) | per-file max over names=32601662 | files seen during run (created)=20 (est>= 15) | idle baseline files=2
+   peak live files=22 peak total(stat)=638.9 MiB peak JMX TotalCommitLogSize=638.9 MiB | maps peak n=0 bytes=0.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | rolls >= est: True
+ARM lz4zero-s32: S=32MiB mode=lz4 total_space=4096MiB load=loader n=600000 load_s=118
+   largest file (stat, all samples)=674417 (0.643 MiB; S=32) | per-file max over names=674417 | files seen during run (created)=18 (est>= 15) | idle baseline files=2
+   peak live files=20 peak total(stat)=11.9 MiB peak JMX TotalCommitLogSize=11.9 MiB | maps peak n=0 bytes=0.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | compressible: max file < 5% of S: True | rolls >= est: True
+ARM s128: S=128MiB mode=mmap total_space=4096MiB load=stress n=600000 load_s=15
+   largest file (stat, all samples)=134217728 (128.000 MiB; S=128) | per-file max over names=134217728 | files seen during run (created)=5 (est>= 4) | idle baseline files=2
+   peak live files=7 peak total(stat)=896.0 MiB peak JMX TotalCommitLogSize=896.0 MiB | maps peak n=2 bytes=256.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+ARM s32: S=32MiB mode=mmap total_space=4096MiB load=stress n=600000 load_s=14
+   largest file (stat, all samples)=33554432 (32.000 MiB; S=32) | per-file max over names=33554432 | files seen during run (created)=20 (est>= 15) | idle baseline files=2
+   peak live files=22 peak total(stat)=704.0 MiB peak JMX TotalCommitLogSize=704.0 MiB | maps peak n=2 bytes=64.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+ARM s8: S=8MiB mode=mmap total_space=4096MiB load=stress n=600000 load_s=15
+   largest file (stat, all samples)=8388608 (8.000 MiB; S=8) | per-file max over names=8388608 | files seen during run (created)=82 (est>= 60) | idle baseline files=2
+   peak live files=84 peak total(stat)=672.0 MiB peak JMX TotalCommitLogSize=672.0 MiB | maps peak n=3 bytes=24.0 MiB | flush reasons: ERRORS 0
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+SCALING largest-file ratios (S=8,32,32,128): [1.0, 4.0, 4.0, 16.0]
+CONTROL total_space=64MiB S=8: peak dir 128.0 MiB (expected <= 84 ) vs uncontrolled 672.0 MiB (expected well above 64)

@@ -1,0 +1,133 @@
+Warning: ignoring deprecated parameter: native
+Warning: ignoring deprecated parameter: cql3
+******************** Stress Settings ********************
+Command:
+  Type: write
+  Count: 600,000
+  No Warmup: false
+  Consistency Level: ONE
+  Target Uncertainty: not applicable
+  Key Size (bytes): 10
+  Counter Increment Distibution: add=fixed(1)
+Rate:
+  Auto: false
+  Thread Count: 32
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..600000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Columns:
+  Max Columns Per Key: 1
+  Column Names: [C0]
+  Comparator: AsciiType
+  Timestamp: null
+  Variable Column Count: false
+  Slice: false
+  Size Distribution: Fixed:  key=1000
+  Count Distribution: Fixed:  key=1
+Errors:
+  Ignore: false
+  Tries: 10
+Log:
+  No Summary: false
+  No Settings: false
+  File: /users/jason92/stage4-seg/runA/cluster/s8/stress.log
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.1]
+  Is White List: false
+  Datacenter: null
+Schema:
+  Keyspace: keyspace1
+  Replication Strategy: org.apache.cassandra.locator.SimpleStrategy
+  Replication Strategy Options: {replication_factor=1}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  Truststore: null
+  Truststore Password: null
+  Keystore: null
+  Keystore Password: null
+  SSL Protocol: TLS
+  SSL Algorithm: null
+  SSL Ciphers: null
+Port:
+  Native Port: 9042
+  JMX Port: 7199
+JMX:
+  Username: null
+  Password: *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: null
+  Operation: WRITE
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+Credentials file:
+  File: *not set*
+  CQL username: *not set*
+  CQL password: *not set*
+  JMX username: *not set*
+  JMX password: *not set*
+  Transport truststore password: *not set*
+  Transport keystore password: *not set*
+Reporting:
+  Output frequency: 1s
+  Header frequency: *not set*
+
+Connected to cluster: Test Cluster, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: /127.0.0.1:9042; Rack: rack1
+Created keyspaces. Sleeping 1s for propagation.
+Sleeping 2s...
+Warming up WRITE with 50000 iterations...
+Running WRITE with 32 threads for 600000 iteration
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+total,                                                 13921,   13921,   13921,   13921,     0.7,     0.6,     1.3,     3.2,     8.7,    16.3,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                 98077,   84156,   84156,   84156,     0.4,     0.3,     0.6,     0.8,     1.7,    10.6,    2.0,  0.50539,      0,      0,       0,       0,       0,       0
+total,                                                202091,  104014,  104014,  104014,     0.3,     0.3,     0.4,     0.6,     1.2,    31.3,    3.0,  0.33322,      0,      1,      27,      27,       0,    1746
+total,                                                306630,  104539,  104539,  104539,     0.3,     0.3,     0.4,     0.5,     3.1,    44.9,    4.0,  0.24457,      0,      1,      36,      36,       0,    1548
+total,                                                422247,  115617,  115617,  115617,     0.3,     0.2,     0.4,     0.5,     0.9,     4.8,    5.0,  0.19467,      0,      0,       0,       0,       0,       0
+total,                                                522399,  100152,  100152,  100152,     0.3,     0.3,     0.4,     0.6,     2.9,    69.3,    6.0,  0.15992,      0,      1,      51,      51,       0,    1541
+total,                                                600000,  119745,  119745,  119745,     0.3,     0.2,     0.4,     0.5,     0.7,     2.5,    6.6,  0.13750,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   90,252 op/s  [WRITE: 90,252 op/s]
+Partition rate            :   90,252 pk/s  [WRITE: 90,252 pk/s]
+Row rate                  :   90,252 row/s [WRITE: 90,252 row/s]
+Latency mean              :    0.3 ms [WRITE: 0.3 ms]
+Latency median            :    0.3 ms [WRITE: 0.3 ms]
+Latency 95th percentile   :    0.5 ms [WRITE: 0.5 ms]
+Latency 99th percentile   :    0.8 ms [WRITE: 0.8 ms]
+Latency 99.9th percentile :    2.4 ms [WRITE: 2.4 ms]
+Latency max               :   69.3 ms [WRITE: 69.3 ms]
+Total partitions          :    600,000 [WRITE: 600,000]
+Total errors              :          0 [WRITE: 0]
+Total GC count            : 3
+Total GC memory           : 4.722 GiB
+Total GC time             :    0.1 seconds
+Avg GC time               :   38.0 ms
+StdDev GC time            :    9.9 ms
+Total operation time      : 00:00:06
+
+END

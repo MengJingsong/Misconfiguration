@@ -1,0 +1,29 @@
+EXPECTED: capacity series, event count, four array lengths and size equal the iterated expression (sorted and random order, every cell): PASS (112 runs, 0 differ)
+EXPECTED: final capacity >= N and below the growth bound (ceil(f*N)+1 for 1.2<=f<=5.0; 1.5*N+2 for f<=1.0, R6): PASS (0 violations)
+EXPECTED: unsharedHeapSize() grows ~linearly in N (R3: ratio of the largest to the smallest N within 0.5..1.5 x the N ratio), every (f, s) cell with growth: PASS (14 cells; cells outside: [])
+EXPECTED: |unshared(f_a) - unshared(f_b)| <= 28 B x (ceil((f_max-1)*N)+1) for the same (s, N), all pairs of f: FAIL (168 pairs, 2 violations: [(1, 100000, 0.5, 1.2, 649552, 560028), (1, 100000, 1.0, 1.2, 649552, 560028)])
+POST-HOC (not frozen): pair bound with f_eff (1.5 for f <= 1.0): PASS (168 pairs, 0 violations)
+OBSERVED: unshared - deep: min 112 max 23999872 B over 56 runs; boundaryHeapSize - sum(true bound sizes): min 0 max 23999760 B
+OBSERVED: N=1 f=1.5 s=1: unshared 384 deep 272 boundary 240 trueBounds 240 (boundary/trueBounds 1.000); unshared-deep 112 = 0.467 x trueBounds
+OBSERVED: N=10 f=1.5 s=1: unshared 4912 deep 2640 boundary 4560 trueBounds 2400 (boundary/trueBounds 1.900); unshared-deep 2272 = 0.947 x trueBounds
+OBSERVED: N=1000 f=1.5 s=1: unshared 501184 deep 261312 boundary 479760 trueBounds 240000 (boundary/trueBounds 1.999); unshared-deep 239872 = 0.999 x trueBounds
+OBSERVED: N=100000 f=1.5 s=1: unshared 50764952 deep 26765080 boundary 47999760 trueBounds 24000000 (boundary/trueBounds 2.000); unshared-deep 23999872 = 1.000 x trueBounds
+EXPECTED: DatabaseDescriptor setter takes f = 100.0, 0.5, 1.0 with no error and reads them back (no validation): PASS ([('100.0', '100.0', 'none'), ('0.5', '0.5', 'none'), ('1.0', '1.0', 'none')])
+EXPECTED: f = 100.0, c = 1, N = 100000: capacities 1 -> 100 -> 10000 -> 1000000 (after the initial 1): PASS ([100, 10000, 1000000])
+EXPECTED: N >= 1000 with growth: 1 <= capacity/N <= f (1.5 for the fallback), plus the +1 of the ceiling: PASS (0 outside)
+EXPECTED: each capacity sequence is deterministic: the repeat of every run is identical: PASS (56 cells)
+EXPECTED: unsharedHeapSize() >= 20 B x capacity in every run: PASS (0 below)
+EXPECTED: copy()+add x1000: after each copy() capacity == size, after the add capacity == ceil(size*f) (fallback rule applied), no bound: PASS (8 runs)
+OBSERVED: copyadd f=1.2 s=1: capacity after the last add 2399 for size 2000 (ratio 1.200)
+OBSERVED: copyadd f=1.2 s=1024: capacity after the last add 2399 for size 2000 (ratio 1.200)
+OBSERVED: copyadd f=1.5 s=1: capacity after the last add 2999 for size 2000 (ratio 1.500)
+OBSERVED: copyadd f=1.5 s=1024: capacity after the last add 2999 for size 2000 (ratio 1.500)
+OBSERVED: copyadd f=2.0 s=1: capacity after the last add 3998 for size 2000 (ratio 1.999)
+OBSERVED: copyadd f=2.0 s=1024: capacity after the last add 3998 for size 2000 (ratio 1.999)
+OBSERVED: copyadd f=5.0 s=1: capacity after the last add 9995 for size 2000 (ratio 4.997)
+OBSERVED: copyadd f=5.0 s=1024: capacity after the last add 9995 for size 2000 (ratio 4.997)
+EXPECTED: addAll into an empty list (target line 696): capacity == max(c, src.size) in all four arrays, the same for every f (R6): PASS (14 runs; capacities ['1000', '1024'])
+EXPECTED: positive control: c = 1024, n = 1000 < c: capacity stays 1024 at f = 1.2, 1.5, 2.0, 5.0: PASS (['1024/1024/1024/1024', '1024/1024/1024/1024', '1024/1024/1024/1024', '1024/1024/1024/1024'])
+EXPECTED: control cells c = 1024 with n = 1, 10, 1000: capacity stays 1024, no growth event: PASS (21 cells)
+SUMMARY: 12/13 expectations hold
+MATCHED ROW: B2g row 1 (capacity follows the iterated ceil(c*f), slack grows with n and f, no f stops growth) with the addAll row and the c>n control row -- with ONE frozen R3 criterion not holding (the pair bound; the violating pairs all contain a fallback factor f <= 1.0 against 1.2); the POST-HOC line shows the bound holds with the effective factor; see the results file

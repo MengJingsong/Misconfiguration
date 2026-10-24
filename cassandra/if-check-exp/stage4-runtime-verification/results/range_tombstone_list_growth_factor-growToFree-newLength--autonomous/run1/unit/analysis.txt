@@ -1,0 +1,17 @@
+EXPECTED: capacity series, event count, four array lengths and size equal the iterated expression (sorted and random order, every cell): PASS (36 runs, 0 differ)
+EXPECTED: final capacity >= N and below the growth bound (ceil(f*N)+1 for 1.2<=f<=5.0; 1.5*N+2 for f<=1.0, R6): PASS (0 violations)
+EXPECTED: unsharedHeapSize() grows ~linearly in N (R3: ratio of the largest to the smallest N within 0.5..1.5 x the N ratio), every (f, s) cell with growth: PASS (12 cells; cells outside: [])
+EXPECTED: |unshared(f_a) - unshared(f_b)| <= 28 B x (ceil((f_max-1)*N)+1) for the same (s, N), all pairs of f: PASS (54 pairs, 0 violations)
+POST-HOC (not frozen): pair bound with f_eff (1.5 for f <= 1.0): PASS (54 pairs, 0 violations)
+OBSERVED: unshared - deep: min 2272 max 23999872 B over 36 runs; boundaryHeapSize - sum(true bound sizes): min 2160 max 23999760 B
+OBSERVED: N=10 f=1.5 s=1: unshared 4912 deep 2640 boundary 4560 trueBounds 2400 (boundary/trueBounds 1.900); unshared-deep 2272 = 0.947 x trueBounds
+OBSERVED: N=1000 f=1.5 s=1: unshared 501184 deep 261312 boundary 479760 trueBounds 240000 (boundary/trueBounds 1.999); unshared-deep 239872 = 0.999 x trueBounds
+OBSERVED: N=100000 f=1.5 s=1: unshared 50764952 deep 26765080 boundary 47999760 trueBounds 24000000 (boundary/trueBounds 2.000); unshared-deep 23999872 = 1.000 x trueBounds
+EXPECTED: N=100000, s=1: growth events within max(3, 15 %) of ln(N)/ln(f) (filed: roughly 63, 28, 17, 8): PASS (counts {1.2: 57, 1.5: 28, 2.0: 17, 5.0: 8})
+EXPECTED: the N+1-th add after the last growth is accepted at every (f, n0, N) (no rejection, size = N+1): PASS (36 runs)
+EXPECTED: addAll into an empty list: capacity == max(n0, src.size) in all four arrays, the same for every f (R6): PASS (12 runs; capacities ['1000', '1024'])
+EXPECTED: positive control (LinkedHashMap, removeEldestEntry at 1000): its size plateaus at 1000 while the list keeps growing: PASS ([(1000, 1000, 1000), (10000, 1000, 10000), (100000, 1000, 100000)])
+OBSERVED: unshared(f=5.0) > unshared(f=1.2) at every (s in {0,1}, N >= 1000): True []
+EXPECTED: second control (R7): n0=1024 with N <= 1000 never grows: capacity stays 1024 at every f: PASS (8/8 cells)
+SUMMARY: 9/9 expectations hold
+MATCHED ROW: B2g row 1/4 (size reaches N at every f and keeps accepting adds; unsharedHeapSize rises with N; the positive control plateaus while the list does not)

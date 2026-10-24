@@ -1,0 +1,34 @@
+ARM s1-lz4: S=1MiB mode=standard comp=LZ4Compressor entry=65536 adds=58 segments=8 (>= 4) maxEnd_max=1048575 capacity=1048576
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | lz4 fileLength<=bound (max fileLength/S=1.0039) True (files>S: 1) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=524181 stayed=true after=1048575) | edge-b True (rem=524181 rolled=true oldEnd=524395 oldAlloc=1048577) | control(S+1MiB assertion false) True
+ARM s1-mmap: S=1MiB mode=mmap comp=none entry=65536 adds=58 segments=8 (>= 4) maxEnd_max=1048575 capacity=1048576
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | mmap fileLength==S True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=524244 stayed=true after=1048575) | edge-b True (rem=524244 rolled=true oldEnd=524332 oldAlloc=1048577) | control(S+1MiB assertion false) True
+ARM s2-lz4: S=2MiB mode=standard comp=LZ4Compressor entry=65536 adds=106 segments=8 (>= 4) maxEnd_max=2097151 capacity=2097152
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | lz4 fileLength<=bound (max fileLength/S=1.0039) True (files>S: 1) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=1048469 stayed=true after=2097151) | edge-b True (rem=1048469 rolled=true oldEnd=1048683 oldAlloc=2097153) | control(S+1MiB assertion false) True
+ARM s2-mmap: S=2MiB mode=mmap comp=none entry=65536 adds=106 segments=8 (>= 4) maxEnd_max=2097151 capacity=2097152
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | mmap fileLength==S True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=1048532 stayed=true after=2097151) | edge-b True (rem=1048532 rolled=true oldEnd=1048620 oldAlloc=2097153) | control(S+1MiB assertion false) True
+ARM s32-lz4: S=32MiB mode=standard comp=LZ4Compressor entry=65536 adds=1546 segments=8 (>= 4) maxEnd_max=33554431 capacity=33554432
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | lz4 fileLength<=bound (max fileLength/S=1.0039) True (files>S: 6) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=16777109 stayed=true after=33554431) | edge-b True (rem=16777109 rolled=true oldEnd=16777323 oldAlloc=33554433) | control(S+1MiB assertion false) True
+ARM s32-mmap: S=32MiB mode=mmap comp=none entry=65536 adds=1546 segments=8 (>= 4) maxEnd_max=33554431 capacity=33554432
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | mmap fileLength==S True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=16777164 stayed=true after=33554431) | edge-b True (rem=16777164 rolled=true oldEnd=16777268 oldAlloc=33554433) | control(S+1MiB assertion false) True
+ARM s8-lz4-zero: S=8MiB mode=standard comp=LZ4Compressor entry=65536 adds=394 segments=8 (>= 4) maxEnd_max=8388607 capacity=8388608
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | lz4 fileLength<=bound (max fileLength/S=0.0051) True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=4194197 stayed=true after=8388607) | edge-b True (rem=4194197 rolled=true oldEnd=4194411 oldAlloc=8388609) | control(S+1MiB assertion false) True
+ARM s8-lz4: S=8MiB mode=standard comp=LZ4Compressor entry=65536 adds=394 segments=8 (>= 4) maxEnd_max=8388607 capacity=8388608
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | lz4 fileLength<=bound (max fileLength/S=1.0039) True (files>S: 1) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=4194197 stayed=true after=8388607) | edge-b True (rem=4194197 rolled=true oldEnd=4194411 oldAlloc=8388609) | control(S+1MiB assertion false) True
+ARM s8-mmap-E16k: S=8MiB mode=mmap comp=none entry=16384 adds=1546 segments=8 (>= 4) maxEnd_max=8388607 capacity=8388608
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | mmap fileLength==S True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=4194260 stayed=true after=8388607) | edge-b True (rem=4194260 rolled=true oldEnd=4194348 oldAlloc=8388609) | control(S+1MiB assertion false) True
+ARM s8-mmap-rep: S=8MiB mode=mmap comp=none entry=65536 adds=394 segments=8 (>= 4) maxEnd_max=8388607 capacity=8388608
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | mmap fileLength==S True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=4194252 stayed=true after=8388607) | edge-b True (rem=4194260 rolled=true oldEnd=4194348 oldAlloc=8388609) | control(S+1MiB assertion false) True
+ARM s8-mmap: S=8MiB mode=mmap comp=none entry=65536 adds=394 segments=8 (>= 4) maxEnd_max=8388607 capacity=8388608
+   EXPECTED capacity==S True | all maxEnd<capacity True (violations=0) | retired endOfBuffer<cap, allocPos==cap+1, !stillAllocating True | mmap fileLength==S True (files>S: 0) | segments>=min True
+   PROBES max-accepted True | oversize True (MutationExceededMaxSizeException, +1, dPos=0) | edge-a True (rem=4194260 stayed=true after=8388607) | edge-b True (rem=4194260 rolled=true oldEnd=4194348 oldAlloc=8388609) | control(S+1MiB assertion false) True
+ARMS_NOT_AS_EXPECTED: none

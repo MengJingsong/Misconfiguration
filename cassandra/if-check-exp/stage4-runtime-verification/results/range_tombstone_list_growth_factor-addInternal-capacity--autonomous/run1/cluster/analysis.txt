@@ -1,0 +1,34 @@
+cells: main ['M-1.2-r1', 'M-5.0-r1', 'M-1.5-r1', 'S1-1.2', 'S1-5.0', 'S100-1.2', 'S100-5.0', 'J-1.2to5.0', 'M-1.5-r2', 'M-5.0-r2', 'M-1.2-r2']; controls ['C-1.5-128MiB']
+EXPECTED: factor read back over JMX equals the factor set (yaml or JMX; cell J: 5.0 after the runtime change) before every cell: PASS (12 cells; mismatches [])
+EXPECTED: every write was acknowledged: ok == tombstones (or rows) written, errors == 0, in every cell (no rejection at any f): PASS (5100000 acknowledged; bad [])
+EXPECTED: main cells are flush-free: MemtableSwitchCount unchanged from the start of the cell to its last checkpoint (R3): PASS (bad [])
+EXPECTED: no ERROR or OutOfMemoryError line in system.log of any lifetime: PASS ({'M-1.2-r1': 0, 'M-5.0-r1': 0, 'M-1.5-r1': 0, 'S1-1.2': 0, 'S1-5.0': 0, 'S100-1.2': 0, 'S100-5.0': 0, 'J-1.2to5.0': 0, 'C-1.5-128MiB': 0, 'M-1.5-r2': 0, 'M-5.0-r2': 0, 'M-1.2-r2': 0})
+EXPECTED: the tombstones are live in the memtable: BufferClusteringBound count delta == 2 x tombstones (1 %) and MemtableColumnsCount == tombstones, at every checkpoint of every main cell: PASS (bad [])
+EXPECTED: Byteman trace on the live node: every sampled grow(i, newLength) (cap >= 20) has newLength == iterated expression at the cell factor, and every sampled growToFree line reads the cell factor: PASS (5085 grow lines checked (5088 sampled); bad [])
+EXPECTED: counter grows with N at every main cell: rises at every checkpoint and last/first within [0.6, 1.4] x (tombstones last/first) (R3): PASS (11 cells; bad [])
+EXPECTED: no plateau at any factor: NOT (last two checkpoints differ by less than 5 % while the tombstone counts differ by at least 1.5x) (R3): PASS (bad [])
+EXPECTED: |counter(f_a) - counter(f_b)| <= 28 B x |f_a - f_b| x T + 1 MiB for every pair of main cells of the same shape at the last checkpoint (R3): PASS (23 pairs; bad [])
+EXPECTED: live ClusteringBound[] bytes after the last checkpoint are ordered like the factor (non-decreasing in f) for every shape (R3): PASS (bad [])
+OBSERVED: M-1.2-r1 f=1.2: T=500000 counter 251977440 (504 B/tombstone); live tombstones 500000, allocated slots 600000 (slots/live 1.200); CB[] bytes 4800320, BCB bytes 24000912, long[] 14799752, int[] 18447816, histogram total 205392184; peak EU+OU+SU in the run 5011 MiB
+OBSERVED: M-5.0-r1 f=5.0: T=500000 counter 289976640 (580 B/tombstone); live tombstones 500000, allocated slots 2499960 (slots/live 5.000); CB[] bytes 20000000, BCB bytes 24000912, long[] 30000464, int[] 26052176, histogram total 248904864; peak EU+OU+SU in the run 5088 MiB
+OBSERVED: M-1.5-r1 f=1.5: T=500000 counter 254977440 (510 B/tombstone); live tombstones 500000, allocated slots 750000 (slots/live 1.500); CB[] bytes 6000320, BCB bytes 24000912, long[] 15999824, int[] 19050056, histogram total 214812904; peak EU+OU+SU in the run 5013 MiB
+OBSERVED: S1-1.2 f=1.2: T=50000 counter 25197745 (504 B/tombstone); live tombstones 50000, allocated slots 60000 (slots/live 1.200); CB[] bytes 480032, BCB bytes 2400912, long[] 10478448, int[] 16264464, histogram total 84129112; peak EU+OU+SU in the run 4878 MiB
+OBSERVED: S1-5.0 f=5.0: T=50000 counter 28997664 (580 B/tombstone); live tombstones 50000, allocated slots 249996 (slots/live 5.000); CB[] bytes 2000000, BCB bytes 2400912, long[] 11998224, int[] 17026608, histogram total 88001424; peak EU+OU+SU in the run 4966 MiB
+OBSERVED: S100-1.2 f=1.2: T=500000 counter 251774400 (504 B/tombstone); live tombstones 500000, allocated slots 600000 (slots/live 1.200); CB[] bytes 4803200, BCB bytes 24000912, long[] 14818392, int[] 18566328, histogram total 221918896; peak EU+OU+SU in the run 5058 MiB
+OBSERVED: S100-5.0 f=5.0: T=500000 counter 289766400 (580 B/tombstone); live tombstones 500000, allocated slots 2499600 (slots/live 4.999); CB[] bytes 20000000, BCB bytes 24000912, long[] 30014712, int[] 26164744, histogram total 263070720; peak EU+OU+SU in the run 5069 MiB
+OBSERVED: J-1.2to5.0 f=5.0: T=500000 counter 289976640 (580 B/tombstone); live tombstones 500000, allocated slots 2499960 (slots/live 5.000); CB[] bytes 20000000, BCB bytes 24000912, long[] 29999688, int[] 26047680, histogram total 243462576; peak EU+OU+SU in the run 5113 MiB
+OBSERVED: M-1.5-r2 f=1.5: T=500000 counter 254977450 (510 B/tombstone); live tombstones 500000, allocated slots 750000 (slots/live 1.500); CB[] bytes 6000320, BCB bytes 24000912, long[] 16000536, int[] 19050128, histogram total 215861664; peak EU+OU+SU in the run 5080 MiB
+OBSERVED: M-5.0-r2 f=5.0: T=500000 counter 289976640 (580 B/tombstone); live tombstones 500000, allocated slots 2499960 (slots/live 5.000); CB[] bytes 20000000, BCB bytes 24000912, long[] 29999640, int[] 26049896, histogram total 250862168; peak EU+OU+SU in the run 5083 MiB
+OBSERVED: M-1.2-r2 f=1.2: T=500000 counter 251977450 (504 B/tombstone); live tombstones 500000, allocated slots 600000 (slots/live 1.200); CB[] bytes 4800320, BCB bytes 24000912, long[] 14799232, int[] 18445664, histogram total 210556736; peak EU+OU+SU in the run 5083 MiB
+OBSERVED: shape M: counter(5.0) - counter(1.2) = 37999195 B for T=500000 (76.0 B/tombstone), 15.1 % of counter(1.2)
+OBSERVED: shape S1: counter(5.0) - counter(1.2) = 3799919 B for T=50000 (76.0 B/tombstone), 15.1 % of counter(1.2)
+OBSERVED: shape S100: counter(5.0) - counter(1.2) = 37992000 B for T=500000 (76.0 B/tombstone), 15.1 % of counter(1.2)
+EXPECTED: S1 (1 x 50,000): 0 < counter(5.0) - counter(1.2) <= (5.0 - 1.2) x 50,000 x 28 B = 5.32 MB (about 4 MB, B3f): PASS (3799919 B)
+EXPECTED: per-tombstone difference of M, S1 and S100 is equal within [0.5, 2]x (R8: replaces "smaller per tombstone"): PASS ([76.0, 76.0, 76.0])
+EXPECTED: the difference is small compared with the bound objects: |counter(5.0) - counter(1.2)| < 25 % of counter(1.2) in every shape (R8): PASS ({'M': 15.1, 'S1': 15.1, 'S100': 15.1})
+EXPECTED: positive control C-1.5-128MiB: the memtable flushes (switch count above its start) and the counter series stays <= 1.5 x 128 MiB (R8): PASS (switch 0->['0', '1', '2', '5']; series max 40.5 MiB)
+OBSERVED: control C-1.5-128MiB: counter at the last checkpoint 29.7 MiB, series peak 40.5 MiB; main M-1.2 last counter 240.3 MiB
+OBSERVED: repeat stability (B3h), final counters per factor: {1.2: [251977440, 251977450], 5.0: [289976640, 289976640], 1.5: [254977440, 254977450]}
+OBSERVED: cell J (yaml 1.2, runtime change to 5.0): final counter 289976640 vs M-5.0 [289976640, 289976640]; factor read back 5.0
+SUMMARY: 14/14 expectations hold
+MATCHED ROW: B3g row 1 (usage rises with N at all factors; the factor changes it only within the slack bound; no cap tied to f) with the positive control moving (flush-bound memtable) while the factor stays flat -- Confirmed, does not cap

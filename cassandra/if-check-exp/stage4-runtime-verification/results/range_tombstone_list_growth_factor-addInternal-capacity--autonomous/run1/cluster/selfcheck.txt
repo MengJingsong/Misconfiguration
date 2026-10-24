@@ -1,0 +1,57 @@
+CHECK 1: every checkpoint counter lies within the range of the 2-second counter series of its cell -> HOLDS (48 checkpoints, 0 outside)
+     control C-1.5-128MiB cp1: live tombstones 50000 of 50000 written (the rest was flushed, by design)
+     control C-1.5-128MiB cp2: live tombstones 12216 of 100000 written (the rest was flushed, by design)
+     control C-1.5-128MiB cp3: live tombstones 24432 of 200000 written (the rest was flushed, by design)
+     control C-1.5-128MiB cp4: live tombstones 61120 of 500000 written (the rest was flushed, by design)
+CHECK 2: raw histograms: live tombstones (BufferClusteringBound/2) == tombstones written at every checkpoint of every flush-free range-delete cell (controls excluded: they flush by design) -> HOLDS (0 off by more than 1 %)
+CHECK 3: raw histograms: allocated slots / live tombstones at the last checkpoint is within [1, f] of the cell factor (one growth per merge) -> HOLDS ([('M-1.2-r1', 1.2, 1.2), ('M-5.0-r1', 5.0, 5.0), ('M-1.5-r1', 1.5, 1.5), ('S1-1.2', 1.2, 1.2), ('S1-5.0', 5.0, 5.0), ('S100-1.2', 1.2, 1.2)])
+CHECK 4: session.log: every checkpoint load acknowledged all its writes with 0 errors -> HOLDS (48 loads, 5100000 writes)
+CHECK 5: system.log C-1.5-128MiB: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 6: system.log C-1.5-128MiB (control): memtable-limit flushes of ks.t/t2 happened during the load -> HOLDS (reasons {'MEMTABLE_LIMIT': 5, 'USER_FORCED': 1}; 5 non-user flushes inside the load windows)
+CHECK 7: system.log J-1.2to5.0: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 8: system.log J-1.2to5.0: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['276.543MiB (14%)'])
+CHECK 9: system.log M-1.2-r1: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 10: system.log M-1.2-r1: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['240.304MiB (12%)'])
+CHECK 11: system.log M-1.2-r2: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 12: system.log M-1.2-r2: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['240.304MiB (12%)'])
+CHECK 13: system.log M-1.5-r1: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 14: system.log M-1.5-r1: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['243.165MiB (12%)'])
+CHECK 15: system.log M-1.5-r2: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 16: system.log M-1.5-r2: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['243.165MiB (12%)'])
+CHECK 17: system.log M-5.0-r1: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 18: system.log M-5.0-r1: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['276.543MiB (14%)'])
+CHECK 19: system.log M-5.0-r2: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 20: system.log M-5.0-r2: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['276.543MiB (14%)'])
+CHECK 21: system.log S1-1.2: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 22: system.log S1-1.2: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['24.030MiB (1%)'])
+CHECK 23: system.log S1-5.0: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 24: system.log S1-5.0: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['27.654MiB (1%)'])
+CHECK 25: system.log S100-1.2: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 26: system.log S100-1.2: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['240.111MiB (12%)'])
+CHECK 27: system.log S100-5.0: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 28: system.log S100-5.0: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['276.343MiB (13%)'])
+CHECK 29: trace M-1.2-r1: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (499 lines, min 1.2000 max 1.2059)
+CHECK 30: trace M-5.0-r1: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (498 lines, min 5.0000 max 5.0000)
+CHECK 31: trace M-1.5-r1: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (498 lines, min 1.5000 max 1.5016)
+CHECK 32: trace S1-1.2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (49 lines, min 1.2000 max 1.2000)
+CHECK 33: trace S1-5.0: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (49 lines, min 5.0000 max 5.0000)
+CHECK 34: trace S100-1.2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (490 lines, min 1.2000 max 1.2072)
+CHECK 35: trace S100-5.0: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (490 lines, min 5.0000 max 5.0000)
+CHECK 36: trace J-1.2to5.0: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (499 lines, min 5.0000 max 5.0000)
+CHECK 37: trace C-1.5-128MiB: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (494 lines, min 1.5000 max 1.5043)
+CHECK 38: trace M-1.5-r2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (498 lines, min 1.5000 max 1.5017)
+CHECK 39: trace M-5.0-r2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (499 lines, min 5.0000 max 5.0000)
+CHECK 40: trace M-1.2-r2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (499 lines, min 1.2000 max 1.2027)
+     M-1.2-r1: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     M-5.0-r1: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     M-1.5-r1: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     S1-1.2: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     S1-5.0: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     S100-1.2: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     S100-5.0: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     J-1.2to5.0: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     C-1.5-128MiB: MemtableSwitchCount start 0, end(after final flush) 6; last checkpoint 5
+     M-1.5-r2: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     M-5.0-r2: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     M-1.2-r2: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+process check (manual): ps -eo cmd | grep [C]assandraDaemon after the run

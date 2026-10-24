@@ -1,0 +1,21 @@
+unit-run 2026-10-23T11:50:27-04:00 host node0 tree cassandra-5.0.9 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 RangeTombstoneListGrowthProbeTest.java=2dacc0b4272d unit-run.sh=a98721d3bf8d unit-analyze.py=b602cc89f740 
+df: /dev/sda3        63G   13G   48G  21% /
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 197 s
+RTL lines: 649
+cleanup: probe removed; leftover junit JVMs: 0
+EXPECTED: capacity series, event count, four array lengths and size equal the iterated expression (sorted and random order, every cell): PASS (324 runs, 0 differ)
+EXPECTED: final capacity >= N and below the growth bound (ceil(f*N)+1 for 1.2<=f<=5.0; 1.5*N+2 for f<=1.0, R6): PASS (0 violations)
+EXPECTED: unsharedHeapSize() grows ~linearly in N (R3: ratio of the largest to the smallest N within 0.5..1.5 x the N ratio), every (f, s) cell with growth: PASS (18 cells; cells outside: [])
+EXPECTED: |unshared(f_a) - unshared(f_b)| <= 28 B x (ceil((f_max-1)*N)+1) for the same (s, N), all pairs of f: FAIL (135 pairs, 4 violations: [(0, 100000, 0.5, 1.2, 649552, 560028), (0, 100000, 1.0, 1.2, 649552, 560028), (1, 100000, 0.5, 1.2, 649552, 560028)])
+OBSERVED: unshared - deep: min 239872 max 23999872 B over 54 runs; boundaryHeapSize - sum(true bound sizes): min 239760 max 23999760 B
+OBSERVED: N=1000 f=1.5 s=1: unshared 501184 deep 261312 boundary 479760 trueBounds 240000 (boundary/trueBounds 1.999); unshared-deep 239872 = 0.999 x trueBounds
+OBSERVED: N=10000 f=1.5 s=1: unshared 5042624 deep 2642752 boundary 4799760 trueBounds 2400000 (boundary/trueBounds 2.000); unshared-deep 2399872 = 1.000 x trueBounds
+OBSERVED: N=100000 f=1.5 s=1: unshared 50764952 deep 26765080 boundary 47999760 trueBounds 24000000 (boundary/trueBounds 2.000); unshared-deep 23999872 = 1.000 x trueBounds
+EXPECTED: after copy(): capacity == size and the drop in unsharedHeapSize() equals the drop in array bytes exactly (bound term copied): PASS (324 copies, 0 differ)
+EXPECTED: three repeats of every cell give identical size, capacity, event count and unsharedHeapSize(): PASS (true)
+EXPECTED: control (R7): s=1024, N=1000 never grows: capacity stays 1024 at every f: PASS (18/18 cells (f = [0.5, 1.0, 1.2, 1.5, 2.0, 5.0]))
+EXPECTED: random-order insertion (insertFrom path) reaches the same capacity and event count as sorted order: PASS (0 differ)
+SUMMARY: 7/8 expectations hold
+MATCHED ROW: none yet -- at least one expectation failed; read the FAIL lines against B2g (do not edit B2f)
+done 2026-10-23T11:53:45-04:00

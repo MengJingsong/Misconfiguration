@@ -1,0 +1,15 @@
+CHECK 1: junit XML: one test, 0 failures, 0 errors -> HOLDS (<testsuite errors="0" failures="0" hostname="node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu" name="org.apache.cassandra.db.RtlGrowthFact)
+case G; 123 RTL rows; header: HEADER case=G java=11.0.32.1 maxHeap=1056309248 origF=1.5 origS=1 compressedOops=64
+CHECK 2: final capacity, growth-event count and size of every sorted/random run equal an independent simulation of lines 683-686 -> HOLDS (36 runs, 0 differ)
+CHECK 3: printed growth series (first 80 events) equals the simulation event by event -> HOLDS (0 differ)
+CHECK 4: unsharedHeapSize() == EMPTY_SIZE + boundaryHeapSize + array bytes in every run: unshared - empty - boundary - arrays is the same constant -64 B (the four zero-length arrays inside the empty list) -> HOLDS ({-64: 36})
+CHECK 5: boundaryHeapSize is about twice the sum of the true bound sizes for N >= 1000 (the lines 178/766 double count) -> HOLDS (min 1.9990 max 2.0000)
+CHECK 6: unshared minus Jamm deep size equals the true bound sizes (within 0.1 %) for N >= 1000 -> HOLDS (24 runs; max |a-b| = 128 B)
+     frozen R3 pair check violations: 0 []; with f_eff: 0
+CHECK 7: every pair violating the frozen R3 pair bound contains a fallback factor (f <= 1.0) and none violates it with f_eff -> HOLDS (0 frozen violations)
+CHECK 8: unshared(N=100000) / unshared(N=1000) within [0.5, 1.5] x 100 in every (f, s) cell -> HOLDS (min 99.8 max 102.9 over 12 cells)
+CHECK 9: control: initial capacity 1024 with N <= 1000 never grows, at every f (no event, all arrays 1024) -> HOLDS (8 runs)
+CHECK 10: addAll into an empty list: all four array lengths == max(initial capacity, 1000) for every f -> HOLDS (12 runs; capacities ['1000', '1024'])
+CHECK 11: N+1-th add accepted in every run -> HOLDS (36 runs)
+CHECK 12: LinkedHashMap control stays at 1000 entries while the list grows 1000 -> 10000 -> 100000 -> HOLDS
+CHECK 13: number of sorted/random runs equals the grid of the case (B2b/B2c) -> HOLDS (36 vs 36)

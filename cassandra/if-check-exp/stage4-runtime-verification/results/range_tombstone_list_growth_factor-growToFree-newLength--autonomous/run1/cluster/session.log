@@ -1,0 +1,290 @@
+[2026-10-23 12:06:08] cluster-run G run1: RUN=/users/jason92/stage4-rtl-g tree=/users/jason92/cassandra-rtl-g scale=1 lifetimes=['F-1.2', 'F-1.5', 'F-5.0', 'C-ins-64MiB']
+[2026-10-23 12:06:08] + git describe --tags; git rev-parse --short HEAD; java -version 2>&1 | head -1; uname -r; df -h /users/jason92
+cassandra-5.0.9
+d29d715
+openjdk version "11.0.32.1" 2026-08-18
+5.15.0-187-generic
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3        63G   13G   47G  21% /
+
+  rc=0
+[2026-10-23 12:06:08] + ss -ltn
+[2026-10-23 12:06:08] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-23 12:06:08] + mkdir -p /users/jason92/stage4-rtl-g/logs /users/jason92/stage4-rtl-g/tools && javac -d /users/jason92/stage4-rtl-g/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomo
+
+  rc=0
+[2026-10-23 12:06:09] + rm -rf /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/hints /users/jason92/stage4-rtl-g/saved_caches /users/jason92/stage4-rtl-g/cdc_raw && mkdir -p /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/
+
+  rc=0
+[2026-10-23 12:06:09] + rm -rf /users/jason92/stage4-rtl-g/conf && cp -r /users/jason92/cassandra-rtl-g/conf /users/jason92/stage4-rtl-g/conf
+
+  rc=0
+[2026-10-23 12:06:09] conf F-1.2: cluster_name='rtl-g'; commitlog_directory=/users/jason92/stage4-rtl-g/commitlog; hints_directory=/users/jason92/stage4-rtl-g/hints; saved_caches_directory=/users/jason92/stage4-rtl-g/saved_caches; cdc_raw_directory=/users/jason92/stage4-rtl-g/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7220; ssl_storage_port=7221; native_transport_port=9252; memtable_allocation_type=heap_buffers; memtable_heap_space=3072MiB; autocompaction_on_startup_enabled=false; range_tombstone_list_growth_factor=1.2; native_transport_timeout=60s; tombstone_failure_threshold=1000000
+[2026-10-23 12:06:09] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-23 12:06:09] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/stage4-rtl-g/cassandra.pid > /users/jason92/stage4-rtl-g/logs/start-F-1.2.out 2>&1"
+
+  rc=0
+[2026-10-23 12:06:12] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:17] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:21] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:25] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:29] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:33] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:37] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:41] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:46] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:50] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:54] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:06:55] + bin/nodetool -h 127.0.0.1 -p 7499 statusbinary
+[2026-10-23 12:06:56] node up (F-1.2) after 47 s, pid 1469927
+[2026-10-23 12:06:56] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py schema 127.0.0.1 9252
+[2026-10-23 12:06:57] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-23 12:06:57] + bin/nodetool -h 127.0.0.1 -p 7499 disableautocompaction ks
+[2026-10-23 12:06:58] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=CompactionManager" "CompletedTasks"
+[2026-10-23 12:06:58] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:06:58] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 setdouble "org.apache.cassandra.db:type=StorageService" setRangeTombstoneListResizeGrowthFactor 1.2
+[2026-10-23 12:06:59] F-1.2: set f=1.2 over JMX: OK set RangeTombstoneListResizeGrowthFactor=1.2
+[2026-10-23 12:06:59] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:06:59] F-1.2: factor read back over JMX: 1.2
+[2026-10-23 12:06:59] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:07:02] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:07:02] + jcmd 1469927 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.2/histo-base.txt
+[2026-10-23 12:07:03] F-1.2: base {'counter': '0', 'columns': '0', 'switch': '0'} histo ClusteringBound[] None total (750937, 66866360)
+[2026-10-23 12:07:03] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 0 10000 20
+[2026-10-23 12:07:35] F-1.2: checkpoint 1: per-partition 0->10000: {'ok': 200000, 'expected': 200000, 'errors': 0, 'first_errors': [], 'seconds': 31.9}
+[2026-10-23 12:07:36] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:07:36] + jcmd 1469927 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.2/histo-cp1.txt
+[2026-10-23 12:07:37] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:07:37] F-1.2: cp1 counter 100754880 columns 200000 switch 0; ClusteringBound[] (40, 1920640) BufferClusteringBound (400038, 9600912) total (2369122, 134437768)
+[2026-10-23 12:07:37] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 10000 25000 20
+[2026-10-23 12:08:36] F-1.2: checkpoint 2: per-partition 10000->25000: {'ok': 300000, 'expected': 300000, 'errors': 0, 'first_errors': [], 'seconds': 58.4}
+[2026-10-23 12:08:37] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:08:37] + jcmd 1469927 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.2/histo-cp2.txt
+[2026-10-23 12:08:38] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:08:38] F-1.2: cp2 counter 251954880 columns 500000 switch 0; ClusteringBound[] (40, 4800640) BufferClusteringBound (1000038, 24000912) total (4770515, 213928008)
+[2026-10-23 12:08:38] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 25000 50000 20
+[2026-10-23 12:10:27] F-1.2: checkpoint 3: per-partition 25000->50000: {'ok': 500000, 'expected': 500000, 'errors': 0, 'first_errors': [], 'seconds': 108.54}
+[2026-10-23 12:10:28] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:10:29] + jcmd 1469927 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.2/histo-cp3.txt
+[2026-10-23 12:10:29] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:10:30] F-1.2: cp3 counter 503954880 columns 1000000 switch 0; ClusteringBound[] (40, 9600640) BufferClusteringBound (2000038, 48000912) total (8772033, 346235688)
+[2026-10-23 12:10:33] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py select 127.0.0.1 9252 t 0
+[2026-10-23 12:10:34] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:10:36] + du -sb /users/jason92/stage4-rtl-g/data
+[2026-10-23 12:10:36] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:10:37] F-1.2: done; select {'table': 't', 'pk': 0, 'rows': 0, 'first': []}; trace lines 1998; data 18174165 B
+[2026-10-23 12:10:37] F-1.2: system.log ERROR/OOM lines: 0 []
+[2026-10-23 12:10:37] stopping node pid 1469927
+[2026-10-23 12:10:37] + kill 1469927
+
+  rc=0
+[2026-10-23 12:10:44] node stopped
+[2026-10-23 12:10:44] + cp /users/jason92/stage4-rtl-g/logs/gc-F-1.2.log /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/logs/rtl-F-1.2.trace /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/conf/cassandra.yaml /users/jason92/stage4-logs/r
+
+  rc=0
+[2026-10-23 12:10:44] + rm -rf /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/hints /users/jason92/stage4-rtl-g/saved_caches /users/jason92/stage4-rtl-g/cdc_raw && mkdir -p /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/
+
+  rc=0
+[2026-10-23 12:10:44] + rm -rf /users/jason92/stage4-rtl-g/conf && cp -r /users/jason92/cassandra-rtl-g/conf /users/jason92/stage4-rtl-g/conf
+
+  rc=0
+[2026-10-23 12:10:44] conf F-1.5: cluster_name='rtl-g'; commitlog_directory=/users/jason92/stage4-rtl-g/commitlog; hints_directory=/users/jason92/stage4-rtl-g/hints; saved_caches_directory=/users/jason92/stage4-rtl-g/saved_caches; cdc_raw_directory=/users/jason92/stage4-rtl-g/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7220; ssl_storage_port=7221; native_transport_port=9252; memtable_allocation_type=heap_buffers; memtable_heap_space=3072MiB; autocompaction_on_startup_enabled=false; range_tombstone_list_growth_factor=1.5; native_transport_timeout=60s; tombstone_failure_threshold=1000000
+[2026-10-23 12:10:44] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-23 12:10:44] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/stage4-rtl-g/cassandra.pid > /users/jason92/stage4-rtl-g/logs/start-F-1.5.out 2>&1"
+
+  rc=0
+[2026-10-23 12:10:47] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:10:52] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:10:56] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:01] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:05] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:09] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:14] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:18] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:23] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:11:24] + bin/nodetool -h 127.0.0.1 -p 7499 statusbinary
+[2026-10-23 12:11:25] node up (F-1.5) after 41 s, pid 1479390
+[2026-10-23 12:11:25] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py schema 127.0.0.1 9252
+[2026-10-23 12:11:26] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-23 12:11:26] + bin/nodetool -h 127.0.0.1 -p 7499 disableautocompaction ks
+[2026-10-23 12:11:28] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=CompactionManager" "CompletedTasks"
+[2026-10-23 12:11:28] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:11:28] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 setdouble "org.apache.cassandra.db:type=StorageService" setRangeTombstoneListResizeGrowthFactor 1.5
+[2026-10-23 12:11:29] F-1.5: set f=1.5 over JMX: OK set RangeTombstoneListResizeGrowthFactor=1.5
+[2026-10-23 12:11:29] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:11:29] F-1.5: factor read back over JMX: 1.5
+[2026-10-23 12:11:29] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:11:32] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:11:33] + jcmd 1479390 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.5/histo-base.txt
+[2026-10-23 12:11:33] F-1.5: base {'counter': '0', 'columns': '0', 'switch': '0'} histo ClusteringBound[] None total (750221, 65781312)
+[2026-10-23 12:11:33] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 0 10000 20
+[2026-10-23 12:12:11] F-1.5: checkpoint 1: per-partition 0->10000: {'ok': 200000, 'expected': 200000, 'errors': 0, 'first_errors': [], 'seconds': 37.07}
+[2026-10-23 12:12:12] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:12:12] + jcmd 1479390 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.5/histo-cp1.txt
+[2026-10-23 12:12:13] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:12:13] F-1.5: cp1 counter 101954880 columns 200000 switch 0; ClusteringBound[] (40, 2400640) BufferClusteringBound (400038, 9600912) total (2368814, 128029168)
+[2026-10-23 12:12:13] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 10000 25000 20
+[2026-10-23 12:13:20] F-1.5: checkpoint 2: per-partition 10000->25000: {'ok': 300000, 'expected': 300000, 'errors': 0, 'first_errors': [], 'seconds': 66.46}
+[2026-10-23 12:13:21] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:13:22] + jcmd 1479390 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.5/histo-cp2.txt
+[2026-10-23 12:13:22] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:13:23] F-1.5: cp2 counter 254954880 columns 500000 switch 0; ClusteringBound[] (40, 6000640) BufferClusteringBound (1000038, 24000912) total (4770210, 209316432)
+[2026-10-23 12:13:23] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 25000 50000 20
+[2026-10-23 12:15:16] F-1.5: checkpoint 3: per-partition 25000->50000: {'ok': 500000, 'expected': 500000, 'errors': 0, 'first_errors': [], 'seconds': 112.26}
+[2026-10-23 12:15:17] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:15:17] + jcmd 1479390 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-1.5/histo-cp3.txt
+[2026-10-23 12:15:18] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:15:18] F-1.5: cp3 counter 509954880 columns 1000000 switch 0; ClusteringBound[] (40, 12000640) BufferClusteringBound (2000038, 48000912) total (8772593, 344750048)
+[2026-10-23 12:15:21] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py select 127.0.0.1 9252 t 0
+[2026-10-23 12:15:22] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:15:25] + du -sb /users/jason92/stage4-rtl-g/data
+[2026-10-23 12:15:25] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:15:25] F-1.5: done; select {'table': 't', 'pk': 0, 'rows': 0, 'first': []}; trace lines 1998; data 18172505 B
+[2026-10-23 12:15:25] F-1.5: system.log ERROR/OOM lines: 0 []
+[2026-10-23 12:15:25] stopping node pid 1479390
+[2026-10-23 12:15:25] + kill 1479390
+
+  rc=0
+[2026-10-23 12:15:32] node stopped
+[2026-10-23 12:15:32] + cp /users/jason92/stage4-rtl-g/logs/gc-F-1.5.log /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/logs/rtl-F-1.5.trace /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/conf/cassandra.yaml /users/jason92/stage4-logs/r
+
+  rc=0
+[2026-10-23 12:15:32] + rm -rf /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/hints /users/jason92/stage4-rtl-g/saved_caches /users/jason92/stage4-rtl-g/cdc_raw && mkdir -p /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/
+
+  rc=0
+[2026-10-23 12:15:32] + rm -rf /users/jason92/stage4-rtl-g/conf && cp -r /users/jason92/cassandra-rtl-g/conf /users/jason92/stage4-rtl-g/conf
+
+  rc=0
+[2026-10-23 12:15:32] conf F-5.0: cluster_name='rtl-g'; commitlog_directory=/users/jason92/stage4-rtl-g/commitlog; hints_directory=/users/jason92/stage4-rtl-g/hints; saved_caches_directory=/users/jason92/stage4-rtl-g/saved_caches; cdc_raw_directory=/users/jason92/stage4-rtl-g/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7220; ssl_storage_port=7221; native_transport_port=9252; memtable_allocation_type=heap_buffers; memtable_heap_space=3072MiB; autocompaction_on_startup_enabled=false; range_tombstone_list_growth_factor=5.0; native_transport_timeout=60s; tombstone_failure_threshold=1000000
+[2026-10-23 12:15:32] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-23 12:15:32] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/stage4-rtl-g/cassandra.pid > /users/jason92/stage4-rtl-g/logs/start-F-5.0.out 2>&1"
+
+  rc=0
+[2026-10-23 12:15:35] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:15:41] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:15:45] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:15:50] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:15:54] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:15:58] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:16:02] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:16:07] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:16:11] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:16:15] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:16:17] + bin/nodetool -h 127.0.0.1 -p 7499 statusbinary
+[2026-10-23 12:16:18] node up (F-5.0) after 45 s, pid 1485203
+[2026-10-23 12:16:18] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py schema 127.0.0.1 9252
+[2026-10-23 12:16:19] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-23 12:16:19] + bin/nodetool -h 127.0.0.1 -p 7499 disableautocompaction ks
+[2026-10-23 12:16:20] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=CompactionManager" "CompletedTasks"
+[2026-10-23 12:16:21] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:16:21] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 setdouble "org.apache.cassandra.db:type=StorageService" setRangeTombstoneListResizeGrowthFactor 5.0
+[2026-10-23 12:16:21] F-5.0: set f=5.0 over JMX: OK set RangeTombstoneListResizeGrowthFactor=5.0
+[2026-10-23 12:16:21] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:16:22] F-5.0: factor read back over JMX: 5.0
+[2026-10-23 12:16:22] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:16:25] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:16:25] + jcmd 1485203 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-5.0/histo-base.txt
+[2026-10-23 12:16:26] F-5.0: base {'counter': '0', 'columns': '0', 'switch': '0'} histo ClusteringBound[] None total (748482, 66774784)
+[2026-10-23 12:16:26] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 0 10000 20
+[2026-10-23 12:17:01] F-5.0: checkpoint 1: per-partition 0->10000: {'ok': 200000, 'expected': 200000, 'errors': 0, 'first_errors': [], 'seconds': 34.66}
+[2026-10-23 12:17:02] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:17:02] + jcmd 1485203 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-5.0/histo-cp1.txt
+[2026-10-23 12:17:03] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:17:03] F-5.0: cp1 counter 115953300 columns 200000 switch 0; ClusteringBound[] (40, 8000000) BufferClusteringBound (400038, 9600912) total (2368728, 156695952)
+[2026-10-23 12:17:03] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 10000 25000 20
+[2026-10-23 12:18:04] F-5.0: checkpoint 2: per-partition 10000->25000: {'ok': 300000, 'expected': 300000, 'errors': 0, 'first_errors': [], 'seconds': 60.78}
+[2026-10-23 12:18:05] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:18:05] + jcmd 1485203 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-5.0/histo-cp2.txt
+[2026-10-23 12:18:06] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:18:06] F-5.0: cp2 counter 289953300 columns 500000 switch 0; ClusteringBound[] (40, 20000000) BufferClusteringBound (1000038, 24000912) total (4769956, 258977488)
+[2026-10-23 12:18:06] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 del4 t 0 20 25000 50000 20
+[2026-10-23 12:20:25] F-5.0: checkpoint 3: per-partition 25000->50000: {'ok': 500000, 'expected': 500000, 'errors': 0, 'first_errors': [], 'seconds': 138.58}
+[2026-10-23 12:20:26] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:20:27] + jcmd 1485203 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/F-5.0/histo-cp3.txt
+[2026-10-23 12:20:27] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:20:27] F-5.0: cp3 counter 579953300 columns 1000000 switch 0; ClusteringBound[] (40, 40000000) BufferClusteringBound (2000038, 48000912) total (8773989, 429918576)
+[2026-10-23 12:20:31] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py select 127.0.0.1 9252 t 0
+[2026-10-23 12:20:31] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:20:34] + du -sb /users/jason92/stage4-rtl-g/data
+[2026-10-23 12:20:34] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=
+[2026-10-23 12:20:34] F-5.0: done; select {'table': 't', 'pk': 0, 'rows': 0, 'first': []}; trace lines 1998; data 18167916 B
+[2026-10-23 12:20:34] F-5.0: system.log ERROR/OOM lines: 0 []
+[2026-10-23 12:20:34] stopping node pid 1485203
+[2026-10-23 12:20:34] + kill 1485203
+
+  rc=0
+[2026-10-23 12:20:40] node stopped
+[2026-10-23 12:20:40] + cp /users/jason92/stage4-rtl-g/logs/gc-F-5.0.log /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/logs/rtl-F-5.0.trace /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/conf/cassandra.yaml /users/jason92/stage4-logs/r
+
+  rc=0
+[2026-10-23 12:20:40] + rm -rf /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/hints /users/jason92/stage4-rtl-g/saved_caches /users/jason92/stage4-rtl-g/cdc_raw && mkdir -p /users/jason92/stage4-rtl-g/data /users/jason92/stage4-rtl-g/commitlog /users/jason92/stage4-rtl-g/
+
+  rc=0
+[2026-10-23 12:20:40] + rm -rf /users/jason92/stage4-rtl-g/conf && cp -r /users/jason92/cassandra-rtl-g/conf /users/jason92/stage4-rtl-g/conf
+
+  rc=0
+[2026-10-23 12:20:40] conf C-ins-64MiB: cluster_name='rtl-g'; commitlog_directory=/users/jason92/stage4-rtl-g/commitlog; hints_directory=/users/jason92/stage4-rtl-g/hints; saved_caches_directory=/users/jason92/stage4-rtl-g/saved_caches; cdc_raw_directory=/users/jason92/stage4-rtl-g/cdc_raw; listen_address=127.0.0.1; rpc_address=127.0.0.1; storage_port=7220; ssl_storage_port=7221; native_transport_port=9252; memtable_allocation_type=heap_buffers; memtable_heap_space=64MiB; autocompaction_on_startup_enabled=false; range_tombstone_list_growth_factor=1.5; native_transport_timeout=60s; tombstone_failure_threshold=1000000
+[2026-10-23 12:20:40] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-23 12:20:40] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/stage4-rtl-g/cassandra.pid > /users/jason92/stage4-rtl-g/logs/start-C-ins-64MiB.out 2>&1"
+
+  rc=0
+[2026-10-23 12:20:43] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:20:48] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:20:52] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:20:56] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:00] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:04] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:08] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:13] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:17] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:21] + bin/nodetool -h 127.0.0.1 -p 7499 status
+[2026-10-23 12:21:22] + bin/nodetool -h 127.0.0.1 -p 7499 statusbinary
+[2026-10-23 12:21:23] node up (C-ins-64MiB) after 43 s, pid 1494317
+[2026-10-23 12:21:23] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py schema 127.0.0.1 9252
+[2026-10-23 12:21:24] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-23 12:21:24] + bin/nodetool -h 127.0.0.1 -p 7499 disableautocompaction ks
+[2026-10-23 12:21:25] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=CompactionManager" "CompletedTasks"
+[2026-10-23 12:21:26] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:21:26] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 setdouble "org.apache.cassandra.db:type=StorageService" setRangeTombstoneListResizeGrowthFactor 1.5
+[2026-10-23 12:21:26] C-ins-64MiB: set f=1.5 over JMX: OK set RangeTombstoneListResizeGrowthFactor=1.5
+[2026-10-23 12:21:26] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:21:27] C-ins-64MiB: factor read back over JMX: 1.5
+[2026-10-23 12:21:27] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:21:30] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspac
+[2026-10-23 12:21:30] + jcmd 1494317 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/C-ins-64MiB/histo-base.txt
+[2026-10-23 12:21:31] C-ins-64MiB: base {'counter': '0', 'columns': '0', 'switch': '0'} histo ClusteringBound[] None total (748415, 66680680)
+[2026-10-23 12:21:31] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 ins t2 0 20 0 10000 20
+[2026-10-23 12:22:02] C-ins-64MiB: checkpoint 1: per-partition 0->10000: {'ok': 200000, 'expected': 200000, 'errors': 0, 'first_errors': [], 'seconds': 30.92}
+[2026-10-23 12:22:03] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspac
+[2026-10-23 12:22:04] + jcmd 1494317 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/C-ins-64MiB/histo-cp1.txt
+[2026-10-23 12:22:04] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:22:04] C-ins-64MiB: cp1 counter 13146568 columns 45421 switch 2; ClusteringBound[] None BufferClusteringBound (42, 1008) total (1224848, 88337656)
+[2026-10-23 12:22:04] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 ins t2 0 20 10000 25000 20
+[2026-10-23 12:22:52] C-ins-64MiB: checkpoint 2: per-partition 10000->25000: {'ok': 300000, 'expected': 300000, 'errors': 0, 'first_errors': [], 'seconds': 47.53}
+[2026-10-23 12:22:53] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspac
+[2026-10-23 12:22:54] + jcmd 1494317 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/C-ins-64MiB/histo-cp2.txt
+[2026-10-23 12:22:54] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:22:54] C-ins-64MiB: cp2 counter 10506976 columns 36297 switch 6; ClusteringBound[] None BufferClusteringBound (50, 1200) total (1154250, 87179704)
+[2026-10-23 12:22:54] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py load 127.0.0.1 9252 ins t2 0 20 25000 50000 20
+[2026-10-23 12:24:07] C-ins-64MiB: checkpoint 3: per-partition 25000->50000: {'ok': 500000, 'expected': 500000, 'errors': 0, 'first_errors': [], 'seconds': 72.11}
+[2026-10-23 12:24:08] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspac
+[2026-10-23 12:24:08] + jcmd 1494317 GC.class_histogram > /users/jason92/stage4-logs/rtl/g/run1/cluster/C-ins-64MiB/histo-cp3.txt
+[2026-10-23 12:24:09] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.db:type=StorageService" "RangeTombstoneResizeListGrowthFactor"
+[2026-10-23 12:24:09] C-ins-64MiB: cp3 counter 21017696 columns 72610 switch 12; ClusteringBound[] None BufferClusteringBound (62, 1488) total (1481891, 99808224)
+[2026-10-23 12:24:12] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-growToFree-newLength--autonomous/client.py select 127.0.0.1 9252 t2 0
+[2026-10-23 12:24:13] + bin/nodetool -h 127.0.0.1 -p 7499 flush ks
+[2026-10-23 12:24:14] + du -sb /users/jason92/stage4-rtl-g/data
+[2026-10-23 12:24:14] + java -cp /users/jason92/stage4-rtl-g/tools Jmx 7499 get "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableOnHeapDataSize" "Value" "org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t2,name=MemtableColumnsCount" "Value" "org.apache.cassandra.metrics:type=Table,keyspac
+[2026-10-23 12:24:15] C-ins-64MiB: done; select {'table': 't2', 'pk': 0, 'rows': 50000, 'first': [[0, 1], [1, 1], [2, 1]]}; trace lines 0; data 9256948 B
+[2026-10-23 12:24:15] C-ins-64MiB: system.log ERROR/OOM lines: 0 []
+[2026-10-23 12:24:15] stopping node pid 1494317
+[2026-10-23 12:24:15] + kill 1494317
+
+  rc=0
+[2026-10-23 12:24:22] node stopped
+[2026-10-23 12:24:22] + cp /users/jason92/stage4-rtl-g/logs/gc-C-ins-64MiB.log /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/logs/rtl-C-ins-64MiB.trace /users/jason92/stage4-logs/rtl/g/run1/cluster/ 2>/dev/null; cp /users/jason92/stage4-rtl-g/conf/cassandra.yaml /users/jason92/s
+
+  rc=0
+[2026-10-23 12:24:22] all lifetimes done
+[2026-10-23 12:24:22] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-23 12:24:22] daemons left: []

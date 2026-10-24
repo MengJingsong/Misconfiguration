@@ -1,0 +1,38 @@
+[2026-10-23T10:05:04.174-0600] cluster-run start label=lz4zero-s32 S=32MiB mode=lz4 total=4096MiB n=600000 load=loader sync=100ms heap=4G tree=/users/jason92/stage4-seg/treeA head=eb1fe992c9b0f75d95b5d27a08b227841d376ea8
+[2026-10-23T10:05:04.204-0600] df: /dev/sda3      ext3  65478604 8359556  53763608  14% /
+[2026-10-23T10:05:04.262-0600] + bin/cassandra -p /users/jason92/stage4-seg/nodeA/cassandra.pid (ulimit -n 100000, heap 4G)
+[2026-10-23T10:05:47.714-0600] node up pid=598877
+CONFIG cdc_enabled=false
+CONFIG commitlog_disk_access_mode=legacy
+CONFIG commitlog_segment_size=32MiB
+CONFIG commitlog_sync_period=100ms
+CONFIG commitlog_total_space=4096MiB
+CONFIG memtable_allocation_type=heap_buffers
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=2048MiB
+INFO  [main] 2026-10-23T16:05:06,425 DatabaseDescriptor.java:642 - commitlog_disk_access_mode resolved to: standard
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-23T16:05:09,688 Flushing.java:179 - Completed flushing /users/jason92/stage4-seg/nodeA/data/system/local-7ad54392bcdd35a684174e047860b377/nb-1-big-Data.db (195B) for commitlog position CommitLogPosition(segmentId=1792771507650, position=529)
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-23T16:05:09,866 Flushing.java:179 - Completed flushing /users/jason92/stage4-seg/nodeA/data/system/local-7ad54392bcdd35a684174e047860b377/nb-2-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1792771507650, position=640)
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-23T16:05:10,129 Flushing.java:179 - Completed flushing /users/jason92/stage4-seg/nodeA/data/system/local-7ad54392bcdd35a684174e047860b377/nb-3-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1792771507650, position=751)
+[2026-10-23T10:05:57.727-0600] idle baseline: CommitLog-7-1792771507650.log:16913 CommitLog-7-1792771507651.log:83 
+[2026-10-23T10:05:57.730-0600] samplers ds=599838 jmx=599839
+[2026-10-23T10:06:00.736-0600] LOAD_START 1792771560734
+[2026-10-23T10:07:59.252-0600] LOAD_END 1792771679250 rc=0 (118 s)
+/users/jason92/stage4-seg/runA/cluster/lz4zero-s32/loader.out:LOADER_DONE rows 600000 errors 0
+[2026-10-23T10:08:30.570-0600] SETTLE_END 1792771710568
+REASON       7 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.aggregates, Reason: INTERNALLY_FORCED
+REASON       2 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       4 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.dropped_columns, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.functions, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.indexes, Reason: INTERNALLY_FORCED
+REASON       5 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       4 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.triggers, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.types, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.views, Reason: INTERNALLY_FORCED
+ERRORS 0
+[2026-10-23T10:08:30.707-0600] + nodetool drain
+[2026-10-23T10:08:40.093-0600] daemons left: []
+[2026-10-23T10:08:40.133-0600] cluster-run end label=lz4zero-s32

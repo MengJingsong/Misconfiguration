@@ -1,0 +1,42 @@
+== unit: per arm, from seg.csv and the raw test log
+direct-1 S=1048576 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=987136 maxEnd=985864
+   junit:  | conf: commitlog_segment_size=1MiB | probes: 3
+direct-32 S=33554432 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=31461376 maxEnd=31460127
+   junit:  | conf: commitlog_segment_size=32MiB | probes: 3
+direct-4 S=4194304 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=3936256 maxEnd=3934984
+   junit:  | conf: commitlog_segment_size=4MiB | probes: 3
+lz4-1 S=1048576 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=989400 maxEnd=985903
+   junit:  | conf: commitlog_segment_size=1MiB | probes: 3
+lz4-32 S=33554432 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=31583162 maxEnd=31460158
+   junit:  | conf: commitlog_segment_size=32MiB | probes: 3
+lz4-4 S=4194304 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=3950088 maxEnd=3935023
+   junit:  | conf: commitlog_segment_size=4MiB | probes: 3
+mmap-1 S=1048576 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=1048576 maxEnd=985856
+   junit:  | conf: commitlog_segment_size=1MiB | probes: 3
+mmap-32 S=33554432 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=33554432 maxEnd=31460127
+   junit:  | conf: commitlog_segment_size=32MiB | probes: 3
+mmap-4 S=4194304 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=4194304 maxEnd=3934976
+   junit:  | conf: commitlog_segment_size=4MiB | probes: 3
+mmap-4-rep S=4194304 segs=5 cap!=S:0 maxEnd>=cap:0 retiredBad:0 activeBad:0 active:1 files>S:0 maxFile=4194304 maxEnd=3934976
+   junit:  | conf: commitlog_segment_size=4MiB | probes: 3
+== cluster: per arm, from ds.csv / final-ls / system.log
+ctl-n32-t256 S=32 maxfile=33554432 (32.000 MiB) peakfiles=24 peaktotal=768.0 MiB maps=320.0 MiB
+   names seen: 68; final ls sizes:       5 33554432 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons:       8 Reason: COMMITLOG_DIRTY       1 Reason: MEMTABLE_LIMIT 
+   stress: Total errors              :          0 [WRITE: 0]
+lz4-n32 S=32 maxfile=32629174 (31.118 MiB) peakfiles=19 peaktotal=502.1 MiB maps=0.0 MiB
+   names seen: 68; final ls sizes:       1 83       1 9506074       1 32590344       1 32623581       1 32623678       1 32623802       1 32623919       1 32624847       1 32626517 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons:       8 Reason: MEMTABLE_LIMIT 
+   stress: Total errors              :          0 [WRITE: 0]
+n32 S=32 maxfile=33554432 (32.000 MiB) peakfiles=26 peaktotal=832.0 MiB maps=352.0 MiB
+   names seen: 68; final ls sizes:       8 33554432 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons:       8 Reason: MEMTABLE_LIMIT 
+   stress: Total errors              :          0 [WRITE: 0]
+n64 S=64 maxfile=67108864 (64.000 MiB) peakfiles=15 peaktotal=960.0 MiB maps=448.0 MiB
+   names seen: 35; final ls sizes:       6 67108864 
+   system.log: segment_size=commitlog_segment_size=64MiB  non-system flush reasons:       8 Reason: MEMTABLE_LIMIT 
+   stress: Total errors              :          0 [WRITE: 0]
+n8 S=8 maxfile=8388608 (8.000 MiB) peakfiles=95 peaktotal=760.0 MiB maps=152.0 MiB
+   names seen: 267; final ls sizes:      21 8388608 
+   system.log: segment_size=commitlog_segment_size=8MiB  non-system flush reasons:       8 Reason: MEMTABLE_LIMIT 
+   stress: Total errors              :          0 [WRITE: 0]

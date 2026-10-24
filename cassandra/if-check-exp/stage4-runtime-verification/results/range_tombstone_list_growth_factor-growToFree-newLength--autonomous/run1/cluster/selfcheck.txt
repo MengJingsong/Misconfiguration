@@ -1,0 +1,20 @@
+CHECK 1: every checkpoint counter lies within the range of the 2-second counter series of its cell -> HOLDS (12 checkpoints, 0 outside)
+CHECK 2: raw histograms: live tombstones (BufferClusteringBound/2) == tombstones written at every checkpoint of every flush-free range-delete cell (controls excluded: they flush by design) -> HOLDS (0 off by more than 1 %)
+CHECK 3: raw histograms: allocated slots / live tombstones at the last checkpoint is within [1, f] of the cell factor (one growth per merge) -> HOLDS ([('F-1.2', 1.2, 1.2), ('F-1.5', 1.5, 1.5), ('F-5.0', 5.0, 5.0)])
+CHECK 4: session.log: every checkpoint load acknowledged all its writes with 0 errors -> HOLDS (12 loads, 4000000 writes)
+CHECK 5: system.log C-ins-64MiB: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 6: system.log C-ins-64MiB (control): memtable-limit flushes of ks.t/t2 happened during the load -> HOLDS (reasons {'MEMTABLE_LIMIT': 12, 'USER_FORCED': 1}; 12 non-user flushes inside the load windows)
+CHECK 7: system.log F-1.2: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 8: system.log F-1.2: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['480.609MiB (16%)'])
+CHECK 9: system.log F-1.5: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 10: system.log F-1.5: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['486.331MiB (16%)'])
+CHECK 11: system.log F-5.0: no ERROR / OutOfMemoryError line -> HOLDS (0 lines)
+CHECK 12: system.log F-5.0: the only flushes of ks.t/t2 are USER_FORCED (my nodetool flush calls), none from the memtable limit, none inside a load window -> HOLDS (reasons {'USER_FORCED': 1}; usage at the forced flushes: ['553.087MiB (18%)'])
+CHECK 13: trace F-1.2: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.2 -> HOLDS (998 lines, min 1.2000 max 1.2039)
+CHECK 14: trace F-1.5: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 1.5 -> HOLDS (997 lines, min 1.5000 max 1.5026)
+CHECK 15: trace F-5.0: sampled newLength/cap (cap >= 100) is within [f, f + 1/100] of the cell factor 5.0 -> HOLDS (998 lines, min 5.0000 max 5.0000)
+     F-1.2: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     F-1.5: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     F-5.0: MemtableSwitchCount start 0, end(after final flush) 1; last checkpoint 0
+     C-ins-64MiB: MemtableSwitchCount start 0, end(after final flush) 13; last checkpoint 12
+process check (manual): ps -eo cmd | grep [C]assandraDaemon after the run

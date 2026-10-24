@@ -188,7 +188,6 @@ check only sets how it is split.
 
 | If statement | Reason rejected |
 |---|---|
-| `CommitLogSegment.java:246` `next >= endOfBuffer` (also helper `isStillAllocating()`) | The "full" branch creates a new segment. |
 | `NativeAllocator$Region.allocate():273` `newOffset + size > capacity` | `trySwapRegion()` allocates a new region. The memtable ceiling is the filed `memtable_*_space` cases. |
 | `SlabAllocator$Region.allocate():201` `newOffset + size > data.capacity()` | Returns `null`; the caller creates a new region. |
 | `MmappedRegions.updateState():208` `segmentSize + chunk.length + 4 > MAX_SEGMENT_SIZE` | Starts a new mmap segment; the whole file is mapped either way. |
@@ -240,7 +239,7 @@ ceiling. The item is stored on both branches, and the "full" branch allocates
 
 | If statement | Reason rejected |
 |---|---|
-| `RangeTombstoneList.java:668`, `:696`; `CompressionMetadata.java:366`; `Walker.java:442`; `AbstractReplicaCollection.java:109`; `HistogramBuilder.java:45`; `ByteSourceInverse.java:424`; `Stack.java:94`; `LongTimSort.java:821` | Grow when full: `size == capacity` or `array.length < required` on the structure's own array; a copy at 1.5–3× or the required length. |
+| `CompressionMetadata.java:366`; `Walker.java:442`; `AbstractReplicaCollection.java:109`; `HistogramBuilder.java:45`; `ByteSourceInverse.java:424`; `Stack.java:94`; `LongTimSort.java:821` | Grow when full: `size == capacity` or `array.length < required` on the structure's own array; a copy at 1.5–3× or the required length. |
 | `InMemoryReadTrie.java:501`; `InMemoryTrie.java:670`; `TriePathReconstructor.java:33`, `:41` | Grow when full, as above. |
 | `BTree.java:1538`, `:1573`, `:1600`; `BTreeSet.java:133`, `:477` | Grow when full; `BTreeSet.java:477` trims to a shorter array, and both branches still write every element. |
 | `PrunableArrayQueue.java:71` | The internode outbound queue (`OutboundMessageQueue.java:70`); `offer()` always returns `true`. Its bytes are bounded by the filed send-queue case's `acquireCapacity()`. |
@@ -248,7 +247,6 @@ ceiling. The item is stored on both branches, and the "full" branch allocates
 | `CompressedInputStream.java:144`; `CompressedChecksummedDataInput.java:118`, `:134`; `CompressedHintsWriter.java:53`; `EncryptedChecksummedDataInput.java:126`; `CompressedSequentialWriter.java:247` | A reusable scratch buffer replaced when too small (`buffer.capacity() < required`); the operation proceeds on both branches, sized to one item. `CompressedInputStream`'s buffer serves only chunks below `maxCompressedLength()` (`:142`). |
 | `ThreadLocalByteBufferHolder.java:74`; `FrameDecoder.java:393`; `EncryptionUtils.java:134`; `CBUtil.java:105` | Same. The frame stash at `:393` holds one frame whose length is a 17-bit header field (`FrameDecoderCrc.java:79`, `FrameDecoderLZ4.java:73`). |
 | `ByteBufferUtil.java:817` | Same; it throws when `allowBufferResize` is false (`:819-820`), but every production caller (via `EncryptionUtils`) passes `true`, so in a node it only grows. |
-| `RangeTombstoneList.java:685` `newLength <= capacity()` | Rule 2, a growth step: the fallback when `capacity() × range_tombstone_list_growth_factor` (default 1.5, JMX-settable in [1.2, 5]) would not grow the list. Both branches allocate; it sets slack, not a ceiling. |
 | `DataOutputBuffer.java:166` `capacity > 1024L * 1024L * DOUBLING_THRESHOLD` | Rule 2, a growth step: switches from doubling to +50 % above `cassandra.DOB_DOUBLING_THRESHOLD_MB` (default 64). |
 | `BTree$LeafBuilder.copy():2575`, `:2608`, `.prepend():2700`; `$BranchBuilder.prepend():2956`, `.copyPreceding():3185` `count + length > MAX_KEYS` | Node fan-out (`MAX_KEYS = BRANCH_FACTOR - 1`, from `cassandra.btree.branchshift`); keys spill into the next node. |
 | `BTree.java:137`, `:231`, `:2530`, `:2558`, `:2712`, `:2832`, `:3064`; `BTreeRemoval.java:88`, `:90`, `:99` | Splitting, overflowing or redistributing B-tree nodes; all keys stored. |

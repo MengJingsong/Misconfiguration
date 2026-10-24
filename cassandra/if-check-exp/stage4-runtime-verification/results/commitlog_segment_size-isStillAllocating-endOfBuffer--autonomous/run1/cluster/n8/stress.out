@@ -1,0 +1,185 @@
+Warning: ignoring deprecated parameter: native
+Warning: ignoring deprecated parameter: cql3
+******************** Stress Settings ********************
+Command:
+  Type: write
+  Count: 2,000,000
+  No Warmup: false
+  Consistency Level: ONE
+  Target Uncertainty: not applicable
+  Key Size (bytes): 10
+  Counter Increment Distibution: add=fixed(1)
+Rate:
+  Auto: false
+  Thread Count: 64
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..2000000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Columns:
+  Max Columns Per Key: 1
+  Column Names: [C0]
+  Comparator: AsciiType
+  Timestamp: null
+  Variable Column Count: false
+  Slice: false
+  Size Distribution: Fixed:  key=1024
+  Count Distribution: Fixed:  key=1
+Errors:
+  Ignore: false
+  Tries: 10
+Log:
+  No Summary: false
+  No Settings: false
+  File: /users/jason92/stage4-seg/runB/cluster/n8/stress.log
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.1]
+  Is White List: false
+  Datacenter: null
+Schema:
+  Keyspace: ks1
+  Replication Strategy: org.apache.cassandra.locator.SimpleStrategy
+  Replication Strategy Options: {replication_factor=1}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  Truststore: null
+  Truststore Password: null
+  Keystore: null
+  Keystore Password: null
+  SSL Protocol: TLS
+  SSL Algorithm: null
+  SSL Ciphers: null
+Port:
+  Native Port: 9042
+  JMX Port: 7199
+JMX:
+  Username: null
+  Password: *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: null
+  Operation: WRITE
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+Credentials file:
+  File: *not set*
+  CQL username: *not set*
+  CQL password: *not set*
+  JMX username: *not set*
+  JMX password: *not set*
+  Transport truststore password: *not set*
+  Transport keystore password: *not set*
+Reporting:
+  Output frequency: 1s
+  Header frequency: *not set*
+
+Connected to cluster: Test Cluster, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: /127.0.0.1:9042; Rack: rack1
+Created keyspaces. Sleeping 1s for propagation.
+Sleeping 2s...
+Warming up WRITE with 50000 iterations...
+Running WRITE with 64 threads for 2000000 iteration
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+total,                                                 20774,   20774,   20774,   20774,     1.2,     0.9,     2.7,     5.6,    14.5,    20.3,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                108519,   87745,   87745,   87745,     0.7,     0.6,     1.3,     2.2,    11.4,    30.6,    2.0,  0.43868,      0,      2,      41,      63,      10,    1614
+total,                                                217044,  108525,  108525,  108525,     0.6,     0.5,     1.0,     1.4,    27.0,    48.8,    3.0,  0.30239,      0,      1,      23,      23,       0,     757
+total,                                                329038,  111994,  111994,  111994,     0.6,     0.5,     0.9,     1.6,    14.4,    31.4,    4.0,  0.22466,      0,      1,      23,      23,       0,     779
+total,                                                448820,  119782,  119782,  119782,     0.5,     0.4,     0.9,     1.2,    21.1,    27.9,    5.0,  0.18045,      0,      2,      19,      35,       2,    1550
+total,                                                566152,  117332,  117332,  117332,     0.5,     0.5,     0.9,     1.4,    10.6,    30.2,    6.0,  0.14971,      0,      1,      27,      27,       0,     775
+total,                                                646662,   80510,   80510,   80510,     0.8,     0.5,     0.9,     1.4,    60.3,   255.5,    7.0,  0.12715,      0,      3,     222,     301,      86,    1244
+total,                                                774095,  127433,  127433,  127433,     0.5,     0.4,     0.8,     1.2,     8.2,    25.6,    8.0,  0.11285,      0,      1,      15,      15,       0,     875
+total,                                                873293,   99198,   99198,   99198,     0.6,     0.5,     1.0,     1.5,     6.4,    33.8,    9.0,  0.10036,      0,      2,      69,      99,      20,     646
+total,                                                970819,   97526,   97526,   97526,     0.7,     0.4,     0.9,     1.4,    18.6,   300.2,   10.0,  0.09304,      0,      2,     224,     240,     104,    2135
+total,                                               1063047,   92228,   92228,   92228,     0.7,     0.5,     0.9,     1.3,     3.6,   251.0,   11.0,  0.08445,      0,      2,     203,     247,      80,    1126
+total,                                               1174272,  111225,  111225,  111225,     0.6,     0.5,     1.0,     1.5,    12.4,    28.6,   12.0,  0.07718,      0,      1,      21,      21,       0,     883
+total,                                               1287170,  112898,  112898,  112898,     0.6,     0.5,     1.0,     1.6,    10.9,    26.1,   13.0,  0.07104,      0,      1,      20,      20,       0,     774
+total,                                               1372349,   85179,   85179,   85179,     0.7,     0.5,     0.9,     1.3,    64.8,   232.8,   14.0,  0.06590,      0,      3,     207,     288,      80,    1211
+total,                                               1487890,  115541,  115541,  115541,     0.5,     0.4,     0.8,     1.2,    20.4,    90.6,   15.0,  0.06172,      0,      2,      36,      53,      10,    1680
+total,                                               1571032,   83142,   83142,   83142,     0.8,     0.5,     0.9,     1.2,    54.5,   343.9,   16.0,  0.05801,      0,      3,     260,     327,     107,     824
+total,                                               1651305,   80273,   80273,   80273,     0.8,     0.5,     0.9,     1.4,    37.5,   311.4,   17.0,  0.05451,      0,      2,     271,     307,     118,     853
+total,                                               1740080,   88775,   88775,   88775,     0.7,     0.4,     0.9,     1.3,     7.9,   283.9,   18.0,  0.05150,      0,      2,     244,     280,     104,    1062
+total,                                               1832800,   92720,   92720,   92720,     0.7,     0.4,     0.9,     1.1,     3.8,   274.7,   19.0,  0.04894,      0,      2,     227,     270,      92,     917
+total,                                               1863170,   30370,   30370,   30370,     1.1,     0.5,     0.9,     1.2,   300.4,   300.9,   20.0,  0.05712,      0,      2,     253,     295,     106,     839
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                               1921635,   58465,   58465,   58465,     4.9,     0.5,     1.0,     3.4,  3691.0,  3695.2,   24.0,  0.11297,      0,      3,     154,     192,      64,    1558
+total,                                               2000000,  114134,  114134,  114134,     0.5,     0.5,     1.0,     1.5,    10.3,    26.4,   24.7,  0.10780,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   81,016 op/s  [WRITE: 81,016 op/s]
+Partition rate            :   81,016 pk/s  [WRITE: 81,016 pk/s]
+Row rate                  :   81,016 row/s [WRITE: 81,016 row/s]
+Latency mean              :    0.8 ms [WRITE: 0.8 ms]
+Latency median            :    0.5 ms [WRITE: 0.5 ms]
+Latency 95th percentile   :    1.0 ms [WRITE: 1.0 ms]
+Latency 99th percentile   :    1.5 ms [WRITE: 1.5 ms]
+Latency 99.9th percentile :   18.1 ms [WRITE: 18.1 ms]
+Latency max               : 3695.2 ms [WRITE: 3,695.2 ms]
+Total partitions          :  2,000,000 [WRITE: 2,000,000]
+Total errors              :          0 [WRITE: 0]
+Total GC count            : 39
+Total GC memory           : 21.897 GiB
+Total GC time             :    3.2 seconds
+Avg GC time               :   81.0 ms
+StdDev GC time            :   87.8 ms
+Total operation time      : 00:00:24
+
+END

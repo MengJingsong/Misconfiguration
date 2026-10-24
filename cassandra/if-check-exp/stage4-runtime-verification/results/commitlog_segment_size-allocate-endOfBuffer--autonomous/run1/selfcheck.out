@@ -1,0 +1,56 @@
+== unit: per arm, from seg.csv and the raw test log
+s1-lz4 S=1048576 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:1 maxFile=1052705 maxEnd=1048575
+   junit:  | conf: commitlog_segment_size=1MiB | probes: 5
+s1-mmap S=1048576 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=1048576 maxEnd=1048575
+   junit:  | conf: commitlog_segment_size=1MiB | probes: 5
+s2-lz4 S=2097152 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:1 maxFile=2105396 maxEnd=2097151
+   junit:  | conf: commitlog_segment_size=2MiB | probes: 5
+s2-mmap S=2097152 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=2097152 maxEnd=2097151
+   junit:  | conf: commitlog_segment_size=2MiB | probes: 5
+s32-lz4 S=33554432 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:6 maxFile=33686042 maxEnd=33554431
+   junit:  | conf: commitlog_segment_size=32MiB | probes: 5
+s32-mmap S=33554432 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=33554432 maxEnd=33554431
+   junit:  | conf: commitlog_segment_size=32MiB | probes: 5
+s8-lz4 S=8388608 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:1 maxFile=8421524 maxEnd=8388607
+   junit:  | conf: commitlog_segment_size=8MiB | probes: 5
+s8-lz4-zero S=8388608 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=43142 maxEnd=8388607
+   junit:  | conf: commitlog_segment_size=8MiB | probes: 5
+s8-mmap S=8388608 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=8388608 maxEnd=8388607
+   junit:  | conf: commitlog_segment_size=8MiB | probes: 5
+s8-mmap-E16k S=8388608 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=8388608 maxEnd=8388607
+   junit:  | conf: commitlog_segment_size=8MiB | probes: 5
+s8-mmap-rep S=8388608 segs=8 cap!=S:0 maxEnd>=cap:0 retiredBad:0 files>S:0 maxFile=8388608 maxEnd=8388607
+   junit:  | conf: commitlog_segment_size=8MiB | probes: 5
+== cluster: per arm, from ds.csv / final-ls / system.log
+attempt1-lz4zero-s32-loader-import-failed S=32 maxfile=15976 (0.015 MiB) peakfiles=2 peaktotal=0.0 MiB maps=0.0 MiB
+   names seen: 2; final ls sizes:       1 83       1 15976 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons: 
+   stress: 
+ctl-s8-t64 S=8 maxfile=8388608 (8.000 MiB) peakfiles=16 peaktotal=128.0 MiB maps=24.0 MiB
+   names seen: 84; final ls sizes:       7 8388608 
+   system.log: segment_size=commitlog_segment_size=8MiB  non-system flush reasons:      11 Reason: COMMITLOG_DIRTY 
+   stress: Total errors              :          0 [WRITE: 0]
+idle-s32 S=32 maxfile=33554432 (32.000 MiB) peakfiles=2 peaktotal=64.0 MiB maps=64.0 MiB
+   names seen: 2; final ls sizes:       2 33554432 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons: 
+   stress: 
+lz4-s32 S=32 maxfile=32601662 (31.091 MiB) peakfiles=22 peaktotal=638.9 MiB maps=0.0 MiB
+   names seen: 22; final ls sizes:       1 83       1 18100379       1 32563286       1 32592328       1 32592667       1 32592717       1 32592856       1 32593116       1 32593239       1 32593411       1 32593646       1 32593767       1 32593859       1 32593979       1 32594492       1 32594498       1 32594661       1 32594678       1 32595181       1 32596119       1 32597603       1 32601662 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons: 
+   stress: Total errors              :          0 [WRITE: 0]
+lz4zero-s32 S=32 maxfile=674417 (0.643 MiB) peakfiles=20 peaktotal=11.9 MiB maps=0.0 MiB
+   names seen: 20; final ls sizes:       1 83       1 605611       1 656197       1 656622       1 656748       1 656950       1 656961       1 656990       1 657114       1 657168       1 657192       1 657260       1 657356       1 657359       1 657397       1 657472       1 657572       1 657617       1 657902       1 674417 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons: 
+   stress: 
+s128 S=128 maxfile=134217728 (128.000 MiB) peakfiles=7 peaktotal=896.0 MiB maps=256.0 MiB
+   names seen: 7; final ls sizes:       7 134217728 
+   system.log: segment_size=commitlog_segment_size=128MiB  non-system flush reasons: 
+   stress: Total errors              :          0 [WRITE: 0]
+s32 S=32 maxfile=33554432 (32.000 MiB) peakfiles=22 peaktotal=704.0 MiB maps=64.0 MiB
+   names seen: 22; final ls sizes:      22 33554432 
+   system.log: segment_size=commitlog_segment_size=32MiB  non-system flush reasons: 
+   stress: Total errors              :          0 [WRITE: 0]
+s8 S=8 maxfile=8388608 (8.000 MiB) peakfiles=84 peaktotal=672.0 MiB maps=24.0 MiB
+   names seen: 84; final ls sizes:      84 8388608 
+   system.log: segment_size=commitlog_segment_size=8MiB  non-system flush reasons: 
+   stress: Total errors              :          0 [WRITE: 0]

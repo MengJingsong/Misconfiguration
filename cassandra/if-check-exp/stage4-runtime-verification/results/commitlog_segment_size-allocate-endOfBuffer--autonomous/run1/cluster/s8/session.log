@@ -1,0 +1,44 @@
+[2026-10-23T09:50:41.670-0600] cluster-run start label=s8 S=8MiB mode=mmap total=4096MiB n=600000 load=stress sync=100ms heap=4G tree=/users/jason92/stage4-seg/treeA head=eb1fe992c9b0f75d95b5d27a08b227841d376ea8
+[2026-10-23T09:50:41.699-0600] df: /dev/sda3      ext3  65478604 8347416  53775748  14% /
+[2026-10-23T09:50:41.756-0600] + bin/cassandra -p /users/jason92/stage4-seg/nodeA/cassandra.pid (ulimit -n 100000, heap 4G)
+[2026-10-23T09:51:25.273-0600] node up pid=568082
+CONFIG cdc_enabled=false
+CONFIG commitlog_disk_access_mode=legacy
+CONFIG commitlog_segment_size=8MiB
+CONFIG commitlog_sync_period=100ms
+CONFIG commitlog_total_space=4096MiB
+CONFIG memtable_allocation_type=heap_buffers
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=2048MiB
+INFO  [main] 2026-10-23T15:50:43,953 DatabaseDescriptor.java:642 - commitlog_disk_access_mode resolved to: mmap
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-23T15:50:47,244 Flushing.java:179 - Completed flushing /users/jason92/stage4-seg/nodeA/data/system/local-7ad54392bcdd35a684174e047860b377/nb-1-big-Data.db (195B) for commitlog position CommitLogPosition(segmentId=1792770645224, position=466)
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-23T15:50:47,399 Flushing.java:179 - Completed flushing /users/jason92/stage4-seg/nodeA/data/system/local-7ad54392bcdd35a684174e047860b377/nb-2-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1792770645224, position=577)
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-23T15:50:47,659 Flushing.java:179 - Completed flushing /users/jason92/stage4-seg/nodeA/data/system/local-7ad54392bcdd35a684174e047860b377/nb-3-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1792770645224, position=688)
+[2026-10-23T09:51:35.285-0600] idle baseline: CommitLog-7-1792770645224.log:8388608 CommitLog-7-1792770645225.log:8388608 
+[2026-10-23T09:51:35.288-0600] + cassandra-stress write n=1 (schema)
+[2026-10-23T09:51:42.799-0600] samplers ds=569306 jmx=569307
+[2026-10-23T09:51:45.804-0600] LOAD_START 1792770705802
+[2026-10-23T09:52:00.839-0600] LOAD_END 1792770720837 rc=0 (15 s)
+/users/jason92/stage4-seg/runA/cluster/s8/stress.out:Op rate                   :   90,252 op/s  [WRITE: 90,252 op/s]
+/users/jason92/stage4-seg/runA/cluster/s8/stress.out:Partition rate            :   90,252 pk/s  [WRITE: 90,252 pk/s]
+/users/jason92/stage4-seg/runA/cluster/s8/stress.out:Total partitions          :    600,000 [WRITE: 600,000]
+/users/jason92/stage4-seg/runA/cluster/s8/stress.out:Total errors              :          0 [WRITE: 0]
+/users/jason92/stage4-seg/runA/cluster/s8/stress.out:Total operation time      : 00:00:06
+/users/jason92/stage4-seg/runA/cluster/s8/stress.out:END
+[2026-10-23T09:52:32.181-0600] SETTLE_END 1792770752179
+REASON       7 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.aggregates, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       5 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.dropped_columns, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.functions, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.indexes, Reason: INTERNALLY_FORCED
+REASON       6 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       5 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.triggers, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.types, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.views, Reason: INTERNALLY_FORCED
+ERRORS 0
+[2026-10-23T09:52:32.445-0600] + nodetool drain
+[2026-10-23T09:52:42.408-0600] daemons left: []
+[2026-10-23T09:52:42.539-0600] cluster-run end label=s8

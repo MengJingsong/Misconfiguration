@@ -1,0 +1,25 @@
+cells: main ['F-1.2-1', 'F-5.0-2', 'F-1.5-3', 'F-2.0-4', 'F-2.0-5', 'F-1.5-6', 'F-5.0-7', 'F-1.2-8']; controls ['C-1.5-256MiB']
+EXPECTED: factor read back over JMX equals the factor set (yaml or JMX; cell J: 5.0 after the runtime change) before every cell: PASS (10 cells; mismatches [])
+EXPECTED: every write was acknowledged: ok == tombstones (or rows) written, errors == 0, in every cell (no rejection at any f): PASS (10000000 acknowledged; bad [])
+EXPECTED: main cells are flush-free: MemtableSwitchCount unchanged from the start of the cell to its last checkpoint (R3): PASS (bad [])
+EXPECTED: no ERROR or OutOfMemoryError line in system.log of any lifetime: PASS ({'L1': 0, 'C-1.5-256MiB': 0})
+EXPECTED: the tombstones are live in the memtable: BufferClusteringBound count delta == 2 x tombstones (1 %) and MemtableColumnsCount == tombstones, at every checkpoint of every main cell: PASS (bad [])
+EXPECTED: Byteman trace on the live node: every sampled grow(i, newLength) (cap >= 20) has newLength == iterated expression at the cell factor, and every sampled growToFree line reads the cell factor: PASS (8986 grow lines checked (8998 sampled); bad [])
+EXPECTED: counter grows with N at every main cell: rises at every checkpoint and last/first within [0.6, 1.4] x (tombstones last/first) (R3): PASS (8 cells; bad [])
+EXPECTED: no plateau at any factor: NOT (last two checkpoints differ by less than 5 % while the tombstone counts differ by at least 1.5x) (R3): PASS (bad [])
+EXPECTED: |counter(f_a) - counter(f_b)| <= 28 B x |f_a - f_b| x T + 1 MiB for every pair of main cells of the same shape at the last checkpoint (R3): PASS (28 pairs; bad [])
+EXPECTED: live ClusteringBound[] bytes after the last checkpoint are ordered like the factor (non-decreasing in f) for every shape (R3): PASS (bad [])
+OBSERVED: F-1.2-1 f=1.2: T=1000000 counter 503887200 (504 B/tombstone); live tombstones 1000000, allocated slots 1200000 (slots/live 1.200); CB[] bytes 9601600, BCB bytes 48000912, long[] 19618048, int[] 20981832, histogram total 344058176; peak EU+OU+SU in the run 5117 MiB
+OBSERVED: F-5.0-2 f=5.0: T=1000000 counter 579883200 (580 B/tombstone); live tombstones 1000048, allocated slots 5000018 (slots/live 5.000); CB[] bytes 40002032, BCB bytes 48003264, long[] 50025616, int[] 36199480, histogram total 420631656; peak EU+OU+SU in the run 5170 MiB
+OBSERVED: F-1.5-3 f=1.5: T=1000000 counter 509887200 (510 B/tombstone); live tombstones 1000001, allocated slots 1499834 (slots/live 1.500); CB[] bytes 12002304, BCB bytes 48003360, long[] 22033408, int[] 22216544, histogram total 351786368; peak EU+OU+SU in the run 5180 MiB
+OBSERVED: F-2.0-4 f=2.0: T=1000000 counter 519885600 (520 B/tombstone); live tombstones 1000000, allocated slots 1999900 (slots/live 2.000); CB[] bytes 16001504, BCB bytes 48003408, long[] 26040968, int[] 24216672, histogram total 362906640; peak EU+OU+SU in the run 5199 MiB
+OBSERVED: F-2.0-5 f=2.0: T=1000000 counter 519885600 (520 B/tombstone); live tombstones 1000000, allocated slots 1999900 (slots/live 2.000); CB[] bytes 16001504, BCB bytes 48003456, long[] 26049456, int[] 24233600, histogram total 364062304; peak EU+OU+SU in the run 5222 MiB
+OBSERVED: F-1.5-6 f=1.5: T=1000000 counter 509887200 (510 B/tombstone); live tombstones 1000000, allocated slots 1500000 (slots/live 1.500); CB[] bytes 12002304, BCB bytes 48003504, long[] 22057584, int[] 22267328, histogram total 355290832; peak EU+OU+SU in the run 5202 MiB
+OBSERVED: F-5.0-7 f=5.0: T=1000000 counter 579883200 (580 B/tombstone); live tombstones 1000000, allocated slots 4999800 (slots/live 5.000); CB[] bytes 40000704, BCB bytes 48003552, long[] 50063944, int[] 36250656, histogram total 426378384; peak EU+OU+SU in the run 5217 MiB
+OBSERVED: F-1.2-8 f=1.2: T=1000000 counter 503887200 (504 B/tombstone); live tombstones 1000000, allocated slots 1200000 (slots/live 1.200); CB[] bytes 9602304, BCB bytes 48003600, long[] 19673600, int[] 21068384, histogram total 351556960; peak EU+OU+SU in the run 5200 MiB
+EXPECTED: counter(5.0) - counter(1.2) (means of the repeats) is on the order of 76 MB: within [38, 152] MB (R8): PASS (76.0 MB)
+EXPECTED: long[] bytes are ordered like f, and long[](5.0) - long[](1.2) in [0.5, 2] x 8 B x extra slots (R8): PASS (long[] {1.2: 19645824.0, 5.0: 50044780.0, 1.5: 22045496.0, 2.0: 26045212.0}; extra slots 3799927; diff 30398956)
+EXPECTED: plain-insert table INS-1.5: live ClusteringBound[] bytes exceed the cell baseline by < 64 KiB (R8): PASS (0 B)
+EXPECTED: positive control C-1.5-256MiB: MemtableSwitchCount rises above its start (main cells: no flush) and the counter series max <= 256 MiB (R8): PASS (switch 0->['1', '2', '5']; series max 84.6 MiB; main cells flush-free: True)
+SUMMARY: 14/14 expectations hold
+MATCHED ROW: B3g row 1 (usage rises with N at all factors; the factor changes it only within the slack bound; no cap tied to f) with the positive control moving (flush-bound memtable) while the factor stays flat -- Confirmed, does not cap

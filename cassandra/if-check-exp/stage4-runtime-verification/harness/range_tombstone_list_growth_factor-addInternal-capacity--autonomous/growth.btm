@@ -1,0 +1,27 @@
+# Byteman rules, cluster tier of the range_tombstone_list_growth_factor autonomous cases (audit R5). Observation only: no rule
+# changes behaviour. Loaded at node start with
+#   -javaagent:<byteman.jar>=script:<this file> -Dstage4.trace=<file>
+# One file, one line per sampled event:
+#   growToFree n=<call counter> cap=<starts.length> size=<size> factor=<DatabaseDescriptor value read now> ms=<epoch ms>
+#       RangeTombstoneList.growToFree(int) entry (RangeTombstoneList.java:680): every 1000th call (the first is n=1 or n=0 per Byteman's counter)
+#   grow n=<call counter> index=<i> cap=<starts.length before> newLength=<new capacity> ms=<epoch ms>
+#       RangeTombstoneList.grow(int, int) entry (line 700) with i >= 0, i.e. the call made by growToFree (copyArrays uses i = -1):
+#       every 1000th call. newLength / cap is the factor as the traced line applied it.
+
+RULE rtl growToFree sample
+CLASS org.apache.cassandra.db.RangeTombstoneList
+METHOD growToFree
+AT ENTRY
+IF incrementCounter("rtl.growToFree") % 1000 == 0
+DO traceOpen("rtl", java.lang.System.getProperty("stage4.trace", "rtl.trace"));
+   traceln("rtl", "growToFree n=" + readCounter("rtl.growToFree") + " cap=" + $0.starts.length + " size=" + $0.size + " factor=" + org.apache.cassandra.config.DatabaseDescriptor.getRangeTombstoneListGrowthFactor() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE rtl grow sample
+CLASS org.apache.cassandra.db.RangeTombstoneList
+METHOD grow(int, int)
+AT ENTRY
+IF $1 >= 0 && incrementCounter("rtl.grow") % 1000 == 0
+DO traceOpen("rtl", java.lang.System.getProperty("stage4.trace", "rtl.trace"));
+   traceln("rtl", "grow n=" + readCounter("rtl.grow") + " index=" + $1 + " cap=" + $0.starts.length + " newLength=" + $2 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

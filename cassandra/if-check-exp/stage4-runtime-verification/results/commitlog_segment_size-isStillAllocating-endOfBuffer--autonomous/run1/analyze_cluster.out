@@ -1,0 +1,27 @@
+ARM ctl-n32-t256: S=32MiB mode=mmap total_space=256MiB load=stress n=2000000 load_s=33
+   largest file (stat, all samples)=33554432 (32.000 MiB; S=32) | per-file max over names=33554432 | files seen during run (created)=66 (est>= 30) | idle baseline files=2
+   peak live files=24 peak total(stat)=768.0 MiB peak JMX TotalCommitLogSize=768.0 MiB | maps peak n=10 bytes=320.0 MiB | flush reasons: REASON       8 Enqueuing flush of ks1.standard1, Reason: COMMITLOG_DIRTY; REASON       1 Enqueuing flush of ks1.standard1, Reason: MEMTABLE_LIMIT; ERRORS 0
+   SOFT: peak live files 24 vs soft prediction 9-10 (+ overshoot allowed)
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+ARM lz4-n32: S=32MiB mode=lz4 total_space=1024MiB load=stress n=2000000 load_s=36
+   largest file (stat, all samples)=32629174 (31.118 MiB; S=32) | per-file max over names=32629174 | files seen during run (created)=66 (est>= 30) | idle baseline files=2
+   peak live files=19 peak total(stat)=502.1 MiB peak JMX TotalCommitLogSize=528.9 MiB | maps peak n=0 bytes=0.0 MiB | flush reasons: REASON       8 Enqueuing flush of ks1.standard1, Reason: MEMTABLE_LIMIT; ERRORS 0
+   SOFT: peak live files 19 vs soft prediction 33-34 (+ overshoot allowed)
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | rolls >= est: True
+ARM n32: S=32MiB mode=mmap total_space=1024MiB load=stress n=2000000 load_s=30
+   largest file (stat, all samples)=33554432 (32.000 MiB; S=32) | per-file max over names=33554432 | files seen during run (created)=66 (est>= 30) | idle baseline files=2
+   peak live files=26 peak total(stat)=832.0 MiB peak JMX TotalCommitLogSize=832.0 MiB | maps peak n=11 bytes=352.0 MiB | flush reasons: REASON       8 Enqueuing flush of ks1.standard1, Reason: MEMTABLE_LIMIT; ERRORS 0
+   SOFT: peak live files 26 vs soft prediction 33-34 (+ overshoot allowed)
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+ARM n64: S=64MiB mode=mmap total_space=1024MiB load=stress n=2000000 load_s=32
+   largest file (stat, all samples)=67108864 (64.000 MiB; S=64) | per-file max over names=67108864 | files seen during run (created)=33 (est>= 30) | idle baseline files=2
+   peak live files=15 peak total(stat)=960.0 MiB peak JMX TotalCommitLogSize=960.0 MiB | maps peak n=7 bytes=448.0 MiB | flush reasons: REASON       8 Enqueuing flush of ks1.standard1, Reason: MEMTABLE_LIMIT; ERRORS 0
+   SOFT: peak live files 15 vs soft prediction 17-18 (+ overshoot allowed)
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+ARM n8: S=8MiB mode=mmap total_space=1024MiB load=stress n=2000000 load_s=33
+   largest file (stat, all samples)=8388608 (8.000 MiB; S=8) | per-file max over names=8388608 | files seen during run (created)=265 (est>= 30) | idle baseline files=2
+   peak live files=95 peak total(stat)=760.0 MiB peak JMX TotalCommitLogSize=760.0 MiB | maps peak n=19 bytes=152.0 MiB | flush reasons: REASON       8 Enqueuing flush of ks1.standard1, Reason: MEMTABLE_LIMIT; ERRORS 0
+   SOFT: peak live files 95 vs soft prediction 129-130 (+ overshoot allowed)
+   EXPECTED: no file > S (mmap) / within bound (lz4): True | largest observed == S: True | rolls >= est: True
+SCALING largest-file ratios (S=8,32,64): [1.0, 4.0, 8.0]
+CONTROL total_space=256MiB S=32: peak files 24 (expected about 8-10) peak dir 768.0 MiB vs 1024 MiB-run peak files 26 dir 832.0 MiB
