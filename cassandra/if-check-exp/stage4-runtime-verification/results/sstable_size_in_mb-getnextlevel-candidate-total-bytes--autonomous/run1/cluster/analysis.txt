@@ -1,0 +1,28 @@
+label rows errors peakL0(MiB) peakFile(MiB) settledFile(MiB) settledLive(MiB) files median(MiB) max(MiB) bigMax(MiB) overwriteSettled(MiB)
+N5    2000000 0     1425     4890     2055     2055 508     5.0     5.0    39.2     2632
+N20   2000000 0     1324     5279     2050     2050 112    20.0    20.0   117.7     2333
+N160  2000000 0     1935     5901     2049     2049 13   160.0   160.0   117.7     2737
+T20   2000000 0     1834     5190     2050     2050 102    20.0    20.0   117.7     2357
+STCS  2000000 0        0     5123     2049     2049 3   101.8  1809.9     0.0     4183
+PASS no write error; same row count :: {'N5': (0, 2000000), 'N20': (0, 2000000), 'N160': (0, 2000000), 'T20': (0, 2000000), 'STCS': (0, 2000000)}
+PASS settled live bytes differ < 10% across N=5,20,160 :: {'N5': 2055, 'N20': 2050, 'N160': 2049}
+PASS STCS reference within 10% of the LCS runs :: 2049 MiB
+PASS SSTable count falls as N rises (about 4x from 5 to 20; 8x or limited by data from 20 to 160) :: {'N5': 508, 'N20': 112, 'N160': 13}; ratios 4.5 and 8.6
+PASS N5: regular-table max sstable ~ N MiB (<= N + 5%) and median >= 0.5 N :: median 5.0 max 5.0
+PASS N5: large-partition table has an sstable above N MiB (partition 39.1 MiB > N) :: max 39.2 MiB vs N=5
+PASS N20: regular-table max sstable ~ N MiB (<= N + 5%) and median >= 0.5 N :: median 20.0 max 20.0
+PASS N20: large-partition table has an sstable above N MiB (partition 39.1 MiB > N) :: max 117.7 MiB vs N=20
+PASS N160: regular-table max sstable ~ N MiB (<= N + 5%) and median >= 0.5 N :: median 160.0 max 160.0
+INFO N160: large-partition test NOT APPLICABLE: the partition (39.1 MiB) and even all three (117.2 MiB) are smaller than N=160 MiB; largest file 117.7 MiB (limit never reached for this arm)
+PASS peak file bytes exceed settled bytes in every main run :: {'N5': (4890, 2055), 'N20': (5279, 2050), 'N160': (5901, 2049)}
+INFO T20 level-to-quota ratios, max over samples before the end of the throttled write: {0: 17.83, 1: 0.87} | over the whole run (includes the unthrottled overwrite phase): {0: 17.83, 1: 5.12, 2: 1.0, 3: 0.01}
+PASS T20 (16 MiB/s write phase): L0 exceeds its 4N quota :: L0 17.83x
+FAIL T20 (16 MiB/s write phase): a level above L0 exceeds fanout^level x N (B3f bullet 4) :: ratios {0: 17.83, 1: 0.87}
+INFO N5 settled per-level bytes [0, 47468872, 524134013, 1540310472, 0, 0, 0, 0, 0]; after overwrite: file bytes 2632 MiB (write phase 2055)
+INFO N20 settled per-level bytes [0, 209724386, 1903798651, 0, 0, 0, 0, 0, 0]; after overwrite: file bytes 2333 MiB (write phase 2050)
+INFO N160 settled per-level bytes [0, 1610100529, 503318468, 0, 0, 0, 0, 0, 0]; after overwrite: file bytes 2737 MiB (write phase 2049)
+INFO T20 settled per-level bytes [0, 209724810, 1903712290, 0, 0, 0, 0, 0, 0]; after overwrite: file bytes 2357 MiB (write phase 2050)
+INFO STCS settled per-level bytes None; after overwrite: file bytes 4183 MiB (write phase 2049)
+PASS every drain settled :: {'N5': 112, 'N20': 90, 'N160': 90, 'T20': 90, 'STCS': 67}
+PASS TRUNCATE control: file bytes after truncate < 1% of settled :: {'N5': 0, 'N20': 0, 'N160': 0, 'T20': 0, 'STCS': 0}
+1 FAIL

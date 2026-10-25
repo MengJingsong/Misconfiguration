@@ -1,0 +1,44 @@
+ARM f10a: files=61 bytes=634761121 levels={1: 10, 2: 51} input=634552951 peak_table_du=1273951171 (x2.01 input) readback=600000/600000 compact_ms=6134 compacted_lines=1 biggest=[10486314, 10486305, 10486305]
+RESULT PASS f10a: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'fanout_size': '10', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '10'}
+RESULT PASS f10a: no data loss (read-back == rows written) :: 600000 vs 600000
+RESULT PASS f10a: a Compacted line and no ERROR in the log segment :: 1 lines, errors []
+RESULT PASS f10a: no L0 output (major writer labels from L1) :: {1: 10, 2: 51}
+RESULT PASS f10a: every non-final file in (S, S + one partition] :: see non-final check below
+RESULT PASS f10a: all but at most one file are > S and <= S + ~11 KiB :: max excess 554, files <= S: 1
+RESULT PASS f10a: level histogram = fill by F^n :: observed {1: 10, 2: 51} expected {1: 10, 2: 51}
+ARM f2: files=61 bytes=634758356 levels={1: 2, 2: 4, 3: 8, 4: 16, 5: 31} input=634548224 peak_table_du=1274533453 (x2.01 input) readback=600000/600000 compact_ms=7191 compacted_lines=1 biggest=[10486265, 10486256, 10486255]
+RESULT PASS f2: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'fanout_size': '2', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '10'}
+RESULT PASS f2: no data loss (read-back == rows written) :: 600000 vs 600000
+RESULT PASS f2: a Compacted line and no ERROR in the log segment :: 1 lines, errors []
+RESULT PASS f2: no L0 output (major writer labels from L1) :: {1: 2, 2: 4, 3: 8, 4: 16, 5: 31}
+RESULT PASS f2: every non-final file in (S, S + one partition] :: see non-final check below
+RESULT PASS f2: all but at most one file are > S and <= S + ~11 KiB :: max excess 505, files <= S: 1
+RESULT PASS f2: level histogram = fill by F^n :: observed {1: 2, 2: 4, 3: 8, 4: 16, 5: 31} expected {1: 2, 2: 4, 3: 8, 4: 16, 5: 31}
+ARM f31: files=61 bytes=634763173 levels={1: 31, 2: 30} input=634555114 peak_table_du=1271448663 (x2.00 input) readback=600000/600000 compact_ms=6168 compacted_lines=1 biggest=[10486341, 10486340, 10486331]
+RESULT PASS f31: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'fanout_size': '31', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '10'}
+RESULT PASS f31: no data loss (read-back == rows written) :: 600000 vs 600000
+RESULT PASS f31: a Compacted line and no ERROR in the log segment :: 1 lines, errors []
+RESULT PASS f31: no L0 output (major writer labels from L1) :: {1: 31, 2: 30}
+RESULT PASS f31: every non-final file in (S, S + one partition] :: see non-final check below
+RESULT PASS f31: all but at most one file are > S and <= S + ~11 KiB :: max excess 581, files <= S: 1
+RESULT PASS f31: level histogram = fill by F^n :: observed {1: 31, 2: 30} expected {1: 31, 2: 30}
+ARM s40: files=16 bytes=634759044 levels={1: 10, 2: 6} input=634555048 peak_table_du=1282159040 (x2.02 input) readback=600000/600000 compact_ms=6661 compacted_lines=1 biggest=[41943926, 41943858, 41943846]
+RESULT PASS s40: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'fanout_size': '10', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '40'}
+RESULT PASS s40: no data loss (read-back == rows written) :: 600000 vs 600000
+RESULT PASS s40: a Compacted line and no ERROR in the log segment :: 1 lines, errors []
+RESULT PASS s40: no L0 output (major writer labels from L1) :: {1: 10, 2: 6}
+RESULT PASS s40: every non-final file in (S, S + one partition] :: see non-final check below
+RESULT PASS s40: all but at most one file are > S and <= S + ~11 KiB :: max excess 886, files <= S: 1
+RESULT PASS s40: level histogram = fill by F^n :: observed {1: 10, 2: 6} expected {1: 10, 2: 6}
+ARM f10b: files=61 bytes=634758501 levels={1: 10, 2: 51} input=634557125 peak_table_du=1287815477 (x2.03 input) readback=600000/600000 compact_ms=6286 compacted_lines=1 biggest=[10486269, 10486258, 10486257]
+RESULT PASS f10b: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'fanout_size': '10', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '10'}
+RESULT PASS f10b: no data loss (read-back == rows written) :: 600000 vs 600000
+RESULT PASS f10b: a Compacted line and no ERROR in the log segment :: 1 lines, errors []
+RESULT PASS f10b: no L0 output (major writer labels from L1) :: {1: 10, 2: 51}
+RESULT PASS f10b: every non-final file in (S, S + one partition] :: see non-final check below
+RESULT PASS f10b: all but at most one file are > S and <= S + ~11 KiB :: max excess 509, files <= S: 1
+RESULT PASS f10b: level histogram = fill by F^n :: observed {1: 10, 2: 51} expected {1: 10, 2: 51}
+RESULT FAIL F sweep + repeat: N within +-2 of 65, B within one file (~10 MiB + a partition) :: N={'f10a': 61, 'f2': 61, 'f31': 61, 'f10b': 61} B={'f10a': 634761121, 'f2': 634758356, 'f31': 634763173, 'f10b': 634758501}
+RESULT PASS peak table du ~ 2x input, the same for every F (within 15 %) :: ratios {'f10a': 2.01, 'f2': 2.01, 'f31': 2.0, 'f10b': 2.03}
+RESULT PASS control: S=40 gives ~16 files, total bytes unchanged :: files=16 bytes=634759044 vs 634761121
+SUMMARY 1 FAIL of 38

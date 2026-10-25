@@ -1,0 +1,24 @@
+PASS boundary N=1: totals N MiB-1 -> 0; N MiB -> 1; N MiB+1 -> 1 (single and 3-way split) :: {-1: ('0', '0', '1048575'), 0: ('1', '1', '1048576'), 1: ('1', '1', '1048577')}
+PASS mixed L0+L1 -> 1, all-L1 -> 2 at N=1 :: 1, 2
+PASS boundary N=5: totals N MiB-1 -> 0; N MiB -> 1; N MiB+1 -> 1 (single and 3-way split) :: {-1: ('0', '0', '5242879'), 0: ('1', '1', '5242880'), 1: ('1', '1', '5242881')}
+PASS mixed L0+L1 -> 1, all-L1 -> 2 at N=5 :: 1, 2
+PASS boundary N=20: totals N MiB-1 -> 0; N MiB -> 1; N MiB+1 -> 1 (single and 3-way split) :: {-1: ('0', '0', '20971519'), 0: ('1', '1', '20971520'), 1: ('1', '1', '20971521')}
+PASS mixed L0+L1 -> 1, all-L1 -> 2 at N=20 :: 1, 2
+PASS boundary N=160: totals N MiB-1 -> 0; N MiB -> 1; N MiB+1 -> 1 (single and 3-way split) :: {-1: ('0', '0', '167772159'), 0: ('1', '1', '167772160'), 1: ('1', '1', '167772161')}
+PASS mixed L0+L1 -> 1, all-L1 -> 2 at N=160 :: 1, 2
+PASS sets N=1: Set A (<N) -> 0, Set B (>N) -> 1 :: A [('0', 0.791), ('0', 0.79), ('0', 0.79)] B [('1', 1.483), ('1', 1.483), ('1', 1.483)]
+PASS sets N=5: Set A (<N) -> 0, Set B (>N) -> 1 :: A [('0', 0.791), ('0', 0.791), ('0', 0.791)] B [('1', 1.483), ('1', 1.483), ('1', 1.483)]
+PASS sets N=20: Set A (<N) -> 0, Set B (>N) -> 1 :: A [('0', 0.791), ('0', 0.791), ('0', 0.791)] B [('1', 1.483), ('1', 1.483), ('1', 1.483)]
+PASS sets N=160: both sets far below -> level 0, single output :: [('0', '0', 0.185), ('0', '0', 0.185), ('0', '0', 0.185)]
+INFO N=1 Set B outputs (count, max MiB, levels): [(2, 1.0003376007080078, [1, 1]), (2, 1.000253677368164, [1, 1]), (2, 1.000260353088379, [1, 1])]
+INFO N=5 Set B outputs (count, max MiB, levels): [(2, 5.000345230102539, [1, 1]), (2, 5.000435829162598, [1, 1]), (2, 5.000049591064453, [1, 1])]
+INFO N=20 Set B outputs (count, max MiB, levels): [(2, 20.000977516174316, [1, 1]), (2, 20.000455856323242, [1, 1]), (2, 20.000614166259766, [1, 1])]
+INFO N=160 Set B outputs (count, max MiB, levels): [(1, 29.662582397460938, [0]), (1, 29.662718772888184, [0]), (1, 29.663613319396973, [0])]
+PASS Set B output files at N=1: each <= N MiB + 200 KiB (one partition) :: ok
+PASS Set B output files at N=5: each <= N MiB + 200 KiB (one partition) :: ok
+PASS Set B output files at N=20: each <= N MiB + 200 KiB (one partition) :: ok
+PASS positive control (B2h, same ~30 MiB input at every N): output file count grows as N shrinks :: {1: [29, 29, 29], 5: [6, 6, 6], 20: [2, 2, 2], 160: [1, 1, 1]}
+PASS same-input control: total output bytes ~ input bytes at every N (< 2% apart) :: 1.0001..1.0001
+PASS sum of outputs vs inputs differs by < 10% across all N :: 1.0001..1.0006
+PASS oversized (~15 MiB) partition at N=5: one output file > 5 MiB :: [15636778, 15636488, 15636474]
+ALL PREDICTIONS PASS

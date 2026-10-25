@@ -1,0 +1,21 @@
+label rows errors peakL0(MiB) L0target(MiB) peakFile(MiB) settledFile(MiB) settledLive(MiB) files median(MiB) max(MiB) drain-s
+N5     2000000 0     1833     20     2859     2055     2055 482     5.0     5.0 112
+N160   2000000 0     1832    640     3944     2047     2047 13   160.0   160.0 90
+N1024  2000000 0     2009   4096     3376     2049     2049 2  1006.8  1024.0 67
+S160   2000000 0     2007    640     4077     2047     2047 13   160.0   160.0 67
+PASS no write error; same row count :: {'N5': (0, 2000000), 'N160': (0, 2000000), 'N1024': (0, 2000000), 'S160': (0, 2000000)}
+PASS settled live bytes within ~10% across N=5,160,1024 :: {'N5': 2055, 'N160': 2047, 'N1024': 2049}
+PASS N5: median file ~ N MiB (0.8N..1.2N) and no file above N MiB + 5% :: median 5.0 max 5.0
+PASS N160: median file ~ N MiB (0.8N..1.2N) and no file above N MiB + 5% :: median 160.0 max 160.0
+PASS file count falls as N rises (positive control: the file-size histogram follows N) :: {'N5': 482, 'N160': 13, 'N1024': 2}
+PASS peak file bytes exceed the settled bytes in every main run (transient compaction space) :: {'N5': (2859, 2055), 'N160': (3944, 2047), 'N1024': (3376, 2049)}
+INFO N1024 limit check: peak L0 2009 MiB vs L0 target 4096 MiB -> limit NOT reached
+PASS S160 (compaction 1 MiB/s): L0 bytes exceed 4 x 160 = 640 MiB with no write error :: peak L0 2007 MiB
+INFO S160 lag-end per-level bytes [2104656588, 0, 0, 0, 0, 0, 0, 0, 0] count [204, 0, 0, 0, 0, 0, 0, 0, 0]
+INFO N5 settled per-level bytes [0, 52439310, 519785869, 1540154407, 0, 0, 0, 0, 0] count [0, 10, 100, 372, 0, 0, 0, 0, 0]
+INFO N160 settled per-level bytes [0, 1608402436, 503318573, 0, 0, 0, 0, 0, 0] count [0, 10, 3, 0, 0, 0, 0, 0, 0]
+INFO N1024 settled per-level bytes [0, 2111446086, 0, 0, 0, 0, 0, 0, 0] count [0, 2, 0, 0, 0, 0, 0, 0, 0]
+INFO S160 settled per-level bytes [0, 1608431235, 503318924, 0, 0, 0, 0, 0, 0] count [0, 10, 3, 0, 0, 0, 0, 0, 0]
+PASS every drain settled :: {'N5': 112, 'N160': 90, 'N1024': 67, 'S160': 67}
+PASS TRUNCATE control: file bytes after truncate < 1% of settled :: {'N5': 0, 'N160': 0, 'N1024': 0, 'S160': 0}
+ALL PASS

@@ -1,0 +1,727 @@
+14:18:25 == S160 start; tree=/users/jason92/cassandra-lcsC rows=2000000 spec={"compaction": "{'class':'LeveledCompactionStrategy','sstable_size_in_mb':'160'}", "throughput": "16MiB/s", "compactors": 1, "post_start": ["setcompactionthroughput 1"]}
+14:18:25 $ sudo mkdir -p /mnt/lcsrun && (mountpoint -q /mnt/lcsrun || sudo mount -t tmpfs -o size=24g tmpfs /mnt/lcsrun) && sudo chown $(id -u):$(id -g) /mnt/lcsrun
+
+14:18:25 $ rm -rf /mnt/lcsrun/* && mkdir -p /mnt/lcsrun/data /mnt/lcsrun/commitlog /mnt/lcsrun/hints /mnt/lcsrun/saved_caches
+
+14:18:25 $ ulimit -n 100000; cd /users/jason92/cassandra-lcsC && ( CASSANDRA_CONF=/users/jason92/stage4-logs/lcs/cluster/C/S160/conf CASSANDRA_LOG_DIR=/users/jason92/stage4-logs/lcs/cluster/C/S160/logs MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M setsid nohup bin/cassandra -f -p /users/jason92/stage4-logs/lcs/cluster/C/S160/pid < /dev/null > /users/jason92/stage4-logs/lcs/cluster/C/S160/node.out 2>&1 & )
+
+14:19:06 node up, pid 1619268
+14:19:06 $ /users/jason92/cassandra-lcsC/bin/cqlsh 127.0.0.1 -e "CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+
+14:19:07 $ /users/jason92/cassandra-lcsC/bin/cqlsh 127.0.0.1 -e "CREATE TABLE IF NOT EXISTS ks.standard1 (key blob PRIMARY KEY, \"C0\" blob, \"C1\" blob, \"C2\" blob, \"C3\" blob, \"C4\" blob) WITH compression = {'enabled':'false'} AND compaction = {'class':'LeveledCompactionStrategy','sstable_size_in_mb':'160'}"
+
+14:19:08 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 setcompactionthroughput 1
+14:19:08 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+
+14:19:09 $ /users/jason92/cassandra-lcsC/tools/bin/cassandra-stress write n=2000000 -col 'size=FIXED(256)' 'n=FIXED(4)' -pop seq=1..2000000 -schema keyspace=ks -rate threads=16 -node 127.0.0.1  > /users/jason92/stage4-logs/lcs/cluster/C/S160/stress-write.txt 2>&1; tail -n 45 /users/jason92/stage4-logs/lcs/cluster/C/S160/stress-write.txt | head -n 40
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 0
+	Write Latency: NaN ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		SSTables in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 0
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 0
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 0
+		Local write latency: NaN ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:19:09 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            4          
+data compacted                   48357      
+compressed data compacted        14128      
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.27/minute
+mean rate                        359.57/hour
+compaction throughput (MiB/s)    1.0        
+
+14:19:30 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1146073
+	Write Latency: 0.011872159103303194 ms
+	Pending Flushes: 1
+		Table: standard1
+		SSTable count: 10
+		Old SSTable count: 0
+		Max SSTable size: 103.558MiB
+		SSTables in each level: [10/4, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1037265784, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1054551851
+		Space used (total): 1054551851
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 767526
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1080508
+		Memtable cell count: 38635
+		Memtable data size: 43868627
+		Memtable off heap memory used: 0
+		Memtable switch count: 11
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1150975
+		Local write latency: 0.012 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 1
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 989.214MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 601968
+		Bloom filter off heap memory used: 601888
+		Index summary off heap memory used: 165638
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:19:32 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        5                                                                    
+ks                                   standard1       5                                                    
+compactions completed                4                                                                    
+data compacted                       48357                                                                
+compressed data compacted            14128                                                                
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.26/minute                                                          
+mean rate                            228.88/hour                                                          
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+6e3a7880-cfd7-11f1-bf72-45ccdc6680bc Compaction      ks       standard1 15530159  183311939 bytes 8.47%   
+active compaction remaining time     0h02m40s                                                             
+
+5304,     0.2,     0.2,     0.3,     0.4,     0.6,    28.1,   19.0,  0.04691,      0,      1,      26,      26,       0,     761
+total,                                               1370051,   75105,   75105,   75105,     0.2,     0.2,     0.3,     0.4,     0.6,    21.3,   20.0,  0.04457,      0,      1,      19,      19,       0,     752
+total,                                               1445141,   75090,   75090,   75090,     0.2,     0.2,     0.3,     0.4,     1.3,    18.8,   21.0,  0.04245,      0,      1,      17,      17,       0,     766
+total,                                               1500012,   54871,   54871,   54871,     0.3,     0.2,     0.3,     0.5,     1.6,   152.3,   22.0,  0.04088,      0,      3,     129,     206,      45,    1476
+total,                                               1573483,   73471,   73471,   73471,     0.2,     0.2,     0.3,     0.4,     0.7,    14.5,   23.0,  0.03908,      0,      1,      13,      13,       0,     870
+total,                                               1648808,   75325,   75325,   75325,     0.2,     0.2,     0.3,     0.4,     0.7,    22.2,   24.0,  0.03748,      0,      1,      20,      20,       0,     802
+total,                                               1722860,   74052,   74052,   74052,     0.2,     0.2,     0.3,     0.4,     0.6,    19.5,   25.0,  0.03597,      0,      1,      18,      18,       0,     762
+total,                                               1798426,   75566,   75566,   75566,     0.2,     0.2,     0.3,     0.4,     0.6,    19.8,   26.0,  0.03461,      0,      1,      18,      18,       0,     763
+total,                                               1868613,   70187,   70187,   70187,     0.2,     0.2,     0.3,     0.4,     0.6,     2.2,   27.0,  0.03336,      0,      1,      60,      60,       0,    -189
+total,                                               1930550,   61937,   61937,   61937,     0.3,     0.2,     0.3,     0.4,     0.7,   176.8,   28.0,  0.03216,      0,      1,     115,     115,       0,    1658
+total,                                               2000000,   71592,   71592,   71592,     0.2,     0.2,     0.3,     0.4,     0.9,    17.4,   29.0,  0.03104,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   69,037 op/s  [WRITE: 69,037 op/s]
+Partition rate            :   69,037 pk/s  [WRITE: 69,037 pk/s]
+Row rate                  :   69,037 row/s [WRITE: 69,037 row/s]
+Latency mean              :    0.2 ms [WRITE: 0.2 ms]
+Latency median            :    0.2 ms [WRITE: 0.2 ms]
+Latency 95th percentile   :    0.3 ms [WRITE: 0.3 ms]
+Latency 99th percentile   :    0.4 ms [WRITE: 0.4 ms]
+Latency 99.9th percentile :    0.9 ms [WRITE: 0.9 ms]
+Latency max               :  176.8 ms [WRITE: 176.8 ms]
+Total partitions          :  2,000,000 [WRITE: 2,000,000]
+Total errors              :          0 [WRITE: 0]
+Total GC count            : 32
+Total GC memory           : 22.564 GiB
+Total GC time             :    1.2 seconds
+
+14:19:47 stress write finished in 38s
+14:19:47 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 2050000
+	Write Latency: 0.011837434146341464 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 20
+		Old SSTable count: 0
+		Max SSTable size: 103.558MiB
+		SSTables in each level: [20/4, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [2104656588, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 2139732719
+		Space used (total): 2139732719
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1557546
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1973228
+		Memtable cell count: 45968
+		Memtable data size: 52081744
+		Memtable off heap memory used: 0
+		Memtable switch count: 20
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 2050000
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.960GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1221568
+		Bloom filter off heap memory used: 1221408
+		Index summary off heap memory used: 336138
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:19:48 $ df -B1 /mnt/lcsrun | tail -1
+tmpfs          25769803776 2258411520 23511392256   9% /mnt/lcsrun
+
+14:19:48 snapshot lag-end: bytes=2169682766 files=21 levels=[2104656588, 0, 0, 0, 0, 0, 0, 0, 0]
+14:19:48 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 setcompactionthroughput 0
+
+14:19:49 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 setconcurrentcompactors 4
+
+14:19:53 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 2050000
+	Write Latency: 0.011837434146341464 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 24
+		Old SSTable count: 0
+		Max SSTable size: 162.669MiB
+		SSTables in each level: [18/4, 2, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1921344649, 183215943, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 2139743686
+		Space used (total): 2139743686
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 2162668
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1973228
+		Memtable cell count: 45968
+		Memtable data size: 52081744
+		Memtable off heap memory used: 0
+		Memtable switch count: 20
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 2050000
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.960GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1730120
+		Bloom filter off heap memory used: 1729928
+		Index summary off heap memory used: 432740
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:19:55 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors                4                                                                             
+pending tasks                        9                                                                             
+ks                                   standard1               9                                                     
+compactions completed                5                                                                             
+data compacted                       183360296                                                                     
+compressed data compacted            183326067                                                                     
+compactions aborted                  0                                                                             
+compactions reduced                  0                                                                             
+sstables dropped from compaction     0                                                                             
+15 minute rate                       0.32/minute                                                                   
+mean rate                            210.91/hour                                                                   
+compaction throughput (MiB/s)        throttling disabled (0)                                                       
+id                                   compaction type         keyspace table     completed total      unit  progress
+80579de0-cfd7-11f1-bf72-45ccdc6680bc Compaction              ks       standard1 772410438 2104560592 bytes 36.70%  
+active compaction remaining time     n/a                                                                           
+
+14:20:10 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tpstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+14:20:11 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            9                      
+data compacted                   2791239896             
+compressed data compacted        2791205667             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   0.58/minute            
+mean rate                        318.03/hour            
+compaction throughput (MiB/s)    throttling disabled (0)
+
+14:20:12 drain[write] busy=0 estimate=0 bytes=2146838717
+14:20:16 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 2050000
+	Write Latency: 0.011837434146341464 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 13
+		Old SSTable count: 0
+		Max SSTable size: 162.657MiB
+		SSTables in each level: [0, 10, 3, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 1608431235, 503318924, 0, 0, 0, 0, 0, 0]
+		Space used (live): 2146838717
+		Space used (total): 2146838717
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1629992
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1973228
+		Memtable cell count: 45968
+		Memtable data size: 52081744
+		Memtable off heap memory used: 0
+		Memtable switch count: 20
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 2050000
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.967GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1294200
+		Bloom filter off heap memory used: 1294096
+		Index summary off heap memory used: 335896
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:20:17 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            9                      
+data compacted                   2791239896             
+compressed data compacted        2791205667             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   0.58/minute            
+mean rate                        300.87/hour            
+compaction throughput (MiB/s)    throttling disabled (0)
+
+14:20:32 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tpstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+14:20:34 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            9                      
+data compacted                   2791239896             
+compressed data compacted        2791205667             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   0.57/minute            
+mean rate                        260.83/hour            
+compaction throughput (MiB/s)    throttling disabled (0)
+
+14:20:35 drain[write] busy=0 estimate=0 bytes=2146838717
+14:20:38 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 2050000
+	Write Latency: 0.011837434146341464 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 13
+		Old SSTable count: 0
+		Max SSTable size: 162.657MiB
+		SSTables in each level: [0, 10, 3, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 1608431235, 503318924, 0, 0, 0, 0, 0, 0]
+		Space used (live): 2146838717
+		Space used (total): 2146838717
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1629992
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1973228
+		Memtable cell count: 45968
+		Memtable data size: 52081744
+		Memtable off heap memory used: 0
+		Memtable switch count: 20
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 2050000
+		Local write latency: 0.012 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.967GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1294200
+		Bloom filter off heap memory used: 1294096
+		Index summary off heap memory used: 335896
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:20:39 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            9                      
+data compacted                   2791239896             
+compressed data compacted        2791205667             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   0.56/minute            
+mean rate                        249.25/hour            
+compaction throughput (MiB/s)    throttling disabled (0)
+
+14:20:55 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tpstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+14:20:56 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            9                      
+data compacted                   2791239896             
+compressed data compacted        2791205667             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   0.55/minute            
+mean rate                        220.88/hour            
+compaction throughput (MiB/s)    throttling disabled (0)
+
+14:20:57 drain[write] busy=0 estimate=0 bytes=2146838717
+14:20:57 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 2050000
+	Write Latency: 0.011837434146341464 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 13
+		Old SSTable count: 0
+		Max SSTable size: 162.657MiB
+		SSTables in each level: [0, 10, 3, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 1608431235, 503318924, 0, 0, 0, 0, 0, 0]
+		Space used (live): 2146838717
+		Space used (total): 2146838717
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1629992
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1973228
+		Memtable cell count: 45968
+		Memtable data size: 52081744
+		Memtable off heap memory used: 0
+		Memtable switch count: 20
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 2050000
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.967GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1294200
+		Bloom filter off heap memory used: 1294096
+		Index summary off heap memory used: 335896
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:20:58 $ df -B1 /mnt/lcsrun | tail -1
+tmpfs          25769803776 2234142720 23535661056   9% /mnt/lcsrun
+
+14:20:58 snapshot settled-write: bytes=2146838717 files=13 levels=[0, 1608431235, 503318924, 0, 0, 0, 0, 0, 0]
+14:21:04 $ /users/jason92/cassandra-lcsC/bin/cqlsh 127.0.0.1 -e "TRUNCATE ks.standard1"
+
+14:21:15 $ /users/jason92/cassandra-lcsC/bin/nodetool -h 127.0.0.1 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 2050000
+	Write Latency: 0.011837434146341464 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		SSTables in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 0
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 21
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 2050000
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+14:21:16 $ df -B1 /mnt/lcsrun | tail -1
+tmpfs          25769803776 53534720 25716269056   1% /mnt/lcsrun
+
+14:21:16 snapshot truncated: bytes=0 files=0 levels=[0, 0, 0, 0, 0, 0, 0, 0, 0]
+14:21:21 daemons left after stop: none
+14:21:21 == S160 done rc=0 node stopped=True

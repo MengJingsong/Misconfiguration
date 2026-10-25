@@ -1,0 +1,46 @@
+ARM f10: F=10 S=4168893 total=208444678 outputs=50 bytes=208444678 rows=200000 partitions=20000 maxPartition=10428 hist={1: 10, 2: 40}
+RESULT PASS f10: no rows lost, no exception :: rows=200000 partitions=20000
+RESULT PASS f10: no level-0 output :: {1: 10, 2: 40}
+RESULT PASS f10: every non-final file in (S, S + maxPartition] :: min=4168900 max=4179318
+RESULT PASS f10: level histogram = fill by F^n :: observed {1: 10, 2: 40} expected {1: 10, 2: 40}
+RESULT PASS f10: level-increment events at the cumulative bytes > capacity :: currentLevel steps coincide with twil reset
+ARM f10s100: F=10 S=2084497 total=208449758 outputs=100 bytes=208449758 rows=200000 partitions=20000 maxPartition=10428 hist={1: 10, 2: 90}
+RESULT PASS f10s100: no rows lost, no exception :: rows=200000 partitions=20000
+RESULT PASS f10s100: no level-0 output :: {1: 10, 2: 90}
+RESULT PASS f10s100: every non-final file in (S, S + maxPartition] :: min=2084500 max=2094918
+RESULT PASS f10s100: level histogram = fill by F^n :: observed {1: 10, 2: 90} expected {1: 10, 2: 90}
+RESULT PASS f10s100: level-increment events at the cumulative bytes > capacity :: currentLevel steps coincide with twil reset
+ARM f10s20: F=10 S=10426238 total=208524770 outputs=20 bytes=208524770 rows=200000 partitions=20000 maxPartition=10428 hist={1: 10, 2: 10}
+RESULT PASS f10s20: no rows lost, no exception :: rows=200000 partitions=20000
+RESULT PASS f10s20: no level-0 output :: {1: 10, 2: 10}
+RESULT PASS f10s20: every non-final file in (S, S + maxPartition] :: min=10426250 max=10436658
+RESULT PASS f10s20: level histogram = fill by F^n :: observed {1: 10, 2: 10} expected {1: 10, 2: 10}
+RESULT PASS f10s20: level-increment events at the cumulative bytes > capacity :: currentLevel steps coincide with twil reset
+ARM f2: F=2 S=4170337 total=208516873 outputs=50 bytes=208516873 rows=200000 partitions=20000 maxPartition=10428 hist={1: 2, 2: 4, 3: 8, 4: 16, 5: 20}
+RESULT PASS f2: no rows lost, no exception :: rows=200000 partitions=20000
+RESULT PASS f2: no level-0 output :: {1: 2, 2: 4, 3: 8, 4: 16, 5: 20}
+RESULT PASS f2: every non-final file in (S, S + maxPartition] :: min=4170350 max=4180755
+RESULT PASS f2: level histogram = fill by F^n :: observed {1: 2, 2: 4, 3: 8, 4: 16, 5: 20} expected {1: 2, 2: 4, 3: 8, 4: 16, 5: 20}
+RESULT PASS f2: level-increment events at the cumulative bytes > capacity :: currentLevel steps coincide with twil reset
+ARM f4: F=4 S=4168761 total=208438059 outputs=50 bytes=208438059 rows=200000 partitions=20000 maxPartition=10428 hist={1: 4, 2: 16, 3: 30}
+RESULT PASS f4: no rows lost, no exception :: rows=200000 partitions=20000
+RESULT PASS f4: no level-0 output :: {1: 4, 2: 16, 3: 30}
+RESULT PASS f4: every non-final file in (S, S + maxPartition] :: min=4168770 max=4179188
+RESULT PASS f4: level histogram = fill by F^n :: observed {1: 4, 2: 16, 3: 30} expected {1: 4, 2: 16, 3: 30}
+RESULT PASS f4: level-increment events at the cumulative bytes > capacity :: currentLevel steps coincide with twil reset
+ARM f41: F=41 S=4168788 total=208439423 outputs=50 bytes=208439423 rows=200000 partitions=20000 maxPartition=10428 hist={1: 41, 2: 9}
+RESULT PASS f41: no rows lost, no exception :: rows=200000 partitions=20000
+RESULT PASS f41: no level-0 output :: {1: 41, 2: 9}
+RESULT PASS f41: every non-final file in (S, S + maxPartition] :: min=4168790 max=4179198
+RESULT PASS f41: level histogram = fill by F^n :: observed {1: 41, 2: 9} expected {1: 41, 2: 9}
+RESULT PASS f41: level-increment events at the cumulative bytes > capacity :: currentLevel steps coincide with twil reset
+RESULT PASS F sweep: file count N the same (+-1) across F :: N={'f2': 50, 'f4': 50, 'f10': 50, 'f41': 50}
+RESULT PASS F sweep: total bytes B the same within one file :: B={'f2': 208516873, 'f4': 208438059, 'f10': 208444678, 'f41': 208439423} spread=78814 oneFile=4180765
+RESULT PASS f2: histogram as predicted for 50 files :: observed {1: 2, 2: 4, 3: 8, 4: 16, 5: 20} predicted {1: 2, 2: 4, 3: 8, 4: 16, 5: 20}
+RESULT PASS f4: histogram as predicted for 50 files :: observed {1: 4, 2: 16, 3: 30} predicted {1: 4, 2: 16, 3: 30}
+RESULT PASS f10: histogram as predicted for 50 files :: observed {1: 10, 2: 40} predicted {1: 10, 2: 40}
+RESULT PASS f41: histogram as predicted for 50 files :: observed {1: 41, 2: 9} predicted {1: 41, 2: 9}
+RESULT PASS control: N ~ 20 / 50 / 100 for total/20, /50, /100 :: {'f10s20': 20, 'f10s100': 100, 'f10': 50}
+RESULT PASS control: total bytes unchanged (within one file) :: {'f10s20': 208524770, 'f10s100': 208449758, 'f10': 208444678}
+RESULT PASS control: per-file bytes track S :: mean non-final file within 1% of S
+SUMMARY ALL PASS

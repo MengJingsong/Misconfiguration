@@ -1,0 +1,45 @@
+ARM s5: files=80 bytes=417236864 levels={1: 10, 2: 70} input=416906351 peak_table_du=836042782 (x2.01) readback=400000/400000 compact_ms=3618 biggest=[5246908, 5246896, 5246886]
+RESULT PASS s5: no data loss :: 400000 vs 400000
+RESULT PASS s5: a Compacted line and no ERROR :: 1 lines, errors []
+RESULT PASS s5: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '5'}
+RESULT PASS s5: no L0 output :: {1: 10, 2: 70}
+RESULT PASS s5: file count ~ live/S (+-1 file, +-5 %) :: files=80 live/S=79.58 (B3f ~80)
+RESULT PASS s5: non-final files in (S, S + ~11 KiB] :: max excess 4028; files <= S: 1
+RESULT PASS s5: levels: <=10 in L1, rest L2 :: {1: 10, 2: 70}
+ARM s20: files=20 bytes=417234639 levels={1: 10, 2: 10} input=416901578 peak_table_du=835496752 (x2.00) readback=400000/400000 compact_ms=4000 biggest=[20976742, 20976722, 20976682]
+RESULT PASS s20: no data loss :: 400000 vs 400000
+RESULT PASS s20: a Compacted line and no ERROR :: 1 lines, errors []
+RESULT PASS s20: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '20'}
+RESULT PASS s20: no L0 output :: {1: 10, 2: 10}
+RESULT PASS s20: file count ~ live/S (+-1 file, +-5 %) :: files=20 live/S=19.90 (B3f ~20)
+RESULT PASS s20: non-final files in (S, S + ~11 KiB] :: max excess 5222; files <= S: 1
+RESULT PASS s20: levels: <=10 in L1, rest L2 :: {1: 10, 2: 10}
+ARM s80: files=5 bytes=417234048 levels={1: 5} input=416905708 peak_table_du=835476668 (x2.00) readback=400000/400000 compact_ms=4424 biggest=[83895646, 83895313, 83895277]
+RESULT PASS s80: no data loss :: 400000 vs 400000
+RESULT PASS s80: a Compacted line and no ERROR :: 1 lines, errors []
+RESULT PASS s80: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '80'}
+RESULT PASS s80: no L0 output :: {1: 5}
+RESULT PASS s80: file count ~ live/S (+-1 file, +-5 %) :: files=5 live/S=4.97 (B3f ~5)
+RESULT PASS s80: non-final files in (S, S + ~11 KiB] :: max excess 9566; files <= S: 1
+RESULT PASS s80: levels: <=10 in L1, rest L2 :: {1: 5}
+ARM s160: files=3 bytes=417233889 levels={1: 3} input=416899643 peak_table_du=835486990 (x2.00) readback=400000/400000 compact_ms=4755 biggest=[167780479, 167779760, 81673650]
+RESULT PASS s160: no data loss :: 400000 vs 400000
+RESULT PASS s160: a Compacted line and no ERROR :: 1 lines, errors []
+RESULT PASS s160: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+RESULT PASS s160: no L0 output :: {1: 3}
+RESULT PASS s160: file count ~ live/S (+-1 file, +-5 %) :: files=3 live/S=2.49 (B3f ~3)
+RESULT PASS s160: non-final files in (S, S + ~11 KiB] :: max excess 8319; files <= S: 1
+RESULT PASS s160: levels: <=10 in L1, rest L2 :: {1: 3}
+ARM stcs: files=1 bytes=417232796 levels={0: 1} input=416909148 peak_table_du=835570540 (x2.00) readback=400000/400000 compact_ms=4700 biggest=[417232796]
+RESULT PASS stcs: no data loss :: 400000 vs 400000
+RESULT PASS stcs: a Compacted line and no ERROR :: 1 lines, errors []
+RESULT PASS stcs control: one file regardless :: files=1
+ARM wide20: files=21 bytes=480148482 levels={1: 10, 2: 11} input=479817836 peak_table_du=955324420 (x1.99) readback=400060/400060 compact_ms=4229 biggest=[75599843, 20976652, 20976592]
+RESULT PASS wide20: no data loss :: 400060 vs 400060
+RESULT PASS wide20: a Compacted line and no ERROR :: 1 lines, errors []
+RESULT PASS wide20: option applied :: {'class': 'org.apache.cassandra.db.compaction.LeveledCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4', 'sstable_size_in_mb': '20'}
+RESULT PASS wide20: no L0 output :: {1: 10, 2: 11}
+RESULT PASS wide20: one file >= 60 MiB (> S) :: biggest [75599843, 20976652, 20976592]
+RESULT PASS live bytes the same across S (within one default-size file or 5 %) :: {'s5': 417236864, 's20': 417234639, 's80': 417234048, 's160': 417233889}
+RESULT PASS peak table du ~ input + output (1.5 to 2.3 x input) for every S :: {'s5': 2.01, 's20': 2.0, 's80': 2.0, 's160': 2.0}
+SUMMARY ALL PASS

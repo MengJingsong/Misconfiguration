@@ -1,0 +1,44 @@
+ARM s10: S=20852608 total=208526085 outputs=10 maxPartition=10428 calls=19999 switches=9 levels={1: 10}
+RESULT PASS s10: rows preserved :: outputRows=200000 partitionsAppended=20000
+RESULT PASS s10: operand at every true return > S, at every false return <= S :: min true=20852620 max false=20852590
+RESULT PASS s10: every non-final output in (S, S + maxPartition + granularity] :: min=20852620 max=20863008 S=20852608 maxPart=10428 gran=0 excess_max=10400
+RESULT PASS s10: final output <= S + maxPartition + granularity :: final=20810726
+RESULT PASS s10: output count ~ 10 (+-10%) :: outputs=10
+RESULT PASS s10: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+INFO s10: fill-rule histogram for 10 files at F=10: {1: 10}; observed {1: 10}
+RESULT PASS s10: all outputs in L1 :: {1: 10}
+ARM s200: S=1042242 total=208448453 outputs=199 maxPartition=10428 calls=19999 switches=198 levels={1: 10, 2: 100, 3: 89}
+RESULT PASS s200: rows preserved :: outputRows=200000 partitionsAppended=20000
+RESULT PASS s200: operand at every true return > S, at every false return <= S :: min true=1042250 max false=1042240
+RESULT PASS s200: every non-final output in (S, S + maxPartition + granularity] :: min=1042250 max=1052668 S=1042242 maxPart=10428 gran=0 excess_max=10426
+RESULT PASS s200: final output <= S + maxPartition + granularity :: final=969334
+RESULT PASS s200: output count ~ 200 (+-10%) :: outputs=199
+RESULT PASS s200: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+INFO s200: fill-rule histogram for 199 files at F=10: {1: 10, 2: 100, 3: 89}; observed {1: 10, 2: 100, 3: 89}
+RESULT PASS s200: ~10 / 100 / rest in L1 / L2 / L3 :: {1: 10, 2: 100, 3: 89}
+ARM s50: S=4170314 total=208515706 outputs=50 maxPartition=10428 calls=19999 switches=49 levels={1: 10, 2: 40}
+RESULT PASS s50: rows preserved :: outputRows=200000 partitionsAppended=20000
+RESULT PASS s50: operand at every true return > S, at every false return <= S :: min true=4170334 max false=4170310
+RESULT PASS s50: every non-final output in (S, S + maxPartition + granularity] :: min=4170334 max=4180738 S=4170314 maxPart=10428 gran=0 excess_max=10424
+RESULT PASS s50: final output <= S + maxPartition + granularity :: final=3888744
+RESULT PASS s50: output count ~ 50 (+-10%) :: outputs=50
+RESULT PASS s50: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+INFO s50: fill-rule histogram for 50 files at F=10: {1: 10, 2: 40}; observed {1: 10, 2: 40}
+RESULT PASS s50: levels 10 in L1, 40 in L2, none else (as predicted for exactly 50 files) :: {1: 10, 2: 40} (outputs=50)
+ARM s50z: S=4181531 total=209076553 outputs=50 maxPartition=16458 calls=19999 switches=49 levels={1: 10, 2: 40}
+RESULT PASS s50z: rows preserved :: outputRows=200000 partitionsAppended=20000
+RESULT PASS s50z: operand at every true return > S, at every false return <= S :: min true=4189987 max false=4174743
+RESULT PASS s50z: every non-final output in (S, S + maxPartition + granularity] :: min=4191605 max=4192754 S=4181531 maxPart=16458 gran=32832 excess_max=11223
+RESULT PASS s50z: final output <= S + maxPartition + granularity :: final=3669931
+INFO s50z: fill-rule histogram for 50 files at F=10: {1: 10, 2: 40}; observed {1: 10, 2: 40}
+INFO s50z levels {1: 10, 2: 40}
+ARM smax: S=9223372036854775807 total=208442706 outputs=1 maxPartition=10428 calls=19999 switches=0 levels={1: 1}
+RESULT PASS smax: rows preserved :: outputRows=200000 partitionsAppended=20000
+RESULT PASS smax: operand at every true return > S, at every false return <= S :: min true=None max false=208432288
+RESULT PASS smax: exactly one output :: outputs=1
+ARM wide: S=4194304 total=116969438 outputs=26 maxPartition=10418 calls=10000 switches=25 levels={1: 10, 2: 16}
+RESULT PASS wide: rows preserved :: outputRows=112288 partitionsAppended=10001
+RESULT PASS wide: operand at every true return > S, at every false return <= S :: min true=4198414 max false=4188036
+RESULT PASS wide: exactly one output above S + maxSmallPartition :: outputs above: [13352382] (S=4194304, maxPartition=10418)
+RESULT PASS wide: that output >= 12 MiB and <= 12 MiB + S + one small partition :: size=13352382
+SUMMARY ALL PASS

@@ -1,0 +1,15 @@
+PASS step2 L0 bytes in 38-46 MiB for all 18 runs, no write error :: ok
+PASS step2 L0 ratio at size 1 ~ 10.13x (scales 1/size) :: min 10.128 max 10.129
+PASS step2 L0 ratio at size 2 ~ 5.07x (scales 1/size) :: min 5.064 max 5.064
+PASS step2 L0 ratio at size 4 ~ 2.53x (scales 1/size) :: min 2.532 max 2.532
+PASS step3 sum over levels after drain >= ingested value bytes :: ok
+PASS step3 sum over levels after drain flat across the 6 knob pairs (spread < 5%) :: min 42517308 max 42518999 spread 0.0000
+INFO L1 ratio after drain: min 0.906 max 1.001
+PASS step4 L8 over target: null candidate, one WARN, bytes unchanged (3 reps) :: 2230139>1048576; 2230569>1048576; 2231781>1048576
+PASS step5 output sstable > 1 MiB (size knob) for the ~5 MiB partition :: maxFile [5267090, 5266687, 5266615]
+PASS step6 arithmetic exact :: 167772160000
+PASS step6 overflow input throws :: RuntimeException
+PASS step7 control: candidates <= max_threshold (4 and 32), 4 < 32 so it binds :: mt4 [4, 4, 4] mt32 [32, 32, 32]
+PASS control: truncate brings level bytes to 0 in every run :: 18 runs
+PASS no write refused / exception in any run :: ok
+ALL PREDICTIONS PASS

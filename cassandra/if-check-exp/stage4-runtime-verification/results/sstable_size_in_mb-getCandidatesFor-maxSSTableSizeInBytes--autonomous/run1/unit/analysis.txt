@@ -1,0 +1,17 @@
+PASS phase1 N=1: L0 total > size and the candidate set contains the L1 sstable (3 reps) :: [('true', 14879365, 12.163), ('true', 14878476, 12.162), ('true', 14877393, 12.161)]
+PASS phase1 N=5: L0 total > size and the candidate set contains the L1 sstable (3 reps) :: [('true', 14876302, 2.432), ('true', 14875268, 2.432), ('true', 14874447, 2.432)]
+PASS phase1 N=160: L0 total < size, no L1 sstable in the candidate set, output level 0 (3 reps) :: [('false', '0', 0.076), ('false', '0', 0.076), ('false', '0', 0.076)]
+PASS phase1 N=1: candidate carries maxSSTableBytes = N MiB :: 1048576
+PASS phase1 N=5: candidate carries maxSSTableBytes = N MiB :: 5242880
+PASS phase1 N=160: candidate carries maxSSTableBytes = N MiB :: 167772160
+PASS step4 rep1: size-5 task splits 12.2 MiB into >=2 files, each <= 5 MiB + 200 KiB (one partition) :: [2268442, 5242945, 5243337]
+PASS step4 rep1: single ~12 MiB partition gives one file > 5 MiB :: maxFile 12344824 outputs 1
+PASS step4 rep2: size-5 task splits 12.2 MiB into >=2 files, each <= 5 MiB + 200 KiB (one partition) :: [2268442, 5242955, 5242980]
+PASS step4 rep2: single ~12 MiB partition gives one file > 5 MiB :: maxFile 12344470 outputs 1
+PASS step4 rep3: size-5 task splits 12.2 MiB into >=2 files, each <= 5 MiB + 200 KiB (one partition) :: [2268442, 5242938, 5243026]
+PASS step4 rep3: single ~12 MiB partition gives one file > 5 MiB :: maxFile 12344413 outputs 1
+PASS phase2 L0 total ~ 200 MiB at size 1 and 160, all sstables level 0 :: p1 [212413250, 212404340, 212403504] p160 [212425310, 212422850, 212426344]
+PASS phase2 L0 total does not depend on the option (|p1-p160| < 2%) :: ok
+PASS phase2 L0 total exceeds the L0 cap formula 4 x size at size 1 (4 MiB) and 160 (640 MiB)? (160: no, 200 MiB < 640) :: p160 max 212426344 vs 640 MiB: limit NOT reached at 160
+PASS control: truncate brings table bytes to 0 :: ['0', '0', '0', '0', '0', '0']
+ALL PREDICTIONS PASS

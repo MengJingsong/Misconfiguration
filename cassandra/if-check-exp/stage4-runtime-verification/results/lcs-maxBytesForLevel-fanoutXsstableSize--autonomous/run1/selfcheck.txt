@@ -1,0 +1,21 @@
+[holds] U0 readings.txt and the console echo in ant.log hold the same readings: 491 readings from file, 491 from ant.log
+[holds] U0b ant reports 5 tests, 0 failures, 0 errors: Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 78.937 sec
+[holds] U1 step 2: 18 runs, 40 L0 sstables each, no write error, logged ratio = L0 bytes / (4 x size x MiB): L0 bytes 42479080..42484241 (40.5-40.5 MiB); size-1 ratio 10.13-10.13; size-4 2.53-2.53
+[holds] U2 step 3: level bytes after draining sum to the logged total, never below the ingested value bytes, flat across knobs: sum range 42517308..42518999 (spread 0.00004)
+[holds] U3 step 3: draining moves bytes between levels (L1 close to target) but not out of the table: [(1, 10, [0.953, 0.31, 0.0, 0.0]), (4, 2, [1.0, 0.784, 0.625, 0.0])]
+[holds] U4 step 4: the L8 WARN text itself shows bytes > maximum, the call returned null, level was 8: [('2230139', '1048576'), ('2230569', '1048576'), ('2231781', '1048576')]
+[holds] U5 step 5: output sstable of the ~5 MiB partition is larger than the 1 MiB size option: [5267090, 5266687, 5266615]
+[holds] U6 step 6: 10^3 x 160 MiB = logged value, level 0 = 4 x size, overflow input throws: 167772160000
+[holds] U7 step 7 control: candidates equal max_threshold (4 and 32) from 40 L0 sstables: {'mt4': [4, 4, 4], 'mt32': [32, 32, 32]}
+[holds] U8 truncate control: all 18 ladder runs end at 0 bytes: ok
+[holds] C1 every run: table created with the labelled compaction options, yaml throughput/compactors as specified, stress finished with 0 errors and 2,000,000 partitions: {'A': (True, True, 0, 2000000), 'B': (True, True, 0, 2000000), 'C': (True, True, 0, 2000000), 'D': (True, True, 0, 2000000), 'Aprime': (True, True, 0, 2000000)}
+[holds] C2 the drain boost (setcompactionthroughput 0) was issued in A, B, C, D and not in Aprime: {'A': True, 'B': True, 'C': True, 'D': True, 'Aprime': False}
+[holds] C3 each node exited cleanly (rc=0, daemon stopped); no ERROR line in any system.log: {'A': ('rc=0 daemons_stopped=True', 0), 'B': ('rc=0 daemons_stopped=True', 0), 'C': ('rc=0 daemons_stopped=True', 0), 'D': ('rc=0 daemons_stopped=True', 0), 'Aprime': ('rc=0 daemons_stopped=True', 0)}
+[holds] C4 peak L0 bytes (raw tablestats text) is >= 10x L0 target in A and C (>= 400 MiB), and above B's 640 MiB target: A 1872 B 1871 (2.92x) C 1870 MiB
+[holds] C5 peak live bytes and settled live bytes of A,B,C,D differ by less than 15% (here: less than 1%): peak live [1907, 1905, 1905, 1908] MiB, settled [1907, 1905, 1905, 1908] MiB, spreads 0.0012 / 0.0012
+[holds] C6 after the drain L0 is empty and every level below the top sits at or below its target (ratios <= 1.001): {'A': (0, [1.0, 0.993], 3), 'B': (0, [0.971], 2), 'C': (0, [1.0, 1.0, 1.0, 1.0, 1.0, 0.987], 7), 'Aprime': (0, [0.981, 0.995], 3)}
+[holds] C7 total live bytes before and after the drain agree within 1% (bytes moved between levels, none removed): {'A': (1904, 1907), 'B': (1904, 1905), 'C': (1902, 1905), 'D': (1905, 1908), 'Aprime': (1905, 1907)}
+[holds] C8 control A': fast compaction from the start lowers the peak L0 versus A and leaves settled bytes equal: A' 1309 vs A 1872 MiB (-30.1%)
+[holds] C9 TRUNCATE control: raw tablestats after truncate shows 0 live bytes in every run: ok
+[holds] C10 every run log records "daemons left after stop: none" (the live check of the node is made once at the end of the session): {'A': True, 'B': True, 'C': True, 'D': True, 'Aprime': True}
+SELF-CHECK: ALL HOLD

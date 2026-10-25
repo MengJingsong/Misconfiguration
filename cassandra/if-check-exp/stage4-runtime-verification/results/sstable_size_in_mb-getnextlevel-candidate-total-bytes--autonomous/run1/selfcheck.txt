@@ -1,0 +1,20 @@
+[holds] U0 readings.txt equals the console echo in ant.log: 300 vs 300 readings
+[holds] U0b ant reports 4 tests, 0 failures, 0 errors: Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 30.299 sec
+[holds] U1 boundary: total = N MiB - 1 gives level 0, N MiB and N MiB + 1 give level 1 (exact byte totals, single and 3-way split, N = 1/5/20/160): {1: ['0', '1', '1'], 5: ['0', '1', '1'], 20: ['0', '1', '1'], 160: ['0', '1', '1']}
+[holds] U2 mixed {L0, L1} gives 1; all-L1 gives 2 at every N: ok
+[holds] U3 real flushed sets: Set A below the size gives 0, Set B above it gives 1 (N=160: both below, 0); totals recomputed from bytes: (N, A/size, B/size) [(1, 0.791, 1.483), (5, 0.791, 1.483), (20, 0.791, 1.483), (160, 0.099, 0.185)]
+[holds] U4 Set B compaction: files no larger than N MiB + 200 KiB at level 1 (N = 1/5/20); at N=160 one file at level 0: (N, files, max MiB) [(1, 2, 1.0), (5, 2, 5.0), (20, 2, 20.001)]; N=160 1 file 29.66 MiB
+[holds] U5 positive control (same ~30 MiB input at every N): file count 29 > 6 > 2 > 1 as N grows 1 < 5 < 20 < 160; outputs sum to the input within 0.1%: counts {1: [29, 29, 29], 5: [6, 6, 6], 20: [2, 2, 2], 160: [1, 1, 1]}; inputs {30289254, 30289627, 30289461, 30289606}
+[holds] U6 ~15 MiB partition at N=5 ends as a file larger than 5 MiB: [15636778, 15636488, 15636474]
+[holds] C1 every run: labelled compaction in CREATE TABLE, yaml throughput and 1 compactor as specified, 0 errors in write and overwrite stress, 2,000,000 partitions: {'N5': (True, True, 0, 0), 'N20': (True, True, 0, 0), 'N160': (True, True, 0, 0), 'T20': (True, True, 0, 0), 'STCS': (True, True, 0, 0)}
+[holds] C2 clean exits (rc 0, daemon stopped, "daemons left after stop: none") and no ERROR in any system.log: {'N5': True, 'N20': True, 'N160': True, 'T20': True, 'STCS': True}
+[holds] C3 settled live bytes (Cassandra's own count) within 10% across N = 5/20/160, and the STCS reference within 10% of them: live [2055, 2050, 2049] MiB, STCS 2049 MiB; spread 0.0027
+[holds] C4 SSTable count (raw tablestats) falls with N: > 2.5x from 5 to 20 and > 3x from 20 to 160: counts {'N5': 508, 'N20': 112, 'N160': 13}; ratios 4.5, 8.6
+[holds] C5 mean file size from Cassandra's own numbers is between 0.5 N and 1.05 N for N = 5/20/160: {'N5': 4.04, 'N20': 18.31, 'N160': 157.62}
+[holds] C6 large-partition table (each partition 39.1 MiB): where the partition exceeds N (N = 5, 20) a file larger than N exists (sampler record of the largest Data.db); at N=160 the partition and all three (117 MiB) are below N, so that arm cannot show an oversized file (limit never reached): (files, largest MiB) {'N5': (3, 106.1), 'N20': (1, 117.7), 'N160': (1, 117.7)}
+[holds] C7 T20 (16 MiB/s) re-read from the raw tablestats text: in the throttled write window L0 exceeded its 4N quota (> 10x) and NO level above L0 exceeded its quota (the B3f bullet "L1+ exceed fanout^level x N under throttling" did not occur there); L1 exceeded its quota only later, in the unthrottled overwrite phase: write window {0: 17.83, 1: 0.87}; whole run {0: 17.83, 1: 5.12, 2: 1.0, 3: 0.01}
+[holds] C7b supplementary: in N5 and N20 (no throttle) L1 also exceeded fanout^1 x N at some sample (a quota is a trigger): N5 {0: 50.91, 1: 27.41, 2: 1.01, 3: 0.41}, N20 {0: 16.56, 1: 6.98, 2: 1.0, 3: 0.0}
+[holds] C8 peak file bytes exceed settled bytes (transient compaction space) in N5/N20/N160: {'N5': (4890, 2055), 'N20': (5279, 2050), 'N160': (5901, 2049)}
+[holds] C9 TRUNCATE control: raw tablestats shows 0 live bytes afterwards in all 5 runs: ok
+INFO supplementary overwrite phase (settled live MiB: write -> overwrite): {'N5': (2055, 2632), 'N20': (2050, 2333), 'N160': (2049, 2737), 'T20': (2050, 2357), 'STCS': (2049, 4183)}
+SELF-CHECK: ALL HOLD

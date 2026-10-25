@@ -1,0 +1,19 @@
+[holds] U0 readings.txt equals the console echo in ant.log: 156 vs 156 readings
+[holds] U0b ant reports 3 tests, 0 failures, 0 errors: Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 56.384 sec
+[holds] U1 N=1 and 5: candidate bytes exceed the size option and all 7 sstables (6 L0 + the L1 one) are candidates: candidate/size ratios [14.19, 14.19, 14.19, 2.84, 2.84, 2.84]
+[holds] U2 N=160: 6 L0 candidates only (no L1), total below the size, output level 0: ratios [0.076, 0.076, 0.076]
+[holds] U3 step 4: the size-5 task writes >= 2 files, none above 5 MiB + 200 KiB, outputs sum to the input within 1%: [(3, 5.0, 1.0005), (3, 5.0, 1.0006), (3, 5.0, 1.0006)]
+[holds] U4 step 4: the ~12 MiB partition ends as one file above the 5 MiB option: [12344824, 12344470, 12344413]
+[holds] U5 phase 2: 200 L0 sstables, none above level 0, L0 bytes = live bytes; size 1 and 160 equal within 0.1%: p1 [212413250, 212404340, 212403504] p160 [212425310, 212422850, 212426344]; size-1 L0 target 4194304, size-160 L0 target 671088640
+[holds] U6 truncate control: 6 runs at 0 bytes: ok
+[holds] C1 every run: CREATE TABLE carries the labelled sstable_size_in_mb, yaml 16 MiB/s and 1 compactor, 0 stress errors, 2,000,000 partitions: {'N5': (True, True, 0, 2000000), 'N160': (True, True, 0, 2000000), 'N1024': (True, True, 0, 2000000), 'S160': (True, True, 0, 2000000)}
+[holds] C2 S160 alone was throttled to 1 MiB/s at start (setcompactionthroughput 1 in its command log); all runs issued the drain boost: {'N5': (True, True), 'N160': (True, True), 'N1024': (True, True), 'S160': (True, True)}
+[holds] C3 clean exits (rc=0, daemon stopped, "daemons left after stop: none"), no ERROR line in any system.log: {'N5': (0, True), 'N160': (0, True), 'N1024': (0, True), 'S160': (0, True)}
+[holds] C4 settled live bytes (Cassandra's own count) within 10% across N=5,160,1024: live [2055, 2047, 2049] MiB; spread 0.0037
+[holds] C5 positive control: Cassandra's SSTable count and mean file size follow N (count falls, mean grows with N): counts {'N5': 482, 'N160': 13, 'N1024': 2}; mean file MiB {'N5': 4.3, 'N160': 157.5, 'N1024': 1024.7}
+[holds] C6 N=5 and N=160: mean file within 0.7N..1.1N (levels hold files of the option size): 4.26 (N=5), 157.5 (N=160)
+[holds] C7 N=1024: 2 files of about the option size (mean 1000-1030 MiB of 2 GiB live): the option, not the data volume, bounds the file (the prediction wording "bounded by the data volume" was imprecise): count 2, mean 1025 MiB of 2049 MiB live
+[holds] C8 N=1024: the L0 target (4,096 MiB) was not reached (peak L0 below it) -> filed "limit never reached" row for that N: peak L0 2009 MiB
+[holds] C9 S160 (1 MiB/s): L0 bytes exceeded 4 x 160 = 640 MiB with 0 write errors: peak L0 2007 MiB; lag-end per-level bytes [2104656588, 0, 0, 0, 0, 0, 0, 0, 0]
+[holds] C10 TRUNCATE control: raw tablestats shows 0 live bytes afterwards in all 4 runs: ok
+SELF-CHECK: ALL HOLD

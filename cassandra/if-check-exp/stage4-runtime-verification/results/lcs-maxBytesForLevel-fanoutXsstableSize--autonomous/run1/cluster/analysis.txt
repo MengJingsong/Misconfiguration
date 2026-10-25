@@ -1,0 +1,26 @@
+label  rows  stressErrors  peakL0(MiB)  L0target(MiB)  ratio  peakLive(MiB)  peakFileBytes(MiB)  settledFileBytes(MiB)  settledLive(MiB)  sstables(settled)  settled-drain-s
+A      2000000 0    1871.9     40.0   46.80    1907.3    3564.5    1907.2    1907.2 188
+B      2000000 0    1871.4    640.0    2.92    1905.5    3595.1    1905.5    1905.5 12
+C      2000000 0    1870.0     40.0   46.75    1905.4    3187.7    1905.4    1905.4 188
+D      2000000 0       0.0      0.0    0.00    1907.6    3029.3    1907.6    1907.6 2
+Aprime 2000000 0    1308.7     40.0   32.72    1906.8    2904.7    1906.8    1906.8 198
+PASS no write error in any run :: {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'Aprime': 0}
+PASS all runs wrote the same row count :: {'A': 2000000, 'B': 2000000, 'C': 2000000, 'D': 2000000, 'Aprime': 2000000}
+PASS A: peak L0 >= 10x its L0 target and >= 400 MiB :: 1872 MiB vs 40
+PASS C: peak L0 >= 10x its L0 target and >= 400 MiB :: 1870 MiB vs 40
+PASS B: peak L0 >= 1x its L0 target (640 MiB) :: 1871 MiB (2.92x)
+PASS peak total live bytes of A,B,C,D differ < 15% :: {'A': 1907, 'B': 1905, 'C': 1905, 'D': 1908}
+PASS settled file bytes of A,B,C,D differ < 15% :: {'A': 1907, 'B': 1905, 'C': 1905, 'D': 1908}
+PASS C (fanout 2) settled bytes within 15% of A :: 1905 vs 1907 MiB
+INFO A settled per-level bytes [0, 104864204, 1041567276, 817934290, 0, 0, 0, 0, 0] ratios-to-target [0.0, 1.0, 0.993, 0.078, 0.0, 0.0, 0.0, 0.0, 0.0] top level L3
+PASS A: after drain L0 empty-ish and every level below the top <= 1.05 x target, total unchanged vs lag-end (<5%) :: L0 0 MiB; body ratios [1.0, 0.993]; live 1907 vs 1904 MiB
+INFO B settled per-level bytes [0, 1628430228, 335546298, 0, 0, 0, 0, 0, 0] ratios-to-target [0.0, 0.971, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] top level L2
+PASS B: after drain L0 empty-ish and every level below the top <= 1.05 x target, total unchanged vs lag-end (<5%) :: L0 0 MiB; body ratios [0.971]; live 1905 vs 1904 MiB
+INFO C settled per-level bytes [0, 20972159, 41938484, 83877058, 167753951, 335507801, 662123786, 650147701, 0] ratios-to-target [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.987, 0.484, 0.0] top level L7
+PASS C: after drain L0 empty-ish and every level below the top <= 1.05 x target, total unchanged vs lag-end (<5%) :: L0 0 MiB; body ratios [1.0, 1.0, 1.0, 1.0, 1.0, 0.987]; live 1905 vs 1902 MiB
+INFO Aprime settled per-level bytes [0, 102888243, 1042955164, 817931973, 0, 0, 0, 0, 0] ratios-to-target [0.0, 0.981, 0.995, 0.078, 0.0, 0.0, 0.0, 0.0, 0.0] top level L3
+PASS Aprime: after drain L0 empty-ish and every level below the top <= 1.05 x target, total unchanged vs lag-end (<5%) :: L0 0 MiB; body ratios [0.981, 0.995]; live 1907 vs 1905 MiB
+PASS A' (fast compaction from the start): peak L0 below A's, settled bytes within 15% of A :: peak L0 1309 vs 1872 MiB (-30.1%)
+PASS every drain settled :: ok
+PASS TRUNCATE control: file bytes after truncate < 1% of settled :: {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'Aprime': 0}
+ALL PASS

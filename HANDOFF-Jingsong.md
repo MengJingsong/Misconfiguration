@@ -102,10 +102,19 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 5 | 5 |
+| Set A | 159 | 10 | 10 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
 true positive (cap per segment; the CSV said negative, the autonomous files estimated positive).
 Write-ups were run as headless `claude -p` sessions in `~/cassandra-5.0.9` from `~/writeup-A/`.
 Next: rows 1–3 (§14 cache bounds), 10–15 (`CommitLogSegmentManagerCDC.java:345`, `LeveledManifest`, `MajorLeveledCompactionWriter`), with row 7 a decision.
+
+2026-10-24, batch 2 (CSV rows 11–15, §14 `LeveledManifest` and `MajorLeveledCompactionWriter`):
+`lcs-maxBytesForLevel`, `sstable_size_in_mb-getCandidatesFor`, `sstable_size_in_mb-getnextlevel`,
+`lcs-level-capacity-shouldSwitchWriter…` true negative (do not cap); `sstable_size_in_mb-shouldSwitchWriter…`
+true positive (caps each file, soft by one partition). §14 lines have no own row in `predicted-negative.md`
+(package survey row only), so nothing was removed there. The `lcs-level-capacity` cluster tier missed two
+frozen numeric predictions (data volume 605 MiB, not 650 MB); the agent kept "Confirmed" because the
+deciding rows held, a stricter reading is "Not confirmed (no matching row)".
+Next: row 10 (`CommitLogSegmentManagerCDC.java:345`), rows 1–3 (§14 cache bounds), then CSV order 16 on.
