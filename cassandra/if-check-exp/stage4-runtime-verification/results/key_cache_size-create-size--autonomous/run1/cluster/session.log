@@ -1,0 +1,199 @@
+[2026-10-25T00:49:43-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 0
+[2026-10-25T00:50:49-0400] node up, pid 1736243
+[2026-10-25T00:50:49-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(insert=1) n=1000000 no-warmup -pop seq=1..1000000 -rate threads=64 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:51:06-0400]   exit 0 in 17.0s
+[2026-10-25T00:51:06-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 flush ks t
+[2026-10-25T00:51:08-0400] 
+[2026-10-25T00:51:08-0400]   exit 0 in 1.8s
+[2026-10-25T00:51:08-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 compact ks t
+[2026-10-25T00:51:14-0400] 
+[2026-10-25T00:51:14-0400]   exit 0 in 6.0s
+[2026-10-25T00:51:14-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 tablestats ks.t
+[2026-10-25T00:51:15-0400]   exit 0 in 1.3s
+[2026-10-25T00:51:15-0400] load summary {'data_files': 1, 'du_bytes': 90409759}
+[2026-10-25T00:51:15-0400] partitions estimate 1008170
+[2026-10-25T00:51:15-0400] stopping node pid 1736243
+[2026-10-25T00:51:22-0400] node pid alive after stop: False
+[2026-10-25T00:51:22-0400] === arm k0 key_cache_size 0 MiB
+[2026-10-25T00:51:22-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 0
+[2026-10-25T00:51:44-0400] node up, pid 1745176
+[2026-10-25T00:51:44-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T00:51:44-0400]   exit 0 in 0.0s
+[2026-10-25T00:51:44-0400] INFO  [SSTableBatchOpen:2] 2026-10-25T04:51:26,994 CacheService.java:121 - Initializing key cache with capacity of 0 MiBs.
+[2026-10-25T00:51:44-0400] t0 {'size': 0, 'capacity': 0, 'entries': 0, 'requests': 148, 'hits': 0, 't_ms': 1792903904675, 'phase': 't0'}
+[2026-10-25T00:51:45-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:52:35-0400] stress pass1 exit 0 after 50s
+[2026-10-25T00:52:35-0400] end-pass1 {'size': 0, 'capacity': 0, 'entries': 0, 'requests': 3000158, 'hits': 0, 't_ms': 1792903955089, 'phase': 'end-pass1'}
+[2026-10-25T00:52:35-0400] EXPECTED entries == 0 for cap 0: True
+[2026-10-25T00:52:35-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:53:15-0400] stress pass2 exit 0 after 40s
+[2026-10-25T00:53:15-0400] end-pass2 {'size': 0, 'capacity': 0, 'entries': 0, 'requests': 6000167, 'hits': 0, 't_ms': 1792903995504, 'phase': 'end-pass2'}
+[2026-10-25T00:53:19-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n0', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n0', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n0'}
+[2026-10-25T00:53:19-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T00:53:20-0400] Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 6000167 requests, 0.000 recent hit rate, 3600 save period in seconds
+[2026-10-25T00:53:20-0400]   exit 0 in 1.4s
+[2026-10-25T00:53:20-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T00:53:22-0400]   exit 0 in 1.4s
+[2026-10-25T00:53:22-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T00:53:22-0400]   exit 0 in 0.0s
+[2026-10-25T00:53:22-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/k0/system.log.full
+[2026-10-25T00:53:22-0400]   exit 0 in 0.0s
+[2026-10-25T00:53:22-0400] stopping node pid 1745176
+[2026-10-25T00:53:28-0400] node pid alive after stop: False
+[2026-10-25T00:53:28-0400] === arm k4 key_cache_size 4 MiB
+[2026-10-25T00:53:28-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 4
+[2026-10-25T00:53:43-0400] node up, pid 1754134
+[2026-10-25T00:53:44-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T00:53:44-0400]   exit 0 in 0.0s
+[2026-10-25T00:53:44-0400] INFO  [SSTableBatchOpen:1] 2026-10-25T04:53:33,754 CacheService.java:121 - Initializing key cache with capacity of 4 MiBs.
+[2026-10-25T00:53:44-0400] t0 {'size': 1536, 'capacity': 4194304, 'entries': 18, 'requests': 119, 'hits': 102, 't_ms': 1792904024517, 'phase': 't0'}
+[2026-10-25T00:53:44-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:54:45-0400] stress pass1 exit 0 after 60s
+[2026-10-25T00:54:45-0400] end-pass1 {'size': 4194240, 'capacity': 4194304, 'entries': 43690, 'requests': 3000129, 'hits': 130098, 't_ms': 1792904085363, 'phase': 'end-pass1'}
+[2026-10-25T00:54:45-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:55:56-0400] stress pass2 exit 0 after 71s
+[2026-10-25T00:55:56-0400] end-pass2 {'size': 4194240, 'capacity': 4194304, 'entries': 43690, 'requests': 6000138, 'hits': 261985, 't_ms': 1792904156323, 'phase': 'end-pass2'}
+[2026-10-25T00:56:03-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n4194240', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n4194304', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n43690'}
+[2026-10-25T00:56:03-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T00:56:05-0400] Key Cache              : entries 43690, size 4 MiB, capacity 4 MiB, 261985 hits, 6000138 requests, 0.044 recent hit rate, 3600 save period in seconds
+[2026-10-25T00:56:05-0400]   exit 0 in 2.1s
+[2026-10-25T00:56:05-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T00:56:07-0400]   exit 0 in 2.5s
+[2026-10-25T00:56:07-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T00:56:07-0400]   exit 0 in 0.0s
+[2026-10-25T00:56:07-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/k4/system.log.full
+[2026-10-25T00:56:07-0400]   exit 0 in 0.0s
+[2026-10-25T00:56:07-0400] stopping node pid 1754134
+[2026-10-25T00:56:14-0400] node pid alive after stop: False
+[2026-10-25T00:56:14-0400] === arm k16 key_cache_size 16 MiB
+[2026-10-25T00:56:14-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 16
+[2026-10-25T00:56:35-0400] node up, pid 1762950
+[2026-10-25T00:56:35-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T00:56:35-0400]   exit 0 in 0.0s
+[2026-10-25T00:56:35-0400] INFO  [SSTableBatchOpen:1] 2026-10-25T04:56:22,773 CacheService.java:121 - Initializing key cache with capacity of 16 MiBs.
+[2026-10-25T00:56:35-0400] t0 {'size': 1968, 'capacity': 16777216, 'entries': 23, 'requests': 119, 'hits': 102, 't_ms': 1792904195996, 'phase': 't0'}
+[2026-10-25T00:56:36-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:57:26-0400] stress pass1 exit 0 after 50s
+[2026-10-25T00:57:26-0400] end-pass1 {'size': 16777152, 'capacity': 16777216, 'entries': 174762, 'requests': 3000129, 'hits': 509928, 't_ms': 1792904246614, 'phase': 'end-pass1'}
+[2026-10-25T00:57:27-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T00:58:28-0400] stress pass2 exit 0 after 61s
+[2026-10-25T00:58:28-0400] end-pass2 {'size': 16777152, 'capacity': 16777216, 'entries': 174762, 'requests': 6000138, 'hits': 1034655, 't_ms': 1792904308115, 'phase': 'end-pass2'}
+[2026-10-25T00:58:35-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n16777152', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n16777216', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n174762'}
+[2026-10-25T00:58:35-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T00:58:38-0400] Key Cache              : entries 174762, size 16 MiB, capacity 16 MiB, 1034655 hits, 6000138 requests, 0.172 recent hit rate, 3600 save period in seconds
+[2026-10-25T00:58:38-0400]   exit 0 in 3.1s
+[2026-10-25T00:58:38-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T00:58:42-0400]   exit 0 in 3.4s
+[2026-10-25T00:58:42-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T00:58:42-0400]   exit 0 in 0.0s
+[2026-10-25T00:58:42-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/k16/system.log.full
+[2026-10-25T00:58:42-0400]   exit 0 in 0.0s
+[2026-10-25T00:58:42-0400] stopping node pid 1762950
+[2026-10-25T00:58:50-0400] node pid alive after stop: False
+[2026-10-25T00:58:50-0400] === arm k64 key_cache_size 64 MiB
+[2026-10-25T00:58:50-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 64
+[2026-10-25T00:59:12-0400] node up, pid 1769654
+[2026-10-25T00:59:12-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T00:59:12-0400]   exit 0 in 0.0s
+[2026-10-25T00:59:12-0400] INFO  [SSTableBatchOpen:1] 2026-10-25T04:58:55,775 CacheService.java:121 - Initializing key cache with capacity of 64 MiBs.
+[2026-10-25T00:59:13-0400] t0 {'size': 2240, 'capacity': 67108864, 'entries': 26, 'requests': 119, 'hits': 102, 't_ms': 1792904353108, 'phase': 't0'}
+[2026-10-25T00:59:14-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:00:24-0400] stress pass1 exit 0 after 71s
+[2026-10-25T01:00:24-0400] end-pass1 {'size': 67108800, 'capacity': 67108864, 'entries': 699050, 'requests': 3000129, 'hits': 1759083, 't_ms': 1792904424894, 'phase': 'end-pass1'}
+[2026-10-25T01:00:25-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:01:27-0400] stress pass2 exit 0 after 62s
+[2026-10-25T01:01:27-0400] end-pass2 {'size': 67108800, 'capacity': 67108864, 'entries': 699050, 'requests': 6000138, 'hits': 3855114, 't_ms': 1792904487528, 'phase': 'end-pass2'}
+[2026-10-25T01:01:34-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n67108800', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n67108864', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n699050'}
+[2026-10-25T01:01:34-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:01:36-0400] Key Cache              : entries 699050, size 64 MiB, capacity 64 MiB, 3855114 hits, 6000138 requests, 0.643 recent hit rate, 3600 save period in seconds
+[2026-10-25T01:01:36-0400]   exit 0 in 1.8s
+[2026-10-25T01:01:36-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:01:38-0400]   exit 0 in 2.3s
+[2026-10-25T01:01:38-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T01:01:38-0400]   exit 0 in 0.0s
+[2026-10-25T01:01:38-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/k64/system.log.full
+[2026-10-25T01:01:38-0400]   exit 0 in 0.0s
+[2026-10-25T01:01:38-0400] stopping node pid 1769654
+[2026-10-25T01:01:45-0400] node pid alive after stop: False
+[2026-10-25T01:01:45-0400] === arm k512 key_cache_size 512 MiB
+[2026-10-25T01:01:45-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 512
+[2026-10-25T01:02:14-0400] node up, pid 1777179
+[2026-10-25T01:02:14-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T01:02:14-0400]   exit 0 in 0.0s
+[2026-10-25T01:02:14-0400] INFO  [SSTableBatchOpen:1] 2026-10-25T05:01:57,000 CacheService.java:121 - Initializing key cache with capacity of 512 MiBs.
+[2026-10-25T01:02:15-0400] t0 {'size': 1536, 'capacity': 536870912, 'entries': 18, 'requests': 119, 'hits': 102, 't_ms': 1792904535259, 'phase': 't0'}
+[2026-10-25T01:02:15-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:03:16-0400] stress pass1 exit 0 after 61s
+[2026-10-25T01:03:16-0400] end-pass1 {'size': 91233880, 'capacity': 536870912, 'entries': 950355, 'requests': 3000129, 'hits': 2049774, 't_ms': 1792904596329, 'phase': 'end-pass1'}
+[2026-10-25T01:03:16-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:03:56-0400] stress pass2 exit 0 after 40s
+[2026-10-25T01:03:56-0400] end-pass2 {'size': 95767576, 'capacity': 536870912, 'entries': 997581, 'requests': 6000138, 'hits': 5002557, 't_ms': 1792904636935, 'phase': 'end-pass2'}
+[2026-10-25T01:04:01-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n95767576', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n536870912', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n997581'}
+[2026-10-25T01:04:01-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:04:02-0400] Key Cache              : entries 997581, size 91.33 MiB, capacity 512 MiB, 5002557 hits, 6000138 requests, 0.834 recent hit rate, 3600 save period in seconds
+[2026-10-25T01:04:02-0400]   exit 0 in 1.3s
+[2026-10-25T01:04:02-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:04:03-0400]   exit 0 in 1.3s
+[2026-10-25T01:04:03-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T01:04:03-0400]   exit 0 in 0.0s
+[2026-10-25T01:04:03-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/k512/system.log.full
+[2026-10-25T01:04:03-0400]   exit 0 in 0.0s
+[2026-10-25T01:04:03-0400] stopping node pid 1777179
+[2026-10-25T01:04:09-0400] node pid alive after stop: False
+[2026-10-25T01:04:09-0400] === arm k16b key_cache_size 16 MiB
+[2026-10-25T01:04:09-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 16
+[2026-10-25T01:04:33-0400] node up, pid 1784195
+[2026-10-25T01:04:33-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T01:04:33-0400]   exit 0 in 0.0s
+[2026-10-25T01:04:33-0400] INFO  [SSTableBatchOpen:1] 2026-10-25T05:04:15,661 CacheService.java:121 - Initializing key cache with capacity of 16 MiBs.
+[2026-10-25T01:04:33-0400] t0 {'size': 1968, 'capacity': 16777216, 'entries': 23, 'requests': 119, 'hits': 102, 't_ms': 1792904673639, 'phase': 't0'}
+[2026-10-25T01:04:34-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:05:24-0400] stress pass1 exit 0 after 50s
+[2026-10-25T01:05:24-0400] end-pass1 {'size': 16777152, 'capacity': 16777216, 'entries': 174762, 'requests': 3000129, 'hits': 508210, 't_ms': 1792904724115, 'phase': 'end-pass1'}
+[2026-10-25T01:05:24-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:06:14-0400] stress pass2 exit 0 after 50s
+[2026-10-25T01:06:14-0400] end-pass2 {'size': 16777152, 'capacity': 16777216, 'entries': 174762, 'requests': 6000138, 'hits': 1032862, 't_ms': 1792904774686, 'phase': 'end-pass2'}
+[2026-10-25T01:06:19-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n16777152', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n16777216', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n174762'}
+[2026-10-25T01:06:19-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:06:20-0400] Key Cache              : entries 174762, size 16 MiB, capacity 16 MiB, 1032862 hits, 6000138 requests, 0.172 recent hit rate, 3600 save period in seconds
+[2026-10-25T01:06:20-0400]   exit 0 in 1.6s
+[2026-10-25T01:06:20-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:06:22-0400]   exit 0 in 1.6s
+[2026-10-25T01:06:22-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T01:06:22-0400]   exit 0 in 0.0s
+[2026-10-25T01:06:22-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/k16b/system.log.full
+[2026-10-25T01:06:22-0400]   exit 0 in 0.0s
+[2026-10-25T01:06:22-0400] stopping node pid 1784195
+[2026-10-25T01:06:28-0400] node pid alive after stop: False
+[2026-10-25T01:06:28-0400] === arm rt key_cache_size 64 MiB
+[2026-10-25T01:06:28-0400] + bin/cassandra -p /users/jason92/s4-kc/node/cassandra.pid key_cache_size 64
+[2026-10-25T01:06:59-0400] node up, pid 1791977
+[2026-10-25T01:06:59-0400] + grep -h 'Initializing key cache' /users/jason92/s4-kc/node/logs/system.log | tail -1
+[2026-10-25T01:06:59-0400]   exit 0 in 0.0s
+[2026-10-25T01:06:59-0400] INFO  [SSTableBatchOpen:1] 2026-10-25T05:06:39,251 CacheService.java:121 - Initializing key cache with capacity of 64 MiBs.
+[2026-10-25T01:06:59-0400] t0 {'size': 2240, 'capacity': 67108864, 'entries': 26, 'requests': 119, 'hits': 102, 't_ms': 1792904819896, 'phase': 't0'}
+[2026-10-25T01:07:00-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:07:50-0400] stress pass1 exit 0 after 50s
+[2026-10-25T01:07:50-0400] end-pass1 {'size': 67108800, 'capacity': 67108864, 'entries': 699050, 'requests': 3000129, 'hits': 1760430, 't_ms': 1792904870671, 'phase': 'end-pass1'}
+[2026-10-25T01:07:51-0400] + nodetool setcachecapacity 16 0 0
+[2026-10-25T01:07:51-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 setcachecapacity 16 0 0
+[2026-10-25T01:07:52-0400] 
+[2026-10-25T01:07:52-0400]   exit 0 in 1.5s
+[2026-10-25T01:08:23-0400] after-setcap {'size': 16777152, 'capacity': 16777216, 'entries': 174762, 'requests': 3000129, 'hits': 1760430, 't_ms': 1792904902984, 'phase': 'after-setcap', 'hist': 'hist-after-setcap.txt'}
+[2026-10-25T01:08:23-0400] + /users/jason92/s4-kc/cassandra/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/key_cache_size-create-size--autonomous/kc.yaml ops(read1=1) n=3000000 no-warmup -pop dist=uniform(1..1000000) -rate threads=32 -node 127.31.7.1 -port native=9042
+[2026-10-25T01:09:13-0400] stress pass2 exit 0 after 50s
+[2026-10-25T01:09:13-0400] end-pass2 {'size': 16777152, 'capacity': 16777216, 'entries': 174762, 'requests': 6000138, 'hits': 2284762, 't_ms': 1792904953538, 'phase': 'end-pass2'}
+[2026-10-25T01:09:18-0400] jmx {'Size': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Size\n16777152', 'Capacity': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Capacity\n16777216', 'Entries': 'org.apache.cassandra.metrics:type=Cache,scope=KeyCache,name=Entries\n174762'}
+[2026-10-25T01:09:18-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:09:19-0400] Key Cache              : entries 174762, size 16 MiB, capacity 16 MiB, 2284762 hits, 6000138 requests, 0.381 recent hit rate, 3600 save period in seconds
+[2026-10-25T01:09:19-0400]   exit 0 in 1.5s
+[2026-10-25T01:09:19-0400] + /users/jason92/s4-kc/cassandra/bin/nodetool -p 7491 info | grep -i 'key cache'
+[2026-10-25T01:09:21-0400]   exit 0 in 1.5s
+[2026-10-25T01:09:21-0400] + grep -c '^ERROR' /users/jason92/s4-kc/node/logs/system.log || true
+[2026-10-25T01:09:21-0400]   exit 0 in 0.0s
+[2026-10-25T01:09:21-0400] + cp /users/jason92/s4-kc/node/logs/system.log /users/jason92/s4-kc/run1/cluster/rt/system.log.full
+[2026-10-25T01:09:21-0400]   exit 0 in 0.0s
+[2026-10-25T01:09:21-0400] stopping node pid 1791977
+[2026-10-25T01:09:27-0400] node pid alive after stop: False
+[2026-10-25T01:09:27-0400] ALL ARMS DONE ['load', 'k0', 'k4', 'k16', 'k64', 'k512', 'k16b', 'rt']
+[2026-10-25T01:09:27-0400] node pid alive after stop: False

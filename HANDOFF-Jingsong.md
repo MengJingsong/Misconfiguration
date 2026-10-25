@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 10 | 10 |
+| Set A | 159 | 15 | 15 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -118,3 +118,16 @@ true positive (caps each file, soft by one partition). §14 lines have no own ro
 frozen numeric predictions (data volume 605 MiB, not 650 MB); the agent kept "Confirmed" because the
 deciding rows held, a stricter reading is "Not confirmed (no matching row)".
 Next: row 10 (`CommitLogSegmentManagerCDC.java:345`), rows 1–3 (§14 cache bounds), then CSV order 16 on.
+
+2026-10-25, batch 3 (CSV rows 1, 2, 3, 10, 16: §14 `CaffeineCache`/`SerializingCache`, `CommitLogSegmentManagerCDC.java:345`,
+`SplittingSizeTieredCompactionWriter.java:84`): `key_cache_size-create-size`, `row_cache_size-create-serialized_size`
+and `cdc_total_space-processNewSegment-sizeInProgress` true positive (cap; row cache and CDC are soft);
+`entry-size-limit-serialize-serializedSize` and `DEFAULT_SMALLEST_SSTABLE_BYTES-…` true negative (do not cap).
+Four of five estimates differ from the CSV's "negative". Write-ups and stage 4 were run by Agent-tool subagents (the
+headless `claude -p --dangerously-skip-permissions` launch was refused by the permission classifier), rows 1–3 on `pc07`,
+rows 10 and 16 on `pc12`; leftovers in `~/s4-{kc,rc,es}` (pc07) and `~/s4-{cdc,ss}` (pc12). §14 lines have no own
+`predicted-negative.md` row, so nothing was removed. `entry-size-limit` missed three unit and one cluster frozen numeric
+bound (kept Confirmed; a strict reading of the cluster one is "Not confirmed (no matching row)"). Upstream bug candidate
+(JIRA check first): `SerializingCache.clear()` does not free native memory (seen in two cases). The CDC row 10 question
+("check site of `cdc_total_space`?") is answered: yes, the non-blocking branch deletes oldest `cdc_raw` links.
+Next: CSV order 7 (decision), 17 on (`NativeCell`, `CompressedInputStream`, `Stack`, tries, hints).

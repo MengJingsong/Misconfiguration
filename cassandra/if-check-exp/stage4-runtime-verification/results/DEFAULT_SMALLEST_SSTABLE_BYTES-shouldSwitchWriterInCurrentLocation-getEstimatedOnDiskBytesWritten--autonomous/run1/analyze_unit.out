@@ -1,0 +1,82 @@
+ARM ctl20: kind=max param=20000000 input=208446012 outputs=11 outputBytes=208446012 switches=10 calls=19999 maxPartition=10428
+RESULT PASS ctl20: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=11 switches=10
+RESULT PASS ctl20: output bytes within 2% of input bytes :: out=208446012 in=208446012 diff=0.000%
+RESULT PASS ctl20: operand at every true return > m, every false return <= m :: min true=20000182 max false=19990359
+RESULT PASS ctl20: every non-final output in (m, m + maxPartition] :: min=20000182 max=20000787 m=20000000 maxPart=10428
+RESULT PASS ctl20: output count within 1 of T/m :: outputs=11 T/m=10.42
+ARM ctl40: kind=max param=40000000 input=208447487 outputs=6 outputBytes=208447487 switches=5 calls=19999 maxPartition=10428
+RESULT PASS ctl40: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=6 switches=5
+RESULT PASS ctl40: output bytes within 2% of input bytes :: out=208447487 in=208447487 diff=0.000%
+RESULT PASS ctl40: operand at every true return > m, every false return <= m :: min true=40000594 max false=39991167
+RESULT PASS ctl40: every non-final output in (m, m + maxPartition] :: min=40000594 max=40001595 m=40000000 maxPart=10428
+RESULT PASS ctl40: output count within 1 of T/m :: outputs=6 T/m=5.21
+ARM d0: kind=split param=0 input=208531939 outputs=12 outputBytes=208531939 switches=11 calls=19999 maxPartition=10428
+RESULT PASS d0: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=12 switches=11
+RESULT PASS d0: output bytes within 2% of input bytes :: out=208531939 in=208531939 diff=0.000%
+RESULT PASS d0: T == input Data.db length :: T=208531939 input=208531939
+RESULT PASS d0: ratios.length == first k with T/2^k < smallest (max 20) (B2i.2) :: ratios.length=20 expected=20
+RESULT PASS d0: line-84 rule holds on every call (true iff operand > currentBytesToWrite and idx < len-1) :: calls=19999
+RESULT PASS d0: target at switch i is round(T * 2^-(i+1)) :: currentBytesToWrite at every call equals round(T*ratio[idx])
+RESULT PASS d0: every non-final output i in (target_i, target_i + maxPartition + granularity] :: maxPart=10428 gran=0 excess_max=10386
+RESULT PASS d0: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+RESULT PASS d0: ratios.length == 20, 2 <= N <= 20, switches == N-1 :: ratios.length=20 N=12
+RESULT PASS d0: last output holds the remainder and exceeds its own target T*ratios[19] :: last=31274 target=199
+MODEL FAIL d0: model N=13 observed N=12 (median partition 10428.0; not a verdict row)
+ARM d5: kind=split param=5000000 input=208520005 outputs=6 outputBytes=208520005 switches=5 calls=19999 maxPartition=10428
+RESULT PASS d5: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=6 switches=5
+RESULT PASS d5: output bytes within 2% of input bytes :: out=208520005 in=208520005 diff=0.000%
+RESULT PASS d5: T == input Data.db length :: T=208520005 input=208520005
+RESULT PASS d5: ratios.length == first k with T/2^k < smallest (max 20) (B2i.2) :: ratios.length=6 expected=6
+RESULT PASS d5: line-84 rule holds on every call (true iff operand > currentBytesToWrite and idx < len-1) :: calls=19999
+RESULT PASS d5: target at switch i is round(T * 2^-(i+1)) :: currentBytesToWrite at every call equals round(T*ratio[idx])
+RESULT PASS d5: every non-final output i in (target_i, target_i + maxPartition + granularity] :: maxPart=10428 gran=0 excess_max=10388
+RESULT PASS d5: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+RESULT PASS d5: gate 160e6 <= T < 320e6; ratios.length == 6, N == 6 :: T=208520005 ratios.length=6 N=6
+RESULT PASS d5: last output > its own target :: last=6495264 target=3258125
+ARM d50: kind=split param=50000000 input=208452678 outputs=3 outputBytes=208452678 switches=2 calls=19999 maxPartition=10428
+RESULT PASS d50: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=3 switches=2
+RESULT PASS d50: output bytes within 2% of input bytes :: out=208452678 in=208452678 diff=0.000%
+RESULT PASS d50: T == input Data.db length :: T=208452678 input=208452678
+RESULT PASS d50: ratios.length == first k with T/2^k < smallest (max 20) (B2i.2) :: ratios.length=3 expected=3
+RESULT PASS d50: line-84 rule holds on every call (true iff operand > currentBytesToWrite and idx < len-1) :: calls=19999
+RESULT PASS d50: target at switch i is round(T * 2^-(i+1)) :: currentBytesToWrite at every call equals round(T*ratio[idx])
+RESULT PASS d50: every non-final output i in (target_i, target_i + maxPartition + granularity] :: maxPart=10428 gran=0 excess_max=10198
+RESULT PASS d50: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+RESULT PASS d50: gate 200e6 <= T < 400e6 :: T=208452678
+RESULT PASS d50: ratios.length == 3, N == 3, switch count == 2 :: ratios.length=3 N=3 switches=2
+RESULT PASS d50: last output (remainder) > its own target T*ratios[last] (no hard stop on the last piece) :: last=52102722 target=26056585 smallest=50000000 (last>smallest: True)
+ARM d50z: kind=split param=50000000 input=209083713 outputs=3 outputBytes=209084311 switches=2 calls=19999 maxPartition=16458
+RESULT PASS d50z: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=3 switches=2
+RESULT PASS d50z: output bytes within 2% of input bytes :: out=209084311 in=209083713 diff=0.000%
+RESULT PASS d50z: T == input Data.db length :: T=209083713 input=209083713
+RESULT PASS d50z: ratios.length == first k with T/2^k < smallest (max 20) (B2i.2) :: ratios.length=3 expected=3
+RESULT PASS d50z: line-84 rule holds on every call (true iff operand > currentBytesToWrite and idx < len-1) :: calls=19999
+RESULT PASS d50z: target at switch i is round(T * 2^-(i+1)) :: currentBytesToWrite at every call equals round(T*ratio[idx])
+RESULT PASS d50z: every non-final output i in (target_i, target_i + maxPartition + granularity] :: maxPart=16458 gran=32832 excess_max=11581
+RESULT PASS d50z: gate 200e6 <= T < 400e6 :: T=209083713
+RESULT PASS d50z: ratios.length == 3, N == 3, switch count == 2 :: ratios.length=3 N=3 switches=2
+RESULT PASS d50z: last output (remainder) > its own target T*ratios[last] (no hard stop on the last piece) :: last=52250859 target=26135464 smallest=50000000 (last>smallest: True)
+ARM dbig: kind=split param=2084442240 input=208444224 outputs=1 outputBytes=208444224 switches=0 calls=19999 maxPartition=10428
+RESULT PASS dbig: rows preserved, outputs == switches + 1 :: outputRows=200000 partitions=20000 outputs=1 switches=0
+RESULT PASS dbig: output bytes within 2% of input bytes :: out=208444224 in=208444224 diff=0.000%
+RESULT PASS dbig: T == input Data.db length :: T=208444224 input=208444224
+RESULT PASS dbig: ratios.length == first k with T/2^k < smallest (max 20) (B2i.2) :: ratios.length=1 expected=1
+RESULT PASS dbig: line-84 rule holds on every call (true iff operand > currentBytesToWrite and idx < len-1) :: calls=19999
+RESULT PASS dbig: target at switch i is round(T * 2^-(i+1)) :: currentBytesToWrite at every call equals round(T*ratio[idx])
+RESULT PASS dbig: every non-final output i in (target_i, target_i + maxPartition + granularity] :: maxPart=10428 gran=0 excess_max=None
+RESULT PASS dbig: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+RESULT PASS dbig: ratios.length == 1, N == 1, no switch, output ~ T :: ratios.length=1 N=1 size=208444224
+ARM small: kind=split param=50000000 input=39587890 outputs=1 outputBytes=39587890 switches=0 calls=3799 maxPartition=10418
+RESULT PASS small: rows preserved, outputs == switches + 1 :: outputRows=38000 partitions=3800 outputs=1 switches=0
+RESULT PASS small: output bytes within 2% of input bytes :: out=39587890 in=39587890 diff=0.000%
+RESULT PASS small: T == input Data.db length :: T=39587890 input=39587890
+RESULT PASS small: ratios.length == first k with T/2^k < smallest (max 20) (B2i.2) :: ratios.length=1 expected=1
+RESULT PASS small: line-84 rule holds on every call (true iff operand > currentBytesToWrite and idx < len-1) :: calls=3799
+RESULT PASS small: target at switch i is round(T * 2^-(i+1)) :: currentBytesToWrite at every call equals round(T*ratio[idx])
+RESULT PASS small: every non-final output i in (target_i, target_i + maxPartition + granularity] :: maxPart=10418 gran=0 excess_max=None
+RESULT PASS small: instrument: non-final Data.db length == operand at its switch (uncompressed) :: first mismatch: []
+RESULT PASS small: gate T < 100e6; ratios.length == 1, N == 1, output below the 50e6 constant :: T=39587890 ratios.length=1 N=1 size=39587890 constant=50000000
+RESULT PASS cross: output bytes the same (within 2%) for smallest = 0, 5e6, 50e6, 10*T while N changes :: out={'d0': 208531939, 'd5': 208520005, 'd50': 208452678, 'dbig': 208444224} N={'d0': 12, 'd5': 6, 'd50': 3, 'dbig': 1}
+RESULT PASS cross: N falls as the constant rises (d0 > d5 > d50 > dbig == 1) :: {'d0': 12, 'd5': 6, 'd50': 3, 'dbig': 1}
+RESULT PASS control: MaxSSTableSizeWriter count falls when m rises (positive control moves with its knob) :: m=20e6 N=11, m=40e6 N=6
+SUMMARY ALL PASS (72 checks)

@@ -1,0 +1,71 @@
+--- k0 knob=0 MiB | end-pass1 size=0 entries=0 | end-pass2 size=0 capacity=0 entries=0 avgW=0.00 | hist cache bytes=3744 (KeyCacheKey 0 + RowIndexEntry 0 + caffeine nodes 3744 + key arrays 0) factor=3744.000 | KeyCacheKey instances=0 | live heap total=87191376
+PASS k0: init log shows knob 0 MiB
+PASS k0: no ERROR line in system.log | 0
+PASS k0: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 0, 'Capacity': 0, 'Entries': 0}
+PASS k0: Size <= Capacity at every sample (overshoot <= 1 entry, 200 B) | max(size-capacity)=0 over 12 samples
+PASS k0: Capacity == knob x 1048576 at every sample
+--- k4 knob=4 MiB | end-pass1 size=4194240 entries=43690 | end-pass2 size=4194240 capacity=4194304 entries=43690 avgW=96.00 | hist cache bytes=5945584 (KeyCacheKey 1398080 + RowIndexEntry 1048560 + caffeine nodes 1751344 + key arrays 1747600) factor=1.418 | KeyCacheKey instances=43690 | live heap total=95150568
+PASS k4: init log shows knob 4 MiB
+PASS k4: no ERROR line in system.log | 0
+PASS k4: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 4194240, 'Capacity': 4194304, 'Entries': 43690}
+PASS k4: Size <= Capacity at every sample (overshoot <= 1 entry, 200 B) | max(size-capacity)=-64 over 16 samples
+PASS k4: Capacity == knob x 1048576 at every sample
+--- k16 knob=16 MiB | end-pass1 size=16777152 entries=174762 | end-pass2 size=16777152 capacity=16777216 entries=174762 avgW=96.00 | hist cache bytes=23771376 (KeyCacheKey 5592384 + RowIndexEntry 4194288 + caffeine nodes 6994224 + key arrays 6990480) factor=1.417 | KeyCacheKey instances=174762 | live heap total=119053432
+PASS k16: init log shows knob 16 MiB
+PASS k16: no ERROR line in system.log | 0
+PASS k16: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 16777152, 'Capacity': 16777216, 'Entries': 174762}
+PASS k16: Size <= Capacity at every sample (overshoot <= 1 entry, 200 B) | max(size-capacity)=-64 over 14 samples
+PASS k16: Capacity == knob x 1048576 at every sample
+--- k64 knob=64 MiB | end-pass1 size=67108800 entries=699050 | end-pass2 size=67108800 capacity=67108864 entries=699050 avgW=96.00 | hist cache bytes=95074544 (KeyCacheKey 22369600 + RowIndexEntry 16777200 + caffeine nodes 27965744 + key arrays 27962000) factor=1.417 | KeyCacheKey instances=699050 | live heap total=224268488
+PASS k64: init log shows knob 64 MiB
+PASS k64: no ERROR line in system.log | 0
+PASS k64: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 67108800, 'Capacity': 67108864, 'Entries': 699050}
+PASS k64: Size <= Capacity at every sample (overshoot <= 1 entry, 200 B) | max(size-capacity)=-64 over 16 samples
+PASS k64: Capacity == knob x 1048576 at every sample
+--- k512 knob=512 MiB | end-pass1 size=91233880 entries=950355 | end-pass2 size=95767576 capacity=536870912 entries=997581 avgW=96.00 | hist cache bytes=135674760 (KeyCacheKey 31922592 + RowIndexEntry 23941944 + caffeine nodes 39906984 + key arrays 39903240) factor=1.417 | KeyCacheKey instances=997581 | live heap total=271698688
+PASS k512: init log shows knob 512 MiB
+PASS k512: no ERROR line in system.log | 0
+PASS k512: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 95767576, 'Capacity': 536870912, 'Entries': 997581}
+PASS k512: Size <= Capacity at every sample (overshoot <= 1 entry, 200 B) | max(size-capacity)=-441103336 over 13 samples
+PASS k512: Capacity == knob x 1048576 at every sample
+--- k16b knob=16 MiB | end-pass1 size=16777152 entries=174762 | end-pass2 size=16777152 capacity=16777216 entries=174762 avgW=96.00 | hist cache bytes=23771376 (KeyCacheKey 5592384 + RowIndexEntry 4194288 + caffeine nodes 6994224 + key arrays 6990480) factor=1.417 | KeyCacheKey instances=174762 | live heap total=119762448
+PASS k16b: init log shows knob 16 MiB
+PASS k16b: no ERROR line in system.log | 0
+PASS k16b: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 16777152, 'Capacity': 16777216, 'Entries': 174762}
+PASS k16b: Size <= Capacity at every sample (overshoot <= 1 entry, 200 B) | max(size-capacity)=-64 over 13 samples
+PASS k16b: Capacity == knob x 1048576 at every sample
+--- rt knob=64 MiB | end-pass1 size=67108800 entries=699050 | end-pass2 size=16777152 capacity=16777216 entries=174762 avgW=96.00 | hist cache bytes=23771376 (KeyCacheKey 5592384 + RowIndexEntry 4194288 + caffeine nodes 6994224 + key arrays 6990480) factor=1.417 | KeyCacheKey instances=174762 | live heap total=137100408
+PASS rt: init log shows knob 64 MiB
+PASS rt: no ERROR line in system.log | 0
+PASS rt: JMX (Size, Entries) equals the virtual-table end sample within 1 s of drift | {'Size': 16777152, 'Capacity': 16777216, 'Entries': 174762}
+PASS k4: Size plateaus at the cap (end-pass2 within 1% of capacity, and pass2-pass1 change < 1%) | size1=4194240 size2=4194240 cap=4194304
+PASS k4: cap binds (cap < P x average weight) | cap=4194304 P*w=96000000
+PASS k4: key-cache heap bytes did not grow after the plateau (pass2/pass1 <= 1.05) | 5945584 -> 5945584
+PASS k4: factor in [1.0, 2.5] | 1.418
+PASS k16: Size plateaus at the cap (end-pass2 within 1% of capacity, and pass2-pass1 change < 1%) | size1=16777152 size2=16777152 cap=16777216
+PASS k16: cap binds (cap < P x average weight) | cap=16777216 P*w=96000000
+PASS k16: key-cache heap bytes did not grow after the plateau (pass2/pass1 <= 1.05) | 23771376 -> 23771376
+PASS k16: factor in [1.0, 2.5] | 1.417
+PASS k64: Size plateaus at the cap (end-pass2 within 1% of capacity, and pass2-pass1 change < 1%) | size1=67108800 size2=67108800 cap=67108864
+PASS k64: cap binds (cap < P x average weight) | cap=67108864 P*w=96000000
+PASS k64: key-cache heap bytes did not grow after the plateau (pass2/pass1 <= 1.05) | 95074544 -> 95074544
+PASS k64: factor in [1.0, 2.5] | 1.417
+PASS k16b: Size plateaus at the cap (end-pass2 within 1% of capacity, and pass2-pass1 change < 1%) | size1=16777152 size2=16777152 cap=16777216
+PASS k16b: cap binds (cap < P x average weight) | cap=16777216 P*w=96000000
+PASS k16b: key-cache heap bytes did not grow after the plateau (pass2/pass1 <= 1.05) | 23771376 -> 23771376
+PASS k16b: factor in [1.0, 2.5] | 1.417
+PASS entries ratio k4:k16:k64 ~ 1:4:16 (each within 10%) | [43690, 174762, 699050]
+PASS factor stable across 4/16/64 (+16 repeat) within +-25% of the mean | 1.418 1.417 1.417 1.417
+PASS heap bytes scale ~ 1:4:16 (each within 15%) | [5945584, 23771376, 95074544]
+PASS repeat of 16 MiB: Size and Entries within 2% | 16777152/16777152, 174762/174762
+PASS k0: Size 0, Entries 0 at every sample
+PASS k0: KeyCacheKey instances in the live histogram <= 100 at every histogram | {'t0': 0, 'end-pass1': 0, 'end-pass2': 0}
+PASS k0: reads actually happened (requests == 0 because the cache is disabled is not required); stress ok
+PASS k512: does not plateau at 512 MiB: Size << cap and keeps growing from pass1 to pass2 | size1=91233880 size2=95767576
+PASS k512: Entries at end ~ distinct keys read (>= 0.95 P) and Size ~ Entries x weight | entries=997581 P=1000000 size=95767576 avgW=96.00
+PASS k512: factor in [1.0, 2.5] | 1.417
+PASS rt: before: Capacity 64 MiB and Size > 16 MiB (the cap bound) | size=67108800
+PASS rt: after setcachecapacity 16: Capacity 16 MiB, Size <= 16 MiB within 30 s | size=16777152
+PASS rt: heap bytes of the cache fell (after-setcap < 0.5 x before) | 95074544 -> 23771376
+PASS rt: end: Size <= 16 MiB and heap bytes ~ those of a 16 MiB cap run | size=16777152 cache_b=23771376
+TOTAL FAIL: 0

@@ -1,0 +1,62 @@
+HOLDS unit fill 1MiB x1 threads: settled weight <= C and size == C/1024
+HOLDS unit fill 1MiB x8 threads: settled weight <= C and size == C/1024
+HOLDS unit fill 8MiB x1 threads: settled weight <= C and size == C/1024
+HOLDS unit fill 8MiB x8 threads: settled weight <= C and size == C/1024
+HOLDS unit fill 64MiB x1 threads: settled weight <= C and size == C/1024
+HOLDS unit fill 64MiB x8 threads: settled weight <= C and size == C/1024
+HOLDS unit guard below: throws iff sum > Integer.MAX_VALUE | sum=2147483646 threw=False
+HOLDS unit guard sum_eq_max_key16: throws iff sum > Integer.MAX_VALUE | sum=2147483647 threw=False
+HOLDS unit guard sum_eq_max_key0: throws iff sum > Integer.MAX_VALUE | sum=2147483647 threw=False
+HOLDS unit guard above_by1_key16: throws iff sum > Integer.MAX_VALUE | sum=2147483648 threw=True
+HOLDS unit guard above_by1_key0: throws iff sum > Integer.MAX_VALUE | sum=2147483648 threw=True
+HOLDS unit guard above_far: throws iff sum > Integer.MAX_VALUE | sum=6442450941 threw=True
+HOLDS k0: system.log initialised the key cache with 0 MiB (last init line) | ['0']
+HOLDS k0 pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k0 pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k0: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=0 hist instances=0
+HOLDS k0: JMX Size <= Capacity | 0 <= 0
+      k0: size=0 entries=0 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=3744 factor=0.000
+HOLDS k4: system.log initialised the key cache with 4 MiB (last init line) | ['4']
+HOLDS k4 pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k4 pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k4: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=43690 hist instances=43690
+HOLDS k4: JMX Size <= Capacity | 4194240 <= 4194304
+      k4: size=4194240 entries=43690 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=5945584 factor=1.418
+HOLDS k16: system.log initialised the key cache with 16 MiB (last init line) | ['16']
+HOLDS k16 pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k16 pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k16: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=174762 hist instances=174762
+HOLDS k16: JMX Size <= Capacity | 16777152 <= 16777216
+      k16: size=16777152 entries=174762 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=23771376 factor=1.417
+HOLDS k64: system.log initialised the key cache with 64 MiB (last init line) | ['64']
+HOLDS k64 pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k64 pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k64: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=699050 hist instances=699050
+HOLDS k64: JMX Size <= Capacity | 67108800 <= 67108864
+      k64: size=67108800 entries=699050 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=95074544 factor=1.417
+HOLDS k512: system.log initialised the key cache with 512 MiB (last init line) | ['512']
+HOLDS k512 pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k512 pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k512: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=997581 hist instances=997581
+HOLDS k512: JMX Size <= Capacity | 95767576 <= 536870912
+      k512: size=95767576 entries=997581 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=135674760 factor=1.417
+HOLDS k16b: system.log initialised the key cache with 16 MiB (last init line) | ['16']
+HOLDS k16b pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k16b pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS k16b: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=174762 hist instances=174762
+HOLDS k16b: JMX Size <= Capacity | 16777152 <= 16777216
+      k16b: size=16777152 entries=174762 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=23771376 factor=1.417
+HOLDS rt: system.log initialised the key cache with 64 MiB (last init line) | ['64']
+HOLDS rt pass1: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS rt pass2: stress read 3,000,000 partitions with 0 errors | partitions=3000000 errors=0
+HOLDS rt: JMX Capacity == knob MiB and histogram KeyCacheKey instances ~ Entries | jmx entries=174762 hist instances=174762
+HOLDS rt: JMX Size <= Capacity | 16777152 <= 16777216
+      rt: size=16777152 entries=174762 heap(KeyCacheKey+RowIndexEntry+nodes+key arrays)=23771376 factor=1.417
+HOLDS k4: Size within 1% of the cap and heap bytes did not grow in pass 2
+HOLDS k16: Size within 1% of the cap and heap bytes did not grow in pass 2
+HOLDS k64: Size within 1% of the cap and heap bytes did not grow in pass 2
+HOLDS k16b: Size within 1% of the cap and heap bytes did not grow in pass 2
+HOLDS heap bytes ratio ~1:4:16 | [5945584, 23771376, 95074544]
+HOLDS k512: not at cap, grows past pass 1, entries >= 0.95 P | {'knob': 512, 'size': 95767576, 'ent': 997581, 'hb': 135674760, 'hb1': 129252024, 'size1': 91233880}
+HOLDS k0: no entries, no size
+SELFCHECK FAILS: 0

@@ -1,0 +1,22 @@
+# cassandra-stress user profile (B3i.1): ks.t (pk text PRIMARY KEY, v blob), 24-char keys, 10-byte values
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+table: t
+table_definition: |
+  CREATE TABLE t (pk text PRIMARY KEY, v blob)
+  WITH caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+  AND compression = {'enabled': 'false'}
+  AND compaction = {'class': 'SizeTieredCompactionStrategy'}
+columnspec:
+  - name: pk
+    size: fixed(24)
+  - name: v
+    size: fixed(10)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries:
+  read1:
+    cql: select * from t where pk = ?
+    fields: samerow

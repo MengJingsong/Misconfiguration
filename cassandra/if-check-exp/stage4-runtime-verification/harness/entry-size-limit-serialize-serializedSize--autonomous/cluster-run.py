@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""Cluster tier driver (case file B3 as amended B3i). Usage: cluster-run.py <tree> <nodedir> <outdir> <driver-dir> [phases...]
+Phases (default all, in order): c0 c64 c256 c1024 big.  One single-node Cassandra on 127.0.0.77 with its own ports; the node is restarted
+per phase with `row_cache_size` changed in its yaml; data stay in <nodedir>. Reading = RssAnon of the node PID (100 ms; 20 ms in `big`).
+Stops the node on any exit; kills by PID only."""
+import sys, os, re, time, json, signal, subprocess, shutil, threading, atexit, random, resource
+tree, node, out, drv = [os.path.abspath(a) for a in sys.argv[1:5]]
+PHASES = sys.argv[5:] or ['c0', 'c64', 'c256', 'c1024', 'big']
+ADDR, STORAGE, NATIVE, JMX = '127.0.0.77', 7077, 9077, 7277
+NT = [os.path.join(tree, 'bin/nodetool'), '-p', str(JMX)]
+PIDF = os.path.join(node, 'cassandra.pid')
+resource.setrlimit(resource.RLIMIT_NOFILE, (100000, 100000))
+os.makedirs(out, exist_ok=True)
+LOG = open(os.path.join(out, 'session.log'), 'a')
+def log(*a):
+    m = '[%s] %s' % (time.strftime('%FT%T%z'), ' '.join(str(x) for x in a)); print(m, flush=True); LOG.write(m + '\n'); LOG.flush()
+def sh(cmd, check=True, timeout=300, quiet=False):
+    t0 = time.time()
+    p = subprocess.run(cmd, shell=isinstance(cmd, str), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+    if not quiet: log('+', cmd if isinstance(cmd, str) else ' '.join(cmd), '->', p.returncode, '(%.1fs)' % (time.time() - t0), p.stdout.strip()[-600:])
+    if check and p.returncode: raise RuntimeError('failed: %s\n%s' % (cmd, p.stdout))
+    return p.stdout
+
+def pid():
+    try: return int(open(PIDF).read().strip())
+    except Exception: return None
+def alive(p):
+    try: os.kill(p, 0); return True
+    except OSError: return False
+def stop_node():
+    p = pid()
+    if p and alive(p):
+        log('stopping node pid', p)
+        try: sh(NT + ['drain'], check=False, timeout=240)
+        except Exception as e: log('drain error', e)
+        try:
+            os.kill(p, signal.SIGTERM)
+            for _ in range(90):
+                if not alive(p): break
+                time.sleep(1)
+            else: os.kill(p, signal.SIGKILL)
+        except OSError: pass
+    log('node pid alive after stop:', bool(p and alive(p)))
+atexit.register(stop_node)
+
+def setkey(txt, k, v):
+    if re.search(r'^%s:' % k, txt, re.M): return re.sub(r'^%s:.*$' % k, '%s: %s' % (k, v), txt, flags=re.M)
+    return txt + '\n%s: %s\n' % (k, v)
+def setup_node():
+    shutil.rmtree(node, ignore_errors=True)
+    for d in ('data', 'commitlog', 'hints', 'saved_caches', 'cdc_raw', 'logs'): os.makedirs(os.path.join(node, d))
+    shutil.copytree(os.path.join(tree, 'conf'), os.path.join(node, 'conf'))
+    envsh = os.path.join(node, 'conf/cassandra-env.sh'); t = open(envsh).read()
+    assert 'JMX_PORT="7199"' in t; open(envsh, 'w').write(t.replace('JMX_PORT="7199"', 'JMX_PORT="%d"' % JMX))
+    y = os.path.join(node, 'conf/cassandra.yaml'); txt = open(y).read()
+    txt = re.sub(r'^listen_address:.*$', 'listen_address: ' + ADDR, txt, flags=re.M); txt = re.sub(r'^rpc_address:.*$', 'rpc_address: ' + ADDR, txt, flags=re.M)
+    txt = re.sub(r'- seeds: ".*"', '- seeds: "%s:%d"' % (ADDR, STORAGE), txt)
+    for k, v in (('storage_port', STORAGE), ('native_transport_port', NATIVE), ('cluster_name', "'es-stage4'"), ('auto_snapshot', 'false'), ('cdc_enabled', 'false'),
+                 ('commitlog_directory', node + '/commitlog'), ('hints_directory', node + '/hints'), ('saved_caches_directory', node + '/saved_caches'), ('cdc_raw_directory', node + '/cdc_raw'),
+                 ('key_cache_size', '0MiB'), ('row_cache_save_period', '0s'), ('file_cache_size', '64MiB'), ('memtable_allocation_type', 'heap_buffers'),
+                 ('read_request_timeout', '60000ms'), ('native_transport_timeout', '60s'), ('write_request_timeout', '60000ms'), ('row_cache_class_name', 'org.apache.cassandra.cache.SerializingCacheProvider')):
+        txt = setkey(txt, k, v)
+    txt = re.sub(r'^data_file_directories:\n(\s+-.*\n)?', '', txt, flags=re.M)
+    txt += '\ndata_file_directories:\n    - %s/data\n' % node
+    txt = setkey(txt, 'row_cache_size', '0MiB')
+    open(y, 'w').write(txt)
+def set_cap(cap):
+    y = os.path.join(node, 'conf/cassandra.yaml'); txt = open(y).read()
+    txt = re.sub(r'^row_cache_size:.*$', 'row_cache_size: %dMiB' % cap, txt, flags=re.M); open(y, 'w').write(txt)
+    assert len(re.findall(r'^row_cache_size: %dMiB$' % cap, txt, re.M)) == 1
+def start_node(label):
+    for p in (STORAGE, NATIVE, JMX):
+        assert subprocess.run("ss -ltn | grep -q ':%d '" % p, shell=True).returncode != 0 or True
+    env = dict(os.environ, MAX_HEAP_SIZE='2G', HEAP_NEWSIZE='512M', CASSANDRA_CONF=node + '/conf', CASSANDRA_LOG_DIR=node + '/logs',
+               MALLOC_ARENA_MAX='1', MALLOC_MMAP_THRESHOLD_='65536', MALLOC_TRIM_THRESHOLD_='0',
+               JVM_EXTRA_OPTS='-XX:+AlwaysPreTouch -XX:MaxDirectMemorySize=256m -XX:NativeMemoryTracking=summary')
+    if os.path.exists(PIDF): os.remove(PIDF)
+    off = os.path.getsize(node + '/logs/system.log') if os.path.exists(node + '/logs/system.log') else 0
+    log('start node phase', label)
+    subprocess.run([os.path.join(tree, 'bin/cassandra'), '-p', PIDF], env=env, stdout=open(node + '/logs/stdout-%s.log' % label, 'w'), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, timeout=120)
+    t0 = time.time()
+    while time.time() - t0 < 400:
+        time.sleep(4)
+        p = pid()
+        if not p or not alive(p): raise RuntimeError('daemon died during start')
+        st = subprocess.run(NT + ['status'], stdout=subprocess.PIPE, text=True, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL).stdout
+        sb = subprocess.run(NT + ['statusbinary'], stdout=subprocess.PIPE, text=True, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL).stdout.strip()
+        if re.search(r'^UN', st, re.M) and sb == 'running': break
+    else: raise RuntimeError('node did not come up')
+    p = pid(); log('node up pid', p, 'in %.0fs' % (time.time() - t0))
+    ev = os.path.join(out, 'evidence-%s' % label); os.makedirs(ev, exist_ok=True)
+    open(ev + '/cmdline.txt', 'w').write(open('/proc/%d/cmdline' % p, 'rb').read().replace(b'\0', b' ').decode())
+    open(ev + '/environ.txt', 'w').write('\n'.join(x for x in open('/proc/%d/environ' % p, 'rb').read().decode().split('\0') if x.startswith(('MALLOC', 'MAX_HEAP', 'HEAP_NEW', 'CASSANDRA_CONF', 'JVM_EXTRA'))))
+    open(ev + '/yaml-keys.txt', 'w').write('\n'.join(l for l in open(node + '/conf/cassandra.yaml').read().splitlines() if re.match(r'(row_cache|key_cache|file_cache|memtable_allocation|listen_address|rpc_address|storage_port|native_transport_port)', l)))
+    with open(node + '/logs/system.log', errors='replace') as f: f.seek(off); seg = f.read()
+    open(ev + '/system.log.startup', 'w').write('\n'.join(l for l in seg.splitlines() if 'row cache' in l.lower() or 'Heap size' in l or l.startswith('ERROR')))
+    return p
+
+def rss_anon_kb(p):
+    for l in open('/proc/%d/status' % p):
+        if l.startswith('RssAnon:'): return int(l.split()[1])
+class Sampler(threading.Thread):
+    def __init__(self, p, dt): super().__init__(daemon=True); self.p, self.dt, self.stop_, self.s = p, dt, threading.Event(), []
+    def run(self):
+        while not self.stop_.is_set():
+            try: self.s.append((int(time.time() * 1000), rss_anon_kb(self.p)))
+            except Exception: pass
+            self.stop_.wait(self.dt)
+    def window(self, a, b): return [v for t, v in self.s if a <= t <= b]
+UNIT = {'bytes': 1, 'KiB': 1024, 'MiB': 1 << 20, 'GiB': 1 << 30}
+def cache_info():
+    o = subprocess.run(NT + ['info'], stdout=subprocess.PIPE, text=True, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).stdout
+    m = re.search(r'Row Cache\s*:\s*entries (\d+), size ([\d.]+) (\w+), capacity ([\d.]+) (\w+), (\d+) hits, (\d+) requests', o)
+    if not m: return None
+    return dict(t=int(time.time() * 1000), entries=int(m.group(1)), size=float(m.group(2)) * UNIT[m.group(3)], capacity=float(m.group(4)) * UNIT[m.group(5)], hits=int(m.group(6)), requests=int(m.group(7)))
+class InfoPoller(threading.Thread):
+    def __init__(self, dt): super().__init__(daemon=True); self.dt, self.stop_, self.rows = dt, threading.Event(), []
+    def run(self):
+        while not self.stop_.is_set():
+            r = cache_info()
+            if r: self.rows.append(r)
+            self.stop_.wait(self.dt)
+
+# ---- CQL ----
+sys.path.insert(0, drv)
+def connect():
+    from cassandra.cluster import Cluster
+    from cassandra.policies import DCAwareRoundRobinPolicy
+    c = Cluster([ADDR], port=NATIVE, protocol_version=5, load_balancing_policy=DCAwareRoundRobinPolicy(local_dc='datacenter1'), token_metadata_enabled=False, connect_timeout=30)
+    return c, c.connect()
+def run_async(s, ps, argl, inflight=32, timeout=120):
+    sem = threading.Semaphore(inflight); st = dict(ok=0, empty=0, err=0, bytes=0, firsterr=None); lock = threading.Lock()
+    def done(rs):
+        with lock:
+            rows = list(rs)
+            if rows: st['ok'] += 1; st['bytes'] += len(rows[0].v)
+            else: st['empty'] += 1
+        sem.release()
+    def bad(e):
+        with lock: st['err'] += 1; st['firsterr'] = st['firsterr'] or str(e)[:300]
+        sem.release()
+    for a in argl:
+        sem.acquire(); f = s.execute_async(ps, a, timeout=timeout); f.add_callbacks(done, bad)
+    for _ in range(inflight): sem.acquire()
+    return st
+SCHEMA = "(pk bigint, ck int, v blob, PRIMARY KEY (pk, ck)) WITH caching = {'keys':'NONE','rows_per_partition':'ALL'} AND compression = {'enabled':'false'}"
+def load():
+    c, s = connect()
+    s.execute("CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}")
+    for t in ('t_small', 't_big8', 't_big256'): s.execute('CREATE TABLE IF NOT EXISTS ks.%s %s' % (t, SCHEMA))
+    ins = lambda t: s.prepare('INSERT INTO ks.%s (pk, ck, v) VALUES (?,?,?)' % t)
+    n = int(os.environ.get('STAGE4_SMALL', 16384))
+    def gen_small():
+        for pk in range(n): yield (pk, 0, random.Random(pk).randbytes(65536))
+    def gen_big(parts, rows, seed):
+        r = random.Random(seed)
+        for pk in range(parts):
+            for ck in range(rows): yield (pk, ck, r.randbytes(1 << 20))
+    t0 = time.time()
+    res = {}
+    res['small'] = run_async_w(s, ins('t_small'), gen_small(), 64)
+    res['big8'] = run_async_w(s, ins('t_big8'), gen_big(8, int(os.environ.get('STAGE4_BIGROWS', 64)), 8), 16)
+    res['big256'] = run_async_w(s, ins('t_big256'), gen_big(1, int(os.environ.get('STAGE4_BIG256ROWS', 256)), 256), 16)
+    log('load results', res, 'in %.0fs' % (time.time() - t0)); c.shutdown()
+    assert all(r['err'] == 0 for r in res.values()), res
+    sh(NT + ['flush'], timeout=600)
+def run_async_w(s, ps, gen, inflight):
+    sem = threading.Semaphore(inflight); st = dict(err=0, n=0, first=None)
+    def ok(_): sem.release()
+    def bad(e): st['err'] += 1; st['first'] = st['first'] or str(e)[:300]; sem.release()
+    for a in gen:
+        sem.acquire(); f = s.execute_async(ps, a, timeout=120); f.add_callbacks(ok, bad); st['n'] += 1
+    for _ in range(inflight): sem.acquire()
+    return st
+
+def histogram(p, label):
+    o = sh(['jcmd', str(p), 'GC.class_histogram'], quiet=True, timeout=300)
+    lines = [l for l in o.splitlines() if 'RefCountedMemory' in l or 'caffinitas' in l or 'SerializingCache' in l or 'OHCProvider' in l]
+    open(os.path.join(out, 'histogram-%s.txt' % label), 'w').write('\n'.join(lines) + '\n')
+    n = 0
+    for l in lines:
+        if l.split()[-1] == 'org.apache.cassandra.cache.RefCountedMemory': n = int(l.split()[1])
+    return n, [l for l in lines if 'caffinitas' in l]
+
+def mark(S, name): S['marks'][name] = int(time.time() * 1000)
+def read_small(label, S):
+    c, s = connect(); ps = s.prepare('SELECT v FROM ks.t_small WHERE pk = ? AND ck = 0')
+    for k in (1, 2):
+        mark(S, 'pass%d_start' % k); t0 = time.time()
+        st = run_async(s, ps, ((pk,) for pk in range(int(os.environ.get('STAGE4_SMALL', 16384)))))
+        st['secs'] = round(time.time() - t0, 1); S['pass%d' % k] = st; mark(S, 'pass%d_end' % k); log(label, 'pass', k, st)
+        time.sleep(6)
+    c.shutdown()
+
+def phase(label, cap):
+    S = dict(label=label, cap_mib=cap, marks={}); log('=== phase', label, 'row_cache_size', cap, 'MiB')
+    set_cap(cap)
+    p = start_node(label); S['pid'] = p
+    time.sleep(20)
+    smp = Sampler(p, 0.02 if label.startswith('big') else 0.1); smp.start(); time.sleep(5)
+    S['baseline_kb'] = sum(v for _, v in smp.s[-40:]) / len(smp.s[-40:]) if not label.startswith('big') else sum(v for _, v in smp.s[-200:]) / len(smp.s[-200:])
+    info = InfoPoller(1 if label.startswith('big') else 5); info.start()
+    log('baseline RssAnon MiB %.1f' % (S['baseline_kb'] / 1024))
+    try:
+        if label.startswith('big'):
+            c, s = connect(); ps8 = s.prepare('SELECT v FROM ks.t_big8 WHERE pk = ? AND ck = 0'); ps256 = s.prepare('SELECT v FROM ks.t_big256 WHERE pk = ? AND ck = 0')
+            S['big8_rounds'] = []
+            for r in range(20):
+                a = int(time.time() * 1000); res = [None] * 8; th = []
+                def go(i):
+                    st = run_async(s, ps8, [(i,)], 1, 120); res[i] = st
+                for i in range(8): t = threading.Thread(target=go, args=(i,)); t.start(); th.append(t)
+                for t in th: t.join()
+                b = int(time.time() * 1000); S['big8_rounds'].append(dict(a=a, b=b, ok=sum(x['ok'] for x in res), err=sum(x['err'] for x in res), firsterr=next((x['firsterr'] for x in res if x['firsterr']), None)))
+                time.sleep(2)
+            log('big8 rounds', S['big8_rounds'][:3], '...')
+            S['big256_reads'] = []
+            for r in range(5):
+                a = int(time.time() * 1000); st = run_async(s, ps256, [(0,)], 1, 120); b = int(time.time() * 1000)
+                S['big256_reads'].append(dict(a=a, b=b, **st)); time.sleep(5)
+            log('big256 reads', S['big256_reads'])
+            c.shutdown()
+        else:
+            read_small(label, S)
+        time.sleep(8)
+        S['refcounted'], S['ohc_lines'] = histogram(p, label); log('RefCountedMemory instances', S['refcounted'], 'ohc lines', S['ohc_lines'])
+        if label == 'c256':
+            mark(S, 'shrink_start'); S['info_before_shrink'] = cache_info()
+            sh(NT + ['setcachecapacity', '0', '32', '0'])
+            S['shrink_polls'] = []
+            for _ in range(8): time.sleep(2); S['shrink_polls'].append(cache_info())
+            time.sleep(6); mark(S, 'shrink_end')
+        S['info_end'] = cache_info(); S['rss_end_kb'] = rss_anon_kb(p)
+    finally:
+        info.stop_.set(); smp.stop_.set(); smp.join(); info.join()
+        with open(os.path.join(out, 'samples-%s.csv' % label), 'w') as f:
+            f.write('epoch_ms,rss_anon_kb\n'); [f.write('%d,%d\n' % x) for x in smp.s]
+        with open(os.path.join(out, 'info-%s.csv' % label), 'w') as f:
+            f.write('epoch_ms,entries,size_bytes,capacity_bytes,hits,requests\n'); [f.write('%d,%d,%d,%d,%d,%d\n' % (r['t'], r['entries'], r['size'], r['capacity'], r['hits'], r['requests'])) for r in info.rows]
+        S['info_rows'] = len(info.rows)
+    with open(node + '/logs/system.log', errors='replace') as f: lg = f.read()
+    S['errors_in_log'] = [l for l in lg.splitlines() if l.startswith('ERROR')][-5:]
+    stop_node()
+    json.dump(S, open(os.path.join(out, 'phase-%s.json' % label), 'w'), indent=1)
+    log('phase', label, 'done')
+
+log('cluster-run start tree=%s head=%s phases=%s' % (tree, sh(['git', '-C', tree, 'rev-parse', '--short', 'HEAD'], quiet=True).strip(), PHASES))
+log('df:', sh('df -T ~ | tail -1', quiet=True).strip())
+for p in (STORAGE, NATIVE, JMX):
+    if subprocess.run("ss -ltn | grep -q ':%d '" % p, shell=True).returncode == 0: raise SystemExit('port %d busy' % p)
+if 'c0' in PHASES:
+    setup_node(); set_cap(0); start_node('load'); load(); stop_node()
+for ph in PHASES:
+    phase(ph, {'c0': 0, 'c0b': 0, 'c64': 64, 'c256': 256, 'c1024': 1024, 'big': 64, 'bigctl': 0}[ph])
+log('cluster-run done')

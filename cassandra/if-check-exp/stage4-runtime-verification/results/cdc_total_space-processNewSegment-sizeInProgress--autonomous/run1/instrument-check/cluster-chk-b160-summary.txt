@@ -1,0 +1,17 @@
+== chk-b160: mode=blocking cap=160MiB table=k.t rows=6144 (=384 MiB) rate=200/s heap=1G ip=127.0.0.37 jmx=7237
+JVM_EXTRA_OPTS=-Dstage4.byteman.out=/users/jason92/s4-cdc/logs/cluster/chk-b160/cdc-verdict.txt -javaagent:/users/jason92/s4-cdc/clone/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/s4-cdc/harness/cdc-verdict.btm; ulimit -n 100000
+node up after 28s, pid 675396
+idle: links=2 1792903504838,2,67108864,73728,0,0,0,50
+stress W: Op rate : 199 op/s [insert: 199 op/s]|Total partitions : 6,144 [insert: 6,144]|Total errors : 4,101 [insert: 4,101]| wall=38s
+after workload: links=4 1792903542938,4,134217728,134230016,4,72,0,50 WARN=5 Freed_up=0 listing=CommitLog-7-1792903435639_cdc.idx:18 CommitLog-7-1792903435639.log:33554432 CommitLog-7-1792903435640_cdc.idx:18 CommitLog-7-1792903435640.log:33554432 CommitLog-7-1792903435641_cdc.idx:18 CommitLog-7-1792903435641.log:33554432 CommitLog-7-1792903435642_cdc.idx:18 CommitLog-7-1792903435642.log:33554432 
+final reading (W+30 s, after a last flush): links=4 1792903577038,4,134217728,134230016,4,72,0,50 WARN=5 Freed_up=0
+final listing: CommitLog-7-1792903435639_cdc.idx:18 CommitLog-7-1792903435639.log:33554432 CommitLog-7-1792903435640_cdc.idx:18 CommitLog-7-1792903435640.log:33554432 CommitLog-7-1792903435641_cdc.idx:18 CommitLog-7-1792903435641.log:33554432 CommitLog-7-1792903435642_cdc.idx:18 CommitLog-7-1792903435642.log:33554432 
+before release: links=4 WARN=5
+release: deleted CommitLog-7-1792903435639.log
+release: deleted CommitLog-7-1792903435640.log
+release: accepted=1 after 2 probe(s), 1365 ms; links=3
+end: links=3 1792903578438,3,100663296,67121152,2,36,0,50
+commit log dir: 100667392 bytes; data: 135035388; free: 49G
+traces: created=7 forbidden=2 deleteOld=0 rejectLines=42 WARN=6 FreedUp=0 ERROR=4102
+sampler: ticks=1572 max_links=4 max_link_bytes=134217728 max_gap_ms=50 first_ms=1792903499888 last_ms=1792903578438
+RESULT chk-b160 finished 1792903588267; disk free 49G

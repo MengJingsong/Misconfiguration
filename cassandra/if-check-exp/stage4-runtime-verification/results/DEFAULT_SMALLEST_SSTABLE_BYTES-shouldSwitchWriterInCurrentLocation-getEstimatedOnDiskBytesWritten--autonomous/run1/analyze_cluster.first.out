@@ -1,0 +1,91 @@
+RESULT PASS A: tree constant in session.log is 50000000 :: DEFAULT_SMALLEST_SSTABLE_BYTES = 50_000_000;
+RESULT PASS B: tree constant in session.log is 5000000 :: DEFAULT_SMALLEST_SSTABLE_BYTES = 5_000_000;
+RESULT PASS C: tree constant in session.log is 500000000 :: DEFAULT_SMALLEST_SSTABLE_BYTES = 500_000_000;
+ARM A/lcs100: constant=50000000 T=2085276921 outputs=20 switches=0 sizes=[104859963, 104860044, 104859864, 104859994, 104859984, 104860184, 104859944, 104859855, 104859984, 104859840, 104859858, 104859684]... output_bytes=2086349705 peak_table_du=4178209820 (x2.000 of pre) space_asked=[2085276921]
+RESULT FAIL A/lcs100: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/lcs100: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086349705 in=2085276921
+RESULT PASS A/lcs100: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085276921] T=2085276921 warnings=[]
+RESULT PASS A/lcs100: LCS control: output count within 1 of ceil(T/S); non-final outputs in (S, S + one partition] :: N=20 T/S=19.89 min/max non-final=104859684/104860361 S=104857600
+ARM A/lcs50: constant=50000000 T=2085250912 outputs=40 switches=0 sizes=[52430092, 52429962, 52429922, 52430159, 52429962, 52430002, 52429914, 52430132, 52429882, 52430180, 52430162, 52430102]... output_bytes=2086351397 peak_table_du=4178128147 (x2.000 of pre) space_asked=[2085250912]
+RESULT FAIL A/lcs50: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/lcs50: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086351397 in=2085250912
+RESULT PASS A/lcs50: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085250912] T=2085250912 warnings=[]
+RESULT PASS A/lcs50: LCS control: output count within 1 of ceil(T/S); non-final outputs in (S, S + one partition] :: N=40 T/S=39.77 min/max non-final=52429672/52430292 S=52428800
+ARM A/plain: constant=50000000 T=2085272076 outputs=1 switches=0 sizes=[2086357597] output_bytes=2086357597 peak_table_du=4178612310 (x2.000 of pre) space_asked=[2085272076]
+RESULT FAIL A/plain: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/plain: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086357597 in=2085272076
+RESULT PASS A/plain: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085272076] T=2085272076 warnings=[]
+RESULT PASS A/plain: no -s: 1 output of about T, no writer switch :: N=1 switches=0
+ARM A/small: constant=50000000 T=91710376 outputs=1 switches=0 sizes=[91782443] output_bytes=91782443 peak_table_du=183860910 (x2.000 of pre) space_asked=[91710376]
+RESULT PASS A/small: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=8 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/small: sum of output Data.db within 2% of input (no data lost or grown) :: out=91782443 in=91710376
+RESULT PASS A/small: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[91710376] T=91710376 warnings=[]
+RESULT PASS A/small: validity gate on T for the predicted ratio count (B3i.1) :: T=91710376
+RESULT PASS A/small: outputs == ratios.length == first k with T/2^k < constant (1) :: N=1 expected=1
+RESULT PASS A/small: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[] expected=[]
+RESULT PASS A/small: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=10630 excess_max=None excess_min=None
+RESULT FAIL A/small: small data, 50e6 constant: 1 output (below the constant), no switch :: N=1 size=91782443
+ARM A/split: constant=50000000 T=2085263611 outputs=6 switches=5 sizes=[1042634753, 521316836, 260658564, 130334898, 65167111, 66241780] output_bytes=2086353942 peak_table_du=4178525042 (x2.000 of pre) space_asked=[2085263611]
+RESULT FAIL A/split: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/split: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086353942 in=2085263611
+RESULT PASS A/split: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085263611] T=2085263611 warnings=[]
+RESULT PASS A/split: validity gate on T for the predicted ratio count (B3i.1) :: T=2085263611
+RESULT PASS A/split: outputs == ratios.length == first k with T/2^k < constant (6) :: N=6 expected=6
+RESULT PASS A/split: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[521315903, 260657951, 130328976, 65164488, 32582244] expected=[521315903, 260657951, 130328976, 65164488, 32582244]
+RESULT PASS A/split: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=10635 excess_max=5922 excess_min=613
+RESULT PASS A/split: last output is the remainder, above its own target T*ratios[last] and above the constant (no hard stop on the last piece) :: last=66241780 own target=32582244 constant=50000000
+ARM A/split2: constant=50000000 T=2085266831 outputs=6 switches=5 sizes=[1042635533, 521317379, 260658761, 130335008, 65167184, 66241840] output_bytes=2086355705 peak_table_du=4178497686 (x2.000 of pre) space_asked=[2085266831]
+RESULT FAIL A/split2: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/split2: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086355705 in=2085266831
+RESULT PASS A/split2: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085266831] T=2085266831 warnings=[]
+RESULT PASS A/split2: validity gate on T for the predicted ratio count (B3i.1) :: T=2085266831
+RESULT PASS A/split2: outputs == ratios.length == first k with T/2^k < constant (6) :: N=6 expected=6
+RESULT PASS A/split2: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[521316708, 260658354, 130329177, 65164588, 32582294] expected=[521316708, 260658354, 130329177, 65164588, 32582294]
+RESULT PASS A/split2: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=10635 excess_max=5831 excess_min=407
+RESULT PASS A/split2: last output is the remainder, above its own target T*ratios[last] and above the constant (no hard stop on the last piece) :: last=66241840 own target=32582294 constant=50000000
+ARM A/splitz: constant=50000000 T=2092576130 outputs=6 switches=5 sizes=[1046300176, 523154105, 261588019, 130803028, 65401959, 66280442] output_bytes=2093527729 peak_table_du=4193779351 (x2.000 of pre) space_asked=[2092576130]
+RESULT FAIL A/splitz: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS A/splitz: sum of output Data.db within 2% of input (no data lost or grown) :: out=2093527729 in=2092576130
+RESULT PASS A/splitz: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2092576130] T=2092576130 warnings=[]
+RESULT PASS A/splitz: validity gate on T for the predicted ratio count (B3i.1) :: T=2092576130
+RESULT PASS A/splitz: outputs == ratios.length == first k with T/2^k < constant (6) :: N=6 expected=6
+RESULT PASS A/splitz: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[523144033, 261572016, 130786008, 65393004, 32696502] expected=[523144033, 261572016, 130786008, 65393004, 32696502]
+RESULT PASS A/splitz: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=43504 excess_max=17020 excess_min=8955
+RESULT PASS A/splitz: last output is the remainder, above its own target T*ratios[last] and above the constant (no hard stop on the last piece) :: last=66280442 own target=32696502 constant=50000000
+ARM B/small: constant=5000000 T=91710733 outputs=5 switches=4 sizes=[45859794, 22935358, 11472690, 5736460, 5778068] output_bytes=91782370 peak_table_du=137798946 (x1.499 of pre) space_asked=[91710733]
+RESULT PASS B/small: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=8 compacted_lines=1 errors=0 spot=True
+RESULT PASS B/small: sum of output Data.db within 2% of input (no data lost or grown) :: out=91782370 in=91710733
+RESULT PASS B/small: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[91710733] T=91710733 warnings=[]
+RESULT PASS B/small: validity gate on T for the predicted ratio count (B3i.1) :: T=91710733
+RESULT PASS B/small: outputs == ratios.length == first k with T/2^k < constant (5) :: N=5 expected=5
+RESULT PASS B/small: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[22927683, 11463842, 5731921, 2865960] expected=[22927683, 11463842, 5731921, 2865960]
+RESULT PASS B/small: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=10630 excess_max=8848 excess_min=4427
+RESULT PASS B/small: last output is the remainder, above its own target T*ratios[last] and above the constant (no hard stop on the last piece) :: last=5778068 own target=2865960 constant=5000000
+ARM B/split: constant=5000000 T=2085270590 outputs=9 switches=8 sizes=[1042636484, 521317867, 260659134, 130335108, 65167256, 32588928, 16294474, 8147232, 9211276] output_bytes=2086357759 peak_table_du=4161082950 (x1.992 of pre) space_asked=[2085270590]
+RESULT FAIL B/split: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS B/split: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086357759 in=2085270590
+RESULT PASS B/split: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085270590] T=2085270590 warnings=[]
+RESULT PASS B/split: validity gate on T for the predicted ratio count (B3i.1) :: T=2085270590
+RESULT PASS B/split: outputs == ratios.length == first k with T/2^k < constant (9) :: N=9 expected=9
+RESULT PASS B/split: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[521317648, 260658824, 130329412, 65164706, 32582353, 16291176, 8145588, 4072794] expected=[521317648, 260658824, 130329412, 65164706, 32582353, 16291176, 8145588, 4072794]
+RESULT PASS B/split: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=10635 excess_max=6575 excess_min=219
+RESULT PASS B/split: last output is the remainder, above its own target T*ratios[last] and above the constant (no hard stop on the last piece) :: last=9211276 own target=4072794 constant=5000000
+ARM C/split: constant=500000000 T=2085264226 outputs=3 switches=2 sizes=[1042636215, 521317724, 522403228] output_bytes=2086357167 peak_table_du=4178570808 (x2.000 of pre) space_asked=[2085264226]
+RESULT FAIL C/split: valid: one input set of 8 files, one new compaction, auto-compaction idle, no ERROR, spot check ok :: input_files=24 compacted_lines=1 errors=0 spot=True
+RESULT PASS C/split: sum of output Data.db within 2% of input (no data lost or grown) :: out=2086357167 in=2085264226
+RESULT PASS C/split: task-level space check asked for the whole input T (B3i.5), nothing in the log says space was short :: asked=[2085264226] T=2085264226 warnings=[]
+RESULT PASS C/split: validity gate on T for the predicted ratio count (B3i.1) :: T=2085264226
+RESULT PASS C/split: outputs == ratios.length == first k with T/2^k < constant (3) :: N=3 expected=3
+RESULT PASS C/split: "Switching writer" DEBUG lines == [round(T*2^-(i+2))], i.e. one per true return of line 84 :: observed=[521316057, 260658028] expected=[521316057, 260658028]
+RESULT PASS C/split: every non-final output i in (target_i, target_i + one partition + granularity] :: bound=10635 excess_max=4102 excess_min=1667
+RESULT PASS C/split: last output is the remainder, above its own target T*ratios[last] and above the constant (no hard stop on the last piece) :: last=522403228 own target=260658028 constant=500000000
+RESULT PASS cross: final output bytes equal (within 2%) for constants 5e6 / 50e6 / 500e6 and the unsplit run :: split={'A': 2086353942, 'B': 2086357759, 'C': 2086357167} plain=2086357597
+RESULT PASS cross: peak table-dir bytes equal (within 5%) for the three constants and the unsplit run :: split={'A': 4178525042, 'B': 4161082950, 'C': 4178570808} plain=4178612310
+RESULT PASS cross: output count follows the constant (9 / 6 / 3) while bytes do not :: B=9 A=6 C=3
+RESULT PASS cross: space-check request Y is the same (== T) for every constant :: {'A': [2085263611], 'B': [2085270590], 'C': [2085264226]}
+INFO input bytes by tree: {'A': 2085263611, 'B': 2085270590, 'C': 2085264226}
+INFO heap used peak (kB) by constant: {'A': 1471135, 'B': 1500575, 'C': 1390514}; relative max difference 0.073; A split vs A split2 spread 0.005858061972558603; RssAnon peak kB: {'A': 2846136, 'B': 2875376, 'C': 2834968}
+RESULT PASS heap context: difference across constants does not exceed both 10% and the repeat spread (B3i.6) :: diff=0.073 spread=0.005858061972558603
+RESULT PASS control: LCS file count rises as sstable_size_in_mb falls (positive control moves with its knob) :: 100MiB -> 20, 50MiB -> 40
+RESULT PASS repeat: split and split2 give the same count and sizes within 1% :: 6 vs 6, 2086353942 vs 2086355705
+SUMMARY 9 FAIL of 78 (78 checks)

@@ -1,0 +1,90 @@
+arm checkpoint size_MiB capacity_MiB entries RssAnon_MiB est_vs_c0_MiB RssAnon-idle_MiB nmtTotal_MiB
+c0 idle 0.00 0 0 2623.8 nan 0.0 2816.7
+c0 pass1 0.00 0 0 2751.6 nan 127.8 3859.3
+c0 pass2 0.00 0 0 2769.0 nan 145.2 3863.7
+c0 rand 0.00 0 0 2823.9 nan 200.1 3861.5
+c128 idle 0.00 128 0 2626.1 2.3 0.0 2793.5
+c128 pass1 128.00 128 2040 2919.6 168.1 293.5 3856.8
+c128 pass2 128.00 128 2040 2945.9 177.0 319.9 3860.8
+c128 rand 128.00 128 2040 2952.5 128.6 326.4 3859.6
+c512 idle 0.00 512 0 2627.2 3.4 0.0 2807.4
+c512 pass1 512.00 512 8160 3243.6 492.0 616.4 3855.2
+c512 pass2 512.00 512 8160 3256.7 487.7 629.5 3860.3
+c512 rand 512.00 512 8160 3271.7 447.8 644.5 3857.9
+c1024 idle 0.00 1024 0 2645.4 21.7 0.0 2844.4
+c1024 pass1 1023.99 1024 16320 3753.5 1002.0 1108.1 3857.4
+c1024 pass2 1023.99 1024 16320 3789.3 1020.3 1143.9 3863.5
+c1024 rand 1023.99 1024 16320 3827.1 1003.2 1181.7 3861.0
+c1024 set256 256.00 256 4080 3827.2 nan 1181.7 3861.3
+c1024 set64 64.00 64 1020 3827.2 nan 1181.8 3862.6
+c1024 set1024 64.00 1024 1020 3827.4 nan 1181.9 3862.8
+c1024 rand_after_set1024 1023.99 1024 16320 3831.7 nan 1186.2 3865.1
+n128 idle 0.00 128 0 2641.1 17.3 0.0 2811.4
+n128 pass1 0.00 128 0 2747.2 -4.4 106.1 3853.6
+n128 pass2 0.00 128 0 2772.7 3.7 131.6 3858.3
+n128 rand 0.00 128 0 2791.0 -32.9 149.9 3854.8
+c128b idle 0.00 128 0 2638.1 14.3 0.0 2835.5
+c128b pass1 128.00 128 2040 2907.8 156.2 269.7 3864.6
+c128b pass2 128.00 128 2040 2914.9 145.9 276.8 3870.5
+c128b rand 128.00 128 2040 2928.1 104.2 290.0 3868.8
+
+RESULT PASS c0 Size==Capacity==0, Entries==0 at every checkpoint 
+RESULT FAIL c0 RssAnon growth idle->rand < 100 MiB growth=200.1 MiB
+RESULT PASS c128 every JMX sample has Size<=Capacity samples=49 maxSize/Capacity(initial)=1.0000
+RESULT PASS c128 pass1 Size<=Capacity=128MiB size=134217720 capacity=134217728
+RESULT PASS c128 pass1 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c128 pass1 Entries<=Capacity/64KiB entries=2040 bound=2048
+RESULT PASS c128 pass2 Size<=Capacity=128MiB size=134217720 capacity=134217728
+RESULT PASS c128 pass2 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c128 pass2 Entries<=Capacity/64KiB entries=2040 bound=2048
+RESULT PASS c128 rand Size<=Capacity=128MiB size=134216456 capacity=134217728
+RESULT PASS c128 rand cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c128 rand Entries<=Capacity/64KiB entries=2040 bound=2048
+RESULT PASS c128 est(RssAnon-c0) in [0.9 Size, 1.3 Size+64MiB] at rand est=128.6 MiB Size=128.0 MiB band=[115.2,230.4] MiB
+RESULT PASS c128 est < 230 MiB est=128.6 MiB
+INFO c128 RssAnon growth pass2->rand = 6.5 MiB (Size flat: 134217720 -> 134216456)
+RESULT PASS c512 every JMX sample has Size<=Capacity samples=49 maxSize/Capacity(initial)=1.0000
+RESULT PASS c512 pass1 Size<=Capacity=512MiB size=536867792 capacity=536870912
+RESULT PASS c512 pass1 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c512 pass1 Entries<=Capacity/64KiB entries=8160 bound=8192
+RESULT PASS c512 pass2 Size<=Capacity=512MiB size=536869360 capacity=536870912
+RESULT PASS c512 pass2 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c512 pass2 Entries<=Capacity/64KiB entries=8160 bound=8192
+RESULT PASS c512 rand Size<=Capacity=512MiB size=536866192 capacity=536870912
+RESULT PASS c512 rand cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c512 rand Entries<=Capacity/64KiB entries=8160 bound=8192
+RESULT FAIL c512 est(RssAnon-c0) in [0.9 Size, 1.3 Size+64MiB] at rand est=447.8 MiB Size=512.0 MiB band=[460.8,729.6] MiB
+INFO c512 RssAnon growth pass2->rand = 14.9 MiB (Size flat: 536869360 -> 536866192)
+RESULT PASS c1024 every JMX sample has Size<=Capacity samples=82 maxSize/Capacity(initial)=1.0000
+RESULT PASS c1024 pass1 Size<=Capacity=1024MiB size=1073728382 capacity=1073741824
+RESULT PASS c1024 pass1 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c1024 pass1 Entries<=Capacity/64KiB entries=16320 bound=16384
+RESULT PASS c1024 pass2 Size<=Capacity=1024MiB size=1073732214 capacity=1073741824
+RESULT PASS c1024 pass2 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c1024 pass2 Entries<=Capacity/64KiB entries=16320 bound=16384
+RESULT PASS c1024 rand Size<=Capacity=1024MiB size=1073731055 capacity=1073741824
+RESULT PASS c1024 rand cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c1024 rand Entries<=Capacity/64KiB entries=16320 bound=16384
+RESULT PASS c1024 est(RssAnon-c0) in [0.9 Size, 1.3 Size+64MiB] at rand est=1003.2 MiB Size=1024.0 MiB band=[921.6,1395.2] MiB
+INFO c1024 RssAnon growth pass2->rand = 37.8 MiB (Size flat: 1073732214 -> 1073731055)
+RESULT PASS n128 (rows_per_partition NONE) Size==0, Entries==0 
+RESULT PASS c128b every JMX sample has Size<=Capacity samples=49 maxSize/Capacity(initial)=1.0000
+RESULT PASS c128b pass1 Size<=Capacity=128MiB size=134216552 capacity=134217728
+RESULT PASS c128b pass1 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c128b pass1 Entries<=Capacity/64KiB entries=2040 bound=2048
+RESULT PASS c128b pass2 Size<=Capacity=128MiB size=134217720 capacity=134217728
+RESULT PASS c128b pass2 cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c128b pass2 Entries<=Capacity/64KiB entries=2040 bound=2048
+RESULT PASS c128b rand Size<=Capacity=128MiB size=134216423 capacity=134217728
+RESULT PASS c128b rand cache full (Size>=0.97 Capacity: limit reached) size/cap=1.0000
+RESULT PASS c128b rand Entries<=Capacity/64KiB entries=2040 bound=2048
+RESULT FAIL c128b est(RssAnon-c0) in [0.9 Size, 1.3 Size+64MiB] at rand est=104.2 MiB Size=128.0 MiB band=[115.2,230.4] MiB
+RESULT PASS c128b est < 230 MiB est=104.2 MiB
+INFO c128b RssAnon growth pass2->rand = 13.2 MiB (Size flat: 134217720 -> 134216423)
+RESULT PASS est rises with capacity 128<512<1024 {'c128': 128.6, 'c512': 447.8, 'c1024': 1003.2}
+RESULT PASS c1024 set256 Capacity==256MiB and Size<=Capacity size=256.00 MiB entries=4080
+RESULT PASS c1024 set64 Capacity==64MiB and Size<=Capacity size=64.00 MiB entries=1020
+RESULT PASS c1024 set1024 Capacity==1024MiB and Size<=Capacity size=64.00 MiB entries=1020
+INFO c1024 RssAnon MiB: rand 3827.1 set256 3827.2 set64 3827.2 set1024 3827.4 rand_after 3831.7 ; c0 rand 2823.9
+
+FAILED CHECKS (3): ['c0 RssAnon growth idle->rand < 100 MiB', 'c512 est(RssAnon-c0) in [0.9 Size, 1.3 Size+64MiB] at rand', 'c128b est(RssAnon-c0) in [0.9 Size, 1.3 Size+64MiB] at rand']

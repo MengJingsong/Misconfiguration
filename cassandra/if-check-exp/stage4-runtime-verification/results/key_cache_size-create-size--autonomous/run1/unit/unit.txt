@@ -1,0 +1,18 @@
+fill capMiB=1 threads=1 cap=1048576 puts=4096 weightedSize_immediate=1048576 size_immediate=1024 weightedSize_settled=1048576 size_settled=1024 capacity=1048576 maxWeightedSizeSeenDuringPuts=1048576
+fill capMiB=1 threads=8 cap=1048576 puts=4096 weightedSize_immediate=1048576 size_immediate=1024 weightedSize_settled=1048576 size_settled=1024 capacity=1048576 maxWeightedSizeSeenDuringPuts=1048576
+fill capMiB=8 threads=1 cap=8388608 puts=32768 weightedSize_immediate=8388608 size_immediate=8192 weightedSize_settled=8388608 size_settled=8192 capacity=8388608 maxWeightedSizeSeenDuringPuts=8388608
+fill capMiB=8 threads=8 cap=8388608 puts=32768 weightedSize_immediate=8388608 size_immediate=8192 weightedSize_settled=8388608 size_settled=8192 capacity=8388608 maxWeightedSizeSeenDuringPuts=8388608
+fill capMiB=64 threads=1 cap=67108864 puts=262144 weightedSize_immediate=67108864 size_immediate=65536 weightedSize_settled=67108864 size_settled=65536 capacity=67108864 maxWeightedSizeSeenDuringPuts=67108864
+fill capMiB=64 threads=8 cap=67108864 puts=262144 weightedSize_immediate=67108864 size_immediate=65536 weightedSize_settled=67108864 size_settled=65536 capacity=67108864 maxWeightedSizeSeenDuringPuts=67108864
+shrink before capacity=67108864 weightedSize=67108864 size=65536
+shrink after capacity=8388608 weightedSize_immediate=8388608 size_immediate=8192 weightedSize_settled=8388608 size_settled=8192
+guard below keyW=16 valueW=2147483630 sum=2147483646 exception=none present=false size=0
+guard sum_eq_max_key16 keyW=16 valueW=2147483631 sum=2147483647 exception=none present=false size=0
+guard sum_eq_max_key0 keyW=0 valueW=2147483647 sum=2147483647 exception=none present=false size=0
+guard above_by1_key16 keyW=16 valueW=2147483632 sum=2147483648 exception=java.lang.IllegalArgumentException:Serialized size cannot be more than 2GiB/Integer.MAX_VALUE present=false size=0
+guard above_by1_key0 keyW=0 valueW=2147483648 sum=2147483648 exception=java.lang.IllegalArgumentException:Serialized size cannot be more than 2GiB/Integer.MAX_VALUE present=false size=0
+guard above_far keyW=0 valueW=6442450941 sum=6442450941 exception=java.lang.IllegalArgumentException:Serialized size cannot be more than 2GiB/Integer.MAX_VALUE present=false size=0
+guard after_rejects get_ok=true size=1
+control weight0 capacity=1048576 puts=100000 weightedSize=0 size=100000
+control constweigher1 capacity=1000 puts=10000(each 1KiB) weightedSize=1000 size=1000
+real KeyCacheKey_unsharedHeapSize=72 RowIndexEntry_unsharedHeapSize=24 sum=96 capacity=1048576 puts=200000 weightedSize=1048512 size=10922 avgWeight=96.00

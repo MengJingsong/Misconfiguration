@@ -1,0 +1,38 @@
+PASS fill cap=1MiB threads=1: settled weightedSize <= C | weightedSize=1048576 C=1048576
+PASS fill cap=1MiB threads=1: size = C/1KiB within 1% | size=1024 expected=1024
+PASS fill cap=1MiB threads=1: max weightedSize seen during puts <= C + 1 entry | max=1048576
+PASS fill cap=1MiB threads=1: immediate weightedSize <= C + 1 entry
+PASS fill cap=1MiB threads=8: settled weightedSize <= C | weightedSize=1048576 C=1048576
+PASS fill cap=1MiB threads=8: size = C/1KiB within 1% | size=1024 expected=1024
+PASS fill cap=1MiB threads=8: max weightedSize seen during puts <= C + 1 entry | max=1048576
+PASS fill cap=1MiB threads=8: immediate weightedSize <= C + 1 entry
+PASS fill cap=8MiB threads=1: settled weightedSize <= C | weightedSize=8388608 C=8388608
+PASS fill cap=8MiB threads=1: size = C/1KiB within 1% | size=8192 expected=8192
+PASS fill cap=8MiB threads=1: max weightedSize seen during puts <= C + 1 entry | max=8388608
+PASS fill cap=8MiB threads=1: immediate weightedSize <= C + 1 entry
+PASS fill cap=8MiB threads=8: settled weightedSize <= C | weightedSize=8388608 C=8388608
+PASS fill cap=8MiB threads=8: size = C/1KiB within 1% | size=8192 expected=8192
+PASS fill cap=8MiB threads=8: max weightedSize seen during puts <= C + 1 entry | max=8388608
+PASS fill cap=8MiB threads=8: immediate weightedSize <= C + 1 entry
+PASS fill cap=64MiB threads=1: settled weightedSize <= C | weightedSize=67108864 C=67108864
+PASS fill cap=64MiB threads=1: size = C/1KiB within 1% | size=65536 expected=65536
+PASS fill cap=64MiB threads=1: max weightedSize seen during puts <= C + 1 entry | max=67108864
+PASS fill cap=64MiB threads=1: immediate weightedSize <= C + 1 entry
+PASS fill cap=64MiB threads=8: settled weightedSize <= C | weightedSize=67108864 C=67108864
+PASS fill cap=64MiB threads=8: size = C/1KiB within 1% | size=65536 expected=65536
+PASS fill cap=64MiB threads=8: max weightedSize seen during puts <= C + 1 entry | max=67108864
+PASS fill cap=64MiB threads=8: immediate weightedSize <= C + 1 entry
+PASS shrink: before, weightedSize == 64MiB
+PASS shrink: capacity now 8MiB and settled weightedSize <= 8MiB | weightedSize=8388608 size=8192
+PASS guard below: sum 2147483646 <= MAX does not throw | present=false (evicted at once: weight > capacity 64MiB)
+PASS guard sum_eq_max_key16: sum 2147483647 <= MAX does not throw | present=false (evicted at once: weight > capacity 64MiB)
+PASS guard sum_eq_max_key0: sum 2147483647 <= MAX does not throw | present=false (evicted at once: weight > capacity 64MiB)
+PASS guard above_by1_key16: sum 2147483648 > MAX throws IllegalArgumentException with the filed message
+PASS guard above_by1_key0: sum 2147483648 > MAX throws IllegalArgumentException with the filed message
+PASS guard above_far: sum 6442450941 > MAX throws IllegalArgumentException with the filed message
+PASS guard: cache usable after rejected puts
+PASS control weight 0: never evicts by weight (size == puts, weightedSize 0)
+PASS control constant weigher 1: caps entry count (size == capacity), not bytes
+INFO real classes: real KeyCacheKey_unsharedHeapSize=72 RowIndexEntry_unsharedHeapSize=24 sum=96 capacity=1048576 puts=200000 weightedSize=1048512 size=10922 avgWeight=96.00
+PASS real classes: weight = KeyCacheKey + RowIndexEntry and weightedSize <= C
+TOTAL FAIL: 0

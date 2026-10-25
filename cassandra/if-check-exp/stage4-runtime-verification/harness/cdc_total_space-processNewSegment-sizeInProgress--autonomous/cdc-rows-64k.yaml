@@ -1,0 +1,27 @@
+# cassandra-stress profile for the cdc_total_space (processNewSegment sizeInProgress) case, B3c: 64 KiB blob rows into k.t (WITH cdc = true).
+#   tools/bin/cassandra-stress user profile=<this file> "ops(insert=1)" n=<rows> no-warmup -rate threads=8 throttle=<rows/s> -errors retries=0 ignore -node 127.0.0.1
+keyspace: k
+
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS k WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+table: t
+
+table_definition: |
+  CREATE TABLE IF NOT EXISTS t (
+    id bigint,
+    v blob,
+    PRIMARY KEY (id)
+  ) WITH cdc = true
+
+columnspec:
+  - name: id
+    population: seq(1..10000000)
+  - name: v
+    size: fixed(65536)
+
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+
+queries: {}

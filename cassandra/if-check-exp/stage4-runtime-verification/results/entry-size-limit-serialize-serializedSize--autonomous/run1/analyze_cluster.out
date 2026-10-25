@@ -1,0 +1,38 @@
+c0: baseline 2597.0 MiB, D(peak rise) 128.2 MiB, info rows 7, max Size 0.0 MiB, end Size 0.0 MiB entries 0, RefCountedMemory 0, pass1 16384 pass2 16384
+c64: baseline 2589.0 MiB, D(peak rise) 167.3 MiB, info rows 8, max Size 63.9 MiB, end Size 63.9 MiB entries 1022, RefCountedMemory 1022, pass1 16384 pass2 16384
+c256: baseline 2581.9 MiB, D(peak rise) 368.1 MiB, info rows 8, max Size 255.9 MiB, end Size 255.9 MiB entries 4091, RefCountedMemory 4091, pass1 16384 pass2 16384
+c1024: baseline 2605.6 MiB, D(peak rise) 1118.7 MiB, info rows 7, max Size 1024.0 MiB, end Size 1024.0 MiB entries 16367, RefCountedMemory 16367, pass1 16384 pass2 16384
+big: baseline 2599.5; big8 round peaks [346, 376, 422, 342, 375, 340, 385, 266, 401, 306, 343, 271, 339, 294, 315, 263, 303, 316, 307, 336]; big256 read peaks [274, 266, 269, 276, 274]; reads ok8=160 err8=0; max Size 0.0 MiB end entries 0
+PASS | c0 both passes returned every row, no errors | {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 13.8} {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 21.4}
+PASS | c0 capacity 0 and < 100 RefCountedMemory | cap 0 rc 0
+PASS | c64 both passes returned every row, no errors | {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 24.3} {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 15.5}
+PASS | c64 Size <= capacity at every sample | max 63.9 cap 64 MiB
+PASS | c64 end Size in [0.95C, C] | 63.9 MiB
+PASS | c64 RefCountedMemory within 5% of entries | 1022 vs 1022
+PASS | c64 no OHC/caffinitas classes | []
+FAIL | c64 D(C)-D0 in [0.8C, 1.25C+64] | 39.1 MiB (C=64)
+PASS | c256 both passes returned every row, no errors | {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 27.3} {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 12.3}
+PASS | c256 Size <= capacity at every sample | max 255.9 cap 256 MiB
+PASS | c256 end Size in [0.95C, C] | 255.9 MiB
+PASS | c256 RefCountedMemory within 5% of entries | 4091 vs 4091
+PASS | c256 no OHC/caffinitas classes | []
+PASS | c256 D(C)-D0 in [0.8C, 1.25C+64] | 239.9 MiB (C=256)
+PASS | c1024 both passes returned every row, no errors | {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 13.0} {'ok': 16384, 'empty': 0, 'err': 0, 'bytes': 1073741824, 'firsterr': None, 'secs': 28.8}
+PASS | c1024 Size <= capacity at every sample | max 1024.0 cap 1024 MiB
+PASS | c1024 end Size in [0.95C, C] | 1024.0 MiB
+PASS | c1024 RefCountedMemory within 5% of entries | 16367 vs 16367
+PASS | c1024 no OHC/caffinitas classes | []
+PASS | c1024 D(C)-D0 in [0.8C, 1.25C+64] | 990.5 MiB (C=1024)
+PASS | D(c256)-D(c64) in [0.8,1.25] x 192 | 200.8
+PASS | D(c1024)-D(c256) in [0.8,1.25] x 768 | 750.6
+PASS | c64 D below 2048 MiB (the :94 limit) | 167.3
+PASS | c256 D below 2048 MiB (the :94 limit) | 368.1
+PASS | c1024 D below 2048 MiB (the :94 limit) | 1118.7
+PASS | shrink: Size <= 32 MiB within 10 s | [32.0, 32.0, 32.0, 32.0, 32.0, 32.0, 32.0, 32.0]
+PASS | shrink: RssAnon rise minus D0 <= 104 MiB | 6.0
+PASS | big8 all 160 reads returned, no error | 160/0
+PASS | big8 end Size 0 and entries 0; Size <= capacity at every sample | end 0/0
+PASS | big8 some round peak >= 96 MiB | 422.2
+PASS | big256 every read peak >= 200 MiB | [274, 266, 269, 276, 274]
+PASS | big256 end rise <= D0+32 | 26.3 vs D0 128.2
+TOTAL pass=31 fail=1

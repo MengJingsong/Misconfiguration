@@ -1,0 +1,42 @@
+PASS | guard_2147483647 no exception | none
+PASS | guard_2147483647 weighted_B == 0 | 0
+PASS | guard_2147483647 peak delta < 64 MiB | 0
+PASS | guard_2147483648 IllegalArgumentException "Unable to allocate 2.000GiB" | java.lang.IllegalArgumentException "Unable_to_allocate_2.000GiB"
+PASS | guard_2147483648 weighted_B == 0 | 0
+PASS | guard_2147483648 peak delta < 64 MiB | 0
+PASS | guard_2147487744 IllegalArgumentException "Unable to allocate 2.000GiB" | java.lang.IllegalArgumentException "Unable_to_allocate_2.000GiB"
+PASS | guard_2147487744 weighted_B == 0 | 0
+PASS | guard_2147487744 peak delta < 64 MiB | 0
+PASS | agg64 weighted in [0.95C, C] | 64.00 MiB
+PASS | agg64 size within 2 of C | 64.0
+FAIL | agg64 peak in [0.95C, C+16] | 59.0
+PASS | agg64 end_clean <= 32 | 0
+PASS | agg64_repeat weighted in [0.95C, C] | 64.00 MiB
+PASS | agg64_repeat size within 2 of C | 64.0
+FAIL | agg64_repeat peak in [0.95C, C+16] | 59.0
+PASS | agg64_repeat end_clean <= 32 | 0
+PASS | agg128 weighted in [0.95C, C] | 128.00 MiB
+PASS | agg128 size within 2 of C | 128.0
+FAIL | agg128 peak in [0.95C, C+16] | 121.0
+PASS | agg128 end_clean <= 32 | 0
+PASS | agg256 weighted in [0.95C, C] | 256.00 MiB
+PASS | agg256 size within 2 of C | 256.0
+PASS | agg256 peak in [0.95C, C+16] | 249.0
+PASS | agg256 end_clean <= 32 | 0
+PASS | slope peak vs C (64->256) in [0.9,1.1] | 0.990
+PASS | repeat within 10 percent | 1.000
+PASS | agg3072 weighted in [0.95,1.0] x 3072 | 3072.0
+PASS | agg3072 peak in [2918,3104] and > 2048 | 3077.0
+PASS | nocache peak < 32 | 0
+PASS | over1_512MiB weighted 0, size 0 | 0/0
+PASS | over1_512MiB peak >= 480 | 496
+PASS | over1_512MiB end_fill <= 32 | 0
+PASS | over8x256MiB weighted 0 | 0
+PASS | over8x256MiB peak >= 1946 | 2041
+PASS | over8x512MiB weighted 0 | 0
+PASS | over8x512MiB peak >= 3891 | 4058
+PASS | shrink256to128 weighted after in [0.9x128,128] | 128.0
+PASS | shrink256to128 RssAnon delta after <= 144 | 128
+PASS | clear_probe64 size 0 and weighted 0 after clear | 0/0
+PASS | clear_probe64 RssAnon delta after clear >= 0.9 x before (memory not freed) | before 57.4 after 57.4 MiB
+TOTAL pass=38 fail=3
