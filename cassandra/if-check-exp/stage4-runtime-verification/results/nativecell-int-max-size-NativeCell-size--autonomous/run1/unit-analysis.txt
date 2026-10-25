@@ -1,0 +1,48 @@
+PASS  B2i.5a S_1KiB: 10 cells, offHeapSize==L+21, owns delta==L+21, no exception      
+PASS  B2i.5a S_1KiB: sum(offHeapSize)==owns_total==10*(L+21)=10450                    10450 10450
+PASS  B2i.5a S_1KiB: owns==0 after discard                                            
+PASS  B2i.5a S_200KiB: 10 cells, offHeapSize==L+21, owns delta==L+21, no exception    
+PASS  B2i.5a S_200KiB: sum(offHeapSize)==owns_total==10*(L+21)=2048210                2048210 2048210
+PASS  B2i.5a S_200KiB: owns==0 after discard                                          
+PASS  B2i.5a S_16MiB: 10 cells, offHeapSize==L+21, owns delta==L+21, no exception     
+PASS  B2i.5a S_16MiB: sum(offHeapSize)==owns_total==10*(L+21)=167772370               167772370 167772370
+PASS  B2i.5a S_16MiB: RssAnon rise in [0.90,1.15]x expected                           rise/exp=0.9990
+PASS  B2i.5a S_16MiB: after free <= 0.10*rise+64MiB                                   after=0.1 MiB
+PASS  B2i.5a S_16MiB: owns==0 after discard                                           
+PASS  B2i.5a S_255MiB: 10 cells, offHeapSize==L+21, owns delta==L+21, no exception    
+PASS  B2i.5a S_255MiB: sum(offHeapSize)==owns_total==10*(L+21)=2673869010             2673869010 2673869010
+PASS  B2i.5a S_255MiB: RssAnon rise in [0.90,1.15]x expected                          rise/exp=1.0022
+PASS  B2i.5a S_255MiB: after free <= 0.10*rise+64MiB                                  after=5.7 MiB
+PASS  B2i.5a S_255MiB: owns==0 after discard                                          
+PASS  B2i.5a R_200KiB_a: 10 cells, offHeapSize==L+21, owns delta==L+21, no exception  
+PASS  B2i.5a R_200KiB_a: sum(offHeapSize)==owns_total==10*(L+21)=2048210              2048210 2048210
+PASS  B2i.5a R_200KiB_a: owns==0 after discard                                        
+PASS  B2i.5a R_200KiB_b: 10 cells, offHeapSize==L+21, owns delta==L+21, no exception  
+PASS  B2i.5a R_200KiB_b: sum(offHeapSize)==owns_total==10*(L+21)=2048210              2048210 2048210
+PASS  B2i.5a R_200KiB_b: owns==0 after discard                                        
+PASS  B2i.5b G1 throw: IllegalStateException                                          java.lang.IllegalStateException
+PASS  B2i.5b G1 throw: message null                                                   
+PASS  B2i.5b G1 throw: frame NativeCell.<init>:101                                    org.apache.cassandra.db.rows.NativeCell.<init>:101
+PASS  B2i.5b G1 throw: owns unchanged, RssAnon rise < 64MiB                           rss rise 0.02 MiB
+PASS  B2i.5b G1 pass: no exception, offHeapSize==2147483647, owns delta==2147483647   OK
+PASS  B2i.5b G2 throw: IllegalStateException                                          java.lang.IllegalStateException
+PASS  B2i.5b G2 throw: message null                                                   
+PASS  B2i.5b G2 throw: frame NativeCell.<init>:101                                    org.apache.cassandra.db.rows.NativeCell.<init>:101
+PASS  B2i.5b G2 throw: owns unchanged, RssAnon rise < 64MiB                           rss rise 0.00 MiB
+PASS  B2i.5b G2 pass: no exception, offHeapSize==2147483647, owns delta==2147483647   OK
+PASS  B2i.5b G2 pass: owns delta > 255 x pool limit                                   256 x
+PASS  B2i.5c P8: admitted before block == floor(P/(1MiB+21)) == 7                     7
+PASS  B2i.5c P8: owns at block == admitted x (1MiB+21); worker blocked                
+PASS  B2i.5c P8: blocked cell completes after release (<5 s)                          5 ms
+PASS  B2i.5c P8: blocking group returns at once (<1 s per cell), owns > P             max 1 ms owns 10485970
+PASS  B2i.5c P16: admitted before block == floor(P/(1MiB+21)) == 15                   15
+PASS  B2i.5c P16: owns at block == admitted x (1MiB+21); worker blocked               
+PASS  B2i.5c P16: blocked cell completes after release (<5 s)                         6 ms
+PASS  B2i.5c P16: blocking group returns at once (<1 s per cell), owns > P            max 1 ms owns 18874746
+PASS  B2i.5c P32: admitted before block == floor(P/(1MiB+21)) == 31                   31
+PASS  B2i.5c P32: owns at block == admitted x (1MiB+21); worker blocked               
+PASS  B2i.5c P32: blocked cell completes after release (<5 s)                         6 ms
+PASS  B2i.5c P32: blocking group returns at once (<1 s per cell), owns > P            max 7 ms owns 35652298
+PASS  B2i.5d O: 16MiB cell accepted, owns==16MiB+21 > 2x pool limit                   16777237
+PASS  B2i.5e H: heap cell leaves owns unchanged                                       
+TOTAL pass=47 fail=0

@@ -1,0 +1,20 @@
+HOLDS   unit: 47 buildup+refill rows equal an independent re-implementation of Stack.add/splice  | []
+HOLDS   unit: footer totals equal totals recomputed from the rows  | # TOTAL refills=9099 stackChanges=15 mcChanges=6 splice_calls_expected=18198 grow_expected=21
+HOLDS   unit (Byteman JVM): S lines 18198 == 2 x refills 9099; G lines 21 == identity changes 21; no other trace lines (0)
+HOLDS   unit: the Byteman JVM raw rows equal the plain JVM raw rows for the shared arms
+HOLDS   unit: heap arm: iterator delta / Object[] delta within [0.8,1.25] in all 3 repetitions  | [('6295608', '6291480'), ('6291536', '6291480'), ('6291536', '6291480')]
+HOLDS   unit: control N arms: heap delta rises with N, each in [0.9,2.0] x N KiB, stack.length 6  | [('ctl_20000', '20000', '24417712', '6'), ('ctl_80000', '80000', '95786888', '6'), ('ctl_160000', '160000', '191768608', '6'), ('ctl_cap', '435532', '521562600', '5')]
+HOLDS   unit: ctl_cap hit OutOfMemoryError at Xmx512m with 435532 rows held (425 MiB), stack.length 5
+INFO    node1 whole-run trace: S=55102 G=0 SRP-rule=27551, system.log short-read lines=27551, largest newCount=2
+HOLDS   cluster node1: G == 0 over the whole run (every Byteman line re-counted)
+HOLDS   cluster node1: SRP rule hits == "short read protection" log lines, and S == 2 x ... (S counts every splice, not only SRP)  | SRP=27551 log=27551 S=55102
+INFO    node2 whole-run trace: S=4 G=0 SRP-rule=0, system.log short-read lines=0, largest newCount=8
+HOLDS   cluster node2: G == 0 over the whole run (every Byteman line re-counted)
+INFO    L10: 54 samples (45 inside the scan window), nscans=8404 rows/scan=[10], max array bytes=592, node1 live total min=72.3 MiB max=72.6 MiB
+HOLDS   cluster L10: >= 10 samples inside the scan window and every scan returned min(L, 40000) rows
+INFO    L2000: 56 samples (46 inside the scan window), nscans=235 rows/scan=[2000], max array bytes=680, node1 live total min=72.5 MiB max=78.6 MiB
+HOLDS   cluster L2000: >= 10 samples inside the scan window and every scan returned min(L, 40000) rows
+INFO    L40000: 56 samples (46 inside the scan window), nscans=14 rows/scan=[40000], max array bytes=592, node1 live total min=72.5 MiB max=178.2 MiB
+HOLDS   cluster L40000: >= 10 samples inside the scan window and every scan returned min(L, 40000) rows
+HOLDS   cluster control: nodetool info key cache entries 0 with capacity 0, then >= 40000 with capacity 64 MiB  | Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 25 hits, 241 | Key Cache              : entries 80002, size 6.1 MiB, capacity 64 MiB, 160025 hits, 482750
+SELFCHECK 14 HOLD, 0 FAIL

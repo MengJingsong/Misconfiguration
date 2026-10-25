@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 15 | 15 |
+| Set A | 159 | 20 | 20 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -131,3 +131,28 @@ bound (kept Confirmed; a strict reading of the cluster one is "Not confirmed (no
 (JIRA check first): `SerializingCache.clear()` does not free native memory (seen in two cases). The CDC row 10 question
 ("check site of `cdc_total_space`?") is answered: yes, the non-blocking branch deletes oldest `cdc_raw` links.
 Next: CSV order 7 (decision), 17 on (`NativeCell`, `CompressedInputStream`, `Stack`, tries, hints).
+
+2026-10-25, batch 4 (CSV rows 17–21, §3 `NativeCell` and §6 array-growth lines): all five **true negative**
+(do not cap): `nativecell-int-max-size-NativeCell-size`, `chunk_length_in_kb-loadNextChunk-compressedChunk`,
+`transform-stack-capacity-splice-newCount`, `BACKTRACK_INITIAL_SIZE-addBacktrack-backtrack`,
+`partition-key-max-size-descend-data-length`. Rows 17, 19, 20 on `pc07`, 18 and 21 on `pc12`; leftovers in
+`~/s4-{nc,st,bt}` and `~/s4-{ci,pk}`. First batch with **time measured** (raw log:
+`stage4-runtime-verification/timing/set-A-batch-4.log`; agents appended `date -u` lines per step).
+Stage 3 write-up, 5 in parallel: 0.95–1.8 min each (17:47:56–17:49:44Z), filing by hand ~0.3 min.
+Stage 4, 5 in parallel, minutes (wall = first audit line to last report line; `bt` redid the harness as `harness2`):
+
+| Case | audit | harness | unit run | cluster run | self-check | report | wall |
+|---|---|---|---|---|---|---|---|
+| `transform-stack` (st) | 5.2 | 7.6 | 0.3 | 8.2 | 0.1 | 1.5 | 23.1 |
+| `partition-key` (pk) | 3.7 | 8.3 | 0.2 | 8.3 | 0.4 | 2.3 | 24.2 |
+| `nativecell` (nc) | 4.6 | 15.9 | 0.8 | 17.1 | 0.5 | 1.6 | 40.7 |
+| `chunk_length` (ci) | 4.9 | 17.0 | 0.8 | 24.8 | 0.8 | 1.7 | 50.2 |
+| `BACKTRACK` (bt) | 8.5 | 2.4 + 14.0 | 0.9 | 23.5 | 0.2 | 2.0 | 52.2 |
+
+The batch took ~55 min from launch to the last report. Harness and cluster run are ~80% of each case's time; the
+unit run, self-check and report steps are under 3 min each. A case that needs a second node or many node
+restarts (`nativecell`: 8 restarts; `chunk_length`: 11 runs of ~2.25 min) takes about twice as long as a
+single-node one. Findings: write-up errors found by the audit in all five (probe arithmetic, piece counts,
+invalid table syntax); `MEMTABLE_TRIE_SIZE_LIMIT` (`cassandra.trie_size_limit_mb`) appears unused (trie threshold is
+read from `cassandra.memtable.row_overhead_size`, `InMemoryTrie.java:63`): upstream/doc candidate, JIRA check first.
+Next: CSV order 7 (decision), 22 on (`TriePathReconstructor`, `CompressedChecksummedDataInput` and the other §6 lines).

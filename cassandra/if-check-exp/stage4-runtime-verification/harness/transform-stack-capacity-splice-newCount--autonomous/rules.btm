@@ -1,0 +1,26 @@
+# Byteman rules for transform-stack-capacity-splice-newCount--autonomous (unit and cluster tiers).
+# S = every Stack.splice call (line 94 reached, newCount computed); G = grow branch (line 95 executed); SRP = ShortReadPartitionsProtection.moreContents entry.
+# Trace file path comes from -Dstage4.trace (set per JVM).
+RULE splice_check_line94
+CLASS org.apache.cassandra.db.transform.Stack
+METHOD splice
+AT LINE 94
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "S " + $newCount + " " + $keep.length + " " + $prefixCount)
+ENDRULE
+
+RULE splice_grow_line95
+CLASS org.apache.cassandra.db.transform.Stack
+METHOD splice
+AT LINE 95
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "G " + $newCount + " " + $keep.length)
+ENDRULE
+
+RULE srp_moreContents
+CLASS org.apache.cassandra.service.reads.ShortReadPartitionsProtection
+METHOD moreContents
+AT ENTRY
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "SRP")
+ENDRULE

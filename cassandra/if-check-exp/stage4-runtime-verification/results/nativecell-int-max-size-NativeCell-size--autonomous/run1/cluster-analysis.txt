@@ -1,0 +1,34 @@
+PASS  B3i.4a A s1: all 100 inserts ok, 0 errors                                              ok=100 err=0
+PASS  B3i.4a A s8: all 100 inserts ok, 0 errors                                              ok=100 err=0
+PASS  B3i.4a A s15: all 100 inserts ok, 0 errors                                             ok=100 err=0
+PASS  B3i.4a A: system.log IllegalStateException==0, NativeCell==0                           0/0
+PASS  B3i.4a A s17: refused with "Request is too big"                                        InvalidRequest: Error from server: code=2200 [Invalid query] message="Request is too big: length 17825848 exceeds maximum allowed length 16777216."
+PASS  B3i.4a A: OverSizedMutations stays 0                                                   0
+PASS  B3i.4a A s17: AllMemtablesOffHeapSize rise <= 1 MiB during/after refused row           rise 0.00 MiB
+PASS  B3i.4b A2 s17: refused, text mentions oversized mutation (client error or system.log)  InvalidRequest: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (17825848/16777216) for keyspace: ks. Top keys are: t.0" | log ove
+PASS  B3i.4b A2: OverSizedMutations Count == 1                                               1
+PASS  B3i.4c B s17: 5 of 5 inserts ok                                                        ok=5 err=0 
+PASS  B3i.4c B s60: 5 of 5 inserts ok                                                        ok=5 err=0 
+PASS  B3i.4c B: IllegalStateException==0, NativeCell==0                                      
+PASS  B3i.4d K64: 100 inserts ok                                                             ok=100 err=0
+PASS  B3i.4d K64: startup log shows off-heap threshold 64 MiB                                ['NFO  [main] 2026-10-25T18:18:56,054 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 256MiB', 'NFO  [main] 2026-10-25T18:18:56,054 Datab
+PASS  B3i.4d K128: 100 inserts ok                                                            ok=100 err=0
+PASS  B3i.4d K128: startup log shows off-heap threshold 128 MiB                              ['NFO  [main] 2026-10-25T18:21:00,991 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 256MiB', 'FO  [main] 2026-10-25T18:21:00,991 Databa
+PASS  B3i.4d K256: 100 inserts ok                                                            ok=100 err=0
+PASS  B3i.4d K256: startup log shows off-heap threshold 256 MiB                              ['NFO  [main] 2026-10-25T18:23:05,833 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 256MiB', 'FO  [main] 2026-10-25T18:23:05,833 Databa
+PASS  B3i.4d K512: 100 inserts ok                                                            ok=100 err=0
+PASS  B3i.4d K512: startup log shows off-heap threshold 512 MiB                              ['NFO  [main] 2026-10-25T18:25:13,087 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 256MiB', 'FO  [main] 2026-10-25T18:25:13,087 Databa
+PASS  B3i.4d K64: peak 16.0 MiB <= k + 16 MiB                                                
+PASS  B3i.4d K128: peak 40.0 MiB <= k + 16 MiB                                               
+PASS  B3i.4d K128: peak >= 0.30 x k                                                          0.31 x
+PASS  B3i.4d K256: peak 80.0 MiB <= k + 16 MiB                                               
+PASS  B3i.4d K256: peak >= 0.30 x k                                                          0.31 x
+PASS  B3i.4d K512: peak 168.0 MiB <= k + 16 MiB                                              
+PASS  B3i.4d K512: peak >= 0.30 x k                                                          0.33 x
+PASS  B3i.4d peaks strictly increase 64<128<256<512                                          16.0 < 40.0 < 80.0 < 168.0
+PASS  B3i.4d P(256)/P(64) >= 2.0                                                             5.00
+PASS  B3i.4e K256: RssAnon rise >= 0.80 x P(256)                                             rise 140.0 MiB, P 80.0 MiB, ratio 1.75
+PASS  B3i.4f hb: 100 inserts ok                                                              
+PASS  B3i.4f hb: AllMemtablesOffHeapSize == 0 throughout                                     max 0
+PASS  B3i.4f hb: RssAnon rise < half of K256 rise                                            hb 41.9 MiB vs K256 140.0 MiB
+TOTAL pass=33 fail=0

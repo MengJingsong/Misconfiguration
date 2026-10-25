@@ -1,0 +1,34 @@
+== UNIT (from ant.log RESULT lines)
+junit: andra.utils.memory.NativeCellGuardTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 24.316 sec
+S_1KiB L=1024 10 cells each L+21 and delta L+21: True | rss_rise/expected = 950.8991 | after free 3.5 MiB
+S_200KiB L=204800 10 cells each L+21 and delta L+21: True | rss_rise/expected = 0.0000 | after free 0.1 MiB
+S_16MiB L=16777216 10 cells each L+21 and delta L+21: True | rss_rise/expected = 0.9990 | after free 0.1 MiB
+S_255MiB L=267386880 10 cells each L+21 and delta L+21: True | rss_rise/expected = 1.0022 | after free 5.7 MiB
+G1 throw: java.lang.IllegalStateException null org.apache.cassandra.db.rows.NativeCell.<init>:101 owns delta 0 | pass: OK 2147483647 2147483647 rise 2048 MiB
+G2 throw: java.lang.IllegalStateException null org.apache.cassandra.db.rows.NativeCell.<init>:101 owns delta 0 | pass: OK 2147483647 2147483647 rise 2032 MiB
+P8 limit 8388608 admitted 7 floor(limit/(1MiB+21))= 7 owns 7340179 = 7340179 | released->done ms 5 | blocking owns 10485970 > 8388608 True
+P16 limit 16777216 admitted 15 floor(limit/(1MiB+21))= 15 owns 15728955 = 15728955 | released->done ms 6 | blocking owns 18874746 > 16777216 True
+P32 limit 33554432 admitted 31 floor(limit/(1MiB+21))= 31 owns 32506507 = 32506507 | released->done ms 6 | blocking owns 35652298 > 33554432 True
+O owns 16777237 = 16MiB+21? True ratio 2.0000025033950806
+H owns before/after 0 0
+== CLUSTER (from samples.csv / rows.jsonl / system.log)
+A rows ok/err per block: {'s1': (100, 0), 's8': (100, 0), 's15': (100, 0), 's17': (0, 1)} | peak AllMem 85.0 MiB | RssAnon rise 236.4 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   first error in s17 : InvalidRequest: Error from server: code=2200 [Invalid query] message="Request is too big: length 17825848 exceeds maximum allowed length 16777216."
+   samples 817 in-window 569 | off-heap min in window 0
+A2 rows ok/err per block: {'s17': (0, 1)} | peak AllMem 0.0 MiB | RssAnon rise 15.0 MiB | max OverSized 1 | log ISE 0 NativeCell 0
+   first error in s17 : InvalidRequest: Error from server: code=2200 [Invalid query] message="Rejected an oversized mutation (17825848/16777216) for keyspace: ks. Top keys are: t.0"
+   samples 301 in-window 52 | off-heap min in window 0
+B rows ok/err per block: {'s17': (5, 0), 's60': (5, 0)} | peak AllMem 85.0 MiB | RssAnon rise 305.9 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   samples 391 in-window 142 | off-heap min in window 0
+K64 rows ok/err per block: {'s8': (100, 0)} | peak AllMem 16.0 MiB | RssAnon rise 61.7 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   samples 437 in-window 188 | off-heap min in window 0
+K128 rows ok/err per block: {'s8': (100, 0)} | peak AllMem 40.0 MiB | RssAnon rise 91.9 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   samples 438 in-window 189 | off-heap min in window 0
+K256 rows ok/err per block: {'s8': (100, 0)} | peak AllMem 80.0 MiB | RssAnon rise 140.0 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   samples 459 in-window 210 | off-heap min in window 0
+K512 rows ok/err per block: {'s8': (100, 0)} | peak AllMem 168.0 MiB | RssAnon rise 246.1 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   samples 444 in-window 195 | off-heap min in window 0
+hb rows ok/err per block: {'s8': (100, 0)} | peak AllMem 0.0 MiB | RssAnon rise 41.9 MiB | max OverSized 0 | log ISE 0 NativeCell 0
+   samples 439 in-window 190 | off-heap min in window 0
+K peaks (MiB): [(64, 16.000062942504883), (128, 40.00015735626221), (256, 80.00031471252441), (512, 168.00066089630127)]
+K256 RssAnon rise / peak = 1.75

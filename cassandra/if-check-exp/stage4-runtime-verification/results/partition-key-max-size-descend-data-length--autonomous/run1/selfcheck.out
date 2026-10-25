@@ -1,0 +1,47 @@
+HOLDS    unit: all 54 apply rows have data.length = closed form
+HOLDS    unit: recursive rows keep 80 (54 rows, statuses ['ok'])
+HOLDS    unit: sizeOnHeap delta apply == recursive for every L (ON_HEAP): L15 36/36, L16 36/36, L127 164/164, L128 164/164, L1024 1252/1252, L16384 18948/18948, L65535 75172/75172, L65536 75172/75172, L65545 75172/75172
+HOLDS    unit: measureDeep(apply)-measureDeep(recursive) = 4*(len-80) at every L
+HOLDS    h64: system.log shows only the 12 explicit flushes (reasons ['USER_FORCED'])
+HOLDS    h64: no ERROR lines in system.log
+HOLDS    h64 K100: raw int[] delta 168, minus control 92 = 76 (pred 0), memtable on-heap delta 2456
+HOLDS    h64 K127: raw int[] delta 168, minus control 92 = 76 (pred 0), memtable on-heap delta 2648
+HOLDS    h64 K128: raw int[] delta 4912, minus control 92 = 4820 (pred 4800), memtable on-heap delta 2648
+HOLDS    h64 K200: raw int[] delta 4968, minus control 92 = 4876 (pred 4800), memtable on-heap delta 3128
+HOLDS    h64 K1000: raw int[] delta 20328, minus control 92 = 20236 (pred 20160), memtable on-heap delta 7832
+HOLDS    h64 K16000: raw int[] delta 327488, minus control 92 = 327396 (pred 327360), memtable on-heap delta 93560
+HOLDS    h64 K60000-N5: raw int[] delta 1310528, minus control 92 = 1310436 (pred 1310400), memtable on-heap delta 345176
+HOLDS    h64 K60000-N1: raw int[] delta 1310408, minus control 92 = 1310316 (pred 1310400), memtable on-heap delta 69208
+HOLDS    h64 K65535-N5: raw int[] delta 2621248, minus control 92 = 2621156 (pred 2621120), memtable on-heap delta 376664
+HOLDS    h64 K65535-N1: raw int[] delta 2621128, minus control 92 = 2621036 (pred 2621120), memtable on-heap delta 75512
+HOLDS    h64 K60000-N1: memtable delta 69208 <= 0.3 MB while excess 1310316 >= 1 MB
+HOLDS    h64 K65535-N1: memtable delta 75512 <= 0.3 MB while excess 2621036 >= 1 MB
+HOLDS    h64: node ran with -Xmx2G
+HOLDS    h256: system.log shows only the 12 explicit flushes (reasons ['USER_FORCED'])
+HOLDS    h256: no ERROR lines in system.log
+HOLDS    h256 K100: raw int[] delta 168, minus control 2596 = -2428 (pred 0), memtable on-heap delta 2456
+HOLDS    h256 K127: raw int[] delta 168, minus control 2596 = -2428 (pred 0), memtable on-heap delta 2648
+HOLDS    h256 K128: raw int[] delta 4952, minus control 2596 = 2356 (pred 4800), memtable on-heap delta 2648
+HOLDS    h256 K200: raw int[] delta 4968, minus control 2596 = 2372 (pred 4800), memtable on-heap delta 3128
+HOLDS    h256 K1000: raw int[] delta 20328, minus control 2596 = 17732 (pred 20160), memtable on-heap delta 7832
+HOLDS    h256 K16000: raw int[] delta 327528, minus control 2596 = 324932 (pred 327360), memtable on-heap delta 93560
+HOLDS    h256 K60000-N5: raw int[] delta 1310528, minus control 2596 = 1307932 (pred 1310400), memtable on-heap delta 345176
+HOLDS    h256 K60000-N1: raw int[] delta 1310408, minus control 2596 = 1307812 (pred 1310400), memtable on-heap delta 69208
+HOLDS    h256 K65535-N5: raw int[] delta 2621248, minus control 2596 = 2618652 (pred 2621120), memtable on-heap delta 376664
+HOLDS    h256 K65535-N1: raw int[] delta 2621128, minus control 2596 = 2618532 (pred 2621120), memtable on-heap delta 75512
+HOLDS    h256 K60000-N1: memtable delta 69208 <= 0.3 MB while excess 1307812 >= 1 MB
+HOLDS    h256 K65535-N1: memtable delta 75512 <= 0.3 MB while excess 2618532 >= 1 MB
+HOLDS    h256: node ran with -Xmx2G
+HOLDS    heap space 64 vs 256, RAW int[] delta (the frozen text: same stack size): K1000 20328 vs 20328
+DOES NOT HOLD heap space 64 vs 256, control-subtracted excess (the analyser criterion, 10%): K1000 20236 vs 17732
+HOLDS    heap space 64 vs 256, RAW int[] delta (the frozen text: same stack size): K16000 327488 vs 327528
+HOLDS    heap space 64 vs 256, control-subtracted excess (the analyser criterion, 10%): K16000 327396 vs 324932
+HOLDS    heap space 64 vs 256, RAW int[] delta (the frozen text: same stack size): K60000-N5 1310528 vs 1310528
+HOLDS    heap space 64 vs 256, control-subtracted excess (the analyser criterion, 10%): K60000-N5 1310436 vs 1307932
+HOLDS    heap space 64 vs 256, RAW int[] delta (the frozen text: same stack size): K65535-N5 2621248 vs 2621248
+HOLDS    heap space 64 vs 256, control-subtracted excess (the analyser criterion, 10%): K65535-N5 2621156 vs 2618652
+HOLDS    pc: raw system.log flush line: Enqueuing flush of ks.pc, Reason: MEMTABLE_LIMIT, Usage: 5.394MiB (34%) on-heap
+HOLDS    pc: int[] bytes before 15923920 after 15929960 (delta 6040), informational
+HOLDS    no CassandraDaemon of this run left (count 0)
+
+RESULT: 1 part(s) do not hold

@@ -1,0 +1,81 @@
+2026-10-25T18:06:49Z conf written: /users/jason92/s4-pk/cluster-run1/h256/conf
+2026-10-25T18:06:49Z $ grep -n 'memtable_heap_space\|memtable_offheap_space\|memtable_allocation_type\|listen_address\|rpc_address\|storage_port\|native_transport_port\|shards\|seeds:' /users/jason92/s4-pk/cluster-run1/h256/conf/cassandra.yaml | grep -v '^[0-9]*:#'  [rc=0, 0.0s]
+706:      - seeds: "127.0.31.1:7131"
+790:        shards: 1
+799:memtable_heap_space: 256MiB
+827:memtable_allocation_type: heap_buffers
+962:storage_port: 7131
+968:ssl_storage_port: 7001
+983:listen_address: 127.0.31.1
+1025:native_transport_port: 9131
+1092:rpc_address: 127.0.31.1
+1651:  # When set to true, encrypted and unencrypted connections are allowed on the storage_port
+1655:  # If enabled, will open up an encrypted listening socket on ssl_storage_port. Should only be used
+1657:  legacy_ssl_storage_port_enabled: false
+1704:  # When set to true, encrypted and unencrypted connections are allowed on the native_transport_port
+2026-10-25T18:06:49Z node started, pid 861843 (MAX_HEAP_SIZE=2G, ulimit -n 100000, memtable_heap_space=256 MiB)
+2026-10-25T18:06:55Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.2s]
+not running
+2026-10-25T18:07:01Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.0s]
+not running
+2026-10-25T18:07:07Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.1s]
+not running
+2026-10-25T18:07:13Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.0s]
+not running
+2026-10-25T18:07:19Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.0s]
+not running
+2026-10-25T18:07:26Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.1s]
+not running
+2026-10-25T18:07:32Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.0s]
+not running
+2026-10-25T18:07:38Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.0s]
+not running
+2026-10-25T18:07:44Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.1s]
+not running
+2026-10-25T18:07:50Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.0s]
+not running
+2026-10-25T18:07:56Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary  [rc=0, 1.1s]
+running
+2026-10-25T18:07:57Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 status  [rc=0, 1.1s]
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.31.1  114.69 KiB  16      100.0%            826d9882-b320-452e-9dc9-4b19e9a79b52  rack1
+2026-10-25T18:07:57Z node up in 68s
+2026-10-25T18:07:57Z driver connected
+2026-10-25T18:07:59Z $ jcmd 861843 GC.class_histogram  [rc=0, 0.5s]
+
+2026-10-25T18:07:59Z hist c32-first-pre: int[] instances=5101 bytes=15919392 ApplyState=1
+2026-10-25T18:08:00Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOnHeapDataSize -f Value  [rc=0, 1.1s]
+org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOnHeapDataSize
+0
+2026-10-25T18:08:01Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOffHeapDataSize -f Value  [rc=0, 1.1s]
+org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOffHeapDataSize
+0
+2026-10-25T18:08:02Z $ jcmd 861843 GC.class_histogram  [rc=0, 0.4s]
+
+2026-10-25T18:08:02Z hist c32-first-post: int[] instances=5118 bytes=15924416 ApplyState=1
+2026-10-25T18:08:03Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOnHeapDataSize -f Value  [rc=0, 1.1s]
+org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOnHeapDataSize
+2136
+2026-10-25T18:08:04Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOffHeapDataSize -f Value  [rc=0, 1.1s]
+org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableOffHeapDataSize
+0
+2026-10-25T18:08:05Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableColumnsCount -f Value  [rc=0, 1.0s]
+org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t00,name=MemtableColumnsCount
+5
+2026-10-25T18:08:06Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 flush ks t00  [rc=0, 1.0s]
+
+2026-10-25T18:08:08Z $ jcmd 861843 GC.class_histogram  [rc=0, 0.4s]
+
+2026-10-25T18:08:08Z hist c32-first-flush: int[] instances=5118 bytes=15924904 ApplyState=1
+2026-10-25T18:08:08Z ARM {'arm': 'c32-first', 'K': 32, 'N': 5, 'table': 't00', 'int_pre': 15919392, 'applystate_pre': 1, 'onheap_pre': 0, 'offheap_pre': 0, 'write_s': 0.03, 'int_post': 15924416, 'applystate_post': 1, 'onheap_post': 2136, 'offheap_post': 0, 'cols_post': 5, 'flush_logged_before_explicit': 0, 'int_flush': 15924904, 'applystate_flush': 1}
+2026-10-25T18:08:10Z $ jcmd 861843 GC.class_histogram  [rc=0, 0.4s]
+
+2026-10-25T18:08:10Z hist K100-pre: int[] instances=5125 bytes=15927120 ApplyState=2
+2026-10-25T18:08:11Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t01,name=MemtableOnHeapDataSize -f Value  [rc=0, 1.1s]
+org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t01,name=MemtableOnHeapDataSize
+0
+2026-10-25T18:08:12Z $ /users/jason92/s4-pk/src/bin/nodetool -h 127.0.0.1 -p 7331 sjk mx -mg -b org.apache.cassandra.metrics:type=Table,keyspace=ks,scope=t01,name=MemtableOffHeapDataSize -f

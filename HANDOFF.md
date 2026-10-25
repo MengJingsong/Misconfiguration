@@ -40,7 +40,7 @@ fresh autonomous agents to write up a case per target and verifies each at stage
 | Yang | [`HANDOFF-Yang.md`](HANDOFF-Yang.md) | [`writeup-set-B.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-B.csv) | 169 / 161 |
 
 The personal handoffs hold the job, the procedure and the progress; this file holds what both
-share. Update the "Current state" numbers below when a batch closes (last: 2026-10-25, set A batch 3).
+share. Update the "Current state" numbers below when a batch closes (last: 2026-10-25, set A batch 4).
 
 ## What this experiment is
 
@@ -60,13 +60,13 @@ noticed along the way are noted in case files for Target 3, not chased.
 
 - **Stage 1:** 17,343 `if` statements → 4,489 numeric comparisons + 1,099 helper-guarded rows.
 - **Stage 2:** 4,789 units banded (A 134, B 174, C 94, D 4,387); `stage2-ai-preprocessing/bands.csv`.
-- **Stage 3:** bands A, B and C fully read; **73 case files** (29 guided, 44 autonomous; estimate
-  positive 48, negative 25). 65 of the 402 A/B/C units were a case's target before the two-set job;
+- **Stage 3:** bands A, B and C fully read; **78 case files** (29 guided, 49 autonomous; estimate
+  positive 48, negative 30). 65 of the 402 A/B/C units were a case's target before the two-set job;
   the other **337** are that job (2 accepted candidates in `predicted-positive.md`, the rest rejected
-  lines in `predicted-negative.md`, ~151 rows). Set A has written up **15** of its 159 targets
-  (batches 1–3, 2026-10-24/25); set B none yet. Nothing is undecided. Band D is not read.
-- **Stage 4:** **all 73 closed**, run 1 only (no run 2 anywhere): 56 Confirmed, 4 Refuted,
-  12 partial, 1 not confirmed. **Outcome class:** 44 true positive, 0 false positive, 13 true
+  lines in `predicted-negative.md`, ~151 rows). Set A has written up **20** of its 159 targets
+  (batches 1–4, 2026-10-24/25); set B none yet. Nothing is undecided. Band D is not read.
+- **Stage 4:** **all 78 closed**, run 1 only (no run 2 anywhere): 61 Confirmed, 4 Refuted,
+  12 partial, 1 not confirmed. **Outcome class:** 44 true positive, 0 false positive, 18 true
   negative, 4 false negative, 12 undetermined (all 12 autonomous, mostly the cluster tier).
   Per-case verdicts: `stage3-ai-deep-read/_INDEX.md` §1.
 
@@ -193,7 +193,8 @@ Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
   `MAX_HINT_BUFFERS=1` deadlocks the hint path; `sendWriteWithCallback` holds a refused write until
   the timeout (`internode_max_message_size`); `maxHintsInProgress` can never fire (bare
   `CacheLoader`, `StorageProxy.java:203`); `SerializingCache.clear()` does not free native memory (removal cause EXPLICIT, the listener frees
-  only evictions; seen in `entry-size-limit` and `row_cache_size` cases, 2026-10-25).
+  only evictions; seen in `entry-size-limit` and `row_cache_size` cases, 2026-10-25); `MEMTABLE_TRIE_SIZE_LIMIT`
+  (`cassandra.trie_size_limit_mb`) has no reader (the trie threshold uses `cassandra.memtable.row_overhead_size`).
 - **Reruns that could settle undetermined cluster tiers:** the `SEPExecutor` cases (pin
   `native_transport_max_threads`, throttle the load), `flushLowWaterMark`, the SAI sawtooth,
   `NORMAL_CHUNK_SIZE` with held frames, a throttled arm for `commitlog_total_space` `:259`.

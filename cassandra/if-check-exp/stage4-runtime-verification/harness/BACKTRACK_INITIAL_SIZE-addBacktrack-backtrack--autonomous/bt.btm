@@ -1,0 +1,23 @@
+RULE bt grow
+CLASS org.apache.cassandra.db.tries.InMemoryReadTrie$CursorBacktrackingState
+METHOD addBacktrack
+AT LINE 502
+IF TRUE
+DO org.stage4.BtHelper.grow($0.backtrack.length)
+ENDRULE
+
+RULE bt cursor
+CLASS org.apache.cassandra.db.tries.InMemoryReadTrie$MemtableCursor
+METHOD <init>
+AT EXIT
+IF TRUE
+DO org.stage4.BtHelper.cursor()
+ENDRULE
+
+RULE bt init
+CLASS org.apache.cassandra.service.CassandraDaemon
+METHOD setup
+AT ENTRY
+IF TRUE
+DO org.stage4.BtHelper.init()
+ENDRULE

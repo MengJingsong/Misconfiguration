@@ -1,0 +1,44 @@
+CHECK apply data.length = 80*2^k rule    PASS  mismatches=[]; rows=54
+  apply lengths (ON_HEAP rep0): L15=80, L16=160, L127=640, L128=1280, L1024=10240, L16384=163840, L65535=327680, L65536=655360, L65545=655360
+CHECK recursive control keeps data.length 80 PASS  violations=[]; recursive non-ok rows=[]
+CHECK 3 repeats identical                PASS  distinct-per-key=1
+CHECK sizeOnHeap(apply) == sizeOnHeap(rec) +-5% PASS  violations=[]
+  L=15: apply delta 36, recursive delta 36, stack growth 0 B, accounted extra 0 B
+  L=16: apply delta 36, recursive delta 36, stack growth 320 B, accounted extra 0 B
+  L=127: apply delta 164, recursive delta 164, stack growth 2240 B, accounted extra 0 B
+  L=128: apply delta 164, recursive delta 164, stack growth 4800 B, accounted extra 0 B
+  L=1024: apply delta 1252, recursive delta 1252, stack growth 40640 B, accounted extra 0 B
+  L=16384: apply delta 18948, recursive delta 18948, stack growth 655040 B, accounted extra 0 B
+  L=65535: apply delta 75172, recursive delta 75172, stack growth 1310400 B, accounted extra 0 B
+  L=65536: apply delta 75172, recursive delta 75172, stack growth 2621120 B, accounted extra 0 B
+  L=65545: apply delta 75172, recursive delta 75172, stack growth 2621120 B, accounted extra 0 B
+  L=15: measureDeep(apply)-measureDeep(recursive) = 0 B; 4*(len-80) = 0 B
+  L=16: measureDeep(apply)-measureDeep(recursive) = 320 B; 4*(len-80) = 320 B
+  L=127: measureDeep(apply)-measureDeep(recursive) = 2240 B; 4*(len-80) = 2240 B
+  L=128: measureDeep(apply)-measureDeep(recursive) = 4800 B; 4*(len-80) = 4800 B
+  L=1024: measureDeep(apply)-measureDeep(recursive) = 40640 B; 4*(len-80) = 40640 B
+  L=16384: measureDeep(apply)-measureDeep(recursive) = 655040 B; 4*(len-80) = 655040 B
+  L=65535: measureDeep(apply)-measureDeep(recursive) = 1310400 B; 4*(len-80) = 1310400 B
+  L=65536: measureDeep(apply)-measureDeep(recursive) = 2621120 B; 4*(len-80) = 2621120 B
+  L=65545: measureDeep(apply)-measureDeep(recursive) = 2621120 B; 4*(len-80) = 2621120 B
+CHECK measureDeep grows by >= 4*(len-80) PASS  violations=[]
+CHECK row_overhead_size=1 leaves lengths PASS  diffs=[] rows=12
+  bulk-default fresh: dataLen 80 -> 160, sizeOnHeap 632 -> 74954200, threshold false -> false
+CHECK bulk-default fresh data.length = 160 after 1M puts PASS  80->160
+CHECK bulk-default fresh sizeOnHeap grows PASS  632->74954200
+CHECK bulk-default fresh threshold after = False PASS  false
+  bulk-default afterLong65535: dataLen 327680 -> 327680, sizeOnHeap 75804 -> 75029116, threshold false -> false
+CHECK bulk-default afterLong65535 data.length = 327680 after 1M puts PASS  327680->327680
+CHECK bulk-default afterLong65535 sizeOnHeap grows PASS  75804->75029116
+CHECK bulk-default afterLong65535 threshold after = False PASS  false
+  bulk-ro1 fresh: dataLen 80 -> 160, sizeOnHeap 632 -> 74954200, threshold false -> true
+CHECK bulk-ro1 fresh data.length = 160 after 1M puts PASS  80->160
+CHECK bulk-ro1 fresh sizeOnHeap grows    PASS  632->74954200
+CHECK bulk-ro1 fresh threshold after = True PASS  true
+  bulk-ro1 afterLong65535: dataLen 327680 -> 327680, sizeOnHeap 75804 -> 75029116, threshold false -> true
+CHECK bulk-ro1 afterLong65535 data.length = 327680 after 1M puts PASS  327680->327680
+CHECK bulk-ro1 afterLong65535 sizeOnHeap grows PASS  75804->75029116
+CHECK bulk-ro1 afterLong65535 threshold after = True PASS  true
+  depth: K32->44(+12), K100->112(+12), K127->139(+12), K128->140(+12), K200->212(+12), K1000->1012(+12), K16000->16012(+12), K60000->60012(+12), K65535->65547(+12)
+CHECK DecoratedKey depth = K + const     PASS  extras=[12]
+  predicted stack ints from D(K): K32->80, K100->80, K127->80, K128->1280, K200->1280, K1000->5120, K16000->81920, K60000->327680, K65535->655360

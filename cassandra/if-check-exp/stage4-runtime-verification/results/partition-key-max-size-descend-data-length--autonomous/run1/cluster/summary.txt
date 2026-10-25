@@ -1,0 +1,101 @@
+[h64] control deltas: first=16 last=168 mean=92 spread=152
+  c32-first  K=32    N=5 predicted stack 320 B (len 80) | int[] delta 16, excess over control -76 (pred 0) | memtable on-heap delta 2136 | flush drop -5432 | ApplyState 1->1->1 | flush-before-explicit 0
+  K100       K=100   N=5 predicted stack 320 B (len 80) | int[] delta 168, excess over control 76 (pred 0) | memtable on-heap delta 2456 | flush drop -480 | ApplyState 2->2->2 | flush-before-explicit 0
+CHECK [h64] K100 excess within control spread+2KB  PASS  excess=76 spread=152
+CHECK [h64] K100 no flush before explicit          PASS  0
+  K127       K=127   N=5 predicted stack 320 B (len 80) | int[] delta 168, excess over control 76 (pred 0) | memtable on-heap delta 2648 | flush drop -480 | ApplyState 3->3->3 | flush-before-explicit 0
+CHECK [h64] K127 excess within control spread+2KB  PASS  excess=76 spread=152
+CHECK [h64] K127 no flush before explicit          PASS  0
+  K128       K=128   N=5 predicted stack 5120 B (len 1280) | int[] delta 4912, excess over control 4820 (pred 4800) | memtable on-heap delta 2648 | flush drop 4320 | ApplyState 4->4->4 | flush-before-explicit 0
+CHECK [h64] K128 excess within 25% of 4*len-320    PASS  excess=4820 pred=4800 tol=2200
+CHECK [h64] K128 no flush before explicit          PASS  0
+  K200       K=200   N=5 predicted stack 5120 B (len 1280) | int[] delta 4968, excess over control 4876 (pred 4800) | memtable on-heap delta 3128 | flush drop 4320 | ApplyState 5->5->5 | flush-before-explicit 0
+CHECK [h64] K200 excess within 25% of 4*len-320    PASS  excess=4876 pred=4800 tol=2200
+CHECK [h64] K200 no flush before explicit          PASS  0
+  K1000      K=1000  N=5 predicted stack 20480 B (len 5120) | int[] delta 20328, excess over control 20236 (pred 20160) | memtable on-heap delta 7832 | flush drop 19680 | ApplyState 6->6->6 | flush-before-explicit 0
+CHECK [h64] K1000 excess within 25% of 4*len-320   PASS  excess=20236 pred=20160 tol=5040
+CHECK [h64] K1000 stack leaves with the memtable (flush drop) PASS  drop=19680 pred=20160
+CHECK [h64] K1000 no flush before explicit         PASS  0
+  K16000     K=16000 N=5 predicted stack 327680 B (len 81920) | int[] delta 327488, excess over control 327396 (pred 327360) | memtable on-heap delta 93560 | flush drop 326880 | ApplyState 7->7->7 | flush-before-explicit 0
+CHECK [h64] K16000 excess within 25% of 4*len-320  PASS  excess=327396 pred=327360 tol=81840
+CHECK [h64] K16000 stack leaves with the memtable (flush drop) PASS  drop=326880 pred=327360
+CHECK [h64] K16000 no flush before explicit        PASS  0
+  K60000-N5  K=60000 N=5 predicted stack 1310720 B (len 327680) | int[] delta 1310528, excess over control 1310436 (pred 1310400) | memtable on-heap delta 345176 | flush drop 1309920 | ApplyState 8->8->8 | flush-before-explicit 0
+CHECK [h64] K60000-N5 excess within 25% of 4*len-320 PASS  excess=1310436 pred=1310400 tol=327600
+CHECK [h64] K60000-N5 stack leaves with the memtable (flush drop) PASS  drop=1309920 pred=1310400
+CHECK [h64] K60000-N5 no flush before explicit     PASS  0
+  K60000-N1  K=60000 N=1 predicted stack 1310720 B (len 327680) | int[] delta 1310408, excess over control 1310316 (pred 1310400) | memtable on-heap delta 69208 | flush drop 1309920 | ApplyState 9->9->9 | flush-before-explicit 0
+CHECK [h64] K60000-N1 excess within 25% of 4*len-320 PASS  excess=1310316 pred=1310400 tol=327600
+CHECK [h64] K60000-N1 stack leaves with the memtable (flush drop) PASS  drop=1309920 pred=1310400
+CHECK [h64] K60000-N1 no flush before explicit     PASS  0
+  K65535-N5  K=65535 N=5 predicted stack 2621440 B (len 655360) | int[] delta 2621248, excess over control 2621156 (pred 2621120) | memtable on-heap delta 376664 | flush drop 2620640 | ApplyState 10->10->10 | flush-before-explicit 0
+CHECK [h64] K65535-N5 excess within 25% of 4*len-320 PASS  excess=2621156 pred=2621120 tol=655280
+CHECK [h64] K65535-N5 stack leaves with the memtable (flush drop) PASS  drop=2620640 pred=2621120
+CHECK [h64] K65535-N5 no flush before explicit     PASS  0
+  K65535-N1  K=65535 N=1 predicted stack 2621440 B (len 655360) | int[] delta 2621128, excess over control 2621036 (pred 2621120) | memtable on-heap delta 75512 | flush drop 2620640 | ApplyState 11->11->11 | flush-before-explicit 0
+CHECK [h64] K65535-N1 excess within 25% of 4*len-320 PASS  excess=2621036 pred=2621120 tol=655280
+CHECK [h64] K65535-N1 stack leaves with the memtable (flush drop) PASS  drop=2620640 pred=2621120
+CHECK [h64] K65535-N1 no flush before explicit     PASS  0
+  c32-last   K=32    N=5 predicted stack 320 B (len 80) | int[] delta 168, excess over control 76 (pred 0) | memtable on-heap delta 2136 | flush drop -480 | ApplyState 12->12->12 | flush-before-explicit 0
+CHECK [h64] K60000-N1 excess >= 1.0 MB, memtable delta <= 0.3 MB PASS  excess=1310316 memtable=69208
+CHECK [h64] K60000-N1 memtable NOT within 0.2 MB of excess (not-accounted) PASS  memtable=69208 excess=1310316
+CHECK [h64] K65535-N1 excess >= 1.0 MB, memtable delta <= 0.3 MB PASS  excess=2621036 memtable=75512
+CHECK [h64] K65535-N1 memtable NOT within 0.2 MB of excess (not-accounted) PASS  memtable=75512 excess=2621036
+CHECK [h64] N=1 vs N=5 at K=60000 same stack within 10% PASS  N1=1310316 N5=1310436
+CHECK [h64] N=5 memtable delta scales with N (K=60000) PASS  N5=345176 N1=69208
+[h256] control deltas: first=5024 last=168 mean=2596 spread=4856
+  c32-first  K=32    N=5 predicted stack 320 B (len 80) | int[] delta 5024, excess over control 2428 (pred 0) | memtable on-heap delta 2136 | flush drop -488 | ApplyState 1->1->1 | flush-before-explicit 0
+  K100       K=100   N=5 predicted stack 320 B (len 80) | int[] delta 168, excess over control -2428 (pred 0) | memtable on-heap delta 2456 | flush drop -480 | ApplyState 2->2->2 | flush-before-explicit 0
+CHECK [h256] K100 excess within control spread+2KB PASS  excess=-2428 spread=4856
+CHECK [h256] K100 no flush before explicit         PASS  0
+  K127       K=127   N=5 predicted stack 320 B (len 80) | int[] delta 168, excess over control -2428 (pred 0) | memtable on-heap delta 2648 | flush drop -480 | ApplyState 3->3->3 | flush-before-explicit 0
+CHECK [h256] K127 excess within control spread+2KB PASS  excess=-2428 spread=4856
+CHECK [h256] K127 no flush before explicit         PASS  0
+  K128       K=128   N=5 predicted stack 5120 B (len 1280) | int[] delta 4952, excess over control 2356 (pred 4800) | memtable on-heap delta 2648 | flush drop 4320 | ApplyState 4->4->4 | flush-before-explicit 0
+CHECK [h256] K128 excess within 25% of 4*len-320   PASS  excess=2356 pred=4800 tol=6904
+CHECK [h256] K128 no flush before explicit         PASS  0
+  K200       K=200   N=5 predicted stack 5120 B (len 1280) | int[] delta 4968, excess over control 2372 (pred 4800) | memtable on-heap delta 3128 | flush drop 4320 | ApplyState 5->5->5 | flush-before-explicit 0
+CHECK [h256] K200 excess within 25% of 4*len-320   PASS  excess=2372 pred=4800 tol=6904
+CHECK [h256] K200 no flush before explicit         PASS  0
+  K1000      K=1000  N=5 predicted stack 20480 B (len 5120) | int[] delta 20328, excess over control 17732 (pred 20160) | memtable on-heap delta 7832 | flush drop 19680 | ApplyState 6->6->6 | flush-before-explicit 0
+CHECK [h256] K1000 excess within 25% of 4*len-320  PASS  excess=17732 pred=20160 tol=6904
+CHECK [h256] K1000 stack leaves with the memtable (flush drop) PASS  drop=19680 pred=20160
+CHECK [h256] K1000 no flush before explicit        PASS  0
+  K16000     K=16000 N=5 predicted stack 327680 B (len 81920) | int[] delta 327528, excess over control 324932 (pred 327360) | memtable on-heap delta 93560 | flush drop 326880 | ApplyState 7->7->7 | flush-before-explicit 0
+CHECK [h256] K16000 excess within 25% of 4*len-320 PASS  excess=324932 pred=327360 tol=81840
+CHECK [h256] K16000 stack leaves with the memtable (flush drop) PASS  drop=326880 pred=327360
+CHECK [h256] K16000 no flush before explicit       PASS  0
+  K60000-N5  K=60000 N=5 predicted stack 1310720 B (len 327680) | int[] delta 1310528, excess over control 1307932 (pred 1310400) | memtable on-heap delta 345176 | flush drop 1309920 | ApplyState 8->8->8 | flush-before-explicit 0
+CHECK [h256] K60000-N5 excess within 25% of 4*len-320 PASS  excess=1307932 pred=1310400 tol=327600
+CHECK [h256] K60000-N5 stack leaves with the memtable (flush drop) PASS  drop=1309920 pred=1310400
+CHECK [h256] K60000-N5 no flush before explicit    PASS  0
+  K60000-N1  K=60000 N=1 predicted stack 1310720 B (len 327680) | int[] delta 1310408, excess over control 1307812 (pred 1310400) | memtable on-heap delta 69208 | flush drop 1309920 | ApplyState 9->9->9 | flush-before-explicit 0
+CHECK [h256] K60000-N1 excess within 25% of 4*len-320 PASS  excess=1307812 pred=1310400 tol=327600
+CHECK [h256] K60000-N1 stack leaves with the memtable (flush drop) PASS  drop=1309920 pred=1310400
+CHECK [h256] K60000-N1 no flush before explicit    PASS  0
+  K65535-N5  K=65535 N=5 predicted stack 2621440 B (len 655360) | int[] delta 2621248, excess over control 2618652 (pred 2621120) | memtable on-heap delta 376664 | flush drop 2620640 | ApplyState 10->10->10 | flush-before-explicit 0
+CHECK [h256] K65535-N5 excess within 25% of 4*len-320 PASS  excess=2618652 pred=2621120 tol=655280
+CHECK [h256] K65535-N5 stack leaves with the memtable (flush drop) PASS  drop=2620640 pred=2621120
+CHECK [h256] K65535-N5 no flush before explicit    PASS  0
+  K65535-N1  K=65535 N=1 predicted stack 2621440 B (len 655360) | int[] delta 2621128, excess over control 2618532 (pred 2621120) | memtable on-heap delta 75512 | flush drop 2620640 | ApplyState 11->11->11 | flush-before-explicit 0
+CHECK [h256] K65535-N1 excess within 25% of 4*len-320 PASS  excess=2618532 pred=2621120 tol=655280
+CHECK [h256] K65535-N1 stack leaves with the memtable (flush drop) PASS  drop=2620640 pred=2621120
+CHECK [h256] K65535-N1 no flush before explicit    PASS  0
+  c32-last   K=32    N=5 predicted stack 320 B (len 80) | int[] delta 168, excess over control -2428 (pred 0) | memtable on-heap delta 2136 | flush drop -480 | ApplyState 12->12->12 | flush-before-explicit 0
+CHECK [h256] K60000-N1 excess >= 1.0 MB, memtable delta <= 0.3 MB PASS  excess=1307812 memtable=69208
+CHECK [h256] K60000-N1 memtable NOT within 0.2 MB of excess (not-accounted) PASS  memtable=69208 excess=1307812
+CHECK [h256] K65535-N1 excess >= 1.0 MB, memtable delta <= 0.3 MB PASS  excess=2618532 memtable=75512
+CHECK [h256] K65535-N1 memtable NOT within 0.2 MB of excess (not-accounted) PASS  memtable=75512 excess=2618532
+CHECK [h256] N=1 vs N=5 at K=60000 same stack within 10% PASS  N1=1307812 N5=1307932
+CHECK [h256] N=5 memtable delta scales with N (K=60000) PASS  N5=345176 N1=69208
+CHECK heap space 64 vs 256 MiB, K1000 same stack (10%) FAIL  64MiB=20236 256MiB=17732
+CHECK heap space 64 vs 256 MiB, K16000 same stack (10%) PASS  64MiB=327396 256MiB=324932
+CHECK heap space 64 vs 256 MiB, K60000-N5 same stack (10%) PASS  64MiB=1310436 256MiB=1307932
+CHECK heap space 64 vs 256 MiB, K60000-N1 same stack (10%) PASS  64MiB=1310316 256MiB=1307812
+CHECK heap space 64 vs 256 MiB, K65535-N5 same stack (10%) PASS  64MiB=2621156 256MiB=2618652
+CHECK heap space 64 vs 256 MiB, K65535-N1 same stack (10%) PASS  64MiB=2621036 256MiB=2618532
+[pc] last row: writes=60 onheap=514116 flush lines=1 memtable_limit=True
+CHECK [pc] flush by MEMTABLE_LIMIT logged          PASS  True
+[pc] flush log line: Enqueuing flush of ks.pc, Reason: MEMTABLE_LIMIT, Usage: 5.394MiB (34%) on-heap, 0B (0%) off-heap
+CHECK [pc] peak on-heap charge before the flush in 4..16 MiB PASS  peak=5141576
+[pc] int_pre=15923920 int_post=15929960 applystate_pre=1 applystate_post=1 first_flush=(60, 514116)
