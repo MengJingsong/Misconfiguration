@@ -1,0 +1,554 @@
+[2026-10-25 19:41:51] cluster-run run1: RUN=/users/jason92/s4-tp33-run tree=/users/jason92/s4-tp33 scale=1 n_small=1000000 n_big=5000 scan_s=180
+[2026-10-25 19:41:51] + git describe --tags; git rev-parse --short HEAD; java -version 2>&1 | head -1; uname -r; df -h /users/jason92
+cassandra-5.0.9
+0339d9a
+openjdk version "11.0.32.1" 2026-08-18
+5.15.0-187-generic
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3        63G   22G   38G  36% /
+
+  rc=0
+[2026-10-25 19:41:51] + ss -ltn
+[2026-10-25 19:41:51] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-25 19:41:51] + mkdir -p /users/jason92/s4-tp33-run/logs /users/jason92/s4-tp33-run/tools && javac -d /users/jason92/s4-tp33-run/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/Jmx.java
+
+  rc=0
+[2026-10-25 19:41:52] + rm -rf /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /users/jason92/s4-tp33-run/saved_caches /users/jason92/s4-tp33-run/cdc_raw && mkdir -p /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /u
+
+  rc=0
+[2026-10-25 19:41:52] + rm -rf /users/jason92/s4-tp33-run/conf && cp -r /users/jason92/s4-tp33/conf /users/jason92/s4-tp33-run/conf
+
+  rc=0
+[2026-10-25 19:41:52] conf H256: cluster_name='tp33'; commitlog_directory=/users/jason92/s4-tp33-run/commitlog; hints_directory=/users/jason92/s4-tp33-run/hints; saved_caches_directory=/users/jason92/s4-tp33-run/saved_caches; cdc_raw_directory=/users/jason92/s4-tp33-run/cdc_raw; listen_address=127.0.33.1; rpc_address=127.0.33.1; storage_port=7010; ssl_storage_port=7011; native_transport_port=9142; memtable_allocation_type=heap_buffers; memtable_heap_space=256MiB; memtable_offheap_space=2048MiB; concurrent_reads=32; commitlog_total_space=2GiB; autocompaction_on_startup_enabled=false; native_transport_timeout=60s; read_request_timeout=30s; range_request_timeout=60s
+[2026-10-25 19:41:52] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-25 19:41:52] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-tp33-run/cassandra.pid > /users/jason92/s4-tp33-run/logs/start-H256.out 2>&1"
+
+  rc=0
+[2026-10-25 19:41:55] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:41:59] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:03] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:07] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:12] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:16] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:20] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:24] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:28] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:32] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:36] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:40] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:44] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:48] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:42:49] + bin/nodetool -h 127.0.0.1 -p 7210 statusbinary
+[2026-10-25 19:42:54] node up (H256) after 62 s, pid 2003347
+[2026-10-25 19:42:54] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py schema 127.0.33.1 9142
+[2026-10-25 19:42:55] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-25 19:42:55] + bin/nodetool -h 127.0.0.1 -p 7210 disableautocompaction ks
+[2026-10-25 19:42:56] + ss -ltn
+[2026-10-25 19:42:56] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-001-base.txt
+[2026-10-25 19:42:56] H256: histo base byte[] (102761, 12005552) total (734452, 65225000)
+[2026-10-25 19:42:56] H256: phase load_small start
+[2026-10-25 19:42:56] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_small 0 1000000 128
+[2026-10-25 19:45:12] H256: phase load_small end (136 s) {'ok': 1000000, 'expected': 1000000, 'errors': 0, 'first_errors': [], 'seconds': 135.55}
+[2026-10-25 19:45:12] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-002-after-load_small.txt
+[2026-10-25 19:45:13] H256: histo after-load_small byte[] (104969, 20530088) total (1481693, 107533008)
+[2026-10-25 19:45:13] H256: phase load_big start
+[2026-10-25 19:45:13] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 5000 16
+[2026-10-25 19:45:18] H256: phase load_big end (5 s) {'ok': 5000, 'expected': 5000, 'errors': 0, 'first_errors': [], 'seconds': 4.81}
+[2026-10-25 19:45:18] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-003-after-load_big.txt
+[2026-10-25 19:45:19] H256: histo after-load_big byte[] (106917, 194354328) total (1509062, 440519672)
+[2026-10-25 19:45:19] H256: phase warm start
+[2026-10-25 19:45:19] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py scan 127.0.33.1 9142 t_big 1 10
+[2026-10-25 19:45:29] H256: phase warm end (11 s) {'rows': 6201, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 10.14}
+[2026-10-25 19:45:29] H256: phase scan_big_R1 start
+[2026-10-25 19:45:29] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:45:30] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-004-t_big-R1-t0.txt
+[2026-10-25 19:45:31] H256: histo t_big-R1-t0 byte[] (106331, 81600272) total (1498803, 222291528)
+[2026-10-25 19:45:46] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-005-t_big-R1-t15.txt
+[2026-10-25 19:45:46] H256: histo t_big-R1-t15 byte[] (106413, 84490248) total (1500470, 225430640)
+[2026-10-25 19:46:01] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-006-t_big-R1-t30.txt
+[2026-10-25 19:46:01] H256: histo t_big-R1-t30 byte[] (106433, 90252312) total (1500516, 231193328)
+[2026-10-25 19:46:15] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-007-t_big-R1-t45.txt
+[2026-10-25 19:46:16] H256: histo t_big-R1-t45 byte[] (106555, 89471808) total (1500483, 230399576)
+[2026-10-25 19:46:31] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-008-t_big-R1-t60.txt
+[2026-10-25 19:46:31] H256: histo t_big-R1-t60 byte[] (106591, 89532024) total (1500350, 230433512)
+[2026-10-25 19:46:31] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 19:46:33] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:46:46] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-009-t_big-R1-t75.txt
+[2026-10-25 19:46:46] H256: histo t_big-R1-t75 byte[] (106512, 72939184) total (1501080, 214131160)
+[2026-10-25 19:47:00] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-010-t_big-R1-t90.txt
+[2026-10-25 19:47:01] H256: histo t_big-R1-t90 byte[] (106556, 73061336) total (1501200, 214255360)
+[2026-10-25 19:47:16] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-011-t_big-R1-t105.txt
+[2026-10-25 19:47:16] H256: histo t_big-R1-t105 byte[] (106570, 75827112) total (1501354, 217026544)
+[2026-10-25 19:47:31] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-012-t_big-R1-t120.txt
+[2026-10-25 19:47:32] H256: histo t_big-R1-t120 byte[] (106788, 81738224) total (1512268, 223358120)
+[2026-10-25 19:47:32] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 19:47:33] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:47:46] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-013-t_big-R1-t135.txt
+[2026-10-25 19:47:46] H256: histo t_big-R1-t135 byte[] (106768, 74598568) total (1513999, 216478600)
+[2026-10-25 19:48:00] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-014-t_big-R1-t150.txt
+[2026-10-25 19:48:01] H256: histo t_big-R1-t150 byte[] (106785, 74479632) total (1514142, 216363952)
+[2026-10-25 19:48:16] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-015-t_big-R1-t165.txt
+[2026-10-25 19:48:16] H256: histo t_big-R1-t165 byte[] (106935, 81865408) total (1514283, 223742488)
+[2026-10-25 19:48:30] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-016-t_big-R1-t180.txt
+[2026-10-25 19:48:31] H256: histo t_big-R1-t180 byte[] (106799, 74241920) total (1514093, 216123960)
+[2026-10-25 19:48:32] H256: phase scan_big_R1 end (182 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.36}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 103901, 'passes': 21, 'errors': 0, 'first_errors': [], 'seconds': 180.27}}
+[2026-10-25 19:48:32] H256: phase scan_big_R32 start
+[2026-10-25 19:48:32] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:48:33] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-017-t_big-R32-t0.txt
+[2026-10-25 19:48:33] H256: histo t_big-R32-t0 byte[] (106786, 74001888) total (1514775, 216141808)
+[2026-10-25 19:48:48] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-018-t_big-R32-t15.txt
+[2026-10-25 19:48:49] H256: histo t_big-R32-t15 byte[] (99821, 198338264) total (1447223, 338383296)
+[2026-10-25 19:49:04] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-019-t_big-R32-t30.txt
+[2026-10-25 19:49:04] H256: histo t_big-R32-t30 byte[] (99880, 174166856) total (1448133, 314265464)
+[2026-10-25 19:49:18] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-020-t_big-R32-t45.txt
+[2026-10-25 19:49:19] H256: histo t_big-R32-t45 byte[] (100001, 162059792) total (1448355, 302151256)
+[2026-10-25 19:49:34] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-021-t_big-R32-t60.txt
+[2026-10-25 19:49:34] H256: histo t_big-R32-t60 byte[] (99738, 158731640) total (1447282, 298797880)
+[2026-10-25 19:49:34] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 19:49:37] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:49:48] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-022-t_big-R32-t75.txt
+[2026-10-25 19:49:49] H256: histo t_big-R32-t75 byte[] (100376, 216041952) total (1452803, 356473896)
+[2026-10-25 19:50:03] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-023-t_big-R32-t90.txt
+[2026-10-25 19:50:03] H256: histo t_big-R32-t90 byte[] (99702, 157897400) total (1450278, 298277768)
+[2026-10-25 19:50:18] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-024-t_big-R32-t105.txt
+[2026-10-25 19:50:19] H256: histo t_big-R32-t105 byte[] (99797, 162825160) total (1451455, 303258056)
+[2026-10-25 19:50:34] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-025-t_big-R32-t120.txt
+[2026-10-25 19:50:34] H256: histo t_big-R32-t120 byte[] (99343, 167325616) total (1450039, 307962528)
+[2026-10-25 19:50:34] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 19:50:38] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:50:48] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-026-t_big-R32-t135.txt
+[2026-10-25 19:50:49] H256: histo t_big-R32-t135 byte[] (100015, 189323528) total (1452565, 329940384)
+[2026-10-25 19:51:03] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-027-t_big-R32-t150.txt
+[2026-10-25 19:51:04] H256: histo t_big-R32-t150 byte[] (100035, 183229904) total (1454458, 323949448)
+[2026-10-25 19:51:19] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-028-t_big-R32-t165.txt
+[2026-10-25 19:51:19] H256: histo t_big-R32-t165 byte[] (100043, 168086680) total (1453719, 308771912)
+[2026-10-25 19:51:33] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-029-t_big-R32-t180.txt
+[2026-10-25 19:51:34] H256: histo t_big-R32-t180 byte[] (99718, 195085720) total (1448669, 335533640)
+[2026-10-25 19:51:35] H256: phase scan_big_R32 end (183 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.66}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 1654732, 'passes': 352, 'errors': 0, 'first_errors': [], 'seconds': 180.44}}
+[2026-10-25 19:51:35] H256: phase scan_small_R1 start
+[2026-10-25 19:51:35] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-030-t_small-R1-t0.txt
+[2026-10-25 19:51:35] H256: histo t_small-R1-t0 byte[] (98705, 73706096) total (1435592, 213636280)
+[2026-10-25 19:51:50] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-031-t_small-R1-t15.txt
+[2026-10-25 19:51:50] H256: histo t_small-R1-t15 byte[] (98934, 73716520) total (1437560, 213891256)
+[2026-10-25 19:52:05] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-032-t_small-R1-t30.txt
+[2026-10-25 19:52:06] H256: histo t_small-R1-t30 byte[] (98940, 73716904) total (1437881, 213909424)
+[2026-10-25 19:52:20] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-033-t_small-R1-t45.txt
+[2026-10-25 19:52:20] H256: histo t_small-R1-t45 byte[] (98950, 73721184) total (1438049, 213919816)
+[2026-10-25 19:52:35] H256: phase scan_small_R1 end (61 s) {'scan': {'rows': 1503001, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 60.0}}
+[2026-10-25 19:52:35] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks
+[2026-10-25 19:52:37] + jcmd 2003347 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H256/histo-034-end.txt
+[2026-10-25 19:52:37] H256: histo end byte[] (98125, 17223456) total (733568, 81054344)
+[2026-10-25 19:52:40] + du -sb /users/jason92/s4-tp33-run/data
+[2026-10-25 19:52:40] H256: system.log ERROR/OOM lines 0 []; data 944130071 B
+[2026-10-25 19:52:40] stopping node pid 2003347
+[2026-10-25 19:52:40] + kill 2003347
+
+  rc=0
+[2026-10-25 19:52:45] node stopped
+[2026-10-25 19:52:45] + cp /users/jason92/s4-tp33-run/logs/tp33-H256.trace /users/jason92/s4-tp33-logs/run1/cluster/H256/growth-trace.txt 2>/dev/null; cp /users/jason92/s4-tp33-run/logs/gc-H256.log /users/jason92/s4-tp33-logs/run1/cluster/H256/ 2>/dev/null; cp /users/jason92/s4-tp33-run/conf/cassandra.yaml /users/jason92/s
+
+  rc=0
+[2026-10-25 19:52:45] + rm -rf /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /users/jason92/s4-tp33-run/saved_caches /users/jason92/s4-tp33-run/cdc_raw && mkdir -p /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /u
+
+  rc=0
+[2026-10-25 19:52:46] + rm -rf /users/jason92/s4-tp33-run/conf && cp -r /users/jason92/s4-tp33/conf /users/jason92/s4-tp33-run/conf
+
+  rc=0
+[2026-10-25 19:52:46] conf H1024: cluster_name='tp33'; commitlog_directory=/users/jason92/s4-tp33-run/commitlog; hints_directory=/users/jason92/s4-tp33-run/hints; saved_caches_directory=/users/jason92/s4-tp33-run/saved_caches; cdc_raw_directory=/users/jason92/s4-tp33-run/cdc_raw; listen_address=127.0.33.1; rpc_address=127.0.33.1; storage_port=7010; ssl_storage_port=7011; native_transport_port=9142; memtable_allocation_type=heap_buffers; memtable_heap_space=1024MiB; memtable_offheap_space=2048MiB; concurrent_reads=32; commitlog_total_space=2GiB; autocompaction_on_startup_enabled=false; native_transport_timeout=60s; read_request_timeout=30s; range_request_timeout=60s
+[2026-10-25 19:52:46] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-25 19:52:46] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-tp33-run/cassandra.pid > /users/jason92/s4-tp33-run/logs/start-H1024.out 2>&1"
+
+  rc=0
+[2026-10-25 19:52:49] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:52:53] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:52:57] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:01] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:05] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:09] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:13] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:17] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:21] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:26] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:30] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:34] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:38] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 19:53:39] + bin/nodetool -h 127.0.0.1 -p 7210 statusbinary
+[2026-10-25 19:53:47] node up (H1024) after 61 s, pid 2047691
+[2026-10-25 19:53:47] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py schema 127.0.33.1 9142
+[2026-10-25 19:53:48] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-25 19:53:48] + bin/nodetool -h 127.0.0.1 -p 7210 disableautocompaction ks
+[2026-10-25 19:53:49] + ss -ltn
+[2026-10-25 19:53:49] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-001-base.txt
+[2026-10-25 19:53:49] H1024: histo base byte[] (102762, 12006936) total (735274, 65435064)
+[2026-10-25 19:53:49] H1024: phase load_small start
+[2026-10-25 19:53:49] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_small 0 1000000 128
+[2026-10-25 19:55:54] H1024: phase load_small end (124 s) {'ok': 1000000, 'expected': 1000000, 'errors': 0, 'first_errors': [], 'seconds': 123.95}
+[2026-10-25 19:55:54] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-002-after-load_small.txt
+[2026-10-25 19:55:54] H1024: histo after-load_small byte[] (105041, 42548912) total (1917489, 144312200)
+[2026-10-25 19:55:54] H1024: phase load_big start
+[2026-10-25 19:55:54] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 5000 16
+[2026-10-25 19:55:58] H1024: phase load_big end (4 s) {'ok': 5000, 'expected': 5000, 'errors': 0, 'first_errors': [], 'seconds': 3.61}
+[2026-10-25 19:55:58] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-003-after-load_big.txt
+[2026-10-25 19:55:59] H1024: histo after-load_big byte[] (106520, 489981808) total (1966102, 749147072)
+[2026-10-25 19:55:59] H1024: phase warm start
+[2026-10-25 19:55:59] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py scan 127.0.33.1 9142 t_big 1 10
+[2026-10-25 19:56:09] H1024: phase warm end (10 s) {'rows': 8501, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 10.0}
+[2026-10-25 19:56:09] H1024: phase scan_big_R1 start
+[2026-10-25 19:56:09] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:56:10] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-004-t_big-R1-t0.txt
+[2026-10-25 19:56:10] H1024: histo t_big-R1-t0 byte[] (106299, 145479120) total (1936137, 301015784)
+[2026-10-25 19:56:25] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-005-t_big-R1-t15.txt
+[2026-10-25 19:56:26] H1024: histo t_big-R1-t15 byte[] (106399, 145605264) total (1937538, 301380904)
+[2026-10-25 19:56:41] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-006-t_big-R1-t30.txt
+[2026-10-25 19:56:41] H1024: histo t_big-R1-t30 byte[] (106406, 146751368) total (1937531, 302521400)
+[2026-10-25 19:56:55] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-007-t_big-R1-t45.txt
+[2026-10-25 19:56:56] H1024: histo t_big-R1-t45 byte[] (106544, 153409496) total (1937767, 309170728)
+[2026-10-25 19:57:11] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-008-t_big-R1-t60.txt
+[2026-10-25 19:57:11] H1024: histo t_big-R1-t60 byte[] (106665, 153353584) total (1937970, 309107472)
+[2026-10-25 19:57:11] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 19:57:14] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:57:26] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-009-t_big-R1-t75.txt
+[2026-10-25 19:57:26] H1024: histo t_big-R1-t75 byte[] (106468, 92442736) total (1934216, 248289968)
+[2026-10-25 19:57:41] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-010-t_big-R1-t90.txt
+[2026-10-25 19:57:41] H1024: histo t_big-R1-t90 byte[] (106555, 97899808) total (1934343, 253741016)
+[2026-10-25 19:57:55] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-011-t_big-R1-t105.txt
+[2026-10-25 19:57:56] H1024: histo t_big-R1-t105 byte[] (106490, 98270104) total (1934292, 254118480)
+[2026-10-25 19:58:11] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-012-t_big-R1-t120.txt
+[2026-10-25 19:58:11] H1024: histo t_big-R1-t120 byte[] (106499, 90280520) total (1934238, 246126400)
+[2026-10-25 19:58:11] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 19:58:13] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:58:26] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-013-t_big-R1-t135.txt
+[2026-10-25 19:58:26] H1024: histo t_big-R1-t135 byte[] (106805, 97043152) total (1946980, 253563472)
+[2026-10-25 19:58:40] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-014-t_big-R1-t150.txt
+[2026-10-25 19:58:41] H1024: histo t_big-R1-t150 byte[] (106710, 89300392) total (1946876, 245826688)
+[2026-10-25 19:58:56] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-015-t_big-R1-t165.txt
+[2026-10-25 19:58:56] H1024: histo t_big-R1-t165 byte[] (106814, 96985736) total (1947133, 253510128)
+[2026-10-25 19:59:10] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-016-t_big-R1-t180.txt
+[2026-10-25 19:59:11] H1024: histo t_big-R1-t180 byte[] (106763, 97409992) total (1947196, 253945800)
+[2026-10-25 19:59:12] H1024: phase scan_big_R1 end (182 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.35}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 138601, 'passes': 28, 'errors': 0, 'first_errors': [], 'seconds': 180.2}}
+[2026-10-25 19:59:12] H1024: phase scan_big_R32 start
+[2026-10-25 19:59:12] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 19:59:13] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-017-t_big-R32-t0.txt
+[2026-10-25 19:59:13] H1024: histo t_big-R32-t0 byte[] (106733, 89122968) total (1947682, 245898376)
+[2026-10-25 19:59:28] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-018-t_big-R32-t15.txt
+[2026-10-25 19:59:29] H1024: histo t_big-R32-t15 byte[] (99871, 193370208) total (1876343, 347917792)
+[2026-10-25 19:59:44] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-019-t_big-R32-t30.txt
+[2026-10-25 19:59:44] H1024: histo t_big-R32-t30 byte[] (99962, 213680128) total (1876203, 368213760)
+[2026-10-25 19:59:58] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-020-t_big-R32-t45.txt
+[2026-10-25 19:59:59] H1024: histo t_big-R32-t45 byte[] (99918, 207825952) total (1875052, 362313504)
+[2026-10-25 20:00:14] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-021-t_big-R32-t60.txt
+[2026-10-25 20:00:14] H1024: histo t_big-R32-t60 byte[] (100278, 257294384) total (1876099, 411773000)
+[2026-10-25 20:00:14] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:00:17] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:00:28] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-022-t_big-R32-t75.txt
+[2026-10-25 20:00:29] H1024: histo t_big-R32-t75 byte[] (100501, 246120952) total (1881003, 401004440)
+[2026-10-25 20:00:44] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-023-t_big-R32-t90.txt
+[2026-10-25 20:00:44] H1024: histo t_big-R32-t90 byte[] (99731, 200373224) total (1879186, 355267648)
+[2026-10-25 20:00:58] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-024-t_big-R32-t105.txt
+[2026-10-25 20:00:59] H1024: histo t_big-R32-t105 byte[] (100001, 227801208) total (1879042, 382647848)
+[2026-10-25 20:01:14] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-025-t_big-R32-t120.txt
+[2026-10-25 20:01:14] H1024: histo t_big-R32-t120 byte[] (100035, 236030120) total (1879728, 391384456)
+[2026-10-25 20:01:14] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:01:18] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:01:29] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-026-t_big-R32-t135.txt
+[2026-10-25 20:01:29] H1024: histo t_big-R32-t135 byte[] (99813, 182194752) total (1882283, 337388520)
+[2026-10-25 20:01:43] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-027-t_big-R32-t150.txt
+[2026-10-25 20:01:44] H1024: histo t_big-R32-t150 byte[] (99804, 193778632) total (1881895, 348928328)
+[2026-10-25 20:01:59] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-028-t_big-R32-t165.txt
+[2026-10-25 20:01:59] H1024: histo t_big-R32-t165 byte[] (99405, 162485784) total (1881769, 317677736)
+[2026-10-25 20:02:13] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-029-t_big-R32-t180.txt
+[2026-10-25 20:02:13] H1024: histo t_big-R32-t180 byte[] (99917, 206579312) total (1882095, 361971600)
+[2026-10-25 20:02:14] H1024: phase scan_big_R32 end (183 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.83}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 2285732, 'passes': 480, 'errors': 0, 'first_errors': [], 'seconds': 180.25}}
+[2026-10-25 20:02:14] H1024: phase scan_small_R1 start
+[2026-10-25 20:02:14] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-030-t_small-R1-t0.txt
+[2026-10-25 20:02:15] H1024: histo t_small-R1-t0 byte[] (98656, 86730312) total (1867513, 241269456)
+[2026-10-25 20:02:30] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-031-t_small-R1-t15.txt
+[2026-10-25 20:02:30] H1024: histo t_small-R1-t15 byte[] (98900, 86745032) total (1869801, 241545880)
+[2026-10-25 20:02:45] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-032-t_small-R1-t30.txt
+[2026-10-25 20:02:46] H1024: histo t_small-R1-t30 byte[] (98892, 86740688) total (1869495, 241523888)
+[2026-10-25 20:03:00] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-033-t_small-R1-t45.txt
+[2026-10-25 20:03:00] H1024: histo t_small-R1-t45 byte[] (98893, 86740784) total (1869482, 241523536)
+[2026-10-25 20:03:15] H1024: phase scan_small_R1 end (61 s) {'scan': {'rows': 1853301, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 60.0}}
+[2026-10-25 20:03:15] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks
+[2026-10-25 20:03:17] + jcmd 2047691 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H1024/histo-034-end.txt
+[2026-10-25 20:03:18] H1024: histo end byte[] (98035, 25003720) total (727192, 88979224)
+[2026-10-25 20:03:21] + du -sb /users/jason92/s4-tp33-run/data
+[2026-10-25 20:03:21] H1024: system.log ERROR/OOM lines 0 []; data 943660242 B
+[2026-10-25 20:03:21] stopping node pid 2047691
+[2026-10-25 20:03:21] + kill 2047691
+
+  rc=0
+[2026-10-25 20:03:26] node stopped
+[2026-10-25 20:03:26] + cp /users/jason92/s4-tp33-run/logs/tp33-H1024.trace /users/jason92/s4-tp33-logs/run1/cluster/H1024/growth-trace.txt 2>/dev/null; cp /users/jason92/s4-tp33-run/logs/gc-H1024.log /users/jason92/s4-tp33-logs/run1/cluster/H1024/ 2>/dev/null; cp /users/jason92/s4-tp33-run/conf/cassandra.yaml /users/jason
+
+  rc=0
+[2026-10-25 20:03:26] + rm -rf /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /users/jason92/s4-tp33-run/saved_caches /users/jason92/s4-tp33-run/cdc_raw && mkdir -p /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /u
+
+  rc=0
+[2026-10-25 20:03:26] + rm -rf /users/jason92/s4-tp33-run/conf && cp -r /users/jason92/s4-tp33/conf /users/jason92/s4-tp33-run/conf
+
+  rc=0
+[2026-10-25 20:03:26] conf H64: cluster_name='tp33'; commitlog_directory=/users/jason92/s4-tp33-run/commitlog; hints_directory=/users/jason92/s4-tp33-run/hints; saved_caches_directory=/users/jason92/s4-tp33-run/saved_caches; cdc_raw_directory=/users/jason92/s4-tp33-run/cdc_raw; listen_address=127.0.33.1; rpc_address=127.0.33.1; storage_port=7010; ssl_storage_port=7011; native_transport_port=9142; memtable_allocation_type=heap_buffers; memtable_heap_space=64MiB; memtable_offheap_space=2048MiB; concurrent_reads=32; commitlog_total_space=2GiB; autocompaction_on_startup_enabled=false; native_transport_timeout=60s; read_request_timeout=30s; range_request_timeout=60s
+[2026-10-25 20:03:26] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-25 20:03:26] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-tp33-run/cassandra.pid > /users/jason92/s4-tp33-run/logs/start-H64.out 2>&1"
+
+  rc=0
+[2026-10-25 20:03:29] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:33] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:37] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:42] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:46] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:50] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:54] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:03:58] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:02] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:06] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:10] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:14] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:18] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:22] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:04:23] + bin/nodetool -h 127.0.0.1 -p 7210 statusbinary
+[2026-10-25 20:04:28] node up (H64) after 62 s, pid 2088029
+[2026-10-25 20:04:28] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py schema 127.0.33.1 9142
+[2026-10-25 20:04:29] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-25 20:04:29] + bin/nodetool -h 127.0.0.1 -p 7210 disableautocompaction ks
+[2026-10-25 20:04:30] + ss -ltn
+[2026-10-25 20:04:30] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-001-base.txt
+[2026-10-25 20:04:31] H64: histo base byte[] (102762, 12006912) total (734605, 65230592)
+[2026-10-25 20:04:31] H64: phase load_small start
+[2026-10-25 20:04:31] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_small 0 1000000 128
+[2026-10-25 20:06:36] H64: phase load_small end (125 s) {'ok': 1000000, 'expected': 1000000, 'errors': 0, 'first_errors': [], 'seconds': 124.86}
+[2026-10-25 20:06:36] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-002-after-load_small.txt
+[2026-10-25 20:06:36] H64: histo after-load_small byte[] (105065, 16609784) total (983894, 88713056)
+[2026-10-25 20:06:36] H64: phase load_big start
+[2026-10-25 20:06:36] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 5000 16
+[2026-10-25 20:06:42] H64: phase load_big end (5 s) {'ok': 5000, 'expected': 5000, 'errors': 0, 'first_errors': [], 'seconds': 4.66}
+[2026-10-25 20:06:42] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-003-after-load_big.txt
+[2026-10-25 20:06:42] H64: histo after-load_big byte[] (100066, 53189736) total (927930, 223790416)
+[2026-10-25 20:06:42] H64: phase warm start
+[2026-10-25 20:06:42] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py scan 127.0.33.1 9142 t_big 1 10
+[2026-10-25 20:06:53] H64: phase warm end (11 s) {'rows': 2901, 'passes': 1, 'errors': 0, 'first_errors': [], 'seconds': 10.4}
+[2026-10-25 20:06:53] H64: phase scan_big_R1 start
+[2026-10-25 20:06:53] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:06:54] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-004-t_big-R1-t0.txt
+[2026-10-25 20:06:54] H64: histo t_big-R1-t0 byte[] (100266, 44063536) total (930703, 192915232)
+[2026-10-25 20:07:09] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-005-t_big-R1-t15.txt
+[2026-10-25 20:07:09] H64: histo t_big-R1-t15 byte[] (99903, 23732584) total (929171, 117142256)
+[2026-10-25 20:07:24] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-006-t_big-R1-t30.txt
+[2026-10-25 20:07:25] H64: histo t_big-R1-t30 byte[] (99945, 24214536) total (929380, 117629664)
+[2026-10-25 20:07:39] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-007-t_big-R1-t45.txt
+[2026-10-25 20:07:39] H64: histo t_big-R1-t45 byte[] (99965, 24755392) total (929730, 118184960)
+[2026-10-25 20:07:54] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-008-t_big-R1-t60.txt
+[2026-10-25 20:07:54] H64: histo t_big-R1-t60 byte[] (100001, 25296736) total (929863, 118711976)
+[2026-10-25 20:07:54] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:07:56] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:08:09] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-009-t_big-R1-t75.txt
+[2026-10-25 20:08:10] H64: histo t_big-R1-t75 byte[] (100372, 40851328) total (932897, 159473000)
+[2026-10-25 20:08:24] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-010-t_big-R1-t90.txt
+[2026-10-25 20:08:24] H64: histo t_big-R1-t90 byte[] (100301, 33169672) total (933579, 151826784)
+[2026-10-25 20:08:39] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-011-t_big-R1-t105.txt
+[2026-10-25 20:08:39] H64: histo t_big-R1-t105 byte[] (100315, 33889976) total (933936, 152561960)
+[2026-10-25 20:08:54] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-012-t_big-R1-t120.txt
+[2026-10-25 20:08:55] H64: histo t_big-R1-t120 byte[] (100329, 34730200) total (934160, 153409368)
+[2026-10-25 20:08:55] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:08:56] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:09:09] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-013-t_big-R1-t135.txt
+[2026-10-25 20:09:09] H64: histo t_big-R1-t135 byte[] (100554, 36155944) total (947598, 155553984)
+[2026-10-25 20:09:24] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-014-t_big-R1-t150.txt
+[2026-10-25 20:09:25] H64: histo t_big-R1-t150 byte[] (100618, 39097360) total (948730, 158539072)
+[2026-10-25 20:09:39] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-015-t_big-R1-t165.txt
+[2026-10-25 20:09:39] H64: histo t_big-R1-t165 byte[] (100781, 43063248) total (948012, 162468288)
+[2026-10-25 20:09:54] H64: phase scan_big_R1 end (181 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.36}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 47801, 'passes': 10, 'errors': 0, 'first_errors': [], 'seconds': 180.22}}
+[2026-10-25 20:09:54] H64: phase scan_big_R32 start
+[2026-10-25 20:09:54] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:09:55] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-016-t_big-R32-t0.txt
+[2026-10-25 20:09:55] H64: histo t_big-R32-t0 byte[] (101777, 92132784) total (959417, 357433424)
+[2026-10-25 20:10:10] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-017-t_big-R32-t15.txt
+[2026-10-25 20:10:11] H64: histo t_big-R32-t15 byte[] (100462, 123584296) total (993521, 229570264)
+[2026-10-25 20:10:26] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-018-t_big-R32-t30.txt
+[2026-10-25 20:10:26] H64: histo t_big-R32-t30 byte[] (100484, 181064360) total (999956, 287322176)
+[2026-10-25 20:10:40] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-019-t_big-R32-t45.txt
+[2026-10-25 20:10:41] H64: histo t_big-R32-t45 byte[] (100172, 109662832) total (998435, 215894440)
+[2026-10-25 20:10:56] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-020-t_big-R32-t60.txt
+[2026-10-25 20:10:56] H64: histo t_big-R32-t60 byte[] (100252, 122564976) total (998903, 228794872)
+[2026-10-25 20:10:56] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:10:58] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:11:11] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-021-t_big-R32-t75.txt
+[2026-10-25 20:11:11] H64: histo t_big-R32-t75 byte[] (100474, 133670720) total (1005724, 258717280)
+[2026-10-25 20:11:25] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-022-t_big-R32-t90.txt
+[2026-10-25 20:11:25] H64: histo t_big-R32-t90 byte[] (100739, 137571272) total (1006541, 262628224)
+[2026-10-25 20:11:40] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-023-t_big-R32-t105.txt
+[2026-10-25 20:11:41] H64: histo t_big-R32-t105 byte[] (101085, 174665944) total (1007258, 299729944)
+[2026-10-25 20:11:55] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-024-t_big-R32-t120.txt
+[2026-10-25 20:11:56] H64: histo t_big-R32-t120 byte[] (100609, 126947056) total (1008640, 252105000)
+[2026-10-25 20:11:56] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:11:57] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:12:10] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-025-t_big-R32-t135.txt
+[2026-10-25 20:12:10] H64: histo t_big-R32-t135 byte[] (100672, 134424384) total (1012213, 259888288)
+[2026-10-25 20:12:25] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-026-t_big-R32-t150.txt
+[2026-10-25 20:12:26] H64: histo t_big-R32-t150 byte[] (100715, 142707360) total (1015655, 268303080)
+[2026-10-25 20:12:40] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-027-t_big-R32-t165.txt
+[2026-10-25 20:12:41] H64: histo t_big-R32-t165 byte[] (100571, 141440752) total (1012167, 266907968)
+[2026-10-25 20:12:55] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-028-t_big-R32-t180.txt
+[2026-10-25 20:12:56] H64: histo t_big-R32-t180 byte[] (100745, 140596552) total (1002489, 265663432)
+[2026-10-25 20:12:57] H64: phase scan_big_R32 end (183 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.3}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 632831, 'passes': 131, 'errors': 0, 'first_errors': [], 'seconds': 181.27}}
+[2026-10-25 20:12:57] H64: phase scan_small_R1 start
+[2026-10-25 20:12:57] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-029-t_small-R1-t0.txt
+[2026-10-25 20:12:57] H64: histo t_small-R1-t0 byte[] (99127, 41199464) total (962188, 164714560)
+[2026-10-25 20:13:12] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-030-t_small-R1-t15.txt
+[2026-10-25 20:13:13] H64: histo t_small-R1-t15 byte[] (99315, 38269648) total (963959, 162023120)
+[2026-10-25 20:13:28] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-031-t_small-R1-t30.txt
+[2026-10-25 20:13:28] H64: histo t_small-R1-t30 byte[] (99297, 38268944) total (963154, 161987888)
+[2026-10-25 20:13:42] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-032-t_small-R1-t45.txt
+[2026-10-25 20:13:43] H64: histo t_small-R1-t45 byte[] (99297, 38268928) total (963195, 161988360)
+[2026-10-25 20:13:58] H64: phase scan_small_R1 end (61 s) {'scan': {'rows': 1206901, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 60.0}}
+[2026-10-25 20:13:58] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks
+[2026-10-25 20:13:59] + jcmd 2088029 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/H64/histo-033-end.txt
+[2026-10-25 20:14:00] H64: histo end byte[] (98659, 21230648) total (767842, 88546760)
+[2026-10-25 20:14:03] + du -sb /users/jason92/s4-tp33-run/data
+[2026-10-25 20:14:03] H64: system.log ERROR/OOM lines 0 []; data 1008611808 B
+[2026-10-25 20:14:03] stopping node pid 2088029
+[2026-10-25 20:14:03] + kill 2088029
+
+  rc=0
+[2026-10-25 20:14:09] node stopped
+[2026-10-25 20:14:09] + cp /users/jason92/s4-tp33-run/logs/tp33-H64.trace /users/jason92/s4-tp33-logs/run1/cluster/H64/growth-trace.txt 2>/dev/null; cp /users/jason92/s4-tp33-run/logs/gc-H64.log /users/jason92/s4-tp33-logs/run1/cluster/H64/ 2>/dev/null; cp /users/jason92/s4-tp33-run/conf/cassandra.yaml /users/jason92/s4-tp
+
+  rc=0
+[2026-10-25 20:14:09] + rm -rf /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /users/jason92/s4-tp33-run/saved_caches /users/jason92/s4-tp33-run/cdc_raw && mkdir -p /users/jason92/s4-tp33-run/data /users/jason92/s4-tp33-run/commitlog /users/jason92/s4-tp33-run/hints /u
+
+  rc=0
+[2026-10-25 20:14:09] + rm -rf /users/jason92/s4-tp33-run/conf && cp -r /users/jason92/s4-tp33/conf /users/jason92/s4-tp33-run/conf
+
+  rc=0
+[2026-10-25 20:14:09] conf O256: cluster_name='tp33'; commitlog_directory=/users/jason92/s4-tp33-run/commitlog; hints_directory=/users/jason92/s4-tp33-run/hints; saved_caches_directory=/users/jason92/s4-tp33-run/saved_caches; cdc_raw_directory=/users/jason92/s4-tp33-run/cdc_raw; listen_address=127.0.33.1; rpc_address=127.0.33.1; storage_port=7010; ssl_storage_port=7011; native_transport_port=9142; memtable_allocation_type=offheap_objects; memtable_heap_space=256MiB; memtable_offheap_space=256MiB; concurrent_reads=32; commitlog_total_space=2GiB; autocompaction_on_startup_enabled=false; native_transport_timeout=60s; read_request_timeout=30s; range_request_timeout=60s
+[2026-10-25 20:14:09] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-25 20:14:09] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-tp33-run/cassandra.pid > /users/jason92/s4-tp33-run/logs/start-O256.out 2>&1"
+
+  rc=0
+[2026-10-25 20:14:12] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:17] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:22] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:26] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:31] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:36] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:40] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:44] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:48] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:52] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:14:56] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:15:00] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:15:04] + bin/nodetool -h 127.0.0.1 -p 7210 status
+[2026-10-25 20:15:05] + bin/nodetool -h 127.0.0.1 -p 7210 statusbinary
+[2026-10-25 20:15:13] node up (O256) after 64 s, pid 2121077
+[2026-10-25 20:15:13] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py schema 127.0.33.1 9142
+[2026-10-25 20:15:14] schema: {'schema': 'ok', 'agreement': True}
+[2026-10-25 20:15:14] + bin/nodetool -h 127.0.0.1 -p 7210 disableautocompaction ks
+[2026-10-25 20:15:15] + ss -ltn
+[2026-10-25 20:15:15] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-001-base.txt
+[2026-10-25 20:15:16] O256: histo base byte[] (102623, 10952160) total (734489, 64267216)
+[2026-10-25 20:15:16] O256: phase load_small start
+[2026-10-25 20:15:16] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_small 0 1000000 128
+[2026-10-25 20:18:11] O256: phase load_small end (176 s) {'ok': 1000000, 'expected': 1000000, 'errors': 0, 'first_errors': [], 'seconds': 175.05}
+[2026-10-25 20:18:11] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-002-after-load_small.txt
+[2026-10-25 20:18:12] O256: histo after-load_small byte[] (104565, 11093552) total (1639225, 100937336)
+[2026-10-25 20:18:12] O256: phase load_big start
+[2026-10-25 20:18:12] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 5000 16
+[2026-10-25 20:18:16] O256: phase load_big end (4 s) {'ok': 5000, 'expected': 5000, 'errors': 0, 'first_errors': [], 'seconds': 3.83}
+[2026-10-25 20:18:16] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-003-after-load_big.txt
+[2026-10-25 20:18:17] O256: histo after-load_big byte[] (104984, 11893848) total (1675694, 262541744)
+[2026-10-25 20:18:17] O256: phase warm start
+[2026-10-25 20:18:17] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py scan 127.0.33.1 9142 t_big 1 10
+[2026-10-25 20:18:27] O256: phase warm end (11 s) {'rows': 7101, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 10.13}
+[2026-10-25 20:18:27] O256: phase scan_big_R1 start
+[2026-10-25 20:18:27] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:18:28] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-004-t_big-R1-t0.txt
+[2026-10-25 20:18:29] O256: histo t_big-R1-t0 byte[] (105351, 11630032) total (1657798, 155211456)
+[2026-10-25 20:18:44] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-005-t_big-R1-t15.txt
+[2026-10-25 20:18:44] O256: histo t_big-R1-t15 byte[] (105454, 11636240) total (1659023, 155443168)
+[2026-10-25 20:18:58] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-006-t_big-R1-t30.txt
+[2026-10-25 20:18:59] O256: histo t_big-R1-t30 byte[] (105511, 16358008) total (1659583, 160188960)
+[2026-10-25 20:19:14] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-007-t_big-R1-t45.txt
+[2026-10-25 20:19:14] O256: histo t_big-R1-t45 byte[] (105498, 11699224) total (1659122, 155507536)
+[2026-10-25 20:19:28] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-008-t_big-R1-t60.txt
+[2026-10-25 20:19:29] O256: histo t_big-R1-t60 byte[] (105506, 11639440) total (1658932, 155420104)
+[2026-10-25 20:19:29] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:19:31] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:19:44] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-009-t_big-R1-t75.txt
+[2026-10-25 20:19:44] O256: histo t_big-R1-t75 byte[] (105552, 12124032) total (1659451, 156191184)
+[2026-10-25 20:19:58] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-010-t_big-R1-t90.txt
+[2026-10-25 20:19:58] O256: histo t_big-R1-t90 byte[] (105746, 12371064) total (1665248, 156604328)
+[2026-10-25 20:20:13] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-011-t_big-R1-t105.txt
+[2026-10-25 20:20:14] O256: histo t_big-R1-t105 byte[] (105774, 11892696) total (1665365, 156128664)
+[2026-10-25 20:20:28] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-012-t_big-R1-t120.txt
+[2026-10-25 20:20:29] O256: histo t_big-R1-t120 byte[] (105855, 19635472) total (1665407, 163862880)
+[2026-10-25 20:20:29] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:20:31] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:20:43] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-013-t_big-R1-t135.txt
+[2026-10-25 20:20:44] O256: histo t_big-R1-t135 byte[] (105998, 19821296) total (1667268, 164302888)
+[2026-10-25 20:20:59] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-014-t_big-R1-t150.txt
+[2026-10-25 20:20:59] O256: histo t_big-R1-t150 byte[] (105871, 19818296) total (1666894, 164290552)
+[2026-10-25 20:21:13] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-015-t_big-R1-t165.txt
+[2026-10-25 20:21:13] O256: histo t_big-R1-t165 byte[] (105844, 14902664) total (1667173, 159392816)
+[2026-10-25 20:21:28] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-016-t_big-R1-t180.txt
+[2026-10-25 20:21:29] O256: histo t_big-R1-t180 byte[] (105822, 11898120) total (1666465, 156356704)
+[2026-10-25 20:21:30] O256: phase scan_big_R1 end (183 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.4}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 96401, 'passes': 20, 'errors': 0, 'first_errors': [], 'seconds': 180.13}}
+[2026-10-25 20:21:30] O256: phase scan_big_R32 start
+[2026-10-25 20:21:30] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:21:31] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-017-t_big-R32-t0.txt
+[2026-10-25 20:21:31] O256: histo t_big-R32-t0 byte[] (105816, 11897952) total (1667624, 156626872)
+[2026-10-25 20:21:46] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-018-t_big-R32-t15.txt
+[2026-10-25 20:21:47] O256: histo t_big-R32-t15 byte[] (98516, 119905856) total (1598695, 262523992)
+[2026-10-25 20:22:02] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-019-t_big-R32-t30.txt
+[2026-10-25 20:22:02] O256: histo t_big-R32-t30 byte[] (98530, 141026104) total (1598600, 283642920)
+[2026-10-25 20:22:16] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-020-t_big-R32-t45.txt
+[2026-10-25 20:22:17] O256: histo t_big-R32-t45 byte[] (98926, 132103064) total (1598737, 274698464)
+[2026-10-25 20:22:32] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-021-t_big-R32-t60.txt
+[2026-10-25 20:22:32] O256: histo t_big-R32-t60 byte[] (99508, 170466152) total (1599596, 313039152)
+[2026-10-25 20:22:32] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:22:35] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:22:47] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-022-t_big-R32-t75.txt
+[2026-10-25 20:22:47] O256: histo t_big-R32-t75 byte[] (98898, 115094392) total (1603252, 258315024)
+[2026-10-25 20:23:01] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-023-t_big-R32-t90.txt
+[2026-10-25 20:23:01] O256: histo t_big-R32-t90 byte[] (98976, 120809688) total (1603672, 263809760)
+[2026-10-25 20:23:16] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-024-t_big-R32-t105.txt
+[2026-10-25 20:23:17] O256: histo t_big-R32-t105 byte[] (99618, 118171896) total (1603024, 261098120)
+[2026-10-25 20:23:32] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-025-t_big-R32-t120.txt
+[2026-10-25 20:23:33] O256: histo t_big-R32-t120 byte[] (98793, 112251272) total (1602362, 255201320)
+[2026-10-25 20:23:33] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks t_big
+[2026-10-25 20:23:37] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/trie-pathreconstructor-keybytes-growth--autonomous/client.py load 127.0.33.1 9142 t_big 0 500 16
+[2026-10-25 20:23:47] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-026-t_big-R32-t135.txt
+[2026-10-25 20:23:47] O256: histo t_big-R32-t135 byte[] (99108, 123674664) total (1604042, 266844088)
+[2026-10-25 20:24:01] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-027-t_big-R32-t150.txt
+[2026-10-25 20:24:02] O256: histo t_big-R32-t150 byte[] (98997, 99123616) total (1606221, 242416848)
+[2026-10-25 20:24:17] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-028-t_big-R32-t165.txt
+[2026-10-25 20:24:17] O256: histo t_big-R32-t165 byte[] (98695, 88996544) total (1605203, 232273288)
+[2026-10-25 20:24:31] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-029-t_big-R32-t180.txt
+[2026-10-25 20:24:32] O256: histo t_big-R32-t180 byte[] (98957, 119986408) total (1604610, 263208768)
+[2026-10-25 20:24:33] O256: phase scan_big_R32 end (183 s) {'rewrite0': {'ok': 500, 'expected': 500, 'errors': 0, 'first_errors': [], 'seconds': 0.7}, 'flushes_at': [60, 120], 'rewrites': [500, 500], 'scan': {'rows': 1901432, 'passes': 385, 'errors': 0, 'first_errors': [], 'seconds': 180.28}}
+[2026-10-25 20:24:33] O256: phase scan_small_R1 start
+[2026-10-25 20:24:33] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-030-t_small-R1-t0.txt
+[2026-10-25 20:24:33] O256: histo t_small-R1-t0 byte[] (97755, 11600680) total (1588257, 154123160)
+[2026-10-25 20:24:48] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-031-t_small-R1-t15.txt
+[2026-10-25 20:24:48] O256: histo t_small-R1-t15 byte[] (97978, 11610456) total (1590520, 154386344)
+[2026-10-25 20:25:03] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-032-t_small-R1-t30.txt
+[2026-10-25 20:25:04] O256: histo t_small-R1-t30 byte[] (97987, 11610968) total (1590605, 154397272)
+[2026-10-25 20:25:18] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-033-t_small-R1-t45.txt
+[2026-10-25 20:25:18] O256: histo t_small-R1-t45 byte[] (98104, 11617712) total (1590815, 154399896)
+[2026-10-25 20:25:33] O256: phase scan_small_R1 end (61 s) {'scan': {'rows': 1580001, 'passes': 2, 'errors': 0, 'first_errors': [], 'seconds': 60.0}}
+[2026-10-25 20:25:33] + bin/nodetool -h 127.0.0.1 -p 7210 flush ks
+[2026-10-25 20:25:35] + jcmd 2121077 GC.class_histogram > /users/jason92/s4-tp33-logs/run1/cluster/O256/histo-034-end.txt
+[2026-10-25 20:25:36] O256: histo end byte[] (98009, 11733280) total (739702, 77508064)
+[2026-10-25 20:25:39] + du -sb /users/jason92/s4-tp33-run/data
+[2026-10-25 20:25:39] O256: system.log ERROR/OOM lines 0 []; data 943939852 B
+[2026-10-25 20:25:39] stopping node pid 2121077
+[2026-10-25 20:25:39] + kill 2121077
+
+  rc=0
+[2026-10-25 20:25:44] node stopped
+[2026-10-25 20:25:44] + cp /users/jason92/s4-tp33-run/logs/tp33-O256.trace /users/jason92/s4-tp33-logs/run1/cluster/O256/growth-trace.txt 2>/dev/null; cp /users/jason92/s4-tp33-run/logs/gc-O256.log /users/jason92/s4-tp33-logs/run1/cluster/O256/ 2>/dev/null; cp /users/jason92/s4-tp33-run/conf/cassandra.yaml /users/jason92/s
+
+  rc=0
+[2026-10-25 20:25:44] all lifetimes done
+[2026-10-25 20:25:44] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-25 20:25:44] daemons left: []

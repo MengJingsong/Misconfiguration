@@ -1,0 +1,20 @@
+# Positive-control injection for hints-CompressedChecksummedDataInput-readBuffer-uncompressedSize--autonomous, cluster tier (audit
+# amendment R11). Loaded alone on node A of an `inject` lifetime: -javaagent:<byteman jar>=listener:true,port:9113,sys:<HuControl jar>,script:<this file>
+# Every 10 s HintsDispatchTrigger.run() fires; when <flagdir>/inject exists the node's chunk-cache pool serves and holds 400 x 64 KiB
+# (HuControl.inject), when <flagdir>/release exists they are given back.
+
+RULE hu control inject
+CLASS org.apache.cassandra.hints.HintsDispatchTrigger
+METHOD run
+AT ENTRY
+IF HuControl.flag("inject")
+DO HuControl.inject()
+ENDRULE
+
+RULE hu control release
+CLASS org.apache.cassandra.hints.HintsDispatchTrigger
+METHOD run
+AT ENTRY
+IF HuControl.flag("release")
+DO HuControl.release()
+ENDRULE

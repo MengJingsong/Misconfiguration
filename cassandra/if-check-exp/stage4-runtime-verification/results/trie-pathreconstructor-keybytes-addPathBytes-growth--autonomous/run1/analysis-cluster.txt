@@ -1,0 +1,65 @@
+label    hs          rows iters chains final caps per phase (min..max,n)    scratch(B)   peak onheap limitfl  userfl    copybytes
+A128r1   128MiB   1000000   227      0 none                                          0      44050928      12       1     57332903
+A128r2   128MiB   1000000   227      0 none                                          0      39436952      12       1     57319744
+A512r1   512MiB   1000000   209      0 none                                          0     178074356       3       1     57814426
+A512r2   512MiB   1000000   209      0 none                                          0     176890596       2       1     57820371
+B128r1   128MiB      2000    27     26 flush:65536..65536,n=2; scan:65536..74752,n=20; write:65536..69632,n=4      3479900      15628708       2       1    278996452
+B128r2   128MiB      2000    27     26 flush:65536..65536,n=2; scan:65536..74752,n=20; write:65536..69632,n=4      3479900      36519256       2       1    280683136
+B512r1   512MiB      2000    23     23 flush:65536..65536,n=2; scan:65536..65536,n=21      3013184     125809296       0       1    362677595
+B512r2   512MiB      2000    23     23 flush:65536..65536,n=2; scan:65536..65536,n=21      3013184     129417120       0       1    362677595
+OK   A128r1: all 1000000 writes succeeded
+OK   A128r1: scan ran, 1000000 rows read
+OK   A128r1: idle baseline had 0 growth events (ctors 0)
+OK   A128r1: no ERROR lines in system.log
+OK   A128r1: at least the flush made iterators (227)
+OK   A128r2: all 1000000 writes succeeded
+OK   A128r2: scan ran, 1000000 rows read
+OK   A128r2: idle baseline had 0 growth events (ctors 0)
+OK   A128r2: no ERROR lines in system.log
+OK   A128r2: at least the flush made iterators (227)
+OK   A512r1: all 1000000 writes succeeded
+OK   A512r1: scan ran, 1000000 rows read
+OK   A512r1: idle baseline had 0 growth events (ctors 0)
+OK   A512r1: no ERROR lines in system.log
+OK   A512r1: at least the flush made iterators (209)
+OK   A512r2: all 1000000 writes succeeded
+OK   A512r2: scan ran, 1000000 rows read
+OK   A512r2: idle baseline had 0 growth events (ctors 0)
+OK   A512r2: no ERROR lines in system.log
+OK   A512r2: at least the flush made iterators (209)
+OK   B128r1: all 2000 writes succeeded
+OK   B128r1: scan ran, 2000 rows read
+OK   B128r1: idle baseline had 0 growth events (ctors 0)
+OK   B128r1: no ERROR lines in system.log
+OK   B128r1: at least the flush made iterators (27)
+OK   B128r2: all 2000 writes succeeded
+OK   B128r2: scan ran, 2000 rows read
+OK   B128r2: idle baseline had 0 growth events (ctors 0)
+OK   B128r2: no ERROR lines in system.log
+OK   B128r2: at least the flush made iterators (27)
+OK   B512r1: all 2000 writes succeeded
+OK   B512r1: scan ran, 2000 rows read
+OK   B512r1: idle baseline had 0 growth events (ctors 0)
+OK   B512r1: no ERROR lines in system.log
+OK   B512r1: at least the flush made iterators (23)
+OK   B512r2: all 2000 writes succeeded
+OK   B512r2: scan ran, 2000 rows read
+OK   B512r2: idle baseline had 0 growth events (ctors 0)
+OK   B512r2: no ERROR lines in system.log
+OK   B512r2: at least the flush made iterators (23)
+OK   A128r1 (Run A): no growth event at all, so every iterator stayed at capacity 32 (227 iterators)
+OK   A128r2 (Run A): no growth event at all, so every iterator stayed at capacity 32 (227 iterators)
+OK   A512r1 (Run A): no growth event at all, so every iterator stayed at capacity 32 (209 iterators)
+OK   A512r2 (Run A): no growth event at all, so every iterator stayed at capacity 32 (209 iterators)
+OK   Run B final capacities all within [~path, 2 x path + 16]: min 65536 max 74752
+     Run B 128MiB distinct final capacities: [65536, 68608, 69632, 72704, 74752]
+     Run B 512MiB distinct final capacities: [65536]
+OK   Ar1 control: limit-driven flushes 128MiB=12 > 512MiB=3; largest memtable at a flush (Usage on flush line) 42.7 MiB < 170.8 MiB (sampled peaks 44050928 vs 178074356 B are coarse)
+OK   Ar2 control: limit-driven flushes 128MiB=12 > 512MiB=2; largest memtable at a flush (Usage on flush line) 42.7 MiB < 170.7 MiB (sampled peaks 39436952 vs 176890596 B are coarse)
+OK   Br1 control: limit-driven flushes 128MiB=2 > 512MiB=0; largest memtable at a flush (Usage on flush line) 44.0 MiB < 132.4 MiB (sampled peaks 15628708 vs 125809296 B are coarse)
+OK   Br2 control: limit-driven flushes 128MiB=2 > 512MiB=0; largest memtable at a flush (Usage on flush line) 43.8 MiB < 132.4 MiB (sampled peaks 36519256 vs 129417120 B are coarse)
+     B128r1 per-iterator scratch (sum of new capacities): [131008, 137149, 139196, 145337, 149431] B; smallest memtable at a flush 40.5 MiB -> largest per-iterator scratch is 0.352 % of it; heap 2048 MiB -> 0.0070 %
+     B128r2 per-iterator scratch (sum of new capacities): [131008, 137149, 139196, 145337, 149431] B; smallest memtable at a flush 42.4 MiB -> largest per-iterator scratch is 0.336 % of it; heap 2048 MiB -> 0.0070 %
+     B512r1 per-iterator scratch (sum of new capacities): [131008] B; smallest memtable at a flush 132.4 MiB -> largest per-iterator scratch is 0.094 % of it; heap 2048 MiB -> 0.0061 %
+     B512r2 per-iterator scratch (sum of new capacities): [131008] B; smallest memtable at a flush 132.4 MiB -> largest per-iterator scratch is 0.094 % of it; heap 2048 MiB -> 0.0061 %
+ALL OK

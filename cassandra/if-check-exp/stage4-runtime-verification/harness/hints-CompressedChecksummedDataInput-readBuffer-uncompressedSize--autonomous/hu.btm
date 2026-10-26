@@ -1,0 +1,38 @@
+# Byteman observation rules for hints-CompressedChecksummedDataInput-readBuffer-uncompressedSize--autonomous, cluster tier (B3d,
+# audit R9). They change no behaviour. Every line goes to the file named by -Dstage4.trace (default hu.trace). Loaded on node A:
+#   -javaagent:<byteman jar>=listener:true,port:9113,sys:<HuHelper jar>,script:<this file>
+#
+#   blk ms=<epoch> file=<path> Z=<uncompressedSize> C=<compressedSize> cap=<buffer.capacity()> ccap=<compressedBuffer.capacity()>
+#       size=<chunk-cache sizeInBytes> used=<usedSizeInBytes> ovf=<overflowMemoryInBytes> thr=<memoryUsageThreshold> direct=<JVM direct pool used>
+#       CompressedChecksummedDataInput.readBuffer(), at line 141 (after the line-134 test and the growth at :136-138, before
+#       buffer.clear()): one line per block read, with Z and C as read from the block header (:115-116) and the buffers' capacities.
+#   cin / cout ms=<epoch> file=<path> <the same counters>
+#       CompressedChecksummedDataInput.close() entry / exit (the reader of a hints file is closed).
+
+RULE hu block header and buffers
+CLASS org.apache.cassandra.hints.CompressedChecksummedDataInput
+METHOD readBuffer
+AT LINE 141
+IF true
+DO traceOpen("hu", java.lang.System.getProperty("stage4.trace", "hu.trace"));
+   traceln("hu", "blk ms=" + java.lang.System.currentTimeMillis() + " file=" + $0.getPath() + " Z=" + $uncompressedSize + " C=" + $compressedSize
+                 + " cap=" + $0.buffer.capacity() + " ccap=" + $0.compressedBuffer.capacity() + " " + HuHelper.pool())
+ENDRULE
+
+RULE hu reader close entry
+CLASS org.apache.cassandra.hints.CompressedChecksummedDataInput
+METHOD close
+AT ENTRY
+IF true
+DO traceOpen("hu", java.lang.System.getProperty("stage4.trace", "hu.trace"));
+   traceln("hu", "cin ms=" + java.lang.System.currentTimeMillis() + " file=" + $0.getPath() + " cap=" + $0.buffer.capacity() + " " + HuHelper.pool())
+ENDRULE
+
+RULE hu reader close exit
+CLASS org.apache.cassandra.hints.CompressedChecksummedDataInput
+METHOD close
+AT EXIT
+IF true
+DO traceOpen("hu", java.lang.System.getProperty("stage4.trace", "hu.trace"));
+   traceln("hu", "cout ms=" + java.lang.System.currentTimeMillis() + " file=" + $0.getPath() + " " + HuHelper.pool())
+ENDRULE

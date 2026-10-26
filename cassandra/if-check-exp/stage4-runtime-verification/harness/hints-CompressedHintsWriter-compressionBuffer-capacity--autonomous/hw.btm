@@ -1,0 +1,67 @@
+# Byteman rules, cluster tier (B3d, amendment 3 of 2026-10-25) of hints-CompressedHintsWriter-compressionBuffer-capacity--autonomous.
+# Observation only: no rule changes behaviour. Loaded on node A at start with
+#   -javaagent:<byteman.jar>=boot:<byteman.jar>,script:<this file>,listener:true,port:9114 -Dstage4.trace=<file>
+# (boot: because the last rule is on java.nio.ByteBuffer). One file, one line per event:
+#
+#   opened w=<identity> ms=<epoch ms>              a CompressedHintsWriter was constructed (exit of <init>)
+#   cbuf w=<identity> in=<bytes> cap=<capacity> direct=<bool> ms=<epoch ms> thread=<name>
+#       exit of CompressedHintsWriter.writeBuffer (CompressedHintsWriter.java:48-69): bb.remaining() at entry (in), and the
+#       capacity of the writer's compressionBuffer afterwards (the quantity under test)
+#   closed w=<identity> class=<simple name> ms=<epoch ms>      HintsWriter.close() entry (a hint file is finished)
+#   created n=<allocatedBuffers> size=<bufferSize> ms=<epoch ms> thread=<name>
+#       HintsBufferPool.createBuffer() exit: a new HintsBuffer slab (the slab correction of B3 amendment 4)
+#   direct size=<bytes> ms=<epoch ms> thread=<name> at=<stack>      every ByteBuffer.allocateDirect(int) of >= 1 MiB
+
+RULE hw writer opened
+CLASS org.apache.cassandra.hints.CompressedHintsWriter
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("hw", java.lang.System.getProperty("stage4.trace", "hw.trace"));
+   traceln("hw", "opened w=" + java.lang.System.identityHashCode($0) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hw writeBuffer entry
+CLASS org.apache.cassandra.hints.CompressedHintsWriter
+METHOD writeBuffer
+AT ENTRY
+IF true
+DO link("hwIn", java.lang.Thread.currentThread(), java.lang.Integer.valueOf($1.remaining()))
+ENDRULE
+
+RULE hw writeBuffer exit
+CLASS org.apache.cassandra.hints.CompressedHintsWriter
+METHOD writeBuffer
+AT EXIT
+BIND n:java.lang.Integer = unlink("hwIn", java.lang.Thread.currentThread())
+IF true
+DO traceOpen("hw", java.lang.System.getProperty("stage4.trace", "hw.trace"));
+   traceln("hw", "cbuf w=" + java.lang.System.identityHashCode($0) + " in=" + n + " cap=" + $0.compressionBuffer.capacity() + " direct=" + $0.compressionBuffer.isDirect() + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hw writer closed
+CLASS org.apache.cassandra.hints.HintsWriter
+METHOD close
+AT ENTRY
+IF true
+DO traceOpen("hw", java.lang.System.getProperty("stage4.trace", "hw.trace"));
+   traceln("hw", "closed w=" + java.lang.System.identityHashCode($0) + " class=" + $0.getClass().getSimpleName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hw slab created
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("hw", java.lang.System.getProperty("stage4.trace", "hw.trace"));
+   traceln("hw", "created n=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hw direct allocation of 1 MiB or more
+CLASS java.nio.ByteBuffer
+METHOD allocateDirect(int)
+AT ENTRY
+IF $1 >= 1048576
+DO traceOpen("hw", java.lang.System.getProperty("stage4.trace", "hw.trace"));
+   traceln("hw", "direct size=" + $1 + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName() + " at=" + java.util.Arrays.toString(java.lang.Thread.currentThread().getStackTrace()))
+ENDRULE

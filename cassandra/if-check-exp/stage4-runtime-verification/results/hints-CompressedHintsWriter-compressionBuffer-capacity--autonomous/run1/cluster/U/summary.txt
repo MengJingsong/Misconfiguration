@@ -1,0 +1,29 @@
+cluster-run U 2026-10-25 20:15:20 EDT host node0 tree /users/jason92/s4-hw ['cassandra-5.0.9', '4632395'] HW_N=(default)
+harness md5: a580be0f751ea4e4b4616396a278ee54  cluster-run.py 1b6fb0f0e18cf8e7fb738717210be13e  client.py 8d1fe3f47c1dcb6e29e7428a4f37ac08  make-node-yaml.sh a9ef136f33e71303c64d0a1caf1d3898  Jmx.java 39eb0cda622833df6a9a0fd040780efd  hw.btm 
+arm U: yaml (none: defaults); workload L; peers down ['B']; compression absent
+free on /users/jason92: 37.4 GiB
+# ---- stage4 hw lines ----;cluster_name: stage4-hw;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.14.1;rpc_address: 127.0.14.1;storage_port: 7014;native_transport_port: 9146;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/s4-hw-data/A/commitlog;hints_directory: /users/jason92/s4-hw-data/A/hints;saved_caches_directory: /users/jason92/s4-hw-data/A/saved_caches;cdc_raw_directory: /users/jason92/s4-hw-data/A/cdc_raw;hinted_handoff_enabled: true;write_request_timeout: 30000ms;native_transport_timeout: 60000ms;
+A JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-hw/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-hw/build/lib/jars/byteman-4.0.20.jar,script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/hints-CompressedHintsWriter-compressionBuffer-capacity--autonomous/hw.btm,listener:true,port:9114 -Dorg.jboss.byteman.verbose=false -Dstage4.trace=/users/jason92/s4-hw-logs/run1/cluster/U/hw.trace
+# ---- stage4 hw lines ----;cluster_name: stage4-hw;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.14.2;rpc_address: 127.0.14.2;storage_port: 7014;native_transport_port: 9146;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/s4-hw-data/B/commitlog;hints_directory: /users/jason92/s4-hw-data/B/hints;saved_caches_directory: /users/jason92/s4-hw-data/B/saved_caches;cdc_raw_directory: /users/jason92/s4-hw-data/B/cdc_raw;hinted_handoff_enabled: true;write_request_timeout: 30000ms;native_transport_timeout: 60000ms;
+schema: {'schema': 'ok', 'agreement': True, 'replication': "{'class': 'SimpleStrategy', 'replication_factor': '2'}"}
+A settings: {'hinted_handoff_enabled': 'true', 'hints_compression': None, 'max_hints_file_size': '128MiB', 'max_hints_size_per_host': '0B', 'max_mutation_size': '16384KiB', 'commitlog_segment_size': '32MiB', 'hints_flush_period': '10000ms', 'write_request_timeout': '30000ms', 'native_transport_timeout': '60000ms', 'storage_port': '7014', 'native_transport_port': '9146'}
+A command line: MaxDirectMemorySize ['-XX:MaxDirectMemorySize=2g']; Xmx ['-Xmx2G']; byteman port ['port:9114']
+read-back: hints_compression shows None in system_views.settings (the view does not render this key, shakedown 1); compression is read from the writer trace instead
+EXPECTED: read-back: hinted_handoff_enabled true (true) — yes
+EXPECTED: read-back: ports storage 7014 native 9146 (7014, 9146) — yes
+['B'] stopped and seen DN by A after 12.0 s
+trace before the workload: {'opened': 0, 'cbuf': 0, 'closed': 0, 'created': 1, 'direct': 3}
+L: 200 INSERTs of 8388608 B at CL ONE, 4 in flight
+workload result: {'n': 200, 'conc': 4, 'ok': 200, 'err': 0, 'errors': {}, 'seconds': 30.362, 'rate': 6.6, 'lat_mean_ms': 600.205, 'lat_p50_ms': 476.786, 'lat_p99_ms': 2346.339, 'lat_max_ms': 2453.76, 'ms_start': 1792973910748, 'ms_end': 1792973941111, 'bytes': 8388608}
+baseline sample: {'direct_used': 58704868.0, 'direct_count': 208.0, 'heap_used': 88612256.0, 'total_hints': 0.0, 'rss': 2978967552.0, 'hints_dir_bytes': 0, 'ms': 1792973908851}
+delta pre-GC : {'direct_used': 67155259.0, 'direct_count': 40.0, 'rss': 283389952.0, 'total_hints': 200.0, 'hints_dir_bytes': 1677735642}
+delta post-GC: {'direct_used': 67155259.0, 'direct_count': 40.0, 'rss': 224702464.0, 'total_hints': 200.0, 'hints_dir_bytes': 1677735642}
+peak direct delta {'ms': 1792973922850, 'direct_used_delta': 117537929.0}; trace {'opened': 0, 'cbuf': 0, 'closed': 12, 'created': 3, 'direct': 765}; slabs created after the baseline 2 (Corr 67108864 B); writers 0 (live 0, sum of last capacities 0 B); max capacity 0 B for max in 0 B (exp 28)
+hints dir at end 1677735642 B; peers at end {'B': 'DN'}; TotalHints {'org.apache.cassandra.metrics:type=Storage,name=TotalHints|Count': '200'}; RSS end 3128976 kB; log counts {'[Mm]utation of .* is too large': 0, 'too large': 0, 'Hint of': 0, '[Hh]inted handoff': 0, 'OutOfMemory': 1, '[Dd]irect buffer memory': 0, 'ERROR': 0, 'WARN': 7}
+EXPECTED: validity: peers down for the whole workload ({'B': 'DN'}) — yes
+EXPECTED: workload: 200 of 200 acknowledged, 0 errors — yes
+EXPECTED: validity: TotalHints +200.0 >= 200 (a hint per write per down peer) — yes
+EXPECTED: validity: hints directory 1677735642 B >= 0.9 x 1677721600 B — yes
+EXPECTED: control: no CompressedHintsWriter opened or used (opened 0, cbuf 0) — yes
+EXPECTED yes 7 no 0
+end 2026-10-25 20:20:05 EDT

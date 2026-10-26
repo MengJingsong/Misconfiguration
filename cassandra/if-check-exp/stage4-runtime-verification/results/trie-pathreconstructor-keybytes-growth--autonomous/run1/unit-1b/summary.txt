@@ -1,0 +1,29 @@
+unit-run 2026-10-25T19:35:36-04:00 host node0 tree cassandra-5.0.9 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 PathReconstructorSizeTest.java=c67ee00a35fd unit-run.sh=0a2db3c5ad6b unit-analyze.py=f4711369ca08 
+df: /dev/sda3        63G   21G   39G  35% /
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 18 s
+TP33 lines: 139
+cleanup: test removed; leftover junit JVMs: 0
+points 126, mctl 4, conc 9
+EXPECTED B2f(1): cap = 32 when P <= 32, else P <= cap <= 2P (P = longest path handed to mapContent), all points
+  HOLDS: 126/126 points; violations: []
+EXPECTED B2f(1b): P computed at insert time equals the path the iterator walked
+  HOLDS: 0 mismatches
+EXPECTED B2f(2): L=65535: raw 65535<=cap<=131070; real random P>65535 and 65536<cap<=2P; all-zero key: L+c <= P <= L+c+2 (c from the real random key) [R9]
+  HOLDS: raw cap [65536]; real P [65547] cap [71680]; zero P [65547] cap [72704]
+EXPECTED B2f(3): real random keys: c = P - L is one constant over L, 8 <= c <= 14; all-zero keys: P - L in [c, c+2] [R9]
+  HOLDS: P-L values {'real': [12], 'zero': [12]}
+EXPECTED B2f(4): sizeOnHeap()/sizeOffHeap() after the drain equal those before it, every row
+  HOLDS: 139/139 rows equal
+EXPECTED B2f(5): M 10k -> 100k: sizes rise >= 5x, cap stays inside P..2P (P = 100)
+  HOLDS: ON_HEAP: onB 1578392 -> 14497912 (x9.2); cap 128 / 128; in band True; OFF_HEAP: offB 1537088 -> 14096416 (x9.2); cap 128 / 128; in band True
+EXPECTED B2f(6): cap identical for ON_HEAP and OFF_HEAP at the same kind and L
+  HOLDS: 63 (kind, L) pairs compared
+EXPECTED B2f(7): N threads: every thread allocates >= its cap; sum >= N x cap
+  HOLDS: [(1, 72704, 145856, 145856), (8, 72704, 1166848, 145856), (64, 72704, 9334784, 145856)]
+EXPECTED B2h-reps: the 3 repetitions of a grid point agree
+  HOLDS: 0 points differ
+
+MATCHED ROW (B2g):
+  Claim confirmed (array not accounted, not limited, bounded only by the path length)
+done 2026-10-25T19:35:54-04:00

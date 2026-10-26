@@ -1,0 +1,64 @@
+group   buf            L       N  capacity(3x)   range          sizeOnHeap  sizeOffHeap  iterAlloc
+empty   OFF_HEAP      16       0  32/32/32       [16,48]               632            0        816
+empty   ON_HEAP       16       0  32/32/32       [16,48]               632            0        816
+lsweep  OFF_HEAP      16    1000  32/32/32       [16,48]              5016        49600        944
+lsweep  OFF_HEAP    1000    1000  1024/1024/1024 [1000,2016]          5176      1169600       2880
+lsweep  OFF_HEAP   20000    1000  32768/32768/32768 [20000,40016]         5304     22897600      66448
+lsweep  OFF_HEAP   65535    1000  65536/65536/65536 [65535,131086]         5368     74929600     132000
+lsweep  OFF_HEAP  131070    1000  149504/149504/149504 [131070,262156]         5400    149817568     299960
+lsweep  ON_HEAP       16    1000  32/32/32       [16,48]             54616            0       1768
+lsweep  ON_HEAP     1000    1000  1024/1024/1024 [1000,2016]       1174776            0       3152
+lsweep  ON_HEAP    20000    1000  32768/32768/32768 [20000,40016]     22902904            0      66832
+lsweep  ON_HEAP    65535    1000  65536/65536/65536 [65535,131086]     74934968            0     132000
+lsweep  ON_HEAP   131070    1000  149504/149504/149504 [131070,262156]    149822968            0     299960
+nsweep  OFF_HEAP      16       1  32/32/32       [16,48]               636           32        816
+nsweep  OFF_HEAP      16    1000  32/32/32       [16,48]              5016        49600        816
+nsweep  OFF_HEAP      16  100000  32/32/32       [16,48]            401464      4493696        816
+nsweep  OFF_HEAP    1000       1  1024/1024/1024 [1000,2016]           700         1152       2880
+nsweep  OFF_HEAP    1000    1000  1024/1024/1024 [1000,2016]          5176      1169600       2880
+nsweep  OFF_HEAP    1000  100000  1024/1024/1024 [1000,2016]        401592    116493696       2880
+nsweep  ON_HEAP       16       1  32/32/32       [16,48]               668            0        816
+nsweep  ON_HEAP       16    1000  32/32/32       [16,48]             54616            0        816
+nsweep  ON_HEAP       16  100000  32/32/32       [16,48]           4895160            0        816
+nsweep  ON_HEAP     1000       1  1024/1024/1024 [1000,2016]          1852            0       2880
+nsweep  ON_HEAP     1000    1000  1024/1024/1024 [1000,2016]       1174776            0       2880
+nsweep  ON_HEAP     1000  100000  1024/1024/1024 [1000,2016]     116895288            0       2880
+OK   every cell ran 3 times
+OK   repeats identical within each cell
+OK   entries walked == N in every row
+OK   capacity 32 within [L=16, 2L+16=48] (OFF_HEAP N=1000)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (OFF_HEAP N=1000)
+OK   capacity 32768 within [L=20000, 2L+16=40016] (OFF_HEAP N=1000)
+OK   capacity 65536 within [L=65535, 2L+16=131086] (OFF_HEAP N=1000)
+OK   capacity 149504 within [L=131070, 2L+16=262156] (OFF_HEAP N=1000)
+OK   capacity 32 within [L=16, 2L+16=48] (ON_HEAP N=1000)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (ON_HEAP N=1000)
+OK   capacity 32768 within [L=20000, 2L+16=40016] (ON_HEAP N=1000)
+OK   capacity 65536 within [L=65535, 2L+16=131086] (ON_HEAP N=1000)
+OK   capacity 149504 within [L=131070, 2L+16=262156] (ON_HEAP N=1000)
+OK   capacity 32 within [L=16, 2L+16=48] (OFF_HEAP N=1)
+OK   capacity 32 within [L=16, 2L+16=48] (OFF_HEAP N=1000)
+OK   capacity 32 within [L=16, 2L+16=48] (OFF_HEAP N=100000)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (OFF_HEAP N=1)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (OFF_HEAP N=1000)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (OFF_HEAP N=100000)
+OK   capacity 32 within [L=16, 2L+16=48] (ON_HEAP N=1)
+OK   capacity 32 within [L=16, 2L+16=48] (ON_HEAP N=1000)
+OK   capacity 32 within [L=16, 2L+16=48] (ON_HEAP N=100000)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (ON_HEAP N=1)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (ON_HEAP N=1000)
+OK   capacity 1024 within [L=1000, 2L+16=2016] (ON_HEAP N=100000)
+OK   empty trie capacity 32
+OK   N-independence at L=16 ON_HEAP: capacities [32]
+OK   N-independence at L=16 OFF_HEAP: capacities [32]
+OK   N-independence at L=1000 ON_HEAP: capacities [1024]
+OK   N-independence at L=1000 OFF_HEAP: capacities [1024]
+OK   buffer-type independence at L=16 N=1000: [32, 32, 32] vs [32, 32, 32]
+OK   buffer-type independence at L=1000 N=1000: [1024, 1024, 1024] vs [1024, 1024, 1024]
+OK   buffer-type independence at L=20000 N=1000: [32768, 32768, 32768] vs [32768, 32768, 32768]
+OK   buffer-type independence at L=65535 N=1000: [65536, 65536, 65536] vs [65536, 65536, 65536]
+OK   buffer-type independence at L=131070 N=1000: [149504, 149504, 149504] vs [149504, 149504, 149504]
+OK   control moves: L=16 sizeOnHeap(ON_HEAP) [668, 54616, 4895160] ; sizeOffHeap(OFF_HEAP) [32, 49600, 4493696]
+OK   control moves: L=1000 sizeOnHeap(ON_HEAP) [1852, 1174776, 116895288] ; sizeOffHeap(OFF_HEAP) [1152, 1169600, 116493696]
+OK   instrument sensitive to L: [32, 1024, 32768, 65536, 149504]
+ALL OK

@@ -1,0 +1,46 @@
+== unit tier: harness.out
+19 checks, 0 MISMATCH
+every planned check present: True (missing [])
+  asc S=100: capacity 128; recomputed exp 128; equal True
+  asc S=204800: capacity 205631; recomputed exp 205631; equal True
+  asc S=262144: capacity 263200; recomputed exp 263200; equal True
+  asc S=1048576: capacity 1052716; recomputed exp 1052716; equal True
+  asc S=4194304: capacity 4210780; recomputed exp 4210780; equal True
+  asc S=16777216: capacity 16843037; recomputed exp 16843037; equal True
+  STAGE4 check seq ok S=100:128 S=1048576:1052716 S=16777216:16843037 S=1048576:16843037 S=100:16843037 S=204800:16843037 final=16843037 exp(16MiB)=16843037
+  STAGE4 check filesize ok max_hints_file_size 1MiB: 4210780,16843037; 128MiB: 4210780,16843037 (getMaxHintsFileSize now 134217728)
+  N=1: pool delta 4210780; recomputed N x exp(4MiB) 4210780; ratio 1.0000; within 10 %: True
+  N=4: pool delta 16843120; recomputed N x exp(4MiB) 16843120; ratio 1.0000; within 10 %: True
+  N=16: pool delta 67372480; recomputed N x exp(4MiB) 67372480; ratio 1.0000; within 10 %: True
+  STAGE4 check uncompressed ok class=HintsWriter noCompressionBufferField=true pool delta=0
+  STAGE4 check cap-boundary ok accepted(16777204)=true refused(16777205)=Hint of 16777205 bytes is too large - the maximum size is 16777216 refused(17MiB)=Hint of 17825792 bytes is too large - the maximum size is 16777216
+  STAGE4 check slab-control-32 ok C=33554432 rise=33554432 count +1 after free() fall=33554432
+  STAGE4 check slab-control-128 ok C=134217728 rise=134217728 count +1 after free() fall=134217728
+
+== cluster tier: per lifetime, from hw.trace + samples.csv + summary.txt
+D1: workload ok 200 err 0; hints +200, hints dir 1684320012 B; writers 13 (opened lines 13, closed lines 12, live 1); writeBuffer lines 400; max in 8388675, max capacity 8421599 (recomputed exp 8421599); every writer exact True, grow-only True; live capacity sum 8421599; slabs [33554432] created after baseline 2 (Corr 67108864); dPool 75590279
+D2: workload ok 200 err 0; hints +200, hints dir 1684320013 B; writers 13 (opened lines 13, closed lines 12, live 1); writeBuffer lines 400; max in 8388675, max capacity 8421599 (recomputed exp 8421599); every writer exact True, grow-only True; live capacity sum 8421599; slabs [33554432] created after baseline 2 (Corr 67108864); dPool 75590057
+F1: workload ok 200 err 0; hints +200, hints dir 1684337589 B; writers 200 (opened lines 200, closed lines 200, live 0); writeBuffer lines 400; max in 8388675, max capacity 8421599 (recomputed exp 8421599); every writer exact True, grow-only True; live capacity sum 0; slabs [33554432] created after baseline 2 (Corr 67108864); dPool 67162370
+H1: workload ok 200 err 0; hints +11, hints dir 92637619 B; writers 1 (opened lines 1, closed lines 0, live 1); writeBuffer lines 22; max in 8388675, max capacity 8421599 (recomputed exp 8421599); every writer exact True, grow-only True; live capacity sum 8421599; slabs [33554432] created after baseline 2 (Corr 67108864); dPool 75586727
+M128: workload ok 200 err 0; hints +200, hints dir 1684320012 B; writers 13 (opened lines 13, closed lines 12, live 1); writeBuffer lines 400; max in 8388675, max capacity 8421599 (recomputed exp 8421599); every writer exact True, grow-only True; live capacity sum 8421599; slabs [134217728] created after baseline 2 (Corr 268435456); dPool 276916709
+P2: workload ok 200 err 0; hints +400, hints dir 3368640026 B; writers 26 (opened lines 26, closed lines 24, live 2); writeBuffer lines 800; max in 8388675, max capacity 8421599 (recomputed exp 8421599); every writer exact True, grow-only True; live capacity sum 16843198; slabs [33554432] created after baseline 2 (Corr 67108864); dPool 84009933
+S: workload ok 200000 err 0; hints +200000, hints dir 209674888 B; writers 2 (opened lines 2, closed lines 1, live 1); writeBuffer lines 843; max in 261227, max capacity 262279 (recomputed exp 262279); every writer exact True, grow-only True; live capacity sum 262279; slabs [33554432] created after baseline 1 (Corr 33554432); dPool 33987975
+U: workload ok 200 err 0; hints +200, hints dir 1677735642 B; writers 0 (opened lines 0, closed lines 12, live 0); writeBuffer lines 0; max in 0, max capacity 0 (recomputed exp -); every writer exact True, grow-only True; live capacity sum 0; slabs [33554432] created after baseline 2 (Corr 67108864); dPool 67155259
+US: workload ok 200000 err 0; hints +200000, hints dir 218600092 B; writers 0 (opened lines 0, closed lines 1, live 0); writeBuffer lines 0; max in 0, max capacity 0 (recomputed exp -); every writer exact True, grow-only True; live capacity sum 0; slabs [33554432] created after baseline 1 (Corr 33554432); dPool 33857669
+
+== cross-arm relations (X = (dPool - Corr)_arm - (dPool - Corr)_control)
+S: X 0.12 MiB; trace live capacity 262279 B (exp(256KiB) 263200); <= 0.3 + band: True
+D1: X 8.04 MiB; trace live capacity sum 8.03 MiB; writers 13, live 1
+D2: X 8.04 MiB; trace live capacity sum 8.03 MiB; writers 13, live 1
+F1: X 0.01 MiB; trace live capacity sum 0.00 MiB; writers 200, live 0
+H1: X 8.04 MiB; trace live capacity sum 8.03 MiB; writers 1, live 1
+P2: X 16.07 MiB; trace live capacity sum 16.06 MiB; writers 26, live 2
+M128: X 8.04 MiB; trace live capacity sum 8.03 MiB; writers 13, live 1
+  D1: |X - 1 x 8.03 MiB| <= band: True
+  D2: |X - 1 x 8.03 MiB| <= band: True
+  F1: |X - 1 x 8.03 MiB| <= band: False
+  H1: |X - 1 x 8.03 MiB| <= band: True
+  P2: |X - 2 x 8.03 MiB| <= band: True
+U (control): CompressedHintsWriter lines opened 0, writeBuffer 0 (both must be 0)
+US (control): opened 0, writeBuffer 0 (both must be 0)
+positive control: dPool(M128) - dPool(D1) = 192.00 MiB; Corr(M128) - Corr(D1) = 192.00 MiB; |diff| <= 8 MiB: True; Corr diff >= 64 MiB: True; slab sizes M128 [134217728]

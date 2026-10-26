@@ -1,0 +1,49 @@
+PASS unit: 68 cells present :: 68
+PASS unit: every cell exit=0 and has 'done'
+PASS unit 6MiB LZ4 R=1: reader overflow equal across 1/8/64/512 MiB (spread 0.0000), 12.62 MiB per reader :: {1: 13234018, 8: 13234018, 64: 13234018, 512: 13234018}
+PASS unit 6MiB LZ4 R=1: real direct delta ~ overflow delta (+-5%) :: {1: 13500391, 8: 13500391, 64: 13500393, 512: 13500391}
+PASS unit 6MiB R=1: overflow at 1 MiB value exceeds capacity
+PASS unit 6MiB R=1: pooled (memoryAllocated) unchanged by readers
+PASS unit 6MiB LZ4 R=2: reader overflow equal across 1/8/64/512 MiB (spread 0.0000), 12.62 MiB per reader :: {1: 26468036, 8: 26468036, 64: 26468036, 512: 26468036}
+PASS unit 6MiB LZ4 R=2: real direct delta ~ overflow delta (+-5%) :: {1: 26738641, 8: 26738641, 64: 26738641, 512: 26738641}
+PASS unit 6MiB R=2: overflow at 1 MiB value exceeds capacity
+PASS unit 6MiB R=2: pooled (memoryAllocated) unchanged by readers
+PASS unit 6MiB LZ4 R=8: reader overflow equal across 1/8/64/512 MiB (spread 0.0000), 12.62 MiB per reader :: {1: 105872144, 8: 105872144, 64: 105872144, 512: 105872144}
+PASS unit 6MiB LZ4 R=8: real direct delta ~ overflow delta (+-5%) :: {1: 106168144, 8: 106168141, 64: 106168141, 512: 106168141}
+PASS unit 6MiB R=8: overflow at 1 MiB value exceeds capacity
+PASS unit 6MiB R=8: pooled (memoryAllocated) unchanged by readers
+PASS unit close residual t1: counter keeps 50.4 MiB (expected ~50.4); real direct back within 1 MiB (263168)
+PASS unit close residual t512: counter keeps 50.4 MiB (expected ~50.4); real direct back within 1 MiB (263165)
+PASS unit small B=32768: overflow share 1 MiB value 519992 vs 8 MiB value -32768
+PASS unit small B=102400: overflow share 1 MiB value 1692104 vs 8 MiB value -32768
+PASS unit Deflate t1: overflow counter ~ same sum; heap delta 119 MiB
+NOTE Deflate real direct delta (prediction said 'direct unchanged'): 56896040 B
+PASS unit Deflate t512: overflow counter ~ same sum; heap delta 119 MiB
+NOTE Deflate real direct delta (prediction said 'direct unchanged'): 56896040 B
+PASS unit control t1: pooled plateau 0 == floor(th/8MiB)*8MiB=0; overflow 3145728 == 3*th - pooled_gain
+PASS unit control t8: pooled plateau 8388608 == floor(th/8MiB)*8MiB=8388608; overflow 16777216 == 3*th - pooled_gain
+PASS unit control t64: pooled plateau 67108864 == floor(th/8MiB)*8MiB=67108864; overflow 134217728 == 3*th - pooled_gain
+PASS unit control t512: pooled plateau 536870912 == floor(th/8MiB)*8MiB=536870912; overflow 1073741824 == 3*th - pooled_gain
+H512: capacity=536870912 files=10 peak_direct_over_pre=26476236 peak_overflow=79284052 final_overflow=66020030
+H64: capacity=67108864 files=10 peak_direct_over_pre=26476236 peak_overflow=79284052 final_overflow=66020030
+H1: capacity=1048576 files=10 peak_direct_over_pre=26476236 peak_overflow=79284052 final_overflow=66020030
+HU1: capacity=1048576 files=10 peak_direct_over_pre=8192 peak_overflow=0 final_overflow=0
+PASS cluster capacities 512/64/1/1 MiB
+PASS cluster: 10 hints files in each run
+PASS cluster: reader direct share [26476236, 26476236, 26476236] within 10% across thresholds and 12-30 MiB band
+PASS cluster: HU1 (uncompressed) direct delta 8192 B < 1 MiB, overflow 0
+PASS cluster: final OverflowSize per file [6602003.0, 6602003.0, 6602003.0] equal across thresholds, ~6.6 MB per file
+PASS cluster: OverflowSize > Capacity at the 1 MiB value
+PASS H512: no ERROR/OutOfMemory line in node 1 system.log
+PASS H64: no ERROR/OutOfMemory line in node 1 system.log
+PASS H1: no ERROR/OutOfMemory line in node 1 system.log
+PASS HU1: no ERROR/OutOfMemory line in node 1 system.log
+PASS C1: no ERROR/OutOfMemory line in node 1 system.log
+PASS C64: no ERROR/OutOfMemory line in node 1 system.log
+PASS C512: no ERROR/OutOfMemory line in node 1 system.log
+C1: max pooled 73728, max overflow 155648, median pooled 0
+C64: max pooled 8388608, max overflow 0, median pooled 8388608
+C512: max pooled 8388608, max overflow 0, median pooled 8388608
+PASS control: C1 pooled never reaches one 8 MiB macro chunk, C64 and C512 hold exactly 8 MiB
+PASS control: overflow peak at 1 MiB > overflow peak at 64 and 512 MiB (= 0)
+OVERALL PASS

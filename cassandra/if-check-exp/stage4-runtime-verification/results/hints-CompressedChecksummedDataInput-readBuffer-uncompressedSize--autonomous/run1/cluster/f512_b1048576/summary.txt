@@ -1,0 +1,33 @@
+cluster-run f512_b1048576 2026-10-25 18:31:35 MDT host node1 clone /users/jason92/s4-hu ['cassandra-5.0.9', 'd7c8ecd'] run run1 cell fcs=512MiB value=1048576 rows=64
+harness md5: 7d60e21fcde4cde723c58eb909634361  cluster-run.py 00efea1d3a0be61418a324823dbd7204  client.py 2b615ba4c3d706d19b6adf0b3a2b7dac  make-node-yaml.sh ff84741a6e3a1e694764c1939fe7c8a5  Jmx.java a0a7a79193593e6eb89c832ebcd8caf1  HuHelper.java 085f39cfa56d22b1e18c798540a14a52  hu.btm 
+free on /users/jason92: 45.2 GiB
+A statushandoff: Hinted handoff is running
+EXPECTED: hinted handoff running on A - yes
+A command line has -Xmx2G: True
+A command line has -XX:MaxDirectMemorySize=2g: True
+A command line has -XX:NativeMemoryTracking=summary: True
+A command line has byteman: True
+A command line has hu.btm: True
+B stops (drain, stopdaemon)
+A sees B DN after 1 s
+baseline (last 3 samples, JMX ['direct_used', 'size', 'used', 'ovf', 'thr']): [[1792974799803, 58658987.0, 8388608.0, 0.0, 0.0, 536870912.0], [1792974800803, 58658987.0, 8388608.0, 0.0, 0.0, 536870912.0], [1792974801803, 58658987.0, 8388608.0, 0.0, 0.0, 536870912.0]]
+writes: {'ok': True, 'target': 64, 'written': 64, 'succeeded': 64, 'failed': 0, 'errors': [], 'size': 1048576, 'conc': 4, 'elapsed_s': 0.36, 'stopped_by': 'count'}
+EXPECTED: every write succeeded (CL ONE, B down) - yes
+hints on disk before the replay: [('97ca9ee7-eff3-4858-a56a-75a5aae880bc-1792974803335-2.hints', 67378197)] (want >= 66437775 B of values)
+EXPECTED: the hint files hold the values (>= 0.99 x rows x value bytes) - yes
+raw hint files: 1 file(s), 128 blocks (64 non-empty), Zmax=1048646 -> expected capacity 1101078; Cmax=1052762; truncated=[] trailing=[0]
+replay: 46 s from the start of B until the hints directory was empty for 20 s; files left []
+EXPECTED: the replay completed (no .hints file left within 900 s) - yes
+listpendinghints: This node does not have any pending hints
+EXPECTED: no daemon of this harness left - yes
+trace: 128 blk lines, 1 reader close(s) (cout), files ['97ca9ee7-eff3-4858-a56a-75a5aae880bc-1792974803335-2.hints']
+EXPECTED: the trace holds one blk line per block of the raw files - yes
+EXPECTED: the (Z, C) pairs in the trace equal the raw files' headers - yes
+EXPECTED: largest reader buffer capacity in the trace = cap(Zmax) = 1101078 (observed 1101078) - yes
+EXPECTED: every block line: capacity = max(4096, cap(Z) of the largest Z so far in that file) (0 deviations) - yes
+EXPECTED: chunk-cache OverflowSize minus baseline equals the model after every block and reader close (0 deviations of 129; first None; baseline 0.0) - yes
+readings: peak chunk-cache OverflowSize over baseline 2202382; peak Size over baseline 2202382.0; peak JVM direct over baseline (trace) 36845829.0, (1 s samples) 36845829.0; largest compressedBuffer capacity 1105400; RssAnon baseline 2784800768.0 peak in replay 2842923008.0
+EXPECTED: file_cache_size is seen by the pool: Capacity = 536870912 - yes
+EXPECTED: peak OverflowSize over baseline >= cap(Zmax) + compressedBuffer capacity - 4096 = 2202382 (blocks > 128 KiB are unpooled) - yes
+error-like lines in system logs (A, B): /users/jason92/stage4-logs/hu/run1/cluster/f512_b1048576/A-system.log:0 /users/jason92/stage4-logs/hu/run1/cluster/f512_b1048576/B-system.log:0
+EXPECTED totals: yes 12 no 0

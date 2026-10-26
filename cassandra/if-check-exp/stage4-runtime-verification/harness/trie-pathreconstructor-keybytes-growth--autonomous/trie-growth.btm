@@ -1,0 +1,21 @@
+# Byteman rules, cluster tier of trie-pathreconstructor-keybytes-growth--autonomous (audit R5). Observation only.
+# Loaded at node start: -javaagent:<byteman.jar>=script:<this file>,listener:true,port:<p> -Dstage4.trace=<file>
+# One line per growth of TriePathReconstructor.keyBytes (the write at :34 in addPathByte, at :42 in addPathBytes):
+#   byte|bytes ms=<epoch ms> thr=<thread> it=<identity hash of the iterator> len=<new keyBytes.length> cls=<iterator class>
+RULE tp33 growth addPathByte
+CLASS org.apache.cassandra.db.tries.TriePathReconstructor
+METHOD addPathByte
+AFTER WRITE keyBytes
+IF true
+DO traceOpen("tp33", java.lang.System.getProperty("stage4.trace", "tp33.trace"));
+   traceln("tp33", "byte ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName() + " it=" + java.lang.System.identityHashCode($0) + " len=" + $0.keyBytes.length + " cls=" + $0.getClass().getName())
+ENDRULE
+
+RULE tp33 growth addPathBytes
+CLASS org.apache.cassandra.db.tries.TriePathReconstructor
+METHOD addPathBytes
+AFTER WRITE keyBytes
+IF true
+DO traceOpen("tp33", java.lang.System.getProperty("stage4.trace", "tp33.trace"));
+   traceln("tp33", "bytes ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName() + " it=" + java.lang.System.identityHashCode($0) + " len=" + $0.keyBytes.length + " cls=" + $0.getClass().getName())
+ENDRULE

@@ -1,0 +1,9 @@
+cluster-run inject_f1 2026-10-25 18:43:27 MDT host node1 clone /users/jason92/s4-hu ['cassandra-5.0.9', 'd7c8ecd'] run run1 inject fcs=1MiB
+harness md5: 86fdbb6956f457275540b4410888d441  cluster-run.py 00efea1d3a0be61418a324823dbd7204  client.py 2b615ba4c3d706d19b6adf0b3a2b7dac  make-node-yaml.sh ff84741a6e3a1e694764c1939fe7c8a5  Jmx.java a0a7a79193593e6eb89c832ebcd8caf1  HuHelper.java 085f39cfa56d22b1e18c798540a14a52  hu.btm 
+free on /users/jason92: 45.3 GiB
+inject.log: ms=1792975446771 injected 400x65536 before: size=0 used=0 ovf=0 thr=1048576 after: size=26214400 used=26214400 ovf=26214400 thr=1048576
+inject readings: baseline Size 0.0 Used 0.0 Overflow 0.0 Capacity 1048576.0; while held: peak pooled part (Size - OverflowSize) 0.0, peak OverflowSize 26214400.0, peak UsedSize 26214400.0; samples 25
+EXPECTED: Capacity gauge = file_cache_size = 1048576 - yes
+EXPECTED: the 400 x 64 KiB (26,214,400 B) are held: UsedSize rose by 26,214,400 - yes
+EXPECTED: nothing is pooled at 1 MiB (pooled part stays 0) and all 26,214,400 B are overflow - yes
+EXPECTED totals: yes 3 no 0

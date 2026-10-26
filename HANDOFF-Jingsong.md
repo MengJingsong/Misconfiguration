@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 20 | 20 |
+| Set A | 159 | 25 | 25 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -156,3 +156,19 @@ single-node one. Findings: write-up errors found by the audit in all five (probe
 invalid table syntax); `MEMTABLE_TRIE_SIZE_LIMIT` (`cassandra.trie_size_limit_mb`) appears unused (trie threshold is
 read from `cassandra.memtable.row_overhead_size`, `InMemoryTrie.java:63`): upstream/doc candidate, JIRA check first.
 Next: CSV order 7 (decision), 22 on (`TriePathReconstructor`, `CompressedChecksummedDataInput` and the other §6 lines).
+
+2026-10-25/26, batch 5 (CSV rows 22–26, §6 `TriePathReconstructor` :33/:41 and hints buffers): all five **true negative**
+(do not cap): `trie-pathreconstructor-keybytes-growth`, `trie-pathreconstructor-keybytes-addPathBytes-growth`,
+`file_cache_size-CompressedChecksummedDataInput-readBuffer-compressedBuffer`, `hints-CompressedChecksummedDataInput-readBuffer-uncompressedSize`,
+`hints-CompressedHintsWriter-compressionBuffer-capacity`. Rows 22, 24, 26 on `pc07`, 23 and 25 on `pc12`; leftovers in
+`~/s4-{tp33,fc,hw}` (+ `-logs`/`-run`/`-data`) on pc07 and `~/s4-{tp41,hu}` (+ `~/stage4-logs/hu`, `~/stage4-harness-run/hu`) on pc12.
+Timing: `stage4-runtime-verification/timing/set-A-batch-5.log`. Write-up, 5 in parallel: 1.5-2.3 min; stage 4, 5 in parallel: ~87 min
+launch to last report (the longest batch so far; `hu` and `hw` ~85 min).
+Open points for you to overrule: (1) `hw` cluster B3g row 2 sub-prediction was refuted (F1, `max_hints_file_size` 1 MiB closes the
+writer after every hint) but the agent kept the cluster tier "Confirmed" (the strict reading is undetermined); (2) `tp33` made a
+dated amendment (R9) after unit run 1a and reran the unit tier as 1b; `fc` saw shakedown numbers before the freeze (disclosed in
+results §1); `tp41` missed one frozen numeric bound (B3f <0.1%; 0.35%) while B3g held. Write-up errors found by the audits: 8 MiB (not
+1 MiB) macro chunk in two hints cases, the 65535 bound applies to the key not the trie path (key + 12), wrong `~` line cites.
+Upstream candidates (JIRA first): `ChecksummedDataInput.close()` leaves the pooled/overflow buffer unreturned; unchecked block-header
+size in `CompressedChecksummedDataInput`. `predicted-negative.md` §6 rows were left in place (they list sibling lines still open).
+Next: CSV order 7 (decision), 27 on (`EncryptedChecksummedDataInput`, `HintsBuffer`, `HintsWriteExecutor`).

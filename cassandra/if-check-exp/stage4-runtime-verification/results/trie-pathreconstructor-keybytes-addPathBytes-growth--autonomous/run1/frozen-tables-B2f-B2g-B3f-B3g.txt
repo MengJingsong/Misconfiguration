@@ -1,0 +1,25 @@
+**B2f. Predictions (before any run).** For N=1000: capacity in [L, 2L+16] for each L (e.g. L=16 gives 32 or 48; L=65 535 gives between 65 535 and 131 086). Capacity is independent of N at fixed L (N=1 vs 100 000 gives the same value). `sizeOnHeap` (or `sizeOffHeap` for OFF_HEAP) grows roughly linearly with N x L, i.e. at L=16, N=100 000 it is orders of magnitude larger than the 32-byte-class scratch. BufferType does not change the capacity. L=131 070 (above 65 535) is walked without failure at this layer, with capacity in [L, 2L+16].
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Capacity tracks L only (within [L, 2L+16]), flat in N and BufferType, while sizeOn/OffHeap grows with N | Claim confirmed: scratch is not tied to memtable memory; usage does not follow any memory knob |
+| Capacity grows with N at fixed L | Claim refuted: the buffer accumulates across entries (would contradict `resetPathLength` semantics) |
+| Capacity differs between ON_HEAP and OFF_HEAP | Claim refuted: the scratch depends on the allocation-type setting |
+| Capacity stays at 32 for all L | Test is not reaching line 41 (path bytes not delivered via `addPathBytes`/`addPathByte`); not confirmed, fix the workload |
+| sizeOn/OffHeap does not grow with N (control did not move) | Positive control failed; not confirmed |
+| Capacity exceeds 2L+16 by a wide margin at some L | Growth policy differs from the traced one; re-read `:33-45` |
+
+**B3f. Predictions.** Allocation at `TriePathReconstructor.addPathBytes` per flush/scan is at most about (number of live iterators) x 2 x (encoded key length): Run A, tens to hundreds of bytes per iterator, KB-scale in total; Run B, up to about 120-250 KB per iterator. That is under 0.1% of memtable occupancy (tens to hundreds of MiB) in both runs. It does not change between `memtable_heap_space` 128 vs 512 MiB for the same key size. Memtable occupancy and flush count change with `memtable_heap_space` (control).
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Scratch allocation tracks key size only; unchanged across memtable_heap_space; <1% of memtable occupancy; occupancy and flush count move with memtable_heap_space | Claim confirmed: scratch is not governed by the memory limit and is not memory-significant |
+| Scratch allocation scales with memtable_heap_space or with row count at fixed key size | Claim refuted |
+| Scratch allocation is a large fraction (>10%) of heap or memtable size | Claim refuted: it is memory-significant in practice |
+| Memtable occupancy / flush count does not change between 128 and 512 MiB | Positive control failed (cap not reached or not bound); not confirmed, increase write volume |
+| No JFR samples at `addPathBytes` | Sampling too coarse; raise the sampling rate or repeat flush more times; not confirmed |
+

@@ -1,0 +1,19 @@
+analyze 2026-10-25 20:48:27 EDT: lifetimes ['D1', 'D2', 'F1', 'H1', 'M128', 'P2', 'S', 'U', 'US']
+S: X = (dPool_S - Corr_S) - (dPool_US - Corr_US) = 0.12 MiB; trace max capacity 262279 B
+EXPECTED: S: X 0.12 MiB <= 0.3 MiB + band (2.30 MiB) (B3f: no more than about 0.3 MiB) — yes
+D1: X vs U = 8.04 MiB (dPool 72.09 MiB, Corr 64.00 MiB; U dPool 64.04 MiB, Corr 64.00 MiB); trace live sum 8.03 MiB, live writers 1, writers 13
+D2: X vs U = 8.04 MiB (dPool 72.09 MiB, Corr 64.00 MiB; U dPool 64.04 MiB, Corr 64.00 MiB); trace live sum 8.03 MiB, live writers 1, writers 13
+F1: X vs U = 0.01 MiB (dPool 64.05 MiB, Corr 64.00 MiB; U dPool 64.04 MiB, Corr 64.00 MiB); trace live sum 0.00 MiB, live writers 0, writers 200
+H1: X vs U = 8.04 MiB (dPool 72.09 MiB, Corr 64.00 MiB; U dPool 64.04 MiB, Corr 64.00 MiB); trace live sum 8.03 MiB, live writers 1, writers 1
+M128: X vs U = 8.04 MiB (dPool 264.09 MiB, Corr 256.00 MiB; U dPool 64.04 MiB, Corr 64.00 MiB); trace live sum 8.03 MiB, live writers 1, writers 13
+P2: X vs U = 16.07 MiB (dPool 80.12 MiB, Corr 64.00 MiB; U dPool 64.04 MiB, Corr 64.00 MiB); trace live sum 16.06 MiB, live writers 2, writers 26
+EXPECTED: D1: X 8.04 MiB in 8.03 MiB +/- 2.00 MiB (B3f: about 8.0-8.1 MiB per down peer) — yes
+EXPECTED: D2: X 8.04 MiB in 8.03 MiB +/- 2.00 MiB (B3f: about 8.0-8.1 MiB per down peer) — yes
+EXPECTED: noise: D1 and D2 differ by 0.00 MiB <= band — yes
+EXPECTED: F1: same increment as the default: X 0.01 MiB within 2.00 MiB of D mean 8.04 MiB — NO (recorded; the AI judges it in the results file)
+EXPECTED: H1: same increment as the default: X 8.04 MiB within 2.00 MiB of D mean 8.04 MiB — yes
+EXPECTED: P2: X 16.07 MiB in 16.06 MiB +/- 2.00 MiB (B3f: 2 peers about 16 MiB) — yes
+positive control: dPool(M128) - dPool(D1) = 192.00 MiB; Corr(M128) - Corr(D1) = 192.00 MiB
+EXPECTED: positive control: pool difference 192.00 MiB = slab-created difference 192.00 MiB within 8 MiB — yes
+EXPECTED: positive control: slab-created difference 192.00 MiB >= 64 MiB — yes
+EXPECTED yes 8 no 1

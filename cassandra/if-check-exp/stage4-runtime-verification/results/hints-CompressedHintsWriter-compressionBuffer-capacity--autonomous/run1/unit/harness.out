@@ -1,0 +1,21 @@
+STAGE4 start java=11.0.32.1 maxMemory=1056309248 AGG=262144 ENTRY_OVERHEAD_SIZE=12 getMaxMutationSize()=2621440 (test yaml; informational) maxHintsFileSize=134217728
+STAGE4 check lz4-bound ok n=0 bound=16 formula=16 init=20 exp=28; n=100 bound=116 formula=116 init=120 exp=128; n=204800 bound=205619 formula=205619 init=205623 exp=205631; n=262144 bound=263188 formula=263188 init=263192 exp=263200; n=1048576 bound=1052704 formula=1052704 init=1052708 exp=1052716; n=4194304 bound=4210768 formula=4210768 init=4210772 exp=4210780; n=8388608 bound=8421520 formula=8421520 init=8421524 exp=8421532; n=16777216 bound=16843025 formula=16843025 init=16843029 exp=16843037; 
+STAGE4 check asc-100 ok S=100 capacity=128 exp=128 diff=0 isDirect=true
+STAGE4 check asc-204800 ok S=204800 capacity=205631 exp=205631 diff=0 isDirect=true
+STAGE4 check asc-262144 ok S=262144 capacity=263200 exp=263200 diff=0 isDirect=true
+STAGE4 check asc-1048576 ok S=1048576 capacity=1052716 exp=1052716 diff=0 isDirect=true
+STAGE4 check asc-4194304 ok S=4194304 capacity=4210780 exp=4210780 diff=0 isDirect=true
+STAGE4 check asc-16777216 ok S=16777216 capacity=16843037 exp=16843037 diff=0 isDirect=true
+STAGE4 check seq ok S=100:128 S=1048576:1052716 S=16777216:16843037 S=1048576:16843037 S=100:16843037 S=204800:16843037 final=16843037 exp(16MiB)=16843037
+STAGE4 check filesize ok max_hints_file_size 1MiB: 4210780,16843037; 128MiB: 4210780,16843037 (getMaxHintsFileSize now 134217728)
+STAGE4 check n-1 ok N=1 pool delta=4210780 want N x exp(4MiB)=4210780 ratio=1.0000 count delta=1
+STAGE4 check n-4 ok N=4 pool delta=16843120 want N x exp(4MiB)=16843120 ratio=1.0000 count delta=4
+STAGE4 check n-16 ok N=16 pool delta=67372480 want N x exp(4MiB)=67372480 ratio=1.0000 count delta=16
+STAGE4 check uncompressed ok class=HintsWriter noCompressionBufferField=true pool delta=0
+STAGE4 check compressible ok zeros 4 MiB capacity=4210780 exp=4210780
+STAGE4 check deflate ok deflate capacity=4195605 isDirect=false pool delta (info, JDK temp buffer)=4187406; lz4 isDirect=true
+STAGE4 check cap-boundary ok accepted(16777204)=true refused(16777205)=Hint of 16777205 bytes is too large - the maximum size is 16777216 refused(17MiB)=Hint of 17825792 bytes is too large - the maximum size is 16777216
+STAGE4 check cap-formula ok mms=1MiB slab=32MiB cap=16MiB; mms=4MiB slab=32MiB cap=16MiB; mms=8MiB slab=32MiB cap=16MiB; mms=16MiB slab=32MiB cap=16MiB; mms=32MiB slab=64MiB cap=32MiB; mms=64MiB slab=128MiB cap=64MiB; 
+STAGE4 check slab-control-32 ok C=33554432 rise=33554432 count +1 after free() fall=33554432
+STAGE4 check slab-control-128 ok C=134217728 rise=134217728 count +1 after free() fall=134217728
+STAGE4 summary checks=19 mismatches=0

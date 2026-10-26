@@ -1,0 +1,50 @@
+c = 12; P_big = 60012; P_small = 28; lifetimes found ['H256', 'H1024', 'H64', 'O256']
+
+H256: trace events 193182
+  load_small     events      0 maxlen       0 iterators     0 threads {}
+  load_big       events     99 maxlen   65536 iterators     9 threads {'MemtableFlushWriter': 55, 'PerDiskMemtableFlushWriter': 44}
+  warm           events    781 maxlen   65536 iterators    71 threads {'PerDiskMemtableFlushWriter': 11, 'ReadStage': 770}
+  scan_big_R1    events  11429 maxlen   65536 iterators  1039 threads {'ReadStage': 11385, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}
+  scan_big_R32   events 180829 maxlen   65536 iterators 16439 threads {'ReadStage': 180785, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}
+  scan_small_R1  events      0 maxlen       0 iterators     0 threads {}
+
+H1024: trace events 266475
+  load_small     events      0 maxlen       0 iterators     0 threads {}
+  load_big       events     11 maxlen   65536 iterators     1 threads {'MemtableFlushWriter': 11}
+  warm           events   1353 maxlen   65536 iterators   123 threads {'ReadStage': 1342, 'PerDiskMemtableFlushWriter': 11}
+  scan_big_R1    events  15224 maxlen   65536 iterators  1384 threads {'ReadStage': 15180, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}
+  scan_big_R32   events 249865 maxlen   65536 iterators 22715 threads {'ReadStage': 249821, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}
+  scan_small_R1  events      0 maxlen       0 iterators     0 threads {}
+
+H64: trace events 117095
+  load_small     events      0 maxlen       0 iterators     0 threads {}
+  load_big       events    528 maxlen   65536 iterators    48 threads {'MemtableFlushWriter': 264, 'PerDiskMemtableFlushWriter': 264}
+  warm           events    330 maxlen   65536 iterators    30 threads {'ReadStage': 330}
+  scan_big_R1    events   5478 maxlen   65536 iterators   498 threads {'MemtableFlushWriter': 99, 'PerDiskMemtableFlushWriter': 99, 'ReadStage': 5280}
+  scan_big_R32   events  71907 maxlen   65536 iterators  6537 threads {'MemtableFlushWriter': 99, 'PerDiskMemtableFlushWriter': 99, 'ReadStage': 71709}
+  scan_small_R1  events      0 maxlen       0 iterators     0 threads {}
+
+O256: trace events 219483
+  load_small     events      0 maxlen       0 iterators     0 threads {}
+  load_big       events     77 maxlen   65536 iterators     7 threads {'MemtableFlushWriter': 44, 'PerDiskMemtableFlushWriter': 33}
+  warm           events    924 maxlen   65536 iterators    84 threads {'PerDiskMemtableFlushWriter': 11, 'ReadStage': 913}
+  scan_big_R1    events  10593 maxlen   65536 iterators   963 threads {'ReadStage': 10549, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}
+  scan_big_R32   events 207867 maxlen   65536 iterators 18897 threads {'ReadStage': 207823, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}
+  scan_small_R1  events      0 maxlen       0 iterators     0 threads {}
+EXPECTED B3f(a1): big phases: largest traced length per lifetime in [P_big, 2 P_big] = [60012, 120024], none above 2 P_big
+  HOLDS: bigmax per lifetime {'H256': 65536, 'H1024': 65536, 'H64': 65536, 'O256': 65536}; over 2P: []
+EXPECTED B3f(a2): small phases (P_small = 28): no growth when P_small <= 32, else lengths <= 2 P_small
+  HOLDS: [('H256', 'load_small', 0, 0), ('H256', 'scan_small_R1', 0, 0), ('H1024', 'load_small', 0, 0), ('H1024', 'scan_small_R1', 0, 0), ('H64', 'load_small', 0, 0), ('H64', 'scan_small_R1', 0, 0), ('O256', 'load_small', 0, 0), ('O256', 'scan_small_R1', 0, 0)]
+EXPECTED B3f(a3): the largest big length is the same for the settings, within one growth step (max/min <= 2)
+  HOLDS: {'H256': 65536, 'H1024': 65536, 'H64': 65536, 'O256': 65536}
+EXPECTED B3f(b): per-iterator scratch <= 2 P_big in both scan phases (growth seen in each); peak scratch (R+4) x 2 P_big = 4320864 B at R=32 [inferred, from the executors]
+  HOLDS: [('H256', 'R32 iterators with growth', 16439, 'events by thread kind', {'ReadStage': 180785, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}), ('H1024', 'R32 iterators with growth', 22715, 'events by thread kind', {'ReadStage': 249821, 'MemtableFlushWriter': 22, 'PerDiskMemtableFlushWriter': 22}), ('H64', 'R32 iterators with growth', 6537, 'events by thread kind', {'MemtableFlushWriter': 99, 'Pe
+EXPECTED B3f(c): max t_big MemtableOnHeapDataSize (load_big..scan_big_R32) rises over 64 < 256 < 1024 MiB; t_small flushes during its load fall (>= >=, 64 > 1024)
+  HOLDS: max big_on {'H256': 55126876.0, 'H1024': 218461792.0, 'H64': 8633016.0, 'O256': 273532.0}; t_small switch count during load_small {'H256': 4.0, 'H1024': 1.0, 'H64': 17.0, 'O256': 3.0}
+EXPECTED B3f(d): offheap_objects: largest big length within [P_big, 2P_big] and within a factor 2 of heap_buffers 256 MiB; accounted off-heap size > 0
+  HOLDS: O256 65536, H256 65536; max t_big MemtableOffHeapDataSize in O256 58564690.0
+EXPECTED B3g-valid: loads complete without errors, scans read rows without errors, all five phases per lifetime, no ERROR/OOM in system.log
+  HOLDS: []
+
+MATCHED ROW (B3g):
+  Claim confirmed (traced lengths independent of memtable_heap_space, set by L; memtable size scales with the setting)

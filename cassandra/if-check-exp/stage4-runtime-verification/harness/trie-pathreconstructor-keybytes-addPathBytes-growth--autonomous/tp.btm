@@ -1,0 +1,39 @@
+RULE tp grow 34
+CLASS org.apache.cassandra.db.tries.TriePathReconstructor
+METHOD addPathByte
+AT LINE 34
+IF TRUE
+DO org.stage4.TpHelper.grow(34, $0, $0.keyBytes.length, $0.keyPos)
+ENDRULE
+
+RULE tp grow 42
+CLASS org.apache.cassandra.db.tries.TriePathReconstructor
+METHOD addPathBytes
+AT LINE 42
+IF TRUE
+DO org.stage4.TpHelper.grow(42, $0, $0.keyBytes.length, $0.keyPos + $3)
+ENDRULE
+
+RULE tp ctor
+CLASS org.apache.cassandra.db.tries.TriePathReconstructor
+METHOD <init>
+AT EXIT
+IF TRUE
+DO org.stage4.TpHelper.ctor($0.getClass().getName())
+ENDRULE
+
+RULE tp copy
+CLASS org.apache.cassandra.db.tries.TriePathReconstructor
+METHOD toByteComparable
+AT ENTRY
+IF TRUE
+DO org.stage4.TpHelper.copy($2)
+ENDRULE
+
+RULE tp init
+CLASS org.apache.cassandra.service.CassandraDaemon
+METHOD setup
+AT ENTRY
+IF TRUE
+DO org.stage4.TpHelper.init()
+ENDRULE

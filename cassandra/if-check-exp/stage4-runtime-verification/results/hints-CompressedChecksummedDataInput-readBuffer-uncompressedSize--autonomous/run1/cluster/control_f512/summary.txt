@@ -1,0 +1,11 @@
+cluster-run control_f512 2026-10-25 18:38:48 MDT host node1 clone /users/jason92/s4-hu ['cassandra-5.0.9', 'd7c8ecd'] run run1 control fcs=512MiB
+harness md5: 7d60e21fcde4cde723c58eb909634361  cluster-run.py 00efea1d3a0be61418a324823dbd7204  client.py 2b615ba4c3d706d19b6adf0b3a2b7dac  make-node-yaml.sh ff84741a6e3a1e694764c1939fe7c8a5  Jmx.java a0a7a79193593e6eb89c832ebcd8caf1  HuHelper.java 085f39cfa56d22b1e18c798540a14a52  hu.btm 
+free on /users/jason92: 45.2 GiB
+writes: {'ok': True, 'target': 2048, 'written': 2048, 'succeeded': 2048, 'failed': 0, 'errors': [], 'size': 65536, 'conc': 8, 'elapsed_s': 1.06, 'stopped_by': 'count'}
+EXPECTED: every write succeeded - yes
+scan: {'ok': True, 'requests': 6144, 'succeeded': 6144, 'failed': 0, 'errors': [], 'conc': 8, 'elapsed_s': 4.29, 'stopped_by': 'count'}
+EXPECTED: every read succeeded - yes
+control readings: baseline Size 8388608.0 Overflow 0.0 Capacity 536870912.0; during the scan peak Size 167772160.0, peak OverflowSize 0.0, peak pooled part (Size - OverflowSize) 167772160.0; samples 10
+EXPECTED: Capacity gauge = file_cache_size = 536870912 - yes
+EXPECTED: the pooled part grows past 16 MiB when file_cache_size is 512 MiB (the control moves) - yes
+EXPECTED totals: yes 4 no 0
