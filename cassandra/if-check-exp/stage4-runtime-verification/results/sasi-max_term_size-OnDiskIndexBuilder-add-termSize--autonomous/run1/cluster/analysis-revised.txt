@@ -1,0 +1,27 @@
+PASS  v1000 no error/OOM  EXPECTED: no error key, 0 OOM, 0 ERROR-rejecting  GOT: (None, 0, 0)
+PASS  v1000 index bytes >= rows*size after flush and after compaction  EXPECTED: >= 200000000  GOT: 478434304 / 478401408 (ratio 2.39 / 2.39 per row-size)
+PASS  v1000 no rejection logs  EXPECTED: 0 / 0  GOT: 0 / 0
+   v1000 heap peaks (indicative): load 1466886480  flush 343005888  compact 1216853992
+PASS  v1023 no error/OOM  EXPECTED: no error key, 0 OOM, 0 ERROR-rejecting  GOT: (None, 0, 0)
+PASS  v1023 index bytes >= rows*size after flush and after compaction  EXPECTED: >= 204600000  GOT: 683488680 / 683459872 (ratio 3.34 / 3.34 per row-size)
+PASS  v1023 no rejection logs  EXPECTED: 0 / 0  GOT: 0 / 0
+   v1023 heap peaks (indicative): load 1218895840  flush 356365104  compact 1249365760
+PASS  v1024 no error/OOM  EXPECTED: no error key, 0 OOM, 0 ERROR-rejecting  GOT: (None, 0, 0)
+PASS  v1024 rejection logs (flush path) == rows  EXPECTED: 200000  GOT: 200000
+PASS  v1024 memtable-path "Can't add term" == rows  EXPECTED: 200000  GOT: 200000
+PASS  v1024 index component total 0 bytes after flush and compaction  EXPECTED: 0 / 0  GOT: 0 / 0
+FAIL  v1024 base table data >= rows*size (not limited)  EXPECTED: >= 204800000  GOT: 66272904
+   v1024 heap peaks (indicative): load 1217068256  flush 1225939472  compact 1275954016
+PASS  v2000 no error/OOM  EXPECTED: no error key, 0 OOM, 0 ERROR-rejecting  GOT: (None, 0, 0)
+PASS  v2000 rejection logs (flush path) == rows  EXPECTED: 200000  GOT: 200000
+PASS  v2000 memtable-path "Can't add term" == rows  EXPECTED: 200000  GOT: 200000
+PASS  v2000 index component total 0 bytes after flush and compaction  EXPECTED: 0 / 0  GOT: 0 / 0
+FAIL  v2000 base table data >= rows*size (not limited)  EXPECTED: >= 400000000  GOT: 136797387
+   v2000 heap peaks (indicative): load 1524671072  flush 942983592  compact 1258998344
+PASS  index bytes grow with value size below 1024 (1000 -> 1023)  EXPECTED: v1023 > v1000  GOT: 478434304 -> 683488680
+PASS  c1 (cap 1 MB) compaction segments = floor(rows/844)+1  EXPECTED: 237 (+-1)  GOT: 237
+   c1 heap peaks (indicative): load 1303249744  flush 363225960  compact 1330226600; index bytes after compaction 683459872
+PASS  c64 (cap 64 MB) compaction segments = floor(rows/53990)+1  EXPECTED: 4 (+-1)  GOT: 4
+   c64 heap peaks (indicative): load 1451030320  flush 356774328  compact 1304358280; index bytes after compaction 683459872
+PASS  control moves: segments cap 1 MB >> cap 64 MB  EXPECTED: c1 > c64  GOT: 237 vs 4
+SUMMARY cluster predictions: 18/20 PASS

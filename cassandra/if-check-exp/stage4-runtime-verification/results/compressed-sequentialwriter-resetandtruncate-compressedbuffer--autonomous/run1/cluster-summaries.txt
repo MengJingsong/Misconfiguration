@@ -1,0 +1,232 @@
+C4 rc=0 2026-10-26T01:56:59Z
+C16 rc=0 2026-10-26T01:59:22Z
+C256 rc=0 2026-10-26T02:01:44Z
+C1024 rc=0 2026-10-26T02:04:11Z
+W4 rc=0 2026-10-26T02:09:03Z
+U rc=0 2026-10-26T02:11:29Z
+S1 0.55 rc=0 2026-10-26T02:13:22Z
+S1 0.40 rc=0 2026-10-26T02:15:15Z
+S1 0.70 rc=0 2026-10-26T02:17:08Z
+S2 0.55 rc=0 2026-10-26T02:19:01Z
+ALLDONE
+=== C4
+arm C4 start 2026-10-26T01:54:32Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/C4/cs.trace -Dcs.force=0
+schema read-back: {"created": {"t": {"chunk_length_in_kb": "4", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}}}
+sstables before compaction: {"t": 4}
+EXPECTED: every table has 4 SSTables before compaction — yes
+compaction window: 1792979798178..1792979801799 ms (3.6 s), nodetool rc: [0]
+sstables after compaction: {"t": 1}
+trace: 86 events; ks writers constructed: 5
+  flush-time ks writers: 4; compaction-window ks writers: 1
+EXPECTED: every ks writer has buffer=4096 (chunk) and compressed=4132 (LZ4 bound + 4), both direct — yes
+EXPECTED: flush writers: 4 constructed (one per flush) — yes
+EXPECTED: compaction writers: 1 constructed in the compaction window — yes
+  max compaction writers alive at once (init..cleanup, 1 of 1 cleanup events seen): 1
+EXPECTED: 1 compaction writer(s) alive at once — yes
+EXPECTED: R2 never printed in this arm (line 247 never evaluated in flush/compaction) — yes
+direct pool (secondary reading, includes reader buffers): baseline used=50669597 count=275; peak during compaction used=51791567 count=283; peak-baseline=1121970; heap used baseline=75321088 max=662523648
+NMT Total committed KB: baseline=2793526 peak=2873770
+NMT Java Heap committed KB: baseline=2097152 peak=2097152
+NMT Internal committed KB: baseline=1698 peak=1754
+NMT Other committed KB: baseline=229731 peak=230826
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=6 no=0
+=== C16
+arm C16 start 2026-10-26T01:56:59Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/C16/cs.trace -Dcs.force=0
+schema read-back: {"created": {"t": {"chunk_length_in_kb": "16", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}}}
+sstables before compaction: {"t": 4}
+EXPECTED: every table has 4 SSTables before compaction — yes
+compaction window: 1792979943101..1792979946270 ms (3.2 s), nodetool rc: [0]
+sstables after compaction: {"t": 1}
+trace: 80 events; ks writers constructed: 5
+  flush-time ks writers: 4; compaction-window ks writers: 1
+EXPECTED: every ks writer has buffer=16384 (chunk) and compressed=16468 (LZ4 bound + 4), both direct — yes
+EXPECTED: flush writers: 4 constructed (one per flush) — yes
+EXPECTED: compaction writers: 1 constructed in the compaction window — yes
+  max compaction writers alive at once (init..cleanup, 1 of 1 cleanup events seen): 1
+EXPECTED: 1 compaction writer(s) alive at once — yes
+EXPECTED: R2 never printed in this arm (line 247 never evaluated in flush/compaction) — yes
+direct pool (secondary reading, includes reader buffers): baseline used=50606379 count=242; peak during compaction used=51759531 count=248; peak-baseline=1153152; heap used baseline=87635096 max=658060440
+NMT Total committed KB: baseline=2791077 peak=2798330
+NMT Java Heap committed KB: baseline=2097152 peak=2097152
+NMT Internal committed KB: baseline=1456 peak=1516
+NMT Other committed KB: baseline=229669 peak=230795
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=6 no=0
+=== C256
+arm C256 start 2026-10-26T01:59:22Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/C256/cs.trace -Dcs.force=0
+schema read-back: {"created": {"t": {"chunk_length_in_kb": "256", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}}}
+sstables before compaction: {"t": 4}
+EXPECTED: every table has 4 SSTables before compaction — yes
+compaction window: 1792980085037..1792980087907 ms (2.9 s), nodetool rc: [0]
+sstables after compaction: {"t": 1}
+trace: 86 events; ks writers constructed: 5
+  flush-time ks writers: 4; compaction-window ks writers: 1
+EXPECTED: every ks writer has buffer=262144 (chunk) and compressed=263192 (LZ4 bound + 4), both direct — yes
+EXPECTED: flush writers: 4 constructed (one per flush) — yes
+EXPECTED: compaction writers: 1 constructed in the compaction window — yes
+  max compaction writers alive at once (init..cleanup, 1 of 1 cleanup events seen): 1
+EXPECTED: 1 compaction writer(s) alive at once — yes
+EXPECTED: R2 never printed in this arm (line 247 never evaluated in flush/compaction) — yes
+direct pool (secondary reading, includes reader buffers): baseline used=50649672 count=259; peak during compaction used=52538610 count=265; peak-baseline=1888938; heap used baseline=75335376 max=628983504
+NMT Total committed KB: baseline=2792894 peak=2861143
+NMT Java Heap committed KB: baseline=2097152 peak=2097152
+NMT Internal committed KB: baseline=1644 peak=1669
+NMT Other committed KB: baseline=229711 peak=230019
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=6 no=0
+=== C1024
+arm C1024 start 2026-10-26T02:01:44Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/C1024/cs.trace -Dcs.force=0
+schema read-back: {"created": {"t": {"chunk_length_in_kb": "1024", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}}}
+sstables before compaction: {"t": 4}
+EXPECTED: every table has 4 SSTables before compaction — yes
+compaction window: 1792980232595..1792980235215 ms (2.6 s), nodetool rc: [0]
+sstables after compaction: {"t": 1}
+trace: 86 events; ks writers constructed: 5
+  flush-time ks writers: 4; compaction-window ks writers: 1
+EXPECTED: every ks writer has buffer=1048576 (chunk) and compressed=1052708 (LZ4 bound + 4), both direct — yes
+EXPECTED: flush writers: 4 constructed (one per flush) — yes
+EXPECTED: compaction writers: 1 constructed in the compaction window — yes
+  max compaction writers alive at once (init..cleanup, 1 of 1 cleanup events seen): 1
+EXPECTED: 1 compaction writer(s) alive at once — yes
+EXPECTED: R2 never printed in this arm (line 247 never evaluated in flush/compaction) — yes
+direct pool (secondary reading, includes reader buffers): baseline used=50654093 count=266; peak during compaction used=58055187 count=275; peak-baseline=7401094; heap used baseline=75915200 max=629563328
+NMT Total committed KB: baseline=2793416 peak=2864881
+NMT Java Heap committed KB: baseline=2097152 peak=2097152
+NMT Internal committed KB: baseline=1603 peak=1625
+NMT Other committed KB: baseline=229711 peak=230795
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=6 no=0
+=== W4
+arm W4 start 2026-10-26T02:04:11Z
+yaml: concurrent_compactors=4, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/W4/cs.trace -Dcs.force=0
+schema read-back: {"created": {"t1": {"chunk_length_in_kb": "1024", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}, "t2": {"chunk_length_in_kb": "1024", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}, "t3": {"chunk_length_in_kb": "1024", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}, "t4": {"chunk_length_in_kb": "1024", "class": "org.apache.cassandra.io.compress.LZ4Compressor"}}}
+sstables before compaction: {"t1": 4, "t2": 4, "t3": 4, "t4": 4}
+EXPECTED: every table has 4 SSTables before compaction — yes
+compaction window: 1792980522342..1792980527517 ms (5.2 s), nodetool rc: [0, 0, 0, 0]
+sstables after compaction: {"t1": 1, "t2": 1, "t3": 1, "t4": 1}
+trace: 180 events; ks writers constructed: 20
+  flush-time ks writers: 16; compaction-window ks writers: 4
+EXPECTED: every ks writer has buffer=1048576 (chunk) and compressed=1052708 (LZ4 bound + 4), both direct — yes
+EXPECTED: flush writers: 16 constructed (one per flush) — yes
+EXPECTED: compaction writers: 4 constructed in the compaction window — yes
+  max compaction writers alive at once (init..cleanup, 4 of 4 cleanup events seen): 4
+EXPECTED: 4 compaction writer(s) alive at once — yes
+EXPECTED: R2 never printed in this arm (line 247 never evaluated in flush/compaction) — yes
+direct pool (secondary reading, includes reader buffers): baseline used=51071853 count=284; peak during compaction used=80676894 count=320; peak-baseline=29605041; heap used baseline=97585024 max=1086578528
+NMT Total committed KB: baseline=2799700 peak=2872260
+NMT Java Heap committed KB: baseline=2097152 peak=2097152
+NMT Internal committed KB: baseline=1642 peak=1726
+NMT Other committed KB: baseline=230123 peak=259050
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=6 no=0
+=== U
+arm U start 2026-10-26T02:09:03Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/U/cs.trace -Dcs.force=0
+schema read-back: {"created": {"t": {"enabled": "false"}}}
+sstables before compaction: {"t": 4}
+EXPECTED: every table has 4 SSTables before compaction — yes
+compaction window: 1792980670588..1792980673357 ms (2.8 s), nodetool rc: [0]
+sstables after compaction: {"t": 1}
+trace: 76 events; ks writers constructed: 0
+  flush-time ks writers: 0; compaction-window ks writers: 0
+EXPECTED: uncompressed table: no CompressedSequentialWriter constructed for ks (R1 silent for ks) — yes
+EXPECTED: R2 never printed in this arm (line 247 never evaluated in flush/compaction) — yes
+direct pool (secondary reading, includes reader buffers): baseline used=50663335 count=266; peak during compaction used=50724379 count=267; peak-baseline=61044; heap used baseline=78985136 max=649410480
+NMT Total committed KB: baseline=2791399 peak=2874553
+NMT Java Heap committed KB: baseline=2097152 peak=2097152
+NMT Internal committed KB: baseline=1561 peak=1581
+NMT Other committed KB: baseline=229724 peak=229784
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=3 no=0
+=== S1-0.55
+arm S1 start 2026-10-26T02:11:29Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S1-55/cs-load.trace -Dcs.force=0
+load: {"n": 240, "err": 0, "first_err": [], "seconds": 0.51}
+EXPECTED: one SSTable Data.db after flush — yes
+corrupted /users/jason92/s4-cs-data/data/ks/scr-b5bf5e80d0e211f1bfdf171557e2419b/nb-1-big-Data.db: size 991406, flipped byte at offset 545273 (frac 0.55); chunk about 33 of about 60
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S1-55/cs-scrub.trace -Dcs.force=0
+nodetool scrub rc=2: jobs (2) is bigger than configured concurrent_compactors (1) on the host, using at most 1 threads | error: Buffer holder has not been acquired | -- StackTrace -- | java.lang.AssertionError: Buffer holder has not been acquired | 	at org.apache.cassandra.io.util.WrappingRebufferer.offset(WrappingRebufferer.java:106) | 	at org.apache.cassandra.io.util.RandomAccessReader.current(RandomAccessReader.jav
+system.log: "Error reading partition" x 1; "Retrying from partition index" x 0; CorruptBlockException/CorruptSSTable lines x 3
+  log: INFO  [CompactionExecutor:1] 2026-10-26T02:13:07,252 OutputHandler.java:64 - Scrub of BigTableReader:big(path='/users/jason92/s4-cs-data/data/ks/scr-b5bf5e80d0e211f1bfdf171557e2419b/nb-1-big-Data.db') complete: 3 partitions in new sstable and 0 empty (tombstoned) partitions dropped
+  log: WARN  [CompactionExecutor:1] 2026-10-26T02:13:07,252 OutputHandler.java:74 - Unable to recover 3 partitions that were skipped.  You can attempt manual recovery from the pre-scrub snapshot.  You can also run nodetool repair to transfer the data from a healthy replica, if any
+trace (scrub lifetime): scrub-output writers 1; resetAndTruncate calls on them 1; r2 events 1; r3 1; r2f 0
+EXPECTED: resetAndTruncate was called by the scrub (scrubber failure path reached) — yes
+EXPECTED: line 247 evaluated (R2 printed) in the scrub: the real failure path reached the branch — yes
+EXPECTED: S1: R2 capacity >= chunkSize and R3 shows the same object identity (no grow) — yes
+EXPECTED: S1: R2 capacity equals the LZ4 bound 16468 for chunk 16 KiB — yes
+rows readable after scrub: {"count": 120}
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=5 no=0
+=== S1-0.40
+arm S1 start 2026-10-26T02:13:22Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S1-40/cs-load.trace -Dcs.force=0
+load: {"n": 240, "err": 0, "first_err": [], "seconds": 0.8}
+EXPECTED: one SSTable Data.db after flush — yes
+corrupted /users/jason92/s4-cs-data/data/ks/scr-f9162380d0e211f1be003d89df6ebb4a/nb-1-big-Data.db: size 991408, flipped byte at offset 396563 (frac 0.4); chunk about 24 of about 60
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S1-40/cs-scrub.trace -Dcs.force=0
+nodetool scrub rc=2: jobs (2) is bigger than configured concurrent_compactors (1) on the host, using at most 1 threads | error: Buffer holder has not been acquired | -- StackTrace -- | java.lang.AssertionError: Buffer holder has not been acquired | 	at org.apache.cassandra.io.util.WrappingRebufferer.offset(WrappingRebufferer.java:106) | 	at org.apache.cassandra.io.util.RandomAccessReader.current(RandomAccessReader.jav
+system.log: "Error reading partition" x 1; "Retrying from partition index" x 0; CorruptBlockException/CorruptSSTable lines x 3
+  log: INFO  [CompactionExecutor:1] 2026-10-26T02:15:00,730 OutputHandler.java:64 - Scrub of BigTableReader:big(path='/users/jason92/s4-cs-data/data/ks/scr-f9162380d0e211f1be003d89df6ebb4a/nb-1-big-Data.db') complete: 2 partitions in new sstable and 0 empty (tombstoned) partitions dropped
+  log: WARN  [CompactionExecutor:1] 2026-10-26T02:15:00,730 OutputHandler.java:74 - Unable to recover 4 partitions that were skipped.  You can attempt manual recovery from the pre-scrub snapshot.  You can also run nodetool repair to transfer the data from a healthy replica, if any
+trace (scrub lifetime): scrub-output writers 1; resetAndTruncate calls on them 1; r2 events 1; r3 1; r2f 0
+EXPECTED: resetAndTruncate was called by the scrub (scrubber failure path reached) — yes
+EXPECTED: line 247 evaluated (R2 printed) in the scrub: the real failure path reached the branch — yes
+EXPECTED: S1: R2 capacity >= chunkSize and R3 shows the same object identity (no grow) — yes
+EXPECTED: S1: R2 capacity equals the LZ4 bound 16468 for chunk 16 KiB — yes
+rows readable after scrub: {"count": 80}
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=5 no=0
+=== S1-0.70
+arm S1 start 2026-10-26T02:15:15Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S1-70/cs-load.trace -Dcs.force=0
+load: {"n": 240, "err": 0, "first_err": [], "seconds": 0.31}
+EXPECTED: one SSTable Data.db after flush — yes
+corrupted /users/jason92/s4-cs-data/data/ks/scr-3c7ffb50d0e311f1a15cffc25cf7da15/nb-1-big-Data.db: size 991404, flipped byte at offset 693982 (frac 0.7); chunk about 42 of about 60
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S1-70/cs-scrub.trace -Dcs.force=0
+nodetool scrub rc=2: jobs (2) is bigger than configured concurrent_compactors (1) on the host, using at most 1 threads | error: Buffer holder has not been acquired | -- StackTrace -- | java.lang.AssertionError: Buffer holder has not been acquired | 	at org.apache.cassandra.io.util.WrappingRebufferer.offset(WrappingRebufferer.java:106) | 	at org.apache.cassandra.io.util.RandomAccessReader.current(RandomAccessReader.jav
+system.log: "Error reading partition" x 1; "Retrying from partition index" x 1; CorruptBlockException/CorruptSSTable lines x 3
+  log: INFO  [CompactionExecutor:1] 2026-10-26T02:16:53,399 OutputHandler.java:64 - Scrub of BigTableReader:big(path='/users/jason92/s4-cs-data/data/ks/scr-3c7ffb50d0e311f1a15cffc25cf7da15/nb-1-big-Data.db') complete: 4 partitions in new sstable and 0 empty (tombstoned) partitions dropped
+  log: WARN  [CompactionExecutor:1] 2026-10-26T02:16:53,400 OutputHandler.java:74 - Unable to recover 2 partitions that were skipped.  You can attempt manual recovery from the pre-scrub snapshot.  You can also run nodetool repair to transfer the data from a healthy replica, if any
+trace (scrub lifetime): scrub-output writers 1; resetAndTruncate calls on them 1; r2 events 1; r3 1; r2f 0
+EXPECTED: resetAndTruncate was called by the scrub (scrubber failure path reached) — yes
+EXPECTED: line 247 evaluated (R2 printed) in the scrub: the real failure path reached the branch — yes
+EXPECTED: S1: R2 capacity >= chunkSize and R3 shows the same object identity (no grow) — yes
+EXPECTED: S1: R2 capacity equals the LZ4 bound 16468 for chunk 16 KiB — yes
+rows readable after scrub: {"count": 160}
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=5 no=0
+=== S2-0.55
+arm S2 start 2026-10-26T02:17:08Z
+yaml: concurrent_compactors=1, flush_compression=table, compaction_throughput=0MiB/s, JMX 7327, native 9349, storage 7027, 127.0.27.1
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S2-55/cs-load.trace -Dcs.force=0
+load: {"n": 240, "err": 0, "first_err": [], "seconds": 0.2}
+EXPECTED: one SSTable Data.db after flush — yes
+corrupted /users/jason92/s4-cs-data/data/ks/scr-7f94ae40d0e311f19f38d113f48c5058/nb-1-big-Data.db: size 991406, flipped byte at offset 545273 (frac 0.55); chunk about 33 of about 60
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar=boot:/users/jason92/s4-cs/build/lib/jars/byteman-4.0.20.jar,script:/users/jason92/s4-cs-harness/cs.btm,listener:true,port:9327 -Dorg.jboss.byteman.verbose=false -Dcs.trace=/users/jason92/s4-cs-logs/run1/S2-55/cs-scrub.trace -Dcs.force=1
+nodetool scrub rc=2: jobs (2) is bigger than configured concurrent_compactors (1) on the host, using at most 1 threads | error: Buffer holder has not been acquired | -- StackTrace -- | java.lang.AssertionError: Buffer holder has not been acquired | 	at org.apache.cassandra.io.util.WrappingRebufferer.offset(WrappingRebufferer.java:106) | 	at org.apache.cassandra.io.util.RandomAccessReader.current(RandomAccessReader.jav
+system.log: "Error reading partition" x 1; "Retrying from partition index" x 0; CorruptBlockException/CorruptSSTable lines x 3
+  log: INFO  [CompactionExecutor:1] 2026-10-26T02:18:45,745 OutputHandler.java:64 - Scrub of BigTableReader:big(path='/users/jason92/s4-cs-data/data/ks/scr-7f94ae40d0e311f19f38d113f48c5058/nb-1-big-Data.db') complete: 3 partitions in new sstable and 0 empty (tombstoned) partitions dropped
+  log: WARN  [CompactionExecutor:1] 2026-10-26T02:18:45,745 OutputHandler.java:74 - Unable to recover 3 partitions that were skipped.  You can attempt manual recovery from the pre-scrub snapshot.  You can also run nodetool repair to transfer the data from a healthy replica, if any
+trace (scrub lifetime): scrub-output writers 1; resetAndTruncate calls on them 1; r2 events 1; r3 1; r2f 1
+EXPECTED: resetAndTruncate was called by the scrub (scrubber failure path reached) — yes
+EXPECTED: line 247 evaluated (R2 printed) in the scrub: the real failure path reached the branch — yes
+EXPECTED: S2: R2f forced capacity 64 on every R2 — yes
+EXPECTED: S2: R3 capacity == chunkSize exactly and a new identity — yes
+EXPECTED: S2: grown capacity is below the LZ4 bound (no ceiling and no floor: it is the stored chunk size) — yes
+rows readable after scrub: {"count": 120}
+processes naming s4-cs-data left: none
+EXPECTED totals: yes=6 no=0

@@ -1,0 +1,59 @@
+# Byteman observation rules for max_hints_file_size-HintsWriteExecutor.flushInternal-session.position--autonomous
+# (B2d / B3d as amended 2026-10-26). They change no behaviour. Every line goes to the file named by -Dstage4.trace.
+#
+#   roll host=<hostId> position=<session.position()> max=<maxHintsFileSize> ms=<epoch>
+#       HintsWriteExecutor.flushInternal at HintsWriteExecutor.java:248, the `return false` taken when
+#       `session.position() >= maxHintsFileSize` (:247). One line per file closed by the limit.
+#   sessclose host=<hostId> size=<position> ms=<epoch>
+#       exit of HintsWriter.Session.close(): the file's length after one flush session.
+#   decide ep=<endpoint> result=<bool> checked=<T> limit=<L> ms=<epoch>
+#       exit of StorageProxy.shouldHint(Replica, boolean); checked/limit as the check itself used them
+#       (captured after its own getTotalHintsSize() call; checked=-1 when the guard skipped that call).
+
+RULE mh roll
+CLASS org.apache.cassandra.hints.HintsWriteExecutor
+METHOD flushInternal
+AT LINE 248
+IF true
+DO traceOpen("mh", java.lang.System.getProperty("stage4.trace", "mh.trace"));
+   traceln("mh", "roll host=" + $writer.descriptor().hostId + " position=" + $session.position() + " max=" + $maxHintsFileSize + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mh session close
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD close
+AT EXIT
+IF true
+DO traceOpen("mh", java.lang.System.getProperty("stage4.trace", "mh.trace"));
+   traceln("mh", "sessclose host=" + $0.this$0.descriptor.hostId + " size=" + $0.position() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE mh decide clear
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AT ENTRY
+IF true
+DO unlink("mh.T", java.lang.Thread.currentThread());
+   unlink("mh.L", java.lang.Thread.currentThread())
+ENDRULE
+
+RULE mh decide operand
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AFTER INVOKE org.apache.cassandra.hints.HintsService.getTotalHintsSize
+IF true
+DO link("mh.T", java.lang.Thread.currentThread(), "" + $!);
+   link("mh.L", java.lang.Thread.currentThread(), "" + $maxHintsSize)
+ENDRULE
+
+RULE mh decide exit
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AT EXIT
+IF true
+DO traceOpen("mh", java.lang.System.getProperty("stage4.trace", "mh.trace"));
+   traceln("mh", "decide ep=" + $1.endpoint() + " result=" + $! 
+                  + " checked=" + (linked("mh.T", java.lang.Thread.currentThread()) == null ? "-1" : linked("mh.T", java.lang.Thread.currentThread()))
+                  + " limit=" + (linked("mh.L", java.lang.Thread.currentThread()) == null ? "" + org.apache.cassandra.config.DatabaseDescriptor.getMaxHintsSizePerHost() : linked("mh.L", java.lang.Thread.currentThread()))
+                  + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

@@ -1,0 +1,164 @@
+[2026-10-26T04:27:31.765Z] run A1024r {'tree': 's4-tm', 'mode': 'CONTAINS', 'size': '1024', 'heap_mb': '256', 'stop': '0', 'rows': '174', 'inflight': '1', 'outdir': '/users/jason92/stage4-logs/tm/run1-cl/A1024r'} host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu
+[2026-10-26T04:27:31.765Z] + ss -ltn | grep -q ":7331 "
+[2026-10-26T04:27:31.775Z] + ss -ltn | grep -q ":9353 "
+[2026-10-26T04:27:31.784Z] + ss -ltn | grep -q ":7031 "
+[2026-10-26T04:27:31.793Z] + mkdir -p /users/jason92/s4-tm-data/A1024r/sampler && javac -d /users/jason92/s4-tm-data/A1024r/sampler /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-max_term_size-TrieMemIndex-add-termSize--autonomous/Sampler.java
+[2026-10-26T04:27:32.508Z] start node ulimit -n 100000; exec /users/jason92/s4-tm/bin/cassandra -f -p /users/jason92/s4-tm-data/A1024r/pid
+[2026-10-26T04:27:32.509Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+nodetool: Failed to connect to '127.0.0.1:7331' - ConnectException: 'Connection refused (Connection refused)'.
+
+[2026-10-26T04:27:36.465Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-10-26T04:27:40.621Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:27:44.675Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:27:48.687Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:27:52.681Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:27:56.768Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:28:00.854Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:28:04.921Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:28:08.952Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+running
+
+[2026-10-26T04:28:10.006Z] node up
+[2026-10-26T04:28:15.013Z] + javap -constants -cp /users/jason92/s4-tm/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder | grep MAX_TERM_SIZE; javap -c -cp /users/jason92/s4-tm/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sasi.memory.TrieMemIndex | grep -m1 -B1 'if_icmplt'
+[2026-10-26T04:28:15.739Z] constant check ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+[2026-10-26T04:28:15.759Z] + jcmd 1180031 GC.class_histogram
+[2026-10-26T04:28:16.271Z] histogram base ['Total        679318       65071168'] ['34:           362         106344  [C (java.base@11.0.32.1)', '359:           103           2472  [[C (java.base@11.0.32.1)', '700:            28            672  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)', '805:             1            432  [[[C (java.base@11.0.32.1)', '896:            13            312  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)']
+[2026-10-26T04:28:16.271Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-max_term_size-TrieMemIndex-add-termSize--autonomous/loader.py schema /users/jason92/s4-tm 127.0.31.1 9353 CONTAINS
+index created with options 'mode':'CONTAINS','analyzed':'false'
+
+[2026-10-26T04:28:49.065Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-max_term_size-TrieMemIndex-add-termSize--autonomous/loader.py verify /users/jason92/s4-tm 127.0.31.1 9353 1024 CONTAINS
+read_by_key rows=1
+like_hits=0
+
+[2026-10-26T04:28:49.513Z] + jcmd 1180031 GC.class_histogram
+[2026-10-26T04:28:49.907Z] histogram post ['Total        726046       73370328'] ['28:           391         165400  [C (java.base@11.0.32.1)', '204:           316           7584  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)', '301:           161           3864  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)', '384:           103           2472  [[C (java.base@11.0.32.1)', '849:             1            432  [[[C (java.base@11.0.32.1)', '2925:             1             24  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory', '3379:             1             16  com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory', '4330:             1             16  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory$$Lambda$1689/0x0000000840846440']
+[2026-10-26T04:28:49.908Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 tablestats ks.t
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 1
+	Read Latency: 0.337 ms
+	Write Count: 174
+	Write Latency: 0.4628333333333333 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 173
+		Memtable cell count: 174
+		Memtable data size: 186702
+		Memtable off heap memory used: 0
+		Memtable switch count: 1
+		Speculative retries: 0
+		Local read count: 1
+		Local read latency: 0.372 ms
+		Local write count: 174
+		Local write latency: 0.504 ms
+		Local read/write ratio: 0.00575
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): 1.0
+		Maximum live cells per slice (last five minutes): 1
+		Average tombstones per slice (last five minutes): 1.0
+		Maximum tombstones per slice (last five minutes): 1
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-10-26T04:28:51.083Z] + /users/jason92/s4-tm/bin/nodetool -h 127.0.0.1 -p 7331 tablestats ks.t
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 1
+	Read Latency: 0.337 ms
+	Write Count: 174
+	Write Latency: 0.4628333333333333 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 173
+		Memtable cell count: 174
+		Memtable data size: 186702
+		Memtable off heap memory used: 0
+		Memtable switch count: 1
+		Speculative retries: 0
+		Local read count: 1
+		Local read latency: 0.372 ms
+		Local write count: 174
+		Local write latency: 0.504 ms
+		Local read/write ratio: 0.00575
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): 1.0
+		Maximum live cells per slice (last five minutes): 1
+		Average tombstones per slice (last five minutes): 1.0
+		Maximum tombstones per slice (last five minutes): 1
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-10-26T04:28:52.229Z] + grep -e 'Enqueuing flush of ks.t' -e 'Flushing largest' -e 'Completed flushing' -e 'Flushed index segment' -e 'OutOfMemory' -e '^ERROR' -e '^WARN' /users/jason92/s4-tm-data/A1024r/logs/system.log | grep -v "Can't add term" > /users/jason92/stage4-logs/tm/run1-cl/A1024r/flush-lines.txt
+[2026-10-26T04:28:52.234Z] + grep -c "Can't add term" /users/jason92/s4-tm-data/A1024r/logs/system.log > /users/jason92/stage4-logs/tm/run1-cl/A1024r/cantadd-count.txt
+[2026-10-26T04:28:52.237Z] + grep -m3 "Can't add term" /users/jason92/s4-tm-data/A1024r/logs/system.log > /users/jason92/stage4-logs/tm/run1-cl/A1024r/cantadd-sample.txt
+[2026-10-26T04:28:52.240Z] + df -h /users/jason92/s4-tm-data/A1024r | tail -1
+/dev/sda3        63G   17G   43G  29% /
+
+[2026-10-26T04:28:57.249Z] stopped {'node': 1180031, 'sampler': 1181362, 'loader': 1181391}
+[2026-10-26T04:28:58.264Z] done {"label": "A1024r", "args": {"tree": "s4-tm", "mode": "CONTAINS", "size": "1024", "heap_mb": "256", "stop": "0", "rows": "174", "inflight": "1", "outdir": "/users/jason92/stage4-logs/tm/run1-cl/A1024r"}, "host": "node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu", "xmx": ["-Xmx2G"], "xms": ["-Xms2G"], "maxterm_jar": "apache-cassandra-5.0.9-SNAPSHOT.jar", "constant_check": ["public static final int MAX_TERM_SIZE = 1024;", "37: sipush        1024", "40: if_icmplt     105"], "yaml": {"memtable_heap_space": "256MiB", "memtable_cleanup_threshold": null, "memtable_flush_writers": null, "memtable_allocation_type": "heap_buffers", "commitlog_total_space": "1024MiB", "concurrent_writes": 8, "sasi_indexes_enabled": true}, "schema_out": ["index created with options 'mode':'CONTAINS','analyzed':'false'"], "base_switch": 1, "sample_before_load": [1792988903085, 216066112, 0, 1], "t_load_start": 1792988903137, "loader_rc": 0, "t_load_end": 1792988904040, "loader_out": ["loaded 174 rows of 1024 chars in 0.4 s (stopped by rowcap)"], "t_settled": 1792988929065, "verify_out": ["read_by_key rows=1", "like_hits=0"], "log_counts": {"Can't add term": 174, "Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT": 0, "Enqueuing flush of ks.t": 1, "Flushed index segment": 0, "Rejecting value": 0, "java.lang.OutOfMemoryError": 0, "Flushing largest": 0}, "si_files": [], "data_files": [], "t_end": 1792988932229}
+[2026-10-26T04:28:58.264Z] stopped {}

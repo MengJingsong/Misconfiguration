@@ -1,0 +1,33 @@
+cluster-run L 2026-10-25 23:14:26 EDT host node0 tree /users/jason92/s4-hb ['cassandra-5.0.9', '8cbcaef'] HB_N=(default)
+harness md5: 82b5839a16e5db37f3cf033b33ec2812  cluster-run.py 84812005d608646b24e08093a202c6a0  client.py 26723e86e2da7a7dbb675d4918041769  make-node-yaml.sh a9ef136f33e71303c64d0a1caf1d3898  Jmx.java 2ddb01a1eb24013cc4fdfdc4a9a90576  hb.btm 22ba488b0074de2f605b8d28d859c08d  hold-flush.btm 
+arm L: yaml ['native_transport_max_message_size=20MiB']; MAX_HINT_BUFFERS 3; peer down True; workload large; expected slab 32 MiB, max_mutation_size 16 MiB; hold 10000 ms per flush
+free on /users/jason92: 35.0 GiB
+Byteman TestScript: Type checked rule "hold each hints buffer flush" |  | TestScript: no errors
+# ---- stage4 hb lines ----;cluster_name: stage4-hb;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.20.1;rpc_address: 127.0.20.1;storage_port: 7020;native_transport_port: 9342;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/s4-hb-data/A/commitlog;hints_directory: /users/jason92/s4-hb-data/A/hints;saved_caches_directory: /users/jason92/s4-hb-data/A/saved_caches;cdc_raw_directory: /users/jason92/s4-hb-data/A/cdc_raw;hinted_handoff_enabled: true;write_request_timeout: 30000ms;native_transport_timeout: 60000ms;native_transport_max_message_size: 20MiB;
+A JVM_EXTRA_OPTS: -Dcassandra.MAX_HINT_BUFFERS=3 -javaagent:/users/jason92/s4-hb/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/hints-HintsBuffer-put-slabCapacity--autonomous/hb.btm,script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/hints-HintsBuffer-put-slabCapacity--autonomous/hold-flush.btm,listener:true,port:9320 -Dorg.jboss.byteman.verbose=false -Dstage4.trace=/users/jason92/s4-hb-logs/run1/cluster/L/hb.trace -Dstage4.hold.ms=10000 -Dstage4.hold.out=/users/jason92/s4-hb-logs/run1/cluster/L/hold.txt
+# ---- stage4 hb lines ----;cluster_name: stage4-hb;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.20.2;rpc_address: 127.0.20.2;storage_port: 7020;native_transport_port: 9342;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/s4-hb-data/B/commitlog;hints_directory: /users/jason92/s4-hb-data/B/hints;saved_caches_directory: /users/jason92/s4-hb-data/B/saved_caches;cdc_raw_directory: /users/jason92/s4-hb-data/B/cdc_raw;hinted_handoff_enabled: true;write_request_timeout: 30000ms;native_transport_timeout: 60000ms;native_transport_max_message_size: 20MiB;
+schema: {'schema': 'ok', 'agreement': True, 'replication': "{'class': 'SimpleStrategy', 'replication_factor': '2'}"}
+A settings: {'hinted_handoff_enabled': 'true', 'max_mutation_size': '16384KiB', 'commitlog_segment_size': '32MiB', 'hints_flush_period': '10000ms', 'write_request_timeout': '30000ms', 'native_transport_timeout': '60000ms', 'native_transport_max_message_size': '20MiB', 'storage_port': '7020', 'native_transport_port': '9342'}
+A command line: -XX:MaxDirectMemorySize=1g -Xmx2G -Dcassandra.MAX_HINT_BUFFERS=3 port:9320 -Dstage4.hold.ms=10000
+EXPECTED: read-back: storage 7020, native 9342 (7020, 9342) — yes
+EXPECTED: A runs with MAX_HINT_BUFFERS=3 on its command line — yes
+max_mutation_size read-back: 16384KiB (expected 16 MiB)
+B stopped and seen DN by A after 11.8 s
+trace before the workload: {'created': 1, 'waiting': 0, 'alloc': 0, 'allocreject': 0, 'flushrun': 0}
+calibration: blob 16773120 -> hintSize 16773175 -> M 16773164; c = 44 bytes of mutation overhead; client {'key': 1, 'bytes': 16773120, 'outcome': 'ok', 'ms': 233, 'ms_end': 1792984648034}
+step m-100: M target 16777116, blob 16777072, client ok ; alloc hint ['16777127']; rejected []; TotalHints 2.0
+step m-23: M target 16777193, blob 16777149, client ok ; alloc hint ['16777204', '16777204']; rejected []; TotalHints 3.0
+step m-22: M target 16777194, blob 16777150, client ok ; alloc hint ['16777205']; rejected ['16777205']; TotalHints 3.0
+step m-15: M target 16777201, blob 16777157, client ok ; alloc hint ['16777212']; rejected ['16777212']; TotalHints 3.0
+step m-12: M target 16777204, blob 16777160, client ok ; alloc hint ['16777215']; rejected ['16777215']; TotalHints 3.0
+step m-11: M target 16777205, blob 16777161, client InvalidRequest Error from server: code=2200 [Invalid query] message="Request is too big: length 16777217 exceeds maximum allowed length; alloc hint []; rejected []; TotalHints 3.0
+readings: created slabs 2 (before baseline 1) sizes [33554432]; writers waited 0 times; flushes 1; peak direct delta 48.02 MiB, peak pool bytes 80.02 MiB, plateau range 0.1 MiB; hints dir 48.0 MiB; TotalHints {'org.apache.cassandra.metrics:type=Storage,name=TotalHints|Count': '3'}; log {'too large': 6, 'Hint of': 6, '[Hh]inted handoff': 0, 'java.lang.OutOfMemoryError': 0, '[Dd]irect buffer memory': 0, 'MutationExceededMaxSize': 0, 'ERROR': 3, 'WARN': 8}
+EXPECTED: all slabs are 32 MiB (sizes [33554432]) — yes
+EXPECTED: m-100: hinted (no allocreject; alloc ['16777127'], reject []) — yes
+EXPECTED: m-23: hinted (no allocreject; alloc ['16777204', '16777204'], reject []) — yes
+EXPECTED: m-22: rejected at HintsBuffer.java:152 (alloc ['16777205'], reject ['16777205']) — yes
+EXPECTED: m-15: rejected at HintsBuffer.java:152 (alloc ['16777212'], reject ['16777212']) — yes
+EXPECTED: m-12: rejected at HintsBuffer.java:152 (alloc ['16777215'], reject ['16777215']) — yes
+m-11: commit-log side, informational: client InvalidRequest, alloc [], reject []
+TotalHints after each step: [2.0, 3.0, 3.0, 3.0, 3.0, 3.0]
+EXPECTED lines: 8 yes, 0 no

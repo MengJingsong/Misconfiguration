@@ -1,0 +1,9 @@
+cluster-run pos pos_default max_hints_file_size=default 2026-10-25 23:31:37 MDT run run1
+# ---- stage4 ec lines ----;cluster_name: stage4-ec;num_tokens: 1;initial_token: -9223372036854775808;endpoint_snitch: SimpleSnitch;listen_address: 127.0.33.2;rpc_address: 127.0.33.2;storage_port: 7033;ssl_storage_port: 7133;native_transport_port: 9355;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/s4-ec-run/A/commitlog;hints_directory: /users/jason92/s4-ec-run/A/hints;saved_caches_directory: /users/jason92/s4-ec-run/A/saved_caches;cdc_raw_directory: /users/jason92/s4-ec-run/A/cdc_raw;hinted_handoff_enabled: true;max_hint_window: 3h;hints_flush_period: 1000ms;hinted_handoff_throttle: 102400KiB;max_hints_delivery_threads: 1;commitlog_segment_size: 32MiB;transparent_data_encryption_options:;
+start A: MAX_HEAP_SIZE=2G JVM_EXTRA_OPTS=""
+# ---- stage4 ec lines ----;cluster_name: stage4-ec;num_tokens: 1;initial_token: 0;endpoint_snitch: SimpleSnitch;listen_address: 127.0.33.3;rpc_address: 127.0.33.3;storage_port: 7034;ssl_storage_port: 7134;native_transport_port: 9356;seed_provider:;data_file_directories:;commitlog_directory: /users/jason92/s4-ec-run/B/commitlog;hints_directory: /users/jason92/s4-ec-run/B/hints;saved_caches_directory: /users/jason92/s4-ec-run/B/saved_caches;cdc_raw_directory: /users/jason92/s4-ec-run/B/cdc_raw;hinted_handoff_enabled: true;max_hint_window: 3h;hints_flush_period: 1000ms;hinted_handoff_throttle: 102400KiB;max_hints_delivery_threads: 1;commitlog_segment_size: 32MiB;transparent_data_encryption_options:;
+start B: MAX_HEAP_SIZE=2G JVM_EXTRA_OPTS=""
+write: {'ok': True, 'target': 200, 'written': 200, 'succeeded': 200, 'failed': 0, 'errors': [], 'size': 1048576, 'conc': 4, 'elapsed_s': 1.07, 'stopped_by': 'count'}
+hints files: count=3 sizes=[8, 134226730, 75502554] total=209729292 max=134226730
+EXPECTED: default: few files (<= 3), total >= 190 MiB - yes
+EXPECTED: no CassandraDaemon of this harness left - yes

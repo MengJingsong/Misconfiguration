@@ -1,0 +1,20 @@
+B2f(1) S=1022 EXPECTED: reached=10000 info=0 est=12420000 | GOT: reached=10000 info=0 est=12420000 | PASS
+B2f(1) S=1023 EXPECTED: reached=10000 info=0 est=12430000 | GOT: reached=10000 info=0 est=12430000 | PASS
+B2f(2) S=1024 EXPECTED: reached=0 info=10000 err=0 est=0 file_len=0 cuts=0 seglines=0 | GOT: reached=0 info=10000 err=0 est=0 file=0 cuts=0 seg=0 | PASS
+B2f(2) S=1025 EXPECTED: reached=0 info=10000 err=0 est=0 file_len=0 cuts=0 seglines=0 | GOT: reached=0 info=10000 err=0 est=0 file=0 cuts=0 seg=0 | PASS
+B2f(3) N=1000 EXPECTED: est=1243000 file>=1023000 | GOT: est=1243000 file=3420092 | PASS
+B2f(3) N=10000 EXPECTED: est=12430000 file>=10230000 | GOT: est=12430000 file=34184312 | PASS
+B2f(3) N=100000 EXPECTED: est=124300000 file>=102300000 | GOT: est=124300000 file=341748424 | PASS
+B2f(3) file ratio N=10000/1000 EXPECTED: 8..12 | GOT: 10.00 | PASS
+B2f(3) file ratio N=100000/10000 EXPECTED: 8..12 | GOT: 10.00 | PASS
+B2f(3) series EXPECTED: value = at_add*1243 at every 10k step | GOT: steps=11 | PASS
+B2f(4) option=1 EXPECTED: cuts=118 lines=119 est_at_cut in [1048576,1049819) | GOT: cuts=118 lines=119 est_at_cut=[1049092,1049092] | PASS
+B2f(4) option=8 EXPECTED: cuts=14 lines=15 est_at_cut in [8388608,8389851) | GOT: cuts=14 lines=15 est_at_cut=[8389007,8389007] | PASS
+B2f(4) option=def EXPECTED: cuts=0 lines=0 est_at_cut in [161061273,161062516) | GOT: cuts=0 lines=0 est_at_cut=[,] | PASS
+B2f(4) final file equal across options EXPECTED: 1 distinct value | GOT: ['341748424'] | PASS
+B2f(4) default, N=200k EXPECTED: cuts=1 lines=2 | GOT: cuts=1 lines=2 | PASS
+B2f(5) FLUSH source, option 1 EXPECTED: cuts=0 lines=0 | GOT: cuts=0 lines=0 | PASS
+B2f(6) tokenized, default option EXPECTED: value=1048576 B, reached=131072 rejects=0 est=29753344 cuts=0 | GOT: value=1048576 reached=131072 info=0 est=29753344 cuts=0 | PASS
+B2f(6) tokenized, option 1 EXPECTED: cuts=1 lines=1 rejects=0 (estimate at cut = 29753344 = 28.4 x cap) | GOT: cuts=1 lines=1 info=0 | PASS
+B2f(7) heap delta (indicative) EXPECTED: 0.5x..2x of 124300000 | GOT: 141054712 | PASS
+SUMMARY ALL PASS

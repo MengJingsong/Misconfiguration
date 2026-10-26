@@ -1,0 +1,35 @@
+[junit-timeout] Testsuite: org.apache.cassandra.io.compress.ChunkBufferGrowthTest-_jdk11
+[junit-timeout] Testsuite: org.apache.cassandra.io.compress.ChunkBufferGrowthTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.746 sec
+[junit-timeout] Testsuite: ChunkBufferGrowthTest-_jdk11
+[junit-timeout] Testsuite: ChunkBufferGrowthTest-_jdk11 Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0 sec
+PASS unit: 17 cells read :: 17
+PASS unit: 8 lz4 cells, every chunk x {random, zeros}
+PASS unit: lz4 capacity before == after == 4+n+n/255+16, same object, direct, buffer == chunk
+PASS unit: lz4 normal cells passed :233 (file shrank to the mark chunk offset)
+PASS unit: capacity ratios to 4 KiB: 3.99 / 15.9 / 254.8 and to chunk within 1.0-1.01
+PASS unit: early-return control: file length unchanged, same object
+PASS unit: mock-force: before == chunk/2, after == chunk exactly, new object, file shrank
+PASS unit: mock-ratio0.5: before == after == 2 x chunk, same object (no fire)
+PASS unit: no assertion failures in the test
+PASS C4: 5 ks writers = 4 flush + 1 compaction; buffer == 4096; compressed == 4132; direct
+PASS C4: no r2 anywhere in the trace
+PASS C16: 5 ks writers = 4 flush + 1 compaction; buffer == 16384; compressed == 16468; direct
+PASS C16: no r2 anywhere in the trace
+PASS C256: 5 ks writers = 4 flush + 1 compaction; buffer == 262144; compressed == 263192; direct
+PASS C256: no r2 anywhere in the trace
+PASS C1024: 5 ks writers = 4 flush + 1 compaction; buffer == 1048576; compressed == 1052708; direct
+PASS C1024: no r2 anywhere in the trace
+PASS W4: 20 ks writers = 16 flush + 4 compaction; buffer == 1048576; compressed == 1052708; direct
+PASS W4: no r2 anywhere in the trace
+PASS W4: the 4 compaction writers overlap in time (max init < min cleanup) :: [(1792980523395, 1792980527490), (1792980523413, 1792980527489), (1792980523435, 1792980527490), (1792980523443, 1792980527490)]
+PASS U: no ks writer constructed (uncompressed)
+PASS U: the same trace does show system-table writers (the rule was live)
+  S1-40: scrub-output writers 1, r2 1, r3 1, r2f 0
+PASS S1-40: r2 cap == 16468 >= chunkSize; r3 same identity; no grow
+  S1-55: scrub-output writers 1, r2 1, r3 1, r2f 0
+PASS S1-55: r2 cap == 16468 >= chunkSize; r3 same identity; no grow
+  S1-70: scrub-output writers 1, r2 1, r3 1, r2f 0
+PASS S1-70: r2 cap == 16468 >= chunkSize; r3 same identity; no grow
+  S2-55: scrub-output writers 1, r2 1, r3 1, r2f 1
+PASS S2-55: forced 64 -> r3 cap == chunkSize exactly, new identity
+SELFCHECK ALL PASS 26 / 26

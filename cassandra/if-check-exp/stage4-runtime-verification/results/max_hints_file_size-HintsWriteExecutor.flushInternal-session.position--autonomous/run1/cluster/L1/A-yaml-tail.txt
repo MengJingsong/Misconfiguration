@@ -1,0 +1,25 @@
+# ---- stage4 mh lines ----
+cluster_name: stage4-mh
+num_tokens: 1
+initial_token: -4611686018427387904
+auto_bootstrap: false
+storage_port: 7023
+native_transport_port: 9345
+listen_address: 127.0.23.1
+rpc_address: 127.0.23.1
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.23.1:7023"
+data_file_directories:
+    - /users/jason92/s4-mh-run/A/data
+commitlog_directory: /users/jason92/s4-mh-run/A/commitlog
+hints_directory: /users/jason92/s4-mh-run/A/hints
+saved_caches_directory: /users/jason92/s4-mh-run/A/saved_caches
+cdc_raw_directory: /users/jason92/s4-mh-run/A/cdc_raw
+hinted_handoff_enabled: true
+max_hint_window: 6h
+hints_flush_period: 1000ms
+auto_hints_cleanup_enabled: false
+endpoint_snitch: SimpleSnitch
+max_hints_file_size: 1MiB

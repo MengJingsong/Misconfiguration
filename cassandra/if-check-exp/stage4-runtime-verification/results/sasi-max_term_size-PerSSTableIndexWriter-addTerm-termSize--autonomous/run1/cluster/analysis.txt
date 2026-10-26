@@ -1,0 +1,34 @@
+valid m EXPECTED: no error; -Xms2G -Xmx2G | GOT: error=None xmx=['-Xmx2G'] xms=['-Xms2G'] | PASS
+no OOM / other ERROR m EXPECTED: 0 / 0 | GOT: 0 / 0 | PASS
+no builder ERROR rejection line m EXPECTED: 0 | GOT: 0 | PASS
+valid c1 EXPECTED: no error; -Xms2G -Xmx2G | GOT: error=None xmx=['-Xmx2G'] xms=['-Xms2G'] | PASS
+no OOM / other ERROR c1 EXPECTED: 0 / 0 | GOT: 0 / 0 | PASS
+no builder ERROR rejection line c1 EXPECTED: 0 | GOT: 0 | PASS
+valid c16 EXPECTED: no error; -Xms2G -Xmx2G | GOT: error=None xmx=['-Xmx2G'] xms=['-Xms2G'] | PASS
+no OOM / other ERROR c16 EXPECTED: 0 / 0 | GOT: 0 / 0 | PASS
+no builder ERROR rejection line c16 EXPECTED: 0 | GOT: 0 | PASS
+valid tc EXPECTED: no error; -Xms2G -Xmx2G | GOT: error=None xmx=['-Xmx2G'] xms=['-Xms2G'] | PASS
+no OOM / other ERROR tc EXPECTED: 0 / 0 | GOT: 0 / 0 | PASS
+no builder ERROR rejection line tc EXPECTED: 0 | GOT: 0 | PASS
+B3f(1) a bytes lower bound EXPECTED: >= rows*1023 at 100k and 400k | GOT: a1=341736224 (min 102300000) a2=1366977664 (min 409200000) | PASS
+B3f(1) a bytes ratio 400k/100k EXPECTED: 3.5..4.5 | GOT: 4.00 | PASS
+B3f(1) b index bytes EXPECTED: 0 at both steps and after compaction | GOT: 0 0 0 | PASS
+B3f(1) b memtable-path lines step 1 EXPECTED: Can't add term col b = 100000 | GOT: 100000 | PASS
+B3f(1) b writer-path lines step 1 (load+flush windows) EXPECTED: Rejecting value col b = 100000, col a = 0 | GOT: b=100000 a=0 | PASS
+B3f(1) b memtable-path lines step 2 EXPECTED: Can't add term col b = 300000 | GOT: 300000 | PASS
+B3f(1) b writer-path lines step 2 (load+flush windows) EXPECTED: Rejecting value col b = 300000, col a = 0 | GOT: b=300000 a=0 | PASS
+B3f(1) b writer-path lines in compaction EXPECTED: 400000 | GOT: 400000 | PASS
+B3f(1) queries EXPECTED: a -> 1 row, b -> 0 rows, before and after compaction | GOT: ['query a prefix64 of id 12345 -> 1 rows [12345]', 'query b prefix64 of id 12345 -> 0 rows []'] | ['query a prefix64 of id 12345 -> 1 rows [12345]', 'query b prefix64 of id 12345 -> 0 rows []'] | PASS
+B3f(2) m (option def) compaction-window segment lines EXPECTED: 4 (floor(400000/129575)=3 cuts + leftover) | GOT: 4 | PASS
+B3f(2) m flush/load-time segment lines EXPECTED: 0 | GOT: 0 | PASS
+B3f(2) c16 (option 16) compaction-window segment lines EXPECTED: 30 (floor(400000/13498)=29 cuts + leftover) | GOT: 30 | PASS
+B3f(2) c16 flush/load-time segment lines EXPECTED: 0 | GOT: 0 | PASS
+B3f(2) c1 (option 1) compaction-window segment lines EXPECTED: 474 (floor(400000/844)=473 cuts + leftover) | GOT: 474 | PASS
+B3f(2) c1 flush/load-time segment lines EXPECTED: 0 | GOT: 0 | PASS
+B3f(2) a bytes after compaction equal across m, c1, c16 (1%) EXPECTED: max/min <= 1.01 | GOT: {'m': 1366944324, 'c16': 1366944324, 'c1': 1366944324} | PASS
+B3f(3) tc rejections EXPECTED: 0 Rejecting value, 0 Can't add term | GOT: 0, 0 | PASS
+B3f(3) tc index bytes ratio 8000/2000 rows EXPECTED: 3..5 | GOT: 91799160 / 23348272 = 3.93 | PASS
+B3f(4) m live DynamicTokenTreeBuilder peak (indicative) EXPECTED: < 2 x 129575 | GOT: 169188 over 20 samples | PASS
+B3f(4) c1 live DynamicTokenTreeBuilder peak (indicative) EXPECTED: < 2 x 844 | GOT: 11231 over 12 samples | FAIL
+B3f(4) c16 live DynamicTokenTreeBuilder peak (indicative) EXPECTED: < 2 x 13498 | GOT: 78264 over 11 samples | FAIL
+SUMMARY 2 FAIL

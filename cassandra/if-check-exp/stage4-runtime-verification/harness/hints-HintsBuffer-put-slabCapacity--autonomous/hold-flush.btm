@@ -1,0 +1,26 @@
+# Byteman rule for MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS, §9c.
+# The trigger: it delays every hints-buffer flush by stage4.hold.ms, which
+# imitates a slow disk. It changes only when a buffer comes back to the pool, not
+# the path to the check. The flush executor is a single thread, so at most one
+# buffer is recycled per delay.
+#
+# One line per held flush:
+#
+#   hold ms=<epoch millis> delay=<ms>
+#
+# Properties: stage4.hold.ms (default 3000) and stage4.hold.out (default
+# hold.txt in the JVM's working directory).
+#
+# Loaded and unloaded at run time with byteman-submit (case 9e):
+#   Submit <this file>        load = start holding
+#   Submit -u <this file>     unload = release
+
+RULE hold each hints buffer flush
+CLASS org.apache.cassandra.hints.HintsWriteExecutor$FlushBufferTask
+METHOD run
+AT ENTRY
+IF true
+DO traceOpen("hintsHold", java.lang.System.getProperty("stage4.hold.out", "hold.txt"));
+   traceln("hintsHold", "hold ms=" + java.lang.System.currentTimeMillis() + " delay=" + java.lang.Integer.getInteger("stage4.hold.ms", 3000));
+   delay(java.lang.Integer.getInteger("stage4.hold.ms", 3000).longValue())
+ENDRULE

@@ -1,0 +1,93 @@
+{
+ "label": "A1024r",
+ "args": {
+  "tree": "s4-tm",
+  "mode": "CONTAINS",
+  "size": "1024",
+  "heap_mb": "256",
+  "stop": "0",
+  "rows": "174",
+  "inflight": "1",
+  "outdir": "/users/jason92/stage4-logs/tm/run1-cl/A1024r"
+ },
+ "host": "node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu",
+ "xmx": [
+  "-Xmx2G"
+ ],
+ "xms": [
+  "-Xms2G"
+ ],
+ "maxterm_jar": "apache-cassandra-5.0.9-SNAPSHOT.jar",
+ "constant_check": [
+  "public static final int MAX_TERM_SIZE = 1024;",
+  "37: sipush        1024",
+  "40: if_icmplt     105"
+ ],
+ "yaml": {
+  "memtable_heap_space": "256MiB",
+  "memtable_cleanup_threshold": null,
+  "memtable_flush_writers": null,
+  "memtable_allocation_type": "heap_buffers",
+  "commitlog_total_space": "1024MiB",
+  "concurrent_writes": 8,
+  "sasi_indexes_enabled": true
+ },
+ "histo_base": {
+  "total_bytes": 65071168,
+  "total_instances": 679318,
+  "top": [
+   "34:           362         106344  [C (java.base@11.0.32.1)",
+   "359:           103           2472  [[C (java.base@11.0.32.1)",
+   "700:            28            672  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)",
+   "805:             1            432  [[[C (java.base@11.0.32.1)",
+   "896:            13            312  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)"
+  ]
+ },
+ "schema_out": [
+  "index created with options 'mode':'CONTAINS','analyzed':'false'"
+ ],
+ "base_switch": 1,
+ "sample_before_load": [
+  1792988903085,
+  216066112,
+  0,
+  1
+ ],
+ "t_load_start": 1792988903137,
+ "loader_rc": 0,
+ "t_load_end": 1792988904040,
+ "loader_out": [
+  "loaded 174 rows of 1024 chars in 0.4 s (stopped by rowcap)"
+ ],
+ "t_settled": 1792988929065,
+ "verify_out": [
+  "read_by_key rows=1",
+  "like_hits=0"
+ ],
+ "log_counts": {
+  "Can't add term": 174,
+  "Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT": 0,
+  "Enqueuing flush of ks.t": 1,
+  "Flushed index segment": 0,
+  "Rejecting value": 0,
+  "java.lang.OutOfMemoryError": 0,
+  "Flushing largest": 0
+ },
+ "si_files": [],
+ "data_files": [],
+ "histo_post": {
+  "total_bytes": 73370328,
+  "total_instances": 726046,
+  "top": [
+   "28:           391         165400  [C (java.base@11.0.32.1)",
+   "204:           316           7584  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)",
+   "301:           161           3864  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)",
+   "384:           103           2472  [[C (java.base@11.0.32.1)",
+   "849:             1            432  [[[C (java.base@11.0.32.1)",
+   "2925:             1             24  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory",
+   "3379:             1             16  com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory",
+   "4330:             1             16  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory$$Lambda$1689/0x0000000840846440"
+  ]
+ },
+ "t_end": 1792988932229
+}

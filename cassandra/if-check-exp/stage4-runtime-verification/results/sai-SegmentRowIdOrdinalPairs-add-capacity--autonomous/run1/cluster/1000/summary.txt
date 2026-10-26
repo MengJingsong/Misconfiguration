@@ -1,0 +1,20 @@
+=== value 1000 (max_materialized_keys=1000) 2026-10-25 21:58:06 first=False
+yaml ok: | < num_tokens: 16 > num_tokens: 1 <       - seeds: "127.0.0.1:7000" >       - seeds: "127.0.28.1:7028" < storage_port: 7000 > storage_port: 7028 < listen_address: localhost > listen_address: 127.0.28.1 < native_transport_port: 9042 > native_transport_port: 9350 < rpc_address: localhost > rpc_address: 127.0.28.1 < read_request_timeout: 5000ms > read_request_timeout: 120000ms < range_request_timeout: 10000ms > range_request_timeout: 120000ms >  > # stage4 sr > data_file_directories: >     - /users/jason92/s4-sr-run/data > commitlog_directory: /users/jason92/s4-sr-run/commitlog > hints_directory: /users/jason92/s4-sr-run/hints > saved_caches_directory: /users/jason92/s4-sr-run/saved_caches > cdc_raw_directory: /users/jason92/s4-sr-run/cdc_raw
+JVM_EXTRA_OPTS=-Dcassandra.sai.vector_search.max_materialized_keys=1000 -Dstage4.sr.out=/users/jason92/stage4-logs/sr/run1/1000/sr-trace.out -Xbootclasspath/a:/users/jason92/s4-sr-run/helper/sr.jar -javaagent:/users/jason92/s4-sr/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sai-SegmentRowIdOrdinalPairs-add-capacity--autonomous/sr.btm,listener:true,port:9328 -XX:StartFlightRecording=filename=/users/jason92/stage4-logs/sr/run1/1000/sr.jfr,settings=profile,dumponexit=true
+JVM args: -Xmx4G True; G1 True; -ea True; byteman True
+node 2251429: up
+VM.system_properties: max_materialized_keys=1000 (set -Dcassandra.sai.vector_search.max_materialized_keys=1000)
+[hybrid-g1] trace: SAI materialized 500 rows; max brute force rows is 5826676 for sstable index with 80500 nodes, LIMIT 10
+[hybrid-g1] client ok=True errors=0 short=0 SR_lines=200 caps=[500] arrlen=[1000] alloc_ctor=[5336, 16088] callers=['VectorIndexSegmentSearcher.orderResultsBy:299']
+EXPECTED: L=1000 M=500: one int[] of 16+8M=4016 B (+K=1320 rule overhead, up to 1 KiB extra) per query (200 lines for 200 queries, cap [500], alloc_ctor [5336, 16088], arrlen [1000]) -- NO (recorded; the AI judges it in the results file)
+[hybrid-g2] trace: WHERE clause generated more than 1000 rows. Switching to ORDER BY then post filter.
+[hybrid-g2] client ok=True errors=0 short=0 SR_lines=0 caps=[] arrlen=[] alloc_ctor=[] callers=[]
+EXPECTED: L=1000 M=10000: no allocation from this class, fallback message in trace (SR lines 0) -- yes
+[hybrid-g3] trace: WHERE clause generated more than 1000 rows. Switching to ORDER BY then post filter.
+[hybrid-g3] client ok=True errors=0 short=0 SR_lines=0 caps=[] arrlen=[] alloc_ctor=[] callers=[]
+EXPECTED: L=1000 M=20000: no allocation from this class, fallback message in trace (SR lines 0) -- yes
+[hybrid-g4] trace: WHERE clause generated more than 1000 rows. Switching to ORDER BY then post filter.
+[hybrid-g4] client ok=True errors=0 short=0 SR_lines=0 caps=[] arrlen=[] alloc_ctor=[] callers=[]
+EXPECTED: L=1000 M=50000: no allocation from this class, fallback message in trace (SR lines 0) -- yes
+JFR (supplementary, TLAB-sampled): allocation events with SegmentRowIdOrdinalPairs in the stack: 5
+node stopped; our pid 2251429 alive: False; ports still busy: []

@@ -1,0 +1,33 @@
+HOLDS    unit: 27 cells (9 N x 3 chunk lengths) :: 27
+HOLDS    unit: every cell has capacity = 100*2^ceil(log2(N/100)), doublings = ceil(log2(N/100)), offHeap before = 8*cap, after prepare = 8*N, file = 8N + 39, no exception :: []
+HOLDS    unit: capacity exceeds the initial 100 for every N > 100
+HOLDS    unit: N=10M gives 13,107,200 / 104,857,600 / 80,000,000 in all three chunk lengths
+HOLDS    unit: C1 AssertionError "Illegal bounds [800..808); size: 800" with assertions enabled
+HOLDS    unit: junit xml has tests=1, failures=0, errors=0
+HOLDS    unit: C3 -ea: N=101 -> capacity 200, offHeap 1600, no exception, assertionsEnabled=true
+HOLDS    unit: C3 -da: N=101 -> capacity 200, offHeap 1600, no exception, assertionsEnabled=false
+HOLDS    cluster: ks64: one live SSTable, header chunkLength 65536, chunks = ceil(dataLength/chunkLength) or one more (the compaction output has one more; flush outputs equal ceil), body = 8 x chunks :: 1 files, chunks 30910, dataLength 2025600000
+HOLDS    cluster: ks16: one live SSTable, header chunkLength 16384, chunks = ceil(dataLength/chunkLength) or one more (the compaction output has one more; flush outputs equal ceil), body = 8 x chunks :: 1 files, chunks 123627, dataLength 2025480355
+HOLDS    cluster: ks4: one live SSTable, header chunkLength 4096, chunks = ceil(dataLength/chunkLength) or one more (the compaction output has one more; flush outputs equal ceil), body = 8 x chunks :: 1 files, chunks 494504, dataLength 2025481805
+HOLDS    cluster: ks1: one live SSTable, header chunkLength 1024, chunks = ceil(dataLength/chunkLength) or one more (the compaction output has one more; flush outputs equal ceil), body = 8 x chunks :: 1 files, chunks 1977966, dataLength 2025435455
+HOLDS    cluster: chunk counts scale ~4x per K step :: {64: 30910, 16: 123627, 4: 494504, 1: 1977966}
+HOLDS    cluster: after-flush metric == 8 x header chunks for all four compressed keyspaces :: {'ks64': (277944, 34743), 'ks16': (1111600, 138950), 'ks4': (4446320, 555790), 'ks1': (17785184, 2223148)}
+HOLDS    cluster: after-compact metric == 8 x header chunks for all four compressed keyspaces :: {'ks64': (247280, 30910), 'ks16': (989016, 123627), 'ks4': (3956032, 494504), 'ks1': (15823728, 1977966)}
+HOLDS    cluster: after-restart metric == 8 x header chunks for all four compressed keyspaces :: {'ks64': (247280, 30910), 'ks16': (989016, 123627), 'ks4': (3956032, 494504), 'ks1': (15823728, 1977966)}
+HOLDS    cluster: restart metric equals 8 x the live files' header chunks (re-parsed here) :: {'ks64': 247280, 'ks16': 989016, 'ks4': 3956032, 'ks1': 15823728}
+HOLDS    cluster: uncompressed keyspace metric 0 at all three readings
+HOLDS    cluster: trace: each writer's doublings are 200, 400, 800, ... (consecutive), each at count == previous capacity :: 64 writers, bad []
+HOLDS    cluster: trace: largest capacity reached is above the initial 100 by >= 2^14 (K=1 compaction/flush writers) :: 3276800
+HOLDS    cluster: trace: at prepare every writer has count <= capacity < 2 x count (or capacity 100) :: 155 writers
+HOLDS    cluster: control 48: Capacity sample == 16777216 in every row; max Size within [0.9, 1.0] x cap (+16 KiB) :: 16 samples, max Size 16777216, cap 16777216
+HOLDS    cluster: control 48: ks16 offsets metric constant across samples :: {989016.0}
+HOLDS    cluster: control 48: stress read 0 errors, 100000 ops
+HOLDS    cluster: control 96: Capacity sample == 67108864 in every row; max Size within [0.9, 1.0] x cap (+16 KiB) :: 17 samples, max Size 67108864, cap 67108864
+HOLDS    cluster: control 96: ks16 offsets metric constant across samples :: {989016.0}
+HOLDS    cluster: control 96: stress read 0 errors, 100000 ops
+HOLDS    cluster: arm M: no failed EXPECTED line except the script-only compaction dataLength check, and no FAIL :: 4 failed lines
+HOLDS    cluster: arm C48: no failed EXPECTED line except the script-only compaction dataLength check, and no FAIL :: 0 failed lines
+HOLDS    cluster: arm C96: no failed EXPECTED line except the script-only compaction dataLength check, and no FAIL :: 0 failed lines
+HOLDS    cluster: system.log (whole file, three lifetimes) has no ERROR line :: []
+
+SELFCHECK: 31 parts hold, 0 do not

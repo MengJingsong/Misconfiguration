@@ -1,0 +1,65 @@
+== unit ==
+derive16.out checks ok 3 MISMATCH 0
+    STAGE4 unit derive direct MemoryUsed before first write 529026 after (slab allocated) 34083458 delta 33554432
+derive24.out checks ok 3 MISMATCH 0
+    STAGE4 unit derive direct MemoryUsed before first write 529026 after (slab allocated) 50860674 delta 50331648
+derive4.out checks ok 3 MISMATCH 0
+    STAGE4 unit derive direct MemoryUsed before first write 529026 after (slab allocated) 34083458 delta 33554432
+derive40.out checks ok 3 MISMATCH 0
+    STAGE4 unit derive direct MemoryUsed before first write 529026 after (slab allocated) 84415106 delta 83886080
+n1.out checks ok 12 MISMATCH 0
+    STAGE4 unit stall n=1 S=4194304 state=WAITING parkedAt=java.base@11.0.32.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433) written=4 allocated=1 flushCallbacks=0 usedDelta=4194304 countDelta=1 | after 2 s: written=4 allocated=1 usedDelta=4194304 countDelta=1
+    STAGE4 unit stall writer ended org.apache.cassandra.utils.concurrent.UncheckedInterruptedException: java.lang.InterruptedException
+n2.out checks ok 18 MISMATCH 0
+    STAGE4 unit rotation end written=81 flushes=19 allocated=2 maxAllocated=2 usedDelta=8388608 maxUsedDelta=8388608 countDelta=2 maxCountDelta=2 capsSeen=[4194304]
+    STAGE4 unit stall n=2 S=4194304 state=WAITING parkedAt=java.base@11.0.32.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433) written=8 allocated=2 flushCallbacks=1 usedDelta=8388608 countDelta=2 | after 2 s: written=8 allocated=2 usedDelta=8388608 countDelta=2
+    STAGE4 unit stall writer ended org.apache.cassandra.utils.concurrent.UncheckedInterruptedException: java.lang.InterruptedException
+n3.out checks ok 18 MISMATCH 0
+    STAGE4 unit rotation end written=81 flushes=18 allocated=3 maxAllocated=3 usedDelta=12582912 maxUsedDelta=12582912 countDelta=3 maxCountDelta=3 capsSeen=[4194304]
+    STAGE4 unit stall n=3 S=4194304 state=WAITING parkedAt=java.base@11.0.32.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433) written=12 allocated=3 flushCallbacks=2 usedDelta=12582912 countDelta=3 | after 2 s: written=12 allocated=3 usedDelta=12582912 countDelta=3
+    STAGE4 unit stall writer ended org.apache.cassandra.utils.concurrent.UncheckedInterruptedException: java.lang.InterruptedException
+n5.out checks ok 18 MISMATCH 0
+    STAGE4 unit rotation end written=81 flushes=16 allocated=5 maxAllocated=5 usedDelta=20971520 maxUsedDelta=20971520 countDelta=5 maxCountDelta=5 capsSeen=[4194304]
+    STAGE4 unit stall n=5 S=4194304 state=WAITING parkedAt=java.base@11.0.32.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433) written=20 allocated=5 flushCallbacks=4 usedDelta=20971520 countDelta=5 | after 2 s: written=20 allocated=5 usedDelta=20971520 countDelta=5
+    STAGE4 unit stall writer ended org.apache.cassandra.utils.concurrent.UncheckedInterruptedException: java.lang.InterruptedException
+derive16.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+derive24.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+derive4.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+derive40.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+n1.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+n2.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+n3.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+n5.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+upstream-HintsBufferPoolTest.xml [('errors', '0'), ('failures', '0'), ('tests', '1')]
+upstream-HintsBufferTest.xml [('errors', '0'), ('failures', '0'), ('tests', '2')]
+== cluster ==
+A2: n=2 created=2 sizes=[32.0] waiting=29 flushrun=30 k0=1 base_direct=55.99MiB peak_direct=89.89MiB peak_delta=33.90MiB peak_pool=65.90MiB n*S=64MiB
+   second-half range of direct during the workload: 1.19 MiB; samples 311
+   hints on disk at the end (ls -l, sum of sizes): 986.6 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 310.136, 'rate': 1612.2, 'lat_mean_ms': 117.401, 'lat_p50_ms': 20.866, 'lat_p99_ms': 7539.59, 'lat
+A3: n=3 created=3 sizes=[32.0] waiting=28 flushrun=30 k0=1 base_direct=55.99MiB peak_direct=121.85MiB peak_delta=65.87MiB peak_pool=97.87MiB n*S=96MiB
+   second-half range of direct during the workload: 1.19 MiB; samples 300
+   hints on disk at the end (ls -l, sum of sizes): 986.6 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 299.418, 'rate': 1669.9, 'lat_mean_ms': 112.437, 'lat_p50_ms': 23.576, 'lat_p99_ms': 7106.132, 'la
+A6: n=6 created=6 sizes=[32.0] waiting=24 flushrun=30 k0=1 base_direct=55.99MiB peak_direct=217.88MiB peak_delta=161.89MiB peak_pool=193.89MiB n*S=192MiB
+   second-half range of direct during the workload: 0.10 MiB; samples 258
+   hints on disk at the end (ls -l, sum of sizes): 986.6 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 257.234, 'rate': 1943.8, 'lat_mean_ms': 95.046, 'lat_p50_ms': 27.026, 'lat_p99_ms': 156.44, 'lat_m
+B3: n=3 created=3 sizes=[80.0] waiting=8 flushrun=12 k0=1 base_direct=103.98MiB peak_direct=265.88MiB peak_delta=161.89MiB peak_pool=241.89MiB n*S=240MiB
+   second-half range of direct during the workload: 1.10 MiB; samples 112
+   hints on disk at the end (ls -l, sum of sizes): 986.6 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 111.503, 'rate': 4484.2, 'lat_mean_ms': 36.637, 'lat_p50_ms': 26.488, 'lat_p99_ms': 69.713, 'lat_m
+C3: n=3 created=3 sizes=[32.0] waiting=28 flushrun=30 k0=1 base_direct=55.99MiB peak_direct=121.87MiB peak_delta=65.88MiB peak_pool=97.88MiB n*S=96MiB
+   second-half range of direct during the workload: 1.19 MiB; samples 288
+   hints on disk at the end (ls -l, sum of sizes): 986.6 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 287.495, 'rate': 1739.2, 'lat_mean_ms': 106.901, 'lat_p50_ms': 26.541, 'lat_p99_ms': 6972.426, 'la
+D3: n=3 created=3 sizes=[48.0] waiting=18 flushrun=20 k0=1 base_direct=71.98MiB peak_direct=169.84MiB peak_delta=97.86MiB peak_pool=145.86MiB n*S=144MiB
+   second-half range of direct during the workload: 1.11 MiB; samples 189
+   hints on disk at the end (ls -l, sum of sizes): 986.6 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 188.856, 'rate': 2647.5, 'lat_mean_ms': 67.799, 'lat_p50_ms': 26.606, 'lat_p99_ms': 74.57, 'lat_ma
+L: n=3 created=2 sizes=[32.0] waiting=0 flushrun=1
+    step m-100: M target 16777116, blob 16777072, client ok ; alloc hint ['16777127']; rejected []; TotalHints 2.0
+    step m-23: M target 16777193, blob 16777149, client ok ; alloc hint ['16777204', '16777204']; rejected []; TotalHints 3.0
+    step m-22: M target 16777194, blob 16777150, client ok ; alloc hint ['16777205']; rejected ['16777205']; TotalHints 3.0
+    step m-15: M target 16777201, blob 16777157, client ok ; alloc hint ['16777212']; rejected ['16777212']; TotalHints 3.0
+    step m-12: M target 16777204, blob 16777160, client ok ; alloc hint ['16777215']; rejected ['16777215']; TotalHints 3.0
+    step m-11: M target 16777205, blob 16777161, client InvalidRequest Error from server: code=2200 [Invalid query] message="Request is too big: length 16777217 exceeds maximum allowed length; alloc hint []; rejected []; TotalHints 3.0
+    alloc ['16773175', '16777127', '16777204', '16777204', '16777205', '16777212', '16777215']
+    allocreject ['16777205', '16777212', '16777215']
+ctl: n=3 created=1 sizes=[32.0] waiting=0 flushrun=0 k0=1 base_direct=55.99MiB peak_direct=57.83MiB peak_delta=1.85MiB peak_pool=33.85MiB n*S=96MiB
+   second-half range of direct during the workload: 1.09 MiB; samples 79
+   hints on disk at the end (ls -l, sum of sizes): 0.0 MiB; client: {'n': 500000, 'conc': 200, 'ok': 500000, 'err': 0, 'seconds': 78.039, 'rate': 6407.0, 'lat_mean_ms': 22.345, 'lat_p50_ms': 20.615, 'lat_p99_ms': 62.995, 'lat_ma

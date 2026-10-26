@@ -1,0 +1,17 @@
+# Node rules for sai-SegmentRowIdOrdinalPairs-add-capacity--autonomous (B3d, replacing the JFR-only instrument; see the results file).
+# One "SR ..." line per SegmentRowIdOrdinalPairs construction, to -Dstage4.sr.out.
+RULE sr enter
+CLASS org.apache.cassandra.index.sai.disk.v1.vector.SegmentRowIdOrdinalPairs
+METHOD <init>(int)
+AT ENTRY
+IF true
+DO stage4.SrHelper.enter()
+ENDRULE
+
+RULE sr exit
+CLASS org.apache.cassandra.index.sai.disk.v1.vector.SegmentRowIdOrdinalPairs
+METHOD <init>(int)
+AT EXIT
+IF true
+DO stage4.SrHelper.exit($1, $0.array.length)
+ENDRULE

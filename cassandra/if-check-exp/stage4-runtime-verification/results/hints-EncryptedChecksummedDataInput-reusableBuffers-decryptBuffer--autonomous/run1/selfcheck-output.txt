@@ -1,0 +1,111 @@
+PASS S1 s1_1: retained == max encrypted block length (exact relation, R4) :: 250928 vs 250928
+FAIL S1 s1_1: amended band [254 KiB, 263,213 B] :: 250928 B = 245.05 KiB
+FAIL S1 s1_1: original band [256 KiB, 258 KiB] :: 250928
+PASS S1 s1_1: capacity above 240 KiB (the 256 KiB-class block) and below 1 MiB :: 250928
+PASS S2 s2_1: retained in [1048576, 1056768] and == max enc :: 1052768 (max enc 1052768)
+PASS S2 s2_1: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 1052768
+PASS S3 s3_1: retained in [8388608, 8429568] and == max enc :: 8421584 (max enc 8421584)
+PASS S3 s3_1: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 8421584
+PASS S4 s4_1: retained in [15728640, 15800320] and == max enc :: 15790400 (max enc 15790400)
+PASS S4 s4_1: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 15790400
+PASS S6 s6_1: retained < 4 KiB :: 1088
+PASS S6 s6_1: reader buffer about 250 KiB (>= 240 KiB) :: 256066
+PASS S1 s1_2: retained == max encrypted block length (exact relation, R4) :: 250912 vs 250912
+FAIL S1 s1_2: amended band [254 KiB, 263,213 B] :: 250912 B = 245.03 KiB
+FAIL S1 s1_2: original band [256 KiB, 258 KiB] :: 250912
+PASS S1 s1_2: capacity above 240 KiB (the 256 KiB-class block) and below 1 MiB :: 250912
+PASS S2 s2_2: retained in [1048576, 1056768] and == max enc :: 1052768 (max enc 1052768)
+PASS S2 s2_2: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 1052768
+PASS S3 s3_2: retained in [8388608, 8429568] and == max enc :: 8421584 (max enc 8421584)
+PASS S3 s3_2: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 8421584
+PASS S4 s4_2: retained in [15728640, 15800320] and == max enc :: 15790400 (max enc 15790400)
+PASS S4 s4_2: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 15790400
+PASS S6 s6_2: retained < 4 KiB :: 1088
+PASS S6 s6_2: reader buffer about 250 KiB (>= 240 KiB) :: 256066
+PASS S1 s1_3: retained == max encrypted block length (exact relation, R4) :: 250896 vs 250896
+FAIL S1 s1_3: amended band [254 KiB, 263,213 B] :: 250896 B = 245.02 KiB
+FAIL S1 s1_3: original band [256 KiB, 258 KiB] :: 250896
+PASS S1 s1_3: capacity above 240 KiB (the 256 KiB-class block) and below 1 MiB :: 250896
+PASS S2 s2_3: retained in [1048576, 1056768] and == max enc :: 1052768 (max enc 1052768)
+PASS S2 s2_3: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 1052768
+PASS S3 s3_3: retained in [8388608, 8429568] and == max enc :: 8421584 (max enc 8421584)
+PASS S3 s3_3: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 8421584
+PASS S4 s4_3: retained in [15728640, 15800320] and == max enc :: 15790400 (max enc 15790400)
+PASS S4 s4_3: larger than 256 KiB and than 1 MiB-class max_mutation_size default 16 MiB for S2-S4? (> 256 KiB) :: 15790400
+PASS S6 s6_3: retained < 4 KiB :: 1088
+PASS S6 s6_3: reader buffer about 250 KiB (>= 240 KiB) :: 256066
+PASS S3 deterministic across 3 repeats (same size) :: [8421584, 8421584, 8421584]
+PASS K2: S3 capacity identical at max_mutation_size 16 MiB / 4 MiB / 1 MiB :: [8421584, 8421584, 8421584]
+PASS K2: the three JVMs really ran with 16777216 / 4194304 / 1048576 :: 
+PASS S5: forged header read failed, retained capacity stays 0 :: {'hints_read': 0, 'tl_capacity_after': 0, 'thread_allocated_bytes': 537693416, 'failed': 1}
+PASS S5: >= 512 MiB allocated on the reading thread :: 537693416
+PASS no shrink after a smaller second read (same thread) :: STAGE4 check noshrink raw file ends on a block boundary expected=10664 actual=10664 ok | STAGE4 check noshrink after big file capacity = its max encrypted length expected=250864 actual=250864 ok | 4 check noshrink after the smaller second f
+PASS C1: write-side cap rejects 600 KiB hint :: 
+PASS C1: 600 KiB block read, retained == its block :: 616896
+PASS all harness-internal unit checks OK :: 
+FAIL all: cell.json present :: missing
+FAIL f1_mmdef: last retained capacity in amended band [260096,263213] :: 250848
+PASS f1_mmdef: retained == max raw encrypted block :: 250848 vs 250848
+PASS f1_mmdef: exactly one reader thread, all reads ok :: 
+PASS f1_mmdef: tl never decreases within the file :: 
+PASS f1_mmdef: live heap dump p10 holds a byte[] of exactly 250848 :: threads=1
+PASS f1_mmdef: live heap dump p30 holds a byte[] of exactly 250848 :: threads=1
+PASS f1_mmdef: after the 1-minute thread keep-alive (+150 s) the array is gone and the thread is gone :: threads=0, present=False
+INFO f1_mmdef: reader buffer high-water 261360 direct=true; direct pool at snapshots [67177918.0, 67177918.0, 66909032.0]
+INFO f1_mmdef: mm=default max_enc=250848 blocks=274 dispatch_end_s=23.03489923477173
+PASS f2_mm1024: last retained capacity in amended band [8388608,8429568] :: 8421584
+PASS f2_mm1024: retained == max raw encrypted block :: 8421584 vs 8421584
+PASS f2_mm1024: exactly one reader thread, all reads ok :: 
+PASS f2_mm1024: tl never decreases within the file :: 
+PASS f2_mm1024: live heap dump p10 holds a byte[] of exactly 8421584 :: threads=1
+PASS f2_mm1024: live heap dump p30 holds a byte[] of exactly 8421584 :: threads=1
+PASS f2_mm1024: after the 1-minute thread keep-alive (+150 s) the array is gone and the thread is gone :: threads=0, present=False
+INFO f2_mm1024: reader buffer high-water 8388675 direct=true; direct pool at snapshots [75348146.0, 75348658.0, 66909032.0]
+INFO f2_mm1024: mm=1024 max_enc=8421584 blocks=3 dispatch_end_s=22.09587073326111
+PASS f2_mm4096: last retained capacity in amended band [8388608,8429568] :: 8421584
+PASS f2_mm4096: retained == max raw encrypted block :: 8421584 vs 8421584
+PASS f2_mm4096: exactly one reader thread, all reads ok :: 
+PASS f2_mm4096: tl never decreases within the file :: 
+PASS f2_mm4096: live heap dump p10 holds a byte[] of exactly 8421584 :: threads=1
+PASS f2_mm4096: live heap dump p30 holds a byte[] of exactly 8421584 :: threads=1
+PASS f2_mm4096: after the 1-minute thread keep-alive (+150 s) the array is gone and the thread is gone :: threads=0, present=False
+INFO f2_mm4096: reader buffer high-water 8388675 direct=true; direct pool at snapshots [75348142.0, 75348654.0, 66909032.0]
+INFO f2_mm4096: mm=4096 max_enc=8421584 blocks=3 dispatch_end_s=22.03248405456543
+PASS f2_mmdef: last retained capacity in amended band [8388608,8429568] :: 8421584
+PASS f2_mmdef: retained == max raw encrypted block :: 8421584 vs 8421584
+PASS f2_mmdef: exactly one reader thread, all reads ok :: 
+PASS f2_mmdef: tl never decreases within the file :: 
+PASS f2_mmdef: live heap dump p10 holds a byte[] of exactly 8421584 :: threads=1
+PASS f2_mmdef: live heap dump p30 holds a byte[] of exactly 8421584 :: threads=1
+PASS f2_mmdef: after the 1-minute thread keep-alive (+150 s) the array is gone and the thread is gone :: threads=0, present=False
+INFO f2_mmdef: reader buffer high-water 8388675 direct=true; direct pool at snapshots [75348142.0, 75348654.0, 66909032.0]
+INFO f2_mmdef: mm=default max_enc=8421584 blocks=3 dispatch_end_s=22.041157960891724
+PASS f3_mm1024: last retained capacity in amended band [15728640,15800320] :: 15790400
+PASS f3_mm1024: retained == max raw encrypted block :: 15790400 vs 15790400
+PASS f3_mm1024: exactly one reader thread, all reads ok :: 
+PASS f3_mm1024: tl never decreases within the file :: 
+PASS f3_mm1024: live heap dump p10 holds a byte[] of exactly 15790400 :: threads=1
+PASS f3_mm1024: live heap dump p30 holds a byte[] of exactly 15790400 :: threads=1
+PASS f3_mm1024: after the 1-minute thread keep-alive (+150 s) the array is gone and the thread is gone :: threads=0, present=False
+INFO f3_mm1024: reader buffer high-water 15728707 direct=true; direct pool at snapshots [82717470.0, 82730832.0, 66922394.0]
+INFO f3_mm1024: mm=1024 max_enc=15790400 blocks=3 dispatch_end_s=23.036062717437744
+PASS f3_mmdef: last retained capacity in amended band [15728640,15800320] :: 15790400
+PASS f3_mmdef: retained == max raw encrypted block :: 15790400 vs 15790400
+PASS f3_mmdef: exactly one reader thread, all reads ok :: 
+PASS f3_mmdef: tl never decreases within the file :: 
+PASS f3_mmdef: live heap dump p10 holds a byte[] of exactly 15790400 :: threads=1
+PASS f3_mmdef: live heap dump p30 holds a byte[] of exactly 15790400 :: threads=1
+PASS f3_mmdef: after the 1-minute thread keep-alive (+150 s) the array is gone and the thread is gone :: threads=0, present=False
+INFO f3_mmdef: reader buffer high-water 15728707 direct=true; direct pool at snapshots [82716958.0, 82717470.0, 66909032.0]
+INFO f3_mmdef: mm=default max_enc=15790400 blocks=3 dispatch_end_s=22.07300305366516
+PASS f3_plain: encrypted reader never ran :: 0 trace lines
+PASS f3_plain: no live byte[] >= 2 MiB :: 
+INFO f3_plain: mm=default max_enc=2192282546 blocks=2 dispatch_end_s=22.034110069274902
+PASS f4_forged: readBuffer exited by exception, tl unchanged :: [{'ms': '1792992522543', 'th': 'HintsDispatcher:1#99', 'file': '/users/jason92/s4-ec-run/A/hints/1552c116-7dc0-4c59-b1c4-e5dcf39bb2c9-1792992499306-2.hints', 'tl': '0', 'alloc': '547616552'}]
+PASS f4_forged: >= 512 MiB allocated by the reader thread :: 537110600
+PASS f4_forged: no live byte[] >= 64 MiB :: 
+PASS f4_forged: log has the FSReadError / failed-to-dispatch and the gossiper stop :: 
+INFO f4_forged: mm=default max_enc=536870912 blocks=1 dispatch_end_s=22.055724382400513
+PASS pos_4mib: >= 40 files each <= 4 MiB + one hint :: 50 files, total 209731300, max 4194626
+PASS pos_default: <= 3 hint files, total ~200 MiB :: 2 files, total 209729284, max 134226730
+SELFCHECK 88 of 96 PASS

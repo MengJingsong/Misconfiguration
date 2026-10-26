@@ -1,0 +1,63 @@
+== cluster: Byteman lines per value / cap / caller
+  L=default cap=   101 lines= 201 caller=VectorIndexSegmentSearcher.searchInternal:164 alloc min/max=2144/2144 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+  L=default cap=   500 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=5336/107392 min-(16+8cap)=1320 max-(16+8cap)=103376 outliers>min+1024=3
+  L=default cap=  1001 lines= 251 caller=VectorIndexSegmentSearcher.searchInternal:164 alloc min/max=9344/20096 min-(16+8cap)=1320 max-(16+8cap)=12072 outliers>min+1024=1
+  L=default cap=  5001 lines= 201 caller=VectorIndexSegmentSearcher.searchInternal:164 alloc min/max=41344/41344 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+  L=default cap= 10000 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=81336/81336 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+  L=default cap= 30001 lines= 402 caller=VectorIndexSegmentSearcher.searchInternal:164 alloc min/max=241344/242216 min-(16+8cap)=1320 max-(16+8cap)=2192 outliers>min+1024=0
+  L=   1000 cap=   500 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=5336/109896 min-(16+8cap)=1320 max-(16+8cap)=105880 outliers>min+1024=4
+  L=   1000 cap=  1001 lines=  50 caller=VectorIndexSegmentSearcher.searchInternal:164 alloc min/max=9344/9344 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+  L=  64000 cap=   500 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=5336/109896 min-(16+8cap)=1320 max-(16+8cap)=105880 outliers>min+1024=3
+  L=  64000 cap=  1001 lines=  50 caller=VectorIndexSegmentSearcher.searchInternal:164 alloc min/max=9344/9344 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+  L=  64000 cap= 10000 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=81336/81336 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+  L=  64000 cap= 20000 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=161336/172088 min-(16+8cap)=1320 max-(16+8cap)=12072 outliers>min+1024=1
+  L=  64000 cap= 50000 lines= 251 caller=VectorIndexSegmentSearcher.orderResultsBy:299 alloc min/max=401336/401336 min-(16+8cap)=1320 max-(16+8cap)=1320 outliers>min+1024=0
+== fit alloc_ctor = s*arrlen + b over all lines (min per arrlen):
+  points=8 slope per int=4.0000 (4.0 expected for 2 ints x 4 B... i.e. 8 B per pair) intercept=1336.0 (16 + K)
+== trace fallback / path lines
+  default hybrid-g1              ['SAI materialized 500 rows; max brute force rows is 3601188 for sstable index with 80500 nodes, LIMIT 10']
+  default hybrid-g2              ['SAI materialized 10000 rows; max brute force rows is 1677928 for sstable index with 80500 nodes, LIMIT 10']
+  default hybrid-g3              ['WHERE clause generated more than 16000 rows. Switching to ORDER BY then post filter.']
+  default hybrid-g4              ['WHERE clause generated more than 16000 rows. Switching to ORDER BY then post filter.']
+  default memtable-control       ['SAI materialized 33 rows; max brute force rows is 5000 for memtable index with 5000 nodes, LIMIT 10']
+  default range-100-lim100       ['Search range covers 101 rows; max brute force rows is 3786816 for sstable index with 80500 nodes, LIMIT 100']
+  default range-1000-lim100      ['Search range covers 1001 rows; max brute force rows is 3786816 for sstable index with 80500 nodes, LIMIT 100']
+  default range-30000-lim10      ['Search range covers 30001 rows; max brute force rows is 236240 for sstable index with 80500 nodes, LIMIT 10']
+  default range-30000-lim100     ['Search range covers 30001 rows; max brute force rows is 945056 for sstable index with 80500 nodes, LIMIT 100']
+  default range-5000-lim100      ['Search range covers 5001 rows; max brute force rows is 3786816 for sstable index with 80500 nodes, LIMIT 100']
+     1000 hybrid-g1              ['SAI materialized 500 rows; max brute force rows is 5826676 for sstable index with 80500 nodes, LIMIT 10']
+     1000 hybrid-g2              ['WHERE clause generated more than 1000 rows. Switching to ORDER BY then post filter.']
+     1000 hybrid-g3              ['WHERE clause generated more than 1000 rows. Switching to ORDER BY then post filter.']
+     1000 hybrid-g4              ['WHERE clause generated more than 1000 rows. Switching to ORDER BY then post filter.']
+    64000 hybrid-g1              ['SAI materialized 500 rows; max brute force rows is 251480 for sstable index with 80500 nodes, LIMIT 10']
+    64000 hybrid-g2              ['SAI materialized 10000 rows; max brute force rows is 117172 for sstable index with 80500 nodes, LIMIT 10']
+    64000 hybrid-g3              ['SAI materialized 20000 rows; max brute force rows is 47728 for sstable index with 80500 nodes, LIMIT 10']
+    64000 hybrid-g4              ['SAI materialized 50000 rows; max brute force rows is 4952 for sstable index with 80500 nodes, LIMIT 10']
+== JFR (real allocation size of int[] with top frame SegmentRowIdOrdinalPairs.<init>)
+  default total alloc events 15203; SR-<init> events by (type, class, allocationSize): {('ObjectAllocationInNewTLAB', '[Ljava/lang/Object;', 24): 2, ('ObjectAllocationInNewTLAB', '[I', 4016): 1, ('ObjectAllocationInNewTLAB', '[I', 8024): 2, ('ObjectAllocationInNewTLAB', '[I', 80016): 7, ('ObjectAllocationOutsideTLAB', '[I', 80016): 22, ('ObjectAllocationInNewTLAB', '[I', 240024): 2, ('ObjectAllocationOutsideTLAB', '[I', 240024): 4}
+     1000 total alloc events 1140; SR-<init> events by (type, class, allocationSize): {('ObjectAllocationInNewTLAB', '[I', 4016): 2}
+    64000 total alloc events 9766; SR-<init> events by (type, class, allocationSize): {('ObjectAllocationInNewTLAB', '[Ljava/lang/Object;', 24): 3, ('ObjectAllocationOutsideTLAB', '[I', 80016): 12, ('ObjectAllocationInNewTLAB', '[I', 80016): 4, ('ObjectAllocationOutsideTLAB', '[I', 160016): 10, ('ObjectAllocationInNewTLAB', '[I', 160016): 4, ('ObjectAllocationOutsideTLAB', '[I', 400016): 46, ('ObjectAllocationInNewTLAB', '[I', 400016): 4}
+== unit: delta - (16+8N) per (mode, flags, N), all reps
+  pairs -ea                          N=1           extra over 16+8N: [24] reps=3
+  pairs -ea                          N=1000        extra over 16+8N: [24] reps=3
+  pairs -ea                          N=16000       extra over 16+8N: [24] reps=3
+  pairs -ea                          N=100000      extra over 16+8N: [24] reps=3
+  pairs -ea                          N=1000000     extra over 16+8N: [24] reps=3
+  pairs -ea                          N=10000000    extra over 16+8N: [24] reps=3
+  pairs -ea                          N=100000000   extra over 16+8N: [24] reps=3
+  pairs -ea                          N=1073741822  extra over 16+8N: [24] reps=1
+  plain -ea                          N=1           extra over 16+8N: [0] reps=3
+  plain -ea                          N=1000        extra over 16+8N: [0] reps=3
+  plain -ea                          N=16000       extra over 16+8N: [0] reps=3
+  plain -ea                          N=100000      extra over 16+8N: [0] reps=3
+  plain -ea                          N=1000000     extra over 16+8N: [0] reps=3
+  plain -ea                          N=10000000    extra over 16+8N: [0] reps=3
+  plain -ea                          N=100000000   extra over 16+8N: [0] reps=3
+  plain -ea                          N=1073741822  extra over 16+8N: [0] reps=1
+  pairs -ea -XX:-UseCompressedOops   N=1000        extra over 16+8N: [40] reps=1
+  pairs -ea -XX:-UseCompressedOops   N=1000000     extra over 16+8N: [40] reps=1
+  pairs -ea -XX:-UseCompressedOops   N=10000000    extra over 16+8N: [40] reps=1
+  threw: ('pairs', '-ea', '1073741823', 'java.lang.AssertionError', 'capacity_is_too_large_1073741823')
+  threw: ('pairs', '-da', '1073741823', 'java.lang.OutOfMemoryError', 'Requested_array_size_exceeds_VM_limit')
+  threw: ('pairs', '-ea', '1073741824', 'java.lang.AssertionError', 'capacity_is_too_large_1073741824')
+  threw: ('pairs', '-da', '1073741824', 'java.lang.NegativeArraySizeException', '-2147483648')

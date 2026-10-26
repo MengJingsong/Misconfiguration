@@ -1,0 +1,58 @@
+# Byteman rules, observation only, for the cluster tier (B3d) of hints-HintsBuffer-put-slabCapacity--autonomous.
+# Loaded on node A at start: -javaagent:<byteman.jar>=script:<this file>,script:<hold-flush.btm>,listener:true,port:9320
+# Output file: system property stage4.trace. One line per event, epoch ms from System.currentTimeMillis():
+#   created n=<allocatedBuffers> size=<bufferSize> max=<MAX_ALLOCATED_BUFFERS> ms=.. thread=..
+#       exit of HintsBufferPool.createBuffer() (HintsBufferPool.java:130-134): one new slab
+#   waiting ms=.. thread=..
+#       the BlockingQueue.take() inside switchCurrentBuffer (HintsBufferPool.java:118): the disallow branch, a writer blocks
+#   alloc hint=<hintSize> cap=<slab capacity> ms=..
+#       entry of HintsBuffer.allocate(int) (HintsBuffer.java:148) for hints of 1 MiB or more only (the hot path is not traced)
+#   allocreject hint=<hintSize> cap=<slab capacity> ms=..
+#       HintsBuffer.allocate(int) left by an exception (the IllegalArgumentException at :154), every size
+#   flushrun ms=..
+#       entry of HintsWriteExecutor$FlushBufferTask.run, so the number of flushes is known (hold-flush.btm delays it)
+
+RULE hb pool creates a slab
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("hb", java.lang.System.getProperty("stage4.trace", "hb.trace"));
+   traceln("hb", "created n=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hb writer waits at the cap
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("hb", java.lang.System.getProperty("stage4.trace", "hb.trace"));
+   traceln("hb", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hb big hint reaches allocate
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD allocate(int)
+AT ENTRY
+IF $1 >= 1048576
+DO traceOpen("hb", java.lang.System.getProperty("stage4.trace", "hb.trace"));
+   traceln("hb", "alloc hint=" + $1 + " cap=" + $0.slab.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hb allocate threw
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD allocate(int)
+AT EXCEPTION EXIT
+IF true
+DO traceOpen("hb", java.lang.System.getProperty("stage4.trace", "hb.trace"));
+   traceln("hb", "allocreject hint=" + $1 + " cap=" + $0.slab.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hb flush task runs
+CLASS org.apache.cassandra.hints.HintsWriteExecutor$FlushBufferTask
+METHOD run
+AT ENTRY
+IF true
+DO traceOpen("hb", java.lang.System.getProperty("stage4.trace", "hb.trace"));
+   traceln("hb", "flushrun ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

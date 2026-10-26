@@ -1,0 +1,29 @@
+PASS  S=1023 accepted  EXPECTED: 100000  GOT: 100000
+PASS  S=1023 estimate  EXPECTED: 124300000  GOT: 124300000
+PASS  S=512 estimate  EXPECTED: 73200000  GOT: 73200000
+PASS  S=1 estimate (62 distinct terms, B5.6)  EXPECTED: 10807006  GOT: 10807006
+PASS  S=1023 file length > 0  EXPECTED: > 0  GOT: 341748424
+PASS  S=1024 accepted/rejection logs/estimate  EXPECTED: 0 / 100000 / 0  GOT: 0 / 100000 / 0
+PASS  S=1024 finish returns false, file length 0 (B5.2)  EXPECTED: False, 0  GOT: False, 0
+PASS  S=1025 accepted/rejection logs/estimate  EXPECTED: 0 / 100000 / 0  GOT: 0 / 100000 / 0
+PASS  S=1025 finish returns false, file length 0 (B5.2)  EXPECTED: False, 0  GOT: False, 0
+PASS  S=4096 accepted/rejection logs/estimate  EXPECTED: 0 / 100000 / 0  GOT: 0 / 100000 / 0
+PASS  S=4096 finish returns false, file length 0 (B5.2)  EXPECTED: False, 0  GOT: False, 0
+PASS  S=1 finish returns true  EXPECTED: True  GOT: True
+PASS  S=512 finish returns true  EXPECTED: True  GOT: True
+PASS  S=1023 finish returns true  EXPECTED: True  GOT: True
+PASS  writer cap 1 MB: segment cut every 1433 terms (estimate at flush 1048956 in [C, C+732))  EXPECTED: {1433}  GOT: {1433}
+PASS  writer cap 1 MB: segments before complete = floor(229197 / 1433)  EXPECTED: 159  GOT: 159
+PASS  writer cap 1 MB: no rejection logs  EXPECTED: 0  GOT: 0/0
+PASS  writer cap 4 MB: segment cut every 5730 terms (estimate at flush 4194360 in [C, C+732))  EXPECTED: {5730}  GOT: {5730}
+PASS  writer cap 4 MB: segments before complete = floor(229197 / 5730)  EXPECTED: 39  GOT: 39
+PASS  writer cap 4 MB: no rejection logs  EXPECTED: 0  GOT: 0/0
+PASS  writer cap 16 MB: segment cut every 22920 terms (estimate at flush 16777440 in [C, C+732))  EXPECTED: {22920}  GOT: {22920}
+PASS  writer cap 16 MB: segments before complete = floor(229197 / 22920)  EXPECTED: 9  GOT: 9
+PASS  writer cap 16 MB: no rejection logs  EXPECTED: 0  GOT: 0/0
+PASS  control: segment count falls as C rises (same 229,197 adds)  EXPECTED: 159 > 39 > 9  GOT: [159, 39, 9]
+PASS  writer S=1023: 1 segment before complete (13,498 terms/segment at 16 MB, 20,000 adds), no rejection  EXPECTED: 1, 0  GOT: 1, 0
+PASS  writer S=1024: 20,000 info rejection logs, 0 segments, file length 0  EXPECTED: 20000, 0, 0  GOT: 20000, 0, 0
+SUMMARY unit predictions: 26/26 PASS
+HEAP (indicative): S=1 delta=16416600, S=512 delta=89847928, S=1023 delta=141048864, S=1024 delta=2456, S=1025 delta=104, S=4096 delta=104
+FILE LENGTH direct: S=1 len=2297880, S=512 len=126925060, S=1023 len=341748424, S=1024 len=0, S=1025 len=0, S=4096 len=0

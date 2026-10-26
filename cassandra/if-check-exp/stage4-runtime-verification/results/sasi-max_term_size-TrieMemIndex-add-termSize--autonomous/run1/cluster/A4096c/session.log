@@ -1,0 +1,167 @@
+[2026-10-26T04:33:38.954Z] run A4096c {'tree': 's4-tm-c4096', 'mode': 'CONTAINS', 'size': '4095', 'heap_mb': '256', 'stop': '3', 'rows': '60', 'inflight': '1', 'outdir': '/users/jason92/stage4-logs/tm/run1-cl/A4096c'} host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu
+[2026-10-26T04:33:38.954Z] + ss -ltn | grep -q ":7331 "
+[2026-10-26T04:33:38.964Z] + ss -ltn | grep -q ":9353 "
+[2026-10-26T04:33:38.973Z] + ss -ltn | grep -q ":7031 "
+[2026-10-26T04:33:38.982Z] + mkdir -p /users/jason92/s4-tm-data/A4096c/sampler && javac -d /users/jason92/s4-tm-data/A4096c/sampler /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-max_term_size-TrieMemIndex-add-termSize--autonomous/Sampler.java
+[2026-10-26T04:33:39.745Z] start node ulimit -n 100000; exec /users/jason92/s4-tm-c4096/bin/cassandra -f -p /users/jason92/s4-tm-data/A4096c/pid
+[2026-10-26T04:33:39.745Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+nodetool: Failed to connect to '127.0.0.1:7331' - ConnectException: 'Connection refused (Connection refused)'.
+
+[2026-10-26T04:33:43.709Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-10-26T04:33:47.938Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:33:52.045Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:33:56.142Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:34:00.188Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:34:04.201Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:34:08.253Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:34:12.333Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+not running
+
+[2026-10-26T04:34:16.453Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 statusbinary
+running
+
+[2026-10-26T04:34:17.548Z] node up
+[2026-10-26T04:34:22.555Z] + javap -constants -cp /users/jason92/s4-tm-c4096/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder | grep MAX_TERM_SIZE; javap -c -cp /users/jason92/s4-tm-c4096/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sasi.memory.TrieMemIndex | grep -m1 -B1 'if_icmplt'
+[2026-10-26T04:34:23.249Z] constant check ['public static final int MAX_TERM_SIZE = 4096;', '37: sipush        4096', '40: if_icmplt     105']
+[2026-10-26T04:34:23.270Z] + jcmd 1192821 GC.class_histogram
+[2026-10-26T04:34:23.760Z] histogram base ['Total        679287       65071624'] ['34:           362         106344  [C (java.base@11.0.32.1)', '358:           103           2472  [[C (java.base@11.0.32.1)', '700:            28            672  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)', '805:             1            432  [[[C (java.base@11.0.32.1)', '829:            17            408  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)']
+[2026-10-26T04:34:23.761Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-max_term_size-TrieMemIndex-add-termSize--autonomous/loader.py schema /users/jason92/s4-tm-c4096 127.0.31.1 9353 CONTAINS
+index created with options 'mode':'CONTAINS','analyzed':'false'
+
+[2026-10-26T04:34:31.937Z] + jcmd 1192821 GC.class_histogram
+[2026-10-26T04:34:32.332Z] histogram mid ['Total        889002      125681552'] ['32:           399         182376  [C (java.base@11.0.32.1)', '310:           144           3456  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)', '379:           104           2496  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)', '380:           103           2472  [[C (java.base@11.0.32.1)', '863:             1            432  [[[C (java.base@11.0.32.1)', '2989:             1             24  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory', '3451:             1             16  com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory', '4398:             1             16  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory$$Lambda$1689/0x0000000840846440']
+[2026-10-26T04:34:32.834Z] stop file written at switch_count 4
+[2026-10-26T04:34:57.960Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-max_term_size-TrieMemIndex-add-termSize--autonomous/loader.py verify /users/jason92/s4-tm-c4096 127.0.31.1 9353 4095 CONTAINS
+read_by_key rows=1
+like_hits=0
+
+[2026-10-26T04:34:58.406Z] + jcmd 1192821 GC.class_histogram
+[2026-10-26T04:34:58.742Z] histogram post ['Total        797047       93110448'] ['32:           395         165608  [C (java.base@11.0.32.1)', '311:           148           3552  java.util.concurrent.ConcurrentSkipListMap$Node (java.base@11.0.32.1)', '363:           114           2736  java.util.concurrent.ConcurrentSkipListMap$Index (java.base@11.0.32.1)', '383:           103           2472  [[C (java.base@11.0.32.1)', '865:             1            432  [[[C (java.base@11.0.32.1)', '2936:             1             24  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory', '3394:             1             16  com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory', '4350:             1             16  org.apache.cassandra.index.sasi.memory.TrieMemIndex$SizeEstimatingNodeFactory$$Lambda$1689/0x0000000840846440']
+[2026-10-26T04:34:58.742Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 tablestats ks.t
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 1
+	Read Latency: 2.13 ms
+	Write Count: 14
+	Write Latency: 55.144 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 3
+		Old SSTable count: 0
+		Max SSTable size: 21.197KiB
+		Space used (live): 65103
+		Space used (total): 65103
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 156
+		SSTable Compression Ratio: 1.00073
+		Number of partitions (estimate): 14
+		Memtable cell count: 2
+		Memtable data size: 8288
+		Memtable off heap memory used: 0
+		Memtable switch count: 4
+		Speculative retries: 0
+		Local read count: 1
+		Local read latency: 2.299 ms
+		Local write count: 14
+		Local write latency: 60.161 ms
+		Local read/write ratio: 0.07143
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 48.463KiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 48
+		Bloom filter off heap memory used: 24
+		Index summary off heap memory used: 84
+		Compression metadata off heap memory used: 48
+		Compacted partition minimum bytes: 3974
+		Compacted partition maximum bytes: 4768
+		Compacted partition mean bytes: 4768
+		Average live cells per slice (last five minutes): 1.0
+		Maximum live cells per slice (last five minutes): 1
+		Average tombstones per slice (last five minutes): 1.0
+		Maximum tombstones per slice (last five minutes): 1
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-10-26T04:34:59.956Z] + /users/jason92/s4-tm-c4096/bin/nodetool -h 127.0.0.1 -p 7331 tablestats ks.t
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 1
+	Read Latency: 2.13 ms
+	Write Count: 14
+	Write Latency: 55.144 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 3
+		Old SSTable count: 0
+		Max SSTable size: 21.197KiB
+		Space used (live): 65103
+		Space used (total): 65103
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 156
+		SSTable Compression Ratio: 1.00073
+		Number of partitions (estimate): 14
+		Memtable cell count: 2
+		Memtable data size: 8288
+		Memtable off heap memory used: 0
+		Memtable switch count: 4
+		Speculative retries: 0
+		Local read count: 1
+		Local read latency: 2.299 ms
+		Local write count: 14
+		Local write latency: 66.787 ms
+		Local read/write ratio: 0.07143
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 48.463KiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 48
+		Bloom filter off heap memory used: 24
+		Index summary off heap memory used: 84
+		Compression metadata off heap memory used: 48
+		Compacted partition minimum bytes: 3974
+		Compacted partition maximum bytes: 4768
+		Compacted partition mean bytes: 4768
+		Average live cells per slice (last five minutes): 1.0
+		Maximum live cells per slice (last five minutes): 1
+		Average tombstones per slice (last five minutes): 1.0
+		Maximum tombstones per slice (last five minutes): 1
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-10-26T04:35:01.160Z] + grep -e 'Enqueuing flush of ks.t' -e 'Flushing largest' -e 'Completed flushing' -e 'Flushed index segment' -e 'OutOfMemory' -e '^ERROR' -e '^WARN' /users/jason92/s4-tm-data/A4096c/logs/system.log | grep -v "Can't add term" > /users/jason92/stage4-logs/tm/run1-cl/A4096c/flush-lines.txt
+[2026-10-26T04:35:01.164Z] + grep -c "Can't add term" /users/jason92/s4-tm-data/A4096c/logs/system.log > /users/jason92/stage4-logs/tm/run1-cl/A4096c/cantadd-count.txt
+[2026-10-26T04:35:01.167Z] + grep -m3 "Can't add term" /users/jason92/s4-tm-data/A4096c/logs/system.log > /users/jason92/stage4-logs/tm/run1-cl/A4096c/cantadd-sample.txt
+[2026-10-26T04:35:01.170Z] + df -h /users/jason92/s4-tm-data/A4096c | tail -1
+/dev/sda3        63G   18G   43G  29% /
+
+[2026-10-26T04:35:07.181Z] stopped {'node': 1192821, 'sampler': 1197145, 'loader': 1197578}
+[2026-10-26T04:35:08.218Z] done {"label": "A4096c", "args": {"tree": "s4-tm-c4096", "mode": "CONTAINS", "size": "4095", "heap_mb": "256", "stop": "3", "rows": "60", "inflight": "1", "outdir": "/users/jason92/stage4-logs/tm/run1-cl/A4096c"}, "host": "node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu", "xmx": ["-Xmx2G"], "xms": ["-Xms2G"], "maxterm_jar": "apache-cassandra-5.0.9-SNAPSHOT.jar", "constant_check": ["public static final int MAX_TERM_SIZE = 4096;", "37: sipush        4096", "40: if_icmplt     105"], "yaml": {"memtable_heap_space": "256MiB", "memtable_cleanup_threshold": null, "memtable_flush_writers": null, "memtable_allocation_type": "heap_buffers", "commitlog_total_space": "1024MiB", "concurrent_writes": 8, "sasi_indexes_enabled": true}, "schema_out": ["index created with options 'mode':'CONTAINS','analyzed':'false'"], "base_switch": 1, "sample_before_load": [1792989270580, 216066568, 0, 1], "t_load_start": 1792989270633, "mid_sample": [1792989271812, 954264072, 25690995, 2], "mid_fraction_of_trigger": 0.287, "loader_rc": 0, "t_load_end": 1792989272934, "loader_out": ["loaded 14 rows of 4095 chars in 1.9 s (stopped by stopfile)"], "t_settled": 1792989297960, "verify_out": ["read_by_key rows=1", "like_hits=0"], "log_counts": {"Can't add term": 0, "Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT": 3, "Enqueuing flush of ks.t": 4, "Flushed index segment": 0, "Rejecting value": 0, "java.lang.OutOfMemoryError": 0, "Flushing largest": 3}, "si_files": [["nb-1-big-SI_t_v_idx.db", 40808772], ["nb-2-big-SI_t_v_idx.db", 5623892], ["nb-3-big-SI_t_v_idx.db", 36479060]], "data_files": [["nb-1-big-Data.db", 16560], ["nb-2-big-Data.db", 16548], ["nb-3-big-Data.db", 16554]], "t_end": 1792989301160}
+[2026-10-26T04:35:08.218Z] stopped {}

@@ -1,0 +1,25 @@
+# Byteman rules, cluster tier (B3d as amended 2026-10-26) of compression-metadata-writer-addOffset-maxCount--autonomous.
+# Loaded at start: -javaagent:<byteman.jar>=boot:<byteman.jar>,script:<this file>,listener:true,port:9329  -Dcm.trace=<file>
+# Observation only. One line per event:
+#   double path=<-CompressionInfo.db> maxCountNow=<n> count=<n> thread=<name> ms=<ms>
+#       before the SafeMemory.copy call in Writer.addOffset (CompressionMetadata.java:368); the argument (maxCount *= 2L) * 8L has
+#       already been evaluated, so maxCountNow is the NEW capacity and count the number of offsets held (== the old capacity)
+#   prepare path=<file> maxCount=<n> count=<n> ms=<ms>     entry of Writer.doPrepare (:409), before the trim to count * 8
+
+RULE cm double
+CLASS org.apache.cassandra.io.compress.CompressionMetadata$Writer
+METHOD addOffset
+AT INVOKE copy
+IF true
+DO traceOpen("cm", java.lang.System.getProperty("cm.trace", "cm.trace"));
+   traceln("cm", "double path=" + $0.file.path() + " maxCountNow=" + $0.maxCount + " count=" + $0.count + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cm prepare
+CLASS org.apache.cassandra.io.compress.CompressionMetadata$Writer
+METHOD doPrepare
+AT ENTRY
+IF true
+DO traceOpen("cm", java.lang.System.getProperty("cm.trace", "cm.trace"));
+   traceln("cm", "prepare path=" + $0.file.path() + " maxCount=" + $0.maxCount + " count=" + $0.count + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

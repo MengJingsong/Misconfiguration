@@ -1,0 +1,20 @@
+ARM L16: max_hints_file_size 16 MiB, max_hints_size_per_host unset (0B), rows 400000
+# ---- stage4 mh lines ----;cluster_name: stage4-mh;num_tokens: 1;initial_token: -4611686018427387904;auto_bootstrap: false;storage_port: 7023;native_transport_port: 9345;listen_address: 127.0.23.1;rpc_address: 127.0.23.1;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.23.1:7023";data_file_directories:;    - /users/jason92/s4-mh-run/A/data;commitlog_directory: /users/jason92/s4-mh-run/A/commitlog;hints_directory: /users/jason92/s4-mh-run/A/hints;saved_caches_directory: /users/jason92/s4-mh-run/A/saved_caches;cdc_raw_directory: /users/jason92/s4-mh-run/A/cdc_raw;hinted_handoff_enabled: true;max_hint_window: 6h;hints_flush_period: 1000ms;auto_hints_cleanup_enabled: false;endpoint_snitch: SimpleSnitch;max_hints_file_size: 16MiB;
+A sees {'127.0.23.1': 'UN'} after 15 s
+# ---- stage4 mh lines ----;cluster_name: stage4-mh;num_tokens: 1;initial_token: 4611686018427387904;auto_bootstrap: false;storage_port: 7024;native_transport_port: 9346;listen_address: 127.0.23.2;rpc_address: 127.0.23.2;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.23.1:7023";data_file_directories:;    - /users/jason92/s4-mh-run/B/data;commitlog_directory: /users/jason92/s4-mh-run/B/commitlog;hints_directory: /users/jason92/s4-mh-run/B/hints;saved_caches_directory: /users/jason92/s4-mh-run/B/saved_caches;cdc_raw_directory: /users/jason92/s4-mh-run/B/cdc_raw;hinted_handoff_enabled: true;max_hint_window: 6h;hints_flush_period: 1000ms;auto_hints_cleanup_enabled: false;endpoint_snitch: SimpleSnitch;max_hints_file_size: 16MiB;
+A sees {'127.0.23.1': 'UN', '127.0.23.2': 'UN'} after 7 s
+KNOB node A configuration line: max_hints_file_size=16MiB
+EXPECTED: node A configuration reports max_hints_file_size 16MiB — yes
+KNOB node A MaxHintsSizePerHostInMiB read back 0
+EXPECTED: max_hints_size_per_host read back 0 MiB — yes
+A sees {'127.0.23.2': 'DN'} after 2 s
+EXPECTED: Byteman lists the 5 rules on A — yes
+PHASE writer start 1792979652728
+PHASE writer end 1792980058117 rc=0 (405 s)
+WRITER {"ok": true, "written": 400000, "succeeded": 400000, "failed": 0, "errors": [], "first_pk": 0, "last_pk": 399999, "rows_per_s": 1000.0, "stopped_by": "rows", "elapsed_s": 400.011}
+EXPECTED: writer wrote 400,000 rows, 0 failed — yes
+PHASE final 1792980064124
+FILES 51 files, 846802142 bytes; hints dir listing in files.txt
+FINAL java.nio:type=BufferPool,name=direct|MemoryUsed|92946845 org.apache.cassandra.metrics:type=Storage,name=TotalHints|Count|400000 org.apache.cassandra.metrics:type=Storage,name=TotalHintsInProgress|Count|0  RssAnon=1783943168
+EXPECTED: no CassandraDaemon from s4-mh-run left — yes
+ARM L16 done, EXPECTED yes=5 no=0

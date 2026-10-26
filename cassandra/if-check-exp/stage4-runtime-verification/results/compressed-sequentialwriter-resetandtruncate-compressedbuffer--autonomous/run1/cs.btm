@@ -1,0 +1,68 @@
+# Byteman rules, cluster tier (B3d, audit amendment of 2026-10-26) of
+# compressed-sequentialwriter-resetandtruncate-compressedbuffer--autonomous.
+# Loaded at start with -javaagent:<byteman.jar>=boot:<byteman.jar>,script:<this file>,listener:true,port:9327
+#   -Dcs.trace=<file> [-Dcs.force=1]
+# R1, R2, R3 and the reset/close rules only observe. R2f (only with -Dcs.force=1, arm S2) replaces `compressed` by a
+# 64-byte direct buffer at line 247 so the grow branch is taken on the real stored chunk.
+#   init   w=<id> path=<file> buffer=<cap> compressed=<cap> direct=<bool> thread=<name> ms=<ms>   exit of <init>
+#   reset  w=<id> thread=<name> curChunkOffset=<n> chunkCount=<n> ms=<ms>                      entry of resetAndTruncate
+#   r2     w=<id> compressedCap=<cap> chunkSize=<n> id=<identity> curChunkOffset=<n> ms=<ms>   before line 247 is evaluated
+#   r2f    w=<id> forcedCap=<cap> ms=<ms>                                                       S2 only
+#   r3     w=<id> compressedCap=<cap> id=<identity> ms=<ms>                                    line 255, after the branch
+#   closed w=<id> ms=<ms>                                                                       doPreCleanup entry
+
+RULE cs init
+CLASS org.apache.cassandra.io.compress.CompressedSequentialWriter
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("cs", java.lang.System.getProperty("cs.trace", "cs.trace"));
+   traceln("cs", "init w=" + java.lang.System.identityHashCode($0) + " path=" + $0.getPath() + " buffer=" + $0.buffer.capacity() + " compressed=" + $0.compressed.capacity() + " direct=" + $0.compressed.isDirect() + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cs reset entry
+CLASS org.apache.cassandra.io.compress.CompressedSequentialWriter
+METHOD resetAndTruncate
+AT ENTRY
+IF true
+DO traceOpen("cs", java.lang.System.getProperty("cs.trace", "cs.trace"));
+   traceln("cs", "reset w=" + java.lang.System.identityHashCode($0) + " thread=" + java.lang.Thread.currentThread().getName() + " curChunkOffset=" + $0.chunkOffset + " chunkCount=" + $0.chunkCount + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cs r2 observer
+CLASS org.apache.cassandra.io.compress.CompressedSequentialWriter
+METHOD resetAndTruncate
+AT LINE 247
+IF java.lang.System.getProperty("cs.force", "0").equals("0")
+DO traceOpen("cs", java.lang.System.getProperty("cs.trace", "cs.trace"));
+   traceln("cs", "r2 w=" + java.lang.System.identityHashCode($0) + " compressedCap=" + $0.compressed.capacity() + " chunkSize=" + $chunkSize + " id=" + java.lang.System.identityHashCode($0.compressed) + " curChunkOffset=" + $0.chunkOffset + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cs r2 forcing
+CLASS org.apache.cassandra.io.compress.CompressedSequentialWriter
+METHOD resetAndTruncate
+AT LINE 247
+IF java.lang.System.getProperty("cs.force", "0").equals("1")
+DO traceOpen("cs", java.lang.System.getProperty("cs.trace", "cs.trace"));
+   traceln("cs", "r2 w=" + java.lang.System.identityHashCode($0) + " compressedCap=" + $0.compressed.capacity() + " chunkSize=" + $chunkSize + " id=" + java.lang.System.identityHashCode($0.compressed) + " curChunkOffset=" + $0.chunkOffset + " ms=" + java.lang.System.currentTimeMillis());
+   $0.compressed = java.nio.ByteBuffer.allocateDirect(64);
+   traceln("cs", "r2f w=" + java.lang.System.identityHashCode($0) + " forcedCap=" + $0.compressed.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cs r3 after branch
+CLASS org.apache.cassandra.io.compress.CompressedSequentialWriter
+METHOD resetAndTruncate
+AT LINE 255
+IF true
+DO traceOpen("cs", java.lang.System.getProperty("cs.trace", "cs.trace"));
+   traceln("cs", "r3 w=" + java.lang.System.identityHashCode($0) + " compressedCap=" + $0.compressed.capacity() + " id=" + java.lang.System.identityHashCode($0.compressed) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE cs closed
+CLASS org.apache.cassandra.io.compress.CompressedSequentialWriter$TransactionalProxy
+METHOD doPreCleanup
+AT ENTRY
+IF true
+DO traceOpen("cs", java.lang.System.getProperty("cs.trace", "cs.trace"));
+   traceln("cs", "closed w=" + java.lang.System.identityHashCode($0.this$0) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

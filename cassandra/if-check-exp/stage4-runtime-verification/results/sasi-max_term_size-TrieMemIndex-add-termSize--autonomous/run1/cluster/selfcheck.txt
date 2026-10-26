@@ -1,0 +1,36 @@
+RAW A1024c rows 174 flush MiB [86.71, 85.26, 86.61] rows at flush [57, 113, 170]
+RAW A1024c128 rows 96 flush MiB [42.99, 42.88, 42.93] rows at flush [28, 56, 84]
+RAW A1024r rows 174 flush MiB [] rows at flush []
+RAW A1024n rows 174 flush MiB [] rows at flush []
+RAW A1024p rows 46787 flush MiB [85.31, 85.28, 85.37] rows at flush [15000, 30000, 46000]
+RAW A256c rows 1476 flush MiB [85.41, 85.41, 85.28] rows at flush [478, 956, 1433]
+RAW A4096c rows 14 flush MiB [89.02, 88.9, 89.07] rows at flush [4, 7, 11]
+HOLDS | A1024c loader total equals rows.csv | loaded 174 rows of 1023 chars in 3.0 s (stopped by stopfile)
+HOLDS | A1024c128 loader total equals rows.csv | loaded 96 rows of 1023 chars in 2.1 s (stopped by stopfile)
+HOLDS | A1024r loader total equals rows.csv | loaded 174 rows of 1024 chars in 0.4 s (stopped by rowcap)
+HOLDS | A1024n loader total equals rows.csv | loaded 174 rows of 1023 chars in 0.3 s (stopped by rowcap)
+HOLDS | A1024p loader total equals rows.csv | loaded 46787 rows of 1023 chars in 16.1 s (stopped by stopfile)
+HOLDS | A256c loader total equals rows.csv | loaded 1476 rows of 255 chars in 5.9 s (stopped by stopfile)
+HOLDS | A4096c loader total equals rows.csv | loaded 14 rows of 4095 chars in 1.9 s (stopped by stopfile)
+HOLDS | A1024c three MEMTABLE_LIMIT flushes, each between H/3-0.1 and H/3+4 MiB | trigger 85.33 MiB; [86.71, 85.26, 86.61]
+HOLDS | A1024p three MEMTABLE_LIMIT flushes, each between H/3-0.1 and H/3+4 MiB | trigger 85.33 MiB; [85.31, 85.28, 85.37]
+HOLDS | A256c three MEMTABLE_LIMIT flushes, each between H/3-0.1 and H/3+4 MiB | trigger 85.33 MiB; [85.41, 85.41, 85.28]
+HOLDS | A4096c three MEMTABLE_LIMIT flushes, each between H/3-0.1 and H/3+4 MiB | trigger 85.33 MiB; [89.02, 88.9, 89.07]
+HOLDS | A1024c128 three MEMTABLE_LIMIT flushes, each between H/3-0.1 and H/3+4 MiB | trigger 42.67 MiB; [42.99, 42.88, 42.93]
+HOLDS | mean flush usage same across 256/1024/4096 builds (spread < 4 MiB) | {'A1024c': 86.19, 'A256c': 85.37, 'A4096c': 89.0, 'A1024p': 85.32}
+HOLDS | 128 MiB pool: mean flush usage about half (0.45..0.55) of the 256 MiB run | 0.498
+HOLDS | rows per flush: 256 build > 1024 build > 4096 build (same bytes per flush) | {'A1024c': 56.7, 'A256c': 477.7, 'A4096c': 3.7}
+HOLDS | A1024r: Can't add term lines == rows, no MEMTABLE_LIMIT flush, memtable cells == rows | count 174 rows 174
+HOLDS | A1024r: data size about the no-index arm (within 1%) | ['186702', '186528']
+HOLDS | A1024n: no Can't add lines and no flush | 0
+HOLDS | A1024r verify ['read_by_key rows=1', 'like_hits=0'] | ['read_by_key rows=1', 'like_hits=0']
+HOLDS | A1024c verify ['read_by_key rows=1', 'like_hits=1'] | ['read_by_key rows=1', 'like_hits=1']
+HOLDS | A1024p verify ['read_by_key rows=1', 'like_hits=1'] | ['read_by_key rows=1', 'like_hits=1']
+HOLDS | A256c verify ['read_by_key rows=1', 'like_hits=1'] | ['read_by_key rows=1', 'like_hits=1']
+NOTE A4096c verify ['read_by_key rows=1', 'like_hits=0'] (LIKE found nothing although 4095-char terms were accepted and indexed; unexplained, no frozen row depends on it)
+HOLDS | A1024c javap constant 1024 | ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+HOLDS | A256c javap constant 256 | ['public static final int MAX_TERM_SIZE = 256;', '37: sipush        256', '40: if_icmplt     105']
+HOLDS | A4096c javap constant 4096 | ['public static final int MAX_TERM_SIZE = 4096;', '37: sipush        4096', '40: if_icmplt     105']
+HOLDS | unit: 1023 accepted and 1024/1025/4096 rejected in both modes | from unit-results.csv
+HOLDS | unit: CONTAINS 1023 N=30 estimate > 47e6 and N=1 estimate > 1.6e6 (no cap near 1 KiB) | ('47798770', '1694447')
+RESULT ALL HOLD 27 / 27

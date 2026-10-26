@@ -1,0 +1,96 @@
+INFO A1024c: rows=174 flushes(MEMTABLE_LIMIT)=3 switches=3 usage_MiB=[86.71, 85.26, 86.61] rows_at_switch=[66, 118, 172] maxheap_MiB=1205 oom=0
+INFO A1024c128: rows=96 flushes(MEMTABLE_LIMIT)=3 switches=3 usage_MiB=[42.99, 42.88, 42.93] rows_at_switch=[28, 56, 86] maxheap_MiB=1029 oom=0
+INFO A1024r: rows=174 flushes(MEMTABLE_LIMIT)=0 switches=0 usage_MiB=[] rows_at_switch=[] maxheap_MiB=238 oom=0
+INFO A1024n: rows=174 flushes(MEMTABLE_LIMIT)=0 switches=0 usage_MiB=[] rows_at_switch=[] maxheap_MiB=206 oom=0
+INFO A1024p: rows=46787 flushes(MEMTABLE_LIMIT)=3 switches=3 usage_MiB=[85.31, 85.28, 85.37] rows_at_switch=[15000, 31000, 46000] maxheap_MiB=1101 oom=0
+INFO A256c: rows=1476 flushes(MEMTABLE_LIMIT)=3 switches=3 usage_MiB=[85.41, 85.41, 85.28] rows_at_switch=[497, 983, 1447] maxheap_MiB=1147 oom=0
+INFO A4096c: rows=14 flushes(MEMTABLE_LIMIT)=3 switches=3 usage_MiB=[89.02, 88.9, 89.07] rows_at_switch=[5, 8, 12] maxheap_MiB=1054 oom=0
+FAIL A1024c flush usage within [H/3, H/3 + one row]
+  EXPECTED: n>=3, each in [85.33, 86.80] MiB
+  GOT: n=3, [86.71, 85.26, 86.61] MiB
+PASS A1024c three flushes within 260 rows
+  EXPECTED: rows at 3rd switch <= 260
+  GOT: [66, 118, 172]
+PASS A1024c growth per row 1 to 5 MB (first memtable)
+  EXPECTED: 1e6..5e6 B/row
+  GOT: 1355682
+INFO A1024c live heap rise 28.7 MiB vs tracked on-heap 41.6 MiB (ratio tracked/live 1.45; predicted within about 2)
+PASS A1024r (1024 chars) rejected, no growth
+  EXPECTED: Can't add term == rows (174); 0 switches; on-heap < 2 MiB; no MEMTABLE_LIMIT flush
+  GOT: logs=174 switches=0 maxonheap=0.26 MiB flushes=0
+PASS A1024r rows readable by key, LIKE finds nothing
+  EXPECTED: key 1 row, like_hits=0
+  GOT: ['read_by_key rows=1', 'like_hits=0']
+PASS A1024n index dropped: no flush, no growth beyond data
+  EXPECTED: 0 switches, on-heap < 2 MiB
+  GOT: switches=0 maxonheap=0.26 MiB
+FAIL A1024p flush usage within [H/3, H/3 + one row]
+  EXPECTED: n>=3, each in [85.33, 86.33] MiB
+  GOT: n=3, [85.31, 85.28, 85.37] MiB
+PASS A1024p three flushes at 31,000 to 60,000 rows
+  EXPECTED: 31000..60000
+  GOT: [15000, 31000, 46000]
+PASS A1024c128 flush usage within [H/3, H/3 + one row]
+  EXPECTED: n>=3, each in [42.67, 43.92] MiB
+  GOT: n=3, [42.99, 42.88, 42.93] MiB
+PASS A1024c128 (128 MiB) rows per flush about half of A1024c
+  EXPECTED: ratio 0.35..0.65
+  GOT: 0.42
+PASS A1024c128 flush usage about half of 256 MiB run
+  EXPECTED: each < 0.65 * 85.3 MiB
+  GOT: [43.0, 42.9, 42.9]
+FAIL A256c flush usage within [H/3, H/3 + one row]
+  EXPECTED: n>=3, each in [85.33, 100.00] MiB
+  GOT: n=3, [85.41, 85.41, 85.28] MiB
+FAIL A256c rows per flush 8x to 32x those of A1024c
+  EXPECTED: 8..32
+  GOT: 7.5
+PASS A4096c flush usage within [H/3, H/3 + one row]
+  EXPECTED: n>=3, each in [85.33, 170.00] MiB
+  GOT: n=3, [89.02, 88.9, 89.07] MiB
+PASS A4096c rows per flush 1/32 to 1/8 of A1024c
+  EXPECTED: 0.031..0.125
+  GOT: 0.076
+PASS A1024c peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 1205 MiB, 0
+PASS A1024c constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+PASS A1024c128 peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 1029 MiB, 0
+PASS A1024c128 constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+PASS A1024r peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 238 MiB, 0
+PASS A1024r constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+PASS A1024n peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 206 MiB, 0
+PASS A1024n constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+PASS A1024p peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 1101 MiB, 0
+PASS A1024p constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 1024;', '37: sipush        1024', '40: if_icmplt     105']
+PASS A256c peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 1147 MiB, 0
+PASS A256c constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 256;', '37: sipush        256', '40: if_icmplt     105']
+PASS A4096c peak heap under Xmx, no OOM
+  EXPECTED: < 2048 MiB, 0 OOM
+  GOT: 1054 MiB, 0
+PASS A4096c constant in the running jar
+  EXPECTED: MAX_TERM_SIZE shown
+  GOT: ['public static final int MAX_TERM_SIZE = 4096;', '37: sipush        4096', '40: if_icmplt     105']
+RESULT SOME FAIL 25 / 29

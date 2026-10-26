@@ -1,0 +1,33 @@
+# Byteman observation rules for hints-EncryptedChecksummedDataInput-reusableBuffers-decryptBuffer--autonomous, cluster tier (audit R8).
+# They change no behaviour. Loaded on node A: -javaagent:<byteman jar>=listener:true,port:9333,sys:<EcHelper jar>,script:<this file>
+# -Dstage4.trace=<file>. One line per EncryptedChecksummedDataInput.readBuffer() call:
+#   in  ms= th=<thread#id> file= tl=<retained capacity before> alloc=<thread allocated bytes>
+#   out ms= th= file= tl=<retained capacity after> rbuf=<reader buffer capacity> direct=<reader buffer isDirect> alloc=
+#   exc ms= th= file= tl= alloc=         (readBuffer left by an exception)
+
+RULE ec in
+CLASS org.apache.cassandra.hints.EncryptedChecksummedDataInput
+METHOD readBuffer
+AT ENTRY
+IF true
+DO traceOpen("ec", java.lang.System.getProperty("stage4.trace", "ec.trace"));
+   traceln("ec", "in ms=" + java.lang.System.currentTimeMillis() + " th=" + EcHelper.thread() + " file=" + $0.getPath() + " tl=" + EcHelper.tl() + " alloc=" + EcHelper.alloc())
+ENDRULE
+
+RULE ec out
+CLASS org.apache.cassandra.hints.EncryptedChecksummedDataInput
+METHOD readBuffer
+AT EXIT
+IF true
+DO traceOpen("ec", java.lang.System.getProperty("stage4.trace", "ec.trace"));
+   traceln("ec", "out ms=" + java.lang.System.currentTimeMillis() + " th=" + EcHelper.thread() + " file=" + $0.getPath() + " tl=" + EcHelper.tl() + " rbuf=" + $0.buffer.capacity() + " direct=" + $0.buffer.isDirect() + " alloc=" + EcHelper.alloc())
+ENDRULE
+
+RULE ec exc
+CLASS org.apache.cassandra.hints.EncryptedChecksummedDataInput
+METHOD readBuffer
+AT EXCEPTION EXIT
+IF true
+DO traceOpen("ec", java.lang.System.getProperty("stage4.trace", "ec.trace"));
+   traceln("ec", "exc ms=" + java.lang.System.currentTimeMillis() + " th=" + EcHelper.thread() + " file=" + $0.getPath() + " tl=" + EcHelper.tl() + " alloc=" + EcHelper.alloc())
+ENDRULE

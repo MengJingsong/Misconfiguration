@@ -1,0 +1,47 @@
+**B2f. Predictions (stated before any run).**
+
+- S1: capacity in [256 KiB, 256 KiB + ~2 KiB] (the compressed bound `n + n/255 + 16` plus LZ4 header plus <=16 bytes of padding). Reader `buffer.capacity()` is about 256 KiB.
+  - **Amendment 2026-10-26 (audit R4, source arithmetic only):** the band is [254 KiB, 257.1 KiB] (a block is the aggregate buffer flushed before the entry that does not fit, so its plaintext is 262144 minus up to one ~1.2 KiB entry; upper bound 4+4+(262144+262144/255+16)=263,197 B encrypted to 263,213 B = 256 KiB + 1069 B). Exact relation, evaluated from the raw 8-byte block headers: retained capacity = max over blocks of the encrypted length field (`max(plain, enc)` is `enc`, `EncryptionUtils.java:148`; `ensureCapacity` allocates exactly the requested length, `ByteBufferUtil.java:822`), in a fresh thread.
+- S2 (1 MiB hint): capacity about 1 MiB + ~5 KiB. S3 (8 MiB): about 8 MiB + ~33 KiB. S4 (15 MiB): about 15 MiB + ~60 KiB. Each is larger than 256 KiB.
+- K2 = 1 MiB: S3 gives the same capacity as with the default. No change from the knob.
+  - **Amendment 2026-10-26 (audit R6, protocol A):** K2 takes three values: default (16 MiB), 4 MiB (`commitlog_segment_size: 8MiB`), 1 MiB (`commitlog_segment_size: 2MiB`), set in the JVM's yaml; S3 (an 8 MiB hint, larger than 4 MiB and 1 MiB) gives the same capacity for all three.
+- No shrink: after the S1 second read, capacity equals the first read's.
+- S5: after the failed read, capacity >= 512 MiB (the allocation happens before any bytes are read, `EncryptionUtils.java:148-150`).
+  - **Amendment 2026-10-26 (audit R3, source-derived; replaces the line above):** S5 = block header `[enc=512 MiB][plain=512 MiB]` followed by 5 junk bytes. The 512 MiB on-heap array IS allocated (`EncryptionUtils.java:148`; thread-allocated bytes grow by >= 536,870,912), but the read then fails: 5 bytes are read (`:150`), `doFinal` throws IllegalBlockSizeException (not a multiple of 16), which becomes IOException (`:159-162`) and FSReadError (`EncryptedChecksummedDataInput.java:129-131`) BEFORE `:126-127`. So the thread-local is NOT replaced: after the failed read its capacity is unchanged (0 in a fresh thread; the 512 MiB array is garbage). The original 'retained >= 512 MiB' is not reachable by this input. Retention needs the read to complete, i.e. a real block of that size. Prediction: allocation >= 512 MiB observed, FSReadError thrown, retained capacity stays 0.
+- S6 (zeros): capacity is much smaller than 256 KiB (a few KiB), since the buffer size is the encrypted compressed length. This shows it is not the plaintext constant.
+  - **Amendment 2026-10-26 (audit R5):** S6 = 4 hints of a 250 KiB zero blob each (one block per hint). Retained capacity < 4 KiB (about 1.1 KiB); reader `buffer.capacity()` about 250 KiB (the plaintext length).
+- What would show the claim wrong: S3 or S4 retained capacity <= 256 KiB + a few KiB; or K2 changes the result; or capacity falls after a smaller second read; or S5 throws before allocating.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Capacity ~ block size (S1 ~256 KiB; S2-S4 ~ hint size; S5 >= 512 MiB), unchanged by K2 | Claim confirmed: buffer follows the largest block on disk, not 256 KiB or `max_mutation_size`. |
+| S3/S4 capacity > 256 KiB and > 1 MiB while K2 = 1 MiB | Confirms no link to `max_mutation_size`. |
+| Usage (capacity) rises with K2 in step with the knob | Claim refuted: some path reads the limit. Re-trace. |
+| Capacity stays <= ~258 KiB for S2-S4 | Claim refuted: a cap exists on the read side that this trace missed. |
+| **(amended 2026-10-26, R3)** S5: allocation >= 512 MiB observed, FSReadError, retained capacity unchanged | Claim holds for the allocation (no header validation) and the retained-buffer relation (set only after a complete read); it is not a retention row. Allocation < 512 MiB or a check before the allocation: refuted for the 'nothing validates the header' part. |
+| Capacity shrinks after a smaller second read | Claim refuted (not grow-only). |
+| Positive control C1 shows the write-side cap rejecting an oversized hint while the reader accepts the oversized block | Cap known to bind exists on the write path; read path has none. |
+| C1 does not throw, or S1-S6 do not produce blocks of the intended sizes (file size check, B2h) | Not confirmed: workload did not reach the limit. |
+
+**B3f. Predictions (stated before any run).**
+
+- **(amended 2026-10-26, R5: retention is read while the dispatcher thread is alive, <60 s after dispatch ends; after the thread's 1-minute keep-alive the buffer is freed with it, which is recorded, not a row.)**
+- F1: after dispatch and after `GC.run`, A holds one large retained `byte[]` of about 256 KiB + ~1 KiB (random payload) in the dispatcher thread's thread-local; `[B` after-GC exceeds the baseline by roughly that plus the usual churn. No growth over the 5 idle minutes (not released, unless the pool thread times out and is reclaimed, `HintsDispatchExecutor.java:68-72`; if so the buffer is freed with the thread, which is itself informative).
+- F2: retained `byte[]` about 8 MiB + ~33 KiB; F3: about 15 MiB + ~60 KiB, greater than 256 KiB and, with K2 = 1024 KiB, greater than `max_mutation_size` too. K2 does not change F2/F3 results.
+- Direct memory: peak above baseline by about the oversized plaintext block (8 MiB or 15 MiB) during the read, for the reader's off-heap buffer, released when the reader closes.
+- Positive control: with `max_hints_file_size` 4 MiB, hints for 200 MiB are split into files of about 4 MiB (file count about 50x higher than at default; no file much larger than 4 MiB + one hint); disk follows the cap's relation.
+- What would show the claim wrong: F3 retained `byte[]` stays near 256 KiB; the retained size follows K2; or the buffer is not retained after dispatch on a live thread.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Retained `byte[]` ~ file's largest block (F1 ~256 KiB, F2 ~8 MiB, F3 ~15 MiB), unchanged by K2 | Claim confirmed: node memory held by this path follows the on-disk block, not 256 KiB or `max_mutation_size`. |
+| F2/F3 retained > K2 limit (1 MiB) | Confirms the limit does not govern the reader. |
+| Retained size tracks K2 (smaller K2, smaller buffer) | Claim refuted. |
+| Retained size is always <= ~260 KiB for F2/F3 | Claim refuted; a read-side cap exists. |
+| Positive control: hints disk / file sizes follow `max_hints_file_size` | A known cap does bind usage on the write side, so a flat reader buffer is a real absence of cap, not a harness blind spot. |
+| Dispatch never ran (file still present), or control files did not rotate | Not confirmed: workload or control did not engage. |
+

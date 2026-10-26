@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 25 | 25 |
+| Set A | 159 | 36 | 36 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -172,3 +172,19 @@ results §1); `tp41` missed one frozen numeric bound (B3f <0.1%; 0.35%) while B3
 Upstream candidates (JIRA first): `ChecksummedDataInput.close()` leaves the pooled/overflow buffer unreturned; unchecked block-header
 size in `CompressedChecksummedDataInput`. `predicted-negative.md` §6 rows were left in place (they list sibling lines still open).
 Next: CSV order 7 (decision), 27 on (`EncryptedChecksummedDataInput`, `HintsBuffer`, `HintsWriteExecutor`).
+
+2026-10-26, batch 6 (CSV rows 27-37, ten cases; rows 29 and 30 are one line, so one case): **8 true negative, 2 true positive**.
+True positive (cap binds): `hints-HintsBuffer-put-slabCapacity` (hint pool = n x max(2 x max_mutation_size, 32 MiB), `MAX_HINT_BUFFERS=1` deadlocks) and
+`sasi-max_compaction_flush_memory-PerSSTableIndexWriter-estimatedMemoryUse` (cap binds; real heap ~1.8x the estimate; flush writers ignore the option).
+True negative: `hints-EncryptedChecksummedDataInput-reusableBuffers-decryptBuffer`, `max_hints_file_size-HintsWriteExecutor.flushInternal-session.position`
+(rows 29+30), `sai-SegmentRowIdOrdinalPairs-add-capacity`, `sasi-max_term_size-{OnDiskIndexBuilder-add,PerSSTableIndexWriter-addTerm,TrieMemIndex-add}-termSize`,
+`compressed-sequentialwriter-resetandtruncate-compressedbuffer`, `compression-metadata-writer-addOffset-maxCount`. Write-ups: 10 in parallel, ~2-3.5 min each; filed by hand.
+Stage 4 ran in a rolling window of 5 (pc07: hb, od, sr, cm, pw, pm; pc12: mh, cs, tm, ec); a session rate limit (reset 00:20 ET)
+stopped the last five agents mid-run and they were resumed with SendMessage; the interruptions are logged in the results files (no frozen reading was lost).
+Timing: `stage4-runtime-verification/timing/set-A-batch-6.log`. Leftovers: `~/s4-{hb,od,sr,cm,pw,pm}` (+ logs) on pc07, `~/s4-{mh,cs,tm,ec}` (+ logs) on pc12; no process running.
+Open points for you to overrule: `hb` reran its cluster tier with a 10 s hold after the 2 s hold proved too short, and its B3f extract hash changed after a post-run
+correction of one audit sentence (results §3); `tp` style frozen-number misses: `ec` S1/F1 (245 KiB, not the predicted size), `pm` amended one prediction (log lines = cuts + 1)
+before freeze. Upstream/doc candidates (JIRA first): forged 512 MiB header in the encrypted reader (~537 MB heap + ~537 MB direct); stale 1G text in `IndexMode.java:60/:192`;
+scrub raises `AssertionError: Buffer holder has not been acquired` on every run of a corrupted compressed sstable (`cs`, not investigated); a SASI LIKE query on 4095-char indexed
+terms returned nothing (`tm`, unexplained). `predicted-negative.md` rows were left in place (siblings still open).
+Next: CSV order 7 (decision), 38 on (`Walker`, `AbstractReplicaCollection`, `HistogramBuilder`, and the rest of the §6 lines).

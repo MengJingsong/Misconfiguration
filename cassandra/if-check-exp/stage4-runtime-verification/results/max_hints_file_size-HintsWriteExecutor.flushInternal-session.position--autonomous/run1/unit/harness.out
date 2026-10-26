@@ -1,0 +1,146 @@
+STAGE4 value hintsDirectory=/users/jason92/s4-mh/build/test/cassandra/hints
+STAGE4 value messagingVersion=12
+STAGE4 value hintsFlushPeriodMs=10000
+STAGE4 check default max_hints_file_size bytes expected=134217728 actual=134217728 ok
+STAGE4 check default max_hints_size_per_host bytes expected=0 actual=0 ok
+STAGE4 check hints compression off expected=true actual=true ok
+STAGE4 check hints encryption off expected=true actual=true ok
+STAGE4 check knob read back MiB=128 expected=134217728 actual=134217728 ok
+STAGE4 predict name=warmup L=128 host=6a775db6-a87f-494e-bd33-701ea48e99c3 L=134217728 e=16460 hints=4096 nominalFiles=1
+STAGE4 run name=warmup L=128 counted=false host=6a775db6-a87f-494e-bd33-701ea48e99c3 L=134217728 hints=4096 payload=16384 e=16460 T=67420202 operand=67420202 files=1 filesGeL=0 closedMin=-1 closedMax=-1 last=67420202 nLo=1 nHi=1 nominalFiles=1 directBefore=297709 directAfter=67668842 directDelta=67371133
+STAGE4 check warmup L=128 operand == sum(File.length) expected=67420202 actual=67420202 ok
+STAGE4 check warmup L=128 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check warmup L=128 files within nominal +-1 expected=true actual=true ok
+STAGE4 check warmup L=128 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check warmup L=128 last file < L+e expected=true actual=true ok
+STAGE4 check knob read back MiB=1 expected=1048576 actual=1048576 ok
+STAGE4 predict name=rep0 L=1 host=8a36e6db-23bd-4ee0-82e2-638d9048acf6 L=1048576 e=16460 hints=4096 nominalFiles=64
+STAGE4 run name=rep0 L=1 counted=true host=8a36e6db-23bd-4ee0-82e2-638d9048acf6 L=1048576 hints=4096 payload=16384 e=16460 T=67422848 operand=67422848 files=64 filesGeL=64 closedMin=1053482 closedMax=1053482 last=1053482 nLo=64 nHi=65 nominalFiles=64 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep0 L=1 operand == sum(File.length) expected=67422848 actual=67422848 ok
+STAGE4 check rep0 L=1 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep0 L=1 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep0 L=1 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep0 L=1 last file < L+e expected=true actual=true ok
+STAGE4 check rep0 L=1 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=4 expected=4194304 actual=4194304 ok
+STAGE4 predict name=rep0 L=4 host=493f8fdf-a599-47f1-93bd-e1808302250a L=4194304 e=16460 hints=4096 nominalFiles=17
+STAGE4 run name=rep0 L=4 counted=true host=493f8fdf-a599-47f1-93bd-e1808302250a L=4194304 hints=4096 payload=16384 e=16460 T=67420874 operand=67420874 files=17 filesGeL=16 closedMin=4197342 closedMax=4197342 last=263402 nLo=17 nHi=17 nominalFiles=17 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep0 L=4 operand == sum(File.length) expected=67420874 actual=67420874 ok
+STAGE4 check rep0 L=4 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep0 L=4 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep0 L=4 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep0 L=4 last file < L+e expected=true actual=true ok
+STAGE4 check rep0 L=4 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=16 expected=16777216 actual=16777216 ok
+STAGE4 predict name=rep0 L=16 host=48578636-86b0-4114-9512-87bd26af5ceb L=16777216 e=16460 hints=4096 nominalFiles=5
+STAGE4 run name=rep0 L=16 counted=true host=48578636-86b0-4114-9512-87bd26af5ceb L=16777216 hints=4096 payload=16384 e=16460 T=67420370 operand=67420370 files=5 filesGeL=4 closedMin=16789242 closedMax=16789242 last=263402 nLo=5 nHi=5 nominalFiles=5 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep0 L=16 operand == sum(File.length) expected=67420370 actual=67420370 ok
+STAGE4 check rep0 L=16 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep0 L=16 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep0 L=16 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep0 L=16 last file < L+e expected=true actual=true ok
+STAGE4 check rep0 L=16 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=128 expected=134217728 actual=134217728 ok
+STAGE4 predict name=rep0 L=128 host=b1945a1d-adca-4400-af83-3090600e0dc2 L=134217728 e=16460 hints=4096 nominalFiles=1
+STAGE4 run name=rep0 L=128 counted=true host=b1945a1d-adca-4400-af83-3090600e0dc2 L=134217728 hints=4096 payload=16384 e=16460 T=67420202 operand=67420202 files=1 filesGeL=0 closedMin=-1 closedMax=-1 last=67420202 nLo=1 nHi=1 nominalFiles=1 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep0 L=128 operand == sum(File.length) expected=67420202 actual=67420202 ok
+STAGE4 check rep0 L=128 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep0 L=128 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep0 L=128 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep0 L=128 last file < L+e expected=true actual=true ok
+STAGE4 check rep0 L=128 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=1 expected=1048576 actual=1048576 ok
+STAGE4 predict name=rep1 L=1 host=5d877b94-acd1-4119-aced-742e7003ade7 L=1048576 e=16460 hints=4096 nominalFiles=64
+STAGE4 run name=rep1 L=1 counted=true host=5d877b94-acd1-4119-aced-742e7003ade7 L=1048576 hints=4096 payload=16384 e=16460 T=67422848 operand=67422848 files=64 filesGeL=64 closedMin=1053482 closedMax=1053482 last=1053482 nLo=64 nHi=65 nominalFiles=64 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep1 L=1 operand == sum(File.length) expected=67422848 actual=67422848 ok
+STAGE4 check rep1 L=1 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep1 L=1 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep1 L=1 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep1 L=1 last file < L+e expected=true actual=true ok
+STAGE4 check rep1 L=1 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=4 expected=4194304 actual=4194304 ok
+STAGE4 predict name=rep1 L=4 host=14d0dc36-0690-41e9-9843-80df42b5f37a L=4194304 e=16460 hints=4096 nominalFiles=17
+STAGE4 run name=rep1 L=4 counted=true host=14d0dc36-0690-41e9-9843-80df42b5f37a L=4194304 hints=4096 payload=16384 e=16460 T=67420874 operand=67420874 files=17 filesGeL=16 closedMin=4197342 closedMax=4197342 last=263402 nLo=17 nHi=17 nominalFiles=17 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep1 L=4 operand == sum(File.length) expected=67420874 actual=67420874 ok
+STAGE4 check rep1 L=4 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep1 L=4 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep1 L=4 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep1 L=4 last file < L+e expected=true actual=true ok
+STAGE4 check rep1 L=4 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=16 expected=16777216 actual=16777216 ok
+STAGE4 predict name=rep1 L=16 host=d7d56ab6-a16e-44bc-b438-e382b44a199d L=16777216 e=16460 hints=4096 nominalFiles=5
+STAGE4 run name=rep1 L=16 counted=true host=d7d56ab6-a16e-44bc-b438-e382b44a199d L=16777216 hints=4096 payload=16384 e=16460 T=67420370 operand=67420370 files=5 filesGeL=4 closedMin=16789242 closedMax=16789242 last=263402 nLo=5 nHi=5 nominalFiles=5 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep1 L=16 operand == sum(File.length) expected=67420370 actual=67420370 ok
+STAGE4 check rep1 L=16 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep1 L=16 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep1 L=16 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep1 L=16 last file < L+e expected=true actual=true ok
+STAGE4 check rep1 L=16 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=128 expected=134217728 actual=134217728 ok
+STAGE4 predict name=rep1 L=128 host=ef601d64-105e-4e4a-a794-495c9fed67a4 L=134217728 e=16460 hints=4096 nominalFiles=1
+STAGE4 run name=rep1 L=128 counted=true host=ef601d64-105e-4e4a-a794-495c9fed67a4 L=134217728 hints=4096 payload=16384 e=16460 T=67420202 operand=67420202 files=1 filesGeL=0 closedMin=-1 closedMax=-1 last=67420202 nLo=1 nHi=1 nominalFiles=1 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep1 L=128 operand == sum(File.length) expected=67420202 actual=67420202 ok
+STAGE4 check rep1 L=128 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep1 L=128 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep1 L=128 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep1 L=128 last file < L+e expected=true actual=true ok
+STAGE4 check rep1 L=128 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=1 expected=1048576 actual=1048576 ok
+STAGE4 predict name=rep2 L=1 host=9c55c04c-db14-49eb-8199-c4236956b13d L=1048576 e=16460 hints=4096 nominalFiles=64
+STAGE4 run name=rep2 L=1 counted=true host=9c55c04c-db14-49eb-8199-c4236956b13d L=1048576 hints=4096 payload=16384 e=16460 T=67422848 operand=67422848 files=64 filesGeL=64 closedMin=1053482 closedMax=1053482 last=1053482 nLo=64 nHi=65 nominalFiles=64 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep2 L=1 operand == sum(File.length) expected=67422848 actual=67422848 ok
+STAGE4 check rep2 L=1 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep2 L=1 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep2 L=1 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep2 L=1 last file < L+e expected=true actual=true ok
+STAGE4 check rep2 L=1 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=4 expected=4194304 actual=4194304 ok
+STAGE4 predict name=rep2 L=4 host=c2564d02-2340-4acb-984c-e496e0bae759 L=4194304 e=16460 hints=4096 nominalFiles=17
+STAGE4 run name=rep2 L=4 counted=true host=c2564d02-2340-4acb-984c-e496e0bae759 L=4194304 hints=4096 payload=16384 e=16460 T=67420874 operand=67420874 files=17 filesGeL=16 closedMin=4197342 closedMax=4197342 last=263402 nLo=17 nHi=17 nominalFiles=17 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep2 L=4 operand == sum(File.length) expected=67420874 actual=67420874 ok
+STAGE4 check rep2 L=4 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep2 L=4 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep2 L=4 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep2 L=4 last file < L+e expected=true actual=true ok
+STAGE4 check rep2 L=4 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=16 expected=16777216 actual=16777216 ok
+STAGE4 predict name=rep2 L=16 host=ee127781-b341-4ec1-b8b0-f92abb09bb9e L=16777216 e=16460 hints=4096 nominalFiles=5
+STAGE4 run name=rep2 L=16 counted=true host=ee127781-b341-4ec1-b8b0-f92abb09bb9e L=16777216 hints=4096 payload=16384 e=16460 T=67420370 operand=67420370 files=5 filesGeL=4 closedMin=16789242 closedMax=16789242 last=263402 nLo=5 nHi=5 nominalFiles=5 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep2 L=16 operand == sum(File.length) expected=67420370 actual=67420370 ok
+STAGE4 check rep2 L=16 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep2 L=16 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep2 L=16 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep2 L=16 last file < L+e expected=true actual=true ok
+STAGE4 check rep2 L=16 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=128 expected=134217728 actual=134217728 ok
+STAGE4 predict name=rep2 L=128 host=7f7552d5-d719-495a-a4a3-95c06c3240a9 L=134217728 e=16460 hints=4096 nominalFiles=1
+STAGE4 run name=rep2 L=128 counted=true host=7f7552d5-d719-495a-a4a3-95c06c3240a9 L=134217728 hints=4096 payload=16384 e=16460 T=67420202 operand=67420202 files=1 filesGeL=0 closedMin=-1 closedMax=-1 last=67420202 nLo=1 nHi=1 nominalFiles=1 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check rep2 L=128 operand == sum(File.length) expected=67420202 actual=67420202 ok
+STAGE4 check rep2 L=128 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check rep2 L=128 files within nominal +-1 expected=true actual=true ok
+STAGE4 check rep2 L=128 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check rep2 L=128 last file < L+e expected=true actual=true ok
+STAGE4 check rep2 L=128 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 value direct delta min=0
+STAGE4 value direct delta max=0
+STAGE4 check totals across L and reps equal within 0.1% expected=true actual=true ok
+STAGE4 check direct delta spread across all runs within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=1 expected=1048576 actual=1048576 ok
+STAGE4 predict name=small-hints L=1 host=d713a672-fda7-4c04-9962-cafa8dc3b4de L=1048576 e=1099 hints=65536 nominalFiles=69
+STAGE4 run name=small-hints L=1 counted=true host=d713a672-fda7-4c04-9962-cafa8dc3b4de L=1048576 hints=65536 payload=1024 e=1099 T=72026962 operand=72026962 files=69 filesGeL=68 closedMin=1049587 closedMax=1049587 last=655046 nLo=69 nHi=69 nominalFiles=69 directBefore=67668850 directAfter=67668850 directDelta=0
+STAGE4 check small-hints L=1 operand == sum(File.length) expected=72026962 actual=72026962 ok
+STAGE4 check small-hints L=1 files in [T/(L+e), T/L+1] expected=true actual=true ok
+STAGE4 check small-hints L=1 files within nominal +-1 expected=true actual=true ok
+STAGE4 check small-hints L=1 every closed file in [L, L+e) expected=true actual=true ok
+STAGE4 check small-hints L=1 last file < L+e expected=true actual=true ok
+STAGE4 check small-hints L=1 direct delta within 1 MiB expected=true actual=true ok
+STAGE4 check knob read back MiB=128 expected=134217728 actual=134217728 ok
+STAGE4 check control cap bytes expected=16777216 actual=16777216 ok
+STAGE4 control host=48f18a1d-3459-47cd-9223-d5fc6c2b8789 cap=16777216 e=16460 batchBytes=1053440 batches=16 refused=true Tstop=16855082 files=1
+STAGE4 check control refused before 200 batches expected=true actual=true ok
+STAGE4 check control T_stop > cap expected=true actual=true ok
+STAGE4 check control T_stop <= cap + one batch + 200 B header slack expected=true actual=true ok
+STAGE4 check control stays refused (20 more checks) expected=0 actual=0 ok
+STAGE4 check control T unchanged after refusals expected=16855082 actual=16855082 ok
+STAGE4 check control allowed again at cap 0 expected=true actual=true ok
+STAGE4 summary checks=111 mismatches=0

@@ -1,0 +1,28 @@
+**B2f. Predictions (stated before any run).** Files: 64/16/4/1 (+-1 for L=1,4 from header and overshoot; the L=128 case: exactly 1 file because 64 MiB < 128 MiB). Every closed file has length in [L MiB, L MiB + 16 KiB + header]; the open/last file is <= that. Sum of lengths = 64 MiB + per-hint entry/CRC overhead + headers, identical across L within 0.1% (differences only from extra file headers: tens of bytes per file). Direct BufferPool MemoryUsed identical across L within a few hundred KiB. With 1 KiB hints, file lengths in [1 MiB, 1 MiB + 1 KiB + header]. **[Amended 2026-10-26, stage-4 step-0 audit: supersedes the file counts above: every closed file has length in [L, L + e) (the test is after the append, :245-247; length equals `position()` uncompressed), so with T the sum of the lengths and e the entry size, N is in [ceil(T/(L+e)), floor(T/L)+1]; nominally N = 64, 17, 5, 1 for L = 1, 4, 16, 128 MiB (+-1). The 1 KiB run at L = 1: each closed file in [1 MiB, 1 MiB + e1). Direct-memory difference of every run within 1 MiB of zero (the 256 KiB `writeBuffer` and the slabs exist before the run), and the spread across L within 1 MiB. The roll count in the trace equals the number of files with length >= L]**
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Total bytes identical across L (within 0.1%), file count scales ~1/L | Claim confirmed: knob is a per-file roll-over, not a disk cap. **[Amended 2026-10-26, step-0 audit: confirmation also needs (i) the Byteman `roll` count equal to the number of files with length >= L (direct evidence the :247 branch fired and is what closed the files) and (ii) the positive control (B2h) stopping at ~16 MiB; without both the tier is Not confirmed]** |
+| Total bytes shrinks or stops at L (e.g. total <= L, or hints missing/deleted) | Claim refuted: knob bounds total usage (would contradict the code trace) |
+| Total bytes grows with L by more than headers | Claim refuted (usage follows the knob) |
+| Closed file lengths < L (e.g. 0.5 L) or > L + one hint by a wide margin | My trace of the check (A3) is wrong (or compression path in play); investigate |
+| All L give 1 file | Limit never reached: workload too small / config not applied; not confirmed |
+| Positive control (B2h) does not bound the bytes | Control failed; run not confirmed |
+| Direct memory differs with L | Knob has an unexpected memory effect; claim refuted for memory |
+
+**B3f. Predictions (before any run).** Total bytes in `hints/` at end of workload equal across L within ~2% (about the logical data size plus per-hint overhead, ~0.8-0.9 GiB), file count roughly total/L: L=128 -> ~7 files, L=16 -> ~55, L=1 -> ~880 (+-2 each); every closed file between L and L + ~2.2 KiB (one hint, 2 KiB blob + overhead) + header. Direct buffer pool MemoryUsed and RSS flat across L (within ~10 MiB; slab 32 MiB + 256 KiB writeBuffer exist regardless). Control run: total stops near 100 MiB + whatever was in the buffer / created between flushes (<= tens of MiB), far below ~850 MiB, with L still 128. **[Amended 2026-10-26, stage-4 step-0 audit: replaces the file counts and the tolerances above with relations: (a) with T the `du -sb` total, e the largest entry (about 2.1 KB), N in [ceil(T/(L+e)), floor(T/L)+1], every closed file in [L, L+e), roll lines = files with length >= L; (b) T equal across L = 1, 16, 128 within 1% (only file headers differ); (c) the direct `MemoryUsed` samples' maximum over the run within 10 MiB across L; `RssAnon` at the end within 128 MiB across L (the 1 GiB heap's touched pages vary with GC timing, which a 5-percent figure cannot separate; the direct pool is the memory observable that could move with L); (d) control: T_end in (100 MiB, 108 MiB] (one to three flush periods of about 2.1 MB/s, not "tens of MiB"), `decide` `false` lines for B only with `checked` > 100 MiB, `true` lines before, and zero growth over the last 60 s]**
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Total `du` same for L=1,16,128 (within a few %), file count ~ total/L | Claim confirmed. **[Amended 2026-10-26, step-0 audit: confirmation also needs the `roll` count equal to the number of files with length >= L, the direct-memory samples flat (B3f c), and the control row below; otherwise Not confirmed]** |
+| Control (per-host cap 100MiB) total ~100 MiB + small overshoot while L=128 runs untouched | Positive control works: a known cap does bind; confirms knob is not that cap |
+| Total `du` tracks L (e.g. ~L, or shrinks with L) | Claim refuted: usage follows the knob |
+| Total hits some ceiling at the same value regardless of L | Another cap is binding (check max_hint_window / max_hints_size_per_host not set); investigate, not confirmed |
+| File counts equal across L | Config not applied or workload below L: not confirmed |
+| Control total does not stop near 100 MiB | Control failed (cap not applied); not confirmed |
+| RSS / direct memory scales with L | Memory effect; refutes "no memory relation" (unexpected) |
+
