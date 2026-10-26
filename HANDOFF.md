@@ -63,7 +63,7 @@ noticed along the way are noted in case files for Target 3, not chased.
 - **Stage 3:** bands A, B and C fully read; **93 case files** (29 guided, 64 autonomous; estimate
   positive 50, negative 43). 65 of the 402 A/B/C units were a case's target before the two-set job;
   the other **337** are that job (2 accepted candidates in `predicted-positive.md`, the rest rejected
-  lines in `predicted-negative.md`, ~151 rows). Set A has written up **35** of its 159 targets
+  lines in `predicted-negative.md`, ~151 rows). Set A has written up **36** of its 159 targets
   (batches 1–6, 2026-10-24/25); set B none yet. Nothing is undecided. Band D is not read.
 - **Stage 4:** **all 93 closed**, run 1 only (no run 2 anywhere): 76 Confirmed, 4 Refuted,
   12 partial, 1 not confirmed. **Outcome class:** 46 true positive, 0 false positive, 31 true
