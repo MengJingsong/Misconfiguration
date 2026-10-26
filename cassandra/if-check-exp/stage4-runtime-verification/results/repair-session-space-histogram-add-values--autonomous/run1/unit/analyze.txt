@@ -1,0 +1,81 @@
+EXPECTED: direct n=10: values.length 10 = 10*2^ceil(log2(n/10)) = 10 -- yes
+EXPECTED: direct n=11: values.length 20 = 10*2^ceil(log2(n/10)) = 20 -- yes
+EXPECTED: direct n=20: values.length 20 = 10*2^ceil(log2(n/10)) = 20 -- yes
+EXPECTED: direct n=21: values.length 40 = 10*2^ceil(log2(n/10)) = 40 -- yes
+EXPECTED: direct n=1024: values.length 1280 = 10*2^ceil(log2(n/10)) = 1280 -- yes
+EXPECTED: direct n=8192: values.length 10240 = 10*2^ceil(log2(n/10)) = 10240 -- yes
+EXPECTED: direct n=131072: values.length 163840 = 10*2^ceil(log2(n/10)) = 163840 -- yes
+EXPECTED: direct n=1048576: values.length 1310720 = 10*2^ceil(log2(n/10)) = 1310720 -- yes
+EXPECTED: direct n=1048577: values.length 1310720 = 10*2^ceil(log2(n/10)) = 1310720 -- yes
+EXPECTED: direct n=10 equals the listed B2f value 10 -- yes
+EXPECTED: direct n=11 equals the listed B2f value 20 -- yes
+EXPECTED: direct n=8192 equals the listed B2f value 10240 -- yes
+EXPECTED: direct n=131072 equals the listed B2f value 163840 -- yes
+EXPECTED: direct n=1048576 equals the listed B2f value 1310720 -- yes
+EXPECTED: direct n=1048577 equals the listed B2f value 1310720 -- yes
+EXPECTED: tree S=1 RF=3 D=20: values.length 1280 follows the formula for n=leaves=1024 (1280) -- yes
+EXPECTED: tree S=1 RF=3 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=8 RF=3 D=20: values.length 10240 follows the formula for n=leaves=8192 (10240) -- yes
+EXPECTED: tree S=8 RF=3 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=64 RF=3 D=20: values.length 81920 follows the formula for n=leaves=65536 (81920) -- yes
+EXPECTED: tree S=64 RF=3 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=512 RF=3 D=20: values.length 655360 follows the formula for n=leaves=524288 (655360) -- yes
+EXPECTED: tree S=512 (RF 3, D 20): depth 20, leaves 2^20, values.length 1310720 -- NO
+EXPECTED: tree S=512 RF=3 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=2047 RF=3 D=20: values.length 1310720 follows the formula for n=leaves=1048576 (1310720) -- yes
+EXPECTED: tree S=2047 (RF 3, D 20): depth 20, leaves 2^20, values.length 1310720 -- yes
+EXPECTED: tree S=2047 RF=3 (depth 20): array bytes/leaf 10.00 within 8..16 -- yes
+EXPECTED: tree S=2047 RF=3 (depth 20): hist thread-allocated 88081344 in (10.5 MB, ~120 MB) -- yes
+EXPECTED: tree S=2047 RF=3 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=2048 RF=3 D=20: values.length 10 follows the formula for n=leaves=2 (10) -- yes
+EXPECTED: tree S=2048 RF=3 D=20: int budget wraps -> depth 1, leaves 2, values.length 10 -- yes
+EXPECTED: tree S=2048 RF=3 D=20: measureDeep(tree)/leaf = 172 B > array bytes/leaf 48.0 -- yes
+EXPECTED: tree S=4096 RF=3 D=20: values.length 10 follows the formula for n=leaves=2 (10) -- yes
+EXPECTED: tree S=4096 RF=3 D=20: int budget wraps -> depth 1, leaves 2, values.length 10 -- yes
+EXPECTED: tree S=4096 RF=3 D=20: measureDeep(tree)/leaf = 172 B > array bytes/leaf 48.0 -- yes
+EXPECTED: tree S=1 RF=3 D=10: values.length 1280 follows the formula for n=leaves=1024 (1280) -- yes
+EXPECTED: tree S=1 D=10: leaves 1024 <= 1024 and values.length 1280 <= 1280 -- yes
+EXPECTED: tree S=1 RF=3 D=10: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=8 RF=3 D=10: values.length 1280 follows the formula for n=leaves=1024 (1280) -- yes
+EXPECTED: tree S=8 D=10: leaves 1024 <= 1024 and values.length 1280 <= 1280 -- yes
+EXPECTED: tree S=8 RF=3 D=10: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=64 RF=3 D=10: values.length 1280 follows the formula for n=leaves=1024 (1280) -- yes
+EXPECTED: tree S=64 D=10: leaves 1024 <= 1024 and values.length 1280 <= 1280 -- yes
+EXPECTED: tree S=64 RF=3 D=10: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=512 RF=3 D=10: values.length 1280 follows the formula for n=leaves=1024 (1280) -- yes
+EXPECTED: tree S=512 D=10: leaves 1024 <= 1024 and values.length 1280 <= 1280 -- yes
+EXPECTED: tree S=512 RF=3 D=10: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=2047 RF=3 D=10: values.length 1280 follows the formula for n=leaves=1024 (1280) -- yes
+EXPECTED: tree S=2047 D=10: leaves 1024 <= 1024 and values.length 1280 <= 1280 -- yes
+EXPECTED: tree S=2047 RF=3 D=10: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=2048 RF=3 D=10: values.length 10 follows the formula for n=leaves=2 (10) -- yes
+EXPECTED: tree S=2048 D=10: leaves 2 <= 1024 and values.length 10 <= 1280 -- yes
+EXPECTED: tree S=2048 RF=3 D=10: int budget wraps -> depth 1, leaves 2, values.length 10 -- yes
+EXPECTED: tree S=2048 RF=3 D=10: measureDeep(tree)/leaf = 172 B > array bytes/leaf 48.0 -- yes
+EXPECTED: tree S=4096 RF=3 D=10: values.length 10 follows the formula for n=leaves=2 (10) -- yes
+EXPECTED: tree S=4096 D=10: leaves 2 <= 1024 and values.length 10 <= 1280 -- yes
+EXPECTED: tree S=4096 RF=3 D=10: int budget wraps -> depth 1, leaves 2, values.length 10 -- yes
+EXPECTED: tree S=4096 RF=3 D=10: measureDeep(tree)/leaf = 172 B > array bytes/leaf 48.0 -- yes
+EXPECTED: tree S=2047 RF=1 D=20: values.length 1310720 follows the formula for n=leaves=1048576 (1310720) -- yes
+EXPECTED: tree S=2047 RF=1 D=20: depth 20, values.length 1310720 -- yes
+EXPECTED: tree S=2047 RF=1 (depth 20): array bytes/leaf 10.00 within 8..16 -- yes
+EXPECTED: tree S=2047 RF=1 (depth 20): hist thread-allocated 88081344 in (10.5 MB, ~120 MB) -- yes
+EXPECTED: tree S=2047 RF=1 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=4096 RF=1 D=20: values.length 10 follows the formula for n=leaves=2 (10) -- yes
+EXPECTED: tree S=4096 RF=1 D=20: int budget wraps -> depth 1, leaves 2, values.length 10 -- yes
+EXPECTED: tree S=4096 RF=1 D=20: measureDeep(tree)/leaf = 172 B > array bytes/leaf 48.0 -- yes
+EXPECTED: tree S=700 RF=2 D=20: values.length 1310720 follows the formula for n=leaves=1048576 (1310720) -- yes
+EXPECTED: tree S=700 RF=2 (depth 20): array bytes/leaf 10.00 within 8..16 -- yes
+EXPECTED: tree S=700 RF=2 (depth 20): hist thread-allocated 88081344 in (10.5 MB, ~120 MB) -- yes
+EXPECTED: tree S=700 RF=2 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=64 RF=2 D=20: values.length 163840 follows the formula for n=leaves=131072 (163840) -- yes
+EXPECTED: tree S=64 RF=2 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=8 RF=2 D=20: values.length 20480 follows the formula for n=leaves=16384 (20480) -- yes
+EXPECTED: tree S=8 RF=2 D=20: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: tree S=700 RF=2 D=12: values.length 5120 follows the formula for n=leaves=4096 (5120) -- yes
+EXPECTED: tree S=700 RF=2 D=12: measureDeep(tree)/leaf = 104 B > array bytes/leaf 10.0 -- yes
+EXPECTED: values.length is a function of n alone (one value per n across all rows) -- yes
+EXPECTED: RF=3 D=20, S=1..2047: depth non-decreasing with S: [(1, 10), (8, 13), (64, 16), (512, 19), (2047, 20)] -- yes
+EXPECTED: positive control: measureDeep(tree) non-decreasing with S below the cap and 2^depth proportional: [(1, 106632), (8, 852104), (64, 6815880), (512, 54526088), (2047, 109052040)] -- yes
+EXPECTED: flat above the cap: values.length identical for all S with depth 20: [(2047, 1310720)] -- yes
+INFO: S=2047 array/tree ratio: unhashed 0.096, with leaf+inner hash arrays added 0.050

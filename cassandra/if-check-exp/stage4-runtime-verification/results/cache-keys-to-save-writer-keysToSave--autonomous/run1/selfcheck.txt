@@ -1,0 +1,26 @@
+SELFCHECK unit: test log has one KeyCache save per K in order (7): holds [1, 100, 500, 1000, 1000, 1000, 1000]
+SELFCHECK unit: KeyCache n from the test log == n_logged in unit.txt: holds 
+SELFCHECK unit: n == min(K, N) (0 and MAX mean N): holds log=[1, 100, 500, 1000, 1000, 1000, 1000] want=[1, 100, 500, 1000, 1000, 1000, 1000]
+SELFCHECK unit: CounterCache n == min(K, N) for K=100, 0: holds [100, 1000]
+SELFCHECK unit: file length affine in n (resid <= 8 B at every point): holds e=12.45 hdr=16.6
+SELFCHECK main: system.log Saved lines == results.json n_logged (in order): holds log=[10000, 100000, 846505, 846505] json=[10000, 100000, 846505, 846505]
+SELFCHECK main: stress-read2.log Total errors 0: holds Total errors              :          0
+SELFCHECK main: stress-read1.log Total errors 0: holds Total errors              :          0
+SELFCHECK main: stress-write.log Total errors 0: holds Total errors              :          0
+SELFCHECK main K10000: heap peak recomputed from csv == recorded: holds 1286563992
+SELFCHECK main K100000: heap peak recomputed from csv == recorded: holds 1353672856
+SELFCHECK main K0: heap peak recomputed from csv == recorded: holds 1789880472
+SELFCHECK main K2147483647: heap peak recomputed from csv == recorded: holds 1924098200
+SELFCHECK ctl20: system.log Saved lines == results.json n_logged (in order): holds log=[10000, 238312] json=[10000, 238312]
+SELFCHECK ctl20: stress-read2.log Total errors 0: holds Total errors              :          0
+SELFCHECK ctl20: stress-read1.log Total errors 0: holds Total errors              :          0
+SELFCHECK ctl20 K10000: heap peak recomputed from csv == recorded: holds 1008174168
+SELFCHECK ctl20 K0: heap peak recomputed from csv == recorded: holds 1142391896
+SELFCHECK yaml10k: system.log Saved lines == results.json n_logged (in order): holds log=[10000, 10000] json=[10000]
+SELFCHECK yaml10k: stress-read2.log Total errors 0: holds Total errors              :          0
+SELFCHECK yaml10k: stress-read1.log Total errors 0: holds Total errors              :          0
+SELFCHECK yaml10k manual: heap peak recomputed from csv == recorded: holds 1439504064
+SELFCHECK main: n == K for K=10000,100000; n ~ entries for 0/MAX: holds {10000: 10000, 100000: 100000, 0: 846505, 2147483647: 846505}
+SELFCHECK main: F(10000) < F(100000) < F(0) ~ F(MAX): holds {10000: 199883, 100000: 1998556, 0: 16918090, 2147483647: 16918090}
+SELFCHECK main: bytes per entry constant within 2 % across K: holds {10000: 19.99, 100000: 19.99, 0: 19.99, 2147483647: 19.99}
+SELFCHECK total not holding: 0

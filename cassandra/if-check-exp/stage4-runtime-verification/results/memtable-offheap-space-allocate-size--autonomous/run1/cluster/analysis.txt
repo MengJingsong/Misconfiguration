@@ -1,0 +1,57 @@
+analysis of run1: arms ['b128', 'b256', 'b512', 'ctl', 'hp', 'k128', 'k256', 'k512']
+k128: L=128 MiB peak_off=126.1 MiB (0.985 L) peak_on=46.2 MiB blocked 0.0->2400.0 flushes=25 rss_base=2631 MiB rss_peak_delta=302.9 MiB nmt_other_peak_delta=0.62 MiB off_after_flush=0.0 samples=358 stress_rc=0
+k256: L=256 MiB peak_off=250.5 MiB (0.979 L) peak_on=91.5 MiB blocked 0.0->1226.0 flushes=13 rss_base=2638 MiB rss_peak_delta=391.2 MiB nmt_other_peak_delta=0.61 MiB off_after_flush=0.0 samples=352 stress_rc=0
+k512: L=512 MiB peak_off=498.1 MiB (0.973 L) peak_on=181.9 MiB blocked 0.0->568.0 flushes=7 rss_base=2621 MiB rss_peak_delta=670.8 MiB nmt_other_peak_delta=0.63 MiB off_after_flush=0.0 samples=384 stress_rc=0
+b128: L=128 MiB peak_off=110.8 MiB (0.865 L) peak_on=0.2 MiB blocked 0.0->206.0 flushes=6 rss_base=2640 MiB rss_peak_delta=147.8 MiB nmt_other_peak_delta=13.33 MiB off_after_flush=0.0 samples=166 stress_rc=0
+b128: client ok=3000 err=0 errors={} seconds=4.266
+b256: L=256 MiB peak_off=241.3 MiB (0.943 L) peak_on=0.4 MiB blocked 0.0->68.0 flushes=3 rss_base=2643 MiB rss_peak_delta=287.6 MiB nmt_other_peak_delta=12.57 MiB off_after_flush=0.0 samples=167 stress_rc=0
+b256: client ok=3000 err=0 errors={} seconds=4.223
+b512: L=512 MiB peak_off=504.3 MiB (0.985 L) peak_on=0.8 MiB blocked 0.0->16.0 flushes=2 rss_base=2655 MiB rss_peak_delta=514.8 MiB nmt_other_peak_delta=12.06 MiB off_after_flush=0.0 samples=166 stress_rc=0
+b512: client ok=3000 err=0 errors={} seconds=3.87
+ctl: L=256 MiB peak_off=0.0 MiB (0.000 L) peak_on=1013.8 MiB blocked 0.0->128.0 flushes=5 rss_base=2632 MiB rss_peak_delta=151.6 MiB nmt_other_peak_delta=0.61 MiB off_after_flush=0.0 samples=360 stress_rc=0
+hp: L=256 MiB peak_off=0.0 MiB (0.000 L) peak_on=126.8 MiB blocked 0.0->1088.0 flushes=35 rss_base=2637 MiB rss_peak_delta=143.4 MiB nmt_other_peak_delta=0.62 MiB off_after_flush=0.0 samples=359 stress_rc=0
+EXPECTED k128 tracked peak <= 1.05 L: yes (126.1 MiB vs 134.4)
+EXPECTED k128 limit reached (peak >= 0.9 L): yes
+EXPECTED k128 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED k128 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (25)
+EXPECTED k128 RssAnon peak delta <= 1.3 L: NO (302.9 vs 166 MiB)
+EXPECTED k128 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED k256 tracked peak <= 1.05 L: yes (250.5 MiB vs 268.8)
+EXPECTED k256 limit reached (peak >= 0.9 L): yes
+EXPECTED k256 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED k256 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (13)
+EXPECTED k256 RssAnon peak delta <= 1.3 L: NO (391.2 vs 333 MiB)
+EXPECTED k256 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED k512 tracked peak <= 1.05 L: yes (498.1 MiB vs 537.6)
+EXPECTED k512 limit reached (peak >= 0.9 L): yes
+EXPECTED k512 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED k512 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (7)
+EXPECTED k512 RssAnon peak delta <= 1.3 L: NO (670.8 vs 666 MiB)
+EXPECTED k512 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED k: tracked peaks ordered 128 < 256 < 512: yes ([126.1, 250.5, 498.1])
+EXPECTED k: RssAnon peak-delta ratios 256/128 in [1.5, 2.5] and 512/128 in [3.0, 5.0] (1:2:4 within 25 %): NO (1.29, 2.21)
+EXPECTED b128 tracked peak <= L + 4 MiB: yes (110.8 MiB vs 132.0)
+EXPECTED b128 limit reached (peak >= 0.9 L): NO
+EXPECTED b128 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED b128 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (6)
+EXPECTED b128 RssAnon peak delta <= 1.3 L: yes (147.8 vs 166 MiB)
+EXPECTED b128 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED b256 tracked peak <= L + 4 MiB: yes (241.3 MiB vs 260.0)
+EXPECTED b256 limit reached (peak >= 0.9 L): yes
+EXPECTED b256 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED b256 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (3)
+EXPECTED b256 RssAnon peak delta <= 1.3 L: yes (287.6 vs 333 MiB)
+EXPECTED b256 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED b512 tracked peak <= L + 4 MiB: yes (504.3 MiB vs 516.0)
+EXPECTED b512 limit reached (peak >= 0.9 L): yes
+EXPECTED b512 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED b512 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (2)
+EXPECTED b512 RssAnon peak delta <= 1.3 L: yes (514.8 vs 666 MiB)
+EXPECTED b512 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED b: tracked peaks ordered 128 < 256 < 512: yes ([110.8, 241.3, 504.3])
+EXPECTED b: RssAnon peak-delta ratios 256/128 in [1.5, 2.5] and 512/128 in [3.0, 5.0] (1:2:4 within 25 %): yes (1.95, 3.48)
+EXPECTED ctl (heap_buffers, L=256): tracked off-heap stays < 1 MiB: yes (0.00 MiB)
+EXPECTED ctl: RssAnon peak delta <= 0.3 x 256 MiB (other consumers only, not L-sized): NO (151.6 MiB)
+EXPECTED hp (heap_buffers, memtable_heap_space 128MiB): tracked on-heap plateaus <= 1.05 x 128 MiB + 4 MiB: yes (126.8 MiB)
+EXPECTED hp: writers blocked (count grew): yes
+EXPECTED hp: limit reached (on-heap peak >= 0.9 x 128 MiB): yes

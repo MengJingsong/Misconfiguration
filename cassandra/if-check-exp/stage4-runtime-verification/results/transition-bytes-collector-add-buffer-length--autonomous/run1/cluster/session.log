@@ -1,0 +1,366 @@
+[2026-10-26 10:07:23] cluster-run run1: RUN=/users/jason92/s4-b7-tc-run tree=/users/jason92/s4-b7-tc scale=1 workload=[('w1', 20000, 100, 900), ('w2', 5000, 8192, 8191), ('w3', 2000, 60000, 900), ('w4', 2000, 100, 40960)] read_s=180
+[2026-10-26 10:07:23] + git describe --tags; git rev-parse --short HEAD; java -version 2>&1 | head -1; uname -r; df -h /users/jason92
+cassandra-5.0.9
+cc35c71
+openjdk version "11.0.32.1" 2026-08-18
+5.15.0-187-generic
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3        63G   26G   34G  43% /
+
+  rc=0
+[2026-10-26 10:07:23] + ss -ltn
+[2026-10-26 10:07:23] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-26 10:07:23] + mkdir -p /users/jason92/s4-b7-tc-run/logs
+
+  rc=0
+[2026-10-26 10:07:23] + rm -rf /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/hints /users/jason92/s4-b7-tc-run/saved_caches /users/jason92/s4-b7-tc-run/cdc_raw && mkdir -p /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/
+
+  rc=0
+[2026-10-26 10:07:23] + rm -f /users/jason92/s4-b7-tc-run/logs/tc-T1k.trace
+
+  rc=0
+[2026-10-26 10:07:23] + rm -rf /users/jason92/s4-b7-tc-run/conf && cp -r /users/jason92/s4-b7-tc/conf /users/jason92/s4-b7-tc-run/conf
+
+  rc=0
+[2026-10-26 10:07:23] conf T1k: format=bti sai_string_term_size_fail_threshold=1KiB compat=NONE
+[2026-10-26 10:07:23] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-26 10:07:23] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-b7-tc-run/cassandra.pid > /users/jason92/s4-b7-tc-run/logs/start-T1k.out 2>&1"
+
+  rc=0
+[2026-10-26 10:07:26] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:30] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:35] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:39] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:43] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:47] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:51] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:55] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:07:59] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:08:04] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:08:08] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:08:12] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:08:16] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:08:17] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 10:08:25] node up (T1k) after 62 s, pid 2523311
+[2026-10-26 10:08:25] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py schema 127.0.1.1 9042
+[2026-10-26 10:08:41] schema: {'schema': 'ok', 'agreement': True, 'role': 'tcw (ordinary, non-superuser)'}
+[2026-10-26 10:08:41] + ss -ltn
+[2026-10-26 10:08:41] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-001-base.txt
+[2026-10-26 10:08:42] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:08:42] T1k: histo base byte[] (107032, 16542128) total (766604, 72095064)
+[2026-10-26 10:08:42] T1k: phase load_w1 start
+[2026-10-26 10:08:42] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w1 20000 100 900 16
+[2026-10-26 10:08:47] T1k: phase load_w1 end (5 s) {'table': 'w1', 'ok': 20000, 'rejected': 0, 'expected': 20000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 4.24}
+[2026-10-26 10:08:47] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-002-after-load_w1.txt
+[2026-10-26 10:08:47] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:08:47] T1k: histo after-load_w1 byte[] (128152, 81935904) total (1376003, 165721488)
+[2026-10-26 10:08:47] T1k: phase load_w2 start
+[2026-10-26 10:08:47] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w2 5000 8192 8191 16
+[2026-10-26 10:08:49] T1k: phase load_w2 end (2 s) {'table': 'w2', 'ok': 0, 'rejected': 5000, 'expected': 5000, 'other_errors': 0, 'first_other': [], 'first_rejection': 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail sai_string_term_size violated: Value of column \'v\' has size 8191, this exceeds the failure threshold of 1024."', 'seconds': 1.68}
+[2026-10-26 10:08:49] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-003-after-load_w2.txt
+[2026-10-26 10:08:50] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:08:50] T1k: histo after-load_w2 byte[] (128246, 81939888) total (1377704, 165987976)
+[2026-10-26 10:08:50] T1k: phase load_w3 start
+[2026-10-26 10:08:50] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w3 2000 60000 900 16
+[2026-10-26 10:08:52] T1k: phase load_w3 end (2 s) {'table': 'w3', 'ok': 2000, 'rejected': 0, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 1.26}
+[2026-10-26 10:08:52] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-004-after-load_w3.txt
+[2026-10-26 10:08:52] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:08:52] T1k: histo after-load_w3 byte[] (131452, 324011168) total (1485325, 420785000)
+[2026-10-26 10:08:52] T1k: phase load_w4 start
+[2026-10-26 10:08:52] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w4 2000 100 40960 16
+[2026-10-26 10:08:54] T1k: phase load_w4 end (1 s) {'table': 'w4', 'ok': 0, 'rejected': 2000, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail sai_string_term_size violated: Value of column \'v\' has size 40960, this exceeds the failure threshold of 1024."', 'seconds': 0.71}
+[2026-10-26 10:08:54] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-005-after-load_w4.txt
+[2026-10-26 10:08:54] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:08:54] T1k: histo after-load_w4 byte[] (131488, 324012744) total (1496158, 421180080)
+[2026-10-26 10:08:54] T1k: phase flush start
+[2026-10-26 10:08:54] + bin/nodetool -h 127.0.0.1 -p 7110 flush ks
+[2026-10-26 10:09:01] T1k: phase flush end (7 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:09:01] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-006-after-flush.txt
+[2026-10-26 10:09:02] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:09:02] T1k: histo after-flush byte[] (109567, 19532160) total (791519, 78558080)
+[2026-10-26 10:09:02] T1k: phase compact start
+[2026-10-26 10:09:02] + bin/nodetool -h 127.0.0.1 -p 7110 compact ks
+[2026-10-26 10:09:08] T1k: phase compact end (6 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:09:08] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-007-after-compact.txt
+[2026-10-26 10:09:09] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:09:09] T1k: histo after-compact byte[] (109938, 21293720) total (793145, 80387360)
+[2026-10-26 10:09:09] T1k: phase reads start
+[2026-10-26 10:09:09] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py read 127.0.1.1 9042 180 8 w1:20000:100:900 w2:0:8192:8191 w3:2000:60000:900 w4:0:100:40960
+[2026-10-26 10:12:10] T1k: phase reads end (181 s) {'point': 73391, 'sai': 74056, 'point_hit': 73391, 'sai_hit': 74056, 'by_table': {'w1': [36656, 36656, 36964, 36964], 'w3': [36735, 36735, 37092, 37092]}, 'errors_n': 0, 'first_errors': [], 'seconds': 180.0}
+[2026-10-26 10:12:10] + jcmd 2523311 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/histo-008-after-reads.txt
+[2026-10-26 10:12:10] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:12:10] T1k: histo after-reads byte[] (110604, 21758528) total (796720, 81184216)
+[2026-10-26 10:12:10] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:12:10] T1k: system.log ERROR/OOM lines 0 []
+[2026-10-26 10:12:10] stopping node pid 2523311
+[2026-10-26 10:12:10] + kill 2523311
+
+  rc=0
+[2026-10-26 10:12:15] node stopped
+[2026-10-26 10:12:15] + cp /users/jason92/s4-b7-tc-run/logs/tc-T1k.trace /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/trace.txt 2>/dev/null; cp /users/jason92/s4-b7-tc-run/logs/gc-T1k.log /users/jason92/s4-b7-tc-logs/run1/cluster/T1k/ 2>/dev/null; cp /users/jason92/s4-b7-tc-run/conf/cassandra.yaml /users/jason92/s4-b7-tc-
+
+  rc=0
+[2026-10-26 10:12:15] + rm -rf /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/hints /users/jason92/s4-b7-tc-run/saved_caches /users/jason92/s4-b7-tc-run/cdc_raw && mkdir -p /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/
+
+  rc=0
+[2026-10-26 10:12:15] + rm -f /users/jason92/s4-b7-tc-run/logs/tc-T8k.trace
+
+  rc=0
+[2026-10-26 10:12:15] + rm -rf /users/jason92/s4-b7-tc-run/conf && cp -r /users/jason92/s4-b7-tc/conf /users/jason92/s4-b7-tc-run/conf
+
+  rc=0
+[2026-10-26 10:12:15] conf T8k: format=bti sai_string_term_size_fail_threshold=8KiB compat=NONE
+[2026-10-26 10:12:15] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-26 10:12:15] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-b7-tc-run/cassandra.pid > /users/jason92/s4-b7-tc-run/logs/start-T8k.out 2>&1"
+
+  rc=0
+[2026-10-26 10:12:18] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:23] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:27] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:31] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:35] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:39] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:43] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:47] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:52] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:12:56] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:13:00] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:13:04] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:13:08] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:13:09] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 10:13:16] node up (T8k) after 61 s, pid 2529707
+[2026-10-26 10:13:16] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py schema 127.0.1.1 9042
+[2026-10-26 10:13:36] schema: {'schema': 'ok', 'agreement': True, 'role': 'tcw (ordinary, non-superuser)'}
+[2026-10-26 10:13:36] + ss -ltn
+[2026-10-26 10:13:36] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-001-base.txt
+[2026-10-26 10:13:36] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:13:36] T8k: histo base byte[] (106963, 16538408) total (766866, 72284400)
+[2026-10-26 10:13:36] T8k: phase load_w1 start
+[2026-10-26 10:13:36] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w1 20000 100 900 16
+[2026-10-26 10:13:43] T8k: phase load_w1 end (6 s) {'table': 'w1', 'ok': 20000, 'rejected': 0, 'expected': 20000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 5.63}
+[2026-10-26 10:13:43] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-002-after-load_w1.txt
+[2026-10-26 10:13:43] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:13:43] T8k: histo after-load_w1 byte[] (128114, 87176560) total (1376040, 170978032)
+[2026-10-26 10:13:43] T8k: phase load_w2 start
+[2026-10-26 10:13:43] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w2 5000 8192 8191 16
+[2026-10-26 10:13:47] T8k: phase load_w2 end (4 s) {'table': 'w2', 'ok': 5000, 'rejected': 0, 'expected': 5000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 2.93}
+[2026-10-26 10:13:47] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-003-after-load_w2.txt
+[2026-10-26 10:13:47] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:13:47] T8k: histo after-load_w2 byte[] (134722, 250209288) total (1584137, 366047120)
+[2026-10-26 10:13:47] T8k: phase load_w3 start
+[2026-10-26 10:13:47] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w3 2000 60000 900 16
+[2026-10-26 10:13:51] T8k: phase load_w3 end (4 s) {'table': 'w3', 'ok': 2000, 'rejected': 0, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 2.69}
+[2026-10-26 10:13:51] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-004-after-load_w3.txt
+[2026-10-26 10:13:51] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:13:51] T8k: histo after-load_w3 byte[] (110297, 440451000) total (984389, 531326512)
+[2026-10-26 10:13:51] T8k: phase load_w4 start
+[2026-10-26 10:13:51] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w4 2000 100 40960 16
+[2026-10-26 10:13:54] T8k: phase load_w4 end (2 s) {'table': 'w4', 'ok': 0, 'rejected': 2000, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail sai_string_term_size violated: Value of column \'v\' has size 40960, this exceeds the failure threshold of 8192."', 'seconds': 1.33}
+[2026-10-26 10:13:54] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-005-after-load_w4.txt
+[2026-10-26 10:13:54] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:13:54] T8k: histo after-load_w4 byte[] (110333, 440461712) total (962225, 530774528)
+[2026-10-26 10:13:54] T8k: phase flush start
+[2026-10-26 10:13:54] + bin/nodetool -h 127.0.0.1 -p 7110 flush ks
+[2026-10-26 10:14:04] T8k: phase flush end (10 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:14:04] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-006-after-flush.txt
+[2026-10-26 10:14:04] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:14:04] T8k: histo after-flush byte[] (103010, 19566568) total (714997, 75788920)
+[2026-10-26 10:14:04] T8k: phase compact start
+[2026-10-26 10:14:04] + bin/nodetool -h 127.0.0.1 -p 7110 compact ks
+[2026-10-26 10:14:19] T8k: phase compact end (14 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:14:19] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-007-after-compact.txt
+[2026-10-26 10:14:19] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:14:19] T8k: histo after-compact byte[] (103236, 20890592) total (715042, 77129192)
+[2026-10-26 10:14:19] T8k: phase reads start
+[2026-10-26 10:14:19] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py read 127.0.1.1 9042 180 8 w1:20000:100:900 w2:5000:8192:8191 w3:2000:60000:900 w4:0:100:40960
+[2026-10-26 10:17:20] T8k: phase reads end (181 s) {'point': 60393, 'sai': 60647, 'point_hit': 60393, 'sai_hit': 60647, 'by_table': {'w1': [20053, 20053, 20271, 20271], 'w2': [19965, 19965, 20183, 20183], 'w3': [20375, 20375, 20193, 20193]}, 'errors_n': 0, 'first_errors': [], 'seconds': 180.03}
+[2026-10-26 10:17:20] + jcmd 2529707 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/histo-008-after-reads.txt
+[2026-10-26 10:17:20] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:17:20] T8k: histo after-reads byte[] (104017, 21144720) total (720086, 77796528)
+[2026-10-26 10:17:20] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:17:20] T8k: system.log ERROR/OOM lines 0 []
+[2026-10-26 10:17:20] stopping node pid 2529707
+[2026-10-26 10:17:20] + kill 2529707
+
+  rc=0
+[2026-10-26 10:17:25] node stopped
+[2026-10-26 10:17:25] + cp /users/jason92/s4-b7-tc-run/logs/tc-T8k.trace /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/trace.txt 2>/dev/null; cp /users/jason92/s4-b7-tc-run/logs/gc-T8k.log /users/jason92/s4-b7-tc-logs/run1/cluster/T8k/ 2>/dev/null; cp /users/jason92/s4-b7-tc-run/conf/cassandra.yaml /users/jason92/s4-b7-tc-
+
+  rc=0
+[2026-10-26 10:17:25] + rm -rf /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/hints /users/jason92/s4-b7-tc-run/saved_caches /users/jason92/s4-b7-tc-run/cdc_raw && mkdir -p /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/
+
+  rc=0
+[2026-10-26 10:17:25] + rm -f /users/jason92/s4-b7-tc-run/logs/tc-T64k.trace
+
+  rc=0
+[2026-10-26 10:17:25] + rm -rf /users/jason92/s4-b7-tc-run/conf && cp -r /users/jason92/s4-b7-tc/conf /users/jason92/s4-b7-tc-run/conf
+
+  rc=0
+[2026-10-26 10:17:25] conf T64k: format=bti sai_string_term_size_fail_threshold=64KiB compat=NONE
+[2026-10-26 10:17:25] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-26 10:17:25] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-b7-tc-run/cassandra.pid > /users/jason92/s4-b7-tc-run/logs/start-T64k.out 2>&1"
+
+  rc=0
+[2026-10-26 10:17:29] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:33] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:37] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:41] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:45] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:50] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:54] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:17:58] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:18:02] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:18:06] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:18:10] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:18:14] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:18:18] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:18:20] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 10:18:28] node up (T64k) after 62 s, pid 2535395
+[2026-10-26 10:18:28] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py schema 127.0.1.1 9042
+[2026-10-26 10:18:43] schema: {'schema': 'ok', 'agreement': True, 'role': 'tcw (ordinary, non-superuser)'}
+[2026-10-26 10:18:43] + ss -ltn
+[2026-10-26 10:18:43] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-001-base.txt
+[2026-10-26 10:18:44] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:18:44] T64k: histo base byte[] (106967, 16540000) total (766765, 72187512)
+[2026-10-26 10:18:44] T64k: phase load_w1 start
+[2026-10-26 10:18:44] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w1 20000 100 900 16
+[2026-10-26 10:18:49] T64k: phase load_w1 end (5 s) {'table': 'w1', 'ok': 20000, 'rejected': 0, 'expected': 20000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 4.2}
+[2026-10-26 10:18:49] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-002-after-load_w1.txt
+[2026-10-26 10:18:49] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:18:49] T64k: histo after-load_w1 byte[] (128091, 74589656) total (1376922, 158590008)
+[2026-10-26 10:18:49] T64k: phase load_w2 start
+[2026-10-26 10:18:49] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w2 5000 8192 8191 16
+[2026-10-26 10:18:53] T64k: phase load_w2 end (4 s) {'table': 'w2', 'ok': 5000, 'rejected': 0, 'expected': 5000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 3.34}
+[2026-10-26 10:18:53] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-003-after-load_w2.txt
+[2026-10-26 10:18:54] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:18:54] T64k: histo after-load_w2 byte[] (134365, 250178000) total (1613894, 366779640)
+[2026-10-26 10:18:54] T64k: phase load_w3 start
+[2026-10-26 10:18:54] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w3 2000 60000 900 16
+[2026-10-26 10:18:56] T64k: phase load_w3 end (2 s) {'table': 'w3', 'ok': 2000, 'rejected': 0, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 1.45}
+[2026-10-26 10:18:56] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-004-after-load_w3.txt
+[2026-10-26 10:18:56] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:18:56] T64k: histo after-load_w3 byte[] (109954, 441469448) total (953548, 531198320)
+[2026-10-26 10:18:56] T64k: phase load_w4 start
+[2026-10-26 10:18:56] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w4 2000 100 40960 16
+[2026-10-26 10:19:07] T64k: phase load_w4 end (11 s) {'table': 'w4', 'ok': 2000, 'rejected': 0, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 9.92}
+[2026-10-26 10:19:07] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-005-after-load_w4.txt
+[2026-10-26 10:19:08] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:19:08] T64k: histo after-load_w4 byte[] (105753, 266318224) total (932819, 366669736)
+[2026-10-26 10:19:08] T64k: phase flush start
+[2026-10-26 10:19:08] + bin/nodetool -h 127.0.0.1 -p 7110 flush ks
+[2026-10-26 10:19:14] T64k: phase flush end (6 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:19:14] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-006-after-flush.txt
+[2026-10-26 10:19:14] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:19:14] T64k: histo after-flush byte[] (103344, 18797512) total (723967, 75520056)
+[2026-10-26 10:19:14] T64k: phase compact start
+[2026-10-26 10:19:14] + bin/nodetool -h 127.0.0.1 -p 7110 compact ks
+[2026-10-26 10:19:44] T64k: phase compact end (30 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:19:44] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-007-after-compact.txt
+[2026-10-26 10:19:44] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:19:44] T64k: histo after-compact byte[] (102644, 20936992) total (714409, 77291656)
+[2026-10-26 10:19:44] T64k: phase reads start
+[2026-10-26 10:19:44] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py read 127.0.1.1 9042 180 8 w1:20000:100:900 w2:5000:8192:8191 w3:2000:60000:900 w4:2000:100:40960
+[2026-10-26 10:22:45] T64k: phase reads end (181 s) {'point': 62404, 'sai': 62690, 'point_hit': 62404, 'sai_hit': 62690, 'by_table': {'w1': [15710, 15710, 15570, 15570], 'w2': [15582, 15582, 15708, 15708], 'w3': [15552, 15552, 15694, 15694], 'w4': [15560, 15560, 15718, 15718]}, 'errors_n': 0, 'first_errors': [], 'seconds': 179.99}
+[2026-10-26 10:22:45] + jcmd 2535395 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/histo-008-after-reads.txt
+[2026-10-26 10:22:46] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:22:46] T64k: histo after-reads byte[] (103487, 21212728) total (719722, 78013048)
+[2026-10-26 10:22:46] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:22:46] T64k: system.log ERROR/OOM lines 0 []
+[2026-10-26 10:22:46] stopping node pid 2535395
+[2026-10-26 10:22:46] + kill 2535395
+
+  rc=0
+[2026-10-26 10:22:51] node stopped
+[2026-10-26 10:22:51] + cp /users/jason92/s4-b7-tc-run/logs/tc-T64k.trace /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/trace.txt 2>/dev/null; cp /users/jason92/s4-b7-tc-run/logs/gc-T64k.log /users/jason92/s4-b7-tc-logs/run1/cluster/T64k/ 2>/dev/null; cp /users/jason92/s4-b7-tc-run/conf/cassandra.yaml /users/jason92/s4-b7
+
+  rc=0
+[2026-10-26 10:22:51] + rm -rf /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/hints /users/jason92/s4-b7-tc-run/saved_caches /users/jason92/s4-b7-tc-run/cdc_raw && mkdir -p /users/jason92/s4-b7-tc-run/data /users/jason92/s4-b7-tc-run/commitlog /users/jason92/s4-b7-tc-run/
+
+  rc=0
+[2026-10-26 10:22:51] + rm -f /users/jason92/s4-b7-tc-run/logs/tc-BIG.trace
+
+  rc=0
+[2026-10-26 10:22:51] + rm -rf /users/jason92/s4-b7-tc-run/conf && cp -r /users/jason92/s4-b7-tc/conf /users/jason92/s4-b7-tc-run/conf
+
+  rc=0
+[2026-10-26 10:22:51] conf BIG: format=big sai_string_term_size_fail_threshold=8KiB compat=NONE
+[2026-10-26 10:22:51] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-26 10:22:51] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-b7-tc-run/cassandra.pid > /users/jason92/s4-b7-tc-run/logs/start-BIG.out 2>&1"
+
+  rc=0
+[2026-10-26 10:22:54] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:22:58] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:02] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:06] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:11] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:15] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:19] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:23] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:27] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:31] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:35] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:39] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:44] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 10:23:45] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 10:23:53] node up (BIG) after 62 s, pid 2542281
+[2026-10-26 10:23:53] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py schema 127.0.1.1 9042
+[2026-10-26 10:24:09] schema: {'schema': 'ok', 'agreement': True, 'role': 'tcw (ordinary, non-superuser)'}
+[2026-10-26 10:24:09] + ss -ltn
+[2026-10-26 10:24:09] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-001-base.txt
+[2026-10-26 10:24:09] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:09] BIG: histo base byte[] (105907, 16434264) total (760136, 71481800)
+[2026-10-26 10:24:09] BIG: phase load_w1 start
+[2026-10-26 10:24:09] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w1 20000 100 900 16
+[2026-10-26 10:24:14] BIG: phase load_w1 end (5 s) {'table': 'w1', 'ok': 20000, 'rejected': 0, 'expected': 20000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 4.31}
+[2026-10-26 10:24:14] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-002-after-load_w1.txt
+[2026-10-26 10:24:15] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:15] BIG: histo after-load_w1 byte[] (127061, 80782632) total (1370562, 164370464)
+[2026-10-26 10:24:15] BIG: phase load_w2 start
+[2026-10-26 10:24:15] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w2 5000 8192 8191 16
+[2026-10-26 10:24:18] BIG: phase load_w2 end (4 s) {'table': 'w2', 'ok': 5000, 'rejected': 0, 'expected': 5000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 2.93}
+[2026-10-26 10:24:18] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-003-after-load_w2.txt
+[2026-10-26 10:24:19] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:19] BIG: histo after-load_w2 byte[] (133825, 251054672) total (1593358, 366941952)
+[2026-10-26 10:24:19] BIG: phase load_w3 start
+[2026-10-26 10:24:19] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w3 2000 60000 900 16
+[2026-10-26 10:24:21] BIG: phase load_w3 end (2 s) {'table': 'w3', 'ok': 2000, 'rejected': 0, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': None, 'seconds': 1.61}
+[2026-10-26 10:24:21] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-004-after-load_w3.txt
+[2026-10-26 10:24:22] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:22] BIG: histo after-load_w3 byte[] (109478, 441289864) total (940670, 530579920)
+[2026-10-26 10:24:22] BIG: phase load_w4 start
+[2026-10-26 10:24:22] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py load 127.0.1.1 9042 w4 2000 100 40960 16
+[2026-10-26 10:24:23] BIG: phase load_w4 end (2 s) {'table': 'w4', 'ok': 0, 'rejected': 2000, 'expected': 2000, 'other_errors': 0, 'first_other': [], 'first_rejection': 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail sai_string_term_size violated: Value of column \'v\' has size 40960, this exceeds the failure threshold of 8192."', 'seconds': 0.97}
+[2026-10-26 10:24:23] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-005-after-load_w4.txt
+[2026-10-26 10:24:24] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:24] BIG: histo after-load_w4 byte[] (109580, 441478216) total (1003921, 533167800)
+[2026-10-26 10:24:24] BIG: phase flush start
+[2026-10-26 10:24:24] + bin/nodetool -h 127.0.0.1 -p 7110 flush ks
+[2026-10-26 10:24:31] BIG: phase flush end (7 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:24:31] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-006-after-flush.txt
+[2026-10-26 10:24:32] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:32] BIG: histo after-flush byte[] (102667, 19537400) total (717625, 75814304)
+[2026-10-26 10:24:32] BIG: phase compact start
+[2026-10-26 10:24:32] + bin/nodetool -h 127.0.0.1 -p 7110 compact ks
+[2026-10-26 10:24:47] BIG: phase compact end (15 s) {'rc': 0, 'out': ''}
+[2026-10-26 10:24:47] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-007-after-compact.txt
+[2026-10-26 10:24:47] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:24:47] BIG: histo after-compact byte[] (102907, 21102128) total (717710, 77395712)
+[2026-10-26 10:24:47] BIG: phase reads start
+[2026-10-26 10:24:47] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/transition-bytes-collector-add-buffer-length--autonomous/client.py read 127.0.1.1 9042 180 8 w1:20000:100:900 w2:5000:8192:8191 w3:2000:60000:900 w4:0:100:40960
+[2026-10-26 10:27:48] BIG: phase reads end (181 s) {'point': 71547, 'sai': 71797, 'point_hit': 71547, 'sai_hit': 71797, 'by_table': {'w1': [23768, 23768, 24059, 24059], 'w2': [23726, 23726, 23841, 23841], 'w3': [24053, 24053, 23897, 23897]}, 'errors_n': 0, 'first_errors': [], 'seconds': 180.0}
+[2026-10-26 10:27:48] + jcmd 2542281 GC.class_histogram > /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/histo-008-after-reads.txt
+[2026-10-26 10:27:48] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:27:48] BIG: histo after-reads byte[] (103638, 74344240) total (714959, 130677288)
+[2026-10-26 10:27:48] + du -sb /users/jason92/s4-b7-tc-run/data
+[2026-10-26 10:27:48] BIG: system.log ERROR/OOM lines 0 []
+[2026-10-26 10:27:48] stopping node pid 2542281
+[2026-10-26 10:27:48] + kill 2542281
+
+  rc=0
+[2026-10-26 10:27:53] node stopped
+[2026-10-26 10:27:53] + cp /users/jason92/s4-b7-tc-run/logs/tc-BIG.trace /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/trace.txt 2>/dev/null; cp /users/jason92/s4-b7-tc-run/logs/gc-BIG.log /users/jason92/s4-b7-tc-logs/run1/cluster/BIG/ 2>/dev/null; cp /users/jason92/s4-b7-tc-run/conf/cassandra.yaml /users/jason92/s4-b7-tc-
+
+  rc=0
+[2026-10-26 10:27:53] all lifetimes done
+[2026-10-26 10:27:53] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-26 10:27:53] daemons left: []

@@ -1,0 +1,8 @@
+settings: num_tokens: 16; listen_address: 127.0.1.1; storage_port: 7000; native_transport_port: 9042; authenticator: PasswordAuthenticator; authorizer: CassandraAuthorizer; 
+jvm: UseG1GC -Xms1G -Xmx1G jmx.local.port=7110 
+EXPECTED: histogram parses (Total > 10 MB). baseline Replica[] instances,bytes=(19, 448) total=(715471, 71868032)
+EXPECTED: P0 thr=1: ord CREATE KEYSPACE RF 3 rejected (message "above the failure threshold of 1")
+P0 ok: rejected with "above the failure threshold of 1"
+EXPECTED: per phase thr t: ord RF3 accepted iff t in (-1,3); ord RF4 accepted iff t == -1; ord RF1 accepted always; superuser RF3 accepted always; stress write n=1000000 into ks_rf1 with 0 errors; Replica[] bytes after stress < 1 MB and equal across thresholds within 10 percent
+keyspaces after K200 step: count ------- 224 (1 rows) Warnings : Aggregation query used without partition key Warning: Using a password on the command line interface can be insecure. Recommendation: use the credentials file to securely provide the password.
+cluster run complete 2026-10-26T07:54:24

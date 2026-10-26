@@ -1,0 +1,9 @@
+unit-run run1 2026-10-26T08:27:06-06:00 host node1 tree /users/jason92/s4-b7-ie cassandra-5.0.9 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 332ac23a01f7da0f51d72d46f3d5fc0d
+x128 xmx=128m set=small exit=0 checks=84 ok=84 MISMATCH=0
+x1g xmx=1g set=full exit=0 checks=88 ok=88 MISMATCH=0
+x4g xmx=4g set=big exit=0 checks=2 ok=2 MISMATCH=0
+EXPECTED: allocation and result length identical at -Xmx128m and -Xmx1g for all 25 common (n, init) points — yes []
+EXPECTED: ratio alloc/N at init 32 is about 3.0 (1000, 65535) and 2.0 (1<<20, 16<<20, 64<<20) — {1000: 3.128, 65535: 3.003, 1048576: 2.0, 16777216: 2.0, 67108864: 2.0}
+EXPECTED: no exception for any N <= 64<<20 — yes
+unit-run end 2026-10-26T08:27:19-06:00

@@ -1,0 +1,86 @@
+analysis of run1: arms ['cd', 'cs', 'd128', 'd256', 'd512', 'hp', 's128', 's256', 's512']
+s128: L=128 MiB V=102400 offheap_buffers peak_off=126.5 MiB (0.988 L) peak_on=0.7 MiB blocked 0.0->618.0 flushes=16 rss_base=2634 MiB rss_peak_delta=174.8 MiB direct_peak_delta=144.1 MiB nmt_other_peak_delta=144.09 MiB off_after_flush=226.0 samples=218 client_rc=0
+s128: client ok=20000 err=0 errors={} seconds=14.773
+EXPECTED s128 client wrote every row without error (ok == rows, err == 0): yes
+s256: L=256 MiB V=102400 offheap_buffers peak_off=251.7 MiB (0.983 L) peak_on=1.3 MiB blocked 0.0->203.0 flushes=8 rss_base=2650 MiB rss_peak_delta=343.4 MiB direct_peak_delta=270.9 MiB nmt_other_peak_delta=270.11 MiB off_after_flush=0.0 samples=219 client_rc=0
+s256: client ok=20000 err=0 errors={} seconds=14.788
+EXPECTED s256 client wrote every row without error (ok == rows, err == 0): yes
+s512: L=512 MiB V=102400 offheap_buffers peak_off=488.5 MiB (0.954 L) peak_on=2.5 MiB blocked 0.0->52.0 flushes=4 rss_base=2645 MiB rss_peak_delta=600.1 MiB direct_peak_delta=539.0 MiB nmt_other_peak_delta=538.95 MiB off_after_flush=0.0 samples=217 client_rc=0
+s512: client ok=20000 err=0 errors={} seconds=13.721
+EXPECTED s512 client wrote every row without error (ok == rows, err == 0): yes
+d128: L=128 MiB V=204800 offheap_buffers peak_off=125.0 MiB (0.977 L) peak_on=0.4 MiB blocked 0.0->662.0 flushes=16 rss_base=2644 MiB rss_peak_delta=160.1 MiB direct_peak_delta=148.8 MiB nmt_other_peak_delta=142.00 MiB off_after_flush=226.0 samples=207 client_rc=0
+d128: client ok=10000 err=0 errors={} seconds=12.779
+EXPECTED d128 client wrote every row without error (ok == rows, err == 0): yes
+d256: L=256 MiB V=204800 offheap_buffers peak_off=253.1 MiB (0.989 L) peak_on=0.8 MiB blocked 0.0->225.0 flushes=8 rss_base=2643 MiB rss_peak_delta=303.3 MiB direct_peak_delta=272.1 MiB nmt_other_peak_delta=268.90 MiB off_after_flush=0.0 samples=206 client_rc=0
+d256: client ok=10000 err=0 errors={} seconds=12.322
+EXPECTED d256 client wrote every row without error (ok == rows, err == 0): yes
+d512: L=512 MiB V=204800 offheap_buffers peak_off=484.4 MiB (0.946 L) peak_on=1.4 MiB blocked 0.0->80.0 flushes=4 rss_base=2640 MiB rss_peak_delta=559.4 MiB direct_peak_delta=525.6 MiB nmt_other_peak_delta=540.55 MiB off_after_flush=0.0 samples=204 client_rc=0
+d512: client ok=10000 err=0 errors={} seconds=11.164
+EXPECTED d512 client wrote every row without error (ok == rows, err == 0): yes
+cs: L=256 MiB V=102400 heap_buffers peak_off=0.0 MiB (0.000 L) peak_on=480.7 MiB blocked 0.0->48.0 flushes=4 rss_base=2653 MiB rss_peak_delta=45.4 MiB direct_peak_delta=6.2 MiB nmt_other_peak_delta=6.21 MiB off_after_flush=0.0 samples=207 client_rc=0
+cs: client ok=20000 err=0 errors={} seconds=12.015
+EXPECTED cs client wrote every row without error (ok == rows, err == 0): yes
+cd: L=256 MiB V=204800 heap_buffers peak_off=0.0 MiB (0.000 L) peak_on=500.5 MiB blocked 0.0->48.0 flushes=4 rss_base=2645 MiB rss_peak_delta=53.6 MiB direct_peak_delta=10.5 MiB nmt_other_peak_delta=26.47 MiB off_after_flush=0.0 samples=204 client_rc=0
+cd: client ok=10000 err=0 errors={} seconds=11.35
+EXPECTED cd client wrote every row without error (ok == rows, err == 0): yes
+hp: L=256 MiB V=102400 heap_buffers peak_off=0.0 MiB (0.000 L) peak_on=126.4 MiB blocked 0.0->241.0 flushes=16 rss_base=2625 MiB rss_peak_delta=70.9 MiB direct_peak_delta=7.8 MiB nmt_other_peak_delta=6.00 MiB off_after_flush=0.0 samples=209 client_rc=0
+hp: client ok=20000 err=0 errors={} seconds=13.032
+EXPECTED hp client wrote every row without error (ok == rows, err == 0): yes
+EXPECTED s128 tracked peak <= L + 16 V: yes (126.5 MiB vs 129.6)
+EXPECTED s128 limit reached (peak >= 0.9 L, or blocked grew with >= 2 flushes): yes
+EXPECTED s128 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED s128 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (16)
+EXPECTED s128 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED s128 net BufferPool direct (arm - control) in [0.9 L, 1.13 L + 4 MiB]: yes (137.9 MiB vs [115, 149])
+EXPECTED s128 net RssAnon (arm - control) in [0.9 L, 1.3 L]: yes (129.4 MiB vs [115, 166])
+EXPECTED s256 tracked peak <= L + 16 V: yes (251.7 MiB vs 257.6)
+EXPECTED s256 limit reached (peak >= 0.9 L, or blocked grew with >= 2 flushes): yes
+EXPECTED s256 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED s256 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (8)
+EXPECTED s256 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED s256 net BufferPool direct (arm - control) in [0.9 L, 1.13 L + 4 MiB]: yes (264.7 MiB vs [230, 293])
+EXPECTED s256 net RssAnon (arm - control) in [0.9 L, 1.3 L]: yes (298.0 MiB vs [230, 333])
+EXPECTED s512 tracked peak <= L + 16 V: yes (488.5 MiB vs 513.6)
+EXPECTED s512 limit reached (peak >= 0.9 L, or blocked grew with >= 2 flushes): yes
+EXPECTED s512 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED s512 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (4)
+EXPECTED s512 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED s512 net BufferPool direct (arm - control) in [0.9 L, 1.13 L + 4 MiB]: yes (532.7 MiB vs [461, 583])
+EXPECTED s512 net RssAnon (arm - control) in [0.9 L, 1.3 L]: yes (554.7 MiB vs [461, 666])
+EXPECTED s: tracked peaks ordered 128 < 256 < 512: yes ([126.5, 251.7, 488.5])
+EXPECTED s: tracked peak ratios 256/128 in [1.7, 2.3] and 512/128 in [3.2, 4.8]: yes (1.99, 3.86)
+EXPECTED s: net direct ratios 256/128 in [1.7, 2.3] and 512/128 in [3.2, 4.8]: yes (1.92, 3.86)
+EXPECTED s: net RssAnon ratios 256/128 in [1.7, 2.3] and 512/128 in [3.2, 4.8]: NO (2.30, 4.29)
+EXPECTED d128 tracked peak <= L + 16 V: yes (125.0 MiB vs 131.1)
+EXPECTED d128 limit reached (peak >= 0.9 L, or blocked grew with >= 2 flushes): yes
+EXPECTED d128 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED d128 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (16)
+EXPECTED d128 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED d128 net BufferPool direct (arm - control) in [0.9 L, 1.13 L + 4 MiB]: yes (138.3 MiB vs [115, 149])
+EXPECTED d128 net RssAnon (arm - control) in [0.9 L, 1.3 L]: NO (106.5 MiB vs [115, 166])
+EXPECTED d256 tracked peak <= L + 16 V: yes (253.1 MiB vs 259.1)
+EXPECTED d256 limit reached (peak >= 0.9 L, or blocked grew with >= 2 flushes): yes
+EXPECTED d256 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED d256 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (8)
+EXPECTED d256 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED d256 net BufferPool direct (arm - control) in [0.9 L, 1.13 L + 4 MiB]: yes (261.7 MiB vs [230, 293])
+EXPECTED d256 net RssAnon (arm - control) in [0.9 L, 1.3 L]: yes (249.7 MiB vs [230, 333])
+EXPECTED d512 tracked peak <= L + 16 V: yes (484.4 MiB vs 515.1)
+EXPECTED d512 limit reached (peak >= 0.9 L, or blocked grew with >= 2 flushes): yes
+EXPECTED d512 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED d512 flushed repeatedly (>= 2 "Enqueuing flush of" for the table): yes (4)
+EXPECTED d512 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED d512 net BufferPool direct (arm - control) in [0.9 L, 1.13 L + 4 MiB]: yes (515.1 MiB vs [461, 583])
+EXPECTED d512 net RssAnon (arm - control) in [0.9 L, 1.3 L]: yes (505.8 MiB vs [461, 666])
+EXPECTED d: tracked peaks ordered 128 < 256 < 512: yes ([125.0, 253.1, 484.4])
+EXPECTED d: tracked peak ratios 256/128 in [1.7, 2.3] and 512/128 in [3.2, 4.8]: yes (2.02, 3.87)
+EXPECTED d: net direct ratios 256/128 in [1.7, 2.3] and 512/128 in [3.2, 4.8]: yes (1.89, 3.72)
+EXPECTED d: net RssAnon ratios 256/128 in [1.7, 2.3] and 512/128 in [3.2, 4.8]: NO (2.34, 4.75)
+EXPECTED L=128: tracked peaks of V=100 KiB and V=200 KiB agree within 15 % (refuted if > 25 %): yes (126.5 vs 125.0 MiB, 1.2 %)
+EXPECTED L=256: tracked peaks of V=100 KiB and V=200 KiB agree within 15 % (refuted if > 25 %): yes (251.7 vs 253.1 MiB, 0.6 %)
+EXPECTED L=512: tracked peaks of V=100 KiB and V=200 KiB agree within 15 % (refuted if > 25 %): yes (488.5 vs 484.4 MiB, 0.8 %)
+EXPECTED cs (heap_buffers): tracked off-heap stays < 1 MiB: yes (0.00 MiB); on-heap peak 480.7 MiB; blocked 0.0->48.0
+EXPECTED cd (heap_buffers): tracked off-heap stays < 1 MiB: yes (0.00 MiB); on-heap peak 500.5 MiB; blocked 0.0->48.0
+EXPECTED hp (heap_buffers, memtable_heap_space 128MiB): tracked on-heap plateaus <= 1.05 x 128 MiB + 4 MiB: yes (126.4 MiB)
+EXPECTED hp: writers blocked (count grew): yes
+EXPECTED hp: limit reached (on-heap peak >= 0.9 x 128 MiB): yes

@@ -1,0 +1,137 @@
+[2026-10-26T15:47:29.436Z] run rows 200000 heap 8g arms ['c32:CONTAINS:32:200'] host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu
+[2026-10-26T15:47:29.436Z] + ss -ltn | grep -q ":7120 "
+[2026-10-26T15:47:29.445Z] + ss -ltn | grep -q "127.0.2.1:9042 "
+[2026-10-26T15:47:29.456Z] + ss -ltn | grep -q "127.0.2.1:7000 "
+[2026-10-26T15:47:29.463Z] + ss -ltn | grep -q "127.0.2.1:7001 "
+[2026-10-26T15:47:29.472Z] + mkdir -p /dev/shm/s4-b7-st-data/oom/sampler && javac -d /dev/shm/s4-b7-st-data/oom/sampler /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/PoolSampler.java
+[2026-10-26T15:47:30.232Z] start node ulimit -n 100000; exec /users/jason92/s4-b7-st/bin/cassandra -f -p /dev/shm/s4-b7-st-data/oom/pid
+[2026-10-26T15:47:30.233Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+nodetool: Failed to connect to '127.0.0.1:7120' - ConnectException: 'Connection refused (Connection refused)'.
+
+[2026-10-26T15:47:34.260Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-10-26T15:47:38.407Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:47:42.444Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:47:46.558Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:47:50.695Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:47:54.757Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:47:58.801Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:48:02.858Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:48:06.920Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+running
+
+[2026-10-26T15:48:07.995Z] node up
+[2026-10-26T15:48:16.005Z] === arm c32:CONTAINS:32:200
+[2026-10-26T15:48:16.005Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_c32 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_c32 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T15:48:16.738Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_c32.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_c32.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T15:48:17.351Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_c32 t
+[2026-10-26T15:48:18.379Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_c32.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'32'}"
+CQL CREATE CUSTOM INDEX t_v ON k_c32.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'32'}
+
+[2026-10-26T15:48:19.016Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 0 25000 200
+loaded rows 0..24999 (L=200) in 56.7 s
+
+[2026-10-26T15:49:16.163Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:49:18.409Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 25000 25000 200
+loaded rows 25000..49999 (L=200) in 56.1 s
+
+[2026-10-26T15:50:14.949Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:50:17.248Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 50000 25000 200
+loaded rows 50000..74999 (L=200) in 56.7 s
+
+[2026-10-26T15:51:14.340Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:51:16.601Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 75000 25000 200
+loaded rows 75000..99999 (L=200) in 56.8 s
+
+[2026-10-26T15:52:13.808Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:52:16.138Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 100000 25000 200
+loaded rows 100000..124999 (L=200) in 56.6 s
+
+[2026-10-26T15:53:13.133Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:53:15.416Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 125000 25000 200
+loaded rows 125000..149999 (L=200) in 56.4 s
+
+[2026-10-26T15:54:12.195Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:54:14.464Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 150000 25000 200
+loaded rows 150000..174999 (L=200) in 56.6 s
+
+[2026-10-26T15:55:11.458Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:55:13.810Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 175000 25000 200
+loaded rows 175000..199999 (L=200) in 56.2 s
+
+[2026-10-26T15:56:10.420Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T15:56:17.751Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 drain
+[2026-10-26T15:57:53.005Z] SIGKILL node 2635453
+[2026-10-26T15:57:53.005Z] SIGKILL sampler 2636657
+[2026-10-26T15:57:53.005Z] stopped {'node': 2635453, 'sampler': 2636657}
+[2026-10-26T15:57:53.060Z] start node ulimit -n 100000; exec /users/jason92/s4-b7-st/bin/cassandra -f -p /dev/shm/s4-b7-st-data/oom/pid
+[2026-10-26T15:57:53.062Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+nodetool: Failed to connect to '127.0.0.1:7120' - ConnectException: 'Connection refused (Connection refused)'.
+
+[2026-10-26T15:57:56.002Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-10-26T15:58:01.141Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:58:05.192Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T15:58:09.256Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+running
+
+[2026-10-26T15:58:15.275Z] + jcmd 2638901 GC.run
+[2026-10-26T15:58:19.203Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_c32 t
+Cassandra has shutdown.
+error: null
+-- StackTrace --
+java.io.EOFException
+	at java.base/java.io.DataInputStream.readByte(DataInputStream.java:272)
+	at java.rmi/sun.rmi.transport.StreamRemoteCall.executeCall(StreamRemoteCall.java:240)
+	at java.rmi/sun.rmi.server.UnicastRef.invoke(UnicastRef.java:164)
+	at jdk.remoteref/jdk.jmx.remote.internal.rmi.PRef.invoke(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnectionImpl_Stub.invoke(Unknown Source)
+	at java.management.rmi/javax.management.remote.rmi.RMIConnector$RemoteMBeanServerConnection.invoke(RMIConnector.java:1021)
+	at java.management/javax.management.MBeanServerInvocationHandler.invoke(MBeanServerInvocationHandler.java:298)
+	at com.sun.proxy.$Proxy7.forceKeyspaceCompaction(Unknown Source)
+	at org.apache.cassandra.tools.NodeProbe.forceKeyspaceCompaction(NodeProbe.java:478)
+	at org.apache.cassandra.tools.nodetool.Compact.execute(Compact.java:98)
+	at org.apache.cassandra.tools.NodeTool$NodeToolCmd.runInternal(NodeTool.java:392)
+	at org.apache.cassandra.tools.NodeTool$NodeToolCmd.run(NodeTool.java:377)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:276)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+
+[2026-10-26T15:59:00.117Z] + tail -c +550478 /dev/shm/s4-b7-st-data/oom/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-oom/segments-c32.txt
+[2026-10-26T15:59:00.125Z] node died in arm c32
+[2026-10-26T15:59:00.125Z] + grep -v 'Rejecting' /dev/shm/s4-b7-st-data/oom/logs/system.log > /users/jason92/s4-b7-st-logs/cl-oom/system.log.filtered
+[2026-10-26T15:59:00.130Z] + df -h /dev/shm/s4-b7-st-data/oom | tail -1
+tmpfs           126G  9.0G  117G   8% /dev/shm
+
+[2026-10-26T16:00:30.230Z] SIGKILL sampler 2639696
+[2026-10-26T16:00:30.231Z] stopped {'node': 2638901, 'sampler': 2639696}

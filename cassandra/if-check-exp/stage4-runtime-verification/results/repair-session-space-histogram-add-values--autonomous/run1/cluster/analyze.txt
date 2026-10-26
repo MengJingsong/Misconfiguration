@@ -1,0 +1,104 @@
+INFO: r1 node 1: sizes [(10256, 1), (20496, 2), (40976, 2), (81936, 2), (163856, 2), (327696, 2), (655376, 2), (1310736, 2), (2621456, 2), (5242896, 2), (10485776, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r1 node 1: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r1 node 1: largest array 10485776 = unit RF=2 prediction 10485776 (S=700, D=20, leaves 1048576) -- yes
+EXPECTED: r1 node 1: Created line reports a tree of 1048576 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r1 node 1: leaves per the "Partitions per leaf" bucket sum = 1048577 (unit tier tree.size() = 1048576)
+EXPECTED: r1 node 1: largest array is 10,485,776 B (S=700, D=20) -- yes
+EXPECTED: r1 node 1: the array before it, 5,242,896 B, is present and each size appears twice (count and size calls, one tree) -- yes
+INFO: r1 node 1: array bytes per leaf (n = 1048577 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00009
+INFO: r1 node 1: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r1 node 1: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r1 node 2: sizes [(2576, 1), (5136, 1), (20496, 2), (40976, 2), (81936, 2), (163856, 2), (327696, 2), (655376, 2), (1310736, 2), (2621456, 2), (5242896, 2), (10485776, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r1 node 2: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r1 node 2: largest array 10485776 = unit RF=2 prediction 10485776 (S=700, D=20, leaves 1048576) -- yes
+EXPECTED: r1 node 2: Created line reports a tree of 1048576 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r1 node 2: leaves per the "Partitions per leaf" bucket sum = 1048577 (unit tier tree.size() = 1048576)
+EXPECTED: r1 node 2: largest array is 10,485,776 B (S=700, D=20) -- yes
+EXPECTED: r1 node 2: the array before it, 5,242,896 B, is present and each size appears twice (count and size calls, one tree) -- yes
+INFO: r1 node 2: array bytes per leaf (n = 1048577 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00009
+INFO: r1 node 2: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r1 node 2: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r2 node 1: sizes []; Created lines (trees, leaves, partitions, serialized bytes): []; "Partitions per leaf" lines 0
+EXPECTED: r2 node 1 (INFO): zero HistogramBuilder.add allocation events and zero "Partitions per leaf" lines -- yes
+INFO: r2 node 2: sizes []; Created lines (trees, leaves, partitions, serialized bytes): []; "Partitions per leaf" lines 0
+EXPECTED: r2 node 2 (INFO): zero HistogramBuilder.add allocation events and zero "Partitions per leaf" lines -- yes
+INFO: r3 node 1: sizes [(10256, 2), (20496, 2), (40976, 2), (81936, 2), (163856, 2), (327696, 2), (655376, 2), (1310736, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r3 node 1: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r3 node 1: largest array 1310736 = unit RF=2 prediction 1310736 (S=64, D=20, leaves 131072) -- yes
+EXPECTED: r3 node 1: Created line reports a tree of 131072 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r3 node 1: leaves per the "Partitions per leaf" bucket sum = 131073 (unit tier tree.size() = 131072)
+INFO: r3 node 1: array bytes per leaf (n = 131073 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00070
+INFO: r3 node 1: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r3 node 1: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r3 node 2: sizes [(2576, 1), (5136, 1), (20496, 2), (40976, 2), (81936, 2), (163856, 2), (327696, 1), (655376, 2), (1310736, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r3 node 2: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r3 node 2: largest array 1310736 = unit RF=2 prediction 1310736 (S=64, D=20, leaves 131072) -- yes
+EXPECTED: r3 node 2: Created line reports a tree of 131072 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r3 node 2: leaves per the "Partitions per leaf" bucket sum = 131073 (unit tier tree.size() = 131072)
+INFO: r3 node 2: array bytes per leaf (n = 131073 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00070
+INFO: r3 node 2: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r3 node 2: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r4 node 1: sizes [(20496, 2), (40976, 2), (81936, 2), (163856, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r4 node 1: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r4 node 1: largest array 163856 = unit RF=2 prediction 163856 (S=8, D=20, leaves 16384) -- yes
+EXPECTED: r4 node 1: Created line reports a tree of 16384 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r4 node 1: leaves per the "Partitions per leaf" bucket sum = 16385 (unit tier tree.size() = 16384)
+INFO: r4 node 1: array bytes per leaf (n = 16385 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00561
+INFO: r4 node 1: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r4 node 1: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r4 node 2: sizes [(2576, 1), (20496, 2), (40976, 2), (81936, 2), (163856, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r4 node 2: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r4 node 2: largest array 163856 = unit RF=2 prediction 163856 (S=8, D=20, leaves 16384) -- yes
+EXPECTED: r4 node 2: Created line reports a tree of 16384 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r4 node 2: leaves per the "Partitions per leaf" bucket sum = 16385 (unit tier tree.size() = 16384)
+INFO: r4 node 2: array bytes per leaf (n = 16385 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00561
+INFO: r4 node 2: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r4 node 2: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r5 node 1: sizes [(5136, 1), (10256, 1), (20496, 2), (40976, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r5 node 1: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r5 node 1: largest array 40976 = unit RF=2 prediction 40976 (S=700, D=12, leaves 4096) -- yes
+EXPECTED: r5 node 1: Created line reports a tree of 4096 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r5 node 1: leaves per the "Partitions per leaf" bucket sum = 4097 (unit tier tree.size() = 4096)
+EXPECTED: r5 node 1: D=12 -> largest array 40,976 B -- yes
+EXPECTED: r5 node 1: D=12 -> a 4096-leaf tree in the Created line (frozen wording; that line is logged before init(), see results) [(1, 1, 1000064, 92)] -- NO
+EXPECTED: r5 node 1: D=12 -> 4096 (+1) values in the "Partitions per leaf" bucket sum: 4097 -- yes
+INFO: r5 node 1: array bytes per leaf (n = 4097 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.02246
+INFO: r5 node 1: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r5 node 1: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r5 node 2: sizes [(10256, 1), (20496, 2), (40976, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r5 node 2: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r5 node 2: largest array 40976 = unit RF=2 prediction 40976 (S=700, D=12, leaves 4096) -- yes
+EXPECTED: r5 node 2: Created line reports a tree of 4096 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r5 node 2: leaves per the "Partitions per leaf" bucket sum = 4097 (unit tier tree.size() = 4096)
+EXPECTED: r5 node 2: D=12 -> largest array 40,976 B -- yes
+EXPECTED: r5 node 2: D=12 -> a 4096-leaf tree in the Created line (frozen wording; that line is logged before init(), see results) [(1, 1, 1000064, 92)] -- NO
+EXPECTED: r5 node 2: D=12 -> 4096 (+1) values in the "Partitions per leaf" bucket sum: 4097 -- yes
+INFO: r5 node 2: array bytes per leaf (n = 4097 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.02246
+INFO: r5 node 2: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r5 node 2: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r1b node 1: sizes [(2576, 1), (20496, 2), (40976, 2), (81936, 2), (163856, 2), (327696, 2), (655376, 2), (1310736, 2), (2621456, 2), (5242896, 2), (10485776, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r1b node 1: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r1b node 1: largest array 10485776 = unit RF=2 prediction 10485776 (S=700, D=20, leaves 1048576) -- yes
+EXPECTED: r1b node 1: Created line reports a tree of 1048576 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r1b node 1: leaves per the "Partitions per leaf" bucket sum = 1048577 (unit tier tree.size() = 1048576)
+EXPECTED: r1b node 1: largest array is 10,485,776 B (S=700, D=20) -- yes
+EXPECTED: r1b node 1: the array before it, 5,242,896 B, is present and each size appears twice (count and size calls, one tree) -- yes
+INFO: r1b node 1: array bytes per leaf (n = 1048577 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00009
+INFO: r1b node 1: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r1b node 1: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+INFO: r1b node 2: sizes [(10256, 1), (20496, 2), (40976, 2), (81936, 2), (163856, 2), (327696, 2), (655376, 2), (1310736, 2), (2621456, 2), (5242896, 2), (10485776, 2)]; Created lines (trees, leaves, partitions, serialized bytes): [(1, 1, 1000064, 92)]; "Partitions per leaf" lines 1
+EXPECTED: r1b node 2: every HistogramBuilder.add array size is 16+8*10*2^k -- yes
+EXPECTED: r1b node 2: largest array 10485776 = unit RF=2 prediction 10485776 (S=700, D=20, leaves 1048576) -- yes
+EXPECTED: r1b node 2: Created line reports a tree of 1048576 leaves [(1, 1, 1000064, 92)] -- NO
+INFO: r1b node 2: leaves per the "Partitions per leaf" bucket sum = 1048577 (unit tier tree.size() = 1048576)
+EXPECTED: r1b node 2: largest array is 10,485,776 B (S=700, D=20) -- yes
+EXPECTED: r1b node 2: the array before it, 5,242,896 B, is present and each size appears twice (count and size calls, one tree) -- yes
+INFO: r1b node 2: array bytes per leaf (n = 1048577 values from the bucket sum) 10.00; serialized bytes of the pre-init tree per leaf (proxy only, not heap) 0.00009
+INFO: r1b node 2: array/(measureDeep per leaf, unhashed 104 B) = 0.096; with leaf+inner hash arrays added (200 B) = 0.050
+EXPECTED: r1b node 2: array bytes per leaf 10.00 within 8..16 and below one fifth of heap bytes per leaf (104) -- yes
+EXPECTED: node 1: largest array strictly rises with S: S=8 163856 < S=64 1310736 < S=700 10485776 -- yes
+EXPECTED: node 1: r1 and r1b agree 10485776 10485776 -- yes
+EXPECTED: node 1: D=12 largest array 40976 is below the D=20 one and independent of S -- yes
+EXPECTED: node 2: largest array strictly rises with S: S=8 163856 < S=64 1310736 < S=700 10485776 -- yes
+EXPECTED: node 2: r1 and r1b agree 10485776 10485776 -- yes
+EXPECTED: node 2: D=12 largest array 40976 is below the D=20 one and independent of S -- yes

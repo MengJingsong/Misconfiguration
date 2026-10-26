@@ -1,0 +1,92 @@
+== unit tier: waste runs (raw readings vs the literal table)
+ok  stock S=100000: owns 40000000 == N*S, other counter 0
+ok  stock S=100000: regionCount 40 == recomputed rule 40
+ok  stock S=100000: (regionCount, real, owns) = (40, 41943040, 40000000) vs table (40, 41943040, 40000000); ratio 1.04858
+ok  stock S=100000: direct delta 41943040 within 64 KiB of real 41943040 (count 40)
+ok  stock S=116509: owns 46603600 == N*S, other counter 0
+ok  stock S=116509: regionCount 50 == recomputed rule 50
+ok  stock S=116509: (regionCount, real, owns) = (50, 52428800, 46603600) vs table (50, 52428800, 46603600); ratio 1.12499
+ok  stock S=116509: direct delta 52428800 within 64 KiB of real 52428800 (count 50)
+ok  stock S=131072: owns 52428800 == N*S, other counter 0
+ok  stock S=131072: regionCount 50 == recomputed rule 50
+ok  stock S=131072: (regionCount, real, owns) = (50, 52428800, 52428800) vs table (50, 52428800, 52428800); ratio 1.00000
+ok  stock S=131072: direct delta 52428800 within 64 KiB of real 52428800 (count 50)
+ok  stock S=131073: owns 52429200 == N*S, other counter 0
+ok  stock S=131073: regionCount 0 == recomputed rule 0
+ok  stock S=131073: (regionCount, real, owns) = (0, 52429200, 52429200) vs table (0, 52429200, 52429200); ratio 1.00000
+ok  stock S=131073: direct delta 52429200 within 64 KiB of real 52429200 (count 400)
+ok  stock S=4096: owns 1638400 == N*S, other counter 0
+ok  stock S=4096: regionCount 2 == recomputed rule 2
+ok  stock S=4096: (regionCount, real, owns) = (2, 2097152, 1638400) vs table (2, 2097152, 1638400); ratio 1.28000
+ok  stock S=4096: direct delta 2097152 within 64 KiB of real 2097152 (count 2)
+ok  v2048 S=100000: owns 40000000 == N*S, other counter 0
+ok  v2048 S=100000: regionCount 20 == recomputed rule 20
+ok  v2048 S=100000: (regionCount, real, owns) = (20, 41943040, 40000000) vs table (20, 41943040, 40000000); ratio 1.04858
+ok  v2048 S=100000: direct delta 41943040 within 64 KiB of real 41943040 (count 20)
+ok  v2048 S=116509: owns 46603600 == N*S, other counter 0
+ok  v2048 S=116509: regionCount 24 == recomputed rule 24
+ok  v2048 S=116509: (regionCount, real, owns) = (24, 50331648, 46603600) vs table (24, 50331648, 46603600); ratio 1.07999
+ok  v2048 S=116509: direct delta 50331648 within 64 KiB of real 50331648 (count 24)
+ok  v512 S=100000: owns 40000000 == N*S, other counter 0
+ok  v512 S=100000: regionCount 80 == recomputed rule 80
+ok  v512 S=100000: (regionCount, real, owns) = (80, 41943040, 40000000) vs table (80, 41943040, 40000000); ratio 1.04858
+ok  v512 S=100000: direct delta 41943040 within 64 KiB of real 41943040 (count 80)
+ok  v512 S=116509: owns 46603600 == N*S, other counter 0
+ok  v512 S=116509: regionCount 100 == recomputed rule 100
+ok  v512 S=116509: (regionCount, real, owns) = (100, 52428800, 46603600) vs table (100, 52428800, 46603600); ratio 1.12499
+ok  v512 S=116509: direct delta 52428800 within 64 KiB of real 52428800 (count 100)
+== unit tier: real vs REGION_SIZE (not proportional)
+ok  S=116509: real 512K/1M/2M = 52428800/52428800/50331648; 2M/512K = 0.960 (4.0 would be proportional)
+ok  S=100000: real 512K/1M/2M = 41943040/41943040/41943040; 2M/512K = 1.000 (4.0 would be proportional)
+== unit tier: limit runs
+ok  stock heap L=64 S=116509: stalled after 575 (floor(L/S)=575), owns 66992675 <= L, worker alive
+ok  stock heap L=64 S=116509: stall stack starts jdk.internal.misc.Unsafe.park:-2 < java.util.concurrent.locks.LockSupport.park:323 < utils.concurrent.WaitQueu
+ok  stock heap L=64 S=116509: regionCount 72 == recomputed 72; real 75497472 = 1.1250 L; real/owns 1.1270
+BAD   heap run: offHeap counter 0, direct delta -3, retained heap delta 151025608 vs real 75497472
+ok  stock offheap L=128 S=116509: stalled after 1151 (floor(L/S)=1151), owns 134101859 <= L, worker alive
+ok  stock offheap L=128 S=116509: stall stack starts jdk.internal.misc.Unsafe.park:-2 < java.util.concurrent.locks.LockSupport.park:323 < utils.concurrent.WaitQueu
+ok  stock offheap L=128 S=116509: regionCount 144 == recomputed 144; real 150994944 = 1.1250 L; real/owns 1.1260
+ok    literal B2f (n, owns, regions, real) (1151, 134101859, 144, 150994944)
+ok  stock offheap L=64 S=116509: stalled after 575 (floor(L/S)=575), owns 66992675 <= L, worker alive
+ok  stock offheap L=64 S=116509: stall stack starts jdk.internal.misc.Unsafe.park:-2 < java.util.concurrent.locks.LockSupport.park:323 < utils.concurrent.WaitQueu
+ok  stock offheap L=64 S=116509: regionCount 72 == recomputed 72; real 75497472 = 1.1250 L; real/owns 1.1270
+ok    literal B2f (n, owns, regions, real) (575, 66992675, 72, 75497472)
+ok  stock offheap L=64 S=131072: stalled after 512 (floor(L/S)=512), owns 67108864 <= L, worker alive
+ok  stock offheap L=64 S=131072: stall stack starts jdk.internal.misc.Unsafe.park:-2 < java.util.concurrent.locks.LockSupport.park:323 < utils.concurrent.WaitQueu
+ok  stock offheap L=64 S=131072: regionCount 64 == recomputed 64; real 67108864 = 1.0000 L; real/owns 1.0000
+ok    literal B2f (n, owns, regions, real) (512, 67108864, 64, 67108864)
+ok  v2048 offheap L=64 S=116509: stalled after 575 (floor(L/S)=575), owns 66992675 <= L, worker alive
+ok  v2048 offheap L=64 S=116509: stall stack starts jdk.internal.misc.Unsafe.park:-2 < java.util.concurrent.locks.LockSupport.park:323 < utils.concurrent.WaitQueu
+ok  v2048 offheap L=64 S=116509: regionCount 34 == recomputed 34; real 71303168 = 1.0625 L; real/owns 1.0643
+ok  v512 offheap L=64 S=116509: stalled after 575 (floor(L/S)=575), owns 66992675 <= L, worker alive
+ok  v512 offheap L=64 S=116509: stall stack starts jdk.internal.misc.Unsafe.park:-2 < java.util.concurrent.locks.LockSupport.park:323 < utils.concurrent.WaitQueu
+ok  v512 offheap L=64 S=116509: regionCount 144 == recomputed 144; real 75497472 = 1.1250 L; real/owns 1.1270
+ok  threads: 20 rounds, owns == 400*S and regionCount == 50 each; final stash 4
+ok  threads: direct delta 1052770301 vs (sum regionCount 1000 + stash 4) x 1 MiB
+== cluster tier (raw files)
+a64: L=64 MiB S=116509 offheap_buffers: peak_acc 63.2 MiB (0.988 L), peak_dir 76.2 MiB, rho median 1.1838574878213175 over 27 samples, RssAnon peak delta 82.8 MiB, blocked 0->120, MEMTABLE_LIMIT flushes 8, client ok 3000+2000/5000 err 0+0 phase-A 60.027 s @ 50.0/s, ERROR lines 0 []
+a128: L=128 MiB S=116509 offheap_buffers: peak_acc 126.7 MiB (0.990 L), peak_dir 146.9 MiB, rho median 1.1460012176750243 over 21 samples, RssAnon peak delta 170.5 MiB, blocked 0->76, MEMTABLE_LIMIT flushes 4, client ok 3000+2000/5000 err 0+0 phase-A 59.983 s @ 50.0/s, ERROR lines 0 []
+a64b: L=64 MiB S=116509 offheap_buffers: peak_acc 63.3 MiB (0.990 L), peak_dir 77.2 MiB, rho median 1.18360766021256 over 26 samples, RssAnon peak delta 94.4 MiB, blocked 0->132, MEMTABLE_LIMIT flushes 8, client ok 3000+2000/5000 err 0+0 phase-A 60.024 s @ 50.0/s, ERROR lines 0 []
+e64: L=64 MiB S=131068 offheap_buffers: peak_acc 63.3 MiB (0.988 L), peak_dir 68.6 MiB, rho median 1.0542870041580532 over 23 samples, RssAnon peak delta 68.9 MiB, blocked 0->193, MEMTABLE_LIMIT flushes 9, client ok 3000+2000/5000 err 0+0 phase-A 60.023 s @ 50.0/s, ERROR lines 0 []
+f64: L=64 MiB S=131072 offheap_buffers: peak_acc 63.1 MiB (0.986 L), peak_dir 78.7 MiB, rho median 1.2100902577620396 over 25 samples, RssAnon peak delta 89.5 MiB, blocked 0->192, MEMTABLE_LIMIT flushes 9, client ok 3000+2000/5000 err 0+0 phase-A 60.026 s @ 50.0/s, ERROR lines 0 []
+h64: L=64 MiB S=116509 heap_buffers: peak_acc 63.3 MiB (0.989 L), peak_dir 1.6 MiB, rho median None over 0 samples, RssAnon peak delta 30.7 MiB, blocked 0->53, MEMTABLE_LIMIT flushes 8, client ok 3000+2000/5000 err 0+0 phase-A 60.024 s @ 50.0/s, ERROR lines 0 []
+ok  a64: rho 1.1839 in [1.1, 1.2]
+ok  a64: peak_acc/L 0.988 in [0.90, 1.05]
+ok  a64: blocked grew (0.0, 120.0), MEMTABLE_LIMIT flushes 8
+ok  a128: rho 1.1460 in [1.1, 1.2]
+ok  a128: peak_acc/L 0.990 in [0.90, 1.05]
+ok  a128: blocked grew (0.0, 76.0), MEMTABLE_LIMIT flushes 4
+ok  a64b: rho 1.1836 in [1.1, 1.2]
+ok  a64b: peak_acc/L 0.990 in [0.90, 1.05]
+ok  a64b: blocked grew (0.0, 132.0), MEMTABLE_LIMIT flushes 8
+ok  e64: rho 1.0543 in [0.97, 1.07]
+ok  e64: peak_acc/L 0.988 in [0.90, 1.05]
+ok  e64: blocked grew (0.0, 193.0), MEMTABLE_LIMIT flushes 9
+BAD f64: rho 1.2101 in [1.11, 1.2]
+ok  f64: peak_acc/L 0.986 in [0.90, 1.05]
+ok  f64: blocked grew (0.0, 192.0), MEMTABLE_LIMIT flushes 9
+ok  a128/a64 peak_acc 2.003 in [1.8, 2.2]
+ok  a128/a64 peak_dir 1.927 in [1.7, 2.3]
+ok  a128/a64 RssAnon delta 2.059 in [1.5, 2.5]
+ok  a64 peak_dir 76.2 MiB above L = 64 MiB
+selfcheck run1: BAD lines 2

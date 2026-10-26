@@ -1,0 +1,36 @@
+PASS  no run error  None
+--- arm c2 CONTAINS cap=2 L=200: compact_rc=0 alive=True windowSorts=41 histoSamples=173 inc=184.1 MiB
+PASS  c2: Flushed index segment lines == cuts + tail = 41  saw 41
+PASS  c2: 40 full segments sorted, each of exactly 998800 elements (8*n = 7.6 MiB); tail 48000  
+PASS  c2: no tmp above half the array  
+PASS  c2: peak live increment >= 3x M  92.0 x M
+PASS  c2: log shows no OutOfMemoryError / Failed to build  
+--- arm c8 CONTAINS cap=8 L=200: compact_rc=0 alive=True windowSorts=11 histoSamples=186 inc=558.3 MiB
+PASS  c8: Flushed index segment lines == cuts + tail = 11  saw 11
+PASS  c8: 10 full segments sorted, each of exactly 3994600 elements (8*n = 30.5 MiB); tail 54000  
+PASS  c8: no tmp above half the array  
+PASS  c8: peak live increment >= 3x M  69.8 x M
+PASS  c8: log shows no OutOfMemoryError / Failed to build  
+--- arm c32 CONTAINS cap=32 L=200: compact_rc=0 alive=True windowSorts=3 histoSamples=256 inc=604.2 MiB
+PASS  c32: Flushed index segment lines == cuts + tail = 3  saw 3
+PASS  c32: 2 full segments sorted, each of exactly 15978400 elements (8*n = 121.9 MiB); tail 8043200  
+PASS  c32: no tmp above half the array  
+PASS  c32: peak live increment >= 3x M  18.9 x M
+PASS  c32: log shows no OutOfMemoryError / Failed to build  
+--- arm p8 PREFIX cap=8 L=200: compact_rc=0 alive=True windowSorts=0 histoSamples=8 inc=11.4 MiB
+PASS  p8: no LongTimSort call in the compaction window  
+PASS  p8: segment cut lines == cuts + tail  saw 11
+PASS  p8: log shows no OutOfMemoryError / Failed to build  
+--- arm p32 PREFIX cap=32 L=200: compact_rc=0 alive=True windowSorts=0 histoSamples=8 inc=45.9 MiB
+PASS  p32: no LongTimSort call in the compaction window  
+PASS  p32: segment cut lines == cuts + tail  saw 3
+PASS  p32: log shows no OutOfMemoryError / Failed to build  
+--- arm c8s CONTAINS cap=8 L=50: compact_rc=0 alive=True windowSorts=7 histoSamples=43 inc=244.9 MiB
+PASS  c8s: log shows no OutOfMemoryError / Failed to build  
+--- arm none NONE cap=def L=200: compact_rc=0 alive=True windowSorts=0 histoSamples=7 inc=3.1 MiB
+PASS  none: log shows no OutOfMemoryError / Failed to build  
+--- arm cdef CONTAINS cap=def L=200: compact_rc=0 alive=True windowSorts=1 histoSamples=364 inc=663.8 MiB
+PASS  cdef: option unset -> no cut line, one sort of 200000*200 elements  segments 0
+PASS  cdef: log shows no OutOfMemoryError / Failed to build  
+
+SUMMARY: 26 checks, 0 failed

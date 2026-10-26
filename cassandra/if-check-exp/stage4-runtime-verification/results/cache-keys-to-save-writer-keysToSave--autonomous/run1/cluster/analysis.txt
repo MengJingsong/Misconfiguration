@@ -1,0 +1,33 @@
+main K=0 readback=0 n_logged=846505 file=16918090 crc=1040 meta=556 entries=846505 size=74492368 heap_peak=1789880472
+main K=10000 readback=10000 n_logged=10000 file=199883 crc=20 meta=68 entries=846505 size=74492368 heap_peak=1286563992
+main K=100000 readback=100000 n_logged=100000 file=1998556 crc=128 meta=68 entries=846505 size=74492368 heap_peak=1353672856
+main K=2147483647 readback=2147483647 n_logged=846505 file=16918090 crc=1040 meta=556 entries=846505 size=74492368 heap_peak=1924098200
+EXPECTED main: every K read back through JMX equals the value set: ok 
+EXPECTED main: limit reached (entries >= 300000 before every save): ok {10000: 846505, 100000: 846505, 0: 846505, 2147483647: 846505}
+EXPECTED main: no read between saves (Entries and Size identical before/after each save and across the sweep): ok {10000: (846505, 74492368, 846505, 74492368), 100000: (846505, 74492368, 846505, 74492368), 0: (846505, 74492368, 846505, 74492368), 2147483647: (846505, 74492368, 846505, 74492368)}
+EXPECTED main K=10000 logged n == K (K < entries): ok n=10000
+EXPECTED main K=100000 logged n == K (K < entries): ok n=100000
+EXPECTED main K=0 logged n == entries (within 0.5 %): ok n=846505 entries=846505
+EXPECTED main K=2147483647 logged n == entries (within 0.5 %): ok n=846505 entries=846505
+derived: e=19.99 bytes/entry hdr=25.2 bytes (two-point fit K=10000 / K=0)
+EXPECTED main K=0 file bytes affine in n (|resid| <= 1 % of file): ok file=16918090 pred=16918090
+EXPECTED main K=10000 file bytes affine in n (|resid| <= 1 % of file): ok file=199883 pred=199883
+EXPECTED main K=100000 file bytes affine in n (|resid| <= 1 % of file): ok file=1998556 pred=1998603
+EXPECTED main K=2147483647 file bytes affine in n (|resid| <= 1 % of file): ok file=16918090 pred=16918090
+EXPECTED main K=10000 file <= 1.05 e_full K + hdr + 64 (no file above K e_max): ok file=199883 bound=209940
+EXPECTED main K=100000 file <= 1.05 e_full K + hdr + 64 (no file above K e_max): ok file=1998556 bound=2098596
+EXPECTED main F(10000)/F(100000) <= 0.11: ok ratio=0.1000
+EXPECTED main F(K=0) == F(default) within 1 %: ok F0=16918090 Fmax=16918090
+EXPECTED main K=0 file larger than K=10000 and K=100000 files: ok 
+INFO metadata file bytes by K (depends on the sstables the saved keys touch, CacheService.java:433-447; no row): {10000: 68, 100000: 68, 0: 556, 2147483647: 556}
+EXPECTED control: entries(20 MiB) < 0.5 x entries(200 MiB): ok entries20=238312 entries200=846505
+EXPECTED control: Size(20 MiB) <= 20 MiB: ok size=20971448
+EXPECTED control: logged n == 10000 at K=10000; n == entries at K=0: ok n=10000,238312 entries=238312
+EXPECTED control: K=10000 file within 5 % of the 200 MiB arm's: ok f20=199882 f200=199883
+EXPECTED control: full file (K=0) smaller than half the 200 MiB arm's: ok f20=4763087 f200=16918090
+EXPECTED yaml: startup read-back 10000: ok 
+EXPECTED yaml: periodic save (startup-captured K) logged n == 10000: ok [10000]
+EXPECTED yaml: manual save logged n == 10000: ok n=10000
+EXPECTED yaml: file within 5 % of the main arm's K=10000 file: ok fy=199888 f=199883
+B3g classification: file size and logged n follow min(K, entries): claim holds (disk cap works on a real node)
+MISMATCH total 0

@@ -1,0 +1,54 @@
+analysis of run1: arms ['m1024', 'm1024b', 'm256', 'm4096', 'o128', 'o256']
+m256: L=64 MiB peak_off=61.9 MiB (0.967 L) blocked 0.0->1839.0 flushes=38 {'MEMTABLE_LIMIT': 37, 'USER_FORCED': 1} rss_base=1583 MiB rss_peak_delta=110.5 MiB nmt_other_peak_delta=4.89 MiB off_after_flush=0.0 samples=210 client_rc=0
+m256: client ok=20000 err=0 errors={} seconds=13.39 n=20000
+EXPECTED m256 client wrote every row without error (ok == 20000, err == 0): yes
+EXPECTED m256 tracked peak in [0.9 L, 1.05 L]: yes (61.9 MiB vs [57.6, 67.2])
+EXPECTED m256 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED m256 flushed repeatedly (>= 2 "Enqueuing flush of ks.t"), at least one MEMTABLE_LIMIT: yes
+EXPECTED m256 RssAnon peak delta <= 1.3 L: NO (110.5 vs 83 MiB)
+EXPECTED m256 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+m1024: L=64 MiB peak_off=63.1 MiB (0.985 L) blocked 0.0->1937.0 flushes=40 {'MEMTABLE_LIMIT': 39, 'USER_FORCED': 1} rss_base=1560 MiB rss_peak_delta=99.3 MiB nmt_other_peak_delta=5.17 MiB off_after_flush=0.0 samples=210 client_rc=0
+m1024: client ok=20000 err=0 errors={} seconds=13.346 n=20000
+EXPECTED m1024 client wrote every row without error (ok == 20000, err == 0): yes
+EXPECTED m1024 tracked peak in [0.9 L, 1.05 L]: yes (63.1 MiB vs [57.6, 67.2])
+EXPECTED m1024 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED m1024 flushed repeatedly (>= 2 "Enqueuing flush of ks.t"), at least one MEMTABLE_LIMIT: yes
+EXPECTED m1024 RssAnon peak delta <= 1.3 L: NO (99.3 vs 83 MiB)
+EXPECTED m1024 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+m1024b: L=64 MiB peak_off=63.4 MiB (0.991 L) blocked 0.0->1681.0 flushes=39 {'MEMTABLE_LIMIT': 38, 'USER_FORCED': 1} rss_base=1543 MiB rss_peak_delta=129.7 MiB nmt_other_peak_delta=5.08 MiB off_after_flush=0.0 samples=212 client_rc=0
+m1024b: client ok=20000 err=0 errors={} seconds=13.659 n=20000
+EXPECTED m1024b client wrote every row without error (ok == 20000, err == 0): yes
+EXPECTED m1024b tracked peak in [0.9 L, 1.05 L]: yes (63.4 MiB vs [57.6, 67.2])
+EXPECTED m1024b writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED m1024b flushed repeatedly (>= 2 "Enqueuing flush of ks.t"), at least one MEMTABLE_LIMIT: yes
+EXPECTED m1024b RssAnon peak delta <= 1.3 L: NO (129.7 vs 83 MiB)
+EXPECTED m1024b tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+m4096: L=64 MiB peak_off=61.6 MiB (0.963 L) blocked 0.0->1927.0 flushes=39 {'MEMTABLE_LIMIT': 38, 'USER_FORCED': 1} rss_base=1561 MiB rss_peak_delta=150.0 MiB nmt_other_peak_delta=4.98 MiB off_after_flush=0.0 samples=213 client_rc=0
+m4096: client ok=20000 err=0 errors={} seconds=13.822 n=20000
+EXPECTED m4096 client wrote every row without error (ok == 20000, err == 0): yes
+EXPECTED m4096 tracked peak in [0.9 L, 1.05 L]: yes (61.6 MiB vs [57.6, 67.2])
+EXPECTED m4096 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED m4096 flushed repeatedly (>= 2 "Enqueuing flush of ks.t"), at least one MEMTABLE_LIMIT: yes
+EXPECTED m4096 RssAnon peak delta <= 1.3 L: NO (150.0 vs 83 MiB)
+EXPECTED m4096 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+o128: L=128 MiB peak_off=119.0 MiB (0.929 L) blocked 0.0->869.0 flushes=19 {'MEMTABLE_LIMIT': 18, 'USER_FORCED': 1} rss_base=1552 MiB rss_peak_delta=185.5 MiB nmt_other_peak_delta=4.79 MiB off_after_flush=91.0 samples=209 client_rc=0
+o128: client ok=20000 err=0 errors={} seconds=13.137 n=20000
+EXPECTED o128 client wrote every row without error (ok == 20000, err == 0): yes
+EXPECTED o128 tracked peak in [0.9 L, 1.05 L]: yes (119.0 MiB vs [115.2, 134.4])
+EXPECTED o128 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED o128 flushed repeatedly (>= 2 "Enqueuing flush of ks.t"), at least one MEMTABLE_LIMIT: yes
+EXPECTED o128 RssAnon peak delta <= 1.3 L: NO (185.5 vs 166 MiB)
+EXPECTED o128 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+o256: L=256 MiB peak_off=251.0 MiB (0.980 L) blocked 0.0->281.0 flushes=10 {'MEMTABLE_LIMIT': 9, 'USER_FORCED': 1} rss_base=1549 MiB rss_peak_delta=317.6 MiB nmt_other_peak_delta=5.07 MiB off_after_flush=0.0 samples=211 client_rc=0
+o256: client ok=20000 err=0 errors={} seconds=13.59 n=20000
+EXPECTED o256 client wrote every row without error (ok == 20000, err == 0): yes
+EXPECTED o256 tracked peak in [0.9 L, 1.05 L]: yes (251.0 MiB vs [230.4, 268.8])
+EXPECTED o256 writers blocked (BlockedOnAllocation count grew): yes
+EXPECTED o256 flushed repeatedly (>= 2 "Enqueuing flush of ks.t"), at least one MEMTABLE_LIMIT: yes
+EXPECTED o256 RssAnon peak delta <= 1.3 L: yes (317.6 vs 333 MiB)
+EXPECTED o256 tracked off-heap returns near 0 after the final flush (< 1 MiB): yes
+EXPECTED knob axis: the three tracked peaks are within 0.05 L of each other: yes ([61.92, 63.06, 61.63] MiB)
+EXPECTED knob axis: RssAnon peak-delta spread <= 0.25 L and max/min <= 1.3: NO ([110.5, 99.3, 150.0] MiB, spread 50.7 MiB, ratio 1.51)
+noise: m1024 vs m1024b peak_off 63.06 / 63.44 MiB, rss_peak_delta 99.3 / 129.7 MiB
+EXPECTED control sweep: tracked peaks ordered 64 < 128 < 256: yes ([63.1, 119.0, 251.0])
+EXPECTED control sweep: RssAnon peak-delta ratios 128/64 in [1.5, 2.5] and 256/64 in [3.0, 5.0]: yes (1.87, 3.2)

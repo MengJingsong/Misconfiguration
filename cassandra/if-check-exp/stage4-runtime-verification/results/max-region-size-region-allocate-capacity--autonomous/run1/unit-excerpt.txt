@@ -1,0 +1,408 @@
+unit-run run1 full 2026-10-26T08:28:03-06:00 host node1 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 160891392ae8adbaac300140fbc0d6c3
+tree stock /users/jason92/s4-b7-mr cassandra-5.0.9 MAX_REGION_SIZE = 1 * 1024 * 1024
+tree m256 /users/jason92/s4-b7-mr-m256 cassandra-5.0.9 MAX_REGION_SIZE = 256 * 1024
+tree m4096 /users/jason92/s4-b7-mr-m4096 cassandra-5.0.9 MAX_REGION_SIZE = 4096 * 1024
+fill-stock-1000-100000 exit=0 checks=12 ok=12 MISMATCH=0 done=1
+fill-stock-2000000-100 exit=0 checks=12 ok=11 MISMATCH=1 done=1
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=205766656 range=[198951424,204464128]
+fill-stock-1000-131072 exit=0 checks=11 ok=10 MISMATCH=1 done=1
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=129937408 range=[130023424,135266304]
+fill-stock-1000-131073 exit=0 checks=11 ok=10 MISMATCH=1 done=1
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=137089024 range=[130024424,135267304]
+fill-m256-2000000-100 exit=0 checks=12 ok=11 MISMATCH=1 done=1
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=207339520 range=[198951424,204464128]
+fill-m256-1000-100000 exit=0 checks=12 ok=12 MISMATCH=0 done=1
+fill-m256-1000-131072 exit=0 checks=11 ok=11 MISMATCH=0 done=1
+fill-m256-1000-131073 exit=0 checks=11 ok=10 MISMATCH=1 done=1
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=138838016 range=[130024424,135267304]
+fill-m4096-2000000-100 exit=0 checks=12 ok=11 MISMATCH=1 done=1
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=212615168 range=[198951424,205512704]
+fill-m4096-1000-100000 exit=0 checks=12 ok=12 MISMATCH=0 done=1
+fill-m4096-1000-131072 exit=0 checks=11 ok=11 MISMATCH=0 done=1
+fill-m4096-1000-131073 exit=0 checks=11 ok=11 MISMATCH=0 done=1
+threads-stock-400000-100 exit=0 checks=11 ok=11 MISMATCH=0 done=1
+limit-stock-16-100000 exit=0 checks=9 ok=9 MISMATCH=0 done=1
+EXPECTED all runs finished with done=1 and MISMATCH=0 (B2f as amended)
+unit-run end 2026-10-26T08:28:34-06:00 total checks 158 MISMATCH 6
+=== fill-m256-1000-100000.out
+STAGE4 reading mode=fill arg1=1000 S=100000
+STAGE4 reading MAX_REGION_SIZE=262144
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=100000000
+STAGE4 reading owns=100000000
+STAGE4 reading capacity_sum=131072000
+STAGE4 reading regions=500
+STAGE4 reading max_capacity=262144
+STAGE4 reading slack=31072000
+STAGE4 reading slack_pct=31.072
+STAGE4 reading rss_delta=105304064
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=100000000 n*S=100000000
+STAGE4 check owns-equals-used ok owns=100000000 used=100000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=262144
+STAGE4 check sum>=used ok cap=131072000 used=100000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=262144 MAX_REGION_SIZE=262144 S=100000
+STAGE4 check sum-capacity-grows-past-one-region ok cap=131072000 regions=500
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=105304064 range=[98951424,135266304]
+STAGE4 check instrument-model-capacity ok model cap=131072000 regions=500 max=262144 real cap=131072000 regions=500 max=262144
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=131072000 regions=500 real cap=131072000 regions=500
+STAGE4 check slack-positive-uncharged ok slack=31072000
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=0
+=== fill-m256-1000-131072.out
+STAGE4 reading mode=fill arg1=1000 S=131072
+STAGE4 reading MAX_REGION_SIZE=262144
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=131072000
+STAGE4 reading owns=131072000
+STAGE4 reading capacity_sum=131072000
+STAGE4 reading regions=500
+STAGE4 reading max_capacity=262144
+STAGE4 reading slack=0
+STAGE4 reading slack_pct=0.000
+STAGE4 reading rss_delta=133902336
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=131072000 n*S=131072000
+STAGE4 check owns-equals-used ok owns=131072000 used=131072000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=262144
+STAGE4 check sum>=used ok cap=131072000 used=131072000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=262144 MAX_REGION_SIZE=262144 S=131072
+STAGE4 check sum-capacity-grows-past-one-region ok cap=131072000 regions=500
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=133902336 range=[130023424,135266304]
+STAGE4 check instrument-model-capacity ok model cap=131072000 regions=500 max=262144 real cap=131072000 regions=500 max=262144
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=131072000 regions=500 real cap=131072000 regions=500
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=0
+=== fill-m256-1000-131073.out
+STAGE4 reading mode=fill arg1=1000 S=131073
+STAGE4 reading MAX_REGION_SIZE=262144
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=131073000
+STAGE4 reading owns=131073000
+STAGE4 reading capacity_sum=131073000
+STAGE4 reading regions=1000
+STAGE4 reading max_capacity=131073
+STAGE4 reading slack=0
+STAGE4 reading slack_pct=0.000
+STAGE4 reading rss_delta=138838016
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=131073000 n*S=131073000
+STAGE4 check owns-equals-used ok owns=131073000 used=131073000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=262144
+STAGE4 check sum>=used ok cap=131073000 used=131073000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=131073 MAX_REGION_SIZE=262144 S=131073
+STAGE4 check sum-capacity-grows-past-one-region ok cap=131073000 regions=1000
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=138838016 range=[130024424,135267304]
+STAGE4 check instrument-model-capacity ok model cap=131073000 regions=1000 max=131073 real cap=131073000 regions=1000 max=131073
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=131073000 regions=1000 real cap=131073000 regions=1000
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=1
+=== fill-m256-2000000-100.out
+STAGE4 reading mode=fill arg1=2000000 S=100
+STAGE4 reading MAX_REGION_SIZE=262144
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=2000000
+STAGE4 reading used=200000000
+STAGE4 reading owns=200000000
+STAGE4 reading capacity_sum=200269824
+STAGE4 reading regions=768
+STAGE4 reading max_capacity=262144
+STAGE4 reading slack=269824
+STAGE4 reading slack_pct=0.135
+STAGE4 reading rss_delta=207339520
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=200000000 n*S=200000000
+STAGE4 check owns-equals-used ok owns=200000000 used=200000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=262144
+STAGE4 check sum>=used ok cap=200269824 used=200000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=262144 MAX_REGION_SIZE=262144 S=100
+STAGE4 check sum-capacity-grows-past-one-region ok cap=200269824 regions=768
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=207339520 range=[198951424,204464128]
+STAGE4 check instrument-model-capacity ok model cap=200269824 regions=768 max=262144 real cap=200269824 regions=768 max=262144
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=200269824 regions=768 real cap=200269824 regions=768
+STAGE4 check slack-positive-uncharged ok slack=269824
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=1
+=== fill-m4096-1000-100000.out
+STAGE4 reading mode=fill arg1=1000 S=100000
+STAGE4 reading MAX_REGION_SIZE=4194304
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=100000000
+STAGE4 reading owns=100000000
+STAGE4 reading capacity_sum=104333312
+STAGE4 reading regions=27
+STAGE4 reading max_capacity=4194304
+STAGE4 reading slack=4333312
+STAGE4 reading slack_pct=4.333
+STAGE4 reading rss_delta=106160128
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=100000000 n*S=100000000
+STAGE4 check owns-equals-used ok owns=100000000 used=100000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=4194304
+STAGE4 check sum>=used ok cap=104333312 used=100000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=4194304 MAX_REGION_SIZE=4194304 S=100000
+STAGE4 check sum-capacity-grows-past-one-region ok cap=104333312 regions=27
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=106160128 range=[98951424,108527616]
+STAGE4 check instrument-model-capacity ok model cap=104333312 regions=27 max=4194304 real cap=104333312 regions=27 max=4194304
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=104333312 regions=27 real cap=104333312 regions=27
+STAGE4 check slack-positive-uncharged ok slack=4333312
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=0
+=== fill-m4096-1000-131072.out
+STAGE4 reading mode=fill arg1=1000 S=131072
+STAGE4 reading MAX_REGION_SIZE=4194304
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=131072000
+STAGE4 reading owns=131072000
+STAGE4 reading capacity_sum=133169152
+STAGE4 reading regions=33
+STAGE4 reading max_capacity=4194304
+STAGE4 reading slack=2097152
+STAGE4 reading slack_pct=1.600
+STAGE4 reading rss_delta=130027520
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=131072000 n*S=131072000
+STAGE4 check owns-equals-used ok owns=131072000 used=131072000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=4194304
+STAGE4 check sum>=used ok cap=133169152 used=131072000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=4194304 MAX_REGION_SIZE=4194304 S=131072
+STAGE4 check sum-capacity-grows-past-one-region ok cap=133169152 regions=33
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=130027520 range=[130023424,137363456]
+STAGE4 check instrument-model-capacity ok model cap=133169152 regions=33 max=4194304 real cap=133169152 regions=33 max=4194304
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=133169152 regions=33 real cap=133169152 regions=33
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=0
+=== fill-m4096-1000-131073.out
+STAGE4 reading mode=fill arg1=1000 S=131073
+STAGE4 reading MAX_REGION_SIZE=4194304
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=131073000
+STAGE4 reading owns=131073000
+STAGE4 reading capacity_sum=131073000
+STAGE4 reading regions=1000
+STAGE4 reading max_capacity=131073
+STAGE4 reading slack=0
+STAGE4 reading slack_pct=0.000
+STAGE4 reading rss_delta=134586368
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=131073000 n*S=131073000
+STAGE4 check owns-equals-used ok owns=131073000 used=131073000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=4194304
+STAGE4 check sum>=used ok cap=131073000 used=131073000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=131073 MAX_REGION_SIZE=4194304 S=131073
+STAGE4 check sum-capacity-grows-past-one-region ok cap=131073000 regions=1000
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=134586368 range=[130024424,135267304]
+STAGE4 check instrument-model-capacity ok model cap=131073000 regions=1000 max=131073 real cap=131073000 regions=1000 max=131073
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=131073000 regions=1000 real cap=131073000 regions=1000
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=0
+=== fill-m4096-2000000-100.out
+STAGE4 reading mode=fill arg1=2000000 S=100
+STAGE4 reading MAX_REGION_SIZE=4194304
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=2000000
+STAGE4 reading used=200000000
+STAGE4 reading owns=200000000
+STAGE4 reading capacity_sum=201318400
+STAGE4 reading regions=56
+STAGE4 reading max_capacity=4194304
+STAGE4 reading slack=1318400
+STAGE4 reading slack_pct=0.659
+STAGE4 reading rss_delta=212615168
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=200000000 n*S=200000000
+STAGE4 check owns-equals-used ok owns=200000000 used=200000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=4194304
+STAGE4 check sum>=used ok cap=201318400 used=200000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=4194304 MAX_REGION_SIZE=4194304 S=100
+STAGE4 check sum-capacity-grows-past-one-region ok cap=201318400 regions=56
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=212615168 range=[198951424,205512704]
+STAGE4 check instrument-model-capacity ok model cap=201318400 regions=56 max=4194304 real cap=201318400 regions=56 max=4194304
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=201318400 regions=56 real cap=201318400 regions=56
+STAGE4 check slack-positive-uncharged ok slack=1318400
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=1
+=== fill-stock-1000-100000.out
+STAGE4 reading mode=fill arg1=1000 S=100000
+STAGE4 reading MAX_REGION_SIZE=1048576
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=100000000
+STAGE4 reading owns=100000000
+STAGE4 reading capacity_sum=105381888
+STAGE4 reading regions=101
+STAGE4 reading max_capacity=1048576
+STAGE4 reading slack=5381888
+STAGE4 reading slack_pct=5.382
+STAGE4 reading rss_delta=102957056
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=100000000 n*S=100000000
+STAGE4 check owns-equals-used ok owns=100000000 used=100000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=1048576
+STAGE4 check sum>=used ok cap=105381888 used=100000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=1048576 MAX_REGION_SIZE=1048576 S=100000
+STAGE4 check sum-capacity-grows-past-one-region ok cap=105381888 regions=101
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=102957056 range=[98951424,109576192]
+STAGE4 check instrument-model-capacity ok model cap=105381888 regions=101 max=1048576 real cap=105381888 regions=101 max=1048576
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=105381888 regions=101 real cap=105381888 regions=101
+STAGE4 check slack-positive-uncharged ok slack=5381888
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=0
+=== fill-stock-1000-131072.out
+STAGE4 reading mode=fill arg1=1000 S=131072
+STAGE4 reading MAX_REGION_SIZE=1048576
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=131072000
+STAGE4 reading owns=131072000
+STAGE4 reading capacity_sum=131072000
+STAGE4 reading regions=125
+STAGE4 reading max_capacity=1048576
+STAGE4 reading slack=0
+STAGE4 reading slack_pct=0.000
+STAGE4 reading rss_delta=129937408
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=131072000 n*S=131072000
+STAGE4 check owns-equals-used ok owns=131072000 used=131072000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=1048576
+STAGE4 check sum>=used ok cap=131072000 used=131072000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=1048576 MAX_REGION_SIZE=1048576 S=131072
+STAGE4 check sum-capacity-grows-past-one-region ok cap=131072000 regions=125
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=129937408 range=[130023424,135266304]
+STAGE4 check instrument-model-capacity ok model cap=131072000 regions=125 max=1048576 real cap=131072000 regions=125 max=1048576
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=131072000 regions=125 real cap=131072000 regions=125
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=1
+=== fill-stock-1000-131073.out
+STAGE4 reading mode=fill arg1=1000 S=131073
+STAGE4 reading MAX_REGION_SIZE=1048576
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=1000
+STAGE4 reading used=131073000
+STAGE4 reading owns=131073000
+STAGE4 reading capacity_sum=131073000
+STAGE4 reading regions=1000
+STAGE4 reading max_capacity=131073
+STAGE4 reading slack=0
+STAGE4 reading slack_pct=0.000
+STAGE4 reading rss_delta=137089024
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=131073000 n*S=131073000
+STAGE4 check owns-equals-used ok owns=131073000 used=131073000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=1048576
+STAGE4 check sum>=used ok cap=131073000 used=131073000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=131073 MAX_REGION_SIZE=1048576 S=131073
+STAGE4 check sum-capacity-grows-past-one-region ok cap=131073000 regions=1000
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=137089024 range=[130024424,135267304]
+STAGE4 check instrument-model-capacity ok model cap=131073000 regions=1000 max=131073 real cap=131073000 regions=1000 max=131073
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=131073000 regions=1000 real cap=131073000 regions=1000
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=1
+=== fill-stock-2000000-100.out
+STAGE4 reading mode=fill arg1=2000000 S=100
+STAGE4 reading MAX_REGION_SIZE=1048576
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=2000000
+STAGE4 reading used=200000000
+STAGE4 reading owns=200000000
+STAGE4 reading capacity_sum=200269824
+STAGE4 reading regions=197
+STAGE4 reading max_capacity=1048576
+STAGE4 reading slack=269824
+STAGE4 reading slack_pct=0.135
+STAGE4 reading rss_delta=205766656
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=200000000 n*S=200000000
+STAGE4 check owns-equals-used ok owns=200000000 used=200000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=1048576
+STAGE4 check sum>=used ok cap=200269824 used=200000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=1048576 MAX_REGION_SIZE=1048576 S=100
+STAGE4 check sum-capacity-grows-past-one-region ok cap=200269824 regions=197
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=205766656 range=[198951424,204464128]
+STAGE4 check instrument-model-capacity ok model cap=200269824 regions=197 max=1048576 real cap=200269824 regions=197 max=1048576
+STAGE4 check B2f-literal-capacity-and-regions ok B2f cap=200269824 regions=197 real cap=200269824 regions=197
+STAGE4 check slack-positive-uncharged ok slack=269824
+STAGE4 reading used_after_discard=0
+STAGE4 check discard-releases-charge ok used=0
+STAGE4 done mismatches=1
+=== limit-stock-16-100000.out
+STAGE4 reading mode=limit arg1=16 S=100000
+STAGE4 reading MAX_REGION_SIZE=1048576
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 reading n=167
+STAGE4 reading used=16700000
+STAGE4 reading limit=16777216
+STAGE4 reading capacity_sum=18350080
+STAGE4 reading regions=18
+STAGE4 check fill-reached-limit ok used=16700000 S=100000 L=16777216
+STAGE4 check used-equals-n*S ok used=16700000
+STAGE4 check owns-equals-used ok owns=16700000
+STAGE4 reading extra_state_2s=WAITING
+STAGE4 check extra-allocate-parked ok state=WAITING
+STAGE4 check used-unchanged-while-parked ok used=16700000
+STAGE4 check group-isBlocking ok isBlocking=true
+STAGE4 reading blocking_writer_alive=false
+STAGE4 reading used_after_blocking=17700000
+STAGE4 check blocking-group-not-parked ok alive=false err=null
+STAGE4 check blocking-group-exceeds-L ok used=17700000 L=16777216
+STAGE4 reading extra_state_after_discard=TERMINATED
+STAGE4 check extra-completed-after-discard ok alive=false
+STAGE4 done mismatches=0
+=== threads-stock-400000-100.out
+STAGE4 reading mode=threads arg1=400000 S=100
+STAGE4 reading MAX_REGION_SIZE=1048576
+STAGE4 reading MAX_CLONED_SIZE=131072
+STAGE4 check workers-no-error ok null
+STAGE4 reading n=400000
+STAGE4 reading used=40000000
+STAGE4 reading owns=40000000
+STAGE4 reading capacity_sum=40886272
+STAGE4 reading regions=45
+STAGE4 reading max_capacity=1048576
+STAGE4 reading slack=886272
+STAGE4 reading slack_pct=2.216
+STAGE4 reading rss_delta=42438656
+STAGE4 reading onHeap_used=0
+STAGE4 check used-equals-n*S ok used=40000000 n*S=40000000
+STAGE4 check owns-equals-used ok owns=40000000 used=40000000
+STAGE4 check used-independent-of-region-constant ok MAX_REGION_SIZE=1048576
+STAGE4 check sum>=used ok cap=40886272 used=40000000
+STAGE4 check max-capacity-equals-constant-or-oversize ok max=1048576 MAX_REGION_SIZE=1048576 S=100
+STAGE4 check sum-capacity-grows-past-one-region ok cap=40886272 regions=45
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] ok delta=42438656 range=[38951424,45080576]
+STAGE4 check capacity>=used-with-threads ok cap=40886272
+STAGE4 reading stash_nonempty=8192:7 16384:7 32768:5 1048576:3 65536:7 131072:7 262144:7 524288:7
+STAGE4 reading stash_bytes=10362880
+STAGE4 check stash<=8-per-size-class ok max per class=7
+STAGE4 check stash-bytes<=16MiB+ ok stashBytes=10362880
+STAGE4 done mismatches=0

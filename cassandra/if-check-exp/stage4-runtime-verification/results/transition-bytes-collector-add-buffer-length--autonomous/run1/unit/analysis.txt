@@ -1,0 +1,11 @@
+files: tc-unit-x256m.txt, tc-unit-x512m.txt, tc-unit.txt rows: 582
+env: [('tc-unit-x256m.txt', '259522560', '9.7.0'), ('tc-unit-x512m.txt', '519438336', '9.7.0'), ('tc-unit.txt', '1056309248', '9.7.0')]
+EXPECTED: B2f(1) standalone capacity in band (32 if L<=32 else L..L+L/8+10), equals the library simulation, pos=L, pos 0 after pops: HOLDS  [162 readings, violations []]
+EXPECTED: B2f(1) one capacity per L across guardrail values, repetitions, -Xmx runs: HOLDS  [L=8:[32]; L=32:[32]; L=33:[40]; L=1024:[1088]; L=8192:[8296]; L=65535:[69368]]
+EXPECTED: B2f(1) no cap beyond 65535 (131072 and 1048576 adds, no exception, capacity = library simulation): HOLDS  [L=131072 cap=140656; L=1048576 cap=1172112]
+EXPECTED: B2f(2) [auxiliary] getMax/MinTerm allocation within S(L)+L .. S(L)+L+65536 and result equals the key: HOLDS  [324 readings, violations []]
+EXPECTED: B2f(3) collecting=true iterator: capacity = standalone capacity for the same L, 1 entry, value length L, pos 0 or -1 after drain (the root frame pops without an add): HOLDS  [54 readings, violations []]
+EXPECTED: B2h control: Guardrails.saiStringTermSize.failsOn fails exactly the sizes above the threshold, at 1KiB, 8KiB, 64KiB: HOLDS  [9 readings, violations []]
+EXPECTED: B2h control: allocation instrument counts a known array (new byte[L]: L+16 .. L+80 bytes per call): HOLDS  [L=8:24; L=32:48; L=33:56; L=1024:1040; L=8192:8208; L=65535:65552; L=8:24; L=32:48; L=33:56; L=1024:1040; L=8192:8208; L=65535:65552; L=8:24; L=32:48; L=33:56; L=1024:1040; L=8192:8208; L=65535:65552]
+EXPECTED: B2e step 4: tc-unit.txt plus two -Xmx runs present: HOLDS  [3 files]
+MATCHED: B2g row 1: capacity depends only on L; same under all guardrail/-Xmx values - claim confirmed

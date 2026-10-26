@@ -1,0 +1,31 @@
+STAGE4 reading mode=blocking L_MiB=64 S=1024
+STAGE4 reading nmt_before=Native Memory Tracking: | Total: reserved=2061642KB, committed=255670KB | -                     Other (reserved=4116KB, committed=4116KB) | -    Native Memory Tracking (reserved=1342KB, committed=1342KB) | 
+STAGE4 reading n=65536
+STAGE4 reading used=67108864
+STAGE4 reading owns=67108864
+STAGE4 reading limit=67108864
+STAGE4 reading usedRatio=1.0
+STAGE4 reading capacity_sum=68149248
+STAGE4 reading regions=71
+STAGE4 reading rss_delta=77070336
+STAGE4 reading nmt_after=Native Memory Tracking: | Total: reserved=2066695KB, committed=265095KB | -                     Other (reserved=4116KB, committed=4116KB) | -    Native Memory Tracking (reserved=1388KB, committed=1388KB) | 
+STAGE4 reading cleaner_calls=2201369
+STAGE4 reading onHeap_used=0
+STAGE4 reading excess=1040384
+STAGE4 check fill-reached-limit ok used=67108864 S=1024 L=67108864
+STAGE4 check used-equals-n*S ok used=67108864 n*S=67108864
+STAGE4 check used-le-L ok used=67108864 L=67108864
+STAGE4 check n-equals-floor(L/S) ok n=65536 L/S=65536
+STAGE4 check owns-equals-used ok owns=67108864 used=67108864
+STAGE4 check capacity>=used ok cap=68149248 used=67108864
+STAGE4 check excess<(regions-1)*S+lastCapacity ok excess=1040384 bound=1120256 lastCap=1048576
+STAGE4 check instrument-model-capacity ok model cap=68149248 regions=71 real cap=68149248 regions=71
+STAGE4 check rssAnon-delta-in[used-1MiB,cap+4MiB] MISMATCH delta=77070336 range=[66060288,72343552]
+STAGE4 check group-isBlocking ok isBlocking=true
+STAGE4 reading blocking_writer_alive=false
+STAGE4 reading used_after_blocking=67119104
+STAGE4 check blocking-group-not-parked ok alive=false err=null
+STAGE4 check blocking-group-exceeds-L ok used=67119104 L=67108864 expect=67119104
+STAGE4 reading nonblocking_extra_state=WAITING
+STAGE4 check nonblocking-still-parked ok state=WAITING
+STAGE4 done mismatches=1

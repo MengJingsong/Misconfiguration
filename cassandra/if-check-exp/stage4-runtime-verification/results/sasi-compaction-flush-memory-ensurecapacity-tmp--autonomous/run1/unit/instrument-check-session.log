@@ -1,0 +1,34 @@
+e8d94aa4e302efde3b39d3b155ec2b80  SasiSuffixMemoryTest.java
+0e96de7839da655a8df39a54ad5995ca  lts.btm
+368369253aa57dec716c7842a0e2694e  unit-run.sh
+[2026-10-26T09:43:10.040-0400] unit-run check tree=/users/jason92/s4-b7-st head=aa9f803 java=openjdk version "11.0.32.1" 2026-08-18
+[2026-10-26T09:43:10.045-0400] + ant testsome (STAGE4_CELL=p1 STAGE4_SIZES=2048,70000 STAGE4_REPEAT=1)
+[2026-10-26T09:43:23.683-0400] ant exit 0 ; [junit-timeout] Testsuite: org.apache.cassandra.index.sasi.disk.SasiSuffixMemoryTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.525 sec
+# P1 columns: seq,n,shape,rep,millis,thread_alloc_bytes,sorted_ok
+P1,1,2048,random,1,0,15432,true
+P1,2,2048,ascending,1,0,3112,true
+P1,3,2048,descending,1,0,3112,true
+P1,4,2048,runs,1,0,7224,true
+P1,5,70000,random,1,20,803504,true
+P1,6,70000,ascending,1,0,3112,true
+P1,7,70000,descending,1,0,3112,true
+P1,8,70000,runs,1,0,803432,true
+cell=p1 heap=512m rc=0 secs=2 OK (1 test)
+# P1 columns: seq,n,shape,rep,millis,thread_alloc_bytes,sorted_ok
+P1,1,2048,random,1,1,48368,true
+P1,2,2048,ascending,1,0,14144,true
+P1,3,2048,descending,1,1,86600,true
+P1,4,2048,runs,1,0,22024,true
+P1,5,70000,random,1,23,845336,true
+P1,6,70000,ascending,1,1,14048,true
+P1,7,70000,descending,1,1,14048,true
+P1,8,70000,runs,1,1,845336,true
+P1,9,1048576,random,1,187,8360000,true
+P1,10,1048576,ascending,1,0,14224,true
+P1,11,1048576,descending,1,2,14224,true
+P1,12,1048576,runs,1,16,8294464,true
+80
+cell=p2:CONTAINS:1:100:1 heap=1024m rc=0 secs=5 OK (1 test)
+P2,mode=CONTAINS,M_mib=1,L=100,rep=1,N=3277,chars=327700,estimate=1048640,overshoot=64,baseline_live=18946328,peak_live=23177136,increment=4230808,samples=2,finish_ms=2789,thread_alloc_bytes=3531725784,wrote=true,file_len=59390100
+cell=p2:PREFIX:1:100:1 heap=1024m rc=0 secs=2 OK (1 test)
+P2,mode=PREFIX,M_mib=1,L=100,rep=1,N=3277,chars=327700,estimate=1048640,overshoot=64,baseline_live=18983040,peak_live=19020168,increment=37128,samples=1,finish_ms=108,thread_alloc_bytes=16844472,wrote=true,file_len=750336

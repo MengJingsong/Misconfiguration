@@ -1,0 +1,9 @@
+== run r4: S=8 MiB, D=20, level=DEBUG, 2026-10-26T14:04:23Z
+EXPECTED: node 1 RepairSessionSpaceInMiB=8 and RepairSessionMaxTreeDepth=20 read back -- yes
+EXPECTED: node 2 RepairSessionSpaceInMiB=8 and RepairSessionMaxTreeDepth=20 read back -- yes
+log level org.apache.cassandra: DEBUG
+repair rc=0 wall_ms=7763 t0_ms=1793023481235; completed: yes; [2026-10-26 14:04:48,674] Repair completed successfully
+node 1 debug.log window: 19 relevant lines; Created-lines: ['Created 1 merkle trees with merkle trees size 1, 1000064 partitions, 92 bytes']; "Partitions per leaf" lines: 1
+node 1 JFR: HistogramBuilder.add outside-TLAB sizes (distinct): ['20496', '40976', '81936', '163856']; total outside-TLAB events ['101']
+node 2 debug.log window: 18 relevant lines; Created-lines: ['Created 1 merkle trees with merkle trees size 1, 1000064 partitions, 92 bytes']; "Partitions per leaf" lines: 1
+node 2 JFR: HistogramBuilder.add outside-TLAB sizes (distinct): ['2576', '20496', '40976', '81936', '163856']; total outside-TLAB events ['98']

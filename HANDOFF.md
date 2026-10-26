@@ -40,7 +40,7 @@ fresh autonomous agents to write up a case per target and verifies each at stage
 | Yang | [`HANDOFF-Yang.md`](HANDOFF-Yang.md) | [`writeup-set-B.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-B.csv) | 169 / 161 |
 
 The personal handoffs hold the job, the procedure and the progress; this file holds what both
-share. Update the "Current state" numbers below when a batch closes (last: 2026-10-25, set A batch 6).
+share. Update the "Current state" numbers below when a batch closes (last: 2026-10-26, set A batch 7).
 
 ## What this experiment is
 
@@ -63,8 +63,8 @@ noticed along the way are noted in case files for Target 3, not chased.
 - **Stage 3:** bands A, B and C fully read; **93 case files** (29 guided, 64 autonomous; estimate
   positive 50, negative 43). 65 of the 402 A/B/C units were a case's target before the two-set job;
   the other **337** are that job (2 accepted candidates in `predicted-positive.md`, the rest rejected
-  lines in `predicted-negative.md`, ~151 rows). Set A has written up **36** of its 159 targets
-  (batches 1–6, 2026-10-24/25); set B none yet. Nothing is undecided. Band D is not read.
+  lines in `predicted-negative.md`, ~151 rows). Set A has written up **46** of its 159 targets
+  (batches 1–7, 2026-10-24/26); set B none yet. Nothing is undecided. Band D is not read.
 - **Stage 4:** **all 93 closed**, run 1 only (no run 2 anywhere): 76 Confirmed, 4 Refuted,
   12 partial, 1 not confirmed. **Outcome class:** 46 true positive, 0 false positive, 31 true
   negative, 4 false negative, 12 undetermined (all 12 autonomous, mostly the cluster tier).
@@ -170,6 +170,7 @@ Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
 - A standalone client JVM on Cassandra classes needs `conf/jvm11-clients.options` on JDK 11. The
   bundled Python driver: use protocol 5 for per-replica failure codes; on one node use
   `DCAwareRoundRobinPolicy` and `token_metadata_enabled=False`.
+- Guardrail tests need `PasswordAuthenticator` plus an ordinary role (with `AllowAllAuthenticator` every client is a superuser and guardrails never fire); `bti` needs `storage_compatibility_mode: NONE`; memtable regions come from JNA `malloc`, so NMT cannot see them (read `RssAnon`), and set `memtable_cleanup_threshold: 0.99` or the pool limit is never reached (set A batch 7).
 - Several local nodes applying every write stall on a spinning disk: put data on a tmpfs.
   Timed-out writes expire in the sender's queue and are hinted: truncate hints between arms.
 - `ant testsome` forks a 1 GiB JVM (`maxmemory` overrides `-Xmx`); every test copied into a tree
@@ -193,7 +194,7 @@ Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
   `MAX_HINT_BUFFERS=1` deadlocks the hint path; `sendWriteWithCallback` holds a refused write until
   the timeout (`internode_max_message_size`); `maxHintsInProgress` can never fire (bare
   `CacheLoader`, `StorageProxy.java:203`); `SerializingCache.clear()` does not free native memory (removal cause EXPLICIT, the listener frees
-  only evictions; seen in `entry-size-limit` and `row_cache_size` cases, 2026-10-25); `ChecksummedDataInput.close()` never returns the decompressed hint block (BufferPool `OverflowSize` drifts ~6.6 MB per closed hints file) and `CompressedChecksummedDataInput` allocates a forged block-header size unchecked (512 MiB header → 563.7 MB; set A batch 5, 2026-10-25); a forged 512 MiB block header in `EncryptedChecksummedDataInput` allocates ~537 MB heap garbage plus ~537 MB direct memory cached on the reading thread (set A batch 6, 2026-10-26); stale "1G default" text/log message in `IndexMode.java:60`/`:192` (real default of `max_compaction_flush_memory_in_mb` is 0.15 GiB); `MEMTABLE_TRIE_SIZE_LIMIT`
+  only evictions; seen in `entry-size-limit` and `row_cache_size` cases, 2026-10-25); `ChecksummedDataInput.close()` never returns the decompressed hint block (BufferPool `OverflowSize` drifts ~6.6 MB per closed hints file) and `CompressedChecksummedDataInput` allocates a forged block-header size unchecked (512 MiB header → 563.7 MB; set A batch 5, 2026-10-25); a forged 512 MiB block header in `EncryptedChecksummedDataInput` allocates ~537 MB heap garbage plus ~537 MB direct memory cached on the reading thread (set A batch 6, 2026-10-26); `ValidationManager.java:62-63` computes `repair_session_space * 1048576 / RF` in `int` (wraps for ≥ 2048 MiB: tree depth 1; set A batch 7); `MemtableOffHeapDataSize` gauge registered under the name `MemtableOnHeapDataSize` (`TableMetrics.java:507`) and `AllMemtablesOffHeapDataSize` covers only the current memtable; `nodetool setcachekeystosave` says "0 to disable" but 0 means save all (`AutoSavingCache.java:305`); stale "1G default" text/log message in `IndexMode.java:60`/`:192` (real default of `max_compaction_flush_memory_in_mb` is 0.15 GiB); `MEMTABLE_TRIE_SIZE_LIMIT`
   (`cassandra.trie_size_limit_mb`) has no reader (the trie threshold uses `cassandra.memtable.row_overhead_size`).
 - **Reruns that could settle undetermined cluster tiers:** the `SEPExecutor` cases (pin
   `native_transport_max_threads`, throttle the load), `flushLowWaterMark`, the SAI sawtooth,

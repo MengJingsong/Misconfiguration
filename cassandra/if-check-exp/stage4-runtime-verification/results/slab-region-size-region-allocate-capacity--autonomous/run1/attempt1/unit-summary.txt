@@ -1,0 +1,28 @@
+variant v512: >     private final static int REGION_SIZE = 512 * 1024;
+variant v2048: >     private final static int REGION_SIZE = 2 * 1024 * 1024;
+unit-run run1 full 2026-10-26T10:49:49-04:00 host node0 tree /users/jason92/s4-b7-sr7 cassandra-5.0.9 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 f748f841d16b268e4a8ad56729d15c41
+stock-waste_offheap_116509_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-waste_offheap_131072_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-waste_offheap_100000_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-waste_offheap_4096_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-waste_offheap_131073_400 exit=0 checks=7 ok=6 MISMATCH=1 done=1
+STAGE4 check rssAnon-covers-direct MISMATCH rss=48300032 direct=52429200
+v512-waste_offheap_116509_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+v512-waste_offheap_100000_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+v2048-waste_offheap_116509_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+v2048-waste_offheap_100000_400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-waste_heap_116509_400 exit=0 checks=6 ok=5 MISMATCH=1 done=1
+STAGE4 check heap-retained-within-3MiB-of-real MISMATCH heap_delta=1560856 real=52428800
+stock-limit_offheap_64_116509_1400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-limit_offheap_128_116509_1400 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-limit_offheap_64_131072_700 exit=0 checks=7 ok=7 MISMATCH=0 done=1
+stock-limit_heap_64_116509_1400 exit=0 checks=8 ok=7 MISMATCH=1 done=1
+STAGE4 check heap-retained-within-3MiB-of-real MISMATCH heap_delta=2096936 real=75497472
+v512-limit_offheap_64_116509_1400 exit=0 checks=7 ok=6 MISMATCH=1 done=1
+STAGE4 check B2f-limit-64-116509 MISMATCH n=575 owns=66992675 regions=144
+v2048-limit_offheap_64_116509_1400 exit=0 checks=7 ok=6 MISMATCH=1 done=1
+STAGE4 check B2f-limit-64-116509 MISMATCH n=575 owns=66992675 regions=34
+stock-threads_116509_20 exit=0 checks=3 ok=3 MISMATCH=0 done=1
+EXPECTED all runs finished with done=1 and MISMATCH=0 (B2f as amended)
+unit-run end 2026-10-26T10:50:55-04:00 total checks 115 MISMATCH 5

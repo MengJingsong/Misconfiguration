@@ -1,0 +1,103 @@
+{
+ "arm": "ctl20",
+ "jvm_xmx": [
+  "-Xmx2G"
+ ],
+ "populate": [
+  {
+   "pass": 1,
+   "entries_before": 34,
+   "entries_after": 238312,
+   "size": 20971456,
+   "stress": {
+    "rc": 0,
+    "seconds": 13.1,
+    "errors": 0,
+    "partitions": "500,000"
+   }
+  },
+  {
+   "pass": 2,
+   "entries_before": 238312,
+   "entries_after": 238312,
+   "size": 20971448,
+   "stress": {
+    "rc": 0,
+    "seconds": 11.7,
+    "errors": 0,
+    "partitions": "500,000"
+   }
+  }
+ ],
+ "saves": [
+  {
+   "label": "K10000",
+   "K": 10000,
+   "set_output": "org.apache.cassandra.db:type=Caches|KeyCacheKeysToSave|set 10000 -> 10000",
+   "K_readback": "10000",
+   "before": {
+    "entries": 238312,
+    "size": 20971448,
+    "capacity": 20971520
+   },
+   "files_before": {},
+   "save_seconds": 0.33,
+   "new_lines": [
+    {
+     "n": 10000,
+     "ms": 37,
+     "line": "INFO  [CompactionExecutor:2] 2026-10-26T15:06:34,400 AutoSavingCache.java:425 - Saved KeyCache (10000 items) in 37 ms to /dev/shm/s4-b7-ck/saved_caches/KeyCache-g.db : 0 MB"
+    }
+   ],
+   "n_logged": 10000,
+   "files_after": {
+    "KeyCache-g.crc": 20,
+    "KeyCache-g.db": 199882,
+    "KeyCache-g.metadata": 68
+   },
+   "after": {
+    "entries": 238312,
+    "size": 20971448,
+    "capacity": 20971520
+   },
+   "heap_peak_during_save": 1008174168
+  },
+  {
+   "label": "K0",
+   "K": 0,
+   "set_output": "org.apache.cassandra.db:type=Caches|KeyCacheKeysToSave|set 0 -> 0",
+   "K_readback": "0",
+   "before": {
+    "entries": 238312,
+    "size": 20971448,
+    "capacity": 20971520
+   },
+   "files_before": {
+    "KeyCache-g.crc": 20,
+    "KeyCache-g.db": 199882,
+    "KeyCache-g.metadata": 68
+   },
+   "save_seconds": 0.66,
+   "new_lines": [
+    {
+     "n": 238312,
+     "ms": 389,
+     "line": "INFO  [CompactionExecutor:1] 2026-10-26T15:06:39,169 AutoSavingCache.java:425 - Saved KeyCache (238312 items) in 389 ms to /dev/shm/s4-b7-ck/saved_caches/KeyCache-g.db : 4 MB"
+    }
+   ],
+   "n_logged": 238312,
+   "files_after": {
+    "KeyCache-g.crc": 296,
+    "KeyCache-g.db": 4763087,
+    "KeyCache-g.metadata": 102
+   },
+   "after": {
+    "entries": 238312,
+    "size": 20971448,
+    "capacity": 20971520
+   },
+   "heap_peak_during_save": 1142391896
+  }
+ ],
+ "leftover": ""
+}

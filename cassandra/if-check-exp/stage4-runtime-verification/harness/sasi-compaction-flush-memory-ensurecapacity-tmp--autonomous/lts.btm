@@ -1,0 +1,42 @@
+# Byteman rules for sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous (both tiers). Observation only.
+# Loaded with -javaagent:<byteman.jar>=script:<this file>[,listener:true,port:<p>] -Dstage4.trace=<file>
+# Trace lines (epoch ms, thread):
+#   SORT_BEGIN ms=.. thr=.. alen=<a.length>          every LongTimSort.sort(long[], int, int, LongComparator) call
+#   SORT_END   ms=.. thr=.. alen=..
+#   TMP_INIT   ms=.. thr=.. alen=.. tmplen=..        the constructor's first tmp (256 longs, or alen/2 when alen < 512)
+#   TMP_GROW   ms=.. thr=.. alen=.. tmplen=..        every ensureCapacity growth (a new long[tmplen])
+RULE lts sort begin
+CLASS org.apache.cassandra.utils.LongTimSort
+METHOD sort
+AT ENTRY
+IF $# == 4
+DO traceOpen("lts", java.lang.System.getProperty("stage4.trace", "lts.trace"));
+   traceln("lts", "SORT_BEGIN ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName() + " alen=" + $1.length)
+ENDRULE
+
+RULE lts sort end
+CLASS org.apache.cassandra.utils.LongTimSort
+METHOD sort
+AT EXIT
+IF $# == 4
+DO traceOpen("lts", java.lang.System.getProperty("stage4.trace", "lts.trace"));
+   traceln("lts", "SORT_END ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName() + " alen=" + $1.length)
+ENDRULE
+
+RULE lts tmp init
+CLASS org.apache.cassandra.utils.LongTimSort
+METHOD <init>
+AFTER WRITE tmp
+IF true
+DO traceOpen("lts", java.lang.System.getProperty("stage4.trace", "lts.trace"));
+   traceln("lts", "TMP_INIT ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName() + " alen=" + $0.a.length + " tmplen=" + $0.tmp.length)
+ENDRULE
+
+RULE lts tmp grow
+CLASS org.apache.cassandra.utils.LongTimSort
+METHOD ensureCapacity
+AFTER WRITE tmp
+IF true
+DO traceOpen("lts", java.lang.System.getProperty("stage4.trace", "lts.trace"));
+   traceln("lts", "TMP_GROW ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName() + " alen=" + $0.a.length + " tmplen=" + $0.tmp.length)
+ENDRULE

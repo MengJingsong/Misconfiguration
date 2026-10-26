@@ -1,0 +1,29 @@
+# Byteman observation rules for initial-buffer-capacity-ensurecapacity-datalengthinbytes--autonomous, cluster tier (B3d as amended 2026-10-26).
+# They change no behaviour. One line per call of ByteSourceInverse.readBytes(ByteSource, int) (format in Ec.java); the one-argument
+# readBytes and getUnescapedBytes both end in it, and ensureCapacity is called only from it.
+# (A rule on ensureCapacity itself perturbs the measurement: see Ec.java.) stage4.Ec is on the boot class path.
+
+RULE rb entry
+CLASS org.apache.cassandra.utils.bytecomparable.ByteSourceInverse
+METHOD readBytes(org.apache.cassandra.utils.bytecomparable.ByteSource, int)
+AT ENTRY
+IF TRUE
+DO stage4.Ec.start()
+ENDRULE
+
+RULE rb exit
+CLASS org.apache.cassandra.utils.bytecomparable.ByteSourceInverse
+METHOD readBytes(org.apache.cassandra.utils.bytecomparable.ByteSource, int)
+AT EXIT
+IF TRUE
+DO stage4.Ec.end($!.length, false)
+ENDRULE
+
+RULE rb exception exit
+CLASS org.apache.cassandra.utils.bytecomparable.ByteSourceInverse
+METHOD readBytes(org.apache.cassandra.utils.bytecomparable.ByteSource, int)
+AT EXCEPTION EXIT
+IF TRUE
+DO stage4.Ec.end(-1, true)
+ENDRULE
+

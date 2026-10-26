@@ -1,0 +1,15 @@
+cluster-run m1024c 2026-10-26 08:55:43 MDT host node1 tree /users/jason92/s4-b7-mr cassandra-5.0.9 MR_BIG_N=20000
+tree MAX_REGION_SIZE line: MAX_REGION_SIZE = 1 * 1024 * 1024
+# ---- stage4 mr lines ----;cluster_name: stage4-mr;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b7-mr/commitlog;hints_directory: /dev/shm/s4-b7-mr/hints;saved_caches_directory: /dev/shm/s4-b7-mr/saved_caches;cdc_raw_directory: /dev/shm/s4-b7-mr/cdc_raw;memtable_allocation_type: offheap_objects;memtable_offheap_space: 64MiB;memtable_heap_space: 256MiB;memtable_flush_writers: 1;memtable_cleanup_threshold: 0.99;commitlog_total_space: 4096MiB;file_cache_size: 64MiB;key_cache_size: 0MiB;row_cache_size: 0MiB;concurrent_compactors: 1;compaction_throughput: 16MiB/s;write_request_timeout: 30000ms;native_transport_timeout: 60000ms;
+node up after 61 s, pid 1404908
+EXPECTED settings read-back equals the yaml: yes
+EXPECTED JVM flags -Xmx1G, AlwaysPreTouch, NativeMemoryTracking=summary, MaxDirectMemorySize=256m: yes
+node JVM class path (cassandra jar and class dirs): /users/jason92/s4-b7-mr/bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar
+EXPECTED the node runs from this arm's tree jar (/users/jason92/s4-b7-mr/build/): yes
+baseline gauges: {"off": "2524", "on": "13136", "blocked": "0", "pending": "0"}
+baseline RssAnon 1619095552 VmRSS 1803251712 NMT Other 100628480 total 1583919104
+EXPECTED first-trigger check: the tracked off-heap gauge reaches >= 1 MiB within 90 s of the workload start: yes
+workload exit 0 after 14 s
+gauges after flush: {"off": "0", "on": "0", "blocked": "2133", "pending": "0"}
+EXPECTED nothing of this harness left running: yes
+cluster-run m1024c end 2026-10-26 08:58:04 MDT

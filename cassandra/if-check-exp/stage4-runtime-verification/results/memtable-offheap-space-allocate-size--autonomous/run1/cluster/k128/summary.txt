@@ -1,0 +1,12 @@
+cluster-run k128 2026-10-26 09:53:32 EDT host node0 tree /users/jason92/s4-b7-mo cassandra-5.0.9 MO_N=3000000 MO_BIG_N=3000
+# ---- stage4 mo lines ----;cluster_name: stage4-mo;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.3.1;rpc_address: 127.0.3.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b7-mo/commitlog;hints_directory: /dev/shm/s4-b7-mo/hints;saved_caches_directory: /dev/shm/s4-b7-mo/saved_caches;cdc_raw_directory: /dev/shm/s4-b7-mo/cdc_raw;memtable_allocation_type: offheap_objects;memtable_offheap_space: 128MiB;memtable_heap_space: 1024MiB;memtable_flush_writers: 1;memtable_cleanup_threshold: 0.99;commitlog_total_space: 4096MiB;file_cache_size: 64MiB;key_cache_size: 0MiB;row_cache_size: 0MiB;concurrent_compactors: 1;compaction_throughput: 16MiB/s;write_request_timeout: 30000ms;native_transport_timeout: 60000ms;
+node up after 61 s, pid 2493324
+EXPECTED settings read-back equals the yaml: yes
+EXPECTED JVM flags -Xmx2G, AlwaysPreTouch, NativeMemoryTracking=summary, MaxDirectMemorySize=256m: yes
+baseline gauges: {"off": "772", "on": "4688", "blocked": "0", "pending": "0"}
+baseline RssAnon 2758873088 VmRSS 2942984192 NMT Other 100564992 total 2708927488
+EXPECTED first-trigger check: the tracked off-heap gauge reaches >= 1 MiB within 90 s of the workload start: yes
+workload exit 0 after 43 s
+gauges after flush: {"off": "0", "on": "0", "blocked": "2400", "pending": "0"}
+EXPECTED nothing of this harness left running: yes
+cluster-run k128 end 2026-10-26 09:56:22 EDT

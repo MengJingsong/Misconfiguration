@@ -1,0 +1,332 @@
+== unit tier
+SC unit x128 check lines all ok: holds 84 checks
+SC unit x1g check lines all ok: holds 88 checks
+SC unit x4g check lines all ok: holds 2 checks
+SC unit: median allocation = closed-form sum for every (heap, N, initial) point; result length N; no exception: holds 52 points; deviations []
+SC unit: ratio 2.0 for powers of two, about 3.0 for 65535: holds {1000: 3.128, 65535: 3.003, 1048576: 2.0, 16777216: 2.0, 67108864: 2.0}
+SC unit: allocation equal at -Xmx128m and -Xmx1g: holds 25 points
+SC unit: N = 1<<30 returns 1<<30 bytes; N = (1<<30)+1 throws NegativeArraySizeException: holds {1073741824: ('1073741824', 'null'), 1073741825: ('-1', 'java.lang.NegativeArraySizeException')}
+SC unit: positive control copyBytes throws exactly when N > M: holds 24 control checks
+== cluster tier
+SC k16: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1012 calls, exc 0, under 0
+SC k16: SegmentMetadata.write decoded keys of about K bytes (K=16): max_len in [K, 1.02K+64]: holds n=6 max_len=18
+SC k16: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 0.000 max 0
+SC k16: no write failed, no ERROR line, all 20000 rows acknowledged: holds errs 0 ERROR lines 0 ok 20000
+SC k16: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 2.12}
+SC k1k: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1012 calls, exc 0, under 0
+SC k1k: SegmentMetadata.write decoded keys of about K bytes (K=1024): max_len in [K, 1.02K+64]: holds n=6 max_len=1031
+SC k1k: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 4.016 max 4128
+SC k1k: no write failed, no ERROR line, all 20000 rows acknowledged: holds errs 0 ERROR lines 0 ok 20000
+SC k1k: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 2.37}
+SC k32k: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1012 calls, exc 0, under 0
+SC k32k: SegmentMetadata.write decoded keys of about K bytes (K=32768): max_len in [K, 1.02K+64]: holds n=6 max_len=32892
+SC k32k: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 3.989 max 131184
+SC k32k: no write failed, no ERROR line, all 2000 rows acknowledged: holds errs 0 ERROR lines 0 ok 2000
+SC k32k: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 4.94}
+SC k64k: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1012 calls, exc 0, under 0
+SC k64k: SegmentMetadata.write decoded keys of about K bytes (K=65535): max_len in [K, 1.02K+64]: holds n=6 max_len=65810
+SC k64k: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 3.986 max 262272
+SC k64k: no write failed, no ERROR line, all 2000 rows acknowledged: holds errs 0 ERROR lines 0 ok 2000
+SC k64k: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 7.98}
+SC k16m: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1012 calls, exc 0, under 0
+SC k16m: SegmentMetadata.write decoded keys of about K bytes (K=16): max_len in [K, 1.02K+64]: holds n=6 max_len=18
+SC k16m: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 0.000 max 0
+SC k16m: no write failed, no ERROR line, all 20000 rows acknowledged: holds errs 0 ERROR lines 0 ok 20000
+SC k16m: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 2.39}
+SC k64km: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1028 calls, exc 0, under 0
+SC k64km: SegmentMetadata.write decoded keys of about K bytes (K=65535): max_len in [K, 1.02K+64]: holds n=10 max_len=65780
+SC k64km: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 3.987 max 262272
+SC k64km: no write failed, no ERROR line, all 2000 rows acknowledged: holds errs 0 ERROR lines 0 ok 2000
+SC k64km: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 8.59}
+SC k16n: no ec.trace file = zero readBytes calls; the Byteman agent and the boot-class-path helper were on the JVM command line: holds 
+SC k16n: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 0 calls, exc 0, under 0
+SC k16n: no SAI index, so no readBytes call from SegmentMetadata.write: holds callers {}
+SC k16n: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 0.000 max 0
+SC k16n: no write failed, no ERROR line, all 20000 rows acknowledged: holds errs 0 ERROR lines 0 ok 20000
+SC k16n: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 2.11}
+SC k64kn: no ec.trace file = zero readBytes calls; the Byteman agent and the boot-class-path helper were on the JVM command line: holds 
+SC k64kn: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 0 calls, exc 0, under 0
+SC k64kn: no SAI index, so no readBytes call from SegmentMetadata.write: holds callers {}
+SC k64kn: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 0.000 max 0
+SC k64kn: no write failed, no ERROR line, all 2000 rows acknowledged: holds errs 0 ERROR lines 0 ok 2000
+SC k64kn: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 49.56}
+SC ctl: no readBytes call threw; every call allocated at least the closed-form sum for its length: holds 1012 calls, exc 0, under 0
+SC ctl: SegmentMetadata.write decoded keys of about K bytes (K=1024): max_len in [K, 1.02K+64]: holds n=6 max_len=1031
+SC ctl: closed-form ensureCapacity allocation per call <= 4.1 x len for len >= 1000, and <= 4 x 65535 B plus the 16-byte array headers (12 arrays: +192 B; the run script literal bound without headers is missed by 132 B): holds worst 4.016 max 4128
+SC ctl: no write failed, no ERROR line, all 2000 rows acknowledged: holds errs 0 ERROR lines 0 ok 2000
+SC ctl: all 1000 queries answered: holds {'queries': 1000, 'ok': 1000, 'err': 0, 'rows_returned': 1000, 'seconds': 2.86}
+SC ctl: the twenty 4 KiB-v inserts were all rejected at fail threshold 1 KiB: holds {'ok': 0, 'err': 20, 'errors': {'InvalidRequest': 20}, 'first_error': 'Error from server: code=2200 [Invalid query] message="Guardrail sai_string_term_size violated: Value of column \'v\' has size 4096, this exceeds the failure threshold of 1024."', 'seconds': 0.229, 'n': 20, 'vlen': 4096}
+{
+ "k16": {
+  "K": 16,
+  "rows": 20000,
+  "n_sm": 6,
+  "sm_maxlen": 18,
+  "n_pk": 1006,
+  "pk_maxlen": 16,
+  "maxlen": 18,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 0,
+  "grow_max": 0,
+  "bytes_max": 43880,
+  "histo_delta": 14408792,
+  "data": 43026857,
+  "jfr_share": 0.0,
+  "jfr_events": 6949,
+  "load_errs": 0,
+  "load_ok": 20000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 6,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1006
+  },
+  "big": null
+ },
+ "k1k": {
+  "K": 1024,
+  "rows": 20000,
+  "n_sm": 6,
+  "sm_maxlen": 1031,
+  "n_pk": 1006,
+  "pk_maxlen": 1024,
+  "maxlen": 1031,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 4.01556420233463,
+  "grow_max": 4128,
+  "bytes_max": 49032,
+  "histo_delta": 29151352,
+  "data": 88809229,
+  "jfr_share": 0.0002471745101196315,
+  "jfr_events": 7168,
+  "load_errs": 0,
+  "load_ok": 20000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 6,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1006
+  },
+  "big": null
+ },
+ "k32k": {
+  "K": 32768,
+  "rows": 2000,
+  "n_sm": 6,
+  "sm_maxlen": 32892,
+  "n_pk": 1006,
+  "pk_maxlen": 32768,
+  "maxlen": 32892,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 3.9890530925013685,
+  "grow_max": 131184,
+  "bytes_max": 208544,
+  "histo_delta": 14037480,
+  "data": 202237758,
+  "jfr_share": 0.018188405786224618,
+  "jfr_events": 21451,
+  "load_errs": 0,
+  "load_ok": 2000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 6,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1006
+  },
+  "big": null
+ },
+ "k64k": {
+  "K": 65535,
+  "rows": 2000,
+  "n_sm": 6,
+  "sm_maxlen": 65810,
+  "n_pk": 1006,
+  "pk_maxlen": 65535,
+  "maxlen": 65810,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 3.9857755083432114,
+  "grow_max": 262272,
+  "bytes_max": 372552,
+  "histo_delta": 9810024,
+  "data": 400125424,
+  "jfr_share": 0.035443106278165756,
+  "jfr_events": 24210,
+  "load_errs": 0,
+  "load_ok": 2000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 6,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1006
+  },
+  "big": null
+ },
+ "k16m": {
+  "K": 16,
+  "rows": 20000,
+  "n_sm": 6,
+  "sm_maxlen": 18,
+  "n_pk": 1006,
+  "pk_maxlen": 16,
+  "maxlen": 18,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 0,
+  "grow_max": 0,
+  "bytes_max": 43880,
+  "histo_delta": 14537360,
+  "data": 43024094,
+  "jfr_share": 0.0,
+  "jfr_events": 9356,
+  "load_errs": 0,
+  "load_ok": 20000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 6,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1006
+  },
+  "big": null
+ },
+ "k64km": {
+  "K": 65535,
+  "rows": 2000,
+  "n_sm": 10,
+  "sm_maxlen": 65780,
+  "n_pk": 1018,
+  "pk_maxlen": 65535,
+  "maxlen": 65780,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 3.987351009486743,
+  "grow_max": 262272,
+  "bytes_max": 370080,
+  "histo_delta": 7153576,
+  "data": 400069294,
+  "jfr_share": 0.047303702042708534,
+  "jfr_events": 41900,
+  "load_errs": 0,
+  "load_ok": 2000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 10,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1018
+  },
+  "big": null
+ },
+ "k16n": {
+  "K": 16,
+  "rows": 20000,
+  "n_sm": 0,
+  "sm_maxlen": 0,
+  "n_pk": 0,
+  "pk_maxlen": 0,
+  "maxlen": 0,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 0,
+  "grow_max": 0,
+  "bytes_max": 0,
+  "histo_delta": 10119896,
+  "data": 1199583,
+  "jfr_share": 0.0,
+  "jfr_events": 1402,
+  "load_errs": 0,
+  "load_ok": 20000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {},
+  "big": null
+ },
+ "k64kn": {
+  "K": 65535,
+  "rows": 2000,
+  "n_sm": 0,
+  "sm_maxlen": 0,
+  "n_pk": 0,
+  "pk_maxlen": 0,
+  "maxlen": 0,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 0,
+  "grow_max": 0,
+  "bytes_max": 0,
+  "histo_delta": 1907024,
+  "data": 264211719,
+  "jfr_share": 0.0,
+  "jfr_events": 20663,
+  "load_errs": 0,
+  "load_ok": 2000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {},
+  "big": null
+ },
+ "ctl": {
+  "K": 1024,
+  "rows": 2000,
+  "n_sm": 6,
+  "sm_maxlen": 1031,
+  "n_pk": 1006,
+  "pk_maxlen": 1024,
+  "maxlen": 1031,
+  "exc": 0,
+  "under": 0,
+  "worst_grow_per_len": 4.01556420233463,
+  "grow_max": 4128,
+  "bytes_max": 49032,
+  "histo_delta": 21215336,
+  "data": 8992208,
+  "jfr_share": 0.002347897719577443,
+  "jfr_events": 2554,
+  "load_errs": 0,
+  "load_ok": 2000,
+  "log_errors": 0,
+  "q_ok": 1000,
+  "q_err": 0,
+  "other": {
+   "SegmentMetadata.write": 6,
+   "PrimaryKey$Factory.partitionKeyFromComparableBytes": 1006
+  },
+  "big": {
+   "ok": 0,
+   "err": 20,
+   "errors": {
+    "InvalidRequest": 20
+   },
+   "first_error": "Error from server: code=2200 [Invalid query] message=\"Guardrail sai_string_term_size violated: Value of column 'v' has size 4096, this exceeds the failure threshold of 1024.\"",
+   "seconds": 0.229,
+   "n": 20,
+   "vlen": 4096
+  }
+ }
+}
+== cross-arm
+SC retained live heap, K=65535 minus K=16 at 1g, under 16 MiB: holds k16=14408792 k64k=9810024 diff=-4598768
+   data dir bytes / raw input bytes (1g): K=16 2.117  K=65535 3.007
+SC retained live heap, K=65535 minus K=16 at 512m, under 16 MiB: holds k16m=14537360 k64km=7153576 diff=-7383784
+   data dir bytes / raw input bytes (512m): K=16 2.117  K=65535 3.006
+SC k16: JFR allocation weight under ensureCapacity below 1 percent: holds share 0.00000 of 6949 events
+SC k1k: JFR allocation weight under ensureCapacity below 1 percent: holds share 0.00025 of 7168 events
+SC k32k: JFR allocation weight under ensureCapacity below 1 percent: DOES NOT HOLD share 0.01819 of 21451 events
+SC k64k: JFR allocation weight under ensureCapacity below 1 percent: DOES NOT HOLD share 0.03544 of 24210 events
+SC k16m: JFR allocation weight under ensureCapacity below 1 percent: holds share 0.00000 of 9356 events
+SC k64km: JFR allocation weight under ensureCapacity below 1 percent: DOES NOT HOLD share 0.04730 of 41900 events
+SC k16n: JFR allocation weight under ensureCapacity below 1 percent: holds share 0.00000 of 1402 events
+SC k64kn: JFR allocation weight under ensureCapacity below 1 percent: holds share 0.00000 of 20663 events
+SC ctl: JFR allocation weight under ensureCapacity below 1 percent: holds share 0.00235 of 2554 events
+SC decode size follows K across the four key sizes (max_len within [K, 1.02K+64]): holds [(16, 18), (1024, 1031), (32768, 32892), (65535, 65810)]
+SELF-CHECK RESULT: 3 part(s) DO NOT HOLD

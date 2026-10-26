@@ -1,0 +1,21 @@
+tree /users/jason92/s4-b7-mr: git diff --stat vs cassandra-5.0.9:
+  classes:   private static final int MAX_REGION_SIZE = 1048576;
+  jar apache-cassandra-5.0.9-SNAPSHOT.jar:   private static final int MAX_REGION_SIZE = 1048576;
+tree /users/jason92/s4-b7-mr-m256: git diff --stat vs cassandra-5.0.9:
+ src/java/org/apache/cassandra/utils/memory/NativeAllocator.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  classes:   private static final int MAX_REGION_SIZE = 262144;
+  jar apache-cassandra-5.0.9-SNAPSHOT.jar:   private static final int MAX_REGION_SIZE = 262144;
+tree /users/jason92/s4-b7-mr-m4096: git diff --stat vs cassandra-5.0.9:
+ src/java/org/apache/cassandra/utils/memory/NativeAllocator.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+  classes:   private static final int MAX_REGION_SIZE = 4194304;
+  jar apache-cassandra-5.0.9-SNAPSHOT.jar:   private static final int MAX_REGION_SIZE = 4194304;
+----
+unit-run instrument-1 instrument 2026-10-26T08:23:49-06:00 host node1 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 160891392ae8adbaac300140fbc0d6c3
+tree stock /users/jason92/s4-b7-mr cassandra-5.0.9 MAX_REGION_SIZE = 1 * 1024 * 1024
+tree m256 /users/jason92/s4-b7-mr-m256 cassandra-5.0.9 MAX_REGION_SIZE = 256 * 1024
+tree m4096 /users/jason92/s4-b7-mr-m4096 cassandra-5.0.9 MAX_REGION_SIZE = 4096 * 1024
+fill-stock-1024-1024 exit=0 checks=10 ok=10 MISMATCH=0 done=1
+EXPECTED instrument known answer (2088960 in 8 regions, max 1048576, used 1048576): ok

@@ -1,0 +1,10 @@
+== run r1: S=700 MiB, D=20, level=DEBUG, 2026-10-26T14:02:48Z
+EXPECTED: node 1 RepairSessionSpaceInMiB=700 and RepairSessionMaxTreeDepth=20 read back -- yes
+EXPECTED: node 2 RepairSessionSpaceInMiB=700 and RepairSessionMaxTreeDepth=20 read back -- yes
+log level org.apache.cassandra: DEBUG
+repair rc=0 wall_ms=10741 t0_ms=1793023387158; completed: yes; [2026-10-26 14:03:17,570] Repair completed successfully
+node 1 debug.log window: 12 relevant lines; Created-lines: ['Created 1 merkle trees with merkle trees size 1, 1000064 partitions, 92 bytes']; "Partitions per leaf" lines: 1
+node 1 JFR: HistogramBuilder.add outside-TLAB sizes (distinct): ['10256', '20496', '40976', '81936', '163856', '327696', '655376', '1310736', '2621456', '5242896', '10485776']; total outside-TLAB events ['468']
+node 2 debug.log window: 11 relevant lines; Created-lines: ['Created 1 merkle trees with merkle trees size 1, 1000064 partitions, 92 bytes']; "Partitions per leaf" lines: 1
+node 2 JFR: HistogramBuilder.add outside-TLAB sizes (distinct): ['2576', '5136', '20496', '40976', '81936', '163856', '327696', '655376', '1310736', '2621456', '5242896', '10485776']; total outside-TLAB events ['290']
+EXPECTED: first trigger (r1, DEBUG): JFR shows HistogramBuilder.add arrays -- yes; debug.log has a Created-merkle-trees line -- yes

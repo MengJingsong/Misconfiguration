@@ -1,0 +1,10 @@
+cluster-run yaml10k 2026-10-26 09:06:47 MDT host node1 tree /users/jason92/s4-b7-ck-n cassandra-5.0.9 write_n=2000000 read_n=500000
+# ---- stage4 ck lines ----;cluster_name: stage4-ck;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.5.1;rpc_address: 127.0.5.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b7-ck/commitlog;hints_directory: /dev/shm/s4-b7-ck/hints;saved_caches_directory: /dev/shm/s4-b7-ck/saved_caches;cdc_raw_directory: /dev/shm/s4-b7-ck/cdc_raw;key_cache_size: 200MiB;key_cache_save_period: 60s;row_cache_size: 0MiB;counter_cache_size: 0MiB;commitlog_total_space: 4096MiB;auto_snapshot: false;concurrent_compactors: 2;key_cac
+node up after 16 s, pid 1431503
+JVM heap flags: -Xmx2G
+EXPECTED yaml key_cache_keys_to_save: 10000 read back through JMX at startup: 10000
+read pass 1: entries 20 -> 480684 size 42300176 capacity 209715200 errors 0 13.2s
+read pass 2: entries 480684 -> 845926 size 74441472 capacity 209715200 errors 0 11.4s
+periodic save after populate: [{'n': 10000, 'ms': 38, 'line': 'INFO  [CompactionExecutor:1] 2026-10-26T15:07:52,876 AutoSavingCache.java:425 - Saved KeyCache (10000 items) in 38 ms to /dev/shm/s4-b7-ck/saved_caches/KeyCache-g.db : 0 MB'}]; files {'KeyCache-g.crc': 20, 'KeyCache-g.db': 199888, 'KeyCache-g.metadata': 68}
+SAVE manual K=None readback=10000 n_logged=10000 data_file=199888 entries 845926->845926 size 74441472->74441472 heap_peak=1439504064 save_s=0.29
+yaml10k finished; leftover java processes of this harness: []

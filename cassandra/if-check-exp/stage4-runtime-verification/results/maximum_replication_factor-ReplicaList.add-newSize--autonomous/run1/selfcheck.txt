@@ -1,0 +1,23 @@
+HOLDS    unit growth rows: 9 rows
+HOLDS    unit capacity = 3/9/9*2^k: N=1:3, N=2:3, N=3:3, N=4:9, N=9:9, N=10:18, N=100:144, N=10000:18432, N=1000000:1179648
+HOLDS    unit bytes = 16 + 4*cap (compressed oops, 8-aligned): N=10: 88
+HOLDS    N=10000 reallocs 13, cap 18432: {'phase': 'growth', 'thr': '-1', 'init': '0', 'N': '10000', 'size': '10000', 'cap': '18432', 'reallocs': '13', 'bytes': '73744', 'meter': '73744'}
+HOLDS    exact capacity: no reallocation, cap = N: 9 rows
+HOLDS    threshold sweep: one (cap, reallocs, bytes) triple per N across thr -1,1,3: {'10': {('18', '3', '88')}, '1000': {('1152', '9', '4624')}, '1000000': {('1179648', '19', '4718608')}}
+HOLDS    unit controls all ok: 7 control checks
+HOLDS    heap of 10 retained 1M lists within 5 percent of instrument: ratio 0.980
+after-stress Replica[] by phase: {'p1': (-1, 832, 35, 144106712), 'p2': (1, 832, 35, 107936192), 'p3': (3, 832, 35, 159162216), 'p4': (-1, 832, 35, 139506632), 'p5': (1, 832, 35, 112317616), 'p6': (3, 832, 35, 157359904)}
+HOLDS    six stress phases sampled: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6']
+HOLDS    Replica[] bytes < 1 MB at every sample: max 832
+HOLDS    threshold means within 10 percent (or 50 KB): {-1: 832.0, 1: 832.0, 3: 832.0}
+noise (two phases per threshold): {-1: 0, 1: 0, 3: 0}
+HOLDS    P0 ordinary role RF3 rejected at thr 1: above the failure threshold of 1
+HOLDS    DDL control matrix per threshold: 24 rows as expected
+HOLDS    stress stress-p1.txt: errors 0 partitions 1,000,000
+HOLDS    stress stress-p2.txt: errors 0 partitions 1,000,000
+HOLDS    stress stress-p3.txt: errors 0 partitions 1,000,000
+HOLDS    stress stress-p4.txt: errors 0 partitions 1,000,000
+HOLDS    stress stress-p5.txt: errors 0 partitions 1,000,000
+HOLDS    stress stress-p6.txt: errors 0 partitions 1,000,000
+K200: [('before', '35', '832'), ('after', '35', '832')]
+ALL HOLD

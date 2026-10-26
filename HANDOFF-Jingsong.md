@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 36 | 36 |
+| Set A | 159 | 46 | 46 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -188,3 +188,20 @@ before freeze. Upstream/doc candidates (JIRA first): forged 512 MiB header in th
 scrub raises `AssertionError: Buffer holder has not been acquired` on every run of a corrupted compressed sstable (`cs`, not investigated); a SASI LIKE query on 4095-char indexed
 terms returned nothing (`tm`, unexplained). `predicted-negative.md` rows were left in place (siblings still open).
 Next: CSV order 7 (decision), 38 on (`Walker`, `AbstractReplicaCollection`, `HistogramBuilder`, and the rest of the §6 lines).
+
+2026-10-26, batch 7 (CSV rows 38-47, ten cases): **7 true negative, 2 true positive, 1 undetermined**. Stage 3 write-ups: 10 in parallel, ~1.5-3 min each; filed by hand
+(four stems were chosen by the agents; r40's stem came from the agent's file comment). Stage 4 ran as a rolling window of 5 (pc07: tc, st, mo, mc, sr7; pc12: rl, hv, ie, mr, ck;
+tags `s4-b7-<tag>`, port slot per case). Outcome classes: true negative `transition-bytes-collector-add-buffer-length`, `maximum_replication_factor-ReplicaList.add-newSize`,
+`repair-session-space-histogram-add-values`, `sasi-compaction-flush-memory-ensurecapacity-tmp`, `initial-buffer-capacity-ensurecapacity-datalengthinbytes`,
+`max-cloned-size-allocate-size`, `slab-region-size-region-allocate-capacity`; true positive `memtable-offheap-space-allocate-size` (the pool charge at `:141` caps; `MAX_CLONED_SIZE` is a routing
+constant), `cache-keys-to-save-writer-keysToSave` (caps entries written to disk, not memory); **undetermined** `max-region-size-region-allocate-capacity` (unit Confirmed, cluster
+"Not confirmed (no matching row)": the charged gauge followed `memtable_offheap_space` but the frozen RssAnon relation failed on noise; the agent's evidence points to true negative).
+Timing: `stage4-runtime-verification/timing/set-A-batch-7.log` (wall: first launch 13:31Z, last report 16:03Z; `st` ~2.5 h, the longest). Leftovers: `~/s4-b7-{tc,st,mo,mc,sr7}` (+ `-logs`) on pc07, `~/s4-b7-{rl,hv,ie,mr,ck}` (+ `-logs`) on pc12; no process running.
+Open points for you to overrule: (1) `mr` cluster tier undetermined, a rerun with the charged gauge primary and an RssAnon tolerance of at least 40 MiB would likely give true negative; (2) `ie` B3f
+JFR-share figure missed at K >= 32 KiB (kept Confirmed); (3) `mc` B1/B2g waste text says 12.3% but readings show 12.6% (the exact region formula held; literal row is "Not confirmed");
+(4) `mo` pre-registered RssAnon relations failed for the 1 KiB cluster arms and hold only after subtracting the heap_buffers control (post-hoc); (5) `hv` frozen B3f sentence "2^20 leaves in debug.log" cannot be
+checked (the log line is written before `init()`), TN vs FN depends on reading "indirect"; (6) `tc` "never exercised" holds only for the tested workload (repair/streaming not run); `ck` heap peak of `hottest(n)` not isolated.
+Many audits found write-up errors (wrong Lucene growth arithmetic, NMT cannot see JNA malloc, guardrails skipped for superusers, `nodetool getcachekeystosave` does not exist, region constants).
+Upstream/doc candidates (JIRA first): see `HANDOFF.md` follow-ups (int overflow in `ValidationManager`, mis-named memtable gauges, `setcachekeystosave` doc, `Guardrail.fail` with null state only logs).
+`predicted-negative.md`: the three rows for `NativeAllocator:273`, `SlabAllocator:201` and `:144/:92` were removed; multi-line rows (`Walker`, `AbstractReplicaCollection`, `HistogramBuilder`, `ByteSourceInverse`, `AutoSavingCache`, ...) stay (siblings still open). An untracked `stage4-runtime-verification/cassandra.logdir_IS_UNDEFINED/` (two logs, 09:48 Oct 26) is not from this batch and was not committed.
+Next: CSV order 7 (decision), 48 on (`AutoSavingCache.java:388`, `DatabaseDescriptor.java:726/:741`, ...).

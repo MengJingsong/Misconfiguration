@@ -1,0 +1,54 @@
+# Byteman rules, cluster tier of transition-bytes-collector-add-buffer-length--autonomous (audit R5). Observation only.
+# Loaded at node start: -javaagent:<byteman jar>=script:<this file>,listener:true,port:<p>,address:<a> -Dstage4.trace=<file>
+# COLL lines: construction / add() of Walker$TransitionBytesCollector (the object under test); written for the first 20 events and
+#   every 1000th (n = running count), so the last line gives the count to within 1000. Expected: none.
+# LIVE lines: liveness of the instrument, same sampling: Walker (any subclass), ValueIterator, TrieTermsDictionaryReader constructions.
+RULE tc COLL ctor
+CLASS org.apache.cassandra.io.tries.Walker$TransitionBytesCollector
+METHOD <init>
+AT EXIT
+BIND n = incrementCounter("coll_ctor")
+IF n <= 20 || n % 1000 == 0
+DO traceOpen("tc", java.lang.System.getProperty("stage4.trace", "tc.trace"));
+   traceln("tc", "COLL ctor n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE tc COLL add
+CLASS org.apache.cassandra.io.tries.Walker$TransitionBytesCollector
+METHOD add
+AT ENTRY
+BIND n = incrementCounter("coll_add")
+IF n <= 20 || n % 1000 == 0
+DO traceOpen("tc", java.lang.System.getProperty("stage4.trace", "tc.trace"));
+   traceln("tc", "COLL add n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " thr=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE tc LIVE walker
+CLASS org.apache.cassandra.io.tries.Walker
+METHOD <init>
+AT EXIT
+BIND n = incrementCounter("walker_init")
+IF n <= 5 || n % 1000 == 0
+DO traceOpen("tc", java.lang.System.getProperty("stage4.trace", "tc.trace"));
+   traceln("tc", "LIVE walker n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " cls=" + $0.getClass().getName())
+ENDRULE
+
+RULE tc LIVE valueiterator
+CLASS org.apache.cassandra.io.tries.ValueIterator
+METHOD <init>
+AT EXIT
+BIND n = incrementCounter("vi_init")
+IF n <= 5 || n % 1000 == 0
+DO traceOpen("tc", java.lang.System.getProperty("stage4.trace", "tc.trace"));
+   traceln("tc", "LIVE valueiterator n=" + n + " ms=" + java.lang.System.currentTimeMillis() + " cls=" + $0.getClass().getName())
+ENDRULE
+
+RULE tc LIVE sai reader
+CLASS org.apache.cassandra.index.sai.disk.v1.trie.TrieTermsDictionaryReader
+METHOD <init>
+AT EXIT
+BIND n = incrementCounter("sai_reader_init")
+IF n <= 5 || n % 1000 == 0
+DO traceOpen("tc", java.lang.System.getProperty("stage4.trace", "tc.trace"));
+   traceln("tc", "LIVE saireader n=" + n + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

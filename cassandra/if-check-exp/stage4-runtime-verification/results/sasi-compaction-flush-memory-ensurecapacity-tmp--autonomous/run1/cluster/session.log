@@ -1,0 +1,447 @@
+[2026-10-26T14:21:28.485Z] run rows 200000 heap 8g arms ['c2:CONTAINS:2:200', 'c8:CONTAINS:8:200', 'c32:CONTAINS:32:200', 'p8:PREFIX:8:200', 'p32:PREFIX:32:200', 'c8s:CONTAINS:8:50', 'none:NONE:def:200', 'cdef:CONTAINS:def:200'] host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu
+[2026-10-26T14:21:28.485Z] + ss -ltn | grep -q ":7120 "
+[2026-10-26T14:21:28.495Z] + ss -ltn | grep -q "127.0.2.1:9042 "
+[2026-10-26T14:21:28.504Z] + ss -ltn | grep -q "127.0.2.1:7000 "
+[2026-10-26T14:21:28.512Z] + ss -ltn | grep -q "127.0.2.1:7001 "
+[2026-10-26T14:21:28.521Z] + mkdir -p /dev/shm/s4-b7-st-data/main/sampler && javac -d /dev/shm/s4-b7-st-data/main/sampler /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/PoolSampler.java
+[2026-10-26T14:21:29.285Z] start node ulimit -n 100000; exec /users/jason92/s4-b7-st/bin/cassandra -f -p /dev/shm/s4-b7-st-data/main/pid
+[2026-10-26T14:21:29.286Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+nodetool: Failed to connect to '127.0.0.1:7120' - ConnectException: 'Connection refused (Connection refused)'.
+
+[2026-10-26T14:21:33.334Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-10-26T14:21:37.713Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:21:41.777Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:21:45.977Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:21:50.161Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:21:54.259Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:21:58.333Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:22:02.458Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+not running
+
+[2026-10-26T14:22:06.544Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 statusbinary
+running
+
+[2026-10-26T14:22:07.734Z] node up
+[2026-10-26T14:22:15.741Z] === arm c2:CONTAINS:2:200
+[2026-10-26T14:22:15.741Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_c2 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_c2 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T14:22:16.461Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_c2.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_c2.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T14:22:17.110Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_c2 t
+[2026-10-26T14:22:18.184Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_c2.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'2'}"
+CQL CREATE CUSTOM INDEX t_v ON k_c2.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'2'}
+
+[2026-10-26T14:22:18.817Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 0 25000 200
+loaded rows 0..24999 (L=200) in 56.5 s
+
+[2026-10-26T14:23:15.782Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:23:18.034Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 25000 25000 200
+loaded rows 25000..49999 (L=200) in 56.6 s
+
+[2026-10-26T14:24:15.100Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:24:17.505Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 50000 25000 200
+loaded rows 50000..74999 (L=200) in 60.1 s
+
+[2026-10-26T14:25:18.138Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:25:20.571Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 75000 25000 200
+loaded rows 75000..99999 (L=200) in 61.8 s
+
+[2026-10-26T14:26:22.853Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:26:25.227Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 100000 25000 200
+loaded rows 100000..124999 (L=200) in 62.5 s
+
+[2026-10-26T14:27:28.191Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:27:30.582Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 125000 25000 200
+loaded rows 125000..149999 (L=200) in 59.0 s
+
+[2026-10-26T14:28:30.034Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:28:32.398Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 150000 25000 200
+loaded rows 150000..174999 (L=200) in 57.4 s
+
+[2026-10-26T14:29:30.219Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:29:32.507Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c2 175000 25000 200
+loaded rows 175000..199999 (L=200) in 58.0 s
+
+[2026-10-26T14:30:30.896Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c2 t
+[2026-10-26T14:30:38.125Z] + jcmd 2539460 GC.run
+[2026-10-26T14:30:41.956Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_c2 t
+[2026-10-26T14:34:46.279Z] + tail -c +382568 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-c2.txt
+[2026-10-26T14:34:46.668Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T14:34:46.672Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_c2"
+CQL DROP KEYSPACE k_c2
+
+[2026-10-26T14:34:53.112Z] === arm c8:CONTAINS:8:200
+[2026-10-26T14:34:53.112Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_c8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_c8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T14:34:53.613Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_c8.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_c8.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T14:34:54.176Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_c8 t
+[2026-10-26T14:34:55.209Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_c8.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'8'}"
+CQL CREATE CUSTOM INDEX t_v ON k_c8.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'8'}
+
+[2026-10-26T14:34:55.749Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 0 25000 200
+loaded rows 0..24999 (L=200) in 58.5 s
+
+[2026-10-26T14:35:54.729Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:35:57.149Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 25000 25000 200
+loaded rows 25000..49999 (L=200) in 57.8 s
+
+[2026-10-26T14:36:55.379Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:36:57.690Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 50000 25000 200
+loaded rows 50000..74999 (L=200) in 58.2 s
+
+[2026-10-26T14:37:56.272Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:37:58.567Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 75000 25000 200
+loaded rows 75000..99999 (L=200) in 57.5 s
+
+[2026-10-26T14:38:56.521Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:38:58.797Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 100000 25000 200
+loaded rows 100000..124999 (L=200) in 58.0 s
+
+[2026-10-26T14:39:57.255Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:39:59.623Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 125000 25000 200
+loaded rows 125000..149999 (L=200) in 57.6 s
+
+[2026-10-26T14:40:57.677Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:40:59.990Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 150000 25000 200
+loaded rows 150000..174999 (L=200) in 58.7 s
+
+[2026-10-26T14:41:59.112Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:42:01.386Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8 175000 25000 200
+loaded rows 175000..199999 (L=200) in 58.8 s
+
+[2026-10-26T14:43:00.560Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8 t
+[2026-10-26T14:43:07.877Z] + jcmd 2539460 GC.run
+[2026-10-26T14:43:11.581Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_c8 t
+[2026-10-26T14:47:38.106Z] + tail -c +766811 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-c8.txt
+[2026-10-26T14:47:38.521Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T14:47:38.525Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_c8"
+CQL DROP KEYSPACE k_c8
+
+[2026-10-26T14:47:44.906Z] === arm c32:CONTAINS:32:200
+[2026-10-26T14:47:44.906Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_c32 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_c32 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T14:47:45.422Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_c32.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_c32.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T14:47:45.945Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_c32 t
+[2026-10-26T14:47:47.076Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_c32.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'32'}"
+CQL CREATE CUSTOM INDEX t_v ON k_c32.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'32'}
+
+[2026-10-26T14:47:47.601Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 0 25000 200
+loaded rows 0..24999 (L=200) in 57.6 s
+
+[2026-10-26T14:48:45.590Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:48:47.955Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 25000 25000 200
+loaded rows 25000..49999 (L=200) in 58.3 s
+
+[2026-10-26T14:49:46.657Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:49:48.997Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 50000 25000 200
+loaded rows 50000..74999 (L=200) in 57.4 s
+
+[2026-10-26T14:50:46.805Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:50:49.122Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 75000 25000 200
+loaded rows 75000..99999 (L=200) in 57.3 s
+
+[2026-10-26T14:51:46.823Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:51:49.250Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 100000 25000 200
+loaded rows 100000..124999 (L=200) in 58.0 s
+
+[2026-10-26T14:52:47.721Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:52:50.014Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 125000 25000 200
+loaded rows 125000..149999 (L=200) in 57.9 s
+
+[2026-10-26T14:53:48.315Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:53:50.601Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 150000 25000 200
+loaded rows 150000..174999 (L=200) in 58.2 s
+
+[2026-10-26T14:54:49.263Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:54:51.555Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c32 175000 25000 200
+loaded rows 175000..199999 (L=200) in 58.8 s
+
+[2026-10-26T14:55:50.791Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c32 t
+[2026-10-26T14:55:58.093Z] + jcmd 2539460 GC.run
+[2026-10-26T14:56:01.834Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_c32 t
+[2026-10-26T15:02:15.765Z] + tail -c +1143026 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-c32.txt
+[2026-10-26T15:02:16.162Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T15:02:16.165Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_c32"
+CQL DROP KEYSPACE k_c32
+
+[2026-10-26T15:02:22.553Z] === arm p8:PREFIX:8:200
+[2026-10-26T15:02:22.553Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_p8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_p8 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T15:02:23.058Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_p8.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_p8.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T15:02:23.598Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_p8 t
+[2026-10-26T15:02:24.675Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_p8.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'PREFIX','max_compaction_flush_memory_in_mb':'8'}"
+CQL CREATE CUSTOM INDEX t_v ON k_p8.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'PREFIX','max_compaction_flush_memory_in_mb':'8'}
+
+[2026-10-26T15:02:25.198Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 0 25000 200
+loaded rows 0..24999 (L=200) in 4.6 s
+
+[2026-10-26T15:02:30.187Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:02:31.508Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 25000 25000 200
+loaded rows 25000..49999 (L=200) in 4.5 s
+
+[2026-10-26T15:02:36.432Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:02:37.712Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 50000 25000 200
+loaded rows 50000..74999 (L=200) in 4.7 s
+
+[2026-10-26T15:02:42.798Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:02:44.157Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 75000 25000 200
+loaded rows 75000..99999 (L=200) in 4.7 s
+
+[2026-10-26T15:02:49.296Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:02:50.506Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 100000 25000 200
+loaded rows 100000..124999 (L=200) in 4.5 s
+
+[2026-10-26T15:02:55.396Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:02:56.697Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 125000 25000 200
+loaded rows 125000..149999 (L=200) in 4.6 s
+
+[2026-10-26T15:03:01.733Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:03:02.002Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 150000 25000 200
+loaded rows 150000..174999 (L=200) in 4.7 s
+
+[2026-10-26T15:03:08.078Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:03:09.277Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p8 175000 25000 200
+loaded rows 175000..199999 (L=200) in 4.7 s
+
+[2026-10-26T15:03:14.337Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p8 t
+[2026-10-26T15:03:20.595Z] + jcmd 2539460 GC.run
+[2026-10-26T15:03:24.318Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_p8 t
+[2026-10-26T15:03:35.228Z] + tail -c +1252775 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-p8.txt
+[2026-10-26T15:03:35.658Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T15:03:35.661Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_p8"
+CQL DROP KEYSPACE k_p8
+
+[2026-10-26T15:03:41.331Z] === arm p32:PREFIX:32:200
+[2026-10-26T15:03:41.331Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_p32 WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_p32 WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T15:03:41.834Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_p32.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_p32.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T15:03:42.363Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_p32 t
+[2026-10-26T15:03:43.493Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_p32.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'PREFIX','max_compaction_flush_memory_in_mb':'32'}"
+CQL CREATE CUSTOM INDEX t_v ON k_p32.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'PREFIX','max_compaction_flush_memory_in_mb':'32'}
+
+[2026-10-26T15:03:44.052Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 0 25000 200
+loaded rows 0..24999 (L=200) in 4.6 s
+
+[2026-10-26T15:03:49.093Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:03:50.397Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 25000 25000 200
+loaded rows 25000..49999 (L=200) in 4.6 s
+
+[2026-10-26T15:03:55.414Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:03:56.658Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 50000 25000 200
+loaded rows 50000..74999 (L=200) in 4.7 s
+
+[2026-10-26T15:04:01.705Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:04:02.940Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 75000 25000 200
+loaded rows 75000..99999 (L=200) in 4.6 s
+
+[2026-10-26T15:04:07.989Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:04:09.220Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 100000 25000 200
+loaded rows 100000..124999 (L=200) in 4.6 s
+
+[2026-10-26T15:04:14.169Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:04:15.494Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 125000 25000 200
+loaded rows 125000..149999 (L=200) in 4.9 s
+
+[2026-10-26T15:04:20.762Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:04:22.093Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 150000 25000 200
+loaded rows 150000..174999 (L=200) in 4.7 s
+
+[2026-10-26T15:04:27.203Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:04:28.439Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_p32 175000 25000 200
+loaded rows 175000..199999 (L=200) in 4.7 s
+
+[2026-10-26T15:04:33.562Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_p32 t
+[2026-10-26T15:04:39.825Z] + jcmd 2539460 GC.run
+[2026-10-26T15:04:43.562Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_p32 t
+[2026-10-26T15:04:54.381Z] + tail -c +1316938 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-p32.txt
+[2026-10-26T15:04:54.812Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T15:04:54.815Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_p32"
+CQL DROP KEYSPACE k_p32
+
+[2026-10-26T15:05:00.463Z] === arm c8s:CONTAINS:8:50
+[2026-10-26T15:05:00.463Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_c8s WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_c8s WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T15:05:00.972Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_c8s.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_c8s.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T15:05:01.495Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_c8s t
+[2026-10-26T15:05:02.551Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_c8s.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'8'}"
+CQL CREATE CUSTOM INDEX t_v ON k_c8s.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS','max_compaction_flush_memory_in_mb':'8'}
+
+[2026-10-26T15:05:03.079Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 0 25000 50
+loaded rows 0..24999 (L=50) in 16.3 s
+
+[2026-10-26T15:05:19.754Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:05:22.469Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 25000 25000 50
+loaded rows 25000..49999 (L=50) in 15.8 s
+
+[2026-10-26T15:05:38.679Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:05:41.290Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 50000 25000 50
+loaded rows 50000..74999 (L=50) in 15.8 s
+
+[2026-10-26T15:05:57.537Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:06:00.236Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 75000 25000 50
+loaded rows 75000..99999 (L=50) in 15.8 s
+
+[2026-10-26T15:06:16.445Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:06:19.148Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 100000 25000 50
+loaded rows 100000..124999 (L=50) in 16.0 s
+
+[2026-10-26T15:06:35.552Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:06:38.223Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 125000 25000 50
+loaded rows 125000..149999 (L=50) in 15.7 s
+
+[2026-10-26T15:06:54.379Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:06:57.064Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 150000 25000 50
+loaded rows 150000..174999 (L=50) in 15.8 s
+
+[2026-10-26T15:07:13.264Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:07:15.930Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_c8s 175000 25000 50
+loaded rows 175000..199999 (L=50) in 15.6 s
+
+[2026-10-26T15:07:31.945Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_c8s t
+[2026-10-26T15:07:39.644Z] + jcmd 2539460 GC.run
+[2026-10-26T15:07:43.412Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_c8s t
+[2026-10-26T15:08:44.820Z] + tail -c +1404391 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-c8s.txt
+[2026-10-26T15:08:45.226Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T15:08:45.230Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_c8s"
+CQL DROP KEYSPACE k_c8s
+
+[2026-10-26T15:08:50.979Z] === arm none:NONE:def:200
+[2026-10-26T15:08:50.979Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_none WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_none WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T15:08:51.474Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_none.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_none.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T15:08:51.988Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_none t
+[2026-10-26T15:08:53.067Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 0 25000 200
+loaded rows 0..24999 (L=200) in 4.6 s
+
+[2026-10-26T15:08:58.019Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:08:59.188Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 25000 25000 200
+loaded rows 25000..49999 (L=200) in 4.5 s
+
+[2026-10-26T15:09:04.098Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:05.221Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 50000 25000 200
+loaded rows 50000..74999 (L=200) in 4.8 s
+
+[2026-10-26T15:09:10.374Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:11.535Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 75000 25000 200
+loaded rows 75000..99999 (L=200) in 4.7 s
+
+[2026-10-26T15:09:16.649Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:17.786Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 100000 25000 200
+loaded rows 100000..124999 (L=200) in 4.5 s
+
+[2026-10-26T15:09:22.690Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:23.771Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 125000 25000 200
+loaded rows 125000..149999 (L=200) in 4.6 s
+
+[2026-10-26T15:09:28.750Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:29.888Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 150000 25000 200
+loaded rows 150000..174999 (L=200) in 4.6 s
+
+[2026-10-26T15:09:34.853Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:35.966Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_none 175000 25000 200
+loaded rows 175000..199999 (L=200) in 4.6 s
+
+[2026-10-26T15:09:40.955Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_none t
+[2026-10-26T15:09:47.075Z] + jcmd 2539460 GC.run
+[2026-10-26T15:09:50.813Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_none t
+[2026-10-26T15:09:59.780Z] + tail -c +1463240 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-none.txt
+[2026-10-26T15:10:00.193Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T15:10:00.197Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_none"
+CQL DROP KEYSPACE k_none
+
+[2026-10-26T15:10:05.830Z] === arm cdef:CONTAINS:def:200
+[2026-10-26T15:10:05.830Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE KEYSPACE k_cdef WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+CQL CREATE KEYSPACE k_cdef WITH replication = {'class':'SimpleStrategy','replication_factor':1}
+
+[2026-10-26T15:10:06.338Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE TABLE k_cdef.t (id bigint PRIMARY KEY, v text)"
+CQL CREATE TABLE k_cdef.t (id bigint PRIMARY KEY, v text)
+
+[2026-10-26T15:10:06.856Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 disableautocompaction k_cdef t
+[2026-10-26T15:10:07.923Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "CREATE CUSTOM INDEX t_v ON k_cdef.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS'}"
+CQL CREATE CUSTOM INDEX t_v ON k_cdef.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'CONTAINS'}
+
+[2026-10-26T15:10:08.441Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 0 25000 200
+loaded rows 0..24999 (L=200) in 58.0 s
+
+[2026-10-26T15:11:06.841Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:11:09.155Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 25000 25000 200
+loaded rows 25000..49999 (L=200) in 58.1 s
+
+[2026-10-26T15:12:07.654Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:12:09.961Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 50000 25000 200
+loaded rows 50000..74999 (L=200) in 57.8 s
+
+[2026-10-26T15:13:08.177Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:13:10.441Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 75000 25000 200
+loaded rows 75000..99999 (L=200) in 58.2 s
+
+[2026-10-26T15:14:09.010Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:14:11.246Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 100000 25000 200
+loaded rows 100000..124999 (L=200) in 58.2 s
+
+[2026-10-26T15:15:09.912Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:15:12.217Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 125000 25000 200
+loaded rows 125000..149999 (L=200) in 58.4 s
+
+[2026-10-26T15:16:11.025Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:16:13.316Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 150000 25000 200
+loaded rows 150000..174999 (L=200) in 58.2 s
+
+[2026-10-26T15:17:11.903Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:17:14.201Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/loader.py /users/jason92/s4-b7-st 127.0.2.1 9042 k_cdef 175000 25000 200
+loaded rows 175000..199999 (L=200) in 58.2 s
+
+[2026-10-26T15:18:12.843Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 flush k_cdef t
+[2026-10-26T15:18:20.116Z] + jcmd 2539460 GC.run
+[2026-10-26T15:18:23.874Z] + /users/jason92/s4-b7-st/bin/nodetool -h 127.0.0.1 -p 7120 compact k_cdef t
+[2026-10-26T15:27:35.972Z] + tail -c +1804044 /dev/shm/s4-b7-st-data/main/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' -e 'Failed to' -e 'OutOfMemory' > /users/jason92/s4-b7-st-logs/cl-run1/segments-cdef.txt
+[2026-10-26T15:27:36.393Z] + echo "$(date +%s%3N)" > /dev/null
+[2026-10-26T15:27:36.396Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/cql.py /users/jason92/s4-b7-st 127.0.2.1 9042 "DROP KEYSPACE k_cdef"
+CQL DROP KEYSPACE k_cdef
+
+[2026-10-26T15:27:42.789Z] + grep -v 'Rejecting' /dev/shm/s4-b7-st-data/main/logs/system.log > /users/jason92/s4-b7-st-logs/cl-run1/system.log.filtered
+[2026-10-26T15:27:42.800Z] + df -h /dev/shm/s4-b7-st-data/main | tail -1
+tmpfs           126G  110M  126G   1% /dev/shm
+
+[2026-10-26T15:29:12.911Z] SIGKILL node 2539460
+[2026-10-26T15:29:12.912Z] SIGKILL sampler 2541055
+[2026-10-26T15:29:12.912Z] stopped {'node': 2539460, 'sampler': 2541055}
+[2026-10-26T15:29:13.950Z] done
+[2026-10-26T15:29:13.950Z] stopped {}

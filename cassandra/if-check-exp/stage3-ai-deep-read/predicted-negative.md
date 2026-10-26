@@ -188,8 +188,6 @@ check only sets how it is split.
 
 | If statement | Reason rejected |
 |---|---|
-| `NativeAllocator$Region.allocate():273` `newOffset + size > capacity` | `trySwapRegion()` allocates a new region. The memtable ceiling is the filed `memtable_*_space` cases. |
-| `SlabAllocator$Region.allocate():201` `newOffset + size > data.capacity()` | Returns `null`; the caller creates a new region. |
 | `MmappedRegions.updateState():208` `segmentSize + chunk.length + 4 > MAX_SEGMENT_SIZE` | Starts a new mmap segment; the whole file is mapped either way. |
 | `MmappedRegions.java:170` `compressedFileLength - state.length <= MAX_SEGMENT_SIZE` | Picks the `updateState` overload; same as `:208`. |
 | `IncrementalTrieWriterPageAware.complete():167` `nodeSize + branchSize < maxBytesPerPage` | Node placement within pages; everything is written. |
@@ -216,7 +214,6 @@ branch allocates or moves the same amount somewhere else.
 |---|---|
 | `BufferPool.java:910`, `:940` `size > NORMAL_CHUNK_SIZE` | An oversized request skips the pool and `get()` calls `allocate(size, OFF_HEAP)`. The uncapped fallback the filed `file_cache_size` case records. |
 | `BufferPool.java:929`, `:1602` | A tiny or a normal pool allocation. |
-| `NativeAllocator.java:144`; `SlabAllocator.java:92` `size > MAX_CLONED_SIZE` | An oversized value gets its own allocation; it is charged to the memtable pool before the comparison (`NativeAllocator.java:141`, `SlabAllocator.java:89`). |
 | `BufferedDataOutputStreamPlus.java:169`, `:191`, `:201`, `:211` | A typed write through the buffer or the slow path. |
 | `RebufferingInputStream.java:195`, `:210`, `:219`, `:228`, `:250`, `:256`, `:287`, `:296` | A typed read from the buffer or the slow path. |
 | `CompressedSequentialWriter.java:160`, `:163` | A chunk written compressed or raw. |

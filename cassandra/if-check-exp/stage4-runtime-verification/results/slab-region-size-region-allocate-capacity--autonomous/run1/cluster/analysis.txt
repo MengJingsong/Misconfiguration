@@ -1,0 +1,59 @@
+analysis of run1: arms ['a128', 'a64', 'a64b', 'e64', 'f64', 'h64']
+a64: L=64 MiB S=116509 offheap_buffers peak_acc=63.2 MiB (0.988 L) peak_dir=76.2 MiB (1.191 L) (whole run: peak_acc 63.2, peak_dir 82.7, rss 103.7 MiB) rho=1.1838574878213175 (n=27) blocked 0.0->120.0 MEMTABLE_LIMIT flushes=8 rss_base=2640 MiB rss_peak_delta=82.8 MiB off_after_flush=0.0 dir_end=762151.0 samples=453 client_rc=[0, 0]
+a64: client A ok=3000 err=0 seconds=60.027 rate=50.0; B ok=2000 err=0 seconds=1.379 errors={} {}
+EXPECTED a64 client wrote every row without error (ok == rows, err == 0, both phases): yes
+EXPECTED a64 phase A was throttled and long enough (>= 40 s, rate within 10 % of 50): yes
+a128: L=128 MiB S=116509 offheap_buffers peak_acc=126.7 MiB (0.990 L) peak_dir=146.9 MiB (1.147 L) (whole run: peak_acc 126.7, peak_dir 153.2, rss 189.7 MiB) rho=1.1460012176750243 (n=21) blocked 0.0->76.0 MEMTABLE_LIMIT flushes=4 rss_base=2630 MiB rss_peak_delta=170.5 MiB off_after_flush=0.0 dir_end=312023.0 samples=454 client_rc=[0, 0]
+a128: client A ok=3000 err=0 seconds=59.983 rate=50.0; B ok=2000 err=0 seconds=1.443 errors={} {}
+EXPECTED a128 client wrote every row without error (ok == rows, err == 0, both phases): yes
+EXPECTED a128 phase A was throttled and long enough (>= 40 s, rate within 10 % of 50): yes
+a64b: L=64 MiB S=116509 offheap_buffers peak_acc=63.3 MiB (0.990 L) peak_dir=77.2 MiB (1.206 L) (whole run: peak_acc 63.3, peak_dir 79.4, rss 99.8 MiB) rho=1.18360766021256 (n=26) blocked 0.0->132.0 MEMTABLE_LIMIT flushes=8 rss_base=2638 MiB rss_peak_delta=94.4 MiB off_after_flush=0.0 dir_end=3679625.0 samples=453 client_rc=[0, 0]
+a64b: client A ok=3000 err=0 seconds=60.024 rate=50.0; B ok=2000 err=0 seconds=1.442 errors={} {}
+EXPECTED a64b client wrote every row without error (ok == rows, err == 0, both phases): yes
+EXPECTED a64b phase A was throttled and long enough (>= 40 s, rate within 10 % of 50): yes
+e64: L=64 MiB S=131068 offheap_buffers peak_acc=63.3 MiB (0.988 L) peak_dir=68.6 MiB (1.072 L) (whole run: peak_acc 63.3, peak_dir 73.3, rss 89.2 MiB) rho=1.0542870041580532 (n=23) blocked 0.0->193.0 MEMTABLE_LIMIT flushes=9 rss_base=2644 MiB rss_peak_delta=68.9 MiB off_after_flush=0.0 dir_end=1192944.0 samples=455 client_rc=[0, 0]
+e64: client A ok=3000 err=0 seconds=60.023 rate=50.0; B ok=2000 err=0 seconds=1.668 errors={} {}
+EXPECTED e64 client wrote every row without error (ok == rows, err == 0, both phases): yes
+EXPECTED e64 phase A was throttled and long enough (>= 40 s, rate within 10 % of 50): yes
+f64: L=64 MiB S=131072 offheap_buffers peak_acc=63.1 MiB (0.986 L) peak_dir=78.7 MiB (1.230 L) (whole run: peak_acc 63.1, peak_dir 82.9, rss 106.9 MiB) rho=1.2100902577620396 (n=25) blocked 0.0->192.0 MEMTABLE_LIMIT flushes=9 rss_base=2642 MiB rss_peak_delta=89.5 MiB off_after_flush=0.0 dir_end=3551991.0 samples=456 client_rc=[0, 0]
+f64: client A ok=3000 err=0 seconds=60.026 rate=50.0; B ok=2000 err=0 seconds=1.891 errors={} {}
+EXPECTED f64 client wrote every row without error (ok == rows, err == 0, both phases): yes
+EXPECTED f64 phase A was throttled and long enough (>= 40 s, rate within 10 % of 50): yes
+h64: L=64 MiB S=116509 heap_buffers peak_acc=63.3 MiB (0.989 L) peak_dir=1.6 MiB (0.025 L) (whole run: peak_acc 0.0, peak_dir 5.4, rss 38.2 MiB) rho=None (n=0) blocked 0.0->53.0 MEMTABLE_LIMIT flushes=8 rss_base=2629 MiB rss_peak_delta=30.7 MiB off_after_flush=0.0 dir_end=5663150.0 samples=454 client_rc=[0, 0]
+h64: client A ok=3000 err=0 seconds=60.024 rate=50.0; B ok=2000 err=0 seconds=1.422 errors={} {}
+EXPECTED h64 client wrote every row without error (ok == rows, err == 0, both phases): yes
+EXPECTED h64 phase A was throttled and long enough (>= 40 s, rate within 10 % of 50): yes
+EXPECTED a64 limit reached and disallow evidence (blocked count grew, >= 2 MEMTABLE_LIMIT flushes): yes (blocked 0.0->120.0, flushes 8)
+EXPECTED a64 peak_acc in [0.90 L, 1.05 L]: yes (0.988)
+EXPECTED a64 rho in [1.1, 1.2]: yes (1.1838574878213175)
+EXPECTED a64 RssAnon peak delta in [0.9 peak_dir - 4 MiB, peak_dir + 0.25 L + 32 MiB]: yes (rss 82.8, dir 76.2 MiB)
+EXPECTED a64 accounted gauge < 1 MiB and dir < 0.1 L after the final flush: yes (acc 0.0, dir 762151.0)
+EXPECTED a128 limit reached and disallow evidence (blocked count grew, >= 2 MEMTABLE_LIMIT flushes): yes (blocked 0.0->76.0, flushes 4)
+EXPECTED a128 peak_acc in [0.90 L, 1.05 L]: yes (0.990)
+EXPECTED a128 rho in [1.1, 1.2]: yes (1.1460012176750243)
+EXPECTED a128 RssAnon peak delta in [0.9 peak_dir - 4 MiB, peak_dir + 0.25 L + 32 MiB]: yes (rss 170.5, dir 146.9 MiB)
+EXPECTED a128 accounted gauge < 1 MiB and dir < 0.1 L after the final flush: yes (acc 0.0, dir 312023.0)
+EXPECTED a64b limit reached and disallow evidence (blocked count grew, >= 2 MEMTABLE_LIMIT flushes): yes (blocked 0.0->132.0, flushes 8)
+EXPECTED a64b peak_acc in [0.90 L, 1.05 L]: yes (0.990)
+EXPECTED a64b rho in [1.1, 1.2]: yes (1.18360766021256)
+EXPECTED a64b RssAnon peak delta in [0.9 peak_dir - 4 MiB, peak_dir + 0.25 L + 32 MiB]: yes (rss 94.4, dir 77.2 MiB)
+EXPECTED a64b accounted gauge < 1 MiB and dir < 0.1 L after the final flush: yes (acc 0.0, dir 3679625.0)
+EXPECTED e64 limit reached and disallow evidence (blocked count grew, >= 2 MEMTABLE_LIMIT flushes): yes (blocked 0.0->193.0, flushes 9)
+EXPECTED e64 peak_acc in [0.90 L, 1.05 L]: yes (0.988)
+EXPECTED e64 rho in [0.97, 1.07]: yes (1.0542870041580532)
+EXPECTED e64 RssAnon peak delta in [0.9 peak_dir - 4 MiB, peak_dir + 0.25 L + 32 MiB]: yes (rss 68.9, dir 68.6 MiB)
+EXPECTED e64 accounted gauge < 1 MiB and dir < 0.1 L after the final flush: yes (acc 0.0, dir 1192944.0)
+EXPECTED f64 limit reached and disallow evidence (blocked count grew, >= 2 MEMTABLE_LIMIT flushes): yes (blocked 0.0->192.0, flushes 9)
+EXPECTED f64 peak_acc in [0.90 L, 1.05 L]: yes (0.986)
+EXPECTED f64 rho in [1.11, 1.2]: NO (1.2100902577620396)
+EXPECTED f64 RssAnon peak delta in [0.9 peak_dir - 4 MiB, peak_dir + 0.25 L + 32 MiB]: yes (rss 89.5, dir 78.7 MiB)
+EXPECTED f64 accounted gauge < 1 MiB and dir < 0.1 L after the final flush: yes (acc 0.0, dir 3551991.0)
+EXPECTED a64 peak_dir above L (the waste is visible): yes (76.2 vs 64 MiB)
+EXPECTED peak_acc(a128)/peak_acc(a64) in [1.8, 2.2] (positive control): yes (2.003)
+EXPECTED peak_dir(a128)/peak_dir(a64) in [1.7, 2.3]: yes (1.927)
+EXPECTED RssAnon peak delta a128/a64 in [1.5, 2.5]: yes (2.059)
+EXPECTED a64 vs a64b: peak_acc within 0.05 L and rho within 0.03: yes (63.2 vs 63.3 MiB; rho 1.1838574878213175 vs 1.18360766021256)
+EXPECTED rho(e64) < rho(a64) (the exact fit has less waste): yes (1.0543 vs 1.1839)
+EXPECTED h64 on-heap gauge peak in [0.90, 1.05] x 64 MiB with blocked growth: yes (63.3 MiB, blocked 0.0->53.0)
+EXPECTED h64 off-heap gauge < 1 MiB and direct delta < 8 MiB: yes (off 0.00, dir 1.58 MiB)
+EXPECTED h64 [B growth in [0.9, 1.3] x mean on-heap gauge around the histogram: NO (growth 71.1 MiB, gauge 31.0 MiB, q=2.289)

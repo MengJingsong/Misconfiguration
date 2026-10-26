@@ -1,0 +1,26 @@
+cluster-run k16n 2026-10-26T08:38:44 host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu K=16 rows=20000 heap=1G index=False Q=1000 vlen=1000
+tree /users/jason92/s4-b7-ie cassandra-5.0.9; harness md5 a44cd16265863314da9e66b38c2278e5  ec.btm | bd91a4590bbd84c829545a01dfb4bc5b  Ec.java | bf9b4de5448b50779d4c7f09f0152cef  client.py | a78a0c10c10e1518c499b219640afbaf  cluster-run.py | aa2d6d83cbc01a112c92dfa778fcb851  JfrSum.java | 
+yaml tail: cluster_name: stage4-ec;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.3.1;rpc_address: 127.0.3.1;storage_port: 7000;native_transport_port: 9042;commitlog_directory: /dev/shm/s4-b7-ie-data/commitlog;hints_directory: /dev/shm/s4-b7-ie-data/hints;saved_caches_directory: /dev/shm/s4-b7-ie-data/saved_caches;cdc_raw_directory: /dev/shm/s4-b7-ie-data/cdc_raw;authenticator: PasswordAuthenticator;write_request_timeout: 30000ms;native_transport_timeout: 60000ms
+JVM_EXTRA_OPTS: -javaagent:/users/jason92/s4-b7-ie/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/initial-buffer-capacity-ensurecapacity-datalengthinbytes--autonomous/ec.btm,listener:true,port:19130,address:127.0.0.1 -Xbootclasspath/a:/users/jason92/s4-b7-ie-logs/run1/cluster/k16n/stage4-ec.jar -Dorg.jboss.byteman.verbose=false -Dstage4.byteman.out=/users/jason92/s4-b7-ie-logs/run1/cluster/k16n/ec.trace; MAX_HEAP_SIZE=1G
+node pid 1382679; JVM args: -XX:+UseG1GC -Xms1G -Xmx1G -javaagent:/users/jason92/s4-b7-ie/bin/../lib/jamm-0.4.0.jar -javaagent:/users/jason92/s4-b7-ie/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/initial-buffer-capacity-ensurecapacity-datalengthinbytes--autonomous/ec.btm,listener:true,port:19130,address:127.0.0.1 -Xbootclasspath/a:/users/jason92/s4-b7-ie-logs/run1/cluster/k16n/stage4-ec.jar -Dstage4.byteman.out=/users/jason92/s4-b7-ie-logs/run1/cluster/k16n/ec.trace
+setup: {"schema": "ok", "agreement": true, "ordinary_is_superuser": false, "ordinary_can_login": true}
+baseline: {"histo": {"total_bytes": 71554640, "byte_arrays_bytes": 17465000, "byte_arrays_n": 106350}, "heap_used": 71554640, "data_bytes": 92398, "ms": 1793025600069}
+load1: {"ok": 10000, "err": 0, "errors": {}, "first_error": null, "seconds": 2.157, "K": 16, "n": 10000, "vlen": 1000}
+trace after flush 1: {}
+load2: {"ok": 10000, "err": 0, "errors": {}, "first_error": null, "seconds": 1.997, "K": 16, "n": 10000, "vlen": 1000}
+trace during compaction: {}
+queries: {"queries": 1000, "ok": 1000, "err": 0, "rows_returned": 1000, "seconds": 2.11}
+trace during queries: {}
+final: {"histo": {"total_bytes": 81674536, "byte_arrays_bytes": 23848400, "byte_arrays_n": 107797}, "heap_used": 81674536, "data_bytes": 1199583, "ms": 1793025619019}
+jfr: {"events":1402,"total_weight":614429104,"ensureCapacity_weight":0,"ensureCapacity_events":0,"readBytes_or_ensureCapacity_weight":0,"readBytes_events":0,"share_ensureCapacity":0.0,"share_readBytes":0.0}
+trace, all: {}
+EXPECTED: no write failed for the legal key size K=16 (client errors across both load phases = 0) — yes
+EXPECTED: no ERROR line in system.log — yes
+EXPECTED: every readBytes call allocated at least what the doubling code allocates for its result length (below_mirror = 0 for every caller; the surplus is the byte source, which is not this code) — yes
+EXPECTED: inferred (mirror of the doubling code on the observed lengths): ensureCapacity allocation per call is at most 4.1 x the decoded length on average for every caller that decodes 1000 B or more (arithmetic: sum of doublings to the next power of two is about 2 x capacity < 4 x length, plus 16-byte headers; worst 0.00) — yes
+EXPECTED: inferred: mean ensureCapacity allocation per call is at most 4 x 65535 B = 262140 B (largest caller mean 0) — yes
+EXPECTED: no readBytes call threw (no rbexc line) — yes
+EXPECTED: JFR: allocation weight under ensureCapacity is below 1 percent of all allocation weight (share 0.00000) — yes
+retained live heap (class-histogram total) final - baseline = 10119896; data dir bytes final = 1199583; raw input bytes = 20320000
+EXPECTED totals: yes=7 no=0
+node stopped; leftovers: none
