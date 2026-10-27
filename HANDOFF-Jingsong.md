@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 118 | 78 |
+| Set A | 159 | 126 | 78 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -266,6 +266,8 @@ Next: CSV order 7 (decision), 81 on (`DataLimits.java:1041`, `AtomicBTreePartiti
 
 ## Trace-back only (set A rows 81-159)
 
+> **Done 2026-10-27:** all 48 cases of `traceback-only/_INDEX.md` were completed into case files (see "Trace-back cases completed" below) and the `traceback-only/` folder was deleted. The 79 trace-back files and the index are in git at commit `7098349`. The two bullets below that name the folder (the index rule and the index) describe that folder and no longer apply; the table at the end of this section (row, target, trace-back stem) is kept.
+
 2026-10-27. Jingsong asked for the "trace back" step alone for every set A target that still had no
 case file (CSV rows 81-159; row 7 skipped, it is settled as a second check site of
 `prepared_statements_cache_size`). **Not case files:** these are unfinished, kept out of `cases/`,
@@ -405,4 +407,9 @@ Two corrections found while doing this: `QueryProcessor.java:251` is the empty-k
 
 **Batch 4 (10 cases, rows 133-135, 137, 139, 140, 144, 147-149):** 9 negative, 1 positive. Negative: `RangeTombstoneList.java:213` (a performance heuristic, no constraint), LCS `sstable_size_in_mb` at two sites (`:78` and `:81`, both only log warnings; the "ALTER needs no restart" claim is inferred from method names and flagged as not verified in the files), UCS `min_sstable_size` (compares two configured values), `EXCESS_WASTE_OFFSET`, `avoidReservedValues` (no constraint), `AbstractBlockPackedWriter.MAX_BLOCK_SIZE`, the empty-term skip at `SSTableIndexWriter.java:221` (no constraint; nearest cap `sai_options.segment_write_buffer_size`), and `SegmentBuilder.LAST_VALID_SEGMENT_ROW_ID` (row-id span, not bytes; real check at `:266`, the given `:260` is the empty-builder test, so both are linked). Positive: the hard 2 GB limit of one `InMemoryTrie` (`InMemoryTrie.java:148`), with the caveat that it is per trie and a backstop the flush path is meant never to reach; its entry moved to `predicted-positive.md`. Known weak spots: the B2h positive control of row 135 is clumsy (it only shows the max file size following the knob), and several files carry "not verified" notes. Citations not re-checked line by line.
 
-**Remaining (8 of 48), CSV rows:** 150-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: these 8 (the last), then delete `traceback-only/`.
+**Batch 5, the last (8 cases, rows 150-153, 156-159):** 7 negative, 1 positive. Negative: `shouldUseBruteForce` (cost heuristic, no constraint), the two `RandomAccessReaderAdapter` region-boundary tests (no constraint; for row 151 the jvector side and the graph file suffix are not verified, and the B3 positive control is an untraced assumption, flagged in the file), `MAX_RECURSIVE_KEY_LENGTH` (bounds recursion depth), `NAME_LENGTH` for keyspace and custom-index names (its javadoc says "KS or CF name" but the code uses it only for keyspaces and custom-index columns), `TABLE_NAME_LENGTH`, and the allocation assertion at `NativeAllocator.java:194` (no constraint; nearest limit `memtable_offheap_space`). Positive: the SASI per-index option `max_compaction_flush_memory_in_mb` (`IndexMode.java:190` is only a 100 GiB sanity cap; enforcement at `PerSSTableIndexWriter.java:247`); its entry is in `predicted-positive.md`.
+
+**Trace-back cases completed (done):** 48 cases filed in 5 batches (10, 10, 10, 10, 8): 44 negative and 4 positive estimates (`default_page_size-cqlgroupbylimits_onclose-rowlimit`, `diagnostic_event_memory_store_max_size-store-keyhead`, the `InMemoryTrie` 2 GB limit, `max_compaction_flush_memory_in_mb`). Set A written up: 126 of 159. **Not done:** CSV row 7 (`SystemKeyspace.java:1919`, settled as a second check site of `prepared_statements_cache_size`) and 31 rows whose trace-back type was a yaml entry or JVM property: 85, 102-104, 107-120, 127, 128, 130-132, 138, 141-143, 145, 146, 154, 155 (their A1 trace-backs are in git at commit `7098349`, folder `traceback-only/`). Stage 4 for the 48 new cases is future work; each stays in `predicted-negative.md` / `predicted-positive.md` until then.
+
+**Template rule (2026-10-27):** `_TEMPLATE-autonomous.md` now has a link rule: in an autonomous case file the constraint's declaration (A1) and the if statement (Entry pointer row, A3) must be GitHub permalinks at tag `cassandra-5.0.9`, not plain `file:line`. The 106 autonomous case files filed before batch 1 are not retrofitted; the 10 batch-1 files were updated to the rule on 2026-10-27 (batches 2-5 followed it from the start, with a few added A3 sentences) (31 links on the entry pointer, the declaration and the if statement; three files got one added sentence naming the check; new sha256 lines in `_INDEX.md` §4). The scratch copy of the template used for agent inputs must be refreshed before the next batch.
+**Master Index fix (2026-10-27):** a blank line inside the `_INDEX.md` §1 table (present since before 2026-10-26) cut the table in two, so the last 35 rows rendered as plain text; removed.

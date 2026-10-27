@@ -190,6 +190,14 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`block_packed_max_block_size-checkblocksize-blocksize`](cases/block_packed_max_block_size-checkblocksize-blocksize--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`none-addterm-term_remaining`](cases/none-addterm-term_remaining--autonomous.md) | autonomous | negative |  |  | none |
 | [`last_valid_segment_row_id-exceedssegmentlimit-sstablerowid`](cases/last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`no_constraint-shouldusebruteforce-numrows`](cases/no_constraint-shouldusebruteforce-numrows--autonomous.md) | autonomous | negative |  |  | none |
+| [`none-readfully-dest_length`](cases/none-readfully-dest_length--autonomous.md) | autonomous | negative |  |  | none |
+| [`none-read-count`](cases/none-read-count--autonomous.md) | autonomous | negative |  |  | none |
+| [`max_recursive_key_length-addterm-term`](cases/max_recursive_key_length-addterm-term--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`max_compaction_flush_memory_in_mb-getmode-maxmembytes`](cases/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous.md) | autonomous | positive |  |  | per-table/per-index option |
+| [`schemaconstants_name_length-validatekeyspacename-keyspacename`](cases/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`table_name_length-validatetablename-name_length`](cases/table_name_length-validatetablename-name_length--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`none-allocateoversize-peer`](cases/none-allocateoversize-peer--autonomous.md) | autonomous | negative |  |  | none |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -746,3 +754,11 @@ dated amendment adds a line here with its date and the new hash.
 | `block_packed_max_block_size-checkblocksize-blocksize--autonomous.md` | `17a6ad1b23438e070dad83b280e0cee30ec1396f871822dfc6d4697d38906c1b` | 2026-10-27 |
 | `none-addterm-term_remaining--autonomous.md` | `9e681a379afc2b7304ce9df712586e3f1b4cfcdd970c0c2420729602ca7c30e0` | 2026-10-27 |
 | `last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous.md` | `66ac886dd0952b4abc312e90b10db605e8f8b5d5570cf9893d7fa2df40953934` | 2026-10-27 |
+| `no_constraint-shouldusebruteforce-numrows--autonomous.md` | `52599f8a797c15d5fc21fe8d0374adde45a7d7061e001a65d80a4be1fb7c76b9` | 2026-10-27 |
+| `none-readfully-dest_length--autonomous.md` | `b5eee338d7ab6eb3ee70665cc53d8e4948458fe36173cec7ea8b39e816ff1ef9` | 2026-10-27 |
+| `none-read-count--autonomous.md` | `7c157386e7e332af305b184f3d5b79e2b60564dbd1fc5410c02b0bced903ae36` | 2026-10-27 |
+| `max_recursive_key_length-addterm-term--autonomous.md` | `5a314948937d41107b2b72ecf538d30a2031a82cfba6814af7200476d4209d32` | 2026-10-27 |
+| `max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous.md` | `0d232a9562361ec8e442a1ccaa562e3350791e6fefb6d7047dac2974a5011020` | 2026-10-27 |
+| `schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous.md` | `a1899a8633fca73fff28986c93808d16fa977d6b33c58c48f5011508f782ee89` | 2026-10-27 |
+| `table_name_length-validatetablename-name_length--autonomous.md` | `e7541f0b0f97ada3200b85acc2b8ccb0a4d5e3a717e4ca507fd162724256c910` | 2026-10-27 |
+| `none-allocateoversize-peer--autonomous.md` | `9bd65f7d2ab1a4d0302fd25bae249574287b36965d42a1976ee426868685f0f7` | 2026-10-27 |
