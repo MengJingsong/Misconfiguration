@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 98 | 78 |
+| Set A | 159 | 108 | 78 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -401,4 +401,6 @@ Two corrections found while doing this: `QueryProcessor.java:251` is the empty-k
 
 **Batch 2 (10 cases, rows 87, 90-98):** all 10 negative (a framing guard, `MAX_UNSIGNED_SHORT` on an indexed value, and the SAI/SASI leaf, block, offset and token-tree constants); filed with the same steps as batch 1, with the agents given the refreshed template (link rule) and told to avoid `~` line numbers. They linked the declaration and if statement themselves; three files (rows 90, 91, 96) needed one added sentence naming the check. Agent corrections to the A1 inputs worth keeping: row 95 the `MAX_OFFSET` check guards only the single-offset path (tokens with two or more offsets bypass it) and for the BIG format the offset is the `Index.db` position; row 97 the token-tree constants are in `TokenTreeBuilder.java`; row 92 the constant is Lucene's (lucene-core 9.7.0), not declared in the Cassandra tree, so A1 has no declaration link; row 87 has no constraint (nearest real cap `max_hints_file_size`, `HintsWriteExecutor.java:247`). Several files carry explicit "not verified" notes (property names, defaults). Not yet re-checked line by line.
 
-**Remaining (28 of 48), CSV rows:** 99-101, 121-126, 129, 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Watch row 121: its trace-back followed the adjacent `:259` size check; `QueryProcessor.java:251` is the empty-key test, so the agent input for it must be corrected. Next batch: 10 of these.
+**Batch 3 (10 cases, rows 99-101, 121-126, 129):** all 10 negative: `MAX_KEYS_SPARSE`; `min_compress_ratio` at two sites (`CompressedSequentialWriter.java:160`, `:163`; a nonzero ratio can only make SSTables larger); four with no constraint (the empty-key tests at `QueryProcessor.java:251` and `Validation.java:47`, and `UDFDataType.java:177`) or a wire-format literal (`CodecUtils.java:101`, `:250`, native protocol v1/v2; the agent notes the server rejects v1/v2, so that branch is effectively unreachable); `SchemaConstants.NAME_LENGTH` (48) and `FILENAME_LENGTH` (255, snapshot names, only when `cassandra.snapshot.validation` is true). Row 121 got a corrected input (its trace-back had followed the adjacent `:259` size check) and was written as a no-constraint case. Agents linked the declaration and if statement themselves; rows 121 and 125 needed one added A3 sentence. Fixed by hand: `~248-250` in row 99 (now `253-255`); row 101's `flushData` lines (160, 163) were checked, the others not. Several files carry "not verified" notes.
+
+**Remaining (18 of 48), CSV rows:** 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: 10 of these, then the last 8.

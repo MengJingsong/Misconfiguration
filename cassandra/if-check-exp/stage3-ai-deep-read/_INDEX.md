@@ -170,6 +170,16 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`overflow_trailer_capacity-createoverflowentry-overflowcollisions`](cases/overflow_trailer_capacity-createoverflowentry-overflowcollisions--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`tokens_per_block-add-pos`](cases/tokens_per_block-add-pos--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`super_block_size-flushsuperblock-datablockscnt`](cases/super_block_size-flushsuperblock-datablockscnt--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`max_keys_sparse-addinternal-keys`](cases/max_keys_sparse-addinternal-keys--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`min_compress_ratio-flushdata-maxcompressedlength`](cases/min_compress_ratio-flushdata-maxcompressedlength--autonomous.md) | autonomous | negative |  |  | per-table/per-index option |
+| [`min_compress_ratio-flushdata-maxcompressedlength-2`](cases/min_compress_ratio-flushdata-maxcompressedlength-2--autonomous.md) | autonomous | negative |  |  | per-table/per-index option |
+| [`none-queryprocessor-validatekey-key_remaining`](cases/none-queryprocessor-validatekey-key_remaining--autonomous.md) | autonomous | negative |  |  | none |
+| [`none-validatekey-key_remaining`](cases/none-validatekey-key_remaining--autonomous.md) | autonomous | negative |  |  | none |
+| [`none-compose-buffer_remaining`](cases/none-compose-buffer_remaining--autonomous.md) | autonomous | negative |  |  | none |
+| [`native_protocol_v1_v2_collection_size_limit-writesize-size`](cases/native_protocol_v1_v2_collection_size_limit-writesize-size--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize`](cases/native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`name_length-validatecustomindexcolumnname-name`](cases/name_length-validatecustomindexcolumnname-name--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`filename_length-validatesnapshotname-snapshotname`](cases/filename_length-validatesnapshotname-snapshotname--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -706,3 +716,13 @@ dated amendment adds a line here with its date and the new hash.
 | `overflow_trailer_capacity-createoverflowentry-overflowcollisions--autonomous.md` | `f492cda199db7c67b14a538c38fadd2511369ac4258015e34741b3e0e70e8f7a` | 2026-10-27 |
 | `tokens_per_block-add-pos--autonomous.md` | `ca9bcd09a37daee8943d1a285203369af290848006c845af34cb8659e3132dc1` | 2026-10-27 |
 | `super_block_size-flushsuperblock-datablockscnt--autonomous.md` | `839e41ed6ff22e85ca7a596c9cf63299e7b63d603354a3617c537b9e21937b2a` | 2026-10-27 |
+| `max_keys_sparse-addinternal-keys--autonomous.md` | `1464ad94862e34769d069ad6432625134e63782594f338653a0cc9dcf97dcc59` | 2026-10-27 |
+| `min_compress_ratio-flushdata-maxcompressedlength--autonomous.md` | `e2b1ff6aecc9898adc967144993e87edae5dc03937690eb4be1e617c29f0a0e0` | 2026-10-27 |
+| `min_compress_ratio-flushdata-maxcompressedlength-2--autonomous.md` | `65e4e52941d3613774cea797ddcbd7e008ebbe9be5ce4721d70507611d54c6e6` | 2026-10-27 |
+| `none-queryprocessor-validatekey-key_remaining--autonomous.md` | `d805c43a1811a01373ddee17c2e710561c002eefa81aef9191aa45477c6d1613` | 2026-10-27 |
+| `none-validatekey-key_remaining--autonomous.md` | `949893dab36c77551419fe836ba5f2504aa7c4da446e3475d77f0c165cbb9f48` | 2026-10-27 |
+| `none-compose-buffer_remaining--autonomous.md` | `14d56f2d400a12d22872db9eb472d8f516af7dca3ccada6764874f1ac2b058b0` | 2026-10-27 |
+| `native_protocol_v1_v2_collection_size_limit-writesize-size--autonomous.md` | `70d42e7278aae841b5006773822a50f4598f36f3ecf42de4ada5e0a5a2b5812c` | 2026-10-27 |
+| `native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize--autonomous.md` | `3641143e3fac0574e4b055ab86a5c1b1993df644d84c246fc0ea8971286b15a2` | 2026-10-27 |
+| `name_length-validatecustomindexcolumnname-name--autonomous.md` | `a4ef10ea1abf5bb6d70e20d350be13c8cb4370ee4b4c2dd48db4bc5582ad2802` | 2026-10-27 |
+| `filename_length-validatesnapshotname-snapshotname--autonomous.md` | `fe09a988f22dc72396328b34d8d340896511c399f416a13bf52507ec60f9bedc` | 2026-10-27 |
