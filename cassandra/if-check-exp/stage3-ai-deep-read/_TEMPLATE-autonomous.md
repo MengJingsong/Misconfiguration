@@ -2,23 +2,32 @@
 
 | Field | Value |
 |---|---|
-| Entry pointer | `file:line` as given |
+| Entry pointer | the if statement, as given, **linked**: [`File.java:123`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/path/File.java#L123) |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | model, CLI version, date (filled by the agent) |
 | Estimate | `positive` (usage follows the constraint) / `negative` (it does not) / `undetermined`, with the reason in one or two sentences |
 | Ground | for a negative estimate, why usage should not follow the constraint; otherwise `—` |
 
+> **Link rule.** Two places must be links, not plain `file:line`: **the constraint's
+> declaration** (A1) and **the if statement** (the check; the Entry pointer row above and
+> A3). Use a permalink at the pinned tag,
+> `[`File.java:123`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/path/File.java#L123)`
+> (a range is `#L123-L130`; the path is the file's full path under the repository root).
+> Check that the line number is the line you mean. Other citations may stay plain `file:line`.
+
 ## A. Constraint trace
 
 **A1. The constraint.** Name; kind (configuration entry, JVM property, constant,
-runtime-queried); where it is first declared (`file:line`); unit; default and
+runtime-queried); where it is first declared (**link** to the declaration line, see the
+link rule above); unit; default and
 how the default is derived; how it can be set (yaml key, `-D` property, JMX,
 not settable) and whether a change needs a restart.
 
 **A2. What it caps.** The resource (heap, off-heap, disk, other) and the
 quantity the code compares against the limit.
 
-**A3. Mechanism.** How the code enforces it, step by step, with `file:line`.
+**A3. Mechanism.** How the code enforces it, step by step, with `file:line`; the
+**if statement is a link** (link rule above).
 What each outcome of the check does when the limit is reached. Any path that
 bypasses it or overshoots it.
 

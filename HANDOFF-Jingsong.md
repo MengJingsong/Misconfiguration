@@ -400,3 +400,7 @@ Two corrections found while doing this: `QueryProcessor.java:251` is the empty-k
 `predicted-positive.md` / `predicted-negative.md` until stage 4 closes it.
 
 **Remaining (38 of 48), CSV rows:** 87, 90-101, 121-126, 129, 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: 10 of these, then the same filing steps.
+
+**Template rule (2026-10-27):** `_TEMPLATE-autonomous.md` now has a link rule: in an autonomous case file the constraint's declaration (A1) and the if statement (Entry pointer row, A3) must be GitHub permalinks at tag `cassandra-5.0.9`, not plain `file:line`. Case files filed before this (all 116 autonomous ones, including batch 1) are not retrofitted. The scratch copy of the template used for agent inputs must be refreshed before the next batch.
+**Master Index fix (2026-10-27):** a blank line inside the `_INDEX.md` §1 table (present since before 2026-10-26) cut the table in two, so the last 35 rows rendered as plain text; removed.
+
