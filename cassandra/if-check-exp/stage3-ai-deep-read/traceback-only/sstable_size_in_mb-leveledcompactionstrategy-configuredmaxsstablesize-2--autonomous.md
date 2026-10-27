@@ -1,0 +1,10 @@
+# sstable_size_in_mb — trace-back only  <!-- file: traceback-only/sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize-2--autonomous.md -->
+
+| Field | Value |
+|---|---|
+| Entry pointer | `src/java/org/apache/cassandra/db/compaction/LeveledCompactionStrategy.java:81` |
+| Pinned source | `cassandra-5.0.9` |
+
+## A. Constraint trace
+
+**A1. The constraint.** `sstable_size_in_mb` is a per-table LeveledCompactionStrategy compaction sub-option (a CQL schema option, not a cassandra.yaml entry), declared as the string constant `SSTABLE_SIZE_OPTION = "sstable_size_in_mb"` at LeveledCompactionStrategy.java:52. The target line 81 (`if (configuredMaxSSTableSize < 50)`, inside the constructor `LeveledCompactionStrategy(ColumnFamilyStore, Map)`, declared at line 64) only logs a warning when the configured target SSTable size is under 50 MiB; the matching upper check is at line 78 (>= 1000 MiB). Both checks run only when the JVM property `cassandra.tolerate_sstable_size` (CassandraRelevantProperties.java:604, read into `tolerateSstableSize` at LeveledCompactionStrategy.java:53) is false (line 76), and neither throws. The unit is MiB (the value is multiplied by 1024L*1024L into `maxSSTableSizeInBytes` at LeveledManifest.java:84), and it caps the target size of each SSTable (the unit of compaction) and, through `maxBytesForLevel` (LeveledManifest.java:185), the size of each level. The default is the hard-coded 160 (LeveledCompactionStrategy.java:67), used when the option is absent; the separate validation default of "1" at line 576 only drives the "must be larger than 0" check (lines 578-582), and a non-parsable value throws ConfigurationException (line 587). It is set per table via `CREATE/ALTER TABLE ... WITH compaction = {'class': 'LeveledCompactionStrategy', 'sstable_size_in_mb': N}`, with no restart needed (the strategy is rebuilt from the schema change), and the warning thresholds can be suppressed with `-Dcassandra.tolerate_sstable_size=true`, which is read once into a static final at class load and so needs a restart.

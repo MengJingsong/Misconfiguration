@@ -1,0 +1,10 @@
+# native_transport_max_request_data_in_flight_per_ip — trace-back only  <!-- file: traceback-only/native_transport_max_request_data_in_flight_per_ip-applysimpleconfig-maxcqlmessagesize--autonomous.md -->
+
+| Field | Value |
+|---|---|
+| Entry pointer | `src/java/org/apache/cassandra/config/DatabaseDescriptor.java:914` |
+| Pinned source | `cassandra-5.0.9` |
+
+## A. Constraint trace
+
+**A1. The constraint.** `native_transport_max_request_data_in_flight_per_ip` is a configuration entry. It caps the bytes of in-flight native-protocol request data that one client IP may hold on the heap. It is first declared at `src/java/org/apache/cassandra/config/Config.java:296` as `public volatile DataStorageSpec.LongBytesBound ... = null`. It replaces the deprecated `native_transport_max_concurrent_requests_in_bytes_per_ip` (`Config.java:295`). The unit is bytes, expressed as a DataStorageSpec value (for example `100MiB`). The default is derived in `DatabaseDescriptor.java:654-657`: when the value is null it becomes `Runtime.getRuntime().maxMemory() / 40`, which is 1/40 of the max JVM heap (-Xmx). The check at `DatabaseDescriptor.java:914-915` runs only when `native_transport_max_message_size` is set explicitly (`DatabaseDescriptor.java:907-909`). It throws a ConfigurationException if `maxCqlMessageSize` (`native_transport_max_message_size.toBytes()`, `DatabaseDescriptor.java:910`) exceeds this per-IP limit. A parallel check against the global `native_transport_max_request_data_in_flight` is at `DatabaseDescriptor.java:911-912`, whose default is maxMemory/10 (`DatabaseDescriptor.java:649-652`). It is set through the `native_transport_max_request_data_in_flight_per_ip` key in cassandra.yaml, and a restart is needed for yaml changes. It can also be changed at runtime through `DatabaseDescriptor.setNativeTransportMaxRequestDataInFlightPerIpInBytes` (`DatabaseDescriptor.java:3366-3373`), which maps -1 to maxMemory/40 and is exposed by the field being `volatile`. At runtime that setter re-derives the max message size (`DatabaseDescriptor.java:3374-3376`). It does not repeat the startup exception.

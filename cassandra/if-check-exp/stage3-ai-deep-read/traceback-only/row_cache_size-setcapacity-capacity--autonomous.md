@@ -1,0 +1,10 @@
+# row_cache_size — trace-back only  <!-- file: traceback-only/row_cache_size-setcapacity-capacity--autonomous.md -->
+
+| Field | Value |
+|---|---|
+| Entry pointer | `src/java/org/apache/cassandra/cache/NopCacheProvider.java:39` |
+| Pinned source | `cassandra-5.0.9` |
+
+## A. Constraint trace
+
+**A1. The constraint.** `row_cache_size` (formerly `row_cache_size_in_mb`) is a configuration entry that caps the off-heap memory of the row cache; the check at NopCacheProvider.java:39 (`NopCache.setCapacity`, throws UnsupportedOperationException if capacity != 0) enforces that a disabled cache cannot be given a nonzero capacity. It is first declared in `Config.java:473-474` as `public DataStorageSpec.LongMebibytesBound row_cache_size = new DataStorageSpec.LongMebibytesBound("0MiB")`, with `@Replaces(oldName = "row_cache_size_in_mb", ...)` at Config.java:473. Unit is mebibytes (MiB), read by `DatabaseDescriptor.getRowCacheSizeInMiB()` (DatabaseDescriptor.java:3916-3918, `conf.row_cache_size.toMebibytes()`). Default is a hard-coded 0MiB (Config.java:474), repeated in conf/cassandra.yaml:564 (`row_cache_size: 0MiB`, "Default value is 0, to disable row caching"), so row caching is disabled by default. `CacheService.initRowCache` (CacheService.java:146-147) selects `NopCacheProvider` when `getRowCacheSizeInMiB() > 0` is false, otherwise the class from `row_cache_class_name` (default OHCProvider, Config.java:472); this choice is made once at startup, so changing the yaml value requires a restart. At runtime the capacity can be changed via JMX `CacheServiceMBean.setRowCacheCapacityInMB` (CacheServiceMBean.java:54), implemented at CacheService.java:327-333 as `rowCache.setCapacity(capacity * 1024 * 1024)` (bytes); on a NopCache any nonzero value is rejected (NopCacheProvider.java:39-43), so enabling the cache from 0 needs a restart with a positive `row_cache_size`. `DatabaseDescriptor.setRowCacheSizeInMiB` (DatabaseDescriptor.java:3922-3924) only updates the config object. No -D system property sets it.

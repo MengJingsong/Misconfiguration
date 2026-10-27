@@ -1,0 +1,10 @@
+# max_shard_split — trace-back only  <!-- file: traceback-only/max_shard_split-getnumshards-count--autonomous.md -->
+
+| Field | Value |
+|---|---|
+| Entry pointer | `src/java/org/apache/cassandra/db/compaction/unified/Controller.java:305` |
+| Pinned source | `cassandra-5.0.9` |
+
+## A. Constraint trace
+
+**A1. The constraint.** MAX_SHARD_SPLIT is a compile-time constant (not a configuration entry or JVM property), declared in Controller.java:141 as `Math.scalb(1, MAX_SHARD_SHIFT)`, where MAX_SHARD_SHIFT = 20 is declared at Controller.java:139. It is a unitless shard-splitting factor, so MAX_SHARD_SPLIT = 2^20 = 1048576 (a multiple of baseShardCount, so the maximum shard count is 1048576 * baseShardCount). The check at Controller.java:305 sits in `getNumShards(double localDensity)` (declared at Controller.java:264) and clamps `count`, which is computed at Controller.java:304 as `localDensity / (targetSSTableSize * INVERSE_SQRT_2 * baseShardCount)`. The clamp therefore bounds how finely UCS splits a very dense (large) local data set into shards, and so how many sstables per compaction, when `sstableGrowthModifier == 0`. The compared value `count` is derived from two real settings. `targetSSTableSize` is the `target_sstable_size` compaction option (TARGET_SSTABLE_SIZE_OPTION, Controller.java:80), whose default is DEFAULT_TARGET_SSTABLE_SIZE (Controller.java:81-82), read from `CassandraRelevantProperties.UCS_TARGET_SSTABLE_SIZE` (`unified_compaction.target_sstable_size`, default "1GiB", CassandraRelevantProperties.java:615), with a 1 MiB minimum (MIN_TARGET_SSTABLE_SIZE, Controller.java:83). `baseShardCount` defaults to DEFAULT_BASE_SHARD_COUNT (Controller.java:77-78), read from `unified_compaction.base_shard_count` (default "4", CassandraRelevantProperties.java:609). The two settings can be set with a -D JVM property, which needs a restart, or per table through the UCS compaction options, which are read when the controller is created at Controller.java:432-434. MAX_SHARD_SPLIT itself is hard-coded and not settable at runtime, so changing it requires recompiling.

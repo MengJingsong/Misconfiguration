@@ -1,0 +1,10 @@
+# internode_application_receive_queue_reserve_endpoint_capacity — trace-back only  <!-- file: traceback-only/internode_application_receive_queue_reserve_endpoint_capacity-applysimpleconfig-maxmessagesize--autonomous.md -->
+
+| Field | Value |
+|---|---|
+| Entry pointer | `src/java/org/apache/cassandra/config/DatabaseDescriptor.java:978` |
+| Pinned source | `cassandra-5.0.9` |
+
+## A. Constraint trace
+
+**A1. The constraint.** `internode_application_receive_queue_reserve_endpoint_capacity` is a configuration entry that caps the memory (in-flight inbound internode message bytes) reserved per remote endpoint across all links from that endpoint; it is checked at `src/java/org/apache/cassandra/config/DatabaseDescriptor.java:978` (inside `applySimpleConfig`) as `maxMessageSize > conf.internode_application_receive_queue_reserve_endpoint_capacity.toBytes()`, where `maxMessageSize` is `conf.internode_max_message_size.toBytes()` (line 976), so startup fails with a ConfigurationException (line 979) if the max internode message size exceeds this per-endpoint reserve. It is first declared at `src/java/org/apache/cassandra/config/Config.java:259` as a `DataStorageSpec.IntBytesBound` (legacy name `..._in_bytes` via `@Replaces`, line 258); unit is bytes (yaml min unit B, accepts e.g. MiB, `conf/cassandra.yaml:1384`), default is the hard-coded literal `"128MiB"` (Config.java:259, repeated in the commented-out yaml entry at `conf/cassandra.yaml:1390`), not derived from heap or other settings. It is set via the yaml key of the same name (or the deprecated `_in_bytes` key); it is read through `DatabaseDescriptor.getInternodeApplicationReceiveQueueReserveEndpointCapacityInBytes()` (DatabaseDescriptor.java:3045-3048), and no setter or JMX/-D override was found in these files, so a change requires a node restart. The compared operand `internode_max_message_size` is declared at Config.java:239 with no default (null); when unset, it is derived at DatabaseDescriptor.java:992-996 as the min of the receive and send per-endpoint reserve capacities, so the check at line 978 only runs when it is explicitly set.

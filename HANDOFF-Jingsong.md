@@ -263,3 +263,111 @@ Findings / upstream or doc candidates (JIRA first): `LIMIT` and `PER PARTITION L
 `predicted-negative.md`: the `DataLimits.java:414/:417` row and the `:509/:511/:986` row were removed; the `:993/:1000/:1041` row stays (`:1041` is open), as do the `AtomicBTreePartition` rows.
 Leftovers: `~/s4-b11-{m71,g72,g73,q77,b78}*` on pc07; `~/s4-b11-{c74,p75,c76,l79,g80}*` on pc12; no process running.
 Next: CSV order 7 (decision), 81 on (`DataLimits.java:1041`, `AtomicBTreePartition`, ...).
+
+## Trace-back only (set A rows 81-159)
+
+2026-10-27. Jingsong asked for the "trace back" step alone for every set A target that still had no
+case file (CSV rows 81-159; row 7 skipped, it is settled as a second check site of
+`prepared_statements_cache_size`). **Not case files:** these are unfinished, kept out of `cases/`,
+`_INDEX.md`, `predicted-negative.md` and the CSV (`case_file` and `stage4` columns left empty).
+
+- **Where:** `cassandra/if-check-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
+  field table (only Entry pointer and Pinned source) and **A1. The constraint** filled; A2-A5, B, C and D are absent.
+- **How:** one fresh Agent-tool subagent per target, 8 batches (10 x 7, then 9), each given only
+  `file:line` (or helper), a read-only copy of the source (`~/cassandra-5.0.9`) and the A1 definition.
+  Agents wrote A1 to a scratch file; the stem and file were filed by hand. Stems follow
+  `<constraint>-<method>-<operand>` (lowercased by the filing script; `-2` added when taken).
+- **Checked by hand:** the enclosing method in stems (`applySimpleConfig` for the `DatabaseDescriptor` rows),
+  and line numbers the agents flagged as unverified (rows 125, 134, 137, 159; fixed where off by one).
+  Other citations were not re-checked.
+- **Result:** 69 targets trace to a constraint, 10 are marked "no constraint" (bookkeeping or a format check).
+  Many traced constraints are hard-coded constants or format limits, not memory or disk caps: the A1 text says so; no
+  estimate was recorded.
+- **Duplicates by constraint:** rows 82/83/84/139 (`EXCESS_WASTE_BYTES`, rows 82 and 84 are the same check), 100/101 (`min_compress_ratio`), 115/116
+  (`repair_session_space`), 134/135 (`sstable_size_in_mb`), 143/144 (`InMemoryTrie` soft/hard limit), 145/154/155 (`max_top_k`), 127/128/130/131/132 (`counter_cache_size`/`row_cache_size`).
+  These can share one design when written up.
+- **Rule (2026-10-27):** for trace-back-only work, `traceback-only/_INDEX.md` records only the cases whose constraint type is **not** a yaml entry or a JVM (`-D`) property. Yaml and JVM-property cases still get their file in the folder but no index row.
+- **Index:** `traceback-only/_INDEX.md` (constraint, constraint type, case file) lists the 48 cases whose type is not a yaml entry or JVM property (32 hard-coded constants, 6 per-table/per-index options, 10 with no constraint); the other 31 are not listed.
+- **Next:** turn rows into full cases (A2-A5, B, estimate), or decide per row that a line is not a case.
+
+| Row | Target | File stem |
+|---|---|---|
+| 81 | `db/filter/DataLimits.java:1041` | `default_page_size-cqlgroupbylimits_onclose-rowlimit` |
+| 82 | `helper db.partitions.AtomicBTreePartition.updateWastedAllocationTracker()` | `excess_waste_bytes-updatewastedallocationtracker-wastedbytes` |
+| 83 | `helper db.partitions.AtomicBTreePartition.useLock()` | `excess_waste_bytes-uselock-wastetracker` |
+| 84 | `db/partitions/AtomicBTreePartition.java:272` | `excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2` |
+| 85 | `db/virtual/LogMessagesTable.java:193` | `cassandra.virtual.logs.max.rows-boundedlinkedlist.add-maxsize` |
+| 86 | `diag/store/DiagnosticEventMemoryStore.java:56` | `diagnostic_event_memory_store_max_size-store-keyhead` |
+| 87 | `hints/ChecksummedDataInput.java:161` | `none-checklimit-length` (no constraint) |
+| 88 | `hints/HintsWriter.java:205` | `hints_write_buffer_size-append-hint_remaining` |
+| 89 | `hints/HintsWriter.java:214` | `write_buffer_size-append-hint` |
+| 90 | `index/internal/CassandraIndex.java:618` | `max_unsigned_short-validateindexedvalue-value_remaining` |
+| 91 | `index/sai/disk/v1/bbtree/BlockBalancedTreeWriter.java:528` | `max_points_in_leaf_node-add-leafvaluecount` |
+| 92 | `index/sai/disk/v1/bbtree/BlockBalancedTreeWriter.java:651` | `max_array_length-checkmaxleafnodecount-numleaves` |
+| 93 | `index/sai/disk/v1/bitpack/AbstractBlockPackedWriter.java:62` | `block_size-add-blockindex` |
+| 94 | `index/sai/disk/v1/postings/PostingsWriter.java:222` | `block_size-writeposting-blocksize` |
+| 95 | `index/sasi/disk/AbstractTokenTreeBuilder.java:297` | `max_offset-createentry-offset` |
+| 96 | `index/sasi/disk/AbstractTokenTreeBuilder.java:323` | `overflow_trailer_capacity-createoverflowentry-overflowcollisions` |
+| 97 | `index/sasi/disk/AbstractTokenTreeBuilder.java:520` | `tokens_per_block-add-pos` |
+| 98 | `index/sasi/disk/OnDiskIndexBuilder.java:497` | `super_block_size-flushsuperblock-datablockscnt` |
+| 99 | `index/sasi/disk/OnDiskIndexBuilder.java:598` | `max_keys_sparse-addinternal-keys` |
+| 100 | `io/compress/CompressedSequentialWriter.java:160` | `min_compress_ratio-flushdata-maxcompressedlength` |
+| 101 | `io/compress/CompressedSequentialWriter.java:163` | `min_compress_ratio-flushdata-maxcompressedlength-2` |
+| 102 | `io/util/SafeMemoryWriter.java:52` | `dob_doubling_threshold_mb-resizeto-newcapacity` |
+| 103 | `locator/SimpleSeedProvider.java:110` | `seed_count_warn_threshold-getseeds-seeds_size` |
+| 104 | `net/BufferPoolAllocator.java:121` | `networking_cache_size-capacity-newcapacity` |
+| 105 | `utils/logging/VirtualTableAppender.java:125` | `logs_virtual_table_default_rows-addtobuffer-messagebuffer_size` |
+| 106 | `utils/memory/NativeAllocator.java:166` | `max_region_size-tryswapregion-minsize` |
+| 107 | `cache/NopCacheProvider.java:39` | `row_cache_size-setcapacity-capacity` |
+| 108 | `config/DatabaseDescriptor.java:911` | `native_transport_max_request_data_in_flight-applysimpleconfig-maxcqlmessagesize` |
+| 109 | `config/DatabaseDescriptor.java:914` | `native_transport_max_request_data_in_flight_per_ip-applysimpleconfig-maxcqlmessagesize` |
+| 110 | `config/DatabaseDescriptor.java:978` | `internode_application_receive_queue_reserve_endpoint_capacity-applysimpleconfig-maxmessagesize` |
+| 111 | `config/DatabaseDescriptor.java:981` | `internode_application_receive_queue_reserve_global_capacity-applysimpleconfig-maxmessagesize` |
+| 112 | `config/DatabaseDescriptor.java:984` | `internode_application_send_queue_reserve_endpoint_capacity-applysimpleconfig-maxmessagesize` |
+| 113 | `config/DatabaseDescriptor.java:987` | `internode_application_send_queue_reserve_global_capacity-applysimpleconfig-maxmessagesize` |
+| 114 | `config/DatabaseDescriptor.java:1016` | `max_space_usable_for_compactions_in_percentage-applysimpleconfig-max_space_usable_for_compactions_in_percentage` |
+| 115 | `config/DatabaseDescriptor.java:4093` | `repair_session_space-setrepairsessionspaceinmib-sizeinmib` |
+| 116 | `config/DatabaseDescriptor.java:4096` | `repair_session_space-setrepairsessionspaceinmib-sizeinmib-2` |
+| 117 | `config/DatabaseDescriptor.java:5347` | `repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value` |
+| 118 | `config/GuardrailsOptions.java:1219` | `guardrail_size_fail_threshold-validatewarnlowerthanfail-fail` |
+| 119 | `config/GuardrailsOptions.java:1257` | `data_disk_usage_max_disk_size-validatedatadiskusagemaxdisksize-maxdisksize` |
+| 120 | `config/StorageAttachedIndexOptions.java:41` | `sai_options.segment_write_buffer_size-validate-segment_write_buffer_size` |
+| 121 | `cql3/QueryProcessor.java:251` | `max_unsigned_short-validatekey-key.remaining` |
+| 122 | `cql3/Validation.java:47` | `none-validatekey-key_remaining` (no constraint) |
+| 123 | `cql3/functions/UDFDataType.java:177` | `none-compose-buffer_remaining` (no constraint) |
+| 124 | `cql3/functions/types/CodecUtils.java:101` | `native_protocol_v1_v2_collection_size_limit-writesize-size` |
+| 125 | `cql3/functions/types/CodecUtils.java:250` | `native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize` |
+| 126 | `cql3/statements/schema/CreateIndexStatement.java:213` | `name_length-validatecustomindexcolumnname-name` |
+| 127 | `helper db.ColumnFamilyStore.isCounterCacheEnabled()` | `counter_cache_size-iscountercacheenabled-capacity` |
+| 128 | `helper db.ColumnFamilyStore.isRowCacheEnabled()` | `row_cache_size-isrowcacheenabled-capacity` |
+| 129 | `db/ColumnFamilyStore.java:2185` | `filename_length-validatesnapshotname-snapshotname` |
+| 130 | `db/ColumnFamilyStore.java:2501` | `counter_cache_size-getcachedcounter-capacity` |
+| 131 | `db/ColumnFamilyStore.java:2508` | `counter_cache_size-putcachedcounter-capacity` |
+| 132 | `db/CounterMutation.java:213` | `counter_cache_size-processmodifications-countercache_getcapacity` |
+| 133 | `db/RangeTombstoneList.java:213` | `none-addall-size` (no constraint) |
+| 134 | `db/compaction/LeveledCompactionStrategy.java:78` | `sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize` |
+| 135 | `db/compaction/LeveledCompactionStrategy.java:81` | `sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize-2` |
+| 136 | `db/compaction/unified/Controller.java:305` | `max_shard_split-getnumshards-count` |
+| 137 | `db/compaction/unified/Controller.java:613` | `min_sstable_size-validateoptions-sizeinbytes` |
+| 138 | `db/monitoring/MonitoringTask.java:221` | `cassandra.monitoring_max_operations-offer-maxoperations` |
+| 139 | `db/partitions/AtomicBTreePartition.java:283` | `excess_waste_offset-updatewastedallocationtracker-delta` |
+| 140 | `db/partitions/AtomicBTreePartition.java:300` | `no_constraint-avoidreservedvalues-wastetracker` (no constraint) |
+| 141 | `db/rows/ThrottledUnfilteredIterator.java:234` | `repair_mutation_repair_rows_per_batch-throttle-maxbatchsize` |
+| 142 | `db/tries/InMemoryTrie.java:64` | `cassandra_memtable_row_overhead_size-static_initializer-limitinmb` |
+| 143 | `db/tries/InMemoryTrie.java:145` | `trie_size_threshold-allocateblock-allocatedpos` |
+| 144 | `db/tries/InMemoryTrie.java:148` | `trie_2gb_hard_limit-allocateblock-leadbit` |
+| 145 | `index/sai/StorageAttachedIndex.java:503` | `sai_vector_search_max_top_k-validate-command.limits.count` |
+| 146 | `index/sai/StorageAttachedIndex.java:791` | `sai_term_size_guardrail-validatetermsizeforcell-cellbuffer_remaining` |
+| 147 | `index/sai/disk/v1/SAICodecUtils.java:129` | `block_packed_max_block_size-checkblocksize-blocksize` |
+| 148 | `index/sai/disk/v1/SSTableIndexWriter.java:221` | `none-addterm-term_remaining` (no constraint) |
+| 149 | `index/sai/disk/v1/segment/SegmentBuilder.java:260` | `last_valid_segment_row_id-exceedssegmentlimit-sstablerowid` |
+| 150 | `helper index.sai.disk.v1.segment.VectorIndexSegmentSearcher.shouldUseBruteForce()` | `no_constraint-shouldusebruteforce-numrows` (no constraint) |
+| 151 | `index/sai/disk/v1/vector/RandomAccessReaderAdapter.java:69` | `none-readfully-dest_length` (no constraint) |
+| 152 | `index/sai/disk/v1/vector/RandomAccessReaderAdapter.java:117` | `none-read-count` (no constraint) |
+| 153 | `index/sai/memory/TrieMemoryIndex.java:228` | `max_recursive_key_length-addterm-term` |
+| 154 | `index/sai/memory/VectorMemoryIndex.java:190` | `sai_vector_search_max_top_k-orderby-resultkeys` |
+| 155 | `index/sai/memory/VectorMemoryIndex.java:229` | `sai_vector_search_max_top_k-orderresultsby-resultsinrange_size` |
+| 156 | `index/sasi/conf/IndexMode.java:190` | `max_compaction_flush_memory_in_mb-getmode-maxmembytes` |
+| 157 | `schema/KeyspaceMetadata.java:68` | `schemaconstants_name_length-validatekeyspacename-keyspacename` |
+| 158 | `schema/TableMetadata.java:517` | `table_name_length-validatetablename-name_length` |
+| 159 | `utils/memory/NativeAllocator.java:194` | `none-allocateoversize-peer` (no constraint) |

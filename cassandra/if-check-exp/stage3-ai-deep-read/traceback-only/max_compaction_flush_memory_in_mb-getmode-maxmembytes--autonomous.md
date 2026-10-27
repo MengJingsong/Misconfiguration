@@ -1,0 +1,10 @@
+# max_compaction_flush_memory_in_mb — trace-back only  <!-- file: traceback-only/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous.md -->
+
+| Field | Value |
+|---|---|
+| Entry pointer | `src/java/org/apache/cassandra/index/sasi/conf/IndexMode.java:190` |
+| Pinned source | `cassandra-5.0.9` |
+
+## A. Constraint trace
+
+**A1. The constraint.** `max_compaction_flush_memory_in_mb` is a per-index SASI option (a key in the index options map, not a cassandra.yaml entry or JVM property), declared as the string constant INDEX_MAX_FLUSH_MEMORY_OPTION at `src/java/org/apache/cassandra/index/sasi/conf/IndexMode.java:58`; the target line `IndexMode.java:190` (inside `getMode(ColumnMetadata, Map<String,String>)`, declared at line 126) is only a sanity cap that rejects a configured value above 100 GiB (`maxMemBytes > 100L * 1073741824`) and, per lines 192-193, logs an error and reverts to DEFAULT_MAX_MEM_BYTES. The unit of the option is MiB (line 188 multiplies the parsed Long by 1048576L to get bytes, held in `maxMemBytes`, lines 186-188); the resulting limit is stored in the `maxCompactionFlushMemoryInBytes` field (line 65, assigned at line 73). The default is DEFAULT_MAX_MEM_BYTES (line 60) = (long)(1073741824 * 0.15), where 0.15 is INDEX_MAX_FLUSH_DEFAULT_MULTIPLIER (line 59), i.e. about 161 MB (0.15 GiB), although the comment on line 60 and the log text on line 192 say "1G"/"1GB" (a discrepancy in the source); NOT_INDEXED uses 0 (line 46). It is used as the memory cap for the SASI index write buffer during non-flush operations: `PerSSTableIndexWriter.java:368` returns 1073741824L (1 GiB, hard-coded) for OperationType.FLUSH and `columnIndex.getMode().maxCompactionFlushMemoryInBytes` otherwise. It is set only through the index's options map (`getMode` reads `indexOptions.get(INDEX_MAX_FLUSH_MEMORY_OPTION)` at line 186), i.e. in the WITH OPTIONS clause when the SASI index is created; whether and how it can be changed later, and whether a restart is needed, is not verified in the source I read (no yaml key, -D property or JMX setting for it was found by grep in src/java).
