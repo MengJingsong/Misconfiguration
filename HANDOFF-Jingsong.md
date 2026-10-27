@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 108 | 78 |
+| Set A | 159 | 118 | 78 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -403,4 +403,6 @@ Two corrections found while doing this: `QueryProcessor.java:251` is the empty-k
 
 **Batch 3 (10 cases, rows 99-101, 121-126, 129):** all 10 negative: `MAX_KEYS_SPARSE`; `min_compress_ratio` at two sites (`CompressedSequentialWriter.java:160`, `:163`; a nonzero ratio can only make SSTables larger); four with no constraint (the empty-key tests at `QueryProcessor.java:251` and `Validation.java:47`, and `UDFDataType.java:177`) or a wire-format literal (`CodecUtils.java:101`, `:250`, native protocol v1/v2; the agent notes the server rejects v1/v2, so that branch is effectively unreachable); `SchemaConstants.NAME_LENGTH` (48) and `FILENAME_LENGTH` (255, snapshot names, only when `cassandra.snapshot.validation` is true). Row 121 got a corrected input (its trace-back had followed the adjacent `:259` size check) and was written as a no-constraint case. Agents linked the declaration and if statement themselves; rows 121 and 125 needed one added A3 sentence. Fixed by hand: `~248-250` in row 99 (now `253-255`); row 101's `flushData` lines (160, 163) were checked, the others not. Several files carry "not verified" notes.
 
-**Remaining (18 of 48), CSV rows:** 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: 10 of these, then the last 8.
+**Batch 4 (10 cases, rows 133-135, 137, 139, 140, 144, 147-149):** 9 negative, 1 positive. Negative: `RangeTombstoneList.java:213` (a performance heuristic, no constraint), LCS `sstable_size_in_mb` at two sites (`:78` and `:81`, both only log warnings; the "ALTER needs no restart" claim is inferred from method names and flagged as not verified in the files), UCS `min_sstable_size` (compares two configured values), `EXCESS_WASTE_OFFSET`, `avoidReservedValues` (no constraint), `AbstractBlockPackedWriter.MAX_BLOCK_SIZE`, the empty-term skip at `SSTableIndexWriter.java:221` (no constraint; nearest cap `sai_options.segment_write_buffer_size`), and `SegmentBuilder.LAST_VALID_SEGMENT_ROW_ID` (row-id span, not bytes; real check at `:266`, the given `:260` is the empty-builder test, so both are linked). Positive: the hard 2 GB limit of one `InMemoryTrie` (`InMemoryTrie.java:148`), with the caveat that it is per trie and a backstop the flush path is meant never to reach; its entry moved to `predicted-positive.md`. Known weak spots: the B2h positive control of row 135 is clumsy (it only shows the max file size following the knob), and several files carry "not verified" notes. Citations not re-checked line by line.
+
+**Remaining (8 of 48), CSV rows:** 150-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: these 8 (the last), then delete `traceback-only/`.

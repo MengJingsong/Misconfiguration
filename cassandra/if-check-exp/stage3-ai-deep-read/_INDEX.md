@@ -180,6 +180,16 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize`](cases/native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`name_length-validatecustomindexcolumnname-name`](cases/name_length-validatecustomindexcolumnname-name--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`filename_length-validatesnapshotname-snapshotname`](cases/filename_length-validatesnapshotname-snapshotname--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`none-addall-size`](cases/none-addall-size--autonomous.md) | autonomous | negative |  |  | none |
+| [`sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize`](cases/sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize--autonomous.md) | autonomous | negative |  |  | per-table/per-index option |
+| [`sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize-2`](cases/sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize-2--autonomous.md) | autonomous | negative |  |  | per-table/per-index option |
+| [`min_sstable_size-validateoptions-sizeinbytes`](cases/min_sstable_size-validateoptions-sizeinbytes--autonomous.md) | autonomous | negative |  |  | per-table/per-index option |
+| [`excess_waste_offset-updatewastedallocationtracker-delta`](cases/excess_waste_offset-updatewastedallocationtracker-delta--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`no_constraint-avoidreservedvalues-wastetracker`](cases/no_constraint-avoidreservedvalues-wastetracker--autonomous.md) | autonomous | negative |  |  | none |
+| [`trie_2gb_hard_limit-allocateblock-leadbit`](cases/trie_2gb_hard_limit-allocateblock-leadbit--autonomous.md) | autonomous | positive |  |  | hard-coded constant |
+| [`block_packed_max_block_size-checkblocksize-blocksize`](cases/block_packed_max_block_size-checkblocksize-blocksize--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`none-addterm-term_remaining`](cases/none-addterm-term_remaining--autonomous.md) | autonomous | negative |  |  | none |
+| [`last_valid_segment_row_id-exceedssegmentlimit-sstablerowid`](cases/last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -726,3 +736,13 @@ dated amendment adds a line here with its date and the new hash.
 | `native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize--autonomous.md` | `3641143e3fac0574e4b055ab86a5c1b1993df644d84c246fc0ea8971286b15a2` | 2026-10-27 |
 | `name_length-validatecustomindexcolumnname-name--autonomous.md` | `a4ef10ea1abf5bb6d70e20d350be13c8cb4370ee4b4c2dd48db4bc5582ad2802` | 2026-10-27 |
 | `filename_length-validatesnapshotname-snapshotname--autonomous.md` | `fe09a988f22dc72396328b34d8d340896511c399f416a13bf52507ec60f9bedc` | 2026-10-27 |
+| `none-addall-size--autonomous.md` | `79f74fe3d86702c5e34e0448e7621751a1cc0ad56354e9765b56735daa83d7f2` | 2026-10-27 |
+| `sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize--autonomous.md` | `584f27eb28d88ce7f91e87b0ee05379c5646754e23be88051da9597d0d37c2a5` | 2026-10-27 |
+| `sstable_size_in_mb-leveledcompactionstrategy-configuredmaxsstablesize-2--autonomous.md` | `199693e94740663f079db987ae050f4a8205485320fd61db0ddca23ad4f641bf` | 2026-10-27 |
+| `min_sstable_size-validateoptions-sizeinbytes--autonomous.md` | `597350c83760f66d5d7876c04cd941725c1cc042a36c50ea992a5127b7d15153` | 2026-10-27 |
+| `excess_waste_offset-updatewastedallocationtracker-delta--autonomous.md` | `9e8b79c3e8056ece5e1a5f6a30be51ce83c7b4499f5540329825ed02647ca07e` | 2026-10-27 |
+| `no_constraint-avoidreservedvalues-wastetracker--autonomous.md` | `05921f7449b219f79ef8638ec31a1a0195477c6d1fd11e3cfe1e78de37966c2a` | 2026-10-27 |
+| `trie_2gb_hard_limit-allocateblock-leadbit--autonomous.md` | `6004e6b33bf9a6b7c1cfdd772704e69f7283c48b12a7a073b7b6feaf632aa822` | 2026-10-27 |
+| `block_packed_max_block_size-checkblocksize-blocksize--autonomous.md` | `17a6ad1b23438e070dad83b280e0cee30ec1396f871822dfc6d4697d38906c1b` | 2026-10-27 |
+| `none-addterm-term_remaining--autonomous.md` | `9e681a379afc2b7304ce9df712586e3f1b4cfcdd970c0c2420729602ca7c30e0` | 2026-10-27 |
+| `last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous.md` | `66ac886dd0952b4abc312e90b10db605e8f8b5d5570cf9893d7fa2df40953934` | 2026-10-27 |
