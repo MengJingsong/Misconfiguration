@@ -121,3 +121,10 @@ denominator; without the field, "stage 3 progress" has no coherent answer.
   question instead.
 - **A file's agent is its name.** `--autonomous` or `--guided`; a file is never
   renamed to the other.
+- **Config-type and non-config type.** Every case's constraint is classed by where its
+  value comes from. **Config-type:** a yaml entry (`cassandra.yaml`) or a JVM property
+  (`-D`, e.g. a `CassandraRelevantProperties` constant); an operator can set it without
+  changing code. **Non-config type:** everything else: a per-table or per-index option,
+  a hard-coded constant, a runtime-queried value, a query parameter (CQL `LIMIT` and the
+  like), or no constraint. Name the class in the case file (A1 of an autonomous file,
+  "Limit type" of a guided one), and keep the finer type in the `_INDEX.md` Type column.
