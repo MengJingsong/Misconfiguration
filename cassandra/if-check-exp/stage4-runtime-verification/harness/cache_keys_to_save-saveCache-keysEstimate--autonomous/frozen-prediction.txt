@@ -1,0 +1,24 @@
+**B2f. Predictions.** Items saved = min(N, P) for N > 0, P for N = 0; reloaded `size()` equals items saved (P for N=0 and N>=P); file length is roughly linear in items: length(N=1000) ~ 10 * length(N=100) within 10% (excluding a fixed header and metadata of tens of bytes and per-SSTable metadata). N=100: the persisted keys are the hot 100. Race test: items written <= 10000 even though the cache reaches 15000. Live `size()` after save is unchanged for every N. Wrong if: items > N for any N in (0, P); file length independent of N; or live size changes with N.
+
+**B2g. Readings.**
+| Observation | Meaning |
+|---|---|
+| items == min(N,P), length monotone in N | claim holds |
+| items > N for some 0 < N < P | claim refuted (cap does not bind) |
+| items < min(N,P) with nothing dropped | claim holds but counter counts skipped keys; check A3(a) |
+| live size changes with N | claim refuted: setting also affects memory |
+| race test writes > size at construction | line 388 not effective; refuted |
+| heap during save grows with N | transient heap cost is real (record, side finding) |
+
+**B3f. Predictions.** Saved items (log) = min(N, live entries) for every cache; file size at N=100 is under 1% of N=all and at 10000 is about 5% of N=all (200000 entries), within about 20% for variable key and SSTable metadata. Live entries (JMX `Entries`) are about 200000 (key) in all runs: unchanged by N. Heap and off-heap totals in steady state differ by < 5% between settings (aside from the transient bump during a save). The runtime `nodetool setcachekeystosave` takes effect at the next save without restart. After restart with N=100, `nodetool info` shows about 100 entries per cache, not 200000. Wrong if: file sizes independent of N; live entries or steady heap/off-heap follow N; the change needs a restart.
+
+**B3g. Readings.**
+| Observation | Meaning |
+|---|---|
+| saved items and file size scale with N, plateau at the live population | claim holds |
+| live entries and steady memory unchanged by N | claim holds for the memory side (setting does not touch memory) |
+| file size independent of N | claim refuted |
+| steady heap/off-heap changes with N | claim refuted: also affects memory |
+| after restart entries ~ N | file really limits warm cache |
+| file exceeds N * entry size by a large factor | per-entry size larger than assumed (note, claim on count still holds) |
+

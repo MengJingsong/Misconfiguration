@@ -1,0 +1,17 @@
+run=run1 arm=S size=4G commitlog_total_space=256MiB N=6000000 start=2026-10-26T19:11:01Z
+volume avail at start: 4294967296 bytes
+yaml: cluster_name: 's4-b8-fs' commitlog_directory: /users/jason92/s4-b8-fs-mnt/node/commitlog disk_failure_policy: stop       - seeds: "127.0.3.1:7000" commitlog_total_space: 256MiB listen_address: 127.0.3.1 rpc_address: 127.0.3.1 auto_snapshot: false     - class_name: org.apache.cassandra.security.JKSKeyProvider     - class_name: BinAuditLogger data_file_directories:     - /users/jason92/s4-b8-fs-mnt/node/data 
+node pid=2688239
+node up at 2026-10-26T19:12:10Z; ps java RSS check: 1761188 KiB
+startup WARN lines: 1: [main] 2026-10-26T19:11:04,027 DatabaseDescriptor.java:727 - Only 4.000GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots|
+EXPECTED OK: [S] exactly one 'free across all data volumes' WARN at start
+stress start 2026-10-26T19:12:10Z: n=6000000 col n=5 size=200 threads=32 (max 900s)
+stress end 2026-10-26T19:26:30Z: stress_exit=0
+stress.out lines: 32527411
+system.log: ERROR lines=9 FSWriteError/No space=6 disk_failure_policy/stop=3
+org.apache.cassandra.io.FSWriteError: java.io.IOException: No space left on device
+Caused by: java.io.IOException: No space left on device
+org.apache.cassandra.io.FSWriteError: java.io.IOException: No space left on device
+free-space WARN lines total: 1 (re-read at end)
+2026-10-26T19:29:18Z done
+cleanup: node pid 2688239 alive=no; mount left=0

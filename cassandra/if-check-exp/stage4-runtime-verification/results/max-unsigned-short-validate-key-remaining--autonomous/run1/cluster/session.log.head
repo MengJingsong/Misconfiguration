@@ -1,0 +1,65 @@
+[2026-10-26 15:48:46] yaml tail: cluster_name: uk; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.7.1; rpc_address: 127.0.7.1; commitlog_directory: /dev/shm/s4-b8-uk/node/commitlog; hints_directory: /dev/shm/s4-b8-uk/node/hints; saved_caches_directory: /dev/shm/s4-b8-uk/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-uk/node/cdc_raw; memtable_heap_space: 512MiB; memtable_offheap_space: 512MiB; commitlog_total_space: 1GiB; memtable_allocation_type: offheap_objects; auto_snapshot: false; memtable_cleanup_threshold: 0.99; native_transport_timeout: 30s; write_request_timeout: 20000ms
+[2026-10-26 15:48:46] + bin/cassandra -p /dev/shm/s4-b8-uk/node/cassandra.pid > /dev/shm/s4-b8-uk/node/stdout.txt 2>&1
+
+  rc=0
+[2026-10-26 15:48:48] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:48:49] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:48:53] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:48:54] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:48:58] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:48:59] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:04] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:05] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:09] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:10] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:14] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:15] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:19] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:20] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:24] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:26] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:30] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:31] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:35] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:36] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:40] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:41] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:46] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:47] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:51] + bin/nodetool -h 127.0.0.1 -p 7170 status
+[2026-10-26 15:49:52] + bin/nodetool -h 127.0.0.1 -p 7170 statusbinary
+[2026-10-26 15:49:53] UN and serving after 65 s
+[2026-10-26 15:49:53] life 1 started, pid 2862904, pools 512 MiB
+[2026-10-26 15:49:53] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 schema t_pre
+{"created": "t_pre"}
+
+[2026-10-26 15:49:54] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 write t_pre 65535 5 1
+{"ok": 5, "errors": 0, "messages": {}, "seconds": 0.0}
+
+[2026-10-26 15:49:54] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 write t_pre 65536 5 2
+{"ok": 0, "errors": 5, "messages": {"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 5}, "seconds": 0.0}
+
+[2026-10-26 15:49:55] EXPECTED: precheck: 5 writes at K=65535 succeed - yes [{}]
+[2026-10-26 15:49:55] EXPECTED: precheck: 5 writes at K=65536 fail with the exact message - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 5}]
+[2026-10-26 15:49:55] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 drop t_pre
+{"dropped": "t_pre"}
+
+[2026-10-26 15:49:55] --- arm k16: K=16 N=10000 ---
+[2026-10-26 15:49:55] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 schema t_k16
+{"created": "t_k16"}
+
+[2026-10-26 15:49:57] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 write t_k16 16 10000 11
+{"ok": 10000, "errors": 0, "messages": {}, "seconds": 1.9}
+
+[2026-10-26 15:50:00] + bin/nodetool -h 127.0.0.1 -p 7170 tablestats ks.t_k16
+[2026-10-26 15:50:01] + bin/nodetool -h 127.0.0.1 -p 7170 flush ks t_k16
+[2026-10-26 15:50:04] arm k16: ok=10000 errors=0 msgs={} write_s=3 data+index=442528 (N*K=160000) memtable_data(pre-flush)=530000 off_heap=490000 rss_anon peak=2841374720 MEMTABLE_LIMIT flushes=0 first usage=None
+[2026-10-26 15:50:04] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 drop t_k16
+{"dropped": "t_k16"}
+
+[2026-10-26 15:50:05] --- arm k1024: K=1024 N=10000 ---
+[2026-10-26 15:50:05] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 schema t_k1024
+{"created": "t_k1024"}
+
+[2026-10-26 15:50:07] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max-unsigned-short-validate-key-remaining--autonomous/writer.py 127.0.7.1 write t_k1024 1024 10000 12
+{"ok": 10000, "errors": 0, "messages": {}, "seconds"

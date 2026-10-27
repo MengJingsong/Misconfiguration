@@ -1,0 +1,46 @@
+HOLDS     unit: console echo in ant.log (1851 keys) equals readings.txt (1851 keys)
+HOLDS     unit: JUnit XML testsuite header <testsuite errors="0" failures="0" hostname="node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu" name="org.apache.cassandra.db.compaction.LeveledManif (errors and failures 0)
+HOLDS     unit: every (route, table, N, flag) cell gives the same candidate in all reps (60 cells)
+HOLDS     unit: STCS candidate appears exactly from N=33 on routes R1 and R2, size = max_threshold, never on R0, never with the flag true
+HOLDS     unit: no exception, 200 L0 sstables exist on R0 (nothing refused)
+HOLDS     unit: positive control L1 bytes (before, after, target) [(31859589, 9557791, 10485760), (31859473, 9557836, 10485760), (31862598, 9558477, 10485760)]
+HOLDS     unit: one executed STCS task removes max_threshold-1 sstables from L0 (12 arms)
+INFO peak L0 per label (re-parsed from raw tablestats text): {'A': 211, 'B': 211, 'C': 209, 'D': 2}
+HOLDS     A: exit.txt "rc=0 daemons_stopped=True"
+HOLDS     A: stress errors 0, partitions 1500000
+HOLDS     A: 217 nodetool flush calls, all rc 0
+INFO A: lag-end live 1555 MiB; per-level counts [211, 5, 0, 0, 0, 0, 0, 0, 0]; stcs debug lines 7
+HOLDS     B: exit.txt "rc=0 daemons_stopped=True"
+HOLDS     B: stress errors 0, partitions 1500000
+HOLDS     B: 216 nodetool flush calls, all rc 0
+INFO B: lag-end live 1557 MiB; per-level counts [211, 0, 0, 0, 0, 0, 0, 0, 0]; stcs debug lines 0
+HOLDS     C: exit.txt "rc=0 daemons_stopped=True"
+HOLDS     C: stress errors 0, partitions 1500000
+HOLDS     C: 215 nodetool flush calls, all rc 0
+INFO C: lag-end live 1554 MiB; per-level counts [209, 5, 0, 0, 0, 0, 0, 0, 0]; stcs debug lines 0
+HOLDS     D: exit.txt "rc=0 daemons_stopped=True"
+HOLDS     D: stress errors 0, partitions 1500000
+HOLDS     D: 205 nodetool flush calls, all rc 0
+INFO D: lag-end live 1509 MiB; per-level counts [0, 10, 109, 42, 0, 0, 0, 0, 0]; stcs debug lines 0
+HOLDS     A: yaml compaction_throughput 1MiB/s, JVM flag disable_stcs_in_l0=False
+HOLDS     B: yaml compaction_throughput 1MiB/s, JVM flag disable_stcs_in_l0=False
+HOLDS     C: yaml compaction_throughput 1MiB/s, JVM flag disable_stcs_in_l0=True
+HOLDS     D: yaml compaction_throughput 0MiB/s, JVM flag disable_stcs_in_l0=False
+HOLDS     A: lag-end file bytes 1772 MiB vs tablestats live 1555 MiB vs rows x ~1050 B = 1502 MiB
+HOLDS     B: lag-end file bytes 1557 MiB vs tablestats live 1557 MiB vs rows x ~1050 B = 1502 MiB
+HOLDS     C: lag-end file bytes 1770 MiB vs tablestats live 1554 MiB vs rows x ~1050 B = 1502 MiB
+HOLDS     peak L0 A,B,C = 211, 211, 209 (>= 100)
+HOLDS     B: L0 at lag-end 211 = Data.db files on disk 211 (no compaction: every sstable is an L0 flush output), <= 216 flush calls (a call with nothing dirty makes no sstable)
+HOLDS     debug lines: A 7, B 0, C 0
+HOLDS     D peak L0 2 < half of A peak 211
+INFO A first sampled L0>32 at 1793062654.9622009 ; first debug line: ['DEBUG [CompactionExecutor:1] 2026-10-27T00:57:24,670 LeveledManifest.java:311 - L0 is too far behind, performing size-tiering there first']
+INFO A: Data.db files in the 5-s sample just before the first debug line: 40 at -1.0 s before it
+HOLDS     A: the first debug line is not before the L0 count exceeds 32 (Data.db files >= 33 at the last 5-s sample before it; the line is only written when the count is above 32, :306)
+HOLDS     A: settled per-level bytes [0, 104866027, 1040271057, 408969280, 0, 0, 0, 0, 0], below-top ratios [1.0, 0.992], L0 count 0, live 1509 vs 1555 MiB
+HOLDS     C: settled per-level bytes [0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0], below-top ratios [0.908, 0.991], L0 count 0, live 1509 vs 1554 MiB
+HOLDS     D: settled per-level bytes [0, 96970086, 1048138329, 408971217, 0, 0, 0, 0, 0], below-top ratios [0.925, 1.0], L0 count 0, live 1509 vs 1509 MiB
+HOLDS     A: truncate control 0 bytes vs 1582341117
+HOLDS     B: truncate control 0 bytes vs 1632968472
+HOLDS     C: truncate control 0 bytes vs 1582330498
+HOLDS     D: truncate control 0 bytes vs 1582350767
+SELF-CHECK: ALL HOLD

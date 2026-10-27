@@ -1,0 +1,42 @@
+CHECK ok  unit: JUnit XML 1 test, 0 failures, 0 errors 
+CHECK ok  unit t1: u50 warnings=1, log=1, count=50 (1, 1, 50, 7450, '')
+CHECK ok  unit t1: second batch warnings=1, new log lines 0, count=100 (1, 0, 100, 14900, '')
+CHECK ok  unit t1: u5 warnings=1, count=5 (1, 1, 5, 745, '')
+CHECK ok  unit t1: LOGGED 50 no warning, count 50 (0, 0, 50, 7450, '')
+CHECK ok  unit t10: u50 warnings=1, log=1, count=50 (1, 1, 50, 7450, '')
+CHECK ok  unit t10: second batch warnings=1, new log lines 0, count=100 (1, 0, 100, 14900, '')
+CHECK ok  unit t10: u5 warnings=0, count=5 (0, 0, 5, 745, '')
+CHECK ok  unit t10: LOGGED 50 no warning, count 50 (0, 0, 50, 7450, '')
+CHECK ok  unit t1000: u50 warnings=0, log=0, count=50 (0, 0, 50, 7450, '')
+CHECK ok  unit t1000: second batch warnings=0, new log lines 0, count=100 (0, 0, 100, 14900, '')
+CHECK ok  unit t1000: u5 warnings=0, count=5 (0, 0, 5, 745, '')
+CHECK ok  unit t1000: LOGGED 50 no warning, count 50 (0, 0, 50, 7450, '')
+CHECK ok  unit: memtable live bytes of the first 50-key batch within 5% across thresholds [7450, 7450, 7450]
+CHECK ok  unit control: rejected "Batch too large", count 0, memtable 0 (0, 0, 0, 0, 'Batch too large')
+ARM t1: {"warn": 1, "toolarge": 0, "errs": 0, "heap_peak": 1508377600, "data_end": 20974342, "data_max": 20974342, "clog_max": 201326592, "memtable_max": 31796553, "count": 1000000, "pre_memtable": 59435553, "post_space_live": 27392744} load={"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000}
+ARM t10: {"warn": 1, "toolarge": 0, "errs": 0, "heap_peak": 1420567552, "data_end": 20947367, "data_max": 20947367, "clog_max": 201326592, "memtable_max": 16439478, "count": 1000000, "pre_memtable": 59391978, "post_space_live": 27366297} load={"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000}
+ARM t100000: {"warn": 0, "toolarge": 0, "errs": 0, "heap_peak": 1519666176, "data_end": 20972393, "data_max": 20972393, "clog_max": 201326592, "memtable_max": 16540821, "count": 1000000, "pre_memtable": 59368821, "post_space_live": 27385941} load={"ok": 2000, "failed": 0, "rows": 1000000, "warned": 0}
+ARM t10r: {"warn": 1, "toolarge": 0, "errs": 0, "heap_peak": 1479162880, "data_end": 21005264, "data_max": 21005264, "clog_max": 201326592, "memtable_max": 29362827, "count": 1000000, "pre_memtable": 59242827, "post_space_live": 27404461} load={"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000}
+ARM ctl: {"warn": 0, "toolarge": 2001, "errs": 2001, "heap_peak": 1120090112, "data_end": 115385, "data_max": 115385, "clog_max": 67108864, "memtable_max": 0, "count": 0, "pre_memtable": 0, "post_space_live": 0} load={"ok": 0, "failed": 2000, "rows": 0, "warned": 0}
+CHECK ok  cluster t1: rows acked 1000000, failed 0, count(*) 1000000 1000000 1000000
+CHECK ok  cluster t1: client warning on all 2000 batches; WARN log lines 1..2 (probe + at most one more) warned=2000 log=1
+CHECK ok  cluster t1: no ERROR log lines 0
+CHECK ok  cluster t10: rows acked 1000000, failed 0, count(*) 1000000 1000000 1000000
+CHECK ok  cluster t10: client warning on all 2000 batches; WARN log lines 1..2 (probe + at most one more) warned=2000 log=1
+CHECK ok  cluster t10: no ERROR log lines 0
+CHECK ok  cluster t100000: rows acked 1000000, failed 0, count(*) 1000000 1000000 1000000
+CHECK ok  cluster t100000: no client warning, no WARN log line warned=0 log=0
+CHECK ok  cluster t100000: no ERROR log lines 0
+CHECK ok  cluster t10r: rows acked 1000000, failed 0, count(*) 1000000 1000000 1000000
+CHECK ok  cluster t10r: client warning on all 2000 batches; WARN log lines 1..2 (probe + at most one more) warned=2000 log=1
+CHECK ok  cluster t10r: no ERROR log lines 0
+CHECK ok  cluster ctl: all 2000 batches rejected, 0 rows, count 0 
+CHECK ok  cluster ctl: node log has 2001 "exceeding specified threshold" ERROR lines (probe + 2000) 2001
+CHECK ok  cluster ctl: no data and no memtable (data dir < 1% of t10) 
+RATIO heap_peak: [1508377600, 1420567552, 1519666176, 1479162880] max/min 1.070
+RATIO data_end: [20974342, 20947367, 20972393, 21005264] max/min 1.003
+RATIO memtable_max: [31796553, 16439478, 16540821, 29362827] max/min 1.934
+RATIO clog_max: [201326592, 201326592, 201326592, 201326592] max/min 1.000
+RATIO pre_memtable: [59435553, 59391978, 59368821, 59242827] max/min 1.003
+RATIO post_space_live: [27392744, 27366297, 27385941, 27404461] max/min 1.001
+SELFCHECK ALL OK

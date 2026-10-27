@@ -1,0 +1,10 @@
+EXPECTED: R1 ratio before enable: group A, adef, gi, go, pc in 0.4-0.6 (a05:0.500 a20:0.500 a40:0.500 a70:0.500 a150:0.500 adef:0.500 gi:0.500 go:0.500 pc:0.500) — yes
+EXPECTED: R2 ratio before enable: group B in 0.1-0.2 (b05:0.150 b20:0.150 b40:0.150 b70:0.150 b150:0.150) — yes
+EXPECTED: C1 a05, a20, a40, adef: du at window end = 0.42-0.58 of peak (a05:0.483 a20:0.483 a40:0.484 adef:0.483) — yes
+EXPECTED: C2 b05: du at window end = 0.77-0.93 of peak (0.842) — yes
+EXPECTED: H1 a70, a150, b20, b40, b70, b150, gi, go stay within 2% of peak through the window (min over samples: a70:1.000 a150:1.000 b20:1.000 b40:1.000 b70:1.000 b150:1.000 gi:1.000 go:1.000) — yes
+EXPECTED: H2 gi and go: ratio after the window still 0.4-0.6, ten times X=0.05 (gi [0.5001992135395915, 0.49972795874435216], go [0.5, 0.0]) — yes
+EXPECTED: H3 system.log "Compacted" lines per table (one per sstable that compacted; pc: its one(s) are the manual nodetool compact); sstables per table after the flush: a05=2 a150=2 a20=2 a40=2 a70=2 adef=2 b05=2 b150=2 b20=2 b40=2 b70=2 gi=2 go=2 pc=2 | compactions: a05=2 a150=0 a20=2 a40=2 a70=0 adef=2 b05=2 b150=0 b20=0 b40=0 b70=0 gi=0 go=0 pc=1 — yes
+EXPECTED: K1 pc: du at window end within 2% of peak (1.000), then after nodetool compact 0.42-0.58 (0.483) — yes
+EXPECTED: S1 end sizes of a05, a20, a40, adef agree within 0.08 (max-min 0.001) — yes
+SUMMARY: R1=ok R2=ok C1=ok C2=ok H1=ok H2=ok H3=ok K1=ok S1=ok

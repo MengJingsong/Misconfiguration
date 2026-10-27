@@ -1,0 +1,29 @@
+RESULT PASS KA small volume total df_size=16777216 expected=16777216
+RESULT PASS KA big volume total df_size=4294967296 expected>=4294967296
+RESULT PASS S1 small empty seg32 seg=32MiB aug=true only=16777216 operand=16777216 df_size=16777216 df_avail_before=16777216 df_avail_after=16777216
+RESULT PASS S2 big empty seg32 seg=32MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=4294967296 df_avail_after=4294967296
+RESULT PASS S3 big empty seg8 seg=8MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=4294967296 df_avail_after=4294967296
+RESULT PASS S3 big empty seg32 seg=32MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=4294967296 df_avail_after=4294967296
+RESULT PASS S3 big empty seg1024 seg=1024MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=4294967296 df_avail_after=4294967296
+RESULT PASS S3 big empty seg2047 seg=2047MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=4294967296 df_avail_after=4294967296
+RESULT PASS KA big volume full df_avail=32768
+RESULT PASS S4 big FULL seg8 seg=8MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=32768 df_avail_after=32768
+RESULT PASS S4 big FULL seg32 seg=32MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=32768 df_avail_after=32768
+RESULT PASS S4 big FULL seg1024 seg=1024MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=32768 df_avail_after=32768
+RESULT PASS S4 big FULL seg2047 seg=2047MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=32768 df_avail_after=32768
+RESULT PASS KA small volume full df_avail=262144
+RESULT PASS S5 small FULL seg32 seg=32MiB aug=true only=16777216 operand=16777216 df_size=16777216 df_avail_before=262144 df_avail_after=262144
+RESULT PASS S6 small FULL seg8 seg=8MiB aug=false only=-1 operand=16777216 df_size=16777216 df_avail_before=262144 df_avail_after=262144
+RESULT PASS S6 small FULL seg16 seg=16MiB aug=false only=-1 operand=16777216 df_size=16777216 df_avail_before=262144 df_avail_after=262144
+RESULT PASS S6 small FULL seg17 seg=17MiB aug=true only=16777216 operand=16777216 df_size=16777216 df_avail_before=262144 df_avail_after=262144
+RESULT PASS S6 small FULL seg1024 seg=1024MiB aug=true only=16777216 operand=16777216 df_size=16777216 df_avail_before=262144 df_avail_after=262144
+RESULT PASS S7 nonexistent under big seg=32MiB aug=false only=-1 operand=4294967296 df_size=4294967296 df_avail_before=32768 df_avail_after=32768
+RESULT PASS S7 nonexistent under small seg=32MiB aug=true only=16777216 operand=16777216 df_size=16777216 df_avail_before=262144 df_avail_after=262144
+RESULT PASS S8 handleCommitError stop_commit small ret=false aug=true msg=Failed managing commit log segments. Commit disk failure policy is stop_commit; terminating thread.. 33554432 bytes required for next commitlog segment but only 16777216 bytes available. Check /users/jason92/s4-b10-sg-small/cl to see if not enough free space is the reason for this error.
+RESULT PASS S8 handleCommitError stop_commit big ret=false aug=false msg=Failed managing commit log segments. Commit disk failure policy is stop_commit; terminating thread.
+RESULT PASS S8 handleCommitError ignore small ret=true aug=true msg=Failed managing commit log segments. 33554432 bytes required for next commitlog segment but only 16777216 bytes available. Check /users/jason92/s4-b10-sg-small/cl to see if not enough free space is the reason for this error.
+RESULT PASS S8 handleCommitError ignore big ret=true aug=false msg=Failed managing commit log segments
+RESULT PASS C1 segment file length seg8 newest=CommitLog-7-1793062887398.log length=8388608 expected=8388608 files=CommitLog-7-1793062887398.log:8388608 CommitLog-7-1793062887397.log:8388608 
+RESULT PASS C1 segment file length seg32 newest=CommitLog-7-1793062887400.log length=33554432 expected=33554432 files=CommitLog-7-1793062887400.log:33554432 
+RESULT PASS C1 segment file length seg64 newest=CommitLog-7-1793062887402.log length=67108864 expected=67108864 files=CommitLog-7-1793062887402.log:67108864 
+RESULT DONE failures=0

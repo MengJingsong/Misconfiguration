@@ -1,0 +1,97 @@
+mount v05 size=536870912 -> avail 536870912 bytes
+--- case s05 (local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v05/sys)
+    STAGE4 [s05] sysdir=/users/jason92/s4-b8-ls-mnt/v05/sys
+    STAGE4 [s05] unallocated_bytes=536870912 one_gib=1073741824 lt_one_gib=true
+    STAGE4 [s05] sys_warn_count=1 data_warn_count=1
+    STAGE4 [s05] sys_warn_text=Only 512.000MiB free in the system data volume. Consider adding more capacity or removing obsolete snapshots
+    STAGE4 [s05] init_returned=true error=none
+    STAGE4 [s05] raw_local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v05/sys useSpecificLocation=true
+    STAGE4 [s05] config_fields=407 config_hash=1197489869
+    STAGE4 [s05] probe available_bytes=484442112 min_free_space_per_drive=52428800
+    STAGE4 [s05] probe request=314572800 result=returned_directory
+    STAGE4 [s05] probe request=968884224 result=threw_FSDiskFullWriteError
+    OK (1 test)
+    exit=0
+EXPECTED OK: [s05] unallocated=536870912
+EXPECTED OK: [s05] one sys WARN 'Only 512.000MiB free in the system data volume'
+EXPECTED OK: [s05] WARN text
+EXPECTED OK: [s05] init returned
+EXPECTED OK: [s05] 300 MiB request admitted below the 1 GiB line
+EXPECTED OK: [s05] twice-available request refused
+--- case unset (local_system_data_file_directory=unset)
+    STAGE4 [unset] sysdir=(unset)
+    STAGE4 [unset] unallocated_bytes=-1 one_gib=1073741824 lt_one_gib=false
+    STAGE4 [unset] sys_warn_count=0 data_warn_count=1
+    STAGE4 [unset] init_returned=true error=none
+    STAGE4 [unset] raw_local_system_data_file_directory=null useSpecificLocation=false
+    STAGE4 [unset] config_fields=407 config_hash=1197489869
+    OK (1 test)
+    exit=0
+EXPECTED OK: [unset] no sys WARN with the directory unset
+EXPECTED OK: [unset] init returned
+mount v10 size=1073741824 -> avail 1073741824 bytes
+--- case s10 (local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v10/sys)
+    STAGE4 [s10] sysdir=/users/jason92/s4-b8-ls-mnt/v10/sys
+    STAGE4 [s10] unallocated_bytes=1073741824 one_gib=1073741824 lt_one_gib=false
+    STAGE4 [s10] sys_warn_count=0 data_warn_count=1
+    STAGE4 [s10] init_returned=true error=none
+    STAGE4 [s10] raw_local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v10/sys useSpecificLocation=true
+    STAGE4 [s10] config_fields=407 config_hash=1197489869
+    STAGE4 [s10] probe available_bytes=1021313024 min_free_space_per_drive=52428800
+    STAGE4 [s10] probe request=314572800 result=returned_directory
+    STAGE4 [s10] probe request=2042626048 result=threw_FSDiskFullWriteError
+    OK (1 test)
+    exit=0
+EXPECTED OK: [s10] unallocated=1073741824
+EXPECTED OK: [s10] no sys WARN at exactly 1 GiB (strict <)
+EXPECTED OK: [s10] init returned
+mount v10m size=1073737728 -> avail 1073737728 bytes
+--- case s10m (local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v10m/sys)
+    STAGE4 [s10m] sysdir=/users/jason92/s4-b8-ls-mnt/v10m/sys
+    STAGE4 [s10m] unallocated_bytes=1073737728 one_gib=1073741824 lt_one_gib=true
+    STAGE4 [s10m] sys_warn_count=1 data_warn_count=1
+    STAGE4 [s10m] sys_warn_text=Only 1023.996MiB free in the system data volume. Consider adding more capacity or removing obsolete snapshots
+    STAGE4 [s10m] init_returned=true error=none
+    STAGE4 [s10m] raw_local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v10m/sys useSpecificLocation=true
+    STAGE4 [s10m] config_fields=407 config_hash=1197489869
+    STAGE4 [s10m] probe available_bytes=1021308928 min_free_space_per_drive=52428800
+    STAGE4 [s10m] probe request=314572800 result=returned_directory
+    STAGE4 [s10m] probe request=2042617856 result=threw_FSDiskFullWriteError
+    OK (1 test)
+    exit=0
+EXPECTED OK: [s10m] unallocated=1073737728 (1 GiB - 4096)
+EXPECTED OK: [s10m] one sys WARN one page below the line
+mount v15 size=1610612736 -> avail 1610612736 bytes
+--- case s15 (local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v15/sys)
+    STAGE4 [s15] sysdir=/users/jason92/s4-b8-ls-mnt/v15/sys
+    STAGE4 [s15] unallocated_bytes=1610612736 one_gib=1073741824 lt_one_gib=false
+    STAGE4 [s15] sys_warn_count=0 data_warn_count=1
+    STAGE4 [s15] init_returned=true error=none
+    STAGE4 [s15] raw_local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/v15/sys useSpecificLocation=true
+    STAGE4 [s15] config_fields=407 config_hash=1197489869
+    STAGE4 [s15] probe available_bytes=1558183936 min_free_space_per_drive=52428800
+    STAGE4 [s15] probe request=314572800 result=returned_directory
+    STAGE4 [s15] probe request=3116367872 result=threw_FSDiskFullWriteError
+    OK (1 test)
+    exit=0
+EXPECTED OK: [s15] unallocated=1610612736
+EXPECTED OK: [s15] no sys WARN
+EXPECTED OK: [s15] init returned
+EXPECTED OK: [s15] 300 MiB request admitted
+EXPECTED OK: [s15] twice-available request refused
+EXPECTED OK: Config dump (all fields but the directory lists) identical for 0.5 GiB, 1 GiB, 1.5 GiB and unset
+raw lines with the sys WARN across the four main cases: 1 (expect 1)
++ CLCAP_MIB=32 CLCAP_SLEEP_MS=10 CLCAP_N=300 ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+ant rc=0 [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.129 sec BUILD SUCCESSFUL 
+INFO capMiB=32 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=32 sleepMs=10 n=300 peakOnDisk=47185920 peakDir=47185920 final=31457280 finalDir=31457280 switches=14
+COMMITLOG_DIRTY 14
++ CLCAP_MIB=100000 CLCAP_SLEEP_MS=10 CLCAP_N=300 ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest -Dno-build-test=true
+ant rc=0 [junit-timeout] Testsuite: org.apache.cassandra.db.commitlog.CommitLogTotalSpaceCapTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.921 sec BUILD SUCCESSFUL 
+INFO capMiB=100000 segMiB=5 heapMaxMiB=1007 memtableHeapMiB=768 cleanup=0.99 accessMode=mmap startOnDisk=10485760 startSwitches=0
+SUMMARY capMiB=100000 sleepMs=10 n=300 peakOnDisk=398458880 peakDir=398458880 final=398458880 finalDir=398458880 switches=0
+COMMITLOG_DIRTY 0
+control peaks MiB: capped 45.0 (dirty flushes 14), uncapped 380.0 (dirty flushes 0)
+EXPECTED OK: capped peak <= 52 MiB, uncapped > 300 MiB, COMMITLOG_DIRTY >0 capped and 0 uncapped
+unit-run run1 done FAIL=0
+cleanup: mounts left=0

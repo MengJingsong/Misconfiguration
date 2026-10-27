@@ -1,0 +1,49 @@
+CHECK ok: unit: no FAIL line (29 RESULT lines)
+CHECK ok: unit: RESULT PASS S1 small empty seg32 seg=32MiB aug=true only=16777216 operand=16777216 df_size
+CHECK ok: unit: RESULT PASS S2 big empty seg32 seg=32MiB aug=false only=-1 operand=4294967296 df_size=4294
+CHECK ok: unit: RESULT PASS S3 big empty seg8 seg=8MiB aug=false only=-1 operand=4294967296 df_size=429496
+CHECK ok: unit: RESULT PASS S3 big empty seg32 seg=32MiB aug=false only=-1 operand=4294967296 df_size=4294
+CHECK ok: unit: RESULT PASS S3 big empty seg1024 seg=1024MiB aug=false only=-1 operand=4294967296 df_size=
+CHECK ok: unit: RESULT PASS S3 big empty seg2047 seg=2047MiB aug=false only=-1 operand=4294967296 df_size=
+CHECK ok: unit: RESULT PASS S4 big FULL seg8 seg=8MiB aug=false only=-1 operand=4294967296 df_size=4294967
+CHECK ok: unit: RESULT PASS S4 big FULL seg32 seg=32MiB aug=false only=-1 operand=4294967296 df_size=42949
+CHECK ok: unit: RESULT PASS S4 big FULL seg1024 seg=1024MiB aug=false only=-1 operand=4294967296 df_size=4
+CHECK ok: unit: RESULT PASS S4 big FULL seg2047 seg=2047MiB aug=false only=-1 operand=4294967296 df_size=4
+CHECK ok: unit: RESULT PASS S5 small FULL seg32 seg=32MiB aug=true only=16777216 operand=16777216 df_size=
+CHECK ok: unit: big volume had <= 64 KiB free while the operand was the 4 GiB total, all 4 segment sizes not augmented
+CHECK ok: unit: dose-response around the 16 MiB total with the volume full: {8: False, 16: False, 17: True, 1024: True}
+CHECK ok: unit: segment file length = segment size (positive control)
+CHECK ok: unit: handleCommitError lines for 2 policies x 2 volumes
+INFO A1: error lines=0 needle lines=0 only-values=[] required-values=[]
+INFO A1: hs_err=True; .916-0400] daemon alive after settle: []
+CHECK ok: A1: no "bytes required" text in the run window
+INFO A2: error lines=9 needle lines=0 only-values=[] required-values=[]
+INFO A2: df used/avail at the first error line: ['62914560', '4194304']
+INFO A2: hs_err=False; 0] daemon alive after settle: [3158412 ]
+CHECK ok: A2: no "bytes required" text in the run window
+INFO A3: error lines=0 needle lines=0 only-values=[] required-values=[]
+INFO A3: hs_err=True; .793-0400] daemon alive after settle: []
+CHECK NOT OK: A3: text present, only == 16777216, required == 33554432
+INFO A4: error lines=9 needle lines=9 only-values=[16777216] required-values=[33554432]
+INFO A4: df used/avail at the first error line: ['24576', '16752640']
+INFO A4: hs_err=False; 0] daemon alive after settle: [3195062 ]
+CHECK ok: A4: text present, only == 16777216, required == 33554432
+INFO A5: error lines=0 needle lines=0 only-values=[] required-values=[]
+INFO A5: hs_err=True; .080-0400] daemon alive after settle: []
+CHECK ok: A5: no "bytes required" text in the run window
+INFO A5L: error lines=22 needle lines=0 only-values=[] required-values=[]
+INFO A5L: df used/avail at the first error line: ['14680064', '2097152']
+INFO A5L: hs_err=False; 0] daemon alive after settle: [3276589 ]
+CHECK ok: A5L: no "bytes required" text in the run window
+INFO Z32: error lines=0 needle lines=0 only-values=[] required-values=[]
+INFO Z32: hs_err=False; 0] daemon alive after settle: [3220532 ]
+CHECK ok: Z32: no error, no text, TotalCommitLogSize max 100663296 <= 100663296 (46 samples)
+INFO Z32: apparent commit-log bytes max=100663396
+INFO Z8: error lines=0 needle lines=0 only-values=[] required-values=[]
+INFO Z8: hs_err=False; 0] daemon alive after settle: [3243845 ]
+CHECK NOT OK: Z8: no error, no text, TotalCommitLogSize max 109051904 <= 75497472 (46 samples)
+INFO Z8: apparent commit-log bytes max=109052204
+INFO ZH: error lines=0 needle lines=0 only-values=[] required-values=[]
+INFO ZH: hs_err=False; 0] daemon alive after settle: [3316479 ]
+CHECK ok: ZH: no error, no text, TotalCommitLogSize max 234881024 <= 570425344 (46 samples)
+INFO ZH: apparent commit-log bytes max=234881204

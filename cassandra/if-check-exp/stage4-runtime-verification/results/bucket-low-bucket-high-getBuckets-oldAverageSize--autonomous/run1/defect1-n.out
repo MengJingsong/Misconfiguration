@@ -1,0 +1,58 @@
+22:00:06 == n start; tree=/users/jason92/s4-b10-sb chunks=12 rows=[50000, 57500, 66125, 76044, 87450, 100568, 115653, 133001, 152951, 175894, 202278, 232620] spec={"low": 0.9, "high": 1.1, "max": 32}
+22:00:06 EXPECTED: no node of this arm running: PASS 
+22:00:06 $ rm -rf /dev/shm/s4b10sb && mkdir -p /dev/shm/s4b10sb/data /dev/shm/s4b10sb/commitlog /dev/shm/s4b10sb/hints /dev/shm/s4b10sb/saved_caches /dev/shm/s4b10sb/cdc_raw
+22:00:06 yaml tail: cluster_name: 'sb-n'; num_tokens: 1; endpoint_snitch: SimpleSnitch; listen_address: 127.0.8.1; rpc_address: 127.0.8.1; commitlog_directory: /dev/shm/s4b10sb/commitlog; hints_directory: /dev/shm/s4b10sb/hints; saved_caches_directory: /dev/shm/s4b10sb/saved_caches; cdc_raw_directory: /dev/shm/s4b10sb/cdc_raw; auto_snapshot: false; concurrent_compactors: 1; compaction_throughput: 0MiB/s; native_transport_timeout: 30s
+22:00:06 $ cd /users/jason92/s4-b10-sb && CASSANDRA_CONF=/users/jason92/s4-b10-sb-logs/run1/cluster/n/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b10-sb-logs/run1/cluster/n/logs MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M bin/cassandra -p /users/jason92/s4-b10-sb-logs/run1/cluster/n/node.pid > /users/jason92/s4-b10-sb-logs/run1/cluster/n/stdout.txt 2>&1
+22:01:11 node up after 64 s, pid 3456530
+22:01:11 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 setlogginglevel org.apache.cassandra.db.compaction TRACE
+22:01:12 $ /users/jason92/s4-b10-sb/bin/cqlsh 127.0.8.1 -e "CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+22:01:13 $ /users/jason92/s4-b10-sb/bin/cqlsh 127.0.8.1 -e "CREATE TABLE ks.standard1 (key blob PRIMARY KEY, \"C0\" blob, \"C1\" blob, \"C2\" blob, \"C3\" blob, \"C4\" blob) WITH compression = {'enabled':'false'} AND compaction = {'class':'SizeTieredCompactionStrategy','min_threshold':'4','max_threshold':'32','min_sstable_size':'0'}"
+22:01:14 $ /users/jason92/s4-b10-sb/bin/cqlsh 127.0.8.1 -e "ALTER TABLE ks.standard1 WITH compaction = {'class':'SizeTieredCompactionStrategy','min_threshold':'4','max_threshold':'32','min_sstable_size':'0','bucket_low':'0.9','bucket_high':'1.1'}"
+22:01:15 $ /users/jason92/s4-b10-sb/bin/cqlsh 127.0.8.1 -e "SELECT compaction FROM system_schema.tables WHERE keyspace_name='ks' AND table_name='standard1'"
+22:01:15 EXPECTED: schema compaction map holds the arm's bucket_low/bucket_high/max_threshold (read back): PASS compaction ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- {'bucket_high': '1.1', 'bucket_low': 
+22:01:15 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 getcompactionthreshold ks standard1
+22:01:16 EXPECTED: node reports thresholds 4/<arm max>: PASS Current compaction thresholds for ks/standard1:   min = 4,  max = 32
+22:01:16 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 disableautocompaction ks standard1
+22:01:18 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 statusautocompaction ks standard1
+22:01:19 EXPECTED: autocompaction is off for ks.standard1 during the load: PASS not running
+22:01:28 EXPECTED: chunk 1: stress wrote 50000 rows without errors: PASS errors=0 rc=0
+22:01:28 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:01:29 chunk 1: rows=50000 Data.db files=1 dataBytes=11227535
+22:01:29 EXPECTED: first flush: exactly one sstable: PASS files=1
+22:01:38 EXPECTED: chunk 2: stress wrote 57500 rows without errors: PASS errors=0 rc=0
+22:01:38 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:01:39 chunk 2: rows=57500 Data.db files=2 dataBytes=24107535
+22:01:49 EXPECTED: chunk 3: stress wrote 66125 rows without errors: PASS errors=0 rc=0
+22:01:49 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:01:50 chunk 3: rows=66125 Data.db files=3 dataBytes=38952530
+22:02:00 EXPECTED: chunk 4: stress wrote 76044 rows without errors: PASS errors=0 rc=0
+22:02:00 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:02:01 chunk 4: rows=76044 Data.db files=4 dataBytes=56108776
+22:02:12 EXPECTED: chunk 5: stress wrote 87450 rows without errors: PASS errors=0 rc=0
+22:02:12 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:02:13 chunk 5: rows=87450 Data.db files=5 dataBytes=75928746
+22:02:24 EXPECTED: chunk 6: stress wrote 100568 rows without errors: PASS errors=0 rc=0
+22:02:24 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:02:25 chunk 6: rows=100568 Data.db files=6 dataBytes=98709313
+22:02:36 EXPECTED: chunk 7: stress wrote 115653 rows without errors: PASS errors=0 rc=0
+22:02:36 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:02:38 chunk 7: rows=115653 Data.db files=7 dataBytes=125043975
+22:02:49 EXPECTED: chunk 8: stress wrote 133001 rows without errors: PASS errors=0 rc=0
+22:02:49 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:02:51 chunk 8: rows=133001 Data.db files=8 dataBytes=155324469
+22:03:02 EXPECTED: chunk 9: stress wrote 152951 rows without errors: PASS errors=0 rc=0
+22:03:02 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:03:04 chunk 9: rows=152951 Data.db files=9 dataBytes=190194288
+22:03:16 EXPECTED: chunk 10: stress wrote 175894 rows without errors: PASS errors=0 rc=0
+22:03:16 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:03:17 chunk 10: rows=175894 Data.db files=11 dataBytes=230279599
+22:03:30 EXPECTED: chunk 11: stress wrote 202278 rows without errors: PASS errors=0 rc=0
+22:03:30 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:03:32 chunk 11: rows=202278 Data.db files=13 dataBytes=276284506
+22:03:45 EXPECTED: chunk 12: stress wrote 232620 rows without errors: PASS errors=0 rc=0
+22:03:45 $ /users/jason92/s4-b10-sb/bin/nodetool -h 127.0.0.1 -p 7180 flush ks standard1
+22:03:46 chunk 12: rows=232620 Data.db files=15 dataBytes=329099991
+22:03:46 EXPECTED: 12 sstables after the last flush, none compacted during the load: FAIL n=15
+22:03:46 FAILED: Fail('12 sstables after the last flush, none compacted during the load n=15')
+22:03:52 this arm's node left after stop: none
+22:03:52 == n done rc=2 node stopped=True

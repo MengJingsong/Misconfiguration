@@ -1,0 +1,38 @@
+[2026-10-26T21:01:33.885-0400] cluster-run start arm=A1 rep=1 vol=64MiB seg=32MiB comp=none free_after_filler=4194304 n=200000 head=9bb60fd6703f90d149921146715efb4da3d77606
+[2026-10-26T21:01:33.941-0400] commit-log volume df size=67108864 (expected 67108864)
+[2026-10-26T21:01:33.982-0400] + bin/cassandra -p /dev/shm/s4-b10-sg-node/cassandra.pid (ulimit -n 100000, MAX_HEAP_SIZE=1G)
+[2026-10-26T21:02:37.103-0400] node up pid=3148374
+CONFIG commit_failure_policy=ignore
+CONFIG commitlog_directory=/users/jason92/s4-b10-sg-clvol/commitlog
+CONFIG commitlog_disk_access_mode=legacy
+CONFIG commitlog_segment_size=32MiB
+CONFIG commitlog_sync=periodic
+CONFIG commitlog_total_space=64MiB
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-27T01:01:38,910 Flushing.java:179 - Completed flushing /dev/shm/s4-b10-sg-node/data/system/local-7ad54392bcdd35a684174e047860b377/nb-1-big-Data.db (195B) for commitlog position CommitLogPosition(segmentId=1793062896946, position=474)
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-10-27T01:01:39,074 Flushing.java:179 - Completed flushing /dev/shm/s4-b10-sg-node/data/system/local-7ad54392bcdd35a684174e047860b377/nb-2-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1793062896946, position=577)
+INFO  [main] 2026-10-27T01:01:39,274 CommitLog.java:201 - No commitlog files found; skipping replay
+[2026-10-26T21:02:37.118-0400] + cassandra-stress write n=1 (schema; before any filler)
+[2026-10-26T21:02:57.656-0400] baseline: 67108944 B apparent, df used 69632, 2 files
+[2026-10-26T21:02:57.662-0400] avail before filler 67039232; fallocate 62844928
+[2026-10-26T21:02:57.689-0400] avail after filler 4194304 (target 4194304); df size 67108864
+[2026-10-26T21:03:00.698-0400] STRESS_START 1793062980696 (system.log offset 92988)
+[2026-10-26T21:04:20.621-0400] STRESS_END 1793063060619 rc=0 (79 s)
+Op rate                   :    3,363 op/s  [WRITE: 3,363 op/s]
+Partition rate            :    3,363 pk/s  [WRITE: 3,363 pk/s]
+Total partitions          :    200,000 [WRITE: 200,000]
+Total errors              :    200,000 [WRITE: 200,000]
+Total operation time      : 00:00:59
+END
+[2026-10-26T21:04:20.893-0400] daemon alive after stress: []
+[2026-10-26T21:04:50.896-0400] SETTLE_END 1793063090895
+[2026-10-26T21:04:50.916-0400] daemon alive after settle: []
+SUMMARY arm=A1 vol=67108864 seg=33554432 free_after_filler=4194304
+SUMMARY handleCommitError lines=0 with_needle=0
+SUMMARY kinds={}
+SUMMARY apparent_commitlog_bytes max=67108944 df_used max=67108864
+SUMMARY hs_err_files=yes
+EXPECTED MISSING: A1: a handleCommitError line is logged once free space is exhausted (lines=0)
+EXPECTED ok: A1: no "bytes required" text although df avail < segment (total 67108864 >= segment 33554432) (needle lines=0)
+[2026-10-26T21:04:50.967-0400] cluster-run end arm=A1 rep=1 analyze_rc=0
+[2026-10-26T21:04:50.993-0400] daemons left: []
+[2026-10-26T21:04:51.016-0400] cleanup done; mounts left: []

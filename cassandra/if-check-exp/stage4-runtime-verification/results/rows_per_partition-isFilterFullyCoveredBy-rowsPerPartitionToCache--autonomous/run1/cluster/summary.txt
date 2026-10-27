@@ -1,0 +1,27 @@
+EXPECTED full-scale data (10,000 partitions in ks.t, 2,000 in ks.t2) | got (10000, 2000) | RESULT ok INFO
+EXPECTED n1: 0.75 <= e / (N x 1.05 KiB) <= 1.4 | got 1.10 (e = 1182 B) | RESULT ok PRIMARY
+EXPECTED n10: 0.75 <= e / (N x 1.05 KiB) <= 1.4 | got 0.98 (e = 10515 B) | RESULT ok PRIMARY
+EXPECTED n100: 0.75 <= e / (N x 1.05 KiB) <= 1.4 | got 0.97 (e = 103844 B) | RESULT ok PRIMARY
+EXPECTED nall: 250 KiB <= e <= 400 KiB | got 304 KiB | RESULT ok PRIMARY
+EXPECTED nall: e(ALL)/e(100) in 2.4..3.8 | got 3.00 | RESULT ok PRIMARY
+EXPECTED n1: Entries = 10000 after pass 1, Size about 12 MB | got (10000, 11.8) | RESULT ok INFO
+EXPECTED n10: Entries = 10000 after pass 1, Size about 108 MB | got (10000, 105.1) | RESULT ok INFO
+EXPECTED n100: Size <= 256 MiB, Entries <= 2600 and < 10000 (cap binds) | got (265840999, 2560) | RESULT ok PRIMARY
+EXPECTED nall: Size <= 256 MiB, Entries <= 850 and < 10000 (cap binds) | got (239036928, 768) | RESULT ok PRIMARY
+EXPECTED n1: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 26.4 MB, Size 11.8 MB, tol 16.8 MB | RESULT ok PRIMARY
+EXPECTED n10: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 666.7 MB, Size 105.1 MB, tol 21.0 MB | RESULT MISMATCH PRIMARY
+EXPECTED n100: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 708.6 MB, Size 265.8 MB, tol 53.2 MB | RESULT MISMATCH PRIMARY
+EXPECTED nall: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 304.5 MB, Size 239.0 MB, tol 47.8 MB | RESULT MISMATCH PRIMARY
+EXPECTED n10: pass-2 hits >= 95% of 10000 and no HitOutOfRange | got (10000, 0) | RESULT ok PRIMARY
+EXPECTED n1: no hit in either pass; pass-2 HitOutOfRange >= 95% of 10000 | got (0, 10000) | RESULT ok PRIMARY
+EXPECTED t10: e(t10) - e(n10) >= 2 KiB | got 2404 B (e(t10) = 12919, e(n10) = 10515) | RESULT ok PRIMARY
+EXPECTED none: Entries = 0, Size = 0, Hit = Miss = 0 after both passes | got (0, 0, 0, 0) | RESULT ok PRIMARY
+EXPECTED c32 (positive control): Size <= 32 MiB, Entries <= 330 and < 10000 | got (26584320, 256) | RESULT ok PRIMARY
+EXPECTED n1: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED n10: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED n100: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED nall: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED none: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED c32: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED t10: pass 1 returned 10000 rows (LIMIT 5) | got 10000 | RESULT ok INFO
+CLASS no matching row: 3 of 16 primary checks mismatch | primary mismatches 3 of 16

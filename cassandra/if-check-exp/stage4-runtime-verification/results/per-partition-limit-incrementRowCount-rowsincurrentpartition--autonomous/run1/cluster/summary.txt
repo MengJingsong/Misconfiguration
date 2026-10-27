@@ -1,0 +1,113 @@
+EXPECTED rows returned == 4 x min(n, rows per partition), payload bytes == rows x width, no error (lifetime U, 49 queries): ok []
+a(t) marginal allocated bytes per row [A(100)-A(10)]/360: {'t_small': 1350.3, 't_med': 46856.0, 't_big': 460836.8}
+EXPECTED B3f width: a(t_med)-a(t_small) in [1.0, 10] x 10140: ok 45506 (x4.49)
+EXPECTED B3f width: a(t_big)-a(t_med) in [1.0, 10] x 92160: ok 413981 (x4.49)
+INFO refuting condition (flat across widths): d1 < 0.1 x 10140: False ; d2 < 0.1 x 92160: False
+EXPECTED B3f A(small,100) < A(med,100) < A(big,100) and A(big,100) >= 40 MB: ok [683302, 19155968, 187226128]
+EXPECTED B3f n: A(t_small, n) increases with n (n >= 10 and none): ok [197180, 683302, 5300180, 58108942, 157501106]
+EXPECTED B3f n: A(t_med, n) increases with n (n >= 10 and none): ok [2287820, 19155968, 67715930]
+EXPECTED B3f n: A(t_big, n) increases with n (n >= 10 and none): ok [21324872, 187226128, 614178365]
+EXPECTED B3f n: marginal bytes per row of t_small between (100, 1000) and between (1000, 10000) within 0.5..2 x: ok m1=1282.4659735253686 m2=1466.9100595933205
+EXPECTED B3f n: marginal bytes per row of t_med between (10, 100) and between (100, 'none') within 0.5..2 x: ok m1=46855.96676296434 m2=60699.952177678846
+EXPECTED B3f n: marginal bytes per row of t_big between (10, 100) and between (100, 'none') within 0.5..2 x: ok m1=460836.82219864783 m2=533690.2967321898
+EXPECTED B3f none: A(t_big, none) > A(t_big, 100) (1200 rows vs 400): ok 614178365.5485189 vs 187226128.16276705
+EXPECTED B3f paging: t_big n=100 fetch 100: 400 rows in 4 or 5 pages: ok [(400, 5), (400, 5), (400, 5)]
+EXPECTED B3f paging: total A within 0.5..2 x unpaged: ok total 187201471 unpaged 187226128
+EXPECTED B3f paging: largest page A <= 0.5 x unpaged A: ok max page 84990686, 0.5 x unpaged 93613064
+EXPECTED B3f disk: du -sb of the data directory unchanged (within 1 %) across lifetime U: ok before 149089845 after 149089845
+EXPECTED B3f control: t_big n=100 fails on every repeat with a read-size abort: ok ['ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Ope', 'ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Ope', 'ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Ope']
+EXPECTED B3f control: t_big n=none fails on every repeat with a read-size abort: ok ['ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Ope', 'ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Ope', 'ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Ope']
+EXPECTED B3f control: t_big n=10 passes with the full answer, A within 0.5..2 x of lifetime U: ok A_C=21325779.21003135 A_U=21324872.171253823
+EXPECTED B3f control: t_med n=none passes with the full answer, A within 0.5..2 x of lifetime U: ok A_C=67731700.70588236 A_U=67715930.6449644
+EXPECTED B3f control: t_small n=10000 passes with the full answer, A within 0.5..2 x of lifetime U: ok A_C=58115470.57889237 A_U=58108942.60834181
+EXPECTED B3f control: A_C(t_big,100) <= 0.5 x A_U(t_big,100): ok A_C=73577557.32244898 A_U=187226128.16276705
+EXPECTED B3f control: A_C(t_big,100) within 0.5..2 x of A_C(t_big,none): ok A_C(100)=73577557.32244898 A_C(none)=73573310.33808553
+
+TABLE life table n fetch rep rows pages err A_bytes H_bytes
+ROW U t_small 1 none 0 4 1 - 480533 0 (warm)
+ROW U t_small 10 none 0 40 1 - 205972 0 (warm)
+ROW U t_small 100 none 0 400 1 - 691055 16777216 (warm)
+ROW U t_small 1000 none 0 4000 1 - 5486535 0 (warm)
+ROW U t_small 10000 none 0 40000 1 - 59388143 50331648 (warm)
+ROW U t_small none none 0 120000 1 - 157490642 167772160 (warm)
+ROW U t_med 1 none 0 4 1 - 385276 0 (warm)
+ROW U t_med 10 none 0 40 1 - 2275981 0 (warm)
+ROW U t_med 100 none 0 400 1 - 19142659 0 (warm)
+ROW U t_med none none 0 1200 1 - 67719161 83886080 (warm)
+ROW U t_big 1 none 0 4 1 - 2452898 0 (warm)
+ROW U t_big 10 none 0 40 1 - 21309048 0 (warm)
+ROW U t_big 100 none 0 400 1 - 187210736 184549376 (warm)
+ROW U t_big none none 0 1200 1 - 614175499 620756992 (warm)
+ROW U t_big 100 100 0 400 5 - 187210514 167772160 (warm)
+ROW U t_small 10000 5000 0 40000 9 - 58931887 67108864 (warm)
+ROW U t_big 100 none 0 400 1 - 187229357 167772160 (trigger)
+ROW U t_small 10 none 2 40 1 - 188300 0 
+ROW U t_med 10 none 2 40 1 - 2294052 0 
+ROW U t_med none none 2 1200 1 - 67715930 83886080 
+ROW U t_small 10000 5000 2 40000 9 - 58845347 50331648 
+ROW U t_big 100 none 2 400 1 - 187226128 167772160 
+ROW U t_med 100 none 1 400 1 - 19159042 16777216 
+ROW U t_big 10 none 2 40 1 - 21324872 16777216 
+ROW U t_small 1000 none 3 4000 1 - 5300180 16777216 
+ROW U t_big 100 100 1 400 5 - 187164290 184549376 
+ROW U t_big none none 3 1200 1 - 614178365 637534208 
+ROW U t_small 10000 none 2 40000 1 - 58111241 33554432 
+ROW U t_med none none 3 1200 1 - 67714434 67108864 
+ROW U t_big 100 none 1 400 1 - 187216908 184549376 
+ROW U t_small 10000 none 3 40000 1 - 58108942 50331648 
+ROW U t_med 10 none 1 40 1 - 2287820 0 
+ROW U t_med none none 1 1200 1 - 67716961 67108864 
+ROW U t_big 100 none 3 400 1 - 187228298 184549376 
+ROW U t_med 1 none 2 4 1 - 360299 0 
+ROW U t_small 100 none 3 400 1 - 685296 0 
+ROW U t_big 10 none 1 40 1 - 21321037 0 
+ROW U t_small 1 none 3 4 1 - 135893 0 
+ROW U t_small 10 none 1 40 1 - 197180 0 
+ROW U t_med 10 none 3 40 1 - 2268570 16777216 
+ROW U t_small 1000 none 2 4000 1 - 5311714 16777216 
+ROW U t_big none none 2 1200 1 - 614173470 620756992 
+ROW U t_big 100 100 2 400 5 - 187201471 167772160 
+ROW U t_small 10000 5000 3 40000 9 - 58946436 67108864 
+ROW U t_small 100 none 1 400 1 - 683302 0 
+ROW U t_med 100 none 3 400 1 - 19155968 0 
+ROW U t_med 100 none 2 400 1 - 19146967 33554432 
+ROW U t_small 10 none 3 40 1 - 204355 16777216 
+ROW U t_big 1 none 2 4 1 - 2427979 0 
+ROW U t_small 1 none 2 4 1 - 138514 0 
+ROW U t_small none none 3 120000 1 - 157521939 150994944 
+ROW U t_small 1 none 1 4 1 - 141256 0 
+ROW U t_big 1 none 3 4 1 - 2424744 0 
+ROW U t_big none none 1 1200 1 - 614193745 637534208 
+ROW U t_small 1000 none 1 4000 1 - 5293699 16777216 
+ROW U t_big 100 100 3 400 5 - 187202552 184549376 
+ROW U t_big 10 none 3 40 1 - 21605642 33554432 
+ROW U t_big 1 none 1 4 1 - 2428935 0 
+ROW U t_med 1 none 1 4 1 - 355231 0 
+ROW U t_small 100 none 2 400 1 - 667176 0 
+ROW U t_small 10000 5000 1 40000 9 - 58905577 67108864 
+ROW U t_small none none 1 120000 1 - 157471826 150994944 
+ROW U t_small 10000 none 1 40000 1 - 58074214 50331648 
+ROW U t_med 1 none 3 4 1 - 375883 0 
+ROW U t_small none none 2 120000 1 - 157501106 167772160 
+ROW C t_big 10 none 0 40 1 - 21710670 0 (warm)
+ROW C t_big 100 none 0 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 74824006 50331648 (warm)
+ROW C t_big none none 0 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73561821 50331648 (warm)
+ROW C t_med none none 0 1200 1 - 67814539 50331648 (warm)
+ROW C t_small 10000 none 0 40000 1 - 59386258 50331648 (warm)
+ROW C t_big 100 none 0 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73561679 50331648 (trigger)
+ROW C t_big none none 1 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73596234 50331648 
+ROW C t_big 10 none 3 40 1 - 21325779 33554432 
+ROW C t_big 10 none 1 40 1 - 21316646 0 
+ROW C t_big none none 3 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73573310 50331648 
+ROW C t_small 10000 none 3 40000 1 - 58094910 33554432 
+ROW C t_big none none 2 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73572986 67108864 
+ROW C t_med none none 1 1200 1 - 67715481 67108864 
+ROW C t_small 10000 none 2 40000 1 - 58115470 33554432 
+ROW C t_big 10 none 2 40 1 - 21331565 0 
+ROW C t_med none none 2 1200 1 - 67731700 67108864 
+ROW C t_med none none 3 1200 1 - 169748454 67108864 
+ROW C t_big 100 none 1 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73577557 50331648 
+ROW C t_big 100 none 3 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73598118 67108864 
+ROW C t_big 100 none 2 0 0 ReadFailure:_Error_from_server:_code=1300_[Replica(s)_failed 73452643 50331648 
+ROW C t_small 10000 none 1 40000 1 - 58132233 33554432 
+SUMMARY mismatches=0

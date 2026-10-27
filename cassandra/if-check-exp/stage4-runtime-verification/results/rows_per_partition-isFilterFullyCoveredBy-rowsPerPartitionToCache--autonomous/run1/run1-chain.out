@@ -1,0 +1,715 @@
+[2026-10-26T19:52:58.675-0400] unit-run start tree=/users/jason92/s4-b9-rp head=43cb41d rows=1000 host=node0
+[2026-10-26T19:52:58.685-0400] + ant testsome -Dtest.name=org.apache.cassandra.db.RowsPerPartitionTest (STAGE4_OUT=/users/jason92/s4-b9-rp-logs/run1/unit/raw rows=1000)
+[2026-10-26T19:53:15.845-0400] ant exit 0
+[junit-timeout] ------------- ---------------- ---------------
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/commitlog
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/data
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/saved_caches
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/hints
+
+BUILD SUCCESSFUL
+Total time: 16 seconds
+EXPECTED ROWS = 1000 (full-scale run) | got 1000 | RESULT ok INFO
+EXPECTED firsttrigger=OK | got OK | RESULT ok PRIMARY
+EXPECTED done=1 | got 1 | RESULT ok PRIMARY
+EXPECTED N1 entry present | got present | RESULT ok PRIMARY
+EXPECTED N1 cachedLiveRows = 1 | got 1 | RESULT ok PRIMARY
+EXPECTED N1 rowCount = cachedLiveRows (no dead rows) | got 1 | RESULT ok PRIMARY
+EXPECTED N1 coveredFullSlice = false | got false | RESULT ok PRIMARY
+EXPECTED N1 coveredHead5 = false | got false | RESULT ok PRIMARY
+EXPECTED N1 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED N10 entry present | got present | RESULT ok PRIMARY
+EXPECTED N10 cachedLiveRows = 10 | got 10 | RESULT ok PRIMARY
+EXPECTED N10 rowCount = cachedLiveRows (no dead rows) | got 10 | RESULT ok PRIMARY
+EXPECTED N10 coveredFullSlice = false | got false | RESULT ok PRIMARY
+EXPECTED N10 coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED N10 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED N100 entry present | got present | RESULT ok PRIMARY
+EXPECTED N100 cachedLiveRows = 100 | got 100 | RESULT ok PRIMARY
+EXPECTED N100 rowCount = cachedLiveRows (no dead rows) | got 100 | RESULT ok PRIMARY
+EXPECTED N100 coveredFullSlice = false | got false | RESULT ok PRIMARY
+EXPECTED N100 coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED N100 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED NALL entry present | got present | RESULT ok PRIMARY
+EXPECTED NALL cachedLiveRows = 1000 | got 1000 | RESULT ok PRIMARY
+EXPECTED NALL rowCount = cachedLiveRows (no dead rows) | got 1000 | RESULT ok PRIMARY
+EXPECTED NALL coveredFullSlice = true | got true | RESULT ok PRIMARY
+EXPECTED NALL coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED NALL LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED N2000 entry present | got present | RESULT ok PRIMARY
+EXPECTED N2000 cachedLiveRows = 1000 | got 1000 | RESULT ok PRIMARY
+EXPECTED N2000 rowCount = cachedLiveRows (no dead rows) | got 1000 | RESULT ok PRIMARY
+EXPECTED N2000 coveredFullSlice = true | got true | RESULT ok PRIMARY
+EXPECTED N2000 coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED N2000 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED serializedSize N=100 / N=10 within 8..12 (about 10x within 20%) | got 9.63 (11047 / 1147) | RESULT ok PRIMARY
+EXPECTED serializedSize ALL / N=100 within 8..12 (INFO, derived: 1000/100 rows) | got 10.03 | RESULT ok INFO
+EXPECTED serializedSize strictly increasing 1 < 10 < 100 < ALL | got (157, 1147, 11047, 110811) | RESULT ok PRIMARY
+EXPECTED NNONE entry absent | got absent | RESULT ok PRIMARY
+EXPECTED NNONE hit = miss = outOfRange = 0 after both reads | got ('0', '0', '0') | RESULT ok PRIMARY
+EXPECTED NNONE isRowCacheEnabled = false | got false | RESULT ok INFO
+EXPECTED N10 after read 1: miss=1 hit=0; after read 2: hit=1 | got ('1', '0', '1') | RESULT ok INFO
+EXPECTED N1 after read 2: hit=0 outOfRange=1 | got ('0', '1') | RESULT ok INFO
+EXPECTED TOMBROWS entry present | got present | RESULT ok PRIMARY
+EXPECTED TOMBROWS cachedLiveRows = 10 | got 10 | RESULT ok PRIMARY
+EXPECTED TOMBROWS rowCount = 60 (> N) | got 60 | RESULT ok PRIMARY
+EXPECTED TOMBRANGE cachedLiveRows = 10 | got 10 | RESULT ok PRIMARY
+EXPECTED TOMBRANGE rowCount = 10 and rangeTombstones >= 1 | got (10, 1) | RESULT ok PRIMARY
+EXPECTED NOCK_N1_v100 cachedLiveRows = 1 and rowCount = 1 | got (1, 1) | RESULT ok PRIMARY
+EXPECTED NOCK_N5_v100 cachedLiveRows = 1 and rowCount = 1 | got (1, 1) | RESULT ok PRIMARY
+EXPECTED NOCK_N1_v5000 cachedLiveRows = 1 and rowCount = 1 | got (1, 1) | RESULT ok PRIMARY
+EXPECTED no-clustering: size(N=1) == size(N=5) at v=100 B | got (152, 152) | RESULT ok PRIMARY
+EXPECTED no-clustering: size(v=5000) - size(v=100) within 4900 +- 300 | got 4901 | RESULT ok PRIMARY
+CLASS claim holds (population honours the cap; size follows N; tombstone/ALL/no-clustering overshoots as predicted) | primary mismatches 0 of 41
+[2026-10-26T19:53:15.894-0400] leftover java for this tree: []
+[2026-10-26T19:53:15-0400] + javac -d /users/jason92/s4-b9-rp-logs/run1/cluster/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/rows_per_partition-isFilterFullyCoveredBy-rowsPerPartitionToCache--autonomous/Jmx.java
+[2026-10-26T19:53:16-0400] 
+[2026-10-26T19:53:16-0400]   exit 0 in 0.6s
+[2026-10-26T19:53:16-0400] cluster-run start mode=load tree=/users/jason92/s4-b9-rp-n head=0ffa4f3 labels=[] NPK=10000 NPK2=2000
+[2026-10-26T19:53:16-0400] df: tmpfs          tmpfs 132008248 62188 131946060   1% /dev/shm
+[2026-10-26T19:53:16-0400] conf load: row_cache_size=0MiB
+[2026-10-26T19:53:16-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T19:54:19-0400] node up (load) after 62 s, pid 3047414
+[2026-10-26T19:54:48-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.1
+[2026-10-26T19:54:49-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.7
+[2026-10-26T19:54:49-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.4
+[2026-10-26T19:54:49-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.2
+[2026-10-26T19:54:49-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 flush ks t
+[2026-10-26T19:54:50-0400]   exit 0 in 1.2s
+[2026-10-26T19:55:18-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.5
+[2026-10-26T19:55:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.8
+[2026-10-26T19:55:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.2
+[2026-10-26T19:55:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.2
+[2026-10-26T19:55:19-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 flush ks t
+[2026-10-26T19:55:20-0400]   exit 0 in 1.1s
+[2026-10-26T19:55:48-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 27.7
+[2026-10-26T19:55:48-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.2
+[2026-10-26T19:55:50-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 29.6
+[2026-10-26T19:55:50-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.3
+[2026-10-26T19:55:50-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 flush ks t
+[2026-10-26T19:55:51-0400]   exit 0 in 1.2s
+[2026-10-26T19:56:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.0
+[2026-10-26T19:56:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.3
+[2026-10-26T19:56:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.1
+[2026-10-26T19:56:19-0400] CLIENT_DONE load t ok 187500 rows 0 vbytes 0 errors 0 secs 28.3
+[2026-10-26T19:56:19-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 flush ks t
+[2026-10-26T19:56:21-0400]   exit 0 in 1.2s
+[2026-10-26T19:56:43-0400] CLIENT_DONE load t2 ok 150000 rows 0 vbytes 0 errors 0 secs 22.3
+[2026-10-26T19:56:43-0400] CLIENT_DONE load t2 ok 150000 rows 0 vbytes 0 errors 0 secs 21.8
+[2026-10-26T19:56:43-0400] CLIENT_DONE load t2 ok 150000 rows 0 vbytes 0 errors 0 secs 22.3
+[2026-10-26T19:56:43-0400] CLIENT_DONE load t2 ok 150000 rows 0 vbytes 0 errors 0 secs 22.3
+[2026-10-26T19:56:43-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 flush ks t2
+[2026-10-26T19:56:44-0400]   exit 0 in 1.2s
+[2026-10-26T19:56:58-0400] CLIENT_DONE del t2 ok 100000 rows 0 vbytes 0 errors 0 secs 13.1
+[2026-10-26T19:56:58-0400] CLIENT_DONE del t2 ok 100000 rows 0 vbytes 0 errors 0 secs 13.2
+[2026-10-26T19:56:58-0400] CLIENT_DONE del t2 ok 100000 rows 0 vbytes 0 errors 0 secs 12.6
+[2026-10-26T19:56:58-0400] CLIENT_DONE del t2 ok 100000 rows 0 vbytes 0 errors 0 secs 12.4
+[2026-10-26T19:56:58-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 flush ks t2
+[2026-10-26T19:56:59-0400]   exit 0 in 1.3s
+[2026-10-26T19:56:59-0400] load took 159.4s
+[2026-10-26T19:56:59-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 compactionstats
+[2026-10-26T19:57:00-0400]   exit 0 in 1.0s
+[2026-10-26T19:57:00-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t ks.t2
+[2026-10-26T19:57:01-0400]   exit 0 in 1.3s
+[2026-10-26T19:57:01-0400] off heap memory used: 1312
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 315852
+		Compacted partition mean bytes: 315174
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+		Table: t2
+		SSTable count: 3
+		Old SSTable count: 0
+		Max SSTable size: 381.456MiB
+		Space used (live): 630054551
+		Space used (total): 630054551
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 5552
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 2000
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 27
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1000000
+		Local write latency: 0.073 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 600.530MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 5048
+		Bloom filter off heap memory used: 5024
+		Index summary off heap memory used: 528
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 1917
+		Compacted partition maximum bytes: 315852
+		Compacted partition mean bytes: 159170
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-10-26T19:57:02-0400] rows in ks.t pk=17: 300
+[2026-10-26T19:57:02-0400] live rows in ks.t2 pk=17 (200 deleted): 100
+[2026-10-26T19:57:02-0400] + du -sb /dev/shm/s4-b9-rp/data
+[2026-10-26T19:57:02-0400] 3754676711	/dev/shm/s4-b9-rp/data
+[2026-10-26T19:57:02-0400]   exit 0 in 0.0s
+[2026-10-26T19:57:02-0400] stopping node: nodetool drain
+[2026-10-26T19:57:08-0400] daemons left: []
+[2026-10-26T19:57:08-0400] + javac -d /users/jason92/s4-b9-rp-logs/run1/cluster/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/rows_per_partition-isFilterFullyCoveredBy-rowsPerPartitionToCache--autonomous/Jmx.java
+[2026-10-26T19:57:09-0400] 
+[2026-10-26T19:57:09-0400]   exit 0 in 0.6s
+[2026-10-26T19:57:09-0400] cluster-run start mode=arm tree=/users/jason92/s4-b9-rp-n head=0ffa4f3 labels=['n10', 'n1', 'n100', 'nall', 't10', 'none', 'c32'] NPK=10000 NPK2=2000
+[2026-10-26T19:57:09-0400] df: tmpfs          tmpfs 132008248 4542488 127465760   4% /dev/shm
+[2026-10-26T19:57:09-0400] === arm n10 row_cache_size 256 rows_per_partition 10 table t partitions 10000
+[2026-10-26T19:57:09-0400] conf n10: row_cache_size=256MiB
+[2026-10-26T19:57:09-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T19:57:28-0400] node up (n10) after 19 s, pid 3055989
+[2026-10-26T19:57:29-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': '10'}]
+[2026-10-26T19:57:29-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T19:57:30-0400] 
+[2026-10-26T19:57:30-0400]   exit 0 in 1.1s
+[2026-10-26T19:57:50-0400] + jcmd 3055989 GC.run
+[2026-10-26T19:57:50-0400]   exit 0 in 0.4s
+[2026-10-26T19:57:53-0400] + jcmd 3055989 GC.heap_info
+[2026-10-26T19:57:53-0400]   exit 0 in 0.2s
+[2026-10-26T19:57:54-0400] CKPT {"name": "cold", "table": "t", "epoch_ms": 1793059073678, "RssAnon_kb": 2768696, "VmRSS_kb": 2948404, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T19:57:55-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T19:57:55-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T19:57:55-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.9
+[2026-10-26T19:57:55-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T19:57:55-0400] warm-up took 1.2s
+[2026-10-26T19:58:05-0400] + jcmd 3055989 GC.run
+[2026-10-26T19:58:05-0400]   exit 0 in 0.3s
+[2026-10-26T19:58:08-0400] + jcmd 3055989 GC.heap_info
+[2026-10-26T19:58:08-0400]   exit 0 in 0.2s
+[2026-10-26T19:58:09-0400] CKPT {"name": "baseline", "table": "t", "epoch_ms": 1793059088621, "RssAnon_kb": 2847012, "VmRSS_kb": 3026976, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T19:58:10-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:58:10-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:58:10-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:58:10-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:58:10-0400] scan pass 1 took 1.4s, rows returned 50000
+[2026-10-26T19:58:10-0400] + jcmd 3055989 GC.run
+[2026-10-26T19:58:10-0400]   exit 0 in 0.3s
+[2026-10-26T19:58:13-0400] + jcmd 3055989 GC.heap_info
+[2026-10-26T19:58:14-0400]   exit 0 in 0.2s
+[2026-10-26T19:58:14-0400] CKPT {"name": "pass1", "table": "t", "epoch_ms": 1793059093830, "RssAnon_kb": 3498084, "VmRSS_kb": 3679432, "size": 105148419, "capacity": 268435456, "entries": 10000, "hit": 0, "miss": 10000, "outOfRange": 0, "secs": 1.4, "rows_returned": 50000}
+[2026-10-26T19:58:14-0400] FIRST-TRIGGER CHECK ok entries = 10000
+[2026-10-26T19:58:15-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:58:15-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:58:15-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.0
+[2026-10-26T19:58:15-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.0
+[2026-10-26T19:58:15-0400] scan pass 2 took 1.3s, rows returned 50000
+[2026-10-26T19:58:15-0400] + jcmd 3055989 GC.run
+[2026-10-26T19:58:15-0400]   exit 0 in 0.3s
+[2026-10-26T19:58:18-0400] + jcmd 3055989 GC.heap_info
+[2026-10-26T19:58:19-0400]   exit 0 in 0.2s
+[2026-10-26T19:58:19-0400] CKPT {"name": "pass2", "table": "t", "epoch_ms": 1793059098938, "RssAnon_kb": 3513436, "VmRSS_kb": 3694792, "size": 105148419, "capacity": 268435456, "entries": 10000, "hit": 10000, "miss": 10000, "outOfRange": 0, "secs": 1.3, "rows_returned": 50000}
+[2026-10-26T19:58:19-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T19:58:20-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059035
+Uptime (seconds)       : 71
+Heap Memory (MB)       : 85.58 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 2 hits, 192 requests, 0.010 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 10000, size 100.28 MiB, capacity 256 MiB, 10000 hits, 20000 requests, 0.500 recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T19:58:20-0400]   exit 0 in 1.4s
+[2026-10-26T19:58:20-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t
+[2026-10-26T19:58:22-0400]   exit 0 in 1.3s
+[2026-10-26T19:58:22-0400] ERROR lines in segment: 0 []
+[2026-10-26T19:58:22-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:1] 2026-10-26T23:57:14,286 CacheService.java:143 - Initializing row cache with capacity of 256 MiBs']
+[2026-10-26T19:58:22-0400] stopping node: nodetool drain
+[2026-10-26T19:58:28-0400] daemons left: []
+[2026-10-26T19:58:28-0400] === arm n1 row_cache_size 256 rows_per_partition 1 table t partitions 10000
+[2026-10-26T19:58:28-0400] conf n1: row_cache_size=256MiB
+[2026-10-26T19:58:28-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T19:58:47-0400] node up (n1) after 19 s, pid 3059075
+[2026-10-26T19:58:47-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': '1'}]
+[2026-10-26T19:58:47-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T19:58:48-0400] 
+[2026-10-26T19:58:48-0400]   exit 0 in 1.1s
+[2026-10-26T19:59:08-0400] + jcmd 3059075 GC.run
+[2026-10-26T19:59:09-0400]   exit 0 in 0.4s
+[2026-10-26T19:59:12-0400] + jcmd 3059075 GC.heap_info
+[2026-10-26T19:59:12-0400]   exit 0 in 0.2s
+[2026-10-26T19:59:12-0400] CKPT {"name": "cold", "table": "t", "epoch_ms": 1793059152367, "RssAnon_kb": 2720388, "VmRSS_kb": 2900268, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T19:59:13-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T19:59:13-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T19:59:13-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T19:59:13-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.9
+[2026-10-26T19:59:13-0400] warm-up took 1.1s
+[2026-10-26T19:59:23-0400] + jcmd 3059075 GC.run
+[2026-10-26T19:59:24-0400]   exit 0 in 0.3s
+[2026-10-26T19:59:27-0400] + jcmd 3059075 GC.heap_info
+[2026-10-26T19:59:27-0400]   exit 0 in 0.2s
+[2026-10-26T19:59:27-0400] CKPT {"name": "baseline", "table": "t", "epoch_ms": 1793059167264, "RssAnon_kb": 2823084, "VmRSS_kb": 3003156, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T19:59:29-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:59:29-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:59:29-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:59:29-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:59:29-0400] scan pass 1 took 1.4s, rows returned 50000
+[2026-10-26T19:59:29-0400] + jcmd 3059075 GC.run
+[2026-10-26T19:59:29-0400]   exit 0 in 0.3s
+[2026-10-26T19:59:32-0400] + jcmd 3059075 GC.heap_info
+[2026-10-26T19:59:32-0400]   exit 0 in 0.2s
+[2026-10-26T19:59:32-0400] CKPT {"name": "pass1", "table": "t", "epoch_ms": 1793059172444, "RssAnon_kb": 2848848, "VmRSS_kb": 3029924, "size": 11819841, "capacity": 268435456, "entries": 10000, "hit": 0, "miss": 10000, "outOfRange": 0, "secs": 1.4, "rows_returned": 50000}
+[2026-10-26T19:59:32-0400] FIRST-TRIGGER CHECK ok entries = 10000
+[2026-10-26T19:59:34-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:59:34-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T19:59:34-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:59:34-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T19:59:34-0400] scan pass 2 took 1.3s, rows returned 50000
+[2026-10-26T19:59:34-0400] + jcmd 3059075 GC.run
+[2026-10-26T19:59:34-0400]   exit 0 in 0.3s
+[2026-10-26T19:59:37-0400] + jcmd 3059075 GC.heap_info
+[2026-10-26T19:59:37-0400]   exit 0 in 0.2s
+[2026-10-26T19:59:38-0400] CKPT {"name": "pass2", "table": "t", "epoch_ms": 1793059177537, "RssAnon_kb": 2869364, "VmRSS_kb": 3050692, "size": 11819841, "capacity": 268435456, "entries": 10000, "hit": 0, "miss": 10000, "outOfRange": 10000, "secs": 1.3, "rows_returned": 50000}
+[2026-10-26T19:59:38-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T19:59:39-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059114
+Uptime (seconds)       : 70
+Heap Memory (MB)       : 84.62 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 1 hits, 190 requests, 0.005 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 10000, size 11.27 MiB, capacity 256 MiB, 10000 hits, 20000 requests, 0.500 recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T19:59:39-0400]   exit 0 in 1.3s
+[2026-10-26T19:59:39-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t
+[2026-10-26T19:59:40-0400]   exit 0 in 1.2s
+[2026-10-26T19:59:40-0400] ERROR lines in segment: 0 []
+[2026-10-26T19:59:40-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:1] 2026-10-26T23:58:33,231 CacheService.java:143 - Initializing row cache with capacity of 256 MiBs']
+[2026-10-26T19:59:40-0400] stopping node: nodetool drain
+[2026-10-26T19:59:46-0400] daemons left: []
+[2026-10-26T19:59:46-0400] === arm n100 row_cache_size 256 rows_per_partition 100 table t partitions 10000
+[2026-10-26T19:59:46-0400] conf n100: row_cache_size=256MiB
+[2026-10-26T19:59:46-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T20:00:05-0400] node up (n100) after 19 s, pid 3064548
+[2026-10-26T20:00:06-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': '100'}]
+[2026-10-26T20:00:06-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T20:00:07-0400] 
+[2026-10-26T20:00:07-0400]   exit 0 in 1.1s
+[2026-10-26T20:00:27-0400] + jcmd 3064548 GC.run
+[2026-10-26T20:00:28-0400]   exit 0 in 0.4s
+[2026-10-26T20:00:31-0400] + jcmd 3064548 GC.heap_info
+[2026-10-26T20:00:31-0400]   exit 0 in 0.2s
+[2026-10-26T20:00:31-0400] CKPT {"name": "cold", "table": "t", "epoch_ms": 1793059231121, "RssAnon_kb": 2721024, "VmRSS_kb": 2900852, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:00:32-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.7
+[2026-10-26T20:00:32-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.9
+[2026-10-26T20:00:32-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T20:00:32-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T20:00:32-0400] warm-up took 1.1s
+[2026-10-26T20:00:42-0400] + jcmd 3064548 GC.run
+[2026-10-26T20:00:42-0400]   exit 0 in 0.3s
+[2026-10-26T20:00:45-0400] + jcmd 3064548 GC.heap_info
+[2026-10-26T20:00:46-0400]   exit 0 in 0.2s
+[2026-10-26T20:00:46-0400] CKPT {"name": "baseline", "table": "t", "epoch_ms": 1793059245976, "RssAnon_kb": 2771808, "VmRSS_kb": 2951812, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:00:48-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.5
+[2026-10-26T20:00:48-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.4
+[2026-10-26T20:00:48-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.5
+[2026-10-26T20:00:48-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.5
+[2026-10-26T20:00:48-0400] scan pass 1 took 1.7s, rows returned 50000
+[2026-10-26T20:00:48-0400] + jcmd 3064548 GC.run
+[2026-10-26T20:00:48-0400]   exit 0 in 0.3s
+[2026-10-26T20:00:51-0400] + jcmd 3064548 GC.heap_info
+[2026-10-26T20:00:51-0400]   exit 0 in 0.2s
+[2026-10-26T20:00:51-0400] CKPT {"name": "pass1", "table": "t", "epoch_ms": 1793059251421, "RssAnon_kb": 3463772, "VmRSS_kb": 3645196, "size": 265840999, "capacity": 268435456, "entries": 2560, "hit": 0, "miss": 10000, "outOfRange": 0, "secs": 1.7, "rows_returned": 50000}
+[2026-10-26T20:00:51-0400] FIRST-TRIGGER CHECK ok entries = 2560
+[2026-10-26T20:00:53-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T20:00:53-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T20:00:53-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T20:00:53-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T20:00:53-0400] scan pass 2 took 1.4s, rows returned 50000
+[2026-10-26T20:00:53-0400] + jcmd 3064548 GC.run
+[2026-10-26T20:00:53-0400]   exit 0 in 0.3s
+[2026-10-26T20:00:56-0400] + jcmd 3064548 GC.heap_info
+[2026-10-26T20:00:56-0400]   exit 0 in 0.2s
+[2026-10-26T20:00:57-0400] CKPT {"name": "pass2", "table": "t", "epoch_ms": 1793059256621, "RssAnon_kb": 3514984, "VmRSS_kb": 3696408, "size": 265841599, "capacity": 268435456, "entries": 2560, "hit": 0, "miss": 20000, "outOfRange": 0, "secs": 1.4, "rows_returned": 50000}
+[2026-10-26T20:00:57-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T20:00:58-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059193
+Uptime (seconds)       : 71
+Heap Memory (MB)       : 84.99 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 2 hits, 186 requests, 0.011 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 2560, size 253.53 MiB, capacity 256 MiB, 0 hits, 20000 requests, 0.000 recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T20:00:58-0400]   exit 0 in 1.4s
+[2026-10-26T20:00:58-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t
+[2026-10-26T20:00:59-0400]   exit 0 in 1.3s
+[2026-10-26T20:00:59-0400] ERROR lines in segment: 0 []
+[2026-10-26T20:00:59-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:2] 2026-10-26T23:59:51,729 CacheService.java:143 - Initializing row cache with capacity of 256 MiBs']
+[2026-10-26T20:00:59-0400] stopping node: nodetool drain
+[2026-10-26T20:01:05-0400] daemons left: []
+[2026-10-26T20:01:05-0400] === arm nall row_cache_size 256 rows_per_partition ALL table t partitions 10000
+[2026-10-26T20:01:05-0400] conf nall: row_cache_size=256MiB
+[2026-10-26T20:01:06-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T20:01:24-0400] node up (nall) after 18 s, pid 3067773
+[2026-10-26T20:01:25-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': 'ALL'}]
+[2026-10-26T20:01:25-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T20:01:26-0400] 
+[2026-10-26T20:01:26-0400]   exit 0 in 1.1s
+[2026-10-26T20:01:46-0400] + jcmd 3067773 GC.run
+[2026-10-26T20:01:46-0400]   exit 0 in 0.4s
+[2026-10-26T20:01:49-0400] + jcmd 3067773 GC.heap_info
+[2026-10-26T20:01:50-0400]   exit 0 in 0.2s
+[2026-10-26T20:01:50-0400] CKPT {"name": "cold", "table": "t", "epoch_ms": 1793059309929, "RssAnon_kb": 2718012, "VmRSS_kb": 2897872, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:01:51-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T20:01:51-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.7
+[2026-10-26T20:01:51-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T20:01:51-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T20:01:51-0400] warm-up took 1.0s
+[2026-10-26T20:02:01-0400] + jcmd 3067773 GC.run
+[2026-10-26T20:02:01-0400]   exit 0 in 0.3s
+[2026-10-26T20:02:04-0400] + jcmd 3067773 GC.heap_info
+[2026-10-26T20:02:04-0400]   exit 0 in 0.2s
+[2026-10-26T20:02:05-0400] CKPT {"name": "baseline", "table": "t", "epoch_ms": 1793059324738, "RssAnon_kb": 2818284, "VmRSS_kb": 2998352, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:02:07-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 2.0
+[2026-10-26T20:02:07-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 2.0
+[2026-10-26T20:02:07-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.9
+[2026-10-26T20:02:07-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.9
+[2026-10-26T20:02:07-0400] scan pass 1 took 2.2s, rows returned 50000
+[2026-10-26T20:02:07-0400] + jcmd 3067773 GC.run
+[2026-10-26T20:02:07-0400]   exit 0 in 0.3s
+[2026-10-26T20:02:10-0400] + jcmd 3067773 GC.heap_info
+[2026-10-26T20:02:10-0400]   exit 0 in 0.2s
+[2026-10-26T20:02:11-0400] CKPT {"name": "pass1", "table": "t", "epoch_ms": 1793059330732, "RssAnon_kb": 3115660, "VmRSS_kb": 3297256, "size": 239036928, "capacity": 268435456, "entries": 768, "hit": 0, "miss": 10000, "outOfRange": 0, "secs": 2.2, "rows_returned": 50000}
+[2026-10-26T20:02:11-0400] FIRST-TRIGGER CHECK ok entries = 768
+[2026-10-26T20:02:12-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.3
+[2026-10-26T20:02:12-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.3
+[2026-10-26T20:02:12-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.3
+[2026-10-26T20:02:12-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.3
+[2026-10-26T20:02:12-0400] scan pass 2 took 1.5s, rows returned 50000
+[2026-10-26T20:02:12-0400] + jcmd 3067773 GC.run
+[2026-10-26T20:02:12-0400]   exit 0 in 0.3s
+[2026-10-26T20:02:15-0400] + jcmd 3067773 GC.heap_info
+[2026-10-26T20:02:16-0400]   exit 0 in 0.2s
+[2026-10-26T20:02:16-0400] CKPT {"name": "pass2", "table": "t", "epoch_ms": 1793059335999, "RssAnon_kb": 3119828, "VmRSS_kb": 3301424, "size": 239036928, "capacity": 268435456, "entries": 768, "hit": 0, "miss": 20000, "outOfRange": 0, "secs": 1.5, "rows_returned": 50000}
+[2026-10-26T20:02:16-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T20:02:17-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059272
+Uptime (seconds)       : 71
+Heap Memory (MB)       : 84.47 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 3 hits, 188 requests, 0.016 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 768, size 227.96 MiB, capacity 256 MiB, 0 hits, 20000 requests, 0.000 recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T20:02:17-0400]   exit 0 in 1.3s
+[2026-10-26T20:02:17-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t
+[2026-10-26T20:02:19-0400]   exit 0 in 1.3s
+[2026-10-26T20:02:19-0400] ERROR lines in segment: 0 []
+[2026-10-26T20:02:19-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:1] 2026-10-27T00:01:10,848 CacheService.java:143 - Initializing row cache with capacity of 256 MiBs']
+[2026-10-26T20:02:19-0400] stopping node: nodetool drain
+[2026-10-26T20:02:25-0400] daemons left: []
+[2026-10-26T20:02:25-0400] === arm t10 row_cache_size 256 rows_per_partition 10 table t2 partitions 2000
+[2026-10-26T20:02:25-0400] conf t10: row_cache_size=256MiB
+[2026-10-26T20:02:25-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T20:02:44-0400] node up (t10) after 18 s, pid 3071580
+[2026-10-26T20:02:44-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': '10'}]
+[2026-10-26T20:02:44-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T20:02:45-0400] 
+[2026-10-26T20:02:45-0400]   exit 0 in 1.1s
+[2026-10-26T20:03:05-0400] + jcmd 3071580 GC.run
+[2026-10-26T20:03:06-0400]   exit 0 in 0.4s
+[2026-10-26T20:03:09-0400] + jcmd 3071580 GC.heap_info
+[2026-10-26T20:03:09-0400]   exit 0 in 0.2s
+[2026-10-26T20:03:09-0400] CKPT {"name": "cold", "table": "t2", "epoch_ms": 1793059389301, "RssAnon_kb": 2738208, "VmRSS_kb": 2918068, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:03:11-0400] CLIENT_DONE full t ok 250 rows 75000 vbytes 76800000 errors 0 secs 1.4
+[2026-10-26T20:03:11-0400] CLIENT_DONE full t ok 250 rows 75000 vbytes 76800000 errors 0 secs 1.4
+[2026-10-26T20:03:11-0400] CLIENT_DONE full t ok 250 rows 75000 vbytes 76800000 errors 0 secs 1.4
+[2026-10-26T20:03:11-0400] CLIENT_DONE full t ok 250 rows 75000 vbytes 76800000 errors 0 secs 1.5
+[2026-10-26T20:03:11-0400] warm-up took 1.7s
+[2026-10-26T20:03:21-0400] + jcmd 3071580 GC.run
+[2026-10-26T20:03:21-0400]   exit 0 in 0.3s
+[2026-10-26T20:03:24-0400] + jcmd 3071580 GC.heap_info
+[2026-10-26T20:03:24-0400]   exit 0 in 0.2s
+[2026-10-26T20:03:25-0400] CKPT {"name": "baseline", "table": "t2", "epoch_ms": 1793059404803, "RssAnon_kb": 2899968, "VmRSS_kb": 3080988, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:03:26-0400] CLIENT_DONE scan t2 ok 500 rows 2500 vbytes 2560000 errors 0 secs 0.8
+[2026-10-26T20:03:26-0400] CLIENT_DONE scan t2 ok 500 rows 2500 vbytes 2560000 errors 0 secs 0.8
+[2026-10-26T20:03:26-0400] CLIENT_DONE scan t2 ok 500 rows 2500 vbytes 2560000 errors 0 secs 0.9
+[2026-10-26T20:03:26-0400] CLIENT_DONE scan t2 ok 500 rows 2500 vbytes 2560000 errors 0 secs 0.9
+[2026-10-26T20:03:26-0400] scan pass 1 took 1.1s, rows returned 10000
+[2026-10-26T20:03:26-0400] + jcmd 3071580 GC.run
+[2026-10-26T20:03:26-0400]   exit 0 in 0.3s
+[2026-10-26T20:03:29-0400] + jcmd 3071580 GC.heap_info
+[2026-10-26T20:03:29-0400]   exit 0 in 0.2s
+[2026-10-26T20:03:30-0400] CKPT {"name": "pass1", "table": "t2", "epoch_ms": 1793059409648, "RssAnon_kb": 3011976, "VmRSS_kb": 3193336, "size": 25838240, "capacity": 268435456, "entries": 2000, "hit": 0, "miss": 2000, "outOfRange": 0, "secs": 1.1, "rows_returned": 10000}
+[2026-10-26T20:03:30-0400] FIRST-TRIGGER CHECK ok entries = 2000
+[2026-10-26T20:03:30-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T20:03:31-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059351
+Uptime (seconds)       : 65
+Heap Memory (MB)       : 98.07 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 1 hits, 184 requests, 0.005 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 2000, size 24.64 MiB, capacity 256 MiB, 0 hits, 2000 requests, 0.000 recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T20:03:31-0400]   exit 0 in 1.4s
+[2026-10-26T20:03:31-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t2
+[2026-10-26T20:03:32-0400]   exit 0 in 1.3s
+[2026-10-26T20:03:32-0400] ERROR lines in segment: 0 []
+[2026-10-26T20:03:32-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:2] 2026-10-27T00:02:30,224 CacheService.java:143 - Initializing row cache with capacity of 256 MiBs']
+[2026-10-26T20:03:32-0400] stopping node: nodetool drain
+[2026-10-26T20:03:38-0400] daemons left: []
+[2026-10-26T20:03:38-0400] === arm none row_cache_size 256 rows_per_partition NONE table t partitions 10000
+[2026-10-26T20:03:38-0400] conf none: row_cache_size=256MiB
+[2026-10-26T20:03:39-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T20:03:57-0400] node up (none) after 18 s, pid 3073792
+[2026-10-26T20:03:57-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': 'NONE'}]
+[2026-10-26T20:03:58-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T20:03:59-0400] 
+[2026-10-26T20:03:59-0400]   exit 0 in 1.1s
+[2026-10-26T20:04:19-0400] + jcmd 3073792 GC.run
+[2026-10-26T20:04:19-0400]   exit 0 in 0.4s
+[2026-10-26T20:04:22-0400] + jcmd 3073792 GC.heap_info
+[2026-10-26T20:04:23-0400]   exit 0 in 0.2s
+[2026-10-26T20:04:23-0400] CKPT {"name": "cold", "table": "t", "epoch_ms": 1793059462889, "RssAnon_kb": 2759972, "VmRSS_kb": 2939848, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:04:24-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 1.0
+[2026-10-26T20:04:24-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.9
+[2026-10-26T20:04:24-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.7
+[2026-10-26T20:04:24-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.8
+[2026-10-26T20:04:24-0400] warm-up took 1.2s
+[2026-10-26T20:04:34-0400] + jcmd 3073792 GC.run
+[2026-10-26T20:04:34-0400]   exit 0 in 0.3s
+[2026-10-26T20:04:37-0400] + jcmd 3073792 GC.heap_info
+[2026-10-26T20:04:38-0400]   exit 0 in 0.2s
+[2026-10-26T20:04:38-0400] CKPT {"name": "baseline", "table": "t", "epoch_ms": 1793059477876, "RssAnon_kb": 2834360, "VmRSS_kb": 3014428, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:04:39-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T20:04:39-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:04:39-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:04:39-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:04:39-0400] scan pass 1 took 1.4s, rows returned 50000
+[2026-10-26T20:04:39-0400] + jcmd 3073792 GC.run
+[2026-10-26T20:04:39-0400]   exit 0 in 0.3s
+[2026-10-26T20:04:42-0400] + jcmd 3073792 GC.heap_info
+[2026-10-26T20:04:43-0400]   exit 0 in 0.2s
+[2026-10-26T20:04:43-0400] CKPT {"name": "pass1", "table": "t", "epoch_ms": 1793059482988, "RssAnon_kb": 2855552, "VmRSS_kb": 3036124, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0, "secs": 1.4, "rows_returned": 50000}
+[2026-10-26T20:04:43-0400] FIRST-TRIGGER CHECK ok entries = 0
+[2026-10-26T20:04:44-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.0
+[2026-10-26T20:04:44-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:04:44-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:04:44-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:04:44-0400] scan pass 2 took 1.3s, rows returned 50000
+[2026-10-26T20:04:44-0400] + jcmd 3073792 GC.run
+[2026-10-26T20:04:45-0400]   exit 0 in 0.3s
+[2026-10-26T20:04:48-0400] + jcmd 3073792 GC.heap_info
+[2026-10-26T20:04:48-0400]   exit 0 in 0.2s
+[2026-10-26T20:04:48-0400] CKPT {"name": "pass2", "table": "t", "epoch_ms": 1793059488043, "RssAnon_kb": 2861616, "VmRSS_kb": 3042416, "size": 0, "capacity": 268435456, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0, "secs": 1.3, "rows_returned": 50000}
+[2026-10-26T20:04:48-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T20:04:49-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059425
+Uptime (seconds)       : 70
+Heap Memory (MB)       : 84.52 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 4 hits, 188 requests, 0.021 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 256 MiB, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T20:04:49-0400]   exit 0 in 1.3s
+[2026-10-26T20:04:49-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t
+[2026-10-26T20:04:51-0400]   exit 0 in 1.2s
+[2026-10-26T20:04:51-0400] ERROR lines in segment: 0 []
+[2026-10-26T20:04:51-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:1] 2026-10-27T00:03:43,854 CacheService.java:143 - Initializing row cache with capacity of 256 MiBs']
+[2026-10-26T20:04:51-0400] stopping node: nodetool drain
+[2026-10-26T20:04:57-0400] daemons left: []
+[2026-10-26T20:04:57-0400] === arm c32 row_cache_size 32 rows_per_partition 100 table t partitions 10000
+[2026-10-26T20:04:57-0400] conf c32: row_cache_size=32MiB
+[2026-10-26T20:04:57-0400] + bin/cassandra -p /dev/shm/s4-b9-rp/cassandra.pid (ulimit -n 100000)
+[2026-10-26T20:05:16-0400] node up (c32) after 19 s, pid 3076152
+[2026-10-26T20:05:16-0400] schema caching = [{'keys': 'NONE', 'rows_per_partition': '100'}]
+[2026-10-26T20:05:16-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 invalidaterowcache
+[2026-10-26T20:05:17-0400] 
+[2026-10-26T20:05:17-0400]   exit 0 in 1.1s
+[2026-10-26T20:05:37-0400] + jcmd 3076152 GC.run
+[2026-10-26T20:05:38-0400]   exit 0 in 0.4s
+[2026-10-26T20:05:41-0400] + jcmd 3076152 GC.heap_info
+[2026-10-26T20:05:41-0400]   exit 0 in 0.2s
+[2026-10-26T20:05:41-0400] CKPT {"name": "cold", "table": "t", "epoch_ms": 1793059541235, "RssAnon_kb": 2758084, "VmRSS_kb": 2938036, "size": 0, "capacity": 33554432, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:05:42-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.6
+[2026-10-26T20:05:42-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.6
+[2026-10-26T20:05:42-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.7
+[2026-10-26T20:05:42-0400] CLIENT_DONE full t2 ok 250 rows 25000 vbytes 25600000 errors 0 secs 0.9
+[2026-10-26T20:05:42-0400] warm-up took 1.1s
+[2026-10-26T20:05:52-0400] + jcmd 3076152 GC.run
+[2026-10-26T20:05:53-0400]   exit 0 in 0.3s
+[2026-10-26T20:05:56-0400] + jcmd 3076152 GC.heap_info
+[2026-10-26T20:05:56-0400]   exit 0 in 0.2s
+[2026-10-26T20:05:56-0400] CKPT {"name": "baseline", "table": "t", "epoch_ms": 1793059556087, "RssAnon_kb": 2856500, "VmRSS_kb": 3036740, "size": 0, "capacity": 33554432, "entries": 0, "hit": 0, "miss": 0, "outOfRange": 0}
+[2026-10-26T20:05:58-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.7
+[2026-10-26T20:05:58-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.6
+[2026-10-26T20:05:58-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.6
+[2026-10-26T20:05:58-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.7
+[2026-10-26T20:05:58-0400] scan pass 1 took 1.9s, rows returned 50000
+[2026-10-26T20:05:58-0400] + jcmd 3076152 GC.run
+[2026-10-26T20:05:58-0400]   exit 0 in 0.3s
+[2026-10-26T20:06:01-0400] + jcmd 3076152 GC.heap_info
+[2026-10-26T20:06:01-0400]   exit 0 in 0.2s
+[2026-10-26T20:06:02-0400] CKPT {"name": "pass1", "table": "t", "epoch_ms": 1793059561755, "RssAnon_kb": 3268172, "VmRSS_kb": 3449700, "size": 26584320, "capacity": 33554432, "entries": 256, "hit": 0, "miss": 10000, "outOfRange": 0, "secs": 1.9, "rows_returned": 50000}
+[2026-10-26T20:06:02-0400] FIRST-TRIGGER CHECK ok entries = 256
+[2026-10-26T20:06:03-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:06:03-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:06:03-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.2
+[2026-10-26T20:06:03-0400] CLIENT_DONE scan t ok 2500 rows 12500 vbytes 12800000 errors 0 secs 1.1
+[2026-10-26T20:06:03-0400] scan pass 2 took 1.4s, rows returned 50000
+[2026-10-26T20:06:03-0400] + jcmd 3076152 GC.run
+[2026-10-26T20:06:03-0400]   exit 0 in 0.3s
+[2026-10-26T20:06:06-0400] + jcmd 3076152 GC.heap_info
+[2026-10-26T20:06:07-0400]   exit 0 in 0.2s
+[2026-10-26T20:06:07-0400] CKPT {"name": "pass2", "table": "t", "epoch_ms": 1793059566884, "RssAnon_kb": 3272152, "VmRSS_kb": 3453680, "size": 26584320, "capacity": 33554432, "entries": 256, "hit": 0, "miss": 20000, "outOfRange": 0, "secs": 1.4, "rows_returned": 50000}
+[2026-10-26T20:06:07-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 info
+[2026-10-26T20:06:08-0400] ID                     : bac3f13e-507b-4314-b426-b5cbdb570dea
+Gossip active          : true
+Native Transport active: true
+Load                   : 3.5 GiB
+Uncompressed load      : 3.5 GiB
+Generation No          : 1793059503
+Uptime (seconds)       : 70
+Heap Memory (MB)       : 84.94 / 2048.00
+Off Heap Memory (MB)   : 0.02
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 3 hits, 189 requests, 0.016 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 256, size 25.35 MiB, capacity 32 MiB, 0 hits, 20000 requests, 0.000 recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : 6580560342989679305
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+[2026-10-26T20:06:08-0400]   exit 0 in 1.4s
+[2026-10-26T20:06:08-0400] + /users/jason92/s4-b9-rp-n/bin/nodetool -p 7120 tablestats ks.t
+[2026-10-26T20:06:10-0400]   exit 0 in 1.2s
+[2026-10-26T20:06:10-0400] ERROR lines in segment: 0 []
+[2026-10-26T20:06:10-0400] Initializing row cache lines: ['INFO  [SSTableBatchOpen:1] 2026-10-27T00:05:02,151 CacheService.java:143 - Initializing row cache with capacity of 32 MiBs']
+[2026-10-26T20:06:10-0400] stopping node: nodetool drain
+[2026-10-26T20:06:16-0400] daemons left: []
+[2026-10-26T20:06:16-0400] daemons left: []
+EXPECTED full-scale data (10,000 partitions in ks.t, 2,000 in ks.t2) | got (10000, 2000) | RESULT ok INFO
+EXPECTED n1: 0.75 <= e / (N x 1.05 KiB) <= 1.4 | got 1.10 (e = 1182 B) | RESULT ok PRIMARY
+EXPECTED n10: 0.75 <= e / (N x 1.05 KiB) <= 1.4 | got 0.98 (e = 10515 B) | RESULT ok PRIMARY
+EXPECTED n100: 0.75 <= e / (N x 1.05 KiB) <= 1.4 | got 0.97 (e = 103844 B) | RESULT ok PRIMARY
+EXPECTED nall: 250 KiB <= e <= 400 KiB | got 304 KiB | RESULT ok PRIMARY
+EXPECTED nall: e(ALL)/e(100) in 2.4..3.8 | got 3.00 | RESULT ok PRIMARY
+EXPECTED n1: Entries = 10000 after pass 1, Size about 12 MB | got (10000, 11.8) | RESULT ok INFO
+EXPECTED n10: Entries = 10000 after pass 1, Size about 108 MB | got (10000, 105.1) | RESULT ok INFO
+EXPECTED n100: Size <= 256 MiB, Entries <= 2600 and < 10000 (cap binds) | got (265840999, 2560) | RESULT ok PRIMARY
+EXPECTED nall: Size <= 256 MiB, Entries <= 850 and < 10000 (cap binds) | got (239036928, 768) | RESULT ok PRIMARY
+EXPECTED n1: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 26.4 MB, Size 11.8 MB, tol 16.8 MB | RESULT ok PRIMARY
+EXPECTED n10: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 666.7 MB, Size 105.1 MB, tol 21.0 MB | RESULT MISMATCH PRIMARY
+EXPECTED n100: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 708.6 MB, Size 265.8 MB, tol 53.2 MB | RESULT MISMATCH PRIMARY
+EXPECTED nall: RssAnon delta within max(20% of Size, 16 MiB) of Size | got delta 304.5 MB, Size 239.0 MB, tol 47.8 MB | RESULT MISMATCH PRIMARY
+EXPECTED n10: pass-2 hits >= 95% of 10000 and no HitOutOfRange | got (10000, 0) | RESULT ok PRIMARY
+EXPECTED n1: no hit in either pass; pass-2 HitOutOfRange >= 95% of 10000 | got (0, 10000) | RESULT ok PRIMARY
+EXPECTED t10: e(t10) - e(n10) >= 2 KiB | got 2404 B (e(t10) = 12919, e(n10) = 10515) | RESULT ok PRIMARY
+EXPECTED none: Entries = 0, Size = 0, Hit = Miss = 0 after both passes | got (0, 0, 0, 0) | RESULT ok PRIMARY
+EXPECTED c32 (positive control): Size <= 32 MiB, Entries <= 330 and < 10000 | got (26584320, 256) | RESULT ok PRIMARY
+EXPECTED n1: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED n10: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED n100: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED nall: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED none: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED c32: pass 1 returned 50000 rows (LIMIT 5) | got 50000 | RESULT ok INFO
+EXPECTED t10: pass 1 returned 10000 rows (LIMIT 5) | got 10000 | RESULT ok INFO
+CLASS no matching row: 3 of 16 primary checks mismatch | primary mismatches 3 of 16
+chain done unit-rc=0 cluster-rc=0

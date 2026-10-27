@@ -1,0 +1,16 @@
+SUMMARY arm=A4 vol=16777216 seg=33554432 free_after_filler=0
+SUMMARY handleCommitError lines=9 with_needle=9
+SUMMARY kinds={'persist': 9}
+SUMMARY needle required=33554432 only=16777216 df_avail_then=16752640 df_size=16777216
+SUMMARY needle required=33554432 only=16777216 df_avail_then=16752640 df_size=16777216
+SUMMARY needle required=33554432 only=16777216 df_avail_then=0 df_size=16777216
+SUMMARY first_error df_avail_then=16752640 df_used=24576
+SUMMARY other_error 9x CommitLog.java:591 - Failed to persist commits to disk. 33554432 bytes required for next c
+SUMMARY other_error 2x JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtableP
+SUMMARY other_error 1x DefaultFSErrorHandler.java:72 - Stopping transports as disk_failure_policy is stop
+SUMMARY other_error 1x StorageService.java:684 - Stopping native transport
+SUMMARY other_error 1x StorageService.java:689 - Stopping gossiper
+SUMMARY apparent_commitlog_bytes max=16773303 df_used max=16777216
+SUMMARY hs_err_files=no
+EXPECTED ok: A4: a handleCommitError line is logged (lines=9)
+EXPECTED ok: A4: "bytes required" text present with only == volume total 16777216 (needles=[16777216, 16777216, 16777216])

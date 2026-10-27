@@ -1,0 +1,68 @@
+== unit tier (ant.log = the probe's stdout, a second copy of the lines the text file holds)
+junit: org.apache.cassandra.db.filter.GroupByRowLimitTest-_jdk11 tests 1 failures 0 errors 0
+B78 lines in ant.log: 35
+ant.log copy equals the text file: True
+ p=1: reps 2 rows ['50000', '50000'] subpages ['50002', '50002'] max/subpage ['1', '1'] pages ['2', '2'] alloc ['521172416', '518846296']
+ p=7: reps 2 rows ['50000', '50000'] subpages ['7143', '7143'] max/subpage ['7', '7'] pages ['1', '1'] alloc ['136981368', '136981368']
+ p=1000: reps 2 rows ['50000', '50000'] subpages ['51', '51'] max/subpage ['1000', '1000'] pages ['1', '1'] alloc ['73935024', '73935024']
+ p=10000: reps 2 rows ['50000', '50000'] subpages ['6', '6'] max/subpage ['10000', '10000'] pages ['1', '1'] alloc ['73547248', '73547248']
+ p=unset: reps 2 rows ['50000', '50000'] subpages ['6', '6'] max/subpage ['10000', '10000'] pages ['1', '1'] alloc ['73547248', '73547248']
+ W p=1: firstReadBytes 1059 per row 1059.00 rowsCounted 1 groups 0 isDone false
+ W p=7: firstReadBytes 7269 per row 1038.43 rowsCounted 7 groups 0 isDone false
+ W p=1000: firstReadBytes 1035993 per row 1035.99 rowsCounted 1000 groups 0 isDone false
+ W p=10000: firstReadBytes 10359994 per row 1036.00 rowsCounted 10000 groups 0 isDone false
+ W p=unset: firstReadBytes 10359994 per row 1036.00 rowsCounted 10000 groups 0 isDone false
+ CB p=7: firstReadBytes 7269 per row 1038.43
+ CB p=1000: firstReadBytes 1035993 per row 1035.99
+ CB p=10000: firstReadBytes 10359994 per row 1036.00
+  B78 C p=7 rep=2 rows=7 allocBytes=15344 subpages=1
+  B78 C p=7 rep=3 rows=7 allocBytes=15344 subpages=1
+  B78 C p=1000 rep=2 rows=1000 allocBytes=1475128 subpages=1
+  B78 C p=1000 rep=3 rows=1000 allocBytes=1475128 subpages=1
+  B78 C p=10000 rep=2 rows=10000 allocBytes=14705944 subpages=1
+  B78 C p=10000 rep=3 rows=10000 allocBytes=14705944 subpages=1
+
+== cluster tier
+K = 2
+label fetch rep | wall ms | rows | sub-reads | max rows/line | n1 base | n1 peak-after | n1 delta | n2 delta | n1 pause frac | n1 used max | err
+groupby 100 1 | 2868 | 200000 | 2001 | 100 | 81 | 82 | 1 | None | 0.02 | 354 |  | dead []
+groupby 100 2 | 2499 | 200000 | 2001 | 100 | 81 | 83 | 2 | None | 0.01 | 355 |  | dead []
+groupby 100 3 | 2558 | 200000 | 2001 | 100 | 81 | 84 | 3 | None | 0.01 | 356 |  | dead []
+control-select 100 1 | 9868 | 0 | 0 | 0 | 81 | 82 | 1 | None | 0.01 | 354 |  | dead []
+control-select 100 2 | 9478 | 0 | 0 | 0 | 81 | 82 | 1 | None | 0.00 | 355 |  | dead []
+control-select 100 3 | 9504 | 0 | 0 | 0 | 81 | 82 | 1 | None | 0.00 | 354 |  | dead []
+groupby 1000 1 | 1869 | 200000 | 201 | 1000 | 81 | 89 | 8 | None | 0.02 | 357 |  | dead []
+groupby 1000 2 | 1858 | 200000 | 201 | 1000 | 81 | 93 | 12 | None | 0.02 | 330 |  | dead []
+groupby 1000 3 | 1766 | 200000 | 201 | 1000 | 81 | 98 | 17 | None | 0.01 | 352 |  | dead []
+control-select 1000 1 | 7315 | 0 | 0 | 0 | 81 | 88 | 7 | None | 0.00 | 361 |  | dead []
+control-select 1000 2 | 7179 | 0 | 0 | 0 | 81 | 83 | 2 | None | 0.00 | 356 |  | dead []
+control-select 1000 3 | 7101 | 0 | 0 | 0 | 81 | 84 | 3 | None | 0.00 | 356 |  | dead []
+groupby 10000 1 | 2529 | 200000 | 21 | 10000 | 81 | 376 | 295 | None | 0.11 | 405 |  | dead []
+groupby 10000 2 | 2643 | 200000 | 21 | 10000 | 81 | 405 | 324 | None | 0.12 | 405 |  | dead []
+groupby 10000 3 | 2596 | 200000 | 21 | 10000 | 81 | 405 | 324 | None | 0.11 | 406 |  | dead []
+control-select 10000 1 | 7162 | 0 | 0 | 0 | 77 | 358 | 281 | None | 0.05 | 386 |  | dead []
+control-select 10000 2 | 7050 | 0 | 0 | 0 | 77 | 303 | 226 | None | 0.04 | 350 |  | dead []
+control-select 10000 3 | 6874 | 0 | 0 | 0 | 77 | 302 | 225 | None | 0.04 | 350 |  | dead []
+groupby 100000 1 | 1324 | 0 | 0 | 0 | 77 | 477 | 400 | None | 0.49 | 462 | ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') | dead [1]
+groupby 100000 2 | 301055 | 0 | 0 | 0 | 79 | 372 | 293 | 396 | 0.00 | 368 | ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') | dead [1, 2]
+groupby 100000 3 | 301446 | 0 | 0 | 0 | 82 | 479 | 397 | 400 | 0.00 | 464 | ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') | dead [1, 2]
+control-select 100000 1 | 120074 | 0 | 0 | 0 | 83 | None | None | 400 | 0.00 | 99 | OperationTimedOut("errors={'127.0.8.1:9042': 'Client request timeout.  | dead [2]
+groupby 1000000 1 | 147472 | 0 | 0 | 0 | 83 | 480 | 397 | 400 | 0.00 | 465 | ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') | dead [1, 2]
+groupby 1000000 2 | 301442 | 0 | 0 | 0 | 83 | 480 | 397 | 401 | 0.00 | 465 | ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') | dead [1, 2]
+groupby 1000000 3 | 301442 | 0 | 0 | 0 | 84 | 481 | 397 | 401 | 0.00 | 465 | ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') | dead [1, 2]
+groupby None 1 | 3435 | 200000 | 21 | 10000 | 83 | 411 | 328 | 187 | 0.06 | 417 |  | dead []
+groupby None 2 | 3334 | 200000 | 21 | 10000 | 83 | 443 | 360 | None | 0.26 | 421 |  | dead []
+groupby None 3 | 5096 | 200000 | 21 | 10000 | 83 | 375 | 292 | None | 0.51 | 388 |  | dead []
+small-rows 10000 1 | 772 | 200000 | 21 | 10000 | 83 | None | None | None | 0.00 | 340 |  | dead []
+small-rows 10000 2 | 791 | 200000 | 21 | 10000 | 83 | 87 | 4 | None | 0.00 | 356 |  | dead []
+small-rows 10000 3 | 796 | 200000 | 21 | 10000 | 83 | 87 | 4 | None | 0.01 | 359 |  | dead []
+small-rows 100000 1 | 496 | 200000 | 3 | 100000 | 83 | None | None | None | 0.00 | 340 |  | dead []
+small-rows 100000 2 | 473 | 200000 | 3 | 100000 | 83 | 195 | 112 | None | 0.03 | 372 |  | dead []
+small-rows 100000 3 | 460 | 200000 | 3 | 100000 | 83 | 211 | 128 | None | 0.01 | 420 |  | dead []
+guardrail 10000 1 | 3610 | 200000 | 21 | 10000 | 78 | 423 | 345 | 189 | 0.19 | 419 |  | dead []
+guardrail 100000 1 | 14 | 0 | 0 | 0 | 78 | None | None | None | 0.00 | 0 | InvalidRequest('Error from server: code=2200 [Invalid query] message=" | dead []
+guardrail 100000 1 | 4 | 0 | 0 | 0 | 78 | None | None | None | 0.00 | 0 | InvalidRequest('Error from server: code=2200 [Invalid query] message=" | dead []
+guardrail 100000 1 | 6 | 0 | 0 | 0 | 78 | None | None | None | 0.00 | 0 | InvalidRequest('Error from server: code=2200 [Invalid query] message=" | dead []
+node 1: OutOfMemoryError lines in system.log: 0; ERROR lines: 1
+node 2: OutOfMemoryError lines in system.log: 0; ERROR lines: 2
+trace lines outside any timed window (n1, n2): [0, 0]

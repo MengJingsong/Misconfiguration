@@ -1,0 +1,15 @@
+# Byteman observation rule, cluster tier of group-limit-isdone-groupcounted--autonomous (audit amendment A8). Observation only: it changes nothing.
+# Loaded at node start with  -javaagent:<byteman.jar>=script:<this file>  -Dstage4.trace=<file>
+# One line per local sub-page read of a GROUP BY query, written when the counter is closed (end of that read):
+#   GB ms=<epoch ms> rows=<rowsCounted> groups=<groupCounted> unfinished=<hasUnfinishedGroup> done=<isDone()>
+# rows = rows that passed the counter in this read (<= rowLimit = page size P); groups = groups completed in this read; done = groupCounted >= groupLimit
+# (DataLimits.java:1013, the target). PagingGroupByAwareCounter inherits onClose, so continuation reads are traced as well.
+
+RULE g72 groupby counter close
+CLASS org.apache.cassandra.db.filter.DataLimits$CQLGroupByLimits$GroupByAwareCounter
+METHOD onClose
+AT EXIT
+IF TRUE
+DO traceOpen("g72", java.lang.System.getProperty("stage4.trace", "g72.trace"));
+   traceln("g72", "GB ms=" + java.lang.System.currentTimeMillis() + " rows=" + $0.rowsCounted + " groups=" + $0.groupCounted + " unfinished=" + $0.hasUnfinishedGroup + " done=" + $0.isDone())
+ENDRULE

@@ -1,0 +1,377 @@
+RESULT ARM H cassandra.config=file:///users/jason92/s4-b8-cl-logs/unit/arm-H.yaml
+RESULT VOLUME cldir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cl totalMiB=63943 cdcdir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cdc totalMiB=63943
+RESULT INIT commitlog_total_space=8192 cdc_total_space=0 warnCommitlog=0 warnCdc=0 cdc_enabled=false
+RESULT PASS H derived commitlog_total_space = min(8192, total/4) expected=8192 actual=8192
+RESULT PASS H commitlog WARN iff total/4 < 8192 expected=0 actual=0
+RESULT PASS H cdc disabled expected=false actual=false
+RESULT PASS rep1 CL 0 warn expected=1 actual=1
+RESULT PASS rep1 CL 0 expected=0 actual=0
+RESULT PASS rep1 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 999MiB expected=249 actual=249
+RESULT PASS rep1 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep1 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep1 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep1 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep1 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep1 CDC 0 warn expected=1 actual=1
+RESULT PASS rep1 CDC 0 expected=0 actual=0
+RESULT PASS rep1 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep1 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep1 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep1 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep1 upstream1 warn expected=1 actual=1
+RESULT PASS rep1 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep1 upstream2 warn expected=0 actual=0
+RESULT PASS rep1 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep1 swap100 warn expected=0 actual=0
+RESULT PASS rep1 swap preferred=100 expected=100 actual=100
+RESULT PASS rep1 swap667 warn expected=1 actual=1
+RESULT PASS rep1 swap preferred=667 expected=333 actual=333
+RESULT PASS rep2 CL 0 warn expected=1 actual=1
+RESULT PASS rep2 CL 0 expected=0 actual=0
+RESULT PASS rep2 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 999MiB expected=249 actual=249
+RESULT PASS rep2 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep2 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep2 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep2 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep2 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep2 CDC 0 warn expected=1 actual=1
+RESULT PASS rep2 CDC 0 expected=0 actual=0
+RESULT PASS rep2 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep2 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep2 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep2 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep2 upstream1 warn expected=1 actual=1
+RESULT PASS rep2 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep2 upstream2 warn expected=0 actual=0
+RESULT PASS rep2 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep2 swap100 warn expected=0 actual=0
+RESULT PASS rep2 swap preferred=100 expected=100 actual=100
+RESULT PASS rep2 swap667 warn expected=1 actual=1
+RESULT PASS rep2 swap preferred=667 expected=333 actual=333
+RESULT DONE failures=0
+RESULT ARM E cassandra.config=file:///users/jason92/s4-b8-cl-logs/unit/arm-E.yaml
+RESULT VOLUME cldir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cl totalMiB=63943 cdcdir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cdc totalMiB=63943
+RESULT INIT commitlog_total_space=64 cdc_total_space=0 warnCommitlog=0 warnCdc=0 cdc_enabled=false
+RESULT PASS E explicit commitlog_total_space expected=64 actual=64
+RESULT PASS E no commitlog WARN expected=0 actual=0
+RESULT PASS E cdc disabled expected=false actual=false
+RESULT PASS rep1 CL 0 warn expected=1 actual=1
+RESULT PASS rep1 CL 0 expected=0 actual=0
+RESULT PASS rep1 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 999MiB expected=249 actual=249
+RESULT PASS rep1 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep1 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep1 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep1 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep1 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep1 CDC 0 warn expected=1 actual=1
+RESULT PASS rep1 CDC 0 expected=0 actual=0
+RESULT PASS rep1 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep1 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep1 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep1 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep1 upstream1 warn expected=1 actual=1
+RESULT PASS rep1 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep1 upstream2 warn expected=0 actual=0
+RESULT PASS rep1 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep1 swap100 warn expected=0 actual=0
+RESULT PASS rep1 swap preferred=100 expected=100 actual=100
+RESULT PASS rep1 swap667 warn expected=1 actual=1
+RESULT PASS rep1 swap preferred=667 expected=333 actual=333
+RESULT PASS rep2 CL 0 warn expected=1 actual=1
+RESULT PASS rep2 CL 0 expected=0 actual=0
+RESULT PASS rep2 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 999MiB expected=249 actual=249
+RESULT PASS rep2 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep2 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep2 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep2 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep2 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep2 CDC 0 warn expected=1 actual=1
+RESULT PASS rep2 CDC 0 expected=0 actual=0
+RESULT PASS rep2 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep2 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep2 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep2 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep2 upstream1 warn expected=1 actual=1
+RESULT PASS rep2 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep2 upstream2 warn expected=0 actual=0
+RESULT PASS rep2 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep2 swap100 warn expected=0 actual=0
+RESULT PASS rep2 swap preferred=100 expected=100 actual=100
+RESULT PASS rep2 swap667 warn expected=1 actual=1
+RESULT PASS rep2 swap preferred=667 expected=333 actual=333
+RESULT DONE failures=0
+RESULT ARM V cassandra.config=file:///users/jason92/s4-b8-cl-logs/unit/arm-V.yaml
+RESULT VOLUME cldir=/users/jason92/s4-b8-cl-vol/cl totalMiB=4096 cdcdir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cdc totalMiB=63943
+RESULT INIT commitlog_total_space=1024 cdc_total_space=0 warnCommitlog=1 warnCdc=0 cdc_enabled=false
+RESULT PASS V derived commitlog_total_space = min(8192, total/4) expected=1024 actual=1024
+RESULT PASS V commitlog WARN iff total/4 < 8192 expected=1 actual=1
+RESULT PASS V cdc disabled expected=false actual=false
+RESULT PASS rep1 CL 0 warn expected=1 actual=1
+RESULT PASS rep1 CL 0 expected=0 actual=0
+RESULT PASS rep1 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 999MiB expected=249 actual=249
+RESULT PASS rep1 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep1 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep1 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep1 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep1 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep1 CDC 0 warn expected=1 actual=1
+RESULT PASS rep1 CDC 0 expected=0 actual=0
+RESULT PASS rep1 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep1 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep1 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep1 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep1 upstream1 warn expected=1 actual=1
+RESULT PASS rep1 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep1 upstream2 warn expected=0 actual=0
+RESULT PASS rep1 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep1 swap100 warn expected=0 actual=0
+RESULT PASS rep1 swap preferred=100 expected=100 actual=100
+RESULT PASS rep1 swap667 warn expected=1 actual=1
+RESULT PASS rep1 swap preferred=667 expected=333 actual=333
+RESULT PASS rep2 CL 0 warn expected=1 actual=1
+RESULT PASS rep2 CL 0 expected=0 actual=0
+RESULT PASS rep2 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 999MiB expected=249 actual=249
+RESULT PASS rep2 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep2 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep2 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep2 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep2 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep2 CDC 0 warn expected=1 actual=1
+RESULT PASS rep2 CDC 0 expected=0 actual=0
+RESULT PASS rep2 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep2 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep2 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep2 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep2 upstream1 warn expected=1 actual=1
+RESULT PASS rep2 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep2 upstream2 warn expected=0 actual=0
+RESULT PASS rep2 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep2 swap100 warn expected=0 actual=0
+RESULT PASS rep2 swap preferred=100 expected=100 actual=100
+RESULT PASS rep2 swap667 warn expected=1 actual=1
+RESULT PASS rep2 swap preferred=667 expected=333 actual=333
+RESULT DONE failures=0
+RESULT ARM C cassandra.config=file:///users/jason92/s4-b8-cl-logs/unit/arm-C.yaml
+RESULT VOLUME cldir=/users/jason92/s4-b8-cl-vol/cl totalMiB=4096 cdcdir=/users/jason92/s4-b8-cl-vol/cdc totalMiB=4096
+RESULT INIT commitlog_total_space=1024 cdc_total_space=512 warnCommitlog=1 warnCdc=1 cdc_enabled=true
+RESULT PASS C derived commitlog_total_space = min(8192, total/4) expected=1024 actual=1024
+RESULT PASS C commitlog WARN iff total/4 < 8192 expected=1 actual=1
+RESULT PASS C derived cdc_total_space = min(4096, total/8) expected=512 actual=512
+RESULT PASS C cdc WARN iff total/8 < 4096 expected=1 actual=1
+RESULT PASS rep1 CL 0 warn expected=1 actual=1
+RESULT PASS rep1 CL 0 expected=0 actual=0
+RESULT PASS rep1 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 999MiB expected=249 actual=249
+RESULT PASS rep1 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep1 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep1 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep1 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep1 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep1 CDC 0 warn expected=1 actual=1
+RESULT PASS rep1 CDC 0 expected=0 actual=0
+RESULT PASS rep1 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep1 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep1 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep1 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep1 upstream1 warn expected=1 actual=1
+RESULT PASS rep1 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep1 upstream2 warn expected=0 actual=0
+RESULT PASS rep1 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep1 swap100 warn expected=0 actual=0
+RESULT PASS rep1 swap preferred=100 expected=100 actual=100
+RESULT PASS rep1 swap667 warn expected=1 actual=1
+RESULT PASS rep1 swap preferred=667 expected=333 actual=333
+RESULT PASS rep2 CL 0 warn expected=1 actual=1
+RESULT PASS rep2 CL 0 expected=0 actual=0
+RESULT PASS rep2 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 999MiB expected=249 actual=249
+RESULT PASS rep2 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep2 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep2 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep2 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep2 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep2 CDC 0 warn expected=1 actual=1
+RESULT PASS rep2 CDC 0 expected=0 actual=0
+RESULT PASS rep2 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep2 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep2 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep2 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep2 upstream1 warn expected=1 actual=1
+RESULT PASS rep2 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep2 upstream2 warn expected=0 actual=0
+RESULT PASS rep2 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep2 swap100 warn expected=0 actual=0
+RESULT PASS rep2 swap preferred=100 expected=100 actual=100
+RESULT PASS rep2 swap667 warn expected=1 actual=1
+RESULT PASS rep2 swap preferred=667 expected=333 actual=333
+RESULT DONE failures=0
+RESULT ARM D cassandra.config=file:///users/jason92/s4-b8-cl-logs/unit/arm-D.yaml
+RESULT VOLUME cldir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cl totalMiB=63943 cdcdir=/users/jason92/s4-b8-cl-logs/unit/hostdirs/cdc totalMiB=63943
+RESULT INIT commitlog_total_space=8192 cdc_total_space=4096 warnCommitlog=0 warnCdc=0 cdc_enabled=true
+RESULT PASS D derived commitlog_total_space = min(8192, total/4) expected=8192 actual=8192
+RESULT PASS D commitlog WARN iff total/4 < 8192 expected=0 actual=0
+RESULT PASS D derived cdc_total_space = min(4096, total/8) expected=4096 actual=4096
+RESULT PASS D cdc WARN iff total/8 < 4096 expected=0 actual=0
+RESULT PASS rep1 CL 0 warn expected=1 actual=1
+RESULT PASS rep1 CL 0 expected=0 actual=0
+RESULT PASS rep1 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 999MiB expected=249 actual=249
+RESULT PASS rep1 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep1 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep1 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep1 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep1 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep1 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep1 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep1 CDC 0 warn expected=1 actual=1
+RESULT PASS rep1 CDC 0 expected=0 actual=0
+RESULT PASS rep1 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep1 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep1 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep1 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep1 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep1 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep1 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep1 upstream1 warn expected=1 actual=1
+RESULT PASS rep1 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep1 upstream2 warn expected=0 actual=0
+RESULT PASS rep1 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep1 swap100 warn expected=0 actual=0
+RESULT PASS rep1 swap preferred=100 expected=100 actual=100
+RESULT PASS rep1 swap667 warn expected=1 actual=1
+RESULT PASS rep1 swap preferred=667 expected=333 actual=333
+RESULT PASS rep2 CL 0 warn expected=1 actual=1
+RESULT PASS rep2 CL 0 expected=0 actual=0
+RESULT PASS rep2 CL 999MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 999MiB expected=249 actual=249
+RESULT PASS rep2 CL 4GiB warn expected=1 actual=1
+RESULT PASS rep2 CL 4GiB expected=1024 actual=1024
+RESULT PASS rep2 CL 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CL 32767MiB expected=8191 actual=8191
+RESULT PASS rep2 CL 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32768MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 32769MiB warn expected=0 actual=0
+RESULT PASS rep2 CL 32769MiB expected=8192 actual=8192
+RESULT PASS rep2 CL 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CL 1TiB expected=8192 actual=8192
+RESULT PASS rep2 CL Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CL Long.MAX expected=8192 actual=8192
+RESULT PASS rep2 CDC 0 warn expected=1 actual=1
+RESULT PASS rep2 CDC 0 expected=0 actual=0
+RESULT PASS rep2 CDC 32767MiB warn expected=1 actual=1
+RESULT PASS rep2 CDC 32767MiB expected=4095 actual=4095
+RESULT PASS rep2 CDC 32768MiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 32768MiB expected=4096 actual=4096
+RESULT PASS rep2 CDC 1TiB warn expected=0 actual=0
+RESULT PASS rep2 CDC 1TiB expected=4096 actual=4096
+RESULT PASS rep2 CDC Long.MAX warn expected=0 actual=0
+RESULT PASS rep2 CDC Long.MAX expected=4096 actual=4096
+RESULT PASS rep2 upstream1 warn expected=1 actual=1
+RESULT PASS rep2 upstream 667,2/3,999MiB expected=666 actual=666
+RESULT PASS rep2 upstream2 warn expected=0 actual=0
+RESULT PASS rep2 upstream 100,1/3,999MiB expected=100 actual=100
+RESULT PASS rep2 swap100 warn expected=0 actual=0
+RESULT PASS rep2 swap preferred=100 expected=100 actual=100
+RESULT PASS rep2 swap667 warn expected=1 actual=1
+RESULT PASS rep2 swap preferred=667 expected=333 actual=333
+RESULT DONE failures=0

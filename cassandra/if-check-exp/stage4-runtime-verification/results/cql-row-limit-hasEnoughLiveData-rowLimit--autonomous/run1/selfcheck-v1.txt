@@ -1,0 +1,123 @@
+PASS unit: ant.log echo lines equal unit.txt (612 keys)
+PASS unit: done=1 and ant exit 0 
+PASS unit R100: cache empty before arm, entry rows = 100 
+PASS unit R100: direct/hit/oor follow the rule, weightedSize and size() constant across 21 reads 
+PASS unit RALL: cache empty before arm, entry rows = 1000 
+PASS unit RALL: direct/hit/oor follow the rule, weightedSize and size() constant across 21 reads 
+PASS unit R500: cache empty before arm, entry rows = 500 
+PASS unit R500: direct/hit/oor follow the rule, weightedSize and size() constant across 21 reads 
+PASS unit: control, (w500)/(w100) in [4.5, 5.5] 4.953
+PASS unit: negative control cache off, counters 0 
+PASS cluster: every arm appears in session.log ['a100', 'anone', 'l10', 'l100', 'l1000', 'l100k', 'lnone', 'off10', 'off1000', 'offnone', 's256']
+PASS l1000: ckpt.jsonl equals the CKPT lines of session.log 
+PASS l1000: system.log start-up row cache capacity 64 MiB ['64']
+PASS l1000: no ERROR line in the node log segment 
+PASS l1000: jmx.csv Size never above capacity (max 4286517, cap 67108864) 
+PASS l1000: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793084468946', '4286517', '67108864', '200', '0', '200', '10000']
+PASS l1000: window RssAnon within 2% of the nearest 5-s sample 2897008 vs 2897008
+PASS l1000: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS l1000: window rows returned = 10000000 
+PASS l1000: schema read-back shows rows_per_partition 100 
+PASS l1000: nodetool info row-cache entries = idle checkpoint entries ('200', '4.09 MiB', '64 MiB')
+PASS l10: ckpt.jsonl equals the CKPT lines of session.log 
+PASS l10: system.log start-up row cache capacity 64 MiB ['64']
+PASS l10: no ERROR line in the node log segment 
+PASS l10: jmx.csv Size never above capacity (max 4286517, cap 67108864) 
+PASS l10: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793084606641', '4286517', '67108864', '200', '10000', '200', '0']
+PASS l10: window RssAnon within 2% of the nearest 5-s sample 2902860 vs 2902372
+PASS l10: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS l10: window rows returned = 100000 
+PASS l10: schema read-back shows rows_per_partition 100 
+PASS l10: nodetool info row-cache entries = idle checkpoint entries ('200', '4.09 MiB', '64 MiB')
+PASS l100: ckpt.jsonl equals the CKPT lines of session.log 
+PASS l100: system.log start-up row cache capacity 64 MiB ['64']
+PASS l100: no ERROR line in the node log segment 
+PASS l100: jmx.csv Size never above capacity (max 4286517, cap 67108864) 
+FAIL l100: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793084746906', '4286517', '67108864', '200', '5257', '200', '0']
+PASS l100: window RssAnon within 2% of the nearest 5-s sample 2864972 vs 2864972
+PASS l100: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS l100: window rows returned = 1000000 
+PASS l100: schema read-back shows rows_per_partition 100 
+PASS l100: nodetool info row-cache entries = idle checkpoint entries ('200', '4.09 MiB', '64 MiB')
+PASS l100k: ckpt.jsonl equals the CKPT lines of session.log 
+PASS l100k: system.log start-up row cache capacity 64 MiB ['64']
+PASS l100k: no ERROR line in the node log segment 
+PASS l100k: jmx.csv Size never above capacity (max 4286517, cap 67108864) 
+FAIL l100k: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793084943923', '4286517', '67108864', '200', '0', '200', '9934']
+PASS l100k: window RssAnon within 2% of the nearest 5-s sample 2989796 vs 2989796
+PASS l100k: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS l100k: window rows returned = 20000000 
+PASS l100k: schema read-back shows rows_per_partition 100 
+PASS l100k: nodetool info row-cache entries = idle checkpoint entries ('200', '4.09 MiB', '64 MiB')
+PASS lnone: ckpt.jsonl equals the CKPT lines of session.log 
+PASS lnone: system.log start-up row cache capacity 64 MiB ['64']
+PASS lnone: no ERROR line in the node log segment 
+PASS lnone: jmx.csv Size never above capacity (max 4286517, cap 67108864) 
+FAIL lnone: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793085141515', '4286517', '67108864', '200', '0', '200', '9932']
+PASS lnone: window RssAnon within 2% of the nearest 5-s sample 3008236 vs 3008236
+PASS lnone: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS lnone: window rows returned = 20000000 
+PASS lnone: schema read-back shows rows_per_partition 100 
+PASS lnone: nodetool info row-cache entries = idle checkpoint entries ('200', '4.09 MiB', '64 MiB')
+PASS a100: ckpt.jsonl equals the CKPT lines of session.log 
+PASS a100: system.log start-up row cache capacity 64 MiB ['64']
+PASS a100: no ERROR line in the node log segment 
+PASS a100: jmx.csv Size never above capacity (max 44733201, cap 67108864) 
+PASS a100: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793085288888', '44725190', '67108864', '105', '5163', '5037', '0']
+PASS a100: window RssAnon within 2% of the nearest 5-s sample 2938780 vs 2938844
+PASS a100: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS a100: window rows returned = 1000000 
+PASS a100: schema read-back shows rows_per_partition ALL 
+PASS a100: nodetool info row-cache entries = idle checkpoint entries ('105', '42.65 MiB', '64 MiB')
+PASS anone: ckpt.jsonl equals the CKPT lines of session.log 
+PASS anone: system.log start-up row cache capacity 64 MiB ['64']
+PASS anone: no ERROR line in the node log segment 
+PASS anone: jmx.csv Size never above capacity (max 44731809, cap 67108864) 
+PASS anone: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793085482054', '44721120', '67108864', '105', '5232', '4968', '0']
+PASS anone: window RssAnon within 2% of the nearest 5-s sample 3078868 vs 3078868
+PASS anone: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS anone: window rows returned = 20000000 
+PASS anone: schema read-back shows rows_per_partition ALL 
+PASS anone: nodetool info row-cache entries = idle checkpoint entries ('105', '42.65 MiB', '64 MiB')
+PASS s256: ckpt.jsonl equals the CKPT lines of session.log 
+PASS s256: system.log start-up row cache capacity 256 MiB ['256']
+PASS s256: no ERROR line in the node log segment 
+PASS s256: jmx.csv Size never above capacity (max 84338535, cap 268435456) 
+PASS s256: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793085627258', '84336535', '268435456', '198', '9912', '288', '0']
+PASS s256: window RssAnon within 2% of the nearest 5-s sample 2945280 vs 2945460
+PASS s256: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS s256: window rows returned = 1000000 
+PASS s256: schema read-back shows rows_per_partition ALL 
+PASS s256: nodetool info row-cache entries = idle checkpoint entries ('198', '80.43 MiB', '256 MiB')
+PASS off10: ckpt.jsonl equals the CKPT lines of session.log 
+PASS off10: system.log start-up row cache capacity 0 MiB ['0']
+PASS off10: no ERROR line in the node log segment 
+PASS off10: jmx.csv Size never above capacity (max 0, cap 0) 
+PASS off10: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793085765405', '0', '0', '0', '0', '0', '0']
+PASS off10: window RssAnon within 2% of the nearest 5-s sample 2887600 vs 2887416
+PASS off10: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS off10: window rows returned = 100000 
+PASS off10: schema read-back shows rows_per_partition 100 
+PASS off10: cache off, Entries 0 and counters 0 at the window checkpoint 
+PASS off1000: ckpt.jsonl equals the CKPT lines of session.log 
+PASS off1000: system.log start-up row cache capacity 0 MiB ['0']
+PASS off1000: no ERROR line in the node log segment 
+PASS off1000: jmx.csv Size never above capacity (max 0, cap 0) 
+PASS off1000: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793085925195', '0', '0', '0', '0', '0', '0']
+PASS off1000: window RssAnon within 2% of the nearest 5-s sample 2888372 vs 2888372
+PASS off1000: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS off1000: window rows returned = 10000000 
+PASS off1000: schema read-back shows rows_per_partition 100 
+PASS off1000: cache off, Entries 0 and counters 0 at the window checkpoint 
+PASS offnone: ckpt.jsonl equals the CKPT lines of session.log 
+PASS offnone: system.log start-up row cache capacity 0 MiB ['0']
+PASS offnone: no ERROR line in the node log segment 
+PASS offnone: jmx.csv Size never above capacity (max 0, cap 0) 
+PASS offnone: last jmx sample at or before window checkpoint = checkpoint Size/Entries/counters ['1793086131693', '0', '0', '0', '0', '0', '0']
+PASS offnone: window RssAnon within 2% of the nearest 5-s sample 3013824 vs 3013904
+PASS offnone: window clients: 4 processes, 10000 ok reads, 0 errors 
+PASS offnone: window rows returned = 20000000 
+PASS offnone: schema read-back shows rows_per_partition 100 
+PASS offnone: cache off, Entries 0 and counters 0 at the window checkpoint 
+PASS cluster: all daemons stopped 
+TOTAL 122 checks, 3 FAIL

@@ -1,0 +1,79 @@
+yaml: # ---- stage4 b11-m71 lines ----;cluster_name: s4-b11-m71;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.1.1;rpc_address: 127.0.1.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b11-m71/data/commitlog;hints_directory: /dev/shm/s4-b11-m71/data/hints;saved_caches_directory: /dev/shm/s4-b11-m71/data/saved_caches;cdc_raw_directory: /dev/shm/s4-b11-m71/data/cdc_raw;auto_snapshot: false;concurrent_compactors: 1;compaction_throughput: 8MiB/s;
+jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/users/jason92/s4-b11-m71-node/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -Xlog:gc:file=/users/jason92/s4-b11-m71-logs/run1/cluster/gc.log:utc
+EXPECTED: heap -Xms2G -Xmx2G (B3a) — yes
+--- arm e1m2 kind=est rep=1 min=2 max=32
+EXPECTED: e1m2: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e1m2: [21179905, 21179913, 21179920, 21179921, 21179924, 21179933, 21179936, 21179937, 21179947, 21179991]
+EXPECTED: e1m2: thresholds read back as 2/32 — yes
+BASELINE e1m2 {"gauge": 0, "du": 215582636, "rss": 2896519168, "heap": 79903384, "sstables": 10, "live": 215580996, "total": 215580996}
+ARM {"name": "e1m2", "kind": "est", "rep": 1, "min": 2, "max": 32, "base": {"gauge": 0, "du": 215582636, "rss": 2896519168, "heap": 79903384, "sstables": 10, "live": 215580996, "total": 215580996}, "gauge_max": 1, "gauge_first_pos_s": 2.4, "gauge_last": 0, "du_max": 427141227, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684396, "total": 215684396}, "polls": 21}
+  log:  to 202.160MiB (~100% of original) in 24,282ms.  Read Throughput = 8.318MiB/s, Write Throughput = 8.325MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,263ms
+--- arm e1m4 kind=est rep=1 min=4 max=32
+EXPECTED: e1m4: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e1m4: [21179912, 21179915, 21179923, 21179935, 21179936, 21179937, 21179940, 21179947, 21179948, 21179976]
+EXPECTED: e1m4: thresholds read back as 4/32 — yes
+BASELINE e1m4 {"gauge": 0, "du": 215582677, "rss": 2904076288, "heap": 88414352, "sstables": 10, "live": 215581037, "total": 215581037}
+ARM {"name": "e1m4", "kind": "est", "rep": 1, "min": 4, "max": 32, "base": {"gauge": 0, "du": 215582677, "rss": 2904076288, "heap": 88414352, "sstables": 10, "live": 215581037, "total": 215581037}, "gauge_max": 1, "gauge_first_pos_s": 2.3, "gauge_last": 0, "du_max": 427993234, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684352, "total": 215684352}, "polls": 20}
+  log:  to 202.160MiB (~100% of original) in 24,285ms.  Read Throughput = 8.317MiB/s, Write Throughput = 8.324MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,263ms
+--- arm e1m16 kind=est rep=1 min=16 max=32
+EXPECTED: e1m16: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e1m16: [21179911, 21179912, 21179917, 21179918, 21179918, 21179923, 21179924, 21179926, 21179930, 21179932]
+EXPECTED: e1m16: thresholds read back as 16/32 — yes
+BASELINE e1m16 {"gauge": 0, "du": 215582519, "rss": 2907017216, "heap": 87435840, "sstables": 10, "live": 215580879, "total": 215580879}
+ARM {"name": "e1m16", "kind": "est", "rep": 1, "min": 16, "max": 32, "base": {"gauge": 0, "du": 215582519, "rss": 2907017216, "heap": 87435840, "sstables": 10, "live": 215580879, "total": 215580879}, "gauge_max": 0, "gauge_first_pos_s": null, "gauge_last": 0, "du_max": 215582519, "compacted": 0, "compacted_inputs": [], "after": {"sstables": 10, "live": 215580879, "total": 215580879}, "polls": 19}
+--- arm e2m2 kind=est rep=2 min=2 max=32
+EXPECTED: e2m2: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e2m2: [21179910, 21179914, 21179914, 21179920, 21179924, 21179925, 21179927, 21179932, 21179933, 21179944]
+EXPECTED: e2m2: thresholds read back as 2/32 — yes
+BASELINE e2m2 {"gauge": 0, "du": 215582550, "rss": 2907566080, "heap": 88662880, "sstables": 10, "live": 215580910, "total": 215580910}
+ARM {"name": "e2m2", "kind": "est", "rep": 2, "min": 2, "max": 32, "base": {"gauge": 0, "du": 215582550, "rss": 2907566080, "heap": 88662880, "sstables": 10, "live": 215580910, "total": 215580910}, "gauge_max": 1, "gauge_first_pos_s": 2.2, "gauge_last": 0, "du_max": 424912917, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684338, "total": 215684338}, "polls": 22}
+  log:  to 202.160MiB (~100% of original) in 24,268ms.  Read Throughput = 8.323MiB/s, Write Throughput = 8.330MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,255ms
+--- arm e2m4 kind=est rep=2 min=4 max=32
+EXPECTED: e2m4: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e2m4: [21179904, 21179913, 21179918, 21179918, 21179925, 21179928, 21179929, 21179930, 21179936, 21179945]
+EXPECTED: e2m4: thresholds read back as 4/32 — yes
+BASELINE e2m4 {"gauge": 0, "du": 215582555, "rss": 2909777920, "heap": 89643824, "sstables": 10, "live": 215580915, "total": 215580915}
+ARM {"name": "e2m4", "kind": "est", "rep": 2, "min": 4, "max": 32, "base": {"gauge": 0, "du": 215582555, "rss": 2909777920, "heap": 89643824, "sstables": 10, "live": 215580915, "total": 215580915}, "gauge_max": 1, "gauge_first_pos_s": 2.2, "gauge_last": 0, "du_max": 424585242, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684333, "total": 215684333}, "polls": 22}
+  log:  to 202.160MiB (~100% of original) in 24,277ms.  Read Throughput = 8.320MiB/s, Write Throughput = 8.327MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,259ms
+--- arm e2m16 kind=est rep=2 min=16 max=32
+EXPECTED: e2m16: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e2m16: [21179908, 21179917, 21179920, 21179921, 21179922, 21179923, 21179926, 21179928, 21179933, 21179933]
+EXPECTED: e2m16: thresholds read back as 16/32 — yes
+BASELINE e2m16 {"gauge": 0, "du": 215582540, "rss": 2911453184, "heap": 90696080, "sstables": 10, "live": 215580900, "total": 215580900}
+ARM {"name": "e2m16", "kind": "est", "rep": 2, "min": 16, "max": 32, "base": {"gauge": 0, "du": 215582540, "rss": 2911453184, "heap": 90696080, "sstables": 10, "live": 215580900, "total": 215580900}, "gauge_max": 0, "gauge_first_pos_s": null, "gauge_last": 0, "du_max": 215582540, "compacted": 0, "compacted_inputs": [], "after": {"sstables": 10, "live": 215580900, "total": 215580900}, "polls": 18}
+--- arm e3m2 kind=est rep=3 min=2 max=32
+EXPECTED: e3m2: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e3m2: [21179900, 21179912, 21179914, 21179917, 21179922, 21179924, 21179925, 21179930, 21179932, 21179951]
+EXPECTED: e3m2: thresholds read back as 2/32 — yes
+BASELINE e3m2 {"gauge": 0, "du": 215582533, "rss": 2912477184, "heap": 85267904, "sstables": 10, "live": 215580893, "total": 215580893}
+ARM {"name": "e3m2", "kind": "est", "rep": 3, "min": 2, "max": 32, "base": {"gauge": 0, "du": 215582533, "rss": 2912477184, "heap": 85267904, "sstables": 10, "live": 215580893, "total": 215580893}, "gauge_max": 1, "gauge_first_pos_s": 2.3, "gauge_last": 0, "du_max": 428189699, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684304, "total": 215684304}, "polls": 22}
+  log:  to 202.160MiB (~100% of original) in 24,264ms.  Read Throughput = 8.325MiB/s, Write Throughput = 8.332MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,255ms
+--- arm e3m4 kind=est rep=3 min=4 max=32
+EXPECTED: e3m4: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e3m4: [21179898, 21179902, 21179911, 21179917, 21179920, 21179920, 21179921, 21179923, 21179930, 21179939]
+EXPECTED: e3m4: thresholds read back as 4/32 — yes
+BASELINE e3m4 {"gauge": 0, "du": 215582489, "rss": 2913980416, "heap": 87209008, "sstables": 10, "live": 215580849, "total": 215580849}
+ARM {"name": "e3m4", "kind": "est", "rep": 3, "min": 4, "max": 32, "base": {"gauge": 0, "du": 215582489, "rss": 2913980416, "heap": 87209008, "sstables": 10, "live": 215580849, "total": 215580849}, "gauge_max": 1, "gauge_first_pos_s": 2.4, "gauge_last": 0, "du_max": 427075543, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684335, "total": 215684335}, "polls": 22}
+  log:  to 202.160MiB (~100% of original) in 24,271ms.  Read Throughput = 8.322MiB/s, Write Throughput = 8.329MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,258ms
+--- arm e3m16 kind=est rep=3 min=16 max=32
+EXPECTED: e3m16: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes e3m16: [21179903, 21179910, 21179913, 21179917, 21179922, 21179926, 21179928, 21179931, 21179936, 21179954]
+EXPECTED: e3m16: thresholds read back as 16/32 — yes
+BASELINE e3m16 {"gauge": 0, "du": 215582546, "rss": 2915131392, "heap": 89302760, "sstables": 10, "live": 215580906, "total": 215580906}
+ARM {"name": "e3m16", "kind": "est", "rep": 3, "min": 16, "max": 32, "base": {"gauge": 0, "du": 215582546, "rss": 2915131392, "heap": 89302760, "sstables": 10, "live": 215580906, "total": 215580906}, "gauge_max": 0, "gauge_first_pos_s": null, "gauge_last": 0, "du_max": 215582546, "compacted": 0, "compacted_inputs": [], "after": {"sstables": 10, "live": 215580906, "total": 215580906}, "polls": 18}
+--- arm c4 kind=control rep=1 min=4 max=4
+EXPECTED: c4: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes c4: [21179917, 21179917, 21179918, 21179924, 21179927, 21179929, 21179929, 21179930, 21179932, 21179953]
+EXPECTED: c4: thresholds read back as 4/4 — yes
+BASELINE c4 {"gauge": 0, "du": 215582581, "rss": 2916392960, "heap": 88312712, "sstables": 10, "live": 215580941, "total": 215580941}
+ARM {"name": "c4", "kind": "control", "rep": 1, "min": 4, "max": 4, "base": {"gauge": 0, "du": 215582581, "rss": 2916392960, "heap": 88312712, "sstables": 10, "live": 215580941, "total": 215580941}, "gauge_max": 3, "gauge_first_pos_s": 2.2, "gauge_last": 2, "du_max": 299927602, "compacted": 1, "compacted_inputs": [4], "after": {"sstables": 7, "live": 215614712, "total": 215614712}, "polls": 12}
+  log: 795MiB to 80.852MiB (~100% of original) in 9,110ms.  Read Throughput = 8.868MiB/s, Write Throughput = 8.874MiB/s, Row Throughput = ~16,000/s.  80,000 total partitions merged to 80,000.  Partition merge counts were {1:80000, }. Time spent writing keys = 9,106ms
+--- arm c32 kind=control rep=1 min=4 max=32
+EXPECTED: c32: 10 sstables, sizes within 1.3x, all < 50 MB (one bucket); no compaction during ingest — yes
+sizes c32: [21179906, 21179908, 21179913, 21179915, 21179918, 21179921, 21179921, 21179931, 21179932, 21179943]
+EXPECTED: c32: thresholds read back as 4/32 — yes
+BASELINE c32 {"gauge": 0, "du": 215582515, "rss": 2917195776, "heap": 91422560, "sstables": 10, "live": 215580875, "total": 215580875}
+ARM {"name": "c32", "kind": "control", "rep": 1, "min": 4, "max": 32, "base": {"gauge": 0, "du": 215582515, "rss": 2917195776, "heap": 91422560, "sstables": 10, "live": 215580875, "total": 215580875}, "gauge_max": 1, "gauge_first_pos_s": 2.2, "gauge_last": 0, "du_max": 425043952, "compacted": 1, "compacted_inputs": [10], "after": {"sstables": 1, "live": 215684310, "total": 215684310}, "polls": 25}
+  log:  to 202.160MiB (~100% of original) in 24,264ms.  Read Throughput = 8.324MiB/s, Write Throughput = 8.331MiB/s, Row Throughput = ~16,000/s.  200,000 total partitions merged to 200,000.  Partition merge counts were {1:200000, }. Time spent writing keys = 24,258ms
+node log ERROR lines: 0
+EXPECTED: node stopped, no CassandraDaemon of mine left — yes

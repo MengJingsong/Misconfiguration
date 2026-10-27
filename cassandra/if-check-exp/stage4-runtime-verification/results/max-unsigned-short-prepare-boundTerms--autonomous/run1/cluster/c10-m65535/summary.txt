@@ -1,0 +1,20 @@
+=== run run1: prepared_statements_cache_size 10 MiB (cap 10485760 B), M = 65535, rate 100/s, limit 400 offered, sample 5.0s
+yaml tail: cluster_name: bt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.3.1; rpc_address: 127.0.3.1; commitlog_directory: /dev/shm/s4-b9-bt/node/commitlog; hints_directory: /dev/shm/s4-b9-bt/node/hints; saved_caches_directory: /dev/shm/s4-b9-bt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-bt/node/cdc_raw; auto_snapshot: false; prepared_statements_cache_size: 10MiB
+EXPECTED: knob read-back "Initialized prepared statement caches with 10 MiB" - yes [log says 10]
+RESULT setup ok 5.0.9-SNAPSHOT
+HISTO 0-baseline live_bytes=67166200 live_objects=718116 prepared_instances=29 columnspec_instances=27 heap_used_kb=65591
+COUNTERS baseline count=0 evicted=0 memtable_heap=0
+RESULT dup prepared=10
+EXPECTED: 10 repeats of one statement add at most one cache entry - yes [count 0 -> 1]
+RESULT boundary M=65536 rejected InvalidRequest('Error from server: code=2200 [Invalid query] message="Too many markers(?). 65536 markers exceed the allowed maximum of 65535"')
+EXPECTED: 65536-marker PREPARE rejected with "Too many markers(?). 65536 markers exceed the allowed maximum of 65535" and the count unchanged - yes [count 1 -> 1]
+STOP RULE met at 26s: evicted=150 >= 3 x count=3; last 4 counts 3..3
+RESULT load M=65535 offered=153 accepted=153 rejected=0 seconds=27.4 rate=6/s quit_on_rejections=False first_error=None
+LOAD END stop_rule_met=True
+COUNTERS final count=3 evicted=151 memtable_heap=30194854
+HISTO 2-after-load live_bytes=110148808 live_objects=925094 prepared_instances=34 columnspec_instances=28 heap_used_kb=107567
+HEAP DELTA live_bytes=42982608 prepared_instances=34 (baseline 29); memtable_heap=30194854; delta_minus_memtable=12787754
+RESULT rows 3
+LOG discard-warnings=1 first:  2026-10-26T23:28:44,377 QueryProcessor.java:123 - 151 prepared statements discarded in the last minute because cache limit reached (10 MiB)
+LOG other ERROR/WARN lines=7 first: WARN  [main] 2026-10-26T23:26:42,864 StartupChecks.java:262 - jemalloc shared library could not be preloaded to speed up memory allocations
+STOPPED: no daemon of this slot left

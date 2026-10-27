@@ -1,0 +1,20 @@
+U,sweep,maxMemory=536870912
+U,sweep,startup_global_limit=53687091
+U,sweep,startup_per_ip_limit=13421772
+U,sweep,startup_message_size=2621440
+U,sweep,max_mutation_size=2621440
+CHECK sweep getGlobalLimit expected=1048576 actual=1048576 OK
+CHECK sweep usage_initial expected=0 actual=0 OK
+CHECK sweep successes expected=4 actual=4 OK
+CHECK sweep failures expected=16 actual=16 OK
+CHECK sweep failures_endpoint expected=0 actual=0 OK
+CHECK sweep usage_after_fill expected=1048576 actual=1048576 OK
+CHECK sweep max_usage_seen_le_L expected=true actual=true OK
+U,sweep,max_usage_seen=1048576
+CHECK sweep usage_after_release_half expected=524288 actual=524288 OK
+CHECK sweep successes_after_release expected=2 actual=2 OK
+CHECK sweep failures_after_release expected=16 actual=16 OK
+CHECK sweep usage_after_refill expected=1048576 actual=1048576 OK
+CHECK sweep max_usage_seen_le_L_2 expected=true actual=true OK
+CHECK sweep usage_after_release_all expected=0 actual=0 OK
+RESULT sweep L=1048576 checks=13 mismatches=0

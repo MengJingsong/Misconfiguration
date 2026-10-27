@@ -1,0 +1,10 @@
+firsttrigger = OK returned=200 pulled=220  B_ROWS = 100000  reps = 5  maxMemory = 1056309248
+EXPECTED A_ret    MATCH  mismatches []
+EXPECTED A_pull   MATCH  mismatches []; sample gppl=1,10,NO at NO_LIMIT rowLimit: [[40], [220], [20000]]
+EXPECTED A_cnt    MATCH  mismatches []
+EXPECTED B_pull   MATCH  shape B rowLimit=NO_LIMIT (returned, pulled, counted, cip, cip_before): [(1, 400000, 400000, 4, 1, 0), (10, 400000, 400000, 4, 1, 0), (2147483647, 400000, 400000, 4, 1, 0)]
+EXPECTED B_alloc  MATCH  median alloc per gppl {1: 112268176, 10: 112268176, 'NO': 112268176} ratio 1.000
+EXPECTED B_rl     MATCH  mismatches []
+EXPECTED control  MATCH  shape B median rows pulled by rowLimit 100, 10000, NO_LIMIT: {100: 100, 10000: 10000, 2147483647: 400000.0}
+INFO shape B allocated bytes median, by (gppl,rowLimit): {(1, 100): 54304, (1, 10000): 4742544, (1, 'NO'): 112268176, (10, 100): 54304, (10, 10000): 4742544, (10, 'NO'): 112268176, ('NO', 100): 54304, ('NO', 10000): 4742544, ('NO', 'NO'): 112268176}
+CLASS B2g row 1: confirmed (shape A follows gppl, shape B flat across gppl, control moves)

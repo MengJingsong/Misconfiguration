@@ -1,0 +1,215 @@
+[2026-10-27T03:38:51-0400] + javac -d /users/jason92/s4-b11-q77-logs/run1/cluster/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/per-partition-limit-incrementRowCount-rowsincurrentpartition--autonomous/Jmx.java
+[2026-10-27T03:38:51-0400] 
+[2026-10-27T03:38:51-0400] cluster-run start mode=load None tree=/users/jason92/s4-b11-q77-n head=da5f54b small=False
+[2026-10-27T03:38:51-0400] df: tmpfs          tmpfs 132008248 2055096 129953152   2% /dev/shm
+[2026-10-27T03:38:51-0400] conf load: control=False
+[2026-10-27T03:38:51-0400] + bin/cassandra -p /dev/shm/s4-b11-q77/cassandra.pid (ulimit -n 100000)
+[2026-10-27T03:39:54-0400] node up (load) after 62 s, pid 4057380
+[2026-10-27T03:40:25-0400] loaded 120000 rows of 100 B into t_small
+[2026-10-27T03:40:25-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 flush ks t_small
+[2026-10-27T03:40:26-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 compact ks t_small
+[2026-10-27T03:40:28-0400] loaded 1200 rows of 10240 B into t_med
+[2026-10-27T03:40:28-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 flush ks t_med
+[2026-10-27T03:40:29-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 compact ks t_med
+[2026-10-27T03:40:31-0400] loaded 1200 rows of 102400 B into t_big
+[2026-10-27T03:40:31-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 flush ks t_big
+[2026-10-27T03:40:33-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 compact ks t_big
+[2026-10-27T03:40:34-0400] load took 39.8s
+[2026-10-27T03:40:34-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 tablestats ks
+[2026-10-27T03:40:36-0400] 	Space used by snapshots (total): 0
+		Off heap memory used (total): 24
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 4
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 1
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1200
+		Local write latency: 0.046 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 11.737MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 16
+		Bloom filter off heap memory used: 8
+		Index summary off heap memory used: 16
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 2816160
+		Compacted partition maximum bytes: 3379391
+		Compacted partition mean bytes: 3379391
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+		Table: t_small
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 13.049MiB
+		Space used (live): 13683276
+		Space used (total): 13683276
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 24
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 4
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 1
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 120000
+		Local write latency: 0.064 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 13.039MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 16
+		Bloom filter off heap memory used: 8
+		Index summary off heap memory used: 16
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 3379392
+		Compacted partition maximum bytes: 4055269
+		Compacted partition mean bytes: 4055269
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-10-27T03:40:36-0400] rows in ks.t_small: 4 partitions x 30000
+[2026-10-27T03:40:37-0400] rows in ks.t_med: 4 partitions x 300
+[2026-10-27T03:40:37-0400] rows in ks.t_big: 4 partitions x 300
+[2026-10-27T03:40:37-0400] + du -sb /dev/shm/s4-b11-q77/data
+[2026-10-27T03:40:37-0400] 149058075	/dev/shm/s4-b11-q77/data
+[2026-10-27T03:40:37-0400] stopping node: nodetool drain
+[2026-10-27T03:40:43-0400] daemons left: []
+[2026-10-27T03:40:43-0400] + javac -d /users/jason92/s4-b11-q77-logs/run1/cluster/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/per-partition-limit-incrementRowCount-rowsincurrentpartition--autonomous/Jmx.java
+[2026-10-27T03:40:44-0400] 
+[2026-10-27T03:40:44-0400] cluster-run start mode=life U tree=/users/jason92/s4-b11-q77-n head=da5f54b small=False
+[2026-10-27T03:40:44-0400] df: tmpfs          tmpfs 132008248 2461508 129546740   2% /dev/shm
+[2026-10-27T03:40:44-0400] conf U: control=False
+[2026-10-27T03:40:44-0400] + bin/cassandra -p /dev/shm/s4-b11-q77/cassandra.pid (ulimit -n 100000)
+[2026-10-27T03:41:03-0400] node up (U) after 19 s, pid 4066122
+[2026-10-27T03:41:30-0400] Q t_small n 1 fetch none rep 0 rows 4 pages 1 err -
+[2026-10-27T03:41:36-0400] Q t_small n 10 fetch none rep 0 rows 40 pages 1 err -
+[2026-10-27T03:41:43-0400] Q t_small n 100 fetch none rep 0 rows 400 pages 1 err -
+[2026-10-27T03:41:49-0400] Q t_small n 1000 fetch none rep 0 rows 4000 pages 1 err -
+[2026-10-27T03:41:56-0400] Q t_small n 10000 fetch none rep 0 rows 40000 pages 1 err -
+[2026-10-27T03:42:04-0400] Q t_small n none fetch none rep 0 rows 120000 pages 1 err -
+[2026-10-27T03:42:10-0400] Q t_med n 1 fetch none rep 0 rows 4 pages 1 err -
+[2026-10-27T03:42:17-0400] Q t_med n 10 fetch none rep 0 rows 40 pages 1 err -
+[2026-10-27T03:42:23-0400] Q t_med n 100 fetch none rep 0 rows 400 pages 1 err -
+[2026-10-27T03:42:30-0400] Q t_med n none fetch none rep 0 rows 1200 pages 1 err -
+[2026-10-27T03:42:36-0400] Q t_big n 1 fetch none rep 0 rows 4 pages 1 err -
+[2026-10-27T03:42:43-0400] Q t_big n 10 fetch none rep 0 rows 40 pages 1 err -
+[2026-10-27T03:42:49-0400] Q t_big n 100 fetch none rep 0 rows 400 pages 1 err -
+[2026-10-27T03:42:57-0400] Q t_big n none fetch none rep 0 rows 1200 pages 1 err -
+[2026-10-27T03:43:03-0400] Q t_big n 100 fetch 100 rep 0 rows 400 pages 5 err -
+[2026-10-27T03:43:10-0400] Q t_small n 10000 fetch 5000 rep 0 rows 40000 pages 9 err -
+[2026-10-27T03:43:17-0400] Q t_big n 100 fetch none rep 0 rows 400 pages 1 err -
+[2026-10-27T03:43:17-0400] FIRST-TRIGGER CHECK (U: t_big n=100 returns 400 rows, allocates >= 40 MB) ok rows 400 A 187229357.5422177
+[2026-10-27T03:43:23-0400] Q t_small n 10 fetch none rep 2 rows 40 pages 1 err -
+[2026-10-27T03:43:32-0400] Q t_med n 10 fetch none rep 2 rows 40 pages 1 err -
+[2026-10-27T03:43:41-0400] Q t_med n none fetch none rep 2 rows 1200 pages 1 err -
+[2026-10-27T03:43:49-0400] Q t_small n 10000 fetch 5000 rep 2 rows 40000 pages 9 err -
+[2026-10-27T03:43:58-0400] Q t_big n 100 fetch none rep 2 rows 400 pages 1 err -
+[2026-10-27T03:44:07-0400] Q t_med n 100 fetch none rep 1 rows 400 pages 1 err -
+[2026-10-27T03:44:15-0400] Q t_big n 10 fetch none rep 2 rows 40 pages 1 err -
+[2026-10-27T03:44:24-0400] Q t_small n 1000 fetch none rep 3 rows 4000 pages 1 err -
+[2026-10-27T03:44:32-0400] Q t_big n 100 fetch 100 rep 1 rows 400 pages 5 err -
+[2026-10-27T03:44:41-0400] Q t_big n none fetch none rep 3 rows 1200 pages 1 err -
+[2026-10-27T03:44:50-0400] Q t_small n 10000 fetch none rep 2 rows 40000 pages 1 err -
+[2026-10-27T03:44:59-0400] Q t_med n none fetch none rep 3 rows 1200 pages 1 err -
+[2026-10-27T03:45:08-0400] Q t_big n 100 fetch none rep 1 rows 400 pages 1 err -
+[2026-10-27T03:45:17-0400] Q t_small n 10000 fetch none rep 3 rows 40000 pages 1 err -
+[2026-10-27T03:45:25-0400] Q t_med n 10 fetch none rep 1 rows 40 pages 1 err -
+[2026-10-27T03:45:34-0400] Q t_med n none fetch none rep 1 rows 1200 pages 1 err -
+[2026-10-27T03:45:42-0400] Q t_big n 100 fetch none rep 3 rows 400 pages 1 err -
+[2026-10-27T03:45:51-0400] Q t_med n 1 fetch none rep 2 rows 4 pages 1 err -
+[2026-10-27T03:45:59-0400] Q t_small n 100 fetch none rep 3 rows 400 pages 1 err -
+[2026-10-27T03:46:08-0400] Q t_big n 10 fetch none rep 1 rows 40 pages 1 err -
+[2026-10-27T03:46:16-0400] Q t_small n 1 fetch none rep 3 rows 4 pages 1 err -
+[2026-10-27T03:46:25-0400] Q t_small n 10 fetch none rep 1 rows 40 pages 1 err -
+[2026-10-27T03:46:33-0400] Q t_med n 10 fetch none rep 3 rows 40 pages 1 err -
+[2026-10-27T03:46:41-0400] Q t_small n 1000 fetch none rep 2 rows 4000 pages 1 err -
+[2026-10-27T03:46:51-0400] Q t_big n none fetch none rep 2 rows 1200 pages 1 err -
+[2026-10-27T03:46:59-0400] Q t_big n 100 fetch 100 rep 2 rows 400 pages 5 err -
+[2026-10-27T03:47:08-0400] Q t_small n 10000 fetch 5000 rep 3 rows 40000 pages 9 err -
+[2026-10-27T03:47:17-0400] Q t_small n 100 fetch none rep 1 rows 400 pages 1 err -
+[2026-10-27T03:47:25-0400] Q t_med n 100 fetch none rep 3 rows 400 pages 1 err -
+[2026-10-27T03:47:34-0400] Q t_med n 100 fetch none rep 2 rows 400 pages 1 err -
+[2026-10-27T03:47:42-0400] Q t_small n 10 fetch none rep 3 rows 40 pages 1 err -
+[2026-10-27T03:47:51-0400] Q t_big n 1 fetch none rep 2 rows 4 pages 1 err -
+[2026-10-27T03:47:59-0400] Q t_small n 1 fetch none rep 2 rows 4 pages 1 err -
+[2026-10-27T03:48:09-0400] Q t_small n none fetch none rep 3 rows 120000 pages 1 err -
+[2026-10-27T03:48:17-0400] Q t_small n 1 fetch none rep 1 rows 4 pages 1 err -
+[2026-10-27T03:48:25-0400] Q t_big n 1 fetch none rep 3 rows 4 pages 1 err -
+[2026-10-27T03:48:34-0400] Q t_big n none fetch none rep 1 rows 1200 pages 1 err -
+[2026-10-27T03:48:43-0400] Q t_small n 1000 fetch none rep 1 rows 4000 pages 1 err -
+[2026-10-27T03:48:52-0400] Q t_big n 100 fetch 100 rep 3 rows 400 pages 5 err -
+[2026-10-27T03:49:00-0400] Q t_big n 10 fetch none rep 3 rows 40 pages 1 err -
+[2026-10-27T03:49:09-0400] Q t_big n 1 fetch none rep 1 rows 4 pages 1 err -
+[2026-10-27T03:49:17-0400] Q t_med n 1 fetch none rep 1 rows 4 pages 1 err -
+[2026-10-27T03:49:26-0400] Q t_small n 100 fetch none rep 2 rows 400 pages 1 err -
+[2026-10-27T03:49:35-0400] Q t_small n 10000 fetch 5000 rep 1 rows 40000 pages 9 err -
+[2026-10-27T03:49:44-0400] Q t_small n none fetch none rep 1 rows 120000 pages 1 err -
+[2026-10-27T03:49:53-0400] Q t_small n 10000 fetch none rep 1 rows 40000 pages 1 err -
+[2026-10-27T03:50:02-0400] Q t_med n 1 fetch none rep 3 rows 4 pages 1 err -
+[2026-10-27T03:50:11-0400] Q t_small n none fetch none rep 2 rows 120000 pages 1 err -
+[2026-10-27T03:50:13-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 tablestats ks
+[2026-10-27T03:50:15-0400] ERROR lines in segment: 0 []
+[2026-10-27T03:50:15-0400] OOM lines: 1
+[2026-10-27T03:50:15-0400] stopping node: nodetool drain
+[2026-10-27T03:50:21-0400] daemons left: []
+[2026-10-27T03:50:21-0400] daemons left: []
+[2026-10-27T03:50:21-0400] + javac -d /users/jason92/s4-b11-q77-logs/run1/cluster/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/per-partition-limit-incrementRowCount-rowsincurrentpartition--autonomous/Jmx.java
+[2026-10-27T03:50:21-0400] 
+[2026-10-27T03:50:21-0400] cluster-run start mode=life C tree=/users/jason92/s4-b11-q77-n head=da5f54b small=False
+[2026-10-27T03:50:21-0400] df: tmpfs          tmpfs 132008248 2844000 129164248   3% /dev/shm
+[2026-10-27T03:50:21-0400] conf C: control=True
+[2026-10-27T03:50:21-0400] + bin/cassandra -p /dev/shm/s4-b11-q77/cassandra.pid (ulimit -n 100000)
+[2026-10-27T03:50:40-0400] node up (C) after 19 s, pid 4093713
+[2026-10-27T03:51:07-0400] Q t_big n 10 fetch none rep 0 rows 40 pages 1 err -
+[2026-10-27T03:51:14-0400] Q t_big n 100 fetch none rep 0 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:51:20-0400] Q t_big n none fetch none rep 0 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:51:27-0400] Q t_med n none fetch none rep 0 rows 1200 pages 1 err -
+[2026-10-27T03:51:34-0400] Q t_small n 10000 fetch none rep 0 rows 40000 pages 1 err -
+[2026-10-27T03:51:40-0400] Q t_big n 100 fetch none rep 0 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:51:40-0400] FIRST-TRIGGER CHECK (C: t_big n=100 fails with a read-size abort) ok err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - 1 nodes loaded over 21036496 bytes and aborted the query SELECT * FROM ks.t_big PER PARTITION LIMIT 100 ALLOW FILTERING (see local_read_size_fail_threshold): READ_SIZE from /127.0.7.1:7000" info
+[2026-10-27T03:51:47-0400] Q t_big n none fetch none rep 1 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:51:55-0400] Q t_big n 10 fetch none rep 3 rows 40 pages 1 err -
+[2026-10-27T03:52:04-0400] Q t_big n 10 fetch none rep 1 rows 40 pages 1 err -
+[2026-10-27T03:52:12-0400] Q t_big n none fetch none rep 3 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:52:21-0400] Q t_small n 10000 fetch none rep 3 rows 40000 pages 1 err -
+[2026-10-27T03:52:30-0400] Q t_big n none fetch none rep 2 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:52:38-0400] Q t_med n none fetch none rep 1 rows 1200 pages 1 err -
+[2026-10-27T03:52:47-0400] Q t_small n 10000 fetch none rep 2 rows 40000 pages 1 err -
+[2026-10-27T03:52:56-0400] Q t_big n 10 fetch none rep 2 rows 40 pages 1 err -
+[2026-10-27T03:53:04-0400] Q t_med n none fetch none rep 2 rows 1200 pages 1 err -
+[2026-10-27T03:53:13-0400] Q t_med n none fetch none rep 3 rows 1200 pages 1 err -
+[2026-10-27T03:53:21-0400] Q t_big n 100 fetch none rep 1 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:53:30-0400] Q t_big n 100 fetch none rep 3 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:53:38-0400] Q t_big n 100 fetch none rep 2 rows 0 pages 0 err ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation fai
+[2026-10-27T03:53:47-0400] Q t_small n 10000 fetch none rep 1 rows 40000 pages 1 err -
+[2026-10-27T03:53:49-0400] + /users/jason92/s4-b11-q77-n/bin/nodetool -p 7170 tablestats ks
+[2026-10-27T03:53:50-0400] ERROR lines in segment: 0 []
+[2026-10-27T03:53:50-0400] OOM lines: 1
+[2026-10-27T03:53:50-0400] stopping node: nodetool drain
+[2026-10-27T03:53:57-0400] daemons left: []
+[2026-10-27T03:53:57-0400] daemons left: []

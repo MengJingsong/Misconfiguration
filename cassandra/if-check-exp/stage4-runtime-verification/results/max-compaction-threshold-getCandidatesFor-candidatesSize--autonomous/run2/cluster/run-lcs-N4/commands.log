@@ -1,0 +1,25 @@
+20:01:53 == run-lcs-N4 start; tree=/users/jason92/s4-b10-lc mnt=/mnt/s4lc
+20:01:53 $ sudo mkdir -p /mnt/s4lc && (mountpoint -q /mnt/s4lc || sudo mount -t tmpfs -o size=40g tmpfs /mnt/s4lc) && sudo chown $(id -u):$(id -g) /mnt/s4lc
+
+20:01:53 $ rm -rf /mnt/s4lc/work-lcs && mkdir -p /mnt/s4lc/work-lcs/data /mnt/s4lc/work-lcs/commitlog /mnt/s4lc/work-lcs/hints /mnt/s4lc/work-lcs/saved_caches /mnt/s4lc/work-lcs/cdc_raw
+
+20:01:54 $ rm -rf /mnt/s4lc/work-lcs/data && cp -a /mnt/s4lc/fx-lcs/data /mnt/s4lc/work-lcs/data
+
+20:01:59 $ ulimit -n 100000; cd /users/jason92/s4-b10-lc && ( CASSANDRA_CONF=/users/jason92/s4-b10-lc-logs/cluster2/run-lcs-N4/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b10-lc-logs/cluster2/run-lcs-N4/logs MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M setsid nohup bin/cassandra -f -p /users/jason92/s4-b10-lc-logs/cluster2
+
+20:02:14 node up, pid 2344104, address 127.0.5.1, jmx 7150
+20:02:16 before: {'count': [100, 9, 0, 0, 0, 0, 0, 0, 0], 'sstables': 109, 'live': 8680328050}
+20:02:17 $ /users/jason92/s4-b10-lc/bin/nodetool -h 127.0.0.1 -p 7150 setcompactionthreshold ks standard1 2 4
+
+20:02:19 $ /users/jason92/s4-b10-lc/bin/nodetool -h 127.0.0.1 -p 7150 getcompactionthreshold ks standard1
+Current compaction thresholds for ks/standard1: 
+ min = 2,  max = 4
+
+20:02:31 helper: enabled 1793066551455 1793066551459
+20:02:43 settle[task] busy=1 bytes=10028123493 files=897
+20:02:54 settle[task] busy=0 bytes=8681198522 files=856
+20:03:06 settle[task] busy=0 bytes=8681198522 files=856
+20:03:17 settle[task] busy=0 bytes=8681198522 files=856
+20:03:20 after: {'count': [96, 11, 0, 0, 0, 0, 0, 0, 0], 'sstables': 107, 'live': 8681198522}
+20:03:25 daemons of this run left after stop: none
+20:03:25 == run-lcs-N4 done rc=0 node stopped=True

@@ -1,0 +1,198 @@
+[2026-10-27 01:51:53] + rm -rf /dev/shm/s4-b11-l79-run1 && mkdir -p /dev/shm/s4-b11-l79-run1/logs /dev/shm/s4-b11-l79-run1/data /dev/shm/s4-b11-l79-run1/commitlog /dev/shm/s4-b11-l79-run1/hints /dev/shm/s4-b11-l79-run1/saved_caches /dev/shm/s4-b11-l79-run1/cdc_raw
+[2026-10-27 01:51:53] + df -h /dev/shm | tail -1
+[2026-10-27 01:51:53] cluster-run run1: scale 1, reps 3, N_S 1000000, N_G 3000, host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu, df tmpfs           126G  153M  126G   1% /dev/shm
+[2026-10-27 01:51:53] + ss -ltn | grep -E '(127.0.9.1:(9042|7000)|:7190|:19190) ' || true
+[2026-10-27 01:51:53] + rm -rf /dev/shm/s4-b11-l79-run1/conf && cp -r /users/jason92/s4-b11-l79-c/conf /dev/shm/s4-b11-l79-run1/conf
+
+  rc=0
+[2026-10-27 01:51:53] conf: cluster_name='l79'; commitlog_directory=/dev/shm/s4-b11-l79-run1/commitlog; hints_directory=/dev/shm/s4-b11-l79-run1/hints; saved_caches_directory=/dev/shm/s4-b11-l79-run1/saved_caches; cdc_raw_directory=/dev/shm/s4-b11-l79-run1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.9.1; rpc_address=127.0.9.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; JMX 7190; heap 1G; Byteman script only (agent port 19190 reserved)
+[2026-10-27 01:51:53] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-27 01:51:53] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-l79-run1/cassandra.pid > /dev/shm/s4-b11-l79-run1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 01:51:56] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:00] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:04] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:08] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:13] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:17] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:21] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:25] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:29] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:33] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:37] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:41] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:45] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:46] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 01:52:50] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:51] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 01:52:55] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 01:52:56] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 01:52:57] node up after 64 s, pid 2536412
+[2026-10-27 01:52:57] + mkdir -p /dev/shm/s4-b11-l79-run1/tools && javac -d /dev/shm/s4-b11-l79-run1/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/group-by-limit-incrementGroupCount-groupLimit--autonomous/L79Jmx.java
+[2026-10-27 01:53:21]   loaded 100000
+[2026-10-27 01:53:43]   loaded 200000
+[2026-10-27 01:54:05]   loaded 300000
+[2026-10-27 01:54:24]   loaded 400000
+[2026-10-27 01:54:46]   loaded 500000
+[2026-10-27 01:55:09]   loaded 600000
+[2026-10-27 01:55:31]   loaded 700000
+[2026-10-27 01:55:51]   loaded 800000
+[2026-10-27 01:56:10]   loaded 900000
+[2026-10-27 01:56:26]   loaded 1000000
+[2026-10-27 01:56:26] loaded ks.t: 1000000 rows, 0 errors, 208 s []
+[2026-10-27 01:56:44]   loaded 100000
+[2026-10-27 01:57:02]   loaded 200000
+[2026-10-27 01:57:19]   loaded 300000
+[2026-10-27 01:57:38]   loaded 400000
+[2026-10-27 01:57:58]   loaded 500000
+[2026-10-27 01:58:20]   loaded 600000
+[2026-10-27 01:58:40]   loaded 700000
+[2026-10-27 01:59:02]   loaded 800000
+[2026-10-27 01:59:23]   loaded 900000
+[2026-10-27 01:59:23] loaded ks.g: 900000 rows, 0 errors []
+[2026-10-27 01:59:23] + bin/nodetool -h 127.0.0.1 -p 7190 flush
+[2026-10-27 01:59:25] + bin/nodetool -h 127.0.0.1 -p 7190 compact ks t
+[2026-10-27 01:59:28] + bin/nodetool -h 127.0.0.1 -p 7190 compact ks g
+[2026-10-27 01:59:57] + du -sb /dev/shm/s4-b11-l79-run1/data | cut -f1
+[2026-10-27 01:59:57] + bin/nodetool -h 127.0.0.1 -p 7190 tablestats ks.t
+[2026-10-27 01:59:58] data on disk after compaction: 2679444047 bytes; tablestats: SSTable count: 1 SSTable count: 0 Space used (live): 1041419584
+[2026-10-27 01:59:58] + jcmd 2536412 GC.run
+[2026-10-27 01:59:59]   FT L=1 P=10000 rep=0 warm: rows_returned=1 wall=152 ms alloc=12680192 rchar=742532 err=None
+[2026-10-27 02:00:01] FIRST-TRIGGER CHECK trace lines since query start: [(1793087998992, 300, 1, 'false', 'true'), (1793087999000, 300, 1, 'true', 'true'), (1793087999000, 300, 1, 'true', 'true'), (1793087999001, 300, 1, 'false', 'true')]
+[2026-10-27 02:00:01] FIRST-TRIGGER CHECK passed
+[2026-10-27 02:00:01] == drift cell (start)
+[2026-10-27 02:00:01] + jcmd 2536412 GC.run
+[2026-10-27 02:00:06]   idle 5 s: alloc=740176
+[2026-10-27 02:00:11]   T L=none P=10000 rep=0 warm: rows_returned=1 wall=5111 ms alloc=6175708672 rchar=1057253019 err=None
+[2026-10-27 02:00:17]   T L=none P=10000 rep=1: rows_returned=1 wall=5784 ms alloc=6204601208 rchar=1057244501 err=None
+[2026-10-27 02:00:24]   T L=none P=10000 rep=2: rows_returned=1 wall=5911 ms alloc=6171906248 rchar=1057243135 err=None
+[2026-10-27 02:00:30]   T L=none P=10000 rep=3: rows_returned=1 wall=5391 ms alloc=6171770608 rchar=1057243079 err=None
+[2026-10-27 02:00:31] == T P=10000 g=1
+[2026-10-27 02:00:31] + jcmd 2536412 GC.run
+[2026-10-27 02:00:36]   idle 5 s: alloc=943744
+[2026-10-27 02:00:42]   T L=1 P=10000 rep=0 warm: rows_returned=1 wall=5523 ms alloc=6171826248 rchar=1057242995 err=None
+[2026-10-27 02:00:48]   T L=1 P=10000 rep=1: rows_returned=1 wall=6009 ms alloc=6171956408 rchar=1057242947 err=None
+[2026-10-27 02:00:55]   T L=1 P=10000 rep=2: rows_returned=1 wall=6181 ms alloc=6172160488 rchar=1057242947 err=None
+[2026-10-27 02:01:02]   T L=1 P=10000 rep=3: rows_returned=1 wall=6282 ms alloc=6172150768 rchar=1057242923 err=None
+[2026-10-27 02:01:03] == T P=10000 g=100
+[2026-10-27 02:01:03] + jcmd 2536412 GC.run
+[2026-10-27 02:01:09]   idle 5 s: alloc=879160
+[2026-10-27 02:01:15]   T L=100 P=10000 rep=0 warm: rows_returned=1 wall=5912 ms alloc=6171845880 rchar=1057242915 err=None
+[2026-10-27 02:01:21]   T L=100 P=10000 rep=1: rows_returned=1 wall=6292 ms alloc=6171891832 rchar=1057242895 err=None
+[2026-10-27 02:01:28]   T L=100 P=10000 rep=2: rows_returned=1 wall=6221 ms alloc=6171823608 rchar=1057242915 err=None
+[2026-10-27 02:01:35]   T L=100 P=10000 rep=3: rows_returned=1 wall=6273 ms alloc=6171844576 rchar=1057242903 err=None
+[2026-10-27 02:01:36] == T P=10000 g=100000
+[2026-10-27 02:01:36] + jcmd 2536412 GC.run
+[2026-10-27 02:01:42]   idle 5 s: alloc=846064
+[2026-10-27 02:01:48]   T L=100000 P=10000 rep=0 warm: rows_returned=1 wall=6405 ms alloc=6171879280 rchar=1057242915 err=None
+[2026-10-27 02:01:53]   T L=100000 P=10000 rep=1: rows_returned=1 wall=5381 ms alloc=6171604464 rchar=1057242931 err=None
+[2026-10-27 02:02:00]   T L=100000 P=10000 rep=2: rows_returned=1 wall=5684 ms alloc=6171532304 rchar=1057242907 err=None
+[2026-10-27 02:02:07]   T L=100000 P=10000 rep=3: rows_returned=1 wall=5741 ms alloc=6171711032 rchar=1057251107 err=None
+[2026-10-27 02:02:08] == T P=100 g=1
+[2026-10-27 02:02:08] + jcmd 2536412 GC.run
+[2026-10-27 02:02:13]   idle 5 s: alloc=873960
+[2026-10-27 02:02:21]   T L=1 P=100 rep=0 warm: rows_returned=1 wall=7859 ms alloc=5743621360 rchar=2675001128 err=None
+[2026-10-27 02:02:29]   T L=1 P=100 rep=1: rows_returned=1 wall=7539 ms alloc=5745863272 rchar=2674999051 err=None
+[2026-10-27 02:02:36]   T L=1 P=100 rep=2: rows_returned=1 wall=6536 ms alloc=5740711552 rchar=2674999035 err=None
+[2026-10-27 02:02:44]   T L=1 P=100 rep=3: rows_returned=1 wall=6879 ms alloc=5740476336 rchar=2674999039 err=None
+[2026-10-27 02:02:45] == T P=100 g=100
+[2026-10-27 02:02:45] + jcmd 2536412 GC.run
+[2026-10-27 02:02:50]   idle 5 s: alloc=953960
+[2026-10-27 02:02:57]   T L=100 P=100 rep=0 warm: rows_returned=1 wall=6884 ms alloc=-582805752 rchar=2674999035 err=None
+[2026-10-27 02:03:04]   T L=100 P=100 rep=1: rows_returned=1 wall=6529 ms alloc=5740524112 rchar=2674999039 err=None
+[2026-10-27 02:03:13]   T L=100 P=100 rep=2: rows_returned=1 wall=8191 ms alloc=5740904992 rchar=2674999035 err=None
+[2026-10-27 02:03:22]   T L=100 P=100 rep=3: rows_returned=1 wall=7859 ms alloc=5740812528 rchar=2674999035 err=None
+[2026-10-27 02:03:23] == T P=100 g=100000
+[2026-10-27 02:03:23] + jcmd 2536412 GC.run
+[2026-10-27 02:03:28]   idle 5 s: alloc=943360
+[2026-10-27 02:03:36]   T L=100000 P=100 rep=0 warm: rows_returned=1 wall=8167 ms alloc=5740901976 rchar=2674999031 err=None
+[2026-10-27 02:03:44]   T L=100000 P=100 rep=1: rows_returned=1 wall=8203 ms alloc=5740986664 rchar=2674999039 err=None
+[2026-10-27 02:03:53]   T L=100000 P=100 rep=2: rows_returned=1 wall=7729 ms alloc=5740901528 rchar=2674999035 err=None
+[2026-10-27 02:04:02]   T L=100000 P=100 rep=3: rows_returned=1 wall=8315 ms alloc=5741018792 rchar=2674999039 err=None
+[2026-10-27 02:04:03] == drift cell (end)
+[2026-10-27 02:04:03] + jcmd 2536412 GC.run
+[2026-10-27 02:04:09]   idle 5 s: alloc=943536
+[2026-10-27 02:04:15]   T L=none P=10000 rep=0 warm: rows_returned=1 wall=5969 ms alloc=6171654944 rchar=1057242879 err=None
+[2026-10-27 02:04:20]   T L=none P=10000 rep=1: rows_returned=1 wall=5466 ms alloc=6171602832 rchar=1057242883 err=None
+[2026-10-27 02:04:27]   T L=none P=10000 rep=2: rows_returned=1 wall=5546 ms alloc=6171477384 rchar=1057242871 err=None
+[2026-10-27 02:04:33]   T L=none P=10000 rep=3: rows_returned=1 wall=5503 ms alloc=6171548664 rchar=1057242875 err=None
+[2026-10-27 02:04:34] == control SELECT * LIMIT 1000
+[2026-10-27 02:04:34] + jcmd 2536412 GC.run
+[2026-10-27 02:04:40]   idle 5 s: alloc=928696
+[2026-10-27 02:04:40]   C L=1000 P=0 rep=0 warm: rows_returned=1000 wall=37 ms alloc=5149336 rchar=1048580 err=None
+[2026-10-27 02:04:40]   C L=1000 P=0 rep=1: rows_returned=1000 wall=31 ms alloc=5157248 rchar=1048580 err=None
+[2026-10-27 02:04:41]   C L=1000 P=0 rep=2: rows_returned=1000 wall=27 ms alloc=5157032 rchar=1048584 err=None
+[2026-10-27 02:04:42]   C L=1000 P=0 rep=3: rows_returned=1000 wall=26 ms alloc=5161784 rchar=1048580 err=None
+[2026-10-27 02:04:43] == control SELECT * LIMIT 10000
+[2026-10-27 02:04:43] + jcmd 2536412 GC.run
+[2026-10-27 02:04:48]   idle 5 s: alloc=844232
+[2026-10-27 02:04:48]   C L=10000 P=0 rep=0 warm: rows_returned=10000 wall=247 ms alloc=63678088 rchar=10420240 err=None
+[2026-10-27 02:04:48]   C L=10000 P=0 rep=1: rows_returned=10000 wall=212 ms alloc=63670832 rchar=10420236 err=None
+[2026-10-27 02:04:50]   C L=10000 P=0 rep=2: rows_returned=10000 wall=213 ms alloc=63360728 rchar=10420236 err=None
+[2026-10-27 02:04:51]   C L=10000 P=0 rep=3: rows_returned=10000 wall=215 ms alloc=63379208 rchar=10420232 err=None
+[2026-10-27 02:04:52] == control SELECT * LIMIT 100000
+[2026-10-27 02:04:52] + jcmd 2536412 GC.run
+[2026-10-27 02:04:57]   idle 5 s: alloc=1022936
+[2026-10-27 02:04:59]   C L=100000 P=0 rep=0 warm: rows_returned=100000 wall=1454 ms alloc=684158960 rchar=104136712 err=None
+[2026-10-27 02:05:00]   C L=100000 P=0 rep=1: rows_returned=100000 wall=1514 ms alloc=684153272 rchar=104136712 err=None
+[2026-10-27 02:05:03]   C L=100000 P=0 rep=2: rows_returned=100000 wall=1425 ms alloc=684130120 rchar=104136716 err=None
+[2026-10-27 02:05:05]   C L=100000 P=0 rep=3: rows_returned=100000 wall=1442 ms alloc=684131344 rchar=104136708 err=None
+[2026-10-27 02:05:06] == G P=10000 g=1
+[2026-10-27 02:05:06] + jcmd 2536412 GC.run
+[2026-10-27 02:05:11]   idle 5 s: alloc=845952
+[2026-10-27 02:05:11]   G L=1 P=10000 rep=0 warm: rows_returned=1 wall=6 ms alloc=2011960 rchar=327684 err=None
+[2026-10-27 02:05:11]   G L=1 P=10000 rep=1: rows_returned=1 wall=5 ms alloc=2000432 rchar=327680 err=None
+[2026-10-27 02:05:12]   G L=1 P=10000 rep=2: rows_returned=1 wall=5 ms alloc=1998232 rchar=327680 err=None
+[2026-10-27 02:05:13]   G L=1 P=10000 rep=3: rows_returned=1 wall=6 ms alloc=1997480 rchar=327684 err=None
+[2026-10-27 02:05:14] == G P=10000 g=100
+[2026-10-27 02:05:14] + jcmd 2536412 GC.run
+[2026-10-27 02:05:20]   idle 5 s: alloc=845984
+[2026-10-27 02:05:20]   G L=100 P=10000 rep=0 warm: rows_returned=100 wall=285 ms alloc=185896968 rchar=31653928 err=None
+[2026-10-27 02:05:20]   G L=100 P=10000 rep=1: rows_returned=100 wall=192 ms alloc=185614384 rchar=31653904 err=None
+[2026-10-27 02:05:21]   G L=100 P=10000 rep=2: rows_returned=100 wall=187 ms alloc=185615992 rchar=31653900 err=None
+[2026-10-27 02:05:22]   G L=100 P=10000 rep=3: rows_returned=100 wall=205 ms alloc=185616456 rchar=31653896 err=None
+[2026-10-27 02:05:23] == G P=10000 g=100000
+[2026-10-27 02:05:23] + jcmd 2536412 GC.run
+[2026-10-27 02:05:29]   idle 5 s: alloc=853280
+[2026-10-27 02:05:36]   G L=100000 P=10000 rep=0 warm: rows_returned=3000 wall=7127 ms alloc=5565270896 rchar=950049731 err=None
+[2026-10-27 02:05:41]   G L=100000 P=10000 rep=1: rows_returned=3000 wall=5018 ms alloc=5565175992 rchar=950049731 err=None
+[2026-10-27 02:05:47]   G L=100000 P=10000 rep=2: rows_returned=3000 wall=5338 ms alloc=5565098424 rchar=950049651 err=None
+[2026-10-27 02:05:53]   G L=100000 P=10000 rep=3: rows_returned=3000 wall=5214 ms alloc=5565185080 rchar=950049663 err=None
+[2026-10-27 02:05:54] == G P=100 g=1
+[2026-10-27 02:05:54] + jcmd 2536412 GC.run
+[2026-10-27 02:06:00]   idle 5 s: alloc=1070672
+[2026-10-27 02:06:00]   G L=1 P=100 rep=0 warm: rows_returned=1 wall=8 ms alloc=1825896 rchar=720900 err=None
+[2026-10-27 02:06:00]   G L=1 P=100 rep=1: rows_returned=1 wall=7 ms alloc=1823296 rchar=720896 err=None
+[2026-10-27 02:06:01]   G L=1 P=100 rep=2: rows_returned=1 wall=5 ms alloc=1819248 rchar=720900 err=None
+[2026-10-27 02:06:02]   G L=1 P=100 rep=3: rows_returned=1 wall=6 ms alloc=1827200 rchar=720900 err=None
+[2026-10-27 02:06:03] == G P=100 g=100
+[2026-10-27 02:06:03] + jcmd 2536412 GC.run
+[2026-10-27 02:06:08]   idle 5 s: alloc=835064
+[2026-10-27 02:06:08]   G L=100 P=100 rep=0 warm: rows_returned=100 wall=217 ms alloc=174713816 rchar=75563012 err=None
+[2026-10-27 02:06:09]   G L=100 P=100 rep=1: rows_returned=100 wall=291 ms alloc=174702928 rchar=75563020 err=None
+[2026-10-27 02:06:10]   G L=100 P=100 rep=2: rows_returned=100 wall=292 ms alloc=174704984 rchar=75563016 err=None
+[2026-10-27 02:06:11]   G L=100 P=100 rep=3: rows_returned=100 wall=241 ms alloc=174674664 rchar=75563016 err=None
+[2026-10-27 02:06:12] == G P=100 g=100000
+[2026-10-27 02:06:12] + jcmd 2536412 GC.run
+[2026-10-27 02:06:17]   idle 5 s: alloc=835080
+[2026-10-27 02:06:26]   G L=100000 P=100 rep=0 warm: rows_returned=3000 wall=8138 ms alloc=5242183136 rchar=2269944811 err=None
+[2026-10-27 02:06:33]   G L=100000 P=100 rep=1: rows_returned=3000 wall=7644 ms alloc=5241741376 rchar=2269944759 err=None
+[2026-10-27 02:06:42]   G L=100000 P=100 rep=2: rows_returned=3000 wall=7894 ms alloc=5242004576 rchar=2269944759 err=None
+[2026-10-27 02:06:51]   G L=100000 P=100 rep=3: rows_returned=3000 wall=8005 ms alloc=5241964888 rchar=2269944763 err=None
+[2026-10-27 02:06:52] all cells done
+[2026-10-27 02:06:52] cleanup: stopping poller, helper, node
+[2026-10-27 02:06:52] stopping node pid 2536412
+[2026-10-27 02:06:52] + kill 2536412
+
+  rc=0
+[2026-10-27 02:06:57] node stopped
+[2026-10-27 02:06:57] + cp /dev/shm/s4-b11-l79-run1/logs/gc.log /users/jason92/s4-b11-l79-logs/run1/cluster/ 2>/dev/null
+[2026-10-27 02:06:57] + cp /dev/shm/s4-b11-l79-run1/logs/l79.trace /users/jason92/s4-b11-l79-logs/run1/cluster/ 2>/dev/null
+[2026-10-27 02:06:57] + cp /dev/shm/s4-b11-l79-run1/logs/system.log /users/jason92/s4-b11-l79-logs/run1/cluster/ 2>/dev/null
+[2026-10-27 02:06:57] + cp /dev/shm/s4-b11-l79-run1/logs/debug.log /users/jason92/s4-b11-l79-logs/run1/cluster/ 2>/dev/null
+[2026-10-27 02:06:57] + cp /dev/shm/s4-b11-l79-run1/logs/start.out /users/jason92/s4-b11-l79-logs/run1/cluster/ 2>/dev/null
+[2026-10-27 02:06:57] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' || true
+[2026-10-27 02:06:57] leftover CassandraDaemon of this run: []
+[2026-10-27 02:06:57] + rm -rf /dev/shm/s4-b11-l79-run1
+[2026-10-27 02:06:58] tmpfs dir removed: True

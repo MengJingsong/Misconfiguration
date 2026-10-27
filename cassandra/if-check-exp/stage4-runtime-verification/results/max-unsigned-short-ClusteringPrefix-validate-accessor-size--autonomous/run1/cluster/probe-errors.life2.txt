@@ -1,0 +1,13 @@
+ERROR [MutationStage-2] 2026-10-27T00:00:08,943 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-2,10,SharedPool]
+java.lang.AssertionError: Data size 65536 >= 65536
+	at org.apache.cassandra.db.NativeClustering.<init>(NativeClustering.java:50)
+	at org.apache.cassandra.utils.memory.NativeAllocator$1.clone(NativeAllocator.java:120)
+	at org.apache.cassandra.db.rows.BTreeRow.clone(BTreeRow.java:519)
+	at org.apache.cassandra.db.partitions.BTreePartitionUpdater.insert(BTreePartitionUpdater.java:128)
+--
+ERROR [MemtablePostFlush:1] 2026-10-27T00:00:33,318 JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtablePostFlush]
+java.lang.AssertionError: Attempted serializing to buffer exceeded maximum of 65535 bytes: 70000
+	at org.apache.cassandra.utils.ByteBufferUtil.writeWithShortLength(ByteBufferUtil.java:366)
+	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:436)
+	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:308)
+	at org.apache.cassandra.io.sstable.metadata.MetadataSerializer.serialize(MetadataSerializer.java:104)

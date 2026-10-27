@@ -1,0 +1,39 @@
+unit-run 2026-10-26T21:30:33-04:00 host node0 tree cassandra-5.0.9 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 TombstoneFailureThresholdMetricsRecordingTest.java=417a7ed34bf9 unit-run.sh=47117379253a unit-analyze.py=be0eddc2b0e6 
+df: /dev/sda3        63G   40G   20G  67% /
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 46 s
+TFM lines: 14; tsv rows: 14
+  arm	pk	T	outcome	count_at_throw	resp_bytes	unfiltered_in_resp	alloc_median	alloc_min	alloc_max	fail_delta	warn_delta	retained_bytes
+  sweep	0	1000	TOE	1001	-1	-1	676376	676376	676944	5	0	-1
+  sweep	0	10000	TOE	10001	-1	-1	6531776	6531680	6532248	5	0	-1
+  sweep	0	100000	TOE	100001	-1	-1	54727184	54727184	54728064	5	0	-1
+  sweep	0	120000	OK	-1	1400426	120000	64815784	64815784	64816088	0	0	2143576
+  sweep	0	200000	OK	-1	1400426	120000	64815784	64815784	64815784	0	5	2099056
+  sweep	0	2147483647	OK	-1	1400426	120000	64815784	64815784	64818792	0	5	2099056
+  sweep	1	1000	OK	-1	30390031	30000	110731944	110731728	128047968	0	0	44960200
+  sweep	1	10000	OK	-1	30390031	30000	110731728	110731728	110731728	0	0	33916784
+  sweep	1	100000	OK	-1	30390031	30000	110731728	110731728	110731728	0	0	33916784
+  sweep	1	120000	OK	-1	30390031	30000	110731728	110731728	110731728	0	0	33003216
+  sweep	1	200000	OK	-1	30390031	30000	110731728	110731728	110731728	0	0	33916896
+  sweep	1	2147483647	OK	-1	30390031	30000	110731728	110731728	110731728	0	0	33916864
+  ctl-off	1	100000	OK	-1	30390031	30000	111369000	111369000	111644232	0	0	-1
+  ctl-1MiB	1	100000	LRS	-1	-1	-1	3362704	3362704	3362704	0	0	-1
+cleanup: test file removed; leftover junit JVMs: 0
+pk0 T=MAX: OK resp_bytes 1400426; per tombstone s = 11.7 B
+  pk0 T=1000: TOE count=1001 A=0.68 MB (min 0.68, max 0.68) fail+5 warn+0 retained=-1 A/A(MAX)=0.0104; pk1 A=110.73 MB
+  pk0 T=10000: TOE count=10001 A=6.53 MB (min 6.53, max 6.53) fail+5 warn+0 retained=-1 A/A(MAX)=0.1008; pk1 A=110.73 MB
+  pk0 T=100000: TOE count=100001 A=54.73 MB (min 54.73, max 54.73) fail+5 warn+0 retained=-1 A/A(MAX)=0.8443; pk1 A=110.73 MB
+  pk0 T=120000: OK count=-1 A=64.82 MB (min 64.82, max 64.82) fail+0 warn+0 retained=2143576 A/A(MAX)=1.0000; pk1 A=110.73 MB
+  pk0 T=200000: OK count=-1 A=64.82 MB (min 64.82, max 64.82) fail+0 warn+5 retained=2099056 A/A(MAX)=1.0000; pk1 A=110.73 MB
+  pk0 T=2147483647: OK count=-1 A=64.82 MB (min 64.82, max 64.82) fail+0 warn+5 retained=2099056 A/A(MAX)=1.0000; pk1 A=110.73 MB
+EXPECTED: c1 pk0 aborts (TOE) iff T < N, count exactly T+1 - yes
+EXPECTED: c2 A(T) strictly increasing over the aborting T [1000, 10000, 100000] - yes
+EXPECTED: c3 A(lowest T) <= 0.10 x A(MAX) (ratio 0.0104) - yes
+EXPECTED: c4 A at T >= N within +-10% of A(MAX) (1.000, 1.000) and every OK read has N unfiltered items - yes
+EXPECTED: c5 tombstoneFailures +5 per aborting T, 0 otherwise; tombstoneWarnings +5 only where warn < N < T (T=N: +0, aborts: +0) - yes
+EXPECTED: c6 pk1 all OK, no tombstone metrics, max/min of A <= 1.10 (1.000) - yes
+EXPECTED: control: 1 MiB local_read_size_fail aborts (LRS) and its A (3.36 MB) < 0.8 x unrestricted A (111.37 MB), unrestricted reads OK - yes
+EXPECTED: sub: A(MAX) > A(lowest T) (the sweep moves) - yes
+EXPECTED: sub: resp_bytes at T >= N equal within 1% ([1400426, 1400426, 1400426]) - yes
+MATCHED: B2g row 1 (abort at T+1 for every T; usage at the abort follows T; claim confirmed at unit level); EXPECTED yes=9 NO=0
+done 2026-10-26T21:31:20-04:00

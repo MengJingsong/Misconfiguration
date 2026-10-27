@@ -1,0 +1,21 @@
+SELFCHECK unit finished: holds 
+SELFCHECK all 70 single-partition points have rowsCounted == out == n: holds 
+SELFCHECK no point emits more than n rows: holds 
+  m(w)[retained] = {16: 309.2, 1024: 1316.9, 65536: 65829.0}
+SELFCHECK slope check retained: m(1024)-m(16) in [958, 1172.8], m(65536)-m(16) in [62244, 72136]: holds 
+  m(w)[unshared] = {16: 304.0, 1024: 1312.0, 65536: 65824.0}
+SELFCHECK slope check unshared: m(1024)-m(16) in [958, 1172.8], m(65536)-m(16) in [62244, 72136]: holds 
+  control retained medians {16: 8515800, 1024: 8427888, 65536: 8492208} rows {16: 27595, 1024: 6394, 65536: 128}
+SELFCHECK control: retained in [0.8*8MiB, 1.3*(8MiB+row)] for all widths and rows fall with width: holds 
+SELFCHECK lifetime U: no ERROR line starting a log line, no java.lang.OutOfMemoryError: holds 
+  lifetime U: 65 queries, 21084 samples, sample gap max 113 ms
+SELFCHECK lifetime C: no ERROR line starting a log line, no java.lang.OutOfMemoryError: holds 
+  lifetime C: 21 queries, 7243 samples, sample gap max 103 ms
+SELFCHECK U: every non-warm query returned rows = 4 x min(n, rows/partition): holds 
+  a(t) = {'t_small': 1350, 't_med': 46856, 't_big': 460837}
+SELFCHECK width slopes (own windows): a(med)-a(small) in [10140, 101400], a(big)-a(med) in [92160, 921600]: holds 
+SELFCHECK own per-query A agrees with the analyzer to 1e-4 relative (the analyzer prints truncated integers; worst 7.36e-06), 21 shapes: holds []
+SELFCHECK control aborts: t_big 100/none queries all failed with code 1300 read failure (7 queries): holds 
+SELFCHECK control: system.log names local_read_size_fail_threshold: holds 
+SELFCHECK disk bytes identical before and after lifetime U: holds {'before': '149089845', 'after': '149089845'}
+SELFCHECK SUMMARY not-holding=0

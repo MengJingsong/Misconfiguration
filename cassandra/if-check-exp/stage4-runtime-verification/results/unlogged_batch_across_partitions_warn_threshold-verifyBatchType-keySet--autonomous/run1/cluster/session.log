@@ -1,0 +1,239 @@
+[2026-10-26 17:48:34] cluster-run run1 2026-10-26 17:48:34 MDT host node1.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu tree /users/jason92/s4-b9-bu-node batches/thread 250 rows/arm 1000000
+[2026-10-26 17:48:34] harness md5 cluster-run.py=0872f1a0d718 load.py=380c26c3e105 make-node-yaml.sh=5f2a01ee4a52
+[2026-10-26 17:48:34] jvm: openjdk version "11.0.32.1" 2026-08-18
+[2026-10-26 17:48:34] + rm -rf /dev/shm/s4-b9-bu/data /dev/shm/s4-b9-bu/commitlog /dev/shm/s4-b9-bu/hints /dev/shm/s4-b9-bu/logs /dev/shm/s4-b9-bu/saved_caches /dev/shm/s4-b9-bu/cdc_raw
+
+[2026-10-26 17:48:34] + CASSANDRA_HOME=/users/jason92/s4-b9-bu-node BU=/dev/shm/s4-b9-bu bash /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/make-node-yaml.sh unlogged_batch_across_partitions_warn_threshold=1 batch_size_warn_threshold=1000KiB batch_size_fail_threshold=1000KiB range_request_timeout=600s read_request_timeout=600s native_transport_timeout=600s
+node: conf /dev/shm/s4-b9-bu/conf, JMX 7140, address 127.0.4.1; yaml tail:
+# ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 1;range_request_timeout: 600s;read_request_timeout: 600s;native_transport_timeout: 600s;
+
+[2026-10-26 17:48:34] [t1] yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 1;range_request_timeout: 600s;read_reque
+[2026-10-26 17:48:34] + bin/cassandra -p /dev/shm/s4-b9-bu/cassandra.pid > /users/jason92/s4-b9-bu-logs/run1/cluster/t1/stdout.txt 2>&1
+
+[2026-10-26 17:49:39] [t1] node up after 59 s, pid 1919052
+[2026-10-26 17:49:39] EXPECTED: [t1] heap -Xms2G -Xmx2G (B3a) - yes
+[2026-10-26 17:49:39] EXPECTED: [t1] G1 collector (B3a) - yes
+[2026-10-26 17:49:39] + bin/cqlsh 127.0.4.1 9042 -e "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k int PRIMARY KEY, v text); CREATE TABLE ks.probe (k int PRIMARY KEY, v text);"
+
+[2026-10-26 17:49:40] EXPECTED: [t1] node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=1 - yes
+[2026-10-26 17:49:40] [t1] Config echo batch_size_warn_threshold=1000KiB
+[2026-10-26 17:49:40] [t1] Config echo batch_size_fail_threshold=1000KiB
+[2026-10-26 17:49:40] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py probe /users/jason92/s4-b9-bu-node 127.0.4.1
+{"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.2, "mode": "probe"}
+
+[2026-10-26 17:49:41] [t1] probe {"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.2, "mode": "probe"}
+[2026-10-26 17:49:41] EXPECTED: [t1] first trigger: 500-key probe batch accepted with the unlogged-batch client warning (500 > 1) - yes
+[2026-10-26 17:49:41] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py run /users/jason92/s4-b9-bu-node 127.0.4.1 --threads 8 --batches 250 --keys 500
+{"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 19.5, "mode": "run"}
+
+[2026-10-26 17:50:00] [t1] load {"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 19.5, "mode": "run"}
+[2026-10-26 17:50:06] + bin/cqlsh 127.0.4.1 9042 --request-timeout=900 -e "SELECT count(*) FROM ks.t;"
+
+ count
+---------
+ 1000000
+
+(1 rows)
+
+Warnings :
+Aggregation query used without partition key
+
+
+[2026-10-26 17:50:19] [t1] count(*) 1000000; pre-flush {'memtable_data_size': 59435553, 'space_live': 20858959, 'partitions_est': 997441, 'memtable_cells': 238697}; post-flush {'memtable_data_size': 0, 'space_live': 27392744, 'partitions_est': 982748, 'memtable_cells': 0}; disk {'data': 27279374, 'commitlog': 134217728}; heap after load+GC.run 226716672; heap peak 1508377600 mean 858783008; 32 heap samples; gc pause 0.514 s in 13 pauses; load 20 s; WARN log lines 1; ERROR lines 0
+[2026-10-26 17:50:19] EXPECTED: [t1] all 1000000 rows acked and count(*) = 1000000 - yes
+[2026-10-26 17:50:19] EXPECTED: [t1] client warning on every batch (2000) - yes
+[2026-10-26 17:50:19] EXPECTED: [t1] 1 to 2 WARN log lines (NoSpamLogger, at most one per minute) - yes
+[2026-10-26 17:50:19] + cp /dev/shm/s4-b9-bu/logs/system.log /users/jason92/s4-b9-bu-logs/run1/cluster/t1/system.log
+
+[2026-10-26 17:50:29] EXPECTED: [t1] node stopped - yes
+[2026-10-26 17:50:29] + rm -rf /dev/shm/s4-b9-bu/data /dev/shm/s4-b9-bu/commitlog /dev/shm/s4-b9-bu/hints /dev/shm/s4-b9-bu/logs /dev/shm/s4-b9-bu/saved_caches /dev/shm/s4-b9-bu/cdc_raw
+
+[2026-10-26 17:50:29] + CASSANDRA_HOME=/users/jason92/s4-b9-bu-node BU=/dev/shm/s4-b9-bu bash /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/make-node-yaml.sh unlogged_batch_across_partitions_warn_threshold=10 batch_size_warn_threshold=1000KiB batch_size_fail_threshold=1000KiB range_request_timeout=600s read_request_timeout=600s native_transport_timeout=600s
+node: conf /dev/shm/s4-b9-bu/conf, JMX 7140, address 127.0.4.1; yaml tail:
+# ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_request_timeout: 600s;native_transport_timeout: 600s;
+
+[2026-10-26 17:50:29] [t10] yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_requ
+[2026-10-26 17:50:29] + bin/cassandra -p /dev/shm/s4-b9-bu/cassandra.pid > /users/jason92/s4-b9-bu-logs/run1/cluster/t10/stdout.txt 2>&1
+
+[2026-10-26 17:51:34] [t10] node up after 60 s, pid 1924266
+[2026-10-26 17:51:34] EXPECTED: [t10] heap -Xms2G -Xmx2G (B3a) - yes
+[2026-10-26 17:51:34] EXPECTED: [t10] G1 collector (B3a) - yes
+[2026-10-26 17:51:34] + bin/cqlsh 127.0.4.1 9042 -e "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k int PRIMARY KEY, v text); CREATE TABLE ks.probe (k int PRIMARY KEY, v text);"
+
+[2026-10-26 17:51:35] EXPECTED: [t10] node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=10 - yes
+[2026-10-26 17:51:35] [t10] Config echo batch_size_warn_threshold=1000KiB
+[2026-10-26 17:51:35] [t10] Config echo batch_size_fail_threshold=1000KiB
+[2026-10-26 17:51:35] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py probe /users/jason92/s4-b9-bu-node 127.0.4.1
+{"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.2, "mode": "probe"}
+
+[2026-10-26 17:51:36] [t10] probe {"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.2, "mode": "probe"}
+[2026-10-26 17:51:36] EXPECTED: [t10] first trigger: 500-key probe batch accepted with the unlogged-batch client warning (500 > 10) - yes
+[2026-10-26 17:51:36] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py run /users/jason92/s4-b9-bu-node 127.0.4.1 --threads 8 --batches 250 --keys 500
+{"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 21.0, "mode": "run"}
+
+[2026-10-26 17:51:57] [t10] load {"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 21.0, "mode": "run"}
+[2026-10-26 17:52:03] + bin/cqlsh 127.0.4.1 9042 --request-timeout=900 -e "SELECT count(*) FROM ks.t;"
+
+ count
+---------
+ 1000000
+
+(1 rows)
+
+Warnings :
+Aggregation query used without partition key
+
+
+[2026-10-26 17:52:16] [t10] count(*) 1000000; pre-flush {'memtable_data_size': 59391978, 'space_live': 20831976, 'partitions_est': 994456, 'memtable_cells': 238522}; post-flush {'memtable_data_size': 0, 'space_live': 27366297, 'partitions_est': 982748, 'memtable_cells': 0}; disk {'data': 27310441, 'commitlog': 134217728}; heap after load+GC.run 226722816; heap peak 1420567552 mean 774881514; 35 heap samples; gc pause 0.441 s in 13 pauses; load 21 s; WARN log lines 1; ERROR lines 0
+[2026-10-26 17:52:16] EXPECTED: [t10] all 1000000 rows acked and count(*) = 1000000 - yes
+[2026-10-26 17:52:16] EXPECTED: [t10] client warning on every batch (2000) - yes
+[2026-10-26 17:52:16] EXPECTED: [t10] 1 to 2 WARN log lines (NoSpamLogger, at most one per minute) - yes
+[2026-10-26 17:52:16] + cp /dev/shm/s4-b9-bu/logs/system.log /users/jason92/s4-b9-bu-logs/run1/cluster/t10/system.log
+
+[2026-10-26 17:52:26] EXPECTED: [t10] node stopped - yes
+[2026-10-26 17:52:26] + rm -rf /dev/shm/s4-b9-bu/data /dev/shm/s4-b9-bu/commitlog /dev/shm/s4-b9-bu/hints /dev/shm/s4-b9-bu/logs /dev/shm/s4-b9-bu/saved_caches /dev/shm/s4-b9-bu/cdc_raw
+
+[2026-10-26 17:52:26] + CASSANDRA_HOME=/users/jason92/s4-b9-bu-node BU=/dev/shm/s4-b9-bu bash /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/make-node-yaml.sh unlogged_batch_across_partitions_warn_threshold=100000 batch_size_warn_threshold=1000KiB batch_size_fail_threshold=1000KiB range_request_timeout=600s read_request_timeout=600s native_transport_timeout=600s
+node: conf /dev/shm/s4-b9-bu/conf, JMX 7140, address 127.0.4.1; yaml tail:
+# ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 100000;range_request_timeout: 600s;read_request_timeout: 600s;native_transport_timeout: 600s;
+
+[2026-10-26 17:52:26] [t100000] yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 100000;range_request_timeout: 600s;read_
+[2026-10-26 17:52:26] + bin/cassandra -p /dev/shm/s4-b9-bu/cassandra.pid > /users/jason92/s4-b9-bu-logs/run1/cluster/t100000/stdout.txt 2>&1
+
+[2026-10-26 17:53:27] [t100000] node up after 56 s, pid 1931237
+[2026-10-26 17:53:27] EXPECTED: [t100000] heap -Xms2G -Xmx2G (B3a) - yes
+[2026-10-26 17:53:27] EXPECTED: [t100000] G1 collector (B3a) - yes
+[2026-10-26 17:53:27] + bin/cqlsh 127.0.4.1 9042 -e "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k int PRIMARY KEY, v text); CREATE TABLE ks.probe (k int PRIMARY KEY, v text);"
+
+[2026-10-26 17:53:28] EXPECTED: [t100000] node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=100000 - yes
+[2026-10-26 17:53:28] [t100000] Config echo batch_size_warn_threshold=1000KiB
+[2026-10-26 17:53:28] [t100000] Config echo batch_size_fail_threshold=1000KiB
+[2026-10-26 17:53:28] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py probe /users/jason92/s4-b9-bu-node 127.0.4.1
+{"ok": 1, "failed": 0, "rows": 500, "warned": 0, "first_warning": "", "first_error": "", "seconds": 0.1, "mode": "probe"}
+
+[2026-10-26 17:53:29] [t100000] probe {"ok": 1, "failed": 0, "rows": 500, "warned": 0, "first_warning": "", "first_error": "", "seconds": 0.1, "mode": "probe"}
+[2026-10-26 17:53:29] EXPECTED: [t100000] first trigger: 500-key probe batch accepted without the warning (500 <= 100000) - yes
+[2026-10-26 17:53:29] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py run /users/jason92/s4-b9-bu-node 127.0.4.1 --threads 8 --batches 250 --keys 500
+{"ok": 2000, "failed": 0, "rows": 1000000, "warned": 0, "first_warning": "", "first_error": "", "seconds": 21.5, "mode": "run"}
+
+[2026-10-26 17:53:51] [t100000] load {"ok": 2000, "failed": 0, "rows": 1000000, "warned": 0, "first_warning": "", "first_error": "", "seconds": 21.5, "mode": "run"}
+[2026-10-26 17:53:57] + bin/cqlsh 127.0.4.1 9042 --request-timeout=900 -e "SELECT count(*) FROM ks.t;"
+
+ count
+---------
+ 1000000
+
+(1 rows)
+
+Warnings :
+Aggregation query used without partition key
+
+
+[2026-10-26 17:54:11] [t100000] count(*) 1000000; pre-flush {'memtable_data_size': 59368821, 'space_live': 20857006, 'partitions_est': 996837, 'memtable_cells': 238429}; post-flush {'memtable_data_size': 0, 'space_live': 27385941, 'partitions_est': 982748, 'memtable_cells': 0}; disk {'data': 27340252, 'commitlog': 134217728}; heap after load+GC.run 234225664; heap peak 1519666176 mean 840696539; 35 heap samples; gc pause 0.477 s in 13 pauses; load 22 s; WARN log lines 0; ERROR lines 0
+[2026-10-26 17:54:11] EXPECTED: [t100000] all 1000000 rows acked and count(*) = 1000000 - yes
+[2026-10-26 17:54:11] EXPECTED: [t100000] no client warning, no WARN log line - yes
+[2026-10-26 17:54:11] + cp /dev/shm/s4-b9-bu/logs/system.log /users/jason92/s4-b9-bu-logs/run1/cluster/t100000/system.log
+
+[2026-10-26 17:54:20] EXPECTED: [t100000] node stopped - yes
+[2026-10-26 17:54:20] + rm -rf /dev/shm/s4-b9-bu/data /dev/shm/s4-b9-bu/commitlog /dev/shm/s4-b9-bu/hints /dev/shm/s4-b9-bu/logs /dev/shm/s4-b9-bu/saved_caches /dev/shm/s4-b9-bu/cdc_raw
+
+[2026-10-26 17:54:20] + CASSANDRA_HOME=/users/jason92/s4-b9-bu-node BU=/dev/shm/s4-b9-bu bash /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/make-node-yaml.sh unlogged_batch_across_partitions_warn_threshold=10 batch_size_warn_threshold=1000KiB batch_size_fail_threshold=1000KiB range_request_timeout=600s read_request_timeout=600s native_transport_timeout=600s
+node: conf /dev/shm/s4-b9-bu/conf, JMX 7140, address 127.0.4.1; yaml tail:
+# ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_request_timeout: 600s;native_transport_timeout: 600s;
+
+[2026-10-26 17:54:20] [t10r] yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_requ
+[2026-10-26 17:54:20] + bin/cassandra -p /dev/shm/s4-b9-bu/cassandra.pid > /users/jason92/s4-b9-bu-logs/run1/cluster/t10r/stdout.txt 2>&1
+
+[2026-10-26 17:55:22] [t10r] node up after 56 s, pid 1940449
+[2026-10-26 17:55:22] EXPECTED: [t10r] heap -Xms2G -Xmx2G (B3a) - yes
+[2026-10-26 17:55:22] EXPECTED: [t10r] G1 collector (B3a) - yes
+[2026-10-26 17:55:22] + bin/cqlsh 127.0.4.1 9042 -e "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k int PRIMARY KEY, v text); CREATE TABLE ks.probe (k int PRIMARY KEY, v text);"
+
+[2026-10-26 17:55:23] EXPECTED: [t10r] node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=10 - yes
+[2026-10-26 17:55:23] [t10r] Config echo batch_size_warn_threshold=1000KiB
+[2026-10-26 17:55:23] [t10r] Config echo batch_size_fail_threshold=1000KiB
+[2026-10-26 17:55:23] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py probe /users/jason92/s4-b9-bu-node 127.0.4.1
+{"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.1, "mode": "probe"}
+
+[2026-10-26 17:55:23] [t10r] probe {"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.1, "mode": "probe"}
+[2026-10-26 17:55:23] EXPECTED: [t10r] first trigger: 500-key probe batch accepted with the unlogged-batch client warning (500 > 10) - yes
+[2026-10-26 17:55:23] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py run /users/jason92/s4-b9-bu-node 127.0.4.1 --threads 8 --batches 250 --keys 500
+{"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 20.0, "mode": "run"}
+
+[2026-10-26 17:55:44] [t10r] load {"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 20.0, "mode": "run"}
+[2026-10-26 17:55:50] + bin/cqlsh 127.0.4.1 9042 --request-timeout=900 -e "SELECT count(*) FROM ks.t;"
+
+ count
+---------
+ 1000000
+
+(1 rows)
+
+Warnings :
+Aggregation query used without partition key
+
+
+[2026-10-26 17:56:02] [t10r] count(*) 1000000; pre-flush {'memtable_data_size': 59242827, 'space_live': 20889874, 'partitions_est': 994274, 'memtable_cells': 237923}; post-flush {'memtable_data_size': 0, 'space_live': 27404461, 'partitions_est': 982748, 'memtable_cells': 0}; disk {'data': 27285149, 'commitlog': 134217728}; heap after load+GC.run 230468608; heap peak 1479162880 mean 850595437; 33 heap samples; gc pause 0.474 s in 13 pauses; load 20 s; WARN log lines 1; ERROR lines 0
+[2026-10-26 17:56:02] EXPECTED: [t10r] all 1000000 rows acked and count(*) = 1000000 - yes
+[2026-10-26 17:56:02] EXPECTED: [t10r] client warning on every batch (2000) - yes
+[2026-10-26 17:56:02] EXPECTED: [t10r] 1 to 2 WARN log lines (NoSpamLogger, at most one per minute) - yes
+[2026-10-26 17:56:02] + cp /dev/shm/s4-b9-bu/logs/system.log /users/jason92/s4-b9-bu-logs/run1/cluster/t10r/system.log
+
+[2026-10-26 17:56:12] EXPECTED: [t10r] node stopped - yes
+[2026-10-26 17:56:12] + rm -rf /dev/shm/s4-b9-bu/data /dev/shm/s4-b9-bu/commitlog /dev/shm/s4-b9-bu/hints /dev/shm/s4-b9-bu/logs /dev/shm/s4-b9-bu/saved_caches /dev/shm/s4-b9-bu/cdc_raw
+
+[2026-10-26 17:56:12] + CASSANDRA_HOME=/users/jason92/s4-b9-bu-node BU=/dev/shm/s4-b9-bu bash /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/make-node-yaml.sh unlogged_batch_across_partitions_warn_threshold=10 batch_size_warn_threshold=10KiB batch_size_fail_threshold=20KiB range_request_timeout=600s read_request_timeout=600s native_transport_timeout=600s
+node: conf /dev/shm/s4-b9-bu/conf, JMX 7140, address 127.0.4.1; yaml tail:
+# ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 10KiB;batch_size_fail_threshold: 20KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_request_timeout: 600s;native_transport_timeout: 600s;
+
+[2026-10-26 17:56:12] [ctl] yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 10KiB;batch_size_fail_threshold: 20KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_request_
+[2026-10-26 17:56:12] + bin/cassandra -p /dev/shm/s4-b9-bu/cassandra.pid > /users/jason92/s4-b9-bu-logs/run1/cluster/ctl/stdout.txt 2>&1
+
+[2026-10-26 17:57:15] [ctl] node up after 57 s, pid 1949168
+[2026-10-26 17:57:15] EXPECTED: [ctl] heap -Xms2G -Xmx2G (B3a) - yes
+[2026-10-26 17:57:15] EXPECTED: [ctl] G1 collector (B3a) - yes
+[2026-10-26 17:57:15] + bin/cqlsh 127.0.4.1 9042 -e "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (k int PRIMARY KEY, v text); CREATE TABLE ks.probe (k int PRIMARY KEY, v text);"
+
+[2026-10-26 17:57:16] EXPECTED: [ctl] node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=10 - yes
+[2026-10-26 17:57:16] [ctl] Config echo batch_size_warn_threshold=10KiB
+[2026-10-26 17:57:16] [ctl] Config echo batch_size_fail_threshold=20KiB
+[2026-10-26 17:57:16] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py probe /users/jason92/s4-b9-bu-node 127.0.4.1
+{"ok": 0, "failed": 1, "rows": 0, "warned": 0, "first_warning": "", "first_error": "Error from server: code=2200 [Invalid query] message=\"Batch too large\"", "seconds": 0.1, "mode": "probe"}
+
+[2026-10-26 17:57:16] [ctl] probe {"ok": 0, "failed": 1, "rows": 0, "warned": 0, "first_warning": "", "first_error": "Error from server: code=2200 [Invalid query] message=\"Batch too large\"", "seconds": 0.1, "mode": "probe"}
+[2026-10-26 17:57:16] EXPECTED: [ctl] first trigger: 500-key probe batch rejected "Batch too large" (positive control reaches the size branch) - yes
+[2026-10-26 17:57:16] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous/load.py run /users/jason92/s4-b9-bu-node 127.0.4.1 --threads 8 --batches 250 --keys 500
+{"ok": 0, "failed": 2000, "rows": 0, "warned": 0, "first_warning": "", "first_error": "Error from server: code=2200 [Invalid query] message=\"Batch too large\"", "seconds": 20.4, "mode": "run"}
+
+[2026-10-26 17:57:37] [ctl] load {"ok": 0, "failed": 2000, "rows": 0, "warned": 0, "first_warning": "", "first_error": "Error from server: code=2200 [Invalid query] message=\"Batch too large\"", "seconds": 20.4, "mode": "run"}
+[2026-10-26 17:57:42] + bin/cqlsh 127.0.4.1 9042 --request-timeout=900 -e "SELECT count(*) FROM ks.t;"
+
+ count
+-------
+     0
+
+(1 rows)
+
+Warnings :
+Aggregation query used without partition key
+
+
+[2026-10-26 17:57:43] [ctl] count(*) 0; pre-flush {'memtable_data_size': 0, 'space_live': 0, 'partitions_est': 0, 'memtable_cells': 0}; post-flush {'memtable_data_size': 0, 'space_live': 0, 'partitions_est': 0, 'memtable_cells': 0}; disk {'data': 115385, 'commitlog': 67108864}; heap after load+GC.run 71333888; heap peak 1120090112 mean 550356661; 34 heap samples; gc pause 0.152 s in 7 pauses; load 21 s; WARN log lines 0; ERROR lines 2001
+[2026-10-26 17:57:43] EXPECTED: [ctl] control: every batch rejected, rows acked 0, count(*) 0 - yes
+[2026-10-26 17:57:43] EXPECTED: [ctl] control: error text "Batch too large" - yes
+[2026-10-26 17:57:43] + cp /dev/shm/s4-b9-bu/logs/system.log /users/jason92/s4-b9-bu-logs/run1/cluster/ctl/system.log
+
+[2026-10-26 17:57:53] EXPECTED: [ctl] node stopped - yes
+[2026-10-26 17:57:53] --- cross-arm comparison (B3f: peak heap, GC time and disk agree within about 10% across the thresholds)
+[2026-10-26 17:57:53] heap_peak: {'t1': 1508377600, 't10': 1420567552, 't100000': 1519666176, 't10r': 1479162880}; max/min 1.070
+[2026-10-26 17:57:53] EXPECTED: heap_peak within 10% across thresholds (max/min <= 1.10) - yes
+[2026-10-26 17:57:53] gc_seconds: {'t1': 0.514, 't10': 0.441, 't100000': 0.477, 't10r': 0.474}; max/min 1.166
+[2026-10-26 17:57:53] post_flush space_live: {'t1': 27392744, 't10': 27366297, 't100000': 27385941, 't10r': 27404461}; max/min 1.001
+[2026-10-26 17:57:53] EXPECTED: post_flush space_live within 10% across thresholds (max/min <= 1.10) - yes
+[2026-10-26 17:57:53] data dir bytes: {'t1': 27279374, 't10': 27310441, 't100000': 27340252, 't10r': 27285149}; max/min 1.002
+[2026-10-26 17:57:53] EXPECTED: data dir bytes within 10% across thresholds (max/min <= 1.10) - yes
+[2026-10-26 17:57:53] commitlog dir bytes: {'t1': 134217728, 't10': 134217728, 't100000': 134217728, 't10r': 134217728}; max/min 1.000
+[2026-10-26 17:57:53] load seconds: {'t1': 19.901840209960938, 't10': 21.483336687088013, 't100000': 21.905229568481445, 't10r': 20.451966762542725}; max/min 1.101
+[2026-10-26 17:57:53] heap after load + GC.run: {'t1': 226716672, 't10': 226722816, 't100000': 234225664, 't10r': 230468608, 'ctl': 71333888}
+[2026-10-26 17:57:53] EXPECTED: control moved usage: control data dir bytes far below t10 (< 10%; the commit log directory holds pre-allocated segments and is not a usage reading) - yes
+[2026-10-26 17:57:53] leftover CassandraDaemon of this harness: none

@@ -1,0 +1,17 @@
+PASS no error :: all reps, both tables
+PASS R0 N=200 -> 200 L0 sstables, never refused :: all reps, both tables
+PASS L0 sstables overlap each other :: all reps, both tables
+PASS L0 count N and unchanged by the read :: all reps, both tables
+PASS R0: normal candidate, never STCS :: all reps, both tables
+PASS R1 N>=33 flag false: STCS candidate of max_threshold :: all reps, both tables
+PASS R1 N<=32 or flag true: normal L1->L2 candidate :: all reps, both tables
+PASS R2 N>=33 flag false: STCS candidate of max_threshold, not the held one :: all reps, both tables
+PASS R2 N<=32 or flag true: null :: all reps, both tables
+PASS R1 setup: 30 L1 sstables at about 3x target :: all reps, both tables
+PASS R2 setup: exactly one sstable held :: all reps, both tables
+PASS execute: one STCS task takes the L0 count from N to N-(max_threshold-1) :: N 33, 64 x 2 tables x 3 reps
+PASS positive control: L1 at 3x target returns to <= 1.001 x target by executing L1->L2 candidates; truncate gives 0 :: 3 reps
+INFO ctl.rep1 L1 before/after/target 31859589 9557791 10485760 tasks 21 L2after 22301798
+INFO ctl.rep2 L1 before/after/target 31859473 9557836 10485760 tasks 21 L2after 22301637
+INFO ctl.rep3 L1 before/after/target 31862598 9558477 10485760 tasks 21 L2after 22304121
+ALL PREDICTIONS PASS

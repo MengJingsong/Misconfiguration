@@ -1,0 +1,22 @@
+arm                     P       N  samp  qry peak_live_MB peak_used_MB     alloc_MB     secs  rows
+warmup               None    None   324   10          4.2         13.8       2828.9     33.8  [200000]
+f_N1_P1000           1000       1     3  100          0.0          8.4          7.1      0.4  [1]
+f_N100_P1000         1000     100     4  100          4.2         16.8         17.4      0.5  [100]
+f_N10000_P1000       1000   10000   157  100          4.2         15.0       1415.2     16.3  [10000]
+f_Nabs_P1000         1000  absent  3630  100          4.2         54.9      28338.1    375.2  [200000]
+noise                None    None     3  100          0.0          8.4          6.7      0.3  [1]
+c_Nabs_P300000     300000  absent  2015  100        116.0        792.2      27962.7    207.6  [200000]
+r_Nabs_P1000         1000  absent  3601  100          4.2         54.0      28329.5    370.9  [200000]
+r_N10000_P1000       1000   10000   199  100          4.2         16.8       1423.8     20.4  [10000]
+r_N100_P1000         1000     100     5  100          4.2         12.6         21.0      0.5  [100]
+r_N1_P1000           1000       1     3  100          0.0          8.4          7.0      0.3  [1]
+x_N1_P300000       300000       1     2  100          0.0          8.4          5.1      0.3  [1]
+x_N100_P300000     300000     100     4  100          4.2         12.6         17.7      0.5  [100]
+x_N10000_P300000   300000   10000   112  100          4.2         22.8       1493.8     11.7  [10000]
+EXPECTED rows     MATCH  {'f_N1_P1000': [1], 'f_N100_P1000': [100], 'f_N10000_P1000': [10000], 'f_Nabs_P1000': [200000], 'c_Nabs_P300000': [200000], 'r_Nabs_P1000': [200000], 'r_N10000_P1000': [10000], 'r_N100_P1000': [100], 'r_N1_P1000': [1], 'x_N1_P300000': [1], 'x_N100_P300000': [100], 'x_N10000_P300000': [10000]}
+EXPECTED flat     MISMATCH  peak_used MB N=1,100,10000,absent: forward [8.4, 16.8, 15.0, 54.9] reverse(N=1..absent) [8.4, 12.6, 16.8, 54.0]
+EXPECTED disk     MATCH  du start 228028843 end 228028843
+EXPECTED control  MATCH  peak_used(P=300000,absent) - peak_used(P=1000,absent) = 737.3 MB; spread 8.4 MB
+INFO exploratory (not judged): x_N1_P300000 peak_used 8.4 MB alloc 5 MB, x_N100_P300000 peak_used 12.6 MB alloc 18 MB, x_N10000_P300000 peak_used 22.8 MB alloc 1494 MB
+INFO alloc at P=1000 (N=1,100,10000,absent) forward MB: [7.1, 17.4, 1415.2, 28338.1]
+CLASS NOT row 1: see MISMATCH lines (rows -> A3 trace wrong; flat -> refuted if monotone beyond spread; control -> not confirmed)

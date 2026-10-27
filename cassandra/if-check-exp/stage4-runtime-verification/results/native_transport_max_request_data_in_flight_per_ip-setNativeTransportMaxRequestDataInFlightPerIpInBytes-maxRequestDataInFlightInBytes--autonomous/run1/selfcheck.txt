@@ -1,0 +1,37 @@
+== UNIT ==
+A L=1048576 Q=1048576 plateau=787591 adm-plateau=4194304 (C*Q=4194304) maxUsing<=L:True -> True
+A L=4194304 Q=1048576 plateau=3934051 adm-plateau=4194304 (C*Q=4194304) maxUsing<=L:True -> True
+A L=16777216 Q=1048576 plateau=16519891 adm-plateau=4194304 (C*Q=4194304) maxUsing<=L:True -> True
+A L=1048576 Q=65536 plateau=786676 adm-plateau=262144 (C*Q=262144) maxUsing<=L:True -> True
+A L=4194304 Q=65536 plateau=3933136 adm-plateau=262144 (C*Q=262144) maxUsing<=L:True -> True
+A L=16777216 Q=65536 plateau=16518976 adm-plateau=262144 (C*Q=262144) maxUsing<=L:True -> True
+plateaus increase with L at each Q: True | spread at Q=1MiB (max-min): 15732300 S= 262205
+B throw: plateau<=L True, overloaded=161, entered+overloaded=offered True -> True
+C runtime: afterSet=3934051 (unchanged=True) afterSignal=8129331 in (8MiB-S,8MiB]: True
+S sentinel equal: True
+D v4 default: plateau=4981477 L=4194304 over=787173 bytes = 3.00 messages; plateau>=L True
+E v4 throw: plateau<=L True overloaded=177
+controls: a(global 1MiB) True  b(unblocked) True  c(L=0) True
+all arms final=0: True
+UNIT U3 holds: True
+
+== CLUSTER ==
+r1-v5-8MiB             peak=8257672 (7.875 MiB) paused_max=0 dDirect=1502.8 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 8MiB']
+r2-v5-32MiB            peak=33030688 (31.501 MiB) paused_max=0 dDirect=1610.0 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 32MiB']
+r3-v5-128MiB           peak=132122752 (126.002 MiB) paused_max=0 dDirect=1652.0 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 128MiB']
+r4-v4-8MiB             peak=268438464 (256.003 MiB) paused_max=64 dDirect=2149.5 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 8MiB']
+r5-v4-32MiB            peak=268438464 (256.003 MiB) paused_max=64 dDirect=1969.5 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 32MiB']
+r6-v4-128MiB           peak=268438464 (256.003 MiB) paused_max=64 dDirect=2037.5 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 128MiB']
+r7-v5-global16MiB      peak=16515344 (15.750 MiB) paused_max=0 dDirect=1448.3 MiB ok=256 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 16MiB', 'native_transport_max_request_data_in_flight_per_ip: 128MiB']
+r8-v5-twoIP-32MiB      peak=66061376 (63.001 MiB) paused_max=0 dDirect=1644.7 MiB ok=512 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 32MiB']
+r9-v5-jmx-128to8MiB    peak=132122752 (126.002 MiB) paused_max=0 dDirect=1553.0 MiB ok=256 connected=64 errs=0 knob=['native_transport_max_request_data_in_flight: 1GiB', 'native_transport_max_request_data_in_flight_per_ip: 128MiB']
+
+per-message counted bytes implied by v5 peaks (S - 64KiB queue): {'r1-v5-8MiB': 4128836, 'r2-v5-32MiB': 4128836, 'r3-v5-128MiB': 4128836}
+V5 band L-S<peak<=L: True | increasing: True | PausedConnections max>=1 in each: False [0, 0, 0] | 512/512 ok: True
+V5 direct rise r1,r2,r3 (MiB): [1502.8, 1610.0, 1652.0] | r3>r1: True | positive control r7 in (16MiB-S,16MiB]: True 16515344
+PausedConnections min per run (negative = gauge accounting error): {'r1-v5-8MiB': -510, 'r2-v5-32MiB': -504, 'r3-v5-128MiB': -480, 'r4-v4-8MiB': 0, 'r5-v4-32MiB': 0, 'r6-v4-128MiB': 0, 'r7-v5-global16MiB': -252, 'r8-v5-twoIP-32MiB': -495, 'r9-v5-jmx-128to8MiB': -224}
+V4 peaks: [268438464, 268438464, 268438464] all in [L, L+64*S]: True | V4 paused max: [64, 64, 64] | V4 direct rise: [2149.5, 1969.5, 2037.5]
+r8 global peak 66061376: > 32MiB True, <= 2*32MiB True
+r9: samples >=60 s after the JMX set within load: 2520, max 8257672 (<= 8 MiB: True), knob after set: 8388608
+all runs connected 64/64: True
+CLUSTER verdict line by the frozen rules: C7 (no matching row: C3 fails on the PausedConnections clause)

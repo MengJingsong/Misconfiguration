@@ -1,0 +1,49 @@
+unit-run 2026-10-27T03:33:26-04:00 host node0 tree cassandra-5.0.9 java openjdk version "11.0.32.1" 2026-08-18
+harness md5 GroupByRowLimitTest.java=2eaca55f60a2 unit-run.sh=3154db5eeae1 unit-analyze.py=0255a20f9a5b 
+df: /dev/sda3        63G   45G   15G  76% /
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 29 s
+B78 lines: 35
+cleanup: probe removed; leftover test JVMs: 0
+EXPECTED: p=1: white-box first sub-read rowsCounted == 1, groups == 0, isDone False: PASS ({'p': '1', 'groups': '0', 'rowsCounted': '1', 'isDone': 'false', 'rowsDrained': '1', 'firstReadBytes': '1059', 'kind': 'W', 'warm': False})
+EXPECTED: p=1: total rows == 50000 in every rep: PASS (['50000', '50000'])
+EXPECTED: p=1: max rows per sub-read == 1 (never 1+1): PASS (['1', '1'])
+EXPECTED: p=1: sub-reads with exactly p rows == floor(50000/1) = 50000, and at most one other non-empty sub-read: PASS ([('50000', '50000'), ('50000', '50000')])
+EXPECTED: p=1: sub-reads == 50002 (floor(50000/1)+1; +1 more at p=1: the group count 1 fills the top-level page, so a second client page makes one more empty sub-read, A10): PASS (['50002', '50002'])
+EXPECTED: p=1: client pages == 2 (A10): PASS (['2', '2'])
+EXPECTED: p=7: white-box first sub-read rowsCounted == 7, groups == 0, isDone False: PASS ({'p': '7', 'groups': '0', 'rowsCounted': '7', 'isDone': 'false', 'rowsDrained': '7', 'firstReadBytes': '7269', 'kind': 'W', 'warm': False})
+EXPECTED: p=7: total rows == 50000 in every rep: PASS (['50000', '50000'])
+EXPECTED: p=7: max rows per sub-read == 7 (never 7+1): PASS (['7', '7'])
+EXPECTED: p=7: sub-reads with exactly p rows == floor(50000/7) = 7142, and at most one other non-empty sub-read: PASS ([('7142', '7143'), ('7142', '7143')])
+EXPECTED: p=7: sub-reads == 7143 (floor(50000/7)+1): PASS (['7143', '7143'])
+EXPECTED: p=1000: white-box first sub-read rowsCounted == 1000, groups == 0, isDone False: PASS ({'p': '1000', 'groups': '0', 'rowsCounted': '1000', 'isDone': 'false', 'rowsDrained': '1000', 'firstReadBytes': '1035993', 'kind': 'W', 'warm': False})
+EXPECTED: p=1000: total rows == 50000 in every rep: PASS (['50000', '50000'])
+EXPECTED: p=1000: max rows per sub-read == 1000 (never 1000+1): PASS (['1000', '1000'])
+EXPECTED: p=1000: sub-reads with exactly p rows == floor(50000/1000) = 50, and at most one other non-empty sub-read: PASS ([('50', '50'), ('50', '50')])
+EXPECTED: p=1000: sub-reads == 51 (floor(50000/1000)+1): PASS (['51', '51'])
+EXPECTED: p=10000: white-box first sub-read rowsCounted == 10000, groups == 0, isDone False: PASS ({'p': '10000', 'groups': '0', 'rowsCounted': '10000', 'isDone': 'false', 'rowsDrained': '10000', 'firstReadBytes': '10359994', 'kind': 'W', 'warm': False})
+EXPECTED: p=10000: total rows == 50000 in every rep: PASS (['50000', '50000'])
+EXPECTED: p=10000: max rows per sub-read == 10000 (never 10000+1): PASS (['10000', '10000'])
+EXPECTED: p=10000: sub-reads with exactly p rows == floor(50000/10000) = 5, and at most one other non-empty sub-read: PASS ([('5', '5'), ('5', '5')])
+EXPECTED: p=10000: sub-reads == 6 (floor(50000/10000)+1): PASS (['6', '6'])
+EXPECTED: p=unset: white-box first sub-read rowsCounted == 10000, groups == 0, isDone False: PASS ({'p': 'unset', 'groups': '0', 'rowsCounted': '10000', 'isDone': 'false', 'rowsDrained': '10000', 'firstReadBytes': '10359994', 'kind': 'W', 'warm': False})
+EXPECTED: p=unset: total rows == 50000 in every rep: PASS (['50000', '50000'])
+EXPECTED: p=unset: max rows per sub-read == 10000 (never 10000+1): PASS (['10000', '10000'])
+EXPECTED: p=unset: sub-reads with exactly p rows == floor(50000/10000) = 5, and at most one other non-empty sub-read: PASS ([('5', '5'), ('5', '5')])
+EXPECTED: p=unset: sub-reads == 6 (floor(50000/10000)+1): PASS (['6', '6'])
+EXPECTED: paging unset == p=10000 in sub-read count: PASS ()
+EXPECTED: p=1000: first-read serialised bytes per row in [1024, 1120]: PASS (1035993 bytes, 1036.0/row)
+EXPECTED: p=10000: first-read serialised bytes per row in [1024, 1120]: PASS (10359994 bytes, 1036.0/row)
+EXPECTED: size(10000)/size(1000) in [9, 11]: PASS (10.000)
+EXPECTED: control p=7: rows == p: PASS (['7', '7'])
+EXPECTED: control p=1000: rows == p: PASS (['1000', '1000'])
+EXPECTED: control p=1000: serialised bytes per row within 5 percent of the GROUP BY read: PASS (control 1036.0 vs group-by 1036.0)
+EXPECTED: control p=10000: rows == p: PASS (['10000', '10000'])
+EXPECTED: control p=10000: serialised bytes per row within 5 percent of the GROUP BY read: PASS (control 1036.0 vs group-by 1036.0)
+INFO: p=1: thread-allocated bytes over the drain, mean 520009356
+INFO: p=7: thread-allocated bytes over the drain, mean 136981368
+INFO: p=1000: thread-allocated bytes over the drain, mean 73935024
+INFO: p=10000: thread-allocated bytes over the drain, mean 73547248
+INFO: p=unset: thread-allocated bytes over the drain, mean 73547248
+MATCHED B2g row: row 1 (max rows per sub-read == p, bytes linear in p: claim supported)
+SUMMARY: ALL PASS
+done 2026-10-27T03:33:55-04:00

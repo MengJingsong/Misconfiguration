@@ -1,0 +1,84 @@
+EXPECTED OK: [unit s05] raw WARN lines for the system data volume = 1 (want 1)
+EXPECTED OK: [unit s05] JVM ran 1 test OK and initialization returned without exception
+EXPECTED OK: [unit s05] unallocated_bytes 536870912 == 536870912
+EXPECTED OK: [unit s05] WARN text contains 'Only 512.000MiB'
+EXPECTED OK: [unit s05] no ConfigurationException / uncaught exception in stdout
+EXPECTED OK: [unit s05] 300 MiB request admitted: returned_directory
+EXPECTED OK: [unit s05] twice-available request refused: FSDiskFullWriteError
+EXPECTED OK: [unit s10] raw WARN lines for the system data volume = 0 (want 0)
+EXPECTED OK: [unit s10] JVM ran 1 test OK and initialization returned without exception
+EXPECTED OK: [unit s10] unallocated_bytes 1073741824 == 1073741824
+EXPECTED OK: [unit s10] no ConfigurationException / uncaught exception in stdout
+EXPECTED OK: [unit s10] 300 MiB request admitted: returned_directory
+EXPECTED OK: [unit s10] twice-available request refused: FSDiskFullWriteError
+EXPECTED OK: [unit s10m] raw WARN lines for the system data volume = 1 (want 1)
+EXPECTED OK: [unit s10m] JVM ran 1 test OK and initialization returned without exception
+EXPECTED OK: [unit s10m] unallocated_bytes 1073737728 == 1073737728
+EXPECTED OK: [unit s10m] WARN text contains 'Only 1023.996MiB'
+EXPECTED OK: [unit s10m] no ConfigurationException / uncaught exception in stdout
+EXPECTED OK: [unit s15] raw WARN lines for the system data volume = 0 (want 0)
+EXPECTED OK: [unit s15] JVM ran 1 test OK and initialization returned without exception
+EXPECTED OK: [unit s15] unallocated_bytes 1610612736 == 1610612736
+EXPECTED OK: [unit s15] no ConfigurationException / uncaught exception in stdout
+EXPECTED OK: [unit s15] 300 MiB request admitted: returned_directory
+EXPECTED OK: [unit s15] twice-available request refused: FSDiskFullWriteError
+EXPECTED OK: [unit unset] raw WARN lines for the system data volume = 0 (want 0)
+EXPECTED OK: [unit unset] JVM ran 1 test OK and initialization returned without exception
+EXPECTED OK: [unit unset] no ConfigurationException / uncaught exception in stdout
+EXPECTED OK: [unit] Config dumps identical across 0.5 GiB, 1 GiB, 1.5 GiB, unset (447 fields)
+unit control: capped peak onDisk 45.0 MiB dir 45.0 MiB rows 310; uncapped peak 380.0 MiB dir 380.0 MiB rows 310; dirty flushes capped 14 uncapped 0
+EXPECTED OK: [unit control] capped 32 MiB: peak (counter and directory bytes) <= 52 MiB
+EXPECTED OK: [unit control] uncapped: peak > 300 MiB (counter and directory bytes)
+EXPECTED OK: [unit control] COMMITLOG_DIRTY flushes only in the capped arm
+EXPECTED OK: [unit control] JUnit XML 0 failures
+EXPECTED OK: [cluster A] whole system.log: 1 'free in the system data volume' lines (want 1)
+EXPECTED OK: [cluster A] WARN text and source line 742: DatabaseDescriptor.java:742 - Only 512.000MiB free in the system data volume. Consider add
+EXPECTED OK: [cluster A] yaml sysdata directory set = True
+EXPECTED OK: [cluster A] the WARN precedes 'Starting listening for CQL clients' (startup only)
+EXPECTED OK: [cluster A] node alive in all 16 samples
+EXPECTED OK: [cluster A] both stress phases: [('stress-ph1.out', 0, '200,000'), ('stress-ph2.out', 0, '200,000')]
+EXPECTED OK: [cluster A] no ERROR / FSWriteError / ENOSPC in the whole system.log
+EXPECTED OK: [cluster A] schema churn: 3 passes, all rc=0
+cluster A: sys_avail min 535642112 max 536301568 ; sysdata dir bytes max 233822 (MiB 0.22)
+EXPECTED OK: [cluster B] whole system.log: 0 'free in the system data volume' lines (want 0)
+EXPECTED OK: [cluster B] yaml sysdata directory set = True
+EXPECTED OK: [cluster B] the WARN precedes 'Starting listening for CQL clients' (startup only)
+EXPECTED OK: [cluster B] node alive in all 16 samples
+EXPECTED OK: [cluster B] both stress phases: [('stress-ph1.out', 0, '200,000'), ('stress-ph2.out', 0, '200,000')]
+EXPECTED OK: [cluster B] no ERROR / FSWriteError / ENOSPC in the whole system.log
+EXPECTED OK: [cluster B] schema churn: 3 passes, all rc=0
+cluster B: sys_avail min 1608785920 max 1610043392 ; sysdata dir bytes max 308315 (MiB 0.29)
+EXPECTED OK: [cluster C] whole system.log: 0 'free in the system data volume' lines (want 0)
+EXPECTED OK: [cluster C] yaml sysdata directory set = True
+EXPECTED OK: [cluster C] the WARN precedes 'Starting listening for CQL clients' (startup only)
+EXPECTED OK: [cluster C] node alive in all 16 samples
+EXPECTED OK: [cluster C] both stress phases: [('stress-ph1.out', 0, '200,000'), ('stress-ph2.out', 0, '200,000')]
+EXPECTED OK: [cluster C] no ERROR / FSWriteError / ENOSPC in the whole system.log
+EXPECTED OK: [cluster C] schema churn: 3 passes, all rc=0
+cluster C: sys_avail min 104398848 max 1609965568 ; sysdata dir bytes max 263668 (MiB 0.25)
+EXPECTED OK: [cluster C] after the shrink the volume stays at ~100 MiB: 104398848..105054208 over 12 samples
+cluster C: sysdata dir bytes after shrink max 263668
+EXPECTED OK: [cluster C] no new WARN after the shrink (whole log has none)
+EXPECTED OK: [cluster D] whole system.log: 0 'free in the system data volume' lines (want 0)
+EXPECTED OK: [cluster D] yaml sysdata directory set = False
+EXPECTED OK: [cluster D] the WARN precedes 'Starting listening for CQL clients' (startup only)
+EXPECTED OK: [cluster D] node alive in all 16 samples
+EXPECTED OK: [cluster D] both stress phases: [('stress-ph1.out', 0, '200,000'), ('stress-ph2.out', 0, '200,000')]
+EXPECTED OK: [cluster D] no ERROR / FSWriteError / ENOSPC in the whole system.log
+EXPECTED OK: [cluster D] schema churn: 3 passes, all rc=0
+cluster D: sys_avail min 536870912 max 536870912 ; sysdata dir bytes max 40 (MiB 0.00)
+EXPECTED OK: [cluster D] unused 0.5 GiB volume untouched
+EXPECTED OK: [cluster P] node alive in all 37 samples
+EXPECTED OK: [cluster P] stress [('stress-p1.out', 0, '1,000,000')]
+cluster P: commitlog_total_space in log 64MiB; peak commitlog bytes 134217848 (128 MiB)
+cluster P: COMMITLOG_DIRTY flush lines 56
+EXPECTED OK: [cluster P] COMMITLOG_DIRTY flushes occurred
+EXPECTED OK: [cluster U] node alive in all 37 samples
+EXPECTED OK: [cluster U] stress [('stress-p1.out', 0, '1,000,000')]
+cluster U: commitlog_total_space in log 16384MiB; peak commitlog bytes 1140851408 (1088 MiB)
+EXPECTED OK: [cluster U] no COMMITLOG_DIRTY flushes (0)
+EXPECTED OK: [cluster control] capped peak 128 MiB <= 192 MiB
+EXPECTED OK: [cluster control] uncapped peak 1088 MiB >= 400 MiB (control moved)
+EXPECTED OK: [cluster control] capped peak < 0.5 x uncapped peak
+EXPECTED OK: [leftovers] my daemons 0, my mounts 0
+SELFCHECK ALL OK

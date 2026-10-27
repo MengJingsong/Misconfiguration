@@ -1,0 +1,88 @@
+PASS unit bound L=0: Validation.validateKey (target) as predicted | rejected:Key may not be empty
+PASS unit bound L=0: QueryProcessor.validateKey as predicted | rejected:Key may not be empty
+PASS unit bound L=1: Validation.validateKey (target) as predicted | accepted
+PASS unit bound L=1: QueryProcessor.validateKey as predicted | accepted
+PASS unit bound L=1000: Validation.validateKey (target) as predicted | accepted
+PASS unit bound L=1000: QueryProcessor.validateKey as predicted | accepted
+PASS unit bound L=65534: Validation.validateKey (target) as predicted | accepted
+PASS unit bound L=65534: QueryProcessor.validateKey as predicted | accepted
+PASS unit bound L=65535: Validation.validateKey (target) as predicted | accepted
+PASS unit bound L=65535: QueryProcessor.validateKey as predicted | accepted
+PASS unit bound L=65536: Validation.validateKey (target) as predicted | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit bound L=65536: QueryProcessor.validateKey as predicted | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit bound L=70000: Validation.validateKey (target) as predicted | rejected:Key length of 70000 is longer than maximum of 65535
+PASS unit bound L=70000: QueryProcessor.validateKey as predicted | rejected:Key length of 70000 is longer than maximum of 65535
+PASS unit bound L=1000000: Validation.validateKey (target) as predicted | rejected:Key length of 1000000 is longer than maximum of 65535
+PASS unit bound L=1000000: QueryProcessor.validateKey as predicted | rejected:Key length of 1000000 is longer than maximum of 65535
+PASS unit null rejected as empty by both
+PASS unit Int32 L=65536 rejected by the length check
+PASS unit Int32 L=65535 rejected by the type, not the length | rejected:Expected 4 or 0 byte int (65535)
+PASS unit Int32 L=4 accepted
+PASS unit stream: 100000 calls accepted, 0 rejected, 6.55e9 key bytes, heap after GC < 100 MB | accepted_calls=100000 rejected_calls=0 key_bytes_validated=6553500000 ms=1185 heap_before=13335256 heap_after=13306080
+PASS unit hold L=65535 slope within L+40..L+120 | 65618.2
+PASS unit hold L=1 slope within 1+40..1+120 | 89.5
+PASS unit slope ratio > 500 | 733
+PASS unit 1000 held keys of 65535 B retain about 65.6 MB (65.0 to 79 incl. baseline offset) | 65594352
+PASS unit oom: OOM after 1500..4100 held keys, 0 rejections | oom L=65535 oom=true held_before_oom=3662 validation_rejections=0
+PASS unit control: 1024 allocations, used 67107840, 1025th waiting, 100000 validations accepted | allocations_returned=1024 used=67107840 state=WAITING after_2s_more=1024 validations_accepted=100000 rejected=0
+PASS unit bounds: no MISMATCH line and exit recorded 0
+PASS unit stream: no MISMATCH line and exit recorded 0
+PASS unit hold65535: no MISMATCH line and exit recorded 0
+PASS unit hold1: no MISMATCH line and exit recorded 0
+PASS unit oom: no MISMATCH line and exit recorded 0
+PASS unit control: no MISMATCH line and exit recorded 0
+PASS cluster: 8 writer outputs found | 8
+PASS cluster precheck: 5/5 accepted at 65535, 5/5 rejected at 65536 with the exact message
+PASS cluster k1000_n10k: all 10000 writes accepted | ok=10000 errors=0
+PASS cluster k1000_n100k: all 100000 writes accepted | ok=100000 errors=0
+PASS cluster k65535_n10k: all 10000 writes accepted | ok=10000 errors=0
+PASS cluster k65535_n100k: all 100000 writes accepted | ok=100000 errors=0
+PASS cluster p128_k65535_n100k: all 100000 writes accepted | ok=100000 errors=0
+PASS cluster k65536: 100 of 100 rejected with the exact message | {"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 100}
+PASS cluster k1000_n10k: sum of flushed Data.db sizes (node log) is 0.95..1.15 x N*K | 11239686 B, ratio 1.124
+PASS cluster k1000_n100k: sum of flushed Data.db sizes (node log) is 0.95..1.15 x N*K | 112487039 B, ratio 1.125
+PASS cluster k65535_n10k: sum of flushed Data.db sizes (node log) is 0.95..1.15 x N*K | 656602563 B, ratio 1.002
+PASS cluster k65535_n100k: sum of flushed Data.db sizes (node log) is 0.95..1.15 x N*K | 6566065471 B, ratio 1.002
+PASS cluster p128_k65535_n100k: sum of flushed Data.db sizes (node log) is 0.95..1.15 x N*K | 6565999411 B, ratio 1.002
+PASS cluster k1000_n10k: Data+Index (arms.jsonl, Index.db from there only) between 1.0 and 4.0 x N*K | ratio 2.12
+PASS cluster k1000_n10k: no compaction ran in the arm and arms.jsonl Data.db equals the node log sum within 1 percent | 11136232 vs 11239686
+PASS cluster k1000_n100k: Data+Index (arms.jsonl, Index.db from there only) between 1.0 and 4.0 x N*K | ratio 2.12
+PASS cluster k1000_n100k: no compaction ran in the arm and arms.jsonl Data.db equals the node log sum within 1 percent | 111530607 vs 112487039
+PASS cluster k65535_n10k: Data+Index (arms.jsonl, Index.db from there only) between 1.0 and 3.0 x N*K | ratio 2.01
+PASS cluster k65535_n10k: no compaction ran in the arm and arms.jsonl Data.db equals the node log sum within 1 percent | 659564609 vs 656602563
+PASS cluster k65535_n100k: Data+Index (arms.jsonl, Index.db from there only) between 1.0 and 3.0 x N*K | ratio 2.87
+PASS cluster k65535_n100k: compactions ran (6); arms.jsonl Data.db is at least the flushed sum (excess 2.85 GB = in-progress compaction output) | 9418578244 vs 6566065471
+PASS cluster p128_k65535_n100k: Data+Index (arms.jsonl, Index.db from there only) between 1.0 and 3.0 x N*K | ratio 2.80
+PASS cluster p128_k65535_n100k: compactions ran (8); arms.jsonl Data.db is at least the flushed sum (excess 2.64 GB = in-progress compaction output) | 9203270625 vs 6565999411
+PASS cluster: K=1000 N=100k is 8..12 x N=10k | 10.01
+INFO cluster: K=65535 N=100k over N=10k, Data+Index read from the directory (frozen prediction 8..12; measured with a compaction running in the 100k arm) | 14.28
+PASS cluster (post-hoc, not a frozen prediction): flushed Data.db bytes from the node log, K=65535 N=100k over N=10k, between 9.5 and 10.5 | 10.000
+PASS cluster (post-hoc): flushed Data.db bytes, K=1000 N=100k over N=10k, between 9.5 and 10.5 | 10.008
+PASS cluster: the frozen N-scaling prediction for K=65535 (8..12) is NOT met by the directory reading | 14.28
+PASS cluster k65536: nothing added to the table directory, memtable empty (arms.jsonl)
+PASS cluster k65536: no flush line at all in the node log for the arm
+PASS cluster k65535 N=100k @256 MiB: >= 10 MEMTABLE_LIMIT flushes, each <= 320 MiB | 24 flushes, max 255.0
+PASS cluster k65535 N=10k @256 MiB: 1..3 MEMTABLE_LIMIT flushes | 2
+PASS cluster k1000 N=100k @256 MiB: at most 1 MEMTABLE_LIMIT flush | 0
+PASS cluster k65535 N=100k @128 MiB: >= 20 MEMTABLE_LIMIT flushes, each <= 160 MiB | 49 flushes, max 128.0
+PASS cluster flush-count ratio 128/256 MiB between 1.6 and 2.5 | 49/24 = 2.04
+PASS cluster median logged usage ratio 256/128 MiB between 1.6 and 2.5 | 253.9/127.1 = 2.00
+PASS cluster: logged usage at each flush is near the pool (>= 90 percent of 256 / 128 MiB) | min 253.4 / 126.7
+INFO cluster k65535 N=100k @256 flush reasons | {"MEMTABLE_LIMIT": 24, "USER_FORCED": 1}
+PASS trace life 1: no Validation.validateKey entry above 65535
+PASS trace life 1: no QueryProcessor.validateKey entry above 65535
+PASS trace life 1: 105 "Key length of" exceptions, all 65536, all from ClusteringPrefix.validate:279, none via the other validators | {"65535": 110005, "1000": 110000} {'Q': 0, 'X': 105, 'X65536': 105, 'Xcp': 105, 'Xother': 0}
+PASS trace life 1: Validation entries of length 65535 = 110005 and of 1000 = 110000 | {65535: 110005, 1000: 110000}
+PASS trace life 2: 100000 Validation entries of length 65535, 0 exceptions, 0 Q | {'V': {65535: 100000}, 'Q': 0, 'X': 0, 'X65536': 0, 'Xcp': 0, 'Xother': 0}
+PASS trace: the 105 exceptions equal the 105 rejected writes (5 + 100)
+INFO samples k1000_n10k | 2 rows, RssAnon max 2.85 GB, heap used max 0.22 GB, commitlog max 67 MB
+INFO samples k1000_n100k | 14 rows, RssAnon max 2.85 GB, heap used max 0.89 GB, commitlog max 168 MB
+INFO samples k65535_n10k | 5 rows, RssAnon max 2.85 GB, heap used max 1.06 GB, commitlog max 369 MB
+INFO samples k65535_n100k | 49 rows, RssAnon max 2.94 GB, heap used max 1.75 GB, commitlog max 537 MB
+INFO samples p128_k65535_n100k | 51 rows, RssAnon max 2.94 GB, heap used max 1.38 GB, commitlog max 537 MB
+INFO samples k65536 | 1 rows, RssAnon max 2.90 GB, heap used max 1.43 GB, commitlog max 67 MB
+PASS cluster: node heap used stays below the 2 GiB heap in every sample
+PASS cluster: no ERROR line in either system.log | 0 lines; first: 
+PASS no CassandraDaemon of this run is left, and /dev/shm/s4-b9-vk is gone | ps count 0
+
+selfcheck: 78 parts hold, 0 do not hold

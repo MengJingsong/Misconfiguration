@@ -1,0 +1,22 @@
+m2: sstables=1 files=1 tableBytes=49486453 bloom=248664.0 summary=34386.0 history=19 trace=384 rssAnon=2910838784 heap=91920224
+   idle reached=True after 27 s
+m4: sstables=2 files=2 tableBytes=72159891 bloom=365088.0 summary=50402.0 history=6 trace=358 rssAnon=2921050112 heap=95660384
+   idle reached=True after 27 s
+m16: sstables=5 files=5 tableBytes=139970167 bloom=713808.0 summary=98384.0 history=1 trace=348 rssAnon=2898173952 heap=91107272
+   idle reached=True after 27 s
+m32: sstables=20 files=20 tableBytes=452504486 bloom=2324232.0 summary=319836.0 history=0 trace=346 rssAnon=2924601344 heap=91372008
+   idle reached=True after 27 s
+mm4: sstables=2 files=2 tableBytes=72101734 bloom=365104.0 summary=50402.0 history=6 trace=264 rssAnon=2921463808 heap=91546504
+   idle reached=True after 27 s
+PASS every arm idle at end-state :: {'m2': True, 'm4': True, 'm16': True, 'm32': True}
+PASS B3f M=2 and M=4: count <= 4 (filed: under 8) :: m2=1 m4=2
+PASS B3f/C5 M=16: count 5 (filed: <= ~15) :: m16=5 (row governed by <= 15: True)
+PASS B3f/C5 M=32: exactly 20 sstables, zero compaction history rows :: count=20 history=0
+PASS B3f count non-decreasing in M :: {'m2': 1, 'm4': 2, 'm16': 5, 'm32': 20}
+PASS B3f bloom filter and index summary memory non-decreasing in M :: bloom={'m2': 248664.0, 'm4': 365088.0, 'm16': 713808.0, 'm32': 2324232.0} summary={'m2': 34386.0, 'm4': 50402.0, 'm16': 98384.0, 'm32': 319836.0}
+PASS B3f/C5 bytes M=32 >= 3 x M=2 (expected 8-20) :: m32=452504486 m2=49486453 ratio=9.14
+PASS B3f bytes non-decreasing in M :: {'m2': 49486453, 'm4': 72159891, 'm16': 139970167, 'm32': 452504486}
+PASS C4a flip 32 -> 4/32: count falls to <= 5 :: count=1 (from 20)
+PASS C4a flip: bytes fall below the M=32 end-state by the duplicate fraction (>= 3x) :: before=452504486 after=49487201
+PASS B3e(6) min 4/max 4 arm: count < 20 :: count=2
+SUMMARY ALL PASS

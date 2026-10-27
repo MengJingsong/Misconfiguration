@@ -1,0 +1,37 @@
+[1793045090398] + python3 /users/jason92/s4-b8-cr-harness/reduce.py /users/jason92/s4-b8-cr-logs/cluster/p1-default-v5-100k default v5-100k no
+arm=v5-100k
+L=107374182
+live=False
+offered_bytes=256000000
+offered_MiB=244.1
+load_samples=772
+baseline_samples=148
+baseline_direct_median_MiB=279.97
+baseline_direct_spread_MiB=0.0
+baseline_requests_size_max=0
+peak_requests_size=107288132
+peak_requests_size_MiB=102.32
+peak_requests_size_t_s=1.5
+max_paused=4
+samples_paused_ge1=81
+peak_direct_used_MiB=344.0
+delta_direct_MiB=64.03
+peak_heap_MiB=641.5
+series_t_RSmaxMiB_deltaDirectMiB_paused=0:102.3/64.0/4 10:102.3/64.0/4 20:102.3/64.0/0 30:102.3/64.0/0 40:102.3/64.0/0 50:102.3/64.0/0 60:102.3/64.0/0 70:102.3/64.0/0 80:102.3/64.0/0 90:102.3/64.0/0 100:68.0/64.0/0 110:29.8/64.0/0 120:0.0/64.0/0 130:0.0/64.0/0 140:0.0/64.0/0 150:0.0/64.0/0
+nmt_other_peak_over_base_MiB=64.0
+hist_baseline_MiB=65.5
+hist_load60_MiB=312.0
+client_sent=6136
+client_ok=6136
+client_warned=1446
+client_ovl_bytes=0
+client_ovl_other=0
+client_err=0
+client_outstanding_at_end=0
+client_ok_per_s=39.3
+hold_lines=6136
+EXPECTED: P1 Peak_RS <= L + 4 MiB: PASS (peak 102.32 MiB, L+4 = 106.40 MiB)
+EXPECTED: P2 Delta <= bound(L) = 1.5 L + 6 MiB: PASS (delta 64.03 MiB, bound 159.60 MiB)
+EXPECTED: P3 PausedConnections >= 1: PASS (max 4)
+EXPECTED: P0 limit reached (Peak_RS >= 0.9 L): PASS (peak/L = 0.999)
+EXPECTED: P3 client other_err == 0: PASS (err 0 ovl_other 0)

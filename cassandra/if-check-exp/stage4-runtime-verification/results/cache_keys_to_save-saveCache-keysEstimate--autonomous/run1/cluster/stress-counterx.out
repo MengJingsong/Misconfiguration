@@ -1,0 +1,134 @@
+******************** Stress Settings ********************
+Command:
+  Type: counter_write
+  Count: 200,000
+  No Warmup: false
+  Consistency Level: LOCAL_ONE
+  Target Uncertainty: not applicable
+  Key Size (bytes): 10
+  Counter Increment Distibution: add=fixed(1)
+Rate:
+  Auto: false
+  Thread Count: 50
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..200000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Columns:
+  Max Columns Per Key: 5
+  Column Names: [C0, C1, C2, C3, C4]
+  Comparator: AsciiType
+  Timestamp: null
+  Variable Column Count: false
+  Slice: false
+  Size Distribution: Fixed:  key=34
+  Count Distribution: Fixed:  key=5
+Errors:
+  Ignore: false
+  Tries: 10
+Log:
+  No Summary: false
+  No Settings: false
+  File: /users/jason92/s4-b8-kt-logs/run1/cluster/stress-counterx.log
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.1.1]
+  Is White List: false
+  Datacenter: null
+Schema:
+  Keyspace: keyspace1
+  Replication Strategy: org.apache.cassandra.locator.SimpleStrategy
+  Replication Strategy Options: {replication_factor=1}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  Truststore: null
+  Truststore Password: null
+  Keystore: null
+  Keystore Password: null
+  SSL Protocol: TLS
+  SSL Algorithm: null
+  SSL Ciphers: null
+Port:
+  Native Port: 9042
+  JMX Port: 7199
+JMX:
+  Username: null
+  Password: *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: null
+  Operation: COUNTER_WRITE
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+Credentials file:
+  File: *not set*
+  CQL username: *not set*
+  CQL password: *not set*
+  JMX username: *not set*
+  JMX password: *not set*
+  Transport truststore password: *not set*
+  Transport keystore password: *not set*
+Reporting:
+  Output frequency: 1s
+  Header frequency: *not set*
+
+Connected to cluster: kt, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: /127.0.1.1:9042; Rack: rack1
+Created keyspaces. Sleeping 1s for propagation.
+Sleeping 2s...
+Warming up COUNTER_WRITE with 50000 iterations...
+Running COUNTER_WRITE with 50 threads for 200000 iteration
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+total,                                                 41824,   41824,   41824,   41824,     0.9,     0.7,     2.0,     3.7,    10.1,    14.4,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                 80760,   38936,   38936,   38936,     1.3,     1.2,     2.2,     3.0,    46.2,    50.6,    2.0,  0.01208,      0,      0,       0,       0,       0,       0
+total,                                                105364,   24604,   24604,   24604,     2.0,     1.7,     3.7,     5.6,    58.4,    64.5,    3.0,  0.11512,      0,      0,       0,       0,       0,       0
+total,                                                133336,   27972,   27972,   27972,     1.8,     1.6,     2.8,     3.7,    59.4,    61.6,    4.0,  0.09981,      0,      0,       0,       0,       0,       0
+total,                                                155004,   21668,   21668,   21668,     2.3,     2.1,     3.9,     5.0,    48.5,    51.0,    5.0,  0.10848,      0,      0,       0,       0,       0,       0
+total,                                                174381,   19377,   19377,   19377,     2.6,     1.9,     6.4,    12.8,    68.4,    73.3,    6.0,  0.11205,      0,      0,       0,       0,       0,       0
+total,                                                195317,   20936,   20936,   20936,     2.4,     1.8,     5.3,    10.6,    42.7,    49.7,    7.0,  0.10714,      0,      0,       0,       0,       0,       0
+total,                                                200000,   23201,   23201,   23201,     2.1,     1.8,     4.5,     7.3,    13.5,    15.1,    7.2,  0.09703,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   27,771 op/s  [COUNTER_WRITE: 27,771 op/s]
+Partition rate            :   27,771 pk/s  [COUNTER_WRITE: 27,771 pk/s]
+Row rate                  :   27,771 row/s [COUNTER_WRITE: 27,771 row/s]
+Latency mean              :    1.7 ms [COUNTER_WRITE: 1.7 ms]
+Latency median            :    1.4 ms [COUNTER_WRITE: 1.4 ms]
+Latency 95th percentile   :    3.5 ms [COUNTER_WRITE: 3.5 ms]
+Latency 99th percentile   :    6.7 ms [COUNTER_WRITE: 6.7 ms]
+Latency 99.9th percentile :   47.2 ms [COUNTER_WRITE: 47.2 ms]
+Latency max               :   73.3 ms [COUNTER_WRITE: 73.3 ms]
+Total partitions          :    200,000 [COUNTER_WRITE: 200,000]
+Total errors              :          0 [COUNTER_WRITE: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:00:07
+
+END
+Failed to connect over JMX; not collecting these stats
+Failed to connect over JMX; not collecting these stats

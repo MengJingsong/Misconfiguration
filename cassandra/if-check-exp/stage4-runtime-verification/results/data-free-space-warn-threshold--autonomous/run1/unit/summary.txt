@@ -1,0 +1,105 @@
+mount v1 size=1073741824 -> 1073741824 bytes avail
+--- case one1g (dirs=/users/jason92/s4-b8-fs-mnt/v1/data, yaml data_file_directories=yes)
+    STAGE4 [one1g] dirs=/users/jason92/s4-b8-fs-mnt/v1/data
+    STAGE4 [one1g] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v1/data=1073741824; sum_bytes=1073741824 threshold_bytes=68719476736 sum_lt_threshold=true
+    STAGE4 [one1g] warn_count=1
+    STAGE4 [one1g] warn_text=Only 1.000GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+    STAGE4 [one1g] init_returned=true error=none
+    STAGE4 [one1g] config_fields=408 config_hash=601232846
+    STAGE4 [one1g] control max_dir_available=1021313024
+    STAGE4 [one1g] control request=510656512 result=returned_directory
+    STAGE4 [one1g] control request=2042626048 result=threw_FSDiskFullWriteError
+    OK (1 test)
+    exit=0
+EXPECTED OK: [one1g] warn_count=1
+EXPECTED OK: [one1g] init_returned=true
+EXPECTED OK: [one1g] control: half-of-free returns a directory, twice-free throws FSDiskFullWriteError
+mount v40a size=40G -> 42949672960 bytes avail
+mount v40b size=40G -> 42949672960 bytes avail
+--- case two40 (dirs=/users/jason92/s4-b8-fs-mnt/v40a/data,/users/jason92/s4-b8-fs-mnt/v40b/data, yaml data_file_directories=yes)
+    STAGE4 [two40] dirs=/users/jason92/s4-b8-fs-mnt/v40a/data,/users/jason92/s4-b8-fs-mnt/v40b/data
+    STAGE4 [two40] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v40a/data=42949672960;/users/jason92/s4-b8-fs-mnt/v40b/data=42949672960; sum_bytes=85899345920 threshold_bytes=68719476736 sum_lt_threshold=false
+    STAGE4 [two40] warn_count=0
+    STAGE4 [two40] init_returned=true error=none
+    STAGE4 [two40] config_fields=408 config_hash=-262561903
+    OK (1 test)
+    exit=0
+EXPECTED OK: [two40] warn_count=0
+EXPECTED OK: [two40] init_returned=true
+mount v1 size=1073741824 -> 1073741824 bytes avail
+mount v100 size=100G -> 107374182400 bytes avail
+--- case small_big (dirs=/users/jason92/s4-b8-fs-mnt/v1/data,/users/jason92/s4-b8-fs-mnt/v100/data, yaml data_file_directories=yes)
+    STAGE4 [small_big] dirs=/users/jason92/s4-b8-fs-mnt/v1/data,/users/jason92/s4-b8-fs-mnt/v100/data
+    STAGE4 [small_big] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v1/data=1073741824;/users/jason92/s4-b8-fs-mnt/v100/data=107374182400; sum_bytes=108447924224 threshold_bytes=68719476736 sum_lt_threshold=false
+    STAGE4 [small_big] warn_count=0
+    STAGE4 [small_big] init_returned=true error=none
+    STAGE4 [small_big] config_fields=408 config_hash=-262561903
+    OK (1 test)
+    exit=0
+EXPECTED OK: [small_big] warn_count=0
+EXPECTED OK: [small_big] init_returned=true
+--- case big_only (dirs=/users/jason92/s4-b8-fs-mnt/v100/data, yaml data_file_directories=yes)
+    STAGE4 [big_only] dirs=/users/jason92/s4-b8-fs-mnt/v100/data
+    STAGE4 [big_only] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v100/data=107374182400; sum_bytes=107374182400 threshold_bytes=68719476736 sum_lt_threshold=false
+    STAGE4 [big_only] warn_count=0
+    STAGE4 [big_only] init_returned=true error=none
+    STAGE4 [big_only] config_fields=408 config_hash=601232846
+    STAGE4 [big_only] control max_dir_available=107321753600
+    STAGE4 [big_only] control request=53660876800 result=returned_directory
+    STAGE4 [big_only] control request=214643507200 result=threw_FSDiskFullWriteError
+    OK (1 test)
+    exit=0
+EXPECTED OK: [big_only] warn_count=0
+EXPECTED OK: [big_only] init_returned=true
+EXPECTED OK: [big_only] control: request of half the free space returns a directory
+mount v639 size=65433m -> 68611473408 bytes avail
+--- case b639 (dirs=/users/jason92/s4-b8-fs-mnt/v639/data, yaml data_file_directories=yes)
+    STAGE4 [b639] dirs=/users/jason92/s4-b8-fs-mnt/v639/data
+    STAGE4 [b639] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v639/data=68611473408; sum_bytes=68611473408 threshold_bytes=68719476736 sum_lt_threshold=true
+    STAGE4 [b639] warn_count=1
+    STAGE4 [b639] warn_text=Only 63.899GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+    STAGE4 [b639] init_returned=true error=none
+    STAGE4 [b639] config_fields=408 config_hash=601232846
+    OK (1 test)
+    exit=0
+EXPECTED OK: [b639] warn_count=1
+EXPECTED OK: [b639] init_returned=true
+mount v641 size=65639m -> 68827480064 bytes avail
+--- case b641 (dirs=/users/jason92/s4-b8-fs-mnt/v641/data, yaml data_file_directories=yes)
+    STAGE4 [b641] dirs=/users/jason92/s4-b8-fs-mnt/v641/data
+    STAGE4 [b641] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v641/data=68827480064; sum_bytes=68827480064 threshold_bytes=68719476736 sum_lt_threshold=false
+    STAGE4 [b641] warn_count=0
+    STAGE4 [b641] init_returned=true error=none
+    STAGE4 [b641] config_fields=408 config_hash=601232846
+    OK (1 test)
+    exit=0
+EXPECTED OK: [b641] warn_count=0
+EXPECTED OK: [b641] init_returned=true
+mount v1 size=1073741824 -> 1073741824 bytes avail
+after fill: avail=    0
+--- case full (dirs=/users/jason92/s4-b8-fs-mnt/v1/data, yaml data_file_directories=yes)
+    STAGE4 [full] dirs=/users/jason92/s4-b8-fs-mnt/v1/data
+    STAGE4 [full] unallocated_per_dir=/users/jason92/s4-b8-fs-mnt/v1/data=0; sum_bytes=0 threshold_bytes=68719476736 sum_lt_threshold=true
+    STAGE4 [full] warn_count=1
+    STAGE4 [full] warn_text=Only 0B free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+    STAGE4 [full] init_returned=true error=none
+    STAGE4 [full] config_fields=408 config_hash=601232846
+    STAGE4 [full] control max_dir_available=0
+    STAGE4 [full] control request=0 result=returned_directory
+    OK (1 test)
+    exit=0
+EXPECTED OK: [full] warn_count=1
+EXPECTED OK: [full] init_returned=true
+--- case nodirs (dirs=/users/jason92/s4-b8-fs-unitwork/storage/data, yaml data_file_directories=no)
+    STAGE4 [nodirs] dirs=/users/jason92/s4-b8-fs-unitwork/storage/data
+    STAGE4 [nodirs] unallocated_per_dir=/users/jason92/s4-b8-fs-unitwork/storage/data=36511334400; sum_bytes=36511334400 threshold_bytes=68719476736 sum_lt_threshold=true
+    STAGE4 [nodirs] warn_count=1
+    STAGE4 [nodirs] warn_text=Only 34.004GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots
+    STAGE4 [nodirs] init_returned=true error=none
+    STAGE4 [nodirs] config_fields=408 config_hash=601232846
+    OK (1 test)
+    exit=0
+EXPECTED OK: [nodirs] init_returned=true
+(nodirs: local disk avail 33075314688 bytes; warn_count=1)
+EXPECTED OK: Config dump (all fields but data_file_directories) identical for one1g, b639, full (WARN) and b641 (no WARN); two-directory cases differ only by directory count: 2 fields
+unit-run run1 done FAIL=0

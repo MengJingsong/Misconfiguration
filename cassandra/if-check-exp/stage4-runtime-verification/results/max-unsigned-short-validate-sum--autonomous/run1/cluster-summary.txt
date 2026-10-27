@@ -1,0 +1,50 @@
+yaml tail: cluster_name: cs; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.7.1; rpc_address: 127.0.7.1; commitlog_directory: /dev/shm/s4-b9-cs/node/commitlog; hints_directory: /dev/shm/s4-b9-cs/node/hints; saved_caches_directory: /dev/shm/s4-b9-cs/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-cs/node/cdc_raw; memtable_heap_space: 256MiB; memtable_offheap_space: 256MiB; commitlog_total_space: 1GiB; memtable_allocation_type: offheap_objects; auto_snapshot: false; memtable_cleanup_threshold: 0.99; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life 1 started, pid 1962868, pools 256 MiB, offheap_objects
+EXPECTED: precheck: 3 inserts (32768, 32767) succeed (sum 65535) - yes [{}]
+EXPECTED: precheck: 3 inserts (32768, 32768) fail with the exact message (sum branch :284) - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 3}]
+EXPECTED: precheck: 3 inserts (65535, 65535) fail with the sum 131070 (sum branch) - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 131070 is longer than maximum of 65535\"": 3}]
+EXPECTED: precheck: 3 inserts (70000, 10) fail with the sum in the message (per-value branch) - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 70010 is longer than maximum of 65535\"": 3}]
+--- arm s16_r2e5: S=16 (c1=8, c2=8) N=200000 ---
+arm s16_r2e5: ok=200000 errors=0 msgs={} write_s=35 data+index=4579251 (N*K=3200000) memtable_data(pre-flush)=12200800 off_heap=10000800 rss_anon peak=2880851968 MEMTABLE_LIMIT flushes=0 first usage=None
+--- arm s1024_r1e6: S=1024 (c1=512, c2=512) N=1000000 ---
+arm s1024_r1e6: ok=1000000 errors=0 msgs={} write_s=193 data+index=1298913686 (N*K=1024000000) memtable_data(pre-flush)=263422711 off_heap=260712102 rss_anon peak=3224047616 MEMTABLE_LIMIT flushes=3 first usage=(34.835, 253.453)
+--- arm s32768_r2e4: S=32768 (c1=16384, c2=16384) N=20000 ---
+arm s32768_r2e4: ok=20000 errors=0 msgs={} write_s=9 data+index=1320908709 (N*K=655360000) memtable_data(pre-flush)=124427696 off_heap=124385984 rss_anon peak=3261104128 MEMTABLE_LIMIT flushes=2 first usage=(1.131, 253.482)
+--- arm s65535_r1e4: S=65535 (c1=32768, c2=32767) N=10000 ---
+arm s65535_r1e4: ok=10000 errors=0 msgs={} write_s=7 data+index=1969476573 (N*K=655350000) memtable_data(pre-flush)=123684680 off_heap=123663934 rss_anon peak=3305738240 MEMTABLE_LIMIT flushes=2 first usage=(0.574798828125, 253.566)
+--- arm s65536_r1e4: S=65536 (c1=32768, c2=32768) N=10000 ---
+arm s65536_r1e4: ok=0 errors=10000 msgs={'InvalidRequest: Error from server: code=2200 [Invalid query] message="Key length of 65536 is longer than maximum of 65535"': 10000} write_s=5 data+index=0 (N*K=655360000) memtable_data(pre-flush)=0 off_heap=0 rss_anon peak=3180605440 MEMTABLE_LIMIT flushes=0 first usage=None
+yaml tail: cluster_name: cs; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.7.1; rpc_address: 127.0.7.1; commitlog_directory: /dev/shm/s4-b9-cs/node/commitlog; hints_directory: /dev/shm/s4-b9-cs/node/hints; saved_caches_directory: /dev/shm/s4-b9-cs/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-cs/node/cdc_raw; memtable_heap_space: 64MiB; memtable_offheap_space: 64MiB; commitlog_total_space: 1GiB; memtable_allocation_type: offheap_objects; auto_snapshot: false; memtable_cleanup_threshold: 0.99; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life 2 started, pid 1967283, pools 64 MiB
+--- arm p64_s65535_r1e4: S=65535 (c1=32768, c2=32767) N=10000 ---
+arm p64_s65535_r1e4: ok=10000 errors=0 msgs={} write_s=9 data+index=1969482441 (N*K=655350000) memtable_data(pre-flush)=55153580 off_heap=55144329 rss_anon peak=2874974208 MEMTABLE_LIMIT flushes=9 first usage=(0.1626552734375, 63.845)
+--- probe (B3i.8, informational, outside B3g) ---
+probe outcomes: {"a_plain_insert_sum65536": {"outcome": "InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"", "seconds": 0.0}, "b_cas_insert_sum65536": {"outcome": "WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message=\"Operation timed out - received only 0 responses.\" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'write_type': 'CAS'}", "seconds": 20.0}, "c_slice_delete_c2_70000": {"outcome": "accepted", "seconds": 0.0}}
+probe log lines (ERROR/WARN/AssertionError): 4; node alive: True
+yaml tail: cluster_name: cs; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.7.1; rpc_address: 127.0.7.1; commitlog_directory: /dev/shm/s4-b9-cs/node/commitlog; hints_directory: /dev/shm/s4-b9-cs/node/hints; saved_caches_directory: /dev/shm/s4-b9-cs/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-cs/node/cdc_raw; memtable_heap_space: 256MiB; memtable_offheap_space: 256MiB; commitlog_total_space: 1GiB; memtable_allocation_type: heap_buffers; auto_snapshot: false; memtable_cleanup_threshold: 0.99; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life 3 started, pid 1970629, pools 256 MiB, heap_buffers
+--- arm hb_s65535_r1e4: S=65535 (c1=32768, c2=32767) N=10000 ---
+arm hb_s65535_r1e4: ok=10000 errors=0 msgs={} write_s=8 data+index=1969477368 (N*K=655350000) memtable_data(pre-flush)=125717660 off_heap=0 rss_anon peak=2791829504 MEMTABLE_LIMIT flushes=2 first usage=(253.924, 0.0)
+EXPECTED: probe (a) plain insert with a two-component ck summing to 65536 is rejected with the exact message - yes [InvalidRequest: Error from server: code=2200 [Invalid query] message="Key length of 65536 is longer than maximum of 65535"]
+EXPECTED: probe (b) IF NOT EXISTS insert with the same ck is not rejected with the message - yes [WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 resp]
+EXPECTED: probe (c) slice delete with a 70000-byte c2 bound is not rejected with the message - yes [accepted]
+EXPECTED: s16_r2e5: no insert rejected - yes [errors=0]
+EXPECTED: s1024_r1e6: no insert rejected - yes [errors=0]
+EXPECTED: s32768_r2e4: no insert rejected - yes [errors=0]
+EXPECTED: s65535_r1e4: no insert rejected - yes [errors=0]
+EXPECTED: p64_s65535_r1e4: no insert rejected - yes [errors=0]
+EXPECTED: hb_s65535_r1e4: no insert rejected - yes [errors=0]
+EXPECTED: s65536: all 10,000 inserts rejected with the exact message - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 10000}]
+EXPECTED: s65536: 0 B added to the table directory and memtable empty - yes [dir_after=0 before=0 memtable={'memtable_data': 0, 'memtable_off_heap': 0, 'memtable_cells': 0}]
+EXPECTED: s1024_r1e6: Data+Index bytes between 1.0 and 3.0 x R*S - yes [ratio=1.27]
+EXPECTED: s32768_r2e4: Data+Index bytes between 1.0 and 3.0 x R*S - yes [ratio=2.02]
+EXPECTED: s65535_r1e4: Data+Index bytes between 1.0 and 3.0 x R*S - NO (recorded; judged in the results file) [ratio=3.01]
+EXPECTED: Data+Index: S=16 (R=2e5) < S=65535 (R=1e4), S=1024 (R=1e6) > S=65535 (R=1e4), per-row ratio S=65535 over S=16 above 500 - NO (recorded; judged in the results file) [s16_r2e5=4579251 s65535_r1e4=1969476573 s1024_r1e6=1298913686 per-row ratio=8602]
+EXPECTED: s1024_r1e6 at 256 MiB: at least one MEMTABLE_LIMIT flush, logged off-heap usage <= 320 MiB - yes [3 flushes, max off-heap 253.458]
+EXPECTED: s65535_r1e4 at 256 MiB: at least one MEMTABLE_LIMIT flush, logged off-heap usage <= 320 MiB - yes [2 flushes, max off-heap 253.816]
+EXPECTED: s16_r2e5 at 256 MiB: no MEMTABLE_LIMIT flush - yes [0]
+EXPECTED: s65535 at 64 MiB: at least one MEMTABLE_LIMIT flush, logged off-heap usage <= 80 MiB - yes [9 flushes, max off-heap 63.845]
+EXPECTED: plateau ratio (first MEMTABLE_LIMIT off-heap usage, s65535 at 256 MiB over s65535 at 64 MiB) between 2.5 and 6 - yes [253.566 / 63.845]
+hb_s65535 (informational): data+index=1969477368 MEMTABLE_LIMIT flushes=2 first usage=(253.924, 0.0)
+summary: EXPECTED yes=22 no=2
+node pid left: None; /dev/shm/s4-b9-cs exists: False

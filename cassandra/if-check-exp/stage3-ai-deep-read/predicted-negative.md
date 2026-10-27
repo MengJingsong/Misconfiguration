@@ -120,8 +120,6 @@ The limits they validate are enforced elsewhere.
 | `SSTableSplitter.java:52` `sstableSizeInMB <= 0` | Argument check of a CLI tool. |
 | `DatabaseDescriptor.java:911`, `:914`, `:978`, `:981`, `:984`, `:987` | A message size must not exceed the in-flight and reserve caps. |
 | `DatabaseDescriptor.java:1016` (2 units), `:4093`, `:5347` (2 units) | Startup range checks. |
-| `DatabaseDescriptor.java:3369`, `:3386` | Turn `-1` into the default (heap/40, heap/10) of `native_transport_max_request_data_in_flight` and its per-IP twin; the limit is enforced elsewhere. |
-| `DatabaseDescriptor.java:1152` | Derives the default `commitlog_total_space` and `cdc_total_space` from the volume size (`:669`, `:689`). |
 | `GuardrailsOptions.java:1219`, `:1257` | A guardrail's fail threshold must not be below its warn threshold. |
 | `StorageAttachedIndexOptions.java:41`; `IndexMode.java:190`; `SAICodecUtils.java:129` (2 units) | Index option checks; SASI's flush memory is clamped to 100 GiB. |
 | `CQLSSTableWriter.java:539`; `CompressionParams.java:352`, `:456#2` | Writer and compression option checks. |
@@ -143,7 +141,6 @@ are the warn twin of a filed fail threshold.
 | `RowIndexEntry.java:403` `estimatedMemory > warnThreshold.toBytes()` | Warn twin of the filed `row_index_read_size_fail_threshold` at `:392`. |
 | `ReadCommand.java:724` `warnBytes != -1 && sizeInBytes >= warnBytes` | Warn twin of the filed `local_read_size_fail_threshold` at `:715`. |
 | `ResultSetBuilder.java:87` (2 units) | Warn twin of `shouldReject()` (`:95-98`), the filed `coordinator_read_size_fail_threshold`. |
-| `BatchStatement.java:340`, `:388` | `:340` is the warn twin of `batch_size_fail_threshold` (`:352`, a verified case). |
 | `ReplicaFilteringProtection.java:333` | Warn twin of the undecided `:323` ([`undetermined.md`](undetermined.md) §7). |
 | `ReadCommand.java:639`; `DatabaseDescriptor.java:726`, `:741`; `CommitLog.java:609`; `SimpleSeedProvider.java:110` | Log or warn and continue. |
 | `DatabaseDescriptor.java:4096` | Logs when `repair_session_space` is above a quarter of the heap. |
@@ -220,7 +217,6 @@ branch allocates or moves the same amount somewhere else.
 | `InboundMessageHandler.java:148`; `OutboundConnections.java:215`; `OutboundConnection.java:796` | Small or large message path or connection. |
 | `FrameDecoderWith8bHeader.java:114`, `:129` | A partial frame stashed or decoded. |
 | `ColumnFamilyStore.java:1931`, helper `isFilterFullyCoveredBy()` | A row served from the row cache or from SSTables. |
-| `DataLimits.java:414`, `:417` | Route through the query's limits. |
 | `SimpleClient.java:770`, `:777`, `:818`, `:838` | The client side (stress and tests), not node code. |
 | `TrieMemoryIndex.java:228`; `RangeTombstoneList.java:213` | Recursive or iterative insertion; a merge or a per-item add. |
 | `VectorMemoryIndex.java:190`, `:229`, helper `VectorIndexSegmentSearcher.shouldUseBruteForce()` | Brute-force or graph search. |
@@ -303,7 +299,6 @@ done rather than bytes held.
 |---|---|
 | `SEPExecutor.java:373`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). `SEPExecutor.java:196` (`takeWorkPermit`, `concurrent_writes`) left this row on 2026-10-21, verified at stage 4 as Confirmed — does not cap ([case](cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md), `_INDEX.md` §1): excess mutations queue unbounded on the heap, 887.5 MiB at pool size 0. That run tested only `:196` and never made the pool bind under load, so the lines left here stay unverified. **`SEPExecutor.java:165`** (`takeTaskPermit`, pool `maximumPoolSize`) left this row on 2026-10-21 ([case](cases/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md)): unit Confirmed — does not cap (queued heap 125 MiB at every pool size); cluster Not confirmed (BIND-5). That run made the pool bind (Active = v at 1 · 8 · 32 · 128): for **large internode mutations** (> 64 KiB, deserialized only when a worker runs them) heap follows running tasks × per-task bytes (live +5.5 → +70.2 MiB) while the queue waits off heap, bounded by the receive reserve; small mutations are flat. So the queue is uncapped at `:196` and `:165`, and the `concurrent_compactors` pattern holds for heap on the large-message path only. `ReadStage` and `Native-Transport-Requests` have no binding test yet. |
 | `PartitionDenylist.java:419`, `:445` `results.size() > limit` | Rule 3 too: the result set is fully built before the check, which then logs and truncates. |
-| `DataLimits$CQLCounter.incrementRowCount():509`, `:511`; `$GroupByAwareCounter:986` | The query's own `LIMIT` and per-partition limit, a client parameter (also Rule 1). |
 | `DataLimits.java:993`, `:1000`, `:1041` (2 units); helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()` | Same: the query's limits or page size. |
 | `ExpirationDateOverflowHandling.java:82` `ttl + nowInSecs > ...MaxDeletiontionTime()` | A timestamp-overflow guard (CASSANDRA-14092). |
 | `ContentionStrategy.java:401` `minWaitMicros + minDeltaMicros > maxWaitMicros` | Microsecond back-off arithmetic. |

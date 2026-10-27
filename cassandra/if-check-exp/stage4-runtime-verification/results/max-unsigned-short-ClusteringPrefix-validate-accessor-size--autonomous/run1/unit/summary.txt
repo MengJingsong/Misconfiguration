@@ -1,0 +1,21 @@
+unit-run 2026-10-26T19:51:34-04:00 host node0 tree cassandra-5.0.9 openjdk version "11.0.32.1" 2026-08-18
+harness md5 ClusterKeyDriver.java=4a8fedcba9de unit-run.sh=f956d18c6584 
+run grid (grid) exit 0, 39 checks, 0 MISMATCH
+EXPECTED: S x N grid and mixed cells accepted/rejected with the exact message of B2i.2 - yes
+run stream (stream 100000 65535) exit 0, 3 checks, 0 MISMATCH
+run series1000a (series 1000 0) exit 0, 3 checks, 0 MISMATCH
+run series1000b (series 1000 0) exit 0, 3 checks, 0 MISMATCH
+run series1000c (series 1000 0) exit 0, 3 checks, 0 MISMATCH
+run series1 (series 1 0) exit 0, 3 checks, 0 MISMATCH
+run capped (series 1000 10000) exit 0, 2 checks, 0 MISMATCH
+EXPECTED: stream checks - yes
+EXPECTED: series1000a checks - yes
+EXPECTED: series1000b checks - yes
+EXPECTED: series1000c checks - yes
+EXPECTED: series1 checks - yes
+EXPECTED: capped checks - yes
+slopes S=1000 (3 JVMs): 1116.7, 1116.7, 1116.8; S=1: 124.7; ratio 9.0
+EXPECTED: three S=1000 slopes agree within 5 percent - yes
+EXPECTED: S=1 slope below 250 B per key and S=1000 over S=1 above 5 - yes
+uncapped delta 10k->100k 100506344; EXPECTED: uncapped growth above 80 MB - yes
+done 2026-10-26T19:52:08-04:00

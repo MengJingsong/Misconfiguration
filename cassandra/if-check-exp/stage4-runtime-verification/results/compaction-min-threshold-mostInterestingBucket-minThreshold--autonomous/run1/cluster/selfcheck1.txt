@@ -1,0 +1,20 @@
+PASS junit: no failures or errors :: tests=3 failures=0 errors=0
+PASS ant.log carries the readings :: 347 distinct readings
+PASS unit grid: returned = min(N,32) if >= M else empty, both ways, uncompacted bytes monotone :: []
+PASS unit control: returned = min(N, max_threshold) :: []
+PASS unit ovw: M=8 unchanged, M=4 <= 0.25 :: M8 7435057->7435057; M4 7434904->1063000
+m2 {'n': 1, 'total': 49486453.0, 'bloom': 248664.0, 'summary': 34386.0, 'hist': 19, 'comp': 19, 'errs': [], 'errlines': 5}
+m4 {'n': 2, 'total': 72159891.0, 'bloom': 365088.0, 'summary': 50402.0, 'hist': 6, 'comp': 6, 'errs': [], 'errlines': 5}
+m16 {'n': 5, 'total': 139970167.0, 'bloom': 713808.0, 'summary': 98384.0, 'hist': 1, 'comp': 1, 'errs': [], 'errlines': 5}
+m32 {'n': 20, 'total': 452504486.0, 'bloom': 2324232.0, 'summary': 319836.0, 'hist': 0, 'comp': 1, 'errs': [], 'errlines': 5}
+mm4 {'n': 2, 'total': 72101734.0, 'bloom': 365104.0, 'summary': 50402.0, 'hist': 6, 'comp': 6, 'errs': [], 'errlines': 5}
+PASS stress: every chunk reported 0 errors (all arms) :: {'m2': [], 'm4': [], 'm16': [], 'm32': [], 'mm4': []}
+PASS M=32: exactly 20 sstables and zero compaction history rows (raw tablestats / compactionhistory) :: n=20 hist=0
+PASS M=2, M=4: <= 4 sstables; M=16: 5 (<= 15) :: m2=1 m4=2 m16=5
+PASS sstable count non-decreasing in M :: [1, 2, 5, 20]
+PASS bloom + summary memory non-decreasing in M :: [(248664.0, 34386.0), (365088.0, 50402.0), (713808.0, 98384.0), (2324232.0, 319836.0)]
+PASS bytes M=32 >= 3 x M=2; non-decreasing in M :: [49486453.0, 72159891.0, 139970167.0, 452504486.0]
+PASS flip: raw tablestats after the flip: <= 5 sstables, bytes fall >= 3x :: 20->1 bytes 452504486.0->49487201.0
+PASS min 4/max 4 arm < 20 sstables :: 2
+trace lines in the M=32 arm with a >= 20-sstable bucket: 5
+SUMMARY ALL PASS

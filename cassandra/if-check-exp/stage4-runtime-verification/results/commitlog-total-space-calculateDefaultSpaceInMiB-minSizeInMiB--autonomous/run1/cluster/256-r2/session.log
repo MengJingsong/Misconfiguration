@@ -1,0 +1,52 @@
+[2026-10-26T15:27:37.021-0400] cluster-run start arm=256 rep=2 n=2200000 expected effective limit=256MiB head=42a971203fdcfa3f2e18d4f4c94339e5a8662912
+[2026-10-26T15:27:37.093-0400] + bin/cassandra -p /dev/shm/s4-b8-cl-node/cassandra.pid (ulimit -n 100000, MAX_HEAP_SIZE=24G)
+[2026-10-26T15:28:50.423-0400] node up pid=2789522
+CONFIG cdc_enabled=false
+CONFIG commitlog_disk_access_mode=legacy
+CONFIG commitlog_segment_size=32MiB
+CONFIG commitlog_total_space=256MiB
+CONFIG memtable_allocation_type=heap_buffers
+CONFIG memtable_cleanup_threshold=0.9
+CONFIG memtable_heap_space=8192MiB
+[2026-10-26T15:28:50.432-0400] EFFECTIVE commitlog_total_space=256MiB (expected 256MiB)
+[2026-10-26T15:28:50.435-0400] + cassandra-stress write n=1 (schema)
+[2026-10-26T15:29:08.956-0400] baseline commitlog: 67108944 B, 2 files
+[2026-10-26T15:29:08.960-0400] samplers du=2793574 jmx=2793575 watchdog=2793577
+[2026-10-26T15:29:11.965-0400] STRESS_START 1793042951963
+[2026-10-26T15:29:40.764-0400] STRESS_END 1793042980763 rc=0 (28 s)
+Op rate                   :  106,932 op/s  [WRITE: 106,932 op/s]
+Partition rate            :  106,932 pk/s  [WRITE: 106,932 pk/s]
+Row rate                  :  106,932 row/s [WRITE: 106,932 row/s]
+Total partitions          :  2,200,000 [WRITE: 2,200,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:00:20
+END
+[2026-10-26T15:29:42.063-0400] tpstats MemtableFlushWriter: PerDiskMemtableFlushWriter_0   0      0       50        0       0               
+MemtableFlushWriter            0      0       53        0       0               
+[2026-10-26T15:30:42.067-0400] SETTLE_END 1793043042066
+COMMITLOG_DIRTY_standard1 10
+MEMTABLE_LIMIT_any 0
+REASON      10 Enqueuing flush of keyspace1.standard1, Reason: COMMITLOG_DIRTY
+REASON       1 Enqueuing flush of keyspace1.standard1, Reason: USER_FORCED
+REASON       1 Enqueuing flush of system_auth.roles, Reason: USER_FORCED
+REASON       1 Enqueuing flush of system.compaction_history, Reason: USER_FORCED
+REASON       7 Enqueuing flush of system.local, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.local, Reason: USER_FORCED
+REASON       1 Enqueuing flush of system.prepared_statements, Reason: USER_FORCED
+REASON       1 Enqueuing flush of system_schema.aggregates, Reason: INTERNALLY_FORCED
+REASON       3 Enqueuing flush of system_schema.column_masks, Reason: INTERNALLY_FORCED
+REASON       5 Enqueuing flush of system_schema.columns, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.dropped_columns, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.functions, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.indexes, Reason: INTERNALLY_FORCED
+REASON       6 Enqueuing flush of system_schema.keyspaces, Reason: INTERNALLY_FORCED
+REASON       5 Enqueuing flush of system_schema.tables, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.triggers, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.types, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system_schema.views, Reason: INTERNALLY_FORCED
+REASON       1 Enqueuing flush of system.sstable_activity, Reason: USER_FORCED
+REASON       1 Enqueuing flush of system.sstable_activity_v2, Reason: USER_FORCED
+ERRORS 0
+[2026-10-26T15:30:42.081-0400] + nodetool drain
+[2026-10-26T15:30:54.994-0400] daemons left: []
+[2026-10-26T15:30:55.345-0400] cluster-run end arm=256 rep=2

@@ -1,0 +1,23 @@
+label rows errors flushes peakL0 lagL0 lagLive(MiB) lagFiles(MiB) settledL0 stcsLines drainSettled
+A 1500000 0 217 211 211 1555 1772 0 7 True
+B 1500000 0 216 211 211 1557 1557 - 0 -
+C 1500000 0 215 209 209 1554 1770 0 0 True
+D 1500000 0 205 2 0 1509 1509 0 0 True
+PASS no write error; 1.5 M rows in every run :: {'A': (0, 1500000), 'B': (0, 1500000), 'C': (0, 1500000), 'D': (0, 1500000)}
+PASS A: file bytes and live bytes within 15% of each other and of rows x 1050 B :: files 1772, live 1555, written ~1502 MiB
+PASS A: peak L0 >= 100 :: 211
+PASS B: file bytes and live bytes within 15% of each other and of rows x 1050 B :: files 1557, live 1557, written ~1502 MiB
+PASS B: peak L0 >= 100 :: 211
+PASS C: file bytes and live bytes within 15% of each other and of rows x 1050 B :: files 1770, live 1554, written ~1502 MiB
+PASS C: peak L0 >= 100 :: 209
+PASS B: L0 count at lag-end >= 100, equal to the Data.db files on disk, at most the flush calls :: L0 211, files 211, flush calls 216
+PASS B: no debug line (no candidate is ever requested) :: 0
+PASS A: at least one "L0 is too far behind" debug line :: 7
+PASS C (flag true): zero debug lines :: 0
+PASS D (positive control): peak L0 below half of A :: D 2 vs A 211
+PASS A: after the drain every level below the top <= 1.05 x nominal, total live within 5%, L0 <= 32 :: bytes/level [0, 104866027, 1040271057, 408969280, 0, 0, 0, 0, 0], below-top ratios [1.0, 0.992], L0 0, drain {'settled': True, 'seconds': 90, 'hist': [[0, 1582341117, 0], [0, 1582341117, 0], [0, 1582341117, 0]]}
+PASS C: after the drain every level below the top <= 1.05 x nominal, total live within 5%, L0 <= 32 :: bytes/level [0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0], below-top ratios [0.908, 0.991], L0 0, drain {'settled': True, 'seconds': 113, 'hist': [[0, 1582330498, 0], [0, 1582330498, 0], [0, 1582330498, 0]]}
+PASS D: after the drain every level below the top <= 1.05 x nominal, total live within 5%, L0 <= 4 :: bytes/level [0, 96970086, 1048138329, 408971217, 0, 0, 0, 0, 0], below-top ratios [0.925, 1.0], L0 0, drain {'settled': True, 'seconds': 69, 'hist': [[0, 1582350767, 0], [0, 1582350767, 0], [0, 1582350767, 0]]}
+PASS every drain settled :: ok
+PASS TRUNCATE control: file bytes after truncate < 1% of the last pre-truncate bytes :: {'A': 0, 'B': 0, 'C': 0, 'D': 0}
+ALL PASS

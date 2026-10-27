@@ -1,0 +1,30 @@
+cluster-run 2026-10-26 20:56:00 host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu rows 200000 ttl 120 wait 210 obs 300
+harness md5 f4cd88c2dea1773432592f88b8b1c5f5  cluster-run.py 8aea4bbdeaf7772aec874d06dbe9249d  load.py 1496384a22a2ced4742ec8ede87ae1de  analyze-cluster.py 30615fbf016ad4f9bac8330f4fcd7a65  make-node-yaml.sh 
+yaml: # ---- stage4 b10-td lines ----;cluster_name: s4-b10-td;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.3.1;rpc_address: 127.0.3.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b10-td/data/commitlog;hints_directory: /dev/shm/s4-b10-td/data/hints;saved_caches_directory: /dev/shm/s4-b10-td/data/saved_caches;cdc_raw_directory: /dev/shm/s4-b10-td/data/cdc_raw;auto_snapshot: false;concurrent_compactors: 2;compaction_throughput: 0MiB/s;
+jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/users/jason92/s4-b10-td-node/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -Xlog:gc:file=/users/jason92/s4-b10-td-logs/run1/cluster/gc.log:utc
+EXPECTED: heap -Xms2G -Xmx2G (B3a) — yes
+EXPECTED: 14 tables exist with the B3b compaction options and gc_grace_seconds 10 (system_schema.tables) — yes
+load check a05: rows=200000 ttl_rows=100000
+load check b05: rows=200000 ttl_rows=30000
+EXPECTED: go has 2 sstables (first load + overlap sstable): 2 — yes
+EXPECTED: every table except go has exactly 1 sstable after the flush: {'a05': 2, 'b05': 2, 'a20': 2, 'b20': 2, 'a40': 2, 'b40': 2, 'a70': 2, 'b70': 2, 'a150': 2, 'b150': 2, 'adef': 2, 'gi': 2, 'go': 2, 'pc': 2} — NO (recorded; the AI judges it in the results file)
+peak du (bytes): a05=44733090 b05=44434534 a20=44704945 b20=44440188 a40=44719078 b40=44472856 a70=44697248 b70=44446218 a150=44695568 b150=44457582 adef=44706723 gi=44713465 go=45187867 pc=44722986
+EXPECTED: peak du of every table between 30 and 90 MB — yes
+ratio before enable: a05=0.500/0.500 b05=0.150/0.150 a20=0.500/0.500 b20=0.150/0.150 a40=0.500/0.500 b40=0.150/0.150 a70=0.500/0.500 b70=0.150/0.150 a150=0.500/0.500 b150=0.150/0.150 adef=0.500/0.500 gi=0.500/0.500 go=0.500/0.000 pc=0.500/0.500
+du before enable: a05=44733090 b05=44434534 a20=44704945 b20=44440188 a40=44719078 b40=44472856 a70=44697248 b70=44446218 a150=44695568 b150=44457582 adef=44706723 gi=44713465 go=45187867 pc=44722986
+EXPECTED: no compaction ran before the enable (du unchanged from the peak, every table) — yes
+enableautocompaction ks at epoch 1793063123
+ratio after window: a05=0.009/0.000 b05=0.000/0.001 a20=0.000/0.001 b20=0.150/0.150 a40=0.009/0.000 b40=0.150/0.150 a70=0.500/0.500 b70=0.150/0.150 a150=0.500/0.500 b150=0.150/0.150 adef=0.000/0.000 gi=0.500/0.500 go=0.500/0.000 pc=0.500/0.500
+pc: du before nodetool compact 44722986, after 21610349
+EXPECTED: no CassandraDaemon of this run left — yes
+EXPECTED: R1 ratio before enable: group A, adef, gi, go, pc in 0.4-0.6 (a05:0.500 a20:0.500 a40:0.500 a70:0.500 a150:0.500 adef:0.500 gi:0.500 go:0.500 pc:0.500) — yes
+EXPECTED: R2 ratio before enable: group B in 0.1-0.2 (b05:0.150 b20:0.150 b40:0.150 b70:0.150 b150:0.150) — yes
+EXPECTED: C1 a05, a20, a40, adef: du at window end = 0.42-0.58 of peak (a05:0.483 a20:0.483 a40:0.484 adef:0.483) — yes
+EXPECTED: C2 b05: du at window end = 0.77-0.93 of peak (0.842) — yes
+EXPECTED: H1 a70, a150, b20, b40, b70, b150, gi, go stay within 2% of peak through the window (min over samples: a70:1.000 a150:1.000 b20:1.000 b40:1.000 b70:1.000 b150:1.000 gi:1.000 go:1.000) — yes
+EXPECTED: H2 gi and go: ratio after the window still 0.4-0.6, ten times X=0.05 (gi [0.5001992135395915, 0.49972795874435216], go [0.5, 0.0]) — yes
+EXPECTED: H3 system.log "Compacted" lines per table (pc: its one is the manual nodetool compact): a05=2 a150=0 a20=2 a40=2 a70=0 adef=2 b05=2 b150=0 b20=0 b40=0 b70=0 gi=0 go=0 pc=1 — NO
+EXPECTED: K1 pc: du at window end within 2% of peak (1.000), then after nodetool compact 0.42-0.58 (0.483) — yes
+EXPECTED: S1 end sizes of a05, a20, a40, adef agree within 0.08 (max-min 0.001) — yes
+SUMMARY: R1=ok R2=ok C1=ok C2=ok H1=ok H2=ok H3=NO K1=ok S1=ok
+

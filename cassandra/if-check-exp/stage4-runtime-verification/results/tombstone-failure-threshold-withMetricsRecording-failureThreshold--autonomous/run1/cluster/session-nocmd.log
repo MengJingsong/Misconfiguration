@@ -1,0 +1,305 @@
+[2026-10-26 21:31:30] cluster-run run1: RUN=/dev/shm/s4-b10-tf N=1200000 NT2=60000 NLIVE=30000 TS=[1000000, 100000, 10000] VTS=[100000, 10000] C=8 DUR=300 IDLE_S=30 clone=/users/jason92/s4-b10-tf-n
+cassandra-5.0.9
+2113bf6
+openjdk version "11.0.32.1" 2026-08-18
+5.15.0-187-generic
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           126G  2.2M  126G   1% /dev/shm
+
+  rc=0
+
+  rc=0
+
+  rc=0
+
+  rc=0
+[2026-10-26 21:31:31] conf for T=2147483647 label=setup: cluster_name='tfm'; num_tokens=1; concurrent_reads=4; commitlog_directory=/dev/shm/s4-b10-tf/commitlog; hints_directory=/dev/shm/s4-b10-tf/hints; saved_caches_directory=/dev/shm/s4-b10-tf/saved_caches; cdc_raw_directory=/dev/shm/s4-b10-tf/cdc_raw; listen_address=127.0.1.1; rpc_address=127.0.1.1; storage_port=7000; native_transport_port=9042; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; autocompaction_on_startup_enabled=false; tombstone_warn_threshold=1000; tombstone_failure_threshold=2147483647; read_thresholds_enabled=false
+
+  rc=0
+[2026-10-26 21:32:35] node up (setup) after 64 s, pid 3309829
+
+  rc=0
+[2026-10-26 21:32:37] ingest.cql: 213680780 B
+
+  rc=0
+[2026-10-26 21:51:03] ingest rc=0 in 1106 s; errors in output: 0
+
+  rc=0
+[2026-10-26 21:51:09] first-trigger check (T=MAX): trace [('0', '1200000'), ('0', '1200000')]
+
+  rc=0
+[2026-10-26 21:51:10] ks.t2 check (T=MAX): trace [('0', '120000'), ('0', '120000')]
+13370228	/dev/shm/s4-b10-tf/data
+
+  rc=0
+[2026-10-26 21:51:14] stopping node pid 3309829
+
+  rc=0
+[2026-10-26 21:51:19] node stopped
+
+  rc=0
+
+  rc=0
+[2026-10-26 21:51:19] conf for T=1000000 label=T1000000: cluster_name='tfm'; num_tokens=1; concurrent_reads=4; commitlog_directory=/dev/shm/s4-b10-tf/commitlog; hints_directory=/dev/shm/s4-b10-tf/hints; saved_caches_directory=/dev/shm/s4-b10-tf/saved_caches; cdc_raw_directory=/dev/shm/s4-b10-tf/cdc_raw; listen_address=127.0.1.1; rpc_address=127.0.1.1; storage_port=7000; native_transport_port=9042; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; autocompaction_on_startup_enabled=false; tombstone_warn_threshold=1000; tombstone_failure_threshold=1000000; read_thresholds_enabled=false
+
+  rc=0
+[2026-10-26 21:51:34] node up (T1000000) after 15 s, pid 3397777
+[2026-10-26 21:51:35] T confirmed by sjk: 1000000
+
+  rc=2
+[2026-10-26 21:51:39] warm-up T1000000: FAIL_TOMBSTONE, TombstoneFailures 1
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3397777:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3397777 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3397777:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 21:57:15] storm T1000000-main: 301544 ms, 872 reads, outcomes {'FAIL_TOMBSTONE': 872}
+
+  rc=0
+[2026-10-26 21:59:37] metrics T1000000-main: TombstoneFailures 873, TombstoneScannedHistogram.Max 1131752
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3397777:
+Started recording 2. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3397777 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3397777:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:00:33] storm T1000000-live: 22586 ms, 3 reads, outcomes {'OK:30000': 3}
+
+  rc=0
+[2026-10-26 22:00:38] metrics T1000000-live: TombstoneFailures 873, TombstoneScannedHistogram.Max 1131752
+[2026-10-26 22:00:38] T1000000: system.log "Scanned over" lines 873 values ['1000001']; OOM False
+[2026-10-26 22:00:38] stopping node pid 3397777
+
+  rc=0
+[2026-10-26 22:00:44] node stopped
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:00:44] conf for T=100000 label=T100000: cluster_name='tfm'; num_tokens=1; concurrent_reads=4; commitlog_directory=/dev/shm/s4-b10-tf/commitlog; hints_directory=/dev/shm/s4-b10-tf/hints; saved_caches_directory=/dev/shm/s4-b10-tf/saved_caches; cdc_raw_directory=/dev/shm/s4-b10-tf/cdc_raw; listen_address=127.0.1.1; rpc_address=127.0.1.1; storage_port=7000; native_transport_port=9042; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; autocompaction_on_startup_enabled=false; tombstone_warn_threshold=1000; tombstone_failure_threshold=100000; read_thresholds_enabled=false
+
+  rc=0
+[2026-10-26 22:01:03] node up (T100000) after 19 s, pid 3459428
+[2026-10-26 22:01:05] T confirmed by sjk: 100000
+
+  rc=2
+[2026-10-26 22:01:07] warm-up T100000: FAIL_TOMBSTONE, TombstoneFailures 1
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3459428:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3459428 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3459428:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:06:42] storm T100000-main: 300724 ms, 3051 reads, outcomes {'FAIL_TOMBSTONE': 3051}
+
+  rc=0
+[2026-10-26 22:06:58] metrics T100000-main: TombstoneFailures 3052, TombstoneScannedHistogram.Max 105778
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3459428:
+Started recording 2. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3459428 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3459428:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:07:36] storm T100000-variant: 2698 ms, 3 reads, outcomes {'FAIL_TOMBSTONE': 3}
+
+  rc=0
+[2026-10-26 22:07:39] metrics T100000-variant: TombstoneFailures 3052, TombstoneScannedHistogram.Max 105778
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3459428:
+Started recording 3. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3459428 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3459428:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:08:36] storm T100000-live: 22957 ms, 3 reads, outcomes {'OK:30000': 3}
+
+  rc=0
+[2026-10-26 22:08:39] metrics T100000-live: TombstoneFailures 3052, TombstoneScannedHistogram.Max 105778
+[2026-10-26 22:08:39] T100000: system.log "Scanned over" lines 3055 values ['100001']; OOM False
+[2026-10-26 22:08:39] stopping node pid 3459428
+
+  rc=0
+[2026-10-26 22:08:44] node stopped
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:08:44] conf for T=10000 label=T10000: cluster_name='tfm'; num_tokens=1; concurrent_reads=4; commitlog_directory=/dev/shm/s4-b10-tf/commitlog; hints_directory=/dev/shm/s4-b10-tf/hints; saved_caches_directory=/dev/shm/s4-b10-tf/saved_caches; cdc_raw_directory=/dev/shm/s4-b10-tf/cdc_raw; listen_address=127.0.1.1; rpc_address=127.0.1.1; storage_port=7000; native_transport_port=9042; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; autocompaction_on_startup_enabled=false; tombstone_warn_threshold=1000; tombstone_failure_threshold=10000; read_thresholds_enabled=false
+
+  rc=0
+[2026-10-26 22:09:04] node up (T10000) after 20 s, pid 3555719
+[2026-10-26 22:09:05] T confirmed by sjk: 10000
+
+  rc=2
+[2026-10-26 22:09:07] warm-up T10000: FAIL_TOMBSTONE, TombstoneFailures 1
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3555719:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3555719 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3555719:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:14:42] storm T10000-main: 300586 ms, 3855 reads, outcomes {'FAIL_TOMBSTONE': 3855}
+
+  rc=0
+[2026-10-26 22:14:48] metrics T10000-main: TombstoneFailures 3856, TombstoneScannedHistogram.Max 11864
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3555719:
+Started recording 2. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3555719 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3555719:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:15:24] storm T10000-variant: 1863 ms, 3 reads, outcomes {'FAIL_TOMBSTONE': 3}
+
+  rc=0
+[2026-10-26 22:15:27] metrics T10000-variant: TombstoneFailures 3856, TombstoneScannedHistogram.Max 11864
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3555719:
+Started recording 3. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3555719 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3555719:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:16:26] storm T10000-live: 25119 ms, 3 reads, outcomes {'OK:30000': 3}
+
+  rc=0
+[2026-10-26 22:16:29] metrics T10000-live: TombstoneFailures 3856, TombstoneScannedHistogram.Max 11864
+[2026-10-26 22:16:29] T10000: system.log "Scanned over" lines 3859 values ['10001']; OOM False
+[2026-10-26 22:16:29] stopping node pid 3555719
+
+  rc=0
+[2026-10-26 22:16:35] node stopped
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:16:35] conf for T=100000 label=ctl-1MiB: cluster_name='tfm'; num_tokens=1; concurrent_reads=4; commitlog_directory=/dev/shm/s4-b10-tf/commitlog; hints_directory=/dev/shm/s4-b10-tf/hints; saved_caches_directory=/dev/shm/s4-b10-tf/saved_caches; cdc_raw_directory=/dev/shm/s4-b10-tf/cdc_raw; listen_address=127.0.1.1; rpc_address=127.0.1.1; storage_port=7000; native_transport_port=9042; read_request_timeout=120000ms; range_request_timeout=120000ms; native_transport_timeout=180s; autocompaction_on_startup_enabled=false; tombstone_warn_threshold=1000; tombstone_failure_threshold=100000; read_thresholds_enabled=true; local_read_size_fail_threshold=1MiB
+
+  rc=0
+[2026-10-26 22:16:50] node up (ctl-1MiB) after 15 s, pid 3645300
+[2026-10-26 22:16:51] T confirmed by sjk: 100000
+
+  rc=0
+
+  rc=0
+
+  rc=0
+3645300:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 3645300 JFR.dump name=tfm to copy recording data to file.
+
+  rc=0
+3645300:
+Stopped recording "tfm".
+
+  rc=0
+
+  rc=0
+[2026-10-26 22:17:28] storm T100000-live-1MiB: 2176 ms, 3 reads, outcomes {'FAIL_READSIZE': 3}
+
+  rc=0
+[2026-10-26 22:17:31] metrics T100000-live-1MiB: TombstoneFailures 0, TombstoneScannedHistogram.Max 0
+[2026-10-26 22:17:31] ctl-1MiB: system.log "Scanned over" lines 0 values []; OOM False
+[2026-10-26 22:17:31] stopping node pid 3645300
+
+  rc=0
+[2026-10-26 22:17:37] node stopped
+
+  rc=0
+[2026-10-26 22:17:37] all lifetimes done
+[2026-10-26 22:17:37] my daemons left: []

@@ -1,0 +1,29 @@
+Consistency level set to ONE.
+TRACING set to ON
+
+ pk | ck | v
+----+----+---
+
+
+(0 rows)
+
+Warnings :
+Read 0 live rows and 120000 tombstone cells for query SELECT * FROM ks.t2 WHERE pk = 0 LIMIT 100 ALLOW FILTERING; token -3485513579396041028 (see tombstone_warn_threshold)
+
+
+Tracing session: e22459a0-d1a8-11f1-9a3b-abf898999605
+
+ activity                                                                                 | timestamp                  | source    | source_elapsed | client
+------------------------------------------------------------------------------------------+----------------------------+-----------+----------------+-----------
+                                                                       Execute CQL3 query | 2026-10-26 21:51:10.394000 | 127.0.1.1 |              0 | 127.0.0.1
+                    Parsing SELECT * FROM ks.t2 WHERE pk=0; [Native-Transport-Requests-1] | 2026-10-26 21:51:10.395000 | 127.0.1.1 |            377 | 127.0.0.1
+                                        Preparing statement [Native-Transport-Requests-1] | 2026-10-26 21:51:10.395001 | 127.0.1.1 |            687 | 127.0.0.1
+                                     Executing single-partition query on t2 [ReadStage-2] | 2026-10-26 21:51:10.396000 | 127.0.1.1 |           1223 | 127.0.0.1
+                                               Acquiring sstable references [ReadStage-2] | 2026-10-26 21:51:10.396001 | 127.0.1.1 |           1331 | 127.0.0.1
+  Skipped 0/3 non-slice-intersecting sstables, included 0 due to tombstones [ReadStage-2] | 2026-10-26 21:51:10.396002 | 127.0.1.1 |           1459 | 127.0.0.1
+                            Partition index found for sstable 1, size = 868 [ReadStage-2] | 2026-10-26 21:51:10.396003 | 127.0.1.1 |           1958 | 127.0.0.1
+                            Partition index found for sstable 2, size = 868 [ReadStage-2] | 2026-10-26 21:51:10.624000 | 127.0.1.1 |         229571 | 127.0.0.1
+                            Partition index found for sstable 3, size = 111 [ReadStage-2] | 2026-10-26 21:51:10.798000 | 127.0.1.1 |         403420 | 127.0.0.1
+                                  Merged data from memtables and 3 sstables [ReadStage-2] | 2026-10-26 21:51:10.809000 | 127.0.1.1 |         414755 | 127.0.0.1
+ Read 0 live rows and 120000 tombstone cells (see tombstone_warn_threshold) [ReadStage-2] | 2026-10-26 21:51:10.810000 | 127.0.1.1 |         415417 | 127.0.0.1
+                                                                         Request complete | 20

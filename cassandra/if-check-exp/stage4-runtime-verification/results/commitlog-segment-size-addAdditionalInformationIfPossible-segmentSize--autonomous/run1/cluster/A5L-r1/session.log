@@ -1,0 +1,36 @@
+[2026-10-26T21:26:23.376-0400] cluster-run start arm=A5L rep=1 vol=16MiB seg=8MiB comp=LZ4 free_after_filler=2097152 n=200000 head=9bb60fd6703f90d149921146715efb4da3d77606
+[2026-10-26T21:26:23.428-0400] commit-log volume df size=16777216 (expected 16777216)
+[2026-10-26T21:26:23.463-0400] + bin/cassandra -p /dev/shm/s4-b10-sg-node/cassandra.pid (ulimit -n 100000, MAX_HEAP_SIZE=1G)
+[2026-10-26T21:27:27.026-0400] node up pid=3276589
+CONFIG commit_failure_policy=ignore
+CONFIG commitlog_directory=/users/jason92/s4-b10-sg-clvol/commitlog
+CONFIG commitlog_disk_access_mode=legacy
+CONFIG commitlog_segment_size=8MiB
+CONFIG commitlog_sync=periodic
+CONFIG commitlog_total_space=64MiB
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-27T01:26:28,571 Flushing.java:179 - Completed flushing /dev/shm/s4-b10-sg-node/data/system/local-7ad54392bcdd35a684174e047860b377/nb-1-big-Data.db (195B) for commitlog position CommitLogPosition(segmentId=1793064386439, position=529)
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-10-27T01:26:28,757 Flushing.java:179 - Completed flushing /dev/shm/s4-b10-sg-node/data/system/local-7ad54392bcdd35a684174e047860b377/nb-2-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1793064386439, position=632)
+INFO  [main] 2026-10-27T01:26:28,970 CommitLog.java:201 - No commitlog files found; skipping replay
+[2026-10-26T21:27:27.042-0400] + cassandra-stress write n=1 (schema; before any filler)
+[2026-10-26T21:27:47.591-0400] baseline: 18113 B apparent, df used 24576, 2 files
+[2026-10-26T21:27:47.596-0400] avail before filler 16752640; fallocate 14655488
+[2026-10-26T21:27:47.608-0400] avail after filler 2097152 (target 2097152); df size 16777216
+[2026-10-26T21:27:50.614-0400] STRESS_START 1793064470613 (system.log offset 93007)
+[2026-10-26T21:30:50.620-0400] STRESS_END 1793064650618 rc=124 (180 s)
+[2026-10-26T21:30:50.644-0400] daemon alive after stress: [3276589 ]
+[2026-10-26T21:31:20.649-0400] SETTLE_END 1793064680647
+[2026-10-26T21:31:20.673-0400] daemon alive after settle: [3276589 ]
+SUMMARY arm=A5L vol=16777216 seg=8388608 free_after_filler=2097152
+SUMMARY handleCommitError lines=22 with_needle=0
+SUMMARY kinds={'persist': 22}
+SUMMARY first_error df_avail_then=2097152 df_used=14680064
+SUMMARY other_error 22x CommitLog.java:591 - Failed to persist commits to disk
+SUMMARY apparent_commitlog_bytes max=2113802 df_used max=16777216
+SUMMARY hs_err_files=no
+EXPECTED ok: A5L: a handleCommitError line is logged once free space is exhausted (lines=22)
+EXPECTED ok: A5L: no "bytes required" text although df avail < segment (total 16777216 >= segment 8388608) (needle lines=0)
+[2026-10-26T21:31:20.726-0400] cluster-run end arm=A5L rep=1 analyze_rc=0
+[2026-10-26T21:31:20.730-0400] + nodetool drain (60 s cap)
+[2026-10-26T21:33:01.130-0400] kill -9 3276589
+[2026-10-26T21:33:01.155-0400] daemons left: []
+[2026-10-26T21:33:03.190-0400] cleanup done; mounts left: []

@@ -1,0 +1,28 @@
+**B2f. Predictions.** N=65535 succeeds; N=65536 throws "Too many markers(?)". measureDeep scales roughly linearly in N (order of 100 bytes to a few hundred bytes per marker, so single-digit MiB at 65535). With a fixed N, the number of retained statements and total weight scale with cache size (about size/weight), independent of the 0xFFFF constant. *[Amended 2026-10-26, see B2i: the per-marker figure and the "single-digit MiB" are a source estimate, 100 B to 1 KB per marker (6.5 to 65 MB at 65535), and are not a pass/fail criterion. The prediction is the relation: for every cache size, retained weight (sum of `key.size() + pstmntSize`) <= the cap; at a cap below the weight of one 65535-marker statement the statement is rejected by the size gate at `QueryProcessor.java:824-829` and nothing is retained; retained weight and count at M = 1000 and M = 10 follow the cap ratios 1 : 10 : 100.]*
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Retained weight tracks `prepared_statements_cache_size` and stays below it; per-statement weight is bounded by N*c | Claim confirmed (usage governed by cache cap, constant only bounds a count) |
+| Retained weight grows past the cache size, or tracks 65535 irrespective of cache size | Claim refuted |
+| N=65536 accepted | Source trace wrong |
+| Control (small statements) does not move with cache size, or cache never fills | Not confirmed |
+| *(added 2026-10-26)* At a cap below the weight of one 65535-marker statement, the prepare throws "Prepared statement of size ... larger than allowed maximum" (`QueryProcessor.java:824-829`) and the count is unchanged | The cache cap binds on a single statement; counts toward Claim confirmed together with the other conditions of row 1 |
+| *(added 2026-10-26)* N=65536 rejected with exactly "Too many markers(?). 65536 markers exceed the allowed maximum of 65535" and the count unchanged, N=65535 accepted or size-gate rejected | Disallow evidence for the constant itself; required for Claim confirmed |
+| *(added 2026-10-26)* Retained weight at M = 1000 and M = 10 is <= cap at all three caps but does not rise with the cap (ratio of retained weights across caps < 2 while the caps differ by 10x), or no eviction occurs at a cap | Not confirmed (cache not binding, or workload too small) |
+
+**B3f. Predictions.** Retained prepared-statement heap stays near the configured cache size (10 MiB, then 50 MiB) with evictions and the warning log once exceeded; it does not grow with the number of prepares. Heap delta scales about 5x between the two settings. 65536 markers is rejected. *[Amended 2026-10-26, see B3i: cache sizes 10, 50 and 200 MiB; markers 10 (control), 1000, 65535, one node lifetime per pair. The prediction is the relation: retained weight (JMX `PreparedStatementsCount` times the per-statement weight, and the live `QueryHandler$Prepared` instance count in the post-GC histogram) is bounded by the cap and rises with it, at M = 10 and M = 1000 by the cap ratios 1 : 5 : 20; at M = 65535 either the same relation (count x weight <= cap) or, at a cap below one statement's weight, every prepare is rejected by the size gate and the count stays 0. The live heap delta is reported, not predicted to scale exactly (the persisted copies in `system.prepared_statements` are outside the cache, B3i.3). 65536 markers is rejected with "Too many markers(?)" and the count is unchanged.]*
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Post-GC heap delta plateaus near cache size and moves with it; evictions appear | Claim confirmed |
+| Heap delta keeps growing with prepares, ignoring cache size | Claim refuted |
+| Delta equal at both cache sizes (cache not binding) | Not confirmed; raise workload |
+| 10-marker control also plateaus at cache size | Positive control: cap binds as expected |
+| *(added 2026-10-26)* At a cap below the weight of one 65535-marker statement every prepare of that arm fails with "Prepared statement of size ... larger than allowed maximum" and `PreparedStatementsCount` stays 0 | The cache cap binds on a single statement; counts toward Claim confirmed together with the M = 10 and M = 1000 arms |
+| *(added 2026-10-26)* 65536-marker prepare rejected with "Too many markers(?). 65536 markers exceed the allowed maximum of 65535", count unchanged | Disallow evidence for the constant itself; required for Claim confirmed |
+| *(added 2026-10-26)* Count of live `QueryHandler$Prepared` objects keeps rising with the number offered after evictions began, or retained weight exceeds the cap | Claim refuted |
+

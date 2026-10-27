@@ -1,0 +1,9 @@
+# Hold fixed in every cluster run (case file B3a, audit amendment R10): each write to keyspace ks waits 5 s on the
+# mutation thread, so its request keeps its payload bytes counted for that long. Rule on a Cassandra class: no boot:.
+RULE hold writes to ks
+CLASS org.apache.cassandra.db.commitlog.CommitLog
+METHOD add(org.apache.cassandra.db.Mutation)
+AT ENTRY
+IF $1.getKeyspaceName().equals("ks")
+DO java.lang.Thread.sleep(5000L)
+ENDRULE

@@ -1,0 +1,27 @@
+22:14:41 == w start; tree=/users/jason92/s4-b10-sb chunks=12 rows=[50000, 57500, 66125, 76044, 87450, 100568, 115653, 133001, 152951, 175894, 202278, 232620] spec={"low": 0.01, "high": 100.0, "max": 32}
+22:14:41 EXPECTED: no node of this arm running: PASS 
+22:15:51 EXPECTED: schema compaction map holds the arm's bucket_low/bucket_high/max_threshold (read back): PASS compaction ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+22:15:52 EXPECTED: node reports thresholds 4/<arm max>: PASS Current compaction thresholds for ks/standard1:   min = 4,  max = 32
+22:15:55 EXPECTED: autocompaction is off for ks.standard1 during the load: PASS not running
+22:16:05 EXPECTED: chunk 1: stress wrote 50000 rows without errors: PASS errors=0 rc=0
+22:16:06 EXPECTED: first flush: exactly one sstable: PASS files=1
+22:16:15 EXPECTED: chunk 2: stress wrote 57500 rows without errors: PASS errors=0 rc=0
+22:16:25 EXPECTED: chunk 3: stress wrote 66125 rows without errors: PASS errors=0 rc=0
+22:16:36 EXPECTED: chunk 4: stress wrote 76044 rows without errors: PASS errors=0 rc=0
+22:16:47 EXPECTED: chunk 5: stress wrote 87450 rows without errors: PASS errors=0 rc=0
+22:16:58 EXPECTED: chunk 6: stress wrote 100568 rows without errors: PASS errors=0 rc=0
+22:17:09 EXPECTED: chunk 7: stress wrote 115653 rows without errors: PASS errors=0 rc=0
+22:17:21 EXPECTED: chunk 8: stress wrote 133001 rows without errors: PASS errors=0 rc=0
+22:17:34 EXPECTED: chunk 9: stress wrote 152951 rows without errors: PASS errors=0 rc=0
+22:17:47 EXPECTED: chunk 10: stress wrote 175894 rows without errors: PASS errors=0 rc=0
+22:18:00 EXPECTED: chunk 11: stress wrote 202278 rows without errors: PASS errors=0 rc=0
+22:18:14 EXPECTED: chunk 12: stress wrote 232620 rows without errors: PASS errors=0 rc=0
+22:18:15 EXPECTED: 12 sstables after the last flush, none compacted during the load: PASS n=12
+22:18:15 EXPECTED: sstable sizes ascend with consecutive ratios in [1.10,1.20] (narrow cannot join neighbours, default can): PASS ratios=[1.1391, 1.15, 1.1517, 1.1538, 1.1517, 1.1523, 1.1536, 1.154, 1.1511, 1.1506, 1.1511]
+22:18:15 EXPECTED: total Data.db bytes between 100 MB and 800 MB: PASS total=328547306
+22:18:16 EXPECTED: no compaction ran during the load (history has no ks standard1 row): PASS 
+22:18:20 EXPECTED: autocompaction on again: PASS running
+22:18:45 idle reached=True after 25 s
+22:19:48 EXPECTED: instrument: TRACE "Compaction buckets are" lines reached the log: PASS 
+22:19:48 EXPECTED: idle reached: PASS 25 s
+22:19:54 == w done rc=0 node stopped=True

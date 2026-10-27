@@ -1,0 +1,48 @@
+PASS unit bound L=0 both methods | rejected:Key may not be empty / rejected:Key may not be empty
+PASS unit bound L=1 both methods | accepted / accepted
+PASS unit bound L=1000 both methods | accepted / accepted
+PASS unit bound L=65534 both methods | accepted / accepted
+PASS unit bound L=65535 both methods | accepted / accepted
+PASS unit bound L=65536 both methods | rejected:Key length of 65536 is longer than maximum of 65535 / rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit bound L=70000 both methods | rejected:Key length of 70000 is longer than maximum of 65535 / rejected:Key length of 70000 is longer than maximum of 65535
+PASS unit bound L=1000000 both methods | rejected:Key length of 1000000 is longer than maximum of 65535 / rejected:Key length of 1000000 is longer than maximum of 65535
+PASS unit null and UNSET rejected as empty
+PASS unit stream: 200000 calls accepted, 0 rejected, 6.55e9 key bytes, heap < 100 MB | accepted_calls=200000 rejected_calls=0 key_bytes_validated=6553500000 ms=1716 heap_before=13364216 heap_after=19894200
+PASS unit hold L=65535 slope within L+40..L+120 | 65612.6
+PASS unit hold L=1 slope within 1+40..1+120 | 90.1
+PASS unit slope ratio > 500 | 728
+PASS unit 1000 keys of 65535 B retain about 65.6 MB (65.0 to 66.5) | 72154184 (includes base heap offset of the first reading)
+PASS cluster: 9 writer outputs found | 9
+PASS precheck 5/5 accepted at 65535
+PASS precheck 5/5 rejected at 65536 with exact text
+PASS k16: all 10000 accepted
+PASS k1024: all 10000 accepted
+PASS k32768: all 10000 accepted
+PASS k65535: all 10000 accepted
+PASS c16big: all 650000 accepted
+PASS p128_k32768: all 10000 accepted
+PASS k65536: 10000 rejected, one message, exact text
+PASS k16: Data.db from the flush log (info) | 419933 B vs N*K 160000; ratio 2.625
+PASS k1024: Data.db from the flush log (info) | 10509877 B vs N*K 10240000; ratio 1.026
+PASS k32768: Data.db from the flush log within 1.0..1.2 x N*K | 327964164 B vs N*K 327680000; ratio 1.001
+PASS k65535: Data.db from the flush log within 1.0..1.2 x N*K | 655636824 B vs N*K 655350000; ratio 1.000
+PASS k32768: Data+Index (Index.db from arms.jsonl) between 1.0 and 3.0 x N*K | 2.01
+PASS k32768: harness Data.db within 0.5% of the sum of flush-log Data.db sizes | 329441353 vs 327964164
+PASS k65535: Data+Index (Index.db from arms.jsonl) between 1.0 and 3.0 x N*K | 2.01
+PASS k65535: harness Data.db within 0.5% of the sum of flush-log Data.db sizes | 658595161 vs 655636824
+PASS monotone Data+Index at N=10000 (16<1024<32768<65535)
+PASS k65536: table directory unchanged, memtable empty
+PASS k65535@512: >=1 MEMTABLE_LIMIT flush, off-heap usage <= 640 MiB | [('MEMTABLE_LIMIT', 507.435)]
+PASS k32768@512: no MEMTABLE_LIMIT flush
+PASS k32768@128: >=1 MEMTABLE_LIMIT flush, off-heap usage <= 160 MiB | [('MEMTABLE_LIMIT', 127.628), ('MEMTABLE_LIMIT', 127.034)]
+PASS plateau ratio first MEMTABLE_LIMIT usage between 2.5 and 6 | 507.4/127.6 = 3.98
+PASS c16big Data+Index bytes > k1024 Data+Index bytes | 31139124 vs 20691686
+PASS k1024: RssAnon samples present (info: first 2711 MiB, max 2711 MiB, growth 0 MiB, N*K 10 MiB)
+PASS k32768: RssAnon samples present (info: first 2717 MiB, max 2977 MiB, growth 260 MiB, N*K 312 MiB)
+PASS k65535: RssAnon samples present (info: first 2882 MiB, max 3251 MiB, growth 369 MiB, N*K 625 MiB)
+PASS p128_k32768: RssAnon samples present (info: first 2641 MiB, max 2832 MiB, growth 191 MiB, N*K 312 MiB)
+PASS c16big: RssAnon samples present (info: first 3067 MiB, max 3067 MiB, growth 0 MiB, N*K 10 MiB)
+PASS no ERROR in system.log of either life
+PASS only the nodes of this run: no daemon of this run left
+
+46 hold, 0 do not hold

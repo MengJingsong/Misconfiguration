@@ -1,0 +1,19 @@
+run=run1 arm=U sysdata_dir=0 commitlog_total_space=16384MiB heap=8G start=2026-10-26T20:07:54Z
+yaml: cluster_name: 's4-b8-ls' commitlog_directory: /users/jason92/s4-b8-ls-mnt/node/commitlog disk_failure_policy: stop commitlog_segment_size: 32MiB       - seeds: "127.0.6.1:7000" memtable_heap_space: 2048MiB memtable_offheap_space: 4096MiB memtable_cleanup_threshold: 0.9 memtable_allocation_type: offheap_objects commitlog_total_space: 16384MiB listen_address: 127.0.6.1 rpc_address: 127.0.6.1 auto_snapshot: false     - class_name: org.apache.cassandra.security.JKSKeyProvider     - class_name: BinAuditLogger data_file_directories:     - /users/jason92/s4-b8-ls-mnt/node/data 
+node pid=2900218
+node up at 2026-10-26T20:08:52Z (UN, statusbinary running)
+CONFIG commitlog_total_space=16384MiB
+CONFIG local_system_data_file_directory=null
+startup sys WARN lines: 0: 
+EXPECTED OK: [U] no sys WARN at start
+native port 127.0.6.1:9042 accepts
+stress p1 start 2026-10-26T20:09:03Z: write n=1000000 no-warmup cl=ONE -col n=FIXED(1) size=FIXED(1024) -schema replication(factor=1) -rate threads=64
+stress p1 end 2026-10-26T20:09:21Z rc=0
+workload end 2026-10-26T20:09:41Z; node alive=yes
+UN  127.0.6.1  113.29 KiB  16      100.0%            863d38cd-592e-4993-9ad6-c68cc3332016  rack1
+samples=37 node_alive_last=1 commitlog_bytes_max=1140851408 node_data_bytes_max=123650
+stress-p1.out Total partitions: 1,000,000 [WRITE: 1,000,000] | Total errors: 0 [WRITE: 0] | Op rate: 99,791 op/s  [WRITE: 99,791 op/s]
+system-run.log: sys WARN after start=0, data-volume WARN=0, ERROR lines=0, FSWriteError/NoSpace=0, stop-transports=0
+churn: n/a
+2026-10-26T20:09:42Z done
+cleanup: node pid 2900218 alive=no; mounts left=0; daemons(mine)=0

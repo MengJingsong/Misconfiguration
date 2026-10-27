@@ -1,0 +1,54 @@
+[1793043286798] START p1-16MiB-v5-100k L=16MiB ARM=v5-100k(version 5, blob 100000, C=4, W=640) live=no LOAD_S=90 BASE_S=30
+[1793043286799] + git -C /users/jason92/s4-b8-cr describe --tags
+[1793043286802] + sha256sum /users/jason92/s4-b8-cr-harness/cluster-run.sh /users/jason92/s4-b8-cr-harness/NativeFlood.java /users/jason92/s4-b8-cr-harness/InflightProbe.java /users/jason92/s4-b8-cr-harness/hold-request.btm /users/jason92/s4-b8-cr-harness/reduce.py
+[1793043286855] + rm -rf /dev/shm/s4-b8-cr-data
+[1793043286856] + mkdir -p /dev/shm/s4-b8-cr-data/data /dev/shm/s4-b8-cr-data/commitlog /dev/shm/s4-b8-cr-data/hints /dev/shm/s4-b8-cr-data/saved_caches /dev/shm/s4-b8-cr-data/cdc_raw
+[1793043286899] yaml diff saved (209 lines)
+yaml: native_transport_max_request_data_in_flight: 16MiB
+yaml: native_transport_max_request_data_in_flight_per_ip: 16MiB
+yaml: native_transport_max_message_size: 1MiB
+yaml: native_transport_max_threads: 4
+yaml: native_transport_receive_queue_capacity: 1MiB
+yaml: native_transport_timeout: 600000ms
+yaml: read_request_timeout: 600000ms
+yaml: write_request_timeout: 600000ms
+[1793043286902] ulimit -n 100000
+[1793043286903] + CASSANDRA_CONF=/users/jason92/s4-b8-cr-node/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b8-cr-logs/cluster/p1-16MiB-v5-100k/logs MAX_HEAP_SIZE=1G JVM_EXTRA_OPTS="-Dio.netty.maxDirectMemory=0 -XX:MaxDirectMemorySize=4g -XX:NativeMemoryTracking=summary -Dstage4.hold.file=/users/jason92/s4-b8-cr-logs/cluster/p1-16MiB-v5-100k/hold.flag -Dstage4.hold.ms=100 -Dstage4.trace=/users/jason92/
+[1793043349136] node up after 63 s, pid 1513792
+jvm-arg: -Xms1G
+jvm-arg: -Xmx1G
+jvm-arg: -XX:MaxDirectMemorySize=15872M
+jvm-arg: -javaagent:bin/../lib/jamm-0.4.0.jar
+jvm-arg: -Dio.netty.maxDirectMemory=0
+jvm-arg: -XX:MaxDirectMemorySize=4g
+jvm-arg: -XX:NativeMemoryTracking=summary
+jvm-arg: -Dstage4.hold.file=/users/jason92/s4-b8-cr-logs/cluster/p1-16MiB-v5-100k/hold.flag
+jvm-arg: -Dstage4.hold.ms=100
+jvm-arg: -Dstage4.trace=/users/jason92/s4-b8-cr-logs/cluster/p1-16MiB-v5-100k/hold.trace
+jvm-arg: -javaagent:/users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar=port:19150,address:127.0.0.1,script:/users/jason92/s4-b8-cr-harness/hold-request.btm,listener:true
+[1793043350249] global limit at start: 16777216
+[1793043351371] per-IP limit at start: 16777216
+[1793043351373] + java -cp /users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar:/users/jason92/s4-b8-cr/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -p 19150 -l
+[1793043351452] + /users/jason92/s4-b8-cr/bin/cqlsh 127.0.5.1 9042 -e CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE IF NOT EXISTS ks.t (pk int PRIMARY KEY, v blob);
+[1793043353077] warm-up flood (no hold; 20000-B values, below LARGE_MESSAGE_THRESHOLD, so a v5 arm does not start with a frame-buffer residue)
+[1793043369337] + java -cp /users/jason92/s4-b8-cr-harness InflightProbe 127.0.0.1 7150 200 30000 > /users/jason92/s4-b8-cr-logs/cluster/p1-16MiB-v5-100k/base.csv
+[1793043400326] baseline rows: 148
+[1793043400329] probe started pid 1519419 at 1793043400328
+[1793043401335] client start 1793043401334 (hold flag on)
+[1793043403346] first trigger ok: 24 hold lines; RequestsSize seen > 0
+EXPECTED: first trigger: hold rule fired and RequestsSize > 0 within 15 s: PASS
+[1793043557282] client end 1793043557281 (rc 0, elapsed 155947 ms)
+[1793043560302] + nodetool sjk mx -b org.apache.cassandra.metrics:type=Client,name=RequestsSize -mg -f Value
+system.log ERROR+WARN lines: 5
+netty LEAK lines: 0
+hold lines: 6136
+[1793043561411] stopping node pids: 1513792
+[1793043566638] node stopped; none left
+[1793043566640] + python3 /users/jason92/s4-b8-cr-harness/reduce.py /users/jason92/s4-b8-cr-logs/cluster/p1-16MiB-v5-100k 16MiB v5-100k no
+EXPECTED: P1 Peak_RS <= L + 4 MiB: PASS (peak 15.95 MiB, L+4 = 20.00 MiB)
+EXPECTED: P2 Delta <= bound(L) = 1.5 L + 6 MiB: FAIL (delta 64.06 MiB, bound 30.00 MiB)
+EXPECTED: P3 PausedConnections >= 1: PASS (max 4)
+EXPECTED: P0 limit reached (Peak_RS >= 0.9 L): PASS (peak/L = 0.997)
+EXPECTED: P3 client other_err == 0: PASS (err 0 ovl_other 0)
+[1793043566705] no node running
+[1793043566710] END p1-16MiB-v5-100k

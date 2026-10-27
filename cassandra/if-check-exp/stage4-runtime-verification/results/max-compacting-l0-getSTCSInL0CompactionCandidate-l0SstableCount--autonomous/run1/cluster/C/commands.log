@@ -1,0 +1,1955 @@
+19:10:26 == C start; tree=/users/jason92/s4-b10-lz-node rows=1500000 spec={"throughput": "1MiB/s", "compactors": 1, "flag": true, "compaction_off": false, "drain": true} addr=127.0.4.1 jmx=7140
+19:10:26 $ sudo mkdir -p /mnt/s4lz && (mountpoint -q /mnt/s4lz || sudo mount -t tmpfs -o size=12g tmpfs /mnt/s4lz) && sudo chown $(id -u):$(id -g) /mnt/s4lz
+
+19:10:26 $ rm -rf /mnt/s4lz/* && mkdir -p /mnt/s4lz/data /mnt/s4lz/commitlog /mnt/s4lz/hints /mnt/s4lz/saved_caches
+
+19:10:26 $ ulimit -n 100000; cd /users/jason92/s4-b10-lz-node && ( CASSANDRA_CONF=/users/jason92/s4-b10-lz-logs/cluster1/C/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b10-lz-logs/cluster1/C/logs MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M JVM_EXTRA_OPTS="-Dcassandra.disable_stcs_in_l0=true" setsid nohup bin/cassandra -f -p /users/jason92/s4-b10-lz-logs/cluster1/C/pid < /dev/null > /users/jason92/s4-b10-lz-logs/cluster1/C/node.out 2>&1 & )
+
+19:11:28 node up, pid 2083515
+19:11:28 $ /users/jason92/s4-b10-lz-node/bin/cqlsh 127.0.4.1 -e "CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+
+19:11:29 $ /users/jason92/s4-b10-lz-node/bin/cqlsh 127.0.4.1 -e "CREATE TABLE IF NOT EXISTS ks.standard1 (key blob PRIMARY KEY, \"C0\" blob, \"C1\" blob, \"C2\" blob, \"C3\" blob, \"C4\" blob) WITH compression = {'enabled':'false'} AND compaction = {'class':'LeveledCompactionStrategy','sstable_size_in_mb':'10','fanout_size':'10'}"
+
+19:11:29 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 0
+	Write Latency: NaN ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		SSTables in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 0
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 0
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 0
+		Local write latency: NaN ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:11:31 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 setlogginglevel org.apache.cassandra.db.compaction.LeveledManifest DEBUG
+
+19:11:32 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 getcompactionthroughput; /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 getconcurrentcompactors; /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 getlogginglevels | grep -i LeveledManifest
+Current compaction throughput: 1 MB/s
+Current concurrent compactors in the system is: 
+1
+org.apache.cassandra.db.compaction.LeveledManifest     DEBUG
+
+19:11:35 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:11:35 $ /users/jason92/s4-b10-lz-node/tools/bin/cassandra-stress write n=1500000 -col 'size=FIXED(1000)' 'n=FIXED(1)' -pop seq=1..1500000 -schema keyspace=ks -rate threads=64 throttle=5000/s -node 127.0.4.1 > /users/jason92/s4-b10-lz-logs/cluster1/C/stress-write.txt 2>&1; tail -n 45 /users/jason92/s4-b10-lz-logs/cluster1/C/stress-write.txt | head -n 40
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 0
+	Write Latency: NaN ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		SSTables in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 0
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 0
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 0
+		Local write latency: NaN ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:11:36 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            4          
+data compacted                   48376      
+compressed data compacted        14137      
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.26/minute
+mean rate                        219.33/hour
+compaction throughput (MiB/s)    1.0        
+
+19:11:57 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 134041
+	Write Latency: 0.019692377705328966 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 14
+		Old SSTable count: 0
+		Max SSTable size: 50.212MiB
+		SSTables in each level: [13/4, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [137122149, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 139600630
+		Space used (total): 139600630
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 115474
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 84926
+		Memtable cell count: 1249
+		Memtable data size: 1314397
+		Memtable off heap memory used: 0
+		Memtable switch count: 13
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 134329
+		Local write latency: 0.021 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 130.770MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 90880
+		Bloom filter off heap memory used: 90768
+		Index summary off heap memory used: 24706
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:11:58 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                   
+pending tasks                        11                                                                  
+ks                                   standard1       11                                                  
+compactions completed                4                                                                   
+data compacted                       48376                                                               
+compressed data compacted            14137                                                               
+compactions aborted                  0                                                                   
+compactions reduced                  0                                                                   
+sstables dropped from compaction     0                                                                   
+15 minute rate                       0.26/minute                                                         
+mean rate                            163.20/hour                                                         
+compaction throughput (MiB/s)        1.0                                                                 
+id                                   compaction type keyspace table     completed total    unit  progress
+5f108a70-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 18884653  55223514 bytes 34.20%  
+active compaction remaining time     0h00m34s                                                            
+
+19:12:20 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 246958
+	Write Latency: 0.01527914868115226 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 32
+		Old SSTable count: 0
+		Max SSTable size: 50.212MiB
+		SSTables in each level: [29/4, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [253697006, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 258321215
+		Space used (total): 258321215
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 224756
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 195754
+		Memtable cell count: 1607
+		Memtable data size: 1689939
+		Memtable off heap memory used: 0
+		Memtable switch count: 29
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 247328
+		Local write latency: 0.015 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 241.944MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 177272
+		Bloom filter off heap memory used: 177016
+		Index summary off heap memory used: 47740
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:12:21 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                   
+pending tasks                        22                                                                  
+ks                                   standard1       22                                                  
+compactions completed                4                                                                   
+data compacted                       48376                                                               
+compressed data compacted            14137                                                               
+compactions aborted                  0                                                                   
+compactions reduced                  0                                                                   
+sstables dropped from compaction     0                                                                   
+15 minute rate                       0.25/minute                                                         
+mean rate                            130.05/hour                                                         
+compaction throughput (MiB/s)        1.0                                                                 
+id                                   compaction type keyspace table     completed total    unit  progress
+5f108a70-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 42459897  55223514 bytes 76.89%  
+active compaction remaining time     0h00m12s                                                            
+
+19:12:42 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 359633
+	Write Latency: 0.01342563947134996 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 48
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [43/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [315763535, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 374267397
+		Space used (total): 374267397
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 291914
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 310361
+		Memtable cell count: 838
+		Memtable data size: 882209
+		Memtable off heap memory used: 0
+		Memtable switch count: 45
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 359875
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 350.490MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 230720
+		Bloom filter off heap memory used: 230336
+		Index summary off heap memory used: 61578
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:12:43 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        28                                                                   
+ks                                   standard1       28                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.31/minute                                                          
+mean rate                            135.16/hour                                                          
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 10791631  286726931 bytes 3.76%   
+active compaction remaining time     0h04m23s                                                             
+
+19:13:05 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 471781
+	Write Latency: 0.01232983100209631 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 65
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [58/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [425052076, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 485567566
+		Space used (total): 485567566
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 393010
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 418679
+		Memtable cell count: 337
+		Memtable data size: 356660
+		Memtable off heap memory used: 0
+		Memtable switch count: 61
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 472182
+		Local write latency: 0.011 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 454.715MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 314648
+		Bloom filter off heap memory used: 309608
+		Index summary off heap memory used: 83402
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:13:06 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        39                                                                   
+ks                                   standard1       39                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.30/minute                                                          
+mean rate                            115.70/hour                                                          
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 34262212  286726931 bytes 11.95%  
+active compaction remaining time     0h04m00s                                                             
+
+19:13:27 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 583827
+	Write Latency: 0.01172390279997328 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 83
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [74/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [541531714, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 604191340
+		Space used (total): 604191340
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 499698
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 530947
+		Memtable cell count: 7083
+		Memtable data size: 7436361
+		Memtable off heap memory used: 0
+		Memtable switch count: 76
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 584264
+		Local write latency: 0.011 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 565.799MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 393904
+		Bloom filter off heap memory used: 393240
+		Index summary off heap memory used: 106458
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:13:28 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        50                                                                   
+ks                                   standard1       50                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.30/minute                                                          
+mean rate                            101.07/hour                                                          
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 57814570  286726931 bytes 20.16%  
+active compaction remaining time     0h03m38s                                                             
+
+19:13:50 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 696011
+	Write Latency: 0.011213824206801329 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 100
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [90/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [658644772, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 723459400
+		Space used (total): 723459400
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 597158
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 645135
+		Memtable cell count: 6119
+		Memtable data size: 6424076
+		Memtable off heap memory used: 0
+		Memtable switch count: 92
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 696452
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 677.487MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 470160
+		Bloom filter off heap memory used: 469360
+		Index summary off heap memory used: 127798
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:13:51 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        61                                                                   
+ks                                   standard1       61                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.29/minute                                                          
+mean rate                            89.79/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 81255131  286726931 bytes 28.34%  
+active compaction remaining time     0h03m15s                                                             
+
+19:14:12 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 807949
+	Write Latency: 0.010885619018032078 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 118
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [106/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [775140973, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 842099989
+		Space used (total): 842099989
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 703824
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 749220
+		Memtable cell count: 5530
+		Memtable data size: 5804117
+		Memtable off heap memory used: 0
+		Memtable switch count: 108
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 808416
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 788.586MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 553936
+		Bloom filter off heap memory used: 552992
+		Index summary off heap memory used: 150832
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:14:13 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        72                                                                   
+ks                                   standard1       72                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.28/minute                                                          
+mean rate                            80.78/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 104685370 286726931 bytes 36.51%  
+active compaction remaining time     0h02m53s                                                             
+
+19:14:34 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 919794
+	Write Latency: 0.010646710024201072 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 135
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [122/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [891411544, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 960511035
+		Space used (total): 960511035
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 800656
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 861556
+		Memtable cell count: 5024
+		Memtable data size: 5275421
+		Memtable off heap memory used: 0
+		Memtable switch count: 124
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 920250
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 899.470MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 629696
+		Bloom filter off heap memory used: 628616
+		Index summary off heap memory used: 172040
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:14:36 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        83                                                                   
+ks                                   standard1       83                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.27/minute                                                          
+mean rate                            73.38/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 128253289 286726931 bytes 44.73%  
+active compaction remaining time     0h02m31s                                                             
+
+19:14:57 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1032070
+	Write Latency: 0.010454894532347613 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 152
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [138/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1006771314, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1077995578
+		Space used (total): 1077995578
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 898086
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 961029
+		Memtable cell count: 5770
+		Memtable data size: 6055877
+		Memtable off heap memory used: 0
+		Memtable switch count: 140
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1032456
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1009.486MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 706208
+		Bloom filter off heap memory used: 704992
+		Index summary off heap memory used: 193094
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:14:58 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        94                                                                   
+ks                                   standard1       94                                                   
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.27/minute                                                          
+mean rate                            67.24/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 151712464 286726931 bytes 52.91%  
+active compaction remaining time     0h02m08s                                                             
+
+19:15:19 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1144455
+	Write Latency: 0.010296094647670727 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 170
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [154/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1123654603, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1197029961
+		Space used (total): 1197029961
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1005074
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1076298
+		Memtable cell count: 5396
+		Memtable data size: 5661453
+		Memtable off heap memory used: 0
+		Memtable switch count: 156
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1145012
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.095GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 790240
+		Bloom filter off heap memory used: 788880
+		Index summary off heap memory used: 216194
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:15:20 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        105                                                                  
+ks                                   standard1       105                                                  
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.26/minute                                                          
+mean rate                            62.03/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 175281363 286726931 bytes 61.13%  
+active compaction remaining time     0h01m46s                                                             
+
+19:15:42 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1256719
+	Write Latency: 0.0101834117252942 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 187
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [170/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1240123892, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1315643178
+		Space used (total): 1315643178
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1102076
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1186981
+		Memtable cell count: 4965
+		Memtable data size: 5214579
+		Memtable off heap memory used: 0
+		Memtable switch count: 172
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1257122
+		Local write latency: 0.009 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.203GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 866104
+		Bloom filter off heap memory used: 864608
+		Index summary off heap memory used: 237468
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:15:43 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        116                                                                  
+ks                                   standard1       116                                                  
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.26/minute                                                          
+mean rate                            57.58/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 198813031 286726931 bytes 69.34%  
+active compaction remaining time     0h01m23s                                                             
+
+19:16:04 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1368940
+	Write Latency: 0.010094906277850015 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 205
+		Old SSTable count: 0
+		Max SSTable size: 10.182MiB
+		SSTables in each level: [186/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1356732905, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1434398520
+		Space used (total): 1434398520
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1208822
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1298384
+		Memtable cell count: 4648
+		Memtable data size: 4879948
+		Memtable off heap memory used: 0
+		Memtable switch count: 188
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1369466
+		Local write latency: 0.009 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.312GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 949960
+		Bloom filter off heap memory used: 948320
+		Index summary off heap memory used: 260502
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:16:05 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        128                                                                  
+ks                                   standard1       128                                                  
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.25/minute                                                          
+mean rate                            53.71/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 222362309 286726931 bytes 77.55%  
+active compaction remaining time     0h01m01s                                                             
+
+19:16:27 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1482957
+	Write Latency: 0.010040466446431015 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 220
+		Old SSTable count: 0
+		Max SSTable size: 12.083MiB
+		SSTables in each level: [200/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1472357886, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1552136040
+		Space used (total): 1552136040
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1305128
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1416415
+		Memtable cell count: 6990
+		Memtable data size: 7338804
+		Memtable off heap memory used: 0
+		Memtable switch count: 202
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1483525
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.419GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1025288
+		Bloom filter off heap memory used: 1023528
+		Index summary off heap memory used: 281600
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:16:28 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        139                                                                  
+ks                                   standard1       139                                                  
+compactions completed                5                                                                    
+data compacted                       55271890                                                             
+compressed data compacted            55237651                                                             
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.24/minute                                                          
+mean rate                            50.24/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+7deacb90-d1a3-11f1-8ec0-47e148283761 Compaction      ks       standard1 246606055 286726931 bytes 86.01%  
+active compaction remaining time     0h00m38s                                                             
+
+   5000,    5000,     0.3,     0.2,     0.3,     0.4,     0.8,     5.3,  291.0,  0.00313,      0,      0,       0,       0,       0,       0
+total,                                               1455465,    5000,    5000,    5000,     0.2,     0.2,     0.3,     0.3,     0.9,     4.3,  292.0,  0.00312,      0,      0,       0,       0,       0,       0
+total,                                               1460465,    5000,    5000,    5000,     0.2,     0.2,     0.3,     0.4,     0.5,     0.8,  293.0,  0.00311,      0,      0,       0,       0,       0,       0
+total,                                               1465463,    4998,    4998,    4998,     0.5,     0.3,     1.1,     4.0,     7.0,     8.0,  294.0,  0.00310,      0,      0,       0,       0,       0,       0
+total,                                               1470463,    5000,    5000,    5000,     0.5,     0.3,     0.8,     5.0,     8.4,    15.9,  295.0,  0.00309,      0,      0,       0,       0,       0,       0
+total,                                               1475465,    5002,    5002,    5002,     0.3,     0.3,     0.4,     1.3,     5.3,     8.1,  296.0,  0.00308,      0,      0,       0,       0,       0,       0
+total,                                               1480465,    5000,    5000,    5000,     0.2,     0.2,     0.3,     0.3,     0.7,     5.0,  297.0,  0.00307,      0,      0,       0,       0,       0,       0
+total,                                               1485465,    5000,    5000,    5000,     0.2,     0.2,     0.3,     0.4,     0.5,     1.0,  298.0,  0.00306,      0,      0,       0,       0,       0,       0
+total,                                               1490465,    5000,    5000,    5000,     0.2,     0.2,     0.3,     0.4,     0.8,     2.6,  299.0,  0.00305,      0,      0,       0,       0,       0,       0
+total,                                               1495465,    5000,    5000,    5000,     0.2,     0.2,     0.3,     0.3,     0.5,     4.6,  300.0,  0.00304,      0,      0,       0,       0,       0,       0
+total,                                               1500000,    4999,    4999,    4999,     0.3,     0.3,     0.3,     2.0,     7.8,     8.5,  300.9,  0.00303,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :    4,985 op/s  [WRITE: 4,985 op/s]
+Partition rate            :    4,985 pk/s  [WRITE: 4,985 pk/s]
+Row rate                  :    4,985 row/s [WRITE: 4,985 row/s]
+Latency mean              :    0.3 ms [WRITE: 0.3 ms]
+Latency median            :    0.2 ms [WRITE: 0.2 ms]
+Latency 95th percentile   :    0.3 ms [WRITE: 0.3 ms]
+Latency 99th percentile   :    0.4 ms [WRITE: 0.4 ms]
+Latency 99.9th percentile :    3.9 ms [WRITE: 3.9 ms]
+Latency max               :   36.1 ms [WRITE: 36.1 ms]
+Total partitions          :  1,500,000 [WRITE: 1,500,000]
+Total errors              :          0 [WRITE: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+
+19:16:44 stress write finished in 309s
+19:16:48 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 flush ks standard1
+
+19:16:49 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:16:50 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 231
+		Old SSTable count: 0
+		Max SSTable size: 12.083MiB
+		SSTables in each level: [209/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1548413085, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1629579107
+		Space used (total): 1629579107
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1380546
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.490GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1084536
+		Bloom filter off heap memory used: 1082688
+		Index summary off heap memory used: 297858
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:16:50 $ df -B1 /mnt/s4lz | tail -1
+tmpfs          12884901888 1964384256 10920517632  16% /mnt/s4lz
+
+19:16:50 snapshot lag-end: bytes=1855721783 files=236 L0..=[209, 5, 0, 0, 0, 0, 0, 0, 0] bytes/level=[1548413085, 51751476, 0, 0, 0, 0, 0, 0, 0]
+19:16:50 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 setcompactionthroughput 0
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 231
+		Old SSTable count: 0
+		Max SSTable size: 12.083MiB
+		SSTables in each level: [209/4, 5, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [1548413085, 51751476, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1629579107
+		Space used (total): 1629579107
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1380546
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.490GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1084536
+		Bloom filter off heap memory used: 1082688
+		Index summary off heap memory used: 297858
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:16:51 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+
+19:16:52 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 setconcurrentcompactors 4
+concurrent compactors                1                                                                           
+pending tasks                        132                                                                         
+ks                                   standard1               132                                                 
+compactions completed                10                                                                          
+data compacted                       383943717                                                                   
+compressed data compacted            383909478                                                                   
+compactions aborted                  0                                                                           
+compactions reduced                  0                                                                           
+sstables dropped from compaction     0                                                                           
+15 minute rate                       0.24/minute                                                                 
+mean rate                            94.51/hour                                                                  
+compaction throughput (MiB/s)        throttling disabled (0)                                                     
+id                                   compaction type         keyspace table     completed total    unit  progress
+17ad2160-d1a4-11f1-8ec0-47e148283761 Compaction              ks       standard1 6578476   10486211 bytes 62.73%  
+active compaction remaining time     n/a                                                                         
+
+
+19:17:12 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:17:13 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tpstats
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 172
+		Old SSTable count: 0
+		Max SSTable size: 12.083MiB
+		SSTables in each level: [81/4, 17/10, 73, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [614059890, 178267823, 761062940, 0, 0, 0, 0, 0, 0]
+		Space used (live): 1581778776
+		Space used (total): 1581778776
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1366162
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.447GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1100264
+		Bloom filter off heap memory used: 1103944
+		Index summary off heap memory used: 262218
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:17:14 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+19:17:14 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                4                                                                           
+pending tasks                        58                                                                          
+ks                                   standard1               58                                                  
+compactions completed                88                                                                          
+data compacted                       3294435581                                                                  
+compressed data compacted            3294401342                                                                  
+compactions aborted                  0                                                                           
+compactions reduced                  0                                                                           
+sstables dropped from compaction     0                                                                           
+15 minute rate                       4.84/minute                                                                 
+mean rate                            794.33/hour                                                                 
+compaction throughput (MiB/s)        throttling disabled (0)                                                     
+id                                   compaction type         keyspace table     completed total    unit  progress
+25132750-d1a4-11f1-8ec0-47e148283761 Compaction              ks       standard1 0         20972290 bytes 0.00%   
+active compaction remaining time     n/a                                                                         
+
+concurrent compactors                4                                                                            
+pending tasks                        56                                                                           
+ks                                   standard1               56                                                   
+compactions completed                90                                                                           
+data compacted                       3357352961                                                                   
+compressed data compacted            3357318722                                                                   
+compactions aborted                  0                                                                            
+compactions reduced                  0                                                                            
+sstables dropped from compaction     0                                                                            
+15 minute rate                       4.84/minute                                                                  
+mean rate                            801.98/hour                                                                  
+compaction throughput (MiB/s)        throttling disabled (0)                                                      
+id                                   compaction type         keyspace table     completed total     unit  progress
+252528b0-d1a4-11f1-8ec0-47e148283761 Compaction              ks       standard1 50113202  337433346 bytes 14.85%  
+active compaction remaining time     n/a                                                                          
+
+19:17:15 drain[write] busy=1 estimate=56 bytes=1603101372
+19:17:35 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:17:35 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tpstats
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 153
+		Old SSTable count: 0
+		Max SSTable size: 12.083MiB
+		SSTables in each level: [17/4, 13/10, 100, 22, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [147519299, 136322834, 1039301138, 230697878, 0, 0, 0, 0, 0]
+		Space used (live): 1582071407
+		Space used (total): 1582071407
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1376308
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.447GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1107168
+		Bloom filter off heap memory used: 1113848
+		Index summary off heap memory used: 262460
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:17:36 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+19:17:37 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors                4                                                                            
+pending tasks                        12                                                                           
+ks                                   standard1               12                                                   
+compactions completed                163                                                                          
+data compacted                       6381369443                                                                   
+compressed data compacted            6381335204                                                                   
+compactions aborted                  0                                                                            
+compactions reduced                  0                                                                            
+sstables dropped from compaction     0                                                                            
+15 minute rate                       10.25/minute                                                                 
+mean rate                            1377.86/hour                                                                 
+compaction throughput (MiB/s)        throttling disabled (0)                                                      
+id                                   compaction type         keyspace table     completed total     unit  progress
+3246ab90-d1a4-11f1-8ec0-47e148283761 Compaction              ks       standard1 25254586  252382957 bytes 10.01%  
+active compaction remaining time     n/a                                                                          
+
+concurrent compactors                4                                                                            
+pending tasks                        12                                                                           
+ks                                   standard1               12                                                   
+compactions completed                163                                                                          
+data compacted                       6381369443                                                                   
+compressed data compacted            6381335204                                                                   
+compactions aborted                  0                                                                            
+compactions reduced                  0                                                                            
+sstables dropped from compaction     0                                                                            
+15 minute rate                       10.25/minute                                                                 
+mean rate                            1375.01/hour                                                                 
+compaction throughput (MiB/s)        throttling disabled (0)                                                      
+id                                   compaction type         keyspace table     completed total     unit  progress
+3246ab90-d1a4-11f1-8ec0-47e148283761 Compaction              ks       standard1 75797858  252382957 bytes 30.03%  
+active compaction remaining time     n/a                                                                          
+
+19:17:38 drain[write] busy=1 estimate=12 bytes=1621570443
+19:17:57 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:17:58 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tpstats
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 158
+		Old SSTable count: 0
+		Max SSTable size: 10.187MiB
+		SSTables in each level: [0, 10, 107/100, 41, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0]
+		Space used (live): 1582330498
+		Space used (total): 1582330498
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1420568
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.447GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1160824
+		Bloom filter off heap memory used: 1159560
+		Index summary off heap memory used: 261008
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:17:59 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+19:18:00 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            195                    
+data compacted                   7294389525             
+compressed data compacted        7294355286             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   12.38/minute           
+mean rate                        1563.03/hour           
+compaction throughput (MiB/s)    throttling disabled (0)
+
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            195                    
+data compacted                   7294389525             
+compressed data compacted        7294355286             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   12.38/minute           
+mean rate                        1560.54/hour           
+compaction throughput (MiB/s)    throttling disabled (0)
+
+19:18:01 drain[write] busy=0 estimate=0 bytes=1582330498
+19:18:21 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:18:21 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tpstats
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 158
+		Old SSTable count: 0
+		Max SSTable size: 10.187MiB
+		SSTables in each level: [0, 10, 107/100, 41, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0]
+		Space used (live): 1582330498
+		Space used (total): 1582330498
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1420568
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.447GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1160824
+		Bloom filter off heap memory used: 1159560
+		Index summary off heap memory used: 261008
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:18:22 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+19:18:23 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            195                    
+data compacted                   7294389525             
+compressed data compacted        7294355286             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   12.04/minute           
+mean rate                        1487.31/hour           
+compaction throughput (MiB/s)    throttling disabled (0)
+
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            195                    
+data compacted                   7294389525             
+compressed data compacted        7294355286             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   12.04/minute           
+mean rate                        1485.75/hour           
+compaction throughput (MiB/s)    throttling disabled (0)
+
+19:18:24 drain[write] busy=0 estimate=0 bytes=1582330498
+19:18:43 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+19:18:44 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tpstats
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 158
+		Old SSTable count: 0
+		Max SSTable size: 10.187MiB
+		SSTables in each level: [0, 10, 107/100, 41, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0]
+		Space used (live): 1582330498
+		Space used (total): 1582330498
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1420568
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.447GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1160824
+		Bloom filter off heap memory used: 1159560
+		Index summary off heap memory used: 261008
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:18:45 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+ERNAL_RSP                      0           0.0      0.0      0.0      0.0
+FAILED_SESSION_MSG                0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_COMPLETE_REQ       0           0.0      0.0      0.0      0.0
+_TRACE                            0           0.0      0.0      0.0      0.0
+SCHEMA_VERSION_RSP                0           0.0      0.0      0.0      0.0
+FINALIZE_COMMIT_MSG               0           0.0      0.0      0.0      0.0
+SNAPSHOT_MSG                      0           0.0      0.0      0.0      0.0
+PREPARE_CONSISTENT_RSP            0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_REQ                 0           0.0      0.0      0.0      0.0
+PAXOS_PREPARE_RSP                 0           0.0      0.0      0.0      0.0
+MUTATION_REQ                      0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_RSP2               0           0.0      0.0      0.0      0.0
+READ_REQ                          0           0.0      0.0      0.0      0.0
+PING_RSP                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_REQ          0           0.0      0.0      0.0      0.0
+RANGE_RSP                         0           0.0      0.0      0.0      0.0
+VALIDATION_REQ                    0           0.0      0.0      0.0      0.0
+SYNC_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_RSP                0           0.0      0.0      0.0      0.0
+_TEST_1                           0           0.0      0.0      0.0      0.0
+GOSSIP_SHUTDOWN                   0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_START_PREPARE_RSP  0           0.0      0.0      0.0      0.0
+TRUNCATE_REQ                      0           0.0      0.0      0.0      0.0
+_TEST_2                           0           0.0      0.0      0.0      0.0
+GOSSIP_DIGEST_ACK                 0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_REQ                0           0.0      0.0      0.0      0.0
+SCHEMA_PUSH_REQ                   0           0.0      0.0      0.0      0.0
+FINALIZE_PROMISE_MSG              0           0.0      0.0      0.0      0.0
+PAXOS2_CLEANUP_FINISH_PREPARE_REQ 0           0.0      0.0      0.0      0.0
+PAXOS2_PREPARE_REQ                0           0.0      0.0      0.0      0.0
+BATCH_STORE_REQ                   0           0.0      0.0      0.0      0.0
+COUNTER_MUTATION_RSP              0           0.0      0.0      0.0      0.0
+REPAIR_RSP                        0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_REQ     0           0.0      0.0      0.0      0.0
+STATUS_REQ                        0           0.0      0.0      0.0      0.0
+SCHEMA_PULL_REQ                   0           0.0      0.0      0.0      0.0
+READ_REPAIR_REQ                   0           0.0      0.0      0.0      0.0
+REPLICATION_DONE_REQ              0           0.0      0.0      0.0      0.0
+PAXOS_PROPOSE_RSP                 0           0.0      0.0      0.0      0.0
+
+19:18:45 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 compactionstats
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            195                    
+data compacted                   7294389525             
+compressed data compacted        7294355286             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   11.78/minute           
+mean rate                        1419.55/hour           
+compaction throughput (MiB/s)    throttling disabled (0)
+
+concurrent compactors            4                      
+pending tasks                    0                      
+compactions completed            195                    
+data compacted                   7294389525             
+compressed data compacted        7294355286             
+compactions aborted              0                      
+compactions reduced              0                      
+sstables dropped from compaction 0                      
+15 minute rate                   11.78/minute           
+mean rate                        1418.64/hour           
+compaction throughput (MiB/s)    throttling disabled (0)
+
+19:18:46 drain[write] busy=0 estimate=0 bytes=1582330498
+19:18:46 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 158
+		Old SSTable count: 0
+		Max SSTable size: 10.187MiB
+		SSTables in each level: [0, 10, 107/100, 41, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0]
+		Space used (live): 1582330498
+		Space used (total): 1582330498
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 1420568
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.447GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1160824
+		Bloom filter off heap memory used: 1159560
+		Index summary off heap memory used: 261008
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:18:48 $ df -B1 /mnt/s4lz | tail -1
+tmpfs          12884901888 1688117248 11196784640  14% /mnt/s4lz
+
+19:18:48 snapshot settled-write: bytes=1582330498 files=158 L0..=[0, 10, 107, 41, 0, 0, 0, 0, 0] bytes/level=[0, 95229120, 1039340846, 419453257, 0, 0, 0, 0, 0]
+19:18:54 $ grep -h "L0 is too far behind" /users/jason92/s4-b10-lz-logs/cluster1/C/logs/debug.log* > /users/jason92/s4-b10-lz-logs/cluster1/C/stcs-lines.txt; wc -l < /users/jason92/s4-b10-lz-logs/cluster1/C/stcs-lines.txt
+0
+
+19:18:54 $ /users/jason92/s4-b10-lz-node/bin/cqlsh 127.0.4.1 -e "TRUNCATE ks.standard1"
+
+19:19:04 $ /users/jason92/s4-b10-lz-node/bin/nodetool -h 127.0.0.1 -p 7140 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.010037887096774193 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 0
+		Old SSTable count: 0
+		Max SSTable size: 0B
+		SSTables in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 0
+		Space used (total): 0
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 0
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 0
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 211
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.010 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 100.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 0B
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 0
+		Bloom filter off heap memory used: 0
+		Index summary off heap memory used: 0
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 0
+		Compacted partition maximum bytes: 0
+		Compacted partition mean bytes: 0
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+19:19:06 $ df -B1 /mnt/s4lz | tail -1
+tmpfs          12884901888 102154240 12782747648   1% /mnt/s4lz
+
+19:19:06 snapshot truncated: bytes=0 files=0 L0..=[0, 0, 0, 0, 0, 0, 0, 0, 0] bytes/level=[0, 0, 0, 0, 0, 0, 0, 0, 0]
+19:19:10 daemons of this run left after stop: none
+19:19:10 == C done rc=0 node stopped=True

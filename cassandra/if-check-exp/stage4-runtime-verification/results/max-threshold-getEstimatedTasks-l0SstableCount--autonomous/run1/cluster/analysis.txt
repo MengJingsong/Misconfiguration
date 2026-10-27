@@ -1,0 +1,30 @@
+arm   mt  | L0  pend base | tableBytes  dataDirBytes  rssAnon     liveHeap  | B: L0 pend tableBytes rssAnon liveHeap
+mt4      4 |  308   79   0 |   933619011    933734880  2928640000  78853240 |  299   77   922777629  2930315264  82216296
+mt32    32 |  299   11   0 |   933588207    933704062  2917195776  78638616 |  268   11   929928212  2919313408  81745888
+mt128  128 |  310    4   0 |   933628801    933744665  2943324160  78804048 |  310    5  1107912552  2945089536  82951328
+mt32b   32 |  321   12   0 |   933666313    933782171  2964377600  79069368 |  290   12   942310424  2965602304  82250464
+c64     32 |  248    9   0 |   933676804    933792668  2989613056  78139896 |    1    0   879912050  2992234496  75579576
+d32     32 |  318    2   0 |   933657178    933773033  2929713152  79019256 |  287    3   939159044  2926731264  82200080
+PASS all six arms present :: []
+PASS mt4: pending - baseline = floor(L0/max_threshold) + byte term :: pending=79 L0=308 mt=4 stcsTerm=77 byteTerm=2 want=79
+PASS mt4: no merging before phase A end (sstables == L0) :: sstables=308 L0=308
+PASS mt32: pending - baseline = floor(L0/max_threshold) + byte term :: pending=11 L0=299 mt=32 stcsTerm=9 byteTerm=2 want=11
+PASS mt32: no merging before phase A end (sstables == L0) :: sstables=299 L0=299
+PASS mt128: pending - baseline = floor(L0/max_threshold) + byte term :: pending=4 L0=310 mt=128 stcsTerm=2 byteTerm=2 want=4
+PASS mt128: no merging before phase A end (sstables == L0) :: sstables=310 L0=310
+PASS mt32b: pending - baseline = floor(L0/max_threshold) + byte term :: pending=12 L0=321 mt=32 stcsTerm=10 byteTerm=2 want=12
+PASS mt32b: no merging before phase A end (sstables == L0) :: sstables=321 L0=321
+PASS c64: pending - baseline = floor(L0/max_threshold) + byte term :: pending=9 L0=248 mt=32 stcsTerm=7 byteTerm=2 want=9
+PASS c64: no merging before phase A end (sstables == L0) :: sstables=248 L0=248
+PASS d32: pending - baseline = byte term only (STCS-in-L0 off) :: pending=2 L0=318 mt=32 stcsTerm=0 byteTerm=2 want=2
+PASS d32: no merging before phase A end (sstables == L0) :: sstables=318 L0=318
+PASS phase A flat: table file bytes :: {'mt4': 933619011, 'mt32': 933588207, 'mt128': 933628801} spread=40594 (0.00% of mean) noise(mt32 vs mt32b)=78106 limit10%=93361201 limitNoise=18828452
+PASS phase A flat: data dir bytes :: {'mt4': 933734880, 'mt32': 933704062, 'mt128': 933744665} spread=40603 (0.00% of mean) noise(mt32 vs mt32b)=78109 limit10%=93372787 limitNoise=18830775
+PASS phase A flat: RssAnon :: {'mt4': 2928640000, 'mt32': 2917195776, 'mt128': 2943324160} spread=26128384 (0.89% of mean) noise(mt32 vs mt32b)=47181824 limit10%=292971998 limitNoise=152958048
+PASS phase A flat: live heap (histogram) :: {'mt4': 78853240, 'mt32': 78638616, 'mt128': 78804048} spread=214624 (0.27% of mean) noise(mt32 vs mt32b)=430752 limit10%=7876530 limitNoise=2436810
+PASS positive control moves: phase B L0 of c64 < half of mt32 and mt32b :: {'mt4': 299, 'mt32': 268, 'mt128': 310, 'mt32b': 290, 'c64': 1, 'd32': 287}
+INFO phase B table file bytes: {'mt4': 922777629, 'mt32': 929928212, 'mt128': 1107912552} spread=18.76% of mean
+INFO phase B RssAnon: {'mt4': 2930315264, 'mt32': 2919313408, 'mt128': 2945089536} spread=0.88% of mean
+INFO phase B live heap: {'mt4': 82216296, 'mt32': 81745888, 'mt128': 82951328} spread=1.46% of mean
+INFO phase B L0 count by arm: {'mt4': 299, 'mt32': 268, 'mt128': 310, 'mt32b': 290, 'c64': 1, 'd32': 287}
+SUMMARY ALL PASS

@@ -1,0 +1,41 @@
+**B2f. Predictions.** *[Amended 2026-10-26 (A1, stage-4 audit, before any reading): the original text said an STCS candidate is returned whenever N is above 32. The source says otherwise: `getSTCSInL0CompactionCandidate()` (`LeveledManifest.java:304-317`) only builds the candidate; `getCompactionCandidates()` returns it only (a) at `:270-271`, when a level 1 to 7 has score above 1.001, or (b) at `:296-299`, when `getCandidatesFor(0)` is empty. With nothing else pending, `getCandidatesFor(0)` (`:495-573`) is non-empty and the normal L0 candidate wins. Original B2f quoted in section D.]* An STCS candidate is the one with `level == 0` and `maxSSTableSize == Long.MAX_VALUE` (`:312`); a normal candidate carries `maxSSTableSize == sstable_size_in_mb` in bytes (`:301`). N is the total L0 count, flag false, `max_threshold` 32 unless stated.
+
+- **R0 (only L0 sstables, nothing held, L1 empty):** at every N in {31, 32, 33, 64, 200} a normal candidate (never STCS): `maxSSTableSize == 1 MiB`, at most 32 sstables; the L0 count is N and unchanged by the read.
+- **R1 (L1 at about 3x target, nothing held):** N in {31, 32}: a normal L1 to L2 candidate (`level == 2`, every sstable level 1). N in {33, 64, 200}: an STCS candidate with exactly 32 sstables (8 when `max_threshold` is 8), all level 0. After executing it once (fresh arm) the L0 count is N - 31 (N - 7 with `max_threshold` 8). With the flag true: the L1 to L2 candidate at every N.
+- **R2 (one L0 sstable held as compacting, L1 empty):** N = 31 and 32: `null`. N in {33, 64, 200}: an STCS candidate of 32 sstables (8 with `max_threshold` 8), none of them the held one. With the flag true: `null` at every N.
+- **Never refused:** 200 flushes with auto compaction disabled leave exactly 200 L0 sstables and throw nothing (no rejection, no eviction).
+- **Positive control (R1, flag true, N = 32):** executing the L1 to L2 candidate repeatedly brings L1 bytes to at most 1.001 x `maxBytesForLevel(1,10,1 MiB)`.
+
+**B2g. Readings.** *[Amended 2026-10-26 (A1): rows made route-aware; original quoted in section D.]*
+
+| Observation | Meaning |
+|---|---|
+| R1 and R2 match B2f (boundary exactly between N=32 and N=33, candidate size `max_threshold`), R0 never returns an STCS candidate, flag true removes it, 200 L0 sstables exist with no rejection, and the positive control brings L1 to target | **Confirmed**: 32 only selects an STCS task of at most `max_threshold` sstables; it does not cap the L0 count; a real cap binds at L1+ |
+| L0 count falls to 32 or below without executing any task, or a flush or write is refused or throws above 32 | **Refuted**: something caps L0 |
+| An STCS candidate at N <= 32 (flag false) on R1 or R2, or at any N on R0 | **Not confirmed**: the constant or the routes are not as traced; record which |
+| No STCS candidate at N >= 33 on R1 or R2 with the flag false | **Not confirmed**: the bucket or trim rule hides the trigger; record why |
+| An STCS candidate with the flag true | **Not confirmed**: the flag does not gate the check as traced |
+| Candidate size does not follow `max_threshold` (8 vs 32) | **Not confirmed**: the bound is not the table option as traced |
+| Positive control: no candidate at L1 3x over target, or L1 does not return to target | **Not confirmed** (control did not move); the file cannot reach Confirmed |
+| Limit never reached (fewer than 33 L0 sstables built) or any other combination | **Not confirmed (no matching row)** |
+
+**B3f. Predictions.** *[Amended 2026-10-26 (A5, stage-4 audit, before any reading): numbers made explicit and the meaning of the log line corrected (it marks the check being TRUE, not the candidate being chosen; with one compactor the candidate is chosen only on the routes of B2f). Original quoted in section D.]* "Peak L0" is the largest L0 count in the 20-s tablestats samples and the lag-end snapshot.
+- **A:** peak L0 at least 100 (3x the constant); file bytes and "Space used (live)" within 15% of the bytes written at lag-end; at least one "L0 is too far behind" debug line, the first not before the L0 count first exceeds 32; no write error.
+- **B (no compaction):** L0 count equals the number of flushes (at least 100) at lag-end, file bytes within 15% of the bytes written, no debug line (`getCompactionCandidates()` is never called with auto compaction off).
+- **C (flag true):** peak L0 at least 100 and the same disk relation as A, and zero debug lines.
+- **D (positive control):** peak L0 below half of A's peak; after the drain L0 is at most 4 sstables.
+- **After the drain (A, C, D):** every level from 1 to below the top level holds at most 1.05 x its nominal size (`maxBytesForLevel`: L1 100 MiB, L2 1 GiB), and total live bytes are within 5% of the lag-end value.
+- **Instrument control:** after `TRUNCATE` the file bytes are below 1% of the settled bytes.
+
+**B3g. Readings.** *[Amended 2026-10-26 (A5): rows made checkable; original quoted in section D.]*
+
+| Observation | Meaning |
+|---|---|
+| A, B and C peak L0 at least 100 (above 3x the constant), disk tracks the bytes written, at least one debug line in A and none in C, D peak L0 below half of A's, and the L1+ levels settle at or below 1.05 x nominal in A, C and D | **Confirmed**: the constant does not cap L0; a cap binds at L1+ and compaction speed moves L0 |
+| L0 count stays at 40 or below in B (no compaction), or a write is refused | **Refuted**: something else caps L0 (investigate) |
+| A and B peak L0 never above 32 | **Not confirmed**: limit never reached |
+| L0 above 100 in A, B and C but no debug line in A (the true branch was not observed) | **Not confirmed**: the branch evidence is missing; record why |
+| A debug line in C (flag true) | **Not confirmed**: the flag does not gate the check as traced |
+| D peak L0 not below half of A's, or the L1+ levels do not settle at their nominal size after the drain, or the truncate control fails | **Not confirmed** (control did not move or instrument failed); the file cannot reach Confirmed |
+| Any other combination | **Not confirmed (no matching row)** |
+

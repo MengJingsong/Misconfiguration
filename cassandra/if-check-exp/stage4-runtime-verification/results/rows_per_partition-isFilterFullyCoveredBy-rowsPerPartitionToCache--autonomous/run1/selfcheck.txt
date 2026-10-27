@@ -1,0 +1,79 @@
+PASS unit: ant.log echo lines equal unit.txt (130 keys vs 130)
+PASS unit: ant reports the test passed 
+PASS unit: N=1 holds 1 rows (live = stored) (1, 1)
+PASS unit: N=10 holds 10 rows (live = stored) (10, 10)
+PASS unit: N=100 holds 100 rows (live = stored) (100, 100)
+PASS unit: N=ALL holds 1000 rows (live = stored) (1000, 1000)
+PASS unit: N=2000 holds 1000 rows (live = stored) (1000, 1000)
+PASS unit: no N below 1000 stored more live rows than N 
+PASS unit: NONE leaves no entry 
+PASS unit: row-deletion variant 10 live, 60 stored (10, 60)
+PASS unit: range-tombstone arm 10 stored rows + range in deletionInfo (10, 1)
+PASS unit: coverage test false at cachedLiveRows == N, true when partition has fewer than N rows 
+PASS unit: serialized size grows with N; size(100)/size(10) in 8..12 [157, 1147, 11047, 110811]
+PASS cluster n1: 4 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster n1: no jmx.csv poll above the capacity (max 11819841 of 268435456, 11 polls) 
+PASS cluster n1: last jmx.csv poll equals the last checkpoint (1%) ('10000', '11819841', 10000, 11819841)
+PASS cluster n1: no ERROR line in system.log segment 
+PASS cluster n1: node started with row cache 256 MiB 
+PASS cluster n1: rss.csv agrees with the baseline RssAnon ('2826908', 2823084)
+PASS cluster n1: last rss.csv sample within 40 MB of the last checkpoint ('2869672', 2869364)
+PASS cluster n10: 4 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster n10: no jmx.csv poll above the capacity (max 105148419 of 268435456, 11 polls) 
+PASS cluster n10: last jmx.csv poll equals the last checkpoint (1%) ('10000', '105148419', 10000, 105148419)
+PASS cluster n10: no ERROR line in system.log segment 
+PASS cluster n10: node started with row cache 256 MiB 
+PASS cluster n10: rss.csv agrees with the baseline RssAnon ('2847016', 2847012)
+PASS cluster n10: last rss.csv sample within 40 MB of the last checkpoint ('3513496', 3513436)
+PASS cluster n100: 4 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster n100: no jmx.csv poll above the capacity (max 265841609 of 268435456, 11 polls) 
+PASS cluster n100: last jmx.csv poll equals the last checkpoint (1%) ('2560', '265841599', 2560, 265841599)
+PASS cluster n100: no ERROR line in system.log segment 
+PASS cluster n100: node started with row cache 256 MiB 
+PASS cluster n100: rss.csv agrees with the baseline RssAnon ('2772568', 2771808)
+PASS cluster n100: last rss.csv sample within 40 MB of the last checkpoint ('3515136', 3514984)
+PASS cluster nall: 4 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster nall: no jmx.csv poll above the capacity (max 239036928 of 268435456, 11 polls) 
+PASS cluster nall: last jmx.csv poll equals the last checkpoint (1%) ('768', '239036928', 768, 239036928)
+PASS cluster nall: no ERROR line in system.log segment 
+PASS cluster nall: node started with row cache 256 MiB 
+PASS cluster nall: rss.csv agrees with the baseline RssAnon ('2819680', 2818284)
+PASS cluster nall: last rss.csv sample within 40 MB of the last checkpoint ('3120112', 3119828)
+PASS cluster t10: 3 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster t10: no jmx.csv poll above the capacity (max 25838240 of 268435456, 10 polls) 
+PASS cluster t10: last jmx.csv poll equals the last checkpoint (1%) ('2000', '25838240', 2000, 25838240)
+PASS cluster t10: no ERROR line in system.log segment 
+PASS cluster t10: node started with row cache 256 MiB 
+PASS cluster t10: rss.csv agrees with the baseline RssAnon ('2900116', 2899968)
+PASS cluster t10: last rss.csv sample within 40 MB of the last checkpoint ('3012020', 3011976)
+PASS cluster none: 4 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster none: no jmx.csv poll above the capacity (max 0 of 268435456, 11 polls) 
+PASS cluster none: last jmx.csv poll equals the last checkpoint (1%) ('0', '0', 0, 0)
+PASS cluster none: no ERROR line in system.log segment 
+PASS cluster none: node started with row cache 256 MiB 
+PASS cluster none: rss.csv agrees with the baseline RssAnon ('2834068', 2834360)
+PASS cluster none: last rss.csv sample within 40 MB of the last checkpoint ('2862072', 2861616)
+PASS cluster c32: 4 checkpoints in ckpt.jsonl match CKPT lines in session.log 
+PASS cluster c32: no jmx.csv poll above the capacity (max 26585354 of 33554432, 11 polls) 
+PASS cluster c32: last jmx.csv poll equals the last checkpoint (1%) ('256', '26584320', 256, 26584320)
+PASS cluster c32: no ERROR line in system.log segment 
+PASS cluster c32: node started with row cache 32 MiB 
+PASS cluster c32: rss.csv agrees with the baseline RssAnon ('2856616', 2856500)
+PASS cluster c32: last rss.csv sample within 40 MB of the last checkpoint ('3272488', 3272152)
+PASS cluster: one `nodetool info` Row Cache line per arm (7, 7)
+PASS cluster n10: nodetool info entries/size equals the gauges ('10000', '100.28', 'MiB', 10000, 105148419)
+PASS cluster n1: nodetool info entries/size equals the gauges ('10000', '11.27', 'MiB', 10000, 11819841)
+PASS cluster n100: nodetool info entries/size equals the gauges ('2560', '253.53', 'MiB', 2560, 265841599)
+PASS cluster nall: nodetool info entries/size equals the gauges ('768', '227.96', 'MiB', 768, 239036928)
+PASS cluster t10: nodetool info entries/size equals the gauges ('2000', '24.64', 'MiB', 2000, 25838240)
+PASS cluster none: nodetool info entries/size equals the gauges ('0', '0', 'bytes', 0, 0)
+PASS cluster c32: nodetool info entries/size equals the gauges ('256', '25.35', 'MiB', 256, 26584320)
+PASS cluster: bytes/entry of n1 within 0.75..1.4 of N x 1.05 KiB 1.099
+PASS cluster: bytes/entry of n10 within 0.75..1.4 of N x 1.05 KiB 0.978
+PASS cluster: bytes/entry of n100 within 0.75..1.4 of N x 1.05 KiB 0.966
+PASS cluster: bytes/entry of ALL in 250..400 KiB 311246.0
+PASS cluster: n100 at or under 256 MiB with entries < 10000 (265840999, 2560)
+PASS cluster: nall at or under 256 MiB with entries < 10000 (239036928, 768)
+PASS cluster: NONE leaves the cache empty and counters at 0 
+PASS cluster: 32 MiB control fills (entries > 0) and stays under 32 MiB (26584320, 256)
+SELFCHECK ALL PASS (0 FAIL)

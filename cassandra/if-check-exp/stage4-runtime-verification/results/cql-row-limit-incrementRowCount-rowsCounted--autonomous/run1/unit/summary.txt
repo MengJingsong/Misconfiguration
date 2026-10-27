@@ -1,0 +1,21 @@
+EXPECTED first trigger (warm w=16 L=100: rowsCounted 100, out 100, isDone): ok rowsCounted=100 out=100 isDone=true
+EXPECTED run finished (done=1): ok 
+EXPECTED no OutOfMemoryError: ok []
+EXPECTED rowsCounted == out == L (all pairs, all reps; 12 pairs): ok bad=[]
+EXPECTED NONE: output == source (1200000): ok []
+m(w) [retained]: {16: 301.2, 1024: 1317.7, 65536: 65829.0}
+EXPECTED B2f slope w=1024 (retained): 0.9 x 1008 <= m(1024) - m(16) <= 1.15 x 1008 + 64: ok 1016.5
+EXPECTED B2f slope w=65536 (retained): 0.9 x 65520 <= m(65536) - m(16) <= 1.15 x 65520 + 64: ok 65527.9
+EXPECTED B2f ratio m(65536) / m(16) >= 50 (retained): ok 218.6
+INFO flat-across-widths (refuting) condition m(65536)-m(16) < 0.1 x 65520: False
+m(w) [unshared]: {16: 304.0, 1024: 1312.0, 65536: 65824.0}
+EXPECTED B2f slope w=1024 (unshared): 0.9 x 1008 <= m(1024) - m(16) <= 1.15 x 1008 + 64: ok 1008.0
+EXPECTED B2f slope w=65536 (unshared): 0.9 x 65520 <= m(65536) - m(16) <= 1.15 x 65520 + 64: ok 65520.0
+EXPECTED B2f ratio m(65536) / m(16) >= 50 (unshared): ok 216.5
+INFO flat-across-widths (refuting) condition m(65536)-m(16) < 0.1 x 65520: False
+EXPECTED B2f linear in L w=16: retained bytes per row at L=10000 and L=1000000 within 0.75..1.35: ok ratio 1.023 (R=3019536, 308847184)
+EXPECTED B2f linear in L w=65536: retained bytes per row at L=100 and L=1000 within 0.75..1.35: ok ratio 1.000 (R=6582880, 65829008)
+EXPECTED B2f dead rows: rowsCounted == outLive == L, 10L-9 <= pulled <= 10L+1: ok []
+EXPECTED B2f/B2h control: unshared sum in [8 MiB, 8 MiB + one row), retained heap within 0.8 x unshared..1.3 x (8 MiB + row): MISMATCH [('CTL.w16.r3', 'retained', 3728336, 8388912.0)]
+INFO control retained medians (bytes): {16: 8515912, 1024: 8427976, 65536: 8492208}
+SUMMARY mismatches=1

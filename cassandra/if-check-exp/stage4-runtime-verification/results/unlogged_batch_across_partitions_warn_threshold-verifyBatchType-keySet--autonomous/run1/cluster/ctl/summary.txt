@@ -1,0 +1,14 @@
+yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 10KiB;batch_size_fail_threshold: 20KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_request_
+node up after 57 s, pid 1949168
+EXPECTED: heap -Xms2G -Xmx2G (B3a) - yes
+EXPECTED: G1 collector (B3a) - yes
+EXPECTED: node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=10 - yes
+Config echo batch_size_warn_threshold=10KiB
+Config echo batch_size_fail_threshold=20KiB
+probe {"ok": 0, "failed": 1, "rows": 0, "warned": 0, "first_warning": "", "first_error": "Error from server: code=2200 [Invalid query] message=\"Batch too large\"", "seconds": 0.1, "mode": "probe"}
+EXPECTED: first trigger: 500-key probe batch rejected "Batch too large" (positive control reaches the size branch) - yes
+load {"ok": 0, "failed": 2000, "rows": 0, "warned": 0, "first_warning": "", "first_error": "Error from server: code=2200 [Invalid query] message=\"Batch too large\"", "seconds": 20.4, "mode": "run"}
+count(*) 0; pre-flush {'memtable_data_size': 0, 'space_live': 0, 'partitions_est': 0, 'memtable_cells': 0}; post-flush {'memtable_data_size': 0, 'space_live': 0, 'partitions_est': 0, 'memtable_cells': 0}; disk {'data': 115385, 'commitlog': 67108864}; heap after load+GC.run 71333888; heap peak 1120090112 mean 550356661; 34 heap samples; gc pause 0.152 s in 7 pauses; load 21 s; WARN log lines 0; ERROR lines 2001
+EXPECTED: control: every batch rejected, rows acked 0, count(*) 0 - yes
+EXPECTED: control: error text "Batch too large" - yes
+EXPECTED: node stopped - yes

@@ -1,0 +1,33 @@
+CHECK holds: the raw logs (junit XML, test.log, ant.log) hold the 14 TFM lines (14 distinct rows from 14 lines)
+CHECK holds: junit: 1 test, 0 failures, 0 errors 
+CHECK holds: pk0 aborts exactly for T < N with count T+1 
+CHECK holds: allocation strictly increasing over aborting T: [0.68, 6.53, 54.73] 
+CHECK holds: A(1000)/A(MAX) = 0.0104 <= 0.10 
+CHECK holds: warn metric +5 only where warn < N < T, failure metric +5 only on aborts 
+CHECK holds: control: ctl-1MiB aborted (LRS) and allocated less than ctl-off 
+CHECK holds: session.log has a storm line for every storm in phases.json (9)
+CHECK holds: T1000000-main: 872 reads all FAIL_TOMBSTONE (from the cqlsh outputs as logged) 
+CHECK holds: T1000000-main: system.log "Scanned over" lines 873 >= reads 872; every value T+1 = 1000001 
+CHECK holds: T1000000-main: no OutOfMemoryError in the system.log segment 
+CHECK holds: T100000-main: 3051 reads all FAIL_TOMBSTONE (from the cqlsh outputs as logged) 
+CHECK holds: T100000-main: system.log "Scanned over" lines 3055 >= reads 3051; every value T+1 = 100001 
+CHECK holds: T100000-main: no OutOfMemoryError in the system.log segment 
+CHECK holds: T10000-main: 3855 reads all FAIL_TOMBSTONE (from the cqlsh outputs as logged) 
+CHECK holds: T10000-main: system.log "Scanned over" lines 3859 >= reads 3855; every value T+1 = 10001 
+CHECK holds: T10000-main: no OutOfMemoryError in the system.log segment 
+A per read (MB): {'T1000000-main': 612.65, 'T1000000-live': 154.41, 'T100000-main': 69.39, 'T100000-variant': 516.84, 'T100000-live': 155.84, 'T10000-main': 10.66, 'T10000-variant': 50.31, 'T10000-live': 156.1, 'T100000-live-1MiB': 16.37}
+CHECK holds: A ratios per decade 6.51, 8.83 within [10/3, 30] 
+P (peak minus the lowest used over idle and storm, MB) / absolute peak (MB): {'T1000000-main': (1817, 2068), 'T100000-main': (1258, 1359), 'T10000-main': (1262, 1348)}
+gc-T10000.log pauses 45 Pause Full 0 max after-GC (MB) 151
+gc-T100000.log pauses 183 Pause Full 0 max after-GC (MB) 1293
+gc-T1000000.log pauses 1251 Pause Full 0 max after-GC (MB) 1704
+jfr T10000-live.jfr events 730 expandToFit events 19 max MiB 32.13
+jfr T10000-main.jfr events 150441 expandToFit events 1655 max MiB 0.13
+jfr T10000-variant.jfr events 302 expandToFit events 18 max MiB 16.08
+jfr T100000-live-1MiB.jfr events 66 expandToFit events 4 max MiB 1.0
+jfr T100000-live.jfr events 1657 expandToFit events 19 max MiB 32.13
+jfr T100000-main.jfr events 557538 expandToFit events 8451 max MiB 2.0
+jfr T100000-variant.jfr events 1281 expandToFit events 30 max MiB 144.7
+jfr T1000000-live.jfr events 57194 expandToFit events 68 max MiB 32.13
+jfr T1000000-main.jfr events 7181625 expandToFit events 11806 max MiB 16.0
+SELFCHECK all hold

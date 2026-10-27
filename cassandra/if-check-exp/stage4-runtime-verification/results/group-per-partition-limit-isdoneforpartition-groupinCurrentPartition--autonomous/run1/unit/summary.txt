@@ -1,0 +1,7 @@
+R = 100000  firsttrigger = OK groups=10 pulled=11
+EXPECTED groups     MATCH  {1: [1], 10: [10], 100: [100], 1000: [1000], 'NO': [100000]}
+EXPECTED pulled     MATCH  {1: [2], 10: [11], 100: [101], 1000: [1001], 'NO': [100000]}
+EXPECTED retained   MATCH  median used_after (bytes) per N {1: 78690872, 10: 78691088.0, 100: 78757264, 1000: 78757736, 'NO': 78756192}; spread 0.08%
+EXPECTED alloc      MATCH  median alloc {1: 2184, 10: 2976.0, 100: 10896, 1000: 90112, 'NO': 7202008}; bytes per pulled row (N>=100) {100: 108, 1000: 90, 'NO': 72}
+EXPECTED control    MATCH  ctl retained delta per N {1: 1808, 10: 5336, 100: 41016, 1000: 398312, 'NO': 39626464}; largest no-query noise swing 76720 B
+CLASS B2g row 1: confirmed (groups=min(N,R), retained flat, alloc scales with pulled, control moves)

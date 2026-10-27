@@ -1,0 +1,21 @@
+HOLDS    unit: 18 cells (2 shapes x 3 gppl x 3 rowLimit) each with at least 5 reps {('A', 10, 2147483647): 6, ('A', 2147483647, 2147483647): 6, ('B', 2147483647, 2147483647): 6, ('A', 1, 100): 5, ('B', 1, 100): 5, ('A', 10, 100): 5, ('B', 10, 100): 5, ('A', 2147483647, 100): 5, ('B', 2147483647, 100): 5, ('A', 1, 10000): 5, ('B', 1, 10000): 5, ('A', 10, 10000): 5, ('B', 10, 10000): 5, ('A', 2147483647, 10000): 5, ('B', 2147483647, 10000): 5, ('A', 1, 2147483647): 5, ('B', 1, 2147483647): 5, ('B', 10, 2147483647): 5}
+HOLDS    unit: shape A rows returned = min(20*min(gppl,1000), rowLimit) in every rep 
+HOLDS    unit: shape A rows pulled = 20*(gppl+1) / 20000 / within [rowLimit, rowLimit+21] as stated 
+HOLDS    unit: shape B rowLimit=NO_LIMIT: returned = pulled = 4*B_ROWS for all gppl, counted 4, cip 1 after close, 0 before B_ROWS=100000
+HOLDS    unit: shape B rowLimit 100/10000: pulled in [rowLimit, rowLimit+1] for all gppl 
+HOLDS    unit: shape B median allocation within 10 % across gppl {1: 112268176, 10: 112268176, 'NO': 112268176}
+HOLDS    unit: control: shape B rows pulled follow rowLimit (100 < 10000 < 4*B_ROWS) {100: 100, 10000: 10000, 2147483647: 400000.0}
+HOLDS    cluster: 16 forward + 6 reverse arms completed ['f_A_L100_F100', 'f_A_L100_F5000', 'f_A_L1_F100', 'f_A_L1_F100000', 'f_A_L1_F5000', 'f_A_Labs_F100', 'f_A_Labs_F100000', 'f_A_Labs_F5000', 'f_B_L100_F100', 'f_B_L100_F5000', 'f_B_L1_F100', 'f_B_L1_F100000', 'f_B_L1_F5000', 'f_B_Labs_F100', 'f_B_Labs_F100000', 'f_B_Labs_F5000', 'r_A_L100_F5000', 'r_A_L1_F5000', 'r_A_Labs_F5000', 'r_B_L100_F5000', 'r_B_L1_F5000', 'r_B_Labs_F5000']
+HOLDS    cluster: every query of every measured arm returned the stated number of groups queries 66
+HOLDS    cluster: 3 queries in every measured arm 
+HOLDS    cluster: f shape B bytes read per query within 10 % across L [931885655, 931883871, 931883887]
+HOLDS    cluster: f shape B peak heap spread <= 30 MB across L [96.4, 96.3, 95.8]
+HOLDS    cluster: r shape B bytes read per query within 10 % across L [931883863, 931883864, 931883887]
+HOLDS    cluster: r shape B peak heap spread <= 30 MB across L [96.9, 96.3, 96.2]
+HOLDS    cluster: shape A bytes read: L=1 <= 10 %, L=100 <= 50 % of unset [5050767, 51974571, 936602710]
+HOLDS    cluster: page-size control moves the shape B peak by > 50 MB 546.1 MB
+HOLDS    cluster: JVM ran with the 1 GiB heap, G1, young generation caps 
+HOLDS    cluster: no ERROR lines in the node log segment 
+HOLDS    cluster: no OutOfMemoryError, no dropped-message report in the node log 
+HOLDS    cluster: data size unchanged (reads only) {'start': 471912063, 'end': 471912063}
+SELFCHECK ALL HOLD

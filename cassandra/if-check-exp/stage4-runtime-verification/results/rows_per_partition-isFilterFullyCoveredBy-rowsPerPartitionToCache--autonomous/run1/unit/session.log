@@ -1,0 +1,75 @@
+[2026-10-26T19:52:58.675-0400] unit-run start tree=/users/jason92/s4-b9-rp head=43cb41d rows=1000 host=node0
+02396f499ae529d80e6e0c9e48124b4e  Jmx.java
+572ac6977da6020d6d27749de26eb568  RowsPerPartitionTest.java
+fcac30af5343a70b826d70628f2db58b  analyze_cluster.py
+531eb3fe746aed5c7f6d2d5c611300a1  analyze_unit.py
+17403ca857a0c7327742f3db1cd2044b  cluster-run.py
+f4ff9c9034ddda917fbc1d7a4d7d3712  loader.py
+2a3827e178da57aa465c6c957a15c7df  mk-known-answer.py
+9f6a91d586768fc641872da4ccceba51  selfcheck.py
+dc2fd783f31cd37d5184f17df8f7d8d6  run1-chain.sh
+2c92531682d29609e7767a6d3fac7dc5  shake-cluster.sh
+e898cb88d7febbeb8554a895174973eb  unit-run.sh
+[2026-10-26T19:52:58.685-0400] + ant testsome -Dtest.name=org.apache.cassandra.db.RowsPerPartitionTest (STAGE4_OUT=/users/jason92/s4-b9-rp-logs/run1/unit/raw rows=1000)
+[2026-10-26T19:53:15.845-0400] ant exit 0
+[junit-timeout] ------------- ---------------- ---------------
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/commitlog
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/data
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/saved_caches
+   [delete] Deleting directory /users/jason92/s4-b9-rp/build/test/cassandra/hints
+
+BUILD SUCCESSFUL
+Total time: 16 seconds
+EXPECTED ROWS = 1000 (full-scale run) | got 1000 | RESULT ok INFO
+EXPECTED firsttrigger=OK | got OK | RESULT ok PRIMARY
+EXPECTED done=1 | got 1 | RESULT ok PRIMARY
+EXPECTED N1 entry present | got present | RESULT ok PRIMARY
+EXPECTED N1 cachedLiveRows = 1 | got 1 | RESULT ok PRIMARY
+EXPECTED N1 rowCount = cachedLiveRows (no dead rows) | got 1 | RESULT ok PRIMARY
+EXPECTED N1 coveredFullSlice = false | got false | RESULT ok PRIMARY
+EXPECTED N1 coveredHead5 = false | got false | RESULT ok PRIMARY
+EXPECTED N1 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED N10 entry present | got present | RESULT ok PRIMARY
+EXPECTED N10 cachedLiveRows = 10 | got 10 | RESULT ok PRIMARY
+EXPECTED N10 rowCount = cachedLiveRows (no dead rows) | got 10 | RESULT ok PRIMARY
+EXPECTED N10 coveredFullSlice = false | got false | RESULT ok PRIMARY
+EXPECTED N10 coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED N10 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED N100 entry present | got present | RESULT ok PRIMARY
+EXPECTED N100 cachedLiveRows = 100 | got 100 | RESULT ok PRIMARY
+EXPECTED N100 rowCount = cachedLiveRows (no dead rows) | got 100 | RESULT ok PRIMARY
+EXPECTED N100 coveredFullSlice = false | got false | RESULT ok PRIMARY
+EXPECTED N100 coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED N100 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED NALL entry present | got present | RESULT ok PRIMARY
+EXPECTED NALL cachedLiveRows = 1000 | got 1000 | RESULT ok PRIMARY
+EXPECTED NALL rowCount = cachedLiveRows (no dead rows) | got 1000 | RESULT ok PRIMARY
+EXPECTED NALL coveredFullSlice = true | got true | RESULT ok PRIMARY
+EXPECTED NALL coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED NALL LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED N2000 entry present | got present | RESULT ok PRIMARY
+EXPECTED N2000 cachedLiveRows = 1000 | got 1000 | RESULT ok PRIMARY
+EXPECTED N2000 rowCount = cachedLiveRows (no dead rows) | got 1000 | RESULT ok PRIMARY
+EXPECTED N2000 coveredFullSlice = true | got true | RESULT ok PRIMARY
+EXPECTED N2000 coveredHead5 = true | got true | RESULT ok PRIMARY
+EXPECTED N2000 LIMIT 5 returns 5 rows both reads | got ('5', '5') | RESULT ok INFO
+EXPECTED serializedSize N=100 / N=10 within 8..12 (about 10x within 20%) | got 9.63 (11047 / 1147) | RESULT ok PRIMARY
+EXPECTED serializedSize ALL / N=100 within 8..12 (INFO, derived: 1000/100 rows) | got 10.03 | RESULT ok INFO
+EXPECTED serializedSize strictly increasing 1 < 10 < 100 < ALL | got (157, 1147, 11047, 110811) | RESULT ok PRIMARY
+EXPECTED NNONE entry absent | got absent | RESULT ok PRIMARY
+EXPECTED NNONE hit = miss = outOfRange = 0 after both reads | got ('0', '0', '0') | RESULT ok PRIMARY
+EXPECTED NNONE isRowCacheEnabled = false | got false | RESULT ok INFO
+EXPECTED N10 after read 1: miss=1 hit=0; after read 2: hit=1 | got ('1', '0', '1') | RESULT ok INFO
+EXPECTED N1 after read 2: hit=0 outOfRange=1 | got ('0', '1') | RESULT ok INFO
+EXPECTED TOMBROWS entry present | got present | RESULT ok PRIMARY
+EXPECTED TOMBROWS cachedLiveRows = 10 | got 10 | RESULT ok PRIMARY
+EXPECTED TOMBROWS rowCount = 60 (> N) | got 60 | RESULT ok PRIMARY
+EXPECTED TOMBRANGE cachedLiveRows = 10 | got 10 | RESULT ok PRIMARY
+EXPECTED TOMBRANGE rowCount = 10 and rangeTombstones >= 1 | got (10, 1) | RESULT ok PRIMARY
+EXPECTED NOCK_N1_v100 cachedLiveRows = 1 and rowCount = 1 | got (1, 1) | RESULT ok PRIMARY
+EXPECTED NOCK_N5_v100 cachedLiveRows = 1 and rowCount = 1 | got (1, 1) | RESULT ok PRIMARY
+EXPECTED NOCK_N1_v5000 cachedLiveRows = 1 and rowCount = 1 | got (1, 1) | RESULT ok PRIMARY
+EXPECTED no-clustering: size(N=1) == size(N=5) at v=100 B | got (152, 152) | RESULT ok PRIMARY
+EXPECTED no-clustering: size(v=5000) - size(v=100) within 4900 +- 300 | got 4901 | RESULT ok PRIMARY
+CLASS claim holds (population honours the cap; size follows N; tombstone/ALL/no-clustering overshoots as predicted) | primary mismatches 0 of 41
+[2026-10-26T19:53:15.894-0400] leftover java for this tree: []

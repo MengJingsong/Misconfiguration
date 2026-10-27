@@ -1,0 +1,108 @@
+cluster-run run1 2026-10-26 19:29:56 EDT host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu tree cassandra-5.0.9 d90a4e7255b0d26d3b1f5c8cbe45beafd8751b36 count1 2000
+harness md5 Alloc.java=80aee67442ca warn-size.btm=8298a0886b22 WarnBatches.java=ee590fd7a9c1 Jmx.java=d160dfae0cb9 cluster-run.py=9b9b23bee118 make-node-yaml.sh=06947d13dc3c analyze.py=219422f7a0fa
+[L1] yaml: # ---- stage4 b9-bs lines ----;cluster_name: s4-b9-bs;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.1.1;rpc_address: 127.0.1.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bs/data/commitlog;hints_directory: /dev/shm/s4-b9-bs/data/hints;saved_caches_directory: /dev/shm/s4-b9-bs/data/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bs/data/cdc_raw;auto_snapshot: false;native_transport_max_frame_size: 64MiB;native_transport_max_message_size: 64MiB;native_transport_max_request_data_in_flight: 128MiB;native_transport_max_request_data_in_flight_per_ip: 128MiB;batch_size_warn_threshold: 5KiB;batch_size_fail_threshold: 100000KiB;
+EXPECTED: [L1] Submit -l (agent port 19110) lists the 10 rules of warn-size.btm (10) — yes
+[L1] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/users/jason92/s4-b9-bs-node/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -javaagent:bin/../lib/jamm-0.4.0.jar -Dcassandra.jmx.local.port=7110 -javaagent:/users/jason92/s4-b9-bs-n/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/batch_size_warn_threshold-verifyBatchSize-size--autonomous/warn-size.btm,listener:true,port:19110 -Xbootclasspath/a:/users/jason92/s4-b9-bs-logs/run1/cluster/stage4-alloc.jar -Dstage4.byteman.out=/users/jason92/s4-b9-bs-logs/run1/cluster/warn-size.trace -Xlog:gc:file=/users/jason92/s4-b9-bs-logs/run1/cluster/gc-L1.log:utc
+EXPECTED: [L1] heap -Xms2G -Xmx2G (B3a) — yes
+[L1] schema: ks (RF 1), ks.t (k int, c int, v blob, PRIMARY KEY (k, c)), autocompaction off
+EXPECTED: [L1] idle control: no trace line in 10 s with no batch (0 new, 0 in all) — yes
+[L1] thresholds over JMX: warn 5 KiB, fail 100000 KiB
+EXPECTED: [L1] warn 5 KiB / fail 100000 KiB as in the yaml (5 / 100000) — yes
+PHASE [L1] L1-W1a: 2000 x LOGGED 50 partitions; outcomes {'ok': 2000}; writes 0->100000; data dir 106223596 B; heap poll max 1056964608
+PHASE [L1] L1-W1b: 2000 x LOGGED 50 partitions; outcomes {'ok': 2000}; writes 100000->200000; data dir 212468518 B; heap poll max 1278381848
+PHASE [L1] L1-W2a: 20 x UNLOGGED 20480 partitions; outcomes {'ok': 20}; writes 200000->609600; data dir 646137448 B; heap poll max 2110472192
+PHASE [L1] L1-W2b: 20 x UNLOGGED 20480 partitions; outcomes {'ok': 20}; writes 609600->1019200; data dir 1079851696 B; heap poll max 2075304112
+EXPECTED: warn threshold set live to 90000 KiB, read back 90000 KiB — yes
+PHASE [L1live] L1live-W1: 2000 x LOGGED 50 partitions; outcomes {'ok': 2000}; writes 1019200->1119200; data dir 1186058341 B; heap poll max 1390143016
+PHASE [L1live] L1live-W2: 20 x UNLOGGED 20480 partitions; outcomes {'ok': 20}; writes 1119200->1528800; data dir 1619747983 B; heap poll max 2005710888
+[L2] yaml: # ---- stage4 b9-bs lines ----;cluster_name: s4-b9-bs;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.1.1;rpc_address: 127.0.1.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bs/data/commitlog;hints_directory: /dev/shm/s4-b9-bs/data/hints;saved_caches_directory: /dev/shm/s4-b9-bs/data/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bs/data/cdc_raw;auto_snapshot: false;native_transport_max_frame_size: 64MiB;native_transport_max_message_size: 64MiB;native_transport_max_request_data_in_flight: 128MiB;native_transport_max_request_data_in_flight_per_ip: 128MiB;batch_size_warn_threshold: 90000KiB;batch_size_fail_threshold: 100000KiB;
+EXPECTED: [L2] Submit -l (agent port 19110) lists the 10 rules of warn-size.btm (10) — yes
+[L2] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/users/jason92/s4-b9-bs-node/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -javaagent:bin/../lib/jamm-0.4.0.jar -Dcassandra.jmx.local.port=7110 -javaagent:/users/jason92/s4-b9-bs-n/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/batch_size_warn_threshold-verifyBatchSize-size--autonomous/warn-size.btm,listener:true,port:19110 -Xbootclasspath/a:/users/jason92/s4-b9-bs-logs/run1/cluster/stage4-alloc.jar -Dstage4.byteman.out=/users/jason92/s4-b9-bs-logs/run1/cluster/warn-size.trace -Xlog:gc:file=/users/jason92/s4-b9-bs-logs/run1/cluster/gc-L2.log:utc
+EXPECTED: [L2] heap -Xms2G -Xmx2G (B3a) — yes
+[L2] schema: ks (RF 1), ks.t (k int, c int, v blob, PRIMARY KEY (k, c)), autocompaction off
+EXPECTED: [L2] idle control: no trace line in 10 s with no batch (0 new, 24240 in all) — yes
+[L2] thresholds over JMX: warn 90000 KiB, fail 100000 KiB
+EXPECTED: [L2] warn 90000 KiB / fail 100000 KiB as in the yaml (90000 / 100000) — yes
+PHASE [L2] L2-W1a: 2000 x LOGGED 50 partitions; outcomes {'ok': 2000}; writes 0->100000; data dir 106195468 B; heap poll max 1056964608
+PHASE [L2] L2-W1b: 2000 x LOGGED 50 partitions; outcomes {'ok': 2000}; writes 100000->200000; data dir 212412324 B; heap poll max 1292201128
+PHASE [L2] L2-W2a: 20 x UNLOGGED 20480 partitions; outcomes {'ok': 20}; writes 200000->609600; data dir 646095135 B; heap poll max 2093694976
+PHASE [L2] L2-W2b: 20 x UNLOGGED 20480 partitions; outcomes {'ok': 20}; writes 609600->1019200; data dir 1079800228 B; heap poll max 1944927664
+[L3] yaml: # ---- stage4 b9-bs lines ----;cluster_name: s4-b9-bs;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.1.1;rpc_address: 127.0.1.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bs/data/commitlog;hints_directory: /dev/shm/s4-b9-bs/data/hints;saved_caches_directory: /dev/shm/s4-b9-bs/data/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bs/data/cdc_raw;auto_snapshot: false;native_transport_max_frame_size: 64MiB;native_transport_max_message_size: 64MiB;native_transport_max_request_data_in_flight: 128MiB;native_transport_max_request_data_in_flight_per_ip: 128MiB;batch_size_warn_threshold: 5KiB;batch_size_fail_threshold: 20KiB;
+EXPECTED: [L3] Submit -l (agent port 19110) lists the 10 rules of warn-size.btm (10) — yes
+[L3] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/users/jason92/s4-b9-bs-node/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -javaagent:bin/../lib/jamm-0.4.0.jar -Dcassandra.jmx.local.port=7110 -javaagent:/users/jason92/s4-b9-bs-n/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/batch_size_warn_threshold-verifyBatchSize-size--autonomous/warn-size.btm,listener:true,port:19110 -Xbootclasspath/a:/users/jason92/s4-b9-bs-logs/run1/cluster/stage4-alloc.jar -Dstage4.byteman.out=/users/jason92/s4-b9-bs-logs/run1/cluster/warn-size.trace -Xlog:gc:file=/users/jason92/s4-b9-bs-logs/run1/cluster/gc-L3.log:utc
+EXPECTED: [L3] heap -Xms2G -Xmx2G (B3a) — yes
+[L3] schema: ks (RF 1), ks.t (k int, c int, v blob, PRIMARY KEY (k, c)), autocompaction off
+EXPECTED: [L3] idle control: no trace line in 10 s with no batch (0 new, 40400 in all) — yes
+[L3] thresholds over JMX: warn 5 KiB, fail 20 KiB
+EXPECTED: [L3] warn 5 KiB / fail 20 KiB as in the yaml (5 / 20) — yes
+PHASE [L3] L3-ctl: 2000 x LOGGED 50 partitions; outcomes {'ERR:InvalidRequestException:Batch_too_large': 2000}; writes 0->0; data dir 100 B; heap poll max 1006632960
+EXPECTED: warn threshold set live to 200 KiB, read back 200 KiB — yes
+PHASE [L3] L3-inv: 200 x LOGGED 50 partitions; outcomes {'ok': 200}; writes 0->10000; data dir 10618147 B; heap poll max 1056964608
+no CassandraDaemon of mine left running
+tier cluster: 12300 requests in 12 phases
+arm | n | outcomes | client warns | siz lines | rej lines | dataSize values | siz warn/fail B | bst med (min..max) | dec med | exe med
+L1-W1a | 2000 | {'ok': 2000} | 2000 | 2000 | 0 | [54900] | [5120]/[102400000] | 369380.0 (363272..3598896) | 76720.0 | 390612.0
+L1-W1b | 2000 | {'ok': 2000} | 2000 | 2000 | 0 | [54900] | [5120]/[102400000] | 367864.0 (363944..1421096) | 76720.0 | 388736.0
+L1-W2a | 20 | {'ok': 20} | 20 | 20 | 0 | [22487040] | [5120]/[102400000] | 164474032.0 (162318032..166865408) | 27698080.0 | 168499200.0
+L1-W2b | 20 | {'ok': 20} | 20 | 20 | 0 | [22487040] | [5120]/[102400000] | 164436812.0 (162281704..166559656) | 27698080.0 | 168461980.0
+L1live-W1 | 2000 | {'ok': 2000} | 0 | 2000 | 0 | [54900] | [92160000]/[102400000] | 290520.0 (286712..1345472) | 76720.0 | 311392.0
+L1live-W2 | 20 | {'ok': 20} | 0 | 20 | 0 | [22487040] | [92160000]/[102400000] | 140153612.0 (137011800..142293680) | 27698080.0 | 144178780.0
+L2-W1a | 2000 | {'ok': 2000} | 0 | 2000 | 0 | [54900] | [92160000]/[102400000] | 296120.0 (289688..3520384) | 76720.0 | 317384.0
+L2-W1b | 2000 | {'ok': 2000} | 0 | 2000 | 0 | [54900] | [92160000]/[102400000] | 294584.0 (290024..1350040) | 76720.0 | 315456.0
+L2-W2a | 20 | {'ok': 20} | 0 | 20 | 0 | [22487040] | [92160000]/[102400000] | 141129984.0 (138947144..144466392) | 27698080.0 | 145155152.0
+L2-W2b | 20 | {'ok': 20} | 0 | 20 | 0 | [22487040] | [92160000]/[102400000] | 141009576.0 (138870512..143147760) | 27698080.0 | 145034744.0
+L3-ctl | 2000 | {'ERR:Batch_too_large': 2000} | 0 | 2000 | 2000 | [54900] | [5120]/[20480] | 275744.0 (275584..2016072) | 76720.0 | 296696.0
+L3-inv | 200 | {'ok': 200} | 0 | 200 | 0 | [54900] | [204800]/[20480] | 310540.0 (297912..1897584) | 76720.0 | 331812.0
+phase | lifetime | disk bytes (data dir after flush) | writes (WriteLatency Count) delta | heap poll max | post-GC max (MiB) in window
+L1-W1a | L1 | 106223596 | 100000 | 1056964608 | 252 (3 collections)
+L1-W1b | L1 | 212468518 | 100000 | 1278381848 | 487 (2 collections)
+L1-W2a | L1 | 646137448 | 409600 | 2110472192 | 2028 (11 collections)
+L1-W2b | L1 | 1079851696 | 409600 | 2075304112 | 1995 (10 collections)
+L1live-W1 | L1live | 1186058341 | 100000 | 1390143016 | None (0 collections)
+L1live-W2 | L1live | 1619747983 | 409600 | 2005710888 | None (0 collections)
+L2-W1a | L2 | 106195468 | 100000 | 1056964608 | 240 (1 collections)
+L2-W1b | L2 | 212412324 | 100000 | 1292201128 | 445 (2 collections)
+L2-W2a | L2 | 646095135 | 409600 | 2093694976 | 2028 (9 collections)
+L2-W2b | L2 | 1079800228 | 409600 | 1944927664 | 1550 (4 collections)
+L3-ctl | L3 | 100 | 0 | 1006632960 | None (0 collections)
+L3-inv | L3 | 10618147 | 10000 | 1056964608 | 82 (1 collections)
+system.log counts per lifetime: {'L1': {'warn': 4040, 'err': 0}, 'L2': {'warn': 0, 'err': 0}, 'L3': {'warn': 0, 'err': 2000}}
+EXPECTED: V1 every request reached verifyBatchSize (one siz line per request) in every phase — yes
+EXPECTED: V2 the check saw the intended warn and fail values (JMX/yaml) in every phase — mismatches [] — yes
+EXPECTED: V3 the batch dataSize is above 5 KiB in every phase (the lowest warn value is exceeded): {'L1-W1a': 54900, 'L1-W1b': 54900, 'L1-W2a': 22487040, 'L1-W2b': 22487040, 'L1live-W1': 54900, 'L1live-W2': 22487040, 'L2-W1a': 54900, 'L2-W1b': 54900, 'L2-W2a': 22487040, 'L2-W2b': 22487040, 'L3-ctl': 54900, 'L3-inv': 54900} — yes
+EXPECTED: P1 L1-W1a: client warnings 2000 == 2000, outcomes {'ok': 2000} all ok, writes 100000 == 100000 — yes
+EXPECTED: P1 L1-W1b: client warnings 2000 == 2000, outcomes {'ok': 2000} all ok, writes 100000 == 100000 — yes
+EXPECTED: P1 L1-W2a: client warnings 20 == 20, outcomes {'ok': 20} all ok, writes 409600 == 409600 — yes
+EXPECTED: P1 L1-W2b: client warnings 20 == 20, outcomes {'ok': 20} all ok, writes 409600 == 409600 — yes
+EXPECTED: P1 L1live-W1: client warnings 0 == 0, outcomes {'ok': 2000} all ok, writes 100000 == 100000 — yes
+EXPECTED: P1 L1live-W2: client warnings 0 == 0, outcomes {'ok': 20} all ok, writes 409600 == 409600 — yes
+EXPECTED: P1 L2-W1a: client warnings 0 == 0, outcomes {'ok': 2000} all ok, writes 100000 == 100000 — yes
+EXPECTED: P1 L2-W1b: client warnings 0 == 0, outcomes {'ok': 2000} all ok, writes 100000 == 100000 — yes
+EXPECTED: P1 L2-W2a: client warnings 0 == 0, outcomes {'ok': 20} all ok, writes 409600 == 409600 — yes
+EXPECTED: P1 L2-W2b: client warnings 0 == 0, outcomes {'ok': 20} all ok, writes 409600 == 409600 — yes
+EXPECTED: P2 L1: system.log "Batch for [ks.t] is of size" WARN lines 4040 == 4040 — yes
+EXPECTED: P2 L2: system.log "Batch for [ks.t] is of size" WARN lines 0 == 0 — yes
+EXPECTED: P3 L1-W1a vs L2-W1a: coordinator allocation 369380.0 vs 296120.0 (within 10 %/16 KiB) — NO
+EXPECTED: P4 L1-W1a vs L2-W1a: data bytes after flush 106223596 vs 106195468: relative difference 0.000 (<= 0.10) — yes
+EXPECTED: P5 L1-W1a vs L2-W1a: writes 100000 == 100000 — yes
+INFO post-GC max occupancy L1-W1a 252 MiB vs L2-W1a 240 MiB: relative difference 0.048 (10 % equal, 25 % refuted band)
+EXPECTED: P3 L1-W1b vs L2-W1b: coordinator allocation 367864.0 vs 294584.0 (within 10 %/16 KiB) — NO
+EXPECTED: P4 L1-W1b vs L2-W1b: data bytes after flush 212468518 vs 212412324: relative difference 0.000 (<= 0.10) — yes
+EXPECTED: P5 L1-W1b vs L2-W1b: writes 100000 == 100000 — yes
+INFO post-GC max occupancy L1-W1b 487 MiB vs L2-W1b 445 MiB: relative difference 0.086 (10 % equal, 25 % refuted band)
+EXPECTED: P3 L1-W2a vs L2-W2a: coordinator allocation 164474032.0 vs 141129984.0 (within 10 %/16 KiB) — NO
+EXPECTED: P4 L1-W2a vs L2-W2a: data bytes after flush 646137448 vs 646095135: relative difference 0.000 (<= 0.10) — yes
+EXPECTED: P5 L1-W2a vs L2-W2a: writes 409600 == 409600 — yes
+INFO post-GC max occupancy L1-W2a 2028 MiB vs L2-W2a 2028 MiB: relative difference 0.000 (10 % equal, 25 % refuted band)
+EXPECTED: P3 L1-W2b vs L2-W2b: coordinator allocation 164436812.0 vs 141009576.0 (within 10 %/16 KiB) — NO
+EXPECTED: P4 L1-W2b vs L2-W2b: data bytes after flush 1079851696 vs 1079800228: relative difference 0.000 (<= 0.10) — yes
+EXPECTED: P5 L1-W2b vs L2-W2b: writes 409600 == 409600 — yes
+INFO post-GC max occupancy L1-W2b 1995 MiB vs L2-W2b 1550 MiB: relative difference 0.223 (10 % equal, 25 % refuted band)
+EXPECTED: P6 L1live-W1: after the live change to 90000KiB no warning (0), all ok, bst 290520.0 — yes
+EXPECTED: P6 L1live-W2: after the live change to 90000KiB no warning (0), all ok, bst 140153612.0 — yes
+EXPECTED: C1 L3-ctl (warn 5 KiB, fail 20 KiB): all 2000 rejected "Batch too large" ({'ERR:Batch_too_large': 2000}), rej 2000, writes 0 == 0, ERROR log lines 2000 — yes
+EXPECTED: C2 L3-ctl disk bytes after flush 100 <= 1 MiB (no sstable data) — yes
+INFO the same workload accepted (L1-W1a) leaves 106223596 bytes; rejected leaves 100
+EXPECTED: I1 L3-inv (fail 20 KiB, warn 200 KiB): accepted ({'ok': 200}), warns 0, rej 0, writes 10000 == 10000 — yes
+INFO bst of W2 (20 MiB batch), warn 5 KiB vs 90000 KiB: {'L1-W2a': 164474032.0, 'L1-W2b': 164436812.0, 'L1live-W2': 140153612.0, 'L2-W2a': 141129984.0, 'L2-W2b': 141009576.0}
+

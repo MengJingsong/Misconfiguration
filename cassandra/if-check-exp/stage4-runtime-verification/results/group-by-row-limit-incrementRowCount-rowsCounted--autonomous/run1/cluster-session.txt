@@ -1,0 +1,442 @@
+[2026-10-27 04:02:28] + rm -rf /dev/shm/s4-b11-b78-run1 && mkdir -p /dev/shm/s4-b11-b78-run1/tools
+[2026-10-27 04:02:28] + mkdir -p /dev/shm/s4-b11-b78-run1/n1/logs /dev/shm/s4-b11-b78-run1/n1/data /dev/shm/s4-b11-b78-run1/n1/commitlog /dev/shm/s4-b11-b78-run1/n1/hints /dev/shm/s4-b11-b78-run1/n1/saved_caches /dev/shm/s4-b11-b78-run1/n1/cdc_raw
+[2026-10-27 04:02:28] + mkdir -p /dev/shm/s4-b11-b78-run1/n2/logs /dev/shm/s4-b11-b78-run1/n2/data /dev/shm/s4-b11-b78-run1/n2/commitlog /dev/shm/s4-b11-b78-run1/n2/hints /dev/shm/s4-b11-b78-run1/n2/saved_caches /dev/shm/s4-b11-b78-run1/n2/cdc_raw
+[2026-10-27 04:02:28] + df -h /dev/shm | tail -1
+[2026-10-27 04:02:28] cluster-run run1: scale 1, N_T 200000, N_S 200000, host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu, df tmpfs           126G     0  126G   0% /dev/shm
+[2026-10-27 04:02:28] + ss -ltn | grep -E '(127.0.8.[12]:(9042|7000)|:718[01]) ' || true
+[2026-10-27 04:02:28] + javac -d /dev/shm/s4-b11-b78-run1/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/group-by-row-limit-incrementRowCount-rowsCounted--autonomous/B78Jmx.java
+[2026-10-27 04:02:28] + rm -rf /dev/shm/s4-b11-b78-run1/n1/conf && cp -r /users/jason92/s4-b11-b78-c/conf /dev/shm/s4-b11-b78-run1/n1/conf
+[2026-10-27 04:02:28] n1 conf: cluster_name='b78'; authenticator=PasswordAuthenticator; commitlog_directory=/dev/shm/s4-b11-b78-run1/n1/commitlog; hints_directory=/dev/shm/s4-b11-b78-run1/n1/hints; saved_caches_directory=/dev/shm/s4-b11-b78-run1/n1/saved_caches; cdc_raw_directory=/dev/shm/s4-b11-b78-run1/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.8.1; rpc_address=127.0.8.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; JMX 7180; heap 2G
+[2026-10-27 04:02:28] + rm -rf /dev/shm/s4-b11-b78-run1/n2/conf && cp -r /users/jason92/s4-b11-b78-c/conf /dev/shm/s4-b11-b78-run1/n2/conf
+[2026-10-27 04:02:28] n2 conf: cluster_name='b78'; authenticator=PasswordAuthenticator; commitlog_directory=/dev/shm/s4-b11-b78-run1/n2/commitlog; hints_directory=/dev/shm/s4-b11-b78-run1/n2/hints; saved_caches_directory=/dev/shm/s4-b11-b78-run1/n2/saved_caches; cdc_raw_directory=/dev/shm/s4-b11-b78-run1/n2/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.8.2; rpc_address=127.0.8.2; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; JMX 7181; heap 2G
+[2026-10-27 04:02:28] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:02:31] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:02:36] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:02:40] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:02:44] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:02:48] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:02:52] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:02:56] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:03:00] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:03:04] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:03:05] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:03:09] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:03:10] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:03:11] n1 up after 43 s, pid 4128876
+[2026-10-27 04:03:11] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:03:14] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:19] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:23] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:27] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:31] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:35] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:39] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:43] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:47] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:51] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:55] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:03:56] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:04:00] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:04:01] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:04:05] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:04:06] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:04:07] n2 up after 56 s, pid 4130276
+[2026-10-27 04:04:07] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:04:09] nodetool status:
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.8.2  30.9 KiB    16      100.0%            e617085b-e88f-4423-b0d9-46d27c943248  rack1
+UN  127.0.8.1  119.82 KiB  16      100.0%            fd5906bd-8760-4a12-a2e8-5170603f2277  rack1
+
+
+[2026-10-27 04:04:27]   loaded 50000
+[2026-10-27 04:04:38]   loaded 100000
+[2026-10-27 04:04:49]   loaded 150000
+[2026-10-27 04:05:00]   loaded 200000
+[2026-10-27 04:05:00] loaded ks.t: 200000 rows, 0 errors, 42 s []
+[2026-10-27 04:05:10]   loaded 50000
+[2026-10-27 04:05:20]   loaded 100000
+[2026-10-27 04:05:30]   loaded 150000
+[2026-10-27 04:05:40]   loaded 200000
+[2026-10-27 04:05:40] loaded ks.s: 200000 rows, 0 errors []
+[2026-10-27 04:05:40] + bin/nodetool -h 127.0.0.1 -p 7180 flush
+[2026-10-27 04:05:41] + bin/nodetool -h 127.0.0.1 -p 7181 flush
+[2026-10-27 04:05:42] + bin/nodetool -h 127.0.0.1 -p 7180 compact ks t
+[2026-10-27 04:05:45] + bin/nodetool -h 127.0.0.1 -p 7180 compact ks s
+[2026-10-27 04:05:57] + du -sb /dev/shm/s4-b11-b78-run1/n1/data | cut -f1
+[2026-10-27 04:05:57] + bin/nodetool -h 127.0.0.1 -p 7180 tablestats ks.t
+[2026-10-27 04:05:58] n1 data on disk: 849524347 bytes; SSTable count: 1 SSTable count: 0 Space used (live): 826975137 Number of partitions (estimate): 1
+[2026-10-27 04:05:58] + bin/nodetool -h 127.0.0.1 -p 7181 compact ks t
+[2026-10-27 04:06:01] + bin/nodetool -h 127.0.0.1 -p 7181 compact ks s
+[2026-10-27 04:06:12] + du -sb /dev/shm/s4-b11-b78-run1/n2/data | cut -f1
+[2026-10-27 04:06:12] + bin/nodetool -h 127.0.0.1 -p 7181 tablestats ks.t
+[2026-10-27 04:06:14] n2 data on disk: 849467323 bytes; SSTable count: 1 SSTable count: 0 Space used (live): 826975137 Number of partitions (estimate): 1
+[2026-10-27 04:06:14] stopping n1 pid 4128876
+[2026-10-27 04:06:14] + kill 4128876
+
+  rc=0
+[2026-10-27 04:06:19] n1 stopped
+[2026-10-27 04:06:19] stopping n2 pid 4130276
+[2026-10-27 04:06:19] + kill 4130276
+
+  rc=0
+[2026-10-27 04:07:22] n2 stopped
+[2026-10-27 04:07:22] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:07:25] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:07:29] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:07:30] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:07:34] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:07:36] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:07:40] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:07:41] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:07:45] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:07:46] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:07:50] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:07:51] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:07:52] n1 up after 30 s, pid 4133938
+[2026-10-27 04:07:52] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:07:55] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:08:00] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:08:01] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:08:05] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:08:06] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:08:10] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:08:11] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:08:12] n2 up after 20 s, pid 4135368
+[2026-10-27 04:09:12] + jcmd 4133938 GC.run
+[2026-10-27 04:09:13] + jcmd 4135368 GC.run
+[2026-10-27 04:09:16] idle baseline 30 s
+[2026-10-27 04:09:47]   calibration K fetch=100 rep=0: rows_returned=1 wall=249 ms err=None dead_nodes=[]
+[2026-10-27 04:09:49] CALIBRATION trace lines for one small sub-read: [(1793088587193, 10, 1, 'true', 'false'), (1793088587180, 10, 1, 'true', 'false')]
+[2026-10-27 04:09:51]   first-trigger T fetch=1000 rep=0: rows_returned=1 wall=2742 ms err=None dead_nodes=[]
+[2026-10-27 04:09:53] FIRST-TRIGGER CHECK: 402 trace lines, 400 with rows=1000 groups=0 unfinished=true, max rows 1000
+[2026-10-27 04:09:53] FIRST-TRIGGER CHECK passed
+[2026-10-27 04:09:53] == fetch 100: GROUP BY x3
+[2026-10-27 04:09:53] + jcmd 4133938 GC.run
+[2026-10-27 04:09:54] + jcmd 4135368 GC.run
+[2026-10-27 04:10:00]   groupby T fetch=100 rep=1: rows_returned=1 wall=2868 ms err=None dead_nodes=[]
+[2026-10-27 04:10:04]   groupby T fetch=100 rep=2: rows_returned=1 wall=2499 ms err=None dead_nodes=[]
+[2026-10-27 04:10:07]   groupby T fetch=100 rep=3: rows_returned=1 wall=2558 ms err=None dead_nodes=[]
+[2026-10-27 04:10:08] == fetch 100: control SELECT * x3
+[2026-10-27 04:10:08] + jcmd 4133938 GC.run
+[2026-10-27 04:10:08] + jcmd 4135368 GC.run
+[2026-10-27 04:10:22]   control-select T fetch=100 rep=1: rows_returned=200000 wall=9868 ms err=None dead_nodes=[]
+[2026-10-27 04:10:32]   control-select T fetch=100 rep=2: rows_returned=200000 wall=9478 ms err=None dead_nodes=[]
+[2026-10-27 04:10:43]   control-select T fetch=100 rep=3: rows_returned=200000 wall=9504 ms err=None dead_nodes=[]
+[2026-10-27 04:10:44] == fetch 1000: GROUP BY x3
+[2026-10-27 04:10:44] + jcmd 4133938 GC.run
+[2026-10-27 04:10:44] + jcmd 4135368 GC.run
+[2026-10-27 04:10:49]   groupby T fetch=1000 rep=1: rows_returned=1 wall=1869 ms err=None dead_nodes=[]
+[2026-10-27 04:10:52]   groupby T fetch=1000 rep=2: rows_returned=1 wall=1858 ms err=None dead_nodes=[]
+[2026-10-27 04:10:55]   groupby T fetch=1000 rep=3: rows_returned=1 wall=1766 ms err=None dead_nodes=[]
+[2026-10-27 04:10:56] == fetch 1000: control SELECT * x3
+[2026-10-27 04:10:56] + jcmd 4133938 GC.run
+[2026-10-27 04:10:56] + jcmd 4135368 GC.run
+[2026-10-27 04:11:07]   control-select T fetch=1000 rep=1: rows_returned=200000 wall=7315 ms err=None dead_nodes=[]
+[2026-10-27 04:11:15]   control-select T fetch=1000 rep=2: rows_returned=200000 wall=7179 ms err=None dead_nodes=[]
+[2026-10-27 04:11:23]   control-select T fetch=1000 rep=3: rows_returned=200000 wall=7101 ms err=None dead_nodes=[]
+[2026-10-27 04:11:24] == fetch 10000: GROUP BY x3
+[2026-10-27 04:11:24] + jcmd 4133938 GC.run
+[2026-10-27 04:11:24] + jcmd 4135368 GC.run
+[2026-10-27 04:11:30]   groupby T fetch=10000 rep=1: rows_returned=1 wall=2529 ms err=None dead_nodes=[]
+[2026-10-27 04:11:34]   groupby T fetch=10000 rep=2: rows_returned=1 wall=2643 ms err=None dead_nodes=[]
+[2026-10-27 04:11:37]   groupby T fetch=10000 rep=3: rows_returned=1 wall=2596 ms err=None dead_nodes=[]
+[2026-10-27 04:11:38] == fetch 10000: control SELECT * x3
+[2026-10-27 04:11:38] + jcmd 4133938 GC.run
+[2026-10-27 04:11:39] + jcmd 4135368 GC.run
+[2026-10-27 04:11:49]   control-select T fetch=10000 rep=1: rows_returned=200000 wall=7162 ms err=None dead_nodes=[]
+[2026-10-27 04:11:57]   control-select T fetch=10000 rep=2: rows_returned=200000 wall=7050 ms err=None dead_nodes=[]
+[2026-10-27 04:12:05]   control-select T fetch=10000 rep=3: rows_returned=200000 wall=6874 ms err=None dead_nodes=[]
+[2026-10-27 04:12:06] == fetch 100000: GROUP BY x3
+[2026-10-27 04:12:06] + jcmd 4133938 GC.run
+[2026-10-27 04:12:07] + jcmd 4135368 GC.run
+[2026-10-27 04:12:11]   groupby T fetch=100000 rep=1: rows_returned=0 wall=1324 ms err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') dead_nodes=[1]
+[2026-10-27 04:12:11] n1 is DEAD: restarting
+[2026-10-27 04:12:11] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:12:15] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:12:19] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:12:20] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:12:24] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:12:25] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:12:29] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:12:30] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:12:34] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:12:35] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:12:36] n1 up after 25 s, pid 4137808
+[2026-10-27 04:12:42] + jcmd 4137808 GC.run
+[2026-10-27 04:12:42] + jcmd 4135368 GC.run
+[2026-10-27 04:17:48]   groupby T fetch=100000 rep=2: rows_returned=0 wall=301055 ms err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') dead_nodes=[1, 2]
+[2026-10-27 04:17:48] n1 is DEAD: restarting
+[2026-10-27 04:17:48] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:17:51] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:17:55] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:17:56] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:18:00] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:18:01] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:18:05] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:18:07] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:18:11] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:18:12] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:18:16] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:18:17] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:18:18] n1 up after 30 s, pid 4139687
+[2026-10-27 04:18:18] n2 is DEAD: restarting
+[2026-10-27 04:18:18] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:18:21] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:18:25] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:18:26] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:18:30] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:18:32] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:18:36] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:18:37] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:18:38] n2 up after 20 s, pid 4141117
+[2026-10-27 04:18:43] + jcmd 4139687 GC.run
+[2026-10-27 04:18:44] + jcmd 4141117 GC.run
+[2026-10-27 04:23:49]   groupby T fetch=100000 rep=3: rows_returned=0 wall=301446 ms err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') dead_nodes=[1, 2]
+[2026-10-27 04:23:49] n1 is DEAD: restarting
+[2026-10-27 04:23:49] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:23:53] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:23:57] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:23:58] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:24:02] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:24:03] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:24:07] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:24:08] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:24:12] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:24:13] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:24:17] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:24:19] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:24:20] n1 up after 30 s, pid 4142817
+[2026-10-27 04:24:20] n2 is DEAD: restarting
+[2026-10-27 04:24:20] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:24:23] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:24:27] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:24:28] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:24:32] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:24:33] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:24:37] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:24:38] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:24:39] n2 up after 20 s, pid 4144239
+[2026-10-27 04:24:45] + jcmd 4142817 GC.run
+[2026-10-27 04:24:45] + jcmd 4144239 GC.run
+[2026-10-27 04:24:50] == fetch 100000: control SELECT * x1
+[2026-10-27 04:24:50] + jcmd 4142817 GC.run
+[2026-10-27 04:24:50] + jcmd 4144239 GC.run
+[2026-10-27 04:26:53]   control-select T fetch=100000 rep=1: rows_returned=0 wall=120074 ms err=OperationTimedOut("errors={'127.0.8.1:9042': 'Client request timeout. See Session.execute[_async](timeout)'}, last_host=127.0.8.1:9042") dead_nodes=[2]
+[2026-10-27 04:26:53] n2 is DEAD: restarting
+[2026-10-27 04:26:53] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:26:57] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:27:01] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:27:02] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:27:06] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:27:07] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:27:11] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:27:12] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:27:14] n2 up after 20 s, pid 4145725
+[2026-10-27 04:27:19] + jcmd 4142817 GC.run
+[2026-10-27 04:27:19] + jcmd 4145725 GC.run
+[2026-10-27 04:27:24] == fetch 1000000: GROUP BY x3
+[2026-10-27 04:27:24] + jcmd 4142817 GC.run
+[2026-10-27 04:27:24] + jcmd 4145725 GC.run
+[2026-10-27 04:29:55]   groupby T fetch=1000000 rep=1: rows_returned=0 wall=147472 ms err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') dead_nodes=[1, 2]
+[2026-10-27 04:29:55] n1 is DEAD: restarting
+[2026-10-27 04:29:55] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:29:58] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:30:02] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:30:03] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:30:07] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:30:09] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:30:13] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:30:14] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:30:18] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:30:19] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:30:23] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:30:24] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:30:25] n1 up after 30 s, pid 4147180
+[2026-10-27 04:30:25] n2 is DEAD: restarting
+[2026-10-27 04:30:25] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:30:28] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:30:32] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:30:34] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:30:38] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:30:39] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:30:43] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:30:44] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:30:45] n2 up after 20 s, pid 4148569
+[2026-10-27 04:30:50] + jcmd 4147180 GC.run
+[2026-10-27 04:30:51] + jcmd 4148569 GC.run
+[2026-10-27 04:35:57]   groupby T fetch=1000000 rep=2: rows_returned=0 wall=301442 ms err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') dead_nodes=[1, 2]
+[2026-10-27 04:35:57] n1 is DEAD: restarting
+[2026-10-27 04:35:57] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:36:00] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:36:04] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:36:05] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:36:09] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:36:11] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:36:15] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:36:16] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:36:20] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:36:21] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:36:25] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:36:26] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:36:27] n1 up after 30 s, pid 4150252
+[2026-10-27 04:36:27] n2 is DEAD: restarting
+[2026-10-27 04:36:27] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:36:30] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:36:35] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:36:36] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:36:40] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:36:41] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:36:45] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:36:46] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:36:47] n2 up after 20 s, pid 4151734
+[2026-10-27 04:36:52] + jcmd 4150252 GC.run
+[2026-10-27 04:36:53] + jcmd 4151734 GC.run
+[2026-10-27 04:41:59]   groupby T fetch=1000000 rep=3: rows_returned=0 wall=301442 ms err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed') dead_nodes=[1, 2]
+[2026-10-27 04:41:59] n1 is DEAD: restarting
+[2026-10-27 04:41:59] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:42:02] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:42:06] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:42:07] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:42:11] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:42:13] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:42:17] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:42:18] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:42:22] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:42:23] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:42:27] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:42:28] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:42:29] n1 up after 30 s, pid 4153518
+[2026-10-27 04:42:29] n2 is DEAD: restarting
+[2026-10-27 04:42:29] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n2/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n2/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:42:32] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:42:37] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:42:38] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:42:42] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:42:43] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:42:47] + bin/nodetool -h 127.0.0.1 -p 7181 status
+[2026-10-27 04:42:48] + bin/nodetool -h 127.0.0.1 -p 7181 statusbinary
+[2026-10-27 04:42:49] n2 up after 20 s, pid 4154976
+[2026-10-27 04:42:54] + jcmd 4153518 GC.run
+[2026-10-27 04:42:55] + jcmd 4154976 GC.run
+[2026-10-27 04:42:59] == fetch 1000000: control SELECT * not run (A11: builds an 800 MB response on a 512 MB heap)
+[2026-10-27 04:42:59] == fetch None: GROUP BY x3
+[2026-10-27 04:42:59] + jcmd 4153518 GC.run
+[2026-10-27 04:43:00] + jcmd 4154976 GC.run
+[2026-10-27 04:43:06]   groupby T fetch=None rep=1: rows_returned=1 wall=3435 ms err=None dead_nodes=[]
+[2026-10-27 04:43:11]   groupby T fetch=None rep=2: rows_returned=1 wall=3334 ms err=None dead_nodes=[]
+[2026-10-27 04:43:17]   groupby T fetch=None rep=3: rows_returned=1 wall=5096 ms err=None dead_nodes=[]
+[2026-10-27 04:43:18] == fetch None: control SELECT * not run (A11: builds an 800 MB response on a 512 MB heap)
+[2026-10-27 04:43:18] == small rows (ks.s) fetch 10000
+[2026-10-27 04:43:18] + jcmd 4153518 GC.run
+[2026-10-27 04:43:18] + jcmd 4154976 GC.run
+[2026-10-27 04:43:22]   small-rows S fetch=10000 rep=1: rows_returned=1 wall=772 ms err=None dead_nodes=[]
+[2026-10-27 04:43:24]   small-rows S fetch=10000 rep=2: rows_returned=1 wall=791 ms err=None dead_nodes=[]
+[2026-10-27 04:43:26]   small-rows S fetch=10000 rep=3: rows_returned=1 wall=796 ms err=None dead_nodes=[]
+[2026-10-27 04:43:27] == small rows (ks.s) fetch 100000
+[2026-10-27 04:43:27] + jcmd 4153518 GC.run
+[2026-10-27 04:43:27] + jcmd 4154976 GC.run
+[2026-10-27 04:43:31]   small-rows S fetch=100000 rep=1: rows_returned=1 wall=496 ms err=None dead_nodes=[]
+[2026-10-27 04:43:32]   small-rows S fetch=100000 rep=2: rows_returned=1 wall=473 ms err=None dead_nodes=[]
+[2026-10-27 04:43:34]   small-rows S fetch=100000 rep=3: rows_returned=1 wall=460 ms err=None dead_nodes=[]
+[2026-10-27 04:43:35] == guardrail arm: restarting n1 with page_size_fail_threshold 20000
+[2026-10-27 04:43:35] stopping n1 pid 4153518
+[2026-10-27 04:43:35] + kill 4153518
+
+  rc=0
+[2026-10-27 04:43:40] n1 stopped
+[2026-10-27 04:43:40] + rm -rf /dev/shm/s4-b11-b78-run1/n1/conf && cp -r /users/jason92/s4-b11-b78-c/conf /dev/shm/s4-b11-b78-run1/n1/conf
+[2026-10-27 04:43:40] n1 conf: cluster_name='b78'; authenticator=PasswordAuthenticator; commitlog_directory=/dev/shm/s4-b11-b78-run1/n1/commitlog; hints_directory=/dev/shm/s4-b11-b78-run1/n1/hints; saved_caches_directory=/dev/shm/s4-b11-b78-run1/n1/saved_caches; cdc_raw_directory=/dev/shm/s4-b11-b78-run1/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.8.1; rpc_address=127.0.8.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; page_size_fail_threshold=20000; JMX 7180; heap 512M
+[2026-10-27 04:43:40] + bash -c "ulimit -n 100000; bin/cassandra -p /dev/shm/s4-b11-b78-run1/n1/cassandra.pid >> /dev/shm/s4-b11-b78-run1/n1/logs/start.out 2>&1"
+
+  rc=0
+[2026-10-27 04:43:43] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:43:47] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:43:49] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:43:53] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:43:54] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:43:58] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:43:59] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:44:03] + bin/nodetool -h 127.0.0.1 -p 7180 status
+[2026-10-27 04:44:04] + bin/nodetool -h 127.0.0.1 -p 7180 statusbinary
+[2026-10-27 04:44:05] n1 up after 25 s, pid 4156458
+[2026-10-27 04:44:11] + jcmd 4156458 GC.run
+[2026-10-27 04:44:11] + jcmd 4154976 GC.run
+[2026-10-27 04:44:18]   guardrail T fetch=10000 rep=1: rows_returned=1 wall=3610 ms err=None dead_nodes=[]
+[2026-10-27 04:44:19]   guardrail T fetch=100000 rep=1: rows_returned=0 wall=14 ms err=InvalidRequest('Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for table t, page size 100000 exceeds fail threshold of 20000."') dead_nodes=[]
+[2026-10-27 04:44:20]   guardrail T fetch=100000 rep=1: rows_returned=0 wall=4 ms err=InvalidRequest('Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for table t, page size 100000 exceeds fail threshold of 20000."') dead_nodes=[]
+[2026-10-27 04:44:21]   guardrail T fetch=100000 rep=1: rows_returned=0 wall=6 ms err=InvalidRequest('Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for table t, page size 100000 exceeds fail threshold of 20000."') dead_nodes=[]
+[2026-10-27 04:44:22] all cells done
+[2026-10-27 04:44:22] cleanup: stopping pollers, client, nodes
+[2026-10-27 04:44:22] stopping n1 pid 4156458
+[2026-10-27 04:44:22] + kill 4156458
+
+  rc=0
+[2026-10-27 04:44:27] n1 stopped
+[2026-10-27 04:44:27] stopping n2 pid 4154976
+[2026-10-27 04:44:27] + kill 4154976
+
+  rc=0
+[2026-10-27 04:45:30] n2 stopped
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.07 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.07 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.06 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.06 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.05 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.05 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.04 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.04 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.03 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.03 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.02 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.02 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.01 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.01 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/gc.log.00 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n1.log.00 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/b78.trace /users/jason92/s4-b11-b78-logs/run1/cluster/b78-n1.trace 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/system.log /users/jason92/s4-b11-b78-logs/run1/cluster/system-n1.log 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n1/logs/start.out /users/jason92/s4-b11-b78-logs/run1/cluster/start-n1.out 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.06 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.06 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.05 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.05 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.04 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.04 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.03 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.03 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.02 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.02 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.01 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.01 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/gc.log.00 /users/jason92/s4-b11-b78-logs/run1/cluster/gc-n2.log.00 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/b78.trace /users/jason92/s4-b11-b78-logs/run1/cluster/b78-n2.trace 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/system.log /users/jason92/s4-b11-b78-logs/run1/cluster/system-n2.log 2>/dev/null
+[2026-10-27 04:45:30] + cp /dev/shm/s4-b11-b78-run1/n2/logs/start.out /users/jason92/s4-b11-b78-logs/run1/cluster/start-n2.out 2>/dev/null
+[2026-10-27 04:45:30] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' | grep /dev/shm/s4-b11-b78-run1 || true
+[2026-10-27 04:45:30] leftover CassandraDaemon of this run: ''; restarts n1=6 n2=6
+[2026-10-27 04:45:30] + rm -rf /dev/shm/s4-b11-b78-run1
+[2026-10-27 04:45:30] tmpfs dir removed: True

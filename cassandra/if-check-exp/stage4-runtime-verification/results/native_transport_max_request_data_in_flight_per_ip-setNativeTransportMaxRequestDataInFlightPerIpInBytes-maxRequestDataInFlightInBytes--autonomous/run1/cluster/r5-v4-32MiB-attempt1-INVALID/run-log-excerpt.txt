@@ -1,0 +1,21 @@
+[1793047579174] START r5-v4-32MiB PROTO=4 GLOBAL=1GiB PERIP=32MiB THREADS=64 PER_THREAD=8 SRC2THREADS=0 JMXSET=0 TAIL_S=30 BLOB=4194304 HOLD=1
+[1793047644201] node up after 65 s, pid 1713078
+jvm-arg: -XX:+UseG1GC
+jvm-arg: -Xms2G
+jvm-arg: -Xmx2G
+jvm-arg: -XX:MaxDirectMemorySize=15872M
+jvm-arg: -Dio.netty.maxDirectMemory=0
+jvm-arg: -XX:NativeMemoryTracking=summary
+jvm-arg: -XX:MaxDirectMemorySize=8g
+jvm-arg: -javaagent:/users/jason92/s4-b8-pi/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/s4-b8-pi-harness/hold.btm
+jvm-flag: -XX:MaxDirectMemorySize=8589934592
+jvm-flag: -XX:MaxHeapSize=2147483648
+[1793047645651] + /users/jason92/s4-b8-pi/bin/nodetool -h 127.0.0.1 -p 7140 sjk mx -b org.apache.cassandra.db:type=StorageService -mg -f NativeTransportMaxConcurrentRequestsInBytes
+1073741824
+[1793047646748] + /users/jason92/s4-b8-pi/bin/nodetool -h 127.0.0.1 -p 7140 sjk mx -b org.apache.cassandra.db:type=StorageService -mg -f NativeTransportMaxConcurrentRequestsInBytesPerIp
+33554432
+listen: LISTEN 0      4096       127.0.4.1:9042       0.0.0.0:*          
+listen: LISTEN 0      50         127.0.0.1:7140       0.0.0.0:*          
+[1793047680373] client start 1793047680371
+FAIL_CONNECT connected=63 of 64 {'connected': 63}
+[1793047921023] FAIL: client did not complete (no RESULT line; see client.txt)

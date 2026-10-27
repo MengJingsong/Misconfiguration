@@ -1,0 +1,31 @@
+EXPECTED: I1 one bucket holding all sstables for n=8 and n=40 — yes
+EXPECTED: I2 min 33 with max 32 is rejected and min is unchanged (amendment reason) — yes
+EXPECTED: P1 estimate per (n,min) = ceil(n/32) if n>=min else 0, all 14 cells (forward and reverse sweeps) — yes
+EXPECTED: I3 estimate varies with min (not all equal) at n=8 — yes
+EXPECTED: P1b manager-level sum and PendingCompactions gauge equal the strategy estimate in every cell — yes
+EXPECTED: P1c a task is returned exactly when the estimate > 0 or n>=min — yes
+EXPECTED: P2 n=8: disk bytes, live and total identical for every min — yes
+EXPECTED: P3 n=8: heap max-min < 1 MiB over min values (0.01 MiB; sstables constant True) — yes
+EXPECTED: P2 n=40: disk bytes, live and total identical for every min — yes
+EXPECTED: P3 n=40: heap max-min < 1 MiB over min values (0.00 MiB; sstables constant True) — yes
+EXPECTED: P4 flushed data ~ 1 MiB per sstable (n=8: 8.0 MiB, n=40: 40.0 MiB) — yes
+EXPECTED: C1 positive control: executing the (4,8) compaction takes 8 inputs to 1 sstable and changes the bytes — yes
+EXPECTED: C2 positive control: max_threshold 4 -> 4 inputs, 32 -> 32 inputs (4 again), input bytes follow max — yes
+  control-exec n=8 min=4 inputs=8 sstables-before=8 sstables-after=1 bytes-before=8381461 bytes-after=8381677 total-after=17032029
+  control-max n=40 min=4 max=4 est=10 inputs=4 input-bytes=4188662
+  control-max n=40 min=4 max=32 est=2 inputs=32 input-bytes=33521906
+  control-max n=40 min=4 max=4 est=10 inputs=4 input-bytes=4188662
+  cell {'n': 8, 'min': 2, 'est': 1, 'bytes': 8380756, 'total': 8538113, 'heap': 41277312, 'sstables': 8}
+  cell {'n': 8, 'min': 4, 'est': 1, 'bytes': 8380756, 'total': 8538113, 'heap': 41277120, 'sstables': 8}
+  cell {'n': 8, 'min': 8, 'est': 1, 'bytes': 8380756, 'total': 8538113, 'heap': 41277120, 'sstables': 8}
+  cell {'n': 8, 'min': 9, 'est': 0, 'bytes': 8380756, 'total': 8538113, 'heap': 41269928, 'sstables': 8}
+  cell {'n': 8, 'min': 9, 'est': 0, 'bytes': 8380756, 'total': 8538113, 'heap': 41269928, 'sstables': 8}
+  cell {'n': 8, 'min': 8, 'est': 1, 'bytes': 8380756, 'total': 8538113, 'heap': 41277480, 'sstables': 8}
+  cell {'n': 8, 'min': 4, 'est': 1, 'bytes': 8380756, 'total': 8538113, 'heap': 41277480, 'sstables': 8}
+  cell {'n': 8, 'min': 2, 'est': 1, 'bytes': 8380756, 'total': 8538113, 'heap': 41277448, 'sstables': 8}
+  cell {'n': 40, 'min': 2, 'est': 2, 'bytes': 41906915, 'total': 42693594, 'heap': 43304000, 'sstables': 40}
+  cell {'n': 40, 'min': 4, 'est': 2, 'bytes': 41906915, 'total': 42693594, 'heap': 43304032, 'sstables': 40}
+  cell {'n': 40, 'min': 9, 'est': 2, 'bytes': 41906915, 'total': 42693594, 'heap': 43304032, 'sstables': 40}
+  cell {'n': 40, 'min': 9, 'est': 2, 'bytes': 41906915, 'total': 42693594, 'heap': 43304032, 'sstables': 40}
+  cell {'n': 40, 'min': 4, 'est': 2, 'bytes': 41906915, 'total': 42693594, 'heap': 43304056, 'sstables': 40}
+  cell {'n': 40, 'min': 2, 'est': 2, 'bytes': 41906915, 'total': 42693594, 'heap': 43304056, 'sstables': 40}

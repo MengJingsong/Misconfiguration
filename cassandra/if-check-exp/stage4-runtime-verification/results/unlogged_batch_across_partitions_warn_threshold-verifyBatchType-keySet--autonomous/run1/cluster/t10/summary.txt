@@ -1,0 +1,15 @@
+yaml: # ---- stage4 bu lines ----;cluster_name: stage4-bu;num_tokens: 4;endpoint_snitch: SimpleSnitch;listen_address: 127.0.4.1;rpc_address: 127.0.4.1;storage_port: 7000;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /dev/shm/s4-b9-bu/commitlog;hints_directory: /dev/shm/s4-b9-bu/hints;saved_caches_directory: /dev/shm/s4-b9-bu/saved_caches;cdc_raw_directory: /dev/shm/s4-b9-bu/cdc_raw;batch_size_warn_threshold: 1000KiB;batch_size_fail_threshold: 1000KiB;auto_snapshot: false;unlogged_batch_across_partitions_warn_threshold: 10;range_request_timeout: 600s;read_requ
+node up after 60 s, pid 1924266
+EXPECTED: heap -Xms2G -Xmx2G (B3a) - yes
+EXPECTED: G1 collector (B3a) - yes
+EXPECTED: node reads the knob from the yaml: Config echo unlogged_batch_across_partitions_warn_threshold=10 - yes
+Config echo batch_size_warn_threshold=1000KiB
+Config echo batch_size_fail_threshold=1000KiB
+probe {"ok": 1, "failed": 0, "rows": 500, "warned": 1, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.probe]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 0.2, "mode": "probe"}
+EXPECTED: first trigger: 500-key probe batch accepted with the unlogged-batch client warning (500 > 10) - yes
+load {"ok": 2000, "failed": 0, "rows": 1000000, "warned": 2000, "first_warning": "Unlogged batch covering 500 partitions detected against table [ks.t]. You should use a logged batch for atomicity, or asynchronous writes for performance.", "first_error": "", "seconds": 21.0, "mode": "run"}
+count(*) 1000000; pre-flush {'memtable_data_size': 59391978, 'space_live': 20831976, 'partitions_est': 994456, 'memtable_cells': 238522}; post-flush {'memtable_data_size': 0, 'space_live': 27366297, 'partitions_est': 982748, 'memtable_cells': 0}; disk {'data': 27310441, 'commitlog': 134217728}; heap after load+GC.run 226722816; heap peak 1420567552 mean 774881514; 35 heap samples; gc pause 0.441 s in 13 pauses; load 21 s; WARN log lines 1; ERROR lines 0
+EXPECTED: all 1000000 rows acked and count(*) = 1000000 - yes
+EXPECTED: client warning on every batch (2000) - yes
+EXPECTED: 1 to 2 WARN log lines (NoSpamLogger, at most one per minute) - yes
+EXPECTED: node stopped - yes

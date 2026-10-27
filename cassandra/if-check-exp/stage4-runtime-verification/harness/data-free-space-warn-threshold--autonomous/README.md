@@ -1,0 +1,9 @@
+# Harness — data-free-space-warn-threshold--autonomous
+
+Stage-4 instruments (set A batch 8, tag `fs`, node pc07, port slot 3), written 2026-10-26 after the audit (results [§1](../../results/data-free-space-warn-threshold--autonomous.md)). Trees from `copy-source.sh`: `~/s4-b8-fs-u` (`ant build-test`, unit tier) and `~/s4-b8-fs-n` (`ant jar`, node). Needs `sudo` for tmpfs mounts.
+
+| File | What it is | Checked how |
+|---|---|---|
+| `DataFreeSpaceWarnTest.java` | JUnit class (package `org.apache.cassandra.config`), one JVM per case: captures WARN events of the `DatabaseDescriptor` logger, reads `FileStore.getUnallocatedSpace` of each directory independently, calls `daemonInitialization()`, dumps a Config snapshot, and (with `-Dstage4.control=true`) runs the `Directories.getWriteableLocation` positive control. Prints `STAGE4 [case] ...` lines. | known-answer shakedowns 1-5 (1 GiB volume gives one WARN `Only 1.000GiB free ...`) |
+| `unit-run.sh <label>` | Mounts exact-size tmpfs volumes, writes the yaml, runs each case as its own JVM, prints `EXPECTED OK/FAIL`, stops after a failed first case (1 GiB volume must WARN), unmounts on exit. Output `~/s4-b8-fs-logs/unit-<label>/`. | shakedown: a compile error and a log-routing error were caught by the first-case stop |
+| `cluster-run.sh <run> <arm>` | Arms `S` (4 GiB tmpfs), `L` (100 GiB tmpfs), `C` (100 GiB, `commitlog_total_space: 64MiB`): mounts, starts the node on 127.0.3.1 (JMX 7130), checks the startup WARN (first trigger), runs `cassandra-stress write n=6000000`, samples `df`/`du` every 5 s, stops the node by PID, unmounts. Output `~/s4-b8-fs-logs/cluster-<run>/<arm>/`. | shakedown 3 (300k rows; the WARN check, sampler, stress and cleanup worked); shakedowns 1-2 found two script defects (no pid file with `-f`; stress started before the native port accepted) |

@@ -1,0 +1,89 @@
+cluster-run run1 main start 2026-10-26T15:33:15-0400 host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu
+daemons before: none (own start not yet)
+=== L1: yaml keys_to_save unset
+yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 10s; row_cache_save_period: 10s; counter_cache_save_period: 10s; native_transport_timeout: 30s
+stress write rc=0: Op rate                   :   61,845 op/s  [WRITE: 61,845 op/s] | Partition rate            :   61,845 pk/s  [WRITE: 61,845 pk/s] | Total partitions          :    200,000 [WRITE: 200,000] | Total errors              :          0 [WRITE: 0]
+stress counter-create rc=0: Op rate                   :        3 op/s  [COUNTER_WRITE: 3 op/s] | Partition rate            :        3 pk/s  [COUNTER_WRITE: 3 pk/s] | Total partitions          :          1 [COUNTER_WRITE: 1] | Total errors              :          0 [COUNTER_WRITE: 0]
+reader: {"keys": 200000, "errors": 0, "seconds": 102.0}
+stress counter1 rc=0: Op rate                   :   24,427 op/s  [COUNTER_WRITE: 24,427 op/s] | Partition rate            :   24,427 pk/s  [COUNTER_WRITE: 24,427 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+populated: entries [('key', 200016), ('row', 200000), ('counter', 436906)]
+EXPECTED: key cache populated (entries >= 100000) - yes
+EXPECTED: row cache populated (entries >= 100000) - yes
+EXPECTED: counter cache populated (entries >= 100000) - yes
+PHASE all(yaml unset) N=0: saved={'key': 200016, 'row': 200000, 'counter': 436906} file_bytes={'key': 3981567, 'row': 3000016, 'counter': 10485760} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2821
+EXPECTED: all(yaml unset): key saved items == min(N,live) = 200016 (saved 200016, live 200016) - yes
+EXPECTED: all(yaml unset): row saved items == min(N,live) = 200000 (saved 200000, live 200000) - yes
+EXPECTED: all(yaml unset): counter saved items == min(N,live) = 436906 (saved 436906, live 436906) - yes
+nodetool setcachekeystosave 10000 10000 10000
+PHASE runtime 10000 N=10000: saved={'key': 10000, 'row': 10000, 'counter': 10000} file_bytes={'key': 200016, 'row': 150016, 'counter': 240016} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2820
+EXPECTED: runtime 10000: key saved items == min(N,live) = 10000 (saved 10000, live 200016) - yes
+EXPECTED: runtime 10000: row saved items == min(N,live) = 10000 (saved 10000, live 200000) - yes
+EXPECTED: runtime 10000: counter saved items == min(N,live) = 10000 (saved 10000, live 436906) - yes
+nodetool setcachekeystosave 100 100 100
+PHASE runtime 100 N=100: saved={'key': 100, 'row': 100, 'counter': 100} file_bytes={'key': 2016, 'row': 1516, 'counter': 2416} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2819
+EXPECTED: runtime 100: key saved items == min(N,live) = 100 (saved 100, live 200016) - yes
+EXPECTED: runtime 100: row saved items == min(N,live) = 100 (saved 100, live 200000) - yes
+EXPECTED: runtime 100: counter saved items == min(N,live) = 100 (saved 100, live 436906) - yes
+nodetool setcachekeystosave 0 0 0
+PHASE runtime 0 N=0: saved={'key': 200016, 'row': 200000, 'counter': 436906} file_bytes={'key': 3981567, 'row': 3000016, 'counter': 10485760} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2821
+EXPECTED: runtime 0: key saved items == min(N,live) = 200016 (saved 200016, live 200016) - yes
+EXPECTED: runtime 0: row saved items == min(N,live) = 200000 (saved 200000, live 200000) - yes
+EXPECTED: runtime 0: counter saved items == min(N,live) = 436906 (saved 436906, live 436906) - yes
+nodetool setcachecapacity 8 100 50
+PHASE capacity 8 MiB, N=0 N=0: saved={'key': 95325, 'row': 200000, 'counter': 436906} file_bytes={'key': 1906516, 'row': 3000016, 'counter': 10485760} entries={'key': 95325, 'row': 200000, 'counter': 436906} heap_used_mb=219.4 rss_anon_mb=2820
+EXPECTED: capacity 8 MiB, N=0: key saved items == min(N,live) = 95325 (saved 95325, live 95325) - yes
+EXPECTED: capacity 8 MiB, N=0: row saved items == min(N,live) = 200000 (saved 200000, live 200000) - yes
+EXPECTED: capacity 8 MiB, N=0: counter saved items == min(N,live) = 436906 (saved 436906, live 436906) - yes
+nodetool setcachekeystosave 100 100 100
+PHASE runtime 100 (before restart) N=100: saved={'key': 100, 'row': 100, 'counter': 100} file_bytes={'key': 2000, 'row': 1516, 'counter': 2416} entries={'key': 95325, 'row': 200000, 'counter': 436906} heap_used_mb=219.4 rss_anon_mb=2821
+EXPECTED: runtime 100 (before restart): key saved items == min(N,live) = 100 (saved 100, live 95325) - yes
+EXPECTED: runtime 100 (before restart): row saved items == min(N,live) = 100 (saved 100, live 200000) - yes
+EXPECTED: runtime 100 (before restart): counter saved items == min(N,live) = 100 (saved 100, live 436906) - yes
+=== yaml100: restart with yaml keys_to_save 100
+yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 10s; row_cache_save_period: 10s; counter_cache_save_period: 10s; native_transport_timeout: 30s; key_cache_keys_to_save: 100; row_cache_keys_to_save: 100; counter_cache_keys_to_save: 100
+yaml100: entries after warm load: {'key': 255, 'row': 100, 'counter': 100}
+reader: {"keys": 200000, "errors": 0, "seconds": 111.3}
+stress counterx rc=0: Op rate                   :   21,923 op/s  [COUNTER_WRITE: 21,923 op/s] | Partition rate            :   21,923 pk/s  [COUNTER_WRITE: 21,923 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+PHASE yaml100 N=100: saved={'key': 100, 'row': 100, 'counter': 100} file_bytes={'key': 1996, 'row': 1516, 'counter': 2416} entries={'key': 400024, 'row': 200000, 'counter': 436906} heap_used_mb=285.5 rss_anon_mb=2811
+EXPECTED: yaml100: key saved items == min(N,live) = 100 (saved 100, live 400024) - yes
+EXPECTED: yaml100: row saved items == min(N,live) = 100 (saved 100, live 200000) - yes
+EXPECTED: yaml100: counter saved items == min(N,live) = 100 (saved 100, live 436906) - yes
+=== yaml10000: restart with yaml keys_to_save 10000
+yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 10s; row_cache_save_period: 10s; counter_cache_save_period: 10s; native_transport_timeout: 30s; key_cache_keys_to_save: 10000; row_cache_keys_to_save: 10000; counter_cache_keys_to_save: 10000
+yaml10000: entries after warm load: {'key': 439, 'row': 100, 'counter': 100}
+reader: {"keys": 200000, "errors": 0, "seconds": 108.3}
+stress counterx rc=0: Op rate                   :   21,964 op/s  [COUNTER_WRITE: 21,964 op/s] | Partition rate            :   21,964 pk/s  [COUNTER_WRITE: 21,964 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+PHASE yaml10000 N=10000: saved={'key': 10000, 'row': 10000, 'counter': 10000} file_bytes={'key': 199570, 'row': 150016, 'counter': 240016} entries={'key': 400202, 'row': 200000, 'counter': 436906} heap_used_mb=283.5 rss_anon_mb=2809
+EXPECTED: yaml10000: key saved items == min(N,live) = 10000 (saved 10000, live 400202) - yes
+EXPECTED: yaml10000: row saved items == min(N,live) = 10000 (saved 10000, live 200000) - yes
+EXPECTED: yaml10000: counter saved items == min(N,live) = 10000 (saved 10000, live 436906) - yes
+=== L4: save periods 0, saved_caches emptied
+yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 0s; row_cache_save_period: 0s; counter_cache_save_period: 0s; native_transport_timeout: 30s
+nosave baseline: entries after start with no saved files (the node's own system-keyspace reads), before the workload: {'key': 24, 'row': 0, 'counter': 0}
+reader: {"keys": 200000, "errors": 0, "seconds": 111.0}
+stress counterx rc=0: Op rate                   :   27,771 op/s  [COUNTER_WRITE: 27,771 op/s] | Partition rate            :   27,771 pk/s  [COUNTER_WRITE: 27,771 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+nosave: files={} saved lines={} entries=[('key', 798817), ('row', 200000), ('counter', 436906)]
+EXPECTED: nosave control: caches populated but no saved file is created - yes
+EXPECTED: cross key rt10000: file/file(all) = 0.0502 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+EXPECTED: cross key rt100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+EXPECTED: cross key rt0: file/file(all) = 1.0000 within 20% of items/live = 1.0000 (+0.002 abs for tiny) - yes
+EXPECTED: cross key yaml100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+EXPECTED: cross key yaml10000: file/file(all) = 0.0501 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+EXPECTED: cross row rt10000: file/file(all) = 0.0500 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+EXPECTED: cross row rt100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+EXPECTED: cross row rt0: file/file(all) = 1.0000 within 20% of items/live = 1.0000 (+0.002 abs for tiny) - yes
+EXPECTED: cross row yaml100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+EXPECTED: cross row yaml10000: file/file(all) = 0.0500 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+EXPECTED: cross counter rt10000: file/file(all) = 0.0229 within 20% of items/live = 0.0229 (+0.002 abs for tiny) - yes
+EXPECTED: cross counter rt100: file/file(all) = 0.0002 within 20% of items/live = 0.0002 (+0.002 abs for tiny) - yes
+EXPECTED: cross counter rt0: file/file(all) = 1.0000 within 20% of items/live = 1.0000 (+0.002 abs for tiny) - yes
+EXPECTED: cross counter yaml100: file/file(all) = 0.0002 within 20% of items/live = 0.0002 (+0.002 abs for tiny) - yes
+EXPECTED: cross counter yaml10000: file/file(all) = 0.0229 within 20% of items/live = 0.0229 (+0.002 abs for tiny) - yes
+EXPECTED: cross key: live entries unchanged by N across runtime phases (min 95325, max 200016) - NO (recorded; judged in the results file)
+EXPECTED: cross row: live entries unchanged by N across runtime phases (min 200000, max 200000) - yes
+EXPECTED: cross counter: live entries unchanged by N across runtime phases (min 436906, max 436906) - yes
+EXPECTED: cross: steady heap (after GC) differs < 5% between runtime phases (min 234.4, max 234.4 MB) - yes
+EXPECTED: cross: RssAnon differs < 5% between runtime phases (min 2819, max 2821 MB) - yes
+EXPECTED: capacity control: key cache entries fall with key_cache_size (8 MiB): 95325 < 200016 - yes
+daemons after: none
+EXPECTED totals: yes=48 no=1

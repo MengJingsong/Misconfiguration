@@ -1,0 +1,85 @@
+PASS unit grid: 24 uniform cells present | 24
+PASS unit grid S=1,N=1 | accepted
+PASS unit grid S=1,N=2 | accepted
+PASS unit grid S=1,N=3 | accepted
+PASS unit grid S=1000,N=1 | accepted
+PASS unit grid S=1000,N=2 | accepted
+PASS unit grid S=1000,N=3 | accepted
+PASS unit grid S=32767,N=1 | accepted
+PASS unit grid S=32767,N=2 | accepted
+PASS unit grid S=32767,N=3 | rejected:Key length of 98301 is longer than maximum of 65535
+PASS unit grid S=32768,N=1 | accepted
+PASS unit grid S=32768,N=2 | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit grid S=32768,N=3 | rejected:Key length of 98304 is longer than maximum of 65535
+PASS unit grid S=65534,N=1 | accepted
+PASS unit grid S=65534,N=2 | rejected:Key length of 131068 is longer than maximum of 65535
+PASS unit grid S=65534,N=3 | rejected:Key length of 196602 is longer than maximum of 65535
+PASS unit grid S=65535,N=1 | accepted
+PASS unit grid S=65535,N=2 | rejected:Key length of 131070 is longer than maximum of 65535
+PASS unit grid S=65535,N=3 | rejected:Key length of 196605 is longer than maximum of 65535
+PASS unit grid S=65536,N=1 | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit grid S=65536,N=2 | rejected:Key length of 131072 is longer than maximum of 65535
+PASS unit grid S=65536,N=3 | rejected:Key length of 196608 is longer than maximum of 65535
+PASS unit grid S=70000,N=1 | rejected:Key length of 70000 is longer than maximum of 65535
+PASS unit grid S=70000,N=2 | rejected:Key length of 140000 is longer than maximum of 65535
+PASS unit grid S=70000,N=3 | rejected:Key length of 210000 is longer than maximum of 65535
+PASS unit grid mixed 65536+1 | rejected:Key length of 65537 is longer than maximum of 65535
+PASS unit grid mixed 65535+1 | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit grid mixed 65535+0 | accepted
+PASS unit grid mixed 65535+null | accepted
+PASS unit grid mixed null+65536 | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit grid mixed 1+70000 | rejected:Key length of 70001 is longer than maximum of 65535
+PASS unit grid mixed 32768+32767 | accepted
+PASS unit grid mixed 32767+32768+1 | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit grid S=1000,N=65 | accepted
+PASS unit grid S=1000,N=66 | rejected:Key length of 66000 is longer than maximum of 65535
+PASS unit grid EMPTY and STATIC accepted
+PASS unit grid ArrayClustering S=65535 | accepted
+PASS unit grid ArrayClustering S=65536 | rejected:Key length of 65536 is longer than maximum of 65535
+PASS unit grid: no MISMATCH
+PASS unit stream: 100000 accepted, 0 rejected, 6.55e9 bytes, heap < 100 MB | accepted=100000 rejected=0 bytes_validated=6553500000 ms=1304 heap_before=12915088 heap_after=12867904
+PASS unit series1000a: 10 samples, no throw, slope within S+40..S+200, steps within 10 percent | slope 1116.7
+PASS unit series1000b: 10 samples, no throw, slope within S+40..S+200, steps within 10 percent | slope 1116.7
+PASS unit series1000c: 10 samples, no throw, slope within S+40..S+200, steps within 10 percent | slope 1116.8
+PASS unit series1: 10 samples, no throw, slope within S+40..S+200, steps within 10 percent | slope 124.7
+PASS unit three S=1000 slopes agree within 5 percent | [1116.7, 1116.7, 1116.8]
+PASS unit S=1 slope < 250 and ratio S=1000/S=1 > 5 | 124.7 ratio 9.0
+PASS unit capped control: heap at 100k within 5 MB of heap at 10k; uncapped grew > 80 MB | 42744
+PASS cluster: 11 writer outputs found | 11
+PASS precheck single: 5 ok at 65535; 5 rejected at 65536 with exact text
+PASS precheck two-ck: (32768,32767) ok; (32768,32768) rejected, text 65536; (70000,10) rejected, text 70010
+PASS k100_r1e5: all 100000 accepted
+PASS k1000_r1e5: all 100000 accepted
+PASS k1000_r1e6: all 1000000 accepted
+PASS k65535_r1e4: all 10000 accepted
+PASS p64_k65535_r1e4: all 10000 accepted
+PASS k65536: 10000 rejected, one message, exact text
+PASS k1000_r1e6: Data.db from the node flush log within 1.0..1.2 x N*K | 1015971578 B, ratio 1.016
+PASS k1000_r1e6: compaction of the 4 flushed sstables was running (input total equals flush-log sum within 0.01 percent) | 243808941 of 1015972182 bytes done
+PASS k1000_r1e6: harness Data.db minus flush-log sum is positive and below the compaction input (in-flight output) | 213670851 B extra
+INFO k1000_r1e6: (flush-log Data.db + harness Index.db) / N*K | 1.054; frozen bracket 1.0..3.0 -> inside
+PASS k65535_r1e4: Data.db from the node flush log within 1.0..1.2 x N*K | 655526724 B, ratio 1.000
+PASS k65535_r1e4: harness Data.db within 0.5% of the flush-log sum | 658487470 vs 655526724
+INFO k65535_r1e4: Data+Index / N*K (Index.db from arms.jsonl) | 3.005; Index.db / N*K = 2.000; frozen bracket 1.0..3.0 -> OUTSIDE
+PASS Data+Index order (100,1e5) < (1000,1e5) < (1000,1e6); 65535 > (1000,1e5)
+PASS k65536: table directory unchanged, memtable empty
+PASS k1000_r1e6@256: >=1 MEMTABLE_LIMIT flush, off-heap usage <= 320 MiB | [253.5, 253.4, 253.4]
+PASS k65535_r1e4@256: >=1 MEMTABLE_LIMIT flush, off-heap usage <= 320 MiB | [254.0, 254.0]
+PASS k100_r1e5@256: no MEMTABLE_LIMIT flush
+PASS k1000_r1e5@256: no MEMTABLE_LIMIT flush
+PASS k65535@64: >=1 MEMTABLE_LIMIT flush, off-heap usage <= 80 MiB | [64.0, 63.5, 63.9, 64.0, 64.0, 64.0, 64.0, 64.0, 64.0]
+PASS plateau ratio first MEMTABLE_LIMIT usage between 2.5 and 6 | 254.0/64.0 = 3.97
+PASS k1000_r1e6 (1 GB of keys) logged off-heap never above the 256 MiB pool by more than 25 percent although key bytes exceed it 3.7 fold
+INFO k1000_r1e5: RssAnon samples | first 1688 MiB, max 1741 MiB, growth 54 MiB, N*K 95 MiB
+INFO k1000_r1e6: RssAnon samples | first 1704 MiB, max 1949 MiB, growth 244 MiB, N*K 954 MiB
+INFO k65535_r1e4: RssAnon samples | first 1809 MiB, max 1972 MiB, growth 163 MiB, N*K 625 MiB
+INFO p64_k65535_r1e4: RssAnon samples | first 1564 MiB, max 1703 MiB, growth 140 MiB, N*K 625 MiB
+PASS probe (a) plain insert rejected with exact text
+PASS probe (b) CAS insert not rejected with "Key length" (it timed out) | WriteTimeout: Error from server: code=1100 [Coordinator node timed out waiting f
+PASS probe (c) slice delete accepted
+PASS life 2 log has the NativeClustering.java:50 assertion
+PASS life 2 log has the flush failure "exceeded maximum of 65535 bytes: 70000" (StatsMetadata)
+PASS no ERROR line in life 1; in life 2 the first ERROR comes after the probe table was created
+PASS no daemon of this run left
+
+77 hold, 0 do not hold

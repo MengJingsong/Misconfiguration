@@ -1,0 +1,224 @@
+22:01:05 == mt32 start; tree=/users/jason92/s4-b10-lm2 rows=800000 throttle=1800/s spec={"mt": 32, "stcs_off": false, "tpB": "1"}
+22:01:05 EXPECTED: no node of this arm running: PASS 
+22:01:05 $ sudo mkdir -p /mnt/s4b10lm && (mountpoint -q /mnt/s4b10lm || sudo mount -t tmpfs -o size=8g tmpfs /mnt/s4b10lm) && sudo chown $(id -u):$(id -g) /mnt/s4b10lm
+
+22:01:05 $ rm -rf /mnt/s4b10lm/* && mkdir -p /mnt/s4b10lm/data /mnt/s4b10lm/commitlog /mnt/s4b10lm/hints /mnt/s4b10lm/saved_caches /mnt/s4b10lm/cdc_raw
+
+22:01:05 yaml tail: cluster_name: 'mt-mt32'; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.6.1; rpc_address: 127.0.6.1; commitlog_directory: /mnt/s4b10lm/commitlog; hints_directory: /mnt/s4b10lm/hints; saved_caches_directory: /mnt/s4b10lm/saved_caches; cdc_raw_directory: /mnt/s4b10lm/cdc_raw; auto_snapshot: false; concurrent_compactors: 1; compaction_throughput: 1MiB/s; memtable_allocation_type: offheap_objects; native_transport_timeout: 30s
+22:01:05 $ cd /users/jason92/s4-b10-lm2 && JVM_EXTRA_OPTS='-Dcassandra.disable_stcs_in_l0=false' CASSANDRA_CONF=/users/jason92/s4-b10-lm-logs/cluster/mt32/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b10-lm-logs/cluster/mt32/logs MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M bin/cassandra -p /users/jason92/s4-b10-lm-logs/cluster/mt32/node.pid > /users/jason92/s4-b10-lm-logs/cluster/mt32/stdout.txt 2>&1
+
+22:02:07 node up after 61 s, pid 3461465, JVM_EXTRA_OPTS -Dcassandra.disable_stcs_in_l0=false
+22:02:07 $ /users/jason92/s4-b10-lm2/bin/cqlsh 127.0.6.1 -e "CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+
+22:02:08 $ /users/jason92/s4-b10-lm2/bin/cqlsh 127.0.6.1 -e "CREATE TABLE ks.standard1 (key blob PRIMARY KEY, \"C0\" blob, \"C1\" blob, \"C2\" blob, \"C3\" blob, \"C4\" blob) WITH compression = {'enabled':'false'} AND compaction = {'class':'LeveledCompactionStrategy','max_threshold':'32'}"
+
+22:02:10 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthreshold ks standard1
+Current compaction thresholds for ks/standard1: 
+ min = 4,  max = 32
+
+22:02:11 EXPECTED: table max_threshold: PASS Current compaction thresholds for ks/standard1:   min = 4,  max = 32
+22:02:11 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            4          
+data compacted                   48327      
+compressed data compacted        14085      
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.27/minute
+mean rate                        232.86/hour
+compaction throughput (MiB/s)    1.0        
+
+22:02:12 EXPECTED: baseline pending tasks before the stress is 0: PASS baseline=0
+22:02:12 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 disableautocompaction ks standard1
+
+22:02:13 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 statusautocompaction ks standard1
+not running
+
+22:02:14 EXPECTED: autocompaction disabled for ks.standard1: PASS not running
+22:02:16 $ /users/jason92/s4-b10-lm2/tools/bin/cassandra-stress write n=800000 -col 'size=FIXED(256)' 'n=FIXED(4)' -pop seq=1..800000 -schema keyspace=ks -rate threads=8 throttle=1800/s -node 127.0.6.1 -port jmx=7160 > /users/jason92/s4-b10-lm-logs/cluster/mt32/stress-write.txt 2>&1
+22:09:53 EXPECTED: stress completed without errors: PASS errors=0 rc=0 flushes=304 secs=457
+22:09:53 PHASE A: 60 s of sampling with compaction held
+22:10:53 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 850000
+	Write Latency: 0.01105326 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 299
+		Old SSTable count: 0
+		Max SSTable size: 40.886MiB
+		SSTables in each level: [299/4, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [915413468, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 933588207
+		Space used (total): 933588207
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 682658
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 795013
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 299
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 850000
+		Local write latency: 0.011 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 873.006MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 535560
+		Bloom filter off heap memory used: 533168
+		Index summary off heap memory used: 149490
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+22:10:54 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 compactionstats
+concurrent compactors            1             
+pending tasks                    11            
+ks                               standard1   11
+compactions completed            4             
+data compacted                   48327         
+compressed data compacted        14085         
+compactions aborted              0             
+compactions reduced              0             
+sstables dropped from compaction 0             
+15 minute rate                   0.15/minute   
+mean rate                        24.58/hour    
+compaction throughput (MiB/s)    1.0           
+
+22:10:58 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthreshold ks standard1
+Current compaction thresholds for ks/standard1: 
+ min = 4,  max = 32
+
+22:10:59 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthroughput
+Current compaction throughput: 1 MB/s
+
+22:11:00 phase A: L0..=[299, 0, 0, 0, 0, 0, 0, 0, 0] pending=11 tableBytes=933588207 dataDir=933704062 rssAnon=2917195776 heap=78638616 compExec={'active': 0, 'pending': 0, 'completed': 259}
+22:11:00 EXPECTED: limit reached: L0 holds more than 128 sstables: PASS L0=299
+22:11:00 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 compactionhistory
+Compaction History: 
+id                                   keyspace_name columnfamily_name compacted_at            bytes_in bytes_out rows_merged compaction_properties       
+6b3b4d10-d1aa-11f1-a41a-a1193d69c8ff system_schema tables            2026-10-26T22:02:09.919 4370     3901      {1:6}       {compaction_type:Compaction}
+6b3580b0-d1aa-11f1-a41a-a1193d69c8ff system_schema columns           2026-10-26T22:02:09.887 8264     8000      {1:6}       {compaction_type:Compaction}
+6a70aa10-d1aa-11f1-a41a-a1193d69c8ff system_schema keyspaces         2026-10-26T22:02:08.612 584      272       {1:6}       {compaction_type:Compaction}
+68f5f0f0-d1aa-11f1-a41a-a1193d69c8ff system        local             2026-10-26T22:02:06.158 867      675       {7:1}       {compaction_type:Compaction}
+
+22:11:01 EXPECTED: no compaction ran on ks.standard1 in the write and phase A: PASS compactionhistory rows for standard1=0 sstables=299 L0=299
+22:11:01 EXPECTED: levels above 0 are empty (the byte term is L0 only): PASS levels=[299, 0, 0, 0, 0, 0, 0, 0, 0] bytes=[915413468, 0, 0, 0, 0, 0, 0, 0, 0]
+22:11:01 EXPECTED: first trigger: pending tasks = floor(L0/max_threshold) + byte term (STCS term 0 when STCS-in-L0 is off): PASS pending=11 baseline=0 L0=299 max_threshold=32 stcsTerm=9 byteTerm=2 (L0 bytes 915413468) expected=11
+22:11:01 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 enableautocompaction ks standard1
+
+22:11:02 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 setcompactionthroughput 1
+
+22:11:03 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthroughput
+Current compaction throughput: 1 MB/s
+
+22:11:05 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthroughput
+Current compaction throughput: 1 MB/s
+
+22:11:06 EXPECTED: throughput set: PASS Current compaction throughput: 1 MB/s
+22:11:06 PHASE B: 180 s with autocompaction on at 1 MiB/s
+22:14:06 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 tablestats ks.standard1
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 850000
+	Write Latency: 0.01105326 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 268
+		Old SSTable count: 0
+		Max SSTable size: 91.322MiB
+		SSTables in each level: [268/4, 0, 0, 0, 0, 0, 0, 0, 0]
+		SSTable bytes in each level: [861916412, 0, 0, 0, 0, 0, 0, 0, 0]
+		Space used (live): 878875570
+		Space used (total): 878875570
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 642450
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 795013
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 299
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 850000
+		Local write latency: 0.011 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 821.988MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 504080
+		Bloom filter off heap memory used: 501936
+		Index summary off heap memory used: 140514
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+22:14:08 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 compactionstats
+concurrent compactors                1                                                                    
+pending tasks                        11                                                                   
+ks                                   standard1       11                                                   
+compactions completed                5                                                                    
+data compacted                       147738318                                                            
+compressed data compacted            147704076                                                            
+compactions aborted                  0                                                                    
+compactions reduced                  0                                                                    
+sstables dropped from compaction     0                                                                    
+15 minute rate                       0.18/minute                                                          
+mean rate                            23.12/hour                                                           
+compaction throughput (MiB/s)        1.0                                                                  
+id                                   compaction type keyspace table     completed total     unit  progress
+fc2a27f0-d1ab-11f1-a41a-a1193d69c8ff Compaction      ks       standard1 48878935  186696929 bytes 26.18%  
+active compaction remaining time     0h02m11s                                                             
+
+22:14:10 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthreshold ks standard1
+Current compaction thresholds for ks/standard1: 
+ min = 4,  max = 32
+
+22:14:11 $ /users/jason92/s4-b10-lm2/bin/nodetool -h 127.0.0.1 -p 7160 getcompactionthroughput
+Current compaction throughput: 1 MB/s
+
+22:14:13 phase B: L0..=[268, 0, 0, 0, 0, 0, 0, 0, 0] pending=11 tableBytes=929928212 dataDir=930109603 rssAnon=2919313408 heap=81745888 compExec={'active': 1, 'pending': 49, 'completed': 309}
+22:14:19 $ /users/jason92/s4-b10-lm2/bin/cqlsh 127.0.6.1 -e "TRUNCATE ks.standard1"
+
+22:14:29 EXPECTED: truncate empties the table directory: PASS bytes=0
+22:14:35 this arm's node left after stop: none
+22:14:35 == mt32 done rc=0 node stopped=True

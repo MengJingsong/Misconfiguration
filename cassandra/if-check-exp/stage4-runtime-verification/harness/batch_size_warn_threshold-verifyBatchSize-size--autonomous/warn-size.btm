@@ -1,0 +1,91 @@
+# Byteman observation rules for batch_size_warn_threshold-verifyBatchSize-size--autonomous (case B2d/B3d as amended A1, A2,
+# A7, 2026-10-26). They change no behaviour. Adapted from the batch_size_fail_threshold harness (batch-alloc.btm); lines
+# (format in Alloc.java), one of each per batch request that reaches the code:
+#   dec  the event-loop thread's bytes while BatchMessage$1.decode ran
+#   exe  the executing thread's bytes while BatchMessage.execute ran
+#   bst  the executing thread's bytes while BatchStatement.execute ran (the coordinator reading of A2)
+#   siz  at verifyBatchSize entry: mutations n, IMutation.dataSize (the check's operand), warn and fail thresholds in bytes
+#   rej  verifyBatchSize threw (the fail branch, BatchStatement.java:358)
+# stage4.Alloc is on the boot class path.
+
+RULE dec entry
+CLASS org.apache.cassandra.transport.messages.BatchMessage$1
+METHOD decode(io.netty.buffer.ByteBuf, org.apache.cassandra.transport.ProtocolVersion)
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("dec")
+ENDRULE
+
+RULE dec exit
+CLASS org.apache.cassandra.transport.messages.BatchMessage$1
+METHOD decode(io.netty.buffer.ByteBuf, org.apache.cassandra.transport.ProtocolVersion)
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("dec", "")
+ENDRULE
+
+RULE exe entry
+CLASS org.apache.cassandra.transport.messages.BatchMessage
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.transport.Dispatcher$RequestTime, boolean)
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("exe")
+ENDRULE
+
+RULE exe exit
+CLASS org.apache.cassandra.transport.messages.BatchMessage
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.transport.Dispatcher$RequestTime, boolean)
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("exe", "resp=" + $!.getClass().getSimpleName())
+ENDRULE
+
+RULE exe exception exit
+CLASS org.apache.cassandra.transport.messages.BatchMessage
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.transport.Dispatcher$RequestTime, boolean)
+AT EXCEPTION EXIT
+IF TRUE
+DO stage4.Alloc.end("exe", "resp=exception")
+ENDRULE
+
+RULE bst entry
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.BatchQueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("bst")
+ENDRULE
+
+RULE bst exit
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.BatchQueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("bst", "exc=false")
+ENDRULE
+
+RULE bst exception exit
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.BatchQueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT EXCEPTION EXIT
+IF TRUE
+DO stage4.Alloc.end("bst", "exc=true")
+ENDRULE
+
+RULE siz
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD verifyBatchSize
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.line("siz", "n=" + $1.size() + " size=" + org.apache.cassandra.db.IMutation.dataSize($1)
+                      + " warn=" + org.apache.cassandra.config.DatabaseDescriptor.getBatchSizeWarnThreshold()
+                      + " fail=" + org.apache.cassandra.config.DatabaseDescriptor.getBatchSizeFailThreshold())
+ENDRULE
+
+RULE rej
+CLASS org.apache.cassandra.cql3.statements.BatchStatement
+METHOD verifyBatchSize
+AT THROW
+IF TRUE
+DO stage4.Alloc.line("rej", "")
+ENDRULE

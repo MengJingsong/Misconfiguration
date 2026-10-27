@@ -1,0 +1,46 @@
+STAGE4 info default threshold=10 warn_kib=5 fail_kib=50 heap_max=1056309248
+STAGE4 arm t1 begin threshold=1 warn_kib=1000 fail_kib=1000
+STAGE4 reading arm=t1 u50-first client_warnings=1 log_warns=1 count=50 memtable_live_bytes=7450
+STAGE4 reading arm=t1 u50-second-within-a-minute client_warnings=1 log_warns=0 count=100 memtable_live_bytes=14900
+STAGE4 heap arm=t1 used_before=54721672 used_after=160820040 (coarse, no GC after)
+EXPECTED: first trigger: threshold 1, 50 keys -> client warning present and one log line - yes
+EXPECTED: t1 u50: client warnings 1 (50 keys > 1) - yes
+EXPECTED: t1 u50: log lines 1 - yes
+EXPECTED: t1 u50: count(*) = 50 - yes
+EXPECTED: t1 u50 second batch within a minute: client warnings 1, log lines 0 (NoSpamLogger) - yes
+STAGE4 reading arm=t1 u5 client_warnings=1 log_warns=1 count=5 memtable_live_bytes=745
+EXPECTED: t1 u5: client warnings 1, count 5 - yes
+STAGE4 reading arm=t1 l50-logged client_warnings=0 log_warns=0 count=50 memtable_live_bytes=7450
+EXPECTED: t1 l50 (LOGGED): no unlogged warning, count 50 - yes
+STAGE4 arm t1 end
+STAGE4 arm t10 begin threshold=10 warn_kib=1000 fail_kib=1000
+STAGE4 reading arm=t10 u50-first client_warnings=1 log_warns=1 count=50 memtable_live_bytes=7450
+STAGE4 reading arm=t10 u50-second-within-a-minute client_warnings=1 log_warns=0 count=100 memtable_live_bytes=14900
+STAGE4 heap arm=t10 used_before=71155408 used_after=78866960 (coarse, no GC after)
+EXPECTED: t10 u50: client warnings 1 (50 keys > 10) - yes
+EXPECTED: t10 u50: log lines 1 - yes
+EXPECTED: t10 u50: count(*) = 50 - yes
+EXPECTED: t10 u50 second batch within a minute: client warnings 1, log lines 0 (NoSpamLogger) - yes
+STAGE4 reading arm=t10 u5 client_warnings=0 log_warns=0 count=5 memtable_live_bytes=745
+EXPECTED: t10 u5: client warnings 0, count 5 - yes
+STAGE4 reading arm=t10 l50-logged client_warnings=0 log_warns=0 count=50 memtable_live_bytes=7450
+EXPECTED: t10 l50 (LOGGED): no unlogged warning, count 50 - yes
+STAGE4 arm t10 end
+STAGE4 arm t1000 begin threshold=1000 warn_kib=1000 fail_kib=1000
+STAGE4 reading arm=t1000 u50-first client_warnings=0 log_warns=0 count=50 memtable_live_bytes=7450
+STAGE4 reading arm=t1000 u50-second-within-a-minute client_warnings=0 log_warns=0 count=100 memtable_live_bytes=14900
+STAGE4 heap arm=t1000 used_before=71325432 used_after=81108664 (coarse, no GC after)
+EXPECTED: t1000 u50: client warnings 0 (50 keys <= 1000) - yes
+EXPECTED: t1000 u50: log lines 0 - yes
+EXPECTED: t1000 u50: count(*) = 50 - yes
+EXPECTED: t1000 u50 second batch within a minute: client warnings 0, log lines 0 (NoSpamLogger) - yes
+STAGE4 reading arm=t1000 u5 client_warnings=0 log_warns=0 count=5 memtable_live_bytes=745
+EXPECTED: t1000 u5: client warnings 0, count 5 - yes
+STAGE4 reading arm=t1000 l50-logged client_warnings=0 log_warns=0 count=50 memtable_live_bytes=7450
+EXPECTED: t1000 l50 (LOGGED): no unlogged warning, count 50 - yes
+STAGE4 arm t1000 end
+EXPECTED: memtable live bytes after the first 50-key batch equal within 5% across thresholds (7450, 7450, 7450) - yes
+STAGE4 arm control begin threshold=10 warn_kib=1 fail_kib=1
+STAGE4 reading arm=control u50-size-control client_warnings=0 log_warns=0 count=0 memtable_live_bytes=0 error="Batch too large"
+EXPECTED: control: 50-key batch rejected with "Batch too large", count 0 - yes
+STAGE4 arm control end

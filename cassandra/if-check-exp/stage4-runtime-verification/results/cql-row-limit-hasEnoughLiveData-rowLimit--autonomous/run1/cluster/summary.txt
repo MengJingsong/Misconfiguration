@@ -1,0 +1,85 @@
+EXPECTED l1000 rows returned 10000000 GOT 10000000 ok (secondary)
+EXPECTED l1000 RowCacheHit delta 0 GOT 0 ok
+EXPECTED l1000 RowCacheHitOutOfRange delta 10000 GOT 10000 ok
+EXPECTED l1000 RowCacheMiss delta 0 GOT 0 ok
+EXPECTED l1000 Entries after populate 200 GOT 200 ok
+EXPECTED l1000 Size in [3.2e6, 5.4e6] [3.2e6,5.4e6] GOT 4286517 ok
+EXPECTED l1000 Size unchanged populated->window 4286517 GOT 4286517 ok
+EXPECTED l10 rows returned 100000 GOT 100000 ok (secondary)
+EXPECTED l10 RowCacheHit delta 10000 GOT 10000 ok
+EXPECTED l10 RowCacheHitOutOfRange delta 0 GOT 0 ok
+EXPECTED l10 RowCacheMiss delta 0 GOT 0 ok
+EXPECTED l10 Entries after populate 200 GOT 200 ok
+EXPECTED l10 Size in [3.2e6, 5.4e6] [3.2e6,5.4e6] GOT 4286517 ok
+EXPECTED l10 Size unchanged populated->window 4286517 GOT 4286517 ok
+EXPECTED l100 rows returned 1000000 GOT 1000000 ok (secondary)
+EXPECTED l100 RowCacheHit delta 10000 GOT 10000 ok
+EXPECTED l100 RowCacheHitOutOfRange delta 0 GOT 0 ok
+EXPECTED l100 RowCacheMiss delta 0 GOT 0 ok
+EXPECTED l100 Entries after populate 200 GOT 200 ok
+EXPECTED l100 Size in [3.2e6, 5.4e6] [3.2e6,5.4e6] GOT 4286517 ok
+EXPECTED l100 Size unchanged populated->window 4286517 GOT 4286517 ok
+EXPECTED l100k rows returned 20000000 GOT 20000000 ok (secondary)
+EXPECTED l100k RowCacheHit delta 0 GOT 0 ok
+EXPECTED l100k RowCacheHitOutOfRange delta 10000 GOT 10000 ok
+EXPECTED l100k RowCacheMiss delta 0 GOT 0 ok
+EXPECTED l100k Entries after populate 200 GOT 200 ok
+EXPECTED l100k Size in [3.2e6, 5.4e6] [3.2e6,5.4e6] GOT 4286517 ok
+EXPECTED l100k Size unchanged populated->window 4286517 GOT 4286517 ok
+EXPECTED lnone rows returned 20000000 GOT 20000000 ok (secondary)
+EXPECTED lnone RowCacheHit delta 0 GOT 0 ok
+EXPECTED lnone RowCacheHitOutOfRange delta 10000 GOT 10000 ok
+EXPECTED lnone RowCacheMiss delta 0 GOT 0 ok
+EXPECTED lnone Entries after populate 200 GOT 200 ok
+EXPECTED lnone Size in [3.2e6, 5.4e6] [3.2e6,5.4e6] GOT 4286517 ok
+EXPECTED lnone Size unchanged populated->window 4286517 GOT 4286517 ok
+EXPECTED a100 rows returned 1000000 GOT 1000000 ok (secondary)
+EXPECTED a100 RowCacheHitOutOfRange delta 0 GOT 0 ok
+EXPECTED a100 RowCacheHit + RowCacheMiss 10000 GOT 10000 ok
+EXPECTED a100 RowCacheHit > 0 >0 GOT 5163 ok
+EXPECTED a100 Size <= 64 MiB <=67108864 GOT 44725190 ok
+EXPECTED a100 Entries < 200 <200 GOT 105 ok
+EXPECTED anone rows returned 20000000 GOT 20000000 ok (secondary)
+EXPECTED anone RowCacheHitOutOfRange delta 0 GOT 0 ok
+EXPECTED anone RowCacheHit + RowCacheMiss 10000 GOT 10000 ok
+EXPECTED anone RowCacheHit > 0 >0 GOT 5232 ok
+EXPECTED anone Size <= 64 MiB <=67108864 GOT 44721120 ok
+EXPECTED anone Entries < 200 <200 GOT 105 ok
+EXPECTED s256 rows returned 1000000 GOT 1000000 ok (secondary)
+EXPECTED s256 RowCacheHitOutOfRange delta 0 GOT 0 ok
+EXPECTED s256 RowCacheHit + RowCacheMiss 10000 GOT 10000 ok
+EXPECTED s256 RowCacheHit > 0 >0 GOT 9912 ok
+EXPECTED s256 Size in (64 MiB, 256 MiB] (67108864, 268435456] GOT 84336535 ok
+EXPECTED s256 Entries > 150 >150 GOT 198 ok
+EXPECTED off10 Size 0 GOT 0 ok
+EXPECTED off10 counters 0 GOT (0, 0, 0) ok
+EXPECTED off1000 Size 0 GOT 0 ok
+EXPECTED off1000 counters 0 GOT (0, 0, 0) ok
+EXPECTED offnone Size 0 GOT 0 ok
+EXPECTED offnone counters 0 GOT (0, 0, 0) ok
+EXPECTED control: Size(s256) > Size(a100) and Size(anone) > GOT 84336535 vs 44725190, 44721120 ok
+EXPECTED R=100 Size spread over L within 1% <=1% GOT 4286517..4286517 ok
+  RSS l10: idle-baseline 104.2 MiB, off10 125.7 MiB, attributable -21.5 MiB, cache Size 4.1 MiB
+EXPECTED l10 attributable RSS <= Size + max(20%, 64 MiB) <= GOT -21.5 MiB ok (secondary)
+  RSS l100: idle-baseline 75.7 MiB, off10 125.7 MiB, attributable -49.9 MiB, cache Size 4.1 MiB
+EXPECTED l100 attributable RSS <= Size + max(20%, 64 MiB) <= GOT -49.9 MiB ok (secondary)
+  RSS l1000: idle-baseline 118.0 MiB, off1000 105.7 MiB, attributable 12.3 MiB, cache Size 4.1 MiB
+EXPECTED l1000 attributable RSS <= Size + max(20%, 64 MiB) <= GOT 12.3 MiB ok (secondary)
+  RSS l100k: idle-baseline 177.1 MiB, offnone 221.9 MiB, attributable -44.8 MiB, cache Size 4.1 MiB
+EXPECTED l100k attributable RSS <= Size + max(20%, 64 MiB) <= GOT -44.8 MiB ok (secondary)
+  RSS lnone: idle-baseline 206.7 MiB, offnone 221.9 MiB, attributable -15.2 MiB, cache Size 4.1 MiB
+EXPECTED lnone attributable RSS <= Size + max(20%, 64 MiB) <= GOT -15.2 MiB ok (secondary)
+EXPECTED R=100 attributable RSS spread over L <= 64 MiB <=64 MiB GOT 62.3 MiB ok (secondary)
+  l1000: RssAnon baseline 2711 MiB, window 2829, idle 2829; Size 4.29 MB, Entries 200
+  l10: RssAnon baseline 2731 MiB, window 2834, idle 2836; Size 4.29 MB, Entries 200
+  l100: RssAnon baseline 2718 MiB, window 2798, idle 2794; Size 4.29 MB, Entries 200
+  l100k: RssAnon baseline 2742 MiB, window 2920, idle 2919; Size 4.29 MB, Entries 200
+  lnone: RssAnon baseline 2731 MiB, window 2938, idle 2938; Size 4.29 MB, Entries 200
+  a100: RssAnon baseline 2721 MiB, window 2870, idle 2870; Size 44.73 MB, Entries 105
+  anone: RssAnon baseline 2723 MiB, window 3007, idle 3007; Size 44.72 MB, Entries 105
+  s256: RssAnon baseline 2700 MiB, window 2876, idle 2877; Size 84.34 MB, Entries 198
+  off10: RssAnon baseline 2693 MiB, window 2820, idle 2819; Size 0.00 MB, Entries 0
+  off1000: RssAnon baseline 2715 MiB, window 2821, idle 2820; Size 0.00 MB, Entries 0
+  offnone: RssAnon baseline 2721 MiB, window 2943, idle 2943; Size 0.00 MB, Entries 0
+primary mismatches: 0 of 67 checks
+CLASS: claim holds (B3g row 1)

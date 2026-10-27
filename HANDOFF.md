@@ -40,7 +40,7 @@ fresh autonomous agents to write up a case per target and verifies each at stage
 | Yang | [`HANDOFF-Yang.md`](HANDOFF-Yang.md) | [`writeup-set-B.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-B.csv) | 169 / 161 |
 
 The personal handoffs hold the job, the procedure and the progress; this file holds what both
-share. Update the "Current state" numbers below when a batch closes (last: 2026-10-26, set A batch 7).
+share. Update the "Current state" numbers below when a batch closes (last: 2026-10-27, set A batch 11).
 
 ## What this experiment is
 
@@ -60,14 +60,14 @@ noticed along the way are noted in case files for Target 3, not chased.
 
 - **Stage 1:** 17,343 `if` statements → 4,489 numeric comparisons + 1,099 helper-guarded rows.
 - **Stage 2:** 4,789 units banded (A 134, B 174, C 94, D 4,387); `stage2-ai-preprocessing/bands.csv`.
-- **Stage 3:** bands A, B and C fully read; **93 case files** (29 guided, 64 autonomous; estimate
-  positive 50, negative 43). 65 of the 402 A/B/C units were a case's target before the two-set job;
+- **Stage 3:** bands A, B and C fully read; **115 case files** (29 guided, 86 autonomous; estimate
+  positive 56, negative 59). 65 of the 402 A/B/C units were a case's target before the two-set job;
   the other **337** are that job (2 accepted candidates in `predicted-positive.md`, the rest rejected
-  lines in `predicted-negative.md`, ~151 rows). Set A has written up **46** of its 159 targets
-  (batches 1–7, 2026-10-24/26); set B none yet. Nothing is undecided. Band D is not read.
-- **Stage 4:** **all 93 closed**, run 1 only (no run 2 anywhere): 76 Confirmed, 4 Refuted,
-  12 partial, 1 not confirmed. **Outcome class:** 46 true positive, 0 false positive, 31 true
-  negative, 4 false negative, 12 undetermined (all 12 autonomous, mostly the cluster tier).
+  lines in `predicted-negative.md`, ~151 rows). Set A has written up **78** of its 159 targets
+  (batches 1–11, 2026-10-24/27); set B none yet. Nothing is undecided. Band D is not read.
+- **Stage 4:** **all 115 closed**, run 1 only (set A batch 10: `lc` also ran a second cluster pass, same session): 94 Confirmed, 4 Refuted,
+  16 partial, 1 not confirmed. **Outcome class:** 51 true positive, 0 false positive, 46 true
+  negative, 5 false negative, 13 undetermined (all autonomous, mostly the cluster tier).
   Per-case verdicts: `stage3-ai-deep-read/_INDEX.md` §1.
 
 ## Decisions in force

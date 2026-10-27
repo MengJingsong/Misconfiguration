@@ -1,0 +1,24 @@
+run readings (MiB):
+  lcs   N=  4: inputs 13 (L0 4, L1 9), in   1680.2 (L0    279.0, L1   1401.2), logged in 1680.4, out 1681.4 in 11 files, level 1, dur 11.4 s, base 8278, peak 9927, delta 1649, heap 908 (base 876), rssAnon 2684 (base 2653), extra tasks 0
+  lcs   N= 16: inputs 25 (L0 16, L1 9), in   2488.0 (L0   1086.7, L1   1401.2), logged in 2488.3, out 2491.4 in 16 files, level 1, dur 21.2 s, base 8278, peak 10719, delta 2441, heap 1186 (base 891), rssAnon 2694 (base 2642), extra tasks 0
+  lcs   N= 32: inputs 41 (L0 32, L1 9), in   3565.0 (L0   2163.7, L1   1401.2), logged in 3564.5, out 3575.8 in 23 files, level 1, dur 34.6 s, base 8278, peak 11806, delta 3528, heap 1282 (base 876), rssAnon 2692 (base 2650), extra tasks 0
+  lcs   N= 64: inputs 73 (L0 64, L1 9), in   5719.0 (L0   4317.7, L1   1401.2), logged in 5719.0, out 5745.7 in 36 files, level 1, dur 77.1 s, base 8278, peak 14107, delta 5828, heap 1289 (base 876), rssAnon 2693 (base 2647), extra tasks 0
+  stcs  N=  4: inputs 4 (L0 4, L1 0), in    269.2 (L0    269.2, L1      0.0), logged in 269.2, out 270.5 in 1 files, level 0, dur 2.0 s, base 6848, peak 6971, delta 123, heap 892 (base 860), rssAnon 2670 (base 2635), extra tasks 0
+  stcs  N= 16: inputs 16 (L0 16, L1 0), in   1077.0 (L0   1077.0, L1      0.0), logged in 1077.2, out 1083.4 in 1 files, level 0, dur 8.5 s, base 6848, peak 7951, delta 1103, heap 1018 (base 908), rssAnon 2694 (base 2641), extra tasks 0
+  stcs  N= 32: inputs 32 (L0 32, L1 0), in   2154.0 (L0   2154.0, L1      0.0), logged in 2154.5, out 2167.8 in 1 files, level 0, dur 22.4 s, base 6848, peak 8993, delta 2144, heap 1216 (base 876), rssAnon 2712 (base 2657), extra tasks 0
+  stcs  N= 64: inputs 64 (L0 64, L1 0), in   4308.0 (L0   4308.0, L1      0.0), logged in 4308.0, out 4335.6 in 1 files, level 0, dur 56.4 s, base 6848, peak 11169, delta 4321, heap 1281 (base 876), rssAnon 2691 (base 2637), extra tasks 0
+PASS V0 every run settled, first task identified, no input file missing from files-before
+PASS V1 LCS first tasks are L0 tasks (L0 inputs > 0, output level >= 1) at every N
+PASS V2 STCS control first tasks have no level>0 files
+PASS P1 LCS: L0 inputs = N at every N (the cap at :548 binds on the L0 part) -- {16: 16, 32: 32, 4: 4, 64: 64}
+PASS P2 LCS: L1 inputs = all L1 sstables of the fixture (> 0) at every N, so count = N + L1 count > N -- {16: (25, 9), 32: (41, 9), 4: (13, 9), 64: (73, 9)}
+PASS P3 LCS: input bytes = slope x N + fixed offset, offset within 20% of the L1 bytes (the fixed L1 offset of B3f) -- slope 67.3 MiB/N, intercept 1411 MiB, L1 bytes 1401 MiB
+PASS P4 LCS: peak table bytes above baseline carry the same fixed L1 offset (within 30% of L1 bytes) -- slope 69.8 MiB/N, intercept 1337 MiB
+FAIL P5 LCS: peak heap used spread across N <= 25% of the mean (heap about flat; proxy, G1 includes garbage) -- [908, 1186, 1282, 1289] MiB
+PASS P6 LCS: peak table bytes above baseline exceed N x (mean L0 size) for every N (usage not bounded by N x file size)
+PASS P7 STCS control: input count = N exactly at every N -- {16: 16, 32: 32, 4: 4, 64: 64}
+PASS P8 STCS control: input bytes = count x mean sstable size (proportional to N, within 15%)
+FAIL P9 STCS control: peak table bytes above baseline per N constant within 25% (usage scales with N) -- [(4, 30.8), (16, 68.9), (32, 67.0), (64, 67.5)]
+PASS P10 control moves: STCS count rises with N
+
+MATCHED ROW: B3g "STCS control does not move with N": Not confirmed

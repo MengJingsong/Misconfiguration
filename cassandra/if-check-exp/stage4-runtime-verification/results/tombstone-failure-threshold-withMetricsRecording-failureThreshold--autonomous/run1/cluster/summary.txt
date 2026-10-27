@@ -1,0 +1,24 @@
+cluster analysis of /users/jason92/s4-b10-tf-logs/run1/cluster: N=1200000 NT2=60000 NLIVE=30000 C=8 DUR=300
+  main       T1000000 : 872 reads {'FAIL_TOMBSTONE': 872}; B (largest response-buffer allocation) 16.0 MiB over 11806 events; heap low 252 MB, peak rise P 1817 MB; node alloc 534235 MB = 612.65 MB per read (A; background 0.4 MB/s removed); TombstoneFailures 873; system.log "Scanned over" values (this lifetime) [1000001]; OOM False
+  live       T1000000 : 3 reads {'OK:30000': 3}; B (largest response-buffer allocation) 32.1 MiB over 68 events; heap low 327 MB, peak rise P 348 MB; node alloc 463 MB = 154.41 MB per read (A; background 0.2 MB/s removed); TombstoneFailures 873; system.log "Scanned over" values (this lifetime) [1000001]; OOM False
+  main       T100000  : 3051 reads {'FAIL_TOMBSTONE': 3051}; B (largest response-buffer allocation) 2.0 MiB over 8451 events; heap low 102 MB, peak rise P 1258 MB; node alloc 211705 MB = 69.39 MB per read (A; background 0.4 MB/s removed); TombstoneFailures 3052; system.log "Scanned over" values (this lifetime) [100001]; OOM False
+  variant    T100000  : 3 reads {'FAIL_TOMBSTONE': 3}; B (largest response-buffer allocation) 144.7 MiB over 30 events; heap low 284 MB, peak rise P 1611 MB; node alloc 1551 MB = 516.84 MB per read (A; background 0.2 MB/s removed); TombstoneFailures 3052; system.log "Scanned over" values (this lifetime) [100001]; OOM False
+  live       T100000  : 3 reads {'OK:30000': 3}; B (largest response-buffer allocation) 32.1 MiB over 19 events; heap low 400 MB, peak rise P 587 MB; node alloc 468 MB = 155.84 MB per read (A; background 0.2 MB/s removed); TombstoneFailures 3052; system.log "Scanned over" values (this lifetime) [100001]; OOM False
+  main       T10000   : 3855 reads {'FAIL_TOMBSTONE': 3855}; B (largest response-buffer allocation) 0.1 MiB over 1655 events; heap low 85 MB, peak rise P 1262 MB; node alloc 41106 MB = 10.66 MB per read (A; background 0.4 MB/s removed); TombstoneFailures 3856; system.log "Scanned over" values (this lifetime) [10001]; OOM False
+  variant    T10000   : 3 reads {'FAIL_TOMBSTONE': 3}; B (largest response-buffer allocation) 16.1 MiB over 18 events; heap low 209 MB, peak rise P 1189 MB; node alloc 151 MB = 50.31 MB per read (A; background 0.2 MB/s removed); TombstoneFailures 3856; system.log "Scanned over" values (this lifetime) [10001]; OOM False
+  live       T10000   : 3 reads {'OK:30000': 3}; B (largest response-buffer allocation) 32.1 MiB over 19 events; heap low 310 MB, peak rise P 570 MB; node alloc 468 MB = 156.10 MB per read (A; background 0.2 MB/s removed); TombstoneFailures 3856; system.log "Scanned over" values (this lifetime) [10001]; OOM False
+  live-1MiB  ctl-1MiB : 3 reads {'FAIL_READSIZE': 3}; B (largest response-buffer allocation) 1.0 MiB over 4 events; heap low 101 MB, peak rise P 67 MB; node alloc 49 MB = 16.37 MB per read (A; background 0.5 MB/s removed); TombstoneFailures 0; system.log "Scanned over" values (this lifetime) []; OOM False
+EXPECTED: b1 every main read at every T fails with the tombstone code (READ_TOO_MANY_TOMBSTONES) - yes
+EXPECTED: b1b system.log "Scanned over" values are exactly T+1 in each lifetime - yes
+EXPECTED: b1c TombstoneFailures after the main storm = 1 warm-up + the main reads - yes
+EXPECTED: no OutOfMemoryError in any lifetime - yes
+T values [10000, 100000, 1000000]; A (node allocation per read) [10.66, 69.39, 612.65] MB, ratios [6.51, 8.83]; JFR B (secondary) [0.13, 2.0, 16.0] MiB, ratios [16.0, 8.0]; P [1262, 1258, 1817] MB; ratios [1.0, 1.44]
+EXPECTED: b2 A(T) (node allocation per read) consecutive ratios in [3.33, 30] (decade steps, factor 3 of linear) - yes
+EXPECTED: b3 P(T) strictly increasing, consecutive ratios in [3.33, 30] - NO
+EXPECTED: A(lowest T) and A(highest T) within 25% (57.46) - NO
+  size variant T=10000: {'FAIL_TOMBSTONE': 3}, B 16.1 MiB = 1686 B per marker vs row variant 13 B per tombstone: ratio 128.6
+  size variant T=100000: {'FAIL_TOMBSTONE': 3}, B 144.7 MiB = 1517 B per marker vs row variant 21 B per tombstone: ratio 72.4
+  live partition (30 MB): unrestricted A 155.8 MB per read, outcomes {'OK:30000': 3}; 1 MiB local_read_size_fail: A 16.4 MB per read, outcomes {'FAIL_READSIZE': 3}
+EXPECTED: control: 1 MiB cap makes the live reads fail (FAIL_READSIZE) and A < 0.8 x unrestricted A - yes
+EXPECTED: negative control: live reads succeed at every T and their A is flat (max/min <= 1.25) - yes
+MATCHED: A7 added row (Not confirmed, partial): per-read buffer follows T, node-level peak does not; EXPECTED yes=7 NO=2

@@ -1,0 +1,51 @@
+PASS unit: 26 save rows (key 7 N x 2 reps = 14, row 3x2 + counter 3x2 = 12)
+PASS unit: every row completed==loaded==size==min(N,P), live unchanged by the save (0 bad)
+PASS unit log: all 162 "Saved" lines have items <= population
+PASS unit log: each expected (cache, items) pair appears at least as often as the rows imply (short: {})
+INFO unit log pairs not from the sweep (race/hot-check/control saves): {}
+PASS unit: key file length linear in items (per-item 15.83 B, max deviation 0.95%) over [(1, 32), (100, 1616), (1000, 16016), (9999, 158335), (10000, 158351)]
+PASS cluster: 206 Saved lines in system.log
+INFO event 15:33:15 === L1: yaml keys_to_save unset
+INFO event 15:37:26 nodetool setcachekeystosave 10000 10000 10000
+INFO event 15:37:42 nodetool setcachekeystosave 100 100 100
+INFO event 15:37:56 nodetool setcachekeystosave 0 0 0
+INFO event 15:38:12 nodetool setcachecapacity 8 100 50
+INFO event 15:38:23 nodetool setcachekeystosave 100 100 100
+INFO event 15:38:46 === yaml100: restart with yaml keys_to_save 100
+INFO event 15:42:54 === yaml10000: restart with yaml keys_to_save 10000
+INFO event 15:46:54 === L4: save periods 0, saved_caches emptied
+PASS cluster: KeyCache yaml-unset population (last save) 200016, last 3 [200016, 200016, 200016] (the counter cache is at its 50 MiB cap and still settling after the workload; later N=0 windows must equal this value)
+PASS cluster: RowCache yaml-unset population (last save) 200000, last 3 [200000, 200000, 200000] (the counter cache is at its 50 MiB cap and still settling after the workload; later N=0 windows must equal this value)
+PASS cluster: CounterCache yaml-unset population (last save) 436906, last 3 [5, 436858, 436906] (the counter cache is at its 50 MiB cap and still settling after the workload; later N=0 windows must equal this value)
+PASS cluster: setter N=10000 at 15:37:26: KeyCache 1 saves all == 10000 (values [10000])
+PASS cluster: setter N=10000 at 15:37:26: RowCache 1 saves all == 10000 (values [10000])
+PASS cluster: setter N=10000 at 15:37:26: CounterCache 1 saves all == 10000 (values [10000])
+PASS cluster: setter N=100 at 15:37:42: KeyCache 1 saves all == 100 (values [100])
+PASS cluster: setter N=100 at 15:37:42: RowCache 1 saves all == 100 (values [100])
+PASS cluster: setter N=100 at 15:37:42: CounterCache 1 saves all == 100 (values [100])
+PASS cluster: setter N=0 at 15:37:56: KeyCache 1 saves all == 200016 (values [200016])
+PASS cluster: setter N=0 at 15:37:56: RowCache 1 saves all == 200000 (values [200000])
+PASS cluster: setter N=0 at 15:37:56: CounterCache 1 saves all == 436906 (values [436906])
+PASS cluster: setter N=100 at 15:38:23: KeyCache 1 saves all == 100 (values [100])
+PASS cluster: setter N=100 at 15:38:23: RowCache 1 saves all == 100 (values [100])
+PASS cluster: setter N=100 at 15:38:23: CounterCache 1 saves all == 100 (values [100])
+PASS cluster: yaml N=100 lifetime: KeyCache last save [100, 100, 100] ends at 100
+PASS cluster: yaml N=100 lifetime: RowCache last save [100, 100, 100] ends at 100
+PASS cluster: yaml N=100 lifetime: CounterCache last save [100, 100, 100] ends at 100
+PASS cluster: yaml N=10000 lifetime: KeyCache last save [10000, 10000, 10000] ends at 10000
+PASS cluster: yaml N=10000 lifetime: RowCache last save [10000, 10000, 10000] ends at 10000
+PASS cluster: yaml N=10000 lifetime: CounterCache last save [100, 10000, 10000] ends at 10000
+PASS cluster: no Saved line after the L4 start (periods 0)
+INFO warm load: KeyCache 2 keys
+INFO warm load: KeyCache 121 keys
+INFO warm load: RowCache 217 keys
+INFO warm load: CounterCache 253 keys
+INFO warm load: KeyCache 122 keys
+INFO warm load: RowCache 218 keys
+INFO warm load: CounterCache 295 keys
+INFO warm load: KeyCache 15 keys
+PASS cluster: stress-counter-create.out total errors 0
+PASS cluster: stress-counter1.out total errors 0
+PASS cluster: stress-counterx.out total errors 0
+PASS cluster: stress-write.out total errors 0
+SELFCHECK FAILS=0

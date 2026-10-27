@@ -1,0 +1,15 @@
+EXPECTED: I1 strategy threshold equals X after every ALTER (40 cells) — yes
+EXPECTED: I2 r within f +/- 0.1 for every table (r: 0.1:0.100 0.3:0.300 0.6:0.600 0.9:0.900) — yes
+EXPECTED: I3 known answer: X=0.0, gates open, worth true for every f — yes
+EXPECTED: P1 open gates: worth == (r > (double)(float)X) in all 20 cells; mismatches 0 — yes
+EXPECTED: P1b X=1.5 false for every f — yes
+EXPECTED: P1c getNextBackgroundTask returns a task exactly when worth is true (single sstable, no bucket); mismatches 0 — yes
+EXPECTED: P2a interval 86400: worth false in all 5 cells (r > X in 3 of them) — yes
+EXPECTED: P2b overlap + unchecked false: worth false for X>0 (4 cells, r > X in 2) and true at X=0.0 (1 cell) — yes
+EXPECTED: P2c unchecked false, no overlap: worth == (r > X) in all 5 cells — yes
+EXPECTED: P2d never-purge: worth false in all 5 cells — yes
+EXPECTED: P3a bytes after an executed task = (1-f) of before +/- 0.08: f0.3/X0.2:0.689 f0.6/X0.2:0.392 f0.9/X0.2:0.097 f0.9/X0.9:0.098 — yes
+EXPECTED: P3b no task -> bytes unchanged (4 cells, e.g. f0.1/X0.2 f0.1/X0.9 f0.3/X0.9 f0.6/X0.9) — yes
+EXPECTED: P3c task iff r > X in the byte cells; mismatches 0 — yes
+EXPECTED: P4 forced compaction at X=1.5 gives (1-f) +/- 0.08: f0.1:0.895 f0.3:0.690 f0.6:0.390 f0.9:0.097 — yes
+SUMMARY: I1=ok I2=ok I3=ok P1=ok P1b=ok P1c=ok P2a=ok P2b=ok P2c=ok P2d=ok P3a=ok P3b=ok P3c=ok P4=ok

@@ -1,0 +1,79 @@
+STAGE4 run label=c10 cap_mib=10 cap_bytes=10485760 maxMemory=1056309248 keyspace_in_clientstate=null
+STAGE4 cal label=c10 M=1 result=ACCEPTED weight=2452 bind_variables=1 count=1
+STAGE4 check c10 cal-M1 accepted=true bind=1 weight=2452 cap=10485760 msg=ACCEPTED OK
+STAGE4 cal label=c10 M=10 result=ACCEPTED weight=2836 bind_variables=10 count=1
+STAGE4 check c10 cal-M10 accepted=true bind=10 weight=2836 cap=10485760 msg=ACCEPTED OK
+STAGE4 cal label=c10 M=1000 result=ACCEPTED weight=46348 bind_variables=1000 count=1
+STAGE4 check c10 cal-M1000 accepted=true bind=1000 weight=46348 cap=10485760 msg=ACCEPTED OK
+STAGE4 cal label=c10 M=65535 result=ACCEPTED weight=2842844 bind_variables=65535 count=1
+STAGE4 check c10 cal-M65535 accepted=true bind=65535 weight=2842844 cap=10485760 msg=ACCEPTED OK
+STAGE4 boundary label=c10 M=65536 result=Too many markers(?). 65536 markers exceed the allowed maximum of 65535 count_before=0 count_after=0
+STAGE4 check c10 boundary-65536-rejected msg=Too many markers(?). 65536 markers exceed the allowed maximum of 65535 OK
+STAGE4 final label=c10 M=10 cap=10485760 w=2836 offered=14790 rejected=0 sumWeights=10482984 count=3686 evicted=11104 systemRows=3690 measureDeepMap=9145064 liveHeapBaseline=42364232 liveHeapFull=63665368 liveDelta=21301136 firstReject=ACCEPTED
+STAGE4 check c10 M10-sum<=cap sum=10482984 cap=10485760 OK
+STAGE4 check c10 M10-all-accepted rejected=0 OK
+STAGE4 check c10 M10-evictions evicted=11104 expected_evictions=true offered_weight=41944440 OK
+STAGE4 check c10 M10-count+evicted==offered count=3686 evicted=11104 offered=14790 OK
+STAGE4 final label=c10 M=1000 cap=10485760 w=46348 offered=905 rejected=0 sumWeights=10474648 count=226 evicted=679 systemRows=3916 measureDeepMap=10393128 liveHeapBaseline=54433200 liveHeapFull=72748424 liveDelta=18315224 firstReject=ACCEPTED
+STAGE4 check c10 M1000-sum<=cap sum=10474648 cap=10485760 OK
+STAGE4 check c10 M1000-all-accepted rejected=0 OK
+STAGE4 check c10 M1000-evictions evicted=679 expected_evictions=true offered_weight=41944940 OK
+STAGE4 check c10 M1000-count+evicted==offered count=226 evicted=679 offered=905 OK
+STAGE4 final label=c10 M=65535 cap=10485760 w=2842844 offered=15 rejected=0 sumWeights=8528532 count=3 evicted=12 systemRows=3919 measureDeepMap=8527952 liveHeapBaseline=62328920 liveHeapFull=82283088 liveDelta=19954168 firstReject=ACCEPTED
+STAGE4 check c10 M65535-sum<=cap sum=8528532 cap=10485760 OK
+STAGE4 check c10 M65535-all-accepted rejected=0 OK
+STAGE4 check c10 M65535-evictions evicted=12 expected_evictions=true offered_weight=42642660 OK
+STAGE4 check c10 M65535-count+evicted==offered count=3 evicted=12 offered=15 OK
+STAGE4 done label=c10 mismatches=0
+STAGE4 run label=c1 cap_mib=1 cap_bytes=1048576 maxMemory=1056309248 keyspace_in_clientstate=null
+STAGE4 cal label=c1 M=1 result=ACCEPTED weight=2452 bind_variables=1 count=1
+STAGE4 check c1 cal-M1 accepted=true bind=1 weight=2452 cap=1048576 msg=ACCEPTED OK
+STAGE4 cal label=c1 M=10 result=ACCEPTED weight=2836 bind_variables=10 count=1
+STAGE4 check c1 cal-M10 accepted=true bind=10 weight=2836 cap=1048576 msg=ACCEPTED OK
+STAGE4 cal label=c1 M=1000 result=ACCEPTED weight=46348 bind_variables=1000 count=1
+STAGE4 check c1 cal-M1000 accepted=true bind=1000 weight=46348 cap=1048576 msg=ACCEPTED OK
+STAGE4 cal label=c1 M=65535 result=Prepared statement of size 2842824 bytes is larger than allowed maximum of 1 MB: SELECT * FROM cql_t weight=-1 bind_variables=-1 count=0
+STAGE4 check c1 cal-M65535 accepted=false bind=-1 weight=-1 cap=1048576 msg=Prepared statement of size 2842824 bytes is larger than allowed maximum of 1 MB: SELECT * FROM cql_t OK
+STAGE4 boundary label=c1 M=65536 result=Too many markers(?). 65536 markers exceed the allowed maximum of 65535 count_before=0 count_after=0
+STAGE4 check c1 boundary-65536-rejected msg=Too many markers(?). 65536 markers exceed the allowed maximum of 65535 OK
+STAGE4 final label=c1 M=10 cap=1048576 w=2836 offered=1479 rejected=0 sumWeights=1046592 count=368 evicted=1111 systemRows=371 measureDeepMap=912248 liveHeapBaseline=41806640 liveHeapFull=43683440 liveDelta=1876800 firstReject=ACCEPTED
+STAGE4 check c1 M10-sum<=cap sum=1046592 cap=1048576 OK
+STAGE4 check c1 M10-all-accepted rejected=0 OK
+STAGE4 check c1 M10-evictions evicted=1111 expected_evictions=true offered_weight=4194444 OK
+STAGE4 check c1 M10-count+evicted==offered count=368 evicted=1111 offered=1479 OK
+STAGE4 final label=c1 M=1000 cap=1048576 w=46348 offered=91 rejected=0 sumWeights=1019656 count=22 evicted=69 systemRows=393 measureDeepMap=1012104 liveHeapBaseline=43097616 liveHeapFull=44423304 liveDelta=1325688 firstReject=ACCEPTED
+STAGE4 check c1 M1000-sum<=cap sum=1019656 cap=1048576 OK
+STAGE4 check c1 M1000-all-accepted rejected=0 OK
+STAGE4 check c1 M1000-evictions evicted=69 expected_evictions=true offered_weight=4217668 OK
+STAGE4 check c1 M1000-count+evicted==offered count=22 evicted=69 offered=91 OK
+STAGE4 final label=c1 M=65535 cap=1048576 w=-1 offered=5 rejected=5 sumWeights=0 count=0 evicted=0 systemRows=393 measureDeepMap=48 liveHeapBaseline=43409296 liveHeapFull=43264152 liveDelta=-145144 firstReject=Prepared statement of size 2842824 bytes is larger than allowed maximum of 1 MB: SELECT * FROM cql_t
+STAGE4 check c1 M65535-sum<=cap sum=0 cap=1048576 OK
+STAGE4 check c1 M65535-size-gate offered=5 rejected=5 count=0 OK
+STAGE4 done label=c1 mismatches=0
+STAGE4 run label=c100 cap_mib=100 cap_bytes=104857600 maxMemory=1056309248 keyspace_in_clientstate=null
+STAGE4 cal label=c100 M=1 result=ACCEPTED weight=2452 bind_variables=1 count=1
+STAGE4 check c100 cal-M1 accepted=true bind=1 weight=2452 cap=104857600 msg=ACCEPTED OK
+STAGE4 cal label=c100 M=10 result=ACCEPTED weight=2836 bind_variables=10 count=1
+STAGE4 check c100 cal-M10 accepted=true bind=10 weight=2836 cap=104857600 msg=ACCEPTED OK
+STAGE4 cal label=c100 M=1000 result=ACCEPTED weight=46348 bind_variables=1000 count=1
+STAGE4 check c100 cal-M1000 accepted=true bind=1000 weight=46348 cap=104857600 msg=ACCEPTED OK
+STAGE4 cal label=c100 M=65535 result=ACCEPTED weight=2842844 bind_variables=65535 count=1
+STAGE4 check c100 cal-M65535 accepted=true bind=65535 weight=2842844 cap=104857600 msg=ACCEPTED OK
+STAGE4 boundary label=c100 M=65536 result=Too many markers(?). 65536 markers exceed the allowed maximum of 65535 count_before=0 count_after=0
+STAGE4 check c100 boundary-65536-rejected msg=Too many markers(?). 65536 markers exceed the allowed maximum of 65535 OK
+STAGE4 final label=c100 M=10 cap=104857600 w=2836 offered=147896 rejected=0 sumWeights=104855436 count=36869 evicted=111027 systemRows=36873 measureDeepMap=-1 liveHeapBaseline=42235560 liveHeapFull=193158328 liveDelta=150922768 firstReject=ACCEPTED
+STAGE4 check c100 M10-sum<=cap sum=104855436 cap=104857600 OK
+STAGE4 check c100 M10-all-accepted rejected=0 OK
+STAGE4 check c100 M10-evictions evicted=111027 expected_evictions=true offered_weight=419433056 OK
+STAGE4 check c100 M10-count+evicted==offered count=36869 evicted=111027 offered=147896 OK
+STAGE4 final label=c100 M=1000 cap=104857600 w=46348 offered=9050 rejected=0 sumWeights=104839176 count=2262 evicted=6788 systemRows=39135 measureDeepMap=-1 liveHeapBaseline=100371808 liveHeapFull=271781304 liveDelta=171409496 firstReject=ACCEPTED
+STAGE4 check c100 M1000-sum<=cap sum=104839176 cap=104857600 OK
+STAGE4 check c100 M1000-all-accepted rejected=0 OK
+STAGE4 check c100 M1000-evictions evicted=6788 expected_evictions=true offered_weight=419449400 OK
+STAGE4 check c100 M1000-count+evicted==offered count=2262 evicted=6788 offered=9050 OK
+STAGE4 final label=c100 M=65535 cap=104857600 w=2842844 offered=148 rejected=0 sumWeights=102342384 count=36 evicted=112 systemRows=39171 measureDeepMap=-1 liveHeapBaseline=167495024 liveHeapFull=303150136 liveDelta=135655112 firstReject=ACCEPTED
+STAGE4 check c100 M65535-sum<=cap sum=102342384 cap=104857600 OK
+STAGE4 check c100 M65535-all-accepted rejected=0 OK
+STAGE4 check c100 M65535-evictions evicted=112 expected_evictions=true offered_weight=420740912 OK
+STAGE4 check c100 M65535-count+evicted==offered count=36 evicted=112 offered=148 OK
+STAGE4 done label=c100 mismatches=0

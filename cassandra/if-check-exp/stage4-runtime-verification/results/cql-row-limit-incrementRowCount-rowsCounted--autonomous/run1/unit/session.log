@@ -1,0 +1,43 @@
+[2026-10-27T01:33:11.499-0600] unit-run start tree=/users/jason92/s4-b11-c76 head=4bbe65f source=1200000 reps=5 host=node1
+a37645f709db99db08d4a2b632cf4ff0  Jmx.java
+e4f70c36249f60e22a0b3fb8d160249e  RowLimitMemoryProbeTest.java
+b8d75f89da1fdb3a644d8f6850771766  analyze_cluster.py
+300695c34754494248ef0bd3753a806f  analyze_unit.py
+901b45818686ac70f8935de6a88ba71c  cluster-run.py
+cca8f8a2030b0403d71430318b3975dc  loader.py
+afa0e6b605a9665a299b42f4c634cf42  mk-known-answer.py
+a0d07fa1feeba18dc2fe50218ea9e7f0  run1-chain.sh
+d6c9ad9172d4c85e41c7efe72e394ca8  shake-cluster.sh
+04f2ae0472dd2e2c40bb2c3fc6cf9aa0  unit-run.sh
+[2026-10-27T01:33:11.512-0600] + ant testsome -Dtest.name=org.apache.cassandra.db.RowLimitMemoryProbeTest (STAGE4_OUT=/users/jason92/s4-b11-c76-logs/run1/unit/raw)
+[2026-10-27T01:35:14.413-0600] ant exit 0
+[junit-timeout] ------------- ---------------- ---------------
+   [delete] Deleting directory /users/jason92/s4-b11-c76/build/test/cassandra/commitlog
+   [delete] Deleting directory /users/jason92/s4-b11-c76/build/test/cassandra/data
+   [delete] Deleting directory /users/jason92/s4-b11-c76/build/test/cassandra/saved_caches
+   [delete] Deleting directory /users/jason92/s4-b11-c76/build/test/cassandra/hints
+
+BUILD SUCCESSFUL
+Total time: 2 minutes 2 seconds
+EXPECTED first trigger (warm w=16 L=100: rowsCounted 100, out 100, isDone): ok rowsCounted=100 out=100 isDone=true
+EXPECTED run finished (done=1): ok 
+EXPECTED no OutOfMemoryError: ok []
+EXPECTED rowsCounted == out == L (all pairs, all reps; 12 pairs): ok bad=[]
+EXPECTED NONE: output == source (1200000): ok []
+m(w) [retained]: {16: 301.2, 1024: 1317.7, 65536: 65829.0}
+EXPECTED B2f slope w=1024 (retained): 0.9 x 1008 <= m(1024) - m(16) <= 1.15 x 1008 + 64: ok 1016.5
+EXPECTED B2f slope w=65536 (retained): 0.9 x 65520 <= m(65536) - m(16) <= 1.15 x 65520 + 64: ok 65527.9
+EXPECTED B2f ratio m(65536) / m(16) >= 50 (retained): ok 218.6
+INFO flat-across-widths (refuting) condition m(65536)-m(16) < 0.1 x 65520: False
+m(w) [unshared]: {16: 304.0, 1024: 1312.0, 65536: 65824.0}
+EXPECTED B2f slope w=1024 (unshared): 0.9 x 1008 <= m(1024) - m(16) <= 1.15 x 1008 + 64: ok 1008.0
+EXPECTED B2f slope w=65536 (unshared): 0.9 x 65520 <= m(65536) - m(16) <= 1.15 x 65520 + 64: ok 65520.0
+EXPECTED B2f ratio m(65536) / m(16) >= 50 (unshared): ok 216.5
+INFO flat-across-widths (refuting) condition m(65536)-m(16) < 0.1 x 65520: False
+EXPECTED B2f linear in L w=16: retained bytes per row at L=10000 and L=1000000 within 0.75..1.35: ok ratio 1.023 (R=3019536, 308847184)
+EXPECTED B2f linear in L w=65536: retained bytes per row at L=100 and L=1000 within 0.75..1.35: ok ratio 1.000 (R=6582880, 65829008)
+EXPECTED B2f dead rows: rowsCounted == outLive == L, 10L-9 <= pulled <= 10L+1: ok []
+EXPECTED B2f/B2h control: unshared sum in [8 MiB, 8 MiB + one row), retained heap within 0.8 x unshared..1.3 x (8 MiB + row): MISMATCH [('CTL.w16.r3', 'retained', 3728336, 8388912.0)]
+INFO control retained medians (bytes): {16: 8515912, 1024: 8427976, 65536: 8492208}
+SUMMARY mismatches=1
+[2026-10-27T01:35:14.463-0600] leftover java for this tree: []

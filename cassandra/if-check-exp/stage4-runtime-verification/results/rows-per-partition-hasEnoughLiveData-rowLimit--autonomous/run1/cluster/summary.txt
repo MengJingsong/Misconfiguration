@@ -1,0 +1,33 @@
+EXPECTED full-scale data (20,000 partitions in ks.t, 2,000 in ks.t2) | got (20000, 2000) | RESULT ok INFO
+EXPECTED n5: Size <= Capacity (268,435,456 B) at every poll (13 polls) | got max Size 14099113 | RESULT ok PRIMARY
+EXPECTED n50: Size <= Capacity (268,435,456 B) at every poll (28 polls) | got max Size 114891148 | RESULT ok PRIMARY
+EXPECTED nall: Size <= Capacity (268,435,456 B) at every poll (13 polls) | got max Size 268370382 | RESULT ok PRIMARY
+EXPECTED none: Size <= Capacity (268,435,456 B) at every poll (13 polls) | got max Size 0 | RESULT ok PRIMARY
+EXPECTED t5: Size <= Capacity (268,435,456 B) at every poll (10 polls) | got max Size 3816988 | RESULT ok PRIMARY
+EXPECTED n5: Entries = 20000 after P1 | got 20000 | RESULT ok PRIMARY
+EXPECTED n5: 600 <= e(5) <= 1200 B and Size 12..24 MB | got 705 B, Size 14.1 MB | RESULT ok PRIMARY
+EXPECTED n50: Entries = 20000 after P1 | got 20000 | RESULT ok PRIMARY
+EXPECTED n50: e(50)/e(5) within 7..10.5 | got 8.15 (e50 5745, e5 705) | RESULT ok PRIMARY
+EXPECTED nall: e(ALL)/e(50) within 3.3..4.1 | got 3.92 (eALL 22545) | RESULT ok PRIMARY
+EXPECTED nall: Size >= 0.85 x Capacity and 5,000 <= Entries <= 12,000 and < 20000 | got (268370182, 11904) | RESULT ok PRIMARY
+EXPECTED n5: (Size, Entries) equal after P1, P2, P3 | got [(14099113, 20000), (14099113, 20000), (14099113, 20000)] | RESULT ok PRIMARY
+EXPECTED n50: (Size, Entries) equal after P1, P2, P3 | got [(114891148, 20000), (114891148, 20000), (114891148, 20000)] | RESULT ok PRIMARY
+EXPECTED n5: P1 miss delta = 20000 | got 20000 | RESULT ok PRIMARY
+EXPECTED n5: P2 outOfRange delta = 20000 and hit delta = 0 | got (20000, 0) | RESULT ok PRIMARY
+EXPECTED n5: P3 hit delta = 20000 | got 20000 | RESULT ok PRIMARY
+EXPECTED n5: P1 hit and outOfRange deltas = 0 (INFO) | got (0, 0) | RESULT ok INFO
+EXPECTED n50: P1 miss delta = 20000 | got 20000 | RESULT ok PRIMARY
+EXPECTED n50: P2 outOfRange delta = 20000 and hit delta = 0 | got (20000, 0) | RESULT ok PRIMARY
+EXPECTED n50: P3 hit delta = 20000 | got 20000 | RESULT ok PRIMARY
+EXPECTED n50: P1 hit and outOfRange deltas = 0 (INFO) | got (0, 0) | RESULT ok INFO
+INFO nall counters P2: hit +0 out +0 miss +20000; P3: hit +0 out +0 miss +20000
+EXPECTED none: Entries = 0, Size = 0, hit = miss = outOfRange = 0 after P3 | got (0, 0, 0, 0, 0) | RESULT ok PRIMARY
+EXPECTED t5: Entries = 2000 | got 2000 | RESULT ok PRIMARY
+EXPECTED t5: e(t5) > e(5) + 500 B | got 1204 B (e(t5) 1908, e(5) 705) | RESULT ok PRIMARY
+EXPECTED n5: RssAnon delta net of none <= 1.5 x Size + 16 MiB | got net 355.6 MB, Size 14.1 MB, bound 37.9 MB (d 402.7, d(none) 47.1) | RESULT MISMATCH PRIMARY
+EXPECTED n50: RssAnon delta net of none <= 1.5 x Size + 16 MiB | got net 225.5 MB, Size 114.9 MB, bound 189.1 MB (d 272.6, d(none) 47.1) | RESULT MISMATCH PRIMARY
+EXPECTED nall: RssAnon delta net of none <= 1.5 x Size + 16 MiB | got net 198.3 MB, Size 268.4 MB, bound 419.3 MB (d 245.4, d(none) 47.1) | RESULT ok PRIMARY
+INFO n50 shrunk5s: Size 114891148 Capacity 8388608 Entries 20000
+INFO n50 shrunk60s: Size 114891148 Capacity 8388608 Entries 20000
+INFO n50 shrunk_p4: Size 114891148 Capacity 8388608 Entries 20000
+CLASS no matching row or partly unmatched: 2 of 25 primary checks mismatch (RSS rule) | primary mismatches 2 of 25

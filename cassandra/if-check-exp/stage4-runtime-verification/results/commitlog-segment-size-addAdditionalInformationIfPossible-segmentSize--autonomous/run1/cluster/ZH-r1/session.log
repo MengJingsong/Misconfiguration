@@ -1,0 +1,38 @@
+[2026-10-26T21:33:03.199-0400] cluster-run start arm=ZH rep=1 vol=1024MiB seg=32MiB comp=none free_after_filler=0 n=2200000 head=9bb60fd6703f90d149921146715efb4da3d77606
+[2026-10-26T21:33:03.254-0400] commit-log volume df size=1073741824 (expected 1073741824)
+[2026-10-26T21:33:03.298-0400] + bin/cassandra -p /dev/shm/s4-b10-sg-node/cassandra.pid (ulimit -n 100000, MAX_HEAP_SIZE=1G)
+[2026-10-26T21:34:06.833-0400] node up pid=3316479
+CONFIG commit_failure_policy=ignore
+CONFIG commitlog_directory=/users/jason92/s4-b10-sg-clvol/commitlog
+CONFIG commitlog_disk_access_mode=legacy
+CONFIG commitlog_segment_size=32MiB
+CONFIG commitlog_sync=periodic
+CONFIG commitlog_total_space=512MiB
+INFO  [PerDiskMemtableFlushWriter_0:1] 2026-10-27T01:33:08,400 Flushing.java:179 - Completed flushing /dev/shm/s4-b10-sg-node/data/system/local-7ad54392bcdd35a684174e047860b377/nb-1-big-Data.db (195B) for commitlog position CommitLogPosition(segmentId=1793064786282, position=466)
+INFO  [PerDiskMemtableFlushWriter_0:2] 2026-10-27T01:33:08,587 Flushing.java:179 - Completed flushing /dev/shm/s4-b10-sg-node/data/system/local-7ad54392bcdd35a684174e047860b377/nb-2-big-Data.db (64B) for commitlog position CommitLogPosition(segmentId=1793064786282, position=577)
+INFO  [main] 2026-10-27T01:33:08,778 CommitLog.java:201 - No commitlog files found; skipping replay
+[2026-10-26T21:34:06.849-0400] + cassandra-stress write n=1 (schema; before any filler)
+[2026-10-26T21:34:27.440-0400] baseline: 67108944 B apparent, df used 69632, 2 files
+[2026-10-26T21:34:30.448-0400] STRESS_START 1793064870447 (system.log offset 92988)
+[2026-10-26T21:34:59.017-0400] STRESS_END 1793064899016 rc=0 (28 s)
+Op rate                   :  111,166 op/s  [WRITE: 111,166 op/s]
+Partition rate            :  111,166 pk/s  [WRITE: 111,166 pk/s]
+Total partitions          :  2,200,000 [WRITE: 2,200,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:00:19
+END
+[2026-10-26T21:34:59.041-0400] daemon alive after stress: [3316479 ]
+[2026-10-26T21:35:29.046-0400] SETTLE_END 1793064929044
+[2026-10-26T21:35:29.072-0400] daemon alive after settle: [3316479 ]
+SUMMARY arm=ZH vol=1073741824 seg=33554432 free_after_filler=0
+SUMMARY handleCommitError lines=0 with_needle=0
+SUMMARY kinds={}
+SUMMARY apparent_commitlog_bytes max=234881204 df_used max=189304832
+SUMMARY TotalCommitLogSize samples=46 max=234881024
+SUMMARY hs_err_files=no
+EXPECTED ok: ZH: roomy volume, no handleCommitError line and no text (lines=0)
+EXPECTED ok: ZH: TotalCommitLogSize max follows the larger commitlog_total_space: 100663296 < max <= 570425344, max=234881024
+[2026-10-26T21:35:29.124-0400] cluster-run end arm=ZH rep=1 analyze_rc=0
+[2026-10-26T21:35:29.127-0400] + nodetool drain (60 s cap)
+[2026-10-26T21:35:35.377-0400] daemons left: []
+[2026-10-26T21:35:35.680-0400] cleanup done; mounts left: []

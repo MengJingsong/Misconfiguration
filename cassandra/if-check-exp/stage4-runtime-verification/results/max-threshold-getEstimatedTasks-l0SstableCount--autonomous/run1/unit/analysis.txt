@@ -1,0 +1,25 @@
+PASS 200 sstables, all in L0 :: live=200 l0=200
+PASS default max_threshold 32, min 4 :: max=32 min=4
+PASS estimate on seq0 mt4 :: estimate=50 expected=50
+PASS estimate on seq1 mt32 :: estimate=6 expected=6
+PASS estimate on seq2 mt128 :: estimate=1 expected=1
+PASS estimate on seq3 mt32 :: estimate=6 expected=6
+PASS estimate on seq4 mt4 :: estimate=50 expected=50
+PASS estimate on seq5 mt128 :: estimate=1 expected=1
+PASS estimate on seq6 mt32 :: estimate=6 expected=6
+PASS estimate off seq0 mt4 :: estimate=0 expected=0
+PASS estimate off seq1 mt32 :: estimate=0 expected=0
+PASS estimate off seq2 mt128 :: estimate=0 expected=0
+PASS estimate off seq3 mt32 :: estimate=0 expected=0
+PASS estimate off seq4 mt4 :: estimate=0 expected=0
+PASS estimate off seq5 mt128 :: estimate=0 expected=0
+PASS estimate off seq6 mt32 :: estimate=0 expected=0
+PASS sumOnDiskLength identical across every setting and mode :: ['27000']
+PASS liveDiskSpaceUsed identical across every setting and mode :: ['1037156']
+PASS dataFiles identical across every setting and mode :: ['200']
+PASS heap spread across values (on) :: means={4: 51480692, 32: 51479368, 128: 51480716} spread=1348 tol=2574007 (5% mean=2574007, noise at 32=0)
+PASS heap spread across values (off) :: means={4: 51479416, 32: 51479432, 128: 51479424} spread=16 tol=2573971 (5% mean=2573971, noise at 32=0)
+PASS control (a): byte term differs by > 50 tasks (size 1 vs 160) :: size1=199 size160=0
+PASS control (b): max output file < 1.5 MiB at size 1 and > 10 MiB at size 160 :: size1=1049181 size160=12754319 outputs1=13 outputs160=1
+PASS instrument: truncate empties the table :: bytesAfterTruncate
+SUMMARY ALL PASS

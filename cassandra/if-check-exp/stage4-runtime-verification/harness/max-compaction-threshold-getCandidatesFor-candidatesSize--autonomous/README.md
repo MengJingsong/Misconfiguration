@@ -1,0 +1,19 @@
+# Harness: max-compaction-threshold-getCandidatesFor-candidatesSize--autonomous
+
+Written 2026-10-26 (step 1). Case: [`../../../stage3-ai-deep-read/cases/max-compaction-threshold-getCandidatesFor-candidatesSize--autonomous.md`](../../../stage3-ai-deep-read/cases/max-compaction-threshold-getCandidatesFor-candidatesSize--autonomous.md); results: [`../../results/max-compaction-threshold-getCandidatesFor-candidatesSize--autonomous.md`](../../results/max-compaction-threshold-getCandidatesFor-candidatesSize--autonomous.md). Amendments U1-U5, C1-C5 of the case file govern.
+
+| File | Tier | What it is |
+|---|---|---|
+| `LcsMaxThresholdProbeTest.java` | unit (B2) | JUnit class copied into `test/unit/org/apache/cassandra/db/compaction/` of a `copy-source.sh` tree. Records readings (`R <section> <key> <value>` in `$LCS_OUT`), asserts none. Tests: `smallSchema` (max_threshold in the table options, N 4/8/32/64, 2 reps, gate 160 and 1 MiB, STCS control), `smallSetter` (JMX setter, N 4/8/32/64/100, STCS-in-L0 on and off, 20-sstable variant), `largeSetter` (about 20 MiB L0 sstables, N 4/6/8/12/32/64/100), `groups` (25 groups of 4 overlapping L0 sstables), `truncateControl`. Fixture F: 100 overlapping L0 sstables + 10 disjoint L1 sstables (key bands of "k%06d_%03d"; the unit yaml uses ByteOrderedPartitioner) |
+| `unit-run.sh <tree> <outdir> [compile-only]` | unit | copies the class in, runs `ant testsome`, keeps `readings.txt`, `ant.log`, the JUnit XML |
+| `unit-analyze.py <readings.txt>` | unit | judges B2f/B2g with U1-U5 (PASS/FAIL per prediction, matched row) |
+| `lcmt_cluster.py build\|run <lcs\|stcs> [N]` | cluster (B3) | `build`: fixture (LCS: 1.5 M rows into L1, then 100 minus leftover flushes of 65,536 rows; STCS: 100 flushes), stops the node, moves the data directory to `fx-<role>/` on the tmpfs. `run`: restores a copy, starts the node, sets N with `setcompactionthreshold`, samples (1 s: table-directory bytes, `jcmd GC.heap_info` used, `RssAnon`), enables autocompaction through a JMX helper, disables it at the first `Compacting (` line, waits until idle, records `system.log`, `tablestats`, file lists; the node is stopped on any exit |
+| `LcDisable.java` | cluster | JMX helper (one open connection): `enable` / `disable` commands call `StorageService.enableAutoCompaction` / `disableAutoCompaction` in milliseconds (a `nodetool` JVM takes about 2 s) |
+| `lcmt_chain.sh <outdir>` | cluster | mounts the 40 GiB tmpfs `/mnt/s4lc`, builds both fixtures in parallel, runs N = 32, 4, 64, 16 for LCS and the STCS control |
+| `lcmt_cluster_analyze.py <outdir>` | cluster | judges B3f/B3g with C1-C5 from the raw run directories |
+| `selfcheck.py <unit dir> <cluster dir>` | both | independent re-derivation from the raw files |
+| `excerpt.sh <cluster logs dir> <dest>` | cluster | small text excerpts of a run directory for `results/<stem>/runN/cluster/` |
+
+**Instrument checks (not readings), all discarded:** the test class compiled (`ant build-test`); two full unit shakedowns and cluster shakedowns at small scale (300,000 rows, 3 flushes, N 2 and 3) found the defects D1-D6 of the results file section 3 (key bands for the byte-ordered unit partitioner; `statusbinary` "not running"; the lone L0 sstable and the extra sstable per round; the 2 s `nodetool` disable against a small first task, so `LcDisable.java`; `jstat` unusable, so `jcmd`; another session's broad `pkill` killing the first runner, so the script is `lcmt_cluster.py`). Defect D7 (heap used includes garbage; a 1.5 s sampler over a 2 s task) was found in run 1 and is why `lcmt_cluster.py` has a second sampler (`LC_SAMPLER=v2`, used by run 2 with `LC_SKIP_BUILD=1`).
+**Environment:** JDK 11, Ant 1.10, trees from `copy-source.sh`: `~/s4-b10-lc` (cluster node runs from it) and `~/s4-b10-lc-unit` (unit tier) on pc12.
+**Cleanup:** `sudo umount /mnt/s4lc`, delete the two trees and `~/s4-b10-lc-logs`.

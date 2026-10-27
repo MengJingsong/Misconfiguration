@@ -1,0 +1,220 @@
+[2026-10-26 15:33:15] cluster-run run1 main start 2026-10-26T15:33:15-0400 host node0.jason92-320876.misconfiguration-pg0.cloudlab.umass.edu
+[2026-10-26 15:33:15] + ps -eo pid,cmd | grep -E 'java .*org\.apache\.cassandra\.service\.CassandraDaemon' | grep -F 's4-b8-kt/node' | grep -v grep | cut -c1-60 || true
+[2026-10-26 15:33:15] daemons before: none (own start not yet)
+[2026-10-26 15:33:15] === L1: yaml keys_to_save unset
+[2026-10-26 15:33:15] yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 10s; row_cache_save_period: 10s; counter_cache_save_period: 10s; native_transport_timeout: 30s
+[2026-10-26 15:33:15] + ps -eo pid,cmd | grep -E 'java .*org\.apache\.cassandra\.service\.CassandraDaemon' | grep -F 's4-b8-kt/node' | grep -v grep | cut -c1-60 || true
+[2026-10-26 15:33:15] + bin/cassandra -p /dev/shm/s4-b8-kt/node/cassandra.pid > /dev/shm/s4-b8-kt/node/stdout.txt 2>&1
+
+  rc=0
+[2026-10-26 15:33:17] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:17] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:22] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:23] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:27] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:29] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:33] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:35] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:39] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:41] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:45] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:47] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:51] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:53] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:33:57] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:33:59] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:34:03] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:34:05] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:34:09] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:34:11] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:34:15] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:34:17] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:34:18] UN and serving after 62 s
+[2026-10-26 15:34:18] + tools/bin/cassandra-stress write n=200000 -pop seq=1..200000 -node 127.0.1.1 -rate threads=50 -log file=/users/jason92/s4-b8-kt-logs/run1/cluster/stress-write.log
+[2026-10-26 15:34:34] stress write rc=0: Op rate                   :   61,845 op/s  [WRITE: 61,845 op/s] | Partition rate            :   61,845 pk/s  [WRITE: 61,845 pk/s] | Total partitions          :    200,000 [WRITE: 200,000] | Total errors              :          0 [WRITE: 0]
+[2026-10-26 15:34:34] + bin/cqlsh 127.0.1.1 9042 -e "ALTER TABLE keyspace1.standard1 WITH caching = {'keys':'ALL','rows_per_partition':'ALL'}"
+[2026-10-26 15:34:35] + bin/nodetool -h 127.0.0.1 -p 7110 flush
+[2026-10-26 15:34:36] + tools/bin/cassandra-stress counter_write n=1 -pop seq=1..1 -node 127.0.1.1 -rate threads=50 -log file=/users/jason92/s4-b8-kt-logs/run1/cluster/stress-counter-create.log
+[2026-10-26 15:34:44] stress counter-create rc=0: Op rate                   :        3 op/s  [COUNTER_WRITE: 3 op/s] | Partition rate            :        3 pk/s  [COUNTER_WRITE: 3 pk/s] | Total partitions          :          1 [COUNTER_WRITE: 1] | Total errors              :          0 [COUNTER_WRITE: 0]
+[2026-10-26 15:34:44] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/cache_keys_to_save-saveCache-keysEstimate--autonomous/reader.py 127.0.1.1
+{"keys": 200000, "errors": 0, "seconds": 102.0}
+
+  rc=0
+[2026-10-26 15:36:58] reader: {"keys": 200000, "errors": 0, "seconds": 102.0}
+[2026-10-26 15:36:58] + tools/bin/cassandra-stress counter_write n=200000 -pop seq=1..200000 -node 127.0.1.1 -rate threads=50 -log file=/users/jason92/s4-b8-kt-logs/run1/cluster/stress-counter1.log
+[2026-10-26 15:37:15] stress counter1 rc=0: Op rate                   :   24,427 op/s  [COUNTER_WRITE: 24,427 op/s] | Partition rate            :   24,427 pk/s  [COUNTER_WRITE: 24,427 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+[2026-10-26 15:37:15] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:37:16] populated: entries [('key', 200016), ('row', 200000), ('counter', 436906)]
+[2026-10-26 15:37:16] EXPECTED: key cache populated (entries >= 100000) - yes
+[2026-10-26 15:37:16] EXPECTED: row cache populated (entries >= 100000) - yes
+[2026-10-26 15:37:16] EXPECTED: counter cache populated (entries >= 100000) - yes
+[2026-10-26 15:37:23] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:37:24] + jcmd 2826051 GC.run
+[2026-10-26 15:37:25] + jcmd 2826051 GC.heap_info
+[2026-10-26 15:37:25] PHASE all(yaml unset) N=0: saved={'key': 200016, 'row': 200000, 'counter': 436906} file_bytes={'key': 3981567, 'row': 3000016, 'counter': 10485760} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2821
+[2026-10-26 15:37:25] EXPECTED: all(yaml unset): key saved items == min(N,live) = 200016 (saved 200016, live 200016) - yes
+[2026-10-26 15:37:25] EXPECTED: all(yaml unset): row saved items == min(N,live) = 200000 (saved 200000, live 200000) - yes
+[2026-10-26 15:37:25] EXPECTED: all(yaml unset): counter saved items == min(N,live) = 436906 (saved 436906, live 436906) - yes
+[2026-10-26 15:37:25] + bin/nodetool -h 127.0.0.1 -p 7110 setcachekeystosave 10000 10000 10000
+[2026-10-26 15:37:26] nodetool setcachekeystosave 10000 10000 10000
+[2026-10-26 15:37:39] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:37:40] + jcmd 2826051 GC.run
+[2026-10-26 15:37:41] + jcmd 2826051 GC.heap_info
+[2026-10-26 15:37:41] PHASE runtime 10000 N=10000: saved={'key': 10000, 'row': 10000, 'counter': 10000} file_bytes={'key': 200016, 'row': 150016, 'counter': 240016} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2820
+[2026-10-26 15:37:41] EXPECTED: runtime 10000: key saved items == min(N,live) = 10000 (saved 10000, live 200016) - yes
+[2026-10-26 15:37:41] EXPECTED: runtime 10000: row saved items == min(N,live) = 10000 (saved 10000, live 200000) - yes
+[2026-10-26 15:37:41] EXPECTED: runtime 10000: counter saved items == min(N,live) = 10000 (saved 10000, live 436906) - yes
+[2026-10-26 15:37:41] + bin/nodetool -h 127.0.0.1 -p 7110 setcachekeystosave 100 100 100
+[2026-10-26 15:37:42] nodetool setcachekeystosave 100 100 100
+[2026-10-26 15:37:53] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:37:54] + jcmd 2826051 GC.run
+[2026-10-26 15:37:55] + jcmd 2826051 GC.heap_info
+[2026-10-26 15:37:55] PHASE runtime 100 N=100: saved={'key': 100, 'row': 100, 'counter': 100} file_bytes={'key': 2016, 'row': 1516, 'counter': 2416} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2819
+[2026-10-26 15:37:55] EXPECTED: runtime 100: key saved items == min(N,live) = 100 (saved 100, live 200016) - yes
+[2026-10-26 15:37:55] EXPECTED: runtime 100: row saved items == min(N,live) = 100 (saved 100, live 200000) - yes
+[2026-10-26 15:37:55] EXPECTED: runtime 100: counter saved items == min(N,live) = 100 (saved 100, live 436906) - yes
+[2026-10-26 15:37:55] + bin/nodetool -h 127.0.0.1 -p 7110 setcachekeystosave 0 0 0
+[2026-10-26 15:37:56] nodetool setcachekeystosave 0 0 0
+[2026-10-26 15:38:09] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:38:10] + jcmd 2826051 GC.run
+[2026-10-26 15:38:11] + jcmd 2826051 GC.heap_info
+[2026-10-26 15:38:11] PHASE runtime 0 N=0: saved={'key': 200016, 'row': 200000, 'counter': 436906} file_bytes={'key': 3981567, 'row': 3000016, 'counter': 10485760} entries={'key': 200016, 'row': 200000, 'counter': 436906} heap_used_mb=234.4 rss_anon_mb=2821
+[2026-10-26 15:38:11] EXPECTED: runtime 0: key saved items == min(N,live) = 200016 (saved 200016, live 200016) - yes
+[2026-10-26 15:38:11] EXPECTED: runtime 0: row saved items == min(N,live) = 200000 (saved 200000, live 200000) - yes
+[2026-10-26 15:38:11] EXPECTED: runtime 0: counter saved items == min(N,live) = 436906 (saved 436906, live 436906) - yes
+[2026-10-26 15:38:11] + bin/nodetool -h 127.0.0.1 -p 7110 setcachecapacity 8 100 50
+[2026-10-26 15:38:12] nodetool setcachecapacity 8 100 50
+[2026-10-26 15:38:19] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:38:20] + jcmd 2826051 GC.run
+[2026-10-26 15:38:21] + jcmd 2826051 GC.heap_info
+[2026-10-26 15:38:21] PHASE capacity 8 MiB, N=0 N=0: saved={'key': 95325, 'row': 200000, 'counter': 436906} file_bytes={'key': 1906516, 'row': 3000016, 'counter': 10485760} entries={'key': 95325, 'row': 200000, 'counter': 436906} heap_used_mb=219.4 rss_anon_mb=2820
+[2026-10-26 15:38:21] EXPECTED: capacity 8 MiB, N=0: key saved items == min(N,live) = 95325 (saved 95325, live 95325) - yes
+[2026-10-26 15:38:21] EXPECTED: capacity 8 MiB, N=0: row saved items == min(N,live) = 200000 (saved 200000, live 200000) - yes
+[2026-10-26 15:38:21] EXPECTED: capacity 8 MiB, N=0: counter saved items == min(N,live) = 436906 (saved 436906, live 436906) - yes
+[2026-10-26 15:38:21] + bin/nodetool -h 127.0.0.1 -p 7110 setcachecapacity 200 100 50
+[2026-10-26 15:38:22] + bin/nodetool -h 127.0.0.1 -p 7110 setcachekeystosave 100 100 100
+[2026-10-26 15:38:23] nodetool setcachekeystosave 100 100 100
+[2026-10-26 15:38:34] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:38:35] + jcmd 2826051 GC.run
+[2026-10-26 15:38:36] + jcmd 2826051 GC.heap_info
+[2026-10-26 15:38:36] PHASE runtime 100 (before restart) N=100: saved={'key': 100, 'row': 100, 'counter': 100} file_bytes={'key': 2000, 'row': 1516, 'counter': 2416} entries={'key': 95325, 'row': 200000, 'counter': 436906} heap_used_mb=219.4 rss_anon_mb=2821
+[2026-10-26 15:38:36] EXPECTED: runtime 100 (before restart): key saved items == min(N,live) = 100 (saved 100, live 95325) - yes
+[2026-10-26 15:38:36] EXPECTED: runtime 100 (before restart): row saved items == min(N,live) = 100 (saved 100, live 200000) - yes
+[2026-10-26 15:38:36] EXPECTED: runtime 100 (before restart): counter saved items == min(N,live) = 100 (saved 100, live 436906) - yes
+[2026-10-26 15:38:36] + bin/nodetool -h 127.0.0.1 -p 7110 stopdaemon
+[2026-10-26 15:38:46] === yaml100: restart with yaml keys_to_save 100
+[2026-10-26 15:38:46] yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 10s; row_cache_save_period: 10s; counter_cache_save_period: 10s; native_transport_timeout: 30s; key_cache_keys_to_save: 100; row_cache_keys_to_save: 100; counter_cache_keys_to_save: 100
+[2026-10-26 15:38:46] + ps -eo pid,cmd | grep -E 'java .*org\.apache\.cassandra\.service\.CassandraDaemon' | grep -F 's4-b8-kt/node' | grep -v grep | cut -c1-60 || true
+[2026-10-26 15:38:46] + bin/cassandra -p /dev/shm/s4-b8-kt/node/cassandra.pid > /dev/shm/s4-b8-kt/node/stdout.txt 2>&1
+
+  rc=0
+[2026-10-26 15:38:47] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:38:48] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:38:52] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:38:53] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:38:57] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:38:59] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:39:03] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:39:04] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:39:06] UN and serving after 19 s
+[2026-10-26 15:39:46] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:39:47] yaml100: entries after warm load: {'key': 255, 'row': 100, 'counter': 100}
+[2026-10-26 15:39:47] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/cache_keys_to_save-saveCache-keysEstimate--autonomous/reader.py 127.0.1.1
+{"keys": 200000, "errors": 0, "seconds": 111.3}
+
+  rc=0
+[2026-10-26 15:42:13] reader: {"keys": 200000, "errors": 0, "seconds": 111.3}
+[2026-10-26 15:42:13] + tools/bin/cassandra-stress counter_write n=200000 -pop seq=1..200000 -node 127.0.1.1 -rate threads=50 -log file=/users/jason92/s4-b8-kt-logs/run1/cluster/stress-counterx.log
+[2026-10-26 15:42:31] stress counterx rc=0: Op rate                   :   21,923 op/s  [COUNTER_WRITE: 21,923 op/s] | Partition rate            :   21,923 pk/s  [COUNTER_WRITE: 21,923 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+[2026-10-26 15:42:42] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:42:43] + jcmd 2841202 GC.run
+[2026-10-26 15:42:44] + jcmd 2841202 GC.heap_info
+[2026-10-26 15:42:44] PHASE yaml100 N=100: saved={'key': 100, 'row': 100, 'counter': 100} file_bytes={'key': 1996, 'row': 1516, 'counter': 2416} entries={'key': 400024, 'row': 200000, 'counter': 436906} heap_used_mb=285.5 rss_anon_mb=2811
+[2026-10-26 15:42:44] EXPECTED: yaml100: key saved items == min(N,live) = 100 (saved 100, live 400024) - yes
+[2026-10-26 15:42:44] EXPECTED: yaml100: row saved items == min(N,live) = 100 (saved 100, live 200000) - yes
+[2026-10-26 15:42:44] EXPECTED: yaml100: counter saved items == min(N,live) = 100 (saved 100, live 436906) - yes
+[2026-10-26 15:42:44] + bin/nodetool -h 127.0.0.1 -p 7110 stopdaemon
+[2026-10-26 15:42:54] === yaml10000: restart with yaml keys_to_save 10000
+[2026-10-26 15:42:54] yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 10s; row_cache_save_period: 10s; counter_cache_save_period: 10s; native_transport_timeout: 30s; key_cache_keys_to_save: 10000; row_cache_keys_to_save: 10000; counter_cache_keys_to_save: 10000
+[2026-10-26 15:42:54] + ps -eo pid,cmd | grep -E 'java .*org\.apache\.cassandra\.service\.CassandraDaemon' | grep -F 's4-b8-kt/node' | grep -v grep | cut -c1-60 || true
+[2026-10-26 15:42:54] + bin/cassandra -p /dev/shm/s4-b8-kt/node/cassandra.pid > /dev/shm/s4-b8-kt/node/stdout.txt 2>&1
+
+  rc=0
+[2026-10-26 15:42:55] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:42:56] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:43:00] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:43:01] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:43:05] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:43:06] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:43:11] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:43:12] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:43:13] UN and serving after 17 s
+[2026-10-26 15:43:53] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:43:54] yaml10000: entries after warm load: {'key': 439, 'row': 100, 'counter': 100}
+[2026-10-26 15:43:54] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/cache_keys_to_save-saveCache-keysEstimate--autonomous/reader.py 127.0.1.1
+{"keys": 200000, "errors": 0, "seconds": 108.3}
+
+  rc=0
+[2026-10-26 15:46:14] reader: {"keys": 200000, "errors": 0, "seconds": 108.3}
+[2026-10-26 15:46:14] + tools/bin/cassandra-stress counter_write n=200000 -pop seq=1..200000 -node 127.0.1.1 -rate threads=50 -log file=/users/jason92/s4-b8-kt-logs/run1/cluster/stress-counterx.log
+[2026-10-26 15:46:33] stress counterx rc=0: Op rate                   :   21,964 op/s  [COUNTER_WRITE: 21,964 op/s] | Partition rate            :   21,964 pk/s  [COUNTER_WRITE: 21,964 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+[2026-10-26 15:46:42] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:46:43] + jcmd 2846779 GC.run
+[2026-10-26 15:46:44] + jcmd 2846779 GC.heap_info
+[2026-10-26 15:46:44] PHASE yaml10000 N=10000: saved={'key': 10000, 'row': 10000, 'counter': 10000} file_bytes={'key': 199570, 'row': 150016, 'counter': 240016} entries={'key': 400202, 'row': 200000, 'counter': 436906} heap_used_mb=283.5 rss_anon_mb=2809
+[2026-10-26 15:46:44] EXPECTED: yaml10000: key saved items == min(N,live) = 10000 (saved 10000, live 400202) - yes
+[2026-10-26 15:46:44] EXPECTED: yaml10000: row saved items == min(N,live) = 10000 (saved 10000, live 200000) - yes
+[2026-10-26 15:46:44] EXPECTED: yaml10000: counter saved items == min(N,live) = 10000 (saved 10000, live 436906) - yes
+[2026-10-26 15:46:44] + bin/nodetool -h 127.0.0.1 -p 7110 stopdaemon
+[2026-10-26 15:46:54] === L4: save periods 0, saved_caches emptied
+[2026-10-26 15:46:54] yaml tail: cluster_name: kt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.1.1; rpc_address: 127.0.1.1; commitlog_directory: /dev/shm/s4-b8-kt/node/commitlog; hints_directory: /dev/shm/s4-b8-kt/node/hints; saved_caches_directory: /dev/shm/s4-b8-kt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b8-kt/node/cdc_raw; key_cache_size: 200MiB; row_cache_size: 100MiB; counter_cache_size: 50MiB; key_cache_save_period: 0s; row_cache_save_period: 0s; counter_cache_save_period: 0s; native_transport_timeout: 30s
+[2026-10-26 15:46:54] + ps -eo pid,cmd | grep -E 'java .*org\.apache\.cassandra\.service\.CassandraDaemon' | grep -F 's4-b8-kt/node' | grep -v grep | cut -c1-60 || true
+[2026-10-26 15:46:54] + bin/cassandra -p /dev/shm/s4-b8-kt/node/cassandra.pid > /dev/shm/s4-b8-kt/node/stdout.txt 2>&1
+
+  rc=0
+[2026-10-26 15:46:55] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:46:56] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:47:00] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:47:01] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:47:05] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:47:07] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:47:11] + bin/nodetool -h 127.0.0.1 -p 7110 status
+[2026-10-26 15:47:12] + bin/nodetool -h 127.0.0.1 -p 7110 statusbinary
+[2026-10-26 15:47:13] UN and serving after 18 s
+[2026-10-26 15:47:53] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:47:54] nosave baseline: entries after start with no saved files (the node's own system-keyspace reads), before the workload: {'key': 24, 'row': 0, 'counter': 0}
+[2026-10-26 15:47:54] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/cache_keys_to_save-saveCache-keysEstimate--autonomous/reader.py 127.0.1.1
+{"keys": 200000, "errors": 0, "seconds": 111.0}
+
+  rc=0
+[2026-10-26 15:50:18] reader: {"keys": 200000, "errors": 0, "seconds": 111.0}
+[2026-10-26 15:50:18] + tools/bin/cassandra-stress counter_write n=200000 -pop seq=1..200000 -node 127.0.1.1 -rate threads=50 -log file=/users/jason92/s4-b8-kt-logs/run1/cluster/stress-counterx.log
+[2026-10-26 15:50:35] stress counterx rc=0: Op rate                   :   27,771 op/s  [COUNTER_WRITE: 27,771 op/s] | Partition rate            :   27,771 pk/s  [COUNTER_WRITE: 27,771 pk/s] | Total partitions          :    200,000 [COUNTER_WRITE: 200,000] | Total errors              :          0 [COUNTER_WRITE: 0]
+[2026-10-26 15:51:00] + bin/nodetool -h 127.0.0.1 -p 7110 info
+[2026-10-26 15:51:01] nosave: files={} saved lines={} entries=[('key', 798817), ('row', 200000), ('counter', 436906)]
+[2026-10-26 15:51:01] EXPECTED: nosave control: caches populated but no saved file is created - yes
+[2026-10-26 15:51:01] + bin/nodetool -h 127.0.0.1 -p 7110 stopdaemon
+[2026-10-26 15:51:11] EXPECTED: cross key rt10000: file/file(all) = 0.0502 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross key rt100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross key rt0: file/file(all) = 1.0000 within 20% of items/live = 1.0000 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross key yaml100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross key yaml10000: file/file(all) = 0.0501 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross row rt10000: file/file(all) = 0.0500 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross row rt100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross row rt0: file/file(all) = 1.0000 within 20% of items/live = 1.0000 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross row yaml100: file/file(all) = 0.0005 within 20% of items/live = 0.0005 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross row yaml10000: file/file(all) = 0.0500 within 20% of items/live = 0.0500 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross counter rt10000: file/file(all) = 0.0229 within 20% of items/live = 0.0229 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross counter rt100: file/file(all) = 0.0002 within 20% of items/live = 0.0002 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross counter rt0: file/file(all) = 1.0000 within 20% of items/live = 1.0000 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross counter yaml100: file/file(all) = 0.0002 within 20% of items/live = 0.0002 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross counter yaml10000: file/file(all) = 0.0229 within 20% of items/live = 0.0229 (+0.002 abs for tiny) - yes
+[2026-10-26 15:51:11] EXPECTED: cross key: live entries unchanged by N across runtime phases (min 95325, max 200016) - NO (recorded; judged in the results file)
+[2026-10-26 15:51:11] EXPECTED: cross row: live entries unchanged by N across runtime phases (min 200000, max 200000) - yes
+[2026-10-26 15:51:11] EXPECTED: cross counter: live entries unchanged by N across runtime phases (min 436906, max 436906) - yes
+[2026-10-26 15:51:11] EXPECTED: cross: steady heap (after GC) differs < 5% between runtime phases (min 234.4, max 234.4 MB) - yes
+[2026-10-26 15:51:11] EXPECTED: cross: RssAnon differs < 5% between runtime phases (min 2819, max 2821 MB) - yes
+[2026-10-26 15:51:11] EXPECTED: capacity control: key cache entries fall with key_cache_size (8 MiB): 95325 < 200016 - yes
+[2026-10-26 15:51:11] + ps -eo pid,cmd | grep -E 'java .*org\.apache\.cassandra\.service\.CassandraDaemon' | grep -F 's4-b8-kt/node' | grep -v grep | cut -c1-60 || true
+[2026-10-26 15:51:12] daemons after: none
+[2026-10-26 15:51:12] EXPECTED totals: yes=48 no=1

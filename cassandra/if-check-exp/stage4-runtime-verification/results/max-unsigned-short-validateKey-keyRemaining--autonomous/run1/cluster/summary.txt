@@ -1,0 +1,49 @@
+yaml tail: cluster_name: vk; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.5.1; rpc_address: 127.0.5.1; commitlog_directory: /dev/shm/s4-b9-vk/node/commitlog; hints_directory: /dev/shm/s4-b9-vk/node/hints; saved_caches_directory: /dev/shm/s4-b9-vk/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-vk/node/cdc_raw; memtable_heap_space: 256MiB; commitlog_total_space: 512MiB; memtable_allocation_type: heap_buffers; auto_snapshot: false; memtable_cleanup_threshold: 0.99; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life 1 started, pid 1885052, memtable_heap_space 256 MiB
+EXPECTED: precheck: 5 writes at K=65535 succeed - yes [{}]
+EXPECTED: precheck: 5 writes at K=65536 fail with the exact message - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 5}]
+--- arm k1000_n10k: K=1000 N=10000 pool=256 MiB ---
+arm k1000_n10k: ok=10000 errors=0 msgs={} write_s=3 data+index=21204350 (N*K=10000000) memtable_data(pre-flush)=1490000 rss_anon peak=2851790848 flushes={'USER_FORCED': 1} MEMTABLE_LIMIT usage median=None max=None
+--- arm k1000_n100k: K=1000 N=100000 pool=256 MiB ---
+arm k1000_n100k: ok=100000 errors=0 msgs={} write_s=26 data+index=212228726 (N*K=100000000) memtable_data(pre-flush)=14900000 rss_anon peak=2854162432 flushes={'USER_FORCED': 1} MEMTABLE_LIMIT usage median=None max=None
+--- arm k65535_n10k: K=65535 N=10000 pool=256 MiB ---
+arm k65535_n10k: ok=10000 errors=0 msgs={} write_s=9 data+index=1314984507 (N*K=655350000) memtable_data(pre-flush)=289209 rss_anon peak=2853449728 flushes={'MEMTABLE_LIMIT': 2, 'USER_FORCED': 1} MEMTABLE_LIMIT usage median=254.24 max=254.24
+--- arm k65535_n100k: K=65535 N=100000 pool=256 MiB ---
+arm k65535_n100k: ok=100000 errors=0 msgs={} write_s=98 data+index=18777990258 (N*K=6553500000) memtable_data(pre-flush)=494084 rss_anon peak=2940313600 flushes={'MEMTABLE_LIMIT': 24, 'USER_FORCED': 1} MEMTABLE_LIMIT usage median=253.924 max=254.997
+--- arm k65536: K=65536 N=100 pool=256 MiB ---
+arm k65536: ok=0 errors=100 msgs={'InvalidRequest: Error from server: code=2200 [Invalid query] message="Key length of 65536 is longer than maximum of 65535"': 100} write_s=0 data+index=0 (N*K=6553600) memtable_data(pre-flush)=0 rss_anon peak=2905915392 flushes={} MEMTABLE_LIMIT usage median=None max=None
+yaml tail: cluster_name: vk; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.5.1; rpc_address: 127.0.5.1; commitlog_directory: /dev/shm/s4-b9-vk/node/commitlog; hints_directory: /dev/shm/s4-b9-vk/node/hints; saved_caches_directory: /dev/shm/s4-b9-vk/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-vk/node/cdc_raw; memtable_heap_space: 128MiB; commitlog_total_space: 512MiB; memtable_allocation_type: heap_buffers; auto_snapshot: false; memtable_cleanup_threshold: 0.99; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life 2 started, pid 1898462, memtable_heap_space 128 MiB
+--- arm p128_k65535_n100k: K=65535 N=100000 pool=128 MiB ---
+arm p128_k65535_n100k: ok=100000 errors=0 msgs={} write_s=102 data+index=18348689741 (N*K=6553500000) memtable_data(pre-flush)=156450 rss_anon peak=2935750656 flushes={'MEMTABLE_LIMIT': 49, 'USER_FORCED': 1} MEMTABLE_LIMIT usage median=127.089 max=127.972
+trace counts: {"1": {"V_ge1000": {"65535": 110005, "1000": 110000}, "V_gt65535": 0, "Q_gt65535": 0, "X": 105, "X_len65536": 105, "X_stack_clusteringprefix": 105, "X_stack_other_validators": 0}, "2": {"V_ge1000": {"65535": 100000}, "V_gt65535": 0, "Q_gt65535": 0, "X": 0, "X_len65536": 0, "X_stack_clusteringprefix": 0, "X_stack_other_validators": 0}}
+EXPECTED: k1000_n10k: no write rejected - yes [errors=0]
+EXPECTED: k1000_n100k: no write rejected - yes [errors=0]
+EXPECTED: k65535_n10k: no write rejected - yes [errors=0]
+EXPECTED: k65535_n100k: no write rejected - yes [errors=0]
+EXPECTED: p128_k65535_n100k: no write rejected - yes [errors=0]
+EXPECTED: k65536: 100 of 100 writes rejected with the exact message - yes [{"InvalidRequest: Error from server: code=2200 [Invalid query] message=\"Key length of 65536 is longer than maximum of 65535\"": 100}]
+EXPECTED: k65536: 0 B added to the table directory and memtable empty - yes [dir_after=0 before=0 memtable={'memtable_data': 0, 'memtable_off_heap': 0, 'memtable_cells': 0}]
+EXPECTED: k65535_n10k: Data+Index bytes between 1.0 and 3.0 x N*K - yes [ratio=2.01]
+EXPECTED: k65535_n100k: Data+Index bytes between 1.0 and 3.0 x N*K - yes [ratio=2.87]
+EXPECTED: p128_k65535_n100k: Data+Index bytes between 1.0 and 3.0 x N*K - yes [ratio=2.80]
+EXPECTED: k1000_n10k: Data+Index bytes between 1.0 and 4.0 x N*K - yes [ratio=2.12]
+EXPECTED: k1000_n100k: Data+Index bytes between 1.0 and 4.0 x N*K - yes [ratio=2.12]
+EXPECTED: k1000_n100k is 8 to 12 times k1000_n10k in Data+Index bytes - yes [10.01]
+EXPECTED: k65535_n100k is 8 to 12 times k65535_n10k in Data+Index bytes - NO (recorded; judged in the results file) [14.28]
+EXPECTED: k65535 N=100k at 256 MiB: at least 10 MEMTABLE_LIMIT flushes, each logged on-heap usage <= 320 MiB - yes [24 flushes, max 254.997]
+EXPECTED: k65535 N=10k at 256 MiB: 1 to 3 MEMTABLE_LIMIT flushes - yes [2]
+EXPECTED: k1000 N=100k at 256 MiB: at most 1 MEMTABLE_LIMIT flush - yes [0]
+EXPECTED: k65535 N=100k at 128 MiB: at least 20 MEMTABLE_LIMIT flushes, each logged on-heap usage <= 160 MiB - yes [49 flushes, max 127.972]
+EXPECTED: flush-count ratio (128 MiB over 256 MiB, K=65535 N=100k) between 1.6 and 2.5 - yes [49 / 24]
+EXPECTED: median logged on-heap usage ratio (256 MiB over 128 MiB) between 1.6 and 2.5 - yes [253.924 / 127.089]
+EXPECTED: trace life 1: no Validation.validateKey entry above 65535 - yes [0]
+EXPECTED: trace life 1: 0 QueryProcessor.validateKey entries above 65535 - yes [0]
+EXPECTED: trace life 1: 105 "Key length of" exceptions, all for 65536, all with ClusteringPrefix.validate in the stack, none with QueryProcessor/Validation validateKey - yes [{"X": 105, "X_len65536": 105, "X_stack_clusteringprefix": 105, "X_stack_other_validators": 0}]
+EXPECTED: trace life 2: no "Key length of" exception - yes [0]
+EXPECTED: trace life 1: Validation.validateKey entries of length 65535 = 110,005 - yes [110005]
+EXPECTED: trace life 1: Validation.validateKey entries of length 1000 = 110,000 - yes [110000]
+EXPECTED: trace life 2: no Validation entry above 65535 and no QueryProcessor entry above 65535 - yes [0 0]
+EXPECTED: trace life 2: Validation.validateKey entries of length 65535 = 100,000 - yes [100000]
+summary: EXPECTED yes=29 no=1
+node pid left: None; /dev/shm/s4-b9-vk exists: False

@@ -1,0 +1,45 @@
+tier unit: 280 requests in 14 arms
+arm | n | outcomes | client warns | siz lines | rej lines | dataSize values | siz warn/fail B | bst med (min..max) | dec med | exe med
+warm20 | 20 | {'ok': 20} | 20 | 20 | 0 | [21960] | [5120]/[102400000] | 193256.0 (186680..8461792) | 38672.0 | 224480.0
+warm200 | 20 | {'ok': 20} | 20 | 20 | 0 | [219600] | [5120]/[102400000] | 1649904.0 (1619240..2708336) | 282032.0 | 1772588.0
+warm20b | 20 | {'ok': 20} | 0 | 20 | 0 | [21960] | [1048576]/[102400000] | 156984.0 (154592..166712) | 38672.0 | 188192.0
+w1-p20 | 20 | {'ok': 20} | 20 | 20 | 0 | [21960] | [1024]/[102400000] | 195656.0 (193584..199096) | 38672.0 | 226864.0
+w1-p200 | 20 | {'ok': 20} | 20 | 20 | 0 | [219600] | [1024]/[102400000] | 1643024.0 (1621352..2689344) | 282032.0 | 1761288.0
+w5-p20 | 20 | {'ok': 20} | 20 | 20 | 0 | [21960] | [5120]/[102400000] | 193416.0 (191184..1243496) | 38672.0 | 223440.0
+w5-p200 | 20 | {'ok': 20} | 20 | 20 | 0 | [219600] | [5120]/[102400000] | 1625988.0 (1616576..2680840) | 282032.0 | 1735836.0
+w1024-p20 | 20 | {'ok': 20} | 0 | 20 | 0 | [21960] | [1048576]/[102400000] | 154672.0 (152400..156744) | 38672.0 | 184612.0
+w1024-p200 | 20 | {'ok': 20} | 0 | 20 | 0 | [219600] | [1048576]/[102400000] | 1321744.0 (1313848..2373600) | 282032.0 | 1431608.0
+w65536-p20 | 20 | {'ok': 20} | 0 | 20 | 0 | [21960] | [67108864]/[102400000] | 154864.0 (152456..1203640) | 38672.0 | 184792.0
+w65536-p200 | 20 | {'ok': 20} | 0 | 20 | 0 | [219600] | [67108864]/[102400000] | 1321140.0 (1308648..2383024) | 282032.0 | 1430988.0
+sp-w1 | 20 | {'ok': 20} | 0 | 20 | 0 | [21409] | [1024]/[102400000] | 77384.0 (77384..92824) | 38672.0 | 107312.0
+fc | 20 | {'ERR:Batch_too_large': 20} | 0 | 20 | 20 | [21960] | [5120]/[10240] | 155456.0 (155456..370248) | 38672.0 | 185520.0
+inv | 20 | {'ok': 20} | 0 | 20 | 0 | [21960] | [204800]/[10240] | 152856.0 (151440..1201512) | 38672.0 | 182784.0
+rows (SELECT count(*)): {'warm20': 400, 'warm200': 4000, 'warm20b': 400, 'w1-p20': 400, 'w1-p200': 4000, 'w5-p20': 400, 'w5-p200': 4000, 'w1024-p20': 400, 'w1024-p200': 4000, 'w65536-p20': 400, 'w65536-p200': 4000, 'sp-w1': 400, 'fc': 0, 'inv': 400}
+EXPECTED: V1 all 11 arms ran with 20 requests each — yes
+EXPECTED: V2 every request reached verifyBatchSize (one siz line per request) in every arm — yes
+EXPECTED: V3 knob values read back and seen by the check (siz warn/fail bytes equal the set values) in every arm — yes
+EXPECTED: V4 multi-partition batches carry 20 / 200 mutations (siz n) — yes
+EXPECTED: V5 sp-w1 is a single mutation (siz n=1) — yes
+EXPECTED: V6 dataSize of the 20-partition batch is in (5 KiB, 1024 KiB) and of the 200-partition batch in (5 KiB, 1024 KiB): [21960]..[21960] / [219600]..[219600] — yes
+EXPECTED: P1 w1-p20: every batch warned (client warns 20/20 requests with a warning 20), none thrown, rows 400 == 400 — yes
+EXPECTED: P1 w5-p20: every batch warned (client warns 20/20 requests with a warning 20), none thrown, rows 400 == 400 — yes
+EXPECTED: P2 w1024-p20: no warning (0), none thrown, rows 400 == 400 — yes
+EXPECTED: P2 w65536-p20: no warning (0), none thrown, rows 400 == 400 — yes
+EXPECTED: P3 p20: dataSize values identical across the four warn values ([(21960,)]) — yes
+EXPECTED: P4 p20: coordinator allocation (bst) medians within 10 %/16 KiB across warn values {1: 195656.0, 5: 193416.0, 1024: 154672.0, 65536: 154864.0} — NO
+EXPECTED: P3b p20: the size in the client warning equals the check operand — yes
+EXPECTED: P1 w1-p200: every batch warned (client warns 20/20 requests with a warning 20), none thrown, rows 4000 == 4000 — yes
+EXPECTED: P1 w5-p200: every batch warned (client warns 20/20 requests with a warning 20), none thrown, rows 4000 == 4000 — yes
+EXPECTED: P2 w1024-p200: no warning (0), none thrown, rows 4000 == 4000 — yes
+EXPECTED: P2 w65536-p200: no warning (0), none thrown, rows 4000 == 4000 — yes
+EXPECTED: P3 p200: dataSize values identical across the four warn values ([(219600,)]) — yes
+EXPECTED: P4 p200: coordinator allocation (bst) medians within 10 %/16 KiB across warn values {1: 1643024.0, 5: 1625988.0, 1024: 1321744.0, 65536: 1321140.0} — NO
+EXPECTED: P3b p200: the size in the client warning equals the check operand — yes
+EXPECTED: P5 sp-w1: single-partition batch: no warning (0), none thrown, rows 400 == 400 — yes
+EXPECTED: C1 fc (warn 5 KiB, fail 10 KiB): all 20 rejected with "Batch too large" ({'ERR:Batch_too_large': 20}), rej lines 20, rows 0 == 0 — yes
+EXPECTED: I1 inv (warn 200 KiB, fail 10 KiB): accepted ({'ok': 20}), no warning (0), rej 0, rows 400 == 400 — yes
+info (not a prediction):
+  STAGE4 heap arm=warm20 before=68994528 after=74255536
+  STAGE4 heap arm=warm200 before=74347504 after=85488216
+  STAGE4 heap arm=warm20b before=85882128 after=87496784
+  ...

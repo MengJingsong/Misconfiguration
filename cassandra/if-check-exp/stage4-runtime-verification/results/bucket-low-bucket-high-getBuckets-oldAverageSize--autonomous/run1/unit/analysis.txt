@@ -1,0 +1,37 @@
+PASS [instrument] geo list total/max as modelled :: 15472761705 3571443917
+PASS [B2f] synthetic geo.min0.narrow: 32 buckets, largest 1 files / 3571443917 B :: buckets=32 files=1 bytes=3571443917
+PASS [B2f] synthetic geo.min0.default: 11 buckets, largest 2 files / 6318708469 B :: buckets=11 files=2 bytes=6318708469
+PASS [B2f] synthetic geo.min0.wide: 1 buckets, largest 32 files / 15472761705 B :: buckets=1 files=32 bytes=15472761705
+PASS [B2f] synthetic geo.min50.narrow: 18 buckets, largest 1 files / 3571443917 B :: buckets=18 files=1 bytes=3571443917
+PASS [B2f] synthetic geo.min50.default: 7 buckets, largest 2 files / 6318708469 B :: buckets=7 files=2 bytes=6318708469
+PASS [B2f] synthetic geo.min50.wide: 1 buckets, largest 32 files / 15472761705 B :: buckets=1 files=32 bytes=15472761705
+PASS [B2f] equal list eq.min0.narrow: 1 bucket of 32 files, 3355443200 B :: 1 32 3355443200
+PASS [B2f] equal list eq.min0.default: 1 bucket of 32 files, 3355443200 B :: 1 32 3355443200
+PASS [B2f] equal list eq.min0.wide: 1 bucket of 32 files, 3355443200 B :: 1 32 3355443200
+PASS [B2f] equal list eq.min50.narrow: 1 bucket of 32 files, 3355443200 B :: 1 32 3355443200
+PASS [B2f] equal list eq.min50.default: 1 bucket of 32 files, 3355443200 B :: 1 32 3355443200
+PASS [B2f] equal list eq.min50.wide: 1 bucket of 32 files, 3355443200 B :: 1 32 3355443200
+PASS [instrument] nar: 12 live sstables, ascending, consecutive ratios in [1.10,1.20] :: ratios=[1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15]
+PASS [instrument] nar: static getBuckets counts equal the stand-alone model on the measured sizes :: model=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] real=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+PASS [instrument] def: 12 live sstables, ascending, consecutive ratios in [1.10,1.20] :: ratios=[1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15]
+PASS [instrument] def: static getBuckets counts equal the stand-alone model on the measured sizes :: model=[6, 6] real=[6, 6]
+PASS [instrument] wid: 12 live sstables, ascending, consecutive ratios in [1.10,1.20] :: ratios=[1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15]
+PASS [instrument] wid: static getBuckets counts equal the stand-alone model on the measured sizes :: model=[12] real=[12]
+PASS [instrument] ctl: 12 live sstables, ascending, consecutive ratios in [1.10,1.20] :: ratios=[1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15, 1.15]
+PASS [instrument] ctl: static getBuckets counts equal the stand-alone model on the measured sizes :: model=[12] real=[12]
+PASS [B2f] nar: 12 buckets of one, no task :: buckets=12 taskNull=true
+PASS [B2f] def: two buckets, each 4 to 8 files; task of 4 to 8 inputs :: counts=[6, 6] inputs=6
+PASS [B2f] wid: one bucket of 12; task of all 12 inputs = total bytes :: inputs=12 bytes=154264933 total=154264933
+PASS [B2f] ctl: thresholds 4/4; task of exactly 4 inputs; input bytes below the wide task :: thr=4/4 inputs=4 bytes=26558679
+PASS [B2f] def: executed; peak extra / input bytes in [0.8,1.15] :: ratio=1.000 peakExtra=107716563 inputBytes=107707885
+PASS [instrument] def: sampler took >= 20 samples during the task (instrument) :: 892
+PASS [instrument] def: after the task fewer sstables than 12 :: 7
+PASS [B2f] wid: executed; peak extra / input bytes in [0.8,1.15] :: ratio=1.000 peakExtra=154309665 inputBytes=154264933
+PASS [instrument] wid: sampler took >= 20 samples during the task (instrument) :: 911
+PASS [instrument] wid: after the task fewer sstables than 12 :: 1
+PASS [B2f] ctl: executed; peak extra / input bytes in [0.8,1.15] :: ratio=1.000 peakExtra=26562145 inputBytes=26558679
+PASS [instrument] ctl: sampler took >= 20 samples during the task (instrument) :: 177
+PASS [instrument] ctl: after the task fewer sstables than 12 :: 9
+PASS [B2f] peak extra ordered wide > default > wide/max4 > narrow (0) :: wid=154309665 def=107716563 ctl=26562145
+PASS [instrument] truncate empties every table :: bytesAfterTruncate
+SUMMARY ALL PASS (matches B2f; B2g row 1, row 3, with the control moving)

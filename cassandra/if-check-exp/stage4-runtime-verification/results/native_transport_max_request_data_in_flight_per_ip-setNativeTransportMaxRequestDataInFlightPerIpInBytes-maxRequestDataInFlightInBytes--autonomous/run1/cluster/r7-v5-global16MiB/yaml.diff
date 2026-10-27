@@ -1,0 +1,34 @@
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.4.1:7000"
+981,982d980
+< listen_address: localhost
+< 
+1090,1091d1087
+< rpc_address: localhost
+< 
+1147,1148d1142
+< auto_snapshot: true
+< 
+1330d1323
+< write_request_timeout: 2000ms
+2485a2479,2496
+> # ---- stage4 pi lines ----
+> native_transport_max_request_data_in_flight: 16MiB
+> native_transport_max_request_data_in_flight_per_ip: 128MiB
+> native_transport_receive_queue_capacity: 64KiB
+> native_transport_max_message_size: 8MiB
+> commitlog_total_space: 512MiB
+> max_mutation_size: 16MiB
+> write_request_timeout: 600000ms
+> native_transport_timeout: 600000ms
+> auto_snapshot: false
+> listen_address: 127.0.4.1
+> rpc_address: 127.0.4.1
+> data_file_directories:
+>     - /dev/shm/s4-b8-pi/data
+> commitlog_directory: /dev/shm/s4-b8-pi/commitlog
+> hints_directory: /dev/shm/s4-b8-pi/hints
+> saved_caches_directory: /dev/shm/s4-b8-pi/saved_caches
+> cdc_raw_directory: /dev/shm/s4-b8-pi/cdc_raw

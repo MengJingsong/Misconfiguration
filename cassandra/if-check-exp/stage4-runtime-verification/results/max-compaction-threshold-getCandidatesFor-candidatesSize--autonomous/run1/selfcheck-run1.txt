@@ -1,0 +1,58 @@
+holds    U0 console echo of the readings in ant.log = readings.txt -- 772 vs 772 readings
+holds    U1 JUnit: 5 tests, 0 failures, 0 errors
+holds    U2 L0 count = min(N, L0 sstables) in all probes, never above N -- 58 probes
+holds    U3 L1 present iff L0 candidate bytes > gate bytes (strict) in all probes with an L1
+holds    U4 some probes have candidateCount > N (L1 appended after the cap) -- 23 probes
+holds    U5 large class: L1 absent at N=4, 6 and present at N>=8..100 (gate between 6 and 8 x ~21 MiB) -- {4: 0, 6: 0, 8: 10, 12: 10, 32: 10, 64: 10, 100: 10}
+holds    U6 STCS control (positive control): bucket size = N for N<=100 -- {4: 4, 6: 6, 8: 8, 12: 12, 32: 32, 64: 64, 100: 100}
+holds    U7 fixture overlaps as designed (100 L0: 4950 pairs, L0-L1 1000, L1-L1 0; groups 150)
+holds    U8 pinned source at the cited lines (548 trim, 551 subList, 557 gate, 567 union with L1)
+holds    C0 lcs N=16: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 16 read back
+holds    C1 lcs N=16: restored fixture as built (L0 100, L1 9, rest 0)
+holds    C2 lcs N=16: exactly one task started before the first finished
+holds    C0 lcs N=32: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 32 read back
+holds    C1 lcs N=32: restored fixture as built (L0 100, L1 9, rest 0)
+holds    C2 lcs N=32: exactly one task started before the first finished
+holds    C0 lcs N=4: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 4 read back
+holds    C1 lcs N=4: restored fixture as built (L0 100, L1 9, rest 0)
+holds    C2 lcs N=4: exactly one task started before the first finished
+holds    C0 lcs N=64: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 64 read back
+holds    C1 lcs N=64: restored fixture as built (L0 100, L1 9, rest 0)
+holds    C2 lcs N=64: exactly one task started before the first finished
+holds    C0 stcs N=16: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 16 read back
+holds    C1 stcs N=16: restored fixture as built (100 sstables)
+holds    C2 stcs N=16: exactly one task started before the first finished
+holds    C0 stcs N=32: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 32 read back
+holds    C1 stcs N=32: restored fixture as built (100 sstables)
+holds    C2 stcs N=32: exactly one task started before the first finished
+holds    C0 stcs N=4: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 4 read back
+holds    C1 stcs N=4: restored fixture as built (100 sstables)
+holds    C2 stcs N=4: exactly one task started before the first finished
+holds    C0 stcs N=64: node stopped cleanly (exit.txt), concurrent_compactors 1, compaction_throughput 0MiB/s, threshold 64 read back
+holds    C1 stcs N=64: restored fixture as built (100 sstables)
+holds    C2 stcs N=64: exactly one task started before the first finished
+holds    C3 lcs N=4: 4 L0 inputs = N, and they are the 4 lowest-generation L0 sstables of the fixture (age order), 9 L1 inputs = all 9 L1 sstables -- total 13 inputs > N=4
+    lcs N=4: inputs 13 (4+9), input MiB 1680.2, peak-minus-baseline MiB 1649.1, task 11.4 s
+holds    C3 lcs N=16: 16 L0 inputs = N, and they are the 16 lowest-generation L0 sstables of the fixture (age order), 9 L1 inputs = all 9 L1 sstables -- total 25 inputs > N=16
+    lcs N=16: inputs 25 (16+9), input MiB 2488.0, peak-minus-baseline MiB 2441.2, task 21.2 s
+holds    C3 lcs N=32: 32 L0 inputs = N, and they are the 32 lowest-generation L0 sstables of the fixture (age order), 9 L1 inputs = all 9 L1 sstables -- total 41 inputs > N=32
+    lcs N=32: inputs 41 (32+9), input MiB 3565.0, peak-minus-baseline MiB 3528.2, task 34.6 s
+holds    C3 lcs N=64: 64 L0 inputs = N, and they are the 64 lowest-generation L0 sstables of the fixture (age order), 9 L1 inputs = all 9 L1 sstables -- total 73 inputs > N=64
+    lcs N=64: inputs 73 (64+9), input MiB 5719.0, peak-minus-baseline MiB 5828.3, task 77.1 s
+holds    C3 stcs N=4: 4 inputs = N, none above level 0
+    stcs N=4: inputs 4 (4+0), input MiB 269.2, peak-minus-baseline MiB 123.2, task 2.0 s
+holds    C3 stcs N=16: 16 inputs = N, none above level 0
+    stcs N=16: inputs 16 (16+0), input MiB 1077.0, peak-minus-baseline MiB 1102.7, task 8.5 s
+holds    C3 stcs N=32: 32 inputs = N, none above level 0
+    stcs N=32: inputs 32 (32+0), input MiB 2154.0, peak-minus-baseline MiB 2144.4, task 22.4 s
+holds    C3 stcs N=64: 64 inputs = N, none above level 0
+    stcs N=64: inputs 64 (64+0), input MiB 4308.0, peak-minus-baseline MiB 4320.5, task 56.4 s
+holds    C4 LCS input bytes fit slope x N + offset with offset = L1 bytes (20%) -- slope 67.3 MiB, offset 1411 MiB, L1 1401 MiB
+holds    C5 LCS peak table bytes above baseline carry the L1 offset (30%) -- slope 69.8 MiB, offset 1337 MiB
+DOES NOT HOLD C6 STCS control: peak bytes above baseline per N constant within 25% -- [30.8, 68.9, 67.0, 67.5]
+holds    C7 build-lcs: stress runs with 0 errors -- 99 runs
+holds    C8 build-lcs: exit.txt rc=0 and node stopped
+holds    C7 build-stcs: stress runs with 0 errors -- 100 runs
+holds    C8 build-stcs: exit.txt rc=0 and node stopped
+
+SELF-CHECK: FAILED: C6 STCS control: peak bytes above baseline per N constant within 25%

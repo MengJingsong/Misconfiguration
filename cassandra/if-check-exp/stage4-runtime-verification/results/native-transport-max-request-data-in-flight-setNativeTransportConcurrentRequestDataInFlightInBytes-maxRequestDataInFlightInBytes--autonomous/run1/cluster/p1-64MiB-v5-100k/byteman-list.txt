@@ -1,0 +1,17 @@
+[1793044112713] + java -cp /users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar:/users/jason92/s4-b8-cr/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -p 19150 -l
+# File /users/jason92/s4-b8-cr-harness/hold-request.btm line 12
+RULE ntq hold request
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD processRequest(io.netty.channel.Channel, org.apache.cassandra.transport.Message$Request, org.apache.cassandra.transport.ClientResourceLimits$Overload, org.apache.cassandra.transport.Dispatcher$RequestTime)
+NOCOMPILE
+AT ENTRY
+IF $2.toString().startsWith("QUERY SELECT pk FROM ks.t ")
+AND (new java.io.File(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"))).exists()
+DO java.lang.Thread.sleep(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "100")));
+traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "hold ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.Dispatcher.processRequest(io.netty.channel.Channel,org.apache.cassandra.transport.Message$Request,org.apache.cassandra.transport.ClientResourceLimits$Overload,org.apache.cassandra.transport.Dispatcher$RequestTime) org.apache.cassandra.transport.Message$Response
+

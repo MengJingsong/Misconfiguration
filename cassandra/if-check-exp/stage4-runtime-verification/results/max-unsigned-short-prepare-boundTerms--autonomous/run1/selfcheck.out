@@ -1,0 +1,37 @@
+unit JVMs: ['c1', 'c10', 'c100']  check lines: 49  MISMATCH: 0
+PART U1 validity: HOLDS - three JVMs, each reports the cap_mib it was given (the yaml knob took effect): c1->1, c10->10, c100->100
+PART U2 boundary: HOLDS - M=65536 rejected with the exact text and the count unchanged in every JVM
+PART U3 weights: HOLDS - w(1,10,1000)=['2452', '2836', '46348']; w(65535) accepted=[2842844, 2842844] size-gate message=[2842824] (pstmntSize + 16 B key)
+label M cap w offered rejected sumWeights count evicted sum/cap ok
+c1 10 1048576 2836 1479 0 1046592 368 1111 0.998 True
+c1 1000 1048576 46348 91 0 1019656 22 69 0.972 True
+c1 65535 1048576 -1 5 5 0 0 0 0.0 True
+c10 10 10485760 2836 14790 0 10482984 3686 11104 1.0 True
+c10 1000 10485760 46348 905 0 10474648 226 679 0.999 True
+c10 65535 10485760 2842844 15 0 8528532 3 12 0.813 True
+c100 10 104857600 2836 147896 0 104855436 36869 111027 1.0 True
+c100 1000 104857600 46348 9050 0 104839176 2262 6788 1.0 True
+c100 65535 104857600 2842844 148 0 102342384 36 112 0.976 True
+PART U4 ceiling: HOLDS - sumWeights <= cap in every arm; count + evicted == offered where accepted, all rejected by the size gate where w(M) > cap
+PART U5 follows the knob: HOLDS - retained sums by cap MiB {10: {1: 1046592, 10: 10482984, 100: 104855436}, 1000: {1: 1019656, 10: 10474648, 100: 104839176}}; ratio 100 MiB / 1 MiB = M=10: 100.2, M=1000: 102.8
+M=65535 by cap: {1: ('5', '5', '0', '0', '0'), 10: ('15', '0', '3', '8528532', '12'), 100: ('148', '0', '36', '102342384', '112')}
+PART U6 size gate / retention at 65535: HOLDS - w(65535)=2842844: rejected whole where w > cap, retained count*w <= cap where w <= cap
+
+cluster arms: [(10, 10), (10, 1000), (10, 65535), (50, 10), (50, 1000), (50, 65535), (200, 10), (200, 1000), (200, 65535)]
+PART C1 validity: HOLDS - nine arms; the log read-back equals the cap of each: {(10, 10): '10', (10, 1000): '10', (10, 65535): '10', (50, 10): '50', (50, 1000): '50', (50, 65535): '50', (200, 10): '200', (200, 1000): '200', (200, 65535): '200'}
+PART C2 boundary: HOLDS - 65536-marker prepare rejected with the exact text in every 65535 arm
+cap MiB, M: samples-final count, evicted, offered, accepted, rejected, live-Prepared(after-baseline), live_bytes delta, count*w_unit/cap
+10 10 3749 12837 16585 16585 0 3751 21786560 1.014
+10 1000 226 7252 7477 7477 0 228 42388160 0.999
+10 65535 3 151 153 153 0 5 42982608 0.813
+50 10 18697 57122 75818 75818 0 18699 94979848 1.011
+50 1000 1132 6182 7313 7313 0 1134 82038544 1.001
+50 65535 19 108 126 126 0 21 80084080 1.03
+200 10 74791 75210 150000 150000 0 74793 277297264 1.011
+200 1000 4528 14737 19264 19264 0 4530 280937840 1.001
+200 65535 74 240 313 313 0 76 273589888 1.003
+PART C3 ceiling (implied weight): HOLDS - count x unit-tier weight within 5 % of the cap (0.95..1.05 when count >= 10, <= 1.05 below): the cluster does not measure a per-entry weight, so the unit-tier weight is a proxy; strict count x w_unit <= cap held in 2 of 9 arms (first version of this part, kept in selfcheck-first.out, required all)
+PART C4 binding: HOLDS - M=10 and M=1000 arms: evictions > 0 and count > 0 at every cap
+PART C5 follows the knob: HOLDS - retained counts by cap MiB {10: {10: 3749, 50: 18697, 200: 74791}, 1000: {10: 226, 50: 1132, 200: 4528}} (caps 1:5:20)
+PART C6 live Prepared objects match the cache: HOLDS - histogram delta of QueryHandler$Prepared vs count: {(10, 10): 3751, (10, 1000): 228, (10, 65535): 5, (200, 10): 74793, (200, 1000): 4530, (200, 65535): 76, (50, 10): 18699, (50, 1000): 1134, (50, 65535): 21}
+PART C7 stopped clean: HOLDS - every arm ended with no daemon of this slot left

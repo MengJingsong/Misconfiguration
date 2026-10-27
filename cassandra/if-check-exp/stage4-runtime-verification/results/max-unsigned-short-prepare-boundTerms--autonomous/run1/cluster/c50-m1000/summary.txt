@@ -1,0 +1,18 @@
+=== run run1: prepared_statements_cache_size 50 MiB (cap 52428800 B), M = 1000, rate 800/s, limit 20000 offered, sample 5.0s
+yaml tail: cluster_name: bt; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.3.1; rpc_address: 127.0.3.1; commitlog_directory: /dev/shm/s4-b9-bt/node/commitlog; hints_directory: /dev/shm/s4-b9-bt/node/hints; saved_caches_directory: /dev/shm/s4-b9-bt/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b9-bt/node/cdc_raw; auto_snapshot: false; prepared_statements_cache_size: 50MiB
+EXPECTED: knob read-back "Initialized prepared statement caches with 50 MiB" - yes [log says 50]
+RESULT setup ok 5.0.9-SNAPSHOT
+HISTO 0-baseline live_bytes=67274384 live_objects=718554 prepared_instances=29 columnspec_instances=27 heap_used_kb=65697
+COUNTERS baseline count=0 evicted=0 memtable_heap=0
+RESULT dup prepared=10
+EXPECTED: 10 repeats of one statement add at most one cache entry - yes [count 0 -> 1]
+STOP RULE met at 21s: evicted=6173 >= 3 x count=1132; last 4 counts 1132..1133
+RESULT load M=1000 offered=7313 accepted=7313 rejected=0 seconds=20.8 rate=352/s quit_on_rejections=False first_error=None
+LOAD END stop_rule_met=True
+COUNTERS final count=1132 evicted=6182 memtable_heap=27193546
+HISTO 2-after-load live_bytes=149312928 live_objects=2053789 prepared_instances=1163 columnspec_instances=28 heap_used_kb=145813
+HEAP DELTA live_bytes=82038544 prepared_instances=1163 (baseline 29); memtable_heap=27193546; delta_minus_memtable=54844998
+RESULT rows 1132
+LOG discard-warnings=1 first: 2026-10-26T23:44:49,458 QueryProcessor.java:123 - 6182 prepared statements discarded in the last minute because cache limit reached (50 MiB)
+LOG other ERROR/WARN lines=7 first: WARN  [main] 2026-10-26T23:42:47,961 StartupChecks.java:262 - jemalloc shared library could not be preloaded to speed up memory allocations
+STOPPED: no daemon of this slot left

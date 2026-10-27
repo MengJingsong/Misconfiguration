@@ -1,0 +1,30 @@
+holds: U1 14 recorded cells (14)
+holds: U2 estimate = ceil(n/max) if n>=min else 0, strategy, manager and gauge []
+holds: U3 n=8 bytes/live/total constant over min bytes 8380756
+holds: U4 n=8 heap spread < 1 MiB (0.007 MiB)
+holds: U3 n=40 bytes/live/total constant over min bytes 41906915
+holds: U4 n=40 heap spread < 1 MiB (0.000 MiB)
+holds: U5 control: 8 inputs -> 1 sstable control-exec n=8 min=4 inputs=8 sstables-before=8 sstables-after=1 bytes-before=8381461 bytes-after=8381677
+holds: U6 control: max 4/32/4 -> inputs 4/32/4 and est 10/2/10 [('4', '10', '4', '4188662'), ('32', '2', '32', '33521906'), ('4', '10', '4', '4188662')]
+holds: U7 junit xml: 1 test, 0 failures, 0 errors 
+holds: C0 11 baselines (9 estimate + 2 control) ['c32', 'c4', 'e1m16', 'e1m2', 'e1m4', 'e2m16', 'e2m2', 'e2m4', 'e3m16', 'e3m2', 'e3m4']
+holds: C1 min=2: max polled gauge = 1 in 3 reps {'e1m2': 1, 'e2m2': 1, 'e3m2': 1}
+holds: C2 min=2: system.log shows exactly one "Compacted ... 10 sstables" per rep {'e1m2': [10], 'e2m2': [10], 'e3m2': [10]}
+holds: C1 min=4: max polled gauge = 1 in 3 reps {'e1m4': 1, 'e2m4': 1, 'e3m4': 1}
+holds: C2 min=4: system.log shows exactly one "Compacted ... 10 sstables" per rep {'e1m4': [10], 'e2m4': [10], 'e3m4': [10]}
+holds: C1 min=16: max polled gauge = 0 in 3 reps {'e1m16': 0, 'e2m16': 0, 'e3m16': 0}
+holds: C2 min=16: no Compacted line in system.log 
+holds: C3 baseline total/du spread < 2% (total 215580849-215581037, du 215582489-215582677)
+DOES NOT HOLD: C4 baseline heap per-min means within 5% (spread 5.36%, means MB {2: 84.6, 4: 88.4, 16: 89.1})
+holds: C4 baseline rss per-min means within 5% (spread 0.20%, means MB {2: 2905.5, 4: 2909.3, 16: 2911.2})
+holds: C5 baseline gauge 0 and 10 sstables before the enable in all arms 
+holds: C6 control: first compaction 4 inputs at max=4, 10 at max=32 [4, 4] [10]
+holds: C7 control peak du above baseline: max=32 > 1.8 x max=4 (84 vs 209 MB)
+holds: C8 e1m2: du rose above baseline by > 50 MB during its compaction (disk moved only after the enable) 
+holds: C8 e1m4: du rose above baseline by > 50 MB during its compaction (disk moved only after the enable) 
+holds: C8 e2m2: du rose above baseline by > 50 MB during its compaction (disk moved only after the enable) 
+holds: C8 e2m4: du rose above baseline by > 50 MB during its compaction (disk moved only after the enable) 
+holds: C8 e3m2: du rose above baseline by > 50 MB during its compaction (disk moved only after the enable) 
+holds: C8 e3m4: du rose above baseline by > 50 MB during its compaction (disk moved only after the enable) 
+holds: C9 node system.log has 0 ERROR lines (0)
+SOME PARTS DO NOT HOLD

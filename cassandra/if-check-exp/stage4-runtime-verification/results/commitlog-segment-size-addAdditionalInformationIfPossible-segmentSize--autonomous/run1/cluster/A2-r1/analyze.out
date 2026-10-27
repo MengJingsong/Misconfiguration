@@ -1,0 +1,13 @@
+SUMMARY arm=A2 vol=67108864 seg=33554432 free_after_filler=4194304
+SUMMARY handleCommitError lines=9 with_needle=0
+SUMMARY kinds={'persist': 9}
+SUMMARY first_error df_avail_then=4194304 df_used=62914560
+SUMMARY other_error 9x CommitLog.java:591 - Failed to persist commits to disk
+SUMMARY other_error 2x JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtableP
+SUMMARY other_error 1x DefaultFSErrorHandler.java:72 - Stopping transports as disk_failure_policy is stop
+SUMMARY other_error 1x StorageService.java:684 - Stopping native transport
+SUMMARY other_error 1x StorageService.java:689 - Stopping gossiper
+SUMMARY apparent_commitlog_bytes max=4214967 df_used max=67108864
+SUMMARY hs_err_files=no
+EXPECTED ok: A2: a handleCommitError line is logged once free space is exhausted (lines=9)
+EXPECTED ok: A2: no "bytes required" text although df avail < segment (total 67108864 >= segment 33554432) (needle lines=0)

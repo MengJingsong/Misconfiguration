@@ -1,0 +1,131 @@
+PASS unit: ant.log echo lines equal unit.txt (404 keys vs 404)
+PASS unit: ant reports the test passed 
+PASS unit: arm 5 stores 5 rows (live = stored), before and after the L reads (5, 5, 5)
+PASS unit: arm 5 L=1 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 5 hasEnoughLiveData(L=1) = True true
+PASS unit: arm 5 L=4 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 5 hasEnoughLiveData(L=4) = True true
+PASS unit: arm 5 L=5 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 5 hasEnoughLiveData(L=5) = True true
+PASS unit: arm 5 L=6 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 5 hasEnoughLiveData(L=6) = False false
+PASS unit: arm 5 L=49 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 5 hasEnoughLiveData(L=49) = False false
+PASS unit: arm 5 L=50 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 5 hasEnoughLiveData(L=50) = False false
+PASS unit: arm 5 L=51 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 5 hasEnoughLiveData(L=51) = False false
+PASS unit: arm 5 L=1000 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 5 hasEnoughLiveData(L=1000) = False false
+PASS unit: arm 5 serializedSize, size() and weightedSize() equal before and after the L reads 
+PASS unit: arm 50 stores 50 rows (live = stored), before and after the L reads (50, 50, 50)
+PASS unit: arm 50 L=1 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 50 hasEnoughLiveData(L=1) = True true
+PASS unit: arm 50 L=4 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 50 hasEnoughLiveData(L=4) = True true
+PASS unit: arm 50 L=5 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 50 hasEnoughLiveData(L=5) = True true
+PASS unit: arm 50 L=6 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 50 hasEnoughLiveData(L=6) = True true
+PASS unit: arm 50 L=49 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 50 hasEnoughLiveData(L=49) = True true
+PASS unit: arm 50 L=50 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm 50 hasEnoughLiveData(L=50) = True true
+PASS unit: arm 50 L=51 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 50 hasEnoughLiveData(L=51) = False false
+PASS unit: arm 50 L=1000 covered=False <=> hit=0 out=1 ('false', 0, 1)
+PASS unit: arm 50 hasEnoughLiveData(L=1000) = False false
+PASS unit: arm 50 serializedSize, size() and weightedSize() equal before and after the L reads 
+PASS unit: arm ALL stores 200 rows (live = stored), before and after the L reads (200, 200, 200)
+PASS unit: arm ALL L=1 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=1) = True true
+PASS unit: arm ALL L=4 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=4) = True true
+PASS unit: arm ALL L=5 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=5) = True true
+PASS unit: arm ALL L=6 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=6) = True true
+PASS unit: arm ALL L=49 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=49) = True true
+PASS unit: arm ALL L=50 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=50) = True true
+PASS unit: arm ALL L=51 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=51) = True true
+PASS unit: arm ALL L=1000 covered=True <=> hit=1 out=0 ('true', 1, 0)
+PASS unit: arm ALL hasEnoughLiveData(L=1000) = False false
+PASS unit: arm ALL serializedSize, size() and weightedSize() equal before and after the L reads 
+PASS unit: NONE leaves no entry and no counter moves 
+PASS unit: serialized size grows with N; size(50)/size(5) in 7..10.5 [597, 5550, 22184]
+PASS unit: TTL variant takes the re-count branch (0 non-expiring rows; L=5 true, L=6 false) 
+PASS unit: TOMB stores 55 rows for 5 live; L=6 false after re-count (55,)
+PASS unit: NOCK stores its one row 
+PASS cluster n5: all 5 checkpoints of ckpt.jsonl appear as CKPT lines in session.log 
+PASS cluster n5: no jmx.csv poll above the 256 MiB capacity (max 14099113 of 268435456, 13 polls; includes the n50 shrink phase) 
+PASS cluster n5: last jmx.csv poll at/before checkpoint pass3 equals it ('20000', '14099113', 20000, 14099113)
+PASS cluster n5: no ERROR line in system.log segment 
+PASS cluster n5: node started with row cache 256 MiB 
+PASS cluster n5: rss.csv agrees with the baseline RssAnon ('2783180', 2783440)
+PASS cluster n5: rss.csv sample before pass3 within 40 MB of that checkpoint ('3176448', 3176688)
+PASS cluster n50: all 8 checkpoints of ckpt.jsonl appear as CKPT lines in session.log 
+PASS cluster n50: no jmx.csv poll above the 256 MiB capacity (max 114891148 of 268435456, 28 polls; includes the n50 shrink phase) 
+PASS cluster n50: last jmx.csv poll at/before checkpoint pass3 equals it ('20000', '114891148', 20000, 114891148)
+PASS cluster n50: no ERROR line in system.log segment 
+PASS cluster n50: node started with row cache 256 MiB 
+PASS cluster n50: rss.csv agrees with the baseline RssAnon ('2843480', 2843652)
+PASS cluster n50: rss.csv sample before pass3 within 40 MB of that checkpoint ('3109860', 3109824)
+PASS cluster nall: all 5 checkpoints of ckpt.jsonl appear as CKPT lines in session.log 
+PASS cluster nall: no jmx.csv poll above the 256 MiB capacity (max 268370382 of 268435456, 13 polls; includes the n50 shrink phase) 
+PASS cluster nall: last jmx.csv poll at/before checkpoint pass3 equals it ('11904', '268370382', 11904, 268370382)
+PASS cluster nall: no ERROR line in system.log segment 
+PASS cluster nall: node started with row cache 256 MiB 
+PASS cluster nall: rss.csv agrees with the baseline RssAnon ('2847708', 2847708)
+PASS cluster nall: rss.csv sample before pass3 within 40 MB of that checkpoint ('3087332', 3087332)
+PASS cluster none: all 5 checkpoints of ckpt.jsonl appear as CKPT lines in session.log 
+PASS cluster none: no jmx.csv poll above the 256 MiB capacity (max 0 of 268435456, 13 polls; includes the n50 shrink phase) 
+PASS cluster none: last jmx.csv poll at/before checkpoint pass3 equals it ('0', '0', 0, 0)
+PASS cluster none: no ERROR line in system.log segment 
+PASS cluster none: node started with row cache 256 MiB 
+PASS cluster none: rss.csv agrees with the baseline RssAnon ('2827416', 2827416)
+PASS cluster none: rss.csv sample before pass3 within 40 MB of that checkpoint ('2873276', 2873420)
+PASS cluster t5: all 3 checkpoints of ckpt.jsonl appear as CKPT lines in session.log 
+PASS cluster t5: no jmx.csv poll above the 256 MiB capacity (max 3816988 of 268435456, 10 polls; includes the n50 shrink phase) 
+PASS cluster t5: last jmx.csv poll at/before checkpoint pass1 equals it ('2000', '3816988', 2000, 3816988)
+PASS cluster t5: no ERROR line in system.log segment 
+PASS cluster t5: node started with row cache 256 MiB 
+PASS cluster t5: rss.csv agrees with the baseline RssAnon ('2838704', 2834804)
+PASS cluster t5: rss.csv sample before pass1 within 40 MB of that checkpoint ('2905772', 2906296)
+PASS cluster: one `nodetool info` Row Cache line per arm (5, 5)
+PASS cluster n5: nodetool info entries/size equals the gauges ('20000', '13.45', 'MiB', 20000, 14099113)
+PASS cluster n5: nodetool info hits = RowCacheHit + RowCacheHitOutOfRange ('40000', 20000, 20000)
+PASS cluster n5: nodetool info requests = hit + miss + out of range ('60000', 20000, 20000, 20000)
+PASS cluster n50: nodetool info entries/size equals the gauges ('20000', '109.57', 'MiB', 20000, 114891148)
+PASS cluster n50: nodetool info hits = RowCacheHit + RowCacheHitOutOfRange ('40000', 20000, 20000)
+PASS cluster n50: nodetool info requests = hit + miss + out of range ('60000', 20000, 20000, 20000)
+PASS cluster nall: nodetool info entries/size equals the gauges ('11904', '255.94', 'MiB', 11904, 268370382)
+PASS cluster nall: nodetool info hits = RowCacheHit + RowCacheHitOutOfRange ('0', 0, 0)
+PASS cluster nall: nodetool info requests = hit + miss + out of range ('60000', 0, 60000, 0)
+PASS cluster none: nodetool info entries/size equals the gauges ('0', '0', 'bytes', 0, 0)
+PASS cluster none: nodetool info hits = RowCacheHit + RowCacheHitOutOfRange ('0', 0, 0)
+PASS cluster none: nodetool info requests = hit + miss + out of range ('0', 0, 0, 0)
+PASS cluster t5: nodetool info entries/size equals the gauges ('2000', '3.64', 'MiB', 2000, 3816988)
+PASS cluster t5: nodetool info hits = RowCacheHit + RowCacheHitOutOfRange ('0', 0, 0)
+PASS cluster t5: nodetool info requests = hit + miss + out of range ('2000', 0, 2000, 0)
+PASS cluster: n5 holds 20,000 entries of 600..1200 B 704.95565
+PASS cluster: n50 holds 20,000 entries, e(50)/e(5) in 7..10.5 8.148820993207162
+PASS cluster: nall e(ALL)/e(50) in 3.3..4.1, byte cap binds with 5,000..12,000 entries (3.9245039380128506, 11904)
+PASS cluster: n5 Size and Entries equal after P1, P2, P3 (14099113, 20000)
+PASS cluster: n5 counters P1 miss / P2 out of range / P2 hit / P3 hit = 20000 / 20000 / 0 / 20000 
+PASS cluster: n50 Size and Entries equal after P1, P2, P3 (114891148, 20000)
+PASS cluster: n50 counters P1 miss / P2 out of range / P2 hit / P3 hit = 20000 / 20000 / 0 / 20000 
+PASS cluster: NONE leaves the cache empty and the counters at 0 
+PASS cluster: t5 stores 2,000 entries, each more than 500 B above the n5 entry (1908.494, 704.95565)
+INFO n5 RssAnon delta 402.7 MB, net of none 355.6 MB, Size 14.1 MB, bound 1.5*Size+16MiB 37.9 MB, refute line 1.5*Capacity 402.7 MB
+PASS cluster: n5 net RssAnon delta below 1.5 x Capacity (the B3g refute line) 
+INFO n50 RssAnon delta 272.6 MB, net of none 225.5 MB, Size 114.9 MB, bound 1.5*Size+16MiB 189.1 MB, refute line 1.5*Capacity 402.7 MB
+PASS cluster: n50 net RssAnon delta below 1.5 x Capacity (the B3g refute line) 
+INFO nall RssAnon delta 245.4 MB, net of none 198.3 MB, Size 268.4 MB, bound 1.5*Size+16MiB 419.3 MB, refute line 1.5*Capacity 402.7 MB
+PASS cluster: nall net RssAnon delta below 1.5 x Capacity (the B3g refute line) 
+INFO n50 shrunk5s: Size 114891148, Capacity 8388608, Entries 20000
+INFO n50 shrunk60s: Size 114891148, Capacity 8388608, Entries 20000
+INFO n50 shrunk_p4: Size 114891148, Capacity 8388608, Entries 20000
+SELFCHECK ALL PASS (0 FAIL)

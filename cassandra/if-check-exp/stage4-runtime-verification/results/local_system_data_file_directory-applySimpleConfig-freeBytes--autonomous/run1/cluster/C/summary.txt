@@ -1,0 +1,24 @@
+run=run1 arm=C sysdata_dir=1 commitlog_total_space=64MiB heap=1G start=2026-10-26T20:00:48Z
+sysdata volume avail at start: 1610612736 bytes (target 1610612736)
+yaml: cluster_name: 's4-b8-ls' local_system_data_file_directory: /users/jason92/s4-b8-ls-mnt/sys/system commitlog_directory: /users/jason92/s4-b8-ls-mnt/node/commitlog disk_failure_policy: stop commitlog_segment_size: 32MiB       - seeds: "127.0.6.1:7000" memtable_allocation_type: heap_buffers commitlog_total_space: 64MiB listen_address: 127.0.6.1 rpc_address: 127.0.6.1 auto_snapshot: false     - class_name: org.apache.cassandra.security.JKSKeyProvider     - class_name: BinAuditLogger data_file_directories:     - /users/jason92/s4-b8-ls-mnt/node/data 
+node pid=2889015
+node up at 2026-10-26T20:01:49Z (UN, statusbinary running)
+CONFIG commitlog_total_space=64MiB
+CONFIG local_system_data_file_directory=/users/jason92/s4-b8-ls-mnt/sys/system
+startup sys WARN lines: 0: 
+EXPECTED OK: [C] no sys WARN at start
+native port 127.0.6.1:9042 accepts
+stress ph1 start 2026-10-26T20:01:58Z: write n=200000 no-warmup cl=ONE -rate threads=16
+stress ph1 end 2026-10-26T20:02:11Z rc=0
+SHRINK at 2026-10-26T20:02:11Z epoch_ms=1793044931921: sysdata avail 1609568256 -> 104865792 bytes
+stress ph2 start 2026-10-26T20:02:11Z: write n=200000 no-warmup cl=ONE -pop seq=200001..400000 -rate threads=16
+stress ph2 end 2026-10-26T20:02:23Z rc=0
+workload end 2026-10-26T20:03:18Z; node alive=yes
+UN  127.0.6.1  94.46 MiB  16      100.0%            147d58f4-4fc0-4f15-a59a-43c5cac31d53  rack1
+samples=16 node_alive_last=1 commitlog_bytes_max=100663396 node_data_bytes_max=148182722 sys_avail_min=104398848 sys_dir_bytes_max=263668
+stress-ph1.out Total partitions: 200,000 [WRITE: 200,000] | Total errors: 0 [WRITE: 0] | Op rate: 40,836 op/s  [WRITE: 40,836 op/s]
+stress-ph2.out Total partitions: 200,000 [WRITE: 200,000] | Total errors: 0 [WRITE: 0] | Op rate: 50,928 op/s  [WRITE: 50,928 op/s]
+system-run.log: sys WARN after start=0, data-volume WARN=0, ERROR lines=0, FSWriteError/NoSpace=0, stop-transports=0
+churn: churn done passes=3 | passes with errors: 0 of 3
+2026-10-26T20:03:20Z done
+cleanup: node pid 2889015 alive=no; mounts left=0; daemons(mine)=0

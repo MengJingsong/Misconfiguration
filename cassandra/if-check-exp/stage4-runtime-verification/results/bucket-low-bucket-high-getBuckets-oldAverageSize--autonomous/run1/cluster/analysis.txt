@@ -1,0 +1,25 @@
+  arm n: T=329271791 compactions=[] endFiles=12 peakExtra(all)=0 peakExtra(data)=0 (0.000 T) rssPeak=2925551616 rssBase=2929676288 sampling=410 samples
+PASS [instrument] n: workload instrument: 12 files, ratios 1.10-1.20, idle reached, >= 50 samples in the compaction window :: ratios 1.1392-1.1547 idle=True samples=410
+PASS [instrument] n: every compaction line has inputs and bytes (history joined to the Compacting lines) :: []
+  arm d: T=329414176 compactions=[(5, 75949776, 76949286), (6, 200339730, 201094360)] endFiles=3 peakExtra(all)=209854565 peakExtra(data)=195362816 (0.593 T) rssPeak=2906890240 rssBase=2905903104 sampling=450 samples
+PASS [instrument] d: workload instrument: 12 files, ratios 1.10-1.20, idle reached, >= 50 samples in the compaction window :: ratios 1.1388-1.1561 idle=True samples=450
+PASS [instrument] d: every compaction line has inputs and bytes (history joined to the Compacting lines) :: [5, 6]
+  arm w: T=328547306 compactions=[(12, 328547306, 331814233)] endFiles=1 peakExtra(all)=355156069 peakExtra(data)=330366976 (1.006 T) rssPeak=2916216832 rssBase=2913796096 sampling=448 samples
+PASS [instrument] w: workload instrument: 12 files, ratios 1.10-1.20, idle reached, >= 50 samples in the compaction window :: ratios 1.1391-1.154 idle=True samples=448
+PASS [instrument] w: every compaction line has inputs and bytes (history joined to the Compacting lines) :: [12]
+  arm wc: T=328583486 compactions=[(4, 173874042, 174231132), (4, 98678918, 99557308), (4, 56030526, 56923426)] endFiles=3 peakExtra(all)=187765805 peakExtra(data)=174917402 (0.532 T) rssPeak=2932764672 rssBase=2930454528 sampling=446 samples
+PASS [instrument] wc: workload instrument: 12 files, ratios 1.10-1.20, idle reached, >= 50 samples in the compaction window :: ratios 1.1407-1.1573 idle=True samples=446
+PASS [instrument] wc: every compaction line has inputs and bytes (history joined to the Compacting lines) :: [4, 4, 4]
+PASS [B3f] n: no compaction, 12 sstables at the end, peak extra 0 (<= 1% of T) :: compactions=0 endFiles=12 pk=0
+PASS [instrument] n: TRACE bucket listing for ks.standard1 shows 12 singleton buckets (nothing grouped) :: 1 listings; first: buckets=12 sstables=12
+FAIL [B3f] d: two compactions, each 4 to 8 inputs, 2 sstables at the end :: [(5, 75949776), (6, 200339730)] endFiles=3
+PASS [B3f] d: largest compaction reads 0.5 to 0.85 T; peak extra (Data.db) within 0.8-1.15 of it :: big/T=0.608 pk/big=0.975157628494358
+PASS [B3f] w: one compaction of 12 inputs, 1 sstable at the end, peak extra 0.85-1.15 T :: [(12, 328547306)] endFiles=1 pk/T=1.006
+PASS [B3f] wc: every compaction has <= 4 inputs; peak extra 0.4-0.7 T and below w :: [(4, 173874042), (4, 98678918), (4, 56030526)] pk/T=0.532 (w 1.006)
+PASS [B3f] peak extra disk ordered w > d > n (0) :: w=330366976 d=195362816 n=0
+  arm n: GC.heap_info used heap in the compaction window: n=39 peak=681180 KB (information, not the frozen criterion)
+  arm d: GC.heap_info used heap in the compaction window: n=54 peak=1504524 KB (information, not the frozen criterion)
+  arm w: GC.heap_info used heap in the compaction window: n=54 peak=1250380 KB (information, not the frozen criterion)
+  arm wc: GC.heap_info used heap in the compaction window: n=55 peak=1534028 KB (information, not the frozen criterion)
+PASS [B3f] heap (RssAnon peak) does not differ materially across the ratios (spread <= 25% or not monotone n<d<w) :: peaks n,d,w=[2925551616, 2906890240, 2916216832] spread=0.006 monotone=False
+SUMMARY FAILURES: d: two compactions, each 4 to 8 inputs, 2 sstables at the end

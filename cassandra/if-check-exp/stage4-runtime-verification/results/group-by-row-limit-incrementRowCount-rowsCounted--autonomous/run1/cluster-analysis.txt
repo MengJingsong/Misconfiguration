@@ -1,0 +1,47 @@
+INFO: K = 2 trace lines per sub-read (calibration query, both nodes)
+EXPECTED: instrument: first-trigger query (fetch 1000) leaves trace lines with rows=1000 groups=0 unfinished=true, none above 1000, and the calibration gave K >= 1: PASS (K=2, 402 lines, max rows 1000)
+
+INFO per cell (mean over repetitions): kind fetch | errors | rows read | sub-reads | max rows/line | node1 delta MB | node1 peak-after MB | node1 base MB | node2 delta MB | pause frac n1 | sampled used max n1 MB | OOM
+INFO groupby 100 | dead [[], [], []] | err 0/3 | rows [200000, 200000, 200000] | sub [2001, 2001, 2001] | maxrows 100 | d1 2.0 | p1 83.0 | b1 81.0 | d2 NA | pf1 0.0 | used1 354.7 | oom [False, False, False] | served {1: 4002, 2: 0} | wall [2868, 2499, 2558]
+INFO groupby 1000 | dead [[], [], []] | err 0/3 | rows [200000, 200000, 200000] | sub [201, 201, 201] | maxrows 1000 | d1 12.3 | p1 93.3 | b1 81.0 | d2 NA | pf1 0.0 | used1 346.4 | oom [False, False, False] | served {1: 402, 2: 0} | wall [1869, 1858, 1766]
+INFO groupby 10000 | dead [[], [], []] | err 0/3 | rows [200000, 200000, 200000] | sub [21, 21, 21] | maxrows 10000 | d1 314.3 | p1 395.3 | b1 81.0 | d2 NA | pf1 0.1 | used1 405.5 | oom [False, False, False] | served {1: 42, 2: 0} | wall [2529, 2643, 2596]
+INFO groupby 100000 | dead [[1], [1, 2], [1, 2]] | err 3/3 | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | d1 363.3 | p1 442.7 | b1 79.3 | d2 398.0 | pf1 0.2 | used1 431.1 | oom [True, True, True] | served {1: 0, 2: 0} | wall [1324, 301055, 301446]
+     errors: ["ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')", "ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')"]
+INFO groupby 1000000 | dead [[1, 2], [1, 2], [1, 2]] | err 3/3 | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | d1 397.0 | p1 480.3 | b1 83.3 | d2 400.7 | pf1 0.0 | used1 464.9 | oom [True, True, True] | served {1: 0, 2: 0} | wall [147472, 301442, 301442]
+     errors: ["ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')", "ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')"]
+INFO groupby None | dead [[], [], []] | err 0/3 | rows [200000, 200000, 200000] | sub [21, 21, 21] | maxrows 10000 | d1 326.7 | p1 409.7 | b1 83.0 | d2 187.0 | pf1 0.3 | used1 408.4 | oom [False, False, False] | served {1: 39, 2: 3} | wall [3435, 3334, 5096]
+INFO control-select 100 | dead [[], [], []] | err 0/3 | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | d1 1.0 | p1 82.0 | b1 81.0 | d2 NA | pf1 0.0 | used1 354.3 | oom [False, False, False] | served {1: 0, 2: 0} | wall [9868, 9478, 9504]
+INFO control-select 1000 | dead [[], [], []] | err 0/3 | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | d1 4.0 | p1 85.0 | b1 81.0 | d2 NA | pf1 0.0 | used1 357.4 | oom [False, False, False] | served {1: 0, 2: 0} | wall [7315, 7179, 7101]
+INFO control-select 10000 | dead [[], [], []] | err 0/3 | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | d1 244.0 | p1 321.0 | b1 77.0 | d2 NA | pf1 0.0 | used1 362.0 | oom [False, False, False] | served {1: 0, 2: 0} | wall [7162, 7050, 6874]
+INFO control-select 100000 | dead [[2]] | err 1/1 | rows [0] | sub [0] | maxrows 0 | d1 NA | p1 NA | b1 83.0 | d2 400.0 | pf1 0.0 | used1 99.5 | oom [True] | served {1: 0, 2: 0} | wall [120074]
+     errors: ['OperationTimedOut("errors={\'127.0.8.1:9042\': \'Client request timeout. See Session.execute[_async](timeout)\'}, last_host=127.0.8.1:9042")']
+INFO small-rows 10000 | dead [[], [], []] | err 0/3 | rows [200000, 200000, 200000] | sub [21, 21, 21] | maxrows 10000 | d1 4.0 | p1 87.0 | b1 83.0 | d2 NA | pf1 0.0 | used1 351.6 | oom [False, False, False] | served {1: 42, 2: 0} | wall [772, 791, 796]
+INFO small-rows 100000 | dead [[], [], []] | err 0/3 | rows [200000, 200000, 200000] | sub [3, 3, 3] | maxrows 100000 | d1 120.0 | p1 203.0 | b1 83.0 | d2 NA | pf1 0.0 | used1 377.3 | oom [False, False, False] | served {1: 6, 2: 0} | wall [496, 473, 460]
+
+EXPECTED: [B1] fetch 100: all 200000 rows read, max rows per sub-read <= 100, trace lines a multiple of K: PASS (rows [200000.0, 200000.0, 200000.0], maxrows 100, errors 0)
+EXPECTED: [B1] fetch 100: sub-reads == floor(200000/100)+1 = 2001: PASS ([2001.0, 2001.0, 2001.0])
+EXPECTED: [B1] fetch 1000: all 200000 rows read, max rows per sub-read <= 1000, trace lines a multiple of K: PASS (rows [200000.0, 200000.0, 200000.0], maxrows 1000, errors 0)
+EXPECTED: [B1] fetch 1000: sub-reads == floor(200000/1000)+1 = 201: PASS ([201.0, 201.0, 201.0])
+EXPECTED: [B1] fetch 10000: all 200000 rows read, max rows per sub-read <= 10000, trace lines a multiple of K: PASS (rows [200000.0, 200000.0, 200000.0], maxrows 10000, errors 0)
+EXPECTED: [B1] fetch 10000: sub-reads == floor(200000/10000)+1 = 21: PASS ([21.0, 21.0, 21.0])
+EXPECTED: [B1] fetch None: all 200000 rows read, max rows per sub-read <= 10000, trace lines a multiple of K: PASS (rows [200000.0, 200000.0, 200000.0], maxrows 10000, errors 0)
+EXPECTED: [B1] fetch None: sub-reads == floor(200000/10000)+1 = 21: PASS ([21.0, 21.0, 21.0])
+EXPECTED: B3f: fetch 1000: peak heap above baseline in [10, 30] MB (node 1): PASS (12.3 MB (node 2: NA))
+EXPECTED: B3f: fetch 10000: peak heap above baseline in [100, 300] MB (node 1): FAIL (314.3 MB (node 2: NA))
+EXPECTED: B3f: fetch 100 stays near baseline (<= 10 MB above): PASS (2.0 MB)
+EXPECTED: B3f: fetch 100000: OOM or severe GC in every repetition: PASS (oom [True, True, True], severe [False, False, False], errors ["ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')", "ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')", "ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')"])
+EXPECTED: B3f: fetch 1000000: OOM or severe GC in every repetition: PASS (oom [True, True, True], severe [False, False, False], errors ["ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')", "ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')", "ConnectionShutdown('Connection to 127.0.8.1:9042 was closed')"])
+EXPECTED: B3f: PAGING OFF within 20 percent of fetch 10000 (post-GC peak), no OOM: PASS (409.7 vs 395.3 MB; oom [False, False, False])
+EXPECTED: B3f: guardrail run: fetch 10000 passes: PASS (None)
+EXPECTED: B3f: guardrail run: fetch 100000 fails fast with the page-size error: PASS ([(14, 'InvalidRequest(\'Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for t'), (4, 'InvalidRequest(\'Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for t'), (6, 'InvalidRequest(\'Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for t')])
+EXPECTED: B3f: guardrail run: heap flat (<= 10 MB above baseline; sampled-used growth when no GC pause fell in the window): PASS (['0.0', '0.0', '0.0'])
+EXPECTED: B3h 2: 100-byte rows at fetch 100000: no OOM, no error, <= 100 MB above baseline (sampled-used growth when no GC pause fell in the window): FAIL (120.0 MB, errors 0)
+EXPECTED: B3h 1: plain SELECT * rises with the fetch size (delta at 100 < 1000 < 10000): PASS (['1.0', '4.0', '244.0'])
+INFO control SELECT * fetch 100: errors 0, rows returned [200000, 200000, 200000]
+INFO control SELECT * fetch 1000: errors 0, rows returned [200000, 200000, 200000]
+INFO control SELECT * fetch 10000: errors 0, rows returned [200000, 200000, 200000]
+INFO idle 30 s node 1: used min/max 81/81 MB
+INFO idle 30 s node 2: used min/max 79/79 MB
+
+B3g facts: peak_rises_with_fetch=True large_sizes_oom_or_severe=True small_sizes_clean=True unset_matches_10000=True
+FAILED EXPECTATIONS: ['B3f: fetch 10000: peak heap above baseline in [100, 300] MB (node 1)', 'B3h 2: 100-byte rows at fetch 100000: no OOM, no error, <= 100 MB above baseline (sampled-used growth when no GC pause fell in the window)']

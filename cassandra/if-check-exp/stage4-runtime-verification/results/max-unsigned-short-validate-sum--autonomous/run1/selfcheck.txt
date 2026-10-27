@@ -1,0 +1,46 @@
+== unit ==
+biga.out checks 3 MISMATCH 0 STAGE4 series S=65535 cap=0 slope_bytes_per_key=65723.8 delta_first_to_last=591514200 delta_3_to_10=460024744 thrown=0
+bigb.out checks 3 MISMATCH 0 STAGE4 series S=65535 cap=0 slope_bytes_per_key=65726.06222222222 delta_first_to_last=591534560 delta_3_to_10=460016528 thrown=0
+bigc.out checks 3 MISMATCH 0 STAGE4 series S=65535 cap=0 slope_bytes_per_key=65713.9128888889 delta_first_to_last=591425216 delta_3_to_10=460033808 thrown=0
+capped.out checks 2 MISMATCH 0 STAGE4 series S=65535 cap=2000 slope_bytes_per_key=7310.0631111111115 delta_first_to_last=65790568 delta_3_to_10=-19608 thrown=0
+grid.out checks 39 MISMATCH 0 
+small.out checks 3 MISMATCH 0 STAGE4 series S=16 cap=0 slope_bytes_per_key=196.64435555555556 delta_first_to_last=17697992 delta_3_to_10=13722888 thrown=0
+stream.out checks 3 MISMATCH 0 STAGE4 stream m=100000 S=65535 accepted=100000 rejected=0 bytes_validated=6553500000
+grid cells rejected 21 accepted 16
+   STAGE4 cell S=65535,N=2 got=rejected:Key length of 131070 is longer than maximum of 65535
+   STAGE4 cell S=65536,N=1 got=rejected:Key length of 65536 is longer than maximum of 65535
+   STAGE4 cell mixed 32768+32767 got=accepted
+   STAGE4 cell mixed 32768+32768 got=rejected:Key length of 65536 is longer than maximum of 65535
+   STAGE4 cell mixed 32767+32768+1 got=rejected:Key length of 65536 is longer than maximum of 65535
+== cluster ==
+-- life 1: system.log lines 740, ERROR lines 0, AssertionError 0
+   ks.t_s1024_r1e6 MEMTABLE_LIMIT: n=3 first off-heap 253.5 MiB, max off-heap 253.5 MiB
+   ks.t_s1024_r1e6 USER_FORCED: n=1 first off-heap 248.6 MiB, max off-heap 248.6 MiB
+   ks.t_s16_r2e5 USER_FORCED: n=1 first off-heap 9.5 MiB, max off-heap 9.5 MiB
+   ks.t_s32768_r2e4 MEMTABLE_LIMIT: n=2 first off-heap 253.5 MiB, max off-heap 253.5 MiB
+   ks.t_s32768_r2e4 USER_FORCED: n=1 first off-heap 118.6 MiB, max off-heap 118.6 MiB
+   ks.t_s65535_r1e4 MEMTABLE_LIMIT: n=2 first off-heap 253.6 MiB, max off-heap 253.8 MiB
+   ks.t_s65535_r1e4 USER_FORCED: n=1 first off-heap 117.9 MiB, max off-heap 117.9 MiB
+   t_pre2: sum of "Completed flushing" Data.db 0 MiB
+   t_s1024_r1e6: sum of "Completed flushing" Data.db 994 MiB
+   t_s16_r2e5: sum of "Completed flushing" Data.db 6 MiB
+   t_s32768_r2e4: sum of "Completed flushing" Data.db 625 MiB
+   t_s65535_r1e4: sum of "Completed flushing" Data.db 625 MiB
+-- life 2: system.log lines 462, ERROR lines 2, AssertionError 2
+   ks.t_p64_s65535_r1e4 MEMTABLE_LIMIT: n=9 first off-heap 63.8 MiB, max off-heap 63.8 MiB
+   ks.t_p64_s65535_r1e4 USER_FORCED: n=1 first off-heap 52.6 MiB, max off-heap 52.6 MiB
+   ks.t_probe USER_FORCED: n=1 first off-heap 0.0 MiB, max off-heap 0.0 MiB
+   t_p64_s65535_r1e4: sum of "Completed flushing" Data.db 625 MiB
+   t_probe: sum of "Completed flushing" Data.db 0 MiB
+-- life 3: system.log lines 352, ERROR lines 0, AssertionError 0
+   ks.t_hb_s65535_r1e4 MEMTABLE_LIMIT: n=2 first off-heap 0.0 MiB, max off-heap 0.0 MiB
+   ks.t_hb_s65535_r1e4 USER_FORCED: n=1 first off-heap 0.0 MiB, max off-heap 0.0 MiB
+   t_hb_s65535_r1e4: sum of "Completed flushing" Data.db 625 MiB
+rejection messages in session.log (each writer output repeats): {'Key length of 65536 is longer than maximum of 65535': 8, 'Key length of 131070 is longer than maximum of 65535': 2, 'Key length of 70010 is longer than maximum of 65535': 2}
+samples-hb_s65535_r1e4.csv n 5 RssAnon max 2662 MiB min 2630 MiB table dir max 1519 MiB commitlog max 352 MiB
+samples-p64_s65535_r1e4.csv n 5 RssAnon max 2738 MiB min 2650 MiB table dir max 1920 MiB commitlog max 192 MiB
+samples-s1024_r1e6.csv n 97 RssAnon max 3075 MiB min 2750 MiB table dir max 772 MiB commitlog max 352 MiB
+samples-s16_r2e5.csv n 19 RssAnon max 2747 MiB min 2636 MiB table dir max 0 MiB commitlog max 64 MiB
+samples-s32768_r2e4.csv n 6 RssAnon max 3110 MiB min 3025 MiB table dir max 1022 MiB commitlog max 288 MiB
+samples-s65535_r1e4.csv n 5 RssAnon max 3153 MiB min 3030 MiB table dir max 1525 MiB commitlog max 352 MiB
+samples-s65536_r1e4.csv n 4 RssAnon max 3033 MiB min 3032 MiB table dir max 0 MiB commitlog max 64 MiB

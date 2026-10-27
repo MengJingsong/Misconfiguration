@@ -1,0 +1,14 @@
+414:ERROR [MutationStage-2] 2026-10-27T00:12:44,173 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-2,10,SharedPool]
+415:java.lang.AssertionError: Data size 65536 >= 65536
+445:ERROR [MemtablePostFlush:1] 2026-10-27T00:13:08,142 JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtablePostFlush]
+446:java.lang.AssertionError: Attempted serializing to buffer exceeded maximum of 65535 bytes: 70000
+ERROR [MutationStage-2] 2026-10-27T00:12:44,173 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-2,10,SharedPool]
+java.lang.AssertionError: Data size 65536 >= 65536
+	at org.apache.cassandra.db.NativeClustering.<init>(NativeClustering.java:50)
+	at org.apache.cassandra.utils.memory.NativeAllocator$1.clone(NativeAllocator.java:120)
+--
+ERROR [MemtablePostFlush:1] 2026-10-27T00:13:08,142 JVMStabilityInspector.java:70 - Exception in thread Thread[MemtablePostFlush:1,5,MemtablePostFlush]
+java.lang.AssertionError: Attempted serializing to buffer exceeded maximum of 65535 bytes: 70000
+	at org.apache.cassandra.utils.ByteBufferUtil.writeWithShortLength(ByteBufferUtil.java:366)
+	at org.apache.cassandra.io.sstable.metadata.StatsMetadata$StatsMetadataSerializer.serialize(StatsMetadata.java:436)
+{"arm": "hb_s65535_r1e4", "K": 65535, "N": 10000, "ok": 10000, "errors": 0, "messages": {}, "write_seconds": 7.8, "rss_anon_before": 2757414912, "rss_anon_peak": 2791829504, "rss_anon_pre_flush": 2791829504, "table_dir_before": 0, "table_dir_pre_flush": 1592459455, "commitlog_before": 67108864, "commitlog_max": 369098752, "pre_flush_tablestats": {"memtable_data": 125717660, "memtable_off_heap": 0, "memtable_cells": 1917}, "data_bytes": 658517895, "index_bytes": 1310959473, "table_dir_after_flush": 1970207221, "flush_lines": [{"table": "ks.t_hb_s65535_r1e4", "reason": "MEMTABLE_LIMIT", "usage": "253.924MiB (99%) on-heap, 0B (0%) off-heap"}, {"table": "ks.t_hb_s65535_r1e4", "reason": "MEMTABLE_LIMIT", "usage": "253.861MiB (99%) on-heap, 0B (0%) off-heap"}, {"table": "ks.t_hb_s65535_r1e4", "reason": "USER_FORCED", "usage": "120.441MiB (47%) on-heap, 0B (0%) off-heap"}], "memtable_limit_flus

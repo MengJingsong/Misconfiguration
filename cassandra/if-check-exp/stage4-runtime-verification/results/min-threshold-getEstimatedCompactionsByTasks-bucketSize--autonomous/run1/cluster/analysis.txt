@@ -1,0 +1,23 @@
+EXPECTED: P1 min=2: PendingCompactions max after enable = 1 in every repetition [('e1m2', 1, 0), ('e2m2', 1, 0), ('e3m2', 1, 0)] — yes
+EXPECTED: P1 min=4: PendingCompactions max after enable = 1 in every repetition [('e1m4', 1, 0), ('e2m4', 1, 0), ('e3m4', 1, 0)] — yes
+EXPECTED: P1 min=16: PendingCompactions max after enable = 0 in every repetition [('e1m16', 0, 0), ('e2m16', 0, 0), ('e3m16', 0, 0)] — yes
+EXPECTED: P1b min=16: no compaction ran and 10 sstables remain — yes
+EXPECTED: P2 baseline Space used (total) within 2% across all min and reps (215.6-215.6 MB), du (215.6-215.6 MB) — yes
+EXPECTED: P2b baseline total ~ 200 MiB (flushed data) (206 MiB mean) — yes
+EXPECTED: P3 baseline live heap (class histogram total): per-min means within 5% ({2: 84.6, 4: 88.4, 16: 89.1} MB; spread 5.4%) — NO
+EXPECTED: P3 baseline RssAnon: per-min means within 5% ({2: 2905.5, 4: 2909.3, 16: 2911.2} MB; spread 0.2%) — yes
+EXPECTED: C1 min 2 and 4: a compaction ran after the enable (10 inputs) and the pending estimate returned to 0 — yes
+EXPECTED: C1b min 2 and 4: disk moved above the baseline during the compaction (du max > baseline du + 50 MB) — yes
+EXPECTED: C2 control: first compaction takes [4] sstables at max=4 and [10] at max=32 — yes
+EXPECTED: C3 control: peak du above baseline until the first compaction ends: max=4 84 MB, max=32 209 MB (ratio 2.5, want > 1.8) — yes
+   c32 min 4 max 32 gauge_max 1 first_pos_s 2.2 last 0 base(gauge,total,du,heapMB,rssMB) 0 215580875 215582515 91.4 2917.2 du_max 425043952 compacted 1 [10] after 1
+   c4 min 4 max 4 gauge_max 3 first_pos_s 2.2 last 2 base(gauge,total,du,heapMB,rssMB) 0 215580941 215582581 88.3 2916.4 du_max 299927602 compacted 1 [4] after 7
+   e1m16 min 16 max 32 gauge_max 0 first_pos_s None last 0 base(gauge,total,du,heapMB,rssMB) 0 215580879 215582519 87.4 2907.0 du_max 215582519 compacted 0 [] after 10
+   e1m2 min 2 max 32 gauge_max 1 first_pos_s 2.4 last 0 base(gauge,total,du,heapMB,rssMB) 0 215580996 215582636 79.9 2896.5 du_max 427141227 compacted 1 [10] after 1
+   e1m4 min 4 max 32 gauge_max 1 first_pos_s 2.3 last 0 base(gauge,total,du,heapMB,rssMB) 0 215581037 215582677 88.4 2904.1 du_max 427993234 compacted 1 [10] after 1
+   e2m16 min 16 max 32 gauge_max 0 first_pos_s None last 0 base(gauge,total,du,heapMB,rssMB) 0 215580900 215582540 90.7 2911.5 du_max 215582540 compacted 0 [] after 10
+   e2m2 min 2 max 32 gauge_max 1 first_pos_s 2.2 last 0 base(gauge,total,du,heapMB,rssMB) 0 215580910 215582550 88.7 2907.6 du_max 424912917 compacted 1 [10] after 1
+   e2m4 min 4 max 32 gauge_max 1 first_pos_s 2.2 last 0 base(gauge,total,du,heapMB,rssMB) 0 215580915 215582555 89.6 2909.8 du_max 424585242 compacted 1 [10] after 1
+   e3m16 min 16 max 32 gauge_max 0 first_pos_s None last 0 base(gauge,total,du,heapMB,rssMB) 0 215580906 215582546 89.3 2915.1 du_max 215582546 compacted 0 [] after 10
+   e3m2 min 2 max 32 gauge_max 1 first_pos_s 2.3 last 0 base(gauge,total,du,heapMB,rssMB) 0 215580893 215582533 85.3 2912.5 du_max 428189699 compacted 1 [10] after 1
+   e3m4 min 4 max 32 gauge_max 1 first_pos_s 2.4 last 0 base(gauge,total,du,heapMB,rssMB) 0 215580849 215582489 87.2 2914.0 du_max 427075543 compacted 1 [10] after 1

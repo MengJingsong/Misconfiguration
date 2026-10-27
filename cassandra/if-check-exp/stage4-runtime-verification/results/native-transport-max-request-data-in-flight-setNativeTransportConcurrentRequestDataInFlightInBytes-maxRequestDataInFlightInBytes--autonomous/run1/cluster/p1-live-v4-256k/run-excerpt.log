@@ -1,0 +1,53 @@
+[1793046092661] START p1-live-v4-256k L=1GiB ARM=v4-256k(version 4, blob 262144, C=4, W=250) live=live LOAD_S=120 BASE_S=30
+[1793046092663] + git -C /users/jason92/s4-b8-cr describe --tags
+[1793046092666] + sha256sum /users/jason92/s4-b8-cr-harness/cluster-run.sh /users/jason92/s4-b8-cr-harness/NativeFlood.java /users/jason92/s4-b8-cr-harness/InflightProbe.java /users/jason92/s4-b8-cr-harness/hold-request.btm /users/jason92/s4-b8-cr-harness/reduce.py
+[1793046092717] + rm -rf /dev/shm/s4-b8-cr-data
+[1793046092719] + mkdir -p /dev/shm/s4-b8-cr-data/data /dev/shm/s4-b8-cr-data/commitlog /dev/shm/s4-b8-cr-data/hints /dev/shm/s4-b8-cr-data/saved_caches /dev/shm/s4-b8-cr-data/cdc_raw
+[1793046092757] yaml diff saved (209 lines)
+yaml: native_transport_max_request_data_in_flight: 1GiB
+yaml: native_transport_max_request_data_in_flight_per_ip: 1GiB
+yaml: native_transport_max_message_size: 1MiB
+yaml: native_transport_max_threads: 4
+yaml: native_transport_receive_queue_capacity: 1MiB
+yaml: native_transport_timeout: 600000ms
+yaml: read_request_timeout: 600000ms
+yaml: write_request_timeout: 600000ms
+[1793046092760] ulimit -n 100000
+[1793046092761] + CASSANDRA_CONF=/users/jason92/s4-b8-cr-node/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b8-cr-logs/cluster/p1-live-v4-256k/logs MAX_HEAP_SIZE=1G JVM_EXTRA_OPTS="-Dio.netty.maxDirectMemory=0 -XX:MaxDirectMemorySize=4g -XX:NativeMemoryTracking=summary -Dstage4.hold.file=/users/jason92/s4-b8-cr-logs/cluster/p1-live-v4-256k/hold.flag -Dstage4.hold.ms=100 -Dstage4.trace=/users/jason92/s4
+[1793046155185] node up after 63 s, pid 1644197
+jvm-arg: -Xms1G
+jvm-arg: -Xmx1G
+jvm-arg: -XX:MaxDirectMemorySize=15872M
+jvm-arg: -javaagent:bin/../lib/jamm-0.4.0.jar
+jvm-arg: -Dio.netty.maxDirectMemory=0
+jvm-arg: -XX:MaxDirectMemorySize=4g
+jvm-arg: -XX:NativeMemoryTracking=summary
+jvm-arg: -Dstage4.hold.file=/users/jason92/s4-b8-cr-logs/cluster/p1-live-v4-256k/hold.flag
+jvm-arg: -Dstage4.hold.ms=100
+jvm-arg: -Dstage4.trace=/users/jason92/s4-b8-cr-logs/cluster/p1-live-v4-256k/hold.trace
+jvm-arg: -javaagent:/users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar=port:19150,address:127.0.0.1,script:/users/jason92/s4-b8-cr-harness/hold-request.btm,listener:true
+[1793046156289] global limit at start: 1073741824
+[1793046157362] per-IP limit at start: 1073741824
+[1793046157364] + java -cp /users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar:/users/jason92/s4-b8-cr/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -p 19150 -l
+[1793046157441] + /users/jason92/s4-b8-cr/bin/cqlsh 127.0.5.1 9042 -e CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE IF NOT EXISTS ks.t (pk int PRIMARY KEY, v blob);
+[1793046159114] warm-up flood (no hold; 20000-B values, below LARGE_MESSAGE_THRESHOLD, so a v5 arm does not start with a frame-buffer residue)
+[1793046175371] + java -cp /users/jason92/s4-b8-cr-harness InflightProbe 127.0.0.1 7150 200 30000 > /users/jason92/s4-b8-cr-logs/cluster/p1-live-v4-256k/base.csv
+[1793046206374] baseline rows: 148
+[1793046206377] probe started pid 1650083 at 1793046206375
+[1793046207382] client start 1793046207381 (hold flag on)
+[1793046209395] first trigger ok: 24 hold lines; RequestsSize seen > 0
+EXPECTED: first trigger: hold rule fired and RequestsSize > 0 within 15 s: PASS
+[1793046354290] client end 1793046354289 (rc 0, elapsed 146908 ms)
+[1793046357308] + nodetool sjk mx -b org.apache.cassandra.metrics:type=Client,name=RequestsSize -mg -f Value
+system.log ERROR+WARN lines: 5
+netty LEAK lines: 0
+hold lines: 5776
+[1793046358416] stopping node pids: 1644197
+[1793046363644] node stopped; none left
+[1793046363646] + python3 /users/jason92/s4-b8-cr-harness/reduce.py /users/jason92/s4-b8-cr-logs/cluster/p1-live-v4-256k 1GiB v4-256k live
+EXPECTED: live: before the set Peak_RS >= 0.8 offered: PASS (pre-set peak 250.1 MiB, offered 250.0 MiB)
+EXPECTED: live: global limit read back = 16777216: PASS (live-set.txt)
+EXPECTED: live: RequestsSize reaches <= L + 4 MiB within 90 s of the set: PASS (first at +22.9 s)
+EXPECTED: live: stays <= L + 4 MiB afterwards: PASS (max after 19.26 MiB over 460 samples)
+[1793046363714] no node running
+[1793046363717] END p1-live-v4-256k

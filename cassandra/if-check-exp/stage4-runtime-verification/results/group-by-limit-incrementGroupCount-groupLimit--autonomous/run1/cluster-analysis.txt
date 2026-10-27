@@ -1,0 +1,92 @@
+EXPECTED: instrument: first-trigger query (ks.g GROUP BY pk LIMIT 1, P=10000) leaves K Byteman lines, all rows=300 groups=1 done=true: PASS (K=4 [(1793087998992, 300, 1, 'false', 'true'), (1793087999000, 300, 1, 'true', 'true'), (1793087999000, 300, 1, 'true', 'true'), (1793087999001, 300, 1, 'false', 'true')])
+INFO: K = 4 counters closed per sub-page read
+INFO: idle allocation noise median 174513 bytes/s over 17 windows (max 213878)
+EXPECTED: no client errors in timed queries: PASS ([])
+EXPECTED: T P=10000 g=1: trace line count is a multiple of K: PASS ([True, True, True])
+EXPECTED: T P=10000 g=1: rows read = 1000000 in every query: PASS ([1000000.0, 1000000.0, 1000000.0])
+EXPECTED: T P=10000 g=1: sub-pages = floor(1000000/P)+1 = 101 (A13): PASS ([101, 101, 101])
+EXPECTED: T P=10000 g=1: rows per sub-page <= P: PASS (10000)
+EXPECTED: T P=10000 g=1: isDone false in every sub-page but the last: PASS ([False, False, False])
+INFO: T P=10000 g=1: wall ms mean 6157 alloc 6172089221 rchar 1057242939 peak-used 326283328
+EXPECTED: T P=10000 g=100: trace line count is a multiple of K: PASS ([True, True, True])
+EXPECTED: T P=10000 g=100: rows read = 1000000 in every query: PASS ([1000000.0, 1000000.0, 1000000.0])
+EXPECTED: T P=10000 g=100: sub-pages = floor(1000000/P)+1 = 101 (A13): PASS ([101, 101, 101])
+EXPECTED: T P=10000 g=100: rows per sub-page <= P: PASS (10000)
+EXPECTED: T P=10000 g=100: isDone false in every sub-page but the last: PASS ([False, False, False])
+INFO: T P=10000 g=100: wall ms mean 6262 alloc 6171853338 rchar 1057242904 peak-used 328975776
+EXPECTED: T P=10000 g=100000: trace line count is a multiple of K: PASS ([True, True, True])
+EXPECTED: T P=10000 g=100000: rows read = 1000000 in every query: PASS ([1000000.0, 1000000.0, 1000000.0])
+EXPECTED: T P=10000 g=100000: sub-pages = floor(1000000/P)+1 = 101 (A13): PASS ([101, 101, 101])
+EXPECTED: T P=10000 g=100000: rows per sub-page <= P: PASS (10000)
+EXPECTED: T P=10000 g=100000: isDone false in every sub-page but the last: PASS ([False, False, False])
+INFO: T P=10000 g=100000: wall ms mean 5602 alloc 6171615933 rchar 1057245648 peak-used 320573362
+EXPECTED: T P=10000: alloc within 14 percent across g = 1, 100, 100000: PASS ([6172089221, 6171853338, 6171615933, 1.0])
+EXPECTED: T P=10000: rchar within 14 percent across g = 1, 100, 100000: PASS ([1057242939, 1057242904, 1057245648, 1.0])
+EXPECTED: T P=10000: peak within 25 percent across g = 1, 100, 100000 and no monotone rise > 10 percent: PASS ([326283328, 328975776, 320573362, 1.026])
+EXPECTED: T P=10000: wall time of g=1 at least 80 percent of g=100000: PASS ([6157, 5602])
+EXPECTED: T P=100 g=1: trace line count is a multiple of K: PASS ([True, True, True])
+EXPECTED: T P=100 g=1: rows read = 1000000 in every query: PASS ([1000000.0, 1000000.0, 1000000.0])
+EXPECTED: T P=100 g=1: sub-pages = floor(1000000/P)+1 = 10001 (A13): PASS ([10001, 10001, 10001])
+EXPECTED: T P=100 g=1: rows per sub-page <= P: PASS (100)
+EXPECTED: T P=100 g=1: isDone false in every sub-page but the last: PASS ([False, False, False])
+INFO: T P=100 g=1: wall ms mean 6984 alloc 5742350386 rchar 2674999041 peak-used 757841786
+EXPECTED: T P=100 g=100: trace line count is a multiple of K: PASS ([True, True, True])
+EXPECTED: T P=100 g=100: rows read = 1000000 in every query: PASS ([1000000.0, 1000000.0, 1000000.0])
+EXPECTED: T P=100 g=100: sub-pages = floor(1000000/P)+1 = 10001 (A13): PASS ([10001, 10001, 10001])
+EXPECTED: T P=100 g=100: rows per sub-page <= P: PASS (100)
+EXPECTED: T P=100 g=100: isDone false in every sub-page but the last: PASS ([False, False, False])
+INFO: T P=100 g=100: wall ms mean 7526 alloc 5740747210 rchar 2674999036 peak-used 746437568
+EXPECTED: T P=100 g=100000: trace line count is a multiple of K: PASS ([True, True, True])
+EXPECTED: T P=100 g=100000: rows read = 1000000 in every query: PASS ([1000000.0, 1000000.0, 1000000.0])
+EXPECTED: T P=100 g=100000: sub-pages = floor(1000000/P)+1 = 10001 (A13): PASS ([10001, 10001, 10001])
+EXPECTED: T P=100 g=100000: rows per sub-page <= P: PASS (100)
+EXPECTED: T P=100 g=100000: isDone false in every sub-page but the last: PASS ([False, False, False])
+INFO: T P=100 g=100000: wall ms mean 8082 alloc 5740968994 rchar 2674999037 peak-used 751999077
+EXPECTED: T P=100: alloc within 14 percent across g = 1, 100, 100000: PASS ([5742350386, 5740747210, 5740968994, 1.0])
+EXPECTED: T P=100: rchar within 14 percent across g = 1, 100, 100000: PASS ([2674999041, 2674999036, 2674999037, 1.0])
+EXPECTED: T P=100: peak within 25 percent across g = 1, 100, 100000 and no monotone rise > 10 percent: PASS ([757841786, 746437568, 751999077, 1.015])
+EXPECTED: T P=100: wall time of g=1 at least 80 percent of g=100000: PASS ([6984, 8082])
+EXPECTED: drift: g=none P=10000 allocation at start and end within 15 percent: PASS ([6182759354, 6171542960])
+EXPECTED: G P=10000 g=1: trace line count multiple of K: PASS ([True, True, True])
+EXPECTED: G P=10000 g=1: rows read in [300, 301] = 300*min(g, 3000) (A13): PASS ([300.0, 300.0, 300.0])
+EXPECTED: G P=10000 g=1: client rows returned = 1: PASS ([1, 1, 1])
+EXPECTED: G P=10000 g=1: groups = g and isDone true in the last sub-page (disallow branch fired): PASS ([(1.0, True), (1.0, True), (1.0, True)])
+INFO: G P=10000 g=1: wall ms 5 alloc 1998714 rchar 327681 peak-used 152010336
+EXPECTED: G P=10000 g=100: trace line count multiple of K: PASS ([True, True, True])
+EXPECTED: G P=10000 g=100: rows read in [30000, 30001] = 300*min(g, 3000) (A13): PASS ([30000.0, 30000.0, 30000.0])
+EXPECTED: G P=10000 g=100: client rows returned = 100: PASS ([100, 100, 100])
+EXPECTED: G P=10000 g=100: groups = g and isDone true in the last sub-page (disallow branch fired): PASS ([(100.0, True), (100.0, True), (100.0, True)])
+INFO: G P=10000 g=100: wall ms 194 alloc 185615610 rchar 31653900 peak-used 299011472
+EXPECTED: G P=10000 g=100000: trace line count multiple of K: PASS ([True, True, True])
+EXPECTED: G P=10000 g=100000: rows read in [900000, 900001] = 300*min(g, 3000) (A13): PASS ([900000.0, 900000.0, 900000.0])
+EXPECTED: G P=10000 g=100000: client rows returned = 3000: PASS ([3000, 3000, 3000])
+INFO: G P=10000 g=100000: wall ms 5190 alloc 5565153165 rchar 950049681 peak-used 328996032
+EXPECTED: G P=10000: rchar at g=100 >= 20 x g=1 and g=100000 >= 10 x g=100 (A13): PASS ([327681, 31653900, 950049681])
+INFO: G P=10000: fewer than two cells last >= 2 s; peak not compared
+EXPECTED: G P=100 g=1: trace line count multiple of K: PASS ([True, True, True])
+EXPECTED: G P=100 g=1: rows read in [300, 301] = 300*min(g, 3000) (A13): PASS ([300.0, 300.0, 300.0])
+EXPECTED: G P=100 g=1: client rows returned = 1: PASS ([1, 1, 1])
+EXPECTED: G P=100 g=1: groups = g and isDone true in the last sub-page (disallow branch fired): PASS ([(1.0, True), (1.0, True), (1.0, True)])
+INFO: G P=100 g=1: wall ms 6 alloc 1823248 rchar 720898 peak-used 152033864
+EXPECTED: G P=100 g=100: trace line count multiple of K: PASS ([True, True, True])
+EXPECTED: G P=100 g=100: rows read in [30000, 30001] = 300*min(g, 3000) (A13): PASS ([30000.0, 30000.0, 30000.0])
+EXPECTED: G P=100 g=100: client rows returned = 100: PASS ([100, 100, 100])
+EXPECTED: G P=100 g=100: groups = g and isDone true in the last sub-page (disallow branch fired): PASS ([(100.0, True), (100.0, True), (100.0, True)])
+INFO: G P=100 g=100: wall ms 274 alloc 174694192 rchar 75563017 peak-used 644144917
+EXPECTED: G P=100 g=100000: trace line count multiple of K: PASS ([True, True, True])
+EXPECTED: G P=100 g=100000: rows read in [900000, 900001] = 300*min(g, 3000) (A13): PASS ([900000.0, 900000.0, 900000.0])
+EXPECTED: G P=100 g=100000: client rows returned = 3000: PASS ([3000, 3000, 3000])
+INFO: G P=100 g=100000: wall ms 7847 alloc 5241903613 rchar 2269944760 peak-used 756934136
+EXPECTED: G P=100: rchar at g=100 >= 20 x g=1 and g=100000 >= 10 x g=100 (A13): PASS ([720898, 75563017, 2269944760])
+INFO: G P=100: fewer than two cells last >= 2 s; peak not compared
+EXPECTED: control n=1000: rows returned = n: PASS ([1000, 1000, 1000])
+INFO: control n=1000: alloc 5158688 peak-used 163210362 rchar 1048581
+EXPECTED: control n=10000: rows returned = n: PASS ([10000, 10000, 10000])
+INFO: control n=10000: alloc 63470256 peak-used 212295826 rchar 10420234
+EXPECTED: control n=100000: rows returned = n: PASS ([100000, 100000, 100000])
+INFO: control n=100000: alloc 684138245 peak-used 571624765 rchar 104136712
+EXPECTED: control moved (A13): rows == n and allocation at n=100000 >= 10 x allocation at n=1000: PASS ({1000: 5158688, 10000: 63470256, 100000: 684138245})
+
+B3g facts: flat_rows_alloc_rchar_peak=True early_stop=False rises_with_g=False small_group_reads_track_g=True limit_fired_in_small_groups=True control_moved=True
+MATCHED ROW: Huge table: bytes read, allocation and heap flat across g; small-group table: bytes read grow with g, heap flat -> claim confirmed (B3g rows 1 and 2)
+FAILED EXPECTATIONS: none

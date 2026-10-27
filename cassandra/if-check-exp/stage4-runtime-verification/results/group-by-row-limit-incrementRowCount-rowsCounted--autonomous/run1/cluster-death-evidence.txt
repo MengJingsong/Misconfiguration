@@ -1,0 +1,63 @@
+Cells in which a node was found dead right after the query (cells.jsonl dead_nodes), with the last 4 GC pause lines of that node inside/after the query window:
+
+groupby fetch=100000 rep=1 t0=1793088730465 t1=1793088731789 wall=1324 ms dead=[1] err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed'
+  n1: [2026-10-27T04:12:11.253-0400][288.716s] GC(425) Pause Young (Concurrent Start) (G1 Humongous Allocation) 369M->301M(512M) 2.944ms
+  n1: [2026-10-27T04:12:11.256-0400][288.718s] GC(427) Pause Young (Normal) (G1 Humongous Allocation) 301M->301M(512M) 1.249ms
+  n1: [2026-10-27T04:12:11.409-0400][288.872s] GC(428) Pause Full (G1 Humongous Allocation) 301M->301M(512M) 153.279ms
+  n1: [2026-10-27T04:12:11.566-0400][289.028s] GC(429) Pause Full (G1 Humongous Allocation) 301M->301M(512M) 156.286ms
+
+groupby fetch=100000 rep=2 t0=1793088767112 t1=1793089068167 wall=301055 ms dead=[1, 2] err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed'
+  n1: [2026-10-27T04:17:47.594-0400][335.541s] GC(13) Pause Young (Concurrent Start) (G1 Humongous Allocation) 412M->243M(512M) 4.709ms
+  n1: [2026-10-27T04:17:47.596-0400][335.544s] GC(15) Pause Young (Normal) (G1 Humongous Allocation) 244M->242M(512M) 1.329ms
+  n1: [2026-10-27T04:17:47.748-0400][335.696s] GC(16) Pause Full (G1 Humongous Allocation) 242M->239M(512M) 150.923ms
+  n1: [2026-10-27T04:17:47.906-0400][335.854s] GC(17) Pause Full (G1 Humongous Allocation) 239M->239M(512M) 157.921ms
+  n2: [2026-10-27T04:12:48.061-0400][295.240s] GC(27) Pause Young (Concurrent Start) (G1 Humongous Allocation) 373M->299M(512M) 3.503ms
+  n2: [2026-10-27T04:12:48.063-0400][295.243s] GC(29) Pause Young (Normal) (G1 Humongous Allocation) 302M->299M(512M) 1.404ms
+  n2: [2026-10-27T04:12:48.201-0400][295.381s] GC(30) Pause Full (G1 Humongous Allocation) 299M->299M(512M) 137.762ms
+  n2: [2026-10-27T04:12:48.334-0400][295.514s] GC(31) Pause Full (G1 Humongous Allocation) 299M->299M(512M) 132.840ms
+
+groupby fetch=100000 rep=3 t0=1793089128474 t1=1793089429920 wall=301446 ms dead=[1, 2] err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed'
+  n1: [2026-10-27T04:23:49.398-0400][360.972s] GC(20) Pause Young (Concurrent Start) (G1 Humongous Allocation) 381M->303M(512M) 3.695ms
+  n1: [2026-10-27T04:23:49.401-0400][360.974s] GC(22) Pause Young (Normal) (G1 Humongous Allocation) 303M->303M(512M) 1.245ms
+  n1: [2026-10-27T04:23:49.549-0400][361.122s] GC(23) Pause Full (G1 Humongous Allocation) 303M->303M(512M) 148.326ms
+  n1: [2026-10-27T04:23:49.705-0400][361.278s] GC(24) Pause Full (G1 Humongous Allocation) 303M->303M(512M) 155.704ms
+  n2: [2026-10-27T04:18:49.626-0400][31.023s] GC(19) Pause Young (Concurrent Start) (G1 Humongous Allocation) 375M->303M(512M) 2.886ms
+  n2: [2026-10-27T04:18:49.628-0400][31.025s] GC(21) Pause Young (Normal) (G1 Humongous Allocation) 305M->303M(512M) 1.185ms
+  n2: [2026-10-27T04:18:49.775-0400][31.171s] GC(22) Pause Full (G1 Humongous Allocation) 303M->303M(512M) 146.274ms
+  n2: [2026-10-27T04:18:49.923-0400][31.320s] GC(23) Pause Full (G1 Humongous Allocation) 303M->299M(512M) 148.758ms
+
+control-select fetch=100000 rep=1 t0=1793089493915 t1=1793089613989 wall=120074 ms dead=[2] err=OperationTimedOut("errors={'127.0.8.1:9042': 'Client request
+  n2: [2026-10-27T04:24:54.840-0400][34.600s] GC(20) Pause Young (Concurrent Start) (G1 Humongous Allocation) 372M->300M(512M) 10.522ms
+  n2: [2026-10-27T04:24:54.843-0400][34.603s] GC(22) Pause Young (Normal) (G1 Humongous Allocation) 303M->300M(512M) 1.459ms
+  n2: [2026-10-27T04:24:55.008-0400][34.768s] GC(23) Pause Full (G1 Humongous Allocation) 300M->300M(512M) 164.169ms
+  n2: [2026-10-27T04:24:55.154-0400][34.914s] GC(24) Pause Full (G1 Humongous Allocation) 300M->297M(512M) 146.150ms
+
+groupby fetch=1000000 rep=1 t0=1793089647861 t1=1793089795333 wall=147472 ms dead=[1, 2] err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed'
+  n1: [2026-10-27T04:29:54.815-0400][364.605s] GC(22) Pause Young (Concurrent Start) (G1 Humongous Allocation) 376M->304M(512M) 10.240ms
+  n1: [2026-10-27T04:29:54.817-0400][364.608s] GC(24) Pause Young (Normal) (G1 Humongous Allocation) 304M->304M(512M) 1.289ms
+  n1: [2026-10-27T04:29:54.962-0400][364.752s] GC(25) Pause Full (G1 Humongous Allocation) 304M->304M(512M) 144.220ms
+  n1: [2026-10-27T04:29:55.118-0400][364.908s] GC(26) Pause Full (G1 Humongous Allocation) 304M->304M(512M) 155.928ms
+  n2: [2026-10-27T04:27:29.024-0400][34.800s] GC(20) Pause Young (Concurrent Start) (G1 Humongous Allocation) 373M->300M(512M) 3.958ms
+  n2: [2026-10-27T04:27:29.026-0400][34.803s] GC(22) Pause Young (Normal) (G1 Humongous Allocation) 300M->300M(512M) 1.098ms
+  n2: [2026-10-27T04:27:29.173-0400][34.949s] GC(23) Pause Full (G1 Humongous Allocation) 300M->300M(512M) 146.468ms
+  n2: [2026-10-27T04:27:29.323-0400][35.099s] GC(24) Pause Full (G1 Humongous Allocation) 300M->297M(512M) 150.092ms
+
+groupby fetch=1000000 rep=2 t0=1793089855794 t1=1793090157236 wall=301442 ms dead=[1, 2] err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed'
+  n1: [2026-10-27T04:35:56.711-0400][361.086s] GC(20) Pause Young (Concurrent Start) (G1 Humongous Allocation) 382M->304M(512M) 7.312ms
+  n1: [2026-10-27T04:35:56.713-0400][361.088s] GC(22) Pause Young (Normal) (G1 Humongous Allocation) 304M->304M(512M) 1.394ms
+  n1: [2026-10-27T04:35:56.862-0400][361.237s] GC(23) Pause Full (G1 Humongous Allocation) 304M->304M(512M) 148.467ms
+  n1: [2026-10-27T04:35:57.019-0400][361.394s] GC(24) Pause Full (G1 Humongous Allocation) 304M->304M(512M) 156.798ms
+  n2: [2026-10-27T04:30:56.981-0400][31.135s] GC(19) Pause Young (Concurrent Start) (G1 Humongous Allocation) 372M->301M(512M) 8.056ms
+  n2: [2026-10-27T04:30:56.984-0400][31.137s] GC(21) Pause Young (Normal) (G1 Humongous Allocation) 303M->301M(512M) 1.539ms
+  n2: [2026-10-27T04:30:57.132-0400][31.286s] GC(22) Pause Full (G1 Humongous Allocation) 301M->301M(512M) 148.035ms
+  n2: [2026-10-27T04:30:57.270-0400][31.423s] GC(23) Pause Full (G1 Humongous Allocation) 301M->297M(512M) 137.208ms
+
+groupby fetch=1000000 rep=3 t0=1793090217803 t1=1793090519245 wall=301442 ms dead=[1, 2] err=ConnectionShutdown('Connection to 127.0.8.1:9042 was closed'
+  n1: [2026-10-27T04:41:58.684-0400][361.184s] GC(20) Pause Young (Concurrent Start) (G1 Humongous Allocation) 376M->305M(512M) 2.304ms
+  n1: [2026-10-27T04:41:58.694-0400][361.193s] GC(22) Pause Young (Normal) (G1 Humongous Allocation) 306M->305M(512M) 8.747ms
+  n1: [2026-10-27T04:41:58.835-0400][361.334s] GC(23) Pause Full (G1 Humongous Allocation) 305M->305M(512M) 140.832ms
+  n1: [2026-10-27T04:41:58.990-0400][361.489s] GC(24) Pause Full (G1 Humongous Allocation) 305M->305M(512M) 154.380ms
+  n2: [2026-10-27T04:36:58.985-0400][31.153s] GC(19) Pause Young (Concurrent Start) (G1 Humongous Allocation) 373M->301M(512M) 4.064ms
+  n2: [2026-10-27T04:36:58.990-0400][31.158s] GC(21) Pause Young (Normal) (G1 Humongous Allocation) 303M->301M(512M) 3.912ms
+  n2: [2026-10-27T04:36:59.123-0400][31.291s] GC(22) Pause Full (G1 Humongous Allocation) 301M->301M(512M) 132.838ms
+  n2: [2026-10-27T04:36:59.271-0400][31.439s] GC(23) Pause Full (G1 Humongous Allocation) 301M->297M(512M) 147.637ms

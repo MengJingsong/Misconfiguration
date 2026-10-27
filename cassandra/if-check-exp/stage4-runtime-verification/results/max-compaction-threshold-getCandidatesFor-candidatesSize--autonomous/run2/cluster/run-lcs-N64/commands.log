@@ -1,0 +1,31 @@
+20:04:43 == run-lcs-N64 start; tree=/users/jason92/s4-b10-lc mnt=/mnt/s4lc
+20:04:43 $ sudo mkdir -p /mnt/s4lc && (mountpoint -q /mnt/s4lc || sudo mount -t tmpfs -o size=40g tmpfs /mnt/s4lc) && sudo chown $(id -u):$(id -g) /mnt/s4lc
+
+20:04:43 $ rm -rf /mnt/s4lc/work-lcs && mkdir -p /mnt/s4lc/work-lcs/data /mnt/s4lc/work-lcs/commitlog /mnt/s4lc/work-lcs/hints /mnt/s4lc/work-lcs/saved_caches /mnt/s4lc/work-lcs/cdc_raw
+
+20:04:44 $ rm -rf /mnt/s4lc/work-lcs/data && cp -a /mnt/s4lc/fx-lcs/data /mnt/s4lc/work-lcs/data
+
+20:04:49 $ ulimit -n 100000; cd /users/jason92/s4-b10-lc && ( CASSANDRA_CONF=/users/jason92/s4-b10-lc-logs/cluster2/run-lcs-N64/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b10-lc-logs/cluster2/run-lcs-N64/logs MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M setsid nohup bin/cassandra -f -p /users/jason92/s4-b10-lc-logs/cluste
+
+20:05:05 node up, pid 2356741, address 127.0.5.1, jmx 7150
+20:05:06 before: {'count': [100, 9, 0, 0, 0, 0, 0, 0, 0], 'sstables': 109, 'live': 8680328050}
+20:05:07 $ /users/jason92/s4-b10-lc/bin/nodetool -h 127.0.0.1 -p 7150 setcompactionthreshold ks standard1 2 64
+
+20:05:09 $ /users/jason92/s4-b10-lc/bin/nodetool -h 127.0.0.1 -p 7150 getcompactionthreshold ks standard1
+Current compaction thresholds for ks/standard1: 
+ min = 2,  max = 64
+
+20:05:21 helper: enabled 1793066721336 1793066721341
+20:05:33 settle[task] busy=1 bytes=9357773488 files=885
+20:05:44 settle[task] busy=1 bytes=10168472159 files=900
+20:05:56 settle[task] busy=1 bytes=10959588565 files=915
+20:06:07 settle[task] busy=1 bytes=11786152684 files=930
+20:06:18 settle[task] busy=1 bytes=12617505928 files=945
+20:06:30 settle[task] busy=1 bytes=13430039374 files=957
+20:06:41 settle[task] busy=1 bytes=14249325585 files=972
+20:06:52 settle[task] busy=0 bytes=8708404682 files=576
+20:07:04 settle[task] busy=0 bytes=8708404682 files=576
+20:07:15 settle[task] busy=0 bytes=8708404682 files=576
+20:07:18 after: {'count': [36, 36, 0, 0, 0, 0, 0, 0, 0], 'sstables': 72, 'live': 8708404682}
+20:07:23 daemons of this run left after stop: none
+20:07:23 == run-lcs-N64 done rc=0 node stopped=True

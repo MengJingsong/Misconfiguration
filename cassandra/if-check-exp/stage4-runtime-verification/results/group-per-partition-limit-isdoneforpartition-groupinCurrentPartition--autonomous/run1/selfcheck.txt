@@ -1,0 +1,18 @@
+HOLDS    unit: R parsed; 5 N values x 5 reps in both arms (+1 first-trigger rep at N=10 in the run arm) {'run': {10: 6, 1: 5, 100: 5, 1000: 5, 100000: 5}, 'ctl': {1: 5, 10: 5, 100: 5, 1000: 5, 100000: 5}}
+HOLDS    unit: groups == min(N,R) in all 50 reps 
+HOLDS    unit: counter.counted() equals groups returned (one less at N=R: the last open group is closed after the read) 
+HOLDS    unit: rows pulled = N+1 for N<R, R for N=R {10: [11], 1: [2], 100: [101], 1000: [1001], 100000: [100000]}
+HOLDS    unit: median retained heap after GC flat within 5% {10: 78691088, 1: 78690872, 100: 78757264, 1000: 78757736, 100000: 78756192}
+HOLDS    unit: median allocation rises with N {10: 2976, 1: 2184, 100: 10896, 1000: 90112, 100000: 7202008}
+HOLDS    unit: control retained delta rises with N and exceeds 1 MB at N=R {1: 1808, 10: 5336, 100: 41016, 1000: 398312, 100000: 39626464}
+HOLDS    unit: no-query noise swing far below the control delta at N=R noise max 76720 B
+HOLDS    cluster: 12 measured arms completed ['c_Nabs_P300000', 'f_N10000_P1000', 'f_N100_P1000', 'f_N1_P1000', 'f_Nabs_P1000', 'r_N10000_P1000', 'r_N100_P1000', 'r_N1_P1000', 'r_Nabs_P1000', 'x_N10000_P300000', 'x_N100_P300000', 'x_N1_P300000']
+HOLDS    cluster: every query of every measured arm returned min(N,200000) rows queries 1200
+HOLDS    cluster: 100 queries in every measured arm 
+FAILS    cluster: N=absent minus N=1 peak heap within 30 MB (both sweeps) fwd [8.4, 16.8, 15.0, 54.9] rev [8.4, 12.6, 16.8, 54.0]
+HOLDS    cluster: control (P=300000) exceeds P=1000 by > 30 MB 792.2 vs 54.9
+HOLDS    cluster: JVM ran with the 1 GiB heap, G1, young generation caps 
+HOLDS    cluster: no ERROR lines in the node log segment 
+HOLDS    cluster: no OutOfMemoryError, no dropped-message report in the node log 
+HOLDS    cluster: data size unchanged (reads only) {'start': 228028843, 'end': 228028843}
+SELFCHECK FAILS: ['cluster: N=absent minus N=1 peak heap within 30 MB (both sweeps)']

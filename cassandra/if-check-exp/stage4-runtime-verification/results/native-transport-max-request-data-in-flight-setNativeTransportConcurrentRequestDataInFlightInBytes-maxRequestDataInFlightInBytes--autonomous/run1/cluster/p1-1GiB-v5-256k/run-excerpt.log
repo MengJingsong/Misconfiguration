@@ -1,0 +1,52 @@
+[1793045851667] START p1-1GiB-v5-256k L=1GiB ARM=v5-256k(version 5, blob 262144, C=4, W=250) live=no LOAD_S=90 BASE_S=30
+[1793045851668] + git -C /users/jason92/s4-b8-cr describe --tags
+[1793045851671] + sha256sum /users/jason92/s4-b8-cr-harness/cluster-run.sh /users/jason92/s4-b8-cr-harness/NativeFlood.java /users/jason92/s4-b8-cr-harness/InflightProbe.java /users/jason92/s4-b8-cr-harness/hold-request.btm /users/jason92/s4-b8-cr-harness/reduce.py
+[1793045851725] + rm -rf /dev/shm/s4-b8-cr-data
+[1793045851727] + mkdir -p /dev/shm/s4-b8-cr-data/data /dev/shm/s4-b8-cr-data/commitlog /dev/shm/s4-b8-cr-data/hints /dev/shm/s4-b8-cr-data/saved_caches /dev/shm/s4-b8-cr-data/cdc_raw
+[1793045851771] yaml diff saved (209 lines)
+yaml: native_transport_max_request_data_in_flight: 1GiB
+yaml: native_transport_max_request_data_in_flight_per_ip: 1GiB
+yaml: native_transport_max_message_size: 1MiB
+yaml: native_transport_max_threads: 4
+yaml: native_transport_receive_queue_capacity: 1MiB
+yaml: native_transport_timeout: 600000ms
+yaml: read_request_timeout: 600000ms
+yaml: write_request_timeout: 600000ms
+[1793045851775] ulimit -n 100000
+[1793045851776] + CASSANDRA_CONF=/users/jason92/s4-b8-cr-node/conf CASSANDRA_LOG_DIR=/users/jason92/s4-b8-cr-logs/cluster/p1-1GiB-v5-256k/logs MAX_HEAP_SIZE=1G JVM_EXTRA_OPTS="-Dio.netty.maxDirectMemory=0 -XX:MaxDirectMemorySize=4g -XX:NativeMemoryTracking=summary -Dstage4.hold.file=/users/jason92/s4-b8-cr-logs/cluster/p1-1GiB-v5-256k/hold.flag -Dstage4.hold.ms=100 -Dstage4.trace=/users/jason92/s4
+[1793045914121] node up after 63 s, pid 1632825
+jvm-arg: -Xms1G
+jvm-arg: -Xmx1G
+jvm-arg: -XX:MaxDirectMemorySize=15872M
+jvm-arg: -javaagent:bin/../lib/jamm-0.4.0.jar
+jvm-arg: -Dio.netty.maxDirectMemory=0
+jvm-arg: -XX:MaxDirectMemorySize=4g
+jvm-arg: -XX:NativeMemoryTracking=summary
+jvm-arg: -Dstage4.hold.file=/users/jason92/s4-b8-cr-logs/cluster/p1-1GiB-v5-256k/hold.flag
+jvm-arg: -Dstage4.hold.ms=100
+jvm-arg: -Dstage4.trace=/users/jason92/s4-b8-cr-logs/cluster/p1-1GiB-v5-256k/hold.trace
+jvm-arg: -javaagent:/users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar=port:19150,address:127.0.0.1,script:/users/jason92/s4-b8-cr-harness/hold-request.btm,listener:true
+[1793045915232] global limit at start: 1073741824
+[1793045916310] per-IP limit at start: 1073741824
+[1793045916312] + java -cp /users/jason92/s4-b8-cr/build/lib/jars/byteman-4.0.20.jar:/users/jason92/s4-b8-cr/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -p 19150 -l
+[1793045916391] + /users/jason92/s4-b8-cr/bin/cqlsh 127.0.5.1 9042 -e CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE IF NOT EXISTS ks.t (pk int PRIMARY KEY, v blob);
+[1793045918022] warm-up flood (no hold; 20000-B values, below LARGE_MESSAGE_THRESHOLD, so a v5 arm does not start with a frame-buffer residue)
+[1793045934304] + java -cp /users/jason92/s4-b8-cr-harness InflightProbe 127.0.0.1 7150 200 30000 > /users/jason92/s4-b8-cr-logs/cluster/p1-1GiB-v5-256k/base.csv
+[1793045965277] baseline rows: 148
+[1793045965280] probe started pid 1638708 at 1793045965279
+[1793045966287] client start 1793045966286 (hold flag on)
+[1793045968298] first trigger ok: 24 hold lines; RequestsSize seen > 0
+EXPECTED: first trigger: hold rule fired and RequestsSize > 0 within 15 s: PASS
+[1793046083234] client end 1793046083233 (rc 0, elapsed 116947 ms)
+[1793046086251] + nodetool sjk mx -b org.apache.cassandra.metrics:type=Client,name=RequestsSize -mg -f Value
+system.log ERROR+WARN lines: 5
+netty LEAK lines: 0
+hold lines: 4576
+[1793046087354] stopping node pids: 1632825
+[1793046092586] node stopped; none left
+[1793046092588] + python3 /users/jason92/s4-b8-cr-harness/reduce.py /users/jason92/s4-b8-cr-logs/cluster/p1-1GiB-v5-256k 1GiB v5-256k no
+EXPECTED: P4 control Peak_RS >= 0.8 offered: PASS (peak 246.1 MiB, offered 250.0 MiB)
+EXPECTED: P4 control PausedConnections == 0: PASS (max 0)
+EXPECTED: P3 client other_err == 0: PASS (err 0 ovl_other 0)
+[1793046092649] no node running
+[1793046092654] END p1-1GiB-v5-256k

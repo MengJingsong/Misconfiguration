@@ -1,0 +1,17 @@
+unit-run 2026-10-26T17:37:00-06:00 host node1 tree cassandra-5.0.9 openjdk version "11.0.32.1" 2026-08-18
+harness md5 KeyLenDriver.java=7d023ddbdd5b unit-run.sh=582fae91d734 
+run bounds (-Xmx1g bounds) exit 0, 21 checks, 0 MISMATCH
+EXPECTED: boundary 0/1/1000/65534/65535 accepted-or-empty-rejected and 65536/70000/1000000 rejected with the exact message, Int32 order check - yes
+run stream (-Xmx1g stream 100000 65535) exit 0, 3 checks, 0 MISMATCH
+run hold65535 (-Xmx512m hold 65535) exit 0, 1 checks, 0 MISMATCH
+run hold1 (-Xmx512m hold 1) exit 0, 1 checks, 0 MISMATCH
+run oom (-Xmx256m oom 65535) exit 0, 3 checks, 0 MISMATCH
+run control (-Xmx1g control) exit 0, 4 checks, 0 MISMATCH
+EXPECTED: stream checks - yes
+EXPECTED: hold65535 checks - yes
+EXPECTED: hold1 checks - yes
+EXPECTED: oom checks - yes
+EXPECTED: control checks - yes
+slope L=1: 89.5 B/key; L=65535: 65618.2 B/key; ratio 733
+EXPECTED: slope ratio above 500 - yes
+done 2026-10-26T17:37:27-06:00
