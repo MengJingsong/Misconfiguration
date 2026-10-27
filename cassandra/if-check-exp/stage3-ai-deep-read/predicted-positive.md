@@ -6,8 +6,11 @@ queue: the judgement is made: what remains is the write-up (all nine
 questions of [`../README.md` §5](../README.md#5-required-content-per-if-check-case),
 citations checked against the pinned tag).
 
-An entry leaves this file when its case file lands in `cases/` and its row is
-added to [`_INDEX.md`](_INDEX.md). Nothing else belongs here — rows still
+An entry in the write-up queue leaves this file when its case file lands in `cases/` and its row is
+added to [`_INDEX.md`](_INDEX.md). An entry in the *stage-4 table* at the end (since
+2026-10-27) stays until stage 4 closes the case and its outcome class is in
+[`_INDEX.md`](_INDEX.md) §1: stage 3's positive estimate is the prediction, stage 4 the
+true result. Nothing else belongs here — rows still
 *awaiting* a read live in
 [`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md),
 which is stage 3's 3a queue, and rows read but not settled live in
@@ -36,3 +39,14 @@ no autonomous file exists for either). Citations checked against the clone at
 > already in the `cdc_total_space` case file (applied 2026-09-23). Earlier
 > references to this file (for example from `undetermined.md` §6 and §7 and
 > `predicted-negative.md`) point at that trail; read it at commit `98b8eb3`.
+
+## Positive estimates awaiting stage 4 (since 2026-10-27)
+
+Case files whose own estimate is **positive**; each stays here, as the prediction, until
+stage 4 closes it. Both lines were in [`predicted-negative.md`](predicted-negative.md) before the
+write-up and changed estimate when the case was written (the old entry there points here).
+
+| Constraint | Check site | Case file | Estimate and limit | Was in predicted-negative |
+|---|---|---|---|---|
+| `SelectStatement.DEFAULT_PAGE_SIZE` (hard-coded 10000) | `DataLimits.java:1041` (`CQLGroupByLimits.onClose`, `rowLimit`) | [`default_page_size-cqlgroupbylimits_onclose-rowlimit`](cases/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md) | Positive with a stated limit: caps the live rows read per internal sub-read of an un-paged GROUP BY query, not bytes and not groups. | §10 |
+| `DiagnosticEventMemoryStore.maxSize` (hard-coded 200) | `DiagnosticEventMemoryStore.java:56` | [`diagnostic_event_memory_store_max_size-store-keyhead`](cases/diagnostic_event_memory_store_max_size-store-keyhead--autonomous.md) | Positive with a caveat: caps the events held on-heap per event class (a count, not bytes). | §10 |

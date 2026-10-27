@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 78 | 78 |
+| Set A | 159 | 88 | 78 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -371,3 +371,32 @@ case file (CSV rows 81-159; row 7 skipped, it is settled as a second check site 
 | 157 | `schema/KeyspaceMetadata.java:68` | `schemaconstants_name_length-validatekeyspacename-keyspacename` |
 | 158 | `schema/TableMetadata.java:517` | `table_name_length-validatetablename-name_length` |
 | 159 | `utils/memory/NativeAllocator.java:194` | `none-allocateoversize-peer` (no constraint) |
+
+## Trace-back cases completed into case files (2026-10-27)
+
+Decisions (Jingsong, 2026-10-27): complete **all 48** cases listed in `traceback-only/_INDEX.md` into full
+`cases/<stem>--autonomous.md` files (stage 3 only; stage 4 and the outcome class come later); give each agent its A1 text to
+verify and build on (the no-leakage rule is relaxed for this job); delete `traceback-only/` only when all 48 are filed.
+The 31 yaml / JVM-property trace-backs are not completed and go with the folder (they stay in git history, commit `7098349`).
+
+**Batch 1 (10 cases, rows 81-84, 86, 88, 89, 105, 106, 136):** 8 negative, 2 positive (`default_page_size-cqlgroupbylimits_onclose-rowlimit`,
+`diagnostic_event_memory_store_max_size-store-keyhead`). Written by fresh Agent-tool subagents (playbook, template, `file:line` and the A1 only),
+filed by hand with `_INDEX.md` §1 and §4 rows and the CSV `case_file` column; Stage 4 / Outcome class cells empty. Checked by hand: the `~`
+line numbers the agents left approximate (rows 81, 88, 89), one muddled B3f sentence (row 88), and the model name in the Session field was removed
+from the filed files. Not re-checked: the other citations; CASSANDRA-10707 (row 81) and CASSANDRA-6271 (row 84) are cited from memory and flagged as such in the files.
+Overlap: rows 88 and 89 use the same constant as the closed case `WRITE_BUFFER_SIZE-append-remaining` (`HintsWriter.java:237`) at other check sites (`:205`, `:214`).
+
+**Stage-3 file updates:** `_INDEX.md` Master Index has a new last column **Type** (all 145 rows). Values: `yaml entry`, `JVM property`,
+`per-table/per-index option`, `hard-coded constant`, `runtime-queried`, `query parameter` (CQL `LIMIT`, `PER PARTITION LIMIT`, `GROUP BY` limits, 9 existing cases), `none`.
+The 135 older rows were typed by three read-only subagents from the case files and were not re-checked one by one (uncertain: `maxHintsInProgress`, typed
+`runtime-queried`; `local_system_data_file_directory`, typed `hard-coded constant` for its `ONE_GIB` threshold). Fifteen older rows had a stray empty cell
+(`negative || [Unit ...`) that shifted their columns; it was removed. `predicted-negative.md`: 30 targets that stage 3 had rejected now carry a
+"Trace-back 2026-10-27, rejected (no constraint | not a memory/disk cap)" note with evidence (10 no constraint, 20 not a memory/disk cap), and the 8 negative cases link their
+case files; `predicted-positive.md` has a new table "Positive estimates awaiting stage 4" for the 2 positive estimates (their old `predicted-negative.md` entries point to it).
+Two corrections found while doing this: `QueryProcessor.java:251` is the empty-key test (the trace-back followed the adjacent `:259` size check), and
+`ColumnFamilyStore.java:2185` is the snapshot-name length check (the old entry said "a ratio lies in [0, 1]"). `_INDEX.md` §2 (coverage summary) was already out of date and was not touched.
+
+**Rule:** a case's stage-3 estimate is its prediction and the stage-4 outcome class its true result (true / false positive / negative); the line stays in
+`predicted-positive.md` / `predicted-negative.md` until stage 4 closes it.
+
+**Remaining (38 of 48), CSV rows:** 87, 90-101, 121-126, 129, 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: 10 of these, then the same filing steps.

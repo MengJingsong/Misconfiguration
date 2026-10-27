@@ -121,10 +121,10 @@ The limits they validate are enforced elsewhere.
 | `DatabaseDescriptor.java:911`, `:914`, `:978`, `:981`, `:984`, `:987` | A message size must not exceed the in-flight and reserve caps. |
 | `DatabaseDescriptor.java:1016` (2 units), `:4093`, `:5347` (2 units) | Startup range checks. |
 | `GuardrailsOptions.java:1219`, `:1257` | A guardrail's fail threshold must not be below its warn threshold. |
-| `StorageAttachedIndexOptions.java:41`; `IndexMode.java:190`; `SAICodecUtils.java:129` (2 units) | Index option checks; SASI's flush memory is clamped to 100 GiB. |
+| `StorageAttachedIndexOptions.java:41`; `IndexMode.java:190`; `SAICodecUtils.java:129` (2 units) | Index option checks; SASI's flush memory is clamped to 100 GiB.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `SAICodecUtils.java:129` (`checkBlockSize`) tests a block size against `AbstractBlockPackedWriter.MIN_BLOCK_SIZE` (64) and `MAX_BLOCK_SIZE` (`1 << 27`), `AbstractBlockPackedWriter.java:34-35`: hard-coded format-sanity bounds, not settable. |
 | `CQLSSTableWriter.java:539`; `CompressionParams.java:352`, `:456#2` | Writer and compression option checks. |
-| `KeyspaceMetadata.java:68`; `TableMetadata.java:517`; `CreateIndexStatement.java:213` | Schema checks: a name fits its length. |
-| `ColumnFamilyStore.java:2185` | A ratio lies in [0, 1]. |
+| `KeyspaceMetadata.java:68`; `TableMetadata.java:517`; `CreateIndexStatement.java:213` | Schema checks: a name fits its length.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `SchemaConstants.NAME_LENGTH` = 48 (`SchemaConstants.java:75`) for `KeyspaceMetadata.java:68` and `CreateIndexStatement.java:213`; `TABLE_NAME_LENGTH` = 222 (`SchemaConstants.java:91`) for `TableMetadata.java:517`. Hard-coded name-length limits so file and directory names fit. |
+| `ColumnFamilyStore.java:2185` | A ratio lies in [0, 1].<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** Correction: `ColumnFamilyStore.java:2185` is `snapshotName.length() > SchemaConstants.FILENAME_LENGTH` (255, `SchemaConstants.java:80`) in the snapshot-name validation, enforced only when `cassandra.snapshot.validation` is true; it is not a ratio test. |
 | `StorageService.java:6889` (2 units), `:6905` (2 units) | JMX setter range checks (e.g. the growth factor in [1.2, 5]). |
 | `InMemoryTrie.java:64` (2 units) | Validates the trie size threshold; see [Observations](#observations-for-target-3) on its property. |
 | `RepairTokenRangeSplitter.java:181` | Validates two repair options against each other. |
@@ -162,14 +162,14 @@ not at all). Most limits here are encoding or type limits, not configuration.
 | `NativeCell.java:100` `size > Integer.MAX_VALUE` | One native cell over 2 GiB; turns an overflow into a clean exception. |
 | `OffHeapBitSet.java:43` `wordCount > Integer.MAX_VALUE` | One bloom filter over 16 GiB. |
 | `DataOutputBuffer.java:152` `saturatedSize <= capacity()` | One buffer that can no longer grow past `MAX_ARRAY_SIZE`. Contrast `IndexSummaryBuilder.java:204` (a filed case), whose type bound caps a structure that grows with data. |
-| `QueryProcessor.java:259`, `:758`; `Validation.java:51`; `ClusteringPrefix.java:278`, `:284`; `CassandraIndex.java:618` | One key, clustering or indexed value over the 65,535-byte unsigned-short length. |
+| `QueryProcessor.java:259`, `:758`; `Validation.java:51`; `ClusteringPrefix.java:278`, `:284`; `CassandraIndex.java:618` | One key, clustering or indexed value over the 65,535-byte unsigned-short length.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `CassandraIndex.java:618` checks the indexed value against `FBUtilities.MAX_UNSIGNED_SHORT` = 0xFFFF (`FBUtilities.java:158`), a hard-coded serialization-format limit, not settable. |
 | `SortedTableWriter.java:169`, helper `verifyPartition()`; `UnbufferedDataOutputStreamPlus.java:274` | One partition key, or one `writeUTF` string, over the same length. |
 | `CacheService.java:504`; `ClientWarn.java:79`; `ByteBufferUtil.java:766` | A saved cache key, the client-warning list, one buffer: the same encoding bound. |
 | `FrameEncoderCrc.java:71`; `FrameEncoderLZ4.java:73`; `FrameEncoderUnprotected.java:53` | The 128 KiB frame payload. |
 | `StreamingMultiplexedChannel.java:231` | The 1 GiB stream control message. |
-| `BlockBalancedTreeWriter.java:651`; `AbstractTokenTreeBuilder.java:297`, `:323`; `OnDiskIndexBuilder.java:598` | An index file format field. |
+| `BlockBalancedTreeWriter.java:651`; `AbstractTokenTreeBuilder.java:297`, `:323`; `OnDiskIndexBuilder.java:598` | An index file format field.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `BlockBalancedTreeWriter.java:651` guards Lucene's `ArrayUtil.MAX_ARRAY_LENGTH` (the Java array-length limit) for `bytesPerValue * numLeaves`; `TokenTreeBuilder.MAX_OFFSET` = 2^47-1 (`TokenTreeBuilder.java:37`) for `AbstractTokenTreeBuilder.java:297`; `OVERFLOW_TRAILER_CAPACITY` = 8 (`TokenTreeBuilder.java:35`) for `:323`; `MAX_KEYS_SPARSE` = 5 (`OnDiskIndexBuilder.java:575`) for `OnDiskIndexBuilder.java:598`. All hard-coded, not settable. |
 | helper `OutboundConnection.isMaxPendingCount()` | Saturation of the packed pending-count field inside the filed send-queue case's `acquireCapacity()` (`OutboundConnection.java:391`): a type bound, not the byte cap. |
-| `CodecUtils.java:101`, `:250` | Protocol v1/v2's 65,535 elements or bytes per collection. |
+| `CodecUtils.java:101`, `:250` | Protocol v1/v2's 65,535 elements or bytes per collection.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `CodecUtils.java:101` (65535 elements) and `:250` (65535 bytes) are hard-coded literals from the 2-byte length field of native protocol v1/v2; not settable. |
 | `StorageAttachedIndex.java:503` | The ANN top-*k* cap per query. |
 | `MappedBuffer.java:63`, `:105` (2 units), `:119` (2 units); `Memory.java:147#3`, `:188` (3 units) | Position, limit and copy bounds that throw `IndexOutOfBounds`. |
 | `AsyncMessageOutputPlus.java:96` | A serialized size that disagrees with the declared one. |
@@ -190,14 +190,14 @@ check only sets how it is split.
 | `IncrementalTrieWriterPageAware.complete():167` `nodeSize + branchSize < maxBytesPerPage` | Node placement within pages; everything is written. |
 | `IncrementalTrieWriterPageAware.java:125`, `:127`, `:135`, `:141`, `:213`, `:215` | Page packing, as `:167`. |
 | `HintsWriteExecutor.java:247`, helper `flushInternal()` `session.position() >= maxHintsFileSize` | Rolls to a new hints file; every hint is written. |
-| `HintsWriter.java:205`, `:214` | Hints buffer written out and the next started. |
+| `HintsWriter.java:205`, `:214` | Hints buffer written out and the next started.<br>Case files (2026-10-27, estimate negative): [`hints_write_buffer_size-append-hint_remaining`](cases/hints_write_buffer_size-append-hint_remaining--autonomous.md) (`:205`), [`write_buffer_size-append-hint`](cases/write_buffer_size-append-hint--autonomous.md) (`:214`). |
 | `SSTableSimpleUnsortedWriter.java:110` `currentSize > maxSStableSizeInBytes` | `sync()` and a new SSTable (bulk loader). |
 | helper `SSTableSimpleWriter.shouldSwitchToNewWriter()` | Same, for the sorted writer. |
 | `BigFormatPartitionWriter.java:213`; `BtiFormatPartitionWriter.java:82` | Close a row-index block at `column_index_size`; the read-side heap of those entries is the filed `column_index_cache_size` and `row_index_read_size_fail_threshold` cases. |
 | `PerSSTableIndexWriter.java:247` `currentBuilder.estimatedMemoryUse() < maxMemorySize` | Over the threshold a segment flush starts and a new builder is used; the token was added first. `maxMemorySize` is `1GiB` for flush, else `maxCompactionFlushMemoryInBytes` (`:365-369`). SASI. |
 | `NamedMemoryLimiter.usageExceedsLimit():55`, read at `SSTableIndexWriter.shouldFlush():248` | SAI twin of `PerSSTableIndexWriter.java:247`. `limitBytes` is `segment_write_buffer_size` (1,024 MiB, shared node-wide, `V1OnDiskFormat.java:126-128`); over it a builder flushes and starts another, and the term is still added (`SSTableIndexWriter.java:225`). A soft target. |
-| `BlockBalancedTreeWriter.java:528`; `AbstractBlockPackedWriter.java:62`; `PostingsWriter.java:222` | Index block cadence. |
-| `AbstractTokenTreeBuilder.java:520`; `OnDiskIndexBuilder.java:497` | SASI block cadence. |
+| `BlockBalancedTreeWriter.java:528`; `AbstractBlockPackedWriter.java:62`; `PostingsWriter.java:222` | Index block cadence.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `BlockBalancedTreeWriter.java:528`: `DEFAULT_MAX_POINTS_IN_LEAF_NODE` = 1024 (`:96`), hard-coded leaf size; `AbstractBlockPackedWriter.java:62`: `blockIndex == blockValues.length`, a buffer-full flush at hard-coded block sizes (`NumericValuesWriter.BLOCK_SIZE` 128 and `MONOTONIC_BLOCK_SIZE` 16384); `PostingsWriter.java:222`: `BLOCK_SIZE` = 128 (`:89`), a fixed postings-per-block format parameter. |
+| `AbstractTokenTreeBuilder.java:520`; `OnDiskIndexBuilder.java:497` | SASI block cadence.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `AbstractTokenTreeBuilder.java:520`: `TOKENS_PER_BLOCK` = 248 (`TokenTreeBuilder.java:36`); `OnDiskIndexBuilder.java:497`: `SUPER_BLOCK_SIZE` = 64 (`OnDiskIndexBuilder.java:129`). Hard-coded on-disk layout parameters. |
 | `SSTableRewriter.java:156` | Reopens the new SSTable early every `sstable_preemptive_open_interval`: I/O scheduling. |
 | `SequentialWriter.java:227` `bytesSinceTrickleFsync >= trickleFsyncByteInterval()` | Triggers an fsync: when data is forced to disk, not how much is written. |
 | `Flusher.java:152`, `:183`, `:282`, `:303`, `:332`, `:345` (`MAX_FRAMED_PAYLOAD_SIZE`, flush-buffer bookkeeping) | How outbound response bytes are framed; buffers are sized to the response on either branch. |
@@ -218,9 +218,9 @@ branch allocates or moves the same amount somewhere else.
 | `FrameDecoderWith8bHeader.java:114`, `:129` | A partial frame stashed or decoded. |
 | `ColumnFamilyStore.java:1931`, helper `isFilterFullyCoveredBy()` | A row served from the row cache or from SSTables. |
 | `SimpleClient.java:770`, `:777`, `:818`, `:838` | The client side (stress and tests), not node code. |
-| `TrieMemoryIndex.java:228`; `RangeTombstoneList.java:213` | Recursive or iterative insertion; a merge or a per-item add. |
-| `VectorMemoryIndex.java:190`, `:229`, helper `VectorIndexSegmentSearcher.shouldUseBruteForce()` | Brute-force or graph search. |
-| `RandomAccessReaderAdapter.java:69`, `:117` | A read across a region boundary through a temporary buffer. |
+| `TrieMemoryIndex.java:228`; `RangeTombstoneList.java:213` | Recursive or iterative insertion; a merge or a per-item add.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `TrieMemoryIndex.java:228`: `MAX_RECURSIVE_KEY_LENGTH` = 128 (`TrieMemoryIndex.java:64`), hard-coded, only picks the insertion path in `addTerm`.<br>**Trace-back 2026-10-27, rejected (no constraint):** `RangeTombstoneList.java:213` in `addAll`: `size > 10 * tombstones.size` is a performance heuristic choosing `add()` or a merge (comment at `:196-211`). |
+| `VectorMemoryIndex.java:190`, `:229`, helper `VectorIndexSegmentSearcher.shouldUseBruteForce()` | Brute-force or graph search.<br>**Trace-back 2026-10-27, rejected (no constraint):** `shouldUseBruteForce` (`VectorIndexSegmentSearcher.java:349`, `numRows <= maxBruteForceRows`) is a cost heuristic for brute-force versus graph search. |
+| `RandomAccessReaderAdapter.java:69`, `:117` | A read across a region boundary through a temporary buffer.<br>**Trace-back 2026-10-27, rejected (no constraint):** `RandomAccessReaderAdapter.java:69` and `:117` compare the requested float or int count with what remains in the current buffered region; the region size was not traced to a setting. |
 | helper `ByteBufferUtil.canMinimize()` | Whether a buffer can be trimmed. |
 
 ## 6. Growth and layout of a structure
@@ -244,7 +244,7 @@ ceiling. The item is stored on both branches, and the "full" branch allocates
 | `BTree$LeafBuilder.copy():2575`, `:2608`, `.prepend():2700`; `$BranchBuilder.prepend():2956`, `.copyPreceding():3185` `count + length > MAX_KEYS` | Node fan-out (`MAX_KEYS = BRANCH_FACTOR - 1`, from `cassandra.btree.branchshift`); keys spill into the next node. |
 | `BTree.java:137`, `:231`, `:2530`, `:2558`, `:2712`, `:2832`, `:3064`; `BTreeRemoval.java:88`, `:90`, `:99` | Splitting, overflowing or redistributing B-tree nodes; all keys stored. |
 | helpers `BTree$LeafOrBranchBuilder.isSufficient()`, `mustRedistribute()` | Same. |
-| `NativeAllocator.java:166`; `SafeMemoryWriter.java:52`; `BufferPoolAllocator.java:121` | Size a region or resize a buffer. |
+| `NativeAllocator.java:166`; `SafeMemoryWriter.java:52`; `BufferPoolAllocator.java:121` | Size a region or resize a buffer.<br>Case file (2026-10-27, estimate negative): [`max_region_size-tryswapregion-minsize`](cases/max_region_size-tryswapregion-minsize--autonomous.md) (`NativeAllocator.java:166`). |
 | helper `StreamingTombstoneHistogramBuilder$DataHolder.isFull()` | Merges histogram bins in an array allocated once. |
 | `InMemoryTrie.java:145` | The next trie chunk is allocated when the current one is used up. |
 
@@ -276,7 +276,7 @@ corrupt or short input.
 | If statement | Reason rejected |
 |---|---|
 | `TrackedDataInputPlus.checkCanRead():184` `limit >= 0 && bytesRead + size > limit` | The only production site that passes a limit is `UnfilteredSerializer.deserializeRowBody():587` with `rowSize` read from the SSTable (`:585`). The other four construction sites (`CassandraStreamReader.java:134`, `CassandraCompressedStreamReader.java:76`, `HintMessage.java:157`, `RowIndexEntry.java:557`) use `limit = -1` (`:40-43`), which disables the guard. |
-| `ChecksummedDataInput.checkLimit():161` `getPosition() + length > limit` | A digest-boundary guard that throws. |
+| `ChecksummedDataInput.checkLimit():161` `getPosition() + length > limit` | A digest-boundary guard that throws.<br>**Trace-back 2026-10-27, rejected (no constraint):** `checkLimit` compares against `limit`, which `HintsReader.readHint` and `readBuffer` set from each hint's own CRC-validated size (`HintsReader.java:234`, `:340`); no setting is involved. |
 | `VIntCoding.getUnsignedVInt():162`, `:211` `readerIndex + size > readerLimit` | Bounds reading one vint within a buffer, returning `-1`. |
 | `CBUtil.java:457`, `:666`; `EncryptionUtils.java:197` | The bytes left in a message, a block's declared size. |
 
@@ -299,7 +299,7 @@ done rather than bytes held.
 |---|---|
 | `SEPExecutor.java:373`; `SEPWorker.java:165`, `:282`, `:330`, `:342`; `SharedExecutorPool.java:137` | Thread-pool permits: how many tasks run at once. **Re-examine:** the same reasoning was refuted at stage 4 for `concurrent_compactors` (usage = tasks × per-task bytes). `SEPExecutor.java:196` (`takeWorkPermit`, `concurrent_writes`) left this row on 2026-10-21, verified at stage 4 as Confirmed — does not cap ([case](cases/concurrent_writes-takeWorkPermit-workPermits--autonomous.md), `_INDEX.md` §1): excess mutations queue unbounded on the heap, 887.5 MiB at pool size 0. That run tested only `:196` and never made the pool bind under load, so the lines left here stay unverified. **`SEPExecutor.java:165`** (`takeTaskPermit`, pool `maximumPoolSize`) left this row on 2026-10-21 ([case](cases/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md)): unit Confirmed — does not cap (queued heap 125 MiB at every pool size); cluster Not confirmed (BIND-5). That run made the pool bind (Active = v at 1 · 8 · 32 · 128): for **large internode mutations** (> 64 KiB, deserialized only when a worker runs them) heap follows running tasks × per-task bytes (live +5.5 → +70.2 MiB) while the queue waits off heap, bounded by the receive reserve; small mutations are flat. So the queue is uncapped at `:196` and `:165`, and the `concurrent_compactors` pattern holds for heap on the large-message path only. `ReadStage` and `Native-Transport-Requests` have no binding test yet. |
 | `PartitionDenylist.java:419`, `:445` `results.size() > limit` | Rule 3 too: the result set is fully built before the check, which then logs and truncates. |
-| `DataLimits.java:993`, `:1000`, `:1041` (2 units); helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()` | Same: the query's limits or page size. |
+| `DataLimits.java:993`, `:1000`, `:1041` (2 units); helpers `GroupByAwareCounter.isDone()`, `isDoneForPartition()` | Same: the query's limits or page size.<br>`DataLimits.java:1041`: estimate changed to **positive** at the 2026-10-27 write-up; its entry is now in [`predicted-positive.md`](predicted-positive.md) (case file [`default_page_size-cqlgroupbylimits_onclose-rowlimit`](cases/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md)). |
 | `ExpirationDateOverflowHandling.java:82` `ttl + nowInSecs > ...MaxDeletiontionTime()` | A timestamp-overflow guard (CASSANDRA-14092). |
 | `ContentionStrategy.java:401` `minWaitMicros + minDeltaMicros > maxWaitMicros` | Microsecond back-off arithmetic. |
 | `RepairTokenRangeSplitter.java:312`, `:360` `... < maxBytesPerSchedule` | Repair work per schedule: bytes examined, a throughput budget. `:312` only chooses to merge assignments. |
@@ -312,8 +312,8 @@ done rather than bytes held.
 | helper `StartupClusterConnectivityChecker$AckMap.incrementAndCheck()` | A count of acks. |
 | `DiagnosticSnapshotService.java:147` | Snapshot ranges. |
 | `TopPartitionTracker.java:239` | A top-*N* report per table (`max_top_size_partition_count`, default 10): negligible. |
-| `LogMessagesTable.java:193`; `VirtualTableAppender.java:125` | The logs virtual table keeps at most `cassandra.virtual.logs.max.rows` messages (default 50,000) and evicts the oldest; the appender is off in the shipped `logback.xml`. Entries are unsized. |
-| `DiagnosticEventMemoryStore.java:56` | Keeps 200 events; diagnostics are off by default. |
+| `LogMessagesTable.java:193`; `VirtualTableAppender.java:125` | The logs virtual table keeps at most `cassandra.virtual.logs.max.rows` messages (default 50,000) and evicts the oldest; the appender is off in the shipped `logback.xml`. Entries are unsized.<br>Case file (2026-10-27, estimate negative): [`logs_virtual_table_default_rows-addtobuffer-messagebuffer_size`](cases/logs_virtual_table_default_rows-addtobuffer-messagebuffer_size--autonomous.md) (`VirtualTableAppender.java:125`). |
+| `DiagnosticEventMemoryStore.java:56` | Keeps 200 events; diagnostics are off by default.<br>Estimate changed to **positive** at the 2026-10-27 write-up; its entry is now in [`predicted-positive.md`](predicted-positive.md) (case file [`diagnostic_event_memory_store_max_size-store-keyhead`](cases/diagnostic_event_memory_store_max_size-store-keyhead--autonomous.md)). |
 | `Ref.java:435`; `LightweightRecycler.java:69` `pool.size() < capacity()` | A recycler pool of 1,024 objects: keep or leave to GC; negligible and not tunable. |
 | `LimitingRebufferer.java:55`, `:58` | Permits from a `RateLimiter` per chunk (compaction and streaming throughput): speed, not bytes. |
 
@@ -327,8 +327,8 @@ whether an object is created.
 | `LeveledCompactionTask.java:95` `l0SSTableCount > 1` | Which SSTable is treated as "largest" for splitting. |
 | `CompactionTask.java:479`; `LeveledManifest.java:371` | A running maximum (oldest, latest). |
 | `UnifiedCompactionStrategy.java:617`, `:671`, `:768`, `:782`; `Overlaps.java:205` | Which SSTables to compact and how to bucket them. |
-| `unified/Controller.java:305` `count > MAX_SHARD_SPLIT` | Clamps a shard-split count; compaction proceeds with fewer shards. |
-| `AtomicBTreePartition.java:272`, helpers `updateWastedAllocationTracker()`, `useLock()` | Switches a hot partition from CAS to a lock once wasted allocation passes 10 MiB per interval: a concurrency strategy. |
+| `unified/Controller.java:305` `count > MAX_SHARD_SPLIT` | Clamps a shard-split count; compaction proceeds with fewer shards.<br>Case file (2026-10-27, estimate negative): [`max_shard_split-getnumshards-count`](cases/max_shard_split-getnumshards-count--autonomous.md). |
+| `AtomicBTreePartition.java:272`, helpers `updateWastedAllocationTracker()`, `useLock()` | Switches a hot partition from CAS to a lock once wasted allocation passes 10 MiB per interval: a concurrency strategy.<br>Case files (2026-10-27, estimate negative): [`excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2`](cases/excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2--autonomous.md) (`:272`), [`excess_waste_bytes-updatewastedallocationtracker-wastedbytes`](cases/excess_waste_bytes-updatewastedallocationtracker-wastedbytes--autonomous.md) (`updateWastedAllocationTracker()`), [`excess_waste_bytes-uselock-wastetracker`](cases/excess_waste_bytes-uselock-wastetracker--autonomous.md) (`useLock()`). |
 | `StreamSession.java:894`, `:913` | Skip empty stream summaries before the disk check. |
 | helper `StandaloneSplitter.isSSTableLargerEnough()` | The offline `sstablesplit` tool. |
 
@@ -340,11 +340,11 @@ or "unthrottled", a CAS or tracker sentinel, a reference count reaching zero.
 | If statement | Reason rejected |
 |---|---|
 | `CompactionTask.java:318` `count == 0` | Early return on an empty input set. |
-| `QueryProcessor.java:251`; `Validation.java:47`; `UDFDataType.java:177` | An empty key or value. |
-| `StorageAttachedIndex.java:791`; `SSTableIndexWriter.java:221`; `SegmentBuilder.java:260` | An empty term or index. |
+| `QueryProcessor.java:251`; `Validation.java:47`; `UDFDataType.java:177` | An empty key or value.<br>**Trace-back 2026-10-27, rejected (no constraint):** `QueryProcessor.java:251` is `key == null` or `key.remaining() == 0` ("Key may not be empty"; compared with the literal 0); the adjacent size check at `:259` uses `FBUtilities.MAX_UNSIGNED_SHORT`, see §3.<br>**Trace-back 2026-10-27, rejected (no constraint):** `Validation.java:47` is the same empty-key test (`key == null` or `key.remaining() == 0`, `Validation.java:48` throws); the literal 0, no setting.<br>**Trace-back 2026-10-27, rejected (no constraint):** `UDFDataType.java:177` in `compose` tests `buffer == null` or (`buffer.remaining() == 0` and `isEmptyValueMeaningless()`): null/empty bookkeeping. |
+| `StorageAttachedIndex.java:791`; `SSTableIndexWriter.java:221`; `SegmentBuilder.java:260` | An empty term or index.<br>**Trace-back 2026-10-27, rejected (no constraint):** `SSTableIndexWriter.java:221` is `term.remaining() == 0 && skipsEmptyValue()`: a data-validity check on the column type.<br>**Trace-back 2026-10-27, rejected (not a memory/disk cap):** `SegmentBuilder.java:260` is only `getRowCount() == 0`; the real comparison is `:266`, `ssTableRowId - segmentRowIdOffset > lastValidSegmentRowID` against `LAST_VALID_SEGMENT_ROW_ID` = `(Integer.MAX_VALUE/2)-1` (`SegmentBuilder.java:46`), a hard-coded per-segment row-id cap, not settable. |
 | `ColumnFamilyStore.java:2501`, `:2508`, helpers `isCounterCacheEnabled()`, `isRowCacheEnabled()` | Cache on or off; the caches' capacities are enforced inside the cache implementations. |
 | `CounterMutation.java:213`; `MonitoringTask.java:221`; `ThrottledUnfilteredIterator.java:234` | `0` meaning off or unthrottled. |
-| `AtomicBTreePartition.java:283`, `:300` (2 units); `NativeAllocator.java:194` | CAS or tracker sentinels. |
+| `AtomicBTreePartition.java:283`, `:300` (2 units); `NativeAllocator.java:194` | CAS or tracker sentinels.<br>**Trace-back 2026-10-27, rejected (no constraint):** `AtomicBTreePartition.java:300` (`avoidReservedValues`) only keeps the tracker value off the sentinels `TRACKER_NEVER_WASTED` and `TRACKER_PESSIMISTIC_LOCKING` (`:57-58`).<br>**Trace-back 2026-10-27, rejected (no constraint):** `NativeAllocator.java:194` asserts `region.allocate(size) != -1` for a region created with capacity equal to `size` (`:190`); the nearby `MAX_CLONED_SIZE` (128 KiB, `:47`) only routes large allocations. |
 | `ClientResourceLimits.java:176` | A sentinel test. |
 | helper `CQLSSTableWriter$Builder.isMaxSSTableSizeUnset()` | An unset option. |
 
