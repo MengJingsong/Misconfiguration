@@ -102,7 +102,7 @@ Two cases on one node need separate copies, data directories, JMX ports and Byte
 
 | | Targets | Written up | Stage 4 closed |
 |---|---|---|---|
-| Set A | 159 | 88 | 78 |
+| Set A | 159 | 98 | 78 |
 
 **Batch log.** 2026-10-24, batch 1 (CSV rows 4, 5, 6, 8, 9; §6 `RangeTombstoneList` and §4
 `CommitLogSegment`): `range_tombstone_list_growth_factor` ×3 true negative (do not cap), `commitlog_segment_size` ×2
@@ -399,8 +399,6 @@ Two corrections found while doing this: `QueryProcessor.java:251` is the empty-k
 **Rule:** a case's stage-3 estimate is its prediction and the stage-4 outcome class its true result (true / false positive / negative); the line stays in
 `predicted-positive.md` / `predicted-negative.md` until stage 4 closes it.
 
-**Remaining (38 of 48), CSV rows:** 87, 90-101, 121-126, 129, 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Next batch: 10 of these, then the same filing steps.
+**Batch 2 (10 cases, rows 87, 90-98):** all 10 negative (a framing guard, `MAX_UNSIGNED_SHORT` on an indexed value, and the SAI/SASI leaf, block, offset and token-tree constants); filed with the same steps as batch 1, with the agents given the refreshed template (link rule) and told to avoid `~` line numbers. They linked the declaration and if statement themselves; three files (rows 90, 91, 96) needed one added sentence naming the check. Agent corrections to the A1 inputs worth keeping: row 95 the `MAX_OFFSET` check guards only the single-offset path (tokens with two or more offsets bypass it) and for the BIG format the offset is the `Index.db` position; row 97 the token-tree constants are in `TokenTreeBuilder.java`; row 92 the constant is Lucene's (lucene-core 9.7.0), not declared in the Cassandra tree, so A1 has no declaration link; row 87 has no constraint (nearest real cap `max_hints_file_size`, `HintsWriteExecutor.java:247`). Several files carry explicit "not verified" notes (property names, defaults). Not yet re-checked line by line.
 
-**Template rule (2026-10-27):** `_TEMPLATE-autonomous.md` now has a link rule: in an autonomous case file the constraint's declaration (A1) and the if statement (Entry pointer row, A3) must be GitHub permalinks at tag `cassandra-5.0.9`, not plain `file:line`. The 106 autonomous case files filed before batch 1 are not retrofitted; the 10 batch-1 files were updated to the rule on 2026-10-27 (31 links on the entry pointer, the declaration and the if statement; three files got one added sentence naming the check; new sha256 lines in `_INDEX.md` §4). The scratch copy of the template used for agent inputs must be refreshed before the next batch.
-**Master Index fix (2026-10-27):** a blank line inside the `_INDEX.md` §1 table (present since before 2026-10-26) cut the table in two, so the last 35 rows rendered as plain text; removed.
-
+**Remaining (28 of 48), CSV rows:** 99-101, 121-126, 129, 133-135, 137, 139, 140, 144, 147-153, 156-159 (the `traceback-only/_INDEX.md` rows without a case file in `cases/`). Watch row 121: its trace-back followed the adjacent `:259` size check; `QueryProcessor.java:251` is the empty-key test, so the agent input for it must be corrected. Next batch: 10 of these.

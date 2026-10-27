@@ -160,6 +160,16 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [logs_virtual_table_default_rows-addtobuffer-messagebuffer_size](cases/logs_virtual_table_default_rows-addtobuffer-messagebuffer_size--autonomous.md) | A | negative |  |  | hard-coded constant |
 | [`max_region_size-tryswapregion-minsize`](cases/max_region_size-tryswapregion-minsize--autonomous.md) | A | negative |  |  | hard-coded constant |
 | [`max_shard_split-getnumshards-count`](cases/max_shard_split-getnumshards-count--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`none-checklimit-length`](cases/none-checklimit-length--autonomous.md) | autonomous | negative |  |  | none |
+| [`max_unsigned_short-validateindexedvalue-value_remaining`](cases/max_unsigned_short-validateindexedvalue-value_remaining--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`max_points_in_leaf_node-add-leafvaluecount`](cases/max_points_in_leaf_node-add-leafvaluecount--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`max_array_length-checkmaxleafnodecount-numleaves`](cases/max_array_length-checkmaxleafnodecount-numleaves--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`block_size-add-blockindex`](cases/block_size-add-blockindex--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`block_size-writeposting-blocksize`](cases/block_size-writeposting-blocksize--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`max_offset-createentry-offset`](cases/max_offset-createentry-offset--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`overflow_trailer_capacity-createoverflowentry-overflowcollisions`](cases/overflow_trailer_capacity-createoverflowentry-overflowcollisions--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`tokens_per_block-add-pos`](cases/tokens_per_block-add-pos--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
+| [`super_block_size-flushsuperblock-datablockscnt`](cases/super_block_size-flushsuperblock-datablockscnt--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -686,3 +696,13 @@ dated amendment adds a line here with its date and the new hash.
 | `logs_virtual_table_default_rows-addtobuffer-messagebuffer_size--autonomous.md` | `37c372bb13982fdcad9779161668ec4613895f516d832675b5de9bf8eec85416` | 2026-10-27 link rule: declaration and if-statement links added |
 | `max_region_size-tryswapregion-minsize--autonomous.md` | `d3a0f4a045bd327368651b608f8c6d401f41d1f779298aa3d5fcbece871dc28b` | 2026-10-27 link rule: declaration and if-statement links added |
 | `max_shard_split-getnumshards-count--autonomous.md` | `a376207bf450c3ca283333bbe4c2fa7a12847aee92ed16e4fe83c7cfd45a1c07` | 2026-10-27 link rule: declaration and if-statement links added |
+| `none-checklimit-length--autonomous.md` | `870210af488ad6c6cde5720de1fed19d3936da7193ffcb84d529abeaeebf9654` | 2026-10-27 |
+| `max_unsigned_short-validateindexedvalue-value_remaining--autonomous.md` | `fb0de6cca40a1174b0023bf9a016965a240f20bfa7dc85e3c582921e4819b6e3` | 2026-10-27 |
+| `max_points_in_leaf_node-add-leafvaluecount--autonomous.md` | `61e1558c7d6e8fad2193ab35d684d66b81cd87e35cd31d9ff675da75d41d7c00` | 2026-10-27 |
+| `max_array_length-checkmaxleafnodecount-numleaves--autonomous.md` | `323cf9801120c280b646f686ff1c58cb649cddc8ea89a3513a3d09b94a09ad83` | 2026-10-27 |
+| `block_size-add-blockindex--autonomous.md` | `1c81cc0d72bac411522323f2afb9198a1c1a7f60c2d6638918b1de8459451814` | 2026-10-27 |
+| `block_size-writeposting-blocksize--autonomous.md` | `c14c3a24c5b70107465a66a2dcd8849518fd8121e91f05cf8d7a9c2720c1466d` | 2026-10-27 |
+| `max_offset-createentry-offset--autonomous.md` | `2297f857066ca84f1df6d10bed4cd13427b08fd8875689de3ce3951649cb1ff7` | 2026-10-27 |
+| `overflow_trailer_capacity-createoverflowentry-overflowcollisions--autonomous.md` | `f492cda199db7c67b14a538c38fadd2511369ac4258015e34741b3e0e70e8f7a` | 2026-10-27 |
+| `tokens_per_block-add-pos--autonomous.md` | `ca9bcd09a37daee8943d1a285203369af290848006c845af34cb8659e3132dc1` | 2026-10-27 |
+| `super_block_size-flushsuperblock-datablockscnt--autonomous.md` | `839e41ed6ff22e85ca7a596c9cf63299e7b63d603354a3617c537b9e21937b2a` | 2026-10-27 |
