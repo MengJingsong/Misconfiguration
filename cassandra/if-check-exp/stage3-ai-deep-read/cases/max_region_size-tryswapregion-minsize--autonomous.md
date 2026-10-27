@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Entry pointer | `src/java/org/apache/cassandra/utils/memory/NativeAllocator.java:166` |
+| Entry pointer | [`src/java/org/apache/cassandra/utils/memory/NativeAllocator.java:166`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L166) |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Code CLI (Agent-tool subagent), 2026-10-27 |
 | Estimate | `negative`: `MAX_REGION_SIZE` is a hard-coded per-region size ceiling, not a cap on how much off-heap memory a node uses; the total is governed by `memtable_offheap_space` through a separate counter that charges requested bytes, not region capacity. |
@@ -13,7 +13,7 @@
 **A1. The constraint.** (Earlier AI trace verified and corrected.)
 
 - Line 166 is `if (minSize > size)` inside `trySwapRegion(Region current, int minSize)` (`NativeAllocator.java:158-184`). It is a size-selection step, not a limit check: nothing is rejected or blocked at this line. `minSize` is the allocation size passed from `allocate` (`NativeAllocator.java:154`). `size` is `MIN_REGION_SIZE` when there is no current region (`:164`), else `current.capacity * 2` (`:165`). If the request does not fit, `size = Integer.highestOneBit(minSize) << 3` (`:167`), i.e. 4-8x the request. Then `size = Math.min(MAX_REGION_SIZE, size)` (`:168`).
-- The constraint that bounds the result is `MAX_REGION_SIZE`: kind constant (`private final static int`), declared at `NativeAllocator.java:46`, value `1 * 1024 * 1024` = 1 MiB, unit bytes. Companions: `MAX_CLONED_SIZE` = 128 KiB (`:47`), `MIN_REGION_SIZE` = 8 KiB (`:48`). The class comment says regions scale from 8 KiB to 1 MiB and serve allocations up to 128 KiB (`:34-43`).
+- The constraint that bounds the result is `MAX_REGION_SIZE`: kind constant (`private final static int`), declared at [`NativeAllocator.java:46`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L46), value `1 * 1024 * 1024` = 1 MiB, unit bytes. Companions: `MAX_CLONED_SIZE` = 128 KiB (`:47`), `MIN_REGION_SIZE` = 8 KiB (`:48`). The class comment says regions scale from 8 KiB to 1 MiB and serve allocations up to 128 KiB (`:34-43`).
 - Default: a literal, no derivation. Not settable via cassandra.yaml, a `-D` property or JMX; changing it needs a source edit and rebuild.
 - Correction to the earlier trace: the check at :166 does not compare against a limit; and `MAX_REGION_SIZE` does not "cap memtable allocation" in any total sense. Also, the clamp at :168 is never below the request for requests up to 128 KiB (`highestOneBit(131072) << 3` = 1 MiB), so the clamp cannot make a region too small for a request that reaches this path. Requests above 128 KiB never reach `trySwapRegion` (`:144-145`).
 - The class is only in use when `memtable_allocation_type: offheap_objects` (`AbstractAllocatorMemtable.java:106-108` builds `NativePool`; `NativePool.java:28-32` builds `NativeAllocator`). The yaml default is `heap_buffers` (`conf/cassandra.yaml:825`; `Config.java:524`), so by default this code does not run.
@@ -28,6 +28,9 @@
 4. `trySwapRegion` picks the new size (:164-168). It then reuses a stashed race-allocated region of that size from the static `RACE_ALLOCATED` map (`:51-57,171-172`) or mallocs a new one (`:175-176`). `compareAndSet` installs it and adds it to `regions` (`:180-181`); a CAS loser is stashed (up to 8 permits per size, `:212`) or freed (`:182-183`).
 5. Regions are freed only when the allocator is discarded (`setDiscarded`, `:200-206`), so a memtable holds all its regions until flush.
 6. Bypass/overshoot paths: (a) region slack: the unfilled tail of the current region and the abandoned tail of each replaced region are real malloc'd capacity but were never charged (only requested bytes are); (b) one active region per live memtable, so slack scales with the number of tables with non-empty memtables; (c) up to 8 stashed regions per size class (8 KiB..1 MiB, 8 sizes) held globally and uncharged (`:208-227`); (d) oversize regions exceed 1 MiB; (e) the blocking `opGroup` overshoot above.
+
+
+The check itself is the if statement at [`src/java/org/apache/cassandra/utils/memory/NativeAllocator.java:166`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/NativeAllocator.java#L166).
 
 **A4. Other consumers of off-heap memory outside this constraint.** Direct buffers (`BufferPool`/chunk cache `file_cache_size`, `DatabaseDescriptor.java:575-576`), mmap'd commit log and sstable segments, bloom filters / index summaries / compression metadata off-heap, netty direct buffers, JVM metaspace, thread stacks and code cache. All are unaffected by this constant.
 

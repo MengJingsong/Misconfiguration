@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Entry pointer | `src/java/org/apache/cassandra/db/filter/DataLimits.java:1041` |
+| Entry pointer | [`src/java/org/apache/cassandra/db/filter/DataLimits.java:1041`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/filter/DataLimits.java#L1041) |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Code CLI (Agent-tool subagent), 2026-10-27 |
 | Estimate | `positive` with a stated limit: `DEFAULT_PAGE_SIZE` bounds the number of rows each internal sub-read of an un-paged GROUP BY query may return, so transient read-side heap per sub-read should scale with it; it does not bound bytes per row, nor the number of groups in the final result. |
@@ -10,7 +10,7 @@
 
 ## A. Constraint trace
 
-**A1. The constraint.** `SelectStatement.DEFAULT_PAGE_SIZE`, a compile-time constant (not yaml, not a `-D` property, not JMX), declared `public static final int DEFAULT_PAGE_SIZE = 10000;` at `src/java/org/apache/cassandra/cql3/statements/SelectStatement.java:114`. Unit: rows (as an internal row limit; see A2). Default 10000, hard-coded, no derivation. Changing it needs an edit, a rebuild and a restart. (There is an unrelated `SecondaryIndexManager.DEFAULT_PAGE_SIZE = 10000` at `index/SecondaryIndexManager.java:142` and a `BatchlogManager.DEFAULT_PAGE_SIZE = 128` at `batchlog/BatchlogManager.java:91`; they are different constants.)
+**A1. The constraint.** `SelectStatement.DEFAULT_PAGE_SIZE`, a compile-time constant (not yaml, not a `-D` property, not JMX), declared `public static final int DEFAULT_PAGE_SIZE = 10000;` at [`src/java/org/apache/cassandra/cql3/statements/SelectStatement.java:114`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java#L114). Unit: rows (as an internal row limit; see A2). Default 10000, hard-coded, no derivation. Changing it needs an edit, a rebuild and a restart. (There is an unrelated `SecondaryIndexManager.DEFAULT_PAGE_SIZE = 10000` at `index/SecondaryIndexManager.java:142` and a `BatchlogManager.DEFAULT_PAGE_SIZE = 128` at `batchlog/BatchlogManager.java:91`; they are different constants.)
 
 Verification of the earlier trace (checked line by line):
 - `getDataLimits(...)` at `SelectStatement.java:883` replaces `pageSize <= 0` by `DEFAULT_PAGE_SIZE` (`SelectStatement.java:901-902`, comment at 899-900: "Group by and aggregation queries will always be paged internally to avoid OOM"). Correct.
@@ -26,7 +26,7 @@ Verification of the earlier trace (checked line by line):
 2. For GROUP BY (`aggregationSpec != null`) the `pageSize <= 0` shortcut at `SelectStatement.java:338` is not taken, so the statement goes through a pager (`getPager`) wrapped in `AggregationQueryPager` (`service/pager/AggregationQueryPager.java:47-62`, group-by branch at 59-60).
 3. `GroupByPartitionIterator` turns a non-positive page size into `NO_LIMIT` groups (`AggregationQueryPager.java:193-197`), so with an unset client page size one request loops over sub-pages until data ends (`fetchNextRowIterator`, 217-251).
 4. Each sub-page is a normal read command whose limits come from `forGroupByInternalPaging(state)` (`AggregationQueryPager.java:273`), which builds `new CQLGroupByLimits(rowLimit, groupPerPartitionLimit, rowLimit, groupBySpec, state)` (`DataLimits.java:740-748`), so the group limit of each sub-read is also the row limit.
-5. While reading, `GroupByAwareCounter.incrementRowCount` (`DataLimits.java:984-988`) calls `stop()` once `rowsCounted >= rowLimit`. `stop()` is `StoppingTransformation.stop()` (`db/transform/StoppingTransformation.java:37`) and ends the iteration of that read.
+5. While reading, `GroupByAwareCounter.incrementRowCount` ([`DataLimits.java:984-988`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/filter/DataLimits.java#L984-L988)) calls `stop()` once `rowsCounted >= rowLimit`. `stop()` is `StoppingTransformation.stop()` (`db/transform/StoppingTransformation.java:37`) and ends the iteration of that read.
 6. At close, `onClose` (line 1033-1048): if a group is still open and neither limit was hit, the end of data is assumed and the last group is counted; otherwise the group stays open and the next sub-page continues from the saved `GroupingState`.
 Outcome at the limit: the sub-read stops after about `rowLimit` live rows, the open group continues in the next sub-page; no error is raised. Overshoot / bypass paths: (a) the cap counts live rows only (`isLive(row)`, `DataLimits.java:1020-1027`), so tombstones and shadowed data are read without being counted (tombstone thresholds are a separate mechanism); (b) bytes per row are unbounded (wide cells); (c) `AGGREGATE_EVERYTHING` queries and DISTINCT (`SelectStatement.java:916-920`) do not use it; (d) the final result still holds one row per group, so many groups grow coordinator memory regardless of this constant; (e) `forPaging` / `CQLGroupByPagingLimits` (`DataLimits.java:701-709`, 1060-1110) use the caller's group page size, replacing the group limit.
 

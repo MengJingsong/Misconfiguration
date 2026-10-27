@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Entry pointer | `src/java/org/apache/cassandra/hints/HintsWriter.java:214` |
+| Entry pointer | [`src/java/org/apache/cassandra/hints/HintsWriter.java:214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriter.java#L214) |
 | Pinned source | `cassandra-5.0.9` |
 | Session / date | Claude Code CLI (Agent-tool subagent), 2026-10-27 |
 | Estimate | `negative`: the 256 KiB constant sizes one fixed direct buffer that is allocated once, so it is not a cap on any quantity that grows with load; hint bytes larger than the remaining space bypass it, and the hint-memory and hint-disk quantities that do grow are bounded elsewhere. |
@@ -10,7 +10,7 @@
 
 ## A. Constraint trace
 
-**A1. The constraint.** `HintsWriteExecutor.WRITE_BUFFER_SIZE`; kind: compile-time constant (not a yaml key, `-D` property, JMX attribute or runtime-queried value). First declared at `src/java/org/apache/cassandra/hints/HintsWriteExecutor.java:50` as `static final int WRITE_BUFFER_SIZE = 256 << 10;`. Unit: bytes. Default (and only) value 262144 B = 256 KiB, the literal shift expression, derived from nothing else. Not settable at runtime or by configuration; changing it needs a source edit and a rebuild/restart. A grep of the `hints` package finds only two uses: the declaration (line 50) and the allocation (line 60). The earlier trace's claims were re-checked against these lines and hold, with one correction: the earlier trace cites `HintsWriter.java:136` and `:179` correctly, but its description of line 214 as "the check" omits that line 205 (`hint.remaining() > buffer.remaining()`) is the flush-first check and line 214 is the second, "fits" check.
+**A1. The constraint.** `HintsWriteExecutor.WRITE_BUFFER_SIZE`; kind: compile-time constant (not a yaml key, `-D` property, JMX attribute or runtime-queried value). First declared at [`src/java/org/apache/cassandra/hints/HintsWriteExecutor.java:50`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriteExecutor.java#L50) as `static final int WRITE_BUFFER_SIZE = 256 << 10;`. Unit: bytes. Default (and only) value 262144 B = 256 KiB, the literal shift expression, derived from nothing else. Not settable at runtime or by configuration; changing it needs a source edit and a rebuild/restart. A grep of the `hints` package finds only two uses: the declaration (line 50) and the allocation (line 60). The earlier trace's claims were re-checked against these lines and hold, with one correction: the earlier trace cites `HintsWriter.java:136` and `:179` correctly, but its description of line 214 as "the check" omits that line 205 (`hint.remaining() > buffer.remaining()`) is the flush-first check and line 214 is the second, "fits" check.
 
 **A2. What it caps.** Off-heap (direct) memory, and only the size of one reused aggregation buffer: `ByteBuffer.allocateDirect(WRITE_BUFFER_SIZE)` at `HintsWriteExecutor.java:60`, held in the final field `writeBuffer` (line 54) for the life of the `HintsWriteExecutor`. The quantity compared at line 214 is `hint.remaining()` (serialized hint plus 12 bytes of entry overhead, `HintsBuffer.java:58`) against `buffer.remaining()` (free space in the aggregation buffer, at most 262144). It does not cap total hint memory, hint bytes on disk or hint size.
 
@@ -24,6 +24,9 @@
 Outcomes: fits means a memory copy, later one channel write; does not fit means a direct channel write. No outcome rejects, drops or errors a hint. Bypass: any hint with serialized size above 262144 B takes the direct write path. Overshoot: none possible for the buffer itself, as it is fixed-size.
 Hint size is limited elsewhere: `HintsBuffer` rejects an entry whose total size exceeds half its slab (`HintsBuffer.java:152`), and the slab size is `max(2 * max_mutation_size, 32 MiB)` (`HintsService.java:79,110`), where `max_mutation_size` defaults to `commitlog_segment_size / 2` (`DatabaseDescriptor.java:898-899`). A hint can therefore be up to about 16 MiB by default, i.e. far above 256 KiB, so the bypass at line 220 is reachable on defaults.
 Hint file size is limited by `max_hints_file_size` (default 128 MiB, `Config.java:447`), checked after each append (`HintsWriteExecutor.java:239,247`), so a file can overshoot it by up to one hint plus nothing from this buffer's size. Per-host disk is limited by `max_hints_size_per_host` (`Config.java:448`, enforced when deciding to hint, `StorageProxy.java:2488-2496`).
+
+
+The check itself is the if statement at [`src/java/org/apache/cassandra/hints/HintsWriter.java:214`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsWriter.java#L214).
 
 **A4. Other consumers.** Off-heap: the `HintsBuffer` slab(s) from `ByteBuffer.allocateDirect(slabSize)` (`HintsBuffer.java:77`) of at least 32 MiB each, with a pool that can hold more than one while a flush is in progress (`HintsBufferPool.java`); hint dispatch reads (`ChecksummedDataInput`, `ChecksummedDataInput.java:56`, using `RandomAccessReader.DEFAULT_BUFFER_SIZE`); the chunk cache, memtable off-heap (if configured), commit log, networking buffers, NIO direct-memory limit shared by all of these. Heap: the hint-serialization objects, `Hint`/`Mutation` copies created by `HintsService.write`. Disk: hint files themselves (every byte of every hint, whichever path line 214 takes), commit log, sstables.
 

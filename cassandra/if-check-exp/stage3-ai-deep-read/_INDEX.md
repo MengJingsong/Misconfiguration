@@ -676,3 +676,13 @@ dated amendment adds a line here with its date and the new hash.
 | `logs_virtual_table_default_rows-addtobuffer-messagebuffer_size--autonomous.md` | `60bf296ed04a6f8aac2f3be7ae7c59ebb2e611b47cef717d371d443a88160302` | 2026-10-27 |
 | `max_region_size-tryswapregion-minsize--autonomous.md` | `bdd517972b5e68cb11efa713d367474701180d5f3c38d5e750a895fd7bcafc1b` | 2026-10-27 |
 | `max_shard_split-getnumshards-count--autonomous.md` | `302ca99017456f8ca8aa507cfbb0f2ab44a571e08b7192b109251deae9412a24` | 2026-10-27 |
+| `default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md` | `7bcbca469812993b7bac3e578096a4fbe08fc1c7229d88b8ac7c83105b00b171` | 2026-10-27 link rule: declaration and if-statement links added |
+| `excess_waste_bytes-updatewastedallocationtracker-wastedbytes--autonomous.md` | `1dee23f975ea2ebb46f2829c95cd28fea2613ee993756d779f65f5544d50794e` | 2026-10-27 link rule: declaration and if-statement links added |
+| `excess_waste_bytes-uselock-wastetracker--autonomous.md` | `5c1929c29570d7ef2ec36da42d0634687712f31a250260d2c57d5daeb6d87a51` | 2026-10-27 link rule: declaration and if-statement links added |
+| `excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2--autonomous.md` | `6ac3d30114c57bb5c572c06d9bccc1563ccfb8037693150b61495a8daa1456e8` | 2026-10-27 link rule: declaration and if-statement links added |
+| `diagnostic_event_memory_store_max_size-store-keyhead--autonomous.md` | `131e8fe5a28672452005adb6f259194cd699386f62e3a7c32cc1acf93144bcd5` | 2026-10-27 link rule: declaration and if-statement links added |
+| `hints_write_buffer_size-append-hint_remaining--autonomous.md` | `8e936e41fe98c1598c06e952dadb51ad8e2761ed5eac55edcae9dcfed9eff26a` | 2026-10-27 link rule: declaration and if-statement links added |
+| `write_buffer_size-append-hint--autonomous.md` | `b1f2e537d2450b05301d11e84c37ba7e44bf0f69982efd70552ac8fc755ad1b7` | 2026-10-27 link rule: declaration and if-statement links added |
+| `logs_virtual_table_default_rows-addtobuffer-messagebuffer_size--autonomous.md` | `37c372bb13982fdcad9779161668ec4613895f516d832675b5de9bf8eec85416` | 2026-10-27 link rule: declaration and if-statement links added |
+| `max_region_size-tryswapregion-minsize--autonomous.md` | `d3a0f4a045bd327368651b608f8c6d401f41d1f779298aa3d5fcbece871dc28b` | 2026-10-27 link rule: declaration and if-statement links added |
+| `max_shard_split-getnumshards-count--autonomous.md` | `a376207bf450c3ca283333bbe4c2fa7a12847aee92ed16e4fe83c7cfd45a1c07` | 2026-10-27 link rule: declaration and if-statement links added |
