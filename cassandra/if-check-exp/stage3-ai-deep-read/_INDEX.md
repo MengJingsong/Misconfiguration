@@ -198,6 +198,13 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`schemaconstants_name_length-validatekeyspacename-keyspacename`](cases/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`table_name_length-validatetablename-name_length`](cases/table_name_length-validatetablename-name_length--autonomous.md) | autonomous | negative |  |  | hard-coded constant |
 | [`none-allocateoversize-peer`](cases/none-allocateoversize-peer--autonomous.md) | autonomous | negative |  |  | none |
+| [`no_constraint-isallzero-vectorelement`](cases/no_constraint-isallzero-vectorelement--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-equals-quantity`](cases/no_constraint-equals-quantity--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-equals-quantity-2`](cases/no_constraint-equals-quantity-2--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-overlaps-iprangeends`](cases/no_constraint-overlaps-iprangeends--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-hasdayprecision-nanoseconds`](cases/no_constraint-hasdayprecision-nanoseconds--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-hasmillisecondprecision-nanoseconds`](cases/no_constraint-hasmillisecondprecision-nanoseconds--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isnegative-duration_fields`](cases/no_constraint-isnegative-duration_fields--autonomous.md) | A | negative |  |  | none |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -766,3 +773,10 @@ dated amendment adds a line here with its date and the new hash.
 | `diagnostic_event_memory_store_max_size-store-keyhead--autonomous.md` | `b9c42a361f7f181b6310be0c27770f9eb4d466674f066b62cd26754a10947855` | 2026-10-27 stage-4 step-0 audit amendments and section D feedback, after run 1 | (frozen version: unit a6fa28c6…bc09, cluster cebc9b08…3ce6, after S1 8074f33d…1f; the hash above is the file after section D was filled) |
 | `trie_2gb_hard_limit-allocateblock-leadbit--autonomous.md` | `72cd2c4d8191ab1abbe519cc2e49d363abe41434e0eb0a3968ad46da74a28bd0` | 2026-10-27 stage-4 step-0 audit amendments and section D feedback, after run 1 | (frozen version: `36b9e61409b9f2ab1bdb3a65db10ed759f9efc27f66c5d130166d8e9b5e0a33c`; the hash above is the file after section D was filled) |
 | `max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous.md` | `f10e4c7ea5b5603fdedbec15b930af4175bc07a9846f35f6c68cfc770cf1b5c8` | 2026-10-27 stage-4 step-0 audit amendments and section D feedback, after run 1 | (frozen version: `e8b3e12937841c504a9594993ae24f87e463a7f004790e408282095ce38e87fc`; the hash above is the file after section D was filled) |
+| `no_constraint-isallzero-vectorelement--autonomous.md` | `92e12dd8cc836d8dfc0d6b6619a40449ce0b327588944a36545b4eff401f8b2f` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-equals-quantity--autonomous.md` | `81d6b77b808458b10d4319490d3a31d0beea633331a9d7522bb114a8acfb68cc` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-equals-quantity-2--autonomous.md` | `58bfe8af0d9cb8f104c9916fcfa8f4153e079f231aead26e99643194c89b761e` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-overlaps-iprangeends--autonomous.md` | `d6768b4ca83a19ba8e749985d666878508e0fd117a9d43d86b67033bf603b775` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-hasdayprecision-nanoseconds--autonomous.md` | `3387b296ce5cdd949b3b527ff1fd76c9deae4c0f508d10fb24645205b33741b8` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-hasmillisecondprecision-nanoseconds--autonomous.md` | `22866b57a4d87a7c13527682fb13823cb01dc51e355926d285aa4517995a52df` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-isnegative-duration_fields--autonomous.md` | `b349cdb5275c07ead14cdfbdc00c33737c4ca9541c3bd4904c7a943edf75a90b` | 2026-10-27 non-config agent, wave 1 |
