@@ -157,7 +157,7 @@ Work in a fresh directory named for your run, and never open, reuse or delete th
 
 **SSH from `pc07`:**
 - Peers: `ssh -o IdentitiesOnly=yes -i /proj/misconfiguration-PG0/.ssh/id_ed25519 jason92@pcNN.cloudlab.umass.edu` works.
-- `ssh pcNN` alone **fails** with `Permission denied (publickey)`. `~/.ssh/config`'s `setup-node: peer` stanzas name `/proj/misconfiguration-PG0/.ssh/cluster_ed25519`, which the peers do not accept. Either pass `-i …/id_ed25519` as above, or add `cluster_ed25519.pub` to each peer's `~/.ssh/authorized_keys`.
+- `ssh pcNN` alone works after `setup-node.sh --peers "..."` is re-run: the `setup-node: peer` stanzas in `~/.ssh/config` now name `/proj/misconfiguration-PG0/.ssh/id_ed25519`, which the peers accept. On a node set up before this change the stanzas still name the old `cluster_ed25519` (refused with `Permission denied (publickey)`); re-run the script, or pass `-i …/id_ed25519` as above.
 - GitHub: `id_ed25519` works for `git push` (the `github.com` stanza).
 
 ## Logs
