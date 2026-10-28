@@ -1,0 +1,17 @@
+# cassandra-stress user profile for the trie_2gb cluster tier (case B3c): one partition per insert, random 2000-byte blob key,
+# 1-byte value, trie memtable, durable_writes = false.
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND durable_writes = false;
+table: t
+table_definition: |
+  CREATE TABLE t (k blob PRIMARY KEY, v blob) WITH memtable = 'trie';
+columnspec:
+  - name: k
+    size: fixed(2000)
+  - name: v
+    size: fixed(1)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries: {}

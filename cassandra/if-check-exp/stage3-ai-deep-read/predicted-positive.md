@@ -43,12 +43,9 @@ no autonomous file exists for either). Citations checked against the clone at
 ## Positive estimates awaiting stage 4 (since 2026-10-27)
 
 Case files whose own estimate is **positive**; each stays here, as the prediction, until
-stage 4 closes it. Both lines were in [`predicted-negative.md`](predicted-negative.md) before the
-write-up and changed estimate when the case was written (the old entry there points here).
+stage 4 closes it.
 
-| Constraint | Check site | Case file | Estimate and limit | Was in predicted-negative |
-|---|---|---|---|---|
-| `SelectStatement.DEFAULT_PAGE_SIZE` (hard-coded 10000) | `DataLimits.java:1041` (`CQLGroupByLimits.onClose`, `rowLimit`) | [`default_page_size-cqlgroupbylimits_onclose-rowlimit`](cases/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md) | Positive with a stated limit: caps the live rows read per internal sub-read of an un-paged GROUP BY query, not bytes and not groups. | §10 |
-| `DiagnosticEventMemoryStore.maxSize` (hard-coded 200) | `DiagnosticEventMemoryStore.java:56` | [`diagnostic_event_memory_store_max_size-store-keyhead`](cases/diagnostic_event_memory_store_max_size-store-keyhead--autonomous.md) | Positive with a caveat: caps the events held on-heap per event class (a count, not bytes). | §10 |
-| `InMemoryTrie` hard 2 GB limit (32-bit pointers, compiled in) | `InMemoryTrie.java:148` (`allocateBlock`) | [`trie_2gb_hard_limit-allocateblock-leadbit`](cases/trie_2gb_hard_limit-allocateblock-leadbit--autonomous.md) | Positive for the object it bounds: one trie's buffer space. Caveat: it is per trie and a backstop that the memtable flush path is meant never to reach (the configurable guard is `cassandra.memtable.row_overhead_size`). | §3 |
-| SASI per-index option `max_compaction_flush_memory_in_mb` (default 0.15 GiB) | `IndexMode.java:190` (a 100 GiB sanity cap); enforced at `PerSSTableIndexWriter.java:247` | [`max_compaction_flush_memory_in_mb-getmode-maxmembytes`](cases/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous.md) | Positive: caps the on-heap size of the SASI index term builder before it is flushed to a segment file during compaction and index builds. | §1 |
+*None open.* The four rows that stood here (`SelectStatement.DEFAULT_PAGE_SIZE`,
+`DiagnosticEventMemoryStore.maxSize`, the `InMemoryTrie` 2 GB limit and the SASI
+`max_compaction_flush_memory_in_mb` option) were closed by stage 4 on 2026-10-27, all
+true positive; their outcome classes are in [`_INDEX.md`](_INDEX.md) §1.

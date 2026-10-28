@@ -1,0 +1,34 @@
+PASS  a1-102400 Flushed-index-segment lines  EXPECTED: 0 (+-tol)  GOT: 0
+INFO a1-102400 cap 102400 peak live excess over baseline 1499.7 MB; max OnDiskIndexBuilder instances 2; max SASI-General pending 0; max old-after-GC 1617 MB; max heap used 1836 MB; SI bytes [322805532]; build ms 59826
+PASS  a1-102400 "reverting to default" error line present only for 102401  count 0
+PASS  a1-102400 no OOM / failure  {'Flushed index segment': 0, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 0}
+PASS  a2-1 Flushed-index-segment lines  EXPECTED: 641 (+-tol)  GOT: 641
+INFO a2-1 cap 1 peak live excess over baseline 939.3 MB; max OnDiskIndexBuilder instances 512; max SASI-General pending 503; max old-after-GC 1032 MB; max heap used 1699 MB; SI bytes [322805532]; build ms 58894
+PASS  a2-1 "reverting to default" error line present only for 102401  count 0
+PASS  a2-1 no OOM / failure  {'Flushed index segment': 641, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 0}
+PASS  a3-16 Flushed-index-segment lines  EXPECTED: 41 (+-tol)  GOT: 41
+INFO a3-16 cap 16 peak live excess over baseline 326.9 MB; max OnDiskIndexBuilder instances 11; max SASI-General pending 5; max old-after-GC 415 MB; max heap used 1794 MB; SI bytes [322805532]; build ms 34777
+PASS  a3-16 "reverting to default" error line present only for 102401  count 0
+PASS  a3-16 no OOM / failure  {'Flushed index segment': 41, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 0}
+PASS  a4-128 Flushed-index-segment lines  EXPECTED: 6 (+-tol)  GOT: 6
+INFO a4-128 cap 128 peak live excess over baseline 1056.6 MB; max OnDiskIndexBuilder instances 5; max SASI-General pending 0; max old-after-GC 1145 MB; max heap used 1728 MB; SI bytes [322805532]; build ms 41679
+PASS  a4-128 "reverting to default" error line present only for 102401  count 0
+PASS  a4-128 no OOM / failure  {'Flushed index segment': 6, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 0}
+PASS  a5-def Flushed-index-segment lines  EXPECTED: 5 (+-tol)  GOT: 5
+INFO a5-def cap def peak live excess over baseline 1194.8 MB; max OnDiskIndexBuilder instances 5; max SASI-General pending 0; max old-after-GC 1284 MB; max heap used 1932 MB; SI bytes [322805532]; build ms 43984
+PASS  a5-def "reverting to default" error line present only for 102401  count 0
+PASS  a5-def no OOM / failure  {'Flushed index segment': 5, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 0}
+PASS  a6-102401 Flushed-index-segment lines  EXPECTED: 5 (+-tol)  GOT: 5
+INFO a6-102401 cap 102401 peak live excess over baseline 1160.4 MB; max OnDiskIndexBuilder instances 5; max SASI-General pending 0; max old-after-GC 1250 MB; max heap used 1954 MB; SI bytes [322805532]; build ms 43997
+PASS  a6-102401 "reverting to default" error line present only for 102401  count 2
+PASS  a6-102401 no OOM / failure  {'Flushed index segment': 5, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 2}
+PASS  a7-102400 Flushed-index-segment lines  EXPECTED: 0 (+-tol)  GOT: 0
+INFO a7-102400 cap 102400 peak live excess over baseline 1492.8 MB; max OnDiskIndexBuilder instances 2; max SASI-General pending 0; max old-after-GC 1599 MB; max heap used 1767 MB; SI bytes [322805532]; build ms 57674
+PASS  a7-102400 "reverting to default" error line present only for 102401  count 0
+PASS  a7-102400 no OOM / failure  {'Flushed index segment': 0, 'Index flush to': 1, 'Scheduling index flush': 1, 'OutOfMemoryError': 0, 'Failed to build index segment': 0, 'Failed to flush index': 0, 'reverting to default': 0}
+FAIL  peak live excess ordered 1 < 16 < 128 < default < 102400  {'102400': 1499.7, '1': 939.3, '16': 326.9, '128': 1056.6, 'def': 1194.8, '102401': 1160.4}
+FAIL  ratio peak(102400)/peak(1) > 5  ratio 1.6
+PASS  peak(102401) within 25% of peak(default)  ratio 0.97
+PASS  peak(102400) >= 1.10 x peak(102401)  ratio 1.29
+PASS  the two 102400 arms agree within 10%  1500 vs 1493 MB
+FAILS 2

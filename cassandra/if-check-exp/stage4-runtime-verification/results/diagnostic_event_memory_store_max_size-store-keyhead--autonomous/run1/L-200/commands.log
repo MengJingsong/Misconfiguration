@@ -1,0 +1,365 @@
+2026-10-27T15:28:33 $ mkdir -p /users/jason92/stage4-harness/diag/classes && javac -d /users/jason92/stage4-harness/diag/classes /users/jason92/stage4-harness/diag/DiagJmx.java
+2026-10-27T15:28:34 $ ss -ltn | grep -E ":(7000|7199|9042) " || true
+2026-10-27T15:28:34 yaml tail: diagnostic_events_enabled: true ; audit_logging_options: ;   enabled: true ;   logger: ;     - class_name: DiagnosticEventAuditLogger ; data_file_directories: ;     - /users/jason92/stage4-diag/run1/L-200/data ; commitlog_directory: /users/jason92/stage4-diag/run1/L-200/commitlog ; hints_directory: /users/jason92/stage4-diag/run1/L-200/hints ; saved_caches_directory: /users/jason92/stage4-diag/run1/L-200/saved_caches ; cdc_raw_directory: /users/jason92/stage4-diag/run1/L-200/cdc_raw
+2026-10-27T15:28:34 $ cd /users/jason92/cassandra-run1 && bin/cassandra -p /users/jason92/stage4-diag/run1/L-200/pid > /users/jason92/stage4-diag/run1/L-200/logs/stdout.log 2>&1
+2026-10-27T15:29:18 node up pid 712285 after 44s; heap 2G; source cassandra-run1
+2026-10-27T15:29:18 $ ps -o pid,args -p 712285 | cut -c1-600
+    PID COMMAND
+ 712285 /usr/bin/java -ea -da:net.openhft... -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -Djava.net.preferIPv4Stack=true -Dchronicle.analytics.disable=true -XX:-UseBiasedLocking -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.
+2026-10-27T15:29:18 $ jcmd 712285 GC.class_histogram
+712285:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:          4616       15894576  [I (java.base@11.0.32.1)
+   2:         94600       13537120  [B (java.base@11.0.32.1)
+   3:          6203        9219816  [J (java.base@11.0.32.1)
+   4:         23539        4839080  [Ljava.lang.Object; (java.base@11.0.32.1)
+   5:         88237        2117688  java.lang.String (java.base@11.0.32.1)
+   6:         11896        1418744  java.lang.Class (java.base@11.0.32.1)
+   7:         34665        1109280  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.32.1)
+   8:         44719        1073256  javax.management.ObjectName$Property (java.management@11.0.32.1)
+   9:         27971         895072  java.util.HashMap$Node (java.base@11.0.32.1)
+  10:         23285         737616  [Ljavax.management.ObjectName$Property; (java.management@11.0.32.1)
+  11:          6707         590216  java.lang.reflect.Method (java.base@11.0.32.1)
+  12:          7879         567288  io.netty.buffer.PoolSubpage
+  13:         17236         551552  java.lang.invoke.LambdaForm$Name (java.base@11.0.32.1)
+  14:          2095         397296  [S (java.base@11.0.32.1)
+  15:         12195         390240  java.util.concurrent.atomic.LongAdder (java.base@11.0.32.1)
+  16:         11643         372576  javax.management.ObjectName (java.management@11.0.32.1)
+  17:          6774         325152  com.codahale.metrics.EWMA
+  18:          2264         311496  [Ljava.util.HashMap$Node; (java.base@11.0.32.1)
+  19:           392         300896  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.32.1)
+  20:         11638         279312  com.sun.jmx.mbeanserver.NamedObject (java.management@11.0.32.1)
+  21:         11596         278304  com.sun.jmx.mbeanserver.StandardMBeanSupport (java.management@11.0.32.1)
+  22:          8691         278112  java.util.concurrent.locks.ReentrantLock$NonfairSync (java.base@11.0.32.1)
+  23:          9795         237976  [Ljava.lang.Class; (java.base@11.0.32.1)
+  24:          3192         229824  java.lang.reflect.Field (java.base@11.0.32.1)
+  25:          4555         218640  java.lang.invoke.MemberName (java.base@11.0.32.1)
+  26:         12007         192112  java.lang.Object (java.base@11.0.32.1)
+  27:          4896         156672  org.apache.cassandra.metrics.TableMetrics$$Lambda$985/0x00000008405e8c40
+  28:           241         138816  io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue
+  29:          3457         138280  java.lang.ref.SoftReference (java.base@11.0.32.1)
+  30:          8523         136368  java.util.concurrent.locks.ReentrantLock (java.base@11.0.32.1)
+  31:          1385         130952  [Ljava.lang.invoke.LambdaForm$Name; (java.base@11.0.32.1)
+  32:          2008         128512  java.lang.Class$ReflectionData (java.base@11.0.32.1)
+  33:          1548         123840  java.lang.reflect.Constructor (java.base@11.0.32.1)
+  34:          1113         123544  [D (java.base@11.0.32.1)
+  35:          2631         105240  java.lang.invoke.MethodType (java.base@11.0.32.1)
+  36:          4326         103824  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+  37:          3111          99552  java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry (java.base@11.0.32.1)
+  38:          2265          90600  java.util.LinkedHashMap$Entry (java.base@11.0.32.1)
+  39:          3726          89424  java.lang.invoke.ResolvedMethodName (java.base@11.0.32.1)
+  40:          1804          86592  java.util.HashMap (java.base@11.0.32.1)
+  41:          1735          83280  org.apache.cassandra.metrics.DecayingEstimatedHistogramReservoir
+  42:          1534          73632  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxTimer
+  43:           360          73544  [C (java.base@11.0.32.1)
+  44:          2258          72256  com.codahale.metrics.ExponentialMovingAverages
+  45:          2258          72256  com.codahale.metrics.Meter...[truncated]
+2026-10-27T15:29:19 $ jcmd 712285 GC.heap_info
+712285:
+ garbage-first heap   total 2097152K, used 61656K [0x0000000080000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 55508K, capacity 58393K, committed 58652K, reserved 1099776K
+  class space    used 6805K, capacity 8121K, committed 8140K, reserved 1048576K
+2026-10-27T15:29:19 READING {"arm": "L-200", "M": 200, "label": "00-baseline-pre", "N": 0, "t": 1793136559222, "heap_used_after_gc": 63135744, "hist_AuditEvent": null, "hist_AuditLogEntry": null, "hist_SchemaEvent": null, "hist_bytes[]": [94600, 13537120], "hist_String": [88237, 2117688]}
+2026-10-27T15:29:19 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 enabled
+ENABLED true
+2026-10-27T15:29:19 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 enable org.apache.cassandra.audit.AuditEvent
+ENABLE-OK org.apache.cassandra.audit.AuditEvent
+2026-10-27T15:29:24 $ jcmd 712285 GC.class_histogram
+712285:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:          5156       15923128  [I (java.base@11.0.32.1)
+   2:        100281       14925872  [B (java.base@11.0.32.1)
+   3:          6503        9742416  [J (java.base@11.0.32.1)
+   4:         25820        5881944  [Ljava.lang.Object; (java.base@11.0.32.1)
+   5:         93916        2253984  java.lang.String (java.base@11.0.32.1)
+   6:         12346        1470960  java.lang.Class (java.base@11.0.32.1)
+   7:         35593        1138976  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.32.1)
+   8:         46847        1124328  javax.management.ObjectName$Property (java.management@11.0.32.1)
+   9:         28928         925696  java.util.HashMap$Node (java.base@11.0.32.1)
+  10:         24561         778368  [Ljavax.management.ObjectName$Property; (java.management@11.0.32.1)
+  11:          6808         599104  java.lang.reflect.Method (java.base@11.0.32.1)
+  12:         18271         584672  java.lang.invoke.LambdaForm$Name (java.base@11.0.32.1)
+  13:          7919         570168  io.netty.buffer.PoolSubpage
+  14:         13725         439200  java.util.concurrent.atomic.LongAdder (java.base@11.0.32.1)
+  15:          2095         397296  [S (java.base@11.0.32.1)
+  16:         12281         392992  javax.management.ObjectName (java.management@11.0.32.1)
+  17:          7794         374112  com.codahale.metrics.EWMA
+  18:           410         335296  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.32.1)
+  19:          2319         318224  [Ljava.util.HashMap$Node; (java.base@11.0.32.1)
+  20:         12276         294624  com.sun.jmx.mbeanserver.NamedObject (java.management@11.0.32.1)
+  21:         12234         293616  com.sun.jmx.mbeanserver.StandardMBeanSupport (java.management@11.0.32.1)
+  22:          8708         278656  java.util.concurrent.locks.ReentrantLock$NonfairSync (java.base@11.0.32.1)
+  23:         10143         247304  [Ljava.lang.Class; (java.base@11.0.32.1)
+  24:          3242         233424  java.lang.reflect.Field (java.base@11.0.32.1)
+  25:          4824         231552  java.lang.invoke.MemberName (java.base@11.0.32.1)
+  26:         12479         199664  java.lang.Object (java.base@11.0.32.1)
+  27:          4998         159936  org.apache.cassandra.metrics.TableMetrics$$Lambda$985/0x00000008405e8c40
+  28:           216         150464  [Lio.netty.buffer.PoolSubpage;
+  29:          3547         141880  java.lang.ref.SoftReference (java.base@11.0.32.1)
+  30:          1467         139456  [Ljava.lang.invoke.LambdaForm$Name; (java.base@11.0.32.1)
+  31:           241         138816  io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue
+  32:          8537         136592  java.util.concurrent.locks.ReentrantLock (java.base@11.0.32.1)
+  33:          2070         132480  java.lang.Class$ReflectionData (java.base@11.0.32.1)
+  34:          1588         127040  java.lang.reflect.Constructor (java.base@11.0.32.1)
+  35:          1113         123544  [D (java.base@11.0.32.1)
+  36:          2776         111040  java.lang.invoke.MethodType (java.base@11.0.32.1)
+  37:          4439         106536  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+  38:             3          98352  [Ljava.util.concurrent.ForkJoinTask; (java.base@11.0.32.1)
+  39:          3960          95040  java.lang.invoke.ResolvedMethodName (java.base@11.0.32.1)
+  40:          2900          92800  java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry (java.base@11.0.32.1)
+  41:          2313          92520  java.util.LinkedHashMap$Entry (java.base@11.0.32.1)
+  42:           370          90376  [C (java.base@11.0.32.1)
+  43:          1844          88512  java.util.HashMap (java.base@11.0.32.1)
+  44:          1838          88224  org.apache.cassandra.metrics.DecayingEstimatedHistogramReservoir
+  45:          2598          83136  com.codahale.metrics.ExponentialMovingAverages...[truncated]
+2026-10-27T15:29:24 $ jcmd 712285 GC.heap_info
+712285:
+ garbage-first heap   total 2097152K, used 65580K [0x0000000080000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 57321K, capacity 60419K, committed 60572K, reserved 1101824K
+  class space    used 7055K, capacity 8449K, committed 8524K, reserved 1048576K
+2026-10-27T15:29:24 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 read org.apache.cassandra.audit.AuditEvent
+READ org.apache.cassandra.audit.AuditEvent count=2 minKey=1 maxKey=2 opBytes=136
+2026-10-27T15:29:24 READING {"arm": "L-200", "M": 200, "label": "01-baseline-after-schema", "N": 0, "t": 1793136564576, "heap_used_after_gc": 67153920, "hist_AuditEvent": [2, 64], "hist_AuditLogEntry": [2, 128], "hist_SchemaEvent": null, "hist_bytes[]": [100281, 14925872], "hist_String": [93916, 2253984], "read_AuditEvent": {"count": 2, "minKey": 1, "maxKey": 2, "opBytes": 136}}
+2026-10-27T15:29:28 client: 100 statements of 262144 value bytes in 3.6s (ids up to 99)
+2026-10-27T15:29:30 $ jcmd 712285 GC.class_histogram
+712285:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        101162       69488344  [B (java.base@11.0.32.1)
+   2:          5191       15928808  [I (java.base@11.0.32.1)
+   3:          6513        9742728  [J (java.base@11.0.32.1)
+   4:         26178        5892288  [Ljava.lang.Object; (java.base@11.0.32.1)
+   5:         94577        2269848  java.lang.String (java.base@11.0.32.1)
+   6:         12376        1474440  java.lang.Class (java.base@11.0.32.1)
+   7:         35545        1137440  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.32.1)
+   8:         46888        1125312  javax.management.ObjectName$Property (java.management@11.0.32.1)
+   9:         28943         926176  java.util.HashMap$Node (java.base@11.0.32.1)
+  10:         24587         779120  [Ljavax.management.ObjectName$Property; (java.management@11.0.32.1)
+  11:          7073         622424  java.lang.reflect.Method (java.base@11.0.32.1)
+  12:           375         606792  [C (java.base@11.0.32.1)
+  13:         18271         584672  java.lang.invoke.LambdaForm$Name (java.base@11.0.32.1)
+  14:          7921         570312  io.netty.buffer.PoolSubpage
+  15:         13733         439456  java.util.concurrent.atomic.LongAdder (java.base@11.0.32.1)
+  16:          2095         397296  [S (java.base@11.0.32.1)
+  17:         12294         393408  javax.management.ObjectName (java.management@11.0.32.1)
+  18:          7794         374112  com.codahale.metrics.EWMA
+  19:           416         335776  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.32.1)
+  20:          2321         318384  [Ljava.util.HashMap$Node; (java.base@11.0.32.1)
+  21:         12289         294936  com.sun.jmx.mbeanserver.NamedObject (java.management@11.0.32.1)
+  22:         12247         293928  com.sun.jmx.mbeanserver.StandardMBeanSupport (java.management@11.0.32.1)
+  23:          8708         278656  java.util.concurrent.locks.ReentrantLock$NonfairSync (java.base@11.0.32.1)
+  24:         10470         254720  [Ljava.lang.Class; (java.base@11.0.32.1)
+  25:          3270         235440  java.lang.reflect.Field (java.base@11.0.32.1)
+  26:          4843         232464  java.lang.invoke.MemberName (java.base@11.0.32.1)
+  27:         12503         200048  java.lang.Object (java.base@11.0.32.1)
+  28:          4998         159936  org.apache.cassandra.metrics.TableMetrics$$Lambda$985/0x00000008405e8c40
+  29:           216         150464  [Lio.netty.buffer.PoolSubpage;
+  30:          3560         142400  java.lang.ref.SoftReference (java.base@11.0.32.1)
+  31:          1467         139456  [Ljava.lang.invoke.LambdaForm$Name; (java.base@11.0.32.1)
+  32:           241         138816  io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue
+  33:          8537         136592  java.util.concurrent.locks.ReentrantLock (java.base@11.0.32.1)
+  34:          2080         133120  java.lang.Class$ReflectionData (java.base@11.0.32.1)
+  35:          1608         128640  java.lang.reflect.Constructor (java.base@11.0.32.1)
+  36:          1113         123544  [D (java.base@11.0.32.1)
+  37:          2791         111640  java.lang.invoke.MethodType (java.base@11.0.32.1)
+  38:          4445         106680  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+  39:             3          98352  [Ljava.util.concurrent.ForkJoinTask; (java.base@11.0.32.1)
+  40:          3979          95496  java.lang.invoke.ResolvedMethodName (java.base@11.0.32.1)
+  41:          2318          92720  java.util.LinkedHashMap$Entry (java.base@11.0.32.1)
+  42:          2797          89504  java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry (java.base@11.0.32.1)
+  43:          1851          88848  java.util.HashMap (java.base@11.0.32.1)
+  44:          1838          88224  org.apache.cassandra.metrics.DecayingEstimatedHistogramReservoir
+  45:          2598          83136  com.codahale.metrics.ExponentialMovingAverages...[truncated]
+2026-10-27T15:29:30 $ jcmd 712285 GC.heap_info
+712285:
+ garbage-first heap   total 2097152K, used 119528K [0x0000000080000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 57988K, capacity 61074K, committed 61340K, reserved 1101824K
+  class space    used 7073K, capacity 8466K, committed 8524K, reserved 1048576K
+2026-10-27T15:29:31 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 read org.apache.cassandra.audit.AuditEvent
+READ org.apache.cassandra.audit.AuditEvent count=102 minKey=1 maxKey=102 opBytes=26218526
+2026-10-27T15:29:31 READING {"arm": "L-200", "M": 200, "label": "N00100", "N": 100, "t": 1793136571011, "heap_used_after_gc": 122396672, "hist_AuditEvent": [102, 3264], "hist_AuditLogEntry": [102, 6528], "hist_SchemaEvent": null, "hist_bytes[]": [101162, 69488344], "hist_String": [94577, 2269848], "read_AuditEvent": {"count": 102, "minKey": 1, "maxKey": 102, "opBytes": 26218526}}
+2026-10-27T15:29:36 client: 100 statements of 262144 value bytes in 5.1s (ids up to 199)
+2026-10-27T15:29:38 $ jcmd 712285 GC.class_histogram
+712285:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        101612      121935400  [B (java.base@11.0.32.1)
+   2:          5192       15945208  [I (java.base@11.0.32.1)
+   3:          6517        9742904  [J (java.base@11.0.32.1)
+   4:         26480        5932336  [Ljava.lang.Object; (java.base@11.0.32.1)
+   5:         94827        2275848  java.lang.String (java.base@11.0.32.1)
+   6:         12377        1474552  java.lang.Class (java.base@11.0.32.1)
+   7:         35539        1137248  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.32.1)
+   8:         46888        1125312  javax.management.ObjectName$Property (java.management@11.0.32.1)
+   9:         28945         926240  java.util.HashMap$Node (java.base@11.0.32.1)
+  10:         24587         779120  [Ljavax.management.ObjectName$Property; (java.management@11.0.32.1)
+  11:          7073         622424  java.lang.reflect.Method (java.base@11.0.32.1)
+  12:           375         606800  [C (java.base@11.0.32.1)
+  13:         18271         584672  java.lang.invoke.LambdaForm$Name (java.base@11.0.32.1)
+  14:          7921         570312  io.netty.buffer.PoolSubpage
+  15:         13733         439456  java.util.concurrent.atomic.LongAdder (java.base@11.0.32.1)
+  16:          2095         397296  [S (java.base@11.0.32.1)
+  17:         12294         393408  javax.management.ObjectName (java.management@11.0.32.1)
+  18:          7794         374112  com.codahale.metrics.EWMA
+  19:           416         335776  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.32.1)
+  20:          2322         318464  [Ljava.util.HashMap$Node; (java.base@11.0.32.1)
+  21:         12289         294936  com.sun.jmx.mbeanserver.NamedObject (java.management@11.0.32.1)
+  22:         12247         293928  com.sun.jmx.mbeanserver.StandardMBeanSupport (java.management@11.0.32.1)
+  23:          8708         278656  java.util.concurrent.locks.ReentrantLock$NonfairSync (java.base@11.0.32.1)
+  24:         10471         254736  [Ljava.lang.Class; (java.base@11.0.32.1)
+  25:          3270         235440  java.lang.reflect.Field (java.base@11.0.32.1)
+  26:          4843         232464  java.lang.invoke.MemberName (java.base@11.0.32.1)
+  27:         12506         200096  java.lang.Object (java.base@11.0.32.1)
+  28:          4998         159936  org.apache.cassandra.metrics.TableMetrics$$Lambda$985/0x00000008405e8c40
+  29:           216         150464  [Lio.netty.buffer.PoolSubpage;
+  30:          3562         142480  java.lang.ref.SoftReference (java.base@11.0.32.1)
+  31:          1467         139456  [Ljava.lang.invoke.LambdaForm$Name; (java.base@11.0.32.1)
+  32:           241         138816  io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue
+  33:          8537         136592  java.util.concurrent.locks.ReentrantLock (java.base@11.0.32.1)
+  34:          2081         133184  java.lang.Class$ReflectionData (java.base@11.0.32.1)
+  35:          1610         128800  java.lang.reflect.Constructor (java.base@11.0.32.1)
+  36:          1113         123544  [D (java.base@11.0.32.1)
+  37:          2791         111640  java.lang.invoke.MethodType (java.base@11.0.32.1)
+  38:          4445         106680  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+  39:             3          98352  [Ljava.util.concurrent.ForkJoinTask; (java.base@11.0.32.1)
+  40:          3979          95496  java.lang.invoke.ResolvedMethodName (java.base@11.0.32.1)
+  41:          2318          92720  java.util.LinkedHashMap$Entry (java.base@11.0.32.1)
+  42:          2791          89312  java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry (java.base@11.0.32.1)
+  43:          1852          88896  java.util.HashMap (java.base@11.0.32.1)
+  44:          1838          88224  org.apache.cassandra.metrics.DecayingEstimatedHistogramReservoir
+  45:          2598          83136  com.codahale.metrics.ExponentialMovingAverages...[truncated]
+2026-10-27T15:29:39 $ jcmd 712285 GC.heap_info
+712285:
+ garbage-first heap   total 2097152K, used 170880K [0x0000000080000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 58433K, capacity 61530K, committed 61596K, reserved 1101824K
+  class space    used 7073K, capacity 8467K, committed 8524K, reserved 1048576K
+2026-10-27T15:29:39 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 read org.apache.cassandra.audit.AuditEvent
+READ org.apache.cassandra.audit.AuditEvent count=200 minKey=3 maxKey=202 opBytes=52436890
+2026-10-27T15:29:39 READING {"arm": "L-200", "M": 200, "label": "N00200", "N": 200, "t": 1793136579223, "heap_used_after_gc": 174981120, "hist_AuditEvent": [200, 6400], "hist_AuditLogEntry": [200, 12800], "hist_SchemaEvent": null, "hist_bytes[]": [101612, 121935400], "hist_String": [94827, 2275848], "read_AuditEvent": {"count": 200, "minKey": 3, "maxKey": 202, "opBytes": 52436890}}
+2026-10-27T15:29:49 client: 200 statements of 262144 value bytes in 10.1s (ids up to 399)
+2026-10-27T15:29:51 $ jcmd 712285 GC.class_histogram
+712285:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        101941      174375816  [B (java.base@11.0.32.1)
+   2:          5194       15978008  [I (java.base@11.0.32.1)
+   3:          6525        9743256  [J (java.base@11.0.32.1)
+   4:         27087        6012600  [Ljava.lang.Object; (java.base@11.0.32.1)
+   5:         94952        2278848  java.lang.String (java.base@11.0.32.1)
+   6:         12382        1475112  java.lang.Class (java.base@11.0.32.1)
+   7:         35539        1137248  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.32.1)
+   8:         46888        1125312  javax.management.ObjectName$Property (java.management@11.0.32.1)
+   9:         28947         926304  java.util.HashMap$Node (java.base@11.0.32.1)
+  10:         24587         779120  [Ljavax.management.ObjectName$Property; (java.management@11.0.32.1)
+  11:          7073         622424  java.lang.reflect.Method (java.base@11.0.32.1)
+  12:           375         606800  [C (java.base@11.0.32.1)
+  13:         18271         584672  java.lang.invoke.LambdaForm$Name (java.base@11.0.32.1)
+  14:          7921         570312  io.netty.buffer.PoolSubpage
+  15:         13733         439456  java.util.concurrent.atomic.LongAdder (java.base@11.0.32.1)
+  16:          2095         397296  [S (java.base@11.0.32.1)
+  17:         12294         393408  javax.management.ObjectName (java.management@11.0.32.1)
+  18:          7794         374112  com.codahale.metrics.EWMA
+  19:           416         335776  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.32.1)
+  20:          2323         318544  [Ljava.util.HashMap$Node; (java.base@11.0.32.1)
+  21:         12289         294936  com.sun.jmx.mbeanserver.NamedObject (java.management@11.0.32.1)
+  22:         12247         293928  com.sun.jmx.mbeanserver.StandardMBeanSupport (java.management@11.0.32.1)
+  23:          8708         278656  java.util.concurrent.locks.ReentrantLock$NonfairSync (java.base@11.0.32.1)
+  24:         10475         254800  [Ljava.lang.Class; (java.base@11.0.32.1)
+  25:          3270         235440  java.lang.reflect.Field (java.base@11.0.32.1)
+  26:          4843         232464  java.lang.invoke.MemberName (java.base@11.0.32.1)
+  27:         12517         200272  java.lang.Object (java.base@11.0.32.1)
+  28:          4998         159936  org.apache.cassandra.metrics.TableMetrics$$Lambda$985/0x00000008405e8c40
+  29:           216         150464  [Lio.netty.buffer.PoolSubpage;
+  30:          3567         142680  java.lang.ref.SoftReference (java.base@11.0.32.1)
+  31:          1467         139456  [Ljava.lang.invoke.LambdaForm$Name; (java.base@11.0.32.1)
+  32:           241         138816  io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue
+  33:          8537         136592  java.util.concurrent.locks.ReentrantLock (java.base@11.0.32.1)
+  34:          2085         133440  java.lang.Class$ReflectionData (java.base@11.0.32.1)
+  35:          1618         129440  java.lang.reflect.Constructor (java.base@11.0.32.1)
+  36:          1113         123544  [D (java.base@11.0.32.1)
+  37:          2791         111640  java.lang.invoke.MethodType (java.base@11.0.32.1)
+  38:          4445         106680  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+  39:             3          98352  [Ljava.util.concurrent.ForkJoinTask; (java.base@11.0.32.1)
+  40:          3979          95496  java.lang.invoke.ResolvedMethodName (java.base@11.0.32.1)
+  41:          2318          92720  java.util.LinkedHashMap$Entry (java.base@11.0.32.1)
+  42:          2791          89312  java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry (java.base@11.0.32.1)
+  43:          1853          88944  java.util.HashMap (java.base@11.0.32.1)
+  44:          1838          88224  org.apache.cassandra.metrics.DecayingEstimatedHistogramReservoir
+  45:          2598          83136  com.codahale.metrics.ExponentialMovingAverages...[truncated]
+2026-10-27T15:29:52 $ jcmd 712285 GC.heap_info
+712285:
+ garbage-first heap   total 2097152K, used 222299K [0x0000000080000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 58942K, capacity 62074K, committed 62364K, reserved 1103872K
+  class space    used 7076K, capacity 8471K, committed 8524K, reserved 1048576K
+2026-10-27T15:29:52 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 read org.apache.cassandra.audit.AuditEvent
+READ org.apache.cassandra.audit.AuditEvent count=200 minKey=203 maxKey=402 opBytes=52437000
+2026-10-27T15:29:53 READING {"arm": "L-200", "M": 200, "label": "N00400", "N": 400, "t": 1793136592512, "heap_used_after_gc": 227634176, "hist_AuditEvent": [200, 6400], "hist_AuditLogEntry": [200, 12800], "hist_SchemaEvent": null, "hist_bytes[]": [101941, 174375816], "hist_String": [94952, 2278848], "read_AuditEvent": {"count": 200, "minKey": 203, "maxKey": 402, "opBytes": 52437000}}
+2026-10-27T15:31:15 client: 1600 statements of 262144 value bytes in 82.2s (ids up to 1999)
+2026-10-27T15:31:17 $ jcmd 712285 GC.class_histogram
+712285:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:        102466      236264904  [B (java.base@11.0.32.1)
+   2:          5202       16028240  [I (java.base@11.0.32.1)
+   3:          6541        9753960  [J (java.base@11.0.32.1)
+   4:         27796        6126224  [Ljava.lang.Object; (java.base@11.0.32.1)
+   5:         95230        2285520  java.lang.String (java.base@11.0.32.1)
+   6:         12394        1476472  java.lang.Class (java.base@11.0.32.1)
+   7:         35580        1138560  java.util.concurrent.ConcurrentHashMap$Node (java.base@11.0.32.1)
+   8:         46888        1125312  javax.management.ObjectName$Property (java.management@11.0.32.1)
+   9:         28935         925920  java.util.HashMap$Node (java.base@11.0.32.1)
+  10:         24587         779120  [Ljavax.management.ObjectName$Property; (java.management@11.0.32.1)
+  11:          7073         622424  java.lang.reflect.Method (java.base@11.0.32.1)
+  12:           367         606272  [C (java.base@11.0.32.1)
+  13:         18271         584672  java.lang.invoke.LambdaForm$Name (java.base@11.0.32.1)
+  14:          7922         570384  io.netty.buffer.PoolSubpage
+  15:         13743         439776  java.util.concurrent.atomic.LongAdder (java.base@11.0.32.1)
+  16:          2095         397296  [S (java.base@11.0.32.1)
+  17:         12294         393408  javax.management.ObjectName (java.management@11.0.32.1)
+  18:          7794         374112  com.codahale.metrics.EWMA
+  19:           417         335856  [Ljava.util.concurrent.ConcurrentHashMap$Node; (java.base@11.0.32.1)
+  20:          2329         318720  [Ljava.util.HashMap$Node; (java.base@11.0.32.1)
+  21:         12289         294936  com.sun.jmx.mbeanserver.NamedObject (java.management@11.0.32.1)
+  22:         12247         293928  com.sun.jmx.mbeanserver.StandardMBeanSupport (java.management@11.0.32.1)
+  23:          8708         278656  java.util.concurrent.locks.ReentrantLock$NonfairSync (java.base@11.0.32.1)
+  24:         10495         255288  [Ljava.lang.Class; (java.base@11.0.32.1)
+  25:          3270         235440  java.lang.reflect.Field (java.base@11.0.32.1)
+  26:          4853         232944  java.lang.invoke.MemberName (java.base@11.0.32.1)
+  27:         12526         200416  java.lang.Object (java.base@11.0.32.1)
+  28:          4998         159936  org.apache.cassandra.metrics.TableMetrics$$Lambda$985/0x00000008405e8c40
+  29:           216         150464  [Lio.netty.buffer.PoolSubpage;
+  30:          3560         142400  java.lang.ref.SoftReference (java.base@11.0.32.1)
+  31:          1467         139456  [Ljava.lang.invoke.LambdaForm$Name; (java.base@11.0.32.1)
+  32:           241         138816  io.netty.util.internal.shaded.org.jctools.queues.MpscUnboundedArrayQueue
+  33:          8537         136592  java.util.concurrent.locks.ReentrantLock (java.base@11.0.32.1)
+  34:          2089         133696  java.lang.Class$ReflectionData (java.base@11.0.32.1)
+  35:          1623         129840  java.lang.reflect.Constructor (java.base@11.0.32.1)
+  36:          1113         123544  [D (java.base@11.0.32.1)
+  37:          2807         112280  java.lang.invoke.MethodType (java.base@11.0.32.1)
+  38:          4445         106680  org.apache.cassandra.metrics.CassandraMetricsRegistry$JmxGauge
+  39:             3          98352  [Ljava.util.concurrent.ForkJoinTask; (java.base@11.0.32.1)
+  40:          3988          95712  java.lang.invoke.ResolvedMethodName (java.base@11.0.32.1)
+  41:          2318          92720  java.util.LinkedHashMap$Entry (java.base@11.0.32.1)
+  42:          1916          91968  java.nio.HeapByteBuffer (java.base@11.0.32.1)
+  43:          2808          89856  java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry (java.base@11.0.32.1)
+  44:          1858          89184  java.util.HashMap (java.base@11.0.32.1)
+  45:          1838          88224  org.apache.cassandra.metrics.DecayingEstimatedHistogramReservoir
+...[truncated]
+2026-10-27T15:31:17 $ jcmd 712285 GC.heap_info
+712285:
+ garbage-first heap   total 2097152K, used 283017K [0x0000000080000000, 0x0000000100000000)
+  region size 16384K, 1 young (16384K), 0 survivors (0K)
+ Metaspace       used 59198K, capacity 62297K, committed 62364K, reserved 1103872K
+  class space    used 7083K, capacity 8478K, committed 8524K, reserved 1048576K
+2026-10-27T15:31:17 $ java -Xmx3g -cp /users/jason92/stage4-harness/diag/classes:/users/jason92/cassandra-run1/lib/guava-32.0.1-jre.jar DiagJmx 7199 read org.apache.cassandra.audit.AuditEvent
+READ org.apache.cassandra.audit.AuditEvent count=200 minKey=1803 maxKey=2002 opBytes=52437200
+2026-10-27T15:31:18 READING {"arm": "L-200", "M": 200, "label": "N02000", "N": 2000, "t": 1793136677984, "heap_used_after_gc": 289809408, "hist_AuditEvent": [200, 6400], "hist_AuditLogEntry": [200, 12800], "hist_SchemaEvent": null, "hist_bytes[]": [102466, 236264904], "hist_String": [95230, 2285520], "read_AuditEvent": {"count": 200, "minKey": 1803, "maxKey": 2002, "opBytes": 52437200}}
+2026-10-27T15:31:18 ARM DONE L-200
+2026-10-27T15:31:18 $ kill 712285; for i in $(seq 1 60); do kill -0 712285 2>/dev/null || break; sleep 1; done; kill -9 712285 2>/dev/null; true

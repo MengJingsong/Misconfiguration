@@ -1,0 +1,456 @@
+[2026-10-27 15:27:49] + rm -rf /users/jason92/s4-dps-run && mkdir -p /users/jason92/s4-dps-run/tools
+[2026-10-27 15:27:49] + mkdir -p /users/jason92/s4-dps-run/n1/data /users/jason92/s4-dps-run/n1/commitlog /users/jason92/s4-dps-run/n1/hints /users/jason92/s4-dps-run/n1/saved_caches /users/jason92/s4-dps-run/n1/cdc_raw
+[2026-10-27 15:27:49] + df -h /users/jason92/s4-dps-run | tail -1
+[2026-10-27 15:27:49] cluster-run run1: scale 1, N 2000000, host node1.jason92-321705.misconfiguration-pg0.cloudlab.umass.edu, df /dev/sda3        63G  6.6G   53G  12% /
+[2026-10-27 15:27:49] + ss -ltn | grep -E '(127.0.9.1:(9042|7000)|:7190) ' || true
+[2026-10-27 15:27:49] build stock: public static final int DEFAULT_PAGE_SIZE = 10000;; jar ['/users/jason92/s4-dps-v10000/build/apache-cassandra-5.0.9-SNAPSHOT.jar']
+[2026-10-27 15:27:49] build 500: public static final int DEFAULT_PAGE_SIZE = 500;; jar ['/users/jason92/s4-dps-v500/build/apache-cassandra-5.0.9-SNAPSHOT.jar']
+[2026-10-27 15:27:49] build 200000: public static final int DEFAULT_PAGE_SIZE = 200000;; jar ['/users/jason92/s4-dps-v200000/build/apache-cassandra-5.0.9-SNAPSHOT.jar']
+[2026-10-27 15:27:49] + javac -d /users/jason92/s4-dps-run/tools /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous/DpsJmx.java
+[2026-10-27 15:27:49] + mkdir -p /users/jason92/s4-dps-run/n1/logs-stock && rm -rf /users/jason92/s4-dps-run/n1/conf && cp -r /users/jason92/s4-dps-v10000/conf /users/jason92/s4-dps-run/n1/conf
+[2026-10-27 15:27:49] conf variant=stock constant=10000 heap=2G home=/users/jason92/s4-dps-v10000: cluster_name='dps'; authenticator=PasswordAuthenticator; commitlog_directory=/users/jason92/s4-dps-run/n1/commitlog; hints_directory=/users/jason92/s4-dps-run/n1/hints; saved_caches_directory=/users/jason92/s4-dps-run/n1/saved_caches; cdc_raw_directory=/users/jason92/s4-dps-run/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.9.1; rpc_address=127.0.9.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; JMX 7190
+[2026-10-27 15:27:49] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:27:53] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:27:57] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:01] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:05] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:09] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:13] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:17] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:21] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:25] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:29] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:30] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:28:34] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:35] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:28:39] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:28:40] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:28:41] node up after 52 s, pid 705522
+[2026-10-27 15:28:41] connect as cassandra failed (NoHostAvailable('Unable to connect to any servers', {'127.0.9.1:9042': AuthenticationFailed('Failed to authenticate to 127.0.9.1:9042: Error from serv); retry
+[2026-10-27 15:29:45]   loaded 200000
+[2026-10-27 15:30:31]   loaded 400000
+[2026-10-27 15:31:15]   loaded 600000
+[2026-10-27 15:32:01]   loaded 800000
+[2026-10-27 15:32:47]   loaded 1000000
+[2026-10-27 15:33:31]   loaded 1200000
+[2026-10-27 15:34:13]   loaded 1400000
+[2026-10-27 15:35:00]   loaded 1600000
+[2026-10-27 15:35:41]   loaded 1800000
+[2026-10-27 15:36:27]   loaded 2000000
+[2026-10-27 15:36:27] loaded ks.t: 2000000 rows, 0 errors, 447 s []
+[2026-10-27 15:36:27] + bin/nodetool -h 127.0.0.1 -p 7190 flush
+[2026-10-27 15:36:31] + bin/nodetool -h 127.0.0.1 -p 7190 compact ks t
+[2026-10-27 15:36:50] + bin/nodetool -h 127.0.0.1 -p 7190 tablestats ks.t
+[2026-10-27 15:36:51] tablestats: SSTable count: 1 SSTable count: 0 Space used (live): 2091951933 Number of partitions (estimate): 1
+[2026-10-27 15:36:51] stopping node pid 705522
+[2026-10-27 15:36:51] + kill 705522
+
+  rc=0
+[2026-10-27 15:36:57] node stopped
+[2026-10-27 15:36:57] + (cd /users/jason92/s4-dps-run/n1/data/ks && find . -name "*Data.db" -o -name "*Index.db" | sort | xargs ls -l) > /users/jason92/s4-dps-logs/run1/cluster/sstables-before.txt 2>&1
+[2026-10-27 15:36:57] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:36:57] + df -h /users/jason92/s4-dps-run | tail -1
+[2026-10-27 15:36:57] data on disk: 2091979751 bytes; df /dev/sda3        63G  8.6G   51G  15% /
+[2026-10-27 15:36:57] ======== variant stock (DEFAULT_PAGE_SIZE 10000) ========
+[2026-10-27 15:36:57] + mkdir -p /users/jason92/s4-dps-run/n1/logs-stock && rm -rf /users/jason92/s4-dps-run/n1/conf && cp -r /users/jason92/s4-dps-v10000/conf /users/jason92/s4-dps-run/n1/conf
+[2026-10-27 15:36:57] conf variant=stock constant=10000 heap=512M home=/users/jason92/s4-dps-v10000: cluster_name='dps'; authenticator=PasswordAuthenticator; commitlog_directory=/users/jason92/s4-dps-run/n1/commitlog; hints_directory=/users/jason92/s4-dps-run/n1/hints; saved_caches_directory=/users/jason92/s4-dps-run/n1/saved_caches; cdc_raw_directory=/users/jason92/s4-dps-run/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.9.1; rpc_address=127.0.9.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; JMX 7190
+[2026-10-27 15:36:57] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:37:01] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:37:05] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:37:06] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:37:10] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:37:11] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:37:15] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:37:16] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:37:17] node up after 20 s, pid 707935
+[2026-10-27 15:37:58] + jcmd 707935 GC.run
+[2026-10-27 15:38:01] idle baseline 30 s
+[2026-10-27 15:38:31] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:38:31] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:38:31]   [stock] calibration fetch=100 rep=0: rows_returned=1 wall=125 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:38:33] CALIBRATION trace lines for one small read: [(1793137111879, 10, 1, 'true', 'false'), (1793137111884, 10, 1, 'true', 'false')]
+[2026-10-27 15:38:33] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:38:46] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:38:46]   [stock] first-trigger fetch=1000 rep=0: rows_returned=10 wall=12164 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:38:48] FIRST-TRIGGER CHECK: 4002 trace lines, 3982 with rows=1000 groups=0 unfinished=true, max rows 1000
+[2026-10-27 15:38:48] FIRST-TRIGGER CHECK passed (the warm-up is this fetch-1000 query)
+[2026-10-27 15:38:48] + jcmd 707935 GC.run
+[2026-10-27 15:38:51] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:04] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:04]   [stock] groupby-unset fetch=None rep=1: rows_returned=10 wall=13500 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:39:04] + jcmd 707935 GC.run
+[2026-10-27 15:39:09] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:21] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:21]   [stock] groupby-unset fetch=None rep=2: rows_returned=10 wall=12402 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:39:21] + jcmd 707935 GC.run
+[2026-10-27 15:39:25] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:39] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:39]   [stock] groupby-unset fetch=None rep=3: rows_returned=10 wall=13632 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:39:39] + jcmd 707935 GC.run
+[2026-10-27 15:39:43] + jcmd 707935 GC.run
+[2026-10-27 15:39:47] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:48] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:39:48]   [stock] plain-count fetch=None rep=1: rows_returned=0 wall=1507 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:39:48] node is DEAD: restarting
+[2026-10-27 15:39:48] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:39:52] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:39:56] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:40:00] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:40:01] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:40:05] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:40:06] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:40:07] node up after 19 s, pid 709239
+[2026-10-27 15:40:43] + jcmd 709239 GC.run
+[2026-10-27 15:40:47] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:40:49] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:40:49]   [stock] plain-count fetch=None rep=2: rows_returned=0 wall=1609 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:40:49] node is DEAD: restarting
+[2026-10-27 15:40:49] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:40:52] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:40:56] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:41:00] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:41:01] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:41:05] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:41:06] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:41:08] node up after 19 s, pid 710230
+[2026-10-27 15:41:43] + jcmd 710230 GC.run
+[2026-10-27 15:41:48] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:41:49] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:41:49]   [stock] plain-count fetch=None rep=3: rows_returned=0 wall=1617 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:41:49] node is DEAD: restarting
+[2026-10-27 15:41:49] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:41:52] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:41:57] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:42:01] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:42:02] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:42:06] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:42:07] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:42:08] node up after 19 s, pid 711231
+[2026-10-27 15:42:44] + jcmd 711231 GC.run
+[2026-10-27 15:42:48] + jcmd 711231 GC.run
+[2026-10-27 15:42:51] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:06] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:06]   [stock] groupby-fetch fetch=500 rep=1: rows_returned=10 wall=14414 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:43:06] + jcmd 711231 GC.run
+[2026-10-27 15:43:10] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:23] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:23]   [stock] groupby-fetch fetch=500 rep=2: rows_returned=10 wall=13298 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:43:23] + jcmd 711231 GC.run
+[2026-10-27 15:43:28] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:41] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:41]   [stock] groupby-fetch fetch=500 rep=3: rows_returned=10 wall=13448 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:43:41] + jcmd 711231 GC.run
+[2026-10-27 15:43:46] + jcmd 711231 GC.run
+[2026-10-27 15:43:49] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:51] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:43:51]   [stock] groupby-fetch fetch=200000 rep=1: rows_returned=0 wall=2229 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:43:51] node is DEAD: restarting
+[2026-10-27 15:43:51] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:43:54] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:43:59] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:44:03] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:44:04] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:44:08] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:44:09] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:44:10] node up after 18 s, pid 712406
+[2026-10-27 15:44:45] + jcmd 712406 GC.run
+[2026-10-27 15:44:50] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:44:52] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:44:52]   [stock] groupby-fetch fetch=200000 rep=2: rows_returned=0 wall=2541 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:44:52] node is DEAD: restarting
+[2026-10-27 15:44:53] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:44:56] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:45:00] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:45:04] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:45:05] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:45:09] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:45:10] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:45:11] node up after 19 s, pid 713410
+[2026-10-27 15:45:47] + jcmd 713410 GC.run
+[2026-10-27 15:45:51] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:45:54] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:45:54]   [stock] groupby-fetch fetch=200000 rep=3: rows_returned=0 wall=2791 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:45:54] node is DEAD: restarting
+[2026-10-27 15:45:54] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:45:57] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:46:02] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:46:06] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:46:07] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:46:11] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:46:12] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:46:13] node up after 19 s, pid 714422
+[2026-10-27 15:46:49] + jcmd 714422 GC.run
+[2026-10-27 15:46:53] ======== variant 500 (DEFAULT_PAGE_SIZE 500) ========
+[2026-10-27 15:46:53] stopping node pid 714422
+[2026-10-27 15:46:53] + kill 714422
+
+  rc=0
+[2026-10-27 15:47:01] node stopped
+[2026-10-27 15:47:01] + mkdir -p /users/jason92/s4-dps-run/n1/logs-500 && rm -rf /users/jason92/s4-dps-run/n1/conf && cp -r /users/jason92/s4-dps-v500/conf /users/jason92/s4-dps-run/n1/conf
+[2026-10-27 15:47:01] conf variant=500 constant=500 heap=512M home=/users/jason92/s4-dps-v500: cluster_name='dps'; authenticator=PasswordAuthenticator; commitlog_directory=/users/jason92/s4-dps-run/n1/commitlog; hints_directory=/users/jason92/s4-dps-run/n1/hints; saved_caches_directory=/users/jason92/s4-dps-run/n1/saved_caches; cdc_raw_directory=/users/jason92/s4-dps-run/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.9.1; rpc_address=127.0.9.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; JMX 7190
+[2026-10-27 15:47:01] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-500/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:47:04] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:47:08] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:47:10] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:47:14] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:47:15] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:47:19] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:47:20] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:47:21] node up after 20 s, pid 715507
+[2026-10-27 15:48:01] + jcmd 715507 GC.run
+[2026-10-27 15:48:05] idle baseline 30 s
+[2026-10-27 15:48:35] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:48:35] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:48:35]   [500] calibration fetch=100 rep=0: rows_returned=1 wall=99 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:48:37] CALIBRATION trace lines for one small read: [(1793137715319, 10, 1, 'true', 'false'), (1793137715324, 10, 1, 'true', 'false')]
+[2026-10-27 15:48:37] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:48:50] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:48:50]   [500] first-trigger fetch=1000 rep=0: rows_returned=10 wall=13121 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:48:52] FIRST-TRIGGER CHECK: 4002 trace lines, 3982 with rows=1000 groups=0 unfinished=true, max rows 1000
+[2026-10-27 15:48:52] FIRST-TRIGGER CHECK passed (the warm-up is this fetch-1000 query)
+[2026-10-27 15:48:52] + jcmd 715507 GC.run
+[2026-10-27 15:48:55] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:09] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:09]   [500] groupby-unset fetch=None rep=1: rows_returned=10 wall=13635 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:49:09] + jcmd 715507 GC.run
+[2026-10-27 15:49:13] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:26] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:27]   [500] groupby-unset fetch=None rep=2: rows_returned=10 wall=13194 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:49:27] + jcmd 715507 GC.run
+[2026-10-27 15:49:31] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:44] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:44]   [500] groupby-unset fetch=None rep=3: rows_returned=10 wall=12932 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:49:44] + jcmd 715507 GC.run
+[2026-10-27 15:49:48] + jcmd 715507 GC.run
+[2026-10-27 15:49:51] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:53] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:49:53]   [500] plain-count fetch=None rep=1: rows_returned=0 wall=1495 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:49:53] node is DEAD: restarting
+[2026-10-27 15:49:53] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-500/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:49:56] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:50:00] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:50:04] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:50:05] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:50:09] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:50:11] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:50:12] node up after 18 s, pid 716893
+[2026-10-27 15:50:47] + jcmd 716893 GC.run
+[2026-10-27 15:50:52] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:50:53] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:50:53]   [500] plain-count fetch=None rep=2: rows_returned=0 wall=1620 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:50:53] node is DEAD: restarting
+[2026-10-27 15:50:53] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-500/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:50:57] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:51:01] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:51:05] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:51:06] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:51:10] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:51:11] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:51:12] node up after 19 s, pid 717920
+[2026-10-27 15:51:48] + jcmd 717920 GC.run
+[2026-10-27 15:51:52] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:51:54] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:51:54]   [500] plain-count fetch=None rep=3: rows_returned=0 wall=1551 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:51:54] node is DEAD: restarting
+[2026-10-27 15:51:54] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-500/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:51:57] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:52:01] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:52:05] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:52:06] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:52:10] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:52:12] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:52:13] node up after 19 s, pid 718941
+[2026-10-27 15:52:48] + jcmd 718941 GC.run
+[2026-10-27 15:52:53] ======== variant 200000 (DEFAULT_PAGE_SIZE 200000) ========
+[2026-10-27 15:52:53] stopping node pid 718941
+[2026-10-27 15:52:53] + kill 718941
+
+  rc=0
+[2026-10-27 15:53:00] node stopped
+[2026-10-27 15:53:00] + mkdir -p /users/jason92/s4-dps-run/n1/logs-200000 && rm -rf /users/jason92/s4-dps-run/n1/conf && cp -r /users/jason92/s4-dps-v200000/conf /users/jason92/s4-dps-run/n1/conf
+[2026-10-27 15:53:00] conf variant=200000 constant=200000 heap=512M home=/users/jason92/s4-dps-v200000: cluster_name='dps'; authenticator=PasswordAuthenticator; commitlog_directory=/users/jason92/s4-dps-run/n1/commitlog; hints_directory=/users/jason92/s4-dps-run/n1/hints; saved_caches_directory=/users/jason92/s4-dps-run/n1/saved_caches; cdc_raw_directory=/users/jason92/s4-dps-run/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.9.1; rpc_address=127.0.9.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; JMX 7190
+[2026-10-27 15:53:00] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:53:03] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:53:07] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:53:08] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:53:12] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:53:13] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:53:17] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:53:19] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:53:20] node up after 19 s, pid 720049
+[2026-10-27 15:54:00] + jcmd 720049 GC.run
+[2026-10-27 15:54:03] idle baseline 30 s
+[2026-10-27 15:54:33] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:54:34] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:54:34]   [200000] calibration fetch=100 rep=0: rows_returned=1 wall=156 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:54:36] CALIBRATION trace lines for one small read: [(1793138074037, 10, 1, 'true', 'false'), (1793138074044, 10, 1, 'true', 'false')]
+[2026-10-27 15:54:36] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:54:48] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:54:48]   [200000] first-trigger fetch=1000 rep=0: rows_returned=10 wall=12622 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 15:54:50] FIRST-TRIGGER CHECK: 4002 trace lines, 3982 with rows=1000 groups=0 unfinished=true, max rows 1000
+[2026-10-27 15:54:50] FIRST-TRIGGER CHECK passed (the warm-up is this fetch-1000 query)
+[2026-10-27 15:54:50] + jcmd 720049 GC.run
+[2026-10-27 15:54:54] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:54:55] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:54:55]   [200000] groupby-unset fetch=None rep=1: rows_returned=0 wall=949 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:54:55] node is DEAD: restarting
+[2026-10-27 15:54:55] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:54:58] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:55:02] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:55:06] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:55:07] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:55:11] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:55:12] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:55:13] node up after 18 s, pid 721258
+[2026-10-27 15:55:49] + jcmd 721258 GC.run
+[2026-10-27 15:55:53] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:55:55] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:55:55]   [200000] groupby-unset fetch=None rep=2: rows_returned=0 wall=2201 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:55:55] node is DEAD: restarting
+[2026-10-27 15:55:55] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:55:59] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:56:03] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:56:07] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:56:08] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:56:12] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:56:13] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:56:14] node up after 19 s, pid 722272
+[2026-10-27 15:56:49] + jcmd 722272 GC.run
+[2026-10-27 15:56:54] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:56:55] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:56:55]   [200000] groupby-unset fetch=None rep=3: rows_returned=0 wall=1149 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:56:55] node is DEAD: restarting
+[2026-10-27 15:56:55] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:56:58] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:57:02] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:57:07] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:57:08] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:57:12] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:57:13] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:57:14] node up after 18 s, pid 723283
+[2026-10-27 15:57:49] + jcmd 723283 GC.run
+[2026-10-27 15:57:54] + jcmd 723283 GC.run
+[2026-10-27 15:57:57] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:57:59] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:57:59]   [200000] plain-count fetch=None rep=1: rows_returned=0 wall=1592 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:57:59] node is DEAD: restarting
+[2026-10-27 15:57:59] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:58:02] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:58:06] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:58:10] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:58:11] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:58:15] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:58:16] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:58:17] node up after 19 s, pid 724402
+[2026-10-27 15:58:53] + jcmd 724402 GC.run
+[2026-10-27 15:58:57] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:58:59] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:58:59]   [200000] plain-count fetch=None rep=2: rows_returned=0 wall=1611 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:58:59] node is DEAD: restarting
+[2026-10-27 15:58:59] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 15:59:02] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:59:06] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:59:10] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:59:11] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:59:15] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 15:59:16] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 15:59:17] node up after 18 s, pid 725429
+[2026-10-27 15:59:53] + jcmd 725429 GC.run
+[2026-10-27 15:59:57] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:59:59] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 15:59:59]   [200000] plain-count fetch=None rep=3: rows_returned=0 wall=1557 ms err=ConnectionShutdown('Connection to 127.0.9.1:9042 was closed') dead=True data 2091979751->2091979751
+[2026-10-27 15:59:59] node is DEAD: restarting
+[2026-10-27 15:59:59] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-200000/start.out 2>&1"
+
+  rc=0
+[2026-10-27 16:00:02] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:00:06] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:00:10] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:00:12] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 16:00:16] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:00:17] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 16:00:18] node up after 19 s, pid 726456
+[2026-10-27 16:00:53] + jcmd 726456 GC.run
+[2026-10-27 16:00:58] ======== guardrail arm: stock build with page_size_fail_threshold 10000 ========
+[2026-10-27 16:00:58] stopping node pid 726456
+[2026-10-27 16:00:58] + kill 726456
+
+  rc=0
+[2026-10-27 16:01:05] node stopped
+[2026-10-27 16:01:05] + mkdir -p /users/jason92/s4-dps-run/n1/logs-stock && rm -rf /users/jason92/s4-dps-run/n1/conf && cp -r /users/jason92/s4-dps-v10000/conf /users/jason92/s4-dps-run/n1/conf
+[2026-10-27 16:01:05] conf variant=stock constant=10000 heap=512M home=/users/jason92/s4-dps-v10000: cluster_name='dps'; authenticator=PasswordAuthenticator; commitlog_directory=/users/jason92/s4-dps-run/n1/commitlog; hints_directory=/users/jason92/s4-dps-run/n1/hints; saved_caches_directory=/users/jason92/s4-dps-run/n1/saved_caches; cdc_raw_directory=/users/jason92/s4-dps-run/n1/cdc_raw; commitlog_total_space=1024MiB; listen_address=127.0.9.1; rpc_address=127.0.9.1; num_tokens=16; native_transport_timeout=600s; row_cache_size=0MiB; range_request_timeout=600000ms; read_request_timeout=600000ms; request_timeout=600000ms; write_request_timeout=60000ms; page_size_fail_threshold=10000; JMX 7190
+[2026-10-27 16:01:05] + bash -c "ulimit -n 100000; bin/cassandra -p /users/jason92/s4-dps-run/n1/cassandra.pid >> /users/jason92/s4-dps-run/n1/logs-stock/start.out 2>&1"
+
+  rc=0
+[2026-10-27 16:01:08] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:01:12] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:01:13] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 16:01:17] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:01:18] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 16:01:22] + bin/nodetool -h 127.0.0.1 -p 7190 status
+[2026-10-27 16:01:23] + bin/nodetool -h 127.0.0.1 -p 7190 statusbinary
+[2026-10-27 16:01:24] node up after 19 s, pid 727574
+[2026-10-27 16:02:05] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:18] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:18]   [stock] guardrail fetch=500 rep=1: rows_returned=10 wall=13643 ms err=None dead=False data 2091979751->2091979751
+[2026-10-27 16:02:19] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:19] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:19]   [stock] guardrail fetch=200000 rep=1: rows_returned=0 wall=16 ms err=InvalidRequest('Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for table t, page size 200000 exceeds fail threshold of 10000."') dead=False data 2091979751->2091979751
+[2026-10-27 16:02:20] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:20] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:20]   [stock] guardrail fetch=200000 rep=1: rows_returned=0 wall=4 ms err=InvalidRequest('Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for table t, page size 200000 exceeds fail threshold of 10000."') dead=False data 2091979751->2091979751
+[2026-10-27 16:02:21] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:21] + du -sb /users/jason92/s4-dps-run/n1/data/ks | cut -f1
+[2026-10-27 16:02:21]   [stock] guardrail fetch=200000 rep=1: rows_returned=0 wall=5 ms err=InvalidRequest('Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: Aborting query for table t, page size 200000 exceeds fail threshold of 10000."') dead=False data 2091979751->2091979751
+[2026-10-27 16:02:22] + (cd /users/jason92/s4-dps-run/n1/data/ks && find . -name "*Data.db" -o -name "*Index.db" | sort | xargs ls -l) > /users/jason92/s4-dps-logs/run1/cluster/sstables-after.txt 2>&1
+[2026-10-27 16:02:22] all cells done
+[2026-10-27 16:02:22] cleanup: stopping poller, client, node
+[2026-10-27 16:02:22] stopping node pid 727574
+[2026-10-27 16:02:22] + kill 727574
+
+  rc=0
+[2026-10-27 16:02:30] node stopped
+[2026-10-27 16:02:30] + mkdir -p /users/jason92/s4-dps-logs/run1/cluster/stock && cp /users/jason92/s4-dps-run/n1/logs-stock/heap.csv /users/jason92/s4-dps-run/n1/logs-stock/dps.trace /users/jason92/s4-dps-run/n1/logs-stock/gc.log* /users/jason92/s4-dps-run/n1/logs-stock/system.log /users/jason92/s4-dps-run/n1/logs-stock/s
+[2026-10-27 16:02:30] + mkdir -p /users/jason92/s4-dps-logs/run1/cluster/500 && cp /users/jason92/s4-dps-run/n1/logs-500/heap.csv /users/jason92/s4-dps-run/n1/logs-500/dps.trace /users/jason92/s4-dps-run/n1/logs-500/gc.log* /users/jason92/s4-dps-run/n1/logs-500/system.log /users/jason92/s4-dps-run/n1/logs-500/start.out /us
+[2026-10-27 16:02:30] + mkdir -p /users/jason92/s4-dps-logs/run1/cluster/200000 && cp /users/jason92/s4-dps-run/n1/logs-200000/heap.csv /users/jason92/s4-dps-run/n1/logs-200000/dps.trace /users/jason92/s4-dps-run/n1/logs-200000/gc.log* /users/jason92/s4-dps-run/n1/logs-200000/system.log /users/jason92/s4-dps-run/n1/logs-20
+[2026-10-27 16:02:30] + (cd /users/jason92/s4-dps-run/n1/data/ks && find . -name "*Data.db" -o -name "*Index.db" | sort | xargs ls -l) > /users/jason92/s4-dps-logs/run1/cluster/sstables-final.txt 2>&1
+[2026-10-27 16:02:30] + ps -eo pid,args | grep -E '^ *[0-9]+ [^ ]*java .*CassandraDaemon' | grep /users/jason92/s4-dps-run || true
+[2026-10-27 16:02:30] leftover CassandraDaemon of this run: ''; restarts=15
+[2026-10-27 16:02:30] + rm -rf /users/jason92/s4-dps-run
+[2026-10-27 16:02:31] run dir removed: True

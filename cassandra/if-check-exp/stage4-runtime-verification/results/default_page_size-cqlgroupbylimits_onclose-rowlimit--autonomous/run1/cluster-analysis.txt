@@ -1,0 +1,37 @@
+INFO per cell: variant | label fetch | n | dead | err | rows read | sub-reads | max rows/line | delta MB (per rep) | base MB | peak-after MB | pause frac | used growth | disk delta | wall ms
+INFO K[stock] = 2
+INFO stock | groupby-unset None | 3 | dead [False, False, False] | err ['', '', ''] | rows [2000000, 2000000, 2000000] | sub [201, 201, 201] | maxrows 10000 | delta ['367.0', '192.0', '183.0'] | base 75.0 | peak 322.3 | pause [0.15, 0.11, 0.11] | used 226.2 | disk [0, 0, 0] | wall [13500, 12402, 13632]
+INFO stock | plain-count None | 3 | dead [True, True, True] | err ["ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w"] | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | delta ['400.0', '399.0', '399.0'] | base 78.0 | peak 477.3 | pause [0.44, 0.39, 0.4] | used 384.0 | disk [0, 0, 0] | wall [1507, 1609, 1617]
+INFO stock | groupby-fetch 500 | 3 | dead [False, False, False] | err ['', '', ''] | rows [2000000, 2000000, 2000000] | sub [4001, 4001, 4001] | maxrows 500 | delta ['3.0', '2.0', '2.0'] | base 78.7 | peak 81.0 | pause [0.01, 0.01, 0.01] | used 273.9 | disk [0, 0, 0] | wall [14414, 13298, 13448]
+INFO stock | groupby-fetch 200000 | 3 | dead [True, True, True] | err ["ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w"] | rows [200000, 200000, 200000] | sub [1, 1, 1] | maxrows 200000 | delta ['400.0', '401.0', '401.0'] | base 78.7 | peak 479.3 | pause [0.44, 0.37, 0.4] | used 384.2 | disk [0, 0, 0] | wall [2229, 2541, 2791]
+INFO K[500] = 2
+INFO 500 | groupby-unset None | 3 | dead [False, False, False] | err ['', '', ''] | rows [2000000, 2000000, 2000000] | sub [4001, 4001, 4001] | maxrows 500 | delta ['2.0', '2.0', '2.0'] | base 79.0 | peak 81.0 | pause [0.01, 0.0, 0.01] | used 278.5 | disk [0, 0, 0] | wall [13635, 13194, 12932]
+INFO 500 | plain-count None | 3 | dead [True, True, True] | err ["ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w"] | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | delta ['400.0', '400.0', '400.0'] | base 79.3 | peak 479.3 | pause [0.46, 0.4, 0.42] | used 384.0 | disk [0, 0, 0] | wall [1495, 1620, 1551]
+INFO K[200000] = 2
+INFO 200000 | groupby-unset None | 3 | dead [True, True, True] | err ["ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w"] | rows [0, 200000, 0] | sub [0, 1, 0] | maxrows 200000 | delta ['222.0', '401.0', '290.0'] | base 79.3 | peak 383.7 | pause [0.36, 0.38, 0.29] | used 320.3 | disk [0, 0, 0] | wall [949, 2201, 1149]
+INFO 200000 | plain-count None | 3 | dead [True, True, True] | err ["ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w", "ConnectionShutdown('Connection to 127.0.9.1:9042 w"] | rows [0, 0, 0] | sub [0, 0, 0] | maxrows 0 | delta ['400.0', '400.0', '400.0'] | base 80.0 | peak 480.0 | pause [0.41, 0.39, 0.42] | used 384.0 | disk [0, 0, 0] | wall [1592, 1611, 1557]
+
+EXPECTED: instrument [stock]: first-trigger fetch-1000 query leaves reads of rows=1000 groups=0 unfinished=true, none above 1000, K >= 1: PASS (K=2, 4002 lines)
+EXPECTED: instrument [500]: first-trigger fetch-1000 query leaves reads of rows=1000 groups=0 unfinished=true, none above 1000, K >= 1: PASS (K=2, 4002 lines)
+EXPECTED: instrument [200000]: first-trigger fetch-1000 query leaves reads of rows=1000 groups=0 unfinished=true, none above 1000, K >= 1: PASS (K=2, 4002 lines)
+EXPECTED: [B1] [stock] limit 10000: every completed query read all 2000000 rows, max rows per read <= 10000, trace lines a multiple of K: PASS ([(2000000.0, 10000), (2000000.0, 10000), (2000000.0, 10000)])
+EXPECTED: [B1] [stock] limit 10000: reads per query == floor(2000000/10000)+1 = 201 (C2): PASS ([201.0, 201.0, 201.0])
+EXPECTED: [B1] [500] limit 500: every completed query read all 2000000 rows, max rows per read <= 500, trace lines a multiple of K: PASS ([(2000000.0, 500), (2000000.0, 500), (2000000.0, 500)])
+EXPECTED: [B1] [500] limit 500: reads per query == floor(2000000/500)+1 = 4001 (C2): PASS ([4001.0, 4001.0, 4001.0])
+INFO [200000]: no completed query (node dead in [True, True, True]); trace lines per query [0, 2, 0], max rows [0, 200000, 0]
+EXPECTED: B3f: limits 500 and 10000 stay well below the heap (<= 256 MB above baseline, no death): FAIL (['2.0', '2.0', '2.0', '367.0', '192.0', '183.0'])
+EXPECTED: B3f: limit 200000: node death, or peak above baseline >= 5x the 500 value, or pause time > 20 percent, in every repetition: PASS ([(True, '222.0', 0.36), (True, '401.0', 0.38), (True, '290.0', 0.29)])
+EXPECTED: B3f: peak rises with the constant: 500 < 10000 < 200000 (death = above): PASS (2.0 < 247.3 < inf)
+INFO ratio: 10000/500 = 123.7; 200000/500 = inf (death)
+EXPECTED: B3f: plain count(payload) (no GROUP BY): no death, the three variants within 50 MB of each other: FAIL (['399.3', '400.0', '400.0'])
+INFO plain [stock]: rows read by GroupBy counter lines [0, 0, 0] (0 expected: no GROUP BY counter)
+INFO plain [500]: rows read by GroupBy counter lines [0, 0, 0] (0 expected: no GROUP BY counter)
+INFO plain [200000]: rows read by GroupBy counter lines [0, 0, 0] (0 expected: no GROUP BY counter)
+EXPECTED: B3f: disk: the ks data directory is unchanged by reads (<= 1 MiB) in every query: PASS ([])
+EXPECTED: B3h: client fetch 500 on the stock build reads 500-row reads (floor+1 = 4001) and matches the 500 variant (within max(30 MB, 50 percent)): PASS (2.3 vs 2.0; sub [4001.0, 4001.0, 4001.0])
+EXPECTED: B3h: client fetch 200000 on the stock build ends like the 200000 variant (same death outcome, or means within max(30 MB, 50 percent)): PASS (dead [True, True, True] vs [True, True, True])
+EXPECTED: B3f/B3g: guardrail arm: fetch 500 passes: PASS (None)
+EXPECTED: B3f/B3g: guardrail arm: fetch 200000 rejected in under 5 s with the page-size error: PASS ([(16, 'InvalidRequest(\'Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: '), (4, 'InvalidRequest(\'Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: '), (5, 'InvalidRequest(\'Error from server: code=2200 [Invalid query] message="Guardrail page_size violated: ')])
+
+B3g facts: peak_rises_with_constant=True deaths_at_200000=[True, True, True] plain_unaffected=True
+FAILED EXPECTATIONS: ['B3f: limits 500 and 10000 stay well below the heap (<= 256 MB above baseline, no death)', 'B3f: plain count(payload) (no GROUP BY): no death, the three variants within 50 MB of each other']

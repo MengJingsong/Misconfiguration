@@ -1,0 +1,15 @@
+# Byteman observation rule, cluster tier of default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous (case-file amendment C3). Observation only: it changes nothing.
+# Loaded at node start with  -javaagent:<byteman.jar>=script:<this file>  -Dstage4.trace=<file>
+# One line per local sub-page read of a GROUP BY query, written when the counter is closed (end of that read):
+#   GB ms=<epoch ms> rows=<rowsCounted> groups=<groupCounted> unfinished=<hasUnfinishedGroup> done=<isDone()>
+# rows = rows that passed the counter in this read (<= rowLimit = page size P); groups = groups completed in this read; done = groupCounted >= groupLimit
+# (for the target DataLimits.java:986, rowsCounted >= rowLimit). PagingGroupByAwareCounter inherits onClose, so continuation reads are traced as well.
+
+RULE dps row limit observation
+CLASS org.apache.cassandra.db.filter.DataLimits$CQLGroupByLimits$GroupByAwareCounter
+METHOD onClose
+AT EXIT
+IF TRUE
+DO traceOpen("dps", java.lang.System.getProperty("stage4.trace", "dps.trace"));
+   traceln("dps", "GB ms=" + java.lang.System.currentTimeMillis() + " rows=" + $0.rowsCounted + " groups=" + $0.groupCounted + " unfinished=" + $0.hasUnfinishedGroup + " done=" + $0.isDone())
+ENDRULE

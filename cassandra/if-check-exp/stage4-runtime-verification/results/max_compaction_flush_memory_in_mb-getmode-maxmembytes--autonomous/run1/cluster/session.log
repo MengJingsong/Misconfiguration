@@ -1,0 +1,260 @@
+[2026-10-27T21:12:44.761Z] run rows 3000000 heap 3G arms ['102400', '1', '16', '128', 'def', '102401', '102400'] host node3.jason92-321705.misconfiguration-pg0.cloudlab.umass.edu
+[2026-10-27T21:12:44.761Z] + ss -ltn | grep -q ":7332 "
+[2026-10-27T21:12:44.770Z] + ss -ltn | grep -q ":9354 "
+[2026-10-27T21:12:44.778Z] + ss -ltn | grep -q ":7032 "
+[2026-10-27T21:12:44.787Z] + mkdir -p /users/jason92/s4-gm-data/cl/sampler && javac -d /users/jason92/s4-gm-data/cl/sampler /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/PoolSampler.java
+[2026-10-27T21:12:45.544Z] start node ulimit -n 100000; exec /users/jason92/s4-gm/bin/cassandra -f -p /users/jason92/s4-gm-data/cl/pid
+[2026-10-27T21:12:45.545Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+nodetool: Failed to connect to '127.0.0.1:7332' - ConnectException: 'Connection refused (Connection refused)'.
+
+[2026-10-27T21:12:49.453Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+
+[2026-10-27T21:12:53.575Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:12:57.615Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:01.696Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:05.765Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:09.771Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:13.774Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:17.856Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:21.951Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+not running
+
+[2026-10-27T21:13:25.993Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 statusbinary
+running
+
+[2026-10-27T21:13:27.134Z] node up
+[2026-10-27T21:13:37.146Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/loader.py /users/jason92/s4-gm 127.0.32.1 9354 3000000
+loaded 500000 rows in 71.0 s
+loaded 1000000 rows in 141.0 s
+loaded 1500000 rows in 211.9 s
+loaded 2000000 rows in 283.1 s
+loaded 2500000 rows in 354.0 s
+loaded 3000000 rows in 425.4 s
+loaded 3000000 rows with unique v in 425.4 s
+
+[2026-10-27T21:20:44.720Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 flush ks t
+[2026-10-27T21:20:49.047Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compact ks t
+[2026-10-27T21:21:03.650Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 disableautocompaction ks t
+[2026-10-27T21:21:04.720Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 tablestats ks.t | head -40
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 3000000
+	Write Latency: 0.15297533466666666 ms
+	Pending Flushes: 0
+		Table: t
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 98.489MiB
+		Space used (live): 103272957
+		Space used (total): 103272957
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 4317312
+		SSTable Compression Ratio: 0.50905
+		Number of partitions (estimate): 3037384
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 18
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 3000000
+		Local write latency: 0.169 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 101.175MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 3796744
+		Bloom filter off heap memory used: 3796736
+		Index summary off heap memory used: 468760
+		Compression metadata off heap memory used: 51816
+		Compacted partition minimum bytes: 30
+
+[2026-10-27T21:21:06.437Z] + jcmd 702146 GC.run
+[2026-10-27T21:21:10.093Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'102400'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'102400'}
+
+[2026-10-27T21:22:17.988Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            11         
+data compacted                   517808732  
+compressed data compacted        306560826  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.53/minute
+mean rate                        69.73/hour 
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:22:19.443Z] + tail -c +110586 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a1-102400.txt
+[2026-10-27T21:22:19.447Z] + tail -c +110586 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a1-102400.txt
+[2026-10-27T21:22:19.450Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:22:26.124Z] + jcmd 702146 GC.run
+[2026-10-27T21:22:29.759Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'1'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'1'}
+
+[2026-10-27T21:23:36.768Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            15         
+data compacted                   623923264  
+compressed data compacted        412656141  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.73/minute
+mean rate                        83.50/hour 
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:23:38.210Z] + tail -c +124874 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a2-1.txt
+[2026-10-27T21:23:38.213Z] + tail -c +124874 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a2-1.txt
+[2026-10-27T21:23:38.216Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:23:44.883Z] + jcmd 702146 GC.run
+[2026-10-27T21:23:48.532Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'16'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'16'}
+
+[2026-10-27T21:24:31.343Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            18         
+data compacted                   730013562  
+compressed data compacted        518746062  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   0.88/minute
+mean rate                        92.40/hour 
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:24:32.842Z] + tail -c +275253 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a3-16.txt
+[2026-10-27T21:24:32.846Z] + tail -c +275253 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a3-16.txt
+[2026-10-27T21:24:32.849Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:24:39.596Z] + jcmd 702146 GC.run
+[2026-10-27T21:24:43.262Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'128'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'128'}
+
+[2026-10-27T21:25:32.967Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            22         
+data compacted                   836127179  
+compressed data compacted        624840832  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   1.08/minute
+mean rate                        103.81/hour
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:25:34.492Z] + tail -c +297396 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a4-128.txt
+[2026-10-27T21:25:34.496Z] + tail -c +297396 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a4-128.txt
+[2026-10-27T21:25:34.499Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:25:41.067Z] + jcmd 702146 GC.run
+[2026-10-27T21:25:44.760Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE'}
+
+[2026-10-27T21:26:36.765Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            26         
+data compacted                   942241700  
+compressed data compacted        730936136  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   1.26/minute
+mean rate                        113.23/hour
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:26:38.251Z] + tail -c +311450 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a5-def.txt
+[2026-10-27T21:26:38.255Z] + tail -c +311450 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a5-def.txt
+[2026-10-27T21:26:38.259Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:26:44.781Z] + jcmd 702146 GC.run
+[2026-10-27T21:26:48.467Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'102401'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'102401'}
+
+[2026-10-27T21:27:40.550Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            29         
+data compacted                   1048332001 
+compressed data compacted        837026060  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   1.36/minute
+mean rate                        117.24/hour
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:27:41.004Z] + tail -c +327634 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a6-102401.txt
+[2026-10-27T21:27:42.007Z] + tail -c +327634 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a6-102401.txt
+[2026-10-27T21:27:42.011Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:27:48.803Z] + jcmd 702146 GC.run
+[2026-10-27T21:27:52.487Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'102400'}"
+CQL CREATE CUSTOM INDEX t_v ON ks.t(v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode':'SPARSE','max_compaction_flush_memory_in_mb':'102400'}
+
+[2026-10-27T21:28:58.194Z] + /users/jason92/s4-gm/bin/nodetool -h 127.0.0.1 -p 7332 compactionstats
+concurrent compactors            1          
+pending tasks                    0          
+compactions completed            33         
+data compacted                   1154445578 
+compressed data compacted        943120791  
+compactions aborted              0          
+compactions reduced              0          
+sstables dropped from compaction 0          
+15 minute rate                   1.51/minute
+mean rate                        122.72/hour
+compaction throughput (MiB/s)    64.0       
+
+[2026-10-27T21:28:59.612Z] + tail -c +343922 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'Index flush to' -e 'Flushed index segment' > /users/jason92/stage4-logs/gm/run1-cl/segments-a7-102400.txt
+[2026-10-27T21:28:59.616Z] + tail -c +343922 /users/jason92/s4-gm-data/cl/logs/system.log | grep -e 'OutOfMemory' -e '^ERROR' -e '^WARN.*SASI' > /users/jason92/stage4-logs/gm/run1-cl/errors-a7-102400.txt
+[2026-10-27T21:28:59.619Z] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous/cql.py /users/jason92/s4-gm 127.0.32.1 9354 "DROP INDEX ks.t_v"
+CQL DROP INDEX ks.t_v
+
+[2026-10-27T21:29:06.391Z] + grep -v 'Rejecting' /users/jason92/s4-gm-data/cl/logs/system.log > /users/jason92/stage4-logs/gm/run1-cl/system.log.filtered
+[2026-10-27T21:29:06.396Z] + df -h /users/jason92/s4-gm-data/cl | tail -1
+/dev/sda3        63G  6.0G   54G  11% /
+
+[2026-10-27T21:30:36.495Z] SIGKILL node 702146
+[2026-10-27T21:30:36.495Z] SIGKILL sampler 704302
+[2026-10-27T21:30:36.495Z] stopped {'node': 702146, 'sampler': 704302}
+[2026-10-27T21:30:37.532Z] done
+[2026-10-27T21:30:37.533Z] stopped {}

@@ -68,7 +68,13 @@ noticed along the way are noted in case files for Target 3, not chased.
 - **Stage 4:** **all 115 closed**, run 1 only (set A batch 10: `lc` also ran a second cluster pass, same session): 94 Confirmed, 4 Refuted,
   16 partial, 1 not confirmed. **Outcome class:** 51 true positive, 0 false positive, 46 true
   negative, 5 false negative, 13 undetermined (all autonomous, mostly the cluster tier).
-  Per-case verdicts: `stage3-ai-deep-read/_INDEX.md` §1.
+  Per-case verdicts: `stage3-ai-deep-read/_INDEX.md` §1. *(The counts above predate set A's later
+  batches; `_INDEX.md` §1 is the current record.)*
+- **2026-10-27, four non-config positives closed** on nodes `pc39`, `pc32`, `pc29`, `pc41` of
+  experiment `jason92-321705` (JDK 11.0.32.1, Ant 1.10.12, 40 cores, 251 GiB; one case per node, run 1 only,
+  no run 2): `default_page_size-cqlgroupbylimits_onclose-rowlimit` (U/C Confirmed), `diagnostic_event_memory_store_max_size-store-keyhead`
+  (U/C Confirmed), `trie_2gb_hard_limit-allocateblock-leadbit` (U/C Confirmed), `max_compaction_flush_memory_in_mb-getmode-maxmembytes`
+  (U Confirmed, C Partial: bypass at a 1 MiB cap). All four true positive. `predicted-positive.md` has no open stage-4 rows now.
 
 ## Decisions in force
 
@@ -221,9 +227,9 @@ Experiment `jason92-320876`, Ubuntu 22.04, 40 cores, 251 GiB each; JDK 11.0.32.1
 | `pc06` | node2 | `198.22.255.16` | `10.10.1.3` | Yang |
 | `pc13` | node3 | `198.22.255.23` | `10.10.1.4` | Yang |
 
-- SSH to the peers needs `-i /proj/misconfiguration-PG0/.ssh/id_ed25519` (the `cluster_ed25519`
-  key named in `~/.ssh/config` is refused). Peers' `ulimit -n` is 1024: raise it in the shell that
-  starts a node.
+- `ssh pcNN` works once `setup-node.sh --peers "..."` has been re-run on the node (the `~/.ssh/config`
+  stanzas use the shared `id_ed25519` deploy key, which the peers accept). Peers' `ulimit -n` is 1024:
+  raise it in the shell that starts a node.
 - Untracked test files and `~/stage4-*` folders from closed cases remain on each node (listed in
   each results file). Two cases on one node need separate working trees, data directories, JMX and
   Byteman ports, and loopback addresses (recorded as an environment deviation).

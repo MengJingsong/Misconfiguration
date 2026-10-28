@@ -1,0 +1,25 @@
+RUN type=ON_HEAP knob=<unset> maxMemory=10737418240
+THRESHOLD ALLOCATED_SIZE_THRESHOLD=1951399936 (1861 MiB) hardLimit=2147483392
+tag=start allocatedPos=0 sizeOffHeap=0 sizeOnHeap=632 reached=false directUsed=8195 directCount=4 heapUsed=44040192 nmt=[Total: reserved=12332930KB, committed=2326430KB ; - Other (reserved=10KB, committed=10KB) ; ]
+tag=after-put-t1 allocatedPos=32 sizeOffHeap=0 sizeOnHeap=668 reached=false directUsed=8195 directCount=4 heapUsed=48234496 nmt=[Total: reserved=12331968KB, committed=2326456KB ; - Other (reserved=10KB, committed=10KB) ; ]
+op=thr-0x1000 target=1951395840 result=OK returned=1951395840
+tag=after-thr-0x1000 allocatedPos=1951395840 sizeOffHeap=0 sizeOnHeap=1951397180 reached=false directUsed=8192 directCount=1 heapUsed=2184452856 nmt=[Total: reserved=12367050KB, committed=3419946KB ; - Other (reserved=10KB, committed=10KB) ; ]
+op=thr target=1951399936 result=OK returned=1951399936
+tag=after-thr allocatedPos=1951399936 sizeOffHeap=0 sizeOnHeap=1951401276 reached=true directUsed=8192 directCount=1 heapUsed=2184452856 nmt=[Total: reserved=12366024KB, committed=3419904KB ; - Other (reserved=10KB, committed=10KB) ; ]
+op=thr+0x1000 target=1951404032 result=OK returned=1951404032
+tag=after-thr+0x1000 allocatedPos=1951404032 sizeOffHeap=0 sizeOnHeap=1951405372 reached=true directUsed=8192 directCount=1 heapUsed=2184452856 nmt=[Total: reserved=12366024KB, committed=3419904KB ; - Other (reserved=10KB, committed=10KB) ; ]
+op=edge-0x7FFFFEE0 target=2147483360 result=OK returned=2147483360
+tag=after-edge-0x7FFFFEE0 allocatedPos=2147483360 sizeOffHeap=0 sizeOnHeap=2147484700 reached=true directUsed=8192 directCount=1 heapUsed=2184452856 nmt=[Total: reserved=12366026KB, committed=3419970KB ; - Other (reserved=10KB, committed=10KB) ; ]
+CHECK read-t1=test1 read-t3=null
+op=putRecursive-t3 result=SpaceExhaustedException posBefore=2147483360 posAfter=2147483392
+tag=after-put-t3 allocatedPos=2147483392 sizeOffHeap=0 sizeOnHeap=2147484768 reached=true directUsed=8192 directCount=1 heapUsed=2186550008 nmt=[Total: reserved=12366076KB, committed=3420276KB ; - Other (reserved=10KB, committed=10KB) ; ]
+CHECK read-t1=test1 read-t2=null read-t3=null
+op=advance-MAX_VALUE-try1 target=2147483647 result=SpaceExhaustedException msg="The hard 2GB limit on trie size has been exceeded" posBefore=2147483392 posAfter=2147483392
+tag=after-advance-MAX-try1 allocatedPos=2147483392 sizeOffHeap=0 sizeOnHeap=2147484768 reached=true directUsed=8192 directCount=1 heapUsed=2188647160 nmt=[Total: reserved=12366180KB, committed=3420828KB ; - Other (reserved=10KB, committed=10KB) ; ]
+op=advance-MAX_VALUE-try2 target=2147483647 result=SpaceExhaustedException msg="The hard 2GB limit on trie size has been exceeded" posBefore=2147483392 posAfter=2147483392
+tag=after-advance-MAX-try2 allocatedPos=2147483392 sizeOffHeap=0 sizeOnHeap=2147484768 reached=true directUsed=8192 directCount=1 heapUsed=2188647160 nmt=[Total: reserved=12366181KB, committed=3420829KB ; - Other (reserved=10KB, committed=10KB) ; ]
+CHECK read-t1=test1 final-allocatedPos=2147483392
+op=B-advance-edge target=2147483360 result=OK returned=2147483360 pos=2147483360
+op=B-advance-MAX target=2147483647 result=SpaceExhaustedException msg="The hard 2GB limit on trie size has been exceeded" posBefore=2147483360 posAfter=2147483392
+tag=B-after-MAX allocatedPos=2147483392 sizeOffHeap=0 sizeOnHeap=2147484760 reached=true directUsed=8192 directCount=1 heapUsed=2183977160 nmt=[Total: reserved=12352028KB, committed=2391596KB ; - Other (reserved=10KB, committed=10KB) ; ]
+DONE
