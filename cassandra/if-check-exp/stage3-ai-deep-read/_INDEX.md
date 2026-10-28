@@ -225,6 +225,33 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`no_constraint-hascomponent-i_nextsize`](cases/no_constraint-hascomponent-i_nextsize--autonomous.md) | A | negative |  |  | none |
 | [`no_constraint-isempty-header_mask`](cases/no_constraint-isempty-header_mask--autonomous.md) | A | negative |  |  | none |
 | [`no_constraint-isnull-header_bit`](cases/no_constraint-isnull-header_bit--autonomous.md) | A | negative |  |  | none |
+| [`prepared_statements_cache_size-loadpreparedstatements-preparedbytesloaded`](cases/prepared_statements_cache_size-loadpreparedstatements-preparedbytesloaded--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`virtual_logs_max_rows-boundedlinkedlist_add-size`](cases/virtual_logs_max_rows-boundedlinkedlist_add-size--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`no_constraint-resizeto-newcapacity`](cases/no_constraint-resizeto-newcapacity--autonomous.md) | A | negative |  |  | none |
+| [`seed_count_warn_threshold-getseeds-seeds_size`](cases/seed_count_warn_threshold-getseeds-seeds_size--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`no_constraint-capacity-newcapacity`](cases/no_constraint-capacity-newcapacity--autonomous.md) | A | negative |  |  | none |
+| [`nopcache_capacity-setcapacity-capacity`](cases/nopcache_capacity-setcapacity-capacity--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`native_transport_max_request_data_in_flight-applysimpleconfig-maxmessagesize`](cases/native_transport_max_request_data_in_flight-applysimpleconfig-maxmessagesize--autonomous.md) | A | positive |  |  | runtime-queried |
+| [`native_transport_max_request_data_in_flight_per_ip-applysimpleconfig-maxmessagesize`](cases/native_transport_max_request_data_in_flight_per_ip-applysimpleconfig-maxmessagesize--autonomous.md) | A | positive |  |  | runtime-queried |
+| [`max_space_usable_for_compactions_in_percentage-applysimpleconfig-range`](cases/max_space_usable_for_compactions_in_percentage-applysimpleconfig-range--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`repair_session_space-setrepairsessionspaceinmib-sizeinmib`](cases/repair_session_space-setrepairsessionspaceinmib-sizeinmib--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`repair_session_space-setrepairsessionspaceinmib-sizeinmib-2`](cases/repair_session_space-setrepairsessionspaceinmib-sizeinmib-2--autonomous.md) | A | negative |  |  | runtime-queried |
+| [`repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value`](cases/repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`data_disk_usage_max_disk_size-validatedatadiskusagemaxdisksize-disksize`](cases/data_disk_usage_max_disk_size-validatedatadiskusagemaxdisksize-disksize--autonomous.md) | A | negative |  |  | runtime-queried |
+| [`segment_write_buffer_size-validate-maximum_segment_buffer_mb`](cases/segment_write_buffer_size-validate-maximum_segment_buffer_mb--autonomous.md) | A | negative |  |  | hard-coded constant |
+| [`counter_cache_size-iscountercacheenabled-capacity`](cases/counter_cache_size-iscountercacheenabled-capacity--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`row_cache_size-isrowcacheenabled-rowcachecapacity`](cases/row_cache_size-isrowcacheenabled-rowcachecapacity--autonomous.md) | A | positive |  |  | per-table/per-index option |
+| [`counter_cache_size-getcachedcounter-capacity`](cases/counter_cache_size-getcachedcounter-capacity--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`counter_cache_size-putcachedcounter-capacity`](cases/counter_cache_size-putcachedcounter-capacity--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`counter_cache_size-processmodifications-capacity`](cases/counter_cache_size-processmodifications-capacity--autonomous.md) | A | positive |  |  | runtime-queried |
+| [`monitoring_max_operations-operationsqueue_offer-maxoperations`](cases/monitoring_max_operations-operationsqueue_offer-maxoperations--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize`](cases/mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`row_overhead_size-intrie_init-limitinmb`](cases/row_overhead_size-intrie_init-limitinmb--autonomous.md) | A | positive |  |  | hard-coded constant |
+| [`no_constraint-allocateblock-inchunkpointer`](cases/no_constraint-allocateblock-inchunkpointer--autonomous.md) | A | negative |  |  | none |
+| [`sai_vector_search_max_top_k-validate-limit_count`](cases/sai_vector_search_max_top_k-validate-limit_count--autonomous.md) | A | positive |  |  | query parameter |
+| [`no_constraint-validatetermsizeforcell-cellbufferremaining`](cases/no_constraint-validatetermsizeforcell-cellbufferremaining--autonomous.md) | A | negative |  |  | none |
+| [`vector_memory_index_cost_model-orderby-bruteforcerows`](cases/vector_memory_index_cost_model-orderby-bruteforcerows--autonomous.md) | A | negative |  |  | runtime-queried |
+| [`vector_memory_index_cost_model-orderresultsby-maxbruteforcerows`](cases/vector_memory_index_cost_model-orderresultsby-maxbruteforcerows--autonomous.md) | A | negative |  |  | query parameter |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -820,3 +847,30 @@ dated amendment adds a line here with its date and the new hash.
 | `no_constraint-hascomponent-i_nextsize--autonomous.md` | `eeee42afab9c092a279d2b725b17706def4d09b50c84ec15a4cf57a5a1d8761b` | 2026-10-27 non-config agent, batch 2 |
 | `no_constraint-isempty-header_mask--autonomous.md` | `c7c9dd1d5f51019f0e4dac99b2a55501f0fb3c88a66439d2d20ab3baf745bdc1` | 2026-10-27 non-config agent, batch 2 |
 | `no_constraint-isnull-header_bit--autonomous.md` | `018ac4aefb30deddc43bce5261fc87ae74456dd42b5356b868ba40fc1b09a381` | 2026-10-27 non-config agent, batch 2 |
+| `prepared_statements_cache_size-loadpreparedstatements-preparedbytesloaded--autonomous.md` | `473f5037cb8354609bb84e748daec078614a472950d5b2e753df30f30a2fbb57` | 2026-10-27 non-config agent, set A open rows |
+| `virtual_logs_max_rows-boundedlinkedlist_add-size--autonomous.md` | `ffe9ddb2d622884ab91e5bf1a3089371998082b343636db9cba266e4bf9aaee8` | 2026-10-27 non-config agent, set A open rows |
+| `no_constraint-resizeto-newcapacity--autonomous.md` | `59b2a8ae7821e01a1bedf3ad3954bff19f403456ba7e28ff7e221e8c5f888537` | 2026-10-27 non-config agent, set A open rows |
+| `seed_count_warn_threshold-getseeds-seeds_size--autonomous.md` | `2f92193fd92e566aab908377db02a39c9ede320a982adb90c9dac9213b6b9c53` | 2026-10-27 non-config agent, set A open rows |
+| `no_constraint-capacity-newcapacity--autonomous.md` | `e7aa78152f37ae6b0363355c6f6e3cc65d3384611e043e48e456c829d22f44c9` | 2026-10-27 non-config agent, set A open rows |
+| `nopcache_capacity-setcapacity-capacity--autonomous.md` | `361f73086f1c4c9724e8f75a4a5bb69acfdcbb9b4cf2b6d2f3513143765bb13c` | 2026-10-27 non-config agent, set A open rows |
+| `native_transport_max_request_data_in_flight-applysimpleconfig-maxmessagesize--autonomous.md` | `524370bdad9a4e871d5f3ba7396495933812cfdc272f50e629e26fb1dfa93c09` | 2026-10-27 non-config agent, set A open rows |
+| `native_transport_max_request_data_in_flight_per_ip-applysimpleconfig-maxmessagesize--autonomous.md` | `a5c16d06eb97b53125491cb4b710d89e8492aaf316ffaad0de999e321053c013` | 2026-10-27 non-config agent, set A open rows |
+| `max_space_usable_for_compactions_in_percentage-applysimpleconfig-range--autonomous.md` | `08453aa32aafd05fcde80d5b66493956077f9ae104481f02271a78e1fd2d59d8` | 2026-10-27 non-config agent, set A open rows |
+| `repair_session_space-setrepairsessionspaceinmib-sizeinmib--autonomous.md` | `f30fcc0ebc298715e1f8e29a70f75cc6cdf47569c05a5129b1514affb01b9bd4` | 2026-10-27 non-config agent, set A open rows |
+| `repair_session_space-setrepairsessionspaceinmib-sizeinmib-2--autonomous.md` | `07500a2bf88ea0c8a0e546e50b24287d5b65b76dff1e77bf227ed1a0bddce926` | 2026-10-27 non-config agent, set A open rows |
+| `repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value--autonomous.md` | `fd461fa672d90358520ed36aca33dca9dfd91ebb29d1e3f757be10096cdf0f74` | 2026-10-27 non-config agent, set A open rows |
+| `data_disk_usage_max_disk_size-validatedatadiskusagemaxdisksize-disksize--autonomous.md` | `df19156dd47077aae2e72cc9422eb2d88fd0825e0e4e7073d2b92fcd824866a6` | 2026-10-27 non-config agent, set A open rows |
+| `segment_write_buffer_size-validate-maximum_segment_buffer_mb--autonomous.md` | `37bb32f7fd22478473e9857b82a2bc12f3a663b2ac330c04aff9645fd6863a48` | 2026-10-27 non-config agent, set A open rows |
+| `counter_cache_size-iscountercacheenabled-capacity--autonomous.md` | `12bb88094055c48210c1c3271444b8a2e719815630dd2871911eaf8174625333` | 2026-10-27 non-config agent, set A open rows |
+| `row_cache_size-isrowcacheenabled-rowcachecapacity--autonomous.md` | `b9acd8e076f27e3c211dedb3f4beaa4543fcee76c1dace6d2af4327b58ea8231` | 2026-10-27 non-config agent, set A open rows |
+| `counter_cache_size-getcachedcounter-capacity--autonomous.md` | `31e163ad8c8ab032d11885d66594f80d153bcdccb22c05a94bb4c4b7fef400d7` | 2026-10-27 non-config agent, set A open rows |
+| `counter_cache_size-putcachedcounter-capacity--autonomous.md` | `ae0415d35c17ffe6de191bb96444959d9d8c613d4c1916629b7706506723e3e3` | 2026-10-27 non-config agent, set A open rows |
+| `counter_cache_size-processmodifications-capacity--autonomous.md` | `a070080fca162ea616cf8ec662e5fe442f129be54a888e3891d539ec4068c41c` | 2026-10-27 non-config agent, set A open rows |
+| `monitoring_max_operations-operationsqueue_offer-maxoperations--autonomous.md` | `d3cf268c883888756815d40fe6ce357fa589cf7ec963e61b31a1685f15ce225d` | 2026-10-27 non-config agent, set A open rows |
+| `mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize--autonomous.md` | `4d96e7477789a8cb88fee977b9069d362c82b6cd9e6af8639106400a9b7487f8` | 2026-10-27 non-config agent, set A open rows |
+| `row_overhead_size-intrie_init-limitinmb--autonomous.md` | `d23a3b0cadb86e1be097c5525f63dda98008693cc196fef8145ca23d35555eb6` | 2026-10-27 non-config agent, set A open rows |
+| `no_constraint-allocateblock-inchunkpointer--autonomous.md` | `b0bf91f174759638f6bce1c2187d66ea707bd0f5dded52b7a793a30d2dfc5e34` | 2026-10-27 non-config agent, set A open rows |
+| `sai_vector_search_max_top_k-validate-limit_count--autonomous.md` | `d1728786fcda0f8740ddfaf8850637cd0ff6a766d5b842d5a4c78750e5f08ad1` | 2026-10-27 non-config agent, set A open rows |
+| `no_constraint-validatetermsizeforcell-cellbufferremaining--autonomous.md` | `406a4efc95029426d256a3401adc69fb36c18cdd88d1a86f52200f07c8f18302` | 2026-10-27 non-config agent, set A open rows |
+| `vector_memory_index_cost_model-orderby-bruteforcerows--autonomous.md` | `ec8195fbaaefcc58b54240f443ccd1f19ffd32077478da0b9d5930d6d8ca3602` | 2026-10-27 non-config agent, set A open rows |
+| `vector_memory_index_cost_model-orderresultsby-maxbruteforcerows--autonomous.md` | `6d19db6ad72ccad0cfe899b2ac6c9efa4d9c0ba5421e8dbdf580f53977e11fb0` | 2026-10-27 non-config agent, set A open rows |

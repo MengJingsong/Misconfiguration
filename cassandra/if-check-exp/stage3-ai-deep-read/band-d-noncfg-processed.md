@@ -40,7 +40,41 @@ all it produced. The CSV line is the line number in `bands.csv`.
 | 4182 | `org.apache.cassandra.db.ClusteringPrefix$Deserializer.hasComponent()` | CASE `no_constraint-hascomponent-i_nextsize` | negative, no constraint, type none |
 | 4183 | `org.apache.cassandra.db.ClusteringPrefix$Serializer.isEmpty()` | CASE `no_constraint-isempty-header_mask` | negative, no constraint, type none |
 | 4184 | `org.apache.cassandra.db.ClusteringPrefix$Serializer.isNull()` | CASE `no_constraint-isnull-header_bit` | negative, no constraint, type none |
+| set A row 7 | `db/SystemKeyspace.java:1919` | CASE `prepared_statements_cache_size-loadpreparedstatements-preparedbytesloaded` | negative |
+| set A row 85 | `db/virtual/LogMessagesTable.java:193` | CASE `virtual_logs_max_rows-boundedlinkedlist_add-size` | positive |
+| set A row 102 | `io/util/SafeMemoryWriter.java:52` | CASE `no_constraint-resizeto-newcapacity` | negative |
+| set A row 103 | `locator/SimpleSeedProvider.java:110` | CASE `seed_count_warn_threshold-getseeds-seeds_size` | negative |
+| set A row 104 | `net/BufferPoolAllocator.java:121` | CASE `no_constraint-capacity-newcapacity` | negative |
+| set A row 107 | `cache/NopCacheProvider.java:39` | CASE `nopcache_capacity-setcapacity-capacity` | positive |
+| set A row 108 | `config/DatabaseDescriptor.java:911` | CASE `native_transport_max_request_data_in_flight-applysimpleconfig-maxmessagesize` | positive |
+| set A row 109 | `config/DatabaseDescriptor.java:914` | CASE `native_transport_max_request_data_in_flight_per_ip-applysimpleconfig-maxmessagesize` | positive |
+| set A row 114 | `config/DatabaseDescriptor.java:1016` | CASE `max_space_usable_for_compactions_in_percentage-applysimpleconfig-range` | negative |
+| set A row 115 | `config/DatabaseDescriptor.java:4093` | CASE `repair_session_space-setrepairsessionspaceinmib-sizeinmib` | negative |
+| set A row 116 | `config/DatabaseDescriptor.java:4096` | CASE `repair_session_space-setrepairsessionspaceinmib-sizeinmib-2` | negative |
+| set A row 117 | `config/DatabaseDescriptor.java:5347` | CASE `repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value` | negative |
+| set A row 119 | `config/GuardrailsOptions.java:1257` | CASE `data_disk_usage_max_disk_size-validatedatadiskusagemaxdisksize-disksize` | negative |
+| set A row 120 | `config/StorageAttachedIndexOptions.java:41` | CASE `segment_write_buffer_size-validate-maximum_segment_buffer_mb` | negative |
+| set A row 127 | `helper org.apache.cassandra.db.ColumnFamilyStore.isCounterCacheEnabled()` | CASE `counter_cache_size-iscountercacheenabled-capacity` | positive |
+| set A row 128 | `helper org.apache.cassandra.db.ColumnFamilyStore.isRowCacheEnabled()` | CASE `row_cache_size-isrowcacheenabled-rowcachecapacity` | positive |
+| set A row 130 | `db/ColumnFamilyStore.java:2501` | CASE `counter_cache_size-getcachedcounter-capacity` | positive |
+| set A row 131 | `db/ColumnFamilyStore.java:2508` | CASE `counter_cache_size-putcachedcounter-capacity` | positive |
+| set A row 132 | `db/CounterMutation.java:213` | CASE `counter_cache_size-processmodifications-capacity` | positive |
+| set A row 138 | `db/monitoring/MonitoringTask.java:221` | CASE `monitoring_max_operations-operationsqueue_offer-maxoperations` | positive |
+| set A row 141 | `db/rows/ThrottledUnfilteredIterator.java:234` | CASE `mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize` | positive |
+| set A row 142 | `db/tries/InMemoryTrie.java:64` | CASE `row_overhead_size-intrie_init-limitinmb` | positive |
+| set A row 143 | `db/tries/InMemoryTrie.java:145` | CASE `no_constraint-allocateblock-inchunkpointer` | negative |
+| set A row 145 | `index/sai/StorageAttachedIndex.java:503` | CASE `sai_vector_search_max_top_k-validate-limit_count` | positive |
+| set A row 146 | `index/sai/StorageAttachedIndex.java:791` | CASE `no_constraint-validatetermsizeforcell-cellbufferremaining` | negative |
+| set A row 154 | `index/sai/memory/VectorMemoryIndex.java:190` | CASE `vector_memory_index_cost_model-orderby-bruteforcerows` | negative |
+| set A row 155 | `index/sai/memory/VectorMemoryIndex.java:229` | CASE `vector_memory_index_cost_model-orderresultsby-maxbruteforcerows` | negative |
+| set A row 110 | `config/DatabaseDescriptor.java:978` | SKIP | config-type; record in `skipped-config-type.md` |
+| set A row 111 | `config/DatabaseDescriptor.java:981` | SKIP | config-type; record in `skipped-config-type.md` |
+| set A row 112 | `config/DatabaseDescriptor.java:984` | SKIP | config-type; record in `skipped-config-type.md` |
+| set A row 113 | `config/DatabaseDescriptor.java:987` | SKIP | config-type; record in `skipped-config-type.md` |
+| set A row 118 | `config/GuardrailsOptions.java:1219` | SKIP | config-type; record in `skipped-config-type.md` |
 
 **Batch 1 (2026-10-27):** wave 1 took the first 8 band D helper units (CSV lines 4155-4162): 7 case files, 1 unresolved, 0 skips.
 
 **Batch 2 (2026-10-27):** waves 2 and 3 took the next 20 band D helper units that were not covered (CSV lines 4163-4176 and 4179-4184): 20 case files, 0 skips, 0 unresolved; lines 4177 and 4178 were covered. Next unit: CSV line 4185.
+
+**Set A open rows (2026-10-27):** the 32 set A rows that had no case file (`writeup-set-A.csv`, the "skip the 32 open rows" decision) were run through the non-config agent with the widened constant rule (a numeric literal counts as a constant): 27 case files (13 positive, 14 negative) and 5 config-type skips. Row 7 (`SystemKeyspace.java:1919`) was earlier settled as a second check site of `prepared_statements_cache_size` (`undetermined.md` §5.2); it now has its own case file.

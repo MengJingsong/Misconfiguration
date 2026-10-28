@@ -43,12 +43,14 @@ Classify by where the **value the check compares against** comes from.
   constant, a runtime-queried value, a query parameter (CQL `LIMIT` and the like), or **no
   constraint**.
 
-**Constant rule (decided 2026-10-27).** If a constant is involved in the constraint in any
-way, the row is **non-config type** and is written up, even when the same check also reads
-a yaml entry or a JVM property (for example `x < Math.min(DatabaseDescriptor.getFoo(),
-MAX_CONSTANT)`). Say which constant, with a link to its declaration, in A1. A row is
-config-type only when the compared value comes **only** from a yaml entry or a JVM
-property and no constant takes part.
+**Constant rule (decided 2026-10-27, widened the same day).** If a constant is involved in
+the check in any way, the row is **non-config type** and is written up, even when the same
+check also reads a yaml entry or a JVM property (for example `x < Math.min(DatabaseDescriptor.getFoo(),
+MAX_CONSTANT)`). **A numeric literal counts as a constant**: a bare `0`, `1`, `-1` or any other
+number in the comparison (for example `capacity > 0`, `size >= 1`) makes the row non-config.
+Say which constant or literal, with a link to the declaration where there is one, in A1. A row is
+config-type only when the compared value comes **only** from a yaml entry or a JVM property
+and **no** declared constant and **no** numeric literal takes part in the check.
 
 ## Skip record (config-type only)
 
@@ -59,7 +61,8 @@ SKIP | <target file:line> | <constraint name> | <yaml entry | JVM property> | <d
 ```
 
 Check twice before you skip: read the declaration and every place the compared value is
-computed. If any constant takes part, it is not a skip (constant rule).
+computed, and read the whole condition. If any declared constant or numeric literal takes part
+(including a `0`), it is not a skip (constant rule).
 
 ## A row with no constraint
 
