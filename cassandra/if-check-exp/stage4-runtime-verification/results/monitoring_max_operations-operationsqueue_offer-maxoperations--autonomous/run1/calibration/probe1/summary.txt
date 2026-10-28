@@ -1,0 +1,12 @@
+=== probe: monitoring_max_operations=-1, duration 30s, threads 256
+yaml (fast): # ---- stage4 mon lines ----;data_file_directories:;    - /users/jason92/s4-mon/node/data;commitlog_directory: /users/jason92/s4-mon/node/commitlog;hints_directory: /users/jason92/s4-mon/node/hints;saved_caches_directory: /users/jason92/s4-mon/node/saved_caches;cdc_raw_directory: /users/jason92/s4-mon/node/cdc_raw;read_request_timeout: 1ms;slow_query_log_timeout: 1ms;
+READBACK jvm property: -1
+READBACK yaml: read_request_timeout: 1ms slow_query_log_timeout: 1ms
+HISTO 0-baseline live_bytes=76338808 FailedOperation=0 FailedOperation_bytes=0 SlowOperation=0 SlowOperation_bytes=0 SinglePartitionReadCommand=0 SinglePartitionReadCommand_bytes=0 coordinator_read_timeouts=ERROR InstanceNotFoundException
+HISTO 1-t10s live_bytes=87681224 FailedOperation=18 FailedOperation_bytes=864 SlowOperation=95 SlowOperation_bytes=4560 SinglePartitionReadCommand=103 SinglePartitionReadCommand_bytes=9888 coordinator_read_timeouts=29
+HISTO 2-t20s live_bytes=89430832 FailedOperation=19 FailedOperation_bytes=912 SlowOperation=100 SlowOperation_bytes=4800 SinglePartitionReadCommand=109 SinglePartitionReadCommand_bytes=10464 coordinator_read_timeouts=34
+HISTO 3-after-stress live_bytes=94508632 FailedOperation=19 FailedOperation_bytes=912 SlowOperation=112 SlowOperation_bytes=5376 SinglePartitionReadCommand=117 SinglePartitionReadCommand_bytes=11232 coordinator_read_timeouts=38
+DRAIN-WARN lines (Some operations timed out / were slow)=0
+LOG Scheduling monitoring task with report interval of 600000 ms, max operations -1
+STRESS read: Op rate                   :   32,517 op/s  [READ: 32,517 op/s] | Total partitions          :     35,349 [READ: 35,349] | Total errors              :    955,093 [READ: 955,093]
+STOPPED: no CassandraDaemon left

@@ -1,0 +1,60 @@
+PASS unit off-1: threshold == 1 x 1048576 = 1048576
+PASS unit off-1: allocatedPos at the flip in [thr, thr+4096) | +32
+PASS unit off-1: sizeOffHeap == allocatedPos
+NOTE unit off-1: allocatedPos after 10 percent more keys = 1.0835 x threshold (within the predicted 1.1)
+PASS unit off-16: threshold == 16 x 1048576 = 16777216
+PASS unit off-16: allocatedPos at the flip in [thr, thr+4096) | +224
+PASS unit off-16: sizeOffHeap == allocatedPos
+NOTE unit off-16: allocatedPos after 10 percent more keys = 1.1626 x threshold (above the predicted 1.1)
+PASS unit off-64: threshold == 64 x 1048576 = 67108864
+PASS unit off-64: allocatedPos at the flip in [thr, thr+4096) | +32
+PASS unit off-64: sizeOffHeap == allocatedPos
+NOTE unit off-64: allocatedPos after 10 percent more keys = 1.0781 x threshold (within the predicted 1.1)
+PASS unit off-512: threshold == 512 x 1048576 = 536870912
+PASS unit off-512: allocatedPos at the flip in [thr, thr+4096) | +0
+PASS unit off-512: sizeOffHeap == allocatedPos
+NOTE unit off-512: allocatedPos after 10 percent more keys = 1.0945 x threshold (within the predicted 1.1)
+PASS unit off-default: threshold == 1861 x 1048576 = 1951399936
+PASS unit off-default: allocatedPos at the flip in [thr, thr+4096) | +0
+PASS unit off-default: sizeOffHeap == allocatedPos
+NOTE unit off-default: SpaceExhaustedException 3873449 keys after the flip, allocatedPos 2147483392 (hard limit 2147483392)
+PASS unit off-default: exhausted at 2^31-256
+PASS unit off-2047: threshold == 2047 x 1048576 = 2146435072
+PASS unit off-2047: allocatedPos at the flip in [thr, thr+4096) | +256
+PASS unit off-2047: sizeOffHeap == allocatedPos
+NOTE unit off-2047: SpaceExhaustedException 19991 keys after the flip, allocatedPos 2147483392 (hard limit 2147483392)
+PASS unit off-2047: exhausted at 2^31-256
+PASS unit on-16: threshold == 16 x 1048576 = 16777216
+PASS unit on-16: allocatedPos at the flip in [thr, thr+4096) | +224
+PASS unit on-16: sizeOffHeap == 0 and sizeOnHeap >= allocatedPos
+NOTE unit on-16: allocatedPos after 10 percent more keys = 1.1626 x threshold (above the predicted 1.1)
+PASS unit on-64: threshold == 64 x 1048576 = 67108864
+PASS unit on-64: allocatedPos at the flip in [thr, thr+4096) | +32
+PASS unit on-64: sizeOffHeap == 0 and sizeOnHeap >= allocatedPos
+NOTE unit on-64: allocatedPos after 10 percent more keys = 1.0781 x threshold (within the predicted 1.1)
+PASS unit bad-0: AssertionError "must be within 1 and 2047"
+PASS unit bad-2048: AssertionError "must be within 1 and 2047"
+PASS unit bad--5: AssertionError "must be within 1 and 2047"
+PASS unit bad--1: AssertionError "must be within 1 and 2047"
+PASS unit bad-abc: ConfigurationException (observation)
+PASS unit ctl-triesize64: threshold stays 1951399936
+PASS unit ctl-skiplist-64: trie threshold 67108864 and ROW_OVERHEAD_HEAP_SIZE=64
+PASS unit ctl-skiplist-unset: ROW_OVERHEAD_HEAP_SIZE positive and not 64
+PASS cluster a16: at least one trie-size signal and every MEMTABLE_LIMIT flush shows off-heap usage in [N, 1.02N] MiB | 8 flushes, usage [16.012, 16.013, 16.014, 16.016]
+PASS cluster a16: signal lines == MEMTABLE_LIMIT flushes
+PASS cluster a64: at least one trie-size signal and every MEMTABLE_LIMIT flush shows off-heap usage in [N, 1.02N] MiB | 8 flushes, usage [64.032, 64.033, 64.034, 64.035, 64.043]
+PASS cluster a64: signal lines == MEMTABLE_LIMIT flushes
+PASS cluster adef: at least one trie-size signal and every MEMTABLE_LIMIT flush shows off-heap usage in [N, 1.02N] MiB | 1 flushes, usage [1861.632]
+PASS cluster adef: signal lines == MEMTABLE_LIMIT flushes
+PASS cluster a16, a64: at least 5 MEMTABLE_LIMIT flushes
+PASS cluster ops per flush a64/a16 in [3.6, 4.4] | 4.017
+PASS cluster ops per flush h16 within 10 percent of a16 | 1.000
+PASS cluster h16: 8 trie-size signals, on-heap usage ~18 MiB and 0 off-heap in the flush lines
+PASS cluster s16: first MEMTABLE_LIMIT flush off-heap usage in [16, 656] MiB and ops >= one a16 flush | 625.9 MiB, 280708 ops
+PASS cluster c64: no trie-size line, no MEMTABLE_LIMIT flush, no Estimated SkipListMemtable line
+PASS cluster a2048: CREATE TABLE returned the AssertionError message
+NOTE cluster a2048: DESCRIBE shows the table afterwards: True; inserts fail with "Unknown CF": True
+NOTE cluster a16 sampled peak / threshold: 0.9975 (100 ms samples)
+NOTE cluster a64 sampled peak / threshold: 1.0004
+NOTE cluster adef sampled peak / threshold: 1.0004
+ALL PASS

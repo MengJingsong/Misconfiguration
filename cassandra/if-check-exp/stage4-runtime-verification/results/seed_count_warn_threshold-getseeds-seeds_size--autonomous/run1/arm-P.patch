@@ -1,0 +1,12 @@
+diff --git a/src/java/org/apache/cassandra/locator/SimpleSeedProvider.java b/src/java/org/apache/cassandra/locator/SimpleSeedProvider.java
+index b6ccaec..42ca021 100644
+--- a/src/java/org/apache/cassandra/locator/SimpleSeedProvider.java
++++ b/src/java/org/apache/cassandra/locator/SimpleSeedProvider.java
+@@ -112,6 +112,6 @@ public class SimpleSeedProvider implements SeedProvider
+                         "A large seed list may impact effectiveness of the third gossip round.",
+                         SEED_COUNT_WARN_THRESHOLD);
+ 
+-        return Collections.unmodifiableList(seeds);
++        return Collections.unmodifiableList(seeds.size() > SEED_COUNT_WARN_THRESHOLD ? new ArrayList<>(seeds.subList(0, SEED_COUNT_WARN_THRESHOLD)) : seeds);
+     }
+ }

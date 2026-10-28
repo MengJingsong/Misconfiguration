@@ -1,0 +1,23 @@
+INFO A RssAnon growth after-load -> end-pass4 = 34.2 MiB
+INFO AP RssAnon growth after-load -> end-pass4 = 19.0 MiB
+INFO B32 RssAnon growth after-load -> end-pass4 = 44.6 MiB
+INFO B8 RssAnon growth after-load -> end-pass2 = 27.4 MiB
+RESULT PASS A RowCache Capacity/Size/Entries/Hits 0 at every sample (15 samples, all phases) max size=0 entries=0 capacity=0
+RESULT PASS A request 0 64 0 exits non-zero with "Setting capacity of NopCache is not permitted" exit=2 	at java.base/java.lang.Thread.run(Thread.java:829)
+RESULT PASS A request 0 0 0 exits 0 exit=0
+INFO A key cache line before / after the failed request: Key Cache              : entries 12, size 960 bytes, capacity 100 MiB, 89 hits, 99 requests, 0.899 recent hit rate, 14400 save period in seconds / Key Cache              : entries 0, size 0 bytes, capacity 0 bytes, 24348 hits, 40118 requests, 0.607 recent hit rate, 14400 save period in seconds
+RESULT PASS AP RowCache Capacity/Size/Entries/Hits 0 at every sample (15 samples, all phases) max size=0 entries=0 capacity=0
+RESULT PASS AP (patched) request 0 64 0 exits 0 and Capacity stays 0 exit=0
+RESULT PASS B32 Capacity 32 MiB after passes 1-2, Size <= cap and >= 80% size=33168384 cap=33554432 entries=7808
+RESULT PASS B32 request 0 64 0 exits 0, Capacity 64 MiB, Size <= cap and >= 80% after passes 3-4, Entries higher exit=0 size=64395417 cap=67108864 entries 7808 -> 15159
+RESULT PASS B32 Size <= Capacity at every sample 
+RESULT PASS B8 Size <= 8 MiB and >= 80% size=8156160 cap=8388608 entries=1920
+RESULT PASS B8 Size <= Capacity at every sample 
+RESULT PASS Size(B32 at 32 MiB) / Size(B8) in [3,5] 4.07
+RESULT FAIL A RssAnon growth < half of B32 growth A=34.2 MiB B32=44.6 MiB
+INFO A errors_in_log=0 | Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+INFO AP errors_in_log=0 | Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+INFO B32 errors_in_log=0 | Row Cache              : entries 15159, size 61.41 MiB, capacity 64 MiB, 29401 hits, 80000 requests, 0.368 recent hit rate, 0 save period in seconds
+INFO B8 errors_in_log=0 | Row Cache              : entries 1920, size 7.78 MiB, capacity 8 MiB, 1730 hits, 40000 requests, 0.043 recent hit rate, 0 save period in seconds
+
+FAILED CHECKS (1): ['A RssAnon growth < half of B32 growth']

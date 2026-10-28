@@ -33,11 +33,32 @@ Callers: `loadPreparedStatements(onLoaded)` at :1894-1897 (page size 5000, Query
 
 ## B. Verification solution
 
+> **Amendment 2026-10-27 (stage-4 audit, before any run; node pc29; none of it depends on a reading).**
+> (1) *What "resident prepared-statement heap" means here:* the cache component, i.e. the sum over the cache of `key.size() + pstmntSize` (exactly the Caffeine weight, read from `QueryProcessor.instance.getPreparedStatements()`), and `ObjectSizes.measureDeep` of that map. The post-GC live heap and the memtable of `system.prepared_statements` are reported beside it and read as stated in B2g/B3g.
+> (2) *Why the filed workload cannot reach the check (runbook defect, fixed below):* every cache eviction deletes the row from `system.prepared_statements` (`QueryProcessor.evictPreparedStatement`, lines 132-139), so PREPARE-only loading never leaves more than about 1 x cap on disk and the preload loop can never pass 1.1 x cap. The rows must be written without going through the cache (B2c, B3c below).
+> (3) *Positive control* (negative-claim rule): the same preload workload and the same readings in arm B (check inert) at caps 1, 4 and 10 MiB; the cache component must move with the cap (about 1 : 4 : 10). That is the closed `Confirmed` case on this knob (`prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous`) re-used as the control on the preload path.
+
 **B1. Claim under test.** The threshold check does not bound resident prepared-statement heap: with the check effectively disabled, heap held by prepared statements after startup stays at or below the Caffeine cache cap (`prepared_statements_cache_size`), the same as with the check enabled; the check changes only the number of statements loaded and startup time. Also (sanity): `pstmntSize` is >= 0 at the check.
 
 ### B2. Unit tier
 
 **B2a. Environment and build.** JDK 11, Ant, local copy of the tag outside the shared tree (`cp -r` to a work dir, `ant jar`). Write a JUnit test modelled on `PstmtPersistenceTest` (test/unit/org/apache/cassandra/cql3/PstmtPersistenceTest.java), run with `ant testsome -Dtest.name=PstmtPersistenceThresholdTest`. JVM `-Xmx512m`.
+
+> **Amendment 2026-10-27 (B2a-B2h, replaces the text it sits beside where they differ).**
+> *B2a:* two copies of the tag are built on the node, `~/s4-base` (arm A, unmodified) and `~/s4-psc-b` (arm B, `* 1.1)` at `SystemKeyspace.java:1907` changed to `* 1000.0)`; `git diff` of the copy is kept). Test class `PstmtPreloadThresholdTest` (harness folder), copied into both.
+> *B2b:* caps 1, 4 and 10 MiB (10 MiB is the auto default at the unit-test heap, `max(10, 1 GiB/256 MiB)`; 4 replaces 2 so the control spans 1 : 4 : 10); arm A and arm B at every cap; one JVM per cell, because the cap is read at class init.
+> *B2c:* statement text `SELECT v FROM <ks>.<table> WHERE k = ? /* u<i> */` (fully qualified, unique comment; one size s for all; the same text in all arms). s = `pstmntSize` of one statement as the preload callback computes it (`parseAndPrepare(query, cs, false)`, `measure` true). Rows are written with `SystemKeyspace.writePreparedStatement(null, MD5Digest.compute(query), query, ts+i)` for i < n, n = ceil(f x cap / s), then the table's memtable is flushed, the cache is empty, and `preloadPreparedStatements(100)` runs once. Factor f = 3 (as filed) at every cap; factor f = 30 at caps 1 and 10 (new: a leak-sized backlog, the situation CASSANDRA-19703 describes). Offered/cap is printed.
+> *B2d:* per cell the test prints: `loaded` (return value), WARN seen (logback appender on `SystemKeyspace`), cache `count`, `evicted`, `sumWeights`, `sumPstmntSize`, `measureDeep`, rows left in `system.prepared_statements`, memtable on-heap data size of that table before/after (`allMemtablesOnHeapDataSize`), post-GC live heap before/after (3 x `System.gc()`), and thread-allocated bytes during the preload (work done). Resolution note: the post-GC live heap moves by about 1 to 2 MiB between identical runs, so at a 1 MiB cap it cannot by itself show a difference of one cap; the cache component is the exact reading.
+> *B2e step 8 (repetitions):* f = 3 cells are run 3 times (reps), f = 30 cells once.
+> *B2f additions (stated before the run):* arm A loads `floor(1.1 x cap / s) + 1` statements (that is 428 at cap 1 MiB for s = 2696, but the run uses the s it measures) at every cap and every f, WARN logged; arm B loads n, WARN not logged, `count + evicted = n`; `sumWeights <= cap` and `sumWeights > cap - 2 x (s + 16)` in every cell once n x s > cap (the cache fills); the cache component of A and B differs by less than one cap (both are at the cap). Control: in arm B `sumWeights` at 1 : 4 : 10 MiB is about 1 : 4 : 10. Arm A at f = 30 has the same `loaded` as at f = 3 (the check bounds the work, not the backlog). Arm B's evictions delete rows, so arm B ends with about count rows on disk and a memtable holding about `n - count` tombstones, arm A with about `n - loaded + count` rows and a memtable holding about `loaded - count` tombstones; I expect the memtable difference B - A to be below one cap at f = 3 and to be of the order of one cap or more at cap 1 MiB, f = 30 (about 11,000 tombstones; the per-tombstone size is unknown to me, so no number is claimed).
+> *B2g rows added (these refine the first row; the filed rows stay):*
+>
+> | Observation | Meaning |
+> |---|---|
+> | `sumWeights` of either arm exceeds its cap, or arm B's exceeds arm A's by one cap or more | Claim refuted: the check bounds the cache |
+> | `sumWeights` of both arms at the cap (arm B within one statement of arm A), `loaded` A < B, positive control moves 1 : 4 : 10, and the post-GC live-heap difference B - A (cache + memtable) below one cap | Claim confirmed (the check bounds work only) |
+> | Cache component equal, but the live-heap difference B - A is one cap or more and is explained by the memtable difference (memtable difference B - A within 25 % of the live-heap difference) | Claim holds for the cache and fails for total heap: the check indirectly limits heap through the tombstones of evictions. Verdict Not confirmed, Effect `caps only on some paths (bypass)` |
+> | WARN absent in arm A, or `loaded` equal in A and B | Check not reached (n too small) or `pstmntSize` unpopulated: Not confirmed |
 
 **B2b. Knobs.** `prepared_statements_cache_size` in test yaml: 1 MiB (ensure min allowed; note the floor of 1 since 0 is rejected), 2 MiB, 10 MiB. Arm B: the work copy with `1.1` patched to `1000.0` (literal patch, effectively disabling the check). Set the knob via a test yaml/`DatabaseDescriptor` before `QueryProcessor` class init (static field).
 
@@ -64,6 +85,14 @@ Callers: `loadPreparedStatements(onLoaded)` at :1894-1897 (page size 5000, Query
 ### B3. Cluster tier
 
 **B3a. Environment and build.** One node, JDK 11, `ant jar` of a local copy; arm B uses a second copy patched `1.1` -> `1000.0`. `-Xms1g -Xmx1g`, own `cassandra.yaml` copy, separate data dirs under a private work directory, loopback IP.
+
+> **Amendment 2026-10-27 (B3a-B3h).**
+> *B3a:* arm A runs from `~/s4-base`, arm B from `~/s4-psc-b` (both built, `bin/cassandra` from the copy), one node on loopback, `MAX_HEAP_SIZE=1G`, own `CASSANDRA_CONF`, data on local disk under `~/s4-pthr`, never under `/proj`.
+> *B3b:* caps 1, 4 and 10 MiB x arms A and B (6 node starts, plus one seeding start); the 1 MiB pair is repeated once more for a repeat reading.
+> *B3c (replaces the PREPARE-then-restart wording):* seed once, with the cap raised to 64 MiB so nothing is evicted: start arm A at 64 MiB, PREPARE M = 20,000 distinct fully qualified statements (`SELECT v FROM ks.t WHERE k = ? /* c<i> */`, 8 threads, protocol v5, no session keyspace), confirm `system.prepared_statements` holds M rows and the cache count is M, stop the node, and take a copy of the data directory. Each measured start restores a fresh copy of that data directory, so every start sees the same M rows (about 54 MiB of `pstmntSize` if s is near 2.7 KB, i.e. 54 x the 1 MiB cap and 5.4 x the 10 MiB cap). Writing the table through CQL is not possible (system keyspaces reject client writes).
+> *B3d:* after each start: the `Preloaded N prepared statements in X ms` line and any `Detected prepared statement cache filling up` line from this start's part of `system.log`; JMX `PreparedStatementsCount`, `PreparedStatementsEvicted`, the memtable bean of `system.prepared_statements`; `jmap -histo:live` total live bytes and the instance count and shallow bytes of `QueryHandler$Prepared` (a full GC) 60 s after the listener is up; `GC.heap_info`; rows left in `system.prepared_statements` (cqlsh count).
+> *B3f additions:* arm A preloads about `floor(1.1 x cap / s) + 1` statements (428 at 1 MiB if s = 2696) and logs the WARN; arm B preloads all M; in both, the count of `Prepared` instances after the full GC is about `cap / (s + 16)` (386 at 1 MiB) and equal across arms within a few statements; arm B at 1 : 4 : 10 MiB shows `Prepared` instances at about 1 : 4 : 10 (positive control); as in B2f, the memtable of arm B holds the tombstones of about `M - count` evictions and arm A far fewer, so the total live-heap difference B - A may be one cap or more at 1 MiB (same reading rules as the B2g rows added above).
+> *B3g:* the B2g rows added above apply with "cache component" = `Prepared` instances x per-instance weight (and `PreparedStatementsCount`), "live-heap difference" = the `jmap -histo:live` total, "memtable" = the JMX bean.
 
 **B3b. Knobs.** `prepared_statements_cache_size`: 1 and 10 (MiB, restart required); build arm (unpatched/patched).
 
@@ -101,4 +130,9 @@ Callers: `loadPreparedStatements(onLoaded)` at :1894-1897 (page size 5000, Query
 
 ## D. Stage-4 feedback
 
-`none yet`
+**2026-10-27, stage 4 (results: `stage4-runtime-verification/results/prepared_statements_cache_size-loadpreparedstatements-preparedbytesloaded--autonomous.md`).** Amended before the runs (frozen sha256 `892c8eb3…beea`): rows must be written directly because evictions delete their rows (the check is unreachable with PREPARE-only loading); a leak-sized backlog (f = 30), a positive control on the preload path and rows for the memtable outcome were added.
+
+- **Unit and cluster: Not confirmed, Effect `caps only on some paths (bypass)`; outcome class false negative (estimate `negative`).** The stage-3 reasoning about the cache holds: the Caffeine cache weight is identical with the check on or off (`sumWeights` equal in 11 unit pairs, `Prepared` instance counts equal in 4 cluster pairs) and follows `prepared_statements_cache_size` 1 : 4 : 10. What the stage-3 text missed: every cache eviction writes a delete into the memtable of `system.prepared_statements`, so with the check inert (arm B) a backlog of 54 x the cap (cluster, 20,000 rows) left 4.3 to 5.4 MB more live heap than with the check on, and 30 x at 10 MiB (unit, 116,682 rows) 32 MB more (3.07 caps); the difference tracks the memtable gauge within 11 to 15 % (35 % at 1 MiB, f = 30). The check, by stopping the loop at about 1.1 x cap, avoids those tombstones. At the filed workload (3 x cap) the difference is below one cap.
+- Not measured: whether the memtable is flushed (and the heap freed) before it matters on a real node; attribution is by the memtable gauge, not by a heap dump.
+- For stage 3: the "Ground" line is right for the cache but "only saves startup time and transient garbage" omits the system-table tombstones. Estimate left as filed.
+

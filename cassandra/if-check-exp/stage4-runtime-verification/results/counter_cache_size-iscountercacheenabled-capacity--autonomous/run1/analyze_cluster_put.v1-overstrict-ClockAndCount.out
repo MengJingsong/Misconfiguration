@@ -1,0 +1,63 @@
+RESULT PASS c0 capacity at every sample = 0 {0}
+RESULT PASS c0 Size <= Capacity at every sample (9 samples) max=0 cap=0
+RESULT PASS c0 Entries 0 and Size 0 at every sample, Hits 0 max entries=0
+RESULT FAIL c0 no CounterCacheKey / ClockAndCount instances in any of 3 histograms instances=0
+RESULT PASS c1 capacity at every sample = 1048576 {1048576}
+RESULT PASS c1 Size <= Capacity at every sample (14 samples) max=1048560 cap=1048576
+RESULT PASS c1 Size reaches cap at end of pass 1 (>= cap - 240) size=1048560 cap=1048576
+RESULT PASS c1 Entries = cap//120 +-2 at end of pass 1 entries=8738 expected=8738
+RESULT PASS c1 (CounterCacheKey+ClockAndCount bytes)/Size in [0.5,2.0] bytes=559264 size=1048560 ratio=0.533 instances=8738
+RESULT PASS c1 CounterCacheKey instances == Entries (+-1%) instances=8738 entries=8738
+INFO c1 end-pass2 size=1048560 entries=8738 pass2 hitrate=0.0000
+RESULT PASS c8 capacity at every sample = 8388608 {8388608}
+RESULT PASS c8 Size <= Capacity at every sample (14 samples) max=8388600 cap=8388608
+RESULT PASS c8 Size reaches cap at end of pass 1 (>= cap - 240) size=8388600 cap=8388608
+RESULT PASS c8 Entries = cap//120 +-2 at end of pass 1 entries=69905 expected=69905
+RESULT PASS c8 (CounterCacheKey+ClockAndCount bytes)/Size in [0.5,2.0] bytes=4473952 size=8388600 ratio=0.533 instances=69905
+RESULT PASS c8 CounterCacheKey instances == Entries (+-1%) instances=69905 entries=69905
+INFO c8 end-pass2 size=8388600 entries=69905 pass2 hitrate=0.0345
+RESULT PASS c64 capacity at every sample = 67108864 {67108864}
+RESULT PASS c64 Size <= Capacity at every sample (14 samples) max=67108800 cap=67108864
+RESULT PASS c64 Size reaches cap at end of pass 1 (>= cap - 240) size=67108800 cap=67108864
+RESULT PASS c64 Entries = cap//120 +-2 at end of pass 1 entries=559240 expected=559240
+RESULT PASS c64 (CounterCacheKey+ClockAndCount bytes)/Size in [0.5,2.0] bytes=35791392 size=67108800 ratio=0.533 instances=559240
+RESULT PASS c64 CounterCacheKey instances == Entries (+-1%) instances=559240 entries=559240
+INFO c64 end-pass2 size=67108800 entries=559240 pass2 hitrate=0.0000
+RESULT PASS cdef capacity at every sample = 52428800 {52428800}
+RESULT PASS cdef Size <= Capacity at every sample (14 samples) max=52428720 cap=52428800
+RESULT PASS cdef Size reaches cap at end of pass 1 (>= cap - 240) size=52428720 cap=52428800
+RESULT PASS cdef Entries = cap//120 +-2 at end of pass 1 entries=436906 expected=436906
+RESULT PASS cdef (CounterCacheKey+ClockAndCount bytes)/Size in [0.5,2.0] bytes=27962016 size=52428720 ratio=0.533 instances=436906
+RESULT PASS cdef CounterCacheKey instances == Entries (+-1%) instances=436906 entries=436906
+INFO cdef end-pass2 size=52428720 entries=436906 pass2 hitrate=0.0223
+RESULT PASS c8b capacity at every sample = 8388608 {8388608}
+RESULT PASS c8b Size <= Capacity at every sample (18 samples) max=8388600 cap=8388608
+RESULT PASS c8b Size reaches cap at end of pass 1 (>= cap - 240) size=8388600 cap=8388608
+RESULT PASS c8b Entries = cap//120 +-2 at end of pass 1 entries=69905 expected=69905
+RESULT PASS c8b (CounterCacheKey+ClockAndCount bytes)/Size in [0.5,2.0] bytes=4473952 size=8388600 ratio=0.533 instances=69905
+RESULT PASS c8b CounterCacheKey instances == Entries (+-1%) instances=69905 entries=69905
+INFO c8b end-pass2 size=8388600 entries=69905 pass2 hitrate=0.0714
+INFO c1 whole-heap increase over c0 at end-pass2 = 3189760 B = 3.04 x Size
+INFO c8 whole-heap increase over c0 at end-pass2 = 17306624 B = 2.06 x Size
+INFO c64 whole-heap increase over c0 at end-pass2 = 126486528 B = 1.88 x Size
+INFO cdef whole-heap increase over c0 at end-pass2 = 93381632 B = 1.78 x Size
+INFO c8b whole-heap increase over c0 at end-pass2 = 14387200 B = 1.72 x Size
+RESULT PASS c8 whole-heap increase / Size in [1.5,3.0] 2.06
+RESULT PASS c64 whole-heap increase / Size in [1.5,3.0] 1.88
+RESULT PASS cdef whole-heap increase / Size in [1.5,3.0] 1.78
+RESULT PASS heap ratio c64/c8 within 0.75..1.33 (proportional) 0.91
+RESULT PASS Entries(8 MiB)/Entries(1 MiB) in [7.2,8.8] ratio=8.000
+RESULT PASS Entries(1 MiB) in [7000,10000] 8738
+INFO pass-2 hit rate 1MiB=0.0000 8MiB=0.0345
+RESULT PASS Entries(8 MiB) ~ 8x Entries(1 MiB) (histogram bytes track Size: named bytes ratio 8 MiB / 1 MiB in [7.2,8.8]) 8.000
+RESULT PASS c8 repeat: same Entries (+-1%) 69905 vs 69905
+RESULT PASS cdef init log says capacity of 50 MiBs (auto default on 2 GiB heap) ,655 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+RESULT PASS rt64 before: capacity 64 MiB, Size<=cap, reached 67108800
+RESULT PASS rt64 after JMX set 8 MiB: capacity 8 MiB, Size <= 8 MiB at every sample, Entries 69,905+-2 within 30 s last={'t_ms': '1793158283872', 'phase': 'after-setcap', 'size': '8388600', 'capacity': '8388608', 'entries': '69905', 'hits': '0', 'requests': '3000000', 'hist': ''}
+RESULT PASS rt64 end-pass2 Size <= 8 MiB 8388600
+INFO rt64 used heap after full GC: 64 MiB state 293970 KB -> 8 MiB state 202204 KB (decrease 89.6 MiB)
+RESULT PASS rt64 heap decreases by more than 30 MiB after the shrink 89.6 MiB
+RESULT PASS r8 (regular-table writes) Entries 0, Size 0 at every sample n=5
+RESULT PASS r8 no CounterCacheKey in any histogram 2 histograms
+
+FAILED CHECKS (1): ['c0 no CounterCacheKey / ClockAndCount instances in any of 3 histograms']

@@ -1,0 +1,21 @@
+# cassandra-stress user profile for nopcache_capacity-setcapacity-capacity--autonomous (B3c): ks.t (id int PRIMARY KEY, v blob), 4 KiB values, row caching ALL
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+table: t
+table_definition: |
+  CREATE TABLE t (id int PRIMARY KEY, v blob)
+  WITH caching = {'keys': 'ALL', 'rows_per_partition': 'ALL'}
+  AND compression = {'enabled': 'false'}
+columnspec:
+  - name: id
+    population: seq(1..20000)
+  - name: v
+    size: fixed(4096)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries:
+  read1:
+    cql: select * from t where id = ?
+    fields: samerow

@@ -1,0 +1,15 @@
+LABEL setup start 2026-10-27 20:57:17 MDT; harness md5 be1b3059ba31 5db558a3e4ea c33a6ac89bd3 e09e91ca2755 
+INSTRUMENT Byteman TestScript: no errors
+# ---- stage4 hdr lines ----;cluster_name: stage4-hdr;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/s4b-hdr/N1/data;commitlog_directory: /users/jason92/s4b-hdr/N1/commitlog;hints_directory: /users/jason92/s4b-hdr/N1/hints;saved_caches_directory: /users/jason92/s4b-hdr/N1/saved_caches;cdc_raw_directory: /users/jason92/s4b-hdr/N1/cdc_raw;data_disk_usage_max_disk_size: 107374182
+N1 up: statusbinary running, UN ['127.0.0.2'] after 18 s
+# ---- stage4 hdr lines ----;cluster_name: stage4-hdr;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: 0;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/s4b-hdr/N2/data;commitlog_directory: /users/jason92/s4b-hdr/N2/commitlog;hints_directory: /users/jason92/s4b-hdr/N2/hints;saved_caches_directory: /users/jason92/s4b-hdr/N2/saved_caches;cdc_raw_directory: /users/jason92/s4b-hdr/N2/cdc_raw;data_disk_usage_max_disk_size: 1073741824B;hinted_handoff_e
+N2 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 23 s
+INSTRUMENT jmx N1: org.apache.cassandra.db:type=RepairService|IncrementalRepairDiskHeadroomRejectRatio|0.0 ; org.apache.cassandra.db:type=Guardrails|DataDiskUsageMaxDiskSize|1073741824B
+INSTRUMENT jmx N2: org.apache.cassandra.db:type=RepairService|IncrementalRepairDiskHeadroomRejectRatio|0.0 ; org.apache.cassandra.db:type=Guardrails|DataDiskUsageMaxDiskSize|1073741824B
+INSTRUMENT df avail 56439078912 B
+TRIGGER instrument control: knob None r=0.0 U0=None D=None pad=None u_plan=None | usage {'N1': [(0.00016, 0.0)], 'N2': [(0.00014, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=709ec620-d27b-11f1-b090-17773e42593c | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-28 02:58:23,943] Repair session 70b20000-d27b-11f1-b090-17773e42593c for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-28 02:58:23,958] Repair command #1 finished in 0 seconds
+INSTRUMENT N1: usage line 0.00016 vs walk D/C 0.000155
+INSTRUMENT N2: usage line 0.00014 vs walk D/C 0.000131
+INSTRUMENT control repair: two HDR usage lines, admit=true, usage matches the walk
+DONE setup expected 0/0 yes

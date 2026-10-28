@@ -75,6 +75,7 @@ noticed along the way are noted in case files for Target 3, not chased.
   no run 2): `default_page_size-cqlgroupbylimits_onclose-rowlimit` (U/C Confirmed), `diagnostic_event_memory_store_max_size-store-keyhead`
   (U/C Confirmed), `trie_2gb_hard_limit-allocateblock-leadbit` (U/C Confirmed), `max_compaction_flush_memory_in_mb-getmode-maxmembytes`
   (U Confirmed, C Partial: bypass at a 1 MiB cap). All four true positive. `predicted-positive.md` has no open stage-4 rows now.
+- **2026-10-28, 14 hard-coded-constant cases from the non-config job closed at stage 4** (set A rows 7, 85, 103, 107, 114, 115, 117, 120, 127, 130, 131, 138, 141, 142; nodes `pc39`, `pc32`, `pc29`, `pc41`, run 1 only, no run 2): 8 true positive (`counter_cache_size` at three sites, `nopcache_capacity`, `monitoring_max_operations`, `virtual_logs_max_rows`, `mutation_repair_rows_per_batch`, `row_overhead_size`), 5 true negative (`seed_count_warn_threshold`, `max_space_usable_for_compactions_in_percentage` range, `repair_session_space` minimum, `repair_disk_headroom_reject_ratio`, SAI `segment_write_buffer_size`), 1 false negative (`prepared_statements_cache_size` preload threshold: Not confirmed, bypass through eviction tombstones in the `system.prepared_statements` memtable). The `counter_cache_size` cases share one run. Verdicts: `stage3-ai-deep-read/_INDEX.md` §1. Open: `predicted-negative.md` still lists the entries of the 27 set A rows written up on 2026-10-27; row 7's note in `undetermined.md` §5.2 still says "not a case".
 
 ## Decisions in force
 

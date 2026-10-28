@@ -1,0 +1,21 @@
+S4THROTTLE calls: 1 values: ['100000']
+S4BATCH updates: 1 | rows: max 100000 min 100000 total 100000 | updates with rows == max: 1
+  unsharedHeapSize: max 41600064 bytes; per row of the largest update: 416.0  dataSize max 24500029
+  heap per row over all updates: min 416.0 max 416.0
+sampler: 10 histograms every ~4 s; live bytes: first 62229640 max 65046016 last 64388016
+G1 pauses: 13  max heap after pause (MiB): 62
+system.log lines /MutationExceededMaxSizeException/: 5
+     org.apache.cassandra.db.MutationExceededMaxSizeException: Rejected an oversized mutation (21199999/16777216) for keyspace: ks. Top keys are: wide_cdc.1
+     org.apache.cassandra.db.MutationExceededMaxSizeException: Rejected an oversized mutation (21199999/16777216) for keyspace: ks. Top keys are: wide_cdc.1
+system.log lines /java\.lang\.OutOfMemoryError/: 0
+system.log lines /Stream failed/: 4
+     WARN [NonPeriodicTasks:1] 2026-10-28T03:46:26,364 StreamResultFuture.java:250 - [Stream #1c3590d0-d282-11f1-adac-33a60ca07d2f] Stream failed: 
+     org.apache.cassandra.streaming.StreamException: Stream failed: 
+system.log lines /Repair command .* failed|Repair session .* failed|failed with error/: 1
+     java.lang.RuntimeException: Repair session 198ae330-d282-11f1-adac-33a60ca07d2f for range [(3074457345618258602,-3074457345618258603], (-3074457345618258603,3074457345618258602]] failed with error Stream failed: 
+system.log lines /Streaming error occurred/: 2
+     ERROR [StreamReceiveTask:1] 2026-10-28T03:46:26,356 StreamSession.java:759 - [Stream #1c3590d0-d282-11f1-adac-33a60ca07d2f] Streaming error occurred on session with peer 127.0.0.2:7010
+     ERROR [Stream-Deserializer-/127.0.0.2:7010-c151ad27] 2026-10-28T03:46:26,368 StreamSession.java:759 - [Stream #1c3590d0-d282-11f1-adac-33a60ca07d2f] Streaming error occurred on session with peer 127.0.0.2:7010
+repair.txt tail: [' at java.management/com.sun.jmx.remote.internal.ClientNotifForwarder$LinearExecutor.lambda$execute$0(ClientNotifForwarder.java:108)', ' at java.base/java.lang.Thread.run(Thread.java:829)', '']
+count-B: 0
+B after: SSTable count: 0 | Old SSTable count: 0 | Space used (live): 0 | Number of partitions (estimate): 0 | Memtable cell count: 0 | Memtable data size: 0 | Memtable off heap memory used: 0 | Memtable switch count: 0

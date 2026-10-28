@@ -1,0 +1,53 @@
+PASS unit b100 N=0: 1 batch of 100000 rows, same object as the scanner
+PASS unit b100 N=2: 50000 batches, every batch exactly 2 Unfilteds, 100000 rows in total
+PASS unit b100 N=100: 1000 batches, every batch exactly 100 Unfilteds, 100000 rows in total
+PASS unit b100 N=1000: 100 batches, every batch exactly 1000 Unfilteds, 100000 rows in total
+PASS unit b100 N=10000: 10 batches, every batch exactly 10000 Unfilteds, 100000 rows in total
+PASS unit b10 N=0: 1 batch of 100000 rows, same object as the scanner
+PASS unit b10 N=100: 1000 batches, every batch exactly 100 Unfilteds, 100000 rows in total
+PASS unit b10 N=1000: 100 batches, every batch exactly 1000 Unfilteds, 100000 rows in total
+PASS unit b1000 N=0: 1 batch of 100000 rows, same object as the scanner
+PASS unit b1000 N=100: 1000 batches, every batch exactly 100 Unfilteds, 100000 rows in total
+PASS unit b1000 N=1000: 100 batches, every batch exactly 1000 Unfilteds, 100000 rows in total
+PASS unit tomb N=2: largest batch has N+1 = 3 Unfilteds | batches 20000 totalUnf 60000
+PASS unit tomb N=100: largest batch has N+1 = 101 Unfilteds | batches 203 totalUnf 20406
+PASS unit tomb N=1000: largest batch has N+1 = 1001 Unfilteds | batches 21 totalUnf 20042
+PASS unit heap(1000)/heap(100) in [9, 11] | 9.98
+PASS unit heap(10000)/heap(1000) in [9, 11] | 10.00
+PASS unit heap(N=0)/heap(100) in [900, 1100] | 998.0
+PASS unit per-row heap (100-byte values) in [150, 450] | 320.1
+PASS unit per-row heap difference 1000-byte minus 10-byte values = 990 +-20% | 984.0
+PASS unit b100 N=1000: retained/unshared in [0.7, 1.5] | 1.01
+PASS unit b100 N=10000: retained/unshared in [0.7, 1.5] | 1.01
+PASS unit b10 N=1000: retained/unshared in [0.7, 1.5] | 1.02
+PASS unit b1000 N=1000: retained/unshared in [0.7, 1.5] | 1.00
+PASS unit b10 N=1000: heldRows == maxRowsPerBatch
+PASS unit b100 N=1000: heldRows == maxRowsPerBatch
+PASS unit b100 N=10000: heldRows == maxRowsPerBatch
+PASS unit b1000 N=1000: heldRows == maxRowsPerBatch
+PASS cluster u100: S4THROTTLE value == 100 | ['100']
+PASS cluster u100: updates built <= ceil(2M/N) = 20000 and every update has <= N rows | 20000 updates, max rows 100, total rows 2000000
+PASS cluster u100: exactly 20000 updates and total 2,000,000 rows (all of A's partition went through the write path)
+PASS cluster u100: heap per row of the largest update in [294, 545] (unit interpolation +-30%) | 416.6
+PASS cluster n1000: S4THROTTLE value == 1000 | ['1000']
+PASS cluster n1000: updates built <= ceil(2M/N) = 2000 and every update has <= N rows | 2000 updates, max rows 1000, total rows 2000000
+PASS cluster n1000: exactly 2000 updates and total 2,000,000 rows (all of A's partition went through the write path)
+PASS cluster n1000: heap per row of the largest update in [294, 545] (unit interpolation +-30%) | 416.1
+PASS cluster n10000: S4THROTTLE value == 10000 | ['10000']
+PASS cluster n10000: updates built <= ceil(2M/N) = 200 and every update has <= N rows | 200 updates, max rows 10000, total rows 2000000
+PASS cluster n10000: exactly 200 updates and total 2,000,000 rows (all of A's partition went through the write path)
+PASS cluster n10000: heap per row of the largest update in [294, 545] (unit interpolation +-30%) | 416.0
+PASS cluster n100000: S4THROTTLE value == 100000 | ['100000']
+PASS cluster n100000: updates built <= ceil(2M/N) = 20 and every update has <= N rows | 1 updates, max rows 100000, total rows 100000
+PASS cluster n100000: heap per row of the largest update in [294, 545] (unit interpolation +-30%) | 416.0
+PASS cluster n0: S4THROTTLE value == 0 | ['0']
+PASS cluster n0: one update of 2,000,000 rows | [2000000]
+PASS cluster n0: heap per row of the largest update in [294, 545] (unit interpolation +-30%) | 416.0
+PASS cluster p0 (plain table, N=0): no S4THROTTLE and no S4BATCH line
+PASS cluster n100000: MutationExceededMaxSizeException present, repair failed, B holds no sstable
+PASS cluster n0: MutationExceededMaxSizeException present, repair failed, B holds no sstable
+PASS cluster u100: no MutationExceeded..., repair completed, B space used within 0.1% of A
+PASS cluster n1000: no MutationExceeded..., repair completed, B space used within 0.1% of A
+PASS cluster n10000: no MutationExceeded..., repair completed, B space used within 0.1% of A
+PASS cluster p0: no MutationExceeded..., repair completed, B space used within 0.1% of A
+ALL PASS

@@ -1,0 +1,28 @@
+PASS sweep-p A r=0.0: admit == (u + r <= 1) with u=0.9961 r=0.0 | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+PASS sweep-p B r=0.0: admit == (u + r <= 1) with u=1.00391 r=0.0 | rc=2 verdicts={'N1': [True], 'N2': [False]} errors=1
+PASS sweep-p A r=0.2: admit == (u + r <= 1) with u=0.7961 r=0.2 | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+PASS sweep-p B r=0.2: admit == (u + r <= 1) with u=0.80391 r=0.2 | rc=2 verdicts={'N1': [True], 'N2': [False]} errors=1
+PASS sweep-p A r=0.5: admit == (u + r <= 1) with u=0.4961 r=0.5 | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+PASS sweep-p B r=0.5: admit == (u + r <= 1) with u=0.50391 r=0.5 | rc=2 verdicts={'N1': [True], 'N2': [False]} errors=1
+PASS sweep-p A r=0.8: admit == (u + r <= 1) with u=0.1961 r=0.8 | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+PASS sweep-p B r=0.8: admit == (u + r <= 1) with u=0.20391 r=0.8 | rc=2 verdicts={'N1': [True], 'N2': [False]} errors=1
+  (sweep-p: 8 triggers with a ratio holder)
+PASS range A after rejected writes (N2): admit == (u + r <= 1) with u=0.4961 r=0.5 | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+PASS range B after rejected writes (N2): admit == (u + r <= 1) with u=0.50391 r=0.5 | rc=2 verdicts={'N1': [True], 'N2': [False]} errors=1
+PASS range A after rejected writes (N1): admit == (u + r <= 1) with u=0.4961 r=0.5 | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+PASS range B after rejected writes (N1): admit == (u + r <= 1) with u=0.50391 r=0.5 | rc=2 verdicts={'N1': [False], 'N2': []} errors=1
+PASS range NaN stored, usage above L(0.5): admit == (u + r <= 1) with u=0.50391 r=NaN | rc=0 verdicts={'N1': [True], 'N2': [True]} errors=0
+  (range: 5 triggers with a ratio holder)
+  range: 12 rejected writes with the range text
+PASS range: 12 rejected writes (2 holders x 2 triggers x 3 values), all with the range text
+PASS range: every read-back after a rejected write was 0.5
+PASS range: NaN accepted and repair admitted
+  valid: 0 rejected writes with the range text
+PASS valid: yaml 1.5 read back 1.5, repair refused with (-50.00%)
+PASS valid: JMX write of 1.5 refused with the range text
+PASS unit S1-S2.out: 45 checks ok, 0 MISMATCH | ok=45
+PASS unit U1-U2-U4a.out: 92 checks ok, 0 MISMATCH | ok=92
+PASS unit U4b.out: 36 checks ok, 0 MISMATCH | ok=36
+PASS unit U3.out: 7 checks ok, 0 MISMATCH | ok=7
+PASS unit S1: NaN stored (getter NaN)
+FAILS 0

@@ -1,0 +1,116 @@
+PASS unit cap-len200 checkpoint adds=999: buffer=999, newest=999, oldest=1
+PASS unit cap-len200 checkpoint adds=1000: buffer=1000, newest=1000, oldest=1
+PASS unit cap-len200 checkpoint adds=1001: buffer=1000, newest=1001, oldest=2
+PASS unit cap-len200 checkpoint adds=6000: buffer=1000, newest=6000, oldest=5001
+PASS unit cap-len200 size=1000 adds=6000: dataRows==bufferSize==instances==min(adds,size) | 1000/1000/1000 want 1000
+PASS unit cap-len200 checkpoint adds=4999: buffer=4999, newest=4999, oldest=1
+PASS unit cap-len200 checkpoint adds=5000: buffer=5000, newest=5000, oldest=1
+PASS unit cap-len200 checkpoint adds=5001: buffer=5000, newest=5001, oldest=2
+PASS unit cap-len200 checkpoint adds=10000: buffer=5000, newest=10000, oldest=5001
+PASS unit cap-len200 size=5000 adds=10000: dataRows==bufferSize==instances==min(adds,size) | 5000/5000/5000 want 5000
+PASS unit cap-len200 checkpoint adds=49999: buffer=49999, newest=49999, oldest=1
+PASS unit cap-len200 checkpoint adds=50000: buffer=50000, newest=50000, oldest=1
+PASS unit cap-len200 checkpoint adds=50001: buffer=50000, newest=50001, oldest=2
+PASS unit cap-len200 checkpoint adds=55000: buffer=50000, newest=55000, oldest=5001
+PASS unit cap-len200 size=50000 adds=55000: dataRows==bufferSize==instances==min(adds,size) | 50000/50000/50000 want 50000
+PASS unit cap-len200 size=50000 L=200: bytes per row in [L+80, L+112] | 299
+PASS unit cap-len200 checkpoint adds=99999: buffer=99999, newest=99999, oldest=1
+PASS unit cap-len200 checkpoint adds=100000: buffer=100000, newest=100000, oldest=1
+PASS unit cap-len200 checkpoint adds=100001: buffer=100000, newest=100001, oldest=2
+PASS unit cap-len200 checkpoint adds=105000: buffer=100000, newest=105000, oldest=5001
+PASS unit cap-len200 size=100000 adds=105000: dataRows==bufferSize==instances==min(adds,size) | 100000/100000/100000 want 100000
+PASS unit cap-len200 size=100000 L=200: bytes per row in [L+80, L+112] | 297
+PASS unit cap-len2000 checkpoint adds=99999: buffer=99999, newest=99999, oldest=1
+PASS unit cap-len2000 checkpoint adds=100000: buffer=100000, newest=100000, oldest=1
+PASS unit cap-len2000 checkpoint adds=100001: buffer=100000, newest=100001, oldest=2
+PASS unit cap-len2000 checkpoint adds=105000: buffer=100000, newest=105000, oldest=5001
+PASS unit cap-len2000 size=100000 adds=105000: dataRows==bufferSize==instances==min(adds,size) | 100000/100000/100000 want 100000
+PASS unit cap-len2000 size=100000 L=2000: bytes per row in [L+80, L+112] | 2099
+PASS unit cap-adds-lt-size checkpoint adds=600: buffer=600, newest=600, oldest=1
+PASS unit cap-adds-lt-size size=100000 adds=600: dataRows==bufferSize==instances==min(adds,size) | 600/600/600 want 600
+PASS unit cap-50x checkpoint adds=999: buffer=999, newest=999, oldest=1
+PASS unit cap-50x checkpoint adds=1000: buffer=1000, newest=1000, oldest=1
+PASS unit cap-50x checkpoint adds=1001: buffer=1000, newest=1001, oldest=2
+PASS unit cap-50x checkpoint adds=50000: buffer=1000, newest=50000, oldest=49001
+PASS unit cap-50x size=1000 adds=50000: dataRows==bufferSize==instances==min(adds,size) | 1000/1000/1000 want 1000
+PASS unit mt8: final == sampled max == dataRows == 1000
+PASS unit resolve in-process unset -> 50000
+PASS unit resolve in-process 999 -> 50000
+PASS unit resolve in-process 1000 -> 1000
+PASS unit resolve in-process 1001 -> 1001
+PASS unit resolve in-process 50000 -> 50000
+PASS unit resolve in-process 50001 -> 50001
+PASS unit resolve in-process 100000 -> 100000
+PASS unit resolve in-process 100001 -> 50000
+PASS unit resolve in-process 0 -> 50000
+PASS unit resolve in-process -1 -> 50000
+PASS unit resolve -D unset -> 50000
+PASS unit resolve -D 999 -> 50000
+PASS unit resolve -D 1000 -> 1000
+PASS unit resolve -D 100000 -> 100000
+PASS unit resolve -D 100001 -> 50000
+PASS cluster n1000: capacity line says 1000
+PASS cluster n1000 s2000: instances 1000 == min(N_eff 1000, b0+E-e0 = 34321) | cql rows 467
+PASS cluster n1000 s10000: instances 1000 == min(N_eff 1000, b0+E-e0 = 163814) | cql rows 289
+PASS cluster n1000 s20000: instances 1000 == min(N_eff 1000, b0+E-e0 = 325744) | cql rows 715
+PASS cluster n1000 s40000: instances 1000 == min(N_eff 1000, b0+E-e0 = 649594) | cql rows 697
+PASS cluster n1000 s100000: instances 1000 == min(N_eff 1000, b0+E-e0 = 1620733) | cql rows 699
+PASS cluster n20000: capacity line says 20000
+PASS cluster n20000 s2000: instances 20000 == min(N_eff 20000, b0+E-e0 = 34310) | cql rows 8987
+PASS cluster n20000 s10000: instances 20000 == min(N_eff 20000, b0+E-e0 = 163761) | cql rows 7295
+PASS cluster n20000 s20000: instances 20000 == min(N_eff 20000, b0+E-e0 = 325740) | cql rows 11111
+PASS cluster n20000 s40000: instances 20000 == min(N_eff 20000, b0+E-e0 = 649512) | cql rows 14543
+PASS cluster n20000 s100000: instances 20000 == min(N_eff 20000, b0+E-e0 = 1620475) | cql rows 14552
+PASS cluster n100000: capacity line says 100000
+PASS cluster n100000 s2000: instances 34321 == min(N_eff 100000, b0+E-e0 = 34321) | cql rows 16527
+PASS cluster n100000 s10000: instances 100000 == min(N_eff 100000, b0+E-e0 = 163832) | cql rows 37524
+PASS cluster n100000 s20000: instances 100000 == min(N_eff 100000, b0+E-e0 = 325846) | cql rows 53783
+PASS cluster n100000 s40000: instances 100000 == min(N_eff 100000, b0+E-e0 = 649559) | cql rows 66770
+PASS cluster n100000 s100000: instances 100000 == min(N_eff 100000, b0+E-e0 = 1620489) | cql rows 74136
+PASS cluster n200000: capacity line says 50000
+PASS cluster n200000 s2000: instances 34333 == min(N_eff 50000, b0+E-e0 = 34334) | cql rows 16869
+PASS cluster n200000 s10000: instances 50000 == min(N_eff 50000, b0+E-e0 = 163838) | cql rows 19106
+PASS cluster n200000 s20000: instances 50000 == min(N_eff 50000, b0+E-e0 = 325930) | cql rows 29826
+PASS cluster n200000 s40000: instances 50000 == min(N_eff 50000, b0+E-e0 = 649649) | cql rows 36572
+PASS cluster n200000 s100000: instances 50000 == min(N_eff 50000, b0+E-e0 = 1620315) | cql rows 37529
+PASS cluster nunset: capacity line says 50000
+PASS cluster nunset s2000: instances 34326 == min(N_eff 50000, b0+E-e0 = 34326) | cql rows 18525
+PASS cluster nunset s10000: instances 50000 == min(N_eff 50000, b0+E-e0 = 163765) | cql rows 18892
+PASS cluster nunset s20000: instances 50000 == min(N_eff 50000, b0+E-e0 = 325834) | cql rows 28259
+PASS cluster nunset s40000: instances 50000 == min(N_eff 50000, b0+E-e0 = 649488) | cql rows 35939
+PASS cluster nunset s100000: instances 50000 == min(N_eff 50000, b0+E-e0 = 1620473) | cql rows 37014
+PASS cluster off: capacity line says 50000
+PASS cluster off s2000: instances 0, rows 0
+PASS cluster off s10000: instances 0, rows 0
+PASS cluster off s20000: instances 0, rows 0
+PASS cluster off s40000: instances 0, rows 0
+PASS cluster off s100000: instances 0, rows 0
+PASS cluster w1000: capacity line says 1000
+PASS cluster w1000 s2000: instances == 6 (= WARN/ERROR events of the run) < 1000, events 34307
+PASS cluster w1000 s10000: instances == 6 (= WARN/ERROR events of the run) < 1000, events 163773
+PASS cluster w1000 s20000: instances == 6 (= WARN/ERROR events of the run) < 1000, events 325684
+PASS cluster w1000 s40000: instances == 6 (= WARN/ERROR events of the run) < 1000, events 649394
+PASS cluster w1000 s100000: instances == 6 (= WARN/ERROR events of the run) < 1000, events 1620205
+PASS cluster n1000 s2000: events since the oldest listed row 1191 <= 2N+1000 (events in the run 34321; discriminating)
+PASS cluster n1000 s10000: events since the oldest listed row 1261 <= 2N+1000 (events in the run 163814; discriminating)
+PASS cluster n1000 s20000: events since the oldest listed row 1066 <= 2N+1000 (events in the run 325744; discriminating)
+PASS cluster n1000 s40000: events since the oldest listed row 1193 <= 2N+1000 (events in the run 649594; discriminating)
+PASS cluster n1000 s100000: events since the oldest listed row 1184 <= 2N+1000 (events in the run 1620733; discriminating)
+PASS cluster n20000 s2000: events since the oldest listed row 20179 <= 2N+1000 (events in the run 34309; not discriminating, events <= 2N+1000)
+PASS cluster n20000 s10000: events since the oldest listed row 20489 <= 2N+1000 (events in the run 163760; discriminating)
+PASS cluster n20000 s20000: events since the oldest listed row 20051 <= 2N+1000 (events in the run 325739; discriminating)
+PASS cluster n20000 s40000: events since the oldest listed row 20184 <= 2N+1000 (events in the run 649511; discriminating)
+PASS cluster n20000 s100000: events since the oldest listed row 20099 <= 2N+1000 (events in the run 1620474; discriminating)
+PASS cluster n100000 s10000: events since the oldest listed row 100296 <= 2N+1000 (events in the run 163832; not discriminating, events <= 2N+1000)
+PASS cluster n100000 s20000: events since the oldest listed row 100184 <= 2N+1000 (events in the run 325846; discriminating)
+PASS cluster n100000 s40000: events since the oldest listed row 100145 <= 2N+1000 (events in the run 649559; discriminating)
+PASS cluster n100000 s100000: events since the oldest listed row 100084 <= 2N+1000 (events in the run 1620489; discriminating)
+PASS cluster n200000 s10000: events since the oldest listed row 50146 <= 2N+1000 (events in the run 163837; discriminating)
+PASS cluster n200000 s20000: events since the oldest listed row 50211 <= 2N+1000 (events in the run 325929; discriminating)
+PASS cluster n200000 s40000: events since the oldest listed row 50242 <= 2N+1000 (events in the run 649648; discriminating)
+PASS cluster n200000 s100000: events since the oldest listed row 50342 <= 2N+1000 (events in the run 1620314; discriminating)
+PASS cluster nunset s10000: events since the oldest listed row 50282 <= 2N+1000 (events in the run 163765; discriminating)
+PASS cluster nunset s20000: events since the oldest listed row 50335 <= 2N+1000 (events in the run 325834; discriminating)
+PASS cluster nunset s40000: events since the oldest listed row 50093 <= 2N+1000 (events in the run 649488; discriminating)
+PASS cluster nunset s100000: events since the oldest listed row 50215 <= 2N+1000 (events in the run 1620473; discriminating)
+ALL PASS

@@ -1,0 +1,20 @@
+DEPTH TABLE org.apache.cassandra.dht.Murmur3Partitioner: leaf 80 inner 120 d {524288: 11, 1048576: 12, 2097152: 13, 4194304: 14, 8388608: 15, 33554432: 17, 67108864: 18}
+IDLE N2 histogram: OnHeapLeaf (0, 0) OnHeapInner (0, 0)
+KNOB read back {'N1': 128, 'N2': 128}
+READ M control s=default N1: n=524288 L=262144 predicted=262144 {'prod': 134217728, 'b': 67108864, 'd': 18, 'max_depth': 18, 'depth': 18} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[21495840, 21495840]
+READ M control s=default N2: n=524416 L=262144 predicted=262144 {'prod': 134217728, 'b': 67108864, 'd': 18, 'max_depth': 18, 'depth': 18} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M control s=default N1: L = 262144 (2^min(ceil log2 n, d(b), D)); read 262144 — yes
+EXPECTED: M control s=default N2: L = 262144 (2^min(ceil log2 n, d(b), D)); read 262144 — yes
+EXPECTED: M control s=default N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M control s=default N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M control s=default N1: two off-heap buffers of 82 L + 32 = [21495840, 21495840]; read [21495840, 21495840] — yes
+READ M control-hold s=default N1: n=524288 L=262144 predicted=262144 {'prod': 134217728, 'b': 67108864, 'd': 18, 'max_depth': 18, 'depth': 18} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[21495840, 21495840]
+READ M control-hold s=default N2: n=524416 L=262144 predicted=262144 {'prod': 134217728, 'b': 67108864, 'd': 18, 'max_depth': 18, 'depth': 18} split_calls=0 refused=[] toodeep=[] samples=[] offheap=[]
+EXPECTED: M control-hold s=default N1: L = 262144 (2^min(ceil log2 n, d(b), D)); read 262144 — yes
+EXPECTED: M control-hold s=default N2: L = 262144 (2^min(ceil log2 n, d(b), D)); read 262144 — yes
+EXPECTED: M control-hold s=default N1: split() never called (split calls=0); read 0 — yes
+EXPECTED: M control-hold s=default N2: split() never called (split calls=0); read 0 — yes
+EXPECTED: M control-hold s=default N1: two off-heap buffers of 82 L + 32 = [21495840, 21495840]; read [21495840, 21495840] — yes
+HEAP N2 s=default: OnHeapLeaf (0, 0) -> (262144, 8388608) (delta 262144), OnHeapInner (0, 0) -> (262143, 12582864) (delta 262143); bytes delta leaf 8388608 inner 12582864
+EXPECTED: M control-hold s=default N2 heap: OnHeapLeaf +262144, OnHeapInner +262143; read +262144, +262143 — yes
+DIRECT N1 s=default: MemoryUsed idle 75827868 during hold 97335641 (rise 21507773; one buffer would be 21495840) — support only

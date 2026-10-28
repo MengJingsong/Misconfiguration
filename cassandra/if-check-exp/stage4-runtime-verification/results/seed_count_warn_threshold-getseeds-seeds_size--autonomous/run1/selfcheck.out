@@ -1,0 +1,41 @@
+PASS unit: 27 cells
+PASS K=25: arm U returned==K in all 6 cells
+PASS K=25: WARN only when T below K
+PASS K=25: deepBytes identical across T  3368
+PASS K=25: arm P returned==20 and deepBytes small  P 2704 U 3368
+PASS K=25: databaseDescriptorGetSeeds == returned
+PASS K=1000: arm U returned==K in all 6 cells
+PASS K=1000: WARN only when T below K
+PASS K=1000: deepBytes identical across T  132064
+PASS K=1000: arm P returned==20 and deepBytes small  P 2704 U 132064
+PASS K=1000: databaseDescriptorGetSeeds == returned
+PASS K=20000: arm U returned==K in all 6 cells
+PASS K=20000: WARN only when T below K
+PASS K=20000: deepBytes identical across T  2640064
+PASS K=20000: arm P returned==20 and deepBytes small  P 2704 U 2640064
+PASS K=20000: databaseDescriptorGetSeeds == returned
+PASS deepBytes 20000:1000 within 15 % of 20  19.99
+PASS K=20000: arm P deepBytes < 1/100 of arm U
+PASS K=20000: heapPerCopy U equal across T within 20 %
+PASS K=20000: heapPerCopy P < 1/100 of U  P [-599, -538, -2239]
+PASS K=1000: heapPerCopy U equal across T within 20 %
+PASS cluster: 6 starts
+INFO P-k1000-tdef {'warn': 12, 'live': 65785576, 'ia': 22, 'oc': 19, 'seeds': 19, 'rb': 'unset'}
+INFO P-k25-tdef {'warn': 12, 'live': 65801272, 'ia': 22, 'oc': 19, 'seeds': 19, 'rb': 'unset'}
+INFO U-k1000-t2000 {'warn': 0, 'live': 99614008, 'ia': 1002, 'oc': 999, 'seeds': 999, 'rb': '2000'}
+INFO U-k1000-tdef {'warn': 12, 'live': 99614856, 'ia': 1002, 'oc': 999, 'seeds': 999, 'rb': 'unset'}
+INFO U-k25-t50 {'warn': 0, 'live': 65988216, 'ia': 27, 'oc': 24, 'seeds': 24, 'rb': '50'}
+INFO U-k25-tdef {'warn': 12, 'live': 65950312, 'ia': 27, 'oc': 24, 'seeds': 24, 'rb': 'unset'}
+PASS K=25: WARN present (T default) / absent (T=2K)
+PASS K=25: live, InetAddressAndPort, OutboundConnections equal within 25 % across T
+PASS K=25: nodetool getseeds lists K-1 peers (self excluded) in both  24 24
+PASS K=25: OutboundConnections == K-1 (every seed contacted)  24 24
+PASS K=1000: WARN present (T default) / absent (T=2K)
+PASS K=1000: live, InetAddressAndPort, OutboundConnections equal within 25 % across T
+PASS K=1000: nodetool getseeds lists K-1 peers (self excluded) in both  999 999
+PASS K=1000: OutboundConnections == K-1 (every seed contacted)  999 999
+PASS K=1000 more than K=25 (live bytes, outbound)
+PASS arm P K=1000: getseeds lists 19 peers (cap 20 minus self)  19
+PASS arm P K=1000: OutboundConnections <= 21 and far below U  19
+PASS arm P K=1000: live bytes below U by > 30 MB  33829280
+ALL PASS

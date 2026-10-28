@@ -1,0 +1,311 @@
+[2026-10-27T21:03:52-0600] === arm c0 counter_cache_size 0 MiB
+[2026-10-27T21:03:52-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 0
+[2026-10-27T21:05:17-0600] node up, pid 761204
+[2026-10-27T21:05:18-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:05:18-0600]   exit 0 in 0.0s
+[2026-10-27T21:05:18-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:04:07,910 CacheService.java:174 - Initializing counter cache with capacity of 0 MiBs
+[2026-10-27T21:05:21-0600] t0 {'t_ms': 1793156719647, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:05:21-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:06:06-0600] stress pass1 exit 0 after 45s
+[2026-10-27T21:06:10-0600] end-pass1 {'t_ms': 1793156768116, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:06:10-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:06:33-0600] stress pass2 exit 0 after 23s
+[2026-10-27T21:06:37-0600] end-pass2 {'t_ms': 1793156795136, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:06:38-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:06:43-0600]   exit 0 in 4.5s
+[2026-10-27T21:06:43-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:06:43-0600]   exit 0 in 0.0s
+[2026-10-27T21:06:43-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:06:43-0600]   exit 0 in 0.0s
+[2026-10-27T21:06:43-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/c0/system.log.full
+[2026-10-27T21:06:43-0600]   exit 0 in 0.0s
+[2026-10-27T21:06:43-0600] stopping node pid 761204
+[2026-10-27T21:06:56-0600] node pid alive after stop: False
+[2026-10-27T21:06:56-0600] === arm c1 counter_cache_size 1 MiB
+[2026-10-27T21:06:56-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 1
+[2026-10-27T21:08:20-0600] node up, pid 764331
+[2026-10-27T21:08:21-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:08:21-0600]   exit 0 in 0.0s
+[2026-10-27T21:08:21-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:07:12,741 CacheService.java:174 - Initializing counter cache with capacity of 1 MiBs
+[2026-10-27T21:08:25-0600] t0 {'t_ms': 1793156902821, 'size': 0, 'capacity': 1048576, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:08:25-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:10:07-0600] stress pass1 exit 0 after 102s
+[2026-10-27T21:10:11-0600] end-pass1 {'t_ms': 1793157008272, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:10:11-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:10:34-0600] stress pass2 exit 0 after 24s
+[2026-10-27T21:10:38-0600] end-pass2 {'t_ms': 1793157036008, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 3250000, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:10:40-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:10:46-0600]   exit 0 in 5.6s
+[2026-10-27T21:10:46-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:10:46-0600]   exit 0 in 0.0s
+[2026-10-27T21:10:46-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:10:46-0600]   exit 0 in 0.0s
+[2026-10-27T21:10:46-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/c1/system.log.full
+[2026-10-27T21:10:46-0600]   exit 0 in 0.0s
+[2026-10-27T21:10:46-0600] stopping node pid 764331
+[2026-10-27T21:10:59-0600] node pid alive after stop: False
+[2026-10-27T21:10:59-0600] === arm c8 counter_cache_size 8 MiB
+[2026-10-27T21:10:59-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 8
+[2026-10-27T21:12:24-0600] node up, pid 767631
+[2026-10-27T21:12:26-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:12:26-0600]   exit 0 in 0.0s
+[2026-10-27T21:12:26-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:11:16,937 CacheService.java:174 - Initializing counter cache with capacity of 8 MiBs
+[2026-10-27T21:12:29-0600] t0 {'t_ms': 1793157147178, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:12:29-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:14:09-0600] stress pass1 exit 0 after 100s
+[2026-10-27T21:14:13-0600] end-pass1 {'t_ms': 1793157250832, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:14:13-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:14:36-0600] stress pass2 exit 0 after 23s
+[2026-10-27T21:14:40-0600] end-pass2 {'t_ms': 1793157277844, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 8621, 'requests': 3250000, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:14:42-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:14:46-0600]   exit 0 in 4.4s
+[2026-10-27T21:14:46-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:14:46-0600]   exit 0 in 0.0s
+[2026-10-27T21:14:46-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:14:46-0600]   exit 0 in 0.0s
+[2026-10-27T21:14:46-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/c8/system.log.full
+[2026-10-27T21:14:46-0600]   exit 0 in 0.0s
+[2026-10-27T21:14:46-0600] stopping node pid 767631
+[2026-10-27T21:14:59-0600] node pid alive after stop: False
+[2026-10-27T21:14:59-0600] === arm c64 counter_cache_size 64 MiB
+[2026-10-27T21:14:59-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 64
+[2026-10-27T21:16:24-0600] node up, pid 770981
+[2026-10-27T21:16:25-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:16:25-0600]   exit 0 in 0.0s
+[2026-10-27T21:16:25-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:15:16,689 CacheService.java:174 - Initializing counter cache with capacity of 64 MiBs
+[2026-10-27T21:16:28-0600] t0 {'t_ms': 1793157386332, 'size': 0, 'capacity': 67108864, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:16:28-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:18:09-0600] stress pass1 exit 0 after 101s
+[2026-10-27T21:18:13-0600] end-pass1 {'t_ms': 1793157490358, 'size': 67108800, 'capacity': 67108864, 'entries': 559240, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:18:13-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:18:35-0600] stress pass2 exit 0 after 23s
+[2026-10-27T21:18:39-0600] end-pass2 {'t_ms': 1793157516835, 'size': 67108800, 'capacity': 67108864, 'entries': 559240, 'hits': 0, 'requests': 3250000, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:18:40-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:18:45-0600]   exit 0 in 4.9s
+[2026-10-27T21:18:45-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:18:45-0600]   exit 0 in 0.0s
+[2026-10-27T21:18:45-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:18:45-0600]   exit 0 in 0.0s
+[2026-10-27T21:18:45-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/c64/system.log.full
+[2026-10-27T21:18:45-0600]   exit 0 in 0.0s
+[2026-10-27T21:18:45-0600] stopping node pid 770981
+[2026-10-27T21:18:59-0600] node pid alive after stop: False
+[2026-10-27T21:18:59-0600] === arm cdef counter_cache_size default(unset)
+[2026-10-27T21:18:59-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size None
+[2026-10-27T21:20:21-0600] node up, pid 774290
+[2026-10-27T21:20:22-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:20:22-0600]   exit 0 in 0.0s
+[2026-10-27T21:20:22-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:19:16,655 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs
+[2026-10-27T21:20:25-0600] t0 {'t_ms': 1793157623315, 'size': 0, 'capacity': 52428800, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:20:25-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:22:06-0600] stress pass1 exit 0 after 101s
+[2026-10-27T21:22:10-0600] end-pass1 {'t_ms': 1793157727880, 'size': 52428720, 'capacity': 52428800, 'entries': 436906, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:22:10-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:22:32-0600] stress pass2 exit 0 after 22s
+[2026-10-27T21:22:36-0600] end-pass2 {'t_ms': 1793157754048, 'size': 52428720, 'capacity': 52428800, 'entries': 436906, 'hits': 5564, 'requests': 3250000, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:22:37-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:22:43-0600]   exit 0 in 5.1s
+[2026-10-27T21:22:43-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:22:43-0600]   exit 0 in 0.0s
+[2026-10-27T21:22:43-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:22:43-0600]   exit 0 in 0.0s
+[2026-10-27T21:22:43-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/cdef/system.log.full
+[2026-10-27T21:22:43-0600]   exit 0 in 0.0s
+[2026-10-27T21:22:43-0600] stopping node pid 774290
+[2026-10-27T21:22:55-0600] node pid alive after stop: False
+[2026-10-27T21:22:55-0600] === arm c8b counter_cache_size 8 MiB
+[2026-10-27T21:22:55-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 8
+[2026-10-27T21:24:20-0600] node up, pid 777607
+[2026-10-27T21:24:21-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:24:21-0600]   exit 0 in 0.0s
+[2026-10-27T21:24:21-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:23:12,929 CacheService.java:174 - Initializing counter cache with capacity of 8 MiBs
+[2026-10-27T21:24:24-0600] t0 {'t_ms': 1793157861968, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:24:24-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:26:53-0600] stress pass1 exit 0 after 150s
+[2026-10-27T21:26:57-0600] end-pass1 {'t_ms': 1793158015324, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:26:57-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:27:20-0600] stress pass2 exit 0 after 23s
+[2026-10-27T21:27:23-0600] end-pass2 {'t_ms': 1793158041433, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 17843, 'requests': 3250000, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:27:24-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:27:29-0600]   exit 0 in 4.7s
+[2026-10-27T21:27:29-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:27:29-0600]   exit 0 in 0.0s
+[2026-10-27T21:27:29-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:27:29-0600]   exit 0 in 0.0s
+[2026-10-27T21:27:29-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/c8b/system.log.full
+[2026-10-27T21:27:29-0600]   exit 0 in 0.0s
+[2026-10-27T21:27:29-0600] stopping node pid 777607
+[2026-10-27T21:27:42-0600] node pid alive after stop: False
+[2026-10-27T21:27:42-0600] === arm rt64 counter_cache_size 64 MiB
+[2026-10-27T21:27:42-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 64
+[2026-10-27T21:29:03-0600] node up, pid 781204
+[2026-10-27T21:29:03-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:29:04-0600]   exit 0 in 0.0s
+[2026-10-27T21:29:04-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:27:59,368 CacheService.java:174 - Initializing counter cache with capacity of 64 MiBs
+[2026-10-27T21:29:06-0600] t0 {'t_ms': 1793158144877, 'size': 0, 'capacity': 67108864, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:29:06-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:30:46-0600] stress pass1 exit 0 after 100s
+[2026-10-27T21:30:50-0600] end-pass1 {'t_ms': 1793158247484, 'size': 67108800, 'capacity': 67108864, 'entries': 559240, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:30:50-0600] + java -cp /users/jason92/s4-cc/bin Jmx 7439 set counter 8
+[2026-10-27T21:30:51-0600]   exit 0 in 1.6s
+[2026-10-27T21:30:51-0600] set CounterCacheCapacityInMB=8 returned
+
+[2026-10-27T21:31:27-0600] after-setcap-hist {'t_ms': 1793158285121, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 3000000, 'phase': 'after-setcap-hist', 'hist': 'hist-after-setcap-hist.txt'}
+[2026-10-27T21:31:27-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=50000 no-warmup -pop seq=550001..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:31:49-0600] stress pass2 exit 0 after 22s
+[2026-10-27T21:31:53-0600] end-pass2 {'t_ms': 1793158310424, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 2303, 'requests': 3250000, 'phase': 'end-pass2', 'hist': 'hist-end-pass2.txt'}
+[2026-10-27T21:31:54-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:32:00-0600]   exit 0 in 5.7s
+[2026-10-27T21:32:00-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:32:00-0600]   exit 0 in 0.0s
+[2026-10-27T21:32:00-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:32:00-0600]   exit 0 in 0.0s
+[2026-10-27T21:32:00-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/rt64/system.log.full
+[2026-10-27T21:32:00-0600]   exit 0 in 0.0s
+[2026-10-27T21:32:00-0600] stopping node pid 781204
+[2026-10-27T21:32:13-0600] node pid alive after stop: False
+[2026-10-27T21:32:13-0600] === arm r8 counter_cache_size 8 MiB
+[2026-10-27T21:32:13-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 8
+[2026-10-27T21:33:35-0600] node up, pid 784796
+[2026-10-27T21:33:36-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:33:36-0600]   exit 0 in 0.0s
+[2026-10-27T21:33:36-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:32:30,580 CacheService.java:174 - Initializing counter cache with capacity of 8 MiBs
+[2026-10-27T21:33:39-0600] t0 {'t_ms': 1793158417672, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:33:39-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress write n=300000 no-warmup -pop seq=1..300000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:34:13-0600] stress regular exit 0 after 34s
+[2026-10-27T21:34:17-0600] end-regular {'t_ms': 1793158454364, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'end-regular', 'hist': 'hist-end-regular.txt'}
+[2026-10-27T21:34:18-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:34:24-0600]   exit 0 in 5.6s
+[2026-10-27T21:34:24-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:34:24-0600]   exit 0 in 0.0s
+[2026-10-27T21:34:24-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:34:24-0600]   exit 0 in 0.0s
+[2026-10-27T21:34:24-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/r8/system.log.full
+[2026-10-27T21:34:24-0600]   exit 0 in 0.0s
+[2026-10-27T21:34:24-0600] stopping node pid 784796
+[2026-10-27T21:34:37-0600] node pid alive after stop: False
+[2026-10-27T21:34:37-0600] === arm sv8 counter_cache_size 8 MiB
+[2026-10-27T21:34:37-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 8
+[2026-10-27T21:35:57-0600] node up, pid 787358
+[2026-10-27T21:35:58-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:35:58-0600]   exit 0 in 0.0s
+[2026-10-27T21:35:58-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T03:34:52,392 CacheService.java:174 - Initializing counter cache with capacity of 8 MiBs
+[2026-10-27T21:36:01-0600] t0 {'t_ms': 1793158559634, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 't0', 'hist': 'hist-t0.txt'}
+[2026-10-27T21:36:01-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress counter_write n=600000 no-warmup -pop seq=1..600000 -rate threads=64 -node 127.39.9.1 -port native=9042
+[2026-10-27T21:37:42-0600] stress pass1 exit 0 after 101s
+[2026-10-27T21:37:46-0600] end-pass1 {'t_ms': 1793158663788, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 3000000, 'phase': 'end-pass1', 'hist': 'hist-end-pass1.txt'}
+[2026-10-27T21:37:46-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 flush
+[2026-10-27T21:37:53-0600] 
+[2026-10-27T21:37:53-0600]   exit 0 in 7.5s
+[2026-10-27T21:37:53-0600] + java -cp /users/jason92/s4-cc/bin Jmx 7439 save
+[2026-10-27T21:37:55-0600]   exit 0 in 1.9s
+[2026-10-27T21:37:55-0600] saveCaches returned
+
+[2026-10-27T21:38:00-0600] + ls -l --time-style=+%s /users/jason92/s4-cc/node/saved_caches
+[2026-10-27T21:38:00-0600]   exit 0 in 0.0s
+[2026-10-27T21:38:04-0600] after-save {'t_ms': 1793158682016, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 3000000, 'phase': 'after-save', 'hist': 'hist-after-save.txt'}
+[2026-10-27T21:38:05-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:38:09-0600]   exit 0 in 4.0s
+[2026-10-27T21:38:09-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:38:09-0600]   exit 0 in 0.0s
+[2026-10-27T21:38:09-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:38:09-0600]   exit 0 in 0.0s
+[2026-10-27T21:38:09-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/sv8/system.log.full
+[2026-10-27T21:38:09-0600]   exit 0 in 0.0s
+[2026-10-27T21:38:09-0600] stopping node pid 787358
+[2026-10-27T21:38:20-0600] node pid alive after stop: False
+[2026-10-27T21:38:20-0600] === arm rl0 counter_cache_size 0 MiB
+[2026-10-27T21:38:20-0600] + ls -l --time-style=+%s /users/jason92/s4-cc/node/saved_caches
+[2026-10-27T21:38:20-0600]   exit 0 in 0.0s
+[2026-10-27T21:38:20-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 0
+[2026-10-27T21:39:02-0600] node up, pid 790485
+[2026-10-27T21:39:02-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:39:02-0600]   exit 0 in 0.0s
+[2026-10-27T21:39:02-0600] INFO  [SSTableBatchOpen:2] 2026-10-28T03:38:36,289 CacheService.java:174 - Initializing counter cache with capacity of 0 MiBs
+[2026-10-27T21:39:03-0600] {'t_ms': 1793158743759, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+0s'}
+[2026-10-27T21:39:10-0600] {'t_ms': 1793158750135, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+5s'}
+[2026-10-27T21:39:16-0600] {'t_ms': 1793158756448, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+10s'}
+[2026-10-27T21:39:23-0600] {'t_ms': 1793158762844, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+15s'}
+[2026-10-27T21:39:29-0600] {'t_ms': 1793158769345, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+20s'}
+[2026-10-27T21:39:36-0600] {'t_ms': 1793158776136, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+25s'}
+[2026-10-27T21:39:42-0600] {'t_ms': 1793158782616, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+30s'}
+[2026-10-27T21:39:48-0600] {'t_ms': 1793158788718, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+35s'}
+[2026-10-27T21:39:55-0600] {'t_ms': 1793158795259, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+40s'}
+[2026-10-27T21:40:02-0600] {'t_ms': 1793158801825, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+45s'}
+[2026-10-27T21:40:08-0600] {'t_ms': 1793158808337, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+50s'}
+[2026-10-27T21:40:14-0600] {'t_ms': 1793158814704, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload+55s'}
+[2026-10-27T21:40:23-0600] reload-end {'t_ms': 1793158821188, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'phase': 'reload-end', 'hist': 'hist-reload-end.txt'}
+[2026-10-27T21:40:24-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:40:28-0600]   exit 0 in 4.5s
+[2026-10-27T21:40:28-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:40:28-0600]   exit 0 in 0.0s
+[2026-10-27T21:40:28-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:40:28-0600]   exit 0 in 0.0s
+[2026-10-27T21:40:28-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/rl0/system.log.full
+[2026-10-27T21:40:28-0600]   exit 0 in 0.0s
+[2026-10-27T21:40:28-0600] stopping node pid 790485
+[2026-10-27T21:40:41-0600] node pid alive after stop: False
+[2026-10-27T21:40:41-0600] === arm rl1 counter_cache_size 1 MiB
+[2026-10-27T21:40:41-0600] + ls -l --time-style=+%s /users/jason92/s4-cc/node/saved_caches
+[2026-10-27T21:40:41-0600]   exit 0 in 0.0s
+[2026-10-27T21:40:41-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 1
+[2026-10-27T21:41:22-0600] node up, pid 792315
+[2026-10-27T21:41:23-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:41:23-0600]   exit 0 in 0.0s
+[2026-10-27T21:41:23-0600] INFO  [SSTableBatchOpen:1] 2026-10-28T03:40:55,817 CacheService.java:174 - Initializing counter cache with capacity of 1 MiBs
+[2026-10-27T21:41:24-0600] {'t_ms': 1793158884299, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+0s'}
+[2026-10-27T21:41:30-0600] {'t_ms': 1793158890716, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+5s'}
+[2026-10-27T21:41:37-0600] {'t_ms': 1793158897259, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+10s'}
+[2026-10-27T21:41:43-0600] {'t_ms': 1793158903496, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+15s'}
+[2026-10-27T21:41:50-0600] {'t_ms': 1793158909976, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+20s'}
+[2026-10-27T21:41:56-0600] {'t_ms': 1793158916519, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+25s'}
+[2026-10-27T21:42:03-0600] {'t_ms': 1793158922840, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+30s'}
+[2026-10-27T21:42:09-0600] {'t_ms': 1793158929616, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+35s'}
+[2026-10-27T21:42:16-0600] {'t_ms': 1793158935941, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+40s'}
+[2026-10-27T21:42:22-0600] {'t_ms': 1793158942582, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+45s'}
+[2026-10-27T21:42:29-0600] {'t_ms': 1793158948980, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+50s'}
+[2026-10-27T21:42:35-0600] {'t_ms': 1793158955424, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload+55s'}
+[2026-10-27T21:42:43-0600] reload-end {'t_ms': 1793158961787, 'size': 1048560, 'capacity': 1048576, 'entries': 8738, 'hits': 0, 'requests': 0, 'phase': 'reload-end', 'hist': 'hist-reload-end.txt'}
+[2026-10-27T21:42:45-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:42:49-0600]   exit 0 in 4.7s
+[2026-10-27T21:42:49-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:42:49-0600]   exit 0 in 0.0s
+[2026-10-27T21:42:49-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:42:49-0600]   exit 0 in 0.0s
+[2026-10-27T21:42:49-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/rl1/system.log.full
+[2026-10-27T21:42:49-0600]   exit 0 in 0.0s
+[2026-10-27T21:42:49-0600] stopping node pid 792315
+[2026-10-27T21:43:02-0600] node pid alive after stop: False
+[2026-10-27T21:43:02-0600] === arm rl8 counter_cache_size 8 MiB
+[2026-10-27T21:43:02-0600] + ls -l --time-style=+%s /users/jason92/s4-cc/node/saved_caches
+[2026-10-27T21:43:02-0600]   exit 0 in 0.0s
+[2026-10-27T21:43:03-0600] + bin/cassandra -p /users/jason92/s4-cc/node/cassandra.pid counter_cache_size 8
+[2026-10-27T21:43:47-0600] node up, pid 794193
+[2026-10-27T21:43:48-0600] + grep -h 'Initializing counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 1
+[2026-10-27T21:43:48-0600]   exit 0 in 0.0s
+[2026-10-27T21:43:48-0600] INFO  [SSTableBatchOpen:1] 2026-10-28T03:43:19,332 CacheService.java:174 - Initializing counter cache with capacity of 8 MiBs
+[2026-10-27T21:43:49-0600] {'t_ms': 1793159029572, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+0s'}
+[2026-10-27T21:43:56-0600] {'t_ms': 1793159036177, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+5s'}
+[2026-10-27T21:44:03-0600] {'t_ms': 1793159042868, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+10s'}
+[2026-10-27T21:44:09-0600] {'t_ms': 1793159049429, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+15s'}
+[2026-10-27T21:44:15-0600] {'t_ms': 1793159055660, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+20s'}
+[2026-10-27T21:44:22-0600] {'t_ms': 1793159062144, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+25s'}
+[2026-10-27T21:44:28-0600] {'t_ms': 1793159068600, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+30s'}
+[2026-10-27T21:44:35-0600] {'t_ms': 1793159075160, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+35s'}
+[2026-10-27T21:44:41-0600] {'t_ms': 1793159081573, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+40s'}
+[2026-10-27T21:44:48-0600] {'t_ms': 1793159087788, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+45s'}
+[2026-10-27T21:44:54-0600] {'t_ms': 1793159094448, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+50s'}
+[2026-10-27T21:45:00-0600] {'t_ms': 1793159100818, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload+55s'}
+[2026-10-27T21:45:09-0600] reload-end {'t_ms': 1793159107048, 'size': 8388600, 'capacity': 8388608, 'entries': 69905, 'hits': 0, 'requests': 0, 'phase': 'reload-end', 'hist': 'hist-reload-end.txt'}
+[2026-10-27T21:45:10-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7439 info | grep -i 'counter cache'
+[2026-10-27T21:45:15-0600]   exit 0 in 5.0s
+[2026-10-27T21:45:15-0600] + grep -c '^ERROR' /users/jason92/s4-cc/node/logs/system.log || true
+[2026-10-27T21:45:15-0600]   exit 0 in 0.0s
+[2026-10-27T21:45:15-0600] + grep -h 'counter cache' /users/jason92/s4-cc/node/logs/system.log | tail -n 8
+[2026-10-27T21:45:15-0600]   exit 0 in 0.0s
+[2026-10-27T21:45:15-0600] + cp /users/jason92/s4-cc/node/logs/system.log /users/jason92/s4-cc/run1/cluster/rl8/system.log.full
+[2026-10-27T21:45:15-0600]   exit 0 in 0.0s
+[2026-10-27T21:45:15-0600] stopping node pid 794193
+[2026-10-27T21:45:29-0600] node pid alive after stop: False
+[2026-10-27T21:45:29-0600] ALL ARMS DONE ['c0', 'c1', 'c8', 'c64', 'cdef', 'c8b', 'rt64', 'r8', 'sv8', 'rl0', 'rl1', 'rl8']
+[2026-10-27T21:45:29-0600] node pid alive after stop: False

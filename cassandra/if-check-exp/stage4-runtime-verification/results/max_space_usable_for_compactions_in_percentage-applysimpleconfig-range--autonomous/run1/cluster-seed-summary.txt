@@ -1,0 +1,16 @@
+LABEL seed start 2026-10-27 20:24:35 MDT; harness md5 53b10f09e27e
+FS fresh ext4 loop /users/jason92/s4b-mu/fs.img: size 2040373248 B, avail 2023571456 B
+YAML tail: cluster_name: stage4-msu; data_file_directories: [/users/jason92/s4b-mu/mnt/data]; commitlog_directory: /users/jason92/s4b-mu/commitlog; hints_directory: /users/jason92/s4b-mu/hints; saved_caches_directory: /users/jason92/s4b-mu/saved_caches; cdc_raw_directory: /users/jason92/s4b-mu/cdc_raw; min_free_space_per_drive: 50MiB; autocompaction_on_startup_enabled: false; memtable_heap_space: 6144MiB; memtable_offheap_space: 6144MiB
+node up after 54 s
+SEED chunk 1: seq 2..760001; errors 0
+SEED sstables after chunk 1: [174040214]
+SEED chunk 2: seq 760002..1520001; errors 0
+SEED sstables after chunk 2: [173045995, 174040214]
+SEED chunk 3: seq 1520002..2280001; errors 0
+SEED sstables after chunk 3: [173045995, 173048925, 174040214]
+SEED chunk 4: seq 2280002..3040001; errors 0
+SEED sstables after chunk 4: [173028400, 173045995, 173048925, 174040214]
+EXPECTED: seed: exactly 4 sstables, each Data.db >= 160 MiB; sizes [173028400, 173045995, 173048925, 174040214] - yes
+SEED du data dir 749650504 B; fs used/avail (750776320, 1272819712)
+SEED copied to /users/jason92/s4b-mu/seed-data: 749666178 B
+DONE seed expected 1/1 yes

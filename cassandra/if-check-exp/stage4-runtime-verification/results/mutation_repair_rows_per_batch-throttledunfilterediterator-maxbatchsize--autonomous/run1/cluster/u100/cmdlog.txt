@@ -1,0 +1,48 @@
+== u100 N=unset table=wide_cdc heapB=2G start 1793158698222
+daemons before: 0
+node A: conf /users/jason92/stage4-mrb/A/conf, JMX 7102, address 127.0.0.2, token -3074457345618258603
+node B: conf /users/jason92/stage4-mrb/B/conf, JMX 7103, address 127.0.0.3, token 3074457345618258602
+node A up
+B JVM_EXTRA_OPTS=-javaagent:/users/jason92/c4-mrb/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/h-mrb/bm.btm -Xlog:gc*:file=/users/jason92/stage4-logs/mrb/run1/cluster/u100/gc-B.log:time,uptime -XX:NativeMemoryTracking=summary heap=2G
+node B up
+pidA=798637 pidB=799598
+-Xmx2G
+-javaagent:bin/../lib/jamm-0.4.0.jar
+-javaagent:/users/jason92/c4-mrb/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/h-mrb/bm.btm
+A has the property (lines): 0
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.3  77.01 KiB   1       100.0%            57162aaa-5fb9-4af4-9ec2-7e7fedc2e647  rack1
+UN  127.0.0.2  816.12 MiB  1       100.0%            5573f227-e2d7-45ad-a759-8469a8d75746  rack1
+
+B before: 		SSTable count: 0
+B before: 		Old SSTable count: 0
+B before: 		Space used (live): 0
+B before: 		Number of partitions (estimate): 0
+repair start 1793158753381
+repair rc=0 end 1793158785096
+[2026-10-28 03:39:44,564] Repair session 258bd050-d281-11f1-959e-79941c9bda35 for range [(3074457345618258602,-3074457345618258603], (-3074457345618258603,3074457345618258602]] finished (progress: 57%)
+[2026-10-28 03:39:44,580] Repair completed successfully
+[2026-10-28 03:39:44,587] Repair command #1 finished in 29 seconds
+[2026-10-28 03:39:44,596] condition satisfied queried for parent session status and discovered repair completed.
+[2026-10-28 03:39:44,597] Repair completed successfully
+		SSTable count: 4
+		Old SSTable count: 0
+		Space used (live): 427807454
+		Number of partitions (estimate): 1
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 4
+<stdin>:1:ReadTimeout: Error from server: code=1200 [Coordinator node timed out waiting for replica nodes' responses] message="Operation timed out - received only 0 responses." info={'consistency': 'LOCAL_ONE', 'required_responses': 1, 'received_responses': 0}
+Consistency level set to LOCAL_ONE.
+S4BATCH lines: 20000
+S4THROTTLE 1793158776789 maxBatchSize=100
+daemons left: 0
+410M	/users/jason92/stage4-mrb/B/data
+408M	/users/jason92/stage4-mrb/B/cdc_raw
+4.0K	/users/jason92/stage4-mrb/B/commitlog
+== u100 end 1793158843240

@@ -1,0 +1,36 @@
+RESULT PASS N1 five setCapacity calls recorded 5
+RESULT PASS N1 patched: setCapacity(0) accepted none
+RESULT PASS N1 capacity() == 0 after setCapacity(0) 0
+RESULT PASS N1 patched: setCapacity(1048576) accepted none
+RESULT PASS N1 capacity() == 0 after setCapacity(1048576) 0
+RESULT PASS N1 patched: setCapacity(67108864) accepted none
+RESULT PASS N1 capacity() == 0 after setCapacity(67108864) 0
+RESULT PASS N1 patched: setCapacity(-1) accepted none
+RESULT PASS N1 capacity() == 0 after setCapacity(-1) 0
+RESULT PASS N1 patched: setCapacity(9223372036854775807) accepted none
+RESULT PASS N1 capacity() == 0 after setCapacity(9223372036854775807) 0
+RESULT PASS N1 after 2,000,000 puts size == 0 and weightedSize == 0 size=0 weighted=0
+RESULT PASS N1 putIfAbsent/replace false and get null every time {'putIfAbsentTrue': '0', 'replaceTrue': '0', 'getNonNull': '0'}
+RESULT PASS N1 heap delta < 8 MiB and RssAnon delta < 4 MiB heap=-2508328 rss=1503232
+RESULT PASS N2 patched wrapper setCapacity(0) accepted none
+RESULT PASS N2 wrapper getCapacity() == 0 0
+RESULT PASS N2 patched wrapper setCapacity(67108864) accepted none
+RESULT PASS N2 wrapper getCapacity() == 0 0
+RESULT PASS N3 control is the OHC row cache at 16 MiB {'class': 'AutoSavingCache', 'capacityAtStart': '16777216'}
+RESULT PASS N3 phase A weightedSize <= capacity at every report ['5879975', '11759975', '16774464', '16774464', '16774439', '16774439', '16774464', '16774464']
+RESULT PASS N3 phase A ends >= 14 MiB 16774464
+RESULT PASS N3 setRowCacheCapacityInMB(32) succeeds, capacity 32 MiB N3 setRowCacheCapacityInMB(32) exception=none capacityAfter=33554432
+RESULT PASS N3 phase B weightedSize in (16 MiB, 32 MiB] ['23519975', '23519975']
+RESULT PASS N3 RssAnon growth at end >= 80%% of weightedSize rss=85180416 weighted=23519975
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '5000', 'capacity': '16777216', 'size': '5000', 'weightedSize': '5879975', 'rssAnonDelta': '43270144'}
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '10000', 'capacity': '16777216', 'size': '10000', 'weightedSize': '11759975', 'rssAnonDelta': '49438720'}
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '15000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '73306112'}
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '20000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '73744384'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '5000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774439', 'rssAnonDelta': '75542528'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '10000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774439', 'rssAnonDelta': '75587584'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '15000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '76042240'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '20000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '76918784'}
+INFO N3 {'phase': 'B', 'pass': '1', 'capacity': '33554432', 'size': '20000', 'weightedSize': '23519975', 'rssAnonDelta': '85073920'}
+INFO N3 {'phase': 'B', 'pass': '2', 'capacity': '33554432', 'size': '20000', 'weightedSize': '23519975', 'rssAnonDelta': '85180416'}
+
+FAILED CHECKS (0): []

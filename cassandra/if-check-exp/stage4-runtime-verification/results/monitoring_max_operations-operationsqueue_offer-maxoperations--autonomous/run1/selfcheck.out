@@ -1,0 +1,50 @@
+PASS unit: 18 cells
+PASS unit rep1 N=0 M=10000: queues, Failed/Slow instances == 0, Stub == 2x, dropped == 0
+PASS unit rep1 N=1 M=10000: queues, Failed/Slow instances == 1, Stub == 2x, dropped == 9999
+PASS unit rep1 N=50 M=10000: queues, Failed/Slow instances == 50, Stub == 2x, dropped == 9950
+PASS unit rep1 N=1000 M=10000: queues, Failed/Slow instances == 1000, Stub == 2x, dropped == 9000
+PASS unit rep1 N=-1 M=10000: queues, Failed/Slow instances == 10000, Stub == 2x, dropped == 0
+PASS unit rep2 N=0 M=10000: queues, Failed/Slow instances == 0, Stub == 2x, dropped == 0
+PASS unit rep2 N=1 M=10000: queues, Failed/Slow instances == 1, Stub == 2x, dropped == 9999
+PASS unit rep2 N=50 M=10000: queues, Failed/Slow instances == 50, Stub == 2x, dropped == 9950
+PASS unit rep2 N=1000 M=10000: queues, Failed/Slow instances == 1000, Stub == 2x, dropped == 9000
+PASS unit rep2 N=-1 M=10000: queues, Failed/Slow instances == 10000, Stub == 2x, dropped == 0
+PASS unit rep3 N=0 M=10000: queues, Failed/Slow instances == 0, Stub == 2x, dropped == 0
+PASS unit rep3 N=1 M=10000: queues, Failed/Slow instances == 1, Stub == 2x, dropped == 9999
+PASS unit rep3 N=50 M=10000: queues, Failed/Slow instances == 50, Stub == 2x, dropped == 9950
+PASS unit rep3 N=1000 M=10000: queues, Failed/Slow instances == 1000, Stub == 2x, dropped == 9000
+PASS unit rep3 N=-1 M=10000: queues, Failed/Slow instances == 10000, Stub == 2x, dropped == 0
+PASS unit rep1 N=50 M=100000: queues, Failed/Slow instances == 50, Stub == 2x, dropped == 99950
+PASS unit rep1 N=1000 M=100000: queues, Failed/Slow instances == 1000, Stub == 2x, dropped == 99000
+PASS unit rep1 N=-1 M=100000: queues, Failed/Slow instances == 100000, Stub == 2x, dropped == 0
+PASS unit N=1000 liveDelta ~ 2 x N x 1.2 KiB (2.4 MB +-10 %)  2432000
+PASS unit N=-1 liveDelta ~ 24.3 MB  24320000
+PASS unit N=1000 liveDelta ~ 2 x N x 1.2 KiB (2.4 MB +-10 %)  2432000
+PASS unit N=-1 liveDelta ~ 24.3 MB  24320000
+PASS unit N=1000 liveDelta ~ 2 x N x 1.2 KiB (2.4 MB +-10 %)  2432000
+PASS unit N=-1 liveDelta ~ 24.3 MB  24320000
+PASS cluster: 6 starts of 4 samples
+PASS N0-r1: property == log line == name; yaml timeouts 1ms; no drain line
+PASS N0-r1: no sample has Failed or Slow > N  [(0, 0), (0, 0), (0, 0), (0, 0)]
+PASS N50-r1: property == log line == name; yaml timeouts 1ms; no drain line
+PASS N50-r1: no sample has Failed or Slow > N  [(0, 0), (50, 50), (50, 50), (50, 50)]
+PASS N50-r2: property == log line == name; yaml timeouts 1ms; no drain line
+PASS N50-r2: no sample has Failed or Slow > N  [(0, 0), (50, 50), (50, 50), (50, 50)]
+PASS N5000-r1: property == log line == name; yaml timeouts 1ms; no drain line
+PASS N5000-r1: no sample has Failed or Slow > N  [(0, 0), (1564, 5000), (2346, 5000), (3130, 5000)]
+PASS Nm1-r1: property == log line == name; yaml timeouts 1ms; no drain line
+PASS Nm1-r2: property == log line == name; yaml timeouts 1ms; no drain line
+PASS N=0: zero instances at every sample
+PASS N50-r1: saturated at 50 (Failed and Slow) from 80 s
+PASS N50-r2: saturated at 50 (Failed and Slow) from 80 s
+PASS N=5000: Slow saturated at 5000 from 80 s
+INFO N=5000 Failed (never reaches 5000): [0, 1564, 2346, 3130]
+PASS Nm1-r1: Failed and Slow strictly grow across samples  [(0, 0), (1486, 13796), (2246, 21349), (3148, 29895)]
+PASS Nm1-r1: Slow exceeds 5000 cap by >= 5x; Failed exceeds 50 cap by >= 50x
+INFO Nm1-r1: prediction "Failed > 5000, Slow > 40000 at the end": Failed 3148 (MISSED), Slow 29895 (MISSED)
+PASS Nm1-r2: Failed and Slow strictly grow across samples  [(0, 0), (1620, 16270), (2351, 23400), (3943, 42033)]
+PASS Nm1-r2: Slow exceeds 5000 cap by >= 5x; Failed exceeds 50 cap by >= 50x
+INFO Nm1-r2: prediction "Failed > 5000, Slow > 40000 at the end": Failed 3943 (MISSED), Slow 42033 (met)
+PASS live bytes: N=-1 above N=50 by > 10 MB; N=5000 above N=50 by 2-6 MB  {'N0-r1': 133862816, 'N50-r1': 133348896, 'N50-r2': 133107736, 'N5000-r1': 136993120, 'Nm1-r1': 148246840, 'Nm1-r2': 154122256}
+PASS SinglePartitionReadCommand (pinned) <= Failed+Slow+1024 in every sample
+ALL PASS

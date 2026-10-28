@@ -1,0 +1,64 @@
+LABEL range start 2026-10-27 21:00:09 MDT; harness md5 be1b3059ba31 5db558a3e4ea c33a6ac89bd3 e09e91ca2755 
+KNOB N2 set 0.5 read back 0.5
+REJECT N2 write -0.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R A after rejected writes (N2): write -0.1 on N2 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N2 write 1.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R A after rejected writes (N2): write 1.1 on N2 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N2 write 1.0000001: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R A after rejected writes (N2): write 1.0000001 on N2 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+TRIGGER R A after rejected writes (N2): knob N2 r=0.5 U0=532676608 D=189410 pad=532487198 u_plan=0.4961 | usage {'N1': [(0.00021, 0.0)], 'N2': [(0.4961, 0.5)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=b33b89f0-d27b-11f1-b090-17773e42593c | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-28 03:00:15,544] Repair session b33ebe40-d27b-11f1-b090-17773e42593c for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-28 03:00:15,550] Repair command #14 finished in 0 seconds
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: R r=0.5 A: admitted (two HDR lines admit=true, nodetool rc 0 finished, no Rejecting line) — yes
+EXPECTED: R r=0.5 A: operand u=0.4961 within +/-0.0005 of plan 0.4961 — yes
+KNOB N2 set 0.5 read back 0.5
+REJECT N2 write -0.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R B after rejected writes (N2): write -0.1 on N2 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N2 write 1.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R B after rejected writes (N2): write 1.1 on N2 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N2 write 1.0000001: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R B after rejected writes (N2): write 1.0000001 on N2 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+TRIGGER R B after rejected writes (N2): knob N2 r=0.5 U0=541065216 D=161437 pad=540903779 u_plan=0.50391 | usage {'N1': [(0.00019, 0.0)], 'N2': [(0.50391, 0.5)]} verdict {'N1': [True], 'N2': [False]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=2 id=ba5c2f50-d27b-11f1-b090-17773e42593c | ERROR lines N1 0 N2 1 | not-started lines N1 0 N2 0 | dirs changed False | participates: ba5c2f50-d27b-11f1-b090-17773e42593c |         NONE | Not enough disk headroom to perform repair
+  ERROR N2: [[repair #ba5c2f50-d27b-11f1-b090-17773e42593c]] Rejecting incoming repair, disk usage (50.39%) above threshold (50.00%)
+  nodetool: 83] Repair command #15 failed with error Got negative replies from endpoints [/127.0.0.3:7010] / [2026-10-28 03:00:27,485] Repair command #15 finished with error / error: Repair job has failed with the error message: Repair command #15 failed with error Got negative replies from endpoints [/127.0.0.3:7010]. Check the logs on the repair participants for further details / java.lang.RuntimeException:
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: R r=0.5 B: refused by N2 (participant), verdict lines and nodetool text as 9a — yes
+EXPECTED: R r=0.5 B: one ERROR line on N2 only, "Rejecting incoming repair, disk usage (50.39%) above threshold (50.00%)" — yes
+EXPECTED: R r=0.5 B: ERROR percentages 50.39% / 50.00% as planned (u within 0.0005 of plan) — yes
+EXPECTED: R r=0.5 B: nothing started (no merkle/AEService/stream/snapshot/anticompaction line, table dirs unchanged) — yes
+EXPECTED: R r=0.5 B: operand u=0.50391 within +/-0.0005 of plan 0.50391 — yes
+KNOB N1 set 0.5 read back 0.5
+REJECT N1 write -0.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R A after rejected writes (N1): write -0.1 on N1 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N1 write 1.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R A after rejected writes (N1): write 1.1 on N1 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N1 write 1.0000001: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R A after rejected writes (N1): write 1.0000001 on N1 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+TRIGGER R A after rejected writes (N1): knob N1 r=0.5 U0=532676608 D=199157 pad=532477451 u_plan=0.4961 | usage {'N1': [(0.4961, 0.5)], 'N2': [(0.00018, 0.0)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=c104be80-d27b-11f1-b090-17773e42593c | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-28 03:00:38,674] Repair session c10819e0-d27b-11f1-b090-17773e42593c for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-28 03:00:38,680] Repair command #16 finished in 0 seconds
+KNOB N1 set 0.0 read back 0.0
+EXPECTED: R r=0.5 A: admitted (two HDR lines admit=true, nodetool rc 0 finished, no Rejecting line) — yes
+EXPECTED: R r=0.5 A: operand u=0.4961 within +/-0.0005 of plan 0.4961 — yes
+KNOB N1 set 0.5 read back 0.5
+REJECT N1 write -0.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R B after rejected writes (N1): write -0.1 on N1 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N1 write 1.1: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R B after rejected writes (N1): write 1.1 on N1 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+REJECT N1 write 1.0000001: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | read back 0.5
+EXPECTED: R B after rejected writes (N1): write 1.0000001 on N1 fails with the range text and the ratio stays 0.5 (read 0.5) — yes
+TRIGGER R B after rejected writes (N1): knob N1 r=0.5 U0=541065216 D=209684 pad=540855532 u_plan=0.50391 | usage {'N1': [(0.50391, 0.5)], 'N2': []} verdict {'N1': [False], 'N2': []} callers {'N1': ['coordinator'], 'N2': []} | nodetool rc=2 id=c75c4780-d27b-11f1-b090-17773e42593c | ERROR lines N1 1 N2 0 | not-started lines N1 0 N2 0 | dirs changed False
+  ERROR N1: [[repair #c75c4780-d27b-11f1-b090-17773e42593c]] Rejecting incoming repair, disk usage (50.39%) above threshold (50.00%)
+  nodetool: 85] Repair command #17 failed with error Rejecting incoming repair, disk usage above threshold / [2026-10-28 03:00:49,287] Repair command #17 finished with error / error: Repair job has failed with the error message: Repair command #17 failed with error Rejecting incoming repair, disk usage above threshold. Check the logs on the repair participants for further details / java.lang.RuntimeException:
+KNOB N1 set 0.0 read back 0.0
+EXPECTED: R r=0.5 B: refused by N1 (coordinator), verdict lines and nodetool text as 9a — yes
+EXPECTED: R r=0.5 B: one ERROR line on N1 only, "Rejecting incoming repair, disk usage (50.39%) above threshold (50.00%)" — yes
+EXPECTED: R r=0.5 B: ERROR percentages 50.39% / 50.00% as planned (u within 0.0005 of plan) — yes
+EXPECTED: R r=0.5 B: nothing started (no merkle/AEService/stream/snapshot/anticompaction line, table dirs unchanged) — yes
+EXPECTED: R r=0.5 B: operand u=0.50391 within +/-0.0005 of plan 0.50391 — yes
+KNOB N2 set NaN read back NaN
+TRIGGER R-NaN NaN stored, usage above L(0.5): knob N2 r=NaN U0=541065216 D=179263 pad=540885953 u_plan=0.50391 | usage {'N1': [(0.0002, 0.0)], 'N2': [(0.50391, nan)]} verdict {'N1': [True], 'N2': [True]} callers {'N1': ['coordinator'], 'N2': ['participant']} | nodetool rc=0 id=cc8d78f0-d27b-11f1-b090-17773e42593c | ERROR lines N1 0 N2 0 | not-started lines N1 11 N2 3 | dirs changed False
+  nodetool: [2026-10-28 03:00:58,017] Repair session cc8fc2e0-d27b-11f1-b090-17773e42593c for range [(0,-9223372036854775808], (-9223372036854775808,0]] finished (progress: 57%) / [2026-10-28 03:00:58,022] Repair command #18 finished in 0 seconds
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: R-NaN: JMX accepted NaN and read it back (set_ratio did not fail) — yes
+EXPECTED: R-NaN: repair admitted by both nodes (two admit=true), exit 0, no Rejecting line — yes
+DONE range expected 28/28 yes

@@ -1,0 +1,13 @@
+diff --git a/src/java/org/apache/cassandra/db/SystemKeyspace.java b/src/java/org/apache/cassandra/db/SystemKeyspace.java
+index a7318fb..ecd2c6e 100644
+--- a/src/java/org/apache/cassandra/db/SystemKeyspace.java
++++ b/src/java/org/apache/cassandra/db/SystemKeyspace.java
+@@ -1904,7 +1904,7 @@ public final class SystemKeyspace
+ 
+         // As the cache size may be briefly exceeded before statements are evicted, we allow loading 110% the cache size
+         // to avoid logging early.
+-        long preparedBytesLoadThreshold = (long) (PREPARED_STATEMENT_CACHE_SIZE_BYTES * 1.1);
++        long preparedBytesLoadThreshold = (long) (PREPARED_STATEMENT_CACHE_SIZE_BYTES * 1000.0);
+         long preparedBytesLoaded = 0L;
+         for (UntypedResultSet.Row row : resultSet)
+         {

@@ -1,0 +1,8 @@
+LABEL invalid start 2026-10-27 20:24:32 MDT; harness md5 53b10f09e27e
+FS fresh ext4 loop /users/jason92/s4b-mu/fs.img: size 2040373248 B, avail 2023571456 B
+YAML tail: cluster_name: stage4-msu; data_file_directories: [/users/jason92/s4b-mu/mnt/data]; commitlog_directory: /users/jason92/s4b-mu/commitlog; hints_directory: /users/jason92/s4b-mu/hints; saved_caches_directory: /users/jason92/s4b-mu/saved_caches; cdc_raw_directory: /users/jason92/s4b-mu/cdc_raw; min_free_space_per_drive: 50MiB; autocompaction_on_startup_enabled: false; max_space_usable_for_compactions_in_percentage: 1.5
+INVALID 1.5: node alive after 3 s: False; message in stdout: True; in system.log: True
+INVALID stdout tail: [main] 2026-10-28T02:24:34,557 DatabaseDescriptor.java:662 - Native transport rate-limiting disabled. | WARN  [main] 2026-10-28T02:24:34,560 DatabaseDescriptor.java:727 - Only 1.900GiB free across all data volumes. Consider adding more capacity to your cluster or removing obsolete snapshots | Exception (org.apache.cassandra.exceptions.ConfigurationException) encountered during startup: max_space_usable_for_compactions_in_percentage must be between 0 and 1 | max_space_usable_for_compactions_in_percentage must be between 0 and 1 | ERROR [main] 2026-10-28T02:24:34,823 CassandraDaemon.java:887 - Exception encountered during startup: max_space_usable_for_compactions_in_percentage must be between 0 and 1 | 
+EXPECTED: 1.5: node refuses to start (process gone) with the line-1017 message - yes
+INVALID free space on the data fs unchanged by the failed start: used 28672 B
+DONE invalid expected 1/1 yes

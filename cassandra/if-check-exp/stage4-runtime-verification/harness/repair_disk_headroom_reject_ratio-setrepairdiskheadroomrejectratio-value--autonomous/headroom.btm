@@ -1,0 +1,41 @@
+# Byteman observation rules for repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio (case 9c/9d).
+# No behaviour change. One file per node, named by -Dstage4.trace:
+#   HDR caller=coordinator|participant ms=<epoch>                     before each call of the check (prepareForRepair / doVerb)
+#   HDR usage session=<parent id> usage=<getDiskUsage()> ratio=<knob> ms=<epoch>   the operand the check just read
+#   HDR verdict session=<parent id> admit=<true|false> ms=<epoch>     the check's return value
+
+RULE hdr caller coordinator
+CLASS org.apache.cassandra.service.ActiveRepairService
+METHOD prepareForRepair
+AT INVOKE verifyDiskHeadroomThreshold
+IF true
+DO traceOpen("hdr", java.lang.System.getProperty("stage4.trace", "hdr.trace"));
+   traceln("hdr", "HDR caller=coordinator ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hdr caller participant
+CLASS org.apache.cassandra.repair.RepairMessageVerbHandler
+METHOD doVerb
+AT INVOKE verifyDiskHeadroomThreshold
+IF true
+DO traceOpen("hdr", java.lang.System.getProperty("stage4.trace", "hdr.trace"));
+   traceln("hdr", "HDR caller=participant ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hdr usage
+CLASS org.apache.cassandra.service.ActiveRepairService
+METHOD verifyDiskHeadroomThreshold
+AFTER INVOKE getDiskUsage
+IF true
+DO traceOpen("hdr", java.lang.System.getProperty("stage4.trace", "hdr.trace"));
+   traceln("hdr", "HDR usage session=" + $1 + " usage=" + $! + " ratio=" + org.apache.cassandra.config.DatabaseDescriptor.getRepairDiskHeadroomRejectRatio() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hdr verdict
+CLASS org.apache.cassandra.service.ActiveRepairService
+METHOD verifyDiskHeadroomThreshold
+AT EXIT
+IF true
+DO traceOpen("hdr", java.lang.System.getProperty("stage4.trace", "hdr.trace"));
+   traceln("hdr", "HDR verdict session=" + $1 + " admit=" + $! + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

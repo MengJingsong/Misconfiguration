@@ -1,0 +1,12 @@
+SETUP arm M: partitioner org.apache.cassandra.dht.Murmur3Partitioner, tokens {'N1': '-9223372036854775808', 'N2': '0'}, rows 1048576
+# ---- stage4 rss lines ----;cluster_name: stage4-rss;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: -9223372036854775808;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.2;rpc_address: 127.0.0.2;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/s4b-rss/N1/data;commitlog_directory: /users/jason92/s4b-rss/N1/commitlog;hints_directory: /users/jason92/s4b-rss/N1/hints;saved_caches_directory: /users/jason92/s4b-rss/N1/saved_
+N1 up: statusbinary running, UN ['127.0.0.2'] after 18 s
+# ---- stage4 rss lines ----;cluster_name: stage4-rss;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: 0;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/s4b-rss/N2/data;commitlog_directory: /users/jason92/s4b-rss/N2/commitlog;hints_directory: /users/jason92/s4b-rss/N2/hints;saved_caches_directory: /users/jason92/s4b-rss/N2/saved_caches;cdc_raw_dire
+N2 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 23 s
+N1 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 2 s
+SCHEMA keyspace1 RF 2, standard1 with autocompaction disabled
+STRESS n=1048576: partitions 1,048,576, errors 0
+SSTABLES N1: 3 Data.db files
+SSTABLES N2: 3 Data.db files
+DEFAULT repair_session_space read back {'N1': 128, 'N2': 128} (expected 128 at -Xmx2G, G1)
+EXPECTED: default repair_session_space = 128 MiB on both nodes — yes

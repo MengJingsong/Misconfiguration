@@ -28,6 +28,26 @@
 
 ### B2. Unit tier
 
+> **Amendment 2026-10-27 (stage-4 audit, before any accepted run; node pc29; none of it depends on a reading of the prediction).**
+> *Audit findings.* (1) B2a/B3a say `ant jar`; the unit tier needs `ant build-test` (tests compile against the test classpath); copy `~/s4-base` is built with it. (2) `MonitoringTask.make(int,int)`, `addFailedOperation` and the queues are package-private/private, so the test class must sit in `org.apache.cassandra.db.monitoring`; the queue sizes are read by reflection and the instance counts from `GC.class_histogram` (DiagnosticCommand MBean, forces a full GC). (3) The literal `0` at line 221 cannot be varied alone; it is exercised by N = 0 against N = 1 (same property, one step apart), so no patched copy is needed. (4) Citations `MonitoringTask.java:65, 77, 96-99, 194, 209-210, 219-226, 235`, `MonitorableImpl.java:101, 115`, `CassandraRelevantProperties.java:361, 363` match the pinned source. (5) B3c's "unique 2 KiB IN-lists" is irrelevant: an Operation pins the `ReadCommand`, and the CQL text is built only when the queue is drained (`name()`); the workload only has to make point reads cross the read or slow timeout while iterating rows (the cancellation check runs in `applyToRow`, `ReadCommand.java:770-790`; reads of absent partitions never reach it). (6) B3c/B3f sizes ("tens of MiB", "hundreds of MiB") do not follow from the reachable rate; replaced below.
+> *B2 additions.* Test class `MonitoringQueueCapTest` (harness folder). M = 10000 adds to **each** of the two queues (so totals are twice the per-queue figures); N = 0, 1, 50, 1000, -1 in turn in one JVM per repetition, 3 repetitions; an extra run with M = 100000 and N = 50, 1000, -1 (the cap must not move with M). Stub `Monitorable` = `MonitorableImpl` subclass with a unique name and a 1 KiB `byte[]`. Predictions B2f are per queue: N = 0: 0 / 0 instances; N = 1: 1; N = 50: 50; N = 1000: 1000; N = -1: M; `droppedFailed = droppedSlow = M - N` for N > 0 and 0 for N <= 0; instance counts of the Operation classes and of the stub class equal (each Operation pins its stub). Live heap after GC grows by about `2 x N x 1.2 KiB` (stub 1 KiB payload plus object overhead), read in shape.
+> *B3 replacement of a-e (sizes from a 30 s calibration probe on 2026-10-27 before the freeze: 5.5 M point reads at 256 threads gave 517 failed and 5259 slow operations at N = -1; 1024 threads gave about 36 failed/s and 300 slow/s).*
+> *B3a.* Tree `~/s4-base` (`bin/cassandra`), one node on loopback, `MAX_HEAP_SIZE=1G`, data under `~/s4-mon`, never under `/proj`. Data: `cassandra-stress write n=200000` with the shipped timeouts, drained, copied; every measured start restores a fresh copy. Measured starts use `read_request_timeout: 1ms` and `slow_query_log_timeout: 1ms` in yaml and `JVM_EXTRA_OPTS=-Dcassandra.monitoring_max_operations=N -Dcassandra.monitoring_report_interval_ms=600000` (read back from `/proc/<pid>/cmdline` and the `Scheduling monitoring task ... max operations N` log line).
+> *B3b.* N = 0, 50, 5000, -1 (one start each); a second start of N = 50 and N = -1 for repetition.
+> *B3c.* `cassandra-stress read duration=240s cl=ONE no-warmup -pop "dist=UNIFORM(1..200000)" -rate threads=1024 -errors ignore` (the population matches the seeded rows). The report interval of 600000 ms keeps the drain out of the 240 s window (the log must show no `Some operations timed out` / `were slow` line).
+> *B3d.* `jmap -histo:live` (full GC) at baseline, 80 s, 160 s and after the stress (about 243 s): instance count and shallow bytes of `MonitoringTask$FailedOperation`, `MonitoringTask$SlowOperation`, `SinglePartitionReadCommand` (the pinned object), total live bytes; JMX `ClientRequest/Read/Timeouts`. Not observable: how many operations were offered (N = -1 shows the offered count; the others show it only through saturation at N).
+> *B3f.* Per queue: N = 0: 0 Failed and 0 Slow instances at every sample. N = 50: Slow = 50 from the 80 s sample on and Failed = 50 from the 80 s sample on (36 failed/s offered), never above 50. N = 5000: Slow reaches 5000 by 80 s and stays at 5000; Failed rises towards 5000 (offered about 8700 in 240 s) and never exceeds 5000. N = -1: Failed and Slow keep growing across the four samples, Failed above 5000 and Slow above 40,000 at the end. `SinglePartitionReadCommand` instances at the end are at most `FailedOperation + SlowOperation + in-flight reads` (in-flight up to the 1024 client threads) for every N, and total live bytes at N = -1 exceed N = 50 by the extra instances' bytes (about 0.1 to 1 KB each, i.e. a few MB; no "hundreds of MiB").
+> *B3g additions.*
+>
+> | Observation | Meaning |
+> |---|---|
+> | Failed or Slow instances > N at any sample for N >= 0 | Claim wrong |
+> | N = 0 shows any Failed or Slow instance | Claim wrong |
+> | A saturated cell (instances == N) for N = 50 and 5000 in the Slow queue, N = -1 growing past 5000 / 40,000 | Claim confirmed (caps, N = -1 is the uncapped control) |
+> | Failed at N = 5000 below 5000 at the end | That queue's limit not reached; Slow queue still decides, the Failed row is "not reached" |
+> | A drain line in the log before the last sample | Invalid start (queues emptied) |
+
+
 **B2a. Environment and build.** JDK 11, Ant, a private copy of the tag (`ant jar` in the copy, not the shared tree). Test source: a new JUnit class beside `MonitoringTaskTest` in the private copy; `MonitoringTask.make(int, int)` (line 77, `@VisibleForTesting`) and package-private `addFailedOperation` let the test pick N directly without the JVM property. Use a very long report interval (e.g. 3600000 ms) so the task does not drain during the run.
 
 **B2b. Knobs.** `maxTimedoutOperations` passed to `make`: 0, 1, 50 (default), 1000, -1. Chosen as disabled, minimal, default, large, unbounded.
@@ -89,4 +109,9 @@
 
 ## D. Stage-4 feedback
 
-`none yet`
+**2026-10-28, stage 4 (results: `stage4-runtime-verification/results/monitoring_max_operations-operationsqueue_offer-maxoperations--autonomous.md`).** Frozen sha256 before the accepted runs `12b563da…3c04`; amendments of 2026-10-27 at B2 (same-package test, `ant build-test`, both queues, M values) and B3 (workload that reaches the queue, instance-count predictions).
+
+- **Unit and cluster: Confirmed, Effect `caps`; outcome class true positive.** Unit: exactly N Operations per queue for N = 1, 50, 1000, 0 for N = 0, M for N = -1, with dropped = M - N; unchanged when offers rise tenfold. Cluster (one node, 1 ms read and slow timeouts, 240 s stress): N = 0 none; N = 50 saturates both queues at 50 (two repetitions); N = 5000 saturates the Slow queue at 5000; N = -1 reaches 29,895 and 42,033 Slow and 3148 and 3943 Failed and holds 15 to 21 MB more heap.
+- Misses: the Failed queue at N = 5000 did not fill (3130), and N = -1 ended below the predicted 5000 Failed (both runs) and 40,000 Slow (one run); the offered Failed rate under this workload is about 13 to 16 per second, a third of the 30 s calibration. The cap itself was never exceeded.
+- For stage 3: an Operation is created on every abort/slow completion by the caller before `offer`, and reads of absent partitions never trigger the cancellation check; a workload has to iterate rows. Bytes were read from live-heap totals, not attributed by a dump.
+

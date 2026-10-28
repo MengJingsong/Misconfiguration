@@ -1,0 +1,13 @@
+# cassandra-stress user profile (case B3c): one partition per insert, random 2000-byte blob key, 1-byte value, durable_writes = false.
+# The table is created by cluster-run.sh (memtable = 'trie' or 'skiplist'); this profile only describes the rows to insert.
+keyspace: ks
+table: t
+columnspec:
+  - name: k
+    size: fixed(2000)
+  - name: v
+    size: fixed(1)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries: {}

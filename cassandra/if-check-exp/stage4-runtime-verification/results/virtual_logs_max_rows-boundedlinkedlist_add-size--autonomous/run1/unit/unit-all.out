@@ -1,0 +1,251 @@
+== cap-len200 mode=cap args=-Dprobe.sizes=1000,5000,50000,100000 -Dprobe.len=200 -Dprobe.extra=5000 2026-10-28T02:33:18Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=cap -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/cap-len200.out -Dprobe.sizes=1000,5000,50000,100000 -Dprobe.len=200 -Dprobe.extra=5000 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/cap-len200.log
++ tail -15
++ grep -v '^PROBE'
+02:33:20.159 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:20.171 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+02:33:20.375 [main] DEBUG org.apache.cassandra.db.memtable.AbstractAllocatorMemtable -- Memtables allocating with on-heap slabs
+02:33:20.393 [main] INFO org.apache.cassandra.utils.MonotonicClock$AbstractEpochSamplingClock -- Scheduling approximate time conversion task with an interval of 10000 milliseconds
+02:33:20.394 [main] INFO org.apache.cassandra.utils.MonotonicClock$SampledClock -- Scheduling approximate time-check task with a precision of 2 milliseconds
+02:33:21.229 [main] INFO org.apache.cassandra.db.memtable.SkipListMemtable -- Estimated SkipListMemtable row overhead: 172
+02:33:21.246 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 1000 rows
+02:33:21.732 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 5000 rows
+02:33:22.189 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 50000 rows
+02:33:22.999 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 100000 rows
+
+Time: 5.096
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:23Z
+== cap-len2000 mode=cap args=-Dprobe.sizes=100000 -Dprobe.len=2000 -Dprobe.extra=5000 2026-10-28T02:33:23Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=cap -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/cap-len2000.out -Dprobe.sizes=100000 -Dprobe.len=2000 -Dprobe.extra=5000 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/cap-len2000.log
++ grep -v '^PROBE'
++ tail -15
+02:33:25.287 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:25.287 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:25.443 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:25.585 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:25.596 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+02:33:25.832 [main] DEBUG org.apache.cassandra.db.memtable.AbstractAllocatorMemtable -- Memtables allocating with on-heap slabs
+02:33:25.853 [main] INFO org.apache.cassandra.utils.MonotonicClock$AbstractEpochSamplingClock -- Scheduling approximate time conversion task with an interval of 10000 milliseconds
+02:33:25.854 [main] INFO org.apache.cassandra.utils.MonotonicClock$SampledClock -- Scheduling approximate time-check task with a precision of 2 milliseconds
+02:33:26.680 [main] INFO org.apache.cassandra.db.memtable.SkipListMemtable -- Estimated SkipListMemtable row overhead: 172
+02:33:26.699 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 100000 rows
+
+Time: 4.356
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:28Z
+== cap-adds-lt-size mode=cap args=-Dprobe.sizes=100000 -Dprobe.len=200 -Dprobe.extra=-99400 2026-10-28T02:33:28Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=cap -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/cap-adds-lt-size.out -Dprobe.sizes=100000 -Dprobe.len=200 -Dprobe.extra=-99400 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/cap-adds-lt-size.log
++ grep -v '^PROBE'
++ tail -15
+02:33:29.971 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:29.971 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:30.130 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:30.287 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:30.298 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+02:33:30.515 [main] DEBUG org.apache.cassandra.db.memtable.AbstractAllocatorMemtable -- Memtables allocating with on-heap slabs
+02:33:30.533 [main] INFO org.apache.cassandra.utils.MonotonicClock$AbstractEpochSamplingClock -- Scheduling approximate time conversion task with an interval of 10000 milliseconds
+02:33:30.534 [main] INFO org.apache.cassandra.utils.MonotonicClock$SampledClock -- Scheduling approximate time-check task with a precision of 2 milliseconds
+02:33:31.359 [main] INFO org.apache.cassandra.db.memtable.SkipListMemtable -- Estimated SkipListMemtable row overhead: 172
+02:33:31.376 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 100000 rows
+
+Time: 2.835
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:31Z
+== cap-50x mode=cap args=-Dprobe.sizes=1000 -Dprobe.len=200 -Dprobe.mult=50 2026-10-28T02:33:31Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=cap -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/cap-50x.out -Dprobe.sizes=1000 -Dprobe.len=200 -Dprobe.mult=50 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/cap-50x.log
++ grep -v '^PROBE'
++ tail -15
+02:33:33.152 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:33.152 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:33.310 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:33.463 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:33.473 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+02:33:33.699 [main] DEBUG org.apache.cassandra.db.memtable.AbstractAllocatorMemtable -- Memtables allocating with on-heap slabs
+02:33:33.719 [main] INFO org.apache.cassandra.utils.MonotonicClock$AbstractEpochSamplingClock -- Scheduling approximate time conversion task with an interval of 10000 milliseconds
+02:33:33.720 [main] INFO org.apache.cassandra.utils.MonotonicClock$SampledClock -- Scheduling approximate time-check task with a precision of 2 milliseconds
+02:33:34.548 [main] INFO org.apache.cassandra.db.memtable.SkipListMemtable -- Estimated SkipListMemtable row overhead: 172
+02:33:34.566 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 1000 rows
+
+Time: 3.003
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:35Z
+== mt8 mode=mt args=-Dprobe.sizes=1000 -Dprobe.per=200000 2026-10-28T02:33:35Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=mt -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/mt8.out -Dprobe.sizes=1000 -Dprobe.per=200000 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/mt8.log
++ grep -v '^PROBE'
++ tail -15
+02:33:36.516 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:36.516 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:36.677 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:36.843 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:36.854 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+02:33:36.907 [main] DEBUG org.apache.cassandra.db.memtable.AbstractAllocatorMemtable -- Memtables allocating with on-heap slabs
+02:33:36.921 [main] INFO org.apache.cassandra.utils.MonotonicClock$AbstractEpochSamplingClock -- Scheduling approximate time conversion task with an interval of 10000 milliseconds
+02:33:36.922 [main] INFO org.apache.cassandra.utils.MonotonicClock$SampledClock -- Scheduling approximate time-check task with a precision of 2 milliseconds
+02:33:37.682 [main] INFO org.apache.cassandra.db.memtable.SkipListMemtable -- Estimated SkipListMemtable row overhead: 172
+02:33:37.699 [main] DEBUG org.apache.cassandra.db.virtual.LogMessagesTable -- capacity of virtual table system_views.system_logs is set to be at most 1000 rows
+
+Time: 3.573
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:38Z
+== resolve-inproc mode=resolve args=-Dprobe.props=unset,999,1000,1001,50000,50001,100000,100001,0,-1 2026-10-28T02:33:38Z
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/resolve-inproc.log
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=resolve -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/resolve-inproc.out -Dprobe.props=unset,999,1000,1001,50000,50001,100000,100001,0,-1 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ grep -v '^PROBE'
++ tail -15
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:40.405 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:40.564 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:40.682 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:40.694 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+
+Time: 1.523
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:40Z
+== resolve-D-unset mode=resolve args= 2026-10-28T02:33:40Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=resolve -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/resolve-D-unset.out -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/resolve-D-unset.log
++ grep -v '^PROBE'
++ tail -15
+02:33:42.291 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+02:33:42.291 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:42.291 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:42.291 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:42.291 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:42.292 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:42.292 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:42.457 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:42.608 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:42.620 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+
+Time: 1.573
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:42Z
+== resolve-D-999 mode=resolve args=-Dcassandra.virtual.logs.max.rows=999 2026-10-28T02:33:42Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=resolve -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/resolve-D-999.out -Dcassandra.virtual.logs.max.rows=999 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/resolve-D-999.log
++ grep -v '^PROBE'
++ tail -15
+02:33:44.187 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+02:33:44.187 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:44.188 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:44.188 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:44.188 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:44.188 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:44.188 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:44.349 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:44.495 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:44.505 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+
+Time: 1.542
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:44Z
+== resolve-D-1000 mode=resolve args=-Dcassandra.virtual.logs.max.rows=1000 2026-10-28T02:33:44Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=resolve -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/resolve-D-1000.out -Dcassandra.virtual.logs.max.rows=1000 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/resolve-D-1000.log
++ grep -v '^PROBE'
++ tail -15
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:46.077 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:46.235 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:46.395 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:46.406 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+
+Time: 1.581
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:46Z
+== resolve-D-100000 mode=resolve args=-Dcassandra.virtual.logs.max.rows=100000 2026-10-28T02:33:46Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=resolve -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/resolve-D-100000.out -Dcassandra.virtual.logs.max.rows=100000 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/resolve-D-100000.log
++ grep -v '^PROBE'
++ tail -15
+02:33:47.945 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+02:33:47.945 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:47.945 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:47.945 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:47.945 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:47.946 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:47.946 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:48.104 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:48.263 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:48.274 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+
+Time: 1.558
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:48Z
+== resolve-D-100001 mode=resolve args=-Dcassandra.virtual.logs.max.rows=100001 2026-10-28T02:33:48Z
++ java @/users/jason92/stage4-logs/vlr/run1/unit/jvm11-opens.args -Xmx1g -Dprobe.mode=resolve -Dprobe.out=/users/jason92/stage4-logs/vlr/run1/unit/resolve-D-100001.out -Dcassandra.virtual.logs.max.rows=100001 -Dcassandra.config=file:///users/jason92/c4-vlr/conf/cassandra.yaml -Dcassandra.storagedir=/users/jason92/stage4-tmp/vlr -cp '/users/jason92/c4-vlr/build/test/classes:/users/jason92/c4-vlr/build/classes/main:/users/jason92/c4-vlr/build/classes/thrift:/users/jason92/c4-vlr/build/classes/stress:/users/jason92/c4-vlr/build/lib/jars/*:/users/jason92/c4-vlr/build/test/lib/jars/*:/users/jason92/c4-vlr/lib/*' org.junit.runner.JUnitCore org.apache.cassandra.db.virtual.VirtualLogsMaxRowsProbeTest
++ tee -a /users/jason92/stage4-logs/vlr/run1/unit/resolve-D-100001.log
++ grep -v '^PROBE'
++ tail -15
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_128_CBC_SHA => PSK-AES128-CBC-SHA
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_RSA_WITH_AES_256_CBC_SHA => AES256-SHA
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: TLS_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.CipherSuiteConverter -- Cipher suite mapping: SSL_PSK_WITH_AES_256_CBC_SHA => PSK-AES256-CBC-SHA
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Supported protocols (OpenSSL): [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3] 
+02:33:49.896 [main] DEBUG io.netty.handler.ssl.OpenSsl -- Default cipher suites (OpenSSL): [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_CBC_SHA, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+02:33:50.068 [main] DEBUG org.apache.cassandra.config.YamlConfigurationLoader -- Loading settings from file:/users/jason92/c4-vlr/conf/cassandra.yaml
+02:33:50.241 [main] DEBUG org.apache.cassandra.locator.SimpleSeedProvider -- Only resolving one IP per DNS record - 127.0.0.1:7000 resolves to /127.0.0.1:7000
+02:33:50.251 [main] DEBUG org.apache.cassandra.security.SSLFactory -- Initializing hot reloading SSLContext
+
+Time: 1.645
+
+OK (1 test)
+
++ set +x
+== exit 0 2026-10-28T02:33:50Z
+== unit tier done
+RESULT size=1000 len=200 adds=50000 dataRows=1000 bufferSize=1000 logMessageInstances=1000 LogMessagesTable$LogMessageInst=1000 LogMessagesTable$LogMessageBytes=32000 LinkedList$NodeInst=1001 LinkedList$NodeBytes=24024 StringInst=5881 StringBytes=141144 [BInst=5924 [BBytes=484824 sumBytes=681992 bytesPerRow=681 heapUsedDelta=1962216
+RESULT size=100000 len=200 adds=600 dataRows=600 bufferSize=600 logMessageInstances=600 LogMessagesTable$LogMessageInst=600 LogMessagesTable$LogMessageBytes=19200 LinkedList$NodeInst=601 LinkedList$NodeBytes=14424 StringInst=5464 StringBytes=131136 [BInst=5507 [BBytes=397208 sumBytes=561968 bytesPerRow=936 heapUsedDelta=1844680
+RESULT size=100000 len=2000 adds=105000 dataRows=100000 bufferSize=100000 logMessageInstances=100000 LogMessagesTable$LogMessageInst=100000 LogMessagesTable$LogMessageBytes=3200000 LinkedList$NodeInst=100001 LinkedList$NodeBytes=2400024 StringInst=104945 StringBytes=2518680 [BInst=104988 [BBytes=201872568 sumBytes=209991272 bytesPerRow=2099 heapUsedDelta=211266240
+RESULT size=1000 len=200 adds=6000 dataRows=1000 bufferSize=1000 logMessageInstances=1000 LogMessagesTable$LogMessageInst=1000 LogMessagesTable$LogMessageBytes=32000 LinkedList$NodeInst=1001 LinkedList$NodeBytes=24024 StringInst=5875 StringBytes=141000 [BInst=5918 [BBytes=484352 sumBytes=681376 bytesPerRow=681 heapUsedDelta=1961024
+RESULT size=5000 len=200 adds=10000 dataRows=5000 bufferSize=5000 logMessageInstances=5000 LogMessagesTable$LogMessageInst=5000 LogMessagesTable$LogMessageBytes=160000 LinkedList$NodeInst=5000 LinkedList$NodeBytes=120000 StringInst=7154 StringBytes=171696 [BInst=7154 [BBytes=1218720 sumBytes=1670416 bytesPerRow=334 heapUsedDelta=1822576
+RESULT size=50000 len=200 adds=55000 dataRows=50000 bufferSize=50000 logMessageInstances=50000 LogMessagesTable$LogMessageInst=50000 LogMessagesTable$LogMessageBytes=1600000 LinkedList$NodeInst=50000 LinkedList$NodeBytes=1200000 StringInst=52118 StringBytes=1250832 [BInst=52118 [BBytes=10936240 sumBytes=14987072 bytesPerRow=299 heapUsedDelta=15139264
+RESULT size=100000 len=200 adds=105000 dataRows=100000 bufferSize=100000 logMessageInstances=100000 LogMessagesTable$LogMessageInst=100000 LogMessagesTable$LogMessageBytes=3200000 LinkedList$NodeInst=100000 LinkedList$NodeBytes=2400000 StringInst=102098 StringBytes=2450352 [BInst=102098 [BBytes=21735296 sumBytes=29785648 bytesPerRow=297 heapUsedDelta=30024816
+RESULT mt size=1000 threads=8 addsPerThread=200000 totalAdds=1600000 finalBufferSize=1000 maxSampledBufferSize=1000 dataRows=1000

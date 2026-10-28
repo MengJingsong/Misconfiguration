@@ -1,0 +1,14 @@
+LABEL valid start 2026-10-27 21:01:00 MDT; harness md5 be1b3059ba31 5db558a3e4ea c33a6ac89bd3 e09e91ca2755 
+# ---- stage4 hdr lines ----;cluster_name: stage4-hdr;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: 0;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/s4b-hdr/N2/data;commitlog_directory: /users/jason92/s4b-hdr/N2/commitlog;hints_directory: /users/jason92/s4b-hdr/N2/hints;saved_caches_directory: /users/jason92/s4b-hdr/N2/saved_caches;cdc_raw_directory: /users/jason92/s4b-hdr/N2/cdc_raw;data_disk_usage_max_disk_size: 1073741824B;hinted_handoff_e
+N2 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 18 s
+EXPECTED: V: node 2 started with yaml 1.5; JMX reads 1.5 — yes
+V repair: rc=2 N2 ERROR ['[[repair #e2bbb9c0-d27b-11f1-b090-17773e42593c]] Rejecting incoming repair, disk usage (0.03%) above threshold (-50.00%)']
+EXPECTED: V: repair with no pad refused by node 2, threshold printed (-50.00%) — yes
+V JMX write 1.5: SETFAIL | RuntimeMBeanException: java.lang.IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio | IllegalArgumentException: Value must be >= 0 and <= 1 for repair_disk_headroom_reject_ratio
+EXPECTED: V: JMX write of 1.5 fails with the range text — yes
+KNOB N2 set 0.0 read back 0.0
+EXPECTED: V: after a JMX write of 0.0 the repair is admitted — yes
+# ---- stage4 hdr lines ----;cluster_name: stage4-hdr;partitioner: org.apache.cassandra.dht.Murmur3Partitioner;num_tokens: 1;initial_token: 0;auto_bootstrap: false;storage_port: 7010;listen_address: 127.0.0.3;rpc_address: 127.0.0.3;seed_provider:;  - class_name: org.apache.cassandra.locator.SimpleSeedProvider;    parameters:;      - seeds: "127.0.0.2:7010";data_file_directories:;    - /users/jason92/s4b-hdr/N2/data;commitlog_directory: /users/jason92/s4b-hdr/N2/commitlog;hints_directory: /users/jason92/s4b-hdr/N2/hints;saved_caches_directory: /users/jason92/s4b-hdr/N2/saved_caches;cdc_raw_directory: /users/jason92/s4b-hdr/N2/cdc_raw;data_disk_usage_max_disk_size: 1073741824B;hinted_handoff_e
+N2 up: statusbinary running, UN ['127.0.0.3', '127.0.0.2'] after 18 s
+EXPECTED: V: node 2 restarted without the yaml line reads 0.0 — yes
+DONE valid expected 5/5 yes

@@ -1,0 +1,36 @@
+RESULT PASS N1 five setCapacity calls recorded 5
+RESULT PASS N1 setCapacity(0) no exception none
+RESULT PASS N1 capacity() == 0 after setCapacity(0) 0
+RESULT PASS N1 setCapacity(1048576) throws UnsupportedOperationException "not permitted as this cache is disabled" java.lang.UnsupportedOperationException:Setting capacity of NopCache is not permitted as t
+RESULT PASS N1 capacity() == 0 after setCapacity(1048576) 0
+RESULT PASS N1 setCapacity(67108864) throws UnsupportedOperationException "not permitted as this cache is disabled" java.lang.UnsupportedOperationException:Setting capacity of NopCache is not permitted as t
+RESULT PASS N1 capacity() == 0 after setCapacity(67108864) 0
+RESULT PASS N1 setCapacity(-1) throws UnsupportedOperationException "not permitted as this cache is disabled" java.lang.UnsupportedOperationException:Setting capacity of NopCache is not permitted as t
+RESULT PASS N1 capacity() == 0 after setCapacity(-1) 0
+RESULT PASS N1 setCapacity(9223372036854775807) throws UnsupportedOperationException "not permitted as this cache is disabled" java.lang.UnsupportedOperationException:Setting capacity of NopCache is not permitted as t
+RESULT PASS N1 capacity() == 0 after setCapacity(9223372036854775807) 0
+RESULT PASS N1 after 2,000,000 puts size == 0 and weightedSize == 0 size=0 weighted=0
+RESULT PASS N1 putIfAbsent/replace false and get null every time {'putIfAbsentTrue': '0', 'replaceTrue': '0', 'getNonNull': '0'}
+RESULT PASS N1 heap delta < 8 MiB and RssAnon delta < 4 MiB heap=-2498232 rss=-4001792
+RESULT PASS N2 wrapper setCapacity(0) none
+RESULT PASS N2 wrapper getCapacity() == 0 0
+RESULT PASS N2 wrapper setCapacity(67108864) java.lang.UnsupportedOperationException:Setting capacity of NopCache is not perm
+RESULT PASS N2 wrapper getCapacity() == 0 0
+RESULT PASS N3 control is the OHC row cache at 16 MiB {'class': 'AutoSavingCache', 'capacityAtStart': '16777216'}
+RESULT PASS N3 phase A weightedSize <= capacity at every report ['5879969', '11759969', '16774464', '16774464', '16774433', '16774433', '16774464', '16774464']
+RESULT PASS N3 phase A ends >= 14 MiB 16774464
+RESULT PASS N3 setRowCacheCapacityInMB(32) succeeds, capacity 32 MiB N3 setRowCacheCapacityInMB(32) exception=none capacityAfter=33554432
+RESULT PASS N3 phase B weightedSize in (16 MiB, 32 MiB] ['23519969', '23519969']
+RESULT PASS N3 RssAnon growth at end >= 80%% of weightedSize rss=84348928 weighted=23519969
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '5000', 'capacity': '16777216', 'size': '5000', 'weightedSize': '5879969', 'rssAnonDelta': '41152512'}
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '10000', 'capacity': '16777216', 'size': '10000', 'weightedSize': '11759969', 'rssAnonDelta': '47693824'}
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '15000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '67735552'}
+INFO N3 {'phase': 'A', 'pass': '1', 'reads': '20000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '68333568'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '5000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774433', 'rssAnonDelta': '70508544'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '10000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774433', 'rssAnonDelta': '71237632'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '15000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '71426048'}
+INFO N3 {'phase': 'A', 'pass': '2', 'reads': '20000', 'capacity': '16777216', 'size': '14264', 'weightedSize': '16774464', 'rssAnonDelta': '73715712'}
+INFO N3 {'phase': 'B', 'pass': '1', 'capacity': '33554432', 'size': '20000', 'weightedSize': '23519969', 'rssAnonDelta': '83701760'}
+INFO N3 {'phase': 'B', 'pass': '2', 'capacity': '33554432', 'size': '20000', 'weightedSize': '23519969', 'rssAnonDelta': '84348928'}
+
+FAILED CHECKS (0): []

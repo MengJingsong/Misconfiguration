@@ -1,0 +1,29 @@
+== c64 knob=64 n=240000 alloc=offheap_buffers shards=1 memtable=skiplist start 1793189986849
+daemons before: 0
+node conf /users/jason92/stage4-ros/node/conf: alloc offheap_buffers cleanup 0.99
+JVM_EXTRA_OPTS=-XX:MaxDirectMemorySize=10g -XX:NativeMemoryTracking=summary -Dcassandra.memtable.shard.count=1 -Dcassandra.memtable.row_overhead_size=64 MAX_HEAP_SIZE=16G
+node up 1793190033236: running
+pid 844819
+-XX:MaxDirectMemorySize=10737418240
+-XX:MaxHeapSize=17179869184
+-Xmx16G
+-Dcassandra.memtable.shard.count=1
+-Dcassandra.memtable.row_overhead_size=64
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'skiplist'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+workload start 1793190040841
+workload end 1793190052172 rc=0
+daemons left: 0
+== c64 end 1793190089396

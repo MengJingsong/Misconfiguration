@@ -1,0 +1,178 @@
+[2026-10-28T06:04:30-0600] === arm A row_cache_size 0 MiB
+[2026-10-28T06:04:30-0600] + bin/cassandra -p /users/jason92/s4-cc/ncnode/cassandra.pid row_cache_size 0
+[2026-10-28T06:05:41-0600] node up, pid 810325
+[2026-10-28T06:05:41-0600] + grep -h 'row cache' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 3
+[2026-10-28T06:05:41-0600]   exit 0 in 0.0s
+[2026-10-28T06:05:41-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T12:04:35,843 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+[2026-10-28T06:05:42-0600] t0 {'t_ms': 1793189142404, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2757722112, 'phase': 't0'}
+[2026-10-28T06:05:42-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(insert=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:05:53-0600]   exit 0 in 10.2s
+[2026-10-28T06:05:53-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 flush ks t
+[2026-10-28T06:05:55-0600] 
+[2026-10-28T06:05:55-0600]   exit 0 in 2.0s
+[2026-10-28T06:05:55-0600] after-load {'t_ms': 1793189155254, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2891108352, 'phase': 'after-load'}
+[2026-10-28T06:05:55-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 tablestats ks.t
+[2026-10-28T06:05:56-0600]   exit 0 in 1.2s
+[2026-10-28T06:05:56-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:05:58-0600]   exit 0 in 1.3s
+[2026-10-28T06:05:58-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:06:08-0600] stress pass1 exit 0 after 11s
+[2026-10-28T06:06:09-0600] end-pass1 {'t_ms': 1793189169086, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2926370816, 'phase': 'end-pass1'}
+[2026-10-28T06:06:09-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:06:20-0600] stress pass2 exit 0 after 11s
+[2026-10-28T06:06:20-0600] end-pass2 {'t_ms': 1793189180512, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2923438080, 'phase': 'end-pass2'}
+[2026-10-28T06:06:20-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 setcachecapacity 0 64 0
+[2026-10-28T06:06:22-0600]   exit 2 in 1.1s
+[2026-10-28T06:06:22-0600] setcachecapacity ['0', '64', '0'] exit 2 cp.TCPTransport$ConnectionHandler.run(TCPTransport.java:676)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+[2026-10-28T06:06:22-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:06:23-0600]   exit 0 in 1.3s
+[2026-10-28T06:06:23-0600] after-req64 {'t_ms': 1793189183542, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2923155456, 'phase': 'after-req64'}
+[2026-10-28T06:06:23-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 setcachecapacity 0 0 0
+[2026-10-28T06:06:25-0600]   exit 0 in 1.1s
+[2026-10-28T06:06:25-0600] setcachecapacity ['0', '0', '0'] exit 0 
+[2026-10-28T06:06:25-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:06:35-0600] stress pass3 exit 0 after 11s
+[2026-10-28T06:06:36-0600] end-pass3 {'t_ms': 1793189196045, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2925596672, 'phase': 'end-pass3'}
+[2026-10-28T06:06:36-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:06:47-0600] stress pass4 exit 0 after 11s
+[2026-10-28T06:06:47-0600] end-pass4 {'t_ms': 1793189207433, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2926944256, 'phase': 'end-pass4'}
+[2026-10-28T06:06:47-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i 'row cache'
+[2026-10-28T06:06:49-0600]   exit 0 in 1.4s
+[2026-10-28T06:06:49-0600] + grep -c '^ERROR' /users/jason92/s4-cc/ncnode/logs/system.log || true
+[2026-10-28T06:06:49-0600]   exit 0 in 0.0s
+[2026-10-28T06:06:49-0600] + grep -i 'NopCache\|not permitted' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 5
+[2026-10-28T06:06:49-0600]   exit 0 in 0.0s
+[2026-10-28T06:06:49-0600] + cp /users/jason92/s4-cc/ncnode/logs/system.log /users/jason92/s4-cc/run4/cluster/A/system.log.full
+[2026-10-28T06:06:49-0600]   exit 0 in 0.0s
+[2026-10-28T06:06:49-0600] stopping node pid 810325
+[2026-10-28T06:06:56-0600] node pid alive after stop: False
+[2026-10-28T06:06:56-0600] === arm B32 row_cache_size 32 MiB
+[2026-10-28T06:06:56-0600] + bin/cassandra -p /users/jason92/s4-cc/ncnode/cassandra.pid row_cache_size 32
+[2026-10-28T06:08:07-0600] node up, pid 815346
+[2026-10-28T06:08:07-0600] + grep -h 'row cache' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 3
+[2026-10-28T06:08:07-0600]   exit 0 in 0.0s
+[2026-10-28T06:08:07-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T12:07:01,697 CacheService.java:143 - Initializing row cache with capacity of 32 MiBs
+[2026-10-28T06:08:08-0600] t0 {'t_ms': 1793189288484, 'size': 0, 'capacity': 33554432, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2765430784, 'phase': 't0'}
+[2026-10-28T06:08:08-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(insert=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:08:18-0600]   exit 0 in 10.1s
+[2026-10-28T06:08:18-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 flush ks t
+[2026-10-28T06:08:20-0600] 
+[2026-10-28T06:08:20-0600]   exit 0 in 1.9s
+[2026-10-28T06:08:21-0600] after-load {'t_ms': 1793189301134, 'size': 0, 'capacity': 33554432, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2863620096, 'phase': 'after-load'}
+[2026-10-28T06:08:21-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 tablestats ks.t
+[2026-10-28T06:08:22-0600]   exit 0 in 1.2s
+[2026-10-28T06:08:22-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:08:24-0600]   exit 0 in 1.3s
+[2026-10-28T06:08:24-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:08:34-0600] stress pass1 exit 0 after 11s
+[2026-10-28T06:08:35-0600] end-pass1 {'t_ms': 1793189314924, 'size': 33168384, 'capacity': 33554432, 'entries': 7808, 'hits': 3026, 'requests': 20000, 'rssAnon': 2891489280, 'phase': 'end-pass1'}
+[2026-10-28T06:08:35-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:08:46-0600] stress pass2 exit 0 after 11s
+[2026-10-28T06:08:46-0600] end-pass2 {'t_ms': 1793189326327, 'size': 33168384, 'capacity': 33554432, 'entries': 7808, 'hits': 6888, 'requests': 40000, 'rssAnon': 2902470656, 'phase': 'end-pass2'}
+[2026-10-28T06:08:46-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 setcachecapacity 0 64 0
+[2026-10-28T06:08:47-0600]   exit 0 in 1.1s
+[2026-10-28T06:08:47-0600] setcachecapacity ['0', '64', '0'] exit 0 
+[2026-10-28T06:08:47-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:08:49-0600]   exit 0 in 1.3s
+[2026-10-28T06:08:49-0600] after-req64 {'t_ms': 1793189329370, 'size': 33168384, 'capacity': 67108864, 'entries': 7808, 'hits': 6888, 'requests': 40000, 'rssAnon': 2902589440, 'phase': 'after-req64'}
+[2026-10-28T06:08:49-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:09:00-0600] stress pass3 exit 0 after 11s
+[2026-10-28T06:09:01-0600] end-pass3 {'t_ms': 1793189340719, 'size': 64395417, 'capacity': 67108864, 'entries': 15159, 'hits': 16189, 'requests': 60000, 'rssAnon': 2906652672, 'phase': 'end-pass3'}
+[2026-10-28T06:09:01-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:09:11-0600] stress pass4 exit 0 after 11s
+[2026-10-28T06:09:12-0600] end-pass4 {'t_ms': 1793189352178, 'size': 64395417, 'capacity': 67108864, 'entries': 15159, 'hits': 29401, 'requests': 80000, 'rssAnon': 2910404608, 'phase': 'end-pass4'}
+[2026-10-28T06:09:12-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i 'row cache'
+[2026-10-28T06:09:13-0600]   exit 0 in 1.2s
+[2026-10-28T06:09:13-0600] + grep -c '^ERROR' /users/jason92/s4-cc/ncnode/logs/system.log || true
+[2026-10-28T06:09:13-0600]   exit 0 in 0.0s
+[2026-10-28T06:09:13-0600] + grep -i 'NopCache\|not permitted' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 5
+[2026-10-28T06:09:13-0600]   exit 0 in 0.0s
+[2026-10-28T06:09:13-0600] + cp /users/jason92/s4-cc/ncnode/logs/system.log /users/jason92/s4-cc/run4/cluster/B32/system.log.full
+[2026-10-28T06:09:13-0600]   exit 0 in 0.0s
+[2026-10-28T06:09:13-0600] stopping node pid 815346
+[2026-10-28T06:09:21-0600] node pid alive after stop: False
+[2026-10-28T06:09:21-0600] === arm B8 row_cache_size 8 MiB
+[2026-10-28T06:09:21-0600] + bin/cassandra -p /users/jason92/s4-cc/ncnode/cassandra.pid row_cache_size 8
+[2026-10-28T06:10:32-0600] node up, pid 820240
+[2026-10-28T06:10:32-0600] + grep -h 'row cache' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 3
+[2026-10-28T06:10:32-0600]   exit 0 in 0.0s
+[2026-10-28T06:10:32-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T12:09:26,605 CacheService.java:143 - Initializing row cache with capacity of 8 MiBs
+[2026-10-28T06:10:33-0600] t0 {'t_ms': 1793189433293, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2787090432, 'phase': 't0'}
+[2026-10-28T06:10:33-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(insert=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:10:43-0600]   exit 0 in 10.0s
+[2026-10-28T06:10:43-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 flush ks t
+[2026-10-28T06:10:45-0600] 
+[2026-10-28T06:10:45-0600]   exit 0 in 2.0s
+[2026-10-28T06:10:46-0600] after-load {'t_ms': 1793189445958, 'size': 0, 'capacity': 8388608, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2888060928, 'phase': 'after-load'}
+[2026-10-28T06:10:46-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 tablestats ks.t
+[2026-10-28T06:10:47-0600]   exit 0 in 1.2s
+[2026-10-28T06:10:47-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:10:48-0600]   exit 0 in 1.3s
+[2026-10-28T06:10:48-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:10:59-0600] stress pass1 exit 0 after 11s
+[2026-10-28T06:11:00-0600] end-pass1 {'t_ms': 1793189459870, 'size': 8156160, 'capacity': 8388608, 'entries': 1920, 'hits': 837, 'requests': 20000, 'rssAnon': 2907762688, 'phase': 'end-pass1'}
+[2026-10-28T06:11:00-0600] + /users/jason92/s4-cc/tree-base/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:11:11-0600] stress pass2 exit 0 after 11s
+[2026-10-28T06:11:11-0600] end-pass2 {'t_ms': 1793189471340, 'size': 8156160, 'capacity': 8388608, 'entries': 1920, 'hits': 1730, 'requests': 40000, 'rssAnon': 2916749312, 'phase': 'end-pass2'}
+[2026-10-28T06:11:11-0600] + /users/jason92/s4-cc/tree-base/bin/nodetool -p 7438 info | grep -i 'row cache'
+[2026-10-28T06:11:12-0600]   exit 0 in 1.2s
+[2026-10-28T06:11:12-0600] + grep -c '^ERROR' /users/jason92/s4-cc/ncnode/logs/system.log || true
+[2026-10-28T06:11:12-0600]   exit 0 in 0.0s
+[2026-10-28T06:11:12-0600] + grep -i 'NopCache\|not permitted' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 5
+[2026-10-28T06:11:12-0600]   exit 0 in 0.0s
+[2026-10-28T06:11:12-0600] + cp /users/jason92/s4-cc/ncnode/logs/system.log /users/jason92/s4-cc/run4/cluster/B8/system.log.full
+[2026-10-28T06:11:12-0600]   exit 0 in 0.0s
+[2026-10-28T06:11:12-0600] stopping node pid 820240
+[2026-10-28T06:11:20-0600] node pid alive after stop: False
+[2026-10-28T06:11:20-0600] ALL ARMS DONE ['A', 'B32', 'B8']
+[2026-10-28T06:11:20-0600] node pid alive after stop: False
+[2026-10-28T06:11:20-0600] === arm AP row_cache_size 0 MiB
+[2026-10-28T06:11:20-0600] + bin/cassandra -p /users/jason92/s4-cc/ncnode/cassandra.pid row_cache_size 0
+[2026-10-28T06:12:31-0600] node up, pid 824158
+[2026-10-28T06:12:31-0600] + grep -h 'row cache' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 3
+[2026-10-28T06:12:31-0600]   exit 0 in 0.0s
+[2026-10-28T06:12:31-0600] INFO  [MemtableFlushWriter:1] 2026-10-28T12:11:25,362 CacheService.java:143 - Initializing row cache with capacity of 0 MiBs
+[2026-10-28T06:12:32-0600] t0 {'t_ms': 1793189552411, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2770038784, 'phase': 't0'}
+[2026-10-28T06:12:32-0600] + /users/jason92/s4-cc/tree-nopguard/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(insert=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:12:43-0600]   exit 0 in 10.2s
+[2026-10-28T06:12:43-0600] + /users/jason92/s4-cc/tree-nopguard/bin/nodetool -p 7438 flush ks t
+[2026-10-28T06:12:44-0600] 
+[2026-10-28T06:12:44-0600]   exit 0 in 1.9s
+[2026-10-28T06:12:45-0600] after-load {'t_ms': 1793189565242, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2891997184, 'phase': 'after-load'}
+[2026-10-28T06:12:45-0600] + /users/jason92/s4-cc/tree-nopguard/bin/nodetool -p 7438 tablestats ks.t
+[2026-10-28T06:12:46-0600]   exit 0 in 1.3s
+[2026-10-28T06:12:46-0600] + /users/jason92/s4-cc/tree-nopguard/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:12:48-0600]   exit 0 in 1.3s
+[2026-10-28T06:12:48-0600] + /users/jason92/s4-cc/tree-nopguard/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:12:58-0600] stress pass1 exit 0 after 11s
+[2026-10-28T06:12:59-0600] end-pass1 {'t_ms': 1793189579186, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2904403968, 'phase': 'end-pass1'}
+[2026-10-28T06:12:59-0600] + /users/jason92/s4-cc/tree-nopguard/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:13:10-0600] stress pass2 exit 0 after 11s
+[2026-10-28T06:13:11-0600] end-pass2 {'t_ms': 1793189590588, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2911649792, 'phase': 'end-pass2'}
+[2026-10-28T06:13:11-0600] + /users/jason92/s4-cc/tree-nopguard/bin/nodetool -p 7438 setcachecapacity 0 64 0
+[2026-10-28T06:13:12-0600]   exit 0 in 1.1s
+[2026-10-28T06:13:12-0600] setcachecapacity ['0', '64', '0'] exit 0 
+[2026-10-28T06:13:12-0600] + /users/jason92/s4-cc/tree-nopguard/bin/nodetool -p 7438 info | grep -i '^Key Cache'
+[2026-10-28T06:13:13-0600]   exit 0 in 1.2s
+[2026-10-28T06:13:13-0600] after-req64 {'t_ms': 1793189593514, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2909298688, 'phase': 'after-req64'}
+[2026-10-28T06:13:13-0600] + /users/jason92/s4-cc/tree-nopguard/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:13:24-0600] stress pass3 exit 0 after 11s
+[2026-10-28T06:13:25-0600] end-pass3 {'t_ms': 1793189604882, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2911096832, 'phase': 'end-pass3'}
+[2026-10-28T06:13:25-0600] + /users/jason92/s4-cc/tree-nopguard/tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/nopcache_capacity-setcapacity-capacity--autonomous/rc.yaml ops(read1=1) n=20000 no-warmup -pop seq=1..20000 -rate threads=32 -node 127.39.8.1 -port native=9042
+[2026-10-28T06:13:36-0600] stress pass4 exit 0 after 11s
+[2026-10-28T06:13:36-0600] end-pass4 {'t_ms': 1793189616257, 'size': 0, 'capacity': 0, 'entries': 0, 'hits': 0, 'requests': 0, 'rssAnon': 2911870976, 'phase': 'end-pass4'}
+[2026-10-28T06:13:36-0600] + /users/jason92/s4-cc/tree-nopguard/bin/nodetool -p 7438 info | grep -i 'row cache'
+[2026-10-28T06:13:37-0600]   exit 0 in 1.3s
+[2026-10-28T06:13:37-0600] + grep -c '^ERROR' /users/jason92/s4-cc/ncnode/logs/system.log || true
+[2026-10-28T06:13:37-0600]   exit 0 in 0.0s
+[2026-10-28T06:13:37-0600] + grep -i 'NopCache\|not permitted' /users/jason92/s4-cc/ncnode/logs/system.log | head -n 5
+[2026-10-28T06:13:37-0600]   exit 0 in 0.0s
+[2026-10-28T06:13:37-0600] + cp /users/jason92/s4-cc/ncnode/logs/system.log /users/jason92/s4-cc/run4/cluster/AP/system.log.full
+[2026-10-28T06:13:37-0600]   exit 0 in 0.0s
+[2026-10-28T06:13:37-0600] stopping node pid 824158
+[2026-10-28T06:13:45-0600] node pid alive after stop: False
+[2026-10-28T06:13:45-0600] ALL ARMS DONE ['AP']
+[2026-10-28T06:13:45-0600] node pid alive after stop: False

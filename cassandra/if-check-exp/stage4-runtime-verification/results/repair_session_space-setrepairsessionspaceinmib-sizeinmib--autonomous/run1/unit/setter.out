@@ -1,0 +1,93 @@
+STAGE4 value config partitioner=ByteOrderedPartitioner repair_session_space_default_MiB=62 repair_session_max_tree_depth=20 maxMemory=1056309248 RF=1
+STAGE4 value load Standard14 keys=16385 sstables=1
+STAGE4 value load Standard16 keys=65537 sstables=1
+STAGE4 value S3 s=1 leaves=4096
+STAGE4 value S3 raw=0 leaves=2 measureDeep=480
+STAGE4 check S3 raw=0 leaves_vs_formula expected=2 actual=2 ok
+STAGE4 check S3 raw=0 not_larger_than_s1 expected=<=4096 actual=true ok
+STAGE4 value S3 raw=-1 IntMebibytesBound constructor threw java.lang.IllegalArgumentException: Invalid data storage: value must be non-negative (no config object, no validation run)
+STAGE4 check S3 raw=-1 config_object_constructible expected=true actual=false MISMATCH
+STAGE4 value S3 raw=-1000 IntMebibytesBound constructor threw java.lang.IllegalArgumentException: Invalid data storage: value must be non-negative (no config object, no validation run)
+STAGE4 check S3 raw=-1000 config_object_constructible expected=true actual=false MISMATCH
+STAGE4 value S2 accepted s=1 n=16384 ceil_log2_n=14 trees=1 size=4096 maxsize=4096 leaves=4096 measureDeep=497952 per_leaf=121
+STAGE4 check S2 accepted s=1 trees expected=1 actual=1 ok
+STAGE4 check S2 accepted s=1 leaves_vs_case_prediction expected=4096 actual=4096 ok
+STAGE4 check S2 accepted s=1 leaves_vs_formula expected=4096 actual=4096 ok
+STAGE4 check S2 accepted s=1 size_field_equals_leaves expected=4096 actual=4096 ok
+STAGE4 value S2 accepted s=2 n=16384 ceil_log2_n=14 trees=1 size=8192 maxsize=8192 leaves=8192 measureDeep=991200 per_leaf=120
+STAGE4 check S2 accepted s=2 trees expected=1 actual=1 ok
+STAGE4 check S2 accepted s=2 leaves_vs_case_prediction expected=8192 actual=8192 ok
+STAGE4 check S2 accepted s=2 leaves_vs_formula expected=8192 actual=8192 ok
+STAGE4 check S2 accepted s=2 size_field_equals_leaves expected=8192 actual=8192 ok
+STAGE4 value S2 accepted s=4 n=16384 ceil_log2_n=14 trees=1 size=16384 maxsize=16384 leaves=16384 measureDeep=1976448 per_leaf=120
+STAGE4 check S2 accepted s=4 trees expected=1 actual=1 ok
+STAGE4 check S2 accepted s=4 leaves_vs_case_prediction expected=16384 actual=16384 ok
+STAGE4 check S2 accepted s=4 leaves_vs_formula expected=16384 actual=16384 ok
+STAGE4 check S2 accepted s=4 size_field_equals_leaves expected=16384 actual=16384 ok
+STAGE4 check S2 reject 0 expected=thrown actual=true ok
+STAGE4 value S2 after_rejected 0 stored=2 n=16384 ceil_log2_n=14 trees=1 size=8192 maxsize=8192 leaves=8192 measureDeep=991200 per_leaf=120
+STAGE4 check S2 after_rejected 0 stored=2 trees expected=1 actual=1 ok
+STAGE4 check S2 after_rejected 0 stored=2 leaves_vs_case_prediction expected=8192 actual=8192 ok
+STAGE4 check S2 after_rejected 0 stored=2 leaves_vs_formula expected=8192 actual=8192 ok
+STAGE4 check S2 after_rejected 0 stored=2 size_field_equals_leaves expected=8192 actual=8192 ok
+STAGE4 check S2 reject -1 expected=thrown actual=true ok
+STAGE4 value S2 after_rejected -1 stored=2 n=16384 ceil_log2_n=14 trees=1 size=8192 maxsize=8192 leaves=8192 measureDeep=991200 per_leaf=120
+STAGE4 check S2 after_rejected -1 stored=2 trees expected=1 actual=1 ok
+STAGE4 check S2 after_rejected -1 stored=2 leaves_vs_case_prediction expected=8192 actual=8192 ok
+STAGE4 check S2 after_rejected -1 stored=2 leaves_vs_formula expected=8192 actual=8192 ok
+STAGE4 check S2 after_rejected -1 stored=2 size_field_equals_leaves expected=8192 actual=8192 ok
+STAGE4 value S2 big s=1024 int_product=1073741824 leaves=16384
+STAGE4 check S2 big s=1024 leaves_vs_formula expected=16384 actual=16384 ok
+STAGE4 check S2 big s=1024 not_larger_than_partition_term expected=<=16384 actual=true ok
+STAGE4 value S2 big s=2047 int_product=2146435072 leaves=16384
+STAGE4 check S2 big s=2047 leaves_vs_formula expected=16384 actual=16384 ok
+STAGE4 check S2 big s=2047 not_larger_than_partition_term expected=<=16384 actual=true ok
+STAGE4 value S2 big s=2048 int_product=-2147483648 leaves=2
+STAGE4 check S2 big s=2048 leaves_vs_formula expected=2 actual=2 ok
+STAGE4 check S2 big s=2048 not_larger_than_partition_term expected=<=16384 actual=true ok
+STAGE4 value S2 big s=2147483647 setter_threw java.lang.IllegalArgumentException: Invalid data storage: 2147483647 mebibytes. It shouldn't be more than 2147483646 in mebibytes (no validation run)
+STAGE4 check S2 big s=2147483647 validation_ran expected=true actual=false MISMATCH
+STAGE4 value S1 config maxMemory=1056309248 heap_pressure_warn_above_MiB=251
+STAGE4 check S1 reject v=0 throws_ConfigurationException expected=thrown actual=true ok
+STAGE4 check S1 reject v=0 message expected=Cannot set repair_session_space to 0 < 1 mebibyte actual=Cannot set repair_session_space to 0 < 1 mebibyte ok
+STAGE4 check S1 reject v=0 getter_unchanged expected=7 actual=7 ok
+STAGE4 value S1 reject v=0 allocated_bytes_of_the_call=824
+STAGE4 check S1 reject v=0 mbean_IllegalArgumentException expected=thrown actual=true ok
+STAGE4 check S1 reject v=0 getter_unchanged_after_mbean expected=7 actual=7 ok
+STAGE4 check S1 reject v=-1 throws_ConfigurationException expected=thrown actual=true ok
+STAGE4 check S1 reject v=-1 message expected=Cannot set repair_session_space to -1 < 1 mebibyte actual=Cannot set repair_session_space to -1 < 1 mebibyte ok
+STAGE4 check S1 reject v=-1 getter_unchanged expected=7 actual=7 ok
+STAGE4 value S1 reject v=-1 allocated_bytes_of_the_call=824
+STAGE4 check S1 reject v=-1 mbean_IllegalArgumentException expected=thrown actual=true ok
+STAGE4 check S1 reject v=-1 getter_unchanged_after_mbean expected=7 actual=7 ok
+STAGE4 check S1 reject v=-2147483648 throws_ConfigurationException expected=thrown actual=true ok
+STAGE4 check S1 reject v=-2147483648 message expected=Cannot set repair_session_space to -2147483648 < 1 mebibyte actual=Cannot set repair_session_space to -2147483648 < 1 mebibyte ok
+STAGE4 check S1 reject v=-2147483648 getter_unchanged expected=7 actual=7 ok
+STAGE4 value S1 reject v=-2147483648 allocated_bytes_of_the_call=832
+STAGE4 check S1 reject v=-2147483648 mbean_IllegalArgumentException expected=thrown actual=true ok
+STAGE4 check S1 reject v=-2147483648 getter_unchanged_after_mbean expected=7 actual=7 ok
+STAGE4 check S1 accept v=1 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=1 getter_equals expected=1 actual=1 ok
+STAGE4 value S1 accept v=1 allocated_bytes_of_the_call=72 above_warn_threshold=false
+STAGE4 check S1 accept v=2 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=2 getter_equals expected=2 actual=2 ok
+STAGE4 value S1 accept v=2 allocated_bytes_of_the_call=72 above_warn_threshold=false
+STAGE4 check S1 accept v=4 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=4 getter_equals expected=4 actual=4 ok
+STAGE4 value S1 accept v=4 allocated_bytes_of_the_call=72 above_warn_threshold=false
+STAGE4 check S1 accept v=128 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=128 getter_equals expected=128 actual=128 ok
+STAGE4 value S1 accept v=128 allocated_bytes_of_the_call=72 above_warn_threshold=false
+STAGE4 check S1 accept v=251 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=251 getter_equals expected=251 actual=251 ok
+STAGE4 value S1 accept v=251 allocated_bytes_of_the_call=72 above_warn_threshold=false
+STAGE4 check S1 accept v=252 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=252 getter_equals expected=252 actual=252 ok
+STAGE4 value S1 accept v=252 allocated_bytes_of_the_call=4192 above_warn_threshold=true
+STAGE4 check S1 accept v=2048 no_exception expected=null actual=null ok
+STAGE4 check S1 accept v=2048 getter_equals expected=2048 actual=2048 ok
+STAGE4 value S1 accept v=2048 allocated_bytes_of_the_call=4136 above_warn_threshold=true
+STAGE4 check S1 accept v=2147483647 no_exception expected=null actual=java.lang.IllegalArgumentException: Invalid data storage: 2147483647 mebibytes. It shouldn't be more than 2147483646 in mebibytes MISMATCH
+STAGE4 check S1 accept v=2147483647 getter_equals expected=2147483647 actual=2048 MISMATCH
+STAGE4 value S1 accept v=2147483647 allocated_bytes_of_the_call=6624 above_warn_threshold=true
+STAGE4 value summary mismatches=5

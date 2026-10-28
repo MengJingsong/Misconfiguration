@@ -1,0 +1,30 @@
+diff --git a/src/java/org/apache/cassandra/db/ColumnFamilyStore.java b/src/java/org/apache/cassandra/db/ColumnFamilyStore.java
+index fd47b8e..bf4808b 100644
+--- a/src/java/org/apache/cassandra/db/ColumnFamilyStore.java
++++ b/src/java/org/apache/cassandra/db/ColumnFamilyStore.java
+@@ -2498,14 +2498,14 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean, Memtable.Owner
+ 
+     public ClockAndCount getCachedCounter(ByteBuffer partitionKey, Clustering<?> clustering, ColumnMetadata column, CellPath path)
+     {
+-        if (CacheService.instance.counterCache.getCapacity() == 0L) // counter cache disabled.
++        if (false) // counter cache disabled.
+             return null;
+         return CacheService.instance.counterCache.get(CounterCacheKey.create(metadata(), partitionKey, clustering, column, path));
+     }
+ 
+     public void putCachedCounter(ByteBuffer partitionKey, Clustering<?> clustering, ColumnMetadata column, CellPath path, ClockAndCount clockAndCount)
+     {
+-        if (CacheService.instance.counterCache.getCapacity() == 0L) // counter cache disabled.
++        if (false) // counter cache disabled.
+             return;
+         CacheService.instance.counterCache.put(CounterCacheKey.create(metadata(), partitionKey, clustering, column, path), clockAndCount);
+     }
+@@ -3266,7 +3266,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean, Memtable.Owner
+ 
+     public boolean isCounterCacheEnabled()
+     {
+-        return metadata().isCounter() && CacheService.instance.counterCache.getCapacity() > 0;
++        return metadata().isCounter() && CacheService.instance.counterCache.getCapacity() >= 0;
+     }
+ 
+     public boolean isKeyCacheEnabled()

@@ -1,0 +1,18 @@
+# Byteman, observation only (node B, the receiver): one line per PartitionUpdate built by PartitionUpdate.fromIterator for keyspace ks.
+# Case B3d "per-Mutation size": rows, unsharedHeapSize and dataSize of each update the stream receiver wraps in a Mutation.
+RULE batch built
+CLASS org.apache.cassandra.db.partitions.PartitionUpdate
+METHOD fromIterator(org.apache.cassandra.db.rows.UnfilteredRowIterator, org.apache.cassandra.db.filter.ColumnFilter)
+AT EXIT
+IF $!.metadata().keyspace.equals("ks")
+DO traceln("S4BATCH " + System.currentTimeMillis() + " " + $!.metadata().name + " rows=" + $!.rowCount() + " heap=" + $!.unsharedHeapSize() + " data=" + $!.dataSize())
+ENDRULE
+
+# The effective knob value at each call of the check's method (ThrottledUnfilteredIterator.throttle, :232); 0 takes the opt-out branch (:234).
+RULE throttle called
+CLASS org.apache.cassandra.db.rows.ThrottledUnfilteredIterator
+METHOD throttle(org.apache.cassandra.db.partitions.UnfilteredPartitionIterator, int)
+AT ENTRY
+IF TRUE
+DO traceln("S4THROTTLE " + System.currentTimeMillis() + " maxBatchSize=" + $2)
+ENDRULE

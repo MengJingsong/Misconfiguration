@@ -1,0 +1,16 @@
+# Byteman rule for repair_session_space-split-maxsize, case 9c/9d (amended 2026-10-14): node 2 only.
+# While the flag file named by -Dstage4.holdflag exists, Validator.complete() sleeps 20 s at entry, so the validation's
+# tree is still referenced while the harness takes `jmap -histo:live`. It writes "hold start" before the sleep and
+# "hold end" after it, to the file named by -Dstage4.trace. With no flag file it does nothing.
+# Needs stage4.Rss (Rss.java) in a jar on the boot class path (cluster-run.py builds it).
+
+RULE rss hold trees
+CLASS org.apache.cassandra.repair.Validator
+METHOD complete
+AT ENTRY
+IF stage4.Rss.holding()
+DO traceOpen("rss", java.lang.System.getProperty("stage4.trace", "rss.trace"));
+   traceln("rss", "hold start trees=" + $0.trees.size() + " session=" + $0.desc.sessionId + " ms=" + java.lang.System.currentTimeMillis());
+   stage4.Rss.sleep(20000L);
+   traceln("rss", "hold end ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
