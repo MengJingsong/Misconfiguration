@@ -205,6 +205,26 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 | [`no_constraint-hasdayprecision-nanoseconds`](cases/no_constraint-hasdayprecision-nanoseconds--autonomous.md) | A | negative |  |  | none |
 | [`no_constraint-hasmillisecondprecision-nanoseconds`](cases/no_constraint-hasmillisecondprecision-nanoseconds--autonomous.md) | A | negative |  |  | none |
 | [`no_constraint-isnegative-duration_fields`](cases/no_constraint-isnegative-duration_fields--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-istokenvalid-token_position`](cases/no_constraint-istokenvalid-token_position--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isempty-size`](cases/no_constraint-isempty-size--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isempty-size-2`](cases/no_constraint-isempty-size-2--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isnamevalid-disallowed_characters`](cases/no_constraint-isnamevalid-disallowed_characters--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-equalswithouttypesandfunctions-initcond`](cases/no_constraint-equalswithouttypesandfunctions-initcond--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-equalswithouttypes-body`](cases/no_constraint-equalswithouttypes-body--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-islongliteral-char`](cases/no_constraint-islongliteral-char--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isquoted-value`](cases/no_constraint-isquoted-value--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-handleinfilter-restriction_position`](cases/no_constraint-handleinfilter-restriction_position--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-hascomponent-componentbounds_size`](cases/no_constraint-hascomponent-componentbounds_size--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-issupportedby-index_capability`](cases/no_constraint-issupportedby-index_capability--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-hasunrestrictedclusteringcolumns-clustering_count`](cases/no_constraint-hasunrestrictedclusteringcolumns-clustering_count--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-iscolumnrange-clustering_restrictions`](cases/no_constraint-iscolumnrange-clustering_restrictions--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-needfiltering-restriction_count`](cases/no_constraint-needfiltering-restriction_count--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-doesaggregation-aggregatefactories`](cases/no_constraint-doesaggregation-aggregatefactories--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isnullorempty-initcond`](cases/no_constraint-isnullorempty-initcond--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isdone-remainingcount`](cases/no_constraint-isdone-remainingcount--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-hascomponent-i_nextsize`](cases/no_constraint-hascomponent-i_nextsize--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isempty-header_mask`](cases/no_constraint-isempty-header_mask--autonomous.md) | A | negative |  |  | none |
+| [`no_constraint-isnull-header_bit`](cases/no_constraint-isnull-header_bit--autonomous.md) | A | negative |  |  | none |
 <!-- Add one row per case. -->
 
 ## 2. Coverage summary
@@ -780,3 +800,23 @@ dated amendment adds a line here with its date and the new hash.
 | `no_constraint-hasdayprecision-nanoseconds--autonomous.md` | `3387b296ce5cdd949b3b527ff1fd76c9deae4c0f508d10fb24645205b33741b8` | 2026-10-27 non-config agent, wave 1 |
 | `no_constraint-hasmillisecondprecision-nanoseconds--autonomous.md` | `22866b57a4d87a7c13527682fb13823cb01dc51e355926d285aa4517995a52df` | 2026-10-27 non-config agent, wave 1 |
 | `no_constraint-isnegative-duration_fields--autonomous.md` | `b349cdb5275c07ead14cdfbdc00c33737c4ca9541c3bd4904c7a943edf75a90b` | 2026-10-27 non-config agent, wave 1 |
+| `no_constraint-istokenvalid-token_position--autonomous.md` | `d6fdbc9b34b8d4bf4b381c2db16617cad368c652b66a8d26d628636cd3a90fee` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isempty-size--autonomous.md` | `e6bc3b386ab2e10270cdcd3ca68e2041cba4a70d3292a26331e6e26d0dab3dae` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isempty-size-2--autonomous.md` | `ea82abff6ad9c8f4cabfd223947efc1b4f1d93f466020ec80e0d7f3ef706113d` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isnamevalid-disallowed_characters--autonomous.md` | `ca76cf4ab742db1ec2c5c2802c46be8d24c2bdea0fe07f7071a258399d978c08` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-equalswithouttypesandfunctions-initcond--autonomous.md` | `080754db39b297cf3e94b94cd1297951ab801480712c32e3950e70ffdd9cd817` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-equalswithouttypes-body--autonomous.md` | `b1aba38e3f597c6a7656e981b33ca816823aa5fa68a8051018cfec9102150bc9` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-islongliteral-char--autonomous.md` | `2f6e47e791e9b89e58c6244cc79ebf0a8ef51ff89db056b2845f37ee98ef57a7` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isquoted-value--autonomous.md` | `f0146cfb4ecd83c4d89bcaea7311527d47c777b31e6fe2ee56745ae40c3af22b` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-handleinfilter-restriction_position--autonomous.md` | `a12b025d95f03c115254b26e17efbf4cd6bb6fe251c4e4ef8e3c037be1220780` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-hascomponent-componentbounds_size--autonomous.md` | `dd00d1c3a1cc570721e5b9d0716a4efa69a369010d9a2c1d7091b337809c1279` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-issupportedby-index_capability--autonomous.md` | `f5a319d78f323d2e5a85e6dae0595cd5843b69344e0122cbd18ff1300efbf57b` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-hasunrestrictedclusteringcolumns-clustering_count--autonomous.md` | `3dfe4c98bba16ca1e535e504b19b177238343545b1c0807f9ff9f5e97d85d800` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-iscolumnrange-clustering_restrictions--autonomous.md` | `805ff989b1169eb2bacd80e078a44fc38c2b14f0eb9e337c6940996cd5953fcd` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-needfiltering-restriction_count--autonomous.md` | `22c3c7de37ec79ea015c3c1491b5c361e967a81f48da043fae60c5e174995234` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-doesaggregation-aggregatefactories--autonomous.md` | `e348ff604e180fed117d9730e7f9159feeff0aac73643450c98307ea08b89dd6` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isnullorempty-initcond--autonomous.md` | `01120521da23daeb1fb584a10435c689036257834ca0801101e6c2497ce7640f` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isdone-remainingcount--autonomous.md` | `7e102a1deabdd0ae9e3e1d12c77f7cfe9081076d3baa37bb7b9688be4ccf8f41` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-hascomponent-i_nextsize--autonomous.md` | `eeee42afab9c092a279d2b725b17706def4d09b50c84ec15a4cf57a5a1d8761b` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isempty-header_mask--autonomous.md` | `c7c9dd1d5f51019f0e4dac99b2a55501f0fb3c88a66439d2d20ab3baf745bdc1` | 2026-10-27 non-config agent, batch 2 |
+| `no_constraint-isnull-header_bit--autonomous.md` | `018ac4aefb30deddc43bce5261fc87ae74456dd42b5356b868ba40fc1b09a381` | 2026-10-27 non-config agent, batch 2 |
