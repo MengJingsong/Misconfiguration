@@ -1,0 +1,22 @@
+PASS instrument known-answer
+PASS W1 branch proof: R rejected with the filtering message; F accepted, needFiltering true by line 992, one row ck=5 :: 12 lines, 0 bad
+PASS W1 F returned exactly 1 row in every timed call; controls returned N / 10 rows
+PASS W1 byteman: line 992 reached and needFiltering true >= 10 per R cell; at most the one proof call per F cell :: bad=[]
+PASS W2 rejected arm flat (pass A) :: R [13480, 13432, 13432] ratio 0.996
+PASS W3 accepted arm follows the data (pass A) :: Fx [446392, 3926040, 39205864] Fx/R@big 2919x Fp [12808, 12784, 12784]
+PASS W4 controls moved (pass A) :: C1 [1204392, 9934048, 98885952] C2 [16408, 14976, 14896]
+PASS W2 rejected arm flat (pass B) :: R [13480, 13432, 13432] ratio 0.996
+PASS W3 accepted arm follows the data (pass B) :: Fx [398088, 3925944, 39205864] Fx/R@big 2919x Fp [12808, 12784, 12784]
+PASS W4 controls moved (pass B) :: C1 [1036176, 9934048, 98885952] C2 [15128, 14976, 14896]
+PASS W2 rejected arm flat (pass AB) :: R [13480, 13432, 13432] ratio 0.996
+PASS W3 accepted arm follows the data (pass AB) :: Fx [422220, 3925992, 39205864] Fx/R@big 2919x Fp [12808, 12784, 12784]
+PASS W4 controls moved (pass AB) :: C1 [1084176, 9934048, 98885952] C2 [15928, 14976, 14896]
+FAIL W5 noise: passes within 5% :: largest 0.15516 at (1000, 'C1', 1204392, 1036176)
+FAIL W5 repeats (max-min)/median <= 10% :: largest 0.10951
+--- medians (pooled) per N [1000, 10000, 100000]
+R [13480, 13432, 13432]
+Fp [12808, 12784, 12784]
+Fx [422220, 3925992, 39205864]
+C1 [1084176, 9934048, 98885952]
+C2 [15928, 14976, 14896]
+SUMMARY all_pass=False

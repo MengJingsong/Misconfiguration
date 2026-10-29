@@ -1,0 +1,17 @@
+# no_constraint-isempty-size--autonomous, Alloc mode: per-call thread allocation of ResultSetBuilder.build() (the guarded call).
+# stage4.Alloc is on the boot class path (-Xbootclasspath/a); lines go to -Dstage4.byteman.out. rows = size of the returned ResultSet.
+RULE build_entry
+CLASS org.apache.cassandra.cql3.selection.ResultSetBuilder
+METHOD build
+AT ENTRY
+IF TRUE
+DO stage4.Alloc.start("bld")
+ENDRULE
+
+RULE build_exit
+CLASS org.apache.cassandra.cql3.selection.ResultSetBuilder
+METHOD build
+AT EXIT
+IF TRUE
+DO stage4.Alloc.end("bld", "rows=" + $!.size())
+ENDRULE

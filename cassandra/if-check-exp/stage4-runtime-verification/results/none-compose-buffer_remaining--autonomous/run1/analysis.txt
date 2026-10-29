@@ -1,0 +1,27 @@
+cell | type | L | resultNull | A alloc median (min..max) | B hits/calls
+null | BytesType | 0 | true | 0 (0..0) | 0/1200
+bytes | BytesType | 0 | false | 48 (48..48) | 1200/1200
+integer | IntegerType | 0 | true | 0 (0..0) | 0/1200
+bytes | BytesType | 1 | false | 48 (48..48) | 1200/1200
+integer | IntegerType | 1 | false | 64 (64..64) | 1200/1200
+bytes | BytesType | 1024 | false | 48 (48..48) | 1200/1200
+integer | IntegerType | 1024 | false | 1080 (1080..1080) | 1200/1200
+bytes | BytesType | 1048576 | false | 48 (48..48) | 120/120
+integer | IntegerType | 1048576 | false | 1048632 (1048632..1048632) | 120/120
+bytes | BytesType | 16777216 | false | 48 (48..48) | 7/7
+integer | IntegerType | 16777216 | false | 16777272 (16777272..16777272) | 7/7
+bytes | BytesType | 67108864 | false | 48 (48..48) | 7/7
+integer | IntegerType | 67108864 | false | 67108920 (67108920..67108920) | 7/7
+int32 | Int32Type | 0 | true | 0 (0..0) | 0/1200
+int32 | Int32Type | 4 | false | 0 (0..0) | 1200/1200
+bytes-rep | BytesType | 0 | false | 48 (48..48) | 1200/1200
+integer-rep | IntegerType | 0 | true | 0 (0..0) | 0/1200
+integer-rep | IntegerType | 1048576 | false | 1048632 (1048632..1048632) | 120/120
+EXPECTED: R1 pass B: line 180 runs for every call except null and the IntegerType/Int32Type L=0 cells (violations: []) - yes
+EXPECTED: R2 null/IntegerType L=0/Int32Type L=0 return null and allocate <= 256 (0,0,0); BytesType L=0 non-null, <= 1024 (48); difference <= 1024 (48) - yes
+EXPECTED: R3 IntegerType alloc/L in [1,4] for L>=1MiB; BytesType alloc <= 4L+1024 (integer L=1048576: 1.00005; integer L=16777216: 1.00000; integer L=67108864: 1.00000; bytes L=0: 48; bytes L=1: 48; bytes L=1024: 48; bytes L=1048576: 48; bytes L=16777216: 48; bytes L=67108864: 48) - yes
+EXPECTED: R4 noise: L=0 repeats differ <= 64 (bytes 0, integer 0); L=1MiB integer repeats differ <= 1% of L (0 vs 10485); EMPTY <= 16 (0,0) - yes
+EXPECTED: R5 C1 in [L+16,L+32] ({1: 24, 1048576: 1048592, 67108864: 67108880}); control throws IOException with "exceeds_the_maximum_of_1024" (STAGE4 control compose-A read2048max1024 class=IOException msg=Corrupt_value_length_2048_encountered,_as_it_exceeds_the_maximum_of_1024,_which_is_set_via_max_va) - yes
+EXPECTED: R6 Int32Type L=4 non-null, alloc <= 1024 (false, 0) - yes
+EXPECTED: no MISMATCH check lines (0) - yes
+ALL EXPECTED HOLD

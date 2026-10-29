@@ -1,0 +1,11 @@
+HOLD every cell has 7 timed values in each of 2 passes :: 42 cells
+HOLD 7 arms x 3 N x 2 states = 42 cells
+HOLD proof: 60 F/T proof lines, each side/filter/row as the arm table says :: 60 good, 0 bad
+HOLD byteman: F-arm cells see only false returns, T-arm cells only true (>=10 each) :: 60 cells
+HOLD recomputed: largest arm-vs-F1 relative difference <= 20% :: 0.0815
+FAIL recomputed: N-ratio of every F/T arm within [0.5, 2] :: largest |ratio-1| = 1.1155
+HOLD recomputed: controls moved (C1 >= 1e6, >= 50x its N-small, >= 100x F1; C2 <= 0.1 C1 and within [0.5,2] of its N-small) :: [('memtable', 21285344, 271504, 6576, 7184, 5256), ('sstable', 57580840, 573752, 11432, 11112, 14488)]
+FAIL recomputed: noise floor (passes) <= 5% and repeat spread <= 10% :: pass-to-pass 0.14733; repeat spread 0.09774
+HOLD timed calls returned 1 row (F/T), N rows (C1), 10 rows (C2)
+absolute F1 medians (memtable/sstable) per N: {1000: (5496, 6992), 10000: (5328, 12424), 100000: (5256, 14488)}
+SELFCHECK FAILURES

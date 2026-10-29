@@ -1,0 +1,26 @@
+# Byteman rules for no_constraint-doesaggregation-aggregatefactories--autonomous (byteman JVM run: counts only, not an instrument).
+# DA <true|false> = every return of SelectorFactories.doesAggregation; AQP = every AggregationQueryPager.fetchPageInternal entry
+# (the internal pager that aggregate queries are always routed through); MARK = start of a (pass, N, arm) cell in the test.
+RULE da_exit
+CLASS org.apache.cassandra.cql3.selection.SelectorFactories
+METHOD doesAggregation
+AT EXIT
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "DA " + $!)
+ENDRULE
+
+RULE aqp_entry
+CLASS org.apache.cassandra.service.pager.AggregationQueryPager
+METHOD fetchPageInternal
+AT ENTRY
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "AQP")
+ENDRULE
+
+RULE mark
+CLASS org.apache.cassandra.cql3.NoneDoesAggregationAllocTest
+METHOD mark
+AT ENTRY
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "MARK " + $1)
+ENDRULE

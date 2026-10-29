@@ -1,0 +1,10 @@
+HOLD 5 arms x 3 N, 7 timed calls in each pass
+HOLD every timed call: P/P2 N rows, A1/A2 1 row, C 100 rows
+HOLD proof: 30 lines, isAggregate by arm name, rows and values (max = N-1, min = 0) :: 30 good
+HOLD byteman: no doesAggregation call for P, never true for P2/C, true for A1/A2; no aggregate pager for P/P2/C
+HOLD byteman: aggregate pager entered >= 10 times in every A1/A2 run cell
+HOLD recomputed V2: P/P2 retained >= 4e6 B at largest N and >= 50x smallest; A1/A2 <= 2048 B and flat :: {'P': [124040, 1240040, 12400040], 'P2': [124040, 1240040, 12400040], 'A1': [168, 168, 168], 'A2': [240, 240, 240], 'C': [12440, 12440, 12440]}
+HOLD recomputed V3: allocation >= 10x from smallest to largest N for P/P2/A1/A2; A1/A2 >= 0.3 P2 for N >= 10000 :: {'P': [251504, 2173360, 21285344], 'P2': [355904, 2893792, 28485776], 'A1': [189440, 1525320, 15205320], 'A2': [205696, 1525576, 15205576], 'C': [29184, 25896, 25896]}
+HOLD recomputed V4: C retained <= 0.01 P and alloc <= 0.1 P at largest N, alloc within [0.5,2] of own at smallest N
+FAIL recomputed V5: pass-to-pass <= 5%, repeat spread <= 10%, retained passes within 1% :: 0.17964 0.13722 0.000000
+SELFCHECK FAILURES

@@ -1,0 +1,8 @@
+# Stage-4 harness, none-read-count--autonomous: counts passes through the slow-path allocation (line 120). Observation only.
+RULE count line 120 (int slow path)
+CLASS org.apache.cassandra.index.sai.disk.v1.vector.RandomAccessReaderAdapter
+METHOD read(int[], int, int)
+AT LINE 120
+IF true
+DO stage4.Count.hit()
+ENDRULE

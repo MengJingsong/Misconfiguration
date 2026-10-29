@@ -1,0 +1,36 @@
+S | F1 | T1 | F2 | T2 | N | D | T1-F1 | c1 | retained dF / dT | hits/call F,T,N,D (pass B) | T outcomes
+1024 | 1208 | 1880 | 1208 | 1880 | 1208 | 120 | 672 | 1040 | -17368 / -520 | 3.0,3.0,3.0,2.0 | threw=1400/1400 Digest_mismatch_exception
+65536 | 65720 | 66392 | 65720 | 66392 | 65720 | 120 | 672 | 65552 | 14384 / 45632 | 3.0,3.0,3.0,2.0 | threw=1400/1400 Digest_mismatch_exception
+1048576 | 1048760 | 1049432 | 1048760 | 1049432 | 1048760 | 120 | 672 | 1048592 | 2092320 / -528 | 3.0,3.0,3.0,2.0 | threw=140/140 Digest_mismatch_exception
+16777216 | 16777400 | 16778072 | 16777400 | 16778072 | 16777400 | 120 | 672 | 16777232 | 17799984 / 9960 | 3.0,3.0,3.0,2.0 | threw=18/18 Digest_mismatch_exception
+67108864 | 67109048 | 67109720 | 67109048 | 67109720 | 67109048 | 120 | 672 | 67108880 | 68171096 / 6456 | 3.0,3.0,3.0,2.0 | threw=7/7 Digest_mismatch_exception
+EXPECTED: S=1024 Q1 pass B hits per call F,T,N,D = 3,3,3,2 (3.0,3.0,3.0,2.0) - yes
+EXPECTED: S=1024 Q2 outcomes: F,N capacity S; T threw every call with "Digest_mismatch_exception"; D null - yes
+EXPECTED: S=1024 Q3 F in [S+16,S+2048] (184); |N-F|<=256 (0); T in [S+16,S+6144] (856); |T-F|<=6144 (672); D<=4096 (120) - yes
+EXPECTED: S=1024 Q4 |F1-F2|<=256 (0), |T1-T2|<=1024 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: S=1024 Q6 C1 in [S+16,S+32] (1040); D moves (D 120 << F 1208) - yes
+EXPECTED: S=65536 Q1 pass B hits per call F,T,N,D = 3,3,3,2 (3.0,3.0,3.0,2.0) - yes
+EXPECTED: S=65536 Q2 outcomes: F,N capacity S; T threw every call with "Digest_mismatch_exception"; D null - yes
+EXPECTED: S=65536 Q3 F in [S+16,S+2048] (184); |N-F|<=256 (0); T in [S+16,S+6144] (856); |T-F|<=6144 (672); D<=4096 (120) and D<=S/8 (120 vs 8192) - yes
+EXPECTED: S=65536 Q4 |F1-F2|<=256 (0), |T1-T2|<=1024 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: S=65536 Q6 C1 in [S+16,S+32] (65552); D moves (D 120 << F 65720) - yes
+EXPECTED: S=1048576 Q1 pass B hits per call F,T,N,D = 3,3,3,2 (3.0,3.0,3.0,2.0) - yes
+EXPECTED: S=1048576 Q2 outcomes: F,N capacity S; T threw every call with "Digest_mismatch_exception"; D null - yes
+EXPECTED: S=1048576 Q3 F in [S+16,S+2048] (184); |N-F|<=256 (0); T in [S+16,S+6144] (856); |T-F|<=6144 (672); D<=4096 (120) and D<=S/8 (120 vs 131072) - yes
+EXPECTED: S=1048576 Q4 |F1-F2|<=256 (0), |T1-T2|<=1024 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: S=1048576 Q5 retained F in [0.9S, 1.1S+1MiB] (2092320), T within 2 MiB (-528) - yes
+EXPECTED: S=1048576 Q6 C1 in [S+16,S+32] (1048592); D moves (D 120 << F 1048760) - yes
+EXPECTED: S=16777216 Q1 pass B hits per call F,T,N,D = 3,3,3,2 (3.0,3.0,3.0,2.0) - yes
+EXPECTED: S=16777216 Q2 outcomes: F,N capacity S; T threw every call with "Digest_mismatch_exception"; D null - yes
+EXPECTED: S=16777216 Q3 F in [S+16,S+2048] (184); |N-F|<=256 (0); T in [S+16,S+6144] (856); |T-F|<=6144 (672); D<=4096 (120) and D<=S/8 (120 vs 2097152) - yes
+EXPECTED: S=16777216 Q4 |F1-F2|<=256 (0), |T1-T2|<=1024 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: S=16777216 Q5 retained F in [0.9S, 1.1S+1MiB] (17799984), T within 2 MiB (9960) - yes
+EXPECTED: S=16777216 Q6 C1 in [S+16,S+32] (16777232); D moves (D 120 << F 16777400) - yes
+EXPECTED: S=67108864 Q1 pass B hits per call F,T,N,D = 3,3,3,2 (3.0,3.0,3.0,2.0) - yes
+EXPECTED: S=67108864 Q2 outcomes: F,N capacity S; T threw every call with "Digest_mismatch_exception"; D null - yes
+EXPECTED: S=67108864 Q3 F in [S+16,S+2048] (184); |N-F|<=256 (0); T in [S+16,S+6144] (856); |T-F|<=6144 (672); D<=4096 (120) and D<=S/8 (120 vs 8388608) - yes
+EXPECTED: S=67108864 Q4 |F1-F2|<=256 (0), |T1-T2|<=1024 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: S=67108864 Q5 retained F in [0.9S, 1.1S+1MiB] (68171096), T within 2 MiB (6456) - yes
+EXPECTED: S=67108864 Q6 C1 in [S+16,S+32] (67108880); D moves (D 120 << F 67109048) - yes
+EXPECTED: no MISMATCH check lines (0) - yes
+ALL EXPECTED HOLD

@@ -1,0 +1,8 @@
+# no_constraint-isempty-size--autonomous, count mode: every ResultSet.isEmpty() return value, and every build() entry (to pair them).
+RULE isempty_exit
+CLASS org.apache.cassandra.cql3.ResultSet
+METHOD isEmpty
+AT EXIT
+IF TRUE
+DO stage4.Alloc.line("empty", "val=" + $!)
+ENDRULE

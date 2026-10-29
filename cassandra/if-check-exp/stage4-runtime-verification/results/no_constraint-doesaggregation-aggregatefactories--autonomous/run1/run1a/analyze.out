@@ -1,0 +1,22 @@
+PASS instrument known-answers (alloc, measureDeep)
+PASS V1 branch proof: isAggregate side, row counts, values on every cell :: 30 lines, 0 bad
+PASS V1 byteman: doesAggregation true only for A1/A2 (prepare and run), false for P2, not evaluated for P; aggregate pager only for A1/A2 :: bad=[]
+FAIL V2 retained result (pass A) :: P 1149568->11075472 (10x, 111 B/row); P2 124976->12426880 (99x, 124 B/row); A1 [1048768, 1048768, 1048768]; A2 [1048816, 1048816, 1048816]
+FAIL V2 retained result (pass B) :: P 1149568->11075472 (10x, 111 B/row); P2 124976->12426880 (99x, 124 B/row); A1 [1048768, 1048768, 1048768]; A2 [1048816, 1048816, 1048816]
+FAIL V2 retained result (pass AB) :: P 1149568.0->11075472.0 (10x, 111 B/row); P2 124976.0->12426880.0 (99x, 124 B/row); A1 [1048768.0, 1048768.0, 1048768.0]; A2 [1048816.0, 1048816.0, 1048816.0]
+PASS V3 allocation follows N in every arm; aggregate arms >= 0.3 x P2 (pass A) :: P x62.6; P2 x67.8; A1 x68.7; A2 x68.6; A1/P2@10000=0.53; A2/P2@10000=0.53; A1/P2@100000=0.53; A2/P2@100000=0.53
+PASS V3 allocation follows N in every arm; aggregate arms >= 0.3 x P2 (pass B) :: P x84.6; P2 x87.9; A1 x80.3; A2 x68.6; A1/P2@10000=0.53; A2/P2@10000=0.53; A1/P2@100000=0.53; A2/P2@100000=0.53
+PASS V3 allocation follows N in every arm; aggregate arms >= 0.3 x P2 (pass AB) :: P x72.0; P2 x87.9; A1 x74.0; A2 x68.6; A1/P2@10000=0.53; A2/P2@10000=0.53; A1/P2@100000=0.53; A2/P2@100000=0.53
+FAIL V4 control C moved (pass A) :: C rows [100] retained 1058672 vs P 11075472; alloc 25896 vs P 21285344 vs own@small 29184
+FAIL V4 control C moved (pass B) :: C rows [100] retained 1058672 vs P 11075472; alloc 25896 vs P 21285344 vs own@small 29184
+FAIL V4 control C moved (pass AB) :: C rows [100] retained 1058672.0 vs P 11075472.0; alloc 25896.0 vs P 21285344.0 vs own@small 29184.0
+FAIL V5 noise: allocation passes within 5% :: largest 0.29867 at (1000, 'P', 339768, 251504)
+FAIL V5 repeats (max-min)/median <= 10% :: largest 0.32386
+PASS V5 retained sizes of the two passes within 1% :: largest 0.000000
+--- allocation medians (pooled) and retained medians per N [1000, 10000, 100000]
+P alloc [295528, 2173360, 21285344] retained [1149568, 2064848, 11075472] rows [[1000], [10000], [100000]]
+P2 alloc [323968, 2893824, 28485776] retained [124976, 1256256, 12426880] rows [[1000], [10000], [100000]]
+A1 alloc [205456, 1525336, 15205320] retained [1048768, 1048768, 1048768] rows [[1], [1], [1]]
+A2 alloc [221712, 1525576, 15205576] retained [1048816, 1048816, 1048816] rows [[1], [1], [1]]
+C alloc [29184, 25896, 25896] retained [1058672, 1058672, 1058672] rows [[100], [100], [100]]
+SUMMARY all_pass=False

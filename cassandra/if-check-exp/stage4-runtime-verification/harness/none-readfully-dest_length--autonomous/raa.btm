@@ -1,0 +1,8 @@
+# Stage-4 harness, none-readfully-dest_length--autonomous: counts passes through the slow-path allocation (line 72). Observation only.
+RULE count line 72 (float slow path)
+CLASS org.apache.cassandra.index.sai.disk.v1.vector.RandomAccessReaderAdapter
+METHOD readFully(float[])
+AT LINE 72
+IF true
+DO stage4.Count.hit()
+ENDRULE

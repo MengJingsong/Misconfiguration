@@ -1,0 +1,26 @@
+# Byteman rules for no_constraint-needfiltering-restriction_count--autonomous (byteman JVM run: counts only, not an instrument).
+# L992 = line 992 of StatementRestrictions.needFiltering reached (the line-985 test did not return true); NF <true|false> = every
+# return of needFiltering; MARK = start of a (pass, N, arm) cell in the test.
+RULE nf_line992
+CLASS org.apache.cassandra.cql3.restrictions.StatementRestrictions
+METHOD needFiltering
+AT LINE 992
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "L992 " + $numberOfRestrictions)
+ENDRULE
+
+RULE nf_exit
+CLASS org.apache.cassandra.cql3.restrictions.StatementRestrictions
+METHOD needFiltering
+AT EXIT
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "NF " + $!)
+ENDRULE
+
+RULE mark
+CLASS org.apache.cassandra.cql3.NoneNeedFilteringAllocTest
+METHOD mark
+AT ENTRY
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "MARK " + $1)
+ENDRULE

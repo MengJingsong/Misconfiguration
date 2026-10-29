@@ -1,0 +1,12 @@
+PASS 100 attributed queries in each trace (10 groups x 10) 100 / 100
+PASS exactly one build() line per query 
+PASS exactly one isEmpty line per query, true iff N=0 
+NOTE build() medians: {('A', 0): 1384, ('A', 1): 1448, ('A', 1000): 1472, ('A', 20000): 1440, ('B', 0): 1176, ('B', 1): 1280, ('B', 1000): 1248, ('B', 20000): 1248}
+PASS each (arm,N) has 7 timed readings, all equal 
+PASS A(0)-B(0) = 208 and within [100,1000] 
+PASS flat for N >= 1 within 512 
+PASS result rows (from build lines) A=1, B=N 
+PASS noise floor 0 (blocks equal, ranges 0) [1384] [1384]
+NOTE B(0) = 1176 bytes: above the frozen 512-byte bound of B2f (c), the instrument and rule overhead inside the window (not the branch)
+PASS control: whole-query B(20000)/B(1000) in [10,25] 19.29
+ALL PASS

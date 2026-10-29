@@ -1,0 +1,26 @@
+build() lines per query (all marks incl. warm-up): {1: 100}
+PRED (a) isEmpty once, true iff N=0     PASS  100 queries checked, violations []
+PRED (b) result rows A=1, B=N           PASS  A {0: [1], 1: [1], 1000: [1], 20000: [1]} B {0: [0], 1: [1], 1000: [1000], 20000: [20000]}
+PRED (e) noise floor <= 512 B           PASS  blocks medians 1384 / 1384 ranges 0 / 0 floor 0
+  build() median arm A N=0        1384 bytes (range 0)
+  build() median arm A N=1        1448 bytes (range 0)
+  build() median arm A N=1000     1472 bytes (range 0)
+  build() median arm A N=20000    1440 bytes (range 0)
+  build() median arm B N=0        1176 bytes (range 0)
+  build() median arm B N=1        1280 bytes (range 0)
+  build() median arm B N=1000     1248 bytes (range 0)
+  build() median arm B N=20000    1248 bytes (range 0)
+PRED (c) B(0) <= 512                    FAIL  B(0)=1176
+PRED (c) A(0)-B(0) in [100,1000]        PASS  diff 208
+PRED (c) arm A flat for N>=1            PASS  medians [1448, 1472, 1440] tolerance 512
+PRED (c) arm B flat for N>=1            PASS  medians [1280, 1248, 1248] tolerance 512
+PRED (c) |A(0)-A(1)| small              PASS  A(0)=1384 A(1)=1448 tolerance 512
+  query bytes arm A N=0      median 8056
+  query bytes arm A N=1      median 9272
+  query bytes arm A N=1000   median 161264
+  query bytes arm A N=20000  median 1449256
+  query bytes arm B N=0      median 7584
+  query bytes arm B N=1      median 8744
+  query bytes arm B N=1000   median 295520
+  query bytes arm B N=20000  median 5701792
+PRED (d) control B(20000)/B(1000)       PASS  ratio 19.29

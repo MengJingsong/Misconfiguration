@@ -1,0 +1,40 @@
+PASS instrument known-answer
+PASS U1 branch proof (isColumnRange, filter class, one row 5/7) on every cell :: 84 proof lines, 0 bad
+PASS U1 every timed call returned the expected row count
+PASS U1 byteman: isColumnRange returns counted per cell, only the expected side, >= 10 each :: 60 cells; bad=[]
+PASS U2 arms within 20% of F1 (pass A) :: max rel diff 0.0808 at ('memtable', 1000, 'T1', 5096, 5544)
+PASS U2 arms within 20% of F1 (pass B) :: max rel diff 0.0852 at ('memtable', 1000, 'T3', 4984, 5448)
+PASS U2 arms within 20% of F1 (pass AB) :: max rel diff 0.0815 at ('memtable', 1000, 'T1', 5048.0, 5496.0)
+FAIL U3 median(N=100000)/median(N=1000) in [0.5,2] for every F/T arm and state (pass A) :: largest deviation ratio (2.095351609058403, 'sstable', 'T1')
+FAIL U3 median(N=100000)/median(N=1000) in [0.5,2] for every F/T arm and state (pass B) :: largest deviation ratio (2.1360874848116644, 'sstable', 'T1')
+FAIL U3 median(N=100000)/median(N=1000) in [0.5,2] for every F/T arm and state (pass AB) :: largest deviation ratio (2.115523465703971, 'sstable', 'T1')
+PASS U4 controls moved (pass A) :: memtable: C1 21285344/291504 (73.0x) F1 5256 C1/F1 4050x C2 6576/7384 C2/C1 0.0003; sstable: C1 57580840/573752 (100.4x) F1 14488 C1/F1 3974x C2 11432/11112 C2/C1 0.0002
+PASS U4 controls moved (pass B) :: memtable: C1 21285344/251504 (84.6x) F1 5256 C1/F1 4050x C2 6576/6984 C2/C1 0.0003; sstable: C1 57580840/573752 (100.4x) F1 14488 C1/F1 3974x C2 11432/11112 C2/C1 0.0002
+PASS U4 controls moved (pass AB) :: memtable: C1 21285344.0/271504.0 (78.4x) F1 5256.0 C1/F1 4050x C2 6576.0/7184.0 C2/C1 0.0003; sstable: C1 57580840.0/573752.0 (100.4x) F1 14488.0 C1/F1 3974x C2 11432.0/11112.0 C2/C1 0.0002
+FAIL U5 noise floor: pass A vs B medians within 5% :: largest 0.14733 at ('memtable', 1000, 'C1', 291504, 251504)
+PASS U5 repeats (max-min)/median <= 10% :: largest 0.09774
+--- D(N) = median(arm) - median(F1), pooled passes (bytes); relative to F1
+memtable F2: D=[0.0, 72.0, 0.0] rel=[0.0, 0.0135, 0.0] grows_beyond_floor=False
+memtable T1: D=[-448.0, -416.0, -416.0] rel=[-0.0815, -0.0781, -0.0791] grows_beyond_floor=False
+memtable T2: D=[-448.0, -416.0, -416.0] rel=[-0.0815, -0.0781, -0.0791] grows_beyond_floor=False
+memtable T3: D=[-444.0, -400.0, -392.0] rel=[-0.0808, -0.0751, -0.0746] grows_beyond_floor=False
+sstable F2: D=[0.0, 0.0, 0.0] rel=[0.0, 0.0, 0.0] grows_beyond_floor=False
+sstable T1: D=[-344.0, -424.0, -424.0] rel=[-0.0492, -0.0341, -0.0293] grows_beyond_floor=False
+sstable T2: D=[-344.0, -424.0, -424.0] rel=[-0.0492, -0.0341, -0.0293] grows_beyond_floor=False
+sstable T3: D=[-320.0, -400.0, -400.0] rel=[-0.0458, -0.0322, -0.0276] grows_beyond_floor=False
+--- medians (pooled passes)
+memtable F1 [5496, 5328, 5256]
+memtable F2 [5496, 5400, 5256]
+memtable T1 [5048, 4912, 4840]
+memtable T2 [5048, 4912, 4840]
+memtable T3 [5052, 4928, 4864]
+memtable C1 [271504, 2173360, 21285344]
+memtable C2 [7184, 6576, 6576]
+sstable F1 [6992, 12424, 14488]
+sstable F2 [6992, 12424, 14488]
+sstable T1 [6648, 12000, 14064]
+sstable T2 [6648, 12000, 14064]
+sstable T3 [6672, 12024, 14088]
+sstable C1 [573752, 5803448, 57580840]
+sstable C2 [11112, 11432, 11432]
+SUMMARY all_pass=False refuting_growth=False

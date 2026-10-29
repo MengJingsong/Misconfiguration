@@ -1,0 +1,16 @@
+# Byteman rules for no_constraint-capacity-newcapacity--autonomous (B2c).
+RULE cap_super
+CLASS org.apache.cassandra.net.BufferPoolAllocator$Wrapped
+METHOD capacity(int)
+AT LINE 124
+IF TRUE
+DO org.apache.cassandra.net.NetProbe.sc()
+ENDRULE
+
+RULE cap_put
+CLASS org.apache.cassandra.net.BufferPoolAllocator$Wrapped
+METHOD capacity(int)
+AT LINE 128
+IF TRUE
+DO org.apache.cassandra.net.NetProbe.atPut()
+ENDRULE

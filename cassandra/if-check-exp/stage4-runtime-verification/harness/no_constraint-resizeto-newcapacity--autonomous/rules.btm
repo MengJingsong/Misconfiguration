@@ -1,0 +1,24 @@
+# Byteman rules for no_constraint-resizeto-newcapacity--autonomous (B2c): a ledger of native allocations and frees.
+RULE ledger_copy
+CLASS org.apache.cassandra.io.util.SafeMemory
+METHOD copy(long)
+AT ENTRY
+IF TRUE
+DO org.apache.cassandra.io.util.NativeLedger.copy()
+ENDRULE
+
+RULE ledger_alloc
+CLASS org.apache.cassandra.io.util.Memory
+METHOD <init>(long)
+AT LINE 65
+IF TRUE
+DO org.apache.cassandra.io.util.NativeLedger.alloc($bytes)
+ENDRULE
+
+RULE ledger_free
+CLASS org.apache.cassandra.io.util.SafeMemory$MemoryTidy
+METHOD tidy
+AT ENTRY
+IF $0.peer != 0
+DO org.apache.cassandra.io.util.NativeLedger.free($0.size)
+ENDRULE

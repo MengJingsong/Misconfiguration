@@ -1,0 +1,88 @@
+C values: [128, 4096, 65536, 1048576, 16777216] counted rows: 100
+PASS C=128 E: 5 repetitions
+PASS C=128 G: 5 repetitions
+PASS C=128 S: 5 repetitions
+PASS C=128 M: 5 repetitions
+PASS C=128: allocation state used==cap0, overflow==cap0 (overflow sizes) else 0 :: cap0=128
+PASS C=128: after release used==0 and overflow==0 (all arms)
+PASS C=128 E: SC=0, gauges unchanged, capacity unchanged
+PASS C=128 E: residue <= 1024 :: max 0
+PASS C=128 G: SC=1 and capNew in [cap0+1, bound] :: cap0=128 capNew=160
+PASS C=128 G: used after == capNew (one buffer), overflow after as predicted
+PASS C=128 G: line-128 record used == cap0+capNew (both held) :: [(288, 288)]
+PASS C=128 G: residue <= 16384 :: max 16376
+PASS C=128 S: SC=1, used after == capNew <= cap0/2+2048, line-128 == cap0+capNew :: capNew=64
+PASS C=128 S: residue <= 16384 :: max 1888
+PASS C=128 M: IllegalArgumentException, SC=1, usage unchanged
+PASS C=4096 E: 5 repetitions
+PASS C=4096 G: 5 repetitions
+PASS C=4096 S: 5 repetitions
+PASS C=4096 M: 5 repetitions
+PASS C=4096: allocation state used==cap0, overflow==cap0 (overflow sizes) else 0 :: cap0=4096
+PASS C=4096: after release used==0 and overflow==0 (all arms)
+PASS C=4096 E: SC=0, gauges unchanged, capacity unchanged
+PASS C=4096 E: residue <= 1024 :: max 0
+PASS C=4096 G: SC=1 and capNew in [cap0+1, bound] :: cap0=4096 capNew=6144
+PASS C=4096 G: used after == capNew (one buffer), overflow after as predicted
+PASS C=4096 G: line-128 record used == cap0+capNew (both held) :: [(10240, 10240)]
+PASS C=4096 G: residue <= 16384 :: max 16376
+PASS C=4096 S: SC=1, used after == capNew <= cap0/2+2048, line-128 == cap0+capNew :: capNew=2048
+PASS C=4096 S: residue <= 16384 :: max 1888
+PASS C=4096 M: IllegalArgumentException, SC=1, usage unchanged
+PASS C=65536 E: 5 repetitions
+PASS C=65536 G: 5 repetitions
+PASS C=65536 S: 5 repetitions
+PASS C=65536 M: 5 repetitions
+PASS C=65536: allocation state used==cap0, overflow==cap0 (overflow sizes) else 0 :: cap0=65536
+PASS C=65536: after release used==0 and overflow==0 (all arms)
+PASS C=65536 E: SC=0, gauges unchanged, capacity unchanged
+PASS C=65536 E: residue <= 1024 :: max 0
+PASS C=65536 G: SC=1 and capNew in [cap0+1, bound] :: cap0=65536 capNew=67584
+PASS C=65536 G: used after == capNew (one buffer), overflow after as predicted
+PASS C=65536 G: line-128 record used == cap0+capNew (both held) :: [(133120, 133120)]
+FAIL C=65536 G: residue <= 16384 :: max 16456
+PASS C=65536 S: SC=1, used after == capNew <= cap0/2+2048, line-128 == cap0+capNew :: capNew=32768
+PASS C=65536 S: residue <= 16384 :: max 1888
+PASS C=65536 M: IllegalArgumentException, SC=1, usage unchanged
+PASS C=1048576 E: 5 repetitions
+PASS C=1048576 G: 5 repetitions
+PASS C=1048576 S: 5 repetitions
+PASS C=1048576 M: 5 repetitions
+PASS C=1048576: allocation state used==cap0, overflow==cap0 (overflow sizes) else 0 :: cap0=1048576
+PASS C=1048576: cap0 == C (overflow buffer exact)
+PASS C=1048576: after release used==0 and overflow==0 (all arms)
+PASS C=1048576 E: SC=0, gauges unchanged, capacity unchanged
+PASS C=1048576 E: residue <= 1024 :: max 0
+PASS C=1048576 E: direct delta 0 after gc :: [0, 0, 0, 0, 0]
+PASS C=1048576 G: SC=1 and capNew in [cap0+1, bound] :: cap0=1048576 capNew=1048577
+PASS C=1048576 G: used after == capNew (one buffer), overflow after as predicted
+PASS C=1048576 G: line-128 record used == cap0+capNew (both held) :: [(2097153, 2097153)]
+FAIL C=1048576 G: residue <= 16384 :: max 17008
+FAIL C=1048576 G: direct delta after call == capNew :: [1, 1]
+PASS C=1048576 G: direct delta after gc within 4096 of capNew-cap0 :: [1, 1]
+PASS C=1048576 S: SC=1, used after == capNew <= cap0/2+2048, line-128 == cap0+capNew :: capNew=524288
+PASS C=1048576 S: residue <= 16384 :: max 2520
+PASS C=1048576 M: IllegalArgumentException, SC=1, usage unchanged
+PASS C=16777216 E: 5 repetitions
+PASS C=16777216 G: 5 repetitions
+PASS C=16777216 S: 5 repetitions
+PASS C=16777216 M: 5 repetitions
+PASS C=16777216: allocation state used==cap0, overflow==cap0 (overflow sizes) else 0 :: cap0=16777216
+PASS C=16777216: cap0 == C (overflow buffer exact)
+PASS C=16777216: after release used==0 and overflow==0 (all arms)
+PASS C=16777216 E: SC=0, gauges unchanged, capacity unchanged
+PASS C=16777216 E: residue <= 1024 :: max 0
+PASS C=16777216 E: direct delta 0 after gc :: [0, 0, 0, 0, 0]
+PASS C=16777216 G: SC=1 and capNew in [cap0+1, bound] :: cap0=16777216 capNew=16777217
+PASS C=16777216 G: used after == capNew (one buffer), overflow after as predicted
+PASS C=16777216 G: line-128 record used == cap0+capNew (both held) :: [(33554433, 33554433)]
+FAIL C=16777216 G: residue <= 16384 :: max 17008
+FAIL C=16777216 G: direct delta after call == capNew :: [1, 1]
+PASS C=16777216 G: direct delta after gc within 4096 of capNew-cap0 :: [1, 1]
+PASS C=16777216 S: SC=1, used after == capNew <= cap0/2+2048, line-128 == cap0+capNew :: capNew=8388608
+PASS C=16777216 S: residue <= 16384 :: max 2520
+PASS C=16777216 M: IllegalArgumentException, SC=1, usage unchanged
+PASS control cache=128, C=4096: pooled bytes 8388608, overflow 0 :: [(8388608, 0)]
+PASS control cache=0, C=4096: pooled bytes 0, overflow == cap0 (4096) :: [(0, 4096)]
+PASS known answer C=16 MiB: overflow == 16777216
+SUMMARY 81 PASS, 5 FAIL

@@ -63,7 +63,45 @@ Outcomes: null or (empty and meaningless-when-empty) returns null, which for `RE
 
 **B2h. Controls.** Empty-buffer rows show the only behaviour the line has (null vs empty value). Primitive type (`Int32Type`) shows no growth. Control on a real cap in B2e step 4. JVM warmed with 20 calls before measuring; fixed heap and SerialGC to reduce noise.
 
+### B2 amendment: design audit, 2026-10-29 (stage 4; applies `stage4-runtime-verification/none-type-design.md` sections 3 and 4)
+
+The estimate (`negative`) is unchanged. This block supersedes B2a-B2h where they differ; the filed text stays as the record.
+
+**U0. Kind corrected: 2 (emptiness flag), with the data size as a secondary kind 1.** The branch at UDFDataType.java:177 differs only at length 0: for a buffer of length L >= 1 the right operand `buffer.remaining() == 0` is false and line 180 (`typeCodec.deserialize`) runs on both sides of the check. The only value-dependent part is `abstractType.isEmptyValueMeaningless()` (AbstractType.java:458, default false; true for `IntegerType` at IntegerType.java:90 and for `Int32Type` at Int32Type.java:56). The reading that matters for the claim is therefore (i) what the branch changes at L = 0 and (ii) that at L >= 1 the allocation does not depend on the check. "caps" is used only if the true branch reduces or refuses an allocation that the false branch would make at equal operand; the true branch here returns null, so it can only save one small object at L = 0.
+
+**U1. Audit corrections to the filed B2.** (a) Citations re-read in `cassandra/cassandra-5.0.9/`: UDFDataType.java:120, 175-181; AbstractType.java:458-461, 582, 594; Int32Type.java:56 and the other overrides listed in A1 (grep of `isEmptyValueMeaningless`: DateType, FloatType, TimestampType, AbstractTimeUUIDType, Int32Type, LongType, CounterColumnType, InetAddressType, IntegerType, LexicalUUIDType, UUIDType, DoubleType, DecimalType, ReversedType, BooleanType) all hold; the control line is `if (l > maxValueSize)` at AbstractType.java:594 inside `read(ValueAccessor, DataInputPlus, int)` at 582. (b) The filed sweep uses `Int32Type` at lengths 1 KiB to 64 MiB: an int32 value is 4 bytes, so a long `Int32Type` buffer is not a valid value (the driver codec rejects it); the type that is "meaningless when empty" and accepts any length is `IntegerType` (varint, a `BigInteger`), so the sweep uses `IntegerType` (check can be true at L = 0) against `BytesType` (check never true) and keeps `Int32Type` only at L = 0 and L = 4. (c) The filed B2b(3) yaml variants (`max_value_size`, `native_transport_max_frame_size` at 1MiB) are dropped: `compose` reads no configuration (A1), so a yaml variant cannot be a branch flip, and the unit JVM has no frame decoder. (d) The ListType question in B2f is dropped from the prediction (open question, not needed). (e) `-XX:+UseSerialGC` is dropped (G1 default).
+
+**U2. Launcher.** Plain `java -Xmx1g`, not `ant testsome`, `-Dcassandra.config=` the copy's `test/conf/cassandra.yaml`, the JDK 11 module flags of `conf/jvm11-server.options`, `DatabaseDescriptor.daemonInitialization()` first; probe compiled by `javac` into a separate directory (`UDFDataType.wrap` and `compose` are public); never copied into a tree. Build: `copy-source.sh ~/s4-none`, `ant build-test`, on `pc41` only. Pass A (no agent) for allocation, pass B (Byteman, a rule at `UDFDataType.compose` line 180 calling a static counter) for the reach counter: line 180 must run for every call except the null buffer and the L = 0 `IntegerType` call.
+
+**U3. Sweep, arms, instruments.** Length L in {0, 1, 1 KiB, 1 MiB, 16 MiB, 64 MiB}; types `BytesType` (check false at L = 0) and `IntegerType` (check true at L = 0); `Int32Type` at L = 0 (check true, null) and L = 4 (value); a null buffer (check true by `buffer == null`). Per call a window `getThreadAllocatedBytes` before and after `UDFDataType.wrap(type, false).compose(ProtocolVersion.CURRENT, buffer)` (the `wrap` outside the window); record the result class (null or not). 5 repetitions per cell, 20 warm-up calls (2 for L >= 1 MiB). The buffer content is a positive `BigInteger` pattern (first byte 0x01) for IntegerType. Arm order in one JVM: EMPTY (two readings with nothing between), then null buffer, then every cell in the order listed, then L = 0 and L = 1 MiB cells repeated once (the noise floor: two identical calls). Branch-flip pair at L = 0: `IntegerType` (check true) against `BytesType` (check false); at L >= 1 the same-type comparison is the sweep itself (no branch change).
+Control (positive, design section 3.5): `BytesType.instance.read(ByteBufferAccessor.instance, in, 1024)` on a `DataInputBuffer` whose vint length is 2048 must throw `IOException` ("exceeds the maximum of 1024", AbstractType.java:594-597): a real size cap in the same harness, shown to refuse an allocation that `compose` has no counterpart for. Positive allocation control C1: `new byte[L]` through the same window reads L + 16.
+
+**B2f (amended). Frozen predictions.** Bytes, medians of five repetitions, pass A.
+- R1 (reach, pass B): line 180 runs for every call except the null buffer and the `IntegerType` and `Int32Type` L = 0 calls.
+- R2 (the check's own effect at L = 0): the null buffer and the L = 0 `IntegerType` and `Int32Type` calls return null and allocate at most 256 each; the L = 0 `BytesType` call returns a non-null empty value and allocates at most 1024; their difference is at most 1024, which is below the heap noise of about 16 MiB by four orders.
+- R3 (data follows the codec, not the check): for `IntegerType`, allocation divided by L lies in [1.0, 4.0] for L >= 1 MiB; for `BytesType`, allocation at every L is at most 4 L + 1024 (a view or a copy; which of the two is not predicted).
+- R4 (noise floor): two identical L = 0 calls differ by at most 64; two identical L = 1 MiB `IntegerType` calls differ by at most 1 percent of L; EMPTY at most 16.
+- R5 (controls): C1 in [L + 16, L + 32]; the 2048-length read throws `IOException` whose message contains "exceeds the maximum of 1024".
+- R6 (Int32Type): L = 4 returns a non-null value; its allocation is at most 1024.
+
+**B2g (amended). Conclusions table.** The first matching row, in this order.
+
+| Reading | Meaning | Verdict | Effect on the constraint |
+|---|---|---|---|
+| R1 fails (line 180 not reached where predicted), or a result class differs from R2/R6 | the check did not run as traced | Invalid | undetermined |
+| C1 outside R5, the 2048 read does not throw, or EMPTY above 16 | the instrument could not show an effect | Not confirmed | undetermined |
+| R1 to R6 hold | the check saves at most one small object at L = 0 and changes nothing at L >= 1; the allocation follows the codec and the data | Confirmed | does not cap |
+| Any L >= 1 cell shows an allocation difference between the two types that cannot come from the codec, or the L = 0 difference exceeds 1024 | the check gates more than traced | Refuted | caps if the true branch is the smaller one at equal operand, otherwise undetermined |
+| A difference below the noise floor of R4 | not resolved | Not confirmed | undetermined |
+
+**B2h (amended). Controls.** C1, the 2048-length read (positive), EMPTY, the null buffer, `Int32Type`, and the repeated cells as the noise floor.
+
+**U4. Unit-tier limit (kind 2).** This is a unit-tier measurement only. The cluster tier is `n/a` (B3).
+
 ### B3. Cluster tier
+
+**B3 amendment, 2026-10-29: `n/a: operand has no size.`** The branch differs only at length 0, an object of tens of bytes, which is below the heap noise of about 16 MiB with G1; the filed B3 only restates that heap follows the argument data (the expected operand effect, not a finding), and enabling UDFs (`user_defined_functions_enabled`) adds a sandbox for no information about the check. The filed B3a-B3h below are not run; they stay as the record. The unit tier alone settles this case.
+
 
 **B3a. Environment and build.** One node (second optional) built from the local copy, JDK 11, `ant jar`; data, commitlog, hints under `$WORK/data` on local disk. `cassandra.yaml`: `user_defined_functions_enabled: true` (Config.java:588; needs restart), `user_defined_functions_threads_enabled` left true (default Config.java:627). JVM: `-Xms1g -Xmx1g`, G1, `-Xlog:gc*:file=$WORK/gc.log`. Client: `cqlsh` plus a small driver script.
 
@@ -112,4 +150,6 @@ Outcomes: null or (empty and meaningless-when-empty) returns null, which for `RE
 
 ## D. Stage-4 feedback
 
-`none yet`
+`done 2026-10-29` (unit tier only, kind 2; B3 amended `n/a: operand has no size`). Results: [`results/none-compose-buffer_remaining--autonomous.md`](../../stage4-runtime-verification/results/none-compose-buffer_remaining--autonomous.md). **Verdict: Confirmed - does not cap; outcome class true negative** (estimate `negative`, effect `does not cap`). The check changes the outcome only at length 0: null buffer, `IntegerType` L = 0 and `Int32Type` L = 0 return null (0 bytes, line 180 not reached), `BytesType` L = 0 returns an empty buffer (48 bytes); for L = 1 .. 64 MiB line 180 runs for both types, `BytesType` allocates 48 bytes at every L (the codec returns a view) and `IntegerType` allocates L + 56; noise floor 0; control `BytesType.read` with a 2048 vint and max 1024 threw (AbstractType.java:594). All frozen predictions held.
+
+Audit feedback for stage 3 (2026-10-29): (1) operand kind is 2 (an emptiness flag), as the drafts file said, not a data-size operand; (2) the filed sweep used `Int32Type` for large L, but an int32 value is 4 bytes; the type that is meaningless when empty and accepts any length is `IntegerType`; (3) the filed yaml variants (`max_value_size`, frame limit) do not reach `compose` and were dropped; (4) the filed ListType open question is unnecessary; (5) B3 is `n/a`. Citations held (UDFDataType.java:120, 175-181; AbstractType.java:458, 582, 594; the `isEmptyValueMeaningless` overrides listed in A1).

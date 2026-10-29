@@ -1,0 +1,17 @@
+# Byteman rules for no_constraint-hascomponent-i_nextsize--autonomous.
+# F = hasComponent returned false (line 654, i >= nextSize): fields i, nextSize. D = deserializeOne entered. Trace file from -Dstage4.trace.
+RULE hascomponent_false
+CLASS org.apache.cassandra.db.ClusteringPrefix$Deserializer
+METHOD hasComponent
+AT LINE 654
+IF TRUE
+DO traceOpen("cp", System.getProperty("stage4.trace")); traceln("cp", "F " + $i + " " + $0.nextSize)
+ENDRULE
+
+RULE deserializeone_entry
+CLASS org.apache.cassandra.db.ClusteringPrefix$Deserializer
+METHOD deserializeOne
+AT ENTRY
+IF TRUE
+DO traceOpen("cp", System.getProperty("stage4.trace")); traceln("cp", "D " + $0.deserializedSize + " " + $0.nextSize)
+ENDRULE

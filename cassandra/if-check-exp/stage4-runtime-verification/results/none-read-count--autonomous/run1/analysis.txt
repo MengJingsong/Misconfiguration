@@ -1,0 +1,49 @@
+N | F1 | F2 | T1 | T2 | T1-F1 | 4N | c1 | retained dF / dT | c2 delta | pass B hits F1/T1 (calls)
+32 | 56 | 56 | 392 | 392 | 336 | 128 | 144 | -3496 / 0 | 37021664 | 0/14000 (14000)
+128 | 56 | 56 | 776 | 776 | 720 | 512 | 528 | -10488 / 38472 | 105941712 | 0/14000 (14000)
+1536 | 56 | 56 | 6408 | 6408 | 6352 | 6144 | 6160 | 0 / -33496 | 104915640 | 0/14000 (14000)
+16384 | 56 | 56 | 65800 | 65800 | 65744 | 65536 | 65552 | 0 / -26576 | 104826720 | 0/3500 (3500)
+131072 | 56 | 56 | 525168 | 525168 | 525112 | 524288 | 524304 | -6992 / -62872 | 208905112 | 0/700 (700)
+1048576 | 56 | 56 | 4200112 | 4200112 | 4200056 | 4194304 | 4194320 | 0 / 138416 | 126106056 | 0/140 (140)
+EXPECTED: N=32 P1 pass B: F1/F2 hits 0, T1/T2 hits = calls (14000/14000, 14000/14000) - yes
+EXPECTED: N=32 P2 F1 <= 512 (56) - yes
+EXPECTED: N=32 P3 T1-F1 in [4N+16, 4N+640] (336 vs [144, 768]) - yes
+EXPECTED: N=32 P4 |F1-F2|<=32 (0), |T1-T2|<=64 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: N=32 P6 retained |dF|,|dT| <= 2 MiB (-3496, 0) - yes
+EXPECTED: N=32 P7 C1 in [4N+16, 4N+32] (144); C2 delta >= 90 MiB (37021664) - NO
+EXPECTED: N=128 P1 pass B: F1/F2 hits 0, T1/T2 hits = calls (14000/14000, 14000/14000) - yes
+EXPECTED: N=128 P2 F1 <= 512 (56) - yes
+EXPECTED: N=128 P3 T1-F1 in [4N+16, 4N+640] (720 vs [528, 1152]) - yes
+EXPECTED: N=128 P4 |F1-F2|<=32 (0), |T1-T2|<=64 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: N=128 P6 retained |dF|,|dT| <= 2 MiB (-10488, 38472) - yes
+EXPECTED: N=128 P7 C1 in [4N+16, 4N+32] (528); C2 delta >= 90 MiB (105941712) - yes
+EXPECTED: N=1536 P1 pass B: F1/F2 hits 0, T1/T2 hits = calls (14000/14000, 14000/14000) - yes
+EXPECTED: N=1536 P2 F1 <= 512 (56) - yes
+EXPECTED: N=1536 P3 T1-F1 in [4N+16, 4N+640] (6352 vs [6160, 6784]) - yes
+EXPECTED: N=1536 P4 |F1-F2|<=32 (0), |T1-T2|<=64 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: N=1536 P6 retained |dF|,|dT| <= 2 MiB (0, -33496) - yes
+EXPECTED: N=1536 P7 C1 in [4N+16, 4N+32] (6160); C2 delta >= 90 MiB (104915640) - yes
+EXPECTED: N=16384 P1 pass B: F1/F2 hits 0, T1/T2 hits = calls (3500/3500, 3500/3500) - yes
+EXPECTED: N=16384 P2 F1 <= 512 (56) - yes
+EXPECTED: N=16384 P3 T1-F1 in [4N+16, 4N+640] (65744 vs [65552, 66176]) - yes
+EXPECTED: N=16384 P4 |F1-F2|<=32 (0), |T1-T2|<=64 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: N=16384 P4 (T-F) >= 10 x larger spread (65744 vs 10) - yes
+EXPECTED: N=16384 P6 retained |dF|,|dT| <= 2 MiB (0, -26576) - yes
+EXPECTED: N=16384 P7 C1 in [4N+16, 4N+32] (65552); C2 delta >= 90 MiB (104826720) - yes
+EXPECTED: N=131072 P1 pass B: F1/F2 hits 0, T1/T2 hits = calls (700/700, 700/700) - yes
+EXPECTED: N=131072 P2 F1 <= 512 (56) - yes
+EXPECTED: N=131072 P3 T1-F1 in [4N+16, 4N+640] (525112 vs [524304, 524928]) - NO
+EXPECTED: N=131072 P4 |F1-F2|<=32 (0), |T1-T2|<=64 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: N=131072 P4 (T-F) >= 10 x larger spread (525112 vs 10) - yes
+EXPECTED: N=131072 P6 retained |dF|,|dT| <= 2 MiB (-6992, -62872) - yes
+EXPECTED: N=131072 P7 C1 in [4N+16, 4N+32] (524304); C2 delta >= 90 MiB (208905112) - yes
+EXPECTED: N=1048576 P1 pass B: F1/F2 hits 0, T1/T2 hits = calls (140/140, 140/140) - yes
+EXPECTED: N=1048576 P2 F1 <= 512 (56) - yes
+EXPECTED: N=1048576 P3 T1-F1 in [4N+16, 4N+640] (4200056 vs [4194320, 4194944]) - NO
+EXPECTED: N=1048576 P4 |F1-F2|<=32 (0), |T1-T2|<=64 (0), EMPTY<=16 (0,0) - yes
+EXPECTED: N=1048576 P4 (T-F) >= 10 x larger spread (4200056 vs 10) - yes
+EXPECTED: N=1048576 P6 retained |dF|,|dT| <= 2 MiB (0, 138416) - yes
+EXPECTED: N=1048576 P7 C1 in [4N+16, 4N+32] (4194320); C2 delta >= 90 MiB (126106056) - yes
+EXPECTED: P2 spread of F1 across N <= 64 (0) - yes
+EXPECTED: P5 data and file-pointer checks: no MISMATCH lines (0), every arm data=ok - yes
+SOME EXPECTED DO NOT HOLD

@@ -48,7 +48,7 @@ declares the tiers `n/a`. If the audit cannot make a design for a case, the `n/a
    by the branch**, separate from the growth caused by the operand.
 5. **Positive control.** The same instrument on a known capping setting that binds on the same resource (a closed `Confirmed` case, for example
    `memtable_heap_space`), shown to move the reading. Without it, "flat" cannot be told from "the instrument could not see an effect".
-6. **Noise floor.** Run the instrument twice on identical input and record the difference. A branch effect smaller than this is "not resolved",
+6. **Noise floor.** Freeze both a relative bound and an absolute byte floor for small cells (the three kind-2 cases run 2026-10-29 failed a purely relative criterion on cells of 1,000 rows while every large cell was within 3%). Run the instrument twice on identical input and record the difference. A branch effect smaller than this is "not resolved",
    never "none".
 
 ## 4. Prediction and conclusions table (frozen before any reading)
@@ -62,6 +62,7 @@ State numbers: the expected per-call allocation for each value, and the toleranc
 | Usage grows with the operand, but equally on both branches | usage follows the data, not the check | **Confirmed** | `does not cap` |
 | Control did not move, or the check never executed | the experiment could not show an effect | **Not confirmed** / **Invalid** (never Confirmed) | `undetermined` |
 | Difference below the noise floor | not resolved | **Not confirmed** | `undetermined` |
+| Only a transient allocation differs by branch (a redundant copy skipped); retained size equal on both branches | the check avoids work, it does not bound usage | **Confirmed** | `does not cap` (ruling used for `resizeto-newcapacity` and `capacity-newcapacity`, 2026-10-29; a reader who counts any avoided allocation as `caps` would call them false negatives, so the results files show the figures for both readings) |
 
 ## 5. Outcome class
 
@@ -87,7 +88,7 @@ outcomes are: *true negative* (does not cap), *false negative* (the branch gates
 
 ## 8. Status
 
-- Proposal only. The eight `none` cases already closed (`transform-stack-capacity-splice-newCount`, the two `hints-*` buffer cases, `sai-SegmentRowIdOrdinalPairs-add-capacity`,
+- First run 2026-10-29: 13 cases at the unit tier (10 Confirmed does-not-cap true negatives; 3 kind-2 CQL cases Not confirmed on small-cell noise: see HANDOFF.md). The eight `none` cases already closed (`transform-stack-capacity-splice-newCount`, the two `hints-*` buffer cases, `sai-SegmentRowIdOrdinalPairs-add-capacity`,
   `compression-metadata-writer-addOffset-maxCount`, `transition-bytes-collector-add-buffer-length`, `trie-pathreconstructor-keybytes-addPathBytes-growth`, `largestRatio-flushLargestMemtable`)
   were run with a design written for each case before this file existed; they are examples of kinds 1 and 3, not of this template.
 - Counts by kind among the 31 `n/a` cases (approximate, from the Ground text): kind 1 about 8, kind 2 about 18, kind 3 about 5.

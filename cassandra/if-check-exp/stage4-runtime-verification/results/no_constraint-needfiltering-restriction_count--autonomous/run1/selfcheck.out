@@ -1,0 +1,11 @@
+HOLD 5 windows (R, Fp, Fx, C1, C2) x 3 N, 7 timed values in each pass
+HOLD rows: Fx returned 1 row, C1 N rows, C2 10 rows
+HOLD proof: 6 rejections and 6 accepted-with-line-992 statements (3 N x 2 passes) :: 6 6
+HOLD byteman: every R cell reaches line 992 and returns true >= 10 times and never false
+HOLD byteman: F cells evaluate the helper at most once (the test proof call)
+HOLD recomputed W2: R <= 262144 B and ratio N-large/N-small in [0.8,1.25] :: [13480, 13384, 13384]
+HOLD recomputed W3: Fx(large) >= 1e7, >= 20x Fx(small), >= 50x R(large) :: [398144, 3925912, 39205864]
+HOLD recomputed W4: C1 >= 20x, C2 <= 0.1 C1 at large and within [0.5,2] of own at small :: C1 [980176, 9933968, 98885952] C2 [14688, 14896, 14896]
+FAIL recomputed W5: pass-to-pass <= 5%, repeat spread <= 10% :: 0.02723 0.11745
+Fp medians [12808, 12688, 12688] R medians [13480, 13384, 13384]
+SELFCHECK FAILURES

@@ -1,0 +1,18 @@
+# Byteman rules for none-addall-size--autonomous: which branch of RangeTombstoneList.addAll (line 213) each call takes.
+# ADD = reached line 215 (size > 10 * tombstones.size, per-element add()); MRG = reached line 220 (two-pointer merge).
+# Fields: this.size, other.size, this capacity. Trace file from -Dstage4.trace.
+RULE addall_add_branch
+CLASS org.apache.cassandra.db.RangeTombstoneList
+METHOD addAll
+AT LINE 215
+IF TRUE
+DO traceOpen("ra", System.getProperty("stage4.trace")); traceln("ra", "ADD " + $0.size + " " + $1.size + " " + $0.starts.length)
+ENDRULE
+
+RULE addall_merge_branch
+CLASS org.apache.cassandra.db.RangeTombstoneList
+METHOD addAll
+AT LINE 220
+IF TRUE
+DO traceOpen("ra", System.getProperty("stage4.trace")); traceln("ra", "MRG " + $0.size + " " + $1.size + " " + $0.starts.length)
+ENDRULE

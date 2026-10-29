@@ -1,0 +1,46 @@
+NOISE arm P: block medians 0 / 0, ranges 0 / 0 -> floor 0 bytes
+NOISE arm G: block medians 300064 / 300064, ranges 0 / 0 -> floor 0 bytes
+EMPTY/baseline: see STAGE4 check lines in junit log
+PRED (i) arm P <= 4096 B                PASS  max P median 0
+  G S1 n=10000 m=500: median 300064 expected 300064 (+0.00%) cap 15000 expected 15000
+  G S1 n=10000 m=999: median 300064 expected 300064 (+0.00%) cap 15000 expected 15000
+  G S1 n=10000 m=1000: median 300064 expected 300064 (+0.00%) cap 15000 expected 15000
+  G S1 n=10000 m=1001: median 300064 expected 300064 (+0.00%) cap 15000 expected 15000
+  G S1 n=10000 m=2000: median 300064 expected 300064 (+0.00%) cap 15000 expected 15000
+  G S1 n=10000 m=10000: median 750128 expected 750128 (+0.00%) cap 22500 expected 22500
+  G S2 n=9999 m=1000: median 300056 expected 300044 (+0.00%) cap 14999 expected 14999
+  G S2 n=10000 m=1000: median 300064 expected 300064 (+0.00%) cap 15000 expected 15000
+  G S2 n=10001 m=1000: median 300104 expected 300104 (+0.00%) cap 15002 expected 15002
+  G S2 n=10010 m=1000: median 300376 expected 300364 (+0.00%) cap 15015 expected 15015
+PRED (ii) arm G closed form +-10%       PASS  violators []
+PRED (iii) S1 m=999|1000 arm P          PASS  median 0 vs 0, growth-adjusted diff 0, tolerance 1024
+PRED (iii) S2 n=10000|10001 arm P       PASS  median 0 vs 0, growth-adjusted diff 0, tolerance 1024
+PRED (iii) twin T arm P                 PASS  T-merge 0, T-add 0 (bytes per whole operation)
+PRED (iii) S1 m=999|1000 arm G          PASS  median 300064 vs 300064, growth-adjusted diff 0, tolerance 1024
+PRED (iii) S2 n=10000|10001 arm G       PASS  median 300064 vs 300104, growth-adjusted diff 0, tolerance 1024
+PRED (iii) twin T arm G                 PASS  T-merge 300064, T-add 300064 (bytes per whole operation)
+PRED (iv) size == n+m, equals(ref)      PASS  all rows size ok=True, equals ok=True
+PRED (iv) branch == (n > 10*m) in Byteman PASS  ADD calls 20080, MRG calls 190, contradictions []
+PRED    branch n=10000 m=500            PASS  seen ['ADD']
+PRED    branch n=10000 m=999            PASS  seen ['ADD']
+PRED    branch n=10000 m=1000           PASS  seen ['MRG']
+PRED    branch n=10001 m=1000           PASS  seen ['ADD']
+PRED    branch n=10010 m=1000           PASS  seen ['ADD']
+PRED    branch n=9999 m=1000            PASS  seen ['MRG']
+PRED (v) deep per element equal +-1%    PASS  per-element bytes min 240.01 max 240.02 spread 0.003%
+PRED (v) twin deep equal arm P          PASS  T-merge 2860224, T-add 2860224, diff 0
+PRED (v) twin deep equal arm G          PASS  T-merge 2940224, T-add 2940224, diff 0
+PRED (vi) counter T-add - T-merge arm P PASS  diff 240000, 1000 x bsz = 240000 (bsz 240), capacities 11000 / 11000
+PRED (vi) counter T-add - T-merge arm G PASS  diff 240000, 1000 x bsz = 240000 (bsz 240), capacities 15000 / 15000
+  COUNTER P S1 n=10000 m=500 unshared 5249872 deep 2730224
+  COUNTER P S1 n=10000 m=999 unshared 5499384 deep 2859976
+  COUNTER P S1 n=10000 m=1000 unshared 5259872 deep 2860224
+  COUNTER P S1 n=10000 m=1001 unshared 5260144 deep 2860496
+  COUNTER P S1 n=10000 m=2000 unshared 5519872 deep 3120224
+  COUNTER P S1 n=10000 m=10000 unshared 7599872 deep 5200224
+  COUNTER P S2 n=9999 m=1000 unshared 5259384 deep 2859976
+  COUNTER P S2 n=10000 m=1000 unshared 5259872 deep 2860224
+  COUNTER P S2 n=10001 m=1000 unshared 5500384 deep 2860496
+  COUNTER P S2 n=10010 m=1000 unshared 5504872 deep 2862824
+PRED (vii) control gf=3.0               PASS  control median 600064 (expected 600064), base 300064, ratio 2.00, cap 30000
+PRED (vii) unshared rise                PASS  rise 300000 (expected 300000 +-1%)

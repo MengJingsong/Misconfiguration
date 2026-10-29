@@ -1,0 +1,19 @@
+NOISE (4,4): block medians 4160 / 4160, ranges 0 / 0 -> floor 0 bytes
+PRED noise floor < 256 B                PASS  floor 0
+  (1,1): median 1040 range 0 expected 1040 (+0) deserializedSize [1] thrown ['-']
+  (2,1): median 1040 range 0 expected 1040 (+0) deserializedSize [1] thrown ['-']
+  (2,2): median 2080 range 0 expected 2080 (+0) deserializedSize [2] thrown ['-']
+  (2,4): median 2080 range 0 expected 2080 (+0) deserializedSize [2] thrown ['-']
+  (4,2): median 2080 range 0 expected 2080 (+0) deserializedSize [2] thrown ['-']
+  (4,4): median 4160 range 0 expected 4160 (+0) deserializedSize [4] thrown ['-']
+  (4,8): median 4160 range 0 expected 4160 (+0) deserializedSize [4] thrown ['-']
+  (8,8): median 8320 range 0 expected 8320 (+0) deserializedSize [8] thrown ['-']
+  (8,16): median 8320 range 0 expected 8320 (+0) deserializedSize [8] thrown ['-']
+  (16,16): median 16640 range 0 expected 16640 (+0) deserializedSize [16] thrown ['-']
+PRED allocation = min(S,nextSize) x 1040 PASS  violators []
+PRED flip pair (2, 2)|(2, 4)            PASS  medians 2080 vs 2080, diff 0, tolerance 256
+PRED flip pair (4, 4)|(4, 8)            PASS  medians 4160 vs 4160, diff 0, tolerance 256
+PRED flip pair (8, 8)|(8, 16)           PASS  medians 8320 vs 8320, diff 0, tolerance 256
+PRED control A (64 KiB)                 PASS  median 262208 expected 262208 ratio to 1 KiB reading 63.0
+PRED control B (max_value_size 512)     PASS  thrown ['IOException'] median bytes 2792 maxValueSize [0]
+PRED false returns per nextSize         PASS  observed {2: 10, 4: 10, 8: 10} expected {2: 10, 4: 10, 8: 10}; deserializeOne entries 610

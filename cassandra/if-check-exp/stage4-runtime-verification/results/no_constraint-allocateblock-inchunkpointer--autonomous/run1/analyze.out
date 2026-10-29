@@ -1,0 +1,64 @@
+PASS i=1: 5 repetitions of F, A, B
+PASS i=1: floor (empty window) <= 1024 :: max 0
+PASS i=1 A: no buffer (<= 1024 B), positions, buffers[i] null :: heap [0, 0, 0, 0, 0]
+PASS i=1 A: sizeOnHeap delta == 32+R, retained == S :: delta 64 R 32
+PASS i=1 B: bytes in [N+16, N+512] :: N=512 B=[608, 608, 608, 608, 608]
+PASS i=1 B: positions, buffers[i] allocated with capacity N
+PASS i=1 B: sizeOnHeap delta == 32, retained == S+N :: ratio retained/pos 2.667
+PASS i=1: B - A in [N, N+512]
+PASS i=1: noise, spread over 5 reps <= 256 (A and B)
+PASS i=3: 5 repetitions of F, A, B
+PASS i=3: floor (empty window) <= 1024 :: max 0
+PASS i=3 A: no buffer (<= 1024 B), positions, buffers[i] null :: heap [0, 0, 0, 0, 0]
+PASS i=3 A: sizeOnHeap delta == 32+R, retained == S :: delta 64 R 32
+PASS i=3 B: bytes in [N+16, N+512] :: N=2048 B=[2144, 2144, 2144, 2144, 2144]
+PASS i=3 B: positions, buffers[i] allocated with capacity N
+PASS i=3 B: sizeOnHeap delta == 32, retained == S+N :: ratio retained/pos 2.105
+PASS i=3: B - A in [N, N+512]
+PASS i=3: noise, spread over 5 reps <= 256 (A and B)
+PASS i=7: 5 repetitions of F, A, B
+PASS i=7: floor (empty window) <= 1024 :: max 0
+PASS i=7 A: no buffer (<= 1024 B), positions, buffers[i] null :: heap [0, 0, 0, 0, 0]
+PASS i=7 A: sizeOnHeap delta == 32+R, retained == S :: delta 64 R 32
+PASS i=7 B: bytes in [N+16, N+512] :: N=32768 B=[32864, 32864, 32864, 32864, 32864]
+PASS i=7 B: positions, buffers[i] allocated with capacity N
+PASS i=7 B: sizeOnHeap delta == 32, retained == S+N :: ratio retained/pos 2.006
+PASS i=7: B - A in [N, N+512]
+PASS i=7: noise, spread over 5 reps <= 256 (A and B)
+PASS i=11: 5 repetitions of F, A, B
+PASS i=11: floor (empty window) <= 1024 :: max 0
+PASS i=11 A: no buffer (<= 1024 B), positions, buffers[i] null :: heap [0, 0, 0, 0, 0]
+PASS i=11 A: sizeOnHeap delta == 32+R, retained == S :: delta 64 R 32
+PASS i=11 B: bytes in [N+16, N+512] :: N=524288 B=[524384, 524384, 524384, 524384, 524384]
+PASS i=11 B: positions, buffers[i] allocated with capacity N
+PASS i=11 B: sizeOnHeap delta == 32, retained == S+N :: ratio retained/pos 2.000
+PASS i=11: B - A in [N, N+512]
+PASS i=11: noise, spread over 5 reps <= 256 (A and B)
+PASS i=15: 5 repetitions of F, A, B
+PASS i=15: floor (empty window) <= 1024 :: max 0
+PASS i=15 A: no buffer (<= 1024 B), positions, buffers[i] null :: heap [0, 0, 0, 0, 0]
+PASS i=15 A: sizeOnHeap delta == 32+R, retained == S :: delta 64 R 32
+PASS i=15 B: bytes in [N+16, N+512] :: N=8388608 B=[8388704, 8388704, 8388704, 8388704, 8388704]
+PASS i=15 B: positions, buffers[i] allocated with capacity N
+PASS i=15 B: sizeOnHeap delta == 32, retained == S+N :: ratio retained/pos 2.000
+PASS i=15: B - A in [N, N+512]
+PASS i=15: noise, spread over 5 reps <= 256 (A and B)
+PASS i=19: 5 repetitions of F, A, B
+PASS i=19: floor (empty window) <= 1024 :: max 0
+PASS i=19 A: no buffer (<= 1024 B), positions, buffers[i] null :: heap [0, 0, 0, 0, 0]
+PASS i=19 A: sizeOnHeap delta == 32+R, retained == S :: delta 64 R 32
+PASS i=19 B: bytes in [N+16, N+512] :: N=134217728 B=[134217824, 134217824, 134217824, 134217824, 134217824]
+PASS i=19 B: positions, buffers[i] allocated with capacity N
+PASS i=19 B: sizeOnHeap delta == 32, retained == S+N :: ratio retained/pos 2.000
+PASS i=19: B - A in [N, N+512]
+PASS i=19: noise, spread over 5 reps <= 256 (A and B)
+PASS residue (B - N) differs between values of i by <= 256 :: {1: 96, 3: 96, 7: 96, 11: 96, 15: 96, 19: 96}
+PASS OFF_HEAP i=11: direct gauge delta A == 0, B == N :: [524288, 524288, 524288, 524288, 524288]
+PASS OFF_HEAP i=11: B thread bytes <= 1024 (buffer invisible) :: [168, 168, 168, 168, 168]
+PASS OFF_HEAP i=15: direct gauge delta A == 0, B == N :: [8388608, 8388608, 8388608, 8388608, 8388608]
+PASS OFF_HEAP i=15: B thread bytes <= 1024 (buffer invisible) :: [168, 168, 168, 168, 168]
+PASS OFF_HEAP: B thread bytes equal at i=11 and 15 within 256 :: [168, 168]
+PASS control A (i=22): <= 1024, B in [2^30+16, 2^30+512] :: A=0 B=1073741920
+PASS control C1: advance to S_23 allocates <= 1024, allocatedPos == 2147483392 :: 0 pos 2147483392
+PASS control C2: SpaceExhaustedException, <= 4096 bytes (not 2^31), allocatedPos stays 2147483392 :: 1584 exc SpaceExhaustedException
+SUMMARY 63 PASS, 0 FAIL

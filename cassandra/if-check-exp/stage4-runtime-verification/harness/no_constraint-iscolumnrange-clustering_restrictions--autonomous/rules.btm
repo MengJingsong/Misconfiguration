@@ -1,0 +1,17 @@
+# Byteman rules for no_constraint-iscolumnrange-clustering_restrictions--autonomous (byteman JVM run: counts only, not an instrument).
+# ICR <true|false> = every return of StatementRestrictions.isColumnRange; MARK = start of a (pass, state, N, arm) cell in the test.
+RULE icr_exit
+CLASS org.apache.cassandra.cql3.restrictions.StatementRestrictions
+METHOD isColumnRange
+AT EXIT
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "ICR " + $!)
+ENDRULE
+
+RULE mark
+CLASS org.apache.cassandra.cql3.NoneIsColumnRangeAllocTest
+METHOD mark
+AT ENTRY
+IF TRUE
+DO traceOpen("st", System.getProperty("stage4.trace")); traceln("st", "MARK " + $1)
+ENDRULE

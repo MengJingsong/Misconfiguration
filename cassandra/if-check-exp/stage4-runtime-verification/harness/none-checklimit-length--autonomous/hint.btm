@@ -1,0 +1,8 @@
+# Stage-4 harness, none-checklimit-length--autonomous: counts entries to ChecksummedDataInput.checkLimit(int). Observation only.
+RULE count checkLimit entry
+CLASS org.apache.cassandra.hints.ChecksummedDataInput
+METHOD checkLimit(int)
+AT ENTRY
+IF true
+DO stage4.Count.hit()
+ENDRULE
