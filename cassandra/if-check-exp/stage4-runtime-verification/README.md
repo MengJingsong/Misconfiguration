@@ -131,6 +131,11 @@ because of it.
 
 Once stage 4 has run, a case is classed by comparing its stage-3 estimate with the stage-4 effect on the constraint (stage 4 taken as the truth): **true positive** (estimate `positive`, effect `caps`), **false positive** (`positive`, `does not cap`), **true negative** (`negative`, `does not cap`), **false negative** (`negative`, `caps`), or **undetermined** (the unit and cluster tiers disagree, or a tier could not settle the effect: Not confirmed, partial). `caps` includes soft caps and caps with a recorded bypass. The class is recorded beside the verdict; Confirmed / Refuted and the Effect field keep their meaning, and a refuted estimate is still not re-estimated. Abbreviations in tables: TP, FP, TN, FN.
 
+**Weak classes (rule of 2026-10-29).** A case that would be **undetermined** only because its cluster tier could not settle the effect (Not confirmed, Partial or Refuted) is classed from its **unit tier alone**, with the prefix *weak*, when the unit tier is Confirmed or Refuted: the unit effect is `does not cap` or `caps` as the unit verdict gives it, and the class compares it with the estimate as above: **weak true positive**, **weak false positive**, **weak true negative**, **weak false negative**. A case whose unit tier is Not confirmed (or Invalid), or that has only a unit tier that did not settle, stays **undetermined**. The rule is general and applies to every case, now and later.
+- Weak classes are counted **separately** from TP/FP/TN/FN; they are never added to the strong counts.
+- Where the cluster tier contradicts the unit effect (cluster Refuted, or a cluster Confirmed that disagrees with a unit Refuted), the index cell says `(cluster disagrees)`.
+- The per-tier verdicts and the Effect field in the results file are not edited. If a later run settles the cluster tier, the weak class is replaced by the strong class.
+
 The results file records it on the line after Status (`Outcome class:`) and §8 gives the one-line reason; the stage-3 index carries it in the Outcome class column.
 
 **Output, in results §1:** the ratings, a list of recommendations, what was done
