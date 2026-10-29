@@ -281,6 +281,7 @@ is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds 
 
 - **Any case file:** start with [`case-notes.md`](case-notes.md), which lists what the closed cases teach, which are cheap
   to start with and which need a cluster before they say anything, and the worked examples.
+- **A `none`-type case (no limit to vary):** [`none-type-design.md`](none-type-design.md) (operand-sweep design, proposed 2026-10-28).
 - **Setting up a node:** [`environment.md`](environment.md).
 
 **Scripts are per case, not a shared pattern.** Each case's workload, observables and instruments differ (a unit test, a
