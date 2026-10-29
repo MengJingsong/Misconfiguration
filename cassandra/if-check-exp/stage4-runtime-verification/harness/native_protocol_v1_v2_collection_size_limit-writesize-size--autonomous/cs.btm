@@ -1,0 +1,24 @@
+# Byteman rules for native_protocol_v1_v2_collection_size_limit-writesize-size--autonomous (B3 amendment): every CodecUtils.pack / writeSize call on the node.
+RULE cs pack entry
+CLASS org.apache.cassandra.cql3.functions.types.CodecUtils
+METHOD pack
+AT ENTRY
+IF true
+DO traceln("CS_PACK ms=" + System.currentTimeMillis() + " ver=" + $3 + " elements=" + $2 + " buffers=" + $1.length)
+ENDRULE
+
+RULE cs writeSize entry
+CLASS org.apache.cassandra.cql3.functions.types.CodecUtils
+METHOD writeSize
+AT ENTRY
+IF true
+DO traceln("CS_WRITESIZE ms=" + System.currentTimeMillis() + " ver=" + $3 + " size=" + $2)
+ENDRULE
+
+RULE cs pack exit
+CLASS org.apache.cassandra.cql3.functions.types.CodecUtils
+METHOD pack
+AT EXIT
+IF true
+DO traceln("CS_PACK_RET ms=" + System.currentTimeMillis() + " len=" + $!.remaining())
+ENDRULE

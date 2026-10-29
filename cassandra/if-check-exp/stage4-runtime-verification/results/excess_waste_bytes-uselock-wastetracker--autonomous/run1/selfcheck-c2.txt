@@ -1,0 +1,70 @@
+PASS  v100m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v100m-all.out latch 
+PASS  v100m-all.out burst w=1 calls=102625 in [102623,102631] 
+PASS  v100m-all.out burst w=1024 calls=102534 in [102530,102538] 
+PASS  v100m-all.out burst w=102400 calls=1025 in [1021,1029] 
+PASS  v100m-all.out burst w=1048576 calls=100 in [97,105] 
+PASS  v100m-all.out burst w=13107200 calls=8 in [5,13] 
+PASS  v100m-all.out burst w=104856576 calls=2 in [-2,6] 
+PASS  v100m-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v100m-all.out control offheap_objects 8 MiB first clean at 0.500 x limit 
+PASS  v100m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v100m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v100m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v100m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v100m-all.out sentinel vs normal owns equal (heap_buffers) 
+PASS  v100m-all.out sentinel vs normal owns equal (offheap_objects) 
+PASS  v10m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v10m-all.out latch 
+PASS  v10m-all.out burst w=1 calls=10303 in [10300,10308] 
+PASS  v10m-all.out burst w=1024 calls=10263 in [10260,10268] 
+PASS  v10m-all.out burst w=102400 calls=103 in [99,107] 
+PASS  v10m-all.out burst w=1048576 calls=10 in [7,15] 
+PASS  v10m-all.out burst w=1310720 calls=8 in [5,13] 
+PASS  v10m-all.out burst w=10484736 calls=2 in [-2,6] 
+PASS  v10m-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v10m-all.out control offheap_objects 8 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out sentinel vs normal owns equal (heap_buffers) 
+PASS  v10m-all.out sentinel vs normal owns equal (offheap_objects) 
+PASS  v1m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v1m-all.out latch 
+PASS  v1m-all.out burst w=1 calls=1042 in [1039,1047] 
+PASS  v1m-all.out burst w=1024 calls=1027 in [1023,1031] 
+PASS  v1m-all.out burst w=102400 calls=11 in [7,15] 
+PASS  v1m-all.out burst w=1048576 calls=1 in [-2,6] 
+PASS  v1m-all.out burst w=131072 calls=8 in [5,13] 
+PASS  v1m-all.out burst w=1047552 calls=2 in [-2,6] 
+PASS  v1m-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v1m-all.out control offheap_objects 8 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out sentinel vs normal owns equal (heap_buffers) 
+PASS  v1m-all.out sentinel vs normal owns equal (offheap_objects) 
+PASS  cluster cells with logs: 6 of 6 
+PASS  valid cell c2-cold (S5) errors 0/16538, flushes used 55, attempts 16784, C=10485760, flips 0, fails 1
+PASS  valid cell c2-cold128 (S5) errors 0/11404, flushes used 108, attempts 11801, C=10485760, flips 0, fails 1
+PASS  valid cell c2-hot (S5) errors 0/4123, flushes used 41, attempts 63437, C=10485760, flips 43, fails 59101
+PASS  valid cell c2-hot-v100m (S5) errors 0/4411, flushes used 41, attempts 65883, C=104857600, flips 43, fails 61261
+PASS  valid cell c2-hot-v1m (S5) errors 0/3674, flushes used 35, attempts 58751, C=1048576, flips 37, fails 54875
+PASS  valid cell c2-hot128 (S5) errors 0/3029, flushes used 36, attempts 53817, C=10485760, flips 38, fails 50586
+NOTE  case2 hot constants 1MiB/10MiB/100MiB ops medians {'v1m': 188000, 'v10m': 186000, 'v100m': 188000} ratio 1.01 -> FLAT (<=1.3) 
+NOTE  case2 hot constants 1MiB/10MiB/100MiB onheap medians {'v1m': 409657671.7, 'v10m': 392111849.5, 'v100m': 401817468.9} ratio 1.04 -> FLAT (<=1.3) 
+NOTE  case2 hot constants 1MiB/10MiB/100MiB enq medians {'v1m': 179078430.7, 'v10m': 179083149.3, 'v100m': 179137151.0} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  case2 hot pool enq medians {'128': 44895830.0, '512': 179083149.3} ratio 3.99 -> ratio >1.3, order 128<512 
+NOTE  case2 hot pool onheap medians {'128': 343698047.0, '512': 392111849.5} ratio 1.14 -> FLAT (<=1.3) 
+NOTE  case2 cold pool enq medians {'128': 45818576.9, '512': 179589087.2} ratio 3.92 -> ratio >1.3, order 128<512 
+NOTE  case2 cold pool onheap medians {'128': 80792780.8, '512': 219513094.1} ratio 2.72 -> ratio >1.3, order 128<512 
+NOTE  regime c2-hot: flips 43 fails 59101 attempts 63437 
+NOTE  regime c2-cold: flips 0 fails 1 attempts 16784 
+NOTE  regime c2-hot128: flips 38 fails 50586 attempts 53817 
+NOTE  regime c2-cold128: flips 0 fails 1 attempts 11801 
+NOTE  regime c2-hot-v1m: flips 37 fails 54875 attempts 58751 
+NOTE  regime c2-hot-v100m: flips 43 fails 61261 attempts 65883 
+
+TALLY: 55 PASS, 0 FAIL, 13 NOTE

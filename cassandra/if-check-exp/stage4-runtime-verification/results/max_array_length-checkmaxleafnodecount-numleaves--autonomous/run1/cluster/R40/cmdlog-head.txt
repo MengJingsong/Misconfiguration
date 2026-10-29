@@ -1,0 +1,60 @@
+== R40 rows=40000000 buffer=1024MiB slot=5 start 1793234608326
+conf written /users/jason92/stage4-tmp/b34/c2/R40/conf/cassandra.yaml; stage4 lines:
+cluster_name: stage4-sai
+num_tokens: 1
+endpoint_snitch: SimpleSnitch
+listen_address: 127.0.0.6
+rpc_address: 127.0.0.6
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.6:7000"
+data_file_directories:
+    - /users/jason92/stage4-tmp/b34/c2/R40/data
+commitlog_directory: /users/jason92/stage4-tmp/b34/c2/R40/commitlog
+hints_directory: /users/jason92/stage4-tmp/b34/c2/R40/hints
+saved_caches_directory: /users/jason92/stage4-tmp/b34/c2/R40/saved_caches
+cdc_raw_directory: /users/jason92/stage4-tmp/b34/c2/R40/cdc_raw
+sai_options:
+    segment_write_buffer_size: 1024MiB
+NODE_UP pid=1059108 startup_s=87.1
+$ bin/cqlsh 127.0.0.6 -e 'CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'\''class'\'': '\''SimpleStrategy'\'', '\''replication_factor'\'': 1}'
+
+$ bin/cqlsh 127.0.0.6 -e 'CREATE TABLE IF NOT EXISTS ks.t2 (id bigint PRIMARY KEY, vb bigint, vd decimal)'
+
+$ bin/cqlsh 127.0.0.6 -e 'CREATE CUSTOM INDEX t2_vb_idx ON ks.t2(vb) USING '\''StorageAttachedIndex'\'''
+
+$ bin/cqlsh 127.0.0.6 -e 'CREATE CUSTOM INDEX t2_vd_idx ON ks.t2(vd) USING '\''StorageAttachedIndex'\'''
+
+$ bin/nodetool -p 7699 disableautocompaction ks t2
+
+$ bin/cqlsh 127.0.0.6 -e 'SELECT index_name, is_queryable, is_building FROM system_views.sai_column_indexes'
+
+ index_name | is_queryable | is_building
+------------+--------------+-------------
+  t2_vb_idx |         True |       False
+  t2_vd_idx |         True |       False
+
+(2 rows)
+
+ index_name | is_queryable | is_building
+------------+--------------+-------------
+  t2_vb_idx |         True |       False
+  t2_vd_idx |         True |       False
+
+(2 rows)
+
+$ tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_array_length-checkmaxleafnodecount-numleaves--autonomous/profile-t2.yaml "ops(insert=1)" n=40000000 no-warmup -rate threads=64 -node 127.0.0.
+ 0.4,     1.7,     3.2,     7.9,   100.4,  666.0,  1.98086,      0,      0,       0,       0,       0,       0
+total,                                              40000000,   95667,   95667,   95667,     0.7,     0.4,     2.0,     4.4,    12.4,    30.7,  666.8,  1.96544,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   59,990 op/s  [insert: 59,990 op/s]
+Partition rate            :   59,990 pk/s  [insert: 59,990 pk/s]
+Row rate                  :   59,990 row/s [insert: 59,990 row/s]
+Latency mean              :    1.1 ms [insert: 1.1 ms]
+Latency median            :    0.5 ms [insert: 0.5 ms]
+Latency 95th percentile   :    2.3 ms [insert: 2.3 ms]
+Latency 99th percentile   :    5.7 ms [insert: 5.7 ms]
+Latency 99.9th percentile :   32.1 ms [insert: 32.1 ms]

@@ -1,0 +1,203 @@
+== readings: kind bs N | ctorAlloc blockValuesLen maxBlockIndex flushes(expected) metaBytes bytesOut J_bytes_delta(after adds)
+mono  bs=  1048576 N= 167772160 | ctorAlloc=  8388984 len=  1048576 maxIdx=  1048576 flushes=160(160) meta=1554 out=1554 Jdelta=8388680
+mono  bs=  1048576 N=   1048575 | ctorAlloc=  8388984 len=  1048576 maxIdx=  1048575 flushes=1(1) meta=6 out=6 Jdelta=8388680
+mono  bs=      128 N= 167772160 | ctorAlloc=     1400 len=      128 maxIdx=      128 flushes=1310720(1310720) meta=12754920 out=12754920 Jdelta=1096
+mono  bs=      128 N=       127 | ctorAlloc=     1400 len=      128 maxIdx=      127 flushes=1(1) meta=6 out=6 Jdelta=1096
+mono  bs=    16384 N= 167772160 | ctorAlloc=   131448 len=    16384 maxIdx=    16384 flushes=10240(10240) meta=99645 out=99645 Jdelta=131144
+mono  bs=    16384 N=     16383 | ctorAlloc=   131448 len=    16384 maxIdx=    16383 flushes=1(1) meta=6 out=6 Jdelta=131144
+mono  bs= 16777216 N= 167772160 | ctorAlloc=134218104 len= 16777216 maxIdx= 16777216 flushes=10(10) meta=131 out=83886211 Jdelta=134217800
+mono  bs=       64 N= 167772160 | ctorAlloc=      888 len=       64 maxIdx=       64 flushes=2621440(2621440) meta=25509843 out=25509843 Jdelta=584
+plain bs=  1048576 N= 167772160 | ctorAlloc=  8388984 len=  1048576 maxIdx=  1048576 flushes=160(160) meta=917 out=419431637 Jdelta=8388680
+plain bs=  1048576 N=   1048575 | ctorAlloc=  8388984 len=  1048576 maxIdx=  1048575 flushes=1(1) meta=2 out=2621442 Jdelta=8388680
+plain bs=      128 N= 167772160 | ctorAlloc=     1400 len=      128 maxIdx=      128 flushes=1310720(1310720) meta=10115968 out=432167808 Jdelta=1096
+plain bs=      128 N=       127 | ctorAlloc=     1400 len=      128 maxIdx=      127 flushes=1(1) meta=4 out=324 Jdelta=1096
+plain bs=    16384 N= 167772160 | ctorAlloc=   131448 len=    16384 maxIdx=    16384 flushes=10240(10240) meta=68692 out=419519572 Jdelta=131144
+plain bs=    16384 N=     16383 | ctorAlloc=   131448 len=    16384 maxIdx=    16383 flushes=1(1) meta=4 out=40964 Jdelta=131144
+plain bs= 16777216 N= 167772160 | ctorAlloc=134218104 len= 16777216 maxIdx= 16777216 flushes=10(10) meta=50 out=419430470 Jdelta=134217800
+plain bs=       64 N= 167772160 | ctorAlloc=      888 len=       64 maxIdx=       64 flushes=2621440(2621440) meta=20878977 out=445552257 Jdelta=584
+EXPECTED mono-100-invalid-r1 rejected with the expected message: OK "blockSize must be a power of two, got 100"
+EXPECTED mono-100-invalid-r1 no long[] allocated for the rejected size: OK ctorAlloc=8992
+EXPECTED mono-100-invalid-r2 rejected with the expected message: OK "blockSize must be a power of two, got 100"
+EXPECTED mono-100-invalid-r2 no long[] allocated for the rejected size: OK ctorAlloc=8992
+EXPECTED mono-1048576-full-r1 blockValues.length == blockSize: OK len=1048576
+EXPECTED mono-1048576-full-r1 blockIndex never exceeds blockSize: OK max=1048576
+EXPECTED mono-1048576-full-r1 flush count == ceil(N/bs): OK 160 vs 160
+EXPECTED mono-1048576-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED mono-1048576-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED mono-1048576-full-r2 blockValues.length == blockSize: OK len=1048576
+EXPECTED mono-1048576-full-r2 blockIndex never exceeds blockSize: OK max=1048576
+EXPECTED mono-1048576-full-r2 flush count == ceil(N/bs): OK 160 vs 160
+EXPECTED mono-1048576-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED mono-1048576-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED mono-1048576-short-r1 blockValues.length == blockSize: OK len=1048576
+EXPECTED mono-1048576-short-r1 blockIndex never exceeds blockSize: OK max=1048575
+EXPECTED mono-1048576-short-r1 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED mono-1048576-short-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED mono-1048576-short-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED mono-1048576-short-r2 blockValues.length == blockSize: OK len=1048576
+EXPECTED mono-1048576-short-r2 blockIndex never exceeds blockSize: OK max=1048575
+EXPECTED mono-1048576-short-r2 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED mono-1048576-short-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED mono-1048576-short-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED mono-128-full-r1 blockValues.length == blockSize: OK len=128
+EXPECTED mono-128-full-r1 blockIndex never exceeds blockSize: OK max=128
+EXPECTED mono-128-full-r1 flush count == ceil(N/bs): OK 1310720 vs 1310720
+EXPECTED mono-128-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED mono-128-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED mono-128-full-r2 blockValues.length == blockSize: OK len=128
+EXPECTED mono-128-full-r2 blockIndex never exceeds blockSize: OK max=128
+EXPECTED mono-128-full-r2 flush count == ceil(N/bs): OK 1310720 vs 1310720
+EXPECTED mono-128-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED mono-128-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED mono-128-short-r1 blockValues.length == blockSize: OK len=128
+EXPECTED mono-128-short-r1 blockIndex never exceeds blockSize: OK max=127
+EXPECTED mono-128-short-r1 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED mono-128-short-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED mono-128-short-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED mono-128-short-r2 blockValues.length == blockSize: OK len=128
+EXPECTED mono-128-short-r2 blockIndex never exceeds blockSize: OK max=127
+EXPECTED mono-128-short-r2 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED mono-128-short-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED mono-128-short-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED mono-16384-full-r1 blockValues.length == blockSize: OK len=16384
+EXPECTED mono-16384-full-r1 blockIndex never exceeds blockSize: OK max=16384
+EXPECTED mono-16384-full-r1 flush count == ceil(N/bs): OK 10240 vs 10240
+EXPECTED mono-16384-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED mono-16384-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED mono-16384-full-r2 blockValues.length == blockSize: OK len=16384
+EXPECTED mono-16384-full-r2 blockIndex never exceeds blockSize: OK max=16384
+EXPECTED mono-16384-full-r2 flush count == ceil(N/bs): OK 10240 vs 10240
+EXPECTED mono-16384-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED mono-16384-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED mono-16384-short-r1 blockValues.length == blockSize: OK len=16384
+EXPECTED mono-16384-short-r1 blockIndex never exceeds blockSize: OK max=16383
+EXPECTED mono-16384-short-r1 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED mono-16384-short-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED mono-16384-short-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED mono-16384-short-r2 blockValues.length == blockSize: OK len=16384
+EXPECTED mono-16384-short-r2 blockIndex never exceeds blockSize: OK max=16383
+EXPECTED mono-16384-short-r2 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED mono-16384-short-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED mono-16384-short-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED mono-16777216-full-r1 blockValues.length == blockSize: OK len=16777216
+EXPECTED mono-16777216-full-r1 blockIndex never exceeds blockSize: OK max=16777216
+EXPECTED mono-16777216-full-r1 flush count == ceil(N/bs): OK 10 vs 10
+EXPECTED mono-16777216-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 134218104
+EXPECTED mono-16777216-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 134217800
+EXPECTED mono-16777216-full-r2 blockValues.length == blockSize: OK len=16777216
+EXPECTED mono-16777216-full-r2 blockIndex never exceeds blockSize: OK max=16777216
+EXPECTED mono-16777216-full-r2 flush count == ceil(N/bs): OK 10 vs 10
+EXPECTED mono-16777216-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 134218104
+EXPECTED mono-16777216-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 134217800
+EXPECTED mono-32-invalid-r1 rejected with the expected message: OK "blockSize must be >= 64 and <= 134217728, got 32"
+EXPECTED mono-32-invalid-r1 no long[] allocated for the rejected size: OK ctorAlloc=474112
+EXPECTED mono-32-invalid-r2 rejected with the expected message: OK "blockSize must be >= 64 and <= 134217728, got 32"
+EXPECTED mono-32-invalid-r2 no long[] allocated for the rejected size: OK ctorAlloc=473848
+EXPECTED mono-64-full-r1 blockValues.length == blockSize: OK len=64
+EXPECTED mono-64-full-r1 blockIndex never exceeds blockSize: OK max=64
+EXPECTED mono-64-full-r1 flush count == ceil(N/bs): OK 2621440 vs 2621440
+EXPECTED mono-64-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 888
+EXPECTED mono-64-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 584
+EXPECTED mono-64-full-r2 blockValues.length == blockSize: OK len=64
+EXPECTED mono-64-full-r2 blockIndex never exceeds blockSize: OK max=64
+EXPECTED mono-64-full-r2 flush count == ceil(N/bs): OK 2621440 vs 2621440
+EXPECTED mono-64-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 888
+EXPECTED mono-64-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 584
+EXPECTED plain-100-invalid-r1 rejected with the expected message: OK "blockSize must be a power of two, got 100"
+EXPECTED plain-100-invalid-r1 no long[] allocated for the rejected size: OK ctorAlloc=8992
+EXPECTED plain-100-invalid-r2 rejected with the expected message: OK "blockSize must be a power of two, got 100"
+EXPECTED plain-100-invalid-r2 no long[] allocated for the rejected size: OK ctorAlloc=8992
+EXPECTED plain-1048576-full-r1 blockValues.length == blockSize: OK len=1048576
+EXPECTED plain-1048576-full-r1 blockIndex never exceeds blockSize: OK max=1048576
+EXPECTED plain-1048576-full-r1 flush count == ceil(N/bs): OK 160 vs 160
+EXPECTED plain-1048576-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED plain-1048576-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED plain-1048576-full-r2 blockValues.length == blockSize: OK len=1048576
+EXPECTED plain-1048576-full-r2 blockIndex never exceeds blockSize: OK max=1048576
+EXPECTED plain-1048576-full-r2 flush count == ceil(N/bs): OK 160 vs 160
+EXPECTED plain-1048576-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED plain-1048576-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED plain-1048576-short-r1 blockValues.length == blockSize: OK len=1048576
+EXPECTED plain-1048576-short-r1 blockIndex never exceeds blockSize: OK max=1048575
+EXPECTED plain-1048576-short-r1 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED plain-1048576-short-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED plain-1048576-short-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED plain-1048576-short-r2 blockValues.length == blockSize: OK len=1048576
+EXPECTED plain-1048576-short-r2 blockIndex never exceeds blockSize: OK max=1048575
+EXPECTED plain-1048576-short-r2 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED plain-1048576-short-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 8388984
+EXPECTED plain-1048576-short-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 8388680
+EXPECTED plain-128-full-r1 blockValues.length == blockSize: OK len=128
+EXPECTED plain-128-full-r1 blockIndex never exceeds blockSize: OK max=128
+EXPECTED plain-128-full-r1 flush count == ceil(N/bs): OK 1310720 vs 1310720
+EXPECTED plain-128-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED plain-128-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED plain-128-full-r2 blockValues.length == blockSize: OK len=128
+EXPECTED plain-128-full-r2 blockIndex never exceeds blockSize: OK max=128
+EXPECTED plain-128-full-r2 flush count == ceil(N/bs): OK 1310720 vs 1310720
+EXPECTED plain-128-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED plain-128-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED plain-128-short-r1 blockValues.length == blockSize: OK len=128
+EXPECTED plain-128-short-r1 blockIndex never exceeds blockSize: OK max=127
+EXPECTED plain-128-short-r1 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED plain-128-short-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED plain-128-short-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED plain-128-short-r2 blockValues.length == blockSize: OK len=128
+EXPECTED plain-128-short-r2 blockIndex never exceeds blockSize: OK max=127
+EXPECTED plain-128-short-r2 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED plain-128-short-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 1400
+EXPECTED plain-128-short-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 1096
+EXPECTED plain-16384-full-r1 blockValues.length == blockSize: OK len=16384
+EXPECTED plain-16384-full-r1 blockIndex never exceeds blockSize: OK max=16384
+EXPECTED plain-16384-full-r1 flush count == ceil(N/bs): OK 10240 vs 10240
+EXPECTED plain-16384-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED plain-16384-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED plain-16384-full-r2 blockValues.length == blockSize: OK len=16384
+EXPECTED plain-16384-full-r2 blockIndex never exceeds blockSize: OK max=16384
+EXPECTED plain-16384-full-r2 flush count == ceil(N/bs): OK 10240 vs 10240
+EXPECTED plain-16384-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED plain-16384-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED plain-16384-short-r1 blockValues.length == blockSize: OK len=16384
+EXPECTED plain-16384-short-r1 blockIndex never exceeds blockSize: OK max=16383
+EXPECTED plain-16384-short-r1 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED plain-16384-short-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED plain-16384-short-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED plain-16384-short-r2 blockValues.length == blockSize: OK len=16384
+EXPECTED plain-16384-short-r2 blockIndex never exceeds blockSize: OK max=16383
+EXPECTED plain-16384-short-r2 flush count == ceil(N/bs): OK 1 vs 1
+EXPECTED plain-16384-short-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 131448
+EXPECTED plain-16384-short-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 131144
+EXPECTED plain-16777216-full-r1 blockValues.length == blockSize: OK len=16777216
+EXPECTED plain-16777216-full-r1 blockIndex never exceeds blockSize: OK max=16777216
+EXPECTED plain-16777216-full-r1 flush count == ceil(N/bs): OK 10 vs 10
+EXPECTED plain-16777216-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 134218104
+EXPECTED plain-16777216-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 134217800
+EXPECTED plain-16777216-full-r2 blockValues.length == blockSize: OK len=16777216
+EXPECTED plain-16777216-full-r2 blockIndex never exceeds blockSize: OK max=16777216
+EXPECTED plain-16777216-full-r2 flush count == ceil(N/bs): OK 10 vs 10
+EXPECTED plain-16777216-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 134218104
+EXPECTED plain-16777216-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 134217800
+EXPECTED plain-32-invalid-r1 rejected with the expected message: OK "blockSize must be >= 64 and <= 134217728, got 32"
+EXPECTED plain-32-invalid-r1 no long[] allocated for the rejected size: OK ctorAlloc=474112
+EXPECTED plain-32-invalid-r2 rejected with the expected message: OK "blockSize must be >= 64 and <= 134217728, got 32"
+EXPECTED plain-32-invalid-r2 no long[] allocated for the rejected size: OK ctorAlloc=474112
+EXPECTED plain-64-full-r1 blockValues.length == blockSize: OK len=64
+EXPECTED plain-64-full-r1 blockIndex never exceeds blockSize: OK max=64
+EXPECTED plain-64-full-r1 flush count == ceil(N/bs): OK 2621440 vs 2621440
+EXPECTED plain-64-full-r1 constructor allocation in [8bs+16, 8bs+16+2000]: OK 888
+EXPECTED plain-64-full-r1 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 584
+EXPECTED plain-64-full-r2 blockValues.length == blockSize: OK len=64
+EXPECTED plain-64-full-r2 blockIndex never exceeds blockSize: OK max=64
+EXPECTED plain-64-full-r2 flush count == ceil(N/bs): OK 2621440 vs 2621440
+EXPECTED plain-64-full-r2 constructor allocation in [8bs+16, 8bs+16+2000]: OK 888
+EXPECTED plain-64-full-r2 retained long[] growth after N adds in [8bs+16, 8bs+16+200] (flat in N): OK 584
+EXPECTED plain r1: metadata bytes fall as blocks get larger (more blocks, more metadata), not capped: OK meta bs128/16384/2^20 = [10115968, 68692, 917]
+EXPECTED plain r2: metadata bytes fall as blocks get larger (more blocks, more metadata), not capped: OK meta bs128/16384/2^20 = [10115968, 68692, 917]
+EXPECTED mono r1: metadata bytes fall as blocks get larger (more blocks, more metadata), not capped: OK meta bs128/16384/2^20 = [12754920, 99645, 1554]
+EXPECTED mono r2: metadata bytes fall as blocks get larger (more blocks, more metadata), not capped: OK meta bs128/16384/2^20 = [12754920, 99645, 1554]
+EXPECTED ctl-1048576 control long[] grows with N (8 x arr_len): OK delta=8388656 arr_len=1048576
+EXPECTED ctl-16777216 control long[] grows with N (8 x arr_len): OK delta=134217776 arr_len=16777216
+EXPECTED ctl-4194304 control long[] grows with N (8 x arr_len): OK delta=33554480 arr_len=4194304
+EXPECTED plain bs=128: retained long[] equal for N=127 and N=167,772,160: OK short [1096, 1096] full [1096, 1096]
+EXPECTED mono bs=128: retained long[] equal for N=127 and N=167,772,160: OK short [1096, 1096] full [1096, 1096]
+SUMMARY mismatches=0 of 43 runs read

@@ -1,0 +1,39 @@
+unit-run 2026-10-28T12:37:35-06:00 host node2 tree cassandra-5.0.9 openjdk version "11.0.32.1" 2026-08-18
+harness md5 NameLengthProbeTest.java=c79b888550f7 unit-run.sh=69c5e61f5ae4 analyze-unit.py=510fd1489459 
+run names: mode=names yaml=/users/jason92/s4-b2-logs/run1-b/unit/cassandra-names.yaml
+run names exit 0, 38 STAGE4 lines; junit: OK (1 test) 
+EXPECTED: boundary custom L=1 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary custom L=47 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary custom L=48 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary custom L=49 rejected with the exact text (3 of 3) - yes [InvalidRequestException: Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' is longer than the permissible name length of 48 characters]
+EXPECTED: boundary custom L=64 rejected with the exact text (3 of 3) - yes [InvalidRequestException: Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' is longer than the permissible name length of 48 characters]
+EXPECTED: boundary custom L=200 rejected with the exact text (3 of 3) - yes [InvalidRequestException: Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]
+EXPECTED: boundary plain L=1 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary plain L=47 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary plain L=48 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary plain L=49 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary plain L=64 accepted (3 of 3) - yes [3 arms]
+EXPECTED: boundary plain L=200 accepted (3 of 3) - yes [3 arms]
+EXPECTED: plain: memtable owns (max-min)/mean across the six L <= 1% - yes [0.000% values={1: 6020000, 47: 6020000, 48: 6020000, 49: 6020000, 64: 6020000, 200: 6020000}]
+EXPECTED: plain: memtable owns |L=49 - L=48| <= 1% of L=48 (no step at 48) - yes [6020000 vs 6020000]
+EXPECTED: custom: memtable owns (max-min)/mean across L=1,47,48 <= 1% - yes [0.000% values={1: 14930308, 47: 14930308, 48: 14930308}]
+EXPECTED: plain: flushed directory bytes (max-min)/mean across the six L <= 1% - yes [0.010% values={1: 6787540, 47: 6787414, 48: 6786852, 49: 6787412, 64: 6786926, 200: 6787236}]
+EXPECTED: plain: flushed directory bytes |L=49 - L=48| <= 1% of L=48 (no step at 48) - yes [6787412 vs 6786852]
+EXPECTED: custom: flushed directory bytes (max-min)/mean across L=1,47,48 <= 1% - yes [0.013% values={1: 4699932, 47: 4699320, 48: 4699928}]
+INFO: custom dir_bytes reps=[4700518, 4699932, 4699874] heap_delta=[10876984, 11079032, 11089592]
+INFO: custom dir_bytes reps=[4699630, 4699278, 4699320] heap_delta=[11003224, 10981744, 11066256]
+INFO: custom dir_bytes reps=[4699792, 4700070, 4699928] heap_delta=[11084656, 11136432, 11081976]
+INFO: plain dir_bytes reps=[6788278, 6787540, 6786946] heap_delta=[14760304, 14801600, 14759760]
+INFO: plain dir_bytes reps=[6788650, 6787414, 6787000] heap_delta=[14809744, 14757408, 14748368]
+INFO: plain dir_bytes reps=[6787110, 6786538, 6786852] heap_delta=[14727256, 14748480, 14780464]
+INFO: plain dir_bytes reps=[6796432, 6787412, 6787074] heap_delta=[14773352, 14805992, 14751808]
+INFO: plain dir_bytes reps=[6786478, 6787128, 6786926] heap_delta=[14758944, 14762024, 14799904]
+INFO: plain dir_bytes reps=[6787236, 6786932, 6788358] heap_delta=[14654488, 14794952, 14752216]
+run rows: mode=rows yaml=/users/jason92/s4-b2-logs/run1-b/unit/cassandra-rows.yaml
+run rows exit 0, 6 STAGE4 lines; junit: OK (1 test) 
+EXPECTED: row-count control: memtable owns ratio 10,000/1,000 in [7, 13] - yes [10.00]
+EXPECTED: row-count control: memtable owns ratio 100,000/10,000 in [7, 13] - yes [10.00]
+EXPECTED: row-count control: flushed directory bytes ratio 10,000/1,000 in [5, 13] - yes [9.60]
+EXPECTED: row-count control: flushed directory bytes ratio 100,000/10,000 in [5, 13] - yes [10.03]
+EXPECTED: unindexed baseline directory bytes < indexed table directory bytes (N=10,000) - yes [2436076 vs 6789168]
+done 2026-10-28T12:39:24-06:00

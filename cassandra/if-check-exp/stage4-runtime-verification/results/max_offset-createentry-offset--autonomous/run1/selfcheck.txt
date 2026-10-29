@@ -1,0 +1,46 @@
+PASS unit: single 1 writes, 80 bytes, SIMPLE  [OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=SIMPLE]
+PASS unit: single 2147483647 writes, 80 bytes, SIMPLE  [OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=SIMPLE]
+PASS unit: single 2147483648 writes, 80 bytes, FACTORED  [OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=FACTORED]
+PASS unit: single 140737488355326 writes, 80 bytes, FACTORED  [OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=FACTORED]
+PASS unit: single 140737488355327 writes, 80 bytes, FACTORED  [OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=FACTORED]
+PASS unit: single offset=MAX+1 throws AssertionError with the limit in the message  [THROW java.lang.AssertionError: offset 140737488355328 cannot be greater than 140737488355327]
+PASS unit: single offset=Long.MAX_VALUE throws AssertionError with the limit in the message  [THROW java.lang.AssertionError: offset 9223372036854775807 cannot be greater than 140737488355327]
+PASS unit: two offsets {5, MAX+1} does not throw (bypass), 2 slots, size 96  [OK bytes=96 numBlocks=1 slots=2 serializedSizeAfterWrite=96 types=OVERFLOW]
+PASS unit: three offsets {5, 6, MAX+1} does not throw (bypass), 3 slots, size 104  [OK bytes=104 numBlocks=1 slots=3 serializedSizeAfterWrite=104 types=OVERFLOW]
+PASS unit: two offsets {5, Long.MAX_VALUE} does not throw (bypass), 2 slots, size 96  [OK bytes=96 numBlocks=1 slots=2 serializedSizeAfterWrite=96 types=OVERFLOW]
+PASS unit: size control 1 tokens -> 80 bytes (rule: single block 64+16n, else numBlocks x 4096)  [numBlocks 1]
+PASS unit: size control 248 tokens -> 4032 bytes (rule: single block 64+16n, else numBlocks x 4096)  [numBlocks 1]
+PASS unit: size control 249 tokens -> 12288 bytes (rule: single block 64+16n, else numBlocks x 4096)  [numBlocks 3]
+PASS unit: size control 1000 tokens -> 28672 bytes (rule: single block 64+16n, else numBlocks x 4096)  [numBlocks 7]
+PASS unit: sizes strictly grow with token count
+PASS unit: 8 offsets pass and 9 throw the overflow assertion
+PASS unit: serialized length identical for every passing single offset
+PASS cluster s1: finished and left no daemon
+PASS cluster s1: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster s1: stress reported no errors
+PASS cluster s1: one sstable after compaction; SI files present  [Data 1040312341 SI 24981192]
+PASS cluster s4: finished and left no daemon
+PASS cluster s4: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster s4: stress reported no errors
+PASS cluster s4: one sstable after compaction; SI files present  [Data 4160412330 SI 73227976]
+PASS cluster s16: finished and left no daemon
+PASS cluster s16: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster s16: stress reported no errors
+PASS cluster s16: one sstable after compaction; SI files present  [Data 16677053861 SI 265297608]
+PASS cluster n1: finished and left no daemon
+PASS cluster n1: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster n1: stress reported no errors
+PASS cluster n1: one sstable after compaction; SI files absent  [Data 1040152733 SI 0]
+PASS cluster b1: finished and left no daemon
+PASS cluster b1: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster b1: stress reported no errors
+PASS cluster b1: one sstable after compaction; SI files present  [Data 1039663317 SI 24981192]
+PASS cluster h1: finished and left no daemon
+PASS cluster h1: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster h1: stress reported no errors
+PASS cluster h1: one sstable after compaction; SI files present  [Data 1040077514 SI 24981192]
+PASS cluster p1: finished and left no daemon
+PASS cluster p1: no "cannot be greater than" and no AssertionError in system.log
+PASS cluster p1: stress reported no errors
+PASS cluster p1: one sstable after compaction; SI files present  [Data 1040347318 SI 24981192]
+SUMMARY selfcheck pass=45 fail=0

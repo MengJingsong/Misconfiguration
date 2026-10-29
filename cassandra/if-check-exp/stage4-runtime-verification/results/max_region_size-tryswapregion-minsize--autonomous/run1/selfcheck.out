@@ -1,0 +1,59 @@
+PASS R1024: constant line | 46:    private final static int MAX_REGION_SIZE = 1 * 1024 * 1024;
+PASS R1024: every JVM exited 0 | rc0=33 total=33
+PASS R256: constant line | 46:    private final static int MAX_REGION_SIZE = 256 * 1024;
+PASS R256: every JVM exited 0 | rc0=33 total=33
+PASS R1024 C1 x3: owns=used=1280000, capMax=1048576, capTotal>owns | [('1280000', '1048576', '2088960'), ('1280000', '1048576', '2088960'), ('1280000', '1048576', '2088960')]
+PASS R1024 C2 x3: owns=limit=10000, capTotal=24576>L
+PASS R1024 C2 x3: tryAllocate(1) false
+PASS R1024 C3 102400 x3: owns=102400, one region cap=524288 | [('102400', '524288'), ('102400', '524288'), ('102400', '524288')]
+PASS R1024 C3 131072 x3: owns=131072, one region cap=1048576 | [('131072', '1048576'), ('131072', '1048576'), ('131072', '1048576')]
+PASS R1024 C3 131073 x3: owns=131073, one region cap=131073 | [('131073', '131073'), ('131073', '131073'), ('131073', '131073')]
+PASS R1024 C3 4194304 x3: owns=4194304, one region cap=4194304 | [('4194304', '4194304'), ('4194304', '4194304'), ('4194304', '4194304')]
+PASS R1024 C4 A=1 x3: owns=6400, capTotal=8192, slack=1792
+PASS R1024 C4 A=10 x3: owns=64000, capTotal=81920, slack=17920
+PASS R1024 C4 A=100 x3: owns=640000, capTotal=819200, slack=179200
+PASS R1024 Z x3: zero slack
+PASS R1024 P1 x3: 32768 calls then writer WAITING, extra call not returned
+PASS R1024 P1 x3: after release writer TERMINATED, extra returned
+PASS R1024 P1 x3: used=limit=2097152 while capTotal>limit
+PASS R256 C1 x3: owns=used=1280000, capMax=262144, capTotal>owns | [('1280000', '262144', '1302528'), ('1280000', '262144', '1302528'), ('1280000', '262144', '1302528')]
+PASS R256 C2 x3: owns=limit=10000, capTotal=24576>L
+PASS R256 C2 x3: tryAllocate(1) false
+PASS R256 C3 102400 x3: owns=102400, one region cap=262144 | [('102400', '262144'), ('102400', '262144'), ('102400', '262144')]
+PASS R256 C3 131072 x3: owns=131072, one region cap=262144 | [('131072', '262144'), ('131072', '262144'), ('131072', '262144')]
+PASS R256 C3 131073 x3: owns=131073, one region cap=131073 | [('131073', '131073'), ('131073', '131073'), ('131073', '131073')]
+PASS R256 C3 4194304 x3: owns=4194304, one region cap=4194304 | [('4194304', '4194304'), ('4194304', '4194304'), ('4194304', '4194304')]
+PASS R256 C4 A=1 x3: owns=6400, capTotal=8192, slack=1792
+PASS R256 C4 A=10 x3: owns=64000, capTotal=81920, slack=17920
+PASS R256 C4 A=100 x3: owns=640000, capTotal=819200, slack=179200
+PASS R256 Z x3: zero slack
+PASS R256 P1 x3: 32768 calls then writer WAITING, extra call not returned
+PASS R256 P1 x3: after release writer TERMINATED, extra returned
+PASS R256 P1 x3: used=limit=2097152 while capTotal>limit
+PASS owns identical between R1024 and R256 for every case
+PASS capMax follows the constant (1048576 vs 262144) while owns unchanged
+PASS big1: last snapshot ledger equals sum of REGION lines in stdout.txt up to then (<=) | 15384597
+PASS big150: last snapshot ledger equals sum of REGION lines in stdout.txt up to then (<=) | 619618325
+PASS big50: last snapshot ledger equals sum of REGION lines in stdout.txt up to then (<=) | 203939861
+PASS heap150: last snapshot ledger equals sum of REGION lines in stdout.txt up to then (<=) | 0
+PASS idle: last snapshot ledger equals sum of REGION lines in stdout.txt up to then (<=) | 2416640
+PASS small150: last snapshot ledger equals sum of REGION lines in stdout.txt up to then (<=) | 555294720
+big1 dCharged_ks 2950496 dCharged_all 2952360 dLedger 8732672 dVmData_kB 402584 dRssAnon_kB 12532 ks flushes (0, 0)
+PASS big1: no flush of any ks table in system.log | (0, 0)
+big50 dCharged_ks 156031576 dCharged_all 156079573 dLedger 197287936 dVmData_kB 623900 dRssAnon_kB 167952 ks flushes (0, 0)
+PASS big50: no flush of any ks table in system.log | (0, 0)
+big150 dCharged_ks 492882336 dCharged_all 493027098 dLedger 612966400 dVmData_kB 1010956 dRssAnon_kB 459576 ks flushes (0, 0)
+PASS big150: no flush of any ks table in system.log | (0, 0)
+slack (ledger-charged) T=1,50,150: [5780312, 41208363, 119939302]
+PASS big: ledger-charged slack positive and increasing with T
+PASS big: charged grows ~linearly with T (50x and 150x within 20%) | [2950496, 156031576, 492882336]
+blob: dCharged 4195665 dLedger 4235285 ledger_max 4194325 dVmData_kB 64792
+PASS blob: ledger_max >= 4194304 (oversize region > 1 MiB)
+small150 samples 288 max charged_all 11177436 ks flushes (total, MEMTABLE_LIMIT) (147, 147)
+PASS small150: flushes of ks tables with reason MEMTABLE_LIMIT > 0
+PASS small150: max sampled charged <= 32 MiB + 8 MiB | 11177436
+PASS small150: max charged < big150 end charged / 2
+heap150 dCharged_all 0 dLedger 0
+PASS heap150: ledger delta 0 (no NativeAllocator regions under heap_buffers)
+idle drift dVmData_kB 960 dRssAnon_kB 1084 dLedger 0
+50 PASS, 0 FAIL

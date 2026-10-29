@@ -1,0 +1,35 @@
+HOLDS: unit regular indexed S=1000 accepted
+HOLDS: unit regular indexed S=65533 accepted
+HOLDS: unit regular indexed S=65534 accepted
+HOLDS: unit regular indexed S=65535 rejected, message names size 65535 and max 65535 [rejected InvalidRequestException: Cannot index value of size 65535 for index table_probe_00_v_idx on cql_test_keyspace.t]
+HOLDS: unit regular indexed S=65536 rejected, message names size 65536 and max 65535 [rejected InvalidRequestException: Cannot index value of size 65536 for index table_probe_00_v_idx on cql_test_keyspace.t]
+HOLDS: unit unindexed S=65535 and 65536 accepted (the index check, not another validator, rejects)
+HOLDS: unit clustering indexed 65535 rejected by the index check; 65534 accepted; unindexed 65535 accepted [rejected InvalidRequestException: Cannot index value of size 65535 for index table_probe_02_c_idx on]
+HOLDS: unit index disk bytes grow with N (100 < 1000 < 4000) and each is 0.9..2.2 x N*S [ids=[13345606, 132100354, 528128039] ratios=[2.04, 2.02, 2.01]]
+HOLDS: unit ratio 4000/1000 in [3.5,4.5] and 1000/100 in [8,12] [4.00 9.90]
+HOLDS: unit no rejected rows at any N
+HOLDS: unit base table bytes within 5% of the unindexed table; the index adds >= 0.9 N*S [263642129 263636597 528128039]
+HOLDS: unit default-pool arm: no memtable flush before the explicit flush
+HOLDS: unit 64 MiB pool: flushes happened before the explicit one, peak pool usage <= 160 MiB, default arm peak > 2x [idx_sst=7 peak64=64.1 MiB default=754.0 MiB]
+HOLDS: unit 64 MiB pool: the index still holds the same bytes (idx disk 0.9..2.2 x N*S, no rejections) [2.02]
+HOLDS: cluster n1000: all 1000 inserts accepted
+HOLDS: cluster n1000: index Data.db bytes in arms.jsonl agree with the node's own "Completed flushing" sizes (5%) [arms=65862881 log=65567457]
+HOLDS: cluster n4000: all 4000 inserts accepted
+HOLDS: cluster n4000: index Data.db bytes in arms.jsonl agree with the node's own "Completed flushing" sizes (5%) [arms=263451588 log=262267732]
+HOLDS: cluster n16000: all 16000 inserts accepted
+HOLDS: cluster n16000: index Data.db bytes in arms.jsonl agree with the node's own "Completed flushing" sizes (5%) [arms=1100299932 log=1049071976]
+HOLDS: cluster noidx4000: all 4000 inserts accepted
+HOLDS: cluster s100: all 655340 inserts accepted
+DOES NOT HOLD: cluster s100: index Data.db bytes in arms.jsonl agree with the node's own "Completed flushing" sizes (5%) [arms=69497572 log=85849014]
+HOLDS: cluster s65535: all 200 rejected with the index message; nothing flushed for that table in the node log; memtable empty [errors=200 log base=0 idx=0]
+HOLDS: cluster index bytes: 0.9..2.2 x N*S, ratios 16000/4000 and 4000/1000 in [3.5,4.5] [{'n1000': 2.01, 'n4000': 2.01, 'n16000': 2.09, 's100': 2.13} 4.18 4.00]
+HOLDS: cluster no-index base bytes in [0.9,1.3] x N*S; index adds >= 0.9 x N*S [263487957]
+HOLDS: cluster small-value control: index bytes per key byte within [0.5,2.0] x that of n1000 [2.13 / 2.01]
+HOLDS: cluster pool plateau (node log): >=1 MEMTABLE_LIMIT flush at 512 MiB with off-heap <= 640 MiB, >=1 at 256 MiB with <= 320 MiB, first-usage ratio in [1.4,3.0] [512: [507.2, 507.7, 508.0] 256: [256.0, 254.6, 254.5, 254.3, 254.8, 253.6, 254.6]]
+HOLDS: cluster p256_n16000: accepted all rows; the node's own "Space used (live)" of the index table agrees with n16000 within 5% (usage follows the data; the pool sets only the plateau) [2112515199 vs 2111836643]
+HOLDS: cluster index "Space used (live)" (nodetool, independent of the file glob): ratios 16000/4000 and 4000/1000 in [3.5,4.5], and 0.9..2.2 x N*S [{'n1000': 132100360, 'n4000': 527992435, 'n16000': 2111836643}]
+INFO: glob Data+Index of the index dir vs nodetool Space used (live) per arm: n1000=131403847/132100360, n4000=525615554/527992435, n16000=2195224212/2111836643, s100=139586680/141042736, p256_n16000=3034828752/2112515199
+HOLDS: cluster: no daemon and no /dev/shm/s4-b2 left (summary last line)
+HOLDS: cluster: no ERROR line in either system.log
+INFO: EXPECTED lines in summary.txt: yes=21 no=0
+selfcheck: 1 part(s) do not hold

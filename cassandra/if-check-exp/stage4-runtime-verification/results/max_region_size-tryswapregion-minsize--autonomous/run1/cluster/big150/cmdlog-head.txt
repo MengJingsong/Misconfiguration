@@ -1,0 +1,26 @@
+== big150 alloc=offheap_objects offheap=512MiB cleanup=0.99 T=150 blob=1 start 1793197356063
+$ /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/make-node.sh offheap_objects 512MiB 0.99
+node conf /users/jason92/stage4-tmp/mrs/node/conf: alloc offheap_objects offheap 512MiB cleanup 0.99
+-XX:+AlwaysPreTouch
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=16m
+-XX:G1NewSizePercent=50
+-XX:G1RSetUpdatingPauseTimePercent=5
+-Xms2G
+-Xmx2G
+-XX:+AlwaysPreTouch
+-javaagent:/users/jason92/s4-mrs/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/region.btm
+
+$ javac -d /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/cls /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/Jmx.java
+
+EXPECTED yaml:  ['INFO  [main] 2026-10-28T14:22:38,364 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB', 'INFO  [main] 2026-10-28T14:22:38,364 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 512MiB']
+SNAP {"snap": "base", "t": 1793197422682, "RssAnon_kB": 2719924, "VmData_kB": 2733844, "VmRSS_kB": 2892468, "charged_all": 772, "charged_ks": 0, "switch_ks": 0, "switch_all": 0, "ledger_regions": 40, "ledger_bytes": 2416640, "ledger_max": 1048576}
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/workload.py /users/jason92/s4-mrs/lib tables 150
+EXPECTED created 150 tables
+WORKLOAD tables=150 rows=180000 errors=0 seconds=33.9
+SNAP {"snap": "end", "t": 1793197657136, "RssAnon_kB": 3179500, "VmData_kB": 3744800, "VmRSS_kB": 3374876, "charged_all": 493027870, "charged_ks": 492882336, "switch_ks": 0, "switch_all": 0, "ledger_regions": 2175, "ledger_bytes": 615383040, "ledger_max": 1048576}
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/workload.py /users/jason92/s4-mrs/lib blob
+WORKLOAD blob 4194304 bytes written
+SNAP {"snap": "blob", "t": 1793197670423, "RssAnon_kB": 3220816, "VmData_kB": 3809592, "VmRSS_kB": 3420400, "charged_all": 497223535, "charged_ks": 497076673, "switch_ks": 0, "switch_all": 0, "ledger_regions": 2181, "ledger_bytes": 619618325, "ledger_max": 4194325}
+DELTA end-base: RssAnon_kB=459576 VmData_kB=1010956 charged_all=493027098 ledger_bytes=612966400 switch_ks=0
+$ bin/nodetool tablestats ks 2>&1 | grep -E "^Keyspace|Table:|Memtable|Off heap" | head -20 > /users/jason92/stage4-logs/mrs/run1/clust

@@ -1,0 +1,19 @@
+# Byteman trace for case B3 (amendment C3): direct evidence that the overflow-collision check ran and whether it threw.
+# @TRACEFILE@ is replaced by cluster-run.sh (a daemon closes stdout, so traceln goes to a file opened with traceOpen).
+RULE overflow entry
+CLASS org.apache.cassandra.index.sasi.disk.AbstractTokenTreeBuilder$Leaf
+METHOD createOverflowEntry
+AT ENTRY
+IF true
+DO traceOpen("ovf", "@TRACEFILE@");
+   traceln("ovf", "BM-OVF-ENTRY offsets=" + $2 + " slotsSoFar=" + ($0.overflowCollisions == null ? 0 : $0.overflowCollisions.size()))
+ENDRULE
+
+RULE overflow throw
+CLASS org.apache.cassandra.index.sasi.disk.AbstractTokenTreeBuilder$Leaf
+METHOD createOverflowEntry
+AT THROW
+IF true
+DO traceOpen("ovf", "@TRACEFILE@");
+   traceln("ovf", "BM-OVF-THROW")
+ENDRULE

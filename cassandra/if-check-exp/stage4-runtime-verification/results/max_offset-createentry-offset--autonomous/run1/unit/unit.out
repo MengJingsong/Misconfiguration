@@ -1,0 +1,42 @@
+PROBE MAX_OFFSET=140737488355327 OVERFLOW_TRAILER_CAPACITY=8 TOKENS_PER_BLOCK=248
+READ single offset=1 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=SIMPLE
+EXPECTED single 1 no throw, 80 bytes: true  got true  PASS
+EXPECTED single 1 type: SIMPLE  got SIMPLE  PASS
+READ single offset=2147483647 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=SIMPLE
+EXPECTED single 2147483647 no throw, 80 bytes: true  got true  PASS
+EXPECTED single 2147483647 type: SIMPLE  got SIMPLE  PASS
+READ single offset=2147483648 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=FACTORED
+EXPECTED single 2147483648 no throw, 80 bytes: true  got true  PASS
+EXPECTED single 2147483648 type: FACTORED  got FACTORED  PASS
+READ single offset=140737488355326 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=FACTORED
+EXPECTED single 140737488355326 no throw, 80 bytes: true  got true  PASS
+EXPECTED single 140737488355326 type: FACTORED  got FACTORED  PASS
+READ single offset=140737488355327 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=FACTORED
+EXPECTED single 140737488355327 no throw, 80 bytes: true  got true  PASS
+EXPECTED single 140737488355327 type: FACTORED  got FACTORED  PASS
+READ single offset=0 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=SIMPLE
+READ single offset=MAX+1 -> THROW java.lang.AssertionError: offset 140737488355328 cannot be greater than 140737488355327
+EXPECTED single MAX+1 throws: THROW java.lang.AssertionError: offset 140737488355328 cannot be greater than 140737488355327  got THROW java.lang.AssertionError: offset 140737488355328 cannot be greater than 140737488355327  PASS
+READ single offset=Long.MAX_VALUE -> THROW java.lang.AssertionError: offset 9223372036854775807 cannot be greater than 140737488355327
+EXPECTED single Long.MAX throws: THROW java.lang.AssertionError: offset 9223372036854775807 cannot be greater than 140737488355327  got THROW java.lang.AssertionError: offset 9223372036854775807 cannot be greater than 140737488355327  PASS
+READ two offsets {5, MAX+1} -> OK bytes=96 numBlocks=1 slots=2 serializedSizeAfterWrite=96 types=OVERFLOW
+EXPECTED two offsets MAX+1 no throw, 96 bytes, OVERFLOW: true  got true  PASS
+READ three offsets {5, 6, MAX+1} -> OK bytes=104 numBlocks=1 slots=3 serializedSizeAfterWrite=104 types=OVERFLOW
+EXPECTED three offsets MAX+1 no throw, 104 bytes: true  got true  PASS
+READ two offsets {5, Long.MAX_VALUE} -> OK bytes=96 numBlocks=1 slots=2 serializedSizeAfterWrite=96 types=OVERFLOW
+EXPECTED two offsets Long.MAX no throw: true  got true  PASS
+READ two offsets {6, 7} (packed control) -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=PACKED
+EXPECTED two small offsets PACKED, 80 bytes: true  got true  PASS
+READ size control tokens=1 -> OK bytes=80 numBlocks=1 slots=0 serializedSizeAfterWrite=80 types=
+EXPECTED 1 token bytes: 80  got 80  PASS
+READ size control tokens=248 -> OK bytes=4032 numBlocks=1 slots=0 serializedSizeAfterWrite=4032 types=
+EXPECTED 248 tokens bytes: 4032  got 4032  PASS
+READ size control tokens=249 -> OK bytes=12288 numBlocks=3 slots=-1 serializedSizeAfterWrite=12288 types=
+EXPECTED 249 tokens numBlocks/bytes: numBlocks=3|12288  got numBlocks=3|12288  PASS
+READ size control tokens=1000 -> OK bytes=28672 numBlocks=7 slots=-1 serializedSizeAfterWrite=28672 types=
+READ 8 offsets on one token -> OK bytes=144 numBlocks=1 slots=8 serializedSizeAfterWrite=144 types=OVERFLOW
+EXPECTED 8 offsets passes, 144 bytes: true  got true  PASS
+READ 9 offsets on one token -> THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf
+EXPECTED 9 offsets throws: THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf  got THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf  PASS
+CONTEXT heap_used_before=20234448 heap_used_after=20480608
+SUMMARY expectations pass=21 fail=0

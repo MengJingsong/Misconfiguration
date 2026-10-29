@@ -1,0 +1,27 @@
+g8    SI=12312 Data=2780 ovfEntryCalls=2 throws=0 logMsg=0 AssertionErrorInLog=0 segments=None postGCmaxMiB=105 sampledMaxMiB=497
+g9    SI=4110 Data=2795 ovfEntryCalls=3 throws=1 logMsg=1 AssertionErrorInLog=1 segments=None postGCmaxMiB=92 sampledMaxMiB=496
+g0    SI=12312 Data=2784 ovfEntryCalls=0 throws=0 logMsg=0 AssertionErrorInLog=0 segments=None postGCmaxMiB=105 sampledMaxMiB=497
+r1e5  SI=1683480 Data=1691320 ovfEntryCalls=0 throws=0 logMsg=0 AssertionErrorInLog=0 segments=0 postGCmaxMiB=0 sampledMaxMiB=410
+r1e6  SI=16609304 Data=16485081 ovfEntryCalls=0 throws=0 logMsg=0 AssertionErrorInLog=0 segments=0 postGCmaxMiB=981 sampledMaxMiB=916
+m1    SI=16605208 Data=17049859 ovfEntryCalls=0 throws=0 logMsg=0 AssertionErrorInLog=0 segments=112 postGCmaxMiB=401 sampledMaxMiB=881
+m100  SI=16605208 Data=17049341 ovfEntryCalls=0 throws=0 logMsg=0 AssertionErrorInLog=0 segments=2 postGCmaxMiB=927 sampledMaxMiB=847
+EXPECTED g8 token(pk) on the node shows the intended groups: TOKEN-GROUPS 1000000007:4 2000000014:4 rows=108  PASS
+EXPECTED g8 flush succeeds: a Data.db and a SI file exist: Data 2780 SI 12312  PASS
+EXPECTED g8 no throw (Byteman) and no overflow message in system.log: throws 0 msg 0  PASS
+EXPECTED g8 Byteman saw 2 overflow entries of 4 offsets (8 slots in all): [(4, 0), (4, 4)]  PASS
+EXPECTED g0 token(pk) on the node shows the intended groups: TOKEN-GROUPS  rows=108  PASS
+EXPECTED g0 flush succeeds: a Data.db and a SI file exist: Data 2784 SI 12312  PASS
+EXPECTED g0 no throw (Byteman) and no overflow message in system.log: throws 0 msg 0  PASS
+EXPECTED g9 Byteman saw the throw (disallow branch fired): throws 1, entries [(3, 0), (3, 3), (3, 6)]  PASS
+EXPECTED g9 the assertion message appears in system.log (B3f as filed): message lines 1, any AssertionError 1  PASS
+EXPECTED g9 no complete SI component for the flush (B3f): none, or one the node cannot open: SI bytes 4110, node log cannot-open lines 1, files ['nb-1-big-SI_t_v.db']  PASS
+INFO g9 Data.db bytes 2795 (the base-table flush)
+INFO g9 commit log bytes: min 67112960 max 67112960 last 67112960 (samples 68)
+EXPECTED B3g: SI size at 8 slots within 64 bytes (8 x 8) of the 0-slot index: g8 12312 g0 12312  PASS
+EXPECTED SI bytes grow with rows (1e6 / 1e5 between 5 and 15): 9.87 (16609304 / 1683480)  PASS
+EXPECTED Data.db grows with rows (1e6 / 1e5 between 5 and 15, positive control): 9.75  PASS
+EXPECTED m1 writes more index segments than m100 (the option binds): m1 112 m100 2  PASS
+EXPECTED B3f: peak heap in the compaction lower for the smaller option (max post-GC, MiB): m1 401 m100 927  PASS
+INFO sampled max heap used in the compaction window: m1 881 MiB, m100 847 MiB
+INFO SI bytes m1 16605208 m100 16605208 (index-size effect of the option); Data.db m1 17049859 m100 17049341
+SUMMARY expectations pass=15 fail=0

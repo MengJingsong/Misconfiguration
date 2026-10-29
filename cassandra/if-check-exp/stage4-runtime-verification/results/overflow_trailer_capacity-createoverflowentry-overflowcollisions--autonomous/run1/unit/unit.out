@@ -1,0 +1,27 @@
+PROBE OVERFLOW_TRAILER_CAPACITY=8 TOKENS_PER_BLOCK=248 BLOCK_BYTES=4096
+READ C1 4 tokens x 2 large offsets + 20 single (8 slots) -> OK bytes=512 numBlocks=1 slots=8 serializedSizeBeforeWrite=448 overflowEntries=4
+EXPECTED C1 no throw, 512 bytes, 8 slots: 512|8  got 512|8  PASS
+READ C2 5 tokens x 2 large offsets + 19 single (10 slots) -> THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf
+EXPECTED C2 throws: THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf  got THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf  PASS
+READ C3 1 token x 8 offsets -> OK bytes=144 numBlocks=1 slots=8 serializedSizeBeforeWrite=80 overflowEntries=1
+EXPECTED C3 144 bytes, 8 slots: 144|8  got 144|8  PASS
+READ C4 1 token x 9 offsets -> THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf
+EXPECTED C4 throws: THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf  got THROW java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf  PASS
+READ C5 248 tokens x 1 small offset -> OK bytes=4032 numBlocks=1 slots=0 serializedSizeBeforeWrite=4032 overflowEntries=0
+EXPECTED C5 248: numBlocks 1, 4032: 1|4032  got 1|4032  PASS
+READ C5 249 tokens x 1 small offset -> OK bytes=12288 numBlocks=3 slots=0 serializedSizeBeforeWrite=12288 leaf1{tokens=248,overflowEntries=0,slots=0} leaf2{tokens=1,overflowEntries=0,slots=0}
+EXPECTED C5 249: numBlocks 3, 12288: 3|12288  got 3|12288  PASS
+READ C6 600 tokens, 8 slots in each of two leaves -> OK bytes=20480 numBlocks=5 slots=16 serializedSizeBeforeWrite=20480 leaf1{tokens=248,overflowEntries=4,slots=8} leaf2{tokens=248,overflowEntries=4,slots=8} leaf3{tokens=103,overflowEntries=0,slots=0} leaf4{tokens=1,overflowEntries=0,slots=0}
+EXPECTED C6 no throw, numBlocks 5, 20480: 5|20480  got 5|20480  PASS
+EXPECTED C6 total slots 16: 16  got 16  PASS
+READ C6 control 600 tokens, no overflow -> OK bytes=20480 numBlocks=5 slots=0 serializedSizeBeforeWrite=20480 leaf1{tokens=248,overflowEntries=0,slots=0} leaf2{tokens=248,overflowEntries=0,slots=0} leaf3{tokens=103,overflowEntries=0,slots=0} leaf4{tokens=1,overflowEntries=0,slots=0}
+EXPECTED C6 control numBlocks 5, 20480: 5|20480  got 5|20480  PASS
+READ C7 248 tokens x 2 small offsets (packed) -> OK bytes=4032 numBlocks=1 slots=0 serializedSizeBeforeWrite=4032 overflowEntries=0
+EXPECTED C7 0 slots, 4032: 0|4032  got 0|4032  PASS
+READ extra: 249 tokens, 4 of them x 2 large offsets (8 slots in the first leaf) -> OK bytes=12288 numBlocks=3 slots=8 serializedSizeBeforeWrite=12288 leaf1{tokens=248,overflowEntries=4,slots=8} leaf2{tokens=1,overflowEntries=0,slots=0}
+EXPECTED extra 8-slot full leaf: numBlocks 3, 12288: 3|12288  got 3|12288  PASS
+READ C8 terms=1000 estimatedMemoryUse=228000
+EXPECTED C8 estimate 1000 terms of 8 bytes: 228000  got 228000  PASS
+READ C8 terms=10000 estimatedMemoryUse=2280000
+EXPECTED C8 estimate 10000 terms of 8 bytes: 2280000  got 2280000  PASS
+SUMMARY expectations pass=13 fail=0

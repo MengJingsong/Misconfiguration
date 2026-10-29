@@ -1,0 +1,16 @@
+summary 2026-10-28 14:42:48 run1 case tbl: N=500 rows=1000 short L=8 long L=222 heap 1G
+arm A1 L=8 heap_used_after_gc=257410600 histo_total=257460304 du_data=16400345 du_commitlog=67108864 commitlog_files=2 longest_dir_name=63 dirs=555 rss_kb=1921752 write_rows_per_s=16755 failed=0 ddl_s=553.2 errors_in_log=0 oom=1
+arm A2 L=8 heap_used_after_gc=255142864 histo_total=255192568 du_data=16381077 du_commitlog=67108864 commitlog_files=2 longest_dir_name=63 dirs=555 rss_kb=1910056 write_rows_per_s=14786 failed=0 ddl_s=562.1 errors_in_log=0 oom=1
+arm B1 L=222 heap_used_after_gc=314524936 histo_total=314574640 du_data=16618349 du_commitlog=67108864 commitlog_files=2 longest_dir_name=255 dirs=555 rss_kb=1960408 write_rows_per_s=11996 failed=0 ddl_s=565.7 errors_in_log=0 oom=1
+reject B1 len=223 rejected=True class=ConfigurationException message=<Error from server: code=2300 [Query invalid because of configuration issue] message="ks.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+arm B2 L=222 heap_used_after_gc=319458984 histo_total=319508688 du_data=16598949 du_commitlog=67108864 commitlog_files=2 longest_dir_name=255 dirs=555 rss_kb=1962268 write_rows_per_s=12138 failed=0 ddl_s=572.0 errors_in_log=0 oom=1
+reject B2 len=223 rejected=True class=ConfigurationException message=<Error from server: code=2300 [Query invalid because of configuration issue] message="ks.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+control C256 memtable_heap_space=256MiB rows=3000000 samples=179 peak_all_memtables_heap=89061120 peak_heap_used=985928096 flushes=49 errors_in_log=0
+control C64 memtable_heap_space=64MiB rows=3000000 samples=190 peak_all_memtables_heap=22341192 peak_heap_used=976672224 flushes=110 errors_in_log=0
+EXPECTED histo_total_bytes: long-arm mean minus short-arm mean = +60715228 B (name-byte budget 2140000 B, rep spread 4934048 B): EXCEEDS both
+EXPECTED heap_used_after_gc: long-arm mean minus short-arm mean = +60715228 B (name-byte budget 2140000 B, rep spread 4934048 B): EXCEEDS both
+EXPECTED du_data: long minus short = +217938 B = 1.330 % of data size: DIFFERS by more than 1 %
+EXPECTED B1 223-character name rejected with "Table name must not be more than 222 characters long": OK
+EXPECTED B2 223-character name rejected with "Table name must not be more than 222 characters long": OK
+EXPECTED control B: peak AllMemtablesHeapSize 64MiB=22341192 256MiB=89061120 (ratio 0.25, need <= 0.5); flushes 64MiB=110 256MiB=49 (need 64 > 256): moves clearly
+daemons left: []

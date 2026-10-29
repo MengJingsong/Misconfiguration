@@ -1,0 +1,72 @@
+PASS unit: every grid label has CELL, LEAFPOST and SCRATCH lines (20 labels) 
+PASS (a) num_leaves == ceil(N/M) in every cell and max_points_in_leaf_node == M 
+PASS (a) bytes_per_value in the CELL lines equals B (4 or 16) 
+NOTE (b) SCRATCH/M at M=16 (B=4): 297.50 (pre-registered range is for M >= 1024)
+PASS (b) SCRATCH(B=16) - SCRATCH(B=4) within 20% of 12 x M (M=16) measured 208 vs 192
+NOTE (b) SCRATCH/M at M=128 (B=4): 75.69 (pre-registered range is for M >= 1024)
+PASS (b) SCRATCH(B=16) - SCRATCH(B=4) within 20% of 12 x M (M=128) measured 1552 vs 1536
+PASS (b) SCRATCH/M in [35,60] (B=4, M=1024) measured 47.96
+PASS (b) SCRATCH(B=16) - SCRATCH(B=4) within 20% of 12 x M (M=1024) measured 12304 vs 12288
+PASS (b) SCRATCH/M in [35,60] (B=4, M=8192) measured 44.50
+PASS (b) SCRATCH(B=16) - SCRATCH(B=4) within 20% of 12 x M (M=8192) measured 98320 vs 98304
+PASS (b) SCRATCH/M in [35,60] (B=4, M=65536) measured 44.03
+PASS (b) SCRATCH(B=16) - SCRATCH(B=4) within 20% of 12 x M (M=65536) measured 786448 vs 786432
+PASS (b) SCRATCH at N=0 equals SCRATCH at N=1e6 (M=16), within 2% 
+PASS (b) SCRATCH at N=0 equals SCRATCH at N=1e6 (M=1024), within 2% 
+PASS (b) SCRATCH at N=0 equals SCRATCH at N=1e6 (M=65536), within 2% 
+PASS (c) ALLOC(N=4e6)/ALLOC(N=1e5) in [20,60] (M=16) measured 48.5
+PASS (c) ALLOC(N=4e6)/ALLOC(N=1e5) in [20,60] (M=128) measured 48.8
+PASS (c) ALLOC(N=4e6)/ALLOC(N=1e5) in [20,60] (M=1024) measured 47.9
+PASS (c) ALLOC(N=4e6)/ALLOC(N=1e5) in [20,60] (M=8192) measured 42.2
+PASS (c) ALLOC(N=4e6)/ALLOC(N=1e5) in [20,60] (M=65536) measured 29.3
+PASS (c) log-log slope of ALLOC vs M over 16..65536 at N=1e6 is below 0.5 measured -0.325
+PASS (c) ALLOC(M=16)/ALLOC(M=1024) >= 1.2 at N=1e6 measured 12.53
+PASS (c) ALLOC(M=65536)/ALLOC(M=1024) <= 1.5 at N=1e6 measured 0.84
+PASS (d) treeLen(N=4e6)/treeLen(N=1e5) in [20,60] (M=16) measured 40.0
+PASS (d) treeLen(N=4e6)/treeLen(N=1e5) in [20,60] (M=128) measured 40.0
+PASS (d) treeLen(N=4e6)/treeLen(N=1e5) in [20,60] (M=1024) measured 40.0
+PASS (d) treeLen(N=4e6)/treeLen(N=1e5) in [20,60] (M=8192) measured 40.0
+PASS (d) treeLen(N=4e6)/treeLen(N=1e5) in [20,60] (M=65536) measured 40.0
+PASS (d) treeLen at N=1e6: largest/smallest across the five M below 3 measured 1.23
+PASS (d) postLen(N=4e6)/postLen(N=1e5) in [20,60] (M=16) measured 48.4
+FAIL (d) postLen(N=4e6)/postLen(N=1e5) in [20,60] (M=128) measured 75.4
+FAIL (d) postLen(N=4e6)/postLen(N=1e5) in [20,60] (M=1024) measured 122.0
+FAIL (d) postLen(N=4e6)/postLen(N=1e5) in [20,60] (M=8192) measured 84.8
+PASS (d) postLen(N=4e6)/postLen(N=1e5) in [20,60] (M=65536) measured 42.0
+FAIL (d) postLen at N=1e6: largest/smallest across the five M below 3 measured 18.57
+FAIL (e) LEAFPOST per leaf in [150,600] bytes (M=16, N=1e6) measured 140.4
+FAIL (e) LEAFPOST per leaf in [150,600] bytes (M=128, N=1e6) measured 141.0
+PASS (e) LEAFPOST per leaf in [150,600] bytes (M=1024, N=1e6) measured 224.3
+FAIL (e) LEAFPOST per leaf in [150,600] bytes (M=8192, N=1e6) measured 1072.3
+FAIL (e) LEAFPOST per leaf in [150,600] bytes (M=65536, N=1e6) measured 7620.0
+NOTE anomaly: negative retained heap in LEAFPOST (instrument limitation, GC baseline): [('G-M16-N4000000-B4', '-53950320')]
+PASS repeats of (1024, 1e6, B=4): same num_leaves/treeLen/postLen, ALLOC within 1% allocs ['126615456', '126614400', '126614272']
+PASS U5 control: new long[k] allocation differs by about 8 x (1e6 - 1e3) 
+PASS U5 control: constructor rejects M=0 and M=MAX_ARRAY_LENGTH+1 
+NOTE cluster A2: flush {'segments': '1', 'allocSum': '1036386400', 'leavesSum': '14689', 'valuesSum': '1880146', 'treeLenSum': '5915653', 'postLenSum': '11260450'} | rebuild {'segments': '5', 'allocSum': '4674646544', 'leavesSum': '14693'} | tooManyNodes=0 | 
+NOTE cluster A8: flush {'segments': '2', 'allocSum': '4164175760', 'leavesSum': '54488', 'valuesSum': '6974346', 'treeLenSum': '22293204', 'postLenSum': '43934090'} | rebuild {'segments': '17', 'allocSum': '17341988664', 'leavesSum': '54501'} | tooManyNodes=0 | 
+NOTE cluster B2: flush {'segments': '1', 'allocSum': '890700560', 'leavesSum': '1837', 'valuesSum': '1880146', 'treeLenSum': '6787147', 'postLenSum': '7311870'} | rebuild {'segments': '5', 'allocSum': '4399165000', 'leavesSum': '1841'} | tooManyNodes=0 | 
+NOTE cluster B8a: flush {'segments': '2', 'allocSum': '3172236112', 'leavesSum': '6811', 'valuesSum': '6974345', 'treeLenSum': '24875091', 'postLenSum': '28468117'} | rebuild {'segments': '17', 'allocSum': '16318568408', 'leavesSum': '6826'} | tooManyNodes=0 | 
+NOTE cluster B8b: flush {'segments': '2', 'allocSum': '2994942480', 'leavesSum': '6814', 'valuesSum': '6975886', 'treeLenSum': '24878509', 'postLenSum': '28477157'} | rebuild {'segments': '17', 'allocSum': '16320794752', 'leavesSum': '6829'} | tooManyNodes=0 | 
+NOTE cluster B8c: flush {'segments': '2', 'allocSum': '3139427752', 'leavesSum': '6812', 'valuesSum': '6974348', 'treeLenSum': '24875146', 'postLenSum': '28469904'} | rebuild {'segments': '17', 'allocSum': '16318021000', 'leavesSum': '6826'} | tooManyNodes=0 | 
+NOTE cluster C2: flush {'segments': '1', 'allocSum': '764541656', 'leavesSum': '115', 'valuesSum': '1880146', 'treeLenSum': '9417431', 'postLenSum': '2937349'} | rebuild {'segments': '5', 'allocSum': '4355995248', 'leavesSum': '119'} | tooManyNodes=0 | 
+NOTE cluster C8: flush {'segments': '2', 'allocSum': '3031339200', 'leavesSum': '427', 'valuesSum': '6975893', 'treeLenSum': '31883374', 'postLenSum': '15160536'} | rebuild {'segments': '17', 'allocSum': '16158885384', 'leavesSum': '442'} | tooManyNodes=0 | 
+NOTE cluster B8ctl16: flush {'segments': '2', 'allocSum': '3081147352', 'leavesSum': '6811', 'valuesSum': '6973699', 'treeLenSum': '24870803', 'postLenSum': '28463735'} | rebuild {'segments': '1002', 'allocSum': '16315433960', 'leavesSum': '7011'} | tooManyNodes=0 | 
+PASS C5 no "too many nodes" in any arm 
+PASS C5 BALANCED_TREE length N=8e6/N=2e6 in [3.5,4.2] (variant A, flush) measured 3.77
+PASS C5 ALLOC N=8e6/N=2e6 in [3,5] (variant A, flush) measured 4.02
+PASS C5 BALANCED_TREE length N=8e6/N=2e6 in [3.5,4.2] (variant B, flush) measured 3.67
+PASS C5 ALLOC N=8e6/N=2e6 in [3,5] (variant B, flush) measured 3.56
+FAIL C5 BALANCED_TREE length N=8e6/N=2e6 in [3.5,4.2] (variant C, flush) measured 3.39
+PASS C5 ALLOC N=8e6/N=2e6 in [3,5] (variant C, flush) measured 3.96
+FAIL C5 BALANCED_TREE length across variants at N=8e6: largest/smallest below 1.3 measured 1.430
+FAIL C5 POSTING_LISTS length across variants at N=8e6: largest/smallest below 2 measured 2.898
+PASS C5 ALLOC(A)/ALLOC(B) and ALLOC(C)/ALLOC(B) each in [0.6,3.0] (N=8e6, flush) A/B 1.31 C/B 0.96
+PASS leaf counts: leavesSum(flush) per variant at N=8e6 follows ceil(values/M) (M = 128/1024/16384) {'A8': ('54488', '6974346'), 'B8a': ('6811', '6974345'), 'C8': ('427', '6975893')}
+PASS variants ran the intended constant (M in the WCS lines) {'A8': '[128]', 'B8a': '[1024]', 'C8': '[16384]'}
+PASS C5 control: segments(16MiB) >= 10 x segments(1024MiB) on the rebuild path 1002 vs 17
+NOTE peak SegmentBufferSpaceUsedBytes: {'B8b': 1073743992, 'B8c': 1073744164, 'B8ctl16': 16779592} (runs B2, B8a, A2 have no JMX poll, see README)
+PASS C5 control: peak SegmentBufferSpaceUsedBytes at 16 MiB < 40 MiB and at 1024 MiB (B8b, B8c) > 100 MiB 16.0 MiB vs 1024.0 / 1024.0 MiB
+PASS C5 noise: BALANCED_TREE length of the three B/8e6 flushes within 1% [24875091, 24878509, 24875146]
+NOTE ALLOC (flush) of the three B/8e6 runs: [3172236112, 2994942480, 3139427752] (spread 5.9%)
+SUMMARY pass=46 fail=11

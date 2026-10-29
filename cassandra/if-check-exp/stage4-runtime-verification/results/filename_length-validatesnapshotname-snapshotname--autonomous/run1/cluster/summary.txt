@@ -1,0 +1,49 @@
+cluster-run run1 start 2026-10-28T12:14:39-0600 host node4.jason92-321705.misconfiguration-pg0.cloudlab.umass.edu copy /users/jason92/s4-b2/base cassandra-5.0.9
+EXPECTED local disk free 52 GB >= 10: yes
+node up validation=True pid=851611 opts=-Dcassandra.snapshot.validation=true
+EXPECTED JVM has -Dcassandra.snapshot.validation=true and -Xmx2G: yes
+EXPECTED stress to 200000: errors 0: yes
+SNAP warmup N=200000 v=True L=100 rc=0 snapFileBytes=50797538 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=128000 rssDelta=1003520 listsnap="1.01 KiB 48.44 MiB 2026-10-28T18:15:52.846Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED warmup N=200000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED warmup L=100 snapshot dir exists with files: yes
+SNAP N200k N=200000 v=True L=1 rc=0 snapFileBytes=50797538 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=-52224 rssDelta=-135168 listsnap="1.01 KiB 48.44 MiB 2026-10-28T18:16:29.281Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a] and options {skipFlush=false} | Snapshot directory: a"
+EXPECTED N200k N=200000 L=1 v=True nodetool snapshot succeeds: yes
+EXPECTED N200k L=1 snapshot dir exists with files: yes
+SNAP N200k N=200000 v=True L=100 rc=0 snapFileBytes=50797538 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=-1024 rssDelta=-118784 listsnap="1.01 KiB 48.44 MiB 2026-10-28T18:17:05.387Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED N200k N=200000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED N200k L=100 snapshot dir exists with files: yes
+SNAP N200k N=200000 v=True L=255 rc=0 snapFileBytes=50797538 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=19456 rssDelta=200704 listsnap="1015 bytes 1015 bytes 2026-10-28T18:17:41.540Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*255] and options {skipFlush=false} | Snapshot directory: a*255"
+EXPECTED N200k N=200000 L=255 v=True nodetool snapshot succeeds: yes
+EXPECTED N200k L=255 snapshot dir exists with files: yes
+SNAP N200k N=200000 v=True L=256 rc=1 snapFileBytes=-1 files=-1 manifest=-1 schema=-1 physDelta=0 heapDelta=11264 rssDelta=258048 listsnap="none" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*256] and options {skipFlush=false} | nodetool: Snapshot name must not be more than 255 char"
+EXPECTED N200k N=200000 L=256 v=True nodetool snapshot fails: yes
+EXPECTED N200k L=256 no snapshot dir created: yes
+EXPECTED N200k L=256 message is the line-2187 text: yes
+EXPECTED stress to 2000000: errors 0: yes
+SNAP N2M N=2000000 v=True L=100 rc=0 snapFileBytes=507111470 files=66 manifest=269 schema=903 physDelta=2187 heapDelta=0 rssDelta=-122880 listsnap="1015 bytes 1015 bytes 2026-10-28T18:19:37.775Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED N2M N=2000000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED N2M L=100 snapshot dir exists with files: yes
+SNAP N2M N=2000000 v=True L=255 rc=0 snapFileBytes=507111470 files=66 manifest=269 schema=903 physDelta=2187 heapDelta=1489920 rssDelta=618496 listsnap="1015 bytes 1015 bytes 2026-10-28T18:20:13.958Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*255] and options {skipFlush=false} | Snapshot directory: a*255"
+EXPECTED N2M N=2000000 L=255 v=True nodetool snapshot succeeds: yes
+EXPECTED N2M L=255 snapshot dir exists with files: yes
+EXPECTED N=200k snapFileBytes equal for L=1,100,255: yes
+EXPECTED N=200k manifest/schema sizes equal for L=1,100,255: yes
+EXPECTED N=200k |physDelta(255)-physDelta(1)| <= 64 KiB (2047 vs 2047): yes
+EXPECTED N=200k |heapDelta(255)-heapDelta(1)| < 1 MiB (19456 vs -52224): yes
+EXPECTED N=2M snapFileBytes equal for L=100,255: yes
+EXPECTED N=2M |physDelta(255)-physDelta(100)| <= 64 KiB (2187 vs 2187): yes
+EXPECTED N=2M |heapDelta(255)-heapDelta(100)| < 1 MiB (1489920 vs 0): NO
+EXPECTED positive control: snapFileBytes N=2M >= 5x N=200k (507111470 vs 50797538): yes
+node stopped; daemons left: none
+node up validation=False pid=857077 opts=-Dcassandra.snapshot.validation=false
+EXPECTED JVM has -Dcassandra.snapshot.validation=false and -Xmx2G: yes
+SNAP valfalse N=2000000 v=False L=256 rc=2 snapFileBytes=-1 files=-1 manifest=-1 schema=-1 physDelta=-476798887 heapDelta=-503144448 rssDelta=30531584 listsnap="none" err="error: Unable to create directory /users/jason92/s4-b2/node/data/keyspace1/standard1-8bf3c8f0d2fb11f18b79d7f6c5334eb4/snapshots/a*256 | -- StackTrace -- | java."
+EXPECTED valfalse N=2000000 L=256 v=False nodetool snapshot fails: yes
+EXPECTED valfalse L=256 no snapshot dir created: yes
+EXPECTED valfalse L=256 message is NOT the line-2187 text (OS rejection): yes
+SNAP valfalse N=2000000 v=False L=255 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=72704 rssDelta=1818624 listsnap="1015 bytes 1015 bytes 2026-10-28T18:21:48.103Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*255] and options {skipFlush=false} | Snapshot directory: a*255"
+EXPECTED valfalse N=2000000 L=255 v=False nodetool snapshot succeeds: yes
+EXPECTED valfalse L=255 snapshot dir exists with files: yes
+node stopped; daemons left: none
+SUMMARY expected-lines=33 not-yes=1
+done 2026-10-28T12:22:29-0600

@@ -1,0 +1,59 @@
+== g8 mode=collide args=2 4 start 1793231549810
+daemons before: 0
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.github.jamm.utils.InjectedInvoker/0x0000000840066440 (file:/users/jason92/s4-b34/c/build/lib/jars/jamm-0.4.0.jar) to field java.nio.DirectByteBuffer.att
+WARNING: Please consider reporting this to the maintainers of org.github.jamm.utils.InjectedInvoker/0x0000000840066440
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+KEYCHECK group=2 k=3 key=0x3740d3363142e52642225dbfeda21015 wantToken=2000000014 gotToken=2000000014 ok
+KEYCHECK group=2 k=4 key=0x612bbdfa3a1684c144d00512f204729c wantToken=2000000014 gotToken=2000000014 ok
+COLLISION-GROUPS 1000000007:4 2000000014:4 mismatches=0
+EXPECTED collkeys_mismatches: 0  got 0
+node up 1793231596132 pid 1195290
+-Xmx1G
+-javaagent:/users/jason92/s4-b34/c/bin/../lib/jamm-0.4.0.jar
+-javaagent:/users/jason92/s4-b34/c/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/overflow_trailer_capacity-createoverflowentry-overflowcollisions--autonomous/overflow.btm,listener:true
+sasi_indexes_enabled: true
+compaction_throughput: 0MiB/s
+commitlog_total_space: 256MiB
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE CUSTOM INDEX t_v ON ks.t (v) USING 'org.apache.cassandra.index.sasi.SASIIndex';
+inserts rc=0
+TOKEN-GROUPS 1000000007:4 2000000014:4 rows=108
+flush start 1793231603590
+flush rc=0 end 1793231605024
+47 nb-1-big-CompressionInfo.db
+2775 nb-1-big-Data.db
+10 nb-1-big-Digest.crc32
+152 nb-1-big-Filter.db
+2264 nb-1-big-Index.db
+12312 nb-1-big-SI_t_v.db
+5113 nb-1-big-Statistics.db
+92 nb-1-big-Summary.db
+102 nb-1-big-TOC.txt
+
+ pk
+------------------------------------
+ 0xc8942db5b9cfdf14d380620108d6bbd2
+ 0xdc0b2af08a4e0d20c79e5c6ce03d2a40
+ 0xcfd482c9b1da6a53912c560ce776571e
+
+(3 rows)
+watching the commit log for 120 s after the flush
+commitlog bytes 67112960 at +20 s
+commitlog bytes 67112960 at +40 s
+commitlog bytes 67112960 at +60 s
+commitlog bytes 67112960 at +80 s
+commitlog bytes 67112960 at +100 s
+commitlog bytes 67112960 at +120 s
+byteman lines: 0 entries, throws: 0
+log error lines: 1
+INFO  [main] 2026-10-28T23:52:33,101 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+Resize
+daemons left: 0
+== g8 end 1793231753349

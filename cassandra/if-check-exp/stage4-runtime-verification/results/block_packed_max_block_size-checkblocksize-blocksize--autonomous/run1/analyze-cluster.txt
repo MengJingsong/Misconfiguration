@@ -1,0 +1,56 @@
+== arm | total SAI bytes after build / after rebuild | numeric-values bytes | per-index bytes | heap peak MiB | seg gauge peak MiB | RSS peak MiB | ledger lengths | verify
+M1m-3M     | 49133244 / 49133244 | 20839566 | 18417396 | 4029 | 1024.0 | 5176 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=127, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=728, RowToPartition=376987, RowToToken=20459819, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=7659335, v_idx/ColumnComplete=24, v_idx/Meta=1548, v_idx/PostingLists=7585535
+M8k-750k   | 0 / 0 | 0 | 0 | 2034 | 0.0 | 5056 | {'128': 4} | VERIFY failed: ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operatio
+    components: GroupMeta=0, RowToPartition=0, RowToToken=0
+S-1500k    | 24775184 / 24775184 | 10625578 | 9211138 | 3853 | 1024.0 | 5163 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=1500000 expected 1500000; count(txt=w0,w7,w99)=[15000, 15000, 15000] expected 15000 each OK
+    components: ClusteringKeyBlockOffsets=73, ClusteringKeyBlocks=4875025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=968, PartitionKeyBlocks=63091, PartitionToSize=377, RowToPartition=188475, RowToToken=10435685, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=1590151, txt_idx/TermsData=840, v_idx/BalancedTree=3841107, v_idx/ColumnComplete=24, v_idx/Meta=948, v_idx/PostingLists=3777810
+S-3M       | 49133244 / 49133244 | 20839566 | 18417396 | 3945 | 1024.0 | 5186 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=127, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=728, RowToPartition=376987, RowToToken=20459819, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=7659335, v_idx/ColumnComplete=24, v_idx/Meta=1548, v_idx/PostingLists=7585535
+S-750k     | 12310642 / 12310642 | 5363713 | 4477394 | 2969 | 1024.0 | 5123 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=750000 expected 750000; count(txt=w0,w7,w99)=[7500, 7500, 7500] expected 7500 each OK
+    components: ClusteringKeyBlockOffsets=46, ClusteringKeyBlocks=2437525, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=499, PartitionKeyBlocks=31658, PartitionToSize=200, RowToPartition=94223, RowToToken=5268745, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=791859, txt_idx/TermsData=838, v_idx/BalancedTree=1931680, v_idx/ColumnComplete=24, v_idx/Meta=648, v_idx/PostingLists=1752087
+ctl-seg16  | 47832094 / 47832094 | 20839566 | 17116246 | 2507 | 16.0 | 5154 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=127, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=728, RowToPartition=376987, RowToToken=20459819, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=10585079, v_idx/ColumnComplete=24, v_idx/Meta=124999, v_idx/PostingLists=3235190
+EXPECTED M1m-3M: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153131 Oct 28 17:41 /users/jason92/s4-b34/v-max1m/
+EXPECTED M1m-3M: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED M1m-3M: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:43:28,146 DatabaseDescriptor.java:727 - Only 50.661GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED M1m-3M: initial build and rebuild produce the same component bytes: OK 49133244 vs 49133244
+EXPECTED S-1500k: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED S-1500k: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=1500000 expected 1500000; count(txt=w0,w7,w99)=[15000, 15000, 15000] expected 15000 each OK
+EXPECTED S-1500k: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:40:26,720 DatabaseDescriptor.java:727 - Only 50.685GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED S-1500k: initial build and rebuild produce the same component bytes: OK 24775184 vs 24775184
+EXPECTED S-3M: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED S-3M: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED S-3M: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:41:46,265 DatabaseDescriptor.java:727 - Only 50.661GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED S-3M: initial build and rebuild produce the same component bytes: OK 49133244 vs 49133244
+EXPECTED S-750k: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED S-750k: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=750000 expected 750000; count(txt=w0,w7,w99)=[7500, 7500, 7500] expected 7500 each OK
+EXPECTED S-750k: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:39:20,590 DatabaseDescriptor.java:727 - Only 50.696GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED S-750k: initial build and rebuild produce the same component bytes: OK 12310642 vs 12310642
+EXPECTED ctl-seg16: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED ctl-seg16: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED ctl-seg16: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T01:11:09,441 DatabaseDescriptor.java:727 - Only 50.660GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED ctl-seg16: initial build and rebuild produce the same component bytes: OK 47832094 vs 47832094
+EXPECTED S-750k: ledger = whole sets of five writers, only lengths 128 (x2) and 16384 (x3), largest 16384: OK {128: 6, 16384: 9}
+INFO S-750k: checkBlockSize calls 30; max argument bound seen {'134217728'}
+EXPECTED S-1500k: ledger = whole sets of five writers, only lengths 128 (x2) and 16384 (x3), largest 16384: OK {128: 6, 16384: 9}
+INFO S-1500k: checkBlockSize calls 30; max argument bound seen {'134217728'}
+EXPECTED S-3M: ledger = whole sets of five writers, only lengths 128 (x2) and 16384 (x3), largest 16384: OK {128: 6, 16384: 9}
+INFO S-3M: checkBlockSize calls 30; max argument bound seen {'134217728'}
+EXPECTED M1m-3M: ledger = whole sets of five writers, only lengths 128 (x2) and 16384 (x3), largest 16384: OK {128: 6, 16384: 9}
+INFO M1m-3M: checkBlockSize calls 30; max argument bound seen {'1048576'}
+EXPECTED ctl-seg16: ledger = whole sets of five writers, only lengths 128 (x2) and 16384 (x3), largest 16384: OK {128: 6, 16384: 9}
+INFO ctl-seg16: checkBlockSize calls 30; max argument bound seen {'134217728'}
+EXPECTED S-3M and M1m-3M (MAX_BLOCK_SIZE 2^27 vs 2^20) give identical component bytes: OK 49133244 vs 49133244
+INFO heap peak S-3M 3945 MiB, M1m-3M 4029 MiB; S-3M repeat not run (noise from ctl/other arms only)
+INFO heap peak of M1m-3M vs S-3M: 83.5 MiB (no tolerance was frozen for this case's heap comparison; the identical-arm noise seen in the sibling case with this heap size was 293 MiB)
+EXPECTED SAI bytes follow rows 1 : 2 : 4 within 15 %: OK 12310642 24775184 49133244 ratios 2.01 3.99
+INFO M8k-750k: ledger lines 12, CHK calls 8 (bounds {'8192'}), BPW lengths {128: 4}; verify VERIFY failed: ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message; SAI bytes 0
+INFO M8k-750k: IllegalArgumentException lines in errors.txt: none
+EXPECTED M8k-750k: the 2^13 bound rejects the monotonic writer (16384 > 8192) with the range message: OK 
+INFO control: ctl-seg16 seg gauge peak 16.0 MiB (limit 16) vs S-3M 1024.0 MiB (limit 1024); memory-limit flush lines 848 vs 8; heap peaks 2507 vs 3945 MiB
+EXPECTED control (i): segment buffer peak in the 16MiB arm <= 20 MiB: OK 16.0 MiB
+EXPECTED control (ii): the default arm reached more than 32 MiB (the limit was driven): OK 1024.0 MiB
+EXPECTED control (iii) (B5.8, amended 2026-10-28): more memory-limit flush lines in the 16MiB arm than in the default arm: OK 848 vs 8
+INFO control (iii) as frozen in B5.5 (flush lines only in the 16MiB arm): NOT met (848 vs 8); replaced by B5.8, see the results file runbook defect 1
+SUMMARY mismatches=0 arms=6

@@ -1,0 +1,22 @@
+== idle alloc=offheap_objects offheap=512MiB cleanup=0.99 T=0 blob=0 start 1793198418937
+$ /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/make-node.sh offheap_objects 512MiB 0.99
+node conf /users/jason92/stage4-tmp/mrs/node/conf: alloc offheap_objects offheap 512MiB cleanup 0.99
+-XX:+AlwaysPreTouch
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=16m
+-XX:G1NewSizePercent=50
+-XX:G1RSetUpdatingPauseTimePercent=5
+-Xms2G
+-Xmx2G
+-XX:+AlwaysPreTouch
+-javaagent:/users/jason92/s4-mrs/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/region.btm
+
+$ javac -d /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/cls /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/Jmx.java
+
+EXPECTED yaml:  ['INFO  [main] 2026-10-28T14:40:21,160 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB', 'INFO  [main] 2026-10-28T14:40:21,160 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 512MiB']
+SNAP {"snap": "base", "t": 1793198485172, "RssAnon_kB": 2706612, "VmData_kB": 2718680, "VmRSS_kB": 2879400, "charged_all": 772, "charged_ks": 0, "switch_ks": 0, "switch_all": 0, "ledger_regions": 40, "ledger_bytes": 2416640, "ledger_max": 1048576}
+SNAP {"snap": "end", "t": 1793198516376, "RssAnon_kB": 2707696, "VmData_kB": 2719640, "VmRSS_kB": 2880484, "charged_all": 772, "charged_ks": 0, "switch_ks": 0, "switch_all": 0, "ledger_regions": 40, "ledger_bytes": 2416640, "ledger_max": 1048576}
+DELTA end-base: RssAnon_kB=1084 VmData_kB=960 charged_all=0 ledger_bytes=0 switch_ks=0
+$ bin/nodetool tablestats ks 2>&1 | grep -E "^Keyspace|Table:|Memtable|Off heap" | head -20 > /users/jason92/stage4-logs/mrs/run1/cluster/idle/tablestats-head.txt; tail -3 /users/jason92/stage4-logs/mrs/run1/cluster/idle/tablestats-head.txt
+
+daemons left: 0

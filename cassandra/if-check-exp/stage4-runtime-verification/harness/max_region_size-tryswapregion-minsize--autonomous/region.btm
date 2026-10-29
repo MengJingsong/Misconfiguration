@@ -1,0 +1,8 @@
+# Exact reserved capacity of NativeAllocator regions: one line per Region constructed (B3d amendment 2026-10-28).
+RULE mrs region constructed
+CLASS org.apache.cassandra.utils.memory.NativeAllocator$Region
+METHOD <init>(long,int)
+AT ENTRY
+IF TRUE
+DO traceln("REGION " + $2)
+ENDRULE

@@ -1,0 +1,133 @@
+
+=== pristine-direct-burst  C=10485760 OFFSET=10240 instrumented=false from main
+  PASS  direct w=0 (C-10485760) ret=false tracker=1325793413 expect lock=False
+  PASS  direct w=1 (C-10485759) ret=false tracker=1325793481 expect lock=False
+  PASS  direct w=1024 (C-10484736) ret=false tracker=1325793481 expect lock=False
+  PASS  direct w=1025 (C-10484735) ret=false tracker=1325793483 expect lock=False
+  PASS  direct w=10483712 (C-2048) ret=false tracker=1325803719 expect lock=False
+  PASS  direct w=10484736 (C-1024) ret=false tracker=1325803721 expect lock=False
+  PASS  direct w=10484737 (C-1023) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=10485759 (C-1) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=10485760 (C+0) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=10485761 (C+1) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=20971520 (C+10485760) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=67108864 (C+56623104) ret=true tracker=2147483647 expect lock=True
+  PASS  latch: stays true after the sentinel 
+  PASS  burst gap0 w=1 units=1 calls=10271 expected 10271 (OFFSET + elapsed ticks 31, / units) +-207.4; formulaCalls(no credit)=10240 elapsed 4.2 ms
+  PASS  burst gap0 w=1024 units=1 calls=10258 expected 10257 (OFFSET + elapsed ticks 17, / units) +-207.1; formulaCalls(no credit)=10240 elapsed 2.3 ms
+  PASS  burst gap0 w=102400 units=100 calls=103 expected 103 (OFFSET + elapsed ticks 0, / units) +-4.1; formulaCalls(no credit)=103 elapsed 0.0 ms
+  PASS  burst gap0 w=1048576 units=1024 calls=10 expected 10 (OFFSET + elapsed ticks 0, / units) +-2.2; formulaCalls(no credit)=10 elapsed 0.0 ms
+  PASS  burst gap0 w=1310720 units=1280 calls=9 expected 8 (OFFSET + elapsed ticks 0, / units) +-2.2; formulaCalls(no credit)=8 elapsed 0.0 ms
+  PASS  burst gap0 w=10484736 units=10239 calls=2 expected 2 (OFFSET + elapsed ticks 0, / units) +-2.0; formulaCalls(no credit)=2 elapsed 0.0 ms
+  PASS  burst gap1 w=1024 units=1: net -7.08 <= 0.5: no lock calls=3776 elapsed 4.00 s
+  PASS  burst gap1 w=102400 units=100: net 91.99 units/call calls=112 locked=true expected ~111 (cap-limited if not locked) elapsed 0.12 s
+  PASS  burst gap1 w=1048576 units=1024: net 1016.64 units/call calls=11 locked=true expected ~10 (cap-limited if not locked) elapsed 0.01 s
+  PASS  burst gap10 w=1024 units=1: net -75.76 <= 0.5: no lock calls=398 elapsed 4.00 s
+  PASS  burst gap10 w=102400 units=100: net 23.24 units/call calls=398 locked=false expected ~441 (cap-limited if not locked) elapsed 4.00 s
+  PASS  burst gap10 w=1048576 units=1024: net 954.20 units/call calls=11 locked=true expected ~11 (cap-limited if not locked) elapsed 0.10 s
+  PASS  burst gap100 w=1024 units=1: net -762.44 <= 0.5: no lock calls=40 elapsed 4.00 s
+  PASS  burst gap100 w=102400 units=100: net -663.43 <= 0.5: no lock calls=40 elapsed 4.00 s
+  PASS  burst gap100 w=1048576 units=1024: net 281.20 units/call calls=37 locked=true expected ~36 (cap-limited if not locked) elapsed 3.60 s
+  PASS  burstk C/8 x6 lastRet=false units 1280 x k = 7680 vs OFFSET 10240
+  PASS  burstk C/8 x7 lastRet=false units 1280 x k = 8960 vs OFFSET 10240
+  PASS  burstk C/8 x8 lastRet=true units 1280 x k = 10240 vs OFFSET 10240
+  PASS  burstk C/8 x9 lastRet=true units 1280 x k = 11520 vs OFFSET 10240
+  PASS  burstk C/8 x10 lastRet=true units 1280 x k = 12800 vs OFFSET 10240
+
+=== v10m-all  C=10485760 OFFSET=10240 instrumented=true from v10m
+  PASS  direct w=0 (C-10485760) ret=false tracker=1325997148 expect lock=False
+  PASS  direct w=1 (C-10485759) ret=false tracker=1325997213 expect lock=False
+  PASS  direct w=1024 (C-10484736) ret=false tracker=1325997214 expect lock=False
+  PASS  direct w=1025 (C-10484735) ret=false tracker=1325997215 expect lock=False
+  PASS  direct w=10483712 (C-2048) ret=false tracker=1326007452 expect lock=False
+  PASS  direct w=10484736 (C-1024) ret=false tracker=1326007453 expect lock=False
+  PASS  direct w=10484737 (C-1023) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=10485759 (C-1) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=10485760 (C+0) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=10485761 (C+1) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=20971520 (C+10485760) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=67108864 (C+56623104) ret=true tracker=2147483647 expect lock=True
+  PASS  latch: stays true after the sentinel 
+  PASS  burst gap0 w=1 units=1 calls=10283 expected 10283 (OFFSET + elapsed ticks 43, / units) +-207.7; formulaCalls(no credit)=10240 elapsed 5.7 ms
+  PASS  burst gap0 w=1024 units=1 calls=10260 expected 10259 (OFFSET + elapsed ticks 19, / units) +-207.2; formulaCalls(no credit)=10240 elapsed 2.6 ms
+  PASS  burst gap0 w=102400 units=100 calls=103 expected 103 (OFFSET + elapsed ticks 0, / units) +-4.1; formulaCalls(no credit)=103 elapsed 0.0 ms
+  PASS  burst gap0 w=1048576 units=1024 calls=10 expected 10 (OFFSET + elapsed ticks 0, / units) +-2.2; formulaCalls(no credit)=10 elapsed 0.0 ms
+  PASS  burst gap0 w=1310720 units=1280 calls=8 expected 8 (OFFSET + elapsed ticks 0, / units) +-2.2; formulaCalls(no credit)=8 elapsed 0.0 ms
+  PASS  burst gap0 w=10484736 units=10239 calls=2 expected 2 (OFFSET + elapsed ticks 0, / units) +-2.0; formulaCalls(no credit)=2 elapsed 0.0 ms
+  PASS  burst gap1 w=1024 units=1: net -7.08 <= 0.5: no lock calls=3777 elapsed 4.00 s
+  PASS  burst gap1 w=102400 units=100: net 91.99 units/call calls=112 locked=true expected ~111 (cap-limited if not locked) elapsed 0.12 s
+  PASS  burst gap1 w=1048576 units=1024: net 1016.64 units/call calls=11 locked=true expected ~10 (cap-limited if not locked) elapsed 0.01 s
+  PASS  burst gap10 w=1024 units=1: net -75.76 <= 0.5: no lock calls=398 elapsed 4.00 s
+  PASS  burst gap10 w=102400 units=100: net 23.24 units/call calls=398 locked=false expected ~441 (cap-limited if not locked) elapsed 4.00 s
+  PASS  burst gap10 w=1048576 units=1024: net 954.21 units/call calls=11 locked=true expected ~11 (cap-limited if not locked) elapsed 0.10 s
+  PASS  burst gap100 w=1024 units=1: net -762.42 <= 0.5: no lock calls=40 elapsed 4.00 s
+  PASS  burst gap100 w=102400 units=100: net -663.42 <= 0.5: no lock calls=40 elapsed 4.00 s
+  PASS  burst gap100 w=1048576 units=1024: net 281.21 units/call calls=37 locked=true expected ~36 (cap-limited if not locked) elapsed 3.60 s
+  PASS  burstk C/8 x6 lastRet=false units 1280 x k = 7680 vs OFFSET 10240
+  PASS  burstk C/8 x7 lastRet=false units 1280 x k = 8960 vs OFFSET 10240
+  PASS  burstk C/8 x8 lastRet=true units 1280 x k = 10240 vs OFFSET 10240
+  PASS  burstk C/8 x9 lastRet=true units 1280 x k = 11520 vs OFFSET 10240
+  PASS  burstk C/8 x10 lastRet=true units 1280 x k = 12800 vs OFFSET 10240
+  PASS  refill gap 0 ms: first=false second=true window 1342 ms, expected second=True
+  PASS  refill gap 500 ms: first=false second=true window 1342 ms, expected second=True
+  PASS  refill gap 1500 ms: first=false second=false window 1342 ms, expected second=False
+  PASS  memo: heap delta after 3M reports -8560 B (< 1 MB) reported 1568608864 B, useLock=true
+  PASS  control heap_buffers limit 8 MiB: cleaner first called at owns 4200384 = 0.501 x limit (0.5 to 0.55) 
+  PASS  control offheap_objects limit 8 MiB: cleaner first called at owns 4198656 = 0.501 x limit (0.5 to 0.55) 
+  PASS  control unslabbed_heap_buffers limit 8 MiB: cleaner first called at owns 4198320 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control heap_buffers limit 32 MiB: cleaner first called at owns 16780160 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control offheap_objects limit 32 MiB: cleaner first called at owns 16777728 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control unslabbed_heap_buffers limit 32 MiB: cleaner first called at owns 16782304 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control heap_buffers: 32 MiB / 8 MiB first-clean owns ratio 3.99 (4 +-10%) 
+  PASS  control offheap_objects: 32 MiB / 8 MiB first-clean owns ratio 4.00 (4 +-10%) 
+  PASS  control unslabbed_heap_buffers: 32 MiB / 8 MiB first-clean owns ratio 4.00 (4 +-10%) 
+
+=== v20m-all  C=20971520 OFFSET=20480 instrumented=true from v20m
+  PASS  direct w=0 (C-20971520) ret=false tracker=1326238664 expect lock=False
+  PASS  direct w=1 (C-20971519) ret=false tracker=1326238726 expect lock=False
+  PASS  direct w=1024 (C-20970496) ret=false tracker=1326238727 expect lock=False
+  PASS  direct w=1025 (C-20970495) ret=false tracker=1326238728 expect lock=False
+  PASS  direct w=20969472 (C-2048) ret=false tracker=1326259205 expect lock=False
+  PASS  direct w=20970496 (C-1024) ret=false tracker=1326259206 expect lock=False
+  PASS  direct w=20970497 (C-1023) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=20971519 (C-1) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=20971520 (C+0) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=20971521 (C+1) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=41943040 (C+20971520) ret=true tracker=2147483647 expect lock=True
+  PASS  direct w=67108864 (C+46137344) ret=true tracker=2147483647 expect lock=True
+  PASS  latch: stays true after the sentinel 
+  PASS  burst gap0 w=1 units=1 calls=20549 expected 20549 (OFFSET + elapsed ticks 69, / units) +-413.0; formulaCalls(no credit)=20480 elapsed 9.1 ms
+  PASS  burst gap0 w=1024 units=1 calls=20527 expected 20527 (OFFSET + elapsed ticks 47, / units) +-412.5; formulaCalls(no credit)=20480 elapsed 6.3 ms
+  PASS  burst gap0 w=102400 units=100 calls=205 expected 205 (OFFSET + elapsed ticks 0, / units) +-6.1; formulaCalls(no credit)=205 elapsed 0.1 ms
+  PASS  burst gap0 w=1048576 units=1024 calls=20 expected 20 (OFFSET + elapsed ticks 0, / units) +-2.4; formulaCalls(no credit)=20 elapsed 0.0 ms
+  PASS  burst gap0 w=2621440 units=2560 calls=8 expected 8 (OFFSET + elapsed ticks 0, / units) +-2.2; formulaCalls(no credit)=8 elapsed 0.0 ms
+  PASS  burst gap0 w=20970496 units=20479 calls=2 expected 2 (OFFSET + elapsed ticks 0, / units) +-2.0; formulaCalls(no credit)=2 elapsed 0.0 ms
+  PASS  burst gap1 w=1024 units=1: net -7.08 <= 0.5: no lock calls=3776 elapsed 4.00 s
+  PASS  burst gap1 w=102400 units=100: net 91.96 units/call calls=223 locked=true expected ~223 (cap-limited if not locked) elapsed 0.24 s
+  PASS  burst gap1 w=1048576 units=1024: net 1016.30 units/call calls=21 locked=true expected ~20 (cap-limited if not locked) elapsed 0.02 s
+  PASS  burst gap10 w=1024 units=1: net -75.76 <= 0.5: no lock calls=398 elapsed 4.00 s
+  PASS  burst gap10 w=102400 units=100: net 23.24 units/call calls=398 locked=false expected ~881 (cap-limited if not locked) elapsed 4.00 s
+  PASS  burst gap10 w=1048576 units=1024: net 950.72 units/call calls=22 locked=true expected ~22 (cap-limited if not locked) elapsed 0.21 s
+  PASS  burst gap100 w=1024 units=1: net -762.43 <= 0.5: no lock calls=40 elapsed 4.00 s
+  PASS  burst gap100 w=102400 units=100: net -663.42 <= 0.5: no lock calls=40 elapsed 4.00 s
+  PASS  burst gap100 w=1048576 units=1024: net 260.58 units/call calls=40 locked=false expected ~79 (cap-limited if not locked) elapsed 4.00 s
+  PASS  burstk C/8 x6 lastRet=false units 2560 x k = 15360 vs OFFSET 20480
+  PASS  burstk C/8 x7 lastRet=false units 2560 x k = 17920 vs OFFSET 20480
+  PASS  burstk C/8 x8 lastRet=true units 2560 x k = 20480 vs OFFSET 20480
+  PASS  burstk C/8 x9 lastRet=true units 2560 x k = 23040 vs OFFSET 20480
+  PASS  burstk C/8 x10 lastRet=true units 2560 x k = 25600 vs OFFSET 20480
+  PASS  refill gap 0 ms: first=false second=true window 2684 ms, expected second=True
+  PASS  refill gap 500 ms: first=false second=true window 2684 ms, expected second=True
+  PASS  refill gap 1500 ms: first=false second=true window 2684 ms, expected second=True
+  PASS  memo: heap delta after 3M reports -62616 B (< 1 MB) reported 1568608864 B, useLock=true
+  PASS  control heap_buffers limit 8 MiB: cleaner first called at owns 4211072 = 0.502 x limit (0.5 to 0.55) 
+  PASS  control offheap_objects limit 8 MiB: cleaner first called at owns 4198656 = 0.501 x limit (0.5 to 0.55) 
+  PASS  control unslabbed_heap_buffers limit 8 MiB: cleaner first called at owns 4198320 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control heap_buffers limit 32 MiB: cleaner first called at owns 16785504 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control offheap_objects limit 32 MiB: cleaner first called at owns 16781952 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control unslabbed_heap_buffers limit 32 MiB: cleaner first called at owns 16782304 = 0.500 x limit (0.5 to 0.55) 
+  PASS  control heap_buffers: 32 MiB / 8 MiB first-clean owns ratio 3.99 (4 +-10%) 
+  PASS  control offheap_objects: 32 MiB / 8 MiB first-clean owns ratio 4.00 (4 +-10%) 
+  PASS  control unslabbed_heap_buffers: 32 MiB / 8 MiB first-clean owns ratio 4.00 (4 +-10%) 
+
+SUMMARY: 125 checks, 125 PASS, 0 FAIL

@@ -1,0 +1,128 @@
+DEBUG [Native-Transport-Requests-1] 2026-10-29T01:22:06,686 DefaultSchemaUpdateHandler.java:260 - Schema updated: SchemaTransformationResult{319242e8-994d-30e6-8b28-899b321205a3 --> 66e20b30-e422-3491-a07b-2fe4e085057f, diff=KeyspacesDiff{created=[], dropped=[], altered=[KeyspaceDiff{before=KeyspaceMetadata{name=sasi, kind=REGULAR, params=KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}, tables=[sasi.t], views=[], functions=[], types=[]}, after=KeyspaceMetadata{name=sasi, kind=REGULAR, params=KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}, tables=[sasi.t], views=[], functions=[], types=[]}, tables=Diff{created=[], dropped=[], altered=[sasi.t -> sasi.t (SHALLOW)]}, views=Diff{created=[], dropped=[], altered=[]}, types=Diff{created=[], dropped=[], altered=[]}, udfs=Diff{created=[], dropped=[], altered=[]}, udas=Diff{created=[], dropped=[], altered=[]}}]}}
+INFO  [Native-Transport-Requests-1] 2026-10-29T01:22:06,707 Keyspace.java:379 - Creating replication strategy sasi params KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}
+INFO  [Native-Transport-Requests-1] 2026-10-29T01:22:06,976 ColumnFamilyStore.java:1055 - Enqueuing flush of sasi.t, Reason: SCHEMA_CHANGE, Usage: 0B (0%) on-heap, 0B (0%) off-heap
+DEBUG [Native-Transport-Requests-1] 2026-10-29T01:22:06,977 DiskBoundaryManager.java:54 - Refreshing disk boundary cache for sasi.t
+DEBUG [Native-Transport-Requests-1] 2026-10-29T01:22:06,979 DiskBoundaryManager.java:57 - Updating boundaries from DiskBoundaries{directories=[DataDirectory{location=/users/jason92/s4-b34/cl/tpb/node/data}], positions=[max(9223372036854775807)], ringVersion=1, directoriesVersion=0} to DiskBoundaries{directories=[DataDirectory{location=/users/jason92/s4-b34/cl/tpb/node/data}], positions=[max(9223372036854775807)], ringVersion=7, directoriesVersion=0} for sasi.t
+DEBUG [Native-Transport-Requests-1] 2026-10-29T01:22:06,979 CompactionStrategyManager.java:603 - Not recreating compaction strategy for sasi.t - disk boundaries are equivalent
+  [system_schema.indexes] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [kind options]]
+  [system_schema.keyspaces] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [durable_writes replication]]
+  [system_schema.tables] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [additional_write_policy bloom_filter_fp_chance caching comment compaction compression crc_check_chance dclocal_read_repair_chance default_time_to_live extensions flags gc_grace_seconds id max_index_interval memtable_flush_period_in_ms min_index_interval read_repair read_repair_chance speculative_retry]]
+INFO  [SecondaryIndexExecutor:1] 2026-10-29T01:22:07,814 PerSSTableIndexWriter.java:283 - Scheduling index flush to /users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-SI_c_idx.db
+INFO  [SASI-General:1] 2026-10-29T01:22:08,523 PerSSTableIndexWriter.java:332 - Index flush to /users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-SI_c_idx.db took 707 ms.
+INFO  [SecondaryIndexExecutor:1] 2026-10-29T01:22:08,524 DataTracker.java:166 - SSTableIndex.open(column: c, minTerm: q, maxTerm: q, minKey: 0, maxKey: 499999, sstable: BigTableReader:big(path='/users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-Data.db'))
+WARN  [Native-Transport-Requests-2] 2026-10-29T01:22:12,061 NoSpamLogger.java:107 - Aggregation query used without partition key on table sasi.t, aggregation type: AGGREGATE_EVERYTHING
+<SELECT c FROM sasi.t WHERE token(pk) > token(243935) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2458 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(86203) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 5249 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(389201) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 5699 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(425796) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 1546 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(495212) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2001 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(205252) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2599 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(181963) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3167 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(71352) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3311 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(415758) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 5397 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(167974) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3455 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(410458) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2148 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(138652) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3600 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(352836) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4055 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(135281) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 5098 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(301222) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3909 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(301729) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 1707 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(472605) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4948 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(419504) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2294 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(494049) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 1855 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(219786) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4653 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 715 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(467078) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4350 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(270963) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 1370 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(22907) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4496 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(141718) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4201 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(477638) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 4800 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(368466) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2743 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(18713) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 5548 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(403238) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 2883 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(280808) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 1135 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(441965) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3744 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(71242) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 3025 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(107938) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6309 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(459960) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 8396 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(432072) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 8558 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(77478) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 9864 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(134521) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 7922 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(464078) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 7767 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(62483) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 10185 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(382468) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6967 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(94363) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 5851 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(111934) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 8717 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(158860) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 10346 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(149376) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 10509 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(433037) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 7145 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(244671) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6004 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(118621) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 8239 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(306243) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6464 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(443491) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6619 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(477949) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 7456 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(22651) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 7611 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(495826) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 10022 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(37050) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6775 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(298781) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 9039 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(333325) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 9366 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(383075) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 8878 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(141396) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 9203 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(333421) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 9529 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(105710) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 6154 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(41786) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 7299 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(411666) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 10672 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(444330) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 8082 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(51072) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 12399 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(442749) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 14221 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(30856) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 14781 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(184592) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 12937 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(194836) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 14048 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(309098) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 14990 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(467954) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 11886 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(440828) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 14571 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(306790) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 11166 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(362977) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 11001 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(121694) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 13277 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(256331) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 12572 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(452690) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 11712 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(222519) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 15175 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(497200) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 13108 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(232197) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 10837 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(135365) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 13870 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(214273) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 13693 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(467201) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 11517 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(257502) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 12768 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(492160) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 13448 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(62765) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 11331 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(196512) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 12057 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(4622) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 14396 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(443808) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 15357 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(443069) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 15565 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(390126) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 12228 msec - slow timeout 500 msec
+DEBUG [Native-Transport-Requests-6] 2026-10-29T01:22:30,812 DefaultSchemaUpdateHandler.java:260 - Schema updated: SchemaTransformationResult{66e20b30-e422-3491-a07b-2fe4e085057f --> 5e3b71d7-1426-3233-83ae-7d0a746b5211, diff=KeyspacesDiff{created=[], dropped=[], altered=[KeyspaceDiff{before=KeyspaceMetadata{name=sasi, kind=REGULAR, params=KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}, tables=[sasi.t], views=[], functions=[], types=[]}, after=KeyspaceMetadata{name=sasi, kind=REGULAR, params=KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}, tables=[sasi.t], views=[], functions=[], types=[]}, tables=Diff{created=[], dropped=[], altered=[sasi.t -> sasi.t (SHALLOW)]}, views=Diff{created=[], dropped=[], altered=[]}, types=Diff{created=[], dropped=[], altered=[]}, udfs=Diff{created=[], dropped=[], altered=[]}, udas=Diff{created=[], dropped=[], altered=[]}}]}}
+INFO  [Native-Transport-Requests-6] 2026-10-29T01:22:30,813 Keyspace.java:379 - Creating replication strategy sasi params KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}
+INFO  [Native-Transport-Requests-6] 2026-10-29T01:22:31,054 ColumnFamilyStore.java:1055 - Enqueuing flush of sasi.t, Reason: SCHEMA_CHANGE, Usage: 0B (0%) on-heap, 0B (0%) off-heap
+  [system_schema.indexes] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | []]
+  [system_schema.keyspaces] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [durable_writes replication]]
+  [system_schema.tables] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [additional_write_policy bloom_filter_fp_chance caching comment compaction compression crc_check_chance dclocal_read_repair_chance default_time_to_live extensions flags gc_grace_seconds id max_index_interval memtable_flush_period_in_ms min_index_interval read_repair read_repair_chance speculative_retry]]
+<SELECT c FROM sasi.t WHERE token(pk) > token(36553) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 17184 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(481036) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 15919 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(239060) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 15742 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(157211) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 16278 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(332026) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 16098 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(329332) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 16822 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(498520) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 17003 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(239090) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 17568 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(19536) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 17382 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(167049) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 16457 msec - slow timeout 500 msec
+<SELECT c FROM sasi.t WHERE token(pk) > token(247705) AND c LIKE '%<term>%' 'q' LIMIT 5000 ALLOW FILTERING>, time 16638 msec - slow timeout 500 msec
+DEBUG [Native-Transport-Requests-13] 2026-10-29T01:22:36,031 DefaultSchemaUpdateHandler.java:260 - Schema updated: SchemaTransformationResult{5e3b71d7-1426-3233-83ae-7d0a746b5211 --> d211b97f-17a5-3668-8646-e02274160284, diff=KeyspacesDiff{created=[], dropped=[], altered=[KeyspaceDiff{before=KeyspaceMetadata{name=sasi, kind=REGULAR, params=KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}, tables=[sasi.t], views=[], functions=[], types=[]}, after=KeyspaceMetadata{name=sasi, kind=REGULAR, params=KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}, tables=[sasi.t], views=[], functions=[], types=[]}, tables=Diff{created=[], dropped=[], altered=[sasi.t -> sasi.t (SHALLOW)]}, views=Diff{created=[], dropped=[], altered=[]}, types=Diff{created=[], dropped=[], altered=[]}, udfs=Diff{created=[], dropped=[], altered=[]}, udas=Diff{created=[], dropped=[], altered=[]}}]}}
+INFO  [Native-Transport-Requests-13] 2026-10-29T01:22:36,031 Keyspace.java:379 - Creating replication strategy sasi params KeyspaceParams{durable_writes=true, replication=ReplicationParams{class=org.apache.cassandra.locator.SimpleStrategy, replication_factor=1}}
+INFO  [Native-Transport-Requests-13] 2026-10-29T01:22:36,313 ColumnFamilyStore.java:1055 - Enqueuing flush of sasi.t, Reason: SCHEMA_CHANGE, Usage: 0B (0%) on-heap, 0B (0%) off-heap
+  [system_schema.indexes] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [kind options]]
+  [system_schema.keyspaces] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [durable_writes replication]]
+  [system_schema.tables] key=sasi partition_deletion=deletedAt=-9223372036854775808, localDeletion=9223372036854775807 columns=[[] | [additional_write_policy bloom_filter_fp_chance caching comment compaction compression crc_check_chance dclocal_read_repair_chance default_time_to_live extensions flags gc_grace_seconds id max_index_interval memtable_flush_period_in_ms min_index_interval read_repair read_repair_chance speculative_retry]]
+INFO  [SecondaryIndexExecutor:2] 2026-10-29T01:22:36,950 PerSSTableIndexWriter.java:283 - Scheduling index flush to /users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-SI_u_idx.db
+INFO  [SASI-General:2] 2026-10-29T01:22:39,781 PerSSTableIndexWriter.java:332 - Index flush to /users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-SI_u_idx.db took 2829 ms.
+INFO  [SecondaryIndexExecutor:2] 2026-10-29T01:22:39,782 DataTracker.java:166 - SSTableIndex.open(column: u, minTerm: 000016cd437e14a8, maxTerm: fffffb9bae149529, minKey: 0, maxKey: 499999, sstable: BigTableReader:big(path='/users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-Data.db'))

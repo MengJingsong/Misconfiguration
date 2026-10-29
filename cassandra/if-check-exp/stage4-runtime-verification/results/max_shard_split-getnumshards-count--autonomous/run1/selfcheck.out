@@ -1,0 +1,60 @@
+PASS unit: 330 cells in each of 2 probe JVMs (660 read)
+PASS unit: all 660 observed shard counts equal the independent model of getNumShards (0 mismatches)
+PASS unit: every repeated call returns the same value (no state)
+PASS unit: the two JVMs agree on every cell
+PASS growth 0 1MiB base 1 d=NaN -> baseShardCount
+PASS growth 0 1MiB base 1 d=0 -> baseShardCount
+PASS growth 1 1MiB base 1 -> baseShardCount for every density
+PASS growth 0 1MiB base 4 d=NaN -> baseShardCount
+PASS growth 0 1MiB base 4 d=0 -> baseShardCount
+PASS growth 1 1MiB base 4 -> baseShardCount for every density
+PASS growth 0 1MiB base 2047 d=NaN -> baseShardCount
+PASS growth 0 1MiB base 2047 d=0 -> baseShardCount
+PASS growth 1 1MiB base 2047 -> baseShardCount for every density
+PASS growth 0 1MiB base 2048 d=NaN -> baseShardCount
+PASS growth 0 1MiB base 2048 d=0 -> baseShardCount
+PASS growth 1 1MiB base 2048 -> baseShardCount for every density
+PASS growth 0 1MiB base 4096 d=NaN -> baseShardCount
+PASS growth 0 1MiB base 4096 d=0 -> baseShardCount
+PASS growth 1 1MiB base 4096 -> baseShardCount for every density
+PASS growth 0 1GiB base 1 d=NaN -> baseShardCount
+PASS growth 0 1GiB base 1 d=0 -> baseShardCount
+PASS growth 1 1GiB base 1 -> baseShardCount for every density
+PASS growth 0 1GiB base 4 d=NaN -> baseShardCount
+PASS growth 0 1GiB base 4 d=0 -> baseShardCount
+PASS growth 1 1GiB base 4 -> baseShardCount for every density
+PASS growth 0 1GiB base 2047 d=NaN -> baseShardCount
+PASS growth 0 1GiB base 2047 d=0 -> baseShardCount
+PASS growth 1 1GiB base 2047 -> baseShardCount for every density
+PASS growth 0 1GiB base 2048 d=NaN -> baseShardCount
+PASS growth 0 1GiB base 2048 d=0 -> baseShardCount
+PASS growth 1 1GiB base 2048 -> baseShardCount for every density
+PASS growth 0 1GiB base 4096 d=NaN -> baseShardCount
+PASS growth 0 1GiB base 4096 d=0 -> baseShardCount
+PASS growth 1 1GiB base 4096 -> baseShardCount for every density
+PASS growth 0 target 1MiB base 1: d >= 1.01K gives 1048576 (observed [1048576])
+   info growth 0.333 target 1MiB base 1 huge density -> [1048576]
+PASS growth 0 target 1MiB base 4: d >= 1.01K gives 4194304 (observed [4194304])
+   info growth 0.333 target 1MiB base 4 huge density -> [4194304]
+PASS growth 0 target 1MiB base 2047: d >= 1.01K gives 2146435072 (observed [2146435072])
+   info growth 0.333 target 1MiB base 2047 huge density -> [2146435072]
+PASS growth 0 target 1MiB base 2048: d >= 1.01K gives -2147483648 (observed [-2147483648])
+   info growth 0.333 target 1MiB base 2048 huge density -> [-2147483648]
+PASS growth 0 target 1MiB base 4096: d >= 1.01K gives 0 (observed [0])
+   info growth 0.333 target 1MiB base 4096 huge density -> [0]
+PASS growth 0 base 1: d <= 0.99K is below 2^20
+   control-min {'100MiB': [1, 1, 1, 2, 4, 4], '0MiB': [4, 4, 4, 4, 4, 4]}
+PASS unit positive control: min_sstable_size 100MiB moves the shard count below base (0MiB: always base)
+PASS unit: per-tracker retained heap is 76.0..76.0 B at 4 / 1024 / 2^20 shards (reps 1-2, both JVMs; constant within 5%)
+   info rep 0 (cold) per-tracker: {(1, 0): {4: 75.4964, 1024: 76.002, 1048576: 76.0792}, (2, 0): {4: 5.8484, 1024: 76.0288, 1048576: 76.072}}
+PASS upstream ControllerTest#testGetNumShards passed (instrument known-answer check)
+   info A-dense: compact shard values [1048576] flush-phase [1, 64, 1048576] | sstables 84 -> 64 | live 542309973 -> 542212327 | heap post-GC kB 82463 -> 82443 | du 542383701 -> 542286055 | RssAnon 2804412
+   info A-control: compact shard values [512, 1024] flush-phase [64, 128, 256, 512] | sstables 538 -> 513 | live 544587048 -> 544459290 | heap post-GC kB 91541 -> 92590 | du 544832808 -> 544721434 | RssAnon 2831288
+   info B-dense: compact shard values [512] flush-phase [1, 128, 256, 512] | sstables 1 -> 1 | live 541830809 -> 541830809 | heap post-GC kB 84680 -> 84685 | du 542092953 -> 542092953 | RssAnon 2841352
+   info B-control: compact shard values [1] flush-phase [1] | sstables 1 -> 1 | live 541830888 -> 541830888 | heap post-GC kB 85933 -> 85944 | du 542093032 -> 542093032 | RssAnon 2850372
+PASS cluster A-dense: the compaction logged shard count 1048576 (the clamp): [1048576]
+FAIL cluster A-control: logged shard count <= 512: [512, 1024]
+PASS cluster B: clamp not reached in either arm (dense [512], control [1])
+PASS cluster A: live bytes after compaction equal within 5% across arms (542212327 vs 544459290)
+PASS cluster A: post-GC heap after compaction within 2x across arms (82443 vs 92590 kB; shard counts differ by 1024x)
+SELFCHECK fails=1

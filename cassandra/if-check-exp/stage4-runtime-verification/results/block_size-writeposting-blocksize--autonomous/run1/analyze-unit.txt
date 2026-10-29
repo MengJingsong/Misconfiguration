@@ -1,0 +1,120 @@
+== bs N stride lists | ctorAlloc | dataBytes model | file bytes | blocks/list | J_delta - own array | B_delta
+bs= 1024 N=    1000 stride=       3 lists=   1 | ctor=10536 | data=     258 model=258 | file=     293 | blocks=1 | Jrest=7232 | Bdelta=1880
+EXPECTED bs1024-N1000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10536
+EXPECTED bs1024-N1000-s3-L1-r1 data bytes within 2 % of the block model: OK data=258 model=258 dev=0.0000%
+EXPECTED bs1024-N1000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=15248 J-own=7232 window=[6160,28240] array_collected=True
+EXPECTED bs1024-N1000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10536
+EXPECTED bs1024-N1000-s3-L1-r2 data bytes within 2 % of the block model: OK data=258 model=258 dev=0.0000%
+EXPECTED bs1024-N1000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=15248 J-own=7232 window=[6160,28240] array_collected=True
+bs= 1024 N=  100000 stride= 1000003 lists=   1 | ctor=10568 | data=  251175 model=None | file=  251948 | blocks=98 | Jrest=8816 | Bdelta=2048
+EXPECTED bs1024-N100000-s1000003-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10568
+EXPECTED bs1024-N100000-s1000003-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=808832 J-own=8816 window=[6160,31344] array_collected=False
+EXPECTED bs1024-N100000-s1000003-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10568
+EXPECTED bs1024-N100000-s1000003-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=808832 J-own=8816 window=[6160,31344] array_collected=False
+bs= 1024 N=  100000 stride=       3 lists=   1 | ctor=10560 | data=   25187 model=25187 | file=   25663 | blocks=98 | Jrest=8816 | Bdelta=2280
+EXPECTED bs1024-N100000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10560
+EXPECTED bs1024-N100000-s3-L1-r1 data bytes within 2 % of the block model: OK data=25187 model=25187 dev=0.0000%
+EXPECTED bs1024-N100000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=808832 J-own=8816 window=[6160,31344] array_collected=False
+EXPECTED bs1024-N100000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10560
+EXPECTED bs1024-N100000-s3-L1-r2 data bytes within 2 % of the block model: OK data=25187 model=25187 dev=0.0000%
+EXPECTED bs1024-N100000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=808832 J-own=8816 window=[6160,31344] array_collected=False
+bs= 1024 N= 1000000 stride=       3 lists=   1 | ctor=10560 | data=  251090 model=251090 | file=  256501 | blocks=977 | Jrest=-7973200 | Bdelta=4576
+EXPECTED bs1024-N1000000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10560
+EXPECTED bs1024-N1000000-s3-L1-r1 data bytes within 2 % of the block model: OK data=251090 model=251090 dev=0.0000%
+EXPECTED bs1024-N1000000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=26816 J-own=-7973200 window=[6160,59472] array_collected=True
+EXPECTED bs1024-N1000000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10560
+EXPECTED bs1024-N1000000-s3-L1-r2 data bytes within 2 % of the block model: OK data=251090 model=251090 dev=0.0000%
+EXPECTED bs1024-N1000000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8026832 J-own=26816 window=[6160,59472] array_collected=False
+bs= 1024 N=      50 stride=       3 lists=1000 | ctor=10536 | data=  258000 model=258000 | file=  270302 | blocks=1 | Jrest=7232 | Bdelta=2768
+EXPECTED bs1024-N50-s3-L1000-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10536
+EXPECTED bs1024-N50-s3-L1000-r1 data bytes within 2 % of the block model: OK data=258000 model=258000 dev=0.0000%
+EXPECTED bs1024-N50-s3-L1000-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=7648 J-own=7232 window=[6160,28240] array_collected=True
+EXPECTED bs1024-N50-s3-L1000-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=10536
+EXPECTED bs1024-N50-s3-L1000-r2 data bytes within 2 % of the block model: OK data=258000 model=258000 dev=0.0000%
+EXPECTED bs1024-N50-s3-L1000-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=7648 J-own=7232 window=[6160,28240] array_collected=True
+bs=  128 N=    1000 stride=       3 lists=   1 | ctor= 3368 | data=     265 model=265 | file=     317 | blocks=8 | Jrest=64 | Bdelta=1496
+EXPECTED bs128-N1000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3368
+EXPECTED bs128-N1000-s3-L1-r1 data bytes within 2 % of the block model: OK data=265 model=265 dev=0.0000%
+EXPECTED bs128-N1000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8080 J-own=64 window=[-1008,21296] array_collected=True
+EXPECTED bs128-N1000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3368
+EXPECTED bs128-N1000-s3-L1-r2 data bytes within 2 % of the block model: OK data=265 model=265 dev=0.0000%
+EXPECTED bs128-N1000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8080 J-own=64 window=[-1008,21296] array_collected=True
+bs=  128 N=  100000 stride= 1000003 lists=   1 | ctor= 3400 | data=  252587 model=None | file=  258491 | blocks=782 | Jrest=13072 | Bdelta=3208
+EXPECTED bs128-N100000-s1000003-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3400
+EXPECTED bs128-N100000-s1000003-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=813088 J-own=13072 window=[-1008,46064] array_collected=False
+EXPECTED bs128-N100000-s1000003-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3400
+EXPECTED bs128-N100000-s1000003-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=813088 J-own=13072 window=[-1008,46064] array_collected=False
+bs=  128 N=  100000 stride=       3 lists=   1 | ctor= 3368 | data=   25807 model=25807 | file=   29362 | blocks=782 | Jrest=13072 | Bdelta=3160
+EXPECTED bs128-N100000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3368
+EXPECTED bs128-N100000-s3-L1-r1 data bytes within 2 % of the block model: OK data=25807 model=25807 dev=0.0000%
+EXPECTED bs128-N100000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=813088 J-own=13072 window=[-1008,46064] array_collected=False
+EXPECTED bs128-N100000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3368
+EXPECTED bs128-N100000-s3-L1-r2 data bytes within 2 % of the block model: OK data=25807 model=25807 dev=0.0000%
+EXPECTED bs128-N100000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=813088 J-own=13072 window=[-1008,46064] array_collected=False
+bs=  128 N= 1000000 stride=       3 lists=   1 | ctor= 3392 | data=  257830 model=257830 | file=  300840 | blocks=7813 | Jrest=149808 | Bdelta=22592
+EXPECTED bs128-N1000000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3392
+EXPECTED bs128-N1000000-s3-L1-r1 data bytes within 2 % of the block model: OK data=257830 model=257830 dev=0.0000%
+EXPECTED bs128-N1000000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8149824 J-own=149808 window=[-1008,271056] array_collected=False
+EXPECTED bs128-N1000000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3392
+EXPECTED bs128-N1000000-s3-L1-r2 data bytes within 2 % of the block model: OK data=257830 model=257830 dev=0.0000%
+EXPECTED bs128-N1000000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8149824 J-own=149808 window=[-1008,271056] array_collected=False
+bs=  128 N=      50 stride=       3 lists=1000 | ctor= 3368 | data=   34000 model=34000 | file=   44103 | blocks=1 | Jrest=64 | Bdelta=2312
+EXPECTED bs128-N50-s3-L1000-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3368
+EXPECTED bs128-N50-s3-L1000-r1 data bytes within 2 % of the block model: OK data=34000 model=34000 dev=0.0000%
+EXPECTED bs128-N50-s3-L1000-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=480 J-own=64 window=[-1008,21072] array_collected=True
+EXPECTED bs128-N50-s3-L1000-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=3368
+EXPECTED bs128-N50-s3-L1000-r2 data bytes within 2 % of the block model: OK data=34000 model=34000 dev=0.0000%
+EXPECTED bs128-N50-s3-L1000-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=480 J-own=64 window=[-1008,21072] array_collected=True
+bs=   16 N=    1000 stride=       3 lists=   1 | ctor= 2456 | data=     316 model=316 | file=     538 | blocks=63 | Jrest=176 | Bdelta=1528
+EXPECTED bs16-N1000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N1000-s3-L1-r1 data bytes within 2 % of the block model: OK data=316 model=316 dev=0.0000%
+EXPECTED bs16-N1000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8192 J-own=176 window=[-1904,22160] array_collected=True
+EXPECTED bs16-N1000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N1000-s3-L1-r2 data bytes within 2 % of the block model: OK data=316 model=316 dev=0.0000%
+EXPECTED bs16-N1000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=8192 J-own=176 window=[-1904,22160] array_collected=True
+bs=   16 N=  100000 stride= 1000003 lists=   1 | ctor= 2488 | data=  268751 model=None | file=  315664 | blocks=6250 | Jrest=148912 | Bdelta=18448
+EXPECTED bs16-N100000-s1000003-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2488
+EXPECTED bs16-N100000-s1000003-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=948928 J-own=148912 window=[-1904,220144] array_collected=False
+EXPECTED bs16-N100000-s1000003-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2488
+EXPECTED bs16-N100000-s1000003-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=948928 J-own=148912 window=[-1904,220144] array_collected=False
+bs=   16 N=  100000 stride=       3 lists=   1 | ctor= 2456 | data=   31251 model=31251 | file=   59411 | blocks=6250 | Jrest=148912 | Bdelta=15048
+EXPECTED bs16-N100000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N100000-s3-L1-r1 data bytes within 2 % of the block model: OK data=31251 model=31251 dev=0.0000%
+EXPECTED bs16-N100000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=948928 J-own=148912 window=[-1904,220144] array_collected=False
+EXPECTED bs16-N100000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N100000-s3-L1-r2 data bytes within 2 % of the block model: OK data=31251 model=31251 dev=0.0000%
+EXPECTED bs16-N100000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=948928 J-own=148912 window=[-1904,220144] array_collected=False
+bs=   16 N= 1000000 stride=       3 lists=   1 | ctor= 2456 | data=  312501 model=312501 | file=  656289 | blocks=62500 | Jrest=1137248 | Bdelta=161048
+EXPECTED bs16-N1000000-s3-L1-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N1000000-s3-L1-r1 data bytes within 2 % of the block model: OK data=312501 model=312501 dev=0.0000%
+EXPECTED bs16-N1000000-s3-L1-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=9137264 J-own=1137248 window=[-1904,2020144] array_collected=False
+EXPECTED bs16-N1000000-s3-L1-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N1000000-s3-L1-r2 data bytes within 2 % of the block model: OK data=312501 model=312501 dev=0.0000%
+EXPECTED bs16-N1000000-s3-L1-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=1137248 J-own=-6862768 window=[-1904,2020144] array_collected=True
+bs=   16 N=      50 stride=       3 lists=1000 | ctor= 2456 | data=   21000 model=21000 | file=   38894 | blocks=4 | Jrest=-832 | Bdelta=2880
+EXPECTED bs16-N50-s3-L1000-r1 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N50-s3-L1000-r1 data bytes within 2 % of the block model: OK data=21000 model=21000 dev=0.0000%
+EXPECTED bs16-N50-s3-L1000-r1 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=-416 J-own=-832 window=[-1904,20272] array_collected=True
+EXPECTED bs16-N50-s3-L1000-r2 constructor allocates the deltaBuffer: 8bs+16 <= ctorAlloc <= 8bs+16+4000: OK ctor=2456
+EXPECTED bs16-N50-s3-L1000-r2 data bytes within 2 % of the block model: OK data=21000 model=21000 dev=0.0000%
+EXPECTED bs16-N50-s3-L1000-r2 retained long[] = deltaBuffer + the 2 skip-table lists (x2 slack), independent of N beyond the lists: OK J=-416 J-own=-832 window=[-1904,20272] array_collected=True
+EXPECTED bs=16 r1: data bytes grow linearly in N (1M / 100k = 10 +- 5 %): OK ratio=10.000
+EXPECTED bs=16 r1: positive control, wide stride raises bytes per posting (> 4 x): OK stride 3: 31251 stride 1000003: 268751
+EXPECTED bs=128 r1: data bytes grow linearly in N (1M / 100k = 10 +- 5 %): OK ratio=9.991
+EXPECTED bs=128 r1: positive control, wide stride raises bytes per posting (> 4 x): OK stride 3: 25807 stride 1000003: 252587
+EXPECTED bs=1024 r1: data bytes grow linearly in N (1M / 100k = 10 +- 5 %): OK ratio=9.969
+EXPECTED bs=1024 r1: positive control, wide stride raises bytes per posting (> 4 x): OK stride 3: 25187 stride 1000003: 251175
+EXPECTED bs=1024 r1: N=1000 < blockSize writes exactly one tail block: OK nb=1 data=258
+EXPECTED bs=16 r2: data bytes grow linearly in N (1M / 100k = 10 +- 5 %): OK ratio=10.000
+EXPECTED bs=16 r2: positive control, wide stride raises bytes per posting (> 4 x): OK stride 3: 31251 stride 1000003: 268751
+EXPECTED bs=128 r2: data bytes grow linearly in N (1M / 100k = 10 +- 5 %): OK ratio=9.991
+EXPECTED bs=128 r2: positive control, wide stride raises bytes per posting (> 4 x): OK stride 3: 25807 stride 1000003: 252587
+EXPECTED bs=1024 r2: data bytes grow linearly in N (1M / 100k = 10 +- 5 %): OK ratio=9.969
+EXPECTED bs=1024 r2: positive control, wide stride raises bytes per posting (> 4 x): OK stride 3: 25187 stride 1000003: 251175
+EXPECTED bs=1024 r2: N=1000 < blockSize writes exactly one tail block: OK nb=1 data=258
+INFO bs=16 N=1M data bytes per repetition [312501, 312501]; flat in nothing: file grows with N for every size
+INFO bs=128 N=1M data bytes per repetition [257830, 257830]; flat in nothing: file grows with N for every size
+INFO bs=1024 N=1M data bytes per repetition [251090, 251090]; flat in nothing: file grows with N for every size
+INFO N=1M data bytes bs16/bs128/bs1024 = 312501 / 257830 / 251090; ratios 1.212 and 0.974
+EXPECTED no run shows file size flattening at a value tied to blockSize (1M > 100k > 1k for every bs): OK 
+SUMMARY mismatches=0 runs=30

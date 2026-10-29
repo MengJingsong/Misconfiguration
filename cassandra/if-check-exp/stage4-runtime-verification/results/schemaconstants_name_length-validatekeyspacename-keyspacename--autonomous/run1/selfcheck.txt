@@ -1,0 +1,60 @@
+== UNIT /users/jason92/s4-b2/logs/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous/run1 ==
+  [holds] 18 known-answer checks, all ok (none MISMATCH)
+  STAGE4 info NAME_LENGTH=48 TABLE_NAME_LENGTH=222 jdk=11.0.32.1 compactStrings=yes
+  STAGE4 case validateKeyspaceName L=1 -> pass
+  STAGE4 case KeyspaceMetadata.validate L=1 -> pass
+  STAGE4 case TableMetadata.validate(ks L=1) -> pass
+  STAGE4 case validateKeyspaceName L=10 -> pass
+  STAGE4 case KeyspaceMetadata.validate L=10 -> pass
+  STAGE4 case TableMetadata.validate(ks L=10) -> pass
+  STAGE4 case validateKeyspaceName L=47 -> pass
+  STAGE4 case KeyspaceMetadata.validate L=47 -> pass
+  STAGE4 case TableMetadata.validate(ks L=47) -> pass
+  STAGE4 case validateKeyspaceName L=48 -> pass
+  STAGE4 case KeyspaceMetadata.validate L=48 -> pass
+  STAGE4 case TableMetadata.validate(ks L=48) -> pass
+  STAGE4 case validateKeyspaceName L=49 -> throw:Keyspace name must not be more than 48 characters long (got 49 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+  STAGE4 case KeyspaceMetadata.validate L=49 -> throw:Keyspace name must not be more than 48 characters long (got 49 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+  STAGE4 case TableMetadata.validate(ks L=49) -> throw:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.t: Keyspace name must not be more than 48 characters long (got 4...
+  STAGE4 case validateKeyspaceName L=100 -> throw:Keyspace name must not be more than 48 characters long (got 100 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+  STAGE4 case KeyspaceMetadata.validate L=100 -> throw:Keyspace name must not be more than 48 characters long (got 100 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+  STAGE4 case TableMetadata.validate(ks L=100) -> throw:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.t: Keyspace n...
+  per-object bytes (mean of 3 reps; min..max):
+    L=1    T=0   283.11  (283.11..283.11)
+    L=10   T=0   284.26  (284.26..284.26)
+    L=47   T=0   316.26  (316.26..316.26)
+    L=48   T=0   316.26  (316.26..316.26)
+    L=49   T=0   324.26  (324.26..324.26)
+    L=100  T=0   372.26  (372.26..372.26)
+    L=1    T=10  9325.56  (9325.56..9325.56)
+    L=10   T=10  9278.07  (9278.07..9278.07)
+    L=47   T=10  9310.07  (9310.07..9310.07)
+    L=48   T=10  9310.07  (9310.07..9310.07)
+    L=49   T=10  9318.07  (9318.07..9318.07)
+    L=100  T=10  9366.07  (9366.07..9366.07)
+  L=10 -> 48 at T=0: +32.00 B per keyspace; T=0 -> 10 at L=48: +8993.82 B per keyspace; control/delta = 281 x
+  [claim holds] the L change (38 chars) moves retained size by tens of bytes (<= 100 B per keyspace)
+  [claim holds] the T control moves it at least 100 x more
+== CLUSTER /users/jason92/s4-b2/logs/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous/run1 ==
+  A1 histogram Total = 214713208 B; data dir = 49293477 B; longest dir name = 63 (longest user keyspace dir = 3)
+  A2 histogram Total = 197847624 B; data dir = 49293976 B; longest dir name = 63 (longest user keyspace dir = 3)
+  B1 histogram Total = 210542952 B; data dir = 49347406 B; longest dir name = 63 (longest user keyspace dir = 48)
+  B2 histogram Total = 210509024 B; data dir = 49339392 B; longest dir name = 63 (longest user keyspace dir = 48)
+  long mean - short mean = +4245572 B; rep spread = 16865584 B; name-byte budget = 450000 B
+  data dir: long - short = +49672 B (0.101 % of 49293477)
+  [claim holds] arms differ by no more than max(budget, spread)
+  [claim holds] data dirs differ by no more than 1 %
+  [holds] longest user keyspace directory: short arm 3 characters, long arm 48
+  reject reading: {"ok": true, "rejected": true, "name_len": 49, "error_class": "InvalidRequest", "message": "Error from server: code=2200 [Invalid query] message=\"Keyspace name must not be more than 48 characters long (got 49 characters for \"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\")\""}
+  reject reading: {"ok": true, "rejected": true, "name_len": 49, "error_class": "InvalidRequest", "message": "Error from server: code=2200 [Invalid query] message=\"Keyspace name must not be more than 48 characters long (got 49 characters for \"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\")\""}
+  [holds] 2 rejection readings (2 expected, one per long arm), each rejected=true with the message "Keyspace name must not be more than 48 characters long"
+  A1 system.log: ERROR lines 0, OutOfMemory 0
+  A2 system.log: ERROR lines 0, OutOfMemory 0
+  B1 system.log: ERROR lines 0, OutOfMemory 0
+  B2 system.log: ERROR lines 0, OutOfMemory 0
+  C64: 180 samples, peak AllMemtablesHeapSize = 22343119 B, peak heap used = 1557000240 B, flushes enqueued = 117
+  C256: 182 samples, peak AllMemtablesHeapSize = 89445598 B, peak heap used = 1742297216 B, flushes enqueued = 56
+  [claim holds] control B moves clearly: 64MiB peak <= 0.5 x 256MiB peak, and more flushes at 64MiB
+  [claim holds] arm difference is below 10 % of the control peak difference (67102479 B)
+  [holds] no CassandraDaemon left running
+SELFCHECK-RESULT: INTEGRITY OK (0 integrity checks fail; [claim ...] lines are the case claim, not integrity)

@@ -1,0 +1,40 @@
+== s4 rows=4000000 index=yes heap=2G format=big commitlog=1024MiB threads=48 start 1793233441431
+guard: free 49206660 KB, need 16593750 KB (2.2 x payload + 8 GB)
+daemons before: 0
+node up 1793233487430 pid 1250426
+-Xmx2G
+-Dcassandra.storagedir=/users/jason92/s4-b34/c/bin/../data
+#  selected_format: big
+sasi_indexes_enabled: true
+compaction_throughput: 0MiB/s
+commitlog_total_space: 1024MiB
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE CUSTOM INDEX t_v ON ks.t (v) USING 'org.apache.cassandra.index.sasi.SASIIndex';
+load start 1793233493006 free_kb=49190920
+load end 1793233644197 rc=0
+Op rate                   :   27,601 op/s  [insert: 27,601 op/s]
+Partition rate            :   27,601 pk/s  [insert: 27,601 pk/s]
+Total errors              :          0 [insert: 0]
+flush done 1793233649389
+compact start 1793233653577
+compact rc=0 end 1793233740048
+one sstable
+sizes (bytes):
+*-Data.db 4160412330
+*-Index.db 63742101
+*SI_*.db 73227976
+data_dir_bytes 4305362204
+grep: /users/jason92/s4-b34/node-mo/logs/system.log: binary file matches
+log error lines: 0
+daemons left: 0
+== s4 end 1793233768519

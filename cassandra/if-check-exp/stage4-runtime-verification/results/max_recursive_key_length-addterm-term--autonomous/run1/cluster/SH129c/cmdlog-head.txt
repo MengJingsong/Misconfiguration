@@ -1,0 +1,60 @@
+== SH129c build=S alloc=heap L=129 rows=310077 slot=3 guard=False start 1793234118473
+$ javap -p -c -cp /users/jason92/s4-b34/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sai.memory.TrieMemoryIndex | grep -A30 'void addTerm' | grep -E 'sipush|bipush|ifgt|if_icmpgt|iconst_0' | head -3
+      11: iconst_0
+      37: sipush        128
+      40: if_icmpgt     59
+      11: iconst_0
+      37: sipush        128
+      40: if_icmpgt     59
+
+conf written /users/jason92/stage4-tmp/b34/c4/SH129c/conf/cassandra.yaml; stage4 lines:
+cluster_name: stage4-sai
+num_tokens: 1
+endpoint_snitch: SimpleSnitch
+listen_address: 127.0.0.4
+rpc_address: 127.0.0.4
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.4:7000"
+data_file_directories:
+    - /users/jason92/stage4-tmp/b34/c4/SH129c/data
+commitlog_directory: /users/jason92/stage4-tmp/b34/c4/SH129c/commitlog
+hints_directory: /users/jason92/stage4-tmp/b34/c4/SH129c/hints
+saved_caches_directory: /users/jason92/stage4-tmp/b34/c4/SH129c/saved_caches
+cdc_raw_directory: /users/jason92/stage4-tmp/b34/c4/SH129c/cdc_raw
+memtable_heap_space: 1024MiB
+memtable_offheap_space: 1024MiB
+memtable_allocation_type: heap_buffers
+NODE_UP pid=1028574 startup_s=75.6
+$ bin/cqlsh 127.0.0.4 -e 'CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'\''class'\'': '\''SimpleStrategy'\'', '\''replication_factor'\'': 1}'
+
+$ bin/cqlsh 127.0.0.4 -e 'CREATE TABLE IF NOT EXISTS ks.t (id bigint PRIMARY KEY, v text)'
+
+$ bin/cqlsh 127.0.0.4 -e 'CREATE CUSTOM INDEX t_v_idx ON ks.t(v) USING '\''StorageAttachedIndex'\'''
+
+$ java -cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_recursive_key_length-addterm-term--autonomous/cls Jmx 7499 query "org.apache.cassandra.metrics:type=StorageAttachedIndex,*,name=MemtableIndexBytes" Value
+org.apache.cassandra.metrics:type=StorageAttachedIndex,keyspace=ks,table=t,index=t_v_idx,scope=IndexMetrics,name=MemtableIndexBytes|Value|0
+QUERY-END 1
+BASELINE heapUsedAfterGC_kB=88105 VmRSS_kB=2883796 RssAnon_kB=2703800 MemtableIndexBytes=org.apache.cassandra.metrics:type=StorageAttachedIndex,keyspace=ks,table=t,index=t_v_idx,scope=IndexMetrics,name=MemtableIndexBytes|Value|0 QUERY-END 1
+$ tools/bin/cassandra-stress user profile=/users/jason92/s4-b34-logs/b4/run1/cluster/SH129c/profile.yaml "ops(insert=1)" n=310077 no-warmup -rate threads=16 -node 127.0.0.4 -port native=9042 jmx=7499
+0.4,     0.3,     0.5,     0.8,     7.7,   146.8,    8.0,  0.17290,      0,      0,       0,       0,       0,       0
+total,                                                310077,   62931,   62931,   62931,     0.2,     0.2,     0.4,     0.5,     1.3,     4.3,    8.5,  0.15768,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   36,395 op/s  [insert: 36,395 op/s]
+Partition rate            :   36,395 pk/s  [insert: 36,395 pk/s]
+Row rate                  :   36,395 row/s [insert: 36,395 row/s]
+Latency mean              :    0.4 ms [insert: 0.4 ms]
+Latency median            :    0.3 ms [insert: 0.3 ms]
+Latency 95th percentile   :    0.8 ms [insert: 0.8 ms]
+Latency 99th percentile   :    1.8 ms [insert: 1.8 ms]
+Latency 99.9th percentile :    9.4 ms [insert: 9.4 ms]
+Latency max               :  314.6 ms [insert: 314.6 ms]
+Total partitions          :    310,077 [insert: 310,077]
+Total errors              :          0 [insert: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms

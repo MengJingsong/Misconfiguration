@@ -1,0 +1,18 @@
+STAGE4 start mode=bounds label=bounds heap_max=4294967296 pool_heap_limit=2147483648
+STAGE4 bound path=regular indexed=yes S=1000 result=accepted
+STAGE4 bound path=regular indexed=yes S=65533 result=accepted
+STAGE4 bound path=regular indexed=yes S=65534 result=accepted
+STAGE4 bound path=regular indexed=yes S=65535 result=rejected InvalidRequestException: Cannot index value of size 65535 for index table_probe_00_v_idx on cql_test_keyspace.table_probe_00(v) (maximum allowed size=65535)
+STAGE4 bound path=regular indexed=yes S=65536 result=rejected InvalidRequestException: Cannot index value of size 65536 for index table_probe_00_v_idx on cql_test_keyspace.table_probe_00(v) (maximum allowed size=65535)
+STAGE4 bound path=regular indexed=no S=65534 result=accepted
+STAGE4 bound path=regular indexed=no S=65535 result=accepted
+STAGE4 bound path=regular indexed=no S=65536 result=accepted
+STAGE4 bound path=clustering indexed=yes S=1000 result=accepted
+STAGE4 bound path=clustering indexed=yes S=65534 result=accepted
+STAGE4 bound path=clustering indexed=yes S=65535 result=rejected InvalidRequestException: Cannot index value of size 65535 for index table_probe_02_c_idx on cql_test_keyspace.table_probe_02(c) (maximum allowed size=65535)
+STAGE4 bound path=clustering indexed=yes S=65536 result=rejected InvalidRequestException: Key length of 65536 is longer than maximum of 65535
+STAGE4 bound path=clustering indexed=no S=65535 result=accepted
+STAGE4 bound path=clustering indexed=no S=65536 result=rejected InvalidRequestException: Key length of 65536 is longer than maximum of 65535
+STAGE4 bound path=partitionkey-composite indexed=yes S=65500 result=accepted
+STAGE4 bound path=partitionkey-composite indexed=yes S=65535 result=rejected InvalidRequestException: Key length of 65539 is longer than maximum of 65535
+STAGE4 done

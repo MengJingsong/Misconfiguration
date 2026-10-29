@@ -1,0 +1,60 @@
+== S256a build=std buffer=256MiB slot=2 start 1793234816435
+$ javap -constants -p -cp /users/jason92/s4-b34/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sai.disk.v1.segment.SegmentBuilder | grep LAST_VALID; df -h /users/jason92 | tail -1
+  public static final long LAST_VALID_SEGMENT_ROW_ID = 1073741822l;
+/dev/sda3        63G   17G   43G  28% /
+  public static final long LAST_VALID_SEGMENT_ROW_ID = 1073741822l;
+/dev/sda3        63G   17G   43G  28% /
+
+conf written /users/jason92/stage4-tmp/b34/c3/S256a/conf/cassandra.yaml; stage4 lines:
+cluster_name: stage4-sai
+num_tokens: 1
+endpoint_snitch: SimpleSnitch
+listen_address: 127.0.0.3
+rpc_address: 127.0.0.3
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.3:7000"
+data_file_directories:
+    - /users/jason92/stage4-tmp/b34/c3/S256a/data
+commitlog_directory: /users/jason92/stage4-tmp/b34/c3/S256a/commitlog
+hints_directory: /users/jason92/stage4-tmp/b34/c3/S256a/hints
+saved_caches_directory: /users/jason92/stage4-tmp/b34/c3/S256a/saved_caches
+cdc_raw_directory: /users/jason92/stage4-tmp/b34/c3/S256a/cdc_raw
+sai_options:
+    segment_write_buffer_size: 256MiB
+$ cp -a /users/jason92/stage4-tmp/b34/c3/seed/data/. /users/jason92/stage4-tmp/b34/c3/S256a/data/
+
+NODE_UP pid=1074167 startup_s=36.2
+$ bin/nodetool -p 7399 disableautocompaction ks t3
+
+$ grep -E 'Global limit|Flushed segment' /users/jason92/stage4-tmp/b34/c3/S256a/logs/debug.log | wc -l
+0
+0
+
+INDEX_CREATE_MS 1793234862368
+$ bin/cqlsh 127.0.0.3 -e 'CREATE CUSTOM INDEX c0_idx ON ks.t3(c0) USING '\''StorageAttachedIndex'\'''
+
+
+$ bin/cqlsh 127.0.0.3 -e 'SELECT is_queryable, is_building FROM system_views.sai_column_indexes'
+
+ is_queryable | is_building
+--------------+-------------
+        False |        True
+
+(1 rows)
+$ bin/cqlsh 127.0.0.3 -e 'SELECT is_queryable, is_building FROM system_views.sai_column_indexes'
+
+ is_queryable | is_building
+--------------+-------------
+        False |        True
+
+(1 rows)
+$ bin/cqlsh 127.0.0.3 -e 'SELECT is_queryable, is_building FROM system_views.sai_column_indexes'
+
+ is_queryable | is_building
+--------------+-------------
+        False |        True
+
+(1 rows)
+$ bin/cqlsh 127.0.0.3 -e 'SELECT is_queryable, is_building FROM system_views.sai_column_indexes'

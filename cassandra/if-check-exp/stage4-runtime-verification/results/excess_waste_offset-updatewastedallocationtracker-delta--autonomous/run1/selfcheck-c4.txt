@@ -1,0 +1,55 @@
+PASS  v10m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v10m-all.out latch 
+PASS  v10m-all.out burst w=1 calls=10283 in [10280,10288] 
+PASS  v10m-all.out burst w=1024 calls=10260 in [10256,10264] 
+PASS  v10m-all.out burst w=102400 calls=103 in [99,107] 
+PASS  v10m-all.out burst w=1048576 calls=10 in [7,15] 
+PASS  v10m-all.out burst w=1310720 calls=8 in [5,13] 
+PASS  v10m-all.out burst w=10484736 calls=2 in [-2,6] 
+PASS  v10m-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v10m-all.out control offheap_objects 8 MiB first clean at 0.501 x limit 
+PASS  v10m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out memo delta -8560 B 
+PASS  v20m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v20m-all.out latch 
+PASS  v20m-all.out burst w=1 calls=20549 in [20546,20554] 
+PASS  v20m-all.out burst w=1024 calls=20527 in [20524,20532] 
+PASS  v20m-all.out burst w=102400 calls=205 in [201,209] 
+PASS  v20m-all.out burst w=1048576 calls=20 in [17,25] 
+PASS  v20m-all.out burst w=2621440 calls=8 in [5,13] 
+PASS  v20m-all.out burst w=20970496 calls=2 in [-2,6] 
+PASS  v20m-all.out control heap_buffers 8 MiB first clean at 0.502 x limit 
+PASS  v20m-all.out control offheap_objects 8 MiB first clean at 0.501 x limit 
+PASS  v20m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v20m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v20m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v20m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v20m-all.out memo delta -62616 B 
+PASS  cluster cells with logs: 8 of 8 
+PASS  valid cell c4-WF-v1024 (S5) errors 0/1045650, flushes used 59, attempts 2629870, C=1024, flips 61, fails 1583955
+PASS  valid cell c4-WF-v10m (S5) errors 0/1038831, flushes used 60, attempts 2647827, C=10485760, flips 62, fails 1608727
+PASS  valid cell c4-WF-v1g (S5) errors 0/1061771, flushes used 61, attempts 2705768, C=1073741824, flips 0, fails 1643732
+PASS  valid cell c4-WG-v1024 (S5) errors 0/1439032, flushes used 33, attempts 1439191, C=1024, flips 0, fails 0
+PASS  valid cell c4-WG-v10m (S5) errors 0/1444633, flushes used 33, attempts 1444790, C=10485760, flips 0, fails 0
+PASS  valid cell c4-WG-v1g (S5) errors 0/1448305, flushes used 33, attempts 1448462, C=1073741824, flips 0, fails 0
+PASS  valid cell c4-ctl1024 (S5) errors 0/1285226, flushes used 37, attempts 3331147, C=10485760, flips 39, fails 2045737
+PASS  valid cell c4-ctl128 (S5) errors 0/645009, flushes used 137, attempts 1521056, C=10485760, flips 0, fails 875560
+NOTE  case4 WF constants ops medians {'v10m': 17095.0, 'v1g': 17168, 'v1024': 17374} ratio 1.02 -> FLAT (<=1.3) 
+NOTE  case4 WF constants onheap medians {'v10m': 180308410.4, 'v1g': 180269088.8, 'v1024': 180174716.9} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  case4 WF constants enq medians {'v10m': 179531939.8, 'v1g': 179559727.1, 'v1024': 179614777.3} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  regime c4-WF-v10m: flips 62 fails 1608727 attempts 2647827 
+NOTE  regime c4-WF-v1g: flips 0 fails 1643732 attempts 2705768 
+NOTE  regime c4-WF-v1024: flips 61 fails 1583955 attempts 2629870 
+NOTE  case4 WG constants ops medians {'v10m': 40946, 'v1g': 40940, 'v1024': 40947} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  case4 WG constants onheap medians {'v10m': 179405062.1, 'v1g': 179378847.7, 'v1024': 179409256.4} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  case4 WG constants enq medians {'v10m': 179098353.7, 'v1g': 179091537.9, 'v1024': 179100450.8} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  regime c4-WG-v10m: flips 0 fails 0 attempts 1444790 
+NOTE  regime c4-WG-v1g: flips 0 fails 0 attempts 1448462 
+NOTE  regime c4-WG-v1024: flips 0 fails 0 attempts 1439191 
+NOTE  case4 pool 128/512/1024 (WF v10m) enq medians {'128': 45407010.8, '512': 179531939.8, '1024': 358670139.4} ratio 7.90 -> ratio >1.3, order 128<512<1024 
+NOTE  case4 pool 128/512/1024 (WF v10m) onheap medians {'128': 45949648.9, '512': 180308410.4, '1024': 359328120.8} ratio 7.82 -> ratio >1.3, order 128<512<1024 
+
+TALLY: 39 PASS, 0 FAIL, 14 NOTE

@@ -1,0 +1,25 @@
+PASS unit: 54 cells :: 54
+PASS unit: 3 reps per cell
+PASS unit: V2 throws only above 65535 (with the count message); every other cell succeeds with the exact length and count field
+PASS unit: failing V2 call allocated >= 0.8 x the V3 call at the same N,S, and >= its own V2 result size :: {(65536, 1): (0.9655041706374276, 3606776, 196610), (200000, 1): (0.9651062342676653, 11002296, 600002), (65536, 100): (0.9873955662253132, 10094840, 6684674), (200000, 100): (0.9872502923709703, 30802296, 20400002)}
+INFO V3/V4 median allocation ratio per cell: {(65535, 1): 1.667, (65536, 1): 1.0, (200000, 1): 1.0, (65535, 100): 1.0, (65536, 100): 1.0, (200000, 100): 1.0}  (the first measured cell, N=65535 S=1, carries warm-up noise: reps [('3/v3', '6881296'), ('3/v3', '6881296'), ('3/v3', '6881296'), ('4/v4', '6145200'), ('4/v4', '4128832'), ('4/v4', '3735616')])
+PASS unit: V3 and V4 allocate the same (+-5%) in every cell except the first measured one (warm-up)
+PASS unit control: V3 N=200000, 100 B payload allocates >= 0.9*99*N more than 1 B :: 19800000
+PASS unit: alloc rises with N for V3 at S=1 (65535 < 200000)
+PASS cluster: V2 probe refused (client: connected=no) and the server log names the protocol version, not 65535 :: V2PROBE connected=no error=('Unable to connect to any servers', {'127.0.0.1:9042': ConnectionShutdown('Connection to 127.0.0.1:9042 was closed')})
+PASS cluster: W inserts of 1000, 65536, 500000 all accepted (v4), no error mentioning 65535 :: [('1000', 'accepted'), ('65536', 'accepted'), ('500000', 'accepted')]
+PASS cluster: read-back elements == N for the 3 sizes; Byteman pack_calls during W == 0 :: {1000: {'N': '1000', 'memtable_data_bytes': '24041', 'sstable_data_bytes': '4039', 'heapmax_kB': '147612', 'readback_elements': '1000', 'pack_calls': '0'}, 65536: {'N': '65536', 'memtable_data_bytes': '1572905', 'sstable_data_bytes': '262801', 'heapmax_kB': '229532', 'readback_elements': '65536', 'pack_calls': '0'}, 500000: {'N': '500000', 'memtable_data_bytes': '12000041', 'sstable_data_bytes': '2004854', 'heapmax_kB': '491676', 'readback_elements': '500000', 'pack_calls': '0'}}
+PASS cluster: memtable_data_bytes per element at N=65536 and 500000 within 25% (no step at 65535) :: {1000: 24.041, 65536: 24.000625610351562, 500000: 24.000082}
+PASS cluster: memtable_data_bytes grows with N
+PASS cluster: sstable_data_bytes per element at N=65536 and 500000 within 25% (no step at 65535) :: {1000: 4.039, 65536: 4.0100250244140625, 500000: 4.009708}
+PASS cluster: sstable_data_bytes grows with N
+PASS cluster: UDF path reached CodecUtils: 6 pack calls (3 N x v4,v3), with ver V4/V3 only and elements in {1000,65536,500000} :: [{'ms': '1793232592016', 'ver': 'V4', 'elements': '1000', 'buffers': '1000'}, {'ms': '1793232593046', 'ver': 'V4', 'elements': '65536', 'buffers': '65536'}, {'ms': '1793232594220', 'ver': 'V4', 'elements': '500000', 'buffers': '500000'}, {'ms': '1793232595906', 'ver': 'V3', 'elements': '1000', 'buffers': '1000'}, {'ms': '1793232596932', 'ver': 'V3', 'elements': '65536', 'buffers': '65536'}, {'ms': '1793232598066', 'ver': 'V3', 'elements': '500000', 'buffers': '500000'}]
+PASS cluster: writeSize saw size N (incl. 65536 and 500000) under V3/V4, never V1/V2
+PASS cluster: pack result length == 4 + 8N (list<int>)
+PASS cluster: all 6 UDF queries returned N elements, none errored :: [('v4', '1000', 'ok elements=1000'), ('v4', '65536', 'ok elements=65536'), ('v4', '500000', 'ok elements=500000'), ('v3', '1000', 'ok elements=1000'), ('v3', '65536', 'ok elements=65536'), ('v3', '500000', 'ok elements=500000')]
+PASS cluster: no 65535 text in the node log
+INFO control W_INSERT: [('1000', 'accepted'), ('65536', 'rejected InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail collection_size violated: Detected collection s of size 1572864, this e'), ('500000', 'rejected InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail collection_size violated: Detected collection s of size 12000000, this ')]
+PASS cluster control (collection_size_fail_threshold 200KiB): N=1000 accepted; 65536 and 500000 rejected
+PASS cluster control: the rejection is a guardrail message (mentions the threshold/collection), not the 65535 text
+PASS cluster control: yaml line present in the control node
+RESULT 22 PASS 0 FAIL

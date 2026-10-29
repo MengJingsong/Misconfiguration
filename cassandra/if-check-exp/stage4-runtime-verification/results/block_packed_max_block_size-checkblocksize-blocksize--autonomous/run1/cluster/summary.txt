@@ -1,0 +1,108 @@
+CMD all case maxblock start 2026-10-28 18:37:12 MDT; harness md5 2ad30f055b0e ed7873944e3b
+SEED /users/jason92/s4-b34/seeds/sai-750000 exists
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; memtable_heap_space: 2048MiB ; memtable_offheap_space: 2048MiB
+node up after 48 s
+SEED rows 500000 in 22 s
+SEED rows 1000000 in 37 s
+SEED rows 1500000 in 53 s
+SEED loaded 1500000 rows in 53 s
+SEED sstables: -rw-r--r-- 1 jason92 misconfiguration 24658202 Oct 28 18:39 /users/jason92/s4-b34/cl/maxblock/node/data/sai/t-feda8220d33011f1addf7df4125b6efc/nb-2-big-Data.db
+SEED copied to /users/jason92/s4-b34/seeds/sai-1500000; du 25310985 B; daemons left: none
+SEED /users/jason92/s4-b34/seeds/sai-3000000 exists
+ARM S-750k start 2026-10-28 18:39:18 MDT: build base (/users/jason92/s4-b34/base), rows 750000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 13 s
+ARM S-750k: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 3 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 12 s (create + wait)
+FILES after build: 17 SAI files, 12310642 bytes
+REBUILD v_idx rc=0 in 5 s: ''
+REBUILD txt_idx rc=0 in 8 s: ''
+FILES after rebuild: 17 SAI files, 12310642 bytes
+VERIFY count(v>=0)=750000 expected 750000; count(txt=w0,w7,w99)=[7500, 7500, 7500] expected 7500 each OK
+GAUGES S-750k: {"samples": 79, "seg_used_peak": 1073743944, "seg_limits": [-1, 1073741824], "heap_used_peak": 3044788224}
+LEDGER S-750k: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 2
+ARM S-750k STOPPED: daemons left: none
+ARM S-1500k start 2026-10-28 18:40:24 MDT: build base (/users/jason92/s4-b34/base), rows 1500000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM S-1500k: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 3 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 16 s (create + wait)
+FILES after build: 17 SAI files, 24775184 bytes
+REBUILD v_idx rc=0 in 8 s: ''
+REBUILD txt_idx rc=0 in 12 s: ''
+FILES after rebuild: 17 SAI files, 24775184 bytes
+VERIFY count(v>=0)=1500000 expected 1500000; count(txt=w0,w7,w99)=[15000, 15000, 15000] expected 15000 each OK
+GAUGES S-1500k: {"samples": 105, "seg_used_peak": 1073743528, "seg_limits": [-1, 1073741824], "heap_used_peak": 4039852032}
+LEDGER S-1500k: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 4
+ARM S-1500k STOPPED: daemons left: none
+ARM S-3M start 2026-10-28 18:41:43 MDT: build base (/users/jason92/s4-b34/base), rows 3000000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM S-3M: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 22 s (create + wait)
+FILES after build: 17 SAI files, 49133244 bytes
+REBUILD v_idx rc=0 in 13 s: ''
+REBUILD txt_idx rc=0 in 19 s: ''
+FILES after rebuild: 17 SAI files, 49133244 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES S-3M: {"samples": 148, "seg_used_peak": 1073743912, "seg_limits": [-1, 1073741824], "heap_used_peak": 4136838136}
+LEDGER S-3M: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 8
+ARM S-3M STOPPED: daemons left: none
+ARM M1m-3M start 2026-10-28 18:43:25 MDT: build v-max1m (/users/jason92/s4-b34/v-max1m), rows 3000000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM M1m-3M: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 26 s (create + wait)
+FILES after build: 17 SAI files, 49133244 bytes
+REBUILD v_idx rc=0 in 13 s: ''
+REBUILD txt_idx rc=0 in 20 s: ''
+FILES after rebuild: 17 SAI files, 49133244 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES M1m-3M: {"samples": 168, "seg_used_peak": 1073743912, "seg_limits": [-1, 1073741824], "heap_used_peak": 4224401408}
+LEDGER M1m-3M: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 8
+ARM M1m-3M STOPPED: daemons left: none
+ARM M8k-750k start 2026-10-28 18:45:16 MDT: build v-max8k (/users/jason92/s4-b34/v-max8k), rows 750000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM M8k-750k: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build NOT complete after 1508 s (create + wait)
+FILES after build: 3 SAI files, 0 bytes
+REBUILD v_idx rc=2 in 1 s: 'current.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:829)'
+REBUILD txt_idx rc=2 in 2 s: 'current.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:829)'
+FILES after rebuild: 3 SAI files, 0 bytes
+VERIFY failed: ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - received 0 responses and 1 failures: INDEX_NOT_AVAILABLE from localhost/127.0.0.1:7000" info={'consistency'
+GAUGES M8k-750k: {"samples": 3040, "seg_used_peak": 0, "seg_limits": [-1, 1073741824], "heap_used_peak": 2133099792}
+LEDGER M8k-750k: 12 lines; lengths ["128"]
+ERROR lines in system.log: 10; memory-limit flush DEBUG lines in this arm: 0
+ARM M8k-750k STOPPED: daemons left: none
+ARM ctl-seg16 start 2026-10-28 19:11:07 MDT: build base (/users/jason92/s4-b34/base), rows 3000000, extras {'seg': 16}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/maxblock/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/maxblock/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/maxblock/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/maxblock/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/maxblock/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sai_options: ;   segment_write_buffer_size: 16MiB
+node up after 12 s
+ARM ctl-seg16: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 3 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 49 s (create + wait)
+FILES after build: 17 SAI files, 47832094 bytes
+REBUILD v_idx rc=0 in 39 s: ''
+REBUILD txt_idx rc=0 in 45 s: ''
+FILES after rebuild: 17 SAI files, 47832094 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES ctl-seg16: {"samples": 275, "seg_used_peak": 16779568, "seg_limits": [-1, 16777216], "heap_used_peak": 2628816144}
+LEDGER ctl-seg16: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 848
+ARM ctl-seg16 STOPPED: daemons left: none
+DONE all 

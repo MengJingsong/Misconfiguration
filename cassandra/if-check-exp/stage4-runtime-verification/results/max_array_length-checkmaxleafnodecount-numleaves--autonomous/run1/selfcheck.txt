@@ -1,0 +1,44 @@
+PASS unit: 15 runs, all printed RESULT n=15
+PASS LIMIT = ArrayUtil.MAX_ARRAY_LENGTH read at run time = 2147483631 (A1 "value not verified" resolved) 2147483631
+PASS run A (A-B24-M1024-N50e6): completes, leaves = ceil(50e6/1024) = 48829 
+PASS run A (A-B24-M1024-N50e6): ratio B*leaves/LIMIT < 0.001 ratio=0.000545707 (formula 5.457e-04)
+FAIL [pre-registered 3..5 MB] run A (A-B24-M1024-N50e6): retained at the last sample measured -17856 B
+FAIL [pre-registered B+24..B+80 per leaf] run A (A-B24-M1024-N50e6): retained growth per leaf measured 112.0 per leaf
+PASS run A (Ap-B16-M1024-N50e6): completes, leaves = ceil(50e6/1024) = 48829 
+PASS run A (Ap-B16-M1024-N50e6): ratio B*leaves/LIMIT < 0.001 ratio=0.000363804 (formula 3.638e-04)
+FAIL [pre-registered 3..5 MB] run A (Ap-B16-M1024-N50e6): retained at the last sample measured 2525984 B
+PASS [pre-registered B+24..B+80 per leaf] run A (Ap-B16-M1024-N50e6): retained growth per leaf measured 45.6 per leaf
+PASS U2 B=1048576: throw at exactly leaf L = floor(LIMIT/B)+1 = 2048, "too many nodes", consumed = L leavesAtEnd=2048
+PASS U2 B=1048576: N = L-1 completes with product <= LIMIT product=2146435072
+PASS U2 B=1048576: product at the throw is the first count above LIMIT: B*L > LIMIT >= B*(L-1) 
+FAIL [pre-registered B+24..B+80 per leaf] B=1048576 throw run: retained growth per leaf measured 1047778.4 (B+24 = 1048600)
+PASS B2g row: heap just before the throw is LIMIT-scale (>= 0.99 LIMIT) retained 2150467616 = 1.0014 LIMIT
+PASS U2 B=262144: throw at exactly leaf L = floor(LIMIT/B)+1 = 8192, "too many nodes", consumed = L leavesAtEnd=8192
+PASS U2 B=262144: N = L-1 completes with product <= LIMIT product=2147221504
+PASS U2 B=262144: product at the throw is the first count above LIMIT: B*L > LIMIT >= B*(L-1) 
+FAIL [pre-registered B+24..B+80 per leaf] B=262144 throw run: retained growth per leaf measured 261998.5 (B+24 = 262168)
+PASS B2g row: heap just before the throw is LIMIT-scale (>= 0.99 LIMIT) retained 2147731960 = 1.0001 LIMIT
+PASS U2 B=4096: throw at exactly leaf L = floor(LIMIT/B)+1 = 524288, "too many nodes", consumed = L leavesAtEnd=524288
+PASS U2 B=4096: N = L-1 completes with product <= LIMIT product=2147479552
+PASS U2 B=4096: product at the throw is the first count above LIMIT: B*L > LIMIT >= B*(L-1) 
+PASS [pre-registered B+24..B+80 per leaf] B=4096 throw run: retained growth per leaf measured 4141.6 (B+24 = 4120)
+PASS B2g row: heap just before the throw is LIMIT-scale (>= 0.99 LIMIT) retained 2171945696 = 1.0114 LIMIT
+PASS 3 repetitions of the 1 MiB pair agree (throw leaf, consumed) 
+PASS C5 (L-5) completes 
+PASS control: leaf count M=1 vs M=1024 scales by about 1024 (1,000,000 / 977) 1000000 / 977
+PASS [pre-registered B+24..B+80 per leaf] control CTL-B24-M1024-N1e6: retained growth per leaf measured 75.2
+PASS [pre-registered B+24..B+80 per leaf] control CTL-B24-M1-N1e6: retained growth per leaf measured 73.1
+NOTE cluster R5: flush segs=22 maxLeavesOneSeg=444 leavesSum=9760 treeLen=125644891 | rebuild segs=43 maxLeaves=441 | tooMany=0 | segbufPeak=1024.0 MiB | LOAD_SECONDS 79.3 rows=5000000 AUTO_FLUSHES_DURING_LOAD 10 SEGMENTS_AFTER_FLUSH [('t2_vb_idx', 11), ('t2_vd_idx', 11)] SEGMENTS_AFTER_REBUILD [('t2_vb_idx', 21), ('t2_vd_idx', 22)]
+NOTE cluster R20a: flush segs=90 maxLeavesOneSeg=452 leavesSum=39014 treeLen=502584598 | rebuild segs=178 maxLeaves=441 | tooMany=0 | segbufPeak=1024.0 MiB | LOAD_SECONDS 291.6 rows=20000000 AUTO_FLUSHES_DURING_LOAD 44 SEGMENTS_AFTER_FLUSH [('t2_vb_idx', 45), ('t2_vd_idx', 45)] SEGMENTS_AFTER_REBUILD [('t2_vb_idx', 89), ('t2_vd_idx', 89)]
+NOTE cluster R20b: flush segs=88 maxLeavesOneSeg=446 leavesSum=39034 treeLen=502570250 | rebuild segs=174 maxLeaves=441 | tooMany=0 | segbufPeak=1024.0 MiB | LOAD_SECONDS 296.7 rows=20000000 AUTO_FLUSHES_DURING_LOAD 43 SEGMENTS_AFTER_FLUSH [('t2_vb_idx', 44), ('t2_vd_idx', 44)] SEGMENTS_AFTER_REBUILD [('t2_vb_idx', 87), ('t2_vd_idx', 87)]
+NOTE cluster R40: flush segs=176 maxLeavesOneSeg=448 leavesSum=77992 treeLen=1005137334 | rebuild segs=350 maxLeaves=441 | tooMany=0 | segbufPeak=1024.0 MiB | LOAD_SECONDS 674.9 rows=40000000 AUTO_FLUSHES_DURING_LOAD 87 SEGMENTS_AFTER_FLUSH [('t2_vb_idx', 88), ('t2_vd_idx', 88)] SEGMENTS_AFTER_REBUILD [('t2_vb_idx', 175), ('t2_vd_idx', 175)]
+NOTE cluster C32: flush segs=90 maxLeavesOneSeg=449 leavesSum=39016 treeLen=502587647 | rebuild segs=2909 maxLeaves=14 | tooMany=0 | segbufPeak=32.0 MiB | LOAD_SECONDS 371.7 rows=20000000 AUTO_FLUSHES_DURING_LOAD 44 SEGMENTS_AFTER_FLUSH [('t2_vb_idx', 45), ('t2_vd_idx', 45)] SEGMENTS_AFTER_REBUILD [('t2_vb_idx', 1455), ('t2_vd_idx', 1454)]
+PASS C2 no "too many nodes" in any arm 
+PASS C2 largest num_leaves per segment below 1e5 in every arm (ratio below 1e-3) {'R5': ('444', '441'), 'R20a': ('452', '441'), 'R20b': ('446', '441'), 'R40': ('448', '441'), 'C32': ('449', '14')}
+PASS C2 BALANCED_TREE length ratio N=20M/N=5M in [3.0,4.4] (flush + rebuild, both indexes) measured 4.00
+PASS C2 BALANCED_TREE length ratio N=40M/N=20M in [1.6,2.2] measured 2.00
+PASS C2 ALLOC sums grow with N (R5 < R20a < R40) {'R5': 27712399776, 'R20a': 110827957792, 'R40': 221632628088}
+NOTE heap used sampled peak during flush (kB): {'R5': 3655148.0, 'R20a': 3971158.0, 'R40': 3974516.0}
+PASS C2 control: segments(32MiB) >= 10 x segments(1024MiB) on the rebuild path (N=20M) 2909 vs 178
+PASS C2 control: peak SegmentBufferSpaceUsedBytes at 32MiB < 80 MiB and at 1024MiB > 200 MiB 32.0 MiB / 1024.0 MiB
+SUMMARY pass=32 fail=5

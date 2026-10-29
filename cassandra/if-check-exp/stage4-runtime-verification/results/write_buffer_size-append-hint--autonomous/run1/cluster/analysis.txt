@@ -1,0 +1,42 @@
+arm, build, cap, size, written, succeeded, hints_bytes_end, du_ratio, files, slabs, slab_MiB, attributable_MiB, direct_peak_MiB, direct_peak_delta_MiB, peak_residual_B, base_residual_B, heap_peak_MiB, rss_peak_MiB, over, wrdirect
+b256k-p400k-r1, b256k, 262144, 409600, 2621, 2613, 1073745406, 1.0002, 8, 3, 96, 96.25, 157.93, 94.07, 64942654, 33413567, 1763, 3052, 2621, 2621
+b64k-p400k-r1, b64k, 65536, 409600, 2621, 2621, 1073745406, 1.0002, 8, 3, 96, 96.06, 156.97, 93.28, 63929797, 33222718, 1827, 3060, 2621, 2621
+b64k-p1k-r2, b64k, 65536, 1024, 1048576, 1048576, 1146093946, 1.0674, 9, 2, 64, 64.06, 97.14, 33.45, 34747293, 33221725, 1808, 3059, 0, 0
+b256k-p1k-r2, b256k, 262144, 1024, 1048576, 1048576, 1146093946, 1.0674, 9, 2, 64, 64.25, 97.39, 33.52, 35010550, 33419423, 1763, 3021, 0, 0
+b64k-p1k-r1, b64k, 65536, 1024, 1048576, 1048576, 1146093946, 1.0674, 9, 2, 64, 64.06, 97.15, 33.46, 34758060, 33223263, 1776, 3012, 0, 0
+b64k-p400k-r2, b64k, 65536, 409600, 2621, 2621, 1073745406, 1.0002, 8, 3, 96, 96.06, 158.53, 94.85, 65571122, 33222370, 1640, 3046, 2621, 2621
+b1024k-p400k-r1, b1024k, 1048576, 409600, 2621, 2613, 1073745406, 1.0002, 8, 3, 96, 97.00, 160.25, 95.63, 67368963, 34200639, 1464, 3063, 0, 0
+b256k-p400k-r2, b256k, 262144, 409600, 2621, 2605, 1073745406, 1.0002, 8, 3, 96, 96.25, 157.55, 93.68, 64540040, 33420130, 1859, 3066, 2621, 2621
+b256k-p1k-r1, b256k, 262144, 1024, 1048576, 1048576, 1146093946, 1.0674, 9, 2, 64, 64.25, 97.32, 33.45, 34938307, 33414583, 1744, 3018, 0, 0
+b1024k-p400k-r2, b1024k, 1048576, 409600, 2621, 2606, 1073745406, 1.0002, 8, 3, 96, 97.00, 159.46, 94.84, 66545399, 34206508, 1843, 3053, 0, 0
+b1024k-p1k-r1, b1024k, 1048576, 1024, 1048576, 1048576, 1146093946, 1.0674, 9, 2, 64, 65.00, 98.08, 33.46, 35733869, 34207124, 1793, 2993, 0, 0
+b1024k-p1k-r2, b1024k, 1048576, 1024, 1048576, 1048576, 1146093946, 1.0674, 9, 2, 64, 65.00, 98.08, 33.46, 35734585, 34201827, 1796, 3027, 0, 0
+ctl-seg128-p1k, b256k, 262144, 1024, 1048576, 1048576, 1146093946, 0.0000, 9, 2, 256, 256.25, 289.39, 129.52, 35011419, 33421505, 1813, 3308, 0, 0
+ctl-perhost64-p1k, b256k, 262144, 1024, 1048576, 1048576, 71965348, 0.0000, 1, 2, 64, 64.25, 97.35, 33.48, 34974778, 33421256, 1830, 3011, 0, 0
+EXPECTED: X1 payload 1024: hint disk equal across builds and reps: du ratios [1.0674, 1.0674, 1.0674, 1.0674, 1.0674, 1.0674] within 2 % of each other — yes
+payload 1024: hint bytes by build {'b64k': [1146093946, 1146093946], 'b256k': [1146093946, 1146093946], 'b1024k': [1146093946, 1146093946]}
+payload 1024: direct peak (MiB) by build {'b64k': [97.1, 97.1], 'b256k': [97.4, 97.3], 'b1024k': [98.1, 98.1]}; slabs by build {'b64k': [2, 2], 'b256k': [2, 2], 'b1024k': [2, 2]}; peak minus slabs (KiB) by build {'b64k': [33933, 33943], 'b256k': [34190, 34119], 'b1024k': [34896, 34897]}
+  b64k-p1k-r2 vs b256k-p1k-r2: pool diff -0.25 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff -0.06 MiB
+  b64k-p1k-r2 vs b256k-p1k-r1: pool diff -0.18 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +0.01 MiB
+  b64k-p1k-r1 vs b256k-p1k-r2: pool diff -0.24 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff -0.05 MiB
+  b64k-p1k-r1 vs b256k-p1k-r1: pool diff -0.17 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +0.02 MiB
+  b1024k-p1k-r1 vs b256k-p1k-r2: pool diff +0.69 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff -0.06 MiB
+  b1024k-p1k-r1 vs b256k-p1k-r1: pool diff +0.76 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +0.01 MiB
+  b1024k-p1k-r2 vs b256k-p1k-r2: pool diff +0.69 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff -0.06 MiB
+  b1024k-p1k-r2 vs b256k-p1k-r1: pool diff +0.76 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +0.01 MiB
+EXPECTED: X1 payload 409600: hint disk equal across builds and reps: du ratios [1.0002, 1.0002, 1.0002, 1.0002, 1.0002, 1.0002] within 2 % of each other — yes
+payload 409600: hint bytes by build {'b256k': [1073745406, 1073745406], 'b64k': [1073745406, 1073745406], 'b1024k': [1073745406, 1073745406]}
+payload 409600: direct peak (MiB) by build {'b256k': [157.9, 157.6], 'b64k': [157.0, 158.5], 'b1024k': [160.2, 159.5]}; slabs by build {'b256k': [3, 3], 'b64k': [3, 3], 'b1024k': [3, 3]}; peak minus slabs (KiB) by build {'b256k': [63421, 63027], 'b64k': [62431, 64034], 'b1024k': [65790, 64986]}
+  b64k-p400k-r1 vs b256k-p400k-r1: pool diff -0.97 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff -0.78 MiB
+  b64k-p400k-r1 vs b256k-p400k-r2: pool diff -0.58 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff -0.39 MiB
+  b64k-p400k-r2 vs b256k-p400k-r1: pool diff +0.60 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +0.79 MiB
+  b64k-p400k-r2 vs b256k-p400k-r2: pool diff +0.98 MiB; constants diff -0.19 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +1.17 MiB
+  b1024k-p400k-r1 vs b256k-p400k-r1: pool diff +2.31 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +1.56 MiB
+  b1024k-p400k-r1 vs b256k-p400k-r2: pool diff +2.70 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +1.95 MiB
+  b1024k-p400k-r2 vs b256k-p400k-r1: pool diff +1.53 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +0.78 MiB
+  b1024k-p400k-r2 vs b256k-p400k-r2: pool diff +1.91 MiB; constants diff +0.75 MiB; slab diff +0 MiB; pool diff minus constants diff minus slab diff +1.16 MiB
+baseline direct minus slabs (B) by build: {'b256k': [33413567, 33419423, 33420130, 33414583], 'b64k': [33222718, 33221725, 33223263, 33222370], 'b1024k': [34200639, 34206508, 34207124, 34201827]}
+  build b256k: median baseline residual minus the 256 KiB build's +0 B; constants difference +0 B
+  build b64k: median baseline residual minus the 256 KiB build's -194459 B; constants difference -196608 B
+  build b1024k: median baseline residual minus the 256 KiB build's +787164 B; constants difference +786432 B
+analysis EXPECTED yes=2 no=0

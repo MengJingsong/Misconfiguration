@@ -1,0 +1,62 @@
+== arm | total SAI bytes after build / after rebuild | numeric-values bytes | per-index bytes | heap peak MiB | seg gauge peak MiB | RSS peak MiB | ledger lengths | verify
+A-3M       | 49133244 / 49133244 | 20839566 | 18417396 | 4045 | 1024.0 | 5169 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=127, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=728, RowToPartition=376987, RowToToken=20459819, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=7659335, v_idx/ColumnComplete=24, v_idx/Meta=1548, v_idx/PostingLists=7585535
+A-750k     | 12310642 / 12310642 | 5363713 | 4477394 | 3300 | 1024.0 | 5095 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=750000 expected 750000; count(txt=w0,w7,w99)=[7500, 7500, 7500] expected 7500 each OK
+    components: ClusteringKeyBlockOffsets=46, ClusteringKeyBlocks=2437525, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=499, PartitionKeyBlocks=31658, PartitionToSize=200, RowToPartition=94223, RowToToken=5268745, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=791859, txt_idx/TermsData=838, v_idx/BalancedTree=1931680, v_idx/ColumnComplete=24, v_idx/Meta=648, v_idx/PostingLists=1752087
+A2-3M      | 49133244 / 49133244 | 20839566 | 18417396 | 3752 | 1024.0 | 5208 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=127, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=728, RowToPartition=376987, RowToToken=20459819, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=7659335, v_idx/ColumnComplete=24, v_idx/Meta=1548, v_idx/PostingLists=7585535
+B-num64    | 41542421 / 41542421 | 13248743 | 18417396 | 3902 | 1024.0 | 5173 | {'64': 15} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=26073, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1215, PartitionKeyBlocks=125905, PartitionToSize=1430, RowToPartition=669434, RowToToken=12550591, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=7659335, v_idx/ColumnComplete=24, v_idx/Meta=1548, v_idx/PostingLists=7585535
+C-num1m    | 52670752 / 52670752 | 24377074 | 18417396 | 3779 | 1024.0 | 5186 | {'1048576': 15} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=29, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=26, RowToPartition=375052, RowToToken=24000062, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=7659335, v_idx/ColumnComplete=24, v_idx/Meta=1548, v_idx/PostingLists=7585535
+ctl-seg16  | 47832094 / 47832094 | 20839566 | 17116246 | 2511 | 16.0 | 5176 | {'128': 6, '16384': 9} | VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+    components: ClusteringKeyBlockOffsets=127, ClusteringKeyBlocks=9750025, GroupComplete=0, GroupMeta=352, PartitionKeyBlockOffsets=1905, PartitionKeyBlocks=125905, PartitionToSize=728, RowToPartition=376987, RowToToken=20459819, txt_idx/ColumnComplete=24, txt_idx/Meta=234, txt_idx/PostingLists=3169855, txt_idx/TermsData=841, v_idx/BalancedTree=10585079, v_idx/ColumnComplete=24, v_idx/Meta=124999, v_idx/PostingLists=3235190
+EXPECTED A-3M: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED A-3M: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED A-3M: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:13:07,567 DatabaseDescriptor.java:727 - Only 50.885GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED A-3M: initial build and rebuild produce the same component bytes: OK 49133244 vs 49133244
+EXPECTED A-750k: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED A-750k: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=750000 expected 750000; count(txt=w0,w7,w99)=[7500, 7500, 7500] expected 7500 each OK
+EXPECTED A-750k: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:18:13,055 DatabaseDescriptor.java:727 - Only 50.919GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED A-750k: initial build and rebuild produce the same component bytes: OK 12310642 vs 12310642
+EXPECTED A2-3M: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED A2-3M: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED A2-3M: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:19:19,246 DatabaseDescriptor.java:727 - Only 50.884GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED A2-3M: initial build and rebuild produce the same component bytes: OK 49133244 vs 49133244
+EXPECTED B-num64: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:41 /users/jason92/s4-b34/v-num64/
+EXPECTED B-num64: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED B-num64: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:14:49,916 DatabaseDescriptor.java:727 - Only 50.885GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED B-num64: initial build and rebuild produce the same component bytes: OK 41542421 vs 41542421
+EXPECTED C-num1m: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153129 Oct 28 17:41 /users/jason92/s4-b34/v-num1m/
+EXPECTED C-num1m: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED C-num1m: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:16:32,028 DatabaseDescriptor.java:727 - Only 50.885GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED C-num1m: initial build and rebuild produce the same component bytes: OK 52670752 vs 52670752
+EXPECTED ctl-seg16: node ran the arm's jar (jar md5 recorded): OK -rw-r--r-- 1 jason92 misconfiguration 11153127 Oct 28 17:55 /users/jason92/s4-b34/base/bui
+EXPECTED ctl-seg16: verify queries match the seed (count v>=0 == rows; txt terms == rows/100): OK VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+EXPECTED ctl-seg16: no ERROR lines in system.log: OK WARN  [main] 2026-10-29T00:21:01,593 DatabaseDescriptor.java:727 - Only 50.884GiB free across all data volumes. Consider adding more capacity to your cluster or
+EXPECTED ctl-seg16: initial build and rebuild produce the same component bytes: OK 47832094 vs 47832094
+EXPECTED A-3M: ledger = whole sets of five writers with exactly the arm's lengths {128: 2, 16384: 3}: OK 15 lines {128: 6, 16384: 9}
+INFO A-3M: scratch long[] bytes per SSTable writer set = 395264 (386 KiB); sets constructed 3
+EXPECTED A2-3M: ledger = whole sets of five writers with exactly the arm's lengths {128: 2, 16384: 3}: OK 15 lines {128: 6, 16384: 9}
+INFO A2-3M: scratch long[] bytes per SSTable writer set = 395264 (386 KiB); sets constructed 3
+EXPECTED A-750k: ledger = whole sets of five writers with exactly the arm's lengths {128: 2, 16384: 3}: OK 15 lines {128: 6, 16384: 9}
+INFO A-750k: scratch long[] bytes per SSTable writer set = 395264 (386 KiB); sets constructed 3
+EXPECTED ctl-seg16: ledger = whole sets of five writers with exactly the arm's lengths {128: 2, 16384: 3}: OK 15 lines {128: 6, 16384: 9}
+INFO ctl-seg16: scratch long[] bytes per SSTable writer set = 395264 (386 KiB); sets constructed 3
+EXPECTED B-num64: ledger = whole sets of five writers with exactly the arm's lengths {64: 5}: OK 15 lines {64: 15}
+INFO B-num64: scratch long[] bytes per SSTable writer set = 2560 (2 KiB); sets constructed 3
+EXPECTED C-num1m: ledger = whole sets of five writers with exactly the arm's lengths {1048576: 5}: OK 15 lines {1048576: 15}
+INFO C-num1m: scratch long[] bytes per SSTable writer set = 41943040 (40960 KiB); sets constructed 3
+EXPECTED total SAI bytes within 10 % across A / B (64) / C (2^20): MISMATCH 49133244 41542421 52670752
+EXPECTED non-numeric components (per-index files, key blocks) within 2 % across A / B / C: OK 28293678 28293678 28293678
+EXPECTED peak heap of B differs from A by no more than the ledger difference (-392704 B) + 2 % of 4 GiB: MISMATCH diff -142.7 MiB allowed 82.3 MiB
+EXPECTED peak heap of C differs from A by no more than the ledger difference (41547776 B) + 2 % of 4 GiB: MISMATCH diff -266.1 MiB allowed 121.5 MiB
+INFO noise A vs A2: total 49133244 / 49133244; heap peak 4045 / 3752 MiB
+EXPECTED SAI bytes grow with rows: 3M / 750k within 3.4 .. 4.6 (rows ratio 4): OK 3.99
+EXPECTED A-3M ledger-independent: metadata grows with rows (numeric-values bytes 3M / 750k within 3.4 .. 4.6): OK 
+INFO control: ctl-seg16 seg gauge peak 16.0 MiB (limit 16) vs A-3M 1024.0 MiB (limit 1024); memory-limit flush lines 848 vs 8; heap peaks 2511 vs 4045 MiB
+EXPECTED control (i): segment buffer peak in the 16MiB arm <= 20 MiB: OK 16.0 MiB
+EXPECTED control (ii): the default arm reached more than 32 MiB (the limit was driven): OK 1024.0 MiB
+EXPECTED control (iii) (B5.8, amended 2026-10-28): more memory-limit flush lines in the 16MiB arm than in the default arm: OK 848 vs 8
+INFO control (iii) as frozen in B5.5 (flush lines only in the 16MiB arm): NOT met (848 vs 8); replaced by B5.8, see the results file runbook defect 1
+SUMMARY mismatches=3 arms=6

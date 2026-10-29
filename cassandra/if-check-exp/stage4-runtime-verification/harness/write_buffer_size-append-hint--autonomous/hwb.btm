@@ -1,0 +1,121 @@
+# Byteman observation rules for hints_write_buffer_size-append-hint_remaining--autonomous / write_buffer_size-append-hint--autonomous,
+# cluster tier (B3d). They change no behaviour. Loaded on node A only, at start:
+#   -javaagent:<byteman jar>=script:<this file>   (no listener; rules on Cassandra classes need no boot: entry)
+# Lines go to the file named by -Dstage4.trace. Counters are cumulative since the JVM start (A is restarted before every arm).
+#
+#   created=<allocatedBuffers> size=<bufferSize> max=<MAX_ALLOCATED_BUFFERS> ms thread
+#       HintsBufferPool.createBuffer() exit: one line per slab the pool creates (the pool has no gauge).
+#   waiting ms thread
+#       a writer in the pool's disallow branch, BlockingQueue.take in switchCurrentBuffer() (HintsBufferPool.java:118).
+#   asamp n=<count> sz=<hint.remaining()> rem=<buffer.remaining()> cap=<buffer.capacity()> direct=<hint.isDirect()> ms
+#       every 128th Session.append(ByteBuffer) (the production overload, HintsWriter.java:200): entry size and the
+#       aggregation buffer's capacity and free bytes as the comparison at :205 sees them. cap is the build's constant.
+#   refuse ep checked limit ms
+#       every 128th StorageProxy.shouldHint(Replica, boolean) refusal with the per-host check run (StorageProxy.java:2488-2497).
+#   flush host=<hostId> size=<file position> app=<appends> appbytes=<entry bytes> over=<appends with entry > cap>
+#         wr=<writeBuffer calls> wrbytes=<bytes> wrdirect=<calls with a buffer that is not the shared write buffer>
+#         wrzero=<empty calls> refuse=<refusals> ms
+#       HintsWriter.Session.close() exit: the file's new length and the cumulative counters.
+RULE hwb pool creates a buffer
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceOpen("hwb", java.lang.System.getProperty("stage4.trace", "hwb.trace"));
+   traceln("hwb", "created=" + $0.allocatedBuffers + " size=" + $0.bufferSize + " max=" + org.apache.cassandra.hints.HintsBufferPool.MAX_ALLOCATED_BUFFERS + " ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hwb pool writer waits at the cap
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD switchCurrentBuffer
+AT INVOKE java.util.concurrent.BlockingQueue.take
+IF true
+DO traceOpen("hwb", java.lang.System.getProperty("stage4.trace", "hwb.trace"));
+   traceln("hwb", "waiting ms=" + java.lang.System.currentTimeMillis() + " thread=" + java.lang.Thread.currentThread().getName())
+ENDRULE
+
+RULE hwb session append counted and sampled
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD append(java.nio.ByteBuffer)
+AT ENTRY
+IF incrementCounter("app") % 128 == 1
+DO traceOpen("hwb", java.lang.System.getProperty("stage4.trace", "hwb.trace"));
+   traceln("hwb", "asamp n=" + readCounter("app") + " sz=" + $1.remaining() + " rem=" + $0.buffer.remaining() + " cap=" + $0.buffer.capacity() + " direct=" + $1.isDirect() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hwb session append bytes
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD append(java.nio.ByteBuffer)
+AT ENTRY
+IF true
+DO incrementCounter("appbytes", $1.remaining())
+ENDRULE
+
+RULE hwb session append over the buffer
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD append(java.nio.ByteBuffer)
+AT ENTRY
+IF $1.remaining() > $0.buffer.capacity()
+DO incrementCounter("over")
+ENDRULE
+
+RULE hwb channel write counted
+CLASS org.apache.cassandra.hints.HintsWriter
+METHOD writeBuffer(java.nio.ByteBuffer)
+AT ENTRY
+IF true
+DO incrementCounter("wr"); incrementCounter("wrbytes", $1.remaining())
+ENDRULE
+
+RULE hwb channel write of a hint
+CLASS org.apache.cassandra.hints.HintsWriter
+METHOD writeBuffer(java.nio.ByteBuffer)
+AT ENTRY
+IF $1.capacity() != org.apache.cassandra.hints.HintsWriteExecutor.WRITE_BUFFER_SIZE
+DO incrementCounter("wrdirect")
+ENDRULE
+
+RULE hwb empty channel write
+CLASS org.apache.cassandra.hints.HintsWriter
+METHOD writeBuffer(java.nio.ByteBuffer)
+AT ENTRY
+IF $1.remaining() == 0
+DO incrementCounter("wrzero")
+ENDRULE
+
+RULE hwb decide clear
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AT ENTRY
+IF true
+DO unlink("hwb.T", java.lang.Thread.currentThread());
+   unlink("hwb.L", java.lang.Thread.currentThread())
+ENDRULE
+
+RULE hwb decide operand
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AFTER INVOKE org.apache.cassandra.hints.HintsService.getTotalHintsSize
+IF true
+DO link("hwb.T", java.lang.Thread.currentThread(), "" + $!);
+   link("hwb.L", java.lang.Thread.currentThread(), "" + $maxHintsSize)
+ENDRULE
+
+RULE hwb decide refuse
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD shouldHint(org.apache.cassandra.locator.Replica, boolean)
+AT EXIT
+IF !$! && linked("hwb.T", java.lang.Thread.currentThread()) != null && incrementCounter("refuse") % 128 == 1
+DO traceOpen("hwb", java.lang.System.getProperty("stage4.trace", "hwb.trace"));
+   traceln("hwb", "refuse ep=" + $1.endpoint() + " checked=" + linked("hwb.T", java.lang.Thread.currentThread()) + " limit=" + linked("hwb.L", java.lang.Thread.currentThread()) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE hwb flush session close
+CLASS org.apache.cassandra.hints.HintsWriter$Session
+METHOD close
+AT EXIT
+IF true
+DO traceOpen("hwb", java.lang.System.getProperty("stage4.trace", "hwb.trace"));
+   createCounter("app"); createCounter("appbytes"); createCounter("over"); createCounter("wr"); createCounter("wrbytes"); createCounter("wrdirect"); createCounter("wrzero"); createCounter("refuse");
+   traceln("hwb", "flush host=" + $0.this$0.descriptor.hostId + " size=" + $0.position() + " app=" + readCounter("app") + " appbytes=" + readCounter("appbytes") + " over=" + readCounter("over") + " wr=" + readCounter("wr") + " wrbytes=" + readCounter("wrbytes") + " wrdirect=" + readCounter("wrdirect") + " wrzero=" + readCounter("wrzero") + " refuse=" + readCounter("refuse") + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

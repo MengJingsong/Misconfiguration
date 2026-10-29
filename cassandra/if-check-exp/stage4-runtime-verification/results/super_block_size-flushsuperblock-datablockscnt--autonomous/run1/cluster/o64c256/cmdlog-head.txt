@@ -1,0 +1,39 @@
+== o64c256 option=64MiB constant=256 mode=SPARSE rows=5000000 start 1793236913214
+daemons before: 0
+free_kb 49176496
+overlay ov256 copied into /users/jason92/s4-b34/node-sb/conf
+node up 1793236959069 pid 1317458
+-Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/users/jason92/s4-b34/node-sb/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760
+-Xmx2G
+-Xlog:class+load=info:file=/users/jason92/s4-b34/node-sb/logs/classload.log:none
+sasi_indexes_enabled: true
+compaction_throughput: 0MiB/s
+memtable_heap_space: 256MiB
+memtable_offheap_space: 256MiB
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE CUSTOM INDEX t_v ON ks.t (v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'max_compaction_flush_memory_in_mb': '64', 'mode': 'SPARSE'};
+load start 1793236964741
+load end 1793237033553 rc=0
+Op rate                   :   78,885 op/s  [insert: 78,885 op/s]
+Total errors              :          0 [insert: 0]
+flush done 1793237036009
+		SSTable count: 23
+		Old SSTable count: 0
+compact rc=0
+one sstable
+*-Data.db 84507545
+*-Index.db 54910786
+*SI_*.db 535376292
+org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/node-sb/conf/
+org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder source: file:/users/jason92/s4-b34/node-sb/conf/
+org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$MutableBlock source: file:/users/jason92/s4-b34/node-sb/conf/
+org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$MutableDataBlock source: file:/users/jason92/s4-b34/node-sb/conf/
+log error lines: 0
+daemons left: 0
+== o64c256 end 1793237176761

@@ -1,0 +1,60 @@
+PASS unit const 16: SUPER_BLOCK_SIZE read from the loaded class is 16 (source is the overlay)
+PASS unit const 16: printed flushes (true branch of line 497) = file-tail super blocks = 46; all but the forced last one at count 16  [prints 46, full 45, last count 15]
+PASS unit const 16: super blocks = floor((736-1)/16)+1
+PASS unit const 16: the three repeats are byte-identical
+PASS unit const 64: SUPER_BLOCK_SIZE read from the loaded class is 64 (source is the overlay)
+PASS unit const 64: printed flushes (true branch of line 497) = file-tail super blocks = 12; all but the forced last one at count 64  [prints 12, full 11, last count 31]
+PASS unit const 64: super blocks = floor((736-1)/64)+1
+PASS unit const 64: the three repeats are byte-identical
+PASS unit const 256: SUPER_BLOCK_SIZE read from the loaded class is 256 (source is the overlay)
+PASS unit const 256: printed flushes (true branch of line 497) = file-tail super blocks = 3; all but the forced last one at count 256  [prints 3, full 2, last count 223]
+PASS unit const 256: super blocks = floor((736-1)/256)+1
+PASS unit const 256: the three repeats are byte-identical
+PASS unit: super-block counts 46 / 12 / 3 fall by about 4x per 4x constant
+PASS unit: file bytes within 5 percent over the constants  [spread 1.95%]
+PASS unit: live heap at a super-block flush is nearly flat against a 16x constant range (spread < 25%); NOT within the 10% of U3  [spread 13.1%: [120314496, 124560312, 136106976]]
+PASS unit: the largest tree grows with the constant (tokens 4352 / 17408 / 69632)  [[4352, 17408, 69632]]
+PASS unit: the heap difference between constants 16 and 256 is explained by the tree (bytes per token 100..400)  [242 bytes per extra token]
+PASS unit const 16: live heap rises with N  [[45978352, 120314496, 218433248]]
+PASS unit const 64: live heap rises with N  [[48865096, 124560312, 224470144]]
+PASS unit const 256: live heap rises with N  [[52011896, 136106976, 241241800]]
+PASS unit: pristine build, unpatched overlay and patched overlay give one md5
+PASS unit: PREFIX mode has no super blocks
+PASS unit: -Xmx64m run ended with OutOfMemoryError (information)
+PASS cluster o64c64: finished, one sstable after compaction, no daemon left
+PASS cluster o64c64: stress had 0 errors, no AssertionError/OutOfMemoryError in system.log
+PASS cluster o64c64: OnDiskIndexBuilder class loaded from /build/apache-cassandra  [org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar]
+PASS cluster o64c64: compaction window starts 5 to 30 s after the flush (cmdlog "flush done" vs windows.txt)  [['1793235978303'] vs 1793235984623]
+PASS cluster o64c64: compaction window length is between 60 and 300 s  [107 s]
+NOTE o64c64 segments in the compaction window: 18
+PASS cluster o8c64: finished, one sstable after compaction, no daemon left
+PASS cluster o8c64: stress had 0 errors, no AssertionError/OutOfMemoryError in system.log
+PASS cluster o8c64: OnDiskIndexBuilder class loaded from /build/apache-cassandra  [org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar]
+PASS cluster o8c64: compaction window starts 5 to 30 s after the flush (cmdlog "flush done" vs windows.txt)  [['1793236231004'] vs 1793236237249]
+PASS cluster o8c64: compaction window length is between 60 and 300 s  [116 s]
+NOTE o8c64 segments in the compaction window: 137
+PASS cluster o512c64: finished, one sstable after compaction, no daemon left
+PASS cluster o512c64: stress had 0 errors, no AssertionError/OutOfMemoryError in system.log
+PASS cluster o512c64: OnDiskIndexBuilder class loaded from /build/apache-cassandra  [org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar]
+PASS cluster o512c64: compaction window starts 5 to 30 s after the flush (cmdlog "flush done" vs windows.txt)  [['1793236502768'] vs 1793236509524]
+PASS cluster o512c64: compaction window length is between 60 and 300 s  [123 s]
+NOTE o512c64 segments in the compaction window: 3
+PASS cluster o64c16: finished, one sstable after compaction, no daemon left
+PASS cluster o64c16: stress had 0 errors, no AssertionError/OutOfMemoryError in system.log
+PASS cluster o64c16: OnDiskIndexBuilder class loaded from /conf/  [org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/node-sb/conf/]
+PASS cluster o64c16: compaction window starts 5 to 30 s after the flush (cmdlog "flush done" vs windows.txt)  [['1793236778294'] vs 1793236784742]
+PASS cluster o64c16: compaction window length is between 60 and 300 s  [105 s]
+NOTE o64c16 segments in the compaction window: 17
+PASS cluster o64c256: finished, one sstable after compaction, no daemon left
+PASS cluster o64c256: stress had 0 errors, no AssertionError/OutOfMemoryError in system.log
+PASS cluster o64c256: OnDiskIndexBuilder class loaded from /conf/  [org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/node-sb/conf/]
+PASS cluster o64c256: compaction window starts 5 to 30 s after the flush (cmdlog "flush done" vs windows.txt)  [['1793237036009'] vs 1793237042355]
+PASS cluster o64c256: compaction window length is between 60 and 300 s  [111 s]
+NOTE o64c256 segments in the compaction window: 18
+PASS cluster pfx64: finished, one sstable after compaction, no daemon left
+PASS cluster pfx64: stress had 0 errors, no AssertionError/OutOfMemoryError in system.log
+PASS cluster pfx64: OnDiskIndexBuilder class loaded from /build/apache-cassandra  [org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder$Mode source: file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar]
+PASS cluster pfx64: compaction window starts 5 to 30 s after the flush (cmdlog "flush done" vs windows.txt)  [['1793237296786'] vs 1793237303069]
+PASS cluster pfx64: compaction window length is between 60 and 300 s  [94 s]
+NOTE pfx64 segments in the compaction window: 18
+SUMMARY selfcheck pass=53 fail=0

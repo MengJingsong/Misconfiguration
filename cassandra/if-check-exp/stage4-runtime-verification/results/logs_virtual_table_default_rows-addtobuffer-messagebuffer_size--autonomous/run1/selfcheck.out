@@ -1,0 +1,124 @@
+PASS unit: 12 JVMs, all exit 0 (expect 12)
+PASS unit N=0 100B: appender size 0 == min(N,50000) = 0
+PASS unit N=0: live LoggingEvent instances 0 ~ size
+PASS unit N=0: after stop() size 0, instances 0
+PASS unit N=0: after stop() heap delta -22651928 B within 25 MB of baseline
+PASS unit N=1000 100B: appender size 1000 == min(N,50000) = 1000
+PASS unit N=1000: oldest events kept (firstSeq 0, lastSeq 999)
+PASS unit N=1000: live LoggingEvent instances 1000 ~ size
+PASS unit N=1000: after stop() size 0, instances 0
+PASS unit N=1000: after stop() heap delta -22651928 B within 25 MB of baseline
+PASS unit N=49999 100B: appender size 49999 == min(N,50000) = 49999
+PASS unit N=49999: oldest events kept (firstSeq 0, lastSeq 49998)
+PASS unit N=49999: live LoggingEvent instances 49999 ~ size
+PASS unit N=49999: after stop() size 0, instances 0
+PASS unit N=49999: after stop() heap delta -22650296 B within 25 MB of baseline
+PASS unit N=50000 100B: appender size 50000 == min(N,50000) = 50000
+PASS unit N=50000: oldest events kept (firstSeq 0, lastSeq 49999)
+PASS unit N=50000: live LoggingEvent instances 50000 ~ size
+PASS unit N=50000: after stop() size 0, instances 0
+PASS unit N=50000: after stop() heap delta -11193208 B within 25 MB of baseline
+PASS unit N=50001 100B: appender size 50000 == min(N,50000) = 50000
+PASS unit N=50001: oldest events kept (firstSeq 0, lastSeq 49999)
+PASS unit N=50001: live LoggingEvent instances 50000 ~ size
+PASS unit N=50001: after stop() size 0, instances 0
+PASS unit N=50001: after stop() heap delta -22644248 B within 25 MB of baseline
+PASS unit N=120000 100B: appender size 50000 == min(N,50000) = 50000
+PASS unit N=120000: oldest events kept (firstSeq 0, lastSeq 49999)
+PASS unit N=120000: live LoggingEvent instances 50000 ~ size
+PASS unit N=120000: after stop() size 0, instances 0
+PASS unit N=120000: after stop() heap delta -11190992 B within 25 MB of baseline
+PASS unit 100B: heap delta of the full-buffer JVMs is above the empty / 1000-event JVMs ({0: -22836472, 1000: -22548472, 49999: -8433552, 50000: 3019904, 50001: -8433264, 120000: 3019680})
+PASS unit 100B: N=50000 / 50001 / 120000 retain the same bytes within baseline noise (corrected deltas [25856376, 14403208, 25856152])
+PASS unit 10KiB N=50000: size 50000 == 50000
+PASS unit 10KiB N=120000: size 50000 == 50000
+PASS unit: heap delta at N=50000 is 532 MB with a 10 KiB payload against 14..26 MB with 100 B (baseline-corrected; ratio at least 14x): the count cap does not bound bytes
+   info per-event retained bytes: 10KiB payload ~ 10648; 100B payload ~ 441 +- 240
+PASS unit 10KiB: N=120000 retains the same bytes as N=50000
+PASS unit max.rows=1000: resolveBufferSize 1000, table size 1000
+PASS unit max.rows=1000: table keeps the newest m (first 119999 last 119000)
+PASS unit max.rows=1000: appender buffer still 50000 (property has no effect on it)
+PASS unit max.rows=50000: resolveBufferSize 50000, table size 50000
+PASS unit max.rows=50000: table keeps the newest m (first 119999 last 70000)
+PASS unit max.rows=50000: appender buffer still 50000 (property has no effect on it)
+PASS unit max.rows=100000: resolveBufferSize 100000, table size 100000
+PASS unit max.rows=100000: table keeps the newest m (first 119999 last 20000)
+PASS unit max.rows=100000: appender buffer still 50000 (property has no effect on it)
+PASS unit: table heap delta rises with max.rows ({1000: 194128, 50000: 9993104, 100000: 19994320})
+PASS unit max.rows=500 (out of range): falls back to the default 50000 (table size 50000)
+   run R1-A-off           const=['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'] maxrows=100000 entry=None exit=None dbg=None t1=None t2=None samples=24 peakLE=0 peakLM=0
+   run R2-A-on-100k       const=['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'] maxrows=100000 entry=(1793216571115, 1993, 1993) exit=0 dbg=('90306', '0') t1=('20680', '1993', '18687') t2=('99922', '0', '99922') samples=29 peakLE=30736 peakLM=356877
+   run R2r2-A-on-100k     const=['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'] maxrows=100000 entry=(1793217603891, 1993, 1993) exit=0 dbg=('46649', '1993') t1=('20679', '1993', '18686') t2=None samples=11 peakLE=452 peakLM=21939
+   run R2r3-A-on-100k     const=['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'] maxrows=100000 entry=(1793217687378, 1993, 1993) exit=0 dbg=('46670', '1993') t1=('20700', '1993', '18707') t2=None samples=11 peakLE=413 peakLM=21939
+   run R3-B-on-100k       const=['DEFAULT_ROWS = 1000', 'sipush        1000'] maxrows=100000 entry=(1793216948048, 1993, 1000) exit=0 dbg=('229293', '0') t1=('19669', '1000', '18669') t2=('99858', '0', '99858') samples=30 peakLE=31684 peakLM=386069
+   run R3r2-B-on-100k     const=['DEFAULT_ROWS = 1000', 'sipush        1000'] maxrows=100000 entry=(1793217770765, 1993, 1000) exit=0 dbg=('45674', '1993') t1=('19705', '1000', '18705') t2=None samples=11 peakLE=466 peakLM=20949
+   run R3r3-B-on-100k     const=['DEFAULT_ROWS = 1000', 'sipush        1000'] maxrows=100000 entry=(1793217853270, 1993, 1000) exit=0 dbg=('45669', '1993') t1=('19700', '1000', '18700') t2=None samples=11 peakLE=466 peakLM=20949
+   run R4-A-on-1000       const=['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'] maxrows=1000 entry=(1793217323596, 1993, 1993) exit=0 dbg=('59771', '0') t1=('977', '0', '977') t2=('1000', '0', '1000') samples=27 peakLE=33298 peakLM=32171
+PASS R1-A-off: appender off: no flushBuffer call seen
+PASS R1-A-off: appender off: LoggingEvent instances never above 0 (async queues only)
+PASS R1-A-off: appender off: no LogMessage instances
+PASS R2-A-on-100k: build constant check (['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'])
+PASS R2-A-on-100k: messageBuffer at flush = min(attempts 1993, cap 50000) = 1993
+PASS R2-A-on-100k: buffer empty after flushBuffer
+   info R2-A-on-100k: debug.log rotated during the stress phase (90306 lines left, 0 before the flush): not used as ground truth here
+PASS R2-A-on-100k: table rows stamped <= flush = 1993 ~ 1993 (min(buffered 1993, max.rows 100000); the table keeps the newest max.rows rows, 18687 later events)
+PASS R2-A-on-100k: LoggingEvent instances at the idle end of the run: [1, 1] (transient in-flight peak during the stress phase: 30736)
+PASS R2-A-on-100k: transient LoggingEvent peak 30736 is far below anything tied to a cap
+PASS R2-A-on-100k: LogMessage instances at the idle end [100000, 100000] == max.rows 100000
+PASS R2-A-on-100k: stock build: events before the flush (1993) < 50000: the stock cap is not reached in practice
+   info R2-A-on-100k: table rows after stress 99922, peak LogMessage instances 356877 (transient), stress ('264', '0')
+PASS R2-A-on-100k: rows after stress 99922 within 1% of max.rows 100000 (rows with an equal timestamp key collapse in a read)
+PASS R2r2-A-on-100k: build constant check (['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'])
+PASS R2r2-A-on-100k: messageBuffer at flush = min(attempts 1993, cap 50000) = 1993
+PASS R2r2-A-on-100k: buffer empty after flushBuffer
+PASS R2r2-A-on-100k: debug.log lines before the flush (1993) ~ attempts (1993)
+PASS R2r2-A-on-100k: table rows stamped <= flush = 1993 ~ 1993 (min(buffered 1993, max.rows 100000); the table keeps the newest max.rows rows, 18686 later events)
+PASS R2r2-A-on-100k: start-up-only run: LoggingEvent instances after the flush (+20 s): max 0
+PASS R2r2-A-on-100k: stock build: events before the flush (1993) < 50000: the stock cap is not reached in practice
+PASS R2r3-A-on-100k: build constant check (['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'])
+PASS R2r3-A-on-100k: messageBuffer at flush = min(attempts 1993, cap 50000) = 1993
+PASS R2r3-A-on-100k: buffer empty after flushBuffer
+PASS R2r3-A-on-100k: debug.log lines before the flush (1993) ~ attempts (1993)
+PASS R2r3-A-on-100k: table rows stamped <= flush = 1993 ~ 1993 (min(buffered 1993, max.rows 100000); the table keeps the newest max.rows rows, 18707 later events)
+PASS R2r3-A-on-100k: start-up-only run: LoggingEvent instances after the flush (+20 s): max 0
+PASS R2r3-A-on-100k: stock build: events before the flush (1993) < 50000: the stock cap is not reached in practice
+PASS R3-B-on-100k: build constant check (['DEFAULT_ROWS = 1000', 'sipush        1000'])
+PASS R3-B-on-100k: messageBuffer at flush = min(attempts 1993, cap 1000) = 1000
+PASS R3-B-on-100k: buffer empty after flushBuffer
+   info R3-B-on-100k: debug.log rotated during the stress phase (229293 lines left, 0 before the flush): not used as ground truth here
+PASS R3-B-on-100k: table rows stamped <= flush = 1000 ~ 1000 (min(buffered 1000, max.rows 100000); the table keeps the newest max.rows rows, 18669 later events)
+PASS R3-B-on-100k: LoggingEvent instances at the idle end of the run: [1, 1] (transient in-flight peak during the stress phase: 31684)
+PASS R3-B-on-100k: transient LoggingEvent peak 31684 is far below anything tied to a cap
+PASS R3-B-on-100k: LogMessage instances at the idle end [100000, 100000] == max.rows 100000
+PASS R3-B-on-100k: build B: peak buffer 1000 while 1993 events were logged before the flush
+   info R3-B-on-100k: table rows after stress 99858, peak LogMessage instances 386069 (transient), stress ('261', '0')
+PASS R3-B-on-100k: rows after stress 99858 within 1% of max.rows 100000 (rows with an equal timestamp key collapse in a read)
+PASS R3r2-B-on-100k: build constant check (['DEFAULT_ROWS = 1000', 'sipush        1000'])
+PASS R3r2-B-on-100k: messageBuffer at flush = min(attempts 1993, cap 1000) = 1000
+PASS R3r2-B-on-100k: buffer empty after flushBuffer
+PASS R3r2-B-on-100k: debug.log lines before the flush (1993) ~ attempts (1993)
+PASS R3r2-B-on-100k: table rows stamped <= flush = 1000 ~ 1000 (min(buffered 1000, max.rows 100000); the table keeps the newest max.rows rows, 18705 later events)
+PASS R3r2-B-on-100k: start-up-only run: LoggingEvent instances after the flush (+20 s): max 0
+PASS R3r2-B-on-100k: build B: peak buffer 1000 while 1993 events were logged before the flush
+PASS R3r3-B-on-100k: build constant check (['DEFAULT_ROWS = 1000', 'sipush        1000'])
+PASS R3r3-B-on-100k: messageBuffer at flush = min(attempts 1993, cap 1000) = 1000
+PASS R3r3-B-on-100k: buffer empty after flushBuffer
+PASS R3r3-B-on-100k: debug.log lines before the flush (1993) ~ attempts (1993)
+PASS R3r3-B-on-100k: table rows stamped <= flush = 1000 ~ 1000 (min(buffered 1000, max.rows 100000); the table keeps the newest max.rows rows, 18700 later events)
+PASS R3r3-B-on-100k: start-up-only run: LoggingEvent instances after the flush (+20 s): max 0
+PASS R3r3-B-on-100k: build B: peak buffer 1000 while 1993 events were logged before the flush
+PASS R4-A-on-1000: build constant check (['DEFAULT_ROWS = 50000', 'ldc           #39                 // int 50000'])
+PASS R4-A-on-1000: messageBuffer at flush = min(attempts 1993, cap 50000) = 1993
+PASS R4-A-on-1000: buffer empty after flushBuffer
+   info R4-A-on-1000: debug.log rotated during the stress phase (59771 lines left, 0 before the flush): not used as ground truth here
+PASS R4-A-on-1000: table rows stamped <= flush = 0 ~ 0 (min(buffered 1993, max.rows 1000); the table keeps the newest max.rows rows, 977 later events)
+PASS R4-A-on-1000: LoggingEvent instances at the idle end of the run: [2, 1] (transient in-flight peak during the stress phase: 33298)
+PASS R4-A-on-1000: transient LoggingEvent peak 33298 is far below anything tied to a cap
+PASS R4-A-on-1000: LogMessage instances at the idle end [1000, 1000] == max.rows 1000
+   info R4-A-on-1000: table rows after stress 1000, peak LogMessage instances 32171 (transient), stress ('169', '0')
+PASS R4-A-on-1000: rows after stress 1000 within 1% of max.rows 1000 (rows with an equal timestamp key collapse in a read)
+   info transient LoggingEvent peaks in the full runs: {'R2-A-on-100k': 30736, 'R3-B-on-100k': 31684, 'R4-A-on-1000': 33298}
+   info plateaus (rows after stress): {'R2-A-on-100k': 99922, 'R3-B-on-100k': 99858, 'R4-A-on-1000': 1000}
+PASS positive control R4: table plateau 1000 at max.rows=1000
+PASS steady state: R2 (constant 50000) 99922 vs R3 (constant 1000) 99858 rows after stress: same within 10%
+SELFCHECK fails=0

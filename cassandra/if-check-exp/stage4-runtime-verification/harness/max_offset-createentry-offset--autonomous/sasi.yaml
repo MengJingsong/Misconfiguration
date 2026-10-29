@@ -1,0 +1,16 @@
+# cassandra-stress user profile (case B3c, as amended C1): one partition per insert, bigint key from -pop, a short text v (100,000
+# distinct values; carries the SASI index when present) and a 1000-byte blob payload that carries the data volume.
+# The table and index are created by cluster-run.sh; this profile only describes the rows to insert.
+keyspace: ks
+table: t
+columnspec:
+  - name: id
+  - name: v
+    size: fixed(10)
+    population: uniform(1..100000)
+  - name: payload
+    size: fixed(1000)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries: {}

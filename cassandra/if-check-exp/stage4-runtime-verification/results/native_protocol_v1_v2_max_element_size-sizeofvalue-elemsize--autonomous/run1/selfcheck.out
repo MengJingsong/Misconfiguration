@@ -1,0 +1,22 @@
+PASS unit: 81 cells :: 81
+PASS unit: 3 reps per cell
+PASS unit: V2 throws exactly when S > 65535 (with the size message); every other cell succeeds with the exact length; V3/V4 succeed at 8 MiB
+PASS unit: failing V2 calls (S=65536, 8 MiB) allocate < 16 KB (result buffer never allocated) :: {('size', 'v2', 1, 65536): 2192, ('size', 'v2', 1, 8388608): 2192}
+PASS unit: V3 at S=65536 and 8 MiB allocates at least the result size
+PASS unit control: allocated bytes per element within 10% across N = 1, 10, 100, 1000 (V2, V3, V4) - proportional to payload
+PASS unit: null element -> NPE on V2, ok len=8 on V3 :: ['STAGE4 null ver=2/v2 outcome=NullPointerException', 'STAGE4 null ver=3/v3 outcome=ok len=8']
+PASS cluster: V2 probe refused (client: connected=no) and the server log names the protocol version, not an element size :: V2PROBE connected=no error=('Unable to connect to any servers', {'127.0.0.1:9042': ConnectionShutdown('Connection to 127.0.0.1:9042 was closed')})
+PASS cluster: W inserts of 65535, 65536 and 1 MiB elements all accepted on v4 (100 rows each) :: [('65535', '100', '-'), ('65536', '100', '-'), ('1048576', '100', '-')]
+PASS cluster: read-back 1 element, Byteman pack_calls during W == 0 :: {65535: {'S': '65535', 'memtable_data_bytes': '6559600', 'sstable_data_bytes': '6586673', 'heapmax_kB': '179544', 'readback_elements': '1', 'pack_calls': '0'}, 65536: {'S': '65536', 'memtable_data_bytes': '6559700', 'sstable_data_bytes': '6586757', 'heapmax_kB': '245080', 'readback_elements': '1', 'pack_calls': '0'}, 1048576: {'S': '1048576', 'memtable_data_bytes': '12583644', 'sstable_data_bytes': '105334768', 'heapmax_kB': '507224', 'readback_elements': '1', 'pack_calls': '0'}}
+INFO MEMTABLE_LIMIT flushes during W: ['tw_1048576']
+PASS cluster: only tw_1048576 hit a MEMTABLE_LIMIT flush during its inserts (memtable leg invalid for it, valid for the two smaller) :: ['tw_1048576']
+PASS cluster: memtable bytes per payload byte at S=65535 and 65536 within 5% (no step at 65535) :: {65535: 1.0009308003356985, 65536: 1.0009307861328125}
+PASS cluster: SSTable bytes per payload byte at S=65535, 65536 and 1 MiB within 25% of each other (no step at 65535) :: {65535: 1.0050618753337912, 65536: 1.0050593566894532, 1048576: 1.0045506286621093}
+PASS cluster: SSTable bytes grow with S
+PASS cluster: sizeOfValue saw remaining 65535, 65536, 1048576 under V3/V4 (UDF path), never V1/V2 :: [('V4', '65535'), ('V4', '65536'), ('V4', '1048576'), ('V3', '65535'), ('V3', '65536'), ('V3', '1048576')]
+PASS cluster: all 6 UDF queries returned the element (first_len == S), none errored :: [('v4', '65535', 'ok elements=1 first_len=65535'), ('v4', '65536', 'ok elements=1 first_len=65536'), ('v4', '1048576', 'ok elements=1 first_len=1048576'), ('v3', '65535', 'ok elements=1 first_len=65535'), ('v3', '65536', 'ok elements=1 first_len=65536'), ('v3', '1048576', 'ok elements=1 first_len=1048576')]
+PASS cluster: no "supports only elements" text in the node log
+INFO control W_INSERT: [('65535', '100', '-'), ('65536', '100', '-'), ('1048576', '0', 'InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail column_value_size violated: Value of column \'s\' has size 1048576, this exceeds t')]
+PASS cluster control (column_value_size_fail_threshold 512KiB): S=65535, 65536 accepted (100 rows); 1 MiB rejected (0 rows)
+PASS cluster control: rejection is a guardrail message, not the element-size text :: InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail column_value_size violated: Value of column 's' has size 1048576, this exceeds the failure threshold of 524288."
+RESULT 19 PASS 0 FAIL

@@ -1,0 +1,17 @@
+# Stage-4 ledger (instrument only, no behaviour change): one line per AbstractBlockPackedWriter construction with the length of blockValues,
+# and one line per SAICodecUtils.checkBlockSize call with its three arguments. Output on stdout (node started with `bin/cassandra -f`).
+RULE stage4 block-packed writer constructed
+CLASS org.apache.cassandra.index.sai.disk.v1.bitpack.AbstractBlockPackedWriter
+METHOD <init>
+AT EXIT
+IF TRUE
+DO traceln("BPW " + $0.blockValues.length + " " + Thread.currentThread().getName())
+ENDRULE
+
+RULE stage4 checkBlockSize called
+CLASS org.apache.cassandra.index.sai.disk.v1.SAICodecUtils
+METHOD checkBlockSize
+AT ENTRY
+IF TRUE
+DO traceln("CHK " + $1 + " " + $2 + " " + $3)
+ENDRULE

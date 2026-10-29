@@ -97,6 +97,15 @@ Outcomes: pass leads to the normal snapshot; fail aborts before any directory or
 
 **B4. Risks and cleanup.** Disk: 2M rows is a few hundred MB plus snapshots as hard links; keep data on local disk with known space, never on shared storage. Do not build in the shared tree (work in the copy). Long snapshot-name directories must be removed with `nodetool clearsnapshot` or by deleting the node's data directory at the end. Stop the node and any `cassandra-stress` process; verify with `pgrep -fa 'CassandraDaemon|cassandra-stress'` that none remain. Remove the copy and temporary directories afterwards.
 
+### Audit amendments (stage 4 step 0, 2026-10-28)
+
+Citations re-read in `cassandra/cassandra-5.0.9/`: `ColumnFamilyStore.java:2144, 2168-2190, 2200, 2230`, `SchemaConstants.java:80`, `CassandraRelevantProperties.java:517` (default `"false"`), `Directories.java:636-646, 1407-1419`, `StorageService.java:4334` (nodetool path adds no name check), `SnapshotTest.java:65-140` (already asserts 255 accepted, 256 rejected with validation true). All hold. In the pinned source the manifest-file mapping is at `ColumnFamilyStore.java:2213/2247-2250` (the case's `:2248` is `mapToDataFilenames`, still correct).
+- R1 (B2f/B3f, validation false, L > 255): the node's local disk is ext3 and a 256-character `mkdir` fails with "File name too long" (checked on the run node), so the prediction is: accepted at line 2185 (no `IllegalArgumentException` with the line-2187 text), then rejected by the OS (an `FSWriteError`/IO error from directory creation), nothing created. The constant is therefore redundant with the filesystem limit here.
+- R2 (B2d/B2g/B3g, tolerances): "flat across L" means the snapshot file bytes and `manifest.json`/`schema.cql` sizes are equal across L (exactly), `du -s` of the whole data directory differs between L = 1 and L = 255 by at most 64 KiB (directory entries and files), and the heap delta (after `System.gc()`) of L = 255 minus L = 1 is under 1 MiB in absolute value; "rises with N" means the N = 100k (unit) or N = 2M (cluster) snapshot is at least 5 times the N = 1k / 200k one.
+- R3 (B2e step 4): three repetitions apply to the L loop of each N; the OS-rejected cells (R1) are recorded, not repeated.
+- R4 (B3d): `du --apparent-size` counts each hard link, so it is read only for the manifest and schema files; disk cost of a snapshot is the change in `du -s` of the whole data directory and `nodetool listsnapshots` "True size".
+- R5 (A5): the memory held for the in-memory snapshot record is not observable directly; the heap delta (R2) is a coarse bound only.
+
 ## C. Sources read
 
 - /users/jason92/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java (lines 2120-2290)
@@ -110,4 +119,8 @@ Outcomes: pass leads to the normal snapshot; fail aborts before any directory or
 
 ## D. Stage-4 feedback
 
-`none yet`
+**2026-10-28 (stage 4, run 1 on pc41; results `stage4-runtime-verification/results/filename_length-validatesnapshotname-snapshotname--autonomous.md`).** Verdict: unit Confirmed, cluster Confirmed, both "does not cap" (true negative; estimate `negative` matched). B section amended before run 1 (audit block R1-R5; file sha256 at freeze `752b8b60...`).
+- Unit (60 cells, 90 checks, 0 mismatch): validation true accepts L = 1, 100, 255 and rejects 256, 300 with the line-2187 `IllegalArgumentException`, no directory; validation false accepts up to 255 and the OS rejects 256, 300 (`FSWriteError`, "Unable to create directory"; ext3 NAME_MAX 255), so the constant is redundant with the filesystem limit. Snapshot bytes (31,688 B at 1k rows; 2,571,365 B at 100k), manifest and schema sizes identical across L = 1, 100, 255; physical growth 1,105 B in every accepted cell; N control 81.1x.
+- Cluster (one node): snapshot bytes 50,797,538 B, `listsnapshots` True size 1.01 KiB / size on disk 48.44 MiB and physical growth +2,047 B identical for L = 1, 100, 255 at 200k rows; 507,111,470 B (10.0x) at 2M rows; L = 256 rejected with the 2187 text (validation true), by the OS with validation false.
+- Weaker than it looks: heap cannot resolve below about 16 MiB at the cluster tier (G1 regions). One pair at 2M rows differs by 1.49 MiB against the frozen 1 MiB tolerance (R2); a six-snapshot probe on the same data swings by +-16 MiB with no ordering by L, so it is noise, but the tolerance was not met as written. The unit tier bounds heap effects under 1 MiB. The memory held for the in-memory snapshot record is not directly observed (R5). The constant itself was not varied (it is not settable).
+- Runbook notes: B3d `listsnapshots` has one row per table (`counter1` and `standard1` after `cassandra-stress`); read the `standard1` row. After a restart, startup compaction runs before `disableautocompaction` can be sent, so the B3e step-5 arm's deltas are not comparable (only accept/reject is used).

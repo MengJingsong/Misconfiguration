@@ -1,0 +1,409 @@
+13:00:16 === arm A1: name length 3, 200 x 10000 rows ===
+13:00:16 $ /users/jason92/s4-b2/hk/make-node.sh /users/jason92/s4-b2/run/ks/A1 
+node dir /users/jason92/s4-b2/run/ks/A1: # ---- stage4 lines ----;data_file_directories:;    - /users/jason92/s4-b2/run/ks/A1/data;commitlog_directory: /users/jason92/s4-b2/run/ks/A1/commitlog;hints_directory: /users/jason92/s4-b2/run/ks/A1/hints;saved_caches_directory: /users/jason92/s4-b2/run/ks/A1/saved_caches;cdc_raw_directory: /users/jason92/s4-b2/run/ks/A1/cdc_raw;
+13:00:16 $ cd /users/jason92/s4-b2/base && bin/cassandra -p /users/jason92/s4-b2/run/ks/A1/pid > /users/jason92/s4-b2/run/ks/A1/stdout 2>&1
+
+13:00:20 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+13:00:25 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:00:30 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:00:35 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:00:40 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:00:45 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:00:50 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:00:55 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:01:01 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+running
+13:01:02 node A1 up, pid 1026084, 46 s
+13:01:02 $ python3 /users/jason92/s4-b2/hk/client.py probe
+{"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+OK {"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+13:01:02 $ python3 /users/jason92/s4-b2/hk/client.py ddl ks 3 200
+{"ok": true, "created": 200, "kind": "ks", "L": 3, "name_len_first": 3, "sample": "k5j", "elapsed_s": 275.7}
+OK {"ok": true, "created": 200, "kind": "ks", "L": 3, "name_len_first": 3, "sample": "k5j", "elapsed_s": 275.7}
+13:05:38 arm writers: 4 processes
+13:07:07 $ /users/jason92/s4-b2/base/bin/nodetool flush
+
+13:07:19 $ /users/jason92/s4-b2/base/bin/nodetool compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            335         
+data compacted                   9308910     
+compressed data compacted        1906487     
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   17.26/minute
+mean rate                        2883.48/hour
+compaction throughput (MiB/s)    64.0
+13:07:20 settle 60 s
+13:08:20 $ jcmd 1026084 GC.run
+1026084:
+Command executed successfully
+13:08:20 $ java -cp /users/jason92/s4-b2/jmx Jmx 7199 get java.lang:type=Memory HeapMemoryUsage
+java.lang:type=Memory|HeapMemoryUsage|214664088
+13:08:20 $ jcmd 1026084 GC.class_histogram > /users/jason92/s4-b2/logs/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous/run1/cluster/A1.histo.txt
+
+13:08:21 $ /users/jason92/s4-b2/base/bin/nodetool info
+ID                     : ae26e9c4-898a-4d69-bd76-5080eca91d79
+Gossip active          : true
+Native Transport active: true
+Load                   : 47.01 MiB
+Uncompressed load      : 267.47 MiB
+Generation No          : 1793214023
+Uptime (seconds)       : 485
+Heap Memory (MB)       : 204.77 / 2048.00
+Off Heap Memory (MB)   : 2.75
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 27371, size 2.09 MiB, capacity 100 MiB, 532 hits, 1172 requests, 0.454 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : (invoke with -T/--tokens to see all 16 tokens)
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+13:08:23 $ grep -c "^ERROR" /users/jason92/s4-b2/run/ks/A1/logs/system.log
+0
+13:08:29 node pid 1026084 stopped; daemons left: []
+13:08:29 arm A1 done: {'heap_used_after_gc': 214664088, 'histo_total_bytes': 214713208, 'du_data': 49293477, 'longest_dir_name': 63}
+13:08:29 === arm B1: name length 48, 200 x 10000 rows ===
+13:08:29 $ /users/jason92/s4-b2/hk/make-node.sh /users/jason92/s4-b2/run/ks/B1 
+node dir /users/jason92/s4-b2/run/ks/B1: # ---- stage4 lines ----;data_file_directories:;    - /users/jason92/s4-b2/run/ks/B1/data;commitlog_directory: /users/jason92/s4-b2/run/ks/B1/commitlog;hints_directory: /users/jason92/s4-b2/run/ks/B1/hints;saved_caches_directory: /users/jason92/s4-b2/run/ks/B1/saved_caches;cdc_raw_directory: /users/jason92/s4-b2/run/ks/B1/cdc_raw;
+13:08:29 $ cd /users/jason92/s4-b2/base && bin/cassandra -p /users/jason92/s4-b2/run/ks/B1/pid > /users/jason92/s4-b2/run/ks/B1/stdout 2>&1
+
+13:08:33 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+13:08:38 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:08:43 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:08:48 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:08:53 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:08:58 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:09:03 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:09:08 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:09:13 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+running
+13:09:14 node B1 up, pid 1031643, 46 s
+13:09:14 $ python3 /users/jason92/s4-b2/hk/client.py probe
+{"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+OK {"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+13:09:15 $ python3 /users/jason92/s4-b2/hk/client.py ddl ks 48 200
+{"ok": true, "created": 200, "kind": "ks", "L": 48, "name_len_first": 48, "sample": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk5j", "elapsed_s": 275.8}
+OK {"ok": true, "created": 200, "kind": "ks", "L": 48, "name_len_first": 48, "sample": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk5j", "elapsed_s": 275.8}
+13:13:51 arm writers: 4 processes
+13:15:25 $ /users/jason92/s4-b2/base/bin/nodetool flush
+
+13:15:36 $ /users/jason92/s4-b2/base/bin/nodetool compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            335         
+data compacted                   10825410    
+compressed data compacted        1939302     
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   17.17/minute
+mean rate                        2852.90/hour
+compaction throughput (MiB/s)    64.0
+13:15:37 settle 60 s
+13:16:37 $ jcmd 1031643 GC.run
+1031643:
+Command executed successfully
+13:16:37 $ java -cp /users/jason92/s4-b2/jmx Jmx 7199 get java.lang:type=Memory HeapMemoryUsage
+java.lang:type=Memory|HeapMemoryUsage|210493792
+13:16:38 $ jcmd 1031643 GC.class_histogram > /users/jason92/s4-b2/logs/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous/run1/cluster/B1.histo.txt
+
+13:16:38 $ /users/jason92/s4-b2/base/bin/nodetool info
+ID                     : 5e53bf22-0ac9-4be0-aefe-d59f7deda851
+Gossip active          : true
+Native Transport active: true
+Load                   : 47.06 MiB
+Uncompressed load      : 267.59 MiB
+Generation No          : 1793214515
+Uptime (seconds)       : 490
+Heap Memory (MB)       : 200.79 / 2048.00
+Off Heap Memory (MB)   : 2.75
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 27376, size 3.13 MiB, capacity 100 MiB, 525 hits, 1167 requests, 0.450 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : (invoke with -T/--tokens to see all 16 tokens)
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+13:16:40 $ python3 /users/jason92/s4-b2/hk/client.py try-ks kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+{"ok": true, "rejected": true, "name_len": 49, "error_class": "InvalidRequest", "message": "Error from server: code=2200 [Invalid query] message=\"Keyspace name must not be more than 48 characters long (got 49 characters for \"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\")\""}
+OK {"ok": true, "rejected": true, "name_len": 49, "error_class": "InvalidRequest", "message": "Error from server: code=2200 [Invalid query] message=\"Keyspace name must not be more than 48 characters long (got 49 characters for \"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\")\""}
+13:16:40 $ grep -c "^ERROR" /users/jason92/s4-b2/run/ks/B1/logs/system.log
+0
+13:16:46 node pid 1031643 stopped; daemons left: []
+13:16:46 arm B1 done: {'heap_used_after_gc': 210493792, 'histo_total_bytes': 210542952, 'du_data': 49347406, 'longest_dir_name': 63}
+13:16:46 === arm A2: name length 3, 200 x 10000 rows ===
+13:16:46 $ /users/jason92/s4-b2/hk/make-node.sh /users/jason92/s4-b2/run/ks/A2 
+node dir /users/jason92/s4-b2/run/ks/A2: # ---- stage4 lines ----;data_file_directories:;    - /users/jason92/s4-b2/run/ks/A2/data;commitlog_directory: /users/jason92/s4-b2/run/ks/A2/commitlog;hints_directory: /users/jason92/s4-b2/run/ks/A2/hints;saved_caches_directory: /users/jason92/s4-b2/run/ks/A2/saved_caches;cdc_raw_directory: /users/jason92/s4-b2/run/ks/A2/cdc_raw;
+13:16:46 $ cd /users/jason92/s4-b2/base && bin/cassandra -p /users/jason92/s4-b2/run/ks/A2/pid > /users/jason92/s4-b2/run/ks/A2/stdout 2>&1
+
+13:16:51 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+13:16:56 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:01 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:06 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:11 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:16 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:21 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:26 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:17:31 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+running
+13:17:32 node A2 up, pid 1037288, 46 s
+13:17:32 $ python3 /users/jason92/s4-b2/hk/client.py probe
+{"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+OK {"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+13:17:33 $ python3 /users/jason92/s4-b2/hk/client.py ddl ks 3 200
+{"ok": true, "created": 200, "kind": "ks", "L": 3, "name_len_first": 3, "sample": "k5j", "elapsed_s": 276.2}
+OK {"ok": true, "created": 200, "kind": "ks", "L": 3, "name_len_first": 3, "sample": "k5j", "elapsed_s": 276.2}
+13:22:09 arm writers: 4 processes
+13:23:39 $ /users/jason92/s4-b2/base/bin/nodetool flush
+
+13:23:50 $ /users/jason92/s4-b2/base/bin/nodetool compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            335         
+data compacted                   9308910     
+compressed data compacted        1905097     
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   17.26/minute
+mean rate                        2875.61/hour
+compaction throughput (MiB/s)    64.0
+13:23:51 settle 60 s
+13:24:51 $ jcmd 1037288 GC.run
+1037288:
+Command executed successfully
+13:24:52 $ java -cp /users/jason92/s4-b2/jmx Jmx 7199 get java.lang:type=Memory HeapMemoryUsage
+java.lang:type=Memory|HeapMemoryUsage|197798504
+13:24:52 $ jcmd 1037288 GC.class_histogram > /users/jason92/s4-b2/logs/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous/run1/cluster/A2.histo.txt
+
+13:24:52 $ /users/jason92/s4-b2/base/bin/nodetool info
+ID                     : afb5f2a4-09ef-4321-aad5-64cf4a915b6e
+Gossip active          : true
+Native Transport active: true
+Load                   : 47.01 MiB
+Uncompressed load      : 267.47 MiB
+Generation No          : 1793215013
+Uptime (seconds)       : 486
+Heap Memory (MB)       : 188.68 / 2048.00
+Off Heap Memory (MB)   : 2.75
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 27372, size 2.09 MiB, capacity 100 MiB, 529 hits, 1170 requests, 0.452 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : (invoke with -T/--tokens to see all 16 tokens)
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+13:24:54 $ grep -c "^ERROR" /users/jason92/s4-b2/run/ks/A2/logs/system.log
+0
+13:25:00 node pid 1037288 stopped; daemons left: []
+13:25:00 arm A2 done: {'heap_used_after_gc': 197798504, 'histo_total_bytes': 197847624, 'du_data': 49293976, 'longest_dir_name': 63}
+13:25:00 === arm B2: name length 48, 200 x 10000 rows ===
+13:25:00 $ /users/jason92/s4-b2/hk/make-node.sh /users/jason92/s4-b2/run/ks/B2 
+node dir /users/jason92/s4-b2/run/ks/B2: # ---- stage4 lines ----;data_file_directories:;    - /users/jason92/s4-b2/run/ks/B2/data;commitlog_directory: /users/jason92/s4-b2/run/ks/B2/commitlog;hints_directory: /users/jason92/s4-b2/run/ks/B2/hints;saved_caches_directory: /users/jason92/s4-b2/run/ks/B2/saved_caches;cdc_raw_directory: /users/jason92/s4-b2/run/ks/B2/cdc_raw;
+13:25:00 $ cd /users/jason92/s4-b2/base && bin/cassandra -p /users/jason92/s4-b2/run/ks/B2/pid > /users/jason92/s4-b2/run/ks/B2/stdout 2>&1
+
+13:25:04 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+13:25:10 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:15 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:20 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:25 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:30 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:35 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:40 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:25:45 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+running
+13:25:46 node B2 up, pid 1042947, 46 s
+13:25:46 $ python3 /users/jason92/s4-b2/hk/client.py probe
+{"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+OK {"ok": true, "release_version": "5.0.9-SNAPSHOT"}
+13:25:46 $ python3 /users/jason92/s4-b2/hk/client.py ddl ks 48 200
+{"ok": true, "created": 200, "kind": "ks", "L": 48, "name_len_first": 48, "sample": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk5j", "elapsed_s": 275.8}
+OK {"ok": true, "created": 200, "kind": "ks", "L": 48, "name_len_first": 48, "sample": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk5j", "elapsed_s": 275.8}
+13:30:23 arm writers: 4 processes
+13:31:53 $ /users/jason92/s4-b2/base/bin/nodetool flush
+
+13:32:05 $ /users/jason92/s4-b2/base/bin/nodetool compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            335         
+data compacted                   10825413    
+compressed data compacted        1938741     
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   17.17/minute
+mean rate                        2871.13/hour
+compaction throughput (MiB/s)    64.0
+13:32:06 settle 60 s
+13:33:06 $ jcmd 1042947 GC.run
+1042947:
+Command executed successfully
+13:33:06 $ java -cp /users/jason92/s4-b2/jmx Jmx 7199 get java.lang:type=Memory HeapMemoryUsage
+java.lang:type=Memory|HeapMemoryUsage|210459200
+13:33:06 $ jcmd 1042947 GC.class_histogram > /users/jason92/s4-b2/logs/schemaconstants_name_length-validatekeyspacename-keyspacename--autonomous/run1/cluster/B2.histo.txt
+
+13:33:07 $ /users/jason92/s4-b2/base/bin/nodetool info
+ID                     : 50720aa0-a348-41de-a9f6-f4d05e21ec24
+Gossip active          : true
+Native Transport active: true
+Load                   : 47.05 MiB
+Uncompressed load      : 267.59 MiB
+Generation No          : 1793215507
+Uptime (seconds)       : 487
+Heap Memory (MB)       : 200.76 / 2048.00
+Off Heap Memory (MB)   : 2.75
+Data Center            : datacenter1
+Rack                   : rack1
+Exceptions             : 0
+Key Cache              : entries 27373, size 3.13 MiB, capacity 100 MiB, 520 hits, 1159 requests, 0.449 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Network Cache          : size 0 bytes, overflow size: 0 bytes, capacity 128 MiB
+Percent Repaired       : 100.0%
+Token                  : (invoke with -T/--tokens to see all 16 tokens)
+Bootstrap state        : COMPLETED
+Bootstrap failed       : false
+Decommissioning        : false
+Decommission failed    : false
+13:33:09 $ python3 /users/jason92/s4-b2/hk/client.py try-ks kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+{"ok": true, "rejected": true, "name_len": 49, "error_class": "InvalidRequest", "message": "Error from server: code=2200 [Invalid query] message=\"Keyspace name must not be more than 48 characters long (got 49 characters for \"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\")\""}
+OK {"ok": true, "rejected": true, "name_len": 49, "error_class": "InvalidRequest", "message": "Error from server: code=2200 [Invalid query] message=\"Keyspace name must not be more than 48 characters long (got 49 characters for \"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\")\""}
+13:33:09 $ grep -c "^ERROR" /users/jason92/s4-b2/run/ks/B2/logs/system.log
+0
+13:33:15 node pid 1042947 stopped; daemons left: []
+13:33:15 arm B2 done: {'heap_used_after_gc': 210459200, 'histo_total_bytes': 210509024, 'du_data': 49339392, 'longest_dir_name': 63}
+13:33:15 === control C64: memtable_heap_space 64MiB, 3000000 rows ===
+13:33:15 $ /users/jason92/s4-b2/hk/make-node.sh /users/jason92/s4-b2/run/ks/C64 memtable_heap_space=64MiB
+node dir /users/jason92/s4-b2/run/ks/C64: # ---- stage4 lines ----;data_file_directories:;    - /users/jason92/s4-b2/run/ks/C64/data;commitlog_directory: /users/jason92/s4-b2/run/ks/C64/commitlog;hints_directory: /users/jason92/s4-b2/run/ks/C64/hints;saved_caches_directory: /users/jason92/s4-b2/run/ks/C64/saved_caches;cdc_raw_directory: /users/jason92/s4-b2/run/ks/C64/cdc_raw;memtable_heap_space: 64MiB;
+13:33:15 $ cd /users/jason92/s4-b2/base && bin/cassandra -p /users/jason92/s4-b2/run/ks/C64/pid > /users/jason92/s4-b2/run/ks/C64/stdout 2>&1
+
+13:33:20 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+13:33:25 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:33:30 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:33:35 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:33:40 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:33:45 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:33:50 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:33:55 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:34:00 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+running
+13:34:01 node C64 up, pid 1048587, 46 s
+13:34:01 $ grep -c "Enqueuing flush of" /users/jason92/s4-b2/run/ks/C64/logs/system.log || true
+24
+13:34:04 $ python3 /users/jason92/s4-b2/hk/client.py one kc3 1 1
+{"ok": true, "targets": 1, "rows_each": 1, "succeeded": 1, "failed": 0, "errors": [], "value_bytes": 100, "elapsed_s": 0.0, "rows_per_s": 56}
+OK {"ok": true, "targets": 1, "rows_each": 1, "succeeded": 1, "failed": 0, "errors": [], "value_bytes": 100, "elapsed_s": 0.0, "rows_per_s": 56}
+13:34:07 control writers: 3 processes x 1000000 rows
+13:37:09 node pid 1048587 stopped; daemons left: []
+13:37:09 control C64 done: peak_all_memtables_heap=22343119 flushes=110
+13:37:09 === control C256: memtable_heap_space 256MiB, 3000000 rows ===
+13:37:09 $ /users/jason92/s4-b2/hk/make-node.sh /users/jason92/s4-b2/run/ks/C256 memtable_heap_space=256MiB
+node dir /users/jason92/s4-b2/run/ks/C256: # ---- stage4 lines ----;data_file_directories:;    - /users/jason92/s4-b2/run/ks/C256/data;commitlog_directory: /users/jason92/s4-b2/run/ks/C256/commitlog;hints_directory: /users/jason92/s4-b2/run/ks/C256/hints;saved_caches_directory: /users/jason92/s4-b2/run/ks/C256/saved_caches;cdc_raw_directory: /users/jason92/s4-b2/run/ks/C256/cdc_raw;memtable_heap_space: 256MiB;
+13:37:10 $ cd /users/jason92/s4-b2/base && bin/cassandra -p /users/jason92/s4-b2/run/ks/C256/pid > /users/jason92/s4-b2/run/ks/C256/stdout 2>&1
+
+13:37:14 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+Exception in thread "main" java.lang.IllegalArgumentException: Server is not initialized yet, cannot run nodetool.
+	at org.apache.cassandra.tools.NodeTool.err(NodeTool.java:328)
+	at org.apache.cassandra.tools.NodeTool.execute(NodeTool.java:291)
+	at org.apache.cassandra.tools.NodeTool.main(NodeTool.java:87)
+13:37:19 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:24 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:29 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:34 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:39 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:44 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:49 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+not running
+13:37:54 $ /users/jason92/s4-b2/base/bin/nodetool statusbinary
+running
+13:37:55 node C256 up, pid 1051805, 46 s
+13:37:55 $ grep -c "Enqueuing flush of" /users/jason92/s4-b2/run/ks/C256/logs/system.log || true
+24
+13:37:59 $ python3 /users/jason92/s4-b2/hk/client.py one kc3 1 1
+{"ok": true, "targets": 1, "rows_each": 1, "succeeded": 1, "failed": 0, "errors": [], "value_bytes": 100, "elapsed_s": 0.0, "rows_per_s": 55}
+OK {"ok": true, "targets": 1, "rows_each": 1, "succeeded": 1, "failed": 0, "errors": [], "value_bytes": 100, "elapsed_s": 0.0, "rows_per_s": 55}
+13:38:01 control writers: 3 processes x 1000000 rows
+13:41:06 node pid 1051805 stopped; daemons left: []
+13:41:06 control C256 done: peak_all_memtables_heap=89445598 flushes=49
+13:41:06 exit; daemons left: []

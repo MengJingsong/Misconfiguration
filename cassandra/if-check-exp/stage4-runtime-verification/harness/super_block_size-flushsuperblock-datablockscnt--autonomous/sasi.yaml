@@ -1,0 +1,12 @@
+# cassandra-stress user profile (case B3c, as amended C2): ks.t (id int PRIMARY KEY, v int); id from -pop seq, v drawn uniform in
+# 1..2,000,000,000 (almost all distinct; a SPARSE term may hold at most 5 keys). The table and index are created by cluster-run.sh.
+keyspace: ks
+table: t
+columnspec:
+  - name: id
+  - name: v
+    population: uniform(1..2000000000)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries: {}

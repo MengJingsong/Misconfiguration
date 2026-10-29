@@ -1,0 +1,60 @@
+== g9 mode=collide args=3 3 start 1793231984324
+daemons before: 0
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.github.jamm.utils.InjectedInvoker/0x0000000840066440 (file:/users/jason92/s4-b34/c/build/lib/jars/jamm-0.4.0.jar) to field java.nio.DirectByteBuffer.att
+WARNING: Please consider reporting this to the maintainers of org.github.jamm.utils.InjectedInvoker/0x0000000840066440
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+KEYCHECK group=3 k=2 key=0x00abc4372b8d92640c65330e3800c45e wantToken=3000000021 gotToken=3000000021 ok
+KEYCHECK group=3 k=3 key=0xa4f6f51e2ea48a578691d33d7b12d618 wantToken=3000000021 gotToken=3000000021 ok
+COLLISION-GROUPS 1000000007:3 2000000014:3 3000000021:3 mismatches=0
+EXPECTED collkeys_mismatches: 0  got 0
+node up 1793232030826 pid 1204834
+-Xmx1G
+-javaagent:/users/jason92/s4-b34/c/bin/../lib/jamm-0.4.0.jar
+-javaagent:/users/jason92/s4-b34/c/build/lib/jars/byteman-4.0.20.jar=script:/users/jason92/s4-b34/node-ov/overflow.btm,listener:true
+sasi_indexes_enabled: true
+compaction_throughput: 0MiB/s
+commitlog_total_space: 256MiB
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE CUSTOM INDEX t_v ON ks.t (v) USING 'org.apache.cassandra.index.sasi.SASIIndex';
+inserts rc=0
+TOKEN-GROUPS 1000000007:3 2000000014:3 3000000021:3 rows=109
+flush start 1793232037856
+flush rc=0 end 1793232039281
+47 nb-1-big-CompressionInfo.db
+2795 nb-1-big-Data.db
+10 nb-1-big-Digest.crc32
+152 nb-1-big-Filter.db
+2285 nb-1-big-Index.db
+4110 nb-1-big-SI_t_v.db
+5116 nb-1-big-Statistics.db
+92 nb-1-big-Summary.db
+92 nb-1-big-TOC.txt
+
+ pk
+----
+
+
+(0 rows)
+watching the commit log for 120 s after the flush
+commitlog bytes 67112960 at +20 s
+commitlog bytes 67112960 at +40 s
+commitlog bytes 67112960 at +60 s
+commitlog bytes 67112960 at +80 s
+commitlog bytes 67112960 at +100 s
+commitlog bytes 67112960 at +120 s
+byteman lines: 4 entries, throws: 1
+BM-OVF-ENTRY offsets=3 slotsSoFar=0
+BM-OVF-ENTRY offsets=3 slotsSoFar=3
+BM-OVF-ENTRY offsets=3 slotsSoFar=6
+BM-OVF-THROW
+log error lines: 4
+ERROR [SASI-Memtable:1] 2026-10-29T00:00:39,207 JVMStabilityInspector.java:70 - Exception in thread Thread[SASI-Memtable:1,5,SASI-Memtable]
+java.lang.AssertionError: cannot have more than 8 overflow collisions per leaf

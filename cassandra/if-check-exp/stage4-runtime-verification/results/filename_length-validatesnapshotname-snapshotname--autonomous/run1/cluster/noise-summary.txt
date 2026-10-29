@@ -1,0 +1,32 @@
+node up validation=True pid=858821 opts=-Dcassandra.snapshot.validation=true
+EXPECTED JVM has -Dcassandra.snapshot.validation=true and -Xmx2G: yes
+SNAP noise-warm N=2000000 v=True L=100 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=20262912 rssDelta=36081664 listsnap="1.01 KiB 485.99 MiB 2026-10-28T18:23:19.960Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED noise-warm N=2000000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED noise-warm L=100 snapshot dir exists with files: yes
+SNAP noise0 N=2000000 v=True L=100 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=16738304 rssDelta=917504 listsnap="1015 bytes 1015 bytes 2026-10-28T18:23:56.253Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED noise0 N=2000000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED noise0 L=100 snapshot dir exists with files: yes
+SNAP noise0 N=2000000 v=True L=255 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=-16777216 rssDelta=905216 listsnap="1015 bytes 1015 bytes 2026-10-28T18:24:32.357Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*255] and options {skipFlush=false} | Snapshot directory: a*255"
+EXPECTED noise0 N=2000000 L=255 v=True nodetool snapshot succeeds: yes
+EXPECTED noise0 L=255 snapshot dir exists with files: yes
+SNAP noise1 N=2000000 v=True L=100 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=16778240 rssDelta=-40960 listsnap="1015 bytes 1015 bytes 2026-10-28T18:25:08.481Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED noise1 N=2000000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED noise1 L=100 snapshot dir exists with files: yes
+SNAP noise1 N=2000000 v=True L=255 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=16778240 rssDelta=434176 listsnap="1.01 KiB 485.99 MiB 2026-10-28T18:25:44.682Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*255] and options {skipFlush=false} | Snapshot directory: a*255"
+EXPECTED noise1 N=2000000 L=255 v=True nodetool snapshot succeeds: yes
+EXPECTED noise1 L=255 snapshot dir exists with files: yes
+SNAP noise2 N=2000000 v=True L=100 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=-16775168 rssDelta=-356352 listsnap="1.01 KiB 485.99 MiB 2026-10-28T18:26:20.805Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*100] and options {skipFlush=false} | Snapshot directory: a*100"
+EXPECTED noise2 N=2000000 L=100 v=True nodetool snapshot succeeds: yes
+EXPECTED noise2 L=100 snapshot dir exists with files: yes
+SNAP noise2 N=2000000 v=True L=255 rc=0 snapFileBytes=509601903 files=10 manifest=129 schema=903 physDelta=2047 heapDelta=1024 rssDelta=-126976 listsnap="1.01 KiB 485.99 MiB 2026-10-28T18:26:57.045Z" err="Requested creating snapshot(s) for [keyspace1] with snapshot name [a*255] and options {skipFlush=false} | Snapshot directory: a*255"
+EXPECTED noise2 N=2000000 L=255 v=True nodetool snapshot succeeds: yes
+EXPECTED noise2 L=255 snapshot dir exists with files: yes
+NOISE L=100 heapDelta=16738304 rssDelta=917504 physDelta=2047
+NOISE L=255 heapDelta=-16777216 rssDelta=905216 physDelta=2047
+NOISE L=100 heapDelta=16778240 rssDelta=-40960 physDelta=2047
+NOISE L=255 heapDelta=16778240 rssDelta=434176 physDelta=2047
+NOISE L=100 heapDelta=-16775168 rssDelta=-356352 physDelta=2047
+NOISE L=255 heapDelta=1024 rssDelta=-126976 physDelta=2047
+NOISE heapDelta L=100: [16738304, 16778240, -16775168] L=255: [-16777216, 16778240, 1024]; range across all six = 33555456 B
+node stopped; daemons left: none
+noise-probe done

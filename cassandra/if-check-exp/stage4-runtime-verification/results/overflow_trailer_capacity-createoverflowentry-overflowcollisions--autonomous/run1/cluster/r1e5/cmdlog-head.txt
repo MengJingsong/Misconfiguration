@@ -1,0 +1,24 @@
+== r1e5 mode=rows args=100000 start 1793232187707
+daemons before: 0
+node up 1793232233755 pid 1209468
+-Xmx1G
+-javaagent:/users/jason92/s4-b34/c/bin/../lib/jamm-0.4.0.jar
+sasi_indexes_enabled: true
+compaction_throughput: 0MiB/s
+commitlog_total_space: 256MiB
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE CUSTOM INDEX t_v ON ks.t (v) USING 'org.apache.cassandra.index.sasi.SASIIndex';
+load rc=0
+Total errors              :          0 [insert: 0]
+*-Data.db 1691320
+*-Index.db 1434384
+*SI_*.db 1683480
+log error lines: 0
+daemons left: 0
+== r1e5 end 1793232274791

@@ -1,0 +1,16 @@
+# Byteman rules for native_protocol_v1_v2_max_element_size-sizeofvalue-elemsize--autonomous (B3 amendment): every CodecUtils.sizeOfValue (non-null element) and pack call on the node.
+RULE es sizeOfValue entry
+CLASS org.apache.cassandra.cql3.functions.types.CodecUtils
+METHOD sizeOfValue
+AT ENTRY
+IF $1 != null
+DO traceln("ES_SIZEOF ms=" + System.currentTimeMillis() + " ver=" + $2 + " remaining=" + $1.remaining())
+ENDRULE
+
+RULE es pack entry
+CLASS org.apache.cassandra.cql3.functions.types.CodecUtils
+METHOD pack
+AT ENTRY
+IF true
+DO traceln("ES_PACK ms=" + System.currentTimeMillis() + " ver=" + $3 + " elements=" + $2 + " buffers=" + $1.length)
+ENDRULE

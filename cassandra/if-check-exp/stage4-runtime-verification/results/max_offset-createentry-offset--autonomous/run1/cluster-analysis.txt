@@ -1,0 +1,45 @@
+arm         rows      Data.db     Index.db           SI      dataDir  maxCLmiB maxHeapMiB  maxPostGC   errs
+s1       1000000   1040312341     15742303     24981192   1083306729     352.0      1965       2028      0
+s4       4000000   4160412330     63742101     73227976   4305362204     640.0      1919       2028      0
+s16     16000000  16677053861    255723314    265297608  17229163002    1056.0      1981       1945      0
+n1       1000000   1040152733     15742291            0   1058143037     448.0      1738       2028      0
+b1       1000000   1039663317            0     24981192   1075224123     352.0      1869       2028      0
+h1       1000000   1040077514     15742304     24981192   1083071877     640.0      3307       4076      0
+p1       1000000   1040347318     15742307     24981192   1083372193     288.0      1799       2028      0
+EXPECTED s1 ran to the end and has one Data.db: Data.db 1040312341  PASS
+EXPECTED s1 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED s1 sampled heap stays within the -Xmx cap: max used 1965 MiB  PASS
+EXPECTED s4 ran to the end and has one Data.db: Data.db 4160412330  PASS
+EXPECTED s4 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED s4 sampled heap stays within the -Xmx cap: max used 1919 MiB  PASS
+EXPECTED s16 ran to the end and has one Data.db: Data.db 16677053861  PASS
+EXPECTED s16 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED s16 sampled heap stays within the -Xmx cap: max used 1981 MiB  PASS
+EXPECTED n1 ran to the end and has one Data.db: Data.db 1040152733  PASS
+EXPECTED n1 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED n1 sampled heap stays within the -Xmx cap: max used 1738 MiB  PASS
+EXPECTED b1 ran to the end and has one Data.db: Data.db 1039663317  PASS
+EXPECTED b1 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED b1 sampled heap stays within the -Xmx cap: max used 1869 MiB  PASS
+EXPECTED h1 ran to the end and has one Data.db: Data.db 1040077514  PASS
+EXPECTED h1 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED h1 sampled heap stays within the -Xmx cap: max used 3307 MiB  PASS
+EXPECTED p1 ran to the end and has one Data.db: Data.db 1040347318  PASS
+EXPECTED p1 no AssertionError / "cannot be greater than" in system.log: count 0  PASS
+EXPECTED p1 sampled heap stays within the -Xmx cap: max used 1799 MiB  PASS
+EXPECTED s4/s1 data bytes ratio 3..5 (rows x4): 4.00  PASS
+EXPECTED s16/s4 data bytes ratio 3..5 (rows x4): 4.01  PASS
+EXPECTED s4/s1 index bytes ratio 3..5 (rows x4): 4.05  PASS
+EXPECTED s16/s4 index bytes ratio 3..5 (rows x4): 4.01  PASS
+EXPECTED s4/s1 si bytes ratio 3..5 (rows x4): 2.93  FAIL
+EXPECTED s16/s4 si bytes ratio 3..5 (rows x4): 3.62  PASS
+EXPECTED C5: max post-collection heap s16 within 1.5 x s1: 1945 / 2028 = 0.96  PASS
+EXPECTED n1 has no SI file: SI bytes 0  PASS
+EXPECTED n1 Data.db within 5 percent of s1 (the index adds files, not data): 1.000  PASS
+EXPECTED p1 commit log stays within 64 MiB + 2 segments (<= 128 MiB): max 288.0 MiB  FAIL
+EXPECTED p1 data keeps growing in the load window (60 percent of the load vs the end): data 661222207 -> 1617336497  PASS
+EXPECTED p1 commit log stays near its 64 MiB cap during the load (<= 2 x 64 MiB + 32 MiB): max in the load window 288 MiB, median 256 MiB  FAIL
+EXPECTED s1 commit log (cap 1024 MiB) reaches more than p1: s1 352.0 MiB vs p1 288.0 MiB  PASS
+INFO heap control: max sampled used h1 (-Xmx4G) 3307 MiB vs s1 (-Xmx2G) 1965 MiB; max post-GC h1 4076 vs s1 2028 MiB
+INFO bti arm: Data.db 1039663317 SI 24981192; ls: da-17-bti
+SUMMARY expectations pass=31 fail=3

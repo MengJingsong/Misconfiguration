@@ -1,0 +1,34 @@
+HOLDS: unit custom L=1: 3 repeats accepted with all 10,000 rows stored (rejected_rows=0)
+HOLDS: unit custom L=47: 3 repeats accepted with all 10,000 rows stored (rejected_rows=0)
+HOLDS: unit custom L=48: 3 repeats accepted with all 10,000 rows stored (rejected_rows=0)
+HOLDS: unit custom L=49: CREATE INDEX rejected 3 of 3 with "Column '<49 chars>' is longer than the permissible name length of 48 characters"
+HOLDS: unit custom L=64: CREATE INDEX rejected 3 of 3 with "Column '<64 chars>' is longer than the permissible name length of 48 characters"
+HOLDS: unit custom L=200: CREATE INDEX rejected 3 of 3 with "Column '<200 chars>' is longer than the permissible name length of 48 characters"
+HOLDS: unit plain L=1: 3 repeats accepted, rejected_rows=0
+HOLDS: unit plain L=47: 3 repeats accepted, rejected_rows=0
+HOLDS: unit plain L=48: 3 repeats accepted, rejected_rows=0
+HOLDS: unit plain L=49: 3 repeats accepted, rejected_rows=0
+HOLDS: unit plain L=64: 3 repeats accepted, rejected_rows=0
+HOLDS: unit plain L=200: 3 repeats accepted, rejected_rows=0
+HOLDS: unit base_owns: plain six-L spread <= 1% and custom three-L spread <= 1% [plain 0.000% custom 0.000%]
+HOLDS: unit dir_bytes: plain six-L spread <= 1% and custom three-L spread <= 1% [plain 0.010% custom 0.013%]
+HOLDS: unit no step at 48: |plain(49)-plain(48)| <= 1% for owns and for directory bytes
+HOLDS: unit absolute scale: plain memtable owns > 5 MB and directory > 5 MB for 10,000 x 100 B (the instrument sees data) [6020000 6786852]
+HOLDS: unit row-count control: owns ratios in [7,13], directory ratios in [5,13] [owns [607000, 6070000, 60700000] dir [707236, 6789168, 68086096]]
+HOLDS: unit unindexed baseline smaller than indexed [2436076 vs 6789168]
+HOLDS: cluster custom49: CREATE INDEX rejected with the exact text; zero indexes in schema; nothing loaded
+HOLDS: cluster custom100: CREATE INDEX rejected with the exact text; zero indexes in schema; nothing loaded
+HOLDS: cluster custom40: DDL accepted, 500000 rows accepted, 0 errors [N=500000]
+HOLDS: cluster custom48: DDL accepted, 500000 rows accepted, 0 errors [N=500000]
+HOLDS: cluster plain40: DDL accepted, 500000 rows accepted, 0 errors [N=500000]
+HOLDS: cluster plain48: DDL accepted, 500000 rows accepted, 0 errors [N=500000]
+HOLDS: cluster plain100: DDL accepted, 500000 rows accepted, 0 errors [N=500000]
+HOLDS: cluster none40: DDL accepted, 500000 rows accepted, 0 errors [N=500000]
+HOLDS: cluster directory bytes after compaction: plain 40/48/100 spread <= 2%; custom 40 vs 48 <= 2%; none40 < plain40 [plain 0.004% custom 0.006% {'plain40': 170365850, 'plain48': 170359707, 'plain100': 170363381, 'custom40': 174248268, 'custom48': 174259086, 'none40': 61894672}]
+HOLDS: cluster node log: each plain arm has >=1 MEMTABLE_LIMIT flush; first logged on-heap usage spread <= 15% [{'plain40': [85.4, 85.4, 85.4, '...7'], 'plain48': [85.3, 85.4, 85.4, '...7'], 'plain100': [85.4, 85.0, 84.9, '...7']}]
+HOLDS: cluster pool control from the node log: first usage 512 MiB over 128 MiB in [2.5,6]; flush count at 128 > at 512 >= 1 [128: first [42.801] n=14; 512: first [170.648] n=3; 256 n=7]
+HOLDS: cluster plain48 repeated across lives (128/256/512 MiB): directory bytes after compaction spread <= 2% [[170365253, 170388538, 170359707]]
+HOLDS: cluster: no daemon and no /dev/shm/s4-b2 left (summary last line)
+HOLDS: cluster: no ERROR line in any system.log
+INFO: EXPECTED lines in summary.txt: yes=16 no=1
+selfcheck: 0 part(s) do not hold

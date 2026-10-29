@@ -1,0 +1,44 @@
+== UNIT /users/jason92/s4-b2/logs/table_name_length-validatetablename-name_length--autonomous/run1 ==
+  [holds] 11 known-answer checks, all ok (none MISMATCH)
+  STAGE4 info TABLE_NAME_LENGTH=222 NAME_LENGTH=48 FILENAME_LENGTH=255 assertionsEnabled=true jdk=11.0.32.1
+  STAGE4 case L=1 validate=pass dirlen=34
+  STAGE4 case L=48 validate=pass dirlen=81
+  STAGE4 case L=100 validate=pass dirlen=133
+  STAGE4 case L=221 validate=pass dirlen=254
+  STAGE4 case L=222 validate=pass dirlen=255
+  STAGE4 case L=223 validate=throw:ks.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... dirlen=256
+  STAGE4 case L=255 validate=throw:ks.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... dirlen=288
+  per-object bytes (mean of 3 reps; min..max):
+    L=1    extra_cols=0   874.89  (874.89..874.89)
+    L=2    extra_cols=0   821.98  (821.98..821.98)
+    L=48   extra_cols=0   861.98  (861.98..861.98)
+    L=100  extra_cols=0   917.98  (917.98..917.98)
+    L=221  extra_cols=0   1037.98  (1037.98..1037.98)
+    L=222  extra_cols=0   1037.98  (1037.98..1037.98)
+    L=48   extra_cols=50  5989.58  (5989.58..5989.58)
+  L=2 -> 222 at 0 extra columns: +216.00 B per table; 50 extra columns at L=48: +5127.60 B per table; control/delta = 24 x
+  [claim holds] the L change (220 chars) moves retained size by a small multiple of 220 B (<= 1000 B per table)
+  [claim holds] the 50-column control moves it more than the whole name range
+== CLUSTER /users/jason92/s4-b2/logs/table_name_length-validatetablename-name_length--autonomous/run1 ==
+  A1 histogram Total = 257460304 B; data dir = 16417052 B; longest dir name = 63 (longest user keyspace dir = 2)
+  A2 histogram Total = 255192568 B; data dir = 16381077 B; longest dir name = 63 (longest user keyspace dir = 2)
+  B1 histogram Total = 314574640 B; data dir = 16623792 B; longest dir name = 255 (longest user keyspace dir = 2)
+  B2 histogram Total = 319508688 B; data dir = 16615677 B; longest dir name = 255 (longest user keyspace dir = 2)
+  long mean - short mean = +60715228 B; rep spread = 4934048 B; name-byte budget = 2140000 B
+  data dir: long - short = +220670 B (1.344 % of 16417052)
+  [claim REFUTED] arms differ by no more than max(budget, spread)
+  [claim REFUTED] data dirs differ by no more than 1 %
+  [holds] longest directory name: short arm < 100, long arm exactly 255 (222 + 1 + 32)
+  reject reading: {"ok": true, "rejected": true, "name_len": 223, "error_class": "ConfigurationException", "message": "<Error from server: code=2300 [Query invalid because of configuration issue] message=\"ks.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  reject reading: {"ok": true, "rejected": true, "name_len": 223, "error_class": "ConfigurationException", "message": "<Error from server: code=2300 [Query invalid because of configuration issue] message=\"ks.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  [holds] 2 rejection readings (2 expected, one per long arm), each rejected=true with the message "Table name must not be more than 222 characters long"
+  A1 system.log: ERROR lines 0, OutOfMemory 0
+  A2 system.log: ERROR lines 0, OutOfMemory 0
+  B1 system.log: ERROR lines 0, OutOfMemory 0
+  B2 system.log: ERROR lines 0, OutOfMemory 0
+  C64: 190 samples, peak AllMemtablesHeapSize = 22341192 B, peak heap used = 976672224 B, flushes enqueued = 117
+  C256: 179 samples, peak AllMemtablesHeapSize = 89061120 B, peak heap used = 985928096 B, flushes enqueued = 56
+  [claim holds] control B moves clearly: 64MiB peak <= 0.5 x 256MiB peak, and more flushes at 64MiB
+  [claim REFUTED] arm difference is below 10 % of the control peak difference (66719928 B)
+  [holds] no CassandraDaemon left running
+SELFCHECK-RESULT: INTEGRITY OK (0 integrity checks fail; [claim ...] lines are the case claim, not integrity)

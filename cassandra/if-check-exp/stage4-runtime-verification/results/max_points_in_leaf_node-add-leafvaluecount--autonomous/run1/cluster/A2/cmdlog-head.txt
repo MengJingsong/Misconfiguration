@@ -1,0 +1,60 @@
+== A2 variant=A rows=2000000 buffer=1024MiB slot=0 start 1793233015387
+$ javap -constants -p -cp /users/jason92/s4-b34-vA/build/apache-cassandra-5.0.9-SNAPSHOT.jar org.apache.cassandra.index.sai.disk.v1.bbtree.NumericIndexWriter | grep MAX_POINTS; df -h /users/jason92 | tail -1
+  public static final int MAX_POINTS_IN_LEAF_NODE = 128;
+/dev/sda3        63G   15G   45G  25% /
+  public static final int MAX_POINTS_IN_LEAF_NODE = 128;
+/dev/sda3        63G   15G   45G  25% /
+
+conf written /users/jason92/stage4-tmp/b34/c1/A2/conf/cassandra.yaml; stage4 lines:
+cluster_name: stage4-sai
+num_tokens: 1
+endpoint_snitch: SimpleSnitch
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.1:7000"
+data_file_directories:
+    - /users/jason92/stage4-tmp/b34/c1/A2/data
+commitlog_directory: /users/jason92/stage4-tmp/b34/c1/A2/commitlog
+hints_directory: /users/jason92/stage4-tmp/b34/c1/A2/hints
+saved_caches_directory: /users/jason92/stage4-tmp/b34/c1/A2/saved_caches
+cdc_raw_directory: /users/jason92/stage4-tmp/b34/c1/A2/cdc_raw
+memtable_heap_space: 5GiB
+memtable_allocation_type: heap_buffers
+commitlog_total_space: 8GiB
+memtable_flush_writers: 1
+sai_options:
+    segment_write_buffer_size: 1024MiB
+NODE_UP pid=962014 startup_s=117.4
+$ bin/cqlsh 127.0.0.1 -e 'CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'\''class'\'': '\''SimpleStrategy'\'', '\''replication_factor'\'': 1}'
+
+$ bin/cqlsh 127.0.0.1 -e 'CREATE TABLE IF NOT EXISTS ks.t (id bigint PRIMARY KEY, v int)'
+
+$ bin/cqlsh 127.0.0.1 -e 'CREATE CUSTOM INDEX t_v_idx ON ks.t(v) USING '\''StorageAttachedIndex'\'''
+
+$ bin/cqlsh 127.0.0.1 -e 'SELECT index_name, is_queryable, is_building FROM system_views.sai_column_indexes'
+
+ index_name | is_queryable | is_building
+------------+--------------+-------------
+    t_v_idx |         True |       False
+
+(1 rows)
+
+ index_name | is_queryable | is_building
+------------+--------------+-------------
+    t_v_idx |         True |       False
+
+(1 rows)
+
+$ tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_points_in_leaf_node-add-leafvaluecount--autonomous/profile-t.yaml "ops(insert=1)" n=2000000 no-warmup -rate threads=64 -node 127.0.0.1 -port 
+     0.9,     1.8,     5.2,    24.4,   19.0,  0.10970,      0,      0,       0,       0,       0,       0
+total,                                               2000000,  144790,  144790,  144790,     0.4,     0.3,     1.0,     1.9,     4.6,    12.2,   20.0,  0.10403,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :  100,026 op/s  [insert: 100,026 op/s]
+Partition rate            :  100,026 pk/s  [insert: 100,026 pk/s]
+Row rate                  :  100,026 row/s [insert: 100,026 row/s]
+Latency mean              :    0.6 ms [insert: 0.6 ms]

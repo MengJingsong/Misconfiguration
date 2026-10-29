@@ -1,0 +1,31 @@
+PASS C1: 24 tokens, 8 slots, bytes = 64 + 24x16 + 8x8  [OK bytes=512 numBlocks=1 slots=8 serializedSizeBeforeWrite=448 overflowEntries=4]
+PASS C1: serializedSize() before write omits the trailer (448 = 512 - 64)
+PASS C2: 10 slots throws the overflow assertion
+PASS C3: 8 offsets pass, 8 slots  [OK bytes=144 numBlocks=1 slots=8 serializedSizeBeforeWrite=80 overflowEntries=1]
+PASS C4: 9 offsets throw
+PASS C5: 248 tokens = one block of 64 + 248x16  [OK bytes=4032 numBlocks=1 slots=0 serializedSizeBeforeWrite=4032 overflowEntries=0]
+PASS C5: 249 tokens add blocks: bytes = numBlocks x 4096 and numBlocks > 1  [OK bytes=12288 numBlocks=3 slots=0 serializedSizeBeforeWrite=12288 leaf1{tokens=248,overflowEntries=0,slots=0} leaf2{tokens=1,overflowEntries=0,slots=0}]
+PASS C6: no exception; 16 slots in all, 8 in each of two leaves, every leaf block 4096 bytes  [OK bytes=20480 numBlocks=5 slots=16 serializedSizeBeforeWrite=20480 leaf1{tokens=248,overflowEntries=4,slots=8} leaf2{tokens=248,overflowEntries=4,slots=8} leaf3{tokens=103,overflowEntries=0,slots=0} leaf4{tokens=1,overflowEntries=0,slots=0}]
+PASS C6: block bytes with 16 slots equal block bytes with 0 slots
+PASS C7: packed pairs use 0 slots, size 64 + 248x16  [OK bytes=4032 numBlocks=1 slots=0 serializedSizeBeforeWrite=4032 overflowEntries=0]
+PASS C8: estimate = (220 + 8) x terms and linear  [{1000: 228000, 10000: 2280000}]
+PASS g8: collision keys: 0 token mismatches offline, groups seen on the node  [TOKEN-GROUPS 1000000007:4 2000000014:4 rows=108]
+PASS g8: SI file written, no throw, no assertion in the log  [{'nb-1-big-CompressionInfo.db': 47, 'nb-1-big-Data.db': 2780, 'nb-1-big-Digest.crc32': 10, 'nb-1-big-Filter.db': 152, 'nb-1-big-Index.db': 2264, 'nb-1-big-SI_t_v.db': 12312, 'nb-1-big-Statistics.db': 5113, 'nb-1-big-Summary.db': 92, 'nb-1-big-TOC.txt': 102}]
+PASS g8: Byteman: entries (4 offsets, 0 slots), (4, 4) = 8 slots  [[(4, 0), (4, 4)]]
+PASS g9: collision keys: 0 token mismatches offline, groups seen on the node  [TOKEN-GROUPS 1000000007:3 2000000014:3 3000000021:3 rows=109]
+PASS g9: Byteman: three entries 3,3,3 and one throw (9th slot)  [[(3, 0), (3, 3), (3, 6)]]
+PASS g9: ERROR line with the assertion text from thread SASI-Memtable in system.log
+PASS g9: the node cannot open the SI file left behind  [['nb-1-big-SI_t_v.db']]
+PASS g9: the index query returns no rows  [pk | ---- |  |  | (0 rows)]
+PASS g9: commit log directory does not grow after the failed flush  [min 67112960 max 67112960]
+PASS r1e5: one SI file and one Data.db  [{'nb-2-big-Data.db': 1691320, 'nb-2-big-SI_t_v.db': 1683480}]
+PASS r1e6: one SI file and one Data.db  [{'nb-10-big-Data.db': 16485081, 'nb-10-big-SI_t_v.db': 16609304}]
+PASS r1e6 / r1e5: SI and Data.db grow with rows (both ratios 5..15)  [SI 9.87 Data 9.75]
+PASS g8: finished, no daemon left
+PASS g9: finished, no daemon left
+PASS r1e5: finished, no daemon left
+PASS r1e6: finished, no daemon left
+PASS m1: finished, no daemon left
+PASS m100: finished, no daemon left
+PASS g0: finished, no daemon left
+SUMMARY selfcheck pass=30 fail=0

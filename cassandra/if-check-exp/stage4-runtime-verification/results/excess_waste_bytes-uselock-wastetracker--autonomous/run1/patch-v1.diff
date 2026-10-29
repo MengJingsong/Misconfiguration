@@ -1,0 +1,16 @@
+63c63
+<     private static final long EXCESS_WASTE_BYTES = 10 * 1024 * 1024L;
+---
+>     private static final long EXCESS_WASTE_BYTES = 1L;
+185c185,187
+<             return refUpdater.compareAndSet(AtomicBTreePartition.this, current, result);
+---
+>             boolean s4ok = refUpdater.compareAndSet(AtomicBTreePartition.this, current, result);
+>             S4Waste.attempt(s4ok, heapSize, Thread.holdsLock(this));
+>             return s4ok;
+270a273
+>         S4Waste.tracker(wastedBytes);
+293c296
+<         wasteTrackerUpdater.set(this, TRACKER_PESSIMISTIC_LOCKING);
+---
+>         if (wasteTrackerUpdater.getAndSet(this, TRACKER_PESSIMISTIC_LOCKING) != TRACKER_PESSIMISTIC_LOCKING) S4Waste.flip();

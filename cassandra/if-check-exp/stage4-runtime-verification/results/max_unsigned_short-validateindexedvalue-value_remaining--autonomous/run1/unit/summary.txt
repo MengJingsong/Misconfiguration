@@ -1,0 +1,39 @@
+unit-run 2026-10-28T12:29:01-06:00 host node2 tree cassandra-5.0.9 openjdk version "11.0.32.1" 2026-08-18
+harness md5 IndexedValueLimitTest.java=91942e3a8a4c unit-run.sh=d561864d3a75 analyze-unit.py=90bc94cf31ef 
+run bounds: mode=bounds pool=2048MiB N=0 yaml=/users/jason92/s4-b2-logs/run1-a/unit/cassandra-2048.yaml
+run bounds exit 0, 18 STAGE4 lines; junit: OK (1 test) 
+EXPECTED: boundary regular indexed S=1000 accepted - yes [accepted]
+EXPECTED: boundary regular indexed S=65533 accepted - yes [accepted]
+EXPECTED: boundary regular indexed S=65534 accepted - yes [accepted]
+EXPECTED: boundary regular indexed S=65535 rejected with "Cannot index value of size 65535 ... (maximum allowed size=65535)" - yes [rejected InvalidRequestException: Cannot index value of size 65535 for index table_probe_00_v_idx on cql_test_keyspace.table_probe_00(v) (maximum allowed size=6]
+EXPECTED: boundary regular indexed S=65536 rejected with "Cannot index value of size 65536 ... (maximum allowed size=65535)" - yes [rejected InvalidRequestException: Cannot index value of size 65536 for index table_probe_00_v_idx on cql_test_keyspace.table_probe_00(v) (maximum allowed size=6]
+EXPECTED: boundary regular NOT indexed S=65534 accepted (control) - yes [accepted]
+EXPECTED: boundary regular NOT indexed S=65535 accepted (control) - yes [accepted]
+EXPECTED: boundary regular NOT indexed S=65536 accepted (control) - yes [accepted]
+EXPECTED: boundary clustering indexed S=65535 rejected with the index message - yes [rejected InvalidRequestException: Cannot index value of size 65535 for index table_probe_02_c_idx on cql_test_keyspace.table_probe_02(c) (maximum allowed size=6]
+EXPECTED: boundary clustering indexed S=65534 accepted - yes [accepted]
+EXPECTED: boundary clustering NOT indexed S=65535 accepted (control) - yes [accepted]
+INFO: ('clustering', 'no', 65536) -> rejected InvalidRequestException: Key length of 65536 is longer than maximum of 65535
+INFO: ('clustering', 'yes', 65536) -> rejected InvalidRequestException: Key length of 65536 is longer than maximum of 65535
+INFO: ('partitionkey-composite', 'yes', 65500) -> accepted
+INFO: ('partitionkey-composite', 'yes', 65535) -> rejected InvalidRequestException: Key length of 65539 is longer than maximum of 65535
+run scale_default: mode=scale pool=2048MiB N=100,1000,4000 yaml=/users/jason92/s4-b2-logs/run1-a/unit/cassandra-2048.yaml
+run scale_default exit 0, 8 STAGE4 lines; junit: OK (1 test) 
+run scale_pool64: mode=scale pool=64MiB N=4000 yaml=/users/jason92/s4-b2-logs/run1-a/unit/cassandra-64.yaml
+run scale_pool64 exit 0, 4 STAGE4 lines; junit: OK (1 test) 
+EXPECTED: N=100: no insert rejected (default pool) - yes [0]
+EXPECTED: N=100: index disk bytes in [0.9, 2.2] x NxS - yes [idx_disk=13345606 ratio=2.04]
+EXPECTED: N=1000: no insert rejected (default pool) - yes [0]
+EXPECTED: N=1000: index disk bytes in [0.9, 2.2] x NxS - yes [idx_disk=132100354 ratio=2.02]
+EXPECTED: N=4000: no insert rejected (default pool) - yes [0]
+EXPECTED: N=4000: index disk bytes in [0.9, 2.2] x NxS - yes [idx_disk=528128039 ratio=2.01]
+EXPECTED: index disk ratio N=4000/N=1000 in [3.5, 4.5] - yes [4.00]
+EXPECTED: index disk ratio N=1000/N=100 in [8, 12] - yes [9.90]
+EXPECTED: peak index memtable owns at N=4000 (default pool) >= 0.9 x NxS - yes [477700740 vs 235922400]
+EXPECTED: base disk of indexed table within 5% of unindexed table (N=4000) - yes [263642129 vs 263636597]
+EXPECTED: index adds >= 0.9 x NxS on top of the base (N=4000) - yes [idx_disk=528128039]
+EXPECTED: control (64 MiB pool): at least one index memtable flush before the explicit flush - yes [idx sstables before flush=7]
+EXPECTED: control: peak pool on-heap usage <= 160 MiB - yes [64.1 MiB]
+EXPECTED: default arm peak pool usage > 2 x control peak - yes [754.0 vs 64.1 MiB]
+EXPECTED: control: no insert rejected, index disk bytes in [0.9, 2.2] x NxS - yes [rejected=0 idx_disk=528928097]
+done 2026-10-28T12:30:36-06:00

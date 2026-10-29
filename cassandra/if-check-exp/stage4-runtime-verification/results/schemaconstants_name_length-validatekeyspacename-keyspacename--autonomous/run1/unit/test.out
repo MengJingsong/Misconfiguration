@@ -1,0 +1,74 @@
+STAGE4 info NAME_LENGTH=48 TABLE_NAME_LENGTH=222 jdk=11.0.32.1 compactStrings=yes
+STAGE4 case validateKeyspaceName L=1 -> pass
+STAGE4 check validateKeyspaceName L=1 passes ok
+STAGE4 case KeyspaceMetadata.validate L=1 -> pass
+STAGE4 check KeyspaceMetadata.validate L=1 passes ok
+STAGE4 case TableMetadata.validate(ks L=1) -> pass
+STAGE4 check TableMetadata.validate ks L=1 passes ok
+STAGE4 case validateKeyspaceName L=10 -> pass
+STAGE4 check validateKeyspaceName L=10 passes ok
+STAGE4 case KeyspaceMetadata.validate L=10 -> pass
+STAGE4 check KeyspaceMetadata.validate L=10 passes ok
+STAGE4 case TableMetadata.validate(ks L=10) -> pass
+STAGE4 check TableMetadata.validate ks L=10 passes ok
+STAGE4 case validateKeyspaceName L=47 -> pass
+STAGE4 check validateKeyspaceName L=47 passes ok
+STAGE4 case KeyspaceMetadata.validate L=47 -> pass
+STAGE4 check KeyspaceMetadata.validate L=47 passes ok
+STAGE4 case TableMetadata.validate(ks L=47) -> pass
+STAGE4 check TableMetadata.validate ks L=47 passes ok
+STAGE4 case validateKeyspaceName L=48 -> pass
+STAGE4 check validateKeyspaceName L=48 passes ok
+STAGE4 case KeyspaceMetadata.validate L=48 -> pass
+STAGE4 check KeyspaceMetadata.validate L=48 passes ok
+STAGE4 case TableMetadata.validate(ks L=48) -> pass
+STAGE4 check TableMetadata.validate ks L=48 passes ok
+STAGE4 case validateKeyspaceName L=49 -> throw:Keyspace name must not be more than 48 characters long (got 49 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+STAGE4 check validateKeyspaceName L=49 throws ConfigurationException with 'more than 48 characters long' ok
+STAGE4 case KeyspaceMetadata.validate L=49 -> throw:Keyspace name must not be more than 48 characters long (got 49 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+STAGE4 check KeyspaceMetadata.validate L=49 throws ok
+STAGE4 case TableMetadata.validate(ks L=49) -> throw:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.t: Keyspace name must not be more than 48 characters long (got 4...
+STAGE4 check TableMetadata.validate ks L=49 throws ok
+STAGE4 case validateKeyspaceName L=100 -> throw:Keyspace name must not be more than 48 characters long (got 100 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+STAGE4 check validateKeyspaceName L=100 throws ConfigurationException with 'more than 48 characters long' ok
+STAGE4 case KeyspaceMetadata.validate L=100 -> throw:Keyspace name must not be more than 48 characters long (got 100 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk...
+STAGE4 check KeyspaceMetadata.validate L=100 throws ok
+STAGE4 case TableMetadata.validate(ks L=100) -> throw:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk.t: Keyspace n...
+STAGE4 check TableMetadata.validate ks L=100 throws ok
+STAGE4 size L=1 N=36 T=0 rep=1 total=10192 jamm_objectsizes=10192 per_ks=283.11
+STAGE4 size L=10 N=1000 T=0 rep=1 total=284256 jamm_objectsizes=284256 per_ks=284.26
+STAGE4 size L=47 N=1000 T=0 rep=1 total=316256 jamm_objectsizes=316256 per_ks=316.26
+STAGE4 size L=48 N=1000 T=0 rep=1 total=316256 jamm_objectsizes=316256 per_ks=316.26
+STAGE4 size L=49 N=1000 T=0 rep=1 total=324256 jamm_objectsizes=324256 per_ks=324.26
+STAGE4 size L=100 N=1000 T=0 rep=1 total=372256 jamm_objectsizes=372256 per_ks=372.26
+STAGE4 size L=1 N=36 T=10 rep=1 total=335720 jamm_objectsizes=74704 per_ks=9325.56
+STAGE4 size L=10 N=1000 T=10 rep=1 total=9278072 jamm_objectsizes=2076256 per_ks=9278.07
+STAGE4 size L=47 N=1000 T=10 rep=1 total=9310072 jamm_objectsizes=2108256 per_ks=9310.07
+STAGE4 size L=48 N=1000 T=10 rep=1 total=9310072 jamm_objectsizes=2108256 per_ks=9310.07
+STAGE4 size L=49 N=1000 T=10 rep=1 total=9318072 jamm_objectsizes=2116256 per_ks=9318.07
+STAGE4 size L=100 N=1000 T=10 rep=1 total=9366072 jamm_objectsizes=2164256 per_ks=9366.07
+STAGE4 size L=1 N=36 T=0 rep=2 total=10192 jamm_objectsizes=10192 per_ks=283.11
+STAGE4 size L=10 N=1000 T=0 rep=2 total=284256 jamm_objectsizes=284256 per_ks=284.26
+STAGE4 size L=47 N=1000 T=0 rep=2 total=316256 jamm_objectsizes=316256 per_ks=316.26
+STAGE4 size L=48 N=1000 T=0 rep=2 total=316256 jamm_objectsizes=316256 per_ks=316.26
+STAGE4 size L=49 N=1000 T=0 rep=2 total=324256 jamm_objectsizes=324256 per_ks=324.26
+STAGE4 size L=100 N=1000 T=0 rep=2 total=372256 jamm_objectsizes=372256 per_ks=372.26
+STAGE4 size L=1 N=36 T=10 rep=2 total=335720 jamm_objectsizes=74704 per_ks=9325.56
+STAGE4 size L=10 N=1000 T=10 rep=2 total=9278072 jamm_objectsizes=2076256 per_ks=9278.07
+STAGE4 size L=47 N=1000 T=10 rep=2 total=9310072 jamm_objectsizes=2108256 per_ks=9310.07
+STAGE4 size L=48 N=1000 T=10 rep=2 total=9310072 jamm_objectsizes=2108256 per_ks=9310.07
+STAGE4 size L=49 N=1000 T=10 rep=2 total=9318072 jamm_objectsizes=2116256 per_ks=9318.07
+STAGE4 size L=100 N=1000 T=10 rep=2 total=9366072 jamm_objectsizes=2164256 per_ks=9366.07
+STAGE4 size L=1 N=36 T=0 rep=3 total=10192 jamm_objectsizes=10192 per_ks=283.11
+STAGE4 size L=10 N=1000 T=0 rep=3 total=284256 jamm_objectsizes=284256 per_ks=284.26
+STAGE4 size L=47 N=1000 T=0 rep=3 total=316256 jamm_objectsizes=316256 per_ks=316.26
+STAGE4 size L=48 N=1000 T=0 rep=3 total=316256 jamm_objectsizes=316256 per_ks=316.26
+STAGE4 size L=49 N=1000 T=0 rep=3 total=324256 jamm_objectsizes=324256 per_ks=324.26
+STAGE4 size L=100 N=1000 T=0 rep=3 total=372256 jamm_objectsizes=372256 per_ks=372.26
+STAGE4 size L=1 N=36 T=10 rep=3 total=335720 jamm_objectsizes=74704 per_ks=9325.56
+STAGE4 size L=10 N=1000 T=10 rep=3 total=9278072 jamm_objectsizes=2076256 per_ks=9278.07
+STAGE4 size L=47 N=1000 T=10 rep=3 total=9310072 jamm_objectsizes=2108256 per_ks=9310.07
+STAGE4 size L=48 N=1000 T=10 rep=3 total=9310072 jamm_objectsizes=2108256 per_ks=9310.07
+STAGE4 size L=49 N=1000 T=10 rep=3 total=9318072 jamm_objectsizes=2116256 per_ks=9318.07
+STAGE4 size L=100 N=1000 T=10 rep=3 total=9366072 jamm_objectsizes=2164256 per_ks=9366.07
+STAGE4 summary mismatches=0

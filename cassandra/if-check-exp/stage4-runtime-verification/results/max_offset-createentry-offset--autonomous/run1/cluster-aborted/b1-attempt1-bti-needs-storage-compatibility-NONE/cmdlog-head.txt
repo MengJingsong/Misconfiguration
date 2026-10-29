@@ -1,0 +1,35 @@
+== b1 rows=1000000 index=yes heap=2G format=bti commitlog=1024MiB threads=48 start 1793233279554
+guard: free 49209740 KB, need 10148437 KB (2.2 x payload + 8 GB)
+daemons before: 0
+daemon died at start
+CompileCommand: inline org/apache/cassandra/utils/vint/VIntCoding.writeVInt(JLorg/apache/cassandra/io/util/DataOutputPlus;)V
+CompileCommand: inline org/apache/cassandra/utils/vint/VIntCoding.writeVInt32(ILjava/lang/Object;ILorg/apache/cassandra/db/marshal/ValueAccessor;)I
+CompileCommand: inline org/apache/cassandra/utils/vint/VIntCoding.writeVInt32(ILjava/nio/ByteBuffer;)V
+CompileCommand: inline org/apache/cassandra/utils/vint/VIntCoding.writeVInt32(ILorg/apache/cassandra/io/util/DataOutputPlus;)V
+INFO  [main] 2026-10-29T00:21:21,128 YamlConfigurationLoader.java:103 - Configuration location: file:/users/jason92/s4-b34/node-mo/conf/cassandra.yaml
+INFO  [main] 2026-10-29T00:21:21,444 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_filtering_enabled=true; allow_insecure_udfs=false; alter_table_enabled=true; audit_logging_options=Aud
+Exception (org.apache.cassandra.exceptions.ConfigurationException) encountered during startup: Selected sstable format 'bti' is not available when in storage compatibility mode 'CASSANDRA_4'.
+org.apache.cassandra.exceptions.ConfigurationException: Selected sstable format 'bti' is not available when in storage compatibility mode 'CASSANDRA_4'.
+	at org.apache.cassandra.utils.StorageCompatibilityMode.validateSstableFormat(StorageCompatibilityMode.java:77)
+	at org.apache.cassandra.config.DatabaseDescriptor.getAndValidateWriteFormat(DatabaseDescriptor.java:1597)
+	at org.apache.cassandra.config.DatabaseDescriptor.applySSTableFormats(DatabaseDescriptor.java:1641)
+	at org.apache.cassandra.config.DatabaseDescriptor.applySSTableFormats(DatabaseDescriptor.java:1617)
+	at org.apache.cassandra.config.DatabaseDescriptor.applyAll(DatabaseDescriptor.java:451)
+	at org.apache.cassandra.config.DatabaseDescriptor.daemonInitialization(DatabaseDescriptor.java:263)
+	at org.apache.cassandra.config.DatabaseDescriptor.daemonInitialization(DatabaseDescriptor.java:247)
+	at org.apache.cassandra.service.CassandraDaemon.applyConfig(CassandraDaemon.java:780)
+	at org.apache.cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:723)
+	at org.apache.cassandra.service.CassandraDaemon.main(CassandraDaemon.java:865)
+ERROR [main] 2026-10-29T00:21:21,466 CassandraDaemon.java:887 - Exception encountered during startup
+org.apache.cassandra.exceptions.ConfigurationException: Selected sstable format 'bti' is not available when in storage compatibility mode 'CASSANDRA_4'.
+	at org.apache.cassandra.utils.StorageCompatibilityMode.validateSstableFormat(StorageCompatibilityMode.java:77)
+	at org.apache.cassandra.config.DatabaseDescriptor.getAndValidateWriteFormat(DatabaseDescriptor.java:1597)
+	at org.apache.cassandra.config.DatabaseDescriptor.applySSTableFormats(DatabaseDescriptor.java:1641)
+	at org.apache.cassandra.config.DatabaseDescriptor.applySSTableFormats(DatabaseDescriptor.java:1617)
+	at org.apache.cassandra.config.DatabaseDescriptor.applyAll(DatabaseDescriptor.java:451)
+	at org.apache.cassandra.config.DatabaseDescriptor.daemonInitialization(DatabaseDescriptor.java:263)
+	at org.apache.cassandra.config.DatabaseDescriptor.daemonInitialization(DatabaseDescriptor.java:247)
+	at org.apache.cassandra.service.CassandraDaemon.applyConfig(CassandraDaemon.java:780)
+	at org.apache.cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:723)
+	at org.apache.cassandra.service.CassandraDaemon.main(CassandraDaemon.java:865)
+Exception (org.apache.cassandra.exceptions.ConfigurationException) encountered during startup: Selected sstable format 'bti' is not available when in storage compatibility mode 'CASSANDRA_4'.

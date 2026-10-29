@@ -1,0 +1,15 @@
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+table: t
+table_definition: |
+  CREATE TABLE IF NOT EXISTS ks.t (id bigint PRIMARY KEY, v int);
+columnspec:
+  - name: id
+    population: seq(1..8000000)
+  - name: v
+    population: uniform(1..2000000000)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries: {}

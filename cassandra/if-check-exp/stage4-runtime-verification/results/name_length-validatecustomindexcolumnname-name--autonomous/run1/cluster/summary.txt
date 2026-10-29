@@ -1,0 +1,45 @@
+yaml tail: cluster_name: nl; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.2.1; rpc_address: 127.0.2.1; commitlog_directory: /dev/shm/s4-b2/node/commitlog; hints_directory: /dev/shm/s4-b2/node/hints; saved_caches_directory: /dev/shm/s4-b2/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b2/node/cdc_raw; memtable_heap_space: 256MiB; memtable_allocation_type: heap_buffers; sasi_indexes_enabled: true; auto_snapshot: false; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life A started, pid 885111, memtable_heap_space 256 MiB
+--- arm custom40: kind=custom L=40 N=500000 ---
+arm custom40: ok=500000 errors=0 msgs={} write_s=123 dir after flush=174182689 after compact=174248268 MEMTABLE_LIMIT flushes=8 first heap usage MiB=85.424 heap_used_gc=99567616 rss_peak=1777184768
+--- arm custom48: kind=custom L=48 N=500000 ---
+arm custom48: ok=500000 errors=0 msgs={} write_s=123 dir after flush=174192914 after compact=174259086 MEMTABLE_LIMIT flushes=8 first heap usage MiB=85.36 heap_used_gc=113198080 rss_peak=1780953088
+--- arm custom49: kind=custom L=49 N=500000 ---
+arm custom49: CREATE INDEX rejected: InvalidRequest: Error from server: code=2200 [Invalid query] message="Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' is longer than the permissible name length of 48 characters"; indexes in system_schema: 0
+--- arm custom100: kind=custom L=100 N=500000 ---
+arm custom100: CREATE INDEX rejected: InvalidRequest: Error from server: code=2200 [Invalid query] message="Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' is longer than the permissible name length of 48 characters"; indexes in system_schema: 0
+--- arm plain40: kind=plain L=40 N=500000 ---
+arm plain40: ok=500000 errors=0 msgs={} write_s=124 dir after flush=170328764 after compact=170365850 MEMTABLE_LIMIT flushes=7 first heap usage MiB=85.406 heap_used_gc=143478784 rss_peak=1785704448
+--- arm plain48: kind=plain L=48 N=500000 ---
+arm plain48: ok=500000 errors=0 msgs={} write_s=125 dir after flush=170328288 after compact=170365253 MEMTABLE_LIMIT flushes=7 first heap usage MiB=85.325 heap_used_gc=137104384 rss_peak=1788563456
+--- arm plain100: kind=plain L=100 N=500000 ---
+arm plain100: ok=500000 errors=0 msgs={} write_s=124 dir after flush=170324041 after compact=170363381 MEMTABLE_LIMIT flushes=7 first heap usage MiB=85.375 heap_used_gc=150935552 rss_peak=1791107072
+--- arm none40: kind=none L=40 N=500000 ---
+arm none40: ok=500000 errors=0 msgs={} write_s=122 dir after flush=114453491 after compact=61894672 MEMTABLE_LIMIT flushes=3 first heap usage MiB=85.375 heap_used_gc=138976256 rss_peak=1792458752
+yaml tail: cluster_name: nl; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.2.1; rpc_address: 127.0.2.1; commitlog_directory: /dev/shm/s4-b2/node/commitlog; hints_directory: /dev/shm/s4-b2/node/hints; saved_caches_directory: /dev/shm/s4-b2/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b2/node/cdc_raw; memtable_heap_space: 128MiB; memtable_allocation_type: heap_buffers; sasi_indexes_enabled: true; auto_snapshot: false; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life B started, pid 891053, memtable_heap_space 128 MiB
+--- arm plain48: kind=plain L=48 N=500000 ---
+arm plain48: ok=500000 errors=0 msgs={} write_s=124 dir after flush=170324844 after compact=170388538 MEMTABLE_LIMIT flushes=14 first heap usage MiB=42.801 heap_used_gc=126405632 rss_peak=1795334144
+yaml tail: cluster_name: nl; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.2.1; rpc_address: 127.0.2.1; commitlog_directory: /dev/shm/s4-b2/node/commitlog; hints_directory: /dev/shm/s4-b2/node/hints; saved_caches_directory: /dev/shm/s4-b2/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b2/node/cdc_raw; memtable_heap_space: 512MiB; memtable_allocation_type: heap_buffers; sasi_indexes_enabled: true; auto_snapshot: false; native_transport_timeout: 30s; write_request_timeout: 20000ms
+life C started, pid 894804, memtable_heap_space 512 MiB
+--- arm plain48: kind=plain L=48 N=500000 ---
+arm plain48: ok=500000 errors=0 msgs={} write_s=125 dir after flush=276558713 after compact=170359707 MEMTABLE_LIMIT flushes=3 first heap usage MiB=170.648 heap_used_gc=209743872 rss_peak=1769545728
+EXPECTED: custom49: CREATE INDEX rejected with the exact text, no index in system_schema - yes [InvalidRequest: Error from server: code=2200 [Invalid query] message="Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' is longer than the permissible ]
+EXPECTED: custom100: CREATE INDEX rejected with the exact text, no index in system_schema - yes [InvalidRequest: Error from server: code=2200 [Invalid query] message="Column 'cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]
+EXPECTED: custom40: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: custom48: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: plain40: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: plain48: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: plain100: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: none40: DDL accepted and no row insert failed - NO (recorded; judged in the results file) [ok=500000 errors=0]
+EXPECTED: plain48@128: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: plain48@512: DDL accepted and no row insert failed - yes [ok=500000 errors=0]
+EXPECTED: plain L=40,48,100: directory bytes after compaction (max-min)/mean <= 2% - yes [0.001% [170365850, 170365253, 170363381]]
+EXPECTED: custom L=40 vs 48: directory bytes after compaction (max-min)/mean <= 2% - yes [0.006% [174248268, 174259086]]
+EXPECTED: plain L=40,48,100: first MEMTABLE_LIMIT logged on-heap usage (max-min)/mean <= 15% - yes [[85.406, 85.325, 85.375]]
+EXPECTED: control: first MEMTABLE_LIMIT on-heap usage ratio (512 MiB over 128 MiB) in [2.5, 6] - yes [170.648 / 42.801]
+EXPECTED: control: MEMTABLE_LIMIT flush count at 128 MiB > at 512 MiB >= 1 - yes [14 / 7 / 3 (128/256/512)]
+EXPECTED: control: directory bytes after compaction at 128 / 256 / 512 MiB (max-min)/mean <= 2% - yes [0.017% [170388538, 170365253, 170359707]]
+EXPECTED: no-index L=40 directory bytes < plain L=40 - yes [61894672 vs 170365850]
+summary: EXPECTED yes=16 no=1
+node pid left: None; /dev/shm/s4-b2 exists: False

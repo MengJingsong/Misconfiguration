@@ -1,0 +1,60 @@
+[2026-10-28 12:43:31] yaml tail: cluster_name: nl; num_tokens: 16; endpoint_snitch: SimpleSnitch; listen_address: 127.0.2.1; rpc_address: 127.0.2.1; commitlog_directory: /dev/shm/s4-b2/node/commitlog; hints_directory: /dev/shm/s4-b2/node/hints; saved_caches_directory: /dev/shm/s4-b2/node/saved_caches; cdc_raw_directory: /dev/shm/s4-b2/node/cdc_raw; memtable_heap_space: 256MiB; memtable_allocation_type: heap_buffers; sasi_indexes_enabled: true; auto_snapshot: false; native_transport_timeout: 30s; write_request_timeout: 20000ms
+[2026-10-28 12:43:31] + bin/cassandra -p /dev/shm/s4-b2/node/cassandra.pid > /dev/shm/s4-b2/node/stdout.txt 2>&1
+
+  rc=0
+[2026-10-28 12:43:33] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:43:34] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:43:38] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:43:39] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:43:43] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:43:44] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:43:48] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:43:49] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:43:53] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:43:54] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:43:58] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:43:59] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:03] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:04] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:08] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:09] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:13] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:14] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:18] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:19] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:23] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:25] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:29] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:30] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:34] + bin/nodetool -h 127.0.0.1 -p 7270 status
+[2026-10-28 12:44:35] + bin/nodetool -h 127.0.0.1 -p 7270 statusbinary
+[2026-10-28 12:44:36] UN and serving after 63 s
+[2026-10-28 12:44:36] life A started, pid 885111, memtable_heap_space 256 MiB
+[2026-10-28 12:44:36] --- arm custom40: kind=custom L=40 N=500000 ---
+[2026-10-28 12:44:36] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/name_length-validatecustomindexcolumnname-name--autonomous/writer.py 127.0.2.1 schema t_custom40 40 custom
+{"created": "t_custom40", "create_index": "ok"}
+
+[2026-10-28 12:44:37] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/name_length-validatecustomindexcolumnname-name--autonomous/writer.py 127.0.2.1 write t_custom40 40 500000 21
+{"ok": 500000, "errors": 0, "messages": {}, "seconds": 95.5}
+
+[2026-10-28 12:46:40] + jcmd 885111 GC.run
+[2026-10-28 12:46:40] + jcmd 885111 GC.heap_info
+[2026-10-28 12:46:40] + bin/nodetool -h 127.0.0.1 -p 7270 flush ks t_custom40
+[2026-10-28 12:46:44] + bin/nodetool -h 127.0.0.1 -p 7270 compact ks t_custom40
+[2026-10-28 12:46:52] + jcmd 885111 GC.run
+[2026-10-28 12:46:52] + jcmd 885111 GC.heap_info
+[2026-10-28 12:46:52] arm custom40: ok=500000 errors=0 msgs={} write_s=123 dir after flush=174182689 after compact=174248268 MEMTABLE_LIMIT flushes=8 first heap usage MiB=85.424 heap_used_gc=99567616 rss_peak=1777184768
+[2026-10-28 12:46:52] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/name_length-validatecustomindexcolumnname-name--autonomous/writer.py 127.0.2.1 drop t_custom40
+{"dropped": "t_custom40"}
+
+[2026-10-28 12:46:53] --- arm custom48: kind=custom L=48 N=500000 ---
+[2026-10-28 12:46:53] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/name_length-validatecustomindexcolumnname-name--autonomous/writer.py 127.0.2.1 schema t_custom48 48 custom
+{"created": "t_custom48", "create_index": "ok"}
+
+[2026-10-28 12:46:54] + python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/name_length-validatecustomindexcolumnname-name--autonomous/writer.py 127.0.2.1 write t_custom48 48 500000 21
+{"ok": 500000, "errors": 0, "messages": {}, "seconds": 95.0}
+
+[2026-10-28 12:48:56] + jcmd 885111 GC.run
+[2026-10-28 12:48:57] + jcmd 885111 GC.heap_info
+[2026-10-28 12:48:57] + bin/nodetool -h 127.0.0.1 -p 7270 flush ks t_custom48
+[2026-10-28 12:49:00] + bin/nodetool -h 127.0.0.1 -p 7270 compact ks t_custom48

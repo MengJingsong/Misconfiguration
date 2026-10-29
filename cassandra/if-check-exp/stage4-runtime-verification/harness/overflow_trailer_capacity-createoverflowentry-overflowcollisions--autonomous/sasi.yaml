@@ -1,0 +1,14 @@
+# cassandra-stress user profile for the clean-row arms (case B3, amendment C4): one partition per insert, 8-byte blob key from -pop,
+# the single value 'x' (one SASI term, one token tree).
+keyspace: ks
+table: t
+columnspec:
+  - name: pk
+    size: fixed(8)
+  - name: v
+    size: fixed(1)
+    population: uniform(1..1)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+queries: {}

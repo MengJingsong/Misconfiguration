@@ -1,0 +1,19 @@
+== arm | total SAI bytes after build / after rebuild | numeric-values bytes | per-index bytes | heap peak MiB | seg gauge peak MiB | RSS peak MiB | ledger lengths | verify
+S-1M: {"c_idx": {"done": true, "secs": 13, "bytes": 16609304, "segs": 1, "heap": 600190976, "verify": "OK"}, "u_idx": {"done": true, "secs": 24, "bytes": 125853952, "segs": 1, "heap": 853992536, "verify": "OK"}}
+EXPECTED S-1M: both indexes built, verify queries OK, no ERROR lines: OK {"c_idx": [true, "OK"], "u_idx": [true, "OK"]}
+S-500k: {"c_idx": {"done": true, "secs": 8, "bytes": 8319000, "segs": 1, "heap": 528306688, "verify": "OK"}, "u_idx": {"done": true, "secs": 11, "bytes": 62935192, "segs": 1, "heap": 878056960, "verify": "OK"}}
+EXPECTED S-500k: both indexes built, verify queries OK, no ERROR lines: OK {"c_idx": [true, "OK"], "u_idx": [true, "OK"]}
+T124-1M: {"c_idx": {"done": true, "secs": 13, "bytes": 33325080, "segs": 1, "heap": 619312640, "verify": "OK"}, "u_idx": {"done": true, "secs": 23, "bytes": 125853952, "segs": 1, "heap": 908248192, "verify": "OK"}}
+EXPECTED T124-1M: both indexes built, verify queries OK, no ERROR lines: OK {"c_idx": [true, "OK"], "u_idx": [true, "OK"]}
+T124-500k: {"c_idx": {"done": true, "secs": 8, "bytes": 16674840, "segs": 1, "heap": 520093696, "verify": "OK"}, "u_idx": {"done": true, "secs": 11, "bytes": 62935192, "segs": 1, "heap": 996194304, "verify": "OK"}}
+EXPECTED T124-500k: both indexes built, verify queries OK, no ERROR lines: OK {"c_idx": [true, "OK"], "u_idx": [true, "OK"]}
+ctl-opt16: {"c_idx": {"done": true, "secs": 13, "bytes": 16605208, "segs": 8, "heap": 542958000, "verify": "OK"}, "u_idx": {"done": true, "secs": 16, "bytes": 125853952, "segs": 16, "heap": 884380544, "verify": "OK"}}
+EXPECTED ctl-opt16: both indexes built, verify queries OK, no ERROR lines: OK {"c_idx": [true, "OK"], "u_idx": [true, "OK"]}
+EXPECTED S-1M c_idx file bytes ~ (ceil(1e6/248) leaves + ~17 interior) x 4096 = 16.6 MB within 10 % (one suffix term holds all tokens): OK 16609304 vs 16588800 (16.61 B per token)
+EXPECTED c_idx bytes grow with rows (1M / 500k within 1.8 .. 2.2), no plateau: OK 2.00
+INFO u_idx bytes (unique terms, PREFIX) 1M / 500k: 125853952 / 62935192 = 2.00
+EXPECTED T124-1M c_idx bytes about twice S-1M (1.8 .. 2.2): the constant sets the block count only: OK 2.01
+EXPECTED c-index build peak heap of T124-1M within 20 % of S-1M (peak between GCs is noisy; reported): OK 591 vs 572 MiB (3.2%)
+INFO control: option 16 -> 8 temp-segment files seen, heap peak 518 MiB; option 1024 -> 1, 572 MiB
+EXPECTED control moves: the 16 MiB option flushes more segment files than 1024 AND the heap peak is lower: OK 8 vs 1; 518 vs 572 MiB
+SUMMARY mismatches=0 arms=5

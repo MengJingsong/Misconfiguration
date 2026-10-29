@@ -1,0 +1,26 @@
+PASS unit: 43 .out files (2 reps x [2 kinds x (2 invalid + 5 full + 3 short)] + 3 controls) :: 43
+PASS unit: every run exited 0
+PASS unit: 32 writer runs: array length == bs, blockIndex <= bs, flushes == ceil(N/bs), retained long[] == 8bs+16 (+<=200) after N adds :: 32
+PASS unit: 100 -> power-of-two message, 32 -> range message
+PASS unit: plain metadata bytes at N=167,772,160 for bs 128 / 16384 / 2^20 shrink as blocks get larger (grow with the block count) :: [10115968, 68692, 917]
+PASS unit: mono metadata bytes at N=167,772,160 for bs 128 / 16384 / 2^20 shrink as blocks get larger (grow with the block count) :: [12754920, 99645, 1554]
+PASS unit: control long[] bytes grow with N (>= 8N) :: [(1048576, 8388656), (4194304, 33554480), (16777216, 134217776)]
+PASS cluster A-3M: BPW lengths are exactly ['128', '16384'] :: 15 lines
+PASS cluster A2-3M: BPW lengths are exactly ['128', '16384'] :: 15 lines
+PASS cluster A-750k: BPW lengths are exactly ['128', '16384'] :: 15 lines
+PASS cluster ctl-seg16: BPW lengths are exactly ['128', '16384'] :: 15 lines
+PASS cluster B-num64: BPW lengths are exactly ['64'] :: 15 lines
+PASS cluster C-num1m: BPW lengths are exactly ['1048576'] :: 15 lines
+PASS cluster: three different jar md5 for the three builds
+PASS cluster A-3M: VERIFY OK and daemon stopped
+PASS cluster A2-3M: VERIFY OK and daemon stopped
+PASS cluster B-num64: VERIFY OK and daemon stopped
+PASS cluster C-num1m: VERIFY OK and daemon stopped
+PASS cluster A-750k: VERIFY OK and daemon stopped
+PASS cluster ctl-seg16: VERIFY OK and daemon stopped
+PASS cluster: frozen criterion "total SAI bytes within 10 percent across A / B / C" is NOT met (spread 26.8 percent): confirms the analyze_cluster MISMATCH :: [49133244, 41542421, 52670752]
+PASS cluster: only per-SSTable numeric-values components differ between the builds (per-index files and key blocks are byte-identical) :: ['ClusteringKeyBlockOffsets', 'PartitionKeyBlockOffsets', 'PartitionToSize', 'RowToPartition', 'RowToToken']
+PASS cluster: heap-peak differences of B and C from A lie inside the A vs A2 noise band (so the peak cannot resolve them) :: noise 293 MiB; B-A -143; C-A -266; A 4045 A2 3752
+PASS cluster: A-3M / A-750k total bytes ratio 3.4 .. 4.6 :: 3.99
+PASS cluster control: seg-buffer peak 16 MiB arm <= 20 MiB < 32 MiB < default arm peak :: 16779844 vs 1073743912
+SELFCHECK total FAIL=0

@@ -1,0 +1,25 @@
+# Observation only (case B3d, instrument added at the 2026-10-28 audit): exact size of VirtualTableAppender.messageBuffer at the flush,
+# and the number of events that reached addToBuffer (attempts, including the ones the cap drops).
+RULE lv count attempts
+CLASS org.apache.cassandra.utils.logging.VirtualTableAppender
+METHOD addToBuffer
+AT ENTRY
+IF TRUE
+DO incrementCounter("att")
+ENDRULE
+
+RULE lv flush entry
+CLASS org.apache.cassandra.utils.logging.VirtualTableAppender
+METHOD flushBuffer
+AT ENTRY
+IF TRUE
+DO traceln("LVFLUSH_ENTRY ms=" + System.currentTimeMillis() + " attempts=" + readCounter("att") + " buffered=" + $0.messageBuffer.size())
+ENDRULE
+
+RULE lv flush exit
+CLASS org.apache.cassandra.utils.logging.VirtualTableAppender
+METHOD flushBuffer
+AT EXIT
+IF TRUE
+DO traceln("LVFLUSH_EXIT ms=" + System.currentTimeMillis() + " buffered=" + $0.messageBuffer.size())
+ENDRULE

@@ -1,0 +1,27 @@
+== heap150 alloc=heap_buffers offheap=512MiB cleanup=0.99 T=150 blob=0 start 1793198070567
+$ /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/make-node.sh heap_buffers 512MiB 0.99
+node conf /users/jason92/stage4-tmp/mrs/node/conf: alloc heap_buffers offheap 512MiB cleanup 0.99
+-XX:+AlwaysPreTouch
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=16m
+-XX:G1NewSizePercent=50
+-XX:G1RSetUpdatingPauseTimePercent=5
+-Xms2G
+-Xmx2G
+-XX:+AlwaysPreTouch
+-javaagent:/users/jason92/s4-mrs/build/lib/jars/byteman-4.0.20.jar=script:/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/region.btm
+
+$ javac -d /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/cls /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/Jmx.java
+
+EXPECTED yaml:  ['INFO  [main] 2026-10-28T14:34:32,813 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB', 'INFO  [main] 2026-10-28T14:34:32,813 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 512MiB']
+SNAP {"snap": "base", "t": 1793198137157, "RssAnon_kB": 2707128, "VmData_kB": 2718740, "VmRSS_kB": 2879668, "charged_all": 0, "charged_ks": 0, "switch_ks": 0, "switch_all": 0, "ledger_regions": 0, "ledger_bytes": 0, "ledger_max": 0}
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_region_size-tryswapregion-minsize--autonomous/workload.py /users/jason92/s4-mrs/lib tables 150
+EXPECTED created 150 tables
+WORKLOAD tables=150 rows=180000 errors=0 seconds=34.4
+SNAP {"snap": "end", "t": 1793198370592, "RssAnon_kB": 2827832, "VmData_kB": 3284516, "VmRSS_kB": 3022756, "charged_all": 0, "charged_ks": 0, "switch_ks": 0, "switch_all": 0, "ledger_regions": 0, "ledger_bytes": 0, "ledger_max": 0}
+DELTA end-base: RssAnon_kB=120704 VmData_kB=565776 charged_all=0 ledger_bytes=0 switch_ks=0
+$ bin/nodetool tablestats ks 2>&1 | grep -E "^Keyspace|Table:|Memtable|Off heap" | head -20 > /users/jason92/stage4-logs/mrs/run1/cluster/heap150/tablestats-head.txt; tail -3 /users/jason92/stage4-logs/mrs/run1/cluster/heap150/tablestats-head.txt
+		Memtable off heap memory used: 0
+		Memtable switch count: 0
+		Table: t100
+daemons left: 0

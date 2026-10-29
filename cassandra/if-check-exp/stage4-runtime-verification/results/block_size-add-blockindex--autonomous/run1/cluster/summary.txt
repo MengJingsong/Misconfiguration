@@ -1,0 +1,115 @@
+CMD all case blockindex start 2026-10-28 18:08:31 MDT; harness md5 2dbbd62582b9 ed7873944e3b
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; memtable_heap_space: 2048MiB ; memtable_offheap_space: 2048MiB
+node up after 48 s
+SEED rows 500000 in 22 s
+SEED loaded 750000 rows in 27 s
+SEED sstables: -rw-r--r-- 1 jason92 misconfiguration 12364816 Oct 28 18:09 /users/jason92/s4-b34/cl/blockindex/node/data/sai/t-fd7a52b0d32c11f1982e0d53322a00b4/nb-2-big-Data.db
+SEED copied to /users/jason92/s4-b34/seeds/sai-750000; du 12916964 B; daemons left: none
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; memtable_heap_space: 2048MiB ; memtable_offheap_space: 2048MiB
+node up after 48 s
+SEED rows 500000 in 21 s
+SEED rows 1000000 in 37 s
+SEED rows 1500000 in 53 s
+SEED rows 2000000 in 68 s
+SEED rows 2500000 in 84 s
+SEED rows 3000000 in 99 s
+SEED loaded 3000000 rows in 99 s
+SEED sstables: -rw-r--r-- 1 jason92 misconfiguration 49159670 Oct 28 18:12 /users/jason92/s4-b34/cl/blockindex/node/data/sai/t-384e2330d32d11f18bb1a52490ab895d/nb-3-big-Data.db
+SEED copied to /users/jason92/s4-b34/seeds/sai-3000000; du 50015260 B; daemons left: none
+ARM A-3M start 2026-10-28 18:13:05 MDT: build base (/users/jason92/s4-b34/base), rows 3000000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM A-3M: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 21 s (create + wait)
+FILES after build: 17 SAI files, 49133244 bytes
+REBUILD v_idx rc=0 in 13 s: ''
+REBUILD txt_idx rc=0 in 19 s: ''
+FILES after rebuild: 17 SAI files, 49133244 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES A-3M: {"samples": 150, "seg_used_peak": 1073743912, "seg_limits": [-1, 1073741824], "heap_used_peak": 4241178624}
+LEDGER A-3M: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 8
+ARM A-3M STOPPED: daemons left: none
+ARM B-num64 start 2026-10-28 18:14:47 MDT: build v-num64 (/users/jason92/s4-b34/v-num64), rows 3000000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM B-num64: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 3 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 21 s (create + wait)
+FILES after build: 17 SAI files, 41542421 bytes
+REBUILD v_idx rc=0 in 13 s: ''
+REBUILD txt_idx rc=0 in 19 s: ''
+FILES after rebuild: 17 SAI files, 41542421 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES B-num64: {"samples": 151, "seg_used_peak": 1073743912, "seg_limits": [-1, 1073741824], "heap_used_peak": 4091579000}
+LEDGER B-num64: 45 lines; lengths ["64"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 8
+ARM B-num64 STOPPED: daemons left: none
+ARM C-num1m start 2026-10-28 18:16:29 MDT: build v-num1m (/users/jason92/s4-b34/v-num1m), rows 3000000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM C-num1m: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 21 s (create + wait)
+FILES after build: 17 SAI files, 52670752 bytes
+REBUILD v_idx rc=0 in 13 s: ''
+REBUILD txt_idx rc=0 in 19 s: ''
+FILES after rebuild: 17 SAI files, 52670752 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES C-num1m: {"samples": 148, "seg_used_peak": 1073743912, "seg_limits": [-1, 1073741824], "heap_used_peak": 3962107408}
+LEDGER C-num1m: 45 lines; lengths ["1048576"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 8
+ARM C-num1m STOPPED: daemons left: none
+ARM A-750k start 2026-10-28 18:18:10 MDT: build base (/users/jason92/s4-b34/base), rows 750000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 13 s
+ARM A-750k: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 3 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 12 s (create + wait)
+FILES after build: 17 SAI files, 12310642 bytes
+REBUILD v_idx rc=0 in 5 s: ''
+REBUILD txt_idx rc=0 in 8 s: ''
+FILES after rebuild: 17 SAI files, 12310642 bytes
+VERIFY count(v>=0)=750000 expected 750000; count(txt=w0,w7,w99)=[7500, 7500, 7500] expected 7500 each OK
+GAUGES A-750k: {"samples": 79, "seg_used_peak": 1073743944, "seg_limits": [-1, 1073741824], "heap_used_peak": 3460753664}
+LEDGER A-750k: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 2
+ARM A-750k STOPPED: daemons left: none
+ARM A2-3M start 2026-10-28 18:19:16 MDT: build base (/users/jason92/s4-b34/base), rows 3000000, extras {}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s
+node up after 12 s
+ARM A2-3M: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 21 s (create + wait)
+FILES after build: 17 SAI files, 49133244 bytes
+REBUILD v_idx rc=0 in 13 s: ''
+REBUILD txt_idx rc=0 in 19 s: ''
+FILES after rebuild: 17 SAI files, 49133244 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES A2-3M: {"samples": 150, "seg_used_peak": 1073743912, "seg_limits": [-1, 1073741824], "heap_used_peak": 3934428344}
+LEDGER A2-3M: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 8
+ARM A2-3M STOPPED: daemons left: none
+ARM ctl-seg16 start 2026-10-28 18:20:59 MDT: build base (/users/jason92/s4-b34/base), rows 3000000, extras {'seg': 16}, heap 4G
+YAML tail: cluster_name: stage4-blockindex ; data_file_directories: [/users/jason92/s4-b34/cl/blockindex/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/blockindex/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/blockindex/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/blockindex/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/blockindex/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sai_options: ;   segment_write_buffer_size: 16MiB
+node up after 13 s
+ARM ctl-seg16: node up, sampler started; before index: 0 SAI files
+CREATE INDEX rc=0 after 4 s: v_idx ON sai.t (v ''
+CREATE INDEX rc=0 after 5 s: txt_idx ON sai.t  ''
+INDEX build complete after 49 s (create + wait)
+FILES after build: 17 SAI files, 47832094 bytes
+REBUILD v_idx rc=0 in 39 s: ''
+REBUILD txt_idx rc=0 in 46 s: ''
+FILES after rebuild: 17 SAI files, 47832094 bytes
+VERIFY count(v>=0)=3000000 expected 3000000; count(txt=w0,w7,w99)=[30000, 30000, 30000] expected 30000 each OK
+GAUGES ctl-seg16: {"samples": 282, "seg_used_peak": 16779844, "seg_limits": [-1, 16777216], "heap_used_peak": 2632542080}
+LEDGER ctl-seg16: 45 lines; lengths ["128", "16384"]
+ERROR lines in system.log: 0; memory-limit flush DEBUG lines in this arm: 848
+ARM ctl-seg16 STOPPED: daemons left: none
+DONE all 

@@ -1,0 +1,56 @@
+
+--- c2-cold  [variant v10m workload WC (64 thr, cold, 2000 rows x 100 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 122 s: 16538 requests, 33076000 rows (3154.4 MiB payload) 27.2 MB/s, errors 0
+  flushes of ks.t: 57 (55 used): ops/flush median 576000, serialized median 79.7 MiB, on-heap at Writing median 209.3 MiB max 301.7 MiB; Enqueuing flush n=56 reasons ['MEMTABLE_LIMIT'] on-heap median 171.3 MiB
+  S4: attempts 16784 fails 1 (0.0%) failHeap 0.5 MiB | locked attempts 0 fails 0 | tracker calls 1 | flips 0 | TRACE contention lines 0 (0 of 0 partitions)
+  JMX (143 samples): MemtableOnHeapSize peak 169.4 MiB p95 138.8 MiB p50 92.5 MiB; AllMemtablesHeapSize peak 171.0 MiB; off-heap peak 0.0 MiB; switch count 57; heap used peak 6123 MiB; LiveDiskSpaceUsed 3205.9 MiB
+  GC: 31 pauses, 0 Full, allocation volume 107392 MB (883.9 MB/s), heap after GC max 2457 MB, max pause 394 ms | threads: BLOCKED 0, AtomicBTreePartition frames 602 | min free disk 49 GB, max data+commitlog 5398 MiB
+
+--- c2-cold128: analysis error IndexError('list index out of range')
+
+--- c2-hot  [variant v10m workload WB (64 thr, hot, 2000 rows x 100 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 122 s: 4123 requests, 8246000 rows (786.4 MiB payload) 6.7 MB/s, errors 0
+  flushes of ks.t: 43 (41 used): ops/flush median 186000, serialized median 25.7 MiB, on-heap at Writing median 373.9 MiB max 460.1 MiB; Enqueuing flush n=43 reasons ['MEMTABLE_LIMIT'] on-heap median 170.8 MiB
+  S4: attempts 63437 fails 59101 (93.2%) failHeap 31200.4 MiB | locked attempts 36908 fails 34893 | tracker calls 24208 | flips 43 | TRACE contention lines 43 (43 of 43 partitions)
+  JMX (137 samples): MemtableOnHeapSize peak 170.2 MiB p95 165.3 MiB p50 6.7 MiB; AllMemtablesHeapSize peak 170.1 MiB; off-heap peak 0.0 MiB; switch count 43; heap used peak 7869 MiB; LiveDiskSpaceUsed 798.9 MiB
+  GC: 41 pauses, 18 Full, allocation volume 74404 MB (609.0 MB/s), heap after GC max 8172 MB, max pause 268 ms | threads: BLOCKED 0, AtomicBTreePartition frames 2000 | min free disk 53 GB, max data+commitlog 1484 MiB
+
+--- c2-hot-v100m  [variant v100m workload WB (64 thr, hot, 2000 rows x 100 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=104857600  load 124 s: 4411 requests, 8822000 rows (841.3 MiB payload) 7.1 MB/s, errors 0
+  flushes of ks.t: 43 (41 used): ops/flush median 188000, serialized median 26.0 MiB, on-heap at Writing median 383.2 MiB max 471.8 MiB; Enqueuing flush n=43 reasons ['MEMTABLE_LIMIT'] on-heap median 170.8 MiB
+  S4: attempts 65883 fails 61261 (93.0%) failHeap 32340.6 MiB | locked attempts 36325 fails 34319 | tracker calls 26942 | flips 43 | TRACE contention lines 43 (43 of 43 partitions)
+  JMX (138 samples): MemtableOnHeapSize peak 169.7 MiB p95 162.8 MiB p50 14.2 MiB; AllMemtablesHeapSize peak 174.2 MiB; off-heap peak 0.0 MiB; switch count 43; heap used peak 8013 MiB; LiveDiskSpaceUsed 854.9 MiB
+  GC: 44 pauses, 16 Full, allocation volume 86097 MB (697.1 MB/s), heap after GC max 8172 MB, max pause 237 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1992 | min free disk 53 GB, max data+commitlog 1498 MiB
+
+--- c2-hot-v1m  [variant v1m workload WB (64 thr, hot, 2000 rows x 100 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=1048576  load 123 s: 3674 requests, 7348000 rows (700.8 MiB payload) 6.0 MB/s, errors 0
+  flushes of ks.t: 37 (35 used): ops/flush median 188000, serialized median 26.0 MiB, on-heap at Writing median 390.7 MiB max 493.7 MiB; Enqueuing flush n=37 reasons ['MEMTABLE_LIMIT'] on-heap median 170.8 MiB
+  S4: attempts 58751 fails 54875 (93.4%) failHeap 28969.4 MiB | locked attempts 35762 fails 33844 | tracker calls 21031 | flips 37 | TRACE contention lines 37 (37 of 37 partitions)
+  JMX (138 samples): MemtableOnHeapSize peak 166.7 MiB p95 154.4 MiB p50 20.0 MiB; AllMemtablesHeapSize peak 166.7 MiB; off-heap peak 0.0 MiB; switch count 37; heap used peak 7949 MiB; LiveDiskSpaceUsed 712.1 MiB
+  GC: 37 pauses, 16 Full, allocation volume 69791 MB (566.0 MB/s), heap after GC max 8172 MB, max pause 230 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1660 | min free disk 53 GB, max data+commitlog 1409 MiB
+
+--- c2-hot128  [variant v10m workload WB (64 thr, hot, 2000 rows x 100 B) memtable_heap_space 128 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 122 s: 3029 requests, 6058000 rows (577.7 MiB payload) 5.0 MB/s, errors 0
+  flushes of ks.t: 38 (36 used): ops/flush median 160000, serialized median 22.1 MiB, on-heap at Writing median 327.8 MiB max 365.7 MiB; Enqueuing flush n=38 reasons ['MEMTABLE_LIMIT'] on-heap median 42.8 MiB
+  S4: attempts 53817 fails 50586 (94.0%) failHeap 26705.1 MiB | locked attempts 49222 fails 46723 | tracker calls 3863 | flips 38 | TRACE contention lines 38 (38 of 38 partitions)
+  JMX (136 samples): MemtableOnHeapSize peak 37.5 MiB p95 24.4 MiB p50 18.4 MiB; AllMemtablesHeapSize peak 37.4 MiB; off-heap peak 0.0 MiB; switch count 38; heap used peak 8077 MiB; LiveDiskSpaceUsed 586.9 MiB
+  GC: 32 pauses, 12 Full, allocation volume 63128 MB (516.4 MB/s), heap after GC max 8172 MB, max pause 209 ms | threads: BLOCKED 0, AtomicBTreePartition frames 2065 | min free disk 53 GB, max data+commitlog 1180 MiB
+
+=== group case 2, WB hot: constant 1 MiB / 10 MiB / 100 MiB
+  ops_med      hot-v1m=1.88e+05 hot=1.86e+05 hot-v100m=1.88e+05  max/min=1.01 (<=1.3 flat)
+  onheap_med   hot-v1m=4.097e+08 hot=3.921e+08 hot-v100m=4.018e+08  max/min=1.04 (<=1.3 flat)
+  enq_on_med   hot-v1m=1.791e+08 hot=1.791e+08 hot-v100m=1.791e+08  max/min=1.00 (<=1.3 flat)
+  peak_on      hot-v1m=1.748e+08 hot=1.785e+08 hot-v100m=1.78e+08  max/min=1.02 (<=1.3 flat)
+  gc_alloc_mb  hot-v1m=6.979e+04 hot=7.44e+04 hot-v100m=8.61e+04  max/min=1.23 (<=1.3 flat)
+
+=== group case 2, pool 128 vs 512: hot
+  enq_on_med   hot128=4.49e+07 hot=1.791e+08  max/min=3.99 (>1.3)
+  onheap_med   hot128=3.437e+08 hot=3.921e+08  max/min=1.14 (<=1.3 flat)
+  ops_med      hot128=1.6e+05 hot=1.86e+05  max/min=1.16 (<=1.3 flat)
+  peak_on      hot128=3.936e+07 hot=1.785e+08  max/min=4.53 (>1.3)
+
+=== group case 2, pool 128 vs 512: cold
+  enq_on_med   cold=1.796e+08  max/min=nan (>1.3)
+  onheap_med   cold=2.195e+08  max/min=nan (>1.3)
+  ops_med      cold=5.76e+05  max/min=nan (>1.3)
+  peak_on      cold=1.776e+08  max/min=nan (>1.3)

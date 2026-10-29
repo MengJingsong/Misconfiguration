@@ -1,0 +1,16 @@
+# Observation only (cluster tier, C3). One ENTER and one EXIT line per NumericIndexWriter.writeCompleteSegment call (flush path and index-build path both call it).
+RULE sai wcs enter
+CLASS org.apache.cassandra.index.sai.disk.v1.bbtree.NumericIndexWriter
+METHOD writeCompleteSegment
+AT ENTRY
+IF TRUE
+DO traceln("WCS_ENTER t=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " alloc=" + stage4.Alloc.bytes() + " M=" + stage4.Alloc.maxPoints($0));
+ENDRULE
+
+RULE sai wcs exit
+CLASS org.apache.cassandra.index.sai.disk.v1.bbtree.NumericIndexWriter
+METHOD writeCompleteSegment
+AT EXIT
+IF TRUE
+DO traceln("WCS_EXIT t=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " alloc=" + stage4.Alloc.bytes() + " " + stage4.Alloc.attrs($!));
+ENDRULE

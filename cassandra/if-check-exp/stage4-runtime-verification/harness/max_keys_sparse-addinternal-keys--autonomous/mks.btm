@@ -1,0 +1,8 @@
+# Byteman rule for max_keys_sparse-addinternal-keys--autonomous (B3d amendment iii): the builder's own counter at every index build.
+RULE mks build entry
+CLASS org.apache.cassandra.index.sasi.disk.OnDiskIndexBuilder
+METHOD finish(org.apache.cassandra.index.sasi.disk.Descriptor, org.apache.cassandra.io.util.File)
+AT ENTRY
+IF true
+DO traceln("MKS_BUILD ms=" + System.currentTimeMillis() + " terms=" + $0.terms.size() + " est=" + $0.estimatedMemoryUse() + " mode=" + $0.mode + " file=" + $2.path())
+ENDRULE

@@ -1,0 +1,60 @@
+conf written /users/jason92/stage4-tmp/b34/c3/seednode/conf/cassandra.yaml; stage4 lines:
+cluster_name: stage4-sai
+num_tokens: 1
+endpoint_snitch: SimpleSnitch
+listen_address: 127.0.0.3
+rpc_address: 127.0.0.3
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.3:7000"
+data_file_directories:
+    - /users/jason92/stage4-tmp/b34/c3/seednode/data
+commitlog_directory: /users/jason92/stage4-tmp/b34/c3/seednode/commitlog
+hints_directory: /users/jason92/stage4-tmp/b34/c3/seednode/hints
+saved_caches_directory: /users/jason92/stage4-tmp/b34/c3/seednode/saved_caches
+cdc_raw_directory: /users/jason92/stage4-tmp/b34/c3/seednode/cdc_raw
+NODE_UP pid=995145 startup_s=77.2
+$ tools/bin/cassandra-stress user profile=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous/profile-seed.yaml "ops(insert=1)" n=5000000 no-warmup -rate threads=64 -no
+  0.5,     0.9,     1.3,     2.9,     9.2,  104.0,  0.57560,      0,      0,       0,       0,       0,       0
+total,                                               5000000,  119744,  119744,  119744,     0.6,     0.5,     0.9,     1.4,    40.7,    44.8,  104.5,  0.55413,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :   47,833 op/s  [insert: 47,833 op/s]
+Partition rate            :   47,833 pk/s  [insert: 47,833 pk/s]
+Row rate                  :   47,833 row/s [insert: 47,833 row/s]
+Latency mean              :    1.3 ms [insert: 1.3 ms]
+Latency median            :    0.5 ms [insert: 0.5 ms]
+Latency 95th percentile   :    1.1 ms [insert: 1.1 ms]
+Latency 99th percentile   :    2.1 ms [insert: 2.1 ms]
+Latency 99.9th percentile :   31.5 ms [insert: 31.5 ms]
+Latency max               : 10024.4 ms [insert: 10,024.4 ms]
+Total partitions          :  5,000,000 [insert: 5,000,000]
+Total errors              :          0 [insert: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:01:44
+
+END
+$ bin/nodetool -p 7399 flush
+
+$ bin/nodetool -p 7399 compact ks t3
+
+$ bin/nodetool -p 7399 tablestats ks.t3
+Total number of tables: 1
+----------------
+Keyspace: ks
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 5000000
+	Write Latency: 0.3822306434 ms
+	Pending Flushes: 0
+		Table: t3
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 3.814GiB
+		Space used (live): 4095114938

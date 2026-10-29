@@ -1,0 +1,51 @@
+PASS unit: every run exited and printed a RESULT (27 grid + 5 pair) n=32
+PASS unit: cap=-1 L=1MiB identical in 3 repetitions segments=458 peak=1050108
+PASS unit: cap=-1 L=64MiB identical in 3 repetitions segments=8 peak=67109408
+PASS unit: cap=-1 L=1024MiB identical in 3 repetitions segments=1 peak=476329976
+PASS unit: cap=1000 L=1MiB identical in 3 repetitions segments=458 peak=1050108
+PASS unit: cap=1000 L=64MiB identical in 3 repetitions segments=200 peak=2402156
+PASS unit: cap=1000 L=1024MiB identical in 3 repetitions segments=200 peak=2402156
+PASS unit: cap=100 L=1MiB identical in 3 repetitions segments=1981 peak=244412
+PASS unit: cap=100 L=64MiB identical in 3 repetitions segments=1981 peak=244412
+PASS unit: cap=100 L=1024MiB identical in 3 repetitions segments=1981 peak=244412
+PASS P1 default cap, L=1024 MiB: 1 segment, 200000 rows 1
+FAIL P2 [pre-registered 3..5] default cap, L=64 MiB: segments measured 8
+FAIL P3 [pre-registered 150..400] default cap, L=1 MiB: segments measured 458
+PASS P4 default cap, L=1 MiB: peak limiter bytes in [L, 1.1 L + 4 MiB] peak=1050108 limit=1048576
+PASS P4 default cap, L=64 MiB: peak limiter bytes in [L, 1.1 L + 4 MiB] peak=67109408 limit=67108864
+PASS P4b default cap, L=1024 MiB: peak grows with N (476,329,976 B ~ 2.4 KB/row), below the limit 476329976
+PASS P5 cap=1000, L=64 MiB: exactly 200 segments, max 1001 rows, last 801 200/1001/801
+PASS P5b cap=1000, L=64 MiB: peak bytes far below L (< 10% of L; B2f gives no number for "far below") 2402156
+FAIL P6 [pre-registered exactly 1980] cap=100, L=64 MiB: segments measured 1981 (ceil(200000/101) = 1981)
+PASS P5 cap=1000, L=1024 MiB: exactly 200 segments, max 1001 rows, last 801 200/1001/801
+PASS P5b cap=1000, L=1024 MiB: peak bytes far below L (< 10% of L; B2f gives no number for "far below") 2402156
+FAIL P6 [pre-registered exactly 1980] cap=100, L=1024 MiB: segments measured 1981 (ceil(200000/101) = 1981)
+PASS P6b cap=100 segments = ceil(200000/101) = 1981 (the correct arithmetic) and max rows 101 
+PASS B2g control: cap 1000/100 gives the same segment count for L=64 and 1024 (independent of L) 
+PASS B2g: at L=1 MiB the byte limit binds before cap 1000 (same as default cap) 
+PASS boundary: default cap, rows 0 and cap -> 1 segment 
+PASS boundary: default cap, rows 0 and cap+1 -> 2 segments 
+PASS boundary: cap 1000, rows 0 and 1000 -> 1 segment; 0 and 1001 -> 2 
+PASS gap: rows 0 and 1073741823 -> 2 segments 
+NOTE cluster S16: segments=829 rowsMax=4746 spanMax=4745 rowsTotal=3931031 segbufPeak=16MB heapSampledPeak=2896MB heapAfterGcPeak=496MB globalLimitLines=828
+NOTE cluster S256a: segments=52 rowsMax=75981 spanMax=75980 rowsTotal=3931031 segbufPeak=256MB heapSampledPeak=3984MB heapAfterGcPeak=4063MB globalLimitLines=51
+NOTE cluster S256b: segments=52 rowsMax=75981 spanMax=75980 rowsTotal=3931031 segbufPeak=256MB heapSampledPeak=3783MB heapAfterGcPeak=4076MB globalLimitLines=51
+NOTE cluster S1024: segments=13 rowsMax=303210 spanMax=303209 rowsTotal=3931031 segbufPeak=1024MB heapSampledPeak=3888MB heapAfterGcPeak=4067MB globalLimitLines=12
+NOTE cluster V1024: segments=394 rowsMax=10001 spanMax=10000 rowsTotal=3931031 segbufPeak=34MB heapSampledPeak=2939MB heapAfterGcPeak=533MB globalLimitLines=0
+PASS C3 default constant: segments strictly decrease 16 > 256 > 1024 MiB 829 > 52 > 13
+FAIL C3 [pre-registered] segments at 1024 MiB in 3..8 measured 13
+FAIL C3 [pre-registered] segments at 256 MiB in 15..40 measured 52
+FAIL C3 [pre-registered] segments at 16 MiB in 200..600 measured 829
+PASS C3 no segment spans more than 5,000,000 row ids (never split at the row cap) 
+PASS C3 [pre-registered] Global-limit lines present at all three limits (segments - 1) 828/51/12
+FAIL C3 [pre-registered] small constant (10000) at 1024 MiB: exactly 500 segments, max 10001 rows, last 9501 segments=394 rowsMax=10001
+PASS C3 [pre-registered] peak SegmentBufferSpaceUsedBytes at 16 MiB < 40 MiB and at 1024 MiB > 400 MiB 16.0 MiB / 1024.0 MiB
+PASS C3 [pre-registered] heap-after-GC peak at 1024 MiB exceeds that at 16 MiB by >= 300 MB 4067 vs 496 MB
+PASS control: small constant at 1024 MiB: peak buffer far below the default constant at 1024 MiB 33.7 vs 1024.0 MiB
+PASS jar check: variant run shows LAST_VALID_SEGMENT_ROW_ID = 10000l; std runs show the default 
+PASS [post-hoc, NOT pre-registered] small constant: segments = ceil(measured rows / 10001) and rows per segment 10001 except the last rows=3931031 -> ceil = 394, measured 394 segments
+NOTE the pre-registered 500 assumed 5,000,000 indexed rows; the seed holds 3931031 (cassandra-stress user mode revisits ids: see results defect D2)
+NOTE S16: rows per segment 1939..4746, bytes per row at the limit ~ 3536
+NOTE S256a: rows per segment 56243..75981, bytes per row at the limit ~ 3533
+NOTE S1024: rows per segment 292558..303210, bytes per row at the limit ~ 3541
+SUMMARY pass=33 fail=8

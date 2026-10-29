@@ -1,0 +1,76 @@
+
+--- c4-WF-v1024  [variant v1024 workload WF (64 thr, hot, 1 rows x 4096 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=1024  load 122 s: 1045650 requests, 1045650 rows (4084.6 MiB payload) 35.1 MB/s, errors 0
+  flushes of ks.t: 61 (59 used): ops/flush median 17374, serialized median 68.6 MiB, on-heap at Writing median 171.8 MiB max 210.1 MiB; Enqueuing flush n=61 reasons ['MEMTABLE_LIMIT'] on-heap median 171.3 MiB
+  S4: attempts 2629870 fails 1583955 (60.2%) failHeap 424.7 MiB | locked attempts 2619821 fails 1579438 | tracker calls 4517 | flips 61 | TRACE contention lines 61 (61 of 61 partitions)
+  JMX (136 samples): MemtableOnHeapSize peak 169.7 MiB p95 169.0 MiB p50 167.5 MiB; AllMemtablesHeapSize peak 169.6 MiB; off-heap peak 0.0 MiB; switch count 61; heap used peak 7901 MiB; LiveDiskSpaceUsed 4030.1 MiB
+  GC: 17 pauses, 2 Full, allocation volume 36824 MB (301.5 MB/s), heap after GC max 8172 MB, max pause 135 ms | threads: BLOCKED 0, AtomicBTreePartition frames 2244 | min free disk 48 GB, max data+commitlog 5802 MiB
+
+--- c4-WF-v10m  [variant v10m workload WF (64 thr, hot, 1 rows x 4096 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 121 s: 1038831 requests, 1038831 rows (4057.9 MiB payload) 35.3 MB/s, errors 0
+  flushes of ks.t: 62 (60 used): ops/flush median 17095, serialized median 67.5 MiB, on-heap at Writing median 172.0 MiB max 179.4 MiB; Enqueuing flush n=61 reasons ['MEMTABLE_LIMIT'] on-heap median 171.2 MiB
+  S4: attempts 2647827 fails 1608727 (60.8%) failHeap 431.4 MiB | locked attempts 1377621 fails 869853 | tracker calls 738874 | flips 62 | TRACE contention lines 62 (62 of 62 partitions)
+  JMX (138 samples): MemtableOnHeapSize peak 169.2 MiB p95 169.2 MiB p50 167.4 MiB; AllMemtablesHeapSize peak 169.2 MiB; off-heap peak 0.0 MiB; switch count 62; heap used peak 7821 MiB; LiveDiskSpaceUsed 4001.5 MiB
+  GC: 16 pauses, 2 Full, allocation volume 33605 MB (278.5 MB/s), heap after GC max 8171 MB, max pause 120 ms | threads: BLOCKED 0, AtomicBTreePartition frames 2237 | min free disk 48 GB, max data+commitlog 5813 MiB
+
+--- c4-WF-v1g  [variant v1g workload WF (64 thr, hot, 1 rows x 4096 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=1073741824  load 121 s: 1061771 requests, 1061771 rows (4147.5 MiB payload) 35.8 MB/s, errors 0
+  flushes of ks.t: 63 (61 used): ops/flush median 17168, serialized median 67.8 MiB, on-heap at Writing median 171.9 MiB max 183.5 MiB; Enqueuing flush n=62 reasons ['MEMTABLE_LIMIT'] on-heap median 171.2 MiB
+  S4: attempts 2705768 fails 1643732 (60.7%) failHeap 440.7 MiB | locked attempts 0 fails 0 | tracker calls 1643732 | flips 0 | TRACE contention lines 0 (0 of 0 partitions)
+  JMX (136 samples): MemtableOnHeapSize peak 170.0 MiB p95 170.0 MiB p50 167.7 MiB; AllMemtablesHeapSize peak 170.0 MiB; off-heap peak 0.0 MiB; switch count 63; heap used peak 8141 MiB; LiveDiskSpaceUsed 4091.1 MiB
+  GC: 17 pauses, 2 Full, allocation volume 36552 MB (300.9 MB/s), heap after GC max 8172 MB, max pause 137 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1548 | min free disk 48 GB, max data+commitlog 6413 MiB
+
+--- c4-WG-v1024  [variant v1024 workload WG (64 thr, perthread, 1 rows x 4096 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=1024  load 122 s: 1439032 requests, 1439032 rows (5621.2 MiB payload) 48.1 MB/s, errors 0
+  flushes of ks.t: 35 (33 used): ops/flush median 40947, serialized median 161.7 MiB, on-heap at Writing median 171.1 MiB max 187.3 MiB; Enqueuing flush n=34 reasons ['MEMTABLE_LIMIT'] on-heap median 170.8 MiB
+  S4: attempts 1439191 fails 0 (0.0%) failHeap 0.0 MiB | locked attempts 0 fails 0 | tracker calls 0 | flips 0 | TRACE contention lines 0 (0 of 0 partitions)
+  JMX (142 samples): MemtableOnHeapSize peak 170.2 MiB p95 170.2 MiB p50 169.7 MiB; AllMemtablesHeapSize peak 170.2 MiB; off-heap peak 0.0 MiB; switch count 35; heap used peak 7241 MiB; LiveDiskSpaceUsed 5545.3 MiB
+  GC: 14 pauses, 2 Full, allocation volume 35438 MB (289.3 MB/s), heap after GC max 8172 MB, max pause 122 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1920 | min free disk 45 GB, max data+commitlog 9490 MiB
+
+--- c4-WG-v10m  [variant v10m workload WG (64 thr, perthread, 1 rows x 4096 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 127 s: 1444633 requests, 1444633 rows (5643.1 MiB payload) 46.7 MB/s, errors 0
+  flushes of ks.t: 35 (33 used): ops/flush median 40946, serialized median 161.7 MiB, on-heap at Writing median 171.1 MiB max 213.4 MiB; Enqueuing flush n=34 reasons ['MEMTABLE_LIMIT'] on-heap median 170.8 MiB
+  S4: attempts 1444790 fails 0 (0.0%) failHeap 0.0 MiB | locked attempts 0 fails 0 | tracker calls 0 | flips 0 | TRACE contention lines 0 (0 of 0 partitions)
+  JMX (148 samples): MemtableOnHeapSize peak 170.1 MiB p95 170.1 MiB p50 169.8 MiB; AllMemtablesHeapSize peak 170.1 MiB; off-heap peak 0.0 MiB; switch count 35; heap used peak 8109 MiB; LiveDiskSpaceUsed 5566.1 MiB
+  GC: 17 pauses, 2 Full, allocation volume 36020 MB (284.2 MB/s), heap after GC max 8172 MB, max pause 150 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1542 | min free disk 45 GB, max data+commitlog 9124 MiB
+
+--- c4-WG-v1g  [variant v1g workload WG (64 thr, perthread, 1 rows x 4096 B) memtable_heap_space 512 MiB alloc heap_buffers 120 s]
+  valid=True  C=1073741824  load 122 s: 1448305 requests, 1448305 rows (5657.4 MiB payload) 48.6 MB/s, errors 0
+  flushes of ks.t: 35 (33 used): ops/flush median 40940, serialized median 161.7 MiB, on-heap at Writing median 171.1 MiB max 222.9 MiB; Enqueuing flush n=34 reasons ['MEMTABLE_LIMIT'] on-heap median 170.8 MiB
+  S4: attempts 1448462 fails 0 (0.0%) failHeap 0.0 MiB | locked attempts 0 fails 0 | tracker calls 0 | flips 0 | TRACE contention lines 0 (0 of 0 partitions)
+  JMX (144 samples): MemtableOnHeapSize peak 170.1 MiB p95 170.1 MiB p50 169.8 MiB; AllMemtablesHeapSize peak 170.1 MiB; off-heap peak 0.0 MiB; switch count 35; heap used peak 7661 MiB; LiveDiskSpaceUsed 5581.4 MiB
+  GC: 14 pauses, 2 Full, allocation volume 35184 MB (288.5 MB/s), heap after GC max 8172 MB, max pause 132 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1540 | min free disk 45 GB, max data+commitlog 9114 MiB
+
+--- c4-ctl1024  [variant v10m workload WF (64 thr, hot, 1 rows x 4096 B) memtable_heap_space 1024 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 135 s: 1285226 requests, 1285226 rows (5020.4 MiB payload) 39.1 MB/s, errors 0
+  flushes of ks.t: 39 (37 used): ops/flush median 33331, serialized median 131.6 MiB, on-heap at Writing median 342.7 MiB max 344.4 MiB; Enqueuing flush n=39 reasons ['MEMTABLE_LIMIT'] on-heap median 342.1 MiB
+  S4: attempts 3331147 fails 2045737 (61.4%) failHeap 548.5 MiB | locked attempts 2525924 fails 1586834 | tracker calls 458903 | flips 39 | TRACE contention lines 39 (39 of 39 partitions)
+  JMX (149 samples): MemtableOnHeapSize peak 339.4 MiB p95 339.4 MiB p50 338.3 MiB; AllMemtablesHeapSize peak 339.4 MiB; off-heap peak 0.0 MiB; switch count 39; heap used peak 7608 MiB; LiveDiskSpaceUsed 4952.5 MiB
+  GC: 20 pauses, 4 Full, allocation volume 46569 MB (345.9 MB/s), heap after GC max 8172 MB, max pause 121 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1365 | min free disk 46 GB, max data+commitlog 8418 MiB
+
+--- c4-ctl128  [variant v10m workload WF (64 thr, hot, 1 rows x 4096 B) memtable_heap_space 128 MiB alloc heap_buffers 120 s]
+  valid=True  C=10485760  load 120 s: 645009 requests, 645009 rows (2519.6 MiB payload) 22.0 MB/s, errors 0
+  flushes of ks.t: 139 (137 used): ops/flush median 4701, serialized median 18.6 MiB, on-heap at Writing median 43.8 MiB max 52.7 MiB; Enqueuing flush n=138 reasons ['MEMTABLE_LIMIT'] on-heap median 43.3 MiB
+  S4: attempts 1521056 fails 875560 (57.6%) failHeap 234.8 MiB | locked attempts 0 fails 0 | tracker calls 875560 | flips 0 | TRACE contention lines 0 (0 of 0 partitions)
+  JMX (134 samples): MemtableOnHeapSize peak 42.9 MiB p95 41.1 MiB p50 39.8 MiB; AllMemtablesHeapSize peak 42.4 MiB; off-heap peak 0.0 MiB; switch count 139; heap used peak 4154 MiB; LiveDiskSpaceUsed 2485.6 MiB
+  GC: 9 pauses, 0 Full, allocation volume 24400 MB (203.2 MB/s), heap after GC max 681 MB, max pause 87 ms | threads: BLOCKED 0, AtomicBTreePartition frames 1920 | min free disk 50 GB, max data+commitlog 4230 MiB
+
+=== group case 4, WF: constants v10m / v1g / v1024
+  ops_med      WF-v10m=1.71e+04 WF-v1g=1.717e+04 WF-v1024=1.737e+04  max/min=1.02 (<=1.3 flat)
+  onheap_med   WF-v10m=1.803e+08 WF-v1g=1.803e+08 WF-v1024=1.802e+08  max/min=1.00 (<=1.3 flat)
+  enq_on_med   WF-v10m=1.795e+08 WF-v1g=1.796e+08 WF-v1024=1.796e+08  max/min=1.00 (<=1.3 flat)
+  peak_on      WF-v10m=1.774e+08 WF-v1g=1.783e+08 WF-v1024=1.78e+08  max/min=1.00 (<=1.3 flat)
+  gc_alloc_mb  WF-v10m=3.36e+04 WF-v1g=3.655e+04 WF-v1024=3.682e+04  max/min=1.10 (<=1.3 flat)
+
+=== group case 4, WG: constants v10m / v1g / v1024
+  ops_med      WG-v10m=4.095e+04 WG-v1g=4.094e+04 WG-v1024=4.095e+04  max/min=1.00 (<=1.3 flat)
+  onheap_med   WG-v10m=1.794e+08 WG-v1g=1.794e+08 WG-v1024=1.794e+08  max/min=1.00 (<=1.3 flat)
+  enq_on_med   WG-v10m=1.791e+08 WG-v1g=1.791e+08 WG-v1024=1.791e+08  max/min=1.00 (<=1.3 flat)
+  peak_on      WG-v10m=1.784e+08 WG-v1g=1.783e+08 WG-v1024=1.785e+08  max/min=1.00 (<=1.3 flat)
+  gc_alloc_mb  WG-v10m=3.602e+04 WG-v1g=3.518e+04 WG-v1024=3.544e+04  max/min=1.02 (<=1.3 flat)
+
+=== group case 4, pool 128 / 512 / 1024 (WF, v10m)
+  enq_on_med   ctl128=4.541e+07 WF-v10m=1.795e+08 ctl1024=3.587e+08  max/min=7.90 (>1.3)
+  onheap_med   ctl128=4.595e+07 WF-v10m=1.803e+08 ctl1024=3.593e+08  max/min=7.82 (>1.3)
+  ops_med      ctl128=4701 WF-v10m=1.71e+04 ctl1024=3.333e+04  max/min=7.09 (>1.3)
+  peak_on      ctl128=4.499e+07 WF-v10m=1.774e+08 ctl1024=3.558e+08  max/min=7.91 (>1.3)

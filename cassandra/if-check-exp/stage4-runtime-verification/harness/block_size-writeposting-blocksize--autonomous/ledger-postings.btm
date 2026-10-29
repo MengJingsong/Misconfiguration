@@ -1,0 +1,8 @@
+# Stage-4 ledger (instrument only): one line per PostingsWriter construction with the length of deltaBuffer. Output on stdout (node started with -f).
+RULE stage4 postings writer constructed
+CLASS org.apache.cassandra.index.sai.disk.v1.postings.PostingsWriter
+METHOD <init>(org.apache.cassandra.index.sai.disk.io.IndexOutputWriter,int)
+AT EXIT
+IF TRUE
+DO traceln("PW " + $0.deltaBuffer.length + " " + Thread.currentThread().getName())
+ENDRULE

@@ -1,0 +1,57 @@
+ok   unit: 20 (N,validation,L) cells x3 reps = 60 lines
+ok   unit N=1000 v=false L=1: accepted x3
+ok   unit N=1000 v=false L=100: accepted x3
+ok   unit N=1000 v=false L=255: accepted x3
+ok   unit N=1000 v=false L=256: FSWriteError (OS), no dir
+ok   unit N=1000 v=false L=300: FSWriteError (OS), no dir
+ok   unit N=1000 v=true L=1: accepted x3
+ok   unit N=1000 v=true L=100: accepted x3
+ok   unit N=1000 v=true L=255: accepted x3
+ok   unit N=1000 v=true L=256: IAE with line-2187 text, no dir
+ok   unit N=1000 v=true L=300: IAE with line-2187 text, no dir
+ok   unit N=100000 v=false L=1: accepted x3
+ok   unit N=100000 v=false L=100: accepted x3
+ok   unit N=100000 v=false L=255: accepted x3
+ok   unit N=100000 v=false L=256: FSWriteError (OS), no dir
+ok   unit N=100000 v=false L=300: FSWriteError (OS), no dir
+ok   unit N=100000 v=true L=1: accepted x3
+ok   unit N=100000 v=true L=100: accepted x3
+ok   unit N=100000 v=true L=255: accepted x3
+ok   unit N=100000 v=true L=256: IAE with line-2187 text, no dir
+ok   unit N=100000 v=true L=300: IAE with line-2187 text, no dir
+ok   unit N=1000 v=false: snapFileBytes/manifest/schema identical in all 9 reps of L=1,100,255
+ok   unit N=1000 v=false: physical delta across L=1,100,255 range 0 B (<= 64 KiB), values [1105]
+     heap mean delta N=1000 v=false: L1=310048 L100=279619 L255=290456 ; all reps range 589904
+ok   unit N=1000 v=false: |mean heap(255)-mean heap(1)| = 19592 B < 1 MiB
+ok   unit N=1000 v=true: snapFileBytes/manifest/schema identical in all 9 reps of L=1,100,255
+ok   unit N=1000 v=true: physical delta across L=1,100,255 range 0 B (<= 64 KiB), values [1105]
+     heap mean delta N=1000 v=true: L1=-186656 L100=-278667 L255=-91883 ; all reps range 279808
+ok   unit N=1000 v=true: |mean heap(255)-mean heap(1)| = 94773 B < 1 MiB
+ok   unit N=100000 v=false: snapFileBytes/manifest/schema identical in all 9 reps of L=1,100,255
+ok   unit N=100000 v=false: physical delta across L=1,100,255 range 0 B (<= 64 KiB), values [1105]
+     heap mean delta N=100000 v=false: L1=-82659 L100=456 L255=744 ; all reps range 249672
+ok   unit N=100000 v=false: |mean heap(255)-mean heap(1)| = 83403 B < 1 MiB
+ok   unit N=100000 v=true: snapFileBytes/manifest/schema identical in all 9 reps of L=1,100,255
+ok   unit N=100000 v=true: physical delta across L=1,100,255 range 0 B (<= 64 KiB), values [1105]
+     heap mean delta N=100000 v=true: L1=216 L100=440 L255=776291 ; all reps range 2327128
+ok   unit N=100000 v=true: |mean heap(255)-mean heap(1)| = 776075 B < 1 MiB
+ok   unit control v=false: snapshot bytes 2571365 (100k) vs 31688 (1k) = 81.1x
+ok   unit control v=true: snapshot bytes 2571365 (100k) vs 31688 (1k) = 81.1x
+cluster: 9 SNAP lines (9 in the designed run)
+ok   cluster N=200k L=1: nodetool rc 0
+ok   cluster N=200k L=100: nodetool rc 0
+ok   cluster N=200k L=255: nodetool rc 0
+ok   cluster N=200k L=256 (v=true): nonzero rc, no snapshot dir
+ok   cluster N=200k: snapFileBytes/manifest/schema identical for L=1,100,255 (50797538 B)
+ok   cluster N=200k: physical delta identical for L=1,100,255 (2047 B)
+ok   cluster N=2M: snapFileBytes 507111470 and physical delta 2187 identical for L=100,255
+ok   cluster control: snapshot bytes 507111470 (2M) vs 50797538 (200k) = 10.0x
+ok   cluster validation=false: L=256 fails (no dir), L=255 succeeds
+ok   log.txt contains the line-2187 text (from the validation=true L=256 call)
+ok   log.txt contains the OS-level "Unable to create directory" error (validation=false L=256)
+ok   stress: Total errors 0 in both loads
+     listsnapshots N=200k L=1: ['a             keyspace1     standard1          1.01 KiB   48.44 MiB    2026-10-28T18:16:29.281Z                ']
+     listsnapshots N=200k L=100: ['a*100 keyspace1     standard1          1.01 KiB   48.44 MiB    2026-10-28T18:17:05.387Z                ']
+     listsnapshots N=200k L=255: ['a*255 keyspace1     counter1           1015 bytes 1015 bytes   2026-10-28T18:17:41.540Z                ']
+rc-derived heap deltas (B), main run: {('warmup', '100'): '128000', ('N200k', '1'): '-52224', ('N200k', '100'): '-1024', ('N200k', '255'): '19456', ('N200k', '256'): '11264', ('N2M', '100'): '0', ('N2M', '255'): '1489920', ('valfalse', '256'): '-503144448', ('valfalse', '255'): '72704'}
+RESULT ALL OK

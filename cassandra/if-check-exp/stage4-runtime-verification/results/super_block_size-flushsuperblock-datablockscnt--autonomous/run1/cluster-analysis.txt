@@ -1,0 +1,24 @@
+arm        rows    Data.db         SI   compactS postGCMiB   sampMiB    segs OnDiskIndexBuilder loaded from
+o8c64    5000000   84384923  537376860        116       844      1846     137 file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+o64c64   5000000   84483550  537376860        107       800      1913      18 file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+o512c64  5000000   84479628  537376860        123      1941      1911       3 file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+o64c16   5000000   84460231  545616708        105       327      1909      17 file:/users/jason92/s4-b34/node-sb/conf/
+o64c256  5000000   84507545  535376292        111       375      1874      18 file:/users/jason92/s4-b34/node-sb/conf/
+pfx64    5000000   84439839  496465360         94      1952      1890      18 file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+EXPECTED o8c64 ran, compacted to one sstable, no AssertionError/OutOfMemoryError in system.log: one=True bad=0  PASS
+EXPECTED o64c64 ran, compacted to one sstable, no AssertionError/OutOfMemoryError in system.log: one=True bad=0  PASS
+EXPECTED o512c64 ran, compacted to one sstable, no AssertionError/OutOfMemoryError in system.log: one=True bad=0  PASS
+EXPECTED o64c16 ran, compacted to one sstable, no AssertionError/OutOfMemoryError in system.log: one=True bad=0  PASS
+EXPECTED o64c256 ran, compacted to one sstable, no AssertionError/OutOfMemoryError in system.log: one=True bad=0  PASS
+EXPECTED pfx64 ran, compacted to one sstable, no AssertionError/OutOfMemoryError in system.log: one=True bad=0  PASS
+EXPECTED o64c16: OnDiskIndexBuilder loaded from /conf/: file:/users/jason92/s4-b34/node-sb/conf/  PASS
+EXPECTED o64c256: OnDiskIndexBuilder loaded from /conf/: file:/users/jason92/s4-b34/node-sb/conf/  PASS
+EXPECTED o64c64: OnDiskIndexBuilder loaded from /build/: file:/users/jason92/s4-b34/c/build/apache-cassandra-5.0.9-SNAPSHOT.jar  PASS
+EXPECTED B3f: segments fall as the option rises (8 > 64 > 512): 137 18 3  PASS
+EXPECTED B3f: peak post-collection heap rises with the option (8 < 64 < 512): 844 800 1941 MiB  FAIL
+EXPECTED B3f: heap does not move with the constant (range over constants < 0.25 x range over options): constants [327, 800, 375] range 473; options range 1141  FAIL
+EXPECTED B3f: SI bytes nearly flat across constants (within 5 percent): [545616708, 537376860, 535376292] spread 1.91%  PASS
+INFO segments across constants at option 64: [17, 18, 18]
+INFO SI bytes across options 8/64/512 (segment-count overhead only): [537376860, 537376860, 537376860]
+INFO PREFIX control: SI 496465360 vs SPARSE 537376860, postGC 1952 vs 800 MiB, segments 18 vs 18
+SUMMARY expectations pass=11 fail=2

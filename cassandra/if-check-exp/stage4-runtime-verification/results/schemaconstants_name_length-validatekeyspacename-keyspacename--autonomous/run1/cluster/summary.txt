@@ -1,0 +1,16 @@
+summary 2026-10-28 13:41:06 run1 case ks: N=200 rows=10000 short L=3 long L=48 heap 2G
+arm A1 L=3 heap_used_after_gc=214664088 histo_total=214713208 du_data=49293477 du_commitlog=67108864 commitlog_files=2 longest_dir_name=63 dirs=454 rss_kb=3065428 write_rows_per_s=22737 failed=0 ddl_s=275.7 errors_in_log=0 oom=1
+arm A2 L=3 heap_used_after_gc=197798504 histo_total=197847624 du_data=49293976 du_commitlog=67108864 commitlog_files=2 longest_dir_name=63 dirs=454 rss_kb=3089876 write_rows_per_s=22567 failed=0 ddl_s=276.2 errors_in_log=0 oom=1
+arm B1 L=48 heap_used_after_gc=210493792 histo_total=210542952 du_data=49347406 du_commitlog=67108864 commitlog_files=2 longest_dir_name=63 dirs=454 rss_kb=3058752 write_rows_per_s=21788 failed=0 ddl_s=275.8 errors_in_log=0 oom=1
+reject B1 len=49 rejected=True class=InvalidRequest message=Error from server: code=2200 [Invalid query] message="Keyspace name must not be more than 48 characters long (got 49 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")"
+arm B2 L=48 heap_used_after_gc=210459200 histo_total=210509024 du_data=49339392 du_commitlog=67108864 commitlog_files=2 longest_dir_name=63 dirs=454 rss_kb=3056584 write_rows_per_s=22567 failed=0 ddl_s=275.8 errors_in_log=0 oom=1
+reject B2 len=49 rejected=True class=InvalidRequest message=Error from server: code=2200 [Invalid query] message="Keyspace name must not be more than 48 characters long (got 49 characters for "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")"
+control C256 memtable_heap_space=256MiB rows=3000000 samples=182 peak_all_memtables_heap=89445598 peak_heap_used=1742297216 flushes=49 errors_in_log=0
+control C64 memtable_heap_space=64MiB rows=3000000 samples=180 peak_all_memtables_heap=22343119 peak_heap_used=1557000240 flushes=110 errors_in_log=0
+EXPECTED histo_total_bytes: long-arm mean minus short-arm mean = +4245572 B (name-byte budget 450000 B, rep spread 16865584 B): within noise/budget
+EXPECTED heap_used_after_gc: long-arm mean minus short-arm mean = +4245200 B (name-byte budget 450000 B, rep spread 16865584 B): within noise/budget
+EXPECTED du_data: long minus short = +49672 B = 0.101 % of data size: within 1 %
+EXPECTED B1 49-character name rejected with "Keyspace name must not be more than 48 characters long": OK
+EXPECTED B2 49-character name rejected with "Keyspace name must not be more than 48 characters long": OK
+EXPECTED control B: peak AllMemtablesHeapSize 64MiB=22343119 256MiB=89445598 (ratio 0.25, need <= 0.5); flushes 64MiB=110 256MiB=49 (need 64 > 256): moves clearly
+daemons left: []

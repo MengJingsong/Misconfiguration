@@ -1,0 +1,86 @@
+PASS  v10m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v10m-all.out latch 
+PASS  v10m-all.out burst w=1 calls=10286 in [10283,10291] 
+PASS  v10m-all.out burst w=1024 calls=10260 in [10257,10265] 
+PASS  v10m-all.out burst w=102400 calls=103 in [99,107] 
+PASS  v10m-all.out burst w=1048576 calls=10 in [7,15] 
+PASS  v10m-all.out burst w=1310720 calls=8 in [5,13] 
+PASS  v10m-all.out burst w=10484736 calls=2 in [-2,6] 
+PASS  v10m-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v10m-all.out control offheap_objects 8 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v10m-all.out cont c1: contended ownsOn min 6051528 > single 3083464 (S2) spread 6051528..7149792
+PASS  v10m-all.out cont c1o: contended ownsOff min 4822092 > single 1056000 (S2) spread 4822092..6245316
+PASS  v10m-all.out cont c3: contended ownsOn min 214060872 > single 63188400 (S2) spread 214060872..253515880
+PASS  v1g-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v1g-all.out latch 
+PASS  v1g-all.out burst w=1 calls=1049324 in [1049320,1049328] 
+PASS  v1g-all.out burst w=1024 calls=1049464 in [1049461,1049469] 
+PASS  v1g-all.out burst w=102400 calls=10486 in [10482,10490] 
+PASS  v1g-all.out burst w=1048576 calls=1025 in [1021,1029] 
+PASS  v1g-all.out burst w=134217728 calls=8 in [5,13] 
+PASS  v1g-all.out burst w=1073740800 calls=2 in [-2,6] 
+PASS  v1g-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v1g-all.out control offheap_objects 8 MiB first clean at 0.500 x limit 
+PASS  v1g-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v1g-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v1g-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v1g-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v1g-all.out cont c1: contended ownsOn min 6678760 > single 3083464 (S2) spread 6678760..7861208
+PASS  v1g-all.out cont c1o: contended ownsOff min 6401604 > single 1056000 (S2) spread 6401604..6818196
+PASS  v1g-all.out cont c3: contended ownsOn min 182077528 > single 63188400 (S2) spread 182077528..402816096
+PASS  v1m-all.out direct: ret true exactly when ceil(w/1024) >= OFFSET or w >= C (12 rows) []
+PASS  v1m-all.out latch 
+PASS  v1m-all.out burst w=1 calls=1047 in [1043,1051] 
+PASS  v1m-all.out burst w=1024 calls=1028 in [1025,1033] 
+PASS  v1m-all.out burst w=102400 calls=11 in [7,15] 
+PASS  v1m-all.out burst w=1048576 calls=1 in [-2,6] 
+PASS  v1m-all.out burst w=131072 calls=8 in [5,13] 
+PASS  v1m-all.out burst w=1047552 calls=2 in [-2,6] 
+PASS  v1m-all.out control heap_buffers 8 MiB first clean at 0.501 x limit 
+PASS  v1m-all.out control offheap_objects 8 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control unslabbed_heap_buffers 8 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control offheap_objects 32 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out control unslabbed_heap_buffers 32 MiB first clean at 0.500 x limit 
+PASS  v1m-all.out cont c1: contended ownsOn min 6454760 > single 3083464 (S2) spread 6454760..7272376
+PASS  v1m-all.out cont c1o: contended ownsOff min 5427840 > single 1056000 (S2) spread 5427840..5878092
+PASS  v1m-all.out cont c3: contended ownsOn min 244143668 > single 63188400 (S2) spread 244143668..364606180
+PASS  unit builds c1: contended-owns medians {'v1g': 7173856, 'v10m': 6839024, 'v1m': 6813248} differ by 360608 vs larger repeat spread 1182448 
+NOTE  unit builds c1o: contended-owns medians {'v1g': 6713388, 'v10m': 4847568, 'v1m': 5731572} differ by 1865820 vs larger repeat spread 1423224 
+PASS  unit builds c3: contended-owns medians {'v1g': 245257912, 'v10m': 220156100, 'v1m': 262232620} differ by 42076520 vs larger repeat spread 220738568 
+PASS  cluster cells with logs: 14 of 14 
+PASS  valid cell c3-WD-v10m-r1 (S5) errors 0/38694, flushes used 142, attempts 437753, C=10485760, flips 144, fails 398572
+PASS  valid cell c3-WD-v10m-r2 (S5) errors 0/38357, flushes used 158, attempts 483790, C=10485760, flips 160, fails 444893
+PASS  valid cell c3-WD-v1g-r1 (S5) errors 0/42651, flushes used 147, attempts 446548, C=1073741824, flips 0, fails 403405
+PASS  valid cell c3-WD-v1g-r2 (S5) errors 0/38188, flushes used 154, attempts 477803, C=1073741824, flips 0, fails 439089
+PASS  valid cell c3-WD-v1m-r1 (S5) errors 0/39876, flushes used 154, attempts 477095, C=1048576, flips 156, fails 436689
+PASS  valid cell c3-WD-v1m-r2 (S5) errors 0/38035, flushes used 146, attempts 446422, C=1048576, flips 147, fails 407891
+FAIL  valid cell c3-WE-v10m-r1 (S5) errors 48200/82, flushes used 0, attempts 1044, C=10485760, flips 3, fails 859
+FAIL  valid cell c3-WE-v10m-r2 (S5) errors 46823/69, flushes used 0, attempts 1040, C=10485760, flips 3, fails 868
+FAIL  valid cell c3-WE-v1g-r1 (S5) errors 40559/81, flushes used 0, attempts 1069, C=1073741824, flips 0, fails 885
+FAIL  valid cell c3-WE-v1g-r2 (S5) errors 39975/72, flushes used 0, attempts 1017, C=1073741824, flips 0, fails 842
+FAIL  valid cell c3-WE-v1m-r1 (S5) errors 48114/79, flushes used 0, attempts 1064, C=1048576, flips 3, fails 881
+FAIL  valid cell c3-WE-v1m-r2 (S5) errors 47598/72, flushes used 0, attempts 1061, C=1048576, flips 3, fails 886
+PASS  valid cell c3-ctl128 (S5) errors 0/26129, flushes used 242, attempts 234657, C=10485760, flips 229, fails 207766
+PASS  valid cell c3-single (S5) errors 0/68609, flushes used 30, attempts 68785, C=1048576, flips 0, fails 0
+NOTE  case3 WD constants ops medians {'v1m': 15600.0, 'v10m': 15216.0, 'v1g': 16240.0} ratio 1.07 -> FLAT (<=1.3) 
+NOTE  case3 WD constants onheap medians {'v1m': 201757818.9, 'v10m': 201759391.7, 'v1g': 201322659.8} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  case3 WD constants enq medians {'v1m': 179928301.6, 'v10m': 179911000.1, 'v1g': 179904184.3} ratio 1.00 -> FLAT (<=1.3) 
+NOTE  regime WD v1m: flips [156, 147] fails [436689, 407891] 
+NOTE  regime WD v10m: flips [144, 160] fails [398572, 444893] 
+NOTE  regime WD v1g: flips [0, 0] fails [403405, 439089] 
+NOTE  case3 WE constants ops: missing data {'v1m': None, 'v10m': None, 'v1g': None} 
+NOTE  case3 WE constants onheap: missing data {'v1m': None, 'v10m': None, 'v1g': None} 
+NOTE  case3 WE constants enq: missing data {'v1m': None, 'v10m': None, 'v1g': None} 
+NOTE  regime WE v1m: flips [3, 3] fails [881, 886] 
+NOTE  regime WE v10m: flips [3, 3] fails [859, 868] 
+NOTE  regime WE v1g: flips [0, 0] fails [885, 842] 
+NOTE  case3 pool 128 vs 512 (WD v10m) enq medians {'128': 45425360.9, '512': 179911000.1} ratio 3.96 -> ratio >1.3, order 128<512 
+NOTE  case3 pool 128 vs 512 (WD v10m) onheap medians {'128': 64914718.7, '512': 201759391.7} ratio 3.11 -> ratio >1.3, order 128<512 
+PASS  single-thread cell: fails 0 flips 0 
+
+TALLY: 63 PASS, 6 FAIL, 15 NOTE

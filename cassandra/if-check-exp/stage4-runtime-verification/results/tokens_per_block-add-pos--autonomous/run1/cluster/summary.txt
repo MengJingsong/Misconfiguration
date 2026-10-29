@@ -1,0 +1,80 @@
+CMD all case tpb start 2026-10-28 19:13:51 MDT; harness md5 2ad30f055b0e ed7873944e3b
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; memtable_heap_space: 2048MiB ; memtable_offheap_space: 2048MiB
+node up after 48 s
+SEED rows 500000 in 21 s
+SEED loaded 500000 rows in 21 s
+SEED sstables: -rw-r--r-- 1 jason92 misconfiguration 14842131 Oct 28 19:15 /users/jason92/s4-b34/cl/tpb/node/data/sasi/t-1dcb3f30d33611f1a5f063575860cdf4/nb-2-big-Data.db
+SEED copied to /users/jason92/s4-b34/seeds/sasi-500000; du 23466260 B; daemons left: none
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; memtable_heap_space: 2048MiB ; memtable_offheap_space: 2048MiB
+node up after 48 s
+SEED rows 500000 in 20 s
+SEED rows 1000000 in 35 s
+SEED loaded 1000000 rows in 35 s
+SEED sstables: -rw-r--r-- 1 jason92 misconfiguration 29916220 Oct 28 19:16 /users/jason92/s4-b34/cl/tpb/node/data/sasi/t-55a0eae0d33611f19195c56508da80be/nb-2-big-Data.db
+SEED copied to /users/jason92/s4-b34/seeds/sasi-1000000; du 46753119 B; daemons left: none
+ARM S-1M start 2026-10-28 19:17:15 MDT: build base (/users/jason92/s4-b34/base), rows 1000000, extras {'opt': 1024}, heap 1G
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sasi_indexes_enabled: true
+node up after 12 s
+CREATE c_idx (CONTAINS, option 1024) rc=0 after 4 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX c_idx build complete after 13 s; files [('nb-2-big-SI_c_idx.db', 16609304)]; temp-segment files seen 1: ['nb-2-big-SI_c_idx.db']
+GAUGES S-1M c: {"samples": 26, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 600190976}
+VERIFY c_idx: count=1000000 expected 1000000 OK
+CREATE u_idx (PREFIX, option 1024) rc=0 after 2 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX u_idx build complete after 24 s; files [('nb-2-big-SI_u_idx.db', 125853952)]; temp-segment files seen 1: ['nb-2-big-SI_u_idx.db']
+GAUGES S-1M u: {"samples": 39, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 853992536}
+VERIFY u_idx: count=1 expected 1 OK
+ERROR lines in system.log: 0
+ARM S-1M STOPPED: daemons left: none
+ARM S-500k start 2026-10-28 19:18:59 MDT: build base (/users/jason92/s4-b34/base), rows 500000, extras {'opt': 1024}, heap 1G
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sasi_indexes_enabled: true
+node up after 12 s
+CREATE c_idx (CONTAINS, option 1024) rc=0 after 4 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX c_idx build complete after 8 s; files [('nb-2-big-SI_c_idx.db', 8319000)]; temp-segment files seen 1: ['nb-2-big-SI_c_idx.db']
+GAUGES S-500k c: {"samples": 17, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 528306688}
+VERIFY c_idx: count=500000 expected 500000 OK
+CREATE u_idx (PREFIX, option 1024) rc=0 after 2 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX u_idx build complete after 11 s; files [('nb-2-big-SI_u_idx.db', 62935192)]; temp-segment files seen 1: ['nb-2-big-SI_u_idx.db']
+GAUGES S-500k u: {"samples": 21, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 878056960}
+VERIFY u_idx: count=1 expected 1 OK
+ERROR lines in system.log: 0
+ARM S-500k STOPPED: daemons left: none
+ARM T124-1M start 2026-10-28 19:20:07 MDT: build v-tpb124 (/users/jason92/s4-b34/v-tpb124), rows 1000000, extras {'opt': 1024}, heap 1G
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sasi_indexes_enabled: true
+node up after 13 s
+CREATE c_idx (CONTAINS, option 1024) rc=0 after 4 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX c_idx build complete after 13 s; files [('nb-2-big-SI_c_idx.db', 33325080)]; temp-segment files seen 1: ['nb-2-big-SI_c_idx.db']
+GAUGES T124-1M c: {"samples": 26, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 619312640}
+VERIFY c_idx: count=1000000 expected 1000000 OK
+CREATE u_idx (PREFIX, option 1024) rc=0 after 2 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX u_idx build complete after 23 s; files [('nb-2-big-SI_u_idx.db', 125853952)]; temp-segment files seen 1: ['nb-2-big-SI_u_idx.db']
+GAUGES T124-1M u: {"samples": 37, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 908248192}
+VERIFY u_idx: count=1 expected 1 OK
+ERROR lines in system.log: 0
+ARM T124-1M STOPPED: daemons left: none
+ARM T124-500k start 2026-10-28 19:21:50 MDT: build v-tpb124 (/users/jason92/s4-b34/v-tpb124), rows 500000, extras {'opt': 1024}, heap 1G
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sasi_indexes_enabled: true
+node up after 12 s
+CREATE c_idx (CONTAINS, option 1024) rc=0 after 4 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX c_idx build complete after 8 s; files [('nb-2-big-SI_c_idx.db', 16674840)]; temp-segment files seen 1: ['nb-2-big-SI_c_idx.db']
+GAUGES T124-500k c: {"samples": 17, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 520093696}
+VERIFY c_idx: count=500000 expected 500000 OK
+CREATE u_idx (PREFIX, option 1024) rc=0 after 2 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX u_idx build complete after 11 s; files [('nb-2-big-SI_u_idx.db', 62935192)]; temp-segment files seen 1: ['nb-2-big-SI_u_idx.db']
+GAUGES T124-500k u: {"samples": 21, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 996194304}
+VERIFY u_idx: count=1 expected 1 OK
+ERROR lines in system.log: 0
+ARM T124-500k STOPPED: daemons left: none
+ARM ctl-opt16 start 2026-10-28 19:22:58 MDT: build base (/users/jason92/s4-b34/base), rows 1000000, extras {'opt': 16}, heap 1G
+YAML tail: cluster_name: stage4-tpb ; data_file_directories: [/users/jason92/s4-b34/cl/tpb/node/data] ; commitlog_directory: /users/jason92/s4-b34/cl/tpb/node/commitlog ; hints_directory: /users/jason92/s4-b34/cl/tpb/node/hints ; saved_caches_directory: /users/jason92/s4-b34/cl/tpb/node/saved_caches ; cdc_raw_directory: /users/jason92/s4-b34/cl/tpb/node/cdc_raw ; autocompaction_on_startup_enabled: false ; native_transport_timeout: 300s ; read_request_timeout: 300s ; range_request_timeout: 300s ; write_request_timeout: 60s ; sasi_indexes_enabled: true
+node up after 12 s
+CREATE c_idx (CONTAINS, option 16) rc=0 after 4 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX c_idx build complete after 13 s; files [('nb-2-big-SI_c_idx.db', 16605208)]; temp-segment files seen 8: ['nb-2-big-SI_c_idx.db', 'nb-2-big-SI_c_idx.db_0', 'nb-2-big-SI_c_idx.db_1', 'nb-2-big-SI_c_idx.db_2', 'nb-2-big-SI_c_idx.db_3', 'nb-2-big-SI_c_idx.db_4', 'nb-2-big-SI_c_idx.db_5', 'nb-2-big-SI_c_idx.db_6']
+GAUGES ctl-opt16 c: {"samples": 26, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 542958000}
+VERIFY c_idx: count=1000000 expected 1000000 OK
+CREATE u_idx (PREFIX, option 16) rc=0 after 2 s: 'Warnings :\nSASI indexes are experimental and are not recommended for production use.'
+INDEX u_idx build complete after 16 s; files [('nb-2-big-SI_u_idx.db', 125853952)]; temp-segment files seen 16: ['nb-2-big-SI_u_idx.db', 'nb-2-big-SI_u_idx.db_0', 'nb-2-big-SI_u_idx.db_1', 'nb-2-big-SI_u_idx.db_10', 'nb-2-big-SI_u_idx.db_11', 'nb-2-big-SI_u_idx.db_12', 'nb-2-big-SI_u_idx.db_13', 'nb-2-big-SI_u_idx.db_14', 'nb-2-big-SI_u_idx.db_2', 'nb-2-big-SI_u_idx.db_3', 'nb-2-big-SI_u_idx.db_4', 'nb-2-big-SI_u_idx.db_5']
+GAUGES ctl-opt16 u: {"samples": 32, "seg_used_peak": -1, "seg_limits": [-1], "heap_used_peak": 884380544}
+VERIFY u_idx: count=1 expected 1 OK
+ERROR lines in system.log: 0
+ARM ctl-opt16 STOPPED: daemons left: none
+DONE all 

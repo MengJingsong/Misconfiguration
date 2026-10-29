@@ -1,0 +1,28 @@
+== m100 mode=mem args=100 start 1793232515337
+daemons before: 0
+node up 1793232561260 pid 1222109
+-Xmx1G
+-javaagent:/users/jason92/s4-b34/c/bin/../lib/jamm-0.4.0.jar
+sasi_indexes_enabled: true
+compaction_throughput: 0MiB/s
+commitlog_total_space: 256MiB
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+
+CREATE CUSTOM INDEX t_v ON ks.t (v) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'max_compaction_flush_memory_in_mb': '100'};
+load 0 rc=0 Total errors              :          0 [insert: 0]
+load 1 rc=0 Total errors              :          0 [insert: 0]
+load 2 rc=0 Total errors              :          0 [insert: 0]
+load 3 rc=0 Total errors              :          0 [insert: 0]
+		SSTable count: 2
+		Old SSTable count: 0
+*-Data.db 17049341
+*-Index.db 14935773
+*SI_*.db 16605208
+log error lines: 0
+daemons left: 0
+== m100 end 1793232649606

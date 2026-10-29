@@ -1,0 +1,214 @@
+== chain start 2026-10-28T20:05:48Z on node1.jason92-321705.misconfiguration-pg0.cloudlab.umass.edu
+-- unit tier
+probe rep 1: [junit-timeout] Testsuite: org.apache.cassandra.db.compaction.unified.ShardCapProbeTest-_jdk11 Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.354 sec BUILD SUCCESSFUL 
+probe rep 2: [junit-timeout] Testsuite: org.apache.cassandra.db.compaction.unified.ShardCapProbeTest-_jdk11 Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.39 sec BUILD SUCCESSFUL 
+ControllerTest#testGetNumShards: [junit-timeout] Testsuite: org.apache.cassandra.db.compaction.unified.ControllerTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.839 sec BUILD SUCCESSFUL 
+no ant/junit processes left
+-- cluster tier
+== run1 start 1793218005479 shakedown=False
+$ mkdir -p /users/jason92/stage4-logs/ms/run1/cluster/run1/cls && javac -cp "/users/jason92/s4-ms/build/classes/main:/users/jason92/s4-ms/build/lib/jars/*:/users/jason92/s4-ms/lib/*" -d /users/jason92/stage4-logs/ms/run1/cluster/run1/cls /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/KeyGen.java
+
+$ java -cp "/users/jason92/stage4-logs/ms/run1/cluster/run1/cls:/users/jason92/s4-ms/build/classes/main:/users/jason92/s4-ms/build/classes/thrift:/users/jason92/s4-ms/build/lib/jars/*:/users/jason92/s4-ms/lib/*" KeyGen window 32768 14 /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt | tail -n 1
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.github.jamm.utils.InjectedInvoker/0x0000000840066440 (file:/users/jason92/s4-ms/build/lib/jars/jamm-0.4.0.jar) to field java.nio.DirectByteBuffer.att
+WARNING: Please consider reporting this to the maintainers of org.github.jamm.utils.InjectedInvoker/0x0000000840066440
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+KEYGEN mode=window count=32768 tried=539738240 minTok=166143991 maxTok=1125899179843783 windowSpanFraction=6.103510783263006E-5
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.github.jamm.utils.InjectedInvoker/0x0000000840066440 (file:/users/jason92/s4-ms/build/lib/jars/jamm-0.4.0.jar) to field java.nio.DirectByteBuffer.att
+WARNING: Please consider reporting this to the maintainers of org.github.jamm.utils.InjectedInvoker/0x0000000840066440
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+KEYGEN mode=window count=32768 tried=539738240 minTok=166143991 maxTok=1125899179843783 windowSpanFraction=6.103510783263006E-5
+$ java -cp "/users/jason92/stage4-logs/ms/run1/cluster/run1/cls:/users/jason92/s4-ms/build/classes/main:/users/jason92/s4-ms/build/classes/thrift:/users/jason92/s4-ms/build/lib/jars/*:/users/jason92/s4-ms/lib/*" KeyGen any 32768 0 /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt | tail -n 1
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.github.jamm.utils.InjectedInvoker/0x0000000840066440 (file:/users/jason92/s4-ms/build/lib/jars/jamm-0.4.0.jar) to field java.nio.DirectByteBuffer.att
+WARNING: Please consider reporting this to the maintainers of org.github.jamm.utils.InjectedInvoker/0x0000000840066440
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+KEYGEN mode=any count=32768 tried=32768 minTok=-9222773668825907316 maxTok=9223082487119334005 windowSpanFraction=0.9999518658815474
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by org.github.jamm.utils.InjectedInvoker/0x0000000840066440 (file:/users/jason92/s4-ms/build/lib/jars/jamm-0.4.0.jar) to field java.nio.DirectByteBuffer.att
+WARNING: Please consider reporting this to the maintainers of org.github.jamm.utils.InjectedInvoker/0x0000000840066440
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+KEYGEN mode=any count=32768 tried=32768 minTok=-9222773668825907316 maxTok=9223082487119334005 windowSpanFraction=0.9999518658815474
+$ T=/users/jason92/stage4-tmp/ms/node /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/make-node.sh /users/jason92/s4-ms
+node conf /users/jason92/stage4-tmp/ms/node/conf
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=16m
+-XX:G1NewSizePercent=50
+-XX:G1RSetUpdatingPauseTimePercent=5
+-Xms2G
+-Xmx2G
+-Dunified_compaction.base_shard_count=1
+-Dunified_compaction.sstable_growth=0
+-Dunified_compaction.min_sstable_size=0MiB
+
+$ bin/nodetool setlogginglevel org.apache.cassandra.db.compaction.unified.Controller DEBUG
+
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "CREATE TABLE IF NOT EXISTS ks.t (k blob PRIMARY KEY, v blob) WITH compaction = {'class':'UnifiedCompactionStrategy','scaling_parameters':'T2','base_shard_count':'1','target_sstable_size':'1MiB','sstable_growth':'0','min_sstable_size':'0MiB'}"
+DDL ok
+EXPECTED A-dense: logged shards 1048576 (clamp); A-control: <= 512; B (1GiB, growth 0.333): clamp not reached (control 1; dense 2^8..2^10); disk bytes equal across arms; heap does not scale with shards
+SNAP {"snap": "base", "t": 1793218098071, "heap_post_gc_kB": 82504, "RssAnon_kB": 2695424, "data_files": 0, "du_bytes": 8192, "SSTable count": "0", "Space used (live)": "0", "Space used (total)": "0", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "0", "Index summary off heap memory used": "0", "Compression metadata off heap memory used": "0"}
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 0 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.5
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 4096 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 8192 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.3
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 12288 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 16384 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.3
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 20480 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.3
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 24576 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 28672 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.3
+IDLE A-dense-postflush after 132 s
+SNAP {"snap": "A-dense-postflush", "t": 1793218263685, "heap_post_gc_kB": 82463, "RssAnon_kB": 2808756, "data_files": 84, "du_bytes": 542383701, "SSTable count": "84", "Space used (live)": "542309973", "Space used (total)": "542309973", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "41496", "Index summary off heap memory used": "8288", "Compression metadata off heap memory used": "263968"}
+$ bin/nodetool compact ks t
+
+COMPACT A-dense seconds=55
+IDLE A-dense-postcompact after 5 s
+SNAP {"snap": "A-dense-postcompact", "t": 1793218332317, "heap_post_gc_kB": 82443, "RssAnon_kB": 2804412, "data_files": 64, "du_bytes": 542286055, "SSTable count": "64", "Space used (live)": "542212327", "Space used (total)": "542212327", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "41384", "Index summary off heap memory used": "8036", "Compression metadata off heap memory used": "263680"}
+ARM A-dense: flush-phase shard lines=118 values=[1, 64, 1048576] | compact-phase shard lines=64 values=[1048576] | sstables postflush=84 postcompact=64 (data files 84 -> 64) | space live 542309973 -> 542212327 | heap post-GC kB 82463 -> 82443 | du bytes 542383701 -> 542286055 | seconds=234
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "TRUNCATE ks.t"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 0 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 4096 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 8192 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 12288 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 16384 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.5
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 20480 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.3
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 24576 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 28672 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.3
+IDLE A-control-postflush after 165 s
+SNAP {"snap": "A-control-postflush", "t": 1793218668724, "heap_post_gc_kB": 91541, "RssAnon_kB": 2830248, "data_files": 538, "du_bytes": 544832808, "SSTable count": "538", "Space used (live)": "544587048", "Space used (total)": "544587048", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "44120", "Index summary off heap memory used": "15064", "Compression metadata off heap memory used": "270528"}
+$ bin/nodetool compact ks t
+
+COMPACT A-control seconds=138
+IDLE A-control-postcompact after 5 s
+SNAP {"snap": "A-control-postcompact", "t": 1793218820423, "heap_post_gc_kB": 92590, "RssAnon_kB": 2831288, "data_files": 513, "du_bytes": 544721434, "SSTable count": "513", "Space used (live)": "544459290", "Space used (total)": "544459290", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "44296", "Index summary off heap memory used": "14364", "Compression metadata off heap memory used": "270352"}
+ARM A-control: flush-phase shard lines=340 values=[64, 128, 256, 512] | compact-phase shard lines=209 values=[512, 1024] | sstables postflush=538 postcompact=513 (data files 538 -> 513) | space live 544587048 -> 544459290 | heap post-GC kB 91541 -> 92590 | du bytes 544832808 -> 544721434 | seconds=484
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "TRUNCATE ks.t"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "ALTER TABLE ks.t WITH compaction = {'class':'UnifiedCompactionStrategy','scaling_parameters':'T2','base_shard_count':'1','target_sstable_size':'1GiB','sstable_growth':'0.333','min_sstable_size':'0MiB'}"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 0 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 4096 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 8192 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 12288 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 16384 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 20480 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 24576 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 28672 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+IDLE B-dense-postflush after 17 s
+SNAP {"snap": "B-dense-postflush", "t": 1793218883956, "heap_post_gc_kB": 84680, "RssAnon_kB": 2841844, "data_files": 1, "du_bytes": 542092953, "SSTable count": "1", "Space used (live)": "541830809", "Space used (total)": "541830809", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "41456", "Index summary off heap memory used": "7168", "Compression metadata off heap memory used": "262856"}
+$ bin/nodetool compact ks t
+
+COMPACT B-dense seconds=7
+IDLE B-dense-postcompact after 5 s
+SNAP {"snap": "B-dense-postcompact", "t": 1793218904460, "heap_post_gc_kB": 84685, "RssAnon_kB": 2841352, "data_files": 1, "du_bytes": 542092953, "SSTable count": "1", "Space used (live)": "541830809", "Space used (total)": "541830809", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "41456", "Index summary off heap memory used": "7168", "Compression metadata off heap memory used": "262856"}
+ARM B-dense: flush-phase shard lines=15 values=[1, 128, 256, 512] | compact-phase shard lines=1 values=[512] | sstables postflush=1 postcompact=1 (data files 1 -> 1) | space live 541830809 -> 541830809 | heap post-GC kB 84680 -> 84685 | du bytes 542092953 -> 542092953 | seconds=72
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "TRUNCATE ks.t"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 0 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 4096 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 8192 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 12288 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 16384 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 20480 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 24576 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-control.txt 28672 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+IDLE B-control-postflush after 18 s
+SNAP {"snap": "B-control-postflush", "t": 1793218959205, "heap_post_gc_kB": 85933, "RssAnon_kB": 2850452, "data_files": 1, "du_bytes": 542093032, "SSTable count": "1", "Space used (live)": "541830888", "Space used (total)": "541830888", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "41504", "Index summary off heap memory used": "7168", "Compression metadata off heap memory used": "262856"}
+$ bin/nodetool compact ks t
+
+COMPACT B-control seconds=7
+IDLE B-control-postcompact after 5 s
+SNAP {"snap": "B-control-postcompact", "t": 1793218979510, "heap_post_gc_kB": 85944, "RssAnon_kB": 2850372, "data_files": 1, "du_bytes": 542093032, "SSTable count": "1", "Space used (live)": "541830888", "Space used (total)": "541830888", "Memtable data size": "0", "Memtable off heap memory used": "0", "Bloom filter off heap memory used": "41504", "Index summary off heap memory used": "7168", "Compression metadata off heap memory used": "262856"}
+ARM B-control: flush-phase shard lines=15 values=[1] | compact-phase shard lines=1 values=[1] | sstables postflush=1 postcompact=1 (data files 1 -> 1) | space live 541830888 -> 541830888 | heap post-GC kB 85933 -> 85944 | du bytes 542093032 -> 542093032 | seconds=72
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "TRUNCATE ks.t"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "ALTER TABLE ks.t WITH compaction = {'class':'UnifiedCompactionStrategy','scaling_parameters':'T2','base_shard_count':'1','target_sstable_size':'1MiB','sstable_growth':'0','min_sstable_size':'0MiB','max_sstables_to_compact':'4'}"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 0 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.0
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 4096 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 8192 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 12288 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 16384 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 20480 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 24576 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 28672 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ bin/nodetool compact ks t
+
+CTL max_sstables_to_compact=4: sstables before=8, compaction tasks logged=1, inputs per task (count of nb- paths)=[8], seconds=27
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "TRUNCATE ks.t"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib ddl "ALTER TABLE ks.t WITH compaction = {'class':'UnifiedCompactionStrategy','scaling_parameters':'T2','base_shard_count':'1','target_sstable_size':'1MiB','sstable_growth':'0','min_sstable_size':'0MiB','max_sstables_to_compact':'32'}"
+DDL ok
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 0 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 4096 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 8192 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 12288 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 16384 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 20480 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 24576 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.2
+$ python3 /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/harness/max_shard_split-getnumshards-count--autonomous/workload.py /users/jason92/s4-ms/lib load /users/jason92/stage4-logs/ms/run1/cluster/run1/keys-dense.txt 28672 4096 16384
+WORKLOAD rows=4096 errors=0 bytes=67108864 seconds=1.1
+$ bin/nodetool compact ks t
+
+CTL max_sstables_to_compact=32: sstables before=8, compaction tasks logged=1, inputs per task (count of nb- paths)=[8], seconds=27
+CTL peak table-dir bytes (5-s samples) {'ctl-max4': 1084222661, 'ctl-max32': 1084336286}
+$ cp /users/jason92/stage4-tmp/ms/node/logs/system.log /users/jason92/stage4-logs/ms/run1/cluster/run1/system.log; ls -l /users/jason92/stage4-tmp/ms/node/logs > /users/jason92/stage4-logs/ms/run1/cluster/run1/loglist.txt; df -h / | tail -n 1 >> /users/jason92/stage4-logs/ms/run1/cluster/run1/loglist.txt
+
+$ grep -E 'ERROR|OutOfMemory|Exception' /users/jason92/stage4-tmp/ms/node/logs/system.log | head -n 20 > /users/jason92/stage4-logs/ms/run1/cluster/run1/errors.txt; wc -l /users/jason92/stage4-logs/ms/run1/cluster/run1/errors.txt
+1 /users/jason92/stage4-logs/ms/run1/cluster/run1/errors.txt
+daemons left: 0
+== chain end 2026-10-28T20:25:22Z
+no daemon left

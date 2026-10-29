@@ -1,0 +1,407 @@
+STAGE4 info WRITE_BUFFER_SIZE=262144 ENTRY_OVERHEAD_SIZE=12 maxMemory=1056309248 dir=/users/jason92/s4-hwb/base/build/tmp/stage4-hwb1450944361563633627
+STAGE4 check constant_WRITE_BUFFER_SIZE expected=262144 actual=262144 ok
+STAGE4 case N=65536 H=1024 rep=1 entry=1036 k=159 header=42 bytesWritten=164724 fileAfterClose=164766 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=164724 maxWrite=65268 maxBufPos=65268 firstJumpIdx=63 firstJumpBytes=65268 writes=[65268, 65268, 34188]
+STAGE4 check N=65536_H=1024_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=1024_rep=1_bufpos_le_N expected=<=65536 actual=65268 ok
+STAGE4 check N=65536_H=1024_rep=1_first_jump_after_N expected=idx 63, 65268 B (<= N) actual=idx 63, 65268 B ok
+STAGE4 check N=65536_H=1024_rep=1_every_channel_write_<=_N expected=<=65536 actual=65268 ok
+STAGE4 check N=65536_H=1024_rep=1_channel_writes_equal_model expected=3 writes, 164724 B actual=3 writes, 164724 B ok
+STAGE4 check N=65536_H=1024_rep=1_bytesWritten expected=164724 actual=164724 ok
+STAGE4 check N=65536_H=1024_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=164766 actual=164766 ok
+STAGE4 check N=65536_H=1024_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=65536 H=102400 rep=1 entry=102412 k=3 header=42 bytesWritten=307236 fileAfterClose=307278 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=307236 maxWrite=102412 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=102412 writes=[102412, 102412, 102412]
+STAGE4 check N=65536_H=102400_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=102400_rep=1_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=102400_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+102412 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=102400_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 102412 actual=3 writes, max 102412 ok
+STAGE4 check N=65536_H=102400_rep=1_channel_writes_equal_model expected=3 writes, 307236 B actual=3 writes, 307236 B ok
+STAGE4 check N=65536_H=102400_rep=1_bytesWritten expected=307236 actual=307236 ok
+STAGE4 check N=65536_H=102400_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=307278 actual=307278 ok
+STAGE4 check N=65536_H=102400_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=102400_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=261120 rep=1 entry=261132 k=3 header=42 bytesWritten=783396 fileAfterClose=783438 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=783396 maxWrite=261132 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=261132 writes=[261132, 261132, 261132]
+STAGE4 check N=65536_H=261120_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=261120_rep=1_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=261120_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+261132 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=261120_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 261132 actual=3 writes, max 261132 ok
+STAGE4 check N=65536_H=261120_rep=1_channel_writes_equal_model expected=3 writes, 783396 B actual=3 writes, 783396 B ok
+STAGE4 check N=65536_H=261120_rep=1_bytesWritten expected=783396 actual=783396 ok
+STAGE4 check N=65536_H=261120_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=783438 actual=783438 ok
+STAGE4 check N=65536_H=261120_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=261120_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=307200 rep=1 entry=307212 k=3 header=42 bytesWritten=921636 fileAfterClose=921678 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=921636 maxWrite=307212 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=307212 writes=[307212, 307212, 307212]
+STAGE4 check N=65536_H=307200_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=307200_rep=1_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=307200_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+307212 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=307200_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 307212 actual=3 writes, max 307212 ok
+STAGE4 check N=65536_H=307200_rep=1_channel_writes_equal_model expected=3 writes, 921636 B actual=3 writes, 921636 B ok
+STAGE4 check N=65536_H=307200_rep=1_bytesWritten expected=921636 actual=921636 ok
+STAGE4 check N=65536_H=307200_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=921678 actual=921678 ok
+STAGE4 check N=65536_H=307200_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=307200_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=2097152 rep=1 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=65536_H=2097152_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=2097152_rep=1_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=2097152_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=2097152_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=65536_H=2097152_rep=1_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=65536_H=2097152_rep=1_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=65536_H=2097152_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=65536_H=2097152_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=2097152_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=262144 H=1024 rep=1 entry=1036 k=633 header=42 bytesWritten=655788 fileAfterClose=655830 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=655788 maxWrite=262108 maxBufPos=262108 firstJumpIdx=253 firstJumpBytes=262108 writes=[262108, 262108, 131572]
+STAGE4 check N=262144_H=1024_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=1024_rep=1_bufpos_le_N expected=<=262144 actual=262108 ok
+STAGE4 check N=262144_H=1024_rep=1_first_jump_after_N expected=idx 253, 262108 B (<= N) actual=idx 253, 262108 B ok
+STAGE4 check N=262144_H=1024_rep=1_every_channel_write_<=_N expected=<=262144 actual=262108 ok
+STAGE4 check N=262144_H=1024_rep=1_channel_writes_equal_model expected=3 writes, 655788 B actual=3 writes, 655788 B ok
+STAGE4 check N=262144_H=1024_rep=1_bytesWritten expected=655788 actual=655788 ok
+STAGE4 check N=262144_H=1024_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=655830 actual=655830 ok
+STAGE4 check N=262144_H=1024_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=262144 H=102400 rep=1 entry=102412 k=7 header=42 bytesWritten=716884 fileAfterClose=716926 channelWrites=4 zeroLengthWriteCalls=0 channelWriteBytes=716884 maxWrite=204824 maxBufPos=204824 firstJumpIdx=2 firstJumpBytes=204824 writes=[204824, 204824, 204824, 102412]
+STAGE4 check N=262144_H=102400_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=102400_rep=1_bufpos_le_N expected=<=262144 actual=204824 ok
+STAGE4 check N=262144_H=102400_rep=1_first_jump_after_N expected=idx 2, 204824 B (<= N) actual=idx 2, 204824 B ok
+STAGE4 check N=262144_H=102400_rep=1_every_channel_write_<=_N expected=<=262144 actual=204824 ok
+STAGE4 check N=262144_H=102400_rep=1_channel_writes_equal_model expected=4 writes, 716884 B actual=4 writes, 716884 B ok
+STAGE4 check N=262144_H=102400_rep=1_bytesWritten expected=716884 actual=716884 ok
+STAGE4 check N=262144_H=102400_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=716926 actual=716926 ok
+STAGE4 check N=262144_H=102400_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=262144 H=261120 rep=1 entry=261132 k=3 header=42 bytesWritten=783396 fileAfterClose=783438 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=783396 maxWrite=261132 maxBufPos=261132 firstJumpIdx=1 firstJumpBytes=261132 writes=[261132, 261132, 261132]
+STAGE4 check N=262144_H=261120_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=261120_rep=1_bufpos_le_N expected=<=262144 actual=261132 ok
+STAGE4 check N=262144_H=261120_rep=1_first_jump_after_N expected=idx 1, 261132 B (<= N) actual=idx 1, 261132 B ok
+STAGE4 check N=262144_H=261120_rep=1_every_channel_write_<=_N expected=<=262144 actual=261132 ok
+STAGE4 check N=262144_H=261120_rep=1_channel_writes_equal_model expected=3 writes, 783396 B actual=3 writes, 783396 B ok
+STAGE4 check N=262144_H=261120_rep=1_bytesWritten expected=783396 actual=783396 ok
+STAGE4 check N=262144_H=261120_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=783438 actual=783438 ok
+STAGE4 check N=262144_H=261120_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=262144 H=307200 rep=1 entry=307212 k=3 header=42 bytesWritten=921636 fileAfterClose=921678 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=921636 maxWrite=307212 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=307212 writes=[307212, 307212, 307212]
+STAGE4 check N=262144_H=307200_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=307200_rep=1_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check N=262144_H=307200_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+307212 each, pos 0 actual=as expected ok
+STAGE4 check N=262144_H=307200_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 307212 actual=3 writes, max 307212 ok
+STAGE4 check N=262144_H=307200_rep=1_channel_writes_equal_model expected=3 writes, 921636 B actual=3 writes, 921636 B ok
+STAGE4 check N=262144_H=307200_rep=1_bytesWritten expected=921636 actual=921636 ok
+STAGE4 check N=262144_H=307200_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=921678 actual=921678 ok
+STAGE4 check N=262144_H=307200_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=262144_H=307200_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=262144 H=2097152 rep=1 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=262144_H=2097152_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=2097152_rep=1_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check N=262144_H=2097152_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=262144_H=2097152_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=262144_H=2097152_rep=1_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=262144_H=2097152_rep=1_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=262144_H=2097152_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=262144_H=2097152_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=262144_H=2097152_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=1048576 H=1024 rep=1 entry=1036 k=2531 header=42 bytesWritten=2622116 fileAfterClose=2622158 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2622116 maxWrite=1048432 maxBufPos=1048432 firstJumpIdx=1012 firstJumpBytes=1048432 writes=[1048432, 1048432, 525252]
+STAGE4 check N=1048576_H=1024_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=1024_rep=1_bufpos_le_N expected=<=1048576 actual=1048432 ok
+STAGE4 check N=1048576_H=1024_rep=1_first_jump_after_N expected=idx 1012, 1048432 B (<= N) actual=idx 1012, 1048432 B ok
+STAGE4 check N=1048576_H=1024_rep=1_every_channel_write_<=_N expected=<=1048576 actual=1048432 ok
+STAGE4 check N=1048576_H=1024_rep=1_channel_writes_equal_model expected=3 writes, 2622116 B actual=3 writes, 2622116 B ok
+STAGE4 check N=1048576_H=1024_rep=1_bytesWritten expected=2622116 actual=2622116 ok
+STAGE4 check N=1048576_H=1024_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2622158 actual=2622158 ok
+STAGE4 check N=1048576_H=1024_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=102400 rep=1 entry=102412 k=26 header=42 bytesWritten=2662712 fileAfterClose=2662754 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2662712 maxWrite=1024120 maxBufPos=1024120 firstJumpIdx=10 firstJumpBytes=1024120 writes=[1024120, 1024120, 614472]
+STAGE4 check N=1048576_H=102400_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=102400_rep=1_bufpos_le_N expected=<=1048576 actual=1024120 ok
+STAGE4 check N=1048576_H=102400_rep=1_first_jump_after_N expected=idx 10, 1024120 B (<= N) actual=idx 10, 1024120 B ok
+STAGE4 check N=1048576_H=102400_rep=1_every_channel_write_<=_N expected=<=1048576 actual=1024120 ok
+STAGE4 check N=1048576_H=102400_rep=1_channel_writes_equal_model expected=3 writes, 2662712 B actual=3 writes, 2662712 B ok
+STAGE4 check N=1048576_H=102400_rep=1_bytesWritten expected=2662712 actual=2662712 ok
+STAGE4 check N=1048576_H=102400_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2662754 actual=2662754 ok
+STAGE4 check N=1048576_H=102400_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=261120 rep=1 entry=261132 k=11 header=42 bytesWritten=2872452 fileAfterClose=2872494 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2872452 maxWrite=1044528 maxBufPos=1044528 firstJumpIdx=4 firstJumpBytes=1044528 writes=[1044528, 1044528, 783396]
+STAGE4 check N=1048576_H=261120_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=261120_rep=1_bufpos_le_N expected=<=1048576 actual=1044528 ok
+STAGE4 check N=1048576_H=261120_rep=1_first_jump_after_N expected=idx 4, 1044528 B (<= N) actual=idx 4, 1044528 B ok
+STAGE4 check N=1048576_H=261120_rep=1_every_channel_write_<=_N expected=<=1048576 actual=1044528 ok
+STAGE4 check N=1048576_H=261120_rep=1_channel_writes_equal_model expected=3 writes, 2872452 B actual=3 writes, 2872452 B ok
+STAGE4 check N=1048576_H=261120_rep=1_bytesWritten expected=2872452 actual=2872452 ok
+STAGE4 check N=1048576_H=261120_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2872494 actual=2872494 ok
+STAGE4 check N=1048576_H=261120_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=307200 rep=1 entry=307212 k=9 header=42 bytesWritten=2764908 fileAfterClose=2764950 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2764908 maxWrite=921636 maxBufPos=921636 firstJumpIdx=3 firstJumpBytes=921636 writes=[921636, 921636, 921636]
+STAGE4 check N=1048576_H=307200_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=307200_rep=1_bufpos_le_N expected=<=1048576 actual=921636 ok
+STAGE4 check N=1048576_H=307200_rep=1_first_jump_after_N expected=idx 3, 921636 B (<= N) actual=idx 3, 921636 B ok
+STAGE4 check N=1048576_H=307200_rep=1_every_channel_write_<=_N expected=<=1048576 actual=921636 ok
+STAGE4 check N=1048576_H=307200_rep=1_channel_writes_equal_model expected=3 writes, 2764908 B actual=3 writes, 2764908 B ok
+STAGE4 check N=1048576_H=307200_rep=1_bytesWritten expected=2764908 actual=2764908 ok
+STAGE4 check N=1048576_H=307200_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2764950 actual=2764950 ok
+STAGE4 check N=1048576_H=307200_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=2097152 rep=1 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=1048576_H=2097152_rep=1_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=2097152_rep=1_bufpos_le_N expected=<=1048576 actual=0 ok
+STAGE4 check N=1048576_H=2097152_rep=1_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=1048576_H=2097152_rep=1_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=1048576_H=2097152_rep=1_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=1048576_H=2097152_rep=1_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=1048576_H=2097152_rep=1_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=1048576_H=2097152_rep=1_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=1048576_H=2097152_rep=1_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=1024 rep=2 entry=1036 k=159 header=42 bytesWritten=164724 fileAfterClose=164766 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=164724 maxWrite=65268 maxBufPos=65268 firstJumpIdx=63 firstJumpBytes=65268 writes=[65268, 65268, 34188]
+STAGE4 check N=65536_H=1024_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=1024_rep=2_bufpos_le_N expected=<=65536 actual=65268 ok
+STAGE4 check N=65536_H=1024_rep=2_first_jump_after_N expected=idx 63, 65268 B (<= N) actual=idx 63, 65268 B ok
+STAGE4 check N=65536_H=1024_rep=2_every_channel_write_<=_N expected=<=65536 actual=65268 ok
+STAGE4 check N=65536_H=1024_rep=2_channel_writes_equal_model expected=3 writes, 164724 B actual=3 writes, 164724 B ok
+STAGE4 check N=65536_H=1024_rep=2_bytesWritten expected=164724 actual=164724 ok
+STAGE4 check N=65536_H=1024_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=164766 actual=164766 ok
+STAGE4 check N=65536_H=1024_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=65536 H=102400 rep=2 entry=102412 k=3 header=42 bytesWritten=307236 fileAfterClose=307278 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=307236 maxWrite=102412 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=102412 writes=[102412, 102412, 102412]
+STAGE4 check N=65536_H=102400_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=102400_rep=2_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=102400_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+102412 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=102400_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 102412 actual=3 writes, max 102412 ok
+STAGE4 check N=65536_H=102400_rep=2_channel_writes_equal_model expected=3 writes, 307236 B actual=3 writes, 307236 B ok
+STAGE4 check N=65536_H=102400_rep=2_bytesWritten expected=307236 actual=307236 ok
+STAGE4 check N=65536_H=102400_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=307278 actual=307278 ok
+STAGE4 check N=65536_H=102400_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=102400_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=261120 rep=2 entry=261132 k=3 header=42 bytesWritten=783396 fileAfterClose=783438 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=783396 maxWrite=261132 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=261132 writes=[261132, 261132, 261132]
+STAGE4 check N=65536_H=261120_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=261120_rep=2_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=261120_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+261132 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=261120_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 261132 actual=3 writes, max 261132 ok
+STAGE4 check N=65536_H=261120_rep=2_channel_writes_equal_model expected=3 writes, 783396 B actual=3 writes, 783396 B ok
+STAGE4 check N=65536_H=261120_rep=2_bytesWritten expected=783396 actual=783396 ok
+STAGE4 check N=65536_H=261120_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=783438 actual=783438 ok
+STAGE4 check N=65536_H=261120_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=261120_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=307200 rep=2 entry=307212 k=3 header=42 bytesWritten=921636 fileAfterClose=921678 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=921636 maxWrite=307212 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=307212 writes=[307212, 307212, 307212]
+STAGE4 check N=65536_H=307200_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=307200_rep=2_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=307200_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+307212 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=307200_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 307212 actual=3 writes, max 307212 ok
+STAGE4 check N=65536_H=307200_rep=2_channel_writes_equal_model expected=3 writes, 921636 B actual=3 writes, 921636 B ok
+STAGE4 check N=65536_H=307200_rep=2_bytesWritten expected=921636 actual=921636 ok
+STAGE4 check N=65536_H=307200_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=921678 actual=921678 ok
+STAGE4 check N=65536_H=307200_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=307200_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=65536 H=2097152 rep=2 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=65536_H=2097152_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=65536_H=2097152_rep=2_bufpos_le_N expected=<=65536 actual=0 ok
+STAGE4 check N=65536_H=2097152_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=65536_H=2097152_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=65536_H=2097152_rep=2_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=65536_H=2097152_rep=2_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=65536_H=2097152_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=65536_H=2097152_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=65536_H=2097152_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=262144 H=1024 rep=2 entry=1036 k=633 header=42 bytesWritten=655788 fileAfterClose=655830 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=655788 maxWrite=262108 maxBufPos=262108 firstJumpIdx=253 firstJumpBytes=262108 writes=[262108, 262108, 131572]
+STAGE4 check N=262144_H=1024_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=1024_rep=2_bufpos_le_N expected=<=262144 actual=262108 ok
+STAGE4 check N=262144_H=1024_rep=2_first_jump_after_N expected=idx 253, 262108 B (<= N) actual=idx 253, 262108 B ok
+STAGE4 check N=262144_H=1024_rep=2_every_channel_write_<=_N expected=<=262144 actual=262108 ok
+STAGE4 check N=262144_H=1024_rep=2_channel_writes_equal_model expected=3 writes, 655788 B actual=3 writes, 655788 B ok
+STAGE4 check N=262144_H=1024_rep=2_bytesWritten expected=655788 actual=655788 ok
+STAGE4 check N=262144_H=1024_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=655830 actual=655830 ok
+STAGE4 check N=262144_H=1024_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=262144 H=102400 rep=2 entry=102412 k=7 header=42 bytesWritten=716884 fileAfterClose=716926 channelWrites=4 zeroLengthWriteCalls=0 channelWriteBytes=716884 maxWrite=204824 maxBufPos=204824 firstJumpIdx=2 firstJumpBytes=204824 writes=[204824, 204824, 204824, 102412]
+STAGE4 check N=262144_H=102400_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=102400_rep=2_bufpos_le_N expected=<=262144 actual=204824 ok
+STAGE4 check N=262144_H=102400_rep=2_first_jump_after_N expected=idx 2, 204824 B (<= N) actual=idx 2, 204824 B ok
+STAGE4 check N=262144_H=102400_rep=2_every_channel_write_<=_N expected=<=262144 actual=204824 ok
+STAGE4 check N=262144_H=102400_rep=2_channel_writes_equal_model expected=4 writes, 716884 B actual=4 writes, 716884 B ok
+STAGE4 check N=262144_H=102400_rep=2_bytesWritten expected=716884 actual=716884 ok
+STAGE4 check N=262144_H=102400_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=716926 actual=716926 ok
+STAGE4 check N=262144_H=102400_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=262144 H=261120 rep=2 entry=261132 k=3 header=42 bytesWritten=783396 fileAfterClose=783438 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=783396 maxWrite=261132 maxBufPos=261132 firstJumpIdx=1 firstJumpBytes=261132 writes=[261132, 261132, 261132]
+STAGE4 check N=262144_H=261120_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=261120_rep=2_bufpos_le_N expected=<=262144 actual=261132 ok
+STAGE4 check N=262144_H=261120_rep=2_first_jump_after_N expected=idx 1, 261132 B (<= N) actual=idx 1, 261132 B ok
+STAGE4 check N=262144_H=261120_rep=2_every_channel_write_<=_N expected=<=262144 actual=261132 ok
+STAGE4 check N=262144_H=261120_rep=2_channel_writes_equal_model expected=3 writes, 783396 B actual=3 writes, 783396 B ok
+STAGE4 check N=262144_H=261120_rep=2_bytesWritten expected=783396 actual=783396 ok
+STAGE4 check N=262144_H=261120_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=783438 actual=783438 ok
+STAGE4 check N=262144_H=261120_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=262144 H=307200 rep=2 entry=307212 k=3 header=42 bytesWritten=921636 fileAfterClose=921678 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=921636 maxWrite=307212 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=307212 writes=[307212, 307212, 307212]
+STAGE4 check N=262144_H=307200_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=307200_rep=2_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check N=262144_H=307200_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+307212 each, pos 0 actual=as expected ok
+STAGE4 check N=262144_H=307200_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 307212 actual=3 writes, max 307212 ok
+STAGE4 check N=262144_H=307200_rep=2_channel_writes_equal_model expected=3 writes, 921636 B actual=3 writes, 921636 B ok
+STAGE4 check N=262144_H=307200_rep=2_bytesWritten expected=921636 actual=921636 ok
+STAGE4 check N=262144_H=307200_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=921678 actual=921678 ok
+STAGE4 check N=262144_H=307200_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=262144_H=307200_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=262144 H=2097152 rep=2 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=262144_H=2097152_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=2097152_rep=2_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check N=262144_H=2097152_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=262144_H=2097152_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=262144_H=2097152_rep=2_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=262144_H=2097152_rep=2_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=262144_H=2097152_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=262144_H=2097152_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=262144_H=2097152_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=1048576 H=1024 rep=2 entry=1036 k=2531 header=42 bytesWritten=2622116 fileAfterClose=2622158 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2622116 maxWrite=1048432 maxBufPos=1048432 firstJumpIdx=1012 firstJumpBytes=1048432 writes=[1048432, 1048432, 525252]
+STAGE4 check N=1048576_H=1024_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=1024_rep=2_bufpos_le_N expected=<=1048576 actual=1048432 ok
+STAGE4 check N=1048576_H=1024_rep=2_first_jump_after_N expected=idx 1012, 1048432 B (<= N) actual=idx 1012, 1048432 B ok
+STAGE4 check N=1048576_H=1024_rep=2_every_channel_write_<=_N expected=<=1048576 actual=1048432 ok
+STAGE4 check N=1048576_H=1024_rep=2_channel_writes_equal_model expected=3 writes, 2622116 B actual=3 writes, 2622116 B ok
+STAGE4 check N=1048576_H=1024_rep=2_bytesWritten expected=2622116 actual=2622116 ok
+STAGE4 check N=1048576_H=1024_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2622158 actual=2622158 ok
+STAGE4 check N=1048576_H=1024_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=102400 rep=2 entry=102412 k=26 header=42 bytesWritten=2662712 fileAfterClose=2662754 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2662712 maxWrite=1024120 maxBufPos=1024120 firstJumpIdx=10 firstJumpBytes=1024120 writes=[1024120, 1024120, 614472]
+STAGE4 check N=1048576_H=102400_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=102400_rep=2_bufpos_le_N expected=<=1048576 actual=1024120 ok
+STAGE4 check N=1048576_H=102400_rep=2_first_jump_after_N expected=idx 10, 1024120 B (<= N) actual=idx 10, 1024120 B ok
+STAGE4 check N=1048576_H=102400_rep=2_every_channel_write_<=_N expected=<=1048576 actual=1024120 ok
+STAGE4 check N=1048576_H=102400_rep=2_channel_writes_equal_model expected=3 writes, 2662712 B actual=3 writes, 2662712 B ok
+STAGE4 check N=1048576_H=102400_rep=2_bytesWritten expected=2662712 actual=2662712 ok
+STAGE4 check N=1048576_H=102400_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2662754 actual=2662754 ok
+STAGE4 check N=1048576_H=102400_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=261120 rep=2 entry=261132 k=11 header=42 bytesWritten=2872452 fileAfterClose=2872494 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2872452 maxWrite=1044528 maxBufPos=1044528 firstJumpIdx=4 firstJumpBytes=1044528 writes=[1044528, 1044528, 783396]
+STAGE4 check N=1048576_H=261120_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=261120_rep=2_bufpos_le_N expected=<=1048576 actual=1044528 ok
+STAGE4 check N=1048576_H=261120_rep=2_first_jump_after_N expected=idx 4, 1044528 B (<= N) actual=idx 4, 1044528 B ok
+STAGE4 check N=1048576_H=261120_rep=2_every_channel_write_<=_N expected=<=1048576 actual=1044528 ok
+STAGE4 check N=1048576_H=261120_rep=2_channel_writes_equal_model expected=3 writes, 2872452 B actual=3 writes, 2872452 B ok
+STAGE4 check N=1048576_H=261120_rep=2_bytesWritten expected=2872452 actual=2872452 ok
+STAGE4 check N=1048576_H=261120_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2872494 actual=2872494 ok
+STAGE4 check N=1048576_H=261120_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=307200 rep=2 entry=307212 k=9 header=42 bytesWritten=2764908 fileAfterClose=2764950 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=2764908 maxWrite=921636 maxBufPos=921636 firstJumpIdx=3 firstJumpBytes=921636 writes=[921636, 921636, 921636]
+STAGE4 check N=1048576_H=307200_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=307200_rep=2_bufpos_le_N expected=<=1048576 actual=921636 ok
+STAGE4 check N=1048576_H=307200_rep=2_first_jump_after_N expected=idx 3, 921636 B (<= N) actual=idx 3, 921636 B ok
+STAGE4 check N=1048576_H=307200_rep=2_every_channel_write_<=_N expected=<=1048576 actual=921636 ok
+STAGE4 check N=1048576_H=307200_rep=2_channel_writes_equal_model expected=3 writes, 2764908 B actual=3 writes, 2764908 B ok
+STAGE4 check N=1048576_H=307200_rep=2_bytesWritten expected=2764908 actual=2764908 ok
+STAGE4 check N=1048576_H=307200_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=2764950 actual=2764950 ok
+STAGE4 check N=1048576_H=307200_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case N=1048576 H=2097152 rep=2 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=1048576_H=2097152_rep=2_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=1048576_H=2097152_rep=2_bufpos_le_N expected=<=1048576 actual=0 ok
+STAGE4 check N=1048576_H=2097152_rep=2_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=1048576_H=2097152_rep=2_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=1048576_H=2097152_rep=2_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=1048576_H=2097152_rep=2_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=1048576_H=2097152_rep=2_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=1048576_H=2097152_rep=2_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=1048576_H=2097152_rep=2_through_check expected=ok actual=true ok
+STAGE4 case N=262144 H=1024 rep=9 entry=1036 k=633 header=42 bytesWritten=655788 fileAfterClose=655830 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=655788 maxWrite=262108 maxBufPos=262108 firstJumpIdx=253 firstJumpBytes=262108 writes=[262108, 262108, 131572]
+STAGE4 check N=262144_H=1024_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=1024_rep=9_bufpos_le_N expected=<=262144 actual=262108 ok
+STAGE4 check N=262144_H=1024_rep=9_first_jump_after_N expected=idx 253, 262108 B (<= N) actual=idx 253, 262108 B ok
+STAGE4 check N=262144_H=1024_rep=9_every_channel_write_<=_N expected=<=262144 actual=262108 ok
+STAGE4 check N=262144_H=1024_rep=9_channel_writes_equal_model expected=3 writes, 655788 B actual=3 writes, 655788 B ok
+STAGE4 check N=262144_H=1024_rep=9_bytesWritten expected=655788 actual=655788 ok
+STAGE4 check N=262144_H=1024_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=655830 actual=655830 ok
+STAGE4 check N=262144_H=1024_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case heapagg N=262144 H=1024 rep=9 entry=1036 k=633 header=42 bytesWritten=655788 fileAfterClose=655830 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=655788 maxWrite=262108 maxBufPos=262108 firstJumpIdx=253 firstJumpBytes=262108 writes=[262108, 262108, 131572]
+STAGE4 check heapagg_N=262144_H=1024_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_bufpos_le_N expected=<=262144 actual=262108 ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_first_jump_after_N expected=idx 253, 262108 B (<= N) actual=idx 253, 262108 B ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_every_channel_write_<=_N expected=<=262144 actual=262108 ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_channel_writes_equal_model expected=3 writes, 655788 B actual=3 writes, 655788 B ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_bytesWritten expected=655788 actual=655788 ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=655830 actual=655830 ok
+STAGE4 check heapagg_N=262144_H=1024_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check heapagg_N=262144_H=1024_same_(fileLen,pos)_sequence_as_direct expected=equal actual=equal ok
+STAGE4 case N=262144 H=102400 rep=9 entry=102412 k=7 header=42 bytesWritten=716884 fileAfterClose=716926 channelWrites=4 zeroLengthWriteCalls=0 channelWriteBytes=716884 maxWrite=204824 maxBufPos=204824 firstJumpIdx=2 firstJumpBytes=204824 writes=[204824, 204824, 204824, 102412]
+STAGE4 check N=262144_H=102400_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=102400_rep=9_bufpos_le_N expected=<=262144 actual=204824 ok
+STAGE4 check N=262144_H=102400_rep=9_first_jump_after_N expected=idx 2, 204824 B (<= N) actual=idx 2, 204824 B ok
+STAGE4 check N=262144_H=102400_rep=9_every_channel_write_<=_N expected=<=262144 actual=204824 ok
+STAGE4 check N=262144_H=102400_rep=9_channel_writes_equal_model expected=4 writes, 716884 B actual=4 writes, 716884 B ok
+STAGE4 check N=262144_H=102400_rep=9_bytesWritten expected=716884 actual=716884 ok
+STAGE4 check N=262144_H=102400_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=716926 actual=716926 ok
+STAGE4 check N=262144_H=102400_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case heapagg N=262144 H=102400 rep=9 entry=102412 k=7 header=42 bytesWritten=716884 fileAfterClose=716926 channelWrites=4 zeroLengthWriteCalls=0 channelWriteBytes=716884 maxWrite=204824 maxBufPos=204824 firstJumpIdx=2 firstJumpBytes=204824 writes=[204824, 204824, 204824, 102412]
+STAGE4 check heapagg_N=262144_H=102400_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_bufpos_le_N expected=<=262144 actual=204824 ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_first_jump_after_N expected=idx 2, 204824 B (<= N) actual=idx 2, 204824 B ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_every_channel_write_<=_N expected=<=262144 actual=204824 ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_channel_writes_equal_model expected=4 writes, 716884 B actual=4 writes, 716884 B ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_bytesWritten expected=716884 actual=716884 ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=716926 actual=716926 ok
+STAGE4 check heapagg_N=262144_H=102400_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check heapagg_N=262144_H=102400_same_(fileLen,pos)_sequence_as_direct expected=equal actual=equal ok
+STAGE4 case N=262144 H=261120 rep=9 entry=261132 k=3 header=42 bytesWritten=783396 fileAfterClose=783438 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=783396 maxWrite=261132 maxBufPos=261132 firstJumpIdx=1 firstJumpBytes=261132 writes=[261132, 261132, 261132]
+STAGE4 check N=262144_H=261120_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=261120_rep=9_bufpos_le_N expected=<=262144 actual=261132 ok
+STAGE4 check N=262144_H=261120_rep=9_first_jump_after_N expected=idx 1, 261132 B (<= N) actual=idx 1, 261132 B ok
+STAGE4 check N=262144_H=261120_rep=9_every_channel_write_<=_N expected=<=262144 actual=261132 ok
+STAGE4 check N=262144_H=261120_rep=9_channel_writes_equal_model expected=3 writes, 783396 B actual=3 writes, 783396 B ok
+STAGE4 check N=262144_H=261120_rep=9_bytesWritten expected=783396 actual=783396 ok
+STAGE4 check N=262144_H=261120_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=783438 actual=783438 ok
+STAGE4 check N=262144_H=261120_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 case heapagg N=262144 H=261120 rep=9 entry=261132 k=3 header=42 bytesWritten=783396 fileAfterClose=783438 channelWrites=3 zeroLengthWriteCalls=0 channelWriteBytes=783396 maxWrite=261132 maxBufPos=261132 firstJumpIdx=1 firstJumpBytes=261132 writes=[261132, 261132, 261132]
+STAGE4 check heapagg_N=262144_H=261120_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_bufpos_le_N expected=<=262144 actual=261132 ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_first_jump_after_N expected=idx 1, 261132 B (<= N) actual=idx 1, 261132 B ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_every_channel_write_<=_N expected=<=262144 actual=261132 ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_channel_writes_equal_model expected=3 writes, 783396 B actual=3 writes, 783396 B ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_bytesWritten expected=783396 actual=783396 ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=783438 actual=783438 ok
+STAGE4 check heapagg_N=262144_H=261120_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check heapagg_N=262144_H=261120_same_(fileLen,pos)_sequence_as_direct expected=equal actual=equal ok
+STAGE4 case N=262144 H=307200 rep=9 entry=307212 k=3 header=42 bytesWritten=921636 fileAfterClose=921678 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=921636 maxWrite=307212 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=307212 writes=[307212, 307212, 307212]
+STAGE4 check N=262144_H=307200_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=307200_rep=9_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check N=262144_H=307200_rep=9_oversized_written_through(+E each append, buffer unchanged at 0) expected=+307212 each, pos 0 actual=as expected ok
+STAGE4 check N=262144_H=307200_rep=9_channel_writes_(one per entry, each E bytes) expected=3 x 307212 actual=3 writes, max 307212 ok
+STAGE4 check N=262144_H=307200_rep=9_channel_writes_equal_model expected=3 writes, 921636 B actual=3 writes, 921636 B ok
+STAGE4 check N=262144_H=307200_rep=9_bytesWritten expected=921636 actual=921636 ok
+STAGE4 check N=262144_H=307200_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=921678 actual=921678 ok
+STAGE4 check N=262144_H=307200_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=262144_H=307200_rep=9_through_check expected=ok actual=true ok
+STAGE4 case heapagg N=262144 H=307200 rep=9 entry=307212 k=3 header=42 bytesWritten=921636 fileAfterClose=921678 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=921636 maxWrite=307212 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=307212 writes=[307212, 307212, 307212]
+STAGE4 check heapagg_N=262144_H=307200_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_oversized_written_through(+E each append, buffer unchanged at 0) expected=+307212 each, pos 0 actual=as expected ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_channel_writes_(one per entry, each E bytes) expected=3 x 307212 actual=3 writes, max 307212 ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_channel_writes_equal_model expected=3 writes, 921636 B actual=3 writes, 921636 B ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_bytesWritten expected=921636 actual=921636 ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=921678 actual=921678 ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check heapagg_N=262144_H=307200_rep=9_through_check expected=ok actual=true ok
+STAGE4 check heapagg_N=262144_H=307200_same_(fileLen,pos)_sequence_as_direct expected=equal actual=equal ok
+STAGE4 case N=262144 H=2097152 rep=9 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check N=262144_H=2097152_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check N=262144_H=2097152_rep=9_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check N=262144_H=2097152_rep=9_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check N=262144_H=2097152_rep=9_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check N=262144_H=2097152_rep=9_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check N=262144_H=2097152_rep=9_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check N=262144_H=2097152_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check N=262144_H=2097152_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check N=262144_H=2097152_rep=9_through_check expected=ok actual=true ok
+STAGE4 case heapagg N=262144 H=2097152 rep=9 entry=2097164 k=3 header=42 bytesWritten=6291492 fileAfterClose=6291534 channelWrites=3 zeroLengthWriteCalls=3 channelWriteBytes=6291492 maxWrite=2097164 maxBufPos=0 firstJumpIdx=0 firstJumpBytes=2097164 writes=[2097164, 2097164, 2097164]
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_model_each_append(flush points, position, file length) expected=as B2f actual=as B2f ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_bufpos_le_N expected=<=262144 actual=0 ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_oversized_written_through(+E each append, buffer unchanged at 0) expected=+2097164 each, pos 0 actual=as expected ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_channel_writes_(one per entry, each E bytes) expected=3 x 2097164 actual=3 writes, max 2097164 ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_channel_writes_equal_model expected=3 writes, 6291492 B actual=3 writes, 6291492 B ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_bytesWritten expected=6291492 actual=6291492 ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_fileLen_after_close_=_header+K*E(nothing lost or refused) expected=6291534 actual=6291534 ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_file_bytes_identical_to_header+K_entries expected=identical actual=identical ok
+STAGE4 check heapagg_N=262144_H=2097152_rep=9_through_check expected=ok actual=true ok
+STAGE4 check heapagg_N=262144_H=2097152_same_(fileLen,pos)_sequence_as_direct expected=equal actual=equal ok
+STAGE4 info filesizestop N=65536 H=1024 appended=1013 positionAtStop=1049510 fileAfterClose=1049510
+STAGE4 info filesizestop N=262144 H=1024 appended=1013 positionAtStop=1049510 fileAfterClose=1049510
+STAGE4 info filesizestop N=1048576 H=1024 appended=1013 positionAtStop=1049510 fileAfterClose=1049510
+STAGE4 check filesizestop_H=1024_stops_at_1MiB,_same_for_every_N expected=all = 1013 (header 42 B) actual=[1013, 1013, 1013] ok
+STAGE4 info filesizestop N=65536 H=102400 appended=11 positionAtStop=1126574 fileAfterClose=1126574
+STAGE4 info filesizestop N=262144 H=102400 appended=11 positionAtStop=1126574 fileAfterClose=1126574
+STAGE4 info filesizestop N=1048576 H=102400 appended=11 positionAtStop=1126574 fileAfterClose=1126574
+STAGE4 check filesizestop_H=102400_stops_at_1MiB,_same_for_every_N expected=all = 11 (header 42 B) actual=[11, 11, 11] ok
+STAGE4 info filesizestop N=65536 H=261120 appended=5 positionAtStop=1305702 fileAfterClose=1305702
+STAGE4 info filesizestop N=262144 H=261120 appended=5 positionAtStop=1305702 fileAfterClose=1305702
+STAGE4 info filesizestop N=1048576 H=261120 appended=5 positionAtStop=1305702 fileAfterClose=1305702
+STAGE4 check filesizestop_H=261120_stops_at_1MiB,_same_for_every_N expected=all = 5 (header 42 B) actual=[5, 5, 5] ok
+STAGE4 info filesizestop N=65536 H=307200 appended=4 positionAtStop=1228890 fileAfterClose=1228890
+STAGE4 info filesizestop N=262144 H=307200 appended=4 positionAtStop=1228890 fileAfterClose=1228890
+STAGE4 info filesizestop N=1048576 H=307200 appended=4 positionAtStop=1228890 fileAfterClose=1228890
+STAGE4 check filesizestop_H=307200_stops_at_1MiB,_same_for_every_N expected=all = 4 (header 42 B) actual=[4, 4, 4] ok
+STAGE4 info filesizestop N=65536 H=2097152 appended=1 positionAtStop=2097206 fileAfterClose=2097206
+STAGE4 info filesizestop N=262144 H=2097152 appended=1 positionAtStop=2097206 fileAfterClose=2097206
+STAGE4 info filesizestop N=1048576 H=2097152 appended=1 positionAtStop=2097206 fileAfterClose=2097206
+STAGE4 check filesizestop_H=2097152_stops_at_1MiB,_same_for_every_N expected=all = 1 (header 42 B) actual=[1, 1, 1] ok
+STAGE4 info tmpdir deleted=true
+STAGE4 summary checks=349 mismatches=0 errors=0
