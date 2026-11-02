@@ -121,10 +121,28 @@ denominator; without the field, "stage 3 progress" has no coherent answer.
   question instead.
 - **A file's agent is its name.** `--autonomous` or `--guided`; a file is never
   renamed to the other.
-- **Config-type and non-config type.** Every case's constraint is classed by where its
-  value comes from. **Config-type:** a yaml entry (`cassandra.yaml`) or a JVM property
-  (`-D`, e.g. a `CassandraRelevantProperties` constant); an operator can set it without
-  changing code. **Non-config type:** everything else: a per-table or per-index option,
-  a hard-coded constant, a runtime-queried value, a query parameter (CQL `LIMIT` and the
-  like), or no constraint. Name the class in the case file (A1 of an autonomous file,
-  "Limit type" of a guided one), and keep the finer type in the `_INDEX.md` Type column.
+- **Case, constraint, capacity (definition of 2026-10-29).** A case starts from an `if`
+  that compares a **usage** value with a **capacity** value. The agent traces the
+  capacity back to its initialization; the initializing variable is the **constraint**.
+  When several constraints determine one capacity, each constraint–capacity pair is its own
+  case. If the agent cannot tell which operand is the capacity, it traces every numeric
+  operand back to its initialization and each initializing variable is a candidate
+  constraint. A comparison against `0` is valid when the operand is a capacity or a
+  capacity minus usage (a gate, a `min(usage, capacity)`); a grow-on-demand buffer whose
+  capacity starts from a literal size counts that literal as the constraint. An `if` with
+  no operand that traces to a constraint (data or state only, a validation of a setting
+  against a literal bound, a reconciliation of two estimates) is **not a case**.
+  The estimate is `positive` if the constraint affects memory or disk usage and `negative`
+  otherwise; verification changes the constraint value in the unit and cluster tiers and
+  measures whether usage follows.
+- **Config-type and non-config type.** The constraint is classed by how its value is
+  initialized. **Config-type:** a yaml entry (`cassandra.yaml`) or a JVM property
+  (`-D`, e.g. a `CassandraRelevantProperties` constant). **Non-config type:** everything
+  else: a per-table or per-index option, a hard-coded constant or initial literal size, a
+  runtime-queried value, a query parameter (CQL `LIMIT` and the like). A case whose
+  capacity is fed by both is **mixed**. Name the class in the case file (A1 of an
+  autonomous file, "Limit type" of a guided one), and keep the finer type in the
+  `_INDEX.md` Type column. A literal in the `if` (such as the `0` in `capacity > 0`) does
+  not make a case non-config; the traced constraint decides. The `_INDEX.md` column
+  "Type (2026-10-29)" applies this definition to the 237 case files filed before it
+  (case files are not edited).
