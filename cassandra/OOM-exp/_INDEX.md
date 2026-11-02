@@ -15,6 +15,7 @@ file carry the rest.
 | Constraints | Result |
 |---|---|
 | [`memtable_heap_space` + `counter_cache_size`](cases/convergence/memtable_heap_space+counter_cache_size.md) | **OOMed** — safe alone, combined usage exceeded the heap (14 `OutOfMemoryError` throws) |
+| [`memtable_heap_space` + `counter_cache_size` + `key_cache_size`](cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md) | **OOMed, JVM killed** — safe alone, combined drove heap to 96.6% and crashed the process |
 
 ## Bypass cases ([`bypass-playbook.md`](bypass-playbook.md))
 
