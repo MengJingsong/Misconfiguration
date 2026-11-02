@@ -74,7 +74,8 @@ capacity — ideally driven far enough to threaten OOM.
 ## Playbooks
 
 Each direction is run from its own playbook — a repeatable procedure an agent
-or a person follows to produce one case. (Playbooks to be written next.)
+or a person follows to produce one case. Every closed case is tracked in
+[`_INDEX.md`](_INDEX.md).
 
 | Direction | Playbook | What it produces |
 |---|---|---|
