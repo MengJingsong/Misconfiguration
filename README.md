@@ -20,18 +20,22 @@ them:
 | **Target 2** | Show *how* each constraint restricts usage, via the exact code path. |
 | **Target 3** | Investigate bypass methods that could lead to resource exhaustion. |
 
-Each experiment folder covers some subset. The two Cassandra folders both
-cover **Target 1 + Target 2 together** — each result names a constraint *and*
-shows the code that enforces it — and both leave Target 3 out of scope,
-noting bypass-relevant observations in passing for later use:
+Each experiment folder covers some subset. The two `*-exp` Cassandra folders
+below both cover **Target 1 + Target 2 together** — each result names a
+constraint *and* shows the code that enforces it — and both leave Target 3
+out of scope, noting bypass-relevant observations in passing for later use.
+`OOM-exp` carries out **Target 3** for Cassandra, taking the constraints
+`if-check-exp` found as its input:
 
 | Folder | Status | Direction |
 |---|---|---|
 | [`cassandra/if-check-exp/`](cassandra/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
 | [`cassandra/entry-restriction-exp/`](cassandra/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
+| [`cassandra/OOM-exp/`](cassandra/OOM-exp/README.md) | **active** | Target 3: drive a test node OOM using `if-check-exp`'s constraints (convergence, bypass) |
 
-They are deliberately **not cross-referenced** — a line may legitimately
-appear in both.
+`if-check-exp` and `entry-restriction-exp` are deliberately **not
+cross-referenced** — a line may legitimately appear in both. `OOM-exp` is the
+one folder that intentionally depends on another (`if-check-exp`).
 
 **Targets are not stages.** An experiment folder may number its own *working
 stages* (`if-check-exp` has three: structural → lexical → semantic). Those
