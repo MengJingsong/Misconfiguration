@@ -1,0 +1,11 @@
+30
+# computed manually: the harness's own error-count.txt step never ran because the
+# convergence arm's final jcmd GC.heap_info failed (Premature EOF, the process was
+# already gone) and `set -Eeuo pipefail` aborted the script via the cleanup trap
+# before reaching the ERROR-count/oom-grep/dmesg steps. 30 is `grep -c '^ERROR'
+# logs/system.log` run directly afterward; all 30 are WriteTimeoutException on
+# CounterMutationStage threads (GC-pause-induced coordinator timeouts), not literal
+# OutOfMemoryError throws -- the actual OOM evidence is in gc-run-final.txt /
+# heap-final.txt (ReportJavaOutOfMemory safepoint, heap already fully expanded)
+# and the 1.35 GB logs/cassandra-*.hprof heap dump the JVM wrote before
+# -XX:OnOutOfMemoryError=kill -9 %p fired.
