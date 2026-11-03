@@ -55,9 +55,24 @@ The "OutOfMemoryError mentions: 1" line in every arm's `summary.txt` is a grep f
 
 **Why runs 4 and 5 did not show this:** run 4's 1-minute resize trimmed summaries before the row cache filled. Run 5's burst never wrote anything (the schema timeout above), so run 5 tested only the row cache.
 
-**Target-3 note.** Schedule B is a plausible operator story: a large row cache that is warm, then a bulk load into a table with dense index sampling (`min_index_interval=1`). It still needs `index_summary_resize_interval` well above default, or a burst that finishes before the next resize tick (the default is 60 minutes, so a 2-minute burst usually does), and an unrealistically fine-grained sampling setting to make the summaries large. It is less of a pure two-knob misconfiguration than the on-heap cases, but the kill itself is genuine.
+**Target-3 note.** Schedule B is a plausible operator story: a large row cache that is warm, then a bulk load into a table with dense index sampling. It does **not** depend on a non-default `index_summary_resize_interval`. The run used 120 m only so no tick could land inside an arm, but resize ticks run on a fixed period from node startup. With the default 60 m, a burst plus its compaction tail of about 2.5 minutes on a long-running node falls entirely between two ticks roughly 96% of the time (1 − 2.5/60), so the default behaves like this run's setting. What does stay unrealistic is `min_index_interval=1`, a per-table option set this fine only to make the summaries large with a feasible partition count. So the case rests on one yaml knob (`row_cache_size`) plus one aggressive table option, not two yaml knobs; the kill itself is genuine. Whether a much more frequent resize (1 m) prevents the kill is tested in the addendum below.
 
 **Group status:** the `row_cache_size` + `index_summary_capacity` pair is **closed (OOMed)**. The off-heap group stays open only for candidates not yet tried (`memtable_offheap_space`, the networking `BufferPool` family, `file_cache_size`); see `_constraint-groups.md`.
+
+## Addendum — schedule B with a 1-minute resize (arm C, 2026-11-03)
+
+**Question:** does a frequent `index_summary_resize_interval` (1 m, far below the 60 m default) keep schedule B under the off-heap budget?
+
+**Arm:** `C_converge_rowfirst_resize1m`: identical to `B_converge_rowfirst` (row cache filled to its cap first, then the 64-thread, 1.5M-partition burst, 50 retries/op, 2000 MiB cgroup, `-Xmx384M`) except `index_summary_resize_interval: 1m`. Files: [`row_cache_size+index_summary_capacity--run6/logs/C_converge_rowfirst_resize1m/`](row_cache_size+index_summary_capacity--run6/logs/C_converge_rowfirst_resize1m/).
+
+**Result: no off-heap kill, but the JVM died of a Java heap `OutOfMemoryError`.**
+
+- **Resize ran on schedule.** It ran every minute through the burst (16:00:41 to 16:05:04 local); the reported index-summary memory went 43.7 → 87.7 → 131.5 MB at successive ticks.
+- **Off-heap stayed under budget.** Row cache filled to 550 MiB (`RssAnon` 1503 MiB after the fill); peak `RssAnon` 1859 MiB (93%), flat from sample 75 on. cgroup `oom_kill 0`; no new `dmesg` kill line.
+- **Burst completed, but slowly.** 1.5M partitions in 4 m 23 s with 0 final errors (192 timeouts absorbed by retries), against 1 m 58 s in arm B.
+- **On-heap is what failed.** Old gen sat at 349 of 384 MiB with back-to-back full GCs that freed nothing (`349M->349M`, 2,265 GCs logged, full GCs from 15:44 during the row preload onward). The JVM threw `java.lang.OutOfMemoryError: Java heap space`, wrote a 504 MB heap dump (191 s, started about 16:04:30, during the burst), and `-XX:OnOutOfMemoryError="kill -9 %p"` killed it (scope ended 16:08:06). No ERROR line in `system.log`.
+
+**Reading.** The 1-minute resize did its job on the off-heap side: anonymous memory peaked at 1859 MiB, against 1973 MiB at arm B's kill. So a frequent resize does keep this pair under the off-heap budget. **The heap OOM is not attributed.** Candidates are the `-Xmx384M` heap with the 220 MiB memtable stabilizer under a slower, retried burst, or a flush backlog from cgroup reclaim pressure (the causal-chain path `convergence-playbook.md` marks out of scope). Neither was isolated; the heap dump is kept on the node at `~/cassandra-run1/logs/cassandra-1793738590-pid263350.hprof` and has not been analyzed. **Not counted as a convergence OOM.**
 
 ## Instrument check and process hygiene
 

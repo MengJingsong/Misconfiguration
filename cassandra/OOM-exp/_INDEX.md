@@ -17,9 +17,9 @@ file carry the rest.
 | [`memtable_heap_space` + `counter_cache_size`](cases/convergence/memtable_heap_space+counter_cache_size.md) | **OOMed** — safe alone, combined usage exceeded the heap (14 `OutOfMemoryError` throws) |
 | [`memtable_heap_space` + `counter_cache_size` + `key_cache_size`](cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md) | **OOMed, JVM killed** — safe alone, combined drove heap to 96.6% and crashed the process |
 | [`commitlog_total_space` + `max_hints_size_per_host`](cases/convergence/commitlog_total_space+max_hints_size_per_host.md) | **Not reached, blocked** — control arm ran the disk budget full from flush/compaction overhead before a convergence arm could run; retryable, not exhausted |
-| [`row_cache_size` + `index_summary_capacity`](cases/convergence/row_cache_size+index_summary_capacity.md) | **Not reached** — safe alone (24-29% free), combined peak 90% of a cgroup budget (naive sum predicted 106%); each cache's own eviction/resize kept operating under combined load |
+| [`row_cache_size` + `index_summary_capacity`](cases/convergence/row_cache_size+index_summary_capacity.md) | **Not reached (superseded by run 6)** — safe alone (24-29% free), combined peak 90% of a cgroup budget (naive sum predicted 106%); each cache's own eviction/resize kept operating under combined load |
 | [`row_cache_size` + `index_summary_capacity` (run 5 retry)](cases/convergence/row_cache_size+index_summary_capacity--run5.md) | **Void** — the concurrent burst wrote 0 partitions (stress client's CREATE TABLE timed out); superseded by run 6 |
-| [`row_cache_size` + `index_summary_capacity` (run 6, retries A and B)](cases/convergence/row_cache_size+index_summary_capacity--run6.md) | **OOMed (schedule B)** — row cache full, then index-summary burst: kernel cgroup OOM-kill at 1973 MiB of 2000 (alone 78% / 80%); concurrent schedule A peaked at 93%, no kill |
+| [`row_cache_size` + `index_summary_capacity` (run 6, retries A and B)](cases/convergence/row_cache_size+index_summary_capacity--run6.md) | **OOMed (schedule B)** — row cache full, then index-summary burst: kernel cgroup OOM-kill at 1973 MiB of 2000 (alone 78% / 80%); concurrent schedule A peaked at 93%, no kill; with a 1 m resize, no off-heap kill (93%) but an unattributed Java heap OOM |
 
 ## Bypass cases ([`bypass-playbook.md`](bypass-playbook.md))
 

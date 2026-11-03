@@ -74,7 +74,10 @@ re-derive them, only consumes them.
     at 1973 MiB anon of a 2000 MiB budget, during the post-burst
     flush/compaction; alone arms 78% / 80%. **Schedule A (concurrent)**
     peaked at 93% with no kill, because the burst and its compaction finished
-    long before the row cache filled. Pair closed as OOMed. Case file:
+    long before the row cache filled. With a 1-minute resize (addendum arm
+    C), no off-heap kill (93%), but the JVM died of an unattributed Java heap
+    `OutOfMemoryError` (heap dump kept on the node, unanalyzed). Run 4 is
+    superseded by run 6. Pair closed as OOMed. Case file:
     [`cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cases/convergence/row_cache_size+index_summary_capacity--run6.md).
   - Batch log: [`cases/convergence/_batch-log.md`](cases/convergence/_batch-log.md) —
     its "Shared-budget group status" table is the dedup record: on-heap is
