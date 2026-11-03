@@ -4,7 +4,7 @@ Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
 [`_INDEX.md`](_INDEX.md) for every closed case.
 
-## Status: active, two cases closed (OOMed), one blocked-retryable, one closed (not reached) (2026-11-03)
+## Status: active, three cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
 
 **Direction 1 (convergence) has two closed (OOMed) cases, one blocked case
 (disk — now paused by request, see below), and one closed off-heap case
@@ -14,7 +14,7 @@ re-derive them, only consumes them.
 
 ## Current state
 
-- **Convergence (`convergence-playbook.md`):** 4 cases run — 2 closed (OOMed), 1 blocked, 1 closed (OOM not reached).
+- **Convergence (`convergence-playbook.md`):** 6 cases run — 3 closed (OOMed: runs 1, 2, 6), 1 blocked (disk, skipped), 1 closed not reached (run 4), 1 void (run 5).
   - Run 1: `memtable_heap_space` + `counter_cache_size` (both config-type, both
     individually confirmed true positive in `if-check-exp`, both on-heap):
     sized safe alone (each left ~38–39% of a 1024 MiB heap free under its own
@@ -63,14 +63,26 @@ re-derive them, only consumes them.
     arm, so weren't filed as their own cases — they're the evidence behind
     the final sizing. Case file:
     [`cases/convergence/row_cache_size+index_summary_capacity.md`](cases/convergence/row_cache_size+index_summary_capacity.md).
+  - Run 5 (2026-11-03): retry of run 4's pair with a 30 m resize interval and
+    concurrent workloads. **Void:** the index-summary burst wrote 0
+    partitions (the stress client's `CREATE TABLE` timed out under the
+    concurrent read load; found in run 6). Case file, with a correction note:
+    [`cases/convergence/row_cache_size+index_summary_capacity--run5.md`](cases/convergence/row_cache_size+index_summary_capacity--run5.md).
+  - Run 6 (2026-11-03): both retries on the same pair, 120 m resize interval,
+    `isc.t` pre-created with `cqlsh`. **Schedule B (row cache filled to 550
+    MiB first, then a 1.5M-partition burst) OOMed:** kernel cgroup OOM-kill
+    at 1973 MiB anon of a 2000 MiB budget, during the post-burst
+    flush/compaction; alone arms 78% / 80%. **Schedule A (concurrent)**
+    peaked at 93% with no kill, because the burst and its compaction finished
+    long before the row cache filled. Pair closed as OOMed. Case file:
+    [`cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cases/convergence/row_cache_size+index_summary_capacity--run6.md).
   - Batch log: [`cases/convergence/_batch-log.md`](cases/convergence/_batch-log.md) —
     its "Shared-budget group status" table is the dedup record: on-heap is
     **exhausted** (2-way then 3-way, escalating outcome, no 4th
-    attempted since it wouldn't add evidence), off-heap is **open**
-    (run 4 unparked it with a working cgroup budget mechanism; the one
-    combination tried didn't OOM, but a concrete retry — longer
-    `index_summary_resize_interval`, or fully-concurrent rather than
-    sequential-then-concurrent preloads — is identified and not yet tried),
+    attempted since it wouldn't add evidence), off-heap is **open for other
+    candidates only** (its first pair, `row_cache_size` +
+    `index_summary_capacity`, closed as OOMed in run 6 under a
+    cgroup budget),
     disk is **skipped** (2026-11-02, by request — not exhausted or blocked,
     just deliberately paused; see run 3's case file for the retry that
     remains available once un-skipped). Read it before picking a combination
@@ -88,17 +100,12 @@ re-derive them, only consumes them.
   `phi_convict_threshold` or otherwise isolating/accounting for the
   contention-induced false-suspicion hint growth seen in the control arm —
   see the case file §3.0/§4 for exact numbers and diagnosis.
-- **Off-heap convergence retry (run 4's own identified next step, not yet
-  tried)**: `row_cache_size` + `index_summary_capacity` didn't OOM on the
-  first attempt (§4 of run 4's case file). The specific retry identified
-  there: (a) a longer `index_summary_resize_interval` so the pre-resize raw
-  transient has more time to grow before being trimmed, and/or (b) running
-  the index-summary write burst and the row-cache read pass fully
-  concurrently from the start (this run's preloads were sequential, only the
-  fill/resize phases overlapped) — either should more faithfully force both
-  constraints' own worst transient moments to coincide. The cgroup-budget
-  mechanism itself is proven working; this is a workload-timing fix, not a
-  re-survey.
+- **Off-heap group, next pair (the run 4 retry is done; closed as OOMed in
+  run 6):** the remaining off-heap candidates are untried:
+  `memtable_offheap_space`, the networking `BufferPool` family (likely one
+  shared pool; see `_constraint-groups.md`), and `file_cache_size`. Check
+  each one's allocation path (JNA malloc vs `DirectByteBuffer`) first, and
+  pre-create any stress-profile table with `cqlsh` before a concurrent load.
 - **Tighter boundary sizing** for either closed heap case: both were sized with
   margin to exceed the heap, not to find the minimum combination that still
   OOMs. A follow-up run could binary-search that boundary.

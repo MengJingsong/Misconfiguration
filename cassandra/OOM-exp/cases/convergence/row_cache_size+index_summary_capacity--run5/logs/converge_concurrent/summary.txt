@@ -1,0 +1,269 @@
+yaml diff: -# row_cache_class_name: org.apache.cassandra.cache.OHCProvider|+row_cache_class_name: org.apache.cassandra.cache.SerializingCacheProvider|-row_cache_size: 0MiB|+row_cache_size: 550MiB|-# memtable_heap_space: 2048MiB|+memtable_heap_space: 220MiB|-index_summary_capacity:|+index_summary_capacity: 100MiB|-index_summary_resize_interval: 60m|+index_summary_resize_interval: 30m|
+node pid 221742, systemd scope unit oom-offheap5-1793730487343516458, cgroup budget 2000MiB
+startup lines: INFO  [main] 2026-11-03T18:28:08,711 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_filtering_enabled=true; allow_insecure_udfs=false; alter_table_enabled=true; audit_logging_options=AuditLogOptions{enabled=false, logger='BinAuditLoggernull', included_keyspaces='', excluded_keyspaces='system,system_schema,system_virtual_schema', included_categories='', excluded_categories='', included_users='', excluded_users='', audit_logs_dir='/users/jason92/cassandra-run1/logs/audit', archive_command='', roll_cycle='HOURLY', block=true, max_queue_weight=268435456, max_log_size=17179869184, max_archive_retries=10}; auth_cache_warming_enabled=false; auth_read_consistency_level=LOCAL_QUORUM; auth_write_consistency_level=EACH_QUORUM; authenticator=AllowAllAuthenticator{}; authorizer=AllowAllAuthorizer{}; auto_bootstrap=true; auto_hints_cleanup_enabled=false; auto_optimise_full_repair_streams=false; auto_optimise_inc_repair_streams=false; auto_optimise_preview_repair_streams=false; auto_repair=AutoRepairConfig{enabled=false, repair_check_interval=5m, history_clear_delete_hosts_buffer_interval=2h, repair_task_min_duration=5s, global_settings=Options{enabled=false, repair_by_keyspace=true, number_of_repair_threads=1, parallel_repair_count=3, parallel_repair_percentage=3, allow_parallel_replica_repair=false, allow_parallel_replica_repair_across_schedules=true, sstable_upper_threshold=50000, min_repair_interval=24h, ignore_dcs=[], repair_primary_token_range_only=true, force_repair_new_node=false, table_max_repair_time=6h, materialized_view_repair_enabled=false, token_range_splitter=org.apache.cassandra.repair.autorepair.RepairTokenRangeSplitter{}, intial_scheduler_delay=5m, repair_session_timeout=3h}, repair_type_overrides={}}; auto_snapshot=true; auto_snapshot_ttl=null; autocompaction_on_startup_enabled=true; automatic_sstable_upgrade=false; available_processors=-1; back_pressure_enabled=false; back_pressure_strategy=null; batch_size_fail_threshold=50KiB; batch_size_warn_threshold=5KiB; batchlog_endpoint_strategy=random_remote; batchlog_replay_throttle=1024KiB; block_for_peers_in_remote_dcs=false; block_for_peers_timeout_in_secs=10; broadcast_address=null; broadcast_rpc_address=null; buffer_pool_use_heap_if_exhausted=false; cache_load_timeout=30s; cas_contention_timeout=1000ms; cdc_block_writes=true; cdc_enabled=false; cdc_free_space_check_interval=250ms; cdc_on_repair_enabled=true; cdc_raw_directory=null; cdc_total_space=0MiB; check_for_duplicate_rows_during_compaction=true; check_for_duplicate_rows_during_reads=true; cidr_authorizer=AllowAllCIDRAuthorizernull; client_encryption_options=<REDACTED>; client_error_reporting_exclusions=SubnetGroups{subnets=[]}; client_request_size_metrics_enabled=true; cluster_name=Test Cluster; collection_size_fail_threshold=null; collection_size_warn_threshold=null; column_index_cache_size=2KiB; column_index_size=null; column_value_size_fail_threshold=null; column_value_size_warn_threshold=null; columns_per_table_fail_threshold=-1; columns_per_table_warn_threshold=-1; commit_failure_policy=stop; commitlog_compression=null; commitlog_directory=null; commitlog_disk_access_mode=legacy; commitlog_max_compression_buffers_in_pool=3; commitlog_segment_size=32MiB; commitlog_sync=periodic; commitlog_sync_group_window=0ms; commitlog_sync_period=10000ms; commitlog_total_space=null; compact_tables_enabled=true; compaction_throughput=64MiB/s; compressed_read_ahead_buffer_size=256KiB; concurrent_compactors=null; concurrent_counter_writes=32; concurrent_index_builders=2; concurrent_materialized_view_builders=1; concurrent_materialized_view_writes=32; concurrent_merkle_tree_requests=0; concurrent_reads=32; concurrent_validations=0; concurrent_writes=32; consecutive_message_errors_threshold=1; coordinator_read_size_fail_threshold=null; coordinator_read_size_warn_threshold=null; corrupted_tombstone_strategy=disabled; counter_cache_keys_to_save=2147483647; counter_cache_save_period=7200s; counter_cache_size=null; counter_write_request_timeout=5000ms; cql_start_time=REQUEST; credentials_cache_active_update=false; credentials_cache_max_entries=1000; credentials_update_interval=null; credentials_validity=2000ms; crypto_provider=org.apache.cassandra.security.DefaultCryptoProvider{fail_on_missing_provider=false}; data_disk_usage_max_disk_size=null; data_disk_usage_percentage_fail_threshold=-1; data_disk_usage_percentage_warn_threshold=-1; data_file_directories=[Ljava.lang.String;@598bd2ba; default_compaction=null; default_keyspace_rf=1; default_secondary_index=legacy_local_table; default_secondary_index_enabled=true; denylist_consistency_level=QUORUM; denylist_initial_load_retry=5s; denylist_max_keys_per_table=1000; denylist_max_keys_total=10000; denylist_range_reads_enabled=true; denylist_reads_enabled=true; denylist_refresh=600s; denylist_writes_enabled=true; diagnostic_events_enabled=false; disk_access_mode=mmap_index_only; disk_failure_policy=stop; disk_optimization_estimate_percentile=0.95; disk_optimization_page_cross_chance=0.1; disk_optimization_strategy=ssd; drop_compact_storage_enabled=false; drop_keyspace_enabled=true; drop_truncate_table_enabled=true; dump_heap_on_uncaught_exception=false; dynamic_data_masking_enabled=false; dynamic_snitch=true; dynamic_snitch_badness_threshold=1.0; dynamic_snitch_reset_interval=600000ms; dynamic_snitch_update_interval=100ms; endpoint_snitch=SimpleSnitch; enforce_native_deadline_for_hints=false; entire_sstable_inter_dc_stream_throughput_outbound=24MiB/s; entire_sstable_stream_throughput_outbound=24MiB/s; failure_detector=FailureDetector; fields_per_udt_fail_threshold=-1; fields_per_udt_warn_threshold=-1; file_cache_enabled=false; file_cache_round_up=null; file_cache_size=null; flush_compression=fast; force_new_prepared_statement_behaviour=false; force_optimized_index_status_format=false; full_query_logging_options=FullQueryLoggerOptions{log_dir='', archive_command='', roll_cycle='HOURLY', block=true, max_queue_weight=268435456, max_log_size=17179869184}; gc_log_threshold=200ms; gc_warn_threshold=1s; group_by_enabled=true; heap_dump_path=heapdump; hint_window_persistent_enabled=true; hinted_handoff_disabled_datacenters=[]; hinted_handoff_enabled=true; hinted_handoff_throttle=1024KiB; hints_compression=null; hints_directory=null; hints_flush_period=10000ms; ideal_consistency_level=null; in_select_cartesian_product_fail_threshold=-1; in_select_cartesian_product_warn_threshold=-1; incremental_backups=false; index_summary_capacity=100MiB; index_summary_resize_interval=30m; initial_range_tombstone_list_allocation_size=1; initial_token=null; inter_dc_stream_throughput_outbound=24MiB/s; inter_dc_tcp_nodelay=false; internode_application_receive_queue_capacity=4MiB; internode_application_receive_queue_reserve_endpoint_capacity=128MiB; internode_application_receive_queue_reserve_global_capacity=512MiB; internode_application_send_queue_capacity=4MiB; internode_application_send_queue_reserve_endpoint_capacity=128MiB; internode_application_send_queue_reserve_global_capacity=512MiB; internode_authenticator=null; internode_compression=dc; internode_error_reporting_exclusions=SubnetGroups{subnets=[]}; internode_max_message_size=null; internode_socket_receive_buffer_size=0B; internode_socket_send_buffer_size=0B; internode_streaming_tcp_user_timeout=300s; internode_tcp_connect_timeout=2s; internode_tcp_user_timeout=30s; internode_timeout=true; intersect_filtering_query_enabled=true; intersect_filtering_query_warned=true; invalid_legacy_protocol_magic_no_spam_enabled=false; items_per_collection_fail_threshold=-1; items_per_collection_warn_threshold=-1; key_cache_invalidate_after_sstable_deletion=false; key_cache_keys_to_save=2147483647; key_cache_migrate_during_compaction=true; key_cache_save_period=4h; key_cache_size=null; keyspaces_fail_threshold=-1; keyspaces_warn_threshold=-1; listen_address=localhost; listen_interface=null; listen_interface_prefer_ipv6=false; listen_on_broadcast_address=false; local_read_size_fail_threshold=null; local_read_size_warn_threshold=null; local_system_data_file_directory=null; log_out_of_token_range_requests=true; materialized_views_enabled=false; materialized_views_on_repair_enabled=true; materialized_views_per_table_fail_threshold=-1; materialized_views_per_table_warn_threshold=-1; max_concurrent_automatic_sstable_upgrades=1; max_hint_window=3h; max_hints_delivery_threads=2; max_hints_file_size=128MiB; max_hints_size_per_host=0B; max_mutation_size=null; max_space_usable_for_compactions_in_percentage=0.95; max_streaming_retries=3; max_top_size_partition_count=10; max_top_tombstone_partition_count=10; max_value_size=256MiB; maximum_replication_factor_fail_threshold=-1; maximum_replication_factor_warn_threshold=-1; maximum_timestamp_fail_threshold=null; maximum_timestamp_warn_threshold=null; memtable=org.apache.cassandra.config.Config$MemtableOptions@3fed2870; memtable_allocation_type=heap_buffers; memtable_cleanup_threshold=null; memtable_flush_writers=0; memtable_heap_space=220MiB; memtable_offheap_space=null; min_free_space_per_drive=50MiB; min_tracked_partition_size=1MiB; min_tracked_partition_tombstone_count=5000; minimum_replication_factor_fail_threshold=-1; minimum_replication_factor_warn_threshold=-1; minimum_timestamp_fail_threshold=null; minimum_timestamp_warn_threshold=null; native_transport_allow_older_protocols=true; native_transport_flush_in_batches_legacy=false; native_transport_idle_timeout=0ms; native_transport_max_auth_threads=4; native_transport_max_backoff_on_queue_overload=200ms; native_transport_max_concurrent_connections=-1; native_transport_max_concurrent_connections_per_ip=-1; native_transport_max_frame_size=16MiB; native_transport_max_message_size=null; native_transport_max_request_data_in_flight=null; native_transport_max_request_data_in_flight_per_ip=null; native_transport_max_requests_per_second=1000000; native_transport_max_threads=128; native_transport_min_backoff_on_queue_overload=10ms; native_transport_port=9042; native_transport_port_ssl=null; native_transport_queue_max_item_age_threshold=1.7976931348623157E308; native_transport_rate_limiting_enabled=false; native_transport_receive_queue_capacity=1MiB; native_transport_throw_on_overload=false; native_transport_timeout=12s; network_authorizer=AllowAllNetworkAuthorizer{}; networking_cache_size=null; non_partition_restricted_index_query_enabled=true; num_tokens=16; otc_backlog_expiration_interval_ms=200; otc_coalescing_enough_coalesced_messages=8; otc_coalescing_strategy=DISABLED; otc_coalescing_window_us=200; page_size_fail_threshold=-1; page_size_warn_threshold=-1; partition_denylist_enabled=false; partition_keys_in_select_fail_threshold=-1; partition_keys_in_select_warn_threshold=-1; partition_size_fail_threshold=null; partition_size_warn_threshold=null; partition_tombstones_fail_threshold=-1; partition_tombstones_warn_threshold=-1; partitioner=org.apache.cassandra.dht.Murmur3Partitioner; paxos_cache_size=null; paxos_contention_max_wait=null; paxos_contention_min_delta=null; paxos_contention_min_wait=null; paxos_contention_wait_randomizer=null; paxos_on_linearizability_violations=ignore; paxos_purge_grace_period=60s; paxos_repair_enabled=true; paxos_repair_parallelism=-1; paxos_repair_race_wait=true; paxos_state_purging=null; paxos_topology_repair_no_dc_checks=false; paxos_topology_repair_strict_each_quorum=false; paxos_variant=v1; periodic_commitlog_sync_lag_block=null; permissions_cache_active_update=false; permissions_cache_max_entries=1000; permissions_update_interval=null; permissions_validity=2000ms; phi_convict_threshold=8.0; prepared_statements_cache_size=null; range_request_timeout=10000ms; range_tombstone_list_growth_factor=1.5; read_before_write_list_operations_enabled=true; read_consistency_levels_disallowed=[]; read_consistency_levels_warned=[]; read_request_timeout=5000ms; read_thresholds_enabled=false; reject_out_of_token_range_requests=false; reject_repair_compaction_threshold=2147483647; repair_command_pool_full_strategy=queue; repair_command_pool_size=0; repair_disk_headroom_reject_ratio=0.0; repair_request_timeout=120000ms; repair_session_max_tree_depth=null; repair_session_space=null; repair_state_expires=3d; repair_state_size=100000; repaired_data_tracking_for_partition_reads_enabled=false; repaired_data_tracking_for_range_reads_enabled=false; report_unconfirmed_repaired_data_mismatches=false; request_timeout=10000ms; role_manager=CassandraRoleManager{}; roles_cache_active_update=false; roles_cache_max_entries=1000; roles_update_interval=null; roles_validity=2000ms; row_cache_class_name=org.apache.cassandra.cache.SerializingCacheProvider; row_cache_keys_to_save=2147483647; row_cache_save_period=0s; row_cache_size=550MiB; row_index_read_size_fail_threshold=null; row_index_read_size_warn_threshold=null; rpc_address=localhost; rpc_interface=null; rpc_interface_prefer_ipv6=false; rpc_keepalive=true; sai_frozen_term_size_fail_threshold=8KiB; sai_frozen_term_size_warn_threshold=1KiB; sai_options=org.apache.cassandra.config.StorageAttachedIndexOptions@289710d9; sai_sstable_indexes_per_query_fail_threshold=-1; sai_sstable_indexes_per_query_warn_threshold=32; sai_string_term_size_fail_threshold=8KiB; sai_string_term_size_warn_threshold=1KiB; sai_vector_term_size_fail_threshold=32KiB; sai_vector_term_size_warn_threshold=16KiB; sasi_indexes_enabled=false; saved_caches_directory=null; scripted_user_defined_functions_enabled=false; secondary_indexes_enabled=true; secondary_indexes_per_table_fail_threshold=-1; secondary_indexes_per_table_warn_threshold=-1; seed_provider=org.apache.cassandra.locator.SimpleSeedProvider{seeds=127.0.0.1:7000}; server_encryption_options=<REDACTED>; severity_during_decommission=0.0; simplestrategy_enabled=true; skip_paxos_repair_on_topology_change=false; skip_paxos_repair_on_topology_change_keyspaces=[]; skip_stream_disk_space_check=false; slow_query_log_timeout=500ms; snapshot_before_compaction=false; snapshot_links_per_second=0; snapshot_on_duplicate_row_detection=false; snapshot_on_repaired_data_mismatch=false; ssl_storage_port=7001; sstable_preemptive_open_interval=50MiB; sstable_read_rate_persistence_enabled=false; start_native_transport=true; startup_checks={}; storage_compatibility_mode=CASSANDRA_4; storage_port=7000; stream_entire_sstables=true; stream_throughput_outbound=24MiB/s; stream_transfer_task_timeout=12h; streaming_connections_per_host=1; streaming_keep_alive_period=300s; streaming_slow_events_log_timeout=10s; streaming_state_expires=3d; streaming_state_size=40MiB; streaming_stats_enabled=true; table_properties_disallowed=[]; table_properties_ignored=[]; table_properties_warned=[]; tables_fail_threshold=-1; tables_warn_threshold=-1; tombstone_failure_threshold=100000; tombstone_warn_threshold=1000; top_partitions_enabled=true; trace_type_query_ttl=1d; trace_type_repair_ttl=7d; transfer_hints_on_decommission=true; transient_replication_enabled=false; transparent_data_encryption_options=org.apache.cassandra.config.TransparentDataEncryptionOptions@5a755cc1; traverse_auth_from_root=false; trickle_fsync=false; trickle_fsync_interval=10240KiB; truncate_request_timeout=60000ms; uncompressed_tables_enabled=true; unlogged_batch_across_partitions_warn_threshold=10; use_creation_time_for_hint_ttl=true; use_deterministic_table_id=false; use_offheap_merkle_trees=true; use_statements_enabled=true; user_defined_functions_enabled=false; user_defined_functions_fail_timeout=1500ms; user_defined_functions_threads_enabled=true; user_defined_functions_warn_timeout=500ms; user_function_timeout_policy=die; user_timestamps_enabled=true; uuid_sstable_identifiers_enabled=false; validation_preview_purge_head_start=3600s; vector_dimensions_fail_threshold=-1; vector_dimensions_warn_threshold=-1; vector_type_enabled=true; windows_timer_interval=0; write_consistency_levels_disallowed=[]; write_consistency_levels_warned=[]; write_request_timeout=2000ms; zero_ttl_on_twcs_enabled=true; zero_ttl_on_twcs_warned=true]|INFO  [MemtableFlushWriter:1] 2026-11-03T18:28:12,182 CacheService.java:143 - Initializing row cache with capacity of 550 MiBs|INFO  [main] 2026-11-03T18:28:13,527 IndexSummaryManager.java:105 - Initializing index summary manager with a memory pool size of 100 MB and a resize interval of 30 minutes|
+== arm converge_concurrent: R=550MiB I=100MiB workloads=row,conc budget=2000MiB N_row=550000 N_isc=1500000
+rss idle: VmHWM:	 1087092 kB VmRSS:	 1087092 kB RssAnon:	  907500 kB RssFile:	  179592 kB RssShmem:	       0 kB 
+cgroup idle: memory.current=955576320 memory.max=2097152000 memory.events=low 0 high 0 max 0 oom 0 oom_kill 0 
+row preload done: 550000 partitions written, caching set to rows_per_partition=ALL, flushed
+rss after-row-preload: VmHWM:	 1271348 kB VmRSS:	 1204632 kB RssAnon:	 1008272 kB RssFile:	  196360 kB RssShmem:	       0 kB 
+cgroup after-row-preload: memory.current=2060292096 memory.max=2097152000 memory.events=low 0 high 0 max 28624 oom 0 oom_kill 0 
+rss t1: VmHWM:	 1271348 kB VmRSS:	 1206892 kB RssAnon:	 1011532 kB RssFile:	  195360 kB RssShmem:	       0 kB 
+cgroup t1: memory.current=2097131520 memory.max=2097152000 memory.events=low 0 high 0 max 29740 oom 0 oom_kill 0 
+rss t2: VmHWM:	 1271348 kB VmRSS:	 1216928 kB RssAnon:	 1013692 kB RssFile:	  203236 kB RssShmem:	       0 kB 
+cgroup t2: memory.current=2096734208 memory.max=2097152000 memory.events=low 0 high 0 max 30579 oom 0 oom_kill 0 
+rss t3: VmHWM:	 1271348 kB VmRSS:	 1218104 kB RssAnon:	 1014080 kB RssFile:	  204024 kB RssShmem:	       0 kB 
+cgroup t3: memory.current=2010447872 memory.max=2097152000 memory.events=low 0 high 0 max 31269 oom 0 oom_kill 0 
+rss t4: VmHWM:	 1271348 kB VmRSS:	 1219108 kB RssAnon:	 1014500 kB RssFile:	  204608 kB RssShmem:	       0 kB 
+cgroup t4: memory.current=2097131520 memory.max=2097152000 memory.events=low 0 high 0 max 31293 oom 0 oom_kill 0 
+rss t5: VmHWM:	 1271348 kB VmRSS:	 1216788 kB RssAnon:	 1011768 kB RssFile:	  205020 kB RssShmem:	       0 kB 
+cgroup t5: memory.current=2096701440 memory.max=2097152000 memory.events=low 0 high 0 max 31891 oom 0 oom_kill 0 
+rss t6: VmHWM:	 1271348 kB VmRSS:	 1221932 kB RssAnon:	 1016612 kB RssFile:	  205320 kB RssShmem:	       0 kB 
+cgroup t6: memory.current=2090254336 memory.max=2097152000 memory.events=low 0 high 0 max 32351 oom 0 oom_kill 0 
+rss t7: VmHWM:	 1271348 kB VmRSS:	 1227348 kB RssAnon:	 1021636 kB RssFile:	  205712 kB RssShmem:	       0 kB 
+cgroup t7: memory.current=2058055680 memory.max=2097152000 memory.events=low 0 high 0 max 32994 oom 0 oom_kill 0 
+rss t8: VmHWM:	 1271348 kB VmRSS:	 1229580 kB RssAnon:	 1025508 kB RssFile:	  204072 kB RssShmem:	       0 kB 
+cgroup t8: memory.current=2074976256 memory.max=2097152000 memory.events=low 0 high 0 max 33573 oom 0 oom_kill 0 
+rss t9: VmHWM:	 1271348 kB VmRSS:	 1233056 kB RssAnon:	 1029480 kB RssFile:	  203576 kB RssShmem:	       0 kB 
+cgroup t9: memory.current=2047610880 memory.max=2097152000 memory.events=low 0 high 0 max 34260 oom 0 oom_kill 0 
+rss t10: VmHWM:	 1271348 kB VmRSS:	 1236400 kB RssAnon:	 1035008 kB RssFile:	  201392 kB RssShmem:	       0 kB 
+cgroup t10: memory.current=2097152000 memory.max=2097152000 memory.events=low 0 high 0 max 34729 oom 0 oom_kill 0 
+rss t11: VmHWM:	 1271348 kB VmRSS:	 1241064 kB RssAnon:	 1040672 kB RssFile:	  200392 kB RssShmem:	       0 kB 
+cgroup t11: memory.current=2097078272 memory.max=2097152000 memory.events=low 0 high 0 max 35357 oom 0 oom_kill 0 
+rss t12: VmHWM:	 1271348 kB VmRSS:	 1244624 kB RssAnon:	 1044556 kB RssFile:	  200068 kB RssShmem:	       0 kB 
+cgroup t12: memory.current=2097041408 memory.max=2097152000 memory.events=low 0 high 0 max 36004 oom 0 oom_kill 0 
+rss t13: VmHWM:	 1271348 kB VmRSS:	 1247352 kB RssAnon:	 1058732 kB RssFile:	  188620 kB RssShmem:	       0 kB 
+cgroup t13: memory.current=2049011712 memory.max=2097152000 memory.events=low 0 high 0 max 36725 oom 0 oom_kill 0 
+rss t14: VmHWM:	 1271348 kB VmRSS:	 1250568 kB RssAnon:	 1061800 kB RssFile:	  188768 kB RssShmem:	       0 kB 
+cgroup t14: memory.current=2097041408 memory.max=2097152000 memory.events=low 0 high 0 max 37138 oom 0 oom_kill 0 
+rss t15: VmHWM:	 1271348 kB VmRSS:	 1255184 kB RssAnon:	 1066284 kB RssFile:	  188900 kB RssShmem:	       0 kB 
+cgroup t15: memory.current=2096873472 memory.max=2097152000 memory.events=low 0 high 0 max 37966 oom 0 oom_kill 0 
+rss t16: VmHWM:	 1271348 kB VmRSS:	 1262496 kB RssAnon:	 1073408 kB RssFile:	  189088 kB RssShmem:	       0 kB 
+cgroup t16: memory.current=2081882112 memory.max=2097152000 memory.events=low 0 high 0 max 37981 oom 0 oom_kill 0 
+rss t17: VmHWM:	 1271824 kB VmRSS:	 1271824 kB RssAnon:	 1082520 kB RssFile:	  189304 kB RssShmem:	       0 kB 
+cgroup t17: memory.current=2097070080 memory.max=2097152000 memory.events=low 0 high 0 max 38194 oom 0 oom_kill 0 
+rss t18: VmHWM:	 1278548 kB VmRSS:	 1278548 kB RssAnon:	 1088784 kB RssFile:	  189764 kB RssShmem:	       0 kB 
+cgroup t18: memory.current=2097082368 memory.max=2097152000 memory.events=low 0 high 0 max 38481 oom 0 oom_kill 0 
+rss t19: VmHWM:	 1290360 kB VmRSS:	 1289944 kB RssAnon:	 1101664 kB RssFile:	  188280 kB RssShmem:	       0 kB 
+cgroup t19: memory.current=2054946816 memory.max=2097152000 memory.events=low 0 high 0 max 38753 oom 0 oom_kill 0 
+rss t20: VmHWM:	 1298904 kB VmRSS:	 1298904 kB RssAnon:	 1110496 kB RssFile:	  188408 kB RssShmem:	       0 kB 
+cgroup t20: memory.current=2097016832 memory.max=2097152000 memory.events=low 0 high 0 max 38781 oom 0 oom_kill 0 
+rss t21: VmHWM:	 1331564 kB VmRSS:	 1331564 kB RssAnon:	 1143072 kB RssFile:	  188492 kB RssShmem:	       0 kB 
+cgroup t21: memory.current=2097016832 memory.max=2097152000 memory.events=low 0 high 0 max 39247 oom 0 oom_kill 0 
+rss t22: VmHWM:	 1336864 kB VmRSS:	 1336864 kB RssAnon:	 1148336 kB RssFile:	  188528 kB RssShmem:	       0 kB 
+cgroup t22: memory.current=2097143808 memory.max=2097152000 memory.events=low 0 high 0 max 39554 oom 0 oom_kill 0 
+rss t23: VmHWM:	 1344680 kB VmRSS:	 1344680 kB RssAnon:	 1156124 kB RssFile:	  188556 kB RssShmem:	       0 kB 
+cgroup t23: memory.current=2097131520 memory.max=2097152000 memory.events=low 0 high 0 max 39882 oom 0 oom_kill 0 
+rss t24: VmHWM:	 1353160 kB VmRSS:	 1353160 kB RssAnon:	 1164548 kB RssFile:	  188612 kB RssShmem:	       0 kB 
+cgroup t24: memory.current=2096963584 memory.max=2097152000 memory.events=low 0 high 0 max 40205 oom 0 oom_kill 0 
+rss t25: VmHWM:	 1362948 kB VmRSS:	 1362948 kB RssAnon:	 1174300 kB RssFile:	  188648 kB RssShmem:	       0 kB 
+cgroup t25: memory.current=2097016832 memory.max=2097152000 memory.events=low 0 high 0 max 40544 oom 0 oom_kill 0 
+rss t26: VmHWM:	 1375064 kB VmRSS:	 1375064 kB RssAnon:	 1186368 kB RssFile:	  188696 kB RssShmem:	       0 kB 
+cgroup t26: memory.current=2097119232 memory.max=2097152000 memory.events=low 0 high 0 max 40894 oom 0 oom_kill 0 
+rss t27: VmHWM:	 1387140 kB VmRSS:	 1387136 kB RssAnon:	 1198352 kB RssFile:	  188784 kB RssShmem:	       0 kB 
+cgroup t27: memory.current=2097000448 memory.max=2097152000 memory.events=low 0 high 0 max 41244 oom 0 oom_kill 0 
+rss t28: VmHWM:	 1398652 kB VmRSS:	 1398652 kB RssAnon:	 1209868 kB RssFile:	  188784 kB RssShmem:	       0 kB 
+cgroup t28: memory.current=2096963584 memory.max=2097152000 memory.events=low 0 high 0 max 41605 oom 0 oom_kill 0 
+rss t29: VmHWM:	 1422548 kB VmRSS:	 1421968 kB RssAnon:	 1233168 kB RssFile:	  188800 kB RssShmem:	       0 kB 
+cgroup t29: memory.current=2097152000 memory.max=2097152000 memory.events=low 0 high 0 max 42043 oom 0 oom_kill 0 
+rss t30: VmHWM:	 1442236 kB VmRSS:	 1442236 kB RssAnon:	 1253420 kB RssFile:	  188816 kB RssShmem:	       0 kB 
+cgroup t30: memory.current=2096996352 memory.max=2097152000 memory.events=low 0 high 0 max 42472 oom 0 oom_kill 0 
+rss t31: VmHWM:	 1451540 kB VmRSS:	 1449204 kB RssAnon:	 1260436 kB RssFile:	  188768 kB RssShmem:	       0 kB 
+cgroup t31: memory.current=2097135616 memory.max=2097152000 memory.events=low 0 high 0 max 42827 oom 0 oom_kill 0 
+rss t32: VmHWM:	 1463536 kB VmRSS:	 1463536 kB RssAnon:	 1275040 kB RssFile:	  188496 kB RssShmem:	       0 kB 
+cgroup t32: memory.current=2097135616 memory.max=2097152000 memory.events=low 0 high 0 max 43234 oom 0 oom_kill 0 
+rss t33: VmHWM:	 1475900 kB VmRSS:	 1475900 kB RssAnon:	 1287496 kB RssFile:	  188404 kB RssShmem:	       0 kB 
+cgroup t33: memory.current=2097094656 memory.max=2097152000 memory.events=low 0 high 0 max 43654 oom 0 oom_kill 0 
+rss t34: VmHWM:	 1494464 kB VmRSS:	 1494464 kB RssAnon:	 1306124 kB RssFile:	  188340 kB RssShmem:	       0 kB 
+cgroup t34: memory.current=2096930816 memory.max=2097152000 memory.events=low 0 high 0 max 44129 oom 0 oom_kill 0 
+rss t35: VmHWM:	 1512980 kB VmRSS:	 1512980 kB RssAnon:	 1324568 kB RssFile:	  188412 kB RssShmem:	       0 kB 
+cgroup t35: memory.current=2096971776 memory.max=2097152000 memory.events=low 0 high 0 max 44558 oom 0 oom_kill 0 
+rss t36: VmHWM:	 1528000 kB VmRSS:	 1528000 kB RssAnon:	 1339544 kB RssFile:	  188456 kB RssShmem:	       0 kB 
+cgroup t36: memory.current=2097074176 memory.max=2097152000 memory.events=low 0 high 0 max 44748 oom 0 oom_kill 0 
+rss t37: VmHWM:	 1544192 kB VmRSS:	 1544192 kB RssAnon:	 1355780 kB RssFile:	  188412 kB RssShmem:	       0 kB 
+cgroup t37: memory.current=2097131520 memory.max=2097152000 memory.events=low 0 high 0 max 44946 oom 0 oom_kill 0 
+rss t38: VmHWM:	 1560496 kB VmRSS:	 1560496 kB RssAnon:	 1372012 kB RssFile:	  188484 kB RssShmem:	       0 kB 
+cgroup t38: memory.current=2097119232 memory.max=2097152000 memory.events=low 0 high 0 max 45136 oom 0 oom_kill 0 
+rss t39: VmHWM:	 1577200 kB VmRSS:	 1577200 kB RssAnon:	 1388732 kB RssFile:	  188468 kB RssShmem:	       0 kB 
+cgroup t39: memory.current=2096861184 memory.max=2097152000 memory.events=low 0 high 0 max 45342 oom 0 oom_kill 0 
+rss t40: VmHWM:	 1589628 kB VmRSS:	 1589628 kB RssAnon:	 1401184 kB RssFile:	  188444 kB RssShmem:	       0 kB 
+cgroup t40: memory.current=2096992256 memory.max=2097152000 memory.events=low 0 high 0 max 45526 oom 0 oom_kill 0 
+rss t41: VmHWM:	 1608540 kB VmRSS:	 1608540 kB RssAnon:	 1420132 kB RssFile:	  188408 kB RssShmem:	       0 kB 
+cgroup t41: memory.current=2097008640 memory.max=2097152000 memory.events=low 0 high 0 max 45741 oom 0 oom_kill 0 
+rss t42: VmHWM:	 1619448 kB VmRSS:	 1619440 kB RssAnon:	 1431164 kB RssFile:	  188276 kB RssShmem:	       0 kB 
+cgroup t42: memory.current=2097086464 memory.max=2097152000 memory.events=low 0 high 0 max 45932 oom 0 oom_kill 0 
+rss t43: VmHWM:	 1633108 kB VmRSS:	 1633108 kB RssAnon:	 1444948 kB RssFile:	  188160 kB RssShmem:	       0 kB 
+cgroup t43: memory.current=2096955392 memory.max=2097152000 memory.events=low 0 high 0 max 46136 oom 0 oom_kill 0 
+rss t44: VmHWM:	 1641048 kB VmRSS:	 1641048 kB RssAnon:	 1452864 kB RssFile:	  188184 kB RssShmem:	       0 kB 
+cgroup t44: memory.current=2097123328 memory.max=2097152000 memory.events=low 0 high 0 max 46298 oom 0 oom_kill 0 
+rss t45: VmHWM:	 1650128 kB VmRSS:	 1650128 kB RssAnon:	 1461972 kB RssFile:	  188156 kB RssShmem:	       0 kB 
+cgroup t45: memory.current=2096803840 memory.max=2097152000 memory.events=low 0 high 0 max 46485 oom 0 oom_kill 0 
+rss t46: VmHWM:	 1652104 kB VmRSS:	 1652104 kB RssAnon:	 1464088 kB RssFile:	  188016 kB RssShmem:	       0 kB 
+cgroup t46: memory.current=2097025024 memory.max=2097152000 memory.events=low 0 high 0 max 46643 oom 0 oom_kill 0 
+rss t47: VmHWM:	 1654556 kB VmRSS:	 1654556 kB RssAnon:	 1466528 kB RssFile:	  188028 kB RssShmem:	       0 kB 
+cgroup t47: memory.current=2097016832 memory.max=2097152000 memory.events=low 0 high 0 max 46806 oom 0 oom_kill 0 
+rss t48: VmHWM:	 1655816 kB VmRSS:	 1655816 kB RssAnon:	 1467740 kB RssFile:	  188076 kB RssShmem:	       0 kB 
+cgroup t48: memory.current=2097090560 memory.max=2097152000 memory.events=low 0 high 0 max 46967 oom 0 oom_kill 0 
+rss t49: VmHWM:	 1656592 kB VmRSS:	 1656592 kB RssAnon:	 1468460 kB RssFile:	  188132 kB RssShmem:	       0 kB 
+cgroup t49: memory.current=2096771072 memory.max=2097152000 memory.events=low 0 high 0 max 47121 oom 0 oom_kill 0 
+rss t50: VmHWM:	 1657148 kB VmRSS:	 1657144 kB RssAnon:	 1468928 kB RssFile:	  188216 kB RssShmem:	       0 kB 
+cgroup t50: memory.current=2097098752 memory.max=2097152000 memory.events=low 0 high 0 max 47281 oom 0 oom_kill 0 
+rss t51: VmHWM:	 1657540 kB VmRSS:	 1657436 kB RssAnon:	 1469312 kB RssFile:	  188124 kB RssShmem:	       0 kB 
+cgroup t51: memory.current=2096885760 memory.max=2097152000 memory.events=low 0 high 0 max 47452 oom 0 oom_kill 0 
+rss t52: VmHWM:	 1657616 kB VmRSS:	 1657516 kB RssAnon:	 1469756 kB RssFile:	  187760 kB RssShmem:	       0 kB 
+cgroup t52: memory.current=2097111040 memory.max=2097152000 memory.events=low 0 high 0 max 47609 oom 0 oom_kill 0 
+rss t53: VmHWM:	 1662936 kB VmRSS:	 1662936 kB RssAnon:	 1475300 kB RssFile:	  187636 kB RssShmem:	       0 kB 
+cgroup t53: memory.current=2097098752 memory.max=2097152000 memory.events=low 0 high 0 max 47795 oom 0 oom_kill 0 
+rss t54: VmHWM:	 1664452 kB VmRSS:	 1664452 kB RssAnon:	 1476732 kB RssFile:	  187720 kB RssShmem:	       0 kB 
+cgroup t54: memory.current=2097135616 memory.max=2097152000 memory.events=low 0 high 0 max 47960 oom 0 oom_kill 0 
+rss t55: VmHWM:	 1665228 kB VmRSS:	 1665188 kB RssAnon:	 1477448 kB RssFile:	  187740 kB RssShmem:	       0 kB 
+cgroup t55: memory.current=2097127424 memory.max=2097152000 memory.events=low 0 high 0 max 48117 oom 0 oom_kill 0 
+rss t56: VmHWM:	 1665460 kB VmRSS:	 1665392 kB RssAnon:	 1477784 kB RssFile:	  187608 kB RssShmem:	       0 kB 
+cgroup t56: memory.current=2097143808 memory.max=2097152000 memory.events=low 0 high 0 max 48278 oom 0 oom_kill 0 
+rss t57: VmHWM:	 1666260 kB VmRSS:	 1666260 kB RssAnon:	 1478436 kB RssFile:	  187824 kB RssShmem:	       0 kB 
+cgroup t57: memory.current=2097082368 memory.max=2097152000 memory.events=low 0 high 0 max 48445 oom 0 oom_kill 0 
+rss t58: VmHWM:	 1667436 kB VmRSS:	 1667428 kB RssAnon:	 1479488 kB RssFile:	  187940 kB RssShmem:	       0 kB 
+cgroup t58: memory.current=2096783360 memory.max=2097152000 memory.events=low 0 high 0 max 48620 oom 0 oom_kill 0 
+rss t59: VmHWM:	 1668536 kB VmRSS:	 1668536 kB RssAnon:	 1480480 kB RssFile:	  188056 kB RssShmem:	       0 kB 
+cgroup t59: memory.current=2097037312 memory.max=2097152000 memory.events=low 0 high 0 max 48789 oom 0 oom_kill 0 
+rss t60: VmHWM:	 1669592 kB VmRSS:	 1669592 kB RssAnon:	 1481528 kB RssFile:	  188064 kB RssShmem:	       0 kB 
+cgroup t60: memory.current=2096906240 memory.max=2097152000 memory.events=low 0 high 0 max 48951 oom 0 oom_kill 0 
+rss t61: VmHWM:	 1670172 kB VmRSS:	 1670172 kB RssAnon:	 1482268 kB RssFile:	  187904 kB RssShmem:	       0 kB 
+cgroup t61: memory.current=2097041408 memory.max=2097152000 memory.events=low 0 high 0 max 49119 oom 0 oom_kill 0 
+rss t62: VmHWM:	 1670444 kB VmRSS:	 1670444 kB RssAnon:	 1482592 kB RssFile:	  187852 kB RssShmem:	       0 kB 
+cgroup t62: memory.current=2097045504 memory.max=2097152000 memory.events=low 0 high 0 max 49286 oom 0 oom_kill 0 
+rss t63: VmHWM:	 1670992 kB VmRSS:	 1670960 kB RssAnon:	 1483220 kB RssFile:	  187740 kB RssShmem:	       0 kB 
+cgroup t63: memory.current=2097037312 memory.max=2097152000 memory.events=low 0 high 0 max 49447 oom 0 oom_kill 0 
+rss t64: VmHWM:	 1671372 kB VmRSS:	 1671356 kB RssAnon:	 1483568 kB RssFile:	  187788 kB RssShmem:	       0 kB 
+cgroup t64: memory.current=2097041408 memory.max=2097152000 memory.events=low 0 high 0 max 49611 oom 0 oom_kill 0 
+rss t65: VmHWM:	 1671932 kB VmRSS:	 1671932 kB RssAnon:	 1484152 kB RssFile:	  187780 kB RssShmem:	       0 kB 
+cgroup t65: memory.current=2096996352 memory.max=2097152000 memory.events=low 0 high 0 max 49781 oom 0 oom_kill 0 
+rss t66: VmHWM:	 1672608 kB VmRSS:	 1672608 kB RssAnon:	 1484792 kB RssFile:	  187816 kB RssShmem:	       0 kB 
+cgroup t66: memory.current=2097098752 memory.max=2097152000 memory.events=low 0 high 0 max 49948 oom 0 oom_kill 0 
+rss t67: VmHWM:	 1673076 kB VmRSS:	 1673064 kB RssAnon:	 1485152 kB RssFile:	  187912 kB RssShmem:	       0 kB 
+cgroup t67: memory.current=2096869376 memory.max=2097152000 memory.events=low 0 high 0 max 50113 oom 0 oom_kill 0 
+rss t68: VmHWM:	 1674000 kB VmRSS:	 1673972 kB RssAnon:	 1486084 kB RssFile:	  187888 kB RssShmem:	       0 kB 
+cgroup t68: memory.current=2097057792 memory.max=2097152000 memory.events=low 0 high 0 max 50281 oom 0 oom_kill 0 
+rss t69: VmHWM:	 1674540 kB VmRSS:	 1674528 kB RssAnon:	 1486748 kB RssFile:	  187780 kB RssShmem:	       0 kB 
+cgroup t69: memory.current=2097065984 memory.max=2097152000 memory.events=low 0 high 0 max 50449 oom 0 oom_kill 0 
+rss t70: VmHWM:	 1675460 kB VmRSS:	 1675448 kB RssAnon:	 1487644 kB RssFile:	  187804 kB RssShmem:	       0 kB 
+cgroup t70: memory.current=2097029120 memory.max=2097152000 memory.events=low 0 high 0 max 50624 oom 0 oom_kill 0 
+rss t71: VmHWM:	 1676320 kB VmRSS:	 1676320 kB RssAnon:	 1488424 kB RssFile:	  187896 kB RssShmem:	       0 kB 
+cgroup t71: memory.current=2097041408 memory.max=2097152000 memory.events=low 0 high 0 max 50788 oom 0 oom_kill 0 
+rss t72: VmHWM:	 1677512 kB VmRSS:	 1677512 kB RssAnon:	 1489564 kB RssFile:	  187948 kB RssShmem:	       0 kB 
+cgroup t72: memory.current=2096963584 memory.max=2097152000 memory.events=low 0 high 0 max 50960 oom 0 oom_kill 0 
+rss t73: VmHWM:	 1678896 kB VmRSS:	 1678880 kB RssAnon:	 1491012 kB RssFile:	  187868 kB RssShmem:	       0 kB 
+cgroup t73: memory.current=2096922624 memory.max=2097152000 memory.events=low 0 high 0 max 51142 oom 0 oom_kill 0 
+rss t74: VmHWM:	 1679452 kB VmRSS:	 1679348 kB RssAnon:	 1491860 kB RssFile:	  187488 kB RssShmem:	       0 kB 
+cgroup t74: memory.current=2097147904 memory.max=2097152000 memory.events=low 0 high 0 max 51324 oom 0 oom_kill 0 
+rss t75: VmHWM:	 1679716 kB VmRSS:	 1679628 kB RssAnon:	 1492112 kB RssFile:	  187516 kB RssShmem:	       0 kB 
+cgroup t75: memory.current=2097147904 memory.max=2097152000 memory.events=low 0 high 0 max 51492 oom 0 oom_kill 0 
+rss t76: VmHWM:	 1679760 kB VmRSS:	 1679728 kB RssAnon:	 1492192 kB RssFile:	  187536 kB RssShmem:	       0 kB 
+cgroup t76: memory.current=2097135616 memory.max=2097152000 memory.events=low 0 high 0 max 51653 oom 0 oom_kill 0 
+rss t77: VmHWM:	 1679784 kB VmRSS:	 1679652 kB RssAnon:	 1492264 kB RssFile:	  187388 kB RssShmem:	       0 kB 
+cgroup t77: memory.current=2096697344 memory.max=2097152000 memory.events=low 0 high 0 max 51826 oom 0 oom_kill 0 
+rss t78: VmHWM:	 1680056 kB VmRSS:	 1680048 kB RssAnon:	 1492488 kB RssFile:	  187560 kB RssShmem:	       0 kB 
+cgroup t78: memory.current=2096914432 memory.max=2097152000 memory.events=low 0 high 0 max 51995 oom 0 oom_kill 0 
+rss t79: VmHWM:	 1680264 kB VmRSS:	 1680260 kB RssAnon:	 1492668 kB RssFile:	  187592 kB RssShmem:	       0 kB 
+cgroup t79: memory.current=2096877568 memory.max=2097152000 memory.events=low 0 high 0 max 52161 oom 0 oom_kill 0 
+rss t80: VmHWM:	 1680592 kB VmRSS:	 1680576 kB RssAnon:	 1492800 kB RssFile:	  187776 kB RssShmem:	       0 kB 
+cgroup t80: memory.current=2097033216 memory.max=2097152000 memory.events=low 0 high 0 max 52323 oom 0 oom_kill 0 
+rss t81: VmHWM:	 1681144 kB VmRSS:	 1681132 kB RssAnon:	 1493360 kB RssFile:	  187772 kB RssShmem:	       0 kB 
+cgroup t81: memory.current=2097123328 memory.max=2097152000 memory.events=low 0 high 0 max 52487 oom 0 oom_kill 0 
+rss t82: VmHWM:	 1681228 kB VmRSS:	 1681228 kB RssAnon:	 1493400 kB RssFile:	  187828 kB RssShmem:	       0 kB 
+cgroup t82: memory.current=2097061888 memory.max=2097152000 memory.events=low 0 high 0 max 52630 oom 0 oom_kill 0 
+rss t83: VmHWM:	 1699204 kB VmRSS:	 1699200 kB RssAnon:	 1511328 kB RssFile:	  187872 kB RssShmem:	       0 kB 
+cgroup t83: memory.current=2096926720 memory.max=2097152000 memory.events=low 0 high 0 max 52877 oom 0 oom_kill 0 
+rss t84: VmHWM:	 1700016 kB VmRSS:	 1700016 kB RssAnon:	 1512312 kB RssFile:	  187704 kB RssShmem:	       0 kB 
+cgroup t84: memory.current=2096635904 memory.max=2097152000 memory.events=low 0 high 0 max 53081 oom 0 oom_kill 0 
+rss t85: VmHWM:	 1700636 kB VmRSS:	 1700636 kB RssAnon:	 1512952 kB RssFile:	  187684 kB RssShmem:	       0 kB 
+cgroup t85: memory.current=2096746496 memory.max=2097152000 memory.events=low 0 high 0 max 53328 oom 0 oom_kill 0 
+rss t86: VmHWM:	 1701480 kB VmRSS:	 1701480 kB RssAnon:	 1513764 kB RssFile:	  187716 kB RssShmem:	       0 kB 
+cgroup t86: memory.current=2097004544 memory.max=2097152000 memory.events=low 0 high 0 max 53591 oom 0 oom_kill 0 
+rss t87: VmHWM:	 1702132 kB VmRSS:	 1702124 kB RssAnon:	 1514348 kB RssFile:	  187776 kB RssShmem:	       0 kB 
+cgroup t87: memory.current=2096918528 memory.max=2097152000 memory.events=low 0 high 0 max 53912 oom 0 oom_kill 0 
+rss t88: VmHWM:	 1708264 kB VmRSS:	 1708264 kB RssAnon:	 1520124 kB RssFile:	  188140 kB RssShmem:	       0 kB 
+cgroup t88: memory.current=2097000448 memory.max=2097152000 memory.events=low 0 high 0 max 54254 oom 0 oom_kill 0 
+rss t89: VmHWM:	 1708852 kB VmRSS:	 1708852 kB RssAnon:	 1520568 kB RssFile:	  188284 kB RssShmem:	       0 kB 
+cgroup t89: memory.current=2097111040 memory.max=2097152000 memory.events=low 0 high 0 max 54525 oom 0 oom_kill 0 
+rss t90: VmHWM:	 1708928 kB VmRSS:	 1708872 kB RssAnon:	 1520596 kB RssFile:	  188276 kB RssShmem:	       0 kB 
+cgroup t90: memory.current=2097119232 memory.max=2097152000 memory.events=low 0 high 0 max 54644 oom 0 oom_kill 0 
+rss t91: VmHWM:	 1708928 kB VmRSS:	 1708588 kB RssAnon:	 1520596 kB RssFile:	  187992 kB RssShmem:	       0 kB 
+cgroup t91: memory.current=2097000448 memory.max=2097152000 memory.events=low 0 high 0 max 54849 oom 0 oom_kill 0 
+rss t92: VmHWM:	 1708928 kB VmRSS:	 1707840 kB RssAnon:	 1520728 kB RssFile:	  187112 kB RssShmem:	       0 kB 
+cgroup t92: memory.current=2097139712 memory.max=2097152000 memory.events=low 0 high 0 max 55065 oom 0 oom_kill 0 
+rss t93: VmHWM:	 1708928 kB VmRSS:	 1706992 kB RssAnon:	 1520760 kB RssFile:	  186232 kB RssShmem:	       0 kB 
+cgroup t93: memory.current=2097135616 memory.max=2097152000 memory.events=low 0 high 0 max 55283 oom 0 oom_kill 0 
+rss t94: VmHWM:	 1708928 kB VmRSS:	 1707356 kB RssAnon:	 1520824 kB RssFile:	  186532 kB RssShmem:	       0 kB 
+cgroup t94: memory.current=2096934912 memory.max=2097152000 memory.events=low 0 high 0 max 55499 oom 0 oom_kill 0 
+rss t95: VmHWM:	 1708928 kB VmRSS:	 1708384 kB RssAnon:	 1521432 kB RssFile:	  186952 kB RssShmem:	       0 kB 
+cgroup t95: memory.current=2096848896 memory.max=2097152000 memory.events=low 0 high 0 max 55745 oom 0 oom_kill 0 
+rss t96: VmHWM:	 1708928 kB VmRSS:	 1708388 kB RssAnon:	 1521652 kB RssFile:	  186736 kB RssShmem:	       0 kB 
+cgroup t96: memory.current=2097053696 memory.max=2097152000 memory.events=low 0 high 0 max 55999 oom 0 oom_kill 0 
+rss t97: VmHWM:	 1708928 kB VmRSS:	 1708476 kB RssAnon:	 1521788 kB RssFile:	  186688 kB RssShmem:	       0 kB 
+cgroup t97: memory.current=2096959488 memory.max=2097152000 memory.events=low 0 high 0 max 56247 oom 0 oom_kill 0 
+rss t98: VmHWM:	 1708928 kB VmRSS:	 1708868 kB RssAnon:	 1521832 kB RssFile:	  187036 kB RssShmem:	       0 kB 
+cgroup t98: memory.current=2097131520 memory.max=2097152000 memory.events=low 0 high 0 max 56511 oom 0 oom_kill 0 
+rss t99: VmHWM:	 1709196 kB VmRSS:	 1709148 kB RssAnon:	 1521920 kB RssFile:	  187228 kB RssShmem:	       0 kB 
+cgroup t99: memory.current=2097061888 memory.max=2097152000 memory.events=low 0 high 0 max 56752 oom 0 oom_kill 0 
+rss t100: VmHWM:	 1709496 kB VmRSS:	 1709488 kB RssAnon:	 1522072 kB RssFile:	  187416 kB RssShmem:	       0 kB 
+cgroup t100: memory.current=2096742400 memory.max=2097152000 memory.events=low 0 high 0 max 56965 oom 0 oom_kill 0 
+rss t101: VmHWM:	 1709744 kB VmRSS:	 1709744 kB RssAnon:	 1522092 kB RssFile:	  187652 kB RssShmem:	       0 kB 
+cgroup t101: memory.current=2096848896 memory.max=2097152000 memory.events=low 0 high 0 max 57198 oom 0 oom_kill 0 
+rss t102: VmHWM:	 1709984 kB VmRSS:	 1709980 kB RssAnon:	 1522180 kB RssFile:	  187800 kB RssShmem:	       0 kB 
+cgroup t102: memory.current=2096934912 memory.max=2097152000 memory.events=low 0 high 0 max 57422 oom 0 oom_kill 0 
+rss t103: VmHWM:	 1710020 kB VmRSS:	 1710020 kB RssAnon:	 1522180 kB RssFile:	  187840 kB RssShmem:	       0 kB 
+cgroup t103: memory.current=2097065984 memory.max=2097152000 memory.events=low 0 high 0 max 57646 oom 0 oom_kill 0 
+rss t104: VmHWM:	 1710152 kB VmRSS:	 1710140 kB RssAnon:	 1522212 kB RssFile:	  187928 kB RssShmem:	       0 kB 
+cgroup t104: memory.current=2097143808 memory.max=2097152000 memory.events=low 0 high 0 max 57860 oom 0 oom_kill 0 
+rss t105: VmHWM:	 1710232 kB VmRSS:	 1710232 kB RssAnon:	 1522212 kB RssFile:	  188020 kB RssShmem:	       0 kB 
+cgroup t105: memory.current=2096967680 memory.max=2097152000 memory.events=low 0 high 0 max 58080 oom 0 oom_kill 0 
+rss t106: VmHWM:	 1710372 kB VmRSS:	 1710360 kB RssAnon:	 1522260 kB RssFile:	  188100 kB RssShmem:	       0 kB 
+cgroup t106: memory.current=2097094656 memory.max=2097152000 memory.events=low 0 high 0 max 58290 oom 0 oom_kill 0 
+rss t107: VmHWM:	 1711340 kB VmRSS:	 1711340 kB RssAnon:	 1523180 kB RssFile:	  188160 kB RssShmem:	       0 kB 
+cgroup t107: memory.current=2096984064 memory.max=2097152000 memory.events=low 0 high 0 max 58502 oom 0 oom_kill 0 
+rss t108: VmHWM:	 1711388 kB VmRSS:	 1711388 kB RssAnon:	 1523184 kB RssFile:	  188204 kB RssShmem:	       0 kB 
+cgroup t108: memory.current=2097049600 memory.max=2097152000 memory.events=low 0 high 0 max 58721 oom 0 oom_kill 0 
+rss t109: VmHWM:	 1714144 kB VmRSS:	 1714144 kB RssAnon:	 1525920 kB RssFile:	  188224 kB RssShmem:	       0 kB 
+cgroup t109: memory.current=2096828416 memory.max=2097152000 memory.events=low 0 high 0 max 58948 oom 0 oom_kill 0 
+rss t110: VmHWM:	 1714780 kB VmRSS:	 1714780 kB RssAnon:	 1526532 kB RssFile:	  188248 kB RssShmem:	       0 kB 
+cgroup t110: memory.current=2096984064 memory.max=2097152000 memory.events=low 0 high 0 max 59167 oom 0 oom_kill 0 
+rss t111: VmHWM:	 1715192 kB VmRSS:	 1715184 kB RssAnon:	 1526876 kB RssFile:	  188308 kB RssShmem:	       0 kB 
+cgroup t111: memory.current=2097123328 memory.max=2097152000 memory.events=low 0 high 0 max 59390 oom 0 oom_kill 0 
+rss t112: VmHWM:	 1715208 kB VmRSS:	 1715188 kB RssAnon:	 1526884 kB RssFile:	  188304 kB RssShmem:	       0 kB 
+cgroup t112: memory.current=2097070080 memory.max=2097152000 memory.events=low 0 high 0 max 59618 oom 0 oom_kill 0 
+rss t113: VmHWM:	 1715252 kB VmRSS:	 1715252 kB RssAnon:	 1526924 kB RssFile:	  188328 kB RssShmem:	       0 kB 
+cgroup t113: memory.current=2097131520 memory.max=2097152000 memory.events=low 0 high 0 max 59841 oom 0 oom_kill 0 
+rss t114: VmHWM:	 1715276 kB VmRSS:	 1715264 kB RssAnon:	 1526924 kB RssFile:	  188340 kB RssShmem:	       0 kB 
+cgroup t114: memory.current=2097049600 memory.max=2097152000 memory.events=low 0 high 0 max 60086 oom 0 oom_kill 0 
+rss t115: VmHWM:	 1715276 kB VmRSS:	 1715244 kB RssAnon:	 1526924 kB RssFile:	  188320 kB RssShmem:	       0 kB 
+cgroup t115: memory.current=2096898048 memory.max=2097152000 memory.events=low 0 high 0 max 60344 oom 0 oom_kill 0 
+rss t116: VmHWM:	 1715320 kB VmRSS:	 1713792 kB RssAnon:	 1526988 kB RssFile:	  186804 kB RssShmem:	       0 kB 
+cgroup t116: memory.current=2097053696 memory.max=2097152000 memory.events=low 0 high 0 max 60585 oom 0 oom_kill 0 
+rss t117: VmHWM:	 1718128 kB VmRSS:	 1718128 kB RssAnon:	 1531700 kB RssFile:	  186428 kB RssShmem:	       0 kB 
+cgroup t117: memory.current=2096721920 memory.max=2097152000 memory.events=low 0 high 0 max 60857 oom 0 oom_kill 0 
+rss t118: VmHWM:	 1718412 kB VmRSS:	 1718144 kB RssAnon:	 1531704 kB RssFile:	  186440 kB RssShmem:	       0 kB 
+cgroup t118: memory.current=2096701440 memory.max=2097152000 memory.events=low 0 high 0 max 61107 oom 0 oom_kill 0 
+rss t119: VmHWM:	 1718412 kB VmRSS:	 1718212 kB RssAnon:	 1531712 kB RssFile:	  186500 kB RssShmem:	       0 kB 
+cgroup t119: memory.current=2097123328 memory.max=2097152000 memory.events=low 0 high 0 max 61371 oom 0 oom_kill 0 
+rss t120: VmHWM:	 1718680 kB VmRSS:	 1718664 kB RssAnon:	 1531896 kB RssFile:	  186768 kB RssShmem:	       0 kB 
+cgroup t120: memory.current=2097025024 memory.max=2097152000 memory.events=low 0 high 0 max 61618 oom 0 oom_kill 0 
+rss hold1: VmHWM:	 1719416 kB VmRSS:	 1719396 kB RssAnon:	 1532108 kB RssFile:	  187288 kB RssShmem:	       0 kB 
+cgroup hold1: memory.current=2096758784 memory.max=2097152000 memory.events=low 0 high 0 max 61925 oom 0 oom_kill 0 
+rss hold2: VmHWM:	 1719416 kB VmRSS:	 1719384 kB RssAnon:	 1532108 kB RssFile:	  187276 kB RssShmem:	       0 kB 
+cgroup hold2: memory.current=2097102848 memory.max=2097152000 memory.events=low 0 high 0 max 62176 oom 0 oom_kill 0 
+rss hold3: VmHWM:	 1719556 kB VmRSS:	 1719548 kB RssAnon:	 1532116 kB RssFile:	  187432 kB RssShmem:	       0 kB 
+cgroup hold3: memory.current=2097012736 memory.max=2097152000 memory.events=low 0 high 0 max 62456 oom 0 oom_kill 0 
+rss hold4: VmHWM:	 1719604 kB VmRSS:	 1719388 kB RssAnon:	 1532116 kB RssFile:	  187272 kB RssShmem:	       0 kB 
+cgroup hold4: memory.current=2097053696 memory.max=2097152000 memory.events=low 0 high 0 max 62717 oom 0 oom_kill 0 
+rss hold5: VmHWM:	 1719604 kB VmRSS:	 1719544 kB RssAnon:	 1532116 kB RssFile:	  187428 kB RssShmem:	       0 kB 
+cgroup hold5: memory.current=2097074176 memory.max=2097152000 memory.events=low 0 high 0 max 62988 oom 0 oom_kill 0 
+rss hold6: VmHWM:	 1719716 kB VmRSS:	 1719712 kB RssAnon:	 1532116 kB RssFile:	  187596 kB RssShmem:	       0 kB 
+cgroup hold6: memory.current=2096988160 memory.max=2097152000 memory.events=low 0 high 0 max 63245 oom 0 oom_kill 0 
+rss final: VmHWM:	 1721228 kB VmRSS:	 1717824 kB RssAnon:	 1537176 kB RssFile:	  180648 kB RssShmem:	       0 kB 
+cgroup final: memory.current=2095681536 memory.max=2097152000 memory.events=low 0 high 0 max 75741 oom 0 oom_kill 0 
+cacheinfo final: Key Cache              : entries 64980, size 5.45 MiB, capacity 19 MiB, 130 hits, 71082 requests, 0.002 recent hit rate, 14400 save period in seconds|Row Cache              : entries 110397, size 550 MiB, capacity 550 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 0 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 9 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|Network Cache          : size 8 MiB, overflow size: 0 bytes, capacity 24 MiB|Percent Repaired       : 100.0%|
+ERROR lines in system.log: 0
+OutOfMemoryError mentions: 1
+dmesg OOM-kill lines: 9
+systemd scope journal OOM mentions: 0
+node alive at end

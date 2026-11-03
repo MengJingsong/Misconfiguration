@@ -1,0 +1,145 @@
+******************** Stress Settings ********************
+Command:
+  Type: user
+  Count: 1,500,000
+  No Warmup: true
+  Consistency Level: LOCAL_ONE
+  Target Uncertainty: not applicable
+  Command Ratios: {insert=1.0}
+  Command Clustering Distribution: clustering=gaussian(1..10)
+  Profile File(s): /users/jason92/oom-offheap-run5/isc-profile.yaml
+Rate:
+  Auto: false
+  Thread Count: 64
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..1500000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Errors:
+  Ignore: false
+  Tries: 10
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V5
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [localhost]
+  Is White List: false
+  Datacenter: null
+Schema:
+  Keyspace: null
+  Replication Strategy: org.apache.cassandra.locator.SimpleStrategy
+  Replication Strategy Options: {replication_factor=1}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  Truststore: null
+  Truststore Password: null
+  Keystore: null
+  Keystore Password: null
+  SSL Protocol: TLS
+  SSL Algorithm: null
+  SSL Ciphers: null
+Port:
+  Native Port: 9042
+  JMX Port: 7199
+JMX:
+  Username: null
+  Password: *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: null
+  Operation: USER
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+Credentials file:
+  File: *not set*
+  CQL username: *not set*
+  CQL password: *not set*
+  JMX username: *not set*
+  JMX password: *not set*
+  Transport truststore password: *not set*
+  Transport keystore password: *not set*
+Reporting:
+  Output frequency: 1s
+  Header frequency: *not set*
+
+******************** Profile(s) ********************
+  Keyspace Name: isc
+  Keyspace CQL: 
+***
+CREATE KEYSPACE isc WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND durable_writes = false;
+***
+
+  Table Name: t
+  Table CQL: 
+***
+CREATE TABLE t (
+      k text,
+      v blob,
+      PRIMARY KEY (k)
+)
+WITH min_index_interval=1
+ AND max_index_interval=128
+ AND caching = {'keys':'NONE', 'rows_per_partition':'NONE'}
+ AND compaction = {'class':'SizeTieredCompactionStrategy'}
+***
+
+  Extra Schema Definitions: null
+  Generator Configs:
+    v: Size: Fixed:  key=32;
+    k: Size: Fixed:  key=200;Identity: Sequence:  start=1,end=200000000;
+  Query Definitions:
+    simple1: CQL:select * from t where k = ?;Fields:samerow;
+  Token Range Queries:
+  Insert Settings:
+    partitions: fixed(1)
+    batchtype: UNLOGGED
+Connected to cluster: Test Cluster, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: localhost/127.0.0.1:9042; Rack: rack1
+com.datastax.driver.core.exceptions.OperationTimedOutException: [localhost/127.0.0.1:9042] Timed out waiting for server response
+	at com.datastax.driver.core.exceptions.OperationTimedOutException.copy(OperationTimedOutException.java:45)
+	at com.datastax.driver.core.exceptions.OperationTimedOutException.copy(OperationTimedOutException.java:27)
+	at com.datastax.driver.core.DriverThrowables.propagateCause(DriverThrowables.java:37)
+	at com.datastax.driver.core.DefaultResultSetFuture.getUninterruptibly(DefaultResultSetFuture.java:295)
+	at com.datastax.driver.core.AbstractSession.execute(AbstractSession.java:60)
+	at org.apache.cassandra.stress.util.JavaDriverClient.execute(JavaDriverClient.java:228)
+	at org.apache.cassandra.stress.StressProfile.maybeCreateSchema(StressProfile.java:243)
+	at org.apache.cassandra.stress.StressProfile.newGenerator(StressProfile.java:689)
+	at org.apache.cassandra.stress.StressProfile.printSettings(StressProfile.java:126)
+	at org.apache.cassandra.stress.settings.StressSettings.lambda$printSettings$1(StressSettings.java:318)
+	at java.base/java.util.LinkedHashMap.forEach(LinkedHashMap.java:684)
+	at org.apache.cassandra.stress.settings.StressSettings.printSettings(StressSettings.java:318)
+	at org.apache.cassandra.stress.Stress.run(Stress.java:92)
+	at org.apache.cassandra.stress.Stress.main(Stress.java:54)
+Caused by: com.datastax.driver.core.exceptions.OperationTimedOutException: [localhost/127.0.0.1:9042] Timed out waiting for server response
+	at com.datastax.driver.core.RequestHandler$SpeculativeExecution.onTimeout(RequestHandler.java:981)
+	at com.datastax.driver.core.Connection$ResponseHandler$1.run(Connection.java:1638)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.run(HashedWheelTimer.java:715)
+	at com.datastax.shaded.netty.util.concurrent.ImmediateExecutor.execute(ImmediateExecutor.java:34)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.expire(HashedWheelTimer.java:703)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelBucket.expireTimeouts(HashedWheelTimer.java:790)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:503)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)

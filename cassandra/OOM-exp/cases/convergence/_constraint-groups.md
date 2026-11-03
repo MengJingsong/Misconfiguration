@@ -52,10 +52,10 @@ a different sizing question (e.g. the tighter-boundary follow-up).
 
 ## Off-heap / direct memory
 
-**Status:** open (run 4 unparked this group — `row_cache_size` +
-`index_summary_capacity` were run against a cgroup v2 `memory.max` budget;
-OOM not reached, but a concrete retry is identified and this is not
-exhausted — see `_batch-log.md`).
+**Status:** open for untried candidates only. The `row_cache_size` +
+`index_summary_capacity` pair is closed as OOMed (run 6: row cache full,
+then an index-summary burst, cgroup OOM-kill during flush/compaction; runs
+4-5 did not reach it, see `_batch-log.md`).
 
 **Important correction found while running run 4, worth checking before
 picking any other candidate from this table:** `-XX:MaxDirectMemorySize`
@@ -82,9 +82,9 @@ of which JVM accounting path, if any, a given off-heap constraint uses.
 | Constraint | Case file | What it caps | Scale | Config-type |
 |---|---|---|---|---|
 | `memtable_offheap_space` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md) | Memtable pool off-heap bytes (direct buffers) | yaml-set | yaml |
-| `row_cache_size` *(used, run 4 — OOM not reached, group still open)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/row_cache_size-create-serialized_size--autonomous.md) | Row cache, serialized off-heap (JNA `Native.malloc`, **not** bound by `-XX:MaxDirectMemorySize`) | yaml-set | yaml |
+| `row_cache_size` *(used, runs 4-6 — OOMed in run 6)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/row_cache_size-create-serialized_size--autonomous.md) | Row cache, serialized off-heap (JNA `Native.malloc`, **not** bound by `-XX:MaxDirectMemorySize`) | yaml-set | yaml |
 | `nopcache_capacity` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/nopcache_capacity-setcapacity-capacity--autonomous.md) | Same row-cache-memory family as `row_cache_size` (off-heap, read as `RssAnon`) | yaml-set | hard-coded constant |
-| `index_summary_capacity` *(used, run 4 — OOM not reached, group still open)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md) | Off-heap index-summary bytes (same JNA `Native.malloc` path, **not** bound by `-XX:MaxDirectMemorySize`; enforced only at periodic resize — see run 4's case file for the bypass window this creates) | yaml-set | yaml |
+| `index_summary_capacity` *(used, runs 4-6 — OOMed in run 6)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md) | Off-heap index-summary bytes (same JNA `Native.malloc` path, **not** bound by `-XX:MaxDirectMemorySize`; enforced only at periodic resize — see run 4's case file for the bypass window this creates) | yaml-set | yaml |
 | `DOB_MAX_RECYCLE_BYTES` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md) | Per-thread scratch-buffer recycle pool (direct bytes held between uses; heap in one control arm) | staircase from 2,048 B up to tens of MB per thread × held-thread count | JVM property |
 | `MAX_HINT_BUFFERS` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided.md) | Off-heap direct `ByteBuffer`s for hints, `n × bufferSize` | config-set | JVM property |
 | hints buffer slabs (indexed under `max_mutation_size` in the index — really a hints constraint) | [case](../../../if-check-exp/stage3-ai-deep-read/cases/hints-HintsBuffer-put-slabCapacity--autonomous.md) | Off-heap direct `ByteBuffer` slabs (`HintsBuffer.allocateDirect`) | slab-sized | yaml (same family as `hints_write_buffer_size`/`MAX_HINT_BUFFERS` — verify exact knob before use) |
