@@ -20,6 +20,7 @@ file carry the rest.
 | [`row_cache_size` + `index_summary_capacity`](cases/convergence/row_cache_size+index_summary_capacity.md) | **Not reached (superseded by run 6)** — safe alone (24-29% free), combined peak 90% of a cgroup budget (naive sum predicted 106%); each cache's own eviction/resize kept operating under combined load |
 | [`row_cache_size` + `index_summary_capacity` (run 5 retry)](cases/convergence/row_cache_size+index_summary_capacity--run5.md) | **Void** — the concurrent burst wrote 0 partitions (stress client's CREATE TABLE timed out); superseded by run 6 |
 | [`row_cache_size` + `index_summary_capacity` (run 6, retries A and B)](cases/convergence/row_cache_size+index_summary_capacity--run6.md) | **OOMed (schedule B)** — row cache full, then index-summary burst: kernel cgroup OOM-kill at 1973 MiB of 2000 (alone 78% / 80%); concurrent schedule A peaked at 93%, no kill; with a 1 m resize, no off-heap kill (93%) but an unattributed Java heap OOM |
+| [`memtable_offheap_space` + `file_cache_size`](cases/convergence/memtable_offheap_space+file_cache_size.md) | **OOMed** — each alone 78% of a 3500 MiB cgroup budget; chunk cache full, then a write burst: kernel OOM-kill 16 s in (3465 MiB anon) |
 
 ## Bypass cases ([`bypass-playbook.md`](bypass-playbook.md))
 
