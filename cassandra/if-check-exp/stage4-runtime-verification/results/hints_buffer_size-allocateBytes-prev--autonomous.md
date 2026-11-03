@@ -36,7 +36,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed with sha256 `eacd4e28…4695` (index §2, "as filed (hints batch)"). Frozen after the step-0 audit's thirteen amendments (2026-10-26, before any run-1 reading) at sha256 **`198eb1ce2924b51fd0e626f7363c95f8ded2920ecf659a6bbf4ddcb6923c13a2`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash, the harness hashes and the self-check hash. Nothing was committed, because no commit was asked for. |
+| **Case-file version** | Filed with sha256 `eacd4e28…4695` (index §2, "as filed (hints batch)"). Frozen after the step-0 audit's thirteen amendments (2026-10-26, before any run-1 reading) at sha256 **`198eb1ce2924b51fd0e626f7363c95f8ded2920ecf659a6bbf4ddcb6923c13a2`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash, the harness hashes and the self-check hash. Nothing was committed, because no commit was asked for. |
 | **Harness** | [`../harness/hints_buffer_size-allocateBytes-prev--autonomous/`](../harness/hints_buffer_size-allocateBytes-prev--autonomous/) (Notes 1–3 below the table) |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM with `-XX:MaxDirectMemorySize=1g`. Slab sizes B ∈ {1 MiB, 32 MiB, 64 MiB} (cases 1, 2); a pool at B = 32 MiB with 3.5 × B offered (case 3); the formula lines. **Cluster (B3):** two nodes from one clone, heap 2G, direct 2g. Node 1's knob arms are (i) default → B = 32 MiB, (ii) `max_mutation_size: 32MiB` → 64 MiB, (iii) `64MiB` → 128 MiB. Per arm: phase U and phase D, each 200,000 stress writes of 1 KiB at RF 2. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -359,5 +359,5 @@ steps of B).
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a, B2c–B2g, B3a, B3d–B3h and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: the §2 row `198eb1ce…13a2` was added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: the §2 row `198eb1ce…13a2` was added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` was not edited (`HANDOFF-ADVISOR.md` §8).

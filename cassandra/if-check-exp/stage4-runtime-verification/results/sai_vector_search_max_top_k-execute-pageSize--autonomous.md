@@ -32,7 +32,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed in commit `80daf71` (sha256 `c0ed4528…edd0f`). Frozen after the step-0 audit's seventeen amendments (2026-10-26, before any run-1 reading) at sha256 **`7124f4a0160c13b81f7dae21fb4a7a6c22b129b3ea4c40db496ba799773d717d`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Nothing committed: no commit was asked for. |
+| **Case-file version** | Filed in commit `80daf71` (sha256 `c0ed4528…edd0f`). Frozen after the step-0 audit's seventeen amendments (2026-10-26, before any run-1 reading) at sha256 **`7124f4a0160c13b81f7dae21fb4a7a6c22b129b3ea4c40db496ba799773d717d`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Nothing committed: no commit was asked for. |
 | **Harness** | [`../harness/sai_vector_search_max_top_k-execute-pageSize--autonomous/`](../harness/sai_vector_search_max_top_k-execute-pageSize--autonomous/) (Notes 1–3 below the table) |
 | **Tiers and values** | **Unit (B2):** three `ant testsome` JVMs, `max_top_k` V ∈ {100, 1000 (default), 1500}; 5 (P, L) cases each = 15 cases; 2000 rows, `vector<float, 4>`. **Cluster (B3):** one node, heap 2G, G1; V ∈ {1000 (default), 5000, 10000}, one restart per V on the same data; 8 (V, L) cells × 3 repetitions = 24 queries; 20,000 rows × 8,192 B, `vector<float,16>`. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -351,5 +351,5 @@ Not done.
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a–B2h, B3a–B3h and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: §2 row `7124f4a0…717d` added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: §2 row `7124f4a0…717d` added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` not edited (`HANDOFF-ADVISOR.md` §8).

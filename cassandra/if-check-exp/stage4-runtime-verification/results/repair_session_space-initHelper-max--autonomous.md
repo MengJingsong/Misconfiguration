@@ -16,7 +16,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed `8befd498215f50002065d2a234c8881f9dd901bb2333c39902363564a0c91d6f` (commit `3ee383c`). Frozen after the audit's 12 amendments (U1–U4, C1–C8): `8aa77acf0c26c7423d77a96f1b957dff2b6f80640d3f6da5708f36c4f719280a`. After runbook-defect fix D1 (found by the unit shakedown, before any run-1 reading): **`d14bc66cbb25693cf393d62078ec61c60d89985732457483a8bae7308f5bfe0e`**; both tiers ran at this version. All three are rows in `_INDEX-advisor.md` §2. Not committed yet (working tree on `advisor-run`, HEAD `0c847e5`) |
+| **Case-file version** | Filed `8befd498215f50002065d2a234c8881f9dd901bb2333c39902363564a0c91d6f` (commit `3ee383c`). Frozen after the audit's 12 amendments (U1–U4, C1–C8): `8aa77acf0c26c7423d77a96f1b957dff2b6f80640d3f6da5708f36c4f719280a`. After runbook-defect fix D1 (found by the unit shakedown, before any run-1 reading): **`d14bc66cbb25693cf393d62078ec61c60d89985732457483a8bae7308f5bfe0e`**; both tiers ran at this version. All three are rows in `_INDEX.md` §4. Not committed yet (working tree on `advisor-run`, HEAD `0c847e5`) |
 | **Harness** | `harness/repair_session_space-initHelper-max--autonomous/`: `RepairSessionSpaceProbeTest.java`, `unit-run.sh`, `JmxAttr.java`, `KnownTree.java`, `make-node-conf.sh`, `cluster-run.sh`; `results/.../run1/selfcheck.py`. Not committed yet. Reused tools (numbers derived again here): the test's structure, `unit-run.sh`, `make-node-conf.sh` and the node mechanics of `cluster-run.sh` were adapted from `harness/repair_session_space-applySimpleConfig-repair_session_space--autonomous/` (those files were not changed). No value or derivation was taken from another case file or results file |
 | **Tiers and values** | Unit: one table, 2^18 + 1 keys populated once, RF 1, S ∈ {1, 2, 4, 8, 16} MiB, control S = 64, four init-only controls. Cluster: three loopback nodes, RF 3, 3M stress partitions, `repair -full -pr`, S ∈ {default (128), 1, 4, 16, 64} MiB and control 1024 MiB, three repairs each |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-27 |
@@ -220,4 +220,4 @@ until the partition or depth-20 cap takes over.
 | Cluster | Confirmed (C7 row: B3g rows 1 and 4) | caps | run 1 + self-check | 2026-10-27 |
 
 **Feedback filed:** the case file's section D updated (uncommitted); amendments U1–U4, C1–C8 and fix D1 in the case file (uncommitted);
-`_INDEX-advisor.md` §2 rows (frozen `8aa77acf…`, D1 `d14bc66c…`) and §1 Stage 4 column filled.
+`_INDEX.md` §4 rows (frozen `8aa77acf…`, D1 `d14bc66c…`) and §1 Stage 4 column filled.

@@ -23,7 +23,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed in commit `80daf71` (sha256 `18f8f934…f050d`). Frozen after the step-0 audit's fifteen amendments (2026-10-26, before any run-1 reading): sha256 **`0e9c927f0d918b9eb0c8f02ff809b9a11a7958b59e5c978903e30ab75bb2016a`**. Both tiers' readings were taken at this version. New row in `_INDEX-advisor.md` §2; `run1/freeze.txt` (with the harness and self-check hashes). Not committed (no commit was asked for). |
+| **Case-file version** | Filed in commit `80daf71` (sha256 `18f8f934…f050d`). Frozen after the step-0 audit's fifteen amendments (2026-10-26, before any run-1 reading): sha256 **`0e9c927f0d918b9eb0c8f02ff809b9a11a7958b59e5c978903e30ab75bb2016a`**. Both tiers' readings were taken at this version. New row in `_INDEX.md` §4; `run1/freeze.txt` (with the harness and self-check hashes). Not committed (no commit was asked for). |
 | **Harness** | [`../harness/batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/`](../harness/batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/): `BatchFailThresholdProbeTest.java` (B2c with amendment B2c), `unit-run.sh`; `batch.py` (bundled-driver client), `cluster-run.sh` (three node lifetimes, F = 50, 100, 200). Instrument checks before the freeze: unit shakedown at F = 8, 16 KiB and B = 2, 5 KiB (`shakedown/unit-f8-16-b2-5-summary.txt`); cluster shakedown with N = 10 batches per run (`shakedown/cluster-n10-summary.txt`). The shakedowns found two harness bugs, both fixed before the freeze and neither in the case file: the probe's helper `list(...)` clashed with `CQLTester.list(Object...)` (compile error), and `cluster-run.sh`'s client wrapper echoed its log line into the captured result (the first cluster shakedown is kept outside the repo as `shakedown/cluster1-clientlog-bug/`). Self-check [`run1/selfcheck.py`](batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/run1/selfcheck.py) was written before run 1 and tested on the shakedown files (`shakedown/selfcheck-on-shakedown.out`: 27/27). |
 | **Tiers and values** | Unit (B2): one `ant testsome` JVM; F ∈ {50, 100, 200} KiB (warn 1 KiB) × B ∈ {10, 24, 26, 60, 98, 102} KiB × {multi, single} = 36 cases. Cluster (B3): one node, heap 2G, warn 5KiB; F ∈ {50, 100, 200} KiB from the yaml with a restart; runs `multi 30`, `multi 10`, `single 30`, `multi 60`, N = 200 logged batches each. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -248,5 +248,5 @@ the commit log or an sstable. A batch on a single partition is not subject to F 
 12.3 MB at F = 100 and 200; `multi 60` 24.6 MB at F = 200; unit B = 26 accepted at F = 100, B = 60 and 98 at F = 200).
 
 **Feedback filed:** the case file's section D updated (uncommitted); amendments B2a–B2g, B3a–B3g, B4 in the case file
-(uncommitted); `_INDEX-advisor.md` §2 row `0e9c927f…016a`, §1 Stage 4 column filled. `HANDOFF.md` not edited
+(uncommitted); `_INDEX.md` §4 row `0e9c927f…016a`, §1 Stage 4 column filled. `HANDOFF.md` not edited
 (`HANDOFF-ADVISOR.md` §8).

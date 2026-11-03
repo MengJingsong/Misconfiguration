@@ -21,7 +21,7 @@
 - Unit: neighbours (graph edges) per vector node.
 
 
-**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates a setting against a literal range (`<= 0 || > MAXIMUM_MAXIMUM_NODE_CONNECTIONS`), not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** The operand is `maximumNodeConnections`, the parsed option value (`IndexWriterConfig.java:125`). It becomes the jvector `GraphIndexBuilder` M (max degree) at `vector/OnHeapGraph.java:110-117`. That M then sizes three things:
 - **Heap.** Each graph node's neighbour set during the memtable's life. `builder.addGraphNode` returns the bytes this adds, and `OnHeapGraph.add` counts them into the memtable index's usage (`OnHeapGraph.java:190`).
 - **Disk.** The `TermsData` component that `OnDiskGraphIndex.write` produces (`OnHeapGraph.java:346-349`). The file is named `<sstable>-SAI+<ver>+<index>+TermsData.db` (`disk/format/Version.java:138-152`, `IndexComponent.java:51`).

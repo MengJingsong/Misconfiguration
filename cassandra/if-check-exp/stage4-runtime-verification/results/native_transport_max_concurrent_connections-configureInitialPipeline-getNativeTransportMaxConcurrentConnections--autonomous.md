@@ -17,7 +17,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | filed in commit `339e0b1`; the 12 audit amendments of 2026-10-27 (U1–U4, C1–C8) are uncommitted in the working tree at the time of the run. Frozen sha256 after the amendments: `d59f24607d61abd3ca25e225563948246fc1d007d7e95f739107b98f13ddfd13` (new row in `_INDEX-advisor.md` §2). Both tiers of run 1 ran at this version; section D was filled after this hash. |
+| **Case-file version** | filed in commit `339e0b1`; the 12 audit amendments of 2026-10-27 (U1–U4, C1–C8) are uncommitted in the working tree at the time of the run. Frozen sha256 after the amendments: `d59f24607d61abd3ca25e225563948246fc1d007d7e95f739107b98f13ddfd13` (new row in `_INDEX.md` §4). Both tiers of run 1 ran at this version; section D was filled after this hash. |
 | **Harness** | `harness/native_transport_max_concurrent_connections-configureInitialPipeline-getNativeTransportMaxConcurrentConnections--autonomous/`: `ConnLimitProbeTest.java`, `unit-run.sh`, `hold_frames.py` (the case's B3c script, verbatim), `Jmx.java`, `cluster-run.sh` (uncommitted; the node start/stop and logging skeleton of `cluster-run.sh` and the structure of `unit-run.sh` are adapted from the harness folders of `native_transport_max_concurrent_connections-channelActive-limit--autonomous` and `native_transport_max_frame_size-decode-bytesToDiscard--autonomous`; no value or derivation was taken from them) |
 | **Tiers and values** | unit: limits -1 (default), 0, 5, 20 with M = 10 channels. cluster: limits -1 (default, run A), 16 (run B), 32 (run C, added by C1), K = 64 connections, each holding exactly 4 MiB (L = 4194296, C2); informational run R (C7) |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-27 |
@@ -154,4 +154,4 @@ Every run: baseline and post established 0; node config line shows the limit, pe
 
 Informational (run R, no row): raising the limit from -1 to 16 at run time left 36 connections open (20 uncounted + 16), as A3's runtime-enabling note predicts.
 
-**Feedback filed:** the case file's section D (uncommitted); amendments U1–U4 and C1–C8 in the case file; `_INDEX-advisor.md` §2 new row and §1 Stage 4 column.
+**Feedback filed:** the case file's section D (uncommitted); amendments U1–U4 and C1–C8 in the case file; `_INDEX.md` §4 new row and §1 Stage 4 column.

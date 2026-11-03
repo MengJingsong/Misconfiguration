@@ -18,7 +18,7 @@
 - The range check under test is `TableParams.validate()`, [`TableParams.java:160-167`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/schema/TableParams.java#L160-L167). It rejects `fp <= BloomCalculations.minSupportedBloomFilterFpChance()` (that is `probs[20][14] = 6.71e-05`, `BloomCalculations.java:65,195-200`) as occurrence #1, and `fp > 1` as occurrence #2.
 
 
-**Limit type (2026-10-29).** non-config: per-table/per-index option. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the option against a literal range, not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** Off-heap native memory and disk taken by sstable bloom filters.
 - The governed quantity is bits per partition key. The check bounds the setting itself: it caps bits/key at 20 (the lower bound on fp) and rejects nonsense values above 1.
 - Per sstable: `numBits = numElements × bucketsPerElement + 20` (`FilterFactory.java:72`), allocated as `Memory.allocate(ceil(numBits/64) × 8)` (`OffHeapBitSet.java:39-53`).

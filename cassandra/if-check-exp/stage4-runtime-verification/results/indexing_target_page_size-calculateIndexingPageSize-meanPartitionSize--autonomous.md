@@ -36,7 +36,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed with sha256 `ecd9286c…e537` (index §2, "as filed (index batch)"). After the step-0 audit's ten amendments (2026-10-26, before any run-1 reading), frozen at sha256 **`cae4285e0e809f3767278910299a9b787f08456f7de10064bb3ce9d0fc3308b5`**. The unit tier ran at this version. The runbook-defect fix D1 (B3c only; B3f and B3g unchanged) gives sha256 **`e20ec09a93061a6439d4388ebafd6606716da9e0df71731abdf37e5259facae9`**, the version the cluster tier was restarted and run at. Both hashes are new rows in `_INDEX-advisor.md` §2. `run1/freeze.txt` holds them together with the harness and self-check hashes. Section D was filled after these hashes. Nothing was committed, because no commit was asked for. |
+| **Case-file version** | Filed with sha256 `ecd9286c…e537` (index §2, "as filed (index batch)"). After the step-0 audit's ten amendments (2026-10-26, before any run-1 reading), frozen at sha256 **`cae4285e0e809f3767278910299a9b787f08456f7de10064bb3ce9d0fc3308b5`**. The unit tier ran at this version. The runbook-defect fix D1 (B3c only; B3f and B3g unchanged) gives sha256 **`e20ec09a93061a6439d4388ebafd6606716da9e0df71731abdf37e5259facae9`**, the version the cluster tier was restarted and run at. Both hashes are new rows in `_INDEX.md` §4. `run1/freeze.txt` holds them together with the harness and self-check hashes. Section D was filled after these hashes. Nothing was committed, because no commit was asked for. |
 | **Harness** | [`../harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/`](../harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/): `IndexingPageSizeProbeTest.java` and `unit-run.sh` (B2), `itp.btm`, `gencsv.py` and `cluster-run.sh` (B3). |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM with a 1 GiB heap. Four tables: T1 with K1 ∈ {false, true}, T2, T2b, T3, each measured 3 times. **Cluster (B3):** one node with a 2G heap. Table B with K1 unset and with K1 = true, table A with K1 unset, 3 rebuilds each. The 32 MiB target is a constant and cannot be set (A1). Two things vary instead: the property K1, which skips it, and the schema (zero vs one regular column), which reaches guard `:1164`. Both the unit and cluster designs are filed this way. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -322,4 +322,4 @@ Not done.
 
 **Feedback filed:**
 - The case file's section D was updated (uncommitted). The case's Estimate and section A need no change, since the run confirmed the filed bypass.
-- `_INDEX-advisor.md`: two new §2 rows (frozen `cae4285e…`, D1 fix `e20ec09a…`) and the §1 Stage 4 column.
+- `_INDEX.md`: two new §2 rows (frozen `cae4285e…`, D1 fix `e20ec09a…`) and the §1 Stage 4 column.

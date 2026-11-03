@@ -15,7 +15,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Branch `advisor-run`, uncommitted on 2026-10-27 (as filed in `419619f`'s tree with sha256 `f565aebd…c190`). Frozen after the audit's 13 amendments (U1–U4, C1–C9): sha256 `8f7f52023b602252247f78a3a655169d0132f4f4a4832b6d19d3a4906a238153`, recorded in `_INDEX-advisor.md` §2 before any harness run or reading. No runbook fix followed, so this is the version both tiers ran. Section D is filled after the hash. |
+| **Case-file version** | Branch `advisor-run`, uncommitted on 2026-10-27 (as filed in `419619f`'s tree with sha256 `f565aebd…c190`). Frozen after the audit's 13 amendments (U1–U4, C1–C9): sha256 `8f7f52023b602252247f78a3a655169d0132f4f4a4832b6d19d3a4906a238153`, recorded in `_INDEX.md` §4 before any harness run or reading. No runbook fix followed, so this is the version both tiers ran. Section D is filled after the hash. |
 | **Harness** | `harness/native_transport_max_concurrent_connections-channelActive-limit--autonomous/`: `ConnectionLimitProbeTest.java` (unit probe, copied into the clone only for the run), `unit-run.sh`; `hold.py` (the case's B3c client, verbatim, C2), `ntc.btm` (two observe-only Byteman rules: `NTCREFUSE` at the global-limit close in `channelActive`, C5; `NTCMEM` = `CBUtil.allocator` metric and `counter` on each `nodetool version`, C4), `cluster-run.sh`. Structure of `unit-run.sh`, `cluster-run.sh` and the `NTCMEM` rule adapted from `harness/native_transport_max_concurrent_connections_per_ip-channelActive-perIpLimit--autonomous/` (tools only; every number and expectation here derived from source). Self-check: `results/<stem>/run1/selfcheck.py`. Uncommitted (no commit asked). |
 | **Tiers and values** | Unit: one test, runs `L-1`, `L0`, `L8`, `L32` (64 `EmbeddedChannel`s each, S = 1,048,576 body bytes written to each open channel) and control `S0` (L = 8, nothing written); per-IP limit -1. Cluster: one node (127.0.0.1, 4 GiB heap), L ∈ {-1 (default), 200, 50}, a fresh node per value; N = 300 connections each sending a 9-byte v4 STARTUP header declaring 16,000,000 body bytes plus S = 4,194,295 body bytes (4 MiB in all); on the L = -1 node also the positive control N = 100 and the `s0` control (N = 300, nothing sent). |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-27 |
@@ -163,4 +163,4 @@ Not done.
 
 **Effect:** caps — the count of live native connections is capped at L, and the decoder-held memory follows min(N, L) × 4 MiB.
 
-**Feedback filed:** the case file's section D updated (after the frozen hash); `_INDEX-advisor.md` §1 Stage 4 column filled. Not committed (no commit asked).
+**Feedback filed:** the case file's section D updated (after the frozen hash); `_INDEX.md` §1 Stage 4 column filled. Not committed (no commit asked).

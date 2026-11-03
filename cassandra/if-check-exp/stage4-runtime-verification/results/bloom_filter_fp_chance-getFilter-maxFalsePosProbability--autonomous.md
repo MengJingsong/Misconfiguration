@@ -16,7 +16,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed `4ffd060f7a3c2e37f930dc914e09b18723d2aa1c1d0cd048ff2b4951cdacb928` (commit `77f1387` holds it as filed). Frozen after the audit's 11 amendments (U1–U5, C1–C6): **`7a71bbb7ac5935baed7e3bdb7044156d4099dc07558bfd559a6a931f2a1f90a7`**; the unit tier ran on this version. After runbook-defect fix D1 (cluster tier only): **`d9feb24d02b07759343bb9da3ace36d7fc1dbd6912dfc3fef253ac717369bc57`**; the cluster tier ran on this version. Both are rows in `_INDEX-advisor.md` §2. Not committed yet (uncommitted working tree on `advisor-run`) |
+| **Case-file version** | Filed `4ffd060f7a3c2e37f930dc914e09b18723d2aa1c1d0cd048ff2b4951cdacb928` (commit `77f1387` holds it as filed). Frozen after the audit's 11 amendments (U1–U5, C1–C6): **`7a71bbb7ac5935baed7e3bdb7044156d4099dc07558bfd559a6a931f2a1f90a7`**; the unit tier ran on this version. After runbook-defect fix D1 (cluster tier only): **`d9feb24d02b07759343bb9da3ace36d7fc1dbd6912dfc3fef253ac717369bc57`**; the cluster tier ran on this version. Both are rows in `_INDEX.md` §4. Not committed yet (uncommitted working tree on `advisor-run`) |
 | **Harness** | `harness/bloom_filter_fp_chance-getFilter-maxFalsePosProbability--autonomous/`: `BloomFpChanceSizeTest.java`, `bf-unit.btm`, `bf-node.btm`, `unit-run.sh`, `cluster-run.sh`, `make-node-conf.sh`; `results/.../run1/selfcheck.py`. Not committed yet. Reused tools (with numbers derived again here): `make-node-conf.sh` copied, and the `BA/BC/A/F` Byteman rules and the node mechanics of `cluster-run.sh` and `unit-run.sh` adapted, from `harness/bloom_filter_fp_chance-computeBloomSpec-maxFalsePosProb--autonomous/` (those files were not changed). No value or derivation was taken from another case file or results file |
 | **Tiers and values** | Unit: `FilterFactory.getFilter(N, fp)`, N ∈ {1M, 2M} × fp ∈ {0.001, 0.01, 0.1, 0.39, 0.5, 0.9999, 1.0}, two reps (28 cells). Cluster: one node, `keyspace1.standard1` with 2M stress partitions, fp 0.01 (default) → 0.001 → 0.1 → 0.5 → 1.0 → 0.01 by `upgradesstables -a`; ALTER-to-1.0 + restart check; control `ks_ctl` with 4M partitions at 0.01 |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-27 |
@@ -194,4 +194,4 @@ Not done.
 | Cluster | **Confirmed** (B3g row 1; step 5 also confirmed) | caps (per key; total grows with partitions) | run 1 + self-check | 2026-10-27 |
 
 **Feedback filed:** case file section D updated (2026-10-27, uncommitted). No section amended by the result; the audit amendments
-U1–U5, C1–C6 and the defect fix D1 are in the case file. `_INDEX-advisor.md` §1 Stage 4 column and the §2 rows were filled.
+U1–U5, C1–C6 and the defect fix D1 are in the case file. `_INDEX.md` §1 Stage 4 column and the §2 rows were filled.

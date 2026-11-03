@@ -35,7 +35,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed at commit `f35af30` with sha256 `dba775c7…e10b` (index §2, "as filed (hints batch)"). Frozen after the step-0 audit's twelve amendments (2026-10-26, before any run-1 reading) at sha256 **`86862af88ac0963c47271d0b3d3e1e7778ba3422299969ac192eceaed0b85a09`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash, the harness hashes and the self-check hash. Nothing was committed, because no commit was asked for. |
+| **Case-file version** | Filed at commit `f35af30` with sha256 `dba775c7…e10b` (index §2, "as filed (hints batch)"). Frozen after the step-0 audit's twelve amendments (2026-10-26, before any run-1 reading) at sha256 **`86862af88ac0963c47271d0b3d3e1e7778ba3422299969ac192eceaed0b85a09`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash, the harness hashes and the self-check hash. Nothing was committed, because no commit was asked for. |
 | **Harness** | [`../harness/hints_PAGE_SIZE-computeNext-position--autonomous/`](../harness/hints_PAGE_SIZE-computeNext-position--autonomous/) (Notes 1–3 below the table) |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM, default test JVM options. Entry value v ∈ {1 KiB, 16 KiB, 600 KiB} × format ∈ {plain, LZ4} × iterator ∈ {buffers, hints}: 12 reads of 8 MiB files (N = 8,192 / 512 / 14 hints). **Cluster (B3):** two nodes from one clone, heap 2G each. Stress value v ∈ {16 KiB, 64 KiB, 1 MiB}, with N = 16,384 / 4,096 / 256 hints for node 2 (≈ 256 MiB each). PAGE_SIZE is a constant and is not varied (B2b, B3b). The entry size varies k = ⌈512 KiB / e⌉ instead. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -380,5 +380,5 @@ node-2 `Hint` went from 0 when paused to k during delivery, and c and `sent` cha
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a, B2c, B2d, B2e, B2g, B3a, B3c, B3d, B3e, B3g, B3h and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: the §2 row `86862af8…5a09` was added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: the §2 row `86862af8…5a09` was added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` was not edited (`HANDOFF-ADVISOR.md` §8).

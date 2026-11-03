@@ -33,7 +33,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | As filed: sha256 `a195e044…0a36` (`_INDEX-advisor.md` §2; in git `HEAD`). Frozen after the step-0 audit's fourteen amendments (2026-10-26, before any run-1 reading) at sha256 **`f60348fb01dd7d0f33aa3ec3923f3ad65f9a427984fb4ace77019f362936336d`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Section D was filled after the verdict (file sha256 now `b83d98e8…d63e`); everything above section D still hashes to `f60348fb…336d`. Nothing committed: no commit was asked for. |
+| **Case-file version** | As filed: sha256 `a195e044…0a36` (`_INDEX.md` §4; in git `HEAD`). Frozen after the step-0 audit's fourteen amendments (2026-10-26, before any run-1 reading) at sha256 **`f60348fb01dd7d0f33aa3ec3923f3ad65f9a427984fb4ace77019f362936336d`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Section D was filled after the verdict (file sha256 now `b83d98e8…d63e`); everything above section D still hashes to `f60348fb…336d`. Nothing committed: no commit was asked for. |
 | **Harness** | [`../harness/MAXIMUM_MAXIMUM_NODE_CONNECTIONS-fromOptions-maximumNodeConnections--autonomous/`](../harness/MAXIMUM_MAXIMUM_NODE_CONNECTIONS-fromOptions-maximumNodeConnections--autonomous/) (Notes 1–3 below the table) |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM. Test A: M ∈ {16, 64, 256, 512, 513, 1024}. Test B: (M, beam) ∈ {(16,100), (64,100), (256,100), (512,100), (16,400)}; N = 5000, dim 8. **Cluster (B3):** one node, heap 2G; tables t_16, t_128, t_512, t_16b400 (20,000 rows each, `vector<float,8>`), plus t_513 (index attempt only). |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -376,5 +376,5 @@ flat components, shows that the instrument sees M.
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a, B2c–B2g, B3a, B3c–B3h and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: §2 row `f60348fb…336d` added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: §2 row `f60348fb…336d` added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` not edited (`HANDOFF-ADVISOR.md` §8).

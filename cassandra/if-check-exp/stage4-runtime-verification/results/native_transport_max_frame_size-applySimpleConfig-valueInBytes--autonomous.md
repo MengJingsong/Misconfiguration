@@ -17,7 +17,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed in commit `f361777` (sha256 `5ee9434b…bb95`). Frozen after the step-0 audit's seventeen amendments (2026-10-24): sha256 **`deeefe3fb980bb48836a7dc5a8882b77bea17f09037672ac4a46c9b5c318f9c2`** (new row in `_INDEX-advisor.md` §2). Both tiers ran at this version; no runbook fix was needed. Nothing is committed (no commit was asked for). |
+| **Case-file version** | Filed in commit `f361777` (sha256 `5ee9434b…bb95`). Frozen after the step-0 audit's seventeen amendments (2026-10-24): sha256 **`deeefe3fb980bb48836a7dc5a8882b77bea17f09037672ac4a46c9b5c318f9c2`** (new row in `_INDEX.md` §4). Both tiers ran at this version; no runbook fix was needed. Nothing is committed (no commit was asked for). |
 | **Harness** | [`../harness/native_transport_max_frame_size-applySimpleConfig-valueInBytes--autonomous/`](../harness/native_transport_max_frame_size-applySimpleConfig-valueInBytes--autonomous/): `FrameCapBase.java`, `FrameCap1MiBTest.java`, `FrameCap4MiBTest.java`, `FrameCapDefaultTest.java`, `FrameCap2048MiBTest.java`, `unit-run.sh` (unit); `frame-client.py`, `cluster-run.sh`, `cluster-chain.sh` (cluster). Not committed. Instrument checks before run 1: (i) `unit-run.sh instrument` — the five classes compiled in the run clone and the upstream known-answer test `ProtocolErrorTest` passed, 9 tests, 0 failures (incl. `testBodyLengthOverLimit`, "Request is too big") ([`run1/unit-instrument/`](native_transport_max_frame_size-applySimpleConfig-valueInBytes--autonomous/run1/unit-instrument/)); (ii) a cluster shakedown, one full start at `2MiB` (`cluster-run.sh cluster-shake s2 2MiB`): every step ran as written, no runbook defect and no harness bug found ([`shakedown/`](native_transport_max_frame_size-applySimpleConfig-valueInBytes--autonomous/shakedown/)); its readings are not used below. |
 | **Tiers and values** | Unit (B2): N = 1, 4, 16 (default, unset) MiB; envelopes with total length N·2^20, N·2^20 + 1, 2·N·2^20 + 9; v5 `extractHeader` control; `2048MiB` rejection. Cluster (B3): one node, K = default (unset → 16 MiB), 2 MiB, 8 MiB (one start each), then a start with `2048MiB`. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-24. |
@@ -186,5 +186,5 @@ The bypass is protocol v5 (the bundled driver's default and the current version,
 message; `native_transport_max_message_size` does.
 
 **Feedback filed:** the case file's section D (uncommitted); the seventeen step-0 amendments are in the case file, dated, with the frozen
-sha256 as a new row in `_INDEX-advisor.md` §2; `_INDEX-advisor.md` §1 Stage 4 column and the coverage line updated. No section was amended
+sha256 as a new row in `_INDEX.md` §4; `_INDEX.md` §1 Stage 4 column and the coverage line updated. No section was amended
 for a refutation (none occurred).

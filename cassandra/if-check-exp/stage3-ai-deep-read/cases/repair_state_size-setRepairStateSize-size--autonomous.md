@@ -18,7 +18,7 @@
 - **Restart.** A change requires a restart.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` is a change test (`conf.repair_state_size != size`), no usage is compared, not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** It caps heap: the entry count of the `repairs` cache (`Cache<TimeUUID, CoordinatorState>`, `ActiveRepairService.java:191,253-256`) and of the `participates` cache (`Cache<TimeUUID, ParticipateState>`, `:193,257-260`). Each entry holds the following:
 - **`CoordinatorState`:** repair options, a map of `SessionState`s (each with a map of `JobState`s), the column-family list, and neighbours and ranges (`CoordinatorState.java:47-54`; `SessionState.java:41-47`; `JobState.java:39-42`).
 - **`ParticipateState`:** table ids, ranges, and a map of jobs with validation and sync states (`ParticipateState.java:42-60,66+`).

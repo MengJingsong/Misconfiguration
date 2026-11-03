@@ -33,7 +33,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed in commit `80daf71` (sha256 `19337bdf…270a9`). Frozen after the step-0 audit's seventeen amendments (2026-10-26, before any run-1 reading) at sha256 **`42872914bef8a3d2dfde36ce207b958061eb588816d7f6f3e95bb0a0086e2854`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Nothing committed: no commit was asked for. |
+| **Case-file version** | Filed in commit `80daf71` (sha256 `19337bdf…270a9`). Frozen after the step-0 audit's seventeen amendments (2026-10-26, before any run-1 reading) at sha256 **`42872914bef8a3d2dfde36ce207b958061eb588816d7f6f3e95bb0a0086e2854`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Nothing committed: no commit was asked for. |
 | **Harness** | [`../harness/page_size_fail_threshold-execute-pageSize--autonomous/`](../harness/page_size_fail_threshold-execute-pageSize--autonomous/) (Notes 1–3 below the table) |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM; (warn, fail) ∈ {(5, 10), (500, 1000), (−1, −1)} × entry {D, L} × c1–c6 = 36 cases, 2000 rows of 100-byte text. **Cluster (B3):** one node, heap 2G, G1; T ∈ {1000 (yaml), 10000, −1 (JMX)}; Q1–Q5 three times each = 45 queries; 100,000 rows × 2,048 B in one partition. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -362,5 +362,5 @@ select.
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a–B2h, B3a–B3h and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: §2 row `42872914…2854` added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: §2 row `42872914…2854` added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` not edited (`HANDOFF-ADVISOR.md` §8).

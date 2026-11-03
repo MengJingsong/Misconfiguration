@@ -17,7 +17,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | filed in commit `339e0b1` (sha256 `7c82fcb1…` as filed); the 12 audit amendments of 2026-10-27 (U1–U4, C1–C8) are uncommitted in the working tree at the time of the run. Frozen sha256 after the amendments: `ba3b32eb87542965adcaa4e02ddbab2d5d53068ab57b519ea2defaa806ca76a9` (new row in `_INDEX-advisor.md` §2). Both tiers of run 1 ran at this version; section D was filled after this hash. |
+| **Case-file version** | filed in commit `339e0b1` (sha256 `7c82fcb1…` as filed); the 12 audit amendments of 2026-10-27 (U1–U4, C1–C8) are uncommitted in the working tree at the time of the run. Frozen sha256 after the amendments: `ba3b32eb87542965adcaa4e02ddbab2d5d53068ab57b519ea2defaa806ca76a9` (new row in `_INDEX.md` §4). Both tiers of run 1 ran at this version; section D was filled after this hash. |
 | **Harness** | `harness/native_transport_max_concurrent_connections_per_ip-configureInitialPipeline-getNativeTransportMaxConcurrentConnectionsPerIp--autonomous/`: `PerIpLimitProbeTest.java`, `unit-run.sh`, `hold_frames.py` (the case's B3c script plus C2's optional source address), `cluster-run.sh` (uncommitted). `unit-run.sh` is adapted from the harness folder of `native_transport_max_concurrent_connections-configureInitialPipeline-getNativeTransportMaxConcurrentConnections--autonomous` (sed of names and clone), and the node start/stop and logging skeleton of `cluster-run.sh` from the same folder; the sampling, the per-address counting and the two-script schedule are new. Every value and derivation here was made from the pinned source and the Netty 4.1.130 bytecode; none was taken from another case or results file. |
 | **Tiers and values** | unit: per-IP limits -1 (default), 0, 3, 5 with 8 channels (6 from 10.0.0.1, 2 from 10.0.0.2). cluster: per-IP limits -1 (default, run A), 16 (run B), 32 (run C, added by C1); K1 = 64 connections from 127.0.0.1 then K2 = 16 from 127.0.0.2, each holding exactly 4 MiB (L = 4194296, C2) |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-27 |
@@ -213,4 +213,4 @@ at most P connections open; the memory those connections pin with incomplete fra
 | Cluster | **Confirmed** (C6 row R): 64/16/32 connections held from 127.0.0.1 at -1/16/32, NMT `Other` +256.0/64.0/128.0 MiB = min(64, P) × 4 MiB; 16 more from 127.0.0.2 in every run (+64.0 MiB); one per-IP log line in each capped run; back to 0 after close | caps (per source IP) | run 1 + self-check | 2026-10-27 |
 
 **Feedback filed:** the case file's section D "Stage-4 feedback" updated (uncommitted, 2026-10-27); the amended sections are U1–U4 (B2a–B2g)
-and C1–C8 (B3a–B4), applied before any reading. `_INDEX-advisor.md` §2 has the frozen-hash row and §1's Stage 4 column is filled.
+and C1–C8 (B3a–B4), applied before any reading. `_INDEX.md` §4 has the frozen-hash row and §1's Stage 4 column is filled.

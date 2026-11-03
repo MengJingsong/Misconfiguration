@@ -21,7 +21,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed as sha256 `b3bea7cd…fc31` (service batch; checked equal to the filed `_INDEX-advisor.md` §2 row before the audit). Frozen after the step-0 audit's seventeen amendments (2026-10-27, before any run-1 reading; hashed 00:32:27 EDT, first run-1 command 00:32:43): sha256 **`5a021af5383d67586183c310ce7baf662efdeb040da81c5d9b1a047938d63869`**, a new row in `_INDEX-advisor.md` §2. Both tiers' run 1 ran at this version (no runbook defect). Section D was filled after this hash. Nothing committed (no commit was asked for). |
+| **Case-file version** | Filed as sha256 `b3bea7cd…fc31` (service batch; checked equal to the filed `_INDEX.md` §4 row before the audit). Frozen after the step-0 audit's seventeen amendments (2026-10-27, before any run-1 reading; hashed 00:32:27 EDT, first run-1 command 00:32:43): sha256 **`5a021af5383d67586183c310ce7baf662efdeb040da81c5d9b1a047938d63869`**, a new row in `_INDEX.md` §4. Both tiers' run 1 ran at this version (no runbook defect). Section D was filled after this hash. Nothing committed (no commit was asked for). |
 | **Harness** | [`../harness/counter_cache_size-setCounterCacheCapacityInMB-capacity--autonomous/`](../harness/counter_cache_size-setCounterCacheCapacityInMB-capacity--autonomous/): `CounterCacheCapacityProbeTest.java` (B2c–B2e as amended; sha256 `6648c136…`), `unit-run.sh` (`5d5fcd8d…`), `CounterCacheSampler.java` (copied unchanged, `c24b7224…`), `cluster-run.sh` (B3e as amended, `99cc7c23…`). None changed after the shakedowns. Not committed. Instrument checks before run 1: (i) unit shakedown (N = 20,000) compiled and ran both tests, every output line present ([`shakedown/unit-shake-summary.txt`](counter_cache_size-setCounterCacheCapacityInMB-capacity--autonomous/shakedown/unit-shake-summary.txt)); (ii) cluster shakedown (n = 40,000; C = 64, shrink 1, 4, 2, 1; yaml 2) ran every step, read back both capacities and left nothing running ([`shakedown/cluster-shake-summary.txt`](counter_cache_size-setCounterCacheCapacityInMB-capacity--autonomous/shakedown/cluster-shake-summary.txt)); (iii) [`run1/selfcheck.py`](counter_cache_size-setCounterCacheCapacityInMB-capacity--autonomous/run1/selfcheck.py) was written before any run-1 reading and run on both shakedowns; it had a format-string bug that crashed its cluster part, which I did not notice until run 1 (fix S1, §3). Shakedown readings are not judged. |
 | **Tiers and values** | Unit (B2): one `ant testsome` JVM; `guard` (C = −1); `sweep` with N = 200,000 distinct counter cells (`k int`, one `counter` column), C = 64 (control), shrink to 1 without invalidation, then 4, 2, 1, 0 MiB through `CacheService.setCounterCacheCapacityInMB`. Cluster (B3): one node, `-Xms2G -Xmx2G`, yaml `counter_cache_size: 64MiB`; per pass `cassandra-stress counter_write n=400000` (2,000,000 distinct cells); C = 256 (control), shrink to 8 without invalidation, then 32, 16, 8 MiB by `nodetool setcachecapacity 0 0 C`; then a restart at yaml `16MiB` with one more pass. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-27. |
@@ -284,8 +284,8 @@ retained heap of counter cache objects scales linearly with C; a negative C is r
 
 **Feedback filed:**
 - The case file's section D (uncommitted).
-- The seventeen step-0 amendments are in the case file, dated; their sha256 is a new row in `_INDEX-advisor.md` §2.
-- `_INDEX-advisor.md` §1 Stage 4 column updated.
+- The seventeen step-0 amendments are in the case file, dated; their sha256 is a new row in `_INDEX.md` §4.
+- `_INDEX.md` §1 Stage 4 column updated.
 - The Estimate line is left as filed. No section was amended for a refutation (none occurred).
 
 Recommendations for stage 3, not applied:

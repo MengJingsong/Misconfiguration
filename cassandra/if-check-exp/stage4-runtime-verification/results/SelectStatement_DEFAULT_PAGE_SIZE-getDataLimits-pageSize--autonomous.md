@@ -36,7 +36,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | Filed in commit `80daf71` (sha256 `528d625a…e761`). Frozen after the step-0 audit's fifteen amendments (2026-10-26, before any run-1 reading) at sha256 **`7393d4f3f235ebd782ac19f0e6f4cecb2133c4d5548947cc59a1667fa9c53317`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash, the harness hashes and the self-check hash. Nothing was committed, because no commit was asked for. |
+| **Case-file version** | Filed in commit `80daf71` (sha256 `528d625a…e761`). Frozen after the step-0 audit's fifteen amendments (2026-10-26, before any run-1 reading) at sha256 **`7393d4f3f235ebd782ac19f0e6f4cecb2133c4d5548947cc59a1667fa9c53317`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash, the harness hashes and the self-check hash. Nothing was committed, because no commit was asked for. |
 | **Harness** | [`../harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/`](../harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/) (Notes 1–3 below the table) |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM. N ∈ {25,000, 50,000} rows of 16 B in 50 groups. Cells (Qg, P = −1 → R = 10000), (Qg, 1000), (Qg, 50000) and (Qa, −1). **Cluster (B3):** one node, heap 2G, G1. N = 100,000 rows of 4,096 B in one partition, 50 groups. Runs Qg-off (R = 10000, the constant), Qg-1000, Qg-50000 and Qa-off, three times each. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -391,5 +391,5 @@ against 41 MB per read under the constant.
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a, B2c–B2g, B3a–B3h and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: the §2 row `7393d4f3…3317` was added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: the §2 row `7393d4f3…3317` was added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` was not edited (`HANDOFF-ADVISOR.md` §8).

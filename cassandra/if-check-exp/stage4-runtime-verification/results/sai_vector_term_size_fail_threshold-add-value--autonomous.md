@@ -34,7 +34,7 @@
 
 | Field | Content |
 |---|---|
-| **Case-file version** | As filed: sha256 `585f6e00…1fdec` (`_INDEX-advisor.md` §2; in git `HEAD` `780b696`). Frozen after the step-0 audit's sixteen amendments (2026-10-26, before any run-1 reading) at sha256 **`c1b87bd8ad5642005a18823bc0e75ced63d454518a60f32fa69c59f39c69f1c0`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX-advisor.md` §2. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Section D was filled after the verdict (file sha256 now `cb69afbf…1421`); everything above section D still hashes to `c1b87bd8…f1c0`. Nothing committed: no commit was asked for. |
+| **Case-file version** | As filed: sha256 `585f6e00…1fdec` (`_INDEX.md` §4; in git `HEAD` `780b696`). Frozen after the step-0 audit's sixteen amendments (2026-10-26, before any run-1 reading) at sha256 **`c1b87bd8ad5642005a18823bc0e75ced63d454518a60f32fa69c59f39c69f1c0`**. Both tiers' readings were taken at this version. A new row was added to `_INDEX.md` §4. `run1/freeze.txt` holds this hash plus the harness and self-check hashes. Section D was filled after the verdict (file sha256 now `cb69afbf…1421`); everything above section D still hashes to `c1b87bd8…f1c0`. Nothing committed: no commit was asked for. |
 | **Harness** | [`../harness/sai_vector_term_size_fail_threshold-add-value--autonomous/`](../harness/sai_vector_term_size_fail_threshold-add-value--autonomous/) (Note 1) |
 | **Tiers and values** | **Unit (B2):** one `ant testsome` JVM; arms A (16KiB/32KiB), B (4KiB/8KiB), C (2KiB/8191B), D (C, two passes), D0 (C, two passes, no index), plus the KA known-answer probe; N = 500, dim 2048. **Cluster (B3):** one node per arm, heap 4G, `memtable_heap_space` 2048MiB; arms A (16KiB/32KiB), C (2KiB/4KiB), D (C, two passes), E (C, PasswordAuthenticator, ordinary role); 10,000 rows each. |
 | **Audit bottom line** | **Ready after amendments** — 2026-10-26. |
@@ -373,5 +373,5 @@ that the instruments see the graph.
 **Feedback filed:**
 - The case file's section D is updated (uncommitted).
 - Amendments B2a–B2h, B3a–B3g and B4 are in the case file (uncommitted).
-- `_INDEX-advisor.md`: §2 row `c1b87bd8…f1c0` added, and the §1 Stage 4 column filled.
+- `_INDEX.md`: §2 row `c1b87bd8…f1c0` added, and the §1 Stage 4 column filled.
 - `HANDOFF.md` not edited (`HANDOFF-ADVISOR.md` §8).
