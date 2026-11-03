@@ -55,7 +55,8 @@ a different sizing question (e.g. the tighter-boundary follow-up).
 **Status:** open for untried candidates only. The `row_cache_size` +
 `index_summary_capacity` pair is closed as OOMed (run 6: row cache full,
 then an index-summary burst, cgroup OOM-kill during flush/compaction; runs
-4-5 did not reach it, see `_batch-log.md`).
+4-5 did not reach it, see `_batch-log.md`). `memtable_offheap_space` +
+`file_cache_size` is closed as OOMed too (run 7).
 
 **Important correction found while running run 4, worth checking before
 picking any other candidate from this table:** `-XX:MaxDirectMemorySize`
@@ -81,7 +82,7 @@ of which JVM accounting path, if any, a given off-heap constraint uses.
 
 | Constraint | Case file | What it caps | Scale | Config-type |
 |---|---|---|---|---|
-| `memtable_offheap_space` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md) | Memtable pool off-heap bytes (direct buffers) | yaml-set | yaml |
+| `memtable_offheap_space` *(used, run 7 — OOMed)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md) | Memtable pool off-heap bytes (direct buffers) | yaml-set | yaml |
 | `row_cache_size` *(used, runs 4-6 — OOMed in run 6)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/row_cache_size-create-serialized_size--autonomous.md) | Row cache, serialized off-heap (JNA `Native.malloc`, **not** bound by `-XX:MaxDirectMemorySize`) | yaml-set | yaml |
 | `nopcache_capacity` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/nopcache_capacity-setcapacity-capacity--autonomous.md) | Same row-cache-memory family as `row_cache_size` (off-heap, read as `RssAnon`) | yaml-set | hard-coded constant |
 | `index_summary_capacity` *(used, runs 4-6 — OOMed in run 6)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md) | Off-heap index-summary bytes (same JNA `Native.malloc` path, **not** bound by `-XX:MaxDirectMemorySize`; enforced only at periodic resize — see run 4's case file for the bypass window this creates) | yaml-set | yaml |
@@ -93,7 +94,7 @@ of which JVM accounting path, if any, a given off-heap constraint uses.
 | `internode_application_receive_queue_reserve_global_capacity` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md) | Same family, global reserve across connections | yaml-set | yaml, typed "not-a-case" in index — verify |
 | `native_transport_receive_queue_capacity` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md) | Off-heap client-facing networking pool (same `BufferPoolAllocator` family as internode, client side) | yaml-set | yaml |
 | `native_transport_max_request_data_in_flight` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/native_transport_max_request_data_in_flight-releaseItem-globalInFlightBytesBelowLimit--autonomous.md) | Same client-facing off-heap pool family, global in-flight bytes | yaml-set | yaml ×2 |
-| `file_cache_size` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md) | Chunk-cache `BufferPool`, pooled direct bytes (`memoryAllocated`) | yaml-set | yaml ×2 |
+| `file_cache_size` *(used, run 7 — OOMed; chunk cache enabled)* | [case](../../../if-check-exp/stage3-ai-deep-read/cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md) | Chunk-cache `BufferPool`, pooled direct bytes (`memoryAllocated`) | yaml-set | yaml ×2 |
 | `networking_cache_size` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/networking_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md) | Same `BufferPool` family, "networking" pool slabs | yaml-set | yaml |
 | `trie_2gb_hard_limit` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/trie_2gb_hard_limit-allocateblock-leadbit--autonomous.md) | One trie memtable's buffers — **off-heap or on-heap depending on `memtable_allocation_type`** (tested both `OFF_HEAP` and `ON_HEAP`); shares the same pool as `memtable_offheap_space`/`memtable_heap_space` when that allocation type is active | hard 2 GiB/trie ceiling | hard-coded constant |
 | `row_overhead_size` | [case](../../../if-check-exp/stage3-ai-deep-read/cases/row_overhead_size-intrie_init-limitinmb--autonomous.md) | Same trie-memtable family as `trie_2gb_hard_limit` — one trie's buffer threshold | config-set MB | hard-coded constant, typed "not-a-case" — verify |

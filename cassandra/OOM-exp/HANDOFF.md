@@ -4,7 +4,7 @@ Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
 [`_INDEX.md`](_INDEX.md) for every closed case.
 
-## Status: active, three cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
+## Status: active, four cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
 
 **Direction 1 (convergence) has two closed (OOMed) cases, one blocked case
 (disk — now paused by request, see below), and one closed off-heap case
@@ -14,7 +14,7 @@ re-derive them, only consumes them.
 
 ## Current state
 
-- **Convergence (`convergence-playbook.md`):** 6 cases run — 3 closed (OOMed: runs 1, 2, 6), 1 blocked (disk, skipped), 1 closed not reached (run 4), 1 void (run 5).
+- **Convergence (`convergence-playbook.md`):** 7 cases run — 4 closed (OOMed: runs 1, 2, 6, 7), 1 blocked (disk, skipped), 1 closed not reached (run 4, superseded), 1 void (run 5).
   - Run 1: `memtable_heap_space` + `counter_cache_size` (both config-type, both
     individually confirmed true positive in `if-check-exp`, both on-heap):
     sized safe alone (each left ~38–39% of a 1024 MiB heap free under its own
@@ -79,6 +79,13 @@ re-derive them, only consumes them.
     `OutOfMemoryError` (heap dump kept on the node, unanalyzed). Run 4 is
     superseded by run 6. Pair closed as OOMed. Case file:
     [`cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cases/convergence/row_cache_size+index_summary_capacity--run6.md).
+  - Run 7 (2026-11-03): `memtable_offheap_space` + `file_cache_size`, both
+    new, both off-heap standing pools (off-heap `offheap_objects` memtable;
+    chunk cache enabled). Same 3500 MiB cgroup budget in every arm, `-Xmx768M`.
+    Each alone 78%; with the chunk cache full, a write burst got the JVM
+    **kernel OOM-killed 16 s in** (anon-rss 3465 MiB). OOMed on the first try:
+    both are hard standing caps, so no timing engineering was needed. Case file:
+    [`cases/convergence/memtable_offheap_space+file_cache_size.md`](cases/convergence/memtable_offheap_space+file_cache_size.md).
   - Batch log: [`cases/convergence/_batch-log.md`](cases/convergence/_batch-log.md) —
     its "Shared-budget group status" table is the dedup record: on-heap is
     **exhausted** (2-way then 3-way, escalating outcome, no 4th
@@ -103,10 +110,11 @@ re-derive them, only consumes them.
   `phi_convict_threshold` or otherwise isolating/accounting for the
   contention-induced false-suspicion hint growth seen in the control arm —
   see the case file §3.0/§4 for exact numbers and diagnosis.
-- **Off-heap group, next pair (the run 4 retry is done; closed as OOMed in
-  run 6):** the remaining off-heap candidates are untried:
-  `memtable_offheap_space`, the networking `BufferPool` family (likely one
-  shared pool; see `_constraint-groups.md`), and `file_cache_size`. Check
+- **Off-heap group, next pair (two pairs closed as OOMed: runs 6 and 7):**
+  the remaining candidates are few: `DOB_MAX_RECYCLE_BYTES`,
+  `MAX_HINT_BUFFERS` / hints buffers, and the trie-memtable limits (which
+  follow `memtable_offheap_space`, so not independent). The networking
+  `BufferPool` family was judged not a standing pool in run 7. Check
   each one's allocation path (JNA malloc vs `DirectByteBuffer`) first, and
   pre-create any stress-profile table with `cqlsh` before a concurrent load.
 - **Tighter boundary sizing** for either closed heap case: both were sized with
