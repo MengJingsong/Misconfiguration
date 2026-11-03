@@ -16,6 +16,8 @@ file carry the rest.
 |---|---|
 | [`memtable_heap_space` + `counter_cache_size`](cases/convergence/memtable_heap_space+counter_cache_size.md) | **OOMed** — safe alone, combined usage exceeded the heap (14 `OutOfMemoryError` throws) |
 | [`memtable_heap_space` + `counter_cache_size` + `key_cache_size`](cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md) | **OOMed, JVM killed** — safe alone, combined drove heap to 96.6% and crashed the process |
+| [`commitlog_total_space` + `max_hints_size_per_host`](cases/convergence/commitlog_total_space+max_hints_size_per_host.md) | **Not reached, blocked** — control arm ran the disk budget full from flush/compaction overhead before a convergence arm could run; retryable, not exhausted |
+| [`row_cache_size` + `index_summary_capacity`](cases/convergence/row_cache_size+index_summary_capacity.md) | **Not reached** — safe alone (24-29% free), combined peak 90% of a cgroup budget (naive sum predicted 106%); each cache's own eviction/resize kept operating under combined load |
 
 ## Bypass cases ([`bypass-playbook.md`](bypass-playbook.md))
 

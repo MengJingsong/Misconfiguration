@@ -56,6 +56,29 @@ For each candidate constraint, pull from its case file and stage-4 results
    a confirmed **bypass**. Do not build a convergence case on a constraint the
    case file found does not cap (true negative) — if it never reached capacity
    on its own, driving it to "capacity" is not a load.
+5. **Standing pool, not a per-request guardrail.** A true positive only
+   qualifies if its usage is a **standing pool** — bytes that accumulate and
+   can sit *at* capacity for a sustained window (a cache, a queue, a
+   memtable, a disk directory total). A **per-request/per-item guardrail**
+   (a size check on one mutation, one query response, one message, one
+   batch) rejects or passes a single operation and releases the memory
+   immediately — there is no window where it's "parked at capacity" for a
+   second constraint to converge with, even though the bytes it touches are
+   genuinely heap or off-heap. Exclude guardrails from convergence picking
+   regardless of outcome class (examples: `max_mutation_size`,
+   `max_value_size`, `tombstone_failure_threshold`, the
+   `*_read_size_fail_threshold` family — see
+   [`cases/convergence/_constraint-groups.md`](cases/convergence/_constraint-groups.md)'s
+   "Not a shared budget" section for the full list and why each was excluded).
+
+A standing survey of every true-positive constraint, grouped by budget and
+already filtered for standing-pool vs. guardrail, lives at
+[`cases/convergence/_constraint-groups.md`](cases/convergence/_constraint-groups.md).
+Check it before re-deriving a group from scratch — it also flags
+look-alike traps (e.g. several off-heap networking constraints that turn
+out to share the exact same underlying pool, so combining two of them is
+not a genuine 2-way combination). Keep it updated when a future survey
+finds more true positives or corrects a classification.
 
 ## Picking combinations (the agent's job)
 
@@ -63,13 +86,43 @@ The agent chooses which constraints go into each case. There is no fixed
 list to work down — survey if-check-exp's true-positive and confirmed-bypass
 cases itself and group them.
 
-1. **Group by shared budget first.** On-heap (JVM heap), off-heap/direct
-   memory (`-XX:MaxDirectMemorySize`, or unbounded direct buffers), a named
-   pool (e.g. a memtable pool, a cache), or disk. Constraints on unrelated
-   budgets (one heap-bound, one disk-bound) cannot converge into an OOM
-   together on their own — pick from the same budget, or from budgets that
-   both ultimately compete for the same physical RAM (heap + off-heap both
-   draw on the node's RAM even though the JVM tracks them separately).
+**Before picking, read the "Shared-budget group status" table at the top of
+[`cases/convergence/_batch-log.md`](cases/convergence/_batch-log.md).** It
+records, per shared-budget group, whether prior runs consider it open,
+exhausted, parked, or **skipped** (and why) — this is the dedup mechanism: it
+exists so a new run doesn't re-survey or re-run a group a previous run
+already closed out, or re-pick a group that was deliberately paused by
+request. **Never pick a combination from a group marked `skipped` — move on
+to another open group instead — until a later instruction explicitly
+un-skips it in that table.** Unlike `exhausted` or `parked`, `skipped` does
+not mean the group ran out of combinations or hit a blocker; it means
+someone asked to stop working it for now, so treat it as a hard stop, not a
+judgment call to override. Update that table (not just the per-run entry)
+whenever a run's result changes a group's status — including marking a
+group **exhausted** when the run judges the remaining plausible
+combinations are no longer worth trying, or **parked** when it's blocked on
+something outside the group (e.g. missing infrastructure).
+
+1. **Group by shared budget first (this is the only lane in scope right
+   now).** On-heap (JVM heap), off-heap/direct memory
+   (`-XX:MaxDirectMemorySize`, or unbounded direct buffers), a named pool
+   (e.g. a memtable pool, a cache), or disk. Two constraints are in the same
+   group if they draw on the literal same budget, or on budgets that both
+   ultimately compete for the same physical RAM (heap + off-heap both draw
+   on the node's RAM even though the JVM tracks them separately).
+
+   There is a second, distinct way two constraints could converge:
+   **causal-chain convergence**, where exhausting one constraint's budget
+   removes or slows the mechanism that normally keeps a *different* budget
+   bounded (e.g. disk pressure stalling flush/compaction so an on-heap
+   backlog queue can't drain — heap grows from the backlog, not because
+   disk and heap share a pool). This is a real, plausible misconfiguration
+   path and **is noted here on purpose so it isn't rediscovered as a gap
+   later**, but it is **out of scope for picking combinations today** —
+   only shared-pool grouping (above) is used to pick a combination for now.
+   A constraint pair that looks like a causal-chain case should be recorded
+   in the batch log's status table as **deferred (causal-chain, not
+   picked)**, not built or run, until this scope is revisited.
 2. **Within a shared-budget group, enumerate combinations of 2–3
    constraints** before trying 4+: start with the smallest combination
    predicted to exceed the budget, and prefer combinations that are
