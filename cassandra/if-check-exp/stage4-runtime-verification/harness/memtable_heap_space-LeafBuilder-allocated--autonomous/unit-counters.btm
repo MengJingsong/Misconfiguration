@@ -1,0 +1,18 @@
+# Stage-4 harness: memtable_heap_space-LeafBuilder-allocated--autonomous, unit tier (amendment U2, 2026-10-27).
+# Observe-only: each rule fires when the line after the target check `if (allocated >= 0)` executes, i.e. the branch was taken,
+# and increments a counter in WideLeafCounters for events on the registered test thread. No return value or field is changed.
+RULE stage4 unit count line 2683 (redistributeAndDrain branch taken)
+CLASS org.apache.cassandra.utils.btree.BTree$LeafBuilder
+METHOD redistributeAndDrain
+AT LINE 2683
+IF org.apache.cassandra.db.memtable.WideLeafCounters.on(Thread.currentThread())
+DO org.apache.cassandra.db.memtable.WideLeafCounters.inc2683()
+ENDRULE
+
+RULE stage4 unit count line 2736 (LeafBuilder.propagateOverflow branch taken)
+CLASS org.apache.cassandra.utils.btree.BTree$LeafBuilder
+METHOD propagateOverflow
+AT LINE 2736
+IF org.apache.cassandra.db.memtable.WideLeafCounters.on(Thread.currentThread())
+DO org.apache.cassandra.db.memtable.WideLeafCounters.inc2736()
+ENDRULE

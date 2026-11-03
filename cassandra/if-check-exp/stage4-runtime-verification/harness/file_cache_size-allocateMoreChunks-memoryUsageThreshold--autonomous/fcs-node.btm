@@ -1,0 +1,29 @@
+# Observe-only Byteman rules (C3 as amended 2026-10-27) for file_cache_size-allocateMoreChunks-memoryUsageThreshold--autonomous.
+# Nothing is changed in the node's behaviour; each rule prints one line to the node's stdout.
+# BufferPool.java at cassandra-5.0.9: 447 = noSpamLogger.info inside "if (memoryUsageThreshold > 0)" (the target branch body),
+# 450 = "return null" reached by both T > 0 and T = 0, 460 = the slab allocation, reached only after the CAS at 452 succeeded.
+# Fields: pool name, memoryAllocated after the event, memoryUsageThreshold.
+
+RULE fcs slab allocated
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks
+AT LINE 460
+IF true
+DO traceln("BMFC SLAB " + $0.this$0.name + " " + $0.this$0.memoryAllocated.get() + " " + $0.this$0.memoryUsageThreshold + " " + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE fcs cap branch body (first per pool)
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks
+AT LINE 447
+IF flag("cap-" + $0.this$0.name)
+DO traceln("BMFC CAP " + $0.this$0.name + " " + $0.this$0.memoryAllocated.get() + " " + $0.this$0.memoryUsageThreshold + " " + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE fcs refuse (first per pool)
+CLASS org.apache.cassandra.utils.memory.BufferPool$GlobalPool
+METHOD allocateMoreChunks
+AT LINE 450
+IF flag("refuse-" + $0.this$0.name)
+DO traceln("BMFC REFUSE " + $0.this$0.name + " " + $0.this$0.memoryAllocated.get() + " " + $0.this$0.memoryUsageThreshold + " " + java.lang.System.currentTimeMillis())
+ENDRULE

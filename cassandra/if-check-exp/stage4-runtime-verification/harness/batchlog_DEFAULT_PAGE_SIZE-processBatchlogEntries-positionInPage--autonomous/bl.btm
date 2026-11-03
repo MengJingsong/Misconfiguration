@@ -1,0 +1,37 @@
+# B3a's rules (as amended 2026-10-26): rules 1 and 2 as filed; rules 3 and 4 add a wall-clock time (ms) to the filed trace text.
+# Runbook fix 2026-10-26 (defect 3): the filed IF `!(new java.io.File(...).exists())` does not parse in Byteman 4.0.20
+# (ParseException, `invalid expression`; the rule was silently not injected); the File is bound first, same condition.
+# The flag-file path is $W/node-bl/go (W=~/Library/Caches/stage4), written out in full because a rule cannot read a variable.
+
+RULE suppress coordinator batchlog cleanup (so batches stay in system.batches)
+CLASS org.apache.cassandra.service.StorageProxy
+METHOD asyncRemoveFromBatchlog
+AT ENTRY
+IF true
+DO return
+ENDRULE
+
+RULE hold replay until flag file exists
+CLASS org.apache.cassandra.batchlog.BatchlogManager
+METHOD getBatchlogTimeout
+AT ENTRY
+BIND flag:java.io.File = new java.io.File("/Users/yangwang/Library/Caches/stage4/node-bl/go")
+IF !flag.exists()
+DO return 86400000L
+ENDRULE
+
+RULE trace page size
+CLASS org.apache.cassandra.batchlog.BatchlogManager
+METHOD calculatePageSize
+AT EXIT
+IF true
+DO traceln("BLPAGESIZE " + $! + " t=" + System.currentTimeMillis())
+ENDRULE
+
+RULE trace page finish
+CLASS org.apache.cassandra.batchlog.BatchlogManager
+METHOD finishAndClearBatches
+AT ENTRY
+IF true
+DO traceln("BLPAGE unfinished=" + $1.size() + " t=" + System.currentTimeMillis())
+ENDRULE

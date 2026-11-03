@@ -1,0 +1,42 @@
+# Node 1 (hint sender). The first two rules are B3a's as filed; the last three only observe (amendment B3a/B3d, 2026-10-26):
+# "file start"/"file end" bracket each HintsDispatcher.dispatch() (one hints file), so a file's last (short) page can be told apart;
+# "count sent decoded" counts the decode path (sendHint), which B3f expects to stay at 0 (same messaging version -> raw path).
+RULE count sent
+CLASS org.apache.cassandra.hints.HintsDispatcher
+METHOD sendEncodedHint
+AT ENTRY
+IF true
+DO incrementCounter("sent"); incrementCounter("bytes", $1.remaining())
+ENDRULE
+
+RULE page end
+CLASS org.apache.cassandra.hints.HintsDispatcher
+METHOD sendHintsAndAwait
+AT EXIT
+IF true
+DO traceln("HPCAP page sent=" + readCounter("sent") + " bytes=" + readCounter("bytes") + " action=" + $!); deleteCounter("sent"); deleteCounter("bytes")
+ENDRULE
+
+RULE count sent decoded
+CLASS org.apache.cassandra.hints.HintsDispatcher
+METHOD sendHint
+AT ENTRY
+IF true
+DO incrementCounter("decoded"); traceln("HPCAP decoded total=" + readCounter("decoded"))
+ENDRULE
+
+RULE file start
+CLASS org.apache.cassandra.hints.HintsDispatcher
+METHOD dispatch()
+AT ENTRY
+IF true
+DO traceln("HPCAP file start ms=" + System.currentTimeMillis())
+ENDRULE
+
+RULE file end
+CLASS org.apache.cassandra.hints.HintsDispatcher
+METHOD dispatch()
+AT EXIT
+IF true
+DO traceln("HPCAP file end result=" + $! + " ms=" + System.currentTimeMillis())
+ENDRULE

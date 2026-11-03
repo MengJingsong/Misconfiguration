@@ -1,0 +1,23 @@
+# B3d instrument (amendment 2026-10-26) of prepared_statements_cache_size-getSizeOfPreparedStatementForCache-pstmntSize--autonomous.
+# Fires only on two exact query texts sent by prep.py `trigger`; every other parse is unaffected.
+#   read : print the cache's entry count and the size of internalStatements
+#   clear: print, QueryProcessor.clearPreparedStatements(true) (memory only, cause EXPLICIT: no eviction counted,
+#          no delete from system.prepared_statements; QueryProcessor.java:132-139, 208-213), print again
+
+RULE pscache read
+CLASS org.apache.cassandra.cql3.QueryProcessor
+METHOD parseStatement(String)
+AT ENTRY
+IF $1.equals("SELECT key FROM system.local WHERE key = 'stage4-pscache-read'")
+DO traceln("PSCACHE op=read count=" + org.apache.cassandra.cql3.QueryProcessor.preparedStatementsCount() + " internal=" + org.apache.cassandra.cql3.QueryProcessor.getInternalStatements().size() + " t=" + System.currentTimeMillis())
+ENDRULE
+
+RULE pscache clear
+CLASS org.apache.cassandra.cql3.QueryProcessor
+METHOD parseStatement(String)
+AT ENTRY
+IF $1.equals("SELECT key FROM system.local WHERE key = 'stage4-pscache-clear'")
+DO traceln("PSCACHE op=clear-before count=" + org.apache.cassandra.cql3.QueryProcessor.preparedStatementsCount() + " internal=" + org.apache.cassandra.cql3.QueryProcessor.getInternalStatements().size() + " t=" + System.currentTimeMillis());
+   org.apache.cassandra.cql3.QueryProcessor.clearPreparedStatements(true);
+   traceln("PSCACHE op=clear-after count=" + org.apache.cassandra.cql3.QueryProcessor.preparedStatementsCount() + " internal=" + org.apache.cassandra.cql3.QueryProcessor.getInternalStatements().size() + " t=" + System.currentTimeMillis())
+ENDRULE

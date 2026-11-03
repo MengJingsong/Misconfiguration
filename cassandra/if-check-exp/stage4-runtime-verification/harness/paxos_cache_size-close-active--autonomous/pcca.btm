@@ -1,0 +1,10 @@
+# Stage-4 harness, cluster tier (amendment C4 (3), 2026-10-27) of paxos_cache_size-close-active--autonomous.
+# Observe-only: on `nodetool getconcurrentviewbuilders` (JMX -> StorageService.getConcurrentViewBuilders(),
+# StorageService.java:2031-2034, no internal caller) append one PROBE line via the helper; the method's result is unchanged.
+RULE pcca probe RECENT
+CLASS org.apache.cassandra.service.StorageService
+METHOD getConcurrentViewBuilders
+AT ENTRY
+IF true
+DO stage4.pcca.PcacheProbe.report()
+ENDRULE

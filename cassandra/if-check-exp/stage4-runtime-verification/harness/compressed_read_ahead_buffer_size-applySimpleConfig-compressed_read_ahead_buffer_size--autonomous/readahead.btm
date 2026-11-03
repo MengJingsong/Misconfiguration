@@ -1,0 +1,28 @@
+# Byteman observation rules, cluster tier B3d (amended 2026-10-25) of
+# compressed_read_ahead_buffer_size-applySimpleConfig-compressed_read_ahead_buffer_size--autonomous. No behaviour change.
+# At cassandra-5.0.9 the read-ahead buffer is allocated in exactly one place, ThreadLocalReadAheadBuffer.getBlock():84
+# (block.buffer = bufferType.allocate(bufferSize)), and freed in exactly one place, ThreadLocalReadAheadBuffer.clear():147
+# (FileUtils.clean(blockBuffer), only when deallocate is true and the buffer is non-null).
+# One line each:
+#   alloc knob=<bufferSize> cap=<returned capacity> direct=<isDirect> file=<data file> thread=<name> ms=<epoch millis>
+#   free knob=<bufferSize> file=<data file> thread=<name> ms=<epoch millis>
+# Output file: the system property stage4.byteman.out, or else readahead.txt in the JVM's working directory.
+# Cassandra classes only, so no boot: is needed (environment.md §6).
+
+RULE read-ahead buffer allocated
+CLASS org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer
+METHOD getBlock
+AFTER INVOKE org.apache.cassandra.io.compress.BufferType.allocate(int)
+IF true
+DO traceOpen("readAhead", java.lang.System.getProperty("stage4.byteman.out", "readahead.txt"));
+   traceln("readAhead", "alloc knob=" + $0.bufferSize + " cap=" + $!.capacity() + " direct=" + $!.isDirect() + " file=" + $0.channel.filePath() + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE read-ahead buffer freed
+CLASS org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer
+METHOD clear
+AT INVOKE org.apache.cassandra.io.util.FileUtils.clean(java.nio.ByteBuffer)
+IF true
+DO traceOpen("readAhead", java.lang.System.getProperty("stage4.byteman.out", "readahead.txt"));
+   traceln("readAhead", "free knob=" + $0.bufferSize + " file=" + $0.channel.filePath() + " thread=" + java.lang.Thread.currentThread().getName() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE

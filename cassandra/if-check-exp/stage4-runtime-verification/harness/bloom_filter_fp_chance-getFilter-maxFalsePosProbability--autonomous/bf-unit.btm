@@ -1,0 +1,21 @@
+# Observe-only Byteman rules (U3, amendment of 2026-10-27) for bloom_filter_fp_chance-getFilter-maxFalsePosProbability--autonomous,
+# unit tier. Loaded into the forked test JVM via -Dtest.jvm.args. Each rule only prints one line to System.out.
+# BMBF A <size> <thread>    every MemoryUtil.allocate(size) (JNA Native.malloc), after it returns
+# BMBF BA <bytes> <thread>  every OffHeapBitSet(long numBits) constructed, its byte count
+# Adapted from harness/bloom_filter_fp_chance-computeBloomSpec-maxFalsePosProb--autonomous/bf.btm (thread name added; that file is not modified).
+
+RULE bmbf malloc
+CLASS org.apache.cassandra.utils.memory.MemoryUtil
+METHOD allocate(long)
+AT EXIT
+IF true
+DO traceln("BMBF A " + $1 + " " + Thread.currentThread().getName())
+ENDRULE
+
+RULE bmbf bitset alloc
+CLASS org.apache.cassandra.utils.obs.OffHeapBitSet
+METHOD <init>(long)
+AT EXIT
+IF true
+DO traceln("BMBF BA " + $0.offHeapSize() + " " + Thread.currentThread().getName())
+ENDRULE

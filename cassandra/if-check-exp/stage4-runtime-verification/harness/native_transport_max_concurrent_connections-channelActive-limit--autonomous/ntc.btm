@@ -1,0 +1,28 @@
+# Stage-4 cluster tier (amendments C4, C5 of 2026-10-27) of native_transport_max_concurrent_connections-channelActive-limit--autonomous.
+# Observe-only rules; output goes to the node's stdout. (NTCMEM rule adapted from
+# harness/native_transport_max_concurrent_connections_per_ip-channelActive-perIpLimit--autonomous/ntpip.btm.)
+
+# C5: one line per refused channel, at the first ChannelHandlerContext.close() call in channelActive, which is the global-limit
+# branch (ConnectionLimitHandler.java:97); the per-IP branch is not reached with the per-IP limit off.
+RULE ntc refuse at global close
+CLASS org.apache.cassandra.transport.ConnectionLimitHandler
+METHOD channelActive
+AT INVOKE io.netty.channel.ChannelHandlerContext.close
+IF true
+DO traceln("NTCREFUSE t=" + System.currentTimeMillis() + " counter=" + $0.counter.get() + " limit=" + org.apache.cassandra.config.DatabaseDescriptor.getNativeTransportMaxConcurrentConnections())
+ENDRULE
+
+# C4: the native-transport allocator's metric (capacity bytes of its live direct and heap buffers) and the handler's counter,
+# printed on every `nodetool version` call (StorageService.getReleaseVersion). The binding needs the heap-allocator flag
+# (CBUtil.allocator is then an UnpooledByteBufAllocator).
+
+RULE ntc allocator metric on nodetool version
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion
+AT ENTRY
+BIND a : io.netty.buffer.UnpooledByteBufAllocator = org.apache.cassandra.transport.CBUtil.allocator;
+     m : io.netty.buffer.ByteBufAllocatorMetric = a.metric();
+     h = org.apache.cassandra.transport.PipelineConfigurator.connectionLimitHandler
+IF true
+DO traceln("NTCMEM t=" + System.currentTimeMillis() + " direct=" + m.usedDirectMemory() + " heap=" + m.usedHeapMemory() + " allocator=" + org.apache.cassandra.transport.CBUtil.allocator.getClass().getSimpleName() + " heapAllocatorFlag=" + org.apache.cassandra.transport.CBUtil.USE_HEAP_ALLOCATOR + " counter=" + h.counter.get())
+ENDRULE

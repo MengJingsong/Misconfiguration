@@ -1,0 +1,25 @@
+# Stage-4 harness, cluster tier (B3d, as amended 2026-10-26) of SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous.
+# Observation only: no rule changes control flow. Loaded at node start with
+#   -javaagent:<clone>/build/lib/jars/byteman-4.0.20.jar=script:<this file>   (no listener; rules on Cassandra classes, no boot:)
+# Output goes to the node's stdout (node.out), one line per event.
+
+# M1: the heap buffer each local read materializes for its response (ReadResponse.java:183-203; built by the
+# constructor ReadCommand.createResponse uses, ReadCommand.java:374, ReadResponse.java:46-48), with the table read.
+# remaining = serialized bytes; capacity = length of the backing byte[] (DataOutputBuffer growth, DataOutputBuffer.java:158-182).
+RULE dp local data response
+CLASS org.apache.cassandra.db.ReadResponse$LocalDataResponse
+METHOD <init>(org.apache.cassandra.db.partitions.UnfilteredPartitionIterator, org.apache.cassandra.db.ReadCommand, org.apache.cassandra.db.RepairedDataInfo)
+AT EXIT
+IF true
+DO traceln("BM-RESP ms=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " table=" + $2.metadata().keyspace + "." + $2.metadata().name + " remaining=" + $0.data.remaining() + " capacity=" + $0.data.capacity())
+ENDRULE
+
+# M2: rows and groups counted per page/sub-page by the coordinator's pager (AbstractQueryPager.java:179-201), and the
+# page limits in force (CQLGroupByLimits.toString prints "LIMIT <rowLimit>", DataLimits.java:779-801).
+RULE dp pager page closed
+CLASS org.apache.cassandra.service.pager.AbstractQueryPager$Pager
+METHOD onClose
+AT EXIT
+IF true
+DO traceln("BM-PAGE ms=" + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " table=" + $0.this$0.query.metadata().keyspace + "." + $0.this$0.query.metadata().name + " rows=" + $0.counter.rowsCounted() + " groups=" + $0.counter.counted() + " limits=[" + $0.pageLimits.toString() + "]")
+ENDRULE

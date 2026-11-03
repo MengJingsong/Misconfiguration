@@ -1,0 +1,38 @@
+# Observe-only Byteman rules (C3 (4), amendment of 2026-10-27) for
+# bloom_filter_fp_chance-computeBloomSpec-maxFalsePosProb--autonomous. Each rule only prints one line to the node's stdout.
+# BMBF A <size> <address>   every MemoryUtil.allocate(size) (JNA Native.malloc), after it returns
+# BMBF F <address>          every MemoryUtil.free(address), before it frees
+# BMBF BA <bytes>           every OffHeapBitSet(long numBits) constructed (bloom filter bit set), its byte count
+# BMBF BC <bytes>           every OffHeapBitSet.close(), its byte count before the free
+
+RULE bmbf malloc
+CLASS org.apache.cassandra.utils.memory.MemoryUtil
+METHOD allocate(long)
+AT EXIT
+IF true
+DO traceln("BMBF A " + $1 + " " + $!)
+ENDRULE
+
+RULE bmbf free
+CLASS org.apache.cassandra.utils.memory.MemoryUtil
+METHOD free(long)
+AT ENTRY
+IF true
+DO traceln("BMBF F " + $1)
+ENDRULE
+
+RULE bmbf bitset alloc
+CLASS org.apache.cassandra.utils.obs.OffHeapBitSet
+METHOD <init>(long)
+AT EXIT
+IF true
+DO traceln("BMBF BA " + $0.offHeapSize())
+ENDRULE
+
+RULE bmbf bitset close
+CLASS org.apache.cassandra.utils.obs.OffHeapBitSet
+METHOD close()
+AT ENTRY
+IF true
+DO traceln("BMBF BC " + $0.offHeapSize())
+ENDRULE

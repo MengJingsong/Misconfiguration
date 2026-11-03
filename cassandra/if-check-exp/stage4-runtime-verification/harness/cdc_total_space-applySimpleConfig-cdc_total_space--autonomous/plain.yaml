@@ -1,0 +1,28 @@
+# cassandra-stress user profile, case cdc_total_space-applySimpleConfig-cdc_total_space--autonomous: non-CDC control table ks.p (B3h a).
+#   tools/bin/cassandra-stress user profile=<this file> "ops(insert=1)" n=<N> no-warmup \
+#     -rate threads=16 throttle=2000/s -errors retries=0 ignore -node 127.0.0.1
+# 16,384-byte blob per row, one row per insert. The runner creates ks.c and ks.p with cqlsh first; the DDL here is IF NOT EXISTS.
+keyspace: ks
+
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+table: p
+
+table_definition: |
+  CREATE TABLE IF NOT EXISTS p (
+    k uuid PRIMARY KEY,
+    v blob
+  ) WITH cdc = false
+
+columnspec:
+  - name: k
+    population: seq(1..1000000000)
+  - name: v
+    size: fixed(16384)
+
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+
+queries: {}

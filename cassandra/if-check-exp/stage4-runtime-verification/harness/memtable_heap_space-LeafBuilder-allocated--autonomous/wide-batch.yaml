@@ -1,0 +1,22 @@
+# Stage-4 harness: memtable_heap_space-LeafBuilder-allocated--autonomous, cluster tier (B3c as amended C3, 2026-10-27), batch mode.
+# 1,000 partitions of up to 8,192 rows (pk uniform(1..1000), ck fixed(8192)); each op writes select = fixed(128)/8192 of one partition's
+# rows (expected 128 row(s)) as an UNLOGGED batch (a single statement when it holds one row).
+keyspace: ks
+keyspace_definition: |
+  CREATE KEYSPACE ks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+table: t
+table_definition: |
+  CREATE TABLE t (pk bigint, ck bigint, v bigint, PRIMARY KEY (pk, ck)) WITH compression = {'enabled': false} AND compaction = {'class': 'SizeTieredCompactionStrategy', 'enabled': 'false'}
+columnspec:
+  - name: pk
+    population: uniform(1..1000)
+  - name: ck
+    cluster: fixed(8192)
+insert:
+  partitions: fixed(1)
+  select: fixed(128)/8192
+  batchtype: UNLOGGED
+queries:
+  read1:
+    cql: select v from t where pk = ? and ck = ?
+    fields: samerow

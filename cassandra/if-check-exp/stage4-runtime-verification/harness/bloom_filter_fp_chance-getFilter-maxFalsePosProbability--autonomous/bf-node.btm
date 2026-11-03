@@ -1,0 +1,49 @@
+# Observe-only Byteman rules (C1/C2, amendment of 2026-10-27) for bloom_filter_fp_chance-getFilter-maxFalsePosProbability--autonomous,
+# cluster tier. Each rule only prints one line to the node's stdout (node.out).
+# BMBF GF <numElements> <fp> <class>  every FilterFactory.getFilter(long, double), on return, with the returned filter's class
+# BMBF BA <bytes>           every OffHeapBitSet(long numBits) constructed (bloom filter bit set), its byte count
+# BMBF BC <bytes>           every OffHeapBitSet.close(), its byte count before the free
+# BMBF A <size> <address>   every MemoryUtil.allocate(size) (JNA Native.malloc), after it returns
+# BMBF F <address>          every MemoryUtil.free(address), before it frees
+# The BA/BC/A/F rules are copied from harness/bloom_filter_fp_chance-computeBloomSpec-maxFalsePosProb--autonomous/bf.btm
+# (that file is not modified); the GF rule is new.
+
+RULE bmbf getFilter
+CLASS org.apache.cassandra.utils.FilterFactory
+METHOD getFilter(long, double)
+AT EXIT
+IF true
+DO traceln("BMBF GF " + $1 + " " + $2 + " " + $!.getClass().getSimpleName())
+ENDRULE
+
+RULE bmbf malloc
+CLASS org.apache.cassandra.utils.memory.MemoryUtil
+METHOD allocate(long)
+AT EXIT
+IF true
+DO traceln("BMBF A " + $1 + " " + $!)
+ENDRULE
+
+RULE bmbf free
+CLASS org.apache.cassandra.utils.memory.MemoryUtil
+METHOD free(long)
+AT ENTRY
+IF true
+DO traceln("BMBF F " + $1)
+ENDRULE
+
+RULE bmbf bitset alloc
+CLASS org.apache.cassandra.utils.obs.OffHeapBitSet
+METHOD <init>(long)
+AT EXIT
+IF true
+DO traceln("BMBF BA " + $0.offHeapSize())
+ENDRULE
+
+RULE bmbf bitset close
+CLASS org.apache.cassandra.utils.obs.OffHeapBitSet
+METHOD close()
+AT ENTRY
+IF true
+DO traceln("BMBF BC " + $0.offHeapSize())
+ENDRULE

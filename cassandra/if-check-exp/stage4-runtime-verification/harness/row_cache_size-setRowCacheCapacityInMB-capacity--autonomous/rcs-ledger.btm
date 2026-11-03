@@ -1,0 +1,29 @@
+# Byteman rules for row_cache_size-setRowCacheCapacityInMB-capacity--autonomous, cluster re-run (case-file amendment
+# 2026-10-27 (after run 1, authorised by the user) — B3d). Observation only: each rule calls a recording method of the
+# helper RcsLedger (RcsLedger.java), which never changes OHC's arguments, results or control flow.
+# Loaded on every node start of the re-run with
+#   JVM_EXTRA_OPTS="-javaagent:<byteman jar>=script:<this file>,boot:<byteman jar>,sys:<rcs-ledger.jar>"
+#
+# ohc-core 0.5.1, org.caffinitas.ohc.linked.Uns:
+#   allocated(long address, long bytes)  :104-113, called by allocate(long, boolean) :338-346 only after a non-zero malloc
+#   freed(long address)                  :90-102,  called by free(long) :361-367 for a non-zero address, before allocator.free
+# Every native block OHC's linked implementation takes or returns passes through these two methods (all Uns.allocate /
+# Uns.free call sites, OHCacheLinkedImpl, OffHeapLinkedMap, HashEntries, Timeouts, the channel classes).
+
+RULE rcs ledger allocated
+CLASS org.caffinitas.ohc.linked.Uns
+METHOD allocated(long, long)
+HELPER RcsLedger
+AT ENTRY
+IF true
+DO alloc($1, $2)
+ENDRULE
+
+RULE rcs ledger freed
+CLASS org.caffinitas.ohc.linked.Uns
+METHOD freed(long)
+HELPER RcsLedger
+AT ENTRY
+IF true
+DO free($1)
+ENDRULE

@@ -1,0 +1,39 @@
+# Byteman rules for repair_session_max_tree_depth-setRepairSessionMaxTreeDepth-depth--autonomous, cluster re-run
+# (Amendment 2026-10-27 (after run 1, authorised by the user) — B3d). Observation only: no rule changes behaviour.
+# Loaded on n1 (the coordinator) only, with
+#   JVM_EXTRA_OPTS="-javaagent:<clone>/build/lib/jars/byteman-4.0.20.jar=script:<this file>,boot:<same jar>"
+# Every line goes to n1's stdout (bin/cassandra -f > node.out).
+#
+#   RSMTD alloc ms=<epoch ms> cap=<B> mt=<running total B> used=<pool B> count=<n> thread=<name>
+#       exit of MerkleTree.allocate (MerkleTree.java:747-754): after ByteBuffer.allocateDirect (:751) has reserved the
+#       buffer in java.nio.Bits, so 'used' includes it
+#   RSMTD release ms=<epoch ms> cap=<B> mt=<running total B> used=<pool B> count=<n> thread=<name>
+#       entry of MerkleTree$OffHeapNode.release (MerkleTree.java:985-991): before FileUtils.clean, so 'used' still
+#       includes the buffer being released
+# 'mt' is one Byteman counter changed atomically by +cap / -cap (Helper.incrementCounter returns the new value).
+# 'used' and 'count' are Bits.RESERVED_MEMORY and Bits.COUNT through the JDK's direct buffer pool, the same object the JMX
+# bean java.nio:type=BufferPool,name=direct reads (ManagementFactoryHelper.getBufferPoolMXBeans, JDK 11).
+
+RULE rsmtd alloc
+CLASS org.apache.cassandra.utils.MerkleTree
+METHOD allocate
+AT EXIT
+BIND cap:int = $!.capacity();
+     mt:int = incrementCounter("rsmtd-mt", cap);
+     used:long = jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed();
+     cnt:long = jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getCount()
+IF true
+DO traceln("RSMTD alloc ms=" + System.currentTimeMillis() + " cap=" + cap + " mt=" + mt + " used=" + used + " count=" + cnt + " thread=" + Thread.currentThread().getName())
+ENDRULE
+
+RULE rsmtd release
+CLASS org.apache.cassandra.utils.MerkleTree$OffHeapNode
+METHOD release
+AT ENTRY
+BIND cap:int = $0.buffer.capacity();
+     used:long = jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed();
+     cnt:long = jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getCount();
+     mt:int = incrementCounter("rsmtd-mt", 0 - cap)
+IF true
+DO traceln("RSMTD release ms=" + System.currentTimeMillis() + " cap=" + cap + " mt=" + mt + " used=" + used + " count=" + cnt + " thread=" + Thread.currentThread().getName())
+ENDRULE

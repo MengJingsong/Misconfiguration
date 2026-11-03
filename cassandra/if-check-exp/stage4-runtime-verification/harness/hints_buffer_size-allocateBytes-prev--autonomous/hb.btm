@@ -1,0 +1,52 @@
+# Byteman rules for hints_buffer_size-allocateBytes-prev--autonomous, cluster tier (B3a as filed, plus the two
+# "slab dmem" rules of amendment B3d). Observation only: no rule changes behaviour. All lines go to the node's stdout
+# (bin/cassandra -f > node.out). Loaded on node 1 only, with
+#   JVM_EXTRA_OPTS="-javaagent:<byteman jar>=script:<this file>,boot:<byteman jar>"
+#
+#   HBCAP create slabSize=<bytes>                       entry of HintsBuffer.create (HintsBuffer.java:75-78)
+#   HBCAP full totalSize=<bytes> cap=<slab capacity>    exit of HintsBuffer.allocateBytes with a negative result
+#                                                       (the refusals at :187-188 and :190-193)
+#   HBCAP allocatedBuffers=<n>                          exit of HintsBufferPool.createBuffer (HintsBufferPool.java:130-134)
+#   HBCAP dmem before slabSize=<bytes> used=<B> count=<n>   entry of HintsBuffer.create: the JVM's direct-buffer pool
+#   HBCAP dmem after cap=<bytes> used=<B> count=<n>         exit of HintsBuffer.create   (the same counters as the JMX
+#                                                       java.nio:type=BufferPool,name=direct MemoryUsed and Count)
+
+RULE slab create
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD create
+AT ENTRY
+IF true
+DO traceln("HBCAP create slabSize=" + $1)
+ENDRULE
+
+RULE slab full
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD allocateBytes
+AT EXIT
+IF $! < 0
+DO traceln("HBCAP full totalSize=" + $1 + " cap=" + $0.capacity())
+ENDRULE
+
+RULE pool count
+CLASS org.apache.cassandra.hints.HintsBufferPool
+METHOD createBuffer
+AT EXIT
+IF true
+DO traceln("HBCAP allocatedBuffers=" + $0.allocatedBuffers)
+ENDRULE
+
+RULE slab dmem before
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD create
+AT ENTRY
+IF true
+DO traceln("HBCAP dmem before slabSize=" + $1 + " used=" + jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed() + " count=" + jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getCount())
+ENDRULE
+
+RULE slab dmem after
+CLASS org.apache.cassandra.hints.HintsBuffer
+METHOD create
+AT EXIT
+IF true
+DO traceln("HBCAP dmem after cap=" + $!.capacity() + " used=" + jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getMemoryUsed() + " count=" + jdk.internal.misc.SharedSecrets.getJavaNioAccess().getDirectBufferPool().getCount())
+ENDRULE

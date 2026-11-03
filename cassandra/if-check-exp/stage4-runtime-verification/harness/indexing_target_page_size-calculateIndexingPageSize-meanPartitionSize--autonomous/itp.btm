@@ -1,0 +1,44 @@
+# Observe-only rules (amendment B3d, 2026-10-26) for the cluster tier of
+# indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous.
+# They change no return value or control flow. START and PAGE call System.gc() (a full, stop-the-world collection under G1,
+# jvm11-server.options has no ExplicitGCInvokesConcurrent / DisableExplicitGC) and then read the heap's used bytes, so each
+# reading is the post-GC live heap at that instant: START before the first page of a build, PAGE when a page has just been
+# materialized as an ImmutableBTreePartition (SecondaryIndexManager.java:1066) and is still referenced.
+# heapUsedPostGC = Runtime.totalMemory() - freeMemory() (the heap's used bytes); mxUsed = MemoryMXBean heap used, which under G1
+# counts eden by whole 16 MiB regions and so can read one region high (cluster shakedown 1, harness defect H1); each System.gc()
+# also leaves one "Pause Full (System.gc()) X->Y M" line in gc.log, the cross-check.
+
+RULE itp page size returned
+CLASS org.apache.cassandra.index.SecondaryIndexManager
+METHOD calculateIndexingPageSize
+AT EXIT
+IF true
+DO traceln("ITP PS t=" + java.lang.System.currentTimeMillis() + " table=" + $0.baseCfs.name + " ps=" + $! + " prop=" + java.lang.System.getProperty("cassandra.force_default_indexing_page_size") + " meanPartitionSize=" + $0.baseCfs.getMeanPartitionSize() + " meanCells=" + $0.baseCfs.getMeanEstimatedCellPerPartitionCount() + " regularCols=" + $0.baseCfs.metadata().regularColumns().size() + " sstables=" + $0.baseCfs.getLiveSSTables().size())
+ENDRULE
+
+RULE itp build start
+CLASS org.apache.cassandra.index.internal.CollatedViewIndexBuilder
+METHOD build
+AT ENTRY
+IF true
+DO java.lang.System.gc();
+   traceln("ITP START t=" + java.lang.System.currentTimeMillis() + " table=" + $0.cfs.name + " heapUsedPostGC=" + (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) + " mxUsed=" + java.lang.management.ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed())
+ENDRULE
+
+RULE itp page materialized
+CLASS org.apache.cassandra.index.SecondaryIndexManager
+METHOD indexPartition(org.apache.cassandra.db.DecoratedKey, java.util.Set, int, org.apache.cassandra.db.RegularAndStaticColumns)
+AFTER INVOKE org.apache.cassandra.db.partitions.ImmutableBTreePartition.create
+BIND p = $!
+IF true
+DO java.lang.System.gc();
+   traceln("ITP PAGE t=" + java.lang.System.currentTimeMillis() + " table=" + $0.baseCfs.name + " pageSize=" + $3 + " rows=" + p.rowCount() + " heapUsedPostGC=" + (java.lang.Runtime.getRuntime().totalMemory() - java.lang.Runtime.getRuntime().freeMemory()) + " mxUsed=" + java.lang.management.ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed())
+ENDRULE
+
+RULE itp build end
+CLASS org.apache.cassandra.index.internal.CollatedViewIndexBuilder
+METHOD build
+AT EXIT
+IF true
+DO traceln("ITP END t=" + java.lang.System.currentTimeMillis() + " table=" + $0.cfs.name)
+ENDRULE

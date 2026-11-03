@@ -1,0 +1,61 @@
+# Observe-only Byteman rules (added 2026-10-28 for the cluster re-run's amendment; a diagnostic probe, not a case reading).
+# They record which thread creates a SharedPool worker after start-up, which SEP executor gets a queued task (addTask),
+# and when the auth setup and the default-role setup task run. No rule changes state or control flow.
+
+RULE sepw new SEPWorker (creator stack)
+CLASS org.apache.cassandra.concurrent.SEPWorker
+METHOD <init>
+AT EXIT
+IF true
+DO traceln("SEPW-NEW t=" + System.currentTimeMillis() + " worker=" + $0.thread.getName() + " creator=" + Thread.currentThread().getName());
+   traceStack("SEPW-NEW-STACK ", 30)
+ENDRULE
+
+RULE sepw addTask (queued task on an SEP executor)
+CLASS org.apache.cassandra.concurrent.SEPExecutor
+METHOD addTask
+AT ENTRY
+IF true
+DO traceln("SEPW-ADDTASK t=" + System.currentTimeMillis() + " executor=" + $0.name + " caller=" + Thread.currentThread().getName());
+   traceStack("SEPW-ADDTASK-STACK ", 30)
+ENDRULE
+
+RULE sepw maybeExecuteImmediately (inline execution attempt)
+CLASS org.apache.cassandra.concurrent.SEPExecutor
+METHOD maybeExecuteImmediately
+AT ENTRY
+IF true
+DO traceln("SEPW-MEI t=" + System.currentTimeMillis() + " executor=" + $0.name + " caller=" + Thread.currentThread().getName())
+ENDRULE
+
+RULE sepw setMaximumPoolSize
+CLASS org.apache.cassandra.concurrent.SEPExecutor
+METHOD setMaximumPoolSize
+AT ENTRY
+IF true
+DO traceln("SEPW-SETMAX t=" + System.currentTimeMillis() + " executor=" + $0.name + " value=" + $1 + " caller=" + Thread.currentThread().getName())
+ENDRULE
+
+RULE sepw doAuthSetup
+CLASS org.apache.cassandra.service.StorageService
+METHOD doAuthSetup
+AT ENTRY
+IF true
+DO traceln("SEPW-AUTHSETUP t=" + System.currentTimeMillis() + " caller=" + Thread.currentThread().getName())
+ENDRULE
+
+RULE sepw setupDefaultRole
+CLASS org.apache.cassandra.auth.CassandraRoleManager
+METHOD setupDefaultRole
+AT ENTRY
+IF true
+DO traceln("SEPW-ROLESETUP t=" + System.currentTimeMillis() + " caller=" + Thread.currentThread().getName())
+ENDRULE
+
+RULE sepw setupDefaultRole exit
+CLASS org.apache.cassandra.auth.CassandraRoleManager
+METHOD setupDefaultRole
+AT EXIT
+IF true
+DO traceln("SEPW-ROLESETUP-END t=" + System.currentTimeMillis() + " caller=" + Thread.currentThread().getName())
+ENDRULE

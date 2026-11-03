@@ -1,0 +1,50 @@
+# Stage-4 harness, cluster tier (amendment C5 of 2026-10-27) of max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.
+# Observe-only rules on node 1; helper stage4.rng.RngProbe on the system class path (sys:). Only reads of table rng.t are recorded.
+
+RULE rng begin
+CLASS org.apache.cassandra.service.reads.range.RangeCommandIterator
+METHOD <init>
+AT EXIT
+IF stage4.rng.RngProbe.isRng($0.command)
+DO stage4.rng.RngProbe.begin($0, $0.requestTime)
+ENDRULE
+
+RULE rng batch start
+CLASS org.apache.cassandra.service.reads.range.RangeCommandIterator
+METHOD sendNextRequests
+AT ENTRY
+IF stage4.rng.RngProbe.isRng($0.command)
+DO stage4.rng.RngProbe.batchStart($0, $0.concurrencyFactor, $0.maxConcurrencyFactor, $0.rangesQueried, $0.liveReturned, $0.totalRangeCount)
+ENDRULE
+
+RULE rng request
+CLASS org.apache.cassandra.service.reads.range.RangeCommandIterator
+METHOD query
+AT ENTRY
+IF stage4.rng.RngProbe.isRng($0.command)
+DO stage4.rng.RngProbe.request($0, $1.vnodeCount(), $1.contacts().size())
+ENDRULE
+
+RULE rng batch end
+CLASS org.apache.cassandra.service.reads.range.RangeCommandIterator
+METHOD sendNextRequests
+AT EXIT
+IF stage4.rng.RngProbe.isRng($0.command)
+DO stage4.rng.RngProbe.batchEnd($0, $0.rangesQueried, $0.batchesRequested)
+ENDRULE
+
+RULE rng response
+CLASS org.apache.cassandra.service.reads.ReadCallback
+METHOD onResponse
+AT ENTRY
+IF stage4.rng.RngProbe.isRng($0.command)
+DO stage4.rng.RngProbe.response($0.requestTime, $1)
+ENDRULE
+
+RULE rng close
+CLASS org.apache.cassandra.service.reads.range.RangeCommandIterator
+METHOD close
+AT ENTRY
+IF stage4.rng.RngProbe.isRng($0.command)
+DO stage4.rng.RngProbe.close($0)
+ENDRULE

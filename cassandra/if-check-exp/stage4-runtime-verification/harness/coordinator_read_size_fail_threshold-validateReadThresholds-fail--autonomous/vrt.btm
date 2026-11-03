@@ -1,0 +1,184 @@
+# Byteman observation rules (no behaviour change), cluster tier B3d (5) of
+# coordinator_read_size_fail_threshold-validateReadThresholds-fail--autonomous (amended 2026-10-25). Keyspace ks only.
+# Output: the file named by -Dstage4.byteman.out. Lines:
+#   read-alloc thread=<t> bytes=<allocated while LocalReadRunnable.runMayThrow ran> ms=<epoch> [exceptional=true]
+#   resp-buf len=<serialized bytes> cap=<backing array capacity> ms=<epoch>      exit of ReadResponse$LocalDataResponse.build
+#   resp-buf-abort ms=<epoch>                                                    exception exit of the same method
+#   guard-fail size=<ResultSetBuilder.size> limit=<threshold> ms=<epoch>         throw in SelectStatement.maybeFail
+#   local-abort ms=<epoch> msg=<LocalReadSizeTooLargeException message>
+# stage4.Alloc (Alloc.java, copied unchanged from the guided coordinator_read_size_fail_threshold harness) is on the boot class path.
+
+# Added 2026-10-28 for the cluster re-run (case-file amendment 2026-10-28, B3d (6)); the rules above and below that were in run 1 are unchanged.
+#   inflight-req ms=<end> t0=<start> n=<> H=<> cmds=<> bufs=<> held=<> len=<> pending=<> orphans=<>   (stage4.InFlight.reqEnd, see InFlight.java)
+#   inflight-read ms=<end> m=<> rsum=<> own=<>                                                         (stage4.InFlight.readEnd)
+# stage4.InFlight (InFlight.java) is in the same boot-class-path jar as stage4.Alloc. The inflight read-start rule is placed before the
+# read-alloc entry rule, so that InFlight's registration falls outside the read-alloc window when Byteman runs rules at one trigger point
+# in script order; the read-end rules fire at the hand-over (D2), inside that window, and add a few hundred bytes to read-alloc.
+
+RULE inflight read start
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT ENTRY
+IF $0.command.metadata().keyspace.equals("ks")
+DO stage4.InFlight.readStart()
+ENDRULE
+
+RULE read alloc entry
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT ENTRY
+IF $0.command.metadata().keyspace.equals("ks")
+DO stage4.Alloc.start()
+ENDRULE
+
+RULE read alloc exit
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT EXIT
+IF $0.command.metadata().keyspace.equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.Alloc.end())
+ENDRULE
+
+RULE read alloc exception exit
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT EXCEPTION EXIT
+IF $0.command.metadata().keyspace.equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.Alloc.end() + " exceptional=true")
+ENDRULE
+
+RULE response buffer built
+CLASS org.apache.cassandra.db.ReadResponse$LocalDataResponse
+METHOD build
+AT EXIT
+IF $1.metadata().keyspace.equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", "resp-buf len=" + $!.remaining() + " cap=" + $!.capacity() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE response buffer aborted
+CLASS org.apache.cassandra.db.ReadResponse$LocalDataResponse
+METHOD build
+AT EXCEPTION EXIT
+IF $1.metadata().keyspace.equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", "resp-buf-abort ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE coordinator guard fail
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD maybeFail
+AT THROW
+IF $0.keyspace().equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", "guard-fail size=" + $1.getSize() + " limit=" + $2.getCoordinatorReadSizeAbortThresholdBytes() + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+RULE local abort
+CLASS org.apache.cassandra.db.filter.LocalReadSizeTooLargeException
+METHOD <init>
+AT EXIT
+IF true
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", "local-abort ms=" + java.lang.System.currentTimeMillis() + " msg=" + $1)
+ENDRULE
+
+# Changed 2026-10-28 after the shakedown (runbook defect D2, results §3): the inflight-read window ends where the read hands its response
+# (or failure) to the request's callback, not at the exit of runMayThrow, whose tail (latency bookkeeping, StorageProxy.java:2239-2241)
+# can still run after the request has ended. The exception exit and the normal exit stay as fall-backs (they print only if the read is
+# still registered, which should not happen).
+RULE inflight read end at hand-over
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT INVOKE org.apache.cassandra.service.reads.ReadCallback.response
+IF $0.command.metadata().keyspace.equals("ks") && stage4.InFlight.reading()
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.InFlight.readEnd())
+ENDRULE
+
+RULE inflight read end at failure hand-over
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT INVOKE org.apache.cassandra.service.reads.ReadCallback.onFailure ALL
+IF $0.command.metadata().keyspace.equals("ks") && stage4.InFlight.reading()
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.InFlight.readEnd() + " failure=true")
+ENDRULE
+
+RULE inflight read end fallback exit
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT EXIT
+IF $0.command.metadata().keyspace.equals("ks") && stage4.InFlight.reading()
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.InFlight.readEnd() + " fallback=exit")
+ENDRULE
+
+RULE inflight read exception end
+CLASS org.apache.cassandra.service.StorageProxy$LocalReadRunnable
+METHOD runMayThrow
+AT EXCEPTION EXIT
+IF $0.command.metadata().keyspace.equals("ks") && stage4.InFlight.reading()
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.InFlight.readEnd() + " exceptional=true")
+ENDRULE
+
+RULE inflight request start
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.QueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT ENTRY
+IF $0.keyspace().equals("ks")
+DO stage4.InFlight.reqStart()
+ENDRULE
+
+RULE inflight bind command
+CLASS org.apache.cassandra.service.reads.AbstractReadExecutor
+METHOD executeAsync()
+AT ENTRY
+IF $0.command.metadata().keyspace.equals("ks")
+DO stage4.InFlight.bindCmd($0.command)
+ENDRULE
+
+RULE inflight buffer built
+CLASS org.apache.cassandra.db.ReadResponse$LocalDataResponse
+METHOD build
+AT EXIT
+IF $1.metadata().keyspace.equals("ks")
+DO stage4.InFlight.built($!.remaining(), $!.capacity())
+ENDRULE
+
+RULE inflight hold response
+CLASS org.apache.cassandra.db.ReadCommand
+METHOD createResponse
+AT EXIT
+IF $0.metadata().keyspace.equals("ks")
+DO stage4.InFlight.hold($0)
+ENDRULE
+
+RULE inflight hold empty response
+CLASS org.apache.cassandra.db.ReadCommand
+METHOD createEmptyResponse
+AT EXIT
+IF $0.metadata().keyspace.equals("ks")
+DO stage4.InFlight.hold($0)
+ENDRULE
+
+RULE inflight request end
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.QueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT EXIT
+IF $0.keyspace().equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.InFlight.reqEnd())
+ENDRULE
+
+RULE inflight request exception end
+CLASS org.apache.cassandra.cql3.statements.SelectStatement
+METHOD execute(org.apache.cassandra.service.QueryState, org.apache.cassandra.cql3.QueryOptions, org.apache.cassandra.transport.Dispatcher$RequestTime)
+AT EXCEPTION EXIT
+IF $0.keyspace().equals("ks")
+DO traceOpen("vrt", java.lang.System.getProperty("stage4.byteman.out", "vrt.trace"));
+   traceln("vrt", stage4.InFlight.reqEnd() + " exceptional=true")
+ENDRULE

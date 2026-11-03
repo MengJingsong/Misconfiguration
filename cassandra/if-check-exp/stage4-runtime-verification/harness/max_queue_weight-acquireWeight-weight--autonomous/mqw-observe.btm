@@ -1,0 +1,20 @@
+# Observe-only rules (amendment C3, 2026-10-27), case max_queue_weight-acquireWeight-weight--autonomous.
+# They print and change nothing. Lines go to the node's stdout (node.out).
+# MQWP <epoch ms> <permits left> <maxWeight> <batch size>  : every 20th writer batch (about 1 s apart at delay(50))
+# MQWW <epoch ms> <weight>                                 : every 5000th call of FullQueryLogger$Query.weight()
+RULE mqw writer permits
+CLASS org.apache.cassandra.utils.binlog.BinLog
+METHOD processTasks
+AT ENTRY
+BIND q = $0.sampleQueue
+IF incrementCounter("mqwp") % 20 == 1
+DO traceln("MQWP " + System.currentTimeMillis() + " " + q.availableWeight.permits() + " " + q.maxWeight + " " + $1.size())
+ENDRULE
+
+RULE mqw query weight
+CLASS org.apache.cassandra.fql.FullQueryLogger$Query
+METHOD weight
+AT EXIT
+IF incrementCounter("mqww") % 5000 == 1
+DO traceln("MQWW " + System.currentTimeMillis() + " " + $!)
+ENDRULE

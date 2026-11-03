@@ -1,0 +1,27 @@
+# Stage-4 harness: memtable_heap_space-LeafBuilder-allocated--autonomous, cluster tier (amendment C4, 2026-10-27).
+# Observe-only: counts executions of BTree.java:2683 and :2736 (the lines after the target checks, so only when the branch was
+# taken) in Byteman counters for the whole node, and prints the running totals each time table ks.t switches its memtable
+# (Tracker.switchMemtable entry), so the counts of one memtable epoch are the difference of two lines. Nothing is changed.
+RULE stage4 node count line 2683
+CLASS org.apache.cassandra.utils.btree.BTree$LeafBuilder
+METHOD redistributeAndDrain
+AT LINE 2683
+IF true
+DO incrementCounter("c2683")
+ENDRULE
+
+RULE stage4 node count line 2736
+CLASS org.apache.cassandra.utils.btree.BTree$LeafBuilder
+METHOD propagateOverflow
+AT LINE 2736
+IF true
+DO incrementCounter("c2736")
+ENDRULE
+
+RULE stage4 node print counts at ks.t memtable switch
+CLASS org.apache.cassandra.db.lifecycle.Tracker
+METHOD switchMemtable
+AT ENTRY
+IF $0.cfstore != null && $0.cfstore.name.equals("t") && $0.cfstore.getKeyspaceName().equals("ks")
+DO traceln("STAGE4BM switch ks.t epoch_ms=" + System.currentTimeMillis() + " c2683=" + readCounter("c2683") + " c2736=" + readCounter("c2736"))
+ENDRULE

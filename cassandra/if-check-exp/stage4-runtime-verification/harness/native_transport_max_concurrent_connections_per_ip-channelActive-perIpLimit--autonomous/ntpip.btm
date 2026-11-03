@@ -1,0 +1,34 @@
+# Stage-4 cluster tier (B3d (4), amendment C4 of 2026-10-27): observe-only lines for the per-IP map and the global counter
+# of ConnectionLimitHandler, at every exit of channelActive and channelInactive. Printed to the node's stdout.
+RULE ntpip active exit
+CLASS org.apache.cassandra.transport.ConnectionLimitHandler
+METHOD channelActive
+AT EXIT
+IF true
+DO traceln("NTPIP active t=" + System.currentTimeMillis() + " remote=" + $1.channel().remoteAddress() + " counter=" + $0.counter.get() + " size=" + $0.connectionsPerClient.size() + " map=" + $0.connectionsPerClient)
+ENDRULE
+
+RULE ntpip inactive exit
+CLASS org.apache.cassandra.transport.ConnectionLimitHandler
+METHOD channelInactive
+AT EXIT
+IF true
+DO traceln("NTPIP inactive t=" + System.currentTimeMillis() + " remote=" + $1.channel().remoteAddress() + " counter=" + $0.counter.get() + " size=" + $0.connectionsPerClient.size() + " map=" + $0.connectionsPerClient)
+ENDRULE
+
+# Runbook fix D2 (2026-10-27): the decoder's cumulation is a direct buffer (Netty ioBuffer() returns direct memory when Unsafe
+# is available, whatever the allocator's preference), so the held bytes are read from the native-transport allocator's own
+# metric (CBUtil.allocator, an UnpooledByteBufAllocator: capacity bytes of its live direct and heap buffers), on demand:
+# every `nodetool version` call (StorageService.getReleaseVersion) prints one NTPIPMEM line. Observe-only.
+# Runbook fix D3 (2026-10-27): the same line carries the shared handler's map size, map and global counter, read at a
+# quiescent point (the per-event lines race across event loops, so their print order is not the event order).
+RULE ntpip allocator metric on nodetool version
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion
+AT ENTRY
+BIND a : io.netty.buffer.UnpooledByteBufAllocator = org.apache.cassandra.transport.CBUtil.allocator;
+     m : io.netty.buffer.ByteBufAllocatorMetric = a.metric();
+     h = org.apache.cassandra.transport.PipelineConfigurator.connectionLimitHandler
+IF true
+DO traceln("NTPIPMEM t=" + System.currentTimeMillis() + " direct=" + m.usedDirectMemory() + " heap=" + m.usedHeapMemory() + " nettyDirect=" + io.netty.util.internal.PlatformDependent.usedDirectMemory() + " heapAllocatorFlag=" + org.apache.cassandra.transport.CBUtil.USE_HEAP_ALLOCATOR + " mapSize=" + h.connectionsPerClient.size() + " counter=" + h.counter.get() + " map=" + h.connectionsPerClient)
+ENDRULE

@@ -1,0 +1,25 @@
+# Stage-4 harness, cluster tier (amendment C4 of 2026-10-27) of cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.
+# Observe-only rules on the coordinator (node 1); each calls stage4.rfp.RfpProbe, which only reads and measures.
+RULE rfp peak at throw
+CLASS org.apache.cassandra.service.reads.ReplicaFilteringProtection
+METHOD incrementCachedRows
+AT THROW
+IF true
+DO stage4.rfp.RfpProbe.peak($0, "throw")
+ENDRULE
+
+RULE rfp peak at populate
+CLASS org.apache.cassandra.service.reads.ReplicaFilteringProtection$QueryMergeListener
+METHOD populate
+AT ENTRY
+IF true
+DO stage4.rfp.RfpProbe.peak($0, "populate")
+ENDRULE
+
+RULE rfp responses at resolve
+CLASS org.apache.cassandra.service.reads.DataResolver
+METHOD resolveWithReplicaFilteringProtection
+AT ENTRY
+IF true
+DO stage4.rfp.RfpProbe.resp($0)
+ENDRULE

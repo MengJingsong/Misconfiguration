@@ -1,0 +1,41 @@
+# Stage-4 cluster tier (amendment C4 of 2026-10-27) of native_transport_max_frame_size-decode-bytesToDiscard--autonomous.
+# Observe-only rules; output goes to the node's stdout. (NTFMEM's nodetool-version trigger adapted from
+# harness/native_transport_max_concurrent_connections-channelActive-limit--autonomous/ntc.btm.)
+
+# One line each time a decoder enters discard mode (Envelope.java:432-433), after tooLongTotalLength is written.
+RULE ntfs enter discard mode
+CLASS org.apache.cassandra.transport.Envelope$Decoder
+METHOD decode(io.netty.buffer.ByteBuf)
+AFTER WRITE tooLongTotalLength
+IF true
+DO traceln("NTFDISCARD t=" + System.currentTimeMillis() + " tooLongTotalLength=" + $0.tooLongTotalLength + " readable=" + $1.readableBytes())
+ENDRULE
+
+# One line per fail() call: the true branch of the entry lines (Envelope.java:349 or :436).
+RULE ntfs fail
+CLASS org.apache.cassandra.transport.Envelope$Decoder
+METHOD fail
+AT ENTRY
+IF true
+DO traceln("NTFFAIL t=" + System.currentTimeMillis() + " tooLongTotalLength=" + $0.tooLongTotalLength + " stream=" + $0.tooLongStreamId)
+ENDRULE
+
+# Count of Envelope.discard calls (Envelope.java:493-498).
+RULE ntfs count discard calls
+CLASS org.apache.cassandra.transport.Envelope
+METHOD discard
+AT ENTRY
+IF true
+DO incrementCounter("ntfsDiscardCalls")
+ENDRULE
+
+# On every `nodetool version` (StorageService.getReleaseVersion): the native-transport allocator's metric and the discard count. The binding needs the heap-allocator flag (runbook fix D1: CBUtil.allocator is then an UnpooledByteBufAllocator, CBUtil.java:60).
+RULE ntfs allocator metric on nodetool version
+CLASS org.apache.cassandra.service.StorageService
+METHOD getReleaseVersion
+AT ENTRY
+BIND a : io.netty.buffer.UnpooledByteBufAllocator = org.apache.cassandra.transport.CBUtil.allocator;
+     m : io.netty.buffer.ByteBufAllocatorMetric = a.metric()
+IF true
+DO traceln("NTFMEM t=" + System.currentTimeMillis() + " direct=" + m.usedDirectMemory() + " heap=" + m.usedHeapMemory() + " allocator=" + org.apache.cassandra.transport.CBUtil.allocator.getClass().getSimpleName() + " discardCalls=" + readCounter("ntfsDiscardCalls"))
+ENDRULE

@@ -1,0 +1,8 @@
+# Node 2 (hint receiver), B3a as filed: hold each hint 300 ms on the MUTATION stage so a page's hints coexist.
+RULE hold hint
+CLASS org.apache.cassandra.hints.HintVerbHandler
+METHOD doVerb
+AT ENTRY
+IF true
+DO java.lang.Thread.sleep(300L)
+ENDRULE

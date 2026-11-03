@@ -1,0 +1,14 @@
+keyspace: bl
+keyspace_definition: CREATE KEYSPACE bl WITH replication = {'class':'SimpleStrategy','replication_factor':1};
+table: t
+table_definition: CREATE TABLE t (k bigint PRIMARY KEY, v blob)
+columnspec:
+  - name: k
+    population: seq(200000001..300000000)
+  - name: v
+    size: fixed(16)
+insert:
+  partitions: fixed(2)
+  batchtype: LOGGED
+  select: fixed(1)/1
+queries: {}   # runbook fix 2026-10-26 (defect 2): StressProfile.init requires a queries map; this load runs ops(insert=1) only
