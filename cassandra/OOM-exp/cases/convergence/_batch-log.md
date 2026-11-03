@@ -131,4 +131,8 @@ instead.
 
 **Harness defect found:** a `cassandra-stress user` client creating its own table under concurrent load can time out on `CREATE TABLE` and write nothing, and `-errors retries` does not cover schema creation. This voided `A_converge_slow` and, retroactively, run 5's converge arm. Fixed by creating the table with `cqlsh --request-timeout=120` on the idle node; check each burst's `tablestats` (partition count, "Index summary off heap memory used") instead of trusting the client.
 
-**Stopping reason:** both named retries run; the pair closed as OOMed. The group stays open only for untried candidates.
+3. **Schedule B with a 1-minute resize** (arm C, a follow-up check): **no off-heap kill**, peak 1859 MiB (93%), resize ran every minute through the burst. The JVM still died, of a Java heap `OutOfMemoryError` (old gen 349/384 MiB, full GCs freeing nothing), not attributed and not counted as a convergence OOM; heap dump kept on the node, unanalyzed. See the run 6 case file's addendum.
+
+**Run 4 superseded:** run 4 used the reverse order (burst first, then cache fill) with a 1-minute resize; not worth re-running unchanged. Marked superseded in `_INDEX.md` and its case file.
+
+**Stopping reason:** both named retries run, plus the 1-minute-resize check; the pair closed as OOMed. The group stays open only for untried candidates.

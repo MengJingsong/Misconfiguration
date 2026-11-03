@@ -6,6 +6,8 @@
 
 > **Outcome: OOM NOT reached.** All three arms (row-cache-alone, index-summary-alone, converged) completed without a kernel OOM-kill, a JVM `OutOfMemoryError`, or GC-pressure unresponsiveness. The combined arm's peak usage (938 MiB above idle baseline) came in well under the naive additive prediction from the two alone arms (1246 MiB) — the two caches' own enforcement (Caffeine eviction, periodic index-summary resize) kept operating under combined load instead of simply summing their overshoots. See §4 for the full diagnosis.
 
+> **Superseded (2026-11-03) by [run 6](row_cache_size+index_summary_capacity--run6.md):** the same pair OOMed when the row cache was filled to its cap *before* the index-summary burst. This run used the reverse order (burst and flush first, then the row-cache fill) with a 1-minute resize, so the two peaks never coincided. Kept as the record of that schedule; not worth re-running unchanged.
+
 ## 1. Constraints and capacities
 
 Both are off-heap/direct-memory config-type **true positives** from if-check-exp, surveyed in `cases/convergence/_constraint-groups.md`'s off-heap table and previously parked (run 2) for lack of an off-heap budget setup:
