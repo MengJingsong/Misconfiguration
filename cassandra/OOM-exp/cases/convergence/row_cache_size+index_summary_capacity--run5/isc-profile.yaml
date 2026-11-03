@@ -1,0 +1,44 @@
+# cassandra-stress user profile for the index_summary_capacity workload.
+# One row per partition, min_index_interval=1 so every partition gets its
+# own index-summary entry at full sampling level (makes the raw full-level
+# summary size scale directly with partition count, following the method
+# if-check-exp's index_summary_capacity stage-4 cluster tier used).
+keyspace: isc
+
+keyspace_definition: |
+  CREATE KEYSPACE isc WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1} AND durable_writes = false;
+
+table: t
+
+table_definition: |
+  CREATE TABLE t (
+        k text,
+        v blob,
+        PRIMARY KEY (k)
+  )
+  WITH min_index_interval=1
+   AND max_index_interval=128
+   AND caching = {'keys':'NONE', 'rows_per_partition':'NONE'}
+   AND compaction = {'class':'SizeTieredCompactionStrategy'}
+
+columnspec:
+  # k is deliberately ~200 chars (not a realistic key in practice) so each
+  # index-summary entry is large enough (~212 bytes, matching if-check-exp's
+  # own index_summary_capacity stage-4 cluster-tier calibration) that a
+  # feasible partition count reaches hundreds of MiB of raw summary quickly.
+  # A first attempt with a 16-byte key needed ~25M partitions to reach the
+  # same raw bytes -- too slow to write in a reasonable time.
+  - name: k
+    size: fixed(200)
+    population: seq(1..200000000)
+  - name: v
+    size: fixed(32)
+
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+
+queries:
+  simple1:
+    cql: select * from t where k = ?
+    fields: samerow
