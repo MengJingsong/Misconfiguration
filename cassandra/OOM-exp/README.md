@@ -80,6 +80,7 @@ or a person follows to produce one case. Every closed case is tracked in
 | Direction | Playbook | What it produces |
 |---|---|---|
 | 1 — multiple usages reach capacity together | **`convergence-playbook`** | a convergence case (constraint set, sizing, combined workload, memory outcome) |
+| 1 (variant) — same, with every constraint at its default value | **`default-value-convergence-playbook`** | a default-value convergence case (same as above, plus a defaults audit) |
 | 2 — get past one capacity check | **`bypass-playbook`** | a bypass case (check, defeating mechanism, measured usage past capacity) |
 
 ## Relationship to the project targets
