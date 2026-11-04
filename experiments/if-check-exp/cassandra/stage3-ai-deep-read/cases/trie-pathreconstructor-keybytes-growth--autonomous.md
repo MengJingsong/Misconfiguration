@@ -87,7 +87,7 @@
 
 ### B5. Stage-4 audit amendments (2026-10-25, step-0 audit, before any reading)
 
-Made by the autonomous stage-4 session (tag tp33) from the pinned source `cassandra/cassandra-5.0.9/`; none depends on a reading. The in-place edits above carry the same labels.
+Made by the autonomous stage-4 session (tag tp33) from the pinned source `systems/cassandra/source/`; none depends on a reading. The in-place edits above carry the same labels.
 
 | # | Amendment |
 |---|---|

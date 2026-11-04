@@ -246,7 +246,7 @@ With no human review, the conclusion has to survive the AI's own second look.
 
 | Rule | Why |
 |---|---|
-| **Never build in, or add files to, the repository's `cassandra/cassandra-5.0.9/`.** Copy it to local disk for each run: [`copy-source.sh`](copy-source.sh) `<local-dir>` ([`environment.md`](environment.md) §2). Runs before 2026-10-22 cloned the separate `cassandra-src` clone instead, which held the same files. | Stage 3 reads that source for line numbers, and a build or a copied test file there would show up as a change to this repository. |
+| **Never build in, or add files to, the repository's `systems/cassandra/source/`.** Copy it to local disk for each run: [`copy-source.sh`](copy-source.sh) `<local-dir>` ([`environment.md`](environment.md) §2). Runs before 2026-10-22 cloned the separate `cassandra-src` clone instead, which held the same files. | Stage 3 reads that source for line numbers, and a build or a copied test file there would show up as a change to this repository. |
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
 | A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
 | Stop every process a run starts, and check none is left: `ps -eo cmd | grep '[C]assandraDaemon'` (not `pgrep -f` inside an inline `ssh host '...'` string: it matches its own shell). | A leftover node holds ports and memory and contaminates the next run. |

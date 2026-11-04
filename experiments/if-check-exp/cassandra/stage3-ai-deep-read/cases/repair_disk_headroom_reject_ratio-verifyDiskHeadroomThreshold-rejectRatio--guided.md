@@ -438,7 +438,7 @@ After the run: stop both nodes, keep `logs/`, remove `~/stage4-hdr/`.
 ### 9c. Workload
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`.
 Work for step 1, before run 1:
 
 | File | What it is |

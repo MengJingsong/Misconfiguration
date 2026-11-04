@@ -2,7 +2,7 @@
 # Unit tier driver for none-addall-size--autonomous. Usage: unit-run.sh <tree> <outdir> <mode: plain|bm|check>
 #   plain: allocation / retained-size readings, no agent      bm: Byteman branch trace (allocation columns not used)
 #   check: instrument checks only (known-answer, empty window, rules parse) - no sweep
-# <tree> is a copy-source.sh copy that has been built with `ant build-test` (never a tree a node runs from and never cassandra/cassandra-5.0.9/).
+# <tree> is a copy-source.sh copy that has been built with `ant build-test` (never a tree a node runs from and never systems/cassandra/source/).
 set -u
 TREE=${1:?}; OUT=${2:?}; MODE=${3:?}
 H=$(cd "$(dirname "$0")" && pwd)

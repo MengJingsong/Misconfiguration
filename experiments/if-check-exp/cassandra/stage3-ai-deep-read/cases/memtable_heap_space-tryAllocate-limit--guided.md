@@ -327,7 +327,7 @@ flush.
 ```bash
 # unit tier — copy the committed harness copy of HeapPoolTest (not upstream)
 # into the local clone, then run both tests:
-cp <misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_heap_space-tryAllocate-limit/HeapPoolTest.java \
+cp <misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_heap_space-tryAllocate-limit/HeapPoolTest.java \
    test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java
 ant testsome -Dtest.name=org.apache.cassandra.utils.memory.HeapPoolTest
 ant testsome -Dtest.name=org.apache.cassandra.db.memtable.MemtableSizeUnslabbedTest
@@ -371,7 +371,7 @@ asserted values. `HeapPoolTest` builds the `HeapPool` directly, so the
 allocation-type setting does not affect it.
 
 **Before the cluster tier (amended 2026-09-29).** `<harness>` below stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_heap_space-tryAllocate-limit`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_heap_space-tryAllocate-limit`.
 
 1. **Instrument check.** Run `HeapPoolTest` with the rule attached. Expect
    both tests to pass and the trace to hold exactly one line,

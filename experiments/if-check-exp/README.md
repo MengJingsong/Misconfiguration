@@ -60,7 +60,7 @@ file restates its source ref in the header for this reason.
 ### 2.1 Verifying and linking against the local source
 
 The pinned source is part of this repository, at
-[`../cassandra-5.0.9/`](../cassandra-5.0.9/): the `apache/cassandra` tree at
+[`../../systems/cassandra/source/`](../../systems/cassandra/source/): the `apache/cassandra` tree at
 tag `cassandra-5.0.9`, unmodified (exported with `git archive` on 2026-10-22;
 every file matches the tag). Scripts may also find it through
 `$CASSANDRA_SRC`. Records dated before 2026-10-22 name a separate git clone,
@@ -68,12 +68,12 @@ every file matches the tag). Scripts may also find it through
 files through GitHub — grep/window it, which saves tokens versus pulling
 entire files into context. Never build in it or add files to it.
 
-- **Root mapping:** `cassandra/cassandra-5.0.9/` is the upstream repo root (it
+- **Root mapping:** `systems/cassandra/source/` is the upstream repo root (it
   directly contains `build.xml`, `CHANGES.txt`, `src/`, etc.), so every path in
   it maps 1:1 onto the GitHub repo's paths.
 - **Version confirmation:** the copy has no `.git` of its own, so confirm by
   `build.xml`'s `base.version` property and `CHANGES.txt`'s top entry, which
-  both read `5.0.9`. `git status cassandra/cassandra-5.0.9` in this repository
+  both read `5.0.9`. `git status systems/cassandra/source` in this repository
   must show nothing changed.
 - **Building a link:** take the file's path **relative to that root** (e.g.
   `src/java/org/apache/cassandra/utils/memory/MemtablePool.java`) and splice
@@ -378,7 +378,7 @@ field.
 
 ```
 (repo root)/HANDOFF.md       # start-here brief for a new session
-cassandra/if-check-exp/
+experiments/if-check-exp/
 ├── README.md                # this file: rules, format, the three stages
 ├── stage1-codeql-preprocessing/   # structural narrowing — see §7.2
 │   └── README.md            #   pointers to codeql-queries/, output, blind spot
@@ -511,7 +511,7 @@ and the three enforcement patterns (§3.2): it identifies the pattern, locates
 the decision point and the allocation site, and judges whether the verdict
 reaches a decision point that diverges on object creation (Rule 3) — not only
 whether the comparison's own branches diverge, since under patterns (b) and
-(c) they may not. Prefer the local source (`../cassandra-5.0.9/`) over fetching whole files through
+(c) they may not. Prefer the local source (`../../systems/cassandra/source/`) over fetching whole files through
 GitHub (grep/window it — saves tokens).
 
 It then **designs the test** that would confirm or refute the case — §9 of the

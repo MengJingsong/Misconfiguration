@@ -3,7 +3,7 @@
 # key: blockindex | postings | maxblock | tpb. Full logs stay on the node (~/s4-b34/logs/<key>/); node stdout traces (startup logs) are not copied.
 set -euo pipefail
 stem=$1; key=$2
-R=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification
+R=/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage4-runtime-verification
 D=$R/results/$stem/run1; mkdir -p "$D/unit" "$D/cluster" "$D/build-patches"
 L=$HOME/s4-b34/logs/$key
 cp "$L"/unit/run1/*.out "$L"/unit/run1/summary.txt "$D/unit/" 2>/dev/null || true

@@ -64,7 +64,7 @@ Bypasses and under-counts (things the cap does not see):
 **B2a. Environment and build.**
 - JDK 11.0.32.1 and Ant 1.10.12 on a node with ≥ 10 GB free on local `/`.
 - `WORK=/var/tmp/sai-exp`. Check that `df -h /var/tmp` shows the local root fs.
-- Copy: `<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh $WORK/cassandra` (the tag, unmodified, with a local git baseline).
+- Copy: `<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh $WORK/cassandra` (the tag, unmodified, with a local git baseline).
 - Build in the clone only: `cd $WORK/cassandra && ant jar build-test` (Maven download needs network).
 - Test source (new file in the local clone only): `$WORK/cassandra/test/unit/org/apache/cassandra/index/sai/memory/SaiMemtableChargeTest.java`, listed in B2e.
 - The test JVM is the standard `testsome` fork: `maxmemory=1024m`, jamm javaagent present (`build.xml:1153-1159`), test config `test/conf/cassandra.yaml` (default memtable = SkipListMemtable, one data dir → 2 flush writers → cleanup threshold 1/3).
@@ -473,7 +473,7 @@ Arithmetic (to be replaced by measured c values):
 - STCS, and compaction concurrency fixed across runs.
 
 **B4. Risks and cleanup.**
-- Never build in, or add files to, the repository's `cassandra/cassandra-5.0.9/`. All builds, the test file, data, commit logs and logs live under `$WORK=/var/tmp/sai-exp` on local `/`.
+- Never build in, or add files to, the repository's `systems/cassandra/source/`. All builds, the test file, data, commit logs and logs live under `$WORK=/var/tmp/sai-exp` on local `/`.
 - Disk: the unit tier uses < 2 GB (test data under `$WORK/cassandra/build/test`). The cluster tier peaks at ≤ 15 GB per run (data + compaction + ≤ 8 GiB commit log); wipe `$WORK/node` between runs. Abort if `df /var/tmp` drops below 10 GB free.
 - Histograms force full GCs: at most one per 60 s, and they perturb throughput but not the bound.
 - Processes:
@@ -483,9 +483,9 @@ Arithmetic (to be replaced by measured c values):
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/README.md (§6.1 only)
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/README.md (§6.1 only)
 - src/java/org/apache/cassandra/index/sai/StorageAttachedIndex.java
 - src/java/org/apache/cassandra/index/sai/memory/MemtableIndexManager.java
 - src/java/org/apache/cassandra/index/sai/memory/MemtableIndex.java

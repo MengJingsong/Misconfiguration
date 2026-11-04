@@ -11,7 +11,7 @@ whatever solution a case file holds; what stage 3 is, and where results are file
 
 **How to run it.** One fresh Agent-tool subagent per target, in a copy of the Cassandra
 source at tag `cassandra-5.0.9` made **outside this repository**
-(`rsync -a cassandra/cassandra-5.0.9/ ~/cassandra-5.0.9/`), so the session cannot read the
+(`rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`), so the session cannot read the
 other case and results files. Give it this file, `_TEMPLATE-autonomous.md`, and the target
 as a code location (`file:line`, relative to the source root). Nothing else about the case.
 **The agent writes only to a scratch file it is given. It never edits `_INDEX.md`, the CSVs

@@ -71,7 +71,7 @@ One row per observable in the case's §9d:
 | OS and kernel (`uname -r`) | | |
 | JDK (`java -version`) | | |
 | Ant (`ant -version`) | | |
-| Local source copy (from `cassandra/cassandra-5.0.9/` at repository commit …) | | |
+| Local source copy (from `systems/cassandra/source/` at repository commit …) | | |
 | Case-file commit / harness commit | | |
 | Storage for node data | | |
 | Full logs (path, outside the repo) | | |

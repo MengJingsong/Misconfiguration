@@ -87,7 +87,7 @@ On disk, `Summary.db` files are written alongside every BIG sstable and are rewr
 
 **B2a. Environment and build.**
 - JDK 11.0.32.1, Ant 1.10.12.
-- Get a local copy of the tree (never touch the repository's `cassandra/cassandra-5.0.9/`): `<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/isr-c5 && cd /tmp/isr-c5`.
+- Get a local copy of the tree (never touch the repository's `systems/cassandra/source/`): `<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh /tmp/isr-c5 && cd /tmp/isr-c5`.
 - Build: `ant -Dno-checkstyle=true build-test`.
 - New test file (in the local copy only): `test/unit/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryCapacityProbeTest.java`.
 - Run with `ant testsome -Dtest.name=org.apache.cassandra.io.sstable.indexsummary.IndexSummaryCapacityProbeTest`.
@@ -403,7 +403,7 @@ On disk, `Summary.db` files are written alongside every BIG sstable and are rewr
 - **Zero reads.** No read traffic is run, and the 15-minute read rate in the log trace stays at 0.
 
 **B4. Risks and cleanup.**
-- **Shared tree.** Never build in, or add files to, the repository's `cassandra/cassandra-5.0.9/`. All work is done in `/tmp/isr-c5`, `/tmp/isr-node` and `/tmp/isr-work` on local `/`.
+- **Shared tree.** Never build in, or add files to, the repository's `systems/cassandra/source/`. All work is done in `/tmp/isr-c5`, `/tmp/isr-node` and `/tmp/isr-work` on local `/`.
 - **Disk.** The unit tier uses under 1 GB (build plus test data in `build/test`). The cluster tier uses under 10 GB. Check `df -h /` before and after.
 - **Memory.** The node uses an 8 GB heap plus about 2 GB of summaries, well within 251 GiB.
 - **Processes.**
@@ -416,9 +416,9 @@ On disk, `Summary.db` files are written alongside every BIG sstable and are rewr
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/README.md (§6.1 only)
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/README.md (§6.1 only)
 - src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryRedistribution.java
 - src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryManager.java
 - src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryManagerMBean.java

@@ -8,7 +8,7 @@ agent's playbook (`playbook-guided.md`).** Both fill a template, and
 holds; what stage 3 is, and where results are filed, is in [`README.md`](README.md).
 
 **How to run it (by hand).** Open a Claude Code session in a copy of the Cassandra source at tag
-`cassandra-5.0.9` made **outside this repository** (`rsync -a cassandra/cassandra-5.0.9/ ~/cassandra-5.0.9/`),
+`cassandra-5.0.9` made **outside this repository** (`rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`),
 so the session cannot read the other case and results files. Give it this file, `_TEMPLATE-autonomous.md`, and the target as a
 code location (`file:line`, relative to the source root). Nothing else about the case.
 

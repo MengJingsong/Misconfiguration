@@ -322,7 +322,7 @@ Two rules behind this table:
 ### 9c. Workload
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes`.
 Work for step 1, before run 1 (none of it exists yet); reuse from the sibling's harness (`…/harness/local_read_size_fail_threshold-addSize-failBytes/`) and from `column_index_cache_size`'s where marked:
 
 | File | What it is |
@@ -337,7 +337,7 @@ Work for step 1, before run 1 (none of it exists yet); reuse from the sibling's 
 | `cluster-run.py` | One run script (Python, as the earlier cases): instrument checks, then the 9e sequence in one node lifetime; logs every command to `~/stage4-logs/crs/session.log`, writes `summary.txt` with `EXPECTED:` lines and `readings.csv`, stops the node on any exit, stops at a failed instrument check. |
 
 ```bash
-# unit tier — in the run clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/)
+# unit tier — in the run clone (copy-source.sh; never the repository's systems/cassandra/source/)
 ant build-test
 cp <harness>/CoordinatorReadSizeGuardTest.java test/unit/org/apache/cassandra/cql3/
 mkdir -p $HOME/stage4-logs/crs/unit

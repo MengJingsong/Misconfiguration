@@ -187,8 +187,8 @@ Not directly observable: the tracker's `sizeInProgress` (private). Infer it from
 
 ## C. Sources read
 
-- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md`
-- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md`
+- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md`
+- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md`
 - `src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java`
 - `src/java/org/apache/cassandra/config/Config.java` (lines 405-422)
 - `src/java/org/apache/cassandra/config/DatabaseDescriptor.java` (lines 675-700, grep of 4336-4383)

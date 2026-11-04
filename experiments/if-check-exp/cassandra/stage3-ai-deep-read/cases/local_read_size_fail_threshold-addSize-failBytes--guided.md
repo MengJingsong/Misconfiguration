@@ -293,7 +293,7 @@ Two rules behind this table:
 The operand is the running total of heap sizes, so the workload is **one wide partition of identical rows** and reads that stop at chosen row counts. Read it unpaged and in one command; the cluster tier flushes first so every counted row is built by the SSTable deserializer.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/local_read_size_fail_threshold-addSize-failBytes`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/local_read_size_fail_threshold-addSize-failBytes`.
 Work for step 1, before run 1 (none of it exists yet):
 
 | File | What it is |
@@ -309,7 +309,7 @@ Work for step 1, before run 1 (none of it exists yet):
 **Amendment 2026-10-07 (documentation only; §9a unchanged), made while writing the harness.** (1) `cluster-run.sh` is `cluster-run.py` (Python; the steps are those of 9e; *b0* and *h* are calibrated inside every run by two completed reads, `ck < 100` and `ck < 200`, so no run depends on another's file, and the `16m` run also reads the whole partition); `jmx.sh` is called by it. (2) `read-alloc.btm` calls a helper, `stage4.Alloc` (`Alloc.java`), which is compiled into a jar and put on the **boot class path** (`-Xbootclasspath/a:`): the node runs from `build/apache-cassandra-5.0.9-SNAPSHOT.jar`, so classes compiled into `build/classes/main` are not on its class path. The helper keeps the thread's start value, so the rule needs no cast or link map. (3) The Byteman parse check is `java -cp "build/classes/main:build/lib/jars/*:lib/*" org.jboss.byteman.check.TestScript <file>`. (4) The `--trace` option of `send-read.py` is best effort and is **not used**: the abort's *X* is read from the coordinator's WARN line, so the trace event listed in 9d is not collected. (5) The client uses native protocol 5, as 9b says.
 
 ```bash
-# unit tier — in the local clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/); once:
+# unit tier — in the local clone (copy-source.sh; never the repository's systems/cassandra/source/); once:
 ant build-test
 cp <harness>/LocalReadSizeGuardTest.java test/unit/org/apache/cassandra/db/
 mkdir -p $HOME/stage4-logs/lrs/unit

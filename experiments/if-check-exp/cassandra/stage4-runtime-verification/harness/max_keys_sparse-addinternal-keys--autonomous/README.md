@@ -1,6 +1,6 @@
 # Harness: max_keys_sparse-addinternal-keys--autonomous
 
-Stage-4 instruments for the case file `cases/max_keys_sparse-addinternal-keys--autonomous.md` (sha256 and amendments in `results/max_keys_sparse-addinternal-keys--autonomous.md` §1). Run node `pc41`, run copy `~/s4-b34/src` (`copy-source.sh` of `cassandra/cassandra-5.0.9/`, then `ant build-test`); nothing is added to `cassandra/cassandra-5.0.9/`.
+Stage-4 instruments for the case file `cases/max_keys_sparse-addinternal-keys--autonomous.md` (sha256 and amendments in `results/max_keys_sparse-addinternal-keys--autonomous.md` §1). Run node `pc41`, run copy `~/s4-b34/src` (`copy-source.sh` of `systems/cassandra/source/`, then `ant build-test`); nothing is added to `systems/cassandra/source/`.
 
 | File | Tier | What |
 |---|---|---|

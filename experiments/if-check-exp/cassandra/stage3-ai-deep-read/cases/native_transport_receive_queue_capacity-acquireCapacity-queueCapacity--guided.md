@@ -425,7 +425,7 @@ left out of the yaml). Within a lifetime the arms share the node; each arm opens
 A request is a `QueryMessage` `INSERT INTO ks.t (pk, v) VALUES (?, ?)` with a 256 KiB blob. Its frame body is about 256 KiB. The server holds each request, as a slow query would, so its bytes stay accounted until the response is flushed; the hold changes when the bytes are released, not the path to the check.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity`.
 Work for step 1, before run 1:
 
 | File | What it is |

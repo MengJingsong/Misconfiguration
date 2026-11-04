@@ -27,7 +27,7 @@ The large-hint arm gets the mutation size M from `alloc hint=` (M = hint - 11, 8
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/hints-HintsBuffer-put-slabCapacity--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/hints-HintsBuffer-put-slabCapacity--autonomous
 bash $H/unit-run.sh run1
 for a in ctl A3 A2 A6 C3 D3 B3 L; do HB_RUN=run1 python3 -I $H/cluster-run.py $a; done
 HB_RUN=run1 python3 -I $H/cluster-run.py analyze

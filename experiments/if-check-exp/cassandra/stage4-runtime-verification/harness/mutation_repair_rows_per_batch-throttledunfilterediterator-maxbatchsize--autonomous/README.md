@@ -1,6 +1,6 @@
 # Harness: mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize--autonomous
 
-Written 2026-10-27 (stage 4, node pc41). Run copy: `~/c4-mrb` (`copy-source.sh` of `cassandra/cassandra-5.0.9`, `ant build-test`).
+Written 2026-10-27 (stage 4, node pc41). Run copy: `~/c4-mrb` (`copy-source.sh` of `systems/cassandra/source`, `ant build-test`).
 
 Unit tier (B2): `MutationRepairBatchProbeTest.java` (a `CQLTester` in package `org.apache.cassandra.db.rows`; copy to the run copy's
 `test/unit/org/apache/cassandra/db/rows/`), run by `unit-run.sh` (`ant testsome`, environment `PROBE_VAR`/`PROBE_OUT`).

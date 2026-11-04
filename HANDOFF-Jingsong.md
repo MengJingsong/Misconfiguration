@@ -9,7 +9,7 @@ Jingsong's next job. Yang works on set B in parallel ([`HANDOFF-Yang.md`](HANDOF
 Use **fresh autonomous agents** to write up a case file for every target in **set A**, then
 verify each case at **stage 4** (audit, run 1 at both tiers, results file, outcome class).
 
-- **The list:** [`cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-A.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-A.csv) —
+- **The list:** [`experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv`](experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv) —
   **159 targets covering 168 stage-2 units** (band A 46, B 64, C 58), every one a negative estimate.
   Mostly `cache/`, `config/`, `cql3/`, `db/`, `hints/` and the first part of `index/` (up to
   `index/sai/disk/v1/vector/`), plus a few `io/`, `utils/` and other lines tied to the same queue rows.
@@ -21,7 +21,7 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
   written up by one person. Set B has 169 units / 161 targets.
 - **A target** is one `file:line` (units on the same line, `#1`/`#2`, are merged) or one helper
   method (`helper <class>.<method>()`; give the agent the comparison line inside the helper,
-  found with `grep -n` in `cassandra/cassandra-5.0.9/`).
+  found with `grep -n` in `systems/cassandra/source/`).
 - **CSV columns:** `order` (suggested order), `target`, `units`, `band`, `estimate`,
   `stage3_record` (where stage 3 recorded the line: a `predicted-negative.md` section, or a note),
   `stage2_reason`, and two columns to fill as you go: `case_file` (the stem) and `stage4`
@@ -37,10 +37,10 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 ### 1. Write-up (stage 3, autonomous agent)
 
 1. Make a copy of the source **outside the repository**, so the agent cannot read other cases:
-   `rsync -a cassandra/cassandra-5.0.9/ ~/cassandra-5.0.9/`.
+   `rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`.
 2. Open a **fresh** Claude Code session in that copy. Give it only
-   [`playbook-autonomous.md`](cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
-   [`_TEMPLATE-autonomous.md`](cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
+   [`playbook-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
+   [`_TEMPLATE-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
    and the target as `file:line`. Nothing else about the line (not the stage-3 ground, not the CSV).
 3. File the result as `cases/<stem>--autonomous.md`. The stem follows the existing ones:
    `<constraint>-<method>-<operand>`; check `ls cases/` first and add `-2` if the stem is taken.
@@ -50,14 +50,14 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 
 ### 2. Verification (stage 4, a separate agent)
 
-Protocol: [`stage4-runtime-verification/README.md`](cassandra/if-check-exp/stage4-runtime-verification/README.md)
-("The run protocol"); environment: [`environment.md`](cassandra/if-check-exp/stage4-runtime-verification/environment.md).
+Protocol: [`stage4-runtime-verification/README.md`](experiments/if-check-exp/stage4-runtime-verification/README.md)
+("The run protocol"); environment: [`environment.md`](experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md).
 
-1. **Step-0 audit** (A–D) against `cassandra/cassandra-5.0.9/`; fixes go in the case file as dated
+1. **Step-0 audit** (A–D) against `systems/cassandra/source/`; fixes go in the case file as dated
    amendments (section D). Write the audit and the frozen hash of the predictions and conclusions
    tables (B2f–g, B3f–g) into a new results file from `_TEMPLATE.md` **before any reading**.
 2. Harness under `harness/<stem>--autonomous/`; working trees from
-   [`copy-source.sh`](cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh), one per case.
+   [`copy-source.sh`](experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh), one per case.
 3. Run 1, unit tier then cluster tier; independent self-check from the raw logs; fill the results
    file, including the **Outcome class**.
 4. Close the case: `_INDEX.md` §1 Stage 4 and Outcome class cells, the new sha256 in §4 if the case
@@ -273,7 +273,7 @@ case file (CSV rows 81-159; row 7 skipped, it is settled as a second check site 
 `prepared_statements_cache_size`). **Not case files:** these are unfinished, kept out of `cases/`,
 `_INDEX.md`, `predicted-negative.md` and the CSV (`case_file` and `stage4` columns left empty).
 
-- **Where:** `cassandra/if-check-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
+- **Where:** `experiments/if-check-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
   field table (only Entry pointer and Pinned source) and **A1. The constraint** filled; A2-A5, B, C and D are absent.
 - **How:** one fresh Agent-tool subagent per target, 8 batches (10 x 7, then 9), each given only
   `file:line` (or helper), a read-only copy of the source (`~/cassandra-5.0.9`) and the A1 definition.

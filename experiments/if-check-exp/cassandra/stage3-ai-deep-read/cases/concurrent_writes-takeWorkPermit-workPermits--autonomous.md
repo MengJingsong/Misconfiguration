@@ -372,8 +372,8 @@ Sample each every 5 s with a shell loop that appends to `$N/logs/samples-<run>.t
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
 - src/java/org/apache/cassandra/concurrent/SEPExecutor.java
 - src/java/org/apache/cassandra/concurrent/SharedExecutorPool.java
 - src/java/org/apache/cassandra/concurrent/SEPWorker.java (lines 40-260)

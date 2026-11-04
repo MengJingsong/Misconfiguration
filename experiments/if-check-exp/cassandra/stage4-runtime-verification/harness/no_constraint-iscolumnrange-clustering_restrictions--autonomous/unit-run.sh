@@ -1,6 +1,6 @@
 #!/bin/bash
 # Unit tier driver. Usage: bash unit-run.sh <tree> <harness-dir> <outdir> [byteman=0|1] [sizes]
-# <tree> is a copy-source.sh tree that has been through `ant build-test` (never cassandra/cassandra-5.0.9/). Compiles the test into
+# <tree> is a copy-source.sh tree that has been through `ant build-test` (never systems/cassandra/source/). Compiles the test into
 # <tree>, runs it with plain java + JUnitCore (not ant testsome: its fork JVM options are fixed). byteman=1 attaches rules.btm
 # (counts only); jamm is attached in both modes (used by the doesaggregation case only).
 set -u

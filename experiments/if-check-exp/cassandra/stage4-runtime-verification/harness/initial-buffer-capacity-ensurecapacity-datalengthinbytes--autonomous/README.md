@@ -26,7 +26,7 @@ number, so the comparison is: difference between K = 65535 and K = 16 under 16 M
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/initial-buffer-capacity-ensurecapacity-datalengthinbytes--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/initial-buffer-capacity-ensurecapacity-datalengthinbytes--autonomous
 bash $H/unit-run.sh run1
 for a in k16 k1k k32k k64k k16m k64km k16n k64kn ctl; do EC_RUN=run1 python3 -I $H/cluster-run.py $a; done
 python3 -I $H/selfcheck.py run1

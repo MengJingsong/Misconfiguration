@@ -33,7 +33,7 @@ Bypasses and overshoot: (a) a single message can exceed `queueCapacity` and is a
 
 ### B2. Unit tier
 
-**B2a. Environment and build.** JDK 11, Ant. Copy the tag to local disk: `<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh $WORK/c509` (never build in the repository's `cassandra/cassandra-5.0.9/`), `cd $WORK/c509 && ant jar build-test` (do not run the whole suite). Put a new test class `ReleaseCapacityProbeTest` in `test/unit/org/apache/cassandra/net/` of the local clone (package `org.apache.cassandra.net` so package-private `queueSize` and the `InboundMessageHandler` constructor are reachable). Run with `ant testsome -Dtest.name=ReleaseCapacityProbeTest -Dtest.methods=...`. JVM opts: default test opts; no special heap.
+**B2a. Environment and build.** JDK 11, Ant. Copy the tag to local disk: `<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh $WORK/c509` (never build in the repository's `systems/cassandra/source/`), `cd $WORK/c509 && ant jar build-test` (do not run the whole suite). Put a new test class `ReleaseCapacityProbeTest` in `test/unit/org/apache/cassandra/net/` of the local clone (package `org.apache.cassandra.net` so package-private `queueSize` and the `InboundMessageHandler` constructor are reachable). Run with `ant testsome -Dtest.name=ReleaseCapacityProbeTest -Dtest.methods=...`. JVM opts: default test opts; no special heap.
 
 **B2b. Knobs.** Constructor args rather than yaml: `queueCapacity` Q in {1024, 4096} bytes (small so boundaries are cheap; 4096 stands for scaled default), `endpointReserve` E = `new ResourceLimits.Concurrent(R)` and global G similarly, R in {2048, 8192}. Also a yaml-level check in a separate method: assert `DatabaseDescriptor.getInternodeApplicationReceiveQueueCapacityInBytes()` equals 4194304 under defaults and `8388608` after `DatabaseDescriptor.daemonInitialization(() -> { Config c = ...; c.internode_application_receive_queue_capacity = new DataStorageSpec.IntBytesBound("8MiB"); return c; })` (use a separate JVM/class since config init is once-only).
 
@@ -97,9 +97,9 @@ Bypasses and overshoot: (a) a single message can exceed `queueCapacity` and is a
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md
 - src/java/org/apache/cassandra/net/AbstractMessageHandler.java
 - src/java/org/apache/cassandra/net/InboundMessageHandler.java
 - src/java/org/apache/cassandra/net/InboundMessageHandlers.java

@@ -439,7 +439,7 @@ partition's width. Load four classes of partitions once, then read each class at
 threshold.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/column_index_cache_size-indexSamples-cacheSizeThreshold`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/column_index_cache_size-indexSamples-cacheSizeThreshold`.
 Work for step 1, before run 1:
 
 | File | What it is |

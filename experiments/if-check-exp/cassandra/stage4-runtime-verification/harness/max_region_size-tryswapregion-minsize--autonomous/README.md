@@ -1,6 +1,6 @@
 # Harness: max_region_size-tryswapregion-minsize--autonomous
 
-Written 2026-10-28 (stage 4, node `pc32`). Run copies (from `copy-source.sh` of `cassandra/cassandra-5.0.9`): `~/s4-mrs` (default build, `ant build-test`) and
+Written 2026-10-28 (stage 4, node `pc32`). Run copies (from `copy-source.sh` of `systems/cassandra/source`): `~/s4-mrs` (default build, `ant build-test`) and
 `~/s4-mrs256` (`MAX_REGION_SIZE = 256 * 1024` at `NativeAllocator.java:46`, one line, `ant jar`; patch kept in the run's logs as `arm-R256.patch`).
 Adapted from `../row_overhead_size-intrie_init-limitinmb--autonomous/` (`make-node.sh`, `Jmx.java`, the unit launcher); no conclusions are reused.
 

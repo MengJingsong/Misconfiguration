@@ -1,7 +1,7 @@
 # Harness — max_points_in_leaf_node-add-leafvaluecount--autonomous
 
 Stage-4 harness for the autonomous case file (frozen sha256 `b08bf27e…`, see the results file). Written 2026-10-28 on `pc32`. Run copy `~/s4-b34` (`copy-source.sh` of
-`cassandra/cassandra-5.0.9` at repository commit `b68711e5`, `ant build-test`); cluster variants `~/s4-b34-vA/vB/vC` (`make-variants.sh`).
+`systems/cassandra/source` at repository commit `b68711e5`, `ant build-test`); cluster variants `~/s4-b34-vA/vB/vC` (`make-variants.sh`).
 **Trap (found while building the variants):** the node runs from `build/apache-cassandra-5.0.9-SNAPSHOT.jar` (`bin/cassandra.in.sh`), not from `build/classes/main`, so recompiled
 classes and the Byteman helper `stage4.Alloc` must be put into the jar (`jar uf`, done by `make-variants.sh`); the constant is also inlined into `NumericIndexWriter`, so both classes are recompiled.
 

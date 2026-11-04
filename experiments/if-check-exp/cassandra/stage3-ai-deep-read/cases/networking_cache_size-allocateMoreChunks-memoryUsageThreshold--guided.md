@@ -453,7 +453,7 @@ runs last, in its own lifetime (its residuals persist until restart).
 ### 9c. Workload
 
 **Harness.** `<harness>` =
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/networking_cache_size-allocateMoreChunks-memoryUsageThreshold`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/networking_cache_size-allocateMoreChunks-memoryUsageThreshold`.
 Work for step 1; copy what fits from the sibling's harness folder.
 
 | File | What it is |

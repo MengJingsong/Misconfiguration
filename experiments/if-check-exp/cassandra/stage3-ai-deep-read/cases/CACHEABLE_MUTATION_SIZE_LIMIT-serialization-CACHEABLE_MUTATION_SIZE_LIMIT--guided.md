@@ -404,7 +404,7 @@ are the point.
 The operand is one mutation's serialized size. Write mutations sized to the byte, hold them in memory, and read the heap and the trace while they are held.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT`.
 Work for step 1, before run 1 (none of it exists yet):
 
 | File | What it is |
@@ -425,7 +425,7 @@ prediction as an `EXPECTED: … NO` line and goes on, and stops only at a failed
 asynchronous execution on one session, and takes `--ks` for the control write's keyspace. `make-node-yaml.sh` also writes `native_transport_timeout: 180000ms` (9b).)
 
 ```bash
-# unit tier — in the local clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/); once:
+# unit tier — in the local clone (copy-source.sh; never the repository's systems/cassandra/source/); once:
 ant build-test
 cp <harness>/CacheableMutationSizeTest.java test/unit/org/apache/cassandra/db/
 ant testsome -Dtest.name=org.apache.cassandra.utils.TeeDataInputPlusTest                       # upstream

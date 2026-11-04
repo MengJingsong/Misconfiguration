@@ -2,7 +2,7 @@
 
 Stage-4 harness for the autonomous case file (frozen sha256 `41ebd4fa…`, see the results file
 [§1](../../results/max_shard_split-getnumshards-count--autonomous.md)). Written 2026-10-28 on `pc39`; run copy `~/s4-ms`
-(`copy-source.sh` of `cassandra/cassandra-5.0.9`, `ant build-test`; the probe test is copied into the copy's `test/unit/`, never into the repository).
+(`copy-source.sh` of `systems/cassandra/source`, `ant build-test`; the probe test is copied into the copy's `test/unit/`, never into the repository).
 
 | File | Tier | What it does |
 |---|---|---|

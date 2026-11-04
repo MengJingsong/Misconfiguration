@@ -26,7 +26,7 @@ information only.
 Run order (run 1), each as its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/cache-keys-to-save-writer-keysToSave--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/cache-keys-to-save-writer-keysToSave--autonomous
 bash $H/unit-run.sh ~/s4-b7-ck ~/s4-b7-ck-logs/run1/unit 1000
 for a in main ctl20 yaml10k; do CK_RUN=run1 python3 -I $H/cluster-run.py $a; done
 python3 -I $H/analyze_cluster.py ~/s4-b7-ck-logs/run1/cluster

@@ -410,7 +410,7 @@ Hints accumulate only while a replica is down, so the cluster tier starts with n
 3 stopped (and node 2 in the two-host arm), waiting until node 1 shows `DN`.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/max_hints_size_per_host-shouldHint-maxHintsSize`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/max_hints_size_per_host-shouldHint-maxHintsSize`.
 Work for step 1, before run 1:
 
 | File | What it is |

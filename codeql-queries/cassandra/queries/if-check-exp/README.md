@@ -2,7 +2,7 @@
 
 Four CodeQL queries that narrow Cassandra's ~17k `if` statements down to the working list
 that **stage 2** ranks and **stage 3** reads, for the three rules in
-[`../../../../cassandra/if-check-exp/README.md`](../../../../cassandra/if-check-exp/README.md).
+[`../../../../experiments/if-check-exp/README.md`](../../../../experiments/if-check-exp/README.md).
 This folder produces CSVs and nothing else: the queries decide nothing, and no case file is
 written from them directly.
 
@@ -12,7 +12,7 @@ actually a capacity check; real cases (`memtable_heap_space`, `MAX_HINT_BUFFERS`
 that judgement belongs to stage 2 and the qualification to stage 3.
 
 **Scope: all three enforcement patterns** (see
-[`../../../../cassandra/if-check-exp/README.md` §7.5](../../../../cassandra/if-check-exp/README.md#75-active-scope-decisions-revised-2026-09-25)),
+[`../../../../experiments/if-check-exp/README.md` §7.5](../../../../experiments/if-check-exp/README.md#75-active-scope-decisions-revised-2026-09-25)),
 revised 2026-09-25.
 
 **What these four queries select is a *syntactic* shape, not a pattern.** They keep
@@ -144,7 +144,7 @@ cannot contain hyphens, so `queries/if-check-exp/` is not an importable path.
 ## Known gap and planned extensions (2026-09-20)
 
 `if-check-exp` now recognizes three enforcement patterns (see
-[`../../../../cassandra/if-check-exp/README.md` §3.2](../../../../cassandra/if-check-exp/README.md#3-core-concept-the-if-check-case)):
+[`../../../../experiments/if-check-exp/README.md` §3.2](../../../../experiments/if-check-exp/README.md#3-core-concept-the-if-check-case)):
 (a) the capacity check is itself the deciding `if`; (b) the check produces a
 verdict — a flag, enum, or return value — that a separate decision point
 reads; (c) guard clauses before an allocation that sits outside any branch.
@@ -200,7 +200,7 @@ Output lands in `results/cassandra/<QueryName>.csv` (gitignored).
 The two CSVs are the input to **stage 2**, which ranks every row by AI lexical and semantic
 judgement — it rules nothing out, and it does not apply the three rules. Its design, bands and
 verdicts live in
-[`../../../../cassandra/if-check-exp/stage2-ai-preprocessing/`](../../../../cassandra/if-check-exp/stage2-ai-preprocessing/README.md);
+[`../../../../experiments/if-check-exp/stage2-ai-preprocessing/`](../../../../experiments/if-check-exp/stage2-ai-preprocessing/README.md);
 nothing about it is restated here, so that this file does not go stale when stage 2 changes.
 The batch inputs are built by `../../../scripts/make-stage2-batches.py`, which reads both CSVs
 directly.

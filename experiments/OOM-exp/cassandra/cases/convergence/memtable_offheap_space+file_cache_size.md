@@ -56,4 +56,4 @@ Fixed settings in every arm: `-Xmx768M`, `memtable_heap_space: 200MiB` (raised f
 - Both caps confirmed reached in their alone arms from Cassandra's own readings (flush `Usage: … 1.172GiB (100%) off-heap`; `nodetool info` chunk cache size = capacity).
 - The "JVM OOM lines: 1" in the calibration summaries is a grep false positive (a `CompileCommand` line naming `OutOfMemoryError`); the grep was tightened before the 1200 MiB arms, which all report 0.
 - `memory.current` sits at `memory.max` under load in every arm because page cache counts toward it; `RssAnon` is the reading, `oom_kill`/`dmesg` the outcome signal (as in runs 4-6).
-- After every arm, `pgrep` for `CassandraDaemon` and `cassandra-stress` was empty and the scope unit stopped. Data, commit log and logs stayed under `~/cassandra-run1` on local disk; nothing written to `/proj`; the repository's `cassandra/cassandra-5.0.9/` untouched.
+- After every arm, `pgrep` for `CassandraDaemon` and `cassandra-stress` was empty and the scope unit stopped. Data, commit log and logs stayed under `~/cassandra-run1` on local disk; nothing written to `/proj`; the repository's `systems/cassandra/source/` untouched.

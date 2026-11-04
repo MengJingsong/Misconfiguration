@@ -339,7 +339,7 @@ comes back, not the path to the check.
 **Harness.** Stage 4 wrote these under
 `harness/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS/` and checked
 them before run 1 (results §1.2). `<harness>` below stands
-for `<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`.
+for `<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS`.
 
 | File | What it is |
 |---|---|

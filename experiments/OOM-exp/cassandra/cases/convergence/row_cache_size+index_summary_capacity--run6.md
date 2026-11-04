@@ -78,4 +78,4 @@ The "OutOfMemoryError mentions: 1" line in every arm's `summary.txt` is a grep f
 
 - The kill is attributed from `dmesg` (`oom_memcg` path equals this arm's scope unit; killed PID equals the arm's node PID), not from the process merely disappearing.
 - No `OutOfMemoryError`, no ERROR line, and no resize line in any arm; `index_summary_resize_interval=120m` was confirmed in each startup log.
-- After every arm, `pgrep` for `CassandraDaemon` and `cassandra-stress` returned empty, and the scope unit was stopped. Node data, commit log and logs lived under `~/cassandra-run1` on local disk; nothing was written to `/proj`, and the repository's `cassandra/cassandra-5.0.9/` was not touched.
+- After every arm, `pgrep` for `CassandraDaemon` and `cassandra-stress` returned empty, and the scope unit was stopped. Node data, commit log and logs lived under `~/cassandra-run1` on local disk; nothing was written to `/proj`, and the repository's `systems/cassandra/source/` was not touched.

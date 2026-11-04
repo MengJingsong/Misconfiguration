@@ -449,7 +449,7 @@ The operand is one compaction's estimated output: build SSTables of a known tota
 set the free space with a ballast file, and issue one major compaction.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace`.
 Work for step 1, before run 1:
 
 | File | What it is |

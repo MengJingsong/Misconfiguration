@@ -27,7 +27,7 @@ The allocation type is confirmed by the settings read-back plus the gauges (the 
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/max-cloned-size-allocate-size--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/max-cloned-size-allocate-size--autonomous
 bash $H/unit-run.sh run1                       # after: bash $H/unit-run.sh instrument-1 instrument
 for a in s128 s256 s512 d128 d256 d512 cs cd hp; do MC_RUN=run1 python3 -I $H/cluster-run.py $a; done
 MC_RUN=run1 python3 -I $H/cluster-run.py analyze

@@ -90,7 +90,7 @@ All in-tree default memtables do extend it: `SkipListMemtable`, `TrieMemtable`, 
 - JDK 11.0.32.1, Ant 1.10.12.
 - Clone to local disk; never build in the shared tree:
   ```
-  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/c509-unit
+  <repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh /tmp/c509-unit
   cd /tmp/c509-unit
   git checkout cassandra-5.0.9 2>/dev/null || true
   rm -f test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java
@@ -224,7 +224,7 @@ All in-tree default memtables do extend it: `SkipListMemtable`, `TrieMemtable`, 
 - One node on 127.0.0.1. A second node is not needed: the pool is per-JVM.
 - Build from a local clone:
   ```
-  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/c509-node
+  <repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh /tmp/c509-node
   cd /tmp/c509-node
   rm -f test/unit/org/apache/cassandra/utils/memory/HeapPoolTest.java
   ant -Dno-checkstyle=true jar
@@ -355,9 +355,9 @@ Not directly observable:
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/README.md (§6.1 only)
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/README.md (§6.1 only)
 - src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java
 - src/java/org/apache/cassandra/utils/memory/MemtablePool.java
 - src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java

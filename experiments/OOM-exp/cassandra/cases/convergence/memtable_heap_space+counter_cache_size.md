@@ -4,7 +4,7 @@
 >
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12.
 >
-> **Source:** `cassandra/cassandra-5.0.9` at repository commit `0be49fb6`, copied to local disk `~/cassandra-run1` via `copy-source.sh` (`git describe` = `cassandra-5.0.9`), built with `ant build-test` (2 min 12 s, `BUILD SUCCESSFUL`). Nothing was built in or added to the repository's `cassandra/cassandra-5.0.9/`.
+> **Source:** `systems/cassandra/source` at repository commit `0be49fb6`, copied to local disk `~/cassandra-run1` via `copy-source.sh` (`git describe` = `cassandra-5.0.9`), built with `ant build-test` (2 min 12 s, `BUILD SUCCESSFUL`). Nothing was built in or added to the repository's `systems/cassandra/source/`.
 >
 > **Harness:** [`memtable_heap_space+counter_cache_size/run1/oom-run.sh`](memtable_heap_space+counter_cache_size/run1/oom-run.sh). Full logs on the node at `~/oom-exp-logs/{baseline,M_alone,C_alone,converge}/`; small excerpts under [`memtable_heap_space+counter_cache_size/run1/{baseline,M_alone,C_alone,converge}/`](memtable_heap_space+counter_cache_size/run1/).
 >
@@ -141,4 +141,4 @@ This is a **capability gap**: Cassandra has no mechanism that caps the *combined
 
 - Baseline, control arms, and the convergence arm each confirmed `-Xmx1024M`/`-Xms1024M` from the running process's own `ps -o args=` output before any reading, and the resolved yaml values from the node's own startup log (`Global memtable on-heap threshold is enabled at <M>MiB`, `Initializing counter cache with capacity of <C> MiBs`).
 - After every arm: `ps -eo cmd | grep '[C]assandraDaemon'` returned empty (checked directly on the node, not through an `ssh`-wrapped `pgrep -f`), and `ss -ltn` showed none of ports 7000/7199/9042 in use before the next arm started.
-- Node data (`data/`), commit log, and logs lived under `~/cassandra-run1` on local disk (`/dev/sda3`); nothing was written to `/proj`. The repository's `cassandra/cassandra-5.0.9/` was never touched (`git status --short` on it was empty before the run and is unaffected by this run).
+- Node data (`data/`), commit log, and logs lived under `~/cassandra-run1` on local disk (`/dev/sda3`); nothing was written to `/proj`. The repository's `systems/cassandra/source/` was never touched (`git status --short` on it was empty before the run and is unaffected by this run).

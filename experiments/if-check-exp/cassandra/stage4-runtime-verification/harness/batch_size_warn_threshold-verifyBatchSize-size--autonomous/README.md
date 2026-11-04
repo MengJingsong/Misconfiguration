@@ -22,7 +22,7 @@ and `~/s4-b9-bs-n` (`ant jar`, node; never `ant` in a tree a node runs from).
 Run order (run 1, 2026-10-26, node `pc07`):
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/batch_size_warn_threshold-verifyBatchSize-size--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/batch_size_warn_threshold-verifyBatchSize-size--autonomous
 ulimit -n 100000
 bash $H/unit-run.sh run1                 # about 1 min; output ~/s4-b9-bs-logs/run1/unit/
 python3 $H/cluster-run.py run1           # background job; output ~/s4-b9-bs-logs/run1/cluster/

@@ -311,7 +311,7 @@ raw readings from 9d for every run.
 | **Autonomous reference** | the `--autonomous` case file read for this case, or `none` (the user is asked per case or batch, see `playbook-guided.md` §1) |
 | **Stage-3 feed** | `3a` (from stage 1/2 — cite the `bands.md` row and its band) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
 | **Filed by / Date** | Who wrote this case up and when |
-| **Line numbers checked** | date each cited line was checked against the pinned source `cassandra/cassandra-5.0.9/` (`build.xml` `base.version` = `5.0.9`) — a case is not filed until this is done |
+| **Line numbers checked** | date each cited line was checked against the pinned source `systems/cassandra/source/` (`build.xml` `base.version` = `5.0.9`) — a case is not filed until this is done |
 | **Escape hatch / Target-3 note** | any bypass of the disallow branch noticed (flag for Target 3, do not chase here), or "none found yet" |
 | **Stage-4 feedback** | "none yet" until stage 4 reports. Then: a link to its results entry, and — if the feedback corrected anything above — which section was amended and when. Measured numbers stay in stage 4's file; they are not copied here. |
 | **Notes** | Any other caveats or outstanding questions |

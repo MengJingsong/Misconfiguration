@@ -27,7 +27,7 @@ two `GC.run`); `rho` = median `dir/acc` over phase-A samples with `acc` >= 0.9 L
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/slab-region-size-region-allocate-capacity--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/slab-region-size-region-allocate-capacity--autonomous
 python3 -I $H/replay.py; bash $H/instrument-check.sh; bash $H/unit-run.sh instrument-1 instrument
 bash $H/unit-run.sh run1
 for a in a64 a128 e64 f64 a64b h64; do SR_RUN=run1 python3 -I $H/cluster-run.py $a; done

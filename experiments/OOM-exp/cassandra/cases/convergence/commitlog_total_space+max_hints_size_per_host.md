@@ -4,7 +4,7 @@
 >
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12.
 >
-> **Source:** `cassandra/cassandra-5.0.9` at the pinned tag, reusing the existing build at `~/cassandra-run1` (unchanged since the closed heap-case runs — no rebuild needed).
+> **Source:** `systems/cassandra/source` at the pinned tag, reusing the existing build at `~/cassandra-run1` (unchanged since the closed heap-case runs — no rebuild needed).
 >
 > **Harness:** [`commitlog_total_space+max_hints_size_per_host/run1/oom-run.sh`](commitlog_total_space+max_hints_size_per_host/run1/oom-run.sh). Full logs on the node at `~/oom-disk-run3/{N1-logs,N2-logs,logs/<arm>}/`; this case has no raw-log excerpts committed (see §4 — the run did not reach a state worth excerpting beyond what is quoted inline below).
 >

@@ -128,8 +128,8 @@ Made by the stage-4 audit before any run-1 reading, for reasons derived from the
 
 ## C. Sources read
 
-- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md`
-- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md`
+- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md`
+- `/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md`
 - `src/java/org/apache/cassandra/concurrent/SEPExecutor.java` (whole file)
 - `src/java/org/apache/cassandra/concurrent/SharedExecutorPool.java` (grep lines)
 - `src/java/org/apache/cassandra/concurrent/Stage.java` (grep lines)

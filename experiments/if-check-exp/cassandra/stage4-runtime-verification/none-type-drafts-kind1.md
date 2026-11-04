@@ -2,7 +2,7 @@
 
 Drafted 2026-10-28. **Documents only: nothing here was run, built or filed into a case file.** Each section below is written to be pasted into B2 (and B3 where
 the kind allows) of `stage3-ai-deep-read/cases/<stem>--autonomous.md` as a dated audit amendment, following [`none-type-design.md`](none-type-design.md) §3-4.
-Every `file:line` cited was re-read in `cassandra/cassandra-5.0.9/` on 2026-10-28; where a case file's own citation is wrong, the section says so.
+Every `file:line` cited was re-read in `systems/cassandra/source/` on 2026-10-28; where a case file's own citation is wrong, the section says so.
 `Alloc` below means the existing `stage4.Alloc` helper (`ThreadMXBean.getThreadAllocatedBytes` between `start(tag)`/`end(tag)`,
 `harness/batch_size_fail_threshold-verifyBatchSize-failThreshold--guided/Alloc.java`), or the same call made directly in a JUnit method.
 

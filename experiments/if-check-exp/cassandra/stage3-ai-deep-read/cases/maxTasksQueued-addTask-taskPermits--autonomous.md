@@ -58,7 +58,7 @@ growth is stopped only by an upstream limit or the JVM heap, not by the executor
 ### B2. Unit tier
 
 **B2a. Environment and build.** JDK 11, Ant. Copy the tag to local disk (never build in the
-repository's `cassandra/cassandra-5.0.9/`): `<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh /tmp/c509`,
+repository's `systems/cassandra/source/`): `<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh /tmp/c509`,
 `cd /tmp/c509 && ant jar` (and `ant build-test` for a JUnit variant). Harness: a small `main`
 (`SepQueueProbe`) compiled against `build/classes/main` + `lib/*.jar` + `build/lib/jars/*.jar`,
 placed outside the clone (`/tmp/probe`). It must set `DatabaseDescriptor.daemonInitialization()`
@@ -251,8 +251,8 @@ MutationStage 1` is run before the stress starts (`SetConcurrency.java:42-52`, `
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
 - cassandra-src/src/java/org/apache/cassandra/concurrent/SEPExecutor.java
 - cassandra-src/src/java/org/apache/cassandra/concurrent/Stage.java (lines 40-70, 215-240)
 - cassandra-src/src/java/org/apache/cassandra/concurrent/ExecutorFactory.java (225-260)

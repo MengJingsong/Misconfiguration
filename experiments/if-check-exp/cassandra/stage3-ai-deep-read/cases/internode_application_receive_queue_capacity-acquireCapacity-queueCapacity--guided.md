@@ -417,7 +417,7 @@ mutation's verb handler for a fixed time, as a slow disk would, so the permits
 (released only after the handler ran, `InboundMessageHandler.java:66`) stay out.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity`.
 Work for step 1, before run 1:
 
 | File | What it is |

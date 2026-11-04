@@ -29,9 +29,9 @@ out of scope, noting bypass-relevant observations in passing for later use.
 
 | Folder | Status | Direction |
 |---|---|---|
-| [`cassandra/if-check-exp/`](cassandra/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
-| [`cassandra/entry-restriction-exp/`](cassandra/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
-| [`cassandra/OOM-exp/`](cassandra/OOM-exp/README.md) | **active** | Target 3: drive a test node OOM using `if-check-exp`'s constraints (convergence, bypass) |
+| [`experiments/if-check-exp/`](experiments/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
+| [`experiments/entry-restriction-exp/`](experiments/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
+| [`experiments/OOM-exp/`](experiments/OOM-exp/README.md) | **active** | Target 3: drive a test node OOM using `if-check-exp`'s constraints (convergence, bypass) |
 
 `if-check-exp` and `entry-restriction-exp` are deliberately **not
 cross-referenced** — a line may legitimately appear in both. `OOM-exp` is the
@@ -41,7 +41,7 @@ one folder that intentionally depends on another (`if-check-exp`).
 stages* (`if-check-exp` has three: structural → lexical → semantic). Those
 numbers describe how strongly a finding has been evidenced inside that
 folder; they do not map onto the target numbers above. See
-[`cassandra/if-check-exp/README.md`](cassandra/if-check-exp/README.md) §1.1.
+[`experiments/if-check-exp/README.md`](experiments/if-check-exp/README.md) §1.1.
 
 ## 1. Setup
 
@@ -68,7 +68,7 @@ mount, alongside other resources that are **not** part of this repo:
 /proj/misconfiguration-PG0/          <- shared workspace, survives node/allocation expiry
 ├── git-repos/
 │   └── cassandra-src/               <- older git clone of apache/cassandra (tag cassandra-5.0.9);
-│                                        superseded by this repo's cassandra/cassandra-5.0.9/
+│                                        superseded by this repo's systems/cassandra/source/
 │                                        (see below); NOT tracked by this repo
 ├── tools/codeql/                    <- CodeQL CLI bundle, used by codeql-queries/; NOT tracked by this repo
 ├── codeql-dbs/                      <- compiled CodeQL databases (e.g. cassandra-db), built from
@@ -83,12 +83,12 @@ directories directly under `/proj/`, so the `cassandra-src` source clone lives
 one level down instead.
 
 **Cassandra source.** Since 2026-10-22 the source is part of this repo:
-`cassandra/cassandra-5.0.9/` is the `apache/cassandra` tree at tag
+`systems/cassandra/source/` is the `apache/cassandra` tree at tag
 `cassandra-5.0.9`, unmodified (exported with `git archive`; its own
 `.gitattributes` keeps the bytes as upstream). Both Cassandra experiment
 folders check every `file:line` against it and codeql-queries/ builds its
 databases from it. Never build in it or add files to it; copy it to local disk
-first (`cassandra/if-check-exp/stage4-runtime-verification/environment.md` §2).
+first (`experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md` §2).
 Records dated before 2026-10-22 name the `cassandra-src` clone, which held the
 same files.
 
@@ -132,26 +132,26 @@ never scattered across individual scripts.
 
 ## 4. Experiment folders
 
-### 4.1 `cassandra/build-cassandra-dist/`
+### 4.1 `systems/cassandra/build-dist/`
 
-- **`cassandra/build-cassandra-dist/`** — orchestrator (control-machine)
+- **`systems/cassandra/build-dist/`** — orchestrator (control-machine)
   and remote (per-node) scripts to install/configure/start/stop a 4-node
   Cassandra **5.0.9** binary distribution cluster.
 
-### 4.2 `cassandra/entry-restriction-exp/`, `cassandra/if-check-exp/`
+### 4.2 `experiments/entry-restriction-exp/`, `experiments/if-check-exp/`
 
-- **`cassandra/if-check-exp/`** (active) and
-  **`cassandra/entry-restriction-exp/`** (paused) — static code-path
+- **`experiments/if-check-exp/`** (active) and
+  **`experiments/entry-restriction-exp/`** (paused) — static code-path
   inventories of Cassandra's resource-limit checks, approached from opposite
   directions (§0). Each has its own `README.md` (format spec) and its own
   start-here brief: the root [`HANDOFF.md`](HANDOFF.md) for `if-check-exp`,
-  and [`cassandra/entry-restriction-exp/HANDOFF.md`](cassandra/entry-restriction-exp/HANDOFF.md)
+  and [`experiments/entry-restriction-exp/HANDOFF.md`](experiments/entry-restriction-exp/HANDOFF.md)
   for the paused one.
 
   `if-check-exp` organises its work as **three stages by evidence standard** —
   structural (CodeQL) → lexical (rows only) → semantic (source open) — with
   one folder each. Every cited line is checked against the
-  `cassandra/cassandra-5.0.9/` source described above. **Behavioral verification (running a trigger into
+  `systems/cassandra/source/` source described above. **Behavioral verification (running a trigger into
   the disallow branch) is out of scope** as of 2026-09-23: a case's evidence
   is its traced code path.
 
@@ -164,9 +164,9 @@ never scattered across individual scripts.
   databases under `codeql-dbs/` described above; its CSV output is
   gitignored and regenerated per machine. The Hadoop pack is scaffold only.
 
-### 4.4 `cassandra/original-conf/`
+### 4.4 `systems/cassandra/conf/`
 
-- **`cassandra/original-conf/`** — reference copies of a stock Cassandra
+- **`systems/cassandra/conf/`** — reference copies of a stock Cassandra
   config set: `cassandra.yaml`, `cassandra-env.sh`, `jvm17-server.options`.
   Kept as the untouched baseline to diff an experiment's config against. No
   script reads them, and nothing is generated from them.
@@ -176,10 +176,10 @@ never scattered across individual scripts.
   `cassandra-5.0.9`, but **`cassandra.yaml` is not** — it is missing sections
   that 5.0.9 ships (e.g. the `paxos_variant` block), so it predates the
   pinned tag. It was committed in `56a7d0b`, before the repo pinned 5.0.9.
-  Re-copy it from `cassandra/cassandra-5.0.9/conf/` before treating it as the 5.0.9
+  Re-copy it from `systems/cassandra/source/conf/` before treating it as the 5.0.9
   baseline.
 
-### 4.5 `hadoop/build-hadoop-src/`
+### 4.5 `systems/hadoop/build-src/`
 
-- **`hadoop/build-hadoop-src/`** — Hadoop source build scripts (JDK8 +
+- **`systems/hadoop/build-src/`** — Hadoop source build scripts (JDK8 +
   Maven + protobuf 2.5.0).

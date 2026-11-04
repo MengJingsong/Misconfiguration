@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Unit tier driver for no_constraint-isempty-size--autonomous. Usage: unit-run.sh <tree> <outdir> <mode: check|alloc|count>
 #   check: instrument checks + rule parse only    alloc: ResultSetBuilder.build() allocation per call    count: ResultSet.isEmpty() return values
-# <tree> is a copy-source.sh copy built with `ant build-test` (never cassandra/cassandra-5.0.9/ and never a tree a node runs from).
+# <tree> is a copy-source.sh copy built with `ant build-test` (never systems/cassandra/source/ and never a tree a node runs from).
 set -u
 TREE=${1:?}; OUT=${2:?}; MODE=${3:?}
 H=$(cd "$(dirname "$0")" && pwd)

@@ -1,6 +1,6 @@
 # Harness: row_overhead_size-intrie_init-limitinmb--autonomous
 
-Written 2026-10-27 (stage 4, node pc41). Run copy: `~/c4-ros` (`copy-source.sh` of `cassandra/cassandra-5.0.9`, `ant build-test`).
+Written 2026-10-27 (stage 4, node pc41). Run copy: `~/c4-ros` (`copy-source.sh` of `systems/cassandra/source`, `ant build-test`).
 Adapted from `../trie_2gb_hard_limit-allocateblock-leadbit--autonomous/` (the `make-node.sh`, `trie.yaml` and `Jmx.java` there; the node script
 and analysis are re-written for this case's observables); nothing from that case's conclusions is used.
 

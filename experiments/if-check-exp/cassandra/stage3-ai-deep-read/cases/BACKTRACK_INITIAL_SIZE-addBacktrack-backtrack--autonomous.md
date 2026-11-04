@@ -134,7 +134,7 @@
 
 ### B2i. Audit amendments (2026-10-25, stage-4 step 0, before the freeze and before any reading)
 
-Audited against `cassandra/cassandra-5.0.9/` (clean; `base.version` 5.0.9). All citations in A and B re-read; they hold (`InMemoryReadTrie.java:494-506, 540, 549, 609-616, 660-691, 750, 764, 772-783`, `InMemoryTrie.java:58-67, 88, 969-980`, `TrieMemtable.java:477, 485, 148, 298, 352`, `FBUtilities.java:158`, `QueryProcessor.java:259`; `InMemoryTrie.java:91` is the comment on the 2 GB limit, the constructor is at :88).
+Audited against `systems/cassandra/source/` (clean; `base.version` 5.0.9). All citations in A and B re-read; they hold (`InMemoryReadTrie.java:494-506, 540, 549, 609-616, 660-691, 750, 764, 772-783`, `InMemoryTrie.java:58-67, 88, 969-980`, `TrieMemtable.java:477, 485, 148, 298, 352`, `FBUtilities.java:158`, `QueryProcessor.java:259`; `InMemoryTrie.java:91` is the comment on the 2 GB limit, the constructor is at :88).
 
 1. **Test class and build.** The class is `org.apache.cassandra.db.tries.BacktrackSizeTest` (the name must end in `Test`); run `ant testsome -Dtest.name=org.apache.cassandra.db.tries.BacktrackSizeTest` in a `copy-source.sh` tree (`~/s4-bt/cassandra`, not `/tmp/c509`). The build is `ant build-test`.
 2. **Size measure (defect).** `ObjectSizes.measureDeep(cursor)` (B2d) is invalid: `MemtableCursor` is a non-static inner class, so a deep measure follows `this$0` into the whole trie. The array's size is `16 + 4 * backtrack.length` bytes, with `backtrack.length` and `backtrackDepth` read by reflection on `CursorBacktrackingState`.

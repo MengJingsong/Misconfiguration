@@ -159,7 +159,7 @@ re-derive them, only consumes them.
 - **`_INDEX.md`'s table stays narrow**: short link text, one-line results,
   detail in the case file.
 - **Node safety rules carried over from `if-check-exp` stage 4**: never
-  build in or add files to the repo's `cassandra/cassandra-5.0.9/`, never
+  build in or add files to the repo's `systems/cassandra/source/`, never
   fill `/proj` (shared NFS), node data/commit log/hints go on local disk,
   stop every process a run starts and verify none is left.
 - **How a case is run: a real Cassandra process on a node, not a unit
@@ -204,7 +204,7 @@ re-derive them, only consumes them.
   Set up JDK/Ant/source on `pc39`/`pc29` before use if not already done.
 - **Nodes:** run on whatever CloudLab node the session has — see
   `if-check-exp/stage4-runtime-verification/environment.md` for the JDK/Ant
-  install and source-copy steps (same pinned `cassandra/cassandra-5.0.9/`
+  install and source-copy steps (same pinned `systems/cassandra/source/`
   tag). The first case ran on `pc41.cloudlab.umass.edu`
   (`jason92-323989`, 40 cores, 251 GiB) with Cassandra bounded to a small
   `-Xmx` — the node's physical RAM is not the experiment's budget.

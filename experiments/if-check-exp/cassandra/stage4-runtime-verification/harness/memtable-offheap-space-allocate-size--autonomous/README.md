@@ -24,7 +24,7 @@ in `system.log`. Controls: `ctl` tracked off-heap `< 1 MiB`, `RssAnon` delta `<=
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/memtable-offheap-space-allocate-size--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/memtable-offheap-space-allocate-size--autonomous
 bash $H/unit-run.sh run1                       # after: bash $H/unit-run.sh instrument-1 instrument
 for a in k128 k256 k512 b128 b256 b512 ctl hp; do MO_RUN=run1 python3 -I $H/cluster-run.py $a; done
 MO_RUN=run1 python3 -I $H/cluster-run.py analyze

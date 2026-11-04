@@ -2,7 +2,7 @@
 
 Stage-4 harness for the autonomous case file (frozen sha256 `42b13399…`, see the results file
 [§1](../../results/logs_virtual_table_default_rows-addtobuffer-messagebuffer_size--autonomous.md)). Written 2026-10-28 on `pc39`.
-Run copies (from `copy-source.sh` of `cassandra/cassandra-5.0.9`): `~/s4-lv` (build A, `ant build-test`) and `~/s4-lvB` (build B: `cp -a` of `~/s4-lv`,
+Run copies (from `copy-source.sh` of `systems/cassandra/source`): `~/s4-lv` (build A, `ant build-test`) and `~/s4-lvB` (build B: `cp -a` of `~/s4-lv`,
 `LogMessagesTable.java:58` changed to `1_000`, `VirtualTableAppender.java` and `CassandraRelevantProperties.java` touched, `ant jar`).
 **Trap:** `LOGS_VIRTUAL_TABLE_DEFAULT_ROWS` is a compile-time constant and is inlined into `VirtualTableAppender`; without the `touch`, `ant jar` leaves the
 appender at 50,000. Check with `javap -p -c … VirtualTableAppender | grep -E 'sipush|ldc'` (`cluster-run.py` prints it for each run).

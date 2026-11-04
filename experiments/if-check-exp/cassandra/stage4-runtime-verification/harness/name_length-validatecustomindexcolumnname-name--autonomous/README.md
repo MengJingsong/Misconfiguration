@@ -1,7 +1,7 @@
 # Harness - name_length-validatecustomindexcolumnname-name--autonomous
 
 Written 2026-10-28 on pc32 (stage 4), after the audit amendments B2i and B3i were frozen (`frozen-prediction.txt`, sha256 `8d201203...`; case file `40b4934e...`).
-Run copy: `~/s4-b2/c` (`copy-source.sh` of `cassandra/cassandra-5.0.9`, `ant build-test`). Logs: `~/s4-b2-logs/<run>/{unit,cluster}/`. Node: 127.0.2.1, JMX 7270, native 9042, data on tmpfs `/dev/shm/s4-b2/node`, `sasi_indexes_enabled: true`.
+Run copy: `~/s4-b2/c` (`copy-source.sh` of `systems/cassandra/source`, `ant build-test`). Logs: `~/s4-b2-logs/<run>/{unit,cluster}/`. Node: 127.0.2.1, JMX 7270, native 9042, data on tmpfs `/dev/shm/s4-b2/node`, `sasi_indexes_enabled: true`.
 
 | File | Tier | What it does |
 |---|---|---|

@@ -368,8 +368,8 @@ O-1 vs O-MAX: hint bytes equal within ±5 %, with stress errors ≈ 0.
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
 - src/java/org/apache/cassandra/service/StorageProxy.java (195-215, 770-830, 930-950, 980-998, 1325-1340, 1470-1640, 2420-2500, 2640-2660, 2690-2840)
 - src/java/org/apache/cassandra/service/StorageProxyMBean.java (grep)
 - src/java/org/apache/cassandra/service/AbstractWriteResponseHandler.java (grep :310)

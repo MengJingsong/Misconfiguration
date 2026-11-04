@@ -50,7 +50,7 @@ Bypass and overshoot:
 **B2a. Environment and build.** JDK 11.0.32.1, Ant 1.10.12, on local disk:
 ```
 mkdir -p /tmp/s3bp && cd /tmp/s3bp
-<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh cassandra
+<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh cassandra
 cd cassandra && ant jar        # also builds test deps on first testsome
 ```
 Test source: `/tmp/s3bp/cassandra/test/unit/org/apache/cassandra/utils/memory/FreeUnusedPortionProbeTest.java`, in the same package so that it can reach the package-private `Chunk`, `Chunk.roundUp`, `Chunk.free`, and `Chunk.getParentChunk`. Use the default test JVM options from `build.xml` (`-ea` is on).
@@ -365,9 +365,9 @@ Other predictions:
 
 ## C. Sources read
 
-/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
-/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/README.md (§6.1 only)
+/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/README.md (§6.1 only)
 src/java/org/apache/cassandra/utils/memory/BufferPool.java
 src/java/org/apache/cassandra/utils/memory/BufferPools.java
 src/java/org/apache/cassandra/net/FrameEncoder.java

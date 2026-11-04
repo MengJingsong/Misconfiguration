@@ -2,7 +2,7 @@
 # Usage: run-all.sh <tree> <outdir> unit|cluster     one tier; the cluster tier runs the four arms n d w wc one after another and stops at the first failed arm.
 set -u
 TREE=${1:?tree}; OUT=${2:?outdir}; TIER=${3:?unit|cluster}; HERE=$(cd "$(dirname "$0")" && pwd)
-TIMING=/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage4-runtime-verification/timing/set-A-batch-10.log
+TIMING=/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/cassandra/stage4-runtime-verification/timing/set-A-batch-10.log
 ulimit -n 100000
 mkdir -p "$OUT"
 if [ "$TIER" = unit ]; then

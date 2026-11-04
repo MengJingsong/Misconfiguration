@@ -361,7 +361,7 @@ exact boundary prefer the unit tier: a limit of 100 bytes lands on it at the fir
 attempt, with no race against the flush.
 
 **Harness.** `<harness>` below stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_offheap_space-tryAllocate-limit`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/memtable_offheap_space-tryAllocate-limit`.
 Work for step 1, before run 1 (the audit and the freeze come first):
 
 | File | What it is |

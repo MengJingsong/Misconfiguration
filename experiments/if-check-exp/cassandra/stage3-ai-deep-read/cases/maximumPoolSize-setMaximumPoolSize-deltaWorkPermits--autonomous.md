@@ -115,8 +115,8 @@ Made before any reading, each for a reason that does not depend on one (source, 
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
 - cassandra-src/src/java/org/apache/cassandra/concurrent/SEPExecutor.java
 - cassandra-src/src/java/org/apache/cassandra/concurrent/Stage.java (lines 36-135, 218-235, 275)
 - cassandra-src/src/java/org/apache/cassandra/concurrent/SharedExecutorPool.java (lines 132-175)

@@ -6,7 +6,7 @@
 | `escape-hatch.btm` | Byteman rule for the cluster tier (§9d, bypass volume). Logs one line per allocation forced past the limit. | Not copied: loaded with `-javaagent` at node start (§9e). |
 
 **Origin.** Restored verbatim from the Java block in
-`git show e90423c^:cassandra/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`
+`git show e90423c^:experiments/if-check-exp/memtable/memtable_heap_space-tryAllocate-limit.md`
 (lines 245–403 of that file). It is the test run on 2026-09-16 on pc80.
 An untracked copy that sat in the old `cassandra-src` clone (deleted 2026-10-22) differed from it in one
 comment line only (an older case-file name); the code is identical.

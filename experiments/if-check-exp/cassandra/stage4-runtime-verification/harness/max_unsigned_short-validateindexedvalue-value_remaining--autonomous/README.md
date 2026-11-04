@@ -1,7 +1,7 @@
 # Harness - max_unsigned_short-validateindexedvalue-value_remaining--autonomous
 
 Written 2026-10-28 on pc32 (stage 4), after the audit amendments B2i and B3i were frozen (`frozen-prediction.txt` = B2 ... B3 text of the case file, sha256 `a3cb3f0f...`; case file `647419b2...`). Idea reuse only from `../max-unsigned-short-validate-key-remaining--autonomous/` (a sibling constant); nothing of its conclusions is used.
-Run copy: `~/s4-b2/c` (`copy-source.sh` of `cassandra/cassandra-5.0.9`, `ant build-test`; both tiers use it, one run at a time). Logs: `~/s4-b2-logs/<run>/{unit,cluster}/`. Node: 127.0.2.1, JMX 7270, native 9042, data on tmpfs `/dev/shm/s4-b2/node`.
+Run copy: `~/s4-b2/c` (`copy-source.sh` of `systems/cassandra/source`, `ant build-test`; both tiers use it, one run at a time). Logs: `~/s4-b2-logs/<run>/{unit,cluster}/`. Node: 127.0.2.1, JMX 7270, native 9042, data on tmpfs `/dev/shm/s4-b2/node`.
 
 | File | Tier | What it does |
 |---|---|---|

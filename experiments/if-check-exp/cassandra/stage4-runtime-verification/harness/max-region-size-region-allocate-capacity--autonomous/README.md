@@ -27,7 +27,7 @@ Count and `Enqueuing flush of ks.t, Reason: MEMTABLE_LIMIT` lines in `system.log
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/max-region-size-region-allocate-capacity--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/max-region-size-region-allocate-capacity--autonomous
 bash $H/instrument-check.sh; bash $H/unit-run.sh instrument-1 instrument
 bash $H/unit-run.sh run1
 for a in m1024 m256 m4096 m1024b o128 o256; do MR_RUN=run1 python3 -I $H/cluster-run.py $a; done

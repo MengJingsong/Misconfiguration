@@ -318,7 +318,7 @@ Two rules behind this table:
 The operand is the estimate of one partition's index entry, so the workload is **a ladder of partitions with different block counts** and a point read of each. Write the data with `column_index_size` already set and flush it into one SSTable; read after emptying the key cache.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/row_index_read_size_fail_threshold-checkSize-failThreshold`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/row_index_read_size_fail_threshold-checkSize-failThreshold`.
 Work for step 1, before run 1 (none of it exists yet):
 
 | File | What it is |
@@ -334,7 +334,7 @@ Work for step 1, before run 1 (none of it exists yet):
 **Amendment 2026-10-07 (documentation only; §9a unchanged), made while writing the harness.** (1) `cluster-run.sh` is `cluster-run.py` (Python; the steps are those of 9e). (2) `jmx.sh` is replaced by `Jmx.java`, a small JMX client (`get` several attributes in one JVM start, `set` one string attribute; local node, port 7199), compiled by the run script: `nodetool sjk mx` is slow per call and its setter syntax was not checked; the setter was checked at the instrument step (setting the attribute to its own value succeeds) and arm C1 used it. (3) `checksize.btm` fires for **every** deserialization, including those of system tables (about 70 lines at start-up) and the schema scans that every client connection makes (about 9 lines, `command=null`): the instrument checks (iii) and (vi) and the idle control look only at lines with a `ks1` command or an entry count that belongs to the ladder, and the 'before' snapshot of a ladder read is taken after a `probe` read has put the connection's system-table entries into the key cache (otherwise a read's own connection adds a system entry to `Entries` and `Size`). (4) The Byteman parse check is `java -cp "build/classes/main:build/lib/jars/*:lib/*" org.jboss.byteman.check.TestScript <file>`. (5) The ladder holds 10,684 rows (about 13 MB). (6) 9a's "Default" bullet names a `checksize` line with `active` true; the rule prints `command=` and fires before the thresholds-null gate, so in the default control lines with `command=ks1.t` appear while the check returns at the null thresholds: the control is judged by `RowIndexSize`'s count (0) and the outcomes. (9a itself is not edited.)
 
 ```bash
-# unit tier — in the local clone (copy-source.sh; never the repository's cassandra/cassandra-5.0.9/); once:
+# unit tier — in the local clone (copy-source.sh; never the repository's systems/cassandra/source/); once:
 ant build-test
 cp <harness>/RowIndexSizeGuardTest.java test/unit/org/apache/cassandra/db/
 mkdir -p $HOME/stage4-logs/rirs/unit

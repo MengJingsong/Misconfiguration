@@ -508,7 +508,7 @@ during `big`'s flush; `pc57` has 251 GiB.
 ### 9c. Workload
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE`.
 Work for step 1, before run 1:
 
 | File | What it is |

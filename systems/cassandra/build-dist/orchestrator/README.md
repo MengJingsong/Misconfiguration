@@ -1,4 +1,4 @@
-# cassandra/build-cassandra-dist/orchestrator
+# systems/cassandra/build-dist/orchestrator
 
 Driver scripts for bringing up a 4-node Cassandra cluster from a **control
 machine** (e.g. WSL) that has SSH access to the experiment nodes but does
@@ -58,7 +58,7 @@ Run from the control machine, with SSH access to all 4 nodes already
 working (passwordless SSH keys distributed to each node in advance):
 
 ```bash
-cd cassandra/build-cassandra-dist/orchestrator
+cd systems/cassandra/build-dist/orchestrator
 
 # Only needed once, or after node IPs change (e.g. experiment swap):
 ./check-ips.sh

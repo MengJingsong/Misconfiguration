@@ -1,7 +1,7 @@
 # Harness — tokens_per_block-add-pos--autonomous
 
 Stage-4 harness for the autonomous case file `tokens_per_block-add-pos--autonomous` (frozen sha256 `ae30cf1d22af...`, see the results file [section 1](../../results/tokens_per_block-add-pos--autonomous.md)).
-Written 2026-10-28 for `pc39` (JDK 11, Ant 1.10, 40 cores, 251 GiB). Builds: `~/s4-b34/base` (`copy-source.sh` copy of `cassandra/cassandra-5.0.9/` at repository
+Written 2026-10-28 for `pc39` (JDK 11, Ant 1.10, 40 cores, 251 GiB). Builds: `~/s4-b34/base` (`copy-source.sh` copy of `systems/cassandra/source/` at repository
 commit `b68711e5`, `ant build-test` then `ant jar`) and variant copies (`cp -a` of the built base, one constant edited by `sed`, the files that inline it touched, `ant jar`,
 constant confirmed with `javap -constants`): `v-num64`, `v-num1m` (NumericValuesWriter BLOCK_SIZE / MONOTONIC_BLOCK_SIZE = 64 / 64 and 2^20 / 2^20), `v-post32`, `v-post512`
 (PostingsWriter.BLOCK_SIZE), `v-max1m`, `v-max8k`, `v-max28` (AbstractBlockPackedWriter.MAX_BLOCK_SIZE = 2^20, 2^13, 2^28), `v-tpb124` (TokenTreeBuilder.TOKENS_PER_BLOCK = 124);

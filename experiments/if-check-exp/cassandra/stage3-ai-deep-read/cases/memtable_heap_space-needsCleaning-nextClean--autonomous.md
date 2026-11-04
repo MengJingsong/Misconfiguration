@@ -98,7 +98,7 @@ The claim is wrong if any of the following holds:
 - Make a local clone. Never build in the shared tree.
   ```
   mkdir -p /tmp/s3mhs && cd /tmp/s3mhs
-  <repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh cassandra
+  <repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh cassandra
   cd cassandra && git status --short   # expect empty
   ```
 - Test source: create `/tmp/s3mhs/cassandra/test/unit/org/apache/cassandra/utils/memory/NextCleanBoundaryTest.java`. It must be in package `org.apache.cassandra.utils.memory` to reach the package-private `needsCleaning()`, `nextClean`, `setDiscarding()` and `setDiscarded()`.
@@ -472,9 +472,9 @@ Derived values:
 
 ## C. Sources read
 
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
-- /proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/if-check-exp/README.md (§6.1 only)
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md
+- /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/README.md (§6.1 only)
 - src/java/org/apache/cassandra/utils/memory/MemtablePool.java
 - src/java/org/apache/cassandra/utils/memory/MemtableAllocator.java
 - src/java/org/apache/cassandra/utils/memory/MemtableCleanerThread.java

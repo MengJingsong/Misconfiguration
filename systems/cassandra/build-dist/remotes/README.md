@@ -1,4 +1,4 @@
-# cassandra/build-cassandra-dist/remotes
+# systems/cassandra/build-dist/remotes
 
 Per-node scripts that install and configure a binary distribution of
 Apache Cassandra 5.0.9. These run **on each experiment node**, not on the
@@ -64,10 +64,10 @@ right order.
 To run manually on a single node (e.g. for debugging):
 
 ```bash
-bash cassandra/build-cassandra-dist/remotes/step1.sh
-bash cassandra/build-cassandra-dist/remotes/step2.sh "<seeds>" "<this-node-ip>"
-bash cassandra/build-cassandra-dist/remotes/step3.sh
-bash cassandra/build-cassandra-dist/remotes/step4.sh
+bash systems/cassandra/build-dist/remotes/step1.sh
+bash systems/cassandra/build-dist/remotes/step2.sh "<seeds>" "<this-node-ip>"
+bash systems/cassandra/build-dist/remotes/step3.sh
+bash systems/cassandra/build-dist/remotes/step4.sh
 ```
 
 ## Prerequisites

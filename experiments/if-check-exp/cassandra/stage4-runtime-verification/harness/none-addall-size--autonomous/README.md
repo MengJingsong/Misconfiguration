@@ -10,4 +10,4 @@ Case: [`../../../stage3-ai-deep-read/cases/none-addall-size--autonomous.md`](../
 | `analyze.py <raw.csv> <trace.txt>` | judges the readings against the frozen predictions (B2f (i)-(vii)); `selfcheck.py <run1 dir>` re-derives the numbers independently. |
 
 Run (on the node): `unit-run.sh ~/s4-none OUT check; unit-run.sh ~/s4-none OUT plain; unit-run.sh ~/s4-none OUT bm; analyze.py OUT/raw-plain/raw.csv OUT/raw-bm/trace.txt; selfcheck.py OUT`.
-Not for `ant testsome` (no `-XX:+UseSerialGC` anywhere). Never build in `cassandra/cassandra-5.0.9/`.
+Not for `ant testsome` (no `-XX:+UseSerialGC` anywhere). Never build in `systems/cassandra/source/`.

@@ -263,7 +263,7 @@ Two rules behind this table. **A confirmation needs both** the plateau following
 
 The usage side is bytes of unsent messages, so S must **receive writes faster than it can deliver them**, and under the hold it delivers none. The trigger is deterministic once the hold is on: *D* (about 32 MiB) exceeds `C + F` at every value, so the first `⌊(C + F)/M⌋` messages fit and every later one is refused (README §8.2, rule 2: the allowance is below what the offered load needs).
 
-**Harness.** `<harness>` stands for `<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`. Work for step 1, before run 1 (none of it exists yet):
+**Harness.** `<harness>` stands for `<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes`. Work for step 1, before run 1 (none of it exists yet):
 
 | File | What it is |
 |---|---|

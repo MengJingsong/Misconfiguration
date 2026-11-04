@@ -4,7 +4,7 @@ Written 2026-10-28 on node pc39 (run copy `~/s4-ew` from `copy-source.sh`, `ant 
 One code base for four case files (each has its own harness folder with identical code and its own README, results file and logs):
 `excess_waste_bytes-updatewastedallocationtracker-wastedbytes`, `excess_waste_bytes-uselock-wastetracker`,
 `excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2`, `excess_waste_offset-updatewastedallocationtracker-delta` (all `--autonomous`).
-The constant is `private static final` and inlined, so it is varied by recompiling one class; nothing is edited in `cassandra/cassandra-5.0.9/`.
+The constant is `private static final` and inlined, so it is varied by recompiling one class; nothing is edited in `systems/cassandra/source/`.
 
 | File | Role |
 |---|---|

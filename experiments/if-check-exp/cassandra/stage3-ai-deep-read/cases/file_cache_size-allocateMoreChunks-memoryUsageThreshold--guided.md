@@ -429,7 +429,7 @@ of one partition opens a reader per SSTable that may hold it, so the dataset is 
 from **many overlapping SSTables** and read at high concurrency.
 
 **Harness.** `<harness>` stands for
-`<misconfiguration-repo>/cassandra/if-check-exp/stage4-runtime-verification/long-path/harness/file_cache_size-allocateMoreChunks-memoryUsageThreshold`.
+`<misconfiguration-repo>/experiments/if-check-exp/stage4-runtime-verification/long-path/harness/file_cache_size-allocateMoreChunks-memoryUsageThreshold`.
 Work for step 1, before run 1:
 
 | File | What it is |

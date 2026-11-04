@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copy the pinned Cassandra source (this repository's cassandra/cassandra-5.0.9/,
+# Copy the pinned Cassandra source (this repository's systems/cassandra/source/,
 # or $CASSANDRA_SRC) to a new local working tree, and give that tree a one-commit
 # git baseline tagged cassandra-5.0.9, so `git describe --tags`, `git diff` and
 # `git checkout -- <file>` work there as they did in a clone. Never build in the
@@ -9,7 +9,7 @@
 set -euo pipefail
 DEST=${1:?usage: copy-source.sh <dest-dir>}
 HERE=$(cd "$(dirname "$0")" && pwd)
-SRC=${CASSANDRA_SRC:-$HERE/../../cassandra-5.0.9}
+SRC=${CASSANDRA_SRC:-$HERE/../../../../systems/cassandra/source}
 [ -f "$SRC/build.xml" ] || { echo "no Cassandra source at $SRC" >&2; exit 1; }
 grep -q 'name="base.version" value="5.0.9"' "$SRC/build.xml" || { echo "$SRC is not 5.0.9" >&2; exit 1; }
 [ ! -e "$DEST" ] || { echo "$DEST already exists" >&2; exit 1; }

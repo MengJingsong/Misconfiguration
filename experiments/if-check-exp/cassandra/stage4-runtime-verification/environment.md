@@ -35,13 +35,13 @@ JDK 11 is `build.xml`'s `java.default` (11 and 17 are both supported). No
 
 ## 2. Copy the source to local disk
 
-Copy from this repository's `cassandra/cassandra-5.0.9/` (the `cassandra-5.0.9`
+Copy from this repository's `systems/cassandra/source/` (the `cassandra-5.0.9`
 tag, commit `b5f2a54210d541339c2e7c17a794195cac0e67c2`, unmodified). Never build
 in it. Cassandra's build does not need a `.git` directory.
 
 ```bash
-git -C <repo> status --short cassandra/cassandra-5.0.9   # must print nothing
-<repo>/cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh ~/cassandra-run<N>
+git -C <repo> status --short systems/cassandra/source   # must print nothing
+<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh ~/cassandra-run<N>
 git -C ~/cassandra-run<N> describe --tags     # cassandra-5.0.9 (a local one-commit baseline)
 ```
 

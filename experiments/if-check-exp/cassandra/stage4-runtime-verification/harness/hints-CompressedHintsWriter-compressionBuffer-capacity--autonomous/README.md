@@ -45,7 +45,7 @@ under test is read there; the pool is the real-resource reading.
 Run order (run 1), each lifetime its own background job:
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/hints-CompressedHintsWriter-compressionBuffer-capacity--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/hints-CompressedHintsWriter-compressionBuffer-capacity--autonomous
 bash $H/unit-run.sh run1
 for a in US S U D1 D2 F1 H1 P2 M128; do HW_RUN=run1 python3 -I $H/cluster-run.py $a; done
 HW_RUN=run1 python3 -I $H/cluster-run.py analyze

@@ -21,7 +21,7 @@ each file has its own tree (`~/cassandra-rtl-n`, made by `copy-source.sh`, `ant 
 Run order (run 1, on the node):
 
 ```bash
-H=<repo>/cassandra/if-check-exp/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-grow-newLength--autonomous
+H=<repo>/experiments/if-check-exp/cassandra/stage4-runtime-verification/harness/range_tombstone_list_growth_factor-grow-newLength--autonomous
 bash $H/unit-run.sh run1
 RTL_RUN=run1 python3 -I $H/cluster-run.py N all          # one background job
 python3 -I $H/cluster-analyze.py ~/stage4-logs/rtl/n/run1/cluster

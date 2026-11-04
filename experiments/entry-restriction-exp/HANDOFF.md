@@ -67,14 +67,14 @@ See [`_INDEX.md`](_INDEX.md) for the authoritative per-pair table.
 ## Where things live
 
 - **Repo:** `MengJingsong/Misconfiguration` on GitHub.
-- **Folder:** `cassandra/entry-restriction-exp/`
+- **Folder:** `experiments/entry-restriction-exp/`
   - `README.md` — format spec: the pair concept, required fields, naming,
     code-trace steps, failure modes checked per pair.
   - `_INDEX.md` — master index of every pair.
   - `_TEMPLATE-summary.md` / `_TEMPLATE-codepath.md` — the two files each
     pair is written as.
   - `<entry_point>/` — one folder per entry point.
-- **Cassandra source:** `cassandra/cassandra-5.0.9/` in this repository,
+- **Cassandra source:** `systems/cassandra/source/` in this repository,
   `apache/cassandra` at tag `cassandra-5.0.9`, unmodified (before 2026-10-22,
   the separate clone `/proj/misconfiguration-PG0/git-repos/cassandra-src`).
   Confirm with `build.xml`'s `base.version` (`5.0.9`). **Always grep/read the local source to verify a line

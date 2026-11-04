@@ -22,9 +22,9 @@ are **not** restated here — one source of truth for the rules.
    see which cases exist and `predicted-negative.md` / `undetermined.md` to see which lines
    are already judged. **Don't re-judge a recorded line** — cite it.
 3. Confirm the source is the pinned tag: the source is
-   [`../../cassandra-5.0.9/`](../../cassandra-5.0.9/) in this repository;
+   [`../../../systems/cassandra/source/`](../../../systems/cassandra/source/) in this repository;
    its `build.xml` `base.version` must read `5.0.9`, and
-   `git status cassandra/cassandra-5.0.9` must show nothing changed.
+   `git status systems/cassandra/source` must show nothing changed.
 4. Pick a feed (README's "two feeds"). For **3a**, take
    `../stage2-ai-preprocessing/bands.md` in band order — A first, then B,
    then C; within A, read A1 → A2 → A3.
