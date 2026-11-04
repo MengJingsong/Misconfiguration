@@ -27,7 +27,7 @@ file carry the rest.
 
 | Constraints | Result |
 |---|---|
-| *(none yet)* | |
+| [`DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` (both at defaults)](cases/default-convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md) | **OOMed, strict default** — alone 63% / 69% of a 192 MiB `MaxDirectMemorySize`; together a direct-buffer `OutOfMemoryError`, JVM killed; narrow window only |
 
 ## Bypass cases ([`bypass-playbook.md`](../bypass-playbook.md))
 
