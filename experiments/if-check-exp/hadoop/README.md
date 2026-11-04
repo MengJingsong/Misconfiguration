@@ -5,7 +5,7 @@ The **Hadoop** instance of `if-check-exp`.
 | Stage | Status |
 |---|---|
 | 1 — structural (CodeQL) | **done 2026-11-04**: [`stage1-codeql-preprocessing/README.md`](stage1-codeql-preprocessing/README.md) (10,842-row corpus) |
-| 2 — lexical banding | **ready, not started** (2026-11-04): [`stage2-ai-preprocessing/anchors.md`](stage2-ai-preprocessing/anchors.md) (18 calibration anchors), empty `bands.csv`; batches from `make-stage2-batches.py` (49 × 200) |
+| 2 — lexical banding | **done 2026-11-04**: [`stage2-ai-preprocessing/README.md`](stage2-ai-preprocessing/README.md) — 9,684 units banded, A 90 (incl. 18 anchors) / B 170 / C 489 / D 8,935 |
 | 3 — deep read | not started |
 | 4 — runtime verification | not started |
 

@@ -3,6 +3,13 @@
 The fixed rows repeated in every Hadoop stage-2 batch (playbook, "Anchor every batch"). **All
 18 must come back band A.** If any does not, re-run that batch.
 
+> **Row 9 is retired from the gate (2026-11-04).** In the stage-2 run, `FSDirectory.java:1272#1`
+> (`length > maxComponentLength`) came back B from 3 of the 6 agents that saw it, each in all 7 of
+> its batches. A row that readers split on cannot calibrate, so batches are recorded with
+> `record-stage2-bands.py --exempt=<its uid>`. Its source read below is unchanged, it stays in the
+> batches (so batch contents do not move), and it is in `bands.csv` as A with the other anchors.
+> Pick a replacement before any future re-banding. Run record: [`README.md`](README.md).
+
 Cassandra's anchors were rows that already had stage-3 verdicts. Hadoop had none, so these
 were picked on 2026-11-04 by reading the source at each row against Rules 1–3 (method README
 §3.4–§3.6). These are **anchor-level reads, not stage-3 case files**: each one checks the limit,
