@@ -211,5 +211,6 @@ judgement — it rules nothing out, and it does not apply the three rules. Its d
 verdicts live in
 [`../../../../experiments/if-check-exp/stage2-ai-preprocessing/`](../../../../experiments/if-check-exp/stage2-ai-preprocessing/README.md);
 nothing about it is restated here, so that this file does not go stale when stage 2 changes.
-The batch inputs are built by `../../../scripts/make-stage2-batches.py`, which reads both CSVs
+The batch inputs are built by `../../../scripts/make-stage2-batches.py` (per-system settings; Cassandra
+is its default `cassandra` entry), which reads both CSVs
 directly.

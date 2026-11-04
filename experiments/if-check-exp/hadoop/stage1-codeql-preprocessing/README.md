@@ -76,13 +76,15 @@ about 1.9× larger from 2.7× the files.
   maxDataLength` (`ipc.maximum.data.length`), and `FSDirectory.java:1272` / `:1293`
   (`verifyMaxComponentLength`, `verifyMaxDirItems`).
 
-## Before stage 2
+## Feeding stage 2
 
 [`codeql-queries/scripts/make-stage2-batches.py`](../../../../codeql-queries/scripts/make-stage2-batches.py)
-builds stage-2 batches from these CSVs but is Cassandra-specific in two places: its `ANCHORS` (eight
-known Cassandra positives seeded into every batch as calibration) and its `DONE` package list. A
-Hadoop run needs Hadoop anchors (the three known checks above are candidates) and a module-aware
-`DONE`. Nothing else in the CSV format blocks it.
+builds the stage-2 batches from these CSVs (since 2026-11-04 it takes per-system settings). For
+Hadoop it reads its anchors from
+[`../stage2-ai-preprocessing/anchors.md`](../stage2-ai-preprocessing/anchors.md) (18 rows, the
+three checks above among them), has no consumed subtrees, prefixes each unit's text with
+`moduleDir`, and defaults to 200 units per batch: 9,684 units (9,269 rows + 415 helpers) in 49
+batches.
 
 The structural blind spot of stage 1 applies unchanged: a capacity check written outside an `if`
 condition (ternary, assignment, `return`, method argument) is in no CSV. See the method README.

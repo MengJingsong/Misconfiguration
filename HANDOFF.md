@@ -143,8 +143,10 @@ noticed along the way are noted in case files for Target 3, not chased.
     - `stage4-runtime-verification/` — `environment.md` (**start here on a new node**),
       `environment-notes.md`, `case-notes.md`, `copy-source.sh` (local working tree with a git
       baseline), `results/<stem>.md` + `results/<stem>/run1/`, `harness/<stem>/`, `timing/`.
-  - `hadoop/` — Hadoop instance: stage 1 done 2026-11-04 (`hadoop/stage1-codeql-preprocessing/`),
-    stages 2–4 not started.
+  - `hadoop/` — Hadoop instance: stage 1 done 2026-11-04 (`hadoop/stage1-codeql-preprocessing/`).
+    Stage 2 ready, not started: `hadoop/stage2-ai-preprocessing/anchors.md` (18 anchors, read
+    against Rules 1–3), empty `bands.csv`; `make-stage2-batches.py codeql-queries/results/hadoop
+    <out>` emits 49 batches of 200 units + the anchors (9,684 units). Stages 3–4 not started.
 - **`codeql-queries/`** — the CodeQL packs; results gitignored, regenerated per machine.
 - **Outside the repo (CloudLab `/proj/misconfiguration-PG0/`):** `tools/codeql/`, `codeql-dbs/`,
   and the superseded `git-repos/cassandra-src` clone.
