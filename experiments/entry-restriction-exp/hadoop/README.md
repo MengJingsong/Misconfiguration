@@ -13,6 +13,6 @@ The Cassandra instance under [`../cassandra/`](../cassandra/) is the worked
 example to mirror: one folder per constraint, each with a `*-codepath.md` and a
 `*-summary.md`, indexed in `_INDEX.md`.
 
-Prerequisites: pin the Hadoop source under
-[`../../../systems/hadoop/source/`](../../../systems/hadoop/source/). Every
-`file:line` citation is pinned to the Hadoop source ref.
+Source: the pinned Hadoop tree at
+[`../../../systems/hadoop/source/`](../../../systems/hadoop/source/) (`apache/hadoop` @
+`rel/release-3.4.2`). Every `file:line` citation is pinned to that tag.

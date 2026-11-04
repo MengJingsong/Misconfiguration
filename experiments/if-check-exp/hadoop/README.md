@@ -25,9 +25,9 @@ hadoop/
 └── stage4-runtime-verification/  results/, harness/<case>/, case-notes.md, environment.md, ...
 ```
 
-Prerequisites: pin the Hadoop source under
-[`../../../systems/hadoop/source/`](../../../systems/hadoop/source/), build the
-Hadoop CodeQL database, and fill in the (currently scaffold-only) Hadoop query
+Prerequisites: the pinned Hadoop source is in place at
+[`../../../systems/hadoop/source/`](../../../systems/hadoop/source/) (`apache/hadoop` @
+`rel/release-3.4.2`). Still to do: build the Hadoop CodeQL database from it, and fill in the (currently scaffold-only) Hadoop query
 pack at [`../../../codeql-queries/hadoop/`](../../../codeql-queries/hadoop/).
-Every `file:line` citation is pinned to the Hadoop source ref, exactly as the
+Every `file:line` citation is pinned to `rel/release-3.4.2`, exactly as the
 Cassandra instance pins to `cassandra-5.0.9`.

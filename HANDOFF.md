@@ -124,6 +124,8 @@ noticed along the way are noted in case files for Target 3, not chased.
   Confirm with `build.xml` `base.version` = `5.0.9` and `git status systems/cassandra/source`
   (nothing changed). GitHub links: `.../blob/cassandra-5.0.9/<path>#L<NN>`, line checked in the
   local file. Records before 2026-10-22 name the old `cassandra-src` clone (same files).
+- **`systems/hadoop/source/`** — the pinned Hadoop source (`apache/hadoop` tag `rel/release-3.4.2`,
+  commit `84e8b89`, unmodified, committed 2026-11-04). Same rules as the Cassandra source.
 - **`experiments/if-check-exp/`** — method docs at the root, Cassandra data under `cassandra/`.
   Short paths in this file such as `cassandra/stage3-ai-deep-read/_INDEX.md` are relative to
   `experiments/if-check-exp/`.

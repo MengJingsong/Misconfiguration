@@ -91,7 +91,7 @@ systems/
 │   ├── build-dist/          <- 4-node cluster install/run scripts (orchestrator + remotes)
 │   └── conf/                <- stock config baseline to diff against
 └── hadoop/
-    ├── source/              <- pinned Hadoop source (to populate)
+    ├── source/              <- pinned apache/hadoop @ tag rel/release-3.4.2 (unmodified)
     ├── build-src/           <- Hadoop source build scripts (JDK8 + Maven + protobuf)
     └── conf/                <- stock config baseline (to populate)
 codeql-queries/              <- CodeQL packs: cassandra/, hadoop/, common/ (stage 1 of if-check-exp)
@@ -135,6 +135,19 @@ databases from it. Never build in it or add files to it; copy it to local disk
 first (`experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md` §2).
 Records dated before 2026-10-22 name the `cassandra-src` clone, which held the
 same files.
+
+**Hadoop source.** Since 2026-11-04 the Hadoop source is part of this repo too:
+`systems/hadoop/source/` is the `apache/hadoop` tree at tag `rel/release-3.4.2`
+(commit `84e8b89`), unmodified, exported with `git archive`. Its tree hash equals
+upstream's root tree (`41e2128`), so every path, mode and byte matches. Unlike
+Cassandra, upstream ships its own `.gitattributes` files, which are kept as they are
+(they normalize line endings only, and upstream stores no CRLF files). Hadoop
+`file:line` citations are checked against this tree. As with Cassandra, never build
+in it or add files to it: copy it to local disk first. Upstream's own `.gitignore`
+applies inside it (`*.patch`, `**/.keep`, ...), so a re-import must `git add -f`
+the 12 upstream files those patterns hide. The release tarball that
+`systems/hadoop/build-src/` downloads (`hadoop-3.4.2-src.tar.gz`) is a separate
+artifact; cite the git tree, not the tarball.
 
 **Checkout location.** The repo was removed from the shared mount on 2026-10-06 so that the short path's
 stage-4 executor, which every node could reach through that mount, could not read the long path's files. That
@@ -248,6 +261,7 @@ here alongside a `<exp>/<system>/` subfolder under each experiment.
 
 - **`systems/hadoop/build-src/`** — Hadoop source build scripts (JDK8 + Maven
   + protobuf 2.5.0).
-- **`systems/hadoop/source/`** and **`systems/hadoop/conf/`** — placeholders
-  (empty) for the pinned Hadoop source and its stock config baseline, to be
-  populated when the experiments are applied to Hadoop.
+- **`systems/hadoop/source/`** — the pinned `apache/hadoop` tree at tag
+  `rel/release-3.4.2` (see §2.2). Never build in it or add files to it.
+- **`systems/hadoop/conf/`** — placeholder (empty) for a stock Hadoop config
+  baseline, to be populated when the experiments are applied to Hadoop.
