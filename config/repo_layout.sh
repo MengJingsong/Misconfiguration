@@ -19,7 +19,7 @@ REMOTES_DIR="$BUILD_CASSANDRA_DIST_DIR/remotes"
 CASSANDRA_CONF_DIR="$CASSANDRA_SYS_DIR/conf"              # stock config baseline
 
 HADOOP_SYS_DIR="$SYSTEMS_DIR/hadoop"
-HADOOP_SOURCE_DIR="$HADOOP_SYS_DIR/source"               # pinned Hadoop source (to populate)
+HADOOP_SOURCE_DIR="$HADOOP_SYS_DIR/source"               # pinned apache/hadoop @ rel/release-3.4.2
 HADOOP_BUILD_SRC_DIR="$HADOOP_SYS_DIR/build-src"         # JDK8 + Maven + protobuf build scripts
 HADOOP_CONF_DIR="$HADOOP_SYS_DIR/conf"                   # stock config baseline (to populate)
 
