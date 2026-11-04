@@ -193,7 +193,7 @@ re-derive them, only consumes them.
 - [`default-value-convergence-playbook.md`](default-value-convergence-playbook.md) —
   the convergence playbook plus one restriction: every constraint stays at
   its default value (only the budget and the workload are dials). Own batch
-  log at `cases/default-convergence/_batch-log.md`; not run yet.
+  log at `cases/default-convergence/_batch-log.md`. Run 1 (2026-11-04): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` at defaults **OOMed, strict default** (192 MiB `MaxDirectMemorySize`, narrow window); on-heap and off-heap JNA judged **cannot converge at defaults** by arithmetic.
 - [`_INDEX.md`](cassandra/_INDEX.md) — every closed case, by direction.
 - `cases/convergence/`, `cases/bypass/` — case files, batch logs, harness
   scripts and small raw-log excerpts (full logs stay on the run node; each

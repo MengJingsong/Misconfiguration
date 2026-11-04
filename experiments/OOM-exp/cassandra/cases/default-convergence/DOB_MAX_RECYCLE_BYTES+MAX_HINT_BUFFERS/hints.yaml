@@ -1,0 +1,18 @@
+# default-convergence run 1 hints workload (same as convergence run 8): one 1024-byte blob per partition into the pre-created hintks.standard1 (dc1:1, dc2:1; N2 down).
+# No keyspace_definition/table_definition, so cassandra-stress issues no schema statement.
+keyspace: hintks
+table: standard1
+columnspec:
+  - name: key
+    size: fixed(10)
+    population: seq(1..100000000)
+  - name: C0
+    size: fixed(1024)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+  select: fixed(1)/1
+queries:
+  read1:
+    cql: select * from standard1 where key = ?
+    fields: samerow

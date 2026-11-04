@@ -1,0 +1,18 @@
+# default-convergence run 1 attribution control: the hints workload's 1 KiB writes, but into dobks (dc1 only), so no hints.
+# No keyspace_definition/table_definition, so cassandra-stress issues no schema statement.
+keyspace: dobks
+table: standard1
+columnspec:
+  - name: key
+    size: fixed(10)
+    population: seq(1..100000000)
+  - name: C0
+    size: fixed(1024)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+  select: fixed(1)/1
+queries:
+  read1:
+    cql: select * from standard1 where key = ?
+    fields: samerow
