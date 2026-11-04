@@ -38,7 +38,8 @@ taking the constraints `if-check-exp` found as its input:
 **Systems covered.** Most completed work is **Cassandra** and lives under each
 experiment's `cassandra/` subfolder. **Hadoop** has started: its source is vendored
 (`systems/hadoop/source/`, 3.4.2) and `if-check-exp` stage 1 is done
-([`experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/`](experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/README.md)).
+([`experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/`](experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/README.md));
+stage 2 is ready to run (18 calibration anchors, batch script updated).
 The other Hadoop subfolders (`<exp>/hadoop/`) are still empty.
 
 `if-check-exp` and `entry-restriction-exp` are deliberately **not
@@ -79,7 +80,7 @@ cross, under `experiments/<exp>/<system>/`.
 experiments/                 <- methods; each README/template/playbook is system-agnostic
 ├── if-check-exp/            <- Target 1+2 (active): method docs + stage{1..4}/ specs
 │   ├── cassandra/           <-   Cassandra findings: cases, results, harness runs, CSVs
-│   └── hadoop/              <-   Hadoop findings: stage 1 done (2026-11-04), later stages empty
+│   └── hadoop/              <-   Hadoop findings: stage 1 done (2026-11-04), stage 2 ready
 ├── entry-restriction-exp/   <- Target 1+2 (paused): method docs + templates
 │   ├── cassandra/           <-   Cassandra codepath/summary cases
 │   └── hadoop/              <-   scaffold (empty)
