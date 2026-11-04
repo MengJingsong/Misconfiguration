@@ -13,7 +13,7 @@
 **A1. The constraint.** `counter_cache_size`, configuration entry ([`Config.java:479-480`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L479-L480), `LongMebibytesBound`, default `null` = auto; legacy `counter_cache_size_in_mb`), yaml `conf/cassandra.yaml:595` (comment `:590-594`: auto = min(2.5% heap, 50MiB), 0 disables). Auto: `min(max(1, totalMemory*0.025/1MiB), 50)` ([`DatabaseDescriptor.java:834-836`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L834-L836)). Negative → `ConfigurationException` (`:838-845`), unreachable because `DataStorageSpec` rejects negatives at parse (`DataStorageSpec.java:42,72,107-108`). Written back at `:864`; getter `getCounterCacheSizeInMiB()` (`:3947-3950`). Runtime: JMX `setCounterCacheCapacityInMB` ([`CacheService.java:344-350`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/CacheService.java#L344-L350)) / `nodetool setcachecapacity`.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap held by the counter cache. Operand: Caffeine weighted size = Σ (`CounterCacheKey.unsharedHeapSize()` = shell + partition-key array + cell-name array, `CounterCacheKey.java:152-157`) + (`ClockAndCount.unsharedHeapSize()` = shell, `ClockAndCount.java:46-49`).
 
 **A3. Mechanism.**

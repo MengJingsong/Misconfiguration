@@ -10,7 +10,7 @@ numbers and the conclusion live in the case file itself, linked from the row.
 If a result needs more than one line to state, shorten it and let the case
 file carry the rest.
 
-## Convergence cases ([`convergence-playbook.md`](convergence-playbook.md))
+## Convergence cases ([`convergence-playbook.md`](../convergence-playbook.md))
 
 | Constraints | Result |
 |---|---|
@@ -23,13 +23,13 @@ file carry the rest.
 | [`memtable_offheap_space` + `file_cache_size`](cases/convergence/memtable_offheap_space+file_cache_size.md) | **OOMed** — each alone 78% of a 3500 MiB cgroup budget; chunk cache full, then a write burst: kernel OOM-kill 16 s in (3465 MiB anon) |
 | [`DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`](cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md) | **OOMed, JVM killed** — alone 50% / 70% of a 560 MiB `MaxDirectMemorySize`; together a direct-buffer `OutOfMemoryError`; default-L control did not OOM |
 
-## Default-value convergence cases ([`default-value-convergence-playbook.md`](default-value-convergence-playbook.md))
+## Default-value convergence cases ([`default-value-convergence-playbook.md`](../default-value-convergence-playbook.md))
 
 | Constraints | Result |
 |---|---|
 | *(none yet)* | |
 
-## Bypass cases ([`bypass-playbook.md`](bypass-playbook.md))
+## Bypass cases ([`bypass-playbook.md`](../bypass-playbook.md))
 
 | Constraints | Result |
 |---|---|

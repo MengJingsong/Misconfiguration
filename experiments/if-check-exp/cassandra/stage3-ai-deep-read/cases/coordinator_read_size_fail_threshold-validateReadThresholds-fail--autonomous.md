@@ -37,7 +37,7 @@ and the node does not start.
 - A yaml change needs a restart. A JMX change applies to the next query.
 
 
-**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` reconciles two settings (`fail < warn`), not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` reconciles two settings (`fail < warn`), not usage against a capacity ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** Heap used to materialize one read:
 - **Coordinator:** `ResultSetBuilder.size` is the sum of `ByteBuffer.remaining()` over every
   selected value added to the CQL result set of **one page** (`ResultSetBuilder.java:76-83`). It is

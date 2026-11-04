@@ -154,7 +154,7 @@ default rather than requiring any special caller state.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `native_transport_receive_queue_capacity`, floods a node with large
 CQL requests over protocol-v5 connections held in flight, and compares the two
 overload modes (`throw_on_overload` on and off) at each value. **Run so far:**

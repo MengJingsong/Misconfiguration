@@ -13,7 +13,7 @@
 **A1. The constraint.** `memtable_cleanup_threshold`, configuration entry (`Config.memtable_cleanup_threshold`, `Float`), dimensionless ratio, commented at `conf/cassandra.yaml:812` (deprecated). Default when unset: `1 / (1 + memtable_flush_writers)` ([`DatabaseDescriptor.java:761-764`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L761-L764)), e.g. 0.33 with the default 2 flush writers for one data directory (`:753-756`); a set value logs a deprecation warning (`:765-768`). Validation: `< 0.01` throws (`:770-771`), `> 0.99` throws (`:772-773`), `< 0.1` warns (`:774-775`). Read once into static `MEMORY_POOL` ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59), `83`): restart required.
 
 
-**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the ratio against a literal range (`< 0.01`), not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the ratio against a literal range (`< 0.01`), not usage against a capacity ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** Nothing directly; it governs when memtable memory (heap or off-heap sub-pool) is reclaimed by flushing. Operand: `SubPool.used()` vs `nextClean = reclaiming + limit × cleanThreshold` (`MemtablePool.java:125-147`).
 
 **A3. Mechanism.**

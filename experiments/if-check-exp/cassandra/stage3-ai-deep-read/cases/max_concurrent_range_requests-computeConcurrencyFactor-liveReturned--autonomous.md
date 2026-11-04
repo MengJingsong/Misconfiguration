@@ -20,7 +20,7 @@ processors, minimum 1. Set with `-Dcassandra.max_concurrent_range_requests=N` (J
 `conf/jvm-server.options`); needs a restart (static final, read at class init). Not in yaml or JMX.
 
 
-**Limit type (2026-10-29).** config: JVM property. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: JVM property. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Coordinator heap: the number of sub-range read requests in flight
 together, hence the number of `ReadResponse` messages (one per contacted replica per
 sub-range) buffered in `ReadCallback`/`DataResolver` until the batch is iterated.

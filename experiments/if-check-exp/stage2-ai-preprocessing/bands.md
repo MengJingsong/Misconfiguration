@@ -12,7 +12,7 @@ from the row and never applies the three rules (see
 [`README.md`](README.md)). A row here means "worth reading the source for, in
 roughly this order" — nothing more.
 
-**Per-row bands live in [`bands.csv`](bands.csv)**, not in this file. That file
+**Per-row bands live in [`bands.csv`](../cassandra/stage2-ai-preprocessing/bands.csv)**, not in this file. That file
 is committed because an AI band is a judgement that cannot be regenerated from
 the CSVs the way the old keyword tiers could. Columns: `uid, kind, band,
 reason, model, date, batch`. A `uid` is `path:line#n` — the `#n` disambiguates
@@ -49,7 +49,7 @@ helper judged once and applied to all its call sites.
 | Accidental consistency check | 8 helpers fell into both scopes and were judged twice, in unrelated batches. **All 8 agreed.** This is the only cross-batch consistency evidence that exists, since re-judging for consistency was deliberately not done. |
 
 Anchors are the 4 filed cases plus the 4 candidates in
-[`../stage3-ai-deep-read/predicted-positive.md`](../stage3-ai-deep-read/predicted-positive.md),
+[`../stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md),
 repeated in every batch so separate batches share one yardstick;
 `record-stage2-bands.py` refuses a batch whose anchors do not all come back A.
 They also carry their own band-A rows in `bands.csv` (batch `anchors`), so the
@@ -232,7 +232,7 @@ one at a time.**
 
 ## Band B (174)
 
-Not listed here row by row — query [`bands.csv`](bands.csv). Recurring themes:
+Not listed here row by row — query [`bands.csv`](../cassandra/stage2-ai-preprocessing/bands.csv). Recurring themes:
 warn-rather-than-fail thresholds (batch size, query size, tombstone count),
 count-based guards that proxy for memory, buffer-remaining tests before a typed
 read or write, size-based routing decisions (large vs small message, sparse vs
@@ -245,10 +245,10 @@ not here (verdicts file with the stage that judged them):
 
 | Outcome | Recorded in |
 |---|---|
-| Qualified, written up | [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/) + [`_INDEX.md`](../stage3-ai-deep-read/_INDEX.md) |
-| Qualified, not yet written up | [`../stage3-ai-deep-read/predicted-positive.md`](../stage3-ai-deep-read/predicted-positive.md) |
-| Refused against the three rules | [`../stage3-ai-deep-read/predicted-negative.md`](../stage3-ai-deep-read/predicted-negative.md) |
-| Pattern (b)/(c), parked | [`../stage3-ai-deep-read/undetermined.md`](../stage3-ai-deep-read/undetermined.md) |
+| Qualified, written up | [`../stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/) + [`_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) |
+| Qualified, not yet written up | [`../stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md) |
+| Refused against the three rules | [`../stage3-ai-deep-read/predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) |
+| Pattern (b)/(c), parked | [`../stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) |
 
 **Nothing in this file is a finding.** Some band-A rows are already refused:
 `NativeAllocator$Region.allocate():273` and `SlabAllocator$Region.allocate():201`

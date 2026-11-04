@@ -17,7 +17,7 @@
 - It is set with `-D` at JVM start. Because the field is `static final`, a change needs a restart. There is no yaml key and no JMX setter.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps the LIMIT of an ANN query (`command.limits().count()`). That bounds:
 - (i) the rows the coordinator returns in the single unpaged response;
 - (ii) the replica and coordinator top-K structures: the priority queue of size limit+1 in `VectorTopKProcessor` (`src/java/org/apache/cassandra/index/sai/plan/VectorTopKProcessor.java:81`, `:91-123`) and the graph search top-K (`index/sai/disk/v1/segment/VectorIndexSegmentSearcher.java:121-124`).

@@ -18,7 +18,7 @@
 - Unit: bytes. Setting it needs a restart (read once in the `HintsService` constructor). B cannot go below 32 MiB through configuration.
 
 
-**Limit type (2026-10-29).** non-config: runtime-queried. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: runtime-queried. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Off-heap (direct) memory: the bytes of serialized hints held in one buffer before they are flushed to hints files. The operand of the target :187 is `prev`, the slab's allocation position before this hint, which is negative once the slab has been closed; the capacity test at :190 compares `prev + totalSize` (where `totalSize = hintSize + 12`, `HintsBuffer.java:150`) with `slab.capacity()` = B and closes the slab by setting `position = Long.MIN_VALUE` (:192). :174 tests the resulting `offset < 0`.
 
 **A3. Mechanism.**

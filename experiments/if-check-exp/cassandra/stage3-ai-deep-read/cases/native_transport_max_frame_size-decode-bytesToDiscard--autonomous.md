@@ -26,7 +26,7 @@ count to the `IntMebibytesBound(long mebibytes)` constructor, which is a latent 
 mix-up but does not matter here. No JMX or nodetool path sets it.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** The resource is off-heap (Netty direct) memory, or heap if
 `-Dcassandra.netty_use_heap_allocator=true`. The limit applies to the cumulation buffer
 that a `ByteToMessageDecoder` keeps per connection while it waits for a complete CQL

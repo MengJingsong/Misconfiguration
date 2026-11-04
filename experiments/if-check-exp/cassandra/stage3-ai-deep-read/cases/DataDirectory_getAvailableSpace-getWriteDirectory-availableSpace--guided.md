@@ -247,7 +247,7 @@ regardless of its free space, and this ceiling does not apply.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test runs the same compaction of eight equal SSTables on a nearly full filesystem under two
 partitioners — the default `Murmur3Partitioner`, where §5 says the guard never runs,
 and `ByteOrderedPartitioner`, where it does — and compares what each does. **Run so

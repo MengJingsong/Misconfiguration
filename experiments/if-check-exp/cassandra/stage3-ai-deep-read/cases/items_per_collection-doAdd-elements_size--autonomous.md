@@ -18,7 +18,7 @@
 - The guardrail object is `Guardrails.itemsPerCollection` ([`Guardrails.java:380-387`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/guardrails/Guardrails.java#L380-L387)), a `MaxThreshold`.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** The quantity compared is `elements.size()`, the number of
 elements in the set literal or bound value *being written* (`Sets.java:389, 399`).
 Each element becomes one cell added to the mutation and then to the memtable

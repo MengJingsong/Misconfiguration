@@ -156,7 +156,7 @@ writer threads block waiting for a buffer to be flushed and recycled.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test changes `MAX_HINT_BUFFERS`, makes hints arrive faster than the disk
 flush can recycle buffers, and checks that the pool stops at *n* buffers and the
 writer waits. **Run so far:** both tiers, 2026-09-30 (results file §4.2 and §4.3, §8).
@@ -518,4 +518,4 @@ files, per capacity value.
 ## 11. Notes
 
 - `MAX_ALLOCATED_BUFFERS` is set via a JVM system property (`-D` flag), not `cassandra.yaml` — different configuration mechanism from the memtable/net cases' YAML-backed limits, but still "Configuration" per the Limit type taxonomy since it's externally settable without a code change.
-- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../../HANDOFF.md) before this draft; see `../_INDEX.md` for cross-reference.
+- This case was flagged as a runner-up candidate in [`../../../HANDOFF.md`](../../../../../HANDOFF.md) before this draft; see `../_INDEX.md` for cross-reference.

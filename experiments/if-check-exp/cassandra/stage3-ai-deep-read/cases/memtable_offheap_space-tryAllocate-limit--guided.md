@@ -163,7 +163,7 @@ discard), and with 192 KiB cells the process grew beyond the regions by more tha
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test changes `memtable_offheap_space`, writes faster than flushes free
 memory, and checks that writers wait at the limit **and** how many native bytes
 the node really holds against the pool's counter. **Done so far:** the unit tier's

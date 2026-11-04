@@ -22,7 +22,7 @@
 - This only applies to the BIG format, which is the 5.0.9 default ([`Config.java:373`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L373)). BTI has no summary.
 
 
-**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the option against a literal lower bound (`< 1`), not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the option against a literal lower bound (`< 1`), not usage against a capacity ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** Off-heap memory of BIG index summaries (`IndexSummaryOffHeapMemoryUsed`, `IndexSummaryMetrics.java:40`). The compared quantity is the sampling interval: m sets the full-sampling entry count `ceil(keys/m)`, and M sets the lowest sampling level `ceil(128·m/M)` out of 128.
 
 **A3. Mechanism.**

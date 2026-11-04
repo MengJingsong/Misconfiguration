@@ -13,7 +13,7 @@
 **A1. The constraint.** `paxos_cache_size`, configuration entry ([`Config.java:485`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L485), `LongMebibytesBound`, default `null` = auto; not present in `conf/cassandra.yaml`). Auto: `min(max(1, totalMemory*0.01/1MiB), 50)` ([`DatabaseDescriptor.java:849-852`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L849-L852)). Negative → `ConfigurationException` (`:854-861`), unreachable (`DataStorageSpec.java:42,72,107-108`). Getter `getPaxosCacheSizeInMiB()` (`:3942-3945`). Read into a `static final` at `PaxosState` class init, so restart required; no setter.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap held by `PaxosState.RECENT`. Operand: Caffeine weighted size = Σ `saturatedCast(accepted.update.unsharedHeapSize() + committed.update.unsharedHeapSize())` (`PaxosState.java:73-74`).
 
 **A3. Mechanism.**

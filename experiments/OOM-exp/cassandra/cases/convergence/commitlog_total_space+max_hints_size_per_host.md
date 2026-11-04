@@ -1,6 +1,6 @@
 # commitlog_total_space + max_hints_size_per_host — convergence case
 
-> **Playbook:** [`../../convergence-playbook.md`](../../convergence-playbook.md)
+> **Playbook:** [`../../convergence-playbook.md`](../../../convergence-playbook.md)
 >
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12.
 >
@@ -16,8 +16,8 @@ Both constraints are config-type, **true positive** at if-check-exp stage 4, and
 
 | | `commitlog_total_space` | `max_hints_size_per_host` |
 |---|---|---|
-| if-check-exp case file | [`commitlog-total-space-calculateDefaultSpaceInMiB-minSizeInMiB--autonomous.md`](../../../if-check-exp/stage3-ai-deep-read/cases/commitlog-total-space-calculateDefaultSpaceInMiB-minSizeInMiB--autonomous.md) (constraint); verification solution at `commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md` | [`max_hints_size_per_host-shouldHint-maxHintsSize--guided.md`](../../../if-check-exp/stage3-ai-deep-read/cases/max_hints_size_per_host-shouldHint-maxHintsSize--guided.md) |
-| if-check-exp stage-4 results | [`commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md`](../../../if-check-exp/stage4-runtime-verification/results/commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md) | [`max_hints_size_per_host-shouldHint-maxHintsSize--guided.md`](../../../if-check-exp/stage4-runtime-verification/results/max_hints_size_per_host-shouldHint-maxHintsSize--guided.md) |
+| if-check-exp case file | [`commitlog-total-space-calculateDefaultSpaceInMiB-minSizeInMiB--autonomous.md`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/commitlog-total-space-calculateDefaultSpaceInMiB-minSizeInMiB--autonomous.md) (constraint); verification solution at `commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md` | [`max_hints_size_per_host-shouldHint-maxHintsSize--guided.md`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_hints_size_per_host-shouldHint-maxHintsSize--guided.md) |
+| if-check-exp stage-4 results | [`commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md`](../../../../if-check-exp/cassandra/stage4-runtime-verification/results/commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md) | [`max_hints_size_per_host-shouldHint-maxHintsSize--guided.md`](../../../../if-check-exp/cassandra/stage4-runtime-verification/results/max_hints_size_per_host-shouldHint-maxHintsSize--guided.md) |
 | Outcome class | true positive (soft cap, confirmed overshoot C+4S..C+S bound) | true positive (tight cap, confirmed overshoot bounded to ~one flush period, 0.2–0.97 MiB observed) |
 | Capacity check | `AbstractCommitLogSegmentManager.maybeFlushToReclaim()` / `tryAllocate` path, `CommitLogSegmentManagerStandard` | `StorageProxy.shouldHint():2492` — `actualTotalHintsSize > maxHintsSize`, gated by `if (maxHintsSize > 0)` at `:2489` |
 | What it caps | On-disk bytes of commit log segments (`commitlog_directory`) | On-disk bytes of hint files for one destination host (`hints_directory`) |

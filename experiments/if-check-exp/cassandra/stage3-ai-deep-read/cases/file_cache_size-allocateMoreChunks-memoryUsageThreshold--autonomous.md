@@ -16,7 +16,7 @@
 - The pool stores the value in `BufferPool.memoryUsageThreshold` (`BufferPool.java:142,186-189`) and exposes it as the `Capacity` gauge ([`BufferPoolMetrics.java:58`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/metrics/BufferPoolMetrics.java#L58)).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Off-heap (direct) memory: the bytes of 1 MiB macro chunks the pool has allocated, `memoryAllocated` (`BufferPool.java:158`). The check compares `memoryAllocated + MACRO_CHUNK_SIZE` (1 MiB, `BufferPool.java:385`) against `memoryUsageThreshold` (`BufferPool.java:443`). It does **not** cap `overflowMemoryUsage` (`BufferPool.java:148`), the unpooled direct or heap buffers that the pool hands out when it cannot serve a request.
 
 **A3. Mechanism.**

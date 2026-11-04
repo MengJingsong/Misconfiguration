@@ -13,7 +13,7 @@
 **A1. The constraint.** `cdc_total_space`, configuration entry ([`Config.java:418-419`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L418-L419), `IntMebibytesBound`, default `0MiB`, legacy `cdc_total_space_in_mb`), commented at `conf/cassandra.yaml:923`. Only applied if `cdc_enabled: true` ([`DatabaseDescriptor.java:677`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L677), yaml default false at `conf/cassandra.yaml:413`). When 0: `calculateDefaultSpaceInMiB("cdc", cdc_raw_directory, …, 4096, totalSpace, 1, 8)` ([`DatabaseDescriptor.java:684-695`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L684-L695), helper `:1147-1162`) returns `min(4096, totalMiB/8)` and warns when the volume is small. Getter `getCDCTotalSpace()` in bytes (`:4370-4373`); only a `@VisibleForTesting` setter (`:4376-4379`), so production changes need a restart (it is re-read at every segment event, so the test setter takes effect immediately).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Disk used by CDC commit-log hard links in `cdc_raw` plus in-flight CDC-containing segments. Operand: `cdcSizeTracker.sizeInProgress` (+ segment size) vs `allowance`.
 
 **A3. Mechanism.**

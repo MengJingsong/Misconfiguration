@@ -198,7 +198,7 @@ MiB." Flagged for Target 3 (bypass analysis).
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test changes `memtable_heap_space`, writes faster than flushes free memory,
 and checks that writers wait at the limit. **Done so far:** the unit tier's
 `HeapPoolTest` was written and passed on 2026-09-16, before stage 4 existed

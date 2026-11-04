@@ -20,7 +20,7 @@ This folder needs no cluster (stage-3-style source reading). If a later resumpti
 - `pc12` (node1), `pc06` (node2), `pc13` (node3): reachable, but with no JDK and an empty home.
 
 All four have 40 cores and 251 GiB, with passwordless `sudo`. The table, addresses and the SSH key to use (`-i /proj/misconfiguration-PG0/.ssh/id_ed25519`) are in
-[`../if-check-exp/stage4-runtime-verification/environment.md` §7](../if-check-exp/stage4-runtime-verification/environment.md#7-nodes-checked-2026-10-07-updated-2026-10-13-and-2026-10-20).
+[`../if-check-exp/stage4-runtime-verification/environment.md` §7](../if-check-exp/cassandra/stage4-runtime-verification/environment.md#7-nodes-checked-2026-10-07-updated-2026-10-13-and-2026-10-20).
 
 ## What this folder is
 
@@ -62,7 +62,7 @@ not cross-referenced** — a line may legitimately appear in both.
 | `memtable_flush_writers` | 3 | Thread-pool size capping concurrent flushes — a *weak proxy* for throughput. Also: the flush-task queue is unbounded (`Integer.MAX_VALUE`) and untunable, so tasks pile up in memory rather than being throttled. |
 | `file_cache_size` | 2 | Restriction 1: weight bound on the `ChunkCache` LRU — soft and self-correcting, since a miss inserts unconditionally and eviction runs afterward, so it can be exceeded under concurrent miss load. Restriction 2: hard check in the buffer pool, but on refusal the caller falls back to *untracked* direct allocation. |
 
-See [`_INDEX.md`](_INDEX.md) for the authoritative per-pair table.
+See [`_INDEX.md`](cassandra/_INDEX.md) for the authoritative per-pair table.
 
 ## Where things live
 

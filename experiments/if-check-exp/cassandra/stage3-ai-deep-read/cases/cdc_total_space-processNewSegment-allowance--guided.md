@@ -214,7 +214,7 @@ check only gates `mutation.trackedByCDC()` writes.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `cdc_total_space`, writes CDC-tracked rows with nothing consuming
 `cdc_raw`, and checks that the hard links in `cdc_raw` stop at the number of whole
 segments the limit allows while further CDC writes are rejected (blocking mode)

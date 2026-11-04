@@ -24,7 +24,7 @@ read per query at [`DataResolver.java:257-258`](https://github.com/apache/cassan
 query. Sibling: `cached_rows_warn_threshold` (default 2000, `:26`) only warns.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Coordinator heap: the rows RFP holds in `PartitionBuilder.contents`
 (`ReplicaFilteringProtection.java:458`, an `ArrayDeque<Unfiltered>`) and `staticRow`
 while it waits to complete stale rows from silent replicas. Compared quantity:

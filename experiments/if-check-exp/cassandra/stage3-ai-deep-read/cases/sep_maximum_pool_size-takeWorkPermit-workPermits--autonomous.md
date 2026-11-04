@@ -24,7 +24,7 @@ How each value can be set:
 `concurrent_reads` must be at least 2 at startup ([`DatabaseDescriptor.java:560-562`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L560-L562)). At runtime only a negative value is rejected ([`SEPExecutor.java:373-376`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/concurrent/SEPExecutor.java#L373-L376), [`DatabaseDescriptor.java:2408-2411`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L2408-L2411)).
 
 
-**Limit type (2026-10-29).** non-config: runtime-queried. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: runtime-queried. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** The direct quantity is the per-executor count of work permits in use. The code compares the top 32 bits of `permits` (`SEPExecutor.java:57-60`) against 0. Indirectly it caps:
 - (i) the number of tasks of that executor running at once, and with them their in-flight working memory on heap;
 - (ii) the number of SharedPool worker threads (`SEPWorker` → `FastThreadLocalThread`, `src/java/org/apache/cassandra/concurrent/SEPWorker.java:58`). Each thread costs native memory for its stack (`-Xss256k`, `conf/jvm-server.options:123`) plus thread-local buffers.

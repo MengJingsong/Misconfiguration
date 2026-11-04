@@ -8,7 +8,7 @@
 
 ## 1. Constraints and capacities
 
-Extends the closed 2-constraint case with a third on-heap, config-type **true positive** from if-check-exp: `key_cache_size` ([`key_cache_size-create-size--autonomous`](../if-check-exp/stage3-ai-deep-read/cases/key_cache_size-create-size--autonomous.md), stage-4 result [`key_cache_size-create-size--autonomous.md`](../if-check-exp/stage4-runtime-verification/results/key_cache_size-create-size--autonomous.md)). All three constraints are config-type true positives and draw on the same single-node JVM heap:
+Extends the closed 2-constraint case with a third on-heap, config-type **true positive** from if-check-exp: `key_cache_size` ([`key_cache_size-create-size--autonomous`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/key_cache_size-create-size--autonomous.md), stage-4 result [`key_cache_size-create-size--autonomous.md`](../../../../if-check-exp/cassandra/stage4-runtime-verification/results/key_cache_size-create-size--autonomous.md)). All three constraints are config-type true positives and draw on the same single-node JVM heap:
 
 | | `memtable_heap_space` | `counter_cache_size` | `key_cache_size` |
 |---|---|---|---|

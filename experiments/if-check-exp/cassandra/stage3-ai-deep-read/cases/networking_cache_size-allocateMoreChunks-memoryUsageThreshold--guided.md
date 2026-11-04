@@ -282,7 +282,7 @@ off-heap memory a burst of networking traffic — or one slow-reading client —
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `networking_cache_size`, makes one client send requests whose responses are
 1 MiB each and then stop reading, so the server must hold the responses' frames in the
 networking pool, and reads the pooled bytes, the overflow and the node's direct memory

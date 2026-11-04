@@ -22,7 +22,7 @@ The sibling knob `denylist_max_keys_per_table` (default 1000) is declared at [`C
 Everything is gated by `partition_denylist_enabled` (default false, [`Config.java:759`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L759)).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap. The capped object is the Caffeine `LoadingCache<TableId, DenylistEntry>` at
 `PartitionDenylist.java:92`. Each `DenylistEntry` holds an `ImmutableSet<ByteBuffer>` of raw
 partition keys and an `ImmutableSortedSet<Token>` (`:95-111`). The check compares

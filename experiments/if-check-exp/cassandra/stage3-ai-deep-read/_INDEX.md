@@ -1,8 +1,8 @@
 # If-Check Cases — Master Index
 
 Navigation hub and progress tracker for all case files of both agents.
-See [README.md](README.md) for the format. Each case file is named `<stem>--guided.md`
-or `<stem>--autonomous.md`; the Agent column repeats the suffix as **G** (guided) or **A** (autonomous). Estimate is `positive`, `negative` or `undetermined` (a prediction from the source; stage 4 confirms or refutes it); **Type (2026-10-29)** is the type under the constraint–capacity definition in [README §6](README.md#6-rules-that-hold-for-both-agents) (config / non-config / mixed / not-a-case; `×n` = n constraint–capacity pairs); the data are in [`case-retrace-2026-10-29.csv`](case-retrace-2026-10-29.csv) and [`constraint-pairs-2026-10-29.csv`](constraint-pairs-2026-10-29.csv); the old Type column is kept unchanged. Outcome class (true positive / false positive / true negative / false negative / undetermined, plus the weak classes **weak true positive / weak false positive / weak true negative / weak false negative** for a case whose cluster tier could not settle the effect but whose unit tier gave a decisive verdict, defined in [`../stage4-runtime-verification/README.md`](../stage4-runtime-verification/README.md#outcome-class)) compares the estimate with the stage-4 effect; Ground names the rule or reason for a negative. A column the
+See [README.md](../../stage3-ai-deep-read/README.md) for the format. Each case file is named `<stem>--guided.md`
+or `<stem>--autonomous.md`; the Agent column repeats the suffix as **G** (guided) or **A** (autonomous). Estimate is `positive`, `negative` or `undetermined` (a prediction from the source; stage 4 confirms or refutes it); **Type (2026-10-29)** is the type under the constraint–capacity definition in [README §6](../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents) (config / non-config / mixed / not-a-case; `×n` = n constraint–capacity pairs); the data are in [`case-retrace-2026-10-29.csv`](case-retrace-2026-10-29.csv) and [`constraint-pairs-2026-10-29.csv`](constraint-pairs-2026-10-29.csv); the old Type column is kept unchanged. Outcome class (true positive / false positive / true negative / false negative / undetermined, plus the weak classes **weak true positive / weak false positive / weak true negative / weak false negative** for a case whose cluster tier could not settle the effect but whose unit tier gave a decisive verdict, defined in [`../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md#outcome-class)) compares the estimate with the stage-4 effect; Ground names the rule or reason for a negative. A column the
 autonomous template does not ask for (decision point, module, object, pattern) is `—`
 on an autonomous row.
 
@@ -11,7 +11,7 @@ on an autonomous row.
 
 ## 1. Master Index
 
-The constraint name links to the case file and the Stage 4 cell to its results file. The Stage 4 cell gives the verdict per tier (**U** unit, **C** cluster; one verdict alone covers the case): Confirmed, Refuted, Partial or Not confirmed; the effect on the constraint (caps, does not cap, with its qualifiers) is in the linked results file. Type is the constraint type: yaml entry, JVM property, per-table/per-index option, hard-coded constant, runtime-queried, query parameter or none. **Config-type** is a yaml entry or JVM property; every other value (and none) is **non-config type** ([README §6](README.md#6-rules-that-hold-for-both-agents)). Since 2026-10-20 the table keeps only these columns (plus, since 2026-10-22, the outcome class); the capacity check, decision point, module, object, pattern, feed and ground of each case are in the case file (guided: §1, §3 and §10; autonomous: the header table and section A).
+The constraint name links to the case file and the Stage 4 cell to its results file. The Stage 4 cell gives the verdict per tier (**U** unit, **C** cluster; one verdict alone covers the case): Confirmed, Refuted, Partial or Not confirmed; the effect on the constraint (caps, does not cap, with its qualifiers) is in the linked results file. Type is the constraint type: yaml entry, JVM property, per-table/per-index option, hard-coded constant, runtime-queried, query parameter or none. **Config-type** is a yaml entry or JVM property; every other value (and none) is **non-config type** ([README §6](../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)). Since 2026-10-20 the table keeps only these columns (plus, since 2026-10-22, the outcome class); the capacity check, decision point, module, object, pattern, feed and ground of each case are in the case file (guided: §1, §3 and §10; autonomous: the header table and section A).
 
 | Constraint (→ case file) | Agent | Estimate | Stage 4 | Outcome class | Type | Type (2026-10-29) |
 |---|---|---|---|---|---|---|
@@ -343,7 +343,7 @@ The constraint name links to the case file and the Stage 4 cell to its results f
 >
 > Feed counts are not a progress bar. Only 3a has a denominator — its
 > remaining work is sized in
-> [`stage2-ai-preprocessing/README.md`](../stage2-ai-preprocessing/README.md)'s
+> [`stage2-ai-preprocessing/README.md`](../../stage2-ai-preprocessing/README.md)'s
 > "Progress at a glance". 3b is unbounded, so there is no percentage for it.
 
 ## 3. Notes on Modules

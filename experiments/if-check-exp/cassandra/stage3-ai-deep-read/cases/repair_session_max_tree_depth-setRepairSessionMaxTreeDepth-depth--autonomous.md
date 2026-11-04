@@ -24,7 +24,7 @@
 - **Getter and restart.** The getter is `:4070-4073`. No restart is needed.
 
 
-**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the value against a literal minimum (`< 10`), not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the value against a literal minimum (`< 10`), not usage against a capacity ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** It caps memory: the number of leaves per merkle tree (2^depth), which determines:
 - the on-heap tree built during validation on every replica (`MerkleTree.init`, `MerkleTree.java:139-147`, which builds `OnHeapInner`/`OnHeapLeaf` nodes);
 - the trees deserialized on the coordinator, off-heap when `use_offheap_merkle_trees` is true (default `Config.java:212`). These need `50·(L−1) + 32·L` bytes for L leaves with Murmur3 (`MerkleTree.java:747-751,799-802,1160-1163,1451-1457`; token size 8 bytes, `Murmur3Partitioner.java:52,269-271`).

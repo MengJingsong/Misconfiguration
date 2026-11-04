@@ -18,7 +18,7 @@
 - Unit: rows (batches) and bytes. Neither part can be set: there is no yaml key, `-D` property or JMX setter. Changing either needs a code change and a restart. The only lever an operator has is indirect: whether and what `system.batches` has flushed (`nodetool flush system batches`), and the batch size (`batch_size_fail_threshold`, `conf/cassandra.yaml:1844`, checked in `BatchStatement.verifyBatchSize`, [`BatchStatement.java:331-359`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/cql3/statements/BatchStatement.java#L331-L359)).
 
 
-**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap held by one batchlog replay pass on the `BatchlogTasks` thread. Two things are held:
 - The materialized page of raw rows (`id`, `mutations list<blob>`, `version`). `UntypedResultSet.FromPager` fetches `pageSize` rows and turns them into a list (`src/java/org/apache/cassandra/cql3/UntypedResultSet.java:227-231`).
 - Up to `pageSize` `ReplayingBatch` objects in `unfinishedBatches` (`BatchlogManager.java:263,280`). Each holds deserialized `Mutation`s (`:341,392-418`) and its replay handlers (`:344,365`).

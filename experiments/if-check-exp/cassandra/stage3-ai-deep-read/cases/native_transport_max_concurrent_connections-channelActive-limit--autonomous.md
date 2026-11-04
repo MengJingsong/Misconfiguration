@@ -17,7 +17,7 @@
 - Values ≤ 0: the handler is installed only if this limit or the per-IP limit is **> 0** ([`PipelineConfigurator.java:240-241`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/PipelineConfigurator.java#L240-L241)). So 0 behaves like -1 (unlimited) when the per-IP limit is off. If the per-IP limit is on, 0 makes `count > 0` true for every connection (`:89-93`), so every connection is refused. That edge is covered in the per-IP case file.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps the count of live client TCP connections on the native port. The operand is `counter` (`ConnectionLimitHandler.java:54`): incremented for every accepted channel (`:86`), decremented on `channelInactive` (`:136`), and compared with L at `:93`.
 - The memory that follows the count is everything a channel holds:
   - the Netty channel and pipeline objects;

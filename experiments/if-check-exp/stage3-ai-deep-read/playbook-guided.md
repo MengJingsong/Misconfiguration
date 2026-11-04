@@ -175,12 +175,12 @@ rejections by these patterns).
    and design §9 to test the opposite claim, that usage does **not** follow the
    constraint, so stage 4 can confirm or refute the estimate. Include the positive control and the extra conclusions rows described in `_TEMPLATE-guided.md` §9a. An undetermined line
    (not read against the rules) gets no case file and stays in
-   [`undetermined.md`](undetermined.md).
+   [`undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md).
 4. Add the `_INDEX.md` Master Index row (Agent `guided`, Estimate, Ground) and, if the
    module is new, a Notes entry. For a negative estimate written up from an existing
-   [`predicted-negative.md`](predicted-negative.md) entry, link the case file from that entry's
+   [`predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) entry, link the case file from that entry's
    reason; the entry is removed once the case is verified at stage 4. A line that **qualifies but you are not writing up now** →
-   [`predicted-positive.md`](predicted-positive.md), never left only in stage 2's files.
+   [`predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md), never left only in stage 2's files.
 5. If the feed was 3a, note the batch in
    `../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
    re-read.

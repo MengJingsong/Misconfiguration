@@ -235,7 +235,7 @@ off-heap footprint.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `file_cache_size`, drives concurrent reads so that the `chunk-cache`
 pool wants more memory than the limit allows, and reads three things side by side:
 the bytes the pool reserved, the bytes handed out around the pool, and the

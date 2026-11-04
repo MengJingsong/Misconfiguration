@@ -24,7 +24,7 @@ does **not** follow the constraint, so stage 4 can confirm or refute the estimat
 |-------|---------|
 | **Case ID** | filename stem upper-cased, e.g., MEMTABLE_HEAP_SPACE-TRYALLOCATE-LIMIT |
 | **Constraint** | the resource constraint name (first part of the file name) and its source: configuration entry / JVM system property / constant / runtime-queried accessor (README §6.1) |
-| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](../../README.md#3-core-concept-the-if-check-case) |
+| **Enforcement pattern** | (a) the check is the decision / (b) the check sets a verdict (flag, enum, return value) that a separate decision point reads / (c) guard clause(s) before an allocation that is not inside a branch — see [README.md §3.2](../../../README.md#3-core-concept-the-if-check-case) |
 | **Capacity check** | [`Class.method():NN`](GitHub link) — the usage-vs-limit comparison (names the file: `[constraint]-[function]-[operand].md`). List any additional check sites feeding the same decision point. |
 | **Decision point** | [`Class.method():NN`](GitHub link) — where allow and disallow diverge (same as the capacity check for pattern (a)) |
 | **Allocation site** | [`Class.method():NN`](GitHub link) — where the memory/disk-significant object is created |
@@ -103,7 +103,7 @@ Continuous trace from the allow outcome to the actual allocation call. For patte
 
 What actually happens when the disallow verdict fires — trace the real
 effect before assuming it cleanly rejects anything (the first pitfall in
-[`../playbook-guided.md`](../playbook-guided.md)). Is it a clean reject/throw? A block-and-wait? A silent
+[`../playbook-guided.md`](../../../stage3-ai-deep-read/playbook-guided.md)). Is it a clean reject/throw? A block-and-wait? A silent
 bypass/escape hatch elsewhere in the call chain?
 
 1. [`Class.method():NN`](link) — disallow branch taken, what state (if any) changes
@@ -132,15 +132,15 @@ what one allowed object costs.
 **Stage 3 writes this section; stage 3 never runs it.** It carries **no
 measured numbers and no verdict** — those are stage 4's, and where they land is
 set out in
-[`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
-Method and pitfalls: [README.md §8](../../README.md#8-designing-a-test-for-a-case).
+[`../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+Method and pitfalls: [README.md §8](../../../README.md#8-designing-a-test-for-a-case).
 
 **Two audiences.** The intro and 9a are for a **human reader**: what the test
 does and what each result would mean, readable on their own. 9b–9e are the
 **runbook**: steps a person or an AI session can follow on a Linux machine.
 **Stage 4 audits this section before any run**, against four groups of
 requirements (the core question, step-by-step logic, specificity, runnability) in
-[`../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md#step-0--the-design-audit);
+[`../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#step-0--the-design-audit);
 write to them.
 
 _In a case file, keep this intro to two or three lines: what the test does,
@@ -156,7 +156,7 @@ rules below — they guide the case writer and belong only in the template._
 - **Source links only in 9b–9e**, and only where a setting is not obvious or a
   trap needs justifying. The intro and 9a have none.
 - **Shared setup is linked, not copied** — JDK, `ant`, copying and building the source, and
-  the generic instruments in [README.md §8.3](../../README.md#83-measuring-the-resource).
+  the generic instruments in [README.md §8.3](../../../README.md#83-measuring-the-resource).
 - **Delete what does not apply** (scenario C, a row) instead of writing "n/a".
   **Never delete a tier:** a new case designs both a unit tier and a cluster tier.
   If one cannot be done, keep its step and write `n/a: <reason>` with what

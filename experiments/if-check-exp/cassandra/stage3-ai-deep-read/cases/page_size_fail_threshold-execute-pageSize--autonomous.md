@@ -19,7 +19,7 @@
 - It applies only to ordinary users. `Guardrail.enabled` returns false for internal and superuser client states, and when the daemon is not initialised ([`Guardrail.java:93-96`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/guardrails/Guardrail.java#L93-L96)).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps the client-requested page size that the coordinator uses for a paged SELECT, and with it the rows the coordinator materializes and returns per response. The resource is coordinator heap, and also replica heap for the read response. The compared value is `pageSize` from `QueryOptions.getPageSize()` (`SelectStatement.java:291`, `:586`).
 
 **A3. Mechanism.**

@@ -1,7 +1,7 @@
 # Band D, non-config autonomous agent: processed rows
 
 Written by the non-config autonomous agent job (decided 2026-10-27; playbook:
-[`playbook-non-config-autonomous.md`](playbook-non-config-autonomous.md)). Inputs are the band D units of
+[`playbook-non-config-autonomous.md`](../../stage3-ai-deep-read/playbook-non-config-autonomous.md)). Inputs are the band D units of
 [`../stage2-ai-preprocessing/bands.csv`](../stage2-ai-preprocessing/bands.csv), helper units first, then rows, in file order.
 One line per unit the job has handled. Outcomes: `CASE <stem>` (a non-config case file was written), `SKIP` (config-type;
 the record is in [`skipped-config-type.md`](skipped-config-type.md)), `UNRESOLVED` (the target could not be fixed to one method;

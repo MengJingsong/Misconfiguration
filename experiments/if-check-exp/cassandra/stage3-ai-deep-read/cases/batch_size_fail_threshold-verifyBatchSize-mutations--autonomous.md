@@ -18,7 +18,7 @@
 - Can be changed at runtime with `DatabaseDescriptor.setBatchSizeFailThresholdInKiB` (`:2089-2091`), which is exposed over JMX as `StorageService.setBatchSizeFailureThreshold` ([`StorageService.java:6833`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageService.java#L6833), MBean [`StorageServiceMBean.java:1043`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageServiceMBean.java#L1043)). A yaml change needs a restart; a JMX change does not.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** The quantity compared is `IMutation.dataSize(mutations)`, the sum of `PartitionUpdate.dataSize()` over every partition update in the batch (`src/java/org/apache/cassandra/db/IMutation.java:63-72`). That is the cell data size, not the serialized size.
 - What it protects is per-batch write volume: memtable heap or off-heap space, commit-log bytes, and for logged batches the `system.batches` row written before the batch is applied.
 - It is a per-request cap. It is not a cap on the node's total usage.

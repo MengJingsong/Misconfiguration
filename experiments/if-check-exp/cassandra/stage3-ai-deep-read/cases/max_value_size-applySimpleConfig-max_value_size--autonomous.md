@@ -13,7 +13,7 @@
 **A1. The constraint.** `max_value_size`, configuration entry ([`Config.java:309-310`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L309-L310), `IntMebibytesBound`, default `256MiB`; legacy `max_value_size_in_mb`), yaml `conf/cassandra.yaml:1864` (commented; comment `:1860-1863`: "Safety measure to detect SSTable corruption early … positive and less than 2GiB"). Checks at [`DatabaseDescriptor.java:944-948`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L944-L948). Getter `getMaxValueSize()` = `saturatedCast(MiB × 2^20)` (`:1928-1931`), read on every call (no caching), setter test-only (`:1933-1937`). No JMX; restart required in practice.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap (or the accessor's buffer) allocated for one deserialized value. Operand: the vint length `l` read from the stream (`AbstractType.java:590-597`).
 
 **A3. Mechanism.**

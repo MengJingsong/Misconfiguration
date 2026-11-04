@@ -1,6 +1,6 @@
 # memtable_heap_space + counter_cache_size — convergence case
 
-> **Playbook:** [`../../convergence-playbook.md`](../../convergence-playbook.md)
+> **Playbook:** [`../../convergence-playbook.md`](../../../convergence-playbook.md)
 >
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12.
 >
@@ -16,8 +16,8 @@ Both constraints are config-type, **true positive** at if-check-exp stage 4 (usa
 
 | | `memtable_heap_space` | `counter_cache_size` |
 |---|---|---|
-| if-check-exp case file | [`memtable_heap_space-tryAllocate-limit--guided.md`](../../../if-check-exp/stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--guided.md) | [`counter_cache_size-iscountercacheenabled-capacity--autonomous.md`](../../../if-check-exp/stage3-ai-deep-read/cases/counter_cache_size-iscountercacheenabled-capacity--autonomous.md) |
-| if-check-exp stage-4 results | [`memtable_heap_space-tryAllocate-limit--guided.md`](../../../if-check-exp/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit--guided.md) | [`counter_cache_size-iscountercacheenabled-capacity--autonomous.md`](../../../if-check-exp/stage4-runtime-verification/results/counter_cache_size-iscountercacheenabled-capacity--autonomous.md) |
+| if-check-exp case file | [`memtable_heap_space-tryAllocate-limit--guided.md`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--guided.md) | [`counter_cache_size-iscountercacheenabled-capacity--autonomous.md`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/counter_cache_size-iscountercacheenabled-capacity--autonomous.md) |
+| if-check-exp stage-4 results | [`memtable_heap_space-tryAllocate-limit--guided.md`](../../../../if-check-exp/cassandra/stage4-runtime-verification/results/memtable_heap_space-tryAllocate-limit--guided.md) | [`counter_cache_size-iscountercacheenabled-capacity--autonomous.md`](../../../../if-check-exp/cassandra/stage4-runtime-verification/results/counter_cache_size-iscountercacheenabled-capacity--autonomous.md) |
 | Outcome class | true positive | true positive |
 | Capacity check | [`MemtablePool.SubPool.tryAllocate():156`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/memory/MemtablePool.java#L156) — `(allocated + size) > limit` | [`ColumnFamilyStore.isCounterCacheEnabled():3269`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/ColumnFamilyStore.java#L3269) gates the reload path; the weight cap itself is Caffeine's `maximumWeight(capacity)` set in `CacheService.initCounterCache()` |
 | What it caps | On-heap bytes of the memtable pool (`unslabbed_heap_buffers` allocation path) | On-heap bytes of the counter cache (Caffeine-weighted `CounterCacheKey → ClockAndCount` entries) |

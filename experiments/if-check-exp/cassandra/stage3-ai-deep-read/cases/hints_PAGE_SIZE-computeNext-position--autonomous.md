@@ -13,7 +13,7 @@
 **A1. The constraint.** `HintsReader.PAGE_SIZE`, a `private static final int` constant, `512 << 10` = 524,288 bytes ([`HintsReader.java:55-56`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/hints/HintsReader.java#L55-L56), comment "don't read more than 512 KiB of hints at a time"). Not settable (no yaml key, no `-D` property, no JMX); changing it needs a code change and rebuild.
 
 
-**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap held by hint dispatch: the number of hint bytes read from a hints file and sent to one target node as one page before the dispatcher waits for every response. The operand is `position.subtract(offset)`: the uncompressed bytes read since the page started (`HintsReader.java:186` in `HintsIterator.computeNext`, `:292` in `BuffersIterator.computeNext`). For compressed/encrypted files `subtract` also counts uncompressed bytes (`CompressedChecksummedDataInput.java:76-81`); for plain files the file offset (`ChecksummedDataInput.java:101-105`).
 
 **A3. Mechanism.**

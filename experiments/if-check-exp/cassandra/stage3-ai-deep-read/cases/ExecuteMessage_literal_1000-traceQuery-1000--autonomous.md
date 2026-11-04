@@ -17,7 +17,7 @@
 - **Setting it.** It cannot be set. Changing it needs a code change and a restart.
 
 
-**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.**
 - **Quantity compared.** The length of the CQL-literal rendering of one bound variable, `cs.type.asCQL3Type().toCQLLiteral(bytes)` (`:230`).
 - **Resource.** That string becomes one value of the `parameters map<text,text>` column of `system_traces.sessions` (`src/java/org/apache/cassandra/tracing/TraceKeyspace.java:83`). It is written as a mutation, so it lands in the memtable, then in the commit log, then in SSTables on disk.

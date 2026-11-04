@@ -220,7 +220,7 @@ destination host**, and the mechanism is refusal to create more:
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `max_hints_size_per_host` over JMX, writes through a coordinator
 while one replica is down, and checks that the down host's hint files stop
 growing near the ceiling while client writes keep succeeding, and that at the
@@ -545,7 +545,7 @@ Stop when each scenario's records are taken; a run where the files never reach *
 
 | Field | Content |
 |--------|---------|
-| **Stage-3 feed** | `3a` — from [`../stage2-ai-preprocessing/bands.md`](../../stage2-ai-preprocessing/bands.md)'s **band A1** list, row `StorageProxy.java:2492#1` ("total hints size on disk against the configured per-host maximum, dropping the hint"). Judged in the band-A1 pass on 2026-09-28 and recorded in `predicted-positive.md`; written up 2026-09-28. |
+| **Stage-3 feed** | `3a` — from [`../stage2-ai-preprocessing/bands.md`](../../../stage2-ai-preprocessing/bands.md)'s **band A1** list, row `StorageProxy.java:2492#1` ("total hints size on disk against the configured per-host maximum, dropping the hint"). Judged in the band-A1 pass on 2026-09-28 and recorded in `predicted-positive.md`; written up 2026-09-28. |
 | **Filed by / Date** | Claude (`claude-opus-5`) session, 2026-09-28 |
 | **Line numbers checked** | 2026-09-28 against the local `cassandra-5.0.9` clone at `/proj/misconfiguration-PG0/git-repos/cassandra-src` (`git describe --tags` = `cassandra-5.0.9`). |
 | **Escape hatch / Target-3 note** | **The default is the gap.** `max_hints_size_per_host` defaults to `0B`, and `if (maxHintsSize > 0)` at [`:2489`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/StorageProxy.java#L2489) skips the comparison entirely — so on an unconfigured node this constraint does not exist. That is a stronger default-mode gap than the `native_transport_throw_on_overload` case (where the check runs and is then ignored) and comparable to the compaction guard's non-domination (where the check is never reached), but arrived at a third way: the operator simply has not switched it on. Two further Target-3 observations: the bound is **per host**, so `N` down hosts multiply it, and the disallow path is **silent** — no counter, no log — which makes the resulting data loss hard to detect operationally. |

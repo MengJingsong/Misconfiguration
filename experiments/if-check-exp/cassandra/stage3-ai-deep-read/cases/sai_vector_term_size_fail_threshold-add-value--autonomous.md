@@ -19,7 +19,7 @@
 - The guardrail chosen for a SAI index depends on the term type: vector → `saiVectorTermSize`, frozen → `saiFrozenTermSize`, else `saiStringTermSize` ([`StorageAttachedIndex.java:207-210`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/index/sai/StorageAttachedIndex.java#L207-L210)).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap of the memtable-attached SAI vector index (`OnHeapGraph`
 held by `VectorMemoryIndex`, `VectorMemoryIndex.java:72,83`). The compared quantity is
 the size in bytes of one vector term (`term.remaining()`), compared with the fail

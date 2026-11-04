@@ -1,7 +1,7 @@
 # Stage 4 — environment of the advisor's machine (`advisor-run`)
 
 The advisor's stage-4 runs use this machine, not the CloudLab nodes in [`environment.md`](environment.md). Results from the two
-are not compared; every results file records its own §2. Safety rules are in [`README.md`](README.md#running-safely-on-shared-infrastructure);
+are not compared; every results file records its own §2. Safety rules are in [`README.md`](../../stage4-runtime-verification/README.md#running-safely-on-shared-infrastructure);
 paths below replace the CloudLab ones (`~/cassandra-run<N>`, `~/stage4-logs`).
 
 ## Node (step E, recorded 2026-10-24)

@@ -26,7 +26,7 @@ Associated hard ceilings (constants, not settable): 20 buckets per element
 `BITSET_EXCESS = 20` bits ([`FilterFactory.java:35`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/FilterFactory.java#L35)).
 
 
-**Limit type (2026-10-29).** non-config: per-table/per-index option. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: per-table/per-index option. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Off-heap native memory of each sstable's bloom filter
 (`OffHeapBitSet` via `Memory.allocate`, `src/java/org/apache/cassandra/utils/obs/OffHeapBitSet.java:39-53`)
 and the same number of bytes on disk in the `Filter.db` component. The compared

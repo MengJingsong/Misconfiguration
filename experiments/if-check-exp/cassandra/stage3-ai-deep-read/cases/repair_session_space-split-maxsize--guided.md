@@ -289,7 +289,7 @@ leaves per tree:
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sweeps `repair_session_space` over JMX, runs a full repair of one
 table, and reads each validation's leaf count against the predicted
 `maxsize`, on both partitioners and through the overflow. **Run so far:** none.

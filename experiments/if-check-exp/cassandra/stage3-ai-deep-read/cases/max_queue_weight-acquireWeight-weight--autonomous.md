@@ -28,7 +28,7 @@
 - Validation: the value must be > 0 (`utils/binlog/BinLog.java:138`, `:400`; [`WeightedQueue.java:273`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/utils/concurrent/WeightedQueue.java#L273)).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap, plus Netty pooled direct memory for the query-options
 buffer, held by bin-log records waiting in `BinLog.sampleQueue` for the single
 "Binary Log thread" to write them to Chronicle Queue files. The quantity compared

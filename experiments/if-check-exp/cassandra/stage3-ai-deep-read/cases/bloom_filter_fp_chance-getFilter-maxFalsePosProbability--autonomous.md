@@ -18,7 +18,7 @@
 - Settable online by `ALTER TABLE`; no restart. Takes effect only for SSTables written (flush, compaction, `upgradesstables -a`, `scrub`) after the change, except the `1.0` case, which also takes effect when an existing SSTable is reopened (A3 step 5).
 
 
-**Limit type (2026-10-29).** non-config: per-table/per-index option. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: per-table/per-index option. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Off-heap memory (native, `Memory.allocate`) of every SSTable's
 Bloom filter, and the disk size of the `Filter.db` component. The quantity it
 determines is `bucketsPerElement` (bits per key); bitset size =

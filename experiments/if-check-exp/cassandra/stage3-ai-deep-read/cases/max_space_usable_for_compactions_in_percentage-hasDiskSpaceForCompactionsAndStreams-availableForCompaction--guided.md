@@ -303,7 +303,7 @@ as `COMPACTION` is left to stage 3 (§10 Notes).
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `max_space_usable_for_compactions_in_percentage` so that the
 compaction budget straddles the size of a known set of SSTables, runs one major
 compaction at each value, and counts how the node shrinks, runs or aborts it; a

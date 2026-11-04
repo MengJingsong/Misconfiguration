@@ -1,7 +1,7 @@
 # Draft verification designs for `none`-type cases, kind 3 (buffer length / capacity)
 
 Drafted 2026-10-28. **Documents only: nothing was run, built or committed, and no case file was edited.** Each section below is meant to be pasted
-into B2 and B3 of its case file as a dated audit amendment, following [`none-type-design.md`](none-type-design.md) §3-§4. Source lines were
+into B2 and B3 of its case file as a dated audit amendment, following [`none-type-design.md`](../../stage4-runtime-verification/none-type-design.md) §3-§4. Source lines were
 re-read in `systems/cassandra/source/`; a line marked "(case file)" was taken from the case file and not re-opened.
 Wording for every design: *the operand is the buffer length itself, so "usage follows the operand" is expected and is not a finding (design §6);
 the finding is the difference the branch causes at equal operand.*

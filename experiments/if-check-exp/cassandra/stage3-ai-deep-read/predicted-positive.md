@@ -3,7 +3,7 @@
 Lines stage 3 has **read against the three rules and accepted**, but which do
 not yet exist as case files in [`cases/`](cases/). They are findings, not a
 queue: the judgement is made: what remains is the write-up (all nine
-questions of [`../README.md` §5](../README.md#5-required-content-per-if-check-case),
+questions of [`../README.md` §5](../../README.md#5-required-content-per-if-check-case),
 citations checked against the pinned tag).
 
 An entry in the write-up queue leaves this file when its case file lands in `cases/` and its row is
@@ -12,7 +12,7 @@ added to [`_INDEX.md`](_INDEX.md). An entry in the *stage-4 table* at the end (s
 [`_INDEX.md`](_INDEX.md) §1: stage 3's positive estimate is the prediction, stage 4 the
 true result. Nothing else belongs here — rows still
 *awaiting* a read live in
-[`../stage2-ai-preprocessing/bands.md`](../stage2-ai-preprocessing/bands.md),
+[`../stage2-ai-preprocessing/bands.md`](../../stage2-ai-preprocessing/bands.md),
 which is stage 3's 3a queue, and rows read but not settled live in
 [`undetermined.md`](undetermined.md).
 

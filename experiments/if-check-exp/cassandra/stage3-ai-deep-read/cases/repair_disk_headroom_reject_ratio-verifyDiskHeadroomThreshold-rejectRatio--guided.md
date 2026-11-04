@@ -251,7 +251,7 @@ usage a repair can reach:
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test caps each node's data-disk total at 1 GiB with `data_disk_usage_max_disk_size`,
 sets the node's usage with a sparse pad file in its data directory, sweeps the ratio over
 JMX on a two-node ring, and reads each check's operand, verdict and log line; then it

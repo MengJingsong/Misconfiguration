@@ -2,7 +2,7 @@
 
 If statements read **with the Cassandra source open** (`cassandra-5.0.9`) and
 rejected against the three rules
-([`../README.md` §3.4–§3.6](../README.md#3-core-concept-the-if-check-case)). A line
+([`../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case)). A line
 here carries a **negative estimate**: a prediction from the source that usage
 does not follow the constraint. Stage 4 confirms or refutes it.
 
@@ -16,7 +16,7 @@ does not follow the constraint. Stage 4 confirms or refutes it.
 - **An entry leaves this file once its case is verified at stage 4**; its
   verdict is then in [`_INDEX.md`](_INDEX.md) §1. Until then, a written-up
   entry links its case file in the reason. Lessons from these reads are in
-  [`playbook-guided.md`](playbook-guided.md) §3.1. A line is recorded in one place
+  [`playbook-guided.md`](../../stage3-ai-deep-read/playbook-guided.md) §3.1. A line is recorded in one place
   only: if a later pass reaches a line already here, cite this entry.
 - **Organised by the reason for rejection** (2026-10-21), not by pass or date.
   The rules are cited as Rule 1 (the limit side is a capacity), Rule 2 (changing
@@ -178,7 +178,7 @@ not at all). Most limits here are encoding or type limits, not configuration.
 
 ## 4. Rollover and chunking
 
-**Rule 2, rollover** ([`../README.md` §3.5](../README.md#3-core-concept-the-if-check-case)'s
+**Rule 2, rollover** ([`../README.md` §3.5](../../README.md#3-core-concept-the-if-check-case)'s
 edge case). A buffer, page, block, segment, file or writer is full, so it is
 written out and the next one starts. Every byte is still written or held; the
 check only sets how it is split.

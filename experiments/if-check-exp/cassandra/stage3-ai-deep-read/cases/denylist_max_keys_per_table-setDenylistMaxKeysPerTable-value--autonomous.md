@@ -16,7 +16,7 @@
 - **Restart.** No restart is needed. The value is read at each load or refresh (`PartitionDenylist.java:390,422,497`). The cache does not shrink until the next load or refresh.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps heap. The cache is `LoadingCache<TableId, DenylistEntry>` (`PartitionDenylist.java:92`). Each entry holds an `ImmutableSet<ByteBuffer>` of keys and an `ImmutableSortedSet<Token>` (`:95-111`). The quantity compared is `processed`, the number of rows copied into the entry (`:439-446`), plus `results.size() > limit` for the error log (`:419-430`). The transient query result is also bounded by `LIMIT limit+1` (`:404-409`).
 
 **A3. Mechanism.**

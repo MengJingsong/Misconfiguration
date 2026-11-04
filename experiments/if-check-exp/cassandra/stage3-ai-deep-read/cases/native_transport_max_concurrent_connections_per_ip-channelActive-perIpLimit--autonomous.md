@@ -17,7 +17,7 @@
 - Values ≤ 0 disable the per-IP branch (`:102`). With the per-IP limit > 0 and the global limit exactly 0, the handler is installed and the global check refuses every connection, since `count > 0` (`:87-97`); see B3h.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** The count of live native connections from one remote IP address. The operand is `connectionsPerClient.get(address)` (`ConnectionLimitHandler.java:53,110-121`), incremented at `:121` and decremented at `:142`. Each connection holds the memory listed in the global case's A2. The large part is the `InitialConnectionHandler` cumulation of a partly received envelope:
 - up to `native_transport_max_frame_size` = 16 MiB per connection (`Envelope.java:197,428-442`);
 - no client byte budget applies before STARTUP (`InitialConnectionHandler.java:107-108`).

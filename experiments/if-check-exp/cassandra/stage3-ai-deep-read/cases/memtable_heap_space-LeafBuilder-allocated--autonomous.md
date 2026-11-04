@@ -27,7 +27,7 @@ The target lines test the sentinel `allocated >= 0` ([`BTree.java:2517`](https:/
 `ColumnData.Reconciler`.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** JVM heap used by memtables. The quantity compared is
 `MemtablePool.SubPool.allocated` for the on-heap sub-pool
 (`MemtablePool.java:151-158`). That sum is built from per-write `heapSize` deltas, and

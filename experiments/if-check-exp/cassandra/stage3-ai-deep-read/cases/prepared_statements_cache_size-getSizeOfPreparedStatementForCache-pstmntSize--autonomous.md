@@ -18,7 +18,7 @@
 - The unit-test config already sets it: `test/conf/cassandra.yaml:48` is `prepared_statements_cache_size: 1MiB`.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap. Specifically, the total *weight* of entries in the
 `QueryProcessor.preparedStatements` Caffeine cache, where weight =
 `MD5Digest.size()` (16) + `Prepared.pstmntSize` (`QueryProcessor.java:952-958`).

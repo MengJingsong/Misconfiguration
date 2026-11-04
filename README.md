@@ -20,18 +20,25 @@ them:
 | **Target 2** | Show *how* each constraint restricts usage, via the exact code path. |
 | **Target 3** | Investigate bypass methods that could lead to resource exhaustion. |
 
-Each experiment folder covers some subset. The two `*-exp` Cassandra folders
-below both cover **Target 1 + Target 2 together** — each result names a
-constraint *and* shows the code that enforces it — and both leave Target 3
-out of scope, noting bypass-relevant observations in passing for later use.
-`OOM-exp` carries out **Target 3** for Cassandra, taking the constraints
-`if-check-exp` found as its input:
+Each experiment folder covers some subset. An experiment is **a method, not a
+system**: its README, templates and playbooks are system-agnostic, and its
+findings for each system live in a per-system subfolder (`<exp>/cassandra/`,
+`<exp>/hadoop/`). The two `*-exp` folders below both cover **Target 1 +
+Target 2 together** — each result names a constraint *and* shows the code that
+enforces it — and both leave Target 3 out of scope, noting bypass-relevant
+observations in passing for later use. `OOM-exp` carries out **Target 3**,
+taking the constraints `if-check-exp` found as its input:
 
 | Folder | Status | Direction |
 |---|---|---|
 | [`experiments/if-check-exp/`](experiments/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
 | [`experiments/entry-restriction-exp/`](experiments/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
 | [`experiments/OOM-exp/`](experiments/OOM-exp/README.md) | **active** | Target 3: drive a test node OOM using `if-check-exp`'s constraints (convergence, bypass) |
+
+**Systems covered.** All completed work to date is **Cassandra** and lives
+under each experiment's `cassandra/` subfolder. **Hadoop** subfolders
+(`<exp>/hadoop/`) are scaffolded but empty — the same methods are to be applied
+to Hadoop next, with its source and build tooling under `systems/hadoop/`.
 
 `if-check-exp` and `entry-restriction-exp` are deliberately **not
 cross-referenced** — a line may legitimately appear in both. `OOM-exp` is the
@@ -59,7 +66,44 @@ committed and never overwrites anyone else's values; `check-ips.sh` can
 also rewrite its `CLUSTER_IP` block automatically after a CloudLab
 allocation swap.
 
-## 2. Workspace layout (on CloudLab)
+## 2. Workspace layout
+
+### 2.1 This repo's own layout
+
+Two axes: **experiments** (methods, system-agnostic) and **systems** (the
+software each method is applied to). Per-system findings live where the two
+cross, under `experiments/<exp>/<system>/`.
+
+```
+experiments/                 <- methods; each README/template/playbook is system-agnostic
+├── if-check-exp/            <- Target 1+2 (active): method docs + stage{1..4}/ specs
+│   ├── cassandra/           <-   Cassandra findings: cases, results, harness runs, CSVs
+│   └── hadoop/              <-   scaffold (empty) — Hadoop findings go here
+├── entry-restriction-exp/   <- Target 1+2 (paused): method docs + templates
+│   ├── cassandra/           <-   Cassandra codepath/summary cases
+│   └── hadoop/              <-   scaffold (empty)
+└── OOM-exp/                 <- Target 3 (active): method docs + playbooks
+    ├── cassandra/           <-   Cassandra convergence/bypass cases
+    └── hadoop/              <-   scaffold (empty)
+systems/
+├── cassandra/
+│   ├── source/              <- pinned apache/cassandra @ tag cassandra-5.0.9 (unmodified)
+│   ├── build-dist/          <- 4-node cluster install/run scripts (orchestrator + remotes)
+│   └── conf/                <- stock config baseline to diff against
+└── hadoop/
+    ├── source/              <- pinned Hadoop source (to populate)
+    ├── build-src/           <- Hadoop source build scripts (JDK8 + Maven + protobuf)
+    └── conf/                <- stock config baseline (to populate)
+codeql-queries/              <- CodeQL packs: cassandra/, hadoop/, common/ (stage 1 of if-check-exp)
+config/                      <- repo_layout.sh (local refs), environment.sh.example (external refs)
+README.md  HANDOFF*.md       <- this file and the start-here briefs
+```
+
+Adding a new system means adding a `systems/<system>/` tree and a
+`<exp>/<system>/` subfolder under each experiment — the method docs are not
+duplicated.
+
+### 2.2 On CloudLab
 
 This repo is checked out under a persistent, project-shared CloudLab
 mount, alongside other resources that are **not** part of this repo:
@@ -101,16 +145,17 @@ a `.claude/` folder) is archived at `/proj/misconfiguration-PG0/tarfiles/repo-co
 
 ## 3. Path configuration: local refs vs. external refs
 
-Scripts under `cassandra/` and `hadoop/` need two different kinds of path
+Scripts under `systems/` and `experiments/` need two different kinds of path
 information, kept in separate config files at the repo root so each can
 change independently:
 
 ### 3.1 Local refs — `config/repo_layout.sh`
 
 - **`config/repo_layout.sh`** (committed) — **local refs**: paths
-  *relative to this repo's own root* (e.g. where `build-cassandra-dist`,
-  `build-hadoop-src` live within `cassandra/`/`hadoop/`). Edit this only
-  when folders are renamed/moved *inside* this repo.
+  *relative to this repo's own root* (e.g. where `build-dist` and `build-src`
+  live under `systems/cassandra/`/`systems/hadoop/`, and where each experiment
+  lives under `experiments/`). Edit this only when folders are renamed/moved
+  *inside* this repo.
 
 ### 3.2 External refs — `config/environment.sh`
 
@@ -130,56 +175,79 @@ location, then `config/repo_layout.sh` and `config/environment.sh` under
 it), so path changes only ever need editing in one of these two files,
 never scattered across individual scripts.
 
-## 4. Experiment folders
+## 4. Experiments (`experiments/`)
 
-### 4.1 `systems/cassandra/build-dist/`
+Each experiment is a **method** (README format spec, templates, playbooks,
+stage structure) that is system-agnostic. Per-system findings live under
+`<exp>/<system>/`; today that is `<exp>/cassandra/` (populated) and
+`<exp>/hadoop/` (scaffold, empty).
 
-- **`systems/cassandra/build-dist/`** — orchestrator (control-machine)
-  and remote (per-node) scripts to install/configure/start/stop a 4-node
-  Cassandra **5.0.9** binary distribution cluster.
-
-### 4.2 `experiments/entry-restriction-exp/`, `experiments/if-check-exp/`
+### 4.1 `experiments/if-check-exp/`, `experiments/entry-restriction-exp/`
 
 - **`experiments/if-check-exp/`** (active) and
   **`experiments/entry-restriction-exp/`** (paused) — static code-path
-  inventories of Cassandra's resource-limit checks, approached from opposite
+  inventories of a system's resource-limit checks, approached from opposite
   directions (§0). Each has its own `README.md` (format spec) and its own
   start-here brief: the root [`HANDOFF.md`](HANDOFF.md) for `if-check-exp`,
   and [`experiments/entry-restriction-exp/HANDOFF.md`](experiments/entry-restriction-exp/HANDOFF.md)
   for the paused one.
 
   `if-check-exp` organises its work as **three stages by evidence standard** —
-  structural (CodeQL) → lexical (rows only) → semantic (source open) — with
-  one folder each. Every cited line is checked against the
-  `systems/cassandra/source/` source described above. **Behavioral verification (running a trigger into
-  the disallow branch) is out of scope** as of 2026-09-23: a case's evidence
-  is its traced code path.
+  structural (CodeQL) → lexical (rows only) → semantic (source open). The stage
+  method docs live at the experiment root; each stage's per-system output lives
+  under `<exp>/<system>/<stage>/`. Every cited line is checked against that
+  system's pinned source (for Cassandra, `systems/cassandra/source/`).
+  **Behavioral verification (running a trigger into the disallow branch) is out
+  of scope** as of 2026-09-23: a case's evidence is its traced code path.
+
+### 4.2 `experiments/OOM-exp/`
+
+- **`experiments/OOM-exp/`** (active) — **Target 3**: drive a test node out of
+  memory using the constraints `if-check-exp` found, via convergence (several
+  usages reaching capacity at once) and bypass (getting past a single check).
+  Method docs and playbooks live at the root; per-system cases under
+  `OOM-exp/<system>/cases/`.
 
 ### 4.3 `codeql-queries/`
 
 - **`codeql-queries/`** — CodeQL query packs (one per target: `cassandra/`,
-  `hadoop/`). The Cassandra pack is **stage 1** of `if-check-exp`: it
-  mechanically narrows candidate if-checks, with no keyword list (see its own
-  [`README.md`](codeql-queries/README.md)). Runs against the compiled
-  databases under `codeql-dbs/` described above; its CSV output is
+  `hadoop/`, plus shared `common/`). The Cassandra pack is **stage 1** of
+  `if-check-exp`: it mechanically narrows candidate if-checks, with no keyword
+  list (see its own [`README.md`](codeql-queries/README.md)). Runs against the
+  compiled databases under `codeql-dbs/` described above; its CSV output is
   gitignored and regenerated per machine. The Hadoop pack is scaffold only.
+  (This folder predates the restructure and keeps its own per-target split; it
+  is not moved under `systems/`.)
 
-### 4.4 `systems/cassandra/conf/`
+## 5. Systems (`systems/`)
 
-- **`systems/cassandra/conf/`** — reference copies of a stock Cassandra
-  config set: `cassandra.yaml`, `cassandra-env.sh`, `jvm17-server.options`.
-  Kept as the untouched baseline to diff an experiment's config against. No
-  script reads them, and nothing is generated from them.
+Per-system source, build tooling and config baseline. A new system is added
+here alongside a `<exp>/<system>/` subfolder under each experiment.
+
+### 5.1 `systems/cassandra/`
+
+- **`systems/cassandra/source/`** — the pinned `apache/cassandra` tree at tag
+  `cassandra-5.0.9` (see §2.2). Never build in it or add files to it.
+- **`systems/cassandra/build-dist/`** — orchestrator (control-machine) and
+  remote (per-node) scripts to install/configure/start/stop a 4-node Cassandra
+  **5.0.9** binary distribution cluster.
+- **`systems/cassandra/conf/`** — reference copies of a stock Cassandra config
+  set: `cassandra.yaml`, `cassandra-env.sh`, `jvm17-server.options`. Kept as
+  the untouched baseline to diff an experiment's config against. No script
+  reads them, and nothing is generated from them.
 
   **Caveat (checked 2026-09-24):** `cassandra-env.sh` and
   `jvm17-server.options` are byte-identical to `conf/` at the pinned tag
   `cassandra-5.0.9`, but **`cassandra.yaml` is not** — it is missing sections
   that 5.0.9 ships (e.g. the `paxos_variant` block), so it predates the
   pinned tag. It was committed in `56a7d0b`, before the repo pinned 5.0.9.
-  Re-copy it from `systems/cassandra/source/conf/` before treating it as the 5.0.9
-  baseline.
+  Re-copy it from `systems/cassandra/source/conf/` before treating it as the
+  5.0.9 baseline.
 
-### 4.5 `systems/hadoop/build-src/`
+### 5.2 `systems/hadoop/`
 
-- **`systems/hadoop/build-src/`** — Hadoop source build scripts (JDK8 +
-  Maven + protobuf 2.5.0).
+- **`systems/hadoop/build-src/`** — Hadoop source build scripts (JDK8 + Maven
+  + protobuf 2.5.0).
+- **`systems/hadoop/source/`** and **`systems/hadoop/conf/`** — placeholders
+  (empty) for the pinned Hadoop source and its stock config baseline, to be
+  populated when the experiments are applied to Hadoop.

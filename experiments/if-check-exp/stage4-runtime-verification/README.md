@@ -53,7 +53,7 @@ Within stage 4, every step is done by an AI session:
 
 ## What stage 4 consumes
 
-**Every case file in [`../stage3-ai-deep-read/cases/`](../stage3-ai-deep-read/cases/), whichever agent wrote it.** The suffix of the file name says which:
+**Every case file in [`../stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/), whichever agent wrote it.** The suffix of the file name says which:
 `<stem>--guided.md` or `<stem>--autonomous.md`. The results file and the harness folder take the same name, so a
 case's stem including its suffix is its key everywhere in this stage. A file with a negative estimate
 is run like any other: its claim is that usage does **not** follow the constraint, and the conclusion table says what each
@@ -246,7 +246,7 @@ With no human review, the conclusion has to survive the AI's own second look.
 
 | Rule | Why |
 |---|---|
-| **Never build in, or add files to, the repository's `systems/cassandra/source/`.** Copy it to local disk for each run: [`copy-source.sh`](copy-source.sh) `<local-dir>` ([`environment.md`](environment.md) §2). Runs before 2026-10-22 cloned the separate `cassandra-src` clone instead, which held the same files. | Stage 3 reads that source for line numbers, and a build or a copied test file there would show up as a change to this repository. |
+| **Never build in, or add files to, the repository's `systems/cassandra/source/`.** Copy it to local disk for each run: [`copy-source.sh`](../cassandra/stage4-runtime-verification/copy-source.sh) `<local-dir>` ([`environment.md`](../cassandra/stage4-runtime-verification/environment.md) §2). Runs before 2026-10-22 cloned the separate `cassandra-src` clone instead, which held the same files. | Stage 3 reads that source for line numbers, and a build or a copied test file there would show up as a change to this repository. |
 | **Never fill `/proj`.** Node data, commit log and hints go on local disk; a disk-limit case uses a local filesystem of fixed, known size. | `/proj/misconfiguration-PG0` is a shared NFS mount (95 GB). Filling it affects everyone, and its free space moves with other users' files. |
 | A run 2 uses the same node type and the same kind of storage as run 1. | Flush and write timings depend on the disk. |
 | Stop every process a run starts, and check none is left: `ps -eo cmd | grep '[C]assandraDaemon'` (not `pgrep -f` inside an inline `ssh host '...'` string: it matches its own shell). | A leftover node holds ports and memory and contaminates the next run. |
@@ -259,7 +259,7 @@ Required by `build.xml` at the tag: **JDK 11** (the default) **or 17**, and
 versions, the local copy's source (repository commit), the case-file commit, and the harness
 commit — the results template has the table.
 
-**Setup steps:** [`environment.md`](environment.md) (JDK, Ant, copy, build, and the cluster-tier tools). The machine used for stage-3 work had no `java`, `jcmd` or `ant` on its PATH.
+**Setup steps:** [`environment.md`](../cassandra/stage4-runtime-verification/environment.md) (JDK, Ant, copy, build, and the cluster-tier tools). The machine used for stage-3 work had no `java`, `jcmd` or `ant` on its PATH.
 
 ## What stage 4 produces, and where feedback lands
 
@@ -284,10 +284,10 @@ reads as settled prose is the worst outcome this pipeline can produce.
 Every filed case carries a §9 test design, so stage 4 waits only on execution. **Which cases have run, and what comes next,
 is tracked in [`../../../HANDOFF.md`](../../../HANDOFF.md)**; this README holds the protocol only.
 
-- **Any case file:** start with [`case-notes.md`](case-notes.md), which lists what the closed cases teach, which are cheap
+- **Any case file:** start with [`case-notes.md`](../cassandra/stage4-runtime-verification/case-notes.md), which lists what the closed cases teach, which are cheap
   to start with and which need a cluster before they say anything, and the worked examples.
 - **A `none`-type case (no limit to vary):** [`none-type-design.md`](none-type-design.md) (operand-sweep design, proposed 2026-10-28).
-- **Setting up a node:** [`environment.md`](environment.md).
+- **Setting up a node:** [`environment.md`](../cassandra/stage4-runtime-verification/environment.md).
 
 **Scripts are per case, not a shared pattern.** Each case's workload, observables and instruments differ (a unit test, a
 Byteman rule, a sampler), so there is no common runner. What every run script must do

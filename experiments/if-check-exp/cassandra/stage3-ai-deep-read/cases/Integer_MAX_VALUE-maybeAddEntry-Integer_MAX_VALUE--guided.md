@@ -304,7 +304,7 @@ rebuild paths keep the untrimmed block (§7).
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test fills one SSTable's summary to the bound with keys of known size and
 checks that it stops at the predicted entry, with the limit moved by a Byteman
 rule to 8, 32 and 128 MiB and at the real 2 GiB, then reads the keys past the

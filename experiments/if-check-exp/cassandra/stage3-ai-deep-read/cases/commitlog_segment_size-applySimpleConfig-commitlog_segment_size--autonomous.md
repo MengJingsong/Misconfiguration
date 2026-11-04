@@ -13,7 +13,7 @@
 **A1. The constraint.** `commitlog_segment_size`, configuration entry ([`Config.java:396-397`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/Config.java#L396-L397), `IntMebibytesBound`, default `32MiB`; legacy `commitlog_segment_size_in_mb`), yaml `conf/cassandra.yaml:660` (comment `:650-659`). Unit MiB (KiB refused, [`DataStorageSpec.java:86`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DataStorageSpec.java#L86)). Checks: `== 0` → `ConfigurationException` "must be positive" ([`DatabaseDescriptor.java:891-893`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L891-L893)); `>= 2048` → "must be smaller than 2048" (`:894-896`). Getter `getCommitLogSegmentSize()` returns bytes (`:2875-2878`); setter is test-only (`:2887-2890`). Restart required.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Disk: size of each `CommitLog-*.log` file. Memory: size of each segment's mapped buffer (mmap, legacy mode) or of the per-segment write buffer in compressed/encrypted/direct-IO modes (`CompressedSegment.java:116`, `EncryptedSegment.java:112,176`, `DirectIOSegment.java:201-206`). Indirectly: default `max_mutation_size = segment/2`.
 
 **A3. Mechanism.**

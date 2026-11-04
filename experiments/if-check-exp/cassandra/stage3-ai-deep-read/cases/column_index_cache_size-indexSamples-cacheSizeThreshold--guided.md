@@ -260,7 +260,7 @@ carelessly would overclaim:
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `column_index_cache_size` live, reads partitions whose block indexes are
 of known sizes, and checks that each entry is built as the array (`IndexedEntry`) or the
 file position (`ShallowIndexedEntry`) exactly where the threshold falls, and what that

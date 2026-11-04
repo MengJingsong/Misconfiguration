@@ -116,7 +116,7 @@ constraints must stay unset.
 Follow the original's "Picking combinations" with these changes:
 
 1. **Use this playbook's own batch log,**
-   [`cases/default-convergence/_batch-log.md`](cases/default-convergence/_batch-log.md),
+   [`cases/default-convergence/_batch-log.md`](cassandra/cases/default-convergence/_batch-log.md),
    and its group status table. The original's statuses do **not** carry
    over: a group marked exhausted for raised values is a different question
    at defaults. The disk group's **skipped** status does carry over until it
@@ -195,5 +195,5 @@ original four sections and these additions:
 
 Keep the batch log at `cases/default-convergence/_batch-log.md` (one entry
 per run, same content as the original's, plus the default-arithmetic verdict
-per group surveyed). Track closed cases in [`_INDEX.md`](_INDEX.md) under
+per group surveyed). Track closed cases in [`_INDEX.md`](cassandra/_INDEX.md) under
 their own "Default-value convergence cases" table.

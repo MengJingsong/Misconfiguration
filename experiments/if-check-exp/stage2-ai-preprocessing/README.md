@@ -23,7 +23,7 @@ before `equality` ones.
 | File | Holds |
 |---|---|
 | [`bands.md`](bands.md) | **Stage 2's result** — the bands explained, band A grouped by what the limit is, and the run's provenance. Stage 3's 3a queue, a work list, **not** a list of qualified cases. |
-| [`bands.csv`](bands.csv) | **The per-row verdicts** — `uid, kind, band, reason, model, date, batch`. Committed, because an AI band cannot be regenerated the way the old keyword tiers could. |
+| [`bands.csv`](../cassandra/stage2-ai-preprocessing/bands.csv) | **The per-row verdicts** — `uid, kind, band, reason, model, date, batch`. Committed, because an AI band cannot be regenerated the way the old keyword tiers could. |
 | [`playbook.md`](playbook.md) | **Start here when running a batch.** The four bands, the batch procedure, the calibration rows, and the tricks and pitfalls learned so far. Not a verdict store. |
 
 Every row stage 2 reads lands in `bands.md` with a rank. **Stage 2 has no
@@ -67,7 +67,7 @@ and that is the decision this folder reversed.
 pattern (b) or (c)" means tracing where the verdict is read and whether the
 branches diverge — which no row shows. Deferral is a stage-3 judgment and
 lives in
-[`../stage3-ai-deep-read/undetermined.md`](../stage3-ai-deep-read/undetermined.md).
+[`../stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md).
 If a row *smells* like (b)/(c), **downrank it and let stage 3 decide**; do
 not park it and do not refuse it.
 
@@ -85,7 +85,7 @@ no reject step.
 ## One line, one place
 
 Rejections made by **stage 3** (source open, three rules applied) live in
-[`../stage3-ai-deep-read/predicted-negative.md`](../stage3-ai-deep-read/predicted-negative.md),
+[`../stage3-ai-deep-read/predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md),
 not here — they differ in kind: few, narrative, often
 deferred-rather-than-refused, and citing a rule rather than a row-level
 ground. If stage 2 reaches a line that stage 3 already judged, **cite that
@@ -109,7 +109,7 @@ semantic judgement. See
 
 **The banding is complete, and covers every stage-1 row.** 4,789 units over
 40 batches on 2026-09-23/24 with `claude-opus-5`; per-row verdicts are in
-[`bands.csv`](bands.csv), grouped and explained in
+[`bands.csv`](../cassandra/stage2-ai-preprocessing/bands.csv), grouped and explained in
 [`bands.md`](bands.md).
 
 | Input | Units | Banded |
@@ -153,13 +153,13 @@ a verdict — see [`bands.md`](bands.md).
 
 **Band A1 is consumed (2026-09-28).** Stage 3's first pass over this queue
 read all 65 rows with the source open. Outcome: **21 pending** (in
-[`../stage3-ai-deep-read/predicted-positive.md`](../stage3-ai-deep-read/predicted-positive.md); 13
+[`../stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md); 13
 of them since filed as cases (the count is now 14), 5 more cited with filed cases (second sites, or a row the case shows is not a check), 2 still open; `OutboundConnection.java:398` (filed 2026-10-07 as `internode_application_send_queue_capacity`, with `:416` cited in it: that row is bookkeeping, not a check), `ReadCommand.java:715` and `RowIndexEntry.java:392` (filed 2026-10-06 as `local_read_size_fail_threshold` and `row_index_read_size_fail_threshold`), `Mutation.java:172` and `AbstractType.java:594`, filed 2026-10-06 as
 `max_mutation_size` and `max_value_size`, and the second site `CounterMutation.java:94` are the latest),
 **34 rejected** (in
-[`../stage3-ai-deep-read/predicted-negative.md`](../stage3-ai-deep-read/predicted-negative.md)) and
+[`../stage3-ai-deep-read/predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md)) and
 **10 deferred** (3 undecided in
-[`../stage3-ai-deep-read/undetermined.md`](../stage3-ai-deep-read/undetermined.md) §5,
+[`../stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) §5,
 7 deferred earlier and since filed). 39 of the 65 were newly judged (10
 pending, 26 rejected, 3 deferred); 26 were already recorded by earlier passes
 and cited rather than re-judged (11 pending, 8 rejected, 7 deferred). Counts
@@ -187,7 +187,7 @@ a configurable number (`range_tombstone_list_growth_factor`,
 
 **Band B is consumed (2026-10-13).** All 174 units (157 rows, 17 helpers) read with
 the source open: **1 new candidate** (`repair_disk_headroom_reject_ratio`, 2 units,
-`predicted-positive.md` item 12, **filed 2026-10-15** as [`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`](../stage3-ai-deep-read/cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md)), **148 refused** (`predicted-negative.md`, batch "band B", in eleven
+`predicted-positive.md` item 12, **filed 2026-10-15** as [`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio`](../cassandra/stage3-ai-deep-read/cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md)), **148 refused** (`predicted-negative.md`, batch "band B", in eleven
 groups), **21 already recorded**, **2 joined** to open `undetermined.md` items, **1
 undecided** (`undetermined.md` §7, `cached_rows_fail_threshold`, a Rule 2 ruling). The
 recurring themes this file lists for B were accurate. The pass also found that
@@ -196,7 +196,7 @@ is a second decision point of the filed compaction-space case.
 
 **Band C is consumed (2026-10-13).** All 94 units (87 rows, 7 helpers) read with the
 source open: **1 new candidate** (`DOB_MAX_RECYCLE_BYTES`, `DataOutputBuffer.java:73`,
-`predicted-positive.md` item 13, the row band A3 pointed to; **filed 2026-10-15** as [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](../stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md)), **86 refused** (`predicted-negative.md`,
+`predicted-positive.md` item 13, the row band A3 pointed to; **filed 2026-10-15** as [`DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE`](../cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md)), **86 refused** (`predicted-negative.md`,
 batch "band C", in six groups), **7 already recorded**, nothing deferred. The band's
 label, "named operands, nothing resource-shaped", held for 86 of 87 newly judged units.
 

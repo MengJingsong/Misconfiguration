@@ -68,12 +68,12 @@ For each candidate constraint, pull from its case file and stage-4 results
    regardless of outcome class (examples: `max_mutation_size`,
    `max_value_size`, `tombstone_failure_threshold`, the
    `*_read_size_fail_threshold` family — see
-   [`cases/convergence/_constraint-groups.md`](cases/convergence/_constraint-groups.md)'s
+   [`cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md)'s
    "Not a shared budget" section for the full list and why each was excluded).
 
 A standing survey of every true-positive constraint, grouped by budget and
 already filtered for standing-pool vs. guardrail, lives at
-[`cases/convergence/_constraint-groups.md`](cases/convergence/_constraint-groups.md).
+[`cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md).
 Check it before re-deriving a group from scratch — it also flags
 look-alike traps (e.g. several off-heap networking constraints that turn
 out to share the exact same underlying pool, so combining two of them is
@@ -87,7 +87,7 @@ list to work down — survey if-check-exp's true-positive and confirmed-bypass
 cases itself and group them.
 
 **Before picking, read the "Shared-budget group status" table at the top of
-[`cases/convergence/_batch-log.md`](cases/convergence/_batch-log.md).** It
+[`cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md).** It
 records, per shared-budget group, whether prior runs consider it open,
 exhausted, parked, or **skipped** (and why) — this is the dedup mechanism: it
 exists so a new run doesn't re-survey or re-run a group a previous run

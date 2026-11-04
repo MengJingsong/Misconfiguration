@@ -1,7 +1,7 @@
 # Entry-Restriction Pairs — Master Index
 
 Navigation hub and progress tracker for all entry-restriction pairs.
-See [README.md](README.md) for the format.
+See [README.md](../README.md) for the format.
 
 **Source:** apache/cassandra @ tag `cassandra-5.0.9`
 **Status legend:** `pending` · `in-progress` · `verified`

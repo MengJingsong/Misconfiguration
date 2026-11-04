@@ -13,7 +13,7 @@
 **A1. The constraint.** `memtable_offheap_space`, configuration entry (`Config.memtable_offheap_space`, `IntMebibytesBound`), unit MiB, commented at `conf/cassandra.yaml:799`. Default when unset: `maxMemory / 4` MiB ([`DatabaseDescriptor.java:583-584`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L583-L584)). Line 591 logs "Global memtable off-heap threshold is disabled, HeapAllocator will be used instead" when 0, otherwise logs the threshold (`:591-594`); nothing is rejected. Read once into static `MEMORY_POOL` ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59), `82`): restart required.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Native (direct / `Unsafe`) memory holding memtable data for the off-heap allocation types. Operand: `MEMORY_POOL.offHeap.allocated` vs `offHeap.limit` (= value `<< 20`).
 
 **A3. Mechanism.**

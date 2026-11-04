@@ -18,7 +18,7 @@ setter are at [`DatabaseDescriptor.java:3173-3181`](https://github.com/apache/ca
 command. A change applies to channels accepted afterwards.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps the number of open native connections from one remote
 `InetAddress`. The memory those connections hold is the pipeline, the decoder cumulation
 of up to `native_transport_max_frame_size` (`Envelope.java:429-442`) and connection

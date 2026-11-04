@@ -17,7 +17,7 @@
 - **No restart.** No restart is needed. The value is read at each full load (`PartitionDenylist.java:484,497`) and in the error message (`:424`).
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps heap. The quantity is the total number of keys across all `DenylistEntry` values in the cache (`PartitionDenylist.java:92-111`). The running sum compared is `totalProcessed` (`:478,484,497-500`).
 
 **A3. Mechanism.**

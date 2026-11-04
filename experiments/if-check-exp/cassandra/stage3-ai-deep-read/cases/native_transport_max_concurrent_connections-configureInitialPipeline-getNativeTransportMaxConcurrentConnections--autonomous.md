@@ -20,7 +20,7 @@ command. A runtime change applies to connections accepted afterwards. See the ov
 note in A3.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps the number of concurrently open native (CQL) client
 connections. The resource is the heap and off-heap memory those connections hold: the
 Netty channel and pipeline, the `InitialConnectionHandler` or `Envelope.Decoder`

@@ -1,7 +1,7 @@
 # Stage 4 — environment setup
 
 The steps that worked on 2026-09-28. Follow the same steps for every later run, so every run uses the same versions.
-Safety rules are in [`README.md`](README.md#running-safely-on-shared-infrastructure).
+Safety rules are in [`README.md`](../../stage4-runtime-verification/README.md#running-safely-on-shared-infrastructure).
 
 ## Node
 

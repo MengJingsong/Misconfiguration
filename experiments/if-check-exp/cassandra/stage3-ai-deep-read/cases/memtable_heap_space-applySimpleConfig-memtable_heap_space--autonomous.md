@@ -13,7 +13,7 @@
 **A1. The constraint.** `memtable_heap_space`, configuration entry (`Config.memtable_heap_space`, a `DataStorageSpec.IntMebibytesBound`). Unit MiB. Commented in `conf/cassandra.yaml:797` (`# memtable_heap_space: 2048MiB`). Default when unset: `maxMemory / 4` MiB ([`DatabaseDescriptor.java:586-587`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/config/DatabaseDescriptor.java#L586-L587)). Line 588 throws `ConfigurationException` when the value is 0 MiB, so a node will not start with 0. Read once into the static `MEMORY_POOL` ([`AbstractAllocatorMemtable.java:59`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/db/memtable/AbstractAllocatorMemtable.java#L59), `81`), so a change needs a restart; there is no JMX setter in the pool path.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** JVM heap used by memtable data (the cell/row bytes that memtable allocators account to the on-heap sub-pool). Operand: `SubPool.allocated` (bytes accounted on-heap) vs `SubPool.limit` (= `memtable_heap_space << 20`).
 
 **A3. Mechanism.**

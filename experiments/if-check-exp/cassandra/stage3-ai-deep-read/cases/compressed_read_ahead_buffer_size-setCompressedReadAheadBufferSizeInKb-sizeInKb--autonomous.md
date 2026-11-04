@@ -21,7 +21,7 @@ Getters: `getCompressedReadAheadBufferSize()` returns bytes (`:2544-2547`), and 
 A runtime change does not need a restart, but it only affects SSTable readers built after the change. The value is read once, in the `CompressedChunkReader.Standard` constructor ([`CompressedChunkReader.java:236`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/CompressedChunkReader.java#L236)).
 
 
-**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the value against a literal minimum (`< 256`), not usage against a capacity ([README §6](../README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
+**Limit type (2026-10-29).** not-a-case: the entry-pointer `if` validates the value against a literal minimum (`< 256`), not usage against a capacity ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)). The verification solution and the stage-4 results are kept as filed.
 **A2. What it caps.** It caps off-heap memory: it is the capacity in bytes of each read-ahead `ByteBuffer`. LZ4, the default compressor, prefers `BufferType.OFF_HEAP` (`LZ4Compressor.java:240-243`), which means `ByteBuffer.allocateDirect` (`BufferType.java:33-36`). The quantity compared at 2556 is the requested size itself in KiB; no usage figure is compared. The memory that follows from the setting is the number of open scan buffers × the size.
 
 **A3. Mechanism.**

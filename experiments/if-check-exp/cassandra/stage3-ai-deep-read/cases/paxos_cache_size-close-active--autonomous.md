@@ -23,7 +23,7 @@ JMX setter. The value is read once, when `PaxosState` is class-initialized
 ([`PaxosState.java:72-76`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/service/paxos/PaxosState.java#L72-L76), a static final field), so changing it **needs a restart**.
 
 
-**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** config: yaml entry. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** Heap. It caps the total *weight* of `PaxosState.RECENT`. The weight
 of one entry is `accepted.update.unsharedHeapSize() + committed.update.unsharedHeapSize()`,
 saturated to int (`PaxosState.java:74`). `PartitionUpdate.unsharedHeapSize()` is the sum of

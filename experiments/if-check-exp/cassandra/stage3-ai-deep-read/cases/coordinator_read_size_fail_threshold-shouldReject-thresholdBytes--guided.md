@@ -191,7 +191,7 @@ It does **not** bound: the replica response buffers the coordinator holds while 
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test reads one wide partition of identical rows at several values of the limit and checks that the coordinator refuses exactly the reads whose rows before the last exceed it, with the counter at the abort equal to the predicted value, that the bytes the coordinator allocates while building the result stop growing there, and that the replica's response is built in full regardless. **Run so far:** none.
 
 *Amended 2026-10-15 (stage-4 step-0 audit, before any reading; results file §1.1).* (1) **The unit tier's absolute

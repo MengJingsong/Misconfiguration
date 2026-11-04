@@ -207,7 +207,7 @@ per-connection-type-per-peer one.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test sets `internode_application_receive_queue_capacity` on one receiving node,
 makes its peers send large messages faster than it processes them, and checks that
 the bytes it has accepted per peer stop near the capacity, that the check's

@@ -16,7 +16,7 @@
 - It cannot be set. The only substitute is the client page size, which replaces it when > 0 (`:899-902`).
 
 
-**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../README.md#6-rules-that-hold-for-both-agents)).
+**Limit type (2026-10-29).** non-config: hard-coded constant. The traced constraint decides ([README §6](../../../stage3-ai-deep-read/README.md#6-rules-that-hold-for-both-agents)).
 **A2. What it caps.** It caps the number of rows read per internal sub-page of a GROUP BY query when the client disables paging. Each sub-page is one `StorageProxy.read`, whose replica response is materialized in memory: a local data response is serialized into a `DataOutputBuffer` (`src/java/org/apache/cassandra/db/ReadResponse.java:197-203`). The resource is heap on the coordinator and on the replica.
 
 **A3. Mechanism.**

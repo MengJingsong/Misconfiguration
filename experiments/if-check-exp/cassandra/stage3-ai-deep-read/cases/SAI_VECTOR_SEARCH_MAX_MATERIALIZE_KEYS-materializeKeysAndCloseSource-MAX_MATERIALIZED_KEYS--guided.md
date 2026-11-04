@@ -248,7 +248,7 @@ workload, where the list holds *M* and the knob stops mattering.
 
 **Stage 3 writes this section; stage 3 never runs it** — no measured numbers
 and no verdict here; results go to
-[`../../../stage4-runtime-verification/README.md`](../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 The test drives hybrid vector queries with a known number of matching rows
 around the limit, at several limits, and reads the list's size at the check,
 the plan taken, and the keys held on the heap. **Run so far:** none.
