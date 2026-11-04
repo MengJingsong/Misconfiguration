@@ -1,0 +1,18 @@
+# run 8 DOB workload: one 4,000,000-byte blob per partition into the pre-created dobks.standard1 (dc1 only).
+# No keyspace_definition/table_definition, so cassandra-stress issues no schema statement.
+keyspace: dobks
+table: standard1
+columnspec:
+  - name: key
+    size: fixed(10)
+    population: seq(1..1000000)
+  - name: C0
+    size: fixed(4000000)
+insert:
+  partitions: fixed(1)
+  batchtype: UNLOGGED
+  select: fixed(1)/1
+queries:
+  read1:
+    cql: select * from standard1 where key = ?
+    fields: samerow

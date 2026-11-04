@@ -4,17 +4,17 @@ Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
 [`_INDEX.md`](_INDEX.md) for every closed case.
 
-## Status: active, four cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
+## Status: active, five cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
 
-**Direction 1 (convergence) has two closed (OOMed) cases, one blocked case
-(disk — now paused by request, see below), and one closed off-heap case
-that did not OOM; Direction 2 (bypass) has not started.** `if-check-exp` is
+**Direction 1 (convergence): on-heap and off-heap are both exhausted (five
+OOMed cases across them), disk is paused by request with one blocked case;
+Direction 2 (bypass) has not started.** `if-check-exp` is
 the input (its case files and stage-4 results); this folder does not
 re-derive them, only consumes them.
 
 ## Current state
 
-- **Convergence (`convergence-playbook.md`):** 7 cases run — 4 closed (OOMed: runs 1, 2, 6, 7), 1 blocked (disk, skipped), 1 closed not reached (run 4, superseded), 1 void (run 5).
+- **Convergence (`convergence-playbook.md`):** 8 cases run — 5 closed (OOMed: runs 1, 2, 6, 7, 8), 1 blocked (disk, skipped), 1 closed not reached (run 4, superseded), 1 void (run 5).
   - Run 1: `memtable_heap_space` + `counter_cache_size` (both config-type, both
     individually confirmed true positive in `if-check-exp`, both on-heap):
     sized safe alone (each left ~38–39% of a 1024 MiB heap free under its own
@@ -86,13 +86,22 @@ re-derive them, only consumes them.
     **kernel OOM-killed 16 s in** (anon-rss 3465 MiB). OOMed on the first try:
     both are hard standing caps, so no timing engineering was needed. Case file:
     [`cases/convergence/memtable_offheap_space+file_cache_size.md`](cases/convergence/memtable_offheap_space+file_cache_size.md).
+  - Run 8 (2026-11-03): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`, both
+    new, both JVM properties, both `ByteBuffer.allocateDirect` pools, so the
+    budget is the JVM's own `-XX:MaxDirectMemorySize` (560 MiB), not a cgroup.
+    2-node loopback ring (hints need a down replica; N2 killed before any
+    reading). Alone 50% (hints pool at its 8-slab cap) and 70% (scratch
+    buffers kept by ~44 threads at L = 8 MiB). Together: `OutOfMemoryError:
+    Direct buffer memory` about 7 s into the DOB burst, then Cassandra's
+    forced heap OOM and `kill -9`. The same arm with L at its default did not
+    OOM (attribution control). Case file:
+    [`cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md).
   - Batch log: [`cases/convergence/_batch-log.md`](cases/convergence/_batch-log.md) —
     its "Shared-budget group status" table is the dedup record: on-heap is
     **exhausted** (2-way then 3-way, escalating outcome, no 4th
-    attempted since it wouldn't add evidence), off-heap is **open for other
-    candidates only** (its first pair, `row_cache_size` +
-    `index_summary_capacity`, closed as OOMed in run 6 under a
-    cgroup budget),
+    attempted since it wouldn't add evidence), off-heap is **exhausted**
+    (run 8: three disjoint pairs all OOMed, no independent standing pool
+    left untried),
     disk is **skipped** (2026-11-02, by request — not exhausted or blocked,
     just deliberately paused; see run 3's case file for the retry that
     remains available once un-skipped). Read it before picking a combination
@@ -110,13 +119,22 @@ re-derive them, only consumes them.
   `phi_convict_threshold` or otherwise isolating/accounting for the
   contention-induced false-suspicion hint growth seen in the control arm —
   see the case file §3.0/§4 for exact numbers and diagnosis.
-- **Off-heap group, next pair (two pairs closed as OOMed: runs 6 and 7):**
-  the remaining candidates are few: `DOB_MAX_RECYCLE_BYTES`,
-  `MAX_HINT_BUFFERS` / hints buffers, and the trie-memtable limits (which
-  follow `memtable_offheap_space`, so not independent). The networking
-  `BufferPool` family was judged not a standing pool in run 7. Check
-  each one's allocation path (JNA malloc vs `DirectByteBuffer`) first, and
-  pre-create any stress-profile table with `cqlsh` before a concurrent load.
+- **Off-heap group is exhausted (run 8).** Three disjoint pairs OOMed
+  (runs 6, 7, 8). The rows left in `_constraint-groups.md` are not
+  independent standing pools (same pool as one already used, or
+  in-flight-only networking buffers). Reopen only for a different question:
+  a cross-pair of already-used `allocateDirect` pools under
+  `MaxDirectMemorySize` (e.g. `DOB_MAX_RECYCLE_BYTES` + `file_cache_size`),
+  a 3-way case, or the minimum boundary.
+- **Next convergence work needs a decision**: both memory groups are
+  exhausted and disk is skipped by request, so the next convergence batch
+  needs either disk un-skipped (run 3's retry is ready), the causal-chain
+  scope opened, or one of the reopen questions above. Otherwise move to the
+  first bypass case.
+- **Harness lesson (run 8):** `cassandra-stress write` always sends
+  `CREATE KEYSPACE`, which times out under a concurrent load; use
+  `cassandra-stress user` profiles without schema definitions for any
+  concurrent workload (run 8's `dob.yaml`/`hints.yaml`).
 - **Tighter boundary sizing** for either closed heap case: both were sized with
   margin to exceed the heap, not to find the minimum combination that still
   OOMs. A follow-up run could binary-search that boundary.
@@ -167,6 +185,10 @@ re-derive them, only consumes them.
 - [`convergence-playbook.md`](convergence-playbook.md),
   [`bypass-playbook.md`](bypass-playbook.md) — the agent's whole instruction
   for a run in each direction.
+- [`default-value-convergence-playbook.md`](default-value-convergence-playbook.md) —
+  the convergence playbook plus one restriction: every constraint stays at
+  its default value (only the budget and the workload are dials). Own batch
+  log at `cases/default-convergence/_batch-log.md`; not run yet.
 - [`_INDEX.md`](_INDEX.md) — every closed case, by direction.
 - `cases/convergence/`, `cases/bypass/` — case files, batch logs, harness
   scripts and small raw-log excerpts (full logs stay on the run node; each
