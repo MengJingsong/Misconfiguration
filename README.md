@@ -35,10 +35,11 @@ taking the constraints `if-check-exp` found as its input:
 | [`experiments/entry-restriction-exp/`](experiments/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
 | [`experiments/OOM-exp/`](experiments/OOM-exp/README.md) | **active** | Target 3: drive a test node OOM using `if-check-exp`'s constraints (convergence, bypass) |
 
-**Systems covered.** All completed work to date is **Cassandra** and lives
-under each experiment's `cassandra/` subfolder. **Hadoop** subfolders
-(`<exp>/hadoop/`) are scaffolded but empty — the same methods are to be applied
-to Hadoop next, with its source and build tooling under `systems/hadoop/`.
+**Systems covered.** Most completed work is **Cassandra** and lives under each
+experiment's `cassandra/` subfolder. **Hadoop** has started: its source is vendored
+(`systems/hadoop/source/`, 3.4.2) and `if-check-exp` stage 1 is done
+([`experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/`](experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/README.md)).
+The other Hadoop subfolders (`<exp>/hadoop/`) are still empty.
 
 `if-check-exp` and `entry-restriction-exp` are deliberately **not
 cross-referenced** — a line may legitimately appear in both. `OOM-exp` is the
@@ -78,7 +79,7 @@ cross, under `experiments/<exp>/<system>/`.
 experiments/                 <- methods; each README/template/playbook is system-agnostic
 ├── if-check-exp/            <- Target 1+2 (active): method docs + stage{1..4}/ specs
 │   ├── cassandra/           <-   Cassandra findings: cases, results, harness runs, CSVs
-│   └── hadoop/              <-   scaffold (empty) — Hadoop findings go here
+│   └── hadoop/              <-   Hadoop findings: stage 1 done (2026-11-04), later stages empty
 ├── entry-restriction-exp/   <- Target 1+2 (paused): method docs + templates
 │   ├── cassandra/           <-   Cassandra codepath/summary cases
 │   └── hadoop/              <-   scaffold (empty)
@@ -228,7 +229,8 @@ stage structure) that is system-agnostic. Per-system findings live under
   `if-check-exp`: it mechanically narrows candidate if-checks, with no keyword
   list (see its own [`README.md`](codeql-queries/README.md)). Runs against the
   compiled databases under `codeql-dbs/` described above; its CSV output is
-  gitignored and regenerated per machine. The Hadoop pack is scaffold only.
+  gitignored and regenerated per machine. The Hadoop pack runs the same chain
+  (shared logic in `common/lib/IfCheckCore.qll`) against `codeql-dbs/hadoop-db`.
   (This folder predates the restructure and keeps its own per-target split; it
   is not moved under `systems/`.)
 

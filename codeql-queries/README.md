@@ -14,8 +14,11 @@ documented in this repo.
   [README](cassandra/queries/if-check-exp/README.md) for the query chain that does the
   structural narrowing. Results land in `results/` and are **gitignored** —
   regenerate them per machine rather than expecting them in a checkout.
-- `hadoop/` — query pack for the Hadoop database (`misconfiguration/hadoop`). Scaffold only:
-  `hadoop/queries/` is currently empty.
+- `hadoop/` — query pack for the Hadoop database (`misconfiguration/hadoop`). Its
+  `queries/if-check-exp/` is stage 1 for Hadoop: the Cassandra chain with Hadoop's scope and
+  batching columns (see its [README](hadoop/queries/if-check-exp/README.md)). The database is
+  built by `scripts/build-hadoop-db.sh`.
+- `common/lib/IfCheckCore.qll` — the `if-check-exp` comparison predicates shared by both packs.
 - `scripts/` — driver scripts that work against either database (not part of any qlpack).
 - `results/` — output from query runs (CSV or SARIF, see below). **Contents are gitignored**
   via `results/.gitignore` (`*` with `!.gitignore`), so the directory is tracked but nothing

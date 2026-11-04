@@ -48,7 +48,7 @@ rows are additional, not a subset. Both CSVs feed stage 2 as equals.
 ### The chain — `All` → `Comparison` → `Narrowed`
 
 `NarrowedIfStatements.ql` is where the real filtering happens. `isCandidateComparison` in
-[`IfCheck.qll`](../../ifcheck/IfCheck.qll) keeps a comparison only when **neither operand is
+[`IfCheckCore.qll`](../../../common/lib/IfCheckCore.qll) keeps a comparison only when **neither operand is
 `null`**, **not both operands are literals**, and **both operands are numeric-typed**. Measured
 over the 5,658 rows it drops:
 
@@ -133,13 +133,22 @@ Two columns exist specifically to serve the downstream stages:
 
 ## Shared predicates
 
-`isNumeric`, `operandName`, `pkgDir`, `opClass` and `isCandidateComparison` live in
-[`../../ifcheck/IfCheck.qll`](../../ifcheck/IfCheck.qll), imported as
-`import ifcheck.IfCheck`. They were previously copy-pasted into each query, which risked the
-queries drifting apart on what counts as "numeric" or "a candidate comparison". The library is
-Cassandra-local rather than in `common/` because it encodes this experiment's notion of a
-candidate check; it sits in `ifcheck/` rather than beside the queries because QL module names
-cannot contain hyphens, so `queries/if-check-exp/` is not an importable path.
+Queries import one module, `import ifcheck.IfCheck`. It is split in two (since 2026-11-04, when
+Hadoop got the same chain):
+
+- [`../../../common/lib/IfCheckCore.qll`](../../../common/lib/IfCheckCore.qll): `isNumeric`,
+  `operandName`, `opClass` and `isCandidateComparison`, the experiment's notion of a candidate
+  comparison. System-agnostic, shared by the Cassandra and Hadoop packs, and re-exported by each
+  pack's `IfCheck.qll`. Moving them changed no Cassandra output: all four CSVs were byte-identical
+  before and after.
+- [`../../ifcheck/IfCheck.qll`](../../ifcheck/IfCheck.qll): the Cassandra-specific parts,
+  `inMainSource` (`src/java/`) and `pkgDir` (under `org/apache/cassandra/`). The Hadoop pack has
+  its own (`codeql-queries/hadoop/ifcheck/IfCheck.qll`).
+
+They were previously copy-pasted into each query, which risked the queries drifting apart on what
+counts as "numeric" or "a candidate comparison". `IfCheck.qll` sits in `ifcheck/` rather than
+beside the queries because QL module names cannot contain hyphens, so `queries/if-check-exp/` is
+not an importable path.
 
 ## Known gap and planned extensions (2026-09-20)
 
