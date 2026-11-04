@@ -3,12 +3,18 @@
 
 Verdicts arrive as one line per batch line, in order: "<BAND> <reason>".
 Anchor lines are checked (all must be A) and are not written to bands.csv.
+An anchor named with --exempt=<uid> (repeatable) is neither checked nor
+written: use it only for an anchor retired after the batches were built, and
+record why where the anchors are documented.
 
 Usage: record-stage2-bands.py <batch.txt> <verdicts.txt> <bands.csv> <model> <date>
+                              [--exempt=<uid> ...]
 """
 import csv, os, sys
 
-batch, verdicts, out, model, date = sys.argv[1:6]
+args = [a for a in sys.argv[1:] if not a.startswith('--exempt=')]
+exempt = {a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--exempt=')}
+batch, verdicts, out, model, date = args[0:5]
 rows = [l.rstrip('\n').split('\t') for l in open(batch) if l.strip()]
 vs = [l.strip() for l in open(verdicts) if l.strip()]
 if len(rows) != len(vs):
@@ -21,6 +27,8 @@ for (kind, uid, text), v in zip(rows, vs):
     if band not in ('A', 'B', 'C', 'D'):
         sys.exit("bad band %r for %s" % (band, uid))
     if kind == 'ANCHOR':
+        if uid in exempt:
+            continue
         if band != 'A':
             bad.append("%s -> %s" % (uid, band))
         continue
