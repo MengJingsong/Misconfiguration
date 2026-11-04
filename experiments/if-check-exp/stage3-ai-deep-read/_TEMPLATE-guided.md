@@ -6,9 +6,9 @@
 
 **Formatting note:** Link every code reference (`` `File.java:NN` `` or `` `Class.method():NN` ``) to the pinned source on GitHub. Use the format: `` [`File.java:NN`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/<path>#LNN) `` (ranges use `#LNN-LMM`). Place the link *outside* the backticks so code renders as clickable text.
 
-**Relative links in this template** (`../_INDEX.md`, `../../README.md`) are written for
-where a *copy* of it lives — inside `cases/` — **not** for the template's own location one
-level up. They look wrong here and resolve correctly in a real case file. When checking
+**Relative links in this template** (`../_INDEX.md`, `../../../README.md`) are written for
+where a *copy* of it lives — inside `<system>/stage3-ai-deep-read/cases/` — **not** for the template's own location.
+They look wrong here and resolve correctly in a real case file. When checking
 links repo-wide, resolve this file's relative links against `cases/`, not against its own
 directory: skipping the file instead hides real breakage (that is how these two links went
 stale through the 2026-09-23 folder moves).
@@ -103,7 +103,7 @@ Continuous trace from the allow outcome to the actual allocation call. For patte
 
 What actually happens when the disallow verdict fires — trace the real
 effect before assuming it cleanly rejects anything (the first pitfall in
-[`../playbook-guided.md`](../../../stage3-ai-deep-read/playbook-guided.md)). Is it a clean reject/throw? A block-and-wait? A silent
+[`../../../stage3-ai-deep-read/playbook-guided.md`](../../../stage3-ai-deep-read/playbook-guided.md)). Is it a clean reject/throw? A block-and-wait? A silent
 bypass/escape hatch elsewhere in the call chain?
 
 1. [`Class.method():NN`](link) — disallow branch taken, what state (if any) changes
@@ -132,7 +132,7 @@ what one allowed object costs.
 **Stage 3 writes this section; stage 3 never runs it.** It carries **no
 measured numbers and no verdict** — those are stage 4's, and where they land is
 set out in
-[`../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md).
 Method and pitfalls: [README.md §8](../../../README.md#8-designing-a-test-for-a-case).
 
 **Two audiences.** The intro and 9a are for a **human reader**: what the test
@@ -140,7 +140,7 @@ does and what each result would mean, readable on their own. 9b–9e are the
 **runbook**: steps a person or an AI session can follow on a Linux machine.
 **Stage 4 audits this section before any run**, against four groups of
 requirements (the core question, step-by-step logic, specificity, runnability) in
-[`../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#step-0--the-design-audit);
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#step-0--the-design-audit);
 write to them.
 
 _In a case file, keep this intro to two or three lines: what the test does,

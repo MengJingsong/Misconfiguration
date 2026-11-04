@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed (2026-10-27) — run 1 done at both tiers, self-checked, no run 2
 >
-> **Outcome class:** **true positive** (estimate `positive`, effect `caps`) — [definition](../README.md#outcome-class)
+> **Outcome class:** **true positive** (estimate `positive`, effect `caps`) — [definition](../../../stage4-runtime-verification/README.md#outcome-class)
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; the case file's feedback section is its section D. **Run 1 is a joint run for three case files that share the `counter_cache_size` knob** (`counter_cache_size-iscountercacheenabled-capacity--autonomous` and `counter_cache_size-putcachedcounter-capacity--autonomous`): one build, one unit class, one cluster sequence, three separate audits, predictions and verdicts. The raw readings are therefore the same; each file's conclusion below is matched against its own B2f/B2g/B3f/B3g and nothing is copied from a sibling's conclusion.
 

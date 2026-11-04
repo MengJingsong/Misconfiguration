@@ -166,7 +166,7 @@ Verdict lines (a tier reading is matched to exactly one; arms are judged on V4/2
 
 ## D. Stage-4 feedback
 
-**Stage-4 feedback (2026-10-26, set A batch 8; results: [`stage4-runtime-verification/results/native-transport-max-request-data-in-flight-setNativeTransportConcurrentRequestDataInFlightInBytes-maxRequestDataInFlightInBytes--autonomous.md`](../../stage4-runtime-verification/results/native-transport-max-request-data-in-flight-setNativeTransportConcurrentRequestDataInFlightInBytes-maxRequestDataInFlightInBytes--autonomous.md); not committed).**
+**Stage-4 feedback (2026-10-26, set A batch 8; results: [`../../stage4-runtime-verification/results/native-transport-max-request-data-in-flight-setNativeTransportConcurrentRequestDataInFlightInBytes-maxRequestDataInFlightInBytes--autonomous.md`](../../stage4-runtime-verification/results/native-transport-max-request-data-in-flight-setNativeTransportConcurrentRequestDataInFlightInBytes-maxRequestDataInFlightInBytes--autonomous.md); not committed).**
 
 - **Audit amendments** (dated 2026-10-26, in place): Amendment A (citations; the `Client.RequestsSize` gauge exists), the B2 and B3 amendment blocks (procedure, per-IP pin, flood client plus Byteman hold instead of `cassandra-stress`, offered load, arms, `MaxDirectMemorySize` 4g), and the B2f/B2g and B3f/B3g prediction and verdict lines (U1-U4, C1-C8), frozen before run 1.
 - **Unit tier: Confirmed, caps (U1).** 68 of 68 checks: the global counter admits exactly L/262,144 chunks in every fresh JVM (L = 1 / 8 / 64 MiB), never exceeds L through `tryAllocate`, the default and `-1` give maxMemory/10, the setter lowers `native_transport_max_message_size` as A1 says (and only lowers an explicit one), and the PreV5 forced `allocate` takes usage to L + 1 MiB.

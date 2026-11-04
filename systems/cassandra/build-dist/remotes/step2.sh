@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT_GUESS="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+REPO_ROOT_GUESS="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 # shellcheck source=/dev/null
 source "$REPO_ROOT_GUESS/config/environment.sh"
 

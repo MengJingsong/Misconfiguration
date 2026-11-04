@@ -4,7 +4,7 @@
 >
 > **Status:** **Closed 2026-10-26 — unit Confirmed — caps (per read); cluster Not confirmed (partial) — caps per read, node-level heap peak not shown.** Estimate positive. No run 2.
 >
-> **Outcome class:** undetermined — stage-3 estimate (positive) vs the stage-4 effect (unit: caps per read; cluster: node-level effect not settled) ([definition](../README.md#outcome-class))
+> **Outcome class:** undetermined — stage-3 estimate (positive) vs the stage-4 effect (unit: caps per read; cluster: node-level effect not settled) ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
@@ -18,7 +18,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

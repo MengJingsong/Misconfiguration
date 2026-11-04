@@ -263,7 +263,7 @@ MutationStage 1` is run before the stress starts (`SetConcurrency.java:42-52`, `
 
 ## D. Stage-4 feedback
 
-2026-10-22, run 1 (pc07, shared host), results in `stage4-runtime-verification/results/maxTasksQueued-addTask-taskPermits--autonomous.md`; case file untracked, frozen sha256 `e8ac528c…` (audit amendments E1-E3, U1-U4, C1-C7 above), cluster tier ran on `5b27ef30…` (runbook fix D1).
+2026-10-22, run 1 (pc07, shared host), results in `cassandra/stage4-runtime-verification/results/maxTasksQueued-addTask-taskPermits--autonomous.md`; case file untracked, frozen sha256 `e8ac528c…` (audit amendments E1-E3, U1-U4, C1-C7 above), cluster tier ran on `5b27ef30…` (runbook fix D1).
 
 - **Unit: Confirmed - does not cap** (B2g row 1 with the added row U-a; U-a's "no block >= 5 s" clause missed). `getMaxTasksQueued()` 2147483647 in all 16 JVMs; pending == N exactly to 4,000,000 tasks (P = 64) and, at P = 1 KiB, until the 2 GiB heap ran out at 1.91 M tasks (rejected 0); heap 88 B + P per queued task, identical for c = 1 and 8; the bounded `ArrayBlockingQueue(1000)` control rejected 999,000 of 1e6. The OOM arms' 15-19 s blocks coincide with 28-30 s of G1 pauses.
 - **Cluster: Not confirmed (no matching row) - undetermined.** `MaxTasksQueued` constant, `Active` = pool size, nothing refused by the executor. `RequestsSize` followed the in-flight cap exactly (255.98 / 31.97 MiB) but peak `PendingTasks` did not: 383 / 383 (w = 1) and 1289 / 376 (w = 8) at 256 / 32 MiB, i.e. P(A)/P(B) = 1.00, P(C)/P(D) = 3.43, queued bytes 0.09-0.75 of the cap. The filed B3f ("about 512 / 4096 requests, 8x") was not met; none of B3g's rows (as defined in C6) nor C-a fits, so no verdict. Heap net of the memtable was 0.9-1.1 GiB in every arm, including the 32 MiB cap.

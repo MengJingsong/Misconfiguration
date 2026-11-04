@@ -267,7 +267,7 @@ If nothing matches, use `grep -rh PROBE build/test/`.
 > **Amendment 2026-10-21 (stage-4 audit, R1; instrument only, B2f/B2g unchanged).** The test JVM routes `System.out` through a
 > logger that writes each `printf` fragment as its own line (lesson H1 of the `concurrent_writes` stage-4 run), so step 3's `grep`
 > can return fragments. The stage-4 harness copy of this test
-> (`stage4-runtime-verification/harness/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous/IndexSummaryCapacityProbeTest.java`)
+> (`cassandra/stage4-runtime-verification/harness/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous/IndexSummaryCapacityProbeTest.java`)
 > is the test above with two instrument-only changes: each `PROBE` line is formatted once with `String.format` and also appended,
 > whole, to the file named by `-Dprobe.out`; and `NUM_PARTITIONS` reads `-Dprobe.partitions` (default 2048, used for run 1; a
 > smaller value only for the shakedown). Every other line, value and call is as above. Readings are taken from the `probe.out`
@@ -617,7 +617,7 @@ https://issues.apache.org/jira/browse/CASSANDRA-5519 (referenced, not fetched)
 ## D. Stage-4 feedback
 
 **2026-10-21, run 1 on `pc12` — unit Confirmed (caps); cluster Confirmed — caps only on some paths (bypass).** Results:
-[`stage4-runtime-verification/results/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md`](../../stage4-runtime-verification/results/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md)
+[`../../stage4-runtime-verification/results/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md`](../../stage4-runtime-verification/results/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md)
 (not committed). The step-0 audit (Ready after amendments) added R1–R7 above; the instrument checks and attempt 1 added runbook fixes
 D1–D3. None changed B1 or a prediction.
 

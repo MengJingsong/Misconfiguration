@@ -1,6 +1,6 @@
 # Default-value convergence playbook — batch log
 
-Append one entry per playbook run, per [`../../default-value-convergence-playbook.md`](../../../default-value-convergence-playbook.md).
+Append one entry per playbook run, per [`../../../default-value-convergence-playbook.md`](../../../default-value-convergence-playbook.md).
 Same format as [`../convergence/_batch-log.md`](../convergence/_batch-log.md), plus the default-arithmetic verdict for each group surveyed.
 
 ## Shared-budget group status

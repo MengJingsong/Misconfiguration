@@ -116,8 +116,8 @@ Bypasses and overshoot: (a) a single message can exceed `queueCapacity` and is a
 ## D. Stage-4 feedback
 
 **2026-10-21 — run 1 (stage 4), closed; no run 2.** Results:
-[`stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md`](../../stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md);
-harness `stage4-runtime-verification/harness/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous/`
+[`../../stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md`](../../stage4-runtime-verification/results/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous.md);
+harness `cassandra/stage4-runtime-verification/harness/internode_application_receive_queue_capacity-releaseCapacity-queueCapacity--autonomous/`
 (not committed). Two loopback nodes on `pc13` instead of `pc57` + `pc50` (environment deviation; the design is unchanged).
 
 - **Unit (B2): Confirmed — B2g row 1.** Every B2f value held (sequence `600/0, 1200/176, 1200/176, 600/0, 0/0`; old = Q

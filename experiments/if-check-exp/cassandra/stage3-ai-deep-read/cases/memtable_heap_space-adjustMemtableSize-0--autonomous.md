@@ -534,7 +534,7 @@ Arithmetic (to be replaced by measured c values):
 ## D. Stage-4 feedback
 
 **2026-10-22, run 1 (stage 4, `pc07`, clone `~/cassandra-sai` at `cassandra-5.0.9`).** Results:
-`stage4-runtime-verification/results/memtable_heap_space-adjustMemtableSize-0--autonomous.md` (not committed). Audit: Ready after
+`cassandra/stage4-runtime-verification/results/memtable_heap_space-adjustMemtableSize-0--autonomous.md` (not committed). Audit: Ready after
 amendments A-U1, A-U2, A-K1–A-K5 (dated above, all before any reading); defect D1 fixed in B3c (cluster tier restarted).
 
 - **Unit tier: Confirmed — caps** (A-U2 row 7 = B2g row 1). `dS − dP = S` = 12,979,488 B exactly at N = 100,000 (129.8 B/row);

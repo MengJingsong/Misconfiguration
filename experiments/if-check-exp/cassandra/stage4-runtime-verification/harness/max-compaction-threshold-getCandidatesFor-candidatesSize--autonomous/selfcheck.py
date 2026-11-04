@@ -38,7 +38,7 @@ stcs = {N: int(rd[('control', f'large.setter.stcs.N{N}.count')]) for N in (4, 6,
 ok('U6 STCS control (positive control): bucket size = N for N<=100', all(stcs[N] == N for N in stcs), str(stcs))
 ok('U7 fixture overlaps as designed (100 L0: 4950 pairs, L0-L1 1000, L1-L1 0; groups 150)',
    rd[('fixture', 'small.setter.overlapPairsL0L0')] == '4950' and rd[('fixture', 'small.setter.overlapPairsL0L1')] == '1000' and rd[('fixture', 'small.setter.overlapPairsL1L1')] == '0' and rd[('fixture', 'groups.overlapPairsL0L0')] == '150')
-src = '/proj/misconfiguration-PG0/git-repos/Misconfiguration/cassandra/cassandra-5.0.9/src/java/org/apache/cassandra/db/compaction/LeveledManifest.java'
+src = '/proj/misconfiguration-PG0/git-repos/Misconfiguration/systems/cassandra/source/src/java/org/apache/cassandra/db/compaction/LeveledManifest.java'
 sl = open(src).read().splitlines()
 ok('U8 pinned source at the cited lines (548 trim, 551 subList, 557 gate, 567 union with L1)',
    'candidates.size() > cfs.getMaximumCompactionThreshold()' in sl[547] and 'subList(0, cfs.getMaximumCompactionThreshold())' in sl[550] and 'getTotalBytes(candidates) > maxSSTableSizeInBytes' in sl[556] and 'Sets.union(candidates, l1overlapping)' in sl[566])

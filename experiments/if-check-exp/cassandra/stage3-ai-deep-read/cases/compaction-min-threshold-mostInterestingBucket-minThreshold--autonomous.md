@@ -108,7 +108,7 @@ Bypasses/overshoot: major compaction (`getMaximalTask`, `:205`) ignores threshol
 
 ## D. Stage-4 feedback
 
-Stage 4 run 1, 2026-10-26 (results: `stage4-runtime-verification/results/compaction-min-threshold-mostInterestingBucket-minThreshold--autonomous.md`). Unit **Confirmed** — does not cap; cluster **Confirmed** — does not cap. Outcome class: true negative. Estimate stands.
+Stage 4 run 1, 2026-10-26 (results: `cassandra/stage4-runtime-verification/results/compaction-min-threshold-mostInterestingBucket-minThreshold--autonomous.md`). Unit **Confirmed** — does not cap; cluster **Confirmed** — does not cap. Outcome class: true negative. Estimate stands.
 - Audit amendments A1, U1-U3, C1-C5 (section B, 2026-10-26): A1 corrects the validation citations (`min_threshold` must be >= 2 and <= `max_threshold`: `CompactionParams.java:247-257`) and the claim that the estimate ignores `min_threshold` (it counts a bucket only when `size >= min`, `SizeTieredCompactionStrategy.java:296-304`); the rest fix operational gaps. The `seed=i` option in the first C2 wording does not exist in `cassandra-stress -pop` and was removed before any reading.
 - Cluster numbers (min_threshold 2 / 4 / 16 / 32, 20 flushes of 22.6 MB, 198,927 live keys): 1 / 2 / 5 / 20 sstables, 49.5 / 72.2 / 140.0 / 452.5 MB, bloom filter off-heap 0.25 / 0.37 / 0.71 / 2.32 MB. A runtime `setcompactionthreshold 4 32` on the M = 32 table merged the 20 sstables into 1 (452.5 -> 49.5 MB). Process `RssAnon` (2.9 GB) and live heap (91-96 MB) stayed flat, so the memory effect is visible only in the per-SSTable counters.
 - Note for B1: disk bytes differ with `min_threshold` only when rows are overwritten or deleted; sstable count and per-SSTable memory differ regardless.

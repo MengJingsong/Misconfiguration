@@ -401,7 +401,7 @@ Sample each every 5 s with a shell loop that appends to `$N/logs/samples-<run>.t
 
 ## D. Stage-4 feedback
 
-**2026-10-21 — run 1 closed: unit Confirmed, cluster Confirmed — does not cap** (the negative estimate held; no run 2). Results: [`results/concurrent_writes-takeWorkPermit-workPermits--autonomous.md`](../../stage4-runtime-verification/results/concurrent_writes-takeWorkPermit-workPermits--autonomous.md); harness `stage4-runtime-verification/harness/concurrent_writes-takeWorkPermit-workPermits--autonomous/`. Run on `pc07`, which another stage-4 session shared. The node was on 127.0.0.11 with JMX 7211, and the clone was `~/cassandra-sep` (an environment deviation; the design is unchanged). Run 1 used the version after the audit amendments R1–R6 and runbook fixes D1–D2 above (sha256 `12fb743b…`).
+**2026-10-21 — run 1 closed: unit Confirmed, cluster Confirmed — does not cap** (the negative estimate held; no run 2). Results: [`../../stage4-runtime-verification/results/concurrent_writes-takeWorkPermit-workPermits--autonomous.md`](../../stage4-runtime-verification/results/concurrent_writes-takeWorkPermit-workPermits--autonomous.md); harness `cassandra/stage4-runtime-verification/harness/concurrent_writes-takeWorkPermit-workPermits--autonomous/`. Run on `pc07`, which another stage-4 session shared. The node was on 127.0.0.11 with JMX 7211, and the clone was `~/cassandra-sep` (an environment deviation; the design is unchanged). Run 1 used the version after the audit amendments R1–R6 and runbook fixes D1–D2 above (sha256 `12fb743b…`).
 
 - **Unit (B2g row 1).**
   - For N = 0 · 2 · 32 · 128: active = min(N, M), pending = M − N + 1, and line 196 queued the caller-runs task every time.

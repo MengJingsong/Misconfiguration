@@ -399,7 +399,7 @@ All paths below are in the source tree at `systems/cassandra/source/` in this re
 
 ## D. Stage-4 feedback
 
-**2026-10-22, run 1 on `pc06` (stage-4 agent).** Results: [`results/OTCP_LARGE_MESSAGE_THRESHOLD-doRun-maxSendBytes--autonomous.md`](../../stage4-runtime-verification/results/OTCP_LARGE_MESSAGE_THRESHOLD-doRun-maxSendBytes--autonomous.md). Nothing committed.
+**2026-10-22, run 1 on `pc06` (stage-4 agent).** Results: [`../../stage4-runtime-verification/results/OTCP_LARGE_MESSAGE_THRESHOLD-doRun-maxSendBytes--autonomous.md`](../../stage4-runtime-verification/results/OTCP_LARGE_MESSAGE_THRESHOLD-doRun-maxSendBytes--autonomous.md). Nothing committed.
 
 - **Audit:** Ready after amendments.
   - S4-A1 to S4-A11 were made before any reading. They are dated next to the text they change (B2a, B2d, B2f, B2g, B3a, B3b, B3c, B3d, B3f, B3g, B4).

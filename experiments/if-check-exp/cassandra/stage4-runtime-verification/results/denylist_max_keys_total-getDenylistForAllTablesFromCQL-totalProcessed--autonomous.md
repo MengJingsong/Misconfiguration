@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed, 2026-10-26. **Unit: Confirmed — caps only on some paths (bypass). Cluster: Confirmed — caps only on some paths (bypass).**
 >
-> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/denylist_max_keys_total-getDenylistForAllTablesFromCQL-totalProcessed--autonomous/`](../harness/denylist_max_keys_total-getDenylistForAllTablesFromCQL-totalProcessed--autonomous/).
 >

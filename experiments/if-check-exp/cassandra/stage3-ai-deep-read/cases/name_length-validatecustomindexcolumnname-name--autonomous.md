@@ -117,7 +117,7 @@ These apply to B2a-B2h; B2f and B2g are not changed, only given numbers where th
 
 ## D. Stage-4 feedback
 
-**2026-10-28, stage 4 (results: [`results/name_length-validatecustomindexcolumnname-name--autonomous.md`](../../stage4-runtime-verification/results/name_length-validatecustomindexcolumnname-name--autonomous.md), node `pc32`, run 1 only, self-checked).**
+**2026-10-28, stage 4 (results: [`../../stage4-runtime-verification/results/name_length-validatecustomindexcolumnname-name--autonomous.md`](../../stage4-runtime-verification/results/name_length-validatecustomindexcolumnname-name--autonomous.md), node `pc32`, run 1 only, self-checked).**
 
 - **Unit tier: Confirmed (B2g rows 1 and 2) - does not cap.** Custom (SASI) L = 1, 47, 48 accepted, 49, 64, 200 rejected 3 of 3 with exactly "Column '<name>' is longer than the permissible name length of 48 characters"; plain index accepted at all six L (a 200-character column name is accepted by CREATE TABLE). At equal data (10,000 x 100 B) memtable `owns()` is the same for every L (6,020,000 B) and directory bytes differ by 0.010 percent (no step at 48: 560 B). Row-count control (1,000 / 10,000 / 100,000 rows) moved `owns()` 10.00x and 10.00x.
 - **Cluster tier: Confirmed (B3g rows 1 and 2) - does not cap.** Custom 49 and 100 rejected at DDL with the exact text and no index created; custom 40, 48 and plain 40, 48, 100 took 500,000 rows each with 0 errors. Directory bytes after compaction: plain 170,365,850 / 170,365,253 / 170,363,381 (0.001 percent), custom 174,248,268 / 174,259,086 (0.006 percent). Pool control (plain 48): first pool-flush heap usage 42.8 / 85.3 / 170.6 MiB and 14 / 7 / 3 flushes at `memtable_heap_space` 128 / 256 / 512 MiB, final bytes 0.017 percent apart.

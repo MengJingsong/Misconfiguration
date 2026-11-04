@@ -60,10 +60,10 @@
 4. Run `ant testsome -Dtest.name=org.apache.cassandra.db.guardrails.PageSizeBranchProbeTest`.
 
 > **Amendment B2a (2026-10-26, stage-4 audit, before any reading).** `/local` and `/path/to/shared` do not exist on the advisor's machine
-> (`stage4-runtime-verification/environment-advisor.md`). Clone: `source ~/Library/Caches/stage4/env.sh` (JDK 11), then
+> (`cassandra/stage4-runtime-verification/environment-advisor.md`). Clone: `source ~/Library/Caches/stage4/env.sh` (JDK 11), then
 > `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run33` and `ant -Dlocal.repository=$W/m2 build-test` (not
 > `ant jar`: `testsome` needs the test classes; every `ant` call takes `-Dlocal.repository=$W/m2`). The probe is
-> `stage4-runtime-verification/harness/page_size_fail_threshold-execute-pageSize--autonomous/PageSizeBranchProbeTest.java`; `unit-run.sh` in the same folder copies it into the clone, runs step 4 and removes it.
+> `cassandra/stage4-runtime-verification/harness/page_size_fail_threshold-execute-pageSize--autonomous/PageSizeBranchProbeTest.java`; `unit-run.sh` in the same folder copies it into the clone, runs step 4 and removes it.
 > No change is needed for the user: `GuardrailTester.setUpClass` calls `requireAuthentication()` and `requireNetwork()`
 > (`GuardrailTester.java:112-131`), so `userClientState` is an ordinary user under `PasswordAuthenticator` (`ClientState.java:594-605`).
 
@@ -120,7 +120,7 @@ Which branch was taken is not observable directly. It is inferred from (a) and (
 1. Write the test with a loop over (thresholds, entry point, case) that prints `thr,entry,case,P,threw,rows,hasMore,warnings`.
 2. Run it, then collect the output.
 
-> **Amendment B2e (2026-10-26, stage-4 audit, before any reading).** Run `stage4-runtime-verification/harness/page_size_fail_threshold-execute-pageSize--autonomous/unit-run.sh` with no argument. It logs each command, keeps `ant.log`, `TEST.log` and the `PROBE`
+> **Amendment B2e (2026-10-26, stage-4 audit, before any reading).** Run `cassandra/stage4-runtime-verification/harness/page_size_fail_threshold-execute-pageSize--autonomous/unit-run.sh` with no argument. It logs each command, keeps `ant.log`, `TEST.log` and the `PROBE`
 > lines under `$W/logs/page_size_fail_threshold-execute-pageSize--autonomous/unit/`, and removes the probe, so the clone's
 > `git status` is clean afterwards.
 
@@ -290,7 +290,7 @@ Which branch was taken is not observable directly. It is inferred from (a) and (
 3. Disable the guardrail and repeat Q2 and Q5.
 4. Stop the node.
 
-> **Amendment B3e (2026-10-26, stage-4 audit, before any reading).** One script, `stage4-runtime-verification/harness/page_size_fail_threshold-execute-pageSize--autonomous/cluster-run.sh`:
+> **Amendment B3e (2026-10-26, stage-4 audit, before any reading).** One script, `cassandra/stage4-runtime-verification/harness/page_size_fail_threshold-execute-pageSize--autonomous/cluster-run.sh`:
 > 1. Node directory, overrides, start, setup, load, flush, tablestats, `count(*)`.
 > 2. Restart, then wait 30 s.
 > 3. Start the heap poller.

@@ -113,7 +113,7 @@
 
 ## D. Stage-4 feedback
 
-**Stage-4 result (2026-10-27, run on `pc32`, repository `6e6cf92`; results `stage4-runtime-verification/results/max_space_usable_for_compactions_in_percentage-applysimpleconfig-range--autonomous.md`).**
+**Stage-4 result (2026-10-27, run on `pc32`, repository `6e6cf92`; results `cassandra/stage4-runtime-verification/results/max_space_usable_for_compactions_in_percentage-applysimpleconfig-range--autonomous.md`).**
 
 - **Verdict:** unit **Confirmed - does not cap**; cluster **Confirmed - does not cap**. Outcome class: **true negative** (estimate `negative`, effect `does not cap`). No run 2.
 - **What was measured.** Unit: a probe program, one fresh JVM per yaml value, through the real `DatabaseDescriptor.daemonInitialization()`: -0.01 and 1.01 throw `ConfigurationException` with the line-1017 message; 0, 0.5, 0.95, 1 and no entry are accepted and read back exactly; the real `Directories.getAvailableSpaceForCompactions` returns `round((usable - minFree) x v)` to the byte for each accepted value; heap after init (spread 20 kB) and usable space do not depend on v; the runtime setter stores 1.5 (budget 1.5 x usable) and -0.25 (budget 0) with no check. Positive control: the closed `MaxCompactionSpaceOperandTest` re-run, 56 OK. Cluster: 1.5 refused at startup in 3 s with the same message; on identical data (four sstables of 165 MiB, 2 GiB ext4) 0.95 and 1.0 compacted 4 -> 1 (disk rise 754 MB = 1.09 x the table) and 0.10 (budget 122 MB, below every sstable) refused it (rc 2, 4 `has only 116.36 MiB available, but 661.05 MiB is needed` WARNs, sstables unchanged, rise 0); at-rest used / du / heap equal across settings.

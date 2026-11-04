@@ -91,7 +91,7 @@ single-node CQLTester cannot produce.
 > (`environment-advisor.md`). Clone: `W=~/Library/Caches/stage4`; `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run50`
 > (no `/local` on this host), then `cd $W/cassandra-run50 && ant -Dlocal.repository=$W/m2 build-test` (`build-test` already
 > compiles what the in-JVM dtest needs; no `ant jar`). The test class is kept in
-> `stage4-runtime-verification/harness/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous/RfpCapProbeTest.java` and copied
+> `cassandra/stage4-runtime-verification/harness/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous/RfpCapProbeTest.java` and copied
 > into the clone at `test/distributed/org/apache/cassandra/distributed/test/` only for the run (removed afterwards); the run is
 > `harness/…/unit-run.sh r1`, i.e. `ant -Dlocal.repository=$W/m2 test-jvm-dtest-some -Dtest.name=org.apache.cassandra.distributed.test.RfpCapProbeTest`
 > (one forked JVM, `-Xmx8G` from `build.xml:1835`). The frozen values are the test's defaults; a shakedown may override them only through
@@ -343,7 +343,7 @@ must return nothing; kill the jstat/jcmd samplers. The in-JVM dtest closes its c
 
 **2026-10-27, advisor-run stage 4 (Claude Opus 5.5, on the advisor's Mac), run 1 at sha256 `3fe55d66…7a9a`:**
 unit **Confirmed (B2g row 1, U5) — caps**; cluster **Confirmed (B3g row 1, C7) — caps**. Results:
-[`stage4-runtime-verification/results/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md`](../../stage4-runtime-verification/results/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md).
+[`../../stage4-runtime-verification/results/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md`](../../stage4-runtime-verification/results/cached_rows_fail_threshold-queryProtectedPartitions-i--autonomous.md).
 Unit: with 20,000 divergent rows the query fails with `OverloadedException` at T = 1000 / 10000 / 32000 (default), peak in the histogram
 bucket of T+1; at T = 100000 it completes (peak bucket of 40,000). Cluster: RFP holds exactly T/2 rows (500 / 5,000 / 16,000; 0.40 / 4.0 /
 12.8 MB at 800 B per row) and fails at count T+1; with the threshold not binding it holds 100,000 rows (80.0 MB) at count 200,000. The raw

@@ -1,5 +1,11 @@
 # Stage 3 autonomous-agent playbook
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 **This is the autonomous agent's whole instruction.** It gets the target and nothing
 else: no rules, no patterns, no design method. The guided agent
 gets the same target plus human suggestions. **Do not access, open or read the guided
@@ -96,4 +102,4 @@ These are practical limits, not a method:
 Fill in [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md). Keep its section
 headings. Write `n/a: <reason>` rather than leaving a section empty. You may add
 sections. Save it as `cases/<stem>--autonomous.md`, where `<stem>` is
-`[constraint]-[function]-[operand]` ([`../../README.md` §6.1](../README.md#61-naming)).
+`[constraint]-[function]-[operand]` ([`../README.md` §6.1](../README.md#61-naming)).

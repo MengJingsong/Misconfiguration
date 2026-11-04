@@ -118,7 +118,7 @@
 
 ## D. Stage-4 feedback
 
-**Stage-4 amendments, 2026-10-26 (design audit, before any reading; reasons are from the source, not from a run).** Results: `stage4-runtime-verification/results/commitlog-segment-size-addAdditionalInformationIfPossible-segmentSize--autonomous.md`.
+**Stage-4 amendments, 2026-10-26 (design audit, before any reading; reasons are from the source, not from a run).** Results: `cassandra/stage4-runtime-verification/results/commitlog-segment-size-addAdditionalInformationIfPossible-segmentSize--autonomous.md`.
 
 - **D-R1 (B2b d, B2e 4, B2f).** An "unresolvable path" arm is unreachable: `PathUtils.findExistingAncestor` (`PathUtils.java:572-581`) walks up to `/`, so `tryOnFileStore` returns the nearest existing ancestor's value, not 0 (`PathUtils.java:782-789`). Replaced by a nonexistent path under the large volume and under the tmpfs; the prediction is the ancestor volume's total.
 - **D-R3 (B3b arms, B3c, B3e 4).** The commit-log segments are mmap'd and sparse (`MemoryMappedSegment.java:62`, `legacy` mode without compression), so the third-segment and first-segment arguments in B3c do not hold. Disk exhaustion is made explicitly with a filler file; added a compressed (`standard` mode) variant, because exhaustion on mmap pages arrives as a page fault rather than as an `IOException`; added the 8MiB arm on a 16 MiB volume and the roomy-volume positive-control arms. B3e step 4's "10 minutes" is replaced by the bounded stress of D-R3.

@@ -127,7 +127,7 @@ The check itself is the if statement at [`SegmentBuilder.java:266`](https://gith
 
 ## D. Stage-4 feedback
 
-**2026-10-28 (stage 4, node `pc32`; results: `stage4-runtime-verification/results/last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
+**2026-10-28 (stage 4, node `pc32`; results: `cassandra/stage4-runtime-verification/results/last_valid_segment_row_id-exceedssegmentlimit-sstablerowid--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
 
 - Unit (`SSTableIndexWriter` with an own `NamedMemoryLimiter`, 200,000 rows of 1000 bytes, 27 JVMs = 9 cells x 3): with the cap at its default, the byte limit sets the segments: 458 / 8 / 1 at 1 / 64 / 1024 MiB, peak limiter bytes 1,050,108 / 67,109,408 / 476,329,976 (limit + at most 1.5 KB); with the hook at 1000 and 100 the segments are 200 and 1981 (1001 and 101 rows each) independent of the limit at 64 and 1024 MiB, peaks 2.4 MB and 0.24 MB; boundary pairs: ids 0 and cap -> 1 segment, 0 and cap + 1 -> 2, as `SegmentFlushTest`.
 - Cluster (one 4.1 GB sstable of 3,931,031 rows, `ks.t3.c0` text 1000 bytes, 4 GiB heap, SAI index created after the load): default constant 829 / 52 / 13 segments at 16 / 256 / 1024 MiB (`Global limit` lines = segments - 1), buffer peaks 16.8 / 268 / 1074 MB, heap after GC peak 496 / 4063 / 4067 MB, widest segment 303,209 row ids; the rebuilt jar with `LAST_VALID_SEGMENT_ROW_ID` = 10000 made 394 = ceil(3,931,031 / 10,001) segments of 10,001 rows, peak buffer 35.3 MB, heap after GC 533 MB, at the 1024 MiB limit.

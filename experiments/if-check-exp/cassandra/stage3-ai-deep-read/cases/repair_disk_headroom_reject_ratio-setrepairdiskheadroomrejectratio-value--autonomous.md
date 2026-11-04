@@ -78,7 +78,7 @@ Downstream use: `ActiveRepairService.verifyDiskHeadroomThreshold` (`:649-662`) r
 
 ## D. Stage-4 feedback
 
-**Stage-4 result (2026-10-27, run on `pc32`, repository `6e6cf92`; results `stage4-runtime-verification/results/repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value--autonomous.md`).**
+**Stage-4 result (2026-10-27, run on `pc32`, repository `6e6cf92`; results `cassandra/stage4-runtime-verification/results/repair_disk_headroom_reject_ratio-setrepairdiskheadroomrejectratio-value--autonomous.md`).**
 
 - **Verdict:** unit **Confirmed - does not cap**; cluster **Confirmed - does not cap**. Outcome class: **true negative** (estimate `negative`, effect `does not cap`). No run 2. The estimate stands as filed.
 - **The `n/a` tiers were run** (Amendments U1-U6, C1-C6, 2026-10-27; frozen sha256 `6efb7f2170bf1f3201a705e6deb90dff2b3fa76aa7d8fa7036b93293cf031328`): the claim is testable and the closed same-knob case supplies a positive control and a harness (`repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided`).

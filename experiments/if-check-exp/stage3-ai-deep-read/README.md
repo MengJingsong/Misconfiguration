@@ -1,5 +1,11 @@
 # Stage 3 — AI deep read
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 Stage 3 reads the Cassandra source. For every target line it produces a **case
 file**: a trace of the constraint, an estimate for the line, and a two-tier
 verification solution that [stage 4](../stage4-runtime-verification/README.md) runs.
@@ -8,7 +14,7 @@ finding.
 
 ## 1. Two agents, one folder
 
-Two agents write case files. Both write into [`cases/`](../cassandra/stage3-ai-deep-read/cases/), and the file name
+Two agents write case files. Both write into [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/), and the file name
 says which one wrote it: `<stem>--autonomous.md` or `<stem>--guided.md`
 (`<stem>` is `[constraint]-[function]-[operand]`, [`../README.md` §6.1](../README.md#61-naming)).
 
@@ -29,7 +35,7 @@ so (section 3.2).
 
 **Stage 4 does not care which agent wrote a file.** It audits the verification
 solution in each case file, runs it, and saves the conclusion in
-[`../stage4-runtime-verification/results/`](../cassandra/stage4-runtime-verification/results/).
+[`../cassandra/stage4-runtime-verification/results/`](../cassandra/stage4-runtime-verification/results/).
 There is no comparison step and no scoring across agents.
 
 ## 2. Files
@@ -40,7 +46,7 @@ There is no comparison step and no scoring across agents.
 | [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls. |
 | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. sources read, D. stage-4 feedback. |
 | [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §9 is the test design; §10 holds provenance, estimate and stage-4 feedback. |
-| [`cases/`](../cassandra/stage3-ai-deep-read/cases/) | The case files of both agents. Flat; the module is a field, not a folder. |
+| [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/) | The case files of both agents. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) | One row per case file, with an Agent column. |
 | [`predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) | Lines read with the source open and refused, each citing the rule it failed. Existing entries have **no case file yet**; each leaves this file when its case file is written (section 4). |
 | [`undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) | Lines left **unjudged**; a worklist. No case file for an undetermined line. |
@@ -78,8 +84,8 @@ judged it, not the stage that surfaced it.**
 
 | Outcome | Home |
 |---|---|
-| Positive estimate | a case file in [`cases/`](../cassandra/stage3-ai-deep-read/cases/); a guided positive estimate not yet written up waits in [`predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md) |
-| Negative estimate (either agent) | **also a case file** in [`cases/`](../cassandra/stage3-ai-deep-read/cases/), with its estimate and ground; its verification solution tests that usage does *not* follow the constraint |
+| Positive estimate | a case file in [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/); a guided positive estimate not yet written up waits in [`predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md) |
+| Negative estimate (either agent) | **also a case file** in [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/), with its estimate and ground; its verification solution tests that usage does *not* follow the constraint |
 | Undetermined | [`undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md), or an `undetermined` estimate in the case file; no prediction yet |
 | Existing `predicted-negative.md` entries | stay where they are as a queue; **each one is to be written up as a case file**, and its entry is replaced by a one-line pointer to the file |
 

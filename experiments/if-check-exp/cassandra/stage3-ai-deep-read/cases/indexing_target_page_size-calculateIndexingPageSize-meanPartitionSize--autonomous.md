@@ -50,7 +50,7 @@ Overshoots and bypasses:
 
 > **Amendment B2a (2026-10-26, stage-4 audit, before any run-1 reading).** On the advisor's machine (macOS 27, arm64, JDK 11.0.32.1, Ant 1.10.18; `environment-advisor.md`) the clone is
 > `$W/cassandra-run38` (`W=~/Library/Caches/stage4`), a fresh full `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run38` (no `/local`, no `--depth`),
-> built with `ant -Dlocal.repository=$W/m2 build-test` (it builds the jar classes too). The probe is `stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/IndexingPageSizeProbeTest.java`;
+> built with `ant -Dlocal.repository=$W/m2 build-test` (it builds the jar classes too). The probe is `cassandra/stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/IndexingPageSizeProbeTest.java`;
 > `unit-run.sh` in the same folder copies it into `test/unit/org/apache/cassandra/index/`, runs `ant testsome`, and removes it, so the clone's `git status` stays clean.
 > **Heap correction:** the testsome JVM gets `-Xmx1024m` from the junit task's `maxmemory="1024m"` (`build.xml:1153`); `build.xml:1245-1255` belongs to the
 > `testlist` macro, which testsome does not use, and `-Dtest.jvm.args=-Xmx4G` does not override it (checked: the probe prints the JVM's max heap). 1 GiB holds the largest
@@ -93,7 +93,7 @@ Overshoots and bypasses:
 5. Print everything with `logger.info`/`System.out`, and assert nothing beyond completion, so a refutation still prints.
 6. Delete the test file from the local clone afterwards.
 
-> **Amendment B2e (2026-10-26, stage-4 audit, before any run-1 reading).** Runner: `source ~/Library/Caches/stage4/env.sh; stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/unit-run.sh`. One `@Test` per table (`t1`: T1 with K1=false then
+> **Amendment B2e (2026-10-26, stage-4 audit, before any run-1 reading).** Runner: `source ~/Library/Caches/stage4/env.sh; cassandra/stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/unit-run.sh`. One `@Test` per table (`t1`: T1 with K1=false then
 > K1=true on the same data; `t2`; `t2b`; `t3`), each on a fresh CQLTester table with autocompaction disabled. "Repeat each case 3 times" (B2h) = steps 1–4 are each
 > measured 3 times on the same data (statistics, `ps`, a full `indexPartition`), with the property set before each repeat and cleared after the case.
 > Raw files: `ant.log`, `TEST.log`, `TEST.xml`, `itp.txt`, `summary.txt`, `commands.log` under `$W/logs/<stem>/unit/`.
@@ -153,7 +153,7 @@ Overshoots and bypasses:
 > `-Xlog:gc*:file=$W/node-itp/gc.log:time,uptime` in that copy's `jvm11-server.options`. `MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M` as filed; under G1 (the 5.0 default,
 > `jvm11-server.options`) `HEAP_NEWSIZE` is ignored with a warning (`cassandra-env.sh:125-128`), recorded, not changed. No `setsid`/`-p` pid file: the node is started as a
 > tracked background process `bin/cassandra -f > node.out 2>&1 < /dev/null` and stopped with `nodetool drain` + `kill <pid>`. `JVM_EXTRA_OPTS` carries the Byteman agent
-> (`-javaagent:build/lib/jars/byteman-4.0.20.jar=script:stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/itp.btm`, no listener) and, for K1=true, the property. The rules are type-checked with Byteman's
+> (`-javaagent:build/lib/jars/byteman-4.0.20.jar=script:cassandra/stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/itp.btm`, no listener) and, for K1=true, the property. The rules are type-checked with Byteman's
 > `TestScript` before every start (`btm-check.txt`).
 
 **B3b. Knobs.**
@@ -217,7 +217,7 @@ Arithmetic: rows are about 40 KB. In table B the computed page is about 33.5 MB 
 5. Restart with K1=true and repeat the table B rebuild 3 times.
 6. Stop the node.
 
-> **Amendment B3e (2026-10-26, stage-4 audit, before any run-1 reading).** One script: `source ~/Library/Caches/stage4/env.sh; stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/cluster-run.sh` (B3c steps 1–8, then B3e steps 2–6;
+> **Amendment B3e (2026-10-26, stage-4 audit, before any run-1 reading).** One script: `source ~/Library/Caches/stage4/env.sh; cassandra/stage4-runtime-verification/harness/indexing_target_page_size-calculateIndexingPageSize-meanPartitionSize--autonomous/cluster-run.sh` (B3c steps 1–8, then B3e steps 2–6;
 > step 2's idle baseline is the `ITP START` reading of each build, B3d). Between builds 5 s. Raw files under `$W/logs/<stem>/cluster/`: `summary.txt`, `commands.log`, `node.out`,
 > `itp.txt`, `system-<phase>.log`, `debug-k1true.log` (debug.log is appended across the restart, so it holds both phases), `gc-<phase>.log`, `heapinfo-*.txt`, `copy-*.log`,
 > `tablestats-before-index.txt`, `btm-check.txt`.

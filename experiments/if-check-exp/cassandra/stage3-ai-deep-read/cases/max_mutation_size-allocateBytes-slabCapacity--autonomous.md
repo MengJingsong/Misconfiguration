@@ -148,7 +148,7 @@ Each is a restart of node A.
 
 ## D. Stage-4 feedback
 
-**2026-10-20, run 1 (`pc06`; nodes A and B on loopback on one host, an environment deviation from the audit's `pc57` + `pc50`). Unit Confirmed (B2g row 1); cluster Confirmed (B3g row 1, R1 row 1) — caps; no run 2.** Results: [`stage4-runtime-verification/results/max_mutation_size-allocateBytes-slabCapacity--autonomous.md`](../../stage4-runtime-verification/results/max_mutation_size-allocateBytes-slabCapacity--autonomous.md). B1, B2f and B3f stand. The sections above are not amended; these notes are for a later reader.
+**2026-10-20, run 1 (`pc06`; nodes A and B on loopback on one host, an environment deviation from the audit's `pc57` + `pc50`). Unit Confirmed (B2g row 1); cluster Confirmed (B3g row 1, R1 row 1) — caps; no run 2.** Results: [`../../stage4-runtime-verification/results/max_mutation_size-allocateBytes-slabCapacity--autonomous.md`](../../stage4-runtime-verification/results/max_mutation_size-allocateBytes-slabCapacity--autonomous.md). B1, B2f and B3f stand. The sections above are not amended; these notes are for a later reader.
 
 - **Readings.**
   - Unit: n = ⌊C/(h+12)⌋ exactly at C = 1, 4 and 32 MiB; direct +C and `Count` +1 per `create`; no growth on fill or `recycle`; `C/2 − 12` is the largest legal hint (115/115 checks).

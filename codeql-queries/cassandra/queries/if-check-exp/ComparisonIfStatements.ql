@@ -3,7 +3,7 @@
  * @description Narrows `AllIfStatements.ql` to `if` conditions containing a direct comparison
  *   (`<`, `<=`, `>`, `>=`, `==`, `!=`) between two operands, with a best-effort name for each.
  *   Structural narrowing only — whether a row is a capacity check is decided by reading it
- *   (see ../../../../cassandra/if-check-exp/README.md §3.4-§3.6).
+ *   (see ../../../../experiments/if-check-exp/README.md §3.4-§3.6).
  * @kind table
  * @id cassandra/if-check-exp/comparison-if-statements
  */

@@ -99,7 +99,7 @@
 
 ## D. Stage-4 feedback
 
-Stage 4, 2026-10-27 (results: `stage4-runtime-verification/results/group-per-partition-limit-isdoneforpartition-groupinCurrentPartition--autonomous.md`).
+Stage 4, 2026-10-27 (results: `cassandra/stage4-runtime-verification/results/group-per-partition-limit-isdoneforpartition-groupinCurrentPartition--autonomous.md`).
 
 - **Verdict.** Unit tier **Confirmed** (B2g row 1) — does not cap: groups = min(N,R) exactly, rows pulled N+1, retained heap flat within 0.08 %, a cloning consumer moves retained heap 39.6 MB. Cluster tier **Not confirmed (no matching row)**: 1200 queries returned exactly N groups, disk unchanged, the page-size control moved the peak heap by 737 MB, but at N=absent the sampled peak was 54-55 MB against 8 MB at N=1 (frozen rule 30 MB) and the forward sweep was not strictly monotone. Outcome class: undetermined.
 - **Amendments made at the audit (all dated 2026-10-27, before any reading):** A3 line cite `:842`; B2a (one JVM, `ant testsome`); B3b (`aggregation_subpage_size_in_kb` does not exist in 5.0.9, replaced by a page-size control, `SelectStatement.java:899-911`); B3c (2 M rows x 100 B is 200 MB, not 2 GB); B3d (heap instrument); B3f (30 MB threshold); B3h.

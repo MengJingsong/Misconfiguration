@@ -114,7 +114,7 @@ Made by the stage-4 audit ([results file](../../stage4-runtime-verification/resu
 
 ### D2. Stage-4 result, 2026-10-26
 
-Results: [`results/tombstone-threshold-worthDroppingTombstones-droppableRatio--autonomous.md`](../../stage4-runtime-verification/results/tombstone-threshold-worthDroppingTombstones-droppableRatio--autonomous.md). Run 1 only, no run 2. Outcome class **true negative** (estimate `negative`, effect `does not cap`).
+Results: [`../../stage4-runtime-verification/results/tombstone-threshold-worthDroppingTombstones-droppableRatio--autonomous.md`](../../stage4-runtime-verification/results/tombstone-threshold-worthDroppingTombstones-droppableRatio--autonomous.md). Run 1 only, no run 2. Outcome class **true negative** (estimate `negative`, effect `does not cap`).
 
 - **Unit: Confirmed (does not cap).** With the gates open `worthDroppingTombstones == (r > (double)(float)X)` in all 20 cells; with interval 86400, an overlapping SSTable plus `unchecked=false`, or never-purge on, it is false at r = 0.6 for X below r (the overlap cell at X = 0.0 is true, `:444`); an executed task frees (1-f) of the bytes (0.689, 0.392, 0.097) whatever X (0.2 or 0.9), and with r at or below X nothing is reclaimed although 10 to 60 % of the cells are droppable; a forced compaction at X = 1.5 frees (1-f) (positive control).
 - **Cluster: Confirmed (does not cap).** 14 tables of 44.7 MB: at 50 % TTL'd cells X = 0.05, 0.2, 0.4 and the default end at 0.483 of the peak (the same value), X = 0.7 and 1.5 stay at 1.000; at 15 % only X = 0.05 shrinks (0.842); the interval-gated table `gi` and the overlap-gated table `go` (X = 0.05) stay at 1.000 of their bytes with ratio 0.5, ten times X, for the 300 s window; `nodetool compact` on `pc` (X = 1.5) frees the same 0.483.

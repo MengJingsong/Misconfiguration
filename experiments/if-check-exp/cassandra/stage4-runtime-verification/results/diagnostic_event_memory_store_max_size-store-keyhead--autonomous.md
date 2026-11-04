@@ -4,7 +4,7 @@
 >
 > **Status:** **Verdict filed 2026-10-27 — unit Confirmed, cluster Confirmed (for the store's retention), both: caps** (estimate positive, matched); two filed whole-heap cluster sub-predictions missed (memtable confound) and one filed unit tolerance check missed (harness overhead); no run 2
 >
-> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` ([definition](../README.md#outcome-class))
+> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous. "§9a" below means each tier's predictions and conclusions table: B2f and B2g (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; the case file's feedback section is its section D.
 

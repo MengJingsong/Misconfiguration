@@ -1,5 +1,11 @@
 # If-Check Experiment — Results Format
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 Structured results for **Target 1** (identify resource constraints) and
 **Target 2** (show how each constraint restricts resource usage) of the
 misconfiguration project, scoped to **Cassandra-5.0.9**.
@@ -134,7 +140,7 @@ memory-only. A case whose limit-side operand bounds total on-disk bytes
 an on-disk object, qualifies the same way a memory case does — read
 "memory" as "memory or disk" throughout the rules. Lines rejected before
 that date specifically because they were disk-related are worth revisiting;
-they are flagged inline in `stage3-ai-deep-read/_INDEX.md`'s rejected table rather than
+they are flagged inline in `cassandra/stage3-ai-deep-read/_INDEX.md`'s rejected table rather than
 silently re-triaged.
 
 ### 3.4 Rule 1 — Identify the capacity check and its limit-side operand
@@ -235,7 +241,7 @@ is exactly what Rule 3 is asking for, and the first pitfall in
 Checks that don't pass all three rules (pure validation, logging-only
 branches, null-guards unrelated to capacity, non-diverging outcomes, rate/
 concurrency limits, etc.) are out of scope as cases that cap a resource. Since 2026-10-19 they are still written up: a case file in
-`stage3-ai-deep-read/cases/` with the estimate `negative`, the rule it failed as its ground, and a
+`cassandra/stage3-ai-deep-read/cases/` with the estimate `negative`, the rule it failed as its ground, and a
 verification solution that tests whether usage follows the constraint, so later passes don't re-discover
 and re-reject the same line and stage 4 can confirm the estimate.
 
@@ -310,14 +316,14 @@ Every case file answers exactly these nine questions (see `stage3-ai-deep-read/_
 ## 6. Files per case
 
 Each case is **one file**, all of them together in
-`stage3-ai-deep-read/cases/` — the case files of both agents, filed
+`cassandra/stage3-ai-deep-read/cases/` — the case files of both agents, filed
 with the stage that produced them. (A case may have an autonomous file, a guided
 file or both, under the same stem plus `--autonomous` / `--guided`; see §7.2.
 Everything in this section describes the guided file.)
 
 | File | Content |
 |------|---------|
-| `stage3-ai-deep-read/cases/[constraint]-[function]-[operand]--guided.md` (or `--autonomous.md`) | All nine required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE-guided.md`. |
+| `cassandra/stage3-ai-deep-read/cases/[constraint]-[function]-[operand]--guided.md` (or `--autonomous.md`) | All nine required fields for one case. Use `stage3-ai-deep-read/_TEMPLATE-guided.md`. |
 
 **The layout is flat; the module is a field, not a folder.** Cases were once
 filed under per-module directories; that was flattened 2026-09-23 because the
@@ -353,7 +359,7 @@ field.
   **capacity check** (§3.1; for pattern (a) that is the if-statement),
   no class prefix, verbatim, e.g. `tryAllocate`, `acquireCapacity`,
   `processNewSegment`. The exact `Class.method():line` of all three
-  locations is recorded in the case file's §1 and in `stage3-ai-deep-read/_INDEX.md`.
+  locations is recorded in the case file's §1 and in `cassandra/stage3-ai-deep-read/_INDEX.md`.
 - `[operand]` — the limit-side operand's name exactly as written at the
   capacity check (§5, question 4), e.g. `limit`, `queueCapacity`,
   `allowance`, `MAX_ALLOCATED_BUFFERS`.
@@ -370,9 +376,9 @@ field.
   **newcomer** gets a numeric postfix `-2` (a third gets `-3`, and so on), e.g.
   `memtable_heap_space-tryAllocate-limit.md` (existing, untouched) /
   `memtable_heap_space-tryAllocate-limit-2.md` (new). The object created is not
-  part of the file name; it's the `Object` column in `stage3-ai-deep-read/_INDEX.md` and §5
+  part of the file name; it's the `Object` column in `cassandra/stage3-ai-deep-read/_INDEX.md` and §5
   question 7.
-- **Case ID** — the filename stem (without the `--guided` / `--autonomous` suffix and `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `stage3-ai-deep-read/_INDEX.md` has no Case column; its `File` link identifies the case.
+- **Case ID** — the filename stem (without the `--guided` / `--autonomous` suffix and `.md`) upper-cased, recorded in each case file's header table (`Case ID`). `cassandra/stage3-ai-deep-read/_INDEX.md` has no Case column; its `File` link identifies the case.
 
 ### 6.2 Directory layout
 
@@ -420,7 +426,7 @@ worklists beside them. A verdict is filed with the stage that made it (§7.2).
    brief for a new session (what this experiment is, current state, open
    items) — then the Google Docs ([*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit),
    [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit)) for the current plan, scope, and next step.
-2. Open `stage3-ai-deep-read/_INDEX.md` to see which modules/cases already exist (and which
+2. Open `cassandra/stage3-ai-deep-read/_INDEX.md` to see which modules/cases already exist (and which
    lines were considered and rejected) — continue from there, don't duplicate.
 ### 7.2 Discover and qualify candidate capacity checks
 
@@ -559,10 +565,10 @@ Not by the stage that surfaced the row. A row **stage 2 ranked** and
 | | Stage 2 verdict | Stage 3 verdict |
 |---|---|---|
 | Evidence | the row alone, source unread | the source, against the three rules |
-| Qualified | *(cannot qualify)* | a case file in `stage3-ai-deep-read/cases/`, indexed in `stage3-ai-deep-read/_INDEX.md` |
+| Qualified | *(cannot qualify)* | a case file in `cassandra/stage3-ai-deep-read/cases/`, indexed in `cassandra/stage3-ai-deep-read/_INDEX.md` |
 | Ranked | `stage2-ai-preprocessing/bands.md` — every row, banded A–D | *(n/a)* |
-| Rejected | *(cannot reject — bottom rank instead)* | `stage3-ai-deep-read/predicted-negative.md` |
-| Deferred | *(cannot defer — see below)* | `stage3-ai-deep-read/undetermined.md` |
+| Rejected | *(cannot reject — bottom rank instead)* | `cassandra/stage3-ai-deep-read/predicted-negative.md` |
+| Deferred | *(cannot defer — see below)* | `cassandra/stage3-ai-deep-read/undetermined.md` |
 
 **Stage 2 cannot produce a pattern-(b)/(c) deferral.** Deciding a line "would
 qualify only under (b) or (c)" means tracing where the verdict is read and
@@ -574,14 +580,14 @@ already judged, cite the stage-3 entry rather than re-recording it.
 
 ### 7.3 Write up the case
 
-3. Fill `stage3-ai-deep-read/cases/[constraint]-[function]-[operand]--guided.md` (or `--autonomous.md`) from `stage3-ai-deep-read/_TEMPLATE-guided.md`. If the limit side is
+3. Fill `cassandra/stage3-ai-deep-read/cases/[constraint]-[function]-[operand]--guided.md` (or `--autonomous.md`) from `stage3-ai-deep-read/_TEMPLATE-guided.md`. If the limit side is
    config-derived, trace its short declare → configure → store → read
    sub-path (this names the constraint, completing Target 1 for the case); if
    hardcoded, just cite the constant's declaration.
 4. **Verify every `file:line` against the local source before filing** (§2.1).
    This is a stage-3 exit condition, not a tracked state: a case is not filed
    until its citations are checked.
-5. Add/refresh the `stage3-ai-deep-read/_INDEX.md` Master Index row (four columns since 2026-10-20: Constraint
+5. Add/refresh the `cassandra/stage3-ai-deep-read/_INDEX.md` Master Index row (four columns since 2026-10-20: Constraint
    (the name linked to the case file; add the checking method after a `·` when the same constraint and agent
    already have a row), Agent, Estimate, Stage 4 (linked to the results file once one exists)), and
    record the stage-3 feed (`3a`/`3b`) in the case's Notes.
@@ -619,7 +625,7 @@ filter and no parking.
   it from the corpus), and pattern-(c) guard clauses such as
   [`TrackedDataInputPlus.checkCanRead():184`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/util/TrackedDataInputPlus.java#L184)
   *are* `if` statements. **Corrected 2026-09-25:** this section and
-  `stage3-ai-deep-read/undetermined.md` §3 previously called that filter
+  `cassandra/stage3-ai-deep-read/undetermined.md` §3 previously called that filter
   "structurally exactly pattern (a)" / "precisely pattern (a)". That was
   wrong, and it understated the corpus.
 - **The real gap is narrower, and it is about syntax.** A comparison written

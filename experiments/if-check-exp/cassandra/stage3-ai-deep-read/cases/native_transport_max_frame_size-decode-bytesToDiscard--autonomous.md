@@ -104,7 +104,7 @@ in the local copy only. JVM options are the Ant test defaults.
 > **Amendment U1 (2026-10-27, stage-4 step-0 audit, before any harness run or reading).** B2a on this host (the advisor's Mac, `environment-advisor.md`): there is no `/local`; the run clone is
 > `$W/cassandra-run54` (`W=~/Library/Caches/stage4`, `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run54`,
 > `ant -Dlocal.repository=$W/m2 build-test`, every ant call with `-Dlocal.repository=$W/m2`). The test class is kept in
-> `stage4-runtime-verification/harness/<stem>/FrameSizeDiscardProbeTest.java`, copied into the clone's
+> `cassandra/stage4-runtime-verification/harness/<stem>/FrameSizeDiscardProbeTest.java`, copied into the clone's
 > `test/unit/org/apache/cassandra/transport/` only for the run and removed afterwards (`harness/<stem>/unit-run.sh`).
 
 **B2b. Knobs.** Set `native_transport_max_frame_size` to `4MiB` and to `16MiB`. Because

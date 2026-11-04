@@ -100,7 +100,7 @@ Audit amendments (stage 4, 2026-10-26, before run 1):
 - A3. B3c: client protocol 4 (batch payload of about 115 KB is near the 131,071 B large-message threshold).
 - Prediction tables B2f, B2g (wording of the control row only), B3f and B3g otherwise unchanged. Frozen hashes: see the results file.
 
-Stage-4 result (2026-10-26, `stage4-runtime-verification/results/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous.md`; run 1, no run 2): unit tier **Confirmed**, does not cap; cluster tier **Confirmed**, does not cap. Outcome class: true negative.
+Stage-4 result (2026-10-26, `cassandra/stage4-runtime-verification/results/unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet--autonomous.md`; run 1, no run 2): unit tier **Confirmed**, does not cap; cluster tier **Confirmed**, does not cap. Outcome class: true negative.
 - Unit: warning only above the key count (thresholds 1, 10, 1000 with 50 keys: 1, 1, 0 warnings), count(*) 50 and memtable live data size 7,450 B at every threshold; the size control (warn = fail = 1 KiB) rejected the same batch.
 - Cluster (1,000,000 rows per arm, thresholds 1, 10, 100000, a repeat of 10): all rows written at every threshold, client warning on 2000 of 2000 batches at 1 and 10 and none at 100000, one WARN log line (NoSpamLogger); heap peak within 7%, memtable data size after load within 0.3%, space live after flush and data dir within 0.2%; the control (warn 10KiB, fail 20KiB) rejected 2000 of 2000 batches, 0 rows.
 - The estimate stands: the key-count threshold bounds neither heap nor disk; only the size thresholds do, and `verifyBatchSize` runs its fail check only above `batch_size_warn_threshold` (:338-340).

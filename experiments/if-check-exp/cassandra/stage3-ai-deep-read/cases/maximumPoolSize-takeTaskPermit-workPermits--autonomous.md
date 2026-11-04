@@ -369,7 +369,7 @@ Each mutation ≈ 5 × 200 B values + key/overhead ≈ 1.1 KiB serialized (small
 ## D. Stage-4 feedback
 
 **2026-10-21: run 1 closed. Unit Confirmed — does not cap; cluster Not confirmed (R5 row BIND-5) — undetermined.** No run 2.
-- Results: [`results/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md`](../../stage4-runtime-verification/results/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md). Harness: `stage4-runtime-verification/harness/maximumPoolSize-takeTaskPermit-workPermits--autonomous/`.
+- Results: [`../../stage4-runtime-verification/results/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md`](../../stage4-runtime-verification/results/maximumPoolSize-takeTaskPermit-workPermits--autonomous.md). Harness: `cassandra/stage4-runtime-verification/harness/maximumPoolSize-takeTaskPermit-workPermits--autonomous/`.
 - Run on `pc07` with A/B on 127.0.0.21/.22 and JMX 7221/7222, clone `~/cassandra-mps` (an environment deviation).
 - Version used: the audit amendments R1–R5 and the runbook fixes D1–D2 above (sha256 `e50549b2…`).
 

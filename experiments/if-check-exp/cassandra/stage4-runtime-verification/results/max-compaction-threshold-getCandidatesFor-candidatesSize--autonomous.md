@@ -4,7 +4,7 @@
 >
 > **Status:** **Closed 2026-10-26 (local time) — unit Confirmed, cluster Confirmed — caps only on some paths (bypass)** (estimate negative; Outcome class false negative); run 1 (cluster observable partly unmatched) plus a run 2 with a better sampler (same session, same fixtures); self-checked
 >
-> **Outcome class:** false negative — stage-3 estimate (negative) vs the stage-4 effect on the constraint (`caps only on some paths (bypass)` counts as caps, [definition](../README.md#outcome-class)); see §8 for the reading that makes this overrulable
+> **Outcome class:** false negative — stage-3 estimate (negative) vs the stage-4 effect on the constraint (`caps only on some paths (bypass)` counts as caps, [definition](../../../stage4-runtime-verification/README.md#outcome-class)); see §8 for the reading that makes this overrulable
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
@@ -18,7 +18,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

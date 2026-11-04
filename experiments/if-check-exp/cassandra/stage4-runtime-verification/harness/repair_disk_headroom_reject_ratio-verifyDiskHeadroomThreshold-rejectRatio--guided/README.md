@@ -1,7 +1,7 @@
 # Harness — repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio
 
 Instruments for the case's §9 (stage 4), written 2026-10-15 after the step-0 audit froze §9a (`f04a15be…`). Results:
-[`../../results/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio.md`](../../results/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md).
+[`../../results/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md`](../../results/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md).
 Copy the folder to the node (`~/stage4-harness-run/hdr/`) and compare `md5sum` with the repository before a run. The unit tier
 ran in `~/cassandra-run3`, the cluster tier from `~/cassandra-run1` (both at `b5f2a54`, `cassandra-5.0.9`), so no Ant build ran
 in the clone the nodes ran from.

@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-27 — unit Confirmed (caps), cluster Confirmed (caps) for the heap held per Mutation; three filed process-level heap sub-predictions of the cluster tier missed (a transient of about 0.5 GB on the receive/apply side that does not depend on N, and the sampler's cadence); a second cap on the same Mutation (`max_mutation_size`) turned the unthrottled and the 100000-row arms into failures; no run 2**
 >
-> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` ([definition](../README.md#outcome-class))
+> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D).
 

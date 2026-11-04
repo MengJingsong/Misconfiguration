@@ -3,7 +3,7 @@
 Per-node scripts that install and configure a binary distribution of
 Apache Cassandra 5.0.9. These run **on each experiment node**, not on the
 control machine — they're normally invoked over SSH by
-[`orchestrator/build-cluster.sh`](../orchestrator), but can also be run
+[`../orchestrator`](../orchestrator), but can also be run
 directly on a node if you're logged in there.
 
 They read/write local node state (`/mydata`) but download the shared

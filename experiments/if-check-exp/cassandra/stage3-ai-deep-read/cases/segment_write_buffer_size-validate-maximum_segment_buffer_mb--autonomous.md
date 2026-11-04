@@ -121,7 +121,7 @@ n/a: the constant (32 GiB) can only matter on a node able to buffer more than 32
 
 ## D. Stage-4 feedback
 
-**Stage-4 result (2026-10-28, run on `pc32`, repository `6e6cf92`; results `stage4-runtime-verification/results/segment_write_buffer_size-validate-maximum_segment_buffer_mb--autonomous.md`).**
+**Stage-4 result (2026-10-28, run on `pc32`, repository `6e6cf92`; results `cassandra/stage4-runtime-verification/results/segment_write_buffer_size-validate-maximum_segment_buffer_mb--autonomous.md`).**
 
 - **Verdict:** unit **Refuted on one sub-claim** (row b: "the operative limit is the setting" fails above 2047 MiB) with **effect: does not cap**; cluster **Confirmed - does not cap**. Outcome class: **true negative**. No run 2. The estimate stands as filed. Frozen sha256 `1f130fc135b064d2fabd1cd94961cd29bf38ce043d1f27b18683f374c2eee2ca`.
 - **Cluster declared `n/a` but with a runnable alternative:** the alternative was run as the tier (Amendments C1-C6). Unit: a probe per yaml value through the real `DatabaseDescriptor.daemonInitialization()` and the real `V1OnDiskFormat.SEGMENT_BUILD_MEMORY_LIMITER` (U1-U5), plus a build with the constant at 2048.

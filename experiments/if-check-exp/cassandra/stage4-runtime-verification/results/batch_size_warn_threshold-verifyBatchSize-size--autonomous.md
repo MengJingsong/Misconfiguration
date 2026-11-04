@@ -4,7 +4,7 @@
 >
 > **Status:** **verdict filed 2026-10-26** — unit **Refuted** (does not cap), cluster **Not confirmed** (no matching row for the unit/cluster allocation step; does not cap). Claim tested: the warn threshold does not change the memory or disk a batch uses. Acceptance, rows, disk bytes and write counts are identical at warn 5 KiB and 90000 KiB; the one difference is a step in the coordinator's allocation (+14 % to +20 %) when the warn branch runs. One run 1 per tier, no run 2.
 >
-> **Outcome class:** true negative — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../README.md#outcome-class))
+> **Outcome class:** true negative — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (the suffix of the case-file stem). "§9a" below means each tier's predictions and conclusions table: B2f and B2g
 > (unit), B3f and B3g (cluster); "§9b–§9e" means B2a–B2e or B3a–B3e; and the case
@@ -17,7 +17,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

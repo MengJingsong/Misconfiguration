@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-29. Unit tier filed: Not confirmed (frozen noise criterion W5 missed on one repeat spread; W1 to W4 held: the rejected query costs 13 kB at every N, the same query with ALLOW FILTERING scans and allocates 0.4 / 3.9 / 39.2 MB). Cluster tier `n/a`. No run 2.**
 >
-> **Outcome class:** **undetermined** (estimate `negative`; the tier is Not confirmed, so the effect is `undetermined`) — [definition](../README.md#outcome-class). What the readings show if the noise row were set aside is in section 8; it is not the verdict.
+> **Outcome class:** **undetermined** (estimate `negative`; the tier is Not confirmed, so the effect is `undetermined`) — [definition](../../../stage4-runtime-verification/README.md#outcome-class). What the readings show if the noise row were set aside is in section 8; it is not the verdict.
 >
 > **Agent:** autonomous. "§9a" means B2f/B2g (unit tier, as amended 2026-10-29); B3 is `n/a`; feedback is section D. One results file per case file; the shared Java class is not shared (one class per case).
 

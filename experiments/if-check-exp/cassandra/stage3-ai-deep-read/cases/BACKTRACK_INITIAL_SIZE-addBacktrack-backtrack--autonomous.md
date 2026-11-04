@@ -269,7 +269,7 @@ Audited against `systems/cassandra/source/` (clean; `base.version` 5.0.9). All c
 
 ## D. Stage-4 feedback
 
-Stage 4 (autonomous agent), run 1 at both tiers, 2026-10-25. Results: `stage4-runtime-verification/results/BACKTRACK_INITIAL_SIZE-addBacktrack-backtrack--autonomous.md`. Frozen version: sha256 `619b02fa34f0e1b50d80b6e81fe4e746a3d3dc1f78cfe9551e24e85e5bda1c83` (after B2i, B3i and B3i.9; the first freeze `2cf32d77...0725` differs only by B3i.9). The case file is untracked; no commit holds it.
+Stage 4 (autonomous agent), run 1 at both tiers, 2026-10-25. Results: `cassandra/stage4-runtime-verification/results/BACKTRACK_INITIAL_SIZE-addBacktrack-backtrack--autonomous.md`. Frozen version: sha256 `619b02fa34f0e1b50d80b6e81fe4e746a3d3dc1f78cfe9551e24e85e5bda1c83` (after B2i, B3i and B3i.9; the first freeze `2cf32d77...0725` differs only by B3i.9). The case file is untracked; no commit holds it.
 
 - **Verdict: Confirmed at both tiers, effect `does not cap`, outcome class true negative** (estimate `negative`).
 - **Unit:** the array length L follows only the number of branching ancestors on the walked path (E), as 48 x 2^k with E <= 16 x 2^k. Exact figures held in 105 rows (chain 0 / 48; sparse comb D = 8, 64, 1024, 65535: L = 48, 192, 3072, 196608; split comb: E = 3D, L = 96, 768, 12288, 786432), identical for ON_HEAP and OFF_HEAP, for a trie from 5 KB to 77 MB at a fixed shape, and for the size threshold at 8, 16 and 32 MiB; `sizeOnHeap()` is unchanged by a cursor; a reused cursor keeps its length and a new one starts at 48. The positive control (the trie's `ALLOCATED_SIZE_THRESHOLD` flag, false at T-1 MiB and true at T MiB) flipped as predicted.

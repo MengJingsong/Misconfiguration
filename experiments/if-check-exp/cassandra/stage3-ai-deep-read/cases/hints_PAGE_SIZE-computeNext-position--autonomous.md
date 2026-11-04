@@ -41,7 +41,7 @@ Overshoot: one entry past 512 KiB (up to a hint of `max_mutation_size`, 16 MiB b
 > **Amendment B2a (2026-10-26, stage-4 audit, before any run-1 reading).** On the advisor's machine (macOS 27, arm64, JDK 11.0.32.1, Ant 1.10.18; `environment-advisor.md`): the clone is
 > `$W/cassandra-run37` (`W=~/Library/Caches/stage4`), a fresh `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run37`, built with
 > `ant -Dlocal.repository=$W/m2 build-test` (it builds the jar classes too). The test file is
-> `stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/HintsPageCapTest.java`; `unit-run.sh` in the same folder copies it into
+> `cassandra/stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/HintsPageCapTest.java`; `unit-run.sh` in the same folder copies it into
 > `test/unit/org/apache/cassandra/hints/`, runs it and removes it, so the clone's `git status` stays clean. Default test JVM options.
 **B2b. Knobs.** PAGE_SIZE itself is a constant and is not varied. Varied: the hint entry size, value v ∈ {1 KiB, 16 KiB, 600 KiB} (many per page; few per page; larger than a page), and file format ∈ {plain, LZ4-compressed} (descriptor params `{"compression": {"class_name": "LZ4Compressor"}}`, as in `HintsCompressionTest`).
 
@@ -67,7 +67,7 @@ Overshoot: one entry past 512 KiB (up to a hint of `max_mutation_size`, 16 MiB b
 > `HPCAP-END v=<v> fmt=<fmt> it=<it> pages=<pages> read=<hints read>`. The filed format had no iterator field.
 **B2e. Procedure.** 1. Clone, build. 2. Add the test with one `@Test` per (v, fmt). 3. `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsPageCapTest 2>&1 | tee ~/hp-unit.log`. 4. `grep HPCAP ~/hp-unit.log`. 5. Delete the temp hints dir in `@After`.
 
-> **Amendment B2e (2026-10-26, stage-4 audit, before any run-1 reading).** `source ~/Library/Caches/stage4/env.sh; stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/unit-run.sh` (one `ant testsome`
+> **Amendment B2e (2026-10-26, stage-4 audit, before any run-1 reading).** `source ~/Library/Caches/stage4/env.sh; cassandra/stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/unit-run.sh` (one `ant testsome`
 > JVM; six `@Test` methods, one per (v, format), each reading its file with both iterators). Logs: `$W/logs/<stem>/unit/` (`ant.log`, `TEST.log`,
 > `hpcap.txt`, `summary.txt`, `readings.txt`, `commands.log`).
 **B2f. Predictions.** With e from `serializedSize + 12`: every page except the last has c = ⌈524,288 / e⌉ and 524,288 ≤ P < 524,288 + e; for v = 1 KiB c ≈ 480–500, for 16 KiB c = 32, for 600 KiB c = 1 and P = e > 524,288. Number of pages = ⌈N / c⌉. Same c and P (uncompressed) for the LZ4 file and for both iterators. Σ remaining = P − 12c.
@@ -141,7 +141,7 @@ ENDRULE
 > - The agent is `-javaagent:$C/build/lib/jars/byteman-4.0.20.jar=script:<rules>` (no listener) on every start of each node. `hp1.btm` keeps the two
 >   filed rules unchanged and adds three observe-only rules: `file start` / `file end` (entry and exit of `HintsDispatcher.dispatch()`, one per hints
 >   file, so a file's last page is known) and `count sent decoded` (`sendHint`, the decode path, expected never to fire because both nodes have the
->   same messaging version, `HintsDispatcher.java:135-137`). `hp2.btm` is as filed. Both are in `stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/` and type-check with
+>   same messaging version, `HintsDispatcher.java:135-137`). `hp2.btm` is as filed. Both are in `cassandra/stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/` and type-check with
 >   Byteman's `TestScript`.
 
 **B3b. Knobs.** PAGE_SIZE is not settable. Varied: stress value size v ∈ {16 KiB, 64 KiB, 1 MiB} (k ≈ 32, 8, 1 per page). With 64 MUTATION threads and 300 ms per hint, a page of ≤ 64 hints completes in one 300 ms wave, inside the 5 s timeout.
@@ -179,7 +179,7 @@ ENDRULE
 
 **B3e. Procedure.** Per v: 1. wipe data, start nodes, wait UN/UN. 2. Stop node 2, run stress (B3c), flush, wait 15 s, record `listpendinghints`. 3. Start the 2 s histogram sampler against node 2's pid once it is up; start node 2 with Byteman. 4. When `listpendinghints` on node 1 is empty (or 10 min), stop the sampler. 5. `grep HPCAP` node 1 log. 6. Drain and kill both nodes.
 
-> **Amendment B3e (2026-10-26, stage-4 audit, before any run-1 reading).** One script, `stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/cluster-run.sh`, runs the arms 16k, 64k, 1m in order. Per arm:
+> **Amendment B3e (2026-10-26, stage-4 audit, before any run-1 reading).** One script, `cassandra/stage4-runtime-verification/harness/hints_PAGE_SIZE-computeNext-position--autonomous/cluster-run.sh`, runs the arms 16k, 64k, 1m in order. Per arm:
 > 1. wipe, write both yamls, start node 1 then node 2, wait for UN/UN and `statusbinary` running;
 > 2. `nodetool -p 7299 drain`, kill node 2, wait until node 1 shows `DN 127.0.0.2`; stress (amendment B3c); `nodetool -p 7199 flush`; wait 15 s;
 >    record `listpendinghints`, the JMX counters and the hints directory; `nodetool -p 7199 pausehandoff`;

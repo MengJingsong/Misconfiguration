@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-29 — unit Confirmed (does not cap), cluster Not confirmed (no matching B3g row; effect undetermined); no run 2.** Sub-predictions missed: live heap within 10 percent over the constants (13.1 percent), post-collection heap peaks separating the option from the constant
 >
-> **Outcome class:** undetermined — stage-3 estimate `negative`; the unit tier gives `does not cap`, the cluster tier could not settle the effect (Not confirmed) ([definition](../README.md#outcome-class))
+> **Outcome class:** undetermined — stage-3 estimate `negative`; the unit tier gives `does not cap`, the cluster tier could not settle the effect (Not confirmed) ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D).
 

@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed, 2026-10-25. **Unit: Confirmed — caps** (B2g row 1). **Cluster: Confirmed — caps** (B3g row 1: the retained `PaxosState$Snapshot` count is exactly ⌊C·2^20 / 4,352 B⌋ = 481 · 7,710 · 4,818 at 2 · 32 · 20 (auto) MiB, ratios 16.03 and 10.02; 200,000 LWTs per lifetime; the in-flight map `ACTIVE` stays at 0 in every histogram; the live heap grows by 1.114 / 1.099 × the weight difference, inside the band R_pred ± tol derived at the audit, R_pred = 1.094 / 1.095). Paxos variant `v1` (default at this tag). No run 2.
 >
-> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/paxos_cache_size-applySimpleConfig-paxosCacheSizeInMiB--autonomous/`](../harness/paxos_cache_size-applySimpleConfig-paxosCacheSizeInMiB--autonomous/).
 >

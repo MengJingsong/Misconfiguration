@@ -70,10 +70,10 @@ A batch on a single partition is not subject to F at all, which is the effect of
 5. Run it with `ant testsome -Dtest.name=org.apache.cassandra.cql3.BatchFailThresholdProbeTest`. The default test JVM options are fine.
 
 > **Amendment B2a (2026-10-26, stage-4 audit, before any reading).** `/local` does not exist on the advisor's machine
-> (`stage4-runtime-verification/environment-advisor.md`). Clone: `source ~/Library/Caches/stage4/env.sh` (JDK 11), then
+> (`cassandra/stage4-runtime-verification/environment-advisor.md`). Clone: `source ~/Library/Caches/stage4/env.sh` (JDK 11), then
 > `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run32` and `ant -Dlocal.repository=$W/m2 build-test` (every
 > `ant` call takes `-Dlocal.repository=$W/m2`). The probe lives in
-> `stage4-runtime-verification/harness/batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/BatchFailThresholdProbeTest.java`;
+> `cassandra/stage4-runtime-verification/harness/batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/BatchFailThresholdProbeTest.java`;
 > `unit-run.sh` in the same folder copies it into the clone, runs it and removes it (step 4–5 above).
 
 **B2b. Knobs.** F is set with `DatabaseDescriptor.setBatchSizeFailThresholdInKiB(F)` in `@Before`, together with `setBatchSizeWarnThresholdInKiB(1)` so that warn is below fail. Values:

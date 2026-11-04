@@ -2,7 +2,7 @@
 
 Instruments for the case's section 9 (stage 4), as amended by the step-0 audit of 2026-10-14. Written 2026-10-14 after the
 freeze. The results are in
-[`../../results/file_cache_size-allocateMoreChunks-memoryUsageThreshold.md`](../../results/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md).
+[`../../results/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md`](../../results/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md).
 
 | File | What it is | Checked how |
 |---|---|---|

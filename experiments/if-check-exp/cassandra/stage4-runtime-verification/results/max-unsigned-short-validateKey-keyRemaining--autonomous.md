@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed (2026-10-26) - run 1 done at both tiers, self-checked, no run 2
 >
-> **Outcome class:** **true negative** (estimate `negative`, effect `does not cap`) — [definition](../README.md#outcome-class)
+> **Outcome class:** **true negative** (estimate `negative`, effect `does not cap`) — [definition](../../../stage4-runtime-verification/README.md#outcome-class)
 >
 > **Agent:** autonomous. For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g

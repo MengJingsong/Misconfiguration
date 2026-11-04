@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-27 — unit Confirmed (caps), cluster Confirmed (caps) for the row count; two filed heap sub-predictions of the cluster tier missed (byte readings drowned by the memtable and GC noise of the workload); the case file's B3a (shipped logback.xml feeds the table) was wrong and is amended; no run 2**
 >
-> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` ([definition](../README.md#outcome-class))
+> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D).
 

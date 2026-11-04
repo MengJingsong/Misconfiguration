@@ -9,7 +9,7 @@
 > 12.31 MB at 100 and 200 KiB; `multi 60` puts 0 B at 50 and 100 KiB and 24.60 MB at 200 KiB; `single 30` puts 12.31 MB on disk
 > at every F, including 50 KiB). No run 2.
 >
-> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/`](../harness/batch_size_fail_threshold-verifyBatchSize-mutations--autonomous/).
 >

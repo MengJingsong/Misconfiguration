@@ -4,7 +4,7 @@
 >
 > **Status:** **verdict filed 2026-10-27** — unit **Confirmed** (does not cap), cluster **Confirmed** (does not cap; one frozen numeric tolerance, live heap within 5 %, was missed at 5.4 % and is recorded as a deviation). Claim tested: `min_threshold` at this line only changes a pending-compaction count; node disk and memory do not follow it. Run 1 only, no run 2.
 >
-> **Outcome class:** **true negative** — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../README.md#outcome-class))
+> **Outcome class:** **true negative** — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** guided / autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
@@ -18,7 +18,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

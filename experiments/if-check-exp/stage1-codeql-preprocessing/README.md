@@ -16,7 +16,7 @@ because the same CodeQL database serves other work:
 
 | What | Where |
 |---|---|
-| Queries + their full documentation | [`codeql-queries/cassandra/queries/if-check-exp/`](../../../codeql-queries/cassandra/queries/if-check-exp/README.md) |
+| Queries + their full documentation | [`../../../codeql-queries/cassandra/queries/if-check-exp/README.md`](../../../codeql-queries/cassandra/queries/if-check-exp/README.md) |
 | Shared predicates | `codeql-queries/cassandra/ifcheck/IfCheck.qll` |
 | Results (**gitignored**, regenerate per machine) | `codeql-queries/results/cassandra/` |
 | CodeQL CLI / databases (outside the repo) | `/proj/misconfiguration-PG0/tools/codeql/`, `/proj/misconfiguration-PG0/codeql-dbs/` |

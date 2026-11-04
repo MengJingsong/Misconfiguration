@@ -129,7 +129,7 @@ Made before any reading, each for a reason that does not depend on one (source, 
 
 ## D. Stage-4 feedback
 
-2026-10-22, run 1 (no run 2), results `stage4-runtime-verification/results/maximumPoolSize-setMaximumPoolSize-deltaWorkPermits--autonomous.md` (frozen sha256 `d75be538…`, run version `c2e4c493…`; nothing committed yet).
+2026-10-22, run 1 (no run 2), results `cassandra/stage4-runtime-verification/results/maximumPoolSize-setMaximumPoolSize-deltaWorkPermits--autonomous.md` (frozen sha256 `d75be538…`, run version `c2e4c493…`; nothing committed yet).
 
 - **Unit: Confirmed — does not cap.** Variant B heap 600.1 MiB at n = 1 · 4 · 32 · 128 (pending = T − n, no rejection); variant A n MiB; a bounded queue plateaus at 64; line 384 no-op and the shrink reading (active stays 32 after 32 → 8) as A3 steps 4-6 say. Three identical reps.
 - **Cluster: Not confirmed (no matching row) — undetermined.** Heap after GC (R) 418 / 512 (474 repeat) / 522 MiB at n = 4 / 32 / 256 (1.249, between the 1.15 "equal" band and the 1.5 "tracks n" band); RSS flat (1.022); Active <= n; Pending 121 at n = 4 against 1 at n = 256; "Resized" lines as A3 says; both controls moved. The n = 4 lifetime also ran at 54 % of the op rate.

@@ -1,5 +1,10 @@
 # Default-value convergence playbook (Direction 1, default-value variant)
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
+> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
+> root, data under `if-check-exp/<system>/`.
+
 **This playbook is [`convergence-playbook.md`](convergence-playbook.md) plus one
 restriction: every constraint in a combination stays at its default value.**
 Give the agent both files. Everything in the original playbook applies
@@ -116,7 +121,7 @@ constraints must stay unset.
 Follow the original's "Picking combinations" with these changes:
 
 1. **Use this playbook's own batch log,**
-   [`cases/default-convergence/_batch-log.md`](cassandra/cases/default-convergence/_batch-log.md),
+   [`cassandra/cases/default-convergence/_batch-log.md`](cassandra/cases/default-convergence/_batch-log.md),
    and its group status table. The original's statuses do **not** carry
    over: a group marked exhausted for raised values is a different question
    at defaults. The disk group's **skipped** status does carry over until it
@@ -172,7 +177,7 @@ Follow the original's "Picking combinations" with these changes:
 ## Output (additions to the original template)
 
 Write one file per attempted combination to
-`cases/default-convergence/<constraint-1>+<constraint-2>[+...].md`, with the
+`<system>/cases/default-convergence/<constraint-1>+<constraint-2>[+...].md` (for Cassandra, `cassandra/cases/default-convergence/`), with the
 original four sections and these additions:
 
 - **Section 1:** per constraint, add rows for *default rule (`file:line`)*,
@@ -193,7 +198,7 @@ original four sections and these additions:
     non-default change** that would make it converge, cross-referencing the
     original convergence case where one exists.
 
-Keep the batch log at `cases/default-convergence/_batch-log.md` (one entry
+Keep the batch log at `<system>/cases/default-convergence/_batch-log.md` (one entry
 per run, same content as the original's, plus the default-arithmetic verdict
 per group surveyed). Track closed cases in [`_INDEX.md`](cassandra/_INDEX.md) under
 their own "Default-value convergence cases" table.

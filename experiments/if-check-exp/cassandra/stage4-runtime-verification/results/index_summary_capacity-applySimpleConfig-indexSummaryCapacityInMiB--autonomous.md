@@ -8,7 +8,7 @@
 > both controls; the summaries rebuilt by upsampling allocate 76 × (Σ maxEntries + k) B = 1.729 × their counted size, as derived. **Cluster: Confirmed — caps**
 > (run 1; closed, not re-run). The run-1 unit verdict below (Invalid) stays on record as filed.
 >
-> **Outcome class:** undetermined — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** undetermined — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/index_summary_capacity-applySimpleConfig-indexSummaryCapacityInMiB--autonomous/`](../harness/index_summary_capacity-applySimpleConfig-indexSummaryCapacityInMiB--autonomous/).
 >

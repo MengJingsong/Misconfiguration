@@ -4,7 +4,7 @@
 >
 > **Status:** self-checked 2026-10-29 - unit Confirmed (does not cap); cluster `n/a`; no run 2; frozen sub-predictions P3 (N = 131072, 1048576) and P7 (C2 at N = 32) missed, disclosed
 >
-> **Outcome class:** true negative - stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../README.md#outcome-class))
+> **Outcome class:** true negative - stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D).
 

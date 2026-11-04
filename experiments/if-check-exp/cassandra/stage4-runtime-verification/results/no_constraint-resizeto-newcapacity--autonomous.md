@@ -4,9 +4,9 @@
 >
 > **Status:** verdict filed (2026-10-29) — unit tier run 1 done and self-checked, cluster tier `n/a`, no run 2
 >
-> **Outcome class:** **true negative** (estimate `negative`, effect `does not cap`) — [definition](../README.md#outcome-class). Rests on one judgement written before the run (section 8, "Judgement").
+> **Outcome class:** **true negative** (estimate `negative`, effect `does not cap`) — [definition](../../../stage4-runtime-verification/README.md#outcome-class). Rests on one judgement written before the run (section 8, "Judgement").
 >
-> **Agent:** autonomous. "§9a" means B2f/B2g as amended (the B2 amendment of 2026-10-29, items e and g); "§9b-§9e" means B2a-B2e; feedback is section D. Design: [`none-type-design.md`](../none-type-design.md) (operand sweep), operand kind 3.
+> **Agent:** autonomous. "§9a" means B2f/B2g as amended (the B2 amendment of 2026-10-29, items e and g); "§9b-§9e" means B2a-B2e; feedback is section D. Design: [`none-type-design.md`](../../../stage4-runtime-verification/none-type-design.md) (operand sweep), operand kind 3.
 
 ## 1. Before run 1 — design audit and freeze
 

@@ -141,7 +141,7 @@ Outcome at the limit: the sub-read stops after about `rowLimit` live rows, the o
 
 ## D. Stage-4 feedback
 
-**2026-10-27, stage 4 (pc39), results: [`results/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md`](../../stage4-runtime-verification/results/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md).** Outcome class: true positive (estimate `positive`, effect `caps`).
+**2026-10-27, stage 4 (pc39), results: [`../../stage4-runtime-verification/results/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md`](../../stage4-runtime-verification/results/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md).** Outcome class: true positive (estimate `positive`, effect `caps`).
 
 - **Unit: Confirmed — caps.** For DEFAULT_PAGE_SIZE = 100 / 1000 / 10000 / 50000 (client page size unset): limits string `LIMIT <K>`, first read `rowsCounted` = K (never K+1), max rows per sub-read = K, sub-reads = floor(200000/K)+1 (not the filed ceil), 1040 serialised bytes per row, allocation per full sub-read ratio 466 (50000 vs 100). Plain aggregate: no limit, one read of all rows.
 - **Cluster: Confirmed — caps (soft).** 512 MB heap, one 2 GiB-class partition (2,000,000 x 1 KiB): constant 500 -> +2 MB post-GC peak, 4001 reads; 10000 -> +247 MB mean (322 MB peak occupancy), 201 reads; 200000 -> node death in 3 of 3; client fetch 500 / 200000 on the stock build behave like the 500 / 200000 builds; guardrail rejected fetch 200000 in 4-16 ms.

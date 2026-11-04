@@ -1,7 +1,7 @@
 # Harness — coordinator_read_size_fail_threshold-shouldReject-thresholdBytes
 
 Instruments for the case's §9 (stage 4), written 2026-10-15 after the step-0 audit froze §9a (`d563a86e…`). Results:
-[`../../results/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes.md`](../../results/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md).
+[`../../results/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md`](../../results/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md).
 Copy the folder to the node (`~/stage4-harness-run/crs/`) and compare `md5sum` with the repository before a run. The node's
 clone is `~/cassandra-run1` at `b5f2a54` (`cassandra-5.0.9`).
 

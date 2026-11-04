@@ -1,5 +1,11 @@
 # Stage 2 playbook
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 How to work through the stage-1 rows. Written 2026-09-22 after stage 1 was
 finished for enforcement **pattern (a)**; rewritten 2026-09-23 when the
 keyword tiers were dropped in favour of AI ranking.
@@ -295,10 +301,10 @@ the whole sentence.
 *Helper progress:* 23 distinct helpers judged on 2026-09-22, covering the 114
 helper rows inside the four finished subtrees — 21 rejected (108 rows), 1
 cited to an existing
-[`../stage3-ai-deep-read/_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) entry
+[`../cassandra/stage3-ai-deep-read/_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) entry
 (4 rows), 1 candidate found
 (`Directories.hasDiskSpaceForCompactionsAndStreams():551`, parked in
-[`../stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) as
+[`../cassandra/stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) as
 pattern (b)). Those verdicts predate the bands; re-read them as D and A
 respectively if a band is needed.
 
@@ -332,7 +338,7 @@ read.
 
 **Stage 2 cannot defer.** Judging a row as pattern-(b)/(c)-only needs the
 branches read, so that is a stage-3 call recorded in
-[`../stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md). A
+[`../cassandra/stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md). A
 row that smells like (b)/(c) gets a low band — not a park, and not a refusal.
 
 Stage 3 then takes `bands.md` in band order, reads each row's context in

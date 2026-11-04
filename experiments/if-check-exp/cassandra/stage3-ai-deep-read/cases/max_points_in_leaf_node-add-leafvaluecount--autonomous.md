@@ -124,7 +124,7 @@ The check itself is the if statement at [`BlockBalancedTreeWriter.java:528`](htt
 
 ## D. Stage-4 feedback
 
-**2026-10-28 (stage 4, node `pc32`; results: `stage4-runtime-verification/results/max_points_in_leaf_node-add-leafvaluecount--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
+**2026-10-28 (stage 4, node `pc32`; results: `cassandra/stage4-runtime-verification/results/max_points_in_leaf_node-add-leafvaluecount--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
 
 - Unit (one JVM per cell, 3 repeats of the base cell): `num_leaves` = ceil(N/M) in every cell; the held `LeafWriter` retains 44 to 48 bytes per M (M >= 1024, B = 4; +12 x M for B = 16) and the same at N = 0; allocation grows 29 to 49 x for 40 x the rows at every M and falls as M rises (1586 MB at M = 16, 126.6 MB at M = 1024, 106 MB at M = 65536 for N = 1e6; log-log slope -0.33); tree length x 40.0 for 40 x the rows at every M, within 1.23 x across M; postings length falls 18.6 x from M = 16 to 65536. The constructor rejects M = 0 and M = MAX_ARRAY_LENGTH + 1 (2,147,483,632; MAX = 2,147,483,631).
 - Cluster (variants 128 / 1024 / 16384, 2e6 and 8e6 rows, flush and `rebuild_index`): no `too many nodes`; tree length x 3.4 to 3.8 and allocation x 3.6 to 4.0 for 3.7 x the values; at 8e6 allocation(128)/allocation(1024) = 1.31 and allocation(16384)/allocation(1024) = 0.96; control: `segment_write_buffer_size` 16 MiB against 1024 MiB moved the rebuild path from 17 to 1002 segments and the peak segment buffer from 1024 MiB to 16 MiB.

@@ -1,5 +1,11 @@
 # Stage 3 non-config autonomous-agent playbook
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 **This is the non-config autonomous agent's whole instruction.** It gets one target and
 nothing else: no rules, no patterns, no design method beyond this file. It is the
 [autonomous playbook](playbook-autonomous.md) plus a **type check**: after tracing the

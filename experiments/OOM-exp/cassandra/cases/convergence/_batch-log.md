@@ -1,6 +1,6 @@
 # Convergence playbook — batch log
 
-Append one entry per playbook run, per [`../../convergence-playbook.md`](../../../convergence-playbook.md).
+Append one entry per playbook run, per [`../../../convergence-playbook.md`](../../../convergence-playbook.md).
 
 ## Shared-budget group status
 

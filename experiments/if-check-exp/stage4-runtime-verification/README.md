@@ -1,5 +1,11 @@
 # Stage 4 — runtime verification
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 **The stage that runs the experiment.** Stage 3 reads the source and writes a
 test design; stage 4 audits that design, executes it on a real build or
 cluster, measures, and reports back. The two are deliberately separate: stage
@@ -53,7 +59,7 @@ Within stage 4, every step is done by an AI session:
 
 ## What stage 4 consumes
 
-**Every case file in [`../stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/), whichever agent wrote it.** The suffix of the file name says which:
+**Every case file in [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/), whichever agent wrote it.** The suffix of the file name says which:
 `<stem>--guided.md` or `<stem>--autonomous.md`. The results file and the harness folder take the same name, so a
 case's stem including its suffix is its key everywhere in this stage. A file with a negative estimate
 is run like any other: its claim is that usage does **not** follow the constraint, and the conclusion table says what each
@@ -172,7 +178,7 @@ feedback goes in its section D.
    below.
 2. **Commit the instruments** — when Jingsong asks for a commit, as always.
    Any code a run needs that is not upstream — a restored test class, a Byteman
-   rule — goes under `harness/<case-file-stem>/` in this folder before run 1,
+   rule — goes under `<system>/stage4-runtime-verification/harness/<case-file-stem>/` before run 1,
    and run 1 and any run 2 use those same files. Check each instrument before
    run 1 (parse-check a rule, a known-answer run) and record the check. Share
    instruments, not procedure: a run 2 follows the runbook by hand.

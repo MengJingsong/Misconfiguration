@@ -4,9 +4,9 @@
 >
 > **Status:** **Self-checked 2026-10-29 — unit Confirmed (does not cap), one numeric bound missed (B(0)); cluster `n/a`; no run 2**
 >
-> **Outcome class:** true negative — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../README.md#outcome-class))
+> **Outcome class:** true negative — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
-> **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D). `none` type, operand kind 1 (count of held data) ([`none-type-design.md`](../none-type-design.md)); unit-tier measurement only.
+> **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D). `none` type, operand kind 1 (count of held data) ([`none-type-design.md`](../../../stage4-runtime-verification/none-type-design.md)); unit-tier measurement only.
 
 ## 1. Before run 1 — design audit and freeze
 

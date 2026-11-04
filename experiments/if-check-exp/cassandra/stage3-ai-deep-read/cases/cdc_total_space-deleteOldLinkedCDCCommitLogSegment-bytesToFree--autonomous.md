@@ -200,7 +200,7 @@ Not directly observable: the tracker's `sizeInProgress` (private). Infer it from
 
 ## D. Stage-4 feedback
 
-**2026-10-22, stage 4 run 1 (both tiers), results `stage4-runtime-verification/results/cdc_total_space-deleteOldLinkedCDCCommitLogSegment-bytesToFree--autonomous.md`; nothing committed.**
+**2026-10-22, stage 4 run 1 (both tiers), results `cassandra/stage4-runtime-verification/results/cdc_total_space-deleteOldLinkedCDCCommitLogSegment-bytesToFree--autonomous.md`; nothing committed.**
 
 - **Unit tier: B2g row 1, Confirmed — caps.** 30 JVMs (3 repeats of blocking and non-blocking at n = 64, 128, 256, 512 MiB, plus controls). Blocking: final = peak du = n or n − 1 segment (224 and 480 MiB in 3 of 12 cells), every CDC write after the cap rejected, `deleteOld` never called. Non-blocking: no rejection, final du n to n + 1 segment, peak n + 1 segment, 6 to 28 `deleteOld` passes, oldest links gone. Tracker = du after the final walk. The 4096 MiB control grew to 544 MiB for 384 MiB written, with no `deleteOld`.
 - **Cluster tier: B3g row 1, Confirmed — caps.** One node, 22 cells, 2 repeats. Plateaus 96 / 256 / 512 MiB (blocking) and 128 / 256 / 512 (non-blocking) at caps 128 / 256 / 512; the 16 MiB boundary 0 (blocking) and 64 MiB (non-blocking); the 4096 MiB control 1,600 MiB for 1,536 MiB written. Identical in both repeats. The release and live-switch steps worked (first CDC write accepted about 1.3 s after two links were deleted, about 0.55 s after the switch).

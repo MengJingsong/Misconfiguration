@@ -1,5 +1,10 @@
 # OOM-exp — Handoff
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
+> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
+> root, data under `if-check-exp/<system>/`.
+
 Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
 [`_INDEX.md`](cassandra/_INDEX.md) for every closed case.
@@ -21,7 +26,7 @@ re-derive them, only consumes them.
     workload), predicted and observed to exceed the heap together — 14 genuine
     `OutOfMemoryError` throws, final forced-GC reading 96.6% of `-Xmx` with 0
     young regions left, JVM survived (caught the exceptions). Case file:
-    [`cases/convergence/memtable_heap_space+counter_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md).
+    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md).
   - Run 2: same two plus `key_cache_size` as a 3rd on-heap constraint (config-type
     true positive; `row_cache_size`/`index_summary_capacity` were checked and
     turned out off-heap, not a fit — see below). Smaller individual values than
@@ -29,7 +34,7 @@ re-derive them, only consumes them.
     (96.6%) right after a forced full GC, a genuine `OutOfMemoryError`, a 1.35 GB
     heap dump, and this time `-XX:OnOutOfMemoryError=kill -9 %p` actually fired —
     the JVM was killed, not just stressed. Case file:
-    [`cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md).
+    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md).
   - Run 3: `commitlog_total_space` + `max_hints_size_per_host` (both disk-bound
     true positives), the first case in this folder to use a 2-node ring (a
     second node is structurally required to generate hints at all). **Blocked,
@@ -41,7 +46,7 @@ re-derive them, only consumes them.
     as contention-induced false suspicion from two co-located JVMs plus a
     loaded stress client on one host. The `hints_alone` and `converge` arms
     were never run. Filed as blocked/retryable, not exhausted. Case file:
-    [`cases/convergence/commitlog_total_space+max_hints_size_per_host.md`](cassandra/cases/convergence/commitlog_total_space+max_hints_size_per_host.md).
+    [`cassandra/cases/convergence/commitlog_total_space+max_hints_size_per_host.md`](cassandra/cases/convergence/commitlog_total_space+max_hints_size_per_host.md).
   - Run 4: `row_cache_size` + `index_summary_capacity`, the first off-heap/
     direct-memory case (unparks the group opened in run 2's survey). Found,
     before running anything, that `-XX:MaxDirectMemorySize` does **not**
@@ -62,12 +67,12 @@ re-derive them, only consumes them.
     before any resize could run) but in what was meant to be a safe control
     arm, so weren't filed as their own cases — they're the evidence behind
     the final sizing. Case file:
-    [`cases/convergence/row_cache_size+index_summary_capacity.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity.md).
+    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity.md).
   - Run 5 (2026-11-03): retry of run 4's pair with a 30 m resize interval and
     concurrent workloads. **Void:** the index-summary burst wrote 0
     partitions (the stress client's `CREATE TABLE` timed out under the
     concurrent read load; found in run 6). Case file, with a correction note:
-    [`cases/convergence/row_cache_size+index_summary_capacity--run5.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md).
+    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md).
   - Run 6 (2026-11-03): both retries on the same pair, 120 m resize interval,
     `isc.t` pre-created with `cqlsh`. **Schedule B (row cache filled to 550
     MiB first, then a 1.5M-partition burst) OOMed:** kernel cgroup OOM-kill
@@ -78,14 +83,14 @@ re-derive them, only consumes them.
     C), no off-heap kill (93%), but the JVM died of an unattributed Java heap
     `OutOfMemoryError` (heap dump kept on the node, unanalyzed). Run 4 is
     superseded by run 6. Pair closed as OOMed. Case file:
-    [`cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md).
+    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md).
   - Run 7 (2026-11-03): `memtable_offheap_space` + `file_cache_size`, both
     new, both off-heap standing pools (off-heap `offheap_objects` memtable;
     chunk cache enabled). Same 3500 MiB cgroup budget in every arm, `-Xmx768M`.
     Each alone 78%; with the chunk cache full, a write burst got the JVM
     **kernel OOM-killed 16 s in** (anon-rss 3465 MiB). OOMed on the first try:
     both are hard standing caps, so no timing engineering was needed. Case file:
-    [`cases/convergence/memtable_offheap_space+file_cache_size.md`](cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md).
+    [`cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md`](cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md).
   - Run 8 (2026-11-03): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`, both
     new, both JVM properties, both `ByteBuffer.allocateDirect` pools, so the
     budget is the JVM's own `-XX:MaxDirectMemorySize` (560 MiB), not a cgroup.
@@ -95,8 +100,8 @@ re-derive them, only consumes them.
     Direct buffer memory` about 7 s into the DOB burst, then Cassandra's
     forced heap OOM and `kill -9`. The same arm with L at its default did not
     OOM (attribution control). Case file:
-    [`cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md).
-  - Batch log: [`cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md) —
+    [`cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md).
+  - Batch log: [`cassandra/cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md) —
     its "Shared-budget group status" table is the dedup record: on-heap is
     **exhausted** (2-way then 3-way, escalating outcome, no 4th
     attempted since it wouldn't add evidence), off-heap is **exhausted**
@@ -173,7 +178,7 @@ re-derive them, only consumes them.
   `max_hints_size_per_host` did — hints require an unreachable replica,
   which a single node structurally cannot produce — so it used a 2-node
   loopback ring, 127.0.0.2/127.0.0.3 on one physical host; see
-  `if-check-exp/stage4-runtime-verification/environment.md` section 5 for
+  `if-check-exp/cassandra/stage4-runtime-verification/environment.md` section 5 for
   the general ring-setup approach, and note the JMX-bind-address and
   resource-contention lessons in run 3's batch-log entry if reusing this
   pattern).
@@ -193,7 +198,7 @@ re-derive them, only consumes them.
 - `cases/convergence/`, `cases/bypass/` — case files, batch logs, harness
   scripts and small raw-log excerpts (full logs stay on the run node; each
   case file records the path).
-- [`cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md) —
+- [`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md) —
   every if-check-exp true-positive constraint, surveyed and grouped by
   shared budget (on-heap/off-heap/disk) and filtered to standing-pool
   candidates only (per-request guardrails excluded — see the playbook's
@@ -203,7 +208,7 @@ re-derive them, only consumes them.
   runs here directly, no ssh), `pc39` and `pc29` (remote, reach over ssh).
   Set up JDK/Ant/source on `pc39`/`pc29` before use if not already done.
 - **Nodes:** run on whatever CloudLab node the session has — see
-  `if-check-exp/stage4-runtime-verification/environment.md` for the JDK/Ant
+  `if-check-exp/cassandra/stage4-runtime-verification/environment.md` for the JDK/Ant
   install and source-copy steps (same pinned `systems/cassandra/source/`
   tag). The first case ran on `pc41.cloudlab.umass.edu`
   (`jason92-323989`, 40 cores, 251 GiB) with Cassandra bounded to a small

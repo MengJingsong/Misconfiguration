@@ -159,7 +159,7 @@ Disk: ≈ 200 MB values per run x a few copies plus SASI files; all under `/loca
 
 ## D. Stage-4 feedback
 
-2026-10-26, stage 4 (results: `stage4-runtime-verification/results/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous.md`; harness `stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/`; commits: not committed by the stage-4 agent, the orchestrator commits).
+2026-10-26, stage 4 (results: `cassandra/stage4-runtime-verification/results/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous.md`; harness `cassandra/stage4-runtime-verification/harness/sasi-compaction-flush-memory-ensurecapacity-tmp--autonomous/`; commits: not committed by the stage-4 agent, the orchestrator commits).
 - **Unit: Confirmed (B2g row 1) - does not cap.** In every CONTAINS build the sorted array has exactly N*L elements (suffix array `8*N*L` bytes), `tmp` reaches exactly `a.length>>>1` longs for random input and stays at 256 longs (2 KiB) for sorted input; the live heap increment over `finish()` is 1.3 x M at L=16, 3.1-3.5 x M at L=64, 7.7 x M at L=256 and 11.6 x M at L=1000 for the same limit. PREFIX: no sort at all.
 - **Cluster: Confirmed (B3g row 1) - does not cap.** 200,000 rows of 200 characters: segment counts 41/11/3 for M=2/8/32 and none for the default, arrays exactly `8*n`; peak live increment 184, 558, 604 and 664 MiB (M=2, 8, 32, default), up to 8 segments at once; PREFIX 1.43 x M; with M=32 a node with a 512 MiB heap died of OutOfMemoryError.
 - **Outcome class: true negative** (estimate negative, effect does not cap).

@@ -123,8 +123,8 @@ Bypass/overshoot: expired messages never acquire (`InboundMessageHandler.java:13
 ## D. Stage-4 feedback
 
 **2026-10-22 — run 1 (stage 4), closed; no run 2.** Results:
-[`stage4-runtime-verification/results/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md`](../../stage4-runtime-verification/results/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md);
-harness `stage4-runtime-verification/harness/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous/`
+[`../../stage4-runtime-verification/results/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md`](../../stage4-runtime-verification/results/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md);
+harness `cassandra/stage4-runtime-verification/harness/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous/`
 (not committed). Frozen sha256 (whole file, after amendments R1-R10 and R4a, section D "none yet"): `3a7804acd1f3b1830dc117f287b65208d377e1afb34ff1b4997cbedc9baecfb3`. Two loopback JVMs on `pc06`, node data on a tmpfs.
 
 - **Unit (B2): Confirmed - B2g row 1, caps.** 149 checks, 0 mismatches: successes 8 / 16 / 16 (Q 1 KiB) and 12 / 20 / 20 (Q 64 KiB) at G = 128 KiB / 512 KiB / 2 MiB = floor((Q + min(E,G))/S), refusal `INSUFFICIENT_GLOBAL` only at G < E; the deterministic hook entered the `:447` branch once per scenario with the exact release (H1: 600 of 600, ends (600,0,0); H2: 400 of 600, ends (1224,200,200)); 10^6 acquires against 4 releasers entered it **8,218 times**, `using` never above 2048, final (0,0,0). Mutants M1 (no global release) and M2 (`excess = allocatedExcess`) both fail the test (R2).

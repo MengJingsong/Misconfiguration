@@ -10,7 +10,7 @@
 > adds no cells and no disk bytes, but leaves 8 B of memtable data size, the memtable's fixed charge for a new partition entry.
 > No run 2.
 >
-> **Outcome class:** undetermined — the stage-3 estimate (`undetermined`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** undetermined — the stage-3 estimate (`undetermined`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/items_per_collection-doAdd-elements_size--autonomous/`](../harness/items_per_collection-doAdd-elements_size--autonomous/).
 >

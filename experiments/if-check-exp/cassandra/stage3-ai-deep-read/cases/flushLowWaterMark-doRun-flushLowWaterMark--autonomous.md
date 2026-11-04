@@ -405,7 +405,7 @@ The large H makes the per-connection effect (tens of MiB) visible above node-lev
 
 ## D. Stage-4 feedback
 
-**2026-10-22. Audited, run 1 at both tiers, self-checked; no run 2. Results:** [`results/flushLowWaterMark-doRun-flushLowWaterMark--autonomous.md`](../../stage4-runtime-verification/results/flushLowWaterMark-doRun-flushLowWaterMark--autonomous.md). Run on `pc13`.
+**2026-10-22. Audited, run 1 at both tiers, self-checked; no run 2. Results:** [`../../stage4-runtime-verification/results/flushLowWaterMark-doRun-flushLowWaterMark--autonomous.md`](../../stage4-runtime-verification/results/flushLowWaterMark-doRun-flushLowWaterMark--autonomous.md). Run on `pc13`.
 
 **Case-file sha256 values:**
 - as filed: `16b0da55a6454033fd77d712e0e921f2d331565af0dd9d9f6c6dc538f84295e9`

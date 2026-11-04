@@ -109,7 +109,7 @@
 
 ## D. Stage-4 feedback
 
-**2026-10-28, stage 4 (results: `stage4-runtime-verification/results/monitoring_max_operations-operationsqueue_offer-maxoperations--autonomous.md`).** Frozen sha256 before the accepted runs `12b563da…3c04`; amendments of 2026-10-27 at B2 (same-package test, `ant build-test`, both queues, M values) and B3 (workload that reaches the queue, instance-count predictions).
+**2026-10-28, stage 4 (results: `cassandra/stage4-runtime-verification/results/monitoring_max_operations-operationsqueue_offer-maxoperations--autonomous.md`).** Frozen sha256 before the accepted runs `12b563da…3c04`; amendments of 2026-10-27 at B2 (same-package test, `ant build-test`, both queues, M values) and B3 (workload that reaches the queue, instance-count predictions).
 
 - **Unit and cluster: Confirmed, Effect `caps`; outcome class true positive.** Unit: exactly N Operations per queue for N = 1, 50, 1000, 0 for N = 0, M for N = -1, with dropped = M - N; unchanged when offers rise tenfold. Cluster (one node, 1 ms read and slow timeouts, 240 s stress): N = 0 none; N = 50 saturates both queues at 50 (two repetitions); N = 5000 saturates the Slow queue at 5000; N = -1 reaches 29,895 and 42,033 Slow and 3148 and 3943 Failed and holds 15 to 21 MB more heap.
 - Misses: the Failed queue at N = 5000 did not fill (3130), and N = -1 ended below the predicted 5000 Failed (both runs) and 40,000 Slow (one run); the offered Failed rate under this workload is about 13 to 16 per second, a third of the 30 s calibration. The cap itself was never exceeded.

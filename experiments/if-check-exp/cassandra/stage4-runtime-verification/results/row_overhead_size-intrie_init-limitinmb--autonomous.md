@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-28 — unit Confirmed (caps, soft), cluster Confirmed (caps, soft); sub-predictions missed: the "10 percent more keys stay under 1.1 x threshold" bound (N = 16: 1.163; N = 1861 and 2047: the continuation hit the hard limit), the sampled peak of the N = 16 arm (0.9975 x threshold at 100 ms), the direct-pool window at a second signal, and "CREATE TABLE with N = 2048 leaves no table" (the schema entry stays); no run 2**
 >
-> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` (soft: the owner must switch the trie, which `TrieMemtable` does) ([definition](../README.md#outcome-class))
+> **Outcome class:** true positive — stage-3 estimate `positive` against the stage-4 effect `caps` (soft: the owner must switch the trie, which `TrieMemtable` does) ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D).
 

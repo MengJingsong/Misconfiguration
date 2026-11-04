@@ -143,7 +143,7 @@ Set via `cassandra.yaml` before each (restart required).
 
 ## D. Stage-4 feedback
 
-**Step-0 audit amendments, 2026-10-26 (stage 4, before any reading; independent of any run).** Results: `stage4-runtime-verification/results/max-cloned-size-allocate-size--autonomous.md` §1. Marked `[Amended 2026-10-26 ...]` in B2a-B2f, B3a-B3f:
+**Step-0 audit amendments, 2026-10-26 (stage 4, before any reading; independent of any run).** Results: `cassandra/stage4-runtime-verification/results/max-cloned-size-allocate-size--autonomous.md` §1. Marked `[Amended 2026-10-26 ...]` in B2a-B2f, B3a-B3f:
 1. B2a: tree by `copy-source.sh`, `ant jar`; the cleaner stub sleeps 50 ms per call (an unthrottled stub makes the cleaner thread spin and its garbage enters `RssAnon`).
 2. B2b: L = 32 / 64 / 128 MiB (three values); op-group blocking needs `markBlocking()` (`OpOrder.java:333`), not only `issue()`; added the `heap_buffers` mode control.
 3. B2c/B2e: phases 1-3 in one JVM per (S, L); the parked extra allocate runs on a second allocator so that discarding the first releases the pool.

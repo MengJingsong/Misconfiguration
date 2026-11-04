@@ -1,5 +1,11 @@
 # Stage 4 — verification design for `none`-type cases (operand sweep)
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 Recorded 2026-10-28 as a **proposal**; no case has been run with it yet. It is written to be reused for every `none`-type case, now and later.
 The protocol in [`README.md`](README.md) still applies (audit, freeze, run 1, self-check, verdict); this file only says how to design the
 experiment when the case has no limit to vary.

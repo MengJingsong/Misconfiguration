@@ -1,7 +1,7 @@
 # Harness — local_read_size_fail_threshold-addSize-failBytes
 
 Instruments for the case's section 9 (stage 4). Written 2026-10-07 from the case's 9c table. The results are in
-[`../../results/local_read_size_fail_threshold-addSize-failBytes.md`](../../results/local_read_size_fail_threshold-addSize-failBytes--guided.md).
+[`../../results/local_read_size_fail_threshold-addSize-failBytes--guided.md`](../../results/local_read_size_fail_threshold-addSize-failBytes--guided.md).
 
 | File | What it is | Checked how |
 |---|---|---|

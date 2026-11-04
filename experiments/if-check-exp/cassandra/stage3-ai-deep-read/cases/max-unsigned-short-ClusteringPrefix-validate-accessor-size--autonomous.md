@@ -118,7 +118,7 @@
 
 ## D. Stage-4 feedback
 
-Stage-4 run 1, 2026-10-26/27 (pc07), results: `stage4-runtime-verification/results/max-unsigned-short-ClusteringPrefix-validate-accessor-size--autonomous.md`. Both tiers **Confirmed - does not cap** (unit B2g row 1; cluster B3g row 1, row 4 for the control). Outcome class: true negative.
+Stage-4 run 1, 2026-10-26/27 (pc07), results: `cassandra/stage4-runtime-verification/results/max-unsigned-short-ClusteringPrefix-validate-accessor-size--autonomous.md`. Both tiers **Confirmed - does not cap** (unit B2g row 1; cluster B3g row 1, row 4 for the control). Outcome class: true negative.
 
 - Unit: the grid throws exactly where a component or the sum exceeds 65535, with the message reporting the sum of all components; held clusterings cost S + 116.7 B each (no bound below `-Xmx`); 6.55 x 10^9 bytes validated without a rejection; controls (S = 1, capped list) moved as predicted.
 - Cluster: K = 65536 rejected 10,000 of 10,000 with the exact text; K = 65535 and the two-component cases as predicted; 1 GB of 1000-byte keys and 655 MB of 65535-byte keys accepted, the logged off-heap memtable plateau followed the pool (254.0 MiB at 256 MiB pools, 64.0 MiB at 64 MiB, ratio 3.97). Data+Index at K = 65535 was 3.005 x R x K (Index.db repeats the clustering, 2.00 x), 0.17 percent above the audit bracket of B3i.6.

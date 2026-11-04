@@ -6,7 +6,7 @@
 > (cluster re-run "run 1b" of 2026-10-27 at the re-frozen version `219ff0f9…d4f`, after the user-authorised amendment of B3d, B3e,
 > B3f (iii), B3g, B3h and B4; §7, §8). The run-1 cluster verdict below (Not confirmed) stays on record as filed.
 >
-> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/row_cache_size-setRowCacheCapacityInMB-capacity--autonomous/`](../harness/row_cache_size-setRowCacheCapacityInMB-capacity--autonomous/).
 >

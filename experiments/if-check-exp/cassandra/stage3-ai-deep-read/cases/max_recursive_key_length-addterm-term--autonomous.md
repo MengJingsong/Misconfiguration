@@ -127,7 +127,7 @@ Either outcome appends to the same `InMemoryTrie<PrimaryKeys>` created at the co
 
 ## D. Stage-4 feedback
 
-**2026-10-28 (stage 4, node `pc32`; results: `stage4-runtime-verification/results/max_recursive_key_length-addterm-term--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
+**2026-10-28 (stage 4, node `pc32`; results: `cassandra/stage4-runtime-verification/results/max_recursive_key_length-addterm-term--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
 
 - Unit (one JVM per run, 3 repetitions, byte-identical): the route counters show the recursive route for L <= 128 and the `apply` route for L >= 129; per-term bytes 227.789 at both L = 128 and L = 129 (N = 20000; ratio 1.0000, equal-total pass 0.9996); builds with the constant at 0 and 100000 give the same per-term bytes as stock at every completed cell; the 100000 build overflows the stack (`-Xss512k`) at L = 2048 and 7000; the guardrail at 1 KiB returns 0 and adds 0 bytes for 1500- and 7000-byte terms.
 - Cluster (15 node starts, 2 GiB heap, no flush): `MemtableIndexBytes` 60,343,880 at L = 129 against 60,719,208 at L = 128 (0.9938, equal payload); stock and constant-0 builds identical at L = 100, 128, 129, 400 on heap and off-heap allocation; the 1 KiB guardrail run holds `MemtableIndexBytes` 0 with 100,000 stored cells and 78,563 warnings.

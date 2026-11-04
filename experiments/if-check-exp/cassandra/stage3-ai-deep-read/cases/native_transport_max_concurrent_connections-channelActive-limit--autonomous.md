@@ -72,10 +72,10 @@
 - Run: `ant testsome -Dtest.name=org.apache.cassandra.transport.ConnectionLimitProbeTest`. The default test JVM options from `build.xml` apply, and `test/conf/cassandra.yaml` is loaded by `DatabaseDescriptor.daemonInitialization()`.
 
 > **Amendment U1 (2026-10-27, stage-4 step-0 audit, before any harness run or reading).** The run host is the advisor's Mac
-> (`stage4-runtime-verification/environment-advisor.md`), where `/local` does not exist. The clone is
+> (`cassandra/stage4-runtime-verification/environment-advisor.md`), where `/local` does not exist. The clone is
 > `$W/cassandra-run53` (`git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run53`, then
 > `ant -Dlocal.repository=$W/m2 build-test`; `W=~/Library/Caches/stage4`). The test source is kept at
-> `stage4-runtime-verification/harness/native_transport_max_concurrent_connections-channelActive-limit--autonomous/ConnectionLimitProbeTest.java`;
+> `cassandra/stage4-runtime-verification/harness/native_transport_max_concurrent_connections-channelActive-limit--autonomous/ConnectionLimitProbeTest.java`;
 > the harness script `unit-run.sh` in the same folder copies it into the clone's
 > `test/unit/org/apache/cassandra/transport/`, runs the `ant testsome` line above with `-Dlocal.repository=$W/m2`, and removes it
 > afterwards. Nothing else in B2 changes.
@@ -187,7 +187,7 @@
 - Disk: < 1 GB of local disk (no data is written).
 
 > **Amendment C1 (2026-10-27, stage-4 step-0 audit, before any harness run or reading).** The run host is the advisor's Mac
-> (`stage4-runtime-verification/environment-advisor.md`; macOS, no `/local`, no `ss`, no `setsid`). Substitutions, all else as
+> (`cassandra/stage4-runtime-verification/environment-advisor.md`; macOS, no `/local`, no `ss`, no `setsid`). Substitutions, all else as
 > written:
 > - Clone `$W/cassandra-run53` (already built by `ant -Dlocal.repository=$W/m2 build-test`, which includes the jar), never run
 >   `ant` in it while a node runs.

@@ -1,13 +1,13 @@
 # Convergence candidate groups — surveyed from if-check-exp
 
 Reference list, not a case file. Surveys every row in
-[`../../../if-check-exp/stage3-ai-deep-read/_INDEX.md`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/_INDEX.md)
+[`../../../../if-check-exp/cassandra/stage3-ai-deep-read/_INDEX.md`](../../../../if-check-exp/cassandra/stage3-ai-deep-read/_INDEX.md)
 whose outcome class means **the constraint actually caps usage, per stage 4**
 — **true positive**, **weak true positive**, and **false negative** (a false
 negative is a case where the stage-3 estimate guessed `negative` but stage 4
 measured `caps` anyway; the estimate was wrong, the real effect is a cap, so
 it counts the same as a true positive here — see
-[`../../../if-check-exp/stage4-runtime-verification/README.md#outcome-class`](../../../../if-check-exp/stage4-runtime-verification/README.md)).
+[`../../../../if-check-exp/stage4-runtime-verification/README.md#outcome-class`](../../../../if-check-exp/stage4-runtime-verification/README.md)).
 **True negative and false positive are excluded** — those are confirmed
 *not* to cap, so there's no load to converge. 73 rows, ~50 distinct
 constraints (several rows are the same constraint checked at a different

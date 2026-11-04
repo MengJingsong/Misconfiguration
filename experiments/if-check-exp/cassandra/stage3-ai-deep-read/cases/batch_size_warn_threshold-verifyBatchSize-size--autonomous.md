@@ -134,7 +134,7 @@ Made by the stage-4 audit ([results file](../../stage4-runtime-verification/resu
 
 ### D2. Stage-4 result, 2026-10-26
 
-Results: [`results/batch_size_warn_threshold-verifyBatchSize-size--autonomous.md`](../../stage4-runtime-verification/results/batch_size_warn_threshold-verifyBatchSize-size--autonomous.md). Run 1 only, no run 2. Outcome class **true negative** (estimate `negative`, effect `does not cap`).
+Results: [`../../stage4-runtime-verification/results/batch_size_warn_threshold-verifyBatchSize-size--autonomous.md`](../../stage4-runtime-verification/results/batch_size_warn_threshold-verifyBatchSize-size--autonomous.md). Run 1 only, no run 2. Outcome class **true negative** (estimate `negative`, effect `does not cap`).
 
 - **Unit: Refuted (does not cap).** Every prediction on acceptance held (warning at warn 1 and 5 KiB only, no throw, all rows written, dataSize identical), but the coordinator's allocation inside `BatchStatement.execute` is 20 % (20 partitions) and 19 % (200 partitions) higher in the arms where the warn branch runs, outside the band of B2f.
 - **Cluster: Not confirmed (does not cap).** warn 5 KiB vs 90000 KiB (yaml, and live over JMX): 4040 vs 0 WARN lines, identical rows (100,000 and 409,600 per phase), identical data-directory bytes (within 0.03 %, 1.08 GB), all 40 batches of 21 MiB and 4000 batches of 53.6 KiB accepted at warn 5 KiB; coordinator allocation +14 % (21 MiB batches) to +20 % (53.6 KiB batches), stable across repeats and gone after the live switch.

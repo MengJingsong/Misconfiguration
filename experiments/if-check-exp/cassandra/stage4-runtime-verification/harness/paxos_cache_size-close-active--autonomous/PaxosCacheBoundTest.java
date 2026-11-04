@@ -1,6 +1,6 @@
 /*
  * Stage-4 harness, unit tier (B2, amendments U1-U7 of 2026-10-27) of
- * cassandra/if-check-exp/stage3-ai-deep-read/cases/paxos_cache_size-close-active--autonomous.md.
+ * experiments/if-check-exp/cassandra/stage3-ai-deep-read/cases/paxos_cache_size-close-active--autonomous.md.
  * Copied into test/unit/org/apache/cassandra/service/paxos/ of the run clone only for the run.
  *
  * System properties (passed through -Dtest.jvm.args): paxos.cap = <MiB> | auto, paxos.v = value bytes, paxos.n = proposals.

@@ -2,7 +2,7 @@
 """Emit stage-2 banding batches from the stage-1 CSVs.
 
 Stage 2 bands every stage-1 row A-D by AI lexical/semantic judgement
-(cassandra/if-check-exp/stage2-ai-preprocessing/playbook.md). This script
+(experiments/if-check-exp/stage2-ai-preprocessing/playbook.md). This script
 builds the batch inputs; the bands themselves are a judgement and live in
 that folder's bands.csv, which is committed because it cannot be regenerated.
 

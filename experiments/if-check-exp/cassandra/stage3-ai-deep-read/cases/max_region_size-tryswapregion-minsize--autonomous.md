@@ -135,7 +135,7 @@ What would show the claim wrong: VmData growth minus charged bytes not growing w
 
 ## D. Stage-4 feedback
 
-**2026-10-28 (stage 4, node `pc32`; results: `stage4-runtime-verification/results/max_region_size-tryswapregion-minsize--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
+**2026-10-28 (stage 4, node `pc32`; results: `cassandra/stage4-runtime-verification/results/max_region_size-tryswapregion-minsize--autonomous.md`).** Unit tier and cluster tier both **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
 
 - Unit: charged bytes (`owns` / `used`) were identical in the 1 MiB build and a 256 KiB rebuild for every case, while the largest region followed the constant (C1 1,048,576 vs 262,144; C3 131072 B 1,048,576 vs 262,144); C2 reached L = 10,000 with region capacity 24,576 and `tryAllocate(1)` false; a 4 MiB allocation made a single 4,194,304-byte region; C4 slack was 1,792 x A; P1 blocked at used = L = 2 MiB. 3 repetitions per cell in fresh JVMs, all identical.
 - Cluster: `offheap_objects`, 150 tables with no flush (512 MiB pool): charged 470 MiB, regions constructed 585 MiB, RssAnon +449 MiB; slack (regions minus charged) 5.8 / 41.2 / 119.9 MB at T = 1 / 50 / 150; the 4 MiB row built one 4,194,325-byte region; R-small (32 MiB): 147 `MEMTABLE_LIMIT` flushes, charged at most 11.2 MB; heap_buffers: no region.

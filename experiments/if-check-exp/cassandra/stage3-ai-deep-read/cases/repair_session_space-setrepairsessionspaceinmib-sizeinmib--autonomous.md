@@ -80,7 +80,7 @@
 
 ## D. Stage-4 feedback
 
-**Stage-4 result (2026-10-27, run on `pc32`, repository `6e6cf92`; results `stage4-runtime-verification/results/repair_session_space-setrepairsessionspaceinmib-sizeinmib--autonomous.md`).**
+**Stage-4 result (2026-10-27, run on `pc32`, repository `6e6cf92`; results `cassandra/stage4-runtime-verification/results/repair_session_space-setrepairsessionspaceinmib-sizeinmib--autonomous.md`).**
 
 - **Verdict:** unit **Refuted on one sub-claim** (B2g row b: "stored without upper bound" - the top value `Integer.MAX_VALUE` is refused by the `IntMebibytesBound` constructor, maximum 2147483646) with **effect: does not cap**; cluster **Confirmed - does not cap**. Outcome class: **true negative** (estimate `negative`, effect `does not cap` at both tiers). No run 2. The negative estimate stands as filed.
 - **The `n/a` tiers were run** (Amendments U1-U7, C1-C7, 2026-10-27): the claim is testable and the closed same-knob case supplies a positive control and a harness. Unit: a setter test (rejected 0, -1, MIN; accepted 1 ... 2048), real Merkle-tree builds at the stored value, a raw-field counterfactual, and the closed `RepairSessionSpaceTreeTest` (78 checks ok). Cluster: the closed two-node ring plus a `m-range` label.

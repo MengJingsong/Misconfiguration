@@ -123,7 +123,7 @@
 
 ## D. Stage-4 feedback
 
-Stage-4 run 1, 2026-10-26, results `stage4-runtime-verification/results/hints-HintsBuffer-put-slabCapacity--autonomous.md`. **Confirmed, caps (true positive), both tiers.**
+Stage-4 run 1, 2026-10-26, results `cassandra/stage4-runtime-verification/results/hints-HintsBuffer-put-slabCapacity--autonomous.md`. **Confirmed, caps (true positive), both tiers.**
 - Unit: the threshold sits exactly at S/2 (S/2-12 accepted, S/2-11 and S/2+1 rejected) at S = 1, 4, 32 MiB; a pool of 4 MiB slabs fed 20.17 x S bytes holds exactly n slabs for n = 2, 3, 5 (direct delta 8, 12, 20 MiB exactly); a stalled writer parks in `take()` with the delta exactly n x S; a real `HintsService` derives `max(2m, 32 MiB)` for m = 4, 16, 24, 40 MiB and its pool takes the S/2-12 hint and rejects one byte more.
 - Cluster: 1 GB of hints, pool bytes at the peak = n x slab within 2 MiB for n = 2, 3, 6 (32 MiB slabs) and for slabs 32, 32, 48, 80 MiB at n = 3; writers waited at `take()` in every hint arm; the peer-up control stayed at one slab. Large-hint boundary: M = m-23 hinted, M = m-22, m-15, m-12 rejected at `:152`.
 - Amendments of the audit (all before any reading of the tier they touch): n = 1 replaced by 2 (n = 1 deadlocks, shown as a stall in the unit tier), config D (24 MiB) added, stress replaced by a one-column 500,000-row client workload, the exact hinted-versus-commit-log window, citations (`HintsBuffer.java:100-108` -> `:199-206`; `FlushBufferTask.run` `:141-155`). A runbook defect: the first cluster attempt held each flush 2 s, too short for the offered load (2 slabs, no waiting writer); it was changed to 10 s and the tier rerun. One audit statement was wrong (the rejection does log an ERROR line) and is corrected in place.

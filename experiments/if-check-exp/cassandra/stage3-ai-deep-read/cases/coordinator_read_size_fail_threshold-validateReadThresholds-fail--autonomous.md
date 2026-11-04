@@ -428,7 +428,7 @@ Separately, the line-1101 check only rejects `fail < warn` at startup.
 
 ## D. Stage-4 feedback
 
-**2026-10-25 — stage 4 run 1 (Claude Opus 5.5, advisor's machine), results [`results/coordinator_read_size_fail_threshold-validateReadThresholds-fail--autonomous.md`](../../stage4-runtime-verification/results/coordinator_read_size_fail_threshold-validateReadThresholds-fail--autonomous.md).** Frozen after 19 audit amendments (sha256 `4f2657bc…d8ab`), then again after runbook fix D1 (`3ed15193…24c7`; `_INDEX.md` §4). Uncommitted.
+**2026-10-25 — stage 4 run 1 (Claude Opus 5.5, advisor's machine), results [`../../stage4-runtime-verification/results/coordinator_read_size_fail_threshold-validateReadThresholds-fail--autonomous.md`](../../stage4-runtime-verification/results/coordinator_read_size_fail_threshold-validateReadThresholds-fail--autonomous.md).** Frozen after 19 audit amendments (sha256 `4f2657bc…d8ab`), then again after runbook fix D1 (`3ed15193…24c7`; `_INDEX.md` §4). Uncommitted.
 - **Unit: Not confirmed — caps only on some paths (bypass).**
   - Coordinator arm: refused exactly where (P − 1)·65,544 > T, with the counted size m·65,544 (histogram bucket). At P × 65,536 = T it did not refuse.
   - Local arm: refused exactly at the row where 72 + k·65,752 ≥ T, with X = 263,080 / 1,052,104 / 4,208,200. This includes P × 65,536 = T. Replica allocation was 0.74 / 3.11 / 12.6 MB, independent of P.

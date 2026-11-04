@@ -1,7 +1,7 @@
 # Harness — row_index_read_size_fail_threshold-checkSize-failThreshold
 
 Instruments for the case's section 9 (stage 4). Written 2026-10-07 from the case's 9c table. The results are in
-[`../../results/row_index_read_size_fail_threshold-checkSize-failThreshold.md`](../../results/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md).
+[`../../results/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md`](../../results/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md).
 
 | File | What it is | Checked how |
 |---|---|---|

@@ -133,7 +133,7 @@ These apply to B2a-B2h; the prediction (B2f) and the readings table (B2g) are no
 
 ## D. Stage-4 feedback
 
-**2026-10-28, stage 4 (results: [`results/max_unsigned_short-validateindexedvalue-value_remaining--autonomous.md`](../../stage4-runtime-verification/results/max_unsigned_short-validateindexedvalue-value_remaining--autonomous.md), node `pc32`, run 1 only, self-checked).**
+**2026-10-28, stage 4 (results: [`../../stage4-runtime-verification/results/max_unsigned_short-validateindexedvalue-value_remaining--autonomous.md`](../../stage4-runtime-verification/results/max_unsigned_short-validateindexedvalue-value_remaining--autonomous.md), node `pc32`, run 1 only, self-checked).**
 
 - **Unit tier: Confirmed (B2g row 1) - does not cap.** 65534 accepted, 65535 and 65536 rejected with "Cannot index value of size S for index ... (maximum allowed size=65535)"; the same values are accepted without the index (the rejection is line 618, not another validator). Index backing-table disk bytes 13.3 MB, 132.1 MB, 528.1 MB at N = 100, 1000, 4000 (S = 65534; 2.0 x N x S; ratios 9.90 and 4.00), no rejection. Control: `memtable_heap_space` 64 MiB held the pool at 64.1 MiB (754.0 MiB at 2048 MiB), 7 index sstables flushed early, same 528.9 MB written.
 - **Cluster tier: Confirmed (B3g row 1) - does not cap.** Precheck 5 / 5. Index live space 132.1 MB, 528.0 MB, 2,111.8 MB at N = 1000, 4000, 16000 (ratios 4.00, 4.00), all accepted; S = 65535: 200 of 200 rejected, nothing written. Pool control: first logged `MEMTABLE_LIMIT` off-heap usage 507.2 MiB at `memtable_offheap_space` 512 MiB and 256.0 MiB at 256 MiB (3 versus 7 flushes), index live space 2,111.8 MB versus 2,112.5 MB.

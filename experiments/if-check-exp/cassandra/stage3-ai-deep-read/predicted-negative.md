@@ -2,7 +2,7 @@
 
 If statements read **with the Cassandra source open** (`cassandra-5.0.9`) and
 rejected against the three rules
-([`../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case)). A line
+([`../../README.md` §3.4–§3.6](../../README.md#3-core-concept-the-if-check-case)). A line
 here carries a **negative estimate**: a prediction from the source that usage
 does not follow the constraint. Stage 4 confirms or refutes it.
 
@@ -178,7 +178,7 @@ not at all). Most limits here are encoding or type limits, not configuration.
 
 ## 4. Rollover and chunking
 
-**Rule 2, rollover** ([`../README.md` §3.5](../../README.md#3-core-concept-the-if-check-case)'s
+**Rule 2, rollover** ([`../../README.md` §3.5](../../README.md#3-core-concept-the-if-check-case)'s
 edge case). A buffer, page, block, segment, file or writer is full, so it is
 written out and the next one starts. Every byte is still written or held; the
 check only sets how it is split.

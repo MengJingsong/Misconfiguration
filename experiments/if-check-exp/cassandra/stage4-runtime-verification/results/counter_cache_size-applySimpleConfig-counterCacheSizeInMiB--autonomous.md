@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed, 2026-10-25. **Unit: Confirmed — caps** (B2g row 1). **Cluster: Confirmed — caps** (B3g row 1: entries and weighted size capped exactly at C, ratios 1 : 8 : 12.5; the live heap grows by 1.81 / 1.77 × the weighted size, inside the band R_pred ± 0.25 derived at the audit from Caffeine 3.1.8's node and table layout, R_pred = 1.79 / 1.76). No run 2.
 >
-> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/counter_cache_size-applySimpleConfig-counterCacheSizeInMiB--autonomous/`](../harness/counter_cache_size-applySimpleConfig-counterCacheSizeInMiB--autonomous/).
 >

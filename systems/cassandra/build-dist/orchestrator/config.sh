@@ -15,7 +15,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT_GUESS="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+REPO_ROOT_GUESS="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 
 # shellcheck source=/dev/null
 source "$REPO_ROOT_GUESS/config/environment.sh"
@@ -34,7 +34,7 @@ declare -A SSH_HOST=(
 # (see the "case $- in *i*) ;; *) return;; esac" guard near its top),
 # so exports appended to it by remotes/step1.sh never actually apply
 # when invoked as `ssh host 'source ~/.bashrc; ...'`.
-REMOTE_SCRIPTS_DIR="$REPO_ROOT/cassandra"
+REMOTE_SCRIPTS_DIR="$REPO_ROOT/systems/cassandra"
 REMOTE_CASSANDRA_HOME="$MYDATA_CASSANDRA_HOME"
 
 is_seed() {

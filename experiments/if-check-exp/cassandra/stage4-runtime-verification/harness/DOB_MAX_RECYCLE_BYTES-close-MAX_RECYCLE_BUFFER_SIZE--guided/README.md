@@ -1,7 +1,7 @@
 # Harness — DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE
 
 Instruments for the case's §9 (stage 4), written 2026-10-15 after the step-0 audit froze §9a (`634e47fc…`). Results:
-[`../../results/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE.md`](../../results/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md).
+[`../../results/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md`](../../results/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md).
 Copy the folder to the node (`~/stage4-harness-run/dob/`) and compare `md5sum` before a run. Unit tier in `~/cassandra-run3`,
 cluster tier from `~/cassandra-run1` (both `b5f2a54`).
 

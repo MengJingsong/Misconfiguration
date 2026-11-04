@@ -274,7 +274,7 @@ Part C notes:
   The k-th snapshot has `used ≈ k·m·C` and `reclaiming ≈ (k−1)·m·C`.
 - **Part C:** for every t the allocating thread is blocked after 2 s with `usedAtBlock ≤ 67,108,864`, and `usedAtBlock > 67,108,864 − C`. After `setDiscarded`, `reclaiming` drops to the live remainder (0 if the current allocator was just switched) and `used` falls by the discarded total.
 
-> **Stage-4 audit amendment U2 (2026-10-21).** The after-release reading above is racy: the helper thread keeps allocating, so 200 ms after `setDiscarded` it has refilled the pool and `used` no longer shows the fall. The harness (`stage4-runtime-verification/harness/memtable_heap_space-needsCleaning-nextClean--autonomous/NextCleanBoundaryTest.java`) therefore counts the helper's completed chunks and sums the discarded allocators' `owns()` before releasing them (`released`). Prediction for the release, replacing the sentence above: after release the helper completes `released / C` more chunks (± 1) and is blocked again, and `used ≤ L` at the after-release reading. The block-at-L prediction is unchanged.
+> **Stage-4 audit amendment U2 (2026-10-21).** The after-release reading above is racy: the helper thread keeps allocating, so 200 ms after `setDiscarded` it has refilled the pool and `used` no longer shows the fall. The harness (`cassandra/stage4-runtime-verification/harness/memtable_heap_space-needsCleaning-nextClean--autonomous/NextCleanBoundaryTest.java`) therefore counts the helper's completed chunks and sums the discarded allocators' `owns()` before releasing them (`released`). Prediction for the release, replacing the sentence above: after release the helper completes `released / C` more chunks (± 1) and is blocked again, and `used ≤ L` at the after-release reading. The block-at-L prediction is unchanged.
 
 **B2g. Readings.**
 
@@ -505,7 +505,7 @@ Derived values:
 
 ## D. Stage-4 feedback
 
-**2026-10-22, run 1 (both tiers), results file `stage4-runtime-verification/results/memtable_heap_space-needsCleaning-nextClean--autonomous.md`.** Design audit: Ready after amendments (U1, U2, K1, K3, K4, dated 2026-10-21 next to the text they change; frozen sha256 `0378bf7d45276199e3bb3971324e5b5224cd7fc636c2927a11fd676289500bad`). Not committed.
+**2026-10-22, run 1 (both tiers), results file `cassandra/stage4-runtime-verification/results/memtable_heap_space-needsCleaning-nextClean--autonomous.md`.** Design audit: Ready after amendments (U1, U2, K1, K3, K4, dated 2026-10-21 next to the text they change; frozen sha256 `0378bf7d45276199e3bb3971324e5b5224cd7fc636c2927a11fd676289500bad`). Not committed.
 
 - **Unit: Confirmed — caps (B2g row 1).** Every B2c value exact: first true of line 128 at chunk 26 / 65 / 86 / 129 / 231 for t = 0.10 / 0.25 / 1/3 / 0.50 / 0.90 at 64 MiB (strict `>`), 33 / 65 / 129 at 32 / 64 / 128 MiB (t = 0.25); `nextClean = reclaiming + (long)(L·t)` at every trigger; 9 / 3 / 2 / 1 / 1 triggers with live = m·C; block at exactly L; after release exactly `released/C` more chunks.
 - **Cluster: Confirmed — caps (B3g row 1, with the R3 positive-control row; the R5 "hard cap not exercised" row also applies).** 3 M × 1 KiB at 10 k/s. Trigger `live` 0.33 (R1–R3), 0.15 (R4), 0.66 (R5) at every one of 206 triggers; line 128 traced returning true within 7 B – 7.8 KiB above `(long)(L·t)`; N_flush 101 / 25 / 12 at 128 / 512 / 1024 MiB (R1/R3 = 8.4) and 56 vs 25 at t = 0.15 vs 1/3; pool usage incl. flushing 71.7 / 226.2 / 467.5 MiB; forced-GC memtable live heap 42.8 / 180.4 / 363.5 MiB; never near L (max 0.73 L in R5), 0 writers blocked.

@@ -1,5 +1,11 @@
 # Stage 3 guided-agent playbook — how to run a deep-read pass
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 **This is the guided agent.** It gets the target plus the human suggestions in this
 file: the three rules, the enforcement patterns and the test-design method. The
 [autonomous agent](playbook-autonomous.md) gets the target only. Both write a case

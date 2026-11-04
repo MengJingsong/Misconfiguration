@@ -214,7 +214,7 @@ No external links were relied on.
 
 ## D. Stage-4 feedback
 
-Stage 4, 2026-10-25, tag `rc`, node `pc07`. Results: [`results/row_cache_size-create-serialized_size--autonomous.md`](../../stage4-runtime-verification/results/row_cache_size-create-serialized_size--autonomous.md). Frozen version: sha256 `23f4b160fd23a0326d41136393916e0b652fac8d54c9023483e6c8c21e1bb9cd` (this file before D was filled; case file untracked, base commit `627b1ec`).
+Stage 4, 2026-10-25, tag `rc`, node `pc07`. Results: [`../../stage4-runtime-verification/results/row_cache_size-create-serialized_size--autonomous.md`](../../stage4-runtime-verification/results/row_cache_size-create-serialized_size--autonomous.md). Frozen version: sha256 `23f4b160fd23a0326d41136393916e0b652fac8d54c9023483e6c8c21e1bb9cd` (this file before D was filled; case file untracked, base commit `627b1ec`).
 
 - **Verdict: Confirmed at both tiers; effect on the constraint: caps. Outcome class: true positive** (estimate `positive`, effect `caps`). B1 held: `weightedSize()` never exceeded the capacity (27 unit points, 49 JMX samples per cluster arm), the cache sat at the capacity with 4x to 16x more data offered, and the process's anonymous memory rose with the capacity (unit: C plus a constant 22-69 MiB; cluster: 129, 448 and 1003 MiB over a cache-off node at 128, 512 and 1024 MiB, flat during further reads).
 - **Amendments before the freeze (2026-10-25):** A3 line ranges of `put`, `putIfAbsent`, `replace`, `remove` corrected; B2i (plain `main`, `RssAnon`, fixed slack, exact points, `clear()` side arm and its two B2g rows, one JVM per point) and B3i (32,768 partitions, 180 s random phase, JMX reading, estimate = `RssAnon` difference to the 0 MiB arm instead of the NMT subtraction, arms, ports).

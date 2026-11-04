@@ -61,7 +61,7 @@ The resource is heap. The cap is a row count, so bytes = rows × row size.
 > **Amendment B2a (2026-10-26, stage-4 audit, before any reading).** On the advisor's machine (`environment-advisor.md`):
 > - `$WORK/cassandra` is `$W/cassandra-run34` (`W=~/Library/Caches/stage4`), a fresh clone of `~/cassandra-src` at `cassandra-5.0.9`
 >   (`b5f2a54210`), built with `ant -Dlocal.repository=$W/m2 build-test`; `ant testsome` needs the test classes, which `ant jar` does not build.
-> - The probe classes live in `stage4-runtime-verification/harness/sai_vector_search_max_top_k-execute-pageSize--autonomous/`. `unit-run.sh`
+> - The probe classes live in `cassandra/stage4-runtime-verification/harness/sai_vector_search_max_top_k-execute-pageSize--autonomous/`. `unit-run.sh`
 >   copies them into `test/unit/org/apache/cassandra/index/sai/cql/` of the clone, runs them, and removes them and their class files.
 > - The shared body is in an abstract class `TopKProbeBase extends SAITester` (not a test: `testsome` runs only the named class). Each
 >   test class (`TopKProbe100Test`, `TopKProbeDefaultTest`, `TopKProbe1500Test`, amendment B2b) holds only its static block, which sets

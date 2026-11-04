@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed 2026-10-23 (run 1, unit then cluster, self-checked; no run 2). Estimate negative. Unit **Confirmed — does not cap**; cluster **Confirmed — does not cap**. Run by the autonomous stage-4 session on `pc07` (node0).
 >
-> **Outcome class:** **true negative** (stage-3 estimate `negative`; stage-4 effect on the constraint: `does not cap`, both tiers) — [definition](../README.md#outcome-class)
+> **Outcome class:** **true negative** (stage-3 estimate `negative`; stage-4 effect on the constraint: `does not cap`, both tiers) — [definition](../../../stage4-runtime-verification/README.md#outcome-class)
 >
 > **Agent:** autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
@@ -18,7 +18,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

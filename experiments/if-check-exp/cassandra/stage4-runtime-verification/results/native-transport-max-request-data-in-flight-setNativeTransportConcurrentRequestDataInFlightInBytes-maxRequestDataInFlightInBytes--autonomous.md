@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed (run 1 at both tiers + self-check; no run 2) — 2026-10-26
 >
-> **Outcome class:** true positive — the stage-3 estimate (positive) against the stage-4 effect (`caps only on some paths (bypass)`) ([definition](../README.md#outcome-class))
+> **Outcome class:** true positive — the stage-3 estimate (positive) against the stage-4 effect (`caps only on some paths (bypass)`) ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** guided / autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
@@ -18,7 +18,7 @@
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

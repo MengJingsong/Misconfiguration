@@ -4,7 +4,7 @@
 >
 > **Status:** planned / audited / run 1 done / self-checked / run 2 done / verdict filed
 >
-> **Outcome class:** true positive / false positive / true negative / false negative / undetermined — the stage-3 estimate against the effect found below ([definition](../README.md#outcome-class)); fill it when both tiers are filed
+> **Outcome class:** true positive / false positive / true negative / false negative / undetermined — the stage-3 estimate against the effect found below ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); fill it when both tiers are filed
 >
 > **Agent:** guided / autonomous (the suffix of the case-file stem). For an autonomous
 > file, "§9a" below means each tier's predictions and conclusions table: B2f and B2g
@@ -12,13 +12,13 @@
 > file's feedback section is its section D, not §10. One results file per case file.
 
 **Relative links in this template** are written for where a *copy* of it lives
-— inside `results/` — not for the template's own location one level up.
+— inside `<system>/stage4-runtime-verification/results/` — not for the template's own location.
 
 **Fill the sections in order.** The audit (§1), run 1 (§4) and the self-check
 (§5) are required; run 2 (§6) and the comparison (§7) are filled only if §5.2
 chooses run 2. No step waits for a human.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 
 ## 1. Before run 1 — design audit and freeze
 

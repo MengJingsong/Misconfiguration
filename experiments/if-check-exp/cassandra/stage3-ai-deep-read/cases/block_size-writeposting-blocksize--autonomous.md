@@ -126,7 +126,7 @@ Made before any reading; they override the text of the sections named where they
 
 ## D. Stage-4 feedback
 
-**2026-10-28 (stage 4, node `pc39`; results: `stage4-runtime-verification/results/block_size-writeposting-blocksize--autonomous.md`).** Unit tier **Confirmed**, effect **does not cap**; cluster tier **Not confirmed (no matching row)** on the frozen 5 % bound, effect **does not cap**; outcome class **true negative** (estimate `negative`).
+**2026-10-28 (stage 4, node `pc39`; results: `cassandra/stage4-runtime-verification/results/block_size-writeposting-blocksize--autonomous.md`).** Unit tier **Confirmed**, effect **does not cap**; cluster tier **Not confirmed (no matching row)** on the frozen 5 % bound, effect **does not cap**; outcome class **true negative** (estimate `negative`).
 
 - Unit: the on-disk bytes of a list follow the per-block model to the byte (`1 + blocks x (1 + ceil(bs x 2 / 8))` at stride 3), grow 10.0 x for 10 x the postings at bs 16, 128 and 1024, and are 656 / 301 / 257 KB (file) for 1M postings; `deltaBuffer` is 8 bs + 16; the retained arrays beyond it are the two skip-table lists (1.14 MB at bs 16, N = 1M); a wide stride (20 bits) raised the bytes 9.8 to 10.0 x (control).
 - Cluster (3M rows, seed + `CREATE INDEX` + `rebuild_index`): ledger `deltaBuffer` 32 / 128 / 512 per arm; posting files 11.61 / 10.76 / 11.04 MB (+7.9 % and +2.7 %: U-shaped, per-block overhead at 32, tail padding at 512), total SAI bytes 49.99 / 49.13 / 49.42 MB (+1.7 %, +0.6 %); heap peaks 1,892 / 1,918 / 1,915 MiB; 4.23 x posting bytes for 4 x rows; control `segment_write_buffer_size` 16 MiB: gauge 16.0 MiB against 1,024 MiB, 848 against 8 limit flushes, heap peak 1,280 against 1,918 MiB, `v_idx` posting file 3.2 against 7.6 MB.

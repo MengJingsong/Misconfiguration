@@ -1,7 +1,7 @@
 /*
  * Stage-4 harness, unit tier (B2) of hints-CompressedChecksummedDataInput-readBuffer-uncompressedSize--autonomous. Not upstream.
  * Compiled by unit-run.sh into a separate output directory (package org.apache.cassandra.hints, for the package-private
- * HintsWriter / HintsReader / HintsDescriptor); never copied into the repository's cassandra/cassandra-5.0.9/.
+ * HintsWriter / HintsReader / HintsDescriptor); never copied into the repository's systems/cassandra/source/.
  *
  * One JVM per case (B2h, audit amendment R6), started by unit-run.sh with test/conf/cassandra.yaml plus a
  * file_cache_size line (so BufferPools' static threshold is the knob value).

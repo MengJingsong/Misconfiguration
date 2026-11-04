@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-28 — unit Confirmed (does not cap), cluster Confirmed (does not cap); all pre-registered numbers met (66 PASS, 0 FAIL); `z1` build overflows the stack at L >= 2048 (allowed row); no run 2**
 >
-> **Outcome class:** true negative — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../README.md#outcome-class))
+> **Outcome class:** true negative — stage-3 estimate `negative` against the stage-4 effect `does not cap` ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous (B2 = unit tier, B3 = cluster tier, feedback = section D).
 

@@ -85,10 +85,10 @@ Add `test/unit/org/apache/cassandra/utils/BloomFpChanceMemoryTest.java` in the l
 Run with `ant testsome -Dtest.name=org.apache.cassandra.utils.BloomFpChanceMemoryTest`.
 Default test JVM options are fine (filters are off-heap; largest is 2.5 MB).
 
-> **Amendment U1 (2026-10-27, stage-4 step-0 audit, before any harness run or reading).** B2a, B2e and B4 on this host (the advisor's Mac, `stage4-runtime-verification/environment-advisor.md`).
+> **Amendment U1 (2026-10-27, stage-4 step-0 audit, before any harness run or reading).** B2a, B2e and B4 on this host (the advisor's Mac, `cassandra/stage4-runtime-verification/environment-advisor.md`).
 > There is no `/local`. The run clone is `$W/cassandra-run58` (`W=~/Library/Caches/stage4`; `git clone --branch cassandra-5.0.9
 > ~/cassandra-src $W/cassandra-run58`, then `ant -Dlocal.repository=$W/m2 build-test`, JDK 11). The test source lives in the harness
-> (`stage4-runtime-verification/harness/<stem>/BloomFpChanceMemoryTest.java`); `unit-run.sh` copies it into
+> (`cassandra/stage4-runtime-verification/harness/<stem>/BloomFpChanceMemoryTest.java`); `unit-run.sh` copies it into
 > `test/unit/org/apache/cassandra/utils/` of the clone, runs `ant -Dlocal.repository=$W/m2 testsome
 > -Dtest.name=org.apache.cassandra.utils.BloomFpChanceMemoryTest`, copies `build/test/logs/**/TEST-*.log` (the test's stdout, one line per
 > write) and the JUnit XML to `$W/logs/<stem>/unit-<label>/`, and removes the copied source (clone `git status` clean). A shakedown
@@ -310,7 +310,7 @@ fp=0.00006 rejected with "bloom_filter_fp_chance must be larger than 6.71E-5". C
 > 2·10^7; the source does not give independent draws — the java.util.Random states of consecutive seeds form an arithmetic progression
 > modulo 2^48 — so that model is not what the source determines and is not used.) **Expected counts**, computed by running stress's own
 > generator classes from the run clone, outside any node (harness `StressKeyCount.java`; output
-> `stage4-runtime-verification/results/<stem>/run1b-cluster/stress-key-count.txt`): **E(1..10 000 000) = 9 999 195** distinct keys
+> `cassandra/stage4-runtime-verification/results/<stem>/run1b-cluster/stress-key-count.txt`): **E(1..10 000 000) = 9 999 195** distinct keys
 > (805 lost), **E(1..20 000 000) = 19 997 026** (the LOAD and CTRL seeds together, 2 974 lost); for the shakedown (N = 200 000, not judged)
 > E(1..200 000) = 200 000 and E(1..400 000) = 400 000. **I1 now reads:** after the load `totalRows` ≠ E(1..N) (9 999 195 for N = 10 000 000),
 > N_est outside ±5% of 10 000 000, stress errors > 0, stress `Total partitions` ≠ N for either load, or a sample with SSTable count ≠ 1.

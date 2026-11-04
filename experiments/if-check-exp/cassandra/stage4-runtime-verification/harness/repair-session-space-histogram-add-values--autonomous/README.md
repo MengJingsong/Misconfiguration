@@ -1,6 +1,6 @@
 # Harness: repair-session-space-histogram-add-values--autonomous
 
-Stage-4 harness for the case `stage3-ai-deep-read/cases/repair-session-space-histogram-add-values--autonomous.md` (amendments dated 2026-10-26 in its section D).
+Stage-4 harness for the case `cassandra/stage3-ai-deep-read/cases/repair-session-space-histogram-add-values--autonomous.md` (amendments dated 2026-10-26 in its section D).
 Port slot 2 on pc12: loopback 127.0.2.1 / 127.0.2.2, JMX 7120 / 7121, native 9042 on 127.0.2.1 only. Work tree `~/s4-b7-hv/c509` (copy-source.sh + `ant build-test`), logs `~/s4-b7-hv-logs`, node data `/dev/shm/s4-b7-hv`.
 
 | File | Use |

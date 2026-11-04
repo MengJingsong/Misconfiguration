@@ -93,7 +93,7 @@ Finding 1 can confirm "caps". Finding 2 decides whether the byte target is a cap
 - Use `@RunWith(org.jboss.byteman.contrib.bmunit.BMUnitRunner.class)`. This is the same mechanism as `test/unit/org/apache/cassandra/locator/AssureSufficientLiveNodesTest.java:53-71`; Byteman 4.0.20 is already a test dependency (`.build/parent-pom-template.xml:40`).
 - No extra JVM options are needed. The test config `test/conf/cassandra.yaml` has `commitlog_segment_size: 5MiB`, so `max_mutation_size` is 2.5 MiB and every batch below must stay under 2.5 MiB.
 
-**Amendment 2026-10-26 (step-0 audit, Claude Opus 5.5, claude-opus-5-5) — B2a, this host.** Run clone `$W/cassandra-run28` (`W=~/Library/Caches/stage4`; `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run28`, a full clone at `b5f2a54210`, then `ant -Dlocal.repository=$W/m2 build-test`), macOS arm64, JDK 11.0.32.1, Ant 1.10.18. The test class lives at `stage4-runtime-verification/harness/<stem>/BatchlogPageBudgetTest.java`. `unit-run.sh` copies it into the clone's `test/unit/org/apache/cassandra/batchlog/`. Instrument check at the audit: the class compiles in the run clone (`ant build-test`, `BUILD SUCCESSFUL`, `$W/logs/batchlog_DEFAULT_PAGE_SIZE-processBatchlogEntries/audit-compile.log`). The test yaml is not changed. Reason: B2a named a CloudLab path.
+**Amendment 2026-10-26 (step-0 audit, Claude Opus 5.5, claude-opus-5-5) — B2a, this host.** Run clone `$W/cassandra-run28` (`W=~/Library/Caches/stage4`; `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run28`, a full clone at `b5f2a54210`, then `ant -Dlocal.repository=$W/m2 build-test`), macOS arm64, JDK 11.0.32.1, Ant 1.10.18. The test class lives at `cassandra/stage4-runtime-verification/harness/<stem>/BatchlogPageBudgetTest.java`. `unit-run.sh` copies it into the clone's `test/unit/org/apache/cassandra/batchlog/`. Instrument check at the audit: the class compiles in the run clone (`ant build-test`, `BUILD SUCCESSFUL`, `$W/logs/batchlog_DEFAULT_PAGE_SIZE-processBatchlogEntries/audit-compile.log`). The test yaml is not changed. Reason: B2a named a CloudLab path.
 
 **B2b. Knobs.** The limit cannot be set, so the test varies the inputs to `:254`/`:257`, which are the batch size and the flush state:
 
@@ -470,7 +470,7 @@ The cluster verdict is **Confirmed** when finding 1's first row and both first r
 
 ## D. Stage-4 feedback
 
-**2026-10-26, stage 4 run 1 (Claude Opus 5.5, claude-opus-5-5), on the advisor's machine.** Results: [`stage4-runtime-verification/results/batchlog_DEFAULT_PAGE_SIZE-processBatchlogEntries-positionInPage--autonomous.md`](../../stage4-runtime-verification/results/batchlog_DEFAULT_PAGE_SIZE-processBatchlogEntries-positionInPage--autonomous.md). Uncommitted.
+**2026-10-26, stage 4 run 1 (Claude Opus 5.5, claude-opus-5-5), on the advisor's machine.** Results: [`../../stage4-runtime-verification/results/batchlog_DEFAULT_PAGE_SIZE-processBatchlogEntries-positionInPage--autonomous.md`](../../stage4-runtime-verification/results/batchlog_DEFAULT_PAGE_SIZE-processBatchlogEntries-positionInPage--autonomous.md). Uncommitted.
 
 **Version history.** The file was frozen after fifteen audit amendments at sha256 `d04e9c87…f056`. The unit tier then ran at `e39a7514…2ea3` (defect 1) and the cluster tier at `70b0f972…2226` (defects 2 and 3). No prediction changed.
 

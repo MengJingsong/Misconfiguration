@@ -83,7 +83,7 @@ forks per class). Build `ant jar build-test`; run `ant testsome -Dtest.name=org.
 > `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run51`, then `ant -Dlocal.repository=$W/m2 build-test`
 > (compiles everything `testsome` needs; no `ant jar`). **Four** classes, `RangeCapProbe1Test`, `RangeCapProbe4Test`,
 > `RangeCapProbe16Test`, `RangeCapProbeDefaultTest` (U2), kept in
-> `stage4-runtime-verification/harness/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous/` and copied
+> `cassandra/stage4-runtime-verification/harness/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous/` and copied
 > into the clone's `test/unit/org/apache/cassandra/service/reads/range/` only for the run (removed afterwards, with their compiled
 > classes). Each is run once: `ant -Dlocal.repository=$W/m2 testsome -Dtest.name=org.apache.cassandra.service.reads.range.RangeCapProbe<V>Test`
 > (one forked JVM per class, so the `static final` field is initialised once per value). The run script is `harness/…/unit-run.sh <label>`.
@@ -436,7 +436,7 @@ check `pgrep -f RangeCapProbe` afterwards. Nothing added to the shared clone.
 **2026-10-27, advisor-run stage 4 (Claude Opus 5.5, on the advisor's Mac), run 1 at sha256 `4c8138c9…89fb2`:**
 unit **Confirmed (B2g row 1, U5/D1) — caps**; cluster **Not confirmed (C8 row (b)) — caps** (requests and response bytes per read for
 C ≤ 16). Results:
-[`stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md`](../../stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md).
+[`../../stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md`](../../stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md).
 Unit: `computeConcurrencyFactor(32, 1, C, 5000, 0)` returns C (1 / 4 / 16; the default is 20 in the test JVM, which runs with
 `-XX:ActiveProcessorCount=2`). Cluster (3 nodes, node 1 one empty range, 48 dense ranges on nodes 2/3): on the target branch (trace
 "Didn't get any response rows; new concurrent requests: N") batch 2 issues exactly C requests (1 / 4 / 16 / 48; 49 at the default 100) and
@@ -462,7 +462,7 @@ the target branch (1 / 4 / 16 / 48; 49 at the default), each bringing a 2.078-MB
 99.74 MB per read; ReceivedBytes agreeing); no message dropped, the uncapped controls received all 48 responses and held up to 51.9 / 41.6 MB
 at close (> 35.2 MB, beyond any C = 16 read); L inside the amended band in every GC-mode read; page control ratio 0.1000. Self-check 2,427
 checks, 0 failed. Results:
-[`stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md`](../../stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md)
+[`../../stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md`](../../stage4-runtime-verification/results/max_concurrent_range_requests-computeConcurrencyFactor-liveReturned--autonomous.md)
 §7. Run 1's verdict and findings (replica queue drops at 10-MB responses; the `liveReturned` double count) are kept. For stage 3: an
 uncapped control needs requests per replica × response size under the replica's outbound queue; byte-array heap bands must use the JVM's
 footprint (humongous regions under `G1HeapRegionSize=16m`). Commits: none yet (uncommitted on `advisor-run`, after `942f128`).

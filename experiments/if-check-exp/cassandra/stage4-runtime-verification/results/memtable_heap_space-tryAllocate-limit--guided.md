@@ -9,7 +9,7 @@
 **Fill the sections in order.** Run 1 (§4) and the review (§5) are required;
 run 2 (§6) and the comparison (§7) are filled only if the review chooses run 2.
 The protocol behind each section is in
-[`../README.md`](../README.md#the-run-protocol).
+[`../../../stage4-runtime-verification/README.md`](../../../stage4-runtime-verification/README.md#the-run-protocol).
 This file was started under the 2026-09-28 two-run protocol and moved to the
 2026-09-29 one before any run 2.
 

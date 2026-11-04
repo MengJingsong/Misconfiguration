@@ -1,7 +1,7 @@
 /*
  * Stage-4 harness, unit tier (B2) of write_buffer_size-append-hint--autonomous. Not upstream.
  * Copy into test/unit/org/apache/cassandra/hints/ of a local copy (package-private HintsWriter, Session,
- * HintsWriteExecutor.WRITE_BUFFER_SIZE, HintsBuffer). Never into the repository's cassandra/cassandra-5.0.9/.
+ * HintsWriteExecutor.WRITE_BUFFER_SIZE, HintsBuffer). Never into the repository's systems/cassandra/source/.
  *
  * B2b-B2e as audited (results §1): own direct aggregation buffer of N in {64 KiB, 256 KiB, 1 MiB} (the constant is not
  * settable; the test asserts WRITE_BUFFER_SIZE == 262144), hint size h in {1 KiB, 100 KiB, 300 KiB, 2 MiB}; the entry is an

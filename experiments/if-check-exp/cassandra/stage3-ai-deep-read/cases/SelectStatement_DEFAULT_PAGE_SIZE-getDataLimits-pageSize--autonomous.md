@@ -53,7 +53,7 @@
 
 > **Amendment B2a (2026-10-26, stage-4 audit, before any reading).** `$WORK/cassandra` on the advisor's machine is `$W/cassandra-run35` (`W=~/Library/Caches/stage4`), a fresh
 > `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run35`, built with `ant -Dlocal.repository=$W/m2 build-test`
-> (`testsome` needs the test classes; `ant jar` does not build them). The probe source lives in `stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/`
+> (`testsome` needs the test classes; `ant jar` does not build them). The probe source lives in `cassandra/stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/`
 > and `unit-run.sh` copies it into the clone, runs it, and removes it and its classes, so the clone's `git status` stays clean.
 
 **B2b. Knobs.** The constant cannot be changed, so the varied input is the client page size P ∈ {-1 (off), 1000, 50000}, plus the row count N ∈ {25,000, 50,000}. With P > 0, P replaces the constant, so the boundary is expected to move with P.
@@ -93,7 +93,7 @@
 1. For each N: create the table, load and flush it.
 2. For each (query, P), record limits, reads and groups. Print `N,query,P,limits,reads,localReads,groups`.
 
-> **Amendment B2e (2026-10-26, stage-4 audit, before any reading).** Run `stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/unit-run.sh` with no argument (one `ant testsome` JVM). It logs each command and keeps
+> **Amendment B2e (2026-10-26, stage-4 audit, before any reading).** Run `cassandra/stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/unit-run.sh` with no argument (one `ant testsome` JVM). It logs each command and keeps
 > `ant.log`, `TEST.log`, `probe.txt` and `summary.txt` under `$W/logs/<stem>/unit/`.
 
 **B2f. Predictions** (reads may be one higher than shown, for a final empty sub-page):
@@ -184,7 +184,7 @@
 - Arithmetic: a GROUP BY sub-page is 10000 × 4 KiB ≈ 40 MiB, against ≈ 400 MiB if one read materializes everything.
 - If `max(blob)` is rejected, use `count(v)`. It still has to read v cells, and liveness alone would not move heap, so check the heap result with care.
 
-> **Amendment B3c (2026-10-26, stage-4 audit, before any reading).** `stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/probe.py`: `setup` (keyspace and table as above, compression read back), `load 50 2000 32`
+> **Amendment B3c (2026-10-26, stage-4 audit, before any reading).** `cassandra/stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/probe.py`: `setup` (keyspace and table as above, compression read back), `load 50 2000 32`
 > (prepared INSERT, v = `os.urandom(4096)`, concurrency 32), `count` (must be 100,000), and `q <qg|qa> <off|fetch>`, which reads all
 > pages and prints rows, pages, value bytes and times. `max(blob)` is valid (`AggregateFcts.java:65-71`), so the `count(v)` fallback
 > is not used.
@@ -222,7 +222,7 @@
 2. For each (query, paging) pair (Qg-off, Qg-1000, Qa-off) and each of 3 reps: start jstat, wait 2 s, run the query, wait 3 s, stop jstat, read the counters.
 3. Stop the node.
 
-> **Amendment B3e (2026-10-26, stage-4 audit, before any reading).** One script, `stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/cluster-run.sh`: start the node (agent loaded), setup, load, flush, `count`; restart;
+> **Amendment B3e (2026-10-26, stage-4 audit, before any reading).** One script, `cassandra/stage4-runtime-verification/harness/SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous/cluster-run.sh`: start the node (agent loaded), setup, load, flush, `count`; restart;
 > wait 30 s; start the heap poller; then Qg-off ×3, Qg-1000 ×3, Qg-50000 ×3, Qa-off ×3 (Qa last, since it may OOM the node). Per
 > query: explicit GC; read counts; 2 s; the query; 3 s; read counts; the query's slices of `node.out` (Byteman lines) and `system.log`.
 > Then stop the node, copy `system.log` and `gc.log`, wipe `$W/node-dps`.

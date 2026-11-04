@@ -1,5 +1,11 @@
 # Bands — every stage-1 row, ranked
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,
+> `copy-source.sh`, `predicted-*.md`, `undetermined.md` and the like) live in each system's copy of
+> the stage folder, `experiments/if-check-exp/<system>/<stage>/` (for Cassandra,
+> `experiments/if-check-exp/cassandra/`), not next to this file.
+
 *Named `positives.md` until 2026-09-24. Renamed because the file covers all
 four bands, 4,387 of them band D: nothing here is a "positive", and stage 2
 has nothing to contrast one against since it stopped ruling rows out.*
@@ -49,7 +55,7 @@ helper judged once and applied to all its call sites.
 | Accidental consistency check | 8 helpers fell into both scopes and were judged twice, in unrelated batches. **All 8 agreed.** This is the only cross-batch consistency evidence that exists, since re-judging for consistency was deliberately not done. |
 
 Anchors are the 4 filed cases plus the 4 candidates in
-[`../stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md),
+[`../cassandra/stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md),
 repeated in every batch so separate batches share one yardstick;
 `record-stage2-bands.py` refuses a batch whose anchors do not all come back A.
 They also carry their own band-A rows in `bands.csv` (batch `anchors`), so the
@@ -245,15 +251,15 @@ not here (verdicts file with the stage that judged them):
 
 | Outcome | Recorded in |
 |---|---|
-| Qualified, written up | [`../stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/) + [`_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) |
-| Qualified, not yet written up | [`../stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md) |
-| Refused against the three rules | [`../stage3-ai-deep-read/predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) |
-| Pattern (b)/(c), parked | [`../stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) |
+| Qualified, written up | [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/) + [`_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) |
+| Qualified, not yet written up | [`../cassandra/stage3-ai-deep-read/predicted-positive.md`](../cassandra/stage3-ai-deep-read/predicted-positive.md) |
+| Refused against the three rules | [`../cassandra/stage3-ai-deep-read/predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) |
+| Pattern (b)/(c), parked | [`../cassandra/stage3-ai-deep-read/undetermined.md`](../cassandra/stage3-ai-deep-read/undetermined.md) |
 
 **Nothing in this file is a finding.** Some band-A rows are already refused:
 `NativeAllocator$Region.allocate():273` and `SlabAllocator$Region.allocate():201`
 were read and rejected in the capacity-word pass and are in `predicted-negative.md`. Stage 2 ranked
 them high anyway, correctly — the ground for refusing them is Rule 2, which no
 row can show. The four subtrees banded last also carry older
-verdicts in `../stage3-ai-deep-read/predicted-negative.md`; a band never overrides a
+verdicts in `../cassandra/stage3-ai-deep-read/predicted-negative.md`; a band never overrides a
 verdict already made with the source open.

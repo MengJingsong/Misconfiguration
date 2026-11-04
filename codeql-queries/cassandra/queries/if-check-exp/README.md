@@ -134,7 +134,7 @@ Two columns exist specifically to serve the downstream stages:
 ## Shared predicates
 
 `isNumeric`, `operandName`, `pkgDir`, `opClass` and `isCandidateComparison` live in
-[`cassandra/ifcheck/IfCheck.qll`](../../ifcheck/IfCheck.qll), imported as
+[`../../ifcheck/IfCheck.qll`](../../ifcheck/IfCheck.qll), imported as
 `import ifcheck.IfCheck`. They were previously copy-pasted into each query, which risked the
 queries drifting apart on what counts as "numeric" or "a candidate comparison". The library is
 Cassandra-local rather than in `common/` because it encodes this experiment's notion of a

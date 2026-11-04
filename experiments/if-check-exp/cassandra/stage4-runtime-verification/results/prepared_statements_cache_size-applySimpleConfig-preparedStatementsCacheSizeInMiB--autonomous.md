@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed, 2026-10-25. **Unit: Confirmed — caps** (B2g rows 1 and 2). **Cluster: Confirmed — caps only on some paths (bypass)** (B3g row 1 and the added bypass row: the cache is capped and follows the knob; the `system.prepared_statements` memtable grows by one partition per distinct PREPARE whatever the knob). No run 2.
 >
-> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
+> **Outcome class:** true positive — the stage-3 estimate (`positive`) against the effect found in §8 ([definition](../../../stage4-runtime-verification/README.md#outcome-class)); filed 2026-11-03 when the advisor's results were merged, from the final tier verdicts in §8.
 >
 > **Provenance:** advisor-run (the advisor's machine, [`environment-advisor.md`](../environment-advisor.md)); merged into this repository on 2026-11-03. The raw run folders cited as evidence (`run1/`, `run2/`: logs, samples, leak dumps) are held by the advisor and are not part of this repository; the harness is under [`harness/prepared_statements_cache_size-applySimpleConfig-preparedStatementsCacheSizeInMiB--autonomous/`](../harness/prepared_statements_cache_size-applySimpleConfig-preparedStatementsCacheSizeInMiB--autonomous/).
 >

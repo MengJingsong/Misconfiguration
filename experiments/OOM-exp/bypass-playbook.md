@@ -1,5 +1,10 @@
 # Bypass playbook (Direction 2)
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
+> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
+> root, data under `if-check-exp/<system>/`.
+
 **This is the agent's whole instruction for a bypass run.** Give an agent
 this file, read access to [`if-check-exp`](../if-check-exp/README.md) (its
 case files and stage-4 results are the input; this experiment does not
@@ -112,7 +117,7 @@ For each chosen constraint/mechanism pair:
 ## Output
 
 Write one file per attempted candidate to
-`cases/bypass/<constraint>-<function>.md` in this folder. Use this
+`<system>/cases/bypass/<constraint>-<function>.md` in this folder (for Cassandra, `cassandra/cases/bypass/`). Use this
 template — four sections, in this order:
 
 ### 1. Constraint and capacity

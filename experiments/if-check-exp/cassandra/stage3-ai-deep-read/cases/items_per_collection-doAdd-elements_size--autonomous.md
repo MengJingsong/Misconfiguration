@@ -135,7 +135,7 @@ cell is about tens of bytes in the memtable, so the 50,000-item set adds on the 
 of a megabyte of memtable data, which `memtableLiveDataSize` can see.
 
 > **Amendment B2c (2026-10-26, stage-4 audit, before any reading).** The probe as filed does not compile and logs badly; the
-> run uses `stage4-runtime-verification/harness/items_per_collection-doAdd-elements_size--autonomous/ItemsPerCollectionProbeTest.java`,
+> run uses `cassandra/stage4-runtime-verification/harness/items_per_collection-doAdd-elements_size--autonomous/ItemsPerCollectionProbeTest.java`,
 > which is the text above with these changes only:
 > 1. `useUser(USERNAME, PASSWORD)` → `useUser("guardrail_user", "guardrail_password")`: both constants are `private` in
 >    `GuardrailTester` (`GuardrailTester.java:89-90`), so the subclass cannot see them.

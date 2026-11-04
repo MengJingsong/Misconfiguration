@@ -46,7 +46,7 @@ Overshoot/bypass: the atomic `position` may pass B in the counter (`getAndAdd`),
 
 > **Amendment B2a (2026-10-26, stage-4 audit, before any run-1 reading).** On the advisor's machine (macOS 27, arm64; `environment-advisor.md`): the clone is
 > `$W/cassandra-run36` (`W=~/Library/Caches/stage4`), a fresh full clone of `~/cassandra-src` at `cassandra-5.0.9` (`b5f2a54210`), built with
-> `ant -Dlocal.repository=$W/m2 build-test` (it also builds the jar). The test source is `stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/HintsBufferCapTest.java`; `unit-run.sh` (B2e) copies it
+> `ant -Dlocal.repository=$W/m2 build-test` (it also builds the jar). The test source is `cassandra/stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/HintsBufferCapTest.java`; `unit-run.sh` (B2e) copies it
 > into `test/unit/org/apache/cassandra/hints/` for the run and removes it afterwards, so the clone's `git status` stays clean. The JVM option is passed as
 > `-Dtest.jvm.args="-XX:MaxDirectMemorySize=1g"` (`build.xml:94`, `:1192`); `build.xml` is not edited.
 
@@ -87,7 +87,7 @@ Overshoot/bypass: the atomic `position` may pass B in the counter (`getAndAdd`),
 **B2e. Procedure.**
 1. Clone and build (B2a). 2. Add `HintsBufferCapTest.java` with cases 1–3 (B2c), one `@Test` per B. 3. Run `ant testsome -Dtest.name=org.apache.cassandra.hints.HintsBufferCapTest 2>&1 | tee ~/hb-unit.log`. 4. `grep HBCAP ~/hb-unit.log`. 5. Free each buffer with `buf.free()` at the end of each test and check `dmem` returns to `dmem0` (± 0).
 
-> **Amendment B2e (2026-10-26, stage-4 audit, before any run-1 reading).** Run `stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/unit-run.sh` with no argument (one `ant testsome` JVM; one `@Test`
+> **Amendment B2e (2026-10-26, stage-4 audit, before any run-1 reading).** Run `cassandra/stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/unit-run.sh` with no argument (one `ant testsome` JVM; one `@Test`
 > runs cases 1 and 2 for each B in turn, a second runs case 3 and the formula lines). It logs each command, copies the test log, the XML report and
 > the `HBCAP` lines to `$W/logs/hints_buffer_size-allocateBytes-prev--autonomous/unit/`, and removes the test from the clone. Step 5 is done inside
 > the test (`dmem3`, and `dmemAfterFree` for case 3).
@@ -165,7 +165,7 @@ yaml on both: `cluster_name: hbcap`, `seed_provider` with `seeds: "127.0.0.1"`, 
 > 127.0.0.1–.3 present): both nodes run from the one built clone `$W/cassandra-run36` (never built while a node runs), each with its own
 > `CASSANDRA_CONF` and directories (`$W/node-hb1`, `$W/node-hb2`, amendment B4) instead of two copies of the clone. Node 2's `cassandra-env.sh` has
 > `JMX_PORT="7299"`. The heap is `MAX_HEAP_SIZE=2G HEAP_NEWSIZE=400M` (→ `-Xms2G -Xmx2G`); `-XX:MaxDirectMemorySize=2g` and, on node 1, the agent
-> `-javaagent:$BMJAR=script:stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/hb.btm,boot:$BMJAR` (`BMJAR=$W/cassandra-run36/build/lib/jars/byteman-4.0.20.jar`) are passed in
+> `-javaagent:$BMJAR=script:cassandra/stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/hb.btm,boot:$BMJAR` (`BMJAR=$W/cassandra-run36/build/lib/jars/byteman-4.0.20.jar`) are passed in
 > `JVM_EXTRA_OPTS`, scoped to `bin/cassandra` only. Each node is a tracked background `bin/cassandra -f` (stdout to `node1.out` / `node2.out`, where
 > `traceln` writes). Both yamls get the filed keys plus their own directories, `listen_address`/`rpc_address`, and an explicit
 > `commitlog_segment_size` (32MiB on node 2 and in arm (i)), and `auto_bootstrap: false`; `seeds` stays the default `"127.0.0.1:7000"`. `hb.btm` adds two
@@ -181,7 +181,7 @@ yaml on both: `cluster_name: hbcap`, `seed_provider` with `seeds: "127.0.0.1"`, 
 
 > **Amendment B3d (2026-10-26, stage-4 audit, before any run-1 reading).**
 > 1. **JMX sampler instead of `sjk` and `du -sb`.** `nodetool sjk mx` starts a JVM per call and exits 0 even on failure; `du -sb` is GNU-only. The sampler
->    `stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/HbJmx.java` keeps one JMX connection to node 1 (port 7199) and writes one line every **1 s**: epoch ms, the direct pool's `MemoryUsed`
+>    `cassandra/stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/HbJmx.java` keeps one JMX connection to node 1 (port 7199) and writes one line every **1 s**: epoch ms, the direct pool's `MemoryUsed`
 >    and `Count`, the mapped pool's `MemoryUsed` (commit-log segments; reported only), `org.apache.cassandra.metrics:type=Storage,name=TotalHints`
 >    `Count` (`HintsService.java:171`), and the exact byte sum and number of `*.hints` files in node 1's hints directory.
 > 2. **Two more observation-only Byteman rules,** `slab dmem before` (entry of `HintsBuffer.create`) and `slab dmem after` (its exit), print the direct
@@ -198,7 +198,7 @@ yaml on both: `cluster_name: hbcap`, `seed_provider` with `seeds: "127.0.0.1"`, 
 
 **B3e. Procedure.** Per knob value: 1. wipe data, set yaml, start node 1 then node 2, wait for `nodetool status` UN/UN. 2. Start the 5 s sampler. 3. Phase U; record direct-memory trace. 4. Wait 60 s, drain and kill node 2; wait until `nodetool status` on node 1 shows DN. 5. Phase D; keep sampling 30 s after it ends. 6. `grep HBCAP` node 1's log. 7. Stop sampler; `nodetool drain` + kill node 1; start nothing else. Repeat for (ii), (iii).
 
-> **Amendment B3e (2026-10-26, stage-4 audit, before any run-1 reading).** One script, `stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/cluster-run.sh`, runs the three arms in order
+> **Amendment B3e (2026-10-26, stage-4 audit, before any run-1 reading).** One script, `cassandra/stage4-runtime-verification/harness/hints_buffer_size-allocateBytes-prev--autonomous/cluster-run.sh`, runs the three arms in order
 > (i), (ii), (iii). Per arm it does steps 1–7 as filed, with these specifics: the sampler (amendment B3d) starts 5 s before phase U and stops at the
 > end of the tail; after node 2 shows DN on node 1, a **15 s quiet window** (S0) precedes phase D; after phase D, a **30 s tail** (S1 = its last
 > 15 s). Node 2 is stopped by `nodetool -p 7299 drain` and `kill`; node 1 by `nodetool -p 7199 drain` and `kill`. The script stops at the first

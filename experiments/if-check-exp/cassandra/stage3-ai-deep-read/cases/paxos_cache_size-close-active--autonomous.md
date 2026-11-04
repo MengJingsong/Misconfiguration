@@ -109,7 +109,7 @@ claim is wrong.
 > **Amendment U1 (2026-10-27, stage-4 audit; replaces the paths and the command above).** Host: the advisor's Mac
 > (`environment-advisor.md`). Clone: `W=~/Library/Caches/stage4`; `git clone --branch cassandra-5.0.9 ~/cassandra-src $W/cassandra-run49`
 > (full clone, no `/local`), then `cd $W/cassandra-run49 && ant -Dlocal.repository=$W/m2 build-test`. The test class is kept in
-> `stage4-runtime-verification/harness/paxos_cache_size-close-active--autonomous/PaxosCacheBoundTest.java` and copied into the clone
+> `cassandra/stage4-runtime-verification/harness/paxos_cache_size-close-active--autonomous/PaxosCacheBoundTest.java` and copied into the clone
 > only for the run (removed afterwards). **`-Dpaxos.cap` / `-Dpaxos.v` on the `ant` command line do not reach the test**: the forked
 > test JVM gets only the `testmacro` jvmargs and `${test.jvm.args}` (`build.xml:1153-1192`), so the command is
 > `ant -Dlocal.repository=$W/m2 testsome -Dtest.name=org.apache.cassandra.service.paxos.PaxosCacheBoundTest -Dtest.jvm.args="-Dpaxos.cap=<MiB|auto> -Dpaxos.v=<bytes> -Dpaxos.n=<N>"`
@@ -465,8 +465,8 @@ Confirm the value took effect with
 ## D. Stage-4 feedback
 
 **2026-10-27, stage 4 run 1 (advisor's Mac; Claude Opus 5.5, claude-opus-5-5): unit Confirmed — caps; cluster Confirmed — caps.**
-Results: [`stage4-runtime-verification/results/paxos_cache_size-close-active--autonomous.md`](../../stage4-runtime-verification/results/paxos_cache_size-close-active--autonomous.md)
-(harness `stage4-runtime-verification/harness/paxos_cache_size-close-active--autonomous/`; not committed at the time of writing).
+Results: [`../../stage4-runtime-verification/results/paxos_cache_size-close-active--autonomous.md`](../../stage4-runtime-verification/results/paxos_cache_size-close-active--autonomous.md)
+(harness `cassandra/stage4-runtime-verification/harness/paxos_cache_size-close-active--autonomous/`; not committed at the time of writing).
 Frozen version: sha256 `9f892ab93b5a3df642ebc4b4f6f06516eb4b928babf673e52b15d594ce2ae321` after the fifteen dated audit amendments
 (U1–U7, C1–C8) above; no runbook defect. Unit (B2g row 1): the entry count stops at exactly ⌊M/w⌋ (w = 8,632 B for V = 8,192;
 121 / 485 / 1,943 / 7,774 entries at 1 / 4 / 16 / 64 MiB; auto = 4 MiB in the 1-GiB test JVM), W ≤ M, real heap 1.05–1.06 × M,

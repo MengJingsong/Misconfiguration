@@ -95,7 +95,7 @@ Judgement recorded before the run: the design's §4 row "the check gates an allo
 
 ## D. Stage-4 feedback
 
-**2026-10-29 — unit tier run and self-checked; B3 `n/a`.** Results: [`results/no_constraint-resizeto-newcapacity--autonomous.md`](../../stage4-runtime-verification/results/no_constraint-resizeto-newcapacity--autonomous.md). Verdict **Confirmed — does not cap** (outcome class: true negative). The frozen text is everything above this section (B2 amendment of 2026-10-29); the estimate is unchanged.
+**2026-10-29 — unit tier run and self-checked; B3 `n/a`.** Results: [`../../stage4-runtime-verification/results/no_constraint-resizeto-newcapacity--autonomous.md`](../../stage4-runtime-verification/results/no_constraint-resizeto-newcapacity--autonomous.md). Verdict **Confirmed — does not cap** (outcome class: true negative). The frozen text is everything above this section (B2 amendment of 2026-10-29); the estimate is unchanged.
 
 - Readings (five orders, C = 1 KiB to 512 MiB, 5 repetitions each, exact integers): E (exactly full, `trim()`) made 0 copies and 0 native allocations; D (one byte less) made 1 copy of C-1 bytes and freed C, transient peak 2C-1, retained C-1; H (half) allocated C/2; X (`copy(C)`, what the check skips at equal size) allocated C with peak 2C and retained C. Retained capacity E minus D = 1 byte at every C. Control: `DOB_DOUBLING_THRESHOLD_MB` 64 (default) vs 1 moved the growth allocation 16,777,216 to 12,582,912 (exactly 4,194,304).
 - What the check does: at an exactly full writer it skips a redundant same-size copy whose transient peak would be 2C. It bounds no retained size. This is the judgement written into B2g before the run (a skipped redundant transient is not a cap).

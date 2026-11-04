@@ -1,5 +1,10 @@
 # OOM Experiment — Driving a Test Node Out of Memory
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
+> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
+> root, data under `if-check-exp/<system>/`.
+
 Resource-exhaustion research on **Apache Cassandra 5.0.9**, run on our own
 CloudLab test nodes. Part of the **misconfiguration** project, and a direct
 follow-on to [`if-check-exp`](../if-check-exp/README.md).

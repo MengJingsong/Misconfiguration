@@ -4,7 +4,7 @@
 >
 > **Status:** **Self-checked 2026-10-29. Unit tier filed: Not confirmed (frozen noise criterion U5 failed in two control cells; U1, U2 and U4 held, U3 missed equally for every arm). Cluster tier `n/a`. No run 2.**
 >
-> **Outcome class:** **undetermined** (estimate `negative`; the tier is Not confirmed, so the effect is `undetermined`) — [definition](../README.md#outcome-class). What the readings show if the noise row were set aside is in section 8; it is not the verdict.
+> **Outcome class:** **undetermined** (estimate `negative`; the tier is Not confirmed, so the effect is `undetermined`) — [definition](../../../stage4-runtime-verification/README.md#outcome-class). What the readings show if the noise row were set aside is in section 8; it is not the verdict.
 >
 > **Agent:** autonomous. "§9a" means B2f/B2g (unit tier, as amended 2026-10-29); B3 is `n/a`; feedback is section D. One results file per case file; the shared Java class is not shared (one class per case).
 

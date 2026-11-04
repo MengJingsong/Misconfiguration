@@ -1,5 +1,9 @@
 # Entry-Restriction Experiment — Results Format
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. Per-system cases and
+> `_INDEX.md` live under `experiments/entry-restriction-exp/<system>/` (for Cassandra,
+> `cassandra/`), not next to this file.
+
 Structured results for **Target 1** (identify resource constraints) and
 **Target 2** (show how each constraint restricts resource usage) of the
 misconfiguration project, scoped to **Cassandra-5.0.9**.
@@ -166,4 +170,4 @@ In the summary's Failure Mode Analysis table, the symbol always encodes
 ## Related context (for a new session)
 
 - **Google Docs** — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit) (per-meeting decisions and next steps) and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit) (running log of entry points, cases and findings). Both live in Jingsong's Google Drive; a session with the Google Drive connector enabled can read them directly.
-- **Sibling work** — [`experiments/if-check-exp/`](../if-check-exp/README.md), the repo's active experiment, covers the same Target 1 + 2 from the opposite direction (from the enforcing check back to the constraint). The two are deliberately **not** cross-referenced — see that folder's README §4. The older `cassandra/oom-exp/` chaos-testing experiments were removed in `52a621a`, superseded by `systems/cassandra/build-dist/` on Cassandra 5.0.9.
+- **Sibling work** — [`../if-check-exp/README.md`](../if-check-exp/README.md), the repo's active experiment, covers the same Target 1 + 2 from the opposite direction (from the enforcing check back to the constraint). The two are deliberately **not** cross-referenced — see that folder's README §4. The older `cassandra/oom-exp/` chaos-testing experiments were removed in `52a621a`, superseded by `systems/cassandra/build-dist/` on Cassandra 5.0.9.

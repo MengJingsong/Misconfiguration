@@ -127,7 +127,7 @@ Made before any reading; they override the text of the sections named where they
 
 ## D. Stage-4 feedback
 
-**2026-10-28 (stage 4, node `pc39`; results: `stage4-runtime-verification/results/tokens_per_block-add-pos--autonomous.md`).** Unit tier **Confirmed**, cluster tier **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
+**2026-10-28 (stage 4, node `pc39`; results: `cassandra/stage4-runtime-verification/results/tokens_per_block-add-pos--autonomous.md`).** Unit tier **Confirmed**, cluster tier **Confirmed**, effect **does not cap**; outcome class **true negative** (estimate `negative`).
 
 - Unit (3 repetitions, stock and a `TOKENS_PER_BLOCK = 124` build): `DynamicTokenTreeBuilder` kept every token up to N = 246,016 (3 levels, 999 blocks at 248, 2,003 at 124); no node above the constant (interior <= 246 / 122, leaf <= 248 / 124); `serializedSize` = `numBlocks` x 4,096 = bytes written; retained heap 41.22 MB (stock) against 41.29 MB (124); `OnDiskIndexBuilder.estimatedMemoryUse()` = 236 B per distinct term in both builds (the constant is not in the estimate), retained heap 400 MB at 1M terms; upstream `TokenTreeTest` passes.
 - Cluster (SASI, seed + `CREATE CUSTOM INDEX`, 1 GiB heap): one suffix term holding 1,000,000 tokens produced a `c_idx` of 16,609,304 B (16.61 B per token; arithmetic 4,033 leaves + about 17 interior x 4,096 = 16.59 MB), 2.00 x for 2 x rows, 33,325,080 B (2.01 x) in the 124 build; `u_idx` (1M unique terms, PREFIX) 125,853,952 B, byte-identical in both builds; heap peak of the `c` build 572 / 591 MiB; control `max_compaction_flush_memory_in_mb` 16 against 1024: 8 segment files against 1, heap peak 518 against 572 MiB.

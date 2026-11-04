@@ -1,5 +1,10 @@
 # Convergence playbook (Direction 1)
 
+> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
+> names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
+> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
+> root, data under `if-check-exp/<system>/`.
+
 **This is the agent's whole instruction for a convergence run.** Give an
 agent this file, read access to [`if-check-exp`](../if-check-exp/README.md)
 (its case files and stage-4 results are the input; this experiment does not
@@ -45,7 +50,7 @@ one node), such that:
 ## Inputs from if-check-exp
 
 For each candidate constraint, pull from its case file and stage-4 results
-(`if-check-exp/stage3-ai-deep-read/cases/`, `if-check-exp/stage4-runtime-verification/results/`):
+(`if-check-exp/cassandra/stage3-ai-deep-read/cases/`, `if-check-exp/cassandra/stage4-runtime-verification/results/`):
 
 1. **The capacity check** — `file:line`, and what it compares.
 2. **The constraint** — how its value is set (config/non-config), its default,
@@ -68,12 +73,12 @@ For each candidate constraint, pull from its case file and stage-4 results
    regardless of outcome class (examples: `max_mutation_size`,
    `max_value_size`, `tombstone_failure_threshold`, the
    `*_read_size_fail_threshold` family — see
-   [`cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md)'s
+   [`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md)'s
    "Not a shared budget" section for the full list and why each was excluded).
 
 A standing survey of every true-positive constraint, grouped by budget and
 already filtered for standing-pool vs. guardrail, lives at
-[`cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md).
+[`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md).
 Check it before re-deriving a group from scratch — it also flags
 look-alike traps (e.g. several off-heap networking constraints that turn
 out to share the exact same underlying pool, so combining two of them is
@@ -87,7 +92,7 @@ list to work down — survey if-check-exp's true-positive and confirmed-bypass
 cases itself and group them.
 
 **Before picking, read the "Shared-budget group status" table at the top of
-[`cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md).** It
+[`cassandra/cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md).** It
 records, per shared-budget group, whether prior runs consider it open,
 exhausted, parked, or **skipped** (and why) — this is the dedup mechanism: it
 exists so a new run doesn't re-survey or re-run a group a previous run
@@ -196,7 +201,7 @@ A combination's case file records the outcome whichever way it goes:
 ## Output
 
 Write one file per attempted combination to
-`cases/convergence/<constraint-1>+<constraint-2>[+...].md` in this folder.
+`<system>/cases/convergence/<constraint-1>+<constraint-2>[+...].md` in this folder (for Cassandra, `cassandra/cases/convergence/`).
 Use this template — four sections, in this order:
 
 ### 1. Constraints and capacities

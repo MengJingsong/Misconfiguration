@@ -34,7 +34,7 @@ Bypass/overshoot: the check is a single sample at startup. The system data direc
 
 **B2a. Environment and build.** JDK 11, Ant. Copy the tree to local disk (`cp -r ~/cassandra-5.0.9 /local/c509-unit`), `cd /local/c509-unit && ant jar` (or `ant build-test`). Test class in the copy only: `test/unit/org/apache/cassandra/config/SystemDirFreeSpaceWarnTest.java`. JVM options: the test defaults (`-Dcassandra.config=file:///.../test/conf/cassandra.yaml`). Run `ant testsome -Dtest.name=SystemDirFreeSpaceWarnTest`.
 
-> **Amendment 2026-10-26 (stage-4 audit R2):** `~/cassandra-5.0.9` does not exist; the tree is made with `stage4-runtime-verification/copy-source.sh` (`~/s4-b8-ls-u`, `ant build-test`; node tree `~/s4-b8-ls-n`, `ant jar`). The test class lives in `harness/<stem>/` (package `org.apache.cassandra.config`) and each case runs in its own JVM via `javac` + `JUnitCore` (`-Dcassandra.config` = a copy of `test/conf/cassandra.yaml`). The sentence about a reflective copy in B2b is void: `sudo` works on the node, so every value is an exact-size tmpfs.
+> **Amendment 2026-10-26 (stage-4 audit R2):** `~/cassandra-5.0.9` does not exist; the tree is made with `cassandra/stage4-runtime-verification/copy-source.sh` (`~/s4-b8-ls-u`, `ant build-test`; node tree `~/s4-b8-ls-n`, `ant jar`). The test class lives in `harness/<stem>/` (package `org.apache.cassandra.config`) and each case runs in its own JVM via `javac` + `JUnitCore` (`-Dcassandra.config` = a copy of `test/conf/cassandra.yaml`). The sentence about a reflective copy in B2b is void: `sudo` works on the node, so every value is an exact-size tmpfs.
 
 **B2b. Knobs.** Free space reported for the system data directory, with three values: 0.5 GiB, exactly 1 GiB, 1.5 GiB.
 
@@ -140,7 +140,7 @@ Claim is wrong if the node refuses to start, stops accepting writes, or throttle
 
 ## D. Stage-4 feedback
 
-2026-10-26, results [`results/local_system_data_file_directory-applySimpleConfig-freeBytes--autonomous.md`](../../stage4-runtime-verification/results/local_system_data_file_directory-applySimpleConfig-freeBytes--autonomous.md). Design audit: Ready after amendments R1-R9 (dated notes in A3, B2a-B2g, B3a-B3g, B4; frozen file sha256 `1b976a2788744c307bb180af38098097ff267bf25b5a616c87e83160b4e97b82`). Run 1 and self-check, no run 2.
+2026-10-26, results [`../../stage4-runtime-verification/results/local_system_data_file_directory-applySimpleConfig-freeBytes--autonomous.md`](../../stage4-runtime-verification/results/local_system_data_file_directory-applySimpleConfig-freeBytes--autonomous.md). Design audit: Ready after amendments R1-R9 (dated notes in A3, B2a-B2g, B3a-B3g, B4; frozen file sha256 `1b976a2788744c307bb180af38098097ff267bf25b5a616c87e83160b4e97b82`). Run 1 and self-check, no run 2.
 
 - **Unit: Confirmed, does not cap.** Exact-size tmpfs at 0.5 GiB, 1 GiB, 1.5 GiB and the directory unset: one WARN `Only 512.000MiB free in the system data volume` at 0.5 GiB only (also one page below 1 GiB; none at exactly 1 GiB: the comparison is strict); initialization, Config and the runtime admission outcomes identical across values; positive control (commit-log cap 32 MiB) 45.0 MiB capped vs 380.0 MiB uncapped.
 - **Cluster: Confirmed, does not cap.** One node: the WARN once at the 0.5 GiB start, none at 1.5 GiB, none in the unset control, none after the volume was reduced to 100 MiB; `UN`, 2 x 200,000 stress writes (0 errors) and schema churn unchanged; positive control 128 MiB (cap 64 MiB) vs 1088 MiB uncapped.

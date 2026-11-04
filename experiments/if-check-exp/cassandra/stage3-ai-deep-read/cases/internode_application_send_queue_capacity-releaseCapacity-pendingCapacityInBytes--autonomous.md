@@ -395,7 +395,7 @@ For each value of C, plus the positive control and the negative control:
 
 ## D. Stage-4 feedback
 
-**2026-10-21. Stage 4, run 1 on `pc13`, closed.** Results: [`../../stage4-runtime-verification/results/internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous.md`](../../stage4-runtime-verification/results/internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous.md); harness in `stage4-runtime-verification/harness/<stem>/`. Nothing committed.
+**2026-10-21. Stage 4, run 1 on `pc13`, closed.** Results: [`../../stage4-runtime-verification/results/internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous.md`](../../stage4-runtime-verification/results/internode_application_send_queue_capacity-releaseCapacity-pendingCapacityInBytes--autonomous.md); harness in `cassandra/stage4-runtime-verification/harness/<stem>/`. Nothing committed.
 
 - **Audit (step 0): Ready after amendments.** A1–A9 are dated next to the text they change (B2c, B2f, B2g, B3a, B3d, B3g, B4); no B1 claim was changed. sha256 as filed `49e904a2…`, after the audit `658ca786…`, after defect 2 `b48dd16e…` (the version run).
 - **Unit (B2): Confirmed, B2g row 1. Effect: caps.**

@@ -4,7 +4,7 @@
 >
 > **Status:** verdict filed (2026-10-28) — run 1 done at both tiers, self-checked, no run 2
 >
-> **Outcome class:** **true positive** (estimate `positive`, effect `caps`) — [definition](../README.md#outcome-class)
+> **Outcome class:** **true positive** (estimate `positive`, effect `caps`) — [definition](../../../stage4-runtime-verification/README.md#outcome-class)
 >
 > **Agent:** autonomous. "§9a" below means B2f/B2g (unit) and B3f/B3g (cluster); the feedback section is section D.
 
