@@ -9,7 +9,7 @@ documented in this repo.
   (see note below) — just plain QL source.
 - `cassandra/` — query pack for the Cassandra database (`misconfiguration/cassandra`).
   Its `queries/if-check-exp/` is **stage 1** of
-  [`cassandra/if-check-exp`](../cassandra/if-check-exp/README.md)'s three-stage ladder
+  [`../experiments/if-check-exp/README.md`](../experiments/if-check-exp/README.md)'s three-stage ladder
   (structural → lexical → semantic); see that folder's own
   [README](cassandra/queries/if-check-exp/README.md) for the query chain that does the
   structural narrowing. Results land in `results/` and are **gitignored** —

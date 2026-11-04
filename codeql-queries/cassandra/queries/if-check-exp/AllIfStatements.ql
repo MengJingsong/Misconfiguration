@@ -2,7 +2,7 @@
  * @name All if statements
  * @description Pure inventory of every `if` statement in Cassandra's main source tree — the
  *   unfiltered starting point of the `if-check-exp` pipeline. No filtering beyond the source
- *   tree itself; see ../../../../cassandra/if-check-exp/README.md for the rules that later
+ *   tree itself; see ../../../../experiments/if-check-exp/README.md for the rules that later
  *   stages narrow toward.
  * @kind table
  * @id cassandra/if-check-exp/all-if-statements

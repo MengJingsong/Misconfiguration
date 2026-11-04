@@ -1,9 +1,9 @@
 # If-Check Exp — Handoff
 
 For a new session picking up `if-check-exp` work. Read this first, then
-[`cassandra/if-check-exp/README.md`](cassandra/if-check-exp/README.md) for the full format spec.
+[`experiments/if-check-exp/README.md`](experiments/if-check-exp/README.md) for the full format spec.
 The paused sibling experiment has its own brief at
-[`cassandra/entry-restriction-exp/HANDOFF.md`](cassandra/entry-restriction-exp/HANDOFF.md).
+[`experiments/entry-restriction-exp/HANDOFF.md`](experiments/entry-restriction-exp/HANDOFF.md).
 
 ## Which handoff file to use (read first)
 
@@ -36,8 +36,8 @@ fresh autonomous agents to write up a case per target and verifies each at stage
 
 | Owner | Handoff | List | Units / targets |
 |---|---|---|---|
-| Jingsong | [`HANDOFF-Jingsong.md`](HANDOFF-Jingsong.md) | [`writeup-set-A.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-A.csv) | 168 / 159 |
-| Yang | [`HANDOFF-Yang.md`](HANDOFF-Yang.md) | [`writeup-set-B.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-B.csv) | 169 / 161 |
+| Jingsong | [`HANDOFF-Jingsong.md`](HANDOFF-Jingsong.md) | [`writeup-set-A.csv`](experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv) | 168 / 159 |
+| Yang | [`HANDOFF-Yang.md`](HANDOFF-Yang.md) | [`writeup-set-B.csv`](experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-B.csv) | 169 / 161 |
 
 The personal handoffs hold the job, the procedure and the progress; this file holds what both
 share. Update the "Current state" numbers below when a batch closes (last: 2026-10-27, set A batch 11).
@@ -59,7 +59,7 @@ noticed along the way are noted in case files for Target 3, not chased.
 ## Current state (2026-10-25)
 
 - **Stage 1:** 17,343 `if` statements → 4,489 numeric comparisons + 1,099 helper-guarded rows.
-- **Stage 2:** 4,789 units banded (A 134, B 174, C 94, D 4,387); `stage2-ai-preprocessing/bands.csv`.
+- **Stage 2:** 4,789 units banded (A 134, B 174, C 94, D 4,387); `cassandra/stage2-ai-preprocessing/bands.csv`.
 - **Stage 3:** bands A, B and C fully read; **115 case files** (29 guided, 86 autonomous; estimate
   positive 56, negative 59). 65 of the 402 A/B/C units were a case's target before the two-set job;
   the other **337** are that job (2 accepted candidates in `predicted-positive.md`, the rest rejected
@@ -68,18 +68,18 @@ noticed along the way are noted in case files for Target 3, not chased.
 - **Stage 4:** **all 115 closed**, run 1 only (set A batch 10: `lc` also ran a second cluster pass, same session): 94 Confirmed, 4 Refuted,
   16 partial, 1 not confirmed. **Outcome class:** 51 true positive, 0 false positive, 46 true
   negative, 5 false negative, 13 undetermined (all autonomous, mostly the cluster tier).
-  Per-case verdicts: `stage3-ai-deep-read/_INDEX.md` §1. *(The counts above predate set A's later
+  Per-case verdicts: `cassandra/stage3-ai-deep-read/_INDEX.md` §1. *(The counts above predate set A's later
   batches; `_INDEX.md` §1 is the current record.)*
 - **2026-10-27, four non-config positives closed** on nodes `pc39`, `pc32`, `pc29`, `pc41` of
   experiment `jason92-321705` (JDK 11.0.32.1, Ant 1.10.12, 40 cores, 251 GiB; one case per node, run 1 only,
   no run 2): `default_page_size-cqlgroupbylimits_onclose-rowlimit` (U/C Confirmed), `diagnostic_event_memory_store_max_size-store-keyhead`
   (U/C Confirmed), `trie_2gb_hard_limit-allocateblock-leadbit` (U/C Confirmed), `max_compaction_flush_memory_in_mb-getmode-maxmembytes`
   (U Confirmed, C Partial: bypass at a 1 MiB cap). All four true positive. `predicted-positive.md` has no open stage-4 rows now.
-- **2026-10-28, 14 hard-coded-constant cases from the non-config job closed at stage 4** (set A rows 7, 85, 103, 107, 114, 115, 117, 120, 127, 130, 131, 138, 141, 142; nodes `pc39`, `pc32`, `pc29`, `pc41`, run 1 only, no run 2): 8 true positive (`counter_cache_size` at three sites, `nopcache_capacity`, `monitoring_max_operations`, `virtual_logs_max_rows`, `mutation_repair_rows_per_batch`, `row_overhead_size`), 5 true negative (`seed_count_warn_threshold`, `max_space_usable_for_compactions_in_percentage` range, `repair_session_space` minimum, `repair_disk_headroom_reject_ratio`, SAI `segment_write_buffer_size`), 1 false negative (`prepared_statements_cache_size` preload threshold: Not confirmed, bypass through eviction tombstones in the `system.prepared_statements` memtable). The `counter_cache_size` cases share one run. Verdicts: `stage3-ai-deep-read/_INDEX.md` §1. Open: `predicted-negative.md` still lists the entries of the 27 set A rows written up on 2026-10-27; row 7's note in `undetermined.md` §5.2 still says "not a case".
-- **2026-10-28, hard-coded-constant batch 1 closed at stage 4** (7 of the 28 remaining hard-coded-constant cases, grouped in `cassandra/if-check-exp/stage4-runtime-verification/hardcoded-batches.md`; nodes `pc39`, `pc32`, `pc29`, run 1 only, no run 2): all 7 true negative, U/C Confirmed, does not cap: `excess_waste_bytes` at three sites and `excess_waste_offset` (AtomicBTreePartition), `max_region_size` (NativeAllocator), `hints_write_buffer_size` and `write_buffer_size` (HintsWriter). Caveat: `excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2` cluster verdict rests on the small-batch workload only (the big-batch workload WE failed on the node, runbook defect D2). Batches 2-4 (21 cases) not started. Open: `predicted-negative.md` still lists these entries.
+- **2026-10-28, 14 hard-coded-constant cases from the non-config job closed at stage 4** (set A rows 7, 85, 103, 107, 114, 115, 117, 120, 127, 130, 131, 138, 141, 142; nodes `pc39`, `pc32`, `pc29`, `pc41`, run 1 only, no run 2): 8 true positive (`counter_cache_size` at three sites, `nopcache_capacity`, `monitoring_max_operations`, `virtual_logs_max_rows`, `mutation_repair_rows_per_batch`, `row_overhead_size`), 5 true negative (`seed_count_warn_threshold`, `max_space_usable_for_compactions_in_percentage` range, `repair_session_space` minimum, `repair_disk_headroom_reject_ratio`, SAI `segment_write_buffer_size`), 1 false negative (`prepared_statements_cache_size` preload threshold: Not confirmed, bypass through eviction tombstones in the `system.prepared_statements` memtable). The `counter_cache_size` cases share one run. Verdicts: `cassandra/stage3-ai-deep-read/_INDEX.md` §1. Open: `predicted-negative.md` still lists the entries of the 27 set A rows written up on 2026-10-27; row 7's note in `undetermined.md` §5.2 still says "not a case".
+- **2026-10-28, hard-coded-constant batch 1 closed at stage 4** (7 of the 28 remaining hard-coded-constant cases, grouped in `experiments/if-check-exp/cassandra/stage4-runtime-verification/hardcoded-batches.md`; nodes `pc39`, `pc32`, `pc29`, run 1 only, no run 2): all 7 true negative, U/C Confirmed, does not cap: `excess_waste_bytes` at three sites and `excess_waste_offset` (AtomicBTreePartition), `max_region_size` (NativeAllocator), `hints_write_buffer_size` and `write_buffer_size` (HintsWriter). Caveat: `excess_waste_bytes-updatewastedallocationtracker-wastedbytes-2` cluster verdict rests on the small-batch workload only (the big-batch workload WE failed on the node, runbook defect D2). Batches 2-4 (21 cases) not started. Open: `predicted-negative.md` still lists these entries.
 - **2026-10-28, hard-coded-constant batch 2 closed at stage 4** (nodes `pc39`, `pc32`, `pc29`, `pc41`, run 1 only): 5 true negative (`logs_virtual_table_default_rows`, `max_unsigned_short` validateIndexedValue, `name_length` custom index column name, `filename_length` snapshot name, `schemaconstants_name_length` keyspace name) and 2 undetermined: `max_shard_split` (U Confirmed, C Not confirmed: the positive control `max_sstables_to_compact` never bound) and `table_name_length` (U Confirmed, C Refuted: heap after GC +60.7 MB at 500 tables with 222-char names vs 8-char, probably per-table metric MBean names; reads as a false negative at cluster level). Caveats: `filename_length` cluster heap missed its 1 MiB tolerance by 0.5 MiB (G1 noise about 16 MiB; filed Confirmed, overrule if strict); `schemaconstants_name_length` shows +4.2 MB, probably a small real effect inside cluster resolution. Batches 3-4 (14 cases) not started.
 - **2026-10-28, hard-coded-constant batches 3 and 4 closed at stage 4** (14 cases, nodes `pc39`, `pc32`, `pc29`, `pc41`, run 1 only): 11 true negative and 3 undetermined. Undetermined: `block_size-add-blockindex` (U Confirmed, C Refuted on a frozen 10% disk bound: 26.8% difference, all in numeric-values files), `block_size-writeposting-blocksize` (C Not confirmed on a frozen 5% bound; the agents filed both as true negative, the index says undetermined per the README rule and each results file notes it), `super_block_size` (C Not confirmed; heap too noisy). All 28 hard-coded-constant cases are now closed. Caveats: `max_array_length` is true negative only if the claim is read as "in practice" (one writer's start-value list is bounded near 2 GiB at artificial widths; strictly an FN); the pc32 agent ran up to six nodes at once on pc32 against the one-run-per-node rule; many frozen sub-range predictions were missed and left unedited (see each results file). **Harness side effect:** a blanket `sed -i` over `harness/*/unit-run.sh` on 2026-10-28 ~19:45 removed `-XX:+UseSerialGC` from about 160 scripts; the two tracked files that had it were restored, but untracked scripts (batches 1-2 and others) may have lost it and the script text may not match what ran; verdicts rest on run logs on the nodes.
-- **2026-10-28, design for `none`-type cases recorded** (proposal, not yet run): `cassandra/if-check-exp/stage4-runtime-verification/none-type-design.md`. 42 of the 50 `none` cases are unrun; 31 of those declare both tiers `n/a`. Not yet decided: whether to run the 11 with designs, write new designs for the 31 (kinds 1 and 3 first), or close the 31 as "Confirmed from source, not run" and keep them out of the true-negative count.
+- **2026-10-28, design for `none`-type cases recorded** (proposal, not yet run): `experiments/if-check-exp/stage4-runtime-verification/none-type-design.md`. 42 of the 50 `none` cases are unrun; 31 of those declare both tiers `n/a`. Not yet decided: whether to run the 11 with designs, write new designs for the 31 (kinds 1 and 3 first), or close the 31 as "Confirmed from source, not run" and keep them out of the true-negative count.
 - **2026-10-29, first `none`-type batch run at stage 4** (13 cases, unit tier only, cluster `n/a`; nodes `pc39`, `pc32`, `pc29`, `pc41`, run 1 only), designs from `stage4-runtime-verification/none-type-design.md` and the drafts `none-type-drafts-kind1.md` / `-kind3.md`, applied to each case file as dated B2 amendments. 10 Confirmed / does not cap / true negative: `readfully-dest_length`, `read-count`, `checklimit-length`, `compose-buffer_remaining`, `addall-size`, `hascomponent-i_nextsize`, `isempty-size`, `resizeto-newcapacity`, `capacity-newcapacity`, `allocateblock-inchunkpointer`. 3 Not confirmed / undetermined, all on small-cell noise criteria: `iscolumnrange` (reading with the noise row set aside: does not cap, TN), `doesaggregation` (set aside: bypass, caps by query shape, FN; retained result 12.4 MB plain vs 168 B for `max`), `needfiltering` (set aside: bypass, soft gate that ALLOW FILTERING skips, FN; rejected query costs 13.4 kB vs 0.4/3.9/39.2 MB with ALLOW FILTERING). Open: overrule the three, if wanted. `resizeto`/`capacity` verdicts rest on the ruling that a skipped transient copy is not a cap (added to `none-type-design.md` §4). Audit finding for stage 3: `RangeTombstoneList.add()` line 178 double-counts `boundaryHeapSize`, inflating `unsharedHeapSize()` by 240,000 B per 1000 adds and feeding memtable accounting (`BTreePartitionUpdater.java:121`); effect on flush timing not measured. Not run: 5 `none` cases to close "from source, not run" (`isempty-size-2`, `hasunrestrictedclusteringcolumns`, `isdone-remainingcount`, `hascomponent-componentbounds_size`, `allocateoversize-peer`) and the 18 kind-2 cases. 21 of 50 `none` cases now have a verdict (17 true negative, 4 undetermined); 29 are not run.
 - **2026-10-29, weak outcome classes added** (rule in `stage4-runtime-verification/README.md`, Outcome class): a case whose cluster tier could not settle the effect is classed from its unit tier alone when that tier is Confirmed or Refuted, as *weak* true positive / false positive / true negative / false negative, counted apart from the strong classes. Applied to 18 of the 23 undetermined cases in `_INDEX.md` §1: 5 weak TP, 12 weak TN, 1 weak FN (`largestRatio`, unit Refuted, cluster Confirmed). 3 carry `(cluster disagrees)`: `largestRatio`, `block_size-add-blockindex`, `table_name_length`. 5 stay undetermined: `flushLowWaterMark`, `OTCP_LARGE_MESSAGE_THRESHOLD` (unit Not confirmed) and the three kind-2 `none` cases (`iscolumnrange`, `doesaggregation`, `needfiltering`). Strong counts unchanged: 67 TP, 0 FP, 98 TN, 6 FN, 43 not run.
 - **2026-10-29, new case definition applied as a re-trace** (definition in `stage3-ai-deep-read/README.md` §6: a case is a constraint–capacity pair from an `if` comparing usage with a capacity; config = the constraint is initialized by yaml or JVM property, everything else non-config; no traced constraint = not a case). Four read-only agents re-traced all 237 case files; the owner ruled: comparisons against 0 can be valid cases, grow-on-demand buffers count their initial literal as the constraint, validation `if`s are not cases, multi-constraint cases split into pairs, stage 4 results kept as filed. Result by case (old Type column unchanged; new column `Type (2026-10-29)` in `_INDEX.md` §1; data in `case-retrace-2026-10-29.csv` and `constraint-pairs-2026-10-29.csv`): config 62, non-config 96, mixed 12, not-a-case 67; 170 valid cases give 233 pairs (7 flagged `review` in the pairs file). The pair file inherits the case's outcome class, stage 4 did not measure pairs separately. 58 run cases varied only the operand or load, not the constraint (`stage4_varied` in the case file CSV); their verdicts are kept. Judgement calls by the agents and by the orchestrator, open to overrule: the three `unclear` validation/reconciliation cases made not-a-case, `releaseItem` and `mutation_repair_rows_per_batch` made valid. Old per-class counts in this file predate the re-trace.
@@ -119,22 +119,29 @@ noticed along the way are noted in case files for Target 3, not chased.
 ## Where things live
 
 - **Repo:** `MengJingsong/Misconfiguration` on GitHub; no checkout on the CloudLab shared mount.
-- **`cassandra/cassandra-5.0.9/`** — the pinned source (`apache/cassandra` tag `cassandra-5.0.9`,
+- **`systems/cassandra/source/`** — the pinned source (`apache/cassandra` tag `cassandra-5.0.9`,
   commit `b5f2a54`, unmodified, committed 2026-10-22). Read and cite from it; never build in it.
-  Confirm with `build.xml` `base.version` = `5.0.9` and `git status cassandra/cassandra-5.0.9`
+  Confirm with `build.xml` `base.version` = `5.0.9` and `git status systems/cassandra/source`
   (nothing changed). GitHub links: `.../blob/cassandra-5.0.9/<path>#L<NN>`, line checked in the
   local file. Records before 2026-10-22 name the old `cassandra-src` clone (same files).
-- **`cassandra/if-check-exp/`**
+- **`experiments/if-check-exp/`** — method docs at the root, Cassandra data under `cassandra/`.
+  Short paths in this file such as `cassandra/stage3-ai-deep-read/_INDEX.md` are relative to
+  `experiments/if-check-exp/`.
   - `README.md` — format spec, the three rules (§3.4–§3.6), required content, version pinning (§2).
   - `stage1-codeql-preprocessing/` — pointers only; queries in `codeql-queries/`, CSVs gitignored.
-  - `stage2-ai-preprocessing/` — `bands.csv` (per-row verdicts), `bands.md`, `playbook.md`, `README.md`.
-  - `stage3-ai-deep-read/` — both playbooks and templates, `cases/`, `_INDEX.md` (master index; §4
-    holds the autonomous files' sha256), `predicted-negative.md`, `predicted-positive.md`,
-    `undetermined.md`, `writeup-set-A.csv`, `writeup-set-B.csv`.
+  - `stage2-ai-preprocessing/` — `bands.md`, `playbook.md`, `README.md`.
+  - `stage3-ai-deep-read/` — both playbooks and templates, and `README.md`.
   - `stage4-runtime-verification/` — `README.md` (run protocol, safety rules, outcome class),
-    `environment.md` (**start here on a new node**), `environment-notes.md`, `case-notes.md`,
-    `_TEMPLATE.md`, `copy-source.sh` (local working tree with a git baseline), `results/<stem>.md`
-    + `results/<stem>/run1/`, `harness/<stem>/`.
+    `_TEMPLATE.md`, `none-type-design.md`.
+  - `cassandra/` — the Cassandra data, one folder per stage:
+    - `stage2-ai-preprocessing/bands.csv` (per-row verdicts).
+    - `stage3-ai-deep-read/` — `cases/`, `_INDEX.md` (master index; §4 holds the autonomous
+      files' sha256), `predicted-negative.md`, `predicted-positive.md`, `undetermined.md`,
+      `writeup-set-A.csv`, `writeup-set-B.csv`.
+    - `stage4-runtime-verification/` — `environment.md` (**start here on a new node**),
+      `environment-notes.md`, `case-notes.md`, `copy-source.sh` (local working tree with a git
+      baseline), `results/<stem>.md` + `results/<stem>/run1/`, `harness/<stem>/`, `timing/`.
+  - `hadoop/` — scaffold, empty.
 - **`codeql-queries/`** — the CodeQL packs; results gitignored, regenerated per machine.
 - **Outside the repo (CloudLab `/proj/misconfiguration-PG0/`):** `tools/codeql/`, `codeql-dbs/`,
   and the superseded `git-repos/cassandra-src` clone.
@@ -143,7 +150,7 @@ noticed along the way are noted in case files for Target 3, not chased.
 
 Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
 
-1. **Step-0 audit** against `cassandra/cassandra-5.0.9/`: re-read every load-bearing citation,
+1. **Step-0 audit** against `systems/cassandra/source/`: re-read every load-bearing citation,
    check the trigger really reaches the check (find the `OperationType` / caller it produces),
    check the predictions have numbers and the workload arithmetic reaches the limit. Fix what the
    source shows as dated amendments; write the audit and the frozen hash of the prediction tables
@@ -241,5 +248,5 @@ Experiment `jason92-320876`, Ubuntu 22.04, 40 cores, 251 GiB each; JDK 11.0.32.1
 - Untracked test files and `~/stage4-*` folders from closed cases remain on each node (listed in
   each results file). Two cases on one node need separate working trees, data directories, JMX and
   Byteman ports, and loopback addresses (recorded as an environment deviation).
-- Full table and setup history: `stage4-runtime-verification/environment.md` §7. CloudLab nodes are
+- Full table and setup history: `cassandra/stage4-runtime-verification/environment.md` §7. CloudLab nodes are
   rebuilt from scratch, so this repo is the only record a new node inherits.

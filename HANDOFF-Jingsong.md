@@ -1,5 +1,11 @@
 # If-Check Exp — Handoff for Jingsong (set A)
 
+> **Paths.** This file is Cassandra `if-check-exp` work. Paths starting `cassandra/stage…` are
+> relative to `experiments/if-check-exp/`. Bare `cases/`, `_INDEX.md` and `writeup-set-*.csv` are in
+> `experiments/if-check-exp/cassandra/stage3-ai-deep-read/`; bare `harness/`, `results/`,
+> `timing/` and `environment.md` are in `experiments/if-check-exp/cassandra/stage4-runtime-verification/`.
+> Playbooks, templates and stage READMEs are method docs under `experiments/if-check-exp/<stage>/`.
+
 Created 2026-10-23. The shared background (what the experiment is, where things live, the
 stage-4 lessons, node access) stays in [`HANDOFF.md`](HANDOFF.md); this file holds only
 Jingsong's next job. Yang works on set B in parallel ([`HANDOFF-Yang.md`](HANDOFF-Yang.md)).
@@ -9,19 +15,19 @@ Jingsong's next job. Yang works on set B in parallel ([`HANDOFF-Yang.md`](HANDOF
 Use **fresh autonomous agents** to write up a case file for every target in **set A**, then
 verify each case at **stage 4** (audit, run 1 at both tiers, results file, outcome class).
 
-- **The list:** [`cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-A.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-A.csv) —
+- **The list:** [`experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv`](experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv) —
   **159 targets covering 168 stage-2 units** (band A 46, B 64, C 58), every one a negative estimate.
   Mostly `cache/`, `config/`, `cql3/`, `db/`, `hints/` and the first part of `index/` (up to
   `index/sai/disk/v1/vector/`), plus a few `io/`, `utils/` and other lines tied to the same queue rows.
 - **Where the list came from (2026-10-23):** the 402 band A/B/C units of
-  `stage2-ai-preprocessing/bands.csv`, minus the 65 that are already the target of a case file
+  `cassandra/stage2-ai-preprocessing/bands.csv`, minus the 65 that are already the target of a case file
   (a guided file's **Capacity check** or an autonomous file's **Entry pointer**), leaves **337**.
   They were split into two sets of near-equal size by source area, keeping every unit of one
   source file and every unit of one `predicted-negative.md` row in the same set, so siblings are
   written up by one person. Set B has 169 units / 161 targets.
 - **A target** is one `file:line` (units on the same line, `#1`/`#2`, are merged) or one helper
   method (`helper <class>.<method>()`; give the agent the comparison line inside the helper,
-  found with `grep -n` in `cassandra/cassandra-5.0.9/`).
+  found with `grep -n` in `systems/cassandra/source/`).
 - **CSV columns:** `order` (suggested order), `target`, `units`, `band`, `estimate`,
   `stage3_record` (where stage 3 recorded the line: a `predicted-negative.md` section, or a note),
   `stage2_reason`, and two columns to fill as you go: `case_file` (the stem) and `stage4`
@@ -37,10 +43,10 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 ### 1. Write-up (stage 3, autonomous agent)
 
 1. Make a copy of the source **outside the repository**, so the agent cannot read other cases:
-   `rsync -a cassandra/cassandra-5.0.9/ ~/cassandra-5.0.9/`.
+   `rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`.
 2. Open a **fresh** Claude Code session in that copy. Give it only
-   [`playbook-autonomous.md`](cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
-   [`_TEMPLATE-autonomous.md`](cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
+   [`playbook-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
+   [`_TEMPLATE-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
    and the target as `file:line`. Nothing else about the line (not the stage-3 ground, not the CSV).
 3. File the result as `cases/<stem>--autonomous.md`. The stem follows the existing ones:
    `<constraint>-<method>-<operand>`; check `ls cases/` first and add `-2` if the stem is taken.
@@ -50,14 +56,14 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 
 ### 2. Verification (stage 4, a separate agent)
 
-Protocol: [`stage4-runtime-verification/README.md`](cassandra/if-check-exp/stage4-runtime-verification/README.md)
-("The run protocol"); environment: [`environment.md`](cassandra/if-check-exp/stage4-runtime-verification/environment.md).
+Protocol: [`experiments/if-check-exp/stage4-runtime-verification/README.md`](experiments/if-check-exp/stage4-runtime-verification/README.md)
+("The run protocol"); environment: [`environment.md`](experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md).
 
-1. **Step-0 audit** (A–D) against `cassandra/cassandra-5.0.9/`; fixes go in the case file as dated
+1. **Step-0 audit** (A–D) against `systems/cassandra/source/`; fixes go in the case file as dated
    amendments (section D). Write the audit and the frozen hash of the predictions and conclusions
    tables (B2f–g, B3f–g) into a new results file from `_TEMPLATE.md` **before any reading**.
 2. Harness under `harness/<stem>--autonomous/`; working trees from
-   [`copy-source.sh`](cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh), one per case.
+   [`copy-source.sh`](experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh), one per case.
 3. Run 1, unit tier then cluster tier; independent self-check from the raw logs; fill the results
    file, including the **Outcome class**.
 4. Close the case: `_INDEX.md` §1 Stage 4 and Outcome class cells, the new sha256 in §4 if the case
@@ -137,7 +143,7 @@ Next: CSV order 7 (decision), 17 on (`NativeCell`, `CompressedInputStream`, `Sta
 `transform-stack-capacity-splice-newCount`, `BACKTRACK_INITIAL_SIZE-addBacktrack-backtrack`,
 `partition-key-max-size-descend-data-length`. Rows 17, 19, 20 on `pc07`, 18 and 21 on `pc12`; leftovers in
 `~/s4-{nc,st,bt}` and `~/s4-{ci,pk}`. First batch with **time measured** (raw log:
-`stage4-runtime-verification/timing/set-A-batch-4.log`; agents appended `date -u` lines per step).
+`cassandra/stage4-runtime-verification/timing/set-A-batch-4.log`; agents appended `date -u` lines per step).
 Stage 3 write-up, 5 in parallel: 0.95–1.8 min each (17:47:56–17:49:44Z), filing by hand ~0.3 min.
 Stage 4, 5 in parallel, minutes (wall = first audit line to last report line; `bt` redid the harness as `harness2`):
 
@@ -162,7 +168,7 @@ Next: CSV order 7 (decision), 22 on (`TriePathReconstructor`, `CompressedChecksu
 `file_cache_size-CompressedChecksummedDataInput-readBuffer-compressedBuffer`, `hints-CompressedChecksummedDataInput-readBuffer-uncompressedSize`,
 `hints-CompressedHintsWriter-compressionBuffer-capacity`. Rows 22, 24, 26 on `pc07`, 23 and 25 on `pc12`; leftovers in
 `~/s4-{tp33,fc,hw}` (+ `-logs`/`-run`/`-data`) on pc07 and `~/s4-{tp41,hu}` (+ `~/stage4-logs/hu`, `~/stage4-harness-run/hu`) on pc12.
-Timing: `stage4-runtime-verification/timing/set-A-batch-5.log`. Write-up, 5 in parallel: 1.5-2.3 min; stage 4, 5 in parallel: ~87 min
+Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-5.log`. Write-up, 5 in parallel: 1.5-2.3 min; stage 4, 5 in parallel: ~87 min
 launch to last report (the longest batch so far; `hu` and `hw` ~85 min).
 Open points for you to overrule: (1) `hw` cluster B3g row 2 sub-prediction was refuted (F1, `max_hints_file_size` 1 MiB closes the
 writer after every hint) but the agent kept the cluster tier "Confirmed" (the strict reading is undetermined); (2) `tp33` made a
@@ -181,7 +187,7 @@ True negative: `hints-EncryptedChecksummedDataInput-reusableBuffers-decryptBuffe
 `compressed-sequentialwriter-resetandtruncate-compressedbuffer`, `compression-metadata-writer-addOffset-maxCount`. Write-ups: 10 in parallel, ~2-3.5 min each; filed by hand.
 Stage 4 ran in a rolling window of 5 (pc07: hb, od, sr, cm, pw, pm; pc12: mh, cs, tm, ec); a session rate limit (reset 00:20 ET)
 stopped the last five agents mid-run and they were resumed with SendMessage; the interruptions are logged in the results files (no frozen reading was lost).
-Timing: `stage4-runtime-verification/timing/set-A-batch-6.log`. Leftovers: `~/s4-{hb,od,sr,cm,pw,pm}` (+ logs) on pc07, `~/s4-{mh,cs,tm,ec}` (+ logs) on pc12; no process running.
+Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-6.log`. Leftovers: `~/s4-{hb,od,sr,cm,pw,pm}` (+ logs) on pc07, `~/s4-{mh,cs,tm,ec}` (+ logs) on pc12; no process running.
 Open points for you to overrule: `hb` reran its cluster tier with a 10 s hold after the 2 s hold proved too short, and its B3f extract hash changed after a post-run
 correction of one audit sentence (results §3); `tp` style frozen-number misses: `ec` S1/F1 (245 KiB, not the predicted size), `pm` amended one prediction (log lines = cuts + 1)
 before freeze. Upstream/doc candidates (JIRA first): forged 512 MiB header in the encrypted reader (~537 MB heap + ~537 MB direct); stale 1G text in `IndexMode.java:60/:192`;
@@ -196,14 +202,14 @@ tags `s4-b7-<tag>`, port slot per case). Outcome classes: true negative `transit
 `max-cloned-size-allocate-size`, `slab-region-size-region-allocate-capacity`; true positive `memtable-offheap-space-allocate-size` (the pool charge at `:141` caps; `MAX_CLONED_SIZE` is a routing
 constant), `cache-keys-to-save-writer-keysToSave` (caps entries written to disk, not memory); **undetermined** `max-region-size-region-allocate-capacity` (unit Confirmed, cluster
 "Not confirmed (no matching row)": the charged gauge followed `memtable_offheap_space` but the frozen RssAnon relation failed on noise; the agent's evidence points to true negative).
-Timing: `stage4-runtime-verification/timing/set-A-batch-7.log` (wall: first launch 13:31Z, last report 16:03Z; `st` ~2.5 h, the longest). Leftovers: `~/s4-b7-{tc,st,mo,mc,sr7}` (+ `-logs`) on pc07, `~/s4-b7-{rl,hv,ie,mr,ck}` (+ `-logs`) on pc12; no process running.
+Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-7.log` (wall: first launch 13:31Z, last report 16:03Z; `st` ~2.5 h, the longest). Leftovers: `~/s4-b7-{tc,st,mo,mc,sr7}` (+ `-logs`) on pc07, `~/s4-b7-{rl,hv,ie,mr,ck}` (+ `-logs`) on pc12; no process running.
 Open points for you to overrule: (1) `mr` cluster tier undetermined, a rerun with the charged gauge primary and an RssAnon tolerance of at least 40 MiB would likely give true negative; (2) `ie` B3f
 JFR-share figure missed at K >= 32 KiB (kept Confirmed); (3) `mc` B1/B2g waste text says 12.3% but readings show 12.6% (the exact region formula held; literal row is "Not confirmed");
 (4) `mo` pre-registered RssAnon relations failed for the 1 KiB cluster arms and hold only after subtracting the heap_buffers control (post-hoc); (5) `hv` frozen B3f sentence "2^20 leaves in debug.log" cannot be
 checked (the log line is written before `init()`), TN vs FN depends on reading "indirect"; (6) `tc` "never exercised" holds only for the tested workload (repair/streaming not run); `ck` heap peak of `hottest(n)` not isolated.
 Many audits found write-up errors (wrong Lucene growth arithmetic, NMT cannot see JNA malloc, guardrails skipped for superusers, `nodetool getcachekeystosave` does not exist, region constants).
 Upstream/doc candidates (JIRA first): see `HANDOFF.md` follow-ups (int overflow in `ValidationManager`, mis-named memtable gauges, `setcachekeystosave` doc, `Guardrail.fail` with null state only logs).
-`predicted-negative.md`: the three rows for `NativeAllocator:273`, `SlabAllocator:201` and `:144/:92` were removed; multi-line rows (`Walker`, `AbstractReplicaCollection`, `HistogramBuilder`, `ByteSourceInverse`, `AutoSavingCache`, ...) stay (siblings still open). An untracked `stage4-runtime-verification/cassandra.logdir_IS_UNDEFINED/` (two logs, 09:48 Oct 26) is not from this batch and was not committed.
+`predicted-negative.md`: the three rows for `NativeAllocator:273`, `SlabAllocator:201` and `:144/:92` were removed; multi-line rows (`Walker`, `AbstractReplicaCollection`, `HistogramBuilder`, `ByteSourceInverse`, `AutoSavingCache`, ...) stay (siblings still open). An untracked `cassandra/stage4-runtime-verification/cassandra.logdir_IS_UNDEFINED/` (two logs, 09:48 Oct 26) is not from this batch and was not committed.
 Next: CSV order 7 (decision), 48 on (`AutoSavingCache.java:388`, `DatabaseDescriptor.java:726/:741`, ...).
 
 2026-10-26, batch 8 (CSV rows 48-54, seven cases; row 7 still open): **4 true positive, 3 true negative**. Stage 3 write-ups: 7 in parallel, ~1-2 min each; filed by hand.
@@ -211,7 +217,7 @@ True positive: `cache_keys_to_save-saveCache-keysEstimate` (caps entries written
 `commitlog-total-space-calculateDefaultSpaceInMiB-minSizeInMiB` (caps, soft: peak 1.7-1.9x the limit unthrottled), `native-transport-max-request-data-in-flight-set...Concurrent...` (unit Confirmed; cluster **Refuted**:
 counter holds at L but V5 requests under `LARGE_MESSAGE_THRESHOLD` are copied on heap in full, +246 MiB at every L), `native_transport_max_request_data_in_flight_per_ip-...` (unit Confirmed; cluster
 "Not confirmed (no matching row, C7)": `PausedConnections` goes negative on V5). True negative: `data-free-space-warn-threshold`, `local_system_data_file_directory-applySimpleConfig-freeBytes`, `max-unsigned-short-validate-key-remaining`.
-Stage 4 ran as 5 + 2 (pc07: kt, cl, fs, then ls, uk; pc12: pi, cr; tags `s4-b8-<tag>`, port slots 1-7). Timing: `stage4-runtime-verification/timing/set-A-batch-8.log` (pi ~2.8 h, cr ~1.9 h, the others 0.3-0.9 h).
+Stage 4 ran as 5 + 2 (pc07: kt, cl, fs, then ls, uk; pc12: pi, cr; tags `s4-b8-<tag>`, port slots 1-7). Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-8.log` (pi ~2.8 h, cr ~1.9 h, the others 0.3-0.9 h).
 Open points for you to overrule: (1) `cr` outcome class filed as true positive (counter caps, V4 and V5-large heap follow L, live setter works); the V5/100 KB arm alone would read false positive;
 (2) `pi` C3 needs `PausedConnections` max >= 1, which reads 0 (negative); every other clause held, so Confirmed (C3) is a defensible overrule; (3) `cl` row-4 "soft cap" reading and the flush-lag cause are inferred; the throttled arm (R6) was not run;
 (4) `uk` and `kt` saw shakedown numbers before run 1 (disclosed in results); `kt` unit run 1a lacked a lookup control, rerun as 1b; (5) `fs` S-arm node died with SIGBUS on the full tmpfs (attributed to the volume, not the threshold).
@@ -225,7 +231,7 @@ Next: CSV order 7 (decision), 55 on (`QueryProcessor.java:758`, `Validation.java
 True negative: `max-unsigned-short-prepare-boundTerms`, `max-unsigned-short-validateKey-keyRemaining`, `max-unsigned-short-ClusteringPrefix-validate-accessor-size`, `max-unsigned-short-validate-sum`,
 `batch_size_warn_threshold-verifyBatchSize-size` (unit **Refuted**, cluster **Not confirmed** on an allocation clause only: the warn branch adds +14-20% coordinator allocation; rows, writes and disk bytes identical),
 `unlogged_batch_across_partitions_warn_threshold-verifyBatchType-keySet`. True positive: `rows_per_partition-isFilterFullyCoveredBy-rowsPerPartitionToCache` (soft cap: live rows only).
-Stage 4 ran as 5 + 2 (pc07: bs, rp, bt, then cp; pc12: bu, vk, then cs; tags `s4-b9-<tag>`, port slots 1-7). Timing: `stage4-runtime-verification/timing/set-A-batch-9.log` (rp ~57 min, bs ~29 min, cp ~24 min).
+Stage 4 ran as 5 + 2 (pc07: bs, rp, bt, then cp; pc12: bu, vk, then cs; tags `s4-b9-<tag>`, port slots 1-7). Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-9.log` (rp ~57 min, bs ~29 min, cp ~24 min).
 Findings for Target 3 / upstream (JIRA first): (1) warn threshold above fail threshold disables the batch fail check (`BatchStatement.java:338-352`; seen by `bs` and `bu`); (2) `INSERT ... IF NOT EXISTS` with a 65536-byte clustering skips `validate()` (`ModificationStatement.java:573`), fails at `NativeClustering.java:50` and the client sees a WriteTimeout;
 (3) a range delete with a 70000-byte clustering bound is accepted and the later flush throws in `StatsMetadata` serialization (`cp`, `cs`; node stayed up, restart/replay not tested); (4) through CQL `Validation.java:51` never rejects, `ClusteringPrefix.validate` rejects first (`vk`), so `QueryProcessor.java:259` (`max-unsigned-short-validate-key-remaining`, batch 8) likely has the same attribution;
 (5) a prepared SELECT kept the old `rows_per_partition` after `ALTER TABLE` plus a restart (`rp`); (6) `verifyBatchSize` formats a table name per mutation; (7) the unlogged-batch WARN log line is limited to one per minute.
@@ -243,7 +249,7 @@ Undetermined: `tombstone-failure-threshold-withMetricsRecording-failureThreshold
 False negative: `max-compaction-threshold-getCandidatesFor-candidatesSize` (unit and cluster Confirmed, "caps only on some paths (bypass)": L0 part capped at N, but every overlapping L1 sstable is added to the task; run 1 cluster was "Not confirmed (no matching row)" on a heap clause, run 2 re-used the same fixtures with a live-heap measure and matched; same session, not independent).
 True negative: `commitlog-segment-size-addAdditionalInformationIfPossible-segmentSize` (cluster Confirmed on the three LZ4 arms only; the three default mmap arms died of SIGBUS before any log line), `tombstone-threshold-worthDroppingTombstones-droppableRatio`,
 `max-compacting-l0-getSTCSInL0CompactionCandidate-l0SstableCount`, `max-threshold-getEstimatedTasks-l0SstableCount`, `compaction-min-threshold-mostInterestingBucket-minThreshold`, `bucket-low-bucket-high-getBuckets-oldAverageSize`.
-Stage 4 ran as 5 + 3 (pc07: tf, sg, td, then lm, sb; pc12: lz, lc, then sm; tags `s4-b10-<tag>`, port slots 1-8). Timing: `stage4-runtime-verification/timing/set-A-batch-10.log` (tf ~3.6 h, lm ~2 h, lc ~1.7 h, the others 0.5-1 h).
+Stage 4 ran as 5 + 3 (pc07: tf, sg, td, then lm, sb; pc12: lz, lc, then sm; tags `s4-b10-<tag>`, port slots 1-8). Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-10.log` (tf ~3.6 h, lm ~2 h, lc ~1.7 h, the others 0.5-1 h).
 Open points for you to overrule: (1) `lc` effect "bypass" vs "does not cap" (the 1.4 GiB L1 offset, unbounded L0 sstable size; the readings are the same); (2) `td` effect "does not cap" although an sstable above the threshold is rewritten when all gates are open, and its P2 correction (A8) follows from the source, not a measurement;
 (3) `lm` phase B: in-flight STCS-in-L0 output grew with `max_threshold` (54/94/172 MB), a different path from line 655, recorded under C6 and not counted; (4) `sg` Z8 control reached 104 MiB against its pre-fixed 72 MiB bound (the cap is a reclaim target; the frozen sentence is literally false in both Z arms) and two arms (A5L, ZH) were added after reading earlier arms;
 (5) `lz` Confirmed rests on the unit routes (1 of 7 debug lines came during the write window); (6) `sb` default arm ended with 3 sstables, not the predicted 2 (no B3g row depends on it); (7) `sm` memory shown only by per-sstable counters, RssAnon and live heap flat; (8) `tf` all B3f numeric bands missed (a tombstone is 11.7 B, not 100 B).
@@ -257,7 +263,7 @@ Next: CSV order 7 (decision), 71 on.
 True positive: `rows-per-partition-hasEnoughLiveData-rowLimit` (estimate positive: the `rows_per_partition`/`row_cache_size` caps hold, `DataLimits.java:417` itself moves no memory), `group-by-row-limit-incrementRowCount-rowsCounted` (GROUP BY page size is the internal row limit; a row-count cap, 4 KiB rows at fetch 100000 killed a 512 MB node).
 Undetermined: `group-per-partition-limit-isdoneforpartition-groupinCurrentPartition` (unit Confirmed, does not cap; cluster "Not confirmed (no matching row)": peak heap 54.9 MB at N=absent vs 8.4 MB at N=1 against a 30 MB rule chosen at the audit; heap floor drifted 0 to 40 MB during the arm, so a drift-corrected rerun would likely give true negative).
 True negative: `min-threshold-getEstimatedCompactionsByTasks-bucketSize`, `group-limit-isdone-groupcounted`, `cql-row-limit-hasEnoughLiveData-rowLimit`, `cql-row-limit-incrementRowCount-rowsCounted`, `per-partition-limit-incrementRowCount-rowsincurrentpartition`, `group-by-limit-incrementGroupCount-groupLimit`, `group-per-partition-limit-incrementGroupInCurrentPartitionCount-groupPerPartitionLimit`.
-Stage 4 ran as a rolling window of 5 (pc07: m71, g72, g73, then q77, b78; pc12: c74, p75, then c76, l79, g80; tags `s4-b11-<tag>`, port slots 1-10). Timing: `stage4-runtime-verification/timing/set-A-batch-11.log` (launch 06:29Z, last report 08:48Z).
+Stage 4 ran as a rolling window of 5 (pc07: m71, g72, g73, then q77, b78; pc12: c74, p75, then c76, l79, g80; tags `s4-b11-<tag>`, port slots 1-10). Timing: `cassandra/stage4-runtime-verification/timing/set-A-batch-11.log` (launch 06:29Z, last report 08:48Z).
 Open points for you to overrule: (1) `m71` live-heap tolerance 5% missed at 5.4% (arm order not randomized), kept Confirmed; (2) `b78` +314 MB at fetch 10000 is 4.8% above the filed band, and the 100-byte-row control read +112-128 MB against a 100 MB analyzer threshold; (3) `g73` verdict follows the frozen 30 MB rule, the drift reading would give Confirmed; (4) `g72` read B3g "heap above 90%" as live heap after GC (G1 ran 64-67 full GCs per 5 queries at P=100); (5) `c74` discarded its first unit pass after a harness bug (disclosed in results §3) and the attributable-RSS tolerance margin was 62.3 vs 64 MiB; (6) `q77` added `-XX:-UseTLAB` and restarted the unit tier after seeing attempt 1; (7) `p75` RssAnon bound missed for n5 and n50 (recorded as reported overshoot, Size decides); runtime shrink via `setcachecapacity` left Size unchanged for 60 s (informational, not retested); (8) `l79` peak-heap comparison for the small-group table rests on three cells; sizes scaled down; (9) `c76` one B3f control sub-prediction missed (`local_read_size_fail_threshold` counts row heap, not payload).
 Findings / upstream or doc candidates (JIRA first): `LIMIT` and `PER PARTITION LIMIT` on a GROUP BY bound groups/rows, not bytes scanned; under `GROUP BY <partition key>` `PER PARTITION LIMIT` never stops reading a partition (`groupInCurrentPartition` stays 0); for GROUP BY the page size is the internal row limit (`SelectStatement.java:899-912`); `aggregation_subpage_size_in_kb` does not exist in 5.0.9; `min_threshold` cannot exceed `max_threshold` (setter rejects it); `PendingCompactions` is stale while autocompaction is disabled; `row_cache_size` is split per OHC segment so an entry above a segment is not stored; node killed by `cassandra-env.sh` `kill -9` on OOM leaves no log line.
 `predicted-negative.md`: the `DataLimits.java:414/:417` row and the `:509/:511/:986` row were removed; the `:993/:1000/:1041` row stays (`:1041` is open), as do the `AtomicBTreePartition` rows.
@@ -273,7 +279,7 @@ case file (CSV rows 81-159; row 7 skipped, it is settled as a second check site 
 `prepared_statements_cache_size`). **Not case files:** these are unfinished, kept out of `cases/`,
 `_INDEX.md`, `predicted-negative.md` and the CSV (`case_file` and `stage4` columns left empty).
 
-- **Where:** `cassandra/if-check-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
+- **Where:** `experiments/if-check-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
   field table (only Entry pointer and Pinned source) and **A1. The constraint** filled; A2-A5, B, C and D are absent.
 - **How:** one fresh Agent-tool subagent per target, 8 batches (10 x 7, then 9), each given only
   `file:line` (or helper), a read-only copy of the source (`~/cassandra-5.0.9`) and the A1 definition.

@@ -13,7 +13,7 @@
  *
  *   Mechanical narrowing only: it does not check that the helper's comparison is a
  *   usage-vs-limit test, nor that the `if`'s branches diverge on object creation. Both remain
- *   read-and-judge calls (see ../../../../cassandra/if-check-exp/README.md §3.4-§3.6).
+ *   read-and-judge calls (see ../../../../experiments/if-check-exp/README.md §3.4-§3.6).
  * @kind table
  * @id cassandra/if-check-exp/helper-guarded-if-statements
  */

@@ -5,7 +5,7 @@
  *   `ComparisonIfStatements.ql`'s output: drops comparisons against `null`, comparisons between
  *   two literals with no variable/call involved, and comparisons whose operands aren't numeric
  *   (capacity/threshold checks are inherently magnitude comparisons) — the input to the
- *   read-and-judge triage stage described in ../../../../cassandra/if-check-exp/README.md §7.2.
+ *   read-and-judge triage stage described in ../../../../experiments/if-check-exp/README.md §7.2.
  *
  *   Because it keeps comparisons whose enclosing statement is an `if`, this is structurally
  *   exactly enforcement pattern (a) (README §3.2), which is the pipeline's current scope.

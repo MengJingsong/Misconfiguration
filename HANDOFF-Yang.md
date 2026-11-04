@@ -1,10 +1,16 @@
 # If-Check Exp — Handoff for Yang (set B)
 
+> **Paths.** This file is Cassandra `if-check-exp` work. Paths starting `cassandra/stage…` are
+> relative to `experiments/if-check-exp/`. Bare `cases/`, `_INDEX.md` and `writeup-set-*.csv` are in
+> `experiments/if-check-exp/cassandra/stage3-ai-deep-read/`; bare `harness/`, `results/`,
+> `timing/` and `environment.md` are in `experiments/if-check-exp/cassandra/stage4-runtime-verification/`.
+> Playbooks, templates and stage READMEs are method docs under `experiments/if-check-exp/<stage>/`.
+
 Created 2026-10-23. This file holds **Yang's personal handoff only**: set B, its procedure,
 progress, nodes and log. The shared background (what the experiment is, state, decisions in force,
 working preferences, where things live, stage-4 recipe, lessons, open follow-ups, node access) is in
 [`HANDOFF.md`](HANDOFF.md): **read it first**, then
-[`cassandra/if-check-exp/README.md`](cassandra/if-check-exp/README.md) for the format spec.
+[`experiments/if-check-exp/README.md`](experiments/if-check-exp/README.md) for the format spec.
 Jingsong works on set A in parallel ([`HANDOFF-Jingsong.md`](HANDOFF-Jingsong.md)).
 
 > **Handoff-notes rule (2026-10-23):** a session that starts from this file records **personal**
@@ -23,19 +29,19 @@ Jingsong works on set A in parallel ([`HANDOFF-Jingsong.md`](HANDOFF-Jingsong.md
 Use **fresh autonomous agents** to write up a case file for every target in **set B**, then
 verify each case at **stage 4** (audit, run 1 at both tiers, results file, outcome class).
 
-- **The list:** [`cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-B.csv`](cassandra/if-check-exp/stage3-ai-deep-read/writeup-set-B.csv) —
+- **The list:** [`experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-B.csv`](experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-B.csv) —
   **161 targets covering 169 stage-2 units** (band A 45, B 92, C 32). Mostly `io/`, `net/`,
   `repair/`, `service/`, `streaming/`, `transport/`, `utils/` and the rest of `index/` (from
   `index/sai/disk/v1/vector/` on), plus a few lines elsewhere tied to the same queue rows.
 - **Where the list came from (2026-10-23):** the 402 band A/B/C units of
-  `stage2-ai-preprocessing/bands.csv`, minus the 65 that are already the target of a case file
+  `cassandra/stage2-ai-preprocessing/bands.csv`, minus the 65 that are already the target of a case file
   (a guided file's **Capacity check** or an autonomous file's **Entry pointer**), leaves **337**.
   They were split into two sets of near-equal size by source area, keeping every unit of one
   source file and every unit of one `predicted-negative.md` row in the same set, so siblings are
   written up by one person. Set A has 168 units / 159 targets.
 - **A target** is one `file:line` (units on the same line, `#1`/`#2`, are merged) or one helper
   method (`helper <class>.<method>()`; give the agent the comparison line inside the helper,
-  found with `grep -n` in `cassandra/cassandra-5.0.9/`).
+  found with `grep -n` in `systems/cassandra/source/`).
 - **CSV columns:** `order` (suggested order), `target`, `units`, `band`, `estimate`,
   `stage3_record` (where stage 3 recorded the line: a `predicted-negative.md` section, a
   `predicted-positive.md` item, or a note), `stage2_reason`, and two columns to fill as you go:
@@ -57,10 +63,10 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 ### 1. Write-up (stage 3, autonomous agent)
 
 1. Make a copy of the source **outside the repository**, so the agent cannot read other cases:
-   `rsync -a cassandra/cassandra-5.0.9/ ~/cassandra-5.0.9/`.
+   `rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`.
 2. Open a **fresh** Claude Code session in that copy. Give it only
-   [`playbook-autonomous.md`](cassandra/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
-   [`_TEMPLATE-autonomous.md`](cassandra/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
+   [`playbook-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
+   [`_TEMPLATE-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
    and the target as `file:line`. Nothing else about the line (not the stage-3 ground, not the CSV).
 3. File the result as `cases/<stem>--autonomous.md`. The stem follows the existing ones:
    `<constraint>-<method>-<operand>`; check `ls cases/` first and add `-2` if the stem is taken.
@@ -70,10 +76,10 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 
 ### 2. Verification (stage 4, a separate agent)
 
-Protocol: [`stage4-runtime-verification/README.md`](cassandra/if-check-exp/stage4-runtime-verification/README.md)
-("The run protocol"); environment: [`environment.md`](cassandra/if-check-exp/stage4-runtime-verification/environment.md).
+Protocol: [`experiments/if-check-exp/stage4-runtime-verification/README.md`](experiments/if-check-exp/stage4-runtime-verification/README.md)
+("The run protocol"); environment: [`environment.md`](experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md).
 
-1. **Step-0 audit** (A–D) against `cassandra/cassandra-5.0.9/`: re-read every load-bearing
+1. **Step-0 audit** (A–D) against `systems/cassandra/source/`: re-read every load-bearing
    citation, check the trigger really reaches the check (find the `OperationType` / caller it
    produces), check the predictions have numbers and the workload arithmetic reaches the limit.
    Fixes go in the case file as dated amendments (section D). Write the audit and the frozen hash
@@ -82,7 +88,7 @@ Protocol: [`stage4-runtime-verification/README.md`](cassandra/if-check-exp/stage
 2. Harness under `harness/<stem>--autonomous/` (unit test + one run script per case with
    `EXPECTED:` lines, a stop on a failed first-trigger check, node stopped on any exit);
    instrument-check it. Shakedowns are not readings. Working trees from
-   [`copy-source.sh`](cassandra/if-check-exp/stage4-runtime-verification/copy-source.sh), one per
+   [`copy-source.sh`](experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh), one per
    case. Write audit, amendments, freeze hash and harness to the repo before run 1.
 3. Run 1, unit tier then each cluster label as a background job; read `summary.txt`, not whole
    logs; pull small excerpts to `results/<stem>/run1/`, full logs stay on the node.
@@ -119,7 +125,7 @@ Do not run anything on a node until they are named here. Jingsong uses `pc07` an
 use those.
 
 Shared node facts (experiment `jason92-320876`, SSH key, `ulimit`, leftover files from closed
-cases) are in `HANDOFF.md` "Nodes and access" and `stage4-runtime-verification/environment.md` §7.
+cases) are in `HANDOFF.md` "Nodes and access" and `cassandra/stage4-runtime-verification/environment.md` §7.
 If Yang's nodes are elsewhere, set them up from `environment.md` and record them here.
 
 ## Handoff log

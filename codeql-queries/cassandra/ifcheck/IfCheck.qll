@@ -8,7 +8,7 @@
  * importable path. Imported as `import ifcheck.IfCheck`.
  *
  * See ../queries/if-check-exp/README.md for how these fit the pipeline, and
- * ../../../cassandra/if-check-exp/README.md for the rules they support.
+ * ../../../experiments/if-check-exp/README.md for the rules they support.
  */
 
 import java
