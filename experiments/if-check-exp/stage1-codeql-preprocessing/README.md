@@ -1,6 +1,6 @@
 # Stage 1 — structural preprocessing (CodeQL)
 
-Stage 1 narrows Cassandra's ~17k `if` statements **structurally** — by the
+Stage 1 narrows a system's `if` statements (Cassandra ~17k, Hadoop ~44k) **structurally** — by the
 shape of the code, with no keyword list — down to a worklist that stage 2
 ranks and stage 3 reads. It decides nothing: it cannot tell a capacity check
 from any other numeric comparison.
@@ -16,9 +16,10 @@ because the same CodeQL database serves other work:
 
 | What | Where |
 |---|---|
-| Queries + their full documentation | [`../../../codeql-queries/cassandra/queries/if-check-exp/README.md`](../../../codeql-queries/cassandra/queries/if-check-exp/README.md) |
-| Shared predicates | `codeql-queries/cassandra/ifcheck/IfCheck.qll` |
-| Results (**gitignored**, regenerate per machine) | `codeql-queries/results/cassandra/` |
+| Queries + their full documentation | [`../../../codeql-queries/cassandra/queries/if-check-exp/README.md`](../../../codeql-queries/cassandra/queries/if-check-exp/README.md) (Hadoop: [`../../../codeql-queries/hadoop/queries/if-check-exp/README.md`](../../../codeql-queries/hadoop/queries/if-check-exp/README.md), same logic) |
+| Shared predicates | `codeql-queries/common/lib/IfCheckCore.qll` (system-agnostic) + `codeql-queries/<system>/ifcheck/IfCheck.qll` (scope, batching) |
+| Results (**gitignored**, regenerate per machine) | `codeql-queries/results/<system>/` |
+| Per-system scope, database and counts | [`../cassandra/`](../cassandra/) (counts below) · [`../hadoop/stage1-codeql-preprocessing/README.md`](../hadoop/stage1-codeql-preprocessing/README.md) |
 | CodeQL CLI / databases (outside the repo) | `/proj/misconfiguration-PG0/tools/codeql/`, `/proj/misconfiguration-PG0/codeql-dbs/` |
 
 That pipeline README is the single source of truth for what each query does.
@@ -36,7 +37,7 @@ cd <your checkout>/codeql-queries   # the CloudLab copy was removed 2026-10-06 (
 Results are gitignored and regenerated per machine, so **no row count here is
 pinned to a commit** — re-run before quoting one.
 
-## Output, and what it is worth
+## Output, and what it is worth (Cassandra)
 
 | File | Rows | magnitude | equality |
 |---|---|---|---|
