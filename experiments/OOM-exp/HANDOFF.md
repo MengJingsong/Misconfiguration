@@ -200,10 +200,13 @@ re-derive them, only consumes them.
   case file records the path).
 - [`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md) —
   every if-check-exp true-positive constraint, surveyed and grouped by
-  shared budget (on-heap/off-heap/disk) and filtered to standing-pool
-  candidates only (per-request guardrails excluded — see the playbook's
-  "Picking combinations" step 5). Read this before re-surveying if-check-exp
-  from scratch for the next combination.
+  shared budget (on-heap/off-heap/disk) and classified **floor / surge /
+  excluded** (floor = standing pool; surge = per-item allocation with no
+  global aggregate cap, used on top of a floor; the exclusion axis is "is
+  there a global aggregate cap?", not "per-request vs. standing" — see the
+  playbook's "Picking combinations" step 5 and the floor+surge note at the
+  top of that file). Read this before re-surveying if-check-exp from scratch
+  for the next combination.
 - **Available nodes (updated 2026-11-02):** `pc41` (local — the session
   runs here directly, no ssh), `pc39` and `pc29` (remote, reach over ssh).
   Set up JDK/Ant/source on `pc39`/`pc29` before use if not already done.

@@ -29,6 +29,55 @@ arithmetic of why not (the defaults are sized to fit together, or the pool is
 off by default) is the finding, and it bounds how far the original cases
 depend on non-default values.
 
+## Starting from a custom-capacity case (continuation)
+
+A default-value case does not have to be built from scratch. When the original
+convergence playbook already has an **OOM-reaching case for the same
+constraints at raised values**, the efficient route is to treat that case as a
+starting point and **walk the configuration toward defaults while staying
+inside the OOM region** — a continuation. Each step relaxes one dimension
+toward its default, re-runs, and keeps going only while the node still OOMs;
+the endpoint is every constraint at its default (a strict default case) or the
+nearest point to it that still OOMs (a bounded result: "defaults minus this one
+change"). Three things make this rigorous rather than a guess:
+
+1. **Be explicit about *which variable you are walking* — cap-space or
+   budget-space.** There are two independent dials: the per-constraint
+   **capacities** and the total **budget** (`-Xmx`, `-XX:MaxDirectMemorySize`,
+   cgroup limit). "Default-value convergence" pins the capacities at their
+   defaults; if a default capacity is an **absolute constant** (e.g. hints
+   `3 × 32 MiB = 96 MiB`, DOB `1 MiB × T`) there is nothing left to walk in
+   cap-space, so the continuation necessarily happens in **budget-space** — you
+   shrink the budget until the fixed defaults sum past it. Say so in section 2:
+   *default caps + a realistic/default budget* is the strongest claim; *default
+   caps + a deliberately tightened budget* is weaker (an operator did choose
+   the small budget) but still demonstrates the missing aggregate cap. Name
+   which one the case is. (The first default case, DOB+hints, is the second
+   kind: both caps are absolute, so the dial was `MaxDirectMemorySize`.)
+2. **Do not assume monotonicity along the path.** "Shrink a cap and it stays
+   OOMing until it stops, giving a clean boundary" holds for a *non-self-
+   reclaiming standing pool in isolation*. Capacities are coupled: lowering
+   `memtable_heap_space` makes flushes more frequent → more compaction → more
+   off-heap/disk churn, which can *raise* pressure elsewhere. For
+   budget-relative defaults the coupling is worse — shrinking the budget to
+   force convergence also **shrinks the very default caps you are summing**, so
+   the target can recede as you chase it (this is why absolute-cap pairs are
+   the tractable first cases). Expect the OOM region to have a non-convex
+   boundary; bisect one dimension at a time and re-verify after each step.
+3. **Check it is still the *same mechanism* at every step (same-mechanism
+   check).** Walking a knob can move you out of the intended OOM and into a
+   *different* one — a different pool, a different error signature, a kernel
+   OOM-kill where you had a JVM `OutOfMemoryError`. A boundary found by
+   accidentally crossing into another OOM is an artifact. At each continuation
+   step confirm the OOM is the same pool and the same signature as the starting
+   case; if it changes, stop and record that the path left the original
+   mechanism — that is itself a finding, not a default-value result for the
+   original one.
+
+If no custom-capacity case exists for the group, build the default case
+directly from the default arithmetic ("Picking combinations" step 4 below);
+the continuation route is an optimization, not a requirement.
+
 ## The goal, per case
 
 As in the original: two or more constraints from `if-check-exp` that draw on
@@ -158,6 +207,18 @@ Follow the original's "Picking combinations" with these changes:
 5. **Prefer combinations reachable from ordinary traffic** (the original's
    Target-3 preference applies doubly here, since the config is not the
    "misconfiguration").
+6. **The floor+surge model (base playbook, item 5 of "Inputs") is especially
+   valuable at defaults.** When every capacity is pinned at its default, a
+   **floor + surge** combination is often the *only* way to converge, because
+   the surge's contribution is sized by **concurrency**, not by a capacity
+   value — it is the one continuous dial still free when the caps are fixed.
+   So a default case can be: one default-capped standing pool (the floor) + a
+   workload-driven surge (concurrent no-global-cap per-item allocations) walked
+   up until the sum crosses the budget. This is already what the first default
+   case does — a fixed 96 MiB hints floor plus a DOB surge dialed by thread
+   count (`g ≈ 0.95 MiB × T`, swept over `T`). When you cannot shrink a default
+   cap and cannot shrink the budget further without leaving the documented
+   minimum, raising surge concurrency is the remaining move.
 
 ## Designing, sizing and running (overrides)
 
