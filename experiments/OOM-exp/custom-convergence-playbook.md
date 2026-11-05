@@ -47,6 +47,19 @@ one node), such that:
   `OutOfMemoryError`, is OOM-killed by the kernel, or Cassandra stops serving
   because GC cannot reclaim enough).
 
+**The convergence test is "sum of live usage over budget at one instant,"
+not "every pool parked at capacity."** That admits two shapes of combination
+(see "Floor + surge" below and the roles in
+[`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md)):
+
+- **floor-only** — two or more **standing pools** both sitting at capacity (the
+  deterministic shape; every case run so far is this); or
+- **floor + surge** — one standing pool at capacity (the **floor**) plus one
+  or more per-item allocations with **no global aggregate cap**, driven by
+  concurrency to **peak** on top of the floor in the same window (the **surge**).
+
+Either way, at least one floor is required.
+
 ## Inputs from if-check-exp
 
 For each candidate constraint, pull from its case file and stage-4 results
@@ -61,24 +74,32 @@ For each candidate constraint, pull from its case file and stage-4 results
    a confirmed **bypass**. Do not build a convergence case on a constraint the
    case file found does not cap (true negative) — if it never reached capacity
    on its own, driving it to "capacity" is not a load.
-5. **Standing pool, not a per-request guardrail.** A true positive only
-   qualifies if its usage is a **standing pool** — bytes that accumulate and
-   can sit *at* capacity for a sustained window (a cache, a queue, a
-   memtable, a disk directory total). A **per-request/per-item guardrail**
-   (a size check on one mutation, one query response, one message, one
-   batch) rejects or passes a single operation and releases the memory
-   immediately — there is no window where it's "parked at capacity" for a
-   second constraint to converge with, even though the bytes it touches are
-   genuinely heap or off-heap. Exclude guardrails from convergence picking
-   regardless of outcome class (examples: `max_mutation_size`,
-   `max_value_size`, `tombstone_failure_threshold`, the
-   `*_read_size_fail_threshold` family — see
-   [`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md)'s
-   "Not a shared budget" section for the full list and why each was excluded).
+5. **Classify each true positive as floor, surge, or excluded — the axis is
+   "is there a global aggregate cap?", not "per-request vs. standing".**
+   - **Floor** — a **standing pool**: bytes that accumulate and can sit *at*
+     capacity for a sustained window (a cache, a queue, a memtable, a hints-slab
+     pool, a disk directory total). A per-item guardrail that *does* have a
+     global in-flight/reserve cap (the networking in-flight pools) is a floor
+     too, because its summed capacity is itself a standing bound. **Rank floors
+     by reclaimability:** a non-self-reclaiming pool (counter/row cache, hints
+     slabs) is a strong floor; a self-reclaiming one (`memtable_heap_space`) is
+     weak — it can flush below capacity just as a surge lands. Every
+     combination needs at least one floor.
+   - **Surge** — a **per-item/per-request allocation with no global aggregate
+     cap**: each item is bounded and releases immediately, but the *sum across
+     concurrent items* is uncapped, so `N` concurrent items × the per-item
+     bound is a transient aggregate concurrency can drive to an arbitrary peak.
+     Use a surge only *on top of* a floor, timed to peak while the floor is
+     full (examples: `max_mutation_size`, `max_value_size`, the
+     `*_read_size_fail_threshold` family — see the "Surge candidates" table in
+     [`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md)).
+   - **Excluded** — caps a **count or duration** rather than bytes, or pins
+     bytes genuinely released and re-cappable per operation with no way for
+     concurrency to accumulate them (see that file's "Still excluded" table).
 
 A standing survey of every true-positive constraint, grouped by budget and
-already filtered for standing-pool vs. guardrail, lives at
-[`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md).
+already classified floor / surge / excluded, lives at
+[`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md).
 Check it before re-deriving a group from scratch — it also flags
 look-alike traps (e.g. several off-heap networking constraints that turn
 out to share the exact same underlying pool, so combining two of them is
@@ -92,7 +113,7 @@ list to work down — survey if-check-exp's true-positive and confirmed-bypass
 cases itself and group them.
 
 **Before picking, read the "Shared-budget group status" table at the top of
-[`cassandra/cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md).** It
+[`cassandra/cases/custom-convergence/_batch-log.md`](cassandra/cases/custom-convergence/_batch-log.md).** It
 records, per shared-budget group, whether prior runs consider it open,
 exhausted, parked, or **skipped** (and why) — this is the dedup mechanism: it
 exists so a new run doesn't re-survey or re-run a group a previous run
@@ -132,7 +153,17 @@ something outside the group (e.g. missing infrastructure).
    constraints** before trying 4+: start with the smallest combination
    predicted to exceed the budget, and prefer combinations that are
    plausible from a single operator's misconfiguration (see Target-3 note
-   below) over ones that need many unrelated knobs changed at once.
+   below) over ones that need many unrelated knobs changed at once. A
+   combination can be **floor-only** (2–3 standing pools) or **floor + surge**
+   (one standing pool + one or more no-global-cap per-item allocations driven
+   by concurrency). Prefer floor-only when one exists for the group — it is
+   deterministic. Reach for a surge when the group has only one usable
+   standing pool, or when all remaining standing pools are too small to sum
+   past the budget on their own: a surge adds a concurrency-driven term the
+   floor alone can't reach. For **3+ constraints**, picking becomes partly a
+   **scheduling problem** — which usages can be made to peak in the *same*
+   window (Σ floors + Σ aligned surges > budget), not just which belong to the
+   group.
 3. **A shared-budget group with only one usable constraint, or with
    constraints whose summed capacities cannot plausibly exceed the budget
    even at extreme sizing, is noted and skipped** — record why in the batch
@@ -167,6 +198,25 @@ For each chosen combination:
    `RssAnon`, or the constraint's own metric), at a sampling rate fine enough
    to see the usages rise together, not just the final OOM; `dmesg` for a
    kernel OOM-kill.
+5. **If the combination uses a surge, size and instrument it differently from
+   a floor.** A floor is sized by its capacity knob; a **surge is sized by
+   concurrency** (`N` concurrent items × the per-item bound), so the dial is
+   the workload, not a config value. For a floor+surge case:
+   - **Establish the floor first.** Drive the standing pool to capacity and
+     confirm it is stable there *before* starting the surge — the floor is the
+     measurement baseline the surge lands on.
+   - **Verify no global cap really governs the surge.** From source, confirm
+     the per-item allocation has no in-flight/reserve bound on its sum (if it
+     does, it is a floor, not a surge, and the combination may be two views of
+     one pool).
+   - **Sample fast enough to catch the peak.** A surge's contribution is a
+     transient spike, not a plateau — sample the budget faster than the surge's
+     rise time, or the peak that caused the OOM won't appear in the log.
+   - **Treat the result as probabilistic.** A floor+surge OOM is
+     timing-sensitive (GC and scheduling decide whether the peak lands while
+     the floor is full). Run the convergence arm **several times**; report how
+     many runs OOMed and the distribution of the measured peak, not a single
+     number. A floor-only case does not need this — it is deterministic.
 
 ## Running it (the agent's job)
 
@@ -201,7 +251,7 @@ A combination's case file records the outcome whichever way it goes:
 ## Output
 
 Write one file per attempted combination to
-`<system>/cases/convergence/<constraint-1>+<constraint-2>[+...].md` in this folder (for Cassandra, `cassandra/cases/convergence/`).
+`<system>/cases/custom-convergence/<constraint-1>+<constraint-2>[+...].md` in this folder (for Cassandra, `cassandra/cases/custom-convergence/`).
 Use this template — four sections, in this order:
 
 ### 1. Constraints and capacities
@@ -267,7 +317,7 @@ What happened after the solution was executed:
 - **Target-3 note:** is this combination realistic from a single operator
   misconfiguration, or does it need several workloads driven deliberately?
 
-Keep a **batch log** at `cases/convergence/_batch-log.md` (append one entry
+Keep a **batch log** at `cases/custom-convergence/_batch-log.md` (append one entry
 per playbook run): the date, the shared-budget groups surveyed, every
 combination attempted with a link to its case file, every combination
 considered and skipped with why, and the stopping reason (budget exhausted

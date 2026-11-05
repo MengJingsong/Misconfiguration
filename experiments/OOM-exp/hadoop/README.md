@@ -6,7 +6,7 @@ resource-exhaustion). No cases have been run yet.
 The method is system-agnostic and documented once at the experiment root:
 
 - [`../README.md`](../README.md) — experiment overview (convergence + bypass)
-- [`../convergence-playbook.md`](../convergence-playbook.md), [`../default-value-convergence-playbook.md`](../default-value-convergence-playbook.md), [`../bypass-playbook.md`](../bypass-playbook.md)
+- [`../custom-convergence-playbook.md`](../custom-convergence-playbook.md), [`../default-convergence-playbook.md`](../default-convergence-playbook.md), [`../bypass-playbook.md`](../bypass-playbook.md)
 - [`../HANDOFF.md`](../HANDOFF.md) — start-here brief
 
 The Cassandra instance under [`../cassandra/`](../cassandra/) is the worked

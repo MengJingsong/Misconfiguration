@@ -12,22 +12,52 @@ it counts the same as a true positive here — see
 *not* to cap, so there's no load to converge. 73 rows, ~50 distinct
 constraints (several rows are the same constraint checked at a different
 decision point), grouped by the shared budget they draw on, per
-`convergence-playbook.md`'s "Picking combinations" step 1.
+`custom-convergence-playbook.md`'s "Picking combinations" step 1.
 
 **How to use this:** before picking a combination, check
 [`_batch-log.md`](_batch-log.md)'s "Shared-budget group status" table for
-which group is open/exhausted/parked/skipped, then pick 2–3 **standing-pool**
-constraints (see note below) from an open group here, preferring config-type.
+which group is open/exhausted/parked/skipped, then — from an open group here,
+preferring config-type — pick either **2–3 floor (standing-pool) constraints**,
+or **one floor + one or more surge constraints** (see the floor/surge note
+below). The floor candidates are the On-heap and Off-heap/direct tables; the
+surge candidates are their own table further down.
 
-**Standing pool vs. per-request guardrail.** Within each budget, a
-constraint is only a good convergence candidate if it's a **standing
-pool** — usage that accumulates and can sit *at* capacity for a sustained
-window (a cache, a queue, a memtable). A **per-request/per-item guardrail**
-(a size check on one mutation, one query response, one message) rejects or
-passes a single operation and releases immediately — there's no window
-where it's "parked at capacity" for a second constraint to converge with.
-Guardrails are listed under "Not a shared budget" even when they are,
-technically, heap or off-heap bytes.
+**Floor + surge (supersedes the older "standing pools only" rule).**
+Convergence needs the **sum of live usage to exceed the budget at one
+instant** — it does *not* require every constraint to be parked at capacity
+simultaneously. So there are two roles a constraint can play:
+
+- **Floor** — a **standing pool**: usage that accumulates and can sit *at*
+  capacity for a sustained window (a cache, a queue, a memtable, a hints-slab
+  pool). A combination needs **at least one** floor. Rank floors by
+  **reclaimability**: a *non-self-reclaiming* pool (counter cache, row cache,
+  hints slabs) is a strong floor; a *self-reclaiming* one (`memtable_heap_space`
+  flushes under pressure) is a weak floor — it can drop below capacity exactly
+  when a surge lands, which is one of the recorded "why it didn't OOM"
+  diagnoses. Prefer non-reclaiming floors.
+- **Surge** — a **per-item/per-request allocation with no global aggregate
+  cap**: each item is bounded and releases immediately, but there is no limit
+  on the *sum across concurrent items*, so `N` concurrent items × the per-item
+  bound is a transient aggregate that can be driven arbitrarily high by
+  concurrency and timed to peak while the floor sits full. A surge needs no
+  sustained window of its own; it only needs its peak to coincide with the
+  floor's.
+
+**The real exclusion axis is "is there a global aggregate cap?", not
+"per-request vs. standing".** A per-item guardrail that *does* have a global
+aggregate cap (the networking in-flight pools) is already a standing pool and
+lives in the budget tables above. A per-item guardrail with *no* global cap is
+a **surge candidate**, not an exclusion (see the "Surge candidates" table). A
+check that caps a **count or a duration** rather than bytes, or whose bytes are
+genuinely released and re-cappable per operation (a decision-only buffer), is
+still excluded (see "Still excluded").
+
+**Cost of using a surge.** Floor-only cases are deterministic (park, park,
+measure — a clean minimum-sizing boundary). A floor+surge case is
+timing-sensitive: it may OOM one run and not the next, depending on GC and
+scheduling. When a case uses a surge, measure the floor stable *before* the
+surge, characterize the surge peak over several runs (a distribution, not one
+number), and report an OOM *probability* if it is not deterministic.
 
 ## On-heap (JVM `-Xmx`)
 
@@ -116,30 +146,48 @@ Listed here for completeness only.
 | `cache_keys_to_save` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/cache_keys_to_save-saveCache-keysEstimate--autonomous.md) | Saved-cache file bytes on disk (entry count × entry size) | config-set key count | yaml ×3 |
 | `repair_session_space` *(see On-heap too)* | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/repair_session_space-split-maxsize--guided.md) | Off-heap buffer per merkle tree (`82L+32` bytes) is memory, not disk — listed here only because its on-heap counterpart is cross-referenced above | — | yaml |
 
-## Not a shared budget (per-request/per-item guardrails — excluded from convergence picking)
+## Surge candidates (per-item byte limit, no global aggregate cap)
 
-These cap a single operation's size or count and release immediately after
-that operation completes — there's no sustained "parked at capacity" window
-for a second constraint to converge with, even where the underlying bytes
-are heap or off-heap. Not candidates for this playbook's combinations.
+**Not a floor on their own — use one of these *on top of* a floor from the
+budget tables above.** Each bounds a *single* operation's bytes and releases
+when that operation finishes, but there is **no limit on the sum across
+concurrent operations**, so `N` concurrent items × the per-item bound is a
+transient aggregate that high concurrency can drive to an arbitrary peak.
+Timed to peak while a floor sits at capacity, the aggregate pushes the sum
+over the budget. These were previously excluded under the old "standing pools
+only" rule; they are promoted here under the floor+surge model. For each,
+confirm from source before use that **no global in-flight / reserve cap**
+governs the sum (contrast the networking in-flight pools, which *do* have one
+and are therefore floors in the Off-heap table). State the budget each lands
+on and drive concurrency, not per-item size, to raise the aggregate.
+
+| Constraint | Case file | Budget it surges onto | Per-item bound (no global cap) |
+|---|---|---|---|
+| `local_read_size_fail_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/local_read_size_fail_threshold-addSize-failBytes--guided.md) | On-heap response buffers | Per-command response-buffer bytes; `N` concurrent reads uncapped in sum |
+| `row_index_read_size_fail_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md) | On-heap response buffers | Same family, per-command |
+| `coordinator_read_size_fail_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md) | On-heap response buffers | Same family, per-command (coordinator side) |
+| `max_mutation_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md) | Off-heap serialization buffer (+ commit-log entry) | Per-mutation bytes; `N` concurrent writers uncapped in sum |
+| `max_value_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_value_size-read-maxValueSize--guided.md) | Heap/off-heap per read/write path | Per-column-value bytes |
+| `internode_max_message_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_max_message_size-inferMessageSize-size--autonomous.md) | Direct + heap per message | Per-message bytes — **but** verify the large-message path isn't already governed by the internode in-flight reserve (a floor); if it is, this is not an independent surge |
+| `native_transport_max_message_size` *(false negative)* | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md) | Client-facing direct/heap per message | Per-message bytes — same caveat: verify it isn't governed by `native_transport_max_request_data_in_flight` (a floor) |
+
+## Still excluded (count/duration caps, or truly re-cappable per operation)
+
+Caps a **count** or a **duration** rather than bytes of a shared pool, or
+pins bytes that are genuinely released and re-cappable per operation with no
+way for concurrency to accumulate them — neither a floor nor a surge. Not
+candidates for this playbook's combinations.
 
 | Constraint | Case file | Why excluded |
 |---|---|---|
 | `Integer_MAX_VALUE` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE--guided.md) | Generic overflow guard, not a budget |
-| `rows-per-partition` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/rows-per-partition-hasEnoughLiveData-rowLimit--autonomous.md) | Per-query row-count paging limit |
-| `group-by-row-limit` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/group-by-row-limit-incrementRowCount-rowsCounted--autonomous.md) | Per-query group/row-count paging limit |
-| `default_page_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md) | Hard-coded per-query page row count |
-| `local_read_size_fail_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/local_read_size_fail_threshold-addSize-failBytes--guided.md) | Per-command response-buffer byte threshold, releases after the read |
-| `row_index_read_size_fail_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md) | Same family, per-command |
-| `coordinator_read_size_fail_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md) | Same family, per-command |
-| `tombstone_failure_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/tombstone_failure_threshold-countTombstone-tombstones--autonomous.md) | Per-read response-buffer bound, count-based |
-| `max_mutation_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md) | Per-mutation byte limit (commit-log entry + off-heap serialization buffer), rejects a single oversized mutation |
-| `max_value_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_value_size-read-maxValueSize--guided.md) | Per-column-value byte limit |
-| `internode_max_message_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_max_message_size-inferMessageSize-size--autonomous.md) | Per-message byte limit (direct+heap pinned by one message, not a standing pool) |
-| `CACHEABLE_MUTATION_SIZE_LIMIT` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT--guided.md) | Per-mutation heap byte[] used only to decide cacheability, transient |
-| `SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS--guided.md) | Per-query key-list bound, released when the query ends |
-| `mutation_repair_rows_per_batch` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize--autonomous.md) | Per-batch row-count throttle during repair streaming, not a standing pool |
-| `native_transport_max_message_size` *(false negative)* | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md) | Per-message byte limit — "caps it per request"; released once the message is handled, not a standing pool |
+| `rows-per-partition` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/rows-per-partition-hasEnoughLiveData-rowLimit--autonomous.md) | Per-query row-**count** paging limit (if a surge is wanted here, use the byte-denominated read-size thresholds above instead) |
+| `group-by-row-limit` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/group-by-row-limit-incrementRowCount-rowsCounted--autonomous.md) | Per-query group/row-**count** paging limit |
+| `default_page_size` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md) | Hard-coded per-query page row **count** |
+| `tombstone_failure_threshold` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/tombstone_failure_threshold-countTombstone-tombstones--autonomous.md) | Per-read **count**-based bound; re-evaluate as a surge only if count × tombstone size pins meaningful uncapped bytes |
+| `CACHEABLE_MUTATION_SIZE_LIMIT` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT--guided.md) | Per-mutation heap byte[] used only to *decide* cacheability, released at once — not pinned while a floor sits |
+| `SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS--guided.md) | Per-query key-list **count** bound, released when the query ends |
+| `mutation_repair_rows_per_batch` | [case](../../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize--autonomous.md) | Per-batch row-**count** throttle during repair streaming |
 
 ## Others (not memory/disk bytes at all — count- or time-based caps)
 
