@@ -50,7 +50,7 @@ one node), such that:
 **The convergence test is "sum of live usage over budget at one instant,"
 not "every pool parked at capacity."** That admits two shapes of combination
 (see "Floor + surge" below and the roles in
-[`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md)):
+[`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md)):
 
 - **floor-only** — two or more **standing pools** both sitting at capacity (the
   deterministic shape; every case run so far is this); or
@@ -92,14 +92,14 @@ For each candidate constraint, pull from its case file and stage-4 results
      Use a surge only *on top of* a floor, timed to peak while the floor is
      full (examples: `max_mutation_size`, `max_value_size`, the
      `*_read_size_fail_threshold` family — see the "Surge candidates" table in
-     [`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md)).
+     [`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md)).
    - **Excluded** — caps a **count or duration** rather than bytes, or pins
      bytes genuinely released and re-cappable per operation with no way for
      concurrency to accumulate them (see that file's "Still excluded" table).
 
 A standing survey of every true-positive constraint, grouped by budget and
 already classified floor / surge / excluded, lives at
-[`cassandra/cases/convergence/_constraint-groups.md`](cassandra/cases/convergence/_constraint-groups.md).
+[`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md).
 Check it before re-deriving a group from scratch — it also flags
 look-alike traps (e.g. several off-heap networking constraints that turn
 out to share the exact same underlying pool, so combining two of them is
@@ -113,7 +113,7 @@ list to work down — survey if-check-exp's true-positive and confirmed-bypass
 cases itself and group them.
 
 **Before picking, read the "Shared-budget group status" table at the top of
-[`cassandra/cases/convergence/_batch-log.md`](cassandra/cases/convergence/_batch-log.md).** It
+[`cassandra/cases/custom-convergence/_batch-log.md`](cassandra/cases/custom-convergence/_batch-log.md).** It
 records, per shared-budget group, whether prior runs consider it open,
 exhausted, parked, or **skipped** (and why) — this is the dedup mechanism: it
 exists so a new run doesn't re-survey or re-run a group a previous run
@@ -251,7 +251,7 @@ A combination's case file records the outcome whichever way it goes:
 ## Output
 
 Write one file per attempted combination to
-`<system>/cases/convergence/<constraint-1>+<constraint-2>[+...].md` in this folder (for Cassandra, `cassandra/cases/convergence/`).
+`<system>/cases/custom-convergence/<constraint-1>+<constraint-2>[+...].md` in this folder (for Cassandra, `cassandra/cases/custom-convergence/`).
 Use this template — four sections, in this order:
 
 ### 1. Constraints and capacities
@@ -317,7 +317,7 @@ What happened after the solution was executed:
 - **Target-3 note:** is this combination realistic from a single operator
   misconfiguration, or does it need several workloads driven deliberately?
 
-Keep a **batch log** at `cases/convergence/_batch-log.md` (append one entry
+Keep a **batch log** at `cases/custom-convergence/_batch-log.md` (append one entry
 per playbook run): the date, the shared-budget groups surveyed, every
 combination attempted with a link to its case file, every combination
 considered and skipped with why, and the stopping reason (budget exhausted

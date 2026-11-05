@@ -12,7 +12,7 @@ it counts the same as a true positive here — see
 *not* to cap, so there's no load to converge. 73 rows, ~50 distinct
 constraints (several rows are the same constraint checked at a different
 decision point), grouped by the shared budget they draw on, per
-`convergence-playbook.md`'s "Picking combinations" step 1.
+`custom-convergence-playbook.md`'s "Picking combinations" step 1.
 
 **How to use this:** before picking a combination, check
 [`_batch-log.md`](_batch-log.md)'s "Shared-budget group status" table for

@@ -5,7 +5,7 @@
 > `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
 > root, data under `if-check-exp/<system>/`.
 
-**This playbook is [`convergence-playbook.md`](convergence-playbook.md) plus one
+**This playbook is [`custom-convergence-playbook.md`](custom-convergence-playbook.md) plus one
 restriction: every constraint in a combination stays at its default value.**
 Give the agent both files. Everything in the original playbook applies
 unchanged (one agent end to end, a batch of cases per run, control arms

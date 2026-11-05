@@ -1,6 +1,6 @@
 # commitlog_total_space + max_hints_size_per_host — convergence case
 
-> **Playbook:** [`../../../convergence-playbook.md`](../../../convergence-playbook.md)
+> **Playbook:** [`../../../custom-convergence-playbook.md`](../../../custom-convergence-playbook.md)
 >
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12.
 >
