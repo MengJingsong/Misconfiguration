@@ -6,8 +6,8 @@ The **Hadoop** instance of `if-check-exp`.
 |---|---|
 | 1 — structural (CodeQL) | **done 2026-11-04**: [`stage1-codeql-preprocessing/README.md`](stage1-codeql-preprocessing/README.md) (10,842-row corpus) |
 | 2 — lexical banding | **done 2026-11-04**: [`stage2-ai-preprocessing/README.md`](stage2-ai-preprocessing/README.md) — 9,684 units banded, A 90 (incl. 18 anchors) / B 170 / C 489 / D 8,935 |
-| 3 — deep read | not started |
-| 4 — runtime verification | not started |
+| 3 — deep read | not started; split by person: [`jingsong/`](stage3-ai-deep-read/jingsong/) (bands A, B, C), [`yang/`](stage3-ai-deep-read/yang/) (band D) |
+| 4 — runtime verification | not started; split the same way: [`stage4-runtime-verification/jingsong/`](stage4-runtime-verification/jingsong/), [`yang/`](stage4-runtime-verification/yang/) |
 
 The method is system-agnostic and documented once at the experiment root:
 

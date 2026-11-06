@@ -6,6 +6,37 @@
 > `timing/` and `environment.md` are in `experiments/if-check-exp/cassandra/stage4-runtime-verification/`.
 > Playbooks, templates and stage READMEs are method docs under `experiments/if-check-exp/<stage>/`.
 
+## Hadoop (added 2026-11-06)
+
+**Hadoop `if-check-exp` stage 3 is split by band.** Stage 2 is done
+([`experiments/if-check-exp/hadoop/stage2-ai-preprocessing/README.md`](experiments/if-check-exp/hadoop/stage2-ai-preprocessing/README.md)):
+9,684 units, each with one band in `hadoop/stage2-ai-preprocessing/bands.csv`.
+
+| Person | Bands | Units | Rows | Helpers |
+|---|---|---|---|---|
+| **Jingsong** | A, B, C | **749** (A 90 incl. 18 anchors, B 170, C 489) | 712 | 37 |
+| **Yang** | D | **8,935** | 8,557 | 378 |
+
+Select by the `band` column of `bands.csv`; every unit is in exactly one person's share. The
+Cassandra material below this section is unchanged and still applies to the Cassandra work.
+
+- **Stage 3 not started.** Your folders (do not write to the other person's):
+  stage 3 → `experiments/if-check-exp/hadoop/stage3-ai-deep-read/jingsong/`, stage 4 →
+  `experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/`. Each has a README listing the
+  expected contents (`cases/`, `_INDEX.md`, `writeup.csv`, `predicted-*.md`; `results/`, `harness/`, `case-notes.md`).
+- **Procedure, queue and status:** [`experiments/if-check-exp/hadoop/PROCEDURE.md`](experiments/if-check-exp/hadoop/PROCEDURE.md)
+  (what "this is Jingsong, start the next batch of N" and "summarize the result status" do),
+  your `queue.csv`, and `experiments/if-check-exp/hadoop/status.py jingsong`.
+- **Method:** shared playbooks and templates in `experiments/if-check-exp/stage3-ai-deep-read/`
+  (`playbook-autonomous.md`, `playbook-guided.md`, `playbook-non-config-autonomous.md`,
+  `_TEMPLATE-*.md`). Citations are pinned to `rel/release-3.4.2` (`systems/hadoop/source/`).
+- **Read order inside your share:** A first, then B, C (and for Yang, D in whatever order the
+  triage below picks).
+- **Jingsong:** A is the 90 highest-yield units (the 18 anchors are already source-read, see
+  `hadoop/stage2-ai-preprocessing/anchors.md`; `FSDirectory.java:1272#1` is the disputed one). B rows are
+  mostly flush-when-full buffers, uncapped buffer growth, YARN container memory, and app/entity
+  counts with unclear per-object size.
+
 Created 2026-10-23. The shared background (what the experiment is, where things live, the
 stage-4 lessons, node access) stays in [`HANDOFF.md`](HANDOFF.md); this file holds only
 Jingsong's next job. Yang works on set B in parallel ([`HANDOFF-Yang.md`](HANDOFF-Yang.md)).
