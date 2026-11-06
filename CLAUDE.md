@@ -21,4 +21,8 @@ stage 3/4:
    full build with `YARN_IGNORE_ENGINES=true`, never resumed with `-rf`) and update its Node table
    (keep one environment, dated). **Jingsong** has no environment yet:
    stop after stage 3 and say so; do not invent one (Jingsong may model one on Yang's when nodes are named).
-5. Commit/push only when asked.
+5. **Commit and push automatically** (no need to ask) when a batch finishes (stage 3, plus stage 4
+   where it runs), and after any other change to that person's Hadoop files. Commit to `main` only
+   the files of this work (that person's folders, their `HANDOFF-<Name>.md`, shared Hadoop docs you
+   changed); leave unrelated working-tree changes uncommitted. `git pull --rebase --autostash origin main`
+   before `git push origin main` (both people push to `main`). Report the commit hash.

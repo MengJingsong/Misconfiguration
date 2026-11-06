@@ -43,7 +43,8 @@ Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Ha
    keeps run data on local disk and leaves no Hadoop process running. **Needs that person's
    environment** (see below): if it is not there, stop after stage 3 and say stage 4 is waiting.
 6. Report: units processed, case files created, promotions (Yang), stage 4 status, what is next.
-   Commit to `main` only when asked.
+   Then **commit and push to `main` automatically** (only this work's files; `git pull --rebase
+   --autostash origin main` first) and report the commit hash.
 
 ## "Summarize the result status" (what the AI does)
 
