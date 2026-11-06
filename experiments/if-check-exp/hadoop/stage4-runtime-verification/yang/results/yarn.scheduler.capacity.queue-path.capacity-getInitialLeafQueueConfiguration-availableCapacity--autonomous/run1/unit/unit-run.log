@@ -1,0 +1,46 @@
+=== unit-run.sh 2026-11-06 12:00:06 on node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu mode=run
++ [2026-11-06 12:00:06] java -version
+openjdk version "1.8.0_504"
+OpenJDK Runtime Environment (build 1.8.0_504-8u504-ga-1ubuntu1~22.04.3-b01)
+OpenJDK 64-Bit Server VM (build 25.504-b01, mixed mode)
++ [2026-11-06 12:00:06] mvn -version
+[1mApache Maven 3.6.3[m
+Maven home: /usr/share/maven
+Java version: 1.8.0_504, vendor: Ubuntu, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.15.0-198-generic", arch: "amd64", family: "unix"
++ [2026-11-06 12:00:06] git -C /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/src describe --tags
+rel/release-3.4.2
++ [2026-11-06 12:00:06] cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/yang/harness/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous/TestIfCheckAutoQueueGuaranteeVsUsage.java /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/src/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-resourcemanager/src/test/java/org/apache/hadoop/yarn/server/resourcemanager/scheduler/capacity/
++ [2026-11-06 12:00:06] md5sum /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/yang/harness/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous/TestIfCheckAutoQueueGuaranteeVsUsage.java /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/yang/harness/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous/unit-run.sh
+e04e66f2577bb035ca685699ff8fcf6b  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/yang/harness/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous/TestIfCheckAutoQueueGuaranteeVsUsage.java
+34acb727055a4d55aa1048f0d68511b0  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/yang/harness/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous/unit-run.sh
+EXPECTED: (B2f, frozen) U1 avail 0.2010,0.1010,0.0010; u3 leafAbsCap 0.0000 active=false; actSum after u3 0.2000; u3 effMaxMB 102400; u3 used 41984
+EXPECTED: (B2f, frozen) U2 avail 0.2010,0.1510,0.1010,0.0510,0.0010; u3 0.0500 active=true; u5 0.0000 active=false; actSum 0.1500 after u3, 0.2000 after u5; u3 effMaxMB 102400; u3 used 41984
+EXPECTED: (B2f, frozen) U3 avail 0.4010,0.2010,0.0010; u3 0.0000 active=false; actSum 0.4000; u3 effMaxMB 102400; u3 used 41984
+EXPECTED: (B2f, frozen) U4 avail 0.2010,0.1010,0.0010; u3 0.0000 active=false; actSum 0.2000; u3 effMaxMB 25600; u3 used <= 25600 (<= 26624), >= 15 requests unsatisfied
+EXPECTED: (B2f, frozen) u1 and u2 used 1024 each in all runs; Confirmed needs U1 ~ U2 ~ U3 ~ 41984 (+-1024) and U4 <= 26624
+=== repeat 1
+mvn rc=0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.287 s - in org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.TestIfCheckAutoQueueGuaranteeVsUsage
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+IFCHK source: /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/unit/rep1/org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.TestIfCheckAutoQueueGuaranteeVsUsage-output.txt
+repeat 1: 134 IFCHK lines
+=== repeat 2
+mvn rc=0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.689 s - in org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.TestIfCheckAutoQueueGuaranteeVsUsage
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+IFCHK source: /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/unit/rep2/org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.TestIfCheckAutoQueueGuaranteeVsUsage-output.txt
+repeat 2: 134 IFCHK lines
+=== repeat 3
+mvn rc=0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.897 s - in org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.TestIfCheckAutoQueueGuaranteeVsUsage
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+IFCHK source: /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/unit/rep3/org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.TestIfCheckAutoQueueGuaranteeVsUsage-output.txt
+repeat 3: 134 IFCHK lines
+=== done 2026-11-06 12:02:06
+EXIT rc=0 at 2026-11-06 12:02:06
+leftover surefire JVMs:

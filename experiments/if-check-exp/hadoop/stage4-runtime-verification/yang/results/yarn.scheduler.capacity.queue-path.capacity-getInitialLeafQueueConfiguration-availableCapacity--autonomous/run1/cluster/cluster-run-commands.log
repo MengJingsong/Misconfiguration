@@ -1,0 +1,219 @@
+[2026-11-06 12:03:17] === cluster-run.py /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1 on node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu
+[2026-11-06 12:03:17] === prechecks
+[2026-11-06 12:03:17] + /usr/lib/jvm/java-8-openjdk-amd64/bin/jps -l
+1092424 sun.tools.jps.Jps
+[2026-11-06 12:03:17] hadoop daemons before start: none
+[2026-11-06 12:03:17] ports busy: none
+[2026-11-06 12:03:17] + free -m
+Mem:          257828        3009      214108           5       40710      253007
+Swap:           8192           0        8192
+[2026-11-06 12:03:17] + df -h /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1
+Filesystem                    Size  Used Avail Use% Mounted on
+/dev/mapper/emulab-node0--bs  754G   11G  704G   2% /mydata
+[2026-11-06 12:03:17] === setup (B3a, amended A4)
+[2026-11-06 12:03:17] + ls /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/hadoop/share/hadoop/yarn/*.jar | wc -l
+17
+[2026-11-06 12:03:17] + cp -r /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/hadoop/etc/hadoop/* /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/conf/
+[2026-11-06 12:03:17] === instrument check: hog.py standalone RSS (sampler known-answer, not a reading)
+[2026-11-06 12:03:20] INSTRUMENT hog calib: count=1 rss_mib=607.9 (expect 1 process, ~600-620 MiB)
+[2026-11-06 12:03:20] === HDFS (B3e step 1)
+[2026-11-06 12:03:20] + hdfs namenode -format -nonInteractive
+[2026-11-06 12:03:22] + hdfs --daemon start namenode
+[2026-11-06 12:03:24] + hdfs --daemon start datanode
+[2026-11-06 12:03:26] wait: 1 live datanode (timeout 180 s)
+[2026-11-06 12:03:26] + hdfs dfsadmin -report
+[2026-11-06 12:03:28]   ok after 2 s: Live datanodes (1)
+[2026-11-06 12:03:28] wait: safemode off (timeout 180 s)
+[2026-11-06 12:03:28] + hdfs dfsadmin -safemode get
+[2026-11-06 12:03:30]   ok after 2 s: OFF
+[2026-11-06 12:03:30] === run C1: P=20 T=50 M=100
+[2026-11-06 12:03:30] + cat /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/conf/capacity-scheduler.xml
+<?xml version="1.0"?>
+<configuration>
+</configuration>
+[2026-11-06 12:03:30] + yarn --daemon start resourcemanager
+[2026-11-06 12:03:32] wait: RM REST up (timeout 180 s)
+[2026-11-06 12:03:34]   ok after 2 s: STARTED
+[2026-11-06 12:03:34] + yarn --daemon start nodemanager
+[2026-11-06 12:03:36] wait: 1 RUNNING node with 12288 MB (timeout 180 s)
+[2026-11-06 12:03:38]   ok after 2 s: 1 RUNNING node, 12288 MB
+[2026-11-06 12:03:38] INSTRUMENT REST: root.parent capacity=20.0 absoluteCapacity=20.0 (expect 20); leaves before submit: []
+[2026-11-06 12:03:38] + [HADOOP_USER_NAME=u1] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:03:38] wait: root.parent.u1 resourcesUsed.memory=2048 (first-trigger check, A6c) (timeout 180 s)
+[2026-11-06 12:03:50]   ok after 12 s: ('root.parent.u1', 10.0, 100.0, 2048, 1)
+[2026-11-06 12:03:50] + [HADOOP_USER_NAME=u2] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:03:50] wait: root.parent.u2 resourcesUsed.memory=2048 (timeout 180 s)
+[2026-11-06 12:03:58]   ok after 8 s: ('root.parent.u2', 10.0, 100.0, 2048, 1)
+[2026-11-06 12:03:58] + [HADOOP_USER_NAME=u3] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:03:58] wait: u3 app RUNNING (timeout 180 s)
+[2026-11-06 12:04:05]   ok after 6 s: application_1793984614416_0003
+[2026-11-06 12:04:23] window start: u3 allocation 7168 MB, 18 s after RUNNING
+[2026-11-06 12:04:23] + free -m
+Mem:          257828       12093      205017           5       40717      243924
+Swap:           8192           0        8192
+[2026-11-06 12:04:23] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C1-start.json
+[2026-11-06 12:06:23] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C1-end.json
+[2026-11-06 12:06:23] + curl -s http://localhost:8088/ws/v1/cluster/apps -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/apps-C1.json
+[2026-11-06 12:06:23] + yarn application -list -appStates ALL
+application_1793984614416_0003	    DistributedShell	                YARN	        u3	root.parent.u3	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793984614416_0002	    DistributedShell	                YARN	        u2	root.parent.u2	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793984614416_0001	    DistributedShell	                YARN	        u1	root.parent.u1	           RUNNING	         UNDEFINED	             0%	                                N/A
+2026-11-06 12:06:24,390 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-06 12:06:24,450 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at /0.0.0.0:8032
+[2026-11-06 12:06:24] + yarn application -kill application_1793984614416_0003
+[2026-11-06 12:06:26] + yarn application -kill application_1793984614416_0002
+[2026-11-06 12:06:27] + yarn application -kill application_1793984614416_0001
+[2026-11-06 12:06:29] wait: all apps killed (timeout 180 s)
+[2026-11-06 12:06:29]   ok after 0 s: none active
+[2026-11-06 12:06:29] wait: no hog.py processes (30 s) (timeout 30 s)
+[2026-11-06 12:06:29]   ok after 0 s: empty
+[2026-11-06 12:06:29] === run C2: P=20 T=25 M=100
+[2026-11-06 12:06:29] + cat /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/conf/capacity-scheduler.xml
+<?xml version="1.0"?>
+<configuration>
+</configuration>
+[2026-11-06 12:06:29] + yarn --daemon stop resourcemanager
+[2026-11-06 12:06:30] + yarn --daemon start resourcemanager
+[2026-11-06 12:06:32] wait: RM REST up (timeout 180 s)
+[2026-11-06 12:06:34]   ok after 2 s: STARTED
+[2026-11-06 12:06:34] wait: 1 RUNNING node with 12288 MB (timeout 180 s)
+[2026-11-06 12:07:00]   ok after 26 s: 1 RUNNING node, 12288 MB
+[2026-11-06 12:07:00] INSTRUMENT REST: root.parent capacity=20.0 absoluteCapacity=20.0 (expect 20); leaves before submit: []
+[2026-11-06 12:07:00] + [HADOOP_USER_NAME=u1] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:07:00] wait: root.parent.u1 resourcesUsed.memory=2048 (first-trigger check, A6c) (timeout 180 s)
+[2026-11-06 12:07:08]   ok after 8 s: ('root.parent.u1', 5.0, 100.0, 2048, 1)
+[2026-11-06 12:07:08] + [HADOOP_USER_NAME=u2] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:07:08] wait: root.parent.u2 resourcesUsed.memory=2048 (timeout 180 s)
+[2026-11-06 12:07:17]   ok after 8 s: ('root.parent.u2', 5.0, 100.0, 2048, 1)
+[2026-11-06 12:07:17] + [HADOOP_USER_NAME=u3] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:07:17] wait: u3 app RUNNING (timeout 180 s)
+[2026-11-06 12:07:23]   ok after 6 s: application_1793984794516_0003
+[2026-11-06 12:07:41] window start: u3 allocation 7168 MB, 18 s after RUNNING
+[2026-11-06 12:07:41] + free -m
+Mem:          257828       12000      205109           5       40719      244016
+Swap:           8192           0        8192
+[2026-11-06 12:07:41] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C2-start.json
+[2026-11-06 12:09:41] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C2-end.json
+[2026-11-06 12:09:41] + curl -s http://localhost:8088/ws/v1/cluster/apps -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/apps-C2.json
+[2026-11-06 12:09:41] + yarn application -list -appStates ALL
+application_1793984794516_0003	    DistributedShell	                YARN	        u3	root.parent.u3	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793984794516_0002	    DistributedShell	                YARN	        u2	root.parent.u2	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793984794516_0001	    DistributedShell	                YARN	        u1	root.parent.u1	           RUNNING	         UNDEFINED	             0%	                                N/A
+2026-11-06 12:09:42,380 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-06 12:09:42,441 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at /0.0.0.0:8032
+[2026-11-06 12:09:42] + yarn application -kill application_1793984794516_0003
+[2026-11-06 12:09:44] + yarn application -kill application_1793984794516_0002
+[2026-11-06 12:09:45] + yarn application -kill application_1793984794516_0001
+[2026-11-06 12:09:47] wait: all apps killed (timeout 180 s)
+[2026-11-06 12:09:47]   ok after 0 s: none active
+[2026-11-06 12:09:47] wait: no hog.py processes (30 s) (timeout 30 s)
+[2026-11-06 12:09:47]   ok after 0 s: empty
+[2026-11-06 12:09:47] === run C3: P=40 T=50 M=100
+[2026-11-06 12:09:47] + cat /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/conf/capacity-scheduler.xml
+<?xml version="1.0"?>
+<configuration>
+</configuration>
+[2026-11-06 12:09:47] + yarn --daemon stop resourcemanager
+[2026-11-06 12:09:48] + yarn --daemon start resourcemanager
+[2026-11-06 12:09:50] wait: RM REST up (timeout 180 s)
+[2026-11-06 12:09:52]   ok after 2 s: STARTED
+[2026-11-06 12:09:52] wait: 1 RUNNING node with 12288 MB (timeout 180 s)
+[2026-11-06 12:10:18]   ok after 26 s: 1 RUNNING node, 12288 MB
+[2026-11-06 12:10:18] INSTRUMENT REST: root.parent capacity=40.0 absoluteCapacity=40.0 (expect 40); leaves before submit: []
+[2026-11-06 12:10:18] + [HADOOP_USER_NAME=u1] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:10:18] wait: root.parent.u1 resourcesUsed.memory=2048 (first-trigger check, A6c) (timeout 180 s)
+[2026-11-06 12:10:26]   ok after 8 s: ('root.parent.u1', 20.0, 100.0, 2048, 1)
+[2026-11-06 12:10:26] + [HADOOP_USER_NAME=u2] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:10:26] wait: root.parent.u2 resourcesUsed.memory=2048 (timeout 180 s)
+[2026-11-06 12:10:35]   ok after 8 s: ('root.parent.u2', 20.0, 100.0, 2048, 1)
+[2026-11-06 12:10:35] + [HADOOP_USER_NAME=u3] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:10:35] wait: u3 app RUNNING (timeout 180 s)
+[2026-11-06 12:10:41]   ok after 6 s: application_1793984992308_0003
+[2026-11-06 12:10:59] window start: u3 allocation 7168 MB, 18 s after RUNNING
+[2026-11-06 12:10:59] + free -m
+Mem:          257828       11960      205138           5       40729      244057
+Swap:           8192           0        8192
+[2026-11-06 12:10:59] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C3-start.json
+[2026-11-06 12:12:59] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C3-end.json
+[2026-11-06 12:12:59] + curl -s http://localhost:8088/ws/v1/cluster/apps -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/apps-C3.json
+[2026-11-06 12:12:59] + yarn application -list -appStates ALL
+application_1793984992308_0003	    DistributedShell	                YARN	        u3	root.parent.u3	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793984992308_0002	    DistributedShell	                YARN	        u2	root.parent.u2	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793984992308_0001	    DistributedShell	                YARN	        u1	root.parent.u1	           RUNNING	         UNDEFINED	             0%	                                N/A
+2026-11-06 12:13:00,434 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-06 12:13:00,494 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at /0.0.0.0:8032
+[2026-11-06 12:13:00] + yarn application -kill application_1793984992308_0003
+[2026-11-06 12:13:02] + yarn application -kill application_1793984992308_0002
+[2026-11-06 12:13:03] + yarn application -kill application_1793984992308_0001
+[2026-11-06 12:13:05] wait: all apps killed (timeout 180 s)
+[2026-11-06 12:13:05]   ok after 0 s: none active
+[2026-11-06 12:13:05] wait: no hog.py processes (30 s) (timeout 30 s)
+[2026-11-06 12:13:05]   ok after 0 s: empty
+[2026-11-06 12:13:05] === run C4: P=20 T=50 M=25
+[2026-11-06 12:13:05] + cat /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/conf/capacity-scheduler.xml
+<?xml version="1.0"?>
+<configuration>
+</configuration>
+[2026-11-06 12:13:05] + yarn --daemon stop resourcemanager
+[2026-11-06 12:13:06] + yarn --daemon start resourcemanager
+[2026-11-06 12:13:08] wait: RM REST up (timeout 180 s)
+[2026-11-06 12:13:10]   ok after 2 s: STARTED
+[2026-11-06 12:13:10] wait: 1 RUNNING node with 12288 MB (timeout 180 s)
+[2026-11-06 12:13:36]   ok after 26 s: 1 RUNNING node, 12288 MB
+[2026-11-06 12:13:36] INSTRUMENT REST: root.parent capacity=20.0 absoluteCapacity=20.0 (expect 20); leaves before submit: []
+[2026-11-06 12:13:36] + [HADOOP_USER_NAME=u1] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:13:36] wait: root.parent.u1 resourcesUsed.memory=2048 (first-trigger check, A6c) (timeout 180 s)
+[2026-11-06 12:13:47]   ok after 10 s: ('root.parent.u1', 10.0, 25.0, 2048, 1)
+[2026-11-06 12:13:47] + [HADOOP_USER_NAME=u2] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:13:47] wait: root.parent.u2 resourcesUsed.memory=2048 (timeout 180 s)
+[2026-11-06 12:13:55]   ok after 8 s: ('root.parent.u2', 10.0, 25.0, 2048, 1)
+[2026-11-06 12:13:55] + [HADOOP_USER_NAME=u3] nohup yarn jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /users/jason92/.m2/repository/org/apache/hadoop/hadoop-yarn-applications-distributedshell/3.4.2/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/yang-s4/yarn.sch
+[2026-11-06 12:13:55] wait: u3 app RUNNING (timeout 180 s)
+[2026-11-06 12:14:01]   ok after 6 s: application_1793985190458_0003
+[2026-11-06 12:14:13] window start: u3 allocation 3072 MB, 12 s after RUNNING
+[2026-11-06 12:14:13] + free -m
+Mem:          257828        9535      207571           5       40722      246482
+Swap:           8192           0        8192
+[2026-11-06 12:14:13] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C4-start.json
+[2026-11-06 12:16:13] + curl -s http://localhost:8088/ws/v1/cluster/scheduler -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/scheduler-C4-end.json
+[2026-11-06 12:16:13] + curl -s http://localhost:8088/ws/v1/cluster/apps -o /mydata/yang-s4/yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity--autonomous-run1/logs/cluster/apps-C4.json
+[2026-11-06 12:16:13] + yarn application -list -appStates ALL
+application_1793985190458_0003	    DistributedShell	                YARN	        u3	root.parent.u3	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793985190458_0002	    DistributedShell	                YARN	        u2	root.parent.u2	           RUNNING	         UNDEFINED	             0%	                                N/A
+application_1793985190458_0001	    DistributedShell	                YARN	        u1	root.parent.u1	           RUNNING	         UNDEFINED	             0%	                                N/A
+2026-11-06 12:16:14,447 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-06 12:16:14,506 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at /0.0.0.0:8032
+[2026-11-06 12:16:14] + yarn application -kill application_1793985190458_0003
+[2026-11-06 12:16:16] + yarn application -kill application_1793985190458_0002
+[2026-11-06 12:16:17] + yarn application -kill application_1793985190458_0001
+[2026-11-06 12:16:19] wait: all apps killed (timeout 180 s)
+[2026-11-06 12:16:19]   ok after 0 s: none active
+[2026-11-06 12:16:19] wait: no hog.py processes (30 s) (timeout 30 s)
+[2026-11-06 12:16:19]   ok after 0 s: empty
+[2026-11-06 12:16:19] EXPECTED C1 u3: absCap=0 absMax=100 usedMB=7168 hog=6 rssMiB=3650; u1,u2 2048 MB each
+[2026-11-06 12:16:19] READING C1 u1: n=61 absCap=[10.0] absMax=[100.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=607.9 min=607.9 max=607.9
+[2026-11-06 12:16:19] READING C1 u2: n=61 absCap=[10.0] absMax=[100.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=607.9 min=607.9 max=607.9
+[2026-11-06 12:16:19] READING C1 u3: n=61 absCap=[0.0] absMax=[100.0] usedMB median=7168.0 min=7168.0 max=7168.0 hogCount median=6 rssMiB median=3648.0 min=3648.0 max=3648.0
+[2026-11-06 12:16:19] EXPECTED C2 u3: absCap=5 absMax=100 usedMB=7168 hog=6 rssMiB=3650; u1,u2 2048 MB each
+[2026-11-06 12:16:19] READING C2 u1: n=61 absCap=[5.0] absMax=[100.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=608.0 min=608.0 max=608.0
+[2026-11-06 12:16:19] READING C2 u2: n=61 absCap=[5.0] absMax=[100.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=608.0 min=608.0 max=608.0
+[2026-11-06 12:16:19] READING C2 u3: n=61 absCap=[5.0] absMax=[100.0] usedMB median=7168.0 min=7168.0 max=7168.0 hogCount median=6 rssMiB median=3647.9 min=3647.9 max=3647.9
+[2026-11-06 12:16:19] EXPECTED C3 u3: absCap=0 absMax=100 usedMB=7168 hog=6 rssMiB=3650; u1,u2 2048 MB each
+[2026-11-06 12:16:19] READING C3 u1: n=61 absCap=[20.0] absMax=[100.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=608.0 min=608.0 max=608.0
+[2026-11-06 12:16:19] READING C3 u2: n=61 absCap=[20.0] absMax=[100.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=607.9 min=607.9 max=607.9
+[2026-11-06 12:16:19] READING C3 u3: n=61 absCap=[0.0] absMax=[100.0] usedMB median=7168.0 min=7168.0 max=7168.0 hogCount median=6 rssMiB median=3647.5 min=3647.5 max=3647.5
+[2026-11-06 12:16:19] EXPECTED C4 u3: absCap=0 absMax=25 usedMB=<=3072 hog=<=2 rssMiB=<=~1220; u1,u2 2048 MB each
+[2026-11-06 12:16:19] READING C4 u1: n=61 absCap=[10.0] absMax=[25.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=608.0 min=608.0 max=608.0
+[2026-11-06 12:16:19] READING C4 u2: n=61 absCap=[10.0] absMax=[25.0] usedMB median=2048.0 min=2048.0 max=2048.0 hogCount median=1 rssMiB median=607.9 min=607.9 max=607.9
+[2026-11-06 12:16:19] READING C4 u3: n=61 absCap=[0.0] absMax=[25.0] usedMB median=3072.0 min=3072.0 max=3072.0 hogCount median=2 rssMiB median=1215.8 min=1215.8 max=1215.8
+[2026-11-06 12:16:19] === teardown
+[2026-11-06 12:16:19] + yarn --daemon stop nodemanager
+WARNING: nodemanager did not stop gracefully after 5 seconds: Trying to kill with kill -9
+[2026-11-06 12:16:25] + yarn --daemon stop resourcemanager
+[2026-11-06 12:16:26] + hdfs --daemon stop datanode
+[2026-11-06 12:16:27] + hdfs --daemon stop namenode
+[2026-11-06 12:16:33] leftover processes of this run: none
+[2026-11-06 12:16:33] + /usr/lib/jvm/java-8-openjdk-amd64/bin/jps -l
+1105986 sun.tools.jps.Jps
+[2026-11-06 12:16:33] hadoop daemons after teardown: none
+[2026-11-06 12:16:33] EXIT rc=0

@@ -165,5 +165,24 @@ If Yang's nodes are elsewhere, set them up from `environment.md` and record them
 
 Dated notes from Yang's sessions go here, newest first.
 
+- **2026-11-06 (Hadoop batch 1, stage 4)** — First Hadoop stage-4 environment set up on the local node
+  (`node0.jason92-323989`) at Yang's request: `hadoop/stage4-runtime-verification/yang/environment.md` and
+  `copy-source.sh`; build in `/mydata/yang-s4/hadoop-base` (JDK 8, needs `YARN_IGNORE_ENGINES=true`). Order 2's case
+  run per the stage-4 protocol by a fresh agent: audit Ready after amendments (A1–A8), frozen sha256 `660ebeee…`,
+  two runbook defects fixed (A9 unit AM heartbeat, A10 `cp -r`), unit **Confirmed** (u3 41984 MB in all three arms;
+  control 25600 MB) and cluster **Confirmed** (u3 7168 MB / ~3648 MiB RSS in all three arms; control 3072 MB /
+  1216 MiB) → **Confirmed — does not cap, true negative**. No run 2. Run data in
+  `/mydata/yang-s4/<stem>-run1/` (1.5 GB). Batch 1 closed. Next: order 6.
+- **2026-11-06 (Hadoop batch 1, orders 1–5, tier 1)** — 5 rechecked by fresh agents (target `file:line` +
+  the PROCEDURE question only), source copy `~/hadoop-3.4.2/` on the local node. 4 D (orders 1, 3, 4, 5:
+  split-boundary read, three ZooKeeper retry counters), 1 promoted to **A** (order 2,
+  `GuaranteedOrZeroCapacityOverTimePolicy.java:719`). Answers in `queue.csv` `recheck`/`recheck_note`
+  (new column). Promoted unit's autonomous case file:
+  `yarn.scheduler.capacity.queue-path.capacity-getInitialLeafQueueConfiguration-availableCapacity`,
+  estimate **negative** (the check gates a leaf's guaranteed floor, not its max-capacity ceiling); new
+  Hadoop `_INDEX.md`. The agent got the Cassandra playbook/template plus a Hadoop substitution note (no Hadoop
+  playbook yet; written later the same day at `hadoop/stage3-ai-deep-read/playbook-autonomous.md`, used from
+  batch 2). Stage 4 not run: no Hadoop environment/harness. Tier-1 miss rate so far 1/5. Next: order 6.
+
 - **2026-10-23** — Node assignment withdrawn pending Yang's choice. File trimmed to personal
   content; shared notes live in `HANDOFF.md` (routing rule added there).

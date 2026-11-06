@@ -146,7 +146,11 @@ noticed along the way are noted in case files for Target 3, not chased.
   - `hadoop/` — Hadoop instance: stage 1 done 2026-11-04 (`hadoop/stage1-codeql-preprocessing/`).
     Stage 2 done 2026-11-04 (`hadoop/stage2-ai-preprocessing/`): all 9,684 units banded in
     `bands.csv` — A 90 (incl. 18 anchors), B 170, C 489, D 8,935; run record and caveats in its
-    README, anchors in `anchors.md` (one retired from the gate). Stages 3–4 not started.
+    README, anchors in `anchors.md` (one retired from the gate). Stage 3 started 2026-11-06 (split
+    and procedure in `hadoop/PROCEDURE.md`). **Hadoop autonomous playbook and template** (shared by both
+    people): `hadoop/stage3-ai-deep-read/playbook-autonomous.md`, `_TEMPLATE-autonomous.md` — use these,
+    not the Cassandra ones, for Hadoop case files. Hadoop stage 4: Yang's environment is ready (2026-11-06,
+    local node, `hadoop/stage4-runtime-verification/yang/environment.md`); Jingsong's is not set up yet.
 - **`codeql-queries/`** — the CodeQL packs; results gitignored, regenerated per machine.
 - **Outside the repo (CloudLab `/proj/misconfiguration-PG0/`):** `tools/codeql/`, `codeql-dbs/`,
   and the superseded `git-repos/cassandra-src` clone.

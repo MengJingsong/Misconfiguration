@@ -10,6 +10,11 @@ Two people, two disjoint queues, one method. Created 2026-11-06.
 Each person writes only in their own `stage3-ai-deep-read/<name>/` and `stage4-runtime-verification/<name>/`.
 Source: `systems/hadoop/source/` (`rel/release-3.4.2`). Method docs: `../stage3-ai-deep-read/`,
 `../stage4-runtime-verification/`. Cassandra paths in older handoff text do not apply here.
+**Stage 3 autonomous agent (Hadoop, shared by both people, 2026-11-06):**
+[`stage3-ai-deep-read/playbook-autonomous.md`](stage3-ai-deep-read/playbook-autonomous.md) and
+[`stage3-ai-deep-read/_TEMPLATE-autonomous.md`](stage3-ai-deep-read/_TEMPLATE-autonomous.md): the
+Cassandra method docs with the system-specific parts (tag, permalinks, configuration keys, JDK 8 +
+Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Hadoop.
 
 ## "Start the next batch of N" (what the AI does)
 
@@ -19,7 +24,8 @@ Source: `systems/hadoop/source/` (`rel/release-3.4.2`). Method docs: `../stage3-
 2. **Source copy outside the repo** (so agents cannot read other cases):
    `rsync -a systems/hadoop/source/ ~/hadoop-3.4.2/` (once).
 3. **Stage 3, one fresh agent per unit**, working in that copy, one at a time or in parallel:
-   - *Jingsong's units:* give the agent `playbook-autonomous.md`, `_TEMPLATE-autonomous.md` and the
+   - *Jingsong's units:* give the agent the **Hadoop** `stage3-ai-deep-read/playbook-autonomous.md`,
+     `stage3-ai-deep-read/_TEMPLATE-autonomous.md` (copied outside the repo) and the
      target as `file:line` only (a helper unit: the helper method and its comparison line, found with
      `grep -n`). Output `cases/<stem>--autonomous.md`; stem `<constraint>-<method>-<operand>`,
      `-2` if taken. Add the `_INDEX.md` row and sha256, fill `case_file` and `estimate`.
@@ -32,8 +38,10 @@ Source: `systems/hadoop/source/` (`rel/release-3.4.2`). Method docs: `../stage3-
 4. Stage 3 never changes `bands.csv` (stage 2's record). A promotion is recorded in the queue only.
 5. **Stage 4** for each case file written in this batch, per
    `../stage4-runtime-verification/README.md` ("The run protocol"): audit, frozen predictions,
-   harness, run 1 at both tiers, results file, outcome class. **Blocked until Hadoop stage 4 has an
-   environment** (see below). If it is not there, stop after stage 3 and say stage 4 is waiting.
+   harness, run 1 at both tiers, results file, outcome class. One fresh agent per case, using that
+   person's `stage4-runtime-verification/<name>/environment.md`; it writes only that person's folders,
+   keeps run data on local disk and leaves no Hadoop process running. **Needs that person's
+   environment** (see below): if it is not there, stop after stage 3 and say stage 4 is waiting.
 6. Report: units processed, case files created, promotions (Yang), stage 4 status, what is next.
    Commit to `main` only when asked.
 
@@ -79,6 +87,12 @@ prioritised by how likely a unit is to be a miss.
 
 ## Hadoop stage 4 environment and harness
 
-Do not exist yet (no `environment.md`, harness, or source-copy script under
-`stage4-runtime-verification/`). They are written by an AI session **with a human supplying the
-nodes**; see HANDOFF-Jingsong.md/HANDOFF-Yang.md "Hadoop stage 4". Until then only stage 3 runs.
+Per person, written by an AI session **with a human supplying the nodes**.
+
+| Person | Environment | State |
+|---|---|---|
+| **Yang** | [`stage4-runtime-verification/yang/environment.md`](stage4-runtime-verification/yang/environment.md), [`copy-source.sh`](stage4-runtime-verification/yang/copy-source.sh), [`case-notes.md`](stage4-runtime-verification/yang/case-notes.md) | **Ready** (2026-11-06): local node `node0.jason92-323989`, JDK 8 + Maven, built distribution in `/mydata/yang-s4/hadoop-base`. First case closed (true negative). |
+| **Jingsong** | — | Not set up; stage 3 only. Yang's files are a model (paths and node differ). |
+
+A per-case harness goes in `stage4-runtime-verification/<name>/harness/<stem>/`; the stage-4 protocol is
+[`../stage4-runtime-verification/README.md`](../stage4-runtime-verification/README.md), results from its `_TEMPLATE.md`.
