@@ -7,6 +7,20 @@ and this file is that environment, written at Yang's request. Safety rules:
 (read "Cassandra" there as "Hadoop"; this file and [`copy-source.sh`](copy-source.sh) replace the
 Cassandra ones for Hadoop).
 
+## Moving to another node
+
+This file describes **one** node. Before a stage-4 run, check `hostname` against the Node table below
+and that `/mydata/yang-s4/hadoop-base/hadoop-dist/target/hadoop-3.4.2/bin/hadoop` exists. If either
+fails, set the node up again before running anything:
+
+1. §1 tools: JDK 8 and Maven 3.3+ (`sudo apt-get install -y openjdk-8-jdk maven` on Ubuntu if absent).
+2. Pick a local disk of ~20 GB free or more (not NFS, not `/proj`); if it is not `/mydata`, use the same
+   layout under it and say so here.
+3. §2 `copy-source.sh <local-disk>/yang-s4/hadoop-base`, then §3's **full** build (~30 min, needs
+   Maven Central; about 10 GB with `~/.m2`). Check `share/hadoop/yarn/` has ~19 jars.
+4. Replace the Node table and tool versions below with the new node's (dated), so the file still
+   describes the one node in use. Earlier results files keep their own environment record.
+
 ## Node
 
 | Field | Value |

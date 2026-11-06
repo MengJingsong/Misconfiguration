@@ -15,6 +15,10 @@ stage 3/4:
 4. Stage 4: **Yang** has a Hadoop stage-4 environment on the local node
    (`experiments/if-check-exp/hadoop/stage4-runtime-verification/yang/environment.md`, set up 2026-11-06).
    For Yang, run stage 4 for each case file of the batch per PROCEDURE.md step 5 (one fresh agent per
-   case, run data on `/mydata/yang-s4/`, nothing left running). **Jingsong** has no environment yet:
+   case, run data on `/mydata/yang-s4/`, nothing left running). **First check the node:** if this is
+   not the node in that `environment.md`, or `/mydata/yang-s4/hadoop-base` (the built distribution) is
+   missing, set the node up per its §1–3 first (install JDK 8 + Maven if absent, `copy-source.sh`,
+   full build with `YARN_IGNORE_ENGINES=true`, never resumed with `-rf`) and update its Node table
+   (keep one environment, dated). **Jingsong** has no environment yet:
    stop after stage 3 and say so; do not invent one (Jingsong may model one on Yang's when nodes are named).
 5. Commit/push only when asked.
