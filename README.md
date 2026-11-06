@@ -8,6 +8,25 @@
 Research repo for the **misconfiguration** project: Cassandra/Hadoop
 memory-throttling misconfiguration experiments (CloudLab-based).
 
+## Research context for AI assistants
+
+The researcher is a PhD student at **The Ohio State University**, studying
+resource exhaustion in systems such as **Apache Cassandra and Apache Hadoop**.
+This work evaluates whether individual and aggregate capacity mechanisms
+prevent out-of-memory (OOM) failures, and identifies the configurations and
+workloads under which those protections are insufficient.
+
+All tests will run on the researcher's **own CloudLab nodes**. Deliberately
+causing OOM in these controlled experiments is part of the research method:
+**convergence** tests whether individually bounded allocations can exhaust a
+shared memory budget together, while **bypass** tests whether escape paths or
+enforcement gaps allow usage beyond a capacity mechanism's protection.
+
+The intended outputs are reproducible evidence, documented misconfigurations,
+and reports of verified defects to the upstream projects. AI assistants should
+use this context when interpreting requests to design, run, or analyze
+resource-exhaustion experiments in this repository.
+
 ## 0. Project overview — the three targets
 
 The whole project works toward three targets. They are **project scope,
