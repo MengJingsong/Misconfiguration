@@ -1,0 +1,252 @@
+=== unit-run.sh 2026-11-06 14:08:07 on node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu mode=--compile-only
++ [2026-11-06 14:08:07] java -version
+openjdk version "1.8.0_504"
+OpenJDK Runtime Environment (build 1.8.0_504-8u504-ga-1ubuntu1~22.04.3-b01)
+OpenJDK 64-Bit Server VM (build 25.504-b01, mixed mode)
++ [2026-11-06 14:08:07] mvn -version
+[1mApache Maven 3.6.3[m
+Maven home: /usr/share/maven
+Java version: 1.8.0_504, vendor: Ubuntu, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.15.0-198-generic", arch: "amd64", family: "unix"
++ [2026-11-06 14:08:07] md5sum /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-run.sh
+67f558ea61b752df5aab0c4be37f4dcf  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java
+efcc4567c2669a0894654b42b9570304  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-run.sh
++ [2026-11-06 14:08:07] /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/copy-source.sh /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-baseline
+copied /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/../../../../../systems/hadoop/source -> /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-baseline (rel/release-3.4.2)
++ [2026-11-06 14:08:20] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-baseline describe --tags
+rel/release-3.4.2
++ [2026-11-06 14:08:20] /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/copy-source.sh /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated
+copied /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/../../../../../systems/hadoop/source -> /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated (rel/release-3.4.2)
++ [2026-11-06 14:08:32] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated describe --tags
+rel/release-3.4.2
++ [2026-11-06 14:08:32] sed -n 528,530p /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
+          if (capacity > maxCapacity) {
+            maxCapacity = capacity;
+          }
++ [2026-11-06 14:08:32] sed -i 528,530d /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
++ [2026-11-06 14:08:32] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated diff --numstat
+0	3	hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
++ [2026-11-06 14:08:32] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated diff
+diff --git a/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java b/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
+index 6808bdc..9850cca 100644
+--- a/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
++++ b/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
+@@ -525,9 +525,6 @@ public Path getLocalPathForWrite(String pathStr, long size,
+         int dirNum = ctx.getAndIncrDirNumLastAccessed(randomInc);
+         while (numDirsSearched < numDirs) {
+           long capacity = ctx.dirDF[dirNum].getAvailable();
+-          if (capacity > maxCapacity) {
+-            maxCapacity = capacity;
+-          }
+           if (capacity > size) {
+             final Path localDir = ctx.localDirs[dirNum];
+             try {
++ [2026-11-06 14:08:32] cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-baseline/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/
++ [2026-11-06 14:08:32] cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/
++ [2026-11-06 14:08:32] truncate -s 256M /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img0
++ [2026-11-06 14:08:32] mkfs.ext4 -q -F /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img0
++ [2026-11-06 14:08:32] sudo mount -o loop /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img0 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
++ [2026-11-06 14:08:32] sudo chown jason92 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
++ [2026-11-06 14:08:32] truncate -s 512M /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img1
++ [2026-11-06 14:08:32] mkfs.ext4 -q -F /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img1
++ [2026-11-06 14:08:32] sudo mount -o loop /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img1 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
++ [2026-11-06 14:08:32] sudo chown jason92 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
++ [2026-11-06 14:08:32] df -B1 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
+Filesystem     1B-blocks  Used Available Use% Mounted on
+/dev/loop1     234594304 28672 215781376   1% /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
+/dev/loop2     510873600 28672 473268224   1% /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
+[INFO] BUILD SUCCESS
+-rw-r--r-- 1 jason92 misconfiguration 10245 Nov  6 14:08 target/test-classes/org/apache/hadoop/fs/TestLdaMaxCapacity.class
+[INFO] BUILD SUCCESS
+-rw-r--r-- 1 jason92 misconfiguration 10245 Nov  6 14:09 target/test-classes/org/apache/hadoop/fs/TestLdaMaxCapacity.class
+EXIT rc=0 at 2026-11-06 14:09:16
+unmounted /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
+unmounted /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
+leftover surefire JVMs:
+none
+=== unit-run.sh 2026-11-06 14:09:26 on node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu mode=run
++ [2026-11-06 14:09:26] java -version
+openjdk version "1.8.0_504"
+OpenJDK Runtime Environment (build 1.8.0_504-8u504-ga-1ubuntu1~22.04.3-b01)
+OpenJDK 64-Bit Server VM (build 25.504-b01, mixed mode)
++ [2026-11-06 14:09:26] mvn -version
+[1mApache Maven 3.6.3[m
+Maven home: /usr/share/maven
+Java version: 1.8.0_504, vendor: Ubuntu, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.15.0-198-generic", arch: "amd64", family: "unix"
++ [2026-11-06 14:09:27] md5sum /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-run.sh
+67f558ea61b752df5aab0c4be37f4dcf  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java
+efcc4567c2669a0894654b42b9570304  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-run.sh
++ [2026-11-06 14:09:27] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-baseline describe --tags
+rel/release-3.4.2
++ [2026-11-06 14:09:27] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated describe --tags
+rel/release-3.4.2
++ [2026-11-06 14:09:27] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated diff --numstat
+0	3	hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
++ [2026-11-06 14:09:27] git -C /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated diff
+diff --git a/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java b/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
+index 6808bdc5..9850ccaa 100644
+--- a/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
++++ b/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/LocalDirAllocator.java
+@@ -525,9 +525,6 @@ public Path getLocalPathForWrite(String pathStr, long size,
+         int dirNum = ctx.getAndIncrDirNumLastAccessed(randomInc);
+         while (numDirsSearched < numDirs) {
+           long capacity = ctx.dirDF[dirNum].getAvailable();
+-          if (capacity > maxCapacity) {
+-            maxCapacity = capacity;
+-          }
+           if (capacity > size) {
+             final Path localDir = ctx.localDirs[dirNum];
+             try {
++ [2026-11-06 14:09:27] cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-baseline/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/
++ [2026-11-06 14:09:27] cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/TestLdaMaxCapacity.java /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/src-ablated/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/
++ [2026-11-06 14:09:27] sudo mount -o loop /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img0 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
++ [2026-11-06 14:09:27] sudo chown jason92 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
++ [2026-11-06 14:09:27] sudo mount -o loop /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/ldA/img1 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
++ [2026-11-06 14:09:27] sudo chown jason92 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
++ [2026-11-06 14:09:27] df -B1 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0 /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
+Filesystem     1B-blocks  Used Available Use% Mounted on
+/dev/loop1     234594304 28672 215781376   1% /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
+/dev/loop2     510873600 28672 473268224   1% /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
+EXPECTED (B2f, frozen with A5): outcomes and histograms equal baseline vs ablated; 1k and min-64M succeed 200/200
+(2 dirs ~100/100); max-64M succeeds 200/200 in dir1 (2 dirs) / dir0 ({dir0}, = min-64M); max+64M and longmax-1 fail
+200/200; baseline msgN = max avail (+-1 MiB), ablated msgN = 0; written files as large as written (> size).
+=== baseline rep 1
+mvn rc=0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.233 s - in org.apache.hadoop.fs.TestLdaMaxCapacity
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+rows: 2000
+LDA block 1 1k k3=dir0 size=1024 min=215781376 max=215781376
+LDA du block 1 dir0=417792 dir1=4096
+LDA block 2 min-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 2 dir0=8192 dir1=4096
+LDA block 3 max-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 3 dir0=8192 dir1=4096
+LDA block 4 max+64M k3=dir0 size=282890240 min=215781376 max=215781376
+LDA msg block 4: Could not find any valid local directory for f/x0 with requested size 282890240 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 215781376
+LDA du block 4 dir0=4096 dir1=4096
+LDA block 5 longmax-1 k3=dir0 size=9223372036854775806 min=215781376 max=215781376
+LDA msg block 5: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 215781376
+LDA du block 5 dir0=4096 dir1=4096
+LDA block 6 1k k3=dir0+dir1 size=1024 min=215781376 max=473268224
+LDA du block 6 dir0=212992 dir1=212992
+LDA block 7 min-64M k3=dir0+dir1 size=148672512 min=215781376 max=473268224
+LDA du block 7 dir0=8192 dir1=8192
+LDA block 8 max-64M k3=dir0+dir1 size=406159360 min=215781376 max=473268224
+LDA du block 8 dir0=4096 dir1=8192
+LDA block 9 max+64M k3=dir0+dir1 size=540377088 min=215781376 max=473268224
+LDA msg block 9: Could not find any valid local directory for f/x0 with requested size 540377088 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/lda ) is 47
+LDA du block 9 dir0=4096 dir1=4096
+LDA block 10 longmax-1 k3=dir0+dir1 size=9223372036854775806 min=215781376 max=473268224
+LDA msg block 10: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/
+LDA du block 10 dir0=4096 dir1=4096
+LDA done failedWrites=0
+=== ablated rep 1
+mvn rc=0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.695 s - in org.apache.hadoop.fs.TestLdaMaxCapacity
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+rows: 2000
+LDA block 1 1k k3=dir0 size=1024 min=215781376 max=215781376
+LDA du block 1 dir0=417792 dir1=4096
+LDA block 2 min-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 2 dir0=8192 dir1=4096
+LDA block 3 max-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 3 dir0=8192 dir1=4096
+LDA block 4 max+64M k3=dir0 size=282890240 min=215781376 max=215781376
+LDA msg block 4: Could not find any valid local directory for f/x0 with requested size 282890240 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 0
+LDA du block 4 dir0=4096 dir1=4096
+LDA block 5 longmax-1 k3=dir0 size=9223372036854775806 min=215781376 max=215781376
+LDA msg block 5: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 0
+LDA du block 5 dir0=4096 dir1=4096
+LDA block 6 1k k3=dir0+dir1 size=1024 min=215781376 max=473268224
+LDA du block 6 dir0=212992 dir1=212992
+LDA block 7 min-64M k3=dir0+dir1 size=148672512 min=215781376 max=473268224
+LDA du block 7 dir0=8192 dir1=8192
+LDA block 8 max-64M k3=dir0+dir1 size=406159360 min=215781376 max=473268224
+LDA du block 8 dir0=4096 dir1=8192
+LDA block 9 max+64M k3=dir0+dir1 size=540377088 min=215781376 max=473268224
+LDA msg block 9: Could not find any valid local directory for f/x0 with requested size 540377088 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/lda ) is 0
+LDA du block 9 dir0=4096 dir1=4096
+LDA block 10 longmax-1 k3=dir0+dir1 size=9223372036854775806 min=215781376 max=473268224
+LDA msg block 10: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/
+LDA du block 10 dir0=4096 dir1=4096
+LDA done failedWrites=0
+=== baseline rep 2
+mvn rc=0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.687 s - in org.apache.hadoop.fs.TestLdaMaxCapacity
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+rows: 2000
+LDA block 1 1k k3=dir0 size=1024 min=215781376 max=215781376
+LDA du block 1 dir0=417792 dir1=4096
+LDA block 2 min-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 2 dir0=8192 dir1=4096
+LDA block 3 max-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 3 dir0=8192 dir1=4096
+LDA block 4 max+64M k3=dir0 size=282890240 min=215781376 max=215781376
+LDA msg block 4: Could not find any valid local directory for f/x0 with requested size 282890240 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 215781376
+LDA du block 4 dir0=4096 dir1=4096
+LDA block 5 longmax-1 k3=dir0 size=9223372036854775806 min=215781376 max=215781376
+LDA msg block 5: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 215781376
+LDA du block 5 dir0=4096 dir1=4096
+LDA block 6 1k k3=dir0+dir1 size=1024 min=215781376 max=473268224
+LDA du block 6 dir0=212992 dir1=212992
+LDA block 7 min-64M k3=dir0+dir1 size=148672512 min=215781376 max=473268224
+LDA du block 7 dir0=8192 dir1=8192
+LDA block 8 max-64M k3=dir0+dir1 size=406159360 min=215781376 max=473268224
+LDA du block 8 dir0=4096 dir1=8192
+LDA block 9 max+64M k3=dir0+dir1 size=540377088 min=215781376 max=473268224
+LDA msg block 9: Could not find any valid local directory for f/x0 with requested size 540377088 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/lda ) is 47
+LDA du block 9 dir0=4096 dir1=4096
+LDA block 10 longmax-1 k3=dir0+dir1 size=9223372036854775806 min=215781376 max=473268224
+LDA msg block 10: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/
+LDA du block 10 dir0=4096 dir1=4096
+LDA done failedWrites=0
+=== ablated rep 2
+mvn rc=0
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.975 s - in org.apache.hadoop.fs.TestLdaMaxCapacity
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+rows: 2000
+LDA block 1 1k k3=dir0 size=1024 min=215781376 max=215781376
+LDA du block 1 dir0=417792 dir1=4096
+LDA block 2 min-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 2 dir0=8192 dir1=4096
+LDA block 3 max-64M k3=dir0 size=148672512 min=215781376 max=215781376
+LDA du block 3 dir0=8192 dir1=4096
+LDA block 4 max+64M k3=dir0 size=282890240 min=215781376 max=215781376
+LDA msg block 4: Could not find any valid local directory for f/x0 with requested size 282890240 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 0
+LDA du block 4 dir0=4096 dir1=4096
+LDA block 5 longmax-1 k3=dir0 size=9223372036854775806 min=215781376 max=215781376
+LDA msg block 5: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda ) is 0
+LDA du block 5 dir0=4096 dir1=4096
+LDA block 6 1k k3=dir0+dir1 size=1024 min=215781376 max=473268224
+LDA du block 6 dir0=212992 dir1=212992
+LDA block 7 min-64M k3=dir0+dir1 size=148672512 min=215781376 max=473268224
+LDA du block 7 dir0=8192 dir1=8192
+LDA block 8 max-64M k3=dir0+dir1 size=406159360 min=215781376 max=473268224
+LDA du block 8 dir0=4096 dir1=8192
+LDA block 9 max+64M k3=dir0+dir1 size=540377088 min=215781376 max=473268224
+LDA msg block 9: Could not find any valid local directory for f/x0 with requested size 540377088 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/lda ) is 0
+LDA du block 9 dir0=4096 dir1=4096
+LDA block 10 longmax-1 k3=dir0+dir1 size=9223372036854775806 min=215781376 max=473268224
+LDA msg block 10: Could not find any valid local directory for f/x0 with requested size 9223372036854775806 on host node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu/198.22.255.51 as the max capacity in any directory ( /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0/lda /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1/
+LDA du block 10 dir0=4096 dir1=4096
+LDA done failedWrites=0
++ [2026-11-06 14:13:20] python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-analyze.py /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/logs/unit
+== per run and block
+Traceback (most recent call last):
+  File "/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-analyze.py", line 71, in <module>
+    eq = all(w == f for w, _, _ in [(w, f, z) for w, f, z in wr])
+  File "/proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/DF_getAvailable-getLocalPathForWrite-maxCapacity--autonomous/unit-analyze.py", line 71, in <genexpr>
+    eq = all(w == f for w, _, _ in [(w, f, z) for w, f, z in wr])
+NameError: name 'f' is not defined
+EXIT rc=1 at 2026-11-06 14:13:20
+unmounted /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA0
+unmounted /mydata/jingsong-s4/DF_getAvailable-getLocalPathForWrite-maxCapacity-run1/mnt/ldA1
+leftover surefire JVMs:
+none

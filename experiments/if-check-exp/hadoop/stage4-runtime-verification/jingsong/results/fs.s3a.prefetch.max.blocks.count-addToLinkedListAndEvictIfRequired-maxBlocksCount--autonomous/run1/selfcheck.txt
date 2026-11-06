@@ -1,0 +1,31 @@
+HOLDS   unit: 300 put rows (300) from org.apache.hadoop.fs.impl.prefetch.TestBlockCacheLruCap-output.txt
+HOLDS   unit: every put row = B2f (files=min(b+1,max), cacheSize=files=entryListSize, bytes, peak, evictions); bad=[]
+        max=1: after 20 puts files=[1, 1, 1] bytes=[1048576, 1048576, 1048576] evictions=[19, 19, 19] peak=2
+        max=2: after 20 puts files=[2, 2, 2] bytes=[2097152, 2097152, 2097152] evictions=[18, 18, 18] peak=3
+        max=4: after 20 puts files=[4, 4, 4] bytes=[4194304, 4194304, 4194304] evictions=[16, 16, 16] peak=5
+        max=8: after 20 puts files=[8, 8, 8] bytes=[8388608, 8388608, 8388608] evictions=[12, 12, 12] peak=9
+        max=1000: after 20 puts files=[20, 20, 20] bytes=[20971520, 20971520, 20971520] evictions=[0, 0, 0] peak=20
+HOLDS   unit: files after close all 0 ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+HOLDS   unit: LRU block 0 kept, block 1 evicted (3 reps)
+HOLDS   unit bypass rep 1: put2 5006 ms files 3 els 3 ev 0; after put4 files 3 els 3 ev 2 contains0 true; close files 0
+HOLDS   unit bypass rep 2: put2 5006 ms files 3 els 3 ev 0; after put4 files 3 els 3 ev 2 contains0 true; close files 0
+HOLDS   unit bypass rep 3: put2 5006 ms files 3 els 3 ev 0; after put4 files 3 els 3 ev 2 contains0 true; close files 0
+HOLDS   unit: lock-timeout ERROR lines in raw output = 3 (one per bypass rep)
+HOLDS   client-N1-r1: N=1 samples=427 maxFiles=2 maxBytes=2097152 endHold=1 (1048576 B) gauge=1 evictions=63 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+FAILS   client-N1-r2: N=1 samples=426 maxFiles=2 maxBytes=2097152 endHold=1 (1048576 B) gauge=1 evictions=65 P=66 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+FAILS   client-N1-r3: N=1 samples=427 maxFiles=2 maxBytes=1048576 endHold=1 (1048576 B) gauge=1 evictions=65 P=66 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N1000-r1: N=1000 samples=426 maxFiles=64 maxBytes=67108864 endHold=64 (67108864 B) gauge=64 evictions=0 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N1000-r2: N=1000 samples=426 maxFiles=64 maxBytes=67108864 endHold=64 (67108864 B) gauge=64 evictions=0 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N1000-r3: N=1000 samples=426 maxFiles=64 maxBytes=67108864 endHold=64 (67108864 B) gauge=64 evictions=0 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N16-r1: N=16 samples=426 maxFiles=16 maxBytes=16777216 endHold=16 (16777216 B) gauge=16 evictions=48 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N16-r2: N=16 samples=426 maxFiles=16 maxBytes=16777216 endHold=16 (16777216 B) gauge=16 evictions=48 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N16-r3: N=16 samples=426 maxFiles=17 maxBytes=17825792 endHold=16 (16777216 B) gauge=16 evictions=48 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N4-r1: N=4 samples=425 maxFiles=5 maxBytes=5242880 endHold=4 (4194304 B) gauge=4 evictions=60 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N4-r2: N=4 samples=426 maxFiles=5 maxBytes=4325376 endHold=4 (4194304 B) gauge=4 evictions=60 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-N4-r3: N=4 samples=425 maxFiles=5 maxBytes=5242880 endHold=4 (4194304 B) gauge=4 evictions=60 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-Nunset-r1: N=unset samples=426 maxFiles=5 maxBytes=4194304 endHold=4 (4194304 B) gauge=4 evictions=60 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   container-N1000: N=1000 samples=490 maxFiles=64 maxBytes=67108864 endHold=64 (67108864 B) gauge=64 evictions=0 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   container-N2: N=2 samples=510 maxFiles=3 maxBytes=3018752 endHold=2 (2097152 B) gauge=2 evictions=62 P=64 afterExit=0 lockErr=0 stream=['org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream']
+HOLDS   client-seqcat: max cache files 0 (expect 0)
+HOLDS   cluster: end-of-hold files scale with N: [(1, [1]), (4, [4]), (16, [16])]
+SELFCHECK SOME PART DOES NOT HOLD

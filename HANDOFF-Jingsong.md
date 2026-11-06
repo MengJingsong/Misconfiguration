@@ -20,7 +20,10 @@
 Select by the `band` column of `bands.csv`; every unit is in exactly one person's share. The
 Cassandra material below this section is unchanged and still applies to the Cassandra work.
 
-- **Stage 3 not started.** Your folders (do not write to the other person's):
+- **Progress (2026-11-06):** batch 1 (queue orders 1–5) written up and closed at stage 4 — see the
+  Hadoop log below. Next: order 6. Stage-4 environment: `pc41`, `pc39`, `pc29`
+  ([`environment.md`](experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/environment.md)).
+  Your folders (do not write to the other person's):
   stage 3 → `experiments/if-check-exp/hadoop/stage3-ai-deep-read/jingsong/`, stage 4 →
   `experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/`. Each has a README listing the
   expected contents (`cases/`, `_INDEX.md`, `writeup.csv`, `predicted-*.md`; `results/`, `harness/`, `case-notes.md`).
@@ -36,6 +39,20 @@ Cassandra material below this section is unchanged and still applies to the Cass
   `hadoop/stage2-ai-preprocessing/anchors.md`; `FSDirectory.java:1272#1` is the disputed one). B rows are
   mostly flush-when-full buffers, uncapped buffer growth, YARN container memory, and app/entity
   counts with unclear per-object size.
+
+### Hadoop log (newest first)
+
+- **2026-11-06 (Hadoop batch 1, orders 1–5, band A)** — Stage-4 environment set up on `pc41`, `pc39`, `pc29`
+  (`hadoop/stage4-runtime-verification/jingsong/environment.md`, `setup-node.sh`; full builds 25–31 min, JDK 8,
+  `YARN_IGNORE_ENGINES=true`). Stage 3: 5 fresh autonomous agents (Hadoop playbook/template, target `file:line` only,
+  source copy `~/hadoop-3.4.2/` on pc41) → 5 case files, estimates 3 positive / 2 negative. Stage 4: one fresh agent per
+  case, run 1 only. Outcomes: **2 true positive** (`RawPathHandle_MAX_SIZE` — cluster tier as the case's no-daemon
+  `hadoop jar` probe; `fs.s3a.prefetch.max.blocks.count`), **2 true negative** (`DF_getAvailable…maxCapacity` — line 528
+  only feeds the error message; `MAX_KEY_SIZE-write-limit` — cluster n/a), **1 undetermined**
+  (`fs.s3a.prefetch.block.count`: buffer count capped exactly, frozen heap bounds missed on both tiers). Calls to make and
+  upstream candidates (S3A block-cache eviction race at max-blocks 1; JDK 8 per-block CRC copy) in
+  `jingsong/case-notes.md`. S3 endpoints were moto / S3Proxy (MinIO downloads are gone). Run folders left on the nodes
+  (listed there); nothing running. Next: order 6.
 
 Created 2026-10-23. The shared background (what the experiment is, where things live, the
 stage-4 lessons, node access) stays in [`HANDOFF.md`](HANDOFF.md); this file holds only

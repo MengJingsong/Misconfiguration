@@ -1,0 +1,55 @@
+PASS unit baseline rep1: surefire XML 0 failures 0 errors
+  unit baseline rep1: allocations {}; failure messages 800, N values [215781376, 473268224]
+PASS unit baseline rep2: surefire XML 0 failures 0 errors
+  unit baseline rep2: allocations {}; failure messages 800, N values [215781376, 473268224]
+PASS unit ablated rep1: surefire XML 0 failures 0 errors
+  unit ablated rep1: allocations {}; failure messages 800, N values [0]
+PASS unit ablated rep2: surefire XML 0 failures 0 errors
+  unit ablated rep2: allocations {}; failure messages 800, N values [0]
+PASS unit rep1: allocator log allocations per dir equal baseline vs ablated ({})
+PASS unit rep1: 800 failures in each variant (4 blocks x 200)
+PASS unit rep1: ablated N all 0
+PASS unit rep1: baseline N all > 0 [215781376, 473268224]
+PASS unit rep2: allocator log allocations per dir equal baseline vs ablated ({})
+PASS unit rep2: 800 failures in each variant (4 blocks x 200)
+PASS unit rep2: ablated N all 0
+PASS unit rep2: baseline N all > 0 [215781376, 473268224]
+PASS unit baseline rep1: each failure's N within 1 MiB of the max 'bytes available' the same call logged (0 bad)
+PASS unit baseline rep2: each failure's N within 1 MiB of the max 'bytes available' the same call logged (0 bad)
+PASS unit baseline rep1: 404 written files, each as large as written and larger than size
+PASS unit baseline rep2: 404 written files, each as large as written and larger than size
+PASS unit ablated rep1: 404 written files, each as large as written and larger than size
+PASS unit ablated rep2: 404 written files, each as large as written and larger than size
+  cluster baseline-L900: app application_1793992803298_0002 success=True maps=1 free0=906.2 MiB peak du=199.3 MiB requests(MiB)=[69.2, 28.1, 99.2, 0.0] failmsgs(S,N)=[]
+PASS cluster baseline-L900: exactly 1 map container, counter Launched map tasks=['1']
+PASS cluster baseline-L900: application id in the run log
+PASS cluster baseline-L900: job succeeded, no allocator failure
+  cluster baseline-L300: app application_1793992803298_0003 success=True maps=1 free0=300.0 MiB peak du=199.3 MiB requests(MiB)=[69.2, 28.1, 99.2, 0.0] failmsgs(S,N)=[]
+PASS cluster baseline-L300: exactly 1 map container, counter Launched map tasks=['1']
+PASS cluster baseline-L300: application id in the run log
+PASS cluster baseline-L300: job succeeded, no allocator failure
+  cluster baseline-L60: app application_1793992803298_0004 success=False maps=1 free0=60.0 MiB peak du=0.9 MiB requests(MiB)=[69.2, 69.2] failmsgs(S,N)=[(69.2, 61792256)]
+PASS cluster baseline-L60: exactly 1 map container, counter Launched map tasks=['1']
+PASS cluster baseline-L60: application id in the run log
+PASS cluster baseline-L60: job failed with the allocator message
+PASS cluster baseline-L60: S=72511848 in (60,100] MiB and S > N=61792256
+PASS cluster baseline-L60: peak du 958646 < S/2
+PASS cluster baseline-L60: N=61792256 within 4 MiB of the last df sample before 2026-11-06 14:22:03 (62189568)
+  cluster ablated-L900: app application_1793992978099_0001 success=True maps=1 free0=906.2 MiB peak du=199.3 MiB requests(MiB)=[69.2, 28.1, 99.2, 0.0] failmsgs(S,N)=[]
+PASS cluster ablated-L900: exactly 1 map container, counter Launched map tasks=['1']
+PASS cluster ablated-L900: application id in the run log
+PASS cluster ablated-L900: job succeeded, no allocator failure
+  cluster ablated-L300: app application_1793992978099_0002 success=True maps=1 free0=300.0 MiB peak du=199.3 MiB requests(MiB)=[69.2, 28.1, 99.2, 0.0] failmsgs(S,N)=[]
+PASS cluster ablated-L300: exactly 1 map container, counter Launched map tasks=['1']
+PASS cluster ablated-L300: application id in the run log
+PASS cluster ablated-L300: job succeeded, no allocator failure
+  cluster ablated-L60: app application_1793992978099_0003 success=False maps=1 free0=60.0 MiB peak du=0.9 MiB requests(MiB)=[69.2, 69.2] failmsgs(S,N)=[(69.2, 0)]
+PASS cluster ablated-L60: exactly 1 map container, counter Launched map tasks=['1']
+PASS cluster ablated-L60: application id in the run log
+PASS cluster ablated-L60: job failed with the allocator message
+PASS cluster ablated-L60: S=72511848 in (60,100] MiB and S > N=0
+PASS cluster ablated-L60: peak du 958637 < S/2
+PASS cluster ablated-L60: ablated N = 0
+PASS cluster baseline: L300 peak 199.3 within 5 % of L900 peak 199.3 MiB
+PASS cluster ablated: L300 peak 199.3 within 5 % of L900 peak 199.3 MiB
+selfcheck: 0 FAIL

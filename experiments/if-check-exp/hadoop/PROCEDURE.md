@@ -93,7 +93,7 @@ Per person, written by an AI session **with a human supplying the nodes**.
 | Person | Environment | State |
 |---|---|---|
 | **Yang** | [`stage4-runtime-verification/yang/environment.md`](stage4-runtime-verification/yang/environment.md), [`copy-source.sh`](stage4-runtime-verification/yang/copy-source.sh), [`case-notes.md`](stage4-runtime-verification/yang/case-notes.md) | **Ready** (2026-11-06): local node `node0.jason92-323989`, JDK 8 + Maven, built distribution in `/mydata/yang-s4/hadoop-base`. First case closed (true negative). |
-| **Jingsong** | — | Not set up; stage 3 only. Yang's files are a model (paths and node differ). |
+| **Jingsong** | [`stage4-runtime-verification/jingsong/environment.md`](stage4-runtime-verification/jingsong/environment.md), [`setup-node.sh`](stage4-runtime-verification/jingsong/setup-node.sh), [`copy-source.sh`](stage4-runtime-verification/jingsong/copy-source.sh), [`case-notes.md`](stage4-runtime-verification/jingsong/case-notes.md) | **Ready** (2026-11-06): nodes `pc41` (shared with Yang), `pc39`, `pc29`; JDK 8 + Maven, built distribution in `/mydata/jingsong-s4/hadoop-base` on each. Batch 1 (orders 1–5) closed. |
 
 A per-case harness goes in `stage4-runtime-verification/<name>/harness/<stem>/`; the stage-4 protocol is
 [`../stage4-runtime-verification/README.md`](../stage4-runtime-verification/README.md), results from its `_TEMPLATE.md`.

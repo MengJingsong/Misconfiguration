@@ -150,7 +150,8 @@ noticed along the way are noted in case files for Target 3, not chased.
     and procedure in `hadoop/PROCEDURE.md`). **Hadoop autonomous playbook and template** (shared by both
     people): `hadoop/stage3-ai-deep-read/playbook-autonomous.md`, `_TEMPLATE-autonomous.md` — use these,
     not the Cassandra ones, for Hadoop case files. Hadoop stage 4: Yang's environment is ready (2026-11-06,
-    local node, `hadoop/stage4-runtime-verification/yang/environment.md`); Jingsong's is not set up yet.
+    local node, `hadoop/stage4-runtime-verification/yang/environment.md`); Jingsong's is ready too (2026-11-06,
+    `pc41`/`pc39`/`pc29`, `hadoop/stage4-runtime-verification/jingsong/environment.md`; `pc41` is also Yang's node).
 - **`codeql-queries/`** — the CodeQL packs; results gitignored, regenerated per machine.
 - **Outside the repo (CloudLab `/proj/misconfiguration-PG0/`):** `tools/codeql/`, `codeql-dbs/`,
   and the superseded `git-repos/cassandra-src` clone.

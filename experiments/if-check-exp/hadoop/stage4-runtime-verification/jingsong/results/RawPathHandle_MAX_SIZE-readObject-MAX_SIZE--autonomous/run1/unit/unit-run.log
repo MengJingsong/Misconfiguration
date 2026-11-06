@@ -1,0 +1,240 @@
+=== unit-run.sh 2026-11-06 12:17:57 on node1.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu mode=run
++ [2026-11-06 12:17:57] java -version
+openjdk version "1.8.0_504"
+OpenJDK Runtime Environment (build 1.8.0_504-8u504-ga-1ubuntu1~22.04.3-b01)
+OpenJDK 64-Bit Server VM (build 25.504-b01, mixed mode)
++ [2026-11-06 12:17:57] mvn -version
+[1mApache Maven 3.6.3[m
+Maven home: /usr/share/maven
+Java version: 1.8.0_504, vendor: Ubuntu, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "5.15.0-198-generic", arch: "amd64", family: "unix"
++ [2026-11-06 12:17:57] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src describe --tags
+rel/release-3.4.2
++ [2026-11-06 12:17:57] cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/TestRawPathHandleMaxSize.java /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src/hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/
++ [2026-11-06 12:17:57] md5sum /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/TestRawPathHandleMaxSize.java /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/unit-run.sh /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/analyze.py
+c52090ea939e504b0ce44838dd7c3bd3  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/TestRawPathHandleMaxSize.java
+9b3663eced063537f4e3cea692b218c1  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/unit-run.sh
+cb5bd16b215d4fe15a8c874fc8c840da  /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/analyze.py
++ [2026-11-06 12:17:57] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src status --short
+?? hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/TestRawPathHandleMaxSize.java
+EXPECTED (A4, frozen): every RawPathHandle row: 0<=len<=M -> object x25, remaining=len, content true, med-b in [len, len+4096];
+EXPECTED: else IOException "Illegal buffer length <len>" x25, med-b < 65536, max-b < 1048576, no OOM. Largest accepted = M per arm.
+EXPECTED (A6): C5 object med-b >= 16777216; C8 EOFException med-b >= 67108864; C9 OOM Java heap space; C6 OOM; C8 >= 1000 x L8.
+=== arm D (MAX_SIZE = 1 << 20 = 1048576) 2026-11-06 12:17:57
++ [2026-11-06 12:17:57] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src diff --stat
+(RawPathHandle.java unchanged)
+40:  public static final int MAX_SIZE = 1 << 20;
+mvn rc=0
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.923 s - in org.apache.hadoop.fs.TestRawPathHandleMaxSize
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+IFCHK,row,D,1048576,L0,RawPathHandle,g,0,object,,,0,true,25,true,1168,1168,1168,1168,0,0
+IFCHK,row,D,1048576,L1,RawPathHandle,g,1024,object,,,1024,true,25,true,2192,2192,2192,1168,1024,1024
+IFCHK,row,D,1048576,L2,RawPathHandle,g,1048575,object,,,1048575,true,25,true,1049744,1049744,1049744,1168,1048576,1048576
+IFCHK,row,D,1048576,L3,RawPathHandle,g,1048576,object,,,1048576,true,25,true,1049744,1049744,1049744,1168,1048576,1048576
+IFCHK,row,D,1048576,L4,RawPathHandle,g,1048577,exception,java.io.IOException,Illegal buffer length 1048577,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,D,1048576,L5,RawPathHandle,g,16777216,exception,java.io.IOException,Illegal buffer length 16777216,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,D,1048576,L6,RawPathHandle,p,2147483647,exception,java.io.IOException,Illegal buffer length 2147483647,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,D,1048576,L7,RawPathHandle,p,-1,exception,java.io.IOException,Illegal buffer length -1,-1,na,25,true,3376,3376,3376,1168,2208,2208
+IFCHK,row,D,1048576,L8,RawPathHandle,p,67108864,exception,java.io.IOException,Illegal buffer length 67108864,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,D,1048576,J3,RawPathHandle/JavaSerialization,g,1048576,object,,,1048576,true,25,true,1049824,1049824,1049824,1168,1048656,1048656
+IFCHK,row,D,1048576,J4,RawPathHandle/JavaSerialization,g,1048577,exception,java.io.IOException,Illegal buffer length 1048577,-1,na,25,true,3472,3472,3472,1168,2304,2304
+IFCHK,instr,D,1048576,supported=true,enabled=true,knownAnswer1MiB=1048592,maxMemory=259522560,MAX_SIZE=1048576,codeSource=file:/mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src/hadoop-common-project/hadoop-common/target/classes/,jvmArgs=-Xmx256m -XX:+UseSerialGC -Difchk.arm=D -Difchk.max=1048576,java=1.8.0_504
+IFCHK,row,D,1048576,C5,UncheckedHandle,g,16777216,object,,,16777216,true,25,true,16778544,16778544,16788536,1168,16777376,16787368
+IFCHK,row,D,1048576,C8,UncheckedHandle,p,67108864,exception,java.io.EOFException,,-1,na,25,true,67112216,67112216,67112216,1168,67111048,67111048
+IFCHK,row,D,1048576,C9,UncheckedHandle,p,536870912,exception,java.lang.OutOfMemoryError,Java heap space,-1,na,3,true,2328,2328,2328,1168,1160,1160
+IFCHK,row,D,1048576,C6,UncheckedHandle,p,2147483647,exception,java.lang.OutOfMemoryError,Requested array size exceeds VM limit,-1,na,3,true,2328,2328,2328,1168,1160,1160
++ [2026-11-06 12:18:23] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src diff --stat
+=== arm K16 (MAX_SIZE = 1 << 16 = 65536) 2026-11-06 12:18:23
++ [2026-11-06 12:18:23] sed -i s/MAX_SIZE = 1 << 20;/MAX_SIZE = 1 << 16;/ /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/RawPathHandle.java
++ [2026-11-06 12:18:23] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src diff --stat
+ .../hadoop-common/src/main/java/org/apache/hadoop/fs/RawPathHandle.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-  public static final int MAX_SIZE = 1 << 20;
++  public static final int MAX_SIZE = 1 << 16;
+40:  public static final int MAX_SIZE = 1 << 16;
+mvn rc=0
+[WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.079 s - in org.apache.hadoop.fs.TestRawPathHandleMaxSize
+[WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 2
+[INFO] BUILD SUCCESS
+IFCHK,row,K16,65536,K0,RawPathHandle,g,0,object,,,0,true,25,true,1168,1168,1168,1168,0,0
+IFCHK,row,K16,65536,K1,RawPathHandle,g,1024,object,,,1024,true,25,true,2192,2192,2192,1168,1024,1024
+IFCHK,row,K16,65536,KMm1,RawPathHandle,g,65535,object,,,65535,true,25,true,66704,66704,66704,1168,65536,65536
+IFCHK,row,K16,65536,KM,RawPathHandle,g,65536,object,,,65536,true,25,true,66704,66704,66704,1168,65536,65536
+IFCHK,row,K16,65536,KMp1,RawPathHandle,g,65537,exception,java.io.IOException,Illegal buffer length 65537,-1,na,25,true,3384,3384,3384,1168,2216,2216
+IFCHK,row,K16,65536,K1MiB,RawPathHandle,g,1048576,exception,java.io.IOException,Illegal buffer length 1048576,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,K16,65536,KMAXINT,RawPathHandle,p,2147483647,exception,java.io.IOException,Illegal buffer length 2147483647,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,K16,65536,Kneg1,RawPathHandle,p,-1,exception,java.io.IOException,Illegal buffer length -1,-1,na,25,true,3376,3376,3376,1168,2208,2208
+IFCHK,instr,K16,65536,supported=true,enabled=true,knownAnswer1MiB=1048592,maxMemory=259522560,MAX_SIZE=65536,codeSource=file:/mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src/hadoop-common-project/hadoop-common/target/classes/,jvmArgs=-Xmx256m -XX:+UseSerialGC -Difchk.arm=K16 -Difchk.max=65536,java=1.8.0_504
++ [2026-11-06 12:18:48] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src diff --stat
+=== arm K24 (MAX_SIZE = 1 << 24 = 16777216) 2026-11-06 12:18:49
++ [2026-11-06 12:18:49] sed -i s/MAX_SIZE = 1 << 20;/MAX_SIZE = 1 << 24;/ /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/RawPathHandle.java
++ [2026-11-06 12:18:49] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src diff --stat
+ .../hadoop-common/src/main/java/org/apache/hadoop/fs/RawPathHandle.java | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-  public static final int MAX_SIZE = 1 << 20;
++  public static final int MAX_SIZE = 1 << 24;
+40:  public static final int MAX_SIZE = 1 << 24;
+mvn rc=0
+[WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.732 s - in org.apache.hadoop.fs.TestRawPathHandleMaxSize
+[WARNING] Tests run: 4, Failures: 0, Errors: 0, Skipped: 2
+[INFO] BUILD SUCCESS
+IFCHK,row,K24,16777216,K0,RawPathHandle,g,0,object,,,0,true,25,true,1168,1168,1168,1168,0,0
+IFCHK,row,K24,16777216,K1,RawPathHandle,g,1024,object,,,1024,true,25,true,2192,2192,2192,1168,1024,1024
+IFCHK,row,K24,16777216,KMm1,RawPathHandle,g,16777215,object,,,16777215,true,25,true,16778384,16778384,16778384,1168,16777216,16777216
+IFCHK,row,K24,16777216,KM,RawPathHandle,g,16777216,object,,,16777216,true,25,true,16778384,16778384,16778384,1168,16777216,16777216
+IFCHK,row,K24,16777216,KMp1,RawPathHandle,g,16777217,exception,java.io.IOException,Illegal buffer length 16777217,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,K24,16777216,K64MiB,RawPathHandle,p,67108864,exception,java.io.IOException,Illegal buffer length 67108864,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,K24,16777216,KMAXINT,RawPathHandle,p,2147483647,exception,java.io.IOException,Illegal buffer length 2147483647,-1,na,25,true,3392,3392,3392,1168,2224,2224
+IFCHK,row,K24,16777216,Kneg1,RawPathHandle,p,-1,exception,java.io.IOException,Illegal buffer length -1,-1,na,25,true,3376,3376,3376,1168,2208,2208
+IFCHK,instr,K24,16777216,supported=true,enabled=true,knownAnswer1MiB=1048592,maxMemory=259522560,MAX_SIZE=16777216,codeSource=file:/mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src/hadoop-common-project/hadoop-common/target/classes/,jvmArgs=-Xmx256m -XX:+UseSerialGC -Difchk.arm=K24 -Difchk.max=16777216,java=1.8.0_504
++ [2026-11-06 12:19:13] git -C /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/src diff --stat
++ [2026-11-06 12:19:13] python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE--autonomous/analyze.py unit /mydata/jingsong-s4/RawPathHandle_MAX_SIZE-readObject-MAX_SIZE-run1/logs/unit/ifchk-all.csv
+PASS instr D: allocated-bytes counter supported+enabled
+PASS instr D: known answer 1048592 in [1048576, 1052672]
+PASS instr D: maxMemory 259522560 <= 256 MiB, -Xmx256m
+PASS instr D: MAX_SIZE 1048576 == M 1048576
+PASS instr K16: allocated-bytes counter supported+enabled
+PASS instr K16: known answer 1048592 in [1048576, 1052672]
+PASS instr K16: maxMemory 259522560 <= 256 MiB, -Xmx256m
+PASS instr K16: MAX_SIZE 65536 == M 65536
+PASS instr K24: allocated-bytes counter supported+enabled
+PASS instr K24: known answer 1048592 in [1048576, 1052672]
+PASS instr K24: maxMemory 259522560 <= 256 MiB, -Xmx256m
+PASS instr K24: MAX_SIZE 16777216 == M 16777216
+PASS D L0 len=0 M=1048576: same outcome in all 25 iterations
+PASS D L0 len=0 M=1048576: accepted (object)
+PASS D L0 len=0 M=1048576: remaining 0 == len
+PASS D L0 len=0 M=1048576: content equal
+PASS D L0 len=0 M=1048576: med-b 0 in [len, len+4096]
+PASS D L1 len=1024 M=1048576: same outcome in all 25 iterations
+PASS D L1 len=1024 M=1048576: accepted (object)
+PASS D L1 len=1024 M=1048576: remaining 1024 == len
+PASS D L1 len=1024 M=1048576: content equal
+PASS D L1 len=1024 M=1048576: med-b 1024 in [len, len+4096]
+PASS D L2 len=1048575 M=1048576: same outcome in all 25 iterations
+PASS D L2 len=1048575 M=1048576: accepted (object)
+PASS D L2 len=1048575 M=1048576: remaining 1048575 == len
+PASS D L2 len=1048575 M=1048576: content equal
+PASS D L2 len=1048575 M=1048576: med-b 1048576 in [len, len+4096]
+PASS D L3 len=1048576 M=1048576: same outcome in all 25 iterations
+PASS D L3 len=1048576 M=1048576: accepted (object)
+PASS D L3 len=1048576 M=1048576: remaining 1048576 == len
+PASS D L3 len=1048576 M=1048576: content equal
+PASS D L3 len=1048576 M=1048576: med-b 1048576 in [len, len+4096]
+PASS D L4 len=1048577 M=1048576: same outcome in all 25 iterations
+PASS D L4 len=1048577 M=1048576: IOException 'Illegal buffer length 1048577'
+PASS D L4 len=1048577 M=1048576: med-b 2224 < 65536
+PASS D L4 len=1048577 M=1048576: max-b 2224 < 1048576
+PASS D L5 len=16777216 M=1048576: same outcome in all 25 iterations
+PASS D L5 len=16777216 M=1048576: IOException 'Illegal buffer length 16777216'
+PASS D L5 len=16777216 M=1048576: med-b 2224 < 65536
+PASS D L5 len=16777216 M=1048576: max-b 2224 < 1048576
+PASS D L6 len=2147483647 M=1048576: same outcome in all 25 iterations
+PASS D L6 len=2147483647 M=1048576: IOException 'Illegal buffer length 2147483647'
+PASS D L6 len=2147483647 M=1048576: med-b 2224 < 65536
+PASS D L6 len=2147483647 M=1048576: max-b 2224 < 1048576
+PASS D L7 len=-1 M=1048576: same outcome in all 25 iterations
+PASS D L7 len=-1 M=1048576: IOException 'Illegal buffer length -1'
+PASS D L7 len=-1 M=1048576: med-b 2208 < 65536
+PASS D L7 len=-1 M=1048576: max-b 2208 < 1048576
+PASS D L8 len=67108864 M=1048576: same outcome in all 25 iterations
+PASS D L8 len=67108864 M=1048576: IOException 'Illegal buffer length 67108864'
+PASS D L8 len=67108864 M=1048576: med-b 2224 < 65536
+PASS D L8 len=67108864 M=1048576: max-b 2224 < 1048576
+PASS D J3 len=1048576 M=1048576: same outcome in all 25 iterations
+PASS D J3 len=1048576 M=1048576: accepted (object)
+PASS D J3 len=1048576 M=1048576: remaining 1048576 == len
+PASS D J3 len=1048576 M=1048576: content equal
+PASS D J3 len=1048576 M=1048576: med-b 1048656 in [len, len+4096]
+PASS D J4 len=1048577 M=1048576: same outcome in all 25 iterations
+PASS D J4 len=1048577 M=1048576: IOException 'Illegal buffer length 1048577'
+PASS D J4 len=1048577 M=1048576: med-b 2304 < 65536
+PASS D J4 len=1048577 M=1048576: max-b 2304 < 1048576
+PASS K16 K0 len=0 M=65536: same outcome in all 25 iterations
+PASS K16 K0 len=0 M=65536: accepted (object)
+PASS K16 K0 len=0 M=65536: remaining 0 == len
+PASS K16 K0 len=0 M=65536: content equal
+PASS K16 K0 len=0 M=65536: med-b 0 in [len, len+4096]
+PASS K16 K1 len=1024 M=65536: same outcome in all 25 iterations
+PASS K16 K1 len=1024 M=65536: accepted (object)
+PASS K16 K1 len=1024 M=65536: remaining 1024 == len
+PASS K16 K1 len=1024 M=65536: content equal
+PASS K16 K1 len=1024 M=65536: med-b 1024 in [len, len+4096]
+PASS K16 KMm1 len=65535 M=65536: same outcome in all 25 iterations
+PASS K16 KMm1 len=65535 M=65536: accepted (object)
+PASS K16 KMm1 len=65535 M=65536: remaining 65535 == len
+PASS K16 KMm1 len=65535 M=65536: content equal
+PASS K16 KMm1 len=65535 M=65536: med-b 65536 in [len, len+4096]
+PASS K16 KM len=65536 M=65536: same outcome in all 25 iterations
+PASS K16 KM len=65536 M=65536: accepted (object)
+PASS K16 KM len=65536 M=65536: remaining 65536 == len
+PASS K16 KM len=65536 M=65536: content equal
+PASS K16 KM len=65536 M=65536: med-b 65536 in [len, len+4096]
+PASS K16 KMp1 len=65537 M=65536: same outcome in all 25 iterations
+PASS K16 KMp1 len=65537 M=65536: IOException 'Illegal buffer length 65537'
+PASS K16 KMp1 len=65537 M=65536: med-b 2216 < 65536
+PASS K16 KMp1 len=65537 M=65536: max-b 2216 < 1048576
+PASS K16 K1MiB len=1048576 M=65536: same outcome in all 25 iterations
+PASS K16 K1MiB len=1048576 M=65536: IOException 'Illegal buffer length 1048576'
+PASS K16 K1MiB len=1048576 M=65536: med-b 2224 < 65536
+PASS K16 K1MiB len=1048576 M=65536: max-b 2224 < 1048576
+PASS K16 KMAXINT len=2147483647 M=65536: same outcome in all 25 iterations
+PASS K16 KMAXINT len=2147483647 M=65536: IOException 'Illegal buffer length 2147483647'
+PASS K16 KMAXINT len=2147483647 M=65536: med-b 2224 < 65536
+PASS K16 KMAXINT len=2147483647 M=65536: max-b 2224 < 1048576
+PASS K16 Kneg1 len=-1 M=65536: same outcome in all 25 iterations
+PASS K16 Kneg1 len=-1 M=65536: IOException 'Illegal buffer length -1'
+PASS K16 Kneg1 len=-1 M=65536: med-b 2208 < 65536
+PASS K16 Kneg1 len=-1 M=65536: max-b 2208 < 1048576
+PASS K24 K0 len=0 M=16777216: same outcome in all 25 iterations
+PASS K24 K0 len=0 M=16777216: accepted (object)
+PASS K24 K0 len=0 M=16777216: remaining 0 == len
+PASS K24 K0 len=0 M=16777216: content equal
+PASS K24 K0 len=0 M=16777216: med-b 0 in [len, len+4096]
+PASS K24 K1 len=1024 M=16777216: same outcome in all 25 iterations
+PASS K24 K1 len=1024 M=16777216: accepted (object)
+PASS K24 K1 len=1024 M=16777216: remaining 1024 == len
+PASS K24 K1 len=1024 M=16777216: content equal
+PASS K24 K1 len=1024 M=16777216: med-b 1024 in [len, len+4096]
+PASS K24 KMm1 len=16777215 M=16777216: same outcome in all 25 iterations
+PASS K24 KMm1 len=16777215 M=16777216: accepted (object)
+PASS K24 KMm1 len=16777215 M=16777216: remaining 16777215 == len
+PASS K24 KMm1 len=16777215 M=16777216: content equal
+PASS K24 KMm1 len=16777215 M=16777216: med-b 16777216 in [len, len+4096]
+PASS K24 KM len=16777216 M=16777216: same outcome in all 25 iterations
+PASS K24 KM len=16777216 M=16777216: accepted (object)
+PASS K24 KM len=16777216 M=16777216: remaining 16777216 == len
+PASS K24 KM len=16777216 M=16777216: content equal
+PASS K24 KM len=16777216 M=16777216: med-b 16777216 in [len, len+4096]
+PASS K24 KMp1 len=16777217 M=16777216: same outcome in all 25 iterations
+PASS K24 KMp1 len=16777217 M=16777216: IOException 'Illegal buffer length 16777217'
+PASS K24 KMp1 len=16777217 M=16777216: med-b 2224 < 65536
+PASS K24 KMp1 len=16777217 M=16777216: max-b 2224 < 1048576
+PASS K24 K64MiB len=67108864 M=16777216: same outcome in all 25 iterations
+PASS K24 K64MiB len=67108864 M=16777216: IOException 'Illegal buffer length 67108864'
+PASS K24 K64MiB len=67108864 M=16777216: med-b 2224 < 65536
+PASS K24 K64MiB len=67108864 M=16777216: max-b 2224 < 1048576
+PASS K24 KMAXINT len=2147483647 M=16777216: same outcome in all 25 iterations
+PASS K24 KMAXINT len=2147483647 M=16777216: IOException 'Illegal buffer length 2147483647'
+PASS K24 KMAXINT len=2147483647 M=16777216: med-b 2224 < 65536
+PASS K24 KMAXINT len=2147483647 M=16777216: max-b 2224 < 1048576
+PASS K24 Kneg1 len=-1 M=16777216: same outcome in all 25 iterations
+PASS K24 Kneg1 len=-1 M=16777216: IOException 'Illegal buffer length -1'
+PASS K24 Kneg1 len=-1 M=16777216: med-b 2208 < 65536
+PASS K24 Kneg1 len=-1 M=16777216: max-b 2208 < 1048576
+PASS arm D: largest accepted len 1048576 == M 1048576
+PASS arm K16: largest accepted len 65536 == M 65536
+PASS arm K24: largest accepted len 16777216 == M 16777216
+PASS C5: object, med-b 16777376 >= 16777216
+PASS C8: java.io.EOFException, med-b 67111048 >= 67108864
+PASS C9: java.lang.OutOfMemoryError 'Java heap space'
+PASS C6: java.lang.OutOfMemoryError 'Requested array size exceeds VM limit'
+PASS C8 med-b 67111048 >= 1000 x L8 med-b 2224
+SUMMARY rows=31 instr=3 fails=0
+=== done 2026-11-06 12:19:13
+EXIT rc=0 at 2026-11-06 12:19:14
+git status of the copy:
+?? hadoop-common-project/hadoop-common/src/test/java/org/apache/hadoop/fs/TestRawPathHandleMaxSize.java
+leftover surefire JVMs of this run:

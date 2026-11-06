@@ -1,0 +1,282 @@
+[2026-11-06 12:23:38] === cluster-run.py /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1 on node2.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu
+[2026-11-06 12:23:38] === prechecks
+[2026-11-06 12:23:38] + hostname; uname -r; nproc; free -m
+node2.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu
+5.15.0-198-generic
+40
+               total        used        free      shared  buff/cache   available
+Mem:          257828         998      243807           5       13023      255040
+Swap:           8192           0        8192
+  rc=0
+[2026-11-06 12:23:38] + /usr/lib/jvm/java-8-openjdk-amd64/bin/jps -l
+39236 sun.tools.jps.Jps
+  rc=0
+[2026-11-06 12:23:38] hadoop daemons before start: none
+[2026-11-06 12:23:38] ports busy: none
+[2026-11-06 12:23:38] + df -B1 /mydata
+Filesystem                      1B-blocks       Used    Available Use% Mounted on
+/dev/mapper/emulab-node2--bs 808550711296 9293205504 758110547968   2% /mydata
+  rc=0
+[2026-11-06 12:23:38] === setup (B3a, amended A4)
+[2026-11-06 12:23:38] + /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/bin/hadoop version | head -1
+Hadoop 3.4.2
+  rc=0
+[2026-11-06 12:23:39] + ls /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/tools/lib/ | grep -E 'hadoop-aws|bundle'; ls /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-3.4.2.jar
+bundle-2.29.52.jar
+hadoop-aws-3.4.2.jar
+/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-3.4.2.jar
+  rc=0
+[2026-11-06 12:23:39] + cp -r /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/etc/hadoop/* /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/conf/
+  rc=0
+[2026-11-06 12:23:39] + cp -r /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/etc/hadoop/* /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/conf-ctr/
+  rc=0
+[2026-11-06 12:23:39] + cat /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/conf/core-site.xml; diff /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/conf/core-site.xml /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/conf-ctr/core-site.xml
+<?xml version="1.0"?>
+<configuration>
+  <property><name>hadoop.tmp.dir</name><value>/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/htmp</value></property>
+  <property><name>fs.s3a.endpoint</name><value>http://127.0.0.1:9000</value></property>
+  <property><name>fs.s3a.endpoint.region</name><value>us-east-1</value></property>
+  <property><name>fs.s3a.path.style.access</name><value>true</value></property>
+  <property><name>fs.s3a.connection.ssl.enabled</name><value>false</value></property>
+  <property><name>fs.s3a.access.key</name><value>testing</value></property>
+  <property><name>fs.s3a.secret.key</name><value>testing</value></property>
+  <property><name>fs.s3a.input.stream.type</name><value>prefetch</value></property>
+  <property><name>fs.s3a.prefetch.block.size</name><value>1048576</value></property>
+  <property><name>fs.s3a.buffer.dir</name><value>/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/s3abuf</value></property>
+</configuration>
+12d11
+<   <property><name>fs.s3a.buffer.dir</name><value>/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/s3abuf</value></property>
+  rc=1
+[2026-11-06 12:23:39] + cp /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/harness/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount--autonomous/SeekReader.java /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/ && cd /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar && /usr/lib/jvm/java-8-openjdk-amd64/bin/javac -cp "$(/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/bin/hadoop classpath)" SeekReader.java && /usr/lib/jvm/java-8-openjdk-amd64/bin/jar cf seekreader.jar SeekReader.class && ls -l seekreader.jar
+-rw-r--r-- 1 jason92 misconfiguration 2857 Nov  6 12:23 seekreader.jar
+  rc=0
+[2026-11-06 12:23:41] harness md5:
+86f071f5146a2ace6d476e75667f6a23  SeekReader.java
+8c28f8372c1a3579df773fc36c3b8ec7  TestBlockCacheLruCap.java
+c02510c7ec6fe1d207faf45e70cb7877  cluster-run.py
+fc39349763efdf7214f502b6c8845c13  sampler.py
+a00b9eb7dc3a5df4e855cb3b8304f7e8  selfcheck.py
+59a9df6ed08fd5f3db6b632a4f47b7e4  unit-run.sh
+[2026-11-06 12:23:41] === S3 store: moto server (A4)
+[2026-11-06 12:23:41] + /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/venv/bin/python -I -c 'import moto; print("moto", moto.__version__)'
+moto 5.2.5
+  rc=0
+[2026-11-06 12:23:41] wait: moto port 9000 (timeout 180 s)
+[2026-11-06 12:23:42]   ok after 1 s: listening
+[2026-11-06 12:23:42] + /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/venv/bin/python -I -c "import boto3; s3=boto3.client('s3', endpoint_url='http://127.0.0.1:9000', aws_access_key_id='testing', aws_secret_access_key='testing', region_name='us-east-1'); s3.create_bucket(Bucket='ifchk-pf'); print([b['Name'] for b in s3.list_buckets()['Buckets']])"
+['ifchk-pf']
+  rc=0
+[2026-11-06 12:23:42] === object (B3c) and access check (B3e step 2, A5c)
+[2026-11-06 12:23:42] + md5sum /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/obj64m
+a9862cb12f16cfc8ca236cbd4fae83e4  /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/obj64m
+  rc=0
+[2026-11-06 12:23:43] + hadoop fs -put -f /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/obj64m s3a://ifchk-pf/obj64m
+2026-11-06 19:23:43,855 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+[2026-11-06 12:23:48] + hadoop fs -ls s3a://ifchk-pf/
+Found 1 items
+-rw-rw-rw-   1 jason92 jason92   67108864 2026-11-06 19:23 s3a://ifchk-pf/obj64m
+2026-11-06 19:23:49,355 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+  rc=0
+[2026-11-06 12:23:51] + hadoop fs -cat s3a://ifchk-pf/obj64m | md5sum
+a9862cb12f16cfc8ca236cbd4fae83e4  -
+2026-11-06 19:23:51,928 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-06 19:23:57,125 INFO prefetch.CachingBlockManager: CP;ECP;RP(1);ERP(1);PF(1);GR(0);EGR(0);RL(0);ERL(0);RP(2);ERP(2);PF(2);RP(3);ERP(3);PF(3);RP(4);ERP(4);PF(4);RP(5);ERP(5);PF(5);RP(6);ERP(6);PF(6);RP(7);ERP(7);PF(7);RP(8);ERP(8);PF(8);RP(9);ERP(9);PF(9);EPF(1);GP(1);EGP(1);RL(1);ERL(1);RP(10);ERP(10);PF(10);EPF(2);GP(2);EGP(2);RL(2);ERL(2);RP(11);ERP(11);PF(11);EPF(3);GP(3);EGP(3);RL(3);ERL(3);RP(12);ERP(12);PF(12);EPF(4);GP(4);EGP(4);RL(4);ERL(4);RP(13);ERP(13);PF(13);EPF(5);GP(5);EGP(5);RL(5);ERL(5);RP(14);ERP(14);PF(14);EPF(7);EPF(6);GP(6);EGP(6);RL(6);ERL(6);RP(15);ERP(15);GP(7);EGP(7);PF(15);RL(7);ERL(7);RP(16);ERP(16);PF(16);EPF(8);GP(8);EGP(8);RL(8);ERL(8);RP(17);ERP(17);PF(17);EPF(9);GP(9);EGP(9);RL(9);ERL(9);RP(18);ERP(18);PF(18);EPF(10);GP(10);EGP(10);RL(10);ERL(10);RP(19);ERP(19);PF(19);EPF(11);GP(11);EGP(11);RL(11);ERL(11);RP(20);ERP(20);PF(20);EPF(12);GP(12);EGP(12);RL(12);ERL(12);RP(21);ERP(21);PF(21);EPF(13);GP(13);EGP(13);RL(13);ERL(13);RP(22);ERP(22);PF(22);EPF(14);EPF(15);GP(14);EGP(14);RL(14);ERL(14);RP(23);ERP(23);GP(15);EGP(15);PF(23);RL(15);ERL(15);RP(24);ERP(24);PF(24);EPF(16);GP(16);EGP(16);RL(16);ERL(16);RP(25);ERP(25);PF(25);EPF(17);GP(17);EGP(17);RL(17);ERL(17);RP(26);ERP(26);PF(26);EPF(18);GP(18);EGP(18);RL(18);ERL(18);RP(27);ERP(27);PF(27);EPF(19);GP(19);EGP(19);RL(19);ERL(19);RP(28);ERP(28);PF(28);EPF(20);GP(20);EGP(20);RL(20);ERL(20);RP(29);ERP(29);PF(29);EPF(21);GP(21);EGP(21);RL(21);ERL(21);RP(30);ERP(30);PF(30);EPF(22);GP(22);EGP(22);RL(22);ERL(22);RP(31);ERP(31);PF(31);EPF(23);GP(23);EGP(23);RL(23);ERL(23);RP(32);ERP(32);PF(32);EPF(24);GP(24);EGP(24);RL(24);ERL(24);RP(33);ERP(33);PF(33);EPF(25);GP(25);EGP(25);RL(25);ERL(25);RP(34);ERP(34);PF(34);EPF(26);GP(26);EGP(26);RL(26);ERL(26);RP(35);ERP(35);PF(35);EPF(27);GP(27);EGP(27);RL(27);ERL(27);RP(36);ERP(36);PF(36);EPF(28);GP(28);EGP(28);RL(28);ERL(28);RP(37);ERP(37);PF(37);EPF(29);GP(29);EGP(29);RL(29);ERL(29);RP(38);ERP(38);PF(38);EPF(30);GP(30);EGP(30);RL(30);ERL(30);RP(39);ERP(39);PF(39);EPF(31);GP(31);EGP(31);RL(31);ERL(31);RP(40);ERP(40);PF(40);EPF(32);GP(32);EGP(32);RL(32);ERL(32);RP(41);ERP(41);PF(41);EPF(33);GP(33);EGP(33);RL(33);ERL(33);RP(42);ERP(42);PF(42);EPF(34);GP(34);EGP(34);RL(34);ERL(34);RP(43);ERP(43);PF(43);EPF(35);GP(35);EGP(35);RL(35);ERL(35);RP(44);ERP(44);PF(44);EPF(36);GP(36);EGP(36);RL(36);ERL(36);RP(45);ERP(45);PF(45);EPF(37);GP(37);EGP(37);RL(37);ERL(37);RP(46);ERP(46);PF(46);EPF(38);GP(38);EGP(38);RL(38);ERL(38);RP(47);ERP(47);PF(47);EPF(39);GP(39);EGP(39);RL(39);ERL(39);RP(48);ERP(48);PF(48);EPF(40);GP(40);EGP(40);RL(40);ERL(40);RP(49);ERP(49);PF(49);EPF(41);GP(41);EGP(41);RL(41);ERL(41);RP(50);ERP(50);PF(50);EPF(42);GP(42);EGP(42);RL(42);ERL(42);RP(51);ERP(51);PF(51);EPF(43);GP(43);EGP(43);RL(43);ERL(43);RP(52);ERP(52);PF(52);EPF(44);GP(44);EGP(44);RL(44);ERL(44);RP(53);ERP(53);PF(53);EPF(45);GP(45);EGP(45);RL(45);ERL(45);RP(54);ERP(54);PF(54);EPF(46);GP(46);EGP(46);RL(46);ERL(46);RP(55);ERP(55);PF(55);EPF(47);GP(47);EGP(47);RL(47);ERL(47);RP(56);ERP(56);PF(56);EPF(48);GP(48);EGP(48);RL(48);ERL(48);RP(57);ERP(57);PF(57);EPF(49);GP(49);EGP(49);RL(49);ERL(49);RP(58);ERP(58);PF(58);EPF(50);GP(50);EGP(50);RL(50);ERL(50);RP(59);ERP(59);PF(59);EPF(51);GP(51);EGP(51);RL(51);ERL(51);RP(60);ERP(60);PF(60);EPF(52);GP(52);EGP(52);RL(52);ERL(52);RP(61);ERP(61);PF(61);EPF(53);GP(53);EGP(53);RL(53);ERL(53);RP(62);ERP(62);PF(62);EPF(54);GP(54);EGP(54);RL(54);ERL(54);RP(63);ERP(63);PF(63);EPF(55);GP(55);EGP(55);RL(55);ERL(55);EPF(56);GP(56);EGP(56);RL(56);ERL(56);EPF(57);GP(57);EGP(57);RL(57);ERL(57);EPF(58);GP(58);EGP(58);RL(58);ERL(58);EPF(59);GP(59);EGP(59);RL(59);ERL(59);EPF(60);GP(60);EGP(60);RL(60);ERL(60);EPF(61);GP(61);EGP(61);RL(61);ERL(61);EPF(62);GP(62);EGP(62);RL(62);ERL(62);EPF(63);GP(63);EGP(63);CX;CP;ECP;ECX;
+GET_CACHED         : --
+GET_PREFETCHED     : #ops =  63, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+GET_READ           : #ops =   1, total =   0.1, min: 0.1, avg: 0.1, max: 0.1
+CACHE_PUT          : --
+PREFETCH           : #ops =  63, total =  26.5, min: 0.1, avg: 0.4, max: 0.5
+REQUEST_CACHING    : --
+REQUEST_PREFETCH   : #ops =  63, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+CANCEL_PREFETCHES  : #ops =   2, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+RELEASE            : #ops =  63, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+CLOSE              : #ops =   1, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+
+2026-11-06 19:23:57,141 INFO prefetch.S3ACachingInputStream: closed: s3a://ifchk-pf/obj64m
+  rc=0
+[2026-11-06 12:23:57] INSTRUMENT md5 local=a9862cb12f16cfc8ca236cbd4fae83e4 s3a=a9862cb12f16cfc8ca236cbd4fae83e4
+[2026-11-06 12:23:57] cache files in s3abuf after the check: 0
+[2026-11-06 12:23:57] === client-N1-r1 (B3e step 3)
+[2026-11-06 12:23:57] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293225984 758110527488   2% /mydata
+  rc=0
+[2026-11-06 12:23:58] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=1 s3a://ifchk-pf/obj64m 20 > client-N1-r1.client.log
+[2026-11-06 12:24:34]   client rc=0 after 36.7 s
+[2026-11-06 12:24:39] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293262848 758110490624   2% /mydata
+  rc=0
+[2026-11-06 12:24:39] READING {"label": "client-N1-r1", "N": "1", "rep": 1, "samples": 427, "maxFiles": 2, "maxBytes": 2097152, "endHoldFiles": 1, "endHoldBytes": 1048576, "gauge": 1, "evictions": 63, "evictionDurCount": 63, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:24:39] === client-N1-r2 (B3e step 3)
+[2026-11-06 12:24:39] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293266944 758110486528   2% /mydata
+  rc=0
+[2026-11-06 12:24:40] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=1 s3a://ifchk-pf/obj64m 20 > client-N1-r2.client.log
+[2026-11-06 12:25:17]   client rc=0 after 36.6 s
+[2026-11-06 12:25:22] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293295616 758110457856   2% /mydata
+  rc=0
+[2026-11-06 12:25:22] READING {"label": "client-N1-r2", "N": "1", "rep": 2, "samples": 426, "maxFiles": 2, "maxBytes": 2097152, "endHoldFiles": 1, "endHoldBytes": 1048576, "gauge": 1, "evictions": 65, "evictionDurCount": 65, "P": 66, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 1, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:25:22] === client-N1-r3 (B3e step 3)
+[2026-11-06 12:25:22] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293295616 758110457856   2% /mydata
+  rc=0
+[2026-11-06 12:25:23] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=1 s3a://ifchk-pf/obj64m 20 > client-N1-r3.client.log
+[2026-11-06 12:26:00]   client rc=0 after 36.7 s
+[2026-11-06 12:26:05] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293328384 758110425088   2% /mydata
+  rc=0
+[2026-11-06 12:26:05] READING {"label": "client-N1-r3", "N": "1", "rep": 3, "samples": 427, "maxFiles": 2, "maxBytes": 1048576, "endHoldFiles": 1, "endHoldBytes": 1048576, "gauge": 1, "evictions": 65, "evictionDurCount": 65, "P": 66, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 1, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:26:05] === client-N4-r1 (B3e step 3)
+[2026-11-06 12:26:05] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293328384 758110425088   2% /mydata
+  rc=0
+[2026-11-06 12:26:06] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=4 s3a://ifchk-pf/obj64m 20 > client-N4-r1.client.log
+[2026-11-06 12:26:42]   client rc=0 after 36.5 s
+[2026-11-06 12:26:47] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293361152 758110392320   2% /mydata
+  rc=0
+[2026-11-06 12:26:47] READING {"label": "client-N4-r1", "N": "4", "rep": 1, "samples": 425, "maxFiles": 5, "maxBytes": 5242880, "endHoldFiles": 4, "endHoldBytes": 4194304, "gauge": 4, "evictions": 60, "evictionDurCount": 60, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:26:47] === client-N4-r2 (B3e step 3)
+[2026-11-06 12:26:47] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293369344 758110384128   2% /mydata
+  rc=0
+[2026-11-06 12:26:48] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=4 s3a://ifchk-pf/obj64m 20 > client-N4-r2.client.log
+[2026-11-06 12:27:25]   client rc=0 after 36.6 s
+[2026-11-06 12:27:30] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293398016 758110355456   2% /mydata
+  rc=0
+[2026-11-06 12:27:30] READING {"label": "client-N4-r2", "N": "4", "rep": 2, "samples": 426, "maxFiles": 5, "maxBytes": 4325376, "endHoldFiles": 4, "endHoldBytes": 4194304, "gauge": 4, "evictions": 60, "evictionDurCount": 60, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:27:30] === client-N4-r3 (B3e step 3)
+[2026-11-06 12:27:30] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293398016 758110355456   2% /mydata
+  rc=0
+[2026-11-06 12:27:31] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=4 s3a://ifchk-pf/obj64m 20 > client-N4-r3.client.log
+[2026-11-06 12:28:08]   client rc=0 after 36.5 s
+[2026-11-06 12:28:13] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293430784 758110322688   2% /mydata
+  rc=0
+[2026-11-06 12:28:13] READING {"label": "client-N4-r3", "N": "4", "rep": 3, "samples": 425, "maxFiles": 5, "maxBytes": 5242880, "endHoldFiles": 4, "endHoldBytes": 4194304, "gauge": 4, "evictions": 60, "evictionDurCount": 60, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:28:13] === client-N16-r1 (B3e step 3)
+[2026-11-06 12:28:13] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293430784 758110322688   2% /mydata
+  rc=0
+[2026-11-06 12:28:14] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=16 s3a://ifchk-pf/obj64m 20 > client-N16-r1.client.log
+[2026-11-06 12:28:50]   client rc=0 after 36.6 s
+[2026-11-06 12:28:55] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293459456 758110294016   2% /mydata
+  rc=0
+[2026-11-06 12:28:55] READING {"label": "client-N16-r1", "N": "16", "rep": 1, "samples": 426, "maxFiles": 16, "maxBytes": 16777216, "endHoldFiles": 16, "endHoldBytes": 16777216, "gauge": 16, "evictions": 48, "evictionDurCount": 48, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:28:55] === client-N16-r2 (B3e step 3)
+[2026-11-06 12:28:55] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293459456 758110294016   2% /mydata
+  rc=0
+[2026-11-06 12:28:56] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=16 s3a://ifchk-pf/obj64m 20 > client-N16-r2.client.log
+[2026-11-06 12:29:33]   client rc=0 after 36.6 s
+[2026-11-06 12:29:38] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293492224 758110261248   2% /mydata
+  rc=0
+[2026-11-06 12:29:38] READING {"label": "client-N16-r2", "N": "16", "rep": 2, "samples": 426, "maxFiles": 16, "maxBytes": 16777216, "endHoldFiles": 16, "endHoldBytes": 16777216, "gauge": 16, "evictions": 48, "evictionDurCount": 48, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:29:38] === client-N16-r3 (B3e step 3)
+[2026-11-06 12:29:38] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293496320 758110257152   2% /mydata
+  rc=0
+[2026-11-06 12:29:39] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=16 s3a://ifchk-pf/obj64m 20 > client-N16-r3.client.log
+[2026-11-06 12:30:15]   client rc=0 after 36.5 s
+[2026-11-06 12:30:21] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293524992 758110228480   2% /mydata
+  rc=0
+[2026-11-06 12:30:21] READING {"label": "client-N16-r3", "N": "16", "rep": 3, "samples": 426, "maxFiles": 17, "maxBytes": 17825792, "endHoldFiles": 16, "endHoldBytes": 16777216, "gauge": 16, "evictions": 48, "evictionDurCount": 48, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:30:21] === client-N1000-r1 (B3e step 3)
+[2026-11-06 12:30:21] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293529088 758110224384   2% /mydata
+  rc=0
+[2026-11-06 12:30:22] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=1000 s3a://ifchk-pf/obj64m 20 > client-N1000-r1.client.log
+[2026-11-06 12:30:58]   client rc=0 after 36.6 s
+[2026-11-06 12:31:03] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293557760 758110195712   2% /mydata
+  rc=0
+[2026-11-06 12:31:03] READING {"label": "client-N1000-r1", "N": "1000", "rep": 1, "samples": 426, "maxFiles": 64, "maxBytes": 67108864, "endHoldFiles": 64, "endHoldBytes": 67108864, "gauge": 64, "evictions": 0, "evictionDurCount": 0, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:31:03] === client-N1000-r2 (B3e step 3)
+[2026-11-06 12:31:03] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293557760 758110195712   2% /mydata
+  rc=0
+[2026-11-06 12:31:04] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=1000 s3a://ifchk-pf/obj64m 20 > client-N1000-r2.client.log
+[2026-11-06 12:31:41]   client rc=0 after 36.5 s
+[2026-11-06 12:31:46] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293582336 758110171136   2% /mydata
+  rc=0
+[2026-11-06 12:31:46] READING {"label": "client-N1000-r2", "N": "1000", "rep": 2, "samples": 426, "maxFiles": 64, "maxBytes": 67108864, "endHoldFiles": 64, "endHoldBytes": 67108864, "gauge": 64, "evictions": 0, "evictionDurCount": 0, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:31:46] === client-N1000-r3 (B3e step 3)
+[2026-11-06 12:31:46] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293582336 758110171136   2% /mydata
+  rc=0
+[2026-11-06 12:31:47] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader -Dfs.s3a.prefetch.max.blocks.count=1000 s3a://ifchk-pf/obj64m 20 > client-N1000-r3.client.log
+[2026-11-06 12:32:23]   client rc=0 after 36.6 s
+[2026-11-06 12:32:29] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293606912 758110146560   2% /mydata
+  rc=0
+[2026-11-06 12:32:29] READING {"label": "client-N1000-r3", "N": "1000", "rep": 3, "samples": 426, "maxFiles": 64, "maxBytes": 67108864, "endHoldFiles": 64, "endHoldBytes": 67108864, "gauge": 64, "evictions": 0, "evictionDurCount": 0, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:32:29] === client-Nunset-r1 (B3e step 3)
+[2026-11-06 12:32:29] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293611008 758110142464   2% /mydata
+  rc=0
+[2026-11-06 12:32:30] + hadoop jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/jar/seekreader.jar SeekReader s3a://ifchk-pf/obj64m 20 > client-Nunset-r1.client.log
+[2026-11-06 12:33:06]   client rc=0 after 36.6 s
+[2026-11-06 12:33:11] + df -B1 /mydata | tail -1
+/dev/mapper/emulab-node2--bs 808550711296 9293647872 758110105600   2% /mydata
+  rc=0
+[2026-11-06 12:33:11] READING {"label": "client-Nunset-r1", "N": "unset", "rep": 1, "samples": 426, "maxFiles": 5, "maxBytes": 4194304, "endHoldFiles": 4, "endHoldBytes": 4194304, "gauge": 4, "evictions": 60, "evictionDurCount": 60, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": ""}
+[2026-11-06 12:33:11] === client-seqcat (B3h sequential control)
+[2026-11-06 12:33:12] + hadoop fs -cat s3a://ifchk-pf/obj64m > /dev/null
+2026-11-06 19:33:13,366 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2026-11-06 19:33:18,962 INFO prefetch.CachingBlockManager: CP;ECP;RP(1);ERP(1);PF(1);GR(0);EGR(0);RL(0);ERL(0);RP(2);ERP(2);PF(2);RP(3);ERP(3);PF(3);RP(4);ERP(4);PF(4);RP(5);ERP(5);PF(5);RP(6);ERP(6);PF(6);RP(7);ERP(7);PF(7);RP(8);ERP(8);PF(8);RP(9);ERP(9);PF(9);EPF(1);GP(1);EGP(1);RL(1);ERL(1);RP(10);ERP(10);PF(10);EPF(2);GP(2);EGP(2);RL(2);ERL(2);RP(11);ERP(11);PF(11);EPF(4);EPF(6);EPF(3);GP(3);EGP(3);RL(3);ERL(3);RP(12);ERP(12);GP(4);EGP(4);PF(12);RL(4);ERL(4);RP(13);ERP(13);PF(13);EPF(8);EPF(5);GP(5);EGP(5);RL(5);ERL(5);RP(14);ERP(14);GP(6);EGP(6);PF(14);RL(6);ERL(6);RP(15);ERP(15);PF(15);EPF(9);EPF(7);GP(7);EGP(7);RL(7);ERL(7);RP(16);ERP(16);GP(8);EGP(8);PF(16);RL(8);ERL(8);RP(17);ERP(17);GP(9);EGP(9);PF(17);RL(9);ERL(9);RP(18);ERP(18);PF(18);EPF(10);GP(10);EGP(10);RL(10);ERL(10);RP(19);ERP(19);PF(19);EPF(11);GP(11);EGP(11);RL(11);ERL(11);RP(20);ERP(20);PF(20);EPF(12);GP(12);EGP(12);RL(12);ERL(12);RP(21);ERP(21);PF(21);EPF(13);GP(13);EGP(13);RL(13);ERL(13);RP(22);ERP(22);PF(22);EPF(14);GP(14);EGP(14);RL(14);ERL(14);RP(23);ERP(23);PF(23);EPF(15);GP(15);EGP(15);RL(15);ERL(15);RP(24);ERP(24);PF(24);EPF(16);GP(16);EGP(16);RL(16);ERL(16);RP(25);ERP(25);PF(25);EPF(17);GP(17);EGP(17);RL(17);ERL(17);RP(26);ERP(26);PF(26);EPF(18);GP(18);EGP(18);RL(18);ERL(18);RP(27);ERP(27);PF(27);EPF(19);GP(19);EGP(19);RL(19);ERL(19);RP(28);ERP(28);PF(28);EPF(20);GP(20);EGP(20);RL(20);ERL(20);RP(29);ERP(29);PF(29);EPF(21);GP(21);EGP(21);RL(21);ERL(21);RP(30);ERP(30);PF(30);EPF(22);GP(22);EGP(22);RL(22);ERL(22);RP(31);ERP(31);PF(31);EPF(23);GP(23);EGP(23);RL(23);ERL(23);RP(32);ERP(32);PF(32);EPF(24);GP(24);EGP(24);RL(24);ERL(24);RP(33);ERP(33);PF(33);EPF(25);GP(25);EGP(25);RL(25);ERL(25);RP(34);ERP(34);PF(34);EPF(26);GP(26);EGP(26);RL(26);ERL(26);RP(35);ERP(35);PF(35);EPF(27);GP(27);EGP(27);RL(27);ERL(27);RP(36);ERP(36);PF(36);EPF(28);GP(28);EGP(28);RL(28);ERL(28);RP(37);ERP(37);PF(37);EPF(29);GP(29);EGP(29);RL(29);ERL(29);RP(38);ERP(38);PF(38);EPF(30);GP(30);EGP(30);RL(30);ERL(30);RP(39);ERP(39);PF(39);EPF(31);GP(31);EGP(31);RL(31);ERL(31);RP(40);ERP(40);PF(40);EPF(32);GP(32);EGP(32);RL(32);ERL(32);RP(41);ERP(41);PF(41);EPF(33);GP(33);EGP(33);RL(33);ERL(33);RP(42);ERP(42);PF(42);EPF(34);GP(34);EGP(34);RL(34);ERL(34);RP(43);ERP(43);PF(43);EPF(35);GP(35);EGP(35);RL(35);ERL(35);RP(44);ERP(44);PF(44);EPF(36);GP(36);EGP(36);RL(36);ERL(36);RP(45);ERP(45);PF(45);EPF(37);GP(37);EGP(37);RL(37);ERL(37);RP(46);ERP(46);PF(46);EPF(38);GP(38);EGP(38);RL(38);ERL(38);RP(47);ERP(47);PF(47);EPF(39);GP(39);EGP(39);RL(39);ERL(39);RP(48);ERP(48);PF(48);EPF(40);GP(40);EGP(40);RL(40);ERL(40);RP(49);ERP(49);PF(49);EPF(41);GP(41);EGP(41);RL(41);ERL(41);RP(50);ERP(50);PF(50);EPF(42);GP(42);EGP(42);RL(42);ERL(42);RP(51);ERP(51);PF(51);EPF(43);GP(43);EGP(43);RL(43);ERL(43);RP(52);ERP(52);PF(52);EPF(44);GP(44);EGP(44);RL(44);ERL(44);RP(53);ERP(53);PF(53);EPF(45);GP(45);EGP(45);RL(45);ERL(45);RP(54);ERP(54);PF(54);EPF(46);GP(46);EGP(46);RL(46);ERL(46);RP(55);ERP(55);PF(55);EPF(47);GP(47);EGP(47);RL(47);ERL(47);RP(56);ERP(56);PF(56);EPF(48);GP(48);EGP(48);RL(48);ERL(48);RP(57);ERP(57);PF(57);EPF(49);GP(49);EGP(49);RL(49);ERL(49);RP(58);ERP(58);PF(58);EPF(50);GP(50);EGP(50);RL(50);ERL(50);RP(59);ERP(59);PF(59);EPF(51);GP(51);EGP(51);RL(51);ERL(51);RP(60);ERP(60);PF(60);EPF(52);GP(52);EGP(52);RL(52);ERL(52);RP(61);ERP(61);PF(61);EPF(53);GP(53);EGP(53);RL(53);ERL(53);RP(62);ERP(62);PF(62);EPF(54);GP(54);EGP(54);RL(54);ERL(54);RP(63);ERP(63);PF(63);EPF(55);GP(55);EGP(55);RL(55);ERL(55);EPF(56);GP(56);EGP(56);RL(56);ERL(56);EPF(57);GP(57);EGP(57);RL(57);ERL(57);EPF(58);GP(58);EGP(58);RL(58);ERL(58);EPF(59);GP(59);EGP(59);RL(59);ERL(59);EPF(60);GP(60);EGP(60);RL(60);ERL(60);EPF(61);GP(61);EGP(61);RL(61);ERL(61);EPF(62);GP(62);EGP(62);RL(62);ERL(62);EPF(63);GP(63);EGP(63);CX;CP;ECP;ECX;
+GET_CACHED         : --
+GET_PREFETCHED     : #ops =  63, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+GET_READ           : #ops =   1, total =   0.1, min: 0.1, avg: 0.1, max: 0.1
+CACHE_PUT          : --
+PREFETCH           : #ops =  63, total =  29.4, min: 0.1, avg: 0.5, max: 0.6
+REQUEST_CACHING    : --
+REQUEST_PREFETCH   : #ops =  63, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+CANCEL_PREFETCHES  : #ops =   2, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+RELEASE            : #ops =  63, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+CLOSE              : #ops =   1, total =   0.0, min: 0.0, avg: 0.0, max: 0.0
+
+2026-11-06 19:33:18,977 INFO prefetch.S3ACachingInputStream: closed: s3a://ifchk-pf/obj64m
+  rc=0
+[2026-11-06 12:33:24] READING {"label": "client-seqcat", "N": "unset", "rep": 1, "samples": 124, "maxFiles": 0, "maxBytes": 0, "filesAfterExit": 0}
+[2026-11-06 12:33:24] === YARN (B3e step 4, A4)
+[2026-11-06 12:33:24] + yarn --daemon start resourcemanager
+  rc=0
+[2026-11-06 12:33:26] wait: RM REST up (timeout 180 s)
+[2026-11-06 12:33:28]   ok after 2 s: STARTED
+[2026-11-06 12:33:28] + yarn --daemon start nodemanager
+  rc=0
+[2026-11-06 12:33:30] wait: NM registered (timeout 180 s)
+[2026-11-06 12:33:32]   ok after 2 s: 1 RUNNING node {'memory': 4096, 'vCores': 8, 'resourceInformations': {'resourceInformation': [{'attributes': {}, 'maximumAllocation': 9223372036854775807, 'minimumAllocation': 0, 'name': 'memory-mb', 'resourceType': 'COUNTABLE', 'units': 'Mi', 'value': 4096}, {'attributes': {}, 'maximumAllocation': 9223372036854775807, 'minimumAllocation': 0, 'name': 'vcores', 'resourceType': 'COUNTABLE', 'units': '', 'value': 8}]}}
+[2026-11-06 12:33:32] === container-N2 (B3e step 4)
+[2026-11-06 12:33:33] + [HADOOP_CLIENT_OPTS=-Duser.home=/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/dshome] yarn jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/ds-2.sh -num_containers 1 -container_memory 1024 -master_memory 512 -appname ifchk-container-N2 -timeout 600000 > container-N2.dsclient.log
+[2026-11-06 12:34:18]   DS client rc=0 after 44.9 s
+[2026-11-06 12:34:23] + ls -d /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/nm-logs/application_1793993608293_0001/container_*/ 2>/dev/null
+  rc=0
+[2026-11-06 12:34:23] READING {"label": "container-N2", "N": "2", "rep": 1, "samples": 510, "maxFiles": 3, "maxBytes": 3018752, "endHoldFiles": 2, "endHoldBytes": 2097152, "gauge": 2, "evictions": 62, "evictionDurCount": 62, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": "app=application_1793993608293_0001 dsrc=0"}
+[2026-11-06 12:34:23] === container-N1000 (B3e step 4)
+[2026-11-06 12:34:24] + [HADOOP_CLIENT_OPTS=-Duser.home=/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/dshome] yarn jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-3.4.2.jar -jar /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/hadoop/share/hadoop/yarn/hadoop-yarn-applications-distributedshell-3.4.2.jar -shell_script /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/ds-1000.sh -num_containers 1 -container_memory 1024 -master_memory 512 -appname ifchk-container-N1000 -timeout 600000 > container-N1000.dsclient.log
+[2026-11-06 12:35:07]   DS client rc=0 after 42.9 s
+[2026-11-06 12:35:12] + ls -d /mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1/nm-logs/application_1793993608293_0002/container_*/ 2>/dev/null
+  rc=0
+[2026-11-06 12:35:12] READING {"label": "container-N1000", "N": "1000", "rep": 1, "samples": 490, "maxFiles": 64, "maxBytes": 67108864, "endHoldFiles": 64, "endHoldBytes": 67108864, "gauge": 64, "evictions": 0, "evictionDurCount": 0, "P": 64, "filesAfterExit": 0, "lockTimeoutErrors": 0, "cachingDisabled": 0, "cachePutErrors": 0, "readErrors": 0, "stream": "org.apache.hadoop.fs.s3a.prefetch.S3APrefetchingInputStream", "note": "app=application_1793993608293_0002 dsrc=0"}
+[2026-11-06 12:35:12] === teardown (B3e step 5, B4)
+[2026-11-06 12:35:12] + yarn --daemon stop nodemanager
+WARNING: nodemanager did not stop gracefully after 5 seconds: Trying to kill with kill -9
+  rc=0
+[2026-11-06 12:35:18] + yarn --daemon stop resourcemanager
+  rc=0
+[2026-11-06 12:35:21] killing leftover 45513 bash -c R=/mydata/jingsong-s4/fs.s3a.prefetch.max.blocks.count-addToLinkedListAndEvictIfRequired-maxBlocksCount-run1; L=$R/logs/cluster/cluster-run.log; for i in $(seq 1 110); do grep -qE "EXIT 
+[2026-11-06 12:35:22] leftover processes of this run: none
+[2026-11-06 12:35:22] hadoop daemons after teardown: none
+[2026-11-06 12:35:22] ports busy after teardown: none
+[2026-11-06 12:35:22] + /usr/lib/jvm/java-8-openjdk-amd64/bin/jps -l
+46959 sun.tools.jps.Jps
+  rc=0
+[2026-11-06 12:35:22] EXIT rc=0

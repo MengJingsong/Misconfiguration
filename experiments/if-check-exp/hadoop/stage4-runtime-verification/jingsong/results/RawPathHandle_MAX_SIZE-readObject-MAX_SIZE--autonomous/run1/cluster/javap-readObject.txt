@@ -1,0 +1,35 @@
+  private void readObject(java.io.ObjectInputStream) throws java.io.IOException, java.lang.ClassNotFoundException;
+    Code:
+       0: aload_1
+       1: invokevirtual #23                 // Method java/io/ObjectInputStream.defaultReadObject:()V
+       4: aload_1
+       5: invokevirtual #24                 // Method java/io/ObjectInputStream.readInt:()I
+       8: istore_2
+       9: iload_2
+      10: iflt          19
+      13: iload_2
+      14: ldc           #26                 // int 1048576
+      16: if_icmple     46
+      19: new           #27                 // class java/io/IOException
+      22: dup
+      23: new           #28                 // class java/lang/StringBuilder
+      26: dup
+      27: invokespecial #29                 // Method java/lang/StringBuilder."<init>":()V
+      30: ldc           #30                 // String Illegal buffer length
+      32: invokevirtual #31                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      35: iload_2
+      36: invokevirtual #32                 // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+      39: invokevirtual #33                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      42: invokespecial #34                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      45: athrow
+      46: iload_2
+      47: newarray       byte
+      49: astore_3
+      50: aload_1
+      51: aload_3
+      52: invokevirtual #35                 // Method java/io/ObjectInputStream.readFully:([B)V
+      55: aload_0
+      56: aload_3
+      57: invokestatic  #36                 // Method java/nio/ByteBuffer.wrap:([B)Ljava/nio/ByteBuffer;
+      60: putfield      #4                  // Field fd:Ljava/nio/ByteBuffer;
+      63: return
