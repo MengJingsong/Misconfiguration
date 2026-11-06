@@ -1,265 +1,96 @@
-# Default-value convergence playbook (Direction 1, default-value variant)
+# Default-capacity convergence playbook
 
-> **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
-> names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
-> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
-> root, data under `if-check-exp/<system>/`.
+Read [verification-protocol.md](verification-protocol.md) and
+[custom-convergence-playbook.md](custom-convergence-playbook.md). This variant
+inherits their eligible shapes, controls, repetitions, outcomes and four-section
+case format. A case may replicate one local constraint or use temporary overlap;
+a standing pool and two distinct constraints are not required.
 
-**This playbook is [`custom-convergence-playbook.md`](custom-convergence-playbook.md) plus one
-restriction: every constraint in a combination stays at its default value.**
-Give the agent both files. Everything in the original playbook applies
-unchanged (one agent end to end, a batch of cases per run, control arms
-before the convergence arm, the four-section case template, process hygiene,
-no commit unless asked) **except where this file overrides it**. Where the
-two disagree, this file wins for a default-value run.
+## What defaults mean
 
-## Why this variant exists
+Leave the tested capacity constraints at their shipped/resolved defaults. Record
+for each: source `file:line` for its default rule, resolved value at the chosen
+heap/topology, and evidence from config diffs/command lines that it was not set.
+Derived defaults must be recomputed after every budget change.
 
-The original convergence cases all raised their constraints above the
-defaults. Run 1, for example, used `memtable_heap_space: 550MiB` (default 1/4
-heap, 256 MiB at its 1 GiB heap) and `counter_cache_size: 300MiB` (default
-`min(2.5% heap, 50MiB)`, 25 MiB there). Those cases show that Cassandra never
-checks the **sum** of individually valid settings against the node's memory.
-But they need an operator to change at least two settings.
+Audit every config/JVM change:
 
-This variant asks the stronger question: **does a node running Cassandra's
-own defaults OOM when several default-capped pools fill at the same time?**
-If yes, the gap needs no misconfiguration at all, only a workload. If no, the
-arithmetic of why not (the defaults are sized to fit together, or the pool is
-off by default) is the finding, and it bounds how far the original cases
-depend on non-default values.
+| Class | Treatment |
+|---|---|
+| Environment | Addresses, paths, topology, instrumentation; disclose even when allowed because they may affect memory |
+| Budget | Heap, direct limit, cgroup/process budget; allowed but labeled independently |
+| Supporting deviation | Other knobs, including executor sizes, allocation mode, cleanup thresholds, timeouts; justify and test without them where feasible |
+| Tested capacity | Must remain at its resolved default; otherwise file a custom-capacity case |
 
-## Starting from a custom-capacity case (continuation)
+A case without supporting deviations is **default capacities, no supporting
+deviations** (historically called "strict default"). Always append the budget
+label: automatic/resolved, explicit deployment budget, or deliberately tightened
+diagnostic budget. Preserve historical labels but explain them when citing cases.
+The existing DOB/hints result is default capacities at an explicit 192 MiB direct
+budget; it is not evidence of OOM at the node's automatic budget.
 
-A default-value case does not have to be built from scratch. When the original
-convergence playbook already has an **OOM-reaching case for the same
-constraints at raised values**, the efficient route is to treat that case as a
-starting point and **walk the configuration toward defaults while staying
-inside the OOM region** — a continuation. Each step relaxes one dimension
-toward its default, re-runs, and keeps going only while the node still OOMs;
-the endpoint is every constraint at its default (a strict default case) or the
-nearest point to it that still OOMs (a bounded result: "defaults minus this one
-change"). Three things make this rigorous rather than a guess:
+Compare the chosen heap and direct limit with the pinned startup script's resolved
+values for this machine. For claims about recommended deployment sizing, cite
+version-appropriate operating guidance and record its source/date. Keep heap and
+direct-memory guidance separate. Test a larger deployment-budget arm for a
+promising diagnostic case when practical, and report the result or blocker.
 
-1. **Be explicit about *which variable you are walking* — cap-space or
-   budget-space.** There are two independent dials: the per-constraint
-   **capacities** and the total **budget** (`-Xmx`, `-XX:MaxDirectMemorySize`,
-   cgroup limit). "Default-value convergence" pins the capacities at their
-   defaults; if a default capacity is an **absolute constant** (e.g. hints
-   `3 × 32 MiB = 96 MiB`, DOB `1 MiB × T`) there is nothing left to walk in
-   cap-space, so the continuation necessarily happens in **budget-space** — you
-   shrink the budget until the fixed defaults sum past it. Say so in section 2:
-   *default caps + a realistic/default budget* is the strongest claim; *default
-   caps + a deliberately tightened budget* is weaker (an operator did choose
-   the small budget) but still demonstrates the missing aggregate cap. Name
-   which one the case is. (The first default case, DOB+hints, is the second
-   kind: both caps are absolute, so the dial was `MaxDirectMemorySize`.)
-2. **Do not assume monotonicity along the path.** "Shrink a cap and it stays
-   OOMing until it stops, giving a clean boundary" holds for a *non-self-
-   reclaiming standing pool in isolation*. Capacities are coupled: lowering
-   `memtable_heap_space` makes flushes more frequent → more compaction → more
-   off-heap/disk churn, which can *raise* pressure elsewhere. For
-   budget-relative defaults the coupling is worse — shrinking the budget to
-   force convergence also **shrinks the very default caps you are summing**, so
-   the target can recede as you chase it (this is why absolute-cap pairs are
-   the tractable first cases). Expect the OOM region to have a non-convex
-   boundary; bisect one dimension at a time and re-verify after each step.
-3. **Check it is still the *same mechanism* at every step (same-mechanism
-   check).** Walking a knob can move you out of the intended OOM and into a
-   *different* one — a different pool, a different error signature, a kernel
-   OOM-kill where you had a JVM `OutOfMemoryError`. A boundary found by
-   accidentally crossing into another OOM is an artifact. At each continuation
-   step confirm the OOM is the same pool and the same signature as the starting
-   case; if it changes, stop and record that the path left the original
-   mechanism — that is itself a finding, not a default-value result for the
-   original one.
+Workload, schema, concurrency, data volume, timing and topology are experimental
+variables; disclose them. Per-table options that are tested constraints must stay
+default. A pool off at default contributes nothing; enabling it is a deviation
+(and a custom case if its enabling capacity is the tested constraint). An unlimited
+default is an unprotected-configuration lead, not a default bounded pool or an
+automatically confirmed bypass.
 
-If no custom-capacity case exists for the group, build the default case
-directly from the default arithmetic ("Picking combinations" step 4 below);
-the continuation route is an optimization, not a requirement.
+## Picking and sizing
 
-## The goal, per case
+Use the system's campaign queue and this variant's own batch status. Custom-case
+exhaustion does not imply default-case exhaustion. Disk remains skipped by request.
 
-As in the original: two or more constraints from `if-check-exp` that draw on
-the same budget, each safe alone at capacity, together exceeding the budget
-and OOMing the node. Here, **"at capacity" means at the capacity the default
-value gives on this node**.
+Express each capacity in terms of heap/budget, object footprint and multiplicity.
+Predict baseline + distinct live increments + temporary overlap. Fixed fractions
+alone cannot exclude default convergence when baseline, absolute defaults,
+reachable concurrency, or temporary memory are omitted. A fixed absolute pool
+occupies a **larger** fraction of a smaller budget. Arithmetic exclusions apply
+only to the named consumers, assumptions and tested range.
 
-## What "default value" means
+Try workload multiplicity and overlap at fixed defaults/budget before shrinking
+the budget solely to force failure. Verify actual reachable concurrency and any
+aggregate or executor bounds. Safe-alone margins must be stated and measured.
 
-1. **The constraint's own knob is not set by the run.**
-   - **yaml key:** the value in the shipped `conf/cassandra.yaml` at the
-     pinned tag (`cassandra-5.0.9`). If the key is commented out or empty
-     there, the code default (`Config.java` / `DatabaseDescriptor`) applies.
-     A commented-out example value is **not** the default (for example the
-     shipped `# memtable_heap_space: 2048MiB`; the real default is 1/4 heap).
-   - **JVM system property** (`-Dcassandra.*`): absent from the command
-     line, so `CassandraRelevantProperties` supplies its default.
-   - **Per-table option** (caching, compaction, compression and so on): left
-     unset in the `CREATE TABLE`, so the table default applies.
-   - **Hard-coded constant:** untouched by definition (never rebuild the
-     source to change one).
-2. **Heap-relative defaults follow the budget, and that is allowed.** Many
-   defaults are a fraction of the heap: `memtable_heap_space` and
-   `memtable_offheap_space` 1/4 heap, `counter_cache_size`
-   `min(2.5% heap, 50MiB)`, `key_cache_size` `min(5% heap, 100MiB)`,
-   `index_summary_capacity` 5% heap. Choosing the heap size changes their
-   resolved values; the knob is still at its default. Record the **resolved**
-   value at this budget, not just "default".
-   **The memory limits themselves come from `conf/cassandra-env.sh`, not the
-   JVM's own defaults.** With nothing set, `calculate_heap_sizes()` gives a
-   heap of `min(1/2 RAM, 31744 MiB)` under G1 (15,872 MiB under CMS), and
-   `-XX:MaxDirectMemorySize` of `1/4 RAM`, capped at half the heap limit
-   (15,872 MiB under G1). The direct limit is computed from the node's RAM,
-   **not** from the heap, so setting `MAX_HEAP_SIZE` alone leaves it large
-   (run 8's command line showed 15,872M on a 251 GiB node before its own
-   override). Both read RAM with `free -m`, i.e. the host's RAM, even inside
-   a cgroup or container.
-3. **Verify the default, do not assume it.** For every constraint, record in
-   section 1:
-   - the default rule, with `file:line` (shipped yaml line, `Config.java`,
-     `DatabaseDescriptor`, or `CassandraRelevantProperties`);
-   - the resolved value on this node, from Cassandra's own output where it
-     prints one (for example `Global memtable on-heap threshold is enabled
-     at …`, `Initializing counter cache with capacity of … MiBs`, or a JMX
-     read) or by arithmetic from the rule and the measured heap;
-   - evidence the knob was left alone: the arm's yaml diff against the
-     shipped file does not touch it, and the JVM command line has no `-D` for
-     it.
+## Continuing from a custom case
 
-## What may change, and what must not
+Reuse its harness and mechanism evidence, then move one capacity at a time toward
+default, preserving new dated designs and controls. There are three independent
+dials: capacity settings, budget, and workload/multiplicity. Absolute default
+capacities do not force a budget-only search: workload can change instance count
+or overlap. State which dial changes at each step.
 
-Every arm's `cassandra.yaml` diff against the shipped file and every non-default
-JVM flag goes into a **defaults audit** table in section 2, each line in one
-of these classes:
+Do not assume monotonicity: lowering a cap can increase flushing or change another
+consumer; changing heap can change defaults. At every step confirm the same
+allocation mechanism and initiating error. If the mechanism changes, file a new
+hypothesis rather than claiming continuation reproduced the original defect.
+A direct default-case design is equally valid; a custom predecessor is optional.
 
-| Class | Allowed? | Examples |
-|---|---|---|
-| **Environment** | yes, freely | `cluster_name`, `listen_address`, `rpc_address`, `seed_provider`, `num_tokens`/`initial_token`, `auto_bootstrap`, data/commit log/hints/saved-caches directories (on local disk), `endpoint_snitch` and `cassandra-rackdc.properties` for a multi-node or multi-DC topology, JMX port, `-XX:NativeMemoryTracking` and other read-only instruments |
-| **Budget** | yes, this is the experiment's dial | heap size (`MAX_HEAP_SIZE` / `-Xmx`, or the automatic heap `cassandra-env.sh` computes), the direct-memory limit (`MAX_DIRECT_MEMORY_SIZE` / `-XX:MaxDirectMemorySize`, or the automatic one), a cgroup or container memory limit, a dedicated disk mount |
-| **Supporting deviation** | only if unavoidable, justified, and listed | anything else not a constraint in the combination: `memtable_cleanup_threshold`, `memtable_allocation_type`, `file_cache_enabled`, `concurrent_writes`, timeouts |
-| **Constraint change** | **never** | setting any constraint in the combination to a non-default value |
+## Execution and output
 
-**A case with no supporting deviation is a strict default case.** A case
-with one or more is filed as **"default constraints, with supporting
-deviations"**, and its conclusion must say whether the OOM still depends on
-those deviations. Prefer a strict case. A supporting deviation that changes
-how far a constrained pool can fill (for example run 1's
-`memtable_cleanup_threshold: 0.99`, without which the memtable flushes long
-before its limit) is a strong caveat, because it does part of what the
-restriction forbids. Name it as such.
+Follow the common protocol for controls, repeated boundary runs, intervention,
+measurement and outcomes. All arms use the same budget/build and config except
+explicit intervention/deviation tests. Match total concurrency and background
+work where relevant. An enabled-threshold arm and an unset/unlimited-default arm
+must be labeled separately.
 
-**Budget realism.** The heap may be set to any size, but the case file must
-compare it with Cassandra's own guidance: the
-[Hardware Choices page](https://cassandra.apache.org/doc/stable/cassandra/managing/operating/hardware.html)
-says the heap "should be no less than 2GB, and no more than 50% of your
-system RAM". Also compare it with the heap and direct limit
-`cassandra-env.sh` would pick automatically for the node's RAM (see item 2 under
-"What 'default value' means"). A budget below the documented minimum is
-allowed (absolute defaults dominate at small heaps, which is often where
-convergence is possible) but weakens the Target-3 note. Say so.
+Write `<system>/cases/default-convergence/<mechanism-stem>.md`. Keep existing
+combination filenames. In the four case sections include:
 
-**The workload is not configuration.** Schema shape (columns, value sizes,
-replication factor, number of tables), client concurrency, data volume,
-topology (a down replica for hints), and timing are all free choices, as in
-the original playbook. Only per-table options that are themselves
-constraints must stay unset.
+1. Default rules, resolved values, unchanged-knob evidence, protection map and
+   separate capacity/budget labels.
+2. Complete defaults audit, prediction/window/range, executable workload and
+   controls, repetitions, interventions and stop conditions.
+3. Per-arm/per-repeat outcomes and memory trajectories with evidence.
+4. Exact conditions establishing a gap or protection, dependency on supporting
+   deviations, budget realism and limits of attribution.
 
-## Picking combinations (overrides)
-
-Follow the original's "Picking combinations" with these changes:
-
-1. **Use this playbook's own batch log,**
-   [`cassandra/cases/default-convergence/_batch-log.md`](cassandra/cases/default-convergence/_batch-log.md),
-   and its group status table. The original's statuses do **not** carry
-   over: a group marked exhausted for raised values is a different question
-   at defaults. The disk group's **skipped** status does carry over until it
-   is lifted in this batch log.
-2. **Check that the pool exists at its default.** Several capped pools are
-   off by default and cannot be used: in 5.0.9 `row_cache_size` defaults to
-   `0MiB` (row cache disabled) and `file_cache_enabled` to `false` (the
-   chunk cache holds no data). Turning one on is a supporting deviation at
-   best. Read the resolved default first.
-3. **Check that the default actually caps.** A default that means "no
-   limit" (for example `max_hints_size_per_host: 0B`, unlimited) is not a
-   capped pool at its default, so it is not a convergence candidate here.
-   Note it in the batch log as a candidate for
-   [`bypass-playbook.md`](bypass-playbook.md) or for a separate "unbounded at
-   default" note.
-4. **Do the default arithmetic before building anything.** For each group,
-   write each candidate's default capacity as a function of the budget (heap
-   fraction, absolute size, or per-thread × thread count). Then:
-   - if every candidate is a fixed heap fraction, the summed fractions (times
-     each pool's measured overhead factor from `if-check-exp`, plus
-     baseline) either exceed 100% at every heap size or at none. If they
-     never do, the group **cannot converge at defaults**: record the
-     arithmetic and mark it so, without forcing a case;
-   - **absolute** defaults (fixed MiB, or per-thread × a default thread
-     count) shrink relative to a small budget and grow relative to a large
-     one. Find the budget range, if any, where each alone is safe (≥ 30%
-     free, as in the original) and the sum exceeds the budget. That range,
-     and where it sits against the documented 2 GB minimum, is part of
-     section 2;
-   - absolute defaults on a budget the operator sizes independently are
-     often where a window exists (for example `allocateDirect` pools such as
-     the hints buffers, `MAX_HINT_BUFFERS` × 32 MiB = 96 MiB by default,
-     under a `MaxDirectMemorySize` set for a container).
-5. **Prefer combinations reachable from ordinary traffic** (the original's
-   Target-3 preference applies doubly here, since the config is not the
-   "misconfiguration").
-6. **The floor+surge model (base playbook, item 5 of "Inputs") is especially
-   valuable at defaults.** When every capacity is pinned at its default, a
-   **floor + surge** combination is often the *only* way to converge, because
-   the surge's contribution is sized by **concurrency**, not by a capacity
-   value — it is the one continuous dial still free when the caps are fixed.
-   So a default case can be: one default-capped standing pool (the floor) + a
-   workload-driven surge (concurrent no-global-cap per-item allocations) walked
-   up until the sum crosses the budget. This is already what the first default
-   case does — a fixed 96 MiB hints floor plus a DOB surge dialed by thread
-   count (`g ≈ 0.95 MiB × T`, swept over `T`). When you cannot shrink a default
-   cap and cannot shrink the budget further without leaving the documented
-   minimum, raising surge concurrency is the remaining move.
-
-## Designing, sizing and running (overrides)
-
-- **Sizing step 1 ("size each one safe alone")** becomes **choose the
-  budget**: the constraint values are fixed by the defaults, so the only
-  sizing dial is the budget (and the workload). State the chosen budget, the
-  window found in "Picking" step 4, and each arm's predicted margin.
-- **Sizing step 2 ("size the combination to exceed it")** is the same
-  arithmetic with the resolved default capacities.
-- **Control arms** run at the same budget, with the same yaml and JVM flags
-  as the convergence arm; only the workload differs (as in runs 7-8).
-- **A useful extra arm, when a case OOMs:** if the original convergence
-  playbook already has a case for the same constraints at raised values,
-  cite it; if a supporting deviation was needed, run the convergence arm once
-  without it, if feasible, to show whether the OOM depends on it.
-
-## Output (additions to the original template)
-
-Write one file per attempted combination to
-`<system>/cases/default-convergence/<constraint-1>+<constraint-2>[+...].md` (for Cassandra, `cassandra/cases/default-convergence/`), with the
-original four sections and these additions:
-
-- **Section 1:** per constraint, add rows for *default rule (`file:line`)*,
-  *resolved value at this budget (with the evidence line)*, and *knob left
-  unset (evidence)*. State whether the case is **strict default** or
-  **default constraints, with supporting deviations**.
-- **Section 2:** add the **defaults audit** table (every yaml diff line and
-  non-default JVM flag, classed environment / budget / supporting deviation),
-  and the budget-window arithmetic from "Picking" step 4, including where the
-  budget sits against the documented 2 GB minimum and the automatic heap.
-- **Section 4:**
-  - **if the node OOMed:** state it as *a node with Cassandra's default
-    values for these constraints OOMs under this workload at this budget*,
-    plus whether any supporting deviation was needed;
-  - **if not, or if the group cannot converge at defaults:** state why from
-    the arithmetic (defaults sized to fit together, pool off by default,
-    default not a cap, or no budget window), and name the **smallest
-    non-default change** that would make it converge, cross-referencing the
-    original convergence case where one exists.
-
-Keep the batch log at `<system>/cases/default-convergence/_batch-log.md` (one entry
-per run, same content as the original's, plus the default-arithmetic verdict
-per group surveyed). Track closed cases in [`_INDEX.md`](cassandra/_INDEX.md) under
-their own "Default-value convergence cases" table.
+Append batch records to `<system>/cases/default-convergence/_batch-log.md` and
+closed cases to the system index. Preserve historical results; do not rewrite
+old runs as if they satisfied newly introduced requirements.

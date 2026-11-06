@@ -11,16 +11,17 @@ follow-on to [`if-check-exp`](../if-check-exp/README.md).
 
 ## Target of this experiment
 
-**Make the testing node run out of memory while running Cassandra**, by
-driving the resource usage that Cassandra's own capacity checks are meant to
-bound. The point is to show, at runtime, the conditions under which those
-checks fail to prevent exhaustion — so the misconfigurations and bypasses that
-lead to OOM can be documented and, where they are real defects, reported
-upstream.
+**Under which reachable workloads and accepted configurations do Cassandra's
+individual and aggregate capacity controls fail to keep live memory within its
+budget?** Deliberate OOM on researcher-controlled CloudLab nodes supplies
+counterexamples; passing runs establish protection only within the tested range.
+The outputs are reproducible evidence, documented misconfigurations, and verified
+defects suitable for upstream reporting.
 
-This is a defensive, research-only exercise: every run is on a node we own and
-control, one Cassandra process we started, and no external or third-party
-system is targeted.
+Read [verification-protocol.md](verification-protocol.md) for common evidence and
+classification rules, then the selected playbook. The next Cassandra batch is
+specified in [cassandra/campaign-plan.md](cassandra/campaign-plan.md), with
+[node requirements](cassandra/node-requirements.md).
 
 ## Why this builds on if-check-exp
 
@@ -41,40 +42,32 @@ we turn them into an actual OOM on the node?**
 
 ## Two directions
 
-### Direction 1 — convergence (multiple usages reach capacity at once)
+### Direction 1 — convergence
 
-A single resource pool reaching its capacity usually does **not** OOM the node:
-the check either bounds it, or the pool is small relative to the heap. The idea
-here is to **manipulate several constraints at the same time** so that:
+Local controls work, but their reachable live allocations together exceed a
+shared budget. Test replicated instances of one local limit, independent
+consumers, overlapping bounded requests, and replacement/maintenance overlap.
+A standing pool and two distinct constraints are not required. Trace existing
+aggregate controls and other admission bounds; their presence does not guarantee
+sufficient coverage, and absence of a byte cap does not imply unlimited concurrency.
 
-- each individual usage, at its capacity, stays within a safe margin, but
-- several usages sit at their capacities **simultaneously**, and their sum
-  exceeds the available memory.
+### Direction 2 — bypass
 
-We pick a set of constraints whose capacities draw on the same budget (heap,
-off-heap/direct memory, or a shared pool), size each one so it is harmless in
-isolation, and construct a workload that pushes all of them to capacity in the
-same window. The deliverable is a set of **convergence cases**: which
-constraints combine, how each is sized, the workload that saturates them
-together, and the measured memory outcome.
+A caller, option, fallback allocation, accounting omission, release defect,
+periodic enforcement, or faulty reservation lets allocation grow outside a
+control's protection. The path may skip the check altogether. Distinguish the
+actual cap contract from total resource demand: an intentional pool fallback is
+not automatically a broken pool cap. Establish the physical consequence and
+whether it reaches OOM; neither counter drift nor RSS growth alone proves a leak.
 
-### Direction 2 — bypass (get past a single capacity check)
+Classify a bypass contributing to convergence as **mixed**. Separately identify
+intentional exceptions, configuration-sizing/validation gaps, and suspected
+implementation defects. A disabled limit is not automatically a bypass.
 
-For each constraint/capacity, look for a way that usage **exceeds the capacity
-the check was meant to enforce**. The check is present, but something lets
-usage grow past it. Causes vary:
-
-- an **escape hatch** — a config flag, a code path, or an option that skips or
-  loosens the check,
-- an **accounting gap** — the check counts one thing while a correlated
-  resource grows uncounted,
-- a **unit/overflow/ordering flaw** — the check computes its bound wrongly
-  (e.g. integer overflow, wrong unit, check-after-allocate).
-
-Several such gaps were already noted in passing during if-check-exp (see its
-"upstream bug candidates" list). The deliverable is a set of **bypass cases**:
-the check, the mechanism that defeats it, and the measured usage past the
-capacity — ideally driven far enough to threaten OOM.
+Capacity defaults and budget defaults are independent labels. Record heap OOM,
+direct/native OOM, kernel/container kill, and GC service loss separately; GC
+unresponsiveness alone is not OOM. See the common protocol for matched controls,
+repetitions, causal interventions, and negative/invalid results.
 
 ## Playbooks
 
@@ -96,7 +89,10 @@ Target 3 out of scope and only noted bypasses in passing; they are chased here.
 
 ## Scope and safety
 
-- All runs are on test nodes we own; one Cassandra instance we start and stop.
-- No remote, shared, or third-party target; no network service outside the node.
+- All runs are on allocated nodes we own; one measured experiment per victim
+  node at a time, with owned peers and clients as needed.
+- Only researcher-controlled services participate; build/run data and full logs
+  stay on local storage. Disk experiments remain skipped and disk-to-memory
+  causal-chain experiments deferred until explicitly reopened.
 - Findings that look like genuine upstream defects are checked against JIRA and
   may be reported to the Apache Cassandra project.

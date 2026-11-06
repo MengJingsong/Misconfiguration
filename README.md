@@ -27,6 +27,11 @@ and reports of verified defects to the upstream projects. AI assistants should
 use this context when interpreting requests to design, run, or analyze
 resource-exhaustion experiments in this repository.
 
+For the next Cassandra OOM batch, start with the
+[campaign plan](experiments/OOM-exp/cassandra/campaign-plan.md),
+[verification protocol](experiments/OOM-exp/verification-protocol.md), and
+[node requirements](experiments/OOM-exp/cassandra/node-requirements.md).
+
 ## 0. Project overview — the three targets
 
 The whole project works toward three targets. They are **project scope,

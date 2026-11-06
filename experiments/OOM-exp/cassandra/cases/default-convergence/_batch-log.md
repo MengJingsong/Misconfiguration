@@ -3,7 +3,23 @@
 Append one entry per playbook run, per [`../../../default-convergence-playbook.md`](../../../default-convergence-playbook.md).
 Same format as [`../custom-convergence/_batch-log.md`](../custom-convergence/_batch-log.md), plus the default-arithmetic verdict for each group surveyed.
 
-## Shared-budget group status
+## Current campaign status — 2026-11-06
+
+This dated table governs new candidate selection. Historical domain-wide statuses
+below describe only the earlier standing-pool combinations/arithmetic; they do
+not exclude replicated local limits or transient overlap. No new runtime results
+are asserted. See [campaign plan](../../campaign-plan.md).
+
+| Mechanism / allocation domain / regime | Status | Next action |
+|---|---|---|
+| C1 / internode private allowances / default capacities, budget separately labeled | open | Audit private/reserve accounting; sweep reachable active peers/links |
+| C2 / per-query live memory / default capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
+| C3 / per-worker DOB allocations / default capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
+| Existing standing-pool combinations / original regimes | historical scope only | Preserve results; new runs need a distinct mechanism or boundary question |
+| Disk exhaustion / all regimes | skipped by request | No new disk runs or retries until explicitly reopened |
+| Disk-to-memory causal chain / all regimes | deferred | Outside this batch; not implicitly reopened |
+
+## Historical shared-budget group status
 
 Independent of the original convergence playbook's table: a group exhausted there (raised values) is a separate question at defaults. Statuses as in the original (**open**, **exhausted**, **parked**, **skipped**, **deferred (causal-chain, not picked)**), plus **cannot converge at defaults** (the default arithmetic shows no budget where each is safe alone and the sum exceeds it; state the arithmetic).
 

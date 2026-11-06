@@ -2,7 +2,23 @@
 
 Append one entry per playbook run, per [`../../../custom-convergence-playbook.md`](../../../custom-convergence-playbook.md).
 
-## Shared-budget group status
+## Current campaign status — 2026-11-06
+
+This dated table governs new candidate selection. Historical domain-wide statuses
+below describe only the earlier standing-pool combinations/arithmetic; they do
+not exclude replicated local limits or transient overlap. No new runtime results
+are asserted. See [campaign plan](../../campaign-plan.md).
+
+| Mechanism / allocation domain / regime | Status | Next action |
+|---|---|---|
+| C1 / internode private allowances / custom capacities, budget separately labeled | open | Audit private/reserve accounting; sweep reachable active peers/links |
+| C2 / per-query live memory / custom capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
+| C3 / per-worker DOB allocations / custom capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
+| Existing standing-pool combinations / original regimes | historical scope only | Preserve results; new runs need a distinct mechanism or boundary question |
+| Disk exhaustion / all regimes | skipped by request | No new disk runs or retries until explicitly reopened |
+| Disk-to-memory causal chain / all regimes | deferred | Outside this batch; not implicitly reopened |
+
+## Historical shared-budget group status
 
 Checked and updated **before** picking a combination for a new run — one row
 per shared-budget group surveyed so far (not per combination; see the run

@@ -10,6 +10,15 @@ numbers and the conclusion live in the case file itself, linked from the row.
 If a result needs more than one line to state, shorten it and let the case
 file carry the rest.
 
+## Next campaign (planned, 2026-11-06)
+
+See [campaign-plan.md](campaign-plan.md), [node-requirements.md](node-requirements.md)
+and the [verification protocol](../verification-protocol.md). First batch: C1
+(private allowances × peers/links), B1 (native-v5 lifecycle), C2 (concurrent
+bounded reads). Candidates are hypotheses, not new findings. Historical rows
+below retain their original verdicts; new runs report capacity settings and budget
+selection separately, actual OOM versus service loss, and repeat counts in case files.
+
 ## Convergence cases ([`custom-convergence-playbook.md`](../custom-convergence-playbook.md))
 
 | Constraints | Result |
