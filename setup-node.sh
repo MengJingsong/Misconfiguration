@@ -13,6 +13,7 @@
 #   --timezone Z  system time zone to set (default America/New_York, US Eastern:
 #               EST, EDT in summer; "EST" is a fixed UTC-5); --no-timezone skips it
 #   --no-claude skip installing Claude Code (installed via claude.ai/install.sh)
+#   --no-codex  skip installing the OpenAI Codex CLI (standalone binary from GitHub releases)
 set -euo pipefail
 
 WORKSPACE=/proj/misconfiguration-PG0
@@ -27,6 +28,7 @@ TIMEZONE=America/New_York
 DO_GITHUB=1
 DO_VERIFY=1
 DO_CLAUDE=1
+DO_CODEX=1
 while [ $# -gt 0 ]; do
     case "$1" in
         --peers)     read -r -a PEERS <<< "${2:?--peers needs a host list}"; shift 2 ;;
@@ -34,10 +36,11 @@ while [ $# -gt 0 ]; do
         --no-github) DO_GITHUB=0; shift ;;
         --no-verify) DO_VERIFY=0; shift ;;
         --no-claude) DO_CLAUDE=0; shift ;;
+        --no-codex)  DO_CODEX=0; shift ;;
         --timezone)  TIMEZONE=${2:?--timezone needs a zone}; shift 2 ;;
         --timezone=*) TIMEZONE=${1#*=}; shift ;;
         --no-timezone) TIMEZONE=""; shift ;;
-        -h|--help)   sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help)   awk 'NR > 1 && !/^#/ {exit} NR > 1 {sub(/^# ?/, ""); print}' "$0"; exit 0 ;;
         *)           echo "unknown argument: $1 (see -h)" >&2; exit 2 ;;
     esac
 done
@@ -215,7 +218,40 @@ if [ "$DO_CLAUDE" = 1 ]; then
     else
         echo "   WARNING: Claude Code install failed" >&2
     fi
+fi
 
+# ---------------------------------------------------------------- Codex CLI (step 7)
+
+if [ "$DO_CODEX" = 1 ]; then
+    echo "7. Installing the Codex CLI..."
+    # standalone release binary (no Node.js/npm needed), put in ~/.local/bin like claude
+    export PATH="$HOME/.local/bin:$PATH"
+    case $(uname -m) in
+        x86_64|amd64)  arch=x86_64 ;;
+        aarch64|arm64) arch=aarch64 ;;
+        *)             arch="" ;;
+    esac
+    if command -v codex >/dev/null 2>&1; then
+        echo "   already installed: $(codex --version 2>/dev/null || echo codex)"
+    elif [ -z "$arch" ]; then
+        echo "   WARNING: no Codex binary for $(uname -m), skipped" >&2
+    else
+        asset="codex-$arch-unknown-linux-musl"
+        tmp=$(mktemp -d)
+        if curl -fsSL "https://github.com/openai/codex/releases/latest/download/$asset.tar.gz" | tar -xz -C "$tmp" \
+           && mkdir -p "$HOME/.local/bin" && install -m 755 "$tmp/$asset" "$HOME/.local/bin/codex"; then
+            echo "   installed: $(codex --version 2>/dev/null || echo 'codex (open a new shell if not on PATH)')"
+            echo "   sign in once with: codex login"
+        else
+            echo "   WARNING: Codex CLI install failed" >&2
+        fi
+        rm -rf "$tmp"
+    fi
+fi
+
+# ---------------------------------------------------------------- PATH for the installed CLIs
+
+if [ "$DO_CLAUDE" = 1 ] || [ "$DO_CODEX" = 1 ]; then
     # make ~/.local/bin permanent on PATH for new shells (once, not on every re-run)
     PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'
     if grep -qxF "$PATH_LINE" "$HOME/.bashrc" 2>/dev/null; then
@@ -224,8 +260,6 @@ if [ "$DO_CLAUDE" = 1 ]; then
         echo "$PATH_LINE" >> "$HOME/.bashrc"
         echo "   added ~/.local/bin to PATH in ~/.bashrc"
     fi
-    # shellcheck disable=SC1091
-    source "$HOME/.bashrc" || true
 fi
 
 echo "Done."
