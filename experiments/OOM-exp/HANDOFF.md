@@ -225,13 +225,17 @@ re-derive them, only consumes them.
   for the next combination.
 - **Available nodes (updated 2026-11-09):** `pc96` (local — the session runs
   here directly, no ssh; its full name is `pc96.cloudlab.umass.edu`, not
-  `.emulab.net`), and `pc264`, `pc265`, `pc268`, `pc271`, `pc323` (remote,
-  reach over ssh as `pc264.emulab.net` etc., user `jason92`, via the shared
-  deploy key). SSH to all five remotes is confirmed working; `ssh pc96` itself
-  needs `-i /proj/misconfiguration-PG0/.ssh/id_ed25519` (no `~/.ssh/config`
-  entry for the local node). Set up JDK/Ant/source on any remote before use if
-  not already done. (The earlier `pc41`/`pc39`/`pc29` allocation from
-  2026-11-02 is retired.)
+  `.emulab.net`; 32 cores, ~125 GiB), plus **five remote r320 nodes** (APT,
+  8 cores / 16 GiB each): `apt138`, `apt140`, `apt149`, `apt179`, `apt190`
+  (reach over ssh as `apt138.apt.emulab.net` etc., user **`jason92`**, via the
+  shared deploy key). Plain `ssh apt138` works — `~/.ssh/config` has a
+  `# setup-node: peer` block for each (user `jason92`, the deploy key); note the
+  login user is `jason92`, **not** `jason`. `ssh pc96` itself needs
+  `-i /proj/misconfiguration-PG0/.ssh/id_ed25519` (no config entry for the
+  local node). Build JDK/Ant/source on any remote before use if not already
+  done — see `environment.md`. (The earlier `pc41`/`pc39`/`pc29` allocation from
+  2026-11-02, and the interim `pc264/265/268/271/323` nodes at 2 c/1 GiB that
+  were too small to build or host peers, are retired.)
 - **Nodes:** run on whatever CloudLab node the session has — see
   `if-check-exp/cassandra/stage4-runtime-verification/environment.md` for the JDK/Ant
   install and source-copy steps (same pinned `systems/cassandra/source/`
