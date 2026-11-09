@@ -67,6 +67,19 @@ A standing pool and two distinct constraints are not required. Trace existing
 aggregate controls and other admission bounds; their presence does not guarantee
 sufficient coverage, and absence of a byte cap does not imply unlimited concurrency.
 
+**Sub-directions** (the eligible shapes above, named so a candidate declares
+which it targets; each is a *shape of allocation*, not a new question):
+
+| Sub-direction | Shape | Driver | Campaign candidate |
+|---|---|---|---|
+| Standing-pool / independent-consumer | independent bounded consumers (or replicated pools) sharing one budget | fixed pools filled to cap | runs 1–8 (done) |
+| **Multiplicity** | multiple instances of **one** constraint (peers, links, connections, tables) | per-instance allowance × active instances | **C1** |
+| **Concurrency / surge** | overlapping individually bounded requests, no standing pool required | N simultaneous bounded requests coexisting | **C2** |
+| Replacement / maintenance-overlap | old and new allocations live at once during growth/replacement/maintenance | overlap window before cleanup | (C4) |
+
+The list is open, not a closed enumeration; add a shape when a candidate needs
+one. Never count configured-but-inactive instances as multiplicity.
+
 ### Direction 2 — bypass
 
 A caller, option, fallback allocation, accounting omission, release defect,
@@ -76,9 +89,23 @@ actual cap contract from total resource demand: an intentional pool fallback is
 not automatically a broken pool cap. Establish the physical consequence and
 whether it reaches OOM; neither counter drift nor RSS growth alone proves a leak.
 
+**Sub-directions** (the mechanism rows of [`bypass-playbook.md`](bypass-playbook.md),
+named so a candidate declares which it targets):
+
+| Sub-direction | Mechanism | Campaign candidate |
+|---|---|---|
+| **Ownership / release defect** | repeated fill/complete-or-clear/idle cycles leave residual live allocations that grow with cycle count | **B1** (native-v5 large-request retention) |
+| *(others available)* | exempt caller/option/mode · pool fallback · failed-reservation-but-admitted · periodic/late enforcement · accounting mismatch · arithmetic/ordering/race | B2–B4 |
+
 Classify a bypass contributing to convergence as **mixed**. Separately identify
 intentional exceptions, configuration-sizing/validation gaps, and suspected
 implementation defects. A disabled limit is not automatically a bypass.
+
+**A sub-direction labels the hypothesis chosen before the run; `mixed` labels
+what the evidence shows.** The two are independent: a candidate filed under a
+convergence sub-direction (e.g. C1) becomes `mixed` if a local contract turns
+out to be violated, and a release-defect bypass (B1) is `mixed` if the retained
+allocations accumulate into aggregate exhaustion.
 
 Capacity defaults and budget defaults are independent labels. Record heap OOM,
 direct/native OOM, kernel/container kill, and GC service loss separately; GC
