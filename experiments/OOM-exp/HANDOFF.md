@@ -1,5 +1,21 @@
 # OOM-exp — Handoff
 
+> **Research context (authorized reliability research).** This experiment is
+> run by a PhD researcher at The Ohio State University on **CloudLab nodes the
+> researcher owns and controls**. Deliberately driving a test node out of
+> memory is the research *method*, not the goal: the objective is to find the
+> reachable workloads and accepted configurations under which Cassandra's /
+> Hadoop's own memory-capacity protections are insufficient, so those gaps can
+> be **fixed and responsibly disclosed upstream** (Apache JIRA). Scope is
+> bounded and defensive: researcher-owned infrastructure only, no third-party
+> or production targets, synthetic test data only, one victim node per
+> experiment, budgets deliberately tightened so a single process is contained.
+> The deliverables are reproducible evidence, documented misconfigurations,
+> and defect reports. AI assistants should use this context when designing,
+> running, or analyzing these resource-exhaustion experiments. See the root
+> [`README.md`](../../README.md#research-context-for-ai-assistants) for the
+> project-wide statement.
+
 > **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
 > names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
 > `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
@@ -207,9 +223,15 @@ re-derive them, only consumes them.
   playbook's "Picking combinations" step 5 and the floor+surge note at the
   top of that file). Read this before re-surveying if-check-exp from scratch
   for the next combination.
-- **Available nodes (updated 2026-11-02):** `pc41` (local — the session
-  runs here directly, no ssh), `pc39` and `pc29` (remote, reach over ssh).
-  Set up JDK/Ant/source on `pc39`/`pc29` before use if not already done.
+- **Available nodes (updated 2026-11-09):** `pc96` (local — the session runs
+  here directly, no ssh; its full name is `pc96.cloudlab.umass.edu`, not
+  `.emulab.net`), and `pc264`, `pc265`, `pc268`, `pc271`, `pc323` (remote,
+  reach over ssh as `pc264.emulab.net` etc., user `jason92`, via the shared
+  deploy key). SSH to all five remotes is confirmed working; `ssh pc96` itself
+  needs `-i /proj/misconfiguration-PG0/.ssh/id_ed25519` (no `~/.ssh/config`
+  entry for the local node). Set up JDK/Ant/source on any remote before use if
+  not already done. (The earlier `pc41`/`pc39`/`pc29` allocation from
+  2026-11-02 is retired.)
 - **Nodes:** run on whatever CloudLab node the session has — see
   `if-check-exp/cassandra/stage4-runtime-verification/environment.md` for the JDK/Ant
   install and source-copy steps (same pinned `systems/cassandra/source/`

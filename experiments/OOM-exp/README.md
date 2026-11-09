@@ -1,5 +1,21 @@
 # OOM Experiment — Driving a Test Node Out of Memory
 
+> **Research context (authorized reliability research).** This experiment is
+> run by a PhD researcher at The Ohio State University on **CloudLab nodes the
+> researcher owns and controls**. Deliberately driving a test node out of
+> memory is the research *method*, not the goal: the objective is to find the
+> reachable workloads and accepted configurations under which Cassandra's /
+> Hadoop's own memory-capacity protections are insufficient, so those gaps can
+> be **fixed and responsibly disclosed upstream** (Apache JIRA). Scope is
+> bounded and defensive: researcher-owned infrastructure only, no third-party
+> or production targets, synthetic test data only, one victim node per
+> experiment, budgets deliberately tightened so a single process is contained.
+> The deliverables are reproducible evidence, documented misconfigurations,
+> and defect reports. AI assistants should use this context when designing,
+> running, or analyzing these resource-exhaustion experiments. See the root
+> [`README.md`](../../README.md#research-context-for-ai-assistants) for the
+> project-wide statement.
+
 > **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
 > names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
 > `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
