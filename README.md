@@ -122,6 +122,7 @@ systems/
     └── conf/                <- stock config baseline (to populate)
 codeql-queries/              <- CodeQL packs: cassandra/, hadoop/, common/ (stage 1 of if-check-exp)
 config/                      <- repo_layout.sh (local refs), environment.sh.example (external refs)
+setup-node.sh                <- per-node SSH/GitHub/time-zone setup (see /proj/misconfiguration-PG0/README.md)
 README.md  HANDOFF*.md       <- this file and the start-here briefs
 ```
 
