@@ -23,7 +23,9 @@ stage 3/4:
    environment on nodes `pc41` (the local node, shared with Yang), `pc39`, `pc29`
    (`experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/environment.md`, set up 2026-11-06):
    run stage 4 the same way, run data on `/mydata/jingsong-s4/`, one case per node at a time where possible
-   (remote nodes via `ssh pcNN`); a node missing `/mydata/jingsong-s4/hadoop-base` is set up with its `setup-node.sh`.
+   (remote nodes via `ssh pcNN`); a node missing `/mydata/jingsong-s4/hadoop-base` is set up with
+   `experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/setup-node.sh` (the Hadoop build;
+   the root `setup-node.sh` is the separate SSH/GitHub node setup).
 5. **Commit and push automatically** (no need to ask) when a batch finishes (stage 3, plus stage 4
    where it runs), and after any other change to that person's Hadoop files. Commit to `main` only
    the files of this work (that person's folders, their `HANDOFF-<Name>.md`, shared Hadoop docs you
