@@ -12,7 +12,7 @@ are asserted. See [campaign plan](../../campaign-plan.md).
 
 | Mechanism / allocation domain / regime | Status | Next action |
 |---|---|---|
-| C1 / internode private allowances / default capacities, budget separately labeled | open | Audit private/reserve accounting; sweep reachable active peers/links |
+| C1 / internode private allowances / default capacities, budget separately labeled | **sensitivity-limited / unresolved** (run 2, 2026-11-09) | Mechanism confirmed exactly (N=4: per-conn exclusive=Q, Σreserve=G saturated, admitted=A_max); but N·Q (≤112 MiB) is dominated by the invariant G=512 reserve + occupancy noise, and senders OOM before high N. Reopen only with senders that survive RF-fanout to a slow victim (large heaps / dedicated load hosts) to test N=4 vs N=32 |
 | C2 / per-query live memory / default capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
 | C3 / per-worker DOB allocations / default capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
 | Existing standing-pool combinations / original regimes | historical scope only | Preserve results; new runs need a distinct mechanism or boundary question |
@@ -61,3 +61,57 @@ Independent of the original convergence playbook's table: a group exhausted ther
 2. 8 client threads of 1 KiB hinted writes fill the default 3-slab hints pool within 10 s.
 3. `ThreadLocalReadAheadBuffer` (compaction, direct, 256 KiB each) is a third default direct consumer that can end an arm sitting near the limit.
 4. `start_node` clears `N1-logs`, deleting the previous arm's heap dump. Copy the dump out first if it is needed.
+
+## 2026-11-09 — run 2 (C1, internode receive queues)
+
+**Nodes:** CloudLab APT, one experiment, LAN 10.10.1.0/24, user jason92. Victim `apt140` (10.10.1.1,
+16 threads, 15 GiB, cgroup v2, swap 8G). Peer hosts `apt179/138/190/149` (10.10.1.2–.5), each 16 threads/
+15 GiB. cassandra-5.0.9 built locally (`~/cassandra-b1` victim, `~/cassandra-c1` peers). Run data on
+`/mydata` only. Internode port 7000 restricted to 10.10.1.0/24 during the run (removed after).
+
+**Mechanism / allocation domain / regime:** C1, internode inbound receive queues (exclusive Q=4 MiB,
+endpoint E=128 MiB, global G=512 MiB — **defaults**), tightened diagnostic direct-memory budget. First
+convergence case in this project driven by **multiplicity of active peers** rather than two stacked pools,
+and the first multi-instance ring (up to 33 Cassandra instances via LAN IP aliases).
+
+**Attempted:** one case — [`internode_application_receive_queue_capacity--multiplicity.md`](internode_application_receive_queue_capacity--multiplicity.md).
+Arms: G1 reachability; D_cal_n4 (reference, Byteman 100 ms apply-delay, Q=4, 2048 MiB budget); D_cal_n8;
+RQ_n4_q1 (reduced-Q causal control, Q=1 MiB); D_oom_n4_b450 (450 MiB budget). **Result: mechanism confirmed
+exactly, multiplicity-OOM sensitivity-limited / UNRESOLVED.** At N=4 the admitted bytes = 527.8 MiB =
+A_max(4)=N·Q+G=528, per-connection = 4.0 MiB exclusive (=Q) + 127.9 MiB (=E), Σreserve = 511.8 MiB (G
+saturated); reduced-Q drops per-conn exclusive to exactly 1.00 MiB. But the escaping term N·Q (16→128 MiB
+over N=4→32) is dominated by the invariant reserve G=512 MiB and by ±~350 MiB occupancy noise, and the peer
+coordinators OOM (heap, retaining 128 KiB mutations for the slow victim) before a high-N arm can be
+sustained — so N=16/32 could not be reached and the RF=33 ring was reduced to RF=9.
+
+**Key empirical blockers (all anticipated by the design's decision rules):**
+1. **No natural backpressure** — at reachable load the victim's MutationStage drains and queues stay ~0;
+   the designed **Byteman apply-delay** (frozen, saved) was required to fill them, so queue-fill results are
+   conditional on injected delay; reproduction without it is negative.
+2. **Sender bottleneck** — 512 MiB (and even 2 GiB) peer coordinators OOM under RF fanout to a slow victim.
+3. **Reserve dominates** — receive-queue memory is ~all the shared G=512 MiB reserve, invariant across N; a
+   direct-buffer OOM is reachable only at a budget (450 MiB) so tight that baseline + reserve exceed it
+   before load — reserve/baseline-driven, not multiplicity.
+
+**Infrastructure notes for the next run (multi-instance Cassandra rings):**
+1. `num_tokens: 1` without `initial_token` causes **random-token collisions** across many simultaneous
+   fresh nodes — nodes get dropped from the ring. Assign explicit evenly-spaced `initial_token` per instance.
+2. A `systemd-run --user` transient **service** (not `--scope`) survives the launching ssh session, but
+   needs `loginctl enable-linger` or the user manager tears it down when the session closes.
+3. Do **not** wipe a node's `data/` to "freshen" it between restarts — it erases `system.local` and the
+   rejoin hits an endpoint collision; keep the data to rejoin, or use `replace_address_first_boot` +
+   `allow_unsafe_replace=true`.
+4. Peers need distinct JMX ports: `cassandra-env.sh` hardcodes `JMX_PORT="7199"`; sed it per instance. JMX
+   binds to 127.0.0.1 — use `nodetool -h 127.0.0.1 -p <port>`.
+5. `cassandra-stress -node whitelist <csv>` restricts coordinators to exactly those peers (WhiteListPolicy).
+6. Byteman on a Cassandra class (`MutationVerbHandler.doVerb`) needs no `boot:`; confirm the rule actually
+   fires (`bmsubmit -l`) — a loaded rule that isn't delaying usually means the arm hit a *dead* coordinator,
+   not a Byteman failure.
+7. Raising `write_request_timeout` (here 30 s) lifts the message-expiry ceiling so the receive queue can
+   hold more than `arrival × 2 s` before expiry releases permits.
+
+**Stopping reason:** the mechanism was confirmed to the model and the sensitivity limit was reached and
+quantified (noise ≫ multiplicity signal; senders fail before high N). No OOM was manufactured. Reopen only
+with senders that survive RF-fanout to a slow victim (much larger heaps or dedicated load hosts) to test the
+N=4 vs N=32 window directly. Cleanup verified: no Cassandra JVMs, IP aliases, or port-7000 rules left on any
+node; lingering disabled.

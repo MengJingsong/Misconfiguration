@@ -37,6 +37,7 @@ selection separately, actual OOM versus service loss, and repeat counts in case 
 | Constraints | Result |
 |---|---|
 | [`DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` (both at defaults)](cases/default-convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md) | **OOMed, strict default** — alone 63% / 69% of a 192 MiB `MaxDirectMemorySize`; together a direct-buffer `OutOfMemoryError`, JVM killed; narrow window only |
+| [`internode_application_receive_queue_capacity` × peers (C1 multiplicity)](cases/default-convergence/internode_application_receive_queue_capacity--multiplicity.md) | **Sensitivity limit / unresolved** — mechanism confirmed exactly (N=4: per-conn exclusive=Q=4 MiB, Σreserve=G=512 saturated, admitted=528=model); but N·Q (≤112 MiB over N=4→32) is dominated by the invariant reserve + ±350 MiB noise, and senders OOM before high N — multiplicity-OOM not attributable |
 
 ## Bypass cases ([`bypass-playbook.md`](../bypass-playbook.md))
 

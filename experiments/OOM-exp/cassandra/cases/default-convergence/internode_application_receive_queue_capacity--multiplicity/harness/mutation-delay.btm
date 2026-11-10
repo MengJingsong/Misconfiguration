@@ -1,0 +1,11 @@
+# C1 OOM-exp diagnostic intervention: slow the victim's MutationStage so admitted
+# internode mutation messages accumulate in the per-connection receive queues
+# (exclusive Q then endpoint/global reserve), exposing the exclusive-allowance
+# multiplicity mechanism. Target is a Cassandra class (no boot: needed).
+RULE c1 delay mutation apply
+CLASS org.apache.cassandra.db.MutationVerbHandler
+METHOD doVerb
+AT ENTRY
+IF TRUE
+DO Thread.sleep(__DELAY_MS__)
+ENDRULE

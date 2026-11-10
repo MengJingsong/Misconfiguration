@@ -1,0 +1,10 @@
+# D_cal_n4 (Q=4MiB default, N=4, Byteman 100ms mutation apply-delay), peak sample:
+# total admitted using_bytes = 527.8 MiB  ==  A_max(4)=N*Q+G = 16 + 512 = 528 MiB
+  10.10.1.32   using=131.9MiB  reserve=127.9MiB  exclusive(using-reserve)=4.0MiB
+  10.10.1.49   using=131.9MiB  reserve=127.9MiB  exclusive=4.0MiB
+  10.10.1.65   using=131.9MiB  reserve=127.9MiB  exclusive=4.0MiB
+  10.10.1.80   using=131.9MiB  reserve=127.9MiB  exclusive=4.0MiB
+# per-peer reserve 127.9MiB ~= E=128 (endpoint reserve saturated per peer)
+# Sum reserve 511.6MiB ~= G=512 (global reserve saturated); per-conn exclusive = Q = 4.0MiB
+#
+# RQ_n4_q1 (Q=1MiB custom, N=4) peak per-conn exclusive = 1.00 MiB (causal: exclusive==Q)
