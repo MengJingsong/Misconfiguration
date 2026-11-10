@@ -23,19 +23,24 @@
 
 Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
-[`_INDEX.md`](cassandra/cases/_INDEX.md) for every closed case.
+[`_INDEX.md`](cassandra/cases/_INDEX.md) for case status.
 
-## Status: active, five cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
+## Status as of 2026-11-10
 
-**Direction 1 (convergence): on-heap and off-heap are both exhausted (five
-OOMed cases across them), disk is paused by request with one blocked case;
-Direction 2 (bypass) has not started.** `if-check-exp` is
-the input (its case files and stage-4 results); this folder does not
-re-derive them, only consumes them.
+**Convergence is active.** The case index lists six verified-OOM results
+across the custom- and default-capacity regimes. The original on-heap and
+off-heap standing-pool surveys are complete within their historical scope.
+C1, the internode receive-queue multiplicity case, is still in progress.
+Disk work remains paused by request, and bypass has no recorded runtime runs.
+Use the [campaign plan](cassandra/campaign-plan.md) and
+[current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
+for current priorities and results.
 
 ## Current state
 
-- **Convergence (`custom-convergence-playbook.md`):** 8 cases run — 5 closed (OOMed: runs 1, 2, 6, 7, 8), 1 blocked (disk, skipped), 1 closed not reached (run 4, superseded), 1 void (run 5).
+- **Historical custom-convergence batch:** 8 runs. Five OOMed (runs 1, 2, 6,
+  7, 8), one was blocked (disk, skipped), one did not reach OOM (run 4,
+  superseded), and one was void (run 5).
   - Run 1: `memtable_heap_space` + `counter_cache_size` (both config-type, both
     individually confirmed true positive in `if-check-exp`, both on-heap):
     sized safe alone (each left ~38–39% of a 1024 MiB heap free under its own
@@ -118,8 +123,8 @@ re-derive them, only consumes them.
     OOM (attribution control). Case file:
     [`cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md`](cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md).
   - Batch log: [`cassandra/cases/_run-log.md`](cassandra/cases/_run-log.md) —
-    its "Shared-budget group status" table is the dedup record: on-heap is
-    **exhausted** (2-way then 3-way, escalating outcome, no 4th
+    its "Historical shared-budget group status" table records prior
+    standing-pool coverage. On-heap is **exhausted** (2-way then 3-way, escalating outcome, no 4th
     attempted since it wouldn't add evidence), off-heap is **exhausted**
     (run 8: three disjoint pairs all OOMed, no independent standing pool
     left untried),
@@ -133,10 +138,14 @@ re-derive them, only consumes them.
   Run 1 (default Q): admission ceiling matched to 0.2 MiB at N=4, but N·Q ≪ noise and coordinators OOMed
   under replica fan-out. Run 2 (custom Q, victim sole replica): senders survive, but the client waits on
   the victim, so occupancy settles at ~266 MiB below the ceiling and is Q-invariant. Run 3 (fast
-  co-replica, CL=ONE, open-loop): ceiling reached at N=8 (543 = 8×4 + 511 MiB) with live senders; stopped
-  early by a sampler bug, so the Q/N sweeps and OOM stage are still to run. Next: raise the
-  **coordinators'** `write_request_timeout` above A_max/D, then the N=8 Q-sweep.
-- **Bypass (`bypass-playbook.md`):** not started. No candidate picked yet.
+  co-replica, CL=ONE, fixed-rate load): reached 543 of 544 MiB of accounted
+  admission capacity at N=8 and Q=4 with live senders. A sampler bug stopped
+  the run after calibration. The Q/N sweeps and OOM stage remain outstanding.
+  Next, verify the **coordinators'** `write_request_timeout` against the
+  measured drain rate and run the matched sweeps. Proceed to the fixed-budget
+  OOM stage after a reproducible live-memory increase.
+- **Bypass (`bypass-playbook.md`):** B1 is the first planned investigation.
+  No runtime runs are recorded.
 
 ## Open follow-ups
 
@@ -149,18 +158,11 @@ re-derive them, only consumes them.
   `phi_convict_threshold` or otherwise isolating/accounting for the
   contention-induced false-suspicion hint growth seen in the control arm —
   see the case file §3.0/§4 for exact numbers and diagnosis.
-- **Off-heap group is exhausted (run 8).** Three disjoint pairs OOMed
-  (runs 6, 7, 8). The rows left in `_constraint-groups.md` are not
-  independent standing pools (same pool as one already used, or
-  in-flight-only networking buffers). Reopen only for a different question:
-  a cross-pair of already-used `allocateDirect` pools under
-  `MaxDirectMemorySize` (e.g. `DOB_MAX_RECYCLE_BYTES` + `file_cache_size`),
-  a 3-way case, or the minimum boundary.
-- **Next convergence work needs a decision**: both memory groups are
-  exhausted and disk is skipped by request, so the next convergence batch
-  needs either disk un-skipped (run 3's retry is ready), the causal-chain
-  scope opened, or one of the reopen questions above. Otherwise move to the
-  first bypass case.
+- **Current convergence work** follows the [campaign plan](cassandra/campaign-plan.md).
+  The multiplicity queue continues with C1, then C3 (per-worker serialization
+  buffers) and C5 (per-destination compressed hints buffers). C2 covers
+  overlapping bounded reads. The historical standing-pool exclusions apply
+  to the surveyed combinations and assumptions.
 - **Harness lesson (run 8):** `cassandra-stress write` always sends
   `CREATE KEYSPACE`, which times out under a concurrent load; use
   `cassandra-stress user` profiles without schema definitions for any
@@ -218,7 +220,10 @@ re-derive them, only consumes them.
 - [`default-convergence-playbook.md`](default-convergence-playbook.md) —
   the convergence playbook plus one restriction: every constraint stays at
   its default value (only the budget and the workload are dials). Own batch
-  log at `cases/_run-log.md`. Run 1 (2026-11-04): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` at defaults **OOMed, strict default** (192 MiB `MaxDirectMemorySize`, narrow window); on-heap and off-heap JNA judged **cannot converge at defaults** by arithmetic.
+  log at `cases/_run-log.md`. Run 1 (2026-11-04): `DOB_MAX_RECYCLE_BYTES` +
+  `MAX_HINT_BUFFERS` at defaults OOMed at an explicit 192 MiB
+  `MaxDirectMemorySize`. The arithmetic exclusions for on-heap and off-heap
+  JNA apply to the standing-pool combinations surveyed in that batch.
 - [`_INDEX.md`](cassandra/cases/_INDEX.md) — every closed case, by status.
 - `cases/convergence/`, `cases/candidates/`, `cases/bypass/`, `cases/negatives/` —
   case files (status-first folders) and small raw-log excerpts; the merged

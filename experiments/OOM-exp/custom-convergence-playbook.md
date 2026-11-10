@@ -18,9 +18,9 @@ allocations exceeds a shared memory budget. Eligible shapes are:
 A standing floor is optional. Floor/surge describe allocation lifetime, not the
 presence of aggregate protection. An aggregate control may exist yet leave
 private allowances, temporary copies, or outstanding work insufficiently bounded.
-If a local contract fails, record a mixed convergence/bypass case rather than
-claiming that all local controls held. Disk pressure affecting drainage is a
-separate causal-chain hypothesis, currently deferred.
+Record a mixed result when a demonstrated bypass contributes to aggregate
+exhaustion. Disk pressure affecting drainage is a separate causal-chain
+hypothesis, currently deferred.
 
 ## Picking cases
 
@@ -45,8 +45,9 @@ Hold capacity values and budget fixed while sweeping one workload variable where
 possible. For multiple subsystems, run each alone, then align their measured live
 usage. Sequential prefill is valid when retained memory overlaps the later load;
 sequential workloads that fully recover between steps do not prove convergence.
-For replicated instances, compare low multiplicity with increasing actual active
-instances. For temporary-only cases measure simultaneous live working sets.
+For multiplicity, vary the number of owners holding memory under the same local
+allowance. Include idle owners that retain memory, and measure simultaneous live
+footprints. For temporary-only cases measure simultaneous live working sets.
 
 Predict baseline + distinct live increments + temporary overhead, not merely the
 sum of nominal knobs. Verify local enforcement in the combined arm, and record

@@ -42,7 +42,7 @@ them:
 |---|---|
 | **Target 1** | Identify all resource constraints (config, hardcoded constants, variable types, ...) that limit memory/CPU usage. |
 | **Target 2** | Show *how* each constraint restricts usage, via the exact code path. |
-| **Target 3** | Investigate bypass methods that could lead to resource exhaustion. |
+| **Target 3** | Determine when reachable workloads and accepted configurations exhaust resource budgets through convergence or bypass. |
 
 Each experiment folder covers some subset. An experiment is **a method, not a
 system**: its README, templates and playbooks are system-agnostic, and its
@@ -57,7 +57,7 @@ taking the constraints `if-check-exp` found as its input:
 |---|---|---|
 | [`experiments/if-check-exp/`](experiments/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
 | [`experiments/entry-restriction-exp/`](experiments/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
-| [`experiments/OOM-exp/`](experiments/OOM-exp/README.md) | **active** | Target 3: drive a test node OOM using `if-check-exp`'s constraints (convergence, bypass) |
+| [`experiments/OOM-exp/`](experiments/OOM-exp/README.md) | **active** | Target 3: test memory protection under reachable workloads and configurations (convergence, bypass) |
 
 **Systems covered.** Most completed work is **Cassandra** and lives under each
 experiment's `cassandra/` subfolder. **Hadoop** has started: its source is vendored
@@ -264,9 +264,11 @@ stage structure) that is system-agnostic. Per-system findings live under
 
 ### 4.2 `experiments/OOM-exp/`
 
-- **`experiments/OOM-exp/`** (active) — **Target 3**: drive a test node out of
-  memory using the constraints `if-check-exp` found, via convergence (several
-  usages reaching capacity at once) and bypass (getting past a single check).
+- **`experiments/OOM-exp/`** (active) — **Target 3**: use the constraints
+  `if-check-exp` found to test whether simultaneous live allocations exhaust
+  a shared memory budget while local controls hold (convergence), or whether
+  allocations escape a control's protection (bypass). Controlled OOM tests
+  establish failure conditions, and passing runs bound the tested range.
   Method docs and playbooks live at the root; per-system cases under
   `OOM-exp/<system>/cases/`.
 

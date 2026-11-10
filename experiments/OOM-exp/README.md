@@ -1,4 +1,4 @@
-# OOM Experiment — Driving a Test Node Out of Memory
+# OOM Experiment — Testing Memory Capacity Protections
 
 > **Research context (authorized reliability research).** This experiment is
 > run by a PhD researcher at The Ohio State University on **CloudLab nodes the
@@ -21,16 +21,16 @@
 > `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
 > root, data under `if-check-exp/<system>/`.
 
-Resource-exhaustion research on **Apache Cassandra 5.0.9**, run on our own
-CloudLab test nodes. Part of the **misconfiguration** project, and a direct
-follow-on to [`if-check-exp`](../if-check-exp/README.md).
+OOM-exp is part of the **misconfiguration** project and builds on
+[`if-check-exp`](../if-check-exp/README.md). The current runtime campaign
+uses **Apache Cassandra 5.0.9** on researcher-controlled CloudLab test nodes.
 
 ## Target of this experiment
 
-**Under which reachable workloads and accepted configurations do Cassandra's
-individual and aggregate capacity controls fail to keep live memory within its
-budget?** Deliberate OOM on researcher-controlled CloudLab nodes supplies
-counterexamples; passing runs establish protection only within the tested range.
+**Under which reachable workloads and accepted configurations do individual
+and aggregate capacity controls fail to keep live memory within its budget?**
+Controlled OOM tests can establish failure conditions. Passing runs establish
+protection only within the tested range.
 The outputs are reproducible evidence, documented misconfigurations, and verified
 defects suitable for upstream reporting.
 
@@ -53,16 +53,17 @@ That inventory is the input here. We already know, per constraint:
 - what the constraint is and how its value is initialized (config vs. non-config),
 - whether usage tracked the constraint when we varied it (the outcome class).
 
-This experiment takes those constraints and asks the inverse question: **how do
-we turn them into an actual OOM on the node?**
+OOM-exp uses that evidence to test whether the identified controls protect a
+shared memory budget under reachable workloads and configurations.
 
 ## Two directions
 
 ### Direction 1 — convergence
 
-Local controls work, but their reachable live allocations together exceed a
-shared budget. Test replicated instances of one local limit, independent
-consumers, overlapping bounded requests, and replacement/maintenance overlap.
+Test whether allocations can coexist and exhaust a shared memory budget while
+the relevant local controls hold. Test replicated instances of one local limit,
+independent consumers, overlapping bounded requests, and replacement or
+maintenance overlap.
 A standing pool and two distinct constraints are not required. Trace existing
 aggregate controls and other admission bounds; their presence does not guarantee
 sufficient coverage, and absence of a byte cap does not imply unlimited concurrency.
@@ -72,13 +73,23 @@ which it targets; each is a *shape of allocation*, not a new question):
 
 | Sub-direction | Shape | Driver | Campaign candidate |
 |---|---|---|---|
-| Standing-pool / independent-consumer | independent bounded consumers (or replicated pools) sharing one budget | fixed pools filled to cap | runs 1–8 (done) |
-| **Multiplicity** | multiple instances of **one** constraint (peers, links, connections, tables) | per-instance allowance × active instances | **C1** |
+| Standing-pool / independent-consumer | independent bounded consumers (or replicated pools) sharing one budget | fixed pools filled to cap | historical custom runs 1–8 |
+| **Multiplicity** | multiple owners with separate instances of the same local allowance | number of owners simultaneously holding memory | **C1** (internode receive queues), **C3** (per-worker serialization buffers), **C5** (compressed hints writers) |
 | **Concurrency / surge** | overlapping individually bounded requests, no standing pool required | N simultaneous bounded requests coexisting | **C2** |
 | Replacement / maintenance-overlap | old and new allocations live at once during growth/replacement/maintenance | overlap window before cleanup | (C4) |
 
-The list is open, not a closed enumeration; add a shape when a candidate needs
-one. Never count configured-but-inactive instances as multiplicity.
+**Multiplicity** asks whether increasing the number of owners holding memory
+under the same local allowance increases total live memory enough to threaten a
+shared budget. Owners include connections, workers, writers, and tables. Count
+instances that retain memory while idle and measure their simultaneous
+footprints. Multiplying the allowance by the instance count estimates potential
+exposure. Actual memory depends on occupancy, retention, and other controls.
+For multiplicity, vary the number of memory-holding owners. For concurrency or
+surge, vary the number of overlapping requests. A case may involve both, so
+state which variable the test isolates.
+
+Add a shape when a candidate needs one. Campaign IDs identify individual
+investigations in the [Cassandra campaign plan](cassandra/campaign-plan.md).
 
 ### Direction 2 — bypass
 
@@ -97,15 +108,11 @@ named so a candidate declares which it targets):
 | **Ownership / release defect** | repeated fill/complete-or-clear/idle cycles leave residual live allocations that grow with cycle count | **B1** (native-v5 large-request retention) |
 | *(others available)* | exempt caller/option/mode · pool fallback · failed-reservation-but-admitted · periodic/late enforcement · accounting mismatch · arithmetic/ordering/race | B2–B4 |
 
-Classify a bypass contributing to convergence as **mixed**. Separately identify
-intentional exceptions, configuration-sizing/validation gaps, and suspected
-implementation defects. A disabled limit is not automatically a bypass.
-
-**A sub-direction labels the hypothesis chosen before the run; `mixed` labels
-what the evidence shows.** The two are independent: a candidate filed under a
-convergence sub-direction (e.g. C1) becomes `mixed` if a local contract turns
-out to be violated, and a release-defect bypass (B1) is `mixed` if the retained
-allocations accumulate into aggregate exhaustion.
+Classify a result as **mixed** when a demonstrated bypass contributes to
+aggregate exhaustion. Keep the original sub-direction as the label for the
+hypothesis tested. Separately identify intentional exceptions,
+configuration-sizing or validation gaps, and suspected implementation defects.
+A disabled limit is not automatically a bypass.
 
 Capacity defaults and budget defaults are independent labels. Record heap OOM,
 direct/native OOM, kernel/container kill, and GC service loss separately; GC
@@ -120,15 +127,15 @@ system's index, e.g. [`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md).
 
 | Direction | Playbook | What it produces |
 |---|---|---|
-| 1 — multiple usages reach capacity together | **`custom-convergence-playbook`** | a convergence case (constraint set, sizing, combined workload, memory outcome) |
+| 1 — simultaneous live allocations share a budget | **`custom-convergence-playbook`** | a convergence case (constraint set, sizing, combined workload, memory outcome) |
 | 1 (variant) — same, with every constraint at its default value | **`default-convergence-playbook`** | a default-value convergence case (same as above, plus a defaults audit) |
 | 2 — get past one capacity check | **`bypass-playbook`** | a bypass case (check, defeating mechanism, measured usage past capacity) |
 
 ## Relationship to the project targets
 
-This experiment is where the project's **Target 3** (bypass analysis / resource
-exhaustion) is carried out for Cassandra. `if-check-exp` deliberately left
-Target 3 out of scope and only noted bypasses in passing; they are chased here.
+This experiment carries out the project's **Target 3**, investigating resource
+exhaustion through convergence and bypass. It uses the capacity checks and
+runtime evidence collected by `if-check-exp`.
 
 ## Scope and safety
 
