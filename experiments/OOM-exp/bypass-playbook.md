@@ -40,6 +40,10 @@ Write the claim, expected counter/physical-memory trajectories, commands and sto
 conditions before the run. Demonstrate the protected path's enforcement where
 applicable; for soft targets document the intended timing/overshoot contract.
 Measure actual resource consumption independently of the suspect counter.
+The bypass claim is physical usage past the **contract** capacity (protocol,
+*Classification by measurement*); record the counter alongside it — counter past
+capacity means an enforcement failure, counter within it means an accounting or
+release bypass.
 
 For retention leads, use identical repeated batches and a defined idle window;
 distinguish allocator retention/reuse and logical counter drift from unreleased

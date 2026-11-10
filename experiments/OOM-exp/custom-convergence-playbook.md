@@ -48,6 +48,10 @@ sequential workloads that fully recover between steps do not prove convergence.
 For multiplicity, vary the number of owners holding memory under the same local
 allowance. Include idle owners that retain memory, and measure simultaneous live
 footprints. For temporary-only cases measure simultaneous live working sets.
+Before the run, check feasibility (Σ contract capacities + baseline > budget);
+during it, show every domain's physical usage stays ≤ its contract capacity —
+see the protocol's *Classification by measurement*. A domain past its contract
+makes the result bypass or mixed.
 
 Predict baseline + distinct live increments + temporary overhead, not merely the
 sum of nominal knobs. Verify local enforcement in the combined arm, and record

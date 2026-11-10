@@ -21,6 +21,37 @@ configuration-sizing or validation gap, or suspected implementation defect.
 A disabled limit is an unprotected configuration, not automatically a bypass.
 A retention cap is not necessarily a cap on all allocations using that pool.
 
+### Classification by measurement (amended 2026-11-10)
+
+Decide the direction from measurements, per controlled allocation domain:
+
+- **C** = the control's **contract** capacity, including any documented soft
+  overshoot (e.g. admit one oversized item when empty, periodic enforcement
+  window). Not merely the configured number.
+- **U** = peak **physical** live memory owned by that domain, measured
+  independently of the control's counter (NMT, heap histogram, direct-buffer
+  stats, RSS/cgroup deltas). **K** = the control's own counter.
+- **Scope:** compare U against the control whose contract claims to cover that
+  memory, fixed in the protection map *before* the run. The same bytes can look
+  in-bounds against a per-owner cap and uncovered against an aggregate one
+  (C1: per-connection exclusive ≤ Q, but N·Q is outside G by contract, so it is
+  multiplicity convergence, not a G bypass).
+
+| Observation | Classification |
+|---|---|
+| U ≤ C in every domain, and ΣU (simultaneous) + baseline > budget | **Convergence** (pools need not be full) |
+| U > C, K > C | **Bypass** — enforcement failure (late/periodic check, admitted after failed reservation, race) |
+| U > C, K ≤ C | **Bypass** — accounting omission/mismatch or release defect |
+| A bypass excess plus other domains are both needed for the OOM | **Mixed** |
+| No applicable control, or control disabled | **Unprotected configuration** (neither) |
+
+Overshoot within the documented contract is an intentional exception, not a
+bypass. Track U as peak **and** trend: transient overshoot (periodic enforcement)
+and growth across fill/clear/idle cycles (release defects) are missed by a single
+sample. A bypass with U > C is a result without OOM. For convergence, check
+feasibility first: if Σ contract capacities + baseline < budget, convergence is
+impossible even with every pool full, under that configuration and budget.
+
 ## Protection map (required before execution)
 
 Record one row per distinct allocation domain, citing the pinned source and

@@ -52,7 +52,9 @@ Predict baseline + distinct live increments + temporary overlap. Fixed fractions
 alone cannot exclude default convergence when baseline, absolute defaults,
 reachable concurrency, or temporary memory are omitted. A fixed absolute pool
 occupies a **larger** fraction of a smaller budget. Arithmetic exclusions apply
-only to the named consumers, assumptions and tested range.
+only to the named consumers, assumptions and tested range. Run the protocol's
+feasibility check (Σ default contract capacities + baseline vs budget) first;
+at defaults it is often the deciding screen.
 
 Try workload multiplicity and overlap at fixed defaults/budget before shrinking
 the budget solely to force failure. Verify actual reachable concurrency and any
