@@ -26,7 +26,7 @@ separate causal-chain hypothesis, currently deferred.
 
 Start with the system's campaign plan (for Cassandra,
 [campaign-plan.md](cassandra/campaign-plan.md)), its current batch status, and
-[constraint survey](cassandra/cases/custom-convergence/_constraint-groups.md).
+[constraint survey](cassandra/cases/_constraint-groups.md).
 Use if-check-exp source/case/runtime evidence to populate the protocol's
 protection map. True positives and false negatives with measured caps are leads;
 weak outcomes need confirmation. A true negative is not proof of a usable cap,
@@ -56,8 +56,14 @@ For diagnostic budgets, pursue a deployment-budget follow-up when practical.
 
 ## Output
 
-Write `<system>/cases/custom-convergence/<mechanism-stem>.md`; existing
-`<constraint-1>+<constraint-2>.md` names remain valid. Use a unique descriptive
+Write the case under the status-first folder that matches its outcome —
+`<system>/cases/convergence/<mechanism-stem>.md` for a verified OOM by
+convergence, `<system>/cases/candidates/<mechanism-stem>.md` while it is
+in-progress/parked/unresolved, `<system>/cases/negatives/` for a verified
+no-OOM. Record the capacity regime (**custom** | **default**) as a label in the
+case header and `_INDEX.md`, not as a folder; existing
+`<constraint-1>+<constraint-2>.md` names remain valid (disambiguate with a
+`--<regime>`/`--runN` suffix on collision). Use a unique descriptive
 stem for a single replicated constraint or overlap case. Four sections:
 
 1. **Constraints and capacities:** source/case links, protection map, distinct
@@ -71,6 +77,7 @@ stem for a single replicated constraint or overlap case. Four sections:
 
 Do not infer absence of an aggregate mechanism merely from OOM. Negative,
 protected, invalid, and blocked attempts are also filed once designed and run.
-Add closed cases to the system index and append every batch to
-`<system>/cases/custom-convergence/_batch-log.md`, including considered/skipped
-candidates, status changes and stopping reason. Historical cases remain as filed.
+Add closed cases to the system index (`<system>/cases/_INDEX.md`) and append
+every batch to the chronological `<system>/cases/_run-log.md`, including
+considered/skipped candidates, status changes and stopping reason. Historical
+cases remain as filed.

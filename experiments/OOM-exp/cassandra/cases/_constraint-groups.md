@@ -1,0 +1,192 @@
+# Convergence candidate survey
+
+Updated selection rules: 2026-11-06. Use the [campaign plan](../campaign-plan.md)
+and [common protocol](../../verification-protocol.md). The budget tables below
+retain the earlier survey's source/case pointers (73 rows, about 50 constraints at
+that survey date); they are not a current census or proof of complete coverage.
+Recheck exact allocation paths and controls before running a candidate.
+
+## Current coverage worklist
+
+| Candidate | Scope / lifetime | Multiplicity and accounting to verify | Aggregate coverage to verify |
+|---|---|---|---|
+| C1 private internode allowances | Per peer/link, in-flight | Actual active links, charged versus retained bytes, shared allocations | Private allowance versus endpoint/global reserve; other admission bounds |
+| C2 bounded reads | Per query, transient | Actual simultaneous live working sets; traversed bytes may differ from retained bytes | Executors, queues, transport and request guardrails |
+| C3 DOB buffers | Per serializing worker, active and retained | Actual workers holding buffers, active size versus recycle threshold | Worker limits and shared direct budget |
+| C4 replacement overlap | Per allocation owner, old/new overlap | Simultaneously live versions and cleanup timing | Whether reservations include old plus new memory |
+
+Fill all fields of the protocol's protection map in each new case: allocation,
+owner/release, local contract/units, scope, lifetime, multiplicity, aggregate
+coverage, budget and config. Floor and surge are descriptive lifetime labels,
+not eligibility gates. A floor is optional. Count-based controls qualify when
+live footprint is measurable; request allocations may overlap until their owners release them.
+Shared backing allocation must not be added twice, but different private
+allowances within one allocator can still expose an aggregate-coverage gap.
+
+## On-heap (JVM `-Xmx`)
+
+**Historical standing-pool status:** exhausted for the 3 constraints already run (`memtable_heap_space`,
+`counter_cache_size`, `key_cache_size`) — see `_run-log.md`. The rest below
+are earlier leads. The current coverage worklist above governs new mechanisms;
+old exhaustion does not exclude a distinct sizing or aggregate-coverage question.
+
+| Constraint | Case file | What it caps | Scale | Config-type |
+|---|---|---|---|---|
+| `memtable_heap_space` *(used, exhausted)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/memtable_heap_space-tryAllocate-limit--guided.md) | Memtable pool on-heap bytes, self-reclaiming | default 1/4 heap | yaml |
+| `counter_cache_size` *(used, exhausted)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/counter_cache_size-iscountercacheenabled-capacity--autonomous.md) | Counter cache (Caffeine-weighted), non-self-reclaiming | default ≈2.5% heap | yaml |
+| `key_cache_size` *(used, exhausted)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/key_cache_size-create-size--autonomous.md) | Key cache (Caffeine-weighted) | config-set | yaml |
+| `column_index_cache_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/column_index_cache_size-indexSamples-cacheSizeThreshold--guided.md) | Retained `IndexInfo[]` per row-index entry (write+read path) | per-partition, config-set threshold | yaml |
+| `prepared_statements_cache_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md) | `QueryProcessor.preparedStatements` (Caffeine, `measureDeep` weight) | config-set | yaml |
+| `diagnostic_event_memory_store_max_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/diagnostic_event_memory_store_max_size-store-keyhead--autonomous.md) | `ConcurrentSkipListMap` of diagnostic events, count-capped | count × event size | hard-coded constant (non-config) |
+| `monitoring_max_operations` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/monitoring_max_operations-operationsqueue_offer-maxoperations--autonomous.md) | `LinkedBlockingQueue<Operation>` (slow/failed query monitor), count-capped, each pins a `ReadCommand` | default 50 per queue ×2 queues | JVM property (`-Dcassandra.monitoring_max_operations`) |
+| `virtual_logs_max_rows` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/virtual_logs_max_rows-boundedlinkedlist_add-size--autonomous.md) | `BoundedLinkedList` backing `system_views.logs`, count-capped | rows × message size (small, ~30 MB at 100k×300B) | hard-coded constant, but typed "config" in index — verify before use |
+| `max_compaction_flush_memory_in_mb` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_compaction_flush_memory_in_mb-getmode-maxmembytes--autonomous.md) | Heap of the active SASI index builder during compaction flush | config-set MB, sustained only while a flush/compaction runs | per-table/per-index option (non-config) |
+| `repair_session_space` *(mixed — see Disk too)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/repair_session_space-split-maxsize--guided.md) | Merkle-tree leaves: on-heap per leaf+inner-node, **and** an off-heap buffer per tree (`82L+32` bytes) — sustained only during an active repair session | config-set, RF/partitioner-dependent | yaml |
+| `native_transport_max_concurrent_connections` *(false negative — see note)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_concurrent_connections-channelActive-limit--guided.md) | Live heap of idle open connections — stage-3 estimated this wouldn't move memory; stage 4 confirmed it does: `min(4000, L)` connections × 1,329.6 B/idle connection | ~1.3 KB × connection limit, small at realistic limits | yaml |
+
+## Off-heap / direct memory
+
+**Status:** exhausted (2026-11-03, run 8). Three disjoint pairs, all OOMed: `row_cache_size` + `index_summary_capacity` (run 6: row cache full, then an index-summary burst, cgroup OOM-kill during flush/compaction; runs 4-5 did not reach it, see `_run-log.md`), `memtable_offheap_space` + `file_cache_size` (run 7), and `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` (run 8, budget `-XX:MaxDirectMemorySize`). No independent standing pool is left untried (see `_run-log.md`'s status table for why each remaining row is not one).
+
+**Allocation paths checked so far (run 8):** `DOB_MAX_RECYCLE_BYTES` (`DataOutputBuffer$1$1.allocate` → `ByteBuffer.allocateDirect`), `MAX_HINT_BUFFERS` / hints slabs (`HintsBuffer.create` → `ByteBuffer.allocateDirect`) and the chunk-cache/networking `BufferPool` are **bound by `-XX:MaxDirectMemorySize`** (JDK `Bits` accounting); `row_cache_size`, `index_summary_capacity` and `memtable_offheap_space` (`offheap_objects`) are JNA/`MemoryUtil` malloc and **are not**. Netty's own pooled buffers use a separate counter (same limit value, not shared).
+
+**Important correction found while running run 4, worth checking before
+picking any other candidate from this table:** `-XX:MaxDirectMemorySize`
+does **not** actually bind `row_cache_size` or `index_summary_capacity`
+(confirmed from source and from measurement). Both allocate through
+`Memory.allocate → MemoryUtil.allocate → JNA Native.malloc` — plain libc
+malloc — which never touches the JVM's `DirectByteBuffer`/`Bits.reserveMemory`
+accounting that `-XX:MaxDirectMemorySize` polices. This is stated explicitly
+in both constraints' own if-check-exp case files (their A2 sections), and is
+why both stage-4 results measure `RssAnon` from `/proc/<pid>/status`, never
+a JVM-reported "direct memory" figure. **Before assuming any other row in
+this table is bounded by `-XX:MaxDirectMemorySize`, check whether its real
+allocation path is JNA/malloc (not bound by the flag) or a genuine
+`java.nio.DirectByteBuffer`/Netty pooled buffer (bound by the flag) — the
+Netty/BufferPool-backed rows below (`internode_application_*`,
+`native_transport_*`, `file_cache_size`, `networking_cache_size`) are more
+likely to be the latter, but this has not been verified for this table; only
+`row_cache_size` and `index_summary_capacity` have been checked.** The
+working budget mechanism for this group, confirmed in run 4, is a cgroup v2
+`memory.max` (via `systemd-run --user --scope -p MemoryMax=...`), which
+bounds the whole process (heap + every off-heap/native allocation) regardless
+of which JVM accounting path, if any, a given off-heap constraint uses.
+
+| Constraint | Case file | What it caps | Scale | Config-type |
+|---|---|---|---|---|
+| `memtable_offheap_space` *(used, run 7 — OOMed)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/memtable_offheap_space-tryAllocate-limit--guided.md) | Memtable pool off-heap bytes (direct buffers) | yaml-set | yaml |
+| `row_cache_size` *(used, runs 4-6 — OOMed in run 6)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/row_cache_size-create-serialized_size--autonomous.md) | Row cache, serialized off-heap (JNA `Native.malloc`, **not** bound by `-XX:MaxDirectMemorySize`) | yaml-set | yaml |
+| `nopcache_capacity` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/nopcache_capacity-setcapacity-capacity--autonomous.md) | Same row-cache-memory family as `row_cache_size` (off-heap, read as `RssAnon`) | yaml-set | hard-coded constant |
+| `index_summary_capacity` *(used, runs 4-6 — OOMed in run 6)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/index_summary_capacity-distributeRemainingSpace-extraSpaceRequired--autonomous.md) | Off-heap index-summary bytes (same JNA `Native.malloc` path, **not** bound by `-XX:MaxDirectMemorySize`; enforced only at periodic resize — see run 4's case file for the bypass window this creates) | yaml-set | yaml |
+| `DOB_MAX_RECYCLE_BYTES` *(used, run 8 — OOMed)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided.md) | Per-thread scratch-buffer recycle pool (direct bytes held between uses; heap in one control arm) | staircase from 2,048 B up to tens of MB per thread × held-thread count | JVM property |
+| `MAX_HINT_BUFFERS` *(used, run 8 — OOMed)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided.md) | Off-heap direct `ByteBuffer`s for hints, `n × bufferSize` | config-set | JVM property |
+| hints buffer slabs (indexed under `max_mutation_size` in the index — really a hints constraint) *(same pool as `MAX_HINT_BUFFERS`; covered by run 8)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/hints-HintsBuffer-put-slabCapacity--autonomous.md) | Off-heap direct `ByteBuffer` slabs (`HintsBuffer.allocateDirect`) | slab-sized | yaml (same family as `hints_write_buffer_size`/`MAX_HINT_BUFFERS` — verify exact knob before use) |
+| `internode_application_receive_queue_capacity` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md) | Off-heap networking pool (large messages; small messages' heap holding was refuted at stage 4 — **off-heap is the confirmed path**) | yaml-set, per-connection | yaml ×2 |
+| `internode_application_send_queue_capacity` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_application_send_queue_capacity-acquireCapacity-pendingCapacityInBytes--guided.md) | Same off-heap networking pool family, send side | yaml-set | yaml |
+| `internode_application_receive_queue_reserve_global_capacity` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_application_receive_queue_reserve_global_capacity-acquireCapacity-actualExcess--autonomous.md) | Same family, global reserve across connections | yaml-set | yaml, typed "not-a-case" in index — verify |
+| `native_transport_receive_queue_capacity` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md) | Off-heap client-facing networking pool (same `BufferPoolAllocator` family as internode, client side) | yaml-set | yaml |
+| `native_transport_max_request_data_in_flight` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_request_data_in_flight-releaseItem-globalInFlightBytesBelowLimit--autonomous.md) | Same client-facing off-heap pool family, global in-flight bytes | yaml-set | yaml ×2 |
+| `file_cache_size` *(used, run 7 — OOMed; chunk cache enabled)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md) | Chunk-cache `BufferPool`, pooled direct bytes (`memoryAllocated`) | yaml-set | yaml ×2 |
+| `networking_cache_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/networking_cache_size-allocateMoreChunks-memoryUsageThreshold--guided.md) | Same `BufferPool` family, "networking" pool slabs | yaml-set | yaml |
+| `trie_2gb_hard_limit` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/trie_2gb_hard_limit-allocateblock-leadbit--autonomous.md) | One trie memtable's buffers — **off-heap or on-heap depending on `memtable_allocation_type`** (tested both `OFF_HEAP` and `ON_HEAP`); shares the same pool as `memtable_offheap_space`/`memtable_heap_space` when that allocation type is active | hard 2 GiB/trie ceiling | hard-coded constant |
+| `row_overhead_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/row_overhead_size-intrie_init-limitinmb--autonomous.md) | Same trie-memtable family as `trie_2gb_hard_limit` — one trie's buffer threshold | config-set MB | hard-coded constant, typed "not-a-case" — verify |
+| `native_transport_queue_max_item_age_threshold` *(false negative — see note)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_queue_max_item_age_threshold-hasQueueCapacity-oldestTaskQueueTime--guided.md) | Same off-heap client-facing networking pool family as `native_transport_receive_queue_capacity`/`native_transport_max_request_data_in_flight` (`RequestsSize`/global-reserve bytes) — stage-3 estimated negative, stage 4 confirmed it caps in throwing mode (only slows growth in default mode) | pool-dependent, same family scale | yaml |
+
+## Disk
+
+**Status:** skipped by request (2026-11-02) — do not pick from this group.
+Listed here for completeness only.
+
+| Constraint | Case file | What it caps | Scale | Config-type |
+|---|---|---|---|---|
+| `commitlog_total_space` *(skipped)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/commitlog_total_space-maybeFlushToReclaim-unused--autonomous.md) | Total commit-log disk bytes | yaml-set | yaml |
+| `max_hints_size_per_host` *(skipped)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_hints_size_per_host-shouldHint-maxHintsSize--guided.md) | Hints-on-disk bytes per down replica | yaml-set | yaml |
+| `cdc_total_space` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/cdc_total_space-processNewSegment-allowance--guided.md) | Total CDC commit-log-segment disk bytes | yaml-set | yaml |
+| `commitlog_segment_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/commitlog_segment_size-allocate-endOfBuffer--autonomous.md) | One commit-log segment's disk bytes (not the directory total — a per-segment cap, pairs naturally with `commitlog_total_space`) | yaml-set | yaml |
+| `DataDirectory_getAvailableSpace` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/DataDirectory_getAvailableSpace-getWriteDirectory-availableSpace--guided.md) | Free bytes on the data-file filesystem, checked before compaction output | filesystem-dependent | runtime-queried (mixed) |
+| `max_space_usable_for_compactions_in_percentage` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_space_usable_for_compactions_in_percentage-hasDiskSpaceForCompactionsAndStreams-availableForCompaction--guided.md) | Disk-bytes headroom reserved against compaction/stream output | % of usable disk | yaml (mixed) |
+| `repair_disk_headroom_reject_ratio` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/repair_disk_headroom_reject_ratio-verifyDiskHeadroomThreshold-rejectRatio--guided.md) | Data-directory apparent bytes + memtables vs. `(1−r)×T` headroom | yaml-set ratio | yaml |
+| `sstable_size_in_mb` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/sstable_size_in_mb-shouldSwitchWriterInCurrentLocation-maxSSTableSize--autonomous.md) | One output sstable's disk bytes (per-table option) | yaml-set MB | per-table option (non-config) |
+| `cache_keys_to_save` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/cache_keys_to_save-saveCache-keysEstimate--autonomous.md) | Saved-cache file bytes on disk (entry count × entry size) | config-set key count | yaml ×3 |
+| `repair_session_space` *(see On-heap too)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/repair_session_space-split-maxsize--guided.md) | Off-heap buffer per merkle tree (`82L+32` bytes) is memory, not disk — listed here only because its on-heap counterpart is cross-referenced above | — | yaml |
+
+## Temporary-allocation candidates (source audit required)
+
+These are hypotheses for standalone concurrency or floor-plus-transient cases.
+Verify actual live bytes, reachable multiplicity and every aggregate/executor
+bound. The absence of a global byte counter does not imply unlimited concurrency.
+
+| Constraint | Case file | Budget it surges onto | Per-item lead (aggregate coverage unverified) |
+|---|---|---|---|
+| `local_read_size_fail_threshold` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/local_read_size_fail_threshold-addSize-failBytes--guided.md) | On-heap response buffers | Per-command response-buffer bytes; measure concurrent live working sets and admission bounds |
+| `row_index_read_size_fail_threshold` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/row_index_read_size_fail_threshold-checkSize-failThreshold--guided.md) | On-heap response buffers | Same family, per-command |
+| `coordinator_read_size_fail_threshold` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/coordinator_read_size_fail_threshold-shouldReject-thresholdBytes--guided.md) | On-heap response buffers | Same family, per-command (coordinator side) |
+| `max_mutation_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md) | Off-heap serialization buffer (+ commit-log entry) | Per-mutation bytes; measure concurrent allocations and admission bounds |
+| `max_value_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max_value_size-read-maxValueSize--guided.md) | Heap/off-heap per read/write path | Per-column-value bytes |
+| `internode_max_message_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/internode_max_message_size-inferMessageSize-size--autonomous.md) | Direct + heap per message | Per-message bytes — **but** verify the large-message path isn't already governed by the internode in-flight reserve (a floor); if it is, this is not an independent surge |
+| `native_transport_max_message_size` *(false negative)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/native_transport_max_message_size-processFirstFrameOfLargeMessage-maxMessageSize--guided.md) | Client-facing direct/heap per message | Per-message bytes — same caveat: verify it isn't governed by `native_transport_max_request_data_in_flight` (a floor) |
+
+## Earlier exclusions to reassess
+
+The table retains the previous exclusion reasons for traceability. These reasons
+are **not current exclusions**: count limits and short lifetimes alone do not
+exclude convergence. Measure footprint, reachability and simultaneous lifetimes
+before accepting or rejecting each lead.
+
+| Constraint | Case file | Historical exclusion reason (reassess) |
+|---|---|---|
+| `Integer_MAX_VALUE` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/Integer_MAX_VALUE-maybeAddEntry-Integer_MAX_VALUE--guided.md) | Generic overflow guard, not a budget |
+| `rows-per-partition` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/rows-per-partition-hasEnoughLiveData-rowLimit--autonomous.md) | Per-query row-**count** paging limit (if a surge is wanted here, use the byte-denominated read-size thresholds above instead) |
+| `group-by-row-limit` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/group-by-row-limit-incrementRowCount-rowsCounted--autonomous.md) | Per-query group/row-**count** paging limit |
+| `default_page_size` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/default_page_size-cqlgroupbylimits_onclose-rowlimit--autonomous.md) | Hard-coded per-query page row **count** |
+| `tombstone_failure_threshold` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/tombstone_failure_threshold-countTombstone-tombstones--autonomous.md) | Per-read **count**-based bound; re-evaluate as a surge only if count × tombstone size pins meaningful uncapped bytes |
+| `CACHEABLE_MUTATION_SIZE_LIMIT` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/CACHEABLE_MUTATION_SIZE_LIMIT-serialization-CACHEABLE_MUTATION_SIZE_LIMIT--guided.md) | Per-mutation heap byte[] used only to *decide* cacheability, released at once — not pinned while a floor sits |
+| `SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/SAI_VECTOR_SEARCH_MAX_MATERIALIZE_KEYS-materializeKeysAndCloseSource-MAX_MATERIALIZED_KEYS--guided.md) | Per-query key-list **count** bound, released when the query ends |
+| `mutation_repair_rows_per_batch` | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/mutation_repair_rows_per_batch-throttledunfilterediterator-maxbatchsize--autonomous.md) | Per-batch row-**count** throttle during repair streaming |
+
+## Other count/concurrency leads
+
+Prior exclusion reasons below are historical. Count × footprint and concurrent
+allocation lifetimes can be relevant; confirm the actual memory effect first.
+
+| Constraint | Case file | What it actually caps | Why excluded |
+|---|---|---|---|
+| `concurrent_compactors` *(false negative)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/concurrent_compactors-submitBackground-getMaximumPoolSize--guided.md) | Max compaction thread-pool **size** (thread count) | Count, not bytes |
+| `max-compaction-threshold` *(false negative, bypass)* | [case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/max-compaction-threshold-getCandidatesFor-candidatesSize--autonomous.md) | Candidate-sstable **count** grouped per compaction round, "caps only on some paths (bypass)" | Count, not bytes — but the confirmed bypass mechanism is a candidate for `bypass-playbook.md`, not here |
+
+## Surprises / notes for whoever picks next
+
+- **A sixth false negative,
+  `prepared_statements_cache_size-loadPreparedStatements-preparedBytesLoaded`**
+  ([case](../../../if-check-exp/cassandra/stage3-ai-deep-read/cases/prepared_statements_cache_size-loadpreparedstatements-preparedbytesloaded--autonomous.md)),
+  isn't listed above at all: stage 4 found the prepared-statement cache
+  itself is **not** bounded by this specific check (the thing it actually
+  caps is a *different* on-heap memtable — `system.prepared_statements` via
+  eviction tombstones). It's the same constraint name already in the
+  On-heap table above (`prepared_statements_cache_size`, true positive at
+  `storePreparedStatement`) but a different decision point with the
+  opposite real effect — a confirmed bypass, not a second standing-pool
+  cap. Flagged for `bypass-playbook.md`'s candidate list, not duplicated
+  into On-heap here.
+- **The earlier survey suspected shared backing allocations for networking
+  constraints** (`internode_application_{receive,send}_queue_capacity`,
+  `internode_application_receive_queue_reserve_global_capacity`,
+  `native_transport_receive_queue_capacity`,
+  `native_transport_max_request_data_in_flight`) — re-trace ownership and allocator routes before assuming that all counters
+  cover the same bytes. Avoid double-counting actual allocations, while testing
+  whether private allowances escape sufficient aggregate admission control.
+- **`trie_2gb_hard_limit` and `row_overhead_size`** aren't a fixed on-heap
+  or off-heap constraint — they follow `memtable_allocation_type`, landing
+  in whichever of `memtable_heap_space`/`memtable_offheap_space` is active.
+  They're listed under off-heap here (the default/tested-off-heap case) but
+  really belong to *both* groups depending on config.
+- **`nopcache_capacity` reads as a near-duplicate of `row_cache_size`** —
+  same off-heap row-cache-memory family, same measurement (`RssAnon`). Not
+  an independent off-heap candidate on its own.
+- A handful of index rows are typed `not-a-case` or `mixed` in
+  `_INDEX.md`'s "Type (2026-10-29)" column despite reading as config
+  true positives here (`virtual_logs_max_rows`, `row_overhead_size`,
+  `internode_application_receive_queue_reserve_global_capacity`,
+  `memtable_heap_space · adjustMemtableSize`) — re-check the case file's own
+  type classification before building on one of these, the index's type
+  column and the outcome-class column were updated on different dates.

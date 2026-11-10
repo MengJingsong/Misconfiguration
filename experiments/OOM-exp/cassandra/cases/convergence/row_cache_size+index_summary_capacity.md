@@ -10,7 +10,7 @@
 
 ## 1. Constraints and capacities
 
-Both are off-heap/direct-memory config-type **true positives** from if-check-exp, surveyed in `cases/custom-convergence/_constraint-groups.md`'s off-heap table and previously parked (run 2) for lack of an off-heap budget setup:
+Both are off-heap/direct-memory config-type **true positives** from if-check-exp, surveyed in `cases/_constraint-groups.md`'s off-heap table and previously parked (run 2) for lack of an off-heap budget setup:
 
 | | `row_cache_size` | `index_summary_capacity` |
 |---|---|---|

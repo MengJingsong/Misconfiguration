@@ -67,7 +67,9 @@ Write `<system>/cases/bypass/<constraint>-<mechanism>.md` with four sections:
    OOM reached/not reached, attribution limits, other controls, and whether an
    upstream defect investigation is justified. Upstream reporting is separate.
 
-Add closed cases to `<system>/_INDEX.md`. Append batches to
-`<system>/cases/bypass/_batch-log.md`, including considered candidates, precise
-status/range, failed or invalid attempts, raw-log locations and stopping reason.
+Add closed cases to `<system>/cases/_INDEX.md` (a verified OOM by bypass goes in
+`<system>/cases/bypass/`, an unresolved one in `<system>/cases/candidates/`,
+regime as a label). Append batches to the chronological `<system>/cases/_run-log.md`,
+including considered candidates, precise status/range, failed or invalid
+attempts, raw-log locations and stopping reason.
 Follow the common protocol's owned-node, local-storage and cleanup rules.

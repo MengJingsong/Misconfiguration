@@ -57,7 +57,7 @@ The "OutOfMemoryError mentions: 1" line in every arm's `summary.txt` is a grep f
 
 **Target-3 note.** Schedule B is a plausible operator story: a large row cache that is warm, then a bulk load into a table with dense index sampling. It does **not** depend on a non-default `index_summary_resize_interval`. The run used 120 m only so no tick could land inside an arm, but resize ticks run on a fixed period from node startup. With the default 60 m, a burst plus its compaction tail of about 2.5 minutes on a long-running node falls entirely between two ticks roughly 96% of the time (1 − 2.5/60), so the default behaves like this run's setting. What does stay unrealistic is `min_index_interval=1`, a per-table option set this fine only to make the summaries large with a feasible partition count. So the case rests on one yaml knob (`row_cache_size`) plus one aggressive table option, not two yaml knobs; the kill itself is genuine. Whether a much more frequent resize (1 m) prevents the kill is tested in the addendum below.
 
-**Group status:** the `row_cache_size` + `index_summary_capacity` pair is **closed (OOMed)**. The off-heap group stays open only for candidates not yet tried (`memtable_offheap_space`, the networking `BufferPool` family, `file_cache_size`); see `_constraint-groups.md`.
+**Group status:** the `row_cache_size` + `index_summary_capacity` pair is **closed (OOMed)**. The off-heap group stays open only for candidates not yet tried (`memtable_offheap_space`, the networking `BufferPool` family, `file_cache_size`); see `../_constraint-groups.md`.
 
 ## Addendum — schedule B with a 1-minute resize (arm C, 2026-11-03)
 

@@ -1,13 +1,44 @@
-# Convergence playbook — batch log
+# OOM-exp — Cassandra run log
 
-Append one entry per playbook run, per [`../../../custom-convergence-playbook.md`](../../../custom-convergence-playbook.md).
+One chronological log of every playbook run (convergence/custom, default-value
+convergence, and bypass), merged from the former per-direction batch logs
+(`custom-convergence/_batch-log.md`, `default-convergence/_batch-log.md`,
+`bypass/_batch-log.md`). Append one entry per playbook run, per the relevant
+playbook: [`../../custom-convergence-playbook.md`](../../custom-convergence-playbook.md),
+[`../../default-convergence-playbook.md`](../../default-convergence-playbook.md),
+[`../../bypass-playbook.md`](../../bypass-playbook.md). Regime (custom | default)
+is a label on each run, not a folder; cases now live under status-first folders
+(`convergence/`, `candidates/`, `bypass/`, `negatives/`) — see [`_INDEX.md`](_INDEX.md).
+
+## Runs at a glance
+
+| Date | Playbook / regime | Run | Case | Result |
+|---|---|---|---|---|
+| 2026-11-02 | convergence / custom | run 1 | [memtable_heap_space+counter_cache_size](convergence/memtable_heap_space+counter_cache_size.md) | OOMed |
+| 2026-11-02 | convergence / custom | run 2 | [+key_cache_size](convergence/memtable_heap_space+counter_cache_size+key_cache_size.md) | OOMed, JVM killed |
+| 2026-11-02 | convergence / custom | run 3 | [commitlog_total_space+max_hints_size_per_host](candidates/commitlog_total_space+max_hints_size_per_host.md) | blocked / parked |
+| 2026-11-02/03 | convergence / custom | run 4 | [row_cache_size+index_summary_capacity](convergence/row_cache_size+index_summary_capacity.md) | not reached (superseded by run 6) |
+| 2026-11-03 | convergence / custom | run 5 | [row_cache_size+index_summary_capacity--run5](convergence/row_cache_size+index_summary_capacity--run5.md) | void |
+| 2026-11-03 | convergence / custom | run 6 | [row_cache_size+index_summary_capacity--run6](convergence/row_cache_size+index_summary_capacity--run6.md) | OOMed (schedule B) |
+| 2026-11-03 | convergence / custom | run 7 | [memtable_offheap_space+file_cache_size](convergence/memtable_offheap_space+file_cache_size.md) | OOMed |
+| 2026-11-03 | convergence / custom | run 8 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | OOMed, JVM killed |
+| 2026-11-04 | default | run 1 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (default)](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--default.md) | OOMed, strict default |
+| 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](candidates/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
+| 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](candidates/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
+| — | bypass | (none run yet) | — | planning only |
+
+---
+
+# Part A — Convergence (custom-regime) runs
+
+Originally `custom-convergence/_batch-log.md`. Per [`../../custom-convergence-playbook.md`](../../custom-convergence-playbook.md).
 
 ## Current campaign status — 2026-11-06
 
 This dated table governs new candidate selection. Historical domain-wide statuses
 below describe only the earlier standing-pool combinations/arithmetic; they do
 not exclude replicated local limits or transient overlap. No new runtime results
-are asserted. See [campaign plan](../../campaign-plan.md).
+are asserted. See [campaign plan](../campaign-plan.md).
 
 | Mechanism / allocation domain / regime | Status | Next action |
 |---|---|---|
@@ -47,7 +78,7 @@ instead.
 | Disk (shared-pool sense) | `commitlog_total_space`, `max_hints_size_per_host` | **skipped** (2026-11-02, by request) | Run 3 attempted `commitlog_total_space+max_hints_size_per_host` on a dedicated 1536 MiB loop-mounted disk budget; blocked by a mount-sizing error (flush/compaction overhead exhausted the mount before commit log reached its own target) and a contention-induced false-suspicion confound (real hints in a "should be zero" control). Both are diagnosed and fixable — this is **not** exhausted, just deliberately paused. Retry (bigger mount/throttled workload, `phi_convict_threshold` tuning) remains the natural next step for this group once un-skipped, not abandoned. |
 | Disk → heap (causal-chain) | none picked | **deferred (causal-chain, not picked)** | Flagged during the 2026-11-02 "picking combinations" discussion: disk pressure (commit log/data disk full or slow) stalling flush/compaction could let an on-heap backlog queue grow unbounded — heap OOMs from the backlog, not from a shared pool with disk. This is a distinct convergence mechanism from every other row in this table (causal, not pool-sharing) and is **out of scope for picking combinations today** per `custom-convergence-playbook.md`'s "Picking combinations" step 1 — recorded here so it isn't rediscovered as a gap, not because it's ready to build. |
 
-## 2026-11-02 — run 1
+## 2026-11-02 — run 1 (convergence / custom)
 
 **Node:** `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB RAM, local disk `/dev/sda3` 63 GB). JDK 11.0.32.1 and Ant 1.10.12 installed fresh; source copied from repository commit `0be49fb6` to `~/cassandra-run1` via `copy-source.sh`, built with `ant build-test`.
 
@@ -55,7 +86,7 @@ instead.
 
 **Combinations attempted:**
 
-1. `memtable_heap_space` (M=550 MiB) + `counter_cache_size` (C=300 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `cassandra-stress write` + `cassandra-stress counter_write` — case file: [`memtable_heap_space+counter_cache_size.md`](memtable_heap_space+counter_cache_size.md). **Result: OOM reached** (14 genuine `OutOfMemoryError: Java heap space` throws across unrelated thread pools; both control arms safe with 33–39% free margin).
+1. `memtable_heap_space` (M=550 MiB) + `counter_cache_size` (C=300 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `cassandra-stress write` + `cassandra-stress counter_write` — case file: [`memtable_heap_space+counter_cache_size.md`](convergence/memtable_heap_space+counter_cache_size.md). **Result: OOM reached** (14 genuine `OutOfMemoryError: Java heap space` throws across unrelated thread pools; both control arms safe with 33–39% free margin).
 
 **Combinations considered and skipped (not built or run):**
 
@@ -66,7 +97,7 @@ instead.
 
 **Verification environment notes carried to the next run:** `jcmd GC.heap_info` and `jcmd GC.run` both slow down sharply (14 s and 74 s respectively, vs. <1 s normally) once the heap is genuinely under OOM pressure — budget extra wall-clock time for the final reading in a future convergence arm that pushes this hard. `sudo dmesg -T` needs `sudo` (plain `dmesg` fails with "Operation not permitted" on this node's kernel).
 
-## 2026-11-02 — run 2
+## 2026-11-02 — run 2 (convergence / custom)
 
 **Node:** same node (`pc41`/`node0.jason92-323989...`), same build (`~/cassandra-run1` at `cassandra-5.0.9`, unchanged since run 1 — no rebuild needed).
 
@@ -74,7 +105,7 @@ instead.
 
 **Combinations attempted:**
 
-1. `memtable_heap_space` (M=350 MiB) + `counter_cache_size` (C=250 MiB) + `key_cache_size` (K=200 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `write` + `counter_write` + `read` (the read arm needs a preloaded, flushed dataset — key cache only engages on sstable reads, not memtable reads) — case file: [`memtable_heap_space+counter_cache_size+key_cache_size.md`](memtable_heap_space+counter_cache_size+key_cache_size.md). **Result: OOM reached, JVM killed.** Smaller individual values than run 1's 2-constraint case (chosen so no pairwise subset was already enough to overshoot), each alone safe (46–87% heap free, 0 errors), combined drove the heap to 989/1024 MiB (96.6%) right after a forced full GC with a 72-byte allocation failing, a genuine `OutOfMemoryError`, a 1.35 GB heap dump, and — unlike run 1's case, where the JVM survived — `-XX:OnOutOfMemoryError=kill -9 %p` actually fired and killed the process.
+1. `memtable_heap_space` (M=350 MiB) + `counter_cache_size` (C=250 MiB) + `key_cache_size` (K=200 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `write` + `counter_write` + `read` (the read arm needs a preloaded, flushed dataset — key cache only engages on sstable reads, not memtable reads) — case file: [`memtable_heap_space+counter_cache_size+key_cache_size.md`](convergence/memtable_heap_space+counter_cache_size+key_cache_size.md). **Result: OOM reached, JVM killed.** Smaller individual values than run 1's 2-constraint case (chosen so no pairwise subset was already enough to overshoot), each alone safe (46–87% heap free, 0 errors), combined drove the heap to 989/1024 MiB (96.6%) right after a forced full GC with a 72-byte allocation failing, a genuine `OutOfMemoryError`, a 1.35 GB heap dump, and — unlike run 1's case, where the JVM survived — `-XX:OnOutOfMemoryError=kill -9 %p` actually fired and killed the process.
 
 **Combinations considered and skipped (not built or run):**
 
@@ -86,7 +117,7 @@ instead.
 
 **Verification environment notes carried to the next run:** when the JVM genuinely runs out of room (not just gets close), `jcmd GC.run` can take minutes (3m40s here) to return, and a subsequent `jcmd GC.heap_info` can fail outright with `Premature EOF` if the process dies in between — treat a failed final heap sample as a signal to check `logs/gc.log`'s last lines (`ReportJavaOutOfMemory` safepoint) and for an `.hprof` file before assuming the harness itself broke. `set -Eeuo pipefail` scripts should expect this failure mode (a non-zero `jcmd` return) to trip the `ERR` trap and skip the harness's own post-run steps (error-count, oom-grep, dmesg) — recompute them manually from `system.log`/`dmesg` directly when that happens, which is what `converge/error-count.txt`'s comment in this case does.
 
-## 2026-11-02 — run 3
+## 2026-11-02 — run 3 (convergence / custom)
 
 **Node:** same node (`pc41`/`node0.jason92-323989...`), same build (`~/cassandra-run1`, unchanged). First run in this project to use a second node (127.0.0.3) and a dedicated loop-mounted disk budget (`~/oom-disk-run3/disk3.img`, 1536 MiB, mounted at `~/oom-disk-run3/mnt`) rather than the node's real local disk.
 
@@ -94,7 +125,7 @@ instead.
 
 **Combinations attempted:**
 
-1. `commitlog_total_space` (target 800 MiB) + `max_hints_size_per_host` (target 900 MiB), on a dedicated 1536 MiB loop-mounted disk budget, 2-node ring (127.0.0.2 under test, 127.0.0.3 killed to generate hints) — case file: [`commitlog_total_space+max_hints_size_per_host.md`](commitlog_total_space+max_hints_size_per_host.md). **Result: OOM not reached — blocked before a valid convergence arm could run.** The `commitlog_alone` control arm (meant to confirm commit log is safe alone) instead ran the mount to 100% full from flush/compaction overhead the sizing hadn't budgeted for, tripping a real `FSWriteError`/`disk_failure_policy=stop` event, and separately produced real (non-stale-log) hint growth in an arm meant to produce zero hints — diagnosed as contention-induced false suspicion from two co-located JVMs plus a loaded stress client on one host. The `hints_alone` and `converge` arms were never run as a result. Filed as a **blocked, retryable** case, not exhausted — see the case file §4 for the specific fixes a retry needs (bigger mount or throttled workload; `phi_convict_threshold` tuning or incidental-hint accounting).
+1. `commitlog_total_space` (target 800 MiB) + `max_hints_size_per_host` (target 900 MiB), on a dedicated 1536 MiB loop-mounted disk budget, 2-node ring (127.0.0.2 under test, 127.0.0.3 killed to generate hints) — case file: [`commitlog_total_space+max_hints_size_per_host.md`](candidates/commitlog_total_space+max_hints_size_per_host.md). **Result: OOM not reached — blocked before a valid convergence arm could run.** The `commitlog_alone` control arm (meant to confirm commit log is safe alone) instead ran the mount to 100% full from flush/compaction overhead the sizing hadn't budgeted for, tripping a real `FSWriteError`/`disk_failure_policy=stop` event, and separately produced real (non-stale-log) hint growth in an arm meant to produce zero hints — diagnosed as contention-induced false suspicion from two co-located JVMs plus a loaded stress client on one host. The `hints_alone` and `converge` arms were never run as a result. Filed as a **blocked, retryable** case, not exhausted — see the case file §4 for the specific fixes a retry needs (bigger mount or throttled workload; `phi_convict_threshold` tuning or incidental-hint accounting).
 
 **Combinations considered and skipped (not built or run):**
 
@@ -105,7 +136,7 @@ instead.
 
 **Verification environment notes carried to the next run:** (1) Cassandra's JMX/RMI listener binds to `127.0.0.1` regardless of `listen_address` — use `nodetool -h 127.0.0.1 -p <node's own JMX port>`, never the node's own gossip address, matching if-check-exp's own hints harness convention. (2) A pidfile-based "is it stopped" check can report false before the JVM actually finishes exiting (the shutdown hook removes the pidfile early); give `pgrep`-based confirmation a ~60s retry budget, not a short one. (3) Running two Cassandra JVMs plus a loaded stress client on one physical host is not resource-neutral: it caused both a 34-second local-pause warning from the failure detector in an early attempt and, in the final attempt, real hint generation toward a replica that never actually went down — any future multi-instance-on-one-host harness in this project should expect this and either budget for it or raise `phi_convict_threshold`. (4) A disk-budget mount's size must account for flush-and-compaction overhead as its own large consumer, not just the byte targets of the constraints under test — the heap cases' arithmetic (baseline + per-constraint overshoot) does not carry over to disk without this extra term.
 
-## 2026-11-02/03 — run 4
+## 2026-11-02/03 — run 4 (convergence / custom)
 
 **Node:** same node (`pc41`/`node0.jason92-323989...`), same build (`~/cassandra-run1`, unchanged). First run in this project to target the off-heap/direct-memory shared budget (previously parked) and the first to use a **cgroup v2 `memory.max`** (via `systemd-run --user --scope`) as the actual budget, rather than `-Xmx`.
 
@@ -113,7 +144,7 @@ instead.
 
 **Combinations attempted:**
 
-1. `row_cache_size` (550 MiB, `SerializingCacheProvider`) + `index_summary_capacity` (100 MiB configured cap; effective pre-resize transient ≈595-650 MiB — see case file §2.2 for why the transient, not the configured cap, is the number that matters for this arithmetic), cgroup budget 2000 MiB, `-Xmx384M` — case file: [`row_cache_size+index_summary_capacity.md`](row_cache_size+index_summary_capacity.md). **Result: OOM NOT reached.** Both control arms stayed safe (R alone: 73.6% of budget, 26.4% free; I alone: 76.8% of budget, 23.2% free). The convergence arm's combined peak (90.1% of budget) came in well under the naive additive prediction (106.1%) and never crossed the budget (`memory.events`' `oom`/`oom_kill` stayed 0 throughout). Diagnosed as a timing effect: each constraint's own enforcement (Caffeine eviction for the row cache, periodic resize for the index summary) kept operating under combined load, so the two measured "worst moments" — each captured in isolation at that constraint's own worst instant — did not actually coincide when run together.
+1. `row_cache_size` (550 MiB, `SerializingCacheProvider`) + `index_summary_capacity` (100 MiB configured cap; effective pre-resize transient ≈595-650 MiB — see case file §2.2 for why the transient, not the configured cap, is the number that matters for this arithmetic), cgroup budget 2000 MiB, `-Xmx384M` — case file: [`row_cache_size+index_summary_capacity.md`](convergence/row_cache_size+index_summary_capacity.md). **Result: OOM NOT reached.** Both control arms stayed safe (R alone: 73.6% of budget, 26.4% free; I alone: 76.8% of budget, 23.2% free). The convergence arm's combined peak (90.1% of budget) came in well under the naive additive prediction (106.1%) and never crossed the budget (`memory.events`' `oom`/`oom_kill` stayed 0 throughout). Diagnosed as a timing effect: each constraint's own enforcement (Caffeine eviction for the row cache, periodic resize for the index summary) kept operating under combined load, so the two measured "worst moments" — each captured in isolation at that constraint's own worst instant — did not actually coincide when run together.
 
 **Combinations considered and skipped (not built or run):**
 
@@ -124,21 +155,21 @@ instead.
 
 **Verification environment notes carried to the next run:** (1) `-XX:MaxDirectMemorySize` is not a safe default assumption for "the off-heap budget" — check each constraint's own allocation path (JNA/malloc vs. `DirectByteBuffer`) before picking a JVM-flag-based budget; a cgroup `memory.max` is the more general mechanism and was confirmed working here. (2) `memory.current`/`memory.max` alone are a **misleading "percent used" metric** once any sstable/commitlog I/O is involved — the cgroup counts reclaimable page cache toward `memory.current`, so it can sit pegged at `memory.max` for long stretches with zero real memory pressure; use `RssAnon` (from `/proc/<pid>/status`) for the "how full is the hard, non-reclaimable budget" reading, and `memory.events`' `oom`/`oom_kill` fields (not `memory.current`) as the only reliable OOM-or-not signal. (3) `bin/cassandra -f` never writes a pidfile (only the backgrounding branch of the script does) — detect the daemon's PID by `pgrep`, not a pidfile, when the harness must run the JVM in the foreground (needed here so `systemd-run --scope` tracks the right process). (4) A `systemd-run --user --scope` cgroup's path includes an undocumented `app.slice/` component (`.../user@<uid>.service/app.slice/<unit>.scope`). (5) `index_summary_resize_interval`'s first scheduled run fires on a delay from the **manager's own startup**, not from when a workload's data is loaded — a resize-wait must capture a log-line offset before the workload starts, or it can match an earlier, near-empty resize. (6) `cassandra-stress user profile=...` requires a `queries:` section in the yaml even when only `insert` ops are ever run (a hard `AssertionError` otherwise). (7) a too-small key size for a cassandra-stress table meant to stress `index_summary_capacity` can make the achievable raw summary size per partition far too small to reach a meaningful total within a feasible partition count — match if-check-exp's own ~200-byte-key calibration rather than using a small/realistic key.
 
-## 2026-11-03 — run 5
+## 2026-11-03 — run 5 (convergence / custom)
 
 **Node:** same node and build as runs 1-4 (`~/cassandra-run1`, unchanged). **Scope:** one combination, the off-heap retry named in run 4's §4. The 57 `if-check-exp` set-B cases (merged 2026-11-03) were checked for new standing-pool candidates; none added an off-heap one (they are new decision points on constraints already surveyed, and `paxos_cache_size` is on-heap, a group already exhausted). Disk stayed skipped.
 
 **Correction (found in run 6):** the converge arm's burst wrote 0 partitions (the stress client's CREATE TABLE timed out), so this run's converge arm is void. See run 6.
 
-**Combinations attempted:** 1. `row_cache_size` (550 MiB) + `index_summary_capacity` (100 MiB), cgroup 2000 MiB, `index_summary_resize_interval=30m`, burst and read pass concurrent. Case file: [`row_cache_size+index_summary_capacity--run5.md`](row_cache_size+index_summary_capacity--run5.md). **Result: OOM not reached; converge arm incomplete** (burst client timeouts, peak 1501 MiB vs 1608 / 1550 alone).
+**Combinations attempted:** 1. `row_cache_size` (550 MiB) + `index_summary_capacity` (100 MiB), cgroup 2000 MiB, `index_summary_resize_interval=30m`, burst and read pass concurrent. Case file: [`row_cache_size+index_summary_capacity--run5.md`](convergence/row_cache_size+index_summary_capacity--run5.md). **Result: OOM not reached; converge arm incomplete** (burst client timeouts, peak 1501 MiB vs 1608 / 1550 alone).
 
 **Stopping reason:** one combination built and run through two control arms and a convergence arm. Group left **open** with two untried retries (larger client timeout / fewer threads; fill the row cache first, then burst).
 
 **Notes for the next run:** (1) with the cgroup pinned at `memory.max`, reclaim throttling slows writes, so a concurrent burst can stall rather than grow memory; record partitions actually written, since the stress client prints no totals on timeout. (2) `oom-run.sh baseline` printed "process gone" for its idle sample (PID picked up before the daemon settled); arms are unaffected. (3) Do not call `nodetool stopdaemon` while the driver is running; check `pgrep -fa oom-run.sh` first.
 
-## 2026-11-03 — run 6
+## 2026-11-03 — run 6 (convergence / custom)
 
-**Node:** same node and build. **Scope:** the two retries named in run 5, on the same pair. Case file: [`row_cache_size+index_summary_capacity--run6.md`](row_cache_size+index_summary_capacity--run6.md).
+**Node:** same node and build. **Scope:** the two retries named in run 5, on the same pair. Case file: [`row_cache_size+index_summary_capacity--run6.md`](convergence/row_cache_size+index_summary_capacity--run6.md).
 
 **Combinations attempted (one pair, two workload schedules):**
 
@@ -153,11 +184,11 @@ instead.
 
 **Stopping reason:** both named retries run, plus the 1-minute-resize check; the pair closed as OOMed. The group stays open only for untried candidates.
 
-## 2026-11-03 — run 7
+## 2026-11-03 — run 7 (convergence / custom)
 
 **Node:** same node and build. **Shared budget:** off-heap/direct memory, cgroup v2 `memory.max`. On-heap exhausted, disk skipped; the first off-heap pair closed in run 6.
 
-**Combinations attempted:** 1. `memtable_offheap_space` (1200 MiB, `offheap_objects`, cleanup threshold 0.99) + `file_cache_size` (1200 MiB, chunk cache enabled), 3500 MiB budget, `-Xmx768M`. Case file: [`memtable_offheap_space+file_cache_size.md`](memtable_offheap_space+file_cache_size.md). **OOMed:** alone 77.6% / 77.7%; converge (cache filled, then write burst) kernel-killed 16 s into the burst, anon-rss 3465 MiB.
+**Combinations attempted:** 1. `memtable_offheap_space` (1200 MiB, `offheap_objects`, cleanup threshold 0.99) + `file_cache_size` (1200 MiB, chunk cache enabled), 3500 MiB budget, `-Xmx768M`. Case file: [`memtable_offheap_space+file_cache_size.md`](convergence/memtable_offheap_space+file_cache_size.md). **OOMed:** alone 77.6% / 77.7%; converge (cache filled, then write burst) kernel-killed 16 s into the burst, anon-rss 3465 MiB.
 
 **Considered and not picked:** the networking `BufferPool` family (`networking_cache_size`, `internode_application_*`, `native_transport_*` queue capacities). It fills only while messages are in flight, so it has no sustained window at capacity; `_constraint-groups.md` also flags those as likely one shared pool.
 
@@ -165,13 +196,13 @@ instead.
 
 **Stopping reason:** one new pair sized, run through two matched control arms and a convergence arm, OOMed on the first try. Remaining off-heap candidates are few (`DOB_MAX_RECYCLE_BYTES`, `MAX_HINT_BUFFERS` / hints buffers, trie-memtable limits that follow `memtable_offheap_space`); a next run should check whether any is an independent standing pool before picking.
 
-## 2026-11-03 — run 8
+## 2026-11-03 — run 8 (convergence / custom)
 
 **Node:** same node and build (`pc41`, `~/cassandra-run1`). **Shared budget:** off-heap/direct memory, this time the JVM's own `-XX:MaxDirectMemorySize` (both pools are `java.nio.DirectByteBuffer`s through `Bits.reserveMemory`; checked from source and confirmed by the OOM). On-heap exhausted, disk skipped. Second loopback node used again (hints need a down replica), but killed before any reading, so run 3's two-JVM contention cannot arise.
 
 **Candidates checked:** the three named by run 7. `DOB_MAX_RECYCLE_BYTES`: standing (each thread keeps a scratch buffer of up to L between uses; `allocateDirect`). `MAX_HINT_BUFFERS`: standing (slabs recycled, never freed; `allocateDirect`); the stage-4 natural-load control already reached its cap without a Byteman hold, and calibration here reached 9 slabs at n = 12. The hints-slab case is the same pool as `MAX_HINT_BUFFERS`; the trie limits follow `memtable_offheap_space` (not independent).
 
-**Combinations attempted:** 1. `DOB_MAX_RECYCLE_BYTES` (L = 8 MiB, 4 MB writes on 8 client threads) + `MAX_HINT_BUFFERS` (n = 8, 32 MiB slabs, 1 KiB writes to a down replica), 560 MiB `MaxDirectMemorySize`, `-Xmx3072M`. Case file: [`DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md). **OOMed:** alone 50.4% / 69.5%; converge (hints pool at its cap, then the DOB burst) hit `OutOfMemoryError: Direct buffer memory` in scratch-buffer growth about 7 s into the burst; Cassandra forced a heap OOM (heap 570 of 3072 MiB) and `OnOutOfMemoryError` killed the JVM. **Attribution control:** the same converge arm with only `dob_max_recycle_bytes` at its 1 MiB default stayed at 51%, no OOM.
+**Combinations attempted:** 1. `DOB_MAX_RECYCLE_BYTES` (L = 8 MiB, 4 MB writes on 8 client threads) + `MAX_HINT_BUFFERS` (n = 8, 32 MiB slabs, 1 KiB writes to a down replica), 560 MiB `MaxDirectMemorySize`, `-Xmx3072M`. Case file: [`DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md). **OOMed:** alone 50.4% / 69.5%; converge (hints pool at its cap, then the DOB burst) hit `OutOfMemoryError: Direct buffer memory` in scratch-buffer growth about 7 s into the burst; Cassandra forced a heap OOM (heap 570 of 3072 MiB) and `OnOutOfMemoryError` killed the JVM. **Attribution control:** the same converge arm with only `dob_max_recycle_bytes` at its 1 MiB default stayed at 51%, no OOM.
 
 **Harness defect found:** `cassandra-stress write` always sends `CREATE KEYSPACE` first; under the other workload's load it timed out and the client wrote nothing. This voided two converge attempts (one per order). Fixed with `cassandra-stress user` profiles that have no schema definitions; both controls re-run with them. Any future concurrent-workload harness should use such profiles, not just pre-create the table (run 6's fix covered `CREATE TABLE`, not this).
 
@@ -181,3 +212,187 @@ instead.
 
 **Notes for the next run:** (1) `MaxDirectMemorySize` appears twice on the command line (`cassandra-env.sh` computes one first); the last one wins. (2) The JDK 11 direct-OOM message carries no byte counts; read the limit from the arm's flags and the trajectory from the `BufferPool` MXBean. (3) Client totals after a node death are not writes (cassandra-stress counts `NoHostAvailable` failures as done); use server-side `tablestats`. (4) The node keeps the heap dump (687 MB) in `~/oom-direct-run8/logs/converge/`.
 
+## 2026-11-09 — C1 reopen (convergence / custom Q, single-replica topology)
+
+**Nodes:** CloudLab LAN 10.10.1.0/24 — victim `apt140`/10.10.1.1 (dc=v, `~/cassandra-b1`); 8 coordinator
+instances dc=c on `apt179/138/190/149` (`~/cassandra-c1`, 1 GiB heap, LAN IP aliases .32–.81, 2/host).
+**Design:** `../../temp/C1-design-v2.md`. Case file:
+[`internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`](candidates/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md).
+Reopens the run-2 **default**-Q negative to test whether a **raised (custom)** exclusive allowance N·Q can
+drive the victim to OOM, under v2's three fixes (raise Q; victim owns the only replica so RF=1 keeps
+senders light; concentrate load so backpressure is natural).
+
+**Both v2 topology fixes succeeded.** G1: keyspace `NTS {v:1}` → `getendpoints` = victim-only (10/10 keys).
+G2: at N=8 the 1 GiB coordinators stayed ~336–384 MiB heap, **no sender OOM** (run 2's 512 MiB/2 GiB
+coordinators both OOMed under RF-fanout). G3: noise band **±~10 MiB** vs run 2's ±350 (load concentrated).
+Natural backpressure now reaches ~1.5–1.7 MiB/conn (run 2: 0.4); with the declared Byteman 100 ms delay the
+exclusive allowance fills to **exactly Q** per connection.
+
+**Mechanism confirmed to the MiB; ladders show total occupancy is Q-invariant.** S1 (N=8): using ~266 MiB
+at **every** Q, with exclusive = N·Q (32 / 128 / 267 MiB at Q = 4 / 16 / 64) and reserve taking the
+remainder (234 / 138 / 0). S2 (Q=64): using scales with N (34 / 136 / 267 MiB at N = 1 / 4 / 8),
+per-connection equilibrium ~34 MiB. Reduced-Q (Q=1): exclusive 8 MiB (= N·Q), reserve 258, total 266.
+`throttled_count` ≡ 0 in every arm — the admission ceiling (A_max) is never reached; occupancy ~266 MiB
+sits below G=512. Occupancy is also **invariant to client threads** (identical at 800 and 1500).
+
+**Why no Q-attribution:** in the single-replica/CL=ONE topology the client blocks on the slow victim, so
+the receive queue reaches a **closed-loop occupancy equilibrium** that raising Q merely **re-buckets**
+(reserve→exclusive) without growing. A **load-driven direct-buffer OOM is reachable** — at
+`-XX:MaxDirectMemorySize=384 MiB`, `OutOfMemoryError: Direct buffer memory` on the inbound `BufferPool.allocate`
+path, victim JVM killed ~20–27 s into load, **3/3 clean-start repeats** — but it fires at the **same budget
+for Q=4 and Q=64** (total footprint is Q-invariant), so it is an *aggregate receive-queue-footprint* sizing
+hazard, **not** an exclusive-allowance multiplicity gap. Reduced-Q neither lowers the footprint nor moves
+the threshold. Surviving control (budget 3072) reproduced ≥3 clean starts.
+
+**Decision rule (verification-protocol):** a supported Q-multiplicity result needs physical memory tracking
+N·Q **and** the reduced-Q control removing the OOM — both fail. **Q-attribution: UNRESOLVED / negative**;
+the new obstacle (closed-loop occupancy equilibrium) is the dual of run 2's sender-OOM obstacle — decoupling
+the client to reach the ceiling re-creates the coordinator retention run 2 hit.
+
+**Stopping reason:** both ladders, the failing OOM point with 3 clean-start repeats and its surviving
+control, the reduced-Q control, and the Q-independence control all ran within the ~3 h budget; no OOM was
+manufactured (the direct-buffer OOM is real but Q-independent). **Raw logs** on the nodes under
+`/mydata/c1r/victim/logs{,.prev}` and `/mydata/c1r/arms/<arm>/`; small excerpts in the case `logs/`.
+**Cleanup verified:** no Cassandra JVMs, stress, IP aliases, port-7000 firewall rules, or systemd user
+units on any node; linger disabled.
+
+---
+
+# Part B — Default-value convergence runs
+
+Originally `default-convergence/_batch-log.md`. Per [`../../default-convergence-playbook.md`](../../default-convergence-playbook.md).
+Same format as the convergence/custom run entries in Part A above, plus the default-arithmetic verdict for each group surveyed.
+
+## Current campaign status — 2026-11-06
+
+This dated table governs new candidate selection. Historical domain-wide statuses
+below describe only the earlier standing-pool combinations/arithmetic; they do
+not exclude replicated local limits or transient overlap. No new runtime results
+are asserted. See [campaign plan](../campaign-plan.md).
+
+| Mechanism / allocation domain / regime | Status | Next action |
+|---|---|---|
+| C1 / internode private allowances / default capacities, budget separately labeled | **sensitivity-limited / unresolved** (run 2, 2026-11-09) | Mechanism confirmed exactly (N=4: per-conn exclusive=Q, Σreserve=G saturated, admitted=A_max); but N·Q (≤112 MiB) is dominated by the invariant G=512 reserve + occupancy noise, and senders OOM before high N. Reopen only with senders that survive RF-fanout to a slow victim (large heaps / dedicated load hosts) to test N=4 vs N=32 |
+| C2 / per-query live memory / default capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
+| C3 / per-worker DOB allocations / default capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
+| Existing standing-pool combinations / original regimes | historical scope only | Preserve results; new runs need a distinct mechanism or boundary question |
+| Disk exhaustion / all regimes | skipped by request | No new disk runs or retries until explicitly reopened |
+| Disk-to-memory causal chain / all regimes | deferred | Outside this batch; not implicitly reopened |
+
+## Historical shared-budget group status
+
+Independent of the original convergence playbook's table: a group exhausted there (raised values) is a separate question at defaults. Statuses as in the original (**open**, **exhausted**, **parked**, **skipped**, **deferred (causal-chain, not picked)**), plus **cannot converge at defaults** (the default arithmetic shows no budget where each is safe alone and the sum exceeds it; state the arithmetic).
+
+**Rule: disk is skipped (carried over from the original playbook's 2026-11-02 request).** Do not pick a disk-group combination until it is lifted here.
+
+| Shared budget | Constraints tried | Status | Why |
+|---|---|---|---|
+| On-heap JVM heap | none built (arithmetic only, run 1) | **cannot converge at defaults** | Every capped heap pool is a heap fraction or a small floor. At capacity, with if-check-exp's overhead factors: memtable 1.1 × H/4, key cache 2.0 × 5% H, counter cache 2.1 × 2.5% H, paxos cache ~2 × 1% H, prepared statements 10 MiB, baseline ≈ 57 MiB. Sum = 67 + 0.45H MiB, which exceeds H only below H ≈ 121 MiB. But the memtable alone needs H ≥ 134 MiB to stay ≥ 30% free. No window at any heap; above ~2 GiB the key/counter caps make it worse. The memtable also flushes at the default cleanup threshold (1/3 of its limit), so it rarely reaches H/4. Smallest non-default change: convergence run 1 (raise `memtable_heap_space` + `counter_cache_size`, cleanup 0.99). See run 1 below. |
+| Off-heap/direct memory (`MaxDirectMemorySize`, `allocateDirect` pools) | `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` (run 1) | **open** | Run 1 **OOMed, strict default**, at a 192 MiB direct limit. Both defaults are absolute (96 MiB hints pool, 1 MiB × shared-pool workers), so a window exists only at small direct budgets (about 173-200 MiB here), far below the automatic limit. Left open for the other default `allocateDirect` consumers seen in run 1: the networking `BufferPool` (`networking_cache_size` = min(128 MiB, heap/16), in-flight only) and compaction read-ahead buffers (256 KiB × compaction threads, not yet in `_constraint-groups.md`). |
+| Off-heap JNA/malloc (cgroup budget) | none built (arithmetic only, run 1) | **cannot converge at defaults** | Only one pool exists at defaults: `index_summary_capacity` (5% heap). `memtable_allocation_type: heap_buffers` (shipped yaml line 825) keeps memtables on heap, so `memtable_offheap_space` holds nothing. `row_cache_size: 0MiB` (line 564) and `file_cache_enabled: false` (line 742) are off. A cgroup budget that mixes heap + direct + JNA is a cross-group question, not this group. |
+| Disk | none | **skipped** (carried over, 2026-11-02 request) | See the original batch log (Part A). |
+
+## 2026-11-04 — run 1 (default)
+
+**Node:** `pc41` (`node0.jason92-323989...`, 40 cores, 251 GiB), same build as convergence runs 1-8 (`~/cassandra-run1`, cassandra-5.0.9). Shipped yaml read from the pristine `systems/cassandra/source/conf/cassandra.yaml`; note that `~/cassandra-run1/conf/cassandra.yaml` still carries run 7's edits. Harnesses use `git archive HEAD conf`, so they are unaffected.
+
+**Counts:** 1 combination built and filed as a case (two workload designs); 2 groups judged by arithmetic only (on-heap, off-heap JNA); disk skipped.
+
+**Default arithmetic per group:** see the status table. In summary:
+- heap fractions never sum past the heap;
+- the JNA group has one live pool at defaults;
+- the direct group has two absolute defaults (hints pool 96 MiB; DOB 1 MiB × *T*), so a window exists at a small direct budget.
+
+**Combinations attempted:**
+
+1. `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`, both unset, 500,000-byte values (so the doubled scratch buffer stays at or under 1 MiB) and a down replica. Case file: [`DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--default.md).
+   - **Design A** (185 MiB, 64 hints threads): controls 66% / 67%; converge OOMed 2 of 2. **But the no-hints attribution control also died.** The extra writers raised the DOB pool to 99.5% by themselves, and compaction read-ahead buffers ended it. Not filed as the result.
+   - **Design B** (192 MiB, 8 hints threads, DOB control run at matched concurrency): alone 63% / 69.3%. Converge: `OutOfMemoryError: Direct buffer memory` 7 s into the burst, forced heap OOM, JVM killed. **OOMed, strict default.**
+
+**Considered and not picked:**
+- Every on-heap and JNA combination: no window at defaults (table).
+- `max_hints_size_per_host` (default 0 = unlimited): not a cap at its default; disk group anyway. A candidate for an "unbounded at default" note.
+- `networking_cache_size` (default min(128 MiB, heap/16)): in-flight only, as in the original batch log.
+
+**Stopping reason:** the one viable group at defaults produced a filed OOM, with a clean attribution control after one redesign. The other memory groups were closed by arithmetic.
+
+**Notes for the next run:**
+1. At defaults the DOB pool is about 1 MiB × the shared-pool workers that ever serialize a mutation of up to ~0.5 MB. Any concurrent traffic raises that count, so a DOB control must run at the convergence arm's total concurrency (`B_D_matched`), not alone.
+2. 8 client threads of 1 KiB hinted writes fill the default 3-slab hints pool within 10 s.
+3. `ThreadLocalReadAheadBuffer` (compaction, direct, 256 KiB each) is a third default direct consumer that can end an arm sitting near the limit.
+4. `start_node` clears `N1-logs`, deleting the previous arm's heap dump. Copy the dump out first if it is needed.
+
+## 2026-11-09 — run 2 (default; C1, internode receive queues)
+
+**Nodes:** CloudLab APT, one experiment, LAN 10.10.1.0/24, user jason92. Victim `apt140` (10.10.1.1,
+16 threads, 15 GiB, cgroup v2, swap 8G). Peer hosts `apt179/138/190/149` (10.10.1.2–.5), each 16 threads/
+15 GiB. cassandra-5.0.9 built locally (`~/cassandra-b1` victim, `~/cassandra-c1` peers). Run data on
+`/mydata` only. Internode port 7000 restricted to 10.10.1.0/24 during the run (removed after).
+
+**Mechanism / allocation domain / regime:** C1, internode inbound receive queues (exclusive Q=4 MiB,
+endpoint E=128 MiB, global G=512 MiB — **defaults**), tightened diagnostic direct-memory budget. First
+convergence case in this project driven by **multiplicity of active peers** rather than two stacked pools,
+and the first multi-instance ring (up to 33 Cassandra instances via LAN IP aliases).
+
+**Attempted:** one case — [`internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`](candidates/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md).
+Arms: G1 reachability; D_cal_n4 (reference, Byteman 100 ms apply-delay, Q=4, 2048 MiB budget); D_cal_n8;
+RQ_n4_q1 (reduced-Q causal control, Q=1 MiB); D_oom_n4_b450 (450 MiB budget). **Result: mechanism confirmed
+exactly, multiplicity-OOM sensitivity-limited / UNRESOLVED.** At N=4 the admitted bytes = 527.8 MiB =
+A_max(4)=N·Q+G=528, per-connection = 4.0 MiB exclusive (=Q) + 127.9 MiB (=E), Σreserve = 511.8 MiB (G
+saturated); reduced-Q drops per-conn exclusive to exactly 1.00 MiB. But the escaping term N·Q (16→128 MiB
+over N=4→32) is dominated by the invariant reserve G=512 MiB and by ±~350 MiB occupancy noise, and the peer
+coordinators OOM (heap, retaining 128 KiB mutations for the slow victim) before a high-N arm can be
+sustained — so N=16/32 could not be reached and the RF=33 ring was reduced to RF=9.
+
+**Key empirical blockers (all anticipated by the design's decision rules):**
+1. **No natural backpressure** — at reachable load the victim's MutationStage drains and queues stay ~0;
+   the designed **Byteman apply-delay** (frozen, saved) was required to fill them, so queue-fill results are
+   conditional on injected delay; reproduction without it is negative.
+2. **Sender bottleneck** — 512 MiB (and even 2 GiB) peer coordinators OOM under RF fanout to a slow victim.
+3. **Reserve dominates** — receive-queue memory is ~all the shared G=512 MiB reserve, invariant across N; a
+   direct-buffer OOM is reachable only at a budget (450 MiB) so tight that baseline + reserve exceed it
+   before load — reserve/baseline-driven, not multiplicity.
+
+**Infrastructure notes for the next run (multi-instance Cassandra rings):**
+1. `num_tokens: 1` without `initial_token` causes **random-token collisions** across many simultaneous
+   fresh nodes — nodes get dropped from the ring. Assign explicit evenly-spaced `initial_token` per instance.
+2. A `systemd-run --user` transient **service** (not `--scope`) survives the launching ssh session, but
+   needs `loginctl enable-linger` or the user manager tears it down when the session closes.
+3. Do **not** wipe a node's `data/` to "freshen" it between restarts — it erases `system.local` and the
+   rejoin hits an endpoint collision; keep the data to rejoin, or use `replace_address_first_boot` +
+   `allow_unsafe_replace=true`.
+4. Peers need distinct JMX ports: `cassandra-env.sh` hardcodes `JMX_PORT="7199"`; sed it per instance. JMX
+   binds to 127.0.0.1 — use `nodetool -h 127.0.0.1 -p <port>`.
+5. `cassandra-stress -node whitelist <csv>` restricts coordinators to exactly those peers (WhiteListPolicy).
+6. Byteman on a Cassandra class (`MutationVerbHandler.doVerb`) needs no `boot:`; confirm the rule actually
+   fires (`bmsubmit -l`) — a loaded rule that isn't delaying usually means the arm hit a *dead* coordinator,
+   not a Byteman failure.
+7. Raising `write_request_timeout` (here 30 s) lifts the message-expiry ceiling so the receive queue can
+   hold more than `arrival × 2 s` before expiry releases permits.
+
+**Stopping reason:** the mechanism was confirmed to the model and the sensitivity limit was reached and
+quantified (noise ≫ multiplicity signal; senders fail before high N). No OOM was manufactured. Reopen only
+with senders that survive RF-fanout to a slow victim (much larger heaps or dedicated load hosts) to test the
+N=4 vs N=32 window directly. Cleanup verified: no Cassandra JVMs, IP aliases, or port-7000 rules left on any
+node; lingering disabled.
+
+---
+
+# Part C — Bypass runs
+
+Originally `bypass/_batch-log.md`.
+
+## Current campaign status — 2026-11-06
+
+Planning entries only; no bypass experiment has run in this update. Use the
+[campaign plan](../campaign-plan.md) and [protocol](../../verification-protocol.md).
+Append dated execution records with attempted/skipped cases, configuration/budget
+regime, evidence, status/range and stopping reason.
+
+| Mechanism / allocation domain | Priority | Status / next action |
+|---|---|---|
+| B1 / native-v5 request allocation lifecycle | P1 | open; audit recorded retention and construct repeated-cycle controls |
+| B2 / memtable and pre-V5 exceptional admission | P2 | open; separate paths, quantify outstanding-work bounds |
+| B3 / buffer-pool fallback | P2 | open; distinguish pool contract from total allocation |
+| B4 / cache explicit-clear release | P2 | open; trace ownership before repeated-cycle test |
+| B5 / periodic enforcement or replacement ordering | P3 | open; verify format/path and temporal bounds |

@@ -12,7 +12,7 @@
 
 ## 1. Constraints and capacities
 
-Both constraints are config-type, **true positive** at if-check-exp stage 4, and were picked as the first candidates surveyed for the **disk** shared-budget group (`_batch-log.md`'s status table, "open (unexamined)" going into this run).
+Both constraints are config-type, **true positive** at if-check-exp stage 4, and were picked as the first candidates surveyed for the **disk** shared-budget group (`../_run-log.md`'s status table, "open (unexamined)" going into this run).
 
 | | `commitlog_total_space` | `max_hints_size_per_host` |
 |---|---|---|

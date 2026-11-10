@@ -1,0 +1,46 @@
+# C1-reopen ladder — synchronized victim receive-queue sums (MiB). exclusive = using - reserve.
+# Each line: a ~8s sample of SUM over all inbound connections. throttled_count stayed 0 throughout.
+
+## S1 (N=8, vary Q)  -- total 'using' is Q-invariant; exclusive tracks N*Q, reserve takes the remainder
+### Q=4  (SAT_hard2, 1500 threads; also 800-thread runs identical ~266)
+[1] using=265 reserve=233 throttled=0 stress=1 freeGiB=0
+[2] using=270 reserve=238 throttled=0 stress=1 freeGiB=0
+[3] using=266 reserve=234 throttled=0 stress=1 freeGiB=0
+[4] using=266 reserve=234 throttled=0 stress=1 freeGiB=0
+[5] using=266 reserve=234 throttled=0 stress=1 freeGiB=0
+[6] using=265 reserve=233 throttled=0 stress=1 freeGiB=0
+[7] using=265 reserve=233 throttled=0 stress=1 freeGiB=0
+[8] using=265 reserve=233 throttled=0 stress=1 freeGiB=0
+[9] using=265 reserve=233 throttled=0 stress=1 freeGiB=0
+[10] using=265 reserve=233 throttled=0 stress=1 freeGiB=0
+[11] using=119 reserve=87 throttled=0 stress=1 freeGiB=0
+[12] using=0 reserve=0 throttled=0 stress=1 freeGiB=0
+[13] using=0 reserve=0 throttled=0 stress=1 freeGiB=0
+[14] using=0 reserve=0 throttled=0 stress=1 freeGiB=0
+[15] using=0 reserve=0 throttled=0 stress=0 freeGiB=6
+### Q=16 (S1_q16_n8)
+[1] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=434549079
+[2] using=264.8 reserve=136.8 excl=128.0 throttled=0 direct=426608172
+[3] using=277.6 reserve=149.6 excl=128.0 throttled=0 direct=440546927
+[4] using=282.5 reserve=154.5 excl=128.0 throttled=0 direct=424984545
+[5] using=266.0 reserve=138.0 excl=128.0 throttled=0 direct=435007332
+[6] using=265.9 reserve=137.9 excl=128.0 throttled=0 direct=421898476
+[7] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=180930414
+[8] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=180930414
+[9] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=181379992
+[10] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=181379992
+[11] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=181379992
+### Q=64 (S1_q64_n8 == S2 N=8)
+[1] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=302974050
+[2] using=265.0 reserve=0.0 excl=265.0 throttled=0 direct=415829209
+[3] using=269.0 reserve=0.0 excl=269.0 throttled=0 direct=428251950
+[4] using=286.0 reserve=0.0 excl=286.0 throttled=0 direct=481036298
+[5] using=268.0 reserve=0.0 excl=268.0 throttled=0 direct=425884754
+[6] using=265.0 reserve=0.0 excl=265.0 throttled=0 direct=422911995
+[7] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=180600223
+[8] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=180600223
+[9] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=180600223
+[10] using=0.0 reserve=0.0 excl=0.0 throttled=0 direct=180600602
+
+## S2 (Q=64, vary N)  -- occupancy ~linear in N (per-conn equilibrium ~34 MiB); reserve=0 (all exclusive)
+### see chain trace below (N=4 then N=1)

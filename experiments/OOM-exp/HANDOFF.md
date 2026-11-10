@@ -23,7 +23,7 @@
 
 Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
-[`_INDEX.md`](cassandra/_INDEX.md) for every closed case.
+[`_INDEX.md`](cassandra/cases/_INDEX.md) for every closed case.
 
 ## Status: active, five cases closed (OOMed), one blocked-retryable, one closed (not reached), one void (2026-11-03)
 
@@ -42,7 +42,7 @@ re-derive them, only consumes them.
     workload), predicted and observed to exceed the heap together — 14 genuine
     `OutOfMemoryError` throws, final forced-GC reading 96.6% of `-Xmx` with 0
     young regions left, JVM survived (caught the exceptions). Case file:
-    [`cassandra/cases/custom-convergence/memtable_heap_space+counter_cache_size.md`](cassandra/cases/custom-convergence/memtable_heap_space+counter_cache_size.md).
+    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md).
   - Run 2: same two plus `key_cache_size` as a 3rd on-heap constraint (config-type
     true positive; `row_cache_size`/`index_summary_capacity` were checked and
     turned out off-heap, not a fit — see below). Smaller individual values than
@@ -50,7 +50,7 @@ re-derive them, only consumes them.
     (96.6%) right after a forced full GC, a genuine `OutOfMemoryError`, a 1.35 GB
     heap dump, and this time `-XX:OnOutOfMemoryError=kill -9 %p` actually fired —
     the JVM was killed, not just stressed. Case file:
-    [`cassandra/cases/custom-convergence/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/custom-convergence/memtable_heap_space+counter_cache_size+key_cache_size.md).
+    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md).
   - Run 3: `commitlog_total_space` + `max_hints_size_per_host` (both disk-bound
     true positives), the first case in this folder to use a 2-node ring (a
     second node is structurally required to generate hints at all). **Blocked,
@@ -62,7 +62,7 @@ re-derive them, only consumes them.
     as contention-induced false suspicion from two co-located JVMs plus a
     loaded stress client on one host. The `hints_alone` and `converge` arms
     were never run. Filed as blocked/retryable, not exhausted. Case file:
-    [`cassandra/cases/custom-convergence/commitlog_total_space+max_hints_size_per_host.md`](cassandra/cases/custom-convergence/commitlog_total_space+max_hints_size_per_host.md).
+    [`cassandra/cases/candidates/commitlog_total_space+max_hints_size_per_host.md`](cassandra/cases/candidates/commitlog_total_space+max_hints_size_per_host.md).
   - Run 4: `row_cache_size` + `index_summary_capacity`, the first off-heap/
     direct-memory case (unparks the group opened in run 2's survey). Found,
     before running anything, that `-XX:MaxDirectMemorySize` does **not**
@@ -83,12 +83,12 @@ re-derive them, only consumes them.
     before any resize could run) but in what was meant to be a safe control
     arm, so weren't filed as their own cases — they're the evidence behind
     the final sizing. Case file:
-    [`cassandra/cases/custom-convergence/row_cache_size+index_summary_capacity.md`](cassandra/cases/custom-convergence/row_cache_size+index_summary_capacity.md).
+    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity.md).
   - Run 5 (2026-11-03): retry of run 4's pair with a 30 m resize interval and
     concurrent workloads. **Void:** the index-summary burst wrote 0
     partitions (the stress client's `CREATE TABLE` timed out under the
     concurrent read load; found in run 6). Case file, with a correction note:
-    [`cassandra/cases/custom-convergence/row_cache_size+index_summary_capacity--run5.md`](cassandra/cases/custom-convergence/row_cache_size+index_summary_capacity--run5.md).
+    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md).
   - Run 6 (2026-11-03): both retries on the same pair, 120 m resize interval,
     `isc.t` pre-created with `cqlsh`. **Schedule B (row cache filled to 550
     MiB first, then a 1.5M-partition burst) OOMed:** kernel cgroup OOM-kill
@@ -99,14 +99,14 @@ re-derive them, only consumes them.
     C), no off-heap kill (93%), but the JVM died of an unattributed Java heap
     `OutOfMemoryError` (heap dump kept on the node, unanalyzed). Run 4 is
     superseded by run 6. Pair closed as OOMed. Case file:
-    [`cassandra/cases/custom-convergence/row_cache_size+index_summary_capacity--run6.md`](cassandra/cases/custom-convergence/row_cache_size+index_summary_capacity--run6.md).
+    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md).
   - Run 7 (2026-11-03): `memtable_offheap_space` + `file_cache_size`, both
     new, both off-heap standing pools (off-heap `offheap_objects` memtable;
     chunk cache enabled). Same 3500 MiB cgroup budget in every arm, `-Xmx768M`.
     Each alone 78%; with the chunk cache full, a write burst got the JVM
     **kernel OOM-killed 16 s in** (anon-rss 3465 MiB). OOMed on the first try:
     both are hard standing caps, so no timing engineering was needed. Case file:
-    [`cassandra/cases/custom-convergence/memtable_offheap_space+file_cache_size.md`](cassandra/cases/custom-convergence/memtable_offheap_space+file_cache_size.md).
+    [`cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md`](cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md).
   - Run 8 (2026-11-03): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`, both
     new, both JVM properties, both `ByteBuffer.allocateDirect` pools, so the
     budget is the JVM's own `-XX:MaxDirectMemorySize` (560 MiB), not a cgroup.
@@ -116,8 +116,8 @@ re-derive them, only consumes them.
     Direct buffer memory` about 7 s into the DOB burst, then Cassandra's
     forced heap OOM and `kill -9`. The same arm with L at its default did not
     OOM (attribution control). Case file:
-    [`cassandra/cases/custom-convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](cassandra/cases/custom-convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md).
-  - Batch log: [`cassandra/cases/custom-convergence/_batch-log.md`](cassandra/cases/custom-convergence/_batch-log.md) —
+    [`cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md`](cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md).
+  - Batch log: [`cassandra/cases/_run-log.md`](cassandra/cases/_run-log.md) —
     its "Shared-budget group status" table is the dedup record: on-heap is
     **exhausted** (2-way then 3-way, escalating outcome, no 4th
     attempted since it wouldn't add evidence), off-heap is **exhausted**
@@ -133,7 +133,7 @@ re-derive them, only consumes them.
 
 - **Disk is paused by request (set 2026-11-02).** Do not retry the disk case
   or pick a new disk-group combination until this is explicitly lifted in
-  `cases/custom-convergence/_batch-log.md`'s status table. When it is lifted, the
+  `cases/_run-log.md`'s status table. When it is lifted, the
   retry needed is: (a) a bigger disk-budget mount or a smaller/throttled
   write workload so flush-and-compaction overhead doesn't itself exhaust the
   budget before commit log reaches its own target, and (b) either raising
@@ -172,8 +172,8 @@ re-derive them, only consumes them.
   mechanisms, designs the test, runs it on a node it has access to, and
   files the result. No separate design-then-execute split (unlike
   `if-check-exp` stage 3/4).
-- **One run produces a batch of cases**, not one, tracked in a per-direction
-  `cases/<direction>/_batch-log.md`.
+- **One run produces a batch of cases**, not one, tracked chronologically in
+  the single `cases/_run-log.md` (regime labeled per run).
 - **Case files use the fixed 4-section template** each playbook specifies
   (constraints/capacity, verification solution, runtime results, conclusion
   that branches on the outcome). Keep section headings.
@@ -209,12 +209,13 @@ re-derive them, only consumes them.
 - [`default-convergence-playbook.md`](default-convergence-playbook.md) —
   the convergence playbook plus one restriction: every constraint stays at
   its default value (only the budget and the workload are dials). Own batch
-  log at `cases/default-convergence/_batch-log.md`. Run 1 (2026-11-04): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` at defaults **OOMed, strict default** (192 MiB `MaxDirectMemorySize`, narrow window); on-heap and off-heap JNA judged **cannot converge at defaults** by arithmetic.
-- [`_INDEX.md`](cassandra/_INDEX.md) — every closed case, by direction.
-- `cases/custom-convergence/`, `cases/bypass/` — case files, batch logs, harness
-  scripts and small raw-log excerpts (full logs stay on the run node; each
-  case file records the path).
-- [`cassandra/cases/custom-convergence/_constraint-groups.md`](cassandra/cases/custom-convergence/_constraint-groups.md) —
+  log at `cases/_run-log.md`. Run 1 (2026-11-04): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS` at defaults **OOMed, strict default** (192 MiB `MaxDirectMemorySize`, narrow window); on-heap and off-heap JNA judged **cannot converge at defaults** by arithmetic.
+- [`_INDEX.md`](cassandra/cases/_INDEX.md) — every closed case, by status.
+- `cases/convergence/`, `cases/candidates/`, `cases/bypass/`, `cases/negatives/` —
+  case files (status-first folders) and small raw-log excerpts; the merged
+  `cases/_run-log.md` holds the chronological run log (full logs stay on the
+  run node; each case file records the path).
+- [`cassandra/cases/_constraint-groups.md`](cassandra/cases/_constraint-groups.md) —
   every if-check-exp true-positive constraint, surveyed and grouped by
   shared budget (on-heap/off-heap/disk) and classified **floor / surge /
   excluded** (floor = standing pool; surge = per-item allocation with no

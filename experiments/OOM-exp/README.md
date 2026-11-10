@@ -116,7 +116,7 @@ repetitions, causal interventions, and negative/invalid results.
 
 Each direction is run from its own playbook — a repeatable procedure an agent
 or a person follows to produce one case. Every closed case is tracked in that
-system's index, e.g. [`cassandra/_INDEX.md`](cassandra/_INDEX.md).
+system's index, e.g. [`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md).
 
 | Direction | Playbook | What it produces |
 |---|---|---|

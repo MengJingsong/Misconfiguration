@@ -80,8 +80,12 @@ explicit intervention/deviation tests. Match total concurrency and background
 work where relevant. An enabled-threshold arm and an unset/unlimited-default arm
 must be labeled separately.
 
-Write `<system>/cases/default-convergence/<mechanism-stem>.md`. Keep existing
-combination filenames. In the four case sections include:
+Write the case under the status-first folder that matches its outcome
+(`<system>/cases/convergence/` for a verified OOM, `<system>/cases/candidates/`
+while unresolved/parked, `<system>/cases/negatives/` for a verified no-OOM),
+labeling the capacity regime **default** in the case header and `_INDEX.md`
+rather than in a folder name. Keep existing combination filenames (disambiguate
+with a `--<regime>`/`--runN` suffix on collision). In the four case sections include:
 
 1. Default rules, resolved values, unchanged-knob evidence, protection map and
    separate capacity/budget labels.
@@ -91,6 +95,7 @@ combination filenames. In the four case sections include:
 4. Exact conditions establishing a gap or protection, dependency on supporting
    deviations, budget realism and limits of attribution.
 
-Append batch records to `<system>/cases/default-convergence/_batch-log.md` and
-closed cases to the system index. Preserve historical results; do not rewrite
-old runs as if they satisfied newly introduced requirements.
+Append batch records to the chronological `<system>/cases/_run-log.md` and
+closed cases to the system index (`<system>/cases/_INDEX.md`). Preserve
+historical results; do not rewrite old runs as if they satisfied newly
+introduced requirements.
