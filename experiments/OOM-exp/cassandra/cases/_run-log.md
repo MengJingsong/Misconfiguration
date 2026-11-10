@@ -23,8 +23,9 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-03 | convergence / custom | run 7 | [memtable_offheap_space+file_cache_size](convergence/memtable_offheap_space+file_cache_size.md) | OOMed |
 | 2026-11-03 | convergence / custom | run 8 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | OOMed, JVM killed |
 | 2026-11-04 | default | run 1 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (default)](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--default.md) | OOMed, strict default |
-| 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](candidates/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
-| 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](candidates/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
+| 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
+| 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
+| 2026-11-10 | convergence / custom | C1 run 3 (fast co-replica) | [internode...--run3-fastcoreplica](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) | G1–G3 pass (ceiling at N=8, senders alive); stopped early by a sampler bug; Stage C/D outstanding |
 | — | bypass | (none run yet) | — | planning only |
 
 ---
@@ -42,7 +43,7 @@ are asserted. See [campaign plan](../campaign-plan.md).
 
 | Mechanism / allocation domain / regime | Status | Next action |
 |---|---|---|
-| C1 / internode private allowances / custom capacities, budget separately labeled | open | Audit private/reserve accounting; sweep reachable active peers/links |
+| C1 / internode private allowances / custom capacities, budget separately labeled | **in progress** (updated 2026-11-10): reopen 2 Q-attribution negative (closed-loop equilibrium); run 3 reached the ceiling at N=8 with live senders, Q/N sweeps not yet run | Continue run 3: coordinator `write_request_timeout` > A_max/D, then S1 (N=8, Q=4/16/64) measuring total and physical memory; Stage D only if total grows with Q |
 | C2 / per-query live memory / custom capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
 | C3 / per-worker DOB allocations / custom capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
 | Existing standing-pool combinations / original regimes | historical scope only | Preserve results; new runs need a distinct mechanism or boundary question |
@@ -216,8 +217,8 @@ instead.
 
 **Nodes:** CloudLab LAN 10.10.1.0/24 — victim `apt140`/10.10.1.1 (dc=v, `~/cassandra-b1`); 8 coordinator
 instances dc=c on `apt179/138/190/149` (`~/cassandra-c1`, 1 GiB heap, LAN IP aliases .32–.81, 2/host).
-**Design:** `../../temp/C1-design-v2.md`. Case file:
-[`internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`](candidates/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md).
+**Design:** [`C1-design-v2.md`](candidates/internode_application_receive_queue_capacity-multiplicity/design/C1-design-v2.md). Case file:
+[`internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md).
 Reopens the run-2 **default**-Q negative to test whether a **raised (custom)** exclusive allowance N·Q can
 drive the victim to OOM, under v2's three fixes (raise Q; victim owns the only replica so RF=1 keeps
 senders light; concentrate load so backpressure is natural).
@@ -255,6 +256,36 @@ manufactured (the direct-buffer OOM is real but Q-independent). **Raw logs** on 
 `/mydata/c1r/victim/logs{,.prev}` and `/mydata/c1r/arms/<arm>/`; small excerpts in the case `logs/`.
 **Cleanup verified:** no Cassandra JVMs, stress, IP aliases, port-7000 firewall rules, or systemd user
 units on any node; linger disabled.
+
+## 2026-11-10 — C1 run 3 (convergence / custom topology, fast co-replica)
+
+**Nodes:** victim `apt140`/10.10.1.1 (dc=v, `~/cassandra-b1`, 1 GiB heap, 3072 MiB direct, cgroup 7168 MiB,
+swap off); fast co-replica `apt179`/10.10.1.2 (dc=f, 4 GiB heap); 8 coordinators dc=c on `apt138/190/149`
+(aliases .31–.33/.41–.43/.51–.52, 1 GiB). **Design:**
+[`C1-run3-plan-review.md`](candidates/internode_application_receive_queue_capacity-multiplicity/design/C1-run3-plan-review.md)
+(amends [`C1-design-v3.md`](candidates/internode_application_receive_queue_capacity-multiplicity/design/C1-design-v3.md)).
+Case file:
+[`internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md).
+
+**Premise:** keyspace `NTS {v:1,f:1}`, CL=ONE, so the fast replica acks the client and the victim is flooded
+open-loop (`cassandra-stress -rate fixed=`), with hints off on all instances.
+
+**Results (calibration only):** G1 replicas = {victim, fast} for all sampled keys. Drain rate D ≈ 20/s
+(1 MiB). G2 client at the offered 40 op/s, 22 ms, 0 errors. **G3 pass:** `fixed=150/s` N=4 peak 524 MiB
+(16 excl + 508 rsv, A_max 528); `fixed=300/s` N=8 peak **543 MiB = 8×4.0 excl + 511 rsv (A_max 544)**,
+throttling active; victim and all coordinators alive (no `java.lang.OutOfMemoryError`). `threads=1200`
+reached the same ceiling but the client got `WriteTimeoutException`.
+
+**Stopping reason / error:** the run was stopped after the calibration arms because the live sampler
+summed cqlsh `|` separator fields and read 0 for every queue counter; it was first filed as "G3 fail". The
+raw `arms/<arm>/queue.log` files, re-parsed the same day, show the ceiling was reached; the case file was
+corrected. **Not run:** S1/S2 sweeps, reduced-Q, Stage D. **Open defect:** coordinators kept the default
+2 s `write_request_timeout` (the sender sets `expiresAt`), so expiry was high and the Q=64 arms cannot reach
+their ceiling until it is raised.
+
+**Raw logs** on the nodes under `/mydata/c1r3/victim/logs{,.prev}`, `/mydata/c1r3/arms/<arm>/`,
+`/mydata/c1r3/inst-*/logs`. **Cleanup verified:** no Cassandra JVMs, IP aliases or c1r3 systemd user
+units on any node; linger (enabled for this run) disabled again.
 
 ---
 
@@ -334,7 +365,7 @@ endpoint E=128 MiB, global G=512 MiB — **defaults**), tightened diagnostic dir
 convergence case in this project driven by **multiplicity of active peers** rather than two stacked pools,
 and the first multi-instance ring (up to 33 Cassandra instances via LAN IP aliases).
 
-**Attempted:** one case — [`internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`](candidates/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md).
+**Attempted:** one case — [`internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md).
 Arms: G1 reachability; D_cal_n4 (reference, Byteman 100 ms apply-delay, Q=4, 2048 MiB budget); D_cal_n8;
 RQ_n4_q1 (reduced-Q causal control, Q=1 MiB); D_oom_n4_b450 (450 MiB budget). **Result: mechanism confirmed
 exactly, multiplicity-OOM sensitivity-limited / UNRESOLVED.** At N=4 the admitted bytes = 527.8 MiB =

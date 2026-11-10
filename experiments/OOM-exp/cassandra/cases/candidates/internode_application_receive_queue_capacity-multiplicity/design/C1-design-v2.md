@@ -1,7 +1,7 @@
 # C1 reopen — design v2 (DRAFT for approval)
 
 **Reopens** the run-2 sensitivity-limit result
-(`cases/candidates/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`).
+(`cases/candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`).
 Mechanism is already confirmed to the byte (A_max(4)=528, per-conn=Q+E, Σreserve=G). v2 does **not**
 re-litigate that — it answers the reachability question run 2 left open: **can multiplied exclusive
 allowances drive the victim to OOM, and where is the boundary.**
@@ -111,7 +111,7 @@ OOM + its surviving reference + 3 repeats each + the reduced-Q control.
 
 ## 10. Deliverable
 
-New case `cases/candidates/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`
+New case `cases/candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`
 (4-section), cross-linking the run-2 default-Q negative; harness + small excerpts in a sibling
 folder (full logs on /mydata); rows in `_INDEX.md` and the `_run-log.md`. Reuse
 the run-2 harness (peer-ctl/victim-ctl/arm/analyze/mutation-delay.btm) with the snitch/dc + per-arm Q edits.

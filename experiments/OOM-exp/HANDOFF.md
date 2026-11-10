@@ -127,6 +127,15 @@ re-derive them, only consumes them.
     just deliberately paused; see run 3's case file for the retry that
     remains available once un-skipped). Read it before picking a combination
     for the next run — **do not pick from disk while it is marked skipped.**
+- **C1 — internode receive-queue multiplicity (campaign plan, 2026-11-09/10): in progress.**
+  Three runs, all cases, harnesses and design files in
+  [`cassandra/cases/candidates/internode_application_receive_queue_capacity-multiplicity/`](cassandra/cases/candidates/internode_application_receive_queue_capacity-multiplicity/).
+  Run 1 (default Q): admission ceiling matched to 0.2 MiB at N=4, but N·Q ≪ noise and coordinators OOMed
+  under replica fan-out. Run 2 (custom Q, victim sole replica): senders survive, but the client waits on
+  the victim, so occupancy settles at ~266 MiB below the ceiling and is Q-invariant. Run 3 (fast
+  co-replica, CL=ONE, open-loop): ceiling reached at N=8 (543 = 8×4 + 511 MiB) with live senders; stopped
+  early by a sampler bug, so the Q/N sweeps and OOM stage are still to run. Next: raise the
+  **coordinators'** `write_request_timeout` above A_max/D, then the N=8 Q-sweep.
 - **Bypass (`bypass-playbook.md`):** not started. No candidate picked yet.
 
 ## Open follow-ups

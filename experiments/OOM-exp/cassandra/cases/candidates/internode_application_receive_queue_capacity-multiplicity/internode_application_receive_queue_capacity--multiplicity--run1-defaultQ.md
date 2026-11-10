@@ -8,12 +8,15 @@ supporting deviations (see §1 audit). **Budget regime:** deliberately tightened
 budget (`-XX:MaxDirectMemorySize`), victim cgroup-isolated, swap off.
 **Pinned source:** cassandra-5.0.9 (upstream `b5f2a54210`; local build baselines `46cb80db…` victim /
 `28adf490…` peers — separate `copy-source.sh` copies of the same tag, per the stage-4 environment note).
+
+> **Follow-ups:** [run 2 (custom Q)](internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) and [run 3 (fast co-replica)](internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md). All C1 design files are in [`design/`](design/).
+
 **Date:** 2026-11-09. **Verdict:** mechanism **confirmed at the admission level**; a
 **multiplicity-attributable OOM is a sensitivity limit / UNRESOLVED** (see §4).
 
-This case executes the approved method in `../../../temp/C1-design-codex-v1.md`
-(Codex v1) under `../../../verification-protocol.md` and the
-[default-convergence playbook](../../../default-convergence-playbook.md).
+This case executes the approved method in `design/C1-design-codex-v1.md`
+(Codex v1) under `../../../../verification-protocol.md` and the
+[default-convergence playbook](../../../../default-convergence-playbook.md).
 
 ---
 

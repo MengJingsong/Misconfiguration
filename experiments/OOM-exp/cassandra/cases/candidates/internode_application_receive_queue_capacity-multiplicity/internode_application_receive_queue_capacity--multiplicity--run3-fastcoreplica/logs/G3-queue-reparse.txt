@@ -1,0 +1,16 @@
+# Correct reparse of raw arm queue.log (fields split on |). Sum over the 8 coordinator inbound connections on the victim.
+# throttled/expired are cumulative per-connection counters (connection lifetime, across arms).
+probe2     samples=31 peak_using=85.0MiB reserve=69.0MiB exclusive=16.0MiB max_throttled=0 max_expired=1230
+probe3     samples=42 peak_using=524.0MiB reserve=508.0MiB exclusive=16.0MiB max_throttled=31 max_expired=7369
+burst      samples=18 peak_using=543.0MiB reserve=511.0MiB exclusive=32.0MiB max_throttled=129 max_expired=10911
+threadtest samples=20 peak_using=543.0MiB reserve=511.0MiB exclusive=32.0MiB max_throttled=289 max_expired=16095
+
+# burst (N=8, Q=4, fixed=300/s) peak sample, per connection:
+ 10.10.1.31  using=67.0 rsv=63.0 excl=4.0 thr=4
+ 10.10.1.32  using=67.0 rsv=63.0 excl=4.0 thr=1
+ 10.10.1.33  using=66.0 rsv=62.0 excl=4.0 thr=5
+ 10.10.1.41  using=68.0 rsv=64.0 excl=4.0 thr=13
+ 10.10.1.42  using=69.0 rsv=65.0 excl=4.0 thr=2
+ 10.10.1.43  using=68.0 rsv=64.0 excl=4.0 thr=2
+ 10.10.1.51  using=71.0 rsv=67.0 excl=4.0 thr=16
+ 10.10.1.52  using=67.0 rsv=63.0 excl=4.0 thr=2

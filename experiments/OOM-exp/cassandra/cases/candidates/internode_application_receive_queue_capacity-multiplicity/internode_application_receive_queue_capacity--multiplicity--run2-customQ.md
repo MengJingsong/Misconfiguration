@@ -8,6 +8,9 @@ reduced-Q control); E / G left at defaults (128 / 512 MiB). Disclosed supporting
 **Budget regime:** deliberately tightened diagnostic direct-memory budget (`-XX:MaxDirectMemorySize`),
 victim cgroup-isolated (`MemoryMax` above the JVM budget), swap off (victim only).
 **Pinned source:** cassandra-5.0.9 (victim build `~/cassandra-b1`, peers `~/cassandra-c1`).
+
+> **Follow-up:** [run 3 (fast co-replica)](internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) decouples the client from the victim and reaches the admission ceiling at N=8. All C1 design files are in [`design/`](design/).
+
 **Date:** 2026-11-09. **Verdict:** mechanism **confirmed exactly** (exclusive allowance = N·Q to the
 MiB); the two topology fixes this reopen introduced **both succeeded** (RF=1-to-victim keeps coordinators
 alive at N=8; natural backpressure is now reachable). A genuine **load-driven receive-path direct-buffer
@@ -20,8 +23,8 @@ live memory is **Q-invariant** and the OOM fires at the **same budget for Q=4 an
 
 Reopens the run-2 default-Q negative:
 [`internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`](internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md).
-Executes the approved method `../../../temp/C1-design-v2.md` under `../../../verification-protocol.md`
-and the [custom-convergence playbook](../../../custom-convergence-playbook.md).
+Executes the approved method `design/C1-design-v2.md` under `../../../../verification-protocol.md`
+and the [custom-convergence playbook](../../../../custom-convergence-playbook.md).
 
 ---
 
