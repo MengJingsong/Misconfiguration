@@ -44,7 +44,8 @@ automatically confirmed bypass.
 
 ## Picking and sizing
 
-Use the system's campaign queue and this variant's own batch status. Custom-case
+Use the system's campaign queue and this variant's own batch status (leads may
+come from any [lead source](README.md#lead-sources); record its label). Custom-case
 exhaustion does not imply default-case exhaustion. Disk remains skipped by request.
 
 Express each capacity in terms of heap/budget, object footprint and multiplicity.

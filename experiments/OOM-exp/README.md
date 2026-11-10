@@ -56,6 +56,25 @@ That inventory is the input here. We already know, per constraint:
 OOM-exp uses that evidence to test whether the identified controls protect a
 shared memory budget under reachable workloads and configurations.
 
+## Lead sources
+
+*(Added 2026-11-10.)* A **lead source** is how a candidate is found; a
+**direction** (below) is how the OOM happens. The two are independent: a lead
+from any source is run with the convergence or bypass playbook, or as an
+unprotected-accumulation case, and classified by the common protocol. Each case
+and campaign row records its source as a label, like the capacity regime.
+
+| Source | Starts from | Finds | Method |
+|---|---|---|---|
+| **if-check inventory** | capacity checks found by `if-check-exp` | convergence and bypass of existing checks | the direction playbooks' selection step |
+| **JIRA OOM history** | the project's fixed OOM reports | which mechanisms cause real OOMs; positive controls; unfixed variants and incomplete fixes | [`jira-mining-playbook.md`](jira-mining-playbook.md) |
+| **Data-flow tracing** | where bytes are held along core data flows | accumulation with no check or a check on the wrong unit, plus new leads for both directions | [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) |
+
+The if-check inventory cannot see memory that no check guards; the other two
+sources cover that gap. The JIRA survey also ranks flows for tracing. Lead
+outputs live under `<system>/leads/`; cases stay in `<system>/cases/`.
+A reproduced, already-fixed JIRA bug is a **positive control**, not a new finding.
+
 ## Two directions
 
 ### Direction 1 — convergence
@@ -130,6 +149,13 @@ system's index, e.g. [`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md).
 | 1 — simultaneous live allocations share a budget | **`custom-convergence-playbook`** | a convergence case (constraint set, sizing, combined workload, memory outcome) |
 | 1 (variant) — same, with every constraint at its default value | **`default-convergence-playbook`** | a default-value convergence case (same as above, plus a defaults audit) |
 | 2 — get past one capacity check | **`bypass-playbook`** | a bypass case (check, defeating mechanism, measured usage past capacity) |
+
+The lead-source playbooks run before these and feed them:
+
+| Lead source | Playbook | What it produces |
+|---|---|---|
+| JIRA OOM history | **`jira-mining-playbook`** | `<system>/leads/jira-oom-survey.csv`/`.md`, positive-control cases, variant leads |
+| Data-flow tracing | **`dataflow-tracing-playbook`** | `<system>/leads/dataflow/<flow>.md` holder tables, ranked leads, unprotected-accumulation cases |
 
 ## Relationship to the project targets
 

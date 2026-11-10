@@ -43,7 +43,7 @@ Decide the direction from measurements, per controlled allocation domain:
 | U > C, K > C | **Bypass** — enforcement failure (late/periodic check, admitted after failed reservation, race) |
 | U > C, K ≤ C | **Bypass** — accounting omission/mismatch or release defect |
 | A bypass excess plus other domains are both needed for the OOM | **Mixed** |
-| No applicable control, or control disabled | **Unprotected configuration** (neither) |
+| No applicable control, or control disabled | **Unprotected** (neither) — configuration or accumulation, see below |
 
 Overshoot within the documented contract is an intentional exception, not a
 bypass. Track U as peak **and** trend: transient overshoot (periodic enforcement)
@@ -51,6 +51,27 @@ and growth across fill/clear/idle cycles (release defects) are missed by a singl
 sample. A bypass with U > C is a result without OOM. For convergence, check
 feasibility first: if Σ contract capacities + baseline < budget, convergence is
 impossible even with every pool full, under that configuration and budget.
+
+### Unprotected results (amended 2026-11-10)
+
+New evidence: the JIRA and data-flow lead sources (README, *Lead sources*) target
+memory that no capacity check guards. Such results are **in scope** and
+recorded as **unprotected**, not as a third direction, in two kinds:
+
+- **Unprotected configuration:** a control exists but is disabled or set to
+  unlimited (default or custom). Label the setting; it is not a bypass.
+- **Unprotected accumulation:** no control applies to the holder at all, or the
+  only bound is implicit (concurrency × size, timeout × rate) and not enforced
+  as a memory limit.
+
+An unprotected accumulation is a finding only when the workload stays within
+documented guardrails, protocol limits and accepted configuration, and the
+excess comes from the system's own accumulation (retention, copies,
+amplification, backlog) rather than from input the system is documented not to
+accept. State whether the project documents the behavior as by design. The
+protection map, controls, repetitions and intervention rules apply unchanged;
+the intervention is usually adding a bound and showing the failure stops.
+File these cases in the status-first folders with the label **unprotected**.
 
 ## Protection map (required before execution)
 

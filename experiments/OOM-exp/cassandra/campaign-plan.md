@@ -49,6 +49,22 @@ validation uses three failing and three nearest-surviving runs; extend for mixed
 outcomes. Report the initiating failure, not only Cassandra's shutdown response.
 No experiments are launched by this documentation update.
 
+## Lead-source pilots
+
+Added 2026-11-10 (see [lead sources](../README.md#lead-sources)). Rows in the
+prioritized queue above come from the if-check inventory unless they say
+otherwise (B6 came from tracing C1's write path). New candidates found by these
+pilots get normal C/B IDs (U for unprotected accumulation) and a
+`source:` label. Not yet started.
+
+| ID / priority | Lead source | Task | Output / done when |
+|---|---|---|---|
+| J1 / P1 | JIRA | Survey resolved CASSANDRA issues reporting OOM; classify per [jira-mining-playbook](../jira-mining-playbook.md). Then pick 3–5 positive controls and a variant shortlist. | `leads/jira-oom-survey.csv` + `.md` with counts per class/flow/fix kind and the two shortlists. Reproductions are separate follow-up rows. |
+| F1 / P1 | data flow | Trace the **coordinator write** flow (client intake → coordinator → internode send → replica receive → mutation stage → memtable) per [dataflow-tracing-playbook](../dataflow-tracing-playbook.md). Much of it is mapped already in C1 and B6. | `leads/dataflow/coordinator-write.md` with the holder table and ranked leads. |
+| J2 / P2 | JIRA | Same survey for Hadoop (HDFS, YARN, MAPREDUCE, HADOOP); does not need if-check-exp Hadoop to finish. | `../hadoop/leads/jira-oom-survey.csv` + `.md`. |
+
+Rank later flows for tracing by J1's per-flow counts.
+
 ## Scope and progress
 
 Status is keyed by mechanism + allocation domain + capacity/budget regime. Consult

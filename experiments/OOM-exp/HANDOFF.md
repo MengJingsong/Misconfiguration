@@ -36,6 +36,15 @@ Use the [campaign plan](cassandra/campaign-plan.md) and
 [current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
 for current priorities and results.
 
+**New lead sources (2026-11-10).** Besides the if-check-exp inventory, leads now
+also come from **JIRA OOM history** ([`jira-mining-playbook.md`](jira-mining-playbook.md))
+and **data-flow tracing** ([`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md)).
+They are lead sources, not new directions: results are still convergence,
+bypass, mixed or **unprotected** (memory no check guards is in scope; protocol
+amendment of 2026-11-10). Outputs go under `<system>/leads/`. Pilots J1, J2 and
+F1 are queued in the [campaign plan](cassandra/campaign-plan.md#lead-source-pilots);
+none has run yet.
+
 ## Current state
 
 - **Historical custom-convergence batch:** 8 runs. Five OOMed (runs 1, 2, 6,
@@ -213,7 +222,11 @@ for current priorities and results.
 
 ## Where things live
 
-- [`README.md`](README.md) — the target, the two directions.
+- [`README.md`](README.md) — the target, the lead sources, the two directions.
+- [`jira-mining-playbook.md`](jira-mining-playbook.md),
+  [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) — how to
+  produce leads from JIRA OOM reports and from tracing core data flows; their
+  outputs live in `<system>/leads/`.
 - [`custom-convergence-playbook.md`](custom-convergence-playbook.md),
   [`bypass-playbook.md`](bypass-playbook.md) — the agent's whole instruction
   for a run in each direction.

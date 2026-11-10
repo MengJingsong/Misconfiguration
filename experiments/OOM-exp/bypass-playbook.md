@@ -15,7 +15,8 @@ Record intentional soft enforcement separately from implementation defects.
 A disabled limit is an unprotected configuration, not automatically a bypass.
 
 Start with the system campaign queue, existing stage-4 leads, and source at the
-pinned version. For Cassandra use [campaign-plan.md](cassandra/campaign-plan.md).
+pinned version. Leads may also come from the JIRA and data-flow lead sources
+([README](README.md#lead-sources)); record the source label in the case. For Cassandra use [campaign-plan.md](cassandra/campaign-plan.md).
 Re-check exact callers, protocols, defaults, allocation ownership and release.
 Existing true-positive, weak, or undetermined cases can supply leads; a negative
 case supplies no verified cap by itself. Establish an applicable control before

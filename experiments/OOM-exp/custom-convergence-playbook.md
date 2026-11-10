@@ -27,6 +27,8 @@ hypothesis, currently deferred.
 Start with the system's campaign plan (for Cassandra,
 [campaign-plan.md](cassandra/campaign-plan.md)), its current batch status, and
 [constraint survey](cassandra/cases/_constraint-groups.md).
+Leads may also come from the JIRA and data-flow lead sources
+([README](README.md#lead-sources)); record the source label in the case.
 Use if-check-exp source/case/runtime evidence to populate the protocol's
 protection map. True positives and false negatives with measured caps are leads;
 weak outcomes need confirmation. A true negative is not proof of a usable cap,

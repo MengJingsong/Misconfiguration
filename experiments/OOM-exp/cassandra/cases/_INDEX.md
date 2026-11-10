@@ -12,7 +12,13 @@ Master status table for every OOM-exp Cassandra case. Cases are filed in
 - **`negatives/`** — verified **no-OOM** (safe). *(none yet)*
 
 The capacity **regime** (**custom** raised values | **default** shipped values)
-is a *label* here, not a folder. Chronological run narrative, infra notes and
+is a *label* here, not a folder. So is the **lead source** (if-check inventory
+unless stated; otherwise `JIRA-KEY` — a reproduced fixed bug is a *positive
+control* — or `flow:<name>`), stated in the case file and in the Result phrase
+when not if-check. **Unprotected** results (no applicable control) are filed in
+the same status folders with that label. Lead-source outputs (JIRA survey,
+data-flow holder tables) live in `cassandra/leads/`, not here.
+Chronological run narrative, infra notes and
 shared-budget survey status live in [`_run-log.md`](_run-log.md); the constraint
 survey is in [`_constraint-groups.md`](_constraint-groups.md); the planned next
 campaign is in [`campaign-plan.md`](../campaign-plan.md).
