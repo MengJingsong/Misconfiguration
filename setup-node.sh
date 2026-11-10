@@ -13,7 +13,7 @@
 #   --timezone Z  system time zone to set (default America/New_York, US Eastern:
 #               EST, EDT in summer; "EST" is a fixed UTC-5); --no-timezone skips it
 #   --no-claude skip installing Claude Code (installed via claude.ai/install.sh)
-#   --no-codex  skip installing the OpenAI Codex CLI (standalone binary from GitHub releases)
+#   --no-codex  skip installing the OpenAI Codex CLI (chatgpt.com/codex/install.sh)
 set -euo pipefail
 
 WORKSPACE=/proj/misconfiguration-PG0
@@ -224,28 +224,23 @@ fi
 
 if [ "$DO_CODEX" = 1 ]; then
     echo "7. Installing the Codex CLI..."
-    # standalone release binary (no Node.js/npm needed), put in ~/.local/bin like claude
+    # OpenAI's standalone installer: package in ~/.codex/packages/standalone, symlink
+    # ~/.local/bin/codex (no Node.js needed). A bare binary (what an earlier version of
+    # this script installed) is replaced: `codex remote-control` / the app-server
+    # daemon refuse to run without the package ("no complete local package").
     export PATH="$HOME/.local/bin:$PATH"
-    case $(uname -m) in
-        x86_64|amd64)  arch=x86_64 ;;
-        aarch64|arm64) arch=aarch64 ;;
-        *)             arch="" ;;
-    esac
-    if command -v codex >/dev/null 2>&1; then
+    if [ -L "$HOME/.local/bin/codex" ] && [ -d "$HOME/.codex/packages/standalone" ] \
+       && command -v codex >/dev/null 2>&1; then
         echo "   already installed: $(codex --version 2>/dev/null || echo codex)"
-    elif [ -z "$arch" ]; then
-        echo "   WARNING: no Codex binary for $(uname -m), skipped" >&2
     else
-        asset="codex-$arch-unknown-linux-musl"
-        tmp=$(mktemp -d)
-        if curl -fsSL "https://github.com/openai/codex/releases/latest/download/$asset.tar.gz" | tar -xz -C "$tmp" \
-           && mkdir -p "$HOME/.local/bin" && install -m 755 "$tmp/$asset" "$HOME/.local/bin/codex"; then
+        [ ! -f "$HOME/.local/bin/codex" ] || [ -L "$HOME/.local/bin/codex" ] \
+            || echo "   replacing the bare binary ~/.local/bin/codex with the packaged install"
+        if curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh; then
             echo "   installed: $(codex --version 2>/dev/null || echo 'codex (open a new shell if not on PATH)')"
             echo "   sign in once with: codex login"
         else
             echo "   WARNING: Codex CLI install failed" >&2
         fi
-        rm -rf "$tmp"
     fi
 fi
 

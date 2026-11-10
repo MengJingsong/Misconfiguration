@@ -92,6 +92,28 @@ committed and never overwrites anyone else's values; `check-ips.sh` can
 also rewrite its `CLUSTER_IP` block automatically after a CloudLab
 allocation swap.
 
+### 1.1 Codex remote control (optional)
+
+To drive Codex on a node from the Codex/ChatGPT desktop app or the ChatGPT
+mobile app. Codex is installed by `setup-node.sh` (step 7); run on the node:
+
+```bash
+codex login                    # once per node; sign in with ChatGPT (device-code option on a headless node)
+codex remote-control start     # start the background app server with remote control on
+codex remote-control pair      # print a short-lived pairing code
+```
+
+Enter the code on the device: desktop app **Settings → Connections → Control
+other devices → Add**, or ChatGPT mobile **Remote → pair manually**. Run
+`pair` once per device (desktop and phone can share one server). Notes:
+
+- The ChatGPT account needs **multi-factor authentication** on; without it
+  `start` reports "the connection is errored" (relay returns `403 Multi-factor
+  authentication required`). Turn on MFA, then `codex logout` and `codex login` again.
+- All devices and the node must use the same ChatGPT account/workspace.
+- `codex remote-control stop` stops it. A new node (new CloudLab allocation)
+  is a new host: log in, start and pair again.
+
 ## 2. Workspace layout
 
 ### 2.1 This repo's own layout
