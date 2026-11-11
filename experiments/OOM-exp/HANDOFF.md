@@ -31,7 +31,11 @@ Start-here brief for a session picking up `OOM-exp`. Read this, then
 across the custom- and default-capacity regimes. The original on-heap and
 off-heap standing-pool surveys are complete within their historical scope.
 C1, the internode receive-queue multiplicity case, is still in progress.
-Disk work remains paused by request, and bypass has no recorded runtime runs.
+Disk work remains paused by request. **Bypass has its first runs:** B6
+(internode queue accounting mismatch) run 1 (2026-11-10) confirmed the bypass and
+reproduced heap OOM with supporting deviations; run 2 (2026-11-11) reproduced the
+memory effect at default timeouts and an 8 GiB replica, mostly as GC service loss
+with 2 heap OOMs in 8 arms. It stays a candidate.
 Use the [campaign plan](cassandra/campaign-plan.md) and
 [current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
 for current priorities and results.
@@ -153,8 +157,28 @@ none has run yet.
   Next, verify the **coordinators'** `write_request_timeout` against the
   measured drain rate and run the matched sweeps. Proceed to the fixed-budget
   OOM stage after a reproducible live-memory increase.
-- **Bypass (`bypass-playbook.md`):** B1 is the first planned investigation.
-  No runtime runs are recorded.
+- **Bypass (`bypass-playbook.md`):**
+  - **B6 — internode queue accounting mismatch (2026-11-10/11): candidate, runs 1–2 done.**
+    Found by tracing C1's write path (`source: flow:coordinator-write`). The internode
+    send/receive queues charge on-wire bytes; a 1000-cell map mutation is 10.8 KiB on
+    the wire but ≈ 213 KiB on the coordinator heap and ≈ 181 KiB on the replica heap
+    (R ≈ 19.7× / 16.7×; matched blob ≈ 2.2×). The coordinator also keeps each
+    `Mutation` after flush (`hintOnFailure`) until the replica answers, charged to no
+    sender counter. At a 2 GiB heap: coordinator and slow replica each OOM 3/3 with
+    counters ≤ 132 MiB, blob 0/3; 8 MiB endpoint reserves remove the OOM (n=1).
+    Run 1 needed an injected slow replica and 60 s deadlines. **Run 2** dropped both:
+    default timeouts and threads, Java client, 4 coordinators, 30 s storage stall
+    (dm-delay) on the replica. Tiny-cell writes drove an 8/6 GiB replica to ≈ 99% live
+    heap with ≈ 97% of an 80–123 s window in Full GC in 5/5 stall arms; heap OOM in
+    2/8 stall/hang arms; blob 0 Full GCs; an 8 MiB receive endpoint reserve removed
+    it (n=1). Outcome per protocol: mostly GC-driven service loss, not a
+    deterministic OOM. Cases: [run 1](cassandra/cases/candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run1.md),
+    [run 2](cassandra/cases/candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run2-diskstall.md).
+    Next: heap dump on one OOM arm, intervention ×3, stall-length sweep (5/15/60 s),
+    measure the coordinators, ≥ 2 slow replicas at 8 GiB, JIRA check
+    (CASSANDRA-15066 introduced these limits) before any upstream report.
+  - **B1** (native-v5 large-request retention) remains the first planned
+    if-check-inventory bypass; not started.
 
 ## Open follow-ups
 
@@ -182,9 +206,8 @@ none has run yet.
 - **A 4th on-heap constraint**, on top of the closed 3-way case — not attempted
   this run since 3 already reached a harder outcome (crash, not just caught
   exceptions) than 2 did, so a 4th wouldn't yet add evidence either way.
-- **First bypass case**: pick a candidate per `bypass-playbook.md`'s
-  priority order (confirmed bypasses already on record in `if-check-exp` →
-  true positives → weak/undetermined cases) and run it.
+- **Next bypass work**: finish B6's open arms (above), then B1, per the
+  [campaign plan](cassandra/campaign-plan.md) priority order.
 
 ## Decisions and conventions in force
 

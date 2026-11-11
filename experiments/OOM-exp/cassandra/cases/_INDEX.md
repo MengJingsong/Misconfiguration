@@ -6,7 +6,7 @@ Master status table for every OOM-exp Cassandra case. Cases are filed in
 - **`convergence/`** — verified OOM reached by **convergence** (several bounded
   usages exhausting a shared budget together).
 - **`bypass/`** — verified OOM reached by **bypass** (getting past a single
-  capacity check). *(none yet; B6 run 1 is a conditional candidate)*
+  capacity check). *(none yet; B6 runs 1–2 are candidates)*
 - **`candidates/`** — in-progress, parked, or unresolved (mechanism confirmed but
   no attributable OOM manufactured, or blocked before a valid arm ran).
 - **`negatives/`** — verified **no-OOM** (safe). *(none yet)*

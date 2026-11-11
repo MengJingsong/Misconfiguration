@@ -2,6 +2,16 @@
 
 Planning guidance for C1, B1, C2 (2026-11-06), not an inventory of live allocations.
 Revalidate allocation hostnames and resources before using any historical node.
+
+> **Note (2026-11-10).** The current allocation (see [`HANDOFF.md`](../HANDOFF.md),
+> *Available nodes*) is `pc96` (32 cores, ~125 GiB) plus five r320 nodes
+> `apt138/140/149/179/190` at 8 cores / **16 GiB** — below the 32 GiB victim
+> recommendation below. C1 run 3 used `apt140` as its victim with a 1 GiB heap /
+> 3072 MiB direct / 7168 MiB cgroup budget, which fit; B6 run 1 ran all three
+> instances on `pc96` (2 GiB measured heap, 8 GiB peers) and run 2 six (8/6 GiB replica,
+> five 8 GiB peers, a dm-delay device under `/mydata/b6/slow`). Use `pc96` for any victim
+> or peer that needs several GiB of heap (e.g. B6's 8 GiB deployment-heap arm);
+> an r320 victim is fine when the experimental budget is small and recorded.
 Baseline setup: [stage-4 environment](../../if-check-exp/cassandra/stage4-runtime-verification/environment.md).
 
 ## Recommended allocation

@@ -125,7 +125,8 @@ named so a candidate declares which it targets):
 | Sub-direction | Mechanism | Campaign candidate |
 |---|---|---|
 | **Ownership / release defect** | repeated fill/complete-or-clear/idle cycles leave residual live allocations that grow with cycle count | **B1** (native-v5 large-request retention) |
-| *(others available)* | exempt caller/option/mode · pool fallback · failed-reservation-but-admitted · periodic/late enforcement · accounting mismatch · arithmetic/ordering/race | B2–B4 |
+| **Accounting mismatch** | the control charges a quantity (e.g. on-wire bytes) that differs from the memory actually held | **B6** (internode queues × tiny-cell mutations) |
+| *(others available)* | exempt caller/option/mode · pool fallback · failed-reservation-but-admitted · periodic/late enforcement · arithmetic/ordering/race | B2–B4 (failed reservation, pool fallback, release) |
 
 Classify a result as **mixed** when a demonstrated bypass contributes to
 aggregate exhaustion. Keep the original sub-direction as the label for the
