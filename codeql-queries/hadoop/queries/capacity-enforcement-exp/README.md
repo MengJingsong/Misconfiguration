@@ -9,6 +9,10 @@ it filters what it filters, and the pipeline's blind spots are documented once, 
 Cassandra pack's [README](../../../cassandra/queries/capacity-enforcement-exp/README.md). This file
 records only what differs for Hadoop.
 
+> **2026-11-11:** `EnforcementPlaces.ql` and `CapacitySetPlaces.ql` (the stage-1 extension beyond
+> `if`) are the Cassandra queries with a `moduleDir` column. First run:
+> [`experiments/capacity-enforcement-exp/hadoop/stage1-codeql-preprocessing/pilot-2026-11-11.md`](../../../../experiments/capacity-enforcement-exp/hadoop/stage1-codeql-preprocessing/pilot-2026-11-11.md).
+
 ## What differs from Cassandra
 
 | | Cassandra | Hadoop |

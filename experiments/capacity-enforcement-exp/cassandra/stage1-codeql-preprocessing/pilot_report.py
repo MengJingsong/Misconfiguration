@@ -10,7 +10,9 @@ codeql-queries/scripts/run-query.sh) and the case files in ../stage3-ai-deep-rea
    "Capacity check") is a row of the old `if` corpus, of the new enforcement rows, or of the
    capacity-set rows, exactly or within +-WINDOW lines.
 
-Usage: python3 pilot_report.py [--window N] [--list]
+Usage: python3 pilot_report.py [--system cassandra|hadoop] [--window N] [--list]
+(Hadoop, 2026-11-11: results from codeql-queries/results/hadoop/, case files from
+hadoop/stage3-ai-deep-read/<person>/cases/.)
 """
 import argparse
 import collections
@@ -21,8 +23,16 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+EXP = os.path.abspath(os.path.join(HERE, '..', '..'))
+SYSTEMS = {
+    'cassandra': {'tag': 'cassandra-5.0.9',
+                  'cases': [os.path.join(EXP, 'cassandra', 'stage3-ai-deep-read', 'cases')]},
+    'hadoop': {'tag': 'rel/release-3.4.2',
+               'cases': [os.path.join(EXP, 'hadoop', 'stage3-ai-deep-read', p, 'cases')
+                         for p in ('jingsong', 'yang')]},
+}
+SYSTEM = 'cassandra'
 RES = os.path.join(REPO, 'codeql-queries', 'results', 'cassandra')
-CASES = os.path.join(HERE, '..', 'stage3-ai-deep-read', 'cases')
 
 # README §3.7.2 order: the first context of a comparison is its primary one.
 CONTEXT_ORDER = ['ternary', 'loop-condition', 'switch-selector', 'lambda', 'assert', 'return',
@@ -37,17 +47,19 @@ def load(name):
         return list(csv.DictReader(fh))
 
 
-def case_targets():
+def case_targets(system=None):
+    cfg = SYSTEMS[system or SYSTEM]
     out = {}
-    for fn in sorted(os.listdir(CASES)):
+    files = [(d, fn) for d in cfg['cases'] if os.path.isdir(d) for fn in sorted(os.listdir(d))]
+    for d, fn in files:
         if not fn.endswith('.md'):
             continue
-        text = open(os.path.join(CASES, fn)).read()
+        text = open(os.path.join(d, fn)).read()
         m = re.search(r'^\| Entry pointer \| `([^`:]+):(\d+)', text, re.M)
         if not m:
             # a permalink: [`File.java:NN`](https://github.com/.../blob/cassandra-5.0.9/<path>#LNN)
             m = re.search(r'^\| (?:Entry pointer|\*\*Capacity check\*\*) \|[^\n]*?'
-                          r'blob/cassandra-5\.0\.9/([^#)\s]+)#L(\d+)', text, re.M)
+                          r'blob/' + re.escape(cfg['tag']) + r'/([^#)\s]+)#L(\d+)', text, re.M)
         out[fn] = (m.group(1), int(m.group(2))) if m else None
     return out
 
@@ -72,9 +84,13 @@ def hit(idx, path, line, window):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument('--system', default='cassandra', choices=sorted(SYSTEMS))
     ap.add_argument('--window', type=int, default=3)
     ap.add_argument('--list', action='store_true', help='list the cases each source misses')
     a = ap.parse_args()
+    global SYSTEM, RES
+    SYSTEM = a.system
+    RES = os.path.join(REPO, 'codeql-queries', 'results', a.system)
 
     narrowed = load('NarrowedIfStatements.csv')
     helper = load('HelperGuardedIfStatements.csv')

@@ -71,7 +71,10 @@ noticed along the way are noted in case files for Target 3, not chased.
   `experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read/writeup-set-ext.csv`, 515 units
   of bands A–C. 7 of them are already a case's target, and 49 capacity-set units name a constraint
   that already has cases (`stage3_record` says which). **Owner: Jingsong (2026-11-11); stage 3 not started.** Hadoop
-  copies of the queries are not written.
+  copies of the queries were written and run the same day: 5,599 new enforcement places and
+  5,119 capacity-set rows, 10,008 stage-2 units, not banded yet
+  (`experiments/capacity-enforcement-exp/hadoop/stage1-codeql-preprocessing/pilot-2026-11-11.md`,
+  §5 lists the decisions before stage 2).
 
 - **Stage 1:** 17,343 `if` statements → 4,489 numeric comparisons + 1,099 helper-guarded rows.
 - **Stage 2:** 4,789 units banded (A 134, B 174, C 94, D 4,387); `cassandra/stage2-ai-preprocessing/bands.csv`.
