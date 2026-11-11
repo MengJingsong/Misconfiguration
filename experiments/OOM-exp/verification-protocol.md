@@ -213,10 +213,13 @@ criterion before its readings; record which one was used.
 
 Example Status cell: `verified-gap · service-loss · deployment`.
 
-**Cases filed before 2026-11-06** keep their status with the suffix
-`(pre-protocol)`. They were judged under earlier rules, often from a single
-failing run, and must be rechecked against V1–V5 before being cited as verified
-in an upstream report. Do not move them between folders on this account alone.
+**Cases filed before 2026-11-06** carry the suffix `(pre-protocol)`. They were
+judged under earlier rules, often from a single failing run. On 2026-11-11, by the
+researcher's decision, the Cassandra pre-protocol convergence OOMs (six cases, each
+with one failing run, one run per control and at most one intervention run) were
+moved from `convergence/` to `candidates/` with status `candidate (pre-protocol)`;
+their recorded OOMs stand, only the verification status changed. A pre-protocol
+case returns to a verified folder only after a recheck that meets V1–V5.
 
 ## Case evidence and batch status
 

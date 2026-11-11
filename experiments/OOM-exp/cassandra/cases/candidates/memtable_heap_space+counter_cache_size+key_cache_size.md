@@ -1,5 +1,7 @@
 # memtable_heap_space + counter_cache_size + key_cache_size — convergence case
 
+> **Status (2026-11-11): `candidate (pre-protocol)`.** Moved from `convergence/` to `candidates/`: filed before the 2026-11-06 protocol and does not meet the V1–V5 promotion rule ([protocol](../../../verification-protocol.md#verification-status-amended-2026-11-11)). Evidence held: converge 1 run; M/C/K alone 1 run each; no intervention; 1.35 GB heap dump kept but not analysed for holders. The OOM recorded below stands; rerun ×3 with matched controls and an intervention ×3 to return it to `convergence/`.
+
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12. Third constraint added to the closed [`memtable_heap_space+counter_cache_size`](memtable_heap_space+counter_cache_size.md) case, on the same shared budget.
 
 > **Harness:** [`memtable_heap_space+counter_cache_size+key_cache_size/run1/oom-run.sh`](memtable_heap_space+counter_cache_size+key_cache_size/run1/oom-run.sh). Full logs on the node at `~/oom-exp-logs/{baseline3,M_alone,C_alone,K_alone,converge}/`; small excerpts under [`memtable_heap_space+counter_cache_size+key_cache_size/run1/`](memtable_heap_space+counter_cache_size+key_cache_size/run1/).

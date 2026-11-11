@@ -1,5 +1,7 @@
 # memtable_heap_space + counter_cache_size — convergence case
 
+> **Status (2026-11-11): `candidate (pre-protocol)`.** Moved from `convergence/` to `candidates/`: filed before the 2026-11-06 protocol and does not meet the V1–V5 promotion rule ([protocol](../../../verification-protocol.md#verification-status-amended-2026-11-11)). Evidence held: converge 1 run; M/C alone 1 run each; no intervention; OOM throws logged, no dump or histogram (JVM survived). The OOM recorded below stands; rerun ×3 with matched controls and an intervention ×3 to return it to `convergence/`.
+
 > **Playbook:** [`../../../custom-convergence-playbook.md`](../../../custom-convergence-playbook.md)
 >
 > **Run:** 2026-11-02, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12.

@@ -1,5 +1,7 @@
 # row_cache_size + index_summary_capacity — convergence case
 
+> **Status (2026-11-11):** superseded by [run 6](row_cache_size+index_summary_capacity--run6.md); moved with it from `convergence/` to `candidates/` when the pre-protocol OOMs were reclassified as `candidate (pre-protocol)`.
+
 > **Run:** 2026-11-02/03, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB, local disk `/dev/sda3` 63 GB), Ubuntu 22.04.2, kernel `5.15.0-198-generic`, OpenJDK 11.0.32.1, Ant 1.10.12. Same build as runs 1-3 (`~/cassandra-run1`, cassandra-5.0.9, unchanged, no rebuild). **First off-heap case in this folder** — unparks the off-heap group from runs 1-2.
 
 > **Harness:** `~/oom-offheap-run4/oom-run.sh` + `~/oom-offheap-run4/isc-profile.yaml` (outside the repo, on the node, per the node safety rules — not committed; this case file links paths on the node, not in-repo copies). Full logs on the node at `~/oom-offheap-run4/logs/{baseline,R_alone,I_alone,converge}/`.

@@ -1,5 +1,7 @@
 # DOB_MAX_RECYCLE_BYTES + MAX_HINT_BUFFERS — convergence case (run 8)
 
+> **Status (2026-11-11): `candidate (pre-protocol)`.** Moved from `convergence/` to `candidates/`: filed before the 2026-11-06 protocol and does not meet the V1–V5 promotion rule ([protocol](../../../verification-protocol.md#verification-status-amended-2026-11-11)). Evidence held: converge 1 run; each alone 1 run; `converge_Ldefault` intervention 1 run; first-error stack and heap dump kept. The OOM recorded below stands; rerun ×3 with matched controls and an intervention ×3 to return it to `convergence/`.
+
 > **Run:** 2026-11-03, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (`pc41`, 40 cores, 251 GiB), same build as runs 1-7 (`~/cassandra-run1`, cassandra-5.0.9, unchanged). Third off-heap pair; both constraints are new to OOM-exp.
 >
 > **Harness:** [`DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/`](DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/) (`oom-run.sh`, the two `cassandra-stress` user profiles `dob.yaml` and `hints.yaml`, and per-arm `logs/<arm>/`: summaries with every 5-s sample, yaml diffs, JVM-flag excerpts, stress tails, thread-dump and histogram excerpts; for `converge`, the `OutOfMemoryError` stacks, the GC-log tail and the heap-dump listing). Full logs, thread dumps and the 687 MB heap dump stay on the node in `~/oom-direct-run8/logs/`.

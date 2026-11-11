@@ -1,5 +1,7 @@
 # memtable_offheap_space + file_cache_size — convergence case (run 7)
 
+> **Status (2026-11-11): `candidate (pre-protocol)`.** Moved from `convergence/` to `candidates/`: filed before the 2026-11-06 protocol and does not meet the V1–V5 promotion rule ([protocol](../../../verification-protocol.md#verification-status-amended-2026-11-11)). Evidence held: converge 1 run; each alone 1 run; no intervention; cgroup OOM-kill record in `dmesg`, no per-pool breakdown at the kill. The OOM recorded below stands; rerun ×3 with matched controls and an intervention ×3 to return it to `convergence/`.
+
 > **Run:** 2026-11-03, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB), same build as runs 1-6 (`~/cassandra-run1`, cassandra-5.0.9, unchanged). Second off-heap pair; both constraints are new to OOM-exp.
 >
 > **Harness:** [`memtable_offheap_space+file_cache_size/`](memtable_offheap_space+file_cache_size/) (`oom-run.sh`; per-arm summaries, yaml diffs, final readings, stress outputs, the `M_alone` memtable flush lines and the converge arm's `dmesg` kill lines). Per-5-s samples stay on the node in `~/oom-offheap-run7/logs/`.

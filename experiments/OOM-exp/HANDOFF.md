@@ -27,8 +27,11 @@ Start-here brief for a session picking up `OOM-exp`. Read this, then
 
 ## Status as of 2026-11-10
 
-**Convergence is active.** The case index lists six verified-OOM results
-across the custom- and default-capacity regimes. The original on-heap and
+**Convergence is active.** The case index lists six convergence OOMs
+across the custom- and default-capacity regimes, all filed before the protocol and
+moved to `candidates/` as `candidate (pre-protocol)` on 2026-11-11 (one failing run
+each; V1, V2, V4 unmet; their recheck is queued as R1 at P1 in the
+[campaign plan](cassandra/campaign-plan.md#prioritized-queue)). The original on-heap and
 off-heap standing-pool surveys are complete within their historical scope.
 C1, the internode receive-queue multiplicity case, is still in progress.
 Disk work remains paused by request. **Bypass has its first runs:** B6
@@ -63,7 +66,7 @@ none has run yet.
     workload), predicted and observed to exceed the heap together — 14 genuine
     `OutOfMemoryError` throws, final forced-GC reading 96.6% of `-Xmx` with 0
     young regions left, JVM survived (caught the exceptions). Case file:
-    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size.md).
+    [`cassandra/cases/candidates/memtable_heap_space+counter_cache_size.md`](cassandra/cases/candidates/memtable_heap_space+counter_cache_size.md).
   - Run 2: same two plus `key_cache_size` as a 3rd on-heap constraint (config-type
     true positive; `row_cache_size`/`index_summary_capacity` were checked and
     turned out off-heap, not a fit — see below). Smaller individual values than
@@ -71,7 +74,7 @@ none has run yet.
     (96.6%) right after a forced full GC, a genuine `OutOfMemoryError`, a 1.35 GB
     heap dump, and this time `-XX:OnOutOfMemoryError=kill -9 %p` actually fired —
     the JVM was killed, not just stressed. Case file:
-    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size.md).
+    [`cassandra/cases/candidates/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/candidates/memtable_heap_space+counter_cache_size+key_cache_size.md).
   - Run 3: `commitlog_total_space` + `max_hints_size_per_host` (both disk-bound
     true positives), the first case in this folder to use a 2-node ring (a
     second node is structurally required to generate hints at all). **Blocked,
@@ -104,12 +107,12 @@ none has run yet.
     before any resize could run) but in what was meant to be a safe control
     arm, so weren't filed as their own cases — they're the evidence behind
     the final sizing. Case file:
-    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity.md).
+    [`cassandra/cases/candidates/row_cache_size+index_summary_capacity.md`](cassandra/cases/candidates/row_cache_size+index_summary_capacity.md).
   - Run 5 (2026-11-03): retry of run 4's pair with a 30 m resize interval and
     concurrent workloads. **Void:** the index-summary burst wrote 0
     partitions (the stress client's `CREATE TABLE` timed out under the
     concurrent read load; found in run 6). Case file, with a correction note:
-    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run5.md).
+    [`cassandra/cases/candidates/row_cache_size+index_summary_capacity--run5.md`](cassandra/cases/candidates/row_cache_size+index_summary_capacity--run5.md).
   - Run 6 (2026-11-03): both retries on the same pair, 120 m resize interval,
     `isc.t` pre-created with `cqlsh`. **Schedule B (row cache filled to 550
     MiB first, then a 1.5M-partition burst) OOMed:** kernel cgroup OOM-kill
@@ -120,14 +123,14 @@ none has run yet.
     C), no off-heap kill (93%), but the JVM died of an unattributed Java heap
     `OutOfMemoryError` (heap dump kept on the node, unanalyzed). Run 4 is
     superseded by run 6. Pair closed as OOMed. Case file:
-    [`cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md`](cassandra/cases/convergence/row_cache_size+index_summary_capacity--run6.md).
+    [`cassandra/cases/candidates/row_cache_size+index_summary_capacity--run6.md`](cassandra/cases/candidates/row_cache_size+index_summary_capacity--run6.md).
   - Run 7 (2026-11-03): `memtable_offheap_space` + `file_cache_size`, both
     new, both off-heap standing pools (off-heap `offheap_objects` memtable;
     chunk cache enabled). Same 3500 MiB cgroup budget in every arm, `-Xmx768M`.
     Each alone 78%; with the chunk cache full, a write burst got the JVM
     **kernel OOM-killed 16 s in** (anon-rss 3465 MiB). OOMed on the first try:
     both are hard standing caps, so no timing engineering was needed. Case file:
-    [`cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md`](cassandra/cases/convergence/memtable_offheap_space+file_cache_size.md).
+    [`cassandra/cases/candidates/memtable_offheap_space+file_cache_size.md`](cassandra/cases/candidates/memtable_offheap_space+file_cache_size.md).
   - Run 8 (2026-11-03): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`, both
     new, both JVM properties, both `ByteBuffer.allocateDirect` pools, so the
     budget is the JVM's own `-XX:MaxDirectMemorySize` (560 MiB), not a cgroup.
@@ -137,7 +140,7 @@ none has run yet.
     Direct buffer memory` about 7 s into the DOB burst, then Cassandra's
     forced heap OOM and `kill -9`. The same arm with L at its default did not
     OOM (attribution control). Case file:
-    [`cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md`](cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md).
+    [`cassandra/cases/candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md`](cassandra/cases/candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md).
   - Batch log: [`cassandra/cases/_run-log.md`](cassandra/cases/_run-log.md) —
     its "Historical shared-budget group status" table records prior
     standing-pool coverage. On-heap is **exhausted** (2-way then 3-way, escalating outcome, no 4th
@@ -236,8 +239,8 @@ none has run yet.
   are `verified-OOM`, `verified-gap` (confirmed gap ending in service loss,
   overshoot or leak), `candidate`, `negative`, each verified one labelled
   `deployment` or `diagnostic`. The six convergence OOMs filed before 2026-11-06
-  are marked `(pre-protocol)` in `_INDEX.md` and need a recheck before upstream
-  use. B6 is the first case filed this way (2026-11-11). **A verified case keeps one
+  are `candidate (pre-protocol)` in `candidates/` (moved there 2026-11-11) and need
+  a V1–V5 recheck before they return to `convergence/` or are used upstream. B6 is the first case filed this way (2026-11-11). **A verified case keeps one
   final case file**; its per-run case files are moved verbatim into `history.md` in
   the same folder (protocol, *Case evidence and batch status*).
 - **Case files use the fixed 4-section template** each playbook specifies

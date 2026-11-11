@@ -1,5 +1,7 @@
 # row_cache_size + index_summary_capacity — convergence case, retry (run 5)
 
+> **Status (2026-11-11):** superseded by [run 6](row_cache_size+index_summary_capacity--run6.md); moved with it from `convergence/` to `candidates/` when the pre-protocol OOMs were reclassified as `candidate (pre-protocol)`.
+
 > **Run:** 2026-11-03, node `node0.jason92-323989.misconfiguration-pg0.cloudlab.umass.edu` (40 cores, 251 GiB), same build as runs 1-4 (`~/cassandra-run1`, cassandra-5.0.9, unchanged). Retry of [run 4](row_cache_size+index_summary_capacity.md), using the two changes run 4's §4 named.
 >
 > **Harness:** [`row_cache_size+index_summary_capacity--run5/`](row_cache_size+index_summary_capacity--run5/) (a copy of run 4's `oom-run.sh` plus the `RESIZE` variable and a `conc` workload; per-arm summaries, yaml diffs, final RSS/cgroup readings, `dmesg` greps and the converge arm's stress output). The ~360 per-5-s sample files stay on the node in `~/oom-offheap-run5/logs/`.
