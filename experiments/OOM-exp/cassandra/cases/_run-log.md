@@ -48,7 +48,7 @@ are asserted. See [campaign plan](../campaign-plan.md).
 | C1 / internode private allowances / custom capacities, budget separately labeled | **in progress** (updated 2026-11-10): reopen 2 Q-attribution negative (closed-loop equilibrium); run 3 reached the ceiling at N=8 with live senders, Q/N sweeps not yet run | Continue run 3: coordinator `write_request_timeout` > A_max/D, then S1 (N=8, Q=4/16/64) measuring total and physical memory; Stage D only if total grows with Q |
 | C2 / per-query live memory / custom capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
 | C3 / per-worker DOB allocations / custom capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
-| Existing standing-pool combinations / original regimes | historical scope only; **recheck queued (R1, P1, 2026-11-11)** | Preserve results; reruns of the six pre-protocol OOMs for V1–V5 per [campaign plan R1](../campaign-plan.md#prioritized-queue) are allowed; other new runs need a distinct mechanism or boundary question |
+| Existing standing-pool combinations / original regimes | historical scope only; **recheck queued (R1–R4 P1, R5–R6 P2, 2026-11-11)** | Preserve results; reruns of the six pre-protocol OOMs for V1–V5 per [campaign plan R1–R6](../campaign-plan.md#prioritized-queue) are allowed; other new runs need a distinct mechanism or boundary question |
 | Disk exhaustion / all regimes | skipped by request | No new disk runs or retries until explicitly reopened |
 | Disk-to-memory causal chain / all regimes | deferred | Outside this batch; not implicitly reopened |
 
@@ -308,7 +308,7 @@ are asserted. See [campaign plan](../campaign-plan.md).
 | C1 / internode private allowances / default capacities, budget separately labeled | **sensitivity-limited / unresolved** (run 2, 2026-11-09) | Mechanism confirmed exactly (N=4: per-conn exclusive=Q, Σreserve=G saturated, admitted=A_max); but N·Q (≤112 MiB) is dominated by the invariant G=512 reserve + occupancy noise, and senders OOM before high N. Reopen only with senders that survive RF-fanout to a slow victim (large heaps / dedicated load hosts) to test N=4 vs N=32 |
 | C2 / per-query live memory / default capacities, budget separately labeled | open | Verify threshold applicability and actual concurrent working sets; unlimited defaults are a separate unprotected arm |
 | C3 / per-worker DOB allocations / default capacities, budget separately labeled | open | Audit worker multiplicity and active versus retained buffers |
-| Existing standing-pool combinations / original regimes | historical scope only; **recheck queued (R1, P1, 2026-11-11)** | Preserve results; reruns of the six pre-protocol OOMs for V1–V5 per [campaign plan R1](../campaign-plan.md#prioritized-queue) are allowed; other new runs need a distinct mechanism or boundary question |
+| Existing standing-pool combinations / original regimes | historical scope only; **recheck queued (R1–R4 P1, R5–R6 P2, 2026-11-11)** | Preserve results; reruns of the six pre-protocol OOMs for V1–V5 per [campaign plan R1–R6](../campaign-plan.md#prioritized-queue) are allowed; other new runs need a distinct mechanism or boundary question |
 | Disk exhaustion / all regimes | skipped by request | No new disk runs or retries until explicitly reopened |
 | Disk-to-memory causal chain / all regimes | deferred | Outside this batch; not implicitly reopened |
 

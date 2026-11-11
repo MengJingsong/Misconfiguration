@@ -30,7 +30,7 @@ Start-here brief for a session picking up `OOM-exp`. Read this, then
 **Convergence is active.** The case index lists six convergence OOMs
 across the custom- and default-capacity regimes, all filed before the protocol and
 moved to `candidates/` as `candidate (pre-protocol)` on 2026-11-11 (one failing run
-each; V1, V2, V4 unmet; their recheck is queued as R1 at P1 in the
+each; V1, V2, V4 unmet; their rechecks are queued as R1–R4 (P1) and R5–R6 (P2) in the
 [campaign plan](cassandra/campaign-plan.md#prioritized-queue)). The original on-heap and
 off-heap standing-pool surveys are complete within their historical scope.
 C1, the internode receive-queue multiplicity case, is still in progress.
