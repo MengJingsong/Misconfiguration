@@ -97,8 +97,9 @@ string exprText(Expr e) { result = operandName(e) }
 /**
  * `s` is a counted loop and `cmp` tests its counter: an operand of `cmp` is a variable
  * that the loop's update clause increments, decrements or assigns (`for (i = 0; i < n; i++)`).
- * Kept as a row and tagged `for-counter`, so the pilot can measure how much of the
- * loop-condition form is plain iteration.
+ * The pilot (2026-11-11) found 970 of 1,293 loop-condition rows were such loops and no
+ * case target among them with a real constraint; they are dropped, like the null and
+ * literal-only comparisons the `if` queries drop.
  */
 predicate countedLoop(ForStmt s, BinaryExpr cmp) {
   exists(Variable v, Expr u |
@@ -130,10 +131,9 @@ predicate comparisonContext(BinaryExpr cmp, string ctx, string detail) {
     or
     exists(DoStmt s | within(cmp, s.getCondition())) and ctx = "loop-condition" and detail = "do"
     or
-    exists(ForStmt s | within(cmp, s.getCondition()) |
-      ctx = "loop-condition" and
-      if countedLoop(s, cmp) then detail = "for-counter" else detail = "for"
-    )
+    // counted loops (`for (i = 0; i < n; i++)`) are dropped: plain iteration (decided 2026-11-11)
+    exists(ForStmt s | within(cmp, s.getCondition()) and not countedLoop(s, cmp)) and
+    ctx = "loop-condition" and detail = "for"
     or
     exists(SwitchStmt s | within(cmp, s.getExpr())) and ctx = "switch-selector" and detail = ""
     or

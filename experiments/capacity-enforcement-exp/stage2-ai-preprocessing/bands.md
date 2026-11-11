@@ -33,7 +33,8 @@ helper judged once and applied to all its call sites.
 |---|---|---|
 | `NarrowedIfStatements.csv` | 4,489 rows | **4,489 (100%)** |
 | `HelperGuardedIfStatements.csv` | 1,099 rows → 300 distinct helpers | **300 (100%)** |
-| **bands.csv** | | **4789** |
+| **bands.csv** (`if` corpus) | | **4789** |
+| `EnforcementPlaces.csv` + `CapacitySetPlaces.csv` (extension, 2026-11-11) | 3,482 enforcement + 465 verdict + 2,492 capacity-set units | **6,439 (100%)**, uids `E:` / `C:`, see "Extension run" below |
 
 ## Bands
 
@@ -72,6 +73,32 @@ batches, and for the 703 units under those three labels **only `batch` plus
 the provenance label, not the judgement — but any query that groups by
 `batch` alone will merge two unrelated runs. Group by `(batch, date)`
 instead, or relabel the second run if the column is ever needed on its own.
+
+## Extension run (2026-11-11)
+
+The stage-1 extension beyond `if` (`../README.md` §3.7; Cassandra pilot in
+[`../cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md`](../cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md)),
+banded the same way, into the same `bands.csv`. How to read its rows: [`README.md`](README.md),
+"Extension rows (2026-11-11)".
+
+| Kind | A | B | C | D | Units |
+|---|---|---|---|---|---|
+| `enforcement` (`E:<path>:<line>#<n>`) | 16 (+2 anchors) | 58 | 128 | 3,278 | 3,482 |
+| `verdict` (`E:verdict:<Type.method()>`) | 9 (+1 anchor) | 9 | 21 | 425 | 465 |
+| `capacity-set` (`C:<path>:<line>#<n>`) | 59 (+3 anchors) | 57 | 158 | 2,215 | 2,492 |
+| **Total** | **90** | **124** | **307** | **5,918** | **6,439** |
+
+| | |
+|---|---|
+| Model | `claude-opus-5-5`, 11 fresh agents, 3 batches each, rows only (no source) |
+| Date | 2026-11-11 |
+| Batches | 33 (`ext-batch-01` … `ext-batch-33`, 200 units each, the last 33), labels distinct from the `if` run's |
+| Anchor check | **passed on all 33 batches**: the 8 `if` anchors and the 6 extension anchors came back A every time. The 6 extension anchors carry their own rows in `bands.csv` (batch `ext-anchors`) |
+| Method note | Two agents (batches 22–24 and 25–27, all capacity-set rows) wrote their verdicts with a scratch script: a default reason per row shape, overridden for every row they judged differently. That is a group judgement of the kind the playbook allows ("work a whole method or file at once"), but it is closer to a mechanical rule than the other batches. A check of the 124 capacity-set rows banded D with a literal or constant size found time values, format and layout constants and small fixed scratch buffers, no missed capacity. Re-band those six batches if stricter provenance is wanted. |
+
+Stage 3's queue for these rows is
+[`../cassandra/stage3-ai-deep-read/writeup-set-ext.csv`](../cassandra/stage3-ai-deep-read/writeup-set-ext.csv)
+(bands A–C, 515 units).
 
 ## Band A, grouped by what the limit is
 

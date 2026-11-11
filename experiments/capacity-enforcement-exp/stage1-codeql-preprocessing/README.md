@@ -88,7 +88,9 @@ unchanged, and the new rows are ordinary feed-3a rows (no new feed).
   - one generalized query takes every comparison that passes the existing
     candidate test (`common/lib/IfCheckCore.qll`) and records its context
     (ternary, loop condition, `return`, boolean assignment, method argument,
-    lambda) instead of requiring an `if`;
+    lambda) instead of requiring an `if`. Counted `for` loops (the condition tests
+    the loop's own counter) are dropped, like the null and literal-only comparisons
+    (decided 2026-11-11 after the pilot);
   - a small API model, matched by method signature and not by identifier names,
     covers comparisons without an operator: `Math.min`/`max`, comparator calls,
     `remaining()`-style methods, bit tests, overflow checks, library calls that

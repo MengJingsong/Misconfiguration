@@ -263,6 +263,25 @@ all from feed 3a (`max_space_usable_for_compactions_in_percentage`, `max_hints_s
 (`../cassandra/stage3-ai-deep-read/undetermined.md` §5 to §7). The other 12 of the 23
 filed cases came from feed 3b (the helper `ResultSetBuilder.shouldReject()` behind `coordinator_read_size_fail_threshold` was banded D, batch 35).
 
+## Extension rows (2026-11-11)
+
+The stage-1 extension beyond `if` (`../README.md` §3.7) adds rows of three new kinds. They are
+ranked exactly like the `if` rows: the same four bands, the same playbook, rows only and never
+the source, never ruling anything out. This section only says how to read them.
+
+| Kind | Uid | What the row says | Reads as band A when |
+|---|---|---|---|
+| `enforcement` | `E:<path>:<line>#<n>` | `pkg \| Type.method \| <pattern> [<api or callee>] \| lhs op rhs` — a comparison outside an `if` (pattern `comparison/<context>`: ternary, loop condition, return, argument, ...) or a call that compares (`call/clamp`, `call/clamp-on-remaining`, `call/comparator`, `call/buffer-capacity`, `call/overflow-check`, `call/delegated`, ...) or a capacity exception handler (`exception/catch`) | as for an `if` row: usage compared against a memory or disk limit, whatever the form. A `clamp-on-remaining` against a named capacity, or a `delegated` call on a bounded queue or semaphore of buffers, is the new-form equivalent |
+| `verdict` | `E:verdict:<Type.method()>` | `pkg \| verdict of <Type.method()> used in <if/loop/ternary/switch> \| <n> use sites \| impls minDepth` — a method whose result is a verdict, judged once for all its use sites, with the comparison 0–2 calls down or in an override | the method's name says it decides on room, capacity or a limit (`acquireCapacity`, `hasRoom`, `tryAllocate`), as for a helper row |
+| `capacity-set` | `C:<path>:<line>#<n>` | `pkg \| Type.method \| capacity-set field/<kind> \| Field = value \| compared in <n> comparison(s) \| sizeSource <s>`, or `capacity-set create <api> \| size = value \| sizeSource <s>` — where a value that is compared by magnitude, or a container's size, is set | the value set is a limit on memory or disk: a pool or queue limit, a cache's maximum weight, a buffer count or byte cap, set from configuration, a constant or a runtime setter. A usage field (an offset, a counter, a position reset to 0) or a size taken from the data (`sizeSource parameter` or `call` in a copy) is band D or C |
+
+Batches: `make-stage2-batches.py --extension`, named `ext-batch-NN.txt`, 200 units each. Every
+batch carries the 8 `if` anchors (same yardstick as the `if` run) and 6 extension anchors, all
+stage-4 true positives in the new forms (listed in the script as `CASSANDRA_EXT_ANCHORS`). The
+recorder refuses a batch unless all 14 come back A. Verdicts go to the same `bands.csv`; the
+uid prefix and the `kind` column keep them apart from the `if` rows. Counted `for` loops are
+dropped in stage 1 (decided 2026-11-11).
+
 ## Batch coverage
 
 Triage proceeds by directory batch rather than top-to-bottom, since the corpus
