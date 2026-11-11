@@ -6,7 +6,7 @@ Master status table for every OOM-exp Cassandra case. Cases are filed in
 - **`convergence/`** — verified OOM reached by **convergence** (several bounded
   usages exhausting a shared budget together).
 - **`bypass/`** — verified OOM reached by **bypass** (getting past a single
-  capacity check). *(none yet)*
+  capacity check). *(none yet; B6 run 1 is a conditional candidate)*
 - **`candidates/`** — in-progress, parked, or unresolved (mechanism confirmed but
   no attributable OOM manufactured, or blocked before a valid arm ran).
 - **`negatives/`** — verified **no-OOM** (safe). *(none yet)*
@@ -30,6 +30,7 @@ conclusion live in the linked case file.
 
 | Case | Mechanism | Regime | Status | Result (one line) | Link |
 |---|---|---|---|---|---|
+| internode queues × tiny-cell mutations (B6 run 1) | bypass | default | candidate | **OOM reproduced (conditional)** — counters charge on-wire bytes; heap ≈ 17–20×; 2 GiB coordinator and replica OOM 3/3, blob 0/3; needs slow replica + 60 s deadlines | [`internode_application_queue...--run1`](candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run1.md) |
 | internode receive-queue ×peers (fast co-replica, C1 run 3) | convergence | custom | candidate | **Incomplete — ceiling reached** — fast co-replica decouples the client; at N=8, Q=4 the victim queue hit A_max (543 = 8×4 excl + 511 rsv), throttling on, senders alive; Q/N sweeps and OOM stage not yet run | [`internode...--run3-fastcoreplica`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) |
 | internode receive-queue ×peers (custom Q, C1 reopen) | convergence | custom | candidate | **Sensitivity limit / unresolved** — mechanism confirmed to the MiB (exclusive = N·Q); victim hits a closed-loop occupancy equilibrium (~266 MiB) below the ceiling, so raising Q only re-buckets reserve→exclusive; a direct-buffer OOM is reachable but fires at the same budget for Q=4 and Q=64 (Q-invariant), so not Q-attributable | [`internode...--run2-customQ`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) |
 | internode receive-queue ×peers (default Q, C1 multiplicity) | convergence | default | candidate | **Sensitivity limit / unresolved** — mechanism confirmed exactly (N=4: per-conn exclusive=Q, Σreserve=G saturated, admitted=A_max); but N·Q (≤112 MiB) is dominated by the invariant G=512 reserve + occupancy noise, and senders OOM before high N | [`internode...--run1-defaultQ`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) |
