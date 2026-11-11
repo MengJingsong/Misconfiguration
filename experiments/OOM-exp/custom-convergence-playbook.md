@@ -66,10 +66,11 @@ For diagnostic budgets, pursue a deployment-budget follow-up when practical.
 Begin the file with the protocol's short **Summary** block (conclusion and root cause).
 
 Write the case under the status-first folder that matches its outcome —
-`<system>/cases/convergence/<mechanism-stem>.md` for a verified OOM by
-convergence, `<system>/cases/candidates/<mechanism-stem>.md` while it is
-in-progress/parked/unresolved, `<system>/cases/negatives/` for a verified
-no-OOM. Record the capacity regime (**custom** | **default**) as a label in the
+`<system>/cases/convergence/<mechanism-stem>.md` for a `verified-OOM` or
+`verified-gap` by convergence, `<system>/cases/candidates/<mechanism-stem>.md`
+until it meets the protocol's promotion rule V1–V5, `<system>/cases/negatives/`
+for a verified no-OOM (statuses and the deployment/diagnostic label: protocol,
+*Verification status*). Record the capacity regime (**custom** | **default**) as a label in the
 case header and `_INDEX.md`, not as a folder; existing
 `<constraint-1>+<constraint-2>.md` names remain valid (disambiguate with a
 `--<regime>`/`--runN` suffix on collision). Use a unique descriptive

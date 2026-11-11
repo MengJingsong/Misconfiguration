@@ -158,7 +158,8 @@ Record the mechanism verdict separately from the terminal outcome:
 
 - Java heap OOM; JVM direct-buffer OOM; other native allocation OOM (give cause).
 - Kernel/container OOM-kill, supported by kernel or cgroup event evidence.
-- GC-driven service loss, with predefined latency/availability criterion;
+- GC-driven service loss, with predefined latency/availability criterion
+  (default criterion under *Verification status*);
   **not an OOM** unless an actual OOM event is evidenced.
 - Protective rejection/backpressure; no failure within the tested range.
 - Invalid/blocked experiment (e.g. workload never started or wrong path).
@@ -167,6 +168,55 @@ Preserve the initiating error if Cassandra forces another OOM during shutdown.
 A bypass can be confirmed without OOM; an OOM can occur without establishing the
 proposed mechanism. Report both facts. Observing OOM does not prove no aggregate
 control exists: it may be incomplete, late, or sized above available headroom.
+
+## Verification status (amended 2026-11-11)
+
+New evidence: B6 runs 1–2 (Cassandra) confirmed a bypass (U > C, K ≤ C) and, on a
+deployment-sized heap, sustained GC service loss with only intermittent OOM. The
+earlier rules had no explicit promotion rule and no status for a confirmed gap
+that does not end in OOM, so such results could only stay in `candidates/`.
+This section makes the rule explicit. It does not lower the evidence bar.
+
+**Promotion rule.** A case is *verified* only when all of V1–V5 hold for one
+fixed condition (same build, configuration, budget and workload):
+
+| | Requirement |
+|---|---|
+| V1 Repetition | The claimed endpoint is reached in ≥ 3 runs from clean starts. Report n/N; a rate below N/N is allowed if stated in the Result phrase. |
+| V2 Matched control | The nearest surviving control (convergence: component or low multiplicity alone; bypass: protected path or matched payload) runs ≥ 3 times under the same budget/build and does not reach the endpoint. |
+| V3 Measurement | U is measured independently of K for each domain claimed (*Classification by measurement*). |
+| V4 Intervention | The causal intervention removes the endpoint in ≥ 3 runs at matched or recorded load. If infeasible, state why and name the missing attribution; the status then carries `(no intervention)`. |
+| V5 Initiating failure | OOM: the first error with its thread/stack, or the kernel/cgroup OOM record, plus a histogram or dump at or near failure showing the claimed holder. Service loss: the GC log over the window. |
+
+**Statuses** (the `_INDEX.md` Status column):
+
+| Status | Meaning | Folder |
+|---|---|---|
+| `verified-OOM` | V1–V5 met; endpoint is an OOM (heap, direct, other native, or kernel/cgroup kill) | `convergence/` or `bypass/` by direction |
+| `verified-gap` | V1–V5 met; the protection gap is confirmed but the endpoint is not OOM: **service loss**, or for bypass a sustained **overshoot** (U > C) or growing **leak** | `convergence/` or `bypass/` by direction |
+| `candidate` | anything not yet meeting V1–V5 (in progress, parked, unresolved) | `candidates/` |
+| `negative` | V1–V3 met and no failure within the stated tested range | `negatives/` |
+
+**Service-loss criterion (default).** ≥ 90% of wall time in stop-the-world GC
+pauses over a window of ≥ 60 s, from the GC log. A design may predefine another
+criterion before its readings; record which one was used.
+
+**Conditions label.** Every verified status also carries `deployment` or
+`diagnostic`:
+
+- `deployment`: every setting is a default or an accepted, documented value; the
+  budget is deployment-sized (state the reasoning); faults, if any, are external
+  (disk, network, process), and no instrumentation (Byteman, patches) alters timing.
+- `diagnostic`: the result depends on at least one supporting deviation (raised
+  timeouts, injected delays, a tightened budget, a disabled subsystem used only to
+  isolate the path). Name the deviations in the case file.
+
+Example Status cell: `verified-gap · service-loss · deployment`.
+
+**Cases filed before 2026-11-06** keep their status with the suffix
+`(pre-protocol)`. They were judged under earlier rules, often from a single
+failing run, and must be rechecked against V1–V5 before being cited as verified
+in an upstream report. Do not move them between folders on this account alone.
 
 ## Case evidence and batch status
 

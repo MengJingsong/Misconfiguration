@@ -74,9 +74,10 @@ Begin the file with the protocol's short **Summary** block (conclusion and root 
    OOM reached/not reached, attribution limits, other controls, and whether an
    upstream defect investigation is justified. Upstream reporting is separate.
 
-Add closed cases to `<system>/cases/_INDEX.md` (a verified OOM by bypass goes in
-`<system>/cases/bypass/`, an unresolved one in `<system>/cases/candidates/`,
-regime as a label). Append batches to the chronological `<system>/cases/_run-log.md`,
+Add closed cases to `<system>/cases/_INDEX.md` (a `verified-OOM` or `verified-gap`
+bypass goes in `<system>/cases/bypass/`, anything not meeting the protocol's
+promotion rule V1–V5 in `<system>/cases/candidates/`; regime and conditions as
+labels — see the protocol's *Verification status*). Append batches to the chronological `<system>/cases/_run-log.md`,
 including considered candidates, precise status/range, failed or invalid
 attempts, raw-log locations and stopping reason.
 Follow the common protocol's owned-node, local-storage and cleanup rules.

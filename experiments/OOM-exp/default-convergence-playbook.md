@@ -84,8 +84,10 @@ work where relevant. An enabled-threshold arm and an unset/unlimited-default arm
 must be labeled separately.
 
 Write the case under the status-first folder that matches its outcome
-(`<system>/cases/convergence/` for a verified OOM, `<system>/cases/candidates/`
-while unresolved/parked, `<system>/cases/negatives/` for a verified no-OOM),
+(`<system>/cases/convergence/` for a `verified-OOM` or `verified-gap`,
+`<system>/cases/candidates/` until it meets the protocol's promotion rule V1–V5,
+`<system>/cases/negatives/` for a verified no-OOM; see the protocol's
+*Verification status*),
 labeling the capacity regime **default** in the case header and `_INDEX.md`
 rather than in a folder name. Keep existing combination filenames (disambiguate
 with a `--<regime>`/`--runN` suffix on collision). In the four case sections include:

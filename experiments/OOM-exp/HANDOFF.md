@@ -217,6 +217,18 @@ none has run yet.
   `if-check-exp` stage 3/4).
 - **One run produces a batch of cases**, not one, tracked chronologically in
   the single `cases/_run-log.md` (regime labeled per run).
+- **Verified means V1–V5 (protocol amendment 2026-11-11).** A case moves out of
+  `candidates/` only when it meets the promotion rule in
+  [`verification-protocol.md`](verification-protocol.md#verification-status-amended-2026-11-11):
+  ≥ 3 failing runs of one condition, ≥ 3 matched controls, U measured apart from
+  K, intervention ×3 (or documented infeasible), initiating failure kept. Statuses
+  are `verified-OOM`, `verified-gap` (confirmed gap ending in service loss,
+  overshoot or leak), `candidate`, `negative`, each verified one labelled
+  `deployment` or `diagnostic`. The six convergence OOMs filed before 2026-11-06
+  are marked `(pre-protocol)` in `_INDEX.md` and need a recheck before upstream
+  use. B6 meets everything but V4: repeating the 8 MiB reserve intervention ×3
+  would promote run 1 to `verified-OOM · diagnostic` and run 2 to
+  `verified-gap · service-loss` (conditions label to be decided: hints were off).
 - **Case files use the fixed 4-section template** each playbook specifies
   (constraints/capacity, verification solution, runtime results, conclusion
   that branches on the outcome). Keep section headings.
