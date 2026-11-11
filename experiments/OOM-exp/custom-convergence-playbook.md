@@ -63,6 +63,8 @@ For diagnostic budgets, pursue a deployment-budget follow-up when practical.
 
 ## Output
 
+Begin the file with the protocol's short **Summary** block (conclusion and root cause).
+
 Write the case under the status-first folder that matches its outcome —
 `<system>/cases/convergence/<mechanism-stem>.md` for a verified OOM by
 convergence, `<system>/cases/candidates/<mechanism-stem>.md` while it is

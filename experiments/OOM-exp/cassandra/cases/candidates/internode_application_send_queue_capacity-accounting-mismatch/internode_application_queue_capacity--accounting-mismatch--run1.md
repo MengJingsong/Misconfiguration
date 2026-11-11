@@ -24,6 +24,18 @@ hints off and a tightened heap; at **default timeouts** no OOM was reached at th
 single host could generate (≈ 2.3k inserts/s ≈ 25 MiB/s on-wire; ≥ 66 MiB/s is needed) —
 unresolved, not negative.
 
+## Summary
+
+- **Root cause:** internode send and receive queues limit messages by **on-wire size**, but queued
+  writes live on the heap as Java objects. A 1000-tiny-cell write is 10.8 KiB on the wire, ≈ 213 KiB on
+  the coordinator heap and ≈ 181 KiB on the replica heap (≈ 20× / 17×). The coordinator also keeps each
+  sent write until the replica answers, which no sender counter charges.
+- **Conclusion:** with all counters ≤ 132 MiB, a 2 GiB coordinator and a 2 GiB slow replica each ran
+  out of heap 3/3; matched blob writes 0/3; endpoint reserves of 8 MiB removed both OOMs.
+- **Conditional:** needed a Byteman-slowed replica and 60 s write/native timeouts; at default timeouts
+  the client could not fill the queues (unresolved). Run 2 removes these deviations.
+- **Interpretation:** documented behaviour (limits are on-wire bytes) → sizing gap, not a code bug.
+
 ---
 
 ## 1. Constraint, contract, protection map

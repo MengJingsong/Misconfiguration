@@ -1,0 +1,38 @@
+# P1 probe: V (8 GiB) live class histogram taken during the GC spiral (jcmd GC.class_histogram, ~3 min after the stall began)
+1794366388
+286716:
+ num     #instances         #bytes  class name (module)
+-------------------------------------------------------
+   1:      63274975     3037198800  java.nio.HeapByteBuffer (java.base@11.0.33)
+   2:      74711142     2334515624  [B (java.base@11.0.33)
+   3:      37217509     1488700360  org.apache.cassandra.db.rows.ArrayCell
+   4:      50220484      803527744  org.apache.cassandra.db.rows.CellPath$SingleItemCellPath
+   5:      13003175      520127000  org.apache.cassandra.db.rows.BufferCell
+   6:       1824330      251179472  [Ljava.lang.Object; (java.base@11.0.33)
+   7:         56099       27048224  [I (java.base@11.0.33)
+   8:          6820       18428328  [J (java.base@11.0.33)
+  12:         37217        2084152  org.apache.cassandra.db.Mutation
+  17:         37528        1501120  org.apache.cassandra.net.Message
+Total     242042707     8536915376
+
+# P1 V samples before the sampler stalled: epoch, heap; MutationStage active pending completed blocked
+1794366052 total 8388608K, used 2785731K
+1794366063 total 8388608K, used 1900940K
+1794366075 total 8388608K, used 5493504K
+1794366083 total 8388608K, used 6044654K
+1794366092 total 8388608K, used 8114512K
+1794366052 0 0 38914 0
+1794366063 32 2404 66316 0
+1794366075 32 14013 75877 0
+1794366083 32 30411 75877 0
+1794366092 32 36835 75877 0
+
+# P1 V GC summary
+full_gcs=213 max_after_full=8141MiB (99.4% of heap) first_full_gt95=2026-11-10T22:01:34.354 last_full=2026-11-10T22:06:57.794 log_end=2026-11-10T22:06:57.803 ReportJavaOutOfMemory=0
+# P1 Full GCs (sorted), first and last 5
+[2026-11-10T22:00:23.141-0500][210.116s][286716][286734][info Pause) 8172M->1525M(8192M) 568.238ms
+[2026-11-10T22:01:03.411-0500][250.386s][286716][286734][info Pause) 7877M->1296M(8192M) 558.925ms
+[2026-11-10T22:01:12.836-0500][259.811s][286716][286734][info Pause) 7936M->2084M(8192M) 779.288ms
+[2026-11-10T22:01:24.869-0500][271.844s][286716][286734][info Pause) 7892M->5902M(8192M) 1957.081ms
+[2026-11-10T22:01:32.014-0500][278.989s][286716][286734][info Pause) 7950M->7747M(8192M) 2289.685ms
+[2026-11-10T22:06:57.794-0500][604.769s][286716][286734][info Pause) 8157M->8141M(8192M) 1277.371ms

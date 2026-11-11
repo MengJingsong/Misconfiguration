@@ -90,6 +90,8 @@ labeling the capacity regime **default** in the case header and `_INDEX.md`
 rather than in a folder name. Keep existing combination filenames (disambiguate
 with a `--<regime>`/`--runN` suffix on collision). In the four case sections include:
 
+Begin the file with the protocol's short **Summary** block (conclusion and root cause).
+
 1. Default rules, resolved values, unchanged-knob evidence, protection map and
    separate capacity/budget labels.
 2. Complete defaults audit, prediction/window/range, executable workload and

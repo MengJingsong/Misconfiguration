@@ -172,7 +172,12 @@ control exists: it may be incomplete, late, or sized above available headroom.
 
 Keep the four case sections: (1) constraints/protection map and configuration
 labels, (2) dated pre-run design and executable commands, (3) per-arm/per-repeat
-results with log references, (4) conclusion and limits of attribution. Preserve
+results with log references, (4) conclusion and limits of attribution.
+Start every case file with a **Summary** block, right after the header lines and
+before section 1, stating in short plain words (a few bullets) the **conclusion**
+(what happened, outcome type, how conditional) and the **root cause** (which
+control fails to bound which memory, and why). Keep it consistent with section 4;
+numbers and caveats stay in the body. (Amended 2026-11-11.) Preserve
 predictions; record changed designs as dated amendments before new readings.
 Record raw-log location, small committed excerpts, harness, config diffs, source
 patches, original failure, controls, intervention, and repeat counts.

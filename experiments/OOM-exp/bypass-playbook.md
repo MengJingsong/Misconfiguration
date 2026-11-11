@@ -62,6 +62,8 @@ reach OOM, demonstrate its separate controls and classify the result as mixed.
 
 Write `<system>/cases/bypass/<constraint>-<mechanism>.md` with four sections:
 
+Begin the file with the protocol's short **Summary** block (conclusion and root cause).
+
 1. **Constraint and capacity:** pinned source/case links, contract and protection
    map, hypothesis, capacity/budget labels, intentional exception versus defect.
 2. **Verification solution:** pre-run claim, executable matched controls and
