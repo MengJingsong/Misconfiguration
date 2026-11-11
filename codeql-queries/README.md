@@ -8,17 +8,17 @@ documented in this repo.
 - `common/` — shared `.qll` library files usable by both targets. Not a separate CodeQL pack
   (see note below) — just plain QL source.
 - `cassandra/` — query pack for the Cassandra database (`misconfiguration/cassandra`).
-  Its `queries/if-check-exp/` is **stage 1** of
-  [`../experiments/if-check-exp/README.md`](../experiments/if-check-exp/README.md)'s three-stage ladder
+  Its `queries/capacity-enforcement-exp/` is **stage 1** of
+  [`../experiments/capacity-enforcement-exp/README.md`](../experiments/capacity-enforcement-exp/README.md)'s three-stage ladder
   (structural → lexical → semantic); see that folder's own
-  [README](cassandra/queries/if-check-exp/README.md) for the query chain that does the
+  [README](cassandra/queries/capacity-enforcement-exp/README.md) for the query chain that does the
   structural narrowing. Results land in `results/` and are **gitignored** —
   regenerate them per machine rather than expecting them in a checkout.
 - `hadoop/` — query pack for the Hadoop database (`misconfiguration/hadoop`). Its
-  `queries/if-check-exp/` is stage 1 for Hadoop: the Cassandra chain with Hadoop's scope and
-  batching columns (see its [README](hadoop/queries/if-check-exp/README.md)). The database is
+  `queries/capacity-enforcement-exp/` is stage 1 for Hadoop: the Cassandra chain with Hadoop's scope and
+  batching columns (see its [README](hadoop/queries/capacity-enforcement-exp/README.md)). The database is
   built by `scripts/build-hadoop-db.sh`.
-- `common/lib/IfCheckCore.qll` — the `if-check-exp` comparison predicates shared by both packs.
+- `common/lib/IfCheckCore.qll` — the `capacity-enforcement-exp` comparison predicates shared by both packs.
 - `scripts/` — driver scripts that work against either database (not part of any qlpack).
 - `results/` — output from query runs (CSV or SARIF, see below). **Contents are gitignored**
   via `results/.gitignore` (`*` with `!.gitignore`), so the directory is tracked but nothing
@@ -47,7 +47,7 @@ Compiled databases live outside this repo, under `/proj/misconfiguration-PG0/cod
 
 ```bash
 export PATH="/proj/misconfiguration-PG0/tools/codeql:$PATH"
-./scripts/run-query.sh cassandra cassandra/queries/if-check-exp/NarrowedIfStatements.ql
+./scripts/run-query.sh cassandra cassandra/queries/capacity-enforcement-exp/NarrowedIfStatements.ql
 ```
 
 Usage is `run-query.sh <cassandra|hadoop> <query-or-dir-path> [output-name]`. Paths are
@@ -65,5 +65,5 @@ subcommands:
 | anything else (`problem`, `path-problem`) | `codeql database analyze --format=sarif-latest` | `results/<target>/<name>.sarif` |
 
 `database analyze` expects alert-shaped queries and cannot interpret a plain data dump, which
-is why the table/graph path exists. **Every query in `if-check-exp/` is `@kind table`, so the
+is why the table/graph path exists. **Every query in `capacity-enforcement-exp/` is `@kind table`, so the
 pipeline produces CSV**, which is what the triage stage reads.

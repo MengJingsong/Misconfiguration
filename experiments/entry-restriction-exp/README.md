@@ -18,7 +18,7 @@ This folder captures **Target 1 + Target 2**. Every pair also seeds Target 3
 through its `Bypass Potential` field. The overarching aim of the research is to
 replace *indirect proxy* limits with *direct* resource limits, memory first.
 
-### How this folder finds pairs — and how it differs from `if-check-exp`
+### How this folder finds pairs — and how it differs from `capacity-enforcement-exp`
 
 **Method: AI deep read, constraint-first.** An AI session reads the Cassandra
 source and works *forward* from a resource constraint: starting at the place
@@ -30,7 +30,7 @@ recorded — the AI trace locates candidates, a human confirms them.
 This is the mirror image of the sibling folder. Both serve Target 1 + 2 and
 both read source, but they enter from opposite ends:
 
-| | `entry-restriction-exp` (this folder) | `if-check-exp` |
+| | `entry-restriction-exp` (this folder) | `capacity-enforcement-exp` |
 |---|---|---|
 | Starts from | the **constraint's declaration** | the **code that enforces a limit** |
 | Traces | forward: declaration → restriction sites | backward: check → the limit's declaration |
@@ -40,7 +40,7 @@ both read source, but they enter from opposite ends:
 Neither is a subset of the other, and **they are deliberately not
 cross-referenced** — a line may legitimately appear in both.
 
-> **`if-check-exp`'s stage numbers do not apply here.** That folder numbers
+> **`capacity-enforcement-exp`'s stage numbers do not apply here.** That folder numbers
 > its own working stages (structural → lexical → semantic) to say how
 > strongly a line has been evidenced. This folder has no such ladder; it is
 > deep reading plus manual confirmation throughout. The **targets**, by
@@ -89,7 +89,7 @@ Each pair is recorded in **two** markdown files:
 
 ### Code-trace steps (case-specific, not generic)
 
-> **"Code-trace steps" here are not `if-check-exp`'s numbered stages.** These are the
+> **"Code-trace steps" here are not `capacity-enforcement-exp`'s numbered stages.** These are the
 > hops along one constraint's code flow, named per case. They were called
 > "stages" before that word was given a different meaning in the sibling
 > folder (2026-09-23); renamed to keep the two apart.
@@ -170,4 +170,4 @@ In the summary's Failure Mode Analysis table, the symbol always encodes
 ## Related context (for a new session)
 
 - **Google Docs** — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit) (per-meeting decisions and next steps) and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit) (running log of entry points, cases and findings). Both live in Jingsong's Google Drive; a session with the Google Drive connector enabled can read them directly.
-- **Sibling work** — [`../if-check-exp/README.md`](../if-check-exp/README.md), the repo's active experiment, covers the same Target 1 + 2 from the opposite direction (from the enforcing check back to the constraint). The two are deliberately **not** cross-referenced — see that folder's README §4. The older `cassandra/oom-exp/` chaos-testing experiments were removed in `52a621a`, superseded by `systems/cassandra/build-dist/` on Cassandra 5.0.9.
+- **Sibling work** — [`../capacity-enforcement-exp/README.md`](../capacity-enforcement-exp/README.md), the repo's active experiment, covers the same Target 1 + 2 from the opposite direction (from the enforcing check back to the constraint). The two are deliberately **not** cross-referenced — see that folder's README §4. The older `cassandra/oom-exp/` chaos-testing experiments were removed in `52a621a`, superseded by `systems/cassandra/build-dist/` on Cassandra 5.0.9.

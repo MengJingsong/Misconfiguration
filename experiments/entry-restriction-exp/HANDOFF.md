@@ -11,7 +11,7 @@ then [`README.md`](README.md) for the full format spec.
 
 **Several pairs have been found and written up.** Work then stopped by
 decision so effort could go to the sibling experiment
-[`../if-check-exp/`](../if-check-exp/README.md), which is the repo's active
+[`../capacity-enforcement-exp/`](../capacity-enforcement-exp/README.md), which is the repo's active
 folder. **This folder may be resumed in the future** — nothing here is
 withdrawn or superseded, and the recorded pairs stand as finished results.
 
@@ -24,7 +24,7 @@ This folder needs no cluster (stage-3-style source reading). If a later resumpti
 - `pc12` (node1), `pc06` (node2), `pc13` (node3): reachable, but with no JDK and an empty home.
 
 All four have 40 cores and 251 GiB, with passwordless `sudo`. The table, addresses and the SSH key to use (`-i /proj/misconfiguration-PG0/.ssh/id_ed25519`) are in
-[`../if-check-exp/cassandra/stage4-runtime-verification/environment.md` §7](../if-check-exp/cassandra/stage4-runtime-verification/environment.md#7-nodes-checked-2026-10-07-updated-2026-10-13-and-2026-10-20).
+[`../capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md` §7](../capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md#7-nodes-checked-2026-10-07-updated-2026-10-13-and-2026-10-20).
 
 ## What this folder is
 
@@ -46,12 +46,12 @@ initialised, following the value to the places it actually restricts
 something. Every real pair is then **manually checked** before being
 recorded.
 
-This is the mirror image of `if-check-exp`, which traces *backward* from the
+This is the mirror image of `capacity-enforcement-exp`, which traces *backward* from the
 code that enforces a limit to the constraint's declaration. Both serve
 Targets 1 + 2; neither is a subset of the other, and they are **deliberately
 not cross-referenced** — a line may legitimately appear in both.
 
-> **`if-check-exp`'s stage numbers do not apply here.** That folder numbers
+> **`capacity-enforcement-exp`'s stage numbers do not apply here.** That folder numbers
 > its working stages (structural → lexical → semantic) to say how strongly a
 > line has been evidenced. This folder has no such ladder: it is deep reading
 > plus manual confirmation throughout. What this folder calls **code-trace
@@ -99,5 +99,5 @@ See [`_INDEX.md`](cassandra/_INDEX.md) for the authoritative per-pair table.
 ## Related context
 
 - **Google Docs** — [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit) (per-meeting decisions and next steps) and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit) (running log of entry points, cases and findings). A session with the Google Drive connector enabled can read them directly.
-- **Sibling experiment:** [`../if-check-exp/`](../if-check-exp/README.md) —
+- **Sibling experiment:** [`../capacity-enforcement-exp/`](../capacity-enforcement-exp/README.md) —
   the currently active folder, with its own `HANDOFF.md` at the repo root.

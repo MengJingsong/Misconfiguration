@@ -51,30 +51,30 @@ findings for each system live in a per-system subfolder (`<exp>/cassandra/`,
 Target 2 together** — each result names a constraint *and* shows the code that
 enforces it — and both leave Target 3 out of scope, noting bypass-relevant
 observations in passing for later use. `OOM-exp` carries out **Target 3**,
-taking the constraints `if-check-exp` found as its input:
+taking the constraints `capacity-enforcement-exp` found as its input:
 
 | Folder | Status | Direction |
 |---|---|---|
-| [`experiments/if-check-exp/`](experiments/if-check-exp/README.md) | **active** | backward: from the enforcing check → the constraint's declaration |
+| [`experiments/capacity-enforcement-exp/`](experiments/capacity-enforcement-exp/README.md) | **active** | from enforcement places and capacity-set places: backward to the constraint, forward to the usage effect (named `if-check-exp` until 2026-11-11) |
 | [`experiments/entry-restriction-exp/`](experiments/entry-restriction-exp/README.md) | paused | forward: from the constraint's declaration → the places it restricts |
 | [`experiments/OOM-exp/`](experiments/OOM-exp/README.md) | **active** | Target 3: test memory protection under reachable workloads and configurations (convergence, bypass) |
 
 **Systems covered.** Most completed work is **Cassandra** and lives under each
 experiment's `cassandra/` subfolder. **Hadoop** has started: its source is vendored
-(`systems/hadoop/source/`, 3.4.2) and `if-check-exp` stage 1 is done
-([`experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/`](experiments/if-check-exp/hadoop/stage1-codeql-preprocessing/README.md));
+(`systems/hadoop/source/`, 3.4.2) and `capacity-enforcement-exp` stage 1 is done
+([`experiments/capacity-enforcement-exp/hadoop/stage1-codeql-preprocessing/`](experiments/capacity-enforcement-exp/hadoop/stage1-codeql-preprocessing/README.md));
 stage 2 is done (9,684 units banded; `hadoop/stage2-ai-preprocessing/`).
 The other Hadoop subfolders (`<exp>/hadoop/`) are still empty.
 
-`if-check-exp` and `entry-restriction-exp` are deliberately **not
+`capacity-enforcement-exp` and `entry-restriction-exp` are deliberately **not
 cross-referenced** — a line may legitimately appear in both. `OOM-exp` is the
-one folder that intentionally depends on another (`if-check-exp`).
+one folder that intentionally depends on another (`capacity-enforcement-exp`).
 
 **Targets are not stages.** An experiment folder may number its own *working
-stages* (`if-check-exp` has three: structural → lexical → semantic). Those
+stages* (`capacity-enforcement-exp` has three: structural → lexical → semantic). Those
 numbers describe how strongly a finding has been evidenced inside that
 folder; they do not map onto the target numbers above. See
-[`experiments/if-check-exp/README.md`](experiments/if-check-exp/README.md) §1.1.
+[`experiments/capacity-enforcement-exp/README.md`](experiments/capacity-enforcement-exp/README.md) §1.1.
 
 ## 1. Setup
 
@@ -124,7 +124,7 @@ cross, under `experiments/<exp>/<system>/`.
 
 ```
 experiments/                 <- methods; each README/template/playbook is system-agnostic
-├── if-check-exp/            <- Target 1+2 (active): method docs + stage{1..4}/ specs
+├── capacity-enforcement-exp/            <- Target 1+2 (active): method docs + stage{1..4}/ specs
 │   ├── cassandra/           <-   Cassandra findings: cases, results, harness runs, CSVs
 │   └── hadoop/              <-   Hadoop findings: stages 1–2 done (2026-11-04), stages 3–4 empty
 ├── entry-restriction-exp/   <- Target 1+2 (paused): method docs + templates
@@ -142,7 +142,7 @@ systems/
     ├── source/              <- pinned apache/hadoop @ tag rel/release-3.4.2 (unmodified)
     ├── build-src/           <- Hadoop source build scripts (JDK8 + Maven + protobuf)
     └── conf/                <- stock config baseline (to populate)
-codeql-queries/              <- CodeQL packs: cassandra/, hadoop/, common/ (stage 1 of if-check-exp)
+codeql-queries/              <- CodeQL packs: cassandra/, hadoop/, common/ (stage 1 of capacity-enforcement-exp)
 config/                      <- repo_layout.sh (local refs), environment.sh.example (external refs)
 setup-node.sh                <- per-node SSH/GitHub/time-zone setup + Claude Code/Codex install (see /proj/misconfiguration-PG0/README.md)
 README.md  HANDOFF*.md       <- this file and the start-here briefs
@@ -181,7 +181,7 @@ one level down instead.
 `.gitattributes` keeps the bytes as upstream). Both Cassandra experiment
 folders check every `file:line` against it and codeql-queries/ builds its
 databases from it. Never build in it or add files to it; copy it to local disk
-first (`experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md` §2).
+first (`experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md` §2).
 Records dated before 2026-10-22 name the `cassandra-src` clone, which held the
 same files.
 
@@ -244,17 +244,17 @@ stage structure) that is system-agnostic. Per-system findings live under
 `<exp>/<system>/`; today that is `<exp>/cassandra/` (populated) and
 `<exp>/hadoop/` (scaffold, empty).
 
-### 4.1 `experiments/if-check-exp/`, `experiments/entry-restriction-exp/`
+### 4.1 `experiments/capacity-enforcement-exp/`, `experiments/entry-restriction-exp/`
 
-- **`experiments/if-check-exp/`** (active) and
+- **`experiments/capacity-enforcement-exp/`** (active) and
   **`experiments/entry-restriction-exp/`** (paused) — static code-path
   inventories of a system's resource-limit checks, approached from opposite
   directions (§0). Each has its own `README.md` (format spec) and its own
-  start-here brief: the root [`HANDOFF.md`](HANDOFF.md) for `if-check-exp`,
+  start-here brief: the root [`HANDOFF.md`](HANDOFF.md) for `capacity-enforcement-exp`,
   and [`experiments/entry-restriction-exp/HANDOFF.md`](experiments/entry-restriction-exp/HANDOFF.md)
   for the paused one.
 
-  `if-check-exp` organises its work as **three stages by evidence standard** —
+  `capacity-enforcement-exp` organises its work as **three stages by evidence standard** —
   structural (CodeQL) → lexical (rows only) → semantic (source open). The stage
   method docs live at the experiment root; each stage's per-system output lives
   under `<exp>/<system>/<stage>/`. Every cited line is checked against that
@@ -265,7 +265,7 @@ stage structure) that is system-agnostic. Per-system findings live under
 ### 4.2 `experiments/OOM-exp/`
 
 - **`experiments/OOM-exp/`** (active) — **Target 3**: use the constraints
-  `if-check-exp` found to test whether simultaneous live allocations exhaust
+  `capacity-enforcement-exp` found to test whether simultaneous live allocations exhaust
   a shared memory budget while local controls hold (convergence), or whether
   allocations escape a control's protection (bypass). Controlled OOM tests
   establish failure conditions, and passing runs bound the tested range.
@@ -276,7 +276,8 @@ stage structure) that is system-agnostic. Per-system findings live under
 
 - **`codeql-queries/`** — CodeQL query packs (one per target: `cassandra/`,
   `hadoop/`, plus shared `common/`). The Cassandra pack is **stage 1** of
-  `if-check-exp`: it mechanically narrows candidate if-checks, with no keyword
+  `capacity-enforcement-exp`: it mechanically narrows candidate enforcement places (so far
+  `if` statements; extension beyond `if` planned 2026-11-11), with no keyword
   list (see its own [`README.md`](codeql-queries/README.md)). Runs against the
   compiled databases under `codeql-dbs/` described above; its CSV output is
   gitignored and regenerated per machine. The Hadoop pack runs the same chain

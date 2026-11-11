@@ -29,7 +29,7 @@ Start with the system's campaign plan (for Cassandra,
 [constraint survey](cassandra/cases/_constraint-groups.md).
 Leads may also come from the JIRA and data-flow lead sources
 ([README](README.md#lead-sources)); record the source label in the case.
-Use if-check-exp source/case/runtime evidence to populate the protocol's
+Use capacity-enforcement-exp source/case/runtime evidence to populate the protocol's
 protection map. True positives and false negatives with measured caps are leads;
 weak outcomes need confirmation. A true negative is not proof of a usable cap,
 but does not exclude other checks or allocation domains with a verified bound.

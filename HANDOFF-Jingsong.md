@@ -1,15 +1,15 @@
 # If-Check Exp — Handoff for Jingsong (set A)
 
-> **Paths.** This file is Cassandra `if-check-exp` work. Paths starting `cassandra/stage…` are
-> relative to `experiments/if-check-exp/`. Bare `cases/`, `_INDEX.md` and `writeup-set-*.csv` are in
-> `experiments/if-check-exp/cassandra/stage3-ai-deep-read/`; bare `harness/`, `results/`,
-> `timing/` and `environment.md` are in `experiments/if-check-exp/cassandra/stage4-runtime-verification/`.
-> Playbooks, templates and stage READMEs are method docs under `experiments/if-check-exp/<stage>/`.
+> **Paths.** This file is Cassandra `capacity-enforcement-exp` work. Paths starting `cassandra/stage…` are
+> relative to `experiments/capacity-enforcement-exp/`. Bare `cases/`, `_INDEX.md` and `writeup-set-*.csv` are in
+> `experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read/`; bare `harness/`, `results/`,
+> `timing/` and `environment.md` are in `experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/`.
+> Playbooks, templates and stage READMEs are method docs under `experiments/capacity-enforcement-exp/<stage>/`.
 
 ## Hadoop (added 2026-11-06)
 
-**Hadoop `if-check-exp` stage 3 is split by band.** Stage 2 is done
-([`experiments/if-check-exp/hadoop/stage2-ai-preprocessing/README.md`](experiments/if-check-exp/hadoop/stage2-ai-preprocessing/README.md)):
+**Hadoop `capacity-enforcement-exp` stage 3 is split by band.** Stage 2 is done
+([`experiments/capacity-enforcement-exp/hadoop/stage2-ai-preprocessing/README.md`](experiments/capacity-enforcement-exp/hadoop/stage2-ai-preprocessing/README.md)):
 9,684 units, each with one band in `hadoop/stage2-ai-preprocessing/bands.csv`.
 
 | Person | Bands | Units | Rows | Helpers |
@@ -22,15 +22,15 @@ Cassandra material below this section is unchanged and still applies to the Cass
 
 - **Progress (2026-11-06):** batch 1 (queue orders 1–5) written up and closed at stage 4 — see the
   Hadoop log below. Next: order 6. Stage-4 environment: `pc41`, `pc39`, `pc29`
-  ([`environment.md`](experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/environment.md)).
+  ([`environment.md`](experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/environment.md)).
   Your folders (do not write to the other person's):
-  stage 3 → `experiments/if-check-exp/hadoop/stage3-ai-deep-read/jingsong/`, stage 4 →
-  `experiments/if-check-exp/hadoop/stage4-runtime-verification/jingsong/`. Each has a README listing the
+  stage 3 → `experiments/capacity-enforcement-exp/hadoop/stage3-ai-deep-read/jingsong/`, stage 4 →
+  `experiments/capacity-enforcement-exp/hadoop/stage4-runtime-verification/jingsong/`. Each has a README listing the
   expected contents (`cases/`, `_INDEX.md`, `writeup.csv`, `predicted-*.md`; `results/`, `harness/`, `case-notes.md`).
-- **Procedure, queue and status:** [`experiments/if-check-exp/hadoop/PROCEDURE.md`](experiments/if-check-exp/hadoop/PROCEDURE.md)
+- **Procedure, queue and status:** [`experiments/capacity-enforcement-exp/hadoop/PROCEDURE.md`](experiments/capacity-enforcement-exp/hadoop/PROCEDURE.md)
   (what "this is Jingsong, start the next batch of N" and "summarize the result status" do),
-  your `queue.csv`, and `experiments/if-check-exp/hadoop/status.py jingsong`.
-- **Method:** shared playbooks and templates in `experiments/if-check-exp/stage3-ai-deep-read/`
+  your `queue.csv`, and `experiments/capacity-enforcement-exp/hadoop/status.py jingsong`.
+- **Method:** shared playbooks and templates in `experiments/capacity-enforcement-exp/stage3-ai-deep-read/`
   (`playbook-autonomous.md`, `playbook-guided.md`, `playbook-non-config-autonomous.md`,
   `_TEMPLATE-*.md`). Citations are pinned to `rel/release-3.4.2` (`systems/hadoop/source/`).
 - **Read order inside your share:** A first, then B, C (and for Yang, D in whatever order the
@@ -63,7 +63,7 @@ Jingsong's next job. Yang works on set B in parallel ([`HANDOFF-Yang.md`](HANDOF
 Use **fresh autonomous agents** to write up a case file for every target in **set A**, then
 verify each case at **stage 4** (audit, run 1 at both tiers, results file, outcome class).
 
-- **The list:** [`experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv`](experiments/if-check-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv) —
+- **The list:** [`experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv`](experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read/writeup-set-A.csv) —
   **159 targets covering 168 stage-2 units** (band A 46, B 64, C 58), every one a negative estimate.
   Mostly `cache/`, `config/`, `cql3/`, `db/`, `hints/` and the first part of `index/` (up to
   `index/sai/disk/v1/vector/`), plus a few `io/`, `utils/` and other lines tied to the same queue rows.
@@ -93,8 +93,8 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 1. Make a copy of the source **outside the repository**, so the agent cannot read other cases:
    `rsync -a systems/cassandra/source/ ~/cassandra-5.0.9/`.
 2. Open a **fresh** Claude Code session in that copy. Give it only
-   [`playbook-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/playbook-autonomous.md),
-   [`_TEMPLATE-autonomous.md`](experiments/if-check-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
+   [`playbook-autonomous.md`](experiments/capacity-enforcement-exp/stage3-ai-deep-read/playbook-autonomous.md),
+   [`_TEMPLATE-autonomous.md`](experiments/capacity-enforcement-exp/stage3-ai-deep-read/_TEMPLATE-autonomous.md)
    and the target as `file:line`. Nothing else about the line (not the stage-3 ground, not the CSV).
 3. File the result as `cases/<stem>--autonomous.md`. The stem follows the existing ones:
    `<constraint>-<method>-<operand>`; check `ls cases/` first and add `-2` if the stem is taken.
@@ -104,14 +104,14 @@ verify each case at **stage 4** (audit, run 1 at both tiers, results file, outco
 
 ### 2. Verification (stage 4, a separate agent)
 
-Protocol: [`experiments/if-check-exp/stage4-runtime-verification/README.md`](experiments/if-check-exp/stage4-runtime-verification/README.md)
-("The run protocol"); environment: [`environment.md`](experiments/if-check-exp/cassandra/stage4-runtime-verification/environment.md).
+Protocol: [`experiments/capacity-enforcement-exp/stage4-runtime-verification/README.md`](experiments/capacity-enforcement-exp/stage4-runtime-verification/README.md)
+("The run protocol"); environment: [`environment.md`](experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md).
 
 1. **Step-0 audit** (A–D) against `systems/cassandra/source/`; fixes go in the case file as dated
    amendments (section D). Write the audit and the frozen hash of the predictions and conclusions
    tables (B2f–g, B3f–g) into a new results file from `_TEMPLATE.md` **before any reading**.
 2. Harness under `harness/<stem>--autonomous/`; working trees from
-   [`copy-source.sh`](experiments/if-check-exp/cassandra/stage4-runtime-verification/copy-source.sh), one per case.
+   [`copy-source.sh`](experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/copy-source.sh), one per case.
 3. Run 1, unit tier then cluster tier; independent self-check from the raw logs; fill the results
    file, including the **Outcome class**.
 4. Close the case: `_INDEX.md` §1 Stage 4 and Outcome class cells, the new sha256 in §4 if the case
@@ -327,7 +327,7 @@ case file (CSV rows 81-159; row 7 skipped, it is settled as a second check site 
 `prepared_statements_cache_size`). **Not case files:** these are unfinished, kept out of `cases/`,
 `_INDEX.md`, `predicted-negative.md` and the CSV (`case_file` and `stage4` columns left empty).
 
-- **Where:** `experiments/if-check-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
+- **Where:** `experiments/capacity-enforcement-exp/stage3-ai-deep-read/traceback-only/<stem>--autonomous.md`, 79 files (one per target). Each has the template's
   field table (only Entry pointer and Pinned source) and **A1. The constraint** filled; A2-A5, B, C and D are absent.
 - **How:** one fresh Agent-tool subagent per target, 8 batches (10 x 7, then 9), each given only
   `file:line` (or helper), a read-only copy of the source (`~/cassandra-5.0.9`) and the A1 definition.

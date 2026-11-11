@@ -76,7 +76,7 @@ File these cases in the status-first folders with the label **unprotected**.
 ## Protection map (required before execution)
 
 Record one row per distinct allocation domain, citing the pinned source and
-relevant if-check-exp case/results. Existing verdicts are leads, not substitutes
+relevant capacity-enforcement-exp case/results. Existing verdicts are leads, not substitutes
 for checking the exact path, scope, and configuration used here.
 
 | Field | Required evidence |

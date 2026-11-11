@@ -18,8 +18,8 @@
 
 > **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
 > names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
-> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
-> root, data under `if-check-exp/<system>/`.
+> `cassandra/`). Paths into `capacity-enforcement-exp` follow that experiment's layout: method docs at its
+> root, data under `capacity-enforcement-exp/<system>/`.
 
 Start-here brief for a session picking up `OOM-exp`. Read this, then
 [`README.md`](README.md) for the target and the two directions, then
@@ -46,7 +46,7 @@ Use the [campaign plan](cassandra/campaign-plan.md) and
 [current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
 for current priorities and results.
 
-**New lead sources (2026-11-10).** Besides the if-check-exp inventory, leads now
+**New lead sources (2026-11-10).** Besides the capacity-enforcement-exp inventory, leads now
 also come from **JIRA OOM history** ([`jira-mining-playbook.md`](jira-mining-playbook.md))
 and **data-flow tracing** ([`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md)).
 They are lead sources, not new directions: results are still convergence,
@@ -61,7 +61,7 @@ none has run yet.
   7, 8), one was blocked (disk, skipped), one did not reach OOM (run 4,
   superseded), and one was void (run 5).
   - Run 1: `memtable_heap_space` + `counter_cache_size` (both config-type, both
-    individually confirmed true positive in `if-check-exp`, both on-heap):
+    individually confirmed true positive in `capacity-enforcement-exp`, both on-heap):
     sized safe alone (each left ~38–39% of a 1024 MiB heap free under its own
     workload), predicted and observed to exceed the heap together — 14 genuine
     `OutOfMemoryError` throws, final forced-GC reading 96.6% of `-Xmx` with 0
@@ -228,7 +228,7 @@ none has run yet.
 - **Each playbook run is one agent, end to end**: it picks constraints/
   mechanisms, designs the test, runs it on a node it has access to, and
   files the result. No separate design-then-execute split (unlike
-  `if-check-exp` stage 3/4).
+  `capacity-enforcement-exp` stage 3/4).
 - **One run produces a batch of cases**, not one, tracked chronologically in
   the single `cases/_run-log.md` (regime labeled per run).
 - **Verified means V1–V5 (protocol amendment 2026-11-11).** A case moves out of
@@ -248,7 +248,7 @@ none has run yet.
   that branches on the outcome). Keep section headings.
 - **`_INDEX.md`'s table stays narrow**: short link text, one-line results,
   detail in the case file.
-- **Node safety rules carried over from `if-check-exp` stage 4**: never
+- **Node safety rules carried over from `capacity-enforcement-exp` stage 4**: never
   build in or add files to the repo's `systems/cassandra/source/`, never
   fill `/proj` (shared NFS), node data/commit log/hints go on local disk,
   stop every process a run starts and verify none is left.
@@ -263,7 +263,7 @@ none has run yet.
   `max_hints_size_per_host` did — hints require an unreachable replica,
   which a single node structurally cannot produce — so it used a 2-node
   loopback ring, 127.0.0.2/127.0.0.3 on one physical host; see
-  `if-check-exp/cassandra/stage4-runtime-verification/environment.md` section 5 for
+  `capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md` section 5 for
   the general ring-setup approach, and note the JMX-bind-address and
   resource-contention lessons in run 3's batch-log entry if reusing this
   pattern).
@@ -292,13 +292,13 @@ none has run yet.
   `cases/_run-log.md` holds the chronological run log (full logs stay on the
   run node; each case file records the path).
 - [`cassandra/cases/_constraint-groups.md`](cassandra/cases/_constraint-groups.md) —
-  every if-check-exp true-positive constraint, surveyed and grouped by
+  every capacity-enforcement-exp true-positive constraint, surveyed and grouped by
   shared budget (on-heap/off-heap/disk) and classified **floor / surge /
   excluded** (floor = standing pool; surge = per-item allocation with no
   global aggregate cap, used on top of a floor; the exclusion axis is "is
   there a global aggregate cap?", not "per-request vs. standing" — see the
   playbook's "Picking combinations" step 5 and the floor+surge note at the
-  top of that file). Read this before re-surveying if-check-exp from scratch
+  top of that file). Read this before re-surveying capacity-enforcement-exp from scratch
   for the next combination.
 - **Available nodes (updated 2026-11-09):** `pc96` (local — the session runs
   here directly, no ssh; its full name is `pc96.cloudlab.umass.edu`, not
@@ -314,7 +314,7 @@ none has run yet.
   2026-11-02, and the interim `pc264/265/268/271/323` nodes at 2 c/1 GiB that
   were too small to build or host peers, are retired.)
 - **Nodes:** run on whatever CloudLab node the session has — see
-  `if-check-exp/cassandra/stage4-runtime-verification/environment.md` for the JDK/Ant
+  `capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md` for the JDK/Ant
   install and source-copy steps (same pinned `systems/cassandra/source/`
   tag). The first case ran on `pc41.cloudlab.umass.edu`
   (`jason92-323989`, 40 cores, 251 GiB) with Cassandra bounded to a small

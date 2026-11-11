@@ -1,5 +1,5 @@
 /**
- * System-agnostic predicates for the `if-check-exp` query pipeline.
+ * System-agnostic predicates for the `capacity-enforcement-exp` query pipeline.
  *
  * These encode the experiment's notion of a candidate comparison and do not depend
  * on any one system's layout. Each target pack's `ifcheck/IfCheck.qll` imports this
@@ -7,7 +7,7 @@
  * files count as main source (`inMainSource`) and how rows are batched (`pkgDir`).
  *
  * Imported as `import common.lib.IfCheckCore` (via each pack's `common` symlink).
- * See ../../cassandra/queries/if-check-exp/README.md for the pipeline.
+ * See ../../cassandra/queries/capacity-enforcement-exp/README.md for the pipeline.
  */
 
 import java

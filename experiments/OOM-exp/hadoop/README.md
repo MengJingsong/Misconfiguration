@@ -20,9 +20,9 @@ master status table lives at `cases/_INDEX.md` and the chronological run log at
 `cases/_run-log.md`. Lead-source outputs (the
 [JIRA OOM survey](../jira-mining-playbook.md) and
 [data-flow holder tables](../dataflow-tracing-playbook.md)) go under
-`hadoop/leads/`; the JIRA survey can start before if-check-exp Hadoop is done.
+`hadoop/leads/`; the JIRA survey can start before capacity-enforcement-exp Hadoop is done.
 
 Prerequisites: this experiment consumes the constraints found by
-[`../../if-check-exp/hadoop/`](../../if-check-exp/hadoop/), so it depends on
+[`../../capacity-enforcement-exp/hadoop/`](../../capacity-enforcement-exp/hadoop/), so it depends on
 that instance being populated first, and on a runnable Hadoop test node
 (see [`../../../systems/hadoop/`](../../../systems/hadoop/)).

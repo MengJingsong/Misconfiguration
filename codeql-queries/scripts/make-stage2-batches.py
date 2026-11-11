@@ -2,9 +2,9 @@
 """Emit stage-2 banding batches from the stage-1 CSVs.
 
 Stage 2 bands every stage-1 row A-D by AI lexical/semantic judgement
-(experiments/if-check-exp/stage2-ai-preprocessing/playbook.md). This script
+(experiments/capacity-enforcement-exp/stage2-ai-preprocessing/playbook.md). This script
 builds the batch inputs; the bands themselves are a judgement and live in
-experiments/if-check-exp/<system>/stage2-ai-preprocessing/bands.csv, which is
+experiments/capacity-enforcement-exp/<system>/stage2-ai-preprocessing/bands.csv, which is
 committed because it cannot be regenerated.
 
 The stage-1 CSVs are gitignored and rebuilt per machine, so this script is
@@ -44,7 +44,7 @@ CASSANDRA_ANCHORS = [
 ]
 
 HADOOP_ANCHORS_MD = os.path.join(
-    REPO, 'experiments', 'if-check-exp', 'hadoop', 'stage2-ai-preprocessing', 'anchors.md')
+    REPO, 'experiments', 'capacity-enforcement-exp', 'hadoop', 'stage2-ai-preprocessing', 'anchors.md')
 
 
 def hadoop_anchors():

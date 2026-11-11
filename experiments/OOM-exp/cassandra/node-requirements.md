@@ -12,7 +12,7 @@ Revalidate allocation hostnames and resources before using any historical node.
 > five 8 GiB peers, a dm-delay device under `/mydata/b6/slow`). Use `pc96` for any victim
 > or peer that needs several GiB of heap (e.g. B6's 8 GiB deployment-heap arm);
 > an r320 victim is fine when the experimental budget is small and recorded.
-Baseline setup: [stage-4 environment](../../if-check-exp/cassandra/stage4-runtime-verification/environment.md).
+Baseline setup: [stage-4 environment](../../capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md).
 
 ## Recommended allocation
 

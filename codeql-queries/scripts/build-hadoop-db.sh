@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the Hadoop CodeQL database (hadoop-db) for if-check-exp stage 1.
+# Build the Hadoop CodeQL database (hadoop-db) for capacity-enforcement-exp stage 1.
 #
 # Traces a real Maven build, the way cassandra-db traced Cassandra's ant build,
 # so every type resolves (including generated protobuf classes). Builds a

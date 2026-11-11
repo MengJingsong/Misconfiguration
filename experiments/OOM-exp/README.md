@@ -18,11 +18,11 @@
 
 > **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
 > names (`_INDEX.md`, `cases/...`) live under `experiments/OOM-exp/<system>/` (for Cassandra,
-> `cassandra/`). Paths into `if-check-exp` follow that experiment's layout: method docs at its
-> root, data under `if-check-exp/<system>/`.
+> `cassandra/`). Paths into `capacity-enforcement-exp` follow that experiment's layout: method docs at its
+> root, data under `capacity-enforcement-exp/<system>/`.
 
 OOM-exp is part of the **misconfiguration** project and builds on
-[`if-check-exp`](../if-check-exp/README.md). The current runtime campaign
+[`capacity-enforcement-exp`](../capacity-enforcement-exp/README.md). The current runtime campaign
 uses **Apache Cassandra 5.0.9** on researcher-controlled CloudLab test nodes.
 
 ## Target of this experiment
@@ -39,9 +39,9 @@ classification rules, then the selected playbook. The next Cassandra batch is
 specified in [cassandra/campaign-plan.md](cassandra/campaign-plan.md), with
 [node requirements](cassandra/node-requirements.md).
 
-## Why this builds on if-check-exp
+## Why this builds on capacity-enforcement-exp
 
-`if-check-exp` inventoried **capacity checks** in Cassandra — `if` statements
+`capacity-enforcement-exp` inventoried **capacity checks** in Cassandra — `if` statements
 that compare a usage value against a capacity — and the **constraints** that
 set each capacity (config entries, JVM properties, per-table options,
 hard-coded constants). For each case it recorded, at stage 4, whether the
@@ -66,7 +66,7 @@ and campaign row records its source as a label, like the capacity regime.
 
 | Source | Starts from | Finds | Method |
 |---|---|---|---|
-| **if-check inventory** | capacity checks found by `if-check-exp` | convergence and bypass of existing checks | the direction playbooks' selection step |
+| **if-check inventory** | capacity checks found by `capacity-enforcement-exp` | convergence and bypass of existing checks | the direction playbooks' selection step |
 | **JIRA OOM history** | the project's fixed OOM reports | which mechanisms cause real OOMs; positive controls; unfixed variants and incomplete fixes | [`jira-mining-playbook.md`](jira-mining-playbook.md) |
 | **Data-flow tracing** | where bytes are held along core data flows | accumulation with no check or a check on the wrong unit, plus new leads for both directions | [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) |
 
@@ -162,7 +162,7 @@ The lead-source playbooks run before these and feed them:
 
 This experiment carries out the project's **Target 3**, investigating resource
 exhaustion through convergence and bypass. It uses the capacity checks and
-runtime evidence collected by `if-check-exp`.
+runtime evidence collected by `capacity-enforcement-exp`.
 
 ## Scope and safety
 

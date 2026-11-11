@@ -26,9 +26,10 @@ HADOOP_CONF_DIR="$HADOOP_SYS_DIR/conf"                   # stock config baseline
 # --- experiments (system-agnostic method; per-system data under <exp>/<system>/) ---
 EXPERIMENTS_DIR="$REPO_ROOT/experiments"
 
-IFCHECK_EXP_DIR="$EXPERIMENTS_DIR/if-check-exp"
+CAPACITY_ENFORCEMENT_EXP_DIR="$EXPERIMENTS_DIR/capacity-enforcement-exp"
+IFCHECK_EXP_DIR="$CAPACITY_ENFORCEMENT_EXP_DIR"   # old name (if-check-exp, renamed 2026-11-11)
 ENTRY_RESTRICTION_EXP_DIR="$EXPERIMENTS_DIR/entry-restriction-exp"
 OOM_EXP_DIR="$EXPERIMENTS_DIR/OOM-exp"
 
 # Per-system instance subtrees for each experiment, e.g.:
-#   $IFCHECK_EXP_DIR/cassandra   $IFCHECK_EXP_DIR/hadoop
+#   $CAPACITY_ENFORCEMENT_EXP_DIR/cassandra   $CAPACITY_ENFORCEMENT_EXP_DIR/hadoop

@@ -1,5 +1,5 @@
 /**
- * Cassandra-specific predicates for the `if-check-exp` query pipeline.
+ * Cassandra-specific predicates for the `capacity-enforcement-exp` query pipeline.
  *
  * The system-agnostic comparison predicates (`isNumeric`, `opClass`,
  * `isCandidateComparison`, `operandName`) live in `common/lib/IfCheckCore.qll`
@@ -7,10 +7,10 @@
  * This file adds what depends on Cassandra's layout: which files count as main
  * source, and the package directory used to batch rows. Lives in `ifcheck/`
  * rather than beside the queries because QL module names cannot contain
- * hyphens, so `queries/if-check-exp/` is not an importable path.
+ * hyphens, so `queries/capacity-enforcement-exp/` is not an importable path.
  *
- * See ../queries/if-check-exp/README.md for how these fit the pipeline, and
- * ../../../experiments/if-check-exp/README.md for the rules they support.
+ * See ../queries/capacity-enforcement-exp/README.md for how these fit the pipeline, and
+ * ../../../experiments/capacity-enforcement-exp/README.md for the rules they support.
  */
 
 import java

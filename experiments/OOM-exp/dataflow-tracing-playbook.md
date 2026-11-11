@@ -3,7 +3,7 @@
 Read [verification-protocol.md](verification-protocol.md) first. This is a **lead
 source**, not a direction (see [README](README.md#lead-sources)): it starts from
 where memory is held, not from where a capacity check is, so it also finds memory
-that if-check-exp cannot see because no check guards it. Leads are run with the
+that capacity-enforcement-exp cannot see because no check guards it. Leads are run with the
 convergence or bypass playbooks or as unprotected-accumulation cases and
 classified by the common protocol. Outputs live under `<system>/leads/dataflow/`.
 Added 2026-11-10. B6 (send-queue accounting mismatch) is the first lead found
@@ -50,7 +50,7 @@ flows can be ranked by how many real OOMs they caused.
    | Owner and multiplicity | Per request/connection/thread/table/peer/process; what bounds the count |
    | Lifetime | Released when processed, flushed, acknowledged, timed out, evicted |
    | Bound | **config cap** (name) · **constant** · **implicit** (concurrency × size, timeout × rate) · **wrong unit** (charged quantity ≠ memory held) · **none** |
-   | if-check-exp link | The capacity case for this check, if any |
+   | capacity-enforcement-exp link | The capacity case for this check, if any |
    | Lead | none / convergence / bypass / unprotected, with a one-line hypothesis |
 
 4. **Rank** leads by (bytes reachable per legitimate operation) × (how many

@@ -8,7 +8,7 @@ See [README.md](../README.md) for the format.
 
 > **`verified` here means the cited `file:line`s were checked against the
 > pinned `cassandra-5.0.9` clone** — not that any behavioral experiment was
-> run. The sibling `if-check-exp` dropped its own `Status` field for this
+> run. The sibling `capacity-enforcement-exp` dropped its own `Status` field for this
 > reason (it had come to mean two different things); this folder keeps it,
 > with the narrower meaning stated here.
 

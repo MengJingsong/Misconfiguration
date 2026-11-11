@@ -1,0 +1,221 @@
+# capacity-enforcement-exp queries
+
+Four CodeQL queries that narrow Cassandra's ~17k `if` statements down to the working list
+that **stage 2** ranks and **stage 3** reads, for the three rules in
+[`../../../../experiments/capacity-enforcement-exp/README.md`](../../../../experiments/capacity-enforcement-exp/README.md).
+This folder produces CSVs and nothing else: the queries decide nothing, and no case file is
+written from them directly.
+
+CodeQL narrows **structurally** — by the shape of the code. It cannot judge whether a check is
+actually a capacity check; real cases (`memtable_heap_space`, `MAX_HINT_BUFFERS`,
+`cdc_total_space`, ...) share no vocabulary reliable enough for a keyword filter, which is why
+that judgement belongs to stage 2 and the qualification to stage 3.
+
+**Scope: all three enforcement patterns** (see
+[`../../../../experiments/capacity-enforcement-exp/README.md` §7.5](../../../../experiments/capacity-enforcement-exp/README.md#75-active-scope-decisions-revised-2026-09-25)),
+revised 2026-09-25.
+
+**What these four queries select is a *syntactic* shape, not a pattern.** They keep
+comparisons that sit inside an `if` condition (or one call frame down, via the helper query).
+The enforcement patterns are defined by *where the decision sits relative to the comparison*,
+so the filter spans all three: a pattern-(b) check can be an ordinary `if` that assigns a flag
+(`Directories.java:551`), and pattern-(c) guard clauses *are* `if` statements.
+
+> **Corrected 2026-09-25.** This README previously said the four queries are "structurally
+> exactly pattern (a)" and that the three planned extensions were prerequisites for triaging
+> (b)/(c). Both were wrong. The existing CSVs already contain (b) and (c) candidates, so no
+> query gates that work.
+
+The genuine gap is syntactic and narrower: a comparison written as a ternary, an assignment, a
+`return` expression or a method argument is invisible to all four. Such a comparison cannot be
+pattern (a) — (a) requires the comparison's own `if` — so every miss of this kind is a (b) or
+(c) check. The implication runs one way only: *not in an `if` ⟹ (b) or (c)*, never the
+reverse.
+
+## The four queries
+
+| Query | Selects | Rows |
+|---|---|---|
+| `AllIfStatements.ql` | every `if` in `src/java/...` — pure inventory, no filtering | 17,343 |
+| `ComparisonIfStatements.ql` | those whose condition is a direct comparison between two operands, with a best-effort name for each | 10,147 |
+| `NarrowedIfStatements.ql` | of those, the ones worth ranking: **the stage-2 input** | **4,489** |
+| `HelperGuardedIfStatements.ql` | `if`s whose condition calls a Cassandra boolean helper that itself holds a candidate comparison: **the other stage-2 input** | **1,099** |
+
+The first three form a chain, each narrowing the previous one's output. The fourth is a
+**sibling, not a funnel step** — it finds checks the chain structurally cannot see, and its
+rows are additional, not a subset. Both CSVs feed stage 2 as equals.
+
+### The chain — `All` → `Comparison` → `Narrowed`
+
+`NarrowedIfStatements.ql` is where the real filtering happens. `isCandidateComparison` in
+[`IfCheckCore.qll`](../../../common/lib/IfCheckCore.qll) keeps a comparison only when **neither operand is
+`null`**, **not both operands are literals**, and **both operands are numeric-typed**. Measured
+over the 5,658 rows it drops:
+
+| Cause | Rows | Example |
+|---|---|---|
+| Null check | 4,215 | `getKeyspace() != null` |
+| Enum constant or object reference | 975 | `flag() == NONE`, `bytes == UNSET_BYTE_BUFFER` |
+| Reference identity | 376 | `this == o` (167), `getClass() != getClass()` (121) |
+| `char` operand | 91 | `c >= '0'` in `Hex.java:38`, where `c` is declared `char` |
+| Boolean | 1 | `considerZeroes == true` |
+| Literal vs literal | **0** | — javac constant-folds these before CodeQL sees them |
+
+Three things worth knowing about that table:
+
+- **The filter is on operand *types*, not on the operator.** Equality rows survive it in
+  quantity — 1,808 of the 4,489. `size() == 0` is kept; `kind() == STATIC` is not.
+- **`char` is dropped, and it is not obvious.** CodeQL's `NumericType` covers `byte, short,
+  int, long, float, double` — not `char`. All 25 dropped *magnitude* comparisons are char
+  comparisons. The contrast is sharp: `TypeSizes.encodedUTF8Length`'s `c <= 0x007F` is kept
+  because `int c = st.charAt(i)`, while `Hex.java`'s `c <= '9'` is dropped because the loop
+  variable is declared `char`. Nothing capacity-related is lost, but the rule should be read
+  rather than discovered.
+- **The literal-vs-literal guard is a no-op** on this corpus. It costs nothing and documents
+  intent, but it is not one of the reasons the row count falls.
+
+Remaining noise that mechanical filtering cannot remove without keyword judgment — `index == 0`,
+comparator results (`compareIPs() < 0`) — is left for stage 2.
+
+### `HelperGuardedIfStatements.ql` — closing the boolean-helper gap
+
+The chain finds the capacity check only when the comparison is written **directly in the `if`
+condition**. When it hides behind a boolean helper — `if (!pool.hasRoom())`,
+`if (isOverLimit())` — the `if` carries no comparison and the row never appears, even though
+the `if` itself is intact and its branches may well be what decide. The check just sits one
+call frame down; the enforcement pattern is whatever reading the code shows it to be.
+
+This query reports both the `if` site and the comparison inside the callee (`helper`,
+`helperLine`). **1,099 rows — 577 magnitude, 522 equality — from 300 distinct helpers.**
+
+The real unit of work is the *helper*, not the row: stage 2 judges each helper once and applies
+the verdict to all its call sites, so 1,099 rows cost 300 judgements. The most-repeated helpers
+are plainly not capacity checks (`ProtocolVersion.isGreaterOrEqualTo()` 40 rows,
+`DeletionTime.supersedes()` 28), so sorting by helper frequency disposes of a large share
+quickly. It found at least one real check the chain missed:
+`HintsBufferPool.switchCurrentBuffer()`, the filed `MAX_HINT_BUFFERS` case, reached through
+its helper.
+
+As with the chain, this is mechanical narrowing only. It does not check that the helper's
+comparison is a usage-vs-limit test, nor that the `if`'s branches diverge on object creation —
+both stay read-and-judge calls.
+
+## Output columns and row identity
+
+All queries emit named columns (`path`, `line`, `pkg`, `declaringType`, `method`, ...) and are
+`order by`-ed, so runs are reproducible and diffable across machines — which matters because
+results are gitignored and regenerated per machine, not committed.
+
+> **`path:line` is not a unique row id.** 340 lines carry more than one comparison, affecting
+> **738 rows**, so a consumer keying on the pair silently merges them. Stage 2 keys on
+> `path:line#n`, where `n` is the 1-based index of the row among those sharing a line, in CSV
+> order — stable because the queries are `order by`-ed. This matters in practice:
+> `TeeDataInputPlus.java:58` holds two comparisons and only the first is the capacity check.
+
+Two columns exist specifically to serve the downstream stages:
+
+- **`pkg`** — the package directory under `org/apache/cassandra` (`db/compaction`, `utils`,
+  `net`). It is emitted rather than re-derived from the path by hand. Early triage batched by
+  directory; stage 2's banding instead reads `pkg` as part of the sentence it judges
+  (`pkg | Type.method | lhs op rhs`), and batches by fixed size across the whole corpus.
+- **`opClass`** — `magnitude` (`<`, `<=`, `>`, `>=`) or `equality` (`==`, `!=`). A capacity
+  check is inherently a magnitude comparison, so equality rows are far more likely to be noise
+  (`index == 0`, sentinel tests). They are **kept, not dropped**: an exact-value counter cap
+  (`count == MAX`) is conceivable, and discarding 40% of the corpus silently would be an
+  invisible decision.
+
+> **The `order by opClass` puts equality *first*, not magnitude.** Ascending string order makes
+> `equality` precede `magnitude`, so the first 1,808 rows of `NarrowedIfStatements.csv` are the
+> low-priority ones. This is the opposite of what the sort was intended to achieve, and it is
+> not free: stage 2's banding read 14 batches — about 1,680 rows — before reaching its first
+> magnitude row. Left as-is because the banding is complete and re-sorting would renumber every
+> batch; a future consumer should sort by `opClass desc` itself, or the query should.
+
+## Shared predicates
+
+Queries import one module, `import ifcheck.IfCheck`. It is split in two (since 2026-11-04, when
+Hadoop got the same chain):
+
+- [`../../../common/lib/IfCheckCore.qll`](../../../common/lib/IfCheckCore.qll): `isNumeric`,
+  `operandName`, `opClass` and `isCandidateComparison`, the experiment's notion of a candidate
+  comparison. System-agnostic, shared by the Cassandra and Hadoop packs, and re-exported by each
+  pack's `IfCheck.qll`. Moving them changed no Cassandra output: all four CSVs were byte-identical
+  before and after.
+- [`../../ifcheck/IfCheck.qll`](../../ifcheck/IfCheck.qll): the Cassandra-specific parts,
+  `inMainSource` (`src/java/`) and `pkgDir` (under `org/apache/cassandra/`). The Hadoop pack has
+  its own (`codeql-queries/hadoop/ifcheck/IfCheck.qll`).
+
+They were previously copy-pasted into each query, which risked the queries drifting apart on what
+counts as "numeric" or "a candidate comparison". `IfCheck.qll` sits in `ifcheck/` rather than
+beside the queries because QL module names cannot contain hyphens, so `queries/capacity-enforcement-exp/` is
+not an importable path.
+
+## Known gap and planned extensions (2026-09-20)
+
+`capacity-enforcement-exp` now recognizes three enforcement patterns (see
+[`../../../../experiments/capacity-enforcement-exp/README.md` §3.2](../../../../experiments/capacity-enforcement-exp/README.md#3-core-concept-the-case)):
+(a) the capacity check is itself the deciding `if`; (b) the check produces a
+verdict — a flag, enum, or return value — that a separate decision point
+reads; (c) guard clauses before an allocation that sits outside any branch.
+The chain only keeps comparisons that sit inside an `if` condition, and
+`HelperGuardedIfStatements.ql` extends that to comparisons one call frame down. That syntactic
+filter does **not** exclude (b) and (c) — both are frequently written as `if` statements, and
+the CSVs contain such rows already. What it does exclude is any comparison written outside an
+`if` condition, and those misses are necessarily (b) or (c). Known miss: the `cdc_total_space`
+comparison in `CDCSizeTracker.processNewSegment()` (line 335) is a ternary
+inside a method argument, so it is not in `NarrowedIfStatements.csv`. **The
+constraint itself is not missed, though** — line 345 in the same method
+(`!blocking && sizeInProgress.get() > allowance`, the eviction path) and
+`permitSegmentMaybe():200` both compare the same usage against the same limit
+in real `if`s and do appear. The miss is this *enforcement site*, not the
+constraint. (Earlier wording called line 345 "an unrelated `if`"; it is not —
+same usage, same limit, different response. Corrected 2026-09-23.)
+
+> **2026-11-11:** extension 1 below is taken up and widened, together with
+> capacity-set places, by the rename to `capacity-enforcement-exp`. The plan is
+> in [`../../../../experiments/capacity-enforcement-exp/stage1-codeql-preprocessing/README.md`](../../../../experiments/capacity-enforcement-exp/stage1-codeql-preprocessing/README.md)
+> ("Extension beyond `if`"). The four queries in this folder stay as they are.
+
+Planned structural (still non-keyword) extensions, not yet written. **None
+gates the band-A pass** — priorities reassessed 2026-09-25:
+
+| # | Query | Role | Priority |
+|---|---|---|---|
+| 1 | Comparisons anywhere | Closes the **only genuine coverage gap** — comparisons outside an `if` condition, which no existing query can reach | keep |
+| 2 | Guard clauses | **Precision aid.** Pattern-(c) guards are `if` statements and are already in the CSVs; this narrows to the ones whose then-branch exits | low |
+| 3 | Verdict links | **Precision aid.** Flag-setting (b) checks are already in the CSVs; this traces comparison → flag → reader, which stage 3 currently does by hand | low |
+
+1. **Comparisons anywhere** — the same numeric-comparison narrowing as
+   `NarrowedIfStatements.ql`, but over all comparison expressions, not only
+   those inside an `IfStmt` condition (ternaries, assignments, `return`
+   expressions, method arguments), reporting the enclosing statement kind.
+2. **Guard clauses** — `if` statements with a numeric comparison whose
+   then-branch ends in `throw` or `return`, for pattern (c); candidates are
+   later checked for an allocation that the guard dominates.
+3. **Verdict links** — writes of a boolean/enum field (or a returned
+   boolean/enum) whose value derives from a comparison, joined to the `if`
+   conditions that read that field or call that method, for pattern (b).
+
+As with the four above, these only shrink the search space; whether a row
+qualifies is still decided by reading it (README §3.4–§3.6).
+
+## Running
+
+```bash
+export PATH="/proj/misconfiguration-PG0/tools/codeql:$PATH"
+cd <your checkout>/codeql-queries   # the CloudLab copy was removed 2026-10-06 (root README §2); clone the repo to a node's local disk, not under /proj/.../git-repos
+./scripts/run-query.sh cassandra cassandra/queries/capacity-enforcement-exp/NarrowedIfStatements.ql
+```
+
+Output lands in `results/cassandra/<QueryName>.csv` (gitignored).
+
+## What happens next
+
+The two CSVs are the input to **stage 2**, which ranks every row by AI lexical and semantic
+judgement — it rules nothing out, and it does not apply the three rules. Its design, bands and
+verdicts live in
+[`../../../../experiments/capacity-enforcement-exp/stage2-ai-preprocessing/`](../../../../experiments/capacity-enforcement-exp/stage2-ai-preprocessing/README.md);
+nothing about it is restated here, so that this file does not go stale when stage 2 changes.
+The batch inputs are built by `../../../scripts/make-stage2-batches.py` (per-system settings; Cassandra
+is its default `cassandra` entry), which reads both CSVs
+directly.

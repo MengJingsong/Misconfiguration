@@ -1,5 +1,5 @@
 /**
- * Hadoop-specific predicates for the `if-check-exp` query pipeline.
+ * Hadoop-specific predicates for the `capacity-enforcement-exp` query pipeline.
  *
  * The system-agnostic comparison predicates (`isNumeric`, `opClass`,
  * `isCandidateComparison`, `operandName`) live in `common/lib/IfCheckCore.qll`
@@ -11,8 +11,8 @@
  * `systems/hadoop/source/` (apache/hadoop @ rel/release-3.4.2), so they map 1:1
  * onto that tree.
  *
- * See ../queries/if-check-exp/README.md for the Hadoop specifics and
- * ../../cassandra/queries/if-check-exp/README.md for the pipeline itself.
+ * See ../queries/capacity-enforcement-exp/README.md for the Hadoop specifics and
+ * ../../cassandra/queries/capacity-enforcement-exp/README.md for the pipeline itself.
  */
 
 import java
