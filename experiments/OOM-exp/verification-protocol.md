@@ -232,6 +232,15 @@ predictions; record changed designs as dated amendments before new readings.
 Record raw-log location, small committed excerpts, harness, config diffs, source
 patches, original failure, controls, intervention, and repeat counts.
 
+**Filing a verified case (amended 2026-11-11).** When a case meets the promotion
+rule (*Verification status*), it keeps **one final case file** in its status
+folder: Summary, the four sections, a per-condition status table and a V1–V5
+table citing which run supplies each piece of evidence. The per-run case files
+move **verbatim** into `history.md` in the same case folder (headings demoted one
+level, cross-links pointed at its anchors); designs, harnesses and log excerpts
+stay beside it. Nothing is deleted: predictions and original results remain
+readable, and the chronological run log keeps its entries with links repointed.
+
 Track progress by **mechanism + allocation domain + configuration regime**.
 Statuses: open, parked (specific blocker), exhausted within an explicitly tested
 range, skipped by request, or deferred. Arithmetic-only exclusions apply to the

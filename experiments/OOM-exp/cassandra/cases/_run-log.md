@@ -26,8 +26,9 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
 | 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
 | 2026-11-10 | convergence / custom | C1 run 3 (fast co-replica) | [internode...--run3-fastcoreplica](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) | G1–G3 pass (ceiling at N=8, senders alive); stopped early by a sampler bug; Stage C/D outstanding |
-| 2026-11-10 | bypass | B6 run 1 (accounting mismatch) | [internode_application_queue...--run1](candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run1.md) | bypass confirmed (2 domains); heap OOM 3/3 + 3/3 at 2 GiB with 60 s deadlines; default-timeout arm not established |
-| 2026-11-10/11 | bypass | B6 run 2 (replica disk stall, default timeouts) | [internode_application_queue...--run2-diskstall](candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run2-diskstall.md) | GC service loss 5/5 stall arms (≈ 99% heap, ≈ 97% in Full GC); heap OOM 2/8 stall/hang arms; blob 0 Full GCs; 8 MiB reserve removes it |
+| 2026-11-10 | bypass | B6 run 1 (accounting mismatch) | [internode_application_queue...--run1](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-1) | bypass confirmed (2 domains); heap OOM 3/3 + 3/3 at 2 GiB with 60 s deadlines; default-timeout arm not established |
+| 2026-11-10/11 | bypass | B6 run 2 (replica disk stall, default timeouts) | [internode_application_queue...--run2-diskstall](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-2) | GC service loss 5/5 stall arms (≈ 99% heap, ≈ 97% in Full GC); heap OOM 2/8 stall/hang arms; blob 0 Full GCs; 8 MiB reserve removes it |
+| 2026-11-11 | bypass | B6 run 3 (intervention ×3, same-day positives) | [internode_application_queue...--run3-intervention](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-3) | reserve 8 MiB removes it 3/3 per condition; positives reproduced except run-1 replica side; run 2 and run-1 coordinator meet V1–V5 |
 
 ---
 
@@ -429,7 +430,7 @@ regime, evidence, status/range and stopping reason.
 | B3 / buffer-pool fallback | P2 | open; distinguish pool contract from total allocation |
 | B4 / cache explicit-clear release | P2 | open; trace ownership before repeated-cycle test |
 | B5 / periodic enforcement or replacement ordering | P3 | open; verify format/path and temporal bounds |
-| B6 / internode send+receive queues vs heap `Mutation`s (`source: flow:coordinator-write`) | P1 | **candidate, runs 1–2 done 2026-11-10/11**: bypass (accounting mismatch) confirmed on coordinator and replica. Run 1: OOM 3/3 with slow replica + 60 s deadlines. Run 2: default timeouts, 8/6 GiB replica with a storage stall → GC service loss 5/5, heap OOM 2/8. Next: intervention ×3, stall-length sweep, heap dump on an OOM arm, coordinator measurements, JIRA check |
+| B6 / internode send+receive queues vs heap `Mutation`s (`source: flow:coordinator-write`) | P1 | **verified 2026-11-11** (runs 1–3; [case](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)): A — 8 GiB replica, storage stall, default settings: `verified-gap · service-loss · deployment`; B — 2 GiB coordinator, slow replica, 60 s timeouts: `verified-OOM · diagnostic`; C — 2 GiB replica: candidate. Next: JIRA check (CASSANDRA-15066), stall-length sweep, ≥ 2 slow replicas at 8 GiB |
 
 ## 2026-11-10 — B6 run 1 (bypass · accounting mismatch, default capacities)
 
@@ -441,9 +442,9 @@ regime, evidence, status/range and stopping reason.
 coordinator S .13 (client talks only to S). Keyspace `NTS {v:1,f:1}`, hints off, caches 0.
 Default internode queue capacities (4/128/512 MiB); measured instance at a tightened 2 GiB heap.
 Supporting deviations: `write_request_timeout` and `native_transport_timeout` 60 s (defaults in D arms).
-Design: [`B6-design.md`](candidates/internode_application_send_queue_capacity-accounting-mismatch/design/B6-design.md); case: [`...--run1`](candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run1.md).
+Design: [`B6-design.md`](bypass/internode_application_queue_capacity-accounting-mismatch/design/B6-design.md); case: [`...--run1`](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-1).
 
-**Arms (harness `candidates/internode_application_send_queue_capacity-accounting-mismatch/harness/`, batches 1–3):**
+**Arms (harness `bypass/internode_application_queue_capacity-accounting-mismatch/harness/`, batches 1–3):**
 
 | Arm group | n | Outcome |
 |---|---|---|
@@ -471,8 +472,8 @@ commit log and hints on `/mydata/b6/slow` (ext4 on a dm-delay device over a loop
 (8 GiB), coordinators S1–S4 (8 GiB). `NTS {v:1,f:1}`, CL=ONE, hints off, caches 0, **all timeouts
 default, default `concurrent_writes`, no Byteman**. Client: Java driver (`harness-run2/B6Load.java`),
 256 in flight per coordinator. Replica heap 8 GiB (deployment-like) and 6 GiB. Design:
-[`B6-run2-design.md`](candidates/internode_application_send_queue_capacity-accounting-mismatch/design/B6-run2-design.md); case:
-[`...--run2-diskstall`](candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run2-diskstall.md).
+[`B6-run2-design.md`](bypass/internode_application_queue_capacity-accounting-mismatch/design/B6-run2-design.md); case:
+[`...--run2-diskstall`](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-2).
 
 | Arm group | n | Outcome |
 |---|---|---|
@@ -490,3 +491,32 @@ arms. Interpretation: documented on-wire unit → sizing gap. **Stopping reason:
 instances stopped and dm-delay reset to 0 after each batch; the dm-delay device and loop file are kept on
 `pc96` for reuse.
 
+## 2026-11-11 — B6 run 3 (bypass · accounting mismatch; V1/V4 of the promotion rule)
+
+**Node:** `pc96`, same build, harnesses and devices as runs 1–2, called unchanged by
+`harness-run3/batch.sh`. Design (written before readings):
+[`B6-run3-design.md`](bypass/internode_application_queue_capacity-accounting-mismatch/design/B6-run3-design.md); case:
+[`...--run3-intervention`](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-3).
+Purpose: three fresh endpoint-reserve interventions per condition, a same-day positive per condition,
+and a third clean-start repeat of run 2's failing condition. Batch 11:46–12:52.
+
+| Arm group | n | Outcome |
+|---|---|---|
+| run-2 condition, map, 30 s stall, V 8 GiB (positive) | 1 | 99.3% live, 98% of 126 s in Full GC (service loss MET); alive |
+| run-2 condition + receive endpoint reserve 8 MiB | 3 | 1 Full GC each, 22.1–30.9% live, 0 client errors; coordinators ≤ 8.2% (one arm) |
+| run-1 condition, S 2 GiB (positive) | 1 | **heap OOM**, dump 2.85 GB, S send queue empty |
+| run-1 condition, S 2 GiB + send/receive endpoint reserves 8 MiB | 3 | survived; 20–26 Full GCs, 69.2–75.0% live; S dropped ≈ 51–58k writes to V (overload) |
+| run-1 condition, V 2 GiB (positive) | 1 | **no OOM**: 98.2% live, 131 Full GCs, 57% of 83 s in Full GC, alive at end of load |
+| run-1 condition, V 2 GiB + reserves 8 MiB | 3 | survived; 0 Full GCs, ≤ 25% heap after any GC |
+
+**Status (as run):** candidate pending filing. Under the protocol's promotion rule, run 2 meets V1–V5
+(`verified-gap · service-loss`, conditions label pending: hints off) and run 1's coordinator side
+meets V1–V5 (`verified-OOM · diagnostic`); run 1's replica side stays candidate (its same-day positive
+did not reproduce). **Stopping reason:** planned 12 arms complete. **Raw logs:**
+`/mydata/b6/runs2/R3B_*`, `/mydata/b6/runs/R3A_*` on `pc96`; excerpt in the case `logs-run3/`.
+**Cleanup:** `pgrep java` empty, dm-delay reset to 0; device and loop file kept for reuse.
+
+**Filed 2026-11-11 (after the run):** run 2's condition labelled `deployment` (hints off is an
+accepted, documented setting); B6 consolidated into one final case file in `bypass/`
+([case](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)) with runs 1–3 kept verbatim in its `history.md`; the
+folder moved from `candidates/internode_application_send_queue_capacity-accounting-mismatch/`.

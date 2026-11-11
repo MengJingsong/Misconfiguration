@@ -35,7 +35,10 @@ Disk work remains paused by request. **Bypass has its first runs:** B6
 (internode queue accounting mismatch) run 1 (2026-11-10) confirmed the bypass and
 reproduced heap OOM with supporting deviations; run 2 (2026-11-11) reproduced the
 memory effect at default timeouts and an 8 GiB replica, mostly as GC service loss
-with 2 heap OOMs in 8 arms. It stays a candidate.
+with 2 heap OOMs in 8 arms; run 3 (2026-11-11) repeated the reserve intervention and
+same-day positives. **B6 is the first verified bypass** (filed 2026-11-11 in `bypass/`):
+`verified-gap · service-loss · deployment` (8 GiB replica, storage stall) and
+`verified-OOM · diagnostic` (2 GiB coordinator); the 2 GiB replica condition stays candidate.
 Use the [campaign plan](cassandra/campaign-plan.md) and
 [current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
 for current priorities and results.
@@ -158,7 +161,9 @@ none has run yet.
   measured drain rate and run the matched sweeps. Proceed to the fixed-budget
   OOM stage after a reproducible live-memory increase.
 - **Bypass (`bypass-playbook.md`):**
-  - **B6 — internode queue accounting mismatch (2026-11-10/11): candidate, runs 1–2 done.**
+  - **B6 — internode queue accounting mismatch (2026-11-10/11): verified, runs 1–3 done.**
+    Final case: [`internode_application_queue_capacity--accounting-mismatch.md`](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)
+    (A: `verified-gap · service-loss · deployment`; B: `verified-OOM · diagnostic`; C: candidate).
     Found by tracing C1's write path (`source: flow:coordinator-write`). The internode
     send/receive queues charge on-wire bytes; a 1000-cell map mutation is 10.8 KiB on
     the wire but ≈ 213 KiB on the coordinator heap and ≈ 181 KiB on the replica heap
@@ -172,11 +177,17 @@ none has run yet.
     heap with ≈ 97% of an 80–123 s window in Full GC in 5/5 stall arms; heap OOM in
     2/8 stall/hang arms; blob 0 Full GCs; an 8 MiB receive endpoint reserve removed
     it (n=1). Outcome per protocol: mostly GC-driven service loss, not a
-    deterministic OOM. Cases: [run 1](cassandra/cases/candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run1.md),
-    [run 2](cassandra/cases/candidates/internode_application_send_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch--run2-diskstall.md).
-    Next: heap dump on one OOM arm, intervention ×3, stall-length sweep (5/15/60 s),
-    measure the coordinators, ≥ 2 slow replicas at 8 GiB, JIRA check
-    (CASSANDRA-15066 introduced these limits) before any upstream report.
+    deterministic OOM. Cases: [run 1](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-1),
+    [run 2](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-2).
+    **Run 3** (2026-11-11, [case](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-3)):
+    8 MiB endpoint reserves removed the effect 3/3 per condition, same-day positives reproduced
+    except run 1's 2 GiB replica (survived at 98% live). Run 2 and run 1's 2 GiB coordinator now meet
+    the promotion rule V1–V5; run 1's replica side stays candidate. The reserve protects by shedding
+    (≈ 83% of writes to the slow replica dropped at the run-1 condition) and the capped 2 GiB
+    coordinator still runs at 69–75% live.
+    Filed 2026-11-11 (run 2's condition labelled `deployment`: hints off is an accepted setting).
+    Next: JIRA check (CASSANDRA-15066 introduced these limits) before any upstream report; stall-length
+    sweep (5/15/60 s); ≥ 2 slow replicas at 8 GiB.
   - **B1** (native-v5 large-request retention) remains the first planned
     if-check-inventory bypass; not started.
 
@@ -226,9 +237,9 @@ none has run yet.
   overshoot or leak), `candidate`, `negative`, each verified one labelled
   `deployment` or `diagnostic`. The six convergence OOMs filed before 2026-11-06
   are marked `(pre-protocol)` in `_INDEX.md` and need a recheck before upstream
-  use. B6 meets everything but V4: repeating the 8 MiB reserve intervention ×3
-  would promote run 1 to `verified-OOM · diagnostic` and run 2 to
-  `verified-gap · service-loss` (conditions label to be decided: hints were off).
+  use. B6 is the first case filed this way (2026-11-11). **A verified case keeps one
+  final case file**; its per-run case files are moved verbatim into `history.md` in
+  the same folder (protocol, *Case evidence and batch status*).
 - **Case files use the fixed 4-section template** each playbook specifies
   (constraints/capacity, verification solution, runtime results, conclusion
   that branches on the outcome). Keep section headings.
