@@ -80,9 +80,10 @@ unchanged, and the new rows are ordinary feed-3a rows (no new feed).
 
 - **The four existing queries and their output stay frozen.** The stage-2 bands and
   the stage-3 queues are keyed by their `file:line#n` uids.
-- **New queries emit the same row format plus two columns:** `place`
-  (`enforcement` or `capacity-set`) and `pattern` (the form, from the table in
-  `../README.md` §3.7.2).
+- **Two new queries, with the same leading columns as the `if` queries** (`path`, `line`,
+  `pkg`, `declaringType`, `method`) plus `place` (`enforcement` or `capacity-set`) and
+  `pattern` (the form): `EnforcementPlaces.ql` and `CapacitySetPlaces.ql`, with shared
+  predicates in `codeql-queries/common/lib/CapacityEnforcementCore.qll`.
 - **Enforcement places:**
   - one generalized query takes every comparison that passes the existing
     candidate test (`common/lib/IfCheckCore.qll`) and records its context
@@ -101,9 +102,14 @@ unchanged, and the new rows are ordinary feed-3a rows (no new feed).
   - container creation with a capacity (arrays, `ByteBuffer.allocate*`, bounded
     queues, `Semaphore`, cache builders, sized collections). Initial-size hints are
     included (ruling 2026-11-11);
-  - a size computed from the stored data is flagged in a `data_sized` column, not
-    filtered out, so stage 2 can rank it down.
+  - where a size comes from is recorded in a `sizeSource` column (literal, constant,
+    field, parameter, call, ...). A size taken from the data shows up as a parameter or a
+    call; it is kept, not filtered out, so stage 2 can rank it down.
 - **Pilot on Cassandra first.** The report gives the rows per pattern, how many of
   the existing case targets each pattern recovers (in particular the cases found
   only by reading source, such as `cdc_total_space`), and how many rows are new.
-  Hadoop follows once the pilot is reviewed. Pilot report: not written yet.
+  Hadoop follows once the pilot is reviewed. **Pilot report (2026-11-11):**
+  [`../cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md`](../cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md).
+  It found 5,321 new enforcement places (970 of them counted `for` loops) and 2,492
+  capacity-set rows. 13 of the 15 case targets the `if` corpus misses are recovered,
+  including all three with a real constraint. Open decisions are listed in its §5.

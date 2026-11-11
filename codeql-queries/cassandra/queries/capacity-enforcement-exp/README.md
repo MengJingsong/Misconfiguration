@@ -174,7 +174,10 @@ same usage, same limit, different response. Corrected 2026-09-23.)
 > **2026-11-11:** extension 1 below is taken up and widened, together with
 > capacity-set places, by the rename to `capacity-enforcement-exp`. The plan is
 > in [`../../../../experiments/capacity-enforcement-exp/stage1-codeql-preprocessing/README.md`](../../../../experiments/capacity-enforcement-exp/stage1-codeql-preprocessing/README.md)
-> ("Extension beyond `if`"). The four queries in this folder stay as they are.
+> ("Extension beyond `if`"). The four `if` queries stay as they are. Two queries were added on
+> 2026-11-11, `EnforcementPlaces.ql` and `CapacitySetPlaces.ql` (shared predicates in
+> `../../../common/lib/CapacityEnforcementCore.qll`); Cassandra pilot:
+> [`../../../../experiments/capacity-enforcement-exp/cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md`](../../../../experiments/capacity-enforcement-exp/cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md).
 
 Planned structural (still non-keyword) extensions, not yet written. **None
 gates the band-A pass** — priorities reassessed 2026-09-25:
