@@ -70,7 +70,7 @@ noticed along the way are noted in case files for Target 3, not chased.
   D 5,918, with the anchors passing on all 33 batches. **New write-up set:**
   `experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read/writeup-set-ext.csv`, 515 units
   of bands A–C. 7 of them are already a case's target, and 49 capacity-set units name a constraint
-  that already has cases (`stage3_record` says which). **No owner yet; stage 3 not started.** Hadoop
+  that already has cases (`stage3_record` says which). **Owner: Jingsong (2026-11-11); stage 3 not started.** Hadoop
   copies of the queries are not written.
 
 - **Stage 1:** 17,343 `if` statements → 4,489 numeric comparisons + 1,099 helper-guarded rows.
