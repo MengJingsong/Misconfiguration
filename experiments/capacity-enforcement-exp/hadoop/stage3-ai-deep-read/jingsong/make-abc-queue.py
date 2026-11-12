@@ -5,6 +5,8 @@ Usage (repo root): experiments/capacity-enforcement-exp/hadoop/stage3-ai-deep-re
 Needs codeql-queries/results/hadoop/*.csv (gitignored). Within a band the order is: the 18 anchors
 last (already source-read, see stage2 anchors.md), then units grouped by source file so siblings
 are written up together. Do not regenerate over a queue.csv with filled-in status columns.
+Since 2026-11-11 the queue also holds the stage-1 extension units, appended by
+append-ext-to-queue.py: do not re-run this script (it would fail on their E:/C: uids).
 """
 import csv, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))

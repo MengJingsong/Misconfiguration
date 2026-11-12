@@ -78,7 +78,9 @@ SYSTEMS = {
                   'done': ('concurrent', 'cache', 'transport', 'db/compaction'),
                   'size': 120},
     # 18 anchors: 200 keeps them near 8% of a batch, as Cassandra's 8/120.
-    'hadoop': {'anchors': hadoop_anchors, 'done': (), 'size': 200},
+    'hadoop': {'anchors': hadoop_anchors, 'done': (), 'size': 200,
+               'ext_anchors': lambda: HADOOP_EXT_ANCHORS,
+               'foreign_anchors': lambda: CASSANDRA_EXT_ANCHOR_ROWS},
 }
 
 
@@ -170,6 +172,32 @@ CASSANDRA_EXT_ANCHORS = [
     ('C', 'cache/CaffeineCache.java', '53', 'weightedCapacity'),                    # key_cache_size, Caffeine.maximumWeight
 ]
 
+# --extension anchors (Hadoop, 2026-11-11): the two Hadoop stage-4 true positives with a
+# new-form row, both capacity-set rows.
+HADOOP_EXT_ANCHORS = [
+    ('C', 'hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/RawPathHandle.java',
+     '40', 'RawPathHandle.MAX_SIZE'),                                   # RawPathHandle_MAX_SIZE
+    ('C', 'hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/fs/impl/prefetch/SingleFilePerBlockCache.java',
+     '228', 'SingleFilePerBlockCache.maxBlocksCount'),                  # fs.s3a.prefetch.max.blocks.count
+]
+
+# Cassandra extension anchors as text, carried in Hadoop extension batches for cross-system
+# calibration (Hadoop has no verified enforcement-form anchor). Uids get an `X:cassandra:` prefix.
+CASSANDRA_EXT_ANCHOR_ROWS = [
+    ('X:cassandra:E:src/java/org/apache/cassandra/cql3/selection/ResultSetBuilder.java:97#1',
+     'cql3/selection | ResultSetBuilder.shouldReject | comparison/return | size > thresholdBytes'),
+    ('X:cassandra:E:src/java/org/apache/cassandra/db/commitlog/CommitLogSegmentManagerCDC.java:335#1',
+     'db/commitlog | CommitLogSegmentManagerCDC$CDCSizeTracker.processNewSegment | comparison/ternary | ... + ... > allowance'),
+    ('X:cassandra:E:verdict:OutboundConnection.acquireCapacity()',
+     'net | verdict of OutboundConnection.acquireCapacity() used in switch | 1 use sites | impls=1 minDepth=1'),
+    ('X:cassandra:C:src/java/org/apache/cassandra/cache/CaffeineCache.java:53#1',
+     'cache | CaffeineCache.create | capacity-set create Caffeine.maximumWeight | size = weightedCapacity | sizeSource parameter'),
+    ('X:cassandra:C:src/java/org/apache/cassandra/hints/HintsBufferPool.java:41#1',
+     'hints | HintsBufferPool.<clinit> | capacity-set field/field-initializer | HintsBufferPool.MAX_ALLOCATED_BUFFERS = getInt() | compared in 1 comparison(s) | sizeSource no-arg-call'),
+    ('X:cassandra:C:src/java/org/apache/cassandra/utils/memory/MemtablePool.java:119#1',
+     'utils/memory | MemtablePool$SubPool.SubPool | capacity-set field/constructor | SubPool.limit = limit | compared in 1 comparison(s) | sizeSource parameter'),
+]
+
 # README §3.7.2 order: a comparison with several contexts keeps the first.
 CONTEXT_ORDER = ['ternary', 'loop-condition', 'switch-selector', 'lambda', 'assert', 'return',
                  'argument', 'assignment', 'declaration', 'field-initializer']
@@ -246,6 +274,8 @@ def load_extension(results, cfg):
         if len(hits) != 1:
             sys.exit('extension anchor %r matches %d units (stale CSV or anchor list?)' % (spec, len(hits)))
         hits[0]['anchor'] = True
+    for uid, text in cfg.get('foreign_anchors', lambda: [])():
+        units.append({'id': uid, 'kind': 'foreign-anchor', 'anchor': True, 'text': text})
     if_units = {u['id']: u for u in load(results, cfg)}
     for a in cfg['anchors']():
         u = dict(if_units[a])

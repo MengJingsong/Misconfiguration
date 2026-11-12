@@ -29,6 +29,12 @@ Maven build, daemons, naming of keys with hyphens/placeholders) rewritten for Ha
      target as `file:line` only (a helper unit: the helper method and its comparison line, found with
      `grep -n`). Output `cases/<stem>--autonomous.md`; stem `<constraint>-<method>-<operand>`,
      `-2` if taken. Add the `_INDEX.md` row and sha256, fill `case_file` and `estimate`.
+     **Extension units (orders 750–1746, added 2026-11-11):** uids `E:<path>:<line>#n` (an
+     enforcement place outside an `if`), `C:<path>:<line>#n` (a capacity-set place) and
+     `E:verdict:<Type.method()>` (a method whose result decides). The target is the uid's
+     `file:line`; for a verdict unit it is the method's comparison line, found with `grep -n` as for a
+     helper unit. The agent instructions are unchanged (`../README.md` §3.7 and the stage-3
+     README §6 amendment cover these starting places).
    - *Yang's units (recheck):* give the agent only the target `file:line` and this question: "Does
      this comparison bound or guard memory, disk, a queue, a buffer or another resource? Re-read
      the source and answer `D` (confirmed, no bound) or `A`/`B`/`C` (promote), with a one-line

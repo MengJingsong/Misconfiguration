@@ -467,3 +467,11 @@ Two corrections found while doing this: `QueryProcessor.java:251` is the empty-k
 
 **Template rule (2026-10-27):** `_TEMPLATE-autonomous.md` now has a link rule: in an autonomous case file the constraint's declaration (A1) and the if statement (Entry pointer row, A3) must be GitHub permalinks at tag `cassandra-5.0.9`, not plain `file:line`. The 106 autonomous case files filed before batch 1 are not retrofitted; the 10 batch-1 files were updated to the rule on 2026-10-27 (batches 2-5 followed it from the start, with a few added A3 sentences) (31 links on the entry pointer, the declaration and the if statement; three files got one added sentence naming the check; new sha256 lines in `_INDEX.md` §4). The scratch copy of the template used for agent inputs must be refreshed before the next batch.
 **Master Index fix (2026-10-27):** a blank line inside the `_INDEX.md` §1 table (present since before 2026-10-26) cut the table in two, so the last 35 rows rendered as plain text; removed.
+
+## 2026-11-11: stage-1 extension units in the Hadoop queue
+
+`queue.csv` grew from 749 to 1,746 units: orders 750–1746 are the A–C units of the stage-1 extension
+beyond `if` (uids `E:` / `C:`; 110 A, 272 B, 615 C, of which 2 are anchors marked `anchor=yes`).
+They come after the remaining `if` units, so "start the next batch of N" reaches them in order.
+How to hand them to stage 3: `experiments/capacity-enforcement-exp/hadoop/PROCEDURE.md` step 3.
+Cassandra's extension write-up set (`writeup-set-ext.csv`, 515 units) is also yours.

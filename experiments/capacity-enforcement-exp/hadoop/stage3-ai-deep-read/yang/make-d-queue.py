@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Build Yang's band-D queue (queue.csv) from stage-1 CSVs + stage-2 bands.csv.
 
+Since 2026-11-11 bands.csv also holds the stage-1 extension units (uids E:/C:); they are not in
+this queue. Do not re-run this script without excluding them.
+
 Usage (repo root):  experiments/capacity-enforcement-exp/hadoop/stage3-ai-deep-read/yang/make-d-queue.py
 Needs codeql-queries/results/hadoop/*.csv (gitignored; regenerate per machine, see
 hadoop/stage1-codeql-preprocessing/README.md). Deterministic: same inputs -> same queue.csv.

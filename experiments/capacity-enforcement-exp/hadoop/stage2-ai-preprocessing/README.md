@@ -27,6 +27,32 @@ almost all D. Rows the agents found hard are mostly B: flush-when-full buffers, 
 without a visible cap, YARN container memory (memory on other hosts), and app or entity counts
 whose per-object size is unclear.
 
+## Extension run (2026-11-11)
+
+The stage-1 extension beyond `if` (`../stage1-codeql-preprocessing/pilot-2026-11-11.md`) was banded
+into this `bands.csv` with uids `E:` / `C:` (how to read them: `../../stage2-ai-preprocessing/README.md`,
+"Extension rows").
+
+| Kind | A | B | C | D | Units |
+|---|---|---|---|---|---|
+| `enforcement` | 22 | 96 | 226 | 3,333 | 3,677 |
+| `verdict` | 4 | 10 | 43 | 1,137 | 1,194 |
+| `capacity-set` | 84 (incl. 2 anchors) | 166 | 346 | 4,523 | 5,119 |
+| **Total** | **110** | **272** | **615** | **8,993** | **9,990** |
+
+- **Model and batches:** `claude-opus-5-5`, 2026-11-11, 17 fresh agents. 50 batches (`ext-batch-01` to
+  `ext-batch-50`) of 200 units, rows only. Every agent was told to judge each row itself, with no
+  scripted default bands.
+- **Anchors:** each batch carried 26 anchors: the 18 `if` anchors, 2 Hadoop extension anchors
+  (`RawPathHandle.MAX_SIZE`, `SingleFilePerBlockCache.maxBlocksCount`, rows with batch `ext-anchors`)
+  and the 6 Cassandra extension anchors as cross-system calibration (uids `X:cassandra:…`, not
+  recorded). **All 26 came back A in all 50 batches.**
+- **Repeated reasons:** batches 19–24 are almost all method-verdict rows of protobuf `has*()`
+  field-presence methods, so one D reason repeats there.
+- **Stage 3:** the 997 A–C units were appended to the end of Jingsong's `queue.csv` (orders 750–1746,
+  `../stage3-ai-deep-read/jingsong/append-ext-to-queue.py`). The D units stay here unread; Yang's
+  queue is unchanged.
+
 ## Run
 
 | | |
