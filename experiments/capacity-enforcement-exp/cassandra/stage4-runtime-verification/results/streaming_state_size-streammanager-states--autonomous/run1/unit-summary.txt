@@ -1,0 +1,58 @@
+unit-run 2026-11-12T03:50:15Z host node0 tree cassandra-5.0.9 java openjdk version "11.0.33" 2026-10-20
+harness md5 StreamingStateCapTest.java=6b77e71ddc94 unit-run.sh=4922ce43c4b0 unit-analyze.py=85b453032dec 
+ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 24 s
+O53 lines: 161
+cleanup: test removed; leftover test JVMs: 0
+w = EMPTY 352 + TIMEUUID_SIZE 32 = 384; N = 5000; configurations 8
+peer=False size=16KiB  cap=    16384 P=    42 final inserted=5000 retained=40 last3=[40, 40, 40] plateau*w=15360 weightNow=15360 deep=14080 wn/cap=0.938 deep/cap=0.859 deep/wn=0.917 deep/entry=352.0
+peer=False size=256KiB cap=   262144 P=   682 final inserted=5000 retained=680 last3=[680, 680, 680] plateau*w=261120 weightNow=261120 deep=239360 wn/cap=0.996 deep/cap=0.913 deep/wn=0.917 deep/entry=352.0
+peer=False size=1MiB   cap=  1048576 P=  2730 final inserted=5000 retained=2728 last3=[2728, 2728, 2728] plateau*w=1047552 weightNow=1047552 deep=960256 wn/cap=0.999 deep/cap=0.916 deep/wn=0.917 deep/entry=352.0
+peer=False size=40MiB  cap= 41943040 P=109226 final inserted=5000 retained=5000 last3=[4500, 4750, 5000] plateau*w=1920000 weightNow=1920000 deep=1760000 wn/cap=0.046 deep/cap=0.042 deep/wn=0.917 deep/entry=352.0
+peer=True  size=16KiB  cap=    16384 P=    42 final inserted=5000 retained=40 last3=[40, 40, 40] plateau*w=15360 weightNow=23680 deep=23696 wn/cap=1.445 deep/cap=1.446 deep/wn=1.001 deep/entry=592.4
+peer=True  size=256KiB cap=   262144 P=   682 final inserted=5000 retained=680 last3=[680, 680, 680] plateau*w=261120 weightNow=402560 deep=402576 wn/cap=1.536 deep/cap=1.536 deep/wn=1.000 deep/entry=592.0
+peer=True  size=1MiB   cap=  1048576 P=  2730 final inserted=5000 retained=2728 last3=[2728, 2728, 2728] plateau*w=1047552 weightNow=1614976 deep=1614992 wn/cap=1.540 deep/cap=1.540 deep/wn=1.000 deep/entry=592.0
+peer=True  size=40MiB  cap= 41943040 P=109226 final inserted=5000 retained=5000 last3=[4500, 4750, 5000] plateau*w=1920000 weightNow=2960000 deep=2960016 wn/cap=0.071 deep/cap=0.071 deep/wn=1.000 deep/entry=592.0
+--- primary (B1 refutation conditions; S4-A4)
+EXPECTED: PASS  40MiB: retained = inserted at every sample (both addPeer)
+EXPECTED: PASS  no capped plateau is 0 (zero: [])
+EXPECTED: PASS  peer=False 16KiB: flat (max-min of last 3 = 0 <= 4)
+EXPECTED: PASS  peer=False 16KiB: plateau*w 15360 <= cap 16384
+EXPECTED: PASS  peer=False 16KiB: deep 14080 <= 2*cap 32768
+EXPECTED: PASS  peer=False 256KiB: flat (max-min of last 3 = 0 <= 4)
+EXPECTED: PASS  peer=False 256KiB: plateau*w 261120 <= cap 262144
+EXPECTED: PASS  peer=False 256KiB: deep 239360 <= 2*cap 524288
+EXPECTED: PASS  peer=False 1MiB: flat (max-min of last 3 = 0 <= 4)
+EXPECTED: PASS  peer=False 1MiB: plateau*w 1047552 <= cap 1048576
+EXPECTED: PASS  peer=False 1MiB: deep 960256 <= 2*cap 2097152
+EXPECTED: PASS  peer=True 16KiB: flat (max-min of last 3 = 0 <= 4)
+EXPECTED: PASS  peer=True 16KiB: plateau*w 15360 <= cap 16384
+EXPECTED: PASS  peer=True 16KiB: deep 23696 <= 2*cap 32768
+EXPECTED: PASS  peer=True 256KiB: flat (max-min of last 3 = 0 <= 4)
+EXPECTED: PASS  peer=True 256KiB: plateau*w 261120 <= cap 262144
+EXPECTED: PASS  peer=True 256KiB: deep 402576 <= 2*cap 524288
+EXPECTED: PASS  peer=True 1MiB: flat (max-min of last 3 = 0 <= 4)
+EXPECTED: PASS  peer=True 1MiB: plateau*w 1047552 <= cap 1048576
+EXPECTED: PASS  peer=True 1MiB: deep 1614992 <= 2*cap 2097152
+--- secondary bands (deviation only; S4-A3)
+EXPECTED: PASS  peer=False 16KiB: in band 0.7*P=29.4 <= 40 <= P=42
+EXPECTED: PASS  peer=False 256KiB: in band 0.7*P=477.4 <= 680 <= P=682
+EXPECTED: PASS  peer=False 1MiB: in band 0.7*P=1911.0 <= 2728 <= P=2730
+EXPECTED: PASS  peer=True 16KiB: in band 0.7*P=29.4 <= 40 <= P=42
+EXPECTED: PASS  peer=True 256KiB: in band 0.7*P=477.4 <= 680 <= P=682
+EXPECTED: PASS  peer=True 1MiB: in band 0.7*P=1911.0 <= 2728 <= P=2730
+EXPECTED: PASS  peer=False 16KiB: weigher ~ jamm |deep/weightNow-1| = 0.083 <= 0.20
+EXPECTED: PASS  16KiB: same plateau peer true/false 40 vs 40
+EXPECTED: PASS  peer=True 16KiB: weightNow/cap 1.445 in [1.1, 2.0]
+EXPECTED: PASS  peer=True 16KiB: deep/cap 1.446 in [1.1, 2.0]
+EXPECTED: PASS  peer=False 256KiB: weigher ~ jamm |deep/weightNow-1| = 0.083 <= 0.20
+EXPECTED: PASS  256KiB: same plateau peer true/false 680 vs 680
+EXPECTED: PASS  peer=True 256KiB: weightNow/cap 1.536 in [1.1, 2.0]
+EXPECTED: PASS  peer=True 256KiB: deep/cap 1.536 in [1.1, 2.0]
+EXPECTED: PASS  peer=False 1MiB: weigher ~ jamm |deep/weightNow-1| = 0.083 <= 0.20
+EXPECTED: PASS  1MiB: same plateau peer true/false 2728 vs 2728
+EXPECTED: PASS  peer=True 1MiB: weightNow/cap 1.540 in [1.1, 2.0]
+EXPECTED: PASS  peer=True 1MiB: deep/cap 1.540 in [1.1, 2.0]
+--- matched B2g row (S4-A4, first match)
+MATCHED: V5 Confirmed - caps
+summary: 38 PASS, 0 FAIL
+done 2026-11-12T03:50:39Z

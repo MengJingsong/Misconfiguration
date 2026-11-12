@@ -1,0 +1,90 @@
+**B2f. Predictions.** Let w = EMPTY + TIMEUUID_SIZE (insert-time weight).
+- 40MiB: `retained` = inserted at every sample (2000 at the end).
+- 16KiB, 256KiB, 1MiB: `retained` grows to a plateau and stays there; plateau·w ≤ cap and plateau·w ≥ 0.7·cap
+  (segment imbalance); i.e. plateau ≈ floor(cap/w) within −30%/0.
+- `addPeer=false`: `weightNow` ≤ cap and `deep` within ±20% of `weightNow` (weigher ≈ jamm).
+- `addPeer=true`: same `retained` plateau as `addPeer=false` (weight frozen at insert), but `weightNow` and
+  `deep` exceed cap, by a factor between 1.1 and 2.0.
+
+> **Amendment S4-A3 (2026-11-11, stage-4 audit, before any reading; reading rules fixed in writing).** N = 5000 (S4-A2), so
+> "2000 at the end" reads "5000 at the end". w is the printed `EMPTY + TIMEUUID_SIZE`; P(cap) = floor(cap / w). All quantities
+> are taken from the `O53` lines of the test log. For each configuration:
+> - **uncapped** (40MiB): `retained` = `inserted` exactly at every sample.
+> - **plateau** (16KiB, 256KiB, 1MiB): the plateau is `retained` at the final sample (inserted = 5000); it is **flat** if
+>   max − min of `retained` over the last three samples (inserted = 4500, 4750, 5000) is ≤ 4; it is **in band** if
+>   0.7 · P(cap) ≤ plateau ≤ P(cap) (equivalently 0.7 · cap ≤ plateau · w ≤ cap).
+> - **summed weight** in B1 is the insert-time weight, plateau · w (the weight Guava compares; it is frozen at insert).
+> - **weigher ≈ jamm** (addPeer=false): |deep / weightNow − 1| ≤ 0.20 at the final sample.
+> - **same plateau** (addPeer true vs false, same cap): plateaus differ by ≤ 4.
+> - **overshoot factor** (addPeer=true): weightNow / cap and deep / cap at the final sample; predicted in [1.1, 2.0].
+> - **real bytes bound** (B1): deep ≤ 2 · cap at the final sample of every capped configuration, both addPeer settings.
+> The secondary bands (in band, weigher ≈ jamm, same plateau, overshoot factor in [1.1, 2.0]) are predictions whose miss is
+> recorded as a deviation; per B1 ("The claim is wrong if retained count or summed weight keeps growing with the workload past
+> S, or if real retained bytes exceed 2·S") they do not by themselves change the verdict (B2g rows as amended by S4-A4).
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| retained plateaus at ≈cap/w for the three small caps; 2000 at 40MiB | claim confirmed: the knob caps the tracking set |
+| retained keeps rising with inserts at 16KiB/256KiB | claim wrong: knob not enforced |
+| `deep` > 2·cap with addPeer=true | cap is nominal only; overshoot larger than claimed (claim wrong in its bound) |
+| retained = 0 at small cap | entries heavier than a segment share; choose larger cap; not a refutation |
+| retained at 40MiB < 2000 | something other than weight evicts (expiry / bug); invalidates the run |
+
+> **Amendment S4-A4 (2026-11-11, stage-4 audit, before any reading; verdict labels and missing rows).** Each row above is
+> given a verdict and an effect, with the thresholds of S4-A3 (N = 5000), and rows are added for outcomes the table missed.
+> Rows are checked in this order; the first that matches is the verdict.
+>
+> | Observation (S4-A3 terms) | Verdict — effect |
+> |---|---|
+> | V1. 40MiB `retained` < `inserted` at any sample (either addPeer) | **Invalid run** — something other than weight evicts |
+> | V2. plateau = 0 at a cap | that cap is **invalid** (entry heavier than a segment share), not a refutation; the verdict is taken from the other caps if at least two remain |
+> | V3. at 16KiB or 256KiB (either addPeer) `retained` is not flat and plateau · w > cap (keeps growing past S) | **Refuted — does not cap** |
+> | V4. every capped configuration flat with plateau · w ≤ cap, but deep > 2 · cap in at least one (addPeer=true expected) | **Refuted (bound) — caps (soft)**: the count is capped, real bytes exceed the claimed 2·S |
+> | V5. 40MiB `retained` = `inserted` at every sample; every capped configuration flat with plateau · w ≤ cap; deep ≤ 2 · cap everywhere | **Confirmed — caps** (row 1 of the table above); each secondary band of S4-A3 is reported as met or missed |
+> | V6. anything else (e.g. flat but plateau · w > cap, or not flat at 1MiB only) | **Not confirmed (no matching row)** |
+
+**B3f. Predictions.** With w measured in B2:
+- S=16KiB: row count and live `StreamingState` count on each node rise to ≈floor(16384/w) (within −30%) by i≈50
+  and stay flat to i=150 (e.g. w=500 B → ≤32). Retained real bytes ≤ 2 × 16KiB.
+- S=4MiB: count = i at every sample (150 at the end) on each node.
+- stats disabled: 0 rows, 0 live instances.
+
+> **Amendment S4-A8 (2026-11-11, stage-4 audit, before any reading; thresholds fixed in writing).** w is the unit tier's
+> printed `EMPTY + TIMEUUID_SIZE`; P(S) = floor(S / w); "count" is the vtable count on a node; "live" is that node's
+> histogram instance count of `StreamingState`; deep-per-entry d = deep / retained at the final sample of the unit tier's
+> 16KiB, addPeer=true configuration. For each node separately:
+> - **S = 16KiB and S = 32KiB:** if P(S) < 150, the value binds: count at i = 125 and i = 150 differ by ≤ 4 (**flat**), and
+>   count at i = 150 ≤ P(S) (summed insert-time weight ≤ S) and ≥ 0.7 · P(S) (**in band**). If P(S) ≥ 150 the value does not bind
+>   and the prediction is that of 4MiB.
+> - **S = 4MiB:** count = i at every sample.
+> - **stats disabled:** count = 0 and live = 0 at every sample.
+> - **live vs count:** live − count ≤ 2 at every sample (sampled after the rebuild returned, so no plan is running).
+> - **real bytes bound:** live · d ≤ 2 · S at i = 150 for the binding values.
+> As in the unit tier (S4-A3), "in band" is a secondary prediction; its miss is recorded as a deviation and does not by
+> itself change the verdict (B3g as amended by S4-A9).
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| 16KiB plateau ≈ 16384/w on both nodes, 4MiB reaches 150 | claim confirmed |
+| 16KiB count reaches 150 (or grows linearly) | claim wrong: cap not enforced in a real node |
+| 4MiB count < 150 | workload did not create one plan per rebuild, or rebuild failed; check logs, not a result |
+| histogram count ≫ vtable count after completion | states retained elsewhere (running futures); overshoot path, investigate |
+| count × deep-per-entry > 2·S | overshoot beyond claimed bound |
+
+> **Amendment S4-A9 (2026-11-11, stage-4 audit, before any reading; verdict labels).** With the thresholds of S4-A8, checked
+> in this order on both nodes (a row holds only if it holds on both, except V1–V3 which hold if they hold on either):
+>
+> | Observation (S4-A8 terms) | Verdict — effect |
+> |---|---|
+> | C1. 4MiB count < i at some sample, or a rebuild failed, or the size log line is wrong | **Invalid run** (workload or setup), not a result |
+> | C2. stats disabled: count or live > 0 | **Invalid instrument** (the counted objects come from elsewhere) |
+> | C3. a binding value (16KiB or 32KiB) is not flat and count at i = 150 > P(S) (keeps growing past S), or count at i = 150 ≥ 135 | **Refuted — does not cap** |
+> | C4. live − count > 5 at i = 150 for a binding value and live at i = 150 > P(S) + 5 | **Refuted (real resource) — does not cap** the retained objects, only the tracking set |
+> | C5. binding values flat with count ≤ P(S), but live · d > 2 · S | **Refuted (bound) — caps (soft)** |
+> | C6. 4MiB count = i at every sample; both binding values flat with count ≤ P(S); live − count ≤ 5; live · d ≤ 2 · S | **Confirmed — caps**; the in-band check and live − count ≤ 2 are reported as met or missed |
+> | C7. anything else | **Not confirmed (no matching row)** |
+

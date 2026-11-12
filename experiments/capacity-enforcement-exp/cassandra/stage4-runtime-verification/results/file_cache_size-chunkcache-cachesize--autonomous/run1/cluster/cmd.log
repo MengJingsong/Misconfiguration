@@ -1,0 +1,154 @@
++ 2026-11-12T03:00:40Z javac -d /mydata/jingsong-cass-s4/o07/run1/cluster/bin /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/file_cache_size-chunkcache-cachesize--autonomous/JmxSampler.java
+  rc=0
++ conf diff:
+diff -r /mydata/jingsong-cass-s4/o07/src/conf/cassandra-env.sh /mydata/jingsong-cass-s4/o07/run1/conf/cassandra-env.sh
+235c235
+< JMX_PORT="7199"
+---
+> JMX_PORT="7499"
+diff -r /mydata/jingsong-cass-s4/o07/src/conf/cassandra.yaml /mydata/jingsong-cass-s4/o07/run1/conf/cassandra.yaml
+26c26
+< cluster_name: 'Test Cluster'
+---
+> cluster_name: 'o07fc'
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /mydata/jingsong-cass-s4/o07/cdata/hints
+395,396c395,396
+< # data_file_directories:
+< #     - /var/lib/cassandra/data
+---
+> data_file_directories:
+>     - /mydata/jingsong-cass-s4/o07/cdata/data
+408c408
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /mydata/jingsong-cass-s4/o07/cdata/commitlog
+431c431
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /mydata/jingsong-cass-s4/o07/cdata/cdc
+611c611
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /mydata/jingsong-cass-s4/o07/cdata/saved_caches
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.1:7300"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7300
+966c966
+< ssl_storage_port: 7001
+---
+> ssl_storage_port: 7301
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.1
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9342
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.1
+diff -r /mydata/jingsong-cass-s4/o07/src/conf/jvm11-server.options /mydata/jingsong-cass-s4/o07/run1/conf/jvm11-server.options
+147a148
+> -XX:NativeMemoryTracking=summary
+97:hints_directory: /mydata/jingsong-cass-s4/o07/cdata/hints
+408:commitlog_directory: /mydata/jingsong-cass-s4/o07/cdata/commitlog
+525:key_cache_size:
+564:row_cache_size: 0MiB
+960:storage_port: 7300
+981:listen_address: 127.0.0.1
+1023:native_transport_port: 9342
+1090:rpc_address: 127.0.0.1
++ yaml: file_cache_enabled: false file_cache_size: 128MiB 
++ 2026-11-12T03:00:41Z bin/cassandra -p /mydata/jingsong-cass-s4/o07/cass.pid
++ 2026-11-12T03:01:22Z tools/bin/cassandra-stress write n=500000 -col n=FIXED(1) size=FIXED(1024) -schema compression=LZ4Compressor -rate threads=16 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:01:40Z /mydata/jingsong-cass-s4/o07/src/bin/nodetool -h 127.0.0.1 -p 7499 flush keyspace1
+  rc=0
++ 2026-11-12T03:01:42Z /mydata/jingsong-cass-s4/o07/src/bin/nodetool -h 127.0.0.1 -p 7499 compact keyspace1
+  rc=0
++ 2026-11-12T03:01:53Z /mydata/jingsong-cass-s4/o07/src/bin/nodetool -h 127.0.0.1 -p 7499 tablestats keyspace1.standard1
+Total number of tables: 1
+----------------
+Keyspace: keyspace1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 550000
+	Write Latency: 0.012697278181818183 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 511.614MiB
+		Space used (live): 536465664
+		Space used (total): 536465664
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 963098
+		SSTable Compression Ratio: 0.99407
+		Number of partitions (estimate): 494718
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 5
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 550000
+		Local write latency: 0.013 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 505.341MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 618408
+		Bloom filter off heap memory used: 618400
+		Index summary off heap memory used: 85954
+		Compression metadata off heap memory used: 258744
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+  rc=0
++ 2026-11-12T03:01:54Z kill 872481
+  rc=0
++ yaml: file_cache_enabled: false file_cache_size: 128MiB 
++ 2026-11-12T03:01:59Z bin/cassandra -p /mydata/jingsong-cass-s4/o07/cass.pid
++ 2026-11-12T03:02:10Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:02:58Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:04:53Z kill 876642
+  rc=0
++ yaml: file_cache_enabled: true file_cache_size: 128MiB 
++ 2026-11-12T03:04:58Z bin/cassandra -p /mydata/jingsong-cass-s4/o07/cass.pid
++ 2026-11-12T03:05:10Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:05:51Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:07:43Z kill 885823
+  rc=0
++ yaml: file_cache_enabled: true file_cache_size: 256MiB 
++ 2026-11-12T03:07:48Z bin/cassandra -p /mydata/jingsong-cass-s4/o07/cass.pid
++ 2026-11-12T03:08:03Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:08:41Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:10:29Z kill 896882
+  rc=0
++ yaml: file_cache_enabled: true file_cache_size: 1024MiB 
++ 2026-11-12T03:10:34Z bin/cassandra -p /mydata/jingsong-cass-s4/o07/cass.pid
++ 2026-11-12T03:10:47Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:11:27Z tools/bin/cassandra-stress read n=2000000 -col n=FIXED(1) size=FIXED(1024) -pop dist=UNIFORM(1..500000) -rate threads=32 -node 127.0.0.1 -port native=9342 jmx=7499
++ 2026-11-12T03:13:20Z kill 906559
+  rc=0

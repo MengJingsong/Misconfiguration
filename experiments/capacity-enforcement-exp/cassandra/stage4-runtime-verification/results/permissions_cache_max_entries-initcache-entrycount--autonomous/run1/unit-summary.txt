@@ -1,0 +1,48 @@
+unit-run 2026-11-12T02:58:43Z host node2 tree cassandra-5.0.9 java openjdk version "11.0.33" 2026-10-20
+harness md5 PermissionsCacheMaxEntriesProbeTest.java=a22e65fbfa16 unit-run.sh=712ec8bbccaf unit-analyze.py=b4b7d6b75177 collect-probe.py=dbae494f9e2f 
+arm m0 start 2026-11-12T02:58:43Z
+arm m0 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 19 s
+arm m100 start 2026-11-12T02:59:02Z
+arm m100 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 19 s
+arm m1000 start 2026-11-12T02:59:21Z
+arm m1000 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 18 s
+arm m10000 start 2026-11-12T02:59:39Z
+arm m10000 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 18 s
+arm m100000 start 2026-11-12T02:59:57Z
+arm m100000 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 18 s
+arm negative start 2026-11-12T03:00:15Z
+arm negative ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 16 s
+arm shrinkAtRuntime start 2026-11-12T03:00:31Z
+arm shrinkAtRuntime ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 17 s
+PROBE lines: 7
+cleanup: probe source and classes removed; leftover test JVMs: 0
+ARM M=0: size=0 asMap=0 loads=30000 reloads100=100 heapDeltaMB=-0.3 perEntryKB=nan
+ARM M=100: size=100 asMap=100 loads=30000 reloads100=100 heapDeltaMB=0.1 perEntryKB=1.02
+ARM M=1000: size=1000 asMap=1000 loads=30000 reloads100=100 heapDeltaMB=3.7 perEntryKB=3.79
+ARM M=10000: size=10000 asMap=10000 loads=30000 reloads100=100 heapDeltaMB=39.9 perEntryKB=4.09
+ARM M=100000: size=30000 asMap=30000 loads=30000 reloads100=0 heapDeltaMB=120.5 perEntryKB=4.11
+ARM M=-1: java.lang.IllegalArgumentException: maximum size must not be negative
+ARM shrink: (10000, 100)
+EXPECTED PASS: size M=0 in [0.95*min(M,N), M]: 0
+EXPECTED PASS: size M=100 in [0.95*min(M,N), M]: 100
+EXPECTED PASS: size M=1000 in [0.95*min(M,N), M]: 1000
+EXPECTED PASS: size M=10000 in [0.95*min(M,N), M]: 10000
+EXPECTED PASS: positive control M=100000 size >= 27000: 30000
+EXPECTED PASS: loads M=0 == N: 30000
+EXPECTED PASS: loads M=100 == N: 30000
+EXPECTED PASS: loads M=1000 == N: 30000
+EXPECTED PASS: loads M=10000 == N: 30000
+EXPECTED PASS: loads M=100000 == N: 30000
+EXPECTED PASS: per-entry KB M=1000 in [2.8, 6.3]: 3.79
+EXPECTED PASS: per-entry KB M=10000 in [2.8, 6.3]: 4.09
+EXPECTED PASS: per-entry KB M=100000 in [2.8, 6.3]: 4.11
+EXPECTED PASS: heap delta M=0 < 2 MB: -0.3
+EXPECTED PASS: heap delta M=100 < 2 MB: 0.1
+EXPECTED PASS: reloads100 M=0 == 100 (B2f): 100
+EXPECTED PASS: reloads100 M=100000 == 0 (B2f): 0
+INFO reloads100 binding arms (AM3, informational): M=100:100, M=1000:100, M=10000:100
+EXPECTED PASS: M=-1 throws IllegalArgumentException (informational): java.lang.IllegalArgumentException: maximum size must not be negative
+EXPECTED PASS: shrink before 10000, after <= 100: (10000, 100)
+ROWS row2=False row3=False row4=False row5=False row6=False between=False
+MATCHED: B2g row 1 (size = min(M,N), heap scales, control holds 30000) -> Confirmed
+done 2026-11-12T03:00:48Z

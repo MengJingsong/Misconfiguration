@@ -1,0 +1,87 @@
+unit-run 2026-11-12T03:46:36Z host node2 tree cassandra-5.0.9 java openjdk version "11.0.33" 2026-10-20
+harness md5 SimpleCachedBufferPoolCapTest.java=e32a58dddbaf gen_test2.py=22014ac436bd unit-run.sh=4c530db896e1 unit-analyze.py=ba55a4ebd685 
+df: /dev/mapper/emulab-node2--bs  1.8T   80G  1.6T   5% /mydata
+wrote CommitLogBufferCap2Test
+wrote CommitLogBufferCap3Test
+wrote CommitLogBufferCap6Test
+wrote CommitLogBufferCapCtlTest
+== SimpleCachedBufferPoolCapTest start 2026-11-12T03:46:36Z
++ ant testsome -Dtest.name=org.apache.cassandra.io.util.SimpleCachedBufferPoolCapTest -Dtest.jvm.args=-Dorg.jboss.byteman.contrib.bmunit.agent.port=9391
+SimpleCachedBufferPoolCapTest ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 17 s
+SimpleCachedBufferPoolCapTest CAP/POOL lines: 0
+== CommitLogBufferCap2Test start 2026-11-12T03:46:53Z
++ ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogBufferCap2Test -Dtest.jvm.args=-Dorg.jboss.byteman.contrib.bmunit.agent.port=9391
+CommitLogBufferCap2Test ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 21 s
+CommitLogBufferCap2Test CAP/POOL lines: 0
+== CommitLogBufferCap3Test start 2026-11-12T03:47:14Z
++ ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogBufferCap3Test -Dtest.jvm.args=-Dorg.jboss.byteman.contrib.bmunit.agent.port=9391
+CommitLogBufferCap3Test ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 19 s
+CommitLogBufferCap3Test CAP/POOL lines: 0
+== CommitLogBufferCap6Test start 2026-11-12T03:47:33Z
++ ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogBufferCap6Test -Dtest.jvm.args=-Dorg.jboss.byteman.contrib.bmunit.agent.port=9391
+CommitLogBufferCap6Test ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 20 s
+CommitLogBufferCap6Test CAP/POOL lines: 0
+== CommitLogBufferCapCtlTest start 2026-11-12T03:47:53Z
++ ant testsome -Dtest.name=org.apache.cassandra.db.commitlog.CommitLogBufferCapCtlTest -Dtest.jvm.args=-Dorg.jboss.byteman.contrib.bmunit.agent.port=9391
+CommitLogBufferCapCtlTest ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 30 s
+CommitLogBufferCapCtlTest CAP/POOL lines: 0
+cleanup: test sources removed (0 changed files under test/); leftover test JVMs: 0
+# Test 1: 63 POOL lines; Test 2 + control: 20 CAP lines
+EXPECTED PASS: Test1 N=1 throws IllegalArgumentException at construction (got step=construct exception=java.lang.IllegalArgumentException)
+EXPECTED PASS: Test1 N=2 atLimit false for k<N, true for k>=N
+EXPECTED PASS: Test1 N=2 usedBuffers = k for k = 1..2N (class does not refuse); max usedBuffers 4
+EXPECTED PASS: Test1 N=2 direct delta = k MiB +-0.1 MiB; deltas MiB [1.0, 2.0, 3.0, 4.0]
+EXPECTED PASS: Test1 N=2 retained after releasing 2N = roundUpPow2(N) = 2 MiB (got 2.000 MiB; = N would be 2)
+EXPECTED PASS: Test1 N=2 re-taking N does not change the delta (2.000 -> 2.000 MiB)
+EXPECTED PASS: Test1 N=3 atLimit false for k<N, true for k>=N
+EXPECTED PASS: Test1 N=3 usedBuffers = k for k = 1..2N (class does not refuse); max usedBuffers 6
+EXPECTED PASS: Test1 N=3 direct delta = k MiB +-0.1 MiB; deltas MiB [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+EXPECTED PASS: Test1 N=3 retained after releasing 2N = roundUpPow2(N) = 4 MiB (got 4.000 MiB; = N would be 3)
+EXPECTED PASS: Test1 N=3 re-taking N does not change the delta (4.000 -> 4.000 MiB)
+EXPECTED PASS: Test1 N=6 atLimit false for k<N, true for k>=N
+EXPECTED PASS: Test1 N=6 usedBuffers = k for k = 1..2N (class does not refuse); max usedBuffers 12
+EXPECTED PASS: Test1 N=6 direct delta = k MiB +-0.1 MiB; deltas MiB [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0]
+EXPECTED PASS: Test1 N=6 retained after releasing 2N = roundUpPow2(N) = 8 MiB (got 8.000 MiB; = N would be 6)
+EXPECTED PASS: Test1 N=6 re-taking N does not change the delta (8.000 -> 8.000 MiB)
+EXPECTED PASS: Test1 N=12 atLimit false for k<N, true for k>=N
+EXPECTED PASS: Test1 N=12 usedBuffers = k for k = 1..2N (class does not refuse); max usedBuffers 24
+EXPECTED PASS: Test1 N=12 direct delta = k MiB +-0.1 MiB; deltas MiB [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0]
+EXPECTED PASS: Test1 N=12 retained after releasing 2N = roundUpPow2(N) = 16 MiB (got 16.000 MiB; = N would be 12)
+EXPECTED PASS: Test1 N=12 re-taking N does not change the delta (16.000 -> 16.000 MiB)
+# N=2 pre-writer   active=1 usedBuffers=2 direct-pre=0.000 MiB
+# N=2 plateau1     active=2 usedBuffers=2 direct-pre=0.500 MiB
+# N=2 after-sleep  active=2 usedBuffers=2 direct-pre=0.500 MiB
+# N=2 plateau2     active=2 usedBuffers=2 direct-pre=1.256 MiB
+# N=2 final        active=2 usedBuffers=2 direct-pre=1.256 MiB
+EXPECTED PASS: Test2 N=2 two buffers exist before the writer (usedBuffers=2)
+EXPECTED PASS: Test2 N=2 active = usedBuffers = N at plateau1/after-sleep/plateau2: plateau1:2/2, after-sleep:2/2, plateau2:2/2
+EXPECTED FAIL: Test2 N=2 direct(plateau1) - pre-writer = (N-2) MiB +-0.2 = 0 MiB (got 0.500)
+EXPECTED FAIL: Test2 N=2 refill after archiveAndDiscard: direct flat +-0.2 MiB (got +0.755)
+# N=3 pre-writer   active=1 usedBuffers=2 direct-pre=0.000 MiB
+# N=3 plateau1     active=3 usedBuffers=3 direct-pre=1.500 MiB
+# N=3 after-sleep  active=3 usedBuffers=3 direct-pre=1.500 MiB
+# N=3 plateau2     active=3 usedBuffers=3 direct-pre=2.256 MiB
+# N=3 final        active=3 usedBuffers=3 direct-pre=2.256 MiB
+EXPECTED PASS: Test2 N=3 two buffers exist before the writer (usedBuffers=2)
+EXPECTED PASS: Test2 N=3 active = usedBuffers = N at plateau1/after-sleep/plateau2: plateau1:3/3, after-sleep:3/3, plateau2:3/3
+EXPECTED FAIL: Test2 N=3 direct(plateau1) - pre-writer = (N-2) MiB +-0.2 = 1 MiB (got 1.500)
+EXPECTED FAIL: Test2 N=3 refill after archiveAndDiscard: direct flat +-0.2 MiB (got +0.755)
+# N=6 pre-writer   active=1 usedBuffers=2 direct-pre=0.000 MiB
+# N=6 plateau1     active=6 usedBuffers=6 direct-pre=4.500 MiB
+# N=6 after-sleep  active=6 usedBuffers=6 direct-pre=4.500 MiB
+# N=6 plateau2     active=6 usedBuffers=6 direct-pre=5.256 MiB
+# N=6 final        active=6 usedBuffers=6 direct-pre=5.256 MiB
+EXPECTED PASS: Test2 N=6 two buffers exist before the writer (usedBuffers=2)
+EXPECTED PASS: Test2 N=6 active = usedBuffers = N at plateau1/after-sleep/plateau2: plateau1:6/6, after-sleep:6/6, plateau2:6/6
+EXPECTED FAIL: Test2 N=6 direct(plateau1) - pre-writer = (N-2) MiB +-0.2 = 4 MiB (got 4.500)
+EXPECTED FAIL: Test2 N=6 refill after archiveAndDiscard: direct flat +-0.2 MiB (got +0.755)
+# control pre-writer         active=1 pool=null direct-pre=0.000 MiB
+# control ctl-5s             active=20 pool=null direct-pre=0.500 MiB
+# control ctl-6s             active=20 pool=null direct-pre=0.500 MiB
+# control ctl-after-discard  active=0 pool=null direct-pre=0.500 MiB
+# control final              active=0 pool=null direct-pre=0.500 MiB
+EXPECTED PASS: control (N=3, no compression, mmap): active > 3 at ctl-5s (got 20), pool null
+EXPECTED PASS: control: no segment-buffer direct growth (direct delta 0.500 MiB < 1 MiB)
+# summary: 29 PASS, 6 FAIL
+MATCHED B2g row 2 (claim wrong: check bypassed or racy)
+done 2026-11-12T03:48:23Z

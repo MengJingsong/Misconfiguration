@@ -1,0 +1,18 @@
+== unit tier (raw ant logs, fragments paired key -> next fragment)
+max=0: ['PROBE policyMaximum=0'] ['PROBE outsideGroups estimatedSize=0'] {'PROBE max': '0', 'n': '600000', 'estimatedSize': '0', 'maxSampledSize': '0', 'heapDeltaBytes': '77864'} | [junit-timeout] Testsuite: org.apache.cassandra.auth.IpCacheMaxSizeProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.627 sec
+max=100: ['PROBE policyMaximum=100'] ['PROBE outsideGroups estimatedSize=0'] {'PROBE max': '100', 'n': '600000', 'estimatedSize': '100', 'maxSampledSize': '100', 'heapDeltaBytes': '79864'} | [junit-timeout] Testsuite: org.apache.cassandra.auth.IpCacheMaxSizeProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.418 sec
+max=100000: ['PROBE policyMaximum=100000'] ['PROBE outsideGroups estimatedSize=0'] {'PROBE max': '100000', 'n': '600000', 'estimatedSize': '100000', 'maxSampledSize': '100000', 'heapDeltaBytes': '14171560'} | [junit-timeout] Testsuite: org.apache.cassandra.auth.IpCacheMaxSizeProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.507 sec
+max=1000000: ['PROBE policyMaximum=1000000'] ['PROBE outsideGroups estimatedSize=0'] {'PROBE max': '1000000', 'n': '600000', 'estimatedSize': '600000', 'maxSampledSize': '600000', 'heapDeltaBytes': '84981856'} | [junit-timeout] Testsuite: org.apache.cassandra.auth.IpCacheMaxSizeProbeTest-_jdk11 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.747 sec
+== cluster tier (histograms re-read by column split)
+K=100: base1->base2 noise -2; dInet4Address w1 102 w1b 100 flushed 2 w2 182; dPSMS w1 100; Total bytes w1-base2 150536 (0.14 MB)
+  yaml in session log: ip_cache_max_size=100: True; refresh 1440: True; MONITOR: True
+  getcidrgroupsofip lo: True; W1: done 600000 lookups in 209.6 s (first result [lo], last result [lo]); W2: done 2000 logins in 297.5 s
+  system.log: ERROR lines 0; OutOfMemoryError outside JVM args: []; WARN with cidr: 0; node stopped: True
+K=100000: base1->base2 noise -2; dInet4Address w1 100002 w1b 100000 flushed 2 w2 2000; dPSMS w1 100000; Total bytes w1-base2 14240432 (13.58 MB)
+  yaml in session log: ip_cache_max_size=100000: True; refresh 1440: True; MONITOR: True
+  getcidrgroupsofip lo: True; W1: done 600000 lookups in 206.6 s (first result [lo], last result [lo]); W2: done 2000 logins in 295.6 s
+  system.log: ERROR lines 0; OutOfMemoryError outside JVM args: []; WARN with cidr: 0; node stopped: True
+K=1000000: base1->base2 noise -2; dInet4Address w1 600002 w1b 600000 flushed 2 w2 2000; dPSMS w1 600000; Total bytes w1-base2 93098120 (88.79 MB)
+  yaml in session log: ip_cache_max_size=1000000: True; refresh 1440: True; MONITOR: True
+  getcidrgroupsofip lo: True; W1: done 600000 lookups in 201.0 s (first result [lo], last result [lo]); W2: done 2000 logins in 296.0 s
+  system.log: ERROR lines 0; OutOfMemoryError outside JVM args: []; WARN with cidr: 0; node stopped: True

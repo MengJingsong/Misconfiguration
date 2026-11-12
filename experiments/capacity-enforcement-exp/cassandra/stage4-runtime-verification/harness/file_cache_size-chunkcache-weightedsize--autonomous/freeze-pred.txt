@@ -1,0 +1,47 @@
+**B2f. Predictions** (stated before any run; the test is single-threaded, so the slack is one chunk = 65536 B):
+
+| fcs.mib | cacheSize (B) | maxW | final entries | poolSize |
+|---|---|---|---|---|
+| 32 | 0 | n/a: prints `instance=null` | — | — |
+| 33 | 1 048 576 | ≤ 1 048 576 (+65 536) | ≤ 16 | ≤ 33 MiB, overflow 0 |
+| 64 | 33 554 432 | ≤ 33 554 432 (+65 536); ends at ≥ 0.9× cap | ≤ 512 | ≤ 64 MiB, overflow 0 |
+| 128 | 100 663 296 | ≤ cap (+65 536) | ≤ 1536 | ≤ 128 MiB, overflow 0 |
+| 256 | 234 881 024 | ≤ cap (+65 536) | ≤ 3584 | ≤ 256 MiB, overflow 0 |
+
+Probe (64, hold 1024):
+- `maxW` stays ≤ 32 MiB (+65 536). Held entries are evicted from the cache but not freed.
+- `poolSize` reaches 64 MiB (the pool limit), and `overflow` > 0, about ≥ 32 MiB at the moment the 1024 chunks are held. This shows path A3(a): the operand stays capped while the real buffer memory exceeds it.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| `maxW` ≤ cacheSize + 65 536 for every N, and final w within 10 % of cacheSize | Mechanism works as traced; supports the claim |
+| `maxW` grows with file size past cacheSize (e.g. ≈ 192 MiB for N=64) | Claim wrong: the weight bound is not enforced |
+| final w far below cacheSize (< 50 %) for all N | Cache evicts too aggressively or keys collide; the cap holds but usage does not *follow* the setting; investigate |
+| `instance=null` for N=32, and a non-null instance whose w grows up to its cap for N≥33 | Gate works; positive control that the workload does move the operand |
+| `poolSize` > N MiB with overflow 0 | Pool limit check (`BufferPool.java:443`) broken |
+| Probe: overflow > 0 while maxW ≤ cap | Confirms the referenced-buffer overshoot path A3(a) |
+
+**B3f. Predictions** (stated before any run):
+
+| setting | Chunk Cache capacity | Chunk Cache size (steady, during reads) | chunk-cache pool Size | direct MemoryUsed vs baseline |
+|---|---|---|---|---|
+| disabled | line absent / error | — | 0 | baseline B |
+| 64 MiB | 32 MiB | 29–32 MiB (≤ 32 MiB + 32 × 16 KiB) | ≤ 64 MiB + OverflowSize; OverflowSize ≈ 0 | ≈ B + 32..64 MiB |
+| 256 MiB | 224 MiB | 200–224 MiB | ≤ 256 MiB, overflow ≈ 0 | ≈ B + 224..256 MiB |
+| 512 MiB | 480 MiB | 430–480 MiB | ≤ 512 MiB, overflow ≈ 0 | ≈ B + 480..512 MiB |
+
+The increase over the baseline should be monotone in N and never exceed N + 16 MiB. The claim is wrong if the cache size or the direct memory keeps rising during the 10 minutes past these bounds. For example, at 64 MiB, a direct-memory delta > 100 MiB, or a Chunk Cache size > 33 MiB on any sample.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Chunk Cache size plateaus at about capacity for each N, and the direct-memory delta is about N | Claim confirmed: the cap governs real off-heap use |
+| size plateaus but the direct delta grows far beyond N (overflow climbing) | Operand capped but actual usage not; overshoot via referenced buffers / overflow (A3 a–c) dominates; claim refuted for the actual resource |
+| size exceeds capacity persistently | Caffeine bound not enforced; claim refuted |
+| delta for 512 MiB ≈ delta for 64 MiB | Usage does not follow the setting (e.g. the cache is not on the read path); investigate whether reads hit the cache (Requests/Misses counters) |
+| Chunk Cache size rises from 0 to capacity in the first minutes of reading (positive control) | Workload moves usage where the cap binds |
+| Requests counter does not grow | Workload did not exercise the cache; result not confirmed |
+

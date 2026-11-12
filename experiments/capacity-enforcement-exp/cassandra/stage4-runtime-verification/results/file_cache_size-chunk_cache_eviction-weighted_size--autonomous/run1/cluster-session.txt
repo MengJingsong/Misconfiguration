@@ -1,0 +1,268 @@
+[2026-11-12T03:06:51Z] cluster-run run1 F=[32 96 288 2080] host node0 openjdk version "11.0.33" 2026-10-20 tree cassandra-5.0.9
+[2026-11-12T03:06:51Z] harness md5 cluster-run.sh=e0d4ddb9eb6b mkconf.py=5f99f7402fa5 CcJmx.java=190079861d06 
+[2026-11-12T03:06:51Z] free: 100 GiB available; df: /dev/mapper/emulab-node0--bs  753G   52G  663G   8% /mydata
+[2026-11-12T03:06:51Z] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/file_cache_size-chunk_cache_eviction-weighted_size--autonomous/mkconf.py /mydata/jingsong-cass-s4/o06/src/conf /mydata/jingsong-cass-s4/o06/conf-run /mydata/jingsong-cass-s4/o06/node 32
+conf F=32 written to /mydata/jingsong-cass-s4/o06/conf-run
+[2026-11-12T03:06:51Z]   rc=0
+key_cache_size: 0MiB
+storage_port: 7400
+native_transport_port: 9442
+file_cache_enabled: true
+file_cache_size: 32MiB
+disk_access_mode: mmap_index_only
+[2026-11-12T03:06:51Z] + bin/cassandra -p /mydata/jingsong-cass-s4/o06/node/pid (F=32)
+[2026-11-12T03:06:52Z] node pid 893643 cwd /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read
+[2026-11-12T03:07:31Z] UN and binary running after 13x2 s
+[2026-11-12T03:07:31Z] MARK load_start
+[2026-11-12T03:08:01Z] stress write rc=0 Op rate : 73,076 op/s [WRITE: 73,076 op/s];Total partitions : 1,500,000 [WRITE: 1,500,000];Total errors : 0 [WRITE: 0];
+[2026-11-12T03:08:01Z] MARK load_end
+[2026-11-12T03:08:01Z] + NT flush keyspace1
+[2026-11-12T03:08:03Z]   rc=0
+[2026-11-12T03:08:03Z] + NT compact keyspace1
+[2026-11-12T03:08:41Z]   rc=0
+[2026-11-12T03:08:41Z] + NT compactionstats
+concurrent compactors            2            
+pending tasks                    1            
+keyspace1                        standard1   1
+compactions completed            8            
+data compacted                   3065411238   
+compressed data compacted        3046039801   
+compactions aborted              0            
+compactions reduced              0            
+sstables dropped from compaction 0            
+15 minute rate                   0.44/minute  
+mean rate                        275.03/hour  
+compaction throughput (MiB/s)    64.0         
+[2026-11-12T03:08:42Z]   rc=0
+
+CREATE TABLE keyspace1.standard1 (
+    key blob PRIMARY KEY,
+    "C0" blob
+) WITH additional_write_policy = '99p'
+    AND allow_auto_snapshot = true
+    AND bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND cdc = false
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'default'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND incremental_backups = true
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+Total number of tables: 1
+----------------
+Keyspace: keyspace1
+	Read Count: 0
+	Read Latency: NaN ms
+	Write Count: 1550000
+	Write Latency: 0.020016923225806452 ms
+	Pending Flushes: 0
+		Table: standard1
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 1.499GiB
+		Space used (live): 1609649953
+		Space used (total): 1609649953
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 2890674
+		SSTable Compression Ratio: 0.99380
+		Number of partitions (estimate): 1485229
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 13
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 1550000
+		Local write latency: 0.021 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 1.481GiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 1856552
+		Bloom filter off heap memory used: 1856544
+		Index summary off heap memory used: 257818
+		Compression metadata off heap memory used: 776312
+		Compacted partition minimum bytes: 925
+		Compacted partition maximum bytes: 1109
+		Compacted partition mean bytes: 1109
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+total 1571948
+-rw-r--r-- 1 jason92 misconfiguration     776351 Nov 11 22:08 nb-17-big-CompressionInfo.db
+-rw-r--r-- 1 jason92 misconfiguration 1580004388 Nov 11 22:08 nb-17-big-Data.db
+-rw-r--r-- 1 jason92 misconfiguration         10 Nov 11 22:08 nb-17-big-Digest.crc32
+-rw-r--r-- 1 jason92 misconfiguration    1856552 Nov 11 22:08 nb-17-big-Filter.db
+-rw-r--r-- 1 jason92 misconfiguration   26744437 Nov 11 22:08 nb-17-big-Index.db
+-rw-r--r-- 1 jason92 misconfiguration      10253 Nov 11 22:08 nb-17-big-Statistics.db
+-rw-r--r-- 1 jason92 misconfiguration     257870 Nov 11 22:08 nb-17-big-Summary.db
+-rw-r--r-- 1 jason92 misconfiguration         92 Nov 11 22:08 nb-17-big-TOC.txt
+[2026-11-12T03:08:44Z] stopping node pid 893643
+[2026-11-12T03:08:50Z] node pid 893643 stopped
+[2026-11-12T03:08:50Z] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/file_cache_size-chunk_cache_eviction-weighted_size--autonomous/mkconf.py /mydata/jingsong-cass-s4/o06/src/conf /mydata/jingsong-cass-s4/o06/conf-run /mydata/jingsong-cass-s4/o06/node 32
+conf F=32 written to /mydata/jingsong-cass-s4/o06/conf-run
+[2026-11-12T03:08:50Z]   rc=0
+key_cache_size: 0MiB
+storage_port: 7400
+native_transport_port: 9442
+file_cache_enabled: true
+file_cache_size: 32MiB
+disk_access_mode: mmap_index_only
+[2026-11-12T03:08:50Z] + bin/cassandra -p /mydata/jingsong-cass-s4/o06/node/pid (F=32)
+[2026-11-12T03:08:50Z] node pid 900406 cwd /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read
+[2026-11-12T03:09:00Z] UN and binary running after 3x2 s
+[2026-11-12T03:09:00Z] settle 30 s
+[2026-11-12T03:09:30Z] + NT compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            1           
+data compacted                   1093        
+compressed data compacted        1074        
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   11.67/minute
+mean rate                        107.01/hour 
+compaction throughput (MiB/s)    64.0        
+[2026-11-12T03:09:31Z]   rc=0
+[2026-11-12T03:09:31Z] MARK F=32 baseline
+[2026-11-12T03:09:33Z] samplers pids 902596 902597 902598
+[2026-11-12T03:09:39Z] MARK F=32 read_start
+[2026-11-12T03:10:44Z] stress read F=32 rc=0 Op rate : 55,573 op/s [READ: 55,573 op/s];Total partitions : 3,000,000 [READ: 3,000,000];Total errors : 0 [READ: 0];Total operation time : 00:00:53;
+[2026-11-12T03:10:44Z] MARK F=32 read_end
+[2026-11-12T03:11:44Z] MARK F=32 tail
+[2026-11-12T03:11:49Z] samplers stopped
+[2026-11-12T03:11:51Z] pool-limit log lines so far: 0
+[2026-11-12T03:11:51Z] stopping node pid 900406
+[2026-11-12T03:11:57Z] node pid 900406 stopped
+[2026-11-12T03:11:57Z] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/file_cache_size-chunk_cache_eviction-weighted_size--autonomous/mkconf.py /mydata/jingsong-cass-s4/o06/src/conf /mydata/jingsong-cass-s4/o06/conf-run /mydata/jingsong-cass-s4/o06/node 96
+conf F=96 written to /mydata/jingsong-cass-s4/o06/conf-run
+[2026-11-12T03:11:57Z]   rc=0
+key_cache_size: 0MiB
+storage_port: 7400
+native_transport_port: 9442
+file_cache_enabled: true
+file_cache_size: 96MiB
+disk_access_mode: mmap_index_only
+[2026-11-12T03:11:57Z] + bin/cassandra -p /mydata/jingsong-cass-s4/o06/node/pid (F=96)
+[2026-11-12T03:11:57Z] node pid 911854 cwd /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read
+[2026-11-12T03:12:07Z] UN and binary running after 3x2 s
+[2026-11-12T03:12:07Z] settle 30 s
+[2026-11-12T03:12:37Z] + NT compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            3           
+data compacted                   16986       
+compressed data compacted        8448        
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   35.01/minute
+mean rate                        324.24/hour 
+compaction throughput (MiB/s)    64.0        
+[2026-11-12T03:12:38Z]   rc=0
+[2026-11-12T03:12:38Z] MARK F=96 baseline
+[2026-11-12T03:12:40Z] samplers pids 915240 915241 915242
+[2026-11-12T03:12:46Z] MARK F=96 read_start
+[2026-11-12T03:13:37Z] stress read F=96 rc=0 Op rate : 71,473 op/s [READ: 71,473 op/s];Total partitions : 3,000,000 [READ: 3,000,000];Total errors : 0 [READ: 0];Total operation time : 00:00:41;
+[2026-11-12T03:13:37Z] MARK F=96 read_end
+[2026-11-12T03:14:37Z] MARK F=96 tail
+[2026-11-12T03:14:41Z] samplers stopped
+Chunk Cache            : entries 4096, size 64 MiB, capacity 64 MiB, 3187679 misses, 3325844 requests, 0.042 recent hit rate, 21.561 microseconds miss latency
+[2026-11-12T03:14:42Z] pool-limit log lines so far: 1
+[2026-11-12T03:14:42Z] stopping node pid 911854
+[2026-11-12T03:14:48Z] node pid 911854 stopped
+[2026-11-12T03:14:48Z] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/file_cache_size-chunk_cache_eviction-weighted_size--autonomous/mkconf.py /mydata/jingsong-cass-s4/o06/src/conf /mydata/jingsong-cass-s4/o06/conf-run /mydata/jingsong-cass-s4/o06/node 288
+conf F=288 written to /mydata/jingsong-cass-s4/o06/conf-run
+[2026-11-12T03:14:48Z]   rc=0
+key_cache_size: 0MiB
+storage_port: 7400
+native_transport_port: 9442
+file_cache_enabled: true
+file_cache_size: 288MiB
+disk_access_mode: mmap_index_only
+[2026-11-12T03:14:48Z] + bin/cassandra -p /mydata/jingsong-cass-s4/o06/node/pid (F=288)
+[2026-11-12T03:14:48Z] node pid 921521 cwd /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read
+[2026-11-12T03:14:57Z] UN and binary running after 3x2 s
+[2026-11-12T03:14:57Z] settle 30 s
+[2026-11-12T03:15:27Z] + NT compactionstats
+concurrent compactors            2           
+pending tasks                    0           
+compactions completed            3           
+data compacted                   114849      
+compressed data compacted        29965       
+compactions aborted              0           
+compactions reduced              0           
+sstables dropped from compaction 0           
+15 minute rate                   35.01/minute
+mean rate                        320.25/hour 
+compaction throughput (MiB/s)    64.0        
+[2026-11-12T03:15:28Z]   rc=0
+[2026-11-12T03:15:28Z] MARK F=288 baseline
+[2026-11-12T03:15:30Z] samplers pids 923520 923521 923522
+[2026-11-12T03:15:36Z] MARK F=288 read_start
+[2026-11-12T03:16:25Z] stress read F=288 rc=0 Op rate : 73,007 op/s [READ: 73,007 op/s];Total partitions : 3,000,000 [READ: 3,000,000];Total errors : 0 [READ: 0];Total operation time : 00:00:41;
+[2026-11-12T03:16:25Z] MARK F=288 read_end
+[2026-11-12T03:17:25Z] MARK F=288 tail
+[2026-11-12T03:17:30Z] samplers stopped
+Chunk Cache            : entries 16384, size 256 MiB, capacity 256 MiB, 2933212 misses, 3481363 requests, 0.157 recent hit rate, 22.427 microseconds miss latency
+[2026-11-12T03:17:31Z] pool-limit log lines so far: 2
+[2026-11-12T03:17:31Z] stopping node pid 921521
+[2026-11-12T03:17:37Z] node pid 921521 stopped
+[2026-11-12T03:17:37Z] + python3 -I /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/file_cache_size-chunk_cache_eviction-weighted_size--autonomous/mkconf.py /mydata/jingsong-cass-s4/o06/src/conf /mydata/jingsong-cass-s4/o06/conf-run /mydata/jingsong-cass-s4/o06/node 2080
+conf F=2080 written to /mydata/jingsong-cass-s4/o06/conf-run
+[2026-11-12T03:17:37Z]   rc=0
+key_cache_size: 0MiB
+storage_port: 7400
+native_transport_port: 9442
+file_cache_enabled: true
+file_cache_size: 2080MiB
+disk_access_mode: mmap_index_only
+[2026-11-12T03:17:37Z] + bin/cassandra -p /mydata/jingsong-cass-s4/o06/node/pid (F=2080)
+[2026-11-12T03:17:38Z] node pid 929204 cwd /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read
+[2026-11-12T03:17:46Z] UN and binary running after 3x2 s
+[2026-11-12T03:17:46Z] settle 30 s
+[2026-11-12T03:18:16Z] + NT compactionstats
+concurrent compactors            2            
+pending tasks                    0            
+compactions completed            11           
+data compacted                   8817         
+compressed data compacted        5665         
+compactions aborted              0            
+compactions reduced              0            
+sstables dropped from compaction 0            
+15 minute rate                   128.38/minute
+mean rate                        1182.75/hour 
+compaction throughput (MiB/s)    64.0         
+[2026-11-12T03:18:17Z]   rc=0
+[2026-11-12T03:18:17Z] MARK F=2080 baseline
+[2026-11-12T03:18:19Z] samplers pids 931189 931190 931191
+[2026-11-12T03:18:25Z] MARK F=2080 read_start
+[2026-11-12T03:19:20Z] stress read F=2080 rc=0 Op rate : 64,357 op/s [READ: 64,357 op/s];Total partitions : 3,000,000 [READ: 3,000,000];Total errors : 0 [READ: 0];Total operation time : 00:00:46;
+[2026-11-12T03:19:20Z] MARK F=2080 read_end
+[2026-11-12T03:20:20Z] MARK F=2080 tail
+[2026-11-12T03:20:25Z] samplers stopped
+Chunk Cache            : entries 97062, size 1.48 GiB, capacity 2 GiB, 97098 misses, 3248209 requests, 0.970 recent hit rate, 76.471 microseconds miss latency
+[2026-11-12T03:20:26Z] pool-limit log lines so far: 2
+[2026-11-12T03:20:26Z] stopping node pid 929204
+[2026-11-12T03:20:32Z] node pid 929204 stopped
+[2026-11-12T03:20:32Z] leftover CassandraDaemon of this run: 0
+[2026-11-12T03:20:32Z] done

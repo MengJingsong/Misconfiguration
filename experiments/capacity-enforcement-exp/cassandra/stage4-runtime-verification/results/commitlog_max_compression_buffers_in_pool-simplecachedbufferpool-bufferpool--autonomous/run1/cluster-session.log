@@ -1,0 +1,519 @@
+[2026-11-12T03:34:26Z 1794454466371] start cluster run values=['3', '6', '12', '24', 'mmap6']
+[2026-11-12T03:34:26Z 1794454466371] === value 3: N=3 compression=Zstd19; /mydata free 655.8 GiB
+[2026-11-12T03:34:26Z 1794454466378] + bin/cassandra -p /mydata/jingsong-cass-s4/o44/node/pid > /mydata/jingsong-cass-s4/o44/cluster/run1/start-3.out 2>&1
+[2026-11-12T03:34:26Z 1794454466606] rc=0
+[2026-11-12T03:35:04Z 1794454504705] node up pid=983355
+[2026-11-12T03:35:04Z 1794454504705] + ps -o pid,args -p 983355 | tr " " "\n" | grep -E "Xmx|Xms|MaxDirectMemorySize|NativeMemoryTracking"
+-Xms4G
+-Xmx4G
+-XX:MaxDirectMemorySize=3G
+-XX:NativeMemoryTracking=summary
+[2026-11-12T03:35:04Z 1794454504727] rc=0
+[2026-11-12T03:35:04Z 1794454504727] + grep -E "commitlog_max_compression_buffers_in_pool=|commitlog_compression=|commitlog_segment_size=|commitlog_disk_access_mode=|native_transport_port=|storage_port=" -o /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort -u; grep -oE "commitlog_max_compression_buffers_in_pool=[0-9]+|commitlog_compression=[^;]*;" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -3
+commitlog_compression=
+commitlog_disk_access_mode=
+commitlog_max_compression_buffers_in_pool=
+commitlog_segment_size=
+native_transport_port=
+storage_port=
+commitlog_compression=ZstdCompressor{compression_level=19};
+commitlog_max_compression_buffers_in_pool=3
+[2026-11-12T03:35:04Z 1794454504731] rc=0
+[2026-11-12T03:35:04Z 1794454504731] + grep -i "Zstd\|commit log disk access mode\|DiskAccessMode" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -5
+zero_ttl_on_twcs_enabled=true; zero_ttl_on_twcs_warned=true]
+INFO  [main] 2026-11-12T03:34:28,629 DatabaseDescriptor.java:551 - DiskAccessMode is standard, indexAccessMode is mmap
+INFO  [main] 2026-11-12T03:34:29,168 CassandraDaemon.java:617 - Classpath: /mydata/jingsong-cass-s4/o44/node/conf:bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:bin/../lib/HdrHistogram-2.1.12.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/affinity-3.23.3.jar:bin/../lib/agrona-1.17.1.jar:bin/../lib/airline-0.8.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/asm-9.4.jar:bin/../lib/big-math-2.3.0.jar:bin/../lib/caffeine-3.1.8.jar:bin/../lib/cassandra-driver-core-3.12.1-shaded.jar:bin/../lib/chronicle-bytes-2.23.33.jar:bin/../lib/chronicle-core-2.23.36.jar:bin/../lib/chronicle-queue-5.23.37.jar:bin/../lib/chronicle-threads-2.23.25.jar:bin/../lib/chronicle-wire-2.23.39.jar:bin/../lib/commons-cli-1.5.0.jar:bin/../lib/commons-lang3-3.18.0.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/ecj-3.33.0.jar:bin/../lib/failureaccess-1.0.1.jar:bin/../lib/guava-32.0.1-jre.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.8.1.jar:bin/../lib/ipaddress-5.3.3.jar:bin/../lib/j2objc-annotations-1.3.jar:bin/../lib/jackson-annotations-2.19.2.jar:bin/../lib/jackson-core-2.19.2.jar:bin/../lib/jackson-databind-2.19.2.jar:bin/../lib/jackson-datatype-jsr310-2.19.2.jar:bin/../lib/jamm-0.4.0.jar:bin/../lib/javax.inject-1.jar:bin/../lib/jbcrypt-0.4.jar:bin/../lib/jcl-over-slf4j-2.0.17.jar:bin/../lib/jcommander-1.30.jar:bin/../lib/jctools-core-3.1.0.jar:bin/../lib/jffi-1.3.11-native.jar:bin/../lib/jffi-1.3.11.jar:bin/../lib/jna-5.13.0.jar:bin/../lib/jna-platform-5.13.0.jar:bin/../lib/jnr-a64asm-1.0.0.jar:bin/../lib/jnr-constants-0.10.4.jar:bin/../lib/jnr-ffi-2.2.13.jar:bin/../lib/jnr-x86asm-1.0.2.jar:bin/../lib/jsr305-2.0.2.jar:bin/../lib/jvector-1.0.2.jar:bin/../lib/jvm-attach-api-1.5.jar:bin/../lib/log4j-over-slf4j-2.0.17.jar:bin/../lib/logback-classic-1.5.18.jar:bin/../lib/logback-core-1.5.18.jar:bin/../lib/lucene-analysis-common-9.7.0.jar:bin/../lib/lucene-core-9.7.0.jar:bin/../lib/lz4-java-1.10.1.jar:bin/../lib/metrics-core-4.2.28.jar:bin/../lib/metrics-jvm-4.2.19.jar:bin/../lib/metrics-logback-4.2.19.jar:bin/../lib/mxdump-0.14.jar:bin/../lib/netty-all-4.1.130.Final.jar:bin/../lib/netty-buffer-4.1.130.Final.jar:bin/../lib/netty-codec-4.1.130.Final.jar:bin/../lib/netty-common-4.1.130.Final.jar:bin/../lib/netty-handler-4.1.130.Final.jar:bin/../lib/netty-handler-proxy-4.1.130.Final.jar:bin/../lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:bin/../lib/netty-resolver-4.1.130.Final.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:bin/../lib/netty-tcnative-classes-2.0.70.Final.jar:bin/../lib/netty-transport-4.1.130.Final.jar:bin/../lib/netty-transport-classes-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-classes-kqueue-4.1.130.Final.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-native-unix-common-4.1.130.Final.jar:bin/../lib/ohc-core-0.5.1.jar:bin/../lib/ohc-core-j8-0.5.1.jar:bin/../lib/posix-2.24ea4.jar:bin/../lib/psjava-0.1.19.jar:bin/../lib/semver4j-3.1.0.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/sjk-cli-0.14.jar:bin/../lib/sjk-core-0.14.jar:bin/../lib/sjk-json-0.14.jar:bin/../lib/sjk-stacktrace-0.14.jar:bin/../lib/slf4j-api-2.0.17.jar:bin/../lib/snakeyaml-2.1.jar:bin/../lib/snappy-java-1.1.10.4.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/zstd-jni-1.5.7-2.jar:bin/../lib/jsr223/*/*.jar::bin/../lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar
+[2026-11-12T03:35:04Z 1794454504733] rc=0
+[2026-11-12T03:35:04Z 1794454504734] sampler pid=986231
+[2026-11-12T03:35:04Z 1794454504734] PHASE idle_start 1794454504734
+[2026-11-12T03:35:04Z 1794454504734] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:35:05Z 1794454505047] rc=0
+[2026-11-12T03:35:05Z 1794454505047] + echo idle $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:35:05Z 1794454505052] rc=0
+[2026-11-12T03:35:34Z 1794454534761] PHASE stress_start 1794454534761
+[2026-11-12T03:35:34Z 1794454534761] + timeout 180 tools/bin/cassandra-stress write n=2000000 cl=ONE -rate threads=64 -col "n=FIXED(1)" "size=FIXED(4096)" -port native=9442 jmx=7599 -node 127.0.0.1 -errors ignore -schema "replication(factor=1)"
+[2026-11-12T03:35:34Z 1794454534762] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:35:34Z 1794454534951] rc=0
+[2026-11-12T03:35:34Z 1794454534951] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:35:34Z 1794454534955] rc=0
+[2026-11-12T03:36:04Z 1794454564981] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:36:05Z 1794454565556] rc=0
+[2026-11-12T03:36:05Z 1794454565556] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:36:05Z 1794454565559] rc=0
+[2026-11-12T03:36:35Z 1794454595588] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:36:35Z 1794454595801] rc=0
+[2026-11-12T03:36:35Z 1794454595801] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:36:35Z 1794454595805] rc=0
+[2026-11-12T03:37:05Z 1794454625834] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:37:06Z 1794454626060] rc=0
+[2026-11-12T03:37:06Z 1794454626060] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:37:06Z 1794454626064] rc=0
+[2026-11-12T03:37:36Z 1794454656091] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:37:36Z 1794454656290] rc=0
+[2026-11-12T03:37:36Z 1794454656290] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:37:36Z 1794454656294] rc=0
+[2026-11-12T03:38:06Z 1794454686323] + jcmd 983355 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:38:06Z 1794454686518] rc=0
+[2026-11-12T03:38:06Z 1794454686518] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:38:06Z 1794454686522] rc=0
+[2026-11-12T03:38:35Z 1794454715552] PHASE stress_end 1794454715552 rc=124
+[2026-11-12T03:38:39Z 1794454719471] + grep -E "^ERROR" /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort | uniq -c | sort -rn | head -5; grep -c "^WARN" /mydata/jingsong-cass-s4/o44/node/logs/system.log
+6
+[2026-11-12T03:38:39Z 1794454719476] rc=0
+[2026-11-12T03:38:39Z 1794454719476] + bin/nodetool -p 7599 tpstats | head -30
+Pool Name                      Active Pending Completed Blocked All time blocked
+MutationStage                  32     32      77317     0       0               
+ReadStage                      0      0       34        0       0               
+CompactionExecutor             0      0       65        0       0               
+SecondaryIndexExecutor         0      0       0         0       0               
+MemtableReclaimMemory          0      0       38        0       0               
+PendingRangeCalculator         0      0       2         0       0               
+GossipStage                    0      0       0         0       0               
+SecondaryIndexManagement       0      0       1         0       0               
+HintsDispatcher                0      0       0         0       0               
+StatusPropagationExecutor      0      0       0         0       0               
+MigrationStage                 0      0       6         0       0               
+MemtablePostFlush              0      0       78        0       0               
+PerDiskMemtableFlushWriter_0   0      0       35        0       0               
+ValidationExecutor             0      0       0         0       0               
+Sampler                        0      0       0         0       0               
+ViewBuildExecutor              0      0       0         0       0               
+MemtableFlushWriter            0      0       38        0       0               
+CacheCleanupExecutor           0      0       0         0       0               
+Native-Transport-Auth-Requests 0      0       0         0       0               
+Native-Transport-Requests      64     0       226053    0       0               
+
+Latencies waiting in queue (micros) per dropped message types
+Message type                      Dropped     50%      95%      99%      Max
+READ_RSP                          0           0.0      0.0      0.0      0.0
+RANGE_REQ                         0           0.0      0.0      0.0      0.0
+PING_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_RSP          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_RSP     0           0.0      0.0      0.0      0.0
+_SAMPLE                           0           0.0      0.0      0.0      0.0
+[2026-11-12T03:38:40Z 1794454720799] rc=0
+[2026-11-12T03:38:40Z 1794454720799] + bin/nodetool -p 7599 drain
+[2026-11-12T03:39:13Z 1794454753633] rc=0
+[2026-11-12T03:39:13Z 1794454753633] kill SIGTERM 983355
+[2026-11-12T03:39:14Z 1794454754634] node stopped: True
+[2026-11-12T03:39:14Z 1794454754635] + ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+ 997126 /bin/sh -c ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+[2026-11-12T03:39:14Z 1794454754657] rc=0
+[2026-11-12T03:39:14Z 1794454754657] === value 6: N=6 compression=Zstd19; /mydata free 653.5 GiB
+[2026-11-12T03:39:14Z 1794454754685] + bin/cassandra -p /mydata/jingsong-cass-s4/o44/node/pid > /mydata/jingsong-cass-s4/o44/cluster/run1/start-6.out 2>&1
+[2026-11-12T03:39:14Z 1794454754919] rc=0
+[2026-11-12T03:39:56Z 1794454796676] node up pid=997243
+[2026-11-12T03:39:56Z 1794454796676] + ps -o pid,args -p 997243 | tr " " "\n" | grep -E "Xmx|Xms|MaxDirectMemorySize|NativeMemoryTracking"
+-Xms4G
+-Xmx4G
+-XX:MaxDirectMemorySize=3G
+-XX:NativeMemoryTracking=summary
+[2026-11-12T03:39:56Z 1794454796698] rc=0
+[2026-11-12T03:39:56Z 1794454796698] + grep -E "commitlog_max_compression_buffers_in_pool=|commitlog_compression=|commitlog_segment_size=|commitlog_disk_access_mode=|native_transport_port=|storage_port=" -o /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort -u; grep -oE "commitlog_max_compression_buffers_in_pool=[0-9]+|commitlog_compression=[^;]*;" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -3
+commitlog_compression=
+commitlog_disk_access_mode=
+commitlog_max_compression_buffers_in_pool=
+commitlog_segment_size=
+native_transport_port=
+storage_port=
+commitlog_compression=ZstdCompressor{compression_level=19};
+commitlog_max_compression_buffers_in_pool=6
+[2026-11-12T03:39:56Z 1794454796704] rc=0
+[2026-11-12T03:39:56Z 1794454796704] + grep -i "Zstd\|commit log disk access mode\|DiskAccessMode" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -5
+zero_ttl_on_twcs_enabled=true; zero_ttl_on_twcs_warned=true]
+INFO  [main] 2026-11-12T03:39:16,933 DatabaseDescriptor.java:551 - DiskAccessMode is standard, indexAccessMode is mmap
+INFO  [main] 2026-11-12T03:39:17,458 CassandraDaemon.java:617 - Classpath: /mydata/jingsong-cass-s4/o44/node/conf:bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:bin/../lib/HdrHistogram-2.1.12.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/affinity-3.23.3.jar:bin/../lib/agrona-1.17.1.jar:bin/../lib/airline-0.8.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/asm-9.4.jar:bin/../lib/big-math-2.3.0.jar:bin/../lib/caffeine-3.1.8.jar:bin/../lib/cassandra-driver-core-3.12.1-shaded.jar:bin/../lib/chronicle-bytes-2.23.33.jar:bin/../lib/chronicle-core-2.23.36.jar:bin/../lib/chronicle-queue-5.23.37.jar:bin/../lib/chronicle-threads-2.23.25.jar:bin/../lib/chronicle-wire-2.23.39.jar:bin/../lib/commons-cli-1.5.0.jar:bin/../lib/commons-lang3-3.18.0.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/ecj-3.33.0.jar:bin/../lib/failureaccess-1.0.1.jar:bin/../lib/guava-32.0.1-jre.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.8.1.jar:bin/../lib/ipaddress-5.3.3.jar:bin/../lib/j2objc-annotations-1.3.jar:bin/../lib/jackson-annotations-2.19.2.jar:bin/../lib/jackson-core-2.19.2.jar:bin/../lib/jackson-databind-2.19.2.jar:bin/../lib/jackson-datatype-jsr310-2.19.2.jar:bin/../lib/jamm-0.4.0.jar:bin/../lib/javax.inject-1.jar:bin/../lib/jbcrypt-0.4.jar:bin/../lib/jcl-over-slf4j-2.0.17.jar:bin/../lib/jcommander-1.30.jar:bin/../lib/jctools-core-3.1.0.jar:bin/../lib/jffi-1.3.11-native.jar:bin/../lib/jffi-1.3.11.jar:bin/../lib/jna-5.13.0.jar:bin/../lib/jna-platform-5.13.0.jar:bin/../lib/jnr-a64asm-1.0.0.jar:bin/../lib/jnr-constants-0.10.4.jar:bin/../lib/jnr-ffi-2.2.13.jar:bin/../lib/jnr-x86asm-1.0.2.jar:bin/../lib/jsr305-2.0.2.jar:bin/../lib/jvector-1.0.2.jar:bin/../lib/jvm-attach-api-1.5.jar:bin/../lib/log4j-over-slf4j-2.0.17.jar:bin/../lib/logback-classic-1.5.18.jar:bin/../lib/logback-core-1.5.18.jar:bin/../lib/lucene-analysis-common-9.7.0.jar:bin/../lib/lucene-core-9.7.0.jar:bin/../lib/lz4-java-1.10.1.jar:bin/../lib/metrics-core-4.2.28.jar:bin/../lib/metrics-jvm-4.2.19.jar:bin/../lib/metrics-logback-4.2.19.jar:bin/../lib/mxdump-0.14.jar:bin/../lib/netty-all-4.1.130.Final.jar:bin/../lib/netty-buffer-4.1.130.Final.jar:bin/../lib/netty-codec-4.1.130.Final.jar:bin/../lib/netty-common-4.1.130.Final.jar:bin/../lib/netty-handler-4.1.130.Final.jar:bin/../lib/netty-handler-proxy-4.1.130.Final.jar:bin/../lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:bin/../lib/netty-resolver-4.1.130.Final.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:bin/../lib/netty-tcnative-classes-2.0.70.Final.jar:bin/../lib/netty-transport-4.1.130.Final.jar:bin/../lib/netty-transport-classes-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-classes-kqueue-4.1.130.Final.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-native-unix-common-4.1.130.Final.jar:bin/../lib/ohc-core-0.5.1.jar:bin/../lib/ohc-core-j8-0.5.1.jar:bin/../lib/posix-2.24ea4.jar:bin/../lib/psjava-0.1.19.jar:bin/../lib/semver4j-3.1.0.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/sjk-cli-0.14.jar:bin/../lib/sjk-core-0.14.jar:bin/../lib/sjk-json-0.14.jar:bin/../lib/sjk-stacktrace-0.14.jar:bin/../lib/slf4j-api-2.0.17.jar:bin/../lib/snakeyaml-2.1.jar:bin/../lib/snappy-java-1.1.10.4.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/zstd-jni-1.5.7-2.jar:bin/../lib/jsr223/*/*.jar::bin/../lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar
+[2026-11-12T03:39:56Z 1794454796706] rc=0
+[2026-11-12T03:39:56Z 1794454796707] sampler pid=998803
+[2026-11-12T03:39:56Z 1794454796707] PHASE idle_start 1794454796707
+[2026-11-12T03:39:56Z 1794454796707] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:39:57Z 1794454797011] rc=0
+[2026-11-12T03:39:57Z 1794454797011] + echo idle $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:39:57Z 1794454797017] rc=0
+[2026-11-12T03:40:26Z 1794454826734] PHASE stress_start 1794454826734
+[2026-11-12T03:40:26Z 1794454826734] + timeout 180 tools/bin/cassandra-stress write n=2000000 cl=ONE -rate threads=64 -col "n=FIXED(1)" "size=FIXED(4096)" -port native=9442 jmx=7599 -node 127.0.0.1 -errors ignore -schema "replication(factor=1)"
+[2026-11-12T03:40:26Z 1794454826735] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:40:26Z 1794454826929] rc=0
+[2026-11-12T03:40:26Z 1794454826929] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:40:26Z 1794454826933] rc=0
+[2026-11-12T03:40:56Z 1794454856965] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:40:57Z 1794454857169] rc=0
+[2026-11-12T03:40:57Z 1794454857169] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:40:57Z 1794454857173] rc=0
+[2026-11-12T03:41:27Z 1794454887204] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:41:27Z 1794454887397] rc=0
+[2026-11-12T03:41:27Z 1794454887397] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:41:27Z 1794454887402] rc=0
+[2026-11-12T03:41:57Z 1794454917434] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:41:57Z 1794454917639] rc=0
+[2026-11-12T03:41:57Z 1794454917639] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:41:57Z 1794454917643] rc=0
+[2026-11-12T03:42:27Z 1794454947675] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:42:27Z 1794454947879] rc=0
+[2026-11-12T03:42:27Z 1794454947879] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:42:27Z 1794454947884] rc=0
+[2026-11-12T03:42:57Z 1794454977913] + jcmd 997243 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:42:58Z 1794454978102] rc=0
+[2026-11-12T03:42:58Z 1794454978102] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:42:58Z 1794454978107] rc=0
+[2026-11-12T03:43:27Z 1794455007138] PHASE stress_end 1794455007138 rc=124
+[2026-11-12T03:43:31Z 1794455011409] + grep -E "^ERROR" /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort | uniq -c | sort -rn | head -5; grep -c "^WARN" /mydata/jingsong-cass-s4/o44/node/logs/system.log
+6
+[2026-11-12T03:43:31Z 1794455011414] rc=0
+[2026-11-12T03:43:31Z 1794455011414] + bin/nodetool -p 7599 tpstats | head -30
+Pool Name                      Active Pending Completed Blocked All time blocked
+MutationStage                  32     32      103326    0       0               
+ReadStage                      0      0       33        0       0               
+CompactionExecutor             0      0       66        0       0               
+SecondaryIndexExecutor         0      0       0         0       0               
+MemtableReclaimMemory          0      0       38        0       0               
+PendingRangeCalculator         0      0       2         0       0               
+GossipStage                    0      0       0         0       0               
+SecondaryIndexManagement       0      0       1         0       0               
+HintsDispatcher                0      0       0         0       0               
+StatusPropagationExecutor      0      0       0         0       0               
+MigrationStage                 0      0       6         0       0               
+MemtablePostFlush              1      0       78        0       0               
+PerDiskMemtableFlushWriter_0   0      0       36        0       0               
+ValidationExecutor             0      0       0         0       0               
+Sampler                        0      0       0         0       0               
+ViewBuildExecutor              0      0       0         0       0               
+MemtableFlushWriter            0      0       39        0       0               
+CacheCleanupExecutor           0      0       0         0       0               
+Native-Transport-Auth-Requests 0      0       0         0       0               
+Native-Transport-Requests      64     0       290625    0       0               
+
+Latencies waiting in queue (micros) per dropped message types
+Message type                      Dropped     50%      95%      99%      Max
+READ_RSP                          0           0.0      0.0      0.0      0.0
+RANGE_REQ                         0           0.0      0.0      0.0      0.0
+PING_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_RSP          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_RSP     0           0.0      0.0      0.0      0.0
+_SAMPLE                           0           0.0      0.0      0.0      0.0
+[2026-11-12T03:43:32Z 1794455012742] rc=0
+[2026-11-12T03:43:32Z 1794455012742] + bin/nodetool -p 7599 drain
+[2026-11-12T03:44:42Z 1794455082434] rc=0
+[2026-11-12T03:44:42Z 1794455082434] kill SIGTERM 997243
+[2026-11-12T03:44:43Z 1794455083435] node stopped: True
+[2026-11-12T03:44:43Z 1794455083436] + ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+1003354 /bin/sh -c ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+[2026-11-12T03:44:43Z 1794455083458] rc=0
+[2026-11-12T03:44:43Z 1794455083458] === value 12: N=12 compression=Zstd19; /mydata free 652.6 GiB
+[2026-11-12T03:44:43Z 1794455083472] + bin/cassandra -p /mydata/jingsong-cass-s4/o44/node/pid > /mydata/jingsong-cass-s4/o44/cluster/run1/start-12.out 2>&1
+[2026-11-12T03:44:43Z 1794455083699] rc=0
+[2026-11-12T03:45:26Z 1794455126060] node up pid=1003493
+[2026-11-12T03:45:26Z 1794455126060] + ps -o pid,args -p 1003493 | tr " " "\n" | grep -E "Xmx|Xms|MaxDirectMemorySize|NativeMemoryTracking"
+-Xms4G
+-Xmx4G
+-XX:MaxDirectMemorySize=3G
+-XX:NativeMemoryTracking=summary
+[2026-11-12T03:45:26Z 1794455126077] rc=0
+[2026-11-12T03:45:26Z 1794455126077] + grep -E "commitlog_max_compression_buffers_in_pool=|commitlog_compression=|commitlog_segment_size=|commitlog_disk_access_mode=|native_transport_port=|storage_port=" -o /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort -u; grep -oE "commitlog_max_compression_buffers_in_pool=[0-9]+|commitlog_compression=[^;]*;" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -3
+commitlog_compression=
+commitlog_disk_access_mode=
+commitlog_max_compression_buffers_in_pool=
+commitlog_segment_size=
+native_transport_port=
+storage_port=
+commitlog_compression=ZstdCompressor{compression_level=19};
+commitlog_max_compression_buffers_in_pool=12
+[2026-11-12T03:45:26Z 1794455126082] rc=0
+[2026-11-12T03:45:26Z 1794455126082] + grep -i "Zstd\|commit log disk access mode\|DiskAccessMode" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -5
+zero_ttl_on_twcs_enabled=true; zero_ttl_on_twcs_warned=true]
+INFO  [main] 2026-11-12T03:44:45,790 DatabaseDescriptor.java:551 - DiskAccessMode is standard, indexAccessMode is mmap
+INFO  [main] 2026-11-12T03:44:46,407 CassandraDaemon.java:617 - Classpath: /mydata/jingsong-cass-s4/o44/node/conf:bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:bin/../lib/HdrHistogram-2.1.12.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/affinity-3.23.3.jar:bin/../lib/agrona-1.17.1.jar:bin/../lib/airline-0.8.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/asm-9.4.jar:bin/../lib/big-math-2.3.0.jar:bin/../lib/caffeine-3.1.8.jar:bin/../lib/cassandra-driver-core-3.12.1-shaded.jar:bin/../lib/chronicle-bytes-2.23.33.jar:bin/../lib/chronicle-core-2.23.36.jar:bin/../lib/chronicle-queue-5.23.37.jar:bin/../lib/chronicle-threads-2.23.25.jar:bin/../lib/chronicle-wire-2.23.39.jar:bin/../lib/commons-cli-1.5.0.jar:bin/../lib/commons-lang3-3.18.0.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/ecj-3.33.0.jar:bin/../lib/failureaccess-1.0.1.jar:bin/../lib/guava-32.0.1-jre.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.8.1.jar:bin/../lib/ipaddress-5.3.3.jar:bin/../lib/j2objc-annotations-1.3.jar:bin/../lib/jackson-annotations-2.19.2.jar:bin/../lib/jackson-core-2.19.2.jar:bin/../lib/jackson-databind-2.19.2.jar:bin/../lib/jackson-datatype-jsr310-2.19.2.jar:bin/../lib/jamm-0.4.0.jar:bin/../lib/javax.inject-1.jar:bin/../lib/jbcrypt-0.4.jar:bin/../lib/jcl-over-slf4j-2.0.17.jar:bin/../lib/jcommander-1.30.jar:bin/../lib/jctools-core-3.1.0.jar:bin/../lib/jffi-1.3.11-native.jar:bin/../lib/jffi-1.3.11.jar:bin/../lib/jna-5.13.0.jar:bin/../lib/jna-platform-5.13.0.jar:bin/../lib/jnr-a64asm-1.0.0.jar:bin/../lib/jnr-constants-0.10.4.jar:bin/../lib/jnr-ffi-2.2.13.jar:bin/../lib/jnr-x86asm-1.0.2.jar:bin/../lib/jsr305-2.0.2.jar:bin/../lib/jvector-1.0.2.jar:bin/../lib/jvm-attach-api-1.5.jar:bin/../lib/log4j-over-slf4j-2.0.17.jar:bin/../lib/logback-classic-1.5.18.jar:bin/../lib/logback-core-1.5.18.jar:bin/../lib/lucene-analysis-common-9.7.0.jar:bin/../lib/lucene-core-9.7.0.jar:bin/../lib/lz4-java-1.10.1.jar:bin/../lib/metrics-core-4.2.28.jar:bin/../lib/metrics-jvm-4.2.19.jar:bin/../lib/metrics-logback-4.2.19.jar:bin/../lib/mxdump-0.14.jar:bin/../lib/netty-all-4.1.130.Final.jar:bin/../lib/netty-buffer-4.1.130.Final.jar:bin/../lib/netty-codec-4.1.130.Final.jar:bin/../lib/netty-common-4.1.130.Final.jar:bin/../lib/netty-handler-4.1.130.Final.jar:bin/../lib/netty-handler-proxy-4.1.130.Final.jar:bin/../lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:bin/../lib/netty-resolver-4.1.130.Final.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:bin/../lib/netty-tcnative-classes-2.0.70.Final.jar:bin/../lib/netty-transport-4.1.130.Final.jar:bin/../lib/netty-transport-classes-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-classes-kqueue-4.1.130.Final.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-native-unix-common-4.1.130.Final.jar:bin/../lib/ohc-core-0.5.1.jar:bin/../lib/ohc-core-j8-0.5.1.jar:bin/../lib/posix-2.24ea4.jar:bin/../lib/psjava-0.1.19.jar:bin/../lib/semver4j-3.1.0.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/sjk-cli-0.14.jar:bin/../lib/sjk-core-0.14.jar:bin/../lib/sjk-json-0.14.jar:bin/../lib/sjk-stacktrace-0.14.jar:bin/../lib/slf4j-api-2.0.17.jar:bin/../lib/snakeyaml-2.1.jar:bin/../lib/snappy-java-1.1.10.4.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/zstd-jni-1.5.7-2.jar:bin/../lib/jsr223/*/*.jar::bin/../lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar
+[2026-11-12T03:45:26Z 1794455126084] rc=0
+[2026-11-12T03:45:26Z 1794455126085] sampler pid=1005132
+[2026-11-12T03:45:26Z 1794455126085] PHASE idle_start 1794455126085
+[2026-11-12T03:45:26Z 1794455126085] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:45:26Z 1794455126383] rc=0
+[2026-11-12T03:45:26Z 1794455126383] + echo idle $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:45:26Z 1794455126387] rc=0
+[2026-11-12T03:45:56Z 1794455156113] PHASE stress_start 1794455156113
+[2026-11-12T03:45:56Z 1794455156113] + timeout 180 tools/bin/cassandra-stress write n=2000000 cl=ONE -rate threads=64 -col "n=FIXED(1)" "size=FIXED(4096)" -port native=9442 jmx=7599 -node 127.0.0.1 -errors ignore -schema "replication(factor=1)"
+[2026-11-12T03:45:56Z 1794455156114] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:45:56Z 1794455156303] rc=0
+[2026-11-12T03:45:56Z 1794455156303] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:45:56Z 1794455156307] rc=0
+[2026-11-12T03:46:26Z 1794455186337] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:46:26Z 1794455186536] rc=0
+[2026-11-12T03:46:26Z 1794455186536] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:46:26Z 1794455186540] rc=0
+[2026-11-12T03:46:56Z 1794455216569] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:46:56Z 1794455216772] rc=0
+[2026-11-12T03:46:56Z 1794455216772] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:46:56Z 1794455216776] rc=0
+[2026-11-12T03:47:26Z 1794455246805] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:47:27Z 1794455247064] rc=0
+[2026-11-12T03:47:27Z 1794455247064] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:47:27Z 1794455247068] rc=0
+[2026-11-12T03:47:57Z 1794455277099] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:47:57Z 1794455277306] rc=0
+[2026-11-12T03:47:57Z 1794455277306] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:47:57Z 1794455277310] rc=0
+[2026-11-12T03:48:27Z 1794455307339] + jcmd 1003493 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:48:27Z 1794455307643] rc=0
+[2026-11-12T03:48:27Z 1794455307643] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:48:27Z 1794455307647] rc=0
+[2026-11-12T03:48:56Z 1794455336672] PHASE stress_end 1794455336672 rc=124
+[2026-11-12T03:49:00Z 1794455340840] + grep -E "^ERROR" /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort | uniq -c | sort -rn | head -5; grep -c "^WARN" /mydata/jingsong-cass-s4/o44/node/logs/system.log
+6
+[2026-11-12T03:49:00Z 1794455340844] rc=0
+[2026-11-12T03:49:00Z 1794455340844] + bin/nodetool -p 7599 tpstats | head -30
+Pool Name                      Active Pending Completed Blocked All time blocked
+MutationStage                  0      0       117871    0       0               
+ReadStage                      0      0       49        0       0               
+CompactionExecutor             0      0       67        0       0               
+SecondaryIndexExecutor         0      0       0         0       0               
+MemtableReclaimMemory          0      0       38        0       0               
+PendingRangeCalculator         0      0       2         0       0               
+GossipStage                    0      0       0         0       0               
+SecondaryIndexManagement       0      0       1         0       0               
+HintsDispatcher                0      0       0         0       0               
+StatusPropagationExecutor      0      0       0         0       0               
+MigrationStage                 0      0       6         0       0               
+MemtablePostFlush              1      1       78        0       0               
+PerDiskMemtableFlushWriter_0   0      0       37        0       0               
+ValidationExecutor             0      0       0         0       0               
+Sampler                        0      0       0         0       0               
+ViewBuildExecutor              0      0       0         0       0               
+MemtableFlushWriter            0      0       40        0       0               
+CacheCleanupExecutor           0      0       0         0       0               
+Native-Transport-Auth-Requests 0      0       0         0       0               
+Native-Transport-Requests      0      0       371492    0       0               
+
+Latencies waiting in queue (micros) per dropped message types
+Message type                      Dropped     50%      95%      99%      Max
+READ_RSP                          0           0.0      0.0      0.0      0.0
+RANGE_REQ                         0           0.0      0.0      0.0      0.0
+PING_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_RSP          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_RSP     0           0.0      0.0      0.0      0.0
+_SAMPLE                           0           0.0      0.0      0.0      0.0
+[2026-11-12T03:49:03Z 1794455343007] rc=0
+[2026-11-12T03:49:03Z 1794455343007] + bin/nodetool -p 7599 drain
+[2026-11-12T03:51:03Z 1794455463108] rc=timeout
+[2026-11-12T03:51:03Z 1794455463108] kill SIGTERM 1003493
+[2026-11-12T03:51:04Z 1794455464109] node stopped: True
+[2026-11-12T03:51:04Z 1794455464110] + ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+s-s4/o44/node/logs -Dcassandra.storagedir=bin/../data -Dcassandra-pidfile=/mydata/jingsong-cass-s4/o44/node/pid -cp /mydata/jingsong-cass-s4/o44/node/conf:bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:bin/../lib/HdrHistogram-2.1.12.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/affinity-3.23.3.jar:bin/../lib/agrona-1.17.1.jar:bin/../lib/airline-0.8.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/asm-9.4.jar:bin/../lib/big-math-2.3.0.jar:bin/../lib/caffeine-3.1.8.jar:bin/../lib/cassandra-driver-core-3.12.1-shaded.jar:bin/../lib/chronicle-bytes-2.23.33.jar:bin/../lib/chronicle-core-2.23.36.jar:bin/../lib/chronicle-queue-5.23.37.jar:bin/../lib/chronicle-threads-2.23.25.jar:bin/../lib/chronicle-wire-2.23.39.jar:bin/../lib/commons-cli-1.5.0.jar:bin/../lib/commons-lang3-3.18.0.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/ecj-3.33.0.jar:bin/../lib/failureaccess-1.0.1.jar:bin/../lib/guava-32.0.1-jre.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.8.1.jar:bin/../lib/ipaddress-5.3.3.jar:bin/../lib/j2objc-annotations-1.3.jar:bin/../lib/jackson-annotations-2.19.2.jar:bin/../lib/jackson-core-2.19.2.jar:bin/../lib/jackson-databind-2.19.2.jar:bin/../lib/jackson-datatype-jsr310-2.19.2.jar:bin/../lib/jamm-0.4.0.jar:bin/../lib/javax.inject-1.jar:bin/../lib/jbcrypt-0.4.jar:bin/../lib/jcl-over-slf4j-2.0.17.jar:bin/../lib/jcommander-1.30.jar:bin/../lib/jctools-core-3.1.0.jar:bin/../lib/jffi-1.3.11-native.jar:bin/../lib/jffi-1.3.11.jar:bin/../lib/jna-5.13.0.jar:bin/../lib/jna-platform-5.13.0.jar:bin/../lib/jnr-a64asm-1.0.0.jar:bin/../lib/jnr-constants-0.10.4.jar:bin/../lib/jnr-ffi-2.2.13.jar:bin/../lib/jnr-x86asm-1.0.2.jar:bin/../lib/jsr305-2.0.2.jar:bin/../lib/jvector-1.0.2.jar:bin/../lib/jvm-attach-api-1.5.jar:bin/../lib/log4j-over-slf4j-2.0.17.jar:bin/../lib/logback-classic-1.5.18.jar:bin/../lib/logback-core-1.5.18.jar:bin/../lib/lucene-analysis-common-9.7.0.jar:bin/../lib/lucene-core-9.7.0.jar:bin/../lib/lz4-java-1.10.1.jar:bin/../lib/metrics-core-4.2.28.jar:bin/../lib/metrics-jvm-4.2.19.jar:bin/../lib/metrics-logback-4.2.19.jar:bin/../lib/mxdump-0.14.jar:bin/../lib/netty-all-4.1.130.Final.jar:bin/../lib/netty-buffer-4.1.130.Final.jar:bin/../lib/netty-codec-4.1.130.Final.jar:bin/../lib/netty-common-4.1.130.Final.jar:bin/../lib/netty-handler-4.1.130.Final.jar:bin/../lib/netty-handler-proxy-4.1.130.Final.jar:bin/../lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:bin/../lib/netty-resolver-4.1.130.Final.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:bin/../lib/netty-tcnative-classes-2.0.70.Final.jar:bin/../lib/netty-transport-4.1.130.Final.jar:bin/../lib/netty-transport-classes-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-classes-kqueue-4.1.130.Final.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-native-unix-common-4.1.130.Final.jar:bin/../lib/ohc-core-0.5.1.jar:bin/../lib/ohc-core-j8-0.5.1.jar:bin/../lib/posix-2.24ea4.jar:bin/../lib/psjava-0.1.19.jar:bin/../lib/semver4j-3.1.0.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/sjk-cli-0.14.jar:bin/../lib/sjk-core-0.14.jar:bin/../lib/sjk-json-0.14.jar:bin/../lib/sjk-stacktrace-0.14.jar:bin/../lib/slf4j-api-2.0.17.jar:bin/../lib/snakeyaml-2.1.jar:bin/../lib/snappy-java-1.1.10.4.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/zstd-jni-1.5.7-2.jar:bin/../lib/jsr223/*/*.jar::bin/../lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar org.apache.cassandra.service.CassandraDaemon
+1018111 /bin/sh -c ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+[2026-11-12T03:51:04Z 1794455464134] rc=0
+[2026-11-12T03:51:04Z 1794455464134] === value 24: N=24 compression=Zstd19; /mydata free 651.0 GiB
+[2026-11-12T03:51:04Z 1794455464163] + bin/cassandra -p /mydata/jingsong-cass-s4/o44/node/pid > /mydata/jingsong-cass-s4/o44/cluster/run1/start-24.out 2>&1
+[2026-11-12T03:51:04Z 1794455464418] rc=0
+[2026-11-12T03:51:07Z 1794455467421] STOP: node died during start
+[2026-11-12T03:51:07Z 1794455467421] value 24 failed; stopping run
+[2026-11-12T03:51:07Z 1794455467421] stop: no live node pid
+[2026-11-12T03:51:07Z 1794455467421] + ps -eo pid,args | grep "[C]assandraDaemon" | grep -c "o44" || true
+1
+[2026-11-12T03:51:07Z 1794455467444] rc=0
+[2026-11-12T03:51:07Z 1794455467445] end cluster run
+[2026-11-12T03:52:14Z 1794455534065] start cluster run values=['24', 'mmap6']
+[2026-11-12T03:52:14Z 1794455534065] === value 24: N=24 compression=Zstd19; /mydata free 652.5 GiB
+[2026-11-12T03:52:14Z 1794455534096] + bin/cassandra -p /mydata/jingsong-cass-s4/o44/node/pid > /mydata/jingsong-cass-s4/o44/cluster/run1/start-24.out 2>&1
+[2026-11-12T03:52:14Z 1794455534325] rc=0
+[2026-11-12T03:52:53Z 1794455573023] node up pid=1025405
+[2026-11-12T03:52:53Z 1794455573023] + ps -o pid,args -p 1025405 | tr " " "\n" | grep -E "Xmx|Xms|MaxDirectMemorySize|NativeMemoryTracking"
+-Xms4G
+-Xmx4G
+-XX:MaxDirectMemorySize=3G
+-XX:NativeMemoryTracking=summary
+[2026-11-12T03:52:53Z 1794455573041] rc=0
+[2026-11-12T03:52:53Z 1794455573041] + grep -E "commitlog_max_compression_buffers_in_pool=|commitlog_compression=|commitlog_segment_size=|commitlog_disk_access_mode=|native_transport_port=|storage_port=" -o /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort -u; grep -oE "commitlog_max_compression_buffers_in_pool=[0-9]+|commitlog_compression=[^;]*;" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -3
+commitlog_compression=
+commitlog_disk_access_mode=
+commitlog_max_compression_buffers_in_pool=
+commitlog_segment_size=
+native_transport_port=
+storage_port=
+commitlog_compression=ZstdCompressor{compression_level=19};
+commitlog_max_compression_buffers_in_pool=24
+[2026-11-12T03:52:53Z 1794455573046] rc=0
+[2026-11-12T03:52:53Z 1794455573046] + grep -i "Zstd\|commit log disk access mode\|DiskAccessMode" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -5
+zero_ttl_on_twcs_enabled=true; zero_ttl_on_twcs_warned=true]
+INFO  [main] 2026-11-12T03:52:16,349 DatabaseDescriptor.java:551 - DiskAccessMode is standard, indexAccessMode is mmap
+INFO  [main] 2026-11-12T03:52:16,918 CassandraDaemon.java:617 - Classpath: /mydata/jingsong-cass-s4/o44/node/conf:bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:bin/../lib/HdrHistogram-2.1.12.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/affinity-3.23.3.jar:bin/../lib/agrona-1.17.1.jar:bin/../lib/airline-0.8.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/asm-9.4.jar:bin/../lib/big-math-2.3.0.jar:bin/../lib/caffeine-3.1.8.jar:bin/../lib/cassandra-driver-core-3.12.1-shaded.jar:bin/../lib/chronicle-bytes-2.23.33.jar:bin/../lib/chronicle-core-2.23.36.jar:bin/../lib/chronicle-queue-5.23.37.jar:bin/../lib/chronicle-threads-2.23.25.jar:bin/../lib/chronicle-wire-2.23.39.jar:bin/../lib/commons-cli-1.5.0.jar:bin/../lib/commons-lang3-3.18.0.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/ecj-3.33.0.jar:bin/../lib/failureaccess-1.0.1.jar:bin/../lib/guava-32.0.1-jre.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.8.1.jar:bin/../lib/ipaddress-5.3.3.jar:bin/../lib/j2objc-annotations-1.3.jar:bin/../lib/jackson-annotations-2.19.2.jar:bin/../lib/jackson-core-2.19.2.jar:bin/../lib/jackson-databind-2.19.2.jar:bin/../lib/jackson-datatype-jsr310-2.19.2.jar:bin/../lib/jamm-0.4.0.jar:bin/../lib/javax.inject-1.jar:bin/../lib/jbcrypt-0.4.jar:bin/../lib/jcl-over-slf4j-2.0.17.jar:bin/../lib/jcommander-1.30.jar:bin/../lib/jctools-core-3.1.0.jar:bin/../lib/jffi-1.3.11-native.jar:bin/../lib/jffi-1.3.11.jar:bin/../lib/jna-5.13.0.jar:bin/../lib/jna-platform-5.13.0.jar:bin/../lib/jnr-a64asm-1.0.0.jar:bin/../lib/jnr-constants-0.10.4.jar:bin/../lib/jnr-ffi-2.2.13.jar:bin/../lib/jnr-x86asm-1.0.2.jar:bin/../lib/jsr305-2.0.2.jar:bin/../lib/jvector-1.0.2.jar:bin/../lib/jvm-attach-api-1.5.jar:bin/../lib/log4j-over-slf4j-2.0.17.jar:bin/../lib/logback-classic-1.5.18.jar:bin/../lib/logback-core-1.5.18.jar:bin/../lib/lucene-analysis-common-9.7.0.jar:bin/../lib/lucene-core-9.7.0.jar:bin/../lib/lz4-java-1.10.1.jar:bin/../lib/metrics-core-4.2.28.jar:bin/../lib/metrics-jvm-4.2.19.jar:bin/../lib/metrics-logback-4.2.19.jar:bin/../lib/mxdump-0.14.jar:bin/../lib/netty-all-4.1.130.Final.jar:bin/../lib/netty-buffer-4.1.130.Final.jar:bin/../lib/netty-codec-4.1.130.Final.jar:bin/../lib/netty-common-4.1.130.Final.jar:bin/../lib/netty-handler-4.1.130.Final.jar:bin/../lib/netty-handler-proxy-4.1.130.Final.jar:bin/../lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:bin/../lib/netty-resolver-4.1.130.Final.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:bin/../lib/netty-tcnative-classes-2.0.70.Final.jar:bin/../lib/netty-transport-4.1.130.Final.jar:bin/../lib/netty-transport-classes-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-classes-kqueue-4.1.130.Final.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-native-unix-common-4.1.130.Final.jar:bin/../lib/ohc-core-0.5.1.jar:bin/../lib/ohc-core-j8-0.5.1.jar:bin/../lib/posix-2.24ea4.jar:bin/../lib/psjava-0.1.19.jar:bin/../lib/semver4j-3.1.0.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/sjk-cli-0.14.jar:bin/../lib/sjk-core-0.14.jar:bin/../lib/sjk-json-0.14.jar:bin/../lib/sjk-stacktrace-0.14.jar:bin/../lib/slf4j-api-2.0.17.jar:bin/../lib/snakeyaml-2.1.jar:bin/../lib/snappy-java-1.1.10.4.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/zstd-jni-1.5.7-2.jar:bin/../lib/jsr223/*/*.jar::bin/../lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar
+[2026-11-12T03:52:53Z 1794455573048] rc=0
+[2026-11-12T03:52:53Z 1794455573049] sampler pid=1029118
+[2026-11-12T03:52:53Z 1794455573049] PHASE idle_start 1794455573049
+[2026-11-12T03:52:53Z 1794455573049] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:52:53Z 1794455573345] rc=0
+[2026-11-12T03:52:53Z 1794455573345] + echo idle $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:52:53Z 1794455573349] rc=0
+[2026-11-12T03:53:23Z 1794455603078] PHASE stress_start 1794455603078
+[2026-11-12T03:53:23Z 1794455603079] + timeout 180 tools/bin/cassandra-stress write n=2000000 cl=ONE -rate threads=64 -col "n=FIXED(1)" "size=FIXED(4096)" -port native=9442 jmx=7599 -node 127.0.0.1 -errors ignore -schema "replication(factor=1)"
+[2026-11-12T03:53:23Z 1794455603080] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:53:23Z 1794455603268] rc=0
+[2026-11-12T03:53:23Z 1794455603268] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:53:23Z 1794455603272] rc=0
+[2026-11-12T03:53:53Z 1794455633303] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:53:53Z 1794455633498] rc=0
+[2026-11-12T03:53:53Z 1794455633498] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:53:53Z 1794455633502] rc=0
+[2026-11-12T03:54:23Z 1794455663532] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:54:23Z 1794455663724] rc=0
+[2026-11-12T03:54:23Z 1794455663724] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:54:23Z 1794455663727] rc=0
+[2026-11-12T03:54:53Z 1794455693754] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:54:53Z 1794455693957] rc=0
+[2026-11-12T03:54:53Z 1794455693957] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:54:53Z 1794455693961] rc=0
+[2026-11-12T03:55:23Z 1794455723987] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:55:24Z 1794455724246] rc=0
+[2026-11-12T03:55:24Z 1794455724246] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:55:24Z 1794455724258] rc=0
+[2026-11-12T03:55:54Z 1794455754287] + jcmd 1025405 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T03:55:54Z 1794455754577] rc=0
+[2026-11-12T03:55:54Z 1794455754577] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T03:55:54Z 1794455754580] rc=0
+[2026-11-12T03:56:23Z 1794455783605] PHASE stress_end 1794455783605 rc=124
+[2026-11-12T03:56:27Z 1794455787775] + grep -E "^ERROR" /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort | uniq -c | sort -rn | head -5; grep -c "^WARN" /mydata/jingsong-cass-s4/o44/node/logs/system.log
+6
+[2026-11-12T03:56:27Z 1794455787778] rc=0
+[2026-11-12T03:56:27Z 1794455787778] + bin/nodetool -p 7599 tpstats | head -30
+Pool Name                      Active Pending Completed Blocked All time blocked
+MutationStage                  32     96      114858    0       0               
+ReadStage                      0      0       59        0       0               
+CompactionExecutor             0      0       67        0       0               
+SecondaryIndexExecutor         0      0       0         0       0               
+MemtableReclaimMemory          0      0       38        0       0               
+PendingRangeCalculator         0      0       2         0       0               
+GossipStage                    0      0       0         0       0               
+SecondaryIndexManagement       0      0       1         0       0               
+HintsDispatcher                0      0       0         0       0               
+StatusPropagationExecutor      0      0       0         0       0               
+MigrationStage                 0      0       6         0       0               
+MemtablePostFlush              1      1       78        0       0               
+PerDiskMemtableFlushWriter_0   0      0       37        0       0               
+ValidationExecutor             0      0       0         0       0               
+Sampler                        0      0       0         0       0               
+ViewBuildExecutor              0      0       0         0       0               
+MemtableFlushWriter            0      0       40        0       0               
+CacheCleanupExecutor           0      0       0         0       0               
+Native-Transport-Auth-Requests 0      0       0         0       0               
+Native-Transport-Requests      128    0       394659    0       0               
+
+Latencies waiting in queue (micros) per dropped message types
+Message type                      Dropped     50%      95%      99%      Max
+READ_RSP                          0           0.0      0.0      0.0      0.0
+RANGE_REQ                         0           0.0      0.0      0.0      0.0
+PING_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_RSP          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_RSP     0           0.0      0.0      0.0      0.0
+_SAMPLE                           0           0.0      0.0      0.0      0.0
+[2026-11-12T03:56:29Z 1794455789406] rc=0
+[2026-11-12T03:56:29Z 1794455789406] + bin/nodetool -p 7599 drain
+[2026-11-12T03:58:29Z 1794455909505] rc=timeout
+[2026-11-12T03:58:29Z 1794455909506] kill SIGTERM 1025405
+[2026-11-12T03:59:29Z 1794455969577] kill SIGKILL 1025405
+[2026-11-12T03:59:29Z 1794455969579] node stopped: True
+[2026-11-12T03:59:29Z 1794455969580] + ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+1068334 /bin/sh -c ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+[2026-11-12T03:59:29Z 1794455969601] rc=0
+[2026-11-12T03:59:29Z 1794455969601] === value mmap6: N=6 compression=none (mmap); /mydata free 652.1 GiB
+[2026-11-12T03:59:29Z 1794455969674] + bin/cassandra -p /mydata/jingsong-cass-s4/o44/node/pid > /mydata/jingsong-cass-s4/o44/cluster/run1/start-mmap6.out 2>&1
+[2026-11-12T03:59:29Z 1794455969904] rc=0
+[2026-11-12T04:00:08Z 1794456008423] node up pid=1068468
+[2026-11-12T04:00:08Z 1794456008423] + ps -o pid,args -p 1068468 | tr " " "\n" | grep -E "Xmx|Xms|MaxDirectMemorySize|NativeMemoryTracking"
+-Xms4G
+-Xmx4G
+-XX:MaxDirectMemorySize=3G
+-XX:NativeMemoryTracking=summary
+[2026-11-12T04:00:08Z 1794456008443] rc=0
+[2026-11-12T04:00:08Z 1794456008443] + grep -E "commitlog_max_compression_buffers_in_pool=|commitlog_compression=|commitlog_segment_size=|commitlog_disk_access_mode=|native_transport_port=|storage_port=" -o /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort -u; grep -oE "commitlog_max_compression_buffers_in_pool=[0-9]+|commitlog_compression=[^;]*;" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -3
+commitlog_compression=
+commitlog_disk_access_mode=
+commitlog_max_compression_buffers_in_pool=
+commitlog_segment_size=
+native_transport_port=
+storage_port=
+commitlog_compression=null;
+commitlog_max_compression_buffers_in_pool=6
+[2026-11-12T04:00:08Z 1794456008448] rc=0
+[2026-11-12T04:00:08Z 1794456008448] + grep -i "Zstd\|commit log disk access mode\|DiskAccessMode" /mydata/jingsong-cass-s4/o44/node/logs/system.log | head -5
+INFO  [main] 2026-11-12T03:59:32,003 DatabaseDescriptor.java:551 - DiskAccessMode is standard, indexAccessMode is mmap
+INFO  [main] 2026-11-12T03:59:32,562 CassandraDaemon.java:617 - Classpath: /mydata/jingsong-cass-s4/o44/node/conf:bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:bin/../lib/HdrHistogram-2.1.12.jar:bin/../lib/ST4-4.0.8.jar:bin/../lib/affinity-3.23.3.jar:bin/../lib/agrona-1.17.1.jar:bin/../lib/airline-0.8.jar:bin/../lib/antlr-runtime-3.5.2.jar:bin/../lib/asm-9.4.jar:bin/../lib/big-math-2.3.0.jar:bin/../lib/caffeine-3.1.8.jar:bin/../lib/cassandra-driver-core-3.12.1-shaded.jar:bin/../lib/chronicle-bytes-2.23.33.jar:bin/../lib/chronicle-core-2.23.36.jar:bin/../lib/chronicle-queue-5.23.37.jar:bin/../lib/chronicle-threads-2.23.25.jar:bin/../lib/chronicle-wire-2.23.39.jar:bin/../lib/commons-cli-1.5.0.jar:bin/../lib/commons-lang3-3.18.0.jar:bin/../lib/commons-math3-3.2.jar:bin/../lib/concurrent-trees-2.4.0.jar:bin/../lib/ecj-3.33.0.jar:bin/../lib/failureaccess-1.0.1.jar:bin/../lib/guava-32.0.1-jre.jar:bin/../lib/high-scale-lib-1.0.6.jar:bin/../lib/hppc-0.8.1.jar:bin/../lib/ipaddress-5.3.3.jar:bin/../lib/j2objc-annotations-1.3.jar:bin/../lib/jackson-annotations-2.19.2.jar:bin/../lib/jackson-core-2.19.2.jar:bin/../lib/jackson-databind-2.19.2.jar:bin/../lib/jackson-datatype-jsr310-2.19.2.jar:bin/../lib/jamm-0.4.0.jar:bin/../lib/javax.inject-1.jar:bin/../lib/jbcrypt-0.4.jar:bin/../lib/jcl-over-slf4j-2.0.17.jar:bin/../lib/jcommander-1.30.jar:bin/../lib/jctools-core-3.1.0.jar:bin/../lib/jffi-1.3.11-native.jar:bin/../lib/jffi-1.3.11.jar:bin/../lib/jna-5.13.0.jar:bin/../lib/jna-platform-5.13.0.jar:bin/../lib/jnr-a64asm-1.0.0.jar:bin/../lib/jnr-constants-0.10.4.jar:bin/../lib/jnr-ffi-2.2.13.jar:bin/../lib/jnr-x86asm-1.0.2.jar:bin/../lib/jsr305-2.0.2.jar:bin/../lib/jvector-1.0.2.jar:bin/../lib/jvm-attach-api-1.5.jar:bin/../lib/log4j-over-slf4j-2.0.17.jar:bin/../lib/logback-classic-1.5.18.jar:bin/../lib/logback-core-1.5.18.jar:bin/../lib/lucene-analysis-common-9.7.0.jar:bin/../lib/lucene-core-9.7.0.jar:bin/../lib/lz4-java-1.10.1.jar:bin/../lib/metrics-core-4.2.28.jar:bin/../lib/metrics-jvm-4.2.19.jar:bin/../lib/metrics-logback-4.2.19.jar:bin/../lib/mxdump-0.14.jar:bin/../lib/netty-all-4.1.130.Final.jar:bin/../lib/netty-buffer-4.1.130.Final.jar:bin/../lib/netty-codec-4.1.130.Final.jar:bin/../lib/netty-common-4.1.130.Final.jar:bin/../lib/netty-handler-4.1.130.Final.jar:bin/../lib/netty-handler-proxy-4.1.130.Final.jar:bin/../lib/netty-handler-ssl-ocsp-4.1.130.Final.jar:bin/../lib/netty-resolver-4.1.130.Final.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar:bin/../lib/netty-tcnative-boringssl-static-2.0.70.Final.jar:bin/../lib/netty-tcnative-classes-2.0.70.Final.jar:bin/../lib/netty-transport-4.1.130.Final.jar:bin/../lib/netty-transport-classes-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-classes-kqueue-4.1.130.Final.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-aarch_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final-linux-x86_64.jar:bin/../lib/netty-transport-native-epoll-4.1.130.Final.jar:bin/../lib/netty-transport-native-unix-common-4.1.130.Final.jar:bin/../lib/ohc-core-0.5.1.jar:bin/../lib/ohc-core-j8-0.5.1.jar:bin/../lib/posix-2.24ea4.jar:bin/../lib/psjava-0.1.19.jar:bin/../lib/semver4j-3.1.0.jar:bin/../lib/sigar-1.6.4.jar:bin/../lib/sjk-cli-0.14.jar:bin/../lib/sjk-core-0.14.jar:bin/../lib/sjk-json-0.14.jar:bin/../lib/sjk-stacktrace-0.14.jar:bin/../lib/slf4j-api-2.0.17.jar:bin/../lib/snakeyaml-2.1.jar:bin/../lib/snappy-java-1.1.10.4.jar:bin/../lib/stream-2.5.2.jar:bin/../lib/zstd-jni-1.5.7-2.jar:bin/../lib/jsr223/*/*.jar::bin/../lib/x86_64/AmazonCorrettoCryptoProvider-2.2.0-linux-x86_64.jar
+[2026-11-12T04:00:08Z 1794456008450] rc=0
+[2026-11-12T04:00:08Z 1794456008451] sampler pid=1072116
+[2026-11-12T04:00:08Z 1794456008451] PHASE idle_start 1794456008451
+[2026-11-12T04:00:08Z 1794456008451] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:00:08Z 1794456008761] rc=0
+[2026-11-12T04:00:08Z 1794456008761] + echo idle $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:00:08Z 1794456008765] rc=0
+[2026-11-12T04:00:38Z 1794456038477] PHASE stress_start 1794456038477
+[2026-11-12T04:00:38Z 1794456038477] + timeout 180 tools/bin/cassandra-stress write n=2000000 cl=ONE -rate threads=64 -col "n=FIXED(1)" "size=FIXED(4096)" -port native=9442 jmx=7599 -node 127.0.0.1 -errors ignore -schema "replication(factor=1)"
+[2026-11-12T04:00:38Z 1794456038478] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:00:38Z 1794456038677] rc=0
+[2026-11-12T04:00:38Z 1794456038677] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:00:38Z 1794456038681] rc=0
+[2026-11-12T04:01:08Z 1794456068712] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:01:08Z 1794456068910] rc=0
+[2026-11-12T04:01:09Z 1794456069063] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:01:09Z 1794456069067] rc=0
+[2026-11-12T04:01:39Z 1794456099097] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:01:39Z 1794456099384] rc=0
+[2026-11-12T04:01:39Z 1794456099642] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:01:39Z 1794456099794] rc=0
+[2026-11-12T04:02:09Z 1794456129861] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:02:10Z 1794456130211] rc=0
+[2026-11-12T04:02:10Z 1794456130211] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:02:10Z 1794456130234] rc=0
+[2026-11-12T04:02:40Z 1794456160266] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:02:40Z 1794456160469] rc=0
+[2026-11-12T04:02:40Z 1794456160469] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:02:40Z 1794456160473] rc=0
+[2026-11-12T04:03:10Z 1794456190507] + jcmd 1068468 VM.native_memory summary | grep -E "^-  *(Other|Internal)|Total:" ; echo epoch_ms=$(date +%s%3N)
+[2026-11-12T04:03:10Z 1794456190734] rc=0
+[2026-11-12T04:03:10Z 1794456190734] + echo stress $(date +%s%3N) $(du -sb /mydata/jingsong-cass-s4/o44/node | cut -f1)
+[2026-11-12T04:03:10Z 1794456190738] rc=0
+[2026-11-12T04:03:11Z 1794456191739] PHASE stress_end 1794456191739 rc=0
+[2026-11-12T04:03:15Z 1794456195206] + grep -E "^ERROR" /mydata/jingsong-cass-s4/o44/node/logs/system.log | sort | uniq -c | sort -rn | head -5; grep -c "^WARN" /mydata/jingsong-cass-s4/o44/node/logs/system.log
+6
+[2026-11-12T04:03:15Z 1794456195209] rc=0
+[2026-11-12T04:03:15Z 1794456195209] + bin/nodetool -p 7599 tpstats | head -30
+Pool Name                      Active Pending Completed Blocked All time blocked
+MutationStage                  0      0       789173    0       0               
+ReadStage                      0      0       38        0       0               
+CompactionExecutor             2      0       75        0       0               
+SecondaryIndexExecutor         0      0       0         0       0               
+MemtableReclaimMemory          0      0       62        0       0               
+PendingRangeCalculator         0      0       2         0       0               
+GossipStage                    0      0       0         0       0               
+SecondaryIndexManagement       0      0       1         0       0               
+HintsDispatcher                0      0       0         0       0               
+StatusPropagationExecutor      0      0       0         0       0               
+MigrationStage                 0      0       6         0       0               
+MemtablePostFlush              0      0       102       0       0               
+PerDiskMemtableFlushWriter_0   0      0       59        0       0               
+ValidationExecutor             0      0       0         0       0               
+Sampler                        0      0       0         0       0               
+ViewBuildExecutor              0      0       0         0       0               
+MemtableFlushWriter            0      0       62        0       0               
+CacheCleanupExecutor           0      0       0         0       0               
+Native-Transport-Auth-Requests 0      0       0         0       0               
+Native-Transport-Requests      0      0       2050257   0       0               
+
+Latencies waiting in queue (micros) per dropped message types
+Message type                      Dropped     50%      95%      99%      Max
+READ_RSP                          0           0.0      0.0      0.0      0.0
+RANGE_REQ                         0           0.0      0.0      0.0      0.0
+PING_REQ                          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_REMOTE_RSP          0           0.0      0.0      0.0      0.0
+PAXOS2_COMMIT_AND_PREPARE_RSP     0           0.0      0.0      0.0      0.0
+_SAMPLE                           0           0.0      0.0      0.0      0.0
+[2026-11-12T04:03:16Z 1794456196634] rc=0
+[2026-11-12T04:03:16Z 1794456196634] + bin/nodetool -p 7599 drain
+[2026-11-12T04:04:22Z 1794456262007] rc=0
+[2026-11-12T04:04:22Z 1794456262007] kill SIGTERM 1068468
+[2026-11-12T04:04:23Z 1794456263008] node stopped: True
+[2026-11-12T04:04:23Z 1794456263009] + ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+1084235 /bin/bash -c source /users/jason92/.claude/shell-snapshots/snapshot-bash-1794449798279-1ekzvv.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'which'; \builtin unset -f -- 'which'; } >/dev/null 2>&1 || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'O=/mydata/jingsong-cass-s4/o44/cluster/run1; timeout 300 bash -c "until tail -3 $O/session.log | grep -q '"'"'end cluster run'"'"'; do sleep 5; done"; tail -6 $O/session.log; echo "o44 cluster-run-end $(date -u +%FT%TZ)" >> /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/timing/ext-A-batch-1.log; ps -C java -o pid,args | grep -E "o44" | cut -c1-100 || echo "no o44 java"' < /dev/null && pwd -P >| /tmp/claude-e5ae-cwd
+1090646 /bin/sh -c ps -eo pid,args | grep "[j]ava" | grep -E "o44" || echo "no o44 java left"
+[2026-11-12T04:04:23Z 1794456263036] rc=0
+[2026-11-12T04:04:23Z 1794456263036] stop: no live node pid
+[2026-11-12T04:04:23Z 1794456263036] + ps -eo pid,args | grep "[C]assandraDaemon" | grep -c "o44" || true
+0
+[2026-11-12T04:04:23Z 1794456263066] rc=0
+[2026-11-12T04:04:23Z 1794456263066] end cluster run

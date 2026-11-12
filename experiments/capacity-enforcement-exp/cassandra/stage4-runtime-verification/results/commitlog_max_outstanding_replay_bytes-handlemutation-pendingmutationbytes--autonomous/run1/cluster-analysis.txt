@@ -1,0 +1,26 @@
+b16m: L=16777216 N=24048 replay_ms=40281 samples_before_complete=18 (after 'Replaying': 15) max_Mutation=256 max_PartitionUpdate=256 max_heap_used=470827008 max_hist_total=388038360 opts=[('bytes', '16777216'), ('count', '100000000')]
+   Mutation series: [0, 0, 0, 0, 256, 0, 256, 256, 0, 256, 0, 256, 0, 256, 1, 0, 0, 0]
+b64m: L=67108864 N=24048 replay_ms=35534 samples_before_complete=13 (after 'Replaying': 13) max_Mutation=1024 max_PartitionUpdate=1024 max_heap_used=958952448 max_hist_total=489372056 opts=[('bytes', '67108864'), ('count', '100000000')]
+   Mutation series: [1, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024, 0, 0]
+b256m: L=268435456 N=24048 replay_ms=32539 samples_before_complete=15 (after 'Replaying': 12) max_Mutation=4093 max_PartitionUpdate=4093 max_heap_used=1155776512 max_hist_total=894524448 opts=[('bytes', '268435456'), ('count', '100000000')]
+   Mutation series: [0, 0, 0, 4093, 4093, 4093, 4093, 4093, 2592, 4093, 4093, 3665, 3665, 0, 0]
+b4g: L=4294967296 N=24048 replay_ms=34070 samples_before_complete=12 (after 'Replaying': 12) max_Mutation=19933 max_PartitionUpdate=19933 max_heap_used=3002074112 max_hist_total=2985297904 opts=[('bytes', '4294967296'), ('count', '100000000')]
+   Mutation series: [1244, 19933, 19933, 15866, 15866, 15866, 11799, 7732, 7732, 3665, 3665, 0]
+c16: L=None N=24048 replay_ms=34678 samples_before_complete=16 (after 'Replaying': 13) max_Mutation=17 max_PartitionUpdate=17 max_heap_used=390052864 max_hist_total=356499400 opts=[('bytes', '4294967296'), ('count', '16')]
+   Mutation series: [0, 0, 0, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 0, 0]
+EXPECTED: b16m max Mutation <= L/s+1+10: PASS (max=256 L/s=255.8)
+EXPECTED: b16m max Mutation >= 0.5 L/s (limit reached): PASS (max=256 0.5L/s=127.9)
+EXPECTED: b64m max Mutation <= L/s+1+10: PASS (max=1024 L/s=1023.0)
+EXPECTED: b64m max Mutation >= 0.5 L/s (limit reached): PASS (max=1024 0.5L/s=511.5)
+EXPECTED: b256m max Mutation <= L/s+1+10: PASS (max=4093 L/s=4092.0)
+EXPECTED: b256m max Mutation >= 0.5 L/s (limit reached): PASS (max=4093 0.5L/s=2046.0)
+EXPECTED: b4g max Mutation >= 4 x b256m: PASS (19933 vs 4x4093)
+EXPECTED: b4g max used > b256m max used: PASS (3002074112 vs 1155776512)
+EXPECTED: b256m max used >= b16m + 200 MB: PASS (delta=684949504)
+EXPECTED: c16 max Mutation <= 17+10: PASS (max=17)
+EXPECTED: b16m N >= 23500: PASS (N=24048)
+EXPECTED: b64m N >= 23500: PASS (N=24048)
+EXPECTED: b256m N >= 23500: PASS (N=24048)
+EXPECTED: b4g N >= 23500: PASS (N=24048)
+EXPECTED: c16 N >= 23500: PASS (N=24048)
+MATCHED: B3g row 1 (claim confirmed)

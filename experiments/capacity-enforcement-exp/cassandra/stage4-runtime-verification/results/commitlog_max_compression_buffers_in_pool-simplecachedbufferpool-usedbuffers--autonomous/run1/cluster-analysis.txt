@@ -1,0 +1,21 @@
+# N3: B0=203.4 MiB P=341.2 MiB P-B0=137.8 MiB (=2.15 S) peak at +50 s, 95% at +11 s; stress 261 s; samples idle/window 30/262; dWaitingOnSegmentAllocation=449 dWaitingOnCommit=0; jstack in window 26 (allocator seen 26), blocked-state dumps 24, max writers in awaitAvailableSegment 33; direct count 89->271; BufferPool networking 0.0->8.0 MiB, chunk-cache 8.0->8.0 MiB; mapped 0.0->1.9 MiB; heap max 2153 MiB
+# N6: B0=203.4 MiB P=533.2 MiB P-B0=329.8 MiB (=5.15 S) peak at +260 s, 95% at +13 s; stress 263 s; samples idle/window 30/264; dWaitingOnSegmentAllocation=449 dWaitingOnCommit=0; jstack in window 26 (allocator seen 26), blocked-state dumps 24, max writers in awaitAvailableSegment 32; direct count 89->267; BufferPool networking 0.0->8.0 MiB, chunk-cache 8.0->8.0 MiB; mapped 0.0->4.8 MiB; heap max 3045 MiB
+# N12: B0=203.4 MiB P=981.8 MiB P-B0=778.4 MiB (=12.16 S) peak at +262 s, 95% at +51 s; stress 263 s; samples idle/window 30/263; dWaitingOnSegmentAllocation=224 dWaitingOnCommit=0; jstack in window 26 (allocator seen 26), blocked-state dumps 12, max writers in awaitAvailableSegment 32; direct count 89->317; BufferPool networking 0.0->8.0 MiB, chunk-cache 8.0->8.0 MiB; mapped 0.0->5.1 MiB; heap max 3280 MiB
+# C1: B0=203.4 MiB P=917.5 MiB P-B0=714.1 MiB (=11.16 S) peak at +232 s, 95% at +17 s; stress 254 s; samples idle/window 30/254; dWaitingOnSegmentAllocation=1056 dWaitingOnCommit=0; jstack in window 25 (allocator seen 25), blocked-state dumps 8, max writers in awaitAvailableSegment 32; direct count 89->278; BufferPool networking 0.0->8.0 MiB, chunk-cache 8.0->8.0 MiB; mapped 0.0->14.6 MiB; heap max 4041 MiB
+# C2: B0=75.4 MiB P=85.5 MiB P-B0=10.1 MiB (=0.16 S) peak at +4 s, 95% at +4 s; stress 254 s; samples idle/window 30/255; dWaitingOnSegmentAllocation=0 dWaitingOnCommit=0; jstack in window 25 (allocator seen 25), blocked-state dumps 0, max writers in awaitAvailableSegment 0; direct count 86->116; BufferPool networking 0.0->8.0 MiB, chunk-cache 8.0->8.0 MiB; mapped 128.0->967.7 MiB; heap max 4048 MiB
+EXPECTED PASS: B3f ceiling N=3: P-B0 <= (N-2)S + S + 64 MiB = 192 MiB (got 137.8)
+EXPECTED PASS: B3f plateau N=3: P-B0 >= (N-3)S = 0 MiB (got 137.8)
+EXPECTED PASS: B3f writers blocked N=3: dWOSA=449 >= 1 and blocked-state jstack dumps=24 >= 1
+EXPECTED PASS: B3f ceiling N=6: P-B0 <= (N-2)S + S + 64 MiB = 384 MiB (got 329.8)
+EXPECTED PASS: B3f plateau N=6: P-B0 >= (N-3)S = 192 MiB (got 329.8)
+EXPECTED PASS: B3f writers blocked N=6: dWOSA=449 >= 1 and blocked-state jstack dumps=24 >= 1
+EXPECTED FAIL: B3f ceiling N=12: P-B0 <= (N-2)S + S + 64 MiB = 768 MiB (got 778.4)
+EXPECTED PASS: B3f plateau N=12: P-B0 >= (N-3)S = 576 MiB (got 778.4)
+EXPECTED PASS: B3f writers blocked N=12: dWOSA=224 >= 1 and blocked-state jstack dumps=12 >= 1
+EXPECTED PASS: B3f slope P(6)-P(3) = 192 +-64 MiB (got 192.0; B0-differenced 192.0)
+EXPECTED FAIL: B3f slope P(12)-P(6) = 384 +-64 MiB (got 448.6; B0-differenced 448.6)
+EXPECTED FAIL: B3f C1 (LZ4, N=12): P-B0 <= 3S = 192 MiB (got 714.1)
+EXPECTED FAIL: B3f C1 writers not blocked (dWOSA=1056, blocked-state dumps=8)
+EXPECTED PASS: B3f C2 (mmap): P-B0 < 64 MiB (got 10.1); mapped 128->968 MiB
+# summary: 10 PASS, 4 FAIL
+MATCHED B3g row 2 (claim wrong: buffers escape the cap)

@@ -1,0 +1,57 @@
+w = 384 B (unit EMPTY + TIMEUUID_SIZE); d = 592.4 B (unit deep per entry, 16KiB addPeer=true, final sample)
+--- s16k: S=16384 P=42 rebuild failures=0 size line ok=True
+   i= 25 n1: vtable=  22 live=  22 live_bytes=  1408 heap=68.79  n2: vtable=  22 live=  22 live_bytes=  1408 heap=70.44
+   i= 50 n1: vtable=  34 live=  34 live_bytes=  2176 heap=69.38  n2: vtable=  34 live=  34 live_bytes=  2176 heap=71.19
+   i= 75 n1: vtable=  40 live=  40 live_bytes=  2560 heap=70.02  n2: vtable=  40 live=  40 live_bytes=  2560 heap=71.67
+   i=100 n1: vtable=  40 live=  40 live_bytes=  2560 heap=70.48  n2: vtable=  40 live=  40 live_bytes=  2560 heap=72.18
+   i=125 n1: vtable=  40 live=  40 live_bytes=  2560 heap=71.02  n2: vtable=  40 live=  40 live_bytes=  2560 heap=72.68
+   i=150 n1: vtable=  40 live=  40 live_bytes=  2560 heap=71.47  n2: vtable=  40 live=  40 live_bytes=  2560 heap=73.16
+--- s32k: S=32768 P=85 rebuild failures=0 size line ok=True
+   i= 25 n1: vtable=  25 live=  25 live_bytes=  1600 heap=68.81  n2: vtable=  25 live=  25 live_bytes=  1600 heap=70.50
+   i= 50 n1: vtable=  50 live=  50 live_bytes=  3200 heap=69.49  n2: vtable=  50 live=  50 live_bytes=  3200 heap=71.30
+   i= 75 n1: vtable=  70 live=  70 live_bytes=  4480 heap=69.95  n2: vtable=  70 live=  70 live_bytes=  4480 heap=71.88
+   i=100 n1: vtable=  84 live=  84 live_bytes=  5376 heap=72.79  n2: vtable=  84 live=  84 live_bytes=  5376 heap=72.49
+   i=125 n1: vtable=  84 live=  84 live_bytes=  5376 heap=73.24  n2: vtable=  84 live=  84 live_bytes=  5376 heap=73.00
+   i=150 n1: vtable=  84 live=  84 live_bytes=  5376 heap=73.78  n2: vtable=  84 live=  84 live_bytes=  5376 heap=73.50
+--- s4m: S=4194304 P=10922 rebuild failures=0 size line ok=True
+   i= 25 n1: vtable=  25 live=  25 live_bytes=  1600 heap=68.79  n2: vtable=  25 live=  25 live_bytes=  1600 heap=71.45
+   i= 50 n1: vtable=  50 live=  50 live_bytes=  3200 heap=69.29  n2: vtable=  50 live=  50 live_bytes=  3200 heap=72.21
+   i= 75 n1: vtable=  75 live=  75 live_bytes=  4800 heap=69.75  n2: vtable=  75 live=  75 live_bytes=  4800 heap=72.70
+   i=100 n1: vtable= 100 live= 100 live_bytes=  6400 heap=70.42  n2: vtable= 100 live= 100 live_bytes=  6400 heap=73.32
+   i=125 n1: vtable= 125 live= 125 live_bytes=  8000 heap=70.88  n2: vtable= 125 live= 125 live_bytes=  8000 heap=73.83
+   i=150 n1: vtable= 150 live= 150 live_bytes=  9600 heap=71.35  n2: vtable= 150 live= 150 live_bytes=  9600 heap=74.32
+--- s4m-nostats: S=4194304 P=10922 rebuild failures=0 size line ok=True
+   i= 25 n1: vtable=   0 live=   0 live_bytes=     0 heap=68.86  n2: vtable=   0 live=   0 live_bytes=     0 heap=71.52
+   i= 50 n1: vtable=   0 live=   0 live_bytes=     0 heap=69.35  n2: vtable=   0 live=   0 live_bytes=     0 heap=72.08
+   i= 75 n1: vtable=   0 live=   0 live_bytes=     0 heap=69.89  n2: vtable=   0 live=   0 live_bytes=     0 heap=72.65
+   i=100 n1: vtable=   0 live=   0 live_bytes=     0 heap=70.44  n2: vtable=   0 live=   0 live_bytes=     0 heap=73.16
+   i=125 n1: vtable=   0 live=   0 live_bytes=     0 heap=70.98  n2: vtable=   0 live=   0 live_bytes=     0 heap=73.76
+   i=150 n1: vtable=   0 live=   0 live_bytes=     0 heap=71.43  n2: vtable=   0 live=   0 live_bytes=     0 heap=74.33
+--- validity (C1, C2)
+EXPECTED: PASS  no rebuild failed
+EXPECTED: PASS  size log line as configured on both nodes, every label
+EXPECTED: PASS  4MiB n1: count = i at every sample [25, 50, 75, 100, 125, 150]
+EXPECTED: PASS  4MiB n2: count = i at every sample [25, 50, 75, 100, 125, 150]
+EXPECTED: PASS  stats disabled n1: count = live = 0
+EXPECTED: PASS  stats disabled n2: count = live = 0
+--- binding values (S4-A8)
+EXPECTED: PASS  s16k n1: flat |count(150) - count(125)| = |40 - 40| <= 4
+EXPECTED: PASS  s16k n1: count(150) 40 <= P 42
+EXPECTED: PASS  s16k n1: live*d = 40*592.4 = 23696 <= 2S = 32768
+   secondary: s16k n1 in band 0.7P=29.4 <= 40 <= 42: True
+EXPECTED: PASS  s16k n2: flat |count(150) - count(125)| = |40 - 40| <= 4
+EXPECTED: PASS  s16k n2: count(150) 40 <= P 42
+EXPECTED: PASS  s16k n2: live*d = 40*592.4 = 23696 <= 2S = 32768
+   secondary: s16k n2 in band 0.7P=29.4 <= 40 <= 42: True
+EXPECTED: PASS  s32k n1: flat |count(150) - count(125)| = |84 - 84| <= 4
+EXPECTED: PASS  s32k n1: count(150) 84 <= P 85
+EXPECTED: PASS  s32k n1: live*d = 84*592.4 = 49762 <= 2S = 65536
+   secondary: s32k n1 in band 0.7P=59.5 <= 84 <= 85: True
+EXPECTED: PASS  s32k n2: flat |count(150) - count(125)| = |84 - 84| <= 4
+EXPECTED: PASS  s32k n2: count(150) 84 <= P 85
+EXPECTED: PASS  s32k n2: live*d = 84*592.4 = 49762 <= 2S = 65536
+   secondary: s32k n2 in band 0.7P=59.5 <= 84 <= 85: True
+EXPECTED: PASS  live - count <= 2 at every sample (secondary)
+--- matched B3g row (S4-A9, first match)
+MATCHED: C6 Confirmed - caps; secondary: in band 4/4, live-count<=2 48/48
+summary: 19 PASS, 0 FAIL

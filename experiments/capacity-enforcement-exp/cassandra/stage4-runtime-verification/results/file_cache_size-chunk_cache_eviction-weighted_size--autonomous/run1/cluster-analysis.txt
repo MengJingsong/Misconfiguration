@@ -1,0 +1,50 @@
+F=32 read 65 s, 27 jmx samples (11 in last 60 s), 0 cql rows
+  capacity None (cql None); size max None, plateau(last 60 s median) None, cql size max None; samples over cap+32 chunks: 0
+  entries max None end None; misses None; evictions (misses - entries) None
+  ccpool Size max 16777216 (16.00 MiB), Used max 0.05 MiB, Overflow max 0, Capacity 32.00 MiB; netpool Size max 8.00 MiB
+  direct MemoryUsed read-run (last <= 60 s) mean 63.63 MiB (delta vs F=32 0.00 MiB); max 63.92 MiB; NMT Other delta 0.00 MiB; RSS delta 0.00 MiB
+  info: unclipped-window delta 0.00 MiB; 60 s tail (steady) mean 63.92 MiB, tail delta 0.00 MiB
+F=96 read 51 s, 24 jmx samples (10 in last 60 s), 24 cql rows
+  capacity 67108864 (cql 67108864); size max 67108864, plateau(last 60 s median) 67108864.0, cql size max 67108864; samples over cap+32 chunks: 0
+  entries max 4102 end 4096; misses 3187637; evictions (misses - entries) 3183541
+  ccpool Size max 100663296 (96.00 MiB), Used max 64.05 MiB, Overflow max 0, Capacity 96.00 MiB; netpool Size max 8.00 MiB
+  direct MemoryUsed read-run (last <= 60 s) mean 143.61 MiB (delta vs F=32 79.98 MiB); max 143.96 MiB; NMT Other delta 51.88 MiB; RSS delta 27.70 MiB
+  info: unclipped-window delta 65.13 MiB; 60 s tail (steady) mean 143.96 MiB, tail delta 80.04 MiB
+F=288 read 49 s, 23 jmx samples (9 in last 60 s), 23 cql rows
+  capacity 268435456 (cql 268435456); size max 268435456, plateau(last 60 s median) 268435456, cql size max 268435456; samples over cap+32 chunks: 0
+  entries max 16385 end 16384; misses 2933159; evictions (misses - entries) 2916775
+  ccpool Size max 301989888 (288.00 MiB), Used max 256.06 MiB, Overflow max 0, Capacity 288.00 MiB; netpool Size max 8.00 MiB
+  direct MemoryUsed read-run (last <= 60 s) mean 316.99 MiB (delta vs F=32 253.36 MiB); max 336.09 MiB; NMT Other delta 260.07 MiB; RSS delta 247.63 MiB
+  info: unclipped-window delta 205.63 MiB; 60 s tail (steady) mean 336.08 MiB, tail delta 272.16 MiB
+F=2080 read 55 s, 25 jmx samples (11 in last 60 s), 25 cql rows
+  capacity 2147483648 (cql 2147483648); size max 1590263808, plateau(last 60 s median) 1590263808, cql size max 1590263808; samples over cap+32 chunks: 0
+  entries max 97062 end 97062; misses 97038; evictions (misses - entries) -24
+  ccpool Size max 1593835520 (1520.00 MiB), Used max 1516.59 MiB, Overflow max 0, Capacity 2080.00 MiB; netpool Size max 8.00 MiB
+  direct MemoryUsed read-run (last <= 60 s) mean 1430.92 MiB (delta vs F=32 1367.29 MiB); max 1568.76 MiB; NMT Other delta 1321.36 MiB; RSS delta 1321.87 MiB
+  info: unclipped-window delta 1252.59 MiB; 60 s tail (steady) mean 1568.76 MiB, tail delta 1504.84 MiB
+
+PASS B3f F=32: no chunks row (cache null)
+PASS B3f F=32: chunk-cache pool Size <= 32 MiB
+PASS B3f F=96: capacity_bytes = 67108864
+PASS B3f F=96: size plateau = cap +- 1 chunk
+PASS B3f F=96: size never above cap + 32 x 16 KiB (jmx and cql)
+PASS B3f F=96: ccpool Size <= F MiB
+PASS B3f F=96: direct delta = (F-32) +- 32 MiB (79.98 MiB)
+PASS B3f F=96: OverflowSize ~0 (max 0)
+     AM6 refuted-on-resource test: delta > (F-32)+64 MiB ? False
+     AM6 partial test: delta > F+32 MiB ? False
+PASS B3f F=288: capacity_bytes = 268435456
+PASS B3f F=288: size plateau = cap +- 1 chunk
+PASS B3f F=288: size never above cap + 32 x 16 KiB (jmx and cql)
+PASS B3f F=288: ccpool Size <= F MiB
+PASS B3f F=288: direct delta = (F-32) +- 32 MiB (253.36 MiB)
+PASS B3f F=288: OverflowSize ~0 (max 0)
+     AM6 refuted-on-resource test: delta > (F-32)+64 MiB ? False
+     AM6 partial test: delta > F+32 MiB ? False
+     relation: delta(288) - delta(96) = 173.38 MiB (B3f: ~192 MiB); tail: 192.12 MiB
+PASS B3f F=2080: capacity_bytes = 2147483648
+PASS B3f F=2080: size plateau below capacity
+PASS B3g/AM6 positive control: F=2080 plateau >= 1 GiB
+PASS B3f F=2080: ccpool Size <= 2080 MiB
+     F=2080 direct delta 1367.29 MiB (B3f: ~ +1.5 GiB)
+PASS AM6: F=288 plateau <= 256 MiB + 32 chunks

@@ -1,0 +1,40 @@
+PASS N=3 active=N: active=3 (3s: 3)
+PASS N=3 usedBuffers=N: used=3
+FAIL N=3 directDelta=(N-u0) MiB: u0=2 directDelta=1310771 expected=1048576 tol=262144
+PASS N=3 atLimit: true
+PASS N=3 writer alive and in awaitAvailableSegment: alive=true inAwait=true top=Unsafe.park
+PASS N=3 waitsAfter>=1: waits@5s=1 waitsAfter=20 writerDone=true
+INFO N=3 3s→5s active 3→3 used 3→3 direct 1310771→1310771
+FAIL N=5 active=N: active=3 (3s: 3)
+FAIL N=5 usedBuffers=N: used=3
+FAIL N=5 directDelta=(N-u0) MiB: u0=2 directDelta=1310771 expected=3145728 tol=314572
+PASS N=5 atLimit: true
+PASS N=5 writer alive and in awaitAvailableSegment: alive=true inAwait=true top=Unsafe.park
+PASS N=5 waitsAfter>=1: waits@5s=1 waitsAfter=20 writerDone=true
+INFO N=5 3s→5s active 3→3 used 3→3 direct 1310771→1310771
+FAIL N=8 active=N: active=3 (3s: 3)
+FAIL N=8 usedBuffers=N: used=3
+FAIL N=8 directDelta=(N-u0) MiB: u0=2 directDelta=1310771 expected=6291456 tol=629145
+PASS N=8 atLimit: true
+PASS N=8 writer alive and in awaitAvailableSegment: alive=true inAwait=true top=Unsafe.park
+PASS N=8 waitsAfter>=1: waits@5s=1 waitsAfter=20 writerDone=true
+INFO N=8 3s→5s active 3→3 used 3→3 direct 1310771→1310771
+PASS C2 N=3 usedBuffers=10: used=10
+PASS C2 N=3 directDelta≈10 MiB (±10%): directDelta=10485760
+PASS C2 N=3 atLimit: true
+PASS C2 N=3 retained=4: retained=4
+PASS C2 N=3 N=1 throws IllegalArgumentException: java.lang.IllegalArgumentException
+PASS C2 N=5 usedBuffers=10: used=10
+PASS C2 N=5 directDelta≈10 MiB (±10%): directDelta=10485760
+PASS C2 N=5 atLimit: true
+FAIL C2 N=5 retained=8: retained=4
+PASS C2 N=5 N=1 throws IllegalArgumentException: java.lang.IllegalArgumentException
+PASS C2 N=8 usedBuffers=10: used=10
+PASS C2 N=8 directDelta≈10 MiB (±10%): directDelta=10485760
+PASS C2 N=8 atLimit: true
+FAIL C2 N=8 retained=8: retained=4
+PASS C2 N=8 N=1 throws IllegalArgumentException: java.lang.IllegalArgumentException
+FAIL plateau tracks N (3<5<8): {3: 3, 5: 3, 8: 3}
+C2 rows: retained = N exactly in 0 of 3 values (row "queue not rounded" if 3 of 3 for N=3,5) ; pool caps by itself: False
+MATCHED: Not confirmed (no matching row)
+FAILS: 10

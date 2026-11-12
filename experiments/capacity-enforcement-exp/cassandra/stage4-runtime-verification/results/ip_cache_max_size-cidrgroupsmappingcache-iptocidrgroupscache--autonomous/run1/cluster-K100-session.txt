@@ -1,0 +1,75 @@
++ 2026-11-12T03:02:02Z 1794452522173 step 0: port check (AM2)
++ 2026-11-12T03:02:02Z 1794452522197 step 1: configure K=100, wipe data
+configured K=100
+261:cidr_authorizer:
+262-  class_name: CassandraCIDRAuthorizer
+263-  parameters:
+264-    cidr_authorizer_mode: "MONITOR"
+265-    cidr_groups_cache_refresh_interval: "1440"
+266-    ip_cache_max_size: "100"
+267-  # Below parameters are used only when CIDR authorizer is enabled
+198:authenticator: PasswordAuthenticator
+413:commitlog_directory: /mydata/jingsong-cass-s4/o04/data/commitlog
+711:      - seeds: "127.0.0.1:7300"
+965:storage_port: 7300
+971:ssl_storage_port: 7301
+1028:native_transport_port: 9342
+235:JMX_PORT="7499"
++ 2026-11-12T03:02:02Z 1794452522302 step 2: start node
++ 2026-11-12T03:02:02Z 1794452522601 pid 186858
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.1  114.71 KiB  16      100.0%            6a7e2e48-b3f6-4344-9cb3-20ed2be5bf8e  rack1
+
+running
++ 2026-11-12T03:02:56Z 1794452576362 cidr lines in system.log:
+INFO  [main] 2026-11-12T03:02:04,559 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_filtering_enabled=true; allow_insecure_udfs=false; a
+INFO  [main] 2026-11-12T03:02:48,063 ColumnFamilyStore.java:502 - Initializing system_auth.cidr_permissions
+INFO  [main] 2026-11-12T03:02:48,069 ColumnFamilyStore.java:502 - Initializing system_auth.cidr_groups
+INFO  [main] 2026-11-12T03:02:48,823 AuthCache.java:338 - (Re)initializing CidrPermissionsCache (validity period/update interval/max entries/active update) (2000/2000/1000/false)
++ 2026-11-12T03:02:56Z 1794452576367 step 3: wait for the default role (cqlsh)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ release_version
+-----------------
+  5.0.9-SNAPSHOT
+
+(1 rows)
++ 2026-11-12T03:03:00Z 1794452580761 step 4: group lo
+Reloaded CIDR groups cache
+getcidrgroupsofip 127.1.0.1 -> CIDR Groups: 
+lo           
+Reloaded CIDR groups cache
++ 2026-11-12T03:03:06Z 1794452586414 step 5: baselines
++ 2026-11-12T03:03:06Z 1794452586934 histogram base1: 18 432 total: Total        693965       66994200
++ 2026-11-12T03:04:07Z 1794452647390 histogram base2: 16 384 total: Total        693049       66857096
++ 2026-11-12T03:04:07Z 1794452647911 heap_info base:  garbage-first heap   total 1048576K, used 65289K [0x00000000c0000000, 0x0000000100000000)
+Heap Memory (MB)       : 63.76 / 1024.00
+Off Heap Memory (MB)   : 0.00
++ 2026-11-12T03:04:09Z 1794452649592 step 6: W1 JmxProbe 65536 600000
+done 600000 lookups in 209.6 s (first result [lo], last result [lo])
++ 2026-11-12T03:07:39Z 1794452859591 step 7: after W1
++ 2026-11-12T03:07:40Z 1794452860022 histogram w1: 118 2832 total: Total        696992       67007632
++ 2026-11-12T03:07:40Z 1794452860622 heap_info w1:  garbage-first heap   total 1048576K, used 65437K [0x00000000c0000000, 0x0000000100000000)
+Heap Memory (MB)       : 79.90 / 1024.00
+Off Heap Memory (MB)   : 0.00
++ 2026-11-12T03:08:42Z 1794452922678 histogram w1b: 116 2784 total: Total        706871       69499312
++ 2026-11-12T03:08:42Z 1794452922682 step 8: flush control
+Reloaded CIDR groups cache
++ 2026-11-12T03:08:44Z 1794452924809 histogram flushed: 18 432 total: Total        706547       69491544
++ 2026-11-12T03:08:44Z 1794452924812 step 9: W2 NativeProbe 2000
+done 2000 logins in 297.5 s
++ 2026-11-12T03:13:42Z 1794453222795 histogram w2: 198 4752 total: Total        721886       72995368
++ 2026-11-12T03:13:44Z 1794453224140 node health
+0
+1
++ 2026-11-12T03:13:44Z 1794453224145 step 10: stop node
++ 2026-11-12T03:13:51Z 1794453231166 cluster K=100 done
++ 2026-11-12T03:13:51Z 1794453231171 cleanup: CassandraDaemon processes under /mydata/jingsong-cass-s4/o04:
+  none

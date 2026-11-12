@@ -1,0 +1,47 @@
++ 2026-11-12T03:25:53Z [1794453953031] LOAD phase
+mkconf phase=load memtable_heap_space=3072MiB concurrent_writes=32 
+cluster_name: 'o32'
+data_file_directories:
+commitlog_directory: /mydata/jingsong-cass-s4/o32/node/commitlog
+hints_directory: /mydata/jingsong-cass-s4/o32/node/hints
+saved_caches_directory: /mydata/jingsong-cass-s4/o32/node/saved_caches
+cdc_raw_directory: /mydata/jingsong-cass-s4/o32/node/cdc_raw
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+storage_port: 7300
+ssl_storage_port: 7301
+native_transport_port: 9342
+seed_provider:
+commitlog_segment_size: 32MiB
+commitlog_total_space: 4096MiB
+memtable_heap_space: 3072MiB
+memtable_allocation_type: heap_buffers
+memtable_cleanup_threshold: 0.99
+concurrent_writes: 32
+JMX_PORT="7499"
++ 2026-11-12T03:25:53Z [1794453953102] ulimit -n 100000
++ 2026-11-12T03:25:53Z [1794453953107] start: MAX_HEAP_SIZE=6G HEAP_NEWSIZE=1200M CASSANDRA_LOG_DIR=/mydata/jingsong-cass-s4/o32/node/logs bin/cassandra -p /mydata/jingsong-cass-s4/o32/node/pid
++ 2026-11-12T03:25:54Z [1794453954216] pid 57236
++ 2026-11-12T03:26:40Z [1794454000881] statusbinary running
++ 2026-11-12T03:26:40Z [1794454000884] instrument check: sampler on the idle load node for about 7 s (expect ok=true, small Mutation count)
+{"t_ms": 1794454001031, "mut_n": 0, "mut_b": 0, "pu_n": 0, "pu_b": 0, "total_n": 667605, "total_b": 61905048, "t1_ms": 1794454001655, "heap_total_k": 6291456, "heap_used_k": 76838, "ok": true, "complete_after": false}
+{"t_ms": 1794454003892, "mut_n": 0, "mut_b": 0, "pu_n": 0, "pu_b": 0, "total_n": 664608, "total_b": 61710464, "t1_ms": 1794454004299, "heap_total_k": 6291456, "heap_used_k": 93032, "ok": true, "complete_after": false}
+{"t_ms": 1794454006523, "mut_n": 0, "mut_b": 0, "pu_n": 0, "pu_b": 0, "total_n": 664648, "total_b": 61712688, "t1_ms": 1794454006925, "heap_total_k": 6291456, "heap_used_k": 93034, "ok": true, "complete_after": false}
++ 2026-11-12T03:26:47Z [1794454007902] stress write n=24000
++ 2026-11-12T03:27:03Z [1794454023762] stress exit=0
+Op rate                   :    4,295 op/s  [WRITE: 5,231 op/s]
+Total partitions          :     24,000 [WRITE: 24,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:00:05
+		SSTable count: 0
+		Old SSTable count: 0
+		Memtable cell count: 24000
+		Memtable data size: 1574040000
+		Local write count: 24000
++ 2026-11-12T03:27:05Z [1794454025631] sleep 15 (periodic sync 10 s)
++ 2026-11-12T03:27:20Z [1794454040637] kill -9 57236
+1610616832	/mydata/jingsong-cass-s4/o32/node/commitlog
+353642	/mydata/jingsong-cass-s4/o32/node/data
++ 2026-11-12T03:27:21Z [1794454041765] save pristine
+1612467496	/mydata/jingsong-cass-s4/o32/pristine
++ 2026-11-12T03:27:27Z [1794454047332] LOAD done

@@ -1,0 +1,88 @@
+== unit-32.log  junit ok=True  records=1
+== unit-33.log  junit ok=True  records=20
+== unit-64.log  junit ok=True  records=26
+== unit-128.log  junit ok=True  records=42
+== unit-256.log  junit ok=True  records=74
+== unit-probe.log  junit ok=True  records=26
+EXPECTED PASS: N=32 prints instance=null (gate, B2h) -- O05 instance=null present
+N=33: FINAL {'fcs': 33, 'cacheSize': 1048576, 'maxW': 1048576, 'w': 1048576, 'entries': 16, 'poolSize': 33554432, 'overflow': 0, 'held': 0}; EVID {'fcs': 33, 'misses': 13476, 'requests': 13476}
+   pass0 sampled w (every 256 chunks): [65536, 1048576, 1048576, 1048576, 1048576, 1048576, 1048576, 1048576, 1048576]
+   pass1 sampled w: [1048576, 1048576, 1048576, 1048576, 1048576, 1048576, 1048576, 1048576, 1048576]
+   pass0/1 sampled poolSize max 33554432 overflow max 0
+EXPECTED PASS: N=33 cacheSize == 1048576 -- cacheSize=1048576
+EXPECTED PASS: N=33 maxW <= cacheSize + 65536 -- maxW=1048576
+EXPECTED PASS: N=33 final entries <= 16 -- entries=16
+EXPECTED PASS: N=33 final w within 10% of cacheSize -- w=1048576 (1.000 of cap)
+EXPECTED PASS: N=33 poolSize <= 33 MiB (FINAL) -- poolSize=33554432 (32.0 MiB)
+EXPECTED PASS: N=33 pool sampled max <= 33 MiB -- max sampled poolSize=33554432
+EXPECTED PASS: N=33 overflow 0 (FINAL and every sample) -- final overflow=0
+EXPECTED PASS: N=33 not "maxW grows with file size" (Refuted row) -- maxW=1048576, file weight per pass 136314880
+EXPECTED PASS: N=33 first pass rises from 0 toward the cap (positive control) -- first sample w=65536, max pass-0 sample 1048576
+EXPECTED PASS: N=33 second pass stays at the cap (flat) -- pass-1 w range 1048576..1048576
+EXPECTED PASS: N=33 EVID: removed entries = misses - final entries > 2 x entries (eviction ran; AM7) -- misses=13476 requests=13476 removed>=13460 entries=16
+INFO N=33: rebuffer calls = 4160; requests = 13476 (3.24 per rebuffer); misses/entries = 842.2
+N=64: FINAL {'fcs': 64, 'cacheSize': 33554432, 'maxW': 33554432, 'w': 33554432, 'entries': 512, 'poolSize': 67108864, 'overflow': 0, 'held': 0}; EVID {'fcs': 64, 'misses': 8126, 'requests': 8556}
+   pass0 sampled w (every 256 chunks): [65536, 16842752, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432]
+   pass1 sampled w: [33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432, 33554432]
+   pass0/1 sampled poolSize max 67108864 overflow max 0
+EXPECTED PASS: N=64 cacheSize == 33554432 -- cacheSize=33554432
+EXPECTED PASS: N=64 maxW <= cacheSize + 65536 -- maxW=33554432
+EXPECTED PASS: N=64 final entries <= 512 -- entries=512
+EXPECTED PASS: N=64 final w within 10% of cacheSize -- w=33554432 (1.000 of cap)
+EXPECTED PASS: N=64 final w >= 0.9 x cap -- w=33554432
+EXPECTED PASS: N=64 poolSize <= 64 MiB (FINAL) -- poolSize=67108864 (64.0 MiB)
+EXPECTED PASS: N=64 pool sampled max <= 64 MiB -- max sampled poolSize=67108864
+EXPECTED PASS: N=64 overflow 0 (FINAL and every sample) -- final overflow=0
+EXPECTED PASS: N=64 not "maxW grows with file size" (Refuted row) -- maxW=33554432, file weight per pass 201326592
+EXPECTED PASS: N=64 first pass rises from 0 toward the cap (positive control) -- first sample w=65536, max pass-0 sample 33554432
+EXPECTED PASS: N=64 second pass stays at the cap (flat) -- pass-1 w range 33554432..33554432
+EXPECTED PASS: N=64 EVID: removed entries = misses - final entries > 2 x entries (eviction ran; AM7) -- misses=8126 requests=8556 removed>=7614 entries=512
+INFO N=64: rebuffer calls = 6144; requests = 8556 (1.39 per rebuffer); misses/entries = 15.9
+N=128: FINAL {'fcs': 128, 'cacheSize': 100663296, 'maxW': 100663296, 'w': 100663296, 'entries': 1536, 'poolSize': 134217728, 'overflow': 0, 'held': 0}; EVID {'fcs': 128, 'misses': 8771, 'requests': 10240}
+   pass0 sampled w (every 256 chunks): [65536, 16842752, 33619968, 50397184, 67174400, 83951616, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296]
+   pass1 sampled w: [100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296, 100663296]
+   pass0/1 sampled poolSize max 134217728 overflow max 0
+EXPECTED PASS: N=128 cacheSize == 100663296 -- cacheSize=100663296
+EXPECTED PASS: N=128 maxW <= cacheSize + 65536 -- maxW=100663296
+EXPECTED PASS: N=128 final entries <= 1536 -- entries=1536
+EXPECTED PASS: N=128 final w within 10% of cacheSize -- w=100663296 (1.000 of cap)
+EXPECTED PASS: N=128 poolSize <= 128 MiB (FINAL) -- poolSize=134217728 (128.0 MiB)
+EXPECTED PASS: N=128 pool sampled max <= 128 MiB -- max sampled poolSize=134217728
+EXPECTED PASS: N=128 overflow 0 (FINAL and every sample) -- final overflow=0
+EXPECTED PASS: N=128 not "maxW grows with file size" (Refuted row) -- maxW=100663296, file weight per pass 335544320
+EXPECTED PASS: N=128 first pass rises from 0 toward the cap (positive control) -- first sample w=65536, max pass-0 sample 100663296
+EXPECTED PASS: N=128 second pass stays at the cap (flat) -- pass-1 w range 100663296..100663296
+EXPECTED PASS: N=128 EVID: removed entries = misses - final entries > 2 x entries (eviction ran; AM7) -- misses=8771 requests=10240 removed>=7235 entries=1536
+INFO N=128: rebuffer calls = 10240; requests = 10240 (1.00 per rebuffer); misses/entries = 5.7
+N=256: FINAL {'fcs': 256, 'cacheSize': 234881024, 'maxW': 234881024, 'w': 234881024, 'entries': 3584, 'poolSize': 268435456, 'overflow': 0, 'held': 0}; EVID {'fcs': 256, 'misses': 14883, 'requests': 18432}
+   pass0 sampled w (every 256 chunks): [65536, 16842752, 33619968, 50397184, 67174400, 83951616, 100728832, 117506048, 134283264, 151060480, 167837696, 184614912, 201392128, 218169344, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024]
+   pass1 sampled w: [234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024, 234881024]
+   pass0/1 sampled poolSize max 268435456 overflow max 0
+EXPECTED PASS: N=256 cacheSize == 234881024 -- cacheSize=234881024
+EXPECTED PASS: N=256 maxW <= cacheSize + 65536 -- maxW=234881024
+EXPECTED PASS: N=256 final entries <= 3584 -- entries=3584
+EXPECTED PASS: N=256 final w within 10% of cacheSize -- w=234881024 (1.000 of cap)
+EXPECTED PASS: N=256 poolSize <= 256 MiB (FINAL) -- poolSize=268435456 (256.0 MiB)
+EXPECTED PASS: N=256 pool sampled max <= 256 MiB -- max sampled poolSize=268435456
+EXPECTED PASS: N=256 overflow 0 (FINAL and every sample) -- final overflow=0
+EXPECTED PASS: N=256 not "maxW grows with file size" (Refuted row) -- maxW=234881024, file weight per pass 603979776
+EXPECTED PASS: N=256 first pass rises from 0 toward the cap (positive control) -- first sample w=65536, max pass-0 sample 234881024
+EXPECTED PASS: N=256 second pass stays at the cap (flat) -- pass-1 w range 234881024..234881024
+EXPECTED PASS: N=256 EVID: removed entries = misses - final entries > 2 x entries (eviction ran; AM7) -- misses=14883 requests=18432 removed>=11299 entries=3584
+INFO N=256: rebuffer calls = 18432; requests = 18432 (1.00 per rebuffer); misses/entries = 4.2
+PROBE: FINAL {'fcs': 64, 'cacheSize': 33554432, 'maxW': 33554432, 'w': 33554432, 'entries': 512, 'poolSize': 74121216, 'overflow': 7012352, 'held': 1024}; EVID {'fcs': 64, 'misses': 8169, 'requests': 8661}
+   probe pass0 samples (i, w, poolSize, overflow): [(0, 65536, 8388608, 0), (256, 16842752, 25165824, 0), (512, 33554432, 41943040, 0), (768, 33554432, 58720256, 0), (1024, 33554432, 67174400, 65536), (1280, 33554432, 67436544, 327680), (1536, 33554432, 67502080, 393216), (1792, 33554432, 67502080, 393216), (2048, 33554432, 67502080, 393216), (2304, 33554432, 67764224, 655360), (2560, 33554432, 68354048, 1245184), (2816, 33554432, 68354048, 1245184)]
+   probe pass1 samples (i, w, poolSize, overflow): [(0, 33554432, 68354048, 1245184), (256, 33554432, 68354048, 1245184), (512, 33554432, 68354048, 1245184), (768, 33554432, 68419584, 1310720), (1024, 33554432, 68812800, 1703936), (1280, 33554432, 70254592, 3145728), (1536, 33554432, 70254592, 3145728), (1792, 33554432, 70254592, 3145728), (2048, 33554432, 70254592, 3145728), (2304, 33554432, 71303168, 4194304), (2560, 33554432, 74121216, 7012352), (2816, 33554432, 74121216, 7012352)]
+EXPECTED PASS: probe maxW <= 32 MiB + 65536 -- maxW=33554432
+EXPECTED PASS: probe held == 1024 -- held=1024
+EXPECTED PASS: probe poolSize reaches 64 MiB pooled (sizeInBytes - overflow >= 64 MiB) -- poolSize=74121216 overflow=7012352 pooled=67108864
+EXPECTED PASS: probe overflow > 0 -- overflow=7012352
+EXPECTED FAIL: probe overflow about >= 32 MiB while held (B2f probe magnitude) -- overflow=7012352 (6.7 MiB)
+
+TABLE n cacheSize maxW w entries poolSize overflow misses requests
+TABLE 33 1048576 1048576 1048576 16 33554432 0 13476 13476
+TABLE 64 33554432 33554432 33554432 512 67108864 0 8126 8556
+TABLE 128 100663296 100663296 100663296 1536 134217728 0 8771 10240
+TABLE 256 234881024 234881024 234881024 3584 268435456 0 14883 18432
+
+SUMMARY 50 PASS, 1 FAIL

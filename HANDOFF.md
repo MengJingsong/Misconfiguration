@@ -62,15 +62,14 @@ noticed along the way are noted in case files for Target 3, not chased.
 
 ## Current state (2026-10-25)
 
-- **2026-11-11, stage-1 extension beyond `if`, Cassandra (not pushed yet: waiting until Yang can
-  pull right after).** New queries `EnforcementPlaces.ql` and `CapacitySetPlaces.ql` (counted `for`
+- **2026-11-11, stage-1 extension beyond `if`, Cassandra (pushed 2026-11-11).** New queries `EnforcementPlaces.ql` and `CapacitySetPlaces.ql` (counted `for`
   loops dropped); pilot:
   `experiments/capacity-enforcement-exp/cassandra/stage1-codeql-preprocessing/pilot-2026-11-11.md`.
   Stage 2 banded all 6,439 new units (uids `E:` / `C:`, same `bands.csv`): A 90, B 124, C 307,
   D 5,918, with the anchors passing on all 33 batches. **New write-up set:**
   `experiments/capacity-enforcement-exp/cassandra/stage3-ai-deep-read/writeup-set-ext.csv`, 515 units
   of bands A–C. 7 of them are already a case's target, and 49 capacity-set units name a constraint
-  that already has cases (`stage3_record` says which). **Owner: Jingsong (2026-11-11); stage 3 not started.** Hadoop
+  that already has cases (`stage3_record` says which). **Owner: Jingsong (2026-11-11).** Band A batch 1 (10 cases) closed at stage 4 on 2026-11-12; 43 rows of orders 1–52 skipped as covered by existing cases (the known-constraint marker misses most of them): see `HANDOFF-Jingsong.md`, "Cassandra extension set". Hadoop
   copies of the queries were written and run the same day: 5,599 new enforcement places and
   5,119 capacity-set rows (`experiments/capacity-enforcement-exp/hadoop/stage1-codeql-preprocessing/pilot-2026-11-11.md`).
   Hadoop stage 2 banded the 9,990 units the same day (A 110, B 272, C 615, D 8,993; anchors passed

@@ -1,0 +1,29 @@
+**B2f. Predictions.** For each finite limit L: `L − s < peakPending ≤ L + s` (i.e. ≈1.05 MB, 4.2 MB,
+16.8 MB within one 60 KB entry) and `maxQueued ≤ floor(L/s) + 1` (≈ 18, 70, 280). For L = 1 GiB:
+`peakPending` ≈ total written (≥ 30 MB, up to ≈ 60 MB) and `maxQueued` ≫ 280. `calls = 1000` in every run.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| peakPending ∈ (L − s, L + s] and maxQueued ≈ L/s for each finite L; 1 GiB run much larger | claim confirmed at unit level: the check caps the operand |
+| peakPending > L + s for some finite L | claim wrong: the check does not bound the operand |
+| peakPending ≪ L for finite L and the 1 GiB run also small | limit never reached (consumer too fast): not confirmed; raise the sleep to 20 ms and rerun |
+| calls ≠ 1000 | workload did not replay as intended (segments skipped / filtered); result void |
+
+**B3f. Predictions.** Let s ≈ 65.6 KB. Max live `Mutation` count during replay ≤ L/s + 1 (+ a handful of
+small system mutations): 16 MiB → ≤ ~257; 64 MiB → ≤ ~1,024; 256 MiB → ≤ ~4,093. 4 GiB (unbounded):
+a much larger count, ≥ 4× the 256 MiB run (order 10^4) if the reader outruns the single applier. Count
+cap 16 → ≤ ~17. Max used heap rises with L roughly by (ΔMutation count × s): 256 MiB run ≥ 200 MB above
+the 16 MiB run; the 4 GiB run higher still. Replay completes in every run with N ≈ 24,000.
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Max Mutation count ≈ L/s (within one + system mutations) for each finite L, unbounded run much larger, heap rises with L | claim confirmed: the knob governs the replay backlog heap |
+| Max Mutation count > L/s + small slack for some finite L | claim wrong: the backlog is not capped by the byte limit |
+| All runs, including 4 GiB, show small and similar counts (≪ 257) | limit never reached: appliers keep up; not confirmed — rerun with `memtable_heap_space: 64MiB` or more data |
+| Count-cap control does not stay ≤ ~17 | instrument or workload wrong (positive control failed); result void |
+| N replayed ≪ 24,000 | the commit log was flushed or not restored; result void |
+

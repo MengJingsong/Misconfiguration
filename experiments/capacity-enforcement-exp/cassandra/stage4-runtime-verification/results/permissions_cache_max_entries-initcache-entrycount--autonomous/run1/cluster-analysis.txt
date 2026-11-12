@@ -1,0 +1,25 @@
+ARM M1000: ES base=14 after=1000 vtable=1000 | RoleResource base=6 after=1007 d=1001 | [B d=3.90 MB | histTotal d=4.86 MB | [B/dRR=3.99 KB
+ARM M5000: ES base=14 after=5000 vtable=5000 | RoleResource base=6 after=5007 d=5001 | [B d=19.22 MB | histTotal d=20.73 MB | [B/dRR=3.94 KB
+ARM M100000: ES base=14 after=20014 vtable=20015 | RoleResource base=6 after=20007 d=20001 | [B d=76.67 MB | histTotal d=80.48 MB | [B/dRR=3.93 KB
+ARM off: ES base=0 after=0 vtable=0 | RoleResource base=6 after=6 d=0 | [B d=0.06 MB | histTotal d=0.71 MB | [B/dRR=nan KB
+SHRINK 100000->1000: ES=1000 vtable=1000 RoleResource=1007 d=1001 [B d=3.91 MB histTotal d=5.51 MB
+EXPECTED PASS: ES M1000 <= M+10: 1000
+EXPECTED PASS: ES M5000 <= M+10: 5000
+EXPECTED PASS: ES M1000 within 10% of 1000: 1000
+EXPECTED PASS: dRoleResource M1000 within 10% of 1000: 1001
+EXPECTED PASS: ES M5000 within 10% of 5000: 5000
+EXPECTED PASS: dRoleResource M5000 within 10% of 5000: 5001
+EXPECTED PASS: ES M100000 within 10% of 20000: 20014
+EXPECTED PASS: dRoleResource M100000 within 10% of 20000: 20001
+EXPECTED PASS: ratio dRR 5000/1000 in [3.5, 6.5]: 5.0
+EXPECTED PASS: ratio dRR 100000/1000 in [14, 26]: 19.98
+EXPECTED PASS: d[B/dRR M5000 in [2.8, 6.3] KB: 3.94
+EXPECTED PASS: d[B/dRR M100000 in [2.8, 6.3] KB: 3.93
+EXPECTED PASS: d[B M1000 <= 8 MB: 3.9
+EXPECTED PASS: shrink ES <= 1000 (B3f): 1000
+EXPECTED PASS: shrink dRoleResource back to ~1000 (within 10%): 1001
+EXPECTED PASS: cache-off ES == 0: 0
+EXPECTED PASS: cache-off dRoleResource ~0 (<= 500): 0
+EXPECTED PASS: cache-off d[B ~0 (<= 8 MB): 0.06
+ROWS row2=False row3=False row4=False row5=False row6=False
+MATCHED: B3g row 1 (EstimatedSize and dRoleResource ~ min(M,20000), bytes scale) -> Confirmed

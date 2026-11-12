@@ -1,0 +1,49 @@
+HOLDS | freeze hash of B2f/B2g/B3f/B3g | a3812c99b2659fcab89fa614c8a631dd86c7dacec7bc029c95b2664d095b231d
+HOLDS | unit P=4096: 11 lengths, all <= P | max=4096
+HOLDS | unit P=4096: requests above P hit the cap (len == P) | requests>P=[5000, 8193, 65537, 1048576, 4194304, 20971520] lens=[4096, 4096, 4096, 4096, 4096, 4096]
+HOLDS | unit P=4096: heapDelta read | heapDelta=191224
+HOLDS | unit P=default: 11 lengths, all <= P | max=8192
+HOLDS | unit P=default: requests above P hit the cap (len == P) | requests>P=[8193, 65537, 1048576, 4194304, 20971520] lens=[8192, 8192, 8192, 8192, 8192]
+HOLDS | unit P=default: heapDelta read | heapDelta=322296
+HOLDS | unit P=1048576: 11 lengths, all <= P | max=1048576
+HOLDS | unit P=1048576: requests above P hit the cap (len == P) | requests>P=[4194304, 20971520] lens=[1048576, 1048576]
+HOLDS | unit P=1048576: heapDelta read | heapDelta=67167560
+HOLDS | unit P=16777216: 11 lengths, all <= P | max=16777216
+HOLDS | unit P=16777216: requests above P hit the cap (len == P) | requests>P=[20971520] lens=[16777216]
+HOLDS | unit P=16777216: heapDelta read | heapDelta=302048584
+HOLDS | unit positive control: request 20 MiB -> 16777216 at P=16 MiB | 
+HOLDS | G1, region 1 MiB in a 1 GiB JVM | 
+HOLDS | unit heapDelta - 32*regions*1MiB is the same constant at both high P | {'1048576': 58696, '16777216': 58696}
+HOLDS | cluster default: P unset | 
+HOLDS | cluster default: read "ok 64" | 
+HOLDS | cluster default: 64 misses on the read pass | before=('0', '0') after=('0', '64')
+HOLDS | cluster default: SSTable count 0 before and after reads | 
+HOLDS | cluster default: memtable_allocation_type offheap_buffers | 
+HOLDS | cluster default: JFR has allocation events, none with retrieveTemporaryBuffer in the stack | events=676 tempbuf=0
+HOLDS | cluster default: 4 MiB allocations by HeapCloner (memtable clone to heap) expected only for offheap | HeapCloner >=4MiB events=128
+HOLDS | cluster default: |dH| < 16 MiB | dH=315376
+HOLDS | cluster p1m: jinfo shows P | 
+HOLDS | cluster p1m: read "ok 64" | 
+HOLDS | cluster p1m: 64 misses on the read pass | before=('0', '0') after=('0', '64')
+HOLDS | cluster p1m: SSTable count 0 before and after reads | 
+HOLDS | cluster p1m: memtable_allocation_type offheap_buffers | 
+HOLDS | cluster p1m: JFR has allocation events, none with retrieveTemporaryBuffer in the stack | events=674 tempbuf=0
+HOLDS | cluster p1m: 4 MiB allocations by HeapCloner (memtable clone to heap) expected only for offheap | HeapCloner >=4MiB events=128
+HOLDS | cluster p1m: |dH| < 16 MiB | dH=310520
+HOLDS | cluster p16m: jinfo shows P | 
+HOLDS | cluster p16m: read "ok 64" | 
+HOLDS | cluster p16m: 64 misses on the read pass | before=('0', '0') after=('0', '64')
+HOLDS | cluster p16m: SSTable count 0 before and after reads | 
+HOLDS | cluster p16m: memtable_allocation_type offheap_buffers | 
+HOLDS | cluster p16m: JFR has allocation events, none with retrieveTemporaryBuffer in the stack | events=648 tempbuf=0
+HOLDS | cluster p16m: 4 MiB allocations by HeapCloner (memtable clone to heap) expected only for offheap | HeapCloner >=4MiB events=126
+HOLDS | cluster p16m: |dH| < 16 MiB | dH=314056
+HOLDS | cluster control: jinfo shows P | 
+HOLDS | cluster control: read "ok 64" | 
+HOLDS | cluster control: 64 misses on the read pass | before=('0', '0') after=('0', '64')
+HOLDS | cluster control: SSTable count 0 before and after reads | 
+HOLDS | cluster control: memtable_allocation_type heap_buffers | 
+HOLDS | cluster control: JFR has allocation events, none with retrieveTemporaryBuffer in the stack | events=526 tempbuf=0
+HOLDS | cluster control: 4 MiB allocations by HeapCloner (memtable clone to heap) (heap_buffers: expected none) | HeapCloner >=4MiB events=0
+HOLDS | cluster control: |dH| < 16 MiB | dH=317128
+SUMMARY holds=48 does_not_hold=0

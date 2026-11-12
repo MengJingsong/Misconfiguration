@@ -1,0 +1,30 @@
+**B2f. Predictions.**
+| N | active segments | usedBuffers | direct delta (class 1) | waits | writer thread |
+|---|---|---|---|---|---|
+| 3 | 3 | 3 | ≈ 3 MiB (3 × 1 MiB, ±10%) | ≥ 1 | alive (blocked) |
+| 5 | 5 | 5 | ≈ 5 MiB | ≥ 1 | alive |
+| 8 | 8 | 8 | ≈ 8 MiB | ≥ 1 | alive |
+
+Class 2: usedBuffers = 10 and direct delta ≈ 10 MiB for every N (pool alone does not cap); `atLimit()` true; retained idle after release = 4 (N=3), 8 (N=5), 8 (N=8); N=1 throws `IllegalArgumentException`.
+
+**B2g. Readings.**
+| Observation | Meaning |
+|---|---|
+| active = usedBuffers = N, direct ≈ N MiB, writer blocked, waits ≥ 1 | Claim supported: the check caps segment buffers at N |
+| active or usedBuffers > N | Claim wrong: the manager overshoots the limit |
+| active < N and writer finished | Limit not reached (workload too small or sync not blocked) — not confirmed; rerun with more mutations / check Byteman rule fired |
+| active = N but direct delta ≫ N MiB | Buffers come from elsewhere; cap on count does not bound memory — claim partly wrong |
+| Class 2 retained = N exactly | Queue not rounded; the A3 overshoot note is wrong (does not affect B1) |
+| Class 2 usedBuffers < 10 | Pool itself caps; A3 description wrong |
+
+**B3f. Predictions.** Plateau of direct `MemoryUsed` during stress, minus idle baseline, = N × 64 MiB + ≤ ~70 MiB (sync-thread compression buffer) + other direct users (same across runs, B3h): about 0.2–0.3 GiB (N=3), 0.4–0.5 GiB (6), 0.8–0.9 GiB (12), 1.5–1.65 GiB (24). Pairwise plateau differences ≈ ΔN × 64 MiB (192, 384, 768 MiB) within ±15%. `WaitingOnSegmentAllocation` Count increases during stress for every N (cap binds). Never exceeding (N+2) × 64 MiB + baseline-variance at any sample. mmap control: plateau independent of the knob, no growth of direct memory by segment buffers.
+
+**B3g. Readings.**
+| Observation | Meaning |
+|---|---|
+| Plateaus step by ≈ ΔN × 64 MiB, flat within each run, waits grow | Claim supported: the constraint caps commit-log buffer memory |
+| Direct memory above N × 64 MiB + compression buffer + baseline at any sample | Claim wrong: overshoot |
+| Plateau does not change with N while waits grow | Something else binds first; claim not supported |
+| Waits stay 0 and plateau < N × 64 MiB | Limit not reached (sync kept up) — not confirmed; raise threads, compression level, or use smaller N |
+| mmap control shows the same N-dependence | Plateau not caused by the pool — measurement invalid |
+

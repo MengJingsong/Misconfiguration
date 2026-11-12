@@ -475,3 +475,80 @@ beyond `if` (uids `E:` / `C:`; 110 A, 272 B, 615 C, of which 2 are anchors marke
 They come after the remaining `if` units, so "start the next batch of N" reaches them in order.
 How to hand them to stage 3: `experiments/capacity-enforcement-exp/hadoop/PROCEDURE.md` step 3.
 Cassandra's extension write-up set (`writeup-set-ext.csv`, 515 units) is also yours.
+
+## Cassandra extension set (`writeup-set-ext.csv`), band A batch 1 (2026-11-11/12)
+
+**How it was run.** As set A's later batches: stage 3 by fresh Agent-tool subagents in `~/cassandra-5.0.9`
+(an outside-repo `rsync` of `systems/cassandra/source/`), given only `playbook-autonomous.md`, `_TEMPLATE-autonomous.md`
+(fresh copies in `~/writeup-ext/`) and the `file:line`; the template's "if statement" wording was read as "the given line"
+for capacity-set targets. Filed by hand (`cases/`, `_INDEX.md` §1 and §4, CSV `case_file` and `estimate`). Stage 4: one fresh
+agent per case, run 1 only, on `apt138`, `apt179`, `apt190` (16 cores, 15 GiB) and the local node0
+(`jason92-325405`, 32 cores, 125 GiB), ports 7300/7301/7499/9342/9391 (or 7400/7401/7599/9442/9491 for a second case on
+node0), data under `/mydata/jingsong-cass-s4/<oNN>/`. `apt140` and `apt149` were busy with OOM-exp and not used; `pc*` nodes
+did not answer. Agents left `_INDEX.md`, the CSV and handoffs to the coordinator. Timing: `timing/ext-A-batch-1.log`.
+
+**Skip rule (Jingsong, 2026-11-11).** A row whose constraint already has a case is recorded "covered by `<case>`"
+(`stage3_record`, `stage4 = skipped`) and the batch is filled with the next new row. 43 rows of orders 1–52 were skipped (17 flagged "known constraint", 26 not).
+**Marker gap:** `make-writeup-set-ext.py` flags "known constraint" only when the *assigned field's* name equals an existing
+case prefix, so `DatabaseDescriptor.keyCacheSizeInMiB`, `ChunkCache.cacheSize`, `InMemoryTrie.ALLOCATED_SIZE_THRESHOLD` and
+the like are not flagged. 26 of the 43 skipped rows were missed by it; 6 of them (orders 8, 16, 20, 21, 22, 33) were written
+up before the overlap was seen and then discarded (not filed; kept outside the repo in `~/writeup-ext/discarded/`).
+Screen by constraint (grep the case files) before the next batch, or fix the script.
+
+**Batch 1: orders 3, 4, 5, 6, 7, 32, 43, 44, 45, 53** (all capacity-set rows, all estimated positive):
+
+| Order | Case | Unit | Cluster | Outcome class |
+|---|---|---|---|---|
+| 3 | `permissions_cache_max_entries-initcache-entrycount` | Confirmed | Confirmed | true positive (caps entries, not bytes) |
+| 4 | `ip_cache_max_size-cidrgroupsmappingcache-iptocidrgroupscache` | Confirmed | Confirmed | true positive |
+| 5 | `file_cache_size-chunkcache-weightedsize` | Confirmed | Confirmed | true positive |
+| 6 | `file_cache_size-chunk_cache_eviction-weighted_size` | Confirmed | Confirmed | true positive |
+| 7 | `file_cache_size-chunkcache-cachesize` | Confirmed | Confirmed | true positive |
+| 32 | `commitlog_max_outstanding_replay_bytes-handlemutation-pendingmutationbytes` | Confirmed | Confirmed | true positive |
+| 43 | `data_output_stream_plus_temp_buffer_size-retrievetemporarybuffer-bytes.length` | Confirmed | Not confirmed (path not exercised) | weak true positive |
+| 44 | `commitlog_max_compression_buffers_in_pool-simplecachedbufferpool-bufferpool` | Not confirmed (no matching row) | Not confirmed (limit not reached at N=24) | undetermined |
+| 45 | `commitlog_max_compression_buffers_in_pool-simplecachedbufferpool-usedbuffers` | Not confirmed | Not confirmed | undetermined |
+| 53 | `streaming_state_size-streammanager-states` | Confirmed | Confirmed | true positive (soft: Guava 4 segments, heap ≈ 1.5 × S) |
+
+**Open points for you to overrule, if wanted:**
+- **o06 H1:** the first analyzer took the 60 s before each read ended as "the read run", which included pre-read samples
+  (F=288 growth 205.6 MiB, outside the band, no matching row); the agent clipped the window to the read run as AM6's words
+  say (253 MiB, inside). Both outputs are kept in the results file.
+- **o32:** unit `maxQueued` at 16 MiB was 288 against B2f's strict bound 280 (likely 12 system mutations through the probe,
+  inferred); the strict analyzer prints "no matching row", the agent matched B2g row 1 ("≈ L/s") by hand.
+- **o44:** the pool count stopped at exactly N in every unit run, but at N=3 the direct-memory reading was 51 B over the
+  frozen ±256 KiB tolerance (the writer thread's `DataOutputBuffer` scratch buffer, outside the pool), so no row matches;
+  the cluster tier stepped exactly 64 MiB per buffer at N = 3/6/12 but N=24 was stopped by something else first (likely the
+  1 GiB memtable threshold, not checked). A clear overrule candidate.
+- **o45:** the segment-buffer count followed N exactly in both tiers (unit `usedBuffers` = N for N = 2/3/6; cluster
+  N=3/6 matched, P(6)−P(3) = 192.0 MiB), but each tier's frozen reading rule landed on a "claim wrong" row on direct memory,
+  which the self-check rejected on inferred evidence: unit +524,388 B in every class (likely the writer's scratch buffer),
+  cluster N=12 stepped +64.2 MiB at +51 s when `MemtablePostFlush:1` compressed a segment with its own thread-local Zstd
+  buffer (seen in jstack). So: the pool caps its buffers, but commit-log direct memory also has one compression buffer per
+  syncing thread that N does not govern. Overrule candidate together with o44. The cluster tier was not rerun after the
+  coordinating agent hit an API rate limit: the run on `apt138` was detached and had finished uninterrupted (results §3,
+  deviation (a)).
+- **o43:** the case file's cluster path is wrong for 5.0.9: an `offheap_buffers` memtable read clones rows to heap
+  (`SlabAllocator.java:70`, `AtomicBTreePartition.java:220-223`), so the serializing row cache never reaches
+  `retrieveTemporaryBuffer` with a large request. Stage 3 should redesign that tier around `writeUTF` or mark it n/a.
+
+**Findings worth keeping:** the chunk cache's 32 MiB "reserve" is not left free: the pool's slabs grow to the full
+`file_cache_size` (o05/o06/o07, all three agree), and a disabled chunk cache still holds 16 MiB of pool slabs; small chunk
+caches reload the same chunk repeatedly (`ChunkCache.java:240-242`, performance only); an in-flight replay mutation holds
+about 2 × its serialized size on heap (`Mutation.java:490-519`, o32); `StreamingState`'s weigher counts the `TimeUUID` twice,
+and a repeated `nodetool rebuild` needs `-Dcassandra.reset_bootstrap_progress=true` (o53); `MpmcArrayQueue` rounds the pool's
+idle capacity up to a power of two and `commitlog_max_compression_buffers_in_pool` < 2 fails at start (o44).
+
+**Environment lessons for the next batch** (put in each stage-4 brief): `ant testsome` forces its own test heap;
+5.0.9's `cassandra-env.sh` sets `MaxDirectMemorySize` itself (set `MAX_DIRECT_MEMORY_SIZE`); `cassandra-stress`'s schema is
+uncompressed by default and `-mode native cql3 port=` is ignored; test stdout lands one write per line in
+`build/test/logs/_jdk11/TEST-<class>.log`; Cassandra deletes its pid file when shutdown starts (stop by PID, wait for the
+ports); commit-log compression `parameters` must be a list of maps; `concurrent_writes: 1` is refused; the bundled driver zip
+needs its inner `cassandra-driver-3.29.0/` on `PYTHONPATH`; `/mydata` on the apt nodes is root-owned
+(`/mydata/jingsong-cass-s4` was created with `sudo`).
+
+**Left on the nodes** (nothing running): `/mydata/jingsong-cass-s4/o03`, `o32`, `o45` on `apt138`; `o04` on `apt179`;
+`o05` on `apt190`; `o06`, `o07`, `o43`, `o44` (**11 GB**, mostly the mmap control's data), `o53` and the `oNN-src` copies on
+node0. Delete when no longer needed.
+
+**Next:** band A of the extension set continues at order 54 (the rows after 53 that are not yet skipped or filed).

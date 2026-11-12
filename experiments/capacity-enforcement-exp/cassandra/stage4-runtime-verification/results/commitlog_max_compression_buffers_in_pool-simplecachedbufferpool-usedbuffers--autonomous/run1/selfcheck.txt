@@ -1,0 +1,58 @@
+== unit: raw CAP lines (bytes) ==
+CommitLogBufferCap2Test      pre-writer         N=2 active= 1 used= 2 direct-pre=0 B = 0.0000 MiB; minus (N-2) MiB = 0 B
+CommitLogBufferCap2Test      plateau1           N=2 active= 2 used= 2 direct-pre=524388 B = 0.5001 MiB; minus (N-2) MiB = 524388 B
+CommitLogBufferCap2Test      after-sleep        N=2 active= 2 used= 2 direct-pre=524388 B = 0.5001 MiB; minus (N-2) MiB = 524388 B
+CommitLogBufferCap2Test      plateau2           N=2 active= 2 used= 2 direct-pre=1316509 B = 1.2555 MiB; minus (N-2) MiB = 1316509 B
+CommitLogBufferCap2Test      final              N=2 active= 2 used= 2 direct-pre=1316509 B = 1.2555 MiB; minus (N-2) MiB = 1316509 B
+   junit: tests="1" time="6.024" timestamp="2026-11-12T03:47:07"
+CommitLogBufferCap3Test      pre-writer         N=3 active= 1 used= 2 direct-pre=0 B = 0.0000 MiB; minus (N-2) MiB = -1048576 B
+CommitLogBufferCap3Test      plateau1           N=3 active= 3 used= 3 direct-pre=1572961 B = 1.5001 MiB; minus (N-2) MiB = 524385 B
+CommitLogBufferCap3Test      after-sleep        N=3 active= 3 used= 3 direct-pre=1572961 B = 1.5001 MiB; minus (N-2) MiB = 524385 B
+CommitLogBufferCap3Test      plateau2           N=3 active= 3 used= 3 direct-pre=2365082 B = 2.2555 MiB; minus (N-2) MiB = 1316506 B
+CommitLogBufferCap3Test      final              N=3 active= 3 used= 3 direct-pre=2365082 B = 2.2555 MiB; minus (N-2) MiB = 1316506 B
+   junit: tests="1" time="5.817" timestamp="2026-11-12T03:47:27"
+CommitLogBufferCap6Test      pre-writer         N=6 active= 1 used= 2 direct-pre=0 B = 0.0000 MiB; minus (N-2) MiB = -4194304 B
+CommitLogBufferCap6Test      plateau1           N=6 active= 6 used= 6 direct-pre=4718689 B = 4.5001 MiB; minus (N-2) MiB = 524385 B
+CommitLogBufferCap6Test      after-sleep        N=6 active= 6 used= 6 direct-pre=4718689 B = 4.5001 MiB; minus (N-2) MiB = 524385 B
+CommitLogBufferCap6Test      plateau2           N=6 active= 6 used= 6 direct-pre=5510810 B = 5.2555 MiB; minus (N-2) MiB = 1316506 B
+CommitLogBufferCap6Test      final              N=6 active= 6 used= 6 direct-pre=5510810 B = 5.2555 MiB; minus (N-2) MiB = 1316506 B
+   junit: tests="1" time="5.691" timestamp="2026-11-12T03:47:47"
+CommitLogBufferCapCtlTest    pre-writer         N=3 active= 1 used= - direct-pre=0 B = 0.0000 MiB; minus (N-2) MiB = - B
+CommitLogBufferCapCtlTest    ctl-5s             N=3 active=20 used= - direct-pre=524388 B = 0.5001 MiB; minus (N-2) MiB = - B
+CommitLogBufferCapCtlTest    ctl-6s             N=3 active=20 used= - direct-pre=524388 B = 0.5001 MiB; minus (N-2) MiB = - B
+CommitLogBufferCapCtlTest    ctl-after-discard  N=3 active= 0 used= - direct-pre=524388 B = 0.5001 MiB; minus (N-2) MiB = - B
+CommitLogBufferCapCtlTest    final              N=3 active= 0 used= - direct-pre=524388 B = 0.5001 MiB; minus (N-2) MiB = - B
+   junit: tests="1" time="15.572" timestamp="2026-11-12T03:48:07"
+   POOL N=1 step=construct exception=java.lang.IllegalArgumentException msg=capacity: 1 (expected: >= 2)
+   POOL N=2 step=released2N k=4 atLimit=false pool=[SimpleBufferPool: usedBuffers:0, maxBufferPoolSize:2, bufferSize:1048576] directDelta=2097152 directCount=7
+   POOL N=2 step=retakeN k=2 atLimit=true pool=[SimpleBufferPool: usedBuffers:2, maxBufferPoolSize:2, bufferSize:1048576] directDelta=2097152 directCount=7
+   POOL N=3 step=released2N k=6 atLimit=false pool=[SimpleBufferPool: usedBuffers:0, maxBufferPoolSize:3, bufferSize:1048576] directDelta=4194304 directCount=9
+   POOL N=3 step=retakeN k=3 atLimit=true pool=[SimpleBufferPool: usedBuffers:3, maxBufferPoolSize:3, bufferSize:1048576] directDelta=4194304 directCount=9
+   POOL N=6 step=released2N k=12 atLimit=false pool=[SimpleBufferPool: usedBuffers:0, maxBufferPoolSize:6, bufferSize:1048576] directDelta=8388608 directCount=13
+   POOL N=6 step=retakeN k=6 atLimit=true pool=[SimpleBufferPool: usedBuffers:6, maxBufferPoolSize:6, bufferSize:1048576] directDelta=8388608 directCount=13
+   POOL N=12 step=released2N k=24 atLimit=false pool=[SimpleBufferPool: usedBuffers:0, maxBufferPoolSize:12, bufferSize:1048576] directDelta=16777216 directCount=21
+   POOL N=12 step=retakeN k=12 atLimit=true pool=[SimpleBufferPool: usedBuffers:12, maxBufferPoolSize:12, bufferSize:1048576] directDelta=16777216 directCount=21
+== cluster ==
+-- N3: config echo: commitlog_max_compression_buffers_in_pool=3 commitlog_compression=ZstdCompressor{compression_level=19}; ERROR lines 0; OutOfMemoryError lines 1
+   idle n=30 median=203.40 MiB; window n=262 max=341.20 MiB at +50s; P-B0=137.80 MiB; WOSA 1->450
+   jstack dumps in window with allocator waiting + writer in awaitAvailableSegment: 24
+-- N6: config echo: commitlog_max_compression_buffers_in_pool=6 commitlog_compression=ZstdCompressor{compression_level=19}; ERROR lines 0; OutOfMemoryError lines 1
+   idle n=30 median=203.40 MiB; window n=264 max=533.19 MiB at +260s; P-B0=329.79 MiB; WOSA 1->450
+   jstack dumps in window with allocator waiting + writer in awaitAvailableSegment: 24
+-- N12: config echo: commitlog_max_compression_buffers_in_pool=12 commitlog_compression=ZstdCompressor{compression_level=19}; ERROR lines 0; OutOfMemoryError lines 1
+   idle n=30 median=203.40 MiB; window n=263 max=981.83 MiB at +262s; P-B0=778.43 MiB; WOSA 1->225
+   jstack dumps in window with allocator waiting + writer in awaitAvailableSegment: 12
+-- C1: config echo: commitlog_max_compression_buffers_in_pool=12 commitlog_compression=LZ4Compressornull; ERROR lines 0; OutOfMemoryError lines 1
+   idle n=30 median=203.40 MiB; window n=254 max=917.48 MiB at +232s; P-B0=714.08 MiB; WOSA 1->1057
+   jstack dumps in window with allocator waiting + writer in awaitAvailableSegment: 8
+-- C2: config echo: commitlog_max_compression_buffers_in_pool=3 commitlog_compression=null; ERROR lines 0; OutOfMemoryError lines 1
+   idle n=30 median=75.36 MiB; window n=255 max=85.49 MiB at +4s; P-B0=10.13 MiB; WOSA 1->1
+   jstack dumps in window with allocator waiting + writer in awaitAvailableSegment: 0
+-- N1: config echo: commitlog_max_compression_buffers_in_pool=1 commitlog_compression=ZstdCompressor{compression_level=19}; ERROR lines 1; OutOfMemoryError lines 1
+    INFO  [main] 2026-11-12T04:29:05,745 MonotonicClock.java:345 - Scheduling approximate time-check task with a precision of 2 milliseconds
+    ERROR [main] 2026-11-12T04:29:05,776 CassandraDaemon.java:887 - Exception encountered during startup
+    java.lang.IllegalArgumentException: capacity: 1 (expected: >= 2)
+    	at org.jctools.util.RangeUtil.checkGreaterThanOrEqual(RangeUtil.java:63)
+    	at org.jctools.queues.MpmcArrayQueue.<init>(MpmcArrayQueue.java:175)
+    	at org.apache.cassandra.io.util.SimpleCachedBufferPool.<init>(SimpleCachedBufferPool.java:61)
+    	at org.apache.cassandra.db.commitlog.CompressedSegment$Co

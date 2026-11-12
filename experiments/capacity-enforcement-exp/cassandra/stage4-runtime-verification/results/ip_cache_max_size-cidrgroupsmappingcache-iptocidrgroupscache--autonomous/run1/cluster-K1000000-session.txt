@@ -1,0 +1,75 @@
++ 2026-11-12T03:25:35Z 1794453935031 step 0: port check (AM2)
++ 2026-11-12T03:25:35Z 1794453935054 step 1: configure K=1000000, wipe data
+configured K=1000000
+261:cidr_authorizer:
+262-  class_name: CassandraCIDRAuthorizer
+263-  parameters:
+264-    cidr_authorizer_mode: "MONITOR"
+265-    cidr_groups_cache_refresh_interval: "1440"
+266-    ip_cache_max_size: "1000000"
+267-  # Below parameters are used only when CIDR authorizer is enabled
+198:authenticator: PasswordAuthenticator
+413:commitlog_directory: /mydata/jingsong-cass-s4/o04/data/commitlog
+711:      - seeds: "127.0.0.1:7300"
+965:storage_port: 7300
+971:ssl_storage_port: 7301
+1028:native_transport_port: 9342
+235:JMX_PORT="7499"
++ 2026-11-12T03:25:35Z 1794453935154 step 2: start node
++ 2026-11-12T03:25:35Z 1794453935491 pid 198503
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.1  114.67 KiB  16      100.0%            4911a0ee-9c6c-453c-bbba-f8f94fb48fc6  rack1
+
+running
++ 2026-11-12T03:26:26Z 1794453986397 cidr lines in system.log:
+INFO  [main] 2026-11-12T03:25:37,333 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_filtering_enabled=true; allow_insecure_udfs=false; a
+INFO  [main] 2026-11-12T03:26:20,434 ColumnFamilyStore.java:502 - Initializing system_auth.cidr_permissions
+INFO  [main] 2026-11-12T03:26:20,442 ColumnFamilyStore.java:502 - Initializing system_auth.cidr_groups
+INFO  [main] 2026-11-12T03:26:21,264 AuthCache.java:338 - (Re)initializing CidrPermissionsCache (validity period/update interval/max entries/active update) (2000/2000/1000/false)
++ 2026-11-12T03:26:26Z 1794453986403 step 3: wait for the default role (cqlsh)
+
+Warning: Using a password on the command line interface can be insecure.
+Recommendation: use the credentials file to securely provide the password.
+
+
+ release_version
+-----------------
+  5.0.9-SNAPSHOT
+
+(1 rows)
++ 2026-11-12T03:26:33Z 1794453993881 step 4: group lo
+Reloaded CIDR groups cache
+getcidrgroupsofip 127.1.0.1 -> CIDR Groups: 
+lo           
+Reloaded CIDR groups cache
++ 2026-11-12T03:26:39Z 1794453999224 step 5: baselines
++ 2026-11-12T03:26:39Z 1794453999784 histogram base1: 18 432 total: Total        695376       67331520
++ 2026-11-12T03:27:40Z 1794454060211 histogram base2: 16 384 total: Total        694404       67192688
++ 2026-11-12T03:27:40Z 1794454060778 heap_info base:  garbage-first heap   total 1048576K, used 65617K [0x00000000c0000000, 0x0000000100000000)
+Heap Memory (MB)       : 64.08 / 1024.00
+Off Heap Memory (MB)   : 0.00
++ 2026-11-12T03:27:42Z 1794454062440 step 6: W1 JmxProbe 65536 600000
+done 600000 lookups in 201.0 s (first result [lo], last result [lo])
++ 2026-11-12T03:31:03Z 1794454263854 step 7: after W1
++ 2026-11-12T03:31:04Z 1794454264503 histogram w1: 600018 14400432 total: Total       3097752      160290808
++ 2026-11-12T03:31:05Z 1794454265102 heap_info w1:  garbage-first heap   total 1048576K, used 156534K [0x00000000c0000000, 0x0000000100000000)
+Heap Memory (MB)       : 152.87 / 1024.00
+Off Heap Memory (MB)   : 0.00
++ 2026-11-12T03:32:07Z 1794454327361 histogram w1b: 600016 14400384 total: Total       3107635      162782360
++ 2026-11-12T03:32:07Z 1794454327365 step 8: flush control
+Reloaded CIDR groups cache
++ 2026-11-12T03:32:09Z 1794454329367 histogram flushed: 18 432 total: Total        707723       90786912
++ 2026-11-12T03:32:09Z 1794454329370 step 9: W2 NativeProbe 2000
+done 2000 logins in 296.0 s
++ 2026-11-12T03:37:05Z 1794454625887 histogram w2: 2016 48384 total: Total        729486       94161312
++ 2026-11-12T03:37:07Z 1794454627281 node health
+0
+1
++ 2026-11-12T03:37:07Z 1794454627288 step 10: stop node
++ 2026-11-12T03:37:14Z 1794454634308 cluster K=1000000 done
++ 2026-11-12T03:37:14Z 1794454634312 cleanup: CassandraDaemon processes under /mydata/jingsong-cass-s4/o04:
+  none

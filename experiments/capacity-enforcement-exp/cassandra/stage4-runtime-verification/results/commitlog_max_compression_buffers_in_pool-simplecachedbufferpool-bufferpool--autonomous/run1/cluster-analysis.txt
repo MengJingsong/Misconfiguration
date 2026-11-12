@@ -1,0 +1,28 @@
+INFO 3: idle n=15 stress n=91 plateau-window n=61 baseline=206.4 MiB plateau=343.9 MiB net=137.5 MiB range=0.1 MiB peak-base=137.5 MiB waitsΔ=352 direct Count idle/plateau=(153, 337) max segment files=6
+INFO 6: idle n=15 stress n=90 plateau-window n=60 baseline=206.4 MiB plateau=536.0 MiB net=329.6 MiB range=0.3 MiB peak-base=329.7 MiB waitsΔ=384 direct Count idle/plateau=(153, 339.0) max segment files=7
+INFO 12: idle n=15 stress n=90 plateau-window n=60 baseline=206.4 MiB plateau=920.0 MiB net=713.6 MiB range=0.3 MiB peak-base=713.7 MiB waitsΔ=192 direct Count idle/plateau=(153, 350.0) max segment files=13
+INFO 24: idle n=15 stress n=90 plateau-window n=60 baseline=206.4 MiB plateau=1176.1 MiB net=969.7 MiB range=0.5 MiB peak-base=969.8 MiB waitsΔ=0 direct Count idle/plateau=(153, 368.5) max segment files=17
+INFO mmap6: idle n=15 stress n=77 plateau-window n=47 baseline=78.4 MiB plateau=87.9 MiB net=9.6 MiB range=0.4 MiB peak-base=9.6 MiB waitsΔ=0 direct Count idle/plateau=(150, 328) max segment files=21
+PASS N=3 flat (range ≤ 96 MiB): 0.1 MiB
+PASS N=3 waits grow (≥ 1): 352
+PASS N=3 never exceeding (peak-base ≤ (N+2)×64+32 MiB): 137.5 ≤ 352
+PASS N=3 band (N-2)×64+[0,160] MiB: net 137.5 in [64,224]
+PASS N=6 flat (range ≤ 96 MiB): 0.3 MiB
+PASS N=6 waits grow (≥ 1): 384
+PASS N=6 never exceeding (peak-base ≤ (N+2)×64+32 MiB): 329.7 ≤ 544
+PASS N=6 band (N-2)×64+[0,160] MiB: net 329.6 in [256,416]
+PASS N=12 flat (range ≤ 96 MiB): 0.3 MiB
+PASS N=12 waits grow (≥ 1): 192
+PASS N=12 never exceeding (peak-base ≤ (N+2)×64+32 MiB): 713.7 ≤ 928
+PASS N=12 band (N-2)×64+[0,160] MiB: net 713.6 in [640,800]
+PASS N=24 flat (range ≤ 96 MiB): 0.5 MiB
+FAIL N=24 waits grow (≥ 1): 0
+PASS N=24 never exceeding (peak-base ≤ (N+2)×64+32 MiB): 969.8 ≤ 1696
+FAIL N=24 band (N-2)×64+[0,160] MiB: net 969.7 in [1408,1568]
+PASS pairwise 3→6 within ±15% of 192 MiB: 192.0 MiB (1.000×)
+PASS pairwise 6→12 within ±15% of 384 MiB: 384.0 MiB (1.000×)
+FAIL pairwise 12→24 within ±15% of 768 MiB: 256.1 MiB (0.333×)
+PASS mmap control: plateau-base ≤ 64 MiB: 9.6 MiB
+INFO mmap same-N-dependence test: mmap net 9.6 ≥ compressed-6 net − 64 = 265.6? False
+MATCHED: B3g row 4: limit not reached for N=[24] — not confirmed
+FAILS: 3

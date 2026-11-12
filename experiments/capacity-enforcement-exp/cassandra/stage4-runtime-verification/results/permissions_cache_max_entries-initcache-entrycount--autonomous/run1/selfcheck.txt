@@ -1,0 +1,33 @@
+== unit tier (raw: TEST-*.log, junit XML)
+unit M=0: size=0 (min(M,N)=0, equal=True) asMap=0 loads=30000 reloads100=100 heapMB=-0.3 perEntryKB=0.00
+unit M=100: size=100 (min(M,N)=100, equal=True) asMap=100 loads=30000 reloads100=100 heapMB=0.1 perEntryKB=1.02
+unit M=1000: size=1000 (min(M,N)=1000, equal=True) asMap=1000 loads=30000 reloads100=100 heapMB=3.7 perEntryKB=3.79
+unit M=10000: size=10000 (min(M,N)=10000, equal=True) asMap=10000 loads=30000 reloads100=100 heapMB=39.9 perEntryKB=4.09
+unit M=100000: size=30000 (min(M,N)=30000, equal=True) asMap=30000 loads=30000 reloads100=0 heapMB=120.5 perEntryKB=4.11
+unit M=-1: ['java.lang.IllegalArgumentException: maximum size must not be negative']
+unit shrink: [('10000', '100')]
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-m0.xml: tests=1 failures=0 errors=0
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-m100.xml: tests=1 failures=0 errors=0
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-m1000.xml: tests=1 failures=0 errors=0
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-m10000.xml: tests=1 failures=0 errors=0
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-m100000.xml: tests=1 failures=0 errors=0
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-negative.xml: tests=1 failures=0 errors=0
+junit TEST-org.apache.cassandra.auth.PermissionsCacheMaxEntriesProbeTest-shrinkAtRuntime.xml: tests=1 failures=0 errors=0
+== cluster tier (raw: session.txt, *.hist, system.log, driver.txt)
+M1000: ES={'base': '14', 'after': '1000'} | base: RR=6 dRR=0 d[B=0.00MB dTotal=0.00MB | after: RR=1007 dRR=1001 d[B=3.90MB dTotal=4.86MB 
+   system.log: PermissionsCache init lines ['3600000/3600000/1000/false']; '^ERROR' lines 0; OutOfMemoryError 0; 'Changed'/setMaximum n/a
+   driver: sent 20000 seconds 25.5; driver Traceback: False
+   heap_info after: ['garbage-first heap   total 1048576K, used 69875K [0x00000000c0000000, 0x0000000100000000)']
+M5000: ES={'base': '14', 'after': '5000'} | base: RR=6 dRR=0 d[B=0.00MB dTotal=0.00MB | after: RR=5007 dRR=5001 d[B=19.22MB dTotal=20.73MB 
+   system.log: PermissionsCache init lines ['3600000/3600000/5000/false']; '^ERROR' lines 0; OutOfMemoryError 0; 'Changed'/setMaximum n/a
+   driver: sent 20000 seconds 26.2; driver Traceback: False
+   heap_info after: ['garbage-first heap   total 1048576K, used 85800K [0x00000000c0000000, 0x0000000100000000)']
+M100000: ES={'base': '14', 'after': '20014', 'shrink': '1000'} | base: RR=6 dRR=0 d[B=0.00MB dTotal=0.00MB | after: RR=20007 dRR=20001 d[B=76.67MB dTotal=80.48MB | shrink: RR=1007 dRR=1001 d[B=3.91MB dTotal=5.51MB 
+   system.log: PermissionsCache init lines ['3600000/3600000/100000/false', '3600000/3600000/1000/false']; '^ERROR' lines 0; OutOfMemoryError 0; 'Changed'/setMaximum n/a
+   driver: sent 20000 seconds 26.0; driver Traceback: False
+   heap_info after: ['garbage-first heap   total 1048576K, used 146983K [0x00000000c0000000, 0x0000000100000000)']
+off: ES={'base': '0', 'after': '0'} | base: RR=6 dRR=0 d[B=0.00MB dTotal=0.00MB | after: RR=6 dRR=0 d[B=0.06MB dTotal=0.71MB 
+   system.log: PermissionsCache init lines []; '^ERROR' lines 0; OutOfMemoryError 0; 'Changed'/setMaximum n/a
+   driver: sent 20000 seconds 26.0; driver Traceback: False
+   heap_info after: ['garbage-first heap   total 1048576K, used 65667K [0x00000000c0000000, 0x0000000100000000)']
+daemons left in session: ['0'] drop_roles left: ['0']

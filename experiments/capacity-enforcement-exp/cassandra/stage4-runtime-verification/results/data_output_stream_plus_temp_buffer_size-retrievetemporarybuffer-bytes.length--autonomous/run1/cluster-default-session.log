@@ -1,0 +1,63 @@
+### 2026-11-12T03:27:42.901Z label=default P=default alloc=offheap_buffers
+row_cache_class_name: org.apache.cassandra.cache.SerializingCacheProvider
+row_cache_size: 1024MiB
+memtable_heap_space: 1024MiB
+memtable_offheap_space: 2048MiB
+memtable_allocation_type: offheap_buffers
+storage_port: 7300
+native_transport_port: 9342
+### 2026-11-12T03:27:42.984Z start node
+PID=959824
+UN  127.0.0.1  114.7 KiB  16      100.0%            2437a735-f133-4ad2-9d7c-58bed5973d78  rack1
+-XX:+UseG1GC
+-Xmx4G
+-XX:MaxDirectMemorySize=2G
+### 2026-11-12T03:28:23.388Z jinfo
+P unset (default 8192)
+### 2026-11-12T03:28:23.698Z write 64 x 4 MiB
+		SSTable count: 0
+		Old SSTable count: 0
+		Off heap memory used (total): 268435712
+		Memtable data size: 268438592
+		Memtable off heap memory used: 268435712
+### 2026-11-12T03:28:31.931Z info before reads
+Heap Memory (MB)       : 528.00 / 4096.00
+Off Heap Memory (MB)   : 256.00
+Row Cache              : entries 0, size 0 bytes, capacity 1 GiB, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+### 2026-11-12T03:28:33.209Z H0
+Total        725688       62757352
+### 2026-11-12T03:28:33.541Z JFR start
+959824:
+Started recording 1. No limit specified, using maxsize=250MB as default.
+
+Use jcmd 959824 JFR.dump name=o43 to copy recording data to file.
+### 2026-11-12T03:28:34.100Z read 64, concurrency 32
+ok 64
+### 2026-11-12T03:29:46.616Z JFR dump/stop
+959824:
+Dumped recording "o43", 760.1 kB written to:
+
+/mydata/jingsong-cass-s4/o43/run1/cluster/o43-default.jfr
+959824:
+Stopped recording "o43".
+### 2026-11-12T03:29:47.242Z info after reads
+Heap Memory (MB)       : 2219.85 / 4096.00
+Off Heap Memory (MB)   : 256.00
+Row Cache              : entries 64, size 256 MiB, capacity 1 GiB, 0 hits, 64 requests, 0.000 recent hit rate, 0 save period in seconds
+		SSTable count: 0
+		Old SSTable count: 0
+### 2026-11-12T03:29:49.994Z H1
+Total        765006       67247592
+### 2026-11-12T03:29:50.372Z jfr print
+events=676
+tempbuf_events=0
+tempbuf_max_size=0
+tempbuf_max_len=0  # byte[] header = 16 B (checked with JfrParseCheck)
+byte[]>=1MiB size=8388680 count=128 caller=java/nio/ByteBuffer.allocate
+byte[]>=1MiB size=4194352 count=128 caller=java/nio/ByteBuffer.allocate
+byte[]>=1MiB size=4194320 count=128 caller=org/apache/cassandra/db/marshal/ByteArrayAccessor.read
+byte[]>=1MiB size=4194320 count=128 caller=java/nio/ByteBuffer.allocate
+### 2026-11-12T03:29:52.210Z done
+### 2026-11-12T03:29:52.211Z teardown
+Cassandra has shutdown.
+no o43 CassandraDaemon left

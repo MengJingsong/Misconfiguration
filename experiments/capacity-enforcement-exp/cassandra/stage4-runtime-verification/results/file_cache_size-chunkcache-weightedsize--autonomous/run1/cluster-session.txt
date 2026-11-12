@@ -1,0 +1,631 @@
+[2026-11-12T03:15:07Z 1794453307532] === cluster run run1 shakedown=False N_ROWS=4000000 READ_S=600 settings=['disabled', 64, 256, 512]
+[2026-11-12T03:15:07Z 1794453307532] + javac -d /mydata/jingsong-cass-s4/o05/harness-classes /mydata/jingsong-cass-s4/o05/harness/O05Jmx.java
+
+  rc=0
+[2026-11-12T03:15:08Z 1794453308302] yaml settings:
+# --- o05 stage-4 settings ---
+cluster_name: 'o05'
+storage_port: 7300
+ssl_storage_port: 7301
+native_transport_port: 9342
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+commitlog_directory: /mydata/jingsong-cass-s4/o05/node-run1/commitlog
+hints_directory: /mydata/jingsong-cass-s4/o05/node-run1/hints
+saved_caches_directory: /mydata/jingsong-cass-s4/o05/node-run1/saved_caches
+cdc_raw_directory: /mydata/jingsong-cass-s4/o05/node-run1/cdc_raw
+disk_access_mode: mmap_index_only
+key_cache_size: 0MiB
+row_cache_size: 0MiB
+file_cache_enabled: false
+data_file_directories:
+    - /mydata/jingsong-cass-s4/o05/node-run1/data
+
+[2026-11-12T03:15:08Z 1794453308321] + ( setsid nohup /mydata/jingsong-cass-s4/o05/src/bin/cassandra -p /mydata/jingsong-cass-s4/o05/node-run1/pid < /dev/null > /mydata/jingsong-cass-s4/o05/node-run1/logs/stdout.log 2>&1 & )
+
+  rc=0
+[2026-11-12T03:15:55Z 1794453355638] node up (pid 54880) after 47 s
+[2026-11-12T03:15:55Z 1794453355638] + tr "\0" " " < /proc/54880/cmdline
+[2026-11-12T03:15:55Z 1794453355640] cmdline flags: -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -XX:-UseBiasedLocking -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/jingsong-cass-s4/o05/node-run1/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=4G -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/mydata/jingsong-cass-s4/o05/node-run1/conf/hotspot_compiler -XX:HeapDumpPath=/mydata/jingsong-cass-s4/o05/node-run1/logs/cassandra-1794453308-pid54769.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill
+[2026-11-12T03:15:55Z 1794453355640] + /mydata/jingsong-cass-s4/o05/src/tools/bin/cassandra-stress write n=4000000 -col 'n=FIXED(5)' 'size=FIXED(200)' -node 127.0.0.1 -port native=9342 jmx=7499 -rate threads=32 -schema "replication(factor=1)" compression=LZ4Compressor > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-write.log 2>&1
+
+  rc=0
+[2026-11-12T03:18:34Z 1794453514625] + grep -A30 "^Results:" /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-write.log | head -30; grep -i "error" /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-write.log | head -5
+Results:
+Op rate                   :   27,868 op/s  [WRITE: 27,868 op/s]
+Partition rate            :   27,868 pk/s  [WRITE: 27,868 pk/s]
+Row rate                  :   27,868 row/s [WRITE: 27,868 row/s]
+Latency mean              :    1.1 ms [WRITE: 1.1 ms]
+Latency median            :    0.6 ms [WRITE: 0.6 ms]
+Latency 95th percentile   :    1.4 ms [WRITE: 1.4 ms]
+Latency 99th percentile   :    3.3 ms [WRITE: 3.3 ms]
+Latency 99.9th percentile :   38.8 ms [WRITE: 38.8 ms]
+Latency max               : 5574.2 ms [WRITE: 5,574.2 ms]
+Total partitions          :  4,000,000 [WRITE: 4,000,000]
+Total errors              :          0 [WRITE: 0]
+Total GC count            : 87
+Total GC memory           : 54.075 GiB
+Total GC time             :    6.2 seconds
+Avg GC time               :   70.9 ms
+StdDev GC time            :   55.8 ms
+Total operation time      : 00:02:23
+
+END
+Errors:
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+Total errors              :          0 [WRITE: 0]
+
+  rc=0
+[2026-11-12T03:18:34Z 1794453514639] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 flush keyspace1
+
+  rc=0
+[2026-11-12T03:20:09Z 1794453609598] compactions settled: pending tasks                    0
+[2026-11-12T03:20:09Z 1794453609598] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 compactionstats > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-compactionstats.txt 2>&1
+
+  rc=0
+[2026-11-12T03:20:11Z 1794453611026] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 tablestats keyspace1.standard1 > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-tablestats.txt 2>&1
+
+  rc=0
+[2026-11-12T03:20:12Z 1794453612595] + cat /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-tablestats.txt | grep -E "SSTable count|Space used \(live\)|Compression|Number of partitions"
+		SSTable count: 5
+		Old SSTable count: 0
+		Space used (live): 4243744092
+		SSTable Compression Ratio: 0.97891
+		Number of partitions (estimate): 3967638
+		Compression metadata off heap memory used: 2077384
+
+  rc=0
+[2026-11-12T03:20:12Z 1794453612598] + du -sb /mydata/jingsong-cass-s4/o05/node-run1/data
+4244106002	/mydata/jingsong-cass-s4/o05/node-run1/data
+
+  rc=0
+[2026-11-12T03:20:12Z 1794453612644] + cqlsh_out=$(/mydata/jingsong-cass-s4/o05/src/bin/cqlsh 127.0.0.1 9342 -e "DESCRIBE TABLE keyspace1.standard1" 2>&1); echo "$cqlsh_out" | grep -i compression
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+
+  rc=0
+[2026-11-12T03:20:13Z 1794453613852] === setting disabled
+[2026-11-12T03:20:13Z 1794453613853] stopping node pid 54880
+[2026-11-12T03:20:19Z 1794453619861] node stopped
+[2026-11-12T03:20:19Z 1794453619871] yaml settings:
+# --- o05 stage-4 settings ---
+cluster_name: 'o05'
+storage_port: 7300
+ssl_storage_port: 7301
+native_transport_port: 9342
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+commitlog_directory: /mydata/jingsong-cass-s4/o05/node-run1/commitlog
+hints_directory: /mydata/jingsong-cass-s4/o05/node-run1/hints
+saved_caches_directory: /mydata/jingsong-cass-s4/o05/node-run1/saved_caches
+cdc_raw_directory: /mydata/jingsong-cass-s4/o05/node-run1/cdc_raw
+disk_access_mode: mmap_index_only
+key_cache_size: 0MiB
+row_cache_size: 0MiB
+file_cache_enabled: false
+data_file_directories:
+    - /mydata/jingsong-cass-s4/o05/node-run1/data
+
+[2026-11-12T03:20:20Z 1794453620948] + ( setsid nohup /mydata/jingsong-cass-s4/o05/src/bin/cassandra -p /mydata/jingsong-cass-s4/o05/node-run1/pid < /dev/null > /mydata/jingsong-cass-s4/o05/node-run1/logs/stdout.log 2>&1 & )
+
+  rc=0
+[2026-11-12T03:20:32Z 1794453632831] node up (pid 59285) after 12 s
+[2026-11-12T03:20:32Z 1794453632832] + tr "\0" " " < /proc/59285/cmdline
+[2026-11-12T03:20:32Z 1794453632834] cmdline flags: -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -XX:-UseBiasedLocking -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/jingsong-cass-s4/o05/node-run1/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=4G -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/mydata/jingsong-cass-s4/o05/node-run1/conf/hotspot_compiler -XX:HeapDumpPath=/mydata/jingsong-cass-s4/o05/node-run1/logs/cassandra-1794453621-pid59174.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill
+[2026-11-12T03:20:32Z 1794453632834] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-disabled-start.txt 2>&1
+
+  rc=0
+[2026-11-12T03:20:34Z 1794453634540] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:20:34Z 1794453634948] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:20:35Z 1794453635377] sample disabled idle: cc_size=None entries=None pool=16777216 ovf=0 direct=20300433 req=None miss=None
+[2026-11-12T03:21:04Z 1794453664569] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:21:04Z 1794453664978] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:21:05Z 1794453665204] sample disabled idle: cc_size=None entries=None pool=16777216 ovf=0 direct=53857015 req=None miss=None
+[2026-11-12T03:21:34Z 1794453694598] read start disabled
+[2026-11-12T03:21:34Z 1794453694601] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:21:34Z 1794453695000] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:21:35Z 1794453695227] sample disabled read +0s: cc_size=None entries=None pool=16777216 ovf=0 direct=53840591 req=None miss=None
+[2026-11-12T03:22:05Z 1794453725253] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:22:05Z 1794453725858] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:22:06Z 1794453726250] sample disabled read +31s: cc_size=None entries=None pool=16777216 ovf=0 direct=63003102 req=None miss=None
+[2026-11-12T03:22:35Z 1794453755269] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:22:35Z 1794453755897] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:22:36Z 1794453756302] sample disabled read +61s: cc_size=None entries=None pool=16777216 ovf=0 direct=63003622 req=None miss=None
+[2026-11-12T03:23:05Z 1794453785323] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:23:05Z 1794453785940] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:23:06Z 1794453786349] sample disabled read +91s: cc_size=None entries=None pool=16777216 ovf=0 direct=63003973 req=None miss=None
+[2026-11-12T03:23:35Z 1794453815368] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:23:35Z 1794453815986] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:23:36Z 1794453816375] sample disabled read +121s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004231 req=None miss=None
+[2026-11-12T03:24:05Z 1794453845393] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:24:06Z 1794453846035] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:24:06Z 1794453846426] sample disabled read +151s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004385 req=None miss=None
+[2026-11-12T03:24:35Z 1794453875450] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:24:36Z 1794453876021] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:24:36Z 1794453876409] sample disabled read +181s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004445 req=None miss=None
+[2026-11-12T03:25:06Z 1794453906429] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:25:07Z 1794453907079] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:25:07Z 1794453907450] sample disabled read +212s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004508 req=None miss=None
+[2026-11-12T03:25:36Z 1794453936470] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:25:37Z 1794453937118] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:25:37Z 1794453937482] sample disabled read +242s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004546 req=None miss=None
+[2026-11-12T03:26:06Z 1794453966501] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:26:07Z 1794453967122] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:26:07Z 1794453967489] sample disabled read +272s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004546 req=None miss=None
+[2026-11-12T03:26:36Z 1794453996508] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:26:37Z 1794453997129] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:26:37Z 1794453997516] sample disabled read +302s: cc_size=None entries=None pool=16777216 ovf=0 direct=63004606 req=None miss=None
+[2026-11-12T03:27:06Z 1794454026534] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:27:07Z 1794454027187] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:27:07Z 1794454027548] sample disabled read +332s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085286 req=None miss=None
+[2026-11-12T03:27:36Z 1794454056571] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:27:37Z 1794454057187] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:27:37Z 1794454057577] sample disabled read +362s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085292 req=None miss=None
+[2026-11-12T03:28:06Z 1794454086599] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:28:07Z 1794454087288] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:28:07Z 1794454087649] sample disabled read +392s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085322 req=None miss=None
+[2026-11-12T03:28:36Z 1794454116669] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:28:37Z 1794454117330] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:28:37Z 1794454117701] sample disabled read +422s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085430 req=None miss=None
+[2026-11-12T03:29:06Z 1794454146725] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:29:07Z 1794454147360] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:29:07Z 1794454147754] sample disabled read +452s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085484 req=None miss=None
+[2026-11-12T03:29:36Z 1794454176779] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:29:37Z 1794454177357] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:29:37Z 1794454177725] sample disabled read +482s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085500 req=None miss=None
+[2026-11-12T03:30:07Z 1794454207746] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:30:08Z 1794454208355] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:30:08Z 1794454208728] sample disabled read +513s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085502 req=None miss=None
+[2026-11-12T03:30:38Z 1794454238745] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:30:39Z 1794454239343] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:30:39Z 1794454239707] sample disabled read +544s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085519 req=None miss=None
+[2026-11-12T03:31:09Z 1794454269726] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:31:10Z 1794454270352] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:31:10Z 1794454270734] sample disabled read +575s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085519 req=None miss=None
+[2026-11-12T03:31:39Z 1794454299752] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:31:40Z 1794454300372] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:31:40Z 1794454300780] sample disabled read +605s: cc_size=None entries=None pool=16777216 ovf=0 direct=63085519 req=None miss=None
+[2026-11-12T03:31:46Z 1794454306786] read end disabled rc=0
+[2026-11-12T03:31:46Z 1794454306786] + grep -A30 "^Results:" /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-read-disabled.log | head -30
+Results:
+Op rate                   :   35,596 op/s  [READ: 35,596 op/s]
+Partition rate            :   35,596 pk/s  [READ: 35,596 pk/s]
+Row rate                  :   35,596 row/s [READ: 35,596 row/s]
+Latency mean              :    0.9 ms [READ: 0.9 ms]
+Latency median            :    0.7 ms [READ: 0.7 ms]
+Latency 95th percentile   :    1.8 ms [READ: 1.8 ms]
+Latency 99th percentile   :    2.8 ms [READ: 2.8 ms]
+Latency 99.9th percentile :    5.7 ms [READ: 5.7 ms]
+Latency max               :  193.6 ms [READ: 193.6 ms]
+Total partitions          : 21,382,632 [READ: 21,382,632]
+Total errors              :          0 [READ: 0]
+Total GC count            : 438
+Total GC memory           : 512.842 GiB
+Total GC time             :    1.3 seconds
+Avg GC time               :    3.0 ms
+StdDev GC time            :    0.9 ms
+Total operation time      : 00:10:00
+
+END
+
+  rc=0
+[2026-11-12T03:31:46Z 1794454306790] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-disabled-end.txt 2>&1
+
+  rc=0
+[2026-11-12T03:31:48Z 1794454308452] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:31:48Z 1794454308823] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:31:49Z 1794454309050] sample disabled post: cc_size=None entries=None pool=16777216 ovf=0 direct=63086247 req=None miss=None
+[2026-11-12T03:32:18Z 1794454338463] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:32:18Z 1794454338844] + jcmd 59285 VM.native_memory summary
+[2026-11-12T03:32:19Z 1794454339068] sample disabled post: cc_size=None entries=None pool=16777216 ovf=0 direct=63086247 req=None miss=None
+[2026-11-12T03:32:48Z 1794454368468] + cp /mydata/jingsong-cass-s4/o05/node-run1/logs/system.log /mydata/jingsong-cass-s4/o05/logs/cluster-run1/system-disabled.log
+
+  rc=0
+[2026-11-12T03:32:48Z 1794454368540] === setting 64
+[2026-11-12T03:32:48Z 1794454368540] stopping node pid 59285
+[2026-11-12T03:32:57Z 1794454377552] node stopped
+[2026-11-12T03:32:57Z 1794454377563] yaml settings:
+# --- o05 stage-4 settings ---
+cluster_name: 'o05'
+storage_port: 7300
+ssl_storage_port: 7301
+native_transport_port: 9342
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+commitlog_directory: /mydata/jingsong-cass-s4/o05/node-run1/commitlog
+hints_directory: /mydata/jingsong-cass-s4/o05/node-run1/hints
+saved_caches_directory: /mydata/jingsong-cass-s4/o05/node-run1/saved_caches
+cdc_raw_directory: /mydata/jingsong-cass-s4/o05/node-run1/cdc_raw
+disk_access_mode: mmap_index_only
+key_cache_size: 0MiB
+row_cache_size: 0MiB
+file_cache_enabled: true
+file_cache_size: 64MiB
+data_file_directories:
+    - /mydata/jingsong-cass-s4/o05/node-run1/data
+
+[2026-11-12T03:32:57Z 1794454377585] + ( setsid nohup /mydata/jingsong-cass-s4/o05/src/bin/cassandra -p /mydata/jingsong-cass-s4/o05/node-run1/pid < /dev/null > /mydata/jingsong-cass-s4/o05/node-run1/logs/stdout.log 2>&1 & )
+
+  rc=0
+[2026-11-12T03:33:09Z 1794454389665] node up (pid 63539) after 12 s
+[2026-11-12T03:33:09Z 1794454389666] + tr "\0" " " < /proc/63539/cmdline
+[2026-11-12T03:33:09Z 1794454389668] cmdline flags: -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -XX:-UseBiasedLocking -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/jingsong-cass-s4/o05/node-run1/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=4G -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/mydata/jingsong-cass-s4/o05/node-run1/conf/hotspot_compiler -XX:HeapDumpPath=/mydata/jingsong-cass-s4/o05/node-run1/logs/cassandra-1794454377-pid63428.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill
+[2026-11-12T03:33:09Z 1794454389668] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-64-start.txt 2>&1
+
+  rc=0
+[2026-11-12T03:33:11Z 1794454391398] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:33:11Z 1794454391741] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:33:12Z 1794454392118] sample 64 idle: cc_size=442368 entries=27 pool=8388608 ovf=0 direct=11912302 req=189 miss=39
+[2026-11-12T03:33:41Z 1794454421427] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:33:41Z 1794454421782] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:33:42Z 1794454422109] sample 64 idle: cc_size=458752 entries=28 pool=8388608 ovf=0 direct=45468884 req=190 miss=40
+[2026-11-12T03:34:11Z 1794454451456] read start 64
+[2026-11-12T03:34:11Z 1794454451459] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:34:11Z 1794454451839] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:34:12Z 1794454452099] sample 64 read +0s: cc_size=458752 entries=28 pool=8388608 ovf=0 direct=45447385 req=190 miss=40
+[2026-11-12T03:34:42Z 1794454482124] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:34:42Z 1794454482708] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:34:43Z 1794454483074] sample 64 read +31s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113279027 req=674577 miss=669104
+[2026-11-12T03:35:13Z 1794454513095] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:35:13Z 1794454513715] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:35:14Z 1794454514084] sample 64 read +62s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113279767 req=1812312 miss=1797776
+[2026-11-12T03:35:43Z 1794454543108] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:35:43Z 1794454543689] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:35:44Z 1794454544050] sample 64 read +92s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113279944 req=2921671 miss=2898441
+[2026-11-12T03:36:14Z 1794454574071] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:36:14Z 1794454574701] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:36:15Z 1794454575092] sample 64 read +123s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113280073 req=4064867 miss=4032728
+[2026-11-12T03:36:44Z 1794454604114] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:36:44Z 1794454604678] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:36:45Z 1794454605030] sample 64 read +153s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113280171 req=5159647 miss=5118939
+[2026-11-12T03:37:15Z 1794454635050] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:37:15Z 1794454635629] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:37:15Z 1794454635998] sample 64 read +184s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113280252 req=6295556 miss=6245876
+[2026-11-12T03:37:46Z 1794454666020] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:37:46Z 1794454666614] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:37:46Z 1794454666964] sample 64 read +215s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113280347 req=7435216 miss=7376750
+[2026-11-12T03:38:16Z 1794454696984] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:38:17Z 1794454697544] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:38:17Z 1794454697908] sample 64 read +246s: cc_size=33554432 entries=2050 pool=67108864 ovf=0 direct=113280376 req=8571043 miss=8503566
+[2026-11-12T03:38:47Z 1794454727930] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:38:48Z 1794454728482] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:38:48Z 1794454728839] sample 64 read +276s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113280433 req=9698761 miss=9622335
+[2026-11-12T03:39:18Z 1794454758859] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:39:19Z 1794454759491] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:39:19Z 1794454759863] sample 64 read +307s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113280508 req=10830018 miss=10744715
+[2026-11-12T03:39:48Z 1794454788885] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:39:49Z 1794454789461] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:39:49Z 1794454789805] sample 64 read +337s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113296783 req=11921017 miss=11827155
+[2026-11-12T03:40:19Z 1794454819825] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:40:20Z 1794454820425] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:40:20Z 1794454820775] sample 64 read +368s: cc_size=33554432 entries=2049 pool=67108864 ovf=0 direct=113296799 req=13051479 miss=12948659
+[2026-11-12T03:40:50Z 1794454850798] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:40:51Z 1794454851424] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:40:51Z 1794454851782] sample 64 read +399s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113296832 req=14176340 miss=14064438
+[2026-11-12T03:41:20Z 1794454880802] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:41:21Z 1794454881397] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:41:21Z 1794454881753] sample 64 read +429s: cc_size=33554432 entries=2050 pool=67108864 ovf=0 direct=113296832 req=15268453 miss=15148009
+[2026-11-12T03:41:51Z 1794454911773] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:41:52Z 1794454912390] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:41:52Z 1794454912776] sample 64 read +460s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113296848 req=16399490 miss=16270105
+[2026-11-12T03:42:21Z 1794454941798] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:42:22Z 1794454942382] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:42:22Z 1794454942730] sample 64 read +490s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113296848 req=17489429 miss=17351448
+[2026-11-12T03:42:52Z 1794454972751] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:42:53Z 1794454973365] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:42:53Z 1794454973748] sample 64 read +521s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113296882 req=18618428 miss=18471602
+[2026-11-12T03:43:22Z 1794455002766] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:43:23Z 1794455003346] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:43:23Z 1794455003743] sample 64 read +551s: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113296882 req=19708530 miss=19553075
+[2026-11-12T03:43:53Z 1794455033764] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:43:54Z 1794455034393] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:43:54Z 1794455034789] sample 64 read +582s: cc_size=33554432 entries=2049 pool=67108864 ovf=0 direct=113296898 req=20838937 miss=20674624
+[2026-11-12T03:44:23Z 1794455063807] read end 64 rc=0
+[2026-11-12T03:44:23Z 1794455063807] + grep -A30 "^Results:" /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-read-64.log | head -30
+Results:
+Op rate                   :   34,042 op/s  [READ: 34,042 op/s]
+Partition rate            :   34,042 pk/s  [READ: 34,042 pk/s]
+Row rate                  :   34,042 row/s [READ: 34,042 row/s]
+Latency mean              :    0.9 ms [READ: 0.9 ms]
+Latency median            :    0.8 ms [READ: 0.8 ms]
+Latency 95th percentile   :    1.9 ms [READ: 1.9 ms]
+Latency 99th percentile   :    2.9 ms [READ: 2.9 ms]
+Latency 99.9th percentile :    5.8 ms [READ: 5.8 ms]
+Latency max               :   28.0 ms [READ: 28.0 ms]
+Total partitions          : 20,433,696 [READ: 20,433,696]
+Total errors              :          0 [READ: 0]
+Total GC count            : 432
+Total GC memory           : 505.728 GiB
+Total GC time             :    1.3 seconds
+Avg GC time               :    3.0 ms
+StdDev GC time            :    0.7 ms
+Total operation time      : 00:10:00
+
+END
+
+  rc=0
+[2026-11-12T03:44:23Z 1794455063812] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-64-end.txt 2>&1
+
+  rc=0
+[2026-11-12T03:44:25Z 1794455065568] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:44:25Z 1794455065912] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:44:26Z 1794455066136] sample 64 post: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113297666 req=21821533 miss=21649452
+[2026-11-12T03:44:55Z 1794455095585] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:44:55Z 1794455095973] + jcmd 63539 VM.native_memory summary
+[2026-11-12T03:44:56Z 1794455096197] sample 64 post: cc_size=33554432 entries=2048 pool=67108864 ovf=0 direct=113297666 req=21821533 miss=21649452
+[2026-11-12T03:45:25Z 1794455125614] + cp /mydata/jingsong-cass-s4/o05/node-run1/logs/system.log /mydata/jingsong-cass-s4/o05/logs/cluster-run1/system-64.log
+
+  rc=0
+[2026-11-12T03:45:25Z 1794455125633] === setting 256
+[2026-11-12T03:45:25Z 1794455125634] stopping node pid 63539
+[2026-11-12T03:45:34Z 1794455134646] node stopped
+[2026-11-12T03:45:34Z 1794455134657] yaml settings:
+# --- o05 stage-4 settings ---
+cluster_name: 'o05'
+storage_port: 7300
+ssl_storage_port: 7301
+native_transport_port: 9342
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+commitlog_directory: /mydata/jingsong-cass-s4/o05/node-run1/commitlog
+hints_directory: /mydata/jingsong-cass-s4/o05/node-run1/hints
+saved_caches_directory: /mydata/jingsong-cass-s4/o05/node-run1/saved_caches
+cdc_raw_directory: /mydata/jingsong-cass-s4/o05/node-run1/cdc_raw
+disk_access_mode: mmap_index_only
+key_cache_size: 0MiB
+row_cache_size: 0MiB
+file_cache_enabled: true
+file_cache_size: 256MiB
+data_file_directories:
+    - /mydata/jingsong-cass-s4/o05/node-run1/data
+
+[2026-11-12T03:45:34Z 1794455134679] + ( setsid nohup /mydata/jingsong-cass-s4/o05/src/bin/cassandra -p /mydata/jingsong-cass-s4/o05/node-run1/pid < /dev/null > /mydata/jingsong-cass-s4/o05/node-run1/logs/stdout.log 2>&1 & )
+
+  rc=0
+[2026-11-12T03:45:46Z 1794455146693] node up (pid 66638) after 12 s
+[2026-11-12T03:45:46Z 1794455146694] + tr "\0" " " < /proc/66638/cmdline
+[2026-11-12T03:45:46Z 1794455146696] cmdline flags: -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -XX:-UseBiasedLocking -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/jingsong-cass-s4/o05/node-run1/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=4G -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/mydata/jingsong-cass-s4/o05/node-run1/conf/hotspot_compiler -XX:HeapDumpPath=/mydata/jingsong-cass-s4/o05/node-run1/logs/cassandra-1794455134-pid66527.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill
+[2026-11-12T03:45:46Z 1794455146696] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-256-start.txt 2>&1
+
+  rc=0
+[2026-11-12T03:45:48Z 1794455148407] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:45:48Z 1794455148752] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:45:49Z 1794455149138] sample 256 idle: cc_size=524288 entries=32 pool=8388608 ovf=0 direct=11913697 req=192 miss=48
+[2026-11-12T03:46:18Z 1794455178436] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:46:18Z 1794455178793] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:46:19Z 1794455179132] sample 256 idle: cc_size=540672 entries=33 pool=8388608 ovf=0 direct=45470279 req=193 miss=49
+[2026-11-12T03:46:48Z 1794455208465] read start 256
+[2026-11-12T03:46:48Z 1794455208499] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:46:48Z 1794455208853] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:46:49Z 1794455209093] sample 256 read +0s: cc_size=540672 entries=33 pool=8388608 ovf=0 direct=45447979 req=193 miss=49
+[2026-11-12T03:47:19Z 1794455239119] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:47:19Z 1794455239695] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:47:20Z 1794455240082] sample 256 read +31s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314752598 req=659744 miss=624994
+[2026-11-12T03:47:50Z 1794455270102] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:47:50Z 1794455270696] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:47:51Z 1794455271063] sample 256 read +62s: cc_size=234881024 entries=14338 pool=268435456 ovf=0 direct=314753154 req=1785417 miss=1688295
+[2026-11-12T03:48:21Z 1794455301084] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:48:21Z 1794455301650] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:48:22Z 1794455302029] sample 256 read +93s: cc_size=234881024 entries=14338 pool=268435456 ovf=0 direct=314753291 req=2911443 miss=2752148
+[2026-11-12T03:48:52Z 1794455332049] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:48:52Z 1794455332622] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:48:52Z 1794455332977] sample 256 read +124s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753594 req=4035000 miss=3813669
+[2026-11-12T03:49:22Z 1794455363002] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:49:23Z 1794455363585] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:49:23Z 1794455363962] sample 256 read +155s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753704 req=5149378 miss=4866768
+[2026-11-12T03:49:53Z 1794455393984] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:49:54Z 1794455394607] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:49:54Z 1794455395004] sample 256 read +185s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753775 req=6271254 miss=5926582
+[2026-11-12T03:50:24Z 1794455424023] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:50:24Z 1794455424639] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:50:25Z 1794455425042] sample 256 read +216s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753779 req=7360011 miss=6955338
+[2026-11-12T03:50:54Z 1794455454060] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:50:54Z 1794455454608] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:50:54Z 1794455454966] sample 256 read +246s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753831 req=8447787 miss=7982952
+[2026-11-12T03:51:24Z 1794455484990] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:51:25Z 1794455485606] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:51:25Z 1794455485944] sample 256 read +276s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753885 req=9574998 miss=9047853
+[2026-11-12T03:51:55Z 1794455515968] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:51:56Z 1794455516574] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:51:56Z 1794455516926] sample 256 read +307s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753893 req=10697937 miss=10108689
+[2026-11-12T03:52:26Z 1794455546948] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:52:27Z 1794455547537] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:52:27Z 1794455547925] sample 256 read +338s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314753969 req=11825195 miss=11173326
+[2026-11-12T03:52:57Z 1794455577945] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:52:58Z 1794455578575] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:52:58Z 1794455578944] sample 256 read +369s: cc_size=234881024 entries=14337 pool=268435456 ovf=0 direct=314754000 req=12953086 miss=12238507
+[2026-11-12T03:53:27Z 1794455607965] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:53:28Z 1794455608590] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:53:28Z 1794455608991] sample 256 read +399s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314754016 req=14044264 miss=13269065
+[2026-11-12T03:53:58Z 1794455638010] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:53:58Z 1794455638612] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:53:58Z 1794455638975] sample 256 read +430s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314754035 req=15134538 miss=14299121
+[2026-11-12T03:54:28Z 1794455668995] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:54:29Z 1794455669599] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:54:29Z 1794455670003] sample 256 read +460s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314754071 req=16263950 miss=15366128
+[2026-11-12T03:54:59Z 1794455699024] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:54:59Z 1794455699607] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:54:59Z 1794455699968] sample 256 read +491s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314754073 req=17359002 miss=16400352
+[2026-11-12T03:55:29Z 1794455729992] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:55:30Z 1794455730570] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:55:30Z 1794455730968] sample 256 read +521s: cc_size=234881024 entries=14337 pool=268435456 ovf=0 direct=314754111 req=18487179 miss=17466073
+[2026-11-12T03:56:00Z 1794455760991] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:56:01Z 1794455761609] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:56:01Z 1794455761983] sample 256 read +552s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314754111 req=19617799 miss=18533995
+[2026-11-12T03:56:31Z 1794455791008] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:56:31Z 1794455791630] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:56:32Z 1794455792012] sample 256 read +583s: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314754111 req=20709270 miss=19565017
+[2026-11-12T03:57:01Z 1794455821037] read end 256 rc=0
+[2026-11-12T03:57:01Z 1794455821037] + grep -A30 "^Results:" /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-read-256.log | head -30
+Results:
+Op rate                   :   33,791 op/s  [READ: 33,791 op/s]
+Partition rate            :   33,791 pk/s  [READ: 33,791 pk/s]
+Row rate                  :   33,791 row/s [READ: 33,791 row/s]
+Latency mean              :    0.9 ms [READ: 0.9 ms]
+Latency median            :    0.8 ms [READ: 0.8 ms]
+Latency 95th percentile   :    1.9 ms [READ: 1.9 ms]
+Latency 99th percentile   :    2.9 ms [READ: 2.9 ms]
+Latency 99.9th percentile :    6.1 ms [READ: 6.1 ms]
+Latency max               :   32.9 ms [READ: 32.9 ms]
+Total partitions          : 20,293,313 [READ: 20,293,313]
+Total errors              :          0 [READ: 0]
+Total GC count            : 428
+Total GC memory           : 500.993 GiB
+Total GC time             :    1.7 seconds
+Avg GC time               :    3.9 ms
+StdDev GC time            :    1.0 ms
+Total operation time      : 00:10:00
+
+END
+
+  rc=0
+[2026-11-12T03:57:01Z 1794455821042] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-256-end.txt 2>&1
+
+  rc=0
+[2026-11-12T03:57:02Z 1794455822735] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:57:03Z 1794455823115] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:57:03Z 1794455823332] sample 256 post: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314770958 req=21692205 miss=20493877
+[2026-11-12T03:57:32Z 1794455852764] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:57:33Z 1794455853146] + jcmd 66638 VM.native_memory summary
+[2026-11-12T03:57:33Z 1794455853374] sample 256 post: cc_size=234881024 entries=14336 pool=268435456 ovf=0 direct=314770958 req=21692205 miss=20493877
+[2026-11-12T03:58:02Z 1794455882793] + cp /mydata/jingsong-cass-s4/o05/node-run1/logs/system.log /mydata/jingsong-cass-s4/o05/logs/cluster-run1/system-256.log
+
+  rc=0
+[2026-11-12T03:58:02Z 1794455882817] === setting 512
+[2026-11-12T03:58:02Z 1794455882818] stopping node pid 66638
+[2026-11-12T03:58:10Z 1794455890829] node stopped
+[2026-11-12T03:58:10Z 1794455890837] yaml settings:
+# --- o05 stage-4 settings ---
+cluster_name: 'o05'
+storage_port: 7300
+ssl_storage_port: 7301
+native_transport_port: 9342
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+commitlog_directory: /mydata/jingsong-cass-s4/o05/node-run1/commitlog
+hints_directory: /mydata/jingsong-cass-s4/o05/node-run1/hints
+saved_caches_directory: /mydata/jingsong-cass-s4/o05/node-run1/saved_caches
+cdc_raw_directory: /mydata/jingsong-cass-s4/o05/node-run1/cdc_raw
+disk_access_mode: mmap_index_only
+key_cache_size: 0MiB
+row_cache_size: 0MiB
+file_cache_enabled: true
+file_cache_size: 512MiB
+data_file_directories:
+    - /mydata/jingsong-cass-s4/o05/node-run1/data
+
+[2026-11-12T03:58:11Z 1794455891879] + ( setsid nohup /mydata/jingsong-cass-s4/o05/src/bin/cassandra -p /mydata/jingsong-cass-s4/o05/node-run1/pid < /dev/null > /mydata/jingsong-cass-s4/o05/node-run1/logs/stdout.log 2>&1 & )
+
+  rc=0
+[2026-11-12T03:58:23Z 1794455903899] node up (pid 69745) after 12 s
+[2026-11-12T03:58:23Z 1794455903899] + tr "\0" " " < /proc/69745/cmdline
+[2026-11-12T03:58:23Z 1794455903902] cmdline flags: -XX:+UseThreadPriorities -XX:+HeapDumpOnOutOfMemoryError -Xss256k -XX:+AlwaysPreTouch -XX:+UseTLAB -XX:+ResizeTLAB -XX:+UseNUMA -XX:+PerfDisableSharedMem -XX:-UseBiasedLocking -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxTenuringThreshold=2 -XX:G1HeapRegionSize=16m -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=50 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:MaxGCPauseMillis=300 -XX:InitiatingHeapOccupancyPercent=70 -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/jingsong-cass-s4/o05/node-run1/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760 -Xms2G -Xmx2G -XX:MaxDirectMemorySize=4G -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 -XX:CompileCommandFile=/mydata/jingsong-cass-s4/o05/node-run1/conf/hotspot_compiler -XX:HeapDumpPath=/mydata/jingsong-cass-s4/o05/node-run1/logs/cassandra-1794455892-pid69634.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill
+[2026-11-12T03:58:23Z 1794455903902] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-512-start.txt 2>&1
+
+  rc=0
+[2026-11-12T03:58:25Z 1794455905575] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:58:25Z 1794455905928] + jcmd 69745 VM.native_memory summary
+[2026-11-12T03:58:26Z 1794455906272] sample 512 idle: cc_size=262144 entries=16 pool=8388608 ovf=0 direct=11912421 req=216 miss=52
+[2026-11-12T03:58:55Z 1794455935605] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:58:55Z 1794455935966] + jcmd 69745 VM.native_memory summary
+[2026-11-12T03:58:56Z 1794455936187] sample 512 idle: cc_size=278528 entries=17 pool=8388608 ovf=0 direct=45469003 req=217 miss=53
+[2026-11-12T03:59:25Z 1794455965634] read start 512
+[2026-11-12T03:59:25Z 1794455965680] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:59:26Z 1794455966079] + jcmd 69745 VM.native_memory summary
+[2026-11-12T03:59:26Z 1794455966311] sample 512 read +0s: cc_size=278528 entries=17 pool=8388608 ovf=0 direct=45409303 req=217 miss=53
+[2026-11-12T03:59:56Z 1794455996335] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T03:59:57Z 1794455997024] + jcmd 69745 VM.native_memory summary
+[2026-11-12T03:59:57Z 1794455997494] sample 512 read +31s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583367187 req=778309 miss=696527
+[2026-11-12T04:00:26Z 1794456026513] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:00:27Z 1794456027138] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:00:27Z 1794456027509] sample 512 read +61s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583367698 req=1979176 miss=1765305
+[2026-11-12T04:00:56Z 1794456056529] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:00:57Z 1794456057146] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:00:57Z 1794456057507] sample 512 read +91s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583367950 req=3093809 miss=2747435
+[2026-11-12T04:01:27Z 1794456087529] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:01:28Z 1794456088157] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:01:28Z 1794456088560] sample 512 read +122s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368238 req=4236414 miss=3755014
+[2026-11-12T04:01:57Z 1794456117583] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:01:58Z 1794456118145] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:01:58Z 1794456118512] sample 512 read +152s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368353 req=5338189 miss=4727069
+[2026-11-12T04:02:28Z 1794456148532] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:02:29Z 1794456149160] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:02:29Z 1794456149525] sample 512 read +183s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368414 req=6492160 miss=5743600
+[2026-11-12T04:02:58Z 1794456178549] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:02:59Z 1794456179146] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:02:59Z 1794456179520] sample 512 read +213s: cc_size=503316480 entries=30722 pool=536870912 ovf=0 direct=583368496 req=7609363 miss=6728217
+[2026-11-12T04:03:29Z 1794456209542] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:03:30Z 1794456210149] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:03:30Z 1794456210520] sample 512 read +244s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368530 req=8765927 miss=7747621
+[2026-11-12T04:04:00Z 1794456240539] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:04:01Z 1794456241119] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:04:01Z 1794456241487] sample 512 read +275s: cc_size=503316480 entries=30721 pool=536870912 ovf=0 direct=583368578 req=9917153 miss=8761575
+[2026-11-12T04:04:31Z 1794456271507] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:04:32Z 1794456272078] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:04:32Z 1794456272439] sample 512 read +306s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368636 req=11073254 miss=9780671
+[2026-11-12T04:05:02Z 1794456302465] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:05:03Z 1794456303033] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:05:03Z 1794456303442] sample 512 read +337s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368652 req=12227564 miss=10797796
+[2026-11-12T04:05:33Z 1794456333464] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:05:34Z 1794456334012] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:05:34Z 1794456334387] sample 512 read +368s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368680 req=13376932 miss=11810850
+[2026-11-12T04:06:04Z 1794456364411] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:06:05Z 1794456365017] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:06:05Z 1794456365348] sample 512 read +399s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368728 req=14529419 miss=12826851
+[2026-11-12T04:06:35Z 1794456395367] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:06:35Z 1794456395966] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:06:36Z 1794456396339] sample 512 read +430s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583368943 req=15678784 miss=13839616
+[2026-11-12T04:07:06Z 1794456426360] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:07:06Z 1794456426923] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:07:07Z 1794456427310] sample 512 read +461s: cc_size=503316480 entries=30722 pool=536870912 ovf=0 direct=583368943 req=16827128 miss=14852475
+[2026-11-12T04:07:37Z 1794456457332] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:07:37Z 1794456457936] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:07:38Z 1794456458302] sample 512 read +492s: cc_size=503316480 entries=30721 pool=536870912 ovf=0 direct=583369073 req=17972732 miss=15862225
+[2026-11-12T04:08:08Z 1794456488325] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:08:08Z 1794456488909] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:08:09Z 1794456489296] sample 512 read +523s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583369073 req=19117861 miss=16872122
+[2026-11-12T04:08:39Z 1794456519317] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:08:39Z 1794456519856] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:08:40Z 1794456520249] sample 512 read +554s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583369073 req=20262674 miss=17881361
+[2026-11-12T04:09:10Z 1794456550266] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:09:10Z 1794456550868] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:09:11Z 1794456551229] sample 512 read +585s: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583369073 req=21402498 miss=18886125
+[2026-11-12T04:09:38Z 1794456578246] read end 512 rc=0
+[2026-11-12T04:09:38Z 1794456578246] + grep -A30 "^Results:" /mydata/jingsong-cass-s4/o05/logs/cluster-run1/stress-read-512.log | head -30
+Results:
+Op rate                   :   34,620 op/s  [READ: 34,620 op/s]
+Partition rate            :   34,620 pk/s  [READ: 34,620 pk/s]
+Row rate                  :   34,620 row/s [READ: 34,620 row/s]
+Latency mean              :    0.9 ms [READ: 0.9 ms]
+Latency median            :    0.7 ms [READ: 0.7 ms]
+Latency 95th percentile   :    1.8 ms [READ: 1.8 ms]
+Latency 99th percentile   :    2.9 ms [READ: 2.9 ms]
+Latency 99.9th percentile :    6.1 ms [READ: 6.1 ms]
+Latency max               :  129.0 ms [READ: 129.0 ms]
+Total partitions          : 20,776,002 [READ: 20,776,002]
+Total errors              :          0 [READ: 0]
+Total GC count            : 444
+Total GC memory           : 519.739 GiB
+Total GC time             :    2.4 seconds
+Avg GC time               :    5.3 ms
+StdDev GC time            :    1.0 ms
+Total operation time      : 00:10:00
+
+END
+
+  rc=0
+[2026-11-12T04:09:38Z 1794456578251] + /mydata/jingsong-cass-s4/o05/src/bin/nodetool -h 127.0.0.1 -p 7499 info > /mydata/jingsong-cass-s4/o05/logs/cluster-run1/nodetool-info-512-end.txt 2>&1
+
+  rc=0
+[2026-11-12T04:09:40Z 1794456580144] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:09:40Z 1794456580522] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:09:40Z 1794456580747] sample 512 post: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583369799 req=22334868 miss=19707846
+[2026-11-12T04:10:10Z 1794456610171] + java -cp /mydata/jingsong-cass-s4/o05/harness-classes O05Jmx 7499
+[2026-11-12T04:10:10Z 1794456610550] + jcmd 69745 VM.native_memory summary
+[2026-11-12T04:10:10Z 1794456610776] sample 512 post: cc_size=503316480 entries=30720 pool=536870912 ovf=0 direct=583369799 req=22334868 miss=19707846
+[2026-11-12T04:10:40Z 1794456640200] + cp /mydata/jingsong-cass-s4/o05/node-run1/logs/system.log /mydata/jingsong-cass-s4/o05/logs/cluster-run1/system-512.log
+
+  rc=0
+[2026-11-12T04:10:40Z 1794456640222] stopping node pid 69745
+[2026-11-12T04:10:48Z 1794456648233] node stopped
+[2026-11-12T04:10:48Z 1794456648247] CLUSTER RUN DONE
+[2026-11-12T04:10:52Z 1794456652095] leftover CassandraDaemon processes from this run: 0

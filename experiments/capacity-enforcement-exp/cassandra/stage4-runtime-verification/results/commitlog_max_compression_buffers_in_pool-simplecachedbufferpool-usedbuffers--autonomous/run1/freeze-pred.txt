@@ -1,0 +1,49 @@
+**B2f. Predictions.**
+- Test 1:
+  - N=1 throws `IllegalArgumentException` at construction.
+  - For N ≥ 2: `atLimit()` is false for k < N and true for k ≥ N. `usedBuffers = k` up to 2N, because the class does not refuse.
+  - Direct delta is k MiB (±0.1 MiB).
+  - After releasing 2N, the delta is roundUpPow2(N) MiB: N=2 → 2, 3 → 4, 6 → 8, 12 → 16. This is more than N for N = 3, 6, 12 because of JCTools rounding.
+  - Re-taking N buffers does not change the delta.
+- Test 2, for each N:
+  - the active segment count plateaus at exactly N;
+  - `usedBuffers = N`;
+  - direct `MemoryUsed` − pre-writer ≈ (N − 2) MiB (two buffers already exist from start-up: the first segment plus the reserve), and the total segment-buffer memory is N MiB ± 0.2 MiB;
+  - after `archiveAndDiscard` of all active segments the count returns to N, with no new direct allocation (MemoryUsed flat ± 0.2 MiB);
+  - the plateau stays at N after a 1 s sleep.
+
+**B2g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| Active segments = `usedBuffers` = N and stays there; direct memory ≈ N × 1 MiB | Claim holds at unit level: the manager's check caps live buffers at N |
+| Active segments or `usedBuffers` > N, or direct grows past N MiB with sync blocked | Claim wrong: the check is bypassed or racy |
+| Plateau identical for N = 2, 3, 6 | Claim wrong: the knob does not govern (or the cap comes from elsewhere) |
+| Plateau < N (e.g., stuck at 2) | Limit not reached (workload or sync block failed); not confirmed, so check the Byteman rule fired |
+| Test 1: `atLimit` flips at k=N but allocation continues to 2N | Expected: the class is advisory and the caller enforces it (supports A3 step 8a) |
+| Test 1: retained after release = N, not roundUpPow2(N) | A3 step 8b wrong (JCTools does not round); harmless to the claim |
+| N=1 starts without error | A1 lower-bound prediction wrong |
+
+**B3f. Predictions.** S = 64 MiB. P(N) is the maximum direct `MemoryUsed` during the stress.
+- **Ceiling:** P(N) − B0 ≤ (N − 2) × S + S (thread-local Zstd buffer) + 64 MiB (noise).
+  - N=3: ≤ 192 MiB
+  - N=6: ≤ 384 MiB
+  - N=12: ≤ 768 MiB
+- **Plateau:** for each N with Zstd-19, P(N) − B0 ≥ (N − 2) × S − S. That is, the cap is reached, since sync lags.
+- **Slope:** P(6) − P(3) ≈ 192 MiB ± 64 MiB, and P(12) − P(6) ≈ 384 MiB ± 64 MiB.
+- `WaitingOnSegmentAllocation` Count rises during stress for every Zstd run, and the allocator thread is seen parked in `waitOnCondition`.
+- C1 (LZ4, N=12): P − B0 ≤ about 2 × S + S, far below the 640 MiB that a binding N=12 cap would allow, and `WaitingOnSegmentAllocation` stays near flat.
+- C2 (mmap): no growth of direct memory tied to segments (P − B0 < 64 MiB). Commit-log memory shows instead as mapped file pages in RSS.
+- N=1: start-up fails with `IllegalArgumentException` from JCTools (the commit-log start error is logged).
+
+**B3g. Readings.**
+
+| Observation | Meaning |
+|---|---|
+| P(N) − B0 tracks (N−2)·S (+≤1 S), slope ≈ 64 MiB per unit N, writers blocked at the plateau | Claim confirmed: the constraint caps commit-log segment-buffer memory |
+| P(N) − B0 > (N−1)·S + 64 MiB for some N, or direct grows unboundedly during stress | Claim wrong: buffers escape the cap |
+| P(3) ≈ P(6) ≈ P(12) with the Zstd workload and writers blocked | Claim wrong: something other than N bounds the buffers |
+| No writer blocking and P well below the cap for all N | Limit not reached (sync keeps up). Not confirmed: raise `compression_level` to 22 or `-rate threads=128` and rerun |
+| C1 (LZ4) plateaus near 12·S | Either sync is slow even with LZ4 (check the disk) or allocation ignores the sync rate; re-examine |
+| C2 shows N-dependent direct growth | A3 step 8c wrong |
+

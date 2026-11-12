@@ -1,0 +1,27 @@
++ 2026-11-12T03:27:43Z [1794454063811] REPLAY label=b16m bytes=16777216 count=100000000
+mkconf phase=replay memtable_heap_space=256MiB concurrent_writes=2 bytes=16777216 count=100000000
+commitlog_directory: /mydata/jingsong-cass-s4/o32/node/commitlog
+commitlog_segment_size: 32MiB
+commitlog_total_space: 4096MiB
+memtable_heap_space: 256MiB
+memtable_allocation_type: heap_buffers
+memtable_cleanup_threshold: 0.99
+concurrent_writes: 2
+# --- o32 stage-4 settings ---
+-Dcassandra.commitlog_max_outstanding_replay_count=100000000
+-Dcassandra.commitlog_max_outstanding_replay_bytes=16777216
++ 2026-11-12T03:27:44Z [1794454064018] ulimit -n 100000
++ 2026-11-12T03:27:44Z [1794454064022] start: MAX_HEAP_SIZE=6G HEAP_NEWSIZE=1200M CASSANDRA_LOG_DIR=/mydata/jingsong-cass-s4/o32/node/logs bin/cassandra -p /mydata/jingsong-cass-s4/o32/node/pid
++ 2026-11-12T03:27:45Z [1794454065079] pid 59708
++ 2026-11-12T03:27:45Z [1794454065082] sampler start
++ 2026-11-12T03:28:34Z [1794454114457] sampler end
+INFO  [main] 2026-11-12T03:27:52,265 CommitLog.java:206 - Replaying /mydata/jingsong-cass-s4/o32/node/commitlog/CommitLog-7-1794453957334.log, /mydata/jingsong-cass-s4/o32/node/commitlog/CommitLog-7-1794453957335.log, /mydata/jingsong-cass-s4/o32/node/commitlog/CommitLog-7-1794453957336.log, /mydata
+INFO  [main] 2026-11-12T03:28:32,546 CommitLog.java:210 - Log replay complete, 24048 replayed mutations in 40281 ms
+-Dcassandra.commitlog_max_outstanding_replay_count=100000000
+-Dcassandra.commitlog_max_outstanding_replay_bytes=16777216
+-Xms6G
+-Xmx6G
++ 2026-11-12T03:28:37Z [1794454117574] SIGTERM 59708
++ 2026-11-12T03:28:45Z [1794454125593] node 59708 gone
+ERROR lines: 0
++ 2026-11-12T03:28:45Z [1794454125697] REPLAY done

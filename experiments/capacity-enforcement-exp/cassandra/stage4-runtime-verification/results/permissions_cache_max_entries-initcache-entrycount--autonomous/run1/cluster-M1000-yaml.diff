@@ -1,0 +1,47 @@
+198c198
+< authenticator: AllowAllAuthenticator
+---
+> authenticator: PasswordAuthenticator
+217c217
+< authorizer: AllowAllAuthorizer
+---
+> authorizer: CassandraAuthorizer
+327c327
+< permissions_validity: 2000ms
+---
+> permissions_validity: 3600000ms
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "127.0.0.1:7300"
+960c960
+< storage_port: 7000
+---
+> storage_port: 7300
+966c966
+< ssl_storage_port: 7001
+---
+> ssl_storage_port: 7301
+981c981
+< listen_address: localhost
+---
+> listen_address: 127.0.0.1
+1023c1023
+< native_transport_port: 9042
+---
+> native_transport_port: 9342
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 127.0.0.1
+2485a2486,2495
+> 
+> # --- stage-4 o03 arm overrides (B3a, B3b, AM1, AM2)
+> permissions_update_interval: 3600000ms
+> permissions_cache_max_entries: 1000
+> data_file_directories:
+>   - /mydata/jingsong-cass-s4/o03/run1/cluster/node/data
+> commitlog_directory: /mydata/jingsong-cass-s4/o03/run1/cluster/node/commitlog
+> saved_caches_directory: /mydata/jingsong-cass-s4/o03/run1/cluster/node/saved_caches
+> hints_directory: /mydata/jingsong-cass-s4/o03/run1/cluster/node/hints
+> cdc_raw_directory: /mydata/jingsong-cass-s4/o03/run1/cluster/node/cdc_raw

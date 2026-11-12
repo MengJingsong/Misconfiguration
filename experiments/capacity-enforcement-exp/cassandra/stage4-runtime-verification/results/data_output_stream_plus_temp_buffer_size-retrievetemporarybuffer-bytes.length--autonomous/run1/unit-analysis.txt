@@ -1,0 +1,57 @@
+--- P=4096 (4096); property line: P=4096
+PASS P=4096 initial: expected 16 got 16
+PASS P=4096 request=100: expected 128 got 128
+PASS P=4096 request=5000: expected 4096 got 4096
+PASS P=4096 request=8193: expected 4096 got 4096
+PASS P=4096 request=65537: expected 4096 got 4096
+PASS P=4096 request=1048576: expected 4096 got 4096
+PASS P=4096 request=4194304: expected 4096 got 4096
+PASS P=4096 request=20971520: expected 4096 got 4096
+PASS P=4096 directWrite 4MiB: expected 4096 got 4096
+PASS P=4096 writeUTF 60000: expected 4096 got 4096
+PASS P=4096 sumLen: expected 131072 got 131072
+PASS P=4096 len<=P everywhere: max observed len 4096
+PASS P=4096 heapDelta noise (|hd|<=4MiB): heapDelta=191224 (0.18 MiB), sumLen=131072
+--- P=default (8192); property line: P=default
+PASS P=default initial: expected 16 got 16
+PASS P=default request=100: expected 128 got 128
+PASS P=default request=5000: expected 8192 got 8192
+PASS P=default request=8193: expected 8192 got 8192
+PASS P=default request=65537: expected 8192 got 8192
+PASS P=default request=1048576: expected 8192 got 8192
+PASS P=default request=4194304: expected 8192 got 8192
+PASS P=default request=20971520: expected 8192 got 8192
+PASS P=default directWrite 4MiB: expected 8192 got 8192
+PASS P=default writeUTF 60000: expected 8192 got 8192
+PASS P=default sumLen: expected 262144 got 262144
+PASS P=default len<=P everywhere: max observed len 8192
+PASS P=default heapDelta noise (|hd|<=4MiB): heapDelta=322296 (0.31 MiB), sumLen=262144
+--- P=1048576 (1048576); property line: P=1048576
+PASS P=1048576 initial: expected 16 got 16
+PASS P=1048576 request=100: expected 128 got 128
+PASS P=1048576 request=5000: expected 8192 got 8192
+PASS P=1048576 request=8193: expected 16384 got 16384
+PASS P=1048576 request=65537: expected 131072 got 131072
+PASS P=1048576 request=1048576: expected 1048576 got 1048576
+PASS P=1048576 request=4194304: expected 1048576 got 1048576
+PASS P=1048576 request=20971520: expected 1048576 got 1048576
+PASS P=1048576 directWrite 4MiB: expected 1048576 got 1048576
+PASS P=1048576 writeUTF 60000: expected 65536 got 65536
+PASS P=1048576 sumLen: expected 33554432 got 33554432
+PASS P=1048576 len<=P everywhere: max observed len 1048576
+FAIL P=1048576 heapDelta tracks sumLen (A3 tol 4.0 MiB): heapDelta=67167560 (64.06 MiB) sumLen=33554432 (32.00 MiB) diff=32.06 MiB
+--- P=16777216 (16777216); property line: P=16777216
+PASS P=16777216 initial: expected 16 got 16
+PASS P=16777216 request=100: expected 128 got 128
+PASS P=16777216 request=5000: expected 8192 got 8192
+PASS P=16777216 request=8193: expected 16384 got 16384
+PASS P=16777216 request=65537: expected 131072 got 131072
+PASS P=16777216 request=1048576: expected 2097152 got 2097152
+PASS P=16777216 request=4194304: expected 8388608 got 8388608
+PASS P=16777216 request=20971520: expected 16777216 got 16777216
+PASS P=16777216 directWrite 4MiB: expected 8388608 got 8388608
+PASS P=16777216 writeUTF 60000: expected 65536 got 65536
+PASS P=16777216 sumLen: expected 268435456 got 268435456
+PASS P=16777216 len<=P everywhere: max observed len 16777216
+FAIL P=16777216 heapDelta tracks sumLen (A3 tol 25.6 MiB): heapDelta=302048584 (288.06 MiB) sumLen=268435456 (256.00 MiB) diff=32.06 MiB
+TOTAL PASS=50 FAIL=2

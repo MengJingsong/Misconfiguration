@@ -1,0 +1,156 @@
+unit-run 2026-11-12T02:55:14Z host node0 tree /mydata/jingsong-cass-s4/o07/src cassandra-5.0.9 java openjdk version "11.0.33" 2026-10-20
+harness md5 ChunkCacheCapProbeTest.java=570b5afe6256 unit-run.sh=c78c4f5a4203 unit-analyze.py=63a153175021 
+df: /dev/mapper/emulab-node0--bs  753G   50G  665G   7% /mydata
+yaml check: fc1024.yaml: storage_port: 7012 native_transport_port: 9042 file_cache_enabled: true file_cache_size: 1024MiB storage_port: 7300 native_transport_port: 9342 | fc128.yaml: storage_port: 7012 native_transport_port: 9042 file_cache_enabled: true file_cache_size: 128MiB storage_port: 7300 native_transport_port: 9342 | fc32.yaml: storage_port: 7012 native_transport_port: 9042 file_cache_enabled: true file_cache_size: 32MiB storage_port: 7300 native_transport_port: 9342 | fc64.yaml: storage_port: 7012 native_transport_port: 9042 file_cache_enabled: true file_cache_size: 64MiB storage_port: 7300 native_transport_port: 9342 | fcoff.yaml: storage_port: 7012 native_transport_port: 9042 file_cache_enabled: false file_cache_size: 128MiB storage_port: 7300 native_transport_port: 9342 | 
+== 32 start 2026-11-12T02:55:14Z
+32 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 28 s
+32 pool-limit line: Global buffer pool limit is 32.000MiB for chunk-cache and 62.000MiB for networking
+32 lines: 109
+== 64 start 2026-11-12T02:55:42Z
+64 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 29 s
+64 pool-limit line: Global buffer pool limit is 64.000MiB for chunk-cache and 62.000MiB for networking
+64 lines: 109
+== 128 start 2026-11-12T02:56:11Z
+128 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 26 s
+128 pool-limit line: Global buffer pool limit is 128.000MiB for chunk-cache and 62.000MiB for networking
+128 lines: 109
+== 1024 start 2026-11-12T02:56:38Z
+1024 ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 25 s
+1024 pool-limit line: Global buffer pool limit is 1.000GiB for chunk-cache and 62.000MiB for networking
+1024 lines: 109
+== off start 2026-11-12T02:57:03Z
+off ant exit=0 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0 26 s
+off pool-limit line: Global buffer pool limit is 128.000MiB for chunk-cache and 62.000MiB for networking
+off lines: 109
+cleanup: probe removed; test data removed; leftover test JVMs: 0
+== U0 file_cache_size=32
+  POOL_THRESHOLD,33554432
+  HEAPMAX,1056309248,MaxDirectMemorySizeFlag,0
+  SSTABLES,4,memtableLiveBytes,0,onDiskBytes,211331139
+  MAX,0,0,8388608,0,0,8879552
+  cache: CACHE_NULL
+  samples 104, reads 25600
+  weighted     final -1 (-0.00 MiB)             max -1 (-0.00 MiB)
+  entries      final -1                         max -1
+  misses       final -1                         max -1
+  poolSize     final 8388608 (8.00 MiB)         max 8388608 (8.00 MiB)
+  poolOverflow final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  poolUsed     final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  direct       final 8879552 (8.47 MiB)         max 8879552 (8.47 MiB)
+  loaded    weighted -1 (-0.00 MiB) entries -1 misses -1 poolSize 8388608 (8.00 MiB) direct 8863094 (8.45 MiB)
+  endpass1  weighted -1 (-0.00 MiB) entries -1 misses -1 poolSize 8388608 (8.00 MiB) direct 8879552 (8.47 MiB)
+  endpass2  weighted -1 (-0.00 MiB) entries -1 misses -1 poolSize 8388608 (8.00 MiB) direct 8879552 (8.47 MiB)
+  pool slab bytes (poolSize - poolOverflow) max: 8388608 (8.00 MiB); threshold 33554432 (32.00 MiB)
+== U1 file_cache_size=64
+  POOL_THRESHOLD,67108864
+  HEAPMAX,1056309248,MaxDirectMemorySizeFlag,0
+  SSTABLES,4,memtableLiveBytes,0,onDiskBytes,211331102
+  MAX,33554432,2048,67108864,0,33554432,67628297
+  cache: capacity 33554432 (32.00 MiB)
+  samples 104, reads 25600
+  weighted     final 33554432 (32.00 MiB)       max 33554432 (32.00 MiB)
+  entries      final 2048                       max 2048
+  misses       final 35258                      max 35258
+  poolSize     final 67108864 (64.00 MiB)       max 67108864 (64.00 MiB)
+  poolOverflow final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  poolUsed     final 33554432 (32.00 MiB)       max 33554432 (32.00 MiB)
+  direct       final 67628297 (64.50 MiB)       max 67628297 (64.50 MiB)
+  loaded    weighted 16384 (0.02 MiB) entries 1 misses 1 poolSize 8388608 (8.00 MiB) direct 8862911 (8.45 MiB)
+  endpass1  weighted 33554432 (32.00 MiB) entries 2048 misses 14882 poolSize 67108864 (64.00 MiB) direct 67628297 (64.50 MiB)
+  endpass2  weighted 33554432 (32.00 MiB) entries 2048 misses 35258 poolSize 67108864 (64.00 MiB) direct 67628297 (64.50 MiB)
+  evictions (misses - entries) final: 33210
+  first sample with weighted >= 0.95 cap: reads 2048 (pass1)
+  samples with weighted > cap: 0; > cap+16384: 0
+  pool slab bytes (poolSize - poolOverflow) max: 67108864 (64.00 MiB); threshold 67108864 (64.00 MiB)
+== U2 file_cache_size=128
+  POOL_THRESHOLD,134217728
+  HEAPMAX,1056309248,MaxDirectMemorySizeFlag,0
+  SSTABLES,4,memtableLiveBytes,0,onDiskBytes,211331163
+  MAX,100663296,6144,134217728,0,100663296,134769929
+  cache: capacity 100663296 (96.00 MiB)
+  samples 104, reads 25600
+  weighted     final 100663296 (96.00 MiB)      max 100663296 (96.00 MiB)
+  entries      final 6144                       max 6144
+  misses       final 22855                      max 22855
+  poolSize     final 134217728 (128.00 MiB)     max 134217728 (128.00 MiB)
+  poolOverflow final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  poolUsed     final 100663296 (96.00 MiB)      max 100663296 (96.00 MiB)
+  direct       final 134769929 (128.53 MiB)     max 134769929 (128.53 MiB)
+  loaded    weighted 16384 (0.02 MiB) entries 1 misses 1 poolSize 8388608 (8.00 MiB) direct 8862911 (8.45 MiB)
+  endpass1  weighted 100663296 (96.00 MiB) entries 6144 misses 12827 poolSize 134217728 (128.00 MiB) direct 134769929 (128.53 MiB)
+  endpass2  weighted 100663296 (96.00 MiB) entries 6144 misses 22855 poolSize 134217728 (128.00 MiB) direct 134769929 (128.53 MiB)
+  evictions (misses - entries) final: 16711
+  first sample with weighted >= 0.95 cap: reads 5888 (pass1)
+  samples with weighted > cap: 0; > cap+16384: 0
+  pool slab bytes (poolSize - poolOverflow) max: 134217728 (128.00 MiB); threshold 134217728 (128.00 MiB)
+== U3 file_cache_size=1024
+  POOL_THRESHOLD,1073741824
+  HEAPMAX,1056309248,MaxDirectMemorySizeFlag,0
+  SSTABLES,4,memtableLiveBytes,0,onDiskBytes,211331142
+  MAX,209993728,12817,218103808,0,209993728,218696969
+  cache: capacity 1040187392 (992.00 MiB)
+  samples 104, reads 25600
+  weighted     final 209993728 (200.27 MiB)     max 209993728 (200.27 MiB)
+  entries      final 12817                      max 12817
+  misses       final 12817                      max 12817
+  poolSize     final 218103808 (208.00 MiB)     max 218103808 (208.00 MiB)
+  poolOverflow final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  poolUsed     final 209993728 (200.27 MiB)     max 209993728 (200.27 MiB)
+  direct       final 218696969 (208.57 MiB)     max 218696969 (208.57 MiB)
+  loaded    weighted 16384 (0.02 MiB) entries 1 misses 1 poolSize 8388608 (8.00 MiB) direct 8862911 (8.45 MiB)
+  endpass1  weighted 209993728 (200.27 MiB) entries 12817 misses 12817 poolSize 218103808 (208.00 MiB) direct 218696969 (208.57 MiB)
+  endpass2  weighted 209993728 (200.27 MiB) entries 12817 misses 12817 poolSize 218103808 (208.00 MiB) direct 218696969 (208.57 MiB)
+  evictions (misses - entries) final: 0
+  first sample with weighted >= 0.95 cap: never
+  samples with weighted > cap: 0; > cap+16384: 0
+  pool slab bytes (poolSize - poolOverflow) max: 218103808 (208.00 MiB); threshold 1073741824 (1024.00 MiB)
+== U4 file_cache_size=off
+  POOL_THRESHOLD,134217728
+  HEAPMAX,1056309248,MaxDirectMemorySizeFlag,0
+  SSTABLES,4,memtableLiveBytes,0,onDiskBytes,211331211
+  MAX,0,0,8388608,0,0,8879552
+  cache: CACHE_NULL
+  samples 104, reads 25600
+  weighted     final -1 (-0.00 MiB)             max -1 (-0.00 MiB)
+  entries      final -1                         max -1
+  misses       final -1                         max -1
+  poolSize     final 8388608 (8.00 MiB)         max 8388608 (8.00 MiB)
+  poolOverflow final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  poolUsed     final 0 (0.00 MiB)               max 0 (0.00 MiB)
+  direct       final 8879552 (8.47 MiB)         max 8879552 (8.47 MiB)
+  loaded    weighted -1 (-0.00 MiB) entries -1 misses -1 poolSize 8388608 (8.00 MiB) direct 8863094 (8.45 MiB)
+  endpass1  weighted -1 (-0.00 MiB) entries -1 misses -1 poolSize 8388608 (8.00 MiB) direct 8879552 (8.47 MiB)
+  endpass2  weighted -1 (-0.00 MiB) entries -1 misses -1 poolSize 8388608 (8.00 MiB) direct 8879552 (8.47 MiB)
+  pool slab bytes (poolSize - poolOverflow) max: 8388608 (8.00 MiB); threshold 134217728 (128.00 MiB)
+
+== B2f prediction facts
+  [TRUE ] U0 prints CACHE_NULL
+  [TRUE ] U0 pool max size <= 8 MiB ('a few MiB at most'); max 8388608 (8.00 MiB)
+  [TRUE ] U4 prints CACHE_NULL
+  [TRUE ] U4 pool max size <= 8 MiB ('a few MiB at most'); max 8388608 (8.00 MiB)
+  [TRUE ] U1 capacity == 33554432
+  [TRUE ] U1 max weighted <= cap (33554432 (32.00 MiB))
+  [TRUE ] U1 every sample <= cap + 16384
+  [TRUE ] U1 final weighted in [0.95 cap, cap] (33554432 (32.00 MiB))
+  [TRUE ] U1 final entries within 5% of 2048 (2048)
+  [TRUE ] U1 poolSize <= 64 MiB + poolOverflow at every sample
+  [TRUE ] U1 poolOverflow <= 32 MiB (max 0 (0.00 MiB))
+  [TRUE ] U1 poolSize <= file_cache_size + cacheSize (B2g row 5 not met) (max 67108864 (64.00 MiB))
+  [TRUE ] U1 final weighted >= 50% cap (B2g row 4 not met)
+  [TRUE ] U2 capacity == 100663296
+  [TRUE ] U2 max weighted <= cap (100663296 (96.00 MiB))
+  [TRUE ] U2 every sample <= cap + 16384
+  [TRUE ] U2 final weighted in [0.95 cap, cap] (100663296 (96.00 MiB))
+  [TRUE ] U2 final entries within 5% of 6144 (6144)
+  [TRUE ] U2 poolSize <= 128 MiB + poolOverflow at every sample
+  [TRUE ] U2 poolOverflow <= 32 MiB (max 0 (0.00 MiB))
+  [TRUE ] U2 poolSize <= file_cache_size + cacheSize (B2g row 5 not met) (max 134217728 (128.00 MiB))
+  [TRUE ] U2 final weighted >= 50% cap (B2g row 4 not met)
+  [TRUE ] U3 final weighted in [200, 215] MiB (209993728 (200.27 MiB))
+  [TRUE ] U3 final entries ~12,900 (+-5%) (12817)
+  [TRUE ] U3 weighted same after pass 2 as after pass 1 (209993728 (200.27 MiB) vs 209993728 (200.27 MiB))
+  [TRUE ] U3 far above U1/U2 caps (> 2 x 96 MiB)
+  U3 pass-1 bytes per read at 1/4 and end: 16414, 16406
+  [TRUE ] U2/U1 final weighted ratio ~3 (within 10%): 3.000
+  [FALSE] U0 non-null cache (B2g row 6)
+done 2026-11-12T02:57:29Z
