@@ -149,6 +149,7 @@ system's index, e.g. [`cassandra/cases/_INDEX.md`](cassandra/cases/_INDEX.md).
 |---|---|---|
 | 1 — simultaneous live allocations share a budget | **`custom-convergence-playbook`** | a convergence case (constraint set, sizing, combined workload, memory outcome) |
 | 1 (variant) — same, with every constraint at its default value | **`default-convergence-playbook`** | a default-value convergence case (same as above, plus a defaults audit) |
+| 1 + 2 combined — at defaults, convergence multiplicity first, then stacked convergence sub-directions in one budget domain, then bypass accounting gaps; distance to OOM measured at each stage | **`combo-playbook`** | a combo case (ceiling sheet, per-pool ledger of counted vs real memory, headroom per stage) |
 | 2 — get past one capacity check | **`bypass-playbook`** | a bypass case (check, defeating mechanism, measured usage past capacity) |
 
 The lead-source playbooks run before these and feed them:
