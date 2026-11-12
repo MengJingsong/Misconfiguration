@@ -68,7 +68,8 @@ Begin the file with the protocol's short **Summary** block (conclusion and root 
 Write the case under the status-first folder that matches its outcome —
 `<system>/cases/convergence/<mechanism-stem>.md` for a `verified-OOM` or
 `verified-gap` by convergence, `<system>/cases/candidates/<mechanism-stem>.md`
-until it meets the protocol's promotion rule V1–V5, `<system>/cases/negatives/`
+until it meets the protocol's promotion rule V1–V7 (a custom-capacity result meeting
+V1–V5 is `reproduced-*` and stays there), `<system>/cases/negatives/`
 for a verified no-OOM (statuses and the deployment/diagnostic label: protocol,
 *Verification status*). Record the capacity regime (**custom** | **default**) as a label in the
 case header and `_INDEX.md`, not as a folder; existing

@@ -76,7 +76,7 @@ Begin the file with the protocol's short **Summary** block (conclusion and root 
 
 Add closed cases to `<system>/cases/_INDEX.md` (a `verified-OOM` or `verified-gap`
 bypass goes in `<system>/cases/bypass/`, anything not meeting the protocol's
-promotion rule V1–V5 in `<system>/cases/candidates/`; regime and conditions as
+promotion rule V1–V7 (V1–V5 only: `reproduced-*`) in `<system>/cases/candidates/`; regime and conditions as
 labels — see the protocol's *Verification status*). Append batches to the chronological `<system>/cases/_run-log.md`,
 including considered candidates, precise status/range, failed or invalid
 attempts, raw-log locations and stopping reason.

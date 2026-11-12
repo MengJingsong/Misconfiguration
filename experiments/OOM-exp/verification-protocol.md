@@ -177,8 +177,11 @@ earlier rules had no explicit promotion rule and no status for a confirmed gap
 that does not end in OOM, so such results could only stay in `candidates/`.
 This section makes the rule explicit. It does not lower the evidence bar.
 
-**Promotion rule.** A case is *verified* only when all of V1–V5 hold for one
-fixed condition (same build, configuration, budget and workload):
+**Promotion rule (amended again 2026-11-11, see *Defaults and acceptable budget*
+below).** A case is *verified* only when all of V1–V7 hold for one fixed condition
+(same build, configuration, budget and workload). V1–V5 establish that the result
+is reproducible and attributed; V6–V7 establish that it happens under the
+configuration a deployment would actually run:
 
 | | Requirement |
 |---|---|
@@ -187,13 +190,16 @@ fixed condition (same build, configuration, budget and workload):
 | V3 Measurement | U is measured independently of K for each domain claimed (*Classification by measurement*). |
 | V4 Intervention | The causal intervention removes the endpoint in ≥ 3 runs at matched or recorded load. If infeasible, state why and name the missing attribution; the status then carries `(no intervention)`. |
 | V5 Initiating failure | OOM: the first error with its thread/stack, or the kernel/cgroup OOM record, plus a histogram or dump at or near failure showing the claimed holder. Service loss: the GC log over the window. |
+| V6 Default constraints | Every capacity constraint whose memory the claimed endpoint depends on is at its shipped default, resolved for the node and heap actually used (heap-derived defaults resolved at that heap). A constraint may differ from its default only in a control or intervention arm. |
+| V7 Acceptable budget | The heap, the JVM direct-memory limit and any process/container limit are values a deployment could reasonably run, argued **case by case** in the dated design before the run and reviewed by the researcher before readings (see below). A deliberately tightened budget does not meet V7. |
 
 **Statuses** (the `_INDEX.md` Status column):
 
 | Status | Meaning | Folder |
 |---|---|---|
-| `verified-OOM` | V1–V5 met; endpoint is an OOM (heap, direct, other native, or kernel/cgroup kill) | `convergence/` or `bypass/` by direction |
-| `verified-gap` | V1–V5 met; the protection gap is confirmed but the endpoint is not OOM: **service loss**, or for bypass a sustained **overshoot** (U > C) or growing **leak** | `convergence/` or `bypass/` by direction |
+| `verified-OOM` | V1–V7 met; endpoint is an OOM (heap, direct, other native, or kernel/cgroup kill) | `convergence/` or `bypass/` by direction |
+| `verified-gap` | V1–V7 met; the protection gap is confirmed but the endpoint is not OOM: **service loss**, or for bypass a sustained **overshoot** (U > C) or growing **leak** | `convergence/` or `bypass/` by direction |
+| `reproduced-OOM`, `reproduced-gap` | V1–V5 met, but V6 or V7 not: the endpoint needs a custom (non-default) constraint or a tightened budget. Always labelled `diagnostic`; the case file names the unmet item(s) | `candidates/` |
 | `candidate` | anything not yet meeting V1–V5 (in progress, parked, unresolved) | `candidates/` |
 | `negative` | V1–V3 met and no failure within the stated tested range | `negatives/` |
 
@@ -201,17 +207,55 @@ fixed condition (same build, configuration, budget and workload):
 pauses over a window of ≥ 60 s, from the GC log. A design may predefine another
 criterion before its readings; record which one was used.
 
-**Conditions label.** Every verified status also carries `deployment` or
-`diagnostic`:
+**Conditions label.** Every verified or reproduced status also carries
+`deployment` or `diagnostic`:
 
-- `deployment`: every setting is a default or an accepted, documented value; the
-  budget is deployment-sized (state the reasoning); faults, if any, are external
+- `deployment`: constraints at defaults (V6), an acceptable budget (V7), every other
+  setting a default or an accepted, documented value; faults, if any, are external
   (disk, network, process), and no instrumentation (Byteman, patches) alters timing.
 - `diagnostic`: the result depends on at least one supporting deviation (raised
-  timeouts, injected delays, a tightened budget, a disabled subsystem used only to
-  isolate the path). Name the deviations in the case file.
+  timeouts, injected delays, a disabled subsystem used only to isolate the path,
+  and, for `reproduced-*` only, a custom constraint or a tightened budget). Name the
+  deviations in the case file. A `verified-*` case can still be `diagnostic` when
+  its constraints and budget pass V6–V7 but another supporting deviation is needed.
 
-Example Status cell: `verified-gap · service-loss · deployment`.
+Example Status cells: `verified-gap · service-loss · deployment`,
+`reproduced-OOM · diagnostic`.
+
+### Defaults and acceptable budget (amended 2026-11-11)
+
+New evidence: the R1–R4 recheck (Cassandra, 2026-11-11) met V1–V5 for four
+convergence OOMs, but every one needed raised capacities (1.4–12× their defaults)
+and a deliberately tightened heap, direct or cgroup budget. A result that only
+occurs when an operator raises constraints far past their defaults and the
+experimenter shrinks the memory budget is evidence of a mechanism, not of a
+failure a deployment meets. By the researcher's decision, *verified* now also
+requires V6 and V7.
+
+- **What counts as a constraint (V6).** The capacity settings whose pools or
+  holders the claimed endpoint depends on (the rows of the protection map). Other
+  settings follow the conditions label above. A default that the system derives from
+  the heap or RAM is resolved at the heap/node actually used and recorded.
+- **Acceptable budget (V7), case by case.** No fixed formula. The dated design
+  states the node size the result claims to represent, what the system would
+  resolve by itself for that node (Cassandra: `cassandra-env.sh` sets the heap to
+  min(½ RAM, 15872 MiB) and `MaxDirectMemorySize` to ¼ RAM, or 7936 MiB above that
+  cap; record the resolved values), any documented recommendation, and why the chosen
+  heap, direct limit and container limit are values a deployment could reasonably
+  run. A value below what the system would resolve for the claimed node needs an
+  explicit argument (e.g. a documented container limit). The researcher reviews the
+  argument before readings; record the review date in the case file.
+- **Custom and tightened runs remain useful.** The custom-convergence playbook and
+  tightened-budget runs still map mechanisms, attribution and intervention; their
+  results top out at `reproduced-*` and are leads for a default-capacity,
+  acceptable-budget test. A clean V1–V5 run at defaults and an acceptable budget that
+  does **not** fail is a `negative` within its stated range.
+- **Effect on filed cases (2026-11-11).** R1–R4 (convergence runs 7, 8, 1, 2) move
+  from `convergence/` to `candidates/` as `reproduced-OOM · diagnostic` (R3, R4 still
+  tagged mixed). B6 condition B (2 GiB coordinator, 60 s timeouts) becomes
+  `reproduced-OOM · diagnostic`; B6 condition A (default capacities, 8 GiB replica
+  heap, external storage stall) keeps `verified-gap · service-loss · deployment`,
+  its budget argument pending the researcher's review. Evidence is unchanged.
 
 **Cases filed before 2026-11-06** carry the suffix `(pre-protocol)`. They were
 judged under earlier rules, often from a single failing run. On 2026-11-11, by the
@@ -219,7 +263,8 @@ researcher's decision, the Cassandra pre-protocol convergence OOMs (six cases, e
 with one failing run, one run per control and at most one intervention run) were
 moved from `convergence/` to `candidates/` with status `candidate (pre-protocol)`;
 their recorded OOMs stand, only the verification status changed. A pre-protocol
-case returns to a verified folder only after a recheck that meets V1–V5.
+case returns to a verified folder only after a recheck that meets V1–V7 (one that
+meets only V1–V5 is `reproduced-*`).
 
 ## Case evidence and batch status
 
@@ -235,10 +280,10 @@ predictions; record changed designs as dated amendments before new readings.
 Record raw-log location, small committed excerpts, harness, config diffs, source
 patches, original failure, controls, intervention, and repeat counts.
 
-**Filing a verified case (amended 2026-11-11).** When a case meets the promotion
-rule (*Verification status*), it keeps **one final case file** in its status
-folder: Summary, the four sections, a per-condition status table and a V1–V5
-table citing which run supplies each piece of evidence. The per-run case files
+**Filing a verified or reproduced case (amended 2026-11-11).** When a case meets
+the promotion rule (*Verification status*), or V1–V5 for `reproduced-*`, it keeps
+**one final case file** in its status folder: Summary, the four sections, a
+per-condition status table and a V1–V7 table citing which run supplies each piece of evidence. The per-run case files
 move **verbatim** into `history.md` in the same case folder (headings demoted one
 level, cross-links pointed at its anchors); designs, harnesses and log excerpts
 stay beside it. Nothing is deleted: predictions and original results remain

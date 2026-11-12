@@ -4,7 +4,12 @@
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
-| `memtable_heap_space=350MiB` + `counter_cache_size=250MiB` + `key_cache_size=200MiB`, `-Xmx1024M`, concurrent `write` + `counter_write` + `read` over 500,000 preloaded partitions | **`verified-OOM · diagnostic`** (converge 3/3 OOM; controls 9/9 survive; counter-cache intervention 3/3 survive) |
+| `memtable_heap_space=350MiB` + `counter_cache_size=250MiB` + `key_cache_size=200MiB`, `-Xmx1024M`, concurrent `write` + `counter_write` + `read` over 500,000 preloaded partitions | **`reproduced-OOM · diagnostic`** (converge 3/3 OOM; controls 9/9 survive; counter-cache intervention 3/3 survive) |
+
+> **Status amended 2026-11-11 (protocol *Defaults and acceptable budget*).** V1–V5 are met, so the
+> result is reproduced and attributed, but *verified* now also needs V6 (constraints at defaults) and
+> V7 (an acceptable budget). V6 not met: 350 / 250 / 200 MiB against defaults of 256 / 25 / 51 MiB at 1 GiB (memtable ¼ heap, counter min(2.5% heap, 50 MiB), key min(5% heap, 100 MiB)). V7 not met: the 1 GiB heap is deliberately tightened (`cassandra-env.sh` would resolve ½ RAM, ≈ 7.8 GiB, on apt179). Status therefore `reproduced-OOM · diagnostic`; filed in `candidates/`.
+> Next step toward verified: the same mechanism with default constraints at a budget argued acceptable.
 
 ## Summary
 

@@ -4,24 +4,28 @@ Master status table for every OOM-exp Cassandra case. Cases are filed in
 **status-first** folders, not by direction:
 
 - **`convergence/`** — verified result by **convergence** (several bounded
-  usages exhausting a shared budget together): `verified-OOM` or `verified-gap`. A case whose OOM also needs a demonstrated
-  accounting excess (U > C in one domain) is tagged **mixed** in the Mechanism
-  column and filed here (R3, R4).
+  usages exhausting a shared budget together): `verified-OOM` or `verified-gap`.
+  *(none yet)* A case whose OOM also needs a demonstrated accounting excess
+  (U > C in one domain) is tagged **mixed** in the Mechanism column.
 - **`bypass/`** — verified result by **bypass** (getting past a single
   capacity check): `verified-OOM` or `verified-gap`.
-- **`candidates/`** — not yet meeting the promotion rule (in progress, parked,
-  unresolved, blocked before a valid arm ran, or a pre-protocol OOM awaiting its
-  V1–V5 recheck).
+- **`candidates/`** — not yet meeting the promotion rule: `reproduced-*` (V1–V5
+  met, but only with custom constraints or a tightened budget), in progress,
+  parked, unresolved, blocked before a valid arm ran, or a pre-protocol OOM
+  awaiting its recheck.
 - **`negatives/`** — verified **no-OOM** within a stated range. *(none yet)*
 
 **Status vocabulary (amended 2026-11-11).** A case is verified only when it meets
-the promotion rule V1–V5 of the protocol's
+the promotion rule V1–V7 of the protocol's
 [*Verification status*](../../verification-protocol.md#verification-status-amended-2026-11-11)
 (≥ 3 failing runs of one condition, ≥ 3 matched controls, U measured
 independently of K, intervention ×3 or documented infeasible, initiating failure
-kept). Statuses: `verified-OOM`, `verified-gap` (confirmed gap ending in service
-loss, overshoot or leak, not OOM), `candidate`, `negative`; verified statuses
-also carry `deployment` or `diagnostic`. **`(pre-protocol)`** marks cases filed
+kept, **constraints at their defaults, and a heap/memory budget argued acceptable
+case by case**; see [*Defaults and acceptable budget*](../../verification-protocol.md#defaults-and-acceptable-budget-amended-2026-11-11)).
+Statuses: `verified-OOM`, `verified-gap` (confirmed gap ending in service
+loss, overshoot or leak, not OOM), `reproduced-OOM` / `reproduced-gap` (V1–V5 met
+but V6 or V7 not; always `diagnostic`, filed in `candidates/`), `candidate`,
+`negative`; verified and reproduced statuses also carry `deployment` or `diagnostic`. **`(pre-protocol)`** marks cases filed
 before the 2026-11-06 protocol: judged under earlier rules (one failing run
 each) and to be rechecked against V1–V5 before being cited as verified upstream.
 On 2026-11-11 the six pre-protocol convergence OOMs were moved from
@@ -29,8 +33,10 @@ On 2026-11-11 the six pre-protocol convergence OOMs were moved from
 failing run, one run per control and at most one intervention run (V1, V2, V4
 unmet). Their OOM readings stand; only the verification status changed. A
 rerun that meets V1–V5 moves a case back to `convergence/`. **2026-11-11 recheck:**
-R1–R4 (runs 7, 8, 1, 2) met V1–V5 and are back in `convergence/` as
-`verified-OOM · diagnostic` (R3, R4 tagged mixed); R5–R6 remain candidates.
+R1–R4 (runs 7, 8, 1, 2) met V1–V5, but all four use raised capacities and a
+tightened budget, so under the V6–V7 amendment of the same day they are
+`reproduced-OOM · diagnostic` in `candidates/` (R3, R4 tagged mixed). R5–R6
+remain candidates.
 
 The capacity **regime** (**custom** raised values | **default** shipped values)
 is a *label* here, not a folder. So is the **lead source** (if-check inventory
@@ -52,11 +58,11 @@ conclusion live in the linked case file.
 | Case | Mechanism | Regime | Status | Result (one line) | Link |
 |---|---|---|---|---|---|
 | internode queues × tiny-cell mutations — replica 8 GiB, storage stall (B6 A) | bypass | default | verified-gap · service-loss · deployment | **Service loss** — default settings: 99% live, ≈ 97% of 2 min in Full GC 3/3 with counters ≤ C; blob 0/3; 8 MiB endpoint reserve removes it 4/4; heap OOM occasional | [`internode_application_queue...accounting-mismatch`](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md) |
-| internode queues × tiny-cell mutations — coordinator 2 GiB (B6 B) | bypass | default | verified-OOM · diagnostic | **OOMed 4/4** with the send queue empty (after-flush retention); blob 0/3; reserve removes it 4/4; needs slow replica + 60 s timeouts. Replica-2 GiB condition C stays candidate | [`internode_application_queue...accounting-mismatch`](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md) |
-| memtable_offheap_space + file_cache_size (R1) | convergence | custom | verified-OOM · diagnostic | **Kernel memcg OOM-kill 3/3** — off-heap memtable fills on top of a full 1200 MiB chunk cache (3500 MiB cgroup); each alone 76–78% (0/6); `file_cache_size` 300 MiB removes it 3/3 | [`memtable_offheap_space+file_cache_size`](convergence/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) |
-| DOB_MAX_RECYCLE_BYTES + MAX_HINT_BUFFERS (custom, R2) | convergence | custom | verified-OOM · diagnostic | **Direct-buffer OOM 3/3** at 560 MiB — 8 hint slabs (256 MiB) + 36 kept 7.63 MiB DOB scratch buffers; alone 50% / 70–71% (0/6); L = 1 MiB removes it 3/3 (thin margin, peaks 93%) | [`DOB...--custom`](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) |
-| memtable_heap_space + counter_cache_size (R3) | convergence (mixed) | custom | verified-OOM · diagnostic | **Heap OOM 3/3, JVM killed** — M/C alone 0/6; `counter_cache_size` 50 MiB removes it 3/3; counter cache holds 327–337 MiB vs its 300 MiB cap (weigher omits overhead) → mixed | [`memtable_heap_space+counter_cache_size`](convergence/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) |
-| memtable_heap_space + counter_cache_size + key_cache_size (R4) | convergence (mixed) | custom | verified-OOM · diagnostic | **Heap OOM 3/3, JVM killed** — M/C/K alone 0/9; counter cache to auto 25 MiB removes it 3/3 (key cache to auto does not, 3/3 OOM); caches hold 1.74× / 2.0× their counted weight → mixed | [`memtable_heap_space+counter_cache_size+key_cache_size`](convergence/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) |
+| internode queues × tiny-cell mutations — coordinator 2 GiB (B6 B) | bypass | default | reproduced-OOM · diagnostic | **OOMed 4/4** with the send queue empty (after-flush retention); blob 0/3; reserve removes it 4/4; needs slow replica + 60 s timeouts. Replica-2 GiB condition C stays candidate | [`internode_application_queue...accounting-mismatch`](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md) |
+| memtable_offheap_space + file_cache_size (R1) | convergence | custom | reproduced-OOM · diagnostic | **Kernel memcg OOM-kill 3/3** — off-heap memtable fills on top of a full 1200 MiB chunk cache (3500 MiB cgroup); each alone 76–78% (0/6); `file_cache_size` 300 MiB removes it 3/3 | [`memtable_offheap_space+file_cache_size`](candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) |
+| DOB_MAX_RECYCLE_BYTES + MAX_HINT_BUFFERS (custom, R2) | convergence | custom | reproduced-OOM · diagnostic | **Direct-buffer OOM 3/3** at 560 MiB — 8 hint slabs (256 MiB) + 36 kept 7.63 MiB DOB scratch buffers; alone 50% / 70–71% (0/6); L = 1 MiB removes it 3/3 (thin margin, peaks 93%) | [`DOB...--custom`](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) |
+| memtable_heap_space + counter_cache_size (R3) | convergence (mixed) | custom | reproduced-OOM · diagnostic | **Heap OOM 3/3, JVM killed** — M/C alone 0/6; `counter_cache_size` 50 MiB removes it 3/3; counter cache holds 327–337 MiB vs its 300 MiB cap (weigher omits overhead) → mixed | [`memtable_heap_space+counter_cache_size`](candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) |
+| memtable_heap_space + counter_cache_size + key_cache_size (R4) | convergence (mixed) | custom | reproduced-OOM · diagnostic | **Heap OOM 3/3, JVM killed** — M/C/K alone 0/9; counter cache to auto 25 MiB removes it 3/3 (key cache to auto does not, 3/3 OOM); caches hold 1.74× / 2.0× their counted weight → mixed | [`memtable_heap_space+counter_cache_size+key_cache_size`](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) |
 | internode receive-queue ×peers (fast co-replica, C1 run 3) | convergence | custom | candidate | **Incomplete — ceiling reached** — fast co-replica decouples the client; at N=8, Q=4 the victim queue hit A_max (543 = 8×4 excl + 511 rsv), throttling on, senders alive; Q/N sweeps and OOM stage not yet run | [`internode...--run3-fastcoreplica`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) |
 | internode receive-queue ×peers (custom Q, C1 reopen) | convergence | custom | candidate | **Sensitivity limit / unresolved** — mechanism confirmed to the MiB (exclusive = N·Q); victim hits a closed-loop occupancy equilibrium (~266 MiB) below the ceiling, so raising Q only re-buckets reserve→exclusive; a direct-buffer OOM is reachable but fires at the same budget for Q=4 and Q=64 (Q-invariant), so not Q-attributable | [`internode...--run2-customQ`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) |
 | internode receive-queue ×peers (default Q, C1 multiplicity) | convergence | default | candidate | **Sensitivity limit / unresolved** — mechanism confirmed exactly (N=4: per-conn exclusive=Q, Σreserve=G saturated, admitted=A_max); but N·Q (≤112 MiB) is dominated by the invariant G=512 reserve + occupancy noise, and senders OOM before high N | [`internode...--run1-defaultQ`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) |

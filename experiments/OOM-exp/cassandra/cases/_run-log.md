@@ -14,14 +14,14 @@ is a label on each run, not a folder; cases now live under status-first folders
 
 | Date | Playbook / regime | Run | Case | Result |
 |---|---|---|---|---|
-| 2026-11-02 | convergence / custom | run 1 | [memtable_heap_space+counter_cache_size](convergence/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) | OOMed |
-| 2026-11-02 | convergence / custom | run 2 | [+key_cache_size](convergence/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | OOMed, JVM killed |
+| 2026-11-02 | convergence / custom | run 1 | [memtable_heap_space+counter_cache_size](candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) | OOMed |
+| 2026-11-02 | convergence / custom | run 2 | [+key_cache_size](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | OOMed, JVM killed |
 | 2026-11-02 | convergence / custom | run 3 | [commitlog_total_space+max_hints_size_per_host](candidates/commitlog_total_space+max_hints_size_per_host.md) | blocked / parked |
 | 2026-11-02/03 | convergence / custom | run 4 | [row_cache_size+index_summary_capacity](candidates/row_cache_size+index_summary_capacity.md) | not reached (superseded by run 6) |
 | 2026-11-03 | convergence / custom | run 5 | [row_cache_size+index_summary_capacity--run5](candidates/row_cache_size+index_summary_capacity--run5.md) | void |
 | 2026-11-03 | convergence / custom | run 6 | [row_cache_size+index_summary_capacity--run6](candidates/row_cache_size+index_summary_capacity--run6.md) | OOMed (schedule B) |
-| 2026-11-03 | convergence / custom | run 7 | [memtable_offheap_space+file_cache_size](convergence/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) | OOMed |
-| 2026-11-03 | convergence / custom | run 8 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | OOMed, JVM killed |
+| 2026-11-03 | convergence / custom | run 7 | [memtable_offheap_space+file_cache_size](candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) | OOMed |
+| 2026-11-03 | convergence / custom | run 8 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | OOMed, JVM killed |
 | 2026-11-04 | default | run 1 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (default)](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--default.md) | OOMed, strict default |
 | 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
 | 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
@@ -29,10 +29,10 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-10 | bypass | B6 run 1 (accounting mismatch) | [internode_application_queue...--run1](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-1) | bypass confirmed (2 domains); heap OOM 3/3 + 3/3 at 2 GiB with 60 s deadlines; default-timeout arm not established |
 | 2026-11-10/11 | bypass | B6 run 2 (replica disk stall, default timeouts) | [internode_application_queue...--run2-diskstall](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-2) | GC service loss 5/5 stall arms (≈ 99% heap, ≈ 97% in Full GC); heap OOM 2/8 stall/hang arms; blob 0 Full GCs; 8 MiB reserve removes it |
 | 2026-11-11 | bypass | B6 run 3 (intervention ×3, same-day positives) | [internode_application_queue...--run3-intervention](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-3) | reserve 8 MiB removes it 3/3 per condition; positives reproduced except run-1 replica side; run 2 and run-1 coordinator meet V1–V5 |
-| 2026-11-11 | convergence / custom | R1 recheck of run 7 (pc96) | [memtable_offheap_space+file_cache_size](convergence/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) | kernel memcg kill 3/3; alone 0/6; `file_cache_size` 300 MiB removes it 3/3 → verified-OOM · diagnostic |
-| 2026-11-11 | convergence / custom | R2 recheck of run 8 (apt140) | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | direct OOM 3/3; alone 0/6; L = 1 MiB removes it 3/3 → verified-OOM · diagnostic |
-| 2026-11-11 | convergence / custom | R3 recheck of run 1 (apt149) | [memtable_heap_space+counter_cache_size](convergence/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) | heap OOM + kill 3/3; alone 0/6; counter cache 50 MiB removes it 3/3 → verified-OOM · diagnostic (mixed) |
-| 2026-11-11 | convergence / custom | R4 recheck of run 2 (apt179) | [+key_cache_size](convergence/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | heap OOM + kill 3/3; alone 0/9; counter cache to auto removes it 3/3 → verified-OOM · diagnostic (mixed) |
+| 2026-11-11 | convergence / custom | R1 recheck of run 7 (pc96) | [memtable_offheap_space+file_cache_size](candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) | kernel memcg kill 3/3; alone 0/6; `file_cache_size` 300 MiB removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic |
+| 2026-11-11 | convergence / custom | R2 recheck of run 8 (apt140) | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | direct OOM 3/3; alone 0/6; L = 1 MiB removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic |
+| 2026-11-11 | convergence / custom | R3 recheck of run 1 (apt149) | [memtable_heap_space+counter_cache_size](candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) | heap OOM + kill 3/3; alone 0/6; counter cache 50 MiB removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic (mixed) |
+| 2026-11-11 | convergence / custom | R4 recheck of run 2 (apt179) | [+key_cache_size](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | heap OOM + kill 3/3; alone 0/9; counter cache to auto removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic (mixed) |
 
 ---
 
@@ -93,7 +93,7 @@ instead.
 
 **Combinations attempted:**
 
-1. `memtable_heap_space` (M=550 MiB) + `counter_cache_size` (C=300 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `cassandra-stress write` + `cassandra-stress counter_write` — case file: [`memtable_heap_space+counter_cache_size.md`](convergence/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md). **Result: OOM reached** (14 genuine `OutOfMemoryError: Java heap space` throws across unrelated thread pools; both control arms safe with 33–39% free margin).
+1. `memtable_heap_space` (M=550 MiB) + `counter_cache_size` (C=300 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `cassandra-stress write` + `cassandra-stress counter_write` — case file: [`memtable_heap_space+counter_cache_size.md`](candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md). **Result: OOM reached** (14 genuine `OutOfMemoryError: Java heap space` throws across unrelated thread pools; both control arms safe with 33–39% free margin).
 
 **Combinations considered and skipped (not built or run):**
 
@@ -112,7 +112,7 @@ instead.
 
 **Combinations attempted:**
 
-1. `memtable_heap_space` (M=350 MiB) + `counter_cache_size` (C=250 MiB) + `key_cache_size` (K=200 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `write` + `counter_write` + `read` (the read arm needs a preloaded, flushed dataset — key cache only engages on sstable reads, not memtable reads) — case file: [`memtable_heap_space+counter_cache_size+key_cache_size.md`](convergence/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md). **Result: OOM reached, JVM killed.** Smaller individual values than run 1's 2-constraint case (chosen so no pairwise subset was already enough to overshoot), each alone safe (46–87% heap free, 0 errors), combined drove the heap to 989/1024 MiB (96.6%) right after a forced full GC with a 72-byte allocation failing, a genuine `OutOfMemoryError`, a 1.35 GB heap dump, and — unlike run 1's case, where the JVM survived — `-XX:OnOutOfMemoryError=kill -9 %p` actually fired and killed the process.
+1. `memtable_heap_space` (M=350 MiB) + `counter_cache_size` (C=250 MiB) + `key_cache_size` (K=200 MiB), `-Xmx1024M`/`-Xms1024M`, concurrent `write` + `counter_write` + `read` (the read arm needs a preloaded, flushed dataset — key cache only engages on sstable reads, not memtable reads) — case file: [`memtable_heap_space+counter_cache_size+key_cache_size.md`](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md). **Result: OOM reached, JVM killed.** Smaller individual values than run 1's 2-constraint case (chosen so no pairwise subset was already enough to overshoot), each alone safe (46–87% heap free, 0 errors), combined drove the heap to 989/1024 MiB (96.6%) right after a forced full GC with a 72-byte allocation failing, a genuine `OutOfMemoryError`, a 1.35 GB heap dump, and — unlike run 1's case, where the JVM survived — `-XX:OnOutOfMemoryError=kill -9 %p` actually fired and killed the process.
 
 **Combinations considered and skipped (not built or run):**
 
@@ -195,7 +195,7 @@ instead.
 
 **Node:** same node and build. **Shared budget:** off-heap/direct memory, cgroup v2 `memory.max`. On-heap exhausted, disk skipped; the first off-heap pair closed in run 6.
 
-**Combinations attempted:** 1. `memtable_offheap_space` (1200 MiB, `offheap_objects`, cleanup threshold 0.99) + `file_cache_size` (1200 MiB, chunk cache enabled), 3500 MiB budget, `-Xmx768M`. Case file: [`memtable_offheap_space+file_cache_size.md`](convergence/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md). **OOMed:** alone 77.6% / 77.7%; converge (cache filled, then write burst) kernel-killed 16 s into the burst, anon-rss 3465 MiB.
+**Combinations attempted:** 1. `memtable_offheap_space` (1200 MiB, `offheap_objects`, cleanup threshold 0.99) + `file_cache_size` (1200 MiB, chunk cache enabled), 3500 MiB budget, `-Xmx768M`. Case file: [`memtable_offheap_space+file_cache_size.md`](candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md). **OOMed:** alone 77.6% / 77.7%; converge (cache filled, then write burst) kernel-killed 16 s into the burst, anon-rss 3465 MiB.
 
 **Considered and not picked:** the networking `BufferPool` family (`networking_cache_size`, `internode_application_*`, `native_transport_*` queue capacities). It fills only while messages are in flight, so it has no sustained window at capacity; `_constraint-groups.md` also flags those as likely one shared pool.
 
@@ -209,7 +209,7 @@ instead.
 
 **Candidates checked:** the three named by run 7. `DOB_MAX_RECYCLE_BYTES`: standing (each thread keeps a scratch buffer of up to L between uses; `allocateDirect`). `MAX_HINT_BUFFERS`: standing (slabs recycled, never freed; `allocateDirect`); the stage-4 natural-load control already reached its cap without a Byteman hold, and calibration here reached 9 slabs at n = 12. The hints-slab case is the same pool as `MAX_HINT_BUFFERS`; the trie limits follow `memtable_offheap_space` (not independent).
 
-**Combinations attempted:** 1. `DOB_MAX_RECYCLE_BYTES` (L = 8 MiB, 4 MB writes on 8 client threads) + `MAX_HINT_BUFFERS` (n = 8, 32 MiB slabs, 1 KiB writes to a down replica), 560 MiB `MaxDirectMemorySize`, `-Xmx3072M`. Case file: [`DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md). **OOMed:** alone 50.4% / 69.5%; converge (hints pool at its cap, then the DOB burst) hit `OutOfMemoryError: Direct buffer memory` in scratch-buffer growth about 7 s into the burst; Cassandra forced a heap OOM (heap 570 of 3072 MiB) and `OnOutOfMemoryError` killed the JVM. **Attribution control:** the same converge arm with only `dob_max_recycle_bytes` at its 1 MiB default stayed at 51%, no OOM.
+**Combinations attempted:** 1. `DOB_MAX_RECYCLE_BYTES` (L = 8 MiB, 4 MB writes on 8 client threads) + `MAX_HINT_BUFFERS` (n = 8, 32 MiB slabs, 1 KiB writes to a down replica), 560 MiB `MaxDirectMemorySize`, `-Xmx3072M`. Case file: [`DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS.md`](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md). **OOMed:** alone 50.4% / 69.5%; converge (hints pool at its cap, then the DOB burst) hit `OutOfMemoryError: Direct buffer memory` in scratch-buffer growth about 7 s into the burst; Cassandra forced a heap OOM (heap 570 of 3072 MiB) and `OnOutOfMemoryError` killed the JVM. **Attribution control:** the same converge arm with only `dob_max_recycle_bytes` at its 1 MiB default stayed at 51%, no OOM.
 
 **Harness defect found:** `cassandra-stress write` always sends `CREATE KEYSPACE` first; under the other workload's load it timed out and the client wrote nothing. This voided two converge attempts (one per order). Fixed with `cassandra-stress user` profiles that have no schema definitions; both controls re-run with them. Any future concurrent-workload harness should use such profiles, not just pre-create the table (run 6's fix covered `CREATE TABLE`, not this).
 
@@ -434,7 +434,7 @@ regime, evidence, status/range and stopping reason.
 | B3 / buffer-pool fallback | P2 | open; distinguish pool contract from total allocation |
 | B4 / cache explicit-clear release | P2 | open; trace ownership before repeated-cycle test |
 | B5 / periodic enforcement or replacement ordering | P3 | open; verify format/path and temporal bounds |
-| B6 / internode send+receive queues vs heap `Mutation`s (`source: flow:coordinator-write`) | P1 | **verified 2026-11-11** (runs 1–3; [case](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)): A — 8 GiB replica, storage stall, default settings: `verified-gap · service-loss · deployment`; B — 2 GiB coordinator, slow replica, 60 s timeouts: `verified-OOM · diagnostic`; C — 2 GiB replica: candidate. Next: JIRA check (CASSANDRA-15066), stall-length sweep, ≥ 2 slow replicas at 8 GiB |
+| B6 / internode send+receive queues vs heap `Mutation`s (`source: flow:coordinator-write`) | P1 | **verified 2026-11-11** (runs 1–3; [case](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)): A — 8 GiB replica, storage stall, default settings: `verified-gap · service-loss · deployment`; B — 2 GiB coordinator, slow replica, 60 s timeouts: `reproduced-OOM · diagnostic` (was `verified-OOM`; V7 unmet, reclassified 2026-11-11); C — 2 GiB replica: candidate. Next: JIRA check (CASSANDRA-15066), stall-length sweep, ≥ 2 slow replicas at 8 GiB |
 
 ## 2026-11-10 — B6 run 1 (bypass · accounting mismatch, default capacities)
 
@@ -584,3 +584,23 @@ from clean starts; dated designs written before readings. Full logs and dumps st
 verbatim + `recheck-2026-11-11/`). R3 and R4 carry the **mixed** tag. New bypass lead from R3/R4:
 B7 (cache weigher omits container overhead) in the campaign plan. **Cleanup:** no Cassandra,
 stress or harness processes left on any of the four nodes; data under `/mydata/oom-recheck/`.
+
+## 2026-11-11 — protocol amendment V6–V7 (defaults and acceptable budget): reclassification
+
+No runs. By the researcher's decision the promotion rule gained V6 (every constraint the
+endpoint depends on at its shipped default) and V7 (a heap/memory budget argued acceptable case
+by case and reviewed before readings), and a new status `reproduced-OOM` / `reproduced-gap` for
+cases meeting V1–V5 only ([protocol](../../verification-protocol.md#defaults-and-acceptable-budget-amended-2026-11-11)).
+Effect, evidence unchanged:
+
+- R1–R4 (runs 7, 8, 1, 2) moved from `convergence/` back to `candidates/` as
+  `reproduced-OOM · diagnostic` (R3, R4 still mixed): each uses raised capacities (1.4–12× the
+  defaults) and a deliberately tightened heap, direct or cgroup budget. Their case files carry a
+  dated status note naming the unmet V6/V7 values.
+- B6 condition B (2 GiB coordinator, 60 s timeouts): `verified-OOM · diagnostic` →
+  `reproduced-OOM · diagnostic` (default capacities, V6 met; tightened 2 GiB heap, V7 unmet).
+- B6 condition A (default capacities, 8 GiB replica, external storage stall) keeps
+  `verified-gap · service-loss · deployment`; its budget argument awaits the researcher's review.
+- `convergence/` is empty again. Next step for R1–R4: test the same mechanisms with default
+  constraints at an acceptable budget (a clean no-failure result there is a `negative`).
+

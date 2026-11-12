@@ -8,7 +8,7 @@ per-run records in [`history.md`](history.md). **Consolidated:** 2026-11-11.
 | Condition | Status (protocol *Verification status*) |
 |---|---|
 | A — replica 8 GiB, 30 s storage stall, default timeouts and threads, 4 coordinators | **`verified-gap · service-loss · deployment`** |
-| B — coordinator 2 GiB, slow replica (Byteman), 60 s write/native timeouts | **`verified-OOM · diagnostic`** |
+| B — coordinator 2 GiB, slow replica (Byteman), 60 s write/native timeouts | **`reproduced-OOM · diagnostic`** (V7 unmet: tightened 2 GiB heap; amended 2026-11-11) |
 | C — replica 2 GiB, slow replica (Byteman), 60 s timeouts | `candidate` (same-day positive survived; OOM timing-dependent) |
 
 ## Summary
@@ -119,13 +119,13 @@ Raw logs: `/mydata/b6/runs/` (run 1, run 3 `R3A_*`) and `/mydata/b6/runs2/` (run
 
 ## 4. Conclusion and limits
 
-**Promotion rule:**
+**Promotion rule** (V6–V7 added by the protocol amendment of 2026-11-11, *Defaults and acceptable budget*; condition B moved from `verified-OOM` to `reproduced-OOM` on that date, evidence unchanged):
 
-| Condition | V1 repetition | V2 matched control | V3 U apart from K | V4 intervention | V5 initiating failure | Status |
-|---|---|---|---|---|---|---|
-| A | 3/3 service loss | blob 0/3 | P1 histogram; GC-log live | 4/4 | GC logs | **verified-gap · service-loss · deployment** |
-| B | 4/4 heap OOM | blob 0/3 | histograms (run 1) | 4/4 | `ReportJavaOutOfMemory` + 2 dumps | **verified-OOM · diagnostic** |
-| C | 3/4 (same-day survived) | blob 0/3 | histograms | 4/4 | run 1 dump | candidate |
+| Condition | V1 repetition | V2 matched control | V3 U apart from K | V4 intervention | V5 initiating failure | V6 default constraints | V7 acceptable budget | Status |
+|---|---|---|---|---|---|---|---|---|
+| A | 3/3 service loss | blob 0/3 | P1 histogram; GC-log live | 4/4 | GC logs | yes | 8 GiB heap (argued deployment-sized; researcher review pending) | **verified-gap · service-loss · deployment** |
+| B | 4/4 heap OOM | blob 0/3 | histograms (run 1) | 4/4 | `ReportJavaOutOfMemory` + 2 dumps | yes | **no** (2 GiB, tightened) | **reproduced-OOM · diagnostic** |
+| C | 3/4 (same-day survived) | blob 0/3 | histograms | 4/4 | run 1 dump | yes | no (2 GiB) | candidate |
 
 **Interpretation:** the limits are documented as on-wire bytes, so the gap is a documented unit that
 does not bound heap — sizing a heap from `N·3·(send+receive capacity)` plus reserves can be wrong by

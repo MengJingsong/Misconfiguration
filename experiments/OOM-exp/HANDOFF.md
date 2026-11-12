@@ -33,9 +33,11 @@ moved to `candidates/` as `candidate (pre-protocol)` on 2026-11-11 (one failing 
 each; V1, V2, V4 unmet; their rechecks are queued as R1–R4 (P1) and R5–R6 (P2) in the
 [campaign plan](cassandra/campaign-plan.md#prioritized-queue)). **R1–R4 rechecked
 2026-11-11** (in parallel, one agent per node: pc96, apt140, apt149, apt179): all four met
-V1–V5 and are back in `convergence/` as `verified-OOM · diagnostic` (runs 7, 8, 1, 2;
-runs 1 and 2 tagged **mixed**: the counter/key caches hold 1.7–2.0× their counted weight,
-queued as bypass lead B7). R5–R6 (runs 6 and default run 1) remain `candidate (pre-protocol)`.
+V1–V5 (runs 7, 8, 1, 2; runs 1 and 2 tagged **mixed**: the counter/key caches hold
+1.7–2.0× their counted weight, queued as bypass lead B7). Under the same day's protocol
+amendment (V6 constraints at defaults, V7 acceptable budget) they are
+`reproduced-OOM · diagnostic` and stay in `candidates/`: all four use raised capacities and a
+tightened budget. `convergence/` has no verified case yet. R5–R6 (runs 6 and default run 1) remain `candidate (pre-protocol)`.
 Recheck data, logs and dumps stay on each node under `/mydata/oom-recheck/<Rn>/`; see the
 [run log](cassandra/cases/_run-log.md). The original on-heap and
 off-heap standing-pool surveys are complete within their historical scope.
@@ -46,8 +48,9 @@ reproduced heap OOM with supporting deviations; run 2 (2026-11-11) reproduced th
 memory effect at default timeouts and an 8 GiB replica, mostly as GC service loss
 with 2 heap OOMs in 8 arms; run 3 (2026-11-11) repeated the reserve intervention and
 same-day positives. **B6 is the first verified bypass** (filed 2026-11-11 in `bypass/`):
-`verified-gap · service-loss · deployment` (8 GiB replica, storage stall) and
-`verified-OOM · diagnostic` (2 GiB coordinator); the 2 GiB replica condition stays candidate.
+`verified-gap · service-loss · deployment` (8 GiB replica, storage stall); the 2 GiB
+coordinator condition is `reproduced-OOM · diagnostic` (tightened heap, V7 unmet) and the
+2 GiB replica condition stays candidate.
 Use the [campaign plan](cassandra/campaign-plan.md) and
 [current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
 for current priorities and results.
@@ -72,7 +75,7 @@ none has run yet.
     workload), predicted and observed to exceed the heap together — 14 genuine
     `OutOfMemoryError` throws, final forced-GC reading 96.6% of `-Xmx` with 0
     young regions left, JVM survived (caught the exceptions). Case file:
-    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md).
+    [`cassandra/cases/candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md`](cassandra/cases/candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md).
   - Run 2: same two plus `key_cache_size` as a 3rd on-heap constraint (config-type
     true positive; `row_cache_size`/`index_summary_capacity` were checked and
     turned out off-heap, not a fit — see below). Smaller individual values than
@@ -80,7 +83,7 @@ none has run yet.
     (96.6%) right after a forced full GC, a genuine `OutOfMemoryError`, a 1.35 GB
     heap dump, and this time `-XX:OnOutOfMemoryError=kill -9 %p` actually fired —
     the JVM was killed, not just stressed. Case file:
-    [`cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/convergence/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md).
+    [`cassandra/cases/candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md`](cassandra/cases/candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md).
   - Run 3: `commitlog_total_space` + `max_hints_size_per_host` (both disk-bound
     true positives), the first case in this folder to use a 2-node ring (a
     second node is structurally required to generate hints at all). **Blocked,
@@ -136,7 +139,7 @@ none has run yet.
     Each alone 78%; with the chunk cache full, a write burst got the JVM
     **kernel OOM-killed 16 s in** (anon-rss 3465 MiB). OOMed on the first try:
     both are hard standing caps, so no timing engineering was needed. Case file:
-    [`cassandra/cases/convergence/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md`](cassandra/cases/convergence/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md).
+    [`cassandra/cases/candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md`](cassandra/cases/candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md).
   - Run 8 (2026-11-03): `DOB_MAX_RECYCLE_BYTES` + `MAX_HINT_BUFFERS`, both
     new, both JVM properties, both `ByteBuffer.allocateDirect` pools, so the
     budget is the JVM's own `-XX:MaxDirectMemorySize` (560 MiB), not a cgroup.
@@ -146,7 +149,7 @@ none has run yet.
     Direct buffer memory` about 7 s into the DOB burst, then Cassandra's
     forced heap OOM and `kill -9`. The same arm with L at its default did not
     OOM (attribution control). Case file:
-    [`cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md`](cassandra/cases/convergence/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md).
+    [`cassandra/cases/candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md`](cassandra/cases/candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md).
   - Batch log: [`cassandra/cases/_run-log.md`](cassandra/cases/_run-log.md) —
     its "Historical shared-budget group status" table records prior
     standing-pool coverage. On-heap is **exhausted** (2-way then 3-way, escalating outcome, no 4th
@@ -172,7 +175,7 @@ none has run yet.
 - **Bypass (`bypass-playbook.md`):**
   - **B6 — internode queue accounting mismatch (2026-11-10/11): verified, runs 1–3 done.**
     Final case: [`internode_application_queue_capacity--accounting-mismatch.md`](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)
-    (A: `verified-gap · service-loss · deployment`; B: `verified-OOM · diagnostic`; C: candidate).
+    (A: `verified-gap · service-loss · deployment`; B: `reproduced-OOM · diagnostic`; C: candidate).
     Found by tracing C1's write path (`source: flow:coordinator-write`). The internode
     send/receive queues charge on-wire bytes; a 1000-cell map mutation is 10.8 KiB on
     the wire but ≈ 213 KiB on the coordinator heap and ≈ 181 KiB on the replica heap
@@ -237,16 +240,20 @@ none has run yet.
   `capacity-enforcement-exp` stage 3/4).
 - **One run produces a batch of cases**, not one, tracked chronologically in
   the single `cases/_run-log.md` (regime labeled per run).
-- **Verified means V1–V5 (protocol amendment 2026-11-11).** A case moves out of
+- **Verified means V1–V7 (protocol amendments 2026-11-11).** A case moves out of
   `candidates/` only when it meets the promotion rule in
   [`verification-protocol.md`](verification-protocol.md#verification-status-amended-2026-11-11):
   ≥ 3 failing runs of one condition, ≥ 3 matched controls, U measured apart from
-  K, intervention ×3 (or documented infeasible), initiating failure kept. Statuses
+  K, intervention ×3 (or documented infeasible), initiating failure kept (V1–V5),
+  **every constraint the endpoint depends on at its default (V6), and a heap/memory
+  budget argued acceptable case by case and reviewed before readings (V7)**. A case
+  meeting only V1–V5 is `reproduced-OOM`/`reproduced-gap · diagnostic` and stays in
+  `candidates/`; custom-capacity and tightened-budget runs top out there. Statuses
   are `verified-OOM`, `verified-gap` (confirmed gap ending in service loss,
-  overshoot or leak), `candidate`, `negative`, each verified one labelled
-  `deployment` or `diagnostic`. The six convergence OOMs filed before 2026-11-06
+  overshoot or leak), `reproduced-*`, `candidate`, `negative`, each verified or
+  reproduced one labelled `deployment` or `diagnostic`. The six convergence OOMs filed before 2026-11-06
   are `candidate (pre-protocol)` in `candidates/` (moved there 2026-11-11) and need
-  a V1–V5 recheck before they return to `convergence/` or are used upstream. B6 is the first case filed this way (2026-11-11). **A verified case keeps one
+  a recheck; R1–R4's recheck (2026-11-11) met V1–V5 only, so they are `reproduced-OOM`. B6 is the first case filed this way (2026-11-11). **A verified case keeps one
   final case file**; its per-run case files are moved verbatim into `history.md` in
   the same folder (protocol, *Case evidence and batch status*).
 - **Case files use the fixed 4-section template** each playbook specifies

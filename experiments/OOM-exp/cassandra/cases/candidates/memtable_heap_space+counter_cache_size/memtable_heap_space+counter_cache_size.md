@@ -7,8 +7,13 @@ R3 recheck (2026-11-11, `apt149`); per-run records verbatim in [`history.md`](hi
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
-| `memtable_heap_space=550MiB` + `counter_cache_size=300MiB`, `-Xmx1024M`, concurrent `write` + `counter_write` (recheck on `apt149`) | **`verified-OOM · diagnostic`** (mixed) |
+| `memtable_heap_space=550MiB` + `counter_cache_size=300MiB`, `-Xmx1024M`, concurrent `write` + `counter_write` (recheck on `apt149`) | **`reproduced-OOM · diagnostic`** (mixed) |
 | Same condition, run 1 on the 40-core node (14 caught throws, JVM survived) | superseded by the recheck; kept in [`history.md`](history.md#run-1) |
+
+> **Status amended 2026-11-11 (protocol *Defaults and acceptable budget*).** V1–V5 are met, so the
+> result is reproduced and attributed, but *verified* now also needs V6 (constraints at defaults) and
+> V7 (an acceptable budget). V6 not met: `memtable_heap_space` 550 MiB and `counter_cache_size` 300 MiB, against defaults of ¼ heap = 256 MiB and min(2.5% heap, 50 MiB) = 25 MiB at 1 GiB. V7 not met: the 1 GiB heap is deliberately tightened (`cassandra-env.sh` would resolve ½ RAM, ≈ 7.8 GiB, on apt149). Status therefore `reproduced-OOM · diagnostic`; filed in `candidates/`.
+> Next step toward verified: the same mechanism with default constraints at a budget argued acceptable.
 
 ## Summary
 

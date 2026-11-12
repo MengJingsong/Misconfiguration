@@ -9,7 +9,12 @@ direct-memory budget (`-XX:MaxDirectMemorySize=560m`). **Source:** Cassandra 5.0
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
-| L = 8 MiB, n = 8, 560 MiB direct budget, `-Xmx3072M`, hints to a down replica then 4 MB local writes (8 client threads) | **`verified-OOM · diagnostic`** (3/3 on apt140; run 8 1/1 on pc41) |
+| L = 8 MiB, n = 8, 560 MiB direct budget, `-Xmx3072M`, hints to a down replica then 4 MB local writes (8 client threads) | **`reproduced-OOM · diagnostic`** (3/3 on apt140; run 8 1/1 on pc41) |
+
+> **Status amended 2026-11-11 (protocol *Defaults and acceptable budget*).** V1–V5 are met, so the
+> result is reproduced and attributed, but *verified* now also needs V6 (constraints at defaults) and
+> V7 (an acceptable budget). V6 not met: `dob_max_recycle_bytes` 8 MiB (default 1 MiB) and `MAX_HINT_BUFFERS` 8 (default 3). V7 not met: the 560 MiB `MaxDirectMemorySize` is deliberately tightened (`cassandra-env.sh` resolves ¼ RAM, 3982 MiB on apt140). Status therefore `reproduced-OOM · diagnostic`; filed in `candidates/`.
+> Next step toward verified: the same mechanism with default constraints at a budget argued acceptable.
 
 ## Summary
 

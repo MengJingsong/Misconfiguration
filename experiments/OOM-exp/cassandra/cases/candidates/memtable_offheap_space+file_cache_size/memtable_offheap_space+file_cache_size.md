@@ -7,7 +7,12 @@ per-run records, the recheck design and its amendments in [`history.md`](history
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
-| 3500 MiB cgroup (`MemorySwapMax=0`), `-Xmx768M`, `memtable_offheap_space` = `file_cache_size` = 1200 MiB, `offheap_objects`, `memtable_cleanup_threshold` 0.99; chunk cache filled by a read pass, then a 64-thread write burst | **`verified-OOM · diagnostic`** |
+| 3500 MiB cgroup (`MemorySwapMax=0`), `-Xmx768M`, `memtable_offheap_space` = `file_cache_size` = 1200 MiB, `offheap_objects`, `memtable_cleanup_threshold` 0.99; chunk cache filled by a read pass, then a 64-thread write burst | **`reproduced-OOM · diagnostic`** |
+
+> **Status amended 2026-11-11 (protocol *Defaults and acceptable budget*).** V1–V5 are met, so the
+> result is reproduced and attributed, but *verified* now also needs V6 (constraints at defaults) and
+> V7 (an acceptable budget). V6 not met: `memtable_offheap_space` 1200 MiB and `file_cache_size` 1200 MiB, against defaults of ¼ heap = 192 MiB and min(512 MiB, ¼ heap) = 192 MiB at `-Xmx768M` (the chunk cache is also off by default). V7 not met: the 3500 MiB cgroup and 768 MiB heap are deliberately tightened. Status therefore `reproduced-OOM · diagnostic`; filed in `candidates/`.
+> Next step toward verified: the same mechanism with default constraints at a budget argued acceptable.
 
 ## Summary
 
@@ -172,7 +177,7 @@ its cap and flushed 8 times as in `M_alone`, and the read pass completed all 800
 | V4 | intervention ×3 | `int_F300-1..3`: 0/3 kills, burst throughput equal to `M_alone` | yes |
 | V5 | initiating failure | three `dmesg` OOM blocks (`recheck-2026-11-11/logs/converge-*/dmesg-block.txt`) with per-pool poller rows ≤ 2 s and NMT ≤ 5 s before | yes |
 
-**Status: `verified-OOM · diagnostic`** (convergence · standing-pool). Diagnostic because of the tightened
+**Status: `reproduced-OOM · diagnostic`** (convergence · standing-pool). Diagnostic because of the tightened
 3500 MiB cgroup with `-Xmx768M` and the supporting `memtable_cleanup_threshold: 0.99`.
 
 **Mechanism.** Two independently correct caps. The chunk-cache pool stops at its threshold and the memtable's

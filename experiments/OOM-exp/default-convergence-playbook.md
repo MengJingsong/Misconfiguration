@@ -85,7 +85,7 @@ must be labeled separately.
 
 Write the case under the status-first folder that matches its outcome
 (`<system>/cases/convergence/` for a `verified-OOM` or `verified-gap`,
-`<system>/cases/candidates/` until it meets the protocol's promotion rule V1–V5,
+`<system>/cases/candidates/` until it meets the protocol's promotion rule V1–V7 (V1–V5 only: `reproduced-*`),
 `<system>/cases/negatives/` for a verified no-OOM; see the protocol's
 *Verification status*),
 labeling the capacity regime **default** in the case header and `_INDEX.md`
