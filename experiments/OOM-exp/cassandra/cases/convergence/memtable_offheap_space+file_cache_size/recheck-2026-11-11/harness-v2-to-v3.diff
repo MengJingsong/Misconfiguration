@@ -1,0 +1,11 @@
+--- oom-run.v2.sh	2026-11-11 17:38:39.314481569 -0500
++++ oom-run.sh	2026-11-11 17:38:39.318481697 -0500
+@@ -73,7 +73,7 @@
+ stress() { "$C/tools/bin/cassandra-stress" "$@"; }
+ nmt() { local tag=$1; [ "$NMT" = off ] && return 0; jcmd "$PID" VM.native_memory summary scale=MB > "$D/nmt-$tag.txt" 2>&1 || true
+   note "nmt $tag: $(grep -E '^Total:|^-  *(Java Heap|Class|Thread|Code|GC|Internal|Other|Native Memory Tracking|Symbol|Arena Chunk) ' "$D/nmt-$tag.txt" | sed -E 's/\(reserved=[0-9]+MB, //; s/^- +//; s/ +/ /g' | tr '\n' '|')"; }
+-start_poller() { java -cp "$R/tools" PoolPoller "$PID" "$(cgdir)" "$POLL_MS" "$D/pools.csv" > "$D/poller.err" 2>&1 & POLLER_PID=$!; log "poller pid $POLLER_PID every ${POLL_MS} ms"; }
++start_poller() { [ "$POLL_MS" = 0 ] && { log "poller off"; return 0; }; java -cp "$R/tools" PoolPoller "$PID" "$(cgdir)" "$POLL_MS" "$D/pools.csv" > "$D/poller.err" 2>&1 & POLLER_PID=$!; log "poller pid $POLLER_PID every ${POLL_MS} ms"; }
+ nmt_loop() { local i=0; while daemon_up; do i=$((i+1)); { echo "epoch_ms $(date +%s%3N) $(grep RssAnon /proc/$PID/status 2>/dev/null)"; jcmd "$PID" VM.native_memory summary scale=MB; } > "$D/nmt-burst-$(printf %03d $i).txt" 2>&1 || true; sleep 5; done; }
+ monitor() { # sample every 5 s while pid $1 runs (max $2 samples); prefix $3
+   local p=$1 max=$2 pre=$3 i=0

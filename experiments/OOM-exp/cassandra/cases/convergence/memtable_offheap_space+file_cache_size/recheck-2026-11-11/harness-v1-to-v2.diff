@@ -1,0 +1,36 @@
+--- oom-run.v1.sh	2026-11-11 15:03:06.309111138 -0500
++++ oom-run.v2.sh	2026-11-11 17:38:39.314481569 -0500
+@@ -22,12 +22,12 @@
+ fail() { log "FAIL: $*"; exit 1; }
+ check(){ local d=$1; shift; if "$@"; then log "CHECK PASS: $d"; else fail "CHECK FAILED: $d"; fi; }
+ wait_for() { local d=$1 t=$2 i=0; shift 2; until "$@"; do sleep 1; i=$((i+1)); [ "$i" -ge "$t" ] && fail "timeout ${t}s: $d"; done; log "ok: $d (${i}s)"; }
+-daemon_up() { pgrep -f '[o]rg.apache.cassandra.service.CassandraDaemon' >/dev/null; }
++daemon_up() { pgrep -f '^(/usr/bin/)?java .*org[.]apache[.]cassandra[.]service[.]CassandraDaemon' >/dev/null; }
+ cleanup() { local rc=$?; trap - EXIT ERR
+   [ -n "$NMTLOOP_PID" ] && kill "$NMTLOOP_PID" 2>/dev/null || true; [ -n "$POLLER_PID" ] && kill "$POLLER_PID" 2>/dev/null || true
+-  pkill -f '[o]rg.apache.cassandra.stress.Stress' 2>/dev/null || true
++  pkill -f '^(/usr/bin/)?java .*org[.]apache[.]cassandra[.]stress[.]Stress' 2>/dev/null || true
+   if daemon_up; then (cd "$C" && bin/nodetool stopdaemon) >/dev/null 2>&1 || true; for _ in $(seq 60); do daemon_up || break; sleep 1; done; fi
+-  daemon_up && kill -9 $(pgrep -f '[o]rg.apache.cassandra.service.CassandraDaemon') 2>/dev/null || true
++  daemon_up && kill -9 $(pgrep -f '^(/usr/bin/)?java .*org[.]apache[.]cassandra[.]service[.]CassandraDaemon') 2>/dev/null || true
+   [ -n "$UNIT" ] && systemctl --user stop "$UNIT" >/dev/null 2>&1 || true; exit "$rc"; }
+ trap 'log "ERR line $LINENO: $BASH_COMMAND"' ERR; trap cleanup EXIT
+ start_log() { mkdir -p "$L"; [ -e "$D" ] && mv "$D" "$D.attempt-$(date +%s)"; mkdir -p "$D"; S=$D/summary.txt
+@@ -55,7 +55,7 @@
+     grep -qx "$k" "$Y" || fail "yaml edit missing: $k"; done
+   note "yaml: M=${M}MiB F=${F}MiB heap_space=${HEAPMEM}MiB offheap_objects cleanup=0.99 chunk cache on"; }
+ start_node() { local budget=$1; cd "$C"
+-  check "no daemon" bash -c '! pgrep -f "[o]rg.apache.cassandra.service.CassandraDaemon" >/dev/null'
++  check "no daemon" bash -c '! pgrep -f "^(/usr/bin/)?java .*org[.]apache[.]cassandra[.]service[.]CassandraDaemon" >/dev/null'
+   check "ports free" bash -c '! ss -ltn | grep -q -E ":(7000|7199|9042)\b"'
+   rm -rf "$C"/data/*; [ -n "$(ls -A logs 2>/dev/null)" ] && { mkdir -p "$D/prev-logs"; mv logs/* "$D/prev-logs/"; }; mkdir -p logs
+   export MAX_HEAP_SIZE=$XMX; unset HEAP_NEWSIZE || true; [ "$NMT" != off ] && export JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=$NMT"
+@@ -64,7 +64,7 @@
+   local SP=$!
+   ready() { daemon_up || { kill -0 $SP 2>/dev/null || fail "node died at startup"; return 1; }; grep -q 'Starting listening for CQL clients' "$SYSLOG" 2>/dev/null; }
+   wait_for "CQL up" 300 ready; unset MAX_HEAP_SIZE JVM_EXTRA_OPTS
+-  PID=$(pgrep -f '[o]rg.apache.cassandra.service.CassandraDaemon' | head -1)
++  PID=$(pgrep -f '^(/usr/bin/)?java .*org[.]apache[.]cassandra[.]service[.]CassandraDaemon' | head -1)
+   ps -o args= -p "$PID" | tr ' ' '\n' > "$D/jvm-args.txt"; check "-Xmx$XMX" grep -qx -- "-Xmx$XMX" "$D/jvm-args.txt"
+   grep -E 'off-heap threshold|ChunkCache|chunk cache|Global memtable' "$SYSLOG" | head -5 > "$D/startup-lines.txt" || true
+   note "node pid $PID unit $UNIT budget ${budget}MiB; startup: $(tr '\n' '|' < "$D/startup-lines.txt")"; sleep 5; }

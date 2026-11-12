@@ -1,0 +1,32 @@
+yaml diff: -counter_cache_size:|+counter_cache_size: 300MiB|-# memtable_heap_space: 2048MiB|+memtable_heap_space: 32MiB|-# memtable_cleanup_threshold: 0.11|+memtable_cleanup_threshold: 0.99|-memtable_allocation_type: heap_buffers|+memtable_allocation_type: unslabbed_heap_buffers|
+node pid 48955
+== arm C_alone_r2: M=32MiB C=300MiB workload=counter -Xmx=1024M
+heap idle:  garbage-first heap   total 1048576K, used 56839K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 54632K, capacity 57506K, committed 57648K, reserved 1099776K 
+workloads launched at 2026-11-11 13:09:54
+sample 1 t=1794427800232:  garbage-first heap   total 1048576K, used 138759K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 7 young (114688K), 0 survivors (0K) 
+sample 2 t=1794427806297:  garbage-first heap   total 1048576K, used 450055K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 26 young (425984K), 0 survivors (0K) 
+sample 3 t=1794427811826:  garbage-first heap   total 1048576K, used 437481K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 23 young (376832K), 3 survivors (49152K) 
+sample 4 t=1794427817305:  garbage-first heap   total 1048576K, used 646069K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 31 young (507904K), 4 survivors (65536K) 
+sample 5 t=1794427822664:  garbage-first heap   total 1048576K, used 456005K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 5 young (81920K), 3 survivors (49152K) 
+sample 6 t=1794427828042:  garbage-first heap   total 1048576K, used 567918K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 11 young (180224K), 2 survivors (32768K) 
+K sample 6: Counter Cache : entries 1426205, size 163.22 MiB, capacity 300 MiB, 0 hits, 1426205 requests, 0.000 recent hit rate, 7200 save period in seconds
+sample 7 t=1794427835755:  garbage-first heap   total 1048576K, used 740832K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 18 young (294912K), 0 survivors (0K) 
+sample 8 t=1794427841660:  garbage-first heap   total 1048576K, used 491575K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 9 t=1794427847000:  garbage-first heap   total 1048576K, used 616264K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 3 young (49152K), 0 survivors (0K) 
+sample 10 t=1794427852299:  garbage-first heap   total 1048576K, used 606408K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 11 t=1794427857552:  garbage-first heap   total 1048576K, used 868598K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 14 young (229376K), 0 survivors (0K) 
+sample 12 t=1794427862838:  garbage-first heap   total 1048576K, used 932114K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 17 young (278528K), 0 survivors (0K) 
+K sample 12: Counter Cache : entries 2621440, size 300 MiB, capacity 300 MiB, 0 hits, 2788419 requests, 0.000 recent hit rate, 7200 save period in seconds
+sample 13 t=1794427871460:  garbage-first heap   total 1048576K, used 878182K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 14 young (229376K), 0 survivors (0K) 
+sample 14 t=1794427876719:  garbage-first heap   total 1048576K, used 810356K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 11 young (180224K), 0 survivors (0K) 
+both requested workloads finished after sample 14
+workloads done at 2026-11-11 13:11:16 (82 s); stress rc write=- counter=0
+K end: Heap Memory (MB) : 791.36 / 1024.00|Off Heap Memory (MB) : 0.82|Counter Cache : entries 2621440, size 300 MiB, capacity 300 MiB, 0 hits, 3000000 requests, 0.000 recent hit rate, 7200 save period in seconds|
+heap final:  garbage-first heap   total 1048576K, used 643209K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 58403K, capacity 60692K, committed 63280K, reserved 1103872K 
+memtable K (flush lines, max on-heap): 31.697MiB (99%) on-heap
+JVM-level OOM report (stdout): CompileCommand: exclude org/apache/cassandra/utils/JVMStabilityInspector.forceHeapSpaceOomMaybe(Ljava/lang/OutOfMemoryError;)V|
+heap dumps: 
+ERROR lines in system.log: 0
+OutOfMemoryError mentions: 3
+dmesg OOM-kill lines: 0
+node alive at end

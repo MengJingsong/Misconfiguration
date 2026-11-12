@@ -1,0 +1,119 @@
+--- oom-run.sh.orig	2026-11-11 14:44:03.648593091 -0500
++++ oom-run.sh	2026-11-11 14:45:22.359108389 -0500
+@@ -8,8 +8,14 @@
+ # Logs every command to ~/oom-exp-logs/<name>/session.log; readings to <name>/summary.txt.
+ set -Eeuo pipefail
+ 
+-C=$HOME/cassandra-run1
+-L=$HOME/oom-exp-logs
++# R3 recheck (2026-11-11): build copy and logs on apt149 local /mydata
++R=/mydata/oom-recheck/R3
++C=$R/cassandra
++L=$R/logs
++# pinned workload sizes (filed values); overridable only for the modest-load validation arm
++WRITE_N=${WRITE_N:-3000000}
++COUNTER_N=${COUNTER_N:-600000}
++NSAMPLES=${NSAMPLES:-480}
+ XMX=${XMX:-1024M}
+ SYSLOG=$C/logs/system.log
+ D=""; S=""; PID=""
+@@ -44,8 +50,9 @@
+   log "script: $0 $*"; log "host: $(hostname)"; }
+ 
+ heap_sample() { local tag=$1
+-  runto "$D/gc-run-$tag.txt" jcmd "$PID" GC.run
+-  runto "$D/heap-$tag.txt" jcmd "$PID" GC.heap_info
++  daemon_up || { note "heap $tag: skipped, daemon gone"; return 0; }
++  runto "$D/gc-run-$tag.txt" jcmd "$PID" GC.run || true
++  runto "$D/heap-$tag.txt" jcmd "$PID" GC.heap_info || true
+   local u; u=$(grep -oE 'region size [0-9]+K, [0-9]+ used' "$D/heap-$tag.txt" | head -1 || true)
+   note "heap $tag: $(grep -E '^ *garbage-first heap' -A2 "$D/heap-$tag.txt" | tr '\n' ' ')"
+ }
+@@ -69,7 +76,8 @@
+   rm -rf "$C"/data/* "$C/cassandra.pid"
+   if [ -d logs ] && [ -n "$(ls -A logs)" ]; then mkdir -p "$D/prev-logs"; mv logs/* "$D/prev-logs/" 2>/dev/null || true; fi
+   mkdir -p logs
+-  export MAX_HEAP_SIZE=$XMX; unset HEAP_NEWSIZE || true
++  export MAX_HEAP_SIZE=$XMX; unset HEAP_NEWSIZE JVM_OPTS JVM_EXTRA_OPTS LOCAL_JMX || true
++  export CASSANDRA_HEAPDUMP_DIR=$R/dumps/$(basename "$D"); mkdir -p "$CASSANDRA_HEAPDUMP_DIR"
+   log "+ bin/cassandra -p cassandra.pid > $D/stdout.txt 2>&1"
+   bin/cassandra -p cassandra.pid > "$D/stdout.txt" 2>&1
+   node_ready() { [ -s cassandra.pid ] || return 1
+@@ -79,6 +87,8 @@
+   unset MAX_HEAP_SIZE
+   PID=$(cat cassandra.pid); note "node pid $PID"
+   ps -o args= -p "$PID" | tr ' ' '\n' > "$D/jvm-args.txt"
++  jcmd "$PID" VM.flags -all 2>/dev/null | grep -E ' (ParallelGCThreads|ConcGCThreads|G1HeapRegionSize|NewSize|MaxNewSize|G1NewSizePercent|G1MaxNewSizePercent|InitiatingHeapOccupancyPercent|MaxGCPauseMillis|MaxTenuringThreshold|HeapDumpOnOutOfMemoryError|HeapDumpPath|OnOutOfMemoryError|ExitOnOutOfMemoryError|CrashOnOutOfMemoryError|MaxHeapSize|InitialHeapSize|MaxDirectMemorySize|UseG1GC|UseNUMA|AlwaysPreTouch) ' > "$D/vm-flags.txt" || true
++  java -version > "$D/java-version.txt" 2>&1 || true
+   check "JVM has -Xmx$XMX" grep -qx -- "-Xmx$XMX" "$D/jvm-args.txt"
+   grep -E 'memtable_heap_space|Global memtable|counter cache|Initializing counter cache' "$SYSLOG" | head -10 >> "$D/startup-lines.txt" || true
+   note "startup lines: $(cat "$D/startup-lines.txt" | tr '\n' '|')"
+@@ -129,25 +139,28 @@
+   local WRITE_PID="" CNT_PID=""
+   if [ "$WL" = "write" ] || [ "$WL" = "both" ]; then
+     log "+ cassandra-stress write (background)"
+-    tools/bin/cassandra-stress write n=3000000 no-warmup -col 'size=FIXED(1024)' -rate threads=256 > "$D/stress-write.txt" 2>&1 &
++    tools/bin/cassandra-stress write n=$WRITE_N no-warmup -col 'size=FIXED(1024)' -rate threads=256 > "$D/stress-write.txt" 2>&1 &
+     WRITE_PID=$!
+   fi
+   if [ "$WL" = "counter" ] || [ "$WL" = "both" ]; then
+     log "+ cassandra-stress counter_write (background)"
+-    tools/bin/cassandra-stress counter_write n=600000 no-warmup -rate threads=64 > "$D/stress-counter.txt" 2>&1 &
++    tools/bin/cassandra-stress counter_write n=$COUNTER_N no-warmup -rate threads=64 > "$D/stress-counter.txt" 2>&1 &
+     CNT_PID=$!
+   fi
+ 
+   # sample heap periodically while workload(s) run
+   local i=0 oomed=0
+-  for i in $(seq 1 60); do
++  local T0; T0=$(date +%s); note "workloads launched at $(date '+%F %T')"
++  for i in $(seq 1 "$NSAMPLES"); do
+     sleep 5
+     if daemon_up; then
+       jcmd "$PID" GC.heap_info > "$D/heap-sample-$i.txt" 2>&1 || true
+       note "sample $i t=$(now): $(grep -E 'garbage-first heap' -A1 "$D/heap-sample-$i.txt" | tr '\n' ' ')"
++      if [ $((i % 6)) -eq 0 ]; then note "K sample $i: $(timeout 60 bin/nodetool info 2>/dev/null | grep -i 'counter cache' | tr -s ' ')"; fi
+     else
+-      note "sample $i: node process is GONE (possible OOM-kill or crash)"
++      note "sample $i: node process is GONE (possible OOM-kill or crash) at $(date '+%F %T')"
+       oomed=1
++      sleep 20; pkill -f '[o]rg.apache.cassandra.stress.Stress' 2>/dev/null || true
+       break
+     fi
+     # stop once both requested workloads have exited
+@@ -156,20 +169,31 @@
+     [ -n "$CNT_PID" ] && kill -0 "$CNT_PID" 2>/dev/null && wdone=0
+     [ "$wdone" = 1 ] && { note "both requested workloads finished after sample $i"; break; }
+   done
+-  [ -n "$WRITE_PID" ] && wait "$WRITE_PID" 2>/dev/null || true
+-  [ -n "$CNT_PID" ] && wait "$CNT_PID" 2>/dev/null || true
++  # per-arm cap (R3): stress still running after NSAMPLES*5 s -> stop it, arm recorded as timed out
++  if pgrep -f '[o]rg.apache.cassandra.stress.Stress' >/dev/null; then note "ARM TIMEOUT: stress still running after $NSAMPLES samples; stopping stress"; pkill -f '[o]rg.apache.cassandra.stress.Stress' || true; fi
++  local wrc=- crc=-
++  if [ -n "$WRITE_PID" ]; then wrc=0; wait "$WRITE_PID" 2>/dev/null || wrc=$?; fi
++  if [ -n "$CNT_PID" ]; then crc=0; wait "$CNT_PID" 2>/dev/null || crc=$?; fi
++  note "workloads done at $(date '+%F %T') ($(( $(date +%s) - T0 )) s); stress rc write=$wrc counter=$crc"
++  if daemon_up; then note "K end: $(timeout 120 bin/nodetool info 2>/dev/null | grep -iE 'counter cache|heap memory' | tr -s ' ' | tr '\n' '|')"; fi
+ 
+   heap_sample final
++  if daemon_up; then runto "$D/class-histo-final.txt" jcmd "$PID" GC.class_histogram || true; fi
++  grep -E 'Enqueuing flush of' "$SYSLOG" > "$D/flush-lines.txt" 2>/dev/null || true
++  note "memtable K (flush lines, max on-heap): $(grep -oE '[0-9.]+[KMG]iB \([0-9]+%\) on-heap' "$D/flush-lines.txt" | sort -t'(' -k2 -n | tail -1)"
+   grep -c '^ERROR' "$SYSLOG" > "$D/error-count.txt" 2>&1 || echo 0 > "$D/error-count.txt"
+   grep '^ERROR' "$SYSLOG" > "$D/error-lines.txt" 2>&1 || true
+-  grep -i 'OutOfMemoryError' "$SYSLOG" "$D"/stress-*.txt 2>/dev/null > "$D/oom-grep.txt" || true
++  grep -i 'OutOfMemoryError' "$SYSLOG" "$D/stdout.txt" "$D"/stress-*.txt 2>/dev/null > "$D/oom-grep.txt" || true
++  note "JVM-level OOM report (stdout): $(grep -E 'java.lang.OutOfMemoryError|Dumping heap|Heap dump file created' "$D/stdout.txt" | tr '\n' '|')"
++  note "heap dumps: $(ls -la "$R/dumps/$(basename "$D")" 2>/dev/null | grep hprof | awk '{print $5, $9}' | tr '\n' '|')"
+   note "ERROR lines in system.log: $(cat "$D/error-count.txt")"
+   note "OutOfMemoryError mentions: $(wc -l < "$D/oom-grep.txt" 2>/dev/null || echo 0)"
+-  dmesg | grep -i 'out of memory\|oom-kill\|killed process' > "$D/dmesg-oom.txt" 2>&1 || true
++  sudo dmesg | grep -i 'out of memory\|oom-kill\|killed process' > "$D/dmesg-oom.txt" 2>&1 || true
+   note "dmesg OOM-kill lines: $(wc -l < "$D/dmesg-oom.txt")"
+   if daemon_up; then note "node alive at end"; else note "node process is GONE at end"; fi
+ 
+   if daemon_up; then stop_node; else note "skip stop_node: daemon already gone"; fi
++  mkdir -p "$D/node-logs"; cp -a "$C"/logs/. "$D/node-logs/" 2>/dev/null || true
+   log "ARM $name DONE (oomed-during-sampling=$oomed)"
+ }
+ 

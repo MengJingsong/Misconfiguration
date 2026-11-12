@@ -1,0 +1,190 @@
+== class histogram (top 30 by shallow bytes; header estimate 16 B) ==
+total objects 4770839, shallow 795.5 MiB
+ rank        count          bytes  class
+    1       103331      580863548  byte[]
+    2       619419       40941640  [Ljava.lang.Object;
+    3       597303       32851665  java.nio.HeapByteBuffer
+    4         4687       19921484  int[]
+    5       298194       16698864  org.apache.cassandra.db.rows.BufferCell
+    6       298105       16693880  org.apache.cassandra.db.partitions.BTreePartitionData
+    7       298087       16692872  org.apache.cassandra.db.rows.BTreeRow
+    8       298096       15500992  org.apache.cassandra.db.partitions.AtomicBTreePartition
+    9         7041       14357352  long[]
+   10       298313       11932520  java.util.concurrent.ConcurrentSkipListMap$Node
+   11       298187       10734732  org.apache.cassandra.db.rows.EncodingStats
+   12       298144        9540608  org.apache.cassandra.db.BufferDecoratedKey
+   13       298221        7157304  org.apache.cassandra.dht.Murmur3Partitioner$LongToken
+   14       149456        5978240  java.util.concurrent.ConcurrentSkipListMap$Index
+   15       178495        5711840  java.util.concurrent.ConcurrentLinkedQueue$Node
+   16       178860        3577200  java.lang.Integer
+   17        99560        2887240  java.lang.String
+   18        37227        1637988  java.util.concurrent.ConcurrentHashMap$Node
+   19        48310        1352680  javax.management.ObjectName$Property
+   20        29594        1302136  java.util.HashMap$Node
+   21        25397        1179312  [Ljavax.management.ObjectName$Property;
+   22         2372         733152  [Ljava.util.HashMap$Node;
+   23          426         684896  [Ljava.util.concurrent.ConcurrentHashMap$Node;
+   24        12699         660348  javax.management.ObjectName
+   25        10240         573440  io.netty.util.internal.shaded.org.jctools.queues.unpadded.MpscUnpaddedArrayQueue
+   26        14259         513324  java.util.concurrent.atomic.LongAdder
+   27        12651         506040  com.sun.jmx.mbeanserver.StandardMBeanSupport
+   28         2891         422086  java.lang.reflect.Method
+   29        12693         406176  com.sun.jmx.mbeanserver.NamedObject
+   30         9984         399360  io.netty.buffer.PoolThreadCache$SubPageMemoryRegionCache
+-- selected rows --
+   90          538          42502  java.nio.DirectByteBuffer
+  321          114           4560  org.apache.cassandra.io.util.DataOutputBuffer$1$1
+  433          121           2904  org.apache.cassandra.io.util.DataOutputBuffer$GrowingChannel
+ 1061            8            384  org.apache.cassandra.hints.HintsBuffer
+ 2308            2             56  org.apache.cassandra.io.util.DataOutputBuffer$AllocationType
+ 3149            1             32  org.apache.cassandra.io.util.DataOutputBufferFixed
+ 3599            1             20  org.apache.cassandra.io.util.DataOutputBuffer$1
+
+== java.nio.DirectByteBuffer ==
+instances 538; memory owners charged to Bits (cleaner!=null, att==null, fd==null) 263, capacity sum 586701866 B = 559.5 MiB; views 267 (capacity sum 348.4 MiB, not memory)
+file mappings (MappedByteBuffer, fd!=null; not charged to MaxDirectMemorySize): 8, capacity sum 256.0 MiB
+
+== direct memory owners by holder (capacity) ==
+ count          bytes       MiB  holder
+   114      296154919     282.4  DataOutputBuffer$1$1.buffer (DOB thread-local scratch)
+     7      234881024     224.0  HintsBuffer.slab (hints pool slab)
+     1       33554432      32.0  HintsBuffer.slab (hints pool slab) + org.apache.cassandra.hints.HintsBuffer$1 HintsBuffer$1.flyweight
+     2       16785408      16.0  org.apache.cassandra.utils.memory.BufferPool$Chunk BufferPool$Chunk.slab
+    65        3194880       3.0  io.netty.channel.epoll.EpollEventArray EpollEventArray.memory
+     4        1048576       1.0  org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$Block ThreadLocalReadAheadBuffer$Block.buffer
+    22         360448       0.3  io.netty.buffer.UnpooledUnsafeDirectByteBuf UnpooledDirectByteBuf.buffer
+     7         282658       0.3  [Ljava.nio.ByteBuffer;(array) []
+     1         262144       0.2  org.apache.cassandra.hints.HintsWriteExecutor HintsWriteExecutor.writeBuffer + org.apache.cassandra.hints.HintsWriter$Session HintsWriter$Session.buffer
+    32          78821       0.1  [Ljava.lang.Object;(array) []
+     3          49404       0.0  org.apache.cassandra.io.compress.CompressedSequentialWriter CompressedSequentialWriter.compressed
+     3          49152       0.0  org.apache.cassandra.io.compress.CompressedSequentialWriter BufferedDataOutputStreamPlus.buffer
+     2              0       0.0  (no strong referrer: dropped, awaiting Cleaner)
+
+-- DOB scratch buffers by thread (capacity) --
+  large (>= 1 MiB) scratch buffers by state:
+    idle (position 0)        capacity   4000050 B x   2 =    7.6 MiB  threads: {'MutationStage': 1, 'Native-Transport-Requests': 1}
+    idle (position 0)        capacity   8000100 B x  36 =  274.7 MiB  threads: {'Native-Transport-Requests': 21, 'MutationStage': 15}
+  CompactionExecutor:3                     1031
+  CompactionExecutor:4                     1031
+  GossipStage:1                            128
+  HintsWriteExecutor:1                     128
+  Messaging-EventLoop-3-5                  4096
+  MigrationStage:1                         8192
+  MutationStage-1                          2048
+  MutationStage-101                        2144
+  MutationStage-15                         8000100
+  MutationStage-18                         8000100
+  MutationStage-20                         2144
+  MutationStage-21                         8000100
+  MutationStage-23                         2144
+  MutationStage-24                         1073
+  MutationStage-26                         4000050
+  MutationStage-27                         8000100
+  MutationStage-29                         2144
+  MutationStage-30                         2144
+  MutationStage-33                         8000100
+  MutationStage-35                         8000100
+  MutationStage-36                         2144
+  MutationStage-4                          8000100
+  MutationStage-40                         2144
+  MutationStage-43                         8000100
+  MutationStage-44                         8000100
+  MutationStage-46                         8000100
+  MutationStage-47                         8000100
+  MutationStage-51                         2144
+  MutationStage-52                         8000100
+  MutationStage-53                         2144
+  MutationStage-54                         2144
+  MutationStage-59                         2144
+  MutationStage-60                         2144
+  MutationStage-62                         2144
+  MutationStage-64                         2144
+  MutationStage-66                         8000100
+  MutationStage-67                         8000100
+  MutationStage-68                         2144
+  MutationStage-69                         2144
+  MutationStage-73                         2144
+  MutationStage-75                         1073
+  MutationStage-77                         1073
+  MutationStage-79                         2144
+  MutationStage-8                          2144
+  MutationStage-81                         8000100
+  MutationStage-87                         2144
+  MutationStage-89                         2144
+  MutationStage-90                         2144
+  MutationStage-92                         2144
+  MutationStage-94                         2144
+  MutationStage-96                         2144
+  MutationStage-97                         2144
+  MutationStage-98                         2144
+  MutationStage-99                         2144
+  Native-Transport-Requests-10             8000100
+  Native-Transport-Requests-100            2144
+  Native-Transport-Requests-102            2144
+  Native-Transport-Requests-103            2144
+  Native-Transport-Requests-104            2144
+  Native-Transport-Requests-11             8000100
+  Native-Transport-Requests-12             8000100
+  Native-Transport-Requests-13             2144
+  Native-Transport-Requests-14             8000100
+  Native-Transport-Requests-16             8000100
+  Native-Transport-Requests-17             8000100
+  Native-Transport-Requests-19             8000100
+  Native-Transport-Requests-2              8000100
+  Native-Transport-Requests-22             2144
+  Native-Transport-Requests-25             4000050
+  Native-Transport-Requests-28             2144
+  Native-Transport-Requests-3              8000100
+  Native-Transport-Requests-31             8000100
+  Native-Transport-Requests-32             8000100
+  Native-Transport-Requests-34             2144
+  Native-Transport-Requests-37             8000100
+  Native-Transport-Requests-38             8000100
+  Native-Transport-Requests-39             2144
+  Native-Transport-Requests-41             2144
+  Native-Transport-Requests-42             8000100
+  Native-Transport-Requests-45             2144
+  Native-Transport-Requests-48             2144
+  Native-Transport-Requests-49             1073
+  Native-Transport-Requests-5              2144
+  Native-Transport-Requests-50             8000100
+  Native-Transport-Requests-55             2144
+  Native-Transport-Requests-56             2144
+  Native-Transport-Requests-57             2144
+  Native-Transport-Requests-58             8000100
+  Native-Transport-Requests-6              8000100
+  Native-Transport-Requests-61             2144
+  Native-Transport-Requests-63             1073
+  Native-Transport-Requests-65             2144
+  Native-Transport-Requests-7              8000100
+  Native-Transport-Requests-70             2144
+  Native-Transport-Requests-71             8000100
+  Native-Transport-Requests-72             1073
+  Native-Transport-Requests-74             8000100
+  Native-Transport-Requests-76             8000100
+  Native-Transport-Requests-78             1073
+  Native-Transport-Requests-80             2144
+  Native-Transport-Requests-82             2144
+  Native-Transport-Requests-83             2144
+  Native-Transport-Requests-84             2144
+  Native-Transport-Requests-85             2144
+  Native-Transport-Requests-86             2144
+  Native-Transport-Requests-88             2144
+  Native-Transport-Requests-9              2144
+  Native-Transport-Requests-91             2144
+  Native-Transport-Requests-93             2144
+  Native-Transport-Requests-95             2144
+  NonPeriodicTasks:1                       128
+  OptionalTasks:1                          512
+  PerDiskMemtableFlushWriter_0:3           1031
+  PerDiskMemtableFlushWriter_0:4           1031
+  capacity distribution: 128 B x 3, 512 B x 1, 1031 B x 4, 1073 B x 7, 2048 B x 1, 2144 B x 58, 4096 B x 1, 8192 B x 1, 4000050 B x 2, 8000100 B x 36
+  threads by pool: {'PerDiskMemtableFlushWriter_0:3': 1, 'CompactionExecutor:4': 1, 'CompactionExecutor:3': 1, 'GossipStage:1': 1, 'MigrationStage:1': 1, 'PerDiskMemtableFlushWriter_0:4': 1, 'MutationStage': 48, 'Native-Transport-Requests': 56, 'HintsWriteExecutor:1': 1, 'OptionalTasks:1': 1, 'Messaging-EventLoop-3': 1, 'NonPeriodicTasks:1': 1}
+
+-- hints slabs --
+  7 slabs, capacities [33554432]
+
+-- hints slabs --
+  1 slabs, capacities [33554432]
+
+-- unreferenced owners, largest capacities: 0 B x 2

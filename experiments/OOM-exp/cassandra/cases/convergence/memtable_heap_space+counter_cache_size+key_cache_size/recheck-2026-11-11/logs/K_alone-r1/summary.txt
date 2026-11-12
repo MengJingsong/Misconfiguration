@@ -1,0 +1,34 @@
+yaml diff: -key_cache_size:|+key_cache_size: 200MiB|-counter_cache_size:|+counter_cache_size: 1MiB|-# memtable_heap_space: 2048MiB|+memtable_heap_space: 32MiB|-# memtable_cleanup_threshold: 0.11|+memtable_cleanup_threshold: 0.99|-memtable_allocation_type: heap_buffers|+memtable_allocation_type: unslabbed_heap_buffers|
+node pid 47977
+== arm K_alone-r1: M=32MiB C=1MiB K=200MiB workloads=read -Xmx=1024M
+heap idle:  garbage-first heap   total 1048576K, used 56840K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 54752K, capacity 57640K, committed 57904K, reserved 1099776K 
+preload done: 500000 partitions written and flushed to sstable
+heap after-preload:  garbage-first heap   total 1048576K, used 122576K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 4 young (65536K), 0 survivors (0K)  Metaspace       used 60037K, capacity 63217K, committed 63280K, reserved 1103872K 
+workloads launched t=1794427576357
+sample 1 t=1794427582486:  garbage-first heap   total 1048576K, used 337284K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 19 young (311296K), 1 survivors (16384K) 
+sample 2 t=1794427589672:  garbage-first heap   total 1048576K, used 111736K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 2 young (32768K), 1 survivors (16384K) 
+sample 3 t=1794427596030:  garbage-first heap   total 1048576K, used 696682K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 36 young (589824K), 1 survivors (16384K) 
+sample 4 t=1794427602584:  garbage-first heap   total 1048576K, used 241484K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 4 young (65536K), 1 survivors (16384K) 
+sample 5 t=1794427608786:  garbage-first heap   total 1048576K, used 615190K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 27 young (442368K), 1 survivors (16384K) 
+sample 6 t=1794427614810:  garbage-first heap   total 1048576K, used 317879K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 7 young (114688K), 1 survivors (16384K) 
+nodetool-info 6 t=1794427623851: Key Cache : entries 744913, size 62.52 MiB, capacity 200 MiB, 982923 hits, 1543416 requests, 0.638 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 0, size 0 bytes, capacity 1 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+sample 7 t=1794427629949:  garbage-first heap   total 1048576K, used 706616K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 29 young (475136K), 1 survivors (16384K) 
+sample 8 t=1794427636183:  garbage-first heap   total 1048576K, used 287869K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 2 young (32768K), 1 survivors (16384K) 
+sample 9 t=1794427642484:  garbage-first heap   total 1048576K, used 615885K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 22 young (360448K), 1 survivors (16384K) 
+sample 10 t=1794427648720:  garbage-first heap   total 1048576K, used 681745K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 26 young (425984K), 1 survivors (16384K) 
+sample 11 t=1794427654944:  garbage-first heap   total 1048576K, used 796675K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 33 young (540672K), 1 survivors (16384K) 
+sample 12 t=1794427661048:  garbage-first heap   total 1048576K, used 567693K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 19 young (311296K), 1 survivors (16384K) 
+nodetool-info 12 t=1794427669277: Key Cache : entries 801015, size 67.22 MiB, capacity 200 MiB, 3009511 hits, 3608515 requests, 0.834 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 0, size 0 bytes, capacity 1 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+sample 13 t=1794427675369:  garbage-first heap   total 1048576K, used 388383K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 8 young (131072K), 1 survivors (16384K) 
+sample 14 t=1794427680694:  garbage-first heap   total 1048576K, used 617761K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 22 young (360448K), 1 survivors (16384K) 
+sample 15 t=1794427685986:  garbage-first heap   total 1048576K, used 617761K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 22 young (360448K), 1 survivors (16384K) 
+all requested workloads finished after sample 15 t=1794427685993
+heap final:  garbage-first heap   total 1048576K, used 218834K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 60951K, capacity 64146K, committed 64432K, reserved 1105920K 
+nodetool-info final: Key Cache : entries 801015, size 67.22 MiB, capacity 200 MiB, 3494584 hits, 4102674 requests, 0.852 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 0, size 0 bytes, capacity 1 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+stress stress-preload.txt: Op rate : 4,402 op/s [WRITE: 4,402 op/s]|Partition rate : 4,402 pk/s [WRITE: 4,402 pk/s]|Total partitions : 500,000 [WRITE: 500,000]|Total errors : 0 [WRITE: 0]|Total operation time : 00:01:53| last: |END|
+stress stress-read.txt: Op rate : 40,515 op/s [READ: 40,515 op/s]|Partition rate : 40,515 pk/s [READ: 40,515 pk/s]|Total partitions : 4,000,000 [READ: 4,000,000]|Total errors : 0 [READ: 0]|Total operation time : 00:01:38| last: |END|
+ERROR lines in system.log: 0
+OutOfMemoryError mentions: 1
+dmesg OOM-kill lines: 0
+node alive at end
+node-logs: debug.log gc.log system.log 

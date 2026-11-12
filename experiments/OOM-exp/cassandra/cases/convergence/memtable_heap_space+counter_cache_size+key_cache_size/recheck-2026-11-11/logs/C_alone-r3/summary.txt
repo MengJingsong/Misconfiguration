@@ -1,0 +1,30 @@
+yaml diff: -key_cache_size:|+key_cache_size: 1MiB|-counter_cache_size:|+counter_cache_size: 250MiB|-# memtable_heap_space: 2048MiB|+memtable_heap_space: 32MiB|-# memtable_cleanup_threshold: 0.11|+memtable_cleanup_threshold: 0.99|-memtable_allocation_type: heap_buffers|+memtable_allocation_type: unslabbed_heap_buffers|
+node pid 86664
+== arm C_alone-r3: M=32MiB C=250MiB K=1MiB workloads=counter -Xmx=1024M
+heap idle:  garbage-first heap   total 1048576K, used 56842K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 54749K, capacity 57641K, committed 57904K, reserved 1099776K 
+workloads launched t=1794431891341
+sample 1 t=1794431896687:  garbage-first heap   total 1048576K, used 138762K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 7 young (114688K), 0 survivors (0K) 
+sample 2 t=1794431902916:  garbage-first heap   total 1048576K, used 548362K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 32 young (524288K), 0 survivors (0K) 
+sample 3 t=1794431908232:  garbage-first heap   total 1048576K, used 533141K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 29 young (475136K), 3 survivors (49152K) 
+sample 4 t=1794431913598:  garbage-first heap   total 1048576K, used 462962K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 15 young (245760K), 3 survivors (49152K) 
+sample 5 t=1794431918849:  garbage-first heap   total 1048576K, used 581834K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 10 young (163840K), 4 survivors (65536K) 
+sample 6 t=1794431924199:  garbage-first heap   total 1048576K, used 700090K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 18 young (294912K), 2 survivors (32768K) 
+nodetool-info 6 t=1794431926405: Key Cache : entries 14, size 1.14 KiB, capacity 1 MiB, 93 hits, 8303 requests, 0.011 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 1426140, size 163.21 MiB, capacity 250 MiB, 0 hits, 1426140 requests, 0.000 recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+sample 7 t=1794431931713:  garbage-first heap   total 1048576K, used 574605K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 6 young (98304K), 0 survivors (0K) 
+sample 8 t=1794431937058:  garbage-first heap   total 1048576K, used 929698K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 28 young (458752K), 0 survivors (0K) 
+sample 9 t=1794431942582:  garbage-first heap   total 1048576K, used 566144K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 10 t=1794431948214:  garbage-first heap   total 1048576K, used 587865K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 11 t=1794431953769:  garbage-first heap   total 1048576K, used 565533K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 12 t=1794431959107:  garbage-first heap   total 1048576K, used 718701K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 10 young (163840K), 0 survivors (0K) 
+nodetool-info 12 t=1794431961407: Key Cache : entries 18, size 1.48 KiB, capacity 1 MiB, 94 hits, 20382 requests, 0.005 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 2184533, size 250 MiB, capacity 250 MiB, 0 hits, 2850225 requests, 0.000 recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+sample 13 t=1794431966749:  garbage-first heap   total 1048576K, used 565326K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 14 t=1794431972027:  garbage-first heap   total 1048576K, used 876622K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 20 young (327680K), 0 survivors (0K) 
+all requested workloads finished after sample 14 t=1794431972035
+heap final:  garbage-first heap   total 1048576K, used 562030K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 58285K, capacity 60577K, committed 63536K, reserved 1103872K 
+nodetool-info final: Key Cache : entries 22, size 1.83 KiB, capacity 1 MiB, 95 hits, 21826 requests, 0.004 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 2184533, size 250 MiB, capacity 250 MiB, 0 hits, 3000000 requests, 0.000 recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+stress stress-counter.txt: Op rate : 9,066 op/s [COUNTER_WRITE: 9,066 op/s]|Partition rate : 9,066 pk/s [COUNTER_WRITE: 9,066 pk/s]|Total partitions : 600,000 [COUNTER_WRITE: 600,000]|Total errors : 0 [COUNTER_WRITE: 0]|Total operation time : 00:01:06| last: |END|
+ERROR lines in system.log: 0
+OutOfMemoryError mentions: 1
+dmesg OOM-kill lines: 0
+node alive at end
+node-logs: debug.log gc.log system.log 

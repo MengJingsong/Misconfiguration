@@ -1,0 +1,69 @@
+--- oom-run.sh.orig	2026-11-11 14:41:22.047429299 -0500
++++ oom-run.sh	2026-11-11 14:41:40.076005344 -0500
+@@ -16,13 +16,14 @@
+ #             seq (default: one workload after the other, in the order given)
+ #             overlap (start hints, start dob after HINT_LEAD seconds, both run together)
+ set -Eeuo pipefail
+-CH=$HOME/cassandra-run1; BASE=$HOME/oom-direct-run8; L=$BASE/logs
++# R2 recheck 2026-11-11 (apt140): build copy and run data on local /mydata
++CH=/mydata/oom-recheck/R2/cassandra; BASE=/mydata/oom-recheck/R2; L=$BASE/logs
+ N1DIR=$BASE/N1; N2DIR=$BASE/N2; N1CONF=$BASE/N1-conf; N2CONF=$BASE/N2-conf
+ N1LOGS=$BASE/N1-logs; N2LOGS=$BASE/N2-logs
+ XMX=${XMX:-3072M}; XMX2=${XMX2:-1024M}
+-N_HINTS=${N_HINTS:-1500000}; HINT_THREADS=${HINT_THREADS:-64}; HINT_SECS=${HINT_SECS:-240}
+-N_DOB=${N_DOB:-400}; DOB_THREADS=${DOB_THREADS:-8}; DOB_SIZE=${DOB_SIZE:-4000000}; DOB_SECS=${DOB_SECS:-300}
+-HINT_LEAD=${HINT_LEAD:-60}; DOB_LEAD=${DOB_LEAD:-10}
++N_HINTS=${N_HINTS:-6000000}; HINT_THREADS=${HINT_THREADS:-64}; HINT_SECS=${HINT_SECS:-240}
++N_DOB=${N_DOB:-1500}; DOB_THREADS=${DOB_THREADS:-8}; DOB_SIZE=${DOB_SIZE:-4000000}; DOB_SECS=${DOB_SECS:-300}
++HINT_LEAD=${HINT_LEAD:-20}; DOB_LEAD=${DOB_LEAD:-10}
+ D=""; S=""; PID=""
+ log()  { echo "[$(date '+%F %T')] $*" >&2; }
+ note() { printf '%s\n' "$*" | tee -a "$S"; }
+@@ -94,7 +95,7 @@
+ start_node() { # <conf> <dir> <logs> <xmx> <extra jvm opts> <tag>
+   local conf=$1 dir=$2 logs=$3 xmx=$4 extra=$5 tag=$6
+   rm -rf "$logs"; mkdir -p "$logs"
+-  CASSANDRA_HOME=$CH CASSANDRA_CONF=$conf CASSANDRA_LOG_DIR=$logs MAX_HEAP_SIZE=$xmx HEAP_NEWSIZE= JVM_EXTRA_OPTS="$extra" \
++  CASSANDRA_HOME=$CH CASSANDRA_CONF=$conf CASSANDRA_LOG_DIR=$logs CASSANDRA_HEAPDUMP_DIR=$D MAX_HEAP_SIZE=$xmx HEAP_NEWSIZE= JVM_EXTRA_OPTS="$extra" \
+     "$CH/bin/cassandra" -p "$dir/cassandra.pid" > "$D/$tag-stdout.txt" 2>&1
+   ready() { [ -n "$(pid_of "$logs")" ] || return 1; grep -q 'Starting listening for CQL clients' "$logs/system.log" 2>/dev/null; }
+   wait_for "$tag CQL up" 300 ready; }
+@@ -132,9 +133,9 @@
+   local du dc nmt rss heap
+   du=$(direct || true); dc=$(directcount || true)
+   nmt=$(jcmd "$PID" VM.native_memory summary 2>/dev/null | grep -A1 -E '^-\s+Other' | grep -Eo 'committed=[0-9]+KB' | head -1 || true)
+-  rss=$(awk '/^RssAnon/{print $2}' /proc/$PID/status 2>/dev/null || true)
++  rss=$(awk '/^RssAnon/{print $2}' /proc/$PID/status 2>/dev/null || true); local swp; swp="$(awk '/^VmSwap/{print $2}' /proc/$PID/status 2>/dev/null)/$(free -m | awk '/^Swap/{print $3}')/$(free -m | awk '/^Mem/{print $7}')"
+   heap=$(jcmd "$PID" GC.heap_info 2>/dev/null | grep -Eo 'total [0-9]+K, used [0-9]+K' | head -1 || true)
+-  note "s $tag $(date +%T): directMiB=$(( ${du:-0} / 1048576 )) direct=${du:-?} count=${dc:-?} nmtOther=${nmt:-?} rssAnonKB=${rss:-?} heap=[${heap:-?}]"; }
++  note "s $tag $(date +%T): directMiB=$(( ${du:-0} / 1048576 )) direct=${du:-?} count=${dc:-?} nmtOther=${nmt:-?} rssAnonKB=${rss:-?} swapKB/sysSwapMiB/availMiB=${swp:-?} heap=[${heap:-?}]"; }
+ hints_pool() { local tag=$1; local f="$D/jstack-$tag.txt"
+   jstack "$PID" > "$f" 2>/dev/null || { note "jstack $tag failed"; return 0; }
+   note "pool $tag: threads parked in HintsBufferPool.switchCurrentBuffer take()=$(grep -B4 'HintsBufferPool.switchCurrentBuffer' "$f" | grep -c 'LinkedBlockingQueue.take' || true), blocked on pool monitor=$(grep -c 'HintsBufferPool.switchCurrentBuffer' "$f" || true)"; }
+@@ -144,9 +145,9 @@
+ 
+ # ---------------------------------------------------------------- workloads
+ stress() { CASSANDRA_HOME=$CH "$CH/tools/bin/cassandra-stress" "$@" -node 127.0.0.2 -port native=9042 jmx=7199 -mode native cql3 protocolVersion=4; }
+-run_hints() { log "+ hints workload: $N_HINTS x 1 KiB rows into hintks (RF dc1:1,dc2:1, N2 down), $HINT_THREADS threads, cap ${HINT_SECS}s"
++run_hints() { note "hints start $(date +%T.%N | cut -c1-12)"; log "+ hints workload: $N_HINTS x 1 KiB rows into hintks (RF dc1:1,dc2:1, N2 down), $HINT_THREADS threads, cap ${HINT_SECS}s"
+   timeout --signal=INT "$HINT_SECS" bash -c "$(declare -f stress); CH=$CH; BASE=$BASE; stress user profile=$BASE/hints.yaml 'ops(insert=1)' n=$N_HINTS cl=ONE no-warmup -pop seq=1..$N_HINTS -errors retries=10 -rate threads=$HINT_THREADS" > "$D/stress-hints.txt" 2>&1; }
+-run_dob() { log "+ dob workload: $N_DOB x $DOB_SIZE-byte values into dobks (dc1 only), $DOB_THREADS threads, cap ${DOB_SECS}s"
++run_dob() { note "dob start $(date +%T.%N | cut -c1-12)"; log "+ dob workload: $N_DOB x $DOB_SIZE-byte values into dobks (dc1 only), $DOB_THREADS threads, cap ${DOB_SECS}s"
+   timeout --signal=INT "$DOB_SECS" bash -c "$(declare -f stress); CH=$CH; BASE=$BASE; stress user profile=$BASE/dob.yaml 'ops(insert=1)' n=$N_DOB cl=ONE no-warmup -pop seq=1..$N_DOB -errors retries=50 -rate threads=$DOB_THREADS" > "$D/stress-dob.txt" 2>&1; }
+ monitor() { local p=$1 pre=$2 i=0
+   while kill -0 "$p" 2>/dev/null; do sleep 5; i=$((i+1)); sample "$pre$i" || return 1; [ $((i % 3)) = 0 ] && hints_pool "$pre$i"; done; return 0; }
+@@ -182,12 +183,13 @@
+   fi
+   if [ $alive = 1 ]; then for h in 1 2 3 4 5 6; do sleep 5; sample "hold$h" || { alive=0; break; }; done; fi
+   [ $alive = 1 ] && { histo final; sample final || alive=0; }
++  [ $alive = 1 ] && [ "$sched" != seq ] && tablecounts final
+   for w in hints dob; do [ -f "$D/stress-$w.txt" ] && note "stress-$w: $(grep -E 'Total partitions|Total errors|Op rate' "$D/stress-$w.txt" | tr -s ' ' | tr '\n' '|')"; done
+   grep -c '^ERROR' "$N1LOGS/system.log" > "$D/error-count.txt" 2>/dev/null || echo 0 > "$D/error-count.txt"
+   grep -E '^ERROR' "$N1LOGS/system.log" | head -20 > "$D/error-lines.txt" || true
+   grep -hE 'java.lang.OutOfMemoryError: ' "$D/n1-stdout.txt" "$N1LOGS/system.log" 2>/dev/null | head -10 > "$D/oom-jvm.txt" || true
+   sudo -n dmesg -T 2>/dev/null | grep -E "Killed process|invoked oom-killer" | tail -5 > "$D/dmesg-kills-tail.txt" || true
+-  cp "$N1LOGS/system.log" "$D/n1-system.log" 2>/dev/null || true; ls -la "$N1DIR"/*.hprof "$CH"/*.hprof 2>/dev/null > "$D/hprof.txt" || true
++  cp "$N1LOGS/system.log" "$D/n1-system.log" 2>/dev/null || true; for g in "$N1LOGS"/gc.log*; do [ -f "$g" ] && cp "$g" "$D/n1-$(basename "$g")"; done; ls -la "$D"/*.hprof "$N1LOGS"/*.hprof "$N1DIR"/*.hprof "$CH"/*.hprof 2>/dev/null > "$D/hprof.txt" || true
+   note "ERROR lines: $(cat "$D/error-count.txt"); JVM OOM lines: $(wc -l < "$D/oom-jvm.txt"); N1 alive at end: $(n1_up && echo yes || echo NO)"
+   pkill -f '[o]rg.apache.cassandra.stress.Stress' 2>/dev/null || true
+   for p in $(n1_pid); do nt1 stopdaemon >/dev/null 2>&1 || true; for _ in $(seq 60); do n1_up || break; sleep 1; done; n1_up && kill -9 "$p" 2>/dev/null || true; done

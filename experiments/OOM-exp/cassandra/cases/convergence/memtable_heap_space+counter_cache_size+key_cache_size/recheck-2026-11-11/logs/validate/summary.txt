@@ -1,0 +1,26 @@
+yaml diff: -key_cache_size:|+key_cache_size: 200MiB|-counter_cache_size:|+counter_cache_size: 250MiB|-# memtable_heap_space: 2048MiB|+memtable_heap_space: 350MiB|-# memtable_cleanup_threshold: 0.11|+memtable_cleanup_threshold: 0.99|-memtable_allocation_type: heap_buffers|+memtable_allocation_type: unslabbed_heap_buffers|
+node pid 37083
+== arm validate: M=350MiB C=250MiB K=200MiB workloads=write,counter,read -Xmx=1024M
+heap idle:  garbage-first heap   total 1048576K, used 56840K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 54753K, capacity 57631K, committed 57904K, reserved 1099776K 
+preload done: 50000 partitions written and flushed to sstable
+heap after-preload:  garbage-first heap   total 1048576K, used 65072K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 58790K, capacity 61927K, committed 62256K, reserved 1103872K 
+workloads launched t=1794426649588
+sample 1 t=1794426655289:  garbage-first heap   total 1048576K, used 163376K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 7 young (114688K), 0 survivors (0K) 
+sample 2 t=1794426664553:  garbage-first heap   total 1048576K, used 479710K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 22 young (360448K), 5 survivors (81920K) 
+sample 3 t=1794426669980:  garbage-first heap   total 1048576K, used 698044K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 18 young (294912K), 0 survivors (0K) 
+sample 4 t=1794426676928:  garbage-first heap   total 1048576K, used 455706K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 5 t=1794426683786:  garbage-first heap   total 1048576K, used 437724K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K) 
+sample 6 t=1794426689138:  garbage-first heap   total 1048576K, used 627537K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 11 young (180224K), 0 survivors (0K) 
+nodetool-info 6 t=1794426691063: Key Cache : entries 100015, size 8.39 MiB, capacity 200 MiB, 375911 hits, 477216 requests, 0.788 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 300000, size 34.33 MiB, capacity 250 MiB, 0 hits, 300000 requests, 0.000 recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+all requested workloads finished after sample 6 t=1794426691070
+heap final:  garbage-first heap   total 1048576K, used 463662K [0x00000000c0000000, 0x0000000100000000)   region size 16384K, 1 young (16384K), 0 survivors (0K)  Metaspace       used 58617K, capacity 60927K, committed 63536K, reserved 1103872K 
+nodetool-info final: Key Cache : entries 100015, size 8.39 MiB, capacity 200 MiB, 375913 hits, 477218 requests, 0.788 recent hit rate, 14400 save period in seconds|Row Cache : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds|Counter Cache : entries 300000, size 34.33 MiB, capacity 250 MiB, 0 hits, 300000 requests, 0.000 recent hit rate, 7200 save period in seconds|Network Cache : size 8 MiB, overflow size: 0 bytes, capacity 64 MiB|
+stress stress-counter.txt: Op rate : 2,071 op/s [COUNTER_WRITE: 2,071 op/s]|Partition rate : 2,071 pk/s [COUNTER_WRITE: 2,071 pk/s]|Total partitions : 60,000 [COUNTER_WRITE: 60,000]|Total errors : 0 [COUNTER_WRITE: 0]|Total operation time : 00:00:28| last: |END|
+stress stress-preload.txt: Op rate : 12,511 op/s [WRITE: 12,511 op/s]|Partition rate : 12,511 pk/s [WRITE: 12,511 pk/s]|Total partitions : 50,000 [WRITE: 50,000]|Total errors : 0 [WRITE: 0]|Total operation time : 00:00:03| last: |END|
+stress stress-read.txt: Op rate : 8,845 op/s [READ: 8,845 op/s]|Partition rate : 8,845 pk/s [READ: 8,845 pk/s]|Total partitions : 300,000 [READ: 300,000]|Total errors : 0 [READ: 0]|Total operation time : 00:00:33| last: |END|
+stress stress-write.txt: Op rate : 6,198 op/s [WRITE: 6,198 op/s]|Partition rate : 6,198 pk/s [WRITE: 6,198 pk/s]|Total partitions : 150,000 [WRITE: 150,000]|Total errors : 0 [WRITE: 0]|Total operation time : 00:00:24| last: |END|
+ERROR lines in system.log: 0
+OutOfMemoryError mentions: 1
+dmesg OOM-kill lines: 0
+node alive at end
+node-logs: debug.log gc.log system.log 
