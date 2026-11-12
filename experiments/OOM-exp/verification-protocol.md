@@ -191,7 +191,7 @@ configuration a deployment would actually run:
 | V4 Intervention | The causal intervention removes the endpoint in ≥ 3 runs at matched or recorded load. If infeasible, state why and name the missing attribution; the status then carries `(no intervention)`. |
 | V5 Initiating failure | OOM: the first error with its thread/stack, or the kernel/cgroup OOM record, plus a histogram or dump at or near failure showing the claimed holder. Service loss: the GC log over the window. |
 | V6 Default constraints | Every capacity constraint whose memory the claimed endpoint depends on is at its shipped default, resolved for the node and heap actually used (heap-derived defaults resolved at that heap). A constraint may differ from its default only in a control or intervention arm. |
-| V7 Acceptable budget | The heap, the JVM direct-memory limit and any process/container limit are values a deployment could reasonably run, argued **case by case** in the dated design before the run and reviewed by the researcher before readings (see below). A deliberately tightened budget does not meet V7. |
+| V7 Acceptable budget | The heap, the JVM direct-memory limit and any process/container limit are values a deployment could reasonably run, argued **case by case** in the dated design before the run and reviewed by the researcher before readings (see below). A deliberately tightened budget does not meet V7. **Standing rule (2026-11-11):** a heap or direct-memory budget of **≥ 512 MiB** meets V7 without a per-case review; **2 GiB is the ideal** budget; each run searches for the **largest** budget that still reaches the endpoint. |
 
 **Statuses** (the `_INDEX.md` Status column):
 
@@ -245,6 +245,17 @@ requires V6 and V7.
   run. A value below what the system would resolve for the claimed node needs an
   explicit argument (e.g. a documented container limit). The researcher reviews the
   argument before readings; record the review date in the case file.
+- **Standing budget rule (researcher, 2026-11-11).** For the heap and the JVM
+  direct-memory limit: **512 MiB is the minimum acceptable budget** and **2 GiB is
+  the ideal** one. A value ≥ 512 MiB meets V7 without a per-case review; the
+  dated design still records the chosen values and the resolved defaults. Below
+  512 MiB counts as tightened (V7 unmet). Every run should also **search upward for
+  the largest heap/direct budget that still reaches the endpoint** (start at 2 GiB
+  where feasible, then raise it, e.g. 2 → 4 → 8 GiB, or bisect) and report that
+  maximum with its n/N; a budget where the endpoint stops is the boundary, not a
+  negative for the case. Process/container (cgroup) limits are still argued case
+  by case. Filed cases are reclassified under this rule only on the researcher's review:
+  B6 condition B (2 GiB coordinator) was reviewed the same day and is `verified-OOM · diagnostic`.
 - **Custom and tightened runs remain useful.** The custom-convergence playbook and
   tightened-budget runs still map mechanisms, attribution and intervention; their
   results top out at `reproduced-*` and are leads for a default-capacity,
@@ -252,8 +263,9 @@ requires V6 and V7.
   does **not** fail is a `negative` within its stated range.
 - **Effect on filed cases (2026-11-11).** R1–R4 (convergence runs 7, 8, 1, 2) move
   from `convergence/` to `candidates/` as `reproduced-OOM · diagnostic` (R3, R4 still
-  tagged mixed). B6 condition B (2 GiB coordinator, 60 s timeouts) becomes
-  `reproduced-OOM · diagnostic`; B6 condition A (default capacities, 8 GiB replica
+  tagged mixed). B6 condition B (2 GiB coordinator, 60 s timeouts) became
+  `reproduced-OOM · diagnostic` (restored to `verified-OOM · diagnostic` later that day
+  under the standing budget rule); B6 condition A (default capacities, 8 GiB replica
   heap, external storage stall) keeps `verified-gap · service-loss · deployment`,
   its 8 GiB heap reviewed and accepted by the researcher (V7 met, 2026-11-11). Evidence
   is unchanged.

@@ -11,6 +11,7 @@ anchors below. Relative links to `design/`, `harness*/` and `logs*/` are unchang
 | [Run 1 — 2026-11-10: slow replica (Byteman), 60 s timeouts, 2 GiB heap](#run-1) | `internode_application_queue_capacity--accounting-mismatch--run1.md` |
 | [Run 2 — 2026-11-10/11: replica disk stall, default timeouts, 8/6 GiB](#run-2) | `internode_application_queue_capacity--accounting-mismatch--run2-diskstall.md` |
 | [Run 3 — 2026-11-11: reserve intervention ×3 and same-day positives](#run-3) | `internode_application_queue_capacity--accounting-mismatch--run3-intervention.md` |
+| [Run 4 — 2026-11-11/12: coordinator, two slow replicas, budget search](#run-4) | written directly here (no separate run file) |
 
 ---
 
@@ -510,3 +511,178 @@ replica-side run-1 condition.
 
 All instances stopped at the end of the batch (`pgrep java` empty) and the dm-delay device reset to 0
 (`dmsetup table b6slow`: delay 0). Heap dump `R3A_B_S2g_map_pos` kept on node0.
+
+---
+
+<a id="run-4"></a>
+
+# Run 4 — 2026-11-11/12: coordinator, two slow replicas, budget search
+
+## B6 run 4 — coordinator side with two slow replicas (storage stall), default and 60 s timeouts
+
+**Direction:** bypass · accounting mismatch (coordinator side) · `source: flow:coordinator-write`.
+**Regime:** default capacities. **Source:** Cassandra 5.0.9, `/mydata/b6/cassandra` (same build as runs
+1–3); diagnostic patch build `/mydata/b6/cassandra-p4`. **Date:** 2026-11-11 21:30 → 2026-11-12 ≈ 03:40
+(pc96). **Design:** [`design/B6-run4-design.md`](design/B6-run4-design.md) (written before readings;
+amendments A1–A3 dated inside). **Earlier runs:** [run 1](#run-1), [run 2](#run-2), [run 3](#run-3).
+
+### Summary
+
+- **Question:** does the coordinator, which keeps every sent `Mutation` until each replica answers,
+  run out of heap when **two replicas** (owning disjoint halves of the ring) stall on storage — with
+  default timeouts and no Byteman — and what is the largest coordinator heap that still fails?
+- **Default timeouts (phase D, deployment settings):** the coordinator holds about *write rate × 2 s*
+  of mutations (≈ 1.3 GiB live at ≈ 2k writes/s). It **survives at 2 GiB, 1 GiB, 768 MiB and
+  640 MiB** (63–89% live) and reaches the endpoint only at the **512 MiB floor: 3/5** (2 heap OOM + service
+  loss, 1 service loss; plus 1/1 with a rate-capped client). Rate-matched blob writes survive 0/3 failures
+  (37–42% live). Neither the 8 MiB endpoint reserves (3/3 still OOM) nor a patch that drops the
+  `hintOnFailure` reference (3/3 still OOM) removes it: with the patch the same ≈ 1 850 mutations
+  simply sit in the send queue instead (K ≈ 19 MiB on-wire ≪ C). **Not verified** (V4 unmet; boundary at
+  the minimum acceptable budget).
+- **60 s write/native timeouts (phase X, diagnostic, no Byteman):** the coordinator fails at **2 GiB
+  (service loss), 4 GiB (OOM 3/3) and 6 GiB (OOM + service loss 3/3)** and survives at **8 GiB (2/2,
+  but ≈ 99% live)**. Blob 0/3 and 8 MiB reserves 3/3 at both 4 and 6 GiB → V1–V5 met at **6 GiB** (largest failing) →
+  `reproduced-OOM · diagnostic` (raised timeouts).
+- **Root cause (refined):** the bypass is the on-wire charge of the send queue plus the uncharged
+  after-flush `hintOnFailure` retention; the bound that actually applies is *rate × request deadline ×
+  ≈ 213 KiB per 10.8 KiB write*. At default deadlines that is ≈ 1–1.3 GiB on this host — dangerous only to
+  heaps ≤ 512 MiB; at 60 s deadlines it reaches the send-queue capacity (132 MiB on-wire per slow
+  destination ≈ 2.6 GiB of heap) times the number of slow destinations.
+
+---
+
+### 1. Constraint and protection map (coordinator S)
+
+| Holder | Charged to (K) | Bound | Release |
+|---|---|---|---|
+| (a) queued `Message<Mutation>` to each slow replica | send queue, on-wire: 4 MiB/link + 128 MiB endpoint + 512 MiB global | C = 132 MiB per destination | flush, overload drop, expiry (pruned on enqueue) |
+| (b) flushed `Mutation` via `RequestCallbacks` → `WriteResponseHandler.hintOnFailure` | nothing on S | implicit: rate × deadline (2 s default; 60 s in phase X), reaped every ≈ 0.5 s | replica response or expiry |
+| (c) in-flight client requests | `native_transport_max_request_data_in_flight` (heap/10) and `_per_ip` (heap/40), frame bytes | resolved at S's heap (512 MiB: 51 / 13 MiB) | response sent |
+
+One `Mutation` object is shared by (a), (b), (c) and both destinations of a write; "two slow replicas"
+therefore means **disjoint ranges** (V1 token MIN, V2 token 1, dc v, `{v:1, f:1}`), each with its own
+send reserve. K = `system_views.internode_outbound.pending_bytes` (S → V1/V2); U = live heap from the GC
+log (occupancy after Full GC) and HPROF class histograms of OOM dumps (`harness-run4/hprofhist.py`).
+
+**Labels.** Capacities default (V6). Phase D: timeouts and threads default, no Byteman, storage stall by
+dm-delay on V1+V2 (external), hints off and key/counter cache 0 (accepted documented values, as
+condition A), single host on loopback (environment) → `deployment` settings. Phase X: plus
+`write_request_timeout` and `native_transport_timeout` 60 s on all instances (supporting deviation) →
+`diagnostic`. Budget: S `-Xmx` 512 MiB–8 GiB (standing rule: ≥ 512 MiB meets V7, 2 GiB ideal);
+`cassandra-env.sh` resolved `MaxDirectMemorySize=15872M` (not a factor: no direct OOM).
+
+### 2. Executed design
+
+Topology (`harness-run4/ctl.sh`, `ring-up.sh`): V1 127.0.0.11 and V2 127.0.0.17 (dc v, 8 GiB, data on
+`/mydata/b6/slow` — the run-2 dm-delay device), F 127.0.0.12 (dc f, 8 GiB, acks CL=ONE), S 127.0.0.13
+(dc c, measured, owns no data). Client: `B6Load`, 8 sessions × 256 in flight to S only; payload map 1000
+cells (10.80 KiB on-wire) or 11 000-byte blob (10.80 KiB). Arm (`harness-run4/arm.sh`, clean start):
+load 150 s, write delay 30 s on V1+V2 from t = 20 s to t = 150 s, observe 60 s. Endpoint: heap OOM
+(HotSpot `HeapDumper` / `ReportJavaOutOfMemory` safepoints in the GC log — Cassandra's `system.log` was
+starved in all but one OOM) or service loss (≥ 90% of wall time in STW pauses over ≥ 60 s, all pauses,
+`harness-run4/gcwin.py`). Batches: `batch-d.sh` (stopped by the agent's tool time limit during uncapped
+blob r3, rerun in `batch-r.sh`), `batch-d-rest.sh`, `batch-d2.sh`, `batch-x.sh`, `batch-r.sh`,
+`batch-x6.sh`. Amendments: A1 rate-matched blob control (`RATE=2000` writes/s, run-4 `B6Load.java`) after
+the uncapped blob failed at 512 MiB; A2 dumps for one patched and one reserve arm, 6 GiB bisection; A3
+controls at 6 GiB. Diagnostic patch: [`harness-run4/no-hint-retention.diff`](harness-run4/no-hint-retention.diff)
+(`StorageProxy.java:1391` passes `null` instead of `mutation.hintOnFailure()` when hints are disabled).
+
+**Contention caveat:** another session's Cassandra stage-4 workload (`/mydata/jingsong-cass-s4`) ran on
+pc96 during part of this run (from ≈ 22:40 recorded per arm in `foreign.txt`; load average 8–18 of 32
+cores). The phase-D boundary depends on the write rate and is sensitive to it (pre-stall rates
+1.46–2.43k/s at 512 MiB).
+
+### 3. Results
+
+Raw: `/mydata/b6/runs4/<arm>/` on pc96 (dumps kept there). Excerpts: [`logs-run4/arm-outcomes.txt`](logs-run4/arm-outcomes.txt),
+[`logs-run4/oom-histograms.txt`](logs-run4/oom-histograms.txt), [`logs-run4/oom-evidence.txt`](logs-run4/oom-evidence.txt).
+
+#### 3.1 Phase D — default timeouts, budget search (map, uncapped client)
+
+| S heap | Arms | Endpoint | Live after Full GC | Max STW share in 60 s | Client ok |
+|---|---|---|---|---|---|
+| 2 GiB | r1 | survived | 1 285 MiB (62.7%) | 40% | 286k |
+| 1 GiB | r1 | survived | 881 MiB (86.0%) | 61% | 198k |
+| 768 MiB | r1 | survived | 661 MiB (86.1%) | 76% | 162k |
+| 640 MiB | r1 | survived | 570 MiB (89.1%) | 82% | 122k |
+| **512 MiB** | r1 | **heap OOM** (t = 52 s, JVM not killed) **+ service loss** (262 s window, 93%) | 479 MiB (93.6%) | 100% | 36k |
+| 512 MiB | r2 | survived | 471 MiB (92.0%) | 84% | 95k |
+| 512 MiB | r3 | **heap OOM** (t = 128 s, killed t = 204 s) **+ service loss** (174 s) | 479 MiB | 100% | 36k |
+| 512 MiB | r4 | **service loss** (267 s window, no OOM) | 482 MiB (94.1%) | 100% | 51k |
+| 512 MiB | r5 | survived | 437 MiB (85.4%) | 89% | 100k |
+| 512 MiB, client capped 2k/s | r1 | **heap OOM + service loss** (231 s) | 481 MiB | 100% | 37k |
+
+At 2 GiB the send queue to each slow replica peaked at **24 MiB on-wire** (K ≪ C = 132 MiB), while
+each slow replica's receive counter sat at its 140 MiB cap. At 512 MiB the queues stayed ≤ 6 MiB.
+**Largest failing default-timeout budget: 512 MiB, 3/5 (4/6 with the capped arm); first surviving:
+640 MiB (n = 1; 768 MiB, 1 GiB, 2 GiB also survived, n = 1 each).**
+
+Holder at OOM (dumps r1, r3, capped r1): **1 845–1 893 `Mutation`s / 1.85–1.89 M `BufferCell`s ≈ 460 MiB**
+of a 512 MiB heap, reachable from 1 837–1 884 `WriteResponseHandler`s (1 866–1 984 callbacks); only
+13–77 queued `Message`s. First error (capped r1, the only arm whose `system.log` kept it): `ERROR
+[Native-Transport-Requests-76] JVMStabilityInspector … java.lang.OutOfMemoryError: Java heap space`,
+2 min after the native in-flight limit (13 MiB/IP) had triggered backpressure.
+
+#### 3.2 Phase D — controls and interventions at 512 MiB
+
+| Arm | n | Endpoint | Detail |
+|---|---|---|---|
+| blob, uncapped client | 3 | **heap OOM 3/3** (t = 35–39 s) | **not matched**: blob runs at several times the map rate; reported, not used as V2 |
+| **blob, client capped at 2 000/s** (≈ map rate) | 3 | **0/3** | 189–217 MiB live (37–42%), max 60 s STW 5%, 299k ok each; send queue ≤ 24 MiB |
+| map, no stall | 1 | 0/1 | 355 MiB (69.3%), max 69% |
+| map, send + receive endpoint reserves 8 MiB | 3 (+1 dump) | **heap OOM 3/3** (t = 52, 130, 52 s); dump arm also OOM | dump: 1 857 `Mutation`s, 26 `Message`s — same callback holder |
+| map, patch (no `hintOnFailure` when hints off) | 3 (+1 dump) | **heap OOM 3/3** (t = 51–52 s); dump arm also OOM | dump: 1 824 `Mutation`s held by **1 829 queued `Message`s** (≈ 19 MiB on-wire) |
+
+The patch moves the holder from (b) to (a) without changing its size: once V1/V2 stop reading, about
+rate × 2 s of mutations waits in the send queue, still ≈ 15% of the on-wire capacity C.
+
+#### 3.3 Phase X — 60 s write/native timeouts (diagnostic), budget search (map)
+
+| S heap | Arms | Endpoint | Live after Full GC | Notes |
+|---|---|---|---|---|
+| 2 GiB | r1 | **service loss** (265 s window), alive | 2 018 MiB (98.5%) | |
+| 4 GiB | r1–r3 | **heap OOM + service loss 3/3** | 4 060–4 062 MiB (99.1–99.2%) | dump r1: 19 027 `Mutation`s ≈ 4.4 GiB; 16 907 queued `Message`s (≈ 178 MiB on-wire for both destinations, ≤ 2 × C) |
+| **6 GiB** | r1–r3 | **service loss 3/3, heap OOM 3/3** (r1: OOM + dump but no kill, JVM alive at stop; r2, r3 killed) | 6 109–6 111 MiB (99.4–99.5%) | dump r1: 20 517 `Mutation`s, 20 514 callbacks, 45 queued `Message`s |
+| 8 GiB | r1–r2 | survived 2/2 | 8 097–8 101 MiB (98.8–98.9%) | max 60 s STW 74% / 83% (criterion not met); S → V1/V2 queues reached **132 MiB = C** and dropped (2.4k–24k overloads) |
+| 4 GiB blob | r1–r3 | 0/3 | 1 345–1 359 MiB (33%) | 18.6k writes/s pre-stall; queues full at C, 170k–250k overloads |
+| 4 GiB, reserves 8 MiB | r1–r3 | **0/3** (survived) | 1 964–2 273 MiB (48–56%) | 240k–347k ok |
+| 6 GiB blob | r1–r3 | 0/3 | no Full GC; ≤ 2 271–3 772 MiB (37–61%) after any pause | 859k–908k ok |
+| 6 GiB, reserves 8 MiB | r1–r3 | **0/3** (survived) | 1 798–2 124 MiB (29–35%) | max 60 s STW 6–8%; 190k–391k ok |
+
+**Largest failing phase-X budget: 6 GiB, 3/3; first surviving: 8 GiB (2/2, at ≈ 99% live).** The
+design predicted ≈ 11 GiB of holders and a boundary at 12–16 GiB; the 8 GiB survivals show the actual
+plateau is ≈ 8 GiB on this host (both send queues at C, the rest dropped).
+
+### 4. Conclusion and limits
+
+| Condition | V1 | V2 | V3 | V4 | V5 | V6 | V7 | Result |
+|---|---|---|---|---|---|---|---|---|
+| D: default timeouts, two slow replicas, S 512 MiB | 3/5 (endpoint mixed: 2 OOM + SL, 1 SL) | rate-matched blob 0/3; no stall 0/1 | dumps: U ≈ 460 MiB `Mutation`s, K ≤ 6 MiB | **no**: reserves 0/3, patch 0/3 removed it | `HeapDumper`/`ReportJavaOutOfMemory`, dumps, one `system.log` first error; GC logs | yes | yes (512 MiB, the floor) | **candidate** (V4 unmet) |
+| X: 60 s timeouts, S 4 GiB | 3/3 OOM | blob 0/3 | dump: U ≈ 4.4 GiB, K ≈ 178 MiB ≤ 264 MiB | reserves 3/3 | dumps + safepoints | yes | yes | **reproduced-OOM · diagnostic** (raised timeouts) |
+| **X: 60 s timeouts, S 6 GiB (largest failing)** | 3/3 OOM + SL | blob 0/3 | dump: 20 517 `Mutation`s ≈ 4.9 GiB shallow vs K ≤ 132 MiB per destination | reserves 3/3 | dumps + safepoints | yes | yes | **reproduced-OOM · diagnostic** (raised timeouts) |
+
+**Interpretation.** The coordinator side of B6 is real but, at shipped deadlines, bounded by
+*rate × 2 s*: on this host ≈ 1.3 GiB at ≈ 2k map writes/s, which only a 512 MiB coordinator cannot
+hold. Two slow replicas do not add memory at default deadlines (every write already waits on one slow
+replica); they matter when deadlines are long enough for each destination's 132 MiB send capacity to
+fill, which is what raises the failing budget to 6 GiB under 60 s timeouts. The 8 MiB reserve protects
+at 4 GiB (diagnostic) but not at 512 MiB, where even 2 × 12 MiB on-wire is ≈ 0.5 GiB of heap. Removing the
+`hintOnFailure` reference is not a fix by itself: the same backlog waits in the send queue, charged at
+on-wire size.
+
+**Limits.**
+- Phase D's endpoint is at the protocol's minimum acceptable heap and is rate-sensitive (pre-stall
+  1.46–2.43k/s; another session's workload shared the host for part of the run). 640 MiB–2 GiB n = 1 each.
+- 512 MiB heap OOMs often did not trigger `OnOutOfMemoryError` (no kill; JVM left in a Full-GC loop) and
+  Cassandra's own log was starved; OOMs are read from HotSpot safepoints and dumps. Two dumps were
+  truncated (0 bytes) because the arm stopped the JVM while the dump was being written.
+- Single host on loopback; client on the same host; hints off.
+- HPROF histograms are shallow sizes over the whole dump (no reachability filter); the dumps were taken at
+  OOM after back-to-back Full GCs.
+
+**Next:** a coordinator-side intervention that bounds rate × deadline (e.g. a byte-based in-flight limit
+on the write path charged at heap size, or a much smaller send reserve together with the
+`hintOnFailure` patch) to settle V4 at default timeouts; repeat 640 MiB–1 GiB ×3 on an otherwise idle host.
+
+All run-4 instances stopped after the last batch; dm-delay `b6slow` (created in run 2) left at delay 0;
+no run-4 process left (checked).

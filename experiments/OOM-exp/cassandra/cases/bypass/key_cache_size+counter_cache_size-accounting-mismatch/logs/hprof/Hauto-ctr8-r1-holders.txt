@@ -1,0 +1,76 @@
+## Reachability
+base (reachable from GC roots without passing through the holders): 804867 objects, 66.0 MiB
+
+## Holder memtable (50 root objects): exclusive reachable set: 1724 objects, 0.0 MiB shallow
+       count  shallow_bytes      MiB  class
+         213           6816      0.0  java.util.HashMap$Node
+         250           6000      0.0  java.util.concurrent.atomic.AtomicLong
+         100           4800      0.0  java.util.concurrent.ConcurrentSkipListMap
+          50           4400      0.0  org.apache.cassandra.db.memtable.SkipListMemtable
+          47           4080      0.0  java.util.HashMap$Node[]
+         100           4000      0.0  org.apache.cassandra.utils.memory.MemtableAllocator$SubAllocator
+         213           3408      0.0  java.util.concurrent.atomic.AtomicBoolean
+         200           3200      0.0  java.util.concurrent.atomic.AtomicReference
+          50           2400      0.0  java.util.HashMap
+          50           2400      0.0  org.apache.cassandra.utils.memory.SlabAllocator
+          80           1920      0.0  org.apache.cassandra.db.commitlog.CommitLogPosition
+          50           1200      0.0  org.apache.cassandra.db.memtable.AbstractMemtable$ColumnsCollector
+          50           1200      0.0  java.util.concurrent.ConcurrentLinkedQueue
+          50           1200      0.0  java.util.concurrent.ConcurrentLinkedQueue$Node
+          50            800      0.0  java.util.concurrent.ConcurrentSkipListSet
+
+## Holder counter_cache (1 root objects): exclusive reachable set: 2808705 objects, 90.1 MiB shallow
+       count  shallow_bytes      MiB  class
+      936228       22469472     21.4  byte[]
+      468114       18724560     17.9  com.github.benmanes.caffeine.cache.PSMW
+      468114       14979648     14.3  java.util.concurrent.ConcurrentHashMap$Node
+      468114       14979648     14.3  org.apache.cassandra.cache.CounterCacheKey
+      468114       14979648     14.3  org.apache.cassandra.db.ClockAndCount
+           1        4194320      4.0  java.util.concurrent.ConcurrentHashMap$Node[]
+           1        4194320      4.0  long[]
+           1            552      0.0  com.github.benmanes.caffeine.cache.MpscGrowableArrayQueue
+           1            296      0.0  com.github.benmanes.caffeine.cache.SSMW
+           3             72      0.0  com.github.benmanes.caffeine.cache.AccessOrderDeque
+           1             64      0.0  java.util.concurrent.ConcurrentHashMap
+           1             56      0.0  java.lang.Object[]
+           2             48      0.0  java.util.concurrent.ConcurrentHashMap$CounterCell
+           1             32      0.0  java.lang.ref.WeakReference
+           1             32      0.0  java.util.concurrent.locks.ReentrantLock$NonfairSync
+
+## Holder key_cache (1 root objects): exclusive reachable set: 192 objects, 0.0 MiB shallow
+       count  shallow_bytes      MiB  class
+          46           2800      0.0  byte[]
+          14            560      0.0  com.github.benmanes.caffeine.cache.PSMW
+           1            552      0.0  com.github.benmanes.caffeine.cache.MpscGrowableArrayQueue
+          16            512      0.0  sun.nio.fs.UnixPath
+          14            448      0.0  java.util.concurrent.ConcurrentHashMap$Node
+          14            448      0.0  org.apache.cassandra.cache.KeyCacheKey
+           8            384      0.0  org.apache.cassandra.io.sstable.Descriptor
+          16            384      0.0  java.lang.String
+           8            384      0.0  int[]
+          14            336      0.0  org.apache.cassandra.io.sstable.format.big.RowIndexEntry
+           1            296      0.0  com.github.benmanes.caffeine.cache.SSMW
+          16            256      0.0  org.apache.cassandra.io.util.File
+           1            144      0.0  java.util.concurrent.ConcurrentHashMap$Node[]
+           8            128      0.0  org.apache.cassandra.io.sstable.SequenceBasedSSTableId
+           3             72      0.0  com.github.benmanes.caffeine.cache.AccessOrderDeque
+
+## Memtable data (from each memtable's partitions map, data classes only, shared or not): 0.0 MiB, 50 objects; top: java.util.concurrent.ConcurrentSkipListMap 0.0
+
+## Inclusive reachable per holder (other holders blocked; includes objects shared with base; for memtable this also reaches schema/CFS objects, use the line above), MiB: memtable 45.6 (464852 objects) | counter_cache 90.1 (2808712 objects) | key_cache 0.0 (324 objects)
+
+## Totals (MiB): dump all 173.2 | base 66.0 | memtable 0.0 | counter_cache 90.1 | key_cache 0.0 | unreachable (garbage) 17.0
+
+## Control counters (K) read from the dump
+keyCache -> map:org.apache.cassandra.cache.CaffeineCache -> cache:com.github.benmanes.caffeine.cache.BoundedLocalCache$BoundedLocalManualCache -> cache:com.github.benmanes.caffeine.cache.SSMW :
+   {'mainProtectedWeightedSize': 0, 'mainProtectedMaximum': 83047219, 'windowWeightedSize': 1120, 'windowMaximum': 1048576, 'weightedSize': 1120, 'maximum': 104857600, 'isWeighted': 1}
+   data map java.util.concurrent.ConcurrentHashMap fields: {'sizeCtl': 24, 'baseCount': 14}
+counterCache -> map:org.apache.cassandra.cache.CaffeineCache -> cache:com.github.benmanes.caffeine.cache.BoundedLocalCache$BoundedLocalManualCache -> cache:com.github.benmanes.caffeine.cache.SSMW :
+   {'mainProtectedWeightedSize': 0, 'mainProtectedMaximum': 41523609, 'windowWeightedSize': 524272, 'windowMaximum': 524288, 'weightedSize': 52428768, 'maximum': 52428800, 'isWeighted': 1}
+   data map java.util.concurrent.ConcurrentHashMap fields: {'sizeCtl': 786432, 'baseCount': 121}
+rowCache -> map:org.apache.cassandra.cache.NopCacheProvider$NopCache :
+   {}
+MemtablePool SubPool org.apache.cassandra.utils.memory.MemtablePool$SubPool: {'nextClean': 696254464, 'reclaiming': 0, 'allocated': 0, 'limit': 2088763392}
+MemtablePool SubPool org.apache.cassandra.utils.memory.MemtablePool$SubPool: {'nextClean': 0, 'reclaiming': 0, 'allocated': 0, 'limit': 0}
+
+## Threads / OutOfMemoryError thread

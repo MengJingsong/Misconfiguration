@@ -2,14 +2,16 @@
 
 **Direction:** bypass · accounting mismatch (U > C while K ≤ C). **Lead source:** `flow:coordinator-write`
 (traced from C1). **Regime:** default capacities. **Source:** Cassandra 5.0.9 (`b5f2a54210`), local copy
-`/mydata/b6/cassandra` on `pc96`. **Runs:** 1 (2026-11-10), 2 (2026-11-10/11), 3 (2026-11-11); full
+`/mydata/b6/cassandra` on `pc96`. **Runs:** 1 (2026-11-10), 2 (2026-11-10/11), 3 (2026-11-11), 4 (2026-11-11/12, coordinator with two slow replicas); full
 per-run records in [`history.md`](history.md). **Consolidated:** 2026-11-11.
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
 | A — replica 8 GiB, 30 s storage stall, default timeouts and threads, 4 coordinators | **`verified-gap · service-loss · deployment`** |
-| B — coordinator 2 GiB, slow replica (Byteman), 60 s write/native timeouts | **`reproduced-OOM · diagnostic`** (V7 unmet: tightened 2 GiB heap; amended 2026-11-11) |
+| B — coordinator 2 GiB, slow replica (Byteman), 60 s write/native timeouts | **`verified-OOM · diagnostic`** (2 GiB heap meets V7 under the standing budget rule, reclassified by the researcher 2026-11-11; diagnostic: Byteman + 60 s timeouts) |
 | C — replica 2 GiB, slow replica (Byteman), 60 s timeouts | `candidate` (same-day positive survived; OOM timing-dependent) |
+| D — coordinator, two slow replicas (dm-delay storage stall, no Byteman), 60 s write/native timeouts; largest failing heap **6 GiB** (8 GiB survives at ≈ 99% live) | **`verified-OOM · diagnostic`** (run 4; diagnostic: 60 s timeouts) |
+| E — coordinator, two slow replicas, default timeouts, 512 MiB heap | `candidate` (3/5; no intervention removes it: reserves 0/3, `hintOnFailure` patch 0/3) |
 
 ## Summary
 
@@ -44,8 +46,9 @@ U = live heap (class histogram after full GC, or GC-log occupancy after Full GC)
 **Labels.** A: capacities default; timeouts, threads, GC default; budget 8 GiB (deployment-sized; V7 review: accepted by the researcher 2026-11-11);
 storage stall by dm-delay (external fault); hints off, key/counter cache 0 (accepted documented
 values); single host on loopback, `num_tokens: 1` (environment) → **deployment** (decided 2026-11-11).
-B and C: Byteman 100 ms per mutation and `concurrent_writes: 2` on the replica, 60 s timeouts, 2 GiB
-heap (supporting deviations) → **diagnostic**.
+B and C: Byteman 100 ms per mutation and `concurrent_writes: 2` on the replica, 60 s timeouts
+(supporting deviations) → **diagnostic**; 2 GiB heap meets V7 under the standing budget rule
+(≥ 512 MiB acceptable, 2 GiB ideal; researcher, 2026-11-11).
 
 ## 2. Verification design
 
@@ -119,13 +122,15 @@ Raw logs: `/mydata/b6/runs/` (run 1, run 3 `R3A_*`) and `/mydata/b6/runs2/` (run
 
 ## 4. Conclusion and limits
 
-**Promotion rule** (V6–V7 added by the protocol amendment of 2026-11-11, *Defaults and acceptable budget*; condition B moved from `verified-OOM` to `reproduced-OOM` on that date, evidence unchanged):
+**Promotion rule** (V6–V7 added by the protocol amendment of 2026-11-11, *Defaults and acceptable budget*; condition B moved from `verified-OOM` to `reproduced-OOM` on that date, then back to `verified-OOM` the same day under the researcher's standing budget rule (heap ≥ 512 MiB meets V7, 2 GiB ideal); evidence unchanged):
 
 | Condition | V1 repetition | V2 matched control | V3 U apart from K | V4 intervention | V5 initiating failure | V6 default constraints | V7 acceptable budget | Status |
 |---|---|---|---|---|---|---|---|---|
 | A | 3/3 service loss | blob 0/3 | P1 histogram; GC-log live | 4/4 | GC logs | yes | 8 GiB heap (deployment-sized; accepted by the researcher 2026-11-11) | **verified-gap · service-loss · deployment** |
-| B | 4/4 heap OOM | blob 0/3 | histograms (run 1) | 4/4 | `ReportJavaOutOfMemory` + 2 dumps | yes | **no** (2 GiB, tightened) | **reproduced-OOM · diagnostic** |
-| C | 3/4 (same-day survived) | blob 0/3 | histograms | 4/4 | run 1 dump | yes | no (2 GiB) | candidate |
+| B | 4/4 heap OOM | blob 0/3 | histograms (run 1) | 4/4 | `ReportJavaOutOfMemory` + 2 dumps | yes | yes (2 GiB; standing budget rule, 2026-11-11) | **verified-OOM · diagnostic** |
+| C | 3/4 (same-day survived) | blob 0/3 | histograms | 4/4 | run 1 dump | yes | yes (2 GiB) | candidate (V1) |
+| D (run 4) | 3/3 heap OOM + service loss at 6 GiB (4 GiB 3/3; 8 GiB 0/2) | blob 0/3 at 4 and 6 GiB | dump: 20,517 `Mutation`s vs K ≈ 178 MiB on-wire (4 GiB) | reserves 3/3 at 4 and 6 GiB | HotSpot OOM safepoints + dumps; GC logs | yes | yes (6 GiB) | **verified-OOM · diagnostic** |
+| E (run 4) | 3/5 at 512 MiB (0/1 at 640 MiB–2 GiB) | rate-matched blob 0/3; no stall 0/1 | dumps: ≈ 1,850 `Mutation`s (≈ 460 MiB) on write callbacks, K ≤ 6 MiB | **no**: reserves 0/3, patch 0/3 | safepoints, dumps, one `system.log` first error | yes | yes (512 MiB) | candidate |
 
 **Interpretation:** the limits are documented as on-wire bytes, so the gap is a documented unit that
 does not bound heap — sizing a heap from `N·3·(send+receive capacity)` plus reserves can be wrong by
@@ -141,6 +146,12 @@ ceiling, not the traffic volume, decides the outcome.
 - Single host, loopback; coordinators in A measured in one arm; coordinator side at default timeouts
   not established (client rate).
 
+**Run 4 finding (2026-11-12).** At default deadlines the coordinator's retained heap is bounded by
+*write rate × 2 s × ≈ 213 KiB*, not by the internode queues (K ≤ 6 MiB; reserves do not help; dropping
+`hintOnFailure` only moves the same mutations into the send queue). Two slow replicas matter only once
+deadlines are long enough to fill each destination's 132 MiB send capacity (condition D). Run 4 shared pc96
+with another session's workload from ≈ 22:40 (load 8–18 of 32 cores), recorded per arm; E is rate-sensitive.
+
 **Next:** JIRA history check (CASSANDRA-15066 introduced these limits) before any upstream report;
-stall-length sweep (5/15/60 s); coordinator with ≥ 2 slow replicas at 8 GiB; condition C with a longer
+stall-length sweep (5/15/60 s); coordinator with ≥ 2 slow replicas *(done in run 4: D, E)*; an intervention for E (bound on native in-flight heap, not on-wire bytes); condition C with a longer
 load to settle its OOM timing.

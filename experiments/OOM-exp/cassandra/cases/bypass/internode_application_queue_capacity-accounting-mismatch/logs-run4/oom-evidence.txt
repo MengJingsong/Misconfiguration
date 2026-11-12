@@ -1,0 +1,48 @@
+# B6 run 4 first-error evidence
+
+## R4D_S512m_map_rate2k_r1 S system.log (only arm whose system.log kept the OOM lines)
+INFO  [Native-Transport-Requests-149] 2026-11-12T05:08:00,567 NoSpamLogger.java:104 - Request breached limit(s) on bytes in flight (Endpoint: 13421772, Global: 53687091) and triggered backpressure.
+ERROR [Native-Transport-Requests-76] 2026-11-12T05:10:01,389 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+java.lang.OutOfMemoryError: Java heap space
+ERROR [Native-Transport-Requests-59] 2026-11-12T05:10:01,391 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+java.lang.OutOfMemoryError: Java heap space
+
+## HotSpot safepoints (GC log) in every OOM arm
+R4D_S512m_blob_r1 oom_marks=ReportJavaOutOfMemory@39.340s
+R4D_S512m_blob_r2 oom_marks=ReportJavaOutOfMemory@38.838s
+R4D_S512m_blob_r3 oom_marks=ReportJavaOutOfMemory@34.980s
+R4D_S512m_map_patch_dump oom_marks=HeapDumper@176.951s,ReportJavaOutOfMemory@207.365s
+R4D_S512m_map_patch_r1 oom_marks=ReportJavaOutOfMemory@50.805s
+R4D_S512m_map_patch_r2 oom_marks=ReportJavaOutOfMemory@51.053s
+R4D_S512m_map_patch_r3 oom_marks=ReportJavaOutOfMemory@52.284s
+R4D_S512m_map_r1 oom_marks=HeapDumper@51.911s (no ReportJavaOutOfMemory: OnOutOfMemoryError kill never ran; JVM stayed in Full GC)
+R4D_S512m_map_r3 oom_marks=HeapDumper@127.616s,ReportJavaOutOfMemory@203.787s
+R4D_S512m_map_rate2k_r1 oom_marks=ReportJavaOutOfMemory@249.394s,HeapDumper@146.743s
+R4D_S512m_map_rsv8m_dump oom_marks=HeapDumper@103.081s,ReportJavaOutOfMemory@229.972s
+R4D_S512m_map_rsv8m_r1 oom_marks=ReportJavaOutOfMemory@52.731s
+R4D_S512m_map_rsv8m_r2 oom_marks=ReportJavaOutOfMemory@130.073s
+R4D_S512m_map_rsv8m_r3 oom_marks=ReportJavaOutOfMemory@51.904s
+R4X_S4g_map_r1 oom_marks=HeapDumper@147.417s,ReportJavaOutOfMemory@219.226s
+R4X_S4g_map_r2 oom_marks=HeapDumper@204.912s,ReportJavaOutOfMemory@249.999s
+R4X_S4g_map_r3 oom_marks=HeapDumper@142.569s,ReportJavaOutOfMemory@192.835s
+R4X_S6g_map_r3 oom_marks=HeapDumper@171.475s,ReportJavaOutOfMemory@250.038s
+R4X_S6g_map_r2 oom_marks=HeapDumper@279.730s,ReportJavaOutOfMemory@348.571s
+R4X_S6g_map_r1 oom_marks=HeapDumper@373.466s
+
+## R4D_S512m_map_r3: a native-transport thread on the write path at dump time (hprofstacks.py; HPROF does not mark the throwing thread)
+--- thread serial 67, 27 frames
+  jdk.internal.misc.Unsafe.park(Unsafe.java:-3)
+  java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:357)
+  org.apache.cassandra.utils.concurrent.WaitQueue$Standard$AbstractSignal.awaitUntil(WaitQueue.java:351)
+  org.apache.cassandra.utils.concurrent.Awaitable$AsyncAwaitable.awaitUntil(Awaitable.java:314)
+  org.apache.cassandra.utils.concurrent.Awaitable$AsyncAwaitable.awaitUntil(Awaitable.java:346)
+  org.apache.cassandra.utils.concurrent.Awaitable$Defaults.await(Awaitable.java:114)
+  org.apache.cassandra.utils.concurrent.Awaitable$AbstractAwaitable.await(Awaitable.java:210)
+  org.apache.cassandra.service.AbstractWriteResponseHandler.get(AbstractWriteResponseHandler.java:119)
+  org.apache.cassandra.service.StorageProxy.mutate(StorageProxy.java:906)
+  org.apache.cassandra.service.StorageProxy.mutateWithTriggers(StorageProxy.java:1158)
+  org.apache.cassandra.cql3.statements.ModificationStatement.executeWithoutCondition(ModificationStatement.java:529)
+  org.apache.cassandra.cql3.statements.ModificationStatement.execute(ModificationStatement.java:502)
+  org.apache.cassandra.cql3.QueryProcessor.processStatement(QueryProcessor.java:276)
+  org.apache.cassandra.cql3.QueryProcessor.processPrepared(QueryProcessor.java:870)
+--- thread serial 68, 21 frames

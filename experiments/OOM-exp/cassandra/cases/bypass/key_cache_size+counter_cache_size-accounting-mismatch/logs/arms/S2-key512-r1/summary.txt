@@ -1,0 +1,30 @@
+arm S2-key512-r1: build=orig heap=2048M cache=key keyBytes=512 fill=1.5
+node pid 263370 build /mydata/b7/run-orig
+jvm: -Xms2048M -Xmx2048M -XX:MaxDirectMemorySize=3982M 
+startup: INFO  [main] 2026-11-12T05:16:36,749 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 512MiB|INFO  [main] 2026-11-12T05:16:36,750 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 512MiB|INFO  [MemtableFlushWriter:1] 2026-11-12T05:16:40,413 CacheService.java:121 - Initializing key cache with capacity of 100 MiBs.|INFO  [MemtableFlushWriter:1] 2026-11-12T05:16:40,424 CacheService.java:174 - Initializing counter cache with capacity of 50 MiBs|
+C (KeyCache capacity) = 104857600 bytes
+heap base:  garbage-first heap total 2097152K, used 65791K [0x0000000080000000, 0x0000000100000000)
+histo base (cache classes): com.github.benmanes.caffeine.cache.PSMW 15 600; org.apache.cassandra.cache.KeyCacheKey 14 448; org.apache.cassandra.io.sstable.format.big.RowIndexEntry 14 336; 
+client insert: DONE mode=insert table=kv keyBytes=512 first=0 count=449390 ok=449390 err=0 rows=0 secs=9.5 ops/s=47165 
+sstables after compact: 		SSTable count: 1
+		Old SSTable count: 0
+client calib: DONE mode=read table=kv keyBytes=512 first=0 count=20000 ok=20000 err=0 rows=20000 secs=2.1 ops/s=9384 
+K[calib] KeyCache capacity=104857600 size=11680080 entries=20001 | Key Cache              : entries 20001, size 11.14 MiB, capacity 100 MiB, 86 hits, 20111 requests, 0.004 recent hit rate, 14400 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|
+weight/entry (calibration) = 583 B; read 269788 keys (target weight 1.5 x C; 449390 inserted)
+client fill: DONE mode=read table=kv keyBytes=512 first=20000 count=249788 ok=249788 err=0 rows=249788 secs=6.7 ops/s=37294 
+K[fill] KeyCache capacity=104857600 size=104857200 entries=179550 | Key Cache              : entries 179550, size 100 MiB, capacity 100 MiB, 89 hits, 269902 requests, 0.000 recent hit rate, 14400 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|
+heap fill:  garbage-first heap total 2097152K, used 201789K [0x0000000080000000, 0x0000000100000000)
+histo fill (cache classes): com.github.benmanes.caffeine.cache.PSMW 179554 7182160; org.apache.cassandra.cache.KeyCacheKey 179551 5745632; org.apache.cassandra.io.sstable.format.big.RowIndexEntry 179551 4309224; 
+dump: 264046750 bytes
+K[after-dump] KeyCache capacity=104857600 size=104857280 entries=179551 | Key Cache              : entries 179551, size 100 MiB, capacity 100 MiB, 89 hits, 269903 requests, 0.000 recent hit rate, 14400 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|
+K[idle] KeyCache capacity=104857600 size=104857360 entries=179552 | Key Cache              : entries 179552, size 100 MiB, capacity 100 MiB, 90 hits, 269905 requests, 0.000 recent hit rate, 14400 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|
+heap idle:  garbage-first heap total 2097152K, used 201767K [0x0000000080000000, 0x0000000100000000)
+histo idle (cache classes): com.github.benmanes.caffeine.cache.PSMW 179555 7182200; org.apache.cassandra.cache.KeyCacheKey 179552 5745664; org.apache.cassandra.io.sstable.format.big.RowIndexEntry 179552 4309248; 
+client churn: DONE mode=read table=kv keyBytes=512 first=269788 count=134894 ok=134894 err=0 rows=134894 secs=3.8 ops/s=35378 
+K[churn] KeyCache capacity=104857600 size=104857360 entries=179552 | Key Cache              : entries 179552, size 100 MiB, capacity 100 MiB, 96 hits, 404805 requests, 0.000 recent hit rate, 14400 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|
+heap churn:  garbage-first heap total 2097152K, used 202134K [0x0000000080000000, 0x0000000100000000)
+histo churn (cache classes): com.github.benmanes.caffeine.cache.PSMW 179555 7182200; org.apache.cassandra.cache.KeyCacheKey 179552 5745664; org.apache.cassandra.io.sstable.format.big.RowIndexEntry 179552 4309248; 
+K[invalidated] KeyCache capacity=104857600 size=0 entries=0 | Key Cache              : entries 0, size 0 bytes, capacity 100 MiB, 98 hits, 404807 requests, 0.000 recent hit rate, 14400 save period in seconds|Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds|
+heap invalidated:  garbage-first heap total 2097152K, used 87118K [0x0000000080000000, 0x0000000100000000)
+histo invalidated (cache classes): com.github.benmanes.caffeine.cache.PSMW 5 200; org.apache.cassandra.cache.KeyCacheKey 2 64; org.apache.cassandra.io.sstable.format.big.RowIndexEntry 2 48; 
+arm S2-key512-r1 done

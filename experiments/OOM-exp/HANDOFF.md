@@ -49,7 +49,8 @@ memory effect at default timeouts and an 8 GiB replica, mostly as GC service los
 with 2 heap OOMs in 8 arms; run 3 (2026-11-11) repeated the reserve intervention and
 same-day positives. **B6 is the first verified bypass** (filed 2026-11-11 in `bypass/`):
 `verified-gap · service-loss · deployment` (8 GiB replica, storage stall); the 2 GiB
-coordinator condition is `reproduced-OOM · diagnostic` (tightened heap, V7 unmet) and the
+coordinator condition is `verified-OOM · diagnostic` (2 GiB meets V7 under the standing budget rule
+of 2026-11-11: heap/direct ≥ 512 MiB acceptable, 2 GiB ideal; diagnostic for Byteman + 60 s timeouts) and the
 2 GiB replica condition stays candidate.
 Use the [campaign plan](cassandra/campaign-plan.md) and
 [current run log](cassandra/cases/_run-log.md#current-campaign-status--2026-11-06)
@@ -175,7 +176,7 @@ none has run yet.
 - **Bypass (`bypass-playbook.md`):**
   - **B6 — internode queue accounting mismatch (2026-11-10/11): verified, runs 1–3 done.**
     Final case: [`internode_application_queue_capacity--accounting-mismatch.md`](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)
-    (A: `verified-gap · service-loss · deployment`; B: `reproduced-OOM · diagnostic`; C: candidate).
+    (A: `verified-gap · service-loss · deployment`; B: `verified-OOM · diagnostic`; C: candidate).
     Found by tracing C1's write path (`source: flow:coordinator-write`). The internode
     send/receive queues charge on-wire bytes; a 1000-cell map mutation is 10.8 KiB on
     the wire but ≈ 213 KiB on the coordinator heap and ≈ 181 KiB on the replica heap
@@ -199,9 +200,25 @@ none has run yet.
     coordinator still runs at 69–75% live.
     Filed 2026-11-11 (run 2's condition labelled `deployment`: hints off is an accepted setting).
     Next: JIRA check (CASSANDRA-15066 introduced these limits) before any upstream report; stall-length
-    sweep (5/15/60 s); ≥ 2 slow replicas at 8 GiB.
-  - **B1** (native-v5 large-request retention) remains the first planned
-    if-check-inventory bypass; not started.
+    sweep (5/15/60 s); ≥ 2 slow replicas at 8 GiB *(done in run 4, below)*.
+    **Run 4** (2026-11-11/12, pc96, [case](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-4)):
+    coordinator with two slow replicas (dm-delay), no Byteman. With 60 s timeouts it OOMs 3/3 up to a **6 GiB**
+    heap (8 GiB survives at ≈ 99% live); blob 0/3, reserves remove it 3/3 → condition **D `verified-OOM ·
+    diagnostic`**. At default timeouts it fails only at 512 MiB (3/5) and neither reserves nor a
+    `hintOnFailure` patch remove it → condition E `candidate`: there the bound is write rate × 2 s × ≈ 213 KiB,
+    not the queues. Next for E: an intervention on native in-flight heap rather than on-wire bytes.
+  - **B7 — key/counter cache weigher omits per-entry overhead (run 1, 2026-11-11/12): `verified-gap · overshoot · deployment`.**
+    [Case](cassandra/cases/bypass/key_cache_size+counter_cache_size-accounting-mismatch/key_cache_size+counter_cache_size--accounting-mismatch.md)
+    (apt149). At shipped defaults the key cache holds 2.14× and the counter cache 1.80× their caps with
+    their counters exactly at the cap (3/3 at 512 MiB, 2 GiB, auto 7965 MiB); a weigher with per-entry
+    overhead removes it 3/3. No OOM at defaults (0/3). Next: JIRA check and upstream report.
+  - **B1 — native-v5 large-request release defect (run 1, 2026-11-11/12): `negative · deployment`.**
+    [Case](cassandra/cases/negatives/networking_cache_size-release-defect/networking_cache_size--release-defect.md)
+    (apt140 victim, apt138 client). `CQLMessageHandler.LargeMessage.onComplete()` never calls
+    `releaseBuffers()`: confirmed 3/3, the networking pool is pinned at its 128 MiB cap after ≈ 1,000 large
+    requests and `OverflowSize` drifts without bound; a restored release removes it 3/3. Live direct memory
+    plateaus at the cap, so no overshoot and 0/4 OOM at heap 2 GiB, direct 512 MiB–2 GiB. Next: JIRA
+    re-check and upstream defect report; internode traffic sharing the pool is untested.
 
 ## Open follow-ups
 

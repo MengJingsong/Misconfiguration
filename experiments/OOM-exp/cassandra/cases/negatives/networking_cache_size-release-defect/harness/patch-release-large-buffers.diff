@@ -1,0 +1,23 @@
+--- a/src/java/org/apache/cassandra/transport/CQLMessageHandler.java
++++ b/src/java/org/apache/cassandra/transport/CQLMessageHandler.java
+@@ -831,8 +831,19 @@
+                 else
+                     handleErrorAndRelease(buildOverloadedException(endpointReserveCapacity, globalReserveCapacity, requestRateLimiter, overload), header);
+             else if (!isCorrupt)
+-                processRequest(assembleFrame(), backpressure);
++            {
++                try
++                {
++                    processRequest(assembleFrame(), backpressure);
++                }
++                finally
++                {
++                    // B1 diagnostic (OOM-exp, 2026-11-11): return the frame buffers once the request is decoded
++                    // (CBUtil.readValue copies values), as the self-contained path releases its frame.
++                    releaseBuffers();
++                }
++            }
+         }
+ 
+         @Override
+         protected void abort()

@@ -429,12 +429,13 @@ regime, evidence, status/range and stopping reason.
 
 | Mechanism / allocation domain | Priority | Status / next action |
 |---|---|---|
-| B1 / native-v5 request allocation lifecycle | P1 | open; audit recorded retention and construct repeated-cycle controls |
+| B1 / native-v5 request allocation lifecycle | P1 | **negative · deployment 2026-11-12** (run 1; [case](negatives/networking_cache_size-release-defect/networking_cache_size--release-defect.md)): release defect confirmed (missing `releaseBuffers()` in `LargeMessage.onComplete()`), but live direct memory plateaus at the 128 MiB pool cap; 0/4 OOM at heap 2 GiB, direct 512 MiB–2 GiB. Next: JIRA re-check and upstream report; internode traffic sharing the pool untested |
 | B2 / memtable and pre-V5 exceptional admission | P2 | open; separate paths, quantify outstanding-work bounds |
 | B3 / buffer-pool fallback | P2 | open; distinguish pool contract from total allocation |
 | B4 / cache explicit-clear release | P2 | open; trace ownership before repeated-cycle test |
 | B5 / periodic enforcement or replacement ordering | P3 | open; verify format/path and temporal bounds |
-| B6 / internode send+receive queues vs heap `Mutation`s (`source: flow:coordinator-write`) | P1 | **verified 2026-11-11** (runs 1–3; [case](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)): A — 8 GiB replica, storage stall, default settings: `verified-gap · service-loss · deployment`; B — 2 GiB coordinator, slow replica, 60 s timeouts: `reproduced-OOM · diagnostic` (was `verified-OOM`; V7 unmet, reclassified 2026-11-11); C — 2 GiB replica: candidate. Next: JIRA check (CASSANDRA-15066), stall-length sweep, ≥ 2 slow replicas at 8 GiB |
+| B7 / key + counter cache weigher vs heap (`source: R3/R4 recheck`) | P2 | **verified-gap · overshoot · deployment 2026-11-12** (run 1; [case](bypass/key_cache_size+counter_cache_size-accounting-mismatch/key_cache_size+counter_cache_size--accounting-mismatch.md)): key 2.14×, counter 1.80× their default caps, counters at cap; no OOM at defaults (0/3). Next: JIRA check and upstream report; other sstable formats / indexed partitions untested |
+| B6 / internode send+receive queues vs heap `Mutation`s (`source: flow:coordinator-write`) | P1 | **verified 2026-11-11** (runs 1–3; [case](bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)): A — 8 GiB replica, storage stall, default settings: `verified-gap · service-loss · deployment`; B — 2 GiB coordinator, slow replica, 60 s timeouts: `verified-OOM · diagnostic` (briefly `reproduced-OOM` 2026-11-11; restored the same day under the standing budget rule); C — 2 GiB replica: candidate; **D (run 4, 2026-11-12) — coordinator, two slow replicas, 60 s timeouts: `verified-OOM · diagnostic`, largest failing heap 6 GiB**; E — same at default timeouts, 512 MiB 3/5, no working intervention: candidate. Next: JIRA check (CASSANDRA-15066), stall-length sweep, E intervention |
 
 ## 2026-11-10 — B6 run 1 (bypass · accounting mismatch, default capacities)
 
@@ -599,8 +600,83 @@ Effect, evidence unchanged:
   dated status note naming the unmet V6/V7 values.
 - B6 condition B (2 GiB coordinator, 60 s timeouts): `verified-OOM · diagnostic` →
   `reproduced-OOM · diagnostic` (default capacities, V6 met; tightened 2 GiB heap, V7 unmet).
+  *Superseded the same day:* the researcher's standing budget rule (heap/direct ≥ 512 MiB meets V7,
+  2 GiB ideal) makes the 2 GiB heap acceptable, so B is `verified-OOM · diagnostic` again (V1–V7 met;
+  diagnostic for Byteman and 60 s timeouts). Evidence unchanged.
 - B6 condition A (default capacities, 8 GiB replica, external storage stall) keeps
   `verified-gap · service-loss · deployment`; its 8 GiB heap was reviewed and accepted by the researcher the same day (V7 met).
 - `convergence/` is empty again. Next step for R1–R4: test the same mechanisms with default
   constraints at an acceptable budget (a clean no-failure result there is a `negative`).
+
+## 2026-11-11/12 — B1 run 1 (bypass · release-defect, default capacities)
+
+**Lead source:** capacity-enforcement-exp `networking_cache_size` stage-4 arm L. **Nodes:** victim `apt140`
+(`/mydata/b1/runs/`), client `apt138`. Heap 2 GiB; direct 2 GiB and 512 MiB (standing budget rule); all
+capacity settings default. Run paused about 2 h by a usage limit (nothing running); interrupted lifetime
+`I-1-aborted` discarded and rerun. 22 Cassandra lifetimes, about 5 h 47 min wall.
+
+- **Source:** `CQLMessageHandler.LargeMessage.onComplete()` (5.0.9 `:821-835`) never calls
+  `releaseBuffers()`; pooled slots are pinned and overflow stashes are freed by GC without decrementing
+  `OverflowSize`. Native in-flight limits are returned normally.
+- **Cycles (12 × 200 prepared 1 MB INSERTs, 20 s idle):** S (v5) 3/3 defect — pool chunks reach the
+  128 MiB cap at cycle 5 and stay; slots in use plateau 82 MiB; `OverflowSize` 1.86–1.90 GB at cycle 12;
+  post-GC direct flat at +131 MiB (= cap). H4 (v4) 3/3 and H5s (100 kB, self-contained) 3/3 clean.
+  I (restored release, diagnostic patch) 3/3 residual removed at equal throughput.
+- **OOM probes (8 conn × 4 in flight, 10 min, ~30k requests):** 0/4 OOM (direct 2 GiB ×1, 512 MiB ×3);
+  at 512 MiB 124–131 forced Full GCs / 10 min (2.5% of wall, below the 90% service-loss criterion),
+  patched n=1: 14. ~15% client `WriteTimeout`s in every probe, patched or not (2 s default timeout).
+- **RSS:** +625–688 MiB over 12 cycles vs v4 +104–137 and patched +50–61; glibc retention
+  (`System.trim_native_heap` returns 468–552 MiB), not live memory.
+- **Status:** `negative · deployment` for memory (plateau at the cap + counter drift + allocator
+  retention; no overshoot or leak of live memory) → `negatives/`. The release defect itself is confirmed
+  and worth an upstream report after a JIRA re-check (the 2026-10-15 search found none). Untested:
+  internode traffic sharing the pool. Cleanup verified on both nodes.
+
+## 2026-11-11/12 — B7 run 1 (bypass · accounting mismatch, default capacities)
+
+**Lead source:** R3/R4 recheck dumps. **Node:** `apt149` (`/mydata/b7/`, 28 GB incl. 44 dumps). Heaps 512 MiB,
+2048 MiB and the node's auto heap (7965 MiB), direct 3982 MiB; shipped `cassandra.yaml` (checked per arm).
+45 arm executions; paused by a usage limit after the 43-arm batch.
+
+- **Source:** both caches use `CaffeineCache.create`, weigher `key.unsharedHeapSize() + value.unsharedHeapSize()`
+  (80 B key-cache / 112 B counter-cache entry). Omitted per entry ≈ 88–92 B: Caffeine node (40 B),
+  `ConcurrentHashMap$Node` (32 B), table and frequency-sketch slots (≈ 18 B). `cassandra.yaml` documents both as
+  "maximum size … in memory", so the contract is memory.
+- **Cache alone, filled to cap (n=3 each, repeats identical):** key 2.14×C (100 → 214 MiB), counter 1.80×C
+  (50 → 90 MiB) at 2 GiB and at 7965 MiB; same at 512 MiB (25 → 53.5, 12 → 21.7); 64 B keys 1.65/1.55; 512 B keys
+  1.15/1.15. K = C exactly. Sustained after 60 s idle and 50 % churn. Control (fill to 0.35×C) 0/3.
+  Invalidation releases 188–189 MiB (independent check).
+- **Intervention:** diagnostic weigher + 104 B/entry → U/C 0.95 / 0.93, 3/3 each; 57 % / 48 % fewer entries.
+- **OOM (all defaults, R4 workload mix, 30 min):** 0/2 at 512 MiB (live ≤ 62 %, STW 21–22 %, worst 60 s 62 %),
+  0/1 at 2048 MiB (live ≤ 45 %). Excess (≈ 38 / 154 MiB) far below headroom; no failing budget. Too few runs for
+  a `negative`. The R3/R4 OOMs needed custom 200–300 MiB caches.
+- **Harness note:** a bare `wait` also waited on the `tee` log process; mixed512-r1 ran without its sampler
+  (GC log only), mixed512-r2's final readings taken by hand. Recorded as design amendments.
+- **Status:** `verified-gap · overshoot · deployment` for both caches → `bypass/`. Limits: BIG sstables,
+  unindexed partitions, RF 1; U is a shallow-size estimate (±0.1 from power-of-two table sizing).
+
+## 2026-11-11/12 — B6 run 4 (bypass · accounting mismatch; coordinator, two slow replicas, budget search)
+
+**Node:** `pc96` (`/mydata/b6/runs4/`, ≈ 43 GB incl. dumps; patch build `/mydata/b6/cassandra-p4`). Ring: slow
+replicas V1, V2 owning disjoint halves (`{v:1,f:1}`) on the run-2 dm-delay device, fast replica F (CL=ONE),
+coordinator S owning no data. Java client 8 sessions × 256 in flight to S; map (1000 cells) vs 11,000 B blob, both
+10.8 KiB on wire; 150 s load, 30 s write delay t = 20–150 s, 60 s observation. Capacities default throughout.
+Paused ≈ 2 h by a usage limit; the one cut-short arm (blob r3, 512 MiB) salvaged and rerun. Another session's
+Cassandra workload shared pc96 from ≈ 22:40 (load 8–18 / 32 cores), recorded per arm in `foreign.txt`.
+
+- **Phase D (default timeouts, no Byteman):** map 0/1 at 2 GiB, 1 GiB, 768 MiB, 640 MiB (live 63–89%);
+  **512 MiB 3/5** (+1/1 at a 2k/s client cap). Controls: rate-matched blob 0/3, no stall 0/1 (uncapped blob OOMs
+  3/3 — not matched, several times the write rate). Interventions fail: 8 MiB reserves 0/3, `hintOnFailure`-drop
+  patch 0/3. Dumps: ≈ 1,850 `Mutation`s (≈ 460 MiB) on write callbacks, K ≤ 6 MiB; with the patch the same
+  mutations sit in 1,829 queued messages (≈ 19 MiB on wire). Bound ≈ write rate × 2 s × 213 KiB.
+  → condition E `candidate` (V4 unmet).
+- **Phase X (60 s write/native timeouts):** 2 GiB 1/1 (service loss), 4 GiB 3/3, **6 GiB 3/3** (OOM + service
+  loss), 8 GiB 0/2 (≈ 99% live, 74–83% of worst 60 s in GC; both send queues at 132 MiB and dropping). Blob 0/3
+  and reserves 3/3 survive at 4 and 6 GiB. Dump at 4 GiB: 19,027 mutations (≈ 4.4 GiB), K ≈ 178 MiB.
+  → condition D `verified-OOM · diagnostic` (V1–V7 at 6 GiB; diagnostic for raised timeouts). The agent proposed
+  `reproduced-OOM`; filed as verified because V6 (capacities) and V7 (6 GiB ≥ 512 MiB) hold, consistent with B.
+- **Method notes:** service-loss check now counts all stop-the-world pauses (protocol's literal criterion; run 3's
+  `gcpeak.sh` missed spirals at 92–94%). At 512 MiB several OOMs did not fire the `kill -9` hook; OOMs read from
+  HotSpot safepoints and dumps; two dumps 0 bytes (JVM stopped mid-write).
+- Cleanup verified; run-2 `b6slow` dm-delay device and loop0 left in place at delay 0.
 

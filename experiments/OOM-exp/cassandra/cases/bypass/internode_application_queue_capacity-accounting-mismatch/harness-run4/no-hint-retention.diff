@@ -1,0 +1,11 @@
+--- a/src/java/org/apache/cassandra/service/StorageProxy.java	2026-11-11 21:54:08.136285114 -0500
++++ b/src/java/org/apache/cassandra/service/StorageProxy.java	2026-11-11 21:54:08.140285241 -0500
+@@ -1388,7 +1388,7 @@
+             writeMetrics.remoteRequests.mark();
+ 
+         AbstractReplicationStrategy rs = replicaPlan.replicationStrategy();
+-        AbstractWriteResponseHandler<IMutation> responseHandler = rs.getWriteResponseHandler(replicaPlan, callback, writeType, mutation.hintOnFailure(), requestTime);
++        AbstractWriteResponseHandler<IMutation> responseHandler = rs.getWriteResponseHandler(replicaPlan, callback, writeType, DatabaseDescriptor.hintedHandoffEnabled() ? mutation.hintOnFailure() : null, requestTime); // B6 run 4 diagnostic patch: keep the Mutation only if a hint could be written
+ 
+         performer.apply(mutation, replicaPlan, responseHandler, localDataCenter, requestTime);
+         return responseHandler;
