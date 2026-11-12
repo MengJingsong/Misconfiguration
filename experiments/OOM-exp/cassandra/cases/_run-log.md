@@ -600,7 +600,7 @@ Effect, evidence unchanged:
 - B6 condition B (2 GiB coordinator, 60 s timeouts): `verified-OOM · diagnostic` →
   `reproduced-OOM · diagnostic` (default capacities, V6 met; tightened 2 GiB heap, V7 unmet).
 - B6 condition A (default capacities, 8 GiB replica, external storage stall) keeps
-  `verified-gap · service-loss · deployment`; its budget argument awaits the researcher's review.
+  `verified-gap · service-loss · deployment`; its 8 GiB heap was reviewed and accepted by the researcher the same day (V7 met).
 - `convergence/` is empty again. Next step for R1–R4: test the same mechanisms with default
   constraints at an acceptable budget (a clean no-failure result there is a `negative`).
 

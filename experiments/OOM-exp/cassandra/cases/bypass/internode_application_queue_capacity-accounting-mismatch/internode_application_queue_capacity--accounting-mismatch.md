@@ -41,7 +41,7 @@ per-run records in [`history.md`](history.md). **Consolidated:** 2026-11-11.
 C = contract capacity on-wire; K = `internode_outbound.pending_bytes` / `internode_inbound.using_bytes`;
 U = live heap (class histogram after full GC, or GC-log occupancy after Full GC).
 
-**Labels.** A: capacities default; timeouts, threads, GC default; budget 8 GiB (deployment-sized);
+**Labels.** A: capacities default; timeouts, threads, GC default; budget 8 GiB (deployment-sized; V7 review: accepted by the researcher 2026-11-11);
 storage stall by dm-delay (external fault); hints off, key/counter cache 0 (accepted documented
 values); single host on loopback, `num_tokens: 1` (environment) → **deployment** (decided 2026-11-11).
 B and C: Byteman 100 ms per mutation and `concurrent_writes: 2` on the replica, 60 s timeouts, 2 GiB
@@ -123,7 +123,7 @@ Raw logs: `/mydata/b6/runs/` (run 1, run 3 `R3A_*`) and `/mydata/b6/runs2/` (run
 
 | Condition | V1 repetition | V2 matched control | V3 U apart from K | V4 intervention | V5 initiating failure | V6 default constraints | V7 acceptable budget | Status |
 |---|---|---|---|---|---|---|---|---|
-| A | 3/3 service loss | blob 0/3 | P1 histogram; GC-log live | 4/4 | GC logs | yes | 8 GiB heap (argued deployment-sized; researcher review pending) | **verified-gap · service-loss · deployment** |
+| A | 3/3 service loss | blob 0/3 | P1 histogram; GC-log live | 4/4 | GC logs | yes | 8 GiB heap (deployment-sized; accepted by the researcher 2026-11-11) | **verified-gap · service-loss · deployment** |
 | B | 4/4 heap OOM | blob 0/3 | histograms (run 1) | 4/4 | `ReportJavaOutOfMemory` + 2 dumps | yes | **no** (2 GiB, tightened) | **reproduced-OOM · diagnostic** |
 | C | 3/4 (same-day survived) | blob 0/3 | histograms | 4/4 | run 1 dump | yes | no (2 GiB) | candidate |
 

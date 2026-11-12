@@ -255,7 +255,8 @@ requires V6 and V7.
   tagged mixed). B6 condition B (2 GiB coordinator, 60 s timeouts) becomes
   `reproduced-OOM · diagnostic`; B6 condition A (default capacities, 8 GiB replica
   heap, external storage stall) keeps `verified-gap · service-loss · deployment`,
-  its budget argument pending the researcher's review. Evidence is unchanged.
+  its 8 GiB heap reviewed and accepted by the researcher (V7 met, 2026-11-11). Evidence
+  is unchanged.
 
 **Cases filed before 2026-11-06** carry the suffix `(pre-protocol)`. They were
 judged under earlier rules, often from a single failing run. On 2026-11-11, by the
