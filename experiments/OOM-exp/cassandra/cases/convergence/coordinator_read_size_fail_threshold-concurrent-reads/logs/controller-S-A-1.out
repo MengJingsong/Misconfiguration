@@ -1,0 +1,88 @@
+[2026-11-12T15:26:23Z] ARM S-A-1 arm=A heap=2G steps=slow;64;16:120;150;2048 maxReads=none conns=16
+[2026-11-12T15:26:28Z] started S-A-1 pid 380189 java
+[2026-11-12T15:27:35Z] ready S-A-1
+-XX:+HeapDumpOnOutOfMemoryError -Xms2G -Xmx2G -XX:MaxDirectMemorySize=3982M -XX:HeapDumpPath=/mydata/c2/runs/S-A-1/cassandra-1794497185-pid380189.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+15:27:38 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+15:27:46 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=64 rows=56 size=65536 pk0=0 errors=0
+15:27:51 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=1 rows=72 size=65536 pk0=1000 errors=0
+[2026-11-12T15:27:57Z] flushed
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 240960045
+		Compacted partition maximum bytes: 4866323
+15:28:01 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=1000 OK rows=72 valueBytes=4718592 warnings=[]
+15:28:05 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=0 OK rows=56 valueBytes=3670016 warnings=[]
+[2026-11-12T15:28:14Z] GC.run S-A-1
+1794497298,base,nmtOtherKB=505259,nmtTotalKB=2893366,rssKB=2496600,1794497298001,99487200,99487200,99487200,0,0,3763,0,0,47592623,0,0,82,78,0
+[2026-11-12T15:28:30Z] VICTIM DEAD at +11s
+[2026-11-12T15:29:11Z] OOM/GC check
+ERROR [Native-Transport-Requests-136] 2026-11-12T15:28:22,972 JVMStabilityInspector.java:70 - Exception in thread Thread[Native-Transport-Requests-136,10,SharedPool]
+org.apache.cassandra.transport.messages.ErrorMessage$WrappedException: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at org.apache.cassandra.transport.messages.ErrorMessage.wrap(ErrorMessage.java:486)
+	at org.apache.cassandra.transport.Message.encode(Message.java:423)
+	at org.apache.cassandra.transport.PreV5Handlers$LegacyDispatchHandler.toFlushItem(PreV5Handlers.java:95)
+	at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:462)
+	at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+	at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newChunk(PoolArena.java:693)
+	at io.netty.buffer.PoolArena.allocateNormal(PoolArena.java:213)
+	at io.netty.buffer.PoolArena.tcacheAllocateNormal(PoolArena.java:195)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:137)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+--
+ERROR [Native-Transport-Requests-136] 2026-11-12T15:28:23,127 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newChunk(PoolArena.java:693)
+	at io.netty.buffer.PoolArena.allocateNormal(PoolArena.java:213)
+	at io.netty.buffer.PoolArena.tcacheAllocateNormal(PoolArena.java:195)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:137)
+	at io.netty.buffer.PoolArena.allocate(PoolArena.java:127)
+	at io.netty.buffer.PooledByteBufAllocator.newDirectBuffer(PooledByteBufAllocator.java:403)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:188)
+	at io.netty.buffer.AbstractByteBufAllocator.directBuffer(AbstractByteBufAllocator.java:179)
+	at io.netty.buffer.AbstractByteBufAllocator.buffer(AbstractByteBufAllocator.java:116)
+--
+ERROR [Native-Transport-Requests-136] 2026-11-12T15:28:22,972 JVMStabilityInspector.java:70 - Exception in thread Thread[Native-Transport-Requests-136,10,SharedPool]
+org.apache.cassandra.transport.messages.ErrorMessage$WrappedException: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at org.apache.cassandra.transport.messages.ErrorMessage.wrap(ErrorMessage.java:486)
+	at org.apache.cassandra.transport.Message.encode(Message.java:423)
+	at org.apache.cassandra.transport.PreV5Handlers$LegacyDispatchHandler.toFlushItem(PreV5Handlers.java:95)
+	at org.apache.cassandra.transport.Dispatcher.processRequest(Dispatcher.java:462)
+	at org.apache.cassandra.transport.Dispatcher$RequestProcessor.run(Dispatcher.java:307)
+	at org.apache.cassandra.concurrent.FutureTask$1.call(FutureTask.java:99)
+	at org.apache.cassandra.concurrent.FutureTask.call(FutureTask.java:61)
+	at org.apache.cassandra.concurrent.FutureTask.run(FutureTask.java:71)
+	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+Caused by: io.netty.util.internal.OutOfDirectMemoryError: failed to allocate 16777216 byte(s) of direct memory (used: 4160749568, max: 4175429632)
+	at io.netty.util.internal.PlatformDependent.incrementMemoryCounter(PlatformDependent.java:880)
+	at io.netty.util.internal.PlatformDependent.allocateDirectNoCleaner(PlatformDependent.java:809)
+	at io.netty.buffer.PoolArena$DirectArena.allocateDirect(PoolArena.java:718)
+	at io.netty.buffer.PoolArena$DirectArena.newChunk(PoolArena.java:693)
+-rw-------  1 jason92 misconfiguration 303940321 Nov 12 08:28 cassandra-1794497185-pid380189.hprof
+pauses=51 full_gcs=15 total_pause=2s max60=3% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@117.584s,ReportJavaOutOfMemory@118.983s
+[2026-11-12T15:29:14Z] stopped S-A-1
+no java left
+[2026-11-12T15:29:22Z] END S-A-1

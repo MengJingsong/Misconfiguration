@@ -1,0 +1,15 @@
+arm A-c16: direct=2048M L=default fill=4000x520000B threads=16 ips=1 burst=none dump=dump
+node pid 84403: -Xmx2048M MaxDirectMemorySize=2048M dob_max_recycle_bytes=default; poller 85174
+p idle1 07:44:52: directMiB=51.4 count=101 threads=67 heapMiB=81 nmtOther=committed=314828KB rssAnonKB=2432904
+p idle2 07:45:03: directMiB=51.4 count=102 threads=68 heapMiB=81 nmtOther=committed=314831KB rssAnonKB=2432308
+sep idle: SEP worker threads (distinct ids)=17; by last stage:  1 "MutationStage-  9 "Native-Transport-Requests-  7 "ReadStage- 
+fill clients: rc=0 Op rate : 86 op/s [insert: 86 op/s]|Total partitions : 4,000 [insert: 4,000]|Total errors : 0 [insert: 0]| ;; 
+window fill: samples=210 peakDirectMiB=88.0 (at 1794494749351) minMiB=51.4 peakCount=177
+p retained 07:46:27: directMiB=85.9 count=160 threads=109 heapMiB=1360 nmtOther=committed=448389KB rssAnonKB=2507728
+sep retained: SEP worker threads (distinct ids)=47; by last stage:  25 "MutationStage-  22 "Native-Transport-Requests- 
+dump retained: 154438887 B in 0 s
+p after-dump-retained 07:46:29: directMiB=85.9 count=160 threads=109 heapMiB=120 nmtOther=committed=448389KB rssAnonKB=2511220
+server writes after fill: 	Write Count: 4000
+window whole-run: samples=420 peakDirectMiB=88.0 (at 1794494757607) minMiB=51.4 peakCount=177
+ERROR lines: 0; OOM lines: 1; node alive at end: yes
+hprof retained.hprof:  53 35883504 34.2 DataOutputBuffer$1$1.buffer (DOB thread-local scratch) | capacity sum 90022530 B = 85.9 MiB |  threads by pool: {'MutationStage': 25, 'Native-Transport-Requests': 22, 'NonPeriodicTasks:1': 1, 'OptionalTasks:1': 1, 'CompactionExecutor:4': 1, 'PerDiskMemtableFlushWriter_0:2': 1, 'PerDiskMemtableFlushWriter_0:1': 1, 'CompactionExecutor:3': 1}

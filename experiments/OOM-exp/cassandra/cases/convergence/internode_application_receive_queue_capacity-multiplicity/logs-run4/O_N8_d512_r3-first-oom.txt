@@ -1,0 +1,43 @@
+# O_N8_d512_r3: first java.lang.OutOfMemoryError in victim system.log (excerpt), JVM args line removed
+687-INFO  [NonPeriodicTasks:1] 2026-11-12T15:07:16,586 BigFormat.java:231 - Deleting sstable: /mydata/c1r4/shm/V/data/c1/t-ab10fd60deaa11f19c433bab1dde4472/nb-25-big
+688-ERROR [CompactionExecutor:1] 2026-11-12T15:07:16,583 JVMStabilityInspector.java:70 - Exception in thread Thread[CompactionExecutor:1,5,CompactionExecutor]
+689:java.lang.OutOfMemoryError: Direct buffer memory
+690-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+691-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+692-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+693-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+694-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+695-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+696-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:112)
+697-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:83)
+698-	at org.apache.cassandra.db.marshal.ByteArrayAccessor.write(ByteArrayAccessor.java:63)
+699-	at org.apache.cassandra.db.marshal.ByteArrayAccessor.write(ByteArrayAccessor.java:40)
+700-	at org.apache.cassandra.db.marshal.ValueAccessor.writeWithVIntLength(ValueAccessor.java:174)
+701-	at org.apache.cassandra.db.marshal.AbstractType.writeValue(AbstractType.java:550)
+702-	at org.apache.cassandra.db.rows.Cell$Serializer.serialize(Cell.java:304)
+703-	at org.apache.cassandra.db.rows.UnfilteredSerializer.lambda$serializeRowBody$0(UnfilteredSerializer.java:252)
+704-	at org.apache.cassandra.utils.btree.BTree.applyValue(BTree.java:1765)
+705-	at org.apache.cassandra.utils.btree.BTree.applyLeaf(BTree.java:1773)
+706-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1788)
+707-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1814)
+708-	at org.apache.cassandra.db.rows.BTreeRow.apply(BTreeRow.java:201)
+709-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serializeRowBody(UnfilteredSerializer.java:240)
+710-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:197)
+711-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:140)
+712-	at org.apache.cassandra.io.sstable.format.SortedTablePartitionWriter.addUnfiltered(SortedTablePartitionWriter.java:143)
+713-	at org.apache.cassandra.io.sstable.format.big.BigFormatPartitionWriter.addUnfiltered(BigFormatPartitionWriter.java:210)
+714-	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addRow(SortedTableWriter.java:212)
+
+# last 8 victim samples before death (epoch_ms,direct_used,direct_count,heap_used,mut_pending,mut_active,net_pool_size,net_pool_overflow,cc_pool_size,K_using,K_reserve,peers_using,max_peer_using,throttled,received,processed,expired,...)
+1794496029534,120366082,122,1729898872,0,2,67108864,0,8388608,5243165,0,4,2097266,0,5260,5251,8,8389064,5072161598,5059774781,4
+1794496030534,140301522,125,1045349008,71,32,92274688,0,8388608,79696108,46141676,8,13632229,0,5773,5693,8,8389064,5606965644,5520125884,7
+1794496031534,144528392,127,505001840,4,2,92274688,0,8388608,81793374,53481651,8,15729495,0,6272,6189,8,8389064,6124042056,6035006669,28
+1794496032534,245178759,135,1846138144,55,32,134217728,0,8388608,75501576,41947144,8,15729495,0,6834,6759,8,8389064,6708460203,6627486200,9
+1794496033534,302293691,2330,1107610184,105,32,204810460,70592732,8388608,139468189,105913757,8,26215825,0,7304,7167,8,8389064,7197091210,7052183305,5
+1794496034534,396277047,5499,994207000,269,32,304822480,166115687,8388608,299909038,266354606,8,56626182,0,7831,7542,8,8389064,7741433214,7435986213,37
+1794496035534,536851744,10917,660191400,459,32,482822157,348604429,8388608,519073335,485518903,8,116398263,0,8307,7808,8,8389064,8237535675,7711777440,6
+1794496036534,536851902,10948,656972104,459,32,483903501,349685773,8388608,519073335,485518903,8,116398263,0,8307,7808,8,8389064,8237535675,7711777440,6
+# kill record
+INFO  [main] 2026-11-12T15:05:39,532 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/c1r4/ring/V/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms2G, -Xmx2G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=32, -XX:ConcGCThreads=32, -XX:CompileCommandFile=/mydata/c1r4/ring/V/conf/hotspot_compiler, -javaagent:/mydata/b6/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/c1r4/ring/V/dumps/cassandra-1794495936-pid1683940.hprof, -Dcassandra.jmx.local.port=7221, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/b6/cassandra/bin/../lib/sigar-bin, -XX:MaxDirectMemorySize=512M, -XX:-HeapDumpOnOutOfMemoryError, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/c1r4/ring/V/logs, -Dcassandra.storagedir=/mydata/b6/cassandra/bin/../data, -Dcassandra-pidfile=/mydata/c1r4/ring/V/cass.pid, -Dcassandra-foreground=yes]
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 1683940"...

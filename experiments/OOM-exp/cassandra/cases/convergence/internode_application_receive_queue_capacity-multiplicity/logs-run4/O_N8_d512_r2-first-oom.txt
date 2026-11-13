@@ -1,0 +1,43 @@
+# O_N8_d512_r2: first java.lang.OutOfMemoryError in victim system.log (excerpt), JVM args line removed
+775-INFO  [Service Thread] 2026-11-12T15:02:33,827 GCInspector.java:286 - G1 Old Generation GC in 490ms.  G1 Old Gen: 659590616 -> 659592912; 
+776-ERROR [Messaging-EventLoop-3-2] 2026-11-12T15:02:33,941 JVMStabilityInspector.java:123 - OutOfMemory error letting the JVM handle the error:
+777:java.lang.OutOfMemoryError: Direct buffer memory
+778-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+779-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+780-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+781-	at org.apache.cassandra.utils.memory.BufferPool.allocate(BufferPool.java:238)
+782-	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.get(BufferPool.java:923)
+783-	at org.apache.cassandra.utils.memory.BufferPool$LocalPool.get(BufferPool.java:896)
+784-	at org.apache.cassandra.net.LocalBufferPoolAllocator.get(LocalBufferPoolAllocator.java:49)
+785-	at org.apache.cassandra.net.FrameDecoderLZ4.unpackFrame(FrameDecoderLZ4.java:141)
+786-	at org.apache.cassandra.net.FrameDecoderWith8bHeader.decode(FrameDecoderWith8bHeader.java:135)
+787-	at org.apache.cassandra.net.FrameDecoderLZ4.decode(FrameDecoderLZ4.java:159)
+788-	at org.apache.cassandra.net.FrameDecoder.channelRead(FrameDecoder.java:283)
+789-	at org.apache.cassandra.net.FrameDecoder.channelRead(FrameDecoder.java:273)
+790-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+791-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+792-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+793-	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1357)
+794-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+795-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+796-	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:868)
+797-	at io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:805)
+798-	at io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe$1.run(AbstractEpollChannel.java:425)
+799-	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:173)
+800-	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:166)
+801-	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472)
+802-	at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:405)
+
+# last 8 victim samples before death (epoch_ms,direct_used,direct_count,heap_used,mut_pending,mut_active,net_pool_size,net_pool_overflow,cc_pool_size,K_using,K_reserve,peers_using,max_peer_using,throttled,received,processed,expired,...)
+1794495746258,256216745,156,1176912800,2,28,134217728,0,8388608,35653522,9438609,8,9437697,0,7155,7125,0,0,7045889122,7013381556,26
+1794495747258,249891741,140,1367503752,58,32,134217728,0,8388608,85987906,53481879,8,15729495,0,7713,7635,0,0,7625490641,7541895027,12
+1794495748258,347081972,2825,597875920,190,32,222971640,89212664,8388608,240136957,206582525,8,52431650,0,8204,7983,0,0,8138306638,7901578009,19
+1794495749258,432180987,7081,610418712,295,32,351476210,217422322,8388608,367021550,333467118,8,71307044,0,8749,8233,171,179316243,8701850805,8158495185,11
+1794495750390,448728909,7715,660750360,317,32,386308594,253204978,8388608,367021550,333467118,8,78647475,0,8775,8244,186,195045738,8729868927,8170030148,5
+1794495751390,536841799,10904,657296856,420,32,484612594,350394866,8388608,480273914,454059457,7,117446896,0,9064,8381,231,242234223,9030761342,8312644459,5
+1794495752390,536841727,10876,658464608,415,32,483531250,349313522,8388608,473982116,448816292,6,137370923,1,10110,8586,1077,1129377741,10123602494,8522372842,5
+1794495753390,536842089,10972,659598864,429,32,486676978,352459250,8388608,488662978,463497154,6,137370923,1,10124,8586,1077,1129377741,10137595228,8522372842,6
+# kill record
+INFO  [main] 2026-11-12T15:00:53,091 CassandraDaemon.java:619 - JVM Arguments: [-ea, -da:net.openhft..., -XX:+UseThreadPriorities, -XX:+HeapDumpOnOutOfMemoryError, -Xss256k, -XX:+AlwaysPreTouch, -XX:+UseTLAB, -XX:+ResizeTLAB, -XX:+UseNUMA, -XX:+PerfDisableSharedMem, -Djava.net.preferIPv4Stack=true, -Dchronicle.analytics.disable=true, -XX:-UseBiasedLocking, -XX:+UseG1GC, -XX:+ParallelRefProcEnabled, -XX:MaxTenuringThreshold=2, -XX:G1HeapRegionSize=16m, -XX:+UnlockExperimentalVMOptions, -XX:G1NewSizePercent=50, -XX:G1RSetUpdatingPauseTimePercent=5, -XX:MaxGCPauseMillis=300, -XX:InitiatingHeapOccupancyPercent=70, -Djdk.attach.allowAttachSelf=true, --add-exports=java.base/jdk.internal.misc=ALL-UNNAMED, --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED, --add-exports=java.base/jdk.internal.util=ALL-UNNAMED, --add-exports=java.base/sun.nio.ch=ALL-UNNAMED, --add-exports=java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED, --add-exports=java.rmi/sun.rmi.server=ALL-UNNAMED, --add-exports=java.sql/java.sql=ALL-UNNAMED, --add-opens=java.base/java.lang.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED, --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED, --add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED, --add-opens=java.base/jdk.internal.math=ALL-UNNAMED, --add-opens=java.base/jdk.internal.module=ALL-UNNAMED, --add-opens=java.base/jdk.internal.util.jar=ALL-UNNAMED, --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED, -Dio.netty.tryReflectionSetAccessible=true, -Dio.netty.allocator.useCacheForAllThreads=true, -Dio.netty.allocator.maxOrder=11, -Xlog:gc=info,heap*=trace,age*=debug,safepoint=info,promotion*=trace:file=/mydata/c1r4/ring/V/logs/gc.log:time,uptime,pid,tid,level:filecount=10,filesize=10485760, -Xms2G, -Xmx2G, -XX:MaxDirectMemorySize=15872M, -XX:ParallelGCThreads=32, -XX:ConcGCThreads=32, -XX:CompileCommandFile=/mydata/c1r4/ring/V/conf/hotspot_compiler, -javaagent:/mydata/b6/cassandra/bin/../lib/jamm-0.4.0.jar, -XX:HeapDumpPath=/mydata/c1r4/ring/V/dumps/cassandra-1794495650-pid1675940.hprof, -Dcassandra.jmx.local.port=7221, -Dcom.sun.management.jmxremote.authenticate=false, -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password, -Djava.library.path=/mydata/b6/cassandra/bin/../lib/sigar-bin, -XX:MaxDirectMemorySize=512M, -XX:-HeapDumpOnOutOfMemoryError, -XX:OnOutOfMemoryError=kill -9 %p, -Dlogback.configurationFile=logback.xml, -Dcassandra.logdir=/mydata/c1r4/ring/V/logs, -Dcassandra.storagedir=/mydata/b6/cassandra/bin/../data, -Dcassandra-pidfile=/mydata/c1r4/ring/V/cass.pid, -Dcassandra-foreground=yes]
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 1675940"...

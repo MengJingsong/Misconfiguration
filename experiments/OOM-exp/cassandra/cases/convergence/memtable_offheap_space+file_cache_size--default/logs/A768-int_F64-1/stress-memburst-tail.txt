@@ -1,0 +1,25 @@
+java.lang.RuntimeException: Encountered exception creating schema
+	at org.apache.cassandra.stress.settings.SettingsSchema.createKeySpaces(SettingsSchema.java:88)
+	at org.apache.cassandra.stress.settings.StressSettings.maybeCreateKeyspaces(StressSettings.java:159)
+	at org.apache.cassandra.stress.StressAction.run(StressAction.java:58)
+	at org.apache.cassandra.stress.Stress.run(Stress.java:101)
+	at org.apache.cassandra.stress.Stress.main(Stress.java:54)
+Caused by: com.datastax.driver.core.exceptions.OperationTimedOutException: [localhost/127.0.0.1:9042] Timed out waiting for server response
+	at com.datastax.driver.core.exceptions.OperationTimedOutException.copy(OperationTimedOutException.java:45)
+	at com.datastax.driver.core.exceptions.OperationTimedOutException.copy(OperationTimedOutException.java:27)
+	at com.datastax.driver.core.DriverThrowables.propagateCause(DriverThrowables.java:37)
+	at com.datastax.driver.core.DefaultResultSetFuture.getUninterruptibly(DefaultResultSetFuture.java:295)
+	at com.datastax.driver.core.AbstractSession.execute(AbstractSession.java:60)
+	at org.apache.cassandra.stress.util.JavaDriverClient.execute(JavaDriverClient.java:228)
+	at org.apache.cassandra.stress.settings.SettingsSchema.createKeySpaces(SettingsSchema.java:76)
+	... 4 more
+Caused by: com.datastax.driver.core.exceptions.OperationTimedOutException: [localhost/127.0.0.1:9042] Timed out waiting for server response
+	at com.datastax.driver.core.RequestHandler$SpeculativeExecution.onTimeout(RequestHandler.java:981)
+	at com.datastax.driver.core.Connection$ResponseHandler$1.run(Connection.java:1638)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.run(HashedWheelTimer.java:715)
+	at com.datastax.shaded.netty.util.concurrent.ImmediateExecutor.execute(ImmediateExecutor.java:34)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelTimeout.expire(HashedWheelTimer.java:703)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$HashedWheelBucket.expireTimeouts(HashedWheelTimer.java:790)
+	at com.datastax.shaded.netty.util.HashedWheelTimer$Worker.run(HashedWheelTimer.java:503)
+	at com.datastax.shaded.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)

@@ -1,0 +1,28 @@
+params: XMX=2048M H_PROFILE=hints.yaml H_THREADS=16 H_N=6000000 F_THREADS=256 F_N=6000000 F_WITH_D=1 R_THREADS=64 D_THREADS=512 D_N=12000 D_SIZE=523000 D_LEAD=30 SECS=150 D_SECS=120 END_DUMP=0
+N2 (pid 378464) killed at 09:02:41
+N1 pid 377913: -Xmx2048M MaxDirectMemorySize=250MiB, dob_max_recycle_bytes and MAX_HINT_BUFFERS unset (defaults 1 MiB, 3); N2 DN
+s idle1 09:03:09: directMiB=51 direct=53937195 count=108 threads=120 rssAnonKB=2430160 swapKB/availMiB=0/12693 heap=[total 2097152K, used 215420K]
+s idle2 09:03:17: directMiB=51 direct=53937195 count=108 threads=121 rssAnonKB=2430288 swapKB/availMiB=0/12685 heap=[total 2097152K, used 231804K]
+histo idle: org.apache.cassandra.hints.HintsBuffer=1 
+H start 09:03:18.374: profile=hints.yaml n=6000000 threads=16 cap=150s
+s w1 09:03:32: directMiB=83 direct=87737794 count=169 threads=167 rssAnonKB=2568468 swapKB/availMiB=0/12049 heap=[total 2097152K, used 954920K]
+s w2 09:03:40: directMiB=115 direct=121558805 count=172 threads=166 rssAnonKB=2579340 swapKB/availMiB=0/12073 heap=[total 2097152K, used 965519K]
+s w3 09:03:48: directMiB=115 direct=121525953 count=169 threads=173 rssAnonKB=2579944 swapKB/availMiB=0/12080 heap=[total 2097152K, used 848286K]
+pool pre-dob: parked in HintsBufferPool take()=0; threads by prefix: "G=29 "Native-Transport-Requests-=25 "MutationStage-=23 "GC=16 "epollEventLoopGroup-=14 "Messaging-EventLoop-=10 
+F start 09:03:48.543: profile=local.yaml n=6000000 threads=256 cap=120s
+R start 09:03:48.544: profile=dob.yaml n=100000000 threads=64 cap=120s
+D start 09:03:48.545: profile=dob.yaml n=12000 threads=512 cap=120s
+s w4 09:04:05: directMiB=116 direct=121882647 count=323 threads=309 rssAnonKB=2652064 swapKB/availMiB=0/8698 heap=[total 2097152K, used 1181327K]
+pool w4: parked in HintsBufferPool take()=0; threads by prefix: "Native-Transport-Requests-=141 "G=34 "epollEventLoopGroup-=32 "MutationStage-=17 "GC=16 "Messaging-EventLoop-=10 
+R end 09:04:15
+s w5 09:04:16: directMiB=0 direct=? count=? threads=? rssAnonKB=? swapKB/availMiB=/10766 heap=[?]
+D end 09:04:19
+s w6: N1 GONE
+F end 09:04:21
+H end 09:04:21
+PEAK directMiB (sampled) = 116 of 250 (46%)
+stress-H: 
+stress-F: 
+stress-D: Op rate : 929 op/s [insert: 1,099 op/s]|Total partitions : 12,000 [insert: 12,000]|Total errors : 0 [insert: 0]|
+stress-R: 
+ERROR lines: 2; JVM OOM lines: 2; N1 alive at end: NO

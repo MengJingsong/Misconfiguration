@@ -1,0 +1,39 @@
+# O_N4_d512_r1: first java.lang.OutOfMemoryError in victim system.log (excerpt)
+545-INFO  [ScheduledTasks:1] 2026-11-12T15:56:52,035 StatusLogger.java:71 - CacheCleanupExecutor                 0         0              0         0                 0
+546-ERROR [MutationStage-14] 2026-11-12T15:56:52,172 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-14,10,SharedPool]
+547:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+548-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+549-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+550-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+551-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+552-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+553-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+554-	at java.base/java.lang.Thread.run(Thread.java:829)
+555-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+556-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+557-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+558-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+559-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+560-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+561-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+562-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:112)
+563-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:83)
+564-	at org.apache.cassandra.db.marshal.ByteArrayAccessor.write(ByteArrayAccessor.java:63)
+565-	at org.apache.cassandra.db.marshal.ByteArrayAccessor.write(ByteArrayAccessor.java:40)
+566-	at org.apache.cassandra.db.marshal.ValueAccessor.writeWithVIntLength(ValueAccessor.java:174)
+567-	at org.apache.cassandra.db.marshal.AbstractType.writeValue(AbstractType.java:550)
+568-	at org.apache.cassandra.db.rows.Cell$Serializer.serialize(Cell.java:304)
+569-	at org.apache.cassandra.db.rows.UnfilteredSerializer.lambda$serializeRowBody$0(UnfilteredSerializer.java:252)
+570-	at org.apache.cassandra.utils.btree.BTree.applyValue(BTree.java:1765)
+571-	at org.apache.cassandra.utils.btree.BTree.applyLeaf(BTree.java:1773)
+572-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1788)
+
+# last 8 victim samples before death (epoch_ms,direct_used,direct_count,heap_used,mut_pending,mut_active,net_pool_size,net_pool_overflow,cc_pool_size,K_using,K_reserve,peers_using,max_peer_using,throttled,received,processed,expired,...)
+1794499004294,175153842,128,1193997056,0,2,125829120,0,8388608,2097266,0,2,1048633,0,2694,2694,0,0,2372782545,2372127185,8
+1794499005294,175186496,129,1260089904,33,32,125829120,0,8388608,92279704,75502488,4,35653522,0,3249,3164,0,0,2949172770,2857646901,6
+1794499006294,234954394,135,800118136,21,32,125829120,0,8388608,69209778,52432562,4,24118559,0,3776,3714,0,0,3492204093,3424960623,22
+1794499007294,244359938,134,473184144,88,32,134217728,0,8388608,131079125,117447580,4,70258411,0,4513,4388,0,0,4251286877,4120207752,160
+1794499008294,338704174,4892,1064585616,272,32,289633862,156433062,8388608,324027597,307250381,4,94376970,0,5049,4743,0,0,4812634226,4489327696,6
+1794499009294,489837184,8327,517713352,340,32,396280103,265863463,8388608,432036796,415259580,4,120592795,0,5418,5010,0,0,5195321458,4765119898,229
+1794499010295,507990868,8885,598159360,319,32,418627879,285557031,8388608,455106722,438329506,4,137370923,2,5729,5239,59,61869347,5512601291,4995822001,7
+1794499011295,536860105,10928,654544264,441,32,485572903,351355175,8388608,499149308,482372092,4,137370923,2,5774,5242,59,61869347,5554514808,4995822852,6

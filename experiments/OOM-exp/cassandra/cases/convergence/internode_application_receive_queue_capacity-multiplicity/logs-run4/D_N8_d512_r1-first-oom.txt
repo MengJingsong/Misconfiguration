@@ -1,0 +1,39 @@
+# D_N8_d512_r1: first java.lang.OutOfMemoryError in victim system.log (excerpt)
+637-INFO  [Service Thread] 2026-11-12T16:10:59,635 GCInspector.java:286 - G1 Old Generation GC in 445ms.  G1 Old Gen: 659403064 -> 658351368; 
+638-ERROR [PerDiskMemtableFlushWriter_0:2] 2026-11-12T16:11:00,291 JVMStabilityInspector.java:70 - Exception in thread Thread[PerDiskMemtableFlushWriter_0:2,5,PerDiskMemtableFlushWriter_0]
+639:java.lang.OutOfMemoryError: Direct buffer memory
+640-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+641-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+642-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+643-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+644-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+645-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+646-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:135)
+647-	at org.apache.cassandra.db.marshal.ByteBufferAccessor.write(ByteBufferAccessor.java:63)
+648-	at org.apache.cassandra.db.marshal.ByteBufferAccessor.write(ByteBufferAccessor.java:42)
+649-	at org.apache.cassandra.db.marshal.ValueAccessor.writeWithVIntLength(ValueAccessor.java:174)
+650-	at org.apache.cassandra.db.marshal.AbstractType.writeValue(AbstractType.java:550)
+651-	at org.apache.cassandra.db.rows.Cell$Serializer.serialize(Cell.java:304)
+652-	at org.apache.cassandra.db.rows.UnfilteredSerializer.lambda$serializeRowBody$0(UnfilteredSerializer.java:252)
+653-	at org.apache.cassandra.utils.btree.BTree.applyValue(BTree.java:1765)
+654-	at org.apache.cassandra.utils.btree.BTree.applyLeaf(BTree.java:1773)
+655-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1788)
+656-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1814)
+657-	at org.apache.cassandra.db.rows.BTreeRow.apply(BTreeRow.java:201)
+658-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serializeRowBody(UnfilteredSerializer.java:240)
+659-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:197)
+660-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:140)
+661-	at org.apache.cassandra.io.sstable.format.SortedTablePartitionWriter.addUnfiltered(SortedTablePartitionWriter.java:143)
+662-	at org.apache.cassandra.io.sstable.format.big.BigFormatPartitionWriter.addUnfiltered(BigFormatPartitionWriter.java:210)
+663-	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addRow(SortedTableWriter.java:212)
+664-	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addUnfiltered(SortedTableWriter.java:203)
+
+# last 8 victim samples before death (epoch_ms,direct_used,direct_count,heap_used,mut_pending,mut_active,net_pool_size,net_pool_overflow,cc_pool_size,K_using,K_reserve,peers_using,max_peer_using,throttled,received,processed,expired,...)
+1794499852947,175988687,137,1776635064,0,2,125829120,0,8388608,4194532,0,3,2097266,0,6707,6705,0,0,6600506838,6597066084,10
+1794499853947,179101758,134,1399671952,0,2,125829120,0,8388608,7340431,0,6,2097266,0,7219,7214,0,0,7136260499,7129772150,8
+1794499854948,183328594,136,984245056,0,16,125829120,0,8388608,20972660,5243621,6,8389064,0,7757,7741,0,0,7692104747,7672967266,6
+1794499855948,266632202,505,1153448648,71,32,146276352,12058624,8388608,99620135,66065703,8,17826761,0,8359,8266,0,0,8311227573,8213016576,25
+1794499856948,229014201,222,378936680,115,32,136399371,2181643,8388608,152051785,118497353,8,36702155,0,8855,8713,0,0,8828827506,8678610900,5
+1794499857948,333314983,3498,1579372904,210,32,237120660,100510868,8388608,261109617,227555185,8,36702155,0,9487,9242,0,0,9487239280,9229144547,5
+1794499858949,536870488,10866,659403064,452,32,481900422,347682694,8388608,512781537,479227105,8,72355677,0,9773,9289,0,0,9783250529,9273189021,5
+1794499859949,536870609,10898,660457040,453,32,482948998,348731270,8388608,513830170,480275738,8,72355677,0,9774,9289,0,0,9783676570,9273189021,6

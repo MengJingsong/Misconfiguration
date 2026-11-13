@@ -1,0 +1,56 @@
+# DD_N8_d512_r1: hprof_direct.py on the heap dump written at Cassandra's forced heap OOM right after the direct OOM (dump kept at /mydata/c1r4/runs/DD_N8_d512_r1/)
+# victim death t=19s after load start; lastK=474 lastU=512 MiB one sample (<=1 s) before death
+DirectByteBuffer instances: 31175; owners (allocateDirect) 10999 = 511.0 MiB; mapped 37 = 64.1 MiB; slices of owners 9997; other 10142
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=96.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=536870912, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=536870912
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 10142, total capacity 761.1 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 511.0 MiB):
+  R: receive queue, queued LARGE frames                   311.7 MiB   61.0 %
+  P: BufferPool chunks, no live consumer                  136.3 MiB   26.7 %
+  O: hints buffers                                         32.2 MiB    6.3 %
+  R: inbound frames being decoded                          28.3 MiB    5.5 %
+  O: netty / NIO buffers                                    1.3 MiB    0.2 %
+  O: storage I/O buffers                                    1.1 MiB    0.2 %
+  O: DataOutputBuffer scratch                               0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  O: netty / NIO buffers:
+      [Ljava.nio.ByteBuffer;[].[] <- sun.nio.ch.Util$BufferCache.buffers <- java.lang.ThreadLocal$ThreadLocalMap$Entry.value <- [Ljava.lang.ThreadLocal$ThreadLocalMap$Entry;[].[] <- java.lang.ThreadLocal$ThreadLocalMap.table <- io.netty.util.concurrent.FastThreadLocalThread.threadLocals
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.compressed
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  R: receive queue, queued LARGE frames:
+      org.apache.cassandra.net.ShareableBytes.bytes <- [Ljava.lang.Object;[].[] <- java.util.ArrayList.elementData <- org.apache.cassandra.net.InboundMessageHandler$LargeMessage.buffers
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  R: inbound frames being decoded:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.internal.ThreadExecutorMap$2.val$eventExecutor <- io.netty.util.concurrent.FastThreadLocalRunnable.runnable
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+
+Owner sizes (bytes x count, top 8): 32768 x 10869, 128 x 39, 49152 x 33, 8392704 x 17, 262144 x 5, 16384 x 5, 51 x 4, 65536 x 4
+
+Detail (bytes of slices or unsliced owners; slices may overlap their container chunk slab):
+    311.7 MiB  single     slice  R: receive queue, queued LARGE frames         org.apache.cassandra.net.ShareableBytes.bytes <- [Ljava.lang.Object;[].[] <- java.util.ArrayList.elementData
+    136.0 MiB  macro/pool slice  P: BufferPool chunks, no live consumer        org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+     32.0 MiB  macro/pool owner  O: hints buffers                              org.apache.cassandra.hints.HintsBuffer.slab
+     27.9 MiB  single     owner  R: inbound frames being decoded               org.apache.cassandra.net.ShareableBytes.bytes <- org.apache.cassandra.net.FrameDecoder$IntactFrame.contents
+      1.0 MiB  single     owner  O: netty / NIO buffers                        io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- [Lio.netty.util.concurrent.EventExecutor;[].[]
+      0.8 MiB  single     owner  O: storage I/O buffers                        org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$Block.buffer <- java.util.HashMap$Node.value <- [Ljava.util.HashMap$Node;[].[]
+      0.3 MiB  single     owner  R: inbound frames being decoded               io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- [Lio.netty.util.concurrent.EventExecutor;[].[]
+      0.2 MiB  single     owner  O: storage I/O buffers                        org.apache.cassandra.io.util.ThreadLocalReadAheadBuffer$Block.buffer <- java.util.HashMap$Node.value <- java.util.HashMap$Node.next
+      0.2 MiB  single     owner  O: hints buffers                              org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+      0.2 MiB  single     slice  P: BufferPool chunks, no live consumer        org.apache.cassandra.net.BufferPoolAllocator$Wrapped.buffer
+      0.1 MiB  single     owner  O: netty / NIO buffers                        io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- java.util.concurrent.ConcurrentHashMap$Node.key
+      0.0 MiB  single     owner  O: storage I/O buffers                        org.apache.cassandra.io.compress.CompressedSequentialWriter.compressed
+      0.0 MiB  single     owner  O: storage I/O buffers                        org.apache.cassandra.io.compress.CompressedSequentialWriter.buffer
+      0.0 MiB  single     owner  R: inbound frames being decoded               io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.internal.ThreadExecutorMap$2.val$eventExecutor
+      0.0 MiB  single     owner  O: netty / NIO buffers                        io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.internal.ThreadExecutorMap$1.val$eventExecutor
+      0.0 MiB  single     owner  O: netty / NIO buffers                        [Ljava.nio.ByteBuffer;[].[] <- sun.nio.ch.Util$BufferCache.buffers <- java.lang.ThreadLocal$ThreadLocalMap$Entry.value
+      0.0 MiB  single     slice  O: netty / NIO buffers                        io.netty.buffer.UnpooledUnsafeDirectByteBuf.buffer <- io.netty.channel.unix.IovArray.memory <- io.netty.channel.epoll.EpollEventLoop.iovArray
+      0.0 MiB  single     owner  R: inbound frames being decoded               org.apache.cassandra.net.ShareableBytes.bytes <- org.apache.cassandra.net.ShareableBytes.owner
+      0.0 MiB  single     owner  O: netty / NIO buffers                        [Ljava.lang.Object;[].[] <- io.netty.util.internal.InternalThreadLocalMap.indexedVariables <- io.netty.util.concurrent.FastThreadLocalThread.threadLocalMap
+      0.0 MiB  single     owner  O: DataOutputBuffer scratch                   org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+      0.0 MiB  single     owner  O: netty / NIO buffers                        static io.netty.buffer.EmptyByteBuf.EMPTY_BYTE_BUFFER
+      0.0 MiB  single     owner  P: BufferPool chunks, no live consumer        static org.apache.cassandra.utils.memory.BufferPool.EMPTY_BUFFER

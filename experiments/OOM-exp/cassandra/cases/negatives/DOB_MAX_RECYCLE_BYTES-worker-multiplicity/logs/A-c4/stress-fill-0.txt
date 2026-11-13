@@ -1,0 +1,232 @@
+Warning: ignoring deprecated parameter: native
+Warning: ignoring deprecated parameter: cql3
+******************** Stress Settings ********************
+Command:
+  Type: user
+  Count: 4,000
+  No Warmup: true
+  Consistency Level: ONE
+  Target Uncertainty: not applicable
+  Command Ratios: {insert=1.0}
+  Command Clustering Distribution: clustering=gaussian(1..10)
+  Profile File(s): /mydata/c3/logs/A-c4/fill.yaml
+Rate:
+  Auto: false
+  Thread Count: 4
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..4000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Errors:
+  Ignore: false
+  Tries: 4
+Log:
+  No Summary: false
+  No Settings: false
+  File: null
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  Protocol Version: V4
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: 128
+  Connections Per Host: 8
+  Compression: NONE
+Node:
+  Nodes: [127.0.0.2]
+  Is White List: false
+  Datacenter: null
+Schema:
+  Keyspace: null
+  Replication Strategy: org.apache.cassandra.locator.SimpleStrategy
+  Replication Strategy Options: {replication_factor=1}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  Truststore: null
+  Truststore Password: null
+  Keystore: null
+  Keystore Password: null
+  SSL Protocol: TLS
+  SSL Algorithm: null
+  SSL Ciphers: null
+Port:
+  Native Port: 9042
+  JMX Port: 7199
+JMX:
+  Username: null
+  Password: *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: null
+  Operation: USER
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+Credentials file:
+  File: *not set*
+  CQL username: *not set*
+  CQL password: *not set*
+  JMX username: *not set*
+  JMX password: *not set*
+  Transport truststore password: *not set*
+  Transport keystore password: *not set*
+Reporting:
+  Output frequency: 1s
+  Header frequency: *not set*
+
+******************** Profile(s) ********************
+  Keyspace Name: c3ks
+  Keyspace CQL: 
+***
+null***
+
+  Table Name: t
+  Table CQL: 
+***
+null***
+
+  Extra Schema Definitions: null
+  Generator Configs:
+    C0: Size: Fixed:  key=520000;
+    key: Size: Fixed:  key=10;Identity: Sequence:  start=1,end=100000000;
+  Query Definitions:
+    read1: CQL:select * from t where key = ?;Fields:samerow;
+  Token Range Queries:
+  Insert Settings:
+    partitions: fixed(1)
+    batchtype: UNLOGGED
+    select: fixed(1)/1
+Connected to cluster: oom-exp-c3, max pending requests per connection 128, max connections per host 8
+Datacenter: datacenter1; Host: /127.0.0.2:9042; Rack: rack1
+WARN  14:41:48,341 Query 'com.datastax.driver.core.Statement$1@4d547c79;' generated server side warning(s): `USE <keyspace>` with prepared statements is considered to be an anti-pattern due to ambiguity in non-qualified table names. Please consider removing instances of `Session#setKeyspace(<keyspace>)`, `Session#execute("USE <keyspace>")` and `cluster.newSession(<keyspace>)` from your code, and always use fully qualified table names (e.g. <keyspace>.<table>). Keyspace used: c3ks, statement keyspace: c3ks, statement id: e162e3f8f2c14f1b7d6788507f09db32
+Insert Statement:
+  UPDATE t SET "C0" = ? WHERE key = ?
+Generating batches with [1..1] partitions and [1..1] rows (of [1..1] total rows in the partitions)
+
+Sleeping 2s...
+Running [insert] with 4 threads for 4000 iteration
+Failed to connect over JMX; not collecting these stats
+type                                               total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors,  gc: #,  max ms,  sum ms,  sdv ms,      mb
+total,                                                   257,     257,     257,     257,     8.2,     6.9,    14.2,    40.5,    41.6,    41.6,    1.0,  0.00000,      0,      0,       0,       0,       0,       0
+total,                                                   850,     593,     593,     593,     6.7,     6.1,     8.0,    12.6,    67.5,    67.5,    2.0,  0.28763,      0,      0,       0,       0,       0,       0
+total,                                                  1031,     181,     181,     181,     6.2,     5.9,     9.5,    12.6,    12.7,    12.7,    3.0,  0.31289,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  1034,       3,       3,       3,  2009.2,  2008.0,  2013.3,  2013.3,  2013.3,  2013.3,    5.0,  0.48332,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  1037,       3,       3,       3,  2007.1,  2008.0,  2008.0,  2008.0,  2008.0,  2008.0,    7.0,  0.54142,      0,      0,       0,       0,       0,       0
+total,                                                  1376,     339,     339,     339,    30.4,     5.5,    10.4,  1020.8,  5041.6,  5041.6,    8.0,  0.62806,      0,      0,       0,       0,       0,       0
+total,                                                  1384,       8,       8,       8,   565.1,    12.7,  1119.9,  1119.9,  1119.9,  1119.9,    9.0,  0.70046,      0,      0,       0,       0,       0,       0
+total,                                                  1722,     338,     338,     338,     5.8,     5.4,     8.0,     8.8,     9.4,     9.4,   10.0,  0.54238,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  1726,       4,       4,       4,  2004.4,  2004.9,  2004.9,  2004.9,  2004.9,  2004.9,   12.0,  0.55976,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  1730,       4,       4,       4,  2006.2,  2007.0,  2007.0,  2007.0,  2007.0,  2007.0,   14.0,  0.57249,      0,      0,       0,       0,       0,       0
+total,                                                  1856,     126,     126,     126,    47.6,     5.2,     8.3,  1333.8,  1333.8,  1333.8,   15.0,  0.96230,      0,      0,       0,       0,       0,       0
+total,                                                  2072,     216,     216,     216,     5.5,     5.3,     7.6,    12.6,    12.8,    12.8,   16.0,  0.78441,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  2109,      37,      37,      37,   291.8,    10.3,  2005.9,  2005.9,  2005.9,  2005.9,   18.0,  0.81907,      0,      0,       0,       0,       0,       0
+total,                                                  2419,     310,     310,     310,     6.0,     5.3,     7.8,    50.0,    50.8,    50.8,   19.0,  0.65446,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  2423,       4,       4,       4,  2004.1,  2004.9,  2004.9,  2004.9,  2004.9,  2004.9,   21.0,  0.66038,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  2431,       8,       8,       8,  1259.5,   513.5,  2008.0,  2008.0,  2008.0,  2008.0,   23.0,  0.66771,      0,      0,       0,       0,       0,       0
+total,                                                  2765,     334,     334,     334,     7.9,     5.4,    12.3,    70.5,    78.5,    78.5,   24.0,  0.55557,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  2769,       4,       4,       4,  2004.6,  2004.9,  2005.9,  2005.9,  2005.9,  2005.9,   26.0,  0.55989,      0,      0,       0,       0,       0,       0
+total,                                                  2867,      98,      98,      98,    54.7,     6.7,    97.2,   979.9,   979.9,   979.9,   27.0,  0.72810,      0,      0,       0,       0,       0,       0
+total,                                                  3111,     244,     244,     244,     7.0,     4.5,     5.7,   153.9,   158.5,   158.5,   28.0,  0.69756,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3115,       4,       4,       4,  2003.8,  2003.8,  2004.9,  2004.9,  2004.9,  2004.9,   30.0,  0.69969,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3118,       3,       3,       3,  2006.5,  2007.0,  2007.0,  2007.0,  2007.0,  2007.0,   32.0,  0.70150,      0,      0,       0,       0,       0,       0
+total,                                                  3372,     254,     254,     254,    47.6,     4.7,    10.4,  1980.8,  3986.7,  3986.7,   34.0,  0.71221,      0,      0,       0,       0,       0,       0
+total,                                                  3462,      90,      90,      90,    18.5,     8.1,    98.0,   164.0,   164.0,   164.0,   35.0,  0.70126,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3466,       4,       4,       4,  2006.2,  2007.0,  2007.0,  2007.0,  2007.0,  2007.0,   37.0,  0.70279,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3470,       4,       4,       4,  2004.9,  2004.9,  2007.0,  2007.0,  2007.0,  2007.0,   39.0,  0.70420,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3474,       4,       4,       4,  2005.7,  2005.9,  2007.0,  2007.0,  2007.0,  2007.0,   41.0,  0.70551,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3478,       4,       4,       4,  2006.2,  2007.0,  2007.0,  2007.0,  2007.0,  2007.0,   43.0,  0.70674,      0,      0,       0,       0,       0,       0
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+com.datastax.driver.core.exceptions.WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write)
+total,                                                  3482,       4,       4,       4,  2003.3,  2003.8,  2003.8,  2003.8,  2003.8,  2003.8,   45.0,  0.70790,      0,      0,       0,       0,       0,       0
+total,                                                  3944,     462,     462,     462,    13.8,     4.8,     7.4,    66.9,   963.6,   963.6,   46.0,  0.68046,      0,      0,       0,       0,       0,       0
+total,                                                  4000,     794,     794,     794,     5.1,     4.8,     6.5,     7.1,     7.1,     7.1,   46.1,  0.65151,      0,      0,       0,       0,       0,       0
+
+
+Results:
+Op rate                   :       87 op/s  [insert: 87 op/s]
+Partition rate            :       87 pk/s  [insert: 87 pk/s]
+Row rate                  :       87 row/s [insert: 87 row/s]
+Latency mean              :   45.6 ms [insert: 45.6 ms]
+Latency median            :    5.5 ms [insert: 5.5 ms]
+Latency 95th percentile   :   12.2 ms [insert: 12.2 ms]
+Latency 99th percentile   : 2004.9 ms [insert: 2,004.9 ms]
+Latency 99.9th percentile : 2008.0 ms [insert: 2,008.0 ms]
+Latency max               : 5041.6 ms [insert: 5,041.6 ms]
+Total partitions          :      4,000 [insert: 4,000]
+Total errors              :          0 [insert: 0]
+Total GC count            : 0
+Total GC memory           : 0 B
+Total GC time             :    0.0 seconds
+Avg GC time               :    NaN ms
+StdDev GC time            :    0.0 ms
+Total operation time      : 00:00:46
+
+END

@@ -1,0 +1,19 @@
+arm B512-b6m-loT-r1: direct=512M L=default fill=4000x520000B threads=1 ips=1 burst=6000000:540:4:4 dump=nodump
+node pid 160811: -Xmx2048M MaxDirectMemorySize=512M dob_max_recycle_bytes=default; poller 161621
+p idle1 09:35:27: directMiB=51.4 count=101 threads=69 heapMiB=64 nmtOther=committed=150986KB rssAnonKB=2433044
+p idle2 09:35:39: directMiB=51.4 count=102 threads=70 heapMiB=80 nmtOther=committed=150986KB rssAnonKB=2433744
+sep idle: SEP worker threads (distinct ids)=19; by last stage:  1 "MutationStage-  7 "Native-Transport-Requests-  11 "ReadStage- 
+fill clients: rc=0 Op rate : 67 op/s [insert: 67 op/s]|Total partitions : 4,000 [insert: 4,000]|Total errors : 0 [insert: 0]| ;; 
+window fill: samples=263 peakDirectMiB=60.7 (at 1794501394344) minMiB=51.4 peakCount=135
+p retained 09:37:16: directMiB=58.6 count=120 threads=82 heapMiB=672 nmtOther=committed=158306KB rssAnonKB=2452776
+sep retained: SEP worker threads (distinct ids)=19; by last stage:  4 "MutationStage-  6 "Native-Transport-Requests-  9 "ReadStage- 
+server writes after fill: 	Write Count: 4000
+flush c3ks before burst: 3 s
+p post-flush 09:37:22: directMiB=58.6 count=120 threads=83 heapMiB=688 nmtOther=committed=158308KB rssAnonKB=2452968
+sep post-flush: SEP worker threads (distinct ids)=19; by last stage:  4 "MutationStage-  6 "Native-Transport-Requests-  9 "ReadStage- 
+p pre-burst 09:37:24: directMiB=58.6 count=120 threads=83 heapMiB=688 nmtOther=committed=158308KB rssAnonKB=2452968
+burst clients: rc=0 Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 135 [insert: 135]|Total errors : 0 [insert: 0]| ;; Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 135 [insert: 135]|Total errors : 0 [insert: 0]| ;; Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 135 [insert: 135]|Total errors : 0 [insert: 0]| ;; Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 135 [insert: 135]|Total errors : 0 [insert: 0]| ;; 
+window burst: samples=213 peakDirectMiB=507.0 (at 1794501472456) minMiB=53.4 peakCount=214
+window whole-run: samples=702 peakDirectMiB=507.0 (at 1794501472456) minMiB=51.4 peakCount=214
+ERROR lines: 5; OOM lines: 6; node alive at end: NO
+hprof cassandra-1794501249-pid160700.hprof:  52 7046551 6.7 DataOutputBuffer$1$1.buffer (DOB thread-local scratch) | capacity sum 62626688 B = 59.7 MiB |  threads by pool: {'NonPeriodicTasks:1': 1, 'OptionalTasks:1': 1, 'Native-Transport-Requests': 14, 'CompactionExecutor:3': 1, 'MutationStage': 32, 'CompactionExecutor:4': 1, 'PerDiskMemtableFlushWriter_0:1': 1, 'PerDiskMemtableFlushWriter_0:2': 1}

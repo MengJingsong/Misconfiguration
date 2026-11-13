@@ -1,0 +1,39 @@
+[2026-11-12T15:40:42Z] ARM M-S-B-2 arm=B heap=2G steps=slow;64;2:60;70;2048 maxReads=none conns=16
+[2026-11-12T15:40:47Z] started M-S-B-2 pid 387580 java
+[2026-11-12T15:41:54Z] ready M-S-B-2
+-XX:+HeapDumpOnOutOfMemoryError -Xms2G -Xmx2G -XX:MaxDirectMemorySize=3982M -XX:HeapDumpPath=/mydata/c2/runs/M-S-B-2/cassandra-1794498044-pid387580.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+15:41:56 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+15:42:04 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=64 rows=56 size=65536 pk0=0 errors=0
+15:42:10 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=1 rows=72 size=65536 pk0=1000 errors=0
+[2026-11-12T15:42:16Z] flushed
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 240960054
+		Compacted partition maximum bytes: 4866323
+15:42:20 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=1000 ERROR ReadFailureException: Cassandra failure during read query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+15:42:24 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=0 OK rows=56 valueBytes=3670016 warnings=[Read on table c2.t has exceeded the size warning threshold of 1,048,576 bytes with token: -3485513579396041028]
+[2026-11-12T15:42:34Z] GC.run M-S-B-2
+1794498158,base,nmtOtherKB=488222,nmtTotalKB=2875818,rssKB=2497236,1794498157668,93092992,93092992,93092992,0,0,3763,0,0,46924054,0,1,85,78,4866323
+1794498171,t+11,nmtOtherKB=1062906,nmtTotalKB=3470410,rssKB=3293196,1794498170670,420834936,102067832,93092992,0,0,4275,0,0,48197670,64,1,145,78,4866323
+1794498171340,128,384,0,128.8,,2
+1794498184,t+24,nmtOtherKB=1095674,nmtTotalKB=3510411,rssKB=3327072,1794498184671,1068697936,95619408,93092992,0,0,4787,0,0,48197670,64,1,178,78,4866323
+1794498185336,128,896,0,128.4,,2
+1794498198,t+38,nmtOtherKB=1177487,nmtTotalKB=3598991,rssKB=3416488,1794498197672,717961296,97204304,93092992,0,0,5235,0,0,48106034,64,1,220,78,4055269
+1794498198343,128,1408,0,128.6,,2
+1794498211,t+51,nmtOtherKB=1161103,nmtTotalKB=3578154,rssKB=3410044,1794498211673,1353556064,95264864,93092992,0,0,5747,0,0,48106034,64,1,258,78,4055269
+1794498212335,128,1920,0,127.9,,2
+1794498225,t+65,nmtOtherKB=980879,nmtTotalKB=3391890,rssKB=3425616,1794498224675,155340112,88231248,93092992,0,0,6067,0,0,48106034,0,1,279,78,4055269
+SUMMARY secs=60 responses=2176 errors=0 MB=7670
+1794498239,end-pre,nmtOtherKB=980879,nmtTotalKB=3390658,rssKB=3425616,1794498239677,155340112,88231248,93092992,0,0,6067,0,0,48106034,0,1,279,78,4055269
+[2026-11-12T15:44:01Z] GC.run M-S-B-2
+1794498245,end-post,nmtOtherKB=980678,nmtTotalKB=3391829,rssKB=3425616,1794498244680,102239816,102239816,102239816,0,0,6067,0,0,47900064,0,1,279,147,4055269
+[2026-11-12T15:44:05Z] OOM/GC check
+pauses=41 full_gcs=0 total_pause=0s max60=0% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none
+[2026-11-12T15:44:15Z] stopped M-S-B-2
+no java left
+[2026-11-12T15:44:23Z] END M-S-B-2

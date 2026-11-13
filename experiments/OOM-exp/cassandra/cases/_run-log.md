@@ -23,9 +23,9 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-03 | convergence / custom | run 7 | [memtable_offheap_space+file_cache_size](candidates/memtable_offheap_space+file_cache_size/memtable_offheap_space+file_cache_size.md) | OOMed |
 | 2026-11-03 | convergence / custom | run 8 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (custom)](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--custom.md) | OOMed, JVM killed |
 | 2026-11-04 | default | run 1 | [DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS (default)](candidates/DOB_MAX_RECYCLE_BYTES+MAX_HINT_BUFFERS--default.md) | OOMed, strict default |
-| 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
-| 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
-| 2026-11-10 | convergence / custom | C1 run 3 (fast co-replica) | [internode...--run3-fastcoreplica](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) | G1–G3 pass (ceiling at N=8, senders alive); stopped early by a sampler bug; Stage C/D outstanding |
+| 2026-11-09 | default | run 2 (C1) | [internode...--run1-defaultQ](convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md) | sensitivity-limited / unresolved |
+| 2026-11-09 | convergence / custom | C1 reopen (custom Q) | [internode...--run2-customQ](convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md) | Q-attribution unresolved / negative |
+| 2026-11-10 | convergence / custom | C1 run 3 (fast co-replica) | [internode...--run3-fastcoreplica](convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md) | G1–G3 pass (ceiling at N=8, senders alive); stopped early by a sampler bug; Stage C/D outstanding |
 | 2026-11-10 | bypass | B6 run 1 (accounting mismatch) | [internode_application_queue...--run1](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-1) | bypass confirmed (2 domains); heap OOM 3/3 + 3/3 at 2 GiB with 60 s deadlines; default-timeout arm not established |
 | 2026-11-10/11 | bypass | B6 run 2 (replica disk stall, default timeouts) | [internode_application_queue...--run2-diskstall](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-2) | GC service loss 5/5 stall arms (≈ 99% heap, ≈ 97% in Full GC); heap OOM 2/8 stall/hang arms; blob 0 Full GCs; 8 MiB reserve removes it |
 | 2026-11-11 | bypass | B6 run 3 (intervention ×3, same-day positives) | [internode_application_queue...--run3-intervention](bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-3) | reserve 8 MiB removes it 3/3 per condition; positives reproduced except run-1 replica side; run 2 and run-1 coordinator meet V1–V5 |
@@ -223,8 +223,8 @@ instead.
 
 **Nodes:** CloudLab LAN 10.10.1.0/24 — victim `apt140`/10.10.1.1 (dc=v, `~/cassandra-b1`); 8 coordinator
 instances dc=c on `apt179/138/190/149` (`~/cassandra-c1`, 1 GiB heap, LAN IP aliases .32–.81, 2/host).
-**Design:** [`C1-design-v2.md`](candidates/internode_application_receive_queue_capacity-multiplicity/design/C1-design-v2.md). Case file:
-[`internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md).
+**Design:** [`C1-design-v2.md`](convergence/internode_application_receive_queue_capacity-multiplicity/design/C1-design-v2.md). Case file:
+[`internode_application_receive_queue_capacity--multiplicity--run2-customQ.md`](convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run2-customQ.md).
 Reopens the run-2 **default**-Q negative to test whether a **raised (custom)** exclusive allowance N·Q can
 drive the victim to OOM, under v2's three fixes (raise Q; victim owns the only replica so RF=1 keeps
 senders light; concentrate load so backpressure is natural).
@@ -268,10 +268,10 @@ units on any node; linger disabled.
 **Nodes:** victim `apt140`/10.10.1.1 (dc=v, `~/cassandra-b1`, 1 GiB heap, 3072 MiB direct, cgroup 7168 MiB,
 swap off); fast co-replica `apt179`/10.10.1.2 (dc=f, 4 GiB heap); 8 coordinators dc=c on `apt138/190/149`
 (aliases .31–.33/.41–.43/.51–.52, 1 GiB). **Design:**
-[`C1-run3-plan-review.md`](candidates/internode_application_receive_queue_capacity-multiplicity/design/C1-run3-plan-review.md)
-(amends [`C1-design-v3.md`](candidates/internode_application_receive_queue_capacity-multiplicity/design/C1-design-v3.md)).
+[`C1-run3-plan-review.md`](convergence/internode_application_receive_queue_capacity-multiplicity/design/C1-run3-plan-review.md)
+(amends [`C1-design-v3.md`](convergence/internode_application_receive_queue_capacity-multiplicity/design/C1-design-v3.md)).
 Case file:
-[`internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md).
+[`internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md`](convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run3-fastcoreplica.md).
 
 **Premise:** keyspace `NTS {v:1,f:1}`, CL=ONE, so the fast replica acks the client and the victim is flooded
 open-loop (`cassandra-stress -rate fixed=`), with hints off on all instances.
@@ -371,7 +371,7 @@ endpoint E=128 MiB, global G=512 MiB — **defaults**), tightened diagnostic dir
 convergence case in this project driven by **multiplicity of active peers** rather than two stacked pools,
 and the first multi-instance ring (up to 33 Cassandra instances via LAN IP aliases).
 
-**Attempted:** one case — [`internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`](candidates/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md).
+**Attempted:** one case — [`internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md`](convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run1-defaultQ.md).
 Arms: G1 reachability; D_cal_n4 (reference, Byteman 100 ms apply-delay, Q=4, 2048 MiB budget); D_cal_n8;
 RQ_n4_q1 (reduced-Q causal control, Q=1 MiB); D_oom_n4_b450 (450 MiB budget). **Result: mechanism confirmed
 exactly, multiplicity-OOM sensitivity-limited / UNRESOLVED.** At N=4 the admitted bytes = 527.8 MiB =
@@ -679,4 +679,110 @@ Cassandra workload shared pc96 from ≈ 22:40 (load 8–18 / 32 cores), recorded
   `gcpeak.sh` missed spirals at 92–94%). At 512 MiB several OOMs did not fire the `kill -9` hook; OOMs read from
   HotSpot safepoints and dumps; two dumps 0 bytes (JVM stopped mid-write).
 - Cleanup verified; run-2 `b6slow` dm-delay device and loop0 left in place at delay 0.
+
+## 2026-11-12 — R6-V (default convergence; DOB_MAX_RECYCLE_BYTES + MAX_HINT_BUFFERS at an acceptable budget)
+
+**Node:** `apt179` (`/mydata/r6v/`, ≈ 17 GiB incl. dumps), 2-node loopback ring, N2 killed. Unmodified 5.0.9; both
+settings at defaults (DOB 1 MiB, 3 × 32 MiB hint slabs; no `-D` passed). Heap 2048 MiB, direct 512 MiB (standing-rule
+floor); `cassandra-env.sh` would resolve 7965 / 3982 MiB. 23 arms, 07:22–09:13 MST.
+
+- **Condition S** (demand pushed to the default ceiling: 16 hint writers fill 3 slabs, then 512 threads × 523 kB values,
+  256 × 1 KiB writes, 64 readers): converge 0/3 (peak 256–264 MiB, 50–52%); hints alone 0/3 (121 MiB); DOB alone 0/3
+  (194–203 MiB; also the no-down-replica intervention). Pools add. → `negative` (V1–V3, V6, V7 met) → `negatives/`.
+- **Demand arithmetic:** 171–177 threads hold a DOB buffer (128 native-transport, ≈ 33 MutationStage, others) =
+  131–139 MiB + 96 MiB hints + ≈ 21 MiB. Ceiling with all 276 shared-pool permits holding 1 MiB ≈ 398 MiB < 512. Extra
+  down destinations add only 256 KiB each.
+- **Diagnostic boundary:** 270 MiB survives 1/1; 250 MiB direct OOM 3/3; 240 MiB 1/1. First error
+  `Bits.reserveMemory` ← `DataOutputBuffer$1$1.allocate:87` ← `expandToFit:178`. Dump at 250: 174 DOB buffers
+  131.2 MiB + 3 slabs 96 MiB + pool 16 MiB. Controls not rerun at 250 (not `reproduced-OOM`). The pre-protocol R6
+  candidate thus reproduces only below ≈ 255–265 MiB.
+- **Side finding → new lead U1:** with 15 MB values (no hints), DOB buffers being filled — not limited by the recycle
+  cap — exhausted 512 MiB direct 4/5 (16–20 MutationStage threads × 15–30 MiB in `CommitLog.add`); heap ran out first
+  at 1–2 GiB direct with a 2 GiB heap. Added to the campaign plan as U1 / P2.
+- Cleanup verified (no daemons/stress, ports free).
+
+## 2026-11-12 — C3 run 1 (convergence · multiplicity; DOB scratch buffers × workers, defaults)
+
+**Node:** `apt190` (`/mydata/c3/`, 14 GB incl. dumps), single node; heap 2 GiB; direct 512 MiB (standing-rule floor) and
+2048 MiB for the U-vs-workers sweep; `DOB_MAX_RECYCLE_BYTES` default 1 MiB. 45 arm runs (stated limit 40; 5 void Netty
+arms caused the overrun), 3 h 08 min. Four client IPs emulated with loopback SNAT (removed after each arm).
+
+- **Source:** per-thread `FastThreadLocal` direct scratch buffer; `close()` keeps it only if ≤ L, otherwise frees it
+  and keeps 128 B → at most one ≤ 1 MiB buffer per thread. Holders: native-transport threads (`Mutation.validateSize`),
+  `CommitLog.add`, flush/compaction. Shared pool permits 276; a write load reaches ≈ 165 holders.
+- **U vs workers (matched 4,000 × 520 KB writes):** 8 → 165 holders: kept buffers 6 → 142 MiB, idle direct 58 → 194 MiB.
+- **At 512 MiB:** 0/7 high-holder runs, controls 57–59 MiB → `negative · deployment` (`negatives/`). With large-write
+  bursts the burst, not retention, decides (4–5 MB both survive; 6 MB both die, control by heap OOM).
+- **Diagnostic:** 160 MiB direct OOM 3/3 (first error `DataOutputBuffer.expandToFit`, 108 MiB kept buffers), control
+  0/3, `dob_max_recycle_bytes=0` 0/3; 176 MiB 1/1, 192 MiB survives. Largest failing budget 176 MiB (below floor).
+- **Side findings:** (1) in-flight write buffers in `CommitLog.add` (29 threads × 12 MB) corroborate lead U1.
+  (2) **Method:** Netty keeps its own direct-memory counter, also capped at `MaxDirectMemorySize`, invisible to the
+  java.nio pool readings — so the flag effectively allows up to ≈ 2× its value and direct-memory U from JMX
+  `java.nio` alone can undercount. Future direct-budget cases should read Netty's counter too.
+- Cleanup verified; SNAT rules removed.
+
+## 2026-11-12 — C1 run 4 (convergence · multiplicity, default capacities)
+
+**Node:** `pc96` (`/mydata/c1r4/`, 3.7 GB incl. dumps); victim V, fast co-replica F, coordinators C1–C8 on loopback,
+data on tmpfs, read-only `/mydata/b6/cassandra` build; `NTS {v:1,f:1}`, CL=ONE; 1 MiB zero-filled blobs at 500/s split
+over N coordinators, 90 s per arm; default 2 s timeouts, no Byteman. Conditions D (shipped yaml) and H (hints off,
+`commitlog_total_space` 2 GiB). Heap 2 GiB; direct 512 MiB (standing-rule floor) searched upward.
+
+- **Timeout check:** victim MutationStage stalls during flushes; expired messages are released only when dequeued,
+  so the 2 s timeout does not cap occupancy (K reached 543 of 544 MiB).
+- **Endpoint (direct OOM → forced heap OOM, `kill -9`):** N=8 at 512 MiB D 7/7 (3 with dumps), H 3/3; N=4 1/1.
+  Control N=1 0/6; intervention N=2 0/6 (505/s, 0 errors). Budget search (H, N=8): 640 MiB 4/5, 672 0/3, 704 0/3,
+  768 0/1, 2048 0/2 → largest failing 640 MiB.
+- **U vs K:** N=1/2/4/8 → K peak 131/262/524/543, U peak 201–242/332–352/594/658–704 MiB; per-peer ≤ Q+E, global ≤ G;
+  growth with N is mostly per-peer reserves filling G (N·Q adds only 32 MiB at N=8).
+- **Dumps (D, 3/3):** of ≈ 510 MiB JDK direct, queued LARGE frames 308–319 MiB + frames in decode 20–31 MiB (66–68%),
+  + idle `BufferPool` chunks 136 MiB (93–94% total); hints 32 MiB; DOB 0. Netty's own counter never threw (96 MiB at
+  a 512 MiB flag; 192–272 MiB at 2 GiB), so the process held ≈ flag + Netty share (≈ 607 MiB at 512).
+- **Status (researcher, 2026-11-12):** D `verified-OOM · diagnostic` (V1–V7 met under the standing rule, labelled
+  diagnostic because 512–640 MiB is below what `cassandra-env.sh` resolves for a 2 GiB-heap node); H
+  `verified-OOM · diagnostic`, V5 from D's dumps accepted. C1 folder moved to `convergence/`; runs 1–3 files kept
+  there as history.
+- Invalid: one arm killed by the agent's own 12 GiB safety scope (tmpfs charge; fixed with zero-filled blobs); two
+  arms aborted by a mis-chained batch, rerun. Cleanup verified; tmpfs removed.
+
+## 2026-11-12 — C2 run 1 (convergence · concurrency/surge; concurrent reads below the size threshold)
+
+**Nodes:** victim `apt140` (`/mydata/c2/runs/`, ≈ 7.9 GB incl. dumps), client `apt138`; protocol v4; 3,670,016 B reads.
+Arm A = shipped defaults (`read_thresholds_enabled` false → unprotected configuration); arm B = thresholds at the
+`test/conf` values (coordinator fail 4 MiB, local fail 8 MiB; a 4.5 MiB read refused 30/30, passes in A 15/15).
+Paused 12:53–14:03 ET; one interrupted arm void and rerun.
+
+- **Source:** concurrency capped by `native_transport_max_threads` (128) only while processing; v4 responses are
+  encoded into Netty direct memory on the request thread, which is then freed; no socket-writability check;
+  in-flight limits count request bytes, released at response hand-off; rate limiter does not stop already-read
+  requests → unsent response memory bounded only by client outstanding reads.
+- **S (64 connections, 1,024 outstanding, drain 128 MiB/s):** ≈ 4.4 MiB Netty direct per outstanding read; Netty
+  `OutOfDirectMemoryError` ≈ 11 s in. S-A 3/3, S-B 3/3 at heap 2 GiB / auto direct 3,982 MiB; S-B also 3/3 at auto
+  heap 7,965 MiB and 1/1 at direct 7,936 MiB (2,048 outstanding). Controls (128 outstanding) 0/6; client cap 512
+  outstanding 0/6 at equal throughput; server rate cap 30/s did not help (1/1). Dumps: 244–248 × 16 MiB Netty chunks,
+  1,702–1,812 queued writes.
+- **F (fast clients, ≤ 128 processed):** F-B Java heap OOM 4/4 at 512 MiB, 1/1 at 640; ≥ 768 MiB survive. F-A 0/3 at
+  512 MiB (80–83% GC, below 90%). Controls 0/3; `native_transport_max_threads: 16` 0/3. Why B fails and A does not
+  is untested (candidate: per-read WARN on synchronous appenders).
+- **Status (researcher review 2026-11-12):** S-A `verified-OOM · deployment` (unprotected configuration); S-B, F-B
+  `verified-OOM · diagnostic` (thresholds at test values = supporting deviation); F-A `negative`. Folder
+  `convergence/`. Void: SQ-B-2G-aborted, first S batch attempt, first I-S-A-2.
+
+## 2026-11-12 — R1-V (default convergence; memtable_offheap_space + file_cache_size at defaults, container budget)
+
+**Node:** `apt149` (`/mydata/r1v/`, 4.6 GB). Both capacities unset (resolved 512/512 MiB at a 2 GiB heap);
+`memtable_allocation_type: offheap_objects` and `file_cache_enabled: true` accepted as documented settings; default
+cleanup threshold. Budget: cgroup `memory.max` L with no swap; container limits reviewed by the researcher before
+readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct 1 GiB, L = 3,413 MiB, bisect up).
+30 executions (29 valid, 1 invalid) + 2 void (forced hand-back; the pause). Five dated design amendments.
+
+- **Family B:** converge 3/3 kernel memcg OOM-kill (anon-rss 3,329–3,367 MiB) 80–95 s into the 800k preload, chunk
+  cache 376–504 of 512 and memtable ≤ 188 of 512 at the kill → convergence. `M_only` (cache off) 0/3, `F_only`
+  (memtable on-heap) 0/3 at 86–88% (margin below the 30% target, disclosed); `file_cache_size` 128 MiB 0/3 with full
+  throughput. 3,500 MiB 1/1 kill; 4,096 MiB 0/1. → `verified-OOM · deployment`, `convergence/`.
+- **Family A:** 2048/4096 0/1 (86%), 1536/3072 0/1 (89%), 1024/2048 0/1 (92%), 768/1536 1/5 (others 95–97%);
+  alone 0/6 at 768. A-768 → candidate; one intervention attempt invalid (schema timeout).
+- **Root cause:** both pools are sized from the heap and capped independently; nothing checks heap + pool caps + JVM
+  native overhead against the process memory. A sizing/validation gap, not a defect in either control.
+- Cleanup verified; `/mydata/r1v/STOP` in place.
 

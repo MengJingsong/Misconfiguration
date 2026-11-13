@@ -1,0 +1,46 @@
+97c97
+< # hints_directory: /var/lib/cassandra/hints
+---
+> hints_directory: /mydata/c2/node/hints
+395,396c395,396
+< # data_file_directories:
+< #     - /var/lib/cassandra/data
+---
+> data_file_directories:
+>     - /mydata/c2/node/data
+408c408
+< # commitlog_directory: /var/lib/cassandra/commitlog
+---
+> commitlog_directory: /mydata/c2/node/commitlog
+431c431
+< # cdc_raw_directory: /var/lib/cassandra/cdc_raw
+---
+> cdc_raw_directory: /mydata/c2/node/cdc_raw
+611c611
+< # saved_caches_directory: /var/lib/cassandra/saved_caches
+---
+> saved_caches_directory: /mydata/c2/node/saved_caches
+706c706
+<       - seeds: "127.0.0.1:7000"
+---
+>       - seeds: "10.10.1.1:7000"
+981c981
+< listen_address: localhost
+---
+> listen_address: 10.10.1.1
+1090c1090
+< rpc_address: localhost
+---
+> rpc_address: 10.10.1.1
+2485a2486,2496
+> # C2 arm B: read thresholds enabled at the project's test/conf/cassandra.yaml values
+> read_thresholds_enabled: true
+> coordinator_read_size_warn_threshold: 1024KiB
+> coordinator_read_size_fail_threshold: 4096KiB
+> local_read_size_warn_threshold: 4096KiB
+> local_read_size_fail_threshold: 8192KiB
+> row_index_read_size_warn_threshold: 4096KiB
+> row_index_read_size_fail_threshold: 8192KiB
+> # C2 intervention: native request rate cap
+> native_transport_rate_limiting_enabled: true
+> native_transport_max_requests_per_second: 30

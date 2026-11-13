@@ -1,0 +1,25 @@
+# Condition F (fast clients: Java driver, 16 connections, 10 GbE), 3.5 MiB reads, server concurrency capped at 128 threads.
+# fail = 256 in flight (saturates the 128 native-transport threads) at heap 512 MiB; control = 8 in flight;
+# intervention = native_transport_max_threads 16 (cap simultaneous reads at the server).
+P-B-768M B 768M 256:180
+F-B-1 B 512M 256:180
+M-F-B-1 B 512M 8:180
+I-F-1 B+T16 512M 256:180
+F-A-1 A 512M 256:180
+M-F-A-1 A 512M 8:180
+F-B-2 B 512M 256:180
+M-F-B-2 B 512M 8:180
+I-F-2 B+T16 512M 256:180
+F-A-2 A 512M 256:180
+M-F-A-2 A 512M 8:180
+F-B-3 B 512M 256:180
+M-F-B-3 B 512M 8:180
+I-F-3 B+T16 512M 256:180
+F-A-3 A 512M 256:180
+M-F-A-3 A 512M 8:180
+# appended 2026-11-12 16:25 UTC: condition S intervention (client cap 8/conn) for arm A
+I-S-A-1 A 2G slow;64;8:120;150;2048
+I-S-A-2 A 2G slow;64;8:120;150;2048
+I-S-A-3 A 2G slow;64;8:120;150;2048
+# appended 2026-11-12 16:31 UTC: F budget bisection (512 fails, 768 survives)
+P-B-640M B 640M 256:180

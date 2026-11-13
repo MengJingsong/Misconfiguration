@@ -1,0 +1,29 @@
+# D_N8_d512_r4: tmpfs usage (s after load start) and peer errors; victim died t=20s
+3 406MiB used 24171MiB avail
+13 993MiB used 23584MiB avail
+23 3762MiB used 20815MiB avail
+33 12124MiB used 12453MiB avail
+43 16772MiB used 7805MiB avail
+53 22002MiB used 2575MiB avail
+63 24576MiB used 0MiB avail
+73 24576MiB used 0MiB avail
+83 24576MiB used 0MiB avail
+93 24576MiB used 0MiB avail
+103 24576MiB used 0MiB avail
+113 24576MiB used 0MiB avail
+123 24576MiB used 0MiB avail
+133 24576MiB used 0MiB avail
+== F
+ERROR [PerDiskMemtableFlushWriter_0:2] 2026-11-12T17:24:31,180 JVMStabilityInspector.java:70 - Exception in thread Thread[PerDiskMemtableFlushWriter_0:2,5,PerDiskMemtableFlushWriter_0]
+java.io.IOError: java.io.IOException: No space left on device
+	at org.apache.cassandra.io.util.ChecksumWriter.appendDirect(ChecksumWriter.java:87)
+--
+ERROR [CompactionExecutor:1] 2026-11-12T17:24:31,183 JVMStabilityInspector.java:70 - Exception in thread Thread[CompactionExecutor:1,5,CompactionExecutor]
+java.io.IOError: java.io.IOException: No space left on device
+== C2
+ERROR [HintsWriteExecutor:1] 2026-11-12T17:24:31,334 JVMStabilityInspector.java:70 - Exception in thread Thread[HintsWriteExecutor:1,5,HintsWriteExecutor]
+org.apache.cassandra.io.FSWriteError: java.io.IOException: No space left on device
+	at org.apache.cassandra.hints.HintsWriteExecutor.flushInternal(HintsWriteExecutor.java:255)
+--
+ERROR [HintsWriteExecutor:1] 2026-11-12T17:24:31,336 DefaultFSErrorHandler.java:72 - Stopping transports as disk_failure_policy is stop
+ERROR [HintsWriteExecutor:1] 2026-11-12T17:24:31,336 StorageService.java:684 - Stopping native transport

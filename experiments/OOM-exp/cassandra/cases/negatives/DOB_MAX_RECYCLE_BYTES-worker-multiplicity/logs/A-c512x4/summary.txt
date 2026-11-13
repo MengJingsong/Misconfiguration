@@ -1,0 +1,15 @@
+arm A-c512x4: direct=2048M L=default fill=4000x520000B threads=512 ips=4 burst=none dump=dump
+node pid 90977: -Xmx2048M MaxDirectMemorySize=2048M dob_max_recycle_bytes=default; poller 91737
+p idle1 07:54:50: directMiB=51.4 count=101 threads=68 heapMiB=81 nmtOther=committed=314831KB rssAnonKB=2438408
+p idle2 07:55:01: directMiB=51.4 count=103 threads=69 heapMiB=81 nmtOther=committed=314831KB rssAnonKB=2439332
+sep idle: SEP worker threads (distinct ids)=18; by last stage:  1 "MutationStage-  8 "Native-Transport-Requests-  9 "ReadStage- 
+fill clients: rc=0 Op rate : 25 op/s [insert: 27 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; Op rate : 29 op/s [insert: 29 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; Op rate : 29 op/s [insert: 29 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; Op rate : 29 op/s [insert: 29 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; 
+window fill: samples=188 peakDirectMiB=193.8 (at 1794495341509) minMiB=51.4 peakCount=305
+p retained 07:56:20: directMiB=193.8 count=295 threads=240 heapMiB=1845 nmtOther=committed=624456KB rssAnonKB=3063272
+sep retained: SEP worker threads (distinct ids)=161; by last stage:  32 "MutationStage-  129 "Native-Transport-Requests- 
+dump retained: 119900189 B in 0 s
+p after-dump-retained 07:56:22: directMiB=193.8 count=295 threads=240 heapMiB=79 nmtOther=committed=624456KB rssAnonKB=3052972
+server writes after fill: 	Write Count: 4000
+window whole-run: samples=399 peakDirectMiB=196.0 (at 1794495363270) minMiB=51.4 peakCount=313
+ERROR lines: 0; OOM lines: 1; node alive at end: yes
+hprof retained.hprof:  167 148734104 141.8 DataOutputBuffer$1$1.buffer (DOB thread-local scratch) | capacity sum 203205424 B = 193.8 MiB |  threads by pool: {'Native-Transport-Requests': 129, 'MutationStage': 32, 'CompactionExecutor:4': 1, 'CompactionExecutor:3': 1, 'NonPeriodicTasks:1': 1, 'OptionalTasks:1': 1, 'PerDiskMemtableFlushWriter_0:1': 1, 'PerDiskMemtableFlushWriter_0:2': 1}

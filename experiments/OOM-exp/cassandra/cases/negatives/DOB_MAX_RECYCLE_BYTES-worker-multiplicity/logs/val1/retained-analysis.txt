@@ -1,0 +1,90 @@
+== class histogram (top 30 by shallow bytes; header estimate 16 B) ==
+total objects 708755, shallow 182.6 MiB
+ rank        count          bytes  class
+    1       101272      121791331  byte[]
+    2         5414       17558272  int[]
+    3        30902       15418568  [Ljava.lang.Object;
+    4         6660        9751176  long[]
+    5        94636        2744444  java.lang.String
+    6        35745        1572780  java.util.concurrent.ConcurrentHashMap$Node
+    7        46888        1312864  javax.management.ObjectName$Property
+    8        28996        1275824  java.util.HashMap$Node
+    9        24587        1143600  [Ljavax.management.ObjectName$Property;
+   10         6974        1018204  java.lang.reflect.Method
+   11        18286         914300  java.lang.invoke.LambdaForm$Name
+   12          416         665664  [Ljava.util.concurrent.ConcurrentHashMap$Node;
+   13        12294         639288  javax.management.ObjectName
+   14         2387         608384  [Ljava.util.HashMap$Node;
+   15        13731         494316  java.util.concurrent.atomic.LongAdder
+   16        12247         489880  com.sun.jmx.mbeanserver.StandardMBeanSupport
+   17        12289         393248  com.sun.jmx.mbeanserver.NamedObject
+   18         2095         391530  short[]
+   19          106         388352  [Lio.netty.buffer.PoolSubpage;
+   20         7794         381906  com.codahale.metrics.EWMA
+   21         3288         371544  java.lang.reflect.Field
+   22          405         335786  char[]
+   23            5         327760  [Ljava.util.concurrent.ForkJoinTask;
+   24         3445         320385  io.netty.buffer.PoolSubpage
+   25        10409         304344  [Ljava.lang.Class;
+   26         4883         292980  java.lang.invoke.MemberName
+   27         5040         282240  io.netty.util.internal.shaded.org.jctools.queues.unpadded.MpscUnpaddedArrayQueue
+   28         1473         250320  [Ljava.lang.invoke.LambdaForm$Name;
+   29         4998         239904  org.apache.cassandra.metrics.TableMetrics$$Lambda$970
+   30         2100         226800  java.lang.Class$ReflectionData
+-- selected rows --
+   95          404          31916  java.nio.DirectByteBuffer
+  759           23            920  org.apache.cassandra.io.util.DataOutputBuffer$1$1
+  888           23            552  org.apache.cassandra.io.util.DataOutputBuffer$GrowingChannel
+ 2115            2             56  org.apache.cassandra.io.util.DataOutputBuffer$AllocationType
+ 2261            1             48  org.apache.cassandra.hints.HintsBuffer
+ 3272            1             20  org.apache.cassandra.io.util.DataOutputBuffer$1
+
+== java.nio.DirectByteBuffer ==
+instances 404; memory owners charged to Bits (cleaner!=null, att==null, fd==null) 158, capacity sum 67929263 B = 64.8 MiB; views 244 (capacity sum 520.9 MiB, not memory)
+file mappings (MappedByteBuffer, fd!=null; not charged to MaxDirectMemorySize): 2, capacity sum 64.0 MiB
+
+== direct memory owners by holder (capacity) ==
+ count          bytes       MiB  holder
+     1       33554432      32.0  HintsBuffer.slab (hints pool slab)
+     2       16785408      16.0  org.apache.cassandra.utils.memory.BufferPool$Chunk BufferPool$Chunk.slab
+    23       13524226      12.9  DataOutputBuffer$1$1.buffer (DOB thread-local scratch)
+    65        3194880       3.0  io.netty.channel.epoll.EpollEventArray EpollEventArray.memory
+    32         524288       0.5  io.netty.buffer.UnpooledUnsafeDirectByteBuf UnpooledDirectByteBuf.buffer
+     1         262144       0.2  org.apache.cassandra.hints.HintsWriteExecutor HintsWriteExecutor.writeBuffer
+    27          58347       0.1  [Ljava.lang.Object;(array) []
+     5          25538       0.0  [Ljava.nio.ByteBuffer;(array) []
+     2              0       0.0  (no strong referrer: dropped, awaiting Cleaner)
+
+-- DOB scratch buffers by thread (capacity) --
+  large (>= 524288 B) scratch buffers by state:
+    idle (position 0)        capacity   1040098 B x   9 =    8.9 MiB  threads: {'Native-Transport-Requests': 4, 'MutationStage': 5}
+  CompactionExecutor:3                     1024
+  CompactionExecutor:4                     512
+  MutationStage-10                         1040098
+  MutationStage-11                         1040098
+  MutationStage-14                         520050
+  MutationStage-16                         520050
+  MutationStage-17                         520050
+  MutationStage-2                          520050
+  MutationStage-3                          1040098
+  MutationStage-7                          1040098
+  MutationStage-8                          1040098
+  MutationStage-9                          520050
+  Native-Transport-Requests-1              1040098
+  Native-Transport-Requests-12             520050
+  Native-Transport-Requests-13             520050
+  Native-Transport-Requests-15             1040098
+  Native-Transport-Requests-4              520050
+  Native-Transport-Requests-5              1040098
+  Native-Transport-Requests-6              1040098
+  NonPeriodicTasks:1                       128
+  OptionalTasks:1                          256
+  PerDiskMemtableFlushWriter_0:1           512
+  PerDiskMemtableFlushWriter_0:2           512
+  capacity distribution: 128 B x 1, 256 B x 1, 512 B x 3, 1024 B x 1, 520050 B x 8, 1040098 B x 9
+  threads by pool: {'Native-Transport-Requests': 7, 'MutationStage': 10, 'CompactionExecutor:3': 1, 'CompactionExecutor:4': 1, 'NonPeriodicTasks:1': 1, 'PerDiskMemtableFlushWriter_0:1': 1, 'PerDiskMemtableFlushWriter_0:2': 1, 'OptionalTasks:1': 1}
+
+-- hints slabs --
+  1 slabs, capacities [33554432]
+
+-- unreferenced owners, largest capacities: 0 B x 2

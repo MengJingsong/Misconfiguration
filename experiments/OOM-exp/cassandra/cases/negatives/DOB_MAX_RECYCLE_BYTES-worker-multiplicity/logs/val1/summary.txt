@@ -1,0 +1,19 @@
+arm val1: direct=2048M L=default fill=200x520000B threads=16 ips=4 burst=8000000:20:2:4 dump=dump
+node pid 77333: -Xmx2048M MaxDirectMemorySize=2048M dob_max_recycle_bytes=default; poller 78116
+p idle1 07:35:02: directMiB=51.4 count=97 threads=67 heapMiB=80 nmtOther=committed=298439KB rssAnonKB=2425232
+p idle2 07:35:14: directMiB=51.4 count=98 threads=68 heapMiB=80 nmtOther=committed=298441KB rssAnonKB=2426204
+sep idle: SEP worker threads (distinct ids)=17; by last stage:  1 "MutationStage-  7 "Native-Transport-Requests-  8 "ReadStage-  1 "SharedPool-Worker- 
+fill clients: rc=0 Op rate : 151 op/s [insert: 151 op/s]|Total partitions : 50 [insert: 50]|Total errors : 0 [insert: 0]| ;; Op rate : 147 op/s [insert: 147 op/s]|Total partitions : 50 [insert: 50]|Total errors : 0 [insert: 0]| ;; Op rate : 133 op/s [insert: 133 op/s]|Total partitions : 50 [insert: 50]|Total errors : 0 [insert: 0]| ;; Op rate : 133 op/s [insert: 133 op/s]|Total partitions : 50 [insert: 50]|Total errors : 0 [insert: 0]| ;; 
+window fill: samples=35 peakDirectMiB=64.8 (at 1794494121252) minMiB=51.4 peakCount=158
+p retained 07:35:34: directMiB=64.8 count=158 threads=115 heapMiB=448 nmtOther=committed=426811KB rssAnonKB=2467268
+sep retained: SEP worker threads (distinct ids)=37; by last stage:  10 "MutationStage-  19 "Native-Transport-Requests-  7 "ReadStage-  1 "SharedPool-Worker- 
+dump retained: 209477282 B in 1 s
+p after-dump-retained 07:35:37: directMiB=64.8 count=158 threads=115 heapMiB=186 nmtOther=committed=426811KB rssAnonKB=2467100
+server writes after fill: 	Write Count: 200
+p pre-burst 07:35:40: directMiB=64.8 count=158 threads=116 heapMiB=186 nmtOther=committed=426813KB rssAnonKB=2467300
+burst clients: rc=0 Op rate : 9 op/s [insert: 9 op/s]|Total partitions : 5 [insert: 5]|Total errors : 0 [insert: 0]| ;; Op rate : 8 op/s [insert: 8 op/s]|Total partitions : 5 [insert: 5]|Total errors : 0 [insert: 0]| ;; Op rate : 7 op/s [insert: 7 op/s]|Total partitions : 5 [insert: 5]|Total errors : 0 [insert: 0]| ;; Op rate : 12 op/s [insert: 12 op/s]|Total partitions : 5 [insert: 5]|Total errors : 0 [insert: 0]| ;; 
+window burst: samples=33 peakDirectMiB=79.1 (at 1794494146340) minMiB=59.4 peakCount=163
+p after-burst 07:35:54: directMiB=59.3 count=160 threads=118 heapMiB=586 nmtOther=committed=421239KB rssAnonKB=2598120
+window whole-run: samples=231 peakDirectMiB=79.1 (at 1794494146340) minMiB=51.4 peakCount=163
+ERROR lines: 0; OOM lines: 1; node alive at end: yes
+hprof retained.hprof:  23 13524226 12.9 DataOutputBuffer$1$1.buffer (DOB thread-local scratch) | capacity sum 67929263 B = 64.8 MiB |  threads by pool: {'Native-Transport-Requests': 7, 'MutationStage': 10, 'CompactionExecutor:3': 1, 'CompactionExecutor:4': 1, 'NonPeriodicTasks:1': 1, 'PerDiskMemtableFlushWriter_0:1': 1, 'PerDiskMemtableFlushWriter_0:2': 1, 'OptionalTasks:1': 1}

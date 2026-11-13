@@ -1,0 +1,39 @@
+# B_N8_d640_r1: first java.lang.OutOfMemoryError in victim system.log (excerpt)
+713-INFO  [Service Thread] 2026-11-12T15:42:42,943 GCInspector.java:286 - G1 Old Generation GC in 250ms.  G1 Old Gen: 663430128 -> 663413616; 
+714-ERROR [PerDiskMemtableFlushWriter_0:2] 2026-11-12T15:42:43,124 JVMStabilityInspector.java:70 - Exception in thread Thread[PerDiskMemtableFlushWriter_0:2,5,PerDiskMemtableFlushWriter_0]
+715:java.lang.OutOfMemoryError: Direct buffer memory
+716-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+717-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+718-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+719-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+720-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+721-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+722-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:135)
+723-	at org.apache.cassandra.db.marshal.ByteBufferAccessor.write(ByteBufferAccessor.java:63)
+724-	at org.apache.cassandra.db.marshal.ByteBufferAccessor.write(ByteBufferAccessor.java:42)
+725-	at org.apache.cassandra.db.marshal.ValueAccessor.writeWithVIntLength(ValueAccessor.java:174)
+726-	at org.apache.cassandra.db.marshal.AbstractType.writeValue(AbstractType.java:550)
+727-	at org.apache.cassandra.db.rows.Cell$Serializer.serialize(Cell.java:304)
+728-	at org.apache.cassandra.db.rows.UnfilteredSerializer.lambda$serializeRowBody$0(UnfilteredSerializer.java:252)
+729-	at org.apache.cassandra.utils.btree.BTree.applyValue(BTree.java:1765)
+730-	at org.apache.cassandra.utils.btree.BTree.applyLeaf(BTree.java:1773)
+731-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1788)
+732-	at org.apache.cassandra.utils.btree.BTree.apply(BTree.java:1814)
+733-	at org.apache.cassandra.db.rows.BTreeRow.apply(BTreeRow.java:201)
+734-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serializeRowBody(UnfilteredSerializer.java:240)
+735-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:197)
+736-	at org.apache.cassandra.db.rows.UnfilteredSerializer.serialize(UnfilteredSerializer.java:140)
+737-	at org.apache.cassandra.io.sstable.format.SortedTablePartitionWriter.addUnfiltered(SortedTablePartitionWriter.java:143)
+738-	at org.apache.cassandra.io.sstable.format.big.BigFormatPartitionWriter.addUnfiltered(BigFormatPartitionWriter.java:210)
+739-	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addRow(SortedTableWriter.java:212)
+740-	at org.apache.cassandra.io.sstable.format.SortedTableWriter.addUnfiltered(SortedTableWriter.java:203)
+
+# last 8 victim samples before death (epoch_ms,direct_used,direct_count,heap_used,mut_pending,mut_active,net_pool_size,net_pool_overflow,cc_pool_size,K_using,K_reserve,peers_using,max_peer_using,throttled,received,processed,expired,...)
+1794498155526,244379620,146,1134108616,39,32,134217728,0,8388608,63966613,30412181,8,13632229,0,6726,6664,4,4194532,6604970543,6538349665,6
+1794498156527,236646405,160,916171264,45,32,134814218,596490,8388608,85987906,52433474,8,18875394,0,7190,7108,4,4194532,7090750315,7002894633,6
+1794498157527,236491220,147,610238304,14,32,133969551,-248177,8388608,38799421,12584508,8,9437697,0,7603,7566,4,4194532,7516333238,7476878457,10
+1794498158527,366625967,5700,1576965984,295,32,315093956,181269444,8388608,352340688,318786256,8,53480283,0,8358,8023,4,4194532,8301205194,7947717683,5
+1794498159527,514015888,9011,833108704,379,32,425337993,292496521,8388608,441474493,407920061,8,98571502,0,8961,8538,4,4194532,8931008279,8486715624,88
+1794498160527,533087107,10998,708912136,454,32,502037709,370741243,8388608,554726857,521172425,8,87036539,0,9515,8984,4,4194532,9500845901,8942874898,6
+1794498161527,670809956,13943,710007480,508,32,589928956,456956412,8388608,569407719,535853287,8,84939273,43,9937,9392,4,4194532,9934687373,9362330420,6
+1794498162527,671073396,15001,663430128,509,32,613423612,479205884,8388608,569407719,535853287,8,84939273,43,9938,9393,4,4194532,9934687596,9362330643,6

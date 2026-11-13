@@ -1,0 +1,45 @@
+total shallow 472 MiB, objects 714652
+     404.1 MiB      104770 byte[]
+      19.8 MiB        5932 int[]
+      15.1 MiB       27657 [Ljava.lang.Object;[]
+       9.3 MiB        6761 long[]
+       2.5 MiB       92014 java.lang.String
+       1.5 MiB       35761 java.util.concurrent.ConcurrentHashMap$Node
+       1.3 MiB       46890 javax.management.ObjectName$Property
+       1.2 MiB       29122 java.util.HashMap$Node
+       0.7 MiB       24589 [Ljavax.management.ObjectName$Property;[]
+       0.7 MiB       12960 io.netty.util.internal.shaded.org.jctools.queues.unpadded.MpscUnpaddedArrayQueue
+       0.6 MiB       12295 javax.management.ObjectName
+       0.5 MiB       12636 io.netty.buffer.PoolThreadCache$SubPageMemoryRegionCache
+BB byte[]       <1KiB:   102767 arrays       4.7 MiB
+BB byte[]  1KiB-64KiB:      180 arrays       1.2 MiB
+BB byte[]      =64KiB:     1655 arrays     103.4 MiB
+BB byte[]  64KiB-1MiB:       18 arrays       4.1 MiB
+BB byte[]      1-4MiB:      106 arrays     113.0 MiB
+BB byte[]      4-8MiB:       44 arrays     176.1 MiB
+BB byte[]      >=8MiB:        0 arrays       0.0 MiB
+org.apache.cassandra.db.Mutation: 0
+org.apache.cassandra.db.rows.BufferCell: 827
+org.apache.cassandra.db.rows.ArrayCell: 56
+org.apache.cassandra.net.Message: 3
+org.apache.cassandra.net.RequestCallbacks$CallbackInfo: 0
+org.apache.cassandra.service.WriteResponseHandler: 0
+org.apache.cassandra.db.partitions.PartitionUpdate: 0
+
+== thread stacks in LocalDataResponse.build (serializing a page): 27 threads; first:
+--- thread serial 54, 17 frames
+  org.apache.cassandra.utils.AbstractIterator.hasNext(AbstractIterator.java:47)
+  org.apache.cassandra.db.transform.BaseRows.hasNext(BaseRows.java:133)
+  org.apache.cassandra.db.transform.BaseRows.hasNext(BaseRows.java:133)
+  org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:151)
+  org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+  org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:86)
+  org.apache.cassandra.db.partitions.UnfilteredPartitionIterators$Serializer.serialize(UnfilteredPartitionIterators.java:339)
+  org.apache.cassandra.db.ReadResponse$LocalDataResponse.build(ReadResponse.java:201)
+  org.apache.cassandra.db.ReadResponse$LocalDataResponse.<init>(ReadResponse.java:186)
+  org.apache.cassandra.db.ReadResponse.createDataResponse(ReadResponse.java:48)
+  org.apache.cassandra.db.ReadCommand.createResponse(ReadCommand.java:374)
+  org.apache.cassandra.service.StorageProxy$LocalReadRunnable.runMayThrow(StorageProxy.java:2211)
+  org.apache.cassandra.service.StorageProxy$DroppableRunnable.run(StorageProxy.java:2608)
+  org.apache.cassandra.concurrent.ExecutionFailure$2.run(ExecutionFailure.java:163)
+--- thread serial 58, 51 frames

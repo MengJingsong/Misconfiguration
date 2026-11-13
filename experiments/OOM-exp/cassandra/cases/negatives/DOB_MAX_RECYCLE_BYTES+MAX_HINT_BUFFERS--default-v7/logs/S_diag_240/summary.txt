@@ -1,0 +1,27 @@
+params: XMX=2048M H_PROFILE=hints.yaml H_THREADS=16 H_N=6000000 F_THREADS=256 F_N=6000000 F_WITH_D=1 R_THREADS=64 D_THREADS=512 D_N=12000 D_SIZE=523000 D_LEAD=30 SECS=150 D_SECS=120 END_DUMP=0
+N2 (pid 336309) killed at 08:38:20
+N1 pid 335850: -Xmx2048M MaxDirectMemorySize=240MiB, dob_max_recycle_bytes and MAX_HINT_BUFFERS unset (defaults 1 MiB, 3); N2 DN
+s idle1 08:38:51: directMiB=51 direct=53939389 count=109 threads=121 rssAnonKB=2457736 swapKB/availMiB=0/12667 heap=[total 2097152K, used 215419K]
+s idle2 08:39:00: directMiB=51 direct=53939389 count=109 threads=122 rssAnonKB=2457992 swapKB/availMiB=0/12663 heap=[total 2097152K, used 231803K]
+histo idle: org.apache.cassandra.hints.HintsBuffer=1 
+H start 08:39:00.609: profile=hints.yaml n=6000000 threads=16 cap=150s
+s w1 08:39:13: directMiB=83 direct=87742494 count=167 threads=166 rssAnonKB=2564192 swapKB/availMiB=0/12110 heap=[total 2097152K, used 792234K]
+s w2 08:39:21: directMiB=115 direct=121564527 count=174 threads=169 rssAnonKB=2597332 swapKB/availMiB=0/12111 heap=[total 2097152K, used 857984K]
+s w3 08:39:31: directMiB=115 direct=121531675 count=174 threads=175 rssAnonKB=2597656 swapKB/availMiB=0/12100 heap=[total 2097152K, used 1856750K]
+pool pre-dob: parked in HintsBufferPool take()=1; threads by prefix: "MutationStage-=32 "G=32 "Native-Transport-Requests-=16 "GC=16 "epollEventLoopGroup-=14 "Messaging-EventLoop-=10 
+D start 08:39:31.375: profile=dob.yaml n=12000 threads=512 cap=120s
+F start 08:39:31.376: profile=local.yaml n=6000000 threads=256 cap=120s
+R start 08:39:31.376: profile=dob.yaml n=100000000 threads=64 cap=120s
+s w4 08:39:46: directMiB=117 direct=123025320 count=? threads=? rssAnonKB=? swapKB/availMiB=/11427 heap=[?]
+jstack w4 failed
+R end 08:39:48
+s w5: N1 GONE
+D end 08:39:51
+H end 08:39:52
+F end 08:39:52
+PEAK directMiB (sampled) = 117 of 240 (48%)
+stress-H: 
+stress-F: 
+stress-D: Op rate : 1,085 op/s [insert: 1,085 op/s]|Total partitions : 12,000 [insert: 12,000]|Total errors : 0 [insert: 0]|
+stress-R: 
+ERROR lines: 3; JVM OOM lines: 3; N1 alive at end: NO

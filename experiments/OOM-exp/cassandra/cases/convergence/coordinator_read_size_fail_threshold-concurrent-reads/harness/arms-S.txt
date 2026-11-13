@@ -1,0 +1,27 @@
+# Condition S (slow consumers: 64 connections, aggregate drain 64 x 2 MiB/s = 128 MiB/s), 3.5 MiB reads.
+# fail = 16 outstanding per connection (1024 total); control = 2 per connection (128 total), stopped near the failing runs'
+# read count; intervention = client caps outstanding at 8 per connection (512 total) under the same 1024-read demand.
+# (2026-11-12 15:16, before any I-S reading: the 30 req/s rate-cap intervention I-S-R30-1 failed (direct OOM at +11 s),
+#  so the intervention is replaced by the client-side outstanding cap; see design amendment.)
+S-B-1 B 2G slow;64;16:120;150;2048
+I-S-1 B 2G slow;64;8:120;150;2048
+M-S-B-1 B 2G slow;64;2:60;70;2048
+S-A-1 A 2G slow;64;16:120;150;2048
+M-S-A-1 A 2G slow;64;2:60;70;2048
+S-B-2 B 2G slow;64;16:120;150;2048
+I-S-2 B 2G slow;64;8:120;150;2048
+M-S-B-2 B 2G slow;64;2:60;70;2048
+S-A-2 A 2G slow;64;16:120;150;2048
+M-S-A-2 A 2G slow;64;2:60;70;2048
+S-B-3 B 2G slow;64;16:120;150;2048
+I-S-3 B 2G slow;64;8:120;150;2048
+M-S-B-3 B 2G slow;64;2:60;70;2048
+S-A-3 A 2G slow;64;16:120;150;2048
+M-S-A-3 A 2G slow;64;2:60;70;2048
+# budget: auto-resolved heap (1/2 RAM = 7808M on apt140) with auto direct (3982M)
+X-S-auto-1 B auto slow;64;16:120;150;2048
+X-S-auto-2 B auto slow;64;16:120;150;2048
+X-S-auto-3 B auto slow;64;16:120;150;2048
+# largest direct limit cassandra-env.sh can resolve (7936M, nodes with > 31 GiB RAM); outstanding 2048
+DIRECT=7936M X-S-d7936-1 B 2G slow;64;32:120;150;2048
+S-B-1 B 2G slow;64;16:120;150;2048

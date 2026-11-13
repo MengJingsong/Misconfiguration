@@ -1,0 +1,93 @@
+[252997.090211] PerDiskMemtable invoked oom-killer: gfp_mask=0x1101cca(GFP_HIGHUSER_MOVABLE|__GFP_WRITE), order=0, oom_score_adj=0
+[252997.090219] CPU: 10 PID: 491261 Comm: PerDiskMemtable Tainted: G           OE     5.15.0-198-generic #208-Ubuntu
+[252997.090222] Hardware name: Dell Inc. PowerEdge R320/0R5KP9, BIOS 2.3.3 07/10/2014
+[252997.090224] Call Trace:
+[252997.090226]  <TASK>
+[252997.090229]  show_stack+0x52/0x5c
+[252997.090236]  dump_stack_lvl+0x4a/0x63
+[252997.090240]  dump_stack+0x10/0x16
+[252997.090243]  dump_header+0x53/0x23c
+[252997.090247]  oom_kill_process.cold+0xb/0x10
+[252997.090249]  out_of_memory+0x106/0x2e0
+[252997.090254]  mem_cgroup_out_of_memory+0x13f/0x160
+[252997.090258]  try_charge_memcg+0x687/0x740
+[252997.090261]  ? kernel_init_free_pages.part.0+0x4a/0x70
+[252997.090265]  ? get_page_from_freelist+0x356/0x520
+[252997.090267]  charge_memcg+0x45/0xb0
+[252997.090269]  __mem_cgroup_charge+0x2d/0x90
+[252997.090271]  __add_to_page_cache_locked+0x2d8/0x350
+[252997.090274]  ? scan_shadow_nodes+0x40/0x40
+[252997.090278]  add_to_page_cache_lru+0x4d/0xd0
+[252997.090280]  pagecache_get_page+0x192/0x590
+[252997.090281]  ? ext4_dirty_inode+0x70/0x80
+[252997.090286]  grab_cache_page_write_begin+0x21/0x40
+[252997.090288]  ext4_da_write_begin+0xec/0x2c0
+[252997.090291]  generic_perform_write+0xc6/0x1f0
+[252997.090295]  ext4_buffered_write_iter+0xa4/0x170
+[252997.090300]  ext4_file_write_iter+0x43/0x60
+[252997.090303]  new_sync_write+0x114/0x1a0
+[252997.090307]  vfs_write+0x1d8/0x270
+[252997.090310]  ksys_write+0x67/0xf0
+[252997.090312]  __x64_sys_write+0x19/0x20
+[252997.090313]  x64_sys_call+0x47c/0x1fa0
+[252997.090317]  do_syscall_64+0x5e/0xb0
+[252997.090320]  ? common_interrupt+0x55/0xa0
+[252997.090323]  entry_SYSCALL_64_after_hwframe+0x6c/0xd6
+[252997.090326] RIP: 0033:0x7f243c199a0f
+[252997.090329] Code: 89 54 24 18 48 89 74 24 10 89 7c 24 08 e8 b9 bf f7 ff 48 8b 54 24 18 48 8b 74 24 10 41 89 c0 8b 7c 24 08 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 31 44 89 c7 48 89 44 24 08 e8 fc bf f7 ff 48
+[252997.090331] RSP: 002b:00007f23f8aef230 EFLAGS: 00000293 ORIG_RAX: 0000000000000001
+[252997.090334] RAX: ffffffffffffffda RBX: 0000000000010000 RCX: 00007f243c199a0f
+[252997.090335] RDX: 0000000000010000 RSI: 00007f2418a63ab0 RDI: 00000000000001c1
+[252997.090337] RBP: 00007f23f8aef280 R08: 0000000000000000 R09: 00000000e409a188
+[252997.090338] R10: 0000000000000576 R11: 0000000000000293 R12: 00007f2410bd25a0
+[252997.090339] R13: 00007f2418a63ab0 R14: 00007f23f8aef2c0 R15: 00007f2410bd2250
+[252997.090342]  </TASK>
+[252997.090343] memory: usage 1572864kB, limit 1572864kB, failcnt 2035672
+[252997.090344] swap: usage 0kB, limit 0kB, failcnt 0
+[252997.090346] Memory cgroup stats for /user.slice/user-20001.slice/user@20001.service/app.slice/oom-r1v-1794510217891472941.scope:
+[252997.090369] anon 1576968192
+                file 6131712
+                kernel_stack 3538944
+                pagetables 3715072
+                percpu 0
+                sock 0
+                shmem 0
+                file_mapped 57344
+                file_dirty 4722688
+                file_writeback 1077248
+                swapcached 0
+                anon_thp 0
+                file_thp 0
+                shmem_thp 0
+                inactive_anon 1576955904
+                active_anon 12288
+                inactive_file 3235840
+                active_file 2617344
+                unevictable 0
+                slab_reclaimable 18361472
+                slab_unreclaimable 1869536
+                slab 20231008
+                workingset_refault_anon 0
+                workingset_refault_file 1459137
+                workingset_activate_anon 0
+                workingset_activate_file 43831
+                workingset_restore_anon 0
+                workingset_restore_file 2708
+                workingset_nodereclaim 0
+                pgfault 5198002
+                pgmajfault 5828
+                pgrefill 1895907
+                pgscan 10310064
+                pgsteal 6183585
+                pgactivate 2308558
+                pgdeactivate 1892931
+                pglazyfree 0
+                pglazyfreed 0
+                thp_fault_alloc 0
+                thp_collapse_alloc 0
+[252997.090372] Tasks state (memory values in pages):
+[252997.090372] [  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name
+[252997.090379] [ 487185] 20001 487185   852448   386542  3731456        0             0 java
+[252997.090382] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0,oom_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/oom-r1v-1794510217891472941.scope,task_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/oom-r1v-1794510217891472941.scope,task=java,pid=487185,uid=20001
+[252997.091002] Memory cgroup out of memory: Killed process 487185 (java) total-vm:3409792kB, anon-rss:1530924kB, file-rss:16380kB, shmem-rss:0kB, UID:20001 pgtables:3644kB oom_score_adj:0
+clock: epoch 1794510917.945753233 uptime 252999.23 (dmesg stamps are sched_clock; may drift a few s from wall time)

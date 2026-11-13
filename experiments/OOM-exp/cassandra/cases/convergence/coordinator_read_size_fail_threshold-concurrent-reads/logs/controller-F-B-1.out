@@ -1,0 +1,36 @@
+[2026-11-12T16:27:36Z] ARM F-B-1 arm=B heap=512M steps=256:180 maxReads=none conns=16
+[2026-11-12T16:27:41Z] started F-B-1 pid 411336 java
+[2026-11-12T16:28:46Z] ready F-B-1
+-XX:+HeapDumpOnOutOfMemoryError -Xms512M -Xmx512M -XX:MaxDirectMemorySize=3982M -XX:HeapDumpPath=/mydata/c2/runs/F-B-1/cassandra-1794500858-pid411336.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+16:28:48 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+16:28:55 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=64 rows=56 size=65536 pk0=0 errors=0
+16:29:06 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=1 rows=72 size=65536 pk0=1000 errors=0
+[2026-11-12T16:29:10Z] flushed
+		SSTable count: 4
+		Old SSTable count: 0
+		Space used (live): 240970793
+		Compacted partition maximum bytes: 4866323
+16:29:15 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=1000 ERROR ReadFailureException: Cassandra failure during read query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+16:29:19 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=0 OK rows=56 valueBytes=3670016 warnings=[Read on table c2.t has exceeded the size warning threshold of 1,048,576 bytes with token: -3485513579396041028]
+[2026-11-12T16:29:27Z] GC.run F-B-1
+1794500972,base,nmtOtherKB=592955,nmtTotalKB=1357487,rssKB=874568,1794500971653,191146432,191146432,191146432,0,0,3763,0,0,53507317,0,1,194,649,4866323
+[2026-11-12T16:29:43Z] VICTIM DEAD at +10s
+[2026-11-12T16:30:24Z] OOM/GC check
+WARN  [Native-Transport-Requests-55] 2026-11-12T16:29:38,542 SelectStatement.java:1051 - Read on table c2.t has exceeded the size warning threshold of 1,048,576 bytes with query SELECT v FROM c2.t WHERE pk = 25
+java.lang.OutOfMemoryError: Java heap space
+Dumping heap to /mydata/c2/runs/F-B-1/cassandra-1794500858-pid411336.hprof ...
+Heap dump file created [521525155 bytes in 1.553 secs]
+#
+# java.lang.OutOfMemoryError: Java heap space
+# -XX:OnOutOfMemoryError="kill -9 %p"
+#   Executing /bin/sh -c "kill -9 411336"...
+-rw-------  1 jason92 misconfiguration 521525155 Nov 12 09:29 cassandra-1794500858-pid411336.hprof
+pauses=81 full_gcs=31 total_pause=7s max60=11% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=HeapDumper@122.445s,ReportJavaOutOfMemory@123.798s
+[2026-11-12T16:30:28Z] stopped F-B-1
+no java left
+[2026-11-12T16:30:35Z] END F-B-1

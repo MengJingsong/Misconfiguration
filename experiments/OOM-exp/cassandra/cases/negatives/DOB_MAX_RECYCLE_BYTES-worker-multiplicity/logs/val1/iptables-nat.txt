@@ -1,0 +1,5 @@
+-P POSTROUTING ACCEPT
+-A POSTROUTING -d 127.0.0.2/32 -o lo -p tcp -m tcp --dport 9042 -m comment --comment c3-snat -m statistic --mode nth --every 4 --packet 0 -j SNAT --to-source 127.0.0.11
+-A POSTROUTING -d 127.0.0.2/32 -o lo -p tcp -m tcp --dport 9042 -m comment --comment c3-snat -m statistic --mode nth --every 3 --packet 0 -j SNAT --to-source 127.0.0.12
+-A POSTROUTING -d 127.0.0.2/32 -o lo -p tcp -m tcp --dport 9042 -m comment --comment c3-snat -m statistic --mode nth --every 2 --packet 0 -j SNAT --to-source 127.0.0.13
+-A POSTROUTING -d 127.0.0.2/32 -o lo -p tcp -m tcp --dport 9042 -m comment --comment c3-snat -j SNAT --to-source 127.0.0.14

@@ -1,0 +1,19 @@
+arm B512-b5m-hiT-r1: direct=512M L=default fill=4000x520000B threads=512 ips=4 burst=5000000:640:4:4 dump=nodump
+node pid 142622: -Xmx2048M MaxDirectMemorySize=512M dob_max_recycle_bytes=default; poller 143379
+p idle1 09:10:19: directMiB=51.4 count=99 threads=67 heapMiB=80 nmtOther=committed=150983KB rssAnonKB=2428720
+p idle2 09:10:31: directMiB=51.4 count=101 threads=68 heapMiB=80 nmtOther=committed=150986KB rssAnonKB=2429764
+sep idle: SEP worker threads (distinct ids)=17; by last stage:  1 "MutationStage-  8 "Native-Transport-Requests-  7 "ReadStage-  1 "SharedPool-Worker- 
+fill clients: rc=0 Op rate : 42 op/s [insert: 42 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; Op rate : 28 op/s [insert: 28 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; Op rate : 25 op/s [insert: 26 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; Op rate : 29 op/s [insert: 29 op/s]|Total partitions : 1,000 [insert: 1,000]|Total errors : 0 [insert: 0]| ;; 
+window fill: samples=193 peakDirectMiB=193.8 (at 1794499879956) minMiB=51.4 peakCount=306
+p retained 09:11:51: directMiB=191.8 count=294 threads=240 heapMiB=1329 nmtOther=committed=458577KB rssAnonKB=2858292
+sep retained: SEP worker threads (distinct ids)=160; by last stage:  32 "MutationStage-  128 "Native-Transport-Requests- 
+server writes after fill: 	Write Count: 4000
+flush c3ks before burst: 3 s
+p post-flush 09:11:57: directMiB=191.8 count=294 threads=242 heapMiB=1345 nmtOther=committed=458579KB rssAnonKB=2858612
+sep post-flush: SEP worker threads (distinct ids)=160; by last stage:  32 "MutationStage-  128 "Native-Transport-Requests- 
+p pre-burst 09:11:59: directMiB=191.8 count=294 threads=242 heapMiB=1345 nmtOther=committed=458579KB rssAnonKB=2858868
+burst clients: rc=0 Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 160 [insert: 160]|Total errors : 0 [insert: 0]| ;; Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 160 [insert: 160]|Total errors : 0 [insert: 0]| ;; Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 160 [insert: 160]|Total errors : 0 [insert: 0]| ;; Op rate : 2 op/s [insert: 2 op/s]|Total partitions : 160 [insert: 160]|Total errors : 0 [insert: 0]| ;; 
+window burst: samples=311 peakDirectMiB=511.1 (at 1794499984249) minMiB=148.2 peakCount=328
+p after-burst 09:13:39: directMiB=149.2 count=302 threads=240 heapMiB=1389 nmtOther=committed=419334KB rssAnonKB=3056004
+window whole-run: samples=816 peakDirectMiB=511.1 (at 1794499984249) minMiB=51.4 peakCount=329
+ERROR lines: 0; OOM lines: 1; node alive at end: yes

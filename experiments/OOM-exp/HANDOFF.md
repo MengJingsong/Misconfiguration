@@ -161,9 +161,15 @@ none has run yet.
     just deliberately paused; see run 3's case file for the retry that
     remains available once un-skipped). Read it before picking a combination
     for the next run — **do not pick from disk while it is marked skipped.**
-- **C1 — internode receive-queue multiplicity (campaign plan, 2026-11-09/10): in progress.**
-  Three runs, all cases, harnesses and design files in
-  [`cassandra/cases/candidates/internode_application_receive_queue_capacity-multiplicity/`](cassandra/cases/candidates/internode_application_receive_queue_capacity-multiplicity/).
+- **C1 — internode receive-queue multiplicity: `verified-OOM · diagnostic` (run 4, 2026-11-12).**
+  [Final case](cassandra/cases/convergence/internode_application_receive_queue_capacity-multiplicity/internode_application_receive_queue_capacity--multiplicity--run4.md)
+  (pc96, all colocated). Default capacities, 2 GiB heap: 8 loaded peers fill the receive queue to its
+  ceiling during the victim's flush stalls and the victim dies of a direct OOM at 512 MiB direct, 10/10
+  (largest failing 640 MiB; none ≥ 672); 1–2 peers 0/12. Dumps: receive-path frames 66–68% of direct (93–94% with
+  the pool). Labelled diagnostic by the researcher: the failing budget is below what `cassandra-env.sh`
+  resolves. Netty's separate direct counter adds ≈ 96 MiB the java.nio reading misses.
+  History (runs 1–3) below. Three runs, all cases, harnesses and design files in
+  [`cassandra/cases/convergence/internode_application_receive_queue_capacity-multiplicity/`](cassandra/cases/convergence/internode_application_receive_queue_capacity-multiplicity/).
   Run 1 (default Q): admission ceiling matched to 0.2 MiB at N=4, but N·Q ≪ noise and coordinators OOMed
   under replica fan-out. Run 2 (custom Q, victim sole replica): senders survive, but the client waits on
   the victim, so occupancy settles at ~266 MiB below the ceiling and is Q-invariant. Run 3 (fast
@@ -173,6 +179,17 @@ none has run yet.
   Next, verify the **coordinators'** `write_request_timeout` against the
   measured drain rate and run the matched sweeps. Proceed to the fixed-budget
   OOM stage after a reproducible live-memory increase.
+- **R1-V — off-heap memtable + chunk cache at defaults: `verified-OOM · deployment` (2026-11-12).**
+  [Case](cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md) (apt149). Heap 2 GiB, direct 1 GiB, container 3,413 MiB
+  (researcher-accepted): kernel memcg kill 3/3 with both pools at their default 512 MiB and each under its cap;
+  each alone 0/6; file cache 128 MiB removes it 3/3. With container = 2 × heap no reproducible failure. The first
+  convergence case verified at defaults with a `deployment` label.
+- **C2 — concurrent reads below the size threshold: S-A `verified-OOM · deployment` (unprotected configuration), 2026-11-12.**
+  [Case](cassandra/cases/convergence/coordinator_read_size_fail_threshold-concurrent-reads/coordinator_read_size_fail_threshold--concurrent-reads.md)
+  (apt140/apt138). At shipped defaults, clients keeping 1,024 reads of 3.5 MiB outstanding while draining slowly
+  exhaust Netty direct memory at the budgets `cassandra-env.sh` resolves (2 GiB heap / 3,982 MiB direct, and the
+  auto heap); nothing bounds encoded responses waiting on the socket. With read thresholds on at the test values:
+  S-B and F-B `verified-OOM · diagnostic`; F-A negative. Open: acceptable read-threshold value (to discuss).
 - **Bypass (`bypass-playbook.md`):**
   - **B6 — internode queue accounting mismatch (2026-11-10/11): verified, runs 1–3 done.**
     Final case: [`internode_application_queue_capacity--accounting-mismatch.md`](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/internode_application_queue_capacity--accounting-mismatch.md)

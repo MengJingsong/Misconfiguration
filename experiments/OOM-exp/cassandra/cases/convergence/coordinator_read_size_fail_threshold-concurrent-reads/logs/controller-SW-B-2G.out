@@ -1,0 +1,34 @@
+[2026-11-12T14:25:34Z] ARM S-B-1 arm=B heap=2G steps=8:60,32:60,128:90,256:90,512:90,1024:90 maxReads=none conns=16
+[2026-11-12T14:25:39Z] started S-B-1 pid 361270 java
+[2026-11-12T14:26:46Z] ready S-B-1
+-XX:+HeapDumpOnOutOfMemoryError -Xms2G -Xmx2G -XX:MaxDirectMemorySize=3982M -XX:HeapDumpPath=/mydata/c2/runs/S-B-1/cassandra-1794493536-pid361270.hprof -XX:NativeMemoryTracking=summary -XX:OnOutOfMemoryError=kill 
+14:26:49 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+14:26:56 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=64 rows=56 size=65536 pk0=0 errors=0
+14:27:01 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+load ok parts=1 rows=72 size=65536 pk0=1000 errors=0
+[2026-11-12T14:27:07Z] flushed
+		SSTable count: 2
+		Old SSTable count: 0
+		Space used (live): 240960023
+		Compacted partition maximum bytes: 4866323
+14:27:11 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+one pk=1000 ERROR ReadFailureException: Cassandra failure during read query at consistency LOCAL_ONE (1 responses were required but only 0 replica responded, 1 failed)
+14:27:16 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+14:27:16 WARN  c.d.d.c.RequestHandler - Query '[0 bound values] SELECT v FROM c2.t WHERE pk=0;' generated server side warning(s): Read on table c2.t has exceeded the size warning threshold of 1,048,576 bytes with token: -3485513579396041028
+one pk=0 OK rows=56 valueBytes=3670016 warnings=[Read on table c2.t has exceeded the size warning threshold of 1,048,576 bytes with token: -3485513579396041028]
+[2026-11-12T14:27:25Z] GC.run S-B-1
+1794493649,base,nmtOtherKB=488295,nmtTotalKB=2878509,rssKB=2510824,1794493648853,85738672,85738672,85738672,0,0,3763,0,0,46998147,0,1,117,92,4866323
+1794494149,t+11,nmtOtherKB=588113,nmtTotalKB=3009928,rssKB=2908908,1794494149013,1891393424,1606180752,230499176,0,0,121240,0,0,48562196,0,1,51432,51522,4055269
+SUMMARY secs=485 ok=117414 err=0 bytesMB=410949 inflight_left=0
+cat: /mydata/c2/runs/S-B-1/client.pid: No such file or directory
+cat: /mydata/c2/runs/S-B-1/client.pid: No such file or directory
+1794494164,end-pre,nmtOtherKB=588113,nmtTotalKB=3006325,rssKB=2908908,1794494164013,1891393424,1606180752,230499176,0,0,121240,0,0,48562196,0,1,51432,51522,4055269
+[2026-11-12T14:36:05Z] GC.run S-B-1
+1794494169,end-post,nmtOtherKB=588113,nmtTotalKB=3006613,rssKB=2909084,1794494169014,99655464,99655464,99655464,0,0,121240,0,0,48562196,0,1,51432,51604,4055269
+[2026-11-12T14:36:09Z] OOM/GC check
+Terminated
+[2026-11-12T14:38:40Z] stopped S-B-1
+no java left
+[2026-11-12T14:38:49Z] END S-B-1
