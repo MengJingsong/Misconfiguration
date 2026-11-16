@@ -10,6 +10,12 @@ pre-protocol cases). **Domain:** Java heap of the victim. **Stages run:** 1 (mul
 12:55–15:35 EST, one agent; design [`design/S2-design.md`](design/S2-design.md) (written before readings,
 amendments A1 13:16, A2 14:18, A3 14:43, A4 14:45 EST).
 
+> **Scope of the verified condition (researcher, 2026-11-16).** Condition A is verified for a **replica faster than
+> the victim**: here the other replica had an 8 GiB heap against the victim's 2 GiB, so it acknowledged CL=ONE writes
+> first while the victim's local copies queued. With equal 2 GiB heaps the victim survived 1/1 (81 % live, §3.5).
+> Whether the backlog also forms in an equal-heap ring is open: an **equal-heap RF=3 ring, ×3**, is queued as the
+> follow-up (campaign plan, row S2).
+
 | Condition | Status (protocol *Verification status*) |
 |---|---|
 | **A — victim heap 2 GiB** (other replica 8 GiB), blob 11 000 B, 8 × 256 client in flight, CL=ONE, uncapped, no fault | **`verified-OOM · deployment`** (unprotected accumulation; **Researcher's review 2026-11-16:** promoted, the uncapped CL=ONE burst accepted as a workload within guardrails; moved from `candidates/` to `convergence/`). As filed: `candidate` — V1–V5 met (heap OOM 3/3 + 1 earlier arm; control 3/3 survive; intervention 3/3 survive; dumps), V6 met, V7 met (2 GiB, standing rule); **pending the researcher's review** of the interpretation (unprotected accumulation vs. accepted overload behaviour) and the topology note (§4; equal-heap replica survived 1/1). Proposed: `verified-OOM · deployment` (unprotected). |
