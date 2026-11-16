@@ -268,6 +268,9 @@ none has run yet.
 
 ## Decisions and conventions in force
 
+- **Explain ID prefixes when showing items (2026-11-16).** Any list or report of items by ID
+  (C, B, R, S, U, J, F, L, N, …) says what each prefix means; table and clashes in
+  [`README.md`](README.md#id-prefixes-rule-2026-11-16).
 - **Each playbook run is one agent, end to end**: it picks constraints/
   mechanisms, designs the test, runs it on a node it has access to, and
   files the result. No separate design-then-execute split (unlike

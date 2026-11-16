@@ -110,6 +110,32 @@ state which variable the test isolates.
 Add a shape when a candidate needs one. Campaign IDs identify individual
 investigations in the [Cassandra campaign plan](cassandra/campaign-plan.md).
 
+### ID prefixes (rule, 2026-11-16)
+
+**Whenever items are shown by ID** (in a reply, a status report, a plan or a handoff), say what each
+prefix means the first time it appears, e.g. "U1 (U = unprotected accumulation lead)". This holds for the
+prefixes below and for any prefix added later; a new prefix gets a row here when it is introduced.
+
+| Prefix | Meaning | Defined in |
+|---|---|---|
+| **C** | convergence investigation | [campaign plan](cassandra/campaign-plan.md) queue |
+| **B** | bypass investigation | campaign plan queue |
+| **R** | recheck of a pre-protocol convergence OOM (R1–R6); suffix **-V** = re-test of the same mechanism at default constraints and an acceptable budget (e.g. R1-V) | campaign plan queue |
+| **S** | stacked combo case (convergence → stack → bypass), per the [combo playbook](combo-playbook.md) | campaign plan queue |
+| **U** | unprotected-accumulation lead (memory with no applicable control) | campaign plan queue |
+| **J** | JIRA lead-source task (J1 Cassandra, J2 Hadoop survey) | campaign plan, *Lead-source pilots* |
+| **F** | data-flow tracing task (F1 coordinator write) | campaign plan, *Lead-source pilots* |
+| **L** | candidate lead from the OOM-pattern/JIRA lead list | [`OOM-leads.md`](OOM-leads.md) §4 |
+| **N** | new lead from the capacity-enforcement-exp bypass notes | [`capacity-enforcement-bypass-leads.md`](capacity-enforcement-bypass-leads.md) §3 |
+| **V1–V7** | items of the verification (promotion) rule | [verification protocol](verification-protocol.md) |
+| **P1–P3** after a slash (e.g. `C1 / P1`) | priority in the campaign queue | campaign plan |
+| condition letters inside a case (B6 **A**/**B**/**D**, C2 **S-A**/**F-B**, C1 **D**/**H**) | sub-cases (conditions) of one case | the case file's status table |
+
+**Clashing labels in [`OOM-leads.md`](OOM-leads.md):** there, **P1–P6** are patterns seen in our cases,
+**J1–J6** are JIRA cause patterns and **S1–S6** are search patterns. They are not campaign IDs (P1/P2
+priorities, J1/J2 tasks, S1/S2 combo cases). When citing them, name the file or say "pattern P2",
+"JIRA pattern J2", "search pattern S1".
+
 ### Direction 2 — bypass
 
 A caller, option, fallback allocation, accounting omission, release defect,
