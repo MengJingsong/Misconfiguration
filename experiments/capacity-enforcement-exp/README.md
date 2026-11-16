@@ -3,8 +3,9 @@
 > **Renamed 2026-11-11** from `if-check-exp`. An `if` statement is only one form an enforcement
 > place takes, and the experiment now also starts from capacity-set places (§3.7). Records
 > written before the rename (case files, results, logs, dated handoff entries) keep the old name
-> and are not edited; read `if-check-exp` there as this folder. A symlink
-> `experiments/if-check-exp` → `capacity-enforcement-exp` is kept for a transition period.
+> and are not edited; read `if-check-exp` there as this folder. The transition symlink
+> `experiments/if-check-exp` was removed on 2026-11-16; harness scripts and harness READMEs were
+> repointed to `experiments/capacity-enforcement-exp/`, and frozen records keep the old path.
 
 > **Paths (multi-system layout).** This is a system-agnostic method doc. The per-system files it
 > names (`cases/`, `_INDEX.md`, `results/`, `harness/`, `bands.csv`, `environment.md`,

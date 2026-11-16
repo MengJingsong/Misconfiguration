@@ -106,8 +106,8 @@ noticed along the way are noted in case files for Target 3, not chased.
 
 - **Rename and two kinds of starting place** (2026-11-11, Jingsong): `if-check-exp` is now
   `capacity-enforcement-exp` (folders `experiments/capacity-enforcement-exp/` and
-  `codeql-queries/<system>/queries/capacity-enforcement-exp/`; a symlink `experiments/if-check-exp`
-  is kept for a transition period; frozen records keep the old name). A case starts from an
+  `codeql-queries/<system>/queries/capacity-enforcement-exp/`; the transition symlink `experiments/if-check-exp`
+  was removed on 2026-11-16; frozen records keep the old name). A case starts from an
   **enforcement place** (usage compared with a capacity, in any form: `if`, ternary, loop,
   `switch` on a verdict, clamp, library call, ...) or a **capacity-set place** (where a capacity
   gets its value), and is traced backward to the constraint and forward to the usage effect.

@@ -3,7 +3,8 @@
 ## Hadoop capacity-enforcement-exp stage 3 and 4 (two people)
 
 `capacity-enforcement-exp` was named `if-check-exp` until 2026-11-11; a request that uses the old
-name means this experiment (`experiments/if-check-exp` is a symlink to the new folder for now).
+name means this experiment. The `experiments/if-check-exp` symlink was removed on 2026-11-16; a path
+under `experiments/if-check-exp/` in an older record means the same path under `experiments/capacity-enforcement-exp/`.
 
 If the user says "this is Yang" or "this is Jingsong" (any case) and asks about Hadoop capacity-enforcement-exp
 (or if-check-exp) stage 3/4:
