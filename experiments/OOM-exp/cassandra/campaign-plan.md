@@ -109,7 +109,7 @@ pilots get normal C/B IDs (U for unprotected accumulation) and a
 
 | ID / priority | Lead source | Task | Output / done when |
 |---|---|---|---|
-| J1 / P1 | JIRA | Survey resolved CASSANDRA issues reporting OOM; classify per [jira-mining-playbook](../jira-mining-playbook.md). Then pick 3–5 positive controls and a variant shortlist. | `leads/jira-oom-survey.csv` + `.md` with counts per class/flow/fix kind and the two shortlists. Reproductions are separate follow-up rows. |
+| J1 / P1 | JIRA | **Done 2026-11-16:** [`leads/jira-oom-survey.csv`](leads/jira-oom-survey.csv) + [`.md`](leads/jira-oom-survey.md) (604 issues, 246 kept, 115/120 kept Fixed diffs read, second pass 39/40 screen agreement); prior-art check of the verified cases in [`leads/jira-prior-art-verified-cases.md`](leads/jira-prior-art-verified-cases.md). Positive controls and variant leads listed there, not yet queued. *Original task:* Survey resolved CASSANDRA issues reporting OOM; classify per [jira-mining-playbook](../jira-mining-playbook.md). Then pick 3–5 positive controls and a variant shortlist. | `leads/jira-oom-survey.csv` + `.md` with counts per class/flow/fix kind and the two shortlists. Reproductions are separate follow-up rows. |
 | F1 / P1 | data flow | Trace the **coordinator write** flow (client intake → coordinator → internode send → replica receive → mutation stage → memtable) per [dataflow-tracing-playbook](../dataflow-tracing-playbook.md). Much of it is mapped already in C1 and B6. | `leads/dataflow/coordinator-write.md` with the holder table and ranked leads. |
 | J2 / P2 | JIRA | Same survey for Hadoop (HDFS, YARN, MAPREDUCE, HADOOP); does not need capacity-enforcement-exp Hadoop to finish. | `../hadoop/leads/jira-oom-survey.csv` + `.md`. |
 

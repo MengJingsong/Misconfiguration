@@ -810,3 +810,16 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
   Two void arms; one dump parsed on the victim during a later arm (disclosed).
 - Case: [`coordinator-local-write-backlog--combo`](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md). Evidence `pc96:/mydata/s2-evidence/` (968 MiB; dumps
   reduced to histograms). apt nodes cleaned at 15:23 EST.
+
+## 2026-11-16 — J1 JIRA OOM survey and prior-art check of the verified cases (no node runs)
+
+- Query as in [`leads/jira-oom-survey.md`](../leads/jira-oom-survey.md) §1: 604 issues, read by four agents (151 each),
+  then a second pass (conventions, 36 subject-only rows re-read from diffs, seeded spot-check 25 kept + 15 excluded:
+  screen 39/40, class 25/25 on mechanism, fix_kind 24/25). Result: 246 kept; 131 unprotected:accumulation,
+  22 unprotected:configuration, 18 bypass:accounting-mismatch, 14 convergence:multiplicity, 42 unknown; 115 of 120 kept
+  Fixed issues with the diff read. Shortlists of positive controls and 5.0.9 variant leads in the survey file.
+- Prior-art check ([`leads/jira-prior-art-verified-cases.md`](../leads/jira-prior-art-verified-cases.md)): B1 known-open
+  (21884), C2 known-open (11082), S1's U1 layer known-open (21656), S2 core known-open (19958); B6, B7 new; C1 new but
+  weak; R1-V documented (its failing heap is 60 % of the container vs the documented ≤ 50 %). Nothing posted upstream.
+- Stopping point: survey complete; positive controls and variant leads not yet queued (pre-pick JIRA check rule).
+

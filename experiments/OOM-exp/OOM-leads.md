@@ -51,6 +51,9 @@ reproduce only with custom values or tightened budgets.
 
 ## 2. Patterns in Cassandra JIRA
 
+> **Superseded 2026-11-16** by the formal survey [`cassandra/leads/jira-oom-survey.md`](cassandra/leads/jira-oom-survey.md)
+> (fix diffs read, second pass). This section is kept as the first pass.
+
 ### 2.1 Query and screening
 
 - Query (2026-11-12, `issues.apache.org/jira`, REST search):
