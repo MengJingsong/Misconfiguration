@@ -34,7 +34,7 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-11 | convergence / custom | R3 recheck of run 1 (apt149) | [memtable_heap_space+counter_cache_size](candidates/memtable_heap_space+counter_cache_size/memtable_heap_space+counter_cache_size.md) | heap OOM + kill 3/3; alone 0/6; counter cache 50 MiB removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic (mixed) |
 | 2026-11-11 | convergence / custom | R4 recheck of run 2 (apt179) | [+key_cache_size](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | heap OOM + kill 3/3; alone 0/9; counter cache to auto removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic (mixed) |
 | 2026-11-16 | combo / default | S1 (JVM direct, pc96) | [internode_receive_queue+…--direct-combo](convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo.md) | stage 3 direct OOM 3/3 at 768 MiB; stages 1–2 negative at 2 GiB |
-| 2026-11-16 | combo / default | S2 (heap, apt140/138/149) | [coordinator-local-write-backlog--combo](candidates/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md) | heap OOM 3/3 at 2 GiB via local-write backlog (candidate); 8 GiB survives |
+| 2026-11-16 | combo / default | S2 (heap, apt140/138/149) | [coordinator-local-write-backlog--combo](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md) | heap OOM 3/3 at 2 GiB via local-write backlog (verified-OOM · deployment); 8 GiB survives |
 
 ---
 
@@ -796,8 +796,7 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
   negatives, 67 / 62 % headroom. Stage 3 (15 MiB mutations, in-flight DOB fill, lead U1): 1,368 MiB at 2048; survives
   at 1536 and, touching the limit with `Bits` forced GCs, at 1024 (×2), 896, 832; **direct OOM 3/3 at 768**.
 - Gap off 0/3 (thin margin, U 740–766), 1 peer 0/3, layers off 0/3: joint endpoint. Dumps: DOB 210–435, pool 136,
-  hints 96 MiB. Proposed `verified-OOM · diagnostic` (768 < the 1024 MiB `cassandra-env.sh` gives a 2 GiB-heap node);
-  review pending. Two invalid arms (tmpfs full; 12 GiB safety scope), fixed by amendments 1 and 4.
+  hints 96 MiB. Proposed `verified-OOM · diagnostic`; **researcher's review 2026-11-16: `verified-OOM · deployment`**, thin control margin accepted. Two invalid arms (tmpfs full; 12 GiB safety scope), fixed by amendments 1 and 4.
 - Case: [`…--direct-combo`](convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo.md). Data `pc96:/mydata/s1/runs/` (3.8 GB incl. 3 dumps). Cleanup verified.
 
 ## 2026-11-16 — S2 combo, heap (apt140 victim, apt149 replica, apt138 client; 12:55–15:25 EST)
@@ -807,7 +806,7 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
   a faster 8 GiB replica acked; expired local writes are resubmitted as hints, not dropped. Unprotected accumulation.
 - Rate cap 2,000/s 0/3, CL=LOCAL_ONE 0/3. 4 GiB 1/3, 2/3 with default caches filled + flush (mixed, suggestive);
   8 GiB stages 1–3 survive (35–58 % live); equal-heap replica 1/1 survived (81 %).
-- Filed `candidate` (V1–V7 met) pending review of the workload (uncapped CL=ONE burst) and the unequal-heap topology.
+- Filed `candidate` (V1–V7 met); **researcher's review 2026-11-16: promoted to `verified-OOM · deployment` (unprotected), workload accepted**; moved to `convergence/`.
   Two void arms; one dump parsed on the victim during a later arm (disclosed).
-- Case: [`coordinator-local-write-backlog--combo`](candidates/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md). Evidence `pc96:/mydata/s2-evidence/` (968 MiB; dumps
+- Case: [`coordinator-local-write-backlog--combo`](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md). Evidence `pc96:/mydata/s2-evidence/` (968 MiB; dumps
   reduced to histograms). apt nodes cleaned at 15:23 EST.

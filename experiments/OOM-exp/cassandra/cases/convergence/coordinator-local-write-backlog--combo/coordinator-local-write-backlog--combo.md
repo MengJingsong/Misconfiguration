@@ -12,7 +12,7 @@ amendments A1 13:16, A2 14:18, A3 14:43, A4 14:45 EST).
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
-| **A — victim heap 2 GiB** (other replica 8 GiB), blob 11 000 B, 8 × 256 client in flight, CL=ONE, uncapped, no fault | **`candidate`** — V1–V5 met (heap OOM 3/3 + 1 earlier arm; control 3/3 survive; intervention 3/3 survive; dumps), V6 met, V7 met (2 GiB, standing rule); **pending the researcher's review** of the interpretation (unprotected accumulation vs. accepted overload behaviour) and the topology note (§4; equal-heap replica survived 1/1). Proposed: `verified-OOM · deployment` (unprotected). |
+| **A — victim heap 2 GiB** (other replica 8 GiB), blob 11 000 B, 8 × 256 client in flight, CL=ONE, uncapped, no fault | **`verified-OOM · deployment`** (unprotected accumulation; **Researcher's review 2026-11-16:** promoted, the uncapped CL=ONE burst accepted as a workload within guardrails; moved from `candidates/` to `convergence/`). As filed: `candidate` — V1–V5 met (heap OOM 3/3 + 1 earlier arm; control 3/3 survive; intervention 3/3 survive; dumps), V6 met, V7 met (2 GiB, standing rule); **pending the researcher's review** of the interpretation (unprotected accumulation vs. accepted overload behaviour) and the topology note (§4; equal-heap replica survived 1/1). Proposed: `verified-OOM · deployment` (unprotected). |
 | B — same at 4 GiB | `candidate`: stage 1 alone OOM 1/3 (survivors 82.5 %, 96.4 % live); **with stage-2 layers (default caches filled + flush) OOM 2/3**, third at 99.1 % live (§3.4); no control/intervention at 4 GiB |
 | C — same at 8 GiB (stage 1, 2, 3) | survived 1/1 each (35 %, 36 %, 57.5 % post-Full-GC live): not a failing budget in 90 s of load |
 
@@ -217,7 +217,7 @@ backlog instead of shedding it). JIRA not checked yet.
 | V6 | default constraints | all defaults resolved at the heap; hints on | yes |
 | V7 | acceptable budget | 2 GiB heap (standing rule ≥ 512 MiB, 2 GiB ideal); 4 GiB 1/3 | yes |
 
-**Status proposal:** condition A meets V1–V7 as measured. Filed in `candidates/` as **`candidate`** pending the
+**Researcher's review 2026-11-16:** condition A promoted to **`verified-OOM · deployment`** (unprotected accumulation); the workload is accepted. Filed in `convergence/`. Proposal as filed: condition A meets V1–V7 as measured. Filed in `candidates/` as **`candidate`** pending the
 researcher's review because (1) the protocol requires the workload to stay within documented guardrails, and
 whether an uncapped CL=ONE write burst above a node's apply rate is an accepted workload or documented overload is
 a judgement call; (2) the topology has heterogeneous replica heaps (R 8 GiB), which makes R the faster replica;

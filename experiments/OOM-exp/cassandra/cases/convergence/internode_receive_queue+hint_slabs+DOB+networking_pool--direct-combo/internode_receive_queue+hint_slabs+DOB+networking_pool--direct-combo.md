@@ -14,7 +14,7 @@ JDK 11, G1. **Node:** `pc96` only (11 instances on loopback + clients). **Date:*
 amendments 1–5 dated before the readings they govern). Sources reused: C1 run 4 (C = convergence investigation),
 C2, C3, R6-V (R = recheck; -V = re-test at defaults), B1 (B = bypass investigation), U1.
 
-**Status (proposed, for the researcher's review):** **`verified-OOM · diagnostic`** proposed for condition **S3@768** (all stages stacked, 15 MiB
+**Status:** **`verified-OOM · deployment`** (**Researcher's review 2026-11-16:** label set to `deployment`, the thin gap-off control margin accepted; the paragraph below is the proposal as filed) for condition **S3@768** (all stages stacked, 15 MiB
 mutations, heap 2 GiB, direct 768 MiB): V1–V7 met under the standing budget rule (768 ≥ 512 MiB), labelled
 `diagnostic` by analogy with C1 run 4's review (768 MiB is below the 1024 MiB that `cassandra-env.sh` resolves for a
 node whose automatic heap is 2 GiB; by the letter of the protocol the conditions would be `deployment`: no
@@ -262,11 +262,11 @@ up to ≈ 1 GiB at defaults) is uncounted. In this topology the stack fails at 7
 shape (640) and 256 MiB short of the auto value for a 2 GiB heap. Stacking narrowed the gap to the auto budget but
 did not close it.
 
-**Status by condition (proposed):**
+**Status by condition** (**Researcher's review 2026-11-16:** S3@768 → `deployment`, control margin accepted)**:**
 
 | Condition | Endpoint | Control | Intervention | Proposed status |
 |---|---|---|---|---|
-| S3@768 (stack + 15 MiB, heap 2 GiB, direct 768) | 3/3 | gap off 0/3 | N=1 0/3; layers off 0/3 | `verified-OOM · diagnostic` (pending review; see label note) |
+| S3@768 (stack + 15 MiB, heap 2 GiB, direct 768) | 3/3 | gap off 0/3 | N=1 0/3; layers off 0/3 | **`verified-OOM · deployment`** (researcher, 2026-11-16) |
 | S3@832–2048 | 0/5 (832, 896, 1024 ×2, 1536, 2048) | — | — | boundary: largest failing 768 |
 | Stage 1, stage 2 @2048 | 0/1 each (+ C1 r4 0/2) | — | — | negative (headroom 67 / 62 %) |
 
@@ -280,7 +280,7 @@ did not close it.
 | V4 intervention | multiplicity off `I_N1_d768_r1b, r2, r3`: 0/3 at matched 15 MiB rate (21–23/s, 0 errors), U_peak 556–575; also layers off 0/3 | yes |
 | V5 initiating failure | first `OutOfMemoryError: Direct buffer memory` + stack (MutationStage, `CommitLog.add` → `expandToFit`) 3/3; dumps ×3 with holders | yes |
 | V6 default constraints | all capacities unset (yaml diff = environment keys); 15 MiB mutations within the default `max_mutation_size` 16 MiB | yes |
-| V7 acceptable budget | heap 2048 (ideal), direct 768 ≥ 512 (standing rule); below the 1024 MiB auto value → `diagnostic` by the C1 precedent (researcher to confirm) | yes (standing rule) |
+| V7 acceptable budget | heap 2048 (ideal), direct 768 ≥ 512 (standing rule); below the 1024 MiB auto value; researcher accepted it as `deployment` 2026-11-16 | yes (standing rule) |
 
 **Limits.**
 - Only up to 768 MiB direct; the stack does **not** reach the ideal 2 GiB or any auto-resolved budget. The S1 aim
