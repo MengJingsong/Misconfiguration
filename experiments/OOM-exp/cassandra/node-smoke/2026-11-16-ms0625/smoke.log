@@ -1,0 +1,48 @@
+[1794864148389 14:22:28] == inventory
+[1794864149087 14:22:29] == preflight
+[1794864149145 14:22:29] + systemd-run --user --scope -p MemoryMax=4096M -p MemorySwapMax=0 --unit=smoke-cass-1794864149 -- bin/cassandra -f  (heap 2G, direct 1024M)
+[1794864201448 14:23:21] startup ok=1 in 52 s
+[1794864201483 14:23:21] pid=9319 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/smoke-cass-1794864149.scope memory.max=4294967296 swap.max=0
+[1794864201523 14:23:21] jvm: -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=15872M -XX:MaxDirectMemorySize=1024M 
+[1794864201530 14:23:21] == native libraries and platform warnings (system.log)
+INFO  [main] 2026-11-16T21:22:34,153 Config.java:1371 - Node configuration:[allocate_tokens_for_keyspace=null; allocate_tokens_for_local_replication_factor=3; allow_extra_insecure_udfs=false; allow_filtering_enabled=true; allow_insecure_udfs=false; alter_table_enabled=true; audit_logging_options=Aud
+INFO  [main] 2026-11-16T21:22:35,257 DatabaseDescriptor.java:662 - Native transport rate-limiting disabled.
+INFO  [main] 2026-11-16T21:22:36,869 CassandraDaemon.java:617 - Classpath: /mydata/oom-smoke/cassandra-run1/bin/../conf:/mydata/oom-smoke/cassandra-run1/bin/../build/apache-cassandra-5.0.9-SNAPSHOT.jar:/mydata/oom-smoke/cassandra-run1/bin/../lib/HdrHistogram-2.1.12.jar:/mydata/oom-smoke/cassandra-ru
+INFO  [main] 2026-11-16T21:22:37,812 NativeLibrary.java:186 - JNA mlockall successful
+INFO  [main] 2026-11-16T21:22:38,572 SigarLibrary.java:60 - Could not initialize SIGAR library 'org.hyperic.sigar.FileSystem[] org.hyperic.sigar.Sigar.getFileSystemListNative()' 
+INFO  [main] 2026-11-16T21:22:46,845 StorageService.java:880 - Unable to gossip with any peers but continuing anyway since node is in its own seed list
+INFO  [main] 2026-11-16T21:23:20,789 CassandraDaemon.java:450 - Prewarming of auth caches is disabled
+INFO  [main] 2026-11-16T21:23:20,833 NativeTransportService.java:132 - Using Netty Version: [netty-all=netty-all-4.1.130.Final.41ff1eb (repository: dirty), netty-buffer=netty-buffer-4.1.130.Final.41ff1eb (repository: dirty), netty-codec=netty-codec-4.1.130.Final.41ff1eb (repository: dirty), netty-co
+INFO  [main] 2026-11-16T21:23:20,861 NativeTransportService.java:70 - Netty using native Epoll event loop
+[1794864201548 14:23:21] WARN lines: 5  ERROR lines: 0
+[1794864201557 14:23:21] == nodetool
+--  Address    Load        Tokens  Owns (effective)  Host ID                               Rack 
+UN  127.0.0.1  114.73 KiB  16      100.0%            ee0baa26-7484-4a2a-85e1-81c417b60e8e  rack1
+
+[1794864208743 14:23:28] statusbinary: running
+[1794864208749 14:23:28] == stress write
+[1794864266218 14:24:26] write exit=0 secs=58
+Op rate                   :    6,701 op/s  [WRITE: 6,701 op/s]
+Partition rate            :    6,701 pk/s  [WRITE: 6,701 pk/s]
+Latency mean              :    4.6 ms [WRITE: 4.6 ms]
+Latency 99th percentile   :   19.7 ms [WRITE: 19.7 ms]
+Total partitions          :    200,000 [WRITE: 200,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:00:29
+[1794864266229 14:24:26] == stress read
+[1794864308273 14:25:08] read exit=0 secs=42
+Op rate                   :    4,765 op/s  [READ: 4,765 op/s]
+Partition rate            :    4,765 pk/s  [READ: 4,765 pk/s]
+Latency mean              :    6.6 ms [READ: 6.6 ms]
+Latency 99th percentile   :   27.2 ms [READ: 27.2 ms]
+Total partitions          :    100,000 [READ: 100,000]
+Total errors              :          0 [READ: 0]
+Total operation time      : 00:00:20
+[1794864308283 14:25:08] == memory after workload
+Heap Memory (MB)       : 793.11 / 2048.00
+Off Heap Memory (MB)   : 0.22
+[1794864312561 14:25:12] cgroup memory.peak= current=2836123648 events: low 0 high 0 max 0 oom 0 oom_kill 0 
+[1794864314652 14:25:14] threads in epollWait: 51  in NIO select: 0
+[1794864314658 14:25:14] == stop
+[1794864321237 14:25:21] left running: daemon=0 stress=0 scope=0
+[1794864321251 14:25:21] done

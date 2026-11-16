@@ -9,6 +9,11 @@
 accepted as a documented setting; family A (L = 2 × heap) and family B (heap 2048, L = 3413, bisect upward)
 accepted for V7.
 
+> **Re-review (researcher, 2026-11-16).** Condition B goes back from `verified-OOM · deployment` to
+> **`reproduced-OOM · diagnostic`**, and the case moves from `convergence/` to `candidates/`. V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap (§3.2). The JIRA prior-art check ([`leads/jira-prior-art-verified-cases.md`](../../../leads/jira-prior-art-verified-cases.md)) found the
+> pool-sum sizing documented, so upstream would likely answer "documented". V1–V6 are unchanged; V7's acceptance of
+> the 3,413 MiB container is withdrawn pending the re-review. The text below is the record as filed on 2026-11-12.
+
 | Condition | Status (protocol *Verification status*) |
 |---|---|
 | **B:** heap 2048 MiB, `MaxDirectMemorySize` 1024 MiB, container `memory.max` **3413 MiB** (heap = 60% of the limit), constraints at defaults (memtable off-heap 512, chunk cache 512), `offheap_objects`, chunk cache enabled; 800k-partition write load | **`verified-OOM · deployment`** (proposed) |
@@ -187,7 +192,7 @@ the kill level, the 384 MiB pool reduction). The load did not shrink: the whole 
 | V6 | defaults | `memtable_offheap_space`, `file_cache_size` (and `memtable_heap_space`, cleanup threshold) unset, resolved 512/512 at the 2048 heap; read back from the log | yes |
 | V7 | acceptable budget | heap 2048 / direct 1024 meet the standing rule; container 3413 MiB (heap = 60% of the limit) argued in design §4 and **accepted by the researcher 2026-11-12** before readings | yes |
 
-**Status (filed 2026-11-12 in `convergence/`): `verified-OOM · deployment`** (convergence · standing-pool), filed in
+**Status (filed 2026-11-12 in `convergence/`): `verified-OOM · deployment`** — *withdrawn 2026-11-16, see the re-review note at the top* (convergence · standing-pool), filed in
 `cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/`.
 **Largest failing budget:** family B fails at L = 3413 (3/3) and 3500 (1/1); the same heap/direct survives at
 4096 (0/1, 86.3%). The boundary lies between 3500 and 4096 MiB (≈ 3540 MiB of anon by the 4096 peak); not

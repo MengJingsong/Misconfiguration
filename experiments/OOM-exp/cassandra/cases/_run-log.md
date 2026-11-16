@@ -823,3 +823,7 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
   weak; R1-V documented (its failing heap is 60 % of the container vs the documented ≤ 50 %). Nothing posted upstream.
 - Stopping point: survey complete; positive controls and variant leads not yet queued (pre-pick JIRA check rule).
 
+## 2026-11-16 — R1-V back to re-review
+
+- By the researcher's decision, R1-V condition B goes from `verified-OOM · deployment` to `reproduced-OOM · diagnostic`
+  and moves to `candidates/`: V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap. Re-review needs an argued V7 or failures at heap ≤ 50 % of the container.

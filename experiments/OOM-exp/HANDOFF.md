@@ -179,8 +179,8 @@ none has run yet.
   Next, verify the **coordinators'** `write_request_timeout` against the
   measured drain rate and run the matched sweeps. Proceed to the fixed-budget
   OOM stage after a reproducible live-memory increase.
-- **R1-V — off-heap memtable + chunk cache at defaults: `verified-OOM · deployment` (2026-11-12).**
-  [Case](cassandra/cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md) (apt149). Heap 2 GiB, direct 1 GiB, container 3,413 MiB
+- **R1-V — off-heap memtable + chunk cache at defaults: `verified-OOM · deployment` (2026-11-12); back to `reproduced-OOM · diagnostic`, V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap; moved to `candidates/`.**
+  [Case](cassandra/cases/candidates/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md) (apt149). Heap 2 GiB, direct 1 GiB, container 3,413 MiB
   (researcher-accepted): kernel memcg kill 3/3 with both pools at their default 512 MiB and each under its cap;
   each alone 0/6; file cache 128 MiB removes it 3/3. With container = 2 × heap no reproducible failure. The first
   convergence case verified at defaults with a `deployment` label.
@@ -366,6 +366,20 @@ none has run yet.
   done — see `environment.md`. (The earlier `pc41`/`pc39`/`pc29` allocation from
   2026-11-02, and the interim `pc264/265/268/271/323` nodes at 2 c/1 GiB that
   were too small to build or host peers, are retired.)
+- **Utah m400 nodes (added 2026-11-16, experiment `jason92-326377`):** `ms0625` (node0, LAN
+  `10.10.1.1`), `ms0640` (node1, `.2`), `ms0604` (node2, `.3`), `ms0611` (node3, `.4`), `ms0617`
+  (node4, `.5`), full names `msNNNN.utah.cloudlab.us`. Plain `ssh ms0625` etc. works from `pc96`
+  (`setup-node.sh --peers` blocks; deploy key). Each: **aarch64** (APM X-Gene, 8 cores), 62 GiB RAM,
+  **8 GiB swap on**, 37 GiB free on `/mydata` + 57 GiB on `/`, Ubuntu 22.04.1 / `5.15.0-191`, cgroup v2,
+  passwordless sudo, 10 GbE private LAN (~0.1 ms); **50 ms from `pc96`**, so run controller and clients
+  on one of them. Utah's `/proj` is a separate share without the repository. **Smoke test passed on
+  `ms0625`** ([`cassandra/node-smoke/2026-11-16-ms0625/`](cassandra/node-smoke/2026-11-16-ms0625/README.md)):
+  JDK 11.0.33 + Ant 1.10.12 installed, `ant jar` 5 min 18 s, node up under a 4 GiB user-scope cgroup
+  with swap 0, Netty native **epoll** in use, JNA loaded, write/read stress 0 errors, nothing left
+  running. Not yet set up: the other four nodes (JDK, Ant, build). Before use: these are a separate
+  platform from the x86 nodes (never mix within one case's matched arms; record `aarch64`), auto
+  direct memory = ¼ RAM = 15,872 MiB here, SIGAR does not load, `memory.peak` does not exist on 5.15
+  (sample `memory.current`), and swap must stay 0 in the victim scope (`-p MemorySwapMax=0`).
 - **Nodes:** run on whatever CloudLab node the session has — see
   `capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md` for the JDK/Ant
   install and source-copy steps (same pinned `systems/cassandra/source/`
