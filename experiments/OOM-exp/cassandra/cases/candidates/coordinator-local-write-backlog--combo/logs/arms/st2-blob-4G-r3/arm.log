@@ -1,0 +1,30 @@
+[15:02:50] args: cl=ONE rate=none kind=blob V=4G fill=1 flush=1@85 stall=0 sess=8 load=90 hist=none
+[13:02:55] gen V xmx=4G extra=[]
+[13:02:56] gen R xmx=8G extra=[]
+[13:02:57] launched V pid=592128
+[13:03:29] launched R pid=609823
+[15:03:57] ring UN=2
+20:03:59 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+[15:04:25] fill: insert 1.6M kv
+DONE mode=insert table=kv keyBytes=8 first=0 count=1600000 ok=1600000 err=0 rows=0 secs=13.4 ops/s=119261
+[15:04:47] fill: read 1.5M kv
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 ok=1500000 err=0 rows=1500000 secs=20.4 ops/s=73595
+[15:05:12] fill: counter 550k
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 ok=550000 err=0 rows=0 secs=10.6 ops/s=52108
+Key Cache              : entries 1310720, size 100 MiB, capacity 100 MiB, 127 hits, 1519876 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 468114, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+		Table: t_blob
+		Memtable data size: 0
+		Table: t_map
+		Memtable data size: 0
+		Table: ctr
+		Memtable data size: 0
+		Table: kv
+		Memtable data size: 0
+[15:05:37] load start
+[15:07:03] flush b6
+[13:09:48] s2slow write delay = 0 ms
+[15:09:48] load end, stall off
+V_DEAD
+[15:16:56] st2-blob-4G-r3: V xmx=4G 1 OOMError lines | pauses=984 max_after_any=4062MiB(99.2%) full_gcs=656 max_after_full=4062MiB(99.2%) ReportJavaOutOfMemory=1 | full>95%: n=656 window=328s pause=324s (99%) service_loss=MET | pauses=984 total_pause=326s max60=99% longest>=90%win=328s 437-765s (326s paused) service_loss(all STW)=MET oom_marks=HeapDumper@764.686s,ReportJavaOutOfMemory@794.041s | client: FINAL sent=430268 ok=422912 err=7356 TransportException: [/10.10.1.1:9042] Connection has been closed | R: pauses=18 max_after_any=7727MiB(94.3%) full_gcs=0 max_after_full=0MiB(0.0%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met

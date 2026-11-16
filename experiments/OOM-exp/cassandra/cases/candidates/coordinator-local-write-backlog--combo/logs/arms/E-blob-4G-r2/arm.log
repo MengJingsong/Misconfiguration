@@ -1,0 +1,23 @@
+[14:17:43] args: cl=ONE rate=none kind=blob V=4G fill=0 flush=0@85 stall=0 sess=8 load=90 hist=none
+[12:17:48] gen V xmx=4G extra=[]
+[12:17:50] gen R xmx=8G extra=[]
+[12:17:57] launched V pid=548863
+[12:18:31] launched R pid=605825
+[14:19:00] ring UN=2
+19:19:03 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+Key Cache              : entries 32, size 2.57 KiB, capacity 100 MiB, 121 hits, 142 requests, 0.852 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 50 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+		Table: t_blob
+		Memtable data size: 0
+		Table: t_map
+		Memtable data size: 0
+		Table: ctr
+		Memtable data size: 0
+		Table: kv
+		Memtable data size: 0
+[14:19:33] load start
+[12:21:41] s2slow write delay = 0 ms
+[14:21:41] load end, stall off
+V_ALIVE
+[14:23:14] E-blob-4G-r2: V xmx=4G 0 OOMError lines | pauses=55 max_after_any=4079MiB(99.6%) full_gcs=14 max_after_full=3380MiB(82.5%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met | pauses=55 total_pause=12s max60=14% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | client: FINAL sent=475000 ok=466067 err=8933 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write) | R: pauses=16 max_after_any=8175MiB(99.8%) full_gcs=1 max_after_full=1939MiB(23.7%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met

@@ -1,0 +1,28 @@
+505-WARN  [Messaging-EventLoop-3-2] 2026-11-16T19:09:07,108 NoSpamLogger.java:107 - /127.0.0.51:7000->/127.0.0.65:7000-SMALL_MESSAGES-be13174f dropping message of type MUTATION_RSP whose timeout expired before reaching the network
+506-ERROR [MutationStage-33] 2026-11-16T19:09:07,556 JVMStabilityInspector.java:70 - Exception in thread Thread[MutationStage-33,10,SharedPool]
+507:java.lang.RuntimeException: java.lang.OutOfMemoryError: Direct buffer memory
+508-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:108)
+509-	at org.apache.cassandra.net.InboundSink.accept(InboundSink.java:45)
+510-	at org.apache.cassandra.net.InboundMessageHandler$ProcessMessage.run(InboundMessageHandler.java:430)
+511-	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+512-	at org.apache.cassandra.concurrent.SEPWorker.run(SEPWorker.java:143)
+513-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+514-	at java.base/java.lang.Thread.run(Thread.java:829)
+515-Caused by: java.lang.OutOfMemoryError: Direct buffer memory
+516-	at java.base/java.nio.Bits.reserveMemory(Bits.java:175)
+517-	at java.base/java.nio.DirectByteBuffer.<init>(DirectByteBuffer.java:118)
+518-	at java.base/java.nio.ByteBuffer.allocateDirect(ByteBuffer.java:317)
+519-	at org.apache.cassandra.io.util.DataOutputBuffer$1$1.allocate(DataOutputBuffer.java:87)
+520-	at org.apache.cassandra.io.util.DataOutputBuffer.expandToFit(DataOutputBuffer.java:178)
+521-	at org.apache.cassandra.io.util.DataOutputBuffer.doFlush(DataOutputBuffer.java:138)
+522-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.write(BufferedDataOutputStreamPlus.java:146)
+523-	at org.apache.cassandra.io.util.BufferedDataOutputStreamPlus.writeByte(BufferedDataOutputStreamPlus.java:162)
+524-	at org.apache.cassandra.db.rows.UnfilteredSerializer.writeEndOfPartition(UnfilteredSerializer.java:415)
+525-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:153)
+526-	at org.apache.cassandra.db.rows.UnfilteredRowIteratorSerializer.serialize(UnfilteredRowIteratorSerializer.java:101)
+527-	at org.apache.cassandra.db.partitions.PartitionUpdate$PartitionUpdateSerializer.serialize(PartitionUpdate.java:717)
+528-	at org.apache.cassandra.db.Mutation$MutationSerializer.serializeInternal(Mutation.java:483)
+529-	at org.apache.cassandra.db.Mutation$SizeOnlyCacheableSerialization.serialize(Mutation.java:583)
+530-	at org.apache.cassandra.db.Mutation$MutationSerializer.serialize(Mutation.java:414)
+531-	at org.apache.cassandra.db.commitlog.CommitLog.add(CommitLog.java:308)
+532-	at org.apache.cassandra.db.CassandraKeyspaceWriteHandler.addToCommitLog(CassandraKeyspaceWriteHandler.java:99)

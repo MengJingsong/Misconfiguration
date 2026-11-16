@@ -1,0 +1,1 @@
+-rw------- 1 jason92 misconfiguration 4591315395 Nov 16 12:57 /mydata/s2/inst/V/dumps/cassandra-1794858488-pid582052.hprof

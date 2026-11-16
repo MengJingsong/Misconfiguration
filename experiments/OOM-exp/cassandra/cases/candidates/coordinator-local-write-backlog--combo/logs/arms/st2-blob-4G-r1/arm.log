@@ -1,0 +1,30 @@
+[14:41:39] args: cl=ONE rate=none kind=blob V=4G fill=1 flush=1@85 stall=0 sess=8 load=90 hist=none
+[12:41:43] gen V xmx=4G extra=[]
+[12:41:44] gen R xmx=8G extra=[]
+[12:41:45] launched V pid=575369
+[12:42:14] launched R pid=608549
+[14:42:43] ring UN=2
+19:42:46 WARN  c.d.d.c.p.RoundRobinPolicy - Detected request at Consistency Level LOCAL_ONE but the non-DC aware RoundRobinPolicy is in use. It is strongly advised to use DCAwareRoundRobinPolicy if you have multiple DCs/use DC-aware consistency levels (note: this message will only be logged once)
+schema ok
+[14:43:11] fill: insert 1.6M kv
+DONE mode=insert table=kv keyBytes=8 first=0 count=1600000 ok=1600000 err=0 rows=0 secs=13.8 ops/s=116195
+[14:43:33] fill: read 1.5M kv
+DONE mode=read table=kv keyBytes=8 first=0 count=1500000 ok=1500000 err=0 rows=1500000 secs=20.1 ops/s=74497
+[14:43:58] fill: counter 550k
+DONE mode=counter table=ctr keyBytes=8 first=0 count=550000 ok=550000 err=0 rows=0 secs=10.5 ops/s=52366
+Key Cache              : entries 1310720, size 100 MiB, capacity 100 MiB, 127 hits, 1519827 requests, 0.000 recent hit rate, 14400 save period in seconds
+Counter Cache          : entries 468114, size 50 MiB, capacity 50 MiB, 0 hits, 550000 requests, 0.000 recent hit rate, 7200 save period in seconds
+		Table: t_blob
+		Memtable data size: 0
+		Table: t_map
+		Memtable data size: 0
+		Table: ctr
+		Memtable data size: 0
+		Table: kv
+		Memtable data size: 0
+[14:44:23] load start
+[14:45:49] flush b6
+[12:46:26] s2slow write delay = 0 ms
+[14:46:26] load end, stall off
+V_ALIVE
+[14:48:01] st2-blob-4G-r1: V xmx=4G 0 OOMError lines | pauses=153 max_after_any=4077MiB(99.5%) full_gcs=56 max_after_full=4059MiB(99.1%) ReportJavaOutOfMemory=0 | full>95%: n=33 window=18s pause=17s (94%) service_loss=not met | pauses=153 total_pause=38s max60=48% longest>=90%win=0s - service_loss(all STW)=not met oom_marks=none | client: FINAL sent=461514 ok=451465 err=10049 WriteTimeoutException: Cassandra timeout during SIMPLE write query at consistency ONE (1 replica were required but only 0 acknowledged the write) | R: pauses=15 max_after_any=8175MiB(99.8%) full_gcs=1 max_after_full=1971MiB(24.1%) ReportJavaOutOfMemory=0 | full>95%: n=0 window=0s pause=0s (0%) service_loss=not met

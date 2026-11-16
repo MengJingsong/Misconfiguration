@@ -1,0 +1,33 @@
+DirectByteBuffer instances: 12463; owners (allocateDirect) 2546 = 745.4 MiB; mapped 29 = 192.0 MiB; slices of owners 1702; other 8186
+Netty PlatformDependent: DIRECT_MEMORY_COUNTER=176.0 MiB (counter object present), DIRECT_MEMORY_LIMIT=805306368, USE_DIRECT_BUFFER_NO_CLEANER=1, MAX_DIRECT_MEMORY=805306368
+DirectByteBuffers without cleaner and without a known owner (Netty no-cleaner / JNI / slices of those): 8186, total capacity 1480.2 MiB (upper bound; slices may overlap)
+
+Live direct memory by holder (owners = 745.4 MiB):
+  O: DataOutputBuffer scratch                             435.0 MiB   58.4 %
+  P: BufferPool chunks, no live consumer                  136.1 MiB   18.3 %
+  O: hints buffers                                         96.2 MiB   12.9 %
+  R: receive queue, queued LARGE frames                    52.6 MiB    7.1 %
+  R: inbound frames being decoded                          22.9 MiB    3.1 %
+  O: netty / NIO buffers                                    1.5 MiB    0.2 %
+  O: storage I/O buffers                                    1.1 MiB    0.1 %
+  O: no strong referrer (garbage awaiting Cleaner)          0.0 MiB    0.0 %
+
+Example referrer chain per category (buffer <- holder <- ...):
+  P: BufferPool chunks, no live consumer:
+      java.nio.DirectByteBuffer.att <- org.apache.cassandra.utils.memory.BufferPool$Chunk.slab
+  O: DataOutputBuffer scratch:
+      org.apache.cassandra.io.util.DataOutputBuffer$1$1.buffer
+  O: netty / NIO buffers:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- [Lio.netty.util.concurrent.EventExecutor;[].[] <- io.netty.channel.epoll.EpollEventLoopGroup.children <- io.netty.channel.epoll.EpollEventLoop.parent <- io.netty.util.concurrent.SingleThreadEventExecutor$4.this$0
+  O: hints buffers:
+      org.apache.cassandra.hints.HintsWriteExecutor.writeBuffer
+  R: receive queue, queued LARGE frames:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.concurrent.SingleThreadEventExecutor$4.this$0 <- io.netty.util.internal.ThreadExecutorMap$2.val$command <- io.netty.util.concurrent.FastThreadLocalRunnable.runnable
+  R: inbound frames being decoded:
+      io.netty.channel.epoll.EpollEventArray.memory <- io.netty.channel.epoll.EpollEventLoop.events <- io.netty.util.concurrent.SingleThreadEventExecutor$4.this$0 <- io.netty.util.internal.ThreadExecutorMap$2.val$command <- io.netty.util.concurrent.FastThreadLocalRunnable.runnable
+  O: no strong referrer (garbage awaiting Cleaner):
+      
+  O: storage I/O buffers:
+      org.apache.cassandra.io.compress.CompressedSequentialWriter.buffer
+
+Owner sizes (bytes x count, top 8): 32768 x 2411, 49152 x 33, 128 x 21, 8392704 x 17, 15728683 x 12, 31457366 x 8, 16384 x 6, 262144 x 5

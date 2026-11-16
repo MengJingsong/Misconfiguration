@@ -1,0 +1,17 @@
+WARN  [Messaging-EventLoop-3-2] 2026-11-16T20:16:11,682 NoSpamLogger.java:107 - /10.10.1.1:7000->/10.10.1.5:7000-SMALL_MESSAGES-5a4189d6 dropping message of type MUTATION_REQ whose timeout expired before reaching the network
+WARN  [OptionalTasks:1] 2026-11-16T20:16:11,681 CassandraDaemon.java:198 - Failed to update speculative retry thresholds.
+java.lang.OutOfMemoryError: Java heap space
+	at com.google.common.collect.Sets.union(Sets.java:717)
+	at org.apache.cassandra.schema.Schema.getKeyspaces(Schema.java:355)
+	at org.apache.cassandra.db.Keyspace.allExisting(Keyspace.java:762)
+	at org.apache.cassandra.service.CassandraDaemon.lambda$static$1(CassandraDaemon.java:194)
+	at org.apache.cassandra.service.CassandraDaemon$$Lambda$203/0x0000000840126840.run(Unknown Source)
+	at org.apache.cassandra.concurrent.ExecutionFailure$1.run(ExecutionFailure.java:133)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+ERROR [Reference-Reaper] 2026-11-16T20:16:11,690 Ref.java:243 - LEAK DETECTED: a reference (class org.apache.cassandra.utils.concurrent.WrappedSharedCloseable$Tidy@1798165784:[[OffHeapBitSet]]) to class org.apache.cassandra.utils.concurrent.WrappedSharedCloseable$Tidy@1798165784:[[OffHeapBitSet]] was not released before the reference was garbage collected
