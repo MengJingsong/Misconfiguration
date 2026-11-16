@@ -9,6 +9,14 @@ All leads below require source/path verification; inclusion does not confirm a b
 
 ## Prioritized queue
 
+**JIRA check before a candidate is queued (rule, 2026-11-16).** Before a new row is added to the queue (or a
+lead is picked for a batch), search CASSANDRA JIRA for its mechanism, starting from
+[`leads/jira-oom-survey.csv`](leads/jira-oom-survey.csv) once it exists, and record the matching issues (or "none
+found", with the query) in the row's `source:` / hypothesis text. A mechanism already reported and fixed is queued as a
+**regression check** or a **positive control**, not as a new lead; one reported and closed as by design is queued
+only if the case can show a broken or misleading documented contract. A verified case gets the same check before
+any upstream report.
+
 Direction/sub-direction names are from [`../README.md`](../README.md#two-directions):
 convergence sub-directions are *multiplicity*, *concurrency/surge*,
 *replacement-overlap* (and the done *standing-pool* shape); bypass sub-directions

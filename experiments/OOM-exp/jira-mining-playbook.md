@@ -44,6 +44,12 @@ Write `<system>/leads/jira-oom-survey.md` with the query, counts per `class`,
 the variant and reproduction shortlists. Agents may do the reading in parallel;
 a second pass spot-checks a sample of classifications.
 
+## Pre-pick check (rule, 2026-11-16)
+
+Every candidate is checked against JIRA before it is queued, and every verified case before an upstream report;
+see the rule in the [Cassandra campaign plan](cassandra/campaign-plan.md#prioritized-queue). The survey CSV is the
+first place to look; a targeted JIRA search follows for mechanisms the survey does not cover.
+
 ## Positive controls (reproduction)
 
 Pick 3–5 issues covering different classes and flows with low reproduction cost.

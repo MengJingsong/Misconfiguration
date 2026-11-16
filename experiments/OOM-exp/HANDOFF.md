@@ -268,6 +268,9 @@ none has run yet.
 
 ## Decisions and conventions in force
 
+- **JIRA check before queuing a candidate (2026-11-16).** Search JIRA for the mechanism and record the
+  matching issues in the campaign-plan row; known fixed bugs become regression checks or positive controls.
+  Rule text in [`cassandra/campaign-plan.md`](cassandra/campaign-plan.md#prioritized-queue).
 - **Explain ID prefixes when showing items (2026-11-16).** Any list or report of items by ID
   (C, B, R, S, U, J, F, L, N, …) says what each prefix means; table and clashes in
   [`README.md`](README.md#id-prefixes-rule-2026-11-16).
