@@ -55,7 +55,7 @@ flows can be ranked by how many real OOMs they caused.
 
 4. **Rank** leads by (bytes reachable per legitimate operation) × (how many
    operations or owners can be simultaneously live) and by the JIRA survey's
-   count for the flow. Turn the top leads into campaign-plan rows.
+   count for the flow. Turn the top leads into campaign-plan proposals ([`queuing-playbook.md`](queuing-playbook.md)).
 
 ## What counts as a finding
 

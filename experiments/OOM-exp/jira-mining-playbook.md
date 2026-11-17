@@ -64,7 +64,7 @@ failure to reproduce is recorded with its blocker, not discarded.
 For each shortlisted issue, read the fix and ask: does the same pattern exist on
 another path, caller, message type or table option in the pinned version, and
 does the limit the fix added have its own bypass or convergence exposure? Each
-plausible lead becomes a campaign-plan row with its normal C/B ID and
+plausible lead becomes a campaign-plan **proposal** (after the JIRA check, per [`queuing-playbook.md`](queuing-playbook.md) §4–§5) with its normal C/B ID and
 `source: JIRA-KEY variant`. It is then run with the matching playbook; the JIRA
 issue is cited in the protection map.
 

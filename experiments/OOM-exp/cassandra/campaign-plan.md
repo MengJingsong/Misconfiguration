@@ -9,6 +9,9 @@ All leads below require source/path verification; inclusion does not confirm a b
 
 ## Prioritized queue
 
+**How a lead becomes a row** (screening, the JIRA check, IDs, priority, row format, the gate before a run, row
+statuses): [`../queuing-playbook.md`](../queuing-playbook.md) (2026-11-17), which merges the rules below and elsewhere.
+
 **JIRA check before a candidate is queued (rule, 2026-11-16).** Before a new row is added to the queue (or a
 lead is picked for a batch), search CASSANDRA JIRA for its mechanism, starting from
 [`leads/jira-oom-survey.csv`](leads/jira-oom-survey.csv) once it exists, and record the matching issues (or "none
