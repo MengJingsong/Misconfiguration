@@ -1,4 +1,21 @@
-# S2 run 2 — the local-write backlog without a faster replica: equal-heap RF=3 ring (Utah m400, aarch64)
+# S2 — run history (coordinator's own local-write backlog, heap combo)
+
+The per-run case files of S2 kept verbatim after their conditions were consolidated into
+[`coordinator-local-write-backlog--combo.md`](coordinator-local-write-backlog--combo.md)
+(filing rule: protocol *Case evidence and batch status*, amended 2026-11-11). Only mechanical changes: every
+heading is demoted one level. Relative links to `design/`, `harness*/` and `logs*/` are unchanged. Run 1's case
+file is the final file itself (its conditions A–C and text were kept in place), so only run 2 is here.
+
+| Run | Original file |
+|---|---|
+| Run 1 — 2026-11-16: victim 2 GiB + faster 8 GiB replica (x86, apt140/149/138) | the final file, [`coordinator-local-write-backlog--combo.md`](coordinator-local-write-backlog--combo.md) |
+| [Run 2 — 2026-11-16/17: equal-heap RF=3 ring (aarch64, Utah m400)](#run-2) | `coordinator-local-write-backlog--combo--run2-equal-heap.md` (moved here 2026-11-17) |
+
+---
+
+<a id="run-2"></a>
+
+## S2 run 2 — the local-write backlog without a faster replica: equal-heap RF=3 ring (Utah m400, aarch64)
 
 **Campaign row:** S2 (S = stacked combo case, per [`combo-playbook.md`](../../../../combo-playbook.md)), run 2 = the
 follow-up the researcher queued on 2026-11-16 after S2 run 1 (final file
@@ -24,7 +41,7 @@ victim — all heaps 2 GiB, RF=3, CL=ONE, shipped defaults? And with two faster 
 | Eeq-RF2 — run 1's topology with R1 at 2 GiB (equal-heap RF=2), 300 s load | Heap OOM **3/3**, 66–92 s after load start (the longer burst was not needed); 63.0 k queued `Mutation`; intervention CL=LOCAL_ONE (same topology, 300 s) **0/3**, 43.7–55.5 % live, ≈ 1.02–1.05 M writes. Proposed: `candidate` — V1, V3–V7 met; **V2 missing** (no matched rate-cap control on this topology; ≈ 20 min to add). **Contrasts with run 1's x86 arm (1/1 survived at 81 %)**: platform-dependent. |
 
 
-## Summary
+### Summary
 
 - **Conclusion:** on aarch64 the S2 failure does **not** need a replica that is faster because it is bigger. With an
   RF=3 single-DC ring where **all three nodes have a 2 GiB heap** (G1), the node coordinating every CL=ONE write dies
@@ -45,7 +62,7 @@ victim — all heaps 2 GiB, RF=3, CL=ONE, shipped defaults? And with two faster 
   same topology fails 3/3. The likely difference is the coordinator's CPU headroom (the x86 victim had 8 cores /
   16 threads; the same client shape offered 13–17 k writes/s there vs 3–8 k here): whether "equal heap" also means "equal speed" is a platform property. Untested on x86.
 
-## 1. Ceiling sheet, protection map, configuration
+### 1. Ceiling sheet, protection map, configuration
 
 **Ceiling sheet and protection map:** unchanged from run 1 (final file §1): the holder is the coordinator's own local
 write, a `LocalMutationRunnable` (`StorageProxy$4`) holding the `Mutation` and its `WriteResponseHandler`, queued on
@@ -80,7 +97,7 @@ client slot while V's local copy waits.
 | Workload | blob 11 000 B, 8 sessions × 256 in flight, all to V (whitelist), CL=ONE (interventions: CL=ALL in G, CL=LOCAL_ONE in A), rate cap 1 500/s in the control; load 90 s (300 s in the `Eeq-*-long` arms), observation 60 s after the client exits (300 s in `G1-4G-obs300`) | experimental variable |
 | Instrumentation | one long-lived JMX poller JVM per server node (`S2Poll`, nice 10, every 3 s: heap used/committed without forced GC, `MutationStage` pending/active/completed, memtable size, hints, scope memory); GC log; heap dump on OOM (parsed on pc96 by `hprofhist.py`). Shakedown arm `A-2G-r1` used run 1's nodetool/jcmd/cqlsh loop instead (≈ 30 s per cycle on the loaded m400; disclosed, reported, not counted) | disclosed |
 
-## 2. Design
+### 2. Design
 
 Design and amendments: [`design/S2-run2-design.md`](design/S2-run2-design.md). Harness:
 [`harness-run2/`](harness-run2/) — `arm.sh` (controller on pc96: clean start of all instances, schema with the
@@ -103,7 +120,7 @@ Endpoints (as run 1): heap OOM of V (`HeapDumper` / `ReportJavaOutOfMemory` safe
 in `system.log` when not starved); GC service loss (protocol default ≥ 90 % STW over ≥ 60 s, all pauses,
 `gcwin.py`).
 
-## 3. Results
+### 3. Results
 
 Raw per-arm data: `pc96:/mydata/s2r2-evidence/runs/<arm>/` (arm.log; `V/`, `R1/`, `R2/`: GC logs, system.log,
 `poll.log`, outcome, dump histogram; `client/load.log`). Committed excerpts: [`logs-run2/`](logs-run2/). Kept dumps
@@ -153,7 +170,7 @@ with ≥ 90 % STW (service loss if ≥ 60 s) · V max `MutationStage` pending (s
 | `Eeq-lone-2G-long-r2` | alive | — | 1136 (55.5 %) | 7 % | 0 s (no) | 23728 | — | 1,015,448 / 11,274 | 6,709 | R1 26.5 % / 8402 |
 | `Eeq-lone-2G-long-r3` | alive | — | 895 (43.7 %) | 7 % | 0 s (no) | 7277 | — | 1,045,970 / 9,234 | 6,734 | R1 24.2 % / 12487 |
 
-### 3.1 Positive control on aarch64 (A-aarch64, run 1's condition A)
+#### 3.1 Positive control on aarch64 (A-aarch64, run 1's condition A)
 
 Heap OOM in **3/3** counted arms (`A-2G-r2–r4`) and in the shakedown arm `A-2G-r1` (old sampler, not counted),
 `HeapDumper` 65 (r1), 115–320 s after load start; the counted arms first spent 248–321 s in GC service loss (≥ 90 % STW).
@@ -165,7 +182,7 @@ slower end to end, but V's apply rate is still below the offered rate. CL=LOCAL_
 39.5–42.9 % live, ≈ 317–329 k completed writes (vs 140–143 k before the OOM). **The platform reproduces condition A**,
 so the G arms below are interpretable.
 
-### 3.2 G1 — equal heaps, RF=3 (the question)
+#### 3.2 G1 — equal heaps, RF=3 (the question)
 
 **Heap OOM 3/3** (`HeapDumper` 62, 460, 176 s after load start; service loss in r2 and r3: 466 s and 161 s windows;
 r1 died at 82 % worst-60 s STW before a 60 s window formed). Max post-Full-GC 99.1–99.3 %. Sampler: V `MutationStage`
@@ -173,7 +190,7 @@ pending up to 62.8–64.0 k; dumps 63 349 / 63 427 / 63 520 `Mutation` with as m
 `WriteResponseHandler` — the same holder as A and run 1. The two 2 GiB replicas: one Full GC each (16–25 % live after
 it), `MutationStage` pending ≤ 77, alive. Completed writes 124–141 k (≈ A's).
 
-### 3.3 G2 — RF=3, two faster (8 GiB) peers
+#### 3.3 G2 — RF=3, two faster (8 GiB) peers
 
 **Heap OOM 3/3** (52–264 s after load start; service loss in r1, r2: 299 s, 229 s), 98.9–99.1 % live, dumps
 61 986 / 63 431 / 63 412 `Mutation`. Same as G1 within run-to-run spread: two bigger peers add nothing to an outcome
@@ -181,7 +198,7 @@ that equal peers already produce. First recorded error (r1, `system.log` not sta
 `ERROR [Native-Transport-Requests-69] … OutOfMemory error letting the JVM handle the error: java.lang.OutOfMemoryError:
 Java heap space` (then 16 more request threads); r2's first is `OptionalTasks:1`. Matched control `G2-rate-2G` (1 500 writes/s): 0/3, 8.0–9.7 % live, pending ≤ 2, ≈ 130.1 k writes, 0 errors.
 
-### 3.4 Why only V queues when no replica is bigger (readings, not a separate arm)
+#### 3.4 Why only V queues when no replica is bigger (readings, not a separate arm)
 
 | Reading (OOM arms at 2 GiB) | V | replicas |
 |---|---|---|
@@ -198,7 +215,7 @@ delivers, apply it at once and ack, which releases the client slot, the in-fligh
 while V's own copy is still queued. Expired local copies are re-queued as hints on the same stage (3.4 row 2), so
 the timeout does not shed V's backlog. Under CL=ALL the self-drops fall to 0.9–1.1 k per arm and pending to ≤ 390 (LOCAL_ONE in A: 1.8–1.9 k).
 
-### 3.5 Interventions and controls (2 GiB)
+#### 3.5 Interventions and controls (2 GiB)
 
 | Condition | Intervention (CL waits for V's own write) | Control (client cap 1 500 writes/s) |
 |---|---|---|
@@ -210,7 +227,7 @@ CL=ALL completes ≈ 2.4× the writes of the failing arms at the same offered lo
 stopping useful work (as LOCAL_ONE in run 1). The rate cap (≈ 0.5 × V's measured apply rate) keeps every node idle
 enough that nothing queues.
 
-### 3.6 Upward heap search: G1 at 4 GiB (all three nodes)
+#### 3.6 Upward heap search: G1 at 4 GiB (all three nodes)
 
 | | Outcome | Max live after Full GC | Worst-60 s STW | Service loss | V max pending | Completed |
 |---|---|---|---|---|---|---|
@@ -225,7 +242,7 @@ removes the censoring concern: once the 90 s burst ends, V's stage drains the ba
 heap to ≈ 97 % and stalls V in Full GCs, but the backlog stops growing when the offered load stops. Run 1 (x86, A,
 4 GiB): OOM 1/3. A longer burst at 4 GiB was not run (time).
 
-### 3.7 Equal-heap RF=2 with a longer burst (run 1's next step 1)
+#### 3.7 Equal-heap RF=2 with a longer burst (run 1's next step 1)
 
 `Eeq-2G-long` r1–r3 = run 1's amendment-A4 arm (A topology, R1 at 2 GiB = V) with a 300 s load. **Heap OOM 3/3**,
 66 / 81 / 92 s after load start (r3 after a 61 s service-loss window), 99.0–99.1 % live, dumps 63 083 / 62 866 /
@@ -240,7 +257,7 @@ worst-60 s STW 7 %, V pending ≤ 23.7 k (R1 ≤ 12.5 k: with LOCAL_ONE the 2 Gi
 the boundary, on the m400 it is well past it. Not pooled across platforms.
 
 
-## 4. Conclusion
+### 4. Conclusion
 
 **How far S2 generalizes (answer to the queued question).** On the m400 platform the backlog forms and the OOM
 happens with **no faster replica**: G1 (all 2 GiB, RF=3, CL=ONE, defaults) 3/3, G2 (two faster peers) 3/3, A

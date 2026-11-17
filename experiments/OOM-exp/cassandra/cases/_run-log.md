@@ -35,7 +35,7 @@ is a label on each run, not a folder; cases now live under status-first folders
 | 2026-11-11 | convergence / custom | R4 recheck of run 2 (apt179) | [+key_cache_size](candidates/memtable_heap_space+counter_cache_size+key_cache_size/memtable_heap_space+counter_cache_size+key_cache_size.md) | heap OOM + kill 3/3; alone 0/9; counter cache to auto removes it 3/3 → V1–V5 met; reproduced-OOM · diagnostic (mixed) |
 | 2026-11-16 | combo / default | S1 (JVM direct, pc96) | [internode_receive_queue+…--direct-combo](convergence/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo/internode_receive_queue+hint_slabs+DOB+networking_pool--direct-combo.md) | stage 3 direct OOM 3/3 at 768 MiB; stages 1–2 negative at 2 GiB |
 | 2026-11-16 | combo / default | S2 (heap, apt140/138/149) | [coordinator-local-write-backlog--combo](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo.md) | heap OOM 3/3 at 2 GiB via local-write backlog (verified-OOM · deployment); 8 GiB survives |
-| 2026-11-16 | combo / default | S2 run 2 (heap, Utah m400 aarch64: ms0640/0604/0611/0617) | [coordinator-local-write-backlog--combo--run2-equal-heap](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo--run2-equal-heap.md) | equal-heap RF=3 ring: heap OOM 3/3 at 2 GiB (no faster replica needed); A reproduced on aarch64 3/3 |
+| 2026-11-16 | combo / default | S2 run 2 (heap, Utah m400 aarch64: ms0640/0604/0611/0617) | [coordinator-local-write-backlog--combo history#run-2](convergence/coordinator-local-write-backlog--combo/history.md#run-2) | equal-heap RF=3 ring: heap OOM 3/3 at 2 GiB (no faster replica needed); A reproduced on aarch64 3/3 |
 | 2026-11-16 | unprotected / default | U1 (JVM direct, pc96) | [concurrent_writes+max_mutation_size--inflight-DOB-fill](candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill.md) | U1 direct OOM 2/14 at 576 MiB (candidate); no failure at auto / 1 GiB |
 | 2026-11-16 | bypass | B8 (commit-log replay, ms0625 aarch64) | [commitlog_max_outstanding_replay_bytes--accounting-mismatch](bypass/commitlog_max_outstanding_replay_bytes-accounting-mismatch/commitlog_max_outstanding_replay_bytes--accounting-mismatch.md) | no replay OOM at defaults 0/10; restore + flush stall: heap OOM 3/3 at 1 GiB (proposed, review pending) |
 
@@ -854,9 +854,9 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 - G1 at 4 GiB: no OOM, GC service loss 3/6 (97–98 % live); the backlog drains after the 90 s burst (300 s observation).
 - Proposed: G1 and G2 `verified-OOM · deployment` (unprotected); A unchanged + "reproduced on aarch64"; Eeq-RF2 `candidate` (V2 missing);
   4 GiB `candidate` (service loss 3/6).
-- Case: [`coordinator-local-write-backlog--combo--run2-equal-heap`](convergence/coordinator-local-write-backlog--combo/coordinator-local-write-backlog--combo--run2-equal-heap.md). Evidence `pc96:/mydata/s2r2-evidence/`;
+- Case: [`coordinator-local-write-backlog--combo` history, run 2](convergence/coordinator-local-write-backlog--combo/history.md#run-2). Evidence `pc96:/mydata/s2r2-evidence/`;
   4 dumps kept on `ms0640:/mydata/s2r2/dumps/`, the rest reduced to histograms. All four nodes cleaned at 01:21 EST (no Java, scopes or cgroups; linger disabled).
-- *Statuses above are the agent's proposals; researcher's review pending.*
+- **Researcher's review 2026-11-17:** G1 and G2 accepted as `verified-OOM · deployment`; added as conditions of the S2 final case file, the run file moved verbatim to `history.md#run-2`; no x86 repeat needed.
 
 ## 2026-11-16 — U1 standalone, in-flight DOB fill of large mutations, JVM direct (pc96, 21:23–00:33 EST)
 
@@ -874,7 +874,7 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 - Proposed **`candidate`** (V1 unmet; V2–V7 met; label would be `deployment`). Case:
   [`concurrent_writes+max_mutation_size--inflight-DOB-fill`](candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill.md).
   Data `pc96:/mydata/u1/runs/` (8.9 GB, 6 dumps). Cleanup verified.
-- *Statuses above are the agent's proposals; researcher's review pending.*
+- **Researcher's review 2026-11-17:** status `candidate` stands; the Netty-counter side result queued as lead **B9**.
 
 ## 2026-11-16 — B8 commit-log replay accounting mismatch, lead N4 (ms0625, aarch64; 19:15–22:05 MST)
 
@@ -892,4 +892,12 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
   by the S condition; `negatives/` if S is not accepted).
 - Case: [`commitlog_max_outstanding_replay_bytes--accounting-mismatch`](bypass/commitlog_max_outstanding_replay_bytes-accounting-mismatch/commitlog_max_outstanding_replay_bytes--accounting-mismatch.md).
   Data `ms0625:/mydata/b8/runs/` (1.6 GB incl. the first S OOM dump, 1.4 GB). Cleanup verified 22:05 (no Cassandra, client or scope left).
-- *Statuses above are the agent's proposals; researcher's review pending.*
+- **Researcher's review 2026-11-17:** S accepted as `verified-OOM · diagnostic`; the case stays in `bypass/`.
+
+## 2026-11-17 — researcher's review of the S2 run 2 / U1 / B8 batch (no node runs)
+
+- S2: G1 (equal-heap RF=3) and G2 `verified-OOM · deployment`, merged into the final case file as conditions; run 2's file moved verbatim to [`history.md#run-2`](convergence/coordinator-local-write-backlog--combo/history.md#run-2); no x86 repeat.
+- B8: S `verified-OOM · diagnostic` accepted; A `negative · deployment`, X `negative · diagnostic`; stays in `bypass/`.
+- U1: `candidate`. New campaign row **B9** (B = bypass investigation) from U1's side result: native v4 request frames held on Netty's direct counter at ≈ 2–2.5× `native_transport_max_request_data_in_flight`; JIRA check in the row.
+- Rule: the JIRA check is for finding OOM-exp candidates; no comments or reports are posted to JIRA (researcher, 2026-11-17).
+- Utah m400 nodes reachable by full name (`msNNNN.utah.cloudlab.us`) after `setup-node.sh`; linger disabled on all five. APT nodes still refuse the deploy key.

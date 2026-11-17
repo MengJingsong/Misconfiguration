@@ -1,4 +1,4 @@
-# S2 — coordinator's own local writes queue without bound behind a faster replica (heap combo)
+# S2 — coordinator's own local writes queue without bound on `MutationStage` (heap combo)
 
 **Campaign row:** S2 (S = combo: convergence multiplicity → stacked layers → bypass accounting gap, per
 [`combo-playbook.md`](../../../../combo-playbook.md)). **Sources:** B6 (B = bypass: internode queue on-wire vs heap
@@ -8,19 +8,27 @@ pre-protocol cases). **Domain:** Java heap of the victim. **Stages run:** 1 (mul
 **Regime:** default constraints. **Source:** Cassandra 5.0.9, builds `apt140:~/cassandra-b1` (victim) and
 `apt149/apt138:~/cassandra-c1` (same yaml, md5 `714ee9bf…`), read-only. **Run:** S2 run 1, 2026-11-16
 12:55–15:35 EST, one agent; design [`design/S2-design.md`](design/S2-design.md) (written before readings,
-amendments A1 13:16, A2 14:18, A3 14:43, A4 14:45 EST).
+amendments A1 13:16, A2 14:18, A3 14:43, A4 14:45 EST). **Run 2** (2026-11-16/17, Utah m400 **aarch64**, `ms0640` victim,
+`ms0604`/`ms0611` replicas, `ms0617` client): equal-heap RF=3 ring; design [`design/S2-run2-design.md`](design/S2-run2-design.md),
+run file kept verbatim in [`history.md#run-2`](history.md#run-2), conditions G1/G2 below.
 
-> **Scope of the verified condition (researcher, 2026-11-16).** Condition A is verified for a **replica faster than
-> the victim**: here the other replica had an 8 GiB heap against the victim's 2 GiB, so it acknowledged CL=ONE writes
-> first while the victim's local copies queued. With equal 2 GiB heaps the victim survived 1/1 (81 % live, §3.5).
-> Whether the backlog also forms in an equal-heap ring is open: an **equal-heap RF=3 ring, ×3**, is queued as the
-> follow-up (campaign plan, row S2).
+> **Scope (researcher, 2026-11-17).** A faster replica is **not** required. Run 2 found the same OOM in an
+> equal-heap RF=3 ring (G1, all three nodes 2 GiB) and with two faster peers (G2), 3/3 each, on aarch64; the
+> researcher accepted both as `verified-OOM · deployment` on 2026-11-17 and decided that an x86 repeat is not needed.
+> Verified for a coordinator that is also a replica and acks after another replica at CL=ONE. *(Superseded scope,
+> 2026-11-16: condition A was verified for a replica faster than the victim; with equal 2 GiB heaps the victim had
+> survived 1/1 on x86, §3.5.)*
 
 | Condition | Status (protocol *Verification status*) |
 |---|---|
 | **A — victim heap 2 GiB** (other replica 8 GiB), blob 11 000 B, 8 × 256 client in flight, CL=ONE, uncapped, no fault | **`verified-OOM · deployment`** (unprotected accumulation; **Researcher's review 2026-11-16:** promoted, the uncapped CL=ONE burst accepted as a workload within guardrails; moved from `candidates/` to `convergence/`). As filed: `candidate` — V1–V5 met (heap OOM 3/3 + 1 earlier arm; control 3/3 survive; intervention 3/3 survive; dumps), V6 met, V7 met (2 GiB, standing rule); **pending the researcher's review** of the interpretation (unprotected accumulation vs. accepted overload behaviour) and the topology note (§4; equal-heap replica survived 1/1). Proposed: `verified-OOM · deployment` (unprotected). |
 | B — same at 4 GiB | `candidate`: stage 1 alone OOM 1/3 (survivors 82.5 %, 96.4 % live); **with stage-2 layers (default caches filled + flush) OOM 2/3**, third at 99.1 % live (§3.4); no control/intervention at 4 GiB |
 | C — same at 8 GiB (stage 1, 2, 3) | survived 1/1 each (35 %, 36 %, 57.5 % post-Full-GC live): not a failing budget in 90 s of load |
+| A on aarch64 (run 2: same topology and load on Utah m400) | reproduces A: heap OOM 3/3 (+ 1 shakedown), CL=LOCAL_ONE 0/3 ([run 2](history.md#run-2)); status of A unchanged |
+| **G1 — RF=3 single DC, all three heaps 2 GiB** (run 2, aarch64), blob 11 000 B, 8 × 256 in flight to V, CL=ONE, uncapped, 90 s | **`verified-OOM · deployment`** (unprotected accumulation; **researcher's review 2026-11-17**): heap OOM 3/3, ≈ 63.4 k queued `Mutation`; rate cap 1 500/s 0/3; CL=ALL 0/3 with 2.4× the completed writes; V1–V7 in §4 |
+| **G2 — RF=3, victim 2 GiB, two 8 GiB peers** (run 2, aarch64) | **`verified-OOM · deployment`** (unprotected accumulation; researcher's review 2026-11-17): heap OOM 3/3; CL=ALL 0/3; rate cap 0/3 |
+| G1 at 4 GiB (all three nodes; run 2) | `candidate`: heap OOM 0/6, GC service loss 3/6 (97–98 % live); the backlog drains after the burst; no control or intervention at 4 GiB |
+| Equal-heap RF=2, 300 s load (run 2, aarch64) | `candidate`: heap OOM 3/3 within 92 s; CL=LOCAL_ONE 0/3; no matched rate-cap control on this topology (V2). Run 1's x86 arm survived 1/1 at 81 % |
 
 ## Summary
 
@@ -48,6 +56,14 @@ amendments A1 13:16, A2 14:18, A3 14:43, A4 14:45 EST).
   run only at budgets where stage 1 survives (4 and 8 GiB). Stage 2 moves the 4 GiB boundary (1/3 → 2/3); the B7
   cache overshoot is part of that layer, so the 4 GiB stage-2 result is tagged **mixed** (candidate); the 2 GiB
   endpoint needs no accounting gap (not mixed).
+
+- **Run 2 (aarch64, 2026-11-16/17):** the faster replica is not part of the condition. In an RF=3 ring with all
+  heaps 2 GiB (G1) the coordinator dies of heap OOM 3/3 with the same holder and count (≈ 63.4 k queued local
+  `Mutation`s); the equal-heap replicas stay ≤ 25 % live with ≤ 77 pending. The coordinator is itself the slowest
+  replica (CPU-bound, 93 % vs ≈ 50 % on the replicas, one reading); its copies to the peers pass bounded internode
+  queues and are acked first, while its own copy waits on the unbounded stage and 33–64 k expired local copies per
+  arm are re-queued as hints. CL=ALL survives 3/3 with 2.4× the writes; a 1 500/s cap 3/3. Details in
+  [`history.md#run-2`](history.md#run-2).
 
 ## 1. Ceiling sheet, protection map, configuration
 
@@ -193,6 +209,19 @@ n = 1. With equal heaps V still built a 43 k-write backlog and reached 81 % live
 the replica's spare capacity (here: a 4× larger heap, hence 4× larger memtable pool and fewer flushes) is part of
 the condition. Not repeated (time).
 
+### 3.6 Run 2 — equal-heap RF=3 ring (aarch64)
+
+Full run file, arm tables and amendments R2-A1…A5: [`history.md#run-2`](history.md#run-2); harness
+[`harness-run2/`](harness-run2/), excerpts [`logs-run2/`](logs-run2/). Never pooled with run 1's x86 arms.
+
+| Condition (2 GiB victim unless noted) | Heap OOM | Max live after Full GC | Control / intervention |
+|---|---|---|---|
+| A on aarch64 (V 2 GiB, R 8 GiB, RF=2) | 3/3 (+1 shakedown) | — | CL=LOCAL_ONE 0/3 |
+| **G1** RF=3, all 2 GiB | **3/3** | 99.1–99.3 %; service loss 2/3 | CL=ALL 0/3 (≈ 30 % live, 2.4× writes); rate cap 1 500/s 0/3 (≤ 9 %) |
+| **G2** RF=3, two 8 GiB peers | **3/3** | ≈ 99 %; service loss 2/3 | CL=ALL 0/3 (26–30 %); rate cap 0/3 (≤ 9.7 %) |
+| G1 at 4 GiB (all nodes) | 0/6 | 97.1–98.0 %; service loss 3/6 | — |
+| Equal-heap RF=2, 300 s | 3/3 (66–92 s) | — | CL=LOCAL_ONE 0/3 |
+
 ## 4. Conclusion
 
 **Stage reached:** the endpoint at **stage 1** (2 GiB 3/3, 4 GiB 1/3). Stage 2 (default caches at their caps +
@@ -223,6 +252,13 @@ backlog instead of shedding it). JIRA not checked yet.
 | V6 | default constraints | all defaults resolved at the heap; hints on | yes |
 | V7 | acceptable budget | 2 GiB heap (standing rule ≥ 512 MiB, 2 GiB ideal); 4 GiB 1/3 | yes |
 
+**V1–V7 (G1 and G2, run 2, 2 GiB):** V1 heap OOM 3/3 each; V2 matched rate-cap control (1 500/s) 0/3 each; V3 dump
+histograms 3/3 each (≈ 62–63.4 k `Mutation` = `StorageProxy$4` = `WriteResponseHandler`), no K exists; V4 CL=ALL 0/3
+each; V5 `HeapDumper`/`ReportJavaOutOfMemory` safepoints, `OnOutOfMemoryError=kill -9` fired, first error logged in
+G2 r1/r2 (`Native-Transport-Requests-69`, `Java heap space`); V6 all defaults, hints on; V7 2 GiB heap. Evidence:
+[`history.md#run-2`](history.md#run-2) §4. **Researcher's review 2026-11-17:** G1 and G2 accepted as
+`verified-OOM · deployment` (unprotected accumulation), added as conditions of this case; no x86 repeat needed.
+
 **Researcher's review 2026-11-16:** condition A promoted to **`verified-OOM · deployment`** (unprotected accumulation); the workload is accepted. Filed in `convergence/`. Proposal as filed: condition A meets V1–V7 as measured. Filed in `candidates/` as **`candidate`** pending the
 researcher's review because (1) the protocol requires the workload to stay within documented guardrails, and
 whether an uncapped CL=ONE write burst above a node's apply rate is an accepted workload or documented overload is
@@ -239,7 +275,7 @@ post-Full-GC readings rest on 2 Full GCs per arm; the 4 GiB dumps were parsed on
 hardware thread while the next arm ran (disclosed perturbation). Node clocks are MT
 (2 h behind EST); `system.log` is UTC.
 
-**Next step.** (1) Equal-heap replica ×3 with longer bursts, and an RF=3 single-DC ring at CL=ONE (two faster peers); (2) JIRA search
+**Next step** *(updated 2026-11-17; item (1) done in run 2)*. (1) ~~Equal-heap replica ×3 with longer bursts, and an RF=3 single-DC ring at CL=ONE (two faster peers)~~; a token-aware client spreading coordination over the ring; (2) JIRA search
 (`MutationStage` unbounded / local write backlog / CASSANDRA-  "LocalMutationRunnable hint"), then a diagnostic
 patch that drops (not hints) expired *local* runnables when another replica already acked, as a second intervention;
 (3) 8 GiB with a 300 s burst; (4) the B6-stall stage-1 holder of the original S2 design.

@@ -12,16 +12,18 @@ OOM-leads L7). **Regime:** default capacities. **Source:** Cassandra 5.0.9, the 
 (Utah m400, **aarch64**, 8 cores, 62 GiB, kernel 5.15, cgroup v2; victim in a `systemd-run --user` scope with
 `MemoryMax` = 2 × heap and `MemorySwapMax=0`; linger enabled). **Run:** B8 run 1, 2026-11-16 19:15–22:05 MST (35 arms).
 **Design:** [`design/B8-design.md`](design/B8-design.md), written before readings; amendments 1–2 dated
-before the arms they add. **Proposed statuses (the researcher decides):**
+before the arms they add. **Statuses (researcher's review 2026-11-17: accepted as proposed; S is `verified-OOM ·
+diagnostic`, the case stays in `bypass/`):**
 
-| Condition | Proposed status |
+| Condition | Status |
 |---|---|
 | **A** — defaults; tiny-cell map writes (≈ 10 / 64 / 256 KiB serialized) until the memtable pool is full, `kill -9`, restart at the same heap and container; 512 MiB–2 GiB | **`negative · deployment`**: replay started **10/10** (P64 at 2 GiB 3/3); 0 Full GCs during any replay at ≥ 1 GiB. The **runtime load** is the failing phase: heap OOM 2/2 at 512 MiB, after which replay started 2/2 |
 | **X** — A + restore emulation (the table's sstables removed before restart, so the whole retained log replays: 3,344 P64 mutations ≈ 3 GiB of memtable charge) | **`negative · diagnostic`** (restore emulated): started **4/4** (2 GiB 3/3, 1 GiB 1/1); 1 live `Mutation` in every mid-replay histogram |
 | **S** — X + a 10 s stall on every flush during the restart (Byteman, standing in for a data-disk stall), 1 GiB heap | **`verified-OOM · diagnostic`** (supporting deviations: sstables removed, injected flush stall): heap OOM in replay **3/3**; blob 0/3; replay count 64 0/3; 2 GiB starts (1/1), so the largest failing heap is 1 GiB |
 | **L** — ledger: replay queue held at its bound (Byteman delay on every replay task), 2 and 8 GiB | measurement (`diagnostic`): **U ≈ 947 MiB vs K ≈ 63 MiB** (1,015 P64 mutations, 15.0×); blob 143 MiB (2.2×); count 64 → 76 MiB; node started 4/4 |
 
-**Filing.** Filed in `bypass/` because condition S meets V1–V7 as `verified-OOM · diagnostic` (protocol folder
+**Filing.** Researcher's review 2026-11-17: S accepted as a verified diagnostic condition, so the case stays in
+`bypass/`. As filed: in `bypass/` because condition S meets V1–V7 as `verified-OOM · diagnostic` (protocol folder
 rule). The deployment condition A, which answers the brief's hypothesis, is `negative`. If the researcher does
 not accept S's two supporting deviations as a verified condition, the case belongs in `negatives/` as
 `negative · deployment`.
