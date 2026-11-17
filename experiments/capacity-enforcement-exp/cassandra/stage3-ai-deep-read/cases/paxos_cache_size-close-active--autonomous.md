@@ -475,3 +475,19 @@ nothing retained at 0 MiB; V = 16 B is bounded with overshoot k ≈ 2.19 (bypass
 and all 50,000 (426 MiB) under the 1024 MiB control. Not changed by the run, left for stage 3: `TableMetadata` is `@Unmetered`
 (`TableMetadata.java:82`), so `measureDeep` of `RECENT` never includes the schema; the filed per-entry estimate (≈ 8.3 KiB,
 "≈ 126·P") is ≈ 4 % low in the unit tier.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 result and the pinned source only. Line numbers below were opened in `systems/cassandra/source/` on 2026-11-16.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The weigher charges `accepted.update.unsharedHeapSize() + committed.update.unsharedHeapSize()` per `Snapshot` (`src/java/org/apache/cassandra/service/paxos/PaxosState.java:74`). Not counted: the `Key`/`DecoratedKey`, the `Snapshot`, ballots, `Accepted`/`Committed` wrappers and Caffeine's node (A3 bypass (b)). Stage 4 measured real/weight 1.05–1.06× for 8 KiB values and 2.19× for 16-B values. Charge and memory leave together: the entry goes on eviction (synchronous on the writing thread, `ImmediateExecutor`, `PaxosState.java:75`) or when `ACTIVE` takes it back (`RECENT.remove`, `PaxosState.java:361`, `:378`, `:398`). The object is then garbage, freed at the next GC. |
+| **E2 At the limit** | Graceful. `RECENT.put` (`PaxosState.java:525`) makes Caffeine evict down to `maximumWeight` (`:73`) on the calling thread. An entry heavier than the whole cap is evicted at once. A miss reloads from `system.paxos`, so eviction never fails a request. The unbounded `ACTIVE` map (`:71`) is outside this limit. It holds only partitions with an operation in flight (`close()`, `:514-528`). |
+| **E3 Owner and multiplier** | One static cache per node (`PaxosState.java:72`), so there is one owner and no multiplier. `ACTIVE` grows with the number of concurrent Paxos operations, which other limits bound (request threads). unknown: the exact bound on `ACTIVE` at defaults; a count of the request and stage threads that can hold a `PaxosState` would settle it. |
+| **E4 Budget domain** | Heap. The default cap is `min(max(1, 1% of committed heap), 50)` MiB (`src/java/org/apache/cassandra/config/DatabaseDescriptor.java:850-852`). Other heap users with defaults: memtable heap space heap/4 (`DatabaseDescriptor.java:587`), key cache `min(5% heap, 100 MiB)` (`:815-816`), counter cache `min(2.5% heap, 50 MiB)` (`:834-835`), client request data in flight heap/10 (`:649-651`). Even at the worst measured factor (2.2× of ≤ 50 MiB ≈ 110 MiB), these sum to well under the heap. |
+| **OOM-lead flag** | none. The overshoot is a bounded per-entry factor (≤ ≈2.2× measured) on a cap of at most 50 MiB. |
+
+**Real-memory estimate:** same as Estimate (`positive`). Retained heap follows the cap up to the per-entry overhead factor of E1, which stage 4 measured at 1.06× (8 KiB values) to 2.19× (16-B values).
+
+**Stage-4 claim to add:** none. Stage 4 already measured the E1 factor at both value sizes.

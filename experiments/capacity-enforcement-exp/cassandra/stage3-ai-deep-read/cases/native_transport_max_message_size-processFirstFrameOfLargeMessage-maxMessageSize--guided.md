@@ -215,3 +215,20 @@ Made at the step-0 audit, before any run or reading; each is a dated change that
 ## 11. Notes
 
 - `predicted-negative.md` says "Rejects a single oversized frame outright"; the code rejects a multi-frame *request* by declared size, after the first frame, and keeps draining the rest.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 summary (§8, §10) and the pinned source; nothing
+under `experiments/OOM-exp/`. Citations are relative to the source root at `cassandra-5.0.9`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | On-wire body bytes: `messageSize = header.bodySizeInBytes` (`src/java/org/apache/cassandra/transport/CQLMessageHandler.java:534`) compared at `:551`; the same wire size is charged to the in-flight reserves and released only when the response is flushed (`CQLMessageHandler.java:500-511`). The admitted request holds more: after the last frame it is decoded on the event loop (`CQLMessageHandler.java:390`, before dispatch at `:391`), and every bound value is **copied** into a new heap `byte[]` wrapped in a `HeapByteBuffer` (`src/java/org/apache/cassandra/transport/CBUtil.java:480`, `:669-670`) while the direct envelope is kept until flush (`CQLMessageHandler.java:495`, `:503`). So real memory ≥ 2× the counted bytes, and for tiny values far more: a 1-byte value is 5 B on the wire but ~75 B on heap (buffer object + array header + list slot), ≈15×. A BATCH (`src/java/org/apache/cassandra/transport/messages/BatchMessage.java:56-73`) can carry ~3.3 M such values in a 16 MiB body → ≈250 MB of heap per request, allocated before any batch-size or bind-count check (those run at execution). |
+| **E2 At the limit** | Graceful: a too-big request's frames are consumed without buffering and no capacity is taken (`CQLMessageHandler.java:799-802`), and an `OversizedCQLMessageException` is returned at completion (`:824-826`); stage 4 measured 0 B retained above the limit. Scope: v5 multi-frame only; single-frame requests and v4 are not checked here (§5). |
+| **E3 Owner and multiplier** | Per request. Concurrent admitted large requests across connections are capped only by the endpoint/global reserves, which charge the same wire bytes: per IP `heap/40`, global `heap/10` (`src/java/org/apache/cassandra/config/DatabaseDescriptor.java:651`, `:656`), plus each connection's own 1 MiB queue capacity (`src/java/org/apache/cassandra/config/Config.java:302`; `src/java/org/apache/cassandra/net/AbstractMessageHandler.java:419-426`); connections are unlimited by default (`Config.java:289`). At an 8 GiB heap: limit = min(16 MiB `max_mutation_size`, 819 MiB, 204 MiB) = 16 MiB (`DatabaseDescriptor.java:899`, `:3237-3244`), so the global reserve admits ~51 such requests at once. |
+| **E4 Budget domain** | Two domains: the frames/envelope in direct memory (networking buffer pool, stage 4 read its `Size`), the decoded copies on heap. The reserves are sized from the heap (`maxMemory()/10`) but count wire bytes, not decoded heap; the heap also holds memtables (default `heap_buffers`, `Config.java:524`), key cache, and request execution. |
+| **OOM-lead flag** | E1 — the limit and the in-flight reserves count on-wire body bytes, but decode copies each bound value to its own heap buffer (`CBUtil.java:480`) before execution; with 1-byte values a request held at the default 16 MiB limit is ≈250 MB of heap (~15×), and the global reserve (`heap/10`, wire bytes) admits ~51 at once at an 8 GiB heap, i.e. decoded heap ≈1.5× the heap if the executor is backlogged. |
+
+**Real-memory estimate:** `positive` per request with a shape-dependent multiplier (E1: ≥2×, up to ~15× for tiny values); the node total is decided by E3 (the wire-byte reserves), not by this knob.
+
+**Stage-4 claim to add:** a held (worker-stalled) v5 BATCH of 16 MiB body made of 1-byte values raises live heap (after full GC) by ≥10× its body size while the networking pool holds ≈1× (the claim is wrong if live heap rises by ≤2× the body).

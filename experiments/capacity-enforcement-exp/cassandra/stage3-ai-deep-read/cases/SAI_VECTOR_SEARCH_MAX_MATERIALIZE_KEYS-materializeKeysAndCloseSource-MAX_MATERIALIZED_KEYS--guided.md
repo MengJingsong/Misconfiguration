@@ -518,3 +518,25 @@ python3 <harness>/query.py --table t --m <M> [--q 8] [--trace]      # per readin
 - **`SAI_INTERSECTION_CLAUSE_LIMIT`** (mentioned in the constant's Javadoc) limits how many clauses an intersection uses, before the key stream reaches this check; with one non-ANN clause (9b) it does not act.
 - **The trace line is the only built-in disallow signal.** No metric counts plan switches; `TableQueryMetrics` records partition reads and rows filtered per query, which differ between the plans but are not specific to the switch.
 - **Allowed lists from a memtable** add no key objects (the keys are the memtable's), so on unflushed data the knob moves only list slots and the per-index arrays; the cluster tier flushes for that reason.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this case file, its stage-4 results and the pinned source
+only. Defaults: *L* = 16,000 (`CassandraRelevantProperties.java:476`, `QueryController.java:96`),
+`range_request_timeout` 10 s (`conf/cassandra.yaml:1326`) as the SAI query quota
+(`StorageAttachedIndexQueryPlan.java:140`, `QueryContext.java:85-92`), `concurrent_reads` 32
+(`conf/cassandra.yaml:722`; range reads run on the READ stage, `Verb.java:142`).
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Keys, by count (`QueryController.java:449`), not bytes. A key's heap depends on its partition/clustering key length: stage 4 measured ≈ 152 B per SSTable-derived `int`-keyed `SkinnyPrimaryKey`, so ≈ 2.4 MB per refused list at the default; wide or long keys cost more per count. Memtable-derived keys are references to keys the memtable already holds, and memtable term matches are gathered before the check (case §6b), but that heap is the memtable's. Release: the list is garbage at the refusal (`:449-452`) or at the end of the command; stage 4 found it dropped even earlier on the allow plan (88 keys live at the end of the top-k loop). |
+| **E2 At the limit** | Not a reject: a plan switch to the ANN search with post-filtering (`QueryController.java:393-394`). The fallback allocates elsewhere: every rejected key goes into `processedKeys` (`StorageAttachedIndexSearcher.java:782`, `:802`, `:816`), a `HashSet` not sized or capped by *L* (`:645`). What stops it is the query quota: `queryContext.checkpoint()` (`:774`) throws past `range_request_timeout`. So the fallback's retention is bounded by rows read within 10 s, not by *L*. Stage 4 (quota raised to 120 s) held ≈ 30,657 keys per query after 37 s, ≈ 830 rows/s; at the default 10 s that rate gives ≈ 8K keys (≈ 1.3 MB), below the list's own 16,001-key bound. |
+| **E3 Owner and multiplier** | Per command per replica (the check runs once per top-k range command, case §5). Concurrency is capped by the READ stage, 32 threads at defaults, giving ≈ 32 × 2.4 MB ≈ 77 MB for refused lists, and for the fallback 32 × (rows read in 10 s × ~150 B). No node-wide cap beyond the thread count. |
+| **E4 Budget domain** | Heap, shared with memtables (heap/4), the key cache and decoded requests. The per-query terms above are small against a default heap (tens of MB), so the defaults do not add up past the heap through this constraint. |
+| **OOM-lead flag** | none — the disallow fallback is not bounded by *L* (E2), but at defaults it is time-bounded by the 10 s range quota and measured below the list's own bound; growth needs a raised timeout or much faster row reads (unknown: rows/s for the ANN fallback on small rows in page cache would settle it). |
+
+**Real-memory estimate:** `same as Estimate` (positive) for the key list *L* governs; the query's own
+peak is decided by **E2** (the ANN fallback's `processedKeys`, bounded by `range_request_timeout`, not by *L*).
+
+**Stage-4 claim to add:** none (optional, if OOM-exp wants it: at the default 10 s range timeout, the ANN
+fallback's `processedKeys` per query stays below *L* + 1 keys on far-matching data).

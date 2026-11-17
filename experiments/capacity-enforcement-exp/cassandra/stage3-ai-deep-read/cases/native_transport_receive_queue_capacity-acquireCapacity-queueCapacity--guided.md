@@ -617,3 +617,29 @@ the `new` lines carry `cap=` the label's capacity and `throw=` the arm's mode. `
   confirmed to be the same if-check; flagged for a future triage pass, not
   pursued here.
 - **Reserve mechanism, cited not filed (added 2026-10-21, documentation only).** The endpoint and global reserves are [`ResourceLimits$Concurrent.tryAllocate():138`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L138) (`next > limit`, a CAS loop); every production reserve is a `Concurrent` (`MessagingService.java:310`, `:321`; `InboundMessageHandlers.java:119`; `ClientResourceLimits.java:42`, `:160`). [`ResourceLimits$Basic.tryAllocate():213`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/net/ResourceLimits.java#L213) appears in production only at `AbstractMessageHandler.java:736`, where a wait-queue wake-up hands out capacity already taken from the reserves, so it is bookkeeping, not a limit (and in the test client `SimpleClient`). `ResourceLimits` has no constraint of its own (`limit` is a constructor argument), so it is not a case; settled in `undetermined.md` §5 row 3.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this case file, its stage-4 results (through §10's
+summary) and the pinned source only. Defaults: capacity 1 MiB (`Config.java:302`),
+`native_transport_throw_on_overload: false` (`Config.java:1393`), endpoint reserve heap/40 and global
+reserve heap/10 (`DatabaseDescriptor.java:649-657`), connections uncapped
+(`native_transport_max_concurrent_connections = -1`, `Config.java:289`), protocol v5 clients.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | On-wire body bytes, `header.bodySizeInBytes` (`CQLMessageHandler.java:509`; check `AbstractMessageHandler.java:419`). What an admitted request really holds: a retained slice of the received frame buffer (`CQLMessageHandler.java:378-380`), released only after the response is flushed (`:503`), plus the decoded `Message.Request` on heap (`:390`); neither is the counted number exactly. **Release vs charge is asymmetric in the default mode:** a refused single-frame request is never added to `queueSize` or the reserves (`AbstractMessageHandler.java:428-436` return before the add at `:438`), yet its flush releases it unconditionally (`CQLMessageHandler.java:507-510` → `AbstractMessageHandler.java:461-475`). Each refusal lowers `queueSize` by one request for the connection's life, so the counter under-reports, and the per-connection allowance grows (stage 4: `queueSize` = −37 to −78 MB). |
+| **E2 At the limit** | Mode-dependent. Throwing mode (client option): reject, undecoded (`CQLMessageHandler.java:198-203`). **Default mode, single-frame requests (≤ 131,071 B):** not a reject or a block — the request is decoded and dispatched anyway with an overload warning (`:223-224`, `:245-260`); the handler then stops reading (`:260`) until a ticket fires, but the next requests are admitted against the eroded counter of E1. Default mode, multi-frame requests: graceful wait, undecoded (§9a amendment (i); `:605`). Stage 4: default-mode small requests reached the client's whole window (83.3 MB, 15× the capacity-plus-reserve bound *K* at 128 KiB) at every capacity. |
+| **E3 Owner and multiplier** | Per client connection (`PipelineConfigurator.java:306`), with per-IP and global reserves as the only cross-connection bounds. Connections are uncapped at defaults (`Config.java:289`). Because refused single-frame requests in the default mode are charged to no reserve, and a drifted connection then admits locally without touching the reserves (`AbstractMessageHandler.java:419-423`), the global reserve (heap/10) does not cap the total either. Decoded in-flight bytes ≈ Σ over connections of each client's in-flight window × request size (the stream id is a signed short on the wire, `Envelope.java:100`, `:116`, so up to ~32K requests per connection), bounded by no server-side limit. |
+| **E4 Budget domain** | Two domains: the frame buffers are direct memory from the networking `BufferPool` (`networking_cache_size` = min(128 MiB, heap/16), `DatabaseDescriptor.java:573-574`; allocations past it overflow outside the pool), and the decoded requests are heap, shared with memtables (heap/4), key cache, etc. Stage 4 saw the node's `BufferPool` `UsedSize`/`OverflowSize` rise to ~4.8 GB in the large-request arms and not fall (cause unknown: would be settled by a direct-memory NMT/`BufferPoolMXBean` reading during a held-window run). |
+| **OOM-lead flag** | **E2 (with E1):** in the default mode a refused single-frame CQL request is decoded anyway and its later release drives `queueSize` negative, so neither the 1 MiB per-connection capacity nor the heap/10 global reserve bounds decoded in-flight requests; real heap/direct memory ≈ connections × client window × request size (stage 4: 83.3 MB from 10 connections, 15× the bound; scales linearly with connections and window, no cap at defaults). |
+
+**Real-memory estimate:** `negative` for single-frame requests in the default mode, decided by **E2**
+(decode on refusal) and **E1** (uncharged release); `positive` for multi-frame requests and for the
+throwing mode (stage 4).
+
+**Stage-4 claim to add:** in the default mode with protocol-v5 clients sending single-frame requests
+(< 128 KiB) and holding a large window, total decoded in-flight request bytes across connections exceed
+`native_transport_max_request_data_in_flight` (heap/10) and grow linearly with the number of connections,
+with heap (and `BufferPool` direct memory) following the decoded bytes rather than the capacity or the
+reserves.

@@ -50,3 +50,41 @@ Guided playbook §5, `back-link` mode. 34 files; some serve several cases:
 - **R1-V:** `memtable_offheap_space-tryAllocate-limit--guided`, `file_cache_size-allocateMoreChunks-memoryUsageThreshold--guided`, `memtable_offheap_space-applySimpleConfig-memtable_offheap_space--autonomous`, `memtable-offheap-space-allocate-size--autonomous`, `file_cache_size-allocateMoreChunks-memoryUsageThreshold--autonomous`
 - **S1:** `DOB_MAX_RECYCLE_BYTES-close-MAX_RECYCLE_BUFFER_SIZE--guided`, `max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided`, `MAX_HINT_BUFFERS-switchCurrentBuffer-MAX_ALLOCATED_BUFFERS--guided`, `hints-HintsBuffer-put-slabCapacity--autonomous` (plus the receive-queue and networking files above)
 - **S2:** `concurrent_writes-takeWorkPermit-workPermits--autonomous`, `maxTasksQueued-takeTaskPermit-taskPermits--autonomous`, `maxTasksQueued-addTask-taskPermits--autonomous`, `maxHintsInProgress-checkHintOverload-totalHintsInProgress--autonomous`, `sep_maximum_pool_size-takeWorkPermit-workPermits--autonomous` (plus the two in-flight files above)
+
+## Blind recheck pilot (2026-11-16)
+
+Owner-approved pilot of guided playbook §5 in `blind` mode: 20 phase-1 case files outside the back-link
+list (12 true positives, mostly config; 4 false negative / undetermined / weak; 4 true negatives), four
+agents with 5 cases each, plus one cross-case **budget ledger**
+([`budget-ledger.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/budget-ledger.md)). Agents did
+not open OOM-exp, this file, the handoffs or git history. All flags are in
+[`recheck-flags.md`](../capacity-enforcement-exp/cassandra/stage3-ai-deep-read/recheck-flags.md). The comparison
+with OOM-exp below was made afterwards by the orchestrator, which can read both.
+
+**Per-case rechecks.** 8 of 20 cases flagged (7 distinct mechanisms; the slab-region tail was flagged twice):
+5 of 12 true positives, 2 of 4 FN/undetermined/weak, 1 of 4 true negatives. Appended sections only (359
+lines added, 0 removed).
+
+| Flag (case) | Q | Already in OOM-exp? |
+|---|---|---|
+| Slab-region tails ≈ 1 MiB per written table (`memtable_heap_space`, `max-cloned-size`) | E1/E3 | Known as N11 (bypass-leads, low); the per-table current-region term is new |
+| Refused single-frame v5 requests dispatched anyway; release drives `queueSize` negative (`native_transport_receive_queue_capacity`) | E2 | **New** (N2 is the v4 force-allocation path); source-checked: `CQLMessageHandler.java:223,245-260,509`, `AbstractMessageHandler.java:396-408,461` |
+| Coordinator Merkle trees per job, no scheduler limit (`repair_session_space`) | E3 | Known: N5, JIRA 19336 |
+| Partial pre-STARTUP envelopes up to 16 MiB per connection, connections unlimited (`…_per_ip`) | E3 | **New**; source-consistent (`Envelope.java` decoder, `PipelineConfigurator.java:265`) |
+| Index summaries built at full sampling between hourly runs (`index_summary_capacity`) | E2 | Known: R5 / C4 / B5 |
+| Decode copies bound values to heap, ~15× the wire bytes (`native_transport_max_message_size`) | E1 | Known family (L1/N2, the B6 expansion idea); the v5 BATCH shape is new |
+| Stored collection read whole, ~200 B/item, no read guard at defaults (`items_per_collection`) | E1 | **New** (N8 covers only the guardrail exemption) |
+
+**Ledger.** 17 flags. Most restate mechanisms behind OOM-exp results (C1/S1 reserves and DOB scratch in
+direct memory, C2 slow readers, B7 weighers, S2 stage queues, R1-V off-heap pools, N5 repair). New:
+SAI `segment_write_buffer_size` (fixed 1024 MiB, `StorageAttachedIndexOptions.java:26`) at small heaps;
+inbound compressed-stream buffers; and `cassandra-env.sh` sizing `MaxDirectMemorySize` from `free -m`
+even for a hand-set heap (`conf/cassandra-env.sh:42-50`; seen on ms0625 as `-Xmx2G` with 15872M).
+
+**Caveat on blindness.** The agents read guided playbook §3.2, whose example column names OOM-exp cases
+and their mechanisms (B6, B7, C1, C2, R1-V, S1, S2). So the ledger's rediscovery of those mechanisms is
+**not** independent evidence that phase 1 predicts phase 2. The per-case flags on other constraints are
+less affected. For the full run, blind agents should get §3.2 without the example column.
+
+**Next (owner's decision):** run the remaining ~139 pool cases in blind mode (with the example column
+withheld), the 34 back-link rechecks, and/or hand the new flags to OOM-exp as leads.

@@ -450,3 +450,20 @@ case file and results not yet committed at repository HEAD `f74aade6`). Outcome 
   `UnbufferedDataOutputStreamPlus`.
 - Runbook defects (fixed in A5 / in the harness): D1, the driver zip path; D2, `grep ' \[B$'` matches nothing on JDK 11
   (the line ends `[B (java.base@11.0.33)`).
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 summary (§D) and the pinned source; nothing
+under `experiments/OOM-exp/`. Citations are relative to the source root at `cassandra-5.0.9`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The requested staging size, clipped: `Math.min(minSize, MAX_BUFFER_SIZE)` (`src/java/org/apache/cassandra/io/util/DataOutputStreamPlus.java:59`); the array allocated is `min(MAX_BUFFER_SIZE, 2·highestOneBit(minSize))` (`:62`), so the bounded quantity is the array length itself, the real heap it holds (plus a 16-B header). Release: never while the thread lives; the `FastThreadLocal` is set (`:63`) and never cleared or shrunk (`:68-75`). |
+| **E2 At the limit** | Graceful: a request above the cap reuses the capped array and is served in chunks (`DataOutputStreamPlus.java:115-127`; `writeUTF` loops at `src/java/org/apache/cassandra/io/util/UnbufferedDataOutputStreamPlus.java:285-293`). Nothing allocates elsewhere. |
+| **E3 Owner and multiplier** | Per thread that writes through these two callers (`DataOutputStreamPlus.java:115`, `UnbufferedDataOutputStreamPlus.java:277`; the only callers in `src/`). Threads at defaults are a few hundred (e.g. 128 native-transport workers, `src/java/org/apache/cassandra/config/Config.java:283`; 32 read / 32 write stages, `Config.java:179-180`; event loops, compaction). No limit on the total, but at the default 8 KiB it is ≈ threads × 8 KiB, a few MiB. On a node the reachable request is ≤ 65,537 B (`writeUTF`, `UnbufferedDataOutputStreamPlus.java:274-277`), stage 4 found no other node path. |
+| **E4 Budget domain** | Heap (`byte[]`). Shares the heap with everything; a few MiB at the default is negligible against any default heap. |
+| **OOM-lead flag** | none — real memory per thread equals the bounded array length; the total is threads × 8 KiB (a few MiB) at defaults. |
+
+**Real-memory estimate:** same as Estimate (`positive`; E1: the counted quantity is the retained array itself).
+
+**Stage-4 claim to add:** none.

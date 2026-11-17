@@ -231,7 +231,9 @@ the pinned source; it does not redo the case.
 1. **Mode.** Record which one applies:
    - `blind`: the case was picked from phase 1 alone (a batch the owner approved). **Do not open
      anything under `experiments/OOM-exp/`**, as the autonomous agent does not open the guided
-     playbook. This is the mode that tests whether phase 1 predicts phase 2.
+     playbook. This is the mode that tests whether phase 1 predicts phase 2. Give the agent §3.2's
+     questions **without** the *Shown by* column, which names OOM-exp results (rule added after the
+     2026-11-16 pilot, whose agents saw it).
    - `back-link`: the case was named by a back-link row ([`../../backlink-playbook.md`](../../backlink-playbook.md))
      for a verified OOM-exp case. You may read that OOM case; say so.
 2. **Read** the case file (guided or autonomous) and every `file:line` it cites for the constraint,

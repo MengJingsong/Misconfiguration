@@ -495,3 +495,28 @@ the trace file (amended 2026-09-29)**, per capacity value.
   sibling's note on `offheap_buffers`. Found 2026-09-28: an earlier §9, and
   the never-run cluster trigger before it, assumed `heap_buffers` built a
   `HeapPool`.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this case file, its stage-4 results file and the pinned
+source only. Answers are for the shipped defaults: `memtable_allocation_type: heap_buffers`
+(`conf/cassandra.yaml:825`, `Config.java:524`), the `skiplist` memtable (`conf/cassandra.yaml:783-790`),
+`memtable_heap_space` = max heap / 4 (`DatabaseDescriptor.java:588-589`). Note the default allocator is
+`SlabPool`/`SlabAllocator` (`AbstractAllocatorMemtable.java:100-102`), not this case's `HeapPool` path (§11).
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The counter charges the cell's byte size, `size`, per allocation (`SlabAllocator.java:89`) plus an *estimated* object overhead per new partition (`SkipListMemtable.java:124-125`) and per row/BTree (`BTreePartitionUpdater.java:182`, through `adjust`, `MemtableAllocator.java:160-166`). On the default path the heap really held is **whole 1 MiB regions** (`SlabAllocator.java:51`, `:139`): cells ≤ 128 KiB (`:52`, `:92`) are sliced from the memtable's current region, and the region's unused tail is never charged — when a cell does not fit, the region is abandoned with its tail (`:111-112`). So each memtable that has taken any write holds up to ~1 MiB that the pool does not count, plus up to < 128 KiB of tail per abandoned region (worst case ~12% for cells just under 128 KiB, ~0 for small cells). Release: the counter is released at `setDiscarded()` → `releaseAll()` (`MemtableAllocator.java:140-155`) after the flush; the regions become garbage at the same point and are freed by GC — no lag beyond GC. Stage 4 (unslabbed path only) found the counter within 0.08% of deep size and real heap within +37/−22 MiB of idle + limit; the slab-tail gap was not measured. |
+| **E2 At the limit** | Graceful: the writer parks on `hasRoom` (`MemtableAllocator.java:185-195`) until a flush releases memory (`MemtablePool.java:192-197`). The one non-graceful exit is the escape hatch, `opGroup.isBlocking()` → `allocated(size)` past the limit (`MemtableAllocator.java:180-183`, `MemtablePool.java:176-184`), bounded by the writes in flight behind a flush barrier; stage 4 measured 0.02–0.94% of the limit. Not an OOM path at defaults. |
+| **E3 Owner and multiplier** | The limit is node-wide: one static `MEMORY_POOL` for every table (`AbstractAllocatorMemtable.java:59`). But the uncounted region tail of E1 is **per memtable**, i.e. per table (and per legacy 2i table, and per live + flushing memtable). The number of tables has no cap at defaults (`tables_warn_threshold`/`tables_fail_threshold` = -1, `Config.java:865-866`). Uncounted heap ≈ (tables with unflushed writes) × up to 1 MiB, outside the pool's total. |
+| **E4 Budget domain** | Heap. Same domain as the key cache (min(5% heap, 100 MiB), `DatabaseDescriptor.java:814-816`), the counter cache, and decoded native-transport requests (`native_transport_max_request_data_in_flight` = heap/10, `DatabaseDescriptor.java:649-651`). Their defaults sum to well under the heap (≈ 25% + ≤ 5% + 10%), so the stacking of defaults does not by itself exceed the heap. Flushing starts at the cleanup threshold 1/(1 + `memtable_flush_writers`) = 1/3 by default (`DatabaseDescriptor.java:753-763`), so the pool normally runs well below the limit. |
+| **OOM-lead flag** | **E1/E3:** on the default `heap_buffers` path the pool charges cell bytes, but each memtable that has been written to pins a 1 MiB slab region whose unused tail is uncounted (`SlabAllocator.java:89`, `:139`); with many lightly-written tables (no table-count cap at defaults) real memtable heap ≈ limit + ~1 MiB × tables, e.g. ~1 GiB over a 1–2 GiB limit at 1,000 tables. Known upstream as the "~1 MiB of heap per table" rule; flagged for OOM-exp to judge. |
+
+**Real-memory estimate:** `positive` on this case's own path (`unslabbed_heap_buffers`, confirmed by stage
+4); on the shipped default (`heap_buffers`) `undetermined`, decided by **E1/E3** — real heap follows the
+limit only while the number of written tables × 1 MiB stays small against it.
+
+**Stage-4 claim to add:** under the default `heap_buffers`, with *T* tables each given a few small writes
+and no flush, live heap minus idle heap grows by about *T* × 1 MiB while the pool's counter
+(`AllMemtablesOnHeapDataSize` / `Used total`) grows by only the written bytes — i.e. real memtable heap
+exceeds what `memtable_heap_space` counts by roughly 1 MiB per written table.

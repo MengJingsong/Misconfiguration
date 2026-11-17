@@ -406,3 +406,20 @@ negligible). Never write into `~/cassandra-5.0.9`. Stop both Cassandra JVMs via 
   (node 2) and the follower (node 1); live `StreamingState` objects equal the tracked entries; 0 with
   `streaming_stats_enabled: false`.
 - No section of the trace (A1–A5) is refuted.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 result summary (§D) and the pinned source; nothing
+under `experiments/OOM-exp/`. Citations are relative to the source root at `cassandra-5.0.9`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The weigher charges `unsharedHeapSize() + TIMEUUID_SIZE` (`src/java/org/apache/cassandra/streaming/StreamManager.java:278-282`), i.e. `peers × (IPV6_SOCKET_ADDRESS_SIZE + 48) + sizeOf(completeMessage) + EMPTY` (`src/java/org/apache/cassandra/streaming/StreamingState.java:75-80`), a jamm-based estimate of the real object. It is taken once, at `states.put` (`StreamManager.java:244`), when `peers` is still empty; peers are added later (`StreamingState.java:258`) and only a failure re-puts the entry to be re-weighed (`StreamingState.java:296-302`, `StreamManager.java:256-261`). So a successful plan is under-charged by `peers × ~(IPV6_SOCKET_ADDRESS_SIZE + 48)` B: stage 4 measured 592 B real vs 384 B charged for one peer (1.54×). Release: eviction removes the cache reference, but a running plan's `StreamResultFuture` still holds the state as a listener (`StreamManager.java:246`) until the plan ends, so memory is freed at the later of eviction and plan completion. |
+| **E2 At the limit** | Graceful: Guava `maximumWeight` (`StreamManager.java:270`) evicts least-recently-used tracking entries; streaming itself is not slowed or failed. Nothing allocates elsewhere on the disallow path. |
+| **E3 Owner and multiplier** | One cache per node: `StreamManager.instance` (`StreamManager.java:59`), one `states` field (`StreamManager.java:228`). Entries are per stream plan (initiator and follower each get one, `StreamManager.java:238-247`). Multiplier is the number of peers per plan, which only affects the under-charge (E1): repair sync plans have one peer; bootstrap/rebuild plans have one per source node but are few. No per-owner multiplication of the 40 MiB itself. |
+| **E4 Budget domain** | Heap. Shares the heap with everything else; the default is a fixed 40 MiB (`src/java/org/apache/cassandra/config/Config.java:949`), not heap-derived, so even with the ~1.5× under-charge (~60 MiB) it is small against any default heap. Expiry 3d (`Config.java:948`) does not add memory. |
+| **OOM-lead flag** | none — the only overshoot is the frozen per-entry weight (×1.54 for one peer, measured); many-peer plans are rare and few, so retained heap stays in the tens of MiB at the default. |
+
+**Real-memory estimate:** same as Estimate (`positive`, approximate; E1 bounds the overshoot at about 1.5× for one-peer plans).
+
+**Stage-4 claim to add:** none (stage 4 run 1 already measured the E1 under-charge: real bytes 1.54 · S, inside the claimed 2 · S).

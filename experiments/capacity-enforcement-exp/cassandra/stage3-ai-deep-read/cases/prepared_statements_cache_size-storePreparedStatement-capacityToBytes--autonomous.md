@@ -146,3 +146,23 @@
 ## D. Stage-4 feedback
 
 **Stage 4 closed 2026-10-19** ([results](../../stage4-runtime-verification/results/prepared_statements_cache_size-storePreparedStatement-capacityToBytes--autonomous.md)); estimate `positive` held. **Unit tier: Confirmed** (weights 0.9998 × cap at 1 · 2 · 4 · 8 · 10 MiB, count ⌊cap/w⌋, oversize refused, 64 MiB control no evictions). **Cluster tier: Confirmed for the cache** (count 395 · 1,581 · 6,326 · 25,305 at 1 · 4 · 16 · 64 MiB, rows equal count, knob-dependent heap 0.80 × weights, restart preloads 395), **with a bypass:** the same PREPARE load grows live heap by about 93 MB at 151,819 statements (≈ 614 B each) independent of the knob, through the memtable of `system.prepared_statements` (one row per PREPARE); B3f's last bullet ("total heap does not grow beyond the plateau") is refuted. Notes for stage 3, not applied: A4 should name that table as the dominant other consumer; the oversize PREPARE reaches the guard only at caps below the 16 MiB transport limit (16 and 64 MiB were refused by the transport); the cache's own retained size needs a heap analyser. Amendments of 2026-10-19 (B2a, B2c, B2d, B2g, B3c, B3d, B3g) were made at the step-0 audit; the frozen hash is the one in `_INDEX.md` §4 and this section was added after it.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5), autonomous case file rechecked by the guided agent: read this
+file, its stage-4 results (through §D's summary) and the pinned source only. Default: cache = max(10 MiB,
+heap/256) (`DatabaseDescriptor.java:795-797`).
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Weight = `key.size()` + `ObjectSizes.measureDeep(prepared)` (`QueryProcessor.java:947-957`, measured at `:468-469`). `measureDeep` walks shared objects too, so it over-counts; and a fully-qualified statement from a session with a keyspace is stored twice, under two ids, for the **same** `Prepared` object (`QueryProcessor.java:761-766`), each charged the full weight — again an over-count. Uncounted: the `MD5Digest` object and the Caffeine node per entry (tens of bytes against ~2.6 KB entries). Stage 4: knob-dependent heap 0.80 × the weights. Release: eviction runs on the caller thread (`ImmediateExecutor`, `:113-114`); an evicted `Prepared` can stay reachable from in-flight executions until they finish (short). |
+| **E2 At the limit** | Graceful: Caffeine evicts to `maximumWeight` (`QueryProcessor.java:113-118`); a single statement heavier than the cache is refused (`:825-830`). The eviction listener issues a `DELETE` on `system.prepared_statements` (`:130-137` → `SystemKeyspace.java:1882-1886`), and every new entry an `INSERT` (`QueryProcessor.java:831-833` → `SystemKeyspace.java:1874-1878`): that table's memtable grows by one row per PREPARE regardless of the knob (stage 4: ~93 MB at 151,819 statements, ~614 B each). That growth is charged to the memtable pool and flushed, i.e. governed by `memtable_heap_space`, not unbounded. |
+| **E3 Owner and multiplier** | One static cache per node (`QueryProcessor.java:92`), shared by all connections and keyspaces; no multiplier. The separate `internalStatements` map (`:97`, filled at `:427-432`) has no bound but holds server-internal query strings, not client PREPAREs. |
+| **E4 Budget domain** | Heap. Default ≈ heap/256 (10 MiB floor) — small next to memtables (heap/4, which also absorb the `system.prepared_statements` rows), key cache (≤ 100 MiB) and in-flight requests (heap/10); the defaults do not add up past the heap through this constraint. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive) — the weight over-counts real heap (**E1**,
+0.80× measured); the knob-independent growth is in the system table's memtable (**E2**), governed by
+`memtable_heap_space`.
+
+**Stage-4 claim to add:** none.

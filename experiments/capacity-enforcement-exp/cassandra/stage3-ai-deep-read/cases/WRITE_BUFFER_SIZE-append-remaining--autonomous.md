@@ -136,3 +136,19 @@ Outcomes at limit: flush (no failure, no drop, no error). Bypass/overshoot: any 
   - B2h's positive-control size: 400 KiB + 12 B is below `capacity/2` = 512 KiB, so it cannot refuse. The harness added 600 KiB and the `capacity/2` boundary pair.
   - B3e step 3 (and R2): `nodetool truncatehints` never deletes the file the writer has open (`HintsStore.java:167-181`). Each arm needs a restart of A before truncation; the cluster tier was rerun so.
   - B3b item 3: `MAX_HINT_BUFFERS=1` can never recycle a buffer (`HintsBufferPool.java:79-80`, `:112-118`). After one slab (31 × 1 MiB hints) the hint writer waits forever, all 32 `MutationStage` threads stall, client writes time out and `stopdaemon` does not return. Its memory reading is still valid, but the arm is a stall, not a load at a lower cap.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 results entry (via §D) and the pinned source only. Citations relative to `systems/cassandra/source/`, each opened on 2026-11-16.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | No counter: the operand is the free space of one fixed buffer, `buffer.remaining()` (`src/java/org/apache/cassandra/hints/HintsWriter.java:237` in `append(Hint)`, `:205` in the production `append(ByteBuffer)`), compared with one serialized hint entry. The buffer is allocated once, 256 KiB direct (`src/java/org/apache/cassandra/hints/HintsWriteExecutor.java:50, 60`), and lives as long as the node. In production an entry larger than the buffer is written to the channel from the `HintsBuffer` slab it already sits in (`HintsWriter.java:219-220`), so no extra memory; only the test-only overload copies it to a fresh heap buffer of its size (`HintsWriter.java:242`). |
+| **E2 At the limit** | Graceful: flush the buffered bytes to the channel and clear (`HintsWriter.java:205-209`), or write the oversized entry directly. No failure, no unbounded allocation in the production path. |
+| **E3 Owner and multiplier** | One `HintsWriteExecutor` per node (`src/java/org/apache/cassandra/hints/HintsService.java:108`), so one 256 KiB buffer per node; multiplier 1. Hint memory proper is the `HintsBuffer` slabs, max(2×`max_mutation_size`, 32 MiB) each (`HintsService.java:79, 110`), at most `MAX_HINT_BUFFERS` = 3 (`src/java/org/apache/cassandra/config/CassandraRelevantProperties.java:351`): about 96 MiB (stage 4: 96.25 MiB). |
+| **E4 Budget domain** | Direct memory (`MaxDirectMemorySize`, default RAM/4 or heap/2, `conf/cassandra-env.sh:62, 66`). Shares it with the hint slabs (~96 MiB), the networking buffer pool (min(128 MiB, heap/16), `src/java/org/apache/cassandra/config/DatabaseDescriptor.java:574`), the chunk cache (min(512 MiB, heap/4), `DatabaseDescriptor.java:577`) and Netty. This constant's share is 256 KiB; the sum of these defaults stays below RAM/4 for heaps from 1 GiB up (e.g. RAM 2 GiB: 256 + 64 + 96 MiB ≈ 416 MiB < 512 MiB). |
+| **OOM-lead flag** | none. The constant governs a fixed 256 KiB buffer and its real memory is exactly that (E1, E3). |
+
+**Real-memory estimate:** `same as Estimate` (negative: a flush-batching size, not a limit on hint memory or disk; E1 and E3).
+
+**Stage-4 claim to add:** none.

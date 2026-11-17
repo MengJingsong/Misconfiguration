@@ -205,3 +205,20 @@ Made at the step-0 audit, before any run or reading; each is a dated change that
 ## 11. Notes
 
 - The earlier `predicted-negative.md` entry cites `Dispatcher.java:345`; the method is at line 348 in the pinned tree (the entry's line has drifted by 3).
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 summary (§10) and the pinned source; nothing
+under `experiments/OOM-exp/`. Citations are relative to the source root at `cassandra-5.0.9`.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Time, not bytes: the age of the task at the head of the request executor's queue (`src/java/org/apache/cassandra/concurrent/SEPExecutor.java:88-99`; returns 0 when the head is not a `FutureTask` with a debuggable task, `:91-97`), against `native_transport_timeout × threshold` (`src/java/org/apache/cassandra/transport/Dispatcher.java:348`). Queued memory enters only through `rate × size × age`; it is the decoded request (heap copies of values, stage 4: 65,821 B of `byte[]` per 65,592-B request) plus the envelope, freed when the request is processed and its response flushed (`src/java/org/apache/cassandra/transport/CQLMessageHandler.java:500-511`). |
+| **E2 At the limit** | **At defaults it never fires**: the threshold is `Double.MAX_VALUE` (`src/java/org/apache/cassandra/config/Config.java:1394`), so `12 s in ns × MAX_VALUE` is +∞ and the comparison at `Dispatcher.java:348` is always true. When set: throwing mode releases the bytes and returns an overload error (`CQLMessageHandler.java:208-216`, graceful); default mode (`native_transport_throw_on_overload: false`, `Config.java:1393`) still processes the request and only pauses the connection for 10–200 ms (`CQLMessageHandler.java:237-256`, `Config.java:1395-1396`), so the queue keeps growing, slower (stage 4: ~20× slower, not bounded). |
+| **E3 Owner and multiplier** | One check per node on the shared request executor (the head of one queue); not per connection. The queue's bytes across all connections are bounded only by the in-flight reserves (`heap/10` global, `heap/40` per IP, `src/java/org/apache/cassandra/config/DatabaseDescriptor.java:651`, `:656`) plus 1 MiB per connection (`Config.java:302`), with unlimited connections (`Config.java:289`); this constraint adds no byte bound. |
+| **E4 Budget domain** | Heap for the decoded queued requests (stage 4), direct for envelopes still in flight; the same heap holds memtables (`heap_buffers` default, `Config.java:524`) and caches. This constraint draws no budget of its own. |
+| **OOM-lead flag** | none — at defaults the check is disabled (E2), so it governs no memory; the queued requests' memory is governed by the in-flight reserves and the per-connection receive queue (their cases), not by this constraint. |
+
+**Real-memory estimate:** same as Estimate (`negative` at defaults, decided by E2: the check is off; when enabled, bounded only in throwing mode).
+
+**Stage-4 claim to add:** none (stage 4 run 1 already measured both modes).

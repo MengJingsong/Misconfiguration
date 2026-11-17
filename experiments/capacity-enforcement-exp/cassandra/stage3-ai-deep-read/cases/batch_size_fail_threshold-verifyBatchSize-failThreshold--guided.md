@@ -212,3 +212,19 @@ Made at the step-0 audit, before any run or reading; each is a dated change that
 ## 11. Notes
 
 - The first rejection line in `predicted-negative.md` for this check (`BatchStatement.java:352`, "line corrected 2026-09-28, recorded as `:349`") already carries the corrected line.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 results entry (via §10) and the pinned source only. Citations relative to `systems/cassandra/source/`, each opened on 2026-11-16.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The sum of `PartitionUpdate.dataSize()` over the batch (`src/java/org/apache/cassandra/db/IMutation.java:69`, read at `src/java/org/apache/cassandra/cql3/statements/BatchStatement.java:338`): cell data bytes, without object overhead, without the decoded request buffers. It is a one-shot check with no held counter. What the coordinator really holds per batch is the decoded request plus the built mutations: stage 4 measured 2.48 / 8.77 / 33.93 MB allocated for 1 / 4 / 16 MiB batches (§10), about 2.1–2.5× the counted size, at every threshold. Freed when the request ends (garbage either way). |
+| **E2 At the limit** | Graceful for the replicas, too late for the coordinator: `InvalidRequestException("Batch too large")` (`BatchStatement.java:358`) is thrown after `getMutations(...)` has built every mutation (`:428`, check at `:439`). Nothing on the coordinator is withheld. Not reached for single-mutation batches (`:334`) or conditional batches (`:423`). |
+| **E3 Owner and multiplier** | Per batch request; no node-wide total of its own. Concurrent batches are bounded by the transport: `native_transport_max_request_data_in_flight` = heap/10 and `…_per_ip` = heap/40 by default (`src/java/org/apache/cassandra/config/DatabaseDescriptor.java:651, 656`), charged in wire bytes and released only when the response is flushed (`src/java/org/apache/cassandra/transport/CQLMessageHandler.java:500-509`); default message size min(`max_mutation_size`, both) (`DatabaseDescriptor.java:905`, `:3237`). |
+| **E4 Budget domain** | Heap (decode copies and mutation objects). Shares the heap with the memtable on-heap pool (heap/4, `DatabaseDescriptor.java:587`) and the request in-flight allowance (heap/10 of wire bytes). At the measured ~2.5× expansion, a full in-flight allowance of rejected or accepted batches is about heap/4 of transient heap: with the memtable pool, about half the heap, so the defaults do not add up past the heap on these two alone. |
+| **OOM-lead flag** | none. Real memory exceeds what this check counts (E1, E2), but the excess is transient and bounded per node by the transport's in-flight limit (E3) at about heap/4 at default settings; no concrete way past the heap was found here. |
+
+**Real-memory estimate:** `same as Estimate` (negative; E2 decides: the check runs after the build).
+
+**Stage-4 claim to add:** none.

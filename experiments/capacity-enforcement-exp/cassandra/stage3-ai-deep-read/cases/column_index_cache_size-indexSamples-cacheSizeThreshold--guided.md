@@ -623,3 +623,24 @@ Stop when each scenario's records are taken; a run where the classes do not stra
   *disallow* side. It is noted in §7/§8 rather than filed as its own case:
   same constraint, same method, and it is a consequence of crossing the
   threshold rather than a separate decision.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+Mode `blind` (`playbook-guided.md` §5): read this case file, its stage-4 results (through §10's
+summary) and the pinned source only. Defaults: `column_index_cache_size` = 2 KiB (`Config.java:328`),
+BIG format selected (`Config.java:373`), key cache = min(5% heap, 100 MiB) (`DatabaseDescriptor.java:814-816`),
+`concurrent_reads` 32 (`conf/cassandra.yaml:722`).
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check counts **serialized** index bytes: `S` + 4 B per block on the write path (`BigFormatPartitionWriter.java:113`), the entry's serialized `size` on the read path (`RowIndexEntry.java:360`). The admitted `IndexedEntry` holds the deserialized `IndexInfo[]` (`RowIndexEntry.java:530-532`) plus an `int[] offsets` (`:534-536`); stage 4 measured 188 B of heap per block read back against ~31 B serialized (n = 66 at `S` 2,041), i.e. ~6× expansion, so one entry admitted at 2 KiB holds ~12–13 KB. Its key-cache weight, `unsharedHeapSize()` (`:613-620`), omits the offsets array (16 + 4*n* B, ~2%) — small. Release: transient entries are garbage after the read; cached ones are freed on key-cache eviction. |
+| **E2 At the limit** | Graceful: a representation switch to `ShallowIndexedEntry` (constant `BASE_SIZE`, `RowIndexEntry.java:767-770`), the index bytes skipped (`:367`) and re-read from disk on demand. Nothing is allocated elsewhere in memory; the cost moves to index-file I/O. The write-path disallow side allocates one `DataOutputBuffer` of 2 × threshold = 4 KiB per partition writer (`BigFormatPartitionWriter.java:204`). |
+| **E3 Owner and multiplier** | Per row-index entry (one partition in one SSTable). Live entries: those in the key cache, whose total is capped by the key cache's weigher (`CaffeineCache.java:61-70`, `CacheService.java:119-129`), plus transient ones, one per partition being read per SSTable (bounded by `concurrent_reads` 32 × SSTables touched × ~13 KB — a few MB), plus one 4 KiB buffer per flush/compaction writer. No unbounded multiplier at defaults. |
+| **E4 Budget domain** | Heap. Cached entries draw on the key cache budget (≤ 100 MiB at defaults), which shares the heap with memtables (heap/4) and in-flight requests; this constraint does not add a separate budget. The key cache's own per-entry overhead (key object, Caffeine node) is outside the weigher, but that belongs to `key_cache_size`, not to this constraint. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive) — per-entry heap is bounded by a fixed ~6× multiple
+of the threshold (**E1**) and the retained total is governed by the key cache's weigher (**E3**); stage 4's
+256 MiB cache run had heap +29.99 MB for weight +29.34 MB.
+
+**Stage-4 claim to add:** none.
