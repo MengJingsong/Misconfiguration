@@ -23,7 +23,8 @@ shared memory budget together, while **bypass** tests whether escape paths or
 enforcement gaps allow usage beyond a capacity mechanism's protection.
 
 The intended outputs are reproducible evidence, documented misconfigurations,
-and reports of verified defects to the upstream projects. AI assistants should
+and verified defects. Nothing is posted to the upstream projects' issue trackers
+(owner, 2026-11-17): JIRA is read only, to find candidates and prior art. AI assistants should
 use this context when interpreting requests to design, run, or analyze
 resource-exhaustion experiments in this repository.
 

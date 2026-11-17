@@ -5,13 +5,14 @@
 > researcher owns and controls**. Deliberately driving a test node out of
 > memory is the research *method*, not the goal: the objective is to find the
 > reachable workloads and accepted configurations under which Cassandra's /
-> Hadoop's own memory-capacity protections are insufficient, so those gaps can
-> be **fixed and responsibly disclosed upstream** (Apache JIRA). Scope is
+> Hadoop's own memory-capacity protections are insufficient, and to document
+> those gaps with reproducible evidence. **Nothing is posted to Apache JIRA and no
+> upstream report is filed** (owner, 2026-11-17). Scope is
 > bounded and defensive: researcher-owned infrastructure only, no third-party
 > or production targets, synthetic test data only, one victim node per
 > experiment, budgets deliberately tightened so a single process is contained.
 > The deliverables are reproducible evidence, documented misconfigurations,
-> and defect reports. AI assistants should use this context when designing,
+> and verified defects. AI assistants should use this context when designing,
 > running, or analyzing these resource-exhaustion experiments. See the root
 > [`README.md`](../../README.md#research-context-for-ai-assistants) for the
 > project-wide statement.
@@ -216,7 +217,7 @@ none has run yet.
     (≈ 83% of writes to the slow replica dropped at the run-1 condition) and the capped 2 GiB
     coordinator still runs at 69–75% live.
     Filed 2026-11-11 (run 2's condition labelled `deployment`: hints off is an accepted setting).
-    Next: JIRA check (CASSANDRA-15066 introduced these limits) before any upstream report; stall-length
+    Next: JIRA check (CASSANDRA-15066 introduced these limits) for prior art (nothing is posted upstream); stall-length
     sweep (5/15/60 s); ≥ 2 slow replicas at 8 GiB *(done in run 4, below)*.
     **Run 4** (2026-11-11/12, pc96, [case](cassandra/cases/bypass/internode_application_queue_capacity-accounting-mismatch/history.md#run-4)):
     coordinator with two slow replicas (dm-delay), no Byteman. With 60 s timeouts it OOMs 3/3 up to a **6 GiB**
@@ -228,25 +229,27 @@ none has run yet.
     [Case](cassandra/cases/bypass/key_cache_size+counter_cache_size-accounting-mismatch/key_cache_size+counter_cache_size--accounting-mismatch.md)
     (apt149). At shipped defaults the key cache holds 2.14× and the counter cache 1.80× their caps with
     their counters exactly at the cap (3/3 at 512 MiB, 2 GiB, auto 7965 MiB); a weigher with per-entry
-    overhead removes it 3/3. No OOM at defaults (0/3). Next: JIRA check and upstream report.
+    overhead removes it 3/3. No OOM at defaults (0/3). Next: JIRA check for prior art (no upstream report, owner 2026-11-17).
   - **B1 — native-v5 large-request release defect (run 1, 2026-11-11/12): `negative · deployment`.**
     [Case](cassandra/cases/negatives/networking_cache_size-release-defect/networking_cache_size--release-defect.md)
     (apt140 victim, apt138 client). `CQLMessageHandler.LargeMessage.onComplete()` never calls
     `releaseBuffers()`: confirmed 3/3, the networking pool is pinned at its 128 MiB cap after ≈ 1,000 large
     requests and `OverflowSize` drifts without bound; a restored release removes it 3/3. Live direct memory
     plateaus at the cap, so no overshoot and 0/4 OOM at heap 2 GiB, direct 512 MiB–2 GiB. Next: JIRA
-    re-check and upstream defect report; internode traffic sharing the pool is untested.
+    re-check for prior art (no upstream report, owner 2026-11-17); internode traffic sharing the pool is untested.
 
 ## Open follow-ups
 
-- **From the phase-link session (2026-11-17), see root [`HANDOFF.md`](../../HANDOFF.md) "Phase links and
-  phase-1 rechecks — state and leftover work":** (1) owner rulings on [`queuing-playbook.md`](queuing-playbook.md)
-  §8 and its Proposed text, then the stale-text fixes; (2) back-link row for **B8** (now verified) per
-  [`../backlink-playbook.md`](../backlink-playbook.md); (3) proposals for N13, N14, N15 and the read-limit cluster,
-  all measured at phase-1 stage 4 on 2026-11-17 (each "Confirmed — does not cap"), and candidate N17+ bypass-leads
-  entries; (4) the JIRA survey's CASSANDRA-10930 note is wrong about `cassandra-env.sh` (see N16).
+- **Phase-link leftovers done 2026-11-17** (root [`HANDOFF.md`](../../HANDOFF.md)): queuing-playbook rulings
+  (an agent queues rows; nothing posted upstream; F1 no longer blocks pairs), B8 back-link, new rows **B10, U2,
+  U3 / P1** and **U4 / P2** (B = bypass investigation, U = unprotected-accumulation lead), N17–N21 in the bypass
+  leads. **Renamed files:** `OOM-leads.md` → [`pattern-leads.md`](pattern-leads.md),
+  `capacity-enforcement-bypass-leads.md` → [`phase1-bypass-leads.md`](phase1-bypass-leads.md), phase 1's
+  `recheck-flags.md` → `capacity-enforcement-exp/cassandra/stage3-ai-deep-read/oom-lead-list.md` (OOM-exp's
+  candidate list from phase 1; write each lead's Status back, queuing playbook §7.3). Older records keep the old
+  names.
 
-- **U1 (U = unprotected-accumulation lead) — paused by the researcher on 2026-11-17 until the rename work is done; continue
+- **U1 (U = unprotected-accumulation lead) — paused by the researcher on 2026-11-17 until the rename work is done (done 2026-11-17: it can resume); continue
   from here.** Status `candidate` (V1 unmet in both runs). Run 2 (2026-11-17, Utah m400 aarch64,
   [case](cassandra/cases/candidates/concurrent_writes+max_mutation_size--inflight-DOB-fill/concurrent_writes+max_mutation_size--inflight-DOB-fill--run2-internode.md)):
   victim `ms0625` as the only replica (`NTS {v:1}`), 8 coordinators (4 nodes × 2 instances at alias IPs, dc `c`, RF 0)
@@ -373,8 +376,8 @@ none has run yet.
   excluded** (floor = standing pool; surge = per-item allocation with no
   global aggregate cap, used on top of a floor; the exclusion axis is "is
   there a global aggregate cap?", not "per-request vs. standing" — see the
-  playbook's "Picking combinations" step 5 and the floor+surge note at the
-  top of that file). Read this before re-surveying capacity-enforcement-exp from scratch
+  [custom-convergence playbook](custom-convergence-playbook.md)'s "Picking cases" and the
+  floor/surge note just above it; corrected 2026-11-17, the combo playbook has no such step). Read this before re-surveying capacity-enforcement-exp from scratch
   for the next combination.
 - **Available nodes (updated 2026-11-17, owner's list):** remote `pc91`, `pc84`, `pc72`, `pc99`, `pc75`
   (UMass, experiment `jason92-326528`, x86_64, 32–40 cores, 125 GiB, 715 GiB `/mydata`, LAN
