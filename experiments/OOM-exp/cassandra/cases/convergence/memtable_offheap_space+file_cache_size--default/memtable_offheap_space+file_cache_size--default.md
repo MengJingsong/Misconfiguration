@@ -9,6 +9,10 @@
 accepted as a documented setting; family A (L = 2 × heap) and family B (heap 2048, L = 3413, bisect upward)
 accepted for V7.
 
+> **Current status (researcher, 2026-11-16): condition A-768 on pc96 `verified-OOM · deployment`** — heap 768 = 50 % of a
+> 1536 MiB container, kill 3/3, each pool alone 0/6, `file_cache_size` 64 MiB 0/3; see *Completion of the re-run* at the end.
+> Condition B (heap 60 %, apt149) stays withdrawn. Filed back in `convergence/`.
+>
 > **Re-review (researcher, 2026-11-16).** Condition B goes back from `verified-OOM · deployment` to
 > **`reproduced-OOM · diagnostic`**, and the case moves from `convergence/` to `candidates/`. V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap (§3.2). The JIRA prior-art check ([`leads/jira-prior-art-verified-cases.md`](../../../leads/jira-prior-art-verified-cases.md)) found the
 > pool-sum sizing documented, so upstream would likely answer "documented". V1–V6 are unchanged; V7's acceptance of
@@ -321,7 +325,7 @@ not occur (0/3, 92–93 %). The failing range on pc96 at L = 2 × heap is **768�
 | V6 | defaults | both constraints unset, resolved 192 / 192; 2-line yaml diff | yes |
 | V7 | acceptable budget | heap = 50 % of the container, as `hardware.adoc` and `cassandra-env.sh`; heap and direct ≥ 512 / ≥ 384 MiB (direct = heap/2, the shipped ratio) | yes |
 
-**Proposed status (for the researcher):** condition A-768 on pc96 **`verified-OOM · deployment`** (V1–V7 met at the
+**Status: condition A-768 on pc96 `verified-OOM · deployment` (researcher accepted 2026-11-16).** Proposed as (V1–V7 met at the
 documented heap share). Condition A-1024 on pc96 meets V1 (3/3) with controls and intervention measured only at 768.
 Limits: pc96's non-heap baseline is ≈ 100–170 MiB higher and its preload ≈ 4 × faster than apt149's, which is why the
 kill comes early in the preload; apt149 at the same setting failed only 1/5. The result is therefore platform-dependent

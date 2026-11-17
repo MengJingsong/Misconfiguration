@@ -835,6 +835,6 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 - Heap 768 / container 1536: converge memcg kill **3/3**; `M_only` 0/3 (93 %), `F_only` 0/3 (92 %), `file_cache_size`
   64 MiB 0/3 (96 %, thin). Heap 1024: kill 3/3; 896, 960: 1/1; 1536: 0/3 (93 %). Kills come ≈ 20 s into the preload,
   pools below their caps; pc96's non-heap baseline is 100–170 MiB above apt149's and its preload ≈ 4 × faster.
-- Proposed: A-768 on pc96 `verified-OOM · deployment` (V1–V7 met at the documented heap share); researcher's decision
-  pending. Case stays in `candidates/` until then.
+- A-768 on pc96 `verified-OOM · deployment` (V1–V7 met at the documented heap share; researcher accepted 2026-11-16); case moved back to
+  `convergence/`.
 

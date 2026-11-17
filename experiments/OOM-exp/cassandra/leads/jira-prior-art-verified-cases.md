@@ -183,7 +183,7 @@ close the gap.
 
 ## R1-V — off-heap memtable + chunk cache at defaults exceed a container limit (verified-OOM · deployment)
 
-**Case:** [`candidates/memtable_offheap_space+file_cache_size--default/`](../cases/candidates/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md).
+**Case:** [`convergence/memtable_offheap_space+file_cache_size--default/`](../cases/convergence/memtable_offheap_space+file_cache_size--default/memtable_offheap_space+file_cache_size--default.md).
 
 **Verdict: documented** (plus general **known-open** issues). The 5.0.9 docs state the pieces an operator needs:
 
