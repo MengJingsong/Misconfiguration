@@ -1,0 +1,335 @@
+[2026-11-17 11:04:57 1794938697307] + md5sum /mydata/s4/ntq-recheck/harness/ntq-trace.btm
+[2026-11-17 11:04:57 1794938697310] harness md5 98056c2a12dc0cd8e9a196e67413506e ntq-trace.btm
+[2026-11-17 11:04:57 1794938697310] + md5sum /mydata/s4/ntq-recheck/harness/hold-request.btm
+[2026-11-17 11:04:57 1794938697311] harness md5 3ba52df212e2eda3ce69cc7c6984a8bd hold-request.btm
+[2026-11-17 11:04:57 1794938697311] + md5sum /mydata/s4/ntq-recheck/harness/NativeFlood.java
+[2026-11-17 11:04:57 1794938697313] harness md5 f9d52bb5c2dfc46c0c5aadc0cea58c82 NativeFlood.java
+[2026-11-17 11:04:57 1794938697313] + md5sum /mydata/s4/ntq-recheck/harness/Jmx.java
+[2026-11-17 11:04:57 1794938697315] harness md5 2f18ec53c4d427ffdbc72d30b6a11dbd Jmx.java
+[2026-11-17 11:04:57 1794938697315] + md5sum /mydata/s4/ntq-recheck/harness/make-node-yaml.sh
+[2026-11-17 11:04:57 1794938697317] harness md5 401ea6cc8bca44382897f1dbb2d39e6a make-node-yaml.sh
+[2026-11-17 11:04:57 1794938697317] + md5sum /mydata/s4/ntq-recheck/harness/recheck-run.py
+[2026-11-17 11:04:57 1794938697319] harness md5 a82c77a802b96b144545e4f669324d2b recheck-run.py
+[2026-11-17 11:04:57 1794938697319] run=run1 scale=1.0 base=/mydata/s4/ntq-recheck host=node2.jason92-326528.misconfiguration-pg0.cloudlab.umass.edu
+[2026-11-17 11:04:57 1794938697319] + javac -d /mydata/s4/ntq-recheck/classes /mydata/s4/ntq-recheck/harness/Jmx.java
+
+  rc=0
+[2026-11-17 11:04:58 1794938698155] + javac -nowarn -d /mydata/s4/ntq-recheck/classes -cp "/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" /mydata/s4/ntq-recheck/harness/NativeFlood.java
+
+  rc=0
+[2026-11-17 11:04:59 1794938699693] + rm -rf /mydata/s4/ntq-recheck/node/data /mydata/s4/ntq-recheck/node/logs
+
+  rc=0
+[2026-11-17 11:04:59 1794938699704] + /mydata/s4/ntq-recheck/harness/make-node-yaml.sh
+node: conf /mydata/s4/ntq-recheck/node/conf; yaml tail:
+# ---- stage4 ntq lines ----;cluster_name: stage4-ntq;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /mydata/s4/ntq-recheck/node/data/commitlog;hints_directory: /mydata/s4/ntq-recheck/node/data/hints;saved_caches_directory: /mydata/s4/ntq-recheck/node/data/saved_caches;cdc_raw_directory: /mydata/s4/ntq-recheck/node/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 60s;read_request_timeout: 60000ms;native_transport_throw_on_overload: false;native_transport_rate_limiting_enabled: false;
+
+  rc=0
+[2026-11-17 11:04:59 1794938699750] yaml tail: # ---- stage4 ntq lines ----;cluster_name: stage4-ntq;num_tokens: 1;auto_bootstrap: false;listen_address: 127.0.0.1;rpc_address: 127.0.0.1;native_transport_port: 9042;seed_provider:;data_file_directories:;commitlog_directory: /mydata/s4/ntq-recheck/node/data/commitlog;hints_directory: /mydata/s4/ntq-recheck/node/data/hints;saved_caches_directory: /mydata/s4/ntq-recheck/node/data/saved_caches;cdc_raw_directory: /mydata/s4/ntq-recheck/node/data/cdc_raw;auto_snapshot: false;native_transport_timeout: 60s;read_request_timeout: 60000ms;native_transport_throw_on_overload: false;native_transport_rate_limiting_enabled: false;
+[2026-11-17 11:04:59 1794938699780] EXPECTED: yaml sets none of the knobs under test (set: []); throw_on_overload: ['native_transport_throw_on_overload: false'] — yes
+[2026-11-17 11:04:59 1794938699781] + systemd-run --user --scope --unit ntq-recheck-run1 -p MemoryMax=6442450944 -p MemorySwapMax=0 bash -c ulimit -n 100000 && exec bin/cassandra -f
+[2026-11-17 11:05:01 1794938701830] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:03 1794938703048] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:06 1794938706508] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:07 1794938707963] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:11 1794938711327] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:12 1794938712752] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:16 1794938716101] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:17 1794938717529] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:20 1794938720912] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:22 1794938722299] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:25 1794938725746] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:27 1794938727127] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:30 1794938730497] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:31 1794938731919] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:35 1794938735278] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:36 1794938736700] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:40 1794938740086] + bin/nodetool -p 7199 status
+[2026-11-17 11:05:41 1794938741483] + bin/nodetool -p 7199 statusbinary
+[2026-11-17 11:05:42 1794938742848] node UN and native transport running after 43 s
+[2026-11-17 11:05:42 1794938742848] EXPECTED: node pid 20283 in scope /sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/ntq-recheck-run1.scope with memory.max 6442450944 = 6442450944 and memory.swap.max 0 = 0 — yes
+[2026-11-17 11:05:42 1794938742848] + java -cp /mydata/s4/ntq-recheck/cassandra/build/lib/jars/byteman-submit-4.0.20.jar org.jboss.byteman.agent.submit.Submit -l
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 50
+RULE ntq release decrement
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD releaseCapacity(int)
+NOCOMPILE
+AFTER INVOKE java.util.concurrent.atomic.AtomicLongFieldUpdater.getAndAdd
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "rel id=" + $0.id() + " b=" + $1 + " q=" + ($! - $1) + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 87
+RULE ntq discard large
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD processFirstFrameOfLargeMessage
+NOCOMPILE
+AFTER INVOKE markOverloaded
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "ldisc id=" + $0.id() + " b=" + $messageSize + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/hold-request.btm line 12
+RULE ntq hold request
+CLASS org.apache.cassandra.transport.Dispatcher
+METHOD processRequest(io.netty.channel.Channel, org.apache.cassandra.transport.Message$Request, org.apache.cassandra.transport.ClientResourceLimits$Overload, org.apache.cassandra.transport.Dispatcher$RequestTime)
+NOCOMPILE
+AT ENTRY
+IF $2.toString().startsWith("QUERY SELECT pk FROM ks.t ")
+AND (new java.io.File(java.lang.System.getProperty("stage4.hold.file", "/nonexistent-stage4-hold"))).exists()
+DO java.lang.Thread.sleep(java.lang.Long.parseLong(java.lang.System.getProperty("stage4.hold.ms", "500")));
+traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "hold ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+Transformed in:
+loader: jdk.internal.loader.ClassLoaders$AppClassLoader@3d4eac69
+trigger method: org.apache.cassandra.transport.Dispatcher.processRequest(io.netty.channel.Channel,org.apache.cassandra.transport.Message$Request,org.apache.cassandra.transport.ClientResourceLimits$Overload,org.apache.cassandra.transport.Dispatcher$RequestTime) org.apache.cassandra.transport.Message$Response
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 28
+RULE ntq new handler
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD <init>
+NOCOMPILE
+AT EXIT
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "new id=" + $0.id() + " throw=" + $0.throwOnOverload + " cap=" + $0.queueCapacity
++ " srv=" + ($0.serverConnection != null) + " remote=" + $0.channel.remoteAddress()
++ " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 59
+RULE ntq decode
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD processRequest(org.apache.cassandra.transport.Envelope, org.apache.cassandra.transport.ClientResourceLimits$Overload)
+NOCOMPILE
+AT ENTRY
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "dec id=" + $0.id() + " b=" + $1.header.bodySizeInBytes + " bp=" + $2
++ " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 69
+RULE ntq release decoded
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD release(org.apache.cassandra.transport.Envelope$Header)
+NOCOMPILE
+AT ENTRY
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "rls id=" + $0.id() + " b=" + $1.bodySizeInBytes + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 39
+RULE ntq acquire exit
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD acquireCapacity(org.apache.cassandra.net.ResourceLimits$Limit, org.apache.cassandra.net.ResourceLimits$Limit, int)
+NOCOMPILE
+AT EXIT
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "acq id=" + $0.id() + " b=" + $3 + " out=" + $! + " q=" + $0.queueSize + " cap=" + $0.queueCapacity
++ " ep=" + $1.using() + "/" + $1.limit() + " gl=" + $2.using() + "/" + $2.limit()
++ " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 78
+RULE ntq discard small
+CLASS org.apache.cassandra.transport.CQLMessageHandler
+METHOD discardAndThrow
+NOCOMPILE
+AT ENTRY
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "disc id=" + $0.id() + " b=" + $5 + " ov=" + $6 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+# File /mydata/s4/ntq-recheck/harness/ntq-trace.btm line 96
+RULE ntq ticket fired
+CLASS org.apache.cassandra.net.AbstractMessageHandler
+METHOD onReserveCapacityRegained
+NOCOMPILE
+AT ENTRY
+IF $0.getClass().getName().equals("org.apache.cassandra.transport.CQLMessageHandler")
+DO traceOpen("ntq", java.lang.System.getProperty("stage4.trace", "ntq.trace"));
+traceln("ntq", "wake id=" + $0.id() + " ns=" + $3 + " ms=" + java.lang.System.currentTimeMillis())
+ENDRULE
+
+
+  rc=0
+[2026-11-17 11:05:42 1794938742952] EXPECTED: Submit -l lists the 9 rules (9: ['ntq acquire exit', 'ntq decode', 'ntq discard large', 'ntq discard small', 'ntq hold request', 'ntq new handler', 'ntq release decoded', 'ntq release decrement', 'ntq ticket fired']) — yes
+[2026-11-17 11:05:42 1794938742952] jvm: -XX:+UseThreadPriorities -XX:+UseTLAB -XX:+UseNUMA -XX:+UseG1GC -Xms2G -Xmx2G -XX:MaxDirectMemorySize=2G -javaagent:/mydata/s4/ntq-recheck/cassandra/bin/../lib/jamm-0.4.0.jar -javaagent:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ntq-recheck/harness/ntq-trace.btm,script:/mydata/s4/ntq-recheck/harness/hold-request.btm,listener:true -Dstage4.trace=/mydata/s4/ntq-recheck/logs/run1/ntq.trace -Dstage4.hold.file=/mydata/s4/ntq-recheck/node/hold -Dstage4.hold.ms=250
+[2026-11-17 11:05:42 1794938742952] + bin/cqlsh 127.0.0.1 9042 -e "CREATE KEYSPACE ks WITH replication = {'class':'SimpleStrategy','replication_factor':1}; CREATE TABLE ks.t (pk int PRIMARY KEY, v blob);"
+
+  rc=0
+[2026-11-17 11:05:44 1794938744162] schema: ks (RF 1), ks.t (pk int PRIMARY KEY, v blob)
+[2026-11-17 11:05:44 1794938744180] --- arm idle: kind=idle throw=None value_bytes=0 N=0 W=0 seconds=10 retry_ms=0
+[2026-11-17 11:05:44 1794938744180] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:05:49 1794938749578] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/idle/histo-1.txt
+[2026-11-17 11:05:50 1794938750153] histogram /mydata/s4/ntq-recheck/logs/run1/idle/histo-1.txt: 1794938749578-1794938750148 QueryMessage=0 [B=16428736
+[2026-11-17 11:05:55 1794938755158] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:05:58 1794938758046] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:05:58 1794938758430] idle: client rc=0; meters before {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 58669732}; after {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 58632078}; global in use after drain 0; scope memory.current max 2804252672
+[2026-11-17 11:05:58 1794938758448] --- arm U10: kind=U throw=False value_bytes=65000 N=10 W=80 seconds=45 retry_ms=100
+[2026-11-17 11:05:58 1794938758448] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:05:58 1794938758829] + (U10) java -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dio.netty.eventLoopThreads=1 -Dlogback.configurationFile=/mydata/s4/ntq-recheck/harness/flood-logback.xml -Xmx4g -cp "/mydata/s4/ntq-recheck/classes:/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" org.apache.cassandra.transport.NativeFlood --host 127.0.0.1 --port 9042 --connections 10 --window 80 --value-bytes 65000 --seconds 45 --throw false --retry-ms 100
+[2026-11-17 11:06:47 1794938807570] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:06:50 1794938810455] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:06:50 1794938810844] U10: client rc=0; meters before {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 58632078}; after {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 58771148}; global in use after drain 0; scope memory.current max 2918375424
+[2026-11-17 11:06:50 1794938810879] --- arm D20: kind=D throw=False value_bytes=65000 N=20 W=240 seconds=90 retry_ms=100
+[2026-11-17 11:06:50 1794938810879] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:06:51 1794938811267] + (D20) java -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dio.netty.eventLoopThreads=1 -Dlogback.configurationFile=/mydata/s4/ntq-recheck/harness/flood-logback.xml -Xmx4g -cp "/mydata/s4/ntq-recheck/classes:/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" org.apache.cassandra.transport.NativeFlood --host 127.0.0.1 --port 9042 --connections 20 --window 240 --value-bytes 65000 --seconds 90 --throw false --retry-ms 100
+[2026-11-17 11:07:23 1794938843314] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/D20/histo-1.txt
+[2026-11-17 11:07:23 1794938843804] histogram /mydata/s4/ntq-recheck/logs/run1/D20/histo-1.txt: 1794938843314-1794938843800 QueryMessage=4800 [B=328970944
+[2026-11-17 11:07:53 1794938873446] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/D20/histo-2.txt
+[2026-11-17 11:07:53 1794938873953] histogram /mydata/s4/ntq-recheck/logs/run1/D20/histo-2.txt: 1794938873446-1794938873945 QueryMessage=4800 [B=328970016
+[2026-11-17 11:08:32 1794938912618] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:08:35 1794938915505] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:08:35 1794938915886] D20: client rc=0; meters before {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 58771148}; after {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 59088958}; global in use after drain 0; scope memory.current max 3025686528
+[2026-11-17 11:08:35 1794938915911] --- arm D30: kind=D throw=False value_bytes=65000 N=30 W=240 seconds=90 retry_ms=100
+[2026-11-17 11:08:35 1794938915911] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:08:36 1794938916285] + (D30) java -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dio.netty.eventLoopThreads=1 -Dlogback.configurationFile=/mydata/s4/ntq-recheck/harness/flood-logback.xml -Xmx4g -cp "/mydata/s4/ntq-recheck/classes:/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" org.apache.cassandra.transport.NativeFlood --host 127.0.0.1 --port 9042 --connections 30 --window 240 --value-bytes 65000 --seconds 90 --throw false --retry-ms 100
+[2026-11-17 11:09:08 1794938948332] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/D30/histo-1.txt
+[2026-11-17 11:09:08 1794938948850] histogram /mydata/s4/ntq-recheck/logs/run1/D30/histo-1.txt: 1794938948332-1794938948845 QueryMessage=7200 [B=484651384
+[2026-11-17 11:09:38 1794938978293] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/D30/histo-2.txt
+[2026-11-17 11:09:38 1794938978793] histogram /mydata/s4/ntq-recheck/logs/run1/D30/histo-2.txt: 1794938978293-1794938978789 QueryMessage=7200 [B=484668400
+[2026-11-17 11:10:22 1794939022773] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:10:25 1794939025645] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:10:26 1794939026024] D30: client rc=0; meters before {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 59088958}; after {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 59580478}; global in use after drain 0; scope memory.current max 3084398592
+[2026-11-17 11:10:26 1794939026057] --- arm D40: kind=D throw=False value_bytes=65000 N=40 W=240 seconds=90 retry_ms=100
+[2026-11-17 11:10:26 1794939026057] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:10:26 1794939026444] + (D40) java -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dio.netty.eventLoopThreads=1 -Dlogback.configurationFile=/mydata/s4/ntq-recheck/harness/flood-logback.xml -Xmx4g -cp "/mydata/s4/ntq-recheck/classes:/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" org.apache.cassandra.transport.NativeFlood --host 127.0.0.1 --port 9042 --connections 40 --window 240 --value-bytes 65000 --seconds 90 --throw false --retry-ms 100
+[2026-11-17 11:10:58 1794939058493] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/D40/histo-1.txt
+[2026-11-17 11:10:59 1794939059038] histogram /mydata/s4/ntq-recheck/logs/run1/D40/histo-1.txt: 1794939058493-1794939059030 QueryMessage=9598 [B=642860728
+[2026-11-17 11:11:28 1794939088482] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/D40/histo-2.txt
+[2026-11-17 11:11:29 1794939089009] histogram /mydata/s4/ntq-recheck/logs/run1/D40/histo-2.txt: 1794939088482-1794939089004 QueryMessage=9600 [B=643007736
+[2026-11-17 11:12:17 1794939137699] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:12:20 1794939140584] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:12:20 1794939140965] D40: client rc=0; meters before {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 59580478}; after {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 143769918}; global in use after drain 0; scope memory.current max 3122819072
+[2026-11-17 11:12:20 1794939140990] --- arm T40: kind=T throw=True value_bytes=65000 N=40 W=240 seconds=60 retry_ms=1000
+[2026-11-17 11:12:20 1794939140990] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:12:21 1794939141368] + (T40) java -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dio.netty.eventLoopThreads=1 -Dlogback.configurationFile=/mydata/s4/ntq-recheck/harness/flood-logback.xml -Xmx4g -cp "/mydata/s4/ntq-recheck/classes:/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" org.apache.cassandra.transport.NativeFlood --host 127.0.0.1 --port 9042 --connections 40 --window 240 --value-bytes 65000 --seconds 60 --throw true --retry-ms 1000
+[2026-11-17 11:12:43 1794939163400] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/T40/histo-1.txt
+[2026-11-17 11:12:43 1794939163913] histogram /mydata/s4/ntq-recheck/logs/run1/T40/histo-1.txt: 1794939163400-1794939163908 QueryMessage=1469 [B=113723184
+[2026-11-17 11:13:03 1794939183543] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/T40/histo-2.txt
+[2026-11-17 11:13:04 1794939184035] histogram /mydata/s4/ntq-recheck/logs/run1/T40/histo-2.txt: 1794939183543-1794939184029 QueryMessage=1469 [B=113707072
+[2026-11-17 11:13:27 1794939207576] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:13:30 1794939210459] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:13:30 1794939210848] T40: client rc=0; meters before {'RequestDiscarded.Count': 0, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 143769918}; after {'RequestDiscarded.Count': 263391, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 143769918}; global in use after drain 0; scope memory.current max 3461816320
+[2026-11-17 11:13:30 1794939210864] --- arm L20: kind=L throw=False value_bytes=262000 N=20 W=60 seconds=60 retry_ms=100
+[2026-11-17 11:13:30 1794939210864] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:13:31 1794939211248] + (L20) java -Djdk.attach.allowAttachSelf=true --add-exports java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED --add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED --add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED --add-exports java.rmi/sun.rmi.server=ALL-UNNAMED --add-exports java.sql/java.sql=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED -Dio.netty.eventLoopThreads=1 -Dlogback.configurationFile=/mydata/s4/ntq-recheck/harness/flood-logback.xml -Xmx4g -cp "/mydata/s4/ntq-recheck/classes:/mydata/s4/ntq-recheck/cassandra/build/classes/main:/mydata/s4/ntq-recheck/cassandra/build/lib/jars/*" org.apache.cassandra.transport.NativeFlood --host 127.0.0.1 --port 9042 --connections 20 --window 60 --value-bytes 262000 --seconds 60 --throw false --retry-ms 100
+[2026-11-17 11:13:53 1794939233281] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/L20/histo-1.txt
+[2026-11-17 11:13:53 1794939233765] histogram /mydata/s4/ntq-recheck/logs/run1/L20/histo-1.txt: 1794939233281-1794939233759 QueryMessage=284 [B=92533816
+[2026-11-17 11:14:13 1794939253395] + jcmd 20283 GC.class_histogram > /mydata/s4/ntq-recheck/logs/run1/L20/histo-2.txt
+[2026-11-17 11:14:13 1794939253876] histogram /mydata/s4/ntq-recheck/logs/run1/L20/histo-2.txt: 1794939253395-1794939253869 QueryMessage=284 [B=92517456
+[2026-11-17 11:14:35 1794939275605] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:14:38 1794939278486] + java -cp /mydata/s4/ntq-recheck/classes Jmx 7199 'get' 'org.apache.cassandra.metrics:type=Client,name=RequestDiscarded' 'Count' 'org.apache.cassandra.metrics:type=Client,name=RequestsSize' 'Value' 'org.apache.cassandra.metrics:type=Client,name=PausedConnections' 'Value' 'org.apache.cassandra.metrics:type=Client,name=TimedOutBeforeProcessing' 'Count' 'org.apache.cassandra.metrics:type=Client,name=ProtocolException' 'Count' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=UsedSize' 'Value' 'org.apache.cassandra.metrics:type=BufferPool,scope=networking,name=OverflowSize' 'Value' 'java.nio:type=BufferPool,name=direct' 'MemoryUsed'
+[2026-11-17 11:14:38 1794939278866] L20: client rc=0; meters before {'RequestDiscarded.Count': 263391, 'RequestsSize.Value': 0, 'PausedConnections.Value': 0, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 0, 'OverflowSize.Value': 0, 'direct.MemoryUsed': 143769918}; after {'RequestDiscarded.Count': 263391, 'RequestsSize.Value': 0, 'PausedConnections.Value': -26987, 'TimedOutBeforeProcessing.Count': 0, 'ProtocolException.Count': 0, 'UsedSize.Value': 8298141773, 'OverflowSize.Value': 8163924045, 'direct.MemoryUsed': 1096279260}; global in use after drain 0; scope memory.current max 4471156736
+[2026-11-17 11:14:38 1794939278867] scope memory.events at end: low 0 high 0 max 0 oom 0 oom_kill 0
+[2026-11-17 11:14:38 1794939278867] scope memory.peak: not available (max of the 2 s memory.current polls per arm is in each arm line)
+[2026-11-17 11:14:38 1794939278898] + bin/nodetool -p 7199 stopdaemon
+Cassandra has shutdown.
+
+  rc=0
+[2026-11-17 11:14:49 1794939289470] after stop, CassandraDaemon processes on pc72: none
+[2026-11-17 11:14:49 1794939289470] + cp /mydata/s4/ntq-recheck/node/logs/system.log /mydata/s4/ntq-recheck/logs/run1/system.log
+
+  rc=0
+[2026-11-17 11:14:55 1794939295135] trace: 162 handlers, 1582118 events, 245893 hold lines, 0 other lines (first: [])
+[2026-11-17 11:14:55 1794939295136] EXPECTED: system.log has no "requests/second" (0) — yes
+[2026-11-17 11:14:55 1794939295136] EXPECTED: system.log has no "spent over" (0) — yes
+[2026-11-17 11:14:55 1794939295136] EXPECTED: system.log has no "timed out before it could start" (0) — yes
+[2026-11-17 11:14:55 1794939295136] EXPECTED: system.log has no "java.lang.OutOfMemoryError" (0) — yes
+[2026-11-17 11:14:55 1794939295138] EXPECTED: system.log has no ERROR line (0) — yes
+[2026-11-17 11:14:55 1794939295138] idle: direct MemoryUsed mean 58650948; pool used+overflow mean 0; idle histogram [(1794938749578, 1794938750148, 0, 16428736)]
+[2026-11-17 11:14:55 1794939295139] U10: 10 server handlers matched to 10 client connections; client TOTAL {'sent': 23597, 'ok': 23597, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1794938807493}; texts []
+[2026-11-17 11:14:55 1794939295140] EXPECTED: U10: every client connection has its server handler (10 = 10), each with cap = 1048576 and throw = False — yes
+[2026-11-17 11:14:55 1794939295402] U10: M=65074 (dec sizes {65074: 23597}); E=53687091 G=214748364 K=64172851 V=52059200; refusals=0; peak sumA=52059200; peak sumD=52059200; last-third mean sumD=50670954.666666664; ep max in use=41573440; gl max in use=41573440; lines sumD>sumA=0; holds n/a
+[2026-11-17 11:14:55 1794939295510] EXPECTED: U10: client drained (outstanding 0), rc 0, ovl_other 0, err 0; TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+[2026-11-17 11:14:55 1794939295510] EXPECTED: U10: global reserve in use 0 after the drain (0) — yes
+[2026-11-17 11:14:55 1794939295510] EXPECTED: U10 (P7): no refusal (0) — yes
+[2026-11-17 11:14:55 1794939295510] EXPECTED: U10 (P7): sumD <= sumA at every line (0 violations) and peak sumA 52059200 <= 52059200 — yes
+[2026-11-17 11:14:55 1794939295510] EXPECTED: U10 (P7): every handler ends at queueSize 0 (sum 0, nonzero 0) — yes
+[2026-11-17 11:14:55 1794939295511] D20: 20 server handlers matched to 20 client connections; client TOTAL {'sent': 50554, 'ok': 50554, 'warned': 3654, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1794938912504}; texts []
+[2026-11-17 11:14:55 1794939295511] EXPECTED: D20: every client connection has its server handler (20 = 20), each with cap = 1048576 and throw = False — yes
+[2026-11-17 11:14:55 1794939295906] D20: M=65074 (dec sizes {65074: 50554}); E=53687091 G=214748364 K=74658611 V=312355200; refusals=3654; peak sumA=74639878; peak sumD=312355200; last-third mean sumD=312337846.93333334; ep max in use=53668358; gl max in use=53668358; lines sumD>sumA=203569; holds n/a
+[2026-11-17 11:14:56 1794939296032] EXPECTED: D20: client drained (outstanding 0), rc 0, ovl_other 0, err 0; TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+[2026-11-17 11:14:56 1794939296032] EXPECTED: D20: global reserve in use 0 after the drain (0) — yes
+[2026-11-17 11:14:56 1794939296032] D20: histogram 1794938843314-1794938843800 ms: QueryMessage 4800, [B 328970944; sumD/M over the interval ±1 s [4779.0, 4800.0]
+[2026-11-17 11:14:56 1794939296032] D20: histogram 1794938873446-1794938873945 ms: QueryMessage 4800, [B 328970016; sumD/M over the interval ±1 s [4800.0, 4800.0]
+[2026-11-17 11:14:56 1794939296032] EXPECTED: D20 (P1): refusals occur (3654) — yes
+[2026-11-17 11:14:56 1794939296032] EXPECTED: D20 (P1): per handler dec bp=BYTES_IN_FLIGHT = refusals (total 3654 = 3654; handlers differing 0) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P1): client warned 3654 = refusals 3654 — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P1): RequestDiscarded +0 = 0 and client overloads 0 = 0 — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P2): every handler ends at queueSize = -k_i*M (sum -237780396 = -237780396; handlers differing 0) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P3): sumA <= K = 74658611 at every line (0 lines over; peak 74639878) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P3): last-third mean sumD 312337847 in [0.85 V, V] = [265501920, 312355200] and > G = 214748364 (x1.454 of G, x4.184 of K) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P3): every handler peak D_i > C (min 15617760) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P5): histogram 1: QueryMessage 4800 within sumD/M band [4779.0, 4800.0] (±1) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P5): histogram 2: QueryMessage 4800 within sumD/M band [4800.0, 4800.0] (±1) — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P5): histogram 2: count*M = 312355200 > G = 214748364 — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P5): histogram 2: [B 328970016 - idle 16428736 = 312541280 >= 0.9*count*65000 = 280800000 — yes
+[2026-11-17 11:14:56 1794939296033] EXPECTED: D20 (P6): direct MemoryUsed max - idle = 447880 < 64 MiB and pool used+overflow max - idle = 1310720 < 64 MiB — yes
+[2026-11-17 11:14:56 1794939296034] D30: 30 server handlers matched to 30 client connections; client TOTAL {'sent': 52862, 'ok': 52862, 'warned': 5892, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1794939022657}; texts []
+[2026-11-17 11:14:56 1794939296034] EXPECTED: D30: every client connection has its server handler (30 = 30), each with cap = 1048576 and throw = False — yes
+[2026-11-17 11:14:56 1794939296450] D30: M=65074 (dec sizes {65074: 52862}); E=53687091 G=214748364 K=85144371 V=468532800; refusals=5892; peak sumA=85116792; peak sumD=468532800; last-third mean sumD=467541506.06666666; ep max in use=53659512; gl max in use=53659512; lines sumD>sumA=214725; holds n/a
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30: client drained (outstanding 0), rc 0, ovl_other 0, err 0; TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30: global reserve in use 0 after the drain (0) — yes
+[2026-11-17 11:14:56 1794939296579] D30: histogram 1794938948332-1794938948845 ms: QueryMessage 7200, [B 484651384; sumD/M over the interval ±1 s [7199.0, 7200.0]
+[2026-11-17 11:14:56 1794939296579] D30: histogram 1794938978293-1794938978789 ms: QueryMessage 7200, [B 484668400; sumD/M over the interval ±1 s [7176.0, 7200.0]
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30 (P1): refusals occur (5892) — yes
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30 (P1): per handler dec bp=BYTES_IN_FLIGHT = refusals (total 5892 = 5892; handlers differing 0) — yes
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30 (P1): client warned 5892 = refusals 5892 — yes
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30 (P1): RequestDiscarded +0 = 0 and client overloads 0 = 0 — yes
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30 (P2): every handler ends at queueSize = -k_i*M (sum -383416008 = -383416008; handlers differing 0) — yes
+[2026-11-17 11:14:56 1794939296579] EXPECTED: D30 (P3): sumA <= K = 85144371 at every line (0 lines over; peak 85116792) — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P3): last-third mean sumD 467541506 in [0.85 V, V] = [398252880, 468532800] and > G = 214748364 (x2.177 of G, x5.491 of K) — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P3): every handler peak D_i > C (min 15617760) — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P5): histogram 1: QueryMessage 7200 within sumD/M band [7199.0, 7200.0] (±1) — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P5): histogram 2: QueryMessage 7200 within sumD/M band [7176.0, 7200.0] (±1) — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P5): histogram 2: count*M = 468532800 > G = 214748364 — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P5): histogram 2: [B 484668400 - idle 16428736 = 468239664 >= 0.9*count*65000 = 421200000 — yes
+[2026-11-17 11:14:56 1794939296580] EXPECTED: D30 (P6): direct MemoryUsed max - idle = 929530 < 64 MiB and pool used+overflow max - idle = 1966080 < 64 MiB — yes
+[2026-11-17 11:14:56 1794939296581] D40: 40 server handlers matched to 40 client connections; client TOTAL {'sent': 55283, 'ok': 55283, 'warned': 8132, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1794939137539}; texts []
+[2026-11-17 11:14:56 1794939296581] EXPECTED: D40: every client connection has its server handler (40 = 40), each with cap = 1048576 and throw = False — yes
+[2026-11-17 11:14:57 1794939297016] D40: M=65074 (dec sizes {65074: 55283}); E=53687091 G=214748364 K=95630131 V=624710400; refusals=8132; peak sumA=95593706; peak sumD=624710400; last-third mean sumD=624066167.4; ep max in use=53650666; gl max in use=53650666; lines sumD>sumA=226309; holds n/a
+[2026-11-17 11:14:57 1794939297151] EXPECTED: D40: client drained (outstanding 0), rc 0, ovl_other 0, err 0; TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+[2026-11-17 11:14:57 1794939297151] EXPECTED: D40: global reserve in use 0 after the drain (0) — yes
+[2026-11-17 11:14:57 1794939297152] D40: histogram 1794939058493-1794939059030 ms: QueryMessage 9598, [B 642860728; sumD/M over the interval ±1 s [9508.0, 9599.0]
+[2026-11-17 11:14:57 1794939297152] D40: histogram 1794939088482-1794939089004 ms: QueryMessage 9600, [B 643007736; sumD/M over the interval ±1 s [9586.0, 9600.0]
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P1): refusals occur (8132) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P1): per handler dec bp=BYTES_IN_FLIGHT = refusals (total 8132 = 8132; handlers differing 0) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P1): client warned 8132 = refusals 8132 — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P1): RequestDiscarded +0 = 0 and client overloads 0 = 0 — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P2): every handler ends at queueSize = -k_i*M (sum -529181768 = -529181768; handlers differing 0) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P3): sumA <= K = 95630131 at every line (0 lines over; peak 95593706) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P3): last-third mean sumD 624066167 in [0.85 V, V] = [531003840, 624710400] and > G = 214748364 (x2.906 of G, x6.526 of K) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P3): every handler peak D_i > C (min 15617760) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P5): histogram 1: QueryMessage 9598 within sumD/M band [9508.0, 9599.0] (±1) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P5): histogram 2: QueryMessage 9600 within sumD/M band [9586.0, 9600.0] (±1) — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P5): histogram 2: count*M = 624710400 > G = 214748364 — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P5): histogram 2: [B 643007736 - idle 16428736 = 626579000 >= 0.9*count*65000 = 561600000 — yes
+[2026-11-17 11:14:57 1794939297152] EXPECTED: D40 (P6): direct MemoryUsed max - idle = 85118970 < 64 MiB and pool used+overflow max - idle = 2621440 < 64 MiB — NO (recorded; judged in the results file)
+[2026-11-17 11:14:57 1794939297153] T40: 40 server handlers matched to 40 client connections; client TOTAL {'sent': 295324, 'ok': 31933, 'warned': 0, 'ovl_bytes': 263391, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1794939207373}; texts []
+[2026-11-17 11:14:57 1794939297153] EXPECTED: T40: every client connection has its server handler (40 = 40), each with cap = 1048576 and throw = True — yes
+[2026-11-17 11:14:58 1794939298151] T40: M=65074 (dec sizes {65074: 31933}); E=53687091 G=214748364 K=95630131 V=624710400; refusals=263391; peak sumA=95593706; peak sumD=95593706; last-third mean sumD=95265082.3; ep max in use=53658058; gl max in use=53715740; lines sumD>sumA=0; holds n/a
+[2026-11-17 11:14:58 1794939298373] EXPECTED: T40: client drained (outstanding 0), rc 0, ovl_other 0, err 0; TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+[2026-11-17 11:14:58 1794939298373] EXPECTED: T40: global reserve in use 0 after the drain (0) — yes
+[2026-11-17 11:14:58 1794939298373] T40: histogram 1794939163400-1794939163908 ms: QueryMessage 1469, [B 113723184; sumD/M over the interval ±1 s [1460.0, 1469.0]
+[2026-11-17 11:14:58 1794939298373] T40: histogram 1794939183543-1794939184029 ms: QueryMessage 1469, [B 113707072; sumD/M over the interval ±1 s [1452.0, 1464.0]
+[2026-11-17 11:14:58 1794939298373] EXPECTED: T40 (P8): refusals 263391 > 0 and = disc 263391 = RequestDiscarded +263391 = client overloads 263391 — yes
+[2026-11-17 11:14:58 1794939298374] EXPECTED: T40 (P8): per handler dec = SUCCESS acquires (handlers differing 0) — yes
+[2026-11-17 11:14:58 1794939298374] EXPECTED: T40 (P8): sumA <= K = 95630131 at every line (0 over) and peak 95593706 >= 0.9 K — yes
+[2026-11-17 11:14:58 1794939298374] EXPECTED: T40 (P8): sumD <= sumA at every line (0) so peak sumD 95593706 < G 214748364 — yes
+[2026-11-17 11:14:58 1794939298374] EXPECTED: T40 (P8): every handler ends at 0 (sum 0) — yes
+[2026-11-17 11:14:58 1794939298374] EXPECTED: T40 (P8): histogram 1: QueryMessage 1469 <= K/M + 10 = 1479.6 — yes
+[2026-11-17 11:14:58 1794939298374] EXPECTED: T40 (P8): histogram 2: QueryMessage 1469 <= K/M + 10 = 1479.6 — yes
+[2026-11-17 11:14:58 1794939298374] L20: 20 server handlers matched to 20 client connections; client TOTAL {'sent': 31664, 'ok': 31664, 'warned': 0, 'ovl_bytes': 0, 'ovl_other': 0, 'err': 0, 'outstanding': 0, 'ms': 1794939275499}; texts []
+[2026-11-17 11:14:58 1794939298374] EXPECTED: L20: every client connection has its server handler (20 = 20), each with cap = 1048576 and throw = False — yes
+[2026-11-17 11:14:58 1794939298720] L20: M=262074 (dec sizes {262074: 31664}); E=53687091 G=214748364 K=74658611 V=314488800; refusals=26987; peak sumA=74429016; peak sumD=74429016; last-third mean sumD=74429016.0; ep max in use=53457776; gl max in use=53719570; lines sumD>sumA=0; holds n/a
+[2026-11-17 11:14:58 1794939298841] EXPECTED: L20: client drained (outstanding 0), rc 0, ovl_other 0, err 0; TimedOutBeforeProcessing +0, ProtocolException +0 — yes
+[2026-11-17 11:14:58 1794939298841] EXPECTED: L20: global reserve in use 0 after the drain (0) — yes
+[2026-11-17 11:14:58 1794939298841] L20: histogram 1794939233281-1794939233759 ms: QueryMessage 284, [B 92533816; sumD/M over the interval ±1 s [214.0, 284.0]
+[2026-11-17 11:14:58 1794939298841] L20: histogram 1794939253395-1794939253869 ms: QueryMessage 284, [B 92517456; sumD/M over the interval ±1 s [284.0, 284.0]
+[2026-11-17 11:14:58 1794939298841] EXPECTED: L20 (P9): refusals 26987 > 0, no dec bp=BYTES_IN_FLIGHT (0), client warned 0 = 0 — yes
+[2026-11-17 11:14:58 1794939298841] EXPECTED: L20 (P9): per handler dec = SUCCESS acquires (handlers differing 0) — yes
+[2026-11-17 11:14:58 1794939298841] EXPECTED: L20 (P9): sumA <= K = 74658611 at every line (0 over); sumD <= sumA (0) — yes
+[2026-11-17 11:14:58 1794939298841] EXPECTED: L20 (P9): every handler ends at 0 (sum 0) — yes
+[2026-11-17 11:14:58 1794939298841] EXPECTED: P4: last-third mean sumD per connection [15616892, 15584717, 15601654] within ±10 % of their mean 15601088 (W*M = 15617760) — yes
+[2026-11-17 11:14:58 1794939298841] END {'yes': 79, 'no': 1}

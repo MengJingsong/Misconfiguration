@@ -1,0 +1,131 @@
+[2026-11-17T10:47:17-0700 1794937637129] + javac -d /mydata/s4/rowlim-rc/tools /mydata/s4/rowlim-rc/harness/Jmx.java
+[2026-11-17T10:47:17-0700 1794937637879] 
+[2026-11-17T10:47:17-0700 1794937637880]   exit 0 in 0.8s
+[2026-11-17T10:47:17-0700 1794937637883] rc-run start mode=load None tree=/mydata/s4/rowlim-rc/tree head=cassandra-5.0.9 pid=5503
+[2026-11-17T10:47:17-0700 1794937637884] df: /dev/mapper/emulab-node4--bs ext4 788967512 1098428 747718660   1% /mydata
+[2026-11-17T10:47:17-0700 1794937637938] conf load: control=False; yaml lines changed: ['auto_snapshot', 'cdc_raw_directory', 'commitlog_directory', 'counter_cache_size', 'data_file_directories', 'hints_directory', 'native_transport_timeout', 'num_tokens', 'read_request_timeout', 'row_cache_size', 'saved_caches_directory']
+[2026-11-17T10:47:17-0700 1794937637938] + systemd-run --user --scope --unit=s4rc-load-1794937637 -p MemoryMax=12G -p MemorySwapMax=0 /mydata/s4/rowlim-rc/tree/bin/cassandra -f -p /mydata/s4/rowlim-rc/node/logs-load/cassandra.pid | JVM_EXTRA_OPTS=-Xlog:gc:file=/mydata/s4/rowlim-rc/node/logs-load/gc-load.log:time,uptimemillis | MAX_HEAP_SIZE=8G
+[2026-11-17T10:47:22-0700 1794937642066] scope cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/s4rc-load-1794937637.scope memory.max 12884901888 memory.swap.max 0
+[2026-11-17T10:48:05-0700 1794937685191] node up (load) after 47 s, pid None
+[2026-11-17T10:48:05-0700 1794937685840] cql CREATE KEYSPACE IF NOT EXISTS ks WITH replication = {'class':'SimpleStrategy','replication_factor':1} -> []
+[2026-11-17T10:48:06-0700 1794937686242] cql CREATE TABLE IF NOT EXISTS ks.w16k (pk int, ck int, v blob, PRIMARY KEY (pk, ck)) WITH compression = {'enabled':'false'} AND caching = {'keys':'ALL','rows_per_partition':'NONE'} -> []
+[2026-11-17T10:48:06-0700 1794937686764] loaded 600 rows of 16384 B into w16k
+[2026-11-17T10:48:06-0700 1794937686764] + /mydata/s4/rowlim-rc/tree/bin/nodetool -p 7199 flush ks w16k
+[2026-11-17T10:48:08-0700 1794937688219]   exit 0 in 1.5s
+[2026-11-17T10:48:08-0700 1794937688607] cql CREATE TABLE IF NOT EXISTS ks.w128k (pk int, ck int, v blob, PRIMARY KEY (pk, ck)) WITH compression = {'enabled':'false'} AND caching = {'keys':'ALL','rows_per_partition':'NONE'} -> []
+[2026-11-17T10:48:09-0700 1794937689097] loaded 600 rows of 131072 B into w128k
+[2026-11-17T10:48:09-0700 1794937689097] + /mydata/s4/rowlim-rc/tree/bin/nodetool -p 7199 flush ks w128k
+[2026-11-17T10:48:10-0700 1794937690699]   exit 0 in 1.6s
+[2026-11-17T10:48:11-0700 1794937691045] cql CREATE TABLE IF NOT EXISTS ks.w1m (pk int, ck int, v blob, PRIMARY KEY (pk, ck)) WITH compression = {'enabled':'false'} AND caching = {'keys':'ALL','rows_per_partition':'NONE'} -> []
+[2026-11-17T10:48:13-0700 1794937693517] loaded 600 rows of 1048576 B into w1m
+[2026-11-17T10:48:13-0700 1794937693517] + /mydata/s4/rowlim-rc/tree/bin/nodetool -p 7199 flush ks w1m
+[2026-11-17T10:48:18-0700 1794937698370]   exit 0 in 4.9s
+[2026-11-17T10:48:18-0700 1794937698370] + /mydata/s4/rowlim-rc/tree/bin/nodetool -p 7199 compact ks
+[2026-11-17T10:48:29-0700 1794937709777] 
+[2026-11-17T10:48:29-0700 1794937709777]   exit 0 in 11.4s
+[2026-11-17T10:48:29-0700 1794937709777] + /mydata/s4/rowlim-rc/tree/bin/nodetool -p 7199 compactionstats
+[2026-11-17T10:48:31-0700 1794937711216]   exit 0 in 1.4s
+[2026-11-17T10:48:31-0700 1794937711216] load + flush + compact took 25.4s
+[2026-11-17T10:48:31-0700 1794937711216] + /mydata/s4/rowlim-rc/tree/bin/nodetool -p 7199 tablestats ks
+[2026-11-17T10:48:32-0700 1794937712984]   exit 0 in 1.8s
+[2026-11-17T10:48:32-0700 1794937712984] 5551
+		Compacted partition maximum bytes: 89970660
+		Compacted partition mean bytes: 89970660
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+		Table: w16k
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 9.395MiB
+		Space used (live): 9850859
+		Space used (total): 9850859
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 24
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 1
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 600
+		Local write latency: 0.202 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 9.386MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 16
+		Bloom filter off heap memory used: 8
+		Index summary off heap memory used: 16
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 8409008
+		Compacted partition maximum bytes: 10090808
+		Compacted partition mean bytes: 10090808
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+		Table: w1m
+		SSTable count: 1
+		Old SSTable count: 0
+		Max SSTable size: 600.066MiB
+		Space used (live): 629215228
+		Space used (total): 629215228
+		Space used by snapshots (total): 0
+		Off heap memory used (total): 24
+		SSTable Compression Ratio: -1.00000
+		Number of partitions (estimate): 1
+		Memtable cell count: 0
+		Memtable data size: 0
+		Memtable off heap memory used: 0
+		Memtable switch count: 1
+		Speculative retries: 0
+		Local read count: 0
+		Local read latency: NaN ms
+		Local write count: 600
+		Local write latency: 0.656 ms
+		Local read/write ratio: 0.00000
+		Pending flushes: 0
+		Percent repaired: 0.0
+		Bytes repaired: 0B
+		Bytes unrepaired: 600.011MiB
+		Bytes pending repair: 0B
+		Bloom filter false positives: 0
+		Bloom filter false ratio: 0.00000
+		Bloom filter space used: 16
+		Bloom filter off heap memory used: 8
+		Index summary off heap memory used: 16
+		Compression metadata off heap memory used: 0
+		Compacted partition minimum bytes: 557074611
+		Compacted partition maximum bytes: 668489532
+		Compacted partition mean bytes: 668489532
+		Average live cells per slice (last five minutes): NaN
+		Maximum live cells per slice (last five minutes): 0
+		Average tombstones per slice (last five minutes): NaN
+		Maximum tombstones per slice (last five minutes): 0
+		Droppable tombstone ratio: 0.00000
+
+----------------
+
+[2026-11-17T10:48:33-0700 1794937713246] cql SELECT count(*) FROM ks.w16k WHERE pk = 1 -> [Row(count=600)]
+[2026-11-17T10:48:33-0700 1794937713596] cql SELECT count(*) FROM ks.w128k WHERE pk = 1 -> [Row(count=600)]
+[2026-11-17T10:48:35-0700 1794937715379] cql SELECT count(*) FROM ks.w1m WHERE pk = 1 -> [Row(count=600)]
+[2026-11-17T10:48:35-0700 1794937715379] + du -sb /mydata/s4/rowlim-rc/node/data
+[2026-11-17T10:48:35-0700 1794937715404] 718093716	/mydata/s4/rowlim-rc/node/data
+[2026-11-17T10:48:35-0700 1794937715404]   exit 0 in 0.0s
+[2026-11-17T10:49:19-0700 1794937759538] memory.events gone: [Errno 2] No such file or directory: '/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4rc-load-1794937637.scope/memory.events'
+[2026-11-17T10:49:19-0700 1794937759538] scope max memory.current sampled: 10.32 GiB
+[2026-11-17T10:49:19-0700 1794937759546] scope state: inactive
+[2026-11-17T10:49:19-0700 1794937759572] daemons left: []

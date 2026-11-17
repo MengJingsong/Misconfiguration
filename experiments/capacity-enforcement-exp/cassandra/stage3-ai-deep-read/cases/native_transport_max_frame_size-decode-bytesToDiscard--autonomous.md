@@ -408,6 +408,10 @@ frozen at sha256 `9118745e…2715` after amendments U1–U8 and C1–C9, run at 
   per-connection bytes; the cluster tier ran with `-Dcassandra.netty_use_heap_allocator=true` (unpooled direct buffers).
 - For stage 3: the filed discard start value was off by the 9 header bytes (`discard` counts from the frame start); state where a
   counter starts and the feed schedule before writing exact numbers, and check allocator chunk granularity when reading direct memory.
+- **2026-11-17, recheck claim, stage 4 run 1 on `pc84`** ([results](../../stage4-runtime-verification/results/native_transport_max_frame_size-decode-bytesToDiscard--autonomous--recheck-2026-11-17.md);
+  design: section "Stage-4 design for the recheck claim (2026-11-17)" below, frozen at `b20c07da…`; uncommitted): **Confirmed — does not
+  cap the node** (row C). 64 / 256 / 512 stalled pre-login connections held exactly that many 16 MiB pooled direct chunks (+1 GiB of
+  per-arena chunks), 16.07 MiB resident each; Cassandra counted 0 bytes in flight and 0 clients and refused nothing.
 
 ## Recheck — enforcement properties (guided, 2026-11-16, blind)
 
@@ -421,3 +425,138 @@ frozen at sha256 `9118745e…2715` after amendments U1–U8 and C1–C9, run at 
 
 **Real-memory estimate:** positive per connection; undetermined for the node, decided by E3/E4: whether k connections × 16 MiB partial frames exhaust default direct memory before anything else refuses them.
 **Stage-4 claim to add:** k = 64 / 256 / 512 connections each send a header declaring a body of 16 MiB − 9 B and then all but the last byte, held open: direct memory ≈ k × (16 MiB + cumulation slack), no refusal below the direct limit; above `MaxDirectMemorySize` expect `OutOfDirectMemoryError` on these or other direct allocations.
+
+## Stage-4 design for the recheck claim (2026-11-17)
+
+Written in stage 4 for the recheck's one-sentence **Stage-4 claim to add** (above), which had no design. The 2026-10-27 run
+(section D) already showed the per-connection cap (dose-response on `native_transport_max_frame_size`); this design does not
+redo it. It tests the multiplier: at shipped default limits, how held direct memory grows with the number of stalled pre-login
+connections. It is a measurement inside a recorded budget, not an exhaustion test.
+
+**How this verifies the claim.**
+- **Hypothesis.** At the shipped defaults (`native_transport_max_frame_size` 16 MiB, `native_transport_max_concurrent_connections`
+  -1, `native_transport_idle_timeout` 0 ms; `Config.java:139, 285, 289`), a v4 connection that has sent, before any STARTUP, a
+  9-byte OPTIONS header declaring a body of `L` = 16,777,207 B (16 MiB − 9, so `totalLength` = 16,777,216 = `MAX_TOTAL_LENGTH`,
+  not `>`, `Envelope.java:428-429`) and then `L − 1` body bytes is kept by `InitialConnectionHandler`'s decoder waiting for the last
+  byte (`:441-442`, `InitialConnectionHandler.java:66-70`), and its cumulation holds `U` = 16,777,216 B of pooled direct memory.
+  Held direct memory therefore grows by about `U` per stalled connection, and nothing in Cassandra charges these bytes or refuses
+  the connections below the direct-memory limit (no connection limit, no idle timeout, `native_transport_max_request_data_in_flight`
+  charged only after decode, `PreV5Handlers.java:178-187`).
+- **Test.** Four arms, each on a fresh node, identical except for the client: a matched control (512 connections that each send a
+  complete OPTIONS with an empty body, read the `SUPPORTED` answer and stay open, idle and pre-login) and three held arms of
+  `k` = 64, 256, 512 stalled connections. The knob is not varied: the claim is about the multiplier at the default limit, and the
+  per-connection dose-response was the 2026-10-27 run; the dose here is `k`, at three values.
+- **Logic.** (1) Held arm minus control at the same scale isolates the partial frame from the connection's own cost (arenas, thread
+  caches, read buffers). (2) The increment between held arms, per added connection, is the held bytes per stalled connection,
+  independent of fixed per-arena costs (all held arms have `k` ≥ 64 = the event-loop count). (3) It is measured on the real resource,
+  Netty's direct-memory counter (the one `OutOfDirectMemoryError` is thrown from), and the scope's `memory.current`, next to what
+  Cassandra counts (bytes in flight, connected clients). (4) "No refusal" is shown directly: no discard entry, no `fail()`, every
+  connection still open, and every frame answered `SUPPORTED` when its last byte is sent. (5) The release check ties the memory to the
+  connections.
+- **Refuted if** held direct memory does not grow with `k` (under half of `U` per stalled connection), or Cassandra refuses, closes,
+  discards or charges a stalled connection below the direct limit.
+- **Not tested.** What happens above `MaxDirectMemorySize` (the claim's `OutOfDirectMemoryError`): the run stays well below it. The
+  run reads the limit Netty enforces (`PlatformDependent.maxDirectMemory()`), which settles E2's open question for Netty 4.1.130, and
+  the `k` at which it would be reached is extrapolated, marked inferred.
+
+**Environment.** `pc84` (x86_64, 32 cores, 125 GiB, swap on), run copy `/mydata/s4/ntfs-rc` (`cp -a` of `/mydata/s4/cassandra-base`,
+JDK 11.0.33, Netty 4.1.130). One node at 127.0.0.1 from the shipped `conf/`, with only addresses and directories overridden (node
+files `/mydata/s4/ntfs-rc/node-<arm>`, fresh per arm). Node environment: `MAX_HEAP_SIZE=4G` (G1, `-XX:+AlwaysPreTouch`),
+`MAX_DIRECT_MEMORY_SIZE=15872M` (what `conf/cassandra-env.sh:53-66` calculates for this 125 GiB host under G1, given explicitly and
+recorded), default pooled allocator (no `cassandra.netty_use_heap_allocator`; `CBUtil.java:60`, `-Dio.netty.allocator.maxOrder=11` →
+16 MiB chunks), `JVM_EXTRA_OPTS="-XX:NativeMemoryTracking=summary -javaagent:<byteman>=script:ntfr.btm"` scoped to the start command,
+`ulimit -n 100000`. The node runs in `systemd-run --user --scope -p MemoryMax=24G -p MemorySwapMax=0` (budget: 4 GiB heap +
+15.5 GiB direct cap + 4.5 GiB for the rest), started from an ssh session kept open for the whole run. The client is `python3` on
+`pc84`, outside the scope (its memory is not in `memory.current`).
+
+**Arithmetic.** A stalled connection's cumulation has `9 + L − 1` = 16,777,215 readable bytes; Netty's `calculateNewCapacity` grows a
+buffer above 4 MiB in 4 MiB steps, so its capacity is `U` = 16,777,216 B (no slack at this size), which under the pooled allocator is
+one whole 16 MiB chunk. Per-arena costs: 64 direct arenas (2 × 32 cores, capped at `MaxDirectMemory / chunk / 6` = 165) and 64
+event loops (`EpollEventLoopGroup()` default, `NativeTransportService.java:69`); each arena an event loop uses keeps about one chunk for
+read buffers and growth transients, the same in every arm with `k` ≥ 64 and measured by the control. Expected held-minus-control:
+1,024 / 4,096 / 8,192 MiB for `k` = 64 / 256 / 512; the largest arm peaks near 9.5 GiB of Netty direct memory, 60 % of the 15.5 GiB
+limit, and `memory.current` near 15 GiB of the 24 GiB budget. Client traffic: up to 8 GiB over loopback, seconds.
+
+**Workload.** `hold_prelogin.py <mode> 127.0.0.1 9042 <k> <L> <hold>`, connections opened one after another:
+- `partial` (held arms): per connection, send the header (`0x04 0x00`, stream 1, opcode `0x05`, body length `L` = 16,777,207), then
+  `L − 1` zero bytes in 64 KiB writes; after all `k`, print `holding k`; sleep `hold`; liveness check (a socket readable with zero
+  bytes is closed, with data is unexpected); print `alive`; send the final byte on each socket and read one response each (10 s
+  timeout); close.
+- `complete` (control): per connection, send the header with body length 0 and read the response; then as above without the final
+  byte.
+Arms, in order: **CTRL** (`complete`, `k` = 512), **H64**, **H256**, **H512** (`partial`). `hold` = 90 s.
+
+**Procedure** (`harness/<stem>--recheck-2026-11-17/run.sh <label>`, logged), per arm: fresh node directory; start the node in the scope;
+wait until `nodetool statusbinary` prints `running` and `system.log` has `Starting listening for CQL clients` (stop: not up in 300 s,
+or the daemon dies → Invalid); record the effective `native_transport_max_frame_size`, `native_transport_max_concurrent_connections`
+and `native_transport_idle_timeout` from `system.log`'s config line, `MaxDirectMemorySize` from `jcmd VM.flags`, the allocator class,
+and the scope's `memory.max` / `memory.swap.max`; idle 60 s; **base** sample (and NMT baseline); 50 s; **D0** sample (drift control);
+start the client; when it prints `holding` (stop: not within 300 s → Invalid, unless the client shows the node refused or closed
+connections, which is row R2) wait 10 s, then **S1**, **S2**, **S3** 20 s apart; wait for the client to exit; 15 s; **R** sample
+(release); copy logs; stop the node (`nodetool stopdaemon`, kill after 60 s); check no daemon and no client is left.
+
+**Observables** (each sample; Δ = sample − base):
+- **O1** Netty direct counter `PlatformDependent.usedDirectMemory()` and its limit `maxDirectMemory()` (bytes), printed by an
+  observe-only Byteman rule on `nodetool version`; with **O2**, the pooled allocator's `metric().usedDirectMemory()`,
+  `numDirectArenas()`, `chunkSize()`.
+- **O3** NMT `Other` committed delta (KiB), a cross-check of O1.
+- **O4** the scope's `memory.current` (bytes) and `memory.events` (`max`, `oom`, `oom_kill`).
+- **O5** `VmRSS` (context only).
+- **O6** what Cassandra counts: `ClientResourceLimits.getCurrentGlobalUsage()` (bytes charged to
+  `native_transport_max_request_data_in_flight`) and `ClientMetrics` connected native clients, in the same Byteman line.
+- **O7** disallow / refusal evidence: Byteman `NTFDISCARD` (discard-mode entry) and `NTFFAIL` (`fail()`) counts; the client's
+  `holding`, `alive` and response lines; `system.log` counts of `OutOfDirectMemoryError`, `OutOfMemoryError`, `Request is too big`.
+
+**Prediction** (`U` = 16,777,216 B; MiB = 1,048,576 B):
+- **P1 (per-connection slope).** `s1 = (ΔO1(H256) − ΔO1(H64)) / 192` and `s2 = (ΔO1(H512) − ΔO1(H256)) / 256` lie in
+  [0.9 U, 1.25 U] at each of S1–S3; the same for O4. Expected for O1: exactly `U`.
+- **P2 (held over control).** For O1 and O4 at each of S1–S3: `0.9·k·U ≤ ΔX(Hk) − ΔX(CTRL) ≤ 1.25·k·U + 2 GiB`.
+- **P3 (control stays small).** `ΔO1(CTRL) ≤ 64·U + 64 MiB` (1,088 MiB; at most one chunk per arena) and `ΔO4(CTRL) ≤ 512 MiB` at
+  S1–S3.
+- **P4 (no refusal, uncounted).** In every held arm: `holding k`, `alive k` and 0 closed before the final byte; `NTFDISCARD` 0 and
+  `NTFFAIL` 0; `k` responses with opcode 6 (`SUPPORTED`); in-flight bytes (O6) 0 at S1–S3; 0 `OutOfDirectMemoryError`,
+  `OutOfMemoryError` and `Request is too big` in `system.log`; O1 below `maxDirectMemory()`, which reads 16,642,998,272 (15,872 MiB).
+- **P5 (release).** `ΔO1(R) ≤ 2,048 MiB` in every held arm (the held chunks are freed; at most two chunks per arena stay).
+
+**Conclusions** (first matching row, in this order; Effect on the constraint in brackets):
+
+| # | Observation | Verdict |
+|---|---|---|
+| I | effective frame size ≠ 16MiB, max concurrent connections ≠ -1, idle timeout ≠ 0ms, Netty limit or `MaxDirectMemorySize` ≠ 16,642,998,272 B, allocator not `PooledByteBufAllocator`; a node not up or dead; no `NTFMEM` line; \|ΔO1(D0)\| > 16 MiB or \|ΔO4(D0)\| > 256 MiB; `memory.events` `max` or `oom_kill` > 0 in any arm; a client without `holding` and without refusal evidence; the control without 512 `SUPPORTED` | **Invalid** |
+| R1 | a held arm with `ΔO1(Hk) − ΔO1(CTRL) < 0.5·k·U` at any of S1–S3, or `s1` or `s2` (O1 or O4) < 0.5 U | **Refuted** (caps: partial frames are not held per connection) |
+| R2 | in a held arm a connect fails, the node closes a connection before the final byte, `NTFDISCARD` or `NTFFAIL` > 0, a response is not `SUPPORTED`, or an `OutOfDirectMemoryError` / `OutOfMemoryError` with O1 below the limit | **Refuted** (caps: something refuses below the direct limit) |
+| R3 | O6 in-flight bytes > 0 at a held-arm sample | **Refuted** (caps: the partial frames are charged to a Cassandra limit) |
+| N1 | P3 fails (the control moves) | **Not confirmed** (undetermined): the growth cannot be attributed to the partial frames |
+| N2 | P1 or P2 fails, R1 not matched | **Not confirmed** (undetermined): held but not about `U` per connection; record the size |
+| N3 | P5 fails | **Not confirmed** (undetermined): memory not tied to the connections |
+| C | P1–P5 all hold | **Confirmed** (does not cap the node: each connection is capped at about `U`, but held direct memory is `k·U` with no Cassandra limit on `k`) |
+| N4 | none of the above | **Not confirmed**; feedback (the table missed an outcome) |
+
+**Controls.** CTRL rules out the connections' own cost; D0 rules out drift; R ties the growth to the held connections; O1 is a
+direct-memory counter, so heap activity cannot move it.
+
+**Cleanup.** After each arm the script stops the node and the client and counts `ps -eo cmd | grep '[C]assandraDaemon'` (must be 0);
+node directories are removed at the end; full logs stay in `/mydata/s4/ntfs-rc/logs/` on `pc84`.
+
+> **Amendment S1 (2026-11-17, stage-4 shakedown before the freeze and before run 1; the claim is unchanged).** The first shakedown
+> (`k` = 8, results file §3 D1) showed that the native-transport pool's per-arena chunks (read buffers, growth transients, thread
+> caches) are kept or freed at times the workload does not control: the held arm read 16 chunks at S1 and 8 at S2–S3 with all 8
+> connections still holding their frames (each answered `SUPPORTED` to its last byte), while the control kept 8. "Held minus control"
+> on a chunk-granular counter can therefore read 0 while every connection holds its frame. By source each held cumulation (capacity
+> `U` = chunk size) is one whole-chunk allocation, so it is counted directly instead:
+> - **O2** adds, from the read-only helper `ntfr.Probe` (harness `probe/ntfr/Probe.java`, loaded with Byteman's `sys:` option, in the
+>   `NTFMEM` line): the pool's chunk count, `fullChunks` (chunks with no free bytes), active huge allocations, and
+>   `held16 = fullChunks + activeHuge`, the number of 16 MiB buffers held.
+> - **P1** becomes: (a) `held16` = `k` in each held arm at S1–S3, and 0 in CTRL and at base and D0; (b) the O4 slopes `s1`, `s2` lie in
+>   [0.9 U, 1.25 U] at each of S1–S3.
+> - **P2** becomes: `k·U ≤ ΔO2(Hk) ≤ (k + 64)·U` and `|ΔO1 − ΔO2| ≤ 64 MiB` at S1–S3 (Netty's limit-checked counter carries the held
+>   bytes), and `ΔO4(Hk) − ΔO4(CTRL) ≥ 0.9·k·U`.
+> - **P3** becomes: `ΔO2(CTRL) ≤ 64·U` and `ΔO4(CTRL) ≤ 512 MiB` at S1–S3.
+> - **P5** becomes: at R in every held arm, `held16` = 0 and `ΔO2(R) ≤ 64·U`.
+> - **Row R1** becomes: in a held arm `held16 < 0.5·k` or `ΔO2(Hk) < 0.5·k·U` at any of S1–S3, or `s1` or `s2` (O4) < 0.5 U. Rows N1, N2
+>   and N3 refer to the amended P3, P1/P2 and P5.
+> - The `system.log` OOM count matches `java.lang.OutOfMemoryError:` and `OutOfDirectMemoryError` (the plain word also matches the JVM
+>   argument `-XX:+HeapDumpOnOutOfMemoryError`).
+> - Context, not a row condition: `ClientMetrics`' connected native clients read 0 with 8 pre-STARTUP connections open; by source
+>   `Server.ConnectionTracker` tracks a channel only once a `Connection` exists (after STARTUP), so `nodetool clientstats` and the
+>   `ConnectedNativeClients` gauge do not see these connections.

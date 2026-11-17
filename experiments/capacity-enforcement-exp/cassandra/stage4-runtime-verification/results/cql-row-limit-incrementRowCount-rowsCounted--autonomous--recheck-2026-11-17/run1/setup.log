@@ -1,0 +1,57 @@
++ date +%s%3N
+1794937622135
++ hostname
+node4.jason92-326528.misconfiguration-pg0.cloudlab.umass.edu
++ uname -r
+5.15.0-203-generic
++ java -version
++ head -1
+openjdk version "11.0.33" 2026-10-20
++ ant -version
+Apache Ant(TM) version 1.10.12 compiled on January 17 1970
++ ps -eo cmd
++ grep '[C]assandraDaemon'
++ echo 'no CassandraDaemon'
+no CassandraDaemon
++ ss -ltn
++ grep -E ':(7000|7199|9042) '
++ echo 'ports 7000 7199 9042 free'
+ports 7000 7199 9042 free
++ test '!' -e /mydata/s4/rowlim-rc/tree
++ cp -a /mydata/s4/cassandra-base /mydata/s4/rowlim-rc/tree
++ git -C /mydata/s4/rowlim-rc/tree describe --tags
+cassandra-5.0.9
++ git -C /mydata/s4/rowlim-rc/tree status --short
++ head -5
++ ls /mydata/s4/rowlim-rc/tree/build/apache-cassandra-5.0.9-SNAPSHOT.jar /mydata/s4/rowlim-rc/tree/build/lib/jars/byteman-4.0.20.jar
+/mydata/s4/rowlim-rc/tree/build/apache-cassandra-5.0.9-SNAPSHOT.jar
+/mydata/s4/rowlim-rc/tree/build/lib/jars/byteman-4.0.20.jar
++ mkdir -p /mydata/s4/rowlim-rc/drv
++ unzip -q -o /mydata/s4/rowlim-rc/tree/lib/cassandra-driver-internal-only-3.29.0.zip -d /mydata/s4/rowlim-rc/drv
++ ls /mydata/s4/rowlim-rc/drv
+cassandra-driver-3.29.0
+__MACOSX
++ rm -rf /mydata/s4/rowlim-rc/harness
++ cp -a /proj/misconfiguration-PG0/git-repos/Misconfiguration/experiments/capacity-enforcement-exp/cassandra/stage4-runtime-verification/harness/cql-row-limit-incrementRowCount-rowsCounted--autonomous--recheck-2026-11-17 /mydata/s4/rowlim-rc/harness
++ cd /mydata/s4/rowlim-rc/harness
++ md5sum client.py Jmx.java probes.btm rc-run.py setup.sh
++ tee /mydata/s4/rowlim-rc/logs/harness.md5
+d31a6ac84a95eafceb69b2d16a2d31bd  client.py
+a37645f709db99db08d4a2b632cf4ff0  Jmx.java
+a134b13fe389e3ab1ac458dc8eedaea7  probes.btm
+1d5ac06f2eedd997a7ac3e62f005849e  rc-run.py
+d5ff32c7a4852311f9fa278ba006fb06  setup.sh
++ python3 -I -c 'import sys; sys.path.insert(0, '\''/mydata/s4/rowlim-rc/drv/cassandra-driver-3.29.0'\''); import cassandra; print('\''driver'\'', cassandra.__version__)'
+driver 3.29.0
++ df -h /mydata
++ tail -1
+/dev/mapper/emulab-node4--bs  753G  1.1G  714G   1% /mydata
++ free -g
++ head -2
+               total        used        free      shared  buff/cache   available
+Mem:             125           0         122           0           2         124
++ swapon --show
+NAME       TYPE      SIZE USED PRIO
+/dev/sda99 partition   8G   0B   -2
++ date +%s%3N
+1794937624916

@@ -472,6 +472,8 @@ B3f (iii), B3g, B3h, B4), written knowing run 1's readings (run 1 would pass the
 - For stage 3: a "zero memtable delta" prediction for a no-op write must say whether the key is already in the current memtable;
   after every flush all keys are new to it, so "a key that exists" is not enough.
 
+**2026-11-17, stage 4 run of the recheck claim (pc99)** — [`../../stage4-runtime-verification/results/items_per_collection-doAdd-elements_size--autonomous--recheck-2026-11-17.md`](../../stage4-runtime-verification/results/items_per_collection-doAdd-elements_size--autonomous--recheck-2026-11-17.md) (uncommitted): **Confirmed — does not cap** (design R7 row 1); at defaults one SELECT of a set of M = 10⁵–10⁷ appended items allocates ~345 B and holds ~150 B of heap per item (1.53 GB held at 10⁷) against 4 B/item on disk, and the same at M = 200·T with the guardrail binding.
+
 ## Recheck — enforcement properties (guided, 2026-11-16, blind)
 
 Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 results file and the pinned source only. Citations relative to `systems/cassandra/source/`, each opened on 2026-11-16.
@@ -487,3 +489,111 @@ Mode `blind` (`playbook-guided.md` §5): read this file, its stage-4 results fil
 **Real-memory estimate:** `negative`, decided by E1 (the counted per-write fragment is not the held object; reads materialize the stored collection), with E2 (no limit at defaults).
 
 **Stage-4 claim to add:** with defaults (guard off, read thresholds off), one `SELECT` of a `set<int>` row grown by appends to M items (M = 10⁵, 10⁶, 10⁷) raises the replica's and coordinator's transient heap (thread-allocated bytes, heap after young GC) in proportion to M, roughly 200 B per item, with no limit stopping it; and with `items_per_collection_fail_threshold` = T set the same holds at M = 200·T.
+
+## Stage-4 design for the recheck claim (2026-11-17)
+
+Written by the stage-4 session of 2026-11-17 (Claude Opus 5.5) before any reading of this run. Results:
+[`../../stage4-runtime-verification/results/items_per_collection-doAdd-elements_size--autonomous--recheck-2026-11-17.md`](../../stage4-runtime-verification/results/items_per_collection-doAdd-elements_size--autonomous--recheck-2026-11-17.md);
+harness: `../../stage4-runtime-verification/harness/items_per_collection-doAdd-elements_size--autonomous--recheck-2026-11-17/`.
+Sections A–D above are not changed by this design.
+
+**R1. Claim under test** (the recheck's "Stage-4 claim to add", made exact). At shipped defaults (`items_per_collection_*` = −1,
+`authenticator: AllowAllAuthenticator`, `read_thresholds_enabled: false`, no `local_read_size_*`), one `SELECT v FROM probe.<t> WHERE k = 424242`
+of a `set<int>` row grown by appends to M items:
+- (a) succeeds and returns all M items, with no limit stopping it;
+- (b) makes the node's heap (replica and coordinator are the same JVM here) allocate and hold bytes in proportion to M;
+- (c) the held heap is roughly 200 B per item, far above the item's on-disk (a few B) and serialized (8 B) size;
+- (d) with `items_per_collection_fail_threshold` = T set and binding on an ordinary user, the same holds for a set grown to M = 200·T.
+The claim is negative for the constraint: nothing caps the read's heap, and the guardrail, which counts only the written fragment, does not either.
+
+**R2. How this verifies the claim.**
+- *Hypothesis:* a single-row read materializes every cell of the stored set on heap (`UnfilteredSerializer.java:676-687`, one `Row.Builder` per row),
+  once on the replica side and again on the coordinator side after the local response is serialized and deserialized (`ReadResponse.java:182-194`),
+  and the only read-size check, off by default (`Config.java:526`), runs per row after the row is built (`ReadCommand.java:690-694, 709-722`).
+- *Test:* grow three sets to M = 10⁵, 10⁶, 10⁷ by appends of 10⁵ items, compact each to one sstable, and read each at defaults while measuring the
+  node's heap allocation during the read (all threads' allocated bytes over JMX) and the heap held at the moment the coordinator holds the row
+  (a forced-GC class histogram taken while a Byteman rule holds the request thread at `ResultSetBuilder.newRow`, `SelectStatement.java:1125-1126`).
+- *Logic:* (1) the reads succeed with card = M → no limit stops them (a). (2) Allocation and held heap per item are about constant across a 100× range
+  of M → proportional (b). (3) Held heap per item lies in [100, 400] B while disk and serialized sizes are ≤ 20 B and 8 B per item (c). (4) A blob of the
+  same serialized bytes as the 10⁶ set costs far less heap → the cost is per item (cell objects), not per byte moved. (5) The positive control, the
+  read-size threshold switched on, rejects the large reads and the same instrument shows the change → the instrument sees a binding limit. (6) With
+  the guardrail binding (an ordinary user's T+1 write rejected), a set grown to 200·T costs the same per item (d).
+- *Refuted if:* a default read is rejected or returns fewer than M items; or heap per item falls by more than half from 10⁶ to 10⁷ (something bounds it);
+  or the guardrail-on arm's read costs well below the default arm's at the same M.
+
+**R3. Node, budget, settings.** `pc99` (x86_64, 32 cores, 125 GiB, swap on). Copy `/mydata/s4/cassandra-base` to `/mydata/s4/ipc-recheck/cassandra`;
+node files under `/mydata/s4/ipc-recheck/node/` (own `conf/`, data, commitlog, logs). The node runs inside
+`systemd-run --user --scope -p MemoryMax=14G -p MemorySwapMax=0` (the **recorded budget**: 14 GiB of RAM, no swap), with `MAX_HEAP_SIZE=8G` (G1, the
+shipped `jvm11-server.options`; heap is a node-size choice, not a knob under test) and Byteman (`build/lib/jars/byteman-4.0.20.jar`, rule
+`pause.btm`, no listener) through `JVM_EXTRA_OPTS`. yaml changes from the shipped file: the directories; `read_request_timeout: 120000ms` and
+`native_transport_timeout: 120s` (so a large read is not cut by a time limit before it completes; neither is a memory limit). Everything else at its
+shipped value, including LZ4 compression and compaction. Lifetime L2 (arm G) adds `authenticator: PasswordAuthenticator`,
+`authorizer: CassandraAuthorizer`, `items_per_collection_warn_threshold: 2500`, `items_per_collection_fail_threshold: 5000`. Clients (Python
+bundled driver 3.29.0, protocol 5; `jcmd`; the JMX probe) run outside the scope.
+
+**R4. Arms** (key `k = 424242` in every table; tables `probe.<name> (k int PRIMARY KEY, v set<int>)`, the blob table `(k int PRIMARY KEY, b blob)`).
+
+| Arm | Lifetime | Table | Content | Built by | Reads |
+|---|---|---|---|---|---|
+| Z (baseline) | L1, defaults | `z` | set of 1 item | 1 append | 3 alloc + 1 held |
+| S5 | L1 | `s5` | M = 100,000 | 1 append of 10⁵ | 3 alloc + 1 held |
+| S6 | L1 | `s6` | M = 1,000,000 | 10 appends of 10⁵ | 3 alloc + 1 held |
+| S7 | L1 | `s7` | M = 10,000,000 | 100 appends of 10⁵ | 3 alloc + 1 held |
+| B (control: same bytes, one cell) | L1 | `b6` | blob of 8,000,004 B (= 4 + 8·10⁶, S6's serialized CQL value) | 1 INSERT | 3 alloc + 1 held |
+| P (positive control: the knob that binds) | L1, then `setReadThresholdsEnabled(true)`, `setLocalReadTooLargeAbortThreshold("64MiB")` over JMX (`StorageServiceMBean`) | `s5`, `s6`, `s7` | as above | — | 1 alloc read each, with the pause flag set |
+| G (clause d) | L2, guardrail 2500/5000, role `app` (LOGIN, not superuser) | `g6` | M = 200·T = 1,000,000 | 200 appends of 5,000 by `app` | 3 alloc + 1 held, as `app` |
+
+After loading L1: `nodetool flush probe`, `nodetool compact probe <t>` for each table, then SSTable count must be 1 per table. L2 the same for `g6`.
+Before G's appends, `app` writes 5,001 items in one statement (key 1), which must be rejected (the guardrail binds).
+
+**R5. Observables** (per read; harness `run.sh`, `HeapProbe.java`, `s4.py`, `analyze.py`).
+- **O1 allocation** — `HeapProbe snap` before and after the read: Σ over the JVM's threads of `ThreadMXBean.getThreadAllocatedBytes` (threads in both
+  snapshots: the difference; threads only in the second: their total; threads gone: counted and reported). Idle rate from a 10 s idle window before each
+  arm. `alloc_net = Δ − idle_rate × read_duration`. Per item: `a_M = (median alloc_net(M) − median alloc_net(Z)) / M`.
+- **O2 held** — `jcmd <pid> GC.class_histogram` (forces a full GC, counts live objects) just before the read (`base`) and while the request thread is
+  held at `newRow` for the probe key (`pause`; the rule waits 15 s when the flag file exists and the partition key is 424242). `held = Total bytes(pause) − Total bytes(base)`;
+  per item `h_M = (held(M) − held(Z)) / M`; and the change in the instance count of cell classes (`org.apache.cassandra.db.rows.*Cell`).
+- **O3 GC log** — the node's `gc.log` (shipped `cassandra-env.sh` setting): heap after each young pause inside a read window (recorded, not a condition).
+- **O4 client** — accepted or the error; the set's count and its serialized byte length (the client reads the count from the value's first 4 bytes
+  and does not build the Python set); duration.
+- **O5 sizes** — the table directory's bytes after compaction (`du -sb`, without snapshots) and tablestats "Space used (live)"; serialized value bytes 4 + 8·M.
+- **O6 budget** — the scope's `memory.current` every second (max reported) and `memory.events` (`oom_kill`); `system.log` ERROR lines; the node alive after each read.
+- **P only** — the read-back of both settings; the table metric `LocalReadSize` `Max` (Cassandra's own heap estimate of the read, `ReadCommand.java:690-694`,
+  bucketed); whether a pause line appeared (the coordinator reached `newRow`).
+
+**R6. Predictions** (numbers fixed before the run).
+- **P1** S5, S6, S7 reads accepted; count = M; value bytes = 4 + 8·M; node alive; no `oom_kill`; no read-size message.
+- **P2** `a_M` ∈ [200, 2000] B for M = 10⁶ and 10⁷; `a_{10⁷}/a_{10⁶}` ∈ [0.75, 1.33]; `a_{10⁵}/a_{10⁶}` ∈ [0.5, 2].
+- **P3** `h_M` ∈ [100, 400] B for each of S5, S6, S7; `h_{10⁷}/h_{10⁶}` ∈ [0.75, 1.33]; the cell-object count change at the pause ∈ [0.9·M, 2.1·M].
+- **P4** (recorded relation) disk bytes per item ≤ 20 and `h_M` ≥ 10 × the serialized 8 B per item.
+- **P5** blob control: `alloc_net(B) − alloc_net(Z)` ≤ 0.5 × that of S6, and `held(B) − held(Z)` ≤ 0.5 × that of S6.
+- **P6** positive control: read-backs `true` / `64MiB`; S5 accepted; S6 and S7 rejected (client read failure); no pause line for S6, S7;
+  `alloc_net` of the rejected S7 read < 0.8 × the median S7 default `alloc_net`. Recorded, not conditions: `LocalReadSize` Max / M (expected in [100, 400] B,
+  the claim's own figure), and `alloc_net` of the rejected S7 read / M (expected > 50 B: the replica builds the whole row before the per-row check).
+- **P7** arm G: the 5,001-item write by `app` rejected with `Guardrail items_per_collection violated`; 200/200 appends accepted; count 1,000,000;
+  read accepted; `a_G / a_{10⁶}` and `h_G / h_{10⁶}` ∈ [0.75, 1.33] (G's per item uses Z of L1 as baseline).
+
+**R7. Conclusions.**
+
+| # | Observation | Verdict | Effect on the constraint |
+|---|---|---|---|
+| 1 | Validity holds; P1, P2, P3, P5, P6 and P7 hold | **Confirmed** (clauses a–d) | does not cap |
+| 2 | As row 1, but P7 fails or arm G is invalid (its read accepted) | **Confirmed for clauses a–c**; clause d Not confirmed | does not cap |
+| 3 | P1, P2 and the ratio parts of P3 hold, but some `h_M` lies outside [100, 400] B | **Not confirmed (magnitude)**: proportional, not ~200 B/item; the measured B/item reported | does not cap |
+| 4 | A default read (S5–S7) rejected or truncated (count < M) by a limit | **Refuted**: a limit stops the read | undetermined (name the limit) |
+| 5 | `a_{10⁷}/a_{10⁶}` < 0.5 or `h_{10⁷}/h_{10⁶}` < 0.5 (heap does not follow M) | **Refuted**: the read heap is bounded | undetermined |
+| 6 | P7: the guardrail-on read costs < 0.5 × per item of S6, or the T+1 write is accepted | clause d **Refuted** (or Invalid if the write is accepted: the guard did not bind) | caps (if the read is reduced) |
+| 7 | P5 fails (the blob costs as much as the set) | **Not confirmed**: heap may follow bytes, not items | undetermined |
+| 8 | P6 fails (S6/S7 accepted with the threshold on, or the instrument does not move) | **Not confirmed**: no working positive control | undetermined |
+| 9 | The node dies, `oom_kill` > 0, the scope budget is exceeded, a histogram or snapshot fails, the pause is not reached in a default arm, a load step rejects a write or ends with count ≠ M, SSTable count ≠ 1 before the reads, or lost threads carry > 5 % of a read's allocation | **Invalid** (that arm, or the run) | undetermined |
+| 10 | Any other combination | **No row fits**: feedback to stage 3 | — |
+
+**R8. Procedure.** One script, `run.sh <out> run1` (shakedown first: `run.sh <out> shake`, with every size ÷ 100 — M = 10³, 10⁴, 10⁵, blob 80,004 B, threshold 640KiB, T = 50 — which checks the instruments only; its readings are not evidence).
+Order: environment record → copy check → start L1 in the scope, wait for `UN` and `statusbinary running` → setup and loads (Z, S5, S6, S7, B) → flush,
+compact, SSTable counts, sizes → arms Z, S5, S6, S7, B (idle window, three alloc reads, held read) → P → stop L1 → start L2 → guard check, G loads,
+flush, compact → arm G → stop L2, check `ps -eo cmd | grep '[C]assandraDaemon'` is empty, copy logs → `analyze.py`. Stop conditions: the node dies,
+`oom_kill`, or a step fails (the script stops and the run is Invalid at that step). Wall time expected under 60 minutes.
+
+**R9. Risks.** The Byteman hold adds 15 s to one read per arm (the alloc reads run without the flag); the histogram forces full GCs (only around held reads).
+The memtable flushes on its own while S7 loads (8 GiB heap); compaction to one sstable makes every arm read one sstable. Run data on `/mydata/s4/ipc-recheck/`,
+removed after the run except the logs.

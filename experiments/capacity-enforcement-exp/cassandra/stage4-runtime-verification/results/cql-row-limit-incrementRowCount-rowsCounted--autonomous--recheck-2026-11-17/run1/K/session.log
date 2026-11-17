@@ -1,0 +1,23 @@
+[2026-11-17T10:49:36-0700 1794937776211] rc-run start mode=life K tree=/mydata/s4/rowlim-rc/tree head=cassandra-5.0.9 pid=8039
+[2026-11-17T10:49:36-0700 1794937776212] df: /dev/mapper/emulab-node4--bs ext4 788967512 1803364 747013724   1% /mydata
+[2026-11-17T10:49:36-0700 1794937776291] conf K: control=False; yaml lines changed: ['auto_snapshot', 'cdc_raw_directory', 'commitlog_directory', 'counter_cache_size', 'data_file_directories', 'hints_directory', 'native_transport_timeout', 'num_tokens', 'read_request_timeout', 'row_cache_size', 'saved_caches_directory']
+[2026-11-17T10:49:36-0700 1794937776291] + systemd-run --user --scope --unit=s4rc-K-1794937776 -p MemoryMax=12G -p MemorySwapMax=0 /mydata/s4/rowlim-rc/tree/bin/cassandra -f -p /mydata/s4/rowlim-rc/node/logs-K/cassandra.pid | JVM_EXTRA_OPTS=-Xlog:gc:file=/mydata/s4/rowlim-rc/node/logs-K/gc-K.log:time,uptimemillis -javaagent:/mydata/s4/rowlim-rc/tree/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/rowlim-rc/harness/probes.btm -Ds4rc.pause_ms=8000 -Ds4rc.marker=/mydata/s4/rowlim-rc/node/logs-K/marker.txt | MAX_HEAP_SIZE=8G
+[2026-11-17T10:49:40-0700 1794937780301] scope cgroup /user.slice/user-20001.slice/user@20001.service/app.slice/s4rc-K-1794937776.scope memory.max 12884901888 memory.swap.max 0
+[2026-11-17T10:49:50-0700 1794937790276] node up (K) after 14 s, pid 8062
+[2026-11-17T10:50:28-0700 1794937828301] Q L32-w128k rep 0 check rows 32 err - | B 78.0 MB B2-B +3.3 MB | PR H=5.1MB inside=True size=4194714 cap=4195232 thread=ReadStage-2 PC H=11.7MB inside=True rows=32 thread=Native-Transport-Requests-1
+[2026-11-17T10:50:51-0700 1794937851764] Q P128-w1m rep 0 check rows 128 err - | B 81.3 MB B2-B +0.2 MB | PR H=151.3MB inside=True size=134219403 cap=150999120 thread=ReadStage-2 PC H=285.5MB inside=True rows=128 thread=Native-Transport-Requests-1
+[2026-11-17T10:50:51-0700 1794937851765] system.log ERROR lines: 0 []
+[2026-11-17T10:50:51-0700 1794937851765] java.lang.OutOfMemoryError lines: 0
+[2026-11-17T10:50:51-0700 1794937851766] Byteman/rule lines in stdout: 1
+[2026-11-17T10:50:51-0700 1794937851767] scope memory.events (before stop): low 0; high 0; max 0; oom 0; oom_kill 0; 
+[2026-11-17T10:50:51-0700 1794937851792] stopping node: nodetool drain
+[2026-11-17T10:52:27-0700 1794937947469] SIGKILL sent
+[2026-11-17T10:52:27-0700 1794937947469] memory.events gone: [Errno 2] No such file or directory: '/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4rc-K-1794937776.scope/memory.events'
+[2026-11-17T10:52:27-0700 1794937947469] scope max memory.current sampled: 9.01 GiB
+[2026-11-17T10:52:27-0700 1794937947476] scope state: inactive
+[2026-11-17T10:52:27-0700 1794937947501] daemons left: []
+[2026-11-17T10:52:27-0700 1794937947501] memory.events gone: [Errno 2] No such file or directory: '/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4rc-K-1794937776.scope/memory.events'
+[2026-11-17T10:52:27-0700 1794937947527] memory.events gone: [Errno 2] No such file or directory: '/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4rc-K-1794937776.scope/memory.events'
+[2026-11-17T10:52:27-0700 1794937947527] scope max memory.current sampled: 9.01 GiB
+[2026-11-17T10:52:27-0700 1794937947533] scope state: inactive
+[2026-11-17T10:52:27-0700 1794937947556] daemons left: []

@@ -1,0 +1,15 @@
+# Byteman rule for the held-heap reading (design R5, O2). @FLAG@ is replaced by run.sh with the flag file's path.
+# While the flag file exists, a request whose partition key is the int 424242 waits 15 s at ResultSetBuilder.newRow,
+# which SelectStatement.processPartition calls right after partition.next() has built the row (SelectStatement.java:1125-1126),
+# so the materialized row is live while run.sh takes a forced-GC class histogram. Other requests are not affected.
+# Shakedown fix S1 (2026-11-17): `new X(..).m()` does not parse inside IF, so the flag File is bound with BIND.
+RULE s4 hold coordinator row at newRow
+CLASS org.apache.cassandra.cql3.selection.ResultSetBuilder
+METHOD newRow
+AT ENTRY
+BIND flag : java.io.File = new java.io.File("@FLAG@")
+IF $2.getKey().remaining() == 4 && $2.getKey().getInt($2.getKey().position()) == 424242 && flag.exists()
+DO traceln("S4PAUSE begin " + java.lang.System.currentTimeMillis());
+   waitFor("s4-never-signalled", 15000L);
+   traceln("S4PAUSE end " + java.lang.System.currentTimeMillis())
+ENDRULE

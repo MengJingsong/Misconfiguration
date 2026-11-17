@@ -1,0 +1,117 @@
+RUN scale=shake M5=1000 M6=10000 M7=100000 chunk=1000 blob=80004 pth=640KiB GT=50 GM=10000 budget=14G heap=8G start_epoch=1794937696
+NODE L1 up daemon_pid=5532 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4-ipc-recheck-L1.scope memory.max=15032385536 swap.max=0
+JVMARGS L1 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/mydata/s4/ipc-recheck/cassandra/lib/jamm-0.4.0.jar -javaagent:/mydata/s4/ipc-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ipc-recheck/pause.btm 
+RESULT setup release=5.0.9-SNAPSHOT seconds=0.7
+RESULT load table=z M=1 chunk=1 statements=1 accepted=1 rejected=0 seconds=0.1 first=None
+RESULT load table=s5 M=1000 chunk=1000 statements=1 accepted=1 rejected=0 seconds=0.1 first=None
+RESULT load table=s6 M=10000 chunk=1000 statements=10 accepted=10 rejected=0 seconds=0.6 first=None
+RESULT load table=s7 M=100000 chunk=1000 statements=100 accepted=100 rejected=0 seconds=5.2 first=None
+RESULT loadblob table=b6 bytes=80004 outcome=accepted seconds=0.1
+SIZE z | SSTable count: 1;Old SSTable count: 0;Space used (live): 5114;Memtable data size: 0; du_bytes=9210
+SIZE s5 | SSTable count: 1;Old SSTable count: 0;Space used (live): 9115;Memtable data size: 0; du_bytes=13211
+SIZE s6 | SSTable count: 1;Old SSTable count: 0;Space used (live): 45333;Memtable data size: 0; du_bytes=49429
+SIZE s7 | SSTable count: 1;Old SSTable count: 0;Space used (live): 412862;Memtable data size: 0; du_bytes=416958
+SIZE b6 | SSTable count: 1;Old SSTable count: 0;Space used (live): 5503;Memtable data size: 0; du_bytes=9599
+READTHRESHOLDS-DEFAULT 
+SNAP Z-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-idle0.tsv epoch_ms=1794937762873 uptime_ms=60876 threads=88 alloc_sum=492904584 heap_used=671088640
+SNAP Z-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-idle1.tsv epoch_ms=1794937773282 uptime_ms=71284 threads=88 alloc_sum=494716040 heap_used=687865856
+SNAP Z-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-r1-a.tsv epoch_ms=1794937773665 uptime_ms=71667 threads=88 alloc_sum=495290296 heap_used=687865856
+RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.005 t_start=1794937774.136 t_end=1794937774.141
+SNAP Z-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-r1-b.tsv epoch_ms=1794937774467 uptime_ms=72470 threads=90 alloc_sum=499073264 heap_used=721420288
+SNAP Z-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-r2-a.tsv epoch_ms=1794937774858 uptime_ms=72861 threads=90 alloc_sum=499645464 heap_used=721420288
+RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.003 t_start=1794937775.317 t_end=1794937775.319
+SNAP Z-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-r2-b.tsv epoch_ms=1794937775620 uptime_ms=73622 threads=92 alloc_sum=503435984 heap_used=738197504
+SNAP Z-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-r3-a.tsv epoch_ms=1794937776009 uptime_ms=74011 threads=92 alloc_sum=504027864 heap_used=738197504
+RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.003 t_start=1794937776.473 t_end=1794937776.476
+SNAP Z-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/Z-r3-b.tsv epoch_ms=1794937776779 uptime_ms=74782 threads=94 alloc_sum=507824536 heap_used=754974720
+HISTO Z-base | Total        771784       73096192 | cells 109 4360
+PAUSE Z NOT reached
+HELDREAD Z | RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.003 t_start=1794937777.807 t_end=1794937777.810
+SNAP S5-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-idle0.tsv epoch_ms=1794937778154 uptime_ms=76156 threads=97 alloc_sum=511667440 heap_used=224091136
+SNAP S5-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-idle1.tsv epoch_ms=1794937788550 uptime_ms=86552 threads=97 alloc_sum=512981208 heap_used=240868352
+SNAP S5-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-r1-a.tsv epoch_ms=1794937788933 uptime_ms=86935 threads=97 alloc_sum=513572528 heap_used=240868352
+RESULT read table=s5 col=v user=- accepted count=1000 value_bytes=8004 query_seconds=0.005 t_start=1794937789.400 t_end=1794937789.405
+SNAP S5-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-r1-b.tsv epoch_ms=1794937789716 uptime_ms=87718 threads=99 alloc_sum=517668848 heap_used=257645568
+SNAP S5-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-r2-a.tsv epoch_ms=1794937790112 uptime_ms=88114 threads=99 alloc_sum=518260608 heap_used=257645568
+RESULT read table=s5 col=v user=- accepted count=1000 value_bytes=8004 query_seconds=0.005 t_start=1794937790.572 t_end=1794937790.576
+SNAP S5-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-r2-b.tsv epoch_ms=1794937790897 uptime_ms=88900 threads=101 alloc_sum=522349416 heap_used=257645568
+SNAP S5-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-r3-a.tsv epoch_ms=1794937791286 uptime_ms=89289 threads=101 alloc_sum=522945080 heap_used=257645568
+RESULT read table=s5 col=v user=- accepted count=1000 value_bytes=8004 query_seconds=0.006 t_start=1794937791.771 t_end=1794937791.777
+SNAP S5-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S5-r3-b.tsv epoch_ms=1794937792092 uptime_ms=90095 threads=103 alloc_sum=527065376 heap_used=274422784
+HISTO S5-base | Total        775599       74051840 | cells 109 4360
+PAUSE S5 NOT reached
+HELDREAD S5 | RESULT read table=s5 col=v user=- accepted count=1000 value_bytes=8004 query_seconds=0.005 t_start=1794937792.953 t_end=1794937792.958
+SNAP S6-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-idle0.tsv epoch_ms=1794937793291 uptime_ms=91293 threads=105 alloc_sum=531264464 heap_used=208269568
+SNAP S6-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-idle1.tsv epoch_ms=1794937803678 uptime_ms=101680 threads=105 alloc_sum=532580856 heap_used=241824000
+SNAP S6-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-r1-a.tsv epoch_ms=1794937804054 uptime_ms=102057 threads=105 alloc_sum=533185360 heap_used=241824000
+RESULT read table=s6 col=v user=- accepted count=10000 value_bytes=80004 query_seconds=0.011 t_start=1794937804.522 t_end=1794937804.533
+SNAP S6-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-r1-b.tsv epoch_ms=1794937804834 uptime_ms=102836 threads=107 alloc_sum=540465576 heap_used=241824000
+SNAP S6-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-r2-a.tsv epoch_ms=1794937805219 uptime_ms=103221 threads=107 alloc_sum=541073736 heap_used=241824000
+RESULT read table=s6 col=v user=- accepted count=10000 value_bytes=80004 query_seconds=0.012 t_start=1794937805.680 t_end=1794937805.692
+SNAP S6-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-r2-b.tsv epoch_ms=1794937805992 uptime_ms=103995 threads=109 alloc_sum=548358248 heap_used=258601216
+SNAP S6-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-r3-a.tsv epoch_ms=1794937806381 uptime_ms=104383 threads=109 alloc_sum=548971112 heap_used=258601216
+RESULT read table=s6 col=v user=- accepted count=10000 value_bytes=80004 query_seconds=0.016 t_start=1794937806.852 t_end=1794937806.868
+SNAP S6-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S6-r3-b.tsv epoch_ms=1794937807180 uptime_ms=105182 threads=111 alloc_sum=556276704 heap_used=275378432
+HISTO S6-base | Total        779696       75012832 | cells 109 4360
+PAUSE S6 NOT reached
+HELDREAD S6 | RESULT read table=s6 col=v user=- accepted count=10000 value_bytes=80004 query_seconds=0.011 t_start=1794937807.994 t_end=1794937808.005
+SNAP S7-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-idle0.tsv epoch_ms=1794937808358 uptime_ms=106360 threads=113 alloc_sum=563704688 heap_used=226007776
+SNAP S7-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-idle1.tsv epoch_ms=1794937818750 uptime_ms=116752 threads=107 alloc_sum=288835528 heap_used=293116640
+SNAP S7-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-r1-a.tsv epoch_ms=1794937819139 uptime_ms=117141 threads=107 alloc_sum=289436872 heap_used=293116640
+RESULT read table=s7 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.139 t_start=1794937819.609 t_end=1794937819.748
+SNAP S7-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-r1-b.tsv epoch_ms=1794937820061 uptime_ms=118063 threads=109 alloc_sum=326825480 heap_used=309893856
+SNAP S7-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-r2-a.tsv epoch_ms=1794937820441 uptime_ms=118443 threads=109 alloc_sum=327433288 heap_used=309893856
+RESULT read table=s7 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.090 t_start=1794937820.909 t_end=1794937820.999
+SNAP S7-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-r2-b.tsv epoch_ms=1794937821313 uptime_ms=119315 threads=111 alloc_sum=364839088 heap_used=377002720
+SNAP S7-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-r3-a.tsv epoch_ms=1794937821701 uptime_ms=119704 threads=111 alloc_sum=365452208 heap_used=377002720
+RESULT read table=s7 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.063 t_start=1794937822.159 t_end=1794937822.222
+SNAP S7-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/S7-r3-b.tsv epoch_ms=1794937822529 uptime_ms=120531 threads=113 alloc_sum=402844976 heap_used=410557152
+HISTO S7-base | Total        783608       76022016 | cells 109 4360
+PAUSE S7 NOT reached
+HELDREAD S7 | RESULT read table=s7 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.082 t_start=1794937823.384 t_end=1794937823.467
+SNAP B-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-idle0.tsv epoch_ms=1794937823941 uptime_ms=121943 threads=116 alloc_sum=440301888 heap_used=260571392
+SNAP B-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-idle1.tsv epoch_ms=1794937834340 uptime_ms=132342 threads=114 alloc_sum=441636976 heap_used=310903040
+SNAP B-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-r1-a.tsv epoch_ms=1794937834725 uptime_ms=132727 threads=114 alloc_sum=442254608 heap_used=310903040
+RESULT read table=b6 col=b user=- accepted count=1 value_bytes=80004 query_seconds=0.004 t_start=1794937835.192 t_end=1794937835.196
+SNAP B-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-r1-b.tsv epoch_ms=1794937835496 uptime_ms=133498 threads=116 alloc_sum=446422088 heap_used=310903040
+SNAP B-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-r2-a.tsv epoch_ms=1794937835884 uptime_ms=133887 threads=115 alloc_sum=447042464 heap_used=310903040
+RESULT read table=b6 col=b user=- accepted count=1 value_bytes=80004 query_seconds=0.003 t_start=1794937836.346 t_end=1794937836.349
+SNAP B-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-r2-b.tsv epoch_ms=1794937836649 uptime_ms=134651 threads=117 alloc_sum=451209688 heap_used=327680256
+SNAP B-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-r3-a.tsv epoch_ms=1794937837038 uptime_ms=135040 threads=117 alloc_sum=451833784 heap_used=327680256
+RESULT read table=b6 col=b user=- accepted count=1 value_bytes=80004 query_seconds=0.003 t_start=1794937837.506 t_end=1794937837.509
+SNAP B-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/B-r3-b.tsv epoch_ms=1794937837814 uptime_ms=135817 threads=119 alloc_sum=455972688 heap_used=327680256
+HISTO B-base | Total        787302       76946528 | cells 109 4360
+PAUSE B NOT reached
+HELDREAD B | RESULT read table=b6 col=b user=- accepted count=1 value_bytes=80004 query_seconds=0.003 t_start=1794937838.656 t_end=1794937838.659
+READTHRESHOLDS-P 
+SNAP P-s5-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/P-s5-a.tsv epoch_ms=1794937839299 uptime_ms=137301 threads=120 alloc_sum=460302592 heap_used=244718688
+RESULT read table=s5 col=v user=- accepted count=1000 value_bytes=8004 query_seconds=0.003 t_start=1794937839.774 t_end=1794937839.778
+SNAP P-s5-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/P-s5-b.tsv epoch_ms=1794937840090 uptime_ms=138093 threads=122 alloc_sum=464388080 heap_used=261495904
+READTHRESHOLDS-OFF 
+L1 ERROR lines: 0 WARN lines: 5
+MEMORY L1 max_memory_current=9598361600 oom_kill_last=0
+NODE L2 up daemon_pid=12019 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4-ipc-recheck-L2.scope memory.max=15032385536 swap.max=0
+JVMARGS L2 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/mydata/s4/ipc-recheck/cassandra/lib/jamm-0.4.0.jar -javaagent:/mydata/s4/ipc-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ipc-recheck/pause.btm 
+RESULT setupauth table=g6 app_is_superuser=False seconds=3.8
+RESULT guardcheck table=g6 user=app items=51 outcome=rejected InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail items_per_collection violated: Detected collection v with 51 items, this exceeds the failure threshold of 50."
+RESULT load table=g6 M=10000 chunk=50 statements=200 accepted=200 rejected=0 seconds=0.6 first=None
+SIZE g6 | SSTable count: 1;Old SSTable count: 0;Space used (live): 46114;Memtable data size: 0; du_bytes=50210
+SNAP G-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-idle0.tsv epoch_ms=1794937872399 uptime_ms=17605 threads=77 alloc_sum=184036264 heap_used=452984832
+SNAP G-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-idle1.tsv epoch_ms=1794937882825 uptime_ms=28031 threads=77 alloc_sum=185737592 heap_used=452984832
+SNAP G-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-r1-a.tsv epoch_ms=1794937883209 uptime_ms=28415 threads=77 alloc_sum=186283528 heap_used=452984832
+RESULT read table=g6 col=v user=app accepted count=10000 value_bytes=80004 query_seconds=0.020 t_start=1794937883.947 t_end=1794937883.967
+SNAP G-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-r1-b.tsv epoch_ms=1794937884270 uptime_ms=29476 threads=80 alloc_sum=194942536 heap_used=469762048
+SNAP G-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-r2-a.tsv epoch_ms=1794937884670 uptime_ms=29876 threads=80 alloc_sum=195500536 heap_used=469762048
+RESULT read table=g6 col=v user=app accepted count=10000 value_bytes=80004 query_seconds=0.011 t_start=1794937885.376 t_end=1794937885.387
+SNAP G-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-r2-b.tsv epoch_ms=1794937885686 uptime_ms=30892 threads=82 alloc_sum=203372048 heap_used=486539264
+SNAP G-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-r3-a.tsv epoch_ms=1794937886083 uptime_ms=31289 threads=82 alloc_sum=203940856 heap_used=486539264
+RESULT read table=g6 col=v user=app accepted count=10000 value_bytes=80004 query_seconds=0.022 t_start=1794937886.834 t_end=1794937886.856
+SNAP G-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/shake/snaps/G-r3-b.tsv epoch_ms=1794937887164 uptime_ms=32371 threads=84 alloc_sum=212047592 heap_used=520093696
+HISTO G-base | Total        772875       76011584 | cells 154 6160
+PAUSE G NOT reached
+HELDREAD G | RESULT read table=g6 col=v user=app accepted count=10000 value_bytes=80004 query_seconds=0.010 t_start=1794937888.369 t_end=1794937888.379
+L2 ERROR lines: 2 WARN lines: 10
+MEMORY L2 max_memory_current=9562107904 oom_kill_last=0
+END end_epoch=1794937901
+DAEMONS-LEFT 0
+ANALYSIS rc=0

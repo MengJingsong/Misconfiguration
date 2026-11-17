@@ -149,3 +149,22 @@ what the OOM case showed** (now written into the phase-1 file where the clue was
 Read with the first-pass table above: the 37 restating rows are the phase-1 files' answers to the questions
 their clue was missing, so a later reader of those files now sees the gap. Back-link rows explain results
 after the fact and do not count as prediction; the 19 "beyond" rows are new leads like any other flag.
+
+## Stage-4 runs of recheck claims, batch 1 (2026-11-17)
+
+Owner-approved: five recheck "Stage-4 claim to add" lines, run under the stage-4 protocol (design appended to the
+case file and frozen, audit, run 1, self-check, verdict), one fresh agent per case on the new x86 nodes
+`pc91`/`pc84`/`pc72`/`pc99`/`pc75`. Each was a scaled measurement inside a recorded cgroup budget (swap 0), not an
+OOM test. Results: `stage4-runtime-verification/results/<case>--recheck-2026-11-17.md`.
+
+| Node | Case (lead) | Verdict | Counted vs real (key reading) |
+|---|---|---|---|
+| pc99 | `items_per_collection` (N15) | **Confirmed — does not cap** | one read of a set holds ≈ 150 B/item on heap (19× serialized, 38× on disk), linear to 10⁷ items (1.53 GB held, 3.52 GB allocated per read); with the read-size threshold on, the replica still builds the whole row before the check; the item guardrail is bypassed by appends |
+| pc84 | `native_transport_max_frame_size` (N14) | **Confirmed — does not cap the node** | each stalled pre-login connection holds exactly 16 MiB of Netty direct memory (512 connections: +9.2 GiB, plus ≈ 1 GiB of per-arena chunks); Cassandra counts 0 bytes and refuses nothing |
+| pc72 | `native_transport_receive_queue_capacity` (N13) | **Confirmed — does not cap** (heap; direct undetermined) | decoded in-flight requests 312 / 468 / 624 MB at 20 / 30 / 40 v5 connections (1.45–2.91× heap/10, 15.6 MB per connection) while the counters stay at 75–96 MB; every connection's `queueSize` ends at exactly minus its uncharged bytes; throwing-mode and multi-frame controls hold the bound |
+| pc75 | `cql-row-limit` (read-limit cluster) | **Confirmed — does not cap** | one `LIMIT N` read or N-row page holds 2.0–2.4 × N × W (replica buffer and coordinator `ResultSet` live together): 512 × 1 MiB rows → 1,241 MiB; a 40 MiB `local_read_size_fail_threshold` aborts larger reads at ≈ 65 MiB held |
+| pc91 | `slab-region-size` (slab-tail cluster) | **Not confirmed** (no matching row) | every measured relation held: 1.0000 MiB real heap per written table vs 1.49 KiB counted, the same at 64 / 256 / 2048 MiB limits; 400 tables held 400 MiB, 6.25 × a 64 MiB limit, with no flush; unslabbed control 992 B per table. One frozen sub-prediction bounded the global memtable gauge, which includes 2.13 MiB of system-table memtables; a dated amendment and a ≈ 15-minute restart would settle it (owner's call) |
+
+All five nodes were left with nothing running; run copies and full logs stay under `/mydata/s4/` on each node.
+Four of the five measured mechanisms are new to OOM-exp (N13, N14, N15, the read-limit cluster) and are now
+measured at phase-1 scale; whether any reaches an OOM at defaults and an acceptable budget is OOM-exp's question.

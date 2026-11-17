@@ -1,0 +1,36 @@
+# Byteman probes for the recheck of cql-row-limit-incrementRowCount-rowsCounted--autonomous (2026-11-17). Not upstream code.
+# Each probe writes a start line to the marker file (-Ds4rc.marker), sleeps -Ds4rc.pause_ms, then writes an end line.
+# The harness takes a live-object histogram (full GC) between the two lines.
+
+RULE s4rc PR replica response serialized
+CLASS org.apache.cassandra.db.ReadResponse$LocalDataResponse
+METHOD build(org.apache.cassandra.db.partitions.UnfilteredPartitionIterator, org.apache.cassandra.db.filter.ColumnFilter)
+AT EXIT
+IF $1.metadata().keyspace.equals("ks")
+DO traceOpen("s4", System.getProperty("s4rc.marker"));
+   traceln("s4", "PR start " + System.currentTimeMillis() + " size=" + $!.limit() + " cap=" + $!.capacity() + " thread=" + Thread.currentThread().getName());
+   Thread.sleep(Long.getLong("s4rc.pause_ms").longValue());
+   traceln("s4", "PR end " + System.currentTimeMillis())
+ENDRULE
+
+RULE s4rc PC coordinator result set built
+CLASS org.apache.cassandra.cql3.selection.ResultSetBuilder
+METHOD build()
+AT EXIT
+IF $!.size() >= 8 && $!.metadata.toString().contains("(ks, ")
+DO traceOpen("s4", System.getProperty("s4rc.marker"));
+   traceln("s4", "PC start " + System.currentTimeMillis() + " rows=" + $!.size() + " thread=" + Thread.currentThread().getName());
+   Thread.sleep(Long.getLong("s4rc.pause_ms").longValue());
+   traceln("s4", "PC end " + System.currentTimeMillis())
+ENDRULE
+
+RULE s4rc PA local read size abort
+CLASS org.apache.cassandra.db.filter.LocalReadSizeTooLargeException
+METHOD <init>(java.lang.String)
+AT EXIT
+IF true
+DO traceOpen("s4", System.getProperty("s4rc.marker"));
+   traceln("s4", "PA start " + System.currentTimeMillis() + " thread=" + Thread.currentThread().getName() + " msg=" + $1);
+   Thread.sleep(Long.getLong("s4rc.pause_ms").longValue());
+   traceln("s4", "PA end " + System.currentTimeMillis())
+ENDRULE

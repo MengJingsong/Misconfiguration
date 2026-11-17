@@ -1,0 +1,188 @@
+[2026-11-17 11:00:56 1794938456401] RUN scale=run1 M5=100000 M6=1000000 M7=10000000 chunk=100000 blob=8000004 pth=64MiB GT=5000 GM=1000000 budget=14G heap=8G start_epoch=1794938456
+[2026-11-17 11:00:57 1794938457234] + systemd-run --user --scope -p MemoryMax=14G -p MemorySwapMax=0 --unit=s4-ipc-recheck-L1 env MAX_HEAP_SIZE=8G JVM_EXTRA_OPTS=-javaagent:/mydata/s4/ipc-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ipc-recheck/pause.btm bin/cassandra -f
+[2026-11-17 11:01:36 1794938496127] NODE L1 up daemon_pid=25937 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4-ipc-recheck-L1.scope memory.max=15032385536 swap.max=0
+[2026-11-17 11:01:36 1794938496132] JVMARGS L1 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/mydata/s4/ipc-recheck/cassandra/lib/jamm-0.4.0.jar -javaagent:/mydata/s4/ipc-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ipc-recheck/pause.btm 
+[2026-11-17 11:01:36 1794938496137] + s4.py setup
+[2026-11-17 11:01:37 1794938497199] RESULT setup release=5.0.9-SNAPSHOT seconds=0.7
+[2026-11-17 11:01:37 1794938497203] + s4.py load z 1 1
+[2026-11-17 11:01:37 1794938497625] RESULT load table=z M=1 chunk=1 statements=1 accepted=1 rejected=0 seconds=0.1 first=None
+[2026-11-17 11:01:37 1794938497628] + s4.py load s5 100000 100000
+[2026-11-17 11:01:38 1794938498426] RESULT load table=s5 M=100000 chunk=100000 statements=1 accepted=1 rejected=0 seconds=0.5 first=None
+[2026-11-17 11:01:38 1794938498429] + s4.py load s6 1000000 100000
+[2026-11-17 11:01:41 1794938501309] RESULT load table=s6 M=1000000 chunk=100000 statements=10 accepted=10 rejected=0 seconds=2.5 first=None
+[2026-11-17 11:01:41 1794938501312] + s4.py load s7 10000000 100000
+[2026-11-17 11:02:07 1794938527804] RESULT load table=s7 M=10000000 chunk=100000 statements=100 accepted=100 rejected=0 seconds=26.1 first=None
+[2026-11-17 11:02:07 1794938527807] + s4.py loadblob b6 8000004
+[2026-11-17 11:02:08 1794938528332] RESULT loadblob table=b6 bytes=8000004 outcome=accepted seconds=0.2
+[2026-11-17 11:02:08 1794938528338] + nodetool flush probe
+[2026-11-17 11:02:09 1794938529706] + nodetool compact probe z
+[2026-11-17 11:02:10 1794938530716] + nodetool compact probe s5
+[2026-11-17 11:02:11 1794938531758] + nodetool compact probe s6
+[2026-11-17 11:02:13 1794938533057] + nodetool compact probe s7
+[2026-11-17 11:02:16 1794938536993] + nodetool compact probe b6
+[2026-11-17 11:02:19 1794938539315] SIZE z | SSTable count: 1;Old SSTable count: 0;Space used (live): 5114;Memtable data size: 0; du_bytes=9210
+[2026-11-17 11:02:20 1794938540527] SIZE s5 | SSTable count: 1;Old SSTable count: 0;Space used (live): 406540;Memtable data size: 0; du_bytes=410636
+[2026-11-17 11:02:21 1794938541776] SIZE s6 | SSTable count: 1;Old SSTable count: 0;Space used (live): 4026905;Memtable data size: 0; du_bytes=4031001
+[2026-11-17 11:02:22 1794938542970] SIZE s7 | SSTable count: 1;Old SSTable count: 0;Space used (live): 40247209;Memtable data size: 0; du_bytes=40251305
+[2026-11-17 11:02:24 1794938544153] SIZE b6 | SSTable count: 1;Old SSTable count: 0;Space used (live): 49511;Memtable data size: 0; du_bytes=53607
+[2026-11-17 11:02:24 1794938544435] READTHRESHOLDS-DEFAULT RESULT readthresholds enabled=false localAbort=null
+[2026-11-17 11:02:24 1794938544844] SNAP Z-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-idle0.tsv epoch_ms=1794938544723 uptime_ms=87270 threads=88 alloc_sum=8164577024 heap_used=4877242880
+[2026-11-17 11:02:35 1794938555241] SNAP Z-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-idle1.tsv epoch_ms=1794938555138 uptime_ms=97685 threads=88 alloc_sum=8166384080 heap_used=4877242880
+[2026-11-17 11:02:35 1794938555629] SNAP Z-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-r1-a.tsv epoch_ms=1794938555531 uptime_ms=98078 threads=88 alloc_sum=8166957440 heap_used=4877242880
+[2026-11-17 11:02:35 1794938555631] + s4.py read z v
+[2026-11-17 11:02:36 1794938556014] RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.004 t_start=1794938555.990 t_end=1794938555.995
+[2026-11-17 11:02:36 1794938556391] SNAP Z-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-r1-b.tsv epoch_ms=1794938556293 uptime_ms=98840 threads=90 alloc_sum=8171504272 heap_used=4894020096
+[2026-11-17 11:02:36 1794938556781] SNAP Z-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-r2-a.tsv epoch_ms=1794938556680 uptime_ms=99227 threads=90 alloc_sum=8172076128 heap_used=4894020096
+[2026-11-17 11:02:36 1794938556784] + s4.py read z v
+[2026-11-17 11:02:37 1794938557564] RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.006 t_start=1794938557.536 t_end=1794938557.542
+[2026-11-17 11:02:37 1794938557954] SNAP Z-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-r2-b.tsv epoch_ms=1794938557856 uptime_ms=100403 threads=92 alloc_sum=8176750416 heap_used=3290972160
+[2026-11-17 11:02:38 1794938558343] SNAP Z-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-r3-a.tsv epoch_ms=1794938558246 uptime_ms=100793 threads=92 alloc_sum=8177342088 heap_used=3290972160
+[2026-11-17 11:02:38 1794938558345] + s4.py read z v
+[2026-11-17 11:02:38 1794938558729] RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=0.003 t_start=1794938558.706 t_end=1794938558.710
+[2026-11-17 11:02:39 1794938559111] SNAP Z-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/Z-r3-b.tsv epoch_ms=1794938559011 uptime_ms=101558 threads=94 alloc_sum=8181954936 heap_used=3324526592
+[2026-11-17 11:02:39 1794938559603] HISTO Z-base | Total        774725       73370048 | cells 116 4640
+[2026-11-17 11:02:39 1794938559610] + s4.py read z v (held, flag set)
+[2026-11-17 11:02:40 1794938560921] HISTO Z-pause | Total        776133       73624176 | cells 117 4680
+[2026-11-17 11:02:40 1794938560927] PAUSE Z reached | S4PAUSE begin 1794938559989
+[2026-11-17 11:02:55 1794938575026] HELDREAD Z | RESULT read table=z col=v user=- accepted count=1 value_bytes=12 query_seconds=15.007 t_start=1794938559.986 t_end=1794938574.994
+[2026-11-17 11:02:55 1794938575426] SNAP S5-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-idle0.tsv epoch_ms=1794938575323 uptime_ms=117870 threads=97 alloc_sum=8187729984 heap_used=107178608
+[2026-11-17 11:03:05 1794938585815] SNAP S5-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-idle1.tsv epoch_ms=1794938585717 uptime_ms=128264 threads=97 alloc_sum=8189035872 heap_used=123955824
+[2026-11-17 11:03:06 1794938586200] SNAP S5-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-r1-a.tsv epoch_ms=1794938586099 uptime_ms=128646 threads=97 alloc_sum=8189623456 heap_used=123955824
+[2026-11-17 11:03:06 1794938586203] + s4.py read s5 v
+[2026-11-17 11:03:06 1794938586728] RESULT read table=s5 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.139 t_start=1794938586.569 t_end=1794938586.708
+[2026-11-17 11:03:07 1794938587126] SNAP S5-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-r1-b.tsv epoch_ms=1794938587022 uptime_ms=129569 threads=99 alloc_sum=8227883504 heap_used=191064688
+[2026-11-17 11:03:07 1794938587505] SNAP S5-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-r2-a.tsv epoch_ms=1794938587409 uptime_ms=129956 threads=99 alloc_sum=8228469320 heap_used=207841904
+[2026-11-17 11:03:07 1794938587507] + s4.py read s5 v
+[2026-11-17 11:03:07 1794938587982] RESULT read table=s5 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.089 t_start=1794938587.870 t_end=1794938587.959
+[2026-11-17 11:03:08 1794938588366] SNAP S5-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-r2-b.tsv epoch_ms=1794938588270 uptime_ms=130816 threads=100 alloc_sum=8266449064 heap_used=241396336
+[2026-11-17 11:03:08 1794938588760] SNAP S5-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-r3-a.tsv epoch_ms=1794938588663 uptime_ms=131210 threads=100 alloc_sum=8267042200 heap_used=258173552
+[2026-11-17 11:03:08 1794938588763] + s4.py read s5 v
+[2026-11-17 11:03:09 1794938589208] RESULT read table=s5 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=0.051 t_start=1794938589.128 t_end=1794938589.180
+[2026-11-17 11:03:09 1794938589598] SNAP S5-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S5-r3-b.tsv epoch_ms=1794938589496 uptime_ms=132043 threads=102 alloc_sum=8305040856 heap_used=291727984
+[2026-11-17 11:03:09 1794938589959] HISTO S5-base | Total        778807       74309432 | cells 116 4640
+[2026-11-17 11:03:09 1794938589965] + s4.py read s5 v (held, flag set)
+[2026-11-17 11:03:11 1794938591457] HISTO S5-pause | Total       1183231       89404832 | cells 100116 4004640
+[2026-11-17 11:03:11 1794938591462] PAUSE S5 reached | S4PAUSE begin 1794938590394
+[2026-11-17 11:03:25 1794938605457] HELDREAD S5 | RESULT read table=s5 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=15.086 t_start=1794938590.337 t_end=1794938605.422
+[2026-11-17 11:03:25 1794938605852] SNAP S6-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-idle0.tsv epoch_ms=1794938605753 uptime_ms=148300 threads=93 alloc_sum=4737564176 heap_used=156513696
+[2026-11-17 11:03:36 1794938616238] SNAP S6-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-idle1.tsv epoch_ms=1794938616144 uptime_ms=158691 threads=90 alloc_sum=4739008912 heap_used=173290912
+[2026-11-17 11:03:36 1794938616609] SNAP S6-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-r1-a.tsv epoch_ms=1794938616518 uptime_ms=159065 threads=90 alloc_sum=4739570600 heap_used=173290912
+[2026-11-17 11:03:36 1794938616611] + s4.py read s6 v
+[2026-11-17 11:03:37 1794938617688] RESULT read table=s6 col=v user=- accepted count=1000000 value_bytes=8000004 query_seconds=0.692 t_start=1794938616.967 t_end=1794938617.660
+[2026-11-17 11:03:38 1794938618069] SNAP S6-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-r1-b.tsv epoch_ms=1794938617972 uptime_ms=160519 threads=92 alloc_sum=5090414720 heap_used=559166880
+[2026-11-17 11:03:38 1794938618465] SNAP S6-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-r2-a.tsv epoch_ms=1794938618365 uptime_ms=160912 threads=92 alloc_sum=5090981648 heap_used=559166880
+[2026-11-17 11:03:38 1794938618467] + s4.py read s6 v
+[2026-11-17 11:03:39 1794938619479] RESULT read table=s6 col=v user=- accepted count=1000000 value_bytes=8000004 query_seconds=0.641 t_start=1794938618.818 t_end=1794938619.459
+[2026-11-17 11:03:39 1794938619856] SNAP S6-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-r2-b.tsv epoch_ms=1794938619760 uptime_ms=162307 threads=94 alloc_sum=5441815216 heap_used=945042848
+[2026-11-17 11:03:40 1794938620248] SNAP S6-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-r3-a.tsv epoch_ms=1794938620149 uptime_ms=162696 threads=94 alloc_sum=5442386344 heap_used=945042848
+[2026-11-17 11:03:40 1794938620252] + s4.py read s6 v
+[2026-11-17 11:03:41 1794938621248] RESULT read table=s6 col=v user=- accepted count=1000000 value_bytes=8000004 query_seconds=0.612 t_start=1794938620.608 t_end=1794938621.220
+[2026-11-17 11:03:41 1794938621632] SNAP S6-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S6-r3-b.tsv epoch_ms=1794938621535 uptime_ms=164082 threads=96 alloc_sum=5793228584 heap_used=1314141600
+[2026-11-17 11:03:42 1794938622011] HISTO S6-base | Total        782091       75221360 | cells 116 4640
+[2026-11-17 11:03:42 1794938622018] + s4.py read s6 v (held, flag set)
+[2026-11-17 11:03:43 1794938623813] HISTO S6-pause | Total       4815658      229219280 | cells 1000116 40004640
+[2026-11-17 11:03:43 1794938623818] PAUSE S6 reached | S4PAUSE begin 1794938622826
+[2026-11-17 11:03:58 1794938638028] HELDREAD S6 | RESULT read table=s6 col=v user=- accepted count=1000000 value_bytes=8000004 query_seconds=15.615 t_start=1794938622.383 t_end=1794938637.998
+[2026-11-17 11:03:58 1794938638415] SNAP S7-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-idle0.tsv epoch_ms=1794938638318 uptime_ms=180864 threads=98 alloc_sum=6145169664 heap_used=296328128
+[2026-11-17 11:04:08 1794938648809] SNAP S7-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-idle1.tsv epoch_ms=1794938648706 uptime_ms=191253 threads=99 alloc_sum=6146461200 heap_used=313105344
+[2026-11-17 11:04:09 1794938649201] SNAP S7-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-r1-a.tsv epoch_ms=1794938649098 uptime_ms=191645 threads=99 alloc_sum=6147043008 heap_used=313105344
+[2026-11-17 11:04:09 1794938649204] + s4.py read s7 v
+[2026-11-17 11:04:19 1794938659709] RESULT read table=s7 col=v user=- accepted count=10000000 value_bytes=80000004 query_seconds=10.097 t_start=1794938649.563 t_end=1794938659.660
+[2026-11-17 11:04:20 1794938660084] SNAP S7-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-r1-b.tsv epoch_ms=1794938659989 uptime_ms=202536 threads=101 alloc_sum=9671335512 heap_used=4104756160
+[2026-11-17 11:04:20 1794938660469] SNAP S7-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-r2-a.tsv epoch_ms=1794938660372 uptime_ms=202919 threads=101 alloc_sum=9671921248 heap_used=4104756160
+[2026-11-17 11:04:20 1794938660472] + s4.py read s7 v
+[2026-11-17 11:04:41 1794938681187] RESULT read table=s7 col=v user=- accepted count=10000000 value_bytes=80000004 query_seconds=20.310 t_start=1794938660.823 t_end=1794938681.133
+[2026-11-17 11:04:41 1794938681572] SNAP S7-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-r2-b.tsv epoch_ms=1794938681472 uptime_ms=224019 threads=103 alloc_sum=13196579272 heap_used=7376313280
+[2026-11-17 11:04:41 1794938681966] SNAP S7-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-r3-a.tsv epoch_ms=1794938681864 uptime_ms=224411 threads=103 alloc_sum=13197167752 heap_used=7376313280
+[2026-11-17 11:04:41 1794938681970] + s4.py read s7 v
+[2026-11-17 11:04:53 1794938693419] RESULT read table=s7 col=v user=- accepted count=10000000 value_bytes=80000004 query_seconds=11.012 t_start=1794938682.348 t_end=1794938693.360
+[2026-11-17 11:04:53 1794938693832] SNAP S7-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/S7-r3-b.tsv epoch_ms=1794938693718 uptime_ms=236265 threads=105 alloc_sum=16721221184 heap_used=3788204320
+[2026-11-17 11:04:54 1794938694183] HISTO S7-base | Total        788601       76287168 | cells 116 4640
+[2026-11-17 11:04:54 1794938694190] + s4.py read s7 v (held, flag set)
+[2026-11-17 11:05:00 1794938700936] HISTO S7-pause | Total      41112500     1605607056 | cells 10000116 400004640
+[2026-11-17 11:05:00 1794938700942] PAUSE S7 reached | S4PAUSE begin 1794938698964
+[2026-11-17 11:05:18 1794938718709] HELDREAD S7 | RESULT read table=s7 col=v user=- accepted count=10000000 value_bytes=80000004 query_seconds=24.123 t_start=1794938694.559 t_end=1794938718.683
+[2026-11-17 11:05:19 1794938719097] SNAP B-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-idle0.tsv epoch_ms=1794938718995 uptime_ms=261542 threads=107 alloc_sum=20246316416 heap_used=1924374128
+[2026-11-17 11:05:29 1794938729490] SNAP B-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-idle1.tsv epoch_ms=1794938729389 uptime_ms=271936 threads=107 alloc_sum=20247624936 heap_used=1924374128
+[2026-11-17 11:05:29 1794938729892] SNAP B-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-r1-a.tsv epoch_ms=1794938729783 uptime_ms=272330 threads=107 alloc_sum=20248221384 heap_used=1924374128
+[2026-11-17 11:05:29 1794938729895] + s4.py read b6 b
+[2026-11-17 11:05:30 1794938730388] RESULT read table=b6 col=b user=- accepted count=1 value_bytes=8000004 query_seconds=0.101 t_start=1794938730.256 t_end=1794938730.357
+[2026-11-17 11:05:30 1794938730771] SNAP B-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-r1-b.tsv epoch_ms=1794938730672 uptime_ms=273219 threads=109 alloc_sum=20292627680 heap_used=2008260208
+[2026-11-17 11:05:31 1794938731159] SNAP B-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-r2-a.tsv epoch_ms=1794938731060 uptime_ms=273607 threads=109 alloc_sum=20293228968 heap_used=2008260208
+[2026-11-17 11:05:31 1794938731162] + s4.py read b6 b
+[2026-11-17 11:05:31 1794938731665] RESULT read table=b6 col=b user=- accepted count=1 value_bytes=8000004 query_seconds=0.109 t_start=1794938731.528 t_end=1794938731.636
+[2026-11-17 11:05:32 1794938732054] SNAP B-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-r2-b.tsv epoch_ms=1794938731954 uptime_ms=274500 threads=111 alloc_sum=20337609120 heap_used=2058591856
+[2026-11-17 11:05:32 1794938732443] SNAP B-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-r3-a.tsv epoch_ms=1794938732344 uptime_ms=274891 threads=111 alloc_sum=20338212256 heap_used=2058591856
+[2026-11-17 11:05:32 1794938732446] + s4.py read b6 b
+[2026-11-17 11:05:32 1794938732938] RESULT read table=b6 col=b user=- accepted count=1 value_bytes=8000004 query_seconds=0.109 t_start=1794938732.806 t_end=1794938732.915
+[2026-11-17 11:05:33 1794938733329] SNAP B-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/B-r3-b.tsv epoch_ms=1794938733228 uptime_ms=275775 threads=113 alloc_sum=20382595464 heap_used=2108923504
+[2026-11-17 11:05:33 1794938733682] HISTO B-base | Total        792694       77301504 | cells 116 4640
+[2026-11-17 11:05:33 1794938733688] + s4.py read b6 b (held, flag set)
+[2026-11-17 11:05:34 1794938734928] HISTO B-pause | Total        793864      102305592 | cells 117 4680
+[2026-11-17 11:05:34 1794938734933] PAUSE B reached | S4PAUSE begin 1794938734073
+[2026-11-17 11:05:49 1794938749228] HELDREAD B | RESULT read table=b6 col=b user=- accepted count=1 value_bytes=8000004 query_seconds=15.144 t_start=1794938734.059 t_end=1794938749.203
+[2026-11-17 11:05:49 1794938749510] READTHRESHOLDS-P RESULT readthresholds enabled=true localAbort=64MiB
+[2026-11-17 11:05:49 1794938749898] SNAP P-s5-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/P-s5-a.tsv epoch_ms=1794938749799 uptime_ms=292346 threads=115 alloc_sum=20428349936 heap_used=119082808
+[2026-11-17 11:05:49 1794938749900] + s4.py read s5 v
+[2026-11-17 11:06:05 1794938765406] RESULT read table=s5 col=v user=- accepted count=100000 value_bytes=800004 query_seconds=15.097 t_start=1794938750.275 t_end=1794938765.372
+[2026-11-17 11:06:05 1794938765797] SNAP P-s5-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/P-s5-b.tsv epoch_ms=1794938765695 uptime_ms=308242 threads=117 alloc_sum=20467496272 heap_used=202968888
+[2026-11-17 11:06:06 1794938766807] PPAUSE s5 new_pause_lines=1
+[2026-11-17 11:06:07 1794938767371] PMETRIC s5 RESULT get org.apache.cassandra.metrics:type=Table,keyspace=probe,scope=s5,name=LocalReadSize Max = 17436917 | aborts RESULT get org.apache.cassandra.metrics:type=Table,keyspace=probe,scope=s5,name=LocalReadSizeAborts Count = 0
+[2026-11-17 11:06:23 1794938783776] SNAP P-s6-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/P-s6-a.tsv epoch_ms=1794938783674 uptime_ms=326221 threads=117 alloc_sum=20469563104 heap_used=219746104
+[2026-11-17 11:06:23 1794938783779] + s4.py read s6 v
+[2026-11-17 11:06:24 1794938784441] RESULT read table=s6 col=v user=- error count=-1 value_bytes=-1 msg=ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - 1 nodes loaded over 148919632 bytes and aborted the query SELECT v FROM probe.s6 WHERE k = 424242 LIMIT 5000 ALLOW FILTERING (see local_read_size_fail_threshold): READ_SIZE from localhost/127.0.0.1:7000" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures':  query_seconds=0.273 t_start=1794938784.144 t_end=1794938784.417
+[2026-11-17 11:06:24 1794938784832] SNAP P-s6-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/P-s6-b.tsv epoch_ms=1794938784732 uptime_ms=327279 threads=119 alloc_sum=20619533888 heap_used=370741048
+[2026-11-17 11:06:25 1794938785840] PPAUSE s6 new_pause_lines=0
+[2026-11-17 11:06:26 1794938786393] PMETRIC s6 RESULT get org.apache.cassandra.metrics:type=Table,keyspace=probe,scope=s6,name=LocalReadSize Max = 155469300 | aborts RESULT get org.apache.cassandra.metrics:type=Table,keyspace=probe,scope=s6,name=LocalReadSizeAborts Count = 1
+[2026-11-17 11:06:42 1794938802788] SNAP P-s7-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/P-s7-a.tsv epoch_ms=1794938802689 uptime_ms=345236 threads=121 alloc_sum=20627557392 heap_used=387518264
+[2026-11-17 11:06:42 1794938802791] + s4.py read s7 v
+[2026-11-17 11:06:45 1794938805189] RESULT read table=s7 col=v user=- error count=-1 value_bytes=-1 msg=ReadFailure: Error from server: code=1300 [Replica(s) failed to execute read] message="Operation failed - 1 nodes loaded over 1489193880 bytes and aborted the query SELECT v FROM probe.s7 WHERE k = 424242 LIMIT 5000 ALLOW FILTERING (see local_read_size_fail_threshold): READ_SIZE from localhost/127.0.0.1:7000" info={'consistency': 'ONE', 'required_responses': 1, 'received_responses': 0, 'failures': query_seconds=2.016 t_start=1794938803.153 t_end=1794938805.169
+[2026-11-17 11:06:45 1794938805575] SNAP P-s7-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/P-s7-b.tsv epoch_ms=1794938805477 uptime_ms=348024 threads=123 alloc_sum=22134279144 heap_used=1947799352
+[2026-11-17 11:06:46 1794938806585] PPAUSE s7 new_pause_lines=0
+[2026-11-17 11:06:47 1794938807132] PMETRIC s7 RESULT get org.apache.cassandra.metrics:type=Table,keyspace=probe,scope=s7,name=LocalReadSize Max = 1663415872 | aborts RESULT get org.apache.cassandra.metrics:type=Table,keyspace=probe,scope=s7,name=LocalReadSizeAborts Count = 1
+[2026-11-17 11:07:03 1794938823418] READTHRESHOLDS-OFF RESULT readthresholds enabled=false localAbort=64MiB
+[2026-11-17 11:07:03 1794938823424] L1 ERROR lines: 0 WARN lines: 9
+[2026-11-17 11:07:03 1794938823427] stopping node L1
+Cassandra has shutdown.
+[2026-11-17 11:07:16 1794938836482] no Cassandra daemon left
+[2026-11-17 11:07:16 1794938836490] MEMORY L1 max_memory_current=9884471296 oom_kill_last=0
+[2026-11-17 11:07:16 1794938836509] + systemd-run --user --scope -p MemoryMax=14G -p MemorySwapMax=0 --unit=s4-ipc-recheck-L2 env MAX_HEAP_SIZE=8G JVM_EXTRA_OPTS=-javaagent:/mydata/s4/ipc-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ipc-recheck/pause.btm bin/cassandra -f
+[2026-11-17 11:07:25 1794938845205] NODE L2 up daemon_pid=34729 cgroup=/sys/fs/cgroup/user.slice/user-20001.slice/user@20001.service/app.slice/s4-ipc-recheck-L2.scope memory.max=15032385536 swap.max=0
+[2026-11-17 11:07:25 1794938845211] JVMARGS L2 -XX:+UseG1GC -Xms8G -Xmx8G -javaagent:/mydata/s4/ipc-recheck/cassandra/lib/jamm-0.4.0.jar -javaagent:/mydata/s4/ipc-recheck/cassandra/build/lib/jars/byteman-4.0.20.jar=script:/mydata/s4/ipc-recheck/pause.btm 
+[2026-11-17 11:07:25 1794938845216] + s4.py setupauth g6
+[2026-11-17 11:07:29 1794938849422] RESULT setupauth table=g6 app_is_superuser=False seconds=3.8
+[2026-11-17 11:07:29 1794938849425] + s4.py guardcheck g6 5001
+[2026-11-17 11:07:30 1794938850020] RESULT guardcheck table=g6 user=app items=5001 outcome=rejected InvalidRequest: Error from server: code=2200 [Invalid query] message="Guardrail items_per_collection violated: Detected collection v with 5001 items, this exceeds the failure threshold of 5000."
+[2026-11-17 11:07:30 1794938850023] + s4.py load g6 1000000 5000
+[2026-11-17 11:07:43 1794938863943] RESULT load table=g6 M=1000000 chunk=5000 statements=200 accepted=200 rejected=0 seconds=13.5 first=None
+[2026-11-17 11:07:43 1794938863950] + nodetool flush probe
+[2026-11-17 11:07:45 1794938865163] + nodetool compact probe g6
+[2026-11-17 11:07:47 1794938867879] SIZE g6 | SSTable count: 1;Old SSTable count: 0;Space used (live): 4037966;Memtable data size: 0; du_bytes=4042062
+[2026-11-17 11:07:48 1794938868294] SNAP G-idle0 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-idle0.tsv epoch_ms=1794938868171 uptime_ms=31441 threads=76 alloc_sum=895559552 heap_used=1157627904
+[2026-11-17 11:07:58 1794938878693] SNAP G-idle1 | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-idle1.tsv epoch_ms=1794938878592 uptime_ms=41861 threads=76 alloc_sum=907449504 heap_used=1174405120
+[2026-11-17 11:07:59 1794938879079] SNAP G-r1-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-r1-a.tsv epoch_ms=1794938878977 uptime_ms=42246 threads=76 alloc_sum=907990784 heap_used=1174405120
+[2026-11-17 11:07:59 1794938879082] + s4.py read g6 v
+[2026-11-17 11:08:00 1794938880519] RESULT read table=g6 col=v user=app accepted count=1000000 value_bytes=8000004 query_seconds=0.817 t_start=1794938879.660 t_end=1794938880.476
+[2026-11-17 11:08:00 1794938880911] SNAP G-r1-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-r1-b.tsv epoch_ms=1794938880812 uptime_ms=44081 threads=78 alloc_sum=1260299808 heap_used=1538939104
+[2026-11-17 11:08:01 1794938881307] SNAP G-r2-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-r2-a.tsv epoch_ms=1794938881205 uptime_ms=44474 threads=78 alloc_sum=1260850520 heap_used=1555716320
+[2026-11-17 11:08:01 1794938881309] + s4.py read g6 v
+[2026-11-17 11:08:02 1794938882626] RESULT read table=g6 col=v user=app accepted count=1000000 value_bytes=8000004 query_seconds=0.714 t_start=1794938881.869 t_end=1794938882.583
+[2026-11-17 11:08:03 1794938883015] SNAP G-r2-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-r2-b.tsv epoch_ms=1794938882919 uptime_ms=46188 threads=80 alloc_sum=1613038064 heap_used=1941592288
+[2026-11-17 11:08:03 1794938883405] SNAP G-r3-a | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-r3-a.tsv epoch_ms=1794938883311 uptime_ms=46580 threads=80 alloc_sum=1613603104 heap_used=1941592288
+[2026-11-17 11:08:03 1794938883407] + s4.py read g6 v
+[2026-11-17 11:08:04 1794938884651] RESULT read table=g6 col=v user=app accepted count=1000000 value_bytes=8000004 query_seconds=0.638 t_start=1794938883.971 t_end=1794938884.610
+[2026-11-17 11:08:05 1794938885033] SNAP G-r3-b | RESULT snap file=/mydata/s4/ipc-recheck/logs/run1/snaps/G-r3-b.tsv epoch_ms=1794938884934 uptime_ms=48203 threads=83 alloc_sum=1965794480 heap_used=2327468256
+[2026-11-17 11:08:05 1794938885499] HISTO G-base | Total        798433       78986712 | cells 2201 88040
+[2026-11-17 11:08:05 1794938885505] + s4.py read g6 v (held, flag set)
+[2026-11-17 11:08:07 1794938887504] HISTO G-pause | Total       4831362      232962896 | cells 1002201 40088040
+[2026-11-17 11:08:07 1794938887509] PAUSE G reached | S4PAUSE begin 1794938886522
+[2026-11-17 11:08:21 1794938901744] HELDREAD G | RESULT read table=g6 col=v user=app accepted count=1000000 value_bytes=8000004 query_seconds=15.654 t_start=1794938886.063 t_end=1794938901.717
+[2026-11-17 11:08:21 1794938901756] L2 ERROR lines: 2 WARN lines: 14
+[2026-11-17 11:08:21 1794938901759] stopping node L2
+Cassandra has shutdown.
+[2026-11-17 11:08:34 1794938914815] no Cassandra daemon left
+[2026-11-17 11:08:34 1794938914823] MEMORY L2 max_memory_current=9639948288 oom_kill_last=0
+[2026-11-17 11:08:34 1794938914859] node data removed
+[2026-11-17 11:08:34 1794938914863] END end_epoch=1794938914
+[2026-11-17 11:08:34 1794938914883] DAEMONS-LEFT 0
+[2026-11-17 11:08:35 1794938915153] ANALYSIS rc=0

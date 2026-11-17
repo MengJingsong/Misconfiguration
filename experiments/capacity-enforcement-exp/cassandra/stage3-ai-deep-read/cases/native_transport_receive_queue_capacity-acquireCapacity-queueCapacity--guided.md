@@ -593,7 +593,7 @@ the `new` lines carry `cap=` the label's capacity and `throw=` the arm's mode. `
 | **Stage-3 feed** | `3b` — established by deep-reading the source. (Stage 1/2 had surfaced this line as a row, but the case was made from the source, not the row.) |
 | **Line numbers checked** | 2026-09-22 against the local `cassandra-5.0.9` clone (`git describe --tags`). |
 | **Escape hatch / Target-3 note** | under the default `native_transport_throw_on_overload=false` the message is still decoded despite the over-limit verdict; see §6b. |
-| **Stage-4 feedback** | **Closed 2026-10-15 — unit Confirmed; cluster Confirmed (amended §9a row 1); one sub-prediction missed; no run 2.** Results: [`../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md`](../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md). Step-0 audit **Ready after amendments** (§9a frozen 00:58 EDT `892454c7…`): 9c's 256 KiB requests take the multi-frame path, whose default mode waits instead of decoding (amendment (i)); on the one-frame path the default mode's release subtracts a refused request it never added (amendment (ii)); `channelPayloadBytesInFlight` is not raised on the large path (iii); the filed unit steps would hang (iv). Run 1 on `pc57` (01:29–02:10): unit 11/11 upstream + 60/60 harness checks; cluster, both reserves 4 MiB, *N* = 10, *K* = *N*·*C* + *R*: **throwing mode** peak accepted bytes within 2 requests of *K* at 128 KiB · 512 KiB · 1 MiB · 4 MiB for 65 kB and 262 kB requests (slope *N*), every refusal a discard (`RequestDiscarded` = client overloads exactly); **default mode, large requests**: refused requests wait undecoded for the reserve (`wake` = refusals), the same peak as throwing, no warning, `queueSize` back to 0; **default mode, small requests**: every refusal decoded with the warning, every connection ends at `queueSize` = −*k*·*M* exactly (−37 to −78 MB), decoded requests reach the client's whole window (83.3 MB = 1,280 live `QueryMessage`s) at every capacity, 15× *K* at 128 KiB, while `queueSize` reports the same peak as the throwing mode. *N* sweep: 1 → window-bound, 10 → *K*, 100 → `ΣA` ≤ *K* but its peak 5.8 requests below the frozen band (the miss). Self-check `run1/selfcheck.py` 613/614 (the miss). **For stage 3 (not applied to §5–§8; rec. 6 of the results file):** (1) §5, §6b, §7, §8 describe the one-frame path only; a request above 131,071 B is handled by `processFirstFrameOfLargeMessage` (`CQLMessageHandler.java:516-660`), where the default mode pauses the connection and decodes only after a later successful acquire — §8's "bounds nothing" is wrong for those; §6a's allocation site is `LargeMessage.onComplete` (`:822-835`) for them. (2) The default-mode drift is a stronger Target-3 finding than §8 states: each refused one-frame request lowers that connection's `queueSize` by its size for the connection's life (`:236-261`, `:500-511`; `AbstractMessageHandler.java:461-475`), so the per-connection capacity erodes by one request per refusal; reserves stay consistent. (3) `channelPayloadBytesInFlight` goes negative on the large path (raised only at `:269`, lowered at `:510`); it feeds only `logOverload`'s trace text. (4) A default-mode connection refused with a reserve smaller than the request can never be reactivated; production rules it out via `native_transport_max_message_size` ≤ both reserves. (5) Seen, not in §9a: the node's networking `BufferPool` `UsedSize`/`OverflowSize` rose in every large-request arm (to 4.87/4.74 GB at 4 MiB) and did not fall within the node's lifetime; cause not established (possibly frees the gauge does not count); belongs to the `networking_cache_size` area. |
+| **Stage-4 feedback** | **Closed 2026-10-15 — unit Confirmed; cluster Confirmed (amended §9a row 1); one sub-prediction missed; no run 2.** Results: [`../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md`](../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided.md). Step-0 audit **Ready after amendments** (§9a frozen 00:58 EDT `892454c7…`): 9c's 256 KiB requests take the multi-frame path, whose default mode waits instead of decoding (amendment (i)); on the one-frame path the default mode's release subtracts a refused request it never added (amendment (ii)); `channelPayloadBytesInFlight` is not raised on the large path (iii); the filed unit steps would hang (iv). Run 1 on `pc57` (01:29–02:10): unit 11/11 upstream + 60/60 harness checks; cluster, both reserves 4 MiB, *N* = 10, *K* = *N*·*C* + *R*: **throwing mode** peak accepted bytes within 2 requests of *K* at 128 KiB · 512 KiB · 1 MiB · 4 MiB for 65 kB and 262 kB requests (slope *N*), every refusal a discard (`RequestDiscarded` = client overloads exactly); **default mode, large requests**: refused requests wait undecoded for the reserve (`wake` = refusals), the same peak as throwing, no warning, `queueSize` back to 0; **default mode, small requests**: every refusal decoded with the warning, every connection ends at `queueSize` = −*k*·*M* exactly (−37 to −78 MB), decoded requests reach the client's whole window (83.3 MB = 1,280 live `QueryMessage`s) at every capacity, 15× *K* at 128 KiB, while `queueSize` reports the same peak as the throwing mode. *N* sweep: 1 → window-bound, 10 → *K*, 100 → `ΣA` ≤ *K* but its peak 5.8 requests below the frozen band (the miss). Self-check `run1/selfcheck.py` 613/614 (the miss). **For stage 3 (not applied to §5–§8; rec. 6 of the results file):** (1) §5, §6b, §7, §8 describe the one-frame path only; a request above 131,071 B is handled by `processFirstFrameOfLargeMessage` (`CQLMessageHandler.java:516-660`), where the default mode pauses the connection and decodes only after a later successful acquire — §8's "bounds nothing" is wrong for those; §6a's allocation site is `LargeMessage.onComplete` (`:822-835`) for them. (2) The default-mode drift is a stronger Target-3 finding than §8 states: each refused one-frame request lowers that connection's `queueSize` by its size for the connection's life (`:236-261`, `:500-511`; `AbstractMessageHandler.java:461-475`), so the per-connection capacity erodes by one request per refusal; reserves stay consistent. (3) `channelPayloadBytesInFlight` goes negative on the large path (raised only at `:269`, lowered at `:510`); it feeds only `logOverload`'s trace text. (4) A default-mode connection refused with a reserve smaller than the request can never be reactivated; production rules it out via `native_transport_max_message_size` ≤ both reserves. (5) Seen, not in §9a: the node's networking `BufferPool` `UsedSize`/`OverflowSize` rose in every large-request arm (to 4.87/4.74 GB at 4 MiB) and did not fall within the node's lifetime; cause not established (possibly frees the gauge does not count); belongs to the `networking_cache_size` area. **2026-11-17, recheck claim — Confirmed — does not cap** (design row 3; section "Stage-4 design for the recheck claim (2026-11-17)"): at the shipped defaults (heap 2 GiB) on `pc72`, one-frame default-mode requests refused for capacity are decoded uncharged, every connection ends at `queueSize` = −*k*·*M*, and decoded bytes reach the client window (312 · 468 · 625 MB for 20 · 30 · 40 connections = 1.45–2.91× heap/10, linear in connections, held on the heap) while `queueSize` and the per-IP reserve report the bound; throwing-mode and multi-frame controls are held to it; direct memory does not follow (one 84 MB step: undetermined). Results: [`../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided--recheck-2026-11-17.md`](../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided--recheck-2026-11-17.md). |
 | **Notes** | **Found while converting §9 (2026-10-06), for stage 3 to judge, not applied to §5-§8:** (1) the overload mode is chosen **per connection** by the client's `THROW_ON_OVERLOAD` startup option; `native_transport_throw_on_overload` is only the fallback when no option is sent ([`PipelineConfigurator.java:309-314`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/transport/PipelineConfigurator.java#L309-L314)), and a JMX change affects connections opened afterwards only. (2) In the default mode the handler returns `false` after an over-limit request (`CQLMessageHandler.java:259`), which stops it reading further frames until a wait-queue ticket fires, so §8's "bounds nothing" may overstate: per connection the decoded bytes might stop near the capacity plus one frame. §9a states both readings as competing predictions. |
 
 ---
@@ -643,3 +643,131 @@ throwing mode (stage 4).
 `native_transport_max_request_data_in_flight` (heap/10) and grow linearly with the number of connections,
 with heap (and `BufferPool` direct memory) following the decoded bytes rather than the capacity or the
 reserves.
+
+## Stage-4 design for the recheck claim (2026-11-17)
+
+Written by stage 4 for the recheck's "Stage-4 claim to add" above; §9 and its frozen §9a are not changed. Results:
+[`../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided--recheck-2026-11-17.md`](../../stage4-runtime-verification/results/native_transport_receive_queue_capacity-acquireCapacity-queueCapacity--guided--recheck-2026-11-17.md).
+The earlier run (results file of §10) already showed the drift with both reserves pinned at 4 MiB; this design asks
+the same of the **shipped defaults**, where the reserves are heap-derived and large.
+
+**Claim tested** (negative: the constraint does not cap). With every relevant knob at its shipped default
+(`native_transport_receive_queue_capacity` 1 MiB, `native_transport_throw_on_overload` false, both reserves unset, so
+per-IP = heap/40 and global = heap/10, `DatabaseDescriptor.java:649-657`), protocol-v5 clients sending one-frame
+requests and holding a large window: a request refused for capacity is decoded and dispatched without being charged
+(`CQLMessageHandler.java:223-260`; `AbstractMessageHandler.java:428-436`), its release after the response drives the
+connection's `queueSize` negative (`CQLMessageHandler.java:507-510`, `AbstractMessageHandler.java:461-475`), and the
+decoded in-flight request bytes exceed both the per-connection capacity and the global reserve (heap/10), grow
+linearly with the number of connections, and are held on the heap; the accounting counters (`queueSize`, reserve use)
+stay within capacity plus reserve.
+
+### How this verifies the claim
+
+- **Hypothesis:** in the default mode the bytes the node holds for decoded one-frame requests are set by the clients
+  (connections × window × request size), not by the capacity or the reserves.
+- **Test:** one node at the defaults (heap pinned at 2 GiB so heap/10 is a known number); three arms of default-mode
+  connections with the same per-connection window and *N* = 20, 30, 40 connections; an under-limit control; a
+  matched positive control in the throwing mode with the largest arm's *N* and window; a second control with
+  multi-frame requests in the default mode. Per connection, `queueSize` (counted) and the bytes decoded and not yet
+  released (real) from a Byteman trace; the heap held by decoded requests from class histograms; direct memory from
+  JMX.
+- **Logic:** (1) the refusals occur (the per-IP reserve is exhausted), or the run is invalid. (2) Each refusal is
+  followed by a decode on the same connection with `bp=BYTES_IN_FLIGHT`: refused requests are dispatched uncharged.
+  (3) After the drain every connection ends at `queueSize` = −*k*·*M*: the release drives the counter negative.
+  (4) The counted sum stays within *K* = *N*·*C* + *E* while the decoded sum runs to the client window, above *C* per
+  connection and above *G* in total. (5) The decoded sum follows *N* (slope *W*·*M*), not the capacity or the
+  reserves. (6) The live heap (decoded `QueryMessage`s and their value copies) follows the decoded sum. (7) The throwing
+  control, same workload, is held to *K*, so the instruments and workload can show a binding cap (the positive
+  control a negative claim needs). (8) The multi-frame control is held to *K*, so the escape is specific to the
+  one-frame path.
+- **Refuted if:** in the default arms the decoded sum stays at or below *K* (or flat in *N*), or refused requests are
+  not decoded, or connections end at `queueSize` 0, or the heap does not follow the decoded sum.
+
+### Arms, workload and settings
+
+| Setting | Value | Why |
+|---|---|---|
+| Node | one Cassandra 5.0.9 node on `pc72` from `/mydata/s4/ntq-recheck/cassandra` (a `cp -a` of `cassandra-base`), conf/data/logs under `/mydata/s4/ntq-recheck/node`, 127.0.0.1, native 9042, JMX 7199; started with `bin/cassandra -f` inside `systemd-run --user --scope -p MemoryMax=6G -p MemorySwapMax=0` | the recorded budget: heap 2 GiB + direct ≤ 2 GiB + JVM overhead |
+| Heap / direct | `MAX_HEAP_SIZE=2G` (`-Xms2G -Xmx2G`, G1), `MAX_DIRECT_MEMORY_SIZE=2G` | the shipped heap here would be 31 GiB (`cassandra-env.sh`); pinned so *G* and *E* are known; the reserves stay unset and follow it |
+| Knobs under test | capacity, `throw_on_overload`, both reserves, `native_transport_max_message_size`, `native_transport_max_threads` (128), `networking_cache_size`: **all left at their defaults** (not in the yaml) | the claim is about the defaults |
+| Harness yaml keys | `native_transport_timeout: 60s`, `read_request_timeout: 60000ms` (`make-node-yaml.sh` of the earlier harness) | queueing of up to ~10,000 held requests takes a few seconds; no request may time out (another overload path); they do not touch the capacity path |
+| Request | `QUERY SELECT pk FROM ks.t WHERE pk = 0 AND v = ? ALLOW FILTERING` at ONE on an empty table; small: 65,000-byte value, one frame (*M* ≈ 65,074 B body, read from the trace's `dec` lines); large: 262,000-byte value, multi-frame | as the earlier run; no disk writes |
+| Hold | `hold-request.btm`, ~~50 ms~~ **250 ms** per request on the request executor (*amended 2026-11-17, before run 1: the shakedowns showed one client JVM sends only ≈ 2,300–2,550 requests/s of 65 kB, so with a 50 ms hold the client, not the node, set the pace and most of the window sat outside the node (results §3, defect 1); claim, prediction and conclusions unchanged*) | requests stay in flight; 128 threads × 4/s ≈ 512 requests/s, well below what the client sends, so the window queues in the node (a 9,600-request window ≈ 19 s, under the 60 s timeouts) |
+| Client | `NativeFlood` (`SimpleClient`, v5) on `pc72`, outside the node's scope, `-Xmx4g` | as the earlier run |
+
+Notation: *C* = 1,048,576 B; *E* = per-IP reserve limit and *G* = global reserve limit, read from the trace's `ep=` and
+`gl=` limits (expected 53,687,091 and 214,748,364 B at `-Xmx2G`); *K_N* = *N*·*C* + *E* (all connections share one
+client address, so the per-IP reserve binds before the global one); *W* = 240; *V_N* = *N*·*W*·*M* (the client
+window in bytes: ≈ 312.4 · 468.5 · 624.7 MB for *N* = 20 · 30 · 40); `A_i` = handler *i*'s `queueSize` after each
+traced acquire/release, `ΣA` its sum; `D_i` = handler *i*'s decoded-minus-released bytes (`dec` − `rls`), `ΣD` its sum;
+*k_i* = handler *i*'s refusals (`acq` with `out=INSUFFICIENT_*`).
+
+Arms, in this order, in one node lifetime, each with fresh connections:
+
+| Arm | Mode | Request | *N* | *W* | Duration | Purpose |
+|---|---|---|---|---|---|---|
+| `idle` | — | — | 0 | — | 10 s | memory floor (histogram, direct) |
+| `U10` | default | small | 10 | 80 | 45 s | under-limit control: window 52.1 MB < *K_10* ≈ 64.2 MB |
+| `D20`, `D30`, `D40` | default | small | 20 · 30 · 40 | 240 | 90 s each | the dose-response |
+| `T40` | throwing (`THROW_ON_OVERLOAD=1`) | small | 40 | 240 | 60 s, retry after an overload 1,000 ms | matched positive control |
+| `L20` | default | large | 20 | 60 | 60 s | multi-frame control (window ≈ 314.5 MB) |
+
+### Observables
+
+| Observable | How | Sampling |
+|---|---|---|
+| `A_i`, `ΣA`, *k_i*, `D_i`, `ΣD`, discards, wake-ups | `ntq-trace.btm` (unchanged from the earlier harness): `new`, `acq`, `rel`, `dec`, `rls`, `disc`, `ldisc`, `wake` lines; handlers matched to an arm by the client's local ports | every event |
+| Per-IP and global reserve in use | `ep=`/`gl=` of the `acq` lines; `Client.RequestsSize` (global in use) via JMX | every acquire; every 2 s |
+| Real resource, heap | `jcmd <pid> GC.class_histogram` at 1/3 and 2/3 of `D*`, `T40`, `L20`, once in `idle`: live `QueryMessage` instances and `[B` bytes | as stated; start and end ms recorded |
+| Real resource, direct | JMX `java.nio:type=BufferPool,name=direct` `MemoryUsed`; networking pool `UsedSize`, `OverflowSize`; heap used | every 2 s |
+| Scope memory | the scope's `memory.current`, `memory.peak`-equivalent max, `memory.events` `oom_kill` | every 2 s; context only, not a prediction |
+| Disallow evidence | client warned count (`bytes in flight` warning), client overloads by text, `Client.RequestDiscarded` before/after | per arm |
+| Other overload | client `ovl_other`, `err`; `Client.TimedOutBeforeProcessing`, `Client.ProtocolException` before/after; `system.log` for `requests/second`, `spent over`, `timed out before it could start`, `OutOfMemoryError` | per arm |
+
+### Prediction (frozen before any reading)
+
+1. **Uncharged dispatch (`D20`–`D40`):** refusals occur (Σ*k* > 0); per handler, `dec` lines with `bp=BYTES_IN_FLIGHT`
+   = *k_i* (exact); client warned responses = Σ*k* (exact); `RequestDiscarded` +0; client overloads 0.
+2. **Drift (`D20`–`D40`):** after the drain every handler ends at `A_i` = −*k_i*·*M* (exact); `Client.RequestsSize` 0
+   after the drain.
+3. **Counted vs real (`D20`–`D40`):** `ΣA` ≤ *K_N* at every trace line (exact); the mean of `ΣD` over the last third of
+   the arm is in [0.85·*V_N*, *V_N*], hence above *G* (*V_20* ≈ 1.45 *G*); every handler's peak `D_i` > *C*.
+4. **Linear in *N*:** the three last-third means divided by *N* agree within ±10 % of their average (≈ *W*·*M* ≈
+   15.6 MB per connection).
+5. **Heap:** in each `D` arm, the live `QueryMessage` count of each histogram lies within [min, max] of `ΣD`/*M* over
+   the histogram's interval ±1 s; at 2/3 of the arm count·*M* > *G*; the live `[B` bytes exceed `idle`'s by at least
+   0.9 × count × 65,000 (each request holds a heap copy of its value, `CBUtil.java:443-450`).
+6. **Direct memory (source reading):** the frame's buffer is released after the request is decoded
+   (`FrameDecoder.java:328`; the envelope body wraps a slice without retaining it, `CQLMessageHandler.java:372-382`),
+   so in every `D` arm the maxima of direct `MemoryUsed` and of pool `UsedSize` + `OverflowSize`, each minus its
+   `idle` value, stay below 64 MiB: direct memory does **not** follow `ΣD`.
+7. **Under-limit control (`U10`):** no refusal; `ΣD` ≤ `ΣA` ≤ 52,059,200 B at every line; every handler ends at 0.
+8. **Positive control (`T40`):** refusals > 0 and refusals = `disc` lines = `RequestDiscarded` delta = client
+   `bytes in flight` overloads (exact); per handler `dec` = `SUCCESS` acquires; `ΣA` ≤ *K_40* at every line, peak
+   ≥ 0.9·*K_40*; `ΣD` ≤ `ΣA` (so below *G*); every handler ends at 0; histogram count ≤ *K_40*/*M* + 10.
+9. **Multi-frame control (`L20`):** refusals > 0; no `dec` with `bp=BYTES_IN_FLIGHT`; client warned 0; per handler
+   `dec` = `SUCCESS` acquires; `ΣA` ≤ *K_20* at every line; `ΣD` ≤ `ΣA`; every handler ends at 0.
+10. **Validity, every arm:** no other overload (client `ovl_other` and `err` 0; `TimedOutBeforeProcessing`,
+    `ProtocolException` +0; none of the three texts in `system.log`); no `OutOfMemoryError`, `oom_kill` 0; every client
+    drained (`outstanding=0`).
+
+### Conclusions
+
+| Result | Conclusion |
+|---|---|
+| 1–5 and 7–10 hold; 6 holds (direct flat) | **Confirmed — does not cap** (default mode, one-frame requests): refused requests are dispatched uncharged, `queueSize` drifts to −*k*·*M*, decoded bytes and their heap follow *N* × window past *C* and *G*. The claim's parenthetical "and `BufferPool` direct memory" is **refuted**: the frame bytes are not held. |
+| 1–5 and 7–10 hold; direct rises with `ΣD` (max direct delta ≥ 0.5·`ΣD` in `D40`) | **Confirmed in full — does not cap**, direct memory included. |
+| As row 1 or 2, but direct moves by more than 64 MiB without following `ΣD` (< 0.5·`ΣD`) | **Confirmed — does not cap**, for the heap; direct memory: **undetermined** (recorded). |
+| 1, 2, 7–10 hold, `ΣD` > *K_N* in every `D` arm, but its last-third mean ≤ *G* in some arm | **Not confirmed** for "exceeds heap/10" at that *N*; the escape past capacity + per-IP reserve stands; effect **does not cap**. |
+| 1–3 hold but 4 fails (not linear in *N*) | **Not confirmed** for "linear in connections"; record the shape. |
+| In a `D` arm `ΣD` stays ≤ *K_N* (or flat across *N*) | **Refuted** — the default mode bounds decoded bytes; effect **caps**. |
+| Refusals in a `D` arm but no `dec bp=BYTES_IN_FLIGHT` (refused requests not decoded) | **Refuted** for uncharged dispatch. |
+| Refused requests decoded but handlers end at `A_i` = 0 | **Refuted** for the drift. |
+| Histogram counts outside the `ΣD` band, or `[B` not rising with them | **Refuted** for "held on heap": `D` does not track memory. |
+| No refusal in some `D` arm; or 8 fails (the throwing control is not held to *K_40*, or refusals ≠ discards) | **Invalid** (no positive control, or the limit was not reached) — never Confirmed. |
+| Another overload text, a timeout, an `OutOfMemoryError`, an `oom_kill`, or a client not drained | **Invalid** for that arm; fix and re-run it. |
+
+### Audit and freeze
+
+Audited by stage 4 against README groups A–D (results §1.1) and frozen: the results file records `git hash-object` of
+this section (from its heading to the end of the file) before any harness ran.

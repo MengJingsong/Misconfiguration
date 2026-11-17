@@ -244,6 +244,8 @@
 6b. B3c/B3d (second amendment, same day, after a shakedown that read no capacity value): the table gauge covers the live memtable only (source: `TableMetrics.java:876-883`), so the workload is split into a throttled phase A and an unthrottled phase B, and the relations use phase A (B3c, B3d). B3f and B3g are unchanged by this; the frozen hash of the prediction and conclusions text did not change.
 7. Citation nits (no effect): `allocate` in `MemtableAllocator` is `:169-196`; `NativePool` is created at `AbstractAllocatorMemtable.java:108`.
 
+**Recheck claim, 2026-11-17** ([results](../../stage4-runtime-verification/results/slab-region-size-region-allocate-capacity--autonomous--recheck-2026-11-17.md), one node pc91, run 1 + self-check): **Not confirmed (no matching row)**, Effect undetermined by rule; every relation of the claim held (1.0000 MiB `[B` per table given one 1 KiB write against 1.49 KiB counted, N = 200: 199.95 MiB vs 0.29 MiB; flat across `memtable_heap_space` 64/256/2048 MiB; 992 B per table under `unslabbed_heap_buffers`; positive control flushed only `t0`), but the frozen P4 bound on the global gauge (1.28 MiB) missed at 3.30 MiB, 2.13 MiB of it system tables before any write.
+
 
 ## Recheck — enforcement properties (guided, 2026-11-17, blind)
 
@@ -257,3 +259,59 @@
 
 **Real-memory estimate:** same as Estimate (negative: `REGION_SIZE` is not a cap); the real-vs-accounted gap is positive and decided by E3 (number of memtables holding a live region).
 **Stage-4 claim to add:** With default `heap_buffers` and N tables each given one 1 KB write (no flush), retained `[B` heap rises by about N x 1 MiB while `MemtablePool` on-heap `used` rises by about N x 1 KB (plus row overhead); N = 200 gives ~200 MiB against ~0.3 MiB accounted.
+
+## Stage-4 design for the recheck claim (2026-11-17)
+
+Written by the stage-4 session of 2026-11-17 (one node, `pc91`) for the **Stage-4 claim to add** of the recheck above. Results: `../../stage4-runtime-verification/results/slab-region-size-region-allocate-capacity--autonomous--recheck-2026-11-17.md`. Nothing above this section is changed by it.
+
+**How this verifies the claim.**
+- *Hypothesis (the claim).* With the shipped `memtable_allocation_type: heap_buffers`, each table that receives one small write (no flush) pins one 1 MiB on-heap slab region (`SlabAllocator.java:139`, one allocator per memtable at `AbstractAllocatorMemtable.java:118`, region taken lazily at the first clone), while the memtable pool is charged only the cloned bytes plus row overhead (`SlabAllocator.java:89`, `SkipListMemtable.java:124-125`, `BTreePartitionUpdater.java:182`). So retained `[B` heap rises by about N x 1 MiB for N written tables while the accounted on-heap bytes rise by about N x 1 to 3 KiB; N = 200 gives about 200 MiB against about 0.3 MiB.
+- *Test.* One node per lifetime; create 401 tables up front; write one 1 KiB row into 50, 100, 200, 400 of them cumulatively, and at each step read the live `[B` bytes from a class histogram (full GC) next to the accounted on-heap gauge. Vary `memtable_heap_space` (64 MiB, 256 MiB, shipped default heap/4 = 2048 MiB at the shipped 8 GiB heap); repeat the default with `unslabbed_heap_buffers` (no regions: `HeapPool`) as the matched control; a single table given 400 rows is the same-bytes control; in the 64 MiB lifetime a final fill of one table is the positive control (the pool limit binds on counted bytes and flushes).
+- *Logic.* If real `[B` grows by about 1 MiB per written table under `heap_buffers`, not under `unslabbed_heap_buffers`, not when the same bytes go into one table, and the accounted gauge grows by only KiB per table, then the region bytes are real heap that the pool does not count; if the slope is the same for every `memtable_heap_space` and real passes the 64 MiB limit with no flush of the small tables, the pool limit does not cap them (it flushes only the table it counts as large: the positive control).
+- *Refuted if* the `heap_buffers` `[B` slope is at most 0.10 MiB per table, or the accounted slope is at least 0.5 MiB per table (regions charged), or in the 64 MiB lifetime the small tables are flushed and real stays at or below the limit.
+
+**Tier.** One node (cluster tier, single node). A unit tier is `n/a`: the claim is about tables on a node (one allocator per table memtable, no flush of small memtables, the shipped G1 options), which a probe of `SlabPool` would assume rather than test; the unit-level fact (a fresh allocator takes one 1 MiB region on its first clone) was already measured in the earlier stage-4 unit tier (`regionCount` 2 for 400 x 4096 B).
+
+**Environment.** `pc91` (x86_64, 32 cores, 125 GiB), `cp -a /mydata/s4/cassandra-base /mydata/s4/slabrc` (Cassandra 5.0.9, JDK 11.0.33); conf copied to `/mydata/s4/slabrc-run/conf` with only: cluster name, `listen_address`/`rpc_address` 127.0.6.1, seeds 127.0.6.1, directories under `/mydata/s4/slabrc-run/`, the arm's `memtable_allocation_type` and `memtable_heap_space`, JMX port 7160 (local). Heap `MAX_HEAP_SIZE=8G` (*amended 2026-11-17, before any reading: the shipped 5.0.9 `cassandra-env.sh` sizes the heap at min(RAM/2, 31744 MiB with G1) = 31 GiB on this node, not 8 GiB; with the shipped `-XX:+AlwaysPreTouch` the first H2048 start was OOM-killed by the 12 GiB scope 7 s after launch, before the node served. 8 GiB keeps the default `memtable_heap_space` at the 2048MiB the predictions use; the predictions and conclusions are unchanged*). Everything else shipped: `jvm11-server.options` (G1, `-XX:G1HeapRegionSize=16m`, so a 1 MiB array is not humongous), `-XX:+AlwaysPreTouch`, `num_tokens` 16, flush writers 2, cleanup threshold 1/3. The node JVM runs in `systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0` (budget 12 GiB: pre-touched 8 GiB heap plus at most about 1 GiB of non-heap; the workload adds at most 0.42 GiB of heap inside the pre-touched heap).
+
+**Lifetimes (arms).** `H2048` (`heap_buffers`, `memtable_heap_space` default, read back as 2048MiB), `H256` (`heap_buffers`, 256MiB), `H64` (`heap_buffers`, 64MiB), `U2048` (`unslabbed_heap_buffers`, default space). Order: H2048, U2048, H256, H64. The varied quantity is N (written tables: 0, 50, 100, 200, 400) inside each lifetime; `memtable_heap_space` (3 values including the default) across lifetimes.
+
+**Workload** (bundled Python driver, protocol 4, CL ONE, 127.0.6.1:9042). Keyspace `ks` (SimpleStrategy RF 1); tables `ks.t0` .. `ks.t400`, each `(k int PRIMARY KEY, v blob)`, shipped table options, created one by one before any write. Value: 1024 random bytes. Steps, each followed by 10 s idle and the measurement M:
+- `s0`: after the schema, 20 s idle, two `jcmd GC.run`; M (baseline).
+- `c1` (same-bytes control): 400 rows into `t0` (k = 1..400); M.
+- `s50`, `s100`, `s200`, `s400`: one row (k = 1) into each of `t1..t50`, `t51..t100`, `t101..t200`, `t201..t400` (cumulative N = 50, 100, 200, 400); M after each.
+- `pc` (`H64` only, positive control): 40,000 more rows into `t0` (k = 401..40400, 32 in flight); wait until `PendingFlushTasks` is 0, 15 s idle; M.
+
+**Measurement M** (the step's readings; the observables).
+- Real (primary): two consecutive `jcmd <pid> GC.class_histogram` (each a full GC, live objects); the second gives `[B` bytes and instances and the histogram total. A 1 MiB region is one `byte[1048576]`, 1,048,592 B in the histogram.
+- Real (secondary): JMX `java.lang:type=Memory` `HeapMemoryUsage.used` right after the histograms; cgroup `memory.current` of the scope (flat under pre-touch; recorded, not used in a relation).
+- Counted: JMX global `org.apache.cassandra.metrics:type=Table,name=AllMemtablesOnHeapDataSize` (sum over every table of its memtable's `onHeap().owns()`; equal to the pool's on-heap `used` when no flush is in progress: the gap is named, the pool has no gauge of its own) and `...AllMemtablesOffHeapDataSize`; per table `type=Table,keyspace=ks,scope=t*,name=MemtableOnHeapDataSize` (count of `ks` tables with a value above 0, and their sum).
+- Flushes: `Enqueuing flush of ks.` lines in `system.log` (with reason), counted per step.
+- Definitions: `R(N)` = `[B` bytes at step `sN` minus at `c1`; `A(N)` = global on-heap gauge at `sN` minus at `c1`; `slope_R`, `slope_A` = least-squares slopes over N = 0 (`c1`), 50, 100, 200, 400; `Rc` = `[B` at `c1` minus at `s0`, `Ac` likewise.
+
+**Predictions (frozen before any run).**
+- P1 (`H2048`, `H256`, `H64`): `slope_R` in [0.95, 1.10] MiB per table; `R(200)` in [190, 225] MiB; `R(400)` in [380, 445] MiB.
+- P2 (same lifetimes): `slope_A` in [1.0, 3.0] KiB per table; `A(200)` in [0.2, 0.6] MiB; `R(200) / A(200)` at least 300.
+- P3: the three `heap_buffers` `slope_R` agree within 5 % (max/min at most 1.05): real does not follow `memtable_heap_space`.
+- P4 (`H64`): `R(400)` above 64 MiB (predicted about 6.3 x the limit) while the global gauge at `s400` is below 0.02 x 64 MiB, and no `ks.` flush line before `pc`.
+- P5 (`U2048`, matched control): `slope_R` at most 16 KiB per table; `slope_A` in [1.0, 3.0] KiB per table.
+- P6 (same-bytes control): `heap_buffers` lifetimes `Rc` in [0.9, 2.5] MiB and `Ac` in [0.4, 1.2] MiB (400 rows, one region); `U2048` `Rc` in [0.2, 1.5] MiB.
+- P7 (`H64`, positive control): at least 1 `Enqueuing flush of ks.t0, Reason: MEMTABLE_LIMIT`; 0 flush lines for `t1..t400`; all 400 small tables still hold a memtable gauge above 0 after `pc`; the global gauge after `pc` at most 0.40 x 64 MiB; `[B` at `pc` minus `[B` at `s400` in [-2, 30] MiB.
+- Validity (every lifetime): settings read back as set (`memtable_allocation_type`, `memtable_heap_space`); JVM flags hold `-XX:G1HeapRegionSize=16m` and `-XX:+UseG1GC`; the scope's `memory.max` is 12 GiB; the count of `ks` tables with gauge above 0 equals N + 1 at every step `c1`..`s400`; no `ks.` flush line before `pc`; client errors 0; no `^ERROR` line in `system.log`; the node is not killed.
+
+**Conclusions.**
+
+| Readings | Row |
+|---|---|
+| Validity holds; P1, P2, P3, P5, P6 hold; P4 holds; P7's flush of `t0` and gauge bound hold | **Confirmed** — does not cap: each written table pins a 1 MiB region of real heap that `memtable_heap_space` does not count, at any `memtable_heap_space`, while the limit binds only on counted bytes |
+| `heap_buffers` `slope_R` at most 0.10 MiB per table | **Refuted**: no region retained per table |
+| `heap_buffers` `slope_A` at least 0.5 MiB per table | **Refuted**: the regions are charged |
+| `H64`: small tables flushed (flush lines for `t1..t400` before `pc`) and `R(400)` at most 64 MiB | **Refuted**: the pool limit caps the region bytes |
+| `U2048` `slope_R` at least half of the `H2048` slope | **Not confirmed**: the per-table heap is not the slab region (mechanism not isolated) |
+| `heap_buffers` `slope_R` in (0.10, 0.95) or above 1.10 MiB per table, with P2 holding (for example 2 MiB per table from humongous allocation) | **Not confirmed**: real exceeds counted, but not by one region per table |
+| P3 fails (slopes differ by more than 5 %) with P1 holding for at least one lifetime | **Not confirmed**: real follows the limit knob in part |
+| P7 fails (no `MEMTABLE_LIMIT` flush of `t0`, or the gauge after `pc` above 0.40 x 64 MiB) with the rest holding | **Not confirmed**: positive control did not bind |
+| Validity fails (settings, G1 flags, budget, a `ks.` flush before `pc`, table count, client errors, `ERROR` lines, node killed) | **Invalid** |
+| Any other combination | **Not confirmed** (no matching row) |
+
+**Stop conditions and cleanup.** A lifetime stops on a failed set-up check (port busy, read-back, node not serving in 300 s, histogram unreadable); the node is stopped by its PID; no `CassandraDaemon` is left (`ps -eo cmd | grep '[C]assandraDaemon'`). Run data stays under `/mydata/s4/slabrc-run/` and logs under `/mydata/s4/slabrc-logs/`.
