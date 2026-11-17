@@ -408,3 +408,16 @@ frozen at sha256 `9118745e…2715` after amendments U1–U8 and C1–C9, run at 
   per-connection bytes; the cluster tier ran with `-Dcassandra.netty_use_heap_allocator=true` (unpooled direct buffers).
 - For stage 3: the filed discard start value was off by the 9 header bytes (`discard` counts from the frame start); state where a
   counter starts and the feed schedule before writing exact numbers, and check allocator chunk granularity when reading direct memory.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The frame length the client declares, `bodyLength + 9` (`Envelope.java:424-429`), against `MAX_TOTAL_LENGTH` = 16 MiB (`Config.java:285`, `Envelope.java:197`). The bytes held are the `ByteToMessageDecoder` cumulation's capacity, which grows past the readable bytes (stage 4: 12 MiB capacity for an 8 MiB frame). Held until the frame completes or the connection closes. A partial frame is never charged elsewhere: `native_transport_max_request_data_in_flight` is charged only after decode (`PreV5Handlers.java:178-187`). |
+| **E2 At the limit** | Above the limit graceful: discard plus "Request is too big" (`:345-351`, `:429-439`, `discard` `:493-498`). Below it nothing stops accumulation: the decoder returns `null` until the frame is complete (`:441-442`), allocating from the pooled direct allocator (`CBUtil.java:60`); across connections the only stop is the JVM's direct-memory limit, i.e. `OutOfDirectMemoryError` (unknown: confirm Netty's direct counter uses `-XX:MaxDirectMemorySize` in this Netty version). |
+| **E3 Owner and multiplier** | Per connection. Connections are unlimited by default (`native_transport_max_concurrent_connections = -1`, `Config.java:289-290`; the limit handler is added only if > 0, `PipelineConfigurator.java:239-245`); idle timeout 0 (`Config.java:139`, `PipelineConfigurator.java:247-250`). The decoder runs in `InitialConnectionHandler` before STARTUP and authentication (`PipelineConfigurator.java:265`, `InitialConnectionHandler.java:66-70`). No limit caps the total. |
+| **E4 Budget domain** | Netty direct memory (pooled, `maxOrder=11` → 16 MiB chunks, `conf/jvm11-server.options:145`). `MaxDirectMemorySize` default RAM/4, or heap_limit/2 on large hosts (`conf/cassandra-env.sh:61-66,139-158`). Shared with the chunk cache / buffer pool (`file_cache_size`), `networking_cache_size`, internode buffers and v5 frame buffers. 256 idle connections × 16 MiB partial frames = 4 GiB = the whole default direct budget of a 16-GiB host. |
+| **OOM-lead flag** | E3: per-connection cap only; with unlimited connections and no idle timeout, N unauthenticated connections each holding an incomplete ≤16 MiB frame (uncounted) reach the default direct budget at N ≈ 256 on a 16-GiB host. |
+
+**Real-memory estimate:** positive per connection; undetermined for the node, decided by E3/E4: whether k connections × 16 MiB partial frames exhaust default direct memory before anything else refuses them.
+**Stage-4 claim to add:** k = 64 / 256 / 512 connections each send a header declaring a body of 16 MiB − 9 B and then all but the last byte, held open: direct memory ≈ k × (16 MiB + cumulation slack), no refusal below the direct limit; above `MaxDirectMemorySize` expect `OutOfDirectMemoryError` on these or other direct allocations.

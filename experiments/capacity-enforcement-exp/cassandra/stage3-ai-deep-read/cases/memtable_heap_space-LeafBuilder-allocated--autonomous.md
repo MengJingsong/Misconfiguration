@@ -568,3 +568,16 @@ Stage 4 re-run ("run 1b"), 2026-10-27/28, advisor's Mac, **authorised by the use
 - **Unit: Confirmed — caps** (U4 row 6 as amended). Both JVMs charged 190 B per partition; V0 − V1 = 88·n2683 + 144·n2736 exactly for `skiplist`, `skiplist_sharded` and `trie` (5,720,000 / 2,880,000 B); every V0 case within −0.058 … +0.804 % of jamm.
 - **Cluster: Confirmed — caps** (C7 row 6 with the amended C6 (4)). Flushes at `live` 0.50 in all 213 trigger lines, used ≤ 0.52, switches 46/11/5 and 45/11/5; tail accounting within 3.9 % of the live-heap change in seven runs and 7.2 % above it in `v0-256-batch`, inside the amended band only through its rewrite allowance (the generator predicts about 2,700 rewrites there, 22 kB), so that lead is not explained by rewrites.
 - **Findings for stage 3 (new):** cassandra-stress user mode with `select: fixed(1)/N` writes 1 + (1 − 1/N)^N ≈ 1.37 rows per op and forces the partition's last row in about 37 % of ops, so rewrites are systematic; the idle node holds 5,000–49,000 live `BTreeRow`s outside the memtable that change between full-GC histograms, which moves a live-heap delta by several MB; the skiplist memtables' per-partition charge is a per-JVM random estimate unless `cassandra.memtable.row_overhead_size` is set.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `ObjectSizes` estimates of on-heap memtable objects (slab regions under the default `heap_buffers`, `conf/cassandra.yaml:825`, plus BTree arrays such as `BTree.java:2682-2683`, `:2735-2736`), charged via `allocator.onHeap().adjust` → `allocate` (`MemtableAllocator.java:160-197`). Stage 4 found the accounted size within about 1–8% of measured live heap. Release: when the flushed memtable is discarded; the objects become collectable then. Superseded BTree arrays from CAS retries are garbage, not counted, and short-lived. |
+| **E2 At the limit** | Graceful: `tryAllocate` fails above `limit` (`MemtablePool.java:151-160`) and the writer waits on `hasRoom`; flush of the largest memtable starts at the cleanup threshold 1/(1+2) (`DatabaseDescriptor.java:761-763`, two flush writers `conf/cassandra.yaml:899`). Bypass: if the op group is blocking (a flush barrier), the allocation is recorded past the limit without waiting (`MemtableAllocator.java:180-184`); this covers writes already in the old op group, bounded by concurrent writers × mutation size, transient. |
+| **E3 Owner and multiplier** | One node-wide pool, the static `MEMORY_POOL` (`AbstractAllocatorMemtable.java:59,81`), shared by all tables. Owner count 1. |
+| **E4 Budget domain** | Heap. Default `maxMemory()/4` (`DatabaseDescriptor.java:586-587`). Shares the heap with key/counter caches, coordinator read state, in-flight request bodies (their own limits), compaction. 1/4 of the heap leaves the rest to other consumers; this constraint alone does not overcommit the heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

@@ -150,3 +150,16 @@ Applied by the stage-4 audit session on 2026-10-27, before any reading of the fr
 - The literal's own role (patched copy with the helper `>= 0` and the two sibling guards removed): the helper becomes true at capacity 0 and the reload submits all 34,952 keys, but the cache still holds nothing (Caffeine's `maximumWeight(0)`). So B1's last sentence ("flipping capacity ... flips both the helper and the footprint") is true of the knob, but the footprint bound comes from the weight cap, not from the `> 0` test; the helper only decides whether a saved key is reloaded.
 - Amendments applied by the audit (section "B-audit", dated 2026-10-27): defaults added to the knob values, numeric definitions of slack/ratios, the reload test (the helper is not on the path of the filed direct puts), the patched-literal arm, workload via `counter_write` (five cache entries per key; `-pop dist=uniform` stalls), JMX `saveCaches` instead of a nonexistent `drainsave`, `ps | grep '[C]assandraDaemon'` instead of `pgrep -f`.
 - For stage 3: the estimate and claim hold; note that direct puts into the cache do not exercise this helper, and that the cache key includes the column (5 counters = 5 entries per row).
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The weigher's estimate `key.unsharedHeapSize() + value.unsharedHeapSize()` (`CaffeineCache.java:61-70`): `CounterCacheKey` shell plus its two byte arrays (`CounterCacheKey.java:152-157`) plus a fixed `ClockAndCount` size (`ClockAndCount.java:46-48`); 120 B per entry in stage 4. It omits Caffeine's node and map entry: stage 4 measured whole-heap growth of 1.78-2.06 × `Size`. Counter and memory are released together on eviction, run synchronously (`ImmediateExecutor`, `CaffeineCache.java:53-57`). The traced literal (`ColumnFamilyStore.java:3269`) is only an on/off gate for the start-up reload (`CacheService.java:382`). |
+| **E2 At the limit** | Graceful: Caffeine evicts to `maximumWeight`. Capacity 0 retains nothing even with the gate patched out (stage 4). The reload keeps at most about 1,000 pending load futures (`AutoSavingCache.java:242-257`) and inserts under the same cap. |
+| **E3 Owner and multiplier** | One cache per node (`CacheService.initCounterCache`, `CacheService.java:172-176`), shared by all counter tables; the capacity is the node total. |
+| **E4 Budget domain** | Heap. Default `min(max(1, 2.5 % of totalMemory), 50)` MiB (`DatabaseDescriptor.java:834-836`), so about 100 MiB real at the 2× overhead. Shares the heap with the key cache (`min(5 %, 100 MiB)`, `DatabaseDescriptor.java:815-817`), `memtable_heap_space` (heap/4, `:587`) and the prepared-statement cache; together far below the default heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** positive, bounded at about 2 × `counter_cache_size` (≈ 100 MiB real at the 50 MiB default); E1 decides the factor, and it is a constant factor, not an unbounded overshoot.
+**Stage-4 claim to add:** none

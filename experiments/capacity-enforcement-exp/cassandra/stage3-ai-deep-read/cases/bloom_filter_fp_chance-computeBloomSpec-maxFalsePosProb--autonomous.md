@@ -374,3 +374,16 @@ unit tier), every other value equals F at N_est to the byte, the Byteman native 
 refused. Every reading is identical to run 1's. Run 1's cluster verdict (Invalid) is kept in the results file. B1, B3f and the unit tier are left
 as filed. For stage 3: the legacy cassandra-stress write's keys collide deterministically (805 of 10 M), so a design needing an exact partition
 count must compute it from the stress source or avoid that key generator.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Counted: bits per key chosen from `maxFalsePosProb` (`BloomCalculations.java:146-155`; stage 4: the floor gives 1 bit/key, line 149) times the writer's key-count estimate (`SortedTableWriter.java:445`; compaction merges the inputs' HyperLogLog estimators, `CompactionAwareWriter.java:84` → `SSTableReader.java:302-332`, so overlapping keys are not double-counted). Held: exactly `ceil((N·bpk+20)/64)·8` bytes, `malloc`ed whole at construction (`FilterFactory.java:70-75`, `OffHeapBitSet.java:42-48`, `Memory.java:65`, `MemoryUtil.java:81-84` `Native.malloc`); stage 4's Byteman ledger tracked tablestats within 74 B. Held for the SSTable reader's lifetime; during a compaction the inputs' and the output's filters coexist. |
+| **E2 At the limit** | Per key only: a high fp is floored (2 bits filed, 1 bit observed), a too-low fp is refused at schema validation (`TableParams.java:160-167`). There is no total: a failed `malloc` (peer 0) throws `OutOfMemoryError` (`Memory.java:68-69`), rethrown as `RuntimeException("Out of native memory …")` (`OffHeapBitSet.java:50-52`); one filter > 16 GB is refused (`:43-44`). |
+| **E3 Owner and multiplier** | One filter per SSTable, option per table. SSTables and partitions per node are unbounded and no limit caps the node total: at the default 0.01 (10 bits/key) ≈ 1.25 B per partition per SSTable holding it (≈ 0.63 B under LCS's 0.1). |
+| **E4 Budget domain** | Native `malloc`: outside `-Xmx`, outside `MaxDirectMemorySize`, and not seen by NMT (stage 4, C3). Shares process RSS with other `Memory` users (index summaries, compression metadata) and the direct pool; off-heap memtables are not on by default (`conf/cassandra.yaml:825`, `heap_buffers`). No configured budget for this domain, so only the host or container limit applies. |
+| **OOM-lead flag** | none — real memory follows the knob to the byte per key. The uncapped node total grows with the data volume (≈ 1.25 B/partition at defaults), which is documented behaviour and not an overshoot of this constraint. |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

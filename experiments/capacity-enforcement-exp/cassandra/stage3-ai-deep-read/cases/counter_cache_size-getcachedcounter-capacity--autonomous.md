@@ -141,3 +141,16 @@ Applied by the stage-4 audit session on 2026-10-27, before any reading of the fr
 - The guard's own role: with the `== 0L` guards removed (patched copy) capacity 0 still retains nothing; the guard only skips key construction and lookup. On the real path the guard at line 2501 is not reached at capacity 0, because `CounterMutation.java:213` (`getCapacity() != 0`) already skips `updateWithCurrentValuesFromCache`; the unit tier is the only place its branch is observed, and on the real path it matters only if the capacity is changed between the two checks.
 - Amendments applied by the audit ("B-audit", 2026-10-27): default and 64 MiB added, numeric slack/ratios, allocation-per-call and patched-literal arm, production-path and regular-table controls, workload via `counter_write` (five entries per key), process check via `ps`.
 - For stage 3: the estimate and claim hold; the hit-rate wording of B3f is not a dose-response measure here.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Caffeine weight = `key.unsharedHeapSize() + value.unsharedHeapSize()` (`CaffeineCache.java:64`), i.e. `CounterCacheKey.EMPTY_SIZE` + the two key byte arrays (`CounterCacheKey.java:152-156`) + `ClockAndCount.EMPTY_SIZE` (`ClockAndCount.java:46-48`); about 120 B per entry. Not counted: Caffeine's node and map-table slot. Stage 4 measured real heap at 1.78-2.06 x `Size` (results §4.1). Released on eviction, which runs inline (`ImmediateExecutor`, `CaffeineCache.java:56`), so counter and memory move together (after GC). |
+| **E2 At the limit** | Graceful: Caffeine evicts to `maximumWeight` (`CaffeineCache.java:54`); a put is never refused. Capacity 0 skips the lookup and the put (`ColumnFamilyStore.java:2501`, `:2508`; `CounterMutation.java:213`). On a miss the counter is read from the table (`CounterMutation.java:222`), which is outside this cache. |
+| **E3 Owner and multiplier** | One cache per node (`CacheService.initCounterCache`, `CacheService.java:172-185`), shared by all counter tables. Multiplier 1. |
+| **E4 Budget domain** | Heap. Default auto size = `min(max(1, 2.5 % of totalMemory), 50)` MiB (`DatabaseDescriptor.java:834-836`). Other auto-sized heap caches: key cache `min(5 %, 100 MiB)` (`:815-816`) and paxos cache `min(1 %, 50 MiB)` (`:850-851`); with `memtable_heap_space` = heap/4 (`DatabaseDescriptor.java:586-587`) that is at most about 33.5 % of the heap, so the defaults do not over-commit the heap. Even at ~2x the weight, the counter cache's real heap is ≤ ~100 MiB at default. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive). The weigher understates real heap by about 2x, but this is a fixed factor applied to a cap of ≤ 50 MiB.
+**Stage-4 claim to add:** none

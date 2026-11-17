@@ -117,3 +117,16 @@
 - **Runbook details (C8):** run the nodes with `bin/cassandra -f` or Byteman's `traceln` output is lost (the daemon closes `System.out`); a `SELECT count(*)` on the 2,000,000-row partition times out (B's content was read from the update totals and `tablestats`).
 - **For stage 3:** A5's pointer to `ThrottledUnfilteredIteratorTest` is right (7 tests pass); the file's B3f numbers (20 KB for N = 100, 2 MB for N = 10000) were low by a factor of two (41.7 KB and 4.16 MB for 200-byte values), i.e. a row costs about 220 bytes plus its value.
 
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Unfiltereds (rows and range-tombstone markers) per `PartitionUpdate`, `count < throttle` (`ThrottledUnfilteredIterator.java:146-149`), default 100 (`CassandraStreamReceiver.java:63`); not bytes. Real heap per update ≈ rows × (≈ 220 B + value bytes): 416 B per 200-byte row in stage 4. Held from `PartitionUpdate.fromIterator` until `ks.apply` returns (`CassandraStreamReceiver.java:218-221`); then the rows live on in the memtable under its own limit. |
+| **E2 At the limit** | Graceful split: the iterator ends the slice and the next `Mutation` starts. No byte limit inside the loop; on a CDC table the commit log's `max_mutation_size` (16 MiB) refuses an oversized `Mutation` **after** it is materialised (stage 4: `MutationExceededMaxSizeException`, failed repair, no OOM at 2 GB). |
+| **E3 Owner and multiplier** | Per partition slice, one live at a time per receiving table stream (`finished()`, `:236`, → `sendThroughWritePath`, `:202-227`); concurrent receivers are the concurrent incoming stream sessions, with no total. **Reachability at defaults:** the path runs only if `requiresWritePath` (`:195-199`): a CDC table with `cdc_on_repair_enabled` (default true, `Config.java:416`), a memtable that streams to memtable, or views with `materialized_views_enabled` (false, `conf/cassandra.yaml:1981`). With `cdc_enabled: false` (`conf/cassandra.yaml:413`) the `cdc` flag is not written to the schema (`SchemaKeyspace.java:597-600`), so at shipped defaults no table reaches this path. |
+| **E4 Budget domain** | Heap, shared with the memtable it applies into (`memtable_heap_space` heap/4, `DatabaseDescriptor.java:587`) and the stream receive buffers; stage 4 saw a ≈ 0.5 GB receive/apply transient independent of N. At N = 100 the update itself is tens of KiB for normal rows. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive in rows per `Mutation`); undetermined in bytes for very wide rows, decided by E1 (row size × 100), but the path is off at shipped defaults (E3).
+**Stage-4 claim to add:** none

@@ -322,3 +322,16 @@ frozen at sha256 `7393d4f3…3317` after fifteen audit amendments; uncommitted).
 - **Open reading:** in one of the three Qg-off repetitions, the heap after an in-window Young GC was 528 MiB above baseline, against
   129–132 MiB in the other two. 28 old regions were promoted, and the humongous regions fell to one buffer. Under B3g's heap row
   (2 of 3) this does not change the verdict. What held the heap is not known; a class histogram at a held point would tell.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Counted: rows per internal sub-page of a paging-off GROUP BY query (`rowLimit`, `SelectStatement.java:899-914`; counter `DataLimits.java:986`). Held: the bytes of those rows. Each local response is serialized whole into one heap `DataOutputBuffer` (`ReadResponse.java:196-207`), which grows ×2 and then ×1.5 past 64 MiB (`DataOutputBuffer.java:158-171`). Stage 4 measured 41.1 MB per 10,000 × 4 KiB rows, and a 514 MB array for a 411 MB response. Row size is not limited by the constant, only per write by `max_mutation_size`. The buffer is freed by GC after each sub-page is consumed. |
+| **E2 At the limit** | GROUP BY: graceful, the sub-page ends and the next one resumes. Aggregates without GROUP BY (`AGGREGATE_EVERYTHING`) never receive the constant (`SelectStatement.java:890`, `:906`, `:920`): with paging off they take a single `NO_LIMIT` read (`AggregationQueryPager.java:197`, `:433-442`). The only stops there are the request deadline (`StorageProxy.java:2204-2205`; `read_request_timeout` 5 s, `Config.java:145`) and the 2^31−9 array cap (`DataOutputBuffer.java:118`). Read-size thresholds are off by default (`Config.java:526-530`). |
+| **E3 Owner and multiplier** | Per coordinator query; read concurrency is `concurrent_reads` = 32 (`Config.java:179`). No limit caps the total bytes of responses held at once. |
+| **E4 Budget domain** | Heap, shared with `memtable_heap_space` heap/4 (`DatabaseDescriptor.java:587`) and in-flight heap/10 (`:651`, request bytes only). There is no budget for read responses at defaults. |
+| **OOM-lead flag** | E1+E2: the constant counts rows, not bytes, so a paging-off GROUP BY sub-page holds 10,000 × row size. An aggregate without GROUP BY bypasses the constant and materialises the whole scanned partition in one heap array: 411 MB in a 514 MB array at 100 k × 4 KiB rows, linear up to ≈ 2 GiB per query, × up to 32 concurrent reads. |
+
+**Real-memory estimate:** positive for the row count. For bytes it is undetermined, decided by E1: row size, which no default limits beyond 16 MiB per write.
+**Stage-4 claim to add:** `SELECT count(*) FROM t WHERE k=?` with paging off over a partition of S serialized bytes allocates one coordinator heap array of ≈ 1.25 S. N concurrent such queries hold ≈ N × 1.25 S, until the 5 s deadline or the ≈ 2 GiB array cap.

@@ -522,3 +522,16 @@ defect D1 (B2e.3 output location) fixed by AM6 (D3). The cap is on entries; per-
   per `write()` with the newlines dropped; nothing reaches the junit XML, so B2e.3's `grep` finds no `PROBE` line. Fix: collect from
   that log and rejoin the fragments of each `PROBE` record (harness `collect-probe.py`). The test class, the arms, B2f and B2g are
   unchanged.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Entries (`maximumSize`, `AuthCache.java:346`; default 1,000, `Config.java:91`). One entry is a `(AuthenticatedUser, IResource)` key plus a `Set<Permission>` (`PermissionsCache.java:44-47`). Bytes per entry are not counted; they follow the resource-name length (`RoleResource.java:86-89`). Stage 4: 3.8-4.1 KB per entry with ~4 KB role names. Entries are released on eviction, or by `expireAfterWrite(permissions_validity = 2 s)` (`AuthCache.java:345`, `Config.java:90`). |
+| **E2 At the limit** | Graceful: Caffeine evicts (W-TinyLFU), and a lookup is never refused. The runtime shrink calls `policy.setMaximum` (`AuthCache.java:357`). |
+| **E3 Owner and multiplier** | One cache per node (`AuthenticatedUser.java:42`). The same knob is shared with `JmxPermissionsCache`, so there are at most two caches. Other auth caches (roles, credentials, network, CIDR) each have their own `*_max_entries`. |
+| **E4 Budget domain** | Heap. **Absent at defaults:** `authorizer: AllowAllAuthorizer` (`conf/cassandra.yaml:217`) does not require authorization, so `initCache` returns null (`AuthCache.java:331-332`) and nothing is retained. With `CassandraAuthorizer`, 1,000 × a few KB is a few MB. A worst case of 1,000 × a role name near the 16 MiB frame (`Config.java:285`) needs an authenticated client that issues deliberately huge names, and the 2 s expiry limits how long each entry is held. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive). The cap is on entries, the cache is off at the shipped authorizer, and per-entry bytes at a reachable workload are KB-scale.
+**Stage-4 claim to add:** none

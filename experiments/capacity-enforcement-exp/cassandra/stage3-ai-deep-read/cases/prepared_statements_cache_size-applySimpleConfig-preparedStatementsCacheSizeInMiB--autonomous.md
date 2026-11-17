@@ -164,3 +164,16 @@ conf/cassandra.yaml (508), test/conf/cassandra.yaml (48)
 - **Unit: Confirmed — caps** (B2g rows 1 and 2). `0MiB` refused with the traced message, `1MiB` → 1, auto → 10 at `-Xmx1G`; w = 21,812 B; weightedSize ≤ C at every sample; count ⌊C/w⌋ = 48 · 192 · 769 · 480 at 1 · 4 · 16 · 10 MiB; evicted = N − count; both B2h controls as frozen.
 - **Cluster: Confirmed — caps only on some paths (bypass)** (B3g row 1 and the added bypass row). `0MiB` start aborted (`CassandraDaemon.java:887` line); plateau 96 · 482 · 1,542 at 2 · 10 · 32 MiB (1 : 5.02 : 16.06); evicted = 20,000 − count; `Prepared` instances = count + 31; discard warning logged; live-heap difference 32 vs 2 MiB = 0.857 × 30 MiB; B3h controls 500/0 and 500/0. Bypass: the `system.prepared_statements` memtable gains one partition per distinct PREPARE (+20,001 at every value, ≈ 21.7 MB of live heap independent of the knob).
 - For stage 3 (not applied): A4 lists the system table as an on-disk consumer only; before a flush it is the largest on-heap consumer of a PREPARE flood.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `key.size() + Prepared.pstmntSize` (`QueryProcessor.java:952-958`), where `pstmntSize` is `ObjectSizes.measureDeep(prepared)` (`:947-950`); a deep measure that also counts shared schema objects, so it over- rather than under-counts (stage 4: live-heap difference 0.857 × the cap change). Released on eviction (synchronous, `ImmediateExecutor`, `:112-118`); eviction also deletes the row from `system.prepared_statements` (`:132-139`). The traced line (`DatabaseDescriptor.java:800`) only rejects an explicit `0MiB` at start-up. |
+| **E2 At the limit** | Graceful: Caffeine evicts (warning per minute, `:120-126`), and a single statement heavier than the cap is refused with `InvalidRequestException` (`:825-829`). |
+| **E3 Owner and multiplier** | One static cache per node (`:107`, `:112`), all clients and keyspaces; the cap is the total. Outside it: one `system.prepared_statements` row per distinct PREPARE (`:831-833`), held in that table's memtable until flush (stage 4: ≈ 21.7 MB for 20,000 statements). |
+| **E4 Budget domain** | Heap. Default `max(10, heap/256)` MiB (`DatabaseDescriptor.java:796-798`); the system-table rows draw on `memtable_heap_space` (heap/4, `:587`), which flushes them. Together with the key and counter caches, well below the default heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive); the weigher over-counts, and the per-PREPARE system-table rows are bounded by memtable flushing and deleted on eviction.
+**Stage-4 claim to add:** none

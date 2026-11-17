@@ -349,3 +349,16 @@ The per-entry size cannot be read directly. The quantity used is used-heap after
   - The unit tier stays Confirmed — caps (run 1, closed). The run-1 cluster verdict (Not confirmed) stays on record.
 - **Observation kept from run 1, seen again.** The ingest leaves 226 MiB live in this run (216 MiB in run 1): 20,009 `BTreeRow` of the flushed `heap_buffers` memtable of `partition_denylist`, constant through every later reading. It is recorded, not a condition.
 - **For stage 3.** A heap baseline for a cache filled from a system table must be taken after the ingest, and shown stable. The pre-ingest baseline of B3d was the only failed part of run 1.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Counted: keys (`processed`, `PartitionDenylist.java:437-446`). Held per key: the exact-size `ByteBuffer` read from the result, a set slot and a token (Murmur3 `LongToken`; ByteOrdered copies the key). Stage 4 measured 8,288·P + 4·T(P) + 176 B for 8 KiB keys, so ≈ key bytes + ~100 B. Transient: the unpaged `LIMIT P+1` result (`:404-412`), held serialized and deserialized during each read. The entry is replaced only at the next load or refresh, so a lowered P frees nothing until then. |
+| **E2 At the limit** | Graceful: keys beyond P are not loaded (and so not denied), with an ERROR log (`:419-431`). Row P+1 is read and dropped. |
+| **E3 Owner and multiplier** | Per denylisted table, in a Caffeine cache with no `maximumSize` (`:184-186`). `denylist_max_keys_total` (10,000, `Config.java:780`) is applied only on the full load (`:487-499`). The cache-miss load (`:196`), the timed refresh (`:206`, every `denylist_refresh` = 600 s, `Config.java:767`) and the JMX add/remove refresh (`:525`) use the per-table limit alone. A table skipped at load gets an empty entry (`:492`), which the next timed refresh refills to P. So the node holds up to 1,000 × T keys, not 10,000. Keys are ≤ 65,535 B (clustering value, `ClusteringPrefix.java:278-279`), so ≤ ≈ 64 MiB per table. |
+| **E4 Budget domain** | Heap. The feature is off by default (`partition_denylist_enabled = false`, `Config.java:759`). The default caps resolve to ≤ 64 MiB per table (≤ 640 MiB total if the total cap held), small next to `memtable_heap_space` = heap/4 (`DatabaseDescriptor.java:587`). |
+| **OOM-lead flag** | none — the per-table cap holds exactly on every path (stage 4). The total-cap bypass (E3) needs the feature enabled and an operator who denylists more than 10,000 large keys over more than 10 tables, so its size is set by the operator, not by the workload. |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** with T × min(P, M_t) > `denylist_max_keys_total`, after one `denylist_refresh` period the cache holds min(P, M_t) keys for every denylisted table t, above the total cap (tables cut at load start empty and are refilled by the timed refresh, `PartitionDenylist.java:492`, `:206`).

@@ -457,3 +457,16 @@ bin/nodetool flush ks1 t
 - **The unit yaml is not the node's.** `max_value_size` has no unit-yaml override, so both start at 256 MiB; but the unit yaml's `max_mutation_size` is derived from its 5 MiB segments (2.5 MiB), which does not matter here because the unit tier never calls `CommitLog.add()`.
 - **What this design does not cover.** The inbound-message consumer (it needs two nodes with different limits); the hints, streaming, batchlog and read-repair consumers; sites 3 and 4 of §5 (the SSTable scan's clustering values and the partition key of a read command; site 2 is covered at the unit tier and they have the same shape); range-delete bounds; *N* > 1, the multiplier; the unguarded `AbstractType` case that would allocate up to 2 GiB (§6b item 4); and the other unguarded read sites of §5, which the sibling control samples with one primitive. Each is recorded from the source in §5 or §6b.
 - **Nothing here was run.** No measured number appears in this file; every figure in §9 is derived from the source and is a prediction.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Counted: the decoded on-wire length `l` of one value (`AbstractType.java:590-594`). Held: `l` + an array header (stage 4: *M* + 816 … 1,520 B per call). On a client read the same bytes also sit in the serialized local response (`ReadResponse.java:196-207`), so there are at least two heap copies while the response is consumed. Nothing is counted or released: the array is freed by GC. |
+| **E2 At the limit** | `IOException` before the allocation (`:594-599`), handled as corruption (§6b): the read fails, the SSTable is marked suspect, and a failed replay stops the start. Nothing allocates in its place. The unguarded sibling primitives (§5) allocate up to 2 GiB from a damaged length, but they are reached only on damaged or crafted input, not on a client workload. |
+| **E3 Owner and multiplier** | Per value. Multiplier: the values deserialized at once, i.e. cells per row × rows per response × concurrent reads (`concurrent_reads` 32, `Config.java:179`), plus compaction and mutation threads. No limit caps their sum at defaults (read thresholds off, `Config.java:526-530`). At stock settings a client value is ≤ 16 MiB (`max_mutation_size`), so the 256 MiB bound never binds on client data. The per-read total is set by row and page counts (see `SelectStatement_DEFAULT_PAGE_SIZE-getDataLimits-pageSize--autonomous`). |
+| **E4 Budget domain** | Heap. 256 MiB × 32 concurrent reads = 8 GiB, the whole of an 8 GiB heap, but this is not reachable at stock settings. It shares the heap with `memtable_heap_space` = heap/4 (`DatabaseDescriptor.java:587`) and the native-transport in-flight cap of heap/10 (`:651`). |
+| **OOM-lead flag** | none — no value a client can write at stock settings meets the 256 MiB bound. The multi-value total is a row-count matter, flagged under the page-size case. |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

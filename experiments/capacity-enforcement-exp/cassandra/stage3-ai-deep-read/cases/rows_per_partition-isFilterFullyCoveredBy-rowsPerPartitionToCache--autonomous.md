@@ -158,3 +158,16 @@ Arithmetic: per partition N=10 -> about 10 KiB, 20,000 partitions -> about 200 M
 - Open point: `RssAnon` rose 0.3 to 0.7 GB in the n10, n100 and c32 arms, far more than the cache Size (cause not isolated; read buffers kept by the allocator are the likely one).
 - Finding for stage 3 / upstream (instrument check, not a run-1 reading): a prepared `SELECT` keeps the table's `rows_per_partition` from the time it was prepared (seen after a node restart, probably through the persisted prepared statements; not isolated), so after `ALTER TABLE ... caching` the row cache kept populating with the old N until the statement was re-prepared; unprepared statements follow the new value at once. Not checked against JIRA.
 - Citation corrections made at the audit: `CachingParams.java:51`, `:140`. The case file is unchanged since the audit apart from this field.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Live rows per cached partition (`rowsCounted` increments only on `hasLiveData`, `SinglePartitionReadCommand.java:594-598`; the stop is at `:586`). Not counted: tombstoned or expired rows read before the cap (stage 4 stored 60 rows for N = 10), and cell bytes per row. A table with no clustering columns caches its whole row (`:547-549`). The bytes that OHC charges are the entry's serialized size (`CachedBTreePartition.java:199-212`). The entry is built on heap first (`CachedBTreePartition.create`, `:604`). |
+| **E2 At the limit** | Graceful: the wrapper stops at N live rows and the rest of the partition is not stored. With `ALL` (`Integer.MAX_VALUE`) the whole partition is first materialised on heap and only then offered to OHC (`throwOOME(true)`, `OHCProvider.java:43`). Whether OHC rejects an oversized entry, rather than allocating, is unknown: it would be settled by reading OHC's `maxEntrySize` and `put` path (not in the tree). |
+| **E3 Owner and multiplier** | Per table (`CachingParams`) and per cached partition. Total entries across tables are bounded only by the separate global `row_cache_size` (`OHCProvider.java:40`). |
+| **E4 Budget domain** | Off-heap native memory (OHC, `Unsafe`, outside `MaxDirectMemorySize`) for entries, and heap for the transient build and deserialization. **Off at defaults:** `rows_per_partition` = 0 (`CachingParams.java:51`) and `row_cache_size` = 0 MiB (`Config.java:474`). Stage 4 saw `RssAnon` rise 0.3-0.7 GB above the cache Size when the cache was enabled (cause not isolated). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive with caveats). At defaults the cache is off. When it is enabled, the caveats (tombstones uncounted, the whole-partition heap build with `ALL`, row width) stand as filed.
+**Stage-4 claim to add:** none

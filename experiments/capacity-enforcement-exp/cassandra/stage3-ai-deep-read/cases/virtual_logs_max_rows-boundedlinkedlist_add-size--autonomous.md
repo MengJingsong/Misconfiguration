@@ -109,3 +109,16 @@
 - **Missed (recorded, not tuned):** in the cluster tier the ON-minus-OFF byte totals per retained entry were not constant within 25 percent across arms (90 to 510 B) and the N = 1000 arm gave a non-positive difference; the stress workload's memtable and GC state moved the heap by about 10 MB between arms, more than 1000 messages occupy. The unit tier's per-entry bytes are exact. A log source that stores nothing (for example a read-only workload) would make the cluster byte reading precise.
 - **For stage 3:** (1) A4 is right that `data()` makes a transient per-query copy; nothing was measured on it. (2) The constant-rule point of A1 (bounds 1000 and 100000 are not settable) held: values 999, 100001, 0, -1 and 200000 all resolve to 50000.
 
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Log messages (list entries), not bytes: `size() == maxSize` (`LogMessagesTable.java:191-198`), max resolved to [1000, 100000], default 50,000 (`:57-59`, `:147-152`). Stage 4: message length + 96 B per entry. Held until pushed out by newer messages or `truncate()` (`:135-138`). |
+| **E2 At the limit** | Graceful: the oldest message is dropped. |
+| **E3 Owner and multiplier** | One table per node. Outside the cap: the appender's pre-startup buffer (≤ 50,000, `VirtualTableAppender.java:125`) and a full `SimpleDataSet` copy per concurrent `SELECT` (`data()`, `LogMessagesTable.java:95-127`), not capped in number. |
+| **E4 Budget domain** | Heap. At defaults the table is fed by nothing: the `VirtualTableAppender` and its reference are commented out in `conf/logback.xml:112-118` and `:127-129`, with a `WARN` filter when enabled (stage 4: 0 rows by default). 50,000 × ~300 B–2 KiB = 15–100 MiB when enabled. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

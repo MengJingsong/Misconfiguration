@@ -342,3 +342,16 @@ frozen at sha256 `c1b87bd8…f1c0` after sixteen dated audit amendments; uncommi
   - (2) The bypass needs only an upsert of a key whose row is still in the current memtable, so "caps" holds for first writes only.
   - (3) B2d's "real retained heap not observable" was not so: the class histogram is readable in-process.
   - (4) B3c's concurrency 16 exceeds jvector 1.0.2's 11-insert builder pool, which throws.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Serialized bytes of one vector term (`term.remaining()`, 4·d for `vector<float,d>`) against 32 KiB (`Config.java:946`; `StorageAttachedIndex.java:823`). No counter; per-term yes/no at `VectorMemoryIndex.java:90`. What an admitted term really costs: `OnHeapGraph.add` returns an estimate (vector `float[]`, postings entry, graph node; `OnHeapGraph.java:156-204`) that is charged to memtable on-heap ownership through `markExtraOnHeapUsed` (`StorageAttachedIndex.java:1002-1007`); stage 4 measured estimate 9,001 B vs live `float[]` 8,488 B per 8 KiB term, so the charge tracks the real bytes. Freed when the memtable is flushed and discarded. |
+| **E2 At the limit** | Graceful on the insert path: the term is not indexed, the row is still written (`add` returns 0). Update path (`VectorMemoryIndex.update`, `:107-147`) adds the new vector without the check (stage-4 confirmed bypass). In that path `bytesUsed = add − remove`, and `remove` subtracts only the posting bytes (`OnHeapGraph.java:260-284`, `VectorPostings.java:100-105`), so the oversized vector and its node are still charged to the memtable; only `MemtableIndexBytes` under-reports. Negative deltas are dropped (`:1004-1006`), which over-charges, not under-charges. |
+| **E3 Owner and multiplier** | Per term, per memtable index (one per SAI vector index per table memtable). Number of terms is unbounded by this guardrail; the aggregate is bounded by the memtable flush policy, which sees the charged bytes. |
+| **E4 Budget domain** | Heap (on-heap graph, even when `memtable_allocation_type` is off-heap, because it is charged as `ExtraOnHeap`). Shared with memtable cells (`memtable_heap_space`, default heap/4) and the rest of the heap. The graph's bytes are inside the memtable budget, so the guardrail's default adds no separate claim on the heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (per term, first writes; update path bypasses the per-term cap but stays inside memtable accounting).
+**Stage-4 claim to add:** none

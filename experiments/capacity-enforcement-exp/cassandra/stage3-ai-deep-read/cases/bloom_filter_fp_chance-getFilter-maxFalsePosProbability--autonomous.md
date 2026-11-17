@@ -279,3 +279,16 @@ exact, e.g. N = 1M → 1,875,008 / 1,250,008 / 625,008 / 375,008 / 125,008 / 125
 HLL key estimate 1,972,278, hence 0.986 of the B3f values; live bit-set bytes equal the gauge; `getFilter(…, 1.0)` returned
 `AlwaysPresentFilter`; `ks_ctl` 2.01×). Step 5 confirmed (unchanged before restart, 0 after, `Filter.db` still on disk). The filed K
 for fp 0.01 was wrong (5, not 6; U4); the A5 doc claim "about three times" is 2.0× in this code.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The "counter" is `IFilter.offHeapSize()`, the bit-set bytes `ceil((n·b(fp)+20)/64)·8` computed at construction (`FilterFactory.java:70-75`, `OffHeapBitSet.java:39-48`); real memory is one `Native.malloc` of exactly that size (`Memory.java:80-88`, `MemoryUtil.java:81-84`), stage 4 measured malloc = gauge in every cell. `n` is the flush partition count or, at compaction, the HLL estimate of the inputs (`CompactionAwareWriter.java:84`, `SSTableReader.java:307-347`), so it tracks real keys (0.986 in stage 4). Held for the SSTable reader's life: the filter is in the reader's closeables (`SSTableReaderWithFilter.java:51`) and freed on tidy; during compaction input and output filters coexist until the inputs are released. |
+| **E2 At the limit** | There is no limit: the knob sets bits per key, not a ceiling. Only guard is a single filter > 16 GB → `UnsupportedOperationException` (`OffHeapBitSet.java:44-45`); a failed malloc is turned into a `RuntimeException` ("Out of native memory", `OffHeapBitSet.java:50-53`). Nothing caps the sum over SSTables. |
+| **E3 Owner and multiplier** | Per SSTable (per writer). Count of SSTables and of partitions is workload-driven; no node-wide total cap. A key present in k overlapping SSTables is charged k times (STCS overlap); at defaults (one data directory) `DefaultCompactionWriter` sizes one output from the merged estimate (`DefaultCompactionWriter.java:62-65`), so no per-disk multiplication. |
+| **E4 Budget domain** | Other native (libc malloc via JNA), outside `-XX:MaxDirectMemorySize` and invisible to NMT. Shares the process/container budget with index summaries (`index_summary_capacity`, auto 5% of heap), compression offsets, off-heap memtables (default `memtable_allocation_type: heap_buffers`, `conf/cassandra.yaml:825`, so none at defaults), and malloc arenas; no node-level budget covers this domain. At fp 0.01: ~1.25 B/partition/SSTable, e.g. 1e9 partitions ≈ 1.25 GB. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (per-key sizing follows the knob exactly; total is unbounded in partition count by design, not past what the knob governs).
+**Stage-4 claim to add:** `none`

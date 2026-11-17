@@ -147,3 +147,16 @@ Bypasses and overshoot: (i) the cap is per store and there is one store per even
 - Single-node, single client thread; cap is per event class (verified for two classes); the 200 literal is not a runtime knob (patched copies only).
 
 
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Events (map entries), not bytes: `keyHead` vs the literal `maxSize = 200` (`DiagnosticEventMemoryStore.java:39`, `:52-56`). An event's bytes depend on its class and referents (e.g. `AuditEvent` keeps the query text). Release: an entry leaves only when 200 newer events of the same class arrive; no time-based release, and the per-class store map is never trimmed (`DiagnosticEventPersistence.java:149-152`). Evicted events are freed by GC. |
+| **E2 At the limit** | Graceful: the oldest entry is evicted on each insert (`:56`). Put and clear are not atomic, so concurrent publishers overshoot by about their number (stage 4: 208 of 200 with 8 threads). |
+| **E3 Owner and multiplier** | Per event class (`DiagnosticEventPersistence.java:151`); about 15 direct `DiagnosticEvent` subclasses in `src/java`, so ≤ 200 × (classes persisted) events. One persistence instance per node. No total byte cap. |
+| **E4 Budget domain** | Heap. Off at defaults: `diagnostic_events_enabled = false` (`Config.java:708`, `conf/cassandra.yaml:1936`) makes `publish` return at once (`DiagnosticEventService.java:72-75`), and the store also needs a JMX `enableEventPersistence` subscription. At defaults it holds nothing; when enabled, 200 × class count × event size (e.g. 200 × 16 MiB max frame ≈ 3 GiB for audit events with maximal statements) is reachable only with non-default settings. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

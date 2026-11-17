@@ -225,3 +225,16 @@ Stage 4, 2026-10-25, tag `rc`, node `pc07`. Results: [`../../stage4-runtime-veri
   4. Lowering the capacity (`setcachecapacity`) evicts at once (`Size` 1024 -> 64 MiB) but `RssAnon` does not fall until the allocator is trimmed (853 MiB returned by `malloc_trim(0)`), so the process footprint can stay at the old cap.
   5. Prediction misses recorded in the results file: the cache-off node's `RssAnon` grew 200 MiB over the read phases (predicted under 100); `est` was below its lower band at 512 MiB (447.8 against 460.8) and at a repeat of 128 MiB (104.2 against 115.2); two fill-phase deltas exceeded the B2f range by 1.5 and 5.3 MiB.
 - **Runbook defect:** after the `rows_per_partition NONE` arm, the next node lifetime re-prepared the client's `SELECT` against the persisted NONE schema and a later `ALTER ... ALL` did not reach that statement, so the cache stayed empty; the arm was rerun (results §3, defect 5).
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Serialized partition bytes, `value.size()` of the malloc'd `RefCountedMemory` (`SerializingCache.java:69-75`); excludes malloc headers and the on-heap key and Caffeine node. Allocation precedes insertion and eviction. Release: native memory is freed only on eviction (`:54-58`); `clear()` → `invalidateAll()` has cause EXPLICIT and frees nothing (`:144-147`), confirmed by stage 4 as a leak of up to the capacity per call. |
+| **E2 At the limit** | Graceful: Caffeine evicts on the caller's thread (`:50-53`). Concurrent writers overshoot transiently (stage 4: 1.5–3.3× C); malloc failure drops the put. |
+| **E3 Owner and multiplier** | One node-wide cache; owner count 1. |
+| **E4 Budget domain** | Native malloc. Not on the path at defaults: `row_cache_size = 0MiB` (`Config.java:473-474`) selects `NopCacheProvider` (`CacheService.java:146-147`), and the default provider is `OHCProvider` (`Config.java:472`), not this class. The overshoot and `clear()` leak need a non-default size and provider. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

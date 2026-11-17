@@ -165,3 +165,16 @@ Each is a restart of node A.
   - R2's observable claims held (the write fails, no hint is written, no direct change); its naming of the guard did not. A test of that guard through CQL needs a value between `max_mutation_size` and the transport limit. The M4 arm had one by accident: its 8 MiB writes were refused by `Mutation.validateSize` ("Rejected an oversized mutation (8388664/4194304)"), and v4 frames are not checked against the 4 MiB `native_transport_max_message_size`.
 - **RSS "rises by about the same amount" (B3f bullet 5)** held within 25 % at the end of the 2 KiB phase in all four lifetimes. After the 8 MiB phase it missed in D-1 (96.6 vs 64.2 MiB) and M32 (199 vs 128 MiB); the cause was not traced.
 
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Serialized hint bytes plus a 12-byte entry header, `prev + totalSize` against `slab.capacity()` (`HintsBuffer.java:148-197`, check at `:190`). The memory is the whole slab, allocated and zeroed up front by `allocateDirect(slabSize)` (`:75-78`), `max(2 × max_mutation_size, 32 MiB)` = 32 MiB at defaults (`HintsService.java:79`, `:110`). The counter never governs memory directly: the slab is resident from creation; it is recycled after a flush and freed only at pool close. Stage 4: direct memory = slabs × slab size, flat over 200,000 hints. |
+| **E2 At the limit** | Graceful: the slab closes, the writer switches slab (`HintsBufferPool.java:105-124`), and when `MAX_HINT_BUFFERS` (3) slabs exist it blocks in `reserveBuffers.take()` (`:118`) until a flush recycles one. A single hint over capacity/2 is refused (`HintsBuffer.java:152-157`). Not a default: with `MAX_HINT_BUFFERS=1` the blocked switch never returns (stage-4 deadlock), a liveness failure, not memory. |
+| **E3 Owner and multiplier** | One `HintsService` per node with one pool (`HintsService.java:110-111`); at most `MAX_ALLOCATED_BUFFERS` = 3 slabs (`HintsBufferPool.java:41`), 96 MiB direct at defaults; stage 4 never needed more than 2. Hints waiting upstream of the pool (heap `Mutation`s on the mutation stage) are outside this constraint. |
+| **E4 Budget domain** | Direct memory, default budget RAM/4 (`conf/cassandra-env.sh:58-66`, `:139-158`). Shares it with the `chunk-cache` pool (`file_cache_size`, default `min(512, heap/4)` MiB, `DatabaseDescriptor.java:576-577`) and the networking pool (`min(128, heap/16)`, `:574`), plus Netty; 96 + 512 + 128 MiB stays below RAM/4 for a heap of 2 GiB or more. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive); hint direct memory ≤ 3 × 32 MiB at defaults, allocated in whole slabs.
+**Stage-4 claim to add:** none

@@ -633,3 +633,16 @@ D1–D3. None changed B1 or a prediction.
   real read rates was not exercised on a node. S3. `BigTableWriter.java:255` is `:254`. Side findings: an ALTER that names only
   `max_index_interval` is validated against the default `min_index_interval` 128, not the table's (D2). Stress's `population: seq(…)`
   on a key column does not give distinct keys (D1).
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The summary's own malloc'd bytes, `offsetCount*4 + entriesLength` (`IndexSummary.java:259-262`), summed over BIG sstables: the unit matches the memory held (plus malloc headers). It is not a running counter: the total is recomputed at each resize run (`IndexSummaryRedistribution.java:138`, keep/downsample decision `:327-352`). Between runs (default 60 min, `conf/cassandra.yaml:947`) new flush and compaction outputs get full-level summaries (`BigTableWriter.java:254`) unchecked. Old summaries are freed when the old reader's refs drop, so old and new coexist briefly during a run. |
+| **E2 At the limit** | Graceful: cold summaries are downsampled; nothing is refused. Floor at `min_index_interval/max_index_interval` (`IndexSummaryBuilder.java:304`), 128/2048 = 1/16 of full size at table defaults; below that nothing shrinks further (best effort, `conf/cassandra.yaml:931-937`). |
+| **E3 Owner and multiplier** | One node-wide pool across all tables (`IndexSummaryManager`, `memoryPoolBytes`). Owner count 1; compacting sstables are charged but not shrunk. |
+| **E4 Budget domain** | Native malloc (JNA, outside NMT and `MaxDirectMemorySize`). Default 5% of heap (`DatabaseDescriptor.java:866-868`), ≈ 400 MiB at 8 GiB. Shares RAM with bloom filters (uncapped), chunk cache (`file_cache_size`), networking cache, compression offsets, Netty direct. The floor bypass needs full summaries > 16 × pool = 80% of heap, i.e. tens of billions of partitions per node; between-run growth is one hour of new sstables at full level, tens of MiB at realistic write rates. Not a default-reachable overshoot of note. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** none

@@ -476,3 +476,16 @@ tolerances of words already in B2f-B2g and B3f-B3g; no prediction value or concl
     B3f's first bullet = each within ±(0.05·ΔInet4Address + 500) of ΔInet4Address. "w1b equals w1" = Inet4Address count
     within ±500. "Δ ≫ K" = Δ > 2·K + 500.
   - A reading that meets no row under these tolerances is reported as "Not confirmed (no matching row)".
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Entries (no weigher, weight 1) in `ipToCidrGroupsCache` against `maximumSize(getIpCacheMaxSize())` (`CIDRGroupsMappingCache.java:59-62`; default 100, `DatabaseDescriptor.java:1759-1771`). Real bytes per entry ~120-155 B (key `InetAddress` + nodes; stage 4 measured ~120 B, 142-155 B with arrays); the value `Set<String>` is a reference into the interval tree, not a copy. Fixed per-cache overhead not counted: the frequency sketch (8 B x ceilPow2(max)) and hash table, ~22.5 MB left at max = 1,000,000 in stage 4, ~1 KB at 100. Release: eviction on the inserting thread (`ImmediateExecutor`, `:61`) and a full `invalidateAll` every refresh (`:83`, 5 min default, `DatabaseDescriptor.java:1745-1757`). |
+| **E2 At the limit** | Graceful: Caffeine evicts to <= max synchronously; lookups never fail, a miss re-queries the tree (`:112-123`, `:133`). Overshoot is a handful of buffered writes. No fallback allocation. |
+| **E3 Owner and multiplier** | One cache per node, built once in `CassandraCIDRAuthorizer.setup()` (`CassandraCIDRAuthorizer.java:68`). Distinct client IPs are unbounded, but the count cap governs them, so no multiplier. |
+| **E4 Budget domain** | Heap, shared with every on-heap cache (key cache min(5% heap, 100 MiB), auth caches, the CIDR interval trees sized by `system_auth.cidr_groups`). At defaults the cache does not exist: `cidr_authorizer.class_name: AllowAllCIDRAuthorizer` (`conf/cassandra.yaml:261-262`). Enabled at default max, ~13-15 KB: negligible against any heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (heap ~ 120-155 B x min(distinct IPs, max), plus a fixed sketch/table of ~8-16 B x max).
+**Stage-4 claim to add:** none

@@ -346,3 +346,16 @@ advisor's machine, uncommitted). Frozen at sha256 `7124f4a0…717d` after sevent
   concurrency 32 fails on a host with fewer than 31 cores (JVector's builder pool allows `availableProcessors() + 1` concurrent memtable
   inserts); the ANN query without a partition key is a range read bounded by `range_request_timeout`. Not tested: the A3.5 overshoots
   (row size, tombstones), the partition-restricted ANN path, and replica-side vs coordinator-side heap.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Rows: the ANN `LIMIT` against `MAX_TOP_K` = 1000 (`StorageAttachedIndex.java:497-505`, `IndexWriterConfig.java:57`, `CassandraRelevantProperties.java:479`); not bytes. The target (`SelectStatement.java:322-329`) raises any smaller client page size to LIMIT, and `:338-340` runs Top-K unpaged, so all LIMIT rows exist at once. Stage 4: coordinator heap Δ 48-80 MiB per LIMIT 1000 query of 8 KiB rows, 6-9 × the value bytes. Held for the life of the request; tombstones are kept outside the top-K queue (`VectorTopKProcessor.java:108-116`). |
+| **E2 At the limit** | Graceful for the count (`InvalidRequestException` for LIMIT > 1000). Nothing bounds the bytes: read-size thresholds are off by default (`Config.java:526`), and the paged path is never used for Top-K, so a large result simply allocates until the JVM limit. |
+| **E3 Owner and multiplier** | Per query. Coordinator queries run on the native-transport request executor, up to `native_transport_max_threads` = 128 at once (`Dispatcher.java:58`, `Config.java:283`); no limit caps the bytes of concurrent unpaged Top-K results (rate limiting off, `conf/cassandra.yaml:1076`). 128 × 48-80 MiB ≈ 6-10 GiB at 8 KiB rows. |
+| **E4 Budget domain** | Heap, default half of RAM (`conf/cassandra-env.sh:58-66`), e.g. 8 GiB on a 16 GiB host, of which `memtable_heap_space` takes heap/4 (`DatabaseDescriptor.java:587`), plus the SAI memtable vector graphs. The concurrent Top-K results alone can exceed the remaining heap. |
+| **OOM-lead flag** | E3: no node-wide cap on concurrent unpaged Top-K responses; 128 transport threads × 1000 rows × 8 KiB × 6-9 (≈ 48-80 MiB each, stage 4) ≈ 6-10 GiB, above an 8 GiB default heap. |
+
+**Real-memory estimate:** positive per query in rows; undetermined in bytes per node, decided by E3 (concurrent LIMIT-1000 ANN queries) and E1 (row size).
+**Stage-4 claim to add:** N concurrent clients (N = 32, 64, 128) each issuing LIMIT 1000 ANN queries with fetch size 10 over 8 KiB rows on a 2-4 GiB heap: coordinator heap grows about N × 50-80 MiB until an `OutOfMemoryError` or GC stall, with no rejection.

@@ -431,3 +431,16 @@ If the weight of an entry cannot be read, name the gap rather than substituting 
 - **The unit yaml is not the node's.** `test/conf/cassandra.yaml:63-69` turns the family on and sets this limit to 8 MiB; a shipped node has none of it. The same trap as in [`max_mutation_size`](max_mutation_size-validateSize-MAX_MUTATION_SIZE--guided.md) §11. The cluster tier writes the lines it needs and leaves the sibling guardrails unset.
 - **What this design does not cover.** RF above 1 (the abort as a warning, the digest reads); the remote-replica path and the mismatch between the coordinator's flag and the replica's settings (§6b); *N* > 1, the multiplier; the flush-time and compaction-time entries and the key-cache migration; the BTI format; the reads that shallow entries make later; the interaction with `key_cache_size` beyond the weight reading; and the key cache reload at start, which a restart arm could test. Each is recorded from the source in §5, §6b or §8.
 - **Nothing here was run.** No measured number appears in this file; every figure in §9 is derived from the source and is a prediction.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | An estimate per index entry, `(IndexInfo.EMPTY_SIZE + ArrayClustering.EMPTY_SIZE + DeletionTime.EMPTY_SIZE) × blocks + serialized bytes` (`RowIndexEntry.java:412-419`), made before `column_index_cache_size` decides whether anything per-block is built (`:356` vs `:360`). The built `IndexedEntry` weighs two clusterings per block (`IndexInfo.java:157-163`); stage 4 measured 1.69x the estimate. Counted only for the duration of one `checkSize` call; the built entry lives in the key cache (charged its own weight against `key_cache_size`) or for the read. |
+| **E2 At the limit** | Graceful: `RowIndexEntryReadSizeTooLargeException` before either object is built (`:392-401`), the read is aborted (failure code); nothing reaches the key cache. Inert outside `executeLocally()`, on key-cache hits and saved-cache reloads, in range scans and system keyspaces (§5). |
+| **E3 Owner and multiplier** | Per entry opened, per SSTable per read; nothing sums entries per read or across reads in flight. |
+| **E4 Budget domain** | Heap, shared with the key cache (which retains these entries), memtables, read/compaction transients. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** negative at defaults: the guard is off (`read_thresholds_enabled` false, threshold null, `Config.java:526`, `:532`), and the heap of built entries is bounded by `column_index_cache_size` (2 KiB, `Config.java:328`; larger entries are a 72-byte `ShallowIndexedEntry`), not by this limit. When enabled with `column_index_cache_size` raised, it bounds one entry's estimate, with real weight about 1.7x the estimate, times the entries open at once (E3).
+**Stage-4 claim to add:** none

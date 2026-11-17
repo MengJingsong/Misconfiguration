@@ -487,3 +487,16 @@ The cluster verdict is **Confirmed** when finding 1's first row and both first r
 **For stage 3.**
 - (a) On a node with `read_thresholds_enabled: true` and a `coordinator_read_size_fail_threshold` below one replay page, batchlog replay fails. The coordinator read-size check runs in `SelectStatement.process` for the internal pager, and `loggableTokens` throws on the unbound markers. This was seen in unit attempt 0 and is not tested on a node.
 - (b) The node held about 3 MiB of live heap per decoded 1 MiB batch, not the 2 MiB the design assumed. The extra copy is not identified.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | A count of batch rows: `++positionInPage == pageSize` (`BatchlogManager.java:296`), with `pageSize` from `calculatePageSize` (`:251-258`), whose byte target uses the SSTable partition-size histograms only (`ColumnFamilyStore.java:3123-3134`; 0 for a memtable-only batchlog, so 128). Really held per page: the raw rows of the current page (`UntypedResultSet.java:217-233`, kept until the next fetch), the decoded `Mutation`s (`BatchlogManager.java:400`) and the replay handlers; stage 4 measured about 3 MiB of live heap per 1 MiB batch (section D). Released at `:329` (`batches.clear()`) after every handler of the page has completed (`:379`). At defaults a batchlog entry is a multi-partition LOGGED batch (`BatchStatement.java:443-444`) that passed `verifyBatchSize` against `batch_size_fail_threshold` = 50 KiB (`BatchStatement.java:331-359`, `Config.java:332`), so a 128-row page holds about 128 × 50 KiB × 3 ≈ 19 MiB. |
+| **E2 At the limit** | Graceful: at `:296` the replay thread blocks on each handler (`:379`), hints the failures, clears the list, and only then reads the next row. The byte target has no enforcement of its own when the statistics are missing or stale; the count cap still holds. No fallback allocation. |
+| **E3 Owner and multiplier** | One per node: the single-thread `BatchlogTasks` executor (`:107`), and scheduled, forced and test passes all queue on it (`:183-198`), so one page is live at a time. The per-pass `replayedBatches` set (`:266`) grows by one UUID per batch for the whole pass (deleted at `:316`); small. |
+| **E4 Budget domain** | Heap. Shares it with the memtables the replay applies into (inline apply, governed by `memtable_heap_space`, default heap/4, `DatabaseDescriptor.java:587`) and outbound messages. ~19 MiB at defaults is negligible against the default heap (half of RAM, `conf/cassandra-env.sh:58-66`). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive with the known bypass); at the default `batch_size_fail_threshold` the memtable-only bypass costs about 19 MiB per page, and the 128 × 16 MiB worst case of A3(e) needs a raised fail threshold or a non-client batch source.
+**Stage-4 claim to add:** none

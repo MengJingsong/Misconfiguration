@@ -300,3 +300,16 @@ frozen at sha256 `198eb1ce…13a2` after thirteen audit amendments; uncommitted)
   - Case 3 at 2.5 × B could never block the writer (three buffers hold 3 × B).
   - cassandra-stress adds a warm-up (n/4, at most 50,000 writes), so phase D wrote 250,000 hints, not 200,000.
 - **Host finding:** zero-copy bootstrap streaming fails on this Mac (`transferTo`: Operation not permitted), so node 2 needs `auto_bootstrap: false`.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Counted: serialized hint bytes + 12 per entry (`totalSize`, `HintsBuffer.java:150`) against the slab capacity B (`:190`). Held: each slab is a B-byte direct `ByteBuffer` committed in full at creation whatever its fill (`HintsBuffer.java:75-78`; stage 4: direct step exactly B per slab). The count is reset when a flushed slab is recycled (`HintsWriteExecutor.java:141-154`, `HintsBuffer.java:98-102`). The memory is never freed while the service runs: slabs are reused, and only `close()` frees the current one (`HintsBufferPool.java:136-139`; the case cites `:148-151`). |
+| **E2 At the limit** | Graceful. A refused allocation switches to another slab. With 3 slabs allocated, writers block in `reserveBuffers.take()` until a flush recycles one (`HintsBufferPool.java:107-127`). A single hint > B/2 throws `IllegalArgumentException` (`HintsBuffer.java:152-157`). No fallback allocation. |
+| **E3 Owner and multiplier** | One pool per node, shared by all target hosts. At most `MAX_HINT_BUFFERS` = 3 slabs (`CassandraRelevantProperties.java:351`, `HintsBufferPool.java:41`, `:113`, `:118`). Total 3 × 32 MiB = 96 MiB at defaults, plus the 256 KiB direct write buffer (`HintsWriteExecutor.java:50`, `:60`). |
+| **E4 Budget domain** | Direct, counted against `MaxDirectMemorySize`, which `cassandra-env.sh` sets to heap/2 (`conf/cassandra-env.sh:62`, `:66`, `:140`, `:158`). Other draws on that domain: chunk cache min(512 MiB, heap/4) (`DatabaseDescriptor.java:576-577`), networking cache min(128 MiB, heap/16) (`:573-574`), internode queue reserves (512 MiB global each way, `Config.java:254`, `:261`), off-heap Merkle trees and Netty. At an 8 GiB heap the bounded draws come to ≈ 1.7 GiB against a 4 GiB budget, so they fit. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

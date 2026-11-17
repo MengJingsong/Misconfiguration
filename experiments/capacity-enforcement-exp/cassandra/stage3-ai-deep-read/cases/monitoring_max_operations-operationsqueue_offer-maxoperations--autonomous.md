@@ -115,3 +115,16 @@
 - Misses: the Failed queue at N = 5000 did not fill (3130), and N = -1 ended below the predicted 5000 Failed (both runs) and 40,000 Slow (one run); the offered Failed rate under this workload is about 13 to 16 per second, a third of the 30 s calibration. The cap itself was never exceeded.
 - For stage 3: an Operation is created on every abort/slow completion by the caller before `offer`, and reads of absent partitions never trigger the cancellation check; a workload has to iterate rows. Bytes were read from live-heap totals, not attributed by a dump.
 
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Entries: `Operation` wrappers in a `LinkedBlockingQueue(N)` (`MonitoringTask.java:210`, `:224`). Each one pins its `Monitorable` (`:313`), which is a read command (`AbstractReadQuery extends MonitorableImpl`, `AbstractReadQuery.java:32`), from `abort()`/`complete()` (`MonitorableImpl.java:101`, `:115`) until the next drain every 5 s (`MONITORING_REPORT_INTERVAL_MS`, `CassandraRelevantProperties.java:363`; schedule at `MonitoringTask.java:96-99`). Bytes per entry are not counted. They are a command's size, small in practice: stage 4 measured about 400 B per op (15-21 MB for ~46,000 ops at N = -1). |
+| **E2 At the limit** | Graceful: `queue.offer` fails and `numDroppedOperations` is incremented (`MonitoringTask.java:224-225`). The rejected wrapper becomes garbage at once. 0 = disabled (`:221`). A negative value means unbounded (`:210`, `newBlockingQueue()`), but that is not the default. |
+| **E3 Owner and multiplier** | Node-wide singleton (`MonitoringTask.instance`, `:68`) with two queues, failed and slow (`:90-91`). So 2 × N, and 100 at the default N = 50 (`CassandraRelevantProperties.java:361`). |
+| **E4 Budget domain** | Heap, shared with everything else on the heap. At the default, ≤ 100 pinned commands is on the order of tens of KB; even commands near the 16 MiB native frame limit (`Config.java:285`, e.g. huge `IN` lists) would need 100 distinct slow or failed queries of that size inside 5 s. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (positive). The count is capped at 2 × 50; per-entry bytes follow the command's size, which is small at a reachable workload.
+**Stage-4 claim to add:** none

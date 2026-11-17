@@ -304,3 +304,16 @@ Frozen at sha256 `cae4285e…08b5` after ten audit amendments (unit tier). The r
 - **For stage 3:** the testsome heap is 1 GiB (`build.xml:1153`), not 4G. The filed post-young-GC heap observable cannot see a page that lives only through the indexing
   loop; the run used the live heap after a forced full GC at build start and at each page.
 - The estimate stands as filed.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Nothing is counted at run time. The page size in rows is fixed once per build (`CollatedViewIndexBuilder.java:74`) from table-wide means of serialized sizes: `getMeanPartitionSize()` and `getMeanEstimatedCellPerPartitionCount()` over all canonical sstables (`ColumnFamilyStore.java:3110-3134`), giving `meanRowSize` (`SecondaryIndexManager.java:1167-1168`). Real memory is the `ImmutableBTreePartition` of the actual rows of the current partition's page (`:1053-1066`), in on-heap form (stage 4: 1.06–1.10 × 32 MiB for uniform rows). Any partition whose rows are larger than the table mean overshoots by (its row size / mean row size), up to the 10000-row ceiling. Held only for one page (released before the next fetch). |
+| **E2 At the limit** | No limit is checked: the row count is the only bound applied by the pager (`AbstractQueryPager.java:95-101`). Fallbacks to 10000 rows with no byte bound at `:1156`, `:1160`, `:1164` (zero regular columns, reachable with data; stage 4: ~400 MB pages) and the `force_default_indexing_page_size` property (`:1151`). Beyond the heap, the outcome is a JVM `OutOfMemoryError` in the build thread. |
+| **E3 Owner and multiplier** | Per build task; builds run on `SecondaryIndexExecutor` with `concurrent_index_builders` = 2 threads (`Config.java:350`, `CompactionManager.java:2154-2159`), so ≤ 2 live pages node-wide, each sized independently. |
+| **E4 Budget domain** | Heap. Shares with memtables (the index table's memtable receives the build's writes; `memtable_heap_space` default 1/4 heap, `heap_buffers`), concurrent compaction and reads, coordinator buffers; no budget accounts for build pages. |
+| **OOM-lead flag** | E1: the 32 MiB target uses the table-wide mean row size, so a partition of rows much larger than the mean gets `min(10000, 32 MiB/mean)` large rows, e.g. mean ~10 KB with one partition of 1 MiB rows → ~3.3 GB page, ×2 builders; the `:1164` path gives 10000 × row size (stage 4: ~400 MB at 40 KB rows). |
+
+**Real-memory estimate:** `same as Estimate` (positive with bypass), with the skew overshoot (A3 (b)) as an added path; per-page heap under skew is undetermined until a skewed table is run (which settles it).
+**Stage-4 claim to add:** With a table of many small rows (mean ~1 KB) plus one partition of 2000 × 1 MiB rows, `Calculated page size` ≈ 10000 or ≈ 32 MiB/mean, and the live heap of that partition's page ≈ rows × 1 MiB (≫ 32 MiB).

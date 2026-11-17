@@ -671,3 +671,16 @@ the `Summary.db` size and the `RssAnon` readings.
   readable-boundary branch needs a key that is not sampled
   (`keysWritten + 1 == nextSamplePosition`, [`:218`](https://github.com/apache/cassandra/blob/cassandra-5.0.9/src/java/org/apache/cassandra/io/sstable/indexsummary/IndexSummaryBuilder.java#L218)), and at interval 1 every
   key is. Irrelevant to the cap; noted because §5 mentions the boundaries.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Written bytes of the `entries` region (key + 8 per sampled key) plus the next entry (`IndexSummaryBuilder.java:204`); the 4-byte `offsets` region is not counted (`:206`), adding up to 4/(K+8) on top (4/9 for 1-byte keys). Capacity is not counted either: growth copies into a new native block of 1.5x above 64 MiB (`DataOutputBuffer.java:158-172`, `SafeMemoryWriter.java:50-67`), old and new coexisting during the copy (~2.5x the length at the last growth, transient). The second site counts an estimate at 64-byte keys (`:105-108`) and reserves that up front (`:126-127`); the two rebuild paths keep the untrimmed block (`BigSSTableReaderLoadingBuilder.java:209-230`; stage 4: 1.36 GB capacity for 21 MB of entries with the property raised, 48 MB for 42 MB at the default). Counter lives for one builder; memory lives with the SSTable reader. |
+| **E2 At the limit** | Graceful: the entry is not written, one ERROR line, sampling stops for the rest of the SSTable (`:204-216`); reads past the last sample scan `Index.db`. Second site: samples sparser and reserves at most 2^31 − 1 (`:108-122`). No allocation elsewhere. |
+| **E3 Owner and multiplier** | Per SSTable (BIG format only). Live summaries = SSTables on the node; builders in flight = flushes (`memtable_flush_writers`) + compactions (`concurrent_compactors` = min(8, max(2, min(cores, data dirs))), `DatabaseDescriptor.java:777-778`) + streaming. The total over SSTables is capped only after the fact by `index_summary_capacity` (default 5% of heap, `DatabaseDescriptor.java:867-869`), applied by redistribution every 60 min (`Config.java:543`) on `getOffHeapSize()`, which omits untrimmed capacity. |
+| **E4 Budget domain** | Other native memory (JNA `Native.malloc`), outside `-Xmx` and `MaxDirectMemorySize`; shares the container with off-heap memtables (not at the shipped `heap_buffers`), Bloom filters, compression metadata, chunk cache and the OHC row cache. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` per SSTable, with real native memory up to ~1.44x the counted bytes (offsets) and ~2.5x transiently during growth; reaching the bound needs about 256 GiB of partition-key bytes in one SSTable at the default `min_index_interval` 128, so no reachable default workload exceeds it by more than these factors. The node total is `index_summary_capacity`'s question, not this one.
+**Stage-4 claim to add:** none

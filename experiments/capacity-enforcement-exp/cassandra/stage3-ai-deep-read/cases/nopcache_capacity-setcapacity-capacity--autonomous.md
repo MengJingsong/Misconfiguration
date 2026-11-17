@@ -128,3 +128,16 @@ Applied by the stage-4 audit session on 2026-10-27, before any reading of the fr
 - The guard's role: on a build with the guard removed the request is accepted, `capacity()` stays 0 and nothing is stored (unit and cluster). Row-cache memory is 0 because `NopCache` is a no-op class; the guard protects the contract. Claim holds as filed.
 - Amendments by the audit ("B-audit", 2026-10-27): runnable OHC control via CQL; cluster arm B changed to 32 -> 64 MiB plus an 8 MiB arm (82 MB of data never reaches 128 MiB); patched-guard arms; 2,000,000 puts with an 8 MiB heap threshold (heap reading noise); `ps` process check.
 - For stage 3: the secondary `RssAnon` clause in B3f is not usable as an instrument (the process holds 2.9 GB and drifts 20 to 45 MiB in every arm); use RowCache `Size`/`Entries` instead. The claim is close to tautological (a no-op cache cannot hold memory); the guard itself is not what bounds memory.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The requested capacity in bytes (`CacheService.java:327-333`) against the literal 0 (`NopCacheProvider.java:39`). Nothing is held: `put`/`putIfAbsent`/`replace` are no-ops, `get` returns null, `size`/`weightedSize` are 0 (`:46-77`). Because `capacity()` is 0, `ColumnFamilyStore.isRowCacheEnabled()` is false (`ColumnFamilyStore.java:3259-3265`), so reads never take the row-cache path (`SinglePartitionReadCommand.java:491`) and no partition copy is built for it. Nothing to release. |
+| **E2 At the limit** | Graceful: `UnsupportedOperationException` to the JMX/nodetool caller; no allocation. (Side effect: the key-cache capacity set earlier in the same `nodetool setcachecapacity` call stays changed.) |
+| **E3 Owner and multiplier** | One row cache per node; NopCache when `row_cache_size` is 0 (default `0MiB`, `Config.java:474`; `CacheService.java:146-147`). No multiplier. |
+| **E4 Budget domain** | Would be other native (OHC) memory if the row cache were enabled; with NopCache, no domain is drawn on. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (0 bytes; the no-op class, not the guard, makes it so).
+**Stage-4 claim to add:** none

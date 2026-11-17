@@ -337,3 +337,16 @@ Reason: group B asks for a row for every plausible outcome; the R instrument nee
 - **Cluster: Confirmed — caps only on some paths (bypass)** (B3g row 1 with row 3). The cache's retained heap R (in-place clear, amendment B3d) is 0.879 · 0.929 · 0.913 × C at 4 · 32 · 10 MiB; count 679 · 5,436 · 1,698; one discard WARN per run; uncapped control (236 MiB) retains 109.94 MiB for 20,000 statements. The live heap also grows ≈ 14.2 MiB per 20,000 distinct PREPAREs whatever C is: the `system.prepared_statements` memtable gains one partition per distinct statement (an eviction adds a deletion, it does not remove the partition).
 - Runbook defects found at the audit and fixed before the freeze: B2e's `-Dno-build-test=false` skips building the probe (Ant skips an `unless` target when the property is set to any value); B3c's `PYTHONPATH=<zip>` cannot import the bundled driver; MAT is not available on this host.
 - For stage 3 (not applied): A4 should name the `system.prepared_statements` memtable as a heap consumer that the knob does not bound; A2's `MD5Digest.size()` is 20 B, not 16.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Caffeine weight per entry = `key.size()` + `pstmntSize` (`QueryProcessor.java:952-958`), `pstmntSize` = jamm `measureDeep(Prepared)` taken once at parse (`:947-950`). `measureDeep` includes shared objects (table metadata), and one `Prepared` sits under two ids, so weight ≥ retained bytes; stage 4: retained 0.88-0.93 × C. Released when Caffeine evicts or the entry is replaced; the `Prepared` is then freed unless a running query still holds it. |
+| **E2 At the limit** | Graceful: eviction on the caller thread (`ImmediateExecutor`, `:113-118`); a single statement heavier than the whole cap is rejected with `InvalidRequestException` after it has been parsed and measured (`:825-829`), a transient bounded by the message size. The `:954` branch is a programming-error guard. |
+| **E3 Owner and multiplier** | One cache per node (static field, `:107`, `:113`). `internalStatements` is a separate unbounded map (`:97`) but is filled only by server code (fixed set of internal queries). The `system.prepared_statements` row written per new statement (`:832-833`) lands in a memtable outside the cap (stage 4: ~14.2 MiB per 20,000 distinct PREPAREs); that memtable is governed by the memtable flush budget, not by this cap. |
+| **E4 Budget domain** | Heap. Auto default = max(10 MiB, heap/256) (`DatabaseDescriptor.java:795-798`), i.e. 0.4 % of heap; shared with memtables (default heap/4), key cache, in-flight requests. The cache's default cannot by itself push the heap past its budget. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`. The memtable growth from `system.prepared_statements` is a side effect governed by `memtable_heap_space`, not a hole in this cap.
+**Stage-4 claim to add:** none

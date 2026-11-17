@@ -357,3 +357,16 @@ https://issues.apache.org/jira/browse/CASSANDRA-10876
   fails; `parseStatement(String, ClientState)` already prepares; `requireNetwork()` missing), and `du` of the table directory
   after `TRUNCATE` counts `snapshots/` under the default `auto_snapshot: true`. The other bypasses in A3 (conditional batches,
   virtual tables) were not exercised.
+
+## Recheck — enforcement properties (guided, 2026-11-16, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `IMutation.dataSize` = sum of `PartitionUpdate.dataSize()` (cell data, not serialized size, not object overhead) over the batch's mutations (`IMutation.java:63-72`), measured once per request at `BatchStatement.java:338`. No counter is held: it is a one-shot comparison, nothing to release. The real bytes at the check are larger: the decoded request plus every built `IMutation` (BTree rows, cells, `ByteBuffer`s) are already on the coordinator heap (`getMutations`, `:270-324`, called before `verifyBatchSize` at `:428`/`:439`). After admission the batch becomes memtable data (memtable accounting) and, if logged and multi-mutation, a batchlog row (`:443-444`). |
+| **E2 At the limit** | Graceful: `InvalidRequestException("Batch too large")` (`:352-358`) before `StorageProxy.mutateWithTriggers` (`:445`); the built mutations become garbage. The disallow path allocates nothing new beyond a log/trace line. The pre-check allocation is bounded by the request size: `native_transport_max_message_size` defaults to min(`max_mutation_size` = 16 MiB, heap/10, heap/40) (`DatabaseDescriptor.java:898-899, 903-905, 3237-3244`). Not checked at all: single-mutation batches (`:334`), conditional batches (`:422-423`), virtual-table batches (`:425-426`); these fall back to `max_mutation_size` (16 MiB, `Mutation.java:169-175`) and the transport limits, not to an OOM path. |
+| **E3 Owner and multiplier** | Per batch request (one coordinator, one statement execution). Concurrent batches are not capped by this setting; their count is bounded by `native_transport_max_request_data_in_flight` (default heap/10, `DatabaseDescriptor.java:649-651`) and per-IP heap/40 (`:654-656`) in on-wire bytes, and by `native_transport_max_threads` 128 (`Config.java:283`). |
+| **E4 Budget domain** | Heap (coordinator request objects; memtables under the default `memtable_allocation_type: heap_buffers`, `conf/cassandra.yaml:825`). Same domain as the in-flight request budget (heap/10), memtables (`memtable_heap_space`, default heap/4), caches. The batch threshold (50 KiB per request) is far below any of them; it adds no standing reservation. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (per batch, scoped). Whether the decoded objects of an admitted or rejected batch exceed its on-wire bytes by a large factor (many tiny cells) is undetermined; that is a question for the in-flight budget, not for this threshold, since the threshold's operand is at most 50 KiB of cell data.
+**Stage-4 claim to add:** none
