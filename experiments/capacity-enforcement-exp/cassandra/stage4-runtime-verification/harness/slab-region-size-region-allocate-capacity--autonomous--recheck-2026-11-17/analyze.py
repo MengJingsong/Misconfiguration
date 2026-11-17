@@ -70,10 +70,11 @@ checks['P3'] = p3
 P(f'  P3 heap_buffers slopes max/min <= 1.05: {ok(p3)} ({max(hs)/min(hs):.4f})' if hs else '  P3: no data')
 if 'H64' in res:
     st = res['H64']['st']
-    p4 = res['H64']['R'][400] > 64 * MIB and st['s400']['on'] < 0.02 * 64 * MIB and st['s400']['flush_lines'] == 0
+    # P4 as amended 2026-11-17 (owner-approved after run 1): the ks tables' sum, not the global gauge (which includes system tables)
+    p4 = res['H64']['R'][400] > 64 * MIB and st['s400']['per_table_sum'] < 0.02 * 64 * MIB and st['s400']['flush_lines'] == 0
     checks['P4'] = p4
-    P(f'  P4 H64 R(400) > 64 MiB, gauge at s400 < 1.28 MiB, no ks flush line before pc: {ok(p4)} '
-      f'(R(400) {res["H64"]["R"][400]/MIB:.2f} MiB = {res["H64"]["R"][400]/(64*MIB):.2f} L; gauge {st["s400"]["on"]/MIB:.3f} MiB; flush lines {st["s400"]["flush_lines"]})')
+    P(f'  P4 (amended) H64 R(400) > 64 MiB, ks tables sum at s400 < 1.28 MiB, no ks flush line before pc: {ok(p4)} '
+      f'(R(400) {res["H64"]["R"][400]/MIB:.2f} MiB = {res["H64"]["R"][400]/(64*MIB):.2f} L; ks sum {st["s400"]["per_table_sum"]/MIB:.3f} MiB; global gauge {st["s400"]["on"]/MIB:.3f} MiB; flush lines {st["s400"]["flush_lines"]})')
     pc = st.get('pc')
     if pc:
         dpc = pc['bb'] - st['s400']['bb']

@@ -246,6 +246,8 @@
 
 **Recheck claim, 2026-11-17** ([results](../../stage4-runtime-verification/results/slab-region-size-region-allocate-capacity--autonomous--recheck-2026-11-17.md), one node pc91, run 1 + self-check): **Not confirmed (no matching row)**, Effect undetermined by rule; every relation of the claim held (1.0000 MiB `[B` per table given one 1 KiB write against 1.49 KiB counted, N = 200: 199.95 MiB vs 0.29 MiB; flat across `memtable_heap_space` 64/256/2048 MiB; 992 B per table under `unslabbed_heap_buffers`; positive control flushed only `t0`), but the frozen P4 bound on the global gauge (1.28 MiB) missed at 3.30 MiB, 2.13 MiB of it system tables before any write.
 
+**Recheck claim, run 1b, 2026-11-17** ([results](../../stage4-runtime-verification/results/slab-region-size-region-allocate-capacity--autonomous--recheck-2026-11-17.md) §4b; tier restarted after the owner-approved P4 amendment of the design section, bound on the `ks` tables' sum instead of the global gauge): **Confirmed — does not cap**, superseding run 1's Not confirmed; 0.9999 MiB `[B` per written table against 1.49 KiB counted (N = 200: 199.95 MiB vs 0.29 MiB), flat across `memtable_heap_space` 64/256/2048 MiB, 987 B per table under `unslabbed_heap_buffers`; P4: `ks` sum 1.166 MiB < 1.28 MiB with R(400) = 6.25 x 64 MiB and no small-table flush.
+
 
 ## Recheck — enforcement properties (guided, 2026-11-17, blind)
 
@@ -315,3 +317,5 @@ Written by the stage-4 session of 2026-11-17 (one node, `pc91`) for the **Stage-
 | Any other combination | **Not confirmed** (no matching row) |
 
 **Stop conditions and cleanup.** A lifetime stops on a failed set-up check (port busy, read-back, node not serving in 300 s, histogram unreadable); the node is stopped by its PID; no `CassandraDaemon` is left (`ps -eo cmd | grep '[C]assandraDaemon'`). Run data stays under `/mydata/s4/slabrc-run/` and logs under `/mydata/s4/slabrc-logs/`.
+
+**Amendment of P4, 2026-11-17 (after run 1's reading; approved by the owner after seeing it).** P4's second clause now reads: "the sum of the `ks` tables' `MemtableOnHeapDataSize` at `s400` (`per_table_sum`) is below 0.02 x 64 MiB". It replaces "the global gauge at `s400` is below 0.02 x 64 MiB". Reason: the global `AllMemtablesOnHeapDataSize` sums every table, system tables included (`TableMetrics.java:1331-1349`). Run 1 read 2.13 MiB of system-table memtables at `s0`, before any write, so the old bound tested the system keyspaces rather than the claim. The other clauses of P4, every other prediction, the definitions of R and A, and the conclusions table are unchanged. The tier restarts from its beginning (run 1b), and run 1 stays on record in the results file.

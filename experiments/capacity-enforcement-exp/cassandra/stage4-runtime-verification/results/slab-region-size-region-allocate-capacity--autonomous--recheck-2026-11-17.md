@@ -2,9 +2,9 @@
 
 > **Case:** [`slab-region-size-region-allocate-capacity--autonomous`](../../stage3-ai-deep-read/cases/slab-region-size-region-allocate-capacity--autonomous.md), section "Recheck — enforcement properties (guided, 2026-11-17, blind)", its **Stage-4 claim to add**; design in the case file's section "Stage-4 design for the recheck claim (2026-11-17)"
 >
-> **Status:** verdict filed (run 1 done and self-checked, no run 2) — 2026-11-17
+> **Status:** verdict filed — run 1b (tier restarted after the owner-approved P4 amendment) done and self-checked; supersedes run 1, whose record is kept — 2026-11-17
 >
-> **Outcome class:** unchanged — this file tests the recheck claim only; the case's class (true negative) comes from the earlier results file. This claim's verdict is **Not confirmed (no matching row)**, so it adds no class ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
+> **Outcome class:** unchanged — true negative, from the case's earlier results file. This file tests the recheck claim only; its verdict (run 1b) is **Confirmed — does not cap**, which agrees with that class. Run 1's Not confirmed is superseded ([definition](../../../stage4-runtime-verification/README.md#outcome-class))
 >
 > **Agent:** autonomous file. The claim is the recheck's one-sentence claim, not B1; "§9a" below means the design section's
 > "Predictions" and "Conclusions" (P1–P7, validity, conclusions table); "§9b–§9e" means its Environment, Lifetimes, Workload and
@@ -18,6 +18,7 @@
 | **Case-file version** | Repository HEAD `2f76b847` plus the uncommitted design section (not committed by this session). Frozen: `sed -n '/^## Stage-4 design for the recheck claim (2026-11-17)/,$p' <case file> \| git hash-object --stdin` = `cd3c3273a7015fe24a1f7d6abd0f90301b924c7a` (9637 bytes), taken after the audit and before any run. Predictions + conclusions alone (`sed -n '/^\*\*Predictions (frozen before any run)/,/^\*\*Stop conditions/p'`) = `b77400bd3ad59bb1d5668143dc6b2212606fd123`. After the runbook-defect amendment of the Environment paragraph (§3, defect 1, before any reading) the section hash is `8e76440b03b51bb31234734a77bea9a11bff8816`; the predictions + conclusions hash is unchanged (`b77400bd…`). |
 | **Harness** | `harness/slab-region-size-region-allocate-capacity--autonomous--recheck-2026-11-17/`: `client.py` (bundled driver: schema, one row per table, fill), `run.py` (one lifetime per arm, scripted and logged), `analyze.py` (P1–P7, validity, matched row; literals typed from the frozen section), `Jmx.java` (copied unchanged from the earlier harness), `HoldBytes.java` + `instrument-check.sh` (known-answer check of the histogram reading). Not committed (the caller commits). |
 | **Tiers and values** | One node (cluster tier). Unit tier `n/a` (reason in the design: the claim is about tables on a node; the allocator-level fact was measured in the earlier unit tier). Lifetimes `H2048` (`heap_buffers`, default `memtable_heap_space` = 2048 MiB), `U2048` (`unslabbed_heap_buffers`, matched control), `H256`, `H64` (`heap_buffers`, 256 / 64 MiB); in each, N = 0, 50, 100, 200, 400 written tables, a same-bytes control (`c1`: 400 rows in one table), and in `H64` a positive control (`pc`: 40,000 rows in one table). |
+| **Re-freeze after the P4 amendment** | The owner approved the amendment after seeing run 1's reading. It was appended to the design section on 2026-11-17 as "Amendment of P4". New section hash `4396002a394af5b509ce198fc61d9613f323c911` (previous: `cd3c3273…` at the freeze, `8e76440b…` after defect 1). Hash of the amendment paragraph alone: `3a471dbec05f827f0eaa5997c707b709484a1ca0`. The original predictions + conclusions text is unchanged (`b77400bd…`); the amendment replaces P4's gauge clause by reference. `analyze.py`'s P4 now reads `per_table_sum`; nothing else changed in the harness. |
 | **Audit bottom line** | **Ready** — 2026-11-17 (one citation corrected before the freeze; one runbook defect found at the first start and amended before any reading, §3) |
 
 ### 1.1 Design audit
@@ -130,6 +131,65 @@ Re-read: `run1/<arm>/steps.json` (relations recomputed by an independent script,
 
 **No** — decided 2026-11-17. The readings are exact and repeat across three lifetimes. A run 2 under the same frozen table would miss P4 the same way, because the system tables' share of the global gauge does not depend on the run. Settling the verdict needs a stage-3/design amendment of P4, not a repeat. The amendment would bound the `ks` tables' sum (`per_table_sum`), or A(400), instead of the global gauge. Under the README's "No §9a row fits" it is made dated and the tier restarted; that is left to the orchestrator, because it would be written after this reading.
 
+## 4b. Run 1b — tier restarted after the P4 amendment (supersedes run 1)
+
+**Why.** Run 1 missed only P4's bound on the global gauge, and 2.13 MiB of that gauge was system-table memtables before any write (§4.2 part 2). The owner approved replacing the gauge with the `ks` tables' sum (`per_table_sum`) after seeing that reading. This is recorded as an amendment made after a reading. The amendment is dated in the case file, and run 1's record stays above unchanged.
+
+**Scope and procedure.** The same harness on the same node: `run.py` unchanged, `analyze.py` with only the P4 change. All four lifetimes ran in the same order (`SR_RUN=run1b`), 11:53–12:06 MST, each with a fresh node data dir under `/mydata/s4/slabrc-run/`, created per lifetime and removed afterwards. **Command log:** `run1b/session-all-lifetimes.log`, `run1b/<arm>/{summary.txt,steps.json,jvm-cmdline.txt}`, `run1b/flush-and-hist-heads.txt`, `run1b/analysis.txt`; full logs at `pc91:/mydata/s4/slabrc-logs/run1b/`.
+
+### 4b.1 Readings
+
+| Lifetime | `slope_R` per table | `slope_A` per table | R(200) / A(200) / ratio | R(400) | Rc / Ac | Evidence |
+|---|---|---|---|---|---|---|
+| H2048 (`heap_buffers`, 2048MiB) | 0.9999 MiB (1,048,522 B) | 1.492 KiB | 199.95 MiB / 0.291 MiB / 686 | 399.96 MiB | 2.006 / 0.584 MiB | `run1b/analysis.txt`, `H2048/steps.json` |
+| U2048 (`unslabbed_heap_buffers`) | 0.964 KiB (987 B) | 1.523 KiB | 0.15 MiB / 0.298 MiB | 0.35 MiB | 0.414 / 0.596 MiB | `U2048/steps.json` |
+| H256 | 0.9999 MiB (1,048,520 B) | 1.492 KiB | 199.95 / 0.291 / 686 | 399.96 MiB | 2.010 / 0.584 MiB | `H256/steps.json` |
+| H64 | 0.9999 MiB (1,048,514 B) | 1.492 KiB | 199.95 / 0.291 / 686 | 399.95 MiB (6.25 L) | 2.007 / 0.584 MiB | `H64/steps.json` |
+
+- **P4 (amended), H64 at `s400`:**
+  - `ks` tables' sum 1.166 MiB (0.018 L), under the 1.28 MiB bound;
+  - for the record, the global gauge was 3.300 MiB and 2.134 MiB at `s0`;
+  - 0 `ks.` flush lines before `pc`;
+  - R(400) 399.95 MiB, above 64 MiB.
+- **P7 (H64 `pc`):**
+  - 3 `MEMTABLE_LIMIT` flushes of `ks.t0` ("Usage: 18.671 / 18.636 / 18.629MiB (29%) on-heap");
+  - 0 flush lines for `t1..t400`, and all 400 small tables still holding data;
+  - global gauge after `pc` 5.632 MiB, and `[B` pc minus s400 +4.02 MiB.
+- **Validity, all four lifetimes:**
+  - every EXPECTED line `yes`: settings read back, `-Xmx8G`, G1, 16m regions, pre-touch, scope 12 GiB with swap 0;
+  - tables with data = N + 1 at every step, and no `ks.` flush before `pc` (401 DRAIN lines at shutdown);
+  - client errors 0, `^ERROR` 0, oom_kill 0;
+  - the instrument warm-up `s0pre` -> `s0` was +20.71 MB in each lifetime, before any write.
+- **Agreement with run 1:** per-table R within 60 B, A equal to the byte, Rc within 4 KB. The P7 `[B` delta was +4.02 MiB against run 1's +11.01; both are inside [-2, 30], and they depend on where `t0`'s live memtable stood when `pc` ended.
+
+### 4b.2 Conclusion and logic
+
+1. **Validity** — valid, by the same clauses as run 1 **[observed: `run1b/<arm>/summary.txt`, `steps.json`, `flush-and-hist-heads.txt`]**.
+2. **Readings** — nothing unusual. The three `heap_buffers` lifetimes agree on `slope_R` within 8 B per table. The only reading that moved from run 1 is the P7 `[B` delta, which stays inside its band **[observed: `run1b/analysis.txt`]**.
+3. **Matched row** — **"Validity holds; P1, P2, P3, P5, P6 hold; P4 holds; P7's flush of `t0` and gauge bound hold — Confirmed: does not cap"** (P4 as amended). P1: 0.9999 MiB per table, R(200) 199.95 MiB, R(400) 399.95–399.96 MiB. P2: 1.492 KiB per table, A(200) 0.291 MiB, ratio 686. P3: 1.0000. P4: 6.25 L with the `ks` sum at 1.166 MiB and no flush. P5: 987 B per table. P6: Rc 2.006–2.010, Ac 0.584; U2048 Rc 0.414. P7: all parts **[observed: `run1b/analysis.txt`, recomputed from `steps.json`]**.
+4. **Excluded rows** — every Refuted row: the slope is 0.9999, not at most 0.10 MiB; A is 1.49 KiB per table, not at least 0.5 MiB; in H64 the small tables are not flushed and R(400) is 6.25 L, above L. Mechanism: U2048 gives 987 B per table, far below half of 1,048,522. Magnitude: the slope lies inside [0.95, 1.10]. P3 holds and P7 holds. Invalid is excluded by part 1 **[observed]**.
+5. **Observed vs. inferred** — as in run 1 part 5(b): the `[B` growth is taken to be the slab region. The basis is the U2048 contrast, the flat `[B` instance count, and the known-answer check. No direct region count is made at this tier **[inferred]**. P4 no longer depends on an inference: the `ks` sum is read directly.
+6. **Deviations and gaps** — run 1's (i), (iii), (iv) and (v) apply. In addition, P4 was amended after a reading, with the owner's approval, to the quantity the claim names. The amendment loosens nothing: the bound is the same 0.02 L, and the reading already met it in run 1.
+7. **Core question** — Under the default `heap_buffers`, each table given one 1 KiB write retains one 1 MiB region of heap, about 1,048,500 B. The memtable pool counts about 1,528 B for it: 200 tables give 199.95 MiB real against 0.29 MiB counted, as the claim predicted. This is the same at 64, 256 and 2048 MiB of `memtable_heap_space`. It is absent under `unslabbed_heap_buffers` (987 B per table) and absent when the same rows go into one table (2 MiB). At 64 MiB the regions reached 6.25 times the limit, while the limit flushed only the table it counted as large. `memtable_heap_space` does not cap the slab-region heap of small memtables.
+
+**Conclusion (one line):** Conclusions row 1 — **Confirmed — does not cap** (run 1b; supersedes run 1's Not confirmed, which failed only on the replaced P4 clause).
+
+### 4b.3 Self-check of run 1b
+
+The relations were recomputed by an independent script from `run1b/<arm>/steps.json`, giving the values above. `run1b/flush-and-hist-heads.txt` was re-read: 3 `MEMTABLE_LIMIT` lines, all for `ks.t0`, 401 DRAIN lines per lifetime, and `^ERROR` 0. Every EXPECTED line in the four `summary.txt` files reads `yes`.
+
+| Part | Holds? | Note |
+|---|---|---|
+| 1. Validity | yes | `summary.txt` x 4, `jvm-cmdline.txt` x 4, table and flush counts in `steps.json`. |
+| 2. Readings | yes | Run 1 and run 1b agree (see the agreement bullet in 4b.1). |
+| 3. Matched row | yes | Every clause of row 1, with P4 as amended, holds on the raw files. |
+| 4. Excluded rows | yes | Recomputed slopes and flush counts. |
+| 5. Observed vs. inferred | yes | The verdict rests on the observed contrasts; the region attribution is stated as inferred. |
+| 6. Deviations and gaps | yes | The amendment is dated in the case file, made after a reading with the owner's approval, and run 1 is kept. |
+| 7. Core question | yes | The steps of the design's logic block hold in order. |
+
+**Run 2?** No. Two full passes of the tier (run 1 and run 1b) agree on every relation, and the verdict does not rest on an unresolved inference.
+
 ## 6. Run 2 — fresh AI session (optional)
 
 Not done (§5.2).
@@ -138,7 +198,7 @@ Not done (§5.2).
 
 Jingsong may overrule any verdict at any time; record an override here with its date and reason.
 
-**Stage-3 estimate:** negative (case Estimate line; the recheck adds "the real-vs-accounted gap is positive and decided by E3"). **Outcome class:** unchanged (true negative, from the earlier results file); this claim adds none (Not confirmed).
+**Stage-3 estimate:** negative (case Estimate line; the recheck adds "the real-vs-accounted gap is positive and decided by E3"). **Outcome class:** unchanged (true negative, from the earlier results file); this claim's run 1b verdict, Confirmed — does not cap, agrees with it.
 
 **Claim tested:** (the recheck's Stage-4 claim to add) "With default `heap_buffers` and N tables each given one 1 KB write (no flush), retained `[B` heap rises by about N x 1 MiB while `MemtablePool` on-heap `used` rises by about N x 1 KB (plus row overhead); N = 200 gives ~200 MiB against ~0.3 MiB accounted." It says the pool's limit does not count, and so does not cap, the per-table slab regions.
 "Confirmed" below always means this claim held.
@@ -146,10 +206,11 @@ Jingsong may overrule any verdict at any time; record an override here with its 
 | Tier | Verdict (row of the design's conclusions table) | Effect on the constraint | Basis | Date |
 |---|---|---|---|---|
 | Unit | not run: `n/a` — the claim is about tables on a node; the allocator-level fact was measured in the earlier unit tier | — | — | 2026-11-17 |
-| One node | **Not confirmed (no matching row)**. The relations of the claim all held: 1.0000 MiB `[B` per written table against 1.49 KiB counted; N = 200 gives 199.95 MiB against 0.29 MiB; flat across `memtable_heap_space` 64 / 256 / 2048 MiB; 992 B per table under `unslabbed_heap_buffers`; positive control bound. The frozen P4 gauge bound (1.28 MiB) missed at 3.30 MiB, of which 2.13 MiB was system tables before any write | undetermined (by the rule for Not confirmed; the readings show `memtable_heap_space` does not cap the regions) | run 1 + self-check | 2026-11-17 |
+| One node (run 1b, current) | **Confirmed — does not cap**: conclusions row 1, with P4 as amended on 2026-11-17 (owner-approved after run 1). 0.9999 MiB of `[B` per written table against 1.49 KiB counted; N = 200 gives 199.95 MiB against 0.29 MiB; flat across `memtable_heap_space` 64 / 256 / 2048 MiB; 987 B per table under `unslabbed_heap_buffers`; at 64 MiB, 6.25 x L with the `ks` sum at 1.166 MiB and no flush of the small tables; positive control bound | does not cap | run 1b + self-check (§4b) | 2026-11-17 |
+| One node (run 1, superseded) | **Not confirmed (no matching row)**. The relations of the claim all held: 1.0000 MiB `[B` per written table against 1.49 KiB counted; N = 200 gives 199.95 MiB against 0.29 MiB; flat across `memtable_heap_space` 64 / 256 / 2048 MiB; 992 B per table under `unslabbed_heap_buffers`; positive control bound. The frozen P4 gauge bound (1.28 MiB) missed at 3.30 MiB, of which 2.13 MiB was system tables before any write | undetermined (by the rule for Not confirmed; the readings show `memtable_heap_space` does not cap the regions) | run 1 + self-check | 2026-11-17 |
 
 **Positive control:** `H64`, 40,000 x 1 KiB rows into `t0`. The pool limit bound on counted bytes: three `MEMTABLE_LIMIT` flushes of `ks.t0` at 18.6 MiB counted (29 % of 64 MiB, cleanup threshold 1/3), the global gauge back to 5.65 MiB, and `[B` only 11.0 MiB above `s400`. The same flushes left all 400 small tables (399.96 MiB of regions, 0.018 L counted) unflushed.
 
-**Feedback filed:** one dated line in the case file's section D pointing here (uncommitted). The design section was appended to the case file before the run, and its Environment paragraph was amended for defect 1 (marked in place). Findings for stage 3 and upstream: (1) with `heap_buffers`, every memtable with at least one write pins a 1 MiB on-heap region that `memtable_heap_space` charges at about 1.5 KiB. The node's own flush log reports such a table as "1.492KiB (0%) on-heap": 400 tables gave 400 MiB of heap at 0.6 MiB counted. (2) The pool's cleaner picks by counted bytes, so these regions are freed only by other flush triggers (commit-log, period, drain). (3) The global `AllMemtablesOnHeapDataSize` includes about 2.1 MiB of system-table memtables on an idle node; a bound written on it must allow for that. (4) Harness lesson: a JMX pattern query over about 97k metric MBeans leaves about 21 MB of live heap (`ObjectName` property maps); warm it before a heap baseline.
+**Feedback filed:** two dated lines in the case file's section D pointing here: run 1's line, and a second line for run 1b (uncommitted). The case file's design section also carries the P4 amendment, dated. The design section was appended to the case file before the run, and its Environment paragraph was amended for defect 1 (marked in place). Findings for stage 3 and upstream: (1) with `heap_buffers`, every memtable with at least one write pins a 1 MiB on-heap region that `memtable_heap_space` charges at about 1.5 KiB. The node's own flush log reports such a table as "1.492KiB (0%) on-heap": 400 tables gave 400 MiB of heap at 0.6 MiB counted. (2) The pool's cleaner picks by counted bytes, so these regions are freed only by other flush triggers (commit-log, period, drain). (3) The global `AllMemtablesOnHeapDataSize` includes about 2.1 MiB of system-table memtables on an idle node; a bound written on it must allow for that. (4) Harness lesson: a JMX pattern query over about 97k metric MBeans leaves about 21 MB of live heap (`ObjectName` property maps); warm it before a heap baseline.
 
 **Leftovers on the node:** none running. `ps -eo cmd | grep '[C]assandraDaemon'` gives 0; no `slabrc` scope or process; `/mydata/s4/slabrc-run` removed. Kept on pc91: `/mydata/s4/slabrc` (tree), `/mydata/s4/slabrc-harness`, `/mydata/s4/slabrc-logs`.
