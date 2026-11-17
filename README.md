@@ -51,7 +51,9 @@ findings for each system live in a per-system subfolder (`<exp>/cassandra/`,
 Target 2 together** — each result names a constraint *and* shows the code that
 enforces it — and both leave Target 3 out of scope, noting bypass-relevant
 observations in passing for later use. `OOM-exp` carries out **Target 3**,
-taking the constraints `capacity-enforcement-exp` found as its input:
+taking the constraints `capacity-enforcement-exp` found as its input. How the experiments
+depend on each other (phase 1 → phase 2) and how verified OOM cases link back to phase 1 is in
+[`experiments/README.md`](experiments/README.md):
 
 | Folder | Status | Direction |
 |---|---|---|

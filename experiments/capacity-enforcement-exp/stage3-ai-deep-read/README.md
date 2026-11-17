@@ -43,9 +43,10 @@ There is no comparison step and no scoring across agents.
 | File | Holds |
 |---|---|
 | [`playbook-autonomous.md`](playbook-autonomous.md) | The autonomous agent's whole instruction. |
-| [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls. |
+| [`playbook-guided.md`](playbook-guided.md) | The guided agent's instruction: how a feed is worked, the seven steps, the pitfalls, the enforcement-property questions (§3.2) and how a filed case is rechecked (§5), both added 2026-11-16. |
 | [`_TEMPLATE-autonomous.md`](_TEMPLATE-autonomous.md) | A. constraint trace, B. verification solution (B1 claim, B2 unit tier, B3 cluster tier, B4 risks), C. sources read, D. stage-4 feedback. |
-| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §9 is the test design; §10 holds provenance, estimate and stage-4 feedback. |
+| [`_TEMPLATE-guided.md`](_TEMPLATE-guided.md) | The eleven-section case file; §8a (from 2026-11-16) holds the enforcement properties; §9 is the test design; §10 holds provenance, estimate, real-memory estimate and stage-4 feedback. |
+| [`../cassandra/stage3-ai-deep-read/recheck-flags.md`](../cassandra/stage3-ai-deep-read/recheck-flags.md) | OOM-lead flags from §8a and from rechecks; OOM-exp picks leads from it. |
 | [`../cassandra/stage3-ai-deep-read/cases/`](../cassandra/stage3-ai-deep-read/cases/) | The case files of both agents. Flat; the module is a field, not a folder. |
 | [`_INDEX.md`](../cassandra/stage3-ai-deep-read/_INDEX.md) | One row per case file, with an Agent column. |
 | [`predicted-negative.md`](../cassandra/stage3-ai-deep-read/predicted-negative.md) | Lines read with the source open and refused, each citing the rule it failed. Existing entries have **no case file yet**; each leaves this file when its case file is written (section 4). |

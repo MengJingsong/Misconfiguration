@@ -7,7 +7,8 @@
 > `experiments/capacity-enforcement-exp/cassandra/`), not next to this file.
 
 **This is the guided agent.** It gets the target plus the human suggestions in this
-file: the three rules, the enforcement patterns and the test-design method. The
+file: the three rules, the enforcement patterns, the test-design method and (from
+2026-11-16) the enforcement-property questions of section 3.2. The
 [autonomous agent](playbook-autonomous.md) gets the target only. Both write a case
 file into `cases/` (this one as `<stem>--guided.md`, from `_TEMPLATE-guided.md`),
 and stage 4 runs either file the same way. There is no isolation rule: this agent
@@ -168,6 +169,36 @@ rejections by these patterns).
   that count. Before rejecting a count, time or per-item check, ask how many
   bytes each admitted item holds.
 
+### 3.2 Enforcement properties (added 2026-11-16)
+
+Learned from the OOM-exp verified cases (phase 2). A constraint can cap the quantity its check
+counts and still leave real memory unbounded. The estimate in §10 answers "does usage follow
+the constraint?" and cannot show that difference, so every guided case also answers the four
+questions below and records them in the case file's §8a. They describe **how** a constraint is
+enforced; they are not new kinds of constraint (non-config constraints, the hidden factors, stay
+local variables and constants: [`README.md`](README.md) §6, *Config-type and non-config type*). Answer each from the source with `file:line`, or `unknown: <what
+would settle it>`.
+
+| # | Question | Shown by (OOM-exp case) |
+|---|---|---|
+| **E1** | **What is counted, and for how long?** The unit the counter charges (on-wire bytes, entries, a weigher's estimate) against the bytes the object really holds once admitted (after deserialization, with per-entry overhead, with copies). And when the counter is released against when the memory is freed. | B6: internode queues charge on-wire bytes, a tiny-cell mutation expands on the heap; B7: the key/counter cache weigher leaves out per-entry overhead (2.14× / 1.80× the cap); S2: at CL=ONE a faster replica's ack releases the in-flight charge while the coordinator's own write still waits on MutationStage |
+| **E2** | **What happens at the limit?** A graceful outcome (reject, block, evict, back-pressure, shrink) or a failing one: the disallow path still allocates elsewhere (overflow, fallback), or nothing stops the allocation before the JVM's own limit, so the "enforcement" is an `OutOfMemoryError` / `OutOfDirectMemoryError`. | C2: pool overflow and unsent responses bounded only by `MaxDirectMemorySize` |
+| **E3** | **Per what, and how many?** The owner a limit applies to (node, table, connection, peer link, thread, writer, validation), how many owners exist at default settings and under a reachable load, and whether any limit caps their total. | C1: a receive-queue allowance per peer link, outside the global reserve |
+| **E4** | **Which budget, shared with what?** The memory domain (heap, direct, other native, page cache, container), the other constraints that draw on the same domain, and whether their defaults, resolved at a deployment heap, add up to more than that domain's default budget. | R1-V: off-heap memtable and chunk cache, each at its default 512 MiB and under its cap, together exceed the container; S1: several direct-memory pools stacked |
+
+How to use them:
+
+- **They do not change the estimate.** §10's Estimate keeps its meaning, so cases filed before
+  and after this section stay comparable. §10's **Real-memory estimate** row records whether real
+  memory, not the counted quantity, follows the constraint.
+- **Flag, don't chase.** When an answer says real memory can exceed what the constraint governs,
+  write one line in §8a's *OOM-lead flag* row and add it to
+  `<system>/stage3-ai-deep-read/recheck-flags.md`. OOM-exp picks leads from there. Do not design
+  or run an OOM test here.
+- **Only OOM-exp results add a row.** A question joins this table when a verified OOM-exp case
+  shows it (through [`../../backlink-playbook.md`](../../backlink-playbook.md)), dated, with the
+  case named. The autonomous playbook is never given these questions.
+
 ## 4. Finishing
 
 1. Write the case file from `_TEMPLATE-guided.md`, answering all nine questions
@@ -190,3 +221,28 @@ rejections by these patterns).
 5. If the feed was 3a, note the batch in
    `../stage2-ai-preprocessing/README.md`'s coverage table so the row is not
    re-read.
+6. Answer §3.2's four questions in §8a (cases filed from 2026-11-16 on).
+
+## 5. Rechecking a filed case (added 2026-11-16)
+
+A recheck answers §3.2's questions for a case filed before they existed. It reads the case file and
+the pinned source; it does not redo the case.
+
+1. **Mode.** Record which one applies:
+   - `blind`: the case was picked from phase 1 alone (a batch the owner approved). **Do not open
+     anything under `experiments/OOM-exp/`**, as the autonomous agent does not open the guided
+     playbook. This is the mode that tests whether phase 1 predicts phase 2.
+   - `back-link`: the case was named by a back-link row ([`../../backlink-playbook.md`](../../backlink-playbook.md))
+     for a verified OOM-exp case. You may read that OOM case; say so.
+2. **Read** the case file (guided or autonomous) and every `file:line` it cites for the constraint,
+   the counter and the disallow path, in the pinned source.
+3. **Answer E1–E4** with `file:line`. Check every new citation against the source.
+4. **Append, don't rewrite.** At the end of the case file add a section
+   `## Recheck — enforcement properties (guided, YYYY-MM-DD, <mode>)` with §8a's table, the
+   Real-memory estimate and the OOM-lead flag. Leave every earlier section, the Estimate and the
+   stage-4 feedback as filed. An autonomous case file is rechecked the same way, by the guided agent.
+5. **Flags** go to `<system>/stage3-ai-deep-read/recheck-flags.md`: one row per flag (case file,
+   question, one-line mechanism, mode, date).
+6. **Stage 4 only on request.** If the recheck changes the claim stage 4 should test (most often the
+   Real-memory estimate), name the claim in the appended section. A stage-4 run follows only when
+   the owner approves it.

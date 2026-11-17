@@ -127,6 +127,20 @@ or write via this check, and through what mechanism? Goes beyond §7's
 per-object sizing — this is about the limit's effect on the ceiling, not
 what one allowed object costs.
 
+## 8a. Enforcement properties (cases filed from 2026-11-16)
+
+The four questions of `playbook-guided.md` §3.2. Cite `file:line`, or write `unknown: <what would
+settle it>`. A case filed earlier gets these through a recheck (`playbook-guided.md` §5), appended at
+the end of the file instead.
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | the unit the counter charges vs the bytes the admitted object really holds; when the counter is released vs when the memory is freed |
+| **E2 At the limit** | what the disallow path does: graceful (reject / block / evict / back-pressure) or not (allocates elsewhere, or nothing stops it before the JVM's own limit) |
+| **E3 Owner and multiplier** | per what the limit applies; how many owners at defaults and under a reachable load; any limit on their total |
+| **E4 Budget domain** | heap / direct / other native / page cache / container; other constraints drawing on the same domain; whether their defaults add up to more than its default budget |
+| **OOM-lead flag** | one line if any answer says real memory can exceed what this constraint governs (also add it to `recheck-flags.md`), or `none` |
+
 ## 9. Test design (guidance for stage 4)
 
 **Stage 3 writes this section; stage 3 never runs it.** It carries **no
@@ -308,6 +322,7 @@ raw readings from 9d for every run.
 |--------|---------|
 | **Estimate** | `positive` (usage follows the constraint) / `negative` (it does not) / `undetermined` (an undetermined line has no case file and stays in `undetermined.md`; this value is for completeness only). A prediction from the source; stage 4 confirms or refutes it. |
 | **Ground** | for a negative estimate, the rule it fails (README §3.4–§3.6) or the reason usage should not follow; otherwise `—` |
+| **Real-memory estimate** | (from 2026-11-16) whether the real memory, not the counted quantity, follows the constraint: `same as Estimate`, or `positive` / `negative` / `undetermined` with the §8a question that decides it |
 | **Autonomous reference** | the `--autonomous` case file read for this case, or `none` (the user is asked per case or batch, see `playbook-guided.md` §1) |
 | **Stage-3 feed** | `3a` (from stage 1/2 — cite the `bands.md` row and its band) or `3b` (found by reading the source directly — say which subsystem/call chain led here) |
 | **Filed by / Date** | Who wrote this case up and when |

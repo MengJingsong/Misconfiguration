@@ -222,6 +222,11 @@ criterion before its readings; record which one was used.
 Example Status cells: `verified-gap · service-loss · deployment`,
 `reproduced-OOM · diagnostic`.
 
+**Back-link (added 2026-11-16).** When a case first reaches `verified-OOM` or `verified-gap`,
+run [`../backlink-playbook.md`](../backlink-playbook.md) for it and add its row to
+`../phase-links/<system>.md`. The row records whether phase 1 (`capacity-enforcement-exp`) held a
+clue to the result; it does not change the case's status.
+
 ### Defaults and acceptable budget (amended 2026-11-11)
 
 New evidence: the R1–R4 recheck (Cassandra, 2026-11-11) met V1–V5 for four
