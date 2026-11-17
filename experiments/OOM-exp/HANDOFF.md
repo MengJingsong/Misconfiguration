@@ -353,19 +353,13 @@ none has run yet.
   playbook's "Picking combinations" step 5 and the floor+surge note at the
   top of that file). Read this before re-surveying capacity-enforcement-exp from scratch
   for the next combination.
-- **Available nodes (updated 2026-11-09):** `pc96` (local — the session runs
-  here directly, no ssh; its full name is `pc96.cloudlab.umass.edu`, not
-  `.emulab.net`; 32 cores, ~125 GiB), plus **five remote r320 nodes** (APT,
-  8 cores / 16 GiB each): `apt138`, `apt140`, `apt149`, `apt179`, `apt190`
-  (reach over ssh as `apt138.apt.emulab.net` etc., user **`jason92`**, via the
-  shared deploy key). Plain `ssh apt138` works — `~/.ssh/config` has a
-  `# setup-node: peer` block for each (user `jason92`, the deploy key); note the
-  login user is `jason92`, **not** `jason`. `ssh pc96` itself needs
-  `-i /proj/misconfiguration-PG0/.ssh/id_ed25519` (no config entry for the
-  local node). Build JDK/Ant/source on any remote before use if not already
-  done — see `environment.md`. (The earlier `pc41`/`pc39`/`pc29` allocation from
-  2026-11-02, and the interim `pc264/265/268/271/323` nodes at 2 c/1 GiB that
-  were too small to build or host peers, are retired.)
+- **Available nodes (updated 2026-11-17, owner's list):** remote `pc91`, `pc84`, `pc72`, `pc99`, `pc75`
+  (UMass, experiment `jason92-326528`, x86_64, 32–40 cores, 125 GiB, 715 GiB `/mydata`, LAN
+  `10.10.1.1`–`.5`) and `ms0625`, `ms0640`, `ms0604`, `ms0611`, `ms0617` (Utah m400, below), plus the
+  local `pc96`. Plain `ssh pcNN` / `ssh msNNNN` works from `pc96`. Table and state: root
+  [`HANDOFF.md`](../../HANDOFF.md) "Nodes and access (updated 2026-11-17)". The five pc nodes are being
+  used for phase-1 stage-4 recheck runs from 2026-11-17 (`/mydata/s4/`); coordinate before running
+  OOM-exp there. The `apt138/140/149/179/190` r320 nodes are no longer available.
 - **Utah m400 nodes (added 2026-11-16, experiment `jason92-326377`):** `ms0625` (node0, LAN
   `10.10.1.1`), `ms0640` (node1, `.2`), `ms0604` (node2, `.3`), `ms0611` (node3, `.4`), `ms0617`
   (node4, `.5`), full names `msNNNN.utah.cloudlab.us`. Plain `ssh ms0625` etc. works from `pc96`

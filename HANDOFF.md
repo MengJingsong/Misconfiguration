@@ -271,7 +271,37 @@ Protocol: `stage4-runtime-verification/README.md` ("The run protocol").
 - **`undetermined.md` §2 re-audit** (rejections made under the old pattern-(a)-only scope) and
   **band D** (4,387 units, one filed case already came from it).
 
-## Nodes and access (checked 2026-10-21)
+## Nodes and access (updated 2026-11-17)
+
+**Available remote nodes (owner's list, 2026-11-17):** the ten below, all reached from the local node
+`pc96` with plain `ssh <name>` (`setup-node.sh --peers` blocks in `~/.ssh/config`, shared deploy key,
+user `jason92`); passwordless `sudo`, cgroup v2, Ubuntu 22.04, NTP synchronized. Checked 2026-11-17.
+Earlier allocations (`apt138/140/149/179/190`, and the `pc07/12/06/13` set below) are no longer
+available.
+
+| Node | Host (experiment) | Arch / cores / RAM | Local disk | LAN | State 2026-11-17 |
+|---|---|---|---|---|---|
+| `pc91` | node0.jason92-326528 (UMass) | x86_64 / 32 / 125 GiB | `/mydata` 715 GiB | `10.10.1.1` | JDK 11 + Ant, `/mydata/s4/cassandra-base` built (phase-1 stage-4 rechecks) |
+| `pc84` | node1.jason92-326528 | x86_64 / 32 / 125 GiB | 715 GiB | `10.10.1.2` | same |
+| `pc72` | node2.jason92-326528 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.3` | same |
+| `pc99` | node3.jason92-326528 | x86_64 / 32 / 125 GiB | 715 GiB | `10.10.1.4` | same |
+| `pc75` | node4.jason92-326528 | x86_64 / 40 / 125 GiB | 715 GiB | `10.10.1.5` | same |
+| `ms0625` | node0.jason92-326377 (Utah m400) | **aarch64** / 8 / 62 GiB | 35 GiB | `10.10.1.1` | JDK 11 + Ant; **a Cassandra node was running** (OOM-exp) |
+| `ms0640` | node1.jason92-326377 | aarch64 / 8 / 62 GiB | 19 GiB | `10.10.1.2` | JDK 11 + Ant |
+| `ms0604` | node2.jason92-326377 | aarch64 / 8 / 62 GiB | 30 GiB | `10.10.1.3` | JDK 11 + Ant |
+| `ms0611` | node3.jason92-326377 | aarch64 / 8 / 62 GiB | 35 GiB | `10.10.1.4` | JDK 11 + Ant |
+| `ms0617` | node4.jason92-326377 | aarch64 / 8 / 62 GiB | 37 GiB | `10.10.1.5` | JDK 11 + Ant |
+
+- The two sets are on different sites (UMass, Utah; ≈ 50 ms apart) with separate `10.10.1.0/24` LANs:
+  run a cluster within one set. The m400s are **ARM**: never mix them with x86 nodes in one case's
+  matched arms, and record `aarch64` (smoke test: `experiments/OOM-exp/cassandra/node-smoke/2026-11-16-ms0625/`).
+- All nodes have 8 GiB of swap on: keep it at 0 for a measured process (`systemd-run --user --scope
+  -p MemorySwapMax=0`). `cassandra-env.sh` sizes `MaxDirectMemorySize` from RAM even with a hand-set
+  heap; record the resolved value.
+- Before using a node, check what runs there (`ps -eo cmd | grep '[C]assandraDaemon'`) and work in a
+  fresh directory named for the run.
+
+## Nodes and access (2026-10-21; retired)
 
 Experiment `jason92-320876`, Ubuntu 22.04, 40 cores, 251 GiB each; JDK 11.0.32.1, Ant 1.10.12,
 `~/cassandra-run1` built with `build-test`; no Cassandra process left on any.

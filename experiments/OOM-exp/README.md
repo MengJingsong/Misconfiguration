@@ -68,7 +68,7 @@ and campaign row records its source as a label, like the capacity regime.
 |---|---|---|---|
 | **if-check inventory** | capacity checks found by `capacity-enforcement-exp` | convergence and bypass of existing checks | the direction playbooks' selection step |
 | **JIRA OOM history** | the project's fixed OOM reports | **clues for selecting among phase 1's constraints** (owner's rule, 2026-11-16): which constraints and mechanisms have caused real OOMs; positive controls; unfixed variants and incomplete fixes | [`jira-mining-playbook.md`](jira-mining-playbook.md) |
-| **Data-flow tracing** | where bytes are held along core data flows | accumulation with no check or a check on the wrong unit, plus new leads for both directions. *Role under review (2026-11-16): the only source that does not go through phase 1's constraints; the owner decides whether it stays here, moves into phase 1, or is dropped* | [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) |
+| **Data-flow tracing** | where bytes are held along core data flows | accumulation with no check or a check on the wrong unit, plus new leads for both directions. *Kept as a phase-2-only source for now (owner's decision, 2026-11-17): the only source that does not go through phase 1's constraints* | [`dataflow-tracing-playbook.md`](dataflow-tracing-playbook.md) |
 
 The if-check inventory cannot see memory that no check guards; data-flow tracing
 covers that gap, and JIRA history points the selection at the constraints that have

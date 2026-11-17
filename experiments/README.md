@@ -40,8 +40,9 @@ starts from Hadoop's phase-1 results.
   the places that enforce them.
 - **JIRA OOM history** gives clues for selecting among phase 1's constraints: which ones have failed
   before, and how.
-- **Data-flow tracing** (OOM-exp) starts from where bytes are held, not from a constraint. *Open
-  (2026-11-16): whether it stays a phase-2-only source, moves into phase 1, or is dropped.*
+- **Data-flow tracing** (OOM-exp) starts from where bytes are held, not from a constraint. It stays a
+  **phase-2-only source for now** (owner's decision, 2026-11-17): the one lead source that does not go
+  through phase 1, and the one that can find memory no constraint touches.
 
 ## How phase 2 feeds back into phase 1
 

@@ -171,3 +171,12 @@ Run 1's logs are in `~/stage4-logs/` on the node, outside the repo:
 sudo apt-get remove -y openjdk-11-jdk ant && sudo apt-get autoremove -y
 rm -rf ~/cassandra-run<N> ~/.m2 ~/stage4-logs
 ```
+
+**2026-11-17: experiment `jason92-326528`, five nodes (UMass) — the current x86 set.** `pc91` (node0, LAN `10.10.1.1`),
+`pc84` (node1, `.2`), `pc72` (node2, `.3`), `pc99` (node3, `.4`), `pc75` (node4, `.5`); x86_64, 32 cores (`pc72`, `pc75`: 40),
+125 GiB, 715 GiB free on `/mydata`, 8 GiB swap on, Ubuntu 22.04.2 / `5.15.0-203-generic`, passwordless `sudo`, cgroup v2.
+Plain `ssh pcNN` from `pc96` (`setup-node.sh --peers`). Set up the same day: `openjdk-11-jdk` (11.0.33) and Ant 1.10.12 from
+apt; source copied to `/mydata/s4/src-5.0.9` (repo `systems/cassandra/source/`) and to `/mydata/s4/cassandra-base` with
+`copy-source.sh`; `ant build-test` successful in 116–143 s. For a run, copy `cassandra-base` (`cp -a`) to a fresh
+`/mydata/s4/<run>/` rather than building in it. The full list of available nodes, including the Utah aarch64 m400s, is in
+the root `HANDOFF.md` "Nodes and access (updated 2026-11-17)".

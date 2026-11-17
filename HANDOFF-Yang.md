@@ -153,6 +153,11 @@ Protocol: [`experiments/capacity-enforcement-exp/stage4-runtime-verification/REA
 
 ## Nodes
 
+**Update 2026-11-17 (owner):** the nodes named below are gone. The available remote nodes are now
+`pc91`, `pc84`, `pc72`, `pc99`, `pc75` (x86_64) and `ms0625`, `ms0640`, `ms0604`, `ms0611`, `ms0617`
+(aarch64), listed with their state in `HANDOFF.md` "Nodes and access (updated 2026-11-17)". Which of
+them each person uses is not yet agreed; record it here when it is.
+
 **Yang's nodes: to be announced by Yang** (the earlier suggestion of `pc06`/`pc13` does not hold).
 Do not run anything on a node until they are named here. Jingsong uses `pc07` and `pc12`; do not
 use those.

@@ -17,14 +17,13 @@ withdrawn or superseded, and the recorded pairs stand as finished results.
 
 A session should **not** start new work here unless Jingsong asks for it.
 
-## Available nodes (2026-10-20)
+## Available nodes (updated 2026-11-17)
 
-This folder needs no cluster (stage-3-style source reading). If a later resumption needs a machine, the current CloudLab experiment `jason92-320876` has four nodes:
-- `pc07` (node0): set up, with JDK 11, Ant and a built `cassandra-5.0.9` clone.
-- `pc12` (node1), `pc06` (node2), `pc13` (node3): reachable, but with no JDK and an empty home.
-
-All four have 40 cores and 251 GiB, with passwordless `sudo`. The table, addresses and the SSH key to use (`-i /proj/misconfiguration-PG0/.ssh/id_ed25519`) are in
-[`../capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md` §7](../capacity-enforcement-exp/cassandra/stage4-runtime-verification/environment.md#7-nodes-checked-2026-10-07-updated-2026-10-13-and-2026-10-20).
+This folder needs no cluster (stage-3-style source reading). If a later resumption needs a machine, the
+available remote nodes are `pc91`, `pc84`, `pc72`, `pc99`, `pc75` (x86_64) and `ms0625`, `ms0640`,
+`ms0604`, `ms0611`, `ms0617` (aarch64); table, access and state in the root
+[`HANDOFF.md`](../../HANDOFF.md) "Nodes and access (updated 2026-11-17)". The 2026-10-20 set
+(`pc07`, `pc12`, `pc06`, `pc13`) is gone.
 
 ## What this folder is
 
