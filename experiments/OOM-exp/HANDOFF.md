@@ -239,6 +239,13 @@ none has run yet.
 
 ## Open follow-ups
 
+- **From the phase-link session (2026-11-17), see root [`HANDOFF.md`](../../HANDOFF.md) "Phase links and
+  phase-1 rechecks — state and leftover work":** (1) owner rulings on [`queuing-playbook.md`](queuing-playbook.md)
+  §8 and its Proposed text, then the stale-text fixes; (2) back-link row for **B8** (now verified) per
+  [`../backlink-playbook.md`](../backlink-playbook.md); (3) proposals for N13, N14, N15 and the read-limit cluster,
+  all measured at phase-1 stage 4 on 2026-11-17 (each "Confirmed — does not cap"), and candidate N17+ bypass-leads
+  entries; (4) the JIRA survey's CASSANDRA-10930 note is wrong about `cassandra-env.sh` (see N16).
+
 - **Disk is paused by request (set 2026-11-02).** Do not retry the disk case
   or pick a new disk-group combination until this is explicitly lifted in
   `cases/_run-log.md`'s status table. When it is lifted, the

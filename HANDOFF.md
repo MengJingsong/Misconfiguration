@@ -1,8 +1,8 @@
 # Capacity-Enforcement Exp — Handoff
 
 > Named `if-check-exp` until 2026-11-11. Paths in this file use the new name; case files, results
-> and logs written before the rename keep the old one (the old folder path is a symlink to the new
-> one for now).
+> and logs written before the rename keep the old one (the `experiments/if-check-exp` symlink was
+> removed on 2026-11-16: read that path as `experiments/capacity-enforcement-exp`).
 
 For a new session picking up `capacity-enforcement-exp` work. Read this first, then
 [`experiments/capacity-enforcement-exp/README.md`](experiments/capacity-enforcement-exp/README.md) for the full format spec.
@@ -32,6 +32,64 @@ version is in git: `git show d40ee0c:HANDOFF.md` (older: `git show 2e9cf7b:HANDO
 The running plan and findings live in two Google Docs —
 [*Meeting Summary*](https://docs.google.com/document/d/1tldFFEk28qtQD0QdsnC2Br-BisTyOUp8OCwG1SZ_6Jk/edit)
 and [*Progress Report*](https://docs.google.com/document/d/1gMRFwaTvgahSiRi10ad_Y3CLDkxyF1QTYkAhZ4be4x8/edit).
+
+## Phase links and phase-1 rechecks — state and leftover work (2026-11-17)
+
+Session of 2026-11-16/17 (owner). **Start here for anything linking phase 1 (this experiment) to phase 2
+(OOM-exp).** How the experiments relate: [`experiments/README.md`](experiments/README.md). Everything below
+is committed and pushed (last commit of the session `9bc40857`).
+
+**Done:**
+- `experiments/if-check-exp` symlink removed; harness paths repointed.
+- Guided playbook §3.2 (enforcement-property questions E1–E4) and §5 (rechecking a filed case, `blind` /
+  `back-link`); template §8a and Real-memory estimate; `stage3-ai-deep-read/recheck-blind.md` (blind agents'
+  whole instruction, no OOM-exp examples). Autonomous playbook unchanged.
+- [`experiments/backlink-playbook.md`](experiments/backlink-playbook.md) and the link table
+  [`experiments/phase-links/cassandra.md`](experiments/phase-links/cassandra.md): 7 verified cases linked (6
+  `recorded-untested`, R1-V `missed`); 34 phase-1 files rechecked in back-link mode (56 flag rows, 19 beyond the
+  OOM case).
+- Blind rechecks of all 159 remaining Cassandra memory cases (41 flagged) and a budget-domain ledger
+  (`cassandra/stage3-ai-deep-read/budget-ledger.md`). All flags: `cassandra/stage3-ai-deep-read/recheck-flags.md`
+  (114 rows).
+- OOM-exp leads N13–N16 added to `experiments/OOM-exp/capacity-enforcement-bypass-leads.md` with JIRA notes.
+- Stage 4, batch 1 of recheck claims (owner-approved), on `pc91/84/72/99/75`: N15 `items_per_collection`, N14
+  `native_transport_max_frame_size`, N13 `native_transport_receive_queue_capacity`, `cql-row-limit`, and
+  `slab-region-size` (run 1b after an owner-approved amendment): **all five Confirmed — does not cap**. Results:
+  `cassandra/stage4-runtime-verification/results/*--recheck-2026-11-17.md`; summary in the link table.
+- OOM-exp [`queuing-playbook.md`](experiments/OOM-exp/queuing-playbook.md) (lead → campaign row), merged from
+  scattered rules; data-flow tracing kept as a phase-2-only source (owner).
+- Nodes: ten available remote nodes declared below ("Nodes and access (updated 2026-11-17)").
+
+**Leftover work (owner decides order):**
+1. **Rule on the queuing playbook's open decisions** (its §8 and every **Proposed** text): who queues (researcher
+   vs agent); P1–P3 criteria; one row-status vocabulary; `source:` syntax and ID rules; upstream reporting vs
+   "nothing posted to JIRA"; whether data-flow F1 still blocks new configuration pairs; JIRA check for rows
+   queued before the rule (C5, B2–B4, C4/B5). Then apply the rulings and the stale-text fixes in its §8.5
+   (`_INDEX.md` "V1–V5", run-log status tables, HANDOFF "step 5", campaign-plan "Not yet started", jira-mining wording).
+2. **Back-link for B8** (commit-log replay, now `verified-OOM · diagnostic`, lead source N4 from
+   `commitlog_max_outstanding_replay_bytes`): run `experiments/backlink-playbook.md`, add its row to the link
+   table, recheck the files it names in back-link mode. Do the same for every later verified case.
+3. **Hand more leads to OOM-exp** (via the queuing playbook): proposals for N13, N14, N15 and the read-limit
+   cluster, which now have stage-4 measurements (§3.6 satisfied) and JIRA checks; candidate N17+ entries for the
+   bypass-leads list: the read-limit cluster, SAI `segment_write_buffer_size` (fixed 1 GiB) at small heaps,
+   upsampled index-summary buffers never trimmed (extends R5), counter/view stages multiplying in-use DOB scratch
+   (extends U1/S1), the 512 MiB send reserve not heap-scaled (extends L1), and `cassandra_latest.yaml` shipping
+   `offheap_objects` (note on R1-V). Mark N5, N11, R5 as corroborated by the rechecks.
+4. **Add a status column to `recheck-flags.md`** (`lead` → `stage-4 measured` → `queued as <ID>` → `verified` /
+   `negative`), so phase 1's hit rate can be counted; set the five batch-1 rows to `stage-4 measured`.
+5. **Remaining stage-4 recheck claims:** 73 proposed, 5 run, **68 left** (61 of the 73 carry an OOM-lead flag).
+   Suggested batch 2: denylist refresh (`denylist_max_keys_total`), index-summary upsampling, Paxos empty entries
+   (`paxos_cache_size-applySimpleConfig`), per-query `cached_rows_fail_threshold`, SAI segment buffer. Method used
+   for batch 1: one fresh agent per claim and node; design appended to the case file and frozen; results file
+   `<case>--recheck-<date>.md`; scaled measurement in a cgroup scope with `MemorySwapMax=0`, not an OOM test.
+6. **Correct the JIRA survey note on CASSANDRA-10930** (`experiments/OOM-exp/cassandra/leads/jira-oom-survey.csv`):
+   it says `cassandra-env.sh` sets `MaxDirectMemorySize` only when given; 5.0.9 always sets it (N16).
+7. **Hadoop:** nothing linked yet (no Hadoop OOM-exp cases); apply the same playbooks once Hadoop has verified cases.
+
+**Left on the nodes** (nothing running): build `/mydata/s4/cassandra-base` and run copies with logs on each pc
+node — `pc99:/mydata/s4/ipc-recheck`, `pc84:/mydata/s4/ntfs-rc`, `pc72:/mydata/s4/ntq-recheck`,
+`pc75:/mydata/s4/rowlim-rc` (718 MB of node data), `pc91:/mydata/s4/slabrc*`. Safe to delete once the results are
+accepted. The m400s are used by the OOM-exp session (a Cassandra node was running on `ms0625`).
 
 ## Next job (2026-10-23): two people, two sets
 
