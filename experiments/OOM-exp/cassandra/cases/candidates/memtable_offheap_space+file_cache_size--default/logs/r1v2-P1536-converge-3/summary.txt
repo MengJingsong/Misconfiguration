@@ -1,0 +1,136 @@
+yaml: memtable offheap_objects; file cache on; memtable_offheap_space=def file_cache_size=def (def = unset, heap-derived); diff lines: 4
+cpu affinity: 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30 (CPUS=0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30); GC threads: -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 
+expected resolved: memtable_offheap_space=384MiB memtable_heap_space=384MiB file_cache_size=384MiB networking=96MiB
+node pid 3313425 unit oom-r1v2-1794872838125564626 budget 3072MiB heap 1536M direct 768M; startup: INFO  [main] 2026-11-16T23:47:20,500 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 384MiB|INFO  [main] 2026-11-16T23:47:20,501 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 384MiB|INFO  [MemtableFlushWriter:1] 2026-11-16T23:47:23,116 BufferPools.java:49 - Global buffer pool limit is 384.000MiB for chunk-cache and 96.000MiB for networking|
+rss idle: VmHWM: 2184756 kB VmRSS: 2184756 kB RssAnon: 2005144 kB RssFile: 179612 kB 
+cgroup idle: cur=2079027200 max 0 oom 0 oom_kill 0 
+nmt idle: Total: reserved=3121MB, committed=1882MB|Java Heap committed=1536MB)|Class committed=60MB)|Thread committed=51MB)|Code committed=26MB)|GC committed=123MB)|Internal committed=1MB)|Other committed=59MB)|Symbol committed=11MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=1MB)|
+rss idle-nopoll: VmHWM: 2186680 kB VmRSS: 2186680 kB RssAnon: 2007004 kB RssFile: 179676 kB 
+cgroup idle-nopoll: cur=2080718848 max 0 oom 0 oom_kill 0 
+rss idle-poll: VmHWM: 2188668 kB VmRSS: 2188600 kB RssAnon: 2008924 kB RssFile: 179676 kB 
+cgroup idle-poll: cur=2082131968 max 0 oom 0 oom_kill 0 
+rss p1: VmHWM: 2202236 kB VmRSS: 2202228 kB RssAnon: 2022312 kB RssFile: 179916 kB 
+cgroup p1: cur=2100674560 max 0 oom 0 oom_kill 0 
+rss p2: VmHWM: 2686460 kB VmRSS: 2680408 kB RssAnon: 2471504 kB RssFile: 208904 kB 
+cgroup p2: cur=3124453376 max 0 oom 0 oom_kill 0 
+rss p3: VmHWM: 2775196 kB VmRSS: 2732368 kB RssAnon: 2504320 kB RssFile: 228048 kB 
+cgroup p3: cur=3221098496 max 5615 oom 0 oom_kill 0 
+rss p4: VmHWM: 2811576 kB VmRSS: 2721052 kB RssAnon: 2482628 kB RssFile: 238424 kB 
+cgroup p4: cur=3221225472 max 10744 oom 0 oom_kill 0 
+rss p5: VmHWM: 2811576 kB VmRSS: 2683544 kB RssAnon: 2496388 kB RssFile: 187156 kB 
+cgroup p5: cur=3221225472 max 15241 oom 0 oom_kill 0 
+rss p6: VmHWM: 2811576 kB VmRSS: 2705976 kB RssAnon: 2502796 kB RssFile: 203180 kB 
+cgroup p6: cur=3221225472 max 21830 oom 0 oom_kill 0 
+rss p7: VmHWM: 2811576 kB VmRSS: 2731740 kB RssAnon: 2492000 kB RssFile: 239740 kB 
+cgroup p7: cur=3221225472 max 26817 oom 0 oom_kill 0 
+rss p8: VmHWM: 2811576 kB VmRSS: 2722152 kB RssAnon: 2512456 kB RssFile: 209696 kB 
+cgroup p8: cur=3221225472 max 32160 oom 0 oom_kill 0 
+rss p9: VmHWM: 2811576 kB VmRSS: 2752292 kB RssAnon: 2544064 kB RssFile: 208228 kB 
+cgroup p9: cur=3221041152 max 36513 oom 0 oom_kill 0 
+rss p10: VmHWM: 2846664 kB VmRSS: 2821824 kB RssAnon: 2559776 kB RssFile: 262048 kB 
+cgroup p10: cur=3221225472 max 41876 oom 0 oom_kill 0 
+rss p11: VmHWM: 2903680 kB VmRSS: 2819080 kB RssAnon: 2609204 kB RssFile: 209876 kB 
+cgroup p11: cur=3221102592 max 45781 oom 0 oom_kill 0 
+rss p12: VmHWM: 2903680 kB VmRSS: 2791472 kB RssAnon: 2608056 kB RssFile: 183416 kB 
+cgroup p12: cur=3221192704 max 47414 oom 0 oom_kill 0 
+rss after-preload: VmHWM: 2903680 kB VmRSS: 2821976 kB RssAnon: 2637960 kB RssFile: 184016 kB 
+cgroup after-preload: cur=3221110784 max 48715 oom 0 oom_kill 0 
+chunkcache after-preload: Chunk Cache : entries 45056, size 352 MiB, capacity 352 MiB, 45586 misses, 45776 requests, 0.004 recent hit rate, 1405.364 microseconds miss latency
+tablestats after-preload:  Table: standard1| Number of partitions (estimate): 795013| Memtable data size: 0| Memtable off heap memory used: 0|
+nmt after-preload: Total: reserved=3686MB, committed=2442MB|Java Heap committed=1536MB)|Class committed=65MB)|Thread committed=63MB)|Code committed=44MB)|GC committed=123MB)|Internal committed=1MB)|Other committed=573MB)|Symbol committed=12MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=9MB)|
+rss c1: VmHWM: 2938496 kB VmRSS: 2934688 kB RssAnon: 2754860 kB RssFile: 179828 kB 
+cgroup c1: cur=3221217280 max 52290 oom 0 oom_kill 0 
+rss c2: VmHWM: 2950640 kB VmRSS: 2950640 kB RssAnon: 2759820 kB RssFile: 190820 kB 
+cgroup c2: cur=3204808704 max 53088 oom 0 oom_kill 0 
+rss c3: VmHWM: 2950640 kB VmRSS: 2949476 kB RssAnon: 2759884 kB RssFile: 189592 kB 
+cgroup c3: cur=3168890880 max 53252 oom 0 oom_kill 0 
+rss after-cachefill: VmHWM: 2950640 kB VmRSS: 2949476 kB RssAnon: 2759884 kB RssFile: 189592 kB 
+cgroup after-cachefill: cur=3168890880 max 53252 oom 0 oom_kill 0 
+chunkcache after-cachefill: Chunk Cache : entries 1, size 16 KiB, capacity 352 MiB, 143940 misses, 146501 requests, 0.017 recent hit rate, 1947.646 microseconds miss latency
+tablestats after-cachefill:  Table: standard1| Number of partitions (estimate): 795013| Memtable data size: 0| Memtable off heap memory used: 0|
+nmt after-cachefill: Total: reserved=3697MB, committed=2447MB|Java Heap committed=1536MB)|Class committed=66MB)|Thread committed=68MB)|Code committed=46MB)|GC committed=123MB)|Internal committed=2MB)|Other committed=573MB)|Symbol committed=12MB)|Native Memory Tracking committed=4MB)|Arena Chunk committed=5MB)|
+burst start 2026-11-16 18:50:32
+rss m1: VmHWM: 2950640 kB VmRSS: 2950636 kB RssAnon: 2760944 kB RssFile: 189692 kB 
+cgroup m1: cur=3171614720 max 53252 oom 0 oom_kill 0 
+rss m2: VmHWM: 3147416 kB VmRSS: 3059868 kB RssAnon: 2879988 kB RssFile: 179880 kB 
+cgroup m2: cur=3221192704 max 59746 oom 0 oom_kill 0 
+rss m3: VmHWM: 3147416 kB VmRSS: 3078084 kB RssAnon: 2866128 kB RssFile: 211956 kB 
+cgroup m3: cur=3221196800 max 64090 oom 0 oom_kill 0 
+rss m4: VmHWM: 3155580 kB VmRSS: 3124056 kB RssAnon: 2866512 kB RssFile: 257544 kB 
+cgroup m4: cur=3221024768 max 69321 oom 0 oom_kill 0 
+rss m5: VmHWM: 3155580 kB VmRSS: 3123672 kB RssAnon: 2903756 kB RssFile: 219916 kB 
+cgroup m5: cur=3221110784 max 74504 oom 0 oom_kill 0 
+rss m6: VmHWM: 3155580 kB VmRSS: 3068148 kB RssAnon: 2882956 kB RssFile: 185192 kB 
+cgroup m6: cur=3217166336 max 79396 oom 0 oom_kill 0 
+rss m7: VmHWM: 3155580 kB VmRSS: 3104736 kB RssAnon: 2862988 kB RssFile: 241748 kB 
+cgroup m7: cur=3221225472 max 84584 oom 0 oom_kill 0 
+rss m8: VmHWM: 3155580 kB VmRSS: 3094624 kB RssAnon: 2874756 kB RssFile: 219868 kB 
+cgroup m8: cur=3220992000 max 89557 oom 0 oom_kill 0 
+rss m9: VmHWM: 3155580 kB VmRSS: 3067952 kB RssAnon: 2879676 kB RssFile: 188276 kB 
+cgroup m9: cur=3221204992 max 93987 oom 0 oom_kill 0 
+rss m10: VmHWM: 3155580 kB VmRSS: 3073796 kB RssAnon: 2878404 kB RssFile: 195392 kB 
+cgroup m10: cur=3196084224 max 98549 oom 0 oom_kill 0 
+rss m11: VmHWM: 3155580 kB VmRSS: 3080804 kB RssAnon: 2854696 kB RssFile: 226108 kB 
+cgroup m11: cur=3221094400 max 103107 oom 0 oom_kill 0 
+rss m12: VmHWM: 3155580 kB VmRSS: 3060144 kB RssAnon: 2868172 kB RssFile: 191972 kB 
+cgroup m12: cur=3221073920 max 107636 oom 0 oom_kill 0 
+rss m13: VmHWM: 3155580 kB VmRSS: 3074032 kB RssAnon: 2870756 kB RssFile: 203276 kB 
+cgroup m13: cur=3221192704 max 112656 oom 0 oom_kill 0 
+rss m14: VmHWM: 3155580 kB VmRSS: 3093028 kB RssAnon: 2892712 kB RssFile: 200316 kB 
+cgroup m14: cur=3221225472 max 117585 oom 0 oom_kill 0 
+rss m15: VmHWM: 3155580 kB VmRSS: 3084928 kB RssAnon: 2888520 kB RssFile: 196408 kB 
+cgroup m15: cur=3221188608 max 122632 oom 0 oom_kill 0 
+rss m16: VmHWM: 3155580 kB VmRSS: 3104936 kB RssAnon: 2877388 kB RssFile: 227548 kB 
+cgroup m16: cur=3221188608 max 128050 oom 0 oom_kill 0 
+rss m17: VmHWM: 3155580 kB VmRSS: 3085880 kB RssAnon: 2889364 kB RssFile: 196516 kB 
+cgroup m17: cur=3221209088 max 133673 oom 0 oom_kill 0 
+rss m18: VmHWM: 3155580 kB VmRSS: 3056916 kB RssAnon: 2844416 kB RssFile: 212500 kB 
+cgroup m18: cur=3221217280 max 138373 oom 0 oom_kill 0 
+rss m19: VmHWM: 3155580 kB VmRSS: 3081664 kB RssAnon: 2878124 kB RssFile: 203540 kB 
+cgroup m19: cur=3221184512 max 143202 oom 0 oom_kill 0 
+rss m20: VmHWM: 3155580 kB VmRSS: 3073316 kB RssAnon: 2877760 kB RssFile: 195556 kB 
+cgroup m20: cur=3221168128 max 148035 oom 0 oom_kill 0 
+rss m21: VmHWM: 3155580 kB VmRSS: 3085324 kB RssAnon: 2858924 kB RssFile: 226400 kB 
+cgroup m21: cur=3221159936 max 152709 oom 0 oom_kill 0 
+rss m22: VmHWM: 3155580 kB VmRSS: 3118592 kB RssAnon: 2894224 kB RssFile: 224368 kB 
+cgroup m22: cur=3220758528 max 158310 oom 0 oom_kill 0 
+rss m23: VmHWM: 3155580 kB VmRSS: 3064084 kB RssAnon: 2857332 kB RssFile: 206752 kB 
+cgroup m23: cur=3221192704 max 163172 oom 0 oom_kill 0 
+rss m24: VmHWM: 3155580 kB VmRSS: 3105764 kB RssAnon: 2896756 kB RssFile: 209008 kB 
+cgroup m24: cur=3221090304 max 168689 oom 0 oom_kill 0 
+rss m25: VmHWM: 3155580 kB VmRSS: 3065684 kB RssAnon: 2878176 kB RssFile: 187508 kB 
+cgroup m25: cur=3221209088 max 173965 oom 0 oom_kill 0 
+rss m26: VmHWM: 3155580 kB VmRSS: 3061656 kB RssAnon: 2846792 kB RssFile: 214864 kB 
+cgroup m26: cur=3221094400 max 179061 oom 0 oom_kill 0 
+rss m27: VmHWM: 3155580 kB VmRSS: 3084544 kB RssAnon: 2876024 kB RssFile: 208520 kB 
+cgroup m27: cur=3221012480 max 184679 oom 0 oom_kill 0 
+rss m28: VmHWM: 3155580 kB VmRSS: 3129804 kB RssAnon: 2902944 kB RssFile: 226860 kB 
+cgroup m28: cur=3221106688 max 188519 oom 0 oom_kill 0 
+rss m29: VmHWM: 3155580 kB VmRSS: 3087492 kB RssAnon: 2887596 kB RssFile: 199896 kB 
+cgroup m29: cur=3221225472 max 193828 oom 0 oom_kill 0 
+rss m30: VmHWM: 3155580 kB VmRSS: 2986832 kB RssAnon: 2809064 kB RssFile: 177768 kB 
+cgroup m30: cur=3221159936 max 195312 oom 0 oom_kill 0 
+burst end 2026-11-16 18:53:04
+rss after-burst: VmHWM: 3155580 kB VmRSS: 2986832 kB RssAnon: 2809064 kB RssFile: 177768 kB 
+cgroup after-burst: cur=3221159936 max 195313 oom 0 oom_kill 0 
+chunkcache after-burst: Chunk Cache : entries 45044, size 352 MiB, capacity 352 MiB, 285432 misses, 288062 requests, 0.009 recent hit rate, 1393.561 microseconds miss latency
+tablestats after-burst:  Table: standard1| Number of partitions (estimate): 1973810| Memtable data size: 13988585| Memtable off heap memory used: 13972595| Table: standard1| Number of partitions (estimate): 795013| Memtable data size: 0| Memtable off heap memory used: 0|
+rss hold1: VmHWM: 3155580 kB VmRSS: 2988336 kB RssAnon: 2809664 kB RssFile: 178672 kB 
+cgroup hold1: cur=3221225472 max 197958 oom 0 oom_kill 0 
+rss hold2: VmHWM: 3155580 kB VmRSS: 2989040 kB RssAnon: 2809728 kB RssFile: 179312 kB 
+cgroup hold2: cur=3221159936 max 198969 oom 0 oom_kill 0 
+rss hold3: VmHWM: 3155580 kB VmRSS: 2989664 kB RssAnon: 2809860 kB RssFile: 179804 kB 
+cgroup hold3: cur=3213701120 max 199823 oom 0 oom_kill 0 
+rss hold4: VmHWM: 3155580 kB VmRSS: 2989504 kB RssAnon: 2809860 kB RssFile: 179644 kB 
+cgroup hold4: cur=3221164032 max 200789 oom 0 oom_kill 0 
+rss hold5: VmHWM: 3155580 kB VmRSS: 2990188 kB RssAnon: 2809924 kB RssFile: 180264 kB 
+cgroup hold5: cur=3201183744 max 202012 oom 0 oom_kill 0 
+rss hold6: VmHWM: 3155580 kB VmRSS: 2990388 kB RssAnon: 2809988 kB RssFile: 180400 kB 
+cgroup hold6: cur=3221069824 max 202909 oom 0 oom_kill 0 
+rss final: VmHWM: 3155580 kB VmRSS: 2990388 kB RssAnon: 2809988 kB RssFile: 180400 kB 
+cgroup final: cur=3221069824 max 202909 oom 0 oom_kill 0 
+chunkcache final: Chunk Cache : entries 45055, size 352 MiB, capacity 352 MiB, 503094 misses, 505721 requests, 0.005 recent hit rate, 546.257 microseconds miss latency
+tablestats final:  Table: standard1| Number of partitions (estimate): 1973810| Memtable data size: 13988585| Memtable off heap memory used: 13972595| Table: standard1| Number of partitions (estimate): 795013| Memtable data size: 0| Memtable off heap memory used: 0|
+nmt final: Total: reserved=3698MB, committed=2452MB|Java Heap committed=1536MB)|Class committed=67MB)|Thread committed=69MB)|Code committed=49MB)|GC committed=124MB)|Internal committed=2MB)|Other committed=573MB)|Symbol committed=12MB)|Native Memory Tracking committed=4MB)|Arena Chunk committed=1MB)|
+ERROR lines: 0; JVM OOM lines: 0; dmesg kills for this scope: 0
+node alive at end

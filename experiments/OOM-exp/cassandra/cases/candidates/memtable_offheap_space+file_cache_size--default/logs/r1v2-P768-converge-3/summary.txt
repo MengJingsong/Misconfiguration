@@ -1,0 +1,22 @@
+yaml: memtable offheap_objects; file cache on; memtable_offheap_space=def file_cache_size=def (def = unset, heap-derived); diff lines: 4
+cpu affinity: 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30 (CPUS=0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30); GC threads: -XX:ParallelGCThreads=32 -XX:ConcGCThreads=32 -XX:ParallelGCThreads=16 -XX:ConcGCThreads=16 
+expected resolved: memtable_offheap_space=192MiB memtable_heap_space=192MiB file_cache_size=192MiB networking=48MiB
+node pid 3241920 unit oom-r1v2-1794867046432495239 budget 1536MiB heap 768M direct 384M; startup: INFO  [main] 2026-11-16T22:10:48,363 DatabaseDescriptor.java:590 - Global memtable on-heap threshold is enabled at 192MiB|INFO  [main] 2026-11-16T22:10:48,363 DatabaseDescriptor.java:594 - Global memtable off-heap threshold is enabled at 192MiB|INFO  [MemtableFlushWriter:1] 2026-11-16T22:10:50,967 BufferPools.java:49 - Global buffer pool limit is 192.000MiB for chunk-cache and 48.000MiB for networking|
+rss idle: VmHWM: 1343952 kB VmRSS: 1343952 kB RssAnon: 1164384 kB RssFile: 179568 kB 
+cgroup idle: cur=1216897024 max 0 oom 0 oom_kill 0 
+nmt idle: Total: reserved=2323MB, committed=1083MB|Java Heap committed=768MB)|Class committed=60MB)|Thread committed=50MB)|Code committed=25MB)|GC committed=94MB)|Internal committed=1MB)|Other committed=59MB)|Symbol committed=11MB)|Native Memory Tracking committed=3MB)|Arena Chunk committed=1MB)|
+rss idle-nopoll: VmHWM: 1346856 kB VmRSS: 1346856 kB RssAnon: 1167288 kB RssFile: 179568 kB 
+cgroup idle-nopoll: cur=1219624960 max 0 oom 0 oom_kill 0 
+rss idle-poll: VmHWM: 1349368 kB VmRSS: 1349112 kB RssAnon: 1169544 kB RssFile: 179568 kB 
+cgroup idle-poll: cur=1221337088 max 0 oom 0 oom_kill 0 
+rss p1: VmHWM: 1362328 kB VmRSS: 1362328 kB RssAnon: 1182528 kB RssFile: 179800 kB 
+cgroup p1: cur=1238679552 max 0 oom 0 oom_kill 0 
+rss p2: VmHWM: 1609852 kB VmRSS: 1568952 kB RssAnon: 1385112 kB RssFile: 183840 kB 
+cgroup p2: cur=1610498048 max 2491 oom 0 oom_kill 0 
+rss p3: VmHWM: 1678644 kB VmRSS: 1652756 kB RssAnon: 1454496 kB RssFile: 198260 kB 
+cgroup p3: cur=1610547200 max 8029 oom 0 oom_kill 0 
+rss p4: VmHWM: 1721540 kB VmRSS: 1711720 kB RssAnon: 1503012 kB RssFile: 208708 kB 
+cgroup p4: cur=1610575872 max 12219 oom 0 oom_kill 0 
+p5: node GONE
+ERROR lines: 0; JVM OOM lines: 0; dmesg kills for this scope: 1
+node GONE at end

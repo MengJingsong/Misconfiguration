@@ -827,3 +827,14 @@ readings (family A: L = 2 × heap, direct = heap/2; family B: heap 2 GiB, direct
 
 - By the researcher's decision, R1-V condition B goes from `verified-OOM · deployment` to `reproduced-OOM · diagnostic`
   and moves to `candidates/`: V7 under re-review (researcher, 2026-11-16): the failing container gives the heap 60 % of its memory, while the 5.0.9 docs (`hardware.adoc`) say the heap should be no more than 50 % of RAM and `cassandra-env.sh` follows that; at heap = 50 % (L = 2 × heap) the only failure is 1/5 at a 768 MiB heap. Re-review needs an argued V7 or failures at heap ≤ 50 % of the container.
+
+## 2026-11-16 — R1-V re-review re-run, family A (heap = 50 % of the container), pc96
+
+- Agent run 16:44–17:24 (two forced hand-backs), completed by the parent session 17:24–19:04 with the agent's queued list.
+  pc96 pinned to 16 threads, GC threads 16; same 5.0.9 tree as apt149.
+- Heap 768 / container 1536: converge memcg kill **3/3**; `M_only` 0/3 (93 %), `F_only` 0/3 (92 %), `file_cache_size`
+  64 MiB 0/3 (96 %, thin). Heap 1024: kill 3/3; 896, 960: 1/1; 1536: 0/3 (93 %). Kills come ≈ 20 s into the preload,
+  pools below their caps; pc96's non-heap baseline is 100–170 MiB above apt149's and its preload ≈ 4 × faster.
+- Proposed: A-768 on pc96 `verified-OOM · deployment` (V1–V7 met at the documented heap share); researcher's decision
+  pending. Case stays in `candidates/` until then.
+

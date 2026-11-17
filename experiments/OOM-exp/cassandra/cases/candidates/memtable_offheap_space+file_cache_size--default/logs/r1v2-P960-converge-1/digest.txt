@@ -1,0 +1,17 @@
+== P960-converge-1
+  idle RssAnon 1359 MiB; peak RssAnon 1888 MiB = 98.3% of 1920 (summary 1878, poller 1888)
+  max over arm: memtable offheap K 80 MiB; JDK direct 285 MiB; chunk pool size 240 MiB (overflow max 0); chunk cache 208 MiB; blocked_on_alloc 3837
+  last poller row 17:10:41: RssAnon 1888 MiB, cg_anon 1893, heap 260, direct 285, chunk pool 240, cache 153 (19622 entries), memtable K 74 (memks 74), memks writes 278105, pending flush 1, blocked 3837
+  memks flushes 16; off-heap % at enqueue: [33, 33, 33, 33, 33, 33, 36, 34, 33, 34, 38, 34, 34, 35, 34, 35]
+  stress preload: op rate 15,704 op/s, partitions 800,000, errors 0, time 00:00:50
+  stress cachefill: op rate 2,396 op/s, partitions 10,000, errors 0, time 00:00:04
+  stress memburst: op rate -, partitions -, errors -, time -
+  burst start 2026-11-16 17:10:20
+  m5: node GONE
+  burst end 2026-11-16 17:10:46
+  ERROR lines: 0; JVM OOM lines: 0; dmesg kills for this scope: 1
+  node GONE at end
+  dmesg: [Mon Nov 16 17:10:23 2026] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=/,mems_allowed=0-1,oom_memcg=/user.slice/user-20001.slice/user@20001.service/app.slice/oom-r1v2-1794866834074036457.scope,task_memcg=/user.slice/user-20001.slice/user@20001.
+  pre-burst 17:10:19: RssAnon 1807, direct 285, chunk pool 240, cache 112, memtable K 0, heap 301
+  last full 17:10:41 (+22s): RssAnon 1888, direct 285, chunk pool 240, cache 153, memtable K 74, heap 260, memks writes 278105
+  kill anon-rss 1888 MiB; RssAnon growth pre-burst -> kill 81 MiB (Δdirect to last row 0); memtable U bound = this + glibc-retained reusable memory (case file)

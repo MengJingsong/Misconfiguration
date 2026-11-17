@@ -238,3 +238,91 @@ gives the heap 60% of its memory, which published container guidance considers n
   completed the full 800,000-write preload, the phase in which all family-B kills occurred.
 - Harness change mid-run: v1 (`oom-run.sh`) for the first three arms, v2 (`oom-run2.sh`) for the rest; fill pass
   300k → 50k → 10k reads (amendments 1–2). One arm (`A768-int_F64-1`) is invalid (stress schema timeout).
+
+## Re-review re-run 2026-11-16, pc96, family A (partial: stopped early at 17:22 EST by forced handback)
+
+Design: [`design/R1V2-amendment-2026-11-16.md`](design/R1V2-amendment-2026-11-16.md) (amendment 6, written before
+readings; 6a after the first arm). Node `pc96` (2 × Xeon E5-2667 v2, 32 threads, 125 GiB, rotational `/mydata`);
+same OS/kernel/glibc/JDK as apt149. Build: 5.0.9, tree `b796bcfd…` (identical tree; copy of `/mydata/b6/cassandra`,
+HEAD `f2de695` vs apt149's `7cb9cc7`). Victim JVM, stress and poller pinned to NUMA node 0 (16 hardware threads);
+GC threads forced to 16 (= apt149; `cassandra-env.sh` would give 32 here). Harness v3
+([`harness/oom-run3.sh`](harness/oom-run3.sh), [`harness/run-all3.sh`](harness/run-all3.sh), lists and run logs
+in [`harness/r1v2/`](harness/r1v2/)). Raw: `/mydata/r1v2/logs/` on pc96; excerpts `logs/r1v2-<arm>/`.
+Arm prefix `P` = pc96 (never pooled with apt149's `A` arms). L = 2 × heap, direct = heap/2, 2-line yaml diff.
+
+| Arm | Heap / L | Idle RssAnon | Peak RssAnon (% of L) | Pools at last poller row (chunk pool / cache / memtable K) | When | Outcome |
+|---|---|---|---|---|---|---|
+| `P768g32-converge-1` (32 GC threads; supplementary, not counted) | 768 / 1536 | 1198 | kernel anon-rss 1517 | 88 / 78 / 64 | preload, ≈ 12 s (141k writes) | memcg OOM-kill |
+| `P768-converge-1` | 768 / 1536 | 1141 | 1501 (97.7%); kernel 1516 | 128 / 121 / 68 | preload, ≈ 16 s (238k) | **memcg OOM-kill** |
+| `P768-converge-2` | 768 / 1536 | 1126 | 1507 (98.1%); kernel 1517 | 192 / 160 / 63 | preload, ≈ 22 s (248k) | **memcg OOM-kill** |
+| `P768-converge-3` | 768 / 1536 | 1137 | 1500 (97.7%); kernel 1514 | 160 / 158 / 7 | preload, ≈ 21 s (273k) | **memcg OOM-kill** |
+| `P896-converge-1` | 896 / 1792 | 1285 | 1764 (98.4%); kernel 1769 | 224 / 192 / 60 | preload, ≈ 36 s (544k) | **memcg OOM-kill** |
+| `P960-converge-1` | 960 / 1920 | 1359 | 1888 (98.3%); kernel 1888 | 240 / 153 / 74 | burst (278k memks writes) | **memcg OOM-kill** |
+| `P1024-converge-1` | 1024 / 2048 | 1423 | 2010 (98.1%); kernel 2009 | 256 / 224 / 77 | burst (719k memks writes) | **memcg OOM-kill** |
+| `void-P768-M_only-1-stopped-burst` (control, stopped by the handback) | 768 / 1536 | 1124 | 1429 (93.0%) so far | 8 / 0 / 62 | full preload done; burst 581k writes | alive when stopped; **not a reading** |
+| void: `void-P896-converge-1-stopped-idle` | — | — | — | — | stopped in idle (config change, 6a) | — |
+
+Kernel records (`logs/r1v2-<arm>/dmesg-block.txt`): `CompactionExecutor` (P768 ×3, P896), `C2 CompilerThread` (P960),
+`PerDiskMemtableFlushWriter` (P1024) invoked the oom-killer; `CONSTRAINT_MEMCG`, `oom_memcg` = the arm's `oom-r1v2-*`
+scope, killed PID = the node JVM; no `OutOfMemoryError`, no ERROR line.
+
+**Platform differences found (important for interpretation).** (1) Idle RssAnon is ≈ 100–170 MiB higher than on apt149
+at the same heap (768: ≈ 1130 vs ≈ 1030 MiB; NMT thread stacks committed 52 vs 6 MiB, rest outside NMT). (2) The same
+preload runs ≈ 4 × faster (15.5–17.3k vs ≈ 3.8k writes/s), so flushes and compaction (which fill the chunk cache) start
+within seconds. Result: at heap 768 every pc96 converge arm is killed ≈ 15–25 s into the preload, *before* either pool
+reaches its cap (chunk pool 128–192 of 192, memtable K ≤ 68 of 192), unlike apt149 (1/5, late in the burst).
+
+**Status of this re-run (proposed):**
+- P768 (heap 768 = 50 % of a 1536 MiB container): V1 met on pc96 (**3/3**); V2 **not measured** (the only control,
+  `M_only-1`, was stopped mid-burst at 93.0 % — no kill so far, but it is void); V4 not run; V3/V5/V6 as for apt149
+  (V5: three kernel records with scope + PID, poller row ≤ 2 s before). V7: heap = 50 % of the container, matching
+  `hardware.adoc`/`cassandra-env.sh`. → **`reproduced-OOM · diagnostic`**-level evidence at heap = 50 % on pc96,
+  *not* `verified-OOM` (V2, V4 missing). Caveat: the kills occur with both pools well below their caps, so whether
+  this is two-pool convergence or the general non-heap load overhead at a small heap is exactly what the missing
+  `M_only`/`F_only` controls must decide.
+- Bisection: every tested heap fails at n = 1: 896, 960, 1024 (the largest failing heap tested is **1024 / 2048**;
+  apt149 survived there 0/1). 1280 and 1536 were queued but not run. So on pc96 the failing range extends at least to
+  1024; the upper boundary is not found.
+- Not run: P1536 ×3, P1280 ×1, ×3 at 896–1024, `M_only` ×3, `F_only` ×3, `int_F64` ×3. A resume at 17:23 (amendment 6b, `harness/r1v2/list-4.txt`) was cut off after 40 s by a second forced hand-back; its first arm is void.
+
+### Completion of the re-run (2026-11-16 17:24–19:04 EST, pc96)
+
+The queued list [`harness/r1v2/list-4.txt`](harness/r1v2/list-4.txt) (amendment 6b, written before these readings) was
+started by the parent session as a plain background job with the same harness v3, 16 GC threads, NUMA-node-0 pinning
+and `N_FILL=10000`; a STOP guard was set for 19:10. All 14 arms ran; no leftover process or scope after any arm
+([`harness/r1v2/run-4b.log`](harness/r1v2/run-4b.log)). Excerpts in `logs/r1v2-<arm>/`. The void arms' raw logs were
+moved to `/mydata/r1v2/logs/void-old/`.
+
+| Arm | Heap / L | Idle RssAnon | Peak RssAnon (% of L) | Max over arm: chunk pool / cache / memtable K / JDK direct | Outcome |
+|---|---|---|---|---|---|
+| `P768-M_only-1..3` (chunk cache off) | 768 / 1536 | 1125–1138 | 1427–1438 (92.9–93.6 %) | 8 / 0 / 64–75 / 53–54 | alive 3/3 |
+| `P768-F_only-1..3` (memtable `heap_buffers`) | 768 / 1536 | 1131–1146 | 1406–1410 (91.5–91.8 %) | 192 / 160 / 0 / 237 | alive 3/3 |
+| `P768-int_F64-1..3` (`file_cache_size: 64`) | 768 / 1536 | 1128–1135 | 1467–1486 (95.5–96.7 %) | 64 / 32 / 64 / 109 | alive 3/3, full preload and 2M-write burst |
+| `P1536-converge-1..3` | 1536 / 3072 | 1958–1967 | 2836–2861 (92.3–93.1 %) | 384 / 352 / 128–131 / 429 | alive 3/3 |
+| `P1024-converge-2..3` | 1024 / 2048 | 1409–1415 | 2006–2011 (97.9–98.2 %); kernel anon-rss 1999 / 2004 | 256 / 224 / 85–94 / 301 | **memcg OOM-kill 2/2** (with `-1`: 3/3) |
+
+**Reading.** At heap 768 each pool alone reaches the same size it reaches in the converge arms (chunk pool 192 with
+`F_only`, memtable K 64–75 with `M_only`) and survives at 91.5–93.6 %; both together are killed 3/3 at ≈ 98 %. So the
+pc96 kill is the combination of the two pools, not the non-heap baseline alone, even though each pool is still below
+its own cap when the kill happens (the definition of convergence). Lowering only `file_cache_size` to 64 MiB removes it
+3/3 at the same throughput, but with a thin margin (peak 95.5–96.7 %). At heap 1024 the kill repeats 3/3; at 1536 it does
+not occur (0/3, 92–93 %). The failing range on pc96 at L = 2 × heap is **768–1024 MiB heap**, boundary between 1024 and
+1536 (1280 untested).
+
+**V1–V7, condition A-768 on pc96 (heap 768 = 50 % of a 1536 MiB container, direct 384, constraints at default):**
+
+| | Requirement | Evidence | Met |
+|---|---|---|---|
+| V1 | endpoint ≥ 3 runs | `P768-converge-1..3` memcg kill 3/3 (also `P1024` 3/3, `P896`, `P960` 1/1) | yes |
+| V2 | matched control ≥ 3 | `M_only` ×3 and `F_only` ×3: 0/6, 91.5–93.6 % | yes (margin 6.4–8.5 %) |
+| V3 | U apart from K | chunk cache: JDK direct = pool; memtable by RssAnon decomposition (bound, as on apt149) | yes (memtable as a bound) |
+| V4 | intervention ×3 | `int_F64` ×3: 0/3, full preload and burst | yes (thin margin, 3.3–4.5 %) |
+| V5 | initiating failure | three kernel memcg records with scope and PID, poller row ≤ 2 s before | yes |
+| V6 | defaults | both constraints unset, resolved 192 / 192; 2-line yaml diff | yes |
+| V7 | acceptable budget | heap = 50 % of the container, as `hardware.adoc` and `cassandra-env.sh`; heap and direct ≥ 512 / ≥ 384 MiB (direct = heap/2, the shipped ratio) | yes |
+
+**Proposed status (for the researcher):** condition A-768 on pc96 **`verified-OOM · deployment`** (V1–V7 met at the
+documented heap share). Condition A-1024 on pc96 meets V1 (3/3) with controls and intervention measured only at 768.
+Limits: pc96's non-heap baseline is ≈ 100–170 MiB higher and its preload ≈ 4 × faster than apt149's, which is why the
+kill comes early in the preload; apt149 at the same setting failed only 1/5. The result is therefore platform-dependent
+and should be reported with the platform (pc96: 2 × Xeon E5-2667 v2, rotational disk). Thin intervention margin.
