@@ -122,3 +122,16 @@ Reachability gate: SASI indexes can only be created if `sasi_indexes_enabled` is
 - **Missed (recorded, not tuned):** (1) the SI file grows less than linearly with the rows (x 2.93, then x 3.62 for x 4 rows) because the indexed text has only 100,000 distinct values; (2) the 64 MiB commit-log control (`p1`) did not hold the commit log near 64 MiB (192 to 288 MiB during the load, 1.0 GB written in 40 s); the 1024 MiB cap did bind in the 16 GB arm (max 1056 MiB, against 640 MiB in the 4 GB arm) and served as the control; (3) the limit cannot be approached on a node: the largest checked quantity was 2.6 x 10^8 (BIG index-file position), 5.5 x 10^5 times below `MAX_OFFSET`.
 - **Weaker than it looks:** the cluster tier shows only that nothing changes far below the constant; the only crossing of the boundary is the unit test, which passes offsets directly to the builder; the heap is saturated at `-Xmx` in the 1 and 4 GB arms.
 - **For stage 3:** the head of the file (Entry, Ground) says the checked value is a position in an SSTable data file; in BIG it is a position in the primary index file (A2 says so).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | A single file position (`offset`, the BIG `Index.db` position or the data-file position for other formats), checked per token at serialization (`AbstractTokenTreeBuilder.java:296-298`) against 2^47 - 1 (`TokenTreeBuilder.java:37`). It is an encoding width, not a count of held bytes; nothing is charged or released. The memory of a SASI build (term and token sets in `OnDiskIndexBuilder`) is unrelated to this value. |
+| **E2 At the limit** | Throws `AssertionError` (`:298`), aborting that index build: a refusal of an unencodable value, after nothing extra was allocated for it. Multi-offset tokens skip the test (`:304-314`, overflow entries store full longs), a format-correctness gap, not a memory one. |
+| **E3 Owner and multiplier** | Per token per SSTable index build; no aggregation, nothing summed. Reaching the value needs a ~128 TiB file; stage 4's largest was 5.5 x 10^5 times below it. |
+| **E4 Budget domain** | Disk format (file offsets); draws on no memory budget. Not reached at defaults at all: SASI is off (`sasi_indexes_enabled = false`, `Config.java:606`, `conf/cassandra.yaml:1992`). |
+| **OOM-lead flag** | none — a format-width check that governs no memory; SASI disabled by default. |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

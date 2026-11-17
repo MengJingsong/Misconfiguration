@@ -143,3 +143,16 @@ Results: [`../../stage4-runtime-verification/results/batch_size_warn_threshold-v
 - **Positive control (fail threshold, warn kept below it):** unit 20/20 rejected, 0 rows; cluster 2000/2000 rejected, 0 writes, 100 B on disk against 106 MB for the same accepted workload.
 - **Upstream candidates:** warn above fail disables the fail check without a message (add a startup validation or move the fail test out of the warn gate); `verifyBatchSize` formats a table name per mutation before it needs only the distinct tables.
 
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `IMutation.dataSize(mutations)` (`IMutation.java:63-72`): the sum of `PartitionUpdate.dataSize()`, a serialized-style data size, not heap (`unsharedHeapSize`) and not on-wire bytes. It is computed once, per request, after `getMutations(...)` has already built every mutation on heap (`BatchStatement.java:428-430`, check at `:439`); nothing is charged or held, so there is no release. Heap per admitted batch is a multiple of dataSize (BTree rows, cell objects, the request buffer), unmeasured here. |
+| **E2 At the limit** | Graceful and advisory: over 5 KiB the batch gets a WARN line and a client warning (`BatchStatement.java:340-365`) and is applied in full (`:446`); it only rejects when the separate fail threshold (default 50 KiB, `Config.java:332`) is also exceeded (`:352-358`). The warn branch allocates more, not less: stage 4 measured +1.1 to 2 KB per mutation (per-mutation `metadata().toString()`, `:342-346`). Not reached at all for single-mutation batches (`:334`), CAS batches and the virtual-table/internal path (`:425-427`, `executeInternalWithoutCondition`). |
+| **E3 Owner and multiplier** | Per request (one batch), checked on the coordinator. Concurrent batches are not counted by this check; their number is bounded upstream by the native-transport in-flight limits (`native_transport_max_request_data_in_flight` = heap/10, per IP heap/40, `DatabaseDescriptor.java:649-656`) and a per-message cap that defaults to min(`max_mutation_size`, both in-flight limits) (`DatabaseDescriptor.java:903-905`, `:3237-3245`). |
+| **E4 Budget domain** | Coordinator heap, shared with the request buffers counted by the in-flight limits, memtables, caches and the batchlog mutation for LOGGED batches. The warn threshold reserves nothing in that domain, so it adds nothing to any default sum. |
+| **OOM-lead flag** | none — the threshold governs no memory (it logs); the batch's memory is already spent before the check and is bounded, if at all, by the native-transport limits, which are separate constraints. The warn-above-fail inversion (stage 4) is a fail-threshold bypass, not a memory overshoot of this constraint. |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

@@ -119,3 +119,16 @@ Bypass/overshoot: the buffer may overshoot the data by up to 2x (and the trailin
 *(Superseded text:)* `none yet`.
 
 **Amendments by the stage-4 audit, 2026-10-26** (all independent of any reading; each is also marked inline): (1) B2a: the probe is a `main` class run with `java -Xmx`, because `ant testsome` overrides `-Xmx`; (2) B2c: the 1<<30 overflow is run (N = 1<<30 and (1<<30)+1 at `-Xmx4g`), with a matching B2g row; (3) B2f: the allocation slope band 2x to 4x corrected to the exact sum (2 to about 5), arithmetic of `:424-431`; (4) B2h: the baseline is `Arrays.copyOf`; (5) B3b: the SAI guardrail control needs `PasswordAuthenticator` and an ordinary role, since guardrails do not apply to a superuser or without authentication; (6) B3c: the run matrix is fixed; (7) B3d: an exact Byteman per-call instrument is added beside JFR. The B3 optional rebuilt variant (B3b 3) is not run; the unit tier's `initialBufferCapacity` knob answers the same question. Prediction and conclusions rows are otherwise unchanged.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Bytes already decoded (`readBytes` local) against the current `byte[]` length (`ByteSourceInverse.java:373-377,424`). The object really held is the exact-size result (`:381-384`); transient peak is old + new array at the last doubling, about 3 x the data (stage 4: 2.0 to 5.6 x per call including headers). Nothing is charged to any counter; arrays are released to GC when the call returns. |
+| **E2 At the limit** | No limit: a full buffer is doubled (`:429`). The only failure is `NegativeArraySizeException` at 1<<30 bytes (`:425-429`), or a heap OOM before that. |
+| **E3 Owner and multiplier** | Per decode call (one thread). Inputs are partition keys and clustering components ≤ 65535 B (`ClusteringPrefix.java:278-287`), BOP/OPP tokens, SAI primary keys and min/max keys (`PrimaryKey.java:153`, `SegmentMetadata.java:168-169`), SAI decimal terms (`IndexTermType.java:912`). Concurrent calls bounded by request and compaction thread counts; at ~200 KB per call peak, even hundreds of threads stay in tens of MB. |
+| **E4 Budget domain** | Heap, transient (young generation), shared with memtables, caches, reads and compaction; no constraint of its own. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (negative).
+**Stage-4 claim to add:** none

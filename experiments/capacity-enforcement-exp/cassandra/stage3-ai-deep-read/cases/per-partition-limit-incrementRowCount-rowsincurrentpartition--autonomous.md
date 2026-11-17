@@ -180,3 +180,16 @@
 4. B4 rewritten to the new paths.
 5. B2a: `-XX:-UseTLAB` added to the test JVM after unit attempt 1 (defect 1 in the results file; B2f and B2g unchanged; the unit tier restarted).
 6. Citations checked against the pinned source (all hold): `DataLimits.java:48,102-107,350,392-405,484,489-494,509-512,542`; `StoppingTransformation.java:50-60`; `SelectStatement.java:114,290,882-902,942,1236,1247-1248`; `conf/cassandra.yaml:1815,2015-2026,2090`; `ReadCommand.java:717` (the read-size abort message used by the control). Not checked: yaml lines other than those listed.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Live rows per partition in one read (`db/filter/DataLimits.java:509-512`), reset per partition (`:484`); tombstones and dead rows are read but not counted (`:489-494`). Bytes = rows x row width, which the counter does not see (stage 4: 1,350 B to 460,837 B allocated per extra row for 100 B to 100 KiB values). Lives for one query execution / page. |
+| **E2 At the limit** | Graceful: silent truncation via `stopInPartition()` (`StoppingTransformation.java:53-60`); no rejection, no allocation elsewhere. |
+| **E3 Owner and multiplier** | Per query, per page, per partition, set by the client; default `NO_LIMIT` (`DataLimits.java:48`). Concurrent reads: `concurrent_reads` 32 (`conf/cassandra.yaml:722`) plus coordinator requests. The total is capped by nothing in this constraint. |
+| **E4 Budget domain** | Java heap of the replica read and the coordinator response. The byte-level guards on the same domain (`local_read_size_*`, `coordinator_read_size_*`) are off by default (`read_thresholds_enabled = false`, thresholds `null`, `config/Config.java:526-530`), so at defaults reads are bounded in rows (page size), not bytes. That exposure belongs to paging and the read thresholds, not to this optional client-side cap, which can only lower usage. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

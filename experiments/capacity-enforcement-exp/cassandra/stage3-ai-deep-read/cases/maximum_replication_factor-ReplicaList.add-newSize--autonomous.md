@@ -136,3 +136,16 @@ B2e step 4 and two rows of B2g were reworded (item 5); no row of B3g was changed
 5. B2e step 4, B2g rows 2-3: the unit control reads `failsOn(10, null)` instead of "throws `InvalidRequestException`" (a null `ClientState` never throws, `Guardrail.java:139-140`; the guardrail is disabled at -1, `Threshold.java:80-86`). Found by the first test run (a shakedown whose readings are not used; it showed `guard` returning without a throw); the cause is established from the source lines cited, and run 1 starts from scratch with the corrected text.
 
 **Stage-4 result, 2026-10-26 (`cassandra/stage4-runtime-verification/results/maximum_replication_factor-ReplicaList.add-newSize--autonomous.md`):** unit tier **Confirmed**, does not cap; cluster tier **Confirmed**, does not cap. Outcome class: true negative. Unit: capacity 3/9/18/doubling exactly as predicted (N=10_000: 18432 after 13 reallocations; N=1_000_000: 1,179,648, 4.7 MB), one identical reading per N for thresholds -1, 1 and 3, guardrail fires at 3 and 1 (positive control, by `failsOn`). Cluster: live `Replica[]` is 35 arrays, 832 B in all six stress phases (thresholds -1, 1, 3, twice) and after 200 extra keyspaces; an ordinary role is refused RF 3 at threshold 1 and RF 4 at threshold 3, the superuser never. The prediction needed no change except the reallocation count (amendment 2). Two source facts found for future cases: `Threshold.enabled()` is false while both thresholds are at or below 0, and `Guardrail.fail()` does not throw for a null `ClientState`; guardrails are skipped for superusers and, under `AllowAllAuthenticator`, for every client.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `size == contents.length` (`AbstractReplicaCollection.java:109`) compares `Replica` references held against array capacity; growth 3, 9, then doubling (`:111-115`). The guardrail compares `rf.fullReplicas` of a keyspace in DDL (`SimpleStrategy.java:112`, `NetworkTopologyStrategy.java:353`), a replica count, never bytes. Lists are short-lived per plan; the array is freed with the list. |
+| **E2 At the limit** | At line 109 there is no limit: the array grows by `Arrays.copyOf`. The guardrail is off by default (`Config.java:931-932`, -1) and, when on, rejects the DDL for non-superusers only (stage 4). Neither path relates to bytes. |
+| **E3 Owner and multiplier** | One list per range/endpoint calculation or replica plan; size at most RF (or endpoint count). Number alive is O(concurrent requests + ranges x RF), set by `num_tokens` and cluster size, not by this guardrail; overshoot of capacity at most about 2x of a few references (stage 4: 35 live arrays, 832 B). |
+| **E4 Budget domain** | Heap, shared with all heap consumers; contribution is bytes to kilobytes, far below any default budget. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

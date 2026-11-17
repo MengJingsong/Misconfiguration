@@ -134,3 +134,16 @@
 - Notes for stage 3: the unset-key branch (`QueryProcessor.java:255`) is unreachable for `UNSET_BYTE_BUFFER` (an empty buffer, `ByteBufferUtil.java:92`; the amendment B2i.2 first got this wrong and was corrected the same day); `tablestats` "Memtable data size" omits partition-key bytes. Amendments: B2i, B3i (2026-10-26).
 
 Stage-4 audit amendments of 2026-10-26 are B2i and B3i above. Citation checks (pinned `cassandra-5.0.9`): lines 249-263 of `QueryProcessor.java`, 158 of `FBUtilities.java`, 372-374 and 781/802 of `ModificationStatement.java`, 730-732 of `SelectStatement.java`, 51-55 of `Validation.java`, 209 of `TriggerExecutor.java`, 169-172 of `SortedTableWriter.java`, 365 and 766 of `ByteBufferUtil.java`, 229 of `ByteArrayUtil.java` hold. Two notes: `conf/cassandra.yaml:1044` (`native_transport_max_frame_size`) and `:1864` (`max_value_size`) are commented-out defaults (16MiB, 256MiB); `CacheService.java:504` is a corrupted-key-cache read check, not a write-path backstop.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `key.remaining()` of one partition key (`QueryProcessor.java:259`) against 65535 (`FBUtilities.java:158`), a 2-byte length-prefix width. Checked once per key per request; nothing is charged or held. Once admitted, the key costs its bytes plus ~82 B of buffer overhead (stage 4) on the coordinator, and in the memtable it is cloned through the memtable allocator (`SkipListMemtable.java:115`) with token and row overhead charged on heap (`:124-125`), i.e. it is counted by the memtable pool, not by this check. |
+| **E2 At the limit** | Graceful: `InvalidRequestException` before the write or read (`QueryProcessor.java:259-263`); nothing written. Stage 4: 10,000/10,000 rejected at 65536 B, 0 bytes written. |
+| **E3 Owner and multiplier** | Per key. Keys per request (IN lists, batches), concurrent requests and memtable partitions are not bounded by this constant; their total falls to the native-transport in-flight limits, `batch_size_fail_threshold` and the memtable pools. |
+| **E4 Budget domain** | Heap (request objects) and memtable heap/off-heap; the constant reserves nothing in either, so it adds nothing to a default sum. |
+| **OOM-lead flag** | none — a per-object format width; aggregate key memory is governed (stage 4 saw the memtable pool bind at 507.4 / 127.6 MiB with 64 KB keys) by other constraints. |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

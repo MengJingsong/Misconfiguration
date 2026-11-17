@@ -113,3 +113,16 @@ Amendments (2026-10-26, stage 4 design audit, all before any reading; they chang
 - **R1 (left for stage 3).** B1 and A2 speak of "temporary disk"; at the sstable level it is the output of the chosen task, not bytes of the whole table.
 
 Feedback (stage-4 verdicts, 2026-10-26; results: `cassandra/stage4-runtime-verification/results/bucket-low-bucket-high-getBuckets-oldAverageSize--autonomous.md`): unit **Confirmed** (B2g row 1) — does not cap; cluster **Confirmed** (B3g rows 1 and 3) — does not cap. Outcome class: true negative (estimate `negative`). Unit: the largest-bucket bytes follow the band (3.326, 5.885, 14.410 GiB for narrow, default, wide on the 14.410 GiB list) and the executed tasks' peak extra disk equals their input bytes (0 / 107.7 / 154.3 MB, control `max_threshold` 4: 26.6 MB). Cluster: peak extra disk 0 / 195 MB / 330 MB for narrow / default / wide (T = 329 MB), 175 MB with `max_threshold` 4; peak `RssAnon` flat (spread 0.6%). One detail of the (replaced) B3f missed: the default arm ended with 3 sstables, not 2 (buckets [1, 5, 6]: real neighbour ratios 1.139 to 1.157 put the largest sstable just over 1.5 x the mean of its bucket); no conclusions row depends on it. The estimate is unchanged (a confirmed negative).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | No counter. The compared figure is one sstable's `onDiskLength()` (`SizeTieredCompactionStrategy.java:241`) against the running mean of a bucket's on-disk lengths, the `Long` key of a local `HashMap` (`:260`, test at `:274`, re-keyed at `:278-282`). Nothing is charged or released; the map lives for one `getBuckets` call. Heap use of the call is O(number of sstables) (one list entry per sstable), not set by the ratios. |
+| **E2 At the limit** | There is no limit: outside the band a file starts a new bucket (`:288-290`), inside it joins. Nothing is refused or deferred. The bytes a compaction then reads and writes are bounded by other mechanisms: `max_threshold` trims a bucket by count (`:151`), and `CompactionTask` drops the largest input when `hasDiskSpaceForCompactionsAndStreams` says no (`CompactionTask.java:412`, `:421`, `reduceScopeForLimitedSpace` `:98-114`). |
+| **E3 Owner and multiplier** | Per table (compaction sub-option, `SizeTieredCompactionStrategyOptions.java:27-28,40-44`); one `getBuckets` call per background-task request. Concurrent compactions across tables are capped by `concurrent_compactors` (default `min(8, max(2, min(cores, data dirs)))`, `DatabaseDescriptor.java:777-778`), each up to `max_threshold` (32) inputs. The ratios do not change the count of owners. |
+| **E4 Budget domain** | Disk (compaction inputs plus output coexist until the transaction commits); stage 4 measured peak extra disk = the task's input bytes (0 / 195 / 330 MB for narrow / default / wide on a 329 MB table). Heap is not touched by the ratios (stage 4: peak `RssAnon` spread 0.6%). Shares the data disks with flush, streaming and other tables' compactions; the disk check above is the only byte-level guard. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (negative: a grouping ratio over disk sizes; no memory domain is governed or overrun).
+**Stage-4 claim to add:** none

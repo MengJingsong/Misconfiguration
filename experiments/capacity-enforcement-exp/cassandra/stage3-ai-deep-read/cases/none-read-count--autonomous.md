@@ -177,3 +177,16 @@ Controls, in pass A: C1 `new int[N]` through the same window; C2 100 MiB of such
 `done 2026-10-29` (unit tier only; B3 amended `n/a`). Results: [`../../stage4-runtime-verification/results/none-read-count--autonomous.md`](../../stage4-runtime-verification/results/none-read-count--autonomous.md). **Verdict: Confirmed - does not cap; outcome class true negative** (estimate `negative`, effect `does not cap`). Same harness as its float twin (`none-readfully-dest_length`), int variant, run and filed separately: line 120 hit 0 times in the one-region arm and once per call in the lowered-segment arm at every N = 32 .. 1048576; F = 56 bytes at every N; T - F = 4N + 208 up to N = 16384 (4N + 824 at 131072, 4N + 5752 at 1048576); noise floor 0; retained change under 140 kB; C1 and C2 as designed. Frozen sub-predictions missed, not edited: the T - F band at N = 131072 and 1048576 (the per-region `reBuffer()` cost of the lowered segment) and C2 at N = 32 (array count capped at 250000).
 
 Audit feedback for stage 3 (2026-10-29): (1) a read before any `seek` throws (`Rebufferer.EMPTY.intBuffer()` is the throwing default), so the probe seeks first; (2) jvector 1.0.2 `OnDiskGraphIndex$OnDiskView` calls `read([III)V` (`javap -c`), which the case file left unverified; (3) the filed counts 1..1024 and segment sizes 4096/16384 are replaced by six counts over four orders and a single lowered size so both arms share the start offset; (4) the true branch needs a lowered `MAX_SEGMENT_SIZE` or a graph file above 2 GiB, so B3 is `n/a`; (5) no capping setting binds this transient allocation. Citations held.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | No counter. `count` (ints requested by the jvector caller) against ints left in the current mmap region (`RandomAccessReaderAdapter.java:117`). The true branch allocates `4 * count` bytes of heap (`:120`), freed when the call returns; the region itself is mmapped file (`IndexDescriptor.java:296`), sized by `MAX_SEGMENT_SIZE = Integer.MAX_VALUE` (`MmappedRegions.java:44`, `:186`). |
+| **E2 At the limit** | Not a limit: the slow path copies across the boundary (`:119-122`) and the read completes. Nothing is refused or bounded. |
+| **E3 Owner and multiplier** | Per call on a per-reader view; the slow path fires only for a slice straddling a ~2 GiB region boundary of an SAI vector file larger than one region. Concurrency is that of vector searches; each transient buffer is `4 * count` bytes (graph neighbour lists, small). |
+| **E4 Budget domain** | Transient heap for the slow path; the mmapped SAI file is page cache / virtual address space, shared with mmapped sstable index files (`disk_access_mode` default) and not consulted from yaml for these files. No budget is governed here. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

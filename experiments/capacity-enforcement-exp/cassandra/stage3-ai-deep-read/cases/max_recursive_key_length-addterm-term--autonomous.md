@@ -133,3 +133,16 @@ Either outcome appends to the same `InMemoryTrie<PrimaryKeys>` created at the co
 - Cluster (15 node starts, 2 GiB heap, no flush): `MemtableIndexBytes` 60,343,880 at L = 129 against 60,719,208 at L = 128 (0.9938, equal payload); stock and constant-0 builds identical at L = 100, 128, 129, 400 on heap and off-heap allocation; the 1 KiB guardrail run holds `MemtableIndexBytes` 0 with 100,000 stored cells and 78,563 warnings.
 - Amendments made at the audit, before any reading (2026-10-28): U1-U4 (B2) and C1-C3 (B3) inserted after the link rule; U3 added the missing outcome row for `StackOverflowError` when the constant is raised (`InMemoryTrie.java:884-885`); C2 replaced the full factorial of B3b (about 48 node starts) by a listed 15-run matrix.
 - Findings for stage 3: (1) the constant bounds the call-stack depth of the recursive route, a stack resource (the claim's A2 was right): the 100000 build overflows at L = 2048 with `-Xss512k`. (2) With `AllowAllAuthenticator` `ClientState.isSuper()` is true, so the guardrail does not apply on the client path (`ClientState.java:602-605`, `Guardrail.java:93-96`) and the term is skipped on the memtable path with `noSpamLogger` warnings, as B3f expected. (3) The node runs from the jar: a variant needs `jar uf` with the recompiled class.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `term.limit()`, the encoded term's byte length (`TrieMemoryIndex.java:228`), against 128 (`:64`). Nothing is charged: the comparison only picks `putRecursive` (`:230`) or `apply(Trie.singleton(...))` (`:234`). What it governs is call-stack depth of the recursive route, one frame per key byte (`InMemoryTrie.java:884-885`), released when the call returns. The trie's bytes are counted separately by `add`'s size deltas and charged to the memtable via `adjustMemtableSize` -> `markExtraOnHeapUsed` (`StorageAttachedIndex.java:1003-1007`, `AbstractAllocatorMemtable.java:194-196`). |
+| **E2 At the limit** | Graceful: a longer term takes the iterative `apply` route into the same trie; nothing is refused (stage 4: identical per-term bytes, 227.789 at L = 128 and 129). Terms too large for the trie are stopped earlier by the term-size guardrail on the memtable path (`addTerm` `:220`; fail 8 KiB for strings), and `SpaceExhaustedException` at the trie's own pointer limit becomes a `RuntimeException` (`:237-239`). |
+| **E3 Owner and multiplier** | Per write: each writing thread recurses at most ~128 frames (+ a few) for one term; threads are bounded by `concurrent_writes` (32, `conf/cassandra.yaml:723`). Per-thread stack is reserved at thread creation, so no load multiplies it. |
+| **E4 Budget domain** | Thread stack (native, fixed `-Xss` per thread); the constant draws nothing from heap or direct memory. The trie memory itself is heap at the default `heap_buffers` (`TrieMemtable.java:94`, `cassandra.yaml:825`) and is charged to the memtable on-heap pool, governed by `memtable_heap_space`. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (negative: a route switch that bounds recursion depth; trie memory follows the memtable pool, not the constant).
+**Stage-4 claim to add:** none

@@ -134,3 +134,16 @@ Overshoot and bypass paths:
 **Stage-4 design-audit amendments, 2026-10-27** (made before run 1; none depends on a reading; each is also marked next to the text it changes):
 A1 line numbers in A1; A2 sub-page count is floor(N/P)+1 (B2f); A3 many-groups total rows in B2f; A4 definition of "control moved" (B2f); A5 scope of the "limit never reached" row (B2g); A6 control values L = 1000, 10000, 50000 (B3e.4); A7 many-groups variant added as B3e.4b; A8 Byteman observation rule and JMX allocation instrument replace tracing (B3d); A9 tolerance across P and sub-page count in B3f; A10 Python driver client (B3b).
 A11 (runbook defect found by run 1 attempt 1, 2026-10-27, tier restarted; no prediction or conclusion text changed): B3a also sets `range_request_timeout`, `read_request_timeout`, `request_timeout` to 600000ms and `native_transport_timeout` to 600s. The coordinator's 10 s range deadline runs from the start of the request and spans every sub-page, so a full scan of the 500000-row group at P=100 (5001 sub-pages) timed out (`ReadTimeout` / `ReadFailure`) in attempt 1; the P=10000 cells of that attempt completed. Attempt 1's logs are kept at `~/s4-b11-g72-logs/run1a-aborted-timeouts/` on pc07.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Completed result groups (`groupCounted`, incremented only when the next group or the end of data is reached, `DataLimits.java:990-995`, `:1041`), not rows or bytes. A group of any size counts as one, and only after all its rows have passed. Counter lives for one read/sub-page counter instance. The row-side bound in the same counter is `rowsCounted >= rowLimit` (`:983-988`), where `rowLimit` is the page size, `DEFAULT_PAGE_SIZE = 10000` when the client gives none (`SelectStatement.java:114`, `:901-902`). |
+| **E2 At the limit** | Graceful: `stop()` cuts the iterator (`DataLimits.java:993-994`); `isDone()` (`:1011-1014`) only ends the result. Before the limit, a large group is cut by `rowLimit` into sub-pages (`AggregationQueryPager.java:284-287`), so the group limit is never what stops a big read. |
+| **E3 Owner and multiplier** | Per query (client `LIMIT`, or page size under paging). Concurrent queries are many; no limit on this value caps their total, and none is needed since it governs a count of returned groups. Rows held per sub-page are bounded by `rowLimit` (page size). |
+| **E4 Budget domain** | Heap (rows materialised per sub-page, aggregate state), shared with memtables (`memtable_heap_space` default heap/4, `DatabaseDescriptor.java:586-587`) and request buffering. `groupLimit` draws on no budget of its own; per-row size is bounded elsewhere (mutation size), not here. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

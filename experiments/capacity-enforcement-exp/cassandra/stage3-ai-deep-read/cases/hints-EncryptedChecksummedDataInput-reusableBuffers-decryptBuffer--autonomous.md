@@ -246,3 +246,16 @@ A stock 5.0.9 node never writes encrypted hints (`HintsService.java:130-148`), s
 ### Audit amendments 2026-10-26 (before any reading; sources checked against `systems/cassandra/source/`)
 
 Checked and met: every line cite in A1-A5 and B (HintsService.java:79,107,110,130-148; HintsWriteExecutor.java:50,60,237-247; HintsBuffer.java:58,75-77,152-157; HintsWriter.java:86-87,200-222,232-262; EncryptedHintsWriter.java:47-52; EncryptionUtils.java:66-77,88-116,140-166,183-186; ByteBufferUtil.java:797-829; EncryptedChecksummedDataInput.java:35-41,114-133; HintsReader.java:75-88; HintsDescriptor.java:75,97-98,109-110,185; HintsBufferPool.java:41; CassandraRelevantProperties.java:351; Config.java:397,406-407,443,446-447; DatabaseDescriptor.java:898-901; HintsDispatchExecutor.java:68-72; HintsEncryptionTest.java:78; conf/cassandra.yaml:1774; LZ4Compressor.java:113-116; CHANGES.txt:3076). The claim that 5.0.9 never writes encrypted hints holds (`createDescriptorParams` adds only compression; `ENCRYPTION` is referenced only by `HintsDescriptor` and the test). Not as written: R3 (S5 retention, above), R4 (S1 lower bound), the unqualified 5-minute idle (R5), a two-value knob (R6). Ownerless wording corrected: the 8-byte header's second field is the compressed-block length (writer: `plainTextLength = inputBuffer.remaining()` of the compressed block, `EncryptionUtils.java:90,99`), not the plaintext length. Case-file sha256 before amendments: bdc3c822...fd19e09.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Nothing is counted against a limit. The buffer is sized by `max(encryptedLength, compressedLength)` read from the block's 8-byte header (`security/EncryptionUtils.java:144-148`) and kept as a per-thread high-water mark (`EncryptedChecksummedDataInput.java:35-41,122-127`). It is held until the thread dies (FastThreadLocal), never shrunk; the reader's own off-heap `buffer` is regrown per reader and freed with it. |
+| **E2 At the limit** | No limit: `ensureCapacity` allocates any non-negative size. Legitimate files are bounded only on the write side, a block up to one hint of slab/2 (`HintsBuffer.java:152-157`; slab = max(2 x `max_mutation_size`, 32 MiB), `HintsService.java:110`) = 16 MiB at defaults. A forged header allocates up to 2 GiB and then fails with `FSReadError` (stage 4: 512 MiB). |
+| **E3 Owner and multiplier** | Per thread that reads an encrypted hints file: the `HintsDispatcher` pool, `max_hints_delivery_threads` = 2 (`Config.java:443`, `HintsDispatchExecutor.java:68-72`). With legitimate files at most about 2 x 16 MiB retained; no limit caps the total, but it is small. |
+| **E4 Budget domain** | Java heap (`ByteBuffer.allocate`, type kept on regrowth), plus direct memory for the reader buffer. **Not reachable at defaults:** 5.0.9 only writes compression parameters into hints descriptors (`HintsService.java:130-148`), so a node reads encrypted hints only from a file produced elsewhere. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

@@ -144,3 +144,16 @@ Stage-4 run 1, 2026-10-25/26, pc12, unit and cluster tiers, both **Confirmed —
 - Cluster: the memtable flushes at `memtable_heap_space`/3 (85.3 to 89.0 MiB) with the constant at 256, 1024 and 4096 (478, 57 and 4 rows per flush), at 42.9 MiB with a 128 MiB pool (positive control, 0.498); 1024-char rows add no index structure (174 rows, data size equal to the no-index arm); PREFIX needs about 15,000 rows per flush.
 - Corrections to this file: `IndexMemtable.index` is `:45` with the validation drop at `:50-63` (not 49-64); `measure` is `:266-282`; the CONTAINS per-term bracket is 1.0 to 5 MB (observed 1.7 MB); 256 MiB / 3 flush trigger replaces the row counts of B3c; the 256 build had about 8x (not 16x) the rows per flush because the estimate grows with the term length to a power below 2 (unit L=512 over L=1023 is 0.305).
 - Not explained: the 4095-char rows on the 4096 build were indexed and flushed (SI files 5.6 to 40.8 MB) but a LIKE query found 0 hits; the live heap there was larger than the tracked size (0.40).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Bytes of one analyzed token (`TrieMemIndex.java:84`), per token, not a total. The trie cost of an accepted token is much larger (CONTAINS stores every suffix: ~1.7 MB estimated per 1023-byte term, stage 4). That cost is charged to the memtable pool after the trie is built (`TrieMemIndex.java:116-136`, `SASIIndex.java:297-321`, `AbstractAllocatorMemtable.java:194-197`); stage 4 found real heap about half the estimate (overcounted). Freed at memtable flush. |
+| **E2 At the limit** | Token skipped with an info log (`:84-91`); the write succeeds. Total index heap is governed by the memtable pool: `allocate` blocks writers when the pool is full (`MemtableAllocator.java:169-194`), but since accounting follows allocation, overshoot is bounded by in-flight writes x per-row index cost. |
+| **E3 Owner and multiplier** | Per token, per indexed text column, per memtable. In-flight writers bounded by `concurrent_writes` (32); with one token per row (non-tokenizing), overshoot ~32 x ~1 MB. |
+| **E4 Budget domain** | Heap, shared with memtable data under `memtable_heap_space` (1/4 heap). Unreachable at defaults: SASI index creation is refused unless `sasi_indexes_enabled` (default false, `Config.java:606`, `conf/cassandra.yaml:1992`, gate `CreateIndexStatement.java:122`). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative: per-term format guard; total is charged to the memtable pool, and SASI is off by default). Undetermined only for opt-in tokenizing analyzers, where per-row token count decides the post-hoc accounting overshoot.
+**Stage-4 claim to add:** none

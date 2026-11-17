@@ -87,3 +87,15 @@ n/a: no constraint, there is no memory or disk resource the check bounds; A2/A3 
 - **Unit and cluster: Confirmed, Effect `does not cap`; outcome class true negative.** Unit: `getSeeds()` returns all K (25, 1000, 20000) whether T is below or above K, the WARN appears only when T is below K, the deep size is identical across T (132,064 B at K = 1000, 2,640,064 B at K = 20000, 3 repetitions each) while the truncating copy returns 20 and 2,704 B. Cluster (one node, K = 25 and 1000): live heap 65.9 MB vs 99.6 MB for K = 25 vs 1000 and identical across T at each K (99,614,856 vs 99,614,008 B); `OutboundConnections` = K-1 in both (999), 19 in the truncating copy (live heap 65.8 MB).
 - Worth stage 3's attention: the seed list is not the memory that grows with K. A node builds one `OutboundConnections` set per seed it messages (about 34 KB per seed at K = 1000, all seeds contacted within the first minutes), and `getSeeds()` re-reads the yaml and warns on every call (12 WARN lines in 150 s). The threshold neither caps nor mitigates that.
 
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check counts the entries of the seed list (`seeds.size()`, `SimpleSeedProvider.java:110`) against 20 (`:43`, `CassandraRelevantProperties.java:490`). The list is small: stage 4 measured about 132 B per seed. What actually grows with K is the outbound connection state for each seed the node messages (stage 4: about 34 KB per seed), and the threshold does not touch it. |
+| **E2 At the limit** | It only logs a warning (`SimpleSeedProvider.java:111-113`) and returns the full list (`:115`). Nothing is refused. |
+| **E3 Owner and multiplier** | One list per call, per node. K is set by the operator; the default is one seed (`cassandra.yaml:706`). Connections per peer exist regardless of the seed role, so they are bounded by cluster size. |
+| **E4 Budget domain** | Heap, kilobytes to megabytes. Negligible against the default heap. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

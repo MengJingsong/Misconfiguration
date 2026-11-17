@@ -135,3 +135,16 @@ Overshoot/bypass: the 65535 check is on the raw key/clustering values; the byte-
 - **Corrections to the write-up (all in the dated amendments B2i, B3i, 2026-10-25; none changes a prediction row):** the memtable trie holds token + partition key only, not the clustering (A3 said "partition-key + clustering"); one `addPathBytes` call delivers at most 27 bytes, not 28; for L = 16 the capacity is exactly 32; the shipped `conf/cassandra.yaml:783-790` already defines the `trie` memtable configuration; the scan must come before the flush (a post-flush `SELECT *` reads sstables); Run A needs 1 000 000 rows to cross the cleanup threshold (`memtable_heap_space` / 3); a Byteman trace at lines 34 and 42 replaces JFR sampling.
 - **Numbers that missed (B3f):** "under 0.1 % of memtable occupancy" held at 512 MiB (0.094 %) and not at 128 MiB (0.34 %), because the memtable at a limit flush is 42.7 MiB; the B3g threshold (1 %) holds. Per-iterator capacity at 128 MiB reached 74 752 vs 65 536 at 512 MiB (trie shape, not heap space).
 - **Outside the claim, observed:** `toByteComparable` (line 54) copies each emitted entry's key: 57 MB in total in Run A and 279 to 363 MB in Run B, transient garbage.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | No counter. Capacity grows to `max(newPos+16, 2*len)` (`TriePathReconstructor.java:38-45`), or doubles at `:31-36`, whenever the path outgrows it. Real bytes are 1 to 2 x the longest path walked. For `TrieMemtable` the path is token plus partition key (B2i.3d), and the partition key is at most 65535 B by validation. Stage 4 measured a capacity of 65,536 to 74,752 B and 131 to 149 KB allocated per reconstructor for 60,000-byte keys. The array lives as long as the iterator. The per-entry copy at `:52-55` is separate garbage (57 to 363 MB total per stage-4 run). |
+| **E2 At the limit** | Grow; it never fails. The only stop is upstream: the 65535-byte key validation rejects the write, which is graceful. |
+| **E3 Owner and multiplier** | Per `TrieEntriesWalker` / `TrieEntriesIterator` (`Trie.java:329`, `:435`), i.e. per flush or range read of a trie memtable. `InMemoryTrie` is also used by SAI's memory index (`index/sai/memory/TrieMemoryIndex.java`). At defaults there are 0 owners: the default memtable is skiplist (`conf/cassandra.yaml:783-790`), and SAI needs an index to be created. With a trie table: about `concurrent_reads` 32 (`Config.java:179`) plus 2 flush writers, so roughly 34 x 150 KB, about 5 MB at most. |
+| **E4 Budget domain** | Heap (a plain `byte[]`), shared with the memtable heap pool and everything else, and not charged to any pool. It is negligible next to `memtable_heap_space` = heap/4. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate.
+**Stage-4 claim to add:** none

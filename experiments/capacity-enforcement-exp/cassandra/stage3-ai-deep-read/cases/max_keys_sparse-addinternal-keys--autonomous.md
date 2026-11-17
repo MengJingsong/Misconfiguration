@@ -131,3 +131,16 @@ Bypass or overshoot: counts are per segment. Each flushed segment is built separ
 - Positive control: `max_compaction_flush_memory_in_mb` 1 gave 12 "Flushed index segment" lines (builds of about 1.05 MB), 64 gave 0 and one 7.64 MB build. **The frozen numeric prediction (about 8, i.e. 7 +-1 closed segments + remainder) was missed** (12): the file derived the volume as if a term costs 116 B once per builder, but in a compaction rows arrive in token order, so a term is charged again in nearly every segment; a simulation after the run (random row order) gives 11 closed segments, observed 11 + a 584 428 B remainder. For stage 3: derive segment counts from add count x (108 + 116 x P(new term in segment)), not from the term count. Heap peaks (1 Hz `jcmd`, 1 GiB G1) are not diagnostic for an 8 MB builder.
 - Source corrections found by the run: on a memtable flush the failing build logs "Failed to build index segment" (`PerSSTableIndexWriter.java:270`), not "Failed to flush index" (327, the merge path); the Byteman `Descriptor` in `OnDiskIndexBuilder.finish(Descriptor, File)` is `org.apache.cassandra.index.sasi.disk.Descriptor`; `ant testsome` runs the test JVM with CMS, so B2a's `-XX:+UseSerialGC` aborts it; the node's `system.log` rolls at UTC midnight (archive zip). The merge-path bypass (A3 "Bypass or overshoot") was not exercised.
 - Commits: none (uncommitted; the repository's latest commit at the run was `b68711e5`).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check counts the distinct partition tokens of one term (`getTokenCount()`, `DynamicTokenTreeBuilder.java:101-103`) against 5 (`OnDiskIndexBuilder.java:575`, `:598`). It runs at `finish`, after the term set has already been built. The builder's heap is the separate `estimatedBytes` (`OnDiskIndexBuilder.java:199-201`): stage 4 measured T x 116 + T x K x 108 bytes, held until the segment is flushed. |
+| **E2 At the limit** | It throws `IOException` (`:598-600`), which becomes `FSWriteError`, and the segment is dropped ("Failed to build index segment", `PerSSTableIndexWriter.java:268-271`). The SSTable is still written and the index is silently absent. The memory has already been spent, but nothing extra is allocated. The real memory cap is the builder flush at `maxMemorySize` (`PerSSTableIndexWriter.java:247-250`, `:365-368`). |
+| **E3 Owner and multiplier** | One builder per SASI column index per SSTable writer, at flush or compaction. The count is the number of SASI indexes times the concurrent flushes (`memtable_flush_writers` defaults to 2, `cassandra.yaml:899`) and compactions. Each builder is capped at 1 GiB for a flush or 0.15 GiB for a compaction (`IndexMode.java:59-60`). |
+| **E4 Budget domain** | Heap. SASI is off by default (`sasi_indexes_enabled = false`, `Config.java:606`, `cassandra.yaml:1992`), so at defaults this domain is unused. With SASI enabled, the 1 GiB-per-builder flush cap times indexes times flush writers could add up past the heap, but that sum comes from the separate `maxMemorySize` constraint and needs non-default settings. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

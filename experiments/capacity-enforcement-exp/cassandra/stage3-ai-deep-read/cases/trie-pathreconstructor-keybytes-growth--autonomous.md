@@ -116,3 +116,16 @@ Made by the autonomous stage-4 session (tag tp33) from the pinned source `system
 ## D. Stage-4 feedback
 
 Stage 4 ran 2026-10-25 (results: `cassandra/stage4-runtime-verification/results/trie-pathreconstructor-keybytes-growth--autonomous.md`; harness `harness/trie-pathreconstructor-keybytes-growth--autonomous/`; no commit yet). **Outcome class: true negative.** Unit **Confirmed, does not cap**: the array length stays within P <= cap <= 2P of the longest path at all 126 grid points (raw 65535-byte key 65,536; real random key P = 65,547, cap 71,680), `sizeOnHeap()/sizeOffHeap()` do not change when the iterator is drained (139/139 rows), the accounted size rises x9.2 with the key count while cap stays 128. Cluster **Confirmed, does not cap**: a Byteman trace of 117,095 to 266,475 growth events per lifetime shows only the lengths 64 to 65,536 for 60,000-byte keys at `memtable_heap_space` 64, 256, 1024 MiB and offheap_objects (largest length 65,536 in all four), no growth for 16-byte keys, while memtable size (8.6 / 55.1 / 218.5 MB) and t_small flush count (17 / 4 / 1) followed the setting. Audit amendments R1 to R9 are in B5; R9 was made after the first unit run, for an error in R3's own description of the zero-byte escape (strict reading in the results file §4.2). Corrections for stage 3: the 65535 bound is on the key, not on the memtable path (path = escaped `DecoratedKey`, key + 12 bytes for keys without zeros); the size methods are `InMemoryTrie.sizeOnHeap()/sizeOffHeap()`; the array is not an exact power-of-two staircase (a first `addPathBytes` growth gives `newPos + 16`).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Nothing is counted against a budget: `keyPos` vs `keyBytes.length` (`TriePathReconstructor.java:33-34`) is a growth trigger for a scratch `byte[]` (initial 32, `:28`); length stays within P..2P of the longest path walked (`:38-44`). Per-entry copies (`:52-55`) are garbage sized to the path. Lives for one iterator. |
+| **E2 At the limit** | No limit; the array doubles. Path length is bounded indirectly by the 65535-byte partition-key limit (`Validation.java:51-55`) plus escaping/token overhead, so the array stays ~64-128 KiB at most. |
+| **E3 Owner and multiplier** | One per live trie iterator: `TrieMemtable` flush and range reads (`TrieMemtable.java:356`, `:392`, `:552`) and SAI in-memory trie index (`TrieMemoryIndex.java:174`). Iterators bounded by flush writers + `concurrent_reads` + client concurrency; total at most tens of MiB of short-lived heap. The default memtable is `SkipListMemtable` (`conf/cassandra.yaml:783-790`), so the memtable path needs opt-in. |
+| **E4 Budget domain** | Heap, outside the memtable allocator's accounting; transient garbage, small next to `memtable_heap_space`. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative: no cap exists; the scratch array is small and bounded by key size).
+**Stage-4 claim to add:** none

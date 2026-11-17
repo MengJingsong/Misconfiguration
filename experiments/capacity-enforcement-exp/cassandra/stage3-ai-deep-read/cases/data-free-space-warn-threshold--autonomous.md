@@ -115,3 +115,16 @@ Bypass or overshoot: the check is not on the write path at all, so disk can be f
 3. *B3a / B3b (cluster volumes).* The ext4 loop device is replaced by a tmpfs of exact size (the stage-4 lesson: a local node on a spinning disk stalls; a full tmpfs gives the same `ENOSPC`). The small volume is 4 GiB; the large volume is a tmpfs of nominal size 100 GiB (free space reported as 100 GiB, RAM is used only for written data). The node runs on loopback 127.0.3.1, heap `-Xms1G -Xmx1G`.
 4. *B3c (stop conditions).* Stress runs until it ends or for at most 15 minutes; sampling every 5 s (`df -B1`, `du -sb` of data and of `commitlog`). The workload is the same on both volumes (same `n`), so growth is compared at equal elapsed rows, not at volume-full.
 5. *B3h (cluster positive control).* The control (`commitlog_total_space: 64MiB`) runs on the 100 GiB volume, so that only the cap differs from the large-volume arm. The two-directory summing comparison is covered by the unit tier (B2c) and is not repeated at the cluster tier.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Free filesystem bytes, not anything Cassandra holds: the saturating sum (`DatabaseDescriptor.java:1654-1659`) of `FileStore.getUnallocatedSpace` over every `data_file_directories` entry (`:711-724`), read once at startup in `applySimpleConfig`. A volume holding several data directories is counted once per directory; one nearly full volume can be hidden by another. Nothing is charged or released; the value is never re-read. |
+| **E2 At the limit** | Below 64 GiB (`:726`, a literal): one WARN line (`:727-728`) and startup continues unchanged. No reject, block or eviction; the write path never sees it. The only startup failure on this code is an unreadable directory (`:1661-1664`), unrelated to the threshold. |
+| **E3 Owner and multiplier** | Per node, per JVM start; one owner, summed over all data directories. |
+| **E4 Budget domain** | Disk (data volumes), not heap or native memory. The binding disk constraints are separate (`data_disk_usage_percentage_*` / `data_disk_usage_max_disk_size`, default off, `Config.java:926-928`; `commitlog_total_space`; `disk_failure_policy`). Stage 4 noted a JVM SIGBUS on a full tmpfs, which is a page-cache/tmpfs effect of the test medium, not of this check. |
+| **OOM-lead flag** | none — the constant governs no memory and no disk; it logs once at startup. |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

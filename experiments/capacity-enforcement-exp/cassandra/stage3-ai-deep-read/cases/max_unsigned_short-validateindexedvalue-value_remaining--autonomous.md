@@ -141,3 +141,16 @@ These apply to B2a-B2h; the prediction (B2f) and the readings table (B2g) are no
 - **Amendments of this audit (B2i, B3i):** a second table "with the index on the partition key" cannot show the boundary (a single-column partition key cannot be indexed; a composite key is rejected by the key-length check first, "Key length of 65539 ..."): a clustering blob column was used (`ClusteringPrefix.validate` rejects only `> 65535`, so 65535 reaches line 618). `Memtable.getLiveDataSize()` does not count partition keys, which hold the indexed value (132,000 B for 4000 keys of 65534 B), so the pool-accounted `owns()` was used.
 - **Side findings:** the index table stores the value twice on disk (Data.db and Index.db: 2 x S per indexed value); `nodetool tablestats` "Memtable data size" of an index table under-reports by about 2000 times for large values; a directory-glob size reading overcounts while compactions run (the node's "Space used (live)" does not).
 - **Not run:** the read-side check at line 225 (`>`), the non-client paths (index build, streaming, hints, sstable import).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `value.remaining()` of one indexed value at write validation (`CassandraIndex.java:618`, constant `FBUtilities.java:158`), a per-value length, not a running total. Nothing is charged or released. Once admitted the value is held at least twice: in the base table and as the partition key of the hidden index table (stage 4: 2 x S per value on disk, and the index memtable's `getLiveDataSize()` omits partition keys while the pool's `owns()` counts them). |
+| **E2 At the limit** | Graceful: `InvalidRequestException` before apply (`:619-625`, called before `mutation.validateSize`, `SingleTableUpdatesCollector.java:111-112`). Below the limit any number of values is accepted with no accounting. Non-client paths (index build, streaming, hints, import) are not validated by it (case A3, not run). |
+| **E3 Owner and multiplier** | Per value per write. The number of indexed values is unbounded (rows); no limit caps their total. Total index size scales with rows (stage 4: 2,111.8 MB at N = 16000 x 65534 B), governed by memtable pools, flushing and disk, not by this constant. |
+| **E4 Budget domain** | The constant governs no budget. The admitted bytes go to the memtable pool (default `heap_buffers`, `Config.java:524`; `memtable_heap_space` default heap/4, `DatabaseDescriptor.java:586-587`), commit log and disk. Stage 4's pool control held the index memtable at the configured space, so the pool accounts these values. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

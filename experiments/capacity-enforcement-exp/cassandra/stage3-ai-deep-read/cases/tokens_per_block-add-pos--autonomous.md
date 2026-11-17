@@ -133,3 +133,16 @@ Made before any reading; they override the text of the sections named where they
 - Cluster (SASI, seed + `CREATE CUSTOM INDEX`, 1 GiB heap): one suffix term holding 1,000,000 tokens produced a `c_idx` of 16,609,304 B (16.61 B per token; arithmetic 4,033 leaves + about 17 interior x 4,096 = 16.59 MB), 2.00 x for 2 x rows, 33,325,080 B (2.01 x) in the 124 build; `u_idx` (1M unique terms, PREFIX) 125,853,952 B, byte-identical in both builds; heap peak of the `c` build 572 / 591 MiB; control `max_compaction_flush_memory_in_mb` 16 against 1024: 8 segment files against 1, heap peak 518 against 572 MiB.
 - Amendments at the audit (B5.1 to B5.7, 2026-10-28): run form and `-Xmx2g` for the 1M-term control, `sasi_indexes_enabled` (exists, default false), 500,000 / 1,000,000 rows with a seed + `CREATE CUSTOM INDEX` path (the build operation type uses the option, a flush would use a fixed 1 GiB), the control reading (segment count decisive), block-count arithmetic; B5.8 (post-freeze, before run 1, from the instrument check): constant `'q'` and `u_idx` PREFIX, because `CONTAINS` indexes every suffix of a term.
 - Findings for stage 3: (1) B3c should say that in `CONTAINS` mode a text value is indexed as all its suffixes (`OnDiskIndexBuilder.java:253-257`), so one-term workloads need a one-character constant and a unique-value index needs `PREFIX`. (2) Heap peak is a weak control reading here (-9.5 % with the 16 MiB option), the temporary-segment count (1 against 8) is the strong one; "falls markedly" in B3f is too strong for the peak. (3) `u_idx` (one token per term) is independent of `TOKENS_PER_BLOCK` byte for byte, the constant only matters for terms with more than one token.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Tokens in one SASI token-tree node (`index/sasi/disk/AbstractTokenTreeBuilder.java:519-520`), against 248 (`disk/TokenTreeBuilder.java:30-36`). Per node, during tree construction/serialization; the write reuses one 4 KiB buffer (`AbstractTokenTreeBuilder.java:77`). The tokens themselves (the `TreeMap<Long, LongSet>` per term) are not counted by it. |
+| **E2 At the limit** | Not a disallow: the node splits (`:522-523`); nothing is rejected. |
+| **E3 Owner and multiplier** | Per interior node of each term's tree, in each `OnDiskIndexBuilder` of each SASI column index being written. Total tokens scale with rows; the bound on a builder is a different counter, `estimatedMemoryUse()` against `maxMemorySize` (`disk/PerSSTableIndexWriter.java:247,365-369`: 1 GiB on flush, `max_compaction_flush_memory_in_mb` otherwise). |
+| **E4 Budget domain** | Java heap. **Not reachable at defaults:** `sasi_indexes_enabled: false` (`config/Config.java:606`, `conf/cassandra.yaml:1992`). Aside, about the other counter: its fixed per-term/per-token charges (`OnDiskIndexBuilder.java:182,194`) gave 236 B per term against about 400 MB retained at 1M terms in stage 4 (about 1.7x under-count); with SASI enabled and a fixed 1 GiB flush budget per index writer, that is a lead for that counter, not for this constant, and it is not a default. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

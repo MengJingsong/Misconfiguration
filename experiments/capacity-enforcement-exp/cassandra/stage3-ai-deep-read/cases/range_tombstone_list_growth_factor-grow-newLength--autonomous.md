@@ -251,3 +251,16 @@ Each item says which filed text it changes. The case's claim (B1), the estimate 
 - **Stage 3 notes.** B3c's "≈ 2×10⁸ element copies" is per partition (≈ 10¹⁰ in total) and was accepted; the filed JVM option `-Xmx512m` for the f = 100.0 cell does not apply to `ant testsome` (1024 MiB), and that cell needed no more than 20 MB.
 
 Side finding (not part of the claim, from the unit and cluster readings of all three sibling files): the `boundaryHeapSize` bookkeeping counts the bounds twice on the `add()` path (`RangeTombstoneList.java:178` after `setInternal` line 766). `boundaryHeapSize` is 2.000 × the true sum of the bound sizes and `unsharedHeapSize()` minus Jamm `measureDeep` equals the true bound sizes (N = 100,000, f = 1.5: 23,999,872 B against 24,000,000 B). In a node the memtable counter reads about 504 B per tombstone at f = 1.2 (580 B at f = 5.0) where the live heap above the baseline is about 270 – 280 B (340 – 370 B), so the memtable limit and the flush trigger are reached at roughly half the real tombstone volume. This is an accounting overestimate, not a cap tied to the factor. (A JIRA search was not done.)
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The factor counts nothing; it sets the next capacity (`RangeTombstoneList.java:680-689`); line 696 (`grow(int)`) does not read it. The memtable charges the delta of `unsharedHeapSize()` (`BTreePartitionUpdater.java:121`), which includes the four arrays at capacity, slack included (`RangeTombstoneList.java:770-778`), and `boundaryHeapSize`, which the `add()` path counts twice (`:178` after `setInternal` `:766`): stage 4 read ~504 B counted vs ~275 B live per tombstone, so the counter over-states real memory. Not counted: each write to a partition with n range tombstones copies the list (`MutableDeletionInfo.java:83` → `RangeTombstoneList.java:106-114`), ~20 B × n of transient arrays (bounds are shared), garbage after the merge. Released at flush. |
+| **E2 At the limit** | No limit: growth always succeeds; failure only by heap OOM (a huge factor saturates the `(int)` cast). The memtable pool is the graceful bound (block / flush, `MemtableAllocator.java:172-195`). |
+| **E3 Owner and multiplier** | One list per partition's deletion info in the memtable, plus lists built on read and compaction paths. Transient copies: one per in-flight write to the partition (`concurrent_writes` 32), more with CAS retries. No total cap other than the memtable pool for the retained part. |
+| **E4 Budget domain** | Heap: retained part in `memtable_heap_space` (heap/4, `DatabaseDescriptor.java:586-587`); transient copies in the young generation, shared with all request processing. |
+| **OOM-lead flag** | none (the retained part is over-counted, not under-counted; the transient copy is ~20 MB per in-flight write only for a single partition holding ~1 M range tombstones in one memtable) |
+
+**Real-memory estimate:** same as Estimate (negative).
+**Stage-4 claim to add:** none

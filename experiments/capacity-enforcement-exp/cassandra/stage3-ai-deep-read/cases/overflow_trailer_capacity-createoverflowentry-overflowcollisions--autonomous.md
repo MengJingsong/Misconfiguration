@@ -134,3 +134,16 @@ Arithmetic: single-block size for C1 = 64 + 24 x 16 + 8 x 8 (`:68-70`).
 - **Answer to the open question of B3f:** after the failed segment build the memtable flush of the table completes; the failure is not silent (ERROR with the assertion text), the SI component is left truncated and unopenable, and the index returns nothing; no commit-log or memtable growth.
 - **Weaker than it looks:** the heap control reads the post-collection peak (401 vs 927 MiB, one run each), not the sampled maximum heap used (881 vs 847 MiB, equal within noise); the effect of the exceeded limit is a failed index on a node with an otherwise normal table, shown for one leaf only.
 - **For stage 3:** a conclusions row for "limit exceeded: error is raised in a SASI thread and the index is unusable" would match what happens; the Ground line could say the cap is a format-validity assertion (it is, by these readings).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check counts the 8-byte overflow-offset slots of one token-tree leaf (`overflowCollisions.size()`, `AbstractTokenTreeBuilder.java:323`) against 8 (`TokenTreeBuilder.java:33-35`). Real memory is a `LongArrayList` of at most 8 longs per leaf (`AbstractTokenTreeBuilder.java:256`), alive while the leaf is serialized. On disk it is part of a fixed 4096-byte block (`TokenTreeBuilder.java:30`, `:36`). |
+| **E2 At the limit** | `AssertionError` (`AbstractTokenTreeBuilder.java:324`). The SASI segment build fails and the index file is left truncated and unusable (stage 4). This is a failure of the index, not of memory: nothing extra is allocated. |
+| **E3 Owner and multiplier** | The limit is per leaf (248 tokens) per SASI index file. It is reachable only through token collisions, or through two offsets both above `Short.MAX_VALUE`. The total across leaves is set by the token count, not by this check. |
+| **E4 Budget domain** | Transient heap and disk. SASI is disabled by default (`Config.java:606`, `cassandra.yaml:1992`). The builder's heap is capped separately by `maxMemorySize` (`PerSSTableIndexWriter.java:365-368`). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

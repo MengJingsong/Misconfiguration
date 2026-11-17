@@ -134,3 +134,16 @@ Positive control: the same workload with the memtable cap (`memtable_offheap_spa
 - Notes for stage 3: `ClusteringPrefix.validate()` has two branches with one message (the per-value branch `:278-281` also reports the sum, `dataSize()`), so a reached `:284` needs every component at most 65535; B2f's "(>=32768, N=2)" is exact only from 32768 and the estimate's "S=16 vs 65535 = 4000 times more disk per row" holds for key bytes, not for Data+Index. Side findings: a conditional write skips `validate()` and trips the `NativeClustering.java:50` assert; a range delete with a 70000-byte bound is accepted and its flush fails with `AssertionError` in `ByteBufferUtil.writeWithShortLength` (`StatsMetadata` serialization); `PartitionKeySingleRestrictionSet.java:67` also calls this method. Amendments: B2i, B3i (2026-10-26).
 
 Stage-4 audit amendments of 2026-10-26 are B2i and B3i above. Citation checks (pinned `cassandra-5.0.9`): `ClusteringPrefix.java:272-288` and `:317-326`, `NativeClustering.java:50,59`, `ModificationStatement.java:815`, `FBUtilities.java:158` hold.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Raw bytes of one clustering's components, summed (`db/ClusteringPrefix.java:274-284`), against 65,535 (`utils/FBUtilities.java:158`). Real heap per held clustering is about the same (stage 4: 65,720 B for a 65,535 B key, +190 B overhead). Stateless check at request time; nothing is held or released by it. |
+| **E2 At the limit** | Graceful: `InvalidRequestException` before the mutation is built (`cql3/statements/ModificationStatement.java:815`). Bypasses seen at stage 4 fail with `AssertionError`, not with memory growth: a conditional write reaches `NativeClustering.java:50`; a range-delete bound of 70,000 B is accepted and its flush fails in `StatsMetadata` serialization (node stayed up). |
+| **E3 Owner and multiplier** | Per clustering key (per row/statement). The number of rows is unbounded by it; aggregate memory is bounded by the memtable pools (stage 4: first `MEMTABLE_LIMIT` flush at 253.6 MiB with 256 MiB pools). |
+| **E4 Budget domain** | Java heap at default `memtable_allocation_type: heap_buffers` (`conf/cassandra.yaml:825`), off-heap with `offheap_objects`; shared with everything in the memtable, caches and reads. Per-key 64 KiB does not change the domain's sum. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate`
+**Stage-4 claim to add:** `none`

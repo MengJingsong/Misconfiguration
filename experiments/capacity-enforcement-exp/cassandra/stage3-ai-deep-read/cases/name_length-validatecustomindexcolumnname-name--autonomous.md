@@ -125,3 +125,16 @@ These apply to B2a-B2h; B2f and B2g are not changed, only given numbers where th
 - **Amendments of this audit:** B2i.1 answers the open question of B3a: SASI creation is gated by `sasi_indexes_enabled` (default false; `CreateIndexStatement.java:122-123`, `Config.java:606`), and every custom-index arm needs it set to true; the SASI warning is at lines 201-205. B3i.3 was amended after an aborted 2,000,000-row start (about 2,700 rows/s): N = 500,000 per arm, the pool was still reached in every life.
 - **Side findings:** the javadoc of `NAME_LENGTH` ("KS or CF name") is stale for tables; the check is marked for removal in the source (CASSANDRA-20235, TODO at line 226); a plain index on 500,000 rows of 100 B costs 108 MB on top of a 62 MB table, independent of the name.
 - **Not run:** the optional rebuild with the constant at 96; heap as evidence (noise of 10 to 15 MB between arms in a 1 GB heap exceeds any effect of a 60-byte name).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Characters of one identifier, `name.length()` of the custom-index target column (`CreateIndexStatement.java:213`) against 48 (`SchemaConstants.java:75`). Checked once at DDL time; nothing is charged or held afterwards. Bytes the name really costs (schema tables, per-column metadata, SASI component file names) are tens of bytes per copy and are not counted. |
+| **E2 At the limit** | Graceful: `InvalidRequestException` (`:214`), no schema change. Bypass: plain (`COMPOSITES`) indexes skip the check (`:227-228`), so the same column can be indexed another way; this bypass costs only name bytes. |
+| **E3 Owner and multiplier** | Per CREATE INDEX statement (per custom index target). The name is stored once per index in schema and replicated to each node; the number of indexes is not capped by this constant (guardrails on secondary indexes per table are separate). Stage 4: on-disk bytes differ by 0.001-0.010% across lengths 40-100. |
+| **E4 Budget domain** | None of the memory domains in practice: schema metadata on heap and in system tables on disk, at bytes per name. Memtable and index memory are governed by `memtable_heap_space` (stage-4 control: flush size moved with 128 / 256 / 512 MiB), not by name length. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (negative: an identifier-length check at DDL time).
+**Stage-4 claim to add:** none

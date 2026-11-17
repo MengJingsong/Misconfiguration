@@ -124,3 +124,16 @@
 - Cluster (1 GB heap, tmpfs): g = 1 / 100 / 100000 on a 1,000,000-row group read the same 1,000,000 rows, allocate the same 6.17 GB (p = 10000) or 5.74 GB (p = 100), request the same bytes from the sstable (`rchar` 1.057 GB / 2.675 GB) and reach the same sampled peak heap (within 2.6 percent); the positive control `SELECT * LIMIT n` moved 132-fold.
 - Correction to the filed text: A1 and B2b describe the fetch size as the sub-page row limit only; it is also the number of groups per client page (`GroupByPartitionIterator.pageSize`), so p bounds both (A1). The page size also changes the bytes requested from the file (2.5 x more at p = 100 than at p = 10000 for the same rows), which A4 did not list among the consumers.
 - Doc note (no bug): `LIMIT` on a GROUP BY bounds the number of result groups, not the rows scanned.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `groupCounted` counts closed GROUP BY groups (`DataLimits.java:990-995`), not rows or bytes. Rows of an open group are counted by `rowsCounted` against `rowLimit` = page size (`:983-988`; `DEFAULT_PAGE_SIZE = 10000`, `SelectStatement.java:114`, `:902`). Built-in aggregates keep O(1) state per group, so a group's real memory is the sub-page of rows held while it is aggregated, not anything tied to `groupLimit`. Counter lives for one (sub-)page. |
+| **E2 At the limit** | Graceful: `stop()` ends the stream (`:993-994`); trailing group counted only if limits not reached (`:1041`). A huge group is not interrupted by the group limit; it is read in sub-pages of `rowLimit` rows (`AggregationQueryPager.java:230-247`). |
+| **E3 Owner and multiplier** | Per query (per sub-page instance via `forPaging`/`forGroupByInternalPaging`). Concurrent queries are bounded by `concurrent_reads` / native-transport request limits, not by this field. No total cap from this field. |
+| **E4 Budget domain** | Heap (coordinator and replica). The memory that matters is the sub-page of up to `rowLimit` rows, a row count with no byte bound; that is the page-size constraint shared with ordinary paged reads, guarded by the `page_size` guardrails (off by default) and per-value limits, not by `groupLimit`. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative: `groupLimit` counts groups; memory follows the row sub-page, which a different constraint governs).
+**Stage-4 claim to add:** none

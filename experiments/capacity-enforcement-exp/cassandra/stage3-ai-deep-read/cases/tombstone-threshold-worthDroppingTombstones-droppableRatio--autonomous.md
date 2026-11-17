@@ -121,3 +121,16 @@ Results: [`../../stage4-runtime-verification/results/tombstone-threshold-worthDr
 - **The claim B1 needs one qualifier:** with every gate open an SSTable above X is rewritten, so its residual droppable ratio is at most X; the claim holds for the byte limit and for the gated paths, not for that single-gate path. Memtable pressure split each cluster table into two SSTables (one is the intended design); both carry the same ratio and compact alone, no row depends on it.
 - **Two things the filed text got wrong, found in the audit:** a delete-into-a-second-SSTable workload cannot give r = f (tombstone SSTable r near 1, data SSTable 0, and its tombstones cannot be purged while the data SSTable overlaps), and an `INSERT USING TTL` counts its row marker in the drop-time histogram without a cell, giving r = 2f (use `UPDATE`).
 - **Upstream or documentation candidates:** the error text of the option (`greater than 0`) accepts 0, and a value above 1 silently disables the mechanism (`validateOptions`, `:448-465`); `tombstone_compaction_interval` and the overlap gate are not mentioned beside `tombstone_threshold` in the option's documentation as conditions that keep a droppable share above the threshold.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | An estimated ratio from sstable metadata histograms: droppable tombstones before `gcBefore` over `mean(cells per partition) x partitions` (`StatsMetadata.java:166-174`), compared at `AbstractCompactionStrategy.java:408` with the float `tombstoneThreshold` (default 0.2, `:69`). Not bytes: cells of any size count alike, and drop times are histogram buckets. Nothing is charged or released; the ratio is recomputed per check. |
+| **E2 At the limit** | Above the ratio, and only if the interval (`:404`, 86400 s default) and overlap gates (`:415-444`) pass, the sstable becomes eligible for a single-sstable compaction; in STCS only when no normal bucket qualifies (`SizeTieredCompactionStrategy.java:91-105`). Below it nothing happens. Never a refusal; the outcome is a rewrite that may free disk and needs the rewrite's output as temporary disk (guarded by the compaction disk-space check). |
+| **E3 Owner and multiplier** | Per sstable of a table using the option; one candidate (the largest) per background check. Compactions in flight are capped by `concurrent_compactors` (default 2-8). |
+| **E4 Budget domain** | Disk (droppable data left in sstables). Heap is touched only indirectly: tombstones not purged are scanned on reads, which `tombstone_warn/failure_threshold` govern, not this ratio. The check itself allocates a small `HashSet` of overlap ranges (`:435-437`). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (negative: an eligibility heuristic for disk reclamation; no memory domain is governed).
+**Stage-4 claim to add:** none

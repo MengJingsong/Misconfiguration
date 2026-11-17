@@ -106,3 +106,16 @@ Stage-4 result (2026-10-26, `cassandra/stage4-runtime-verification/results/unlog
 - The estimate stands: the key-count threshold bounds neither heap nor disk; only the size thresholds do, and `verifyBatchSize` runs its fail check only above `batch_size_warn_threshold` (:338-340).
 - Runbook defects: R1 `SELECT count(*)` over 1,000,000 partitions timed out at the default read timeouts (harness fix: node timeouts 600s; the cluster tier restarted); R2 `jstat` cannot attach (node runs with `-XX:+PerfDisableSharedMem`; heap by `jcmd GC.heap_info`). Neither changed B3f or B3g.
 - Note for the filing: the WARN log line is rate-limited (one per minute, shared by all batches), so a log count says little; the client warning fires on every batch.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Distinct `DecoratedKey`s across the mutations of one unlogged batch (`BatchStatement.java:373-388`), counted after the mutations are built, so the batch is already on heap; no bytes, nothing held or released. Threshold default 10 (`Config.java:334`). (Citation note: `mutateWithTriggers` is at `:445`, not `:443`.) |
+| **E2 At the limit** | Warning only: a rate-limited WARN and a `ClientWarn` (`:389-394`); execution continues (`:445`). The only rejecting batch check is `batch_size_fail_threshold` (default 50KiB, `Config.java:332`) on `IMutation.dataSize`, reached only above `batch_size_warn_threshold` (5KiB, `:330`; `BatchStatement.java:338-358`). |
+| **E3 Owner and multiplier** | Per batch request. Concurrent batches are many; their total in-flight request bytes are bounded per node by `native_transport_max_request_data_in_flight` (default heap/10, `DatabaseDescriptor.java:649-651`), not by this threshold. |
+| **E4 Budget domain** | Heap on the coordinator (statements, mutations, key set), shared with memtables (heap/4) and other request buffers. This threshold draws on no budget; the 50KiB fail check is the per-batch byte limit. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

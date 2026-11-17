@@ -125,3 +125,16 @@ Stage-4 run 1, 2026-10-26/27 (pc07), results: `cassandra/stage4-runtime-verifica
 - Notes for stage 3: (1) A3's "batches" are not a bypass (`addUpdates` validates); the real skips are `INSERT ... IF NOT EXISTS` (`ModificationStatement.java:573`; with `offheap_objects` it fails at `NativeClustering.java:50` in the mutation stage and the client times out after 20 s) and range deletes by slice (`:762-787`; a 70000-byte bound is accepted and the later flush fails in `StatsMetadata` serialization, `ByteBufferUtil.java:366`). (2) The first-branch message reports `dataSize()`, the sum, not the oversize component. (3) `PartitionKeySingleRestrictionSet.java:67` also calls `validate()` (composite partition keys). Amendments: B2i, B3i (2026-10-26).
 
 Citation checks (pinned `cassandra-5.0.9`): `ClusteringPrefix.java:272-288` and `:317-326`, `NativeClustering.java:50`, `ModificationStatement.java:573, 753-787, 815`, `FBUtilities.java:158`, `PartitionKeySingleRestrictionSet.java:67`, `ByteBufferUtil.java:366` hold.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Raw bytes of each clustering component and their sum (`accessor.size(v)`, `ClusteringPrefix.java:278`, `:282-284`), checked once per statement and never held, so there is nothing to release. Admitted bytes are larger. Stage 4: a held clustering costs S + 116.7 B on heap, and on disk Data+Index was 3.0 x R x K at K = 65535 (Index.db repeats the key). |
+| **E2 At the limit** | Graceful: `InvalidRequestException` before `addUpdateForKey` (`:278-287`, `ModificationStatement.java:812-816`). Bypasses: the conditional path takes the clustering without `validate()` (`ModificationStatement.java:573`), and so do slice deletes (`:762-787`, per section D). Stage 4 saw these fail later, at `NativeClustering.java:50` (assert) and at flush (`ByteBufferUtil.java:366`). That is a failure, not a memory overshoot. The size of a single oversize key is still bounded by `max_mutation_size` = half of `commitlog_segment_size` (32 MiB) = 16 MiB (`DatabaseDescriptor.java:898-899`, `Config.java:397`). |
+| **E3 Owner and multiplier** | Per clustering key (one row or one bound). The number of keys is unbounded, and this constant caps no total. The memtable pool caps the in-memory sum. |
+| **E4 Budget domain** | Memtable pool: on-heap with the default `heap_buffers` (`conf/cassandra.yaml:825`), `memtable_heap_space` = heap/4 (`DatabaseDescriptor.java:587`). SSTable disk. Read-path index structures that copy clusterings fall under their own limits, not this one. The constant itself draws on no budget. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate. **Undetermined** side question, about availability rather than an OOM lead: after a slice delete with a bound over 65535 bytes makes a flush fail, does that memtable stay owned and block later flushes (pool full, writers blocked) or leak?
+**Stage-4 claim to add:** After a range delete whose clustering bound exceeds 65535 bytes, at defaults, the failed flush leaves the memtable's pool bytes owned (`MemtableOnHeapDataSize` does not fall) and later writes block on the pool, rather than the node recovering. Measure the pool and write latency for 10 minutes afterwards.

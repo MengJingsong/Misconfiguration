@@ -107,3 +107,16 @@
 - Cluster: **the workload as written did not reach the traced code** (a plain `set<int>` write never calls `CodecUtils`; Byteman counted 0 `pack` calls during it). Only the UDF layer calls the driver-derived codecs, with the client's protocol version, so a Java UDF returning `list<int>` was added: `writeSize` was called with sizes 1000 / 65536 / 500 000 under V4 and V3, results `4 + 8N` bytes, no error. Plain writes on v4 at N = 1000 / 65536 / 500 000 are accepted, 24.0 B per element in the memtable and 4.01 B on disk with no step at 65535. A V2 client is refused by the server ("Invalid or unsupported protocol version (2)"). Control: `collection_size_fail_threshold: 200KiB` rejected N = 65536 and 500 000 and accepted 1000.
 - For stage 3: (1) a write-time guardrail does not apply to a superuser, and with the shipped `AllowAllAuthenticator` every client is one (`ClientState.isSuper`, `ClientState.java:594-605`): a positive control built on a guardrail needs `PasswordAuthenticator` and an ordinary role (the first form of the control accepted everything and only logged the flush-time error); (2) cluster workloads for the UDF codecs must go through a UDF; (3) thread-allocated bytes are exact for large arrays but TLAB-granular for the many small element buffers (first measured cell noisy); (4) `test/unit/.../cql3/functions/types/` does not exist in the tag.
 - Commits: none (uncommitted; the repository's latest commit at the run was `b68711e5`).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The element count `value.size()` (list/set at `TypeCodec.java:2127`, map entries at `:2479`), compared with 65535 only for V1/V2 (`CodecUtils.java:99-106`). Real bytes are the element buffers plus the result buffer, `2 + N(2+S)` or `4 + N(4+S)`. They are allocated before the check (`:50-57`), are transient, and are freed by GC after the UDF value is converted. |
+| **E2 At the limit** | `IllegalArgumentException`, but only after the allocation (`:56` before `:57`). Stage 4: the failing V2 call allocated 96.5 to 98.7 % of what the V3 call did, so the check stops nothing. It is unreachable on a server anyway, because only V3 to V6 decode (`ProtocolVersion.java:66`, `:102-105`; stage 4 saw a V2 client refused). V3 and later write an `int` count with no check (`CodecUtils.java:108-112`). |
+| **E3 Owner and multiplier** | Per UDF argument or result conversion (`UDFDataType.java:180`, `:199`, the only server path, per amendment B3). One per row per UDF call, so concurrent conversions are bounded by the request stages (e.g. `concurrent_reads` 32, `Config.java:179`). UDFs are off by default (`user_defined_functions_enabled = false`, `Config.java:588`), so there are 0 owners at defaults. |
+| **E4 Budget domain** | Heap, shared with all request processing. Collection bytes on write are otherwise bounded only by `collection_size_fail_threshold`, which is null by default (`Config.java:918`). Stage 4 found that guardrails are skipped for superusers, and every client is a superuser with the default `AllowAllAuthenticator`. That concerns a different constraint and is not this literal. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate.
+**Stage-4 claim to add:** none

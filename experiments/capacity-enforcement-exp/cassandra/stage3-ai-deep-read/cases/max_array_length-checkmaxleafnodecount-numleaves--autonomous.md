@@ -137,3 +137,16 @@ Reachability arithmetic (ignoring the header, which is small): leaves needed at 
 - Cluster (4 GiB heap, `vb` bigint and `vd` decimal indexes, 5M / 20M / 40M rows, flush and `rebuild_index` of both): no `too many nodes`; largest leaf count of one segment 452 (flush) and 441 (rebuild), i.e. 5e-6 of the limit; BALANCED_TREE bytes x 4.00 for 4 x the rows and x 2.00 for 2 x; control: `segment_write_buffer_size` 32 MiB against 1024 MiB at 20M rows moved the rebuild path from 89 + 89 to 1455 + 1454 segments and the peak buffer from 1024 to 32 MiB.
 - Amendments made at the audit, before any reading (2026-10-28): U1-U4 (B2) and C1-C2 (B3) inserted after the link rule; U2 corrected the first throwing leaf count (B2b/B2c used `ceil(LIMIT / B) + 1`; the check throws at `floor(LIMIT / B) + 1`), U3 replaced "heap after the run" (the `LeafWriter` is garbage after `write()`) by a callback hook, and U1 raised the heap to 12 GiB (run C holds `leafBlockStartValues` and `splitValues`, 2 GiB each).
 - Findings for stage 3: (1) the pre-registered "tens of MB" of retained heap for run A was an arithmetic error: B x leaves is 1.2 MB at B = 24; and the heap-after-GC readings are noisy by about +-4 MB, so per-leaf retained windows at B >= 4096 or totals below 5 MB are not resolvable by this probe. (2) The 20M-row and 40M-row loads under the shipped memtable settings (4 GiB heap) make 44 and 87 sstables by automatic flushes, so "flush" in B3c is the load; `rebuild_index` then rebuilds them all (247 s at 5M, 697 to 879 s at 20M and 1460 s at 40M, with other nodes running). (3) The check's reachable form needs about 9e10 points in one segment at B = 24, M = 1024; the largest segment seen had 452 leaves.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `bytesPerValue * numLeaves` (`BlockBalancedTreeWriter.java:651`) = the length of `splitValues` (`:173`). Real retained heap per leaf is larger: one `byte[bytesPerValue]` copy with a 16 B header (`:565`), a boxed `Long` and list slots (`:567`), about B + 40-80 B per leaf (stage-4 measured ~1.0x LIMIT at B = 1 MiB). Held for one segment write; freed when the writer returns. |
+| **E2 At the limit** | Throws `IllegalStateException` (`:653`), aborting the segment write; one leaf beyond the allowed count is already copied. Graceful for this array, but only reachable at artificial widths: at B <= 24 (`IndexTermType.java:91`) and 1024 points per leaf (`:96`) it needs ~9e10 points in one segment. |
+| **E3 Owner and multiplier** | Per segment writer (memtable flush via `MemtableIndexWriter`, or SAI build via `SegmentBuilder`), one per numeric index per flush/compaction/build thread. No total cap from this check. |
+| **E4 Budget domain** | Heap. The point data feeding the writer is bounded by the SAI segment buffer (`SEGMENT_BUILD_MEMORY_LIMITER`, `V1OnDiskFormat.java:126-128`, default 1024 MiB, `StorageAttachedIndexOptions.java:27`) on the build path and by the memtable on the flush path; the per-leaf overhead is ~1/1000 of the points held, so it stays far under those budgets. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative: an int-overflow guard on one array, unreachable at real widths; writer heap follows segment size).
+**Stage-4 claim to add:** none

@@ -122,3 +122,16 @@ n/a: a 5.0.9 node cannot be driven with protocol V1/V2 (`ProtocolVersion.java:66
 - Cluster alternative: V2 refused by the server; v4 accepted 100 rows each with one element of 65535 / 65536 / 1 048 576 bytes, disk bytes 1.005 per payload byte at all three; a Java UDF returning `list<blob>` made the node evaluate `sizeOfValue` at V4 and V3 with 65535, 65536 and 1 048 576 bytes (Byteman), never at V1/V2. Control: `column_value_size_fail_threshold: 512KiB` rejected the 1 MiB insert and accepted 65535 and 65536.
 - For stage 3: (1) `max_value_size` (named as the control in B3h) is a deserialization-side check (`AbstractType.java:590-597`), not a write-time cap; `column_value_size_fail_threshold` is, but it is skipped for a superuser and every client is one under `AllowAllAuthenticator` (`ClientState.java:594-605`), so the control needs `PasswordAuthenticator` and an ordinary role; (2) a plain `set<blob>` write never calls `CodecUtils`: only a UDF does; (3) `tablestats` memtable data size is invalid across a `MEMTABLE_LIMIT` flush (hit by 100 x 1 MiB inserts at 256 MiB heap space); use the sum of `Data.db` bytes; (4) `test/unit/.../cql3/functions/types/` does not exist in the tag.
 - Commits: none (uncommitted; the repository's latest commit at the run was `b68711e5`).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | `value.remaining()` of one already-serialized collection element (`CodecUtils.java:249-250`), on-wire bytes; the element buffers exist before the check, and the result buffer (`:56`) is a second copy of their sum. Lifetime: one `pack` call. |
+| **E2 At the limit** | `IllegalArgumentException` before the result buffer is allocated (`:250-254`). V3-V6 have no check (`:256-260`). |
+| **E3 Owner and multiplier** | Per `pack` call (UDF / codec use on the calling thread). V1/V2 are rejected by the server (`ProtocolVersion.java:42-43`, `:66`, `:104-116`), so the check is unreachable on a 5.0.9 node. |
+| **E4 Budget domain** | Heap. The reachable path (UDF returning a collection at V3+) needs `user_defined_functions_enabled`, false by default (`conf/cassandra.yaml:1760`); element size there is bounded by request/value limits, not by this check. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative: a protocol-format guard on an unreachable version branch).
+**Stage-4 claim to add:** none

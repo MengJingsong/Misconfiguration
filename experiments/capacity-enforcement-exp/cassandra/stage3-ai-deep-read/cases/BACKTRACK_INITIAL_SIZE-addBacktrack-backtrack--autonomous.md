@@ -284,3 +284,15 @@ Stage 4 (autonomous agent), run 1 at both tiers, 2026-10-25. Results: `cassandra
 - **Gaps:** live cursor count at an instant not observed (bound only); the accounting-unchanged reading across scans is weak (no writes in between); no heap dump; no run 2.
 - **Cosmetic:** `InMemoryTrie.java:91` is the comment on the 2 GB limit (constructor at :88).
 
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check compares int slots in use (`backtrackDepth * 3`) with the current `backtrack.length` (`InMemoryReadTrie.java:501`). The real bytes are `16 + 4 * L` for one `int[]` per `MemtableCursor` (`:496`, `:540`), with L = 48 x 2^k. The array never shrinks and lives as long as its cursor (one trie walk, so one read, scan or flush step); it is then garbage. The memtable allocator never charges it: `TrieMemtable.java:477-485` charges only `sizeOnHeap()` / `sizeOffHeap()` deltas, and those count buffers and content slots only (`InMemoryTrie.java:969-980`). |
+| **E2 At the limit** | This is not a limit. The check doubles the array (`InMemoryReadTrie.java:502`) and nothing ever refuses. Growth is bounded only by the trie depth, which is the byte-comparable partition-key length; that length is capped at 65535 B (`FBUtilities.java:158`, `QueryProcessor.java:259-263`). Stage 4 measured a worst case of 786,432 ints (about 3 MiB) for a split comb at depth 65535. |
+| **E3 Owner and multiplier** | One array per `MemtableCursor`. There are as many as there are concurrent trie walks (reads with `concurrent_reads: 32`, `cassandra.yaml:722`, plus range scans and flushes, times the shards and memtables merged), and nothing caps the total. At defaults, though, the shipped default memtable is `skiplist` (`cassandra.yaml:783-790`), so no trie cursor exists unless a table opts into `trie`. Under the default `Murmur3Partitioner` (`cassandra.yaml:389`), keys branch within the leading token bytes, so the doubling does not run (stage 4, B3i.2: 212,600 cursors, none grew). |
+| **E4 Budget domain** | Heap, as transient garbage. It shares the heap with memtables (`memtable_heap_space` defaults to 1/4 heap, `cassandra.yaml:793-797`), caches and request objects. At defaults each cursor holds 192 B. In the non-default worst case (trie memtable, ByteOrderedPartitioner, 64 KiB keys), tens of concurrent cursors at about 3 MiB each come to about 100 MiB of short-lived heap. That is well under a default heap of min(1/2 RAM, 15.5 GiB) (`cassandra-env.sh:51-68`). |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

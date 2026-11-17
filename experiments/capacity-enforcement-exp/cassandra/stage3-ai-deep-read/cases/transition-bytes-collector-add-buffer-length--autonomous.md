@@ -123,3 +123,16 @@ Stage 4 ran 2026-10-26 (results: `cassandra/stage4-runtime-verification/results/
 ### Stage-4 amendments (audit, 2026-10-26, before run 1)
 
 R1 cites checked against the pinned source (`Walker.java:437-462`, `ValueIterator.java:74,107,226,250`, `PartitionIndex.java:395-407`, `Config.java:941-944`, `StorageAttachedIndex.java:147,207-210,773-830`): correct; the only change is `validateTermSize` at 807-830. R2 build and harness mechanics (B2a). R3 Lucene growth arithmetic (B2c, B2f, B2g). R4 unit-tier control uses the guardrail object (B2h). R5 JFR replaced by an exact Byteman trace (B3d-B3g). R6 cluster workload sized to the time and disk available (B3c). R7 `file_cache_size` control dropped (B3h). R8 none of these depend on any reading of the experiment. D1 (shakedown, same day): `storage_compatibility_mode: NONE` for the cluster tier (B3a). D2 (shakedown): ordinary role under PasswordAuthenticator for the cluster tier, otherwise the guardrail is skipped (B3a).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Bytes of the current trie path (`pos`) against the scratch array length (`Walker.java:437-446`); grown by Lucene `ArrayUtil.grow` (`:444`), copied out at exact size by `toByteComparable` (`:455-462`). Counted by nothing; garbage when the walk ends. |
+| **E2 At the limit** | No limit: the array grows; only a heap OOM could stop it. |
+| **E3 Owner and multiplier** | Per `ValueIterator` built with `collecting=true` (`ValueIterator.java:74,107`) or per `Walker.getMaxTerm`/`getMinTerm` call (`Walker.java:352-382`). No production caller in 5.0.9: the BTI subclasses use the constructors that pass `collecting=false` (`ValueIterator.java:65-67,87-89`; `PartitionIndex.java:407`, `RowIndexReverseIterator.java:39`), and nothing in `src/java` calls the `Walker` term methods; stage 4 traced zero constructions in four node lifetimes. |
+| **E4 Budget domain** | Heap, transient; shared with everything, but at most one key/term per walk. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate (negative).
+**Stage-4 claim to add:** none

@@ -120,3 +120,16 @@ Bypass/overshoot: the check runs after parsing, so the parse of a very large que
 - Notes for stage 3: the size gate (`:824-829`) is a second cache limit on a single statement and a row `system.prepared_statements` is deleted on eviction (`:132-139`); a 65535-marker statement weighs 2.84 MB, so the minimum 10 MiB cache holds three; `QueryProcessor.getPreparedStatementsMemoryUsage` does not exist (B2d). Open points: the cluster per-entry weight was not measured (inferred from the unit tier, up to 3 % lower); the cache's entry count was seen a few entries above its settled value during a multi-threaded load (Caffeine eviction lag). Amendments: B2i, B3i (2026-10-26).
 
 Stage-4 audit amendments of 2026-10-26 are B2i and B3i above. Citation checks (pinned `cassandra-5.0.9`): lines 728, 757-759 of `QueryProcessor.java`, 158 of `FBUtilities.java`, 795-804 of `DatabaseDescriptor.java`, 584-585 of `Config.java` hold; corrected: `storePreparedStatement` is `:818-836` (not 763-778), `prepareInternal` `:425` (not 170-190), the weigher `:952-958` (not 949).
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | Number of bind markers (`QueryProcessor.java:757-759`), a protocol 2-byte count. Real bytes are weighed separately: `pstmntSize` (measureDeep) + key size (`:952-958`), ~43 B per marker (stage 4: 2.84 MB at 65535). The marker check runs after `parseAndPrepare` (`:754`), so parse garbage is allocated before it; that garbage is transient. |
+| **E2 At the limit** | Graceful: `InvalidRequestException` before caching. A statement heavier than the whole cache is rejected by the size gate (`:824-829`); otherwise Caffeine evicts by weight (`:112-117`). |
+| **E3 Owner and multiplier** | Per statement; one node-wide prepared cache. Concurrent prepares bounded by native-transport request concurrency / in-flight byte limits. |
+| **E4 Budget domain** | Heap. Prepared cache default max(10 MiB, heap/256) (`DatabaseDescriptor.java:795-798`); per-statement weight bounded by this constant to ~2.8 MB; query text bounded by the native frame/message limits. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** `same as Estimate` (negative: a wire-format count; retained memory is capped by the weighed cache).
+**Stage-4 claim to add:** none

@@ -140,3 +140,16 @@ The check itself is the if statement at [`src/java/org/apache/cassandra/hints/Hi
 ## D. Stage-4 feedback
 
 **2026-10-28 — closed, unit Confirmed, cluster Confirmed, does not cap; outcome class true negative** ([results](../../stage4-runtime-verification/results/write_buffer_size-append-hint--autonomous.md)). Audit amendments R1-R5 made before run 1 (block at the head of section B; frozen sha256 recorded in the results file). Unit (36 cells, 333 checks, 0 mismatches): file length identical across the 64 KiB / 256 KiB / 1 MiB buffers for each hint size, direct-pool delta exactly N and zero growth over up to 256 MiB of appends including 2 MiB hints written through, `HintsBuffer.create` 32 vs 64 MiB moves the pool by exactly 33,554,432 vs 67,108,864 B. Cluster (1 GiB per arm, builds 64 KiB / 256 KiB / 1 MiB x 1 KiB / 400 KiB x 2 reps): hint disk byte-identical across builds (1,146,093,946 B and 1,073,745,406 B), the idle baseline and NMT differ by exactly the constants' difference (-196,608 / +786,432 B), pool peaks at 1 KiB within 0.07 MiB of it and at 400 KiB within 2 MiB (slab counts equal), the 1 MiB build does not bypass at 400 KiB (as amended); `commitlog_segment_size` 128MiB made 128 MiB slabs and the pool +192 MiB, `max_hints_size_per_host` 64MiB held disk at 68.6 MiB against 1,093 MiB. Notes for stage 3: B2c's count formula and B3e step 4's wall-clock were inconsistent (amended); `Session.append` calls `writeBuffer` on an empty buffer before every oversized entry; the pool total moves by whole slabs and rises with payload at every build, so only the baseline, NMT and the unit tier resolve a sub-MiB step.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check compares a hint's serialized size with the free space of one fixed 256 KiB direct buffer (`HintsWriter.java:205`, `:214`). That buffer is allocated once (`HintsWriteExecutor.java:50`, `:60`) and lives as long as the service. A larger hint is written straight to the channel with no copy (`HintsWriter.java:220`). Hint memory proper sits in the `HintsBuffer` slabs of max(2 x `max_mutation_size`, 32 MiB) (`HintsService.java:79`, `:110`). |
+| **E2 At the limit** | Neither branch is a limit outcome: both write every byte. The real hint-memory limit is `HintsBufferPool`, which blocks (`reserveBuffers.take()`) once 3 slabs are allocated (`HintsBufferPool.java:41`, `:113-118`; `MAX_HINT_BUFFERS` = 3, `CassandraRelevantProperties.java:351`). That is back-pressure, a graceful outcome. |
+| **E3 Owner and multiplier** | One buffer per node (a single `HintsWriteExecutor`). There are at most 3 slabs per node, 96 MiB at defaults. |
+| **E4 Budget domain** | Direct memory. The default `-XX:MaxDirectMemorySize` is 1/4 RAM, or half the heap limit (`cassandra-env.sh:58-68`, `:93-94`, `:139-140`, `:157-158`). It is shared with the chunk cache (`file_cache_size`, `cassandra.yaml:753`), networking buffers and any off-heap memtables. 256 KiB plus 96 MiB is small against that budget. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none

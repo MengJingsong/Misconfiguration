@@ -124,3 +124,16 @@ Outcomes: a statement with an oversized key is rejected before a mutation is bui
 - Notes for stage 3: (1) the A3 note: through CQL the branch at `Validation.java:51` never rejects; `ClusteringPrefix.validate` (`PartitionKeySingleRestrictionSet.java:67`, `ClusteringPrefix.java:279`) rejects first and `QueryProcessor.validateKey` saw 0 oversize keys in the cluster run (Byteman trace of 105 rejections, all from `ClusteringPrefix.validate`); (2) `tablestats` "Memtable data size" omits partition-key bytes; (3) the commit log (512 MiB) also bound in the 100,000-key arms. Amendments: A3 note, B2i, B3i (2026-10-26).
 
 Stage-4 audit amendments of 2026-10-26 are the A3 note, B2i and B3i above. Citation checks (pinned `cassandra-5.0.9`): lines 45-72 of `Validation.java`, 158 of `FBUtilities.java`, 249-263 of `QueryProcessor.java`, 372-374, 746, 781 and 802 of `ModificationStatement.java`, 732 of `SelectStatement.java`, 209 of `TriggerExecutor.java`, 169-172 of `SortedTableWriter.java`, 365 of `ByteBufferUtil.java`, 229 of `ByteArrayUtil.java`, 50 of `NativeClustering.java` and 278-287 of `ClusteringPrefix.java` hold. `CacheService.java:504` is a corrupted-key-cache read check, not a write-path backstop.
+
+## Recheck — enforcement properties (guided, 2026-11-17, blind)
+
+| Field | Content |
+|-------|---------|
+| **E1 Counted quantity** | The check counts the serialized bytes of one partition key (`key.remaining()`, `Validation.java:51`). Through CQL, the same rule fires earlier, at `ClusteringPrefix.java:278-285` (via `PartitionKeySingleRestrictionSet.java:67`) and `QueryProcessor.java:259-263`. An admitted key is cloned through the memtable allocator's cloner (`SkipListMemtable.java:109`, `:115`), so its bytes are charged to memtable space. Stage 4 measured L + 83 B per held key. The bound is per key only. |
+| **E2 At the limit** | `InvalidRequestException` is thrown before any mutation is built, which is graceful. Nothing reaches the memtable or commit log. |
+| **E3 Owner and multiplier** | The limit is per key. The number of keys is unbounded by this check; the total is governed by memtable space, the commit log and disk. Stage 4 saw the memtable pool flush at its limit (253.9 MiB with a 256 MiB pool) while the check kept accepting keys. |
+| **E4 Budget domain** | Heap (`memtable_allocation_type: heap_buffers`, `cassandra.yaml:825`), shared with the other memtable data under `memtable_heap_space`; then commit log and disk. The key bytes are charged to that budget, so they do not escape it. |
+| **OOM-lead flag** | none |
+
+**Real-memory estimate:** same as Estimate
+**Stage-4 claim to add:** none
