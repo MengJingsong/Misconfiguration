@@ -10,6 +10,8 @@
 nothing else: no rules, no patterns, no design method beyond this file. It is the
 [autonomous playbook](playbook-autonomous.md) plus a **type check**: after tracing the
 constraint, the agent skips a config-type constraint and writes up only a non-config one.
+From 2026-11-17 it also gets the autonomous playbook's general request to note OOM leads
+(step 5; never the guided agent's patterns).
 **Do not access, open or read the guided agent's playbook (`playbook-guided.md`).** Both
 agents fill a template, and [stage 4](../stage4-runtime-verification/README.md) runs
 whatever solution a case file holds; what stage 3 is, and where results are filed, is in
@@ -38,6 +40,11 @@ node uses. Starting from the code location you were given as the target:
    solution that a separate engineer or AI session can execute without re-deriving the
    code path, as the [autonomous playbook](playbook-autonomous.md) describes (two tiers,
    unless the rule for "no constraint" below applies).
+5. **For a written case, note any OOM lead** in the template's section E, as the autonomous
+   playbook's "OOM leads" section describes: anything in the code that could let memory use grow
+   until the node runs out, past this constraint or whatever else should bound it, with
+   `file:line` and a rough magnitude at defaults; or `none found`. Record clues only; they do not
+   change the estimate.
 
 ## Config-type and non-config type
 
@@ -164,4 +171,5 @@ to the scratch file you are given. Add one line under the field table:
 and, when the constant rule applied to a check that also reads a yaml entry or JVM
 property, name both. The lead saves the file as `cases/<stem>--autonomous.md`, where
 `<stem>` is `[constraint]-[function]-[operand]` ([`../README.md` §6.1](../README.md#61-naming)),
-with `-2` added when the stem is taken, and adds its `_INDEX.md` row and sha256.
+with `-2` added when the stem is taken, and adds its `_INDEX.md` row and sha256, and copies each
+section E row into `<system>/stage3-ai-deep-read/oom-lead-list.md` (Mode `new`, Status `lead`).

@@ -81,5 +81,7 @@ outside phase 1's definition; its link row says `out-of-scope` rather than stret
 
 | File | Holds |
 |---|---|
+| [`FLOWCHART.md`](FLOWCHART.md) | What both experiments do, what was added to link them, and a flowchart of the whole loop. **Rule (2026-11-17):** any change to functionality or design under `experiments/` updates it in the same commit ([`CLAUDE.md`](CLAUDE.md)) |
+| [`CLAUDE.md`](CLAUDE.md) | Rules for agents working under `experiments/` |
 | [`backlink-playbook.md`](backlink-playbook.md) | The procedure run for each newly verified OOM-exp case |
 | [`phase-links/`](phase-links/) | One link table per system |
